@@ -47,7 +47,7 @@ from agents.common.lemma_selection import (
     apply_limit_and_sample_rate,
     get_lemmas_for_agent,
 )
-from clients.audio import AudioFormat, Voice, generate_audio
+from clients.audio import AudioFormat, AudioGenerationResult, Voice, generate_audio
 from clients.audio.azure_tts import AzureTTSClient, AzureVoice
 from clients.audio.google_tts import GoogleTTSClient, GoogleTtsVoice
 from clients.audio.gpt_voices import (

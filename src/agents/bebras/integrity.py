@@ -713,9 +713,14 @@ class IntegrityChecker:
             from wordfreq.storage.models.schema import AudioQualityReview
             from wordfreq.storage.translation_helpers import get_translation
 
-            # Only check lemma audio (guid is set)
+            # Only check lemma audio (guid is set, sentence_id is not)
             audio_records = (
-                session.query(AudioQualityReview).filter(AudioQualityReview.guid.isnot(None)).all()
+                session.query(AudioQualityReview)
+                .filter(
+                    AudioQualityReview.guid.isnot(None),
+                    AudioQualityReview.sentence_id.is_(None),
+                )
+                .all()
             )
 
             mismatches: List[Dict[str, Any]] = []
