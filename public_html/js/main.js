@@ -1,5 +1,0 @@
-
-
-function replaceText(name) {
-  pass;
-}

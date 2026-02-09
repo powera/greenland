@@ -132,7 +132,6 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 module = [
     "benchmarks.scripts.model_comparison",
-    "benchmarks.verbalator.server",
     "benchmarks.server.routes.verbalator",
     "benchmarks.lib.exemplars.base",
     "benchmarks.datastore.test_benchmarks",

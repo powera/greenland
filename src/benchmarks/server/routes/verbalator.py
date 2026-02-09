@@ -2,7 +2,6 @@
 
 """Verbalator routes - custom LLM query interface."""
 
-import json
 import sys
 from dataclasses import asdict
 from pathlib import Path
@@ -22,7 +21,6 @@ bp = Blueprint(
     "verbalator",
     __name__,
     url_prefix="/verbalator",
-    template_folder="../../verbalator/templates",
 )
 
 
@@ -58,7 +56,9 @@ class GenerationHandler:
 @bp.route("/")
 def index():
     """Show the verbalator query interface."""
-    return render_template("index.html", prompts=common.PROMPTS, samples=samples.ALL_SAMPLES)
+    return render_template(
+        "verbalator/index.html", prompts=common.PROMPTS, samples=samples.ALL_SAMPLES
+    )
 
 
 @bp.route("/query", methods=["POST"])
