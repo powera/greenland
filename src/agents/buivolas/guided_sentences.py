@@ -19,6 +19,7 @@ from wordfreq.storage.database import (
 )
 from wordfreq.storage.models.imports import PendingImport
 from wordfreq.storage.models.schema import SentencePatternWord
+from wordfreq.tools.sentence_word_linker import find_lemma_by_text
 from wordfreq.tools.vocabulary_budget import build_prompt_vocabulary_section
 
 logger = logging.getLogger(__name__)
@@ -414,63 +415,11 @@ class GuidedSentenceGenerator:
         word_role: str,
         source_lemma: Optional[Lemma] = None,
     ) -> Optional[Lemma]:
-        """Find a lemma matching the given word text and role."""
-        if not word_text:
-            return None
+        """Find a lemma matching the given word text and role.
 
-        # Check if it matches the source lemma
-        if source_lemma:
-            source_text = source_lemma.lemma_text
-            if "(" in source_text:
-                source_base = source_text.split("(")[0].strip()
-            else:
-                source_base = source_text
-
-            if word_text.lower() == source_base.lower():
-                logger.debug(
-                    "Matched word '%s' to source lemma: %s (%s)",
-                    word_text,
-                    source_lemma.guid,
-                    source_lemma.lemma_text,
-                )
-                return source_lemma
-
-        # Map roles to POS types
-        role_to_pos = {
-            "noun": "noun",
-            "verb": "verb",
-            "adjective": "adjective",
-            "adverb": "adverb",
-        }
-
-        pos_hint = role_to_pos.get(word_role)
-
-        # Try exact match
-        query = session.query(Lemma).filter(Lemma.lemma_text == word_text)
-        if pos_hint:
-            query = query.filter(Lemma.pos_type == pos_hint)
-        lemma = query.first()
-
-        if lemma:
-            logger.debug("Found lemma for '%s': %s", word_text, lemma.guid)
-            return cast(Lemma, lemma)
-
-        # Try case-insensitive match
-        query = session.query(Lemma).filter(Lemma.lemma_text.ilike(word_text))
-        if pos_hint:
-            query = query.filter(Lemma.pos_type == pos_hint)
-        lemma = query.first()
-
-        if lemma:
-            logger.debug(
-                "Found lemma (case-insensitive) for '%s': %s",
-                word_text,
-                lemma.guid,
-            )
-            return cast(Lemma, lemma)
-
-        logger.debug("No lemma found for word '%s' (role: %s)", word_text, word_role)
-        return None
+        Delegates to wordfreq.tools.sentence_word_linker.find_lemma_by_text().
+        """
+        return find_lemma_by_text(session, word_text, word_role, source_lemma=source_lemma)
 
 
 def generate_guided_sentences(
