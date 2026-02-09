@@ -42,6 +42,14 @@ def get_argument_parser() -> argparse.ArgumentParser:
     add_processing_args(parser)
     add_backend_args(parser)
 
+    # Wordlist checking mode
+    parser.add_argument(
+        "--check-wordlist",
+        type=str,
+        metavar="FILE",
+        help="Check an input word list file against the database for missing words",
+    )
+
     # Check mode options (reporting only, no changes)
     parser.add_argument(
         "--check",
@@ -137,6 +145,47 @@ def main() -> None:
 
     # Create agent
     agent = DramblysAgent(config=config)
+
+    # Handle --check-wordlist mode
+    if args.check_wordlist:
+        results = agent.check_wordlist_coverage(file_path=args.check_wordlist)
+
+        if "error" in results:
+            print(f"\nError: {results['error']}")
+        else:
+            print(f"\n{'='*64}")
+            print("WORDLIST COVERAGE CHECK")
+            print(f"{'='*64}")
+            print(f"Source: {results['file_path']}")
+            print(f"Total words in file:      {results['total_words']:>5}")
+            print(f"Already in database:      {results['in_database']:>5}")
+            print(
+                f"Grammatical stopwords:    {results['grammatical_stopwords_filtered']:>5}  (filtered)"
+            )
+            print(f"Missing content words:    {results['missing_count']:>5}")
+
+            if results["missing_words"]:
+                print(f"\nMISSING WORDS (alphabetical):")
+                # Print in wrapped lines
+                line = "  "
+                for i, word in enumerate(results["missing_words"]):
+                    suffix = ", " if i < len(results["missing_words"]) - 1 else ""
+                    if len(line) + len(word) + len(suffix) > 78:
+                        print(line.rstrip(", ") + ",")
+                        line = "  "
+                    line += word + suffix
+                if line.strip():
+                    print(line.rstrip(", "))
+
+            if not args.output:
+                print(f"\nUse --output FILE to write full results as JSON.")
+            print(f"{'='*64}")
+
+        if args.output:
+            with open(args.output, "w", encoding="utf-8") as f:
+                json.dump(results, f, indent=2, ensure_ascii=False)
+            print(f"Full results written to: {args.output}")
+        return
 
     # Handle --list-pending mode
     if args.list_pending:

@@ -22,7 +22,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from agents.dramblys import staging
+from agents.dramblys import staging, wordlist
 
 # Import validation and staging operations
 from agents.dramblys.validation import is_valid_word
@@ -173,6 +173,22 @@ class DramblysAgent:
         except Exception as e:
             logger.error(f"Error checking high-frequency missing words: {e}")
             return {"error": str(e), "total_checked": 0, "missing_count": 0, "missing_words": []}
+        finally:
+            session.close()
+
+    def check_wordlist_coverage(self, file_path: str) -> Dict[str, Any]:
+        """
+        Check an external word list file against the database for missing words.
+
+        Args:
+            file_path: Path to a wikitext word list file
+
+        Returns:
+            Dictionary with coverage statistics and missing words
+        """
+        session = self.get_session()
+        try:
+            return wordlist.check_wordlist_coverage(file_path, session)
         finally:
             session.close()
 
