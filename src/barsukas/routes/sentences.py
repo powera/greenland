@@ -567,7 +567,7 @@ def accept_sentence(sentence_id: int) -> Response:
 
         # Generate missing translations (only if validation passed)
         if not has_all_translations:
-            from wordfreq.translation.sentence import translate_sentence
+            from sentences.translation import translate_sentence
 
             translate_sentence(sentence_id, target_languages, g.db, model="gpt-5-mini")
 

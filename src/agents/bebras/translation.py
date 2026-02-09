@@ -20,7 +20,7 @@ from wordfreq.storage.translation_helpers import (
     get_language_name,
     get_supported_languages,
 )
-from wordfreq.translation.sentence import (
+from sentences.translation import (
     build_response_schema,
     build_translation_prompt,
     store_translation_results,

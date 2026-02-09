@@ -43,8 +43,8 @@ from wordfreq.storage.models.schema import (
     SentenceWord,
     SentencePatternWord,
 )
-from wordfreq.tools.sentence_analysis import discover_and_store_lemmas
-from wordfreq.translation.sentence import build_response_schema, build_translation_prompt
+from sentences.analysis import discover_and_store_lemmas
+from sentences.translation import build_response_schema, build_translation_prompt
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"

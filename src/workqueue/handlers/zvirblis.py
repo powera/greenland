@@ -14,7 +14,7 @@ from workqueue.tools import get_lemma_or_raise
 import constants
 from wordfreq.storage.models.schema import Sentence, SentenceTranslation
 from wordfreq.storage.translation_helpers import get_supported_languages
-from wordfreq.translation.sentence import translate_sentence as do_translation
+from sentences.translation import translate_sentence as do_translation
 
 
 def handle_translate_sentence(session: Session, payload: Dict) -> str:
