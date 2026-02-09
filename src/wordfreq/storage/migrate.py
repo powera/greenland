@@ -367,15 +367,16 @@ def convert_sqlalchemy_tombstone_to_jsonl(tombstone: Any) -> Any:
 
 
 def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
-    """Export SQLite to data/release format with translations in base.jsonl.
+    """Export SQLite to data/release format.
 
-    This creates:
+    This creates per-category directories (e.g., nouns/animal/) containing:
     - base.jsonl: concept definitions with translations and difficulty_overrides
       (guid, pos_type, pos_subtype, concept_label, concept_definition,
        difficulty_level, translations: {lang_code: translation},
        difficulty_overrides: {lang_code: level})
-    - {lang}.jsonl: Only created if there's language-specific data beyond translations
-      (derivative_forms, base_form, audio_hashes, grammar_facts, etc.)
+    - {lang}.jsonl: per-language data keyed by guid, written only for languages
+      that have derivative_forms (conjugations, synonyms, alternative forms, etc.)
+      or grammar_facts (gender, declension, number_type, etc.)
 
     Args:
         sqlite_path: Path to SQLite database
@@ -385,13 +386,23 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 
     from wordfreq.storage import translation_helpers
     from wordfreq.storage.database import create_database_session
-    from wordfreq.storage.models.schema import Lemma
+    from wordfreq.storage.models.schema import DerivativeForm, Lemma
 
     session = create_database_session(sqlite_path)
 
     try:
         # Get all lemmas with GUIDs (curated words only)
-        lemmas = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id).all()
+        # Eager-load derivative_forms and grammar_facts to avoid N+1 queries
+        lemmas = (
+            session.query(Lemma)
+            .filter(Lemma.guid.isnot(None))
+            .options(
+                selectinload(Lemma.derivative_forms),
+                selectinload(Lemma.grammar_facts),
+            )
+            .order_by(Lemma.id)
+            .all()
+        )
         print(f"Found {len(lemmas)} curated lemmas to export")
 
         # Group lemmas by POS type/subtype
@@ -473,9 +484,54 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
             base_file = category_dir / "base.jsonl"
             _write_jsonl_atomic(base_file, base_records)
 
-            # Note: Per-language files would only be created if there's
-            # derivative_forms, base_form, audio_hashes, grammar_facts, etc.
-            # This simple export doesn't include those, so no lang files created.
+            # Collect per-language data (derivative_forms, grammar_facts)
+            # keyed by language code -> list of per-lemma records
+            lang_records: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+
+            for lemma in category_lemmas:
+                # Group derivative forms by language
+                forms_by_lang: Dict[str, Dict[str, Dict[str, Any]]] = {}
+                for form in lemma.derivative_forms:
+                    lang = form.language_code
+                    if lang not in forms_by_lang:
+                        forms_by_lang[lang] = {}
+                    forms_by_lang[lang][form.grammatical_form] = {
+                        "form": form.derivative_form_text,
+                        "is_base_form": form.is_base_form,
+                        "ipa": form.ipa_pronunciation,
+                        "phonetic": form.phonetic_pronunciation,
+                    }
+
+                # Group grammar facts by language
+                facts_by_lang: Dict[str, List[Dict[str, Any]]] = {}
+                for fact in lemma.grammar_facts:
+                    lang = fact.language_code
+                    if lang not in facts_by_lang:
+                        facts_by_lang[lang] = []
+                    facts_by_lang[lang].append(
+                        {
+                            "language_code": fact.language_code,
+                            "fact_type": fact.fact_type,
+                            "fact_value": fact.fact_value,
+                            "notes": fact.notes,
+                            "verified": fact.verified,
+                        }
+                    )
+
+                # Build per-language records for every language that has data
+                langs_with_data = set(forms_by_lang.keys()) | set(facts_by_lang.keys())
+                for lang in langs_with_data:
+                    record: Dict[str, Any] = {"guid": lemma.guid}
+                    if lang in forms_by_lang:
+                        record["derivative_forms"] = forms_by_lang[lang]
+                    if lang in facts_by_lang:
+                        record["grammar_facts"] = facts_by_lang[lang]
+                    lang_records[lang].append(record)
+
+            # Write {lang}.jsonl files for each language that has data
+            for lang, records in sorted(lang_records.items()):
+                lang_file = category_dir / f"{lang}.jsonl"
+                _write_jsonl_atomic(lang_file, records)
 
         print(f"\nExport complete!")
         print(f"Languages exported: {', '.join(sorted(all_languages))}")
