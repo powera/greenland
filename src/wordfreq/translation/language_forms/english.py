@@ -61,11 +61,11 @@ VERB_FORM_MAPPING = {
 }
 
 
-def query_english_verb_conjugations(
+def query_english_verb_forms(
     client: Any, lemma_id: int, get_session_func: Any
 ) -> Tuple[Dict[str, str], bool]:
     """
-    Query LLM for all English verb conjugations (6 persons × 3 tenses + 2 imperatives = 20 forms).
+    Query LLM for all English verb forms (6 persons × 3 tenses + 2 imperatives = 20 forms).
 
     Args:
         client: UnifiedLLMClient instance

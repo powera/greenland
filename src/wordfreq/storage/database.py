@@ -165,8 +165,12 @@ def log_query(
     model: Optional[str],
     success: bool = True,
     error: Optional[str] = None,
-) -> QueryLog:
-    """Log a query to the database."""
+) -> Optional[QueryLog]:
+    """Log a query to the database.
+
+    Returns the QueryLog on success, or None if logging failed.
+    On failure, rolls back the session so it remains usable by the caller.
+    """
     log = QueryLog(
         word=word,
         query_type=query_type,
@@ -176,8 +180,13 @@ def log_query(
         success=success,
         error=error,
     )
-    session.add(log)
-    session.commit()
+    try:
+        session.add(log)
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        logger.warning(f"Failed to log query for '{word}' ({query_type}): {e}")
+        return None
     return log
 
 

@@ -92,6 +92,10 @@ def run_worker(poll_interval: float) -> None:
                 continue
 
             try:
+                # Commit the RUNNING status so the SQLite write lock is released
+                # before handlers run. Handlers may use separate sessions
+                # (e.g., via connection_pool) which would deadlock otherwise.
+                session.commit()
                 logger.info("Processing task %s (%s)", task.id, task.task_type)
                 message = process_task(task, session)
                 mark_task_complete(session, task, message)

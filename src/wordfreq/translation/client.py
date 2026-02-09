@@ -245,9 +245,9 @@ class LinguisticClient:
         return pos_subtype.update_subtypes_for_batch(self.client, self.get_session, limit, throttle)
 
     # English forms
-    def query_english_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
-        """Query LLM for English verb conjugations."""
-        return english.query_english_verb_conjugations(self.client, lemma_id, self.get_session)
+    def query_english_verb_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for English verb forms."""
+        return english.query_english_verb_forms(self.client, lemma_id, self.get_session)
 
     def query_english_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
         """Query LLM for English noun forms."""

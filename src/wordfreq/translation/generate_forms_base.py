@@ -13,6 +13,8 @@ import time
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
 
+from sqlalchemy.exc import OperationalError
+
 import constants
 from agents.common.common_args import get_data_source_config
 from wordfreq.storage import database as linguistic_db
@@ -20,6 +22,10 @@ from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.connection_pool import get_session
 from wordfreq.storage.models.enums import GrammaticalForm
 from wordfreq.translation.client import LinguisticClient
+
+# Retry settings for transient SQLite errors (e.g., database locked)
+MAX_RETRIES = 3
+RETRY_BASE_DELAY = 1.0  # seconds, doubles each retry
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -305,6 +311,25 @@ def extract_gender_from_forms(
     return None
 
 
+def _commit_with_retry(session: Any, lemma_id: int) -> None:
+    """Commit with retry logic for transient SQLite errors (e.g., database locked)."""
+    for attempt in range(MAX_RETRIES):
+        try:
+            session.commit()
+            return
+        except OperationalError as e:
+            session.rollback()
+            if attempt < MAX_RETRIES - 1:
+                delay = RETRY_BASE_DELAY * (2**attempt)
+                logger.warning(
+                    f"Database locked on commit for lemma ID {lemma_id}, "
+                    f"retrying in {delay}s (attempt {attempt + 1}/{MAX_RETRIES})"
+                )
+                time.sleep(delay)
+            else:
+                raise
+
+
 def process_lemma_forms(
     client: LinguisticClient,
     lemma_id: int,
@@ -445,10 +470,14 @@ def process_lemma_forms(
                         f"Grammar fact for gender={gender} already exists for lemma ID {lemma_id}"
                     )
 
-        session.commit()
+        _commit_with_retry(session, lemma_id)
         logger.info(f"Added {stored} forms for lemma ID {lemma_id}")
         return True
 
+    except OperationalError as oe:
+        session.rollback()
+        logger.error(f"Database error processing lemma ID {lemma_id}: {oe}")
+        return False
     except Exception as e:
         session.rollback()
         logger.error(f"Error processing lemma ID {lemma_id}: {e}", exc_info=True)
