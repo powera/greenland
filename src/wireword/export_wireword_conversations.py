@@ -257,11 +257,12 @@ class WirewordConversationExporter:
                         "linked_words": linked_words,
                     }
 
-                    # Add pinyin for Chinese translations
+                    # Add pinyin for Chinese translations (inside translations dict
+                    # so apps can access it as translations["pinyin"])
                     if self.language == "zh" and self.language in translations:
                         pinyin = generate_pinyin(translations[self.language])
                         if pinyin:
-                            sentence_entry["pinyin"] = pinyin
+                            translations["pinyin"] = pinyin
 
                     if sentence.minimum_level is not None:
                         sentence_entry["minimum_level"] = sentence.minimum_level
