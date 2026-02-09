@@ -94,11 +94,11 @@ def migrate_form() -> ResponseReturnValue:
         return redirect(url_for("settings.index"))
 
     try:
-        # Build command
-        script_path = Path(__file__).parent.parent.parent.parent / "scripts" / "migrate_backend.py"
+        # Build command using the migrate module directly
         cmd: list[str] = [
             sys.executable,
-            str(script_path),
+            "-m",
+            "wordfreq.storage.migrate",
             direction,
             "--jsonl-dir",
             jsonl_dir,
@@ -109,9 +109,11 @@ def migrate_form() -> ResponseReturnValue:
             cmd.extend(["--sqlite-path", sqlite_path])
         # PostgreSQL URL is read from env/key file automatically
 
-        # Run migration
+        # Run migration with PYTHONPATH set to src/
+        src_dir = str(Path(__file__).parent.parent.parent)
+        migrate_env = {**os.environ, "PYTHONPATH": src_dir}
         logger.info("Launching agent subprocess: %s", " ".join(cmd))
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True, env=migrate_env)
 
         flash(f"Migration completed successfully! Output: {result.stdout}", "success")
         return redirect(url_for("settings.index"))
@@ -161,11 +163,11 @@ def migrate() -> ResponseReturnValue:
         return jsonify({"error": f"Export from {backend_type.value} backend not supported"}), 400
 
     try:
-        # Build command
-        script_path = Path(__file__).parent.parent.parent.parent / "scripts" / "migrate_backend.py"
+        # Build command using the migrate module directly
         cmd: list[str] = [
             sys.executable,
-            str(script_path),
+            "-m",
+            "wordfreq.storage.migrate",
             direction,
             "--jsonl-dir",
             jsonl_dir,
@@ -176,9 +178,11 @@ def migrate() -> ResponseReturnValue:
             cmd.extend(["--sqlite-path", sqlite_path])
         # PostgreSQL URL is read from env/key file automatically
 
-        # Run migration
+        # Run migration with PYTHONPATH set to src/
+        src_dir = str(Path(__file__).parent.parent.parent)
+        migrate_env = {**os.environ, "PYTHONPATH": src_dir}
         logger.info("Launching agent subprocess: %s", " ".join(cmd))
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True, env=migrate_env)
 
         return jsonify(
             {

@@ -12,9 +12,9 @@ This script:
 5. Optionally deletes old files after migration
 
 Usage:
-    PYTHONPATH=src python scripts/migrate_staging_audio_paths.py --dry-run
-    PYTHONPATH=src python scripts/migrate_staging_audio_paths.py --agent strazdas
-    PYTHONPATH=src python scripts/migrate_staging_audio_paths.py --agent strazdas --delete-old
+    PYTHONPATH=src python src/scripts/migrate_staging_audio_paths.py --dry-run
+    PYTHONPATH=src python src/scripts/migrate_staging_audio_paths.py --agent strazdas
+    PYTHONPATH=src python src/scripts/migrate_staging_audio_paths.py --agent strazdas --delete-old
 """
 
 import argparse
@@ -25,8 +25,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 # Add src to path for imports
-if str(Path(__file__).parent.parent / "src") not in sys.path:
-    sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+if str(Path(__file__).parent.parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from clients.audio.s3_uploader import (
     S3AudioUploader,

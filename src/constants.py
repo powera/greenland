@@ -27,7 +27,6 @@ except ImportError:
     SQLITE_DB_PATH = os.path.join(SCHEMA_DIR, "benchmarks.db")
 
 KEY_DIR = os.path.join(PROJECT_ROOT, "keys")
-TEMPLATES_DIR = os.path.join(PROJECT_ROOT, "templates")
 OUTPUT_DIR = os.path.join(os.path.dirname(PROJECT_ROOT), "greenland_output")
 
 # Verbalator directories; possibly should be refactored

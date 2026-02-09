@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from benchmarks.lib.exemplars.base import ExemplarType, register_exemplar
-from lib.sentence_generation import SentenceGenerator
+from benchmarks.lib.sentence_generation import SentenceGenerator
 
 # Sample word matrices for demonstration
 SAMPLE_WORD_MATRICES: Dict[str, Dict[str, Dict[str, Any]]] = {

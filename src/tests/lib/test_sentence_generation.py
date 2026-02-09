@@ -7,7 +7,7 @@ Tests for the sentence generation library.
 import unittest
 from unittest.mock import Mock, patch
 
-from lib.sentence_generation import SentenceGenerator
+from benchmarks.lib.sentence_generation import SentenceGenerator
 
 
 class TestSentenceGenerator(unittest.TestCase):

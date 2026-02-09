@@ -5,8 +5,8 @@ This script handles S3 path format:
   staging/{language}/{voice}/{md5}.mp3 -> prod/{md5}.mp3
 
 Usage:
-    PYTHONPATH=src python scripts/accept_approved_sentence_audio.py --language lt --dry-run
-    PYTHONPATH=src python scripts/accept_approved_sentence_audio.py --language lt
+    PYTHONPATH=src python src/scripts/accept_approved_sentence_audio.py --language lt --dry-run
+    PYTHONPATH=src python src/scripts/accept_approved_sentence_audio.py --language lt
 """
 
 import argparse
@@ -17,8 +17,8 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 # Add src to path for imports
-if str(Path(__file__).parent.parent / "src") not in sys.path:
-    sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+if str(Path(__file__).parent.parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from clients.audio.s3_uploader import S3AudioUploader, get_prod_audio_key, get_staging_audio_key
 from wordfreq.storage.models.schema import AudioQualityReview

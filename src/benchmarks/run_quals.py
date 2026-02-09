@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
 import benchmarks.datastore.quals
-import lib.advanced_queries
+import benchmarks.lib_advanced_queries as lib_advanced_queries
 from clients import unified_client
 from clients.ollama_client import OllamaTimeoutError
 from telemetry import LLMUsage
@@ -125,7 +125,7 @@ Score each criterion from 0-10 (10 being best) and provide a brief explanation."
         for topic in self.topics:
             try:
                 # Generate response using advanced_queries.generate_response
-                response, gen_usage = lib.advanced_queries.generate_response(
+                response, gen_usage = lib_advanced_queries.generate_response(
                     topic, TARGET_LENGTH, self.response_type, self.model
                 )
 
@@ -182,7 +182,7 @@ class HistoricalAnalysisQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "historical_analysis"
-        self.response_type = lib.advanced_queries.ResponseType.HISTORICAL
+        self.response_type = lib_advanced_queries.ResponseType.HISTORICAL
         self.topics = [
             "The causes and effects of the Industrial Revolution",
             "The impact of the printing press on medieval Europe",
@@ -201,7 +201,7 @@ class ScientificExplanationQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "scientific_explanation"
-        self.response_type = lib.advanced_queries.ResponseType.SCIENTIFIC
+        self.response_type = lib_advanced_queries.ResponseType.SCIENTIFIC
         self.topics = [
             "The process of photosynthesis in plants",
             "How black holes form and evolve",
@@ -220,7 +220,7 @@ class TechnicalAnalysisQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "technical_analysis"
-        self.response_type = lib.advanced_queries.ResponseType.TECHNICAL
+        self.response_type = lib_advanced_queries.ResponseType.TECHNICAL
         self.topics = [
             "How public key encryption works",
             "The architecture of modern CPUs",
@@ -239,7 +239,7 @@ class BiographicalAnalysisQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "biographical_analysis"
-        self.response_type = lib.advanced_queries.ResponseType.BIOGRAPHICAL
+        self.response_type = lib_advanced_queries.ResponseType.BIOGRAPHICAL
         self.topics = [
             "The life and achievements of Marie Curie",
             "Albert Einstein's contributions to physics",
@@ -258,7 +258,7 @@ class LiteraryAnalysisQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "literary_analysis"
-        self.response_type = lib.advanced_queries.ResponseType.LITERARY
+        self.response_type = lib_advanced_queries.ResponseType.LITERARY
         self.topics = [
             "The plot and themes of 1984 by George Orwell",
             "The narrative structure of One Hundred Years of Solitude",
@@ -277,7 +277,7 @@ class CulturalAnalysisQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "cultural_analysis"
-        self.response_type = lib.advanced_queries.ResponseType.CULTURAL
+        self.response_type = lib_advanced_queries.ResponseType.CULTURAL
         self.topics = [
             "The influence of jazz on American culture",
             "The role of tea ceremonies in Japanese society",
@@ -296,7 +296,7 @@ class AnalyticalResponseQual(QualTestRunner):
     def __init__(self, model: str, session=None):
         super().__init__(model, session)
         self.test_name = "analytical_response"
-        self.response_type = lib.advanced_queries.ResponseType.ANALYTICAL
+        self.response_type = lib_advanced_queries.ResponseType.ANALYTICAL
         self.topics = [
             "The economic impact of automation on employment",
             "The effects of social media on political discourse",
