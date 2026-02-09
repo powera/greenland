@@ -16,6 +16,7 @@ from wordfreq.storage.translation_helpers import (
     LANGUAGE_HIERARCHY,
     LANGUAGE_NAMES,
     compute_sort_key,
+    invalidate_audio_for_translation_change,
 )
 
 if TYPE_CHECKING:
@@ -1126,6 +1127,11 @@ def apply_translations() -> ResponseReturnValue:
                             language_code=lang_code,
                             old_translation=old_val,
                             new_translation=release_val,
+                        )
+
+                        # Invalidate audio that was generated for the old translation
+                        invalidate_audio_for_translation_change(
+                            g.db, lemma.guid, lang_code, old_val, release_val
                         )
 
                         updated_db_count += 1

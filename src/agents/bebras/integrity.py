@@ -694,6 +694,137 @@ class IntegrityChecker:
         finally:
             session.close()
 
+    def check_audio_translation_mismatches(self, fix: bool = False) -> Dict[str, Any]:
+        """Check for audio records whose expected_text no longer matches the current translation.
+
+        Compares every AudioQualityReview record's expected_text against the
+        translation currently stored in the database for the same
+        guid + language_code pair.  Mismatches indicate audio that was generated
+        for a previous translation and is now stale.
+
+        Args:
+            fix: If True, mark mismatched records as 'needs_replacement' with
+                 a 'translation_mismatch' quality issue.
+        """
+        logger.info("Checking for audio-translation mismatches...")
+
+        session = self.get_session()
+        try:
+            from wordfreq.storage.models.schema import AudioQualityReview
+            from wordfreq.storage.translation_helpers import get_translation
+
+            # Only check lemma audio (guid is set)
+            audio_records = (
+                session.query(AudioQualityReview).filter(AudioQualityReview.guid.isnot(None)).all()
+            )
+
+            mismatches: List[Dict[str, Any]] = []
+            fixed_count = 0
+
+            for audio in audio_records:
+                lemma = session.query(Lemma).filter_by(guid=audio.guid).first()
+                if not lemma:
+                    # Orphaned audio record — no matching lemma
+                    mismatches.append(
+                        {
+                            "audio_id": audio.id,
+                            "guid": audio.guid,
+                            "language_code": audio.language_code,
+                            "voice_name": audio.voice_name,
+                            "expected_text": audio.expected_text,
+                            "current_translation": None,
+                            "status": audio.status,
+                            "reason": "no_matching_lemma",
+                        }
+                    )
+                    continue
+
+                current_translation = get_translation(session, lemma, audio.language_code)
+
+                if current_translation is None:
+                    # Translation was removed entirely
+                    mismatches.append(
+                        {
+                            "audio_id": audio.id,
+                            "guid": audio.guid,
+                            "lemma_text": lemma.lemma_text,
+                            "language_code": audio.language_code,
+                            "voice_name": audio.voice_name,
+                            "expected_text": audio.expected_text,
+                            "current_translation": None,
+                            "status": audio.status,
+                            "reason": "translation_removed",
+                        }
+                    )
+                elif audio.expected_text != current_translation:
+                    mismatches.append(
+                        {
+                            "audio_id": audio.id,
+                            "guid": audio.guid,
+                            "lemma_text": lemma.lemma_text,
+                            "language_code": audio.language_code,
+                            "voice_name": audio.voice_name,
+                            "expected_text": audio.expected_text,
+                            "current_translation": current_translation,
+                            "status": audio.status,
+                            "reason": "text_mismatch",
+                        }
+                    )
+
+                if fix and mismatches and mismatches[-1]["audio_id"] == audio.id:
+                    if audio.status != "needs_replacement":
+                        import json as _json
+
+                        audio.status = "needs_replacement"
+                        existing_issues: List[str] = []
+                        if audio.quality_issues:
+                            try:
+                                existing_issues = _json.loads(audio.quality_issues)
+                            except (ValueError, TypeError):
+                                existing_issues = []
+                        if "translation_mismatch" not in existing_issues:
+                            existing_issues.append("translation_mismatch")
+                            audio.quality_issues = _json.dumps(existing_issues)
+                        fixed_count += 1
+
+            if fix and fixed_count > 0:
+                session.commit()
+                logger.info(f"Fixed {fixed_count} audio records")
+
+            logger.info(
+                f"Found {len(mismatches)} audio-translation mismatches "
+                f"out of {len(audio_records)} audio records checked"
+            )
+
+            # Group by language for summary
+            by_language: Dict[str, int] = {}
+            for item in mismatches:
+                lang = item["language_code"]
+                by_language[lang] = by_language.get(lang, 0) + 1
+
+            return {
+                "total_checked": len(audio_records),
+                "mismatch_count": len(mismatches),
+                "fixed_count": fixed_count if fix else 0,
+                "by_language": by_language,
+                "mismatches": mismatches,
+            }
+
+        except Exception as e:
+            logger.error(f"Error checking audio-translation mismatches: {e}")
+            if fix:
+                session.rollback()
+            return {
+                "error": str(e),
+                "total_checked": 0,
+                "mismatch_count": 0,
+                "fixed_count": 0,
+                "by_language": {},
+                "mismatches": [],
+            }
+        finally:
+            session.close()
+
     def run_full_check(self, output_file: Optional[str] = None) -> Dict[str, Any]:
         """Run all integrity checks and generate a comprehensive report."""
         logger.info("Starting full database integrity check...")
@@ -713,6 +844,7 @@ class IntegrityChecker:
                 "invalid_difficulty_levels": self.check_invalid_difficulty_levels(),
                 "sentences_missing_punctuation": self.check_sentences_missing_punctuation(),
                 "sentence_levels": self.check_sentence_levels(),
+                "audio_translation_mismatches": self.check_audio_translation_mismatches(),
             },
         }
 
@@ -792,6 +924,17 @@ class IntegrityChecker:
         logger.info("SENTENCE LEVELS:")
         sentence_levels = checks["sentence_levels"]
         logger.info(f"  Incorrect: {sentence_levels['issue_count']}")
+        logger.info("")
+
+        audio_mismatches = checks["audio_translation_mismatches"]
+        logger.info("AUDIO-TRANSLATION MISMATCHES:")
+        logger.info(
+            f"  Mismatches: {audio_mismatches['mismatch_count']} "
+            f"(out of {audio_mismatches['total_checked']} audio records)"
+        )
+        if audio_mismatches.get("by_language"):
+            for lang, count in sorted(audio_mismatches["by_language"].items()):
+                logger.info(f"    {lang}: {count}")
 
         total_issues = (
             checks["orphaned_derivative_forms"]["orphaned_count"]
@@ -804,6 +947,7 @@ class IntegrityChecker:
             + checks["invalid_difficulty_levels"]["invalid_count"]
             + missing_punct["missing_count"]
             + sentence_levels["issue_count"]
+            + audio_mismatches["mismatch_count"]
         )
 
         logger.info("")
@@ -828,6 +972,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
             "invalid-levels",
             "missing-punctuation",
             "sentence-levels",
+            "audio-mismatches",
             "all",
         ],
         default="all",
@@ -836,7 +981,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--fix",
         action="store_true",
-        help="Fix issues where possible (missing-punctuation, sentence-levels)",
+        help="Fix issues where possible (missing-punctuation, sentence-levels, audio-mismatches)",
     )
 
     return parser
@@ -941,6 +1086,31 @@ def main() -> None:
                         f"current={item.get('current_level')} "
                         f"expected={item.get('expected_level')} "
                         f"(words: {item.get('word_count')}, levels: {item.get('difficulty_levels')})"
+                    )
+
+    elif args.check == "audio-mismatches":
+        results = checker.check_audio_translation_mismatches(fix=args.fix)
+        print(
+            f"\nAudio-translation mismatches: {results['mismatch_count']} "
+            f"(out of {results['total_checked']} audio records)"
+        )
+        if args.fix:
+            print(f"Fixed: {results.get('fixed_count', 0)}")
+        if results.get("by_language"):
+            for lang, count in sorted(results["by_language"].items()):
+                print(f"  {lang}: {count}")
+        # Print first few examples
+        if not args.fix:
+            mismatch_list = cast(List[Dict[str, Any]], results.get("mismatches") or [])
+            if mismatch_list:
+                print("\nExamples:")
+                for item in mismatch_list[:10]:
+                    print(
+                        f"  [{item.get('language_code')}] "
+                        f"{item.get('guid')}: "
+                        f"audio={item.get('expected_text')!r} "
+                        f"db={item.get('current_translation')!r} "
+                        f"({item.get('reason')})"
                     )
 
     else:  # all
