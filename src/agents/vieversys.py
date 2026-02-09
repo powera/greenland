@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """
-Vieversys - Audio Generation Agent
+Vieversys - LLM API Audio Generation
 
-This agent generates audio files for lemmas using OpenAI TTS API.
+This agent generates audio files for lemmas using cloud TTS APIs.
+Supported engines: OpenAI TTS, Amazon Polly, Azure Cognitive TTS,
+and Google Cloud Text-to-Speech.
+
 Files are generated to a temporary directory, stored with metadata in the
 AudioQualityReview table with 'pending_review' status, and can later be
 uploaded to S3 after review.
@@ -45,11 +48,14 @@ from agents.common.lemma_selection import (
     get_lemmas_for_agent,
 )
 from clients.audio import AudioFormat, Voice, generate_audio
+from clients.audio.azure_tts import AzureTTSClient, AzureVoice
+from clients.audio.google_tts import GoogleTTSClient, GoogleTtsVoice
 from clients.audio.gpt_voices import (
     DEFAULT_GPT_VOICES,
     GptVoice,
     get_character_description,
 )
+from clients.audio.polly_tts import PollyTTSClient, PollyVoice
 from clients.audio.manifest import generate_manifest
 from clients.audio.s3_uploader import S3AudioUploader
 from wordfreq.storage.backend import create_session as create_backend_session
@@ -71,7 +77,7 @@ logger = logging.getLogger(__name__)
 
 
 class VieversysAgent:
-    """Agent for generating audio files for lemmas."""
+    """Agent for generating audio files for lemmas using cloud TTS APIs."""
 
     def __init__(
         self,
@@ -80,6 +86,7 @@ class VieversysAgent:
         upload_s3: bool = False,
         auto_approve: bool = False,
         skip_existing: bool = False,
+        tts_engine: str = "openai",
     ) -> None:
         """
         Initialize the Vieversys agent.
@@ -90,12 +97,14 @@ class VieversysAgent:
             upload_s3: Whether to upload generated audio to S3 staging
             auto_approve: Whether to automatically approve audio (requires upload_s3)
             skip_existing: Whether to skip lemma/voice combinations that already have audio
+            tts_engine: TTS engine to use ('openai', 'polly', 'azure', 'google')
         """
         self.config = config
         self.debug = config.debug
         self.upload_s3 = upload_s3
         self.auto_approve = auto_approve
         self.skip_existing = skip_existing
+        self.tts_engine = tts_engine
         self.output_dir = (
             Path(output_dir) if output_dir else Path(tempfile.mkdtemp(prefix="vieversys_"))
         )
@@ -757,11 +766,277 @@ class VieversysAgent:
 
         session.commit()
 
+    def generate_audio_for_lemma_cloud(
+        self,
+        session: Session,
+        lemma: Lemma,
+        language_code: str,
+        voice_names: List[str],
+    ) -> Dict[str, Any]:
+        """
+        Generate audio for a lemma using a cloud TTS engine (Polly, Azure, or Google).
+
+        Args:
+            session: Database session
+            lemma: Lemma to generate audio for
+            language_code: Target language code
+            voice_names: List of voice identifiers for the selected engine
+
+        Returns:
+            Dict with generation results
+        """
+        text = self.get_translation_text(session, lemma, language_code)
+        if not text:
+            logger.warning(f"No {language_code} translation for lemma {lemma.guid}")
+            return {
+                "success": False,
+                "lemma_guid": lemma.guid,
+                "language": language_code,
+                "error": "No translation available",
+            }
+
+        results: Dict[str, Any] = {
+            "success": True,
+            "lemma_guid": lemma.guid,
+            "language": language_code,
+            "text": text,
+            "voices": [],
+        }
+
+        for voice_name in voice_names:
+            # Check if audio already exists
+            if self.skip_existing:
+                existing = (
+                    session.query(AudioQualityReview)
+                    .filter_by(
+                        guid=lemma.guid,
+                        language_code=language_code,
+                        voice_name=voice_name,
+                    )
+                    .first()
+                )
+                if existing:
+                    logger.info(
+                        f"Skipping {lemma.guid}/{language_code}/{voice_name} - audio exists"
+                    )
+                    results["voices"].append(
+                        {
+                            "voice": voice_name,
+                            "success": True,
+                            "skipped": True,
+                            "reason": "audio already exists",
+                        }
+                    )
+                    continue
+
+            logger.info(
+                f"Generating audio ({self.tts_engine}): " f"{text} ({language_code}/{voice_name})"
+            )
+
+            # Generate audio with the selected engine
+            result = self._call_cloud_tts(text, voice_name, language_code)
+
+            if not result.success:
+                logger.error(f"Failed to generate audio: {result.error}")
+                results["voices"].append(
+                    {"voice": voice_name, "success": False, "error": result.error}
+                )
+                continue
+
+            # Save and process audio file
+            safe_text = text.lower().replace(" ", "_")[:50]
+            filename = f"{lemma.guid}_{safe_text}.mp3"
+
+            voice_dir = self.output_dir / language_code / voice_name
+            voice_dir.mkdir(parents=True, exist_ok=True)
+
+            file_path = voice_dir / filename
+            file_path.write_bytes(result.audio_data)
+
+            md5_hash = hashlib.md5(result.audio_data).hexdigest()
+            logger.info(f"Saved audio: {file_path} (MD5: {md5_hash})")
+
+            # Upload to S3 staging if enabled
+            s3_staging_url = None
+            s3_staging_manifest_url = None
+            s3_prod_url = None
+            if self.upload_s3 and self.s3_uploader:
+                manifest_data = generate_manifest(
+                    audio_file_path=file_path,
+                    agent="vieversys",
+                    voice_name=voice_name,
+                    language_code=language_code,
+                    expected_text=text,
+                    guid=lemma.guid,
+                    sentence_id=None,
+                    grammatical_form=None,
+                    generation_params={
+                        "model": result.model,
+                        "engine": self.tts_engine,
+                        "voice": voice_name,
+                    },
+                )
+
+                success, audio_url, manifest_url = self._upload_to_staging_path(
+                    audio_path=file_path,
+                    manifest_data=manifest_data,
+                    md5_hash=md5_hash,
+                    language_code=language_code,
+                    voice_path_name=voice_name,
+                )
+
+                if success:
+                    s3_staging_url = audio_url
+                    s3_staging_manifest_url = manifest_url
+                    if self.auto_approve:
+                        prod_success, prod_url = self._upload_to_prod_path(
+                            file_path, md5_hash, language_code, voice_name
+                        )
+                        if prod_success:
+                            s3_prod_url = prod_url
+
+            # Create review record
+            self._create_review_record(
+                session,
+                lemma,
+                language_code,
+                voice_name,
+                filename,
+                text,
+                md5_hash,
+                s3_staging_url=s3_staging_url,
+                s3_staging_manifest_url=s3_staging_manifest_url,
+                s3_prod_url=s3_prod_url,
+            )
+
+            results["voices"].append(
+                {
+                    "voice": voice_name,
+                    "success": True,
+                    "filename": filename,
+                    "file_path": str(file_path),
+                    "md5": md5_hash,
+                    "duration_ms": result.duration_ms,
+                }
+            )
+
+        return results
+
+    def _call_cloud_tts(
+        self,
+        text: str,
+        voice_name: str,
+        language_code: str,
+    ) -> AudioGenerationResult:
+        """Dispatch TTS call to the appropriate cloud engine.
+
+        Args:
+            text: Text to convert to speech
+            voice_name: Voice identifier for the engine
+            language_code: Language code
+
+        Returns:
+            AudioGenerationResult from the engine
+        """
+        if self.tts_engine == "polly":
+            client = PollyTTSClient(debug=self.debug)
+            # Find matching PollyVoice by name
+            polly_voice = None
+            for pv in PollyVoice:
+                if pv.voice_id.lower() == voice_name.lower() or pv.ui_name == voice_name:
+                    polly_voice = pv
+                    break
+            if not polly_voice:
+                return AudioGenerationResult(
+                    audio_data=b"",
+                    text=text,
+                    voice=None,
+                    language_code=language_code,
+                    model="polly-neural",
+                    duration_ms=0,
+                    success=False,
+                    error=f"Unknown Polly voice: {voice_name}",
+                )
+            return client.generate_audio(
+                text=text,
+                voice=polly_voice,
+                language_code=language_code,
+            )
+
+        elif self.tts_engine == "azure":
+            client_az = AzureTTSClient(debug=self.debug)
+            azure_voice = None
+            for av in AzureVoice:
+                if (
+                    av.voice_name.lower() == voice_name.lower()
+                    or av.ui_name == voice_name
+                    or av.name.lower() == voice_name.lower()
+                ):
+                    azure_voice = av
+                    break
+            if not azure_voice:
+                return AudioGenerationResult(
+                    audio_data=b"",
+                    text=text,
+                    voice=None,
+                    language_code=language_code,
+                    model="azure-neural",
+                    duration_ms=0,
+                    success=False,
+                    error=f"Unknown Azure voice: {voice_name}",
+                )
+            return client_az.generate_audio(
+                text=text,
+                voice=azure_voice,
+                language_code=language_code,
+            )
+
+        elif self.tts_engine == "google":
+            client_g = GoogleTTSClient(debug=self.debug)
+            google_voice = None
+            for gv in GoogleTtsVoice:
+                if (
+                    gv.voice_name.lower() == voice_name.lower()
+                    or gv.ui_name == voice_name
+                    or gv.name.lower() == voice_name.lower()
+                ):
+                    google_voice = gv
+                    break
+            if not google_voice:
+                return AudioGenerationResult(
+                    audio_data=b"",
+                    text=text,
+                    voice=None,
+                    language_code=language_code,
+                    model="google-wavenet",
+                    duration_ms=0,
+                    success=False,
+                    error=f"Unknown Google TTS voice: {voice_name}",
+                )
+            return client_g.generate_audio(
+                text=text,
+                voice=google_voice,
+                language_code=language_code,
+            )
+
+        else:
+            return AudioGenerationResult(
+                audio_data=b"",
+                text=text,
+                voice=None,
+                language_code=language_code,
+                model="unknown",
+                duration_ms=0,
+                success=False,
+                error=f"Unknown TTS engine: {self.tts_engine}",
+            )
+
     def generate_batch(
         self,
         language_code: str,
         lemmas: Optional[List[Lemma]] = None,
         voices: Optional[List[GptVoice]] = None,
+        cloud_voice_names: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Generate audio for a batch of lemmas.
@@ -769,23 +1044,35 @@ class VieversysAgent:
         Args:
             language_code: Target language code
             lemmas: List of lemmas to process (if None, returns empty result)
-            voices: GptVoices to use (defaults to language's default voices)
+            voices: GptVoices to use for OpenAI engine (defaults to language's defaults)
+            cloud_voice_names: Voice names for cloud engines (polly, azure, google)
 
         Returns:
             Dict with batch generation results
         """
         session = self.get_session()
-        voices = voices or DEFAULT_GPT_VOICES.get(
-            language_code, GptVoice.get_default_voices_for_language(language_code)
-        )
+        use_cloud = self.tts_engine in ("polly", "azure", "google")
+
+        if not use_cloud:
+            voices = voices or DEFAULT_GPT_VOICES.get(
+                language_code, GptVoice.get_default_voices_for_language(language_code)
+            )
 
         try:
+            # Determine voice display names for the result
+            if use_cloud and cloud_voice_names:
+                voice_display = cloud_voice_names
+            elif voices:
+                voice_display = [v.path_name for v in voices]
+            else:
+                voice_display = cloud_voice_names or []
+
             # If no lemmas provided, return empty result
             if not lemmas:
                 return {
                     "language_code": language_code,
                     "total_lemmas": 0,
-                    "voices": [v.path_name for v in voices],
+                    "voices": voice_display,
                     "output_dir": str(self.output_dir),
                     "lemmas": [],
                     "success_count": 0,
@@ -800,12 +1087,15 @@ class VieversysAgent:
 
             lemmas = lemmas_with_translation
 
-            logger.info(f"Generating audio for {len(lemmas)} lemmas in {language_code}")
+            logger.info(
+                f"Generating audio ({self.tts_engine}) for "
+                f"{len(lemmas)} lemmas in {language_code}"
+            )
 
             results: Dict[str, Any] = {
                 "language_code": language_code,
                 "total_lemmas": len(lemmas),
-                "voices": [v.path_name for v in voices],
+                "voices": voice_display,
                 "output_dir": str(self.output_dir),
                 "lemmas": [],
                 "success_count": 0,
@@ -815,9 +1105,14 @@ class VieversysAgent:
             for i, lemma in enumerate(lemmas, 1):
                 logger.info(f"[{i}/{len(lemmas)}] Processing {lemma.guid}")
 
-                result = self.generate_audio_for_lemma(
-                    session, lemma, language_code, voices, create_review_record=True
-                )
+                if use_cloud and cloud_voice_names:
+                    result = self.generate_audio_for_lemma_cloud(
+                        session, lemma, language_code, cloud_voice_names
+                    )
+                else:
+                    result = self.generate_audio_for_lemma(
+                        session, lemma, language_code, voices or [], create_review_record=True
+                    )
 
                 results["lemmas"].append(result)
                 if result["success"]:
@@ -992,7 +1287,7 @@ class VieversysAgent:
 
 def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection."""
-    parser = argparse.ArgumentParser(description="Vieversys - Audio Generation Agent")
+    parser = argparse.ArgumentParser(description="Vieversys - LLM API Audio Generation")
 
     # Common arguments
     add_common_args(parser)
@@ -1014,13 +1309,19 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-dir", help="Output directory for generated audio")
     parser.add_argument(
         "--language",
-        choices=["lt", "zh", "es", "fr"],
+        choices=["lt", "zh", "es", "fr", "ko", "de", "pt", "sw", "vi"],
         help="Target language code (required for populate-only and regenerate modes)",
+    )
+    parser.add_argument(
+        "--tts-engine",
+        choices=["openai", "polly", "azure", "google"],
+        default="openai",
+        help="TTS engine to use: openai (default), polly (Amazon Polly), azure (Azure Cognitive), google (Google Cloud TTS)",
     )
     parser.add_argument(
         "--voices",
         nargs="+",
-        help="Character voices to use (e.g., ruta, jonas, meiling). Defaults to language's primary voices.",
+        help="Voice names to use. For OpenAI: character names (ruta, jonas). For cloud engines: voice IDs (e.g., Zhiyu, zh-CN-XiaoxiaoNeural, cmn-CN-Wavenet-A).",
     )
     parser.add_argument(
         "--generate-manifests",
@@ -1052,6 +1353,27 @@ def get_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _print_cloud_voices(engine: str) -> None:
+    """Print available voice names for a cloud TTS engine."""
+    voice_enum_map = {
+        "polly": PollyVoice,
+        "azure": AzureVoice,
+        "google": GoogleTtsVoice,
+    }
+    voice_cls = voice_enum_map.get(engine)
+    if not voice_cls:
+        return
+
+    print(f"\nAvailable {engine} voices:")
+    languages: Dict[str, List[str]] = {}
+    for v in voice_cls:
+        lang = v.language_code
+        name = v.voice_id if hasattr(v, "voice_id") else v.voice_name
+        languages.setdefault(lang, []).append(f"{name} ({v.gender.upper()})")
+    for lang_code in sorted(languages.keys()):
+        print(f"  {lang_code}: {', '.join(languages[lang_code])}")
+
+
 def main() -> None:
     """Main entry point for the vieversys agent."""
     parser = get_argument_parser()
@@ -1066,26 +1388,49 @@ def main() -> None:
         sys.exit(1)
 
     # Create agent with config
+    tts_engine = getattr(args, "tts_engine", "openai")
     agent = VieversysAgent(
         config=config,
         output_dir=args.output_dir,
         upload_s3=args.upload_s3,
         auto_approve=args.auto_approve,
         skip_existing=(args.mode == "populate-only"),
+        tts_engine=tts_engine,
     )
 
-    # Convert voice names to GptVoice enums
+    # Convert voice names based on TTS engine
     voices = None
-    if args.voices:
-        # Try to match by path_name (e.g., "ruta", "jonas") or ui_name (e.g., "gpt-lt-f1")
+    cloud_voice_names: Optional[List[str]] = None
+
+    if tts_engine in ("polly", "azure", "google"):
+        # For cloud engines, voice names are passed as-is
+        if args.voices:
+            cloud_voice_names = args.voices
+        else:
+            # Provide defaults for cloud engines
+            lang = args.language or "es"
+            if tts_engine == "polly":
+                defaults = PollyVoice.get_voices_for_language(lang)
+                cloud_voice_names = [v.voice_id for v in defaults] if defaults else []
+            elif tts_engine == "azure":
+                defaults_az = AzureVoice.get_voices_for_language(lang)
+                cloud_voice_names = [v.name.lower() for v in defaults_az] if defaults_az else []
+            elif tts_engine == "google":
+                defaults_g = GoogleTtsVoice.get_voices_for_language(lang)
+                cloud_voice_names = [v.name.lower() for v in defaults_g] if defaults_g else []
+
+            if not cloud_voice_names:
+                print(f"Error: No {tts_engine} voices available for language '{lang}'")
+                _print_cloud_voices(tts_engine)
+                sys.exit(1)
+    elif args.voices:
+        # OpenAI: match by path_name or ui_name
         voices = []
         for v in args.voices:
-            # First try ui_name format
             gpt_voice = GptVoice.from_ui_name(v)
             if gpt_voice:
                 voices.append(gpt_voice)
                 continue
-            # Try matching by path_name
             found = False
             for voice in GptVoice:
                 if voice.path_name == v.lower():
@@ -1258,11 +1603,17 @@ def main() -> None:
             finally:
                 session.close()
 
-            voice_count = len(voices) if voices else len(DEFAULT_GPT_VOICES.get(args.language, []))
+            if cloud_voice_names:
+                voice_count = len(cloud_voice_names)
+            elif voices:
+                voice_count = len(voices)
+            else:
+                voice_count = len(DEFAULT_GPT_VOICES.get(args.language, []))
             estimated_calls = lemma_count * voice_count
 
+            engine_label = tts_engine.title() if tts_engine != "openai" else "OpenAI"
             if not confirm_operation(
-                message=f"This will generate audio for {lemma_count} lemmas with {voice_count} voices each.\nTotal API calls: {estimated_calls}\nThis will use OpenAI TTS API and may incur costs.",
+                message=f"This will generate audio for {lemma_count} lemmas with {voice_count} voices each.\nTotal API calls: {estimated_calls}\nThis will use {engine_label} TTS API and may incur costs.",
                 estimated_calls=estimated_calls,
                 skip_confirmation=args.yes,
                 dry_run=args.dry_run,
@@ -1276,6 +1627,7 @@ def main() -> None:
             language_code=args.language,
             lemmas=lemmas,
             voices=voices,
+            cloud_voice_names=cloud_voice_names,
         )
         duration = (datetime.now() - start_time).total_seconds()
 

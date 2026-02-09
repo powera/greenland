@@ -117,8 +117,11 @@
                         <option value="piper">Piper (free, neural)</option>
                         <option value="coqui">Coqui TTS (free, neural, voice cloning)</option>
                         <option value="qwen3">Qwen3 (free, neural, multilingual)</option>
+                        <option value="polly">Amazon Polly (paid, neural)</option>
+                        <option value="azure">Azure Cognitive TTS (paid, neural)</option>
+                        <option value="google">Google Cloud TTS (paid, Wavenet/Neural2)</option>
                     </select>
-                    <div class="form-text">Choose TTS engine: OpenAI (paid), eSpeak (fast), Piper (neural), Coqui (voice cloning), or Qwen3 (multilingual)</div>
+                    <div class="form-text">Choose TTS engine for audio generation</div>
                 </div>
                 <div class="mb-3">
                     <label for="audio_language" class="form-label">Language <span class="text-danger">*</span></label>
@@ -176,7 +179,10 @@ document.addEventListener('DOMContentLoaded', function() {
         espeakVoices: {{ espeak_voices|tojson }},
         piperVoices: {{ piper_voices|tojson }},
         coquiVoices: {{ coqui_voices|tojson }},
-        qwen3Voices: {{ qwen3_voices|tojson }}
+        qwen3Voices: {{ qwen3_voices|tojson }},
+        pollyVoices: {{ polly_voices|tojson }},
+        azureVoices: {{ azure_voices|tojson }},
+        googleVoices: {{ google_voices|tojson }}
     });
 });
 </script>

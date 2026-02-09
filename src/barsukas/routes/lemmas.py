@@ -12,6 +12,9 @@ from audioshoe.coqui.types import CoquiVoice
 from audioshoe.espeak.types import EspeakVoice
 from audioshoe.piper.types import PiperVoice
 from audioshoe.qwen.types import QwenVoice
+from clients.audio.azure_tts import AzureVoice
+from clients.audio.google_tts import GoogleTtsVoice
+from clients.audio.polly_tts import PollyVoice
 from barsukas.helpers.lemma_display import get_difficulty_stats, group_derivative_forms
 from workqueue.task_queue import get_tasks_for_target
 from wordfreq.storage.crud.derivative_form import delete_derivative_form
@@ -308,6 +311,30 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
             {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in qwen3_voice_list
         ]
 
+    # Amazon Polly voices by language
+    polly_voices = {}
+    for lang_code in language_names.keys():
+        polly_voice_list = PollyVoice.get_voices_for_language(lang_code)
+        polly_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in polly_voice_list
+        ]
+
+    # Azure TTS voices by language
+    azure_voices = {}
+    for lang_code in language_names.keys():
+        azure_voice_list = AzureVoice.get_voices_for_language(lang_code)
+        azure_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in azure_voice_list
+        ]
+
+    # Google Cloud TTS voices by language
+    google_voices = {}
+    for lang_code in language_names.keys():
+        google_voice_list = GoogleTtsVoice.get_voices_for_language(lang_code)
+        google_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in google_voice_list
+        ]
+
     queued_tasks = get_tasks_for_target(g.db, "lemma", lemma_id, limit=8)
 
     return render_template(
@@ -333,6 +360,9 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         piper_voices=piper_voices,
         coqui_voices=coqui_voices,
         qwen3_voices=qwen3_voices,
+        polly_voices=polly_voices,
+        azure_voices=azure_voices,
+        google_voices=google_voices,
         related_lemmas=related_lemmas,
         queued_tasks=queued_tasks,
     )
