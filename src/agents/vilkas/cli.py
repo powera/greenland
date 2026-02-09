@@ -31,6 +31,9 @@ SUPPORTED_TASKS = {
     "de": ["noun", "verb"],
     "es": ["noun", "verb"],
     "pt": ["noun", "verb"],
+    "it": ["noun", "verb"],
+    "sv": ["noun", "verb"],
+    "nl": ["noun", "verb"],
     "en": ["noun", "verb", "adjective", "adverb"],
 }
 
@@ -41,6 +44,9 @@ LANGUAGE_NAMES = {
     "de": "German",
     "es": "Spanish",
     "pt": "Portuguese",
+    "it": "Italian",
+    "sv": "Swedish",
+    "nl": "Dutch",
     "en": "English",
 }
 

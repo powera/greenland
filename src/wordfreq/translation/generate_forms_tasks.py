@@ -39,8 +39,14 @@ from wordfreq.translation.language_forms.lithuanian import NOUN_FORM_MAPPING as 
 from wordfreq.translation.language_forms.lithuanian import VERB_FORM_MAPPING as LT_VERB_FORM_MAPPING
 from wordfreq.translation.language_forms.portuguese import NOUN_FORM_MAPPING as PT_NOUN_FORM_MAPPING
 from wordfreq.translation.language_forms.portuguese import VERB_FORM_MAPPING as PT_VERB_FORM_MAPPING
+from wordfreq.translation.language_forms.dutch import NOUN_FORM_MAPPING as NL_NOUN_FORM_MAPPING
+from wordfreq.translation.language_forms.dutch import VERB_FORM_MAPPING as NL_VERB_FORM_MAPPING
+from wordfreq.translation.language_forms.italian import NOUN_FORM_MAPPING as IT_NOUN_FORM_MAPPING
+from wordfreq.translation.language_forms.italian import VERB_FORM_MAPPING as IT_VERB_FORM_MAPPING
 from wordfreq.translation.language_forms.spanish import NOUN_FORM_MAPPING as ES_NOUN_FORM_MAPPING
 from wordfreq.translation.language_forms.spanish import VERB_FORM_MAPPING as ES_VERB_FORM_MAPPING
+from wordfreq.translation.language_forms.swedish import NOUN_FORM_MAPPING as SV_NOUN_FORM_MAPPING
+from wordfreq.translation.language_forms.swedish import VERB_FORM_MAPPING as SV_VERB_FORM_MAPPING
 
 
 @dataclass
@@ -289,6 +295,83 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             base_form_identifier="singular",
             use_legacy_translation=True,
             translation_field_name="spanish_translation",
+            extract_gender=True,
+        )
+    ),
+    # Italian
+    "italian_verbs": _translation_task(
+        FormGenerationConfig(
+            language_code="it",
+            language_name="Italian",
+            pos_type="verb",
+            form_mapping=IT_VERB_FORM_MAPPING,
+            client_method_name="query_italian_verb_conjugations",
+            min_forms_threshold=10,
+            base_form_identifier="1s_present",
+            use_legacy_translation=False,
+        )
+    ),
+    "italian_nouns": _translation_task(
+        FormGenerationConfig(
+            language_code="it",
+            language_name="Italian",
+            pos_type="noun",
+            form_mapping=IT_NOUN_FORM_MAPPING,
+            client_method_name="query_italian_noun_forms",
+            min_forms_threshold=2,
+            base_form_identifier="singular",
+            use_legacy_translation=False,
+            extract_gender=True,
+        )
+    ),
+    # Swedish
+    "swedish_verbs": _translation_task(
+        FormGenerationConfig(
+            language_code="sv",
+            language_name="Swedish",
+            pos_type="verb",
+            form_mapping=SV_VERB_FORM_MAPPING,
+            client_method_name="query_swedish_verb_conjugations",
+            min_forms_threshold=10,
+            base_form_identifier="1s_present",
+            use_legacy_translation=False,
+        )
+    ),
+    "swedish_nouns": _translation_task(
+        FormGenerationConfig(
+            language_code="sv",
+            language_name="Swedish",
+            pos_type="noun",
+            form_mapping=SV_NOUN_FORM_MAPPING,
+            client_method_name="query_swedish_noun_forms",
+            min_forms_threshold=2,
+            base_form_identifier="singular",
+            use_legacy_translation=False,
+        )
+    ),
+    # Dutch
+    "dutch_verbs": _translation_task(
+        FormGenerationConfig(
+            language_code="nl",
+            language_name="Dutch",
+            pos_type="verb",
+            form_mapping=NL_VERB_FORM_MAPPING,
+            client_method_name="query_dutch_verb_conjugations",
+            min_forms_threshold=10,
+            base_form_identifier="1s_present",
+            use_legacy_translation=False,
+        )
+    ),
+    "dutch_nouns": _translation_task(
+        FormGenerationConfig(
+            language_code="nl",
+            language_name="Dutch",
+            pos_type="noun",
+            form_mapping=NL_NOUN_FORM_MAPPING,
+            client_method_name="query_dutch_noun_forms",
+            min_forms_threshold=2,
+            base_form_identifier="singular",
+            use_legacy_translation=False,
             extract_gender=True,
         )
     ),

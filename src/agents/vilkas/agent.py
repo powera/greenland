@@ -282,6 +282,9 @@ class VilkasAgent:
             "de": ["noun", "verb"],
             "es": ["noun", "verb"],
             "pt": ["noun", "verb"],
+            "it": ["noun", "verb"],
+            "sv": ["noun", "verb"],
+            "nl": ["noun", "verb"],
             "en": ["noun", "verb", "adjective", "adverb"],
         }
 
