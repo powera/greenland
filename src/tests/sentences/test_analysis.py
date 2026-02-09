@@ -19,7 +19,7 @@ from wordfreq.storage.models.schema import (
     SentencePatternWord,
     SentenceWord,
 )
-from wordfreq.tools.sentence_analysis import (
+from sentences.analysis import (
     SUBSTRING_MATCH_LANGUAGES,
     _forms_match,
     discover_and_store_lemmas,

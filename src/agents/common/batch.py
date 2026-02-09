@@ -24,7 +24,7 @@ from clients.batch_queue import BatchQueue, get_batch_manager
 from telemetry import CostConfig
 from wordfreq.storage.backend import create_session as create_backend_session
 from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, set_translation
-from wordfreq.translation.sentence import store_translation_results
+from sentences.translation import store_translation_results
 
 logger = logging.getLogger(__name__)
 
@@ -163,9 +163,15 @@ def _report_batch_usage(usage: BatchUsage) -> None:
 
     # Show reasoning breakdown if present
     if usage.total_reasoning_tokens > 0:
-        reasoning_pct = (usage.total_reasoning_tokens / usage.total_output_tokens * 100) if usage.total_output_tokens else 0
+        reasoning_pct = (
+            (usage.total_reasoning_tokens / usage.total_output_tokens * 100)
+            if usage.total_output_tokens
+            else 0
+        )
         logger.info("  - Reasoning:      %d (%.0f%%)", usage.total_reasoning_tokens, reasoning_pct)
-        logger.info("  - Actual output:  %d (%.0f%%)", usage.actual_output_tokens, 100 - reasoning_pct)
+        logger.info(
+            "  - Actual output:  %d (%.0f%%)", usage.actual_output_tokens, 100 - reasoning_pct
+        )
 
     logger.info("Total tokens:       %d", usage.total_tokens)
     logger.info("-" * 40)
