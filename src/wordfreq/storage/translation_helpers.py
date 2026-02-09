@@ -9,12 +9,13 @@ LemmaTranslation table. Code should use these helper functions instead of
 directly accessing translation fields.
 """
 
+import json
 import logging
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
-from wordfreq.storage.models.schema import Lemma, LemmaTranslation
+from wordfreq.storage.models.schema import AudioQualityReview, Lemma, LemmaTranslation
 
 logger = logging.getLogger(__name__)
 
@@ -283,6 +284,77 @@ def compute_sort_key(lang_code: str, translation: str) -> Optional[str]:
     return None
 
 
+def invalidate_audio_for_translation_change(
+    session: Session,
+    guid: Optional[str],
+    lang_code: str,
+    old_translation: Optional[str],
+    new_translation: str,
+) -> List[int]:
+    """Mark audio records as needing replacement when a translation changes.
+
+    Finds all AudioQualityReview records for the given guid + language_code
+    and sets their status to 'needs_replacement' with a 'translation_mismatch'
+    quality issue.
+
+    Args:
+        session: Database session
+        guid: Lemma GUID (e.g. "N01_001"). If None, no-op.
+        lang_code: Language code (e.g. 'lt', 'zh', 'fr')
+        old_translation: Previous translation value
+        new_translation: New translation value
+
+    Returns:
+        List of AudioQualityReview IDs that were invalidated.
+    """
+    if not guid:
+        return []
+
+    # No change — nothing to invalidate
+    if old_translation == new_translation:
+        return []
+
+    audio_records = (
+        session.query(AudioQualityReview)
+        .filter(
+            AudioQualityReview.guid == guid,
+            AudioQualityReview.language_code == lang_code,
+            AudioQualityReview.status != "needs_replacement",
+        )
+        .all()
+    )
+
+    invalidated_ids: List[int] = []
+    for audio in audio_records:
+        audio.status = "needs_replacement"
+
+        # Parse existing quality_issues JSON array and append if needed
+        existing_issues: List[str] = []
+        if audio.quality_issues:
+            try:
+                existing_issues = json.loads(audio.quality_issues)
+            except (json.JSONDecodeError, TypeError):
+                existing_issues = []
+
+        if "translation_mismatch" not in existing_issues:
+            existing_issues.append("translation_mismatch")
+            audio.quality_issues = json.dumps(existing_issues)
+
+        invalidated_ids.append(audio.id)
+
+    if invalidated_ids:
+        logger.info(
+            "Invalidated %d audio record(s) for %s/%s: translation changed " "from %r to %r",
+            len(invalidated_ids),
+            guid,
+            lang_code,
+            old_translation,
+            new_translation,
+        )
+
+    return invalidated_ids
+
+
 def set_translation(
     session: Session,
     lemma: Lemma,
@@ -347,6 +419,11 @@ def set_translation(
         setattr(lemma, field_name, translation)
         if definition is not None and hasattr(lemma, "definition_text"):
             lemma.definition_text = definition
+
+    # Invalidate any audio records whose expected_text no longer matches
+    invalidate_audio_for_translation_change(
+        session, lemma.guid, lang_code, old_translation, translation
+    )
 
     return old_translation, translation
 

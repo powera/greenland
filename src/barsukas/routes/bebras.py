@@ -93,6 +93,11 @@ INTEGRITY_CHECKS = [
         "Sentence Levels",
         "Sentences whose minimum_level doesn't match their linked word difficulties",
     ),
+    (
+        "audio-mismatches",
+        "Audio Mismatches",
+        "Audio files whose expected text no longer matches the current translation",
+    ),
 ]
 
 
@@ -259,6 +264,7 @@ def find_duplicates_integrity() -> ResponseReturnValue:
         "invalid-levels": checker.check_invalid_difficulty_levels,
         "missing-punctuation": lambda: checker.check_sentences_missing_punctuation(fix=fix_issues),
         "sentence-levels": lambda: checker.check_sentence_levels(fix=fix_issues),
+        "audio-mismatches": lambda: checker.check_audio_translation_mismatches(fix=fix_issues),
     }
 
     runner = check_map.get(check_type)
