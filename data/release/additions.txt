@@ -1,0 +1,143 @@
+Possible additions: other meanings of polysemous words
+======================================================
+
+This file lists alternative meanings of words already in the database that
+could be added as separate entries. Each entry shows the existing word and
+its current sense, followed by other well-known meanings.
+
+Format: word (proposed disambiguation) — POS/subtype — description
+
+
+== From disambiguated NOUNS ==
+
+bark (dog sound) — noun/process_event — The sharp explosive sound made by a dog.
+palm (tree) — ALREADY EXISTS as N05_013
+beam (light) — noun/concept_idea — A ray or shaft of light.
+chest (storage box) — noun/small_movable_object — A large strong box for storage or transport.
+foot (unit of measurement) — ALREADY EXISTS as implied by N34 subtypes; consider adding explicitly
+tear (rip) — verb/destruction_action — ALREADY EXISTS as V03_003
+orange (color) — ALREADY EXISTS as A02_009
+jam (traffic) — noun/process_event — A situation where vehicles are unable to move due to congestion.
+corn (foot callus) — noun/disease_condition — A small painful area of thickened skin on the foot.
+school (group of fish) — noun/animal_grouping_term — A large group of fish swimming together.
+temple (side of head) — noun/body_part — The flat part of either side of the head between the forehead and the ear.
+port (wine) — noun/beverage — A sweet dark-red fortified wine from Portugal.
+port (computer) — noun/technology_digital — A socket or connection point for plugging in cables or devices.
+yard (measurement) — ALREADY EXISTS as N34_009
+fork (branching) — noun/shape — A point where something divides into two or more branches.
+key (keyboard) — noun/small_movable_object — A button on a keyboard or piano that is pressed to produce a character or note.
+key (music) — noun/concept_idea — A group of notes based on a particular note and comprising a scale.
+pen (enclosure) — noun/building_part — A small enclosure for farm animals.
+blade (grass) — noun/plant_part — A single flat narrow leaf of grass.
+button (push) — noun/small_movable_object — A small device on a machine that is pressed to operate it.
+net (remaining amount) — adjective/quality — Remaining after all deductions; the final amount.
+pin (bowling) — noun/small_movable_object — A wooden club-shaped object set up to be knocked down in bowling.
+pipe (smoking) — noun/small_movable_object — A narrow tube with a bowl at one end for smoking tobacco.
+coat (layer) — noun/quantitative_concept — A covering or layer of a substance spread over a surface.
+star (celebrity) — noun/human — A famous or talented entertainer or sports player.
+star (shape) — noun/shape — A shape with multiple pointed extensions radiating from a center.
+field (area of study) — noun/knowledge_domain — A subject or area of activity or interest.
+field (sports) — noun/building_structure — An area of ground used for sports or games.
+rock (music genre) — noun/concept_idea — A form of popular music with a strong beat, originating in the 1950s.
+lock (hair) — noun/body_part — A piece or curl of hair.
+drill (training) — noun/activity — Practice or training in military exercises or procedures.
+spade (card suit) — noun/symbolic_element — One of the four suits in a deck of playing cards, marked with a black pointed shape.
+marble (toy) — noun/small_movable_object — A small ball of colored glass used in children's games.
+board (committee) — noun/group_people — A group of people constituted as the decision-making body of an organization.
+form (document) — noun/communication_information — A printed document with blank spaces for information to be inserted.
+deal (large amount) — noun/quantitative_concept — A large amount (as in "a great deal").
+mass (religious ceremony) — noun/process_event — The Christian Eucharistic service, especially in the Roman Catholic Church.
+course (golf) — noun/building_structure — An area of land laid out for golf.
+course (meal) — noun/food — A set of dishes served together as part of a meal.
+course (path/direction) — noun/concept_idea — The route or direction taken.
+flight (stairs) — noun/building_part — A series of steps between two landings.
+flight (escape) — noun/process_event — The act of fleeing or running away.
+change (coins) — noun/small_movable_object — Coins as opposed to paper currency; money returned when paying more than owed.
+trip (stumble) — noun/process_event — An accidental loss of footing causing a stumble.
+country (rural area) — noun/natural_feature — Rural districts as opposed to cities; the countryside.
+branch (division) — noun/group_people — A division or office of a large business or organization.
+trunk (car) — noun/building_part — The enclosed storage space at the rear of a car.
+trunk (elephant) — ALREADY EXISTS as implicit in N03 subtypes; consider adding explicitly
+trunk (storage) — noun/small_movable_object — A large box with a hinged lid for storing or transporting belongings.
+cabinet (government) — noun/group_people — A body of senior government ministers.
+sake (purpose) — preposition/preposition_other — Typically used in "for the sake of"; already a function word.
+beam (light ray) — noun/concept_idea — A ray or shaft of light or radiation.
+sentence (legal) — noun/process_event — The punishment assigned to a defendant by a court.
+company (companionship) — noun/abstract_condition — The fact or condition of being with another person.
+
+== From disambiguated VERBS ==
+
+stand (tolerate) — verb/emotional_state — To endure or put up with something.
+stand (booth) — noun/building_structure — A small temporary structure for selling goods at a market.
+lie (tell falsehood) — verb/communication — To say something that is not true with the intention to deceive.
+beat (defeat) — verb/physical_action — To win against someone in a competition or conflict.
+tie (equal score) — noun/process_event — A result in which two or more competitors finish with the same score.
+wave (water) — ALREADY EXISTS as N11_045 wave (water)
+mean (unkind) — adjective/personal_quality — Unkind, spiteful, or unfair.
+mean (average) — noun/quantitative_concept — The average value of a set of numbers.
+check (bank) — noun/small_movable_object — A written order directing a bank to pay money from an account.
+check (pattern) — noun/shape — A pattern of small squares, typically in two alternating colors.
+miss (fail to hit) — verb/physical_action — To fail to hit, reach, or come into contact with.
+bore (drill hole) — verb/creation_action — To make a hole in something using a drill or similar tool.
+call (telephone) — verb/communication — To contact someone by telephone.
+run (operate) — verb/physical_action — To manage or operate a business, organization, or machine.
+pass (succeed on test) — verb/change — To achieve a required standard on an exam or test.
+pass (hand over) — verb/possession — To give or transfer something to someone.
+odd (not even number) — adjective/quality — Of a whole number: not divisible by two.
+flat (apartment) — noun/building_structure — (British) A set of rooms for living in on one floor of a building.
+sharp (intelligent) — adjective/personal_quality — Quick to understand, notice, or respond; mentally acute.
+present (gift) — ALREADY EXISTS as N08 subtypes; check if disambiguated
+sweet (kind person) — adjective/personal_quality — Kind, thoughtful, or endearing in nature.
+
+== Words NOT currently in the database that are common polysemous words ==
+
+date (calendar day) — noun/time_period — A particular day of the month or year.
+date (fruit) — noun/food — The sweet dark-brown oval fruit of the date palm.
+date (romantic outing) — noun/process_event — A social engagement with a romantic interest.
+bat (sports equipment) — noun/small_movable_object — A specially shaped club used for hitting a ball in sports like baseball or cricket.
+mole (skin mark) — noun/body_part — A small dark blemish on the skin.
+mole (chemistry) — noun/unit_of_measurement — A unit of amount of substance in chemistry.
+organ (musical instrument) — noun/small_movable_object — A large musical instrument with pipes and keys, typically found in churches.
+sole (fish) — noun/food — A type of flatfish used as food.
+sole (only) — adjective/quality — Being the only one; single and exclusive.
+scale (fish) — noun/body_part — A small rigid plate on the skin of fish and reptiles.
+scale (music) — noun/concept_idea — An ordered series of musical notes ascending or descending in pitch.
+scale (size) — noun/quantitative_concept — The relative size or extent of something.
+plot (land) — noun/natural_feature — A small piece of ground, especially one used for a specific purpose.
+plot (conspiracy) — noun/process_event — A secret plan to do something harmful or illegal.
+pool (billiards) — noun/activity — A game played on a table with colored balls and a cue stick.
+post (mail) — noun/communication_information — Letters and packages delivered by the postal service.
+post (pole) — noun/small_movable_object — A long sturdy piece of timber or metal set upright in the ground.
+post (position) — noun/concept_idea — A job or position of employment.
+spring (coil) — noun/small_movable_object — A coiled metal device that returns to its original shape after compression.
+spring (water source) — noun/natural_feature — A place where water naturally flows out of the ground.
+staff (group of employees) — ALREADY EXISTS as N44_005 staff (stick); employee sense at group_people
+stock (financial) — noun/concept_idea — Shares in the ownership of a company.
+stock (broth) — noun/food — A liquid made by cooking bones, meat, or vegetables, used as a base for soups.
+volume (book) — noun/small_movable_object — A single book forming part of a larger work or series.
+volume (space/capacity) — noun/quantitative_concept — The amount of space that a substance or object occupies.
+will (legal document) — noun/communication_information — A legal document declaring a person's wishes regarding disposal of their property after death.
+watch (guard duty) — noun/process_event — A period of keeping guard or staying alert.
+wave (physics) — noun/concept_idea — An oscillation or vibration transmitting energy through a medium or space.
+pride (group of lions) — noun/animal_grouping_term — A group of lions living together.
+range (mountain) — noun/natural_feature — A series of mountains or hills in a line.
+range (cooking stove) — noun/appliance — A large cooking stove with burners and an oven.
+ring (sound) — noun/process_event — A clear resonant sound, as of a bell.
+ring (boxing) — noun/building_structure — An enclosed area for boxing or wrestling matches.
+record (vinyl disc) — noun/small_movable_object — A thin plastic disc carrying recorded sound in grooves.
+record (achievement) — noun/quantitative_concept — The best performance or most remarkable event of its kind.
+rest (remainder) — noun/quantitative_concept — The remaining part of something.
+roll (bread) — noun/food — A small round piece of bread for one person.
+round (competition stage) — noun/process_event — A stage in a competition.
+stamp (rubber) — noun/tool — A device for stamping a pattern or mark on a surface.
+state (political region) — ALREADY EXISTS as N30_041
+stroke (swimming) — noun/activity — A movement of the arms and legs used in swimming.
+stroke (caress) — noun/process_event — An act of stroking something gently.
+suit (lawsuit) — noun/process_event — A legal action brought in a court.
+suit (card) — noun/symbolic_element — One of the four categories of playing cards (hearts, diamonds, clubs, spades).
+tip (gratuity) — noun/concept_idea — A sum of money given as a reward for good service.
+tip (advice) — noun/communication_information — A useful piece of practical advice.
+top (spinning toy) — noun/small_movable_object — A toy that spins on a pointed base.
+top (garment) — noun/clothing_accessory — A garment worn on the upper body.
+track (music recording) — noun/artwork_artifact — A piece of music on a recording.
+track (racing) — noun/path_infrastructure — A course or circuit for racing.
