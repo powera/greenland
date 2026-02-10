@@ -217,6 +217,15 @@ _SL_MAP: Dict[str, str] = {
     "ž": "z{",
 }
 
+# Filipino (Tagalog): A B C D E F G H I J K L M N Ñ NG O P Q R S T U V W X Y Z
+# NG is a digraph that cannot be handled with single-char mapping.
+_TL_MAP: Dict[str, str] = {
+    "ñ": "n{",
+}
+
+# Malay: standard A-Z Latin alphabet, no special characters needing remapping.
+_MS_MAP: Dict[str, str] = {}
+
 # Master table for position-remapped languages.
 _REMAP_LANGUAGES: Dict[str, Dict[str, str]] = {
     "lt": _LT_MAP,
@@ -235,6 +244,8 @@ _REMAP_LANGUAGES: Dict[str, Dict[str, str]] = {
     "mt": _MT_MAP,
     "sk": _SK_MAP,
     "sl": _SL_MAP,
+    "tl": _TL_MAP,
+    "ms": _MS_MAP,
 }
 
 # ---------------------------------------------------------------------------
