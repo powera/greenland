@@ -72,12 +72,14 @@
                                 </td>
                                 <td>
                                     <strong class="text-danger">{{ item.db_lemma_text }}</strong>
+                                    {% if item.db_disambiguation %}<span class="text-muted">({{ item.db_disambiguation }})</span>{% endif %}
                                     {% if item.db_definition %}
                                     <br><small class="text-muted">{{ item.db_definition }}{% if item.db_definition|length >= 60 %}...{% endif %}</small>
                                     {% endif %}
                                 </td>
                                 <td>
                                     <strong class="text-success">{{ item.release_lemma_text }}</strong>
+                                    {% if item.release_disambiguation %}<span class="text-muted">({{ item.release_disambiguation }})</span>{% endif %}
                                     {% if item.release_definition %}
                                     <br><small class="text-muted">{{ item.release_definition }}{% if item.release_definition|length >= 60 %}...{% endif %}</small>
                                     {% endif %}
