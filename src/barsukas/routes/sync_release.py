@@ -4,8 +4,9 @@
 
 import json
 import logging
+import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
@@ -69,6 +70,27 @@ def _load_release_lemmas(release_dir: Path) -> Dict[str, Dict[str, Any]]:
             logger.error(f"Error reading {base_file}: {e}")
 
     return release_lemmas
+
+
+def _parse_concept_label(concept_label: str) -> Tuple[str, Optional[str]]:
+    """Parse concept_label into (word, disambiguation).
+
+    E.g. "sharp (pointed)" -> ("sharp", "pointed"),
+         "dog" -> ("dog", None).
+    """
+    match = re.match(r"^(.+?)\s+\(([^)]+)\)$", concept_label)
+    if match:
+        return match.group(1).strip(), match.group(2).strip()
+    return concept_label, None
+
+
+def _get_release_disambiguation(release_data: Dict[str, Any]) -> Optional[str]:
+    """Extract disambiguation from release data's concept_label."""
+    concept_label = release_data.get("concept_label", "")
+    if not concept_label:
+        return None
+    _, disambiguation = _parse_concept_label(concept_label)
+    return disambiguation
 
 
 def _get_release_lemma_text(release_data: Dict[str, Any]) -> str:
@@ -136,8 +158,11 @@ def index() -> ResponseReturnValue:
                 continue
 
             release_text = _get_release_lemma_text(release_data)
+            release_disambig = _get_release_disambiguation(release_data)
 
             if db_lemma.lemma_text != release_text:
+                lemma_text_changes += 1
+            elif db_lemma.disambiguation != release_disambig:
                 lemma_text_changes += 1
             elif release_data.get("difficulty_level") != db_lemma.difficulty_level:
                 difficulty_diffs += 1
@@ -391,6 +416,7 @@ def _find_additions(
             {
                 "guid": guid,
                 "lemma_text": lemma_text,
+                "disambiguation": _get_release_disambiguation(release_data),
                 "definition": (release_data.get("concept_definition", "") or "")[:80],
                 "pos_type": release_data.get("pos_type", ""),
                 "pos_subtype": release_data.get("pos_subtype", ""),
@@ -458,6 +484,7 @@ def apply_additions() -> ResponseReturnValue:
             lemma = Lemma(
                 guid=guid,
                 lemma_text=lemma_text,
+                disambiguation=_get_release_disambiguation(release_data),
                 definition_text=release_data.get("concept_definition", ""),
                 pos_type=release_data.get("pos_type", ""),
                 pos_subtype=release_data.get("pos_subtype"),
@@ -671,8 +698,12 @@ def _find_lemma_text_changes(
                 continue
 
             release_lemma_text = _get_release_lemma_text(release_data)
+            release_disambig = _get_release_disambiguation(release_data)
 
-            if db_lemma.lemma_text == release_lemma_text:
+            text_differs = db_lemma.lemma_text != release_lemma_text
+            disambig_differs = db_lemma.disambiguation != release_disambig
+
+            if not text_differs and not disambig_differs:
                 continue
 
             changes.append(
@@ -681,6 +712,8 @@ def _find_lemma_text_changes(
                     "lemma_id": db_lemma.id,
                     "db_lemma_text": db_lemma.lemma_text,
                     "release_lemma_text": release_lemma_text,
+                    "db_disambiguation": db_lemma.disambiguation,
+                    "release_disambiguation": release_disambig,
                     "db_definition": (
                         db_lemma.definition_text[:60] if db_lemma.definition_text else ""
                     ),
@@ -775,6 +808,7 @@ def apply_changes() -> ResponseReturnValue:
                 new_definition = release_data.get("concept_definition", "")
 
                 lemma.lemma_text = new_text
+                lemma.disambiguation = _get_release_disambiguation(release_data)
                 if new_definition:
                     lemma.definition_text = new_definition
 

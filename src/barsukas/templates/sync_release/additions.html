@@ -64,6 +64,7 @@
                                 <td><code>{{ item.guid }}</code></td>
                                 <td>
                                     <strong>{{ item.lemma_text }}</strong>
+                                    {% if item.disambiguation %}<span class="text-muted">({{ item.disambiguation }})</span>{% endif %}
                                     {% if item.definition %}
                                     <br><small class="text-muted">{{ item.definition }}{% if item.definition|length >= 80 %}...{% endif %}</small>
                                     {% endif %}
