@@ -432,7 +432,6 @@ class LinguisticClient:
                 "is_base_form": derivative_form.is_base_form,
                 "ipa_pronunciation": derivative_form.ipa_pronunciation,
                 "phonetic_pronunciation": derivative_form.phonetic_pronunciation,
-                "confidence": derivative_form.confidence,
                 "verified": derivative_form.verified,
                 "examples": [],
             }

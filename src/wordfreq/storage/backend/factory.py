@@ -222,7 +222,7 @@ def create_session(config: Optional[DataSourceConfig] = None) -> "Session":
                 storage = JSONLStorage(data_dir)
                 storage.ensure_initialized()
                 _jsonl_storage_cache[data_dir] = storage
-            return _jsonl_storage_cache[data_dir].create_session()  # type: ignore[return-value]
+            return _jsonl_storage_cache[data_dir].create_session()  # type: ignore[no-any-return]
         elif config.backend_type == BackendType.POSTGRES:
             assert config.postgres_url is not None, "postgres_url must be set for POSTGRES backend"
             db_path = config.postgres_url

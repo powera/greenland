@@ -159,7 +159,8 @@ def update_pronunciation_for_definition(
             logger.error(f"Could not get context sentence for definition ID {definition_id}")
             return False
 
-    # Query for pronunciation
+    # Query for pronunciation — sentence is guaranteed non-None here
+    assert sentence is not None
     pronunciation_data, success = query_pronunciation(client, word.word, sentence, get_session_func)
 
     if success:
