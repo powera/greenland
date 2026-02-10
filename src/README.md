@@ -12,7 +12,7 @@ src/
 │   ├── prompts/           # LLM prompt templates
 │   ├── tools/             # CLI utilities
 │   ├── trakaido/          # Trakaido app integration
-│   └── data/              # Data files (linguistics.sqlite, IPA dict)
+│   └── data/              # Python data modules (vital1000, family_relations)
 │
 ├── agents/                # Autonomous data quality agents
 ├── barsukas/              # Flask web interface
@@ -63,7 +63,7 @@ usage and arguments.
 
 ## Database
 
-The primary database is **`src/wordfreq/data/linguistics.sqlite`** (gitignored).
+The primary database is **`data/wordfreq/linguistics.sqlite`** (gitignored).
 Path constants are defined in `src/constants.py`.
 
 Key tables: `lemmas`, `word_tokens`, `derivative_forms`, `lemma_translations`,

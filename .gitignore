@@ -22,7 +22,7 @@ input/
 
 # local datastores, including tmp files
 src/benchmarks/schema/benchmarks.db*
-src/wordfreq/data/linguistics.sqlite*
+data/wordfreq/linguistics.sqlite*
 src/clients/data/batch_tracking.sqlite*
 
 # for claude staging

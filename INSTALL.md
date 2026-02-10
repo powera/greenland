@@ -28,7 +28,7 @@ git config core.hooksPath hooks
 
 ## Database Initialization
 
-The primary database (`src/wordfreq/data/linguistics.sqlite`) is gitignored.
+The primary database (`data/wordfreq/linguistics.sqlite`) is gitignored.
 When setting up a new environment, initialize it:
 
 ```bash
@@ -101,7 +101,7 @@ PYTHONPATH=src python -i src/interactive.py
 These are not checked in and must be initialized or copied:
 
 - `keys/` - API keys
-- `src/wordfreq/data/linguistics.sqlite` - Linguistics database
+- `data/wordfreq/linguistics.sqlite` - Linguistics database
 - `src/benchmarks/schema/benchmarks.db` - Benchmarks database
 - `src/clients/data/batch_tracking.sqlite` - Batch tracking
 - `src/wordfreq/output/` - Generated outputs
@@ -114,7 +114,7 @@ All important paths are defined in `src/constants.py`:
 |----------|------|
 | `SRC_DIR` | `src/` |
 | `PROJECT_ROOT` | Repository root |
-| `WORDFREQ_DB_PATH` | `src/wordfreq/data/linguistics.sqlite` |
+| `WORDFREQ_DB_PATH` | `data/wordfreq/linguistics.sqlite` |
 | `SQLITE_DB_PATH` | `src/benchmarks/schema/benchmarks.db` |
 | `KEY_DIR` | `keys/` |
 | `OUTPUT_DIR` | `../greenland_output` |

@@ -20,7 +20,7 @@ class Config:
 
     # Database settings
     BASE_DIR = Path(__file__).parent.parent.parent  # repo root
-    DEFAULT_DB_PATH = BASE_DIR / "src" / "wordfreq" / "data" / "linguistics.sqlite"
+    DEFAULT_DB_PATH = BASE_DIR / "data" / "wordfreq" / "linguistics.sqlite"
     DB_PATH = os.environ.get("BARSUKAS_DB_PATH", str(DEFAULT_DB_PATH))
 
     # Pagination
