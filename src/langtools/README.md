@@ -1,62 +1,137 @@
-# Langtools - Language-Specific Text Processing
+# Langtools
 
-Language-specific tools for morphological analysis, Wiktionary parsing, and
-sort-key generation, used by the Greenland linguistic database.
+Language-specific text-processing tools used by the Greenland multilingual
+linguistic database.  The package handles three broad tasks:
 
-## Language Modules
+1. **Figuring out word forms** -- given a dictionary word like "mouse" or
+   "gehen", produce all the inflected forms a language learner needs to know
+   (plurals, conjugations, declensions, comparatives, etc.).
 
-### Western European (Wiktionary parsers)
+2. **Romanizing non-Latin scripts** -- converting Chinese, Japanese, and
+   Korean text into Latin-alphabet readings (pinyin, romaji) so learners
+   can see how words are pronounced.
 
-Each of these modules provides a `Parser` class and convenience functions for
-extracting word forms from Wiktionary data.
+3. **Sorting words correctly** -- generating sort keys so that words appear
+   in the right alphabetical order for each language, even when the
+   language's alphabet differs from plain Unicode ordering.
 
-| Module | Language | Capabilities |
-|--------|----------|--------------|
-| `langtools.en` | English | Noun plurals, verb conjugations, adjective comparison, adverb forms |
-| `langtools.de` | German | Noun declensions (with gender), verb conjugations, adjective declensions, adverb forms |
-| `langtools.es` | Spanish | Noun forms, verb conjugations, adjective agreement |
-| `langtools.fr` | French | Noun forms, verb conjugations, adjective agreement |
-| `langtools.lt` | Lithuanian | Noun declensions, verb conjugations |
+## What each tool does
 
-Each module contains:
-- `types.py` - Pydantic models for word forms (NounDeclension, VerbConjugation, etc.)
-- `utils.py` - Language-specific text utilities
-- `wiktionary.py` - Wiktionary HTML parser
+### Word-form extraction (Western European languages)
 
-Example:
+For English, German, Spanish, French, and Lithuanian, langtools can look up
+a word on Wiktionary and pull out all its grammatical forms automatically.
+For example, give it the English verb "swim" and it returns "swims",
+"swam", "swum", "swimming".  Give it the Lithuanian noun "namas" and it
+returns all 14 case forms (nominative, genitive, dative, etc. in both
+singular and plural).
+
+When Wiktionary doesn't have the data, or for languages without a
+Wiktionary parser (Italian, Dutch, Portuguese, Swedish), the tools can
+ask an LLM (like ChatGPT or Claude) to generate the forms instead.
+
+Each language module knows what forms matter for that language:
+
+- **English:** singular/plural for nouns, five principal parts for verbs
+  (walk/walks/walked/walked/walking), and comparative forms for
+  adjectives and adverbs (big/bigger/biggest).
+
+- **German:** four-case declensions for nouns (with gender: der/die/das),
+  conjugations across present/past/future for verbs, and comparison forms
+  for adjectives and adverbs.
+
+- **Spanish and French:** singular/plural with gender for nouns,
+  full verb conjugation tables, and adjective agreement forms.
+
+- **Lithuanian:** the most complex -- seven cases times two numbers
+  (14 forms) for nouns, 28 forms for adjectives (adding masculine/feminine),
+  18 verb conjugations, and adverb comparatives.
+
+- **Italian, Dutch, Portuguese, Swedish:** form definitions and LLM-based
+  generation, but no Wiktionary parser yet.
+
+### Chinese tools
+
+- **Pinyin generation:** converts Chinese characters into pinyin with tone
+  marks (e.g. "你好" becomes "nǐ hǎo").  Uses word segmentation to handle
+  characters that are pronounced differently depending on context.
+
+- **Ruby HTML:** produces HTML where pinyin appears above each Chinese word,
+  the way furigana works in Japanese textbooks.
+
+- **Character conversion:** converts between Traditional and Simplified
+  Chinese (e.g. "傳統" to "传统" and back).
+
+### Japanese tools
+
+- **Romaji generation:** converts Japanese text (kanji, hiragana, katakana)
+  into Hepburn romanization (e.g. "東京" becomes "toukyou").
+
+- **Hiragana readings:** converts kanji to hiragana, used for generating
+  dictionary sort keys.
+
+- **Ruby HTML:** produces HTML with romaji displayed above Japanese text.
+
+- **Gojuon tables:** the standard Japanese syllabary ordering
+  (あ, い, う, え, お, か, き, ...) used to build alphabet navigation bars
+  in the web interface.
+
+### Korean tools
+
+- **Hangul decomposition:** breaks composed Hangul syllables into their
+  consonant and vowel components (e.g. "한" becomes "ㅎㅏㄴ").  This
+  produces sort keys that match the standard Korean dictionary order.
+  No external libraries needed -- it's pure Unicode math.
+
+### Alphabetical sorting (collation)
+
+Different languages put letters in different orders.  Lithuanian treats
+"ą" as a separate letter that comes after "a" but before "b".  Swedish
+puts "å", "ä", "ö" at the end of the alphabet after "z".  French treats
+"é" as the same letter as "e" for sorting purposes.
+
+The collation module generates sort keys that make SQLite's simple binary
+comparison produce the right ordering for each language.  Two strategies
+are used depending on whether accented characters are separate letters
+(position remapping) or just decorated versions of base letters (diacritic
+stripping).
+
+## Quick examples
+
 ```python
+# Get English noun forms from Wiktionary
 from langtools.en.wiktionary import get_english_noun_forms
+forms, ok = get_english_noun_forms("mouse")
+# forms.forms == {'singular': 'mouse', 'plural': 'mice'}
 
-forms, success = get_english_noun_forms("mouse")
-if success:
-    print(forms.forms)  # {'singular': 'mouse', 'plural': 'mice'}
-```
+# Generate pinyin for Chinese text
+from langtools.zh.pinyin_helper import generate_pinyin
+generate_pinyin("你好")  # "nǐ hǎo"
 
-### CJK Languages
-
-| Module | Language | Capabilities |
-|--------|----------|--------------|
-| `langtools.zh` | Chinese | Pinyin generation, simplified/traditional character conversion |
-| `langtools.ja` | Japanese | Romaji conversion, Gojuon kana ordering |
-| `langtools.ko` | Korean | Hangul syllable decomposition for sort keys |
-
-### Collation (`langtools.collation`)
-
-Generates locale-aware sort keys for Latin-alphabet languages, enabling correct
-alphabetical ordering in SQLite's binary collation.
-
-Two strategies:
-- **Position remapping** (lt, es, sv, vi) - Remaps characters that are distinct
-  letters in the language's alphabet (e.g., Lithuanian ą sorts after a, before b)
-- **Diacritic stripping** (de, fr, it, pt) - Removes accents so accented characters
-  sort with their base letter
-
-```python
+# Generate a Lithuanian sort key
 from langtools.collation import generate_latin_sort_key
+generate_latin_sort_key("lt", "ąžuolas")  # sorts after "a..." but before "b..."
 
-generate_latin_sort_key("lt", "ąžuolas")  # correct Lithuanian ordering
-generate_latin_sort_key("fr", "café")     # → "cafe"
+# Decompose Korean for dictionary sorting
+from langtools.ko.hangul_helper import decompose_hangul
+decompose_hangul("바나나")  # "ㅂㅏㄴㅏㄴㅏ"
+
+# Convert Japanese to romaji
+from langtools.ja.romaji_helper import generate_romaji
+generate_romaji("東京")  # "toukyou"
 ```
 
-CJK sort keys are handled by their respective modules (`zh`, `ja`, `ko`),
-not by the collation module.
+## Running the CLI scripts
+
+The generate scripts populate the database with inflected forms for all
+lemmas of a given language and part of speech:
+
+```bash
+PYTHONPATH=src python src/langtools/en/generate_noun_forms.py
+PYTHONPATH=src python src/langtools/de/generate_verb_forms.py
+PYTHONPATH=src python src/langtools/lt/generate_adjective_forms.py
+```
+
+See [STRUCTURE.md](STRUCTURE.md) for the full architecture reference,
+including the file layout within each language module, the dependency
+graph, and external library requirements.
