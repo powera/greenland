@@ -1033,6 +1033,421 @@ class SarkaAgent:
             "dry_run": dry_run,
         }
 
+    def plan_word_definition_pairs(
+        self,
+        level: int,
+        max_level: Optional[int] = None,
+        category: Optional[str] = None,
+        max_word_usage: Optional[int] = None,
+        num_pairs: int = CONVERSATIONS_PER_LEVEL,
+    ) -> Tuple[List[List[Dict[str, Any]]], Dict[str, Any]]:
+        """Plan word pairs for definition/comparison generation.
+
+        Groups words by (pos_type, pos_subtype) and creates pairs within
+        each group. Words in the same subtype are natural comparison targets
+        (e.g., two animals, two foods, two furniture items).
+
+        Args:
+            level: Difficulty level to select words from
+            max_level: If set, select words from level 1 up to max_level
+            category: Optional pos_subtype filter
+            max_word_usage: Skip words already used in this many definition conversations
+            num_pairs: Maximum number of pairs to generate
+
+        Returns:
+            Tuple of (list of word pair lists, stats dict)
+        """
+        session = self.get_session()
+        try:
+            # Get words based on level selection
+            if max_level is not None:
+                words_by_type = self.get_words_up_to_level(
+                    max_level=max_level, min_level=level, category=category, session=session
+                )
+                level_desc = f"{level}-{max_level}"
+            else:
+                words_by_type = self.get_words_at_level(level, session)
+                if category:
+                    filtered: Dict[str, Dict[str, List[Dict[str, Any]]]] = defaultdict(
+                        lambda: defaultdict(list)
+                    )
+                    for pos_type, subtypes in words_by_type.items():
+                        for subtype, words in subtypes.items():
+                            if subtype == category:
+                                filtered[pos_type][subtype] = words
+                    words_by_type = dict(filtered)
+                level_desc = str(level)
+
+            # Count total words before filtering
+            total_before = sum(
+                len(words) for subtypes in words_by_type.values() for words in subtypes.values()
+            )
+
+            # Filter by usage if requested
+            filtered_count = 0
+            if max_word_usage is not None:
+                usage_counts = self.get_word_usage_counts(session)
+                words_by_type = self.filter_words_by_usage(
+                    words_by_type, max_word_usage, usage_counts
+                )
+                total_after = sum(
+                    len(words) for subtypes in words_by_type.values() for words in subtypes.values()
+                )
+                filtered_count = total_before - total_after
+
+            total_words = sum(
+                len(words) for subtypes in words_by_type.values() for words in subtypes.values()
+            )
+
+            if total_words == 0:
+                return [], {
+                    "level_desc": level_desc,
+                    "total_words": 0,
+                    "filtered_out": filtered_count,
+                }
+
+            # Group words by (pos_type, pos_subtype) and create pairs
+            pairs: List[List[Dict[str, Any]]] = []
+            for pos_type, subtypes in words_by_type.items():
+                for subtype, words in subtypes.items():
+                    # Shuffle within subtype for variety
+                    shuffled = list(words)
+                    random.shuffle(shuffled)
+
+                    # Create pairs from consecutive words
+                    for i in range(0, len(shuffled) - 1, 2):
+                        pairs.append([shuffled[i], shuffled[i + 1]])
+                        if len(pairs) >= num_pairs:
+                            break
+                    if len(pairs) >= num_pairs:
+                        break
+                if len(pairs) >= num_pairs:
+                    break
+
+            stats = {
+                "level_desc": level_desc,
+                "total_words": total_words,
+                "filtered_out": filtered_count,
+                "category": category,
+                "planned_pairs": len(pairs),
+            }
+
+            logger.info(
+                f"Planned {len(pairs)} word definition pairs "
+                f"from {total_words} words (levels {level_desc})"
+            )
+
+            return pairs, stats
+
+        finally:
+            session.close()
+
+    def _query_word_definition(self, word_list: List[str], num_sentences: int) -> Dict[str, Any]:
+        """Query the LLM to generate a word definition/comparison narrative.
+
+        Args:
+            word_list: List of words to describe and compare (typically 2)
+            num_sentences: Target number of sentences
+
+        Returns:
+            Dictionary with definition data or error
+        """
+        try:
+            context = util.prompt_loader.get_context("conversations", "definitions")
+            prompt_template = util.prompt_loader.get_prompt("conversations", "definitions")
+        except Exception as e:
+            logger.error(f"Failed to load word definition prompts: {e}")
+            return {"success": False, "error": f"Failed to load prompts: {e}"}
+
+        word_list_str = ", ".join(word_list)
+
+        prompt_text = prompt_template.format(
+            word_list=word_list_str,
+            num_sentences=num_sentences,
+        )
+
+        schema = Schema(
+            name="WordDefinition",
+            description="Generate a short narrative comparing and describing words",
+            properties={
+                "title": SchemaProperty(
+                    "string", "A short title for the comparison (e.g., 'Table vs. Desk')"
+                ),
+                "sentences": SchemaProperty(
+                    "array",
+                    "List of descriptive sentences",
+                    items={
+                        "type": "object",
+                        "properties": {
+                            "text": {
+                                "type": "string",
+                                "description": "A single descriptive sentence",
+                            },
+                        },
+                        "required": ["text"],
+                    },
+                ),
+            },
+        )
+
+        try:
+            client = self.get_llm_client()
+            response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
+
+            if not response.structured_data:
+                return {"success": False, "error": "Empty response from LLM"}
+
+            result = response.structured_data
+            title = result.get("title", "Word Definition")
+            sentences = result.get("sentences", [])
+
+            if not sentences:
+                return {"success": False, "error": "No sentences generated"}
+
+            return {
+                "success": True,
+                "title": title,
+                "sentences": sentences,
+            }
+
+        except Exception as e:
+            logger.error(f"Error querying LLM for word definition: {e}")
+            return {"success": False, "error": str(e)}
+
+    def generate_word_definition(
+        self,
+        words: List[Dict[str, Any]],
+        level: int,
+        num_sentences: int = 10,
+        dry_run: bool = False,
+    ) -> Dict[str, Any]:
+        """Generate a word definition/comparison narrative.
+
+        Creates a short narrative describing and comparing a pair of words,
+        stored as a conversation with speaker="narrator".
+
+        Args:
+            words: List of word info dictionaries (typically a pair)
+            level: Difficulty level (for metadata)
+            num_sentences: Target number of sentences (default 10)
+            dry_run: If True, don't save to database
+
+        Returns:
+            Dictionary with generation results
+        """
+        session = self.get_session()
+
+        try:
+            if not words:
+                return {"error": "No words provided for word definition"}
+
+            word_texts = [w["lemma_text"] for w in words]
+            word_list_str = ", ".join(word_texts)
+
+            logger.info(f"Generating word definition for: {word_list_str}")
+
+            result = self._query_word_definition(word_texts, num_sentences)
+
+            if not result.get("success"):
+                return {
+                    "error": result.get("error", "Failed to generate word definition"),
+                    "words": word_texts,
+                }
+
+            definition_sentences = result["sentences"]
+            title = result.get("title", f"{' vs. '.join(word_texts)}")
+
+            if dry_run:
+                return {
+                    "dry_run": True,
+                    "words": word_texts,
+                    "level": level,
+                    "title": title,
+                    "sentences": definition_sentences,
+                    "num_sentences": len(definition_sentences),
+                }
+
+            # Create conversation record with theme="word_definition"
+            conversation = add_conversation(
+                session,
+                title=title,
+                theme="word_definition",
+                keywords=word_texts,
+                verified=False,
+            )
+
+            conversation.minimum_level = level
+
+            created_sentences = []
+            reused_count = 0
+            for idx, sent_data in enumerate(definition_sentences):
+                text = sent_data.get("text", "")
+
+                # Check for duplicate sentences
+                existing_sentence = find_sentence_by_text(session, text, language_code="en")
+
+                if existing_sentence:
+                    sentence = existing_sentence
+                    reused_count += 1
+                    logger.debug(f"Reusing existing sentence #{sentence.id}: {text[:50]}...")
+                else:
+                    sentence = add_sentence(
+                        session,
+                        pattern_type="definition",
+                        verified=False,
+                        notes=f"Generated by Sarka agent for word definition {conversation.id}",
+                    )
+
+                    sentence.minimum_level = level
+
+                    add_sentence_translation(
+                        session,
+                        sentence=sentence,
+                        language_code="en",
+                        translation_text=text,
+                    )
+
+                # Link to conversation with speaker="narrator"
+                add_conversation_sentence(
+                    session,
+                    conversation=conversation,
+                    sentence=sentence,
+                    position=idx,
+                    speaker="narrator",
+                )
+
+                created_sentences.append(
+                    {
+                        "sentence_id": sentence.id,
+                        "position": idx,
+                        "speaker": "narrator",
+                        "text": text,
+                        "reused": existing_sentence is not None,
+                    }
+                )
+
+            if reused_count > 0:
+                logger.info(f"Reused {reused_count} existing sentence(s) in word definition")
+
+            log_operation(
+                session,
+                operation_type="word_definition_generated",
+                entity_type="conversation",
+                entity_id=conversation.id,
+                details={
+                    "title": title,
+                    "level": level,
+                    "words": word_texts,
+                    "num_sentences": len(created_sentences),
+                    "agent": "sarka",
+                    "model": self.config.model,
+                    "type": "word_definition",
+                },
+            )
+
+            session.commit()
+
+            logger.info(
+                f"Created word definition {conversation.id} with "
+                f"{len(created_sentences)} sentences"
+            )
+
+            return {
+                "success": True,
+                "conversation_id": conversation.id,
+                "title": title,
+                "level": level,
+                "words": word_texts,
+                "sentences": created_sentences,
+                "num_sentences": len(created_sentences),
+            }
+
+        except Exception as e:
+            session.rollback()
+            logger.exception(f"Error generating word definition: {e}")
+            return {"error": str(e), "words": [w["lemma_text"] for w in words] if words else []}
+        finally:
+            session.close()
+
+    def generate_definitions_for_level(
+        self,
+        level: int,
+        max_level: Optional[int] = None,
+        category: Optional[str] = None,
+        max_word_usage: Optional[int] = None,
+        num_pairs: int = CONVERSATIONS_PER_LEVEL,
+        num_sentences: int = 10,
+        dry_run: bool = False,
+    ) -> Dict[str, Any]:
+        """Generate word definition narratives for a level.
+
+        Plans word pairs by grouping words with the same pos_subtype,
+        then generates comparison narratives for each pair.
+
+        Args:
+            level: Difficulty level
+            max_level: Maximum difficulty level (inclusive)
+            category: Optional pos_subtype filter
+            max_word_usage: Skip words used in this many conversations
+            num_pairs: Maximum number of pairs to generate
+            num_sentences: Target sentences per definition (default 10)
+            dry_run: If True, don't save to database
+
+        Returns:
+            Dictionary with generation results and statistics
+        """
+        effective_level = max_level if max_level is not None else level
+
+        logger.info(
+            f"Generating word definitions "
+            f"(level={level}, max_level={max_level}, category={category})"
+        )
+
+        pairs, plan_stats = self.plan_word_definition_pairs(
+            level=level,
+            max_level=max_level,
+            category=category,
+            max_word_usage=max_word_usage,
+            num_pairs=num_pairs,
+        )
+
+        if not pairs:
+            return {
+                "error": "No word pairs could be planned (need 2+ words in same category)",
+                "plan_stats": plan_stats,
+            }
+
+        results = []
+        successful = 0
+        failed = 0
+
+        for i, word_pair in enumerate(pairs):
+            pair_texts = [w["lemma_text"] for w in word_pair]
+            logger.info(f"Generating definition {i + 1}/{len(pairs)}: {', '.join(pair_texts)}")
+
+            result = self.generate_word_definition(
+                words=word_pair,
+                level=effective_level,
+                num_sentences=num_sentences,
+                dry_run=dry_run,
+            )
+
+            if result.get("success") or result.get("dry_run"):
+                successful += 1
+            else:
+                failed += 1
+
+            results.append(result)
+
+        return {
+            "plan_stats": plan_stats,
+            "total": len(pairs),
+            "successful": successful,
+            "failed": failed,
+            "results": results,
+            "dry_run": dry_run,
+        }
+
     def get_conversation_details(self, conversation_id: int) -> Optional[Dict[str, Any]]:
         """Get detailed information about a conversation.
 

@@ -52,6 +52,19 @@ Examples:
   # View a generated conversation
   python sarka.py --view 123
 
+Word definitions (compare/contrast word pairs):
+  # Generate word definition narratives for level 3
+  python sarka.py --level 3 --definitions
+
+  # Dry run to preview word pairs
+  python sarka.py --level 3 --definitions --dry-run
+
+  # Generate definitions for food_drink words only
+  python sarka.py --level 3 --definitions --category food_drink
+
+  # Generate definitions with words up to level 5
+  python sarka.py --level 1 --max-level 5 --definitions
+
 Advanced options (category-based selection):
   # Generate with words up to level 5, grouped by category
   python sarka.py --level 1 --max-level 5 --by-category --generate
@@ -89,6 +102,11 @@ Configuration:
         "--generate",
         action="store_true",
         help="Generate conversations for the specified level(s)",
+    )
+    mode_group.add_argument(
+        "--definitions",
+        action="store_true",
+        help="Generate word definition/comparison narratives for word pairs",
     )
     mode_group.add_argument(
         "--show-words",
@@ -155,6 +173,12 @@ Configuration:
         "--by-category",
         action="store_true",
         help="Generate separate conversations for each noun category (keeps categories coherent)",
+    )
+    gen_group.add_argument(
+        "--num-pairs",
+        type=int,
+        default=CONVERSATIONS_PER_LEVEL,
+        help=f"Number of word pairs for --definitions mode (default: {CONVERSATIONS_PER_LEVEL})",
     )
 
     # Workqueue arguments
@@ -363,6 +387,82 @@ def main() -> None:
                 print()
         else:
             show_level_words(agent, args.level)
+        return
+
+    # DEFINITIONS MODE: Generate word definition/comparison narratives
+    if args.definitions:
+        if args.level is None:
+            print("Error: --level is required for --definitions")
+            sys.exit(1)
+
+        logger.info("=" * 60)
+        logger.info("SARKA AGENT - GENERATING WORD DEFINITIONS")
+        logger.info("=" * 60)
+
+        print(f"\n--- Word Definition Mode ---")
+        print(f"Level: {args.level}")
+        if args.max_level:
+            print(f"Max level: {args.max_level}")
+        if args.category:
+            print(f"Category: {args.category}")
+        if args.max_word_usage:
+            print(f"Max word usage: {args.max_word_usage} conversations")
+
+        result = agent.generate_definitions_for_level(
+            level=args.level,
+            max_level=args.max_level,
+            category=args.category,
+            max_word_usage=args.max_word_usage,
+            num_pairs=args.num_pairs,
+            num_sentences=args.num_sentences,
+            dry_run=args.dry_run,
+        )
+
+        if result.get("error"):
+            print(f"Error: {result['error']}")
+            if result.get("plan_stats"):
+                print(f"Stats: {result['plan_stats']}")
+            sys.exit(1)
+
+        # Show plan stats
+        stats = result.get("plan_stats", {})
+        print(f"\nWord selection:")
+        print(f"  Level range: {stats.get('level_desc', 'N/A')}")
+        print(f"  Total words: {stats.get('total_words', 0)}")
+        if stats.get("filtered_out", 0) > 0:
+            print(f"  Filtered out (usage limit): {stats['filtered_out']}")
+        if stats.get("category"):
+            print(f"  Category: {stats['category']}")
+        print(f"  Planned pairs: {stats.get('planned_pairs', 0)}")
+
+        print(f"\nGenerated: {result['successful']}/{result['total']} definitions")
+        if result["failed"] > 0:
+            print(f"Failed: {result['failed']}")
+
+        # Show results
+        if result.get("results"):
+            print("\nWord definitions:")
+            for i, res in enumerate(result["results"][:5], 1):
+                if res.get("success") or res.get("dry_run"):
+                    words_str = " / ".join(res.get("words", []))
+                    print(
+                        f"  {i}. {words_str}: {res.get('title')} ({res.get('num_sentences')} sentences)"
+                    )
+                    if res.get("dry_run") and res.get("sentences"):
+                        for sent in res["sentences"]:
+                            text = sent.get("text", sent) if isinstance(sent, dict) else sent
+                            print(f"     {text}")
+                else:
+                    print(f"  {i}. Error: {res.get('error')}")
+
+        print("\n" + "=" * 60)
+        print("DEFINITION GENERATION SUMMARY")
+        print("=" * 60)
+        print(f"Total successful: {result['successful']}")
+        print(f"Total failed: {result['failed']}")
+        if args.dry_run:
+            print("\n[DRY RUN] No definitions were actually saved")
+        print("=" * 60)
         return
 
     # GENERATE MODE

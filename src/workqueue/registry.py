@@ -29,7 +29,7 @@ from wordfreq.translation.client import LinguisticClient
 # Import workqueue handlers from centralized workqueue package
 from workqueue.handlers.lape import handle_generate_grammar_fact
 from workqueue.handlers.papuga import handle_generate_pronunciations
-from workqueue.handlers.sarka import handle_generate_conversation
+from workqueue.handlers.sarka import handle_generate_conversation, handle_generate_definition
 from workqueue.handlers.sernas import handle_generate_synonyms
 from workqueue.handlers.vieversys import handle_generate_audio, handle_generate_sentence_audio
 from workqueue.handlers.vilkas import handle_generate_forms
@@ -311,6 +311,7 @@ TASK_HANDLERS = {
     "generate_grammar_fact": handle_generate_grammar_fact,
     "lape_generate_grammar_fact": handle_lape_generate_grammar_fact,
     "sarka_generate_conversation": handle_generate_conversation,
+    "sarka_generate_definition": handle_generate_definition,
     "voras_populate_translations": handle_voras_populate_translations,
     "voras_regenerate_translations": handle_voras_regenerate_translations,
 }
