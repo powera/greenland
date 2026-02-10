@@ -21,17 +21,15 @@ from wordfreq.translation import (
     word_processing,
 )
 from wordfreq.translation.constants import DEFAULT_MODEL
-from wordfreq.translation.language_forms import (
-    dutch,
-    english,
-    french,
-    german,
-    italian,
-    lithuanian,
-    portuguese,
-    spanish,
-    swedish,
-)
+from langtools.en import llm_forms as english
+from langtools.lt import llm_forms as lithuanian
+from langtools.fr import llm_forms as french
+from langtools.de import llm_forms as german
+from langtools.es import llm_forms as spanish
+from langtools.pt import llm_forms as portuguese
+from langtools.it import llm_forms as italian
+from langtools.nl import llm_forms as dutch
+from langtools.sv import llm_forms as swedish
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

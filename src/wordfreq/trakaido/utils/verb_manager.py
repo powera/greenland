@@ -300,14 +300,14 @@ class VerbManager:
 
         if language == "lt":
             # Use existing Lithuanian verb conjugation generator
-            from wordfreq.translation.generate_lithuanian_verb_forms import (
+            from langtools.lt.generate_verb_forms import (
                 process_lemma_conjugations,
             )
 
             return process_lemma_conjugations(self.linguistic_client, lemma_id, self.db_path)
         elif language == "fr":
             # Use French verb conjugation generator
-            from wordfreq.translation.generate_french_verb_forms import (
+            from langtools.fr.generate_verb_forms import (
                 process_lemma_conjugations as process_french,
             )
 

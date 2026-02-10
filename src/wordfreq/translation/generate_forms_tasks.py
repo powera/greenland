@@ -17,36 +17,36 @@ from wordfreq.translation.generate_forms_base import (
     process_lemma_forms,
     run_form_generation,
 )
-from wordfreq.translation.language_forms.english import (
+from langtools.en.llm_forms import (
     ADJECTIVE_FORM_MAPPING as EN_ADJECTIVE_FORM_MAPPING,
 )
-from wordfreq.translation.language_forms.english import (
+from langtools.en.llm_forms import (
     ADVERB_FORM_MAPPING as EN_ADVERB_FORM_MAPPING,
 )
-from wordfreq.translation.language_forms.english import NOUN_FORM_MAPPING as EN_NOUN_FORM_MAPPING
-from wordfreq.translation.language_forms.english import VERB_FORM_MAPPING as EN_VERB_FORM_MAPPING
-from wordfreq.translation.language_forms.french import NOUN_FORM_MAPPING as FR_NOUN_FORM_MAPPING
-from wordfreq.translation.language_forms.french import VERB_FORM_MAPPING as FR_VERB_FORM_MAPPING
-from wordfreq.translation.language_forms.german import NOUN_FORM_MAPPING as DE_NOUN_FORM_MAPPING
-from wordfreq.translation.language_forms.german import VERB_FORM_MAPPING as DE_VERB_FORM_MAPPING
-from wordfreq.translation.language_forms.lithuanian import (
+from langtools.en.llm_forms import NOUN_FORM_MAPPING as EN_NOUN_FORM_MAPPING
+from langtools.en.llm_forms import VERB_FORM_MAPPING as EN_VERB_FORM_MAPPING
+from langtools.fr.llm_forms import NOUN_FORM_MAPPING as FR_NOUN_FORM_MAPPING
+from langtools.fr.llm_forms import VERB_FORM_MAPPING as FR_VERB_FORM_MAPPING
+from langtools.de.llm_forms import NOUN_FORM_MAPPING as DE_NOUN_FORM_MAPPING
+from langtools.de.llm_forms import VERB_FORM_MAPPING as DE_VERB_FORM_MAPPING
+from langtools.lt.llm_forms import (
     ADJECTIVE_FORM_MAPPING as LT_ADJECTIVE_FORM_MAPPING,
 )
-from wordfreq.translation.language_forms.lithuanian import (
+from langtools.lt.llm_forms import (
     ADVERB_FORM_MAPPING as LT_ADVERB_FORM_MAPPING,
 )
-from wordfreq.translation.language_forms.lithuanian import NOUN_FORM_MAPPING as LT_NOUN_FORM_MAPPING
-from wordfreq.translation.language_forms.lithuanian import VERB_FORM_MAPPING as LT_VERB_FORM_MAPPING
-from wordfreq.translation.language_forms.portuguese import NOUN_FORM_MAPPING as PT_NOUN_FORM_MAPPING
-from wordfreq.translation.language_forms.portuguese import VERB_FORM_MAPPING as PT_VERB_FORM_MAPPING
-from wordfreq.translation.language_forms.dutch import NOUN_FORM_MAPPING as NL_NOUN_FORM_MAPPING
-from wordfreq.translation.language_forms.dutch import VERB_FORM_MAPPING as NL_VERB_FORM_MAPPING
-from wordfreq.translation.language_forms.italian import NOUN_FORM_MAPPING as IT_NOUN_FORM_MAPPING
-from wordfreq.translation.language_forms.italian import VERB_FORM_MAPPING as IT_VERB_FORM_MAPPING
-from wordfreq.translation.language_forms.spanish import NOUN_FORM_MAPPING as ES_NOUN_FORM_MAPPING
-from wordfreq.translation.language_forms.spanish import VERB_FORM_MAPPING as ES_VERB_FORM_MAPPING
-from wordfreq.translation.language_forms.swedish import NOUN_FORM_MAPPING as SV_NOUN_FORM_MAPPING
-from wordfreq.translation.language_forms.swedish import VERB_FORM_MAPPING as SV_VERB_FORM_MAPPING
+from langtools.lt.llm_forms import NOUN_FORM_MAPPING as LT_NOUN_FORM_MAPPING
+from langtools.lt.llm_forms import VERB_FORM_MAPPING as LT_VERB_FORM_MAPPING
+from langtools.pt.llm_forms import NOUN_FORM_MAPPING as PT_NOUN_FORM_MAPPING
+from langtools.pt.llm_forms import VERB_FORM_MAPPING as PT_VERB_FORM_MAPPING
+from langtools.nl.llm_forms import NOUN_FORM_MAPPING as NL_NOUN_FORM_MAPPING
+from langtools.nl.llm_forms import VERB_FORM_MAPPING as NL_VERB_FORM_MAPPING
+from langtools.it.llm_forms import NOUN_FORM_MAPPING as IT_NOUN_FORM_MAPPING
+from langtools.it.llm_forms import VERB_FORM_MAPPING as IT_VERB_FORM_MAPPING
+from langtools.es.llm_forms import NOUN_FORM_MAPPING as ES_NOUN_FORM_MAPPING
+from langtools.es.llm_forms import VERB_FORM_MAPPING as ES_VERB_FORM_MAPPING
+from langtools.sv.llm_forms import NOUN_FORM_MAPPING as SV_NOUN_FORM_MAPPING
+from langtools.sv.llm_forms import VERB_FORM_MAPPING as SV_VERB_FORM_MAPPING
 
 
 @dataclass
