@@ -19,4 +19,8 @@ Available language modules:
 - langtools.si: Sinhala (noun forms, verb conjugations)
 - langtools.ja: Japanese (romaji)
 - langtools.zh: Chinese (pinyin, character conversion)
+
+Shared modules:
+- langtools.collation: Latin-alphabet sort-key generation
+- langtools.dialect_overrides: Dialect variant registry (zh-tw, es-mx, pt-br, etc.)
 """
