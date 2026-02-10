@@ -226,6 +226,50 @@ _TL_MAP: Dict[str, str] = {
 # Malay: standard A-Z Latin alphabet, no special characters needing remapping.
 _MS_MAP: Dict[str, str] = {}
 
+# Swahili: standard A-Z Latin alphabet, no special characters needing remapping.
+_SW_MAP: Dict[str, str] = {}
+
+# Hausa: A B Ɓ C D Ɗ E F G H I J K Ƙ L M N O P Q R S T U W Y Z ʼY
+# Ɓ, Ɗ, Ƙ are distinct implosive/ejective consonants after their base letters.
+_HA_MAP: Dict[str, str] = {
+    "ɓ": "b{",
+    "ɗ": "d{",
+    "ƙ": "k{",
+}
+
+# Yoruba: A B D E Ẹ F G GB H I J K L M N O Ọ P R S Ṣ T U W Y
+# Ẹ, Ọ, Ṣ are distinct letters (with dot below) after their base letters.
+# Tone diacritics (acute/grave) are stripped before remapping.
+_YO_MAP: Dict[str, str] = {
+    "ẹ": "e{",
+    "ọ": "o{",
+    "ṣ": "s{",
+}
+
+# Igbo: A B CH D E F G GH GW H I Ị J K KP KW L M N Ṅ NW NY O Ọ P R S SH T U Ụ W Y Z
+# Ị, Ṅ, Ọ, Ụ are distinct letters (with dot below/above) after their base letters.
+_IG_MAP: Dict[str, str] = {
+    "ị": "i{",
+    "ṅ": "n{",
+    "ọ": "o{",
+    "ụ": "u{",
+}
+
+# Zulu: standard A-Z Latin alphabet, no special characters needing remapping.
+_ZU_MAP: Dict[str, str] = {}
+
+# Xhosa: standard A-Z Latin alphabet, no special characters needing remapping.
+_XH_MAP: Dict[str, str] = {}
+
+# Shona: standard A-Z Latin alphabet, no special characters needing remapping.
+_SN_MAP: Dict[str, str] = {}
+
+# Oromo (Qubee): standard A-Z Latin alphabet, long vowels by doubling, no remap needed.
+_OM_MAP: Dict[str, str] = {}
+
+# Somali: standard A-Z Latin alphabet, no special characters needing remapping.
+_SO_MAP: Dict[str, str] = {}
+
 # Master table for position-remapped languages.
 _REMAP_LANGUAGES: Dict[str, Dict[str, str]] = {
     "lt": _LT_MAP,
@@ -246,6 +290,15 @@ _REMAP_LANGUAGES: Dict[str, Dict[str, str]] = {
     "sl": _SL_MAP,
     "tl": _TL_MAP,
     "ms": _MS_MAP,
+    "sw": _SW_MAP,
+    "ha": _HA_MAP,
+    "yo": _YO_MAP,
+    "ig": _IG_MAP,
+    "zu": _ZU_MAP,
+    "xh": _XH_MAP,
+    "sn": _SN_MAP,
+    "om": _OM_MAP,
+    "so": _SO_MAP,
 }
 
 # ---------------------------------------------------------------------------
@@ -303,6 +356,32 @@ def _strip_vietnamese_tones(text: str) -> str:
     return unicodedata.normalize("NFC", stripped)
 
 
+# Yoruba and Igbo tone marks (combining characters) to strip.  These are
+# tonal diacritics; we preserve dot-below (U+0323) and dot-above (U+0307)
+# which distinguish separate letters (ẹ/ọ/ṣ in Yoruba; ị/ọ/ụ/ṅ in Igbo).
+_YO_IG_TONE_MARKS = frozenset(
+    {
+        "\u0301",  # COMBINING ACUTE ACCENT       (high tone)
+        "\u0300",  # COMBINING GRAVE ACCENT        (low tone)
+        "\u0302",  # COMBINING CIRCUMFLEX          (falling tone, rare)
+        "\u030c",  # COMBINING CARON               (rising tone, rare)
+    }
+)
+
+
+def _strip_yoruba_igbo_tones(text: str) -> str:
+    """Remove Yoruba/Igbo tone marks while preserving letter-distinguishing marks.
+
+    Strips acute and grave accents (tone marks) but keeps dot-below (U+0323)
+    and dot-above (U+0307) which distinguish separate letters like ẹ, ọ, ṣ, ṅ.
+
+    ``"àgbàdo"`` → ``"agbado"``, ``"ẹ̀kọ́"`` → ``"ẹkọ"``.
+    """
+    nfd = unicodedata.normalize("NFD", text)
+    stripped = "".join(ch for ch in nfd if ch not in _YO_IG_TONE_MARKS)
+    return unicodedata.normalize("NFC", stripped)
+
+
 def generate_latin_sort_key(lang_code: str, text: str) -> Optional[str]:
     """Return a binary-sortable key for *text* in the given language.
 
@@ -321,6 +400,10 @@ def generate_latin_sort_key(lang_code: str, text: str) -> Optional[str]:
         # the base distinct letters (ă, â, đ, ê, ô, ơ, ư).
         if lang_code == "vi":
             text = _strip_vietnamese_tones(text)
+        # Yoruba/Igbo: strip tone marks first so the remap table can match
+        # the base distinct letters (ẹ, ọ, ṣ in Yoruba; ị, ọ, ụ, ṅ in Igbo).
+        elif lang_code in ("yo", "ig"):
+            text = _strip_yoruba_igbo_tones(text)
         parts: list[str] = []
         for ch in text:
             lower = ch.lower()
