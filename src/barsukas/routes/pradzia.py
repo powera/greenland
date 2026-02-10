@@ -6,7 +6,6 @@ import logging
 import subprocess
 import threading
 import uuid
-from pathlib import Path
 from typing import Any, Dict, List, cast
 
 logger = logging.getLogger(__name__)
@@ -82,13 +81,8 @@ def index() -> ResponseReturnValue:
 
 def run_pradzia_command(args: list[str], timeout: int = 600) -> Dict[str, Any]:
     """Execute a PRADZIA command and return the result."""
-    script_path = Path(constants.AGENTS_DIR) / "pradzia.py"
-
-    if not script_path.exists():
-        return {"success": False, "error": "PRADZIA agent script not found"}
-
     # Build full command with appropriate backend configuration
-    full_args = ["python3", str(script_path)]
+    full_args = ["python3", "-m", "agents.pradzia"]
     if Config.is_postgres_mode():
         full_args.append("--postgres")
     else:
@@ -98,7 +92,11 @@ def run_pradzia_command(args: list[str], timeout: int = 600) -> Dict[str, Any]:
     try:
         logger.info("Launching agent subprocess: %s", " ".join(full_args))
         process = subprocess.Popen(
-            full_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            full_args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            cwd=constants.SRC_DIR,
         )
         stdout, stderr = process.communicate(timeout=timeout)
 
@@ -126,10 +124,8 @@ def start_pradzia_task(args: list[str], operation_name: str) -> str:
     Uses the shared running_tasks dict from agents_launcher for task tracking
     and SSE streaming.
     """
-    script_path = Path(constants.AGENTS_DIR) / "pradzia.py"
-
     # Build full command with appropriate backend configuration
-    full_args = ["python3", str(script_path)]
+    full_args = ["python3", "-m", "agents.pradzia"]
     if Config.is_postgres_mode():
         full_args.append("--postgres")
     else:
@@ -148,6 +144,7 @@ def start_pradzia_task(args: list[str], operation_name: str) -> str:
         text=True,
         bufsize=1,  # Line buffered
         universal_newlines=True,
+        cwd=constants.SRC_DIR,
     )
 
     # Store task info in shared running_tasks dict (from agents_launcher)
