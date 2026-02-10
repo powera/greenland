@@ -41,7 +41,24 @@ TIER_1_LANGUAGES = ["lt", "zh", "fr", "es"]
 TIER_2_LANGUAGES = ["de", "it", "nl", "pt", "sv", "vi"]
 
 # Tier 3: Experimental languages (lower quality/pedagogical issues)
-TIER_3_LANGUAGES = ["ja", "ko", "ro", "pl", "ta", "te", "kn", "ml", "si", "sw"]
+TIER_3_LANGUAGES = [
+    "ja",
+    "ko",
+    "ro",
+    "pl",
+    "th",
+    "ms",
+    "my",
+    "km",
+    "lo",
+    "tl",
+    "ta",
+    "te",
+    "kn",
+    "ml",
+    "si",
+    "sw",
+]
 
 # Languages included in data/release read/write operations.
 # Only these languages will be exported to and synced from release files.
@@ -80,6 +97,12 @@ LANGUAGE_HIERARCHY = [
     "ko",  # Korean (experimental)
     "ro",  # Romanian (experimental)
     "pl",  # Polish (experimental)
+    "th",  # Thai (experimental)
+    "ms",  # Malay (experimental)
+    "my",  # Burmese (experimental)
+    "km",  # Khmer (experimental)
+    "lo",  # Lao (experimental)
+    "tl",  # Filipino (experimental)
     "ta",  # Tamil (experimental)
     "te",  # Telugu (experimental)
     "kn",  # Kannada (experimental)
@@ -111,6 +134,12 @@ LANGUAGE_FIELDS = {
     "sw": ("sw", "Swahili", True),
     "ro": ("ro", "Romanian", True),
     "pl": ("pl", "Polish", True),
+    "th": ("th", "Thai", True),
+    "ms": ("ms", "Malay", True),
+    "my": ("my", "Burmese", True),
+    "km": ("km", "Khmer", True),
+    "lo": ("lo", "Lao", True),
+    "tl": ("tl", "Filipino", True),
     "ta": ("ta", "Tamil", True),
     "te": ("te", "Telugu", True),
     "kn": ("kn", "Kannada", True),
@@ -145,6 +174,12 @@ LLM_FIELD_TO_LANG_CODE = {
     "kannada_translation": "kn",
     "malayalam_translation": "ml",
     "sinhala_translation": "si",
+    "thai_translation": "th",
+    "malay_translation": "ms",
+    "burmese_translation": "my",
+    "khmer_translation": "km",
+    "lao_translation": "lo",
+    "filipino_translation": "tl",
 }
 
 # Reverse mapping: language codes to LLM field names

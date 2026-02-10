@@ -30,6 +30,12 @@ Available language modules:
 - langtools.kn: Kannada (noun forms, verb conjugations)
 - langtools.ml: Malayalam (noun forms, verb conjugations)
 - langtools.si: Sinhala (noun forms, verb conjugations)
+- langtools.th: Thai (noun forms, verb forms)
+- langtools.ms: Malay (noun forms, verb forms)
+- langtools.my: Burmese (noun forms, verb forms)
+- langtools.km: Khmer (noun forms, verb forms)
+- langtools.lo: Lao (noun forms, verb forms)
+- langtools.tl: Filipino/Tagalog (noun forms, verb forms)
 - langtools.ja: Japanese (romaji)
 - langtools.zh: Chinese (pinyin, character conversion)
 

@@ -1424,6 +1424,60 @@ class GrammaticalForm(enum.Enum):
     VERB_SL_2P_FUTURE = "verb/sl_2p_future"
     VERB_SL_3P_FUTURE = "verb/sl_3p_future"
 
+    # Thai noun forms (singular/plural - Thai nouns don't inflect, stored for pedagogy)
+    NOUN_TH_SINGULAR = "noun/th_singular"
+    NOUN_TH_PLURAL = "noun/th_plural"
+
+    # Thai verb forms (isolating language - no person conjugation, tense via particles)
+    VERB_TH_PRESENT = "verb/th_present"
+    VERB_TH_PAST = "verb/th_past"
+    VERB_TH_FUTURE = "verb/th_future"
+
+    # Malay noun forms (singular/plural - plural via reduplication e.g. buku-buku)
+    NOUN_MS_SINGULAR = "noun/ms_singular"
+    NOUN_MS_PLURAL = "noun/ms_plural"
+
+    # Malay verb forms (isolating - no person conjugation, tense via context/markers)
+    VERB_MS_PRESENT = "verb/ms_present"
+    VERB_MS_PAST = "verb/ms_past"
+    VERB_MS_FUTURE = "verb/ms_future"
+
+    # Burmese noun forms (singular/plural - plurality via particles တွေ/များ)
+    NOUN_MY_SINGULAR = "noun/my_singular"
+    NOUN_MY_PLURAL = "noun/my_plural"
+
+    # Burmese verb forms (isolating - tense via sentence-final particles)
+    VERB_MY_PRESENT = "verb/my_present"
+    VERB_MY_PAST = "verb/my_past"
+    VERB_MY_FUTURE = "verb/my_future"
+
+    # Khmer noun forms (singular/plural - no inflection, plurality via context)
+    NOUN_KM_SINGULAR = "noun/km_singular"
+    NOUN_KM_PLURAL = "noun/km_plural"
+
+    # Khmer verb forms (isolating - no conjugation, tense via auxiliaries)
+    VERB_KM_PRESENT = "verb/km_present"
+    VERB_KM_PAST = "verb/km_past"
+    VERB_KM_FUTURE = "verb/km_future"
+
+    # Lao noun forms (singular/plural - no inflection, plurality via classifiers)
+    NOUN_LO_SINGULAR = "noun/lo_singular"
+    NOUN_LO_PLURAL = "noun/lo_plural"
+
+    # Lao verb forms (isolating - tense via particles ຈະ/ໄດ້/ແລ້ວ)
+    VERB_LO_PRESENT = "verb/lo_present"
+    VERB_LO_PAST = "verb/lo_past"
+    VERB_LO_FUTURE = "verb/lo_future"
+
+    # Filipino (Tagalog) noun forms (singular/plural - plural via mga prefix)
+    NOUN_TL_SINGULAR = "noun/tl_singular"
+    NOUN_TL_PLURAL = "noun/tl_plural"
+
+    # Filipino verb forms (aspect-based: completed/incompleted/contemplated)
+    VERB_TL_PRESENT = "verb/tl_present"
+    VERB_TL_PAST = "verb/tl_past"
+    VERB_TL_FUTURE = "verb/tl_future"
+
     # Generic forms
     BASE_FORM = "base_form"
     OTHER = "other"
