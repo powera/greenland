@@ -1478,6 +1478,96 @@ class GrammaticalForm(enum.Enum):
     VERB_TL_PAST = "verb/tl_past"
     VERB_TL_FUTURE = "verb/tl_future"
 
+    # Swahili noun forms (Bantu noun class system with singular/plural prefixes)
+    NOUN_SW_SINGULAR = "noun/sw_singular"
+    NOUN_SW_PLURAL = "noun/sw_plural"
+
+    # Swahili verb forms (agglutinative - subject/tense/object prefixes on verb root)
+    VERB_SW_PRESENT = "verb/sw_present"
+    VERB_SW_PAST = "verb/sw_past"
+    VERB_SW_FUTURE = "verb/sw_future"
+
+    # Hausa noun forms (singular/plural - plural via suffixes and internal vowel changes)
+    NOUN_HA_SINGULAR = "noun/ha_singular"
+    NOUN_HA_PLURAL = "noun/ha_plural"
+
+    # Hausa verb forms (conjugates for person/tense with preverbal markers)
+    VERB_HA_PRESENT = "verb/ha_present"
+    VERB_HA_PAST = "verb/ha_past"
+    VERB_HA_FUTURE = "verb/ha_future"
+
+    # Yoruba noun forms (isolating - no inflectional morphology on nouns)
+    NOUN_YO_SINGULAR = "noun/yo_singular"
+    NOUN_YO_PLURAL = "noun/yo_plural"
+
+    # Yoruba verb forms (isolating - tense/aspect via preverbal particles)
+    VERB_YO_PRESENT = "verb/yo_present"
+    VERB_YO_PAST = "verb/yo_past"
+    VERB_YO_FUTURE = "verb/yo_future"
+
+    # Igbo noun forms (singular/plural - some nouns use prefix changes)
+    NOUN_IG_SINGULAR = "noun/ig_singular"
+    NOUN_IG_PLURAL = "noun/ig_plural"
+
+    # Igbo verb forms (root + suffixes for tense/aspect, tonal distinctions)
+    VERB_IG_PRESENT = "verb/ig_present"
+    VERB_IG_PAST = "verb/ig_past"
+    VERB_IG_FUTURE = "verb/ig_future"
+
+    # Amharic noun forms (singular/plural - plural via suffix -ዎች/-ኦች)
+    NOUN_AM_SINGULAR = "noun/am_singular"
+    NOUN_AM_PLURAL = "noun/am_plural"
+
+    # Amharic verb forms (Semitic root system with person/tense/mood conjugation)
+    VERB_AM_PRESENT = "verb/am_present"
+    VERB_AM_PAST = "verb/am_past"
+    VERB_AM_FUTURE = "verb/am_future"
+
+    # Zulu noun forms (Bantu noun class system with singular/plural prefixes)
+    NOUN_ZU_SINGULAR = "noun/zu_singular"
+    NOUN_ZU_PLURAL = "noun/zu_plural"
+
+    # Zulu verb forms (agglutinative - subject/tense/object concords on verb root)
+    VERB_ZU_PRESENT = "verb/zu_present"
+    VERB_ZU_PAST = "verb/zu_past"
+    VERB_ZU_FUTURE = "verb/zu_future"
+
+    # Oromo noun forms (singular/plural - plural via suffixes -oota/-wwan/-lee)
+    NOUN_OM_SINGULAR = "noun/om_singular"
+    NOUN_OM_PLURAL = "noun/om_plural"
+
+    # Oromo verb forms (conjugates for person/number/tense)
+    VERB_OM_PRESENT = "verb/om_present"
+    VERB_OM_PAST = "verb/om_past"
+    VERB_OM_FUTURE = "verb/om_future"
+
+    # Somali noun forms (singular/plural - plural via suffixes and vowel changes)
+    NOUN_SO_SINGULAR = "noun/so_singular"
+    NOUN_SO_PLURAL = "noun/so_plural"
+
+    # Somali verb forms (conjugates for person/number/tense)
+    VERB_SO_PRESENT = "verb/so_present"
+    VERB_SO_PAST = "verb/so_past"
+    VERB_SO_FUTURE = "verb/so_future"
+
+    # Xhosa noun forms (Bantu noun class system with singular/plural prefixes)
+    NOUN_XH_SINGULAR = "noun/xh_singular"
+    NOUN_XH_PLURAL = "noun/xh_plural"
+
+    # Xhosa verb forms (agglutinative - subject/tense/object concords on verb root)
+    VERB_XH_PRESENT = "verb/xh_present"
+    VERB_XH_PAST = "verb/xh_past"
+    VERB_XH_FUTURE = "verb/xh_future"
+
+    # Shona noun forms (Bantu noun class system with singular/plural prefixes)
+    NOUN_SN_SINGULAR = "noun/sn_singular"
+    NOUN_SN_PLURAL = "noun/sn_plural"
+
+    # Shona verb forms (agglutinative - subject/tense/object markers on verb root)
+    VERB_SN_PRESENT = "verb/sn_present"
+    VERB_SN_PAST = "verb/sn_past"
+    VERB_SN_FUTURE = "verb/sn_future"
+
     # Generic forms
     BASE_FORM = "base_form"
     OTHER = "other"

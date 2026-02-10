@@ -58,6 +58,15 @@ TIER_3_LANGUAGES = [
     "ml",
     "si",
     "sw",
+    "ha",
+    "yo",
+    "ig",
+    "am",
+    "zu",
+    "om",
+    "so",
+    "xh",
+    "sn",
 ]
 
 # Languages included in data/release read/write operations.
@@ -109,6 +118,15 @@ LANGUAGE_HIERARCHY = [
     "ml",  # Malayalam (experimental)
     "si",  # Sinhala (experimental)
     "sw",  # Swahili (experimental)
+    "ha",  # Hausa (experimental)
+    "yo",  # Yoruba (experimental)
+    "ig",  # Igbo (experimental)
+    "am",  # Amharic (experimental)
+    "zu",  # Zulu (experimental)
+    "om",  # Oromo (experimental)
+    "so",  # Somali (experimental)
+    "xh",  # Xhosa (experimental)
+    "sn",  # Shona (experimental)
 ]
 
 # Language mappings
@@ -145,6 +163,15 @@ LANGUAGE_FIELDS = {
     "kn": ("kn", "Kannada", True),
     "ml": ("ml", "Malayalam", True),
     "si": ("si", "Sinhala", True),
+    "ha": ("ha", "Hausa", True),
+    "yo": ("yo", "Yoruba", True),
+    "ig": ("ig", "Igbo", True),
+    "am": ("am", "Amharic", True),
+    "zu": ("zu", "Zulu", True),
+    "om": ("om", "Oromo", True),
+    "so": ("so", "Somali", True),
+    "xh": ("xh", "Xhosa", True),
+    "sn": ("sn", "Shona", True),
 }
 
 # Language display names (for use in prompts, UIs, etc.)
@@ -180,6 +207,15 @@ LLM_FIELD_TO_LANG_CODE = {
     "khmer_translation": "km",
     "lao_translation": "lo",
     "filipino_translation": "tl",
+    "hausa_translation": "ha",
+    "yoruba_translation": "yo",
+    "igbo_translation": "ig",
+    "amharic_translation": "am",
+    "zulu_translation": "zu",
+    "oromo_translation": "om",
+    "somali_translation": "so",
+    "xhosa_translation": "xh",
+    "shona_translation": "sn",
 }
 
 # Reverse mapping: language codes to LLM field names
