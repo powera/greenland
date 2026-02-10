@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
+from sentences.patterns.simple_patterns import SIMPLE_PATTERNS
 from storage.backend import create_session as create_backend_session
 from sqlalchemy.orm import Session
 from storage.backend.config import DataSourceConfig
@@ -29,7 +29,7 @@ def load_subtype_patterns() -> List[Dict]:
     Each subtype module contains METADATA and PATTERNS. This function converts
     them to the format used by SIMPLE_PATTERNS.
     """
-    import wordfreq.patterns.subtypes as subtypes_pkg
+    import sentences.patterns.subtypes as subtypes_pkg
 
     patterns = []
     subtypes_path = Path(subtypes_pkg.__file__).parent
@@ -37,7 +37,7 @@ def load_subtype_patterns() -> List[Dict]:
     for module_info in pkgutil.iter_modules([str(subtypes_path)]):
         module_name = module_info.name
         try:
-            module = importlib.import_module(f"wordfreq.patterns.subtypes.{module_name}")
+            module = importlib.import_module(f"sentences.patterns.subtypes.{module_name}")
         except ImportError as e:
             logger.warning("Failed to import subtype module %s: %s", module_name, e)
             continue

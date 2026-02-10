@@ -14,7 +14,7 @@ from flask import Blueprint, flash, g, jsonify, redirect, render_template, reque
 from flask.typing import ResponseReturnValue
 
 import constants
-from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
+from sentences.patterns.simple_patterns import SIMPLE_PATTERNS
 from storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord
 from storage.translation_helpers import get_languages_in_hierarchy
 
