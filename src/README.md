@@ -12,7 +12,7 @@ src/
 │   ├── prompts/           # LLM prompt templates
 │   ├── tools/             # CLI utilities
 │   ├── trakaido/          # Trakaido app integration
-│   └── data/              # Python data modules (vital1000, family_relations)
+│   └── data/              # Python data modules (family_relations)
 │
 ├── agents/                # Autonomous data quality agents
 ├── barsukas/              # Flask web interface

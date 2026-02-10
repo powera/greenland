@@ -13,7 +13,6 @@ Source data files for word frequency analysis:
 - `subtlex.txt` - SUBTLEX subtitle corpus frequencies
 - `wiki_vital.json` - Wikipedia vital articles word frequencies
 - `compare.py` - Scripts for comparing frequency data across corpora
-- `wikipedia_data.py` - Wikipedia corpus processing utilities
 
 ### `dictionary/`
 Word list export and review tools:
