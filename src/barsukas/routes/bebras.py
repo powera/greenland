@@ -473,8 +473,11 @@ def stream_output(task_id: str) -> ResponseReturnValue:
 @bp.route("/cli-command", methods=["POST"])
 def generate_cli_command() -> ResponseReturnValue:
     """Generate CLI command for the given parameters (AJAX endpoint)."""
-    mode = request.json.get("mode", "sentence")
-    params = request.json.get("params", {})
+    json_data = request.json
+    if json_data is None:
+        json_data = {}
+    mode = json_data.get("mode", "sentence")
+    params = json_data.get("params", {})
 
     cmd_parts = ["PYTHONPATH=src python src/agents/bebras.py"]
 

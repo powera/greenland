@@ -139,7 +139,7 @@ class SernasAgent:
                 for lang in lang_codes:
                     # Get the translation for this language
                     if lang == "en":
-                        translation = lemma.lemma_text
+                        translation: Optional[str] = lemma.lemma_text
                     else:
                         translation = get_translation(session, lemma, lang)
 

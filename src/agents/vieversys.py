@@ -21,7 +21,7 @@ import sys
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -292,7 +292,7 @@ class VieversysAgent:
         session: Session,
         lemma: Lemma,
         language_code: str,
-        voices: List[GptVoice],
+        voices: Sequence[GptVoice],
         create_review_record: bool = True,
     ) -> Dict[str, Any]:
         """
@@ -319,12 +319,13 @@ class VieversysAgent:
                 "error": "No translation available",
             }
 
-        results = {
+        voices_list: List[Dict[str, Any]] = []
+        results: Dict[str, Any] = {
             "success": True,
             "lemma_guid": lemma.guid,
             "language": language_code,
             "text": text,
-            "voices": [],
+            "voices": voices_list,
         }
 
         for gpt_voice in voices:
@@ -343,7 +344,7 @@ class VieversysAgent:
                     logger.info(
                         f"Skipping {lemma.guid}/{language_code}/{gpt_voice.path_name} - audio already exists"
                     )
-                    results["voices"].append(
+                    voices_list.append(
                         {
                             "voice": gpt_voice.path_name,
                             "success": True,
@@ -367,7 +368,7 @@ class VieversysAgent:
 
             if not result.success:
                 logger.error(f"Failed to generate audio: {result.error}")
-                results["voices"].append(
+                voices_list.append(
                     {
                         "voice": gpt_voice.path_name,
                         "success": False,
@@ -460,7 +461,7 @@ class VieversysAgent:
                     s3_prod_url=s3_prod_url,
                 )
 
-            results["voices"].append(
+            voices_list.append(
                 {
                     "voice": voice_path_name,
                     "success": True,
@@ -566,12 +567,13 @@ class VieversysAgent:
         text = sentence_translation.translation_text
         language_code = sentence_translation.language_code
 
-        results = {
+        sent_voices_list: List[Dict[str, Any]] = []
+        results: Dict[str, Any] = {
             "success": True,
             "sentence_id": sentence.id,
             "language": language_code,
             "text": text,
-            "voices": [],
+            "voices": sent_voices_list,
         }
 
         for gpt_voice in voices:
@@ -590,7 +592,7 @@ class VieversysAgent:
                     logger.info(
                         f"Skipping sentence {sentence.id}/{language_code}/{gpt_voice.path_name} - audio already exists"
                     )
-                    results["voices"].append(
+                    sent_voices_list.append(
                         {
                             "voice": gpt_voice.path_name,
                             "success": True,
@@ -614,7 +616,7 @@ class VieversysAgent:
 
             if not result.success:
                 logger.error(f"Failed to generate audio: {result.error}")
-                results["voices"].append(
+                sent_voices_list.append(
                     {
                         "voice": gpt_voice.path_name,
                         "success": False,
@@ -693,7 +695,7 @@ class VieversysAgent:
                     s3_staging_manifest_url=s3_staging_manifest_url,
                 )
 
-            results["voices"].append(
+            sent_voices_list.append(
                 {
                     "voice": voice_path_name,
                     "success": True,
@@ -1171,7 +1173,7 @@ class VieversysAgent:
                     .distinct()
                     .subquery()
                 )
-                query = query.filter(Sentence.id.in_(sentence_ids_subquery))
+                query = query.filter(Sentence.id.in_(sentence_ids_subquery))  # type: ignore[arg-type]
 
             # If skip_existing is enabled, filter out sentences that already have audio
             # for ALL of the specified voices
@@ -1191,7 +1193,7 @@ class VieversysAgent:
                     )
                     .subquery()
                 )
-                query = query.filter(Sentence.id.notin_(sentences_with_all_voices))
+                query = query.filter(Sentence.id.notin_(sentences_with_all_voices))  # type: ignore[arg-type]
 
             # Order by sentence ID and limit
             query = query.order_by(Sentence.id).limit(limit)
@@ -1355,21 +1357,27 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
 def _print_cloud_voices(engine: str) -> None:
     """Print available voice names for a cloud TTS engine."""
-    voice_enum_map = {
-        "polly": PollyVoice,
-        "azure": AzureVoice,
-        "google": GoogleTtsVoice,
-    }
-    voice_cls = voice_enum_map.get(engine)
-    if not voice_cls:
-        return
-
     print(f"\nAvailable {engine} voices:")
     languages: Dict[str, List[str]] = {}
-    for v in voice_cls:
-        lang = v.language_code
-        name = v.voice_id if hasattr(v, "voice_id") else v.voice_name
-        languages.setdefault(lang, []).append(f"{name} ({v.gender.upper()})")
+
+    if engine == "polly":
+        for pv in PollyVoice:
+            languages.setdefault(pv.language_code, []).append(
+                f"{pv.voice_id} ({pv.gender.upper()})"
+            )
+    elif engine == "azure":
+        for av in AzureVoice:
+            languages.setdefault(av.language_code, []).append(
+                f"{av.voice_name} ({av.gender.upper()})"
+            )
+    elif engine == "google":
+        for gv in GoogleTtsVoice:
+            languages.setdefault(gv.language_code, []).append(
+                f"{gv.voice_name} ({gv.gender.upper()})"
+            )
+    else:
+        return
+
     for lang_code in sorted(languages.keys()):
         print(f"  {lang_code}: {', '.join(languages[lang_code])}")
 
@@ -1486,24 +1494,24 @@ def main() -> None:
 
             # Get counts by language and voice
             if args.language:
-                query = (
+                lang_query = (
                     session.query(AudioQualityReview.voice_name, func.count(AudioQualityReview.id))
                     .filter(AudioQualityReview.language_code == args.language)
                     .group_by(AudioQualityReview.voice_name)
                 )
-                coverage_results = query.all()
+                lang_results = lang_query.all()
                 print(f"\nLanguage: {args.language}")
-                for voice_name, count in coverage_results:
+                for voice_name, count in lang_results:
                     print(f"  {voice_name}: {count} audio files")
             else:
-                query = session.query(
+                all_query = session.query(
                     AudioQualityReview.language_code,
                     AudioQualityReview.voice_name,
                     func.count(AudioQualityReview.id),
                 ).group_by(AudioQualityReview.language_code, AudioQualityReview.voice_name)
-                coverage_results = query.all()
+                all_results = all_query.all()
                 current_lang = None
-                for lang_code, voice_name, count in coverage_results:
+                for lang_code, voice_name, count in all_results:
                     if lang_code != current_lang:
                         print(f"\n{lang_code}:")
                         current_lang = lang_code
@@ -1519,15 +1527,17 @@ def main() -> None:
 
         session = agent.get_session()
         try:
-            query = session.query(AudioQualityReview)
+            existing_query = session.query(AudioQualityReview)
 
             if args.language:
-                query = query.filter(AudioQualityReview.language_code == args.language)
+                existing_query = existing_query.filter(
+                    AudioQualityReview.language_code == args.language
+                )
 
             if args.limit:
-                query = query.limit(args.limit)
+                existing_query = existing_query.limit(args.limit)
 
-            audio_files = query.all()
+            audio_files = existing_query.all()
 
             for audio in audio_files:
                 print(

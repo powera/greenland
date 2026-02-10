@@ -411,8 +411,9 @@ class PapugaAgent:
                     lemma = session.query(Lemma).filter(Lemma.id == lemma_id_key).first()
                     num_forms = len(forms_by_lemma_lang[(lemma_id_key, lang_code)])
                     mode = "BATCH" if num_forms > 1 else "SINGLE"
+                    lemma_display = lemma.lemma_text if lemma else f"<unknown id={lemma_id_key}>"
                     logger.info(
-                        f"  {idx}. '{lemma.lemma_text}' ({lang_code}): {num_forms} forms [{mode}]"
+                        f"  {idx}. '{lemma_display}' ({lang_code}): {num_forms} forms [{mode}]"
                     )
                 if len(lemma_lang_pairs) > 5:
                     logger.info(f"  ... and {len(lemma_lang_pairs) - 5} more")

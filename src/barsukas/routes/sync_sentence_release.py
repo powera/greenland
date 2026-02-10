@@ -6,7 +6,7 @@ import json
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, cast
 
 from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
@@ -128,7 +128,7 @@ def _get_db_sentence_english(db_session: Any, sentence: Any) -> str:
         )
         .first()
     )
-    return trans.translation_text if trans else ""
+    return cast(str, trans.translation_text) if trans else ""
 
 
 # =============================================================================

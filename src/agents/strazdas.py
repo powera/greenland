@@ -31,7 +31,7 @@ import tempfile
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 from sqlalchemy.orm import Session
 
@@ -172,7 +172,7 @@ class StrazdasAgent:
         session: Session,
         lemma: Lemma,
         language_code: str,
-        voices: List[VoiceType],
+        voices: Sequence[VoiceType],
         create_review_record: bool = True,
         use_ipa: bool = False,
     ) -> Dict[str, Any]:
@@ -208,14 +208,15 @@ class StrazdasAgent:
                 ipa_text = lemma.ipa
                 logger.info(f"Using IPA for generation: {ipa_text}")
 
-        results = {
+        voice_results: List[Dict[str, Any]] = []
+        results: Dict[str, Any] = {
             "success": True,
             "lemma_guid": lemma.guid,
             "language": language_code,
             "text": text,
             "ipa_text": ipa_text,
             "backend": self.tts_backend.value,
-            "voices": [],
+            "voices": voice_results,
         }
 
         for voice in voices:
@@ -232,7 +233,7 @@ class StrazdasAgent:
 
             if not result.success:
                 logger.error(f"Failed to generate audio: {result.error}")
-                results["voices"].append(
+                voice_results.append(
                     {
                         "voice": voice.name,
                         "success": False,
@@ -310,7 +311,7 @@ class StrazdasAgent:
                     s3_staging_manifest_url=s3_staging_manifest_url,
                 )
 
-            results["voices"].append(
+            voice_results.append(
                 {
                     "voice": voice_name,
                     "success": True,
@@ -709,24 +710,24 @@ def main() -> None:
 
             # Get counts by language and voice
             if args.language:
-                query = (
+                lang_query = (
                     session.query(AudioQualityReview.voice_name, func.count(AudioQualityReview.id))
                     .filter(AudioQualityReview.language_code == args.language)
                     .group_by(AudioQualityReview.voice_name)
                 )
-                coverage_results = query.all()
+                lang_coverage = lang_query.all()
                 print(f"\nLanguage: {args.language}")
-                for voice_name, count in coverage_results:
+                for voice_name, count in lang_coverage:
                     print(f"  {voice_name}: {count} audio files")
             else:
-                query = session.query(
+                all_lang_query = session.query(
                     AudioQualityReview.language_code,
                     AudioQualityReview.voice_name,
                     func.count(AudioQualityReview.id),
                 ).group_by(AudioQualityReview.language_code, AudioQualityReview.voice_name)
-                coverage_results = query.all()
+                all_coverage = all_lang_query.all()
                 current_lang = None
-                for lang_code, voice_name, count in coverage_results:
+                for lang_code, voice_name, count in all_coverage:
                     if lang_code != current_lang:
                         print(f"\n{lang_code}:")
                         current_lang = lang_code
@@ -742,15 +743,15 @@ def main() -> None:
 
         session = agent.get_session()
         try:
-            query = session.query(AudioQualityReview)
+            check_query = session.query(AudioQualityReview)
 
             if args.language:
-                query = query.filter(AudioQualityReview.language_code == args.language)
+                check_query = check_query.filter(AudioQualityReview.language_code == args.language)
 
             if args.limit:
-                query = query.limit(args.limit)
+                check_query = check_query.limit(args.limit)
 
-            audio_files = query.all()
+            audio_files = check_query.all()
 
             for audio in audio_files:
                 print(

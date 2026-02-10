@@ -75,8 +75,8 @@ def generate_missing_translations_for_lemma(
         session, lemma, exclude_languages=missing_languages
     )
 
-    # Fall back to English if no reference
-    if not reference_translation:
+    # Fall back to English if no reference (or if lang code is missing)
+    if not reference_translation or not reference_lang_code:
         reference_lang_code = "en"
         reference_translation = lemma.lemma_text
 

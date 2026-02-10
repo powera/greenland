@@ -17,6 +17,7 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
+from barsukas.config import Config
 import constants
 from wordfreq.storage.backend.config import BackendType, DataSourceConfig
 from wordfreq.storage.backend.factory import create_session
@@ -232,7 +233,7 @@ class WirewordSentenceExporter:
             # Build output structure
             # Note: No generated_date here - that belongs in the manifest file only,
             # so the MD5 checksum stays stable when content hasn't changed.
-            output = {
+            output: Dict[str, Any] = {
                 "language": self.language,
                 "sentences": [],
             }
@@ -287,7 +288,7 @@ class WirewordSentenceExporter:
                     )
 
                 # Build sentence entry
-                sentence_entry = {
+                sentence_entry: Dict[str, Any] = {
                     "sentence_id": f"S_{sentence.id:05d}",
                     "translations": translations,
                     "linked_words": linked_words,
@@ -308,7 +309,7 @@ class WirewordSentenceExporter:
                 if sentence.minimum_level is not None and sentence.minimum_level != -1:
                     sentence_entry["minimum_level"] = sentence.minimum_level
                 else:
-                    sentence_entry["minimum_level"] = 21
+                    sentence_entry["minimum_level"] = Config.MAX_DIFFICULTY_LEVEL + 1
 
                 # Only include audio if present
                 if audio_dict:

@@ -7,7 +7,7 @@ import subprocess
 import threading
 import uuid
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, cast
 
 logger = logging.getLogger(__name__)
 
@@ -166,13 +166,13 @@ def start_pradzia_task(args: list[str], operation_name: str) -> str:
         try:
             assert process.stdout is not None, "process.stdout should not be None"
             for line in process.stdout:
-                output_list: List[str] = running_tasks[task_id]["output"]
+                output_list = cast(List[str], running_tasks[task_id]["output"])
                 output_list.append(line)
             process.wait()
             running_tasks[task_id]["complete"] = True
             running_tasks[task_id]["returncode"] = process.returncode
         except Exception as e:
-            output_list_err: List[str] = running_tasks[task_id]["output"]
+            output_list_err = cast(List[str], running_tasks[task_id]["output"])
             output_list_err.append(f"Error reading output: {str(e)}\n")
             running_tasks[task_id]["complete"] = True
             running_tasks[task_id]["returncode"] = -1

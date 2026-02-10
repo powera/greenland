@@ -13,7 +13,7 @@ import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union, cast
 
 from flask import (
     Blueprint,
@@ -37,9 +37,11 @@ from agents.strazdas import StrazdasAgent
 from agents.vieversys import VieversysAgent
 from audioshoe.coqui import CoquiClient, CoquiVoice
 from audioshoe.espeak import EspeakVoice
+from audioshoe.qwen.types import QwenVoice
 from audioshoe.piper import PiperClient, PiperVoice
 from barsukas.helpers.audio_helpers import link_audio_to_lemma, validate_audio_translation
 from clients.audio import Voice
+from clients.audio.gpt_voices import GptVoice
 from clients.audio.azure_tts import AzureVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.polly_tts import PollyVoice
@@ -756,7 +758,9 @@ def generate() -> ResponseReturnValue:
     # Validate voice names for the selected engine
     try:
         if tts_engine == "espeak-ng":
-            espeak_voice_enums = [EspeakVoice[v.upper()] for v in voice_names]
+            espeak_voice_enums: List[Union[EspeakVoice, QwenVoice]] = [
+                EspeakVoice[v.upper()] for v in voice_names
+            ]
         elif tts_engine in ("polly", "azure", "google"):
             pass  # Cloud voice names are passed as-is to vieversys
         else:
@@ -814,7 +818,7 @@ def generate() -> ResponseReturnValue:
             vieversys_agent = VieversysAgent(config=config, output_dir=str(audio_base_dir))
             results = vieversys_agent.generate_batch(
                 language_code=language_code,
-                voices=openai_voice_enums,
+                voices=cast(List[GptVoice], openai_voice_enums),
             )
 
         flash(

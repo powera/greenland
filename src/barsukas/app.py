@@ -13,7 +13,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, cast
 
 from barsukas.config import Config
 from flask import Flask, Response, g, render_template
@@ -247,7 +247,7 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     @app.after_request
     def after_request(response: Response) -> Response:
         """Record request metrics after response is generated."""
-        return RequestMetricsMiddleware.after_request(response)
+        return cast(Response, RequestMetricsMiddleware.after_request(response))
 
     @app.route("/metrics")
     def metrics() -> Response:

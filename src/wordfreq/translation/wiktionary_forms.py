@@ -278,15 +278,16 @@ def process_lemma_forms_wiktionary(
         # Determine the word to look up
         if form_config.language_code == "en":
             # For English, use the lemma text directly
-            word = lemma.lemma_text
+            word: str = lemma.lemma_text
         else:
             # For other languages, get the translation
-            word = get_translation(session, lemma, form_config.language_code)
-            if not word:
+            translated_word = get_translation(session, lemma, form_config.language_code)
+            if not translated_word:
                 logger.warning(
                     f"No {form_config.language_code} translation for lemma ID {lemma_id}"
                 )
                 return False
+            word = translated_word
 
         # Check if forms already exist
         existing_forms = (

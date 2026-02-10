@@ -724,7 +724,7 @@ class VorasAgent:
                     translations_by_lang_code: Optional[Dict[str, str]] = None
                     translation_source: Optional[str] = None
                     cache_client = self.get_cache_client()
-                    if cache_client:
+                    if cache_client and lemma.guid is not None:
                         try:
                             translations_by_lang_code = cache_client.get_translations(lemma.guid)
                             if translations_by_lang_code:

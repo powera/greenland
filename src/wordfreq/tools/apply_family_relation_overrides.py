@@ -198,11 +198,11 @@ def cmd_view(args: argparse.Namespace) -> None:
             print("No family relation overrides found for this language.")
             return
 
-        # Sort by level, then by concept label
+        # Sort by level, then by lemma text
         overrides.sort(
             key=lambda x: (
                 x[1].difficulty_level,
-                x[0].concept_label or x[0].lemma_text,
+                x[0].lemma_text,
             )
         )
 
@@ -210,7 +210,7 @@ def cmd_view(args: argparse.Namespace) -> None:
         print("-" * 60)
 
         for lemma, override in overrides:
-            concept = lemma.concept_label or lemma.lemma_text
+            concept = lemma.lemma_text
             level_str = str(override.difficulty_level)
             if override.difficulty_level == -1:
                 level_str = "-1 (null)"

@@ -293,6 +293,7 @@ def generate_synonyms_for_lemma(
         config = build_default_config()
 
     # Get the word to find synonyms for
+    word: Optional[str]
     if language_code == "en":
         word = lemma.lemma_text
     else:

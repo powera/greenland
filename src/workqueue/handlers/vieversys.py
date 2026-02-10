@@ -24,6 +24,7 @@ from audioshoe.espeak import EspeakVoice
 from audioshoe.piper import PiperVoice
 from audioshoe.qwen import QwenVoice
 from clients.audio import Voice
+from clients.audio.gpt_voices import GptVoice
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.models.schema import Lemma, Sentence, SentenceTranslation
 
@@ -123,14 +124,19 @@ def handle_generate_audio(session: Session, payload: Dict) -> str:
             voice_names,
         )
     else:
-        # Default to OpenAI
-        openai_voice_enums = [Voice(v) for v in voice_names]
+        # Default to OpenAI - convert Voice names to GptVoice objects
+        gpt_voice_list: List[GptVoice] = []
+        for v in voice_names:
+            openai_voice = Voice(v)
+            gpt_voice = GptVoice.from_openai_voice(openai_voice, language_code)
+            if gpt_voice is not None:
+                gpt_voice_list.append(gpt_voice)
         vieversys_agent = VieversysAgent(config=config, output_dir=audio_output_dir)
         result = vieversys_agent.generate_audio_for_lemma(
             session,
             lemma,
             language_code,
-            openai_voice_enums,
+            gpt_voice_list,
             create_review_record=True,
         )
 

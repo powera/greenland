@@ -7,7 +7,7 @@ Provides streamlined keyboard-driven sentence review interface for verifying
 translations (ES, FR, ZH, LT) before final approval.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from flask import (
     Blueprint,
@@ -116,7 +116,7 @@ def build_sentence_query(
     level_order = case((Sentence.minimum_level.is_(None), 99), else_=Sentence.minimum_level)
     query = query.order_by(level_order, Sentence.id)
 
-    return query
+    return cast(Query[Any], query)
 
 
 def find_sentences_with_translations(query: Query, limit: int = 100) -> List[Dict[str, Any]]:
