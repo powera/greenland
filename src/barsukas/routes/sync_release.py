@@ -13,8 +13,8 @@ from flask.typing import ResponseReturnValue
 from storage.crud.operation_log import log_operation, log_translation_change
 from storage.models.schema import Lemma, LemmaTranslation
 from storage.translation_helpers import (
-    LANGUAGE_HIERARCHY,
     LANGUAGE_NAMES,
+    RELEASE_LANGUAGES,
     compute_sort_key,
     invalidate_audio_for_translation_change,
 )
@@ -867,7 +867,7 @@ def _find_translation_differences(
         return differences
 
     # Languages to check (excluding 'en' which is stored as lemma_text)
-    lang_codes_to_check = [lang for lang in LANGUAGE_HIERARCHY if lang != "en"]
+    lang_codes_to_check = [lang for lang in RELEASE_LANGUAGES if lang != "en"]
 
     batch_size = 500
     guid_list = list(release_guids)
@@ -957,7 +957,7 @@ def _count_translation_differences(
         return count
 
     # Languages to check (excluding 'en')
-    lang_codes_to_check = [lang for lang in LANGUAGE_HIERARCHY if lang != "en"]
+    lang_codes_to_check = [lang for lang in RELEASE_LANGUAGES if lang != "en"]
 
     batch_size = 500
     guid_list = list(release_guids)
