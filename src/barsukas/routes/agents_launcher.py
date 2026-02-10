@@ -50,7 +50,7 @@ AGENTS = [
         "display_name": "Pradzia",
         "subtitle": "Database Initialization",
         "description": "Initializes and maintains the wordfreq database, including corpus configuration synchronization, data loading, and rank calculation.",
-        "script": "pradzia.py",
+        "script": "pradzia/agent.py",
         "icon": "bi-play-circle",
         "use_dynamic_form": True,
         "show_if_empty": True,  # Only show if database is empty

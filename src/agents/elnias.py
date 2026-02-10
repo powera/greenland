@@ -33,7 +33,7 @@ from agents.common.common_args import (
     get_data_source_config,
 )
 from storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
+from wireword.export_manager import TrakaidoExporter
 
 # Supported languages and their codes
 SUPPORTED_LANGUAGES = {"lt": "Lithuanian", "zh": "Chinese", "ko": "Korean", "fr": "French"}

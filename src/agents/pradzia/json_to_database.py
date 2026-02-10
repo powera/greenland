@@ -41,12 +41,15 @@ import re
 import sys
 from typing import Any, Dict, List, Optional, Tuple
 
-# Configuration - Update these paths as needed
-GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+from pathlib import Path
+
+# Add src directory to path
+GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
+if GREENLAND_SRC_PATH not in sys.path:
+    sys.path.insert(0, GREENLAND_SRC_PATH)
+
 DEFAULT_JSON_PATH = os.path.join(os.path.dirname(__file__), "nouns.json")
 
-# Add paths for imports
-sys.path.append(GREENLAND_SRC_PATH)
 import constants
 from storage.database import (
     add_alternative_form,
