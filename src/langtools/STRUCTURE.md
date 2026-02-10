@@ -66,22 +66,11 @@ part of speech in the language.  Every dataclass has:
 Languages with grammatical gender also define a `Gender` enum
 (e.g. `GermanGender`, `FrenchGender`).
 
-Form complexity varies by language:
-
-| Language   | Noun forms | Verb forms | Adjective forms | Adverb forms |
-|------------|------------|------------|-----------------|--------------|
-| English    | 2          | 5 base / 22 full | 3          | 3            |
-| German     | 8 (4 cases x 2 numbers) | 18 | varies    | 3            |
-| Spanish    | 2 + gender | 6+ per tense | agreement  | --           |
-| French     | 2 + gender | 6+ per tense | agreement  | --           |
-| Lithuanian | 14 (7 cases x 2 numbers) | 18 | 28 (7 cases x 2 numbers x 2 genders) | 3 |
-| Romanian   | 2 + gender (m/f/n) | 18 | 4 agreement | --           |
-| Polish     | 14 (7 cases x 2 numbers) + gender | 18 | 4 agreement | -- |
-| Tamil      | 2          | 18         | --              | --           |
-| Telugu     | 2          | 18         | --              | --           |
-| Kannada    | 2          | 18         | --              | --           |
-| Malayalam  | 2          | 18         | --              | --           |
-| Sinhala    | 2          | 18         | --              | --           |
+The number and kind of forms varies by language — case-heavy languages
+(Lithuanian, Polish, German) have many noun forms, while languages
+without a case system (English, Italian, the Dravidian and Sinhala
+modules) only track singular/plural.  See each language's `types.py`
+for its specific form inventory.
 
 ### utils.py -- Language-specific helpers
 
@@ -141,21 +130,18 @@ Available scripts by language:
 Produces binary-sortable strings so that SQLite's default binary collation
 gives linguistically correct alphabetical ordering.  Two strategies:
 
-**Position remapping** (lt, es, sv, vi, ro, pl): Characters that are distinct
-letters in the language's alphabet are mapped to sort in the right position.
-For example, Lithuanian ą sorts after a but before b, encoded as `a{`.
-Romanian ă, â, î, ș, ț and Polish ą, ć, ę, ł, ń, ó, ś, ź, ż are also
-remapped to their correct alphabet positions.
+**Position remapping** (lt, es, sv, vi, ro, pl): Characters that are
+distinct letters in the language's alphabet are mapped to sort in the
+right position.  For example, Lithuanian ą sorts after a but before b,
+encoded as `a{`.
 
-**Diacritic stripping** (de, fr, it, nl, pt): Accented characters are not
-separate letters; accents are removed via Unicode NFD decomposition so
-that `café` sorts as `cafe`.
+**Diacritic stripping** (de, fr, it, nl, pt): Accented characters are
+not separate letters; accents are removed via Unicode NFD decomposition
+so that `café` sorts as `cafe`.
 
-South Asian scripts (ta, te, kn, ml, si) use their own writing systems
-and do not need Latin collation support.
-
-CJK sort keys are handled by the respective language modules (ja, ko, zh),
-not by collation.py.
+CJK sort keys are handled by the respective language modules (ja, ko,
+zh), not by collation.py.  South Asian scripts (ta, te, kn, ml, si)
+do not currently have collation support.
 
 ## CJK modules
 
