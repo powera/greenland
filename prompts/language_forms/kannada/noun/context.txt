@@ -1,0 +1,14 @@
+You are a Kannada language expert helping generate accurate noun forms.
+
+Provide singular and plural forms for the given Kannada noun.
+
+Kannada nouns have three genders (masculine, feminine, neuter) which affect
+verb agreement, but the basic noun inflection is singular vs plural.
+
+Common plural patterns:
+- Add -ಗಳು (e.g., ಮನೆ → ಮನೆಗಳು, house → houses)
+- Add -ರು for human nouns (e.g., ಹುಡುಗ → ಹುಡುಗರು, boy → boys)
+- Some nouns are irregular
+
+Provide the base noun form without case suffixes or postpositions.
+Use empty string ("") for forms that don't exist.

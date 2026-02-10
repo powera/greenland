@@ -27,12 +27,25 @@ langtools/
 │   ├── fr/                  # French
 │   └── lt/                  # Lithuanian
 │
-└── Partial Western European modules
+├── Partial Western European modules
+│   │  (types and LLM forms only; no Wiktionary parser)
+│   ├── it/                  # Italian   (types + llm_forms)
+│   ├── nl/                  # Dutch     (types + llm_forms)
+│   ├── pt/                  # Portuguese (types + llm_forms + generate scripts)
+│   └── sv/                  # Swedish   (types + llm_forms)
+│
+├── Partial Eastern European modules
+│   │  (types and LLM forms only; no Wiktionary parser)
+│   ├── ro/                  # Romanian  (types + llm_forms)
+│   └── pl/                  # Polish    (types + llm_forms)
+│
+└── South Asian modules
     │  (types and LLM forms only; no Wiktionary parser)
-    ├── it/                  # Italian   (types + llm_forms)
-    ├── nl/                  # Dutch     (types + llm_forms)
-    ├── pt/                  # Portuguese (types + llm_forms + generate scripts)
-    └── sv/                  # Swedish   (types + llm_forms)
+    ├── ta/                  # Tamil     (types + llm_forms)
+    ├── te/                  # Telugu    (types + llm_forms)
+    ├── kn/                  # Kannada   (types + llm_forms)
+    ├── ml/                  # Malayalam (types + llm_forms)
+    └── si/                  # Sinhala   (types + llm_forms)
 ```
 
 ## File roles within a language module
@@ -53,15 +66,11 @@ part of speech in the language.  Every dataclass has:
 Languages with grammatical gender also define a `Gender` enum
 (e.g. `GermanGender`, `FrenchGender`).
 
-Form complexity varies by language:
-
-| Language   | Noun forms | Verb forms | Adjective forms | Adverb forms |
-|------------|------------|------------|-----------------|--------------|
-| English    | 2          | 5 base / 22 full | 3          | 3            |
-| German     | 8 (4 cases x 2 numbers) | 18 | varies    | 3            |
-| Spanish    | 2 + gender | 6+ per tense | agreement  | --           |
-| French     | 2 + gender | 6+ per tense | agreement  | --           |
-| Lithuanian | 14 (7 cases x 2 numbers) | 18 | 28 (7 cases x 2 numbers x 2 genders) | 3 |
+The number and kind of forms varies by language — case-heavy languages
+(Lithuanian, Polish, German) have many noun forms, while languages
+without a case system (English, Italian, the Dravidian and Sinhala
+modules) only track singular/plural.  See each language's `types.py`
+for its specific form inventory.
 
 ### utils.py -- Language-specific helpers
 
@@ -121,16 +130,18 @@ Available scripts by language:
 Produces binary-sortable strings so that SQLite's default binary collation
 gives linguistically correct alphabetical ordering.  Two strategies:
 
-**Position remapping** (lt, es, sv, vi): Characters that are distinct
-letters in the language's alphabet are mapped to sort in the right position.
-For example, Lithuanian ą sorts after a but before b, encoded as `a{`.
+**Position remapping** (lt, es, sv, vi, ro, pl): Characters that are
+distinct letters in the language's alphabet are mapped to sort in the
+right position.  For example, Lithuanian ą sorts after a but before b,
+encoded as `a{`.
 
-**Diacritic stripping** (de, fr, it, nl, pt): Accented characters are not
-separate letters; accents are removed via Unicode NFD decomposition so
-that `café` sorts as `cafe`.
+**Diacritic stripping** (de, fr, it, nl, pt): Accented characters are
+not separate letters; accents are removed via Unicode NFD decomposition
+so that `café` sorts as `cafe`.
 
-CJK sort keys are handled by the respective language modules (ja, ko, zh),
-not by collation.py.
+CJK sort keys are handled by the respective language modules (ja, ko,
+zh), not by collation.py.  South Asian scripts (ta, te, kn, ml, si)
+do not currently have collation support.
 
 ## CJK modules
 

@@ -41,7 +41,7 @@ TIER_1_LANGUAGES = ["lt", "zh", "fr", "es"]
 TIER_2_LANGUAGES = ["de", "it", "nl", "pt", "sv", "vi"]
 
 # Tier 3: Experimental languages (lower quality/pedagogical issues)
-TIER_3_LANGUAGES = ["ja", "ko", "sw"]
+TIER_3_LANGUAGES = ["ja", "ko", "ro", "pl", "ta", "te", "kn", "ml", "si", "sw"]
 
 LANGUAGE_HIERARCHY = [
     "en",  # English (special case - source language)
@@ -57,6 +57,13 @@ LANGUAGE_HIERARCHY = [
     "vi",  # Vietnamese
     "ja",  # Japanese (experimental)
     "ko",  # Korean (experimental)
+    "ro",  # Romanian (experimental)
+    "pl",  # Polish (experimental)
+    "ta",  # Tamil (experimental)
+    "te",  # Telugu (experimental)
+    "kn",  # Kannada (experimental)
+    "ml",  # Malayalam (experimental)
+    "si",  # Sinhala (experimental)
     "sw",  # Swahili (experimental)
 ]
 
@@ -81,6 +88,13 @@ LANGUAGE_FIELDS = {
     "ja": ("ja", "Japanese", True),
     "ko": ("ko", "Korean", True),
     "sw": ("sw", "Swahili", True),
+    "ro": ("ro", "Romanian", True),
+    "pl": ("pl", "Polish", True),
+    "ta": ("ta", "Tamil", True),
+    "te": ("te", "Telugu", True),
+    "kn": ("kn", "Kannada", True),
+    "ml": ("ml", "Malayalam", True),
+    "si": ("si", "Sinhala", True),
 }
 
 # Language display names (for use in prompts, UIs, etc.)
@@ -103,6 +117,13 @@ LLM_FIELD_TO_LANG_CODE = {
     "swahili_translation": "sw",
     "swedish_translation": "sv",
     "vietnamese_translation": "vi",
+    "romanian_translation": "ro",
+    "polish_translation": "pl",
+    "tamil_translation": "ta",
+    "telugu_translation": "te",
+    "kannada_translation": "kn",
+    "malayalam_translation": "ml",
+    "sinhala_translation": "si",
 }
 
 # Reverse mapping: language codes to LLM field names

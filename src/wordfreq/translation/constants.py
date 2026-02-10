@@ -109,4 +109,46 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "description": "Vietnamese translation in lemma form",
         "instructions": "- Vietnamese: Provide standard Vietnamese in base form",
     },
+    "romanian": {
+        "field": "romanian_translation",
+        "code": "ro",
+        "description": "Romanian translation in lemma form",
+        "instructions": "- Romanian: Provide standard Romanian in base form (infinitive for verbs, singular indefinite for nouns)",
+    },
+    "polish": {
+        "field": "polish_translation",
+        "code": "pl",
+        "description": "Polish translation in lemma form",
+        "instructions": "- Polish: Provide standard Polish in base form (infinitive for verbs, singular nominative for nouns)",
+    },
+    "tamil": {
+        "field": "tamil_translation",
+        "code": "ta",
+        "description": "Tamil translation in lemma form",
+        "instructions": "- Tamil: Provide standard Tamil in base form (infinitive for verbs, singular for nouns)",
+    },
+    "telugu": {
+        "field": "telugu_translation",
+        "code": "te",
+        "description": "Telugu translation in lemma form",
+        "instructions": "- Telugu: Provide standard Telugu in base form (infinitive for verbs, singular for nouns)",
+    },
+    "kannada": {
+        "field": "kannada_translation",
+        "code": "kn",
+        "description": "Kannada translation in lemma form",
+        "instructions": "- Kannada: Provide standard Kannada in base form (infinitive for verbs, singular for nouns)",
+    },
+    "malayalam": {
+        "field": "malayalam_translation",
+        "code": "ml",
+        "description": "Malayalam translation in lemma form",
+        "instructions": "- Malayalam: Provide standard Malayalam in base form (infinitive for verbs, singular for nouns)",
+    },
+    "sinhala": {
+        "field": "sinhala_translation",
+        "code": "si",
+        "description": "Sinhala translation in lemma form",
+        "instructions": "- Sinhala: Provide standard Sinhala in base form (infinitive for verbs, singular for nouns)",
+    },
 }

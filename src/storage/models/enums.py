@@ -856,6 +856,221 @@ class GrammaticalForm(enum.Enum):
     NUMERAL_KO_SINO = "numeral/ko_sino"  # 일, 이, 삼 (Sino-Korean, for dates/numbers)
     NUMERAL_KO_ORDINAL = "numeral/ko_ordinal"  # 첫째, 둘째, 셋째
 
+    # Romanian noun forms (singular/plural only - each noun has a fixed gender m/f/n)
+    NOUN_RO_SINGULAR = "noun/ro_singular"
+    NOUN_RO_PLURAL = "noun/ro_plural"
+
+    # Romanian adjective forms (2 genders × 2 numbers = 4 forms)
+    ADJ_RO_SINGULAR_M = "adjective/ro_singular_m"
+    ADJ_RO_PLURAL_M = "adjective/ro_plural_m"
+    ADJ_RO_SINGULAR_F = "adjective/ro_singular_f"
+    ADJ_RO_PLURAL_F = "adjective/ro_plural_f"
+
+    # Romanian verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (prezent)
+    VERB_RO_1S_PRESENT = "verb/ro_1s_present"
+    VERB_RO_2S_PRESENT = "verb/ro_2s_present"
+    VERB_RO_3S_PRESENT = "verb/ro_3s_present"
+    VERB_RO_1P_PRESENT = "verb/ro_1p_present"
+    VERB_RO_2P_PRESENT = "verb/ro_2p_present"
+    VERB_RO_3P_PRESENT = "verb/ro_3p_present"
+    # Past tense (perfect compus)
+    VERB_RO_1S_PAST = "verb/ro_1s_past"
+    VERB_RO_2S_PAST = "verb/ro_2s_past"
+    VERB_RO_3S_PAST = "verb/ro_3s_past"
+    VERB_RO_1P_PAST = "verb/ro_1p_past"
+    VERB_RO_2P_PAST = "verb/ro_2p_past"
+    VERB_RO_3P_PAST = "verb/ro_3p_past"
+    # Future tense (viitor)
+    VERB_RO_1S_FUTURE = "verb/ro_1s_future"
+    VERB_RO_2S_FUTURE = "verb/ro_2s_future"
+    VERB_RO_3S_FUTURE = "verb/ro_3s_future"
+    VERB_RO_1P_FUTURE = "verb/ro_1p_future"
+    VERB_RO_2P_FUTURE = "verb/ro_2p_future"
+    VERB_RO_3P_FUTURE = "verb/ro_3p_future"
+
+    # Polish noun forms (7 cases × 2 numbers = 14 forms)
+    # Singular
+    NOUN_PL_NOMINATIVE_SINGULAR = "noun/pl_nominative_singular"
+    NOUN_PL_GENITIVE_SINGULAR = "noun/pl_genitive_singular"
+    NOUN_PL_DATIVE_SINGULAR = "noun/pl_dative_singular"
+    NOUN_PL_ACCUSATIVE_SINGULAR = "noun/pl_accusative_singular"
+    NOUN_PL_INSTRUMENTAL_SINGULAR = "noun/pl_instrumental_singular"
+    NOUN_PL_LOCATIVE_SINGULAR = "noun/pl_locative_singular"
+    NOUN_PL_VOCATIVE_SINGULAR = "noun/pl_vocative_singular"
+    # Plural
+    NOUN_PL_NOMINATIVE_PLURAL = "noun/pl_nominative_plural"
+    NOUN_PL_GENITIVE_PLURAL = "noun/pl_genitive_plural"
+    NOUN_PL_DATIVE_PLURAL = "noun/pl_dative_plural"
+    NOUN_PL_ACCUSATIVE_PLURAL = "noun/pl_accusative_plural"
+    NOUN_PL_INSTRUMENTAL_PLURAL = "noun/pl_instrumental_plural"
+    NOUN_PL_LOCATIVE_PLURAL = "noun/pl_locative_plural"
+    NOUN_PL_VOCATIVE_PLURAL = "noun/pl_vocative_plural"
+
+    # Polish adjective forms (2 genders × 2 numbers = 4 simplified forms)
+    ADJ_PL_SINGULAR_M = "adjective/pl_singular_m"
+    ADJ_PL_PLURAL_M = "adjective/pl_plural_m"
+    ADJ_PL_SINGULAR_F = "adjective/pl_singular_f"
+    ADJ_PL_PLURAL_F = "adjective/pl_plural_f"
+
+    # Polish verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (czas teraźniejszy)
+    VERB_PL_1S_PRESENT = "verb/pl_1s_present"
+    VERB_PL_2S_PRESENT = "verb/pl_2s_present"
+    VERB_PL_3S_PRESENT = "verb/pl_3s_present"
+    VERB_PL_1P_PRESENT = "verb/pl_1p_present"
+    VERB_PL_2P_PRESENT = "verb/pl_2p_present"
+    VERB_PL_3P_PRESENT = "verb/pl_3p_present"
+    # Past tense (czas przeszły)
+    VERB_PL_1S_PAST = "verb/pl_1s_past"
+    VERB_PL_2S_PAST = "verb/pl_2s_past"
+    VERB_PL_3S_PAST = "verb/pl_3s_past"
+    VERB_PL_1P_PAST = "verb/pl_1p_past"
+    VERB_PL_2P_PAST = "verb/pl_2p_past"
+    VERB_PL_3P_PAST = "verb/pl_3p_past"
+    # Future tense (czas przyszły)
+    VERB_PL_1S_FUTURE = "verb/pl_1s_future"
+    VERB_PL_2S_FUTURE = "verb/pl_2s_future"
+    VERB_PL_3S_FUTURE = "verb/pl_3s_future"
+    VERB_PL_1P_FUTURE = "verb/pl_1p_future"
+    VERB_PL_2P_FUTURE = "verb/pl_2p_future"
+    VERB_PL_3P_FUTURE = "verb/pl_3p_future"
+
+    # Tamil noun forms (singular/plural only)
+    NOUN_TA_SINGULAR = "noun/ta_singular"
+    NOUN_TA_PLURAL = "noun/ta_plural"
+
+    # Tamil verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (நிகழ்காலம்)
+    VERB_TA_1S_PRESENT = "verb/ta_1s_present"
+    VERB_TA_2S_PRESENT = "verb/ta_2s_present"
+    VERB_TA_3S_PRESENT = "verb/ta_3s_present"
+    VERB_TA_1P_PRESENT = "verb/ta_1p_present"
+    VERB_TA_2P_PRESENT = "verb/ta_2p_present"
+    VERB_TA_3P_PRESENT = "verb/ta_3p_present"
+    # Past tense (இறந்தகாலம்)
+    VERB_TA_1S_PAST = "verb/ta_1s_past"
+    VERB_TA_2S_PAST = "verb/ta_2s_past"
+    VERB_TA_3S_PAST = "verb/ta_3s_past"
+    VERB_TA_1P_PAST = "verb/ta_1p_past"
+    VERB_TA_2P_PAST = "verb/ta_2p_past"
+    VERB_TA_3P_PAST = "verb/ta_3p_past"
+    # Future tense (எதிர்காலம்)
+    VERB_TA_1S_FUTURE = "verb/ta_1s_future"
+    VERB_TA_2S_FUTURE = "verb/ta_2s_future"
+    VERB_TA_3S_FUTURE = "verb/ta_3s_future"
+    VERB_TA_1P_FUTURE = "verb/ta_1p_future"
+    VERB_TA_2P_FUTURE = "verb/ta_2p_future"
+    VERB_TA_3P_FUTURE = "verb/ta_3p_future"
+
+    # Telugu noun forms (singular/plural only)
+    NOUN_TE_SINGULAR = "noun/te_singular"
+    NOUN_TE_PLURAL = "noun/te_plural"
+
+    # Telugu verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (వర్తమానకాలం)
+    VERB_TE_1S_PRESENT = "verb/te_1s_present"
+    VERB_TE_2S_PRESENT = "verb/te_2s_present"
+    VERB_TE_3S_PRESENT = "verb/te_3s_present"
+    VERB_TE_1P_PRESENT = "verb/te_1p_present"
+    VERB_TE_2P_PRESENT = "verb/te_2p_present"
+    VERB_TE_3P_PRESENT = "verb/te_3p_present"
+    # Past tense (భూతకాలం)
+    VERB_TE_1S_PAST = "verb/te_1s_past"
+    VERB_TE_2S_PAST = "verb/te_2s_past"
+    VERB_TE_3S_PAST = "verb/te_3s_past"
+    VERB_TE_1P_PAST = "verb/te_1p_past"
+    VERB_TE_2P_PAST = "verb/te_2p_past"
+    VERB_TE_3P_PAST = "verb/te_3p_past"
+    # Future tense (భవిష్యత్కాలం)
+    VERB_TE_1S_FUTURE = "verb/te_1s_future"
+    VERB_TE_2S_FUTURE = "verb/te_2s_future"
+    VERB_TE_3S_FUTURE = "verb/te_3s_future"
+    VERB_TE_1P_FUTURE = "verb/te_1p_future"
+    VERB_TE_2P_FUTURE = "verb/te_2p_future"
+    VERB_TE_3P_FUTURE = "verb/te_3p_future"
+
+    # Kannada noun forms (singular/plural only)
+    NOUN_KN_SINGULAR = "noun/kn_singular"
+    NOUN_KN_PLURAL = "noun/kn_plural"
+
+    # Kannada verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (ವರ್ತಮಾನಕಾಲ)
+    VERB_KN_1S_PRESENT = "verb/kn_1s_present"
+    VERB_KN_2S_PRESENT = "verb/kn_2s_present"
+    VERB_KN_3S_PRESENT = "verb/kn_3s_present"
+    VERB_KN_1P_PRESENT = "verb/kn_1p_present"
+    VERB_KN_2P_PRESENT = "verb/kn_2p_present"
+    VERB_KN_3P_PRESENT = "verb/kn_3p_present"
+    # Past tense (ಭೂತಕಾಲ)
+    VERB_KN_1S_PAST = "verb/kn_1s_past"
+    VERB_KN_2S_PAST = "verb/kn_2s_past"
+    VERB_KN_3S_PAST = "verb/kn_3s_past"
+    VERB_KN_1P_PAST = "verb/kn_1p_past"
+    VERB_KN_2P_PAST = "verb/kn_2p_past"
+    VERB_KN_3P_PAST = "verb/kn_3p_past"
+    # Future tense (ಭವಿಷ್ಯತ್ಕಾಲ)
+    VERB_KN_1S_FUTURE = "verb/kn_1s_future"
+    VERB_KN_2S_FUTURE = "verb/kn_2s_future"
+    VERB_KN_3S_FUTURE = "verb/kn_3s_future"
+    VERB_KN_1P_FUTURE = "verb/kn_1p_future"
+    VERB_KN_2P_FUTURE = "verb/kn_2p_future"
+    VERB_KN_3P_FUTURE = "verb/kn_3p_future"
+
+    # Malayalam noun forms (singular/plural only)
+    NOUN_ML_SINGULAR = "noun/ml_singular"
+    NOUN_ML_PLURAL = "noun/ml_plural"
+
+    # Malayalam verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (വർത്തമാനകാലം)
+    VERB_ML_1S_PRESENT = "verb/ml_1s_present"
+    VERB_ML_2S_PRESENT = "verb/ml_2s_present"
+    VERB_ML_3S_PRESENT = "verb/ml_3s_present"
+    VERB_ML_1P_PRESENT = "verb/ml_1p_present"
+    VERB_ML_2P_PRESENT = "verb/ml_2p_present"
+    VERB_ML_3P_PRESENT = "verb/ml_3p_present"
+    # Past tense (ഭൂതകാലം)
+    VERB_ML_1S_PAST = "verb/ml_1s_past"
+    VERB_ML_2S_PAST = "verb/ml_2s_past"
+    VERB_ML_3S_PAST = "verb/ml_3s_past"
+    VERB_ML_1P_PAST = "verb/ml_1p_past"
+    VERB_ML_2P_PAST = "verb/ml_2p_past"
+    VERB_ML_3P_PAST = "verb/ml_3p_past"
+    # Future tense (ഭാവികാലം)
+    VERB_ML_1S_FUTURE = "verb/ml_1s_future"
+    VERB_ML_2S_FUTURE = "verb/ml_2s_future"
+    VERB_ML_3S_FUTURE = "verb/ml_3s_future"
+    VERB_ML_1P_FUTURE = "verb/ml_1p_future"
+    VERB_ML_2P_FUTURE = "verb/ml_2p_future"
+    VERB_ML_3P_FUTURE = "verb/ml_3p_future"
+
+    # Sinhala noun forms (singular/plural only)
+    NOUN_SI_SINGULAR = "noun/si_singular"
+    NOUN_SI_PLURAL = "noun/si_plural"
+
+    # Sinhala verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (වර්තමාන කාලය)
+    VERB_SI_1S_PRESENT = "verb/si_1s_present"
+    VERB_SI_2S_PRESENT = "verb/si_2s_present"
+    VERB_SI_3S_PRESENT = "verb/si_3s_present"
+    VERB_SI_1P_PRESENT = "verb/si_1p_present"
+    VERB_SI_2P_PRESENT = "verb/si_2p_present"
+    VERB_SI_3P_PRESENT = "verb/si_3p_present"
+    # Past tense (අතීත කාලය)
+    VERB_SI_1S_PAST = "verb/si_1s_past"
+    VERB_SI_2S_PAST = "verb/si_2s_past"
+    VERB_SI_3S_PAST = "verb/si_3s_past"
+    VERB_SI_1P_PAST = "verb/si_1p_past"
+    VERB_SI_2P_PAST = "verb/si_2p_past"
+    VERB_SI_3P_PAST = "verb/si_3p_past"
+    # Future tense (අනාගත කාලය)
+    VERB_SI_1S_FUTURE = "verb/si_1s_future"
+    VERB_SI_2S_FUTURE = "verb/si_2s_future"
+    VERB_SI_3S_FUTURE = "verb/si_3s_future"
+    VERB_SI_1P_FUTURE = "verb/si_1p_future"
+    VERB_SI_2P_FUTURE = "verb/si_2p_future"
+    VERB_SI_3P_FUTURE = "verb/si_3p_future"
+
     # Generic forms
     BASE_FORM = "base_form"
     OTHER = "other"
