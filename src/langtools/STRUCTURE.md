@@ -27,12 +27,25 @@ langtools/
 │   ├── fr/                  # French
 │   └── lt/                  # Lithuanian
 │
-└── Partial Western European modules
+├── Partial Western European modules
+│   │  (types and LLM forms only; no Wiktionary parser)
+│   ├── it/                  # Italian   (types + llm_forms)
+│   ├── nl/                  # Dutch     (types + llm_forms)
+│   ├── pt/                  # Portuguese (types + llm_forms + generate scripts)
+│   └── sv/                  # Swedish   (types + llm_forms)
+│
+├── Partial Eastern European modules
+│   │  (types and LLM forms only; no Wiktionary parser)
+│   ├── ro/                  # Romanian  (types + llm_forms)
+│   └── pl/                  # Polish    (types + llm_forms)
+│
+└── South Asian modules
     │  (types and LLM forms only; no Wiktionary parser)
-    ├── it/                  # Italian   (types + llm_forms)
-    ├── nl/                  # Dutch     (types + llm_forms)
-    ├── pt/                  # Portuguese (types + llm_forms + generate scripts)
-    └── sv/                  # Swedish   (types + llm_forms)
+    ├── ta/                  # Tamil     (types + llm_forms)
+    ├── te/                  # Telugu    (types + llm_forms)
+    ├── kn/                  # Kannada   (types + llm_forms)
+    ├── ml/                  # Malayalam (types + llm_forms)
+    └── si/                  # Sinhala   (types + llm_forms)
 ```
 
 ## File roles within a language module
@@ -62,6 +75,13 @@ Form complexity varies by language:
 | Spanish    | 2 + gender | 6+ per tense | agreement  | --           |
 | French     | 2 + gender | 6+ per tense | agreement  | --           |
 | Lithuanian | 14 (7 cases x 2 numbers) | 18 | 28 (7 cases x 2 numbers x 2 genders) | 3 |
+| Romanian   | 2 + gender (m/f/n) | 18 | 4 agreement | --           |
+| Polish     | 14 (7 cases x 2 numbers) + gender | 18 | 4 agreement | -- |
+| Tamil      | 2          | 18         | --              | --           |
+| Telugu     | 2          | 18         | --              | --           |
+| Kannada    | 2          | 18         | --              | --           |
+| Malayalam  | 2          | 18         | --              | --           |
+| Sinhala    | 2          | 18         | --              | --           |
 
 ### utils.py -- Language-specific helpers
 
@@ -121,13 +141,18 @@ Available scripts by language:
 Produces binary-sortable strings so that SQLite's default binary collation
 gives linguistically correct alphabetical ordering.  Two strategies:
 
-**Position remapping** (lt, es, sv, vi): Characters that are distinct
+**Position remapping** (lt, es, sv, vi, ro, pl): Characters that are distinct
 letters in the language's alphabet are mapped to sort in the right position.
 For example, Lithuanian ą sorts after a but before b, encoded as `a{`.
+Romanian ă, â, î, ș, ț and Polish ą, ć, ę, ł, ń, ó, ś, ź, ż are also
+remapped to their correct alphabet positions.
 
 **Diacritic stripping** (de, fr, it, nl, pt): Accented characters are not
 separate letters; accents are removed via Unicode NFD decomposition so
 that `café` sorts as `cafe`.
+
+South Asian scripts (ta, te, kn, ml, si) use their own writing systems
+and do not need Latin collation support.
 
 CJK sort keys are handled by the respective language modules (ja, ko, zh),
 not by collation.py.

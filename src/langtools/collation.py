@@ -72,12 +72,36 @@ _VI_MAP: Dict[str, str] = {
     "ư": "u{",
 }
 
+# Romanian: A Ă Â B C D E F G H I Î J K L M N O P Q R S Ș T Ț U V W X Y Z
+_RO_MAP: Dict[str, str] = {
+    "ă": "a{",
+    "â": "a|",
+    "î": "i{",
+    "ș": "s{",
+    "ț": "t{",
+}
+
+# Polish: A Ą B C Ć D E Ę F G H I J K L Ł M N Ń O Ó P R S Ś T U W Y Z Ź Ż
+_PL_MAP: Dict[str, str] = {
+    "ą": "a{",
+    "ć": "c{",
+    "ę": "e{",
+    "ł": "l{",
+    "ń": "n{",
+    "ó": "o{",
+    "ś": "s{",
+    "ź": "z{",
+    "ż": "z|",
+}
+
 # Master table for position-remapped languages.
 _REMAP_LANGUAGES: Dict[str, Dict[str, str]] = {
     "lt": _LT_MAP,
     "es": _ES_MAP,
     "sv": _SV_MAP,
     "vi": _VI_MAP,
+    "ro": _RO_MAP,
+    "pl": _PL_MAP,
 }
 
 # ---------------------------------------------------------------------------

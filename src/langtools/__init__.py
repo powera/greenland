@@ -10,6 +10,13 @@ Available language modules:
 - langtools.nl: Dutch (noun forms, verb conjugations, adjective agreement)
 - langtools.sv: Swedish (noun forms, verb conjugations)
 - langtools.pt: Portuguese (noun forms, verb conjugations)
+- langtools.ro: Romanian (noun forms, verb conjugations, adjective agreement)
+- langtools.pl: Polish (noun declensions, verb conjugations, adjective agreement)
+- langtools.ta: Tamil (noun forms, verb conjugations)
+- langtools.te: Telugu (noun forms, verb conjugations)
+- langtools.kn: Kannada (noun forms, verb conjugations)
+- langtools.ml: Malayalam (noun forms, verb conjugations)
+- langtools.si: Sinhala (noun forms, verb conjugations)
 - langtools.ja: Japanese (romaji)
 - langtools.zh: Chinese (pinyin, character conversion)
 """
