@@ -1,0 +1,4 @@
+Write about {num_sentences} simple sentences that describe and compare these words:
+{word_list}
+
+For each word, explain what it means using simple language, then highlight the key differences between the words. Use concrete examples from everyday life.

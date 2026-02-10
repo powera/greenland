@@ -7,7 +7,7 @@ work queue management, and the main entry point.
 import argparse
 import logging
 import sys
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from agents.common.common_args import (
     add_backend_args,
@@ -52,6 +52,19 @@ Examples:
   # View a generated conversation
   python sarka.py --view 123
 
+Word definitions (compare/contrast word pairs):
+  # Generate word definition narratives for level 3
+  python sarka.py --level 3 --definitions
+
+  # Dry run to preview word pairs
+  python sarka.py --level 3 --definitions --dry-run
+
+  # Generate definitions for food_drink words only
+  python sarka.py --level 3 --definitions --category food_drink
+
+  # Generate definitions with words up to level 5
+  python sarka.py --level 1 --max-level 5 --definitions
+
 Advanced options (category-based selection):
   # Generate with words up to level 5, grouped by category
   python sarka.py --level 1 --max-level 5 --by-category --generate
@@ -89,6 +102,11 @@ Configuration:
         "--generate",
         action="store_true",
         help="Generate conversations for the specified level(s)",
+    )
+    mode_group.add_argument(
+        "--definitions",
+        action="store_true",
+        help="Generate word definition/comparison narratives for word pairs",
     )
     mode_group.add_argument(
         "--show-words",
@@ -155,6 +173,12 @@ Configuration:
         "--by-category",
         action="store_true",
         help="Generate separate conversations for each noun category (keeps categories coherent)",
+    )
+    gen_group.add_argument(
+        "--num-pairs",
+        type=int,
+        default=CONVERSATIONS_PER_LEVEL,
+        help=f"Number of word pairs for --definitions mode (default: {CONVERSATIONS_PER_LEVEL})",
     )
 
     # Workqueue arguments
@@ -271,6 +295,98 @@ def enqueue_level_work(
     }
 
 
+def enqueue_definition_work(
+    agent: SarkaAgent,
+    session: Any,
+    level: int,
+    max_level: Optional[int] = None,
+    category: Optional[str] = None,
+    max_word_usage: Optional[int] = None,
+    num_pairs: int = CONVERSATIONS_PER_LEVEL,
+    num_sentences: int = 10,
+    dry_run: bool = False,
+) -> Dict[str, Any]:
+    """Enqueue word definition generation work items.
+
+    Args:
+        agent: SarkaAgent instance
+        session: Database session
+        level: Difficulty level
+        max_level: Maximum difficulty level (inclusive)
+        category: Optional pos_subtype filter
+        max_word_usage: Skip words used in this many conversations
+        num_pairs: Maximum number of pairs to generate
+        num_sentences: Target sentences per definition
+        dry_run: If True, don't actually enqueue
+
+    Returns:
+        Dictionary with enqueue statistics
+    """
+    pairs, plan_stats = agent.plan_word_definition_pairs(
+        level=level,
+        max_level=max_level,
+        category=category,
+        max_word_usage=max_word_usage,
+        num_pairs=num_pairs,
+    )
+
+    if not pairs:
+        return {
+            "error": "No word pairs found",
+            "enqueued": 0,
+            "requested": 0,
+        }
+
+    effective_level = max_level if max_level is not None else level
+    enqueued_count = 0
+
+    logger.info(f"Enqueuing {len(pairs)} word definition tasks for level {level}...")
+    if dry_run:
+        logger.info("DRY RUN MODE - No work items will be enqueued")
+
+    for i, word_pair in enumerate(pairs):
+        word_texts = [w["lemma_text"] for w in word_pair]
+
+        if not dry_run:
+            import hashlib
+
+            words_str = ",".join(sorted(word_texts))
+            words_hash = hashlib.md5(words_str.encode()).hexdigest()[:8]
+            dedup_key = f"sarka_def_level{level}_{words_hash}_{i}"
+
+            enqueue_result = enqueue_task(
+                session,
+                task_type="sarka_generate_definition",
+                target_type="conversation",
+                target_id=None,
+                payload={
+                    "words": [
+                        {"lemma_text": w["lemma_text"], "lemma_id": w["lemma_id"]}
+                        for w in word_pair
+                    ],
+                    "level": effective_level,
+                    "num_sentences": num_sentences,
+                },
+                dedup_key=dedup_key,
+            )
+            if enqueue_result.created:
+                enqueued_count += 1
+            else:
+                logger.debug(f"Skipped duplicate task {i + 1}")
+        else:
+            enqueued_count += 1
+
+    if not dry_run:
+        session.commit()
+
+    return {
+        "enqueued": enqueued_count,
+        "requested": len(pairs),
+        "level": level,
+        "dry_run": dry_run,
+    }
+
+
 def get_sarka_queue_stats(session: Any) -> Dict[str, int]:
     """Get statistics for sarka tasks in the queue."""
     task_type = "sarka_generate_conversation"
@@ -363,6 +479,140 @@ def main() -> None:
                 print()
         else:
             show_level_words(agent, args.level)
+        return
+
+    # DEFINITIONS MODE: Generate word definition/comparison narratives
+    if args.definitions:
+        if args.level is None:
+            print("Error: --level is required for --definitions")
+            sys.exit(1)
+
+        logger.info("=" * 60)
+        logger.info("SARKA AGENT - GENERATING WORD DEFINITIONS")
+        logger.info("=" * 60)
+
+        # Determine levels to process
+        if args.level_end:
+            levels = list(range(args.level, args.level_end + 1))
+        else:
+            levels = [args.level]
+
+        # WORKQUEUE MODE: Enqueue definition work for background processing
+        if args.use_workqueue:
+            session = agent.get_session()
+            try:
+                total_enqueued = 0
+                for current_level in levels:
+                    enqueue_result = enqueue_definition_work(
+                        agent=agent,
+                        session=session,
+                        level=current_level,
+                        max_level=args.max_level,
+                        category=args.category,
+                        max_word_usage=args.max_word_usage,
+                        num_pairs=args.num_pairs,
+                        num_sentences=args.num_sentences,
+                        dry_run=args.dry_run,
+                    )
+
+                    print(f"\nLevel {current_level}:")
+                    print(f"  Planned pairs: {enqueue_result['requested']}")
+                    print(f"  Enqueued: {enqueue_result['enqueued']}")
+                    if enqueue_result.get("error"):
+                        print(f"  Error: {enqueue_result['error']}")
+
+                    total_enqueued += enqueue_result["enqueued"]
+
+                print("\n" + "=" * 60)
+                print("DEFINITION WORK ENQUEUE SUMMARY")
+                print("=" * 60)
+                print(f"Levels: {levels}")
+                print(f"Total enqueued: {total_enqueued}")
+                if args.dry_run:
+                    print("\n[DRY RUN] No work items were actually enqueued")
+                print("=" * 60)
+            except Exception as e:
+                logger.error(f"Failed to enqueue definition work: {e}")
+                sys.exit(1)
+            finally:
+                session.close()
+            return
+
+        # IMMEDIATE MODE: Generate directly
+        all_results: List[Dict[str, Any]] = []
+        total_successful = 0
+        total_failed = 0
+
+        for current_level in levels:
+            print(f"\n--- Word Definition Mode (Level {current_level}) ---")
+            if args.max_level:
+                print(f"Max level: {args.max_level}")
+            if args.category:
+                print(f"Category: {args.category}")
+            if args.max_word_usage:
+                print(f"Max word usage: {args.max_word_usage} conversations")
+
+            result = agent.generate_definitions_for_level(
+                level=current_level,
+                max_level=args.max_level,
+                category=args.category,
+                max_word_usage=args.max_word_usage,
+                num_pairs=args.num_pairs,
+                num_sentences=args.num_sentences,
+                dry_run=args.dry_run,
+            )
+
+            if result.get("error"):
+                print(f"Error: {result['error']}")
+                if result.get("plan_stats"):
+                    print(f"Stats: {result['plan_stats']}")
+                continue
+
+            all_results.append(result)
+            total_successful += result["successful"]
+            total_failed += result["failed"]
+
+            # Show plan stats
+            stats = result.get("plan_stats", {})
+            print(f"\nWord selection:")
+            print(f"  Level range: {stats.get('level_desc', 'N/A')}")
+            print(f"  Total words: {stats.get('total_words', 0)}")
+            if stats.get("filtered_out", 0) > 0:
+                print(f"  Filtered out (usage limit): {stats['filtered_out']}")
+            if stats.get("category"):
+                print(f"  Category: {stats['category']}")
+            print(f"  Planned pairs: {stats.get('planned_pairs', 0)}")
+
+            print(f"\nGenerated: {result['successful']}/{result['total']} definitions")
+            if result["failed"] > 0:
+                print(f"Failed: {result['failed']}")
+
+            # Show results
+            if result.get("results"):
+                print("\nWord definitions:")
+                for i, res in enumerate(result["results"][:5], 1):
+                    if res.get("success") or res.get("dry_run"):
+                        words_str = " / ".join(res.get("words", []))
+                        print(
+                            f"  {i}. {words_str}: {res.get('title')} "
+                            f"({res.get('num_sentences')} sentences)"
+                        )
+                        if res.get("dry_run") and res.get("sentences"):
+                            for sent in res["sentences"]:
+                                text = sent.get("text", sent) if isinstance(sent, dict) else sent
+                                print(f"     {text}")
+                    else:
+                        print(f"  {i}. Error: {res.get('error')}")
+
+        print("\n" + "=" * 60)
+        print("DEFINITION GENERATION SUMMARY")
+        print("=" * 60)
+        print(f"Levels: {levels}")
+        print(f"Total successful: {total_successful}")
+        print(f"Total failed: {total_failed}")
+        if args.dry_run:
+            print("\n[DRY RUN] No definitions were actually saved")
+        print("=" * 60)
         return
 
     # GENERATE MODE

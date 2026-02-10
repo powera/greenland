@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from wordfreq.storage.backend.config import DataSourceConfig
 from wordfreq.storage.crud.conversation import add_conversation, add_conversation_sentence
 from wordfreq.storage.crud.operation_log import log_operation
-from wordfreq.storage.crud.sentence import add_sentence
+from wordfreq.storage.crud.sentence import add_sentence, find_sentence_by_text
 from wordfreq.storage.crud.sentence_translation import add_sentence_translation
 import util.prompt_loader
 
@@ -240,6 +240,263 @@ def generate_conversation_with_session(
         "sentences": created_sentences,
         "num_sentences": len(created_sentences),
     }
+
+
+def _query_definition_llm(
+    word_list: List[str], num_sentences: int, config: DataSourceConfig
+) -> Dict[str, Any]:
+    """Query the LLM to generate a word definition/comparison narrative.
+
+    Args:
+        word_list: List of words to describe and compare (typically 2)
+        num_sentences: Target number of sentences
+        config: DataSourceConfig for LLM settings
+
+    Returns:
+        Dictionary with definition data or error
+    """
+    try:
+        context = util.prompt_loader.get_context("conversations", "definitions")
+        prompt_template = util.prompt_loader.get_prompt("conversations", "definitions")
+    except Exception as e:
+        logger.error(f"Failed to load word definition prompts: {e}")
+        return {"success": False, "error": f"Failed to load prompts: {e}"}
+
+    word_list_str = ", ".join(word_list)
+
+    prompt_text = prompt_template.format(
+        word_list=word_list_str,
+        num_sentences=num_sentences,
+    )
+
+    schema = Schema(
+        name="WordDefinition",
+        description="Generate a short narrative comparing and describing words",
+        properties={
+            "title": SchemaProperty(
+                "string", "A short title for the comparison (e.g., 'Table vs. Desk')"
+            ),
+            "sentences": SchemaProperty(
+                "array",
+                "List of descriptive sentences",
+                items={
+                    "type": "object",
+                    "properties": {
+                        "text": {
+                            "type": "string",
+                            "description": "A single descriptive sentence",
+                        },
+                    },
+                    "required": ["text"],
+                },
+            ),
+        },
+    )
+
+    try:
+        client = _get_llm_client(config)
+        response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
+
+        if not response.structured_data:
+            return {"success": False, "error": "Empty response from LLM"}
+
+        result = response.structured_data
+        title = result.get("title", "Word Definition")
+        sentences = result.get("sentences", [])
+
+        if not sentences:
+            return {"success": False, "error": "No sentences generated"}
+
+        return {
+            "success": True,
+            "title": title,
+            "sentences": sentences,
+        }
+
+    except Exception as e:
+        logger.error(f"Error querying LLM for word definition: {e}")
+        return {"success": False, "error": str(e)}
+
+
+def generate_definition_with_session(
+    session: Session,
+    words: List[Dict[str, Any]],
+    level: int,
+    num_sentences: int = 10,
+    config: Optional[DataSourceConfig] = None,
+) -> Dict[str, Any]:
+    """Generate a word definition narrative using the provided session.
+
+    This function uses the passed-in session for all database operations,
+    ensuring it works correctly with both SQLite and PostgreSQL backends.
+
+    Args:
+        session: Database session from the worker
+        words: List of word info dictionaries (typically a pair)
+        level: Difficulty level (for metadata)
+        num_sentences: Target number of sentences
+        config: Optional DataSourceConfig for LLM settings
+
+    Returns:
+        Dictionary with generation results
+    """
+    if config is None:
+        config = build_default_config()
+
+    if not words:
+        return {"error": "No words provided for word definition"}
+
+    word_texts = [w["lemma_text"] for w in words]
+    word_list_str = ", ".join(word_texts)
+
+    logger.info(f"Generating word definition for: {word_list_str}")
+
+    result = _query_definition_llm(word_texts, num_sentences, config)
+
+    if not result.get("success"):
+        return {
+            "error": result.get("error", "Failed to generate word definition"),
+            "words": word_texts,
+        }
+
+    definition_sentences = result["sentences"]
+    title = result.get("title", f"{' vs. '.join(word_texts)}")
+
+    # Create conversation record with theme="word_definition"
+    conversation = add_conversation(
+        session,
+        title=title,
+        theme="word_definition",
+        keywords=word_texts,
+        verified=False,
+    )
+
+    conversation.minimum_level = level
+
+    created_sentences = []
+    reused_count = 0
+    for idx, sent_data in enumerate(definition_sentences):
+        text = sent_data.get("text", "")
+
+        # Check if an identical sentence already exists (dedupe)
+        existing_sentence = find_sentence_by_text(session, text, language_code="en")
+
+        if existing_sentence:
+            sentence = existing_sentence
+            reused_count += 1
+            logger.debug(f"Reusing existing sentence #{sentence.id}: {text[:50]}...")
+        else:
+            sentence = add_sentence(
+                session,
+                pattern_type="definition",
+                verified=False,
+                notes=f"Generated by Sarka agent for word definition {conversation.id}",
+            )
+
+            sentence.minimum_level = level
+
+            add_sentence_translation(
+                session,
+                sentence=sentence,
+                language_code="en",
+                translation_text=text,
+            )
+
+        # Link to conversation with speaker="narrator"
+        add_conversation_sentence(
+            session,
+            conversation=conversation,
+            sentence=sentence,
+            position=idx,
+            speaker="narrator",
+        )
+
+        created_sentences.append(
+            {
+                "sentence_id": sentence.id,
+                "position": idx,
+                "speaker": "narrator",
+                "text": text,
+                "reused": existing_sentence is not None,
+            }
+        )
+
+    if reused_count > 0:
+        logger.info(f"Reused {reused_count} existing sentence(s) in word definition")
+
+    log_operation(
+        session,
+        operation_type="word_definition_generated",
+        entity_type="conversation",
+        entity_id=conversation.id,
+        details={
+            "title": title,
+            "level": level,
+            "words": word_texts,
+            "num_sentences": len(created_sentences),
+            "agent": "sarka",
+            "model": config.model,
+            "type": "word_definition",
+        },
+    )
+
+    logger.info(
+        f"Created word definition {conversation.id} with {len(created_sentences)} sentences"
+    )
+
+    return {
+        "success": True,
+        "conversation_id": conversation.id,
+        "title": title,
+        "level": level,
+        "words": word_texts,
+        "sentences": created_sentences,
+        "num_sentences": len(created_sentences),
+    }
+
+
+def handle_generate_definition(session: Session, payload: Dict) -> str:
+    """Handle word definition generation task (workqueue entry point).
+
+    Payload schema:
+        words: list[dict] - List of word info dicts with lemma_text and lemma_id
+        level: int - Difficulty level
+        num_sentences: int - Target number of sentences (default: 10)
+
+    Returns:
+        str: Result message describing what was generated
+    """
+    words = payload.get("words", [])
+    level = payload.get("level", 1)
+    num_sentences = payload.get("num_sentences", 10)
+
+    if not words:
+        raise ValueError("No words provided in payload")
+
+    config = build_default_config()
+
+    result = generate_definition_with_session(
+        session=session,
+        words=words,
+        level=level,
+        num_sentences=num_sentences,
+        config=config,
+    )
+
+    if result.get("error"):
+        raise RuntimeError(result["error"])
+
+    session.commit()
+
+    conversation_id = result.get("conversation_id")
+    title = result.get("title", "Untitled")
+    num_generated = result.get("num_sentences", 0)
+    word_list = ", ".join(result.get("words", []))
+
+    return (
+        f"Generated word definition {conversation_id}: '{title}' "
+        f"with {num_generated} sentences (words: {word_list})"
+    )
 
 
 def handle_generate_conversation(session: Session, payload: Dict) -> str:
