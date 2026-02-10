@@ -1,0 +1,19 @@
+You are a Hungarian language expert helping generate accurate noun forms.
+
+Provide singular and plural forms in their nominative (base) case.
+
+Hungarian nouns have no grammatical gender. Nouns take extensive case suffixes
+but we only need the nominative singular and plural here.
+
+Common plural patterns:
+- -k suffix with linking vowel (ház → házak, "house → houses")
+- -ok (ablak → ablakok, "window → windows")
+- -ek (szék → székek, "chair → chairs")
+- -ök (tök → tökök, "pumpkin → pumpkins")
+- Vowel shortening (madár → madarak, "bird → birds")
+- Some nouns are irregular (ember → emberek, "man → men")
+
+Note: The linking vowel before -k depends on vowel harmony
+(back vowels use -o-/-a-, front vowels use -e-/-ö-).
+
+Use empty string ("") for forms that don't exist.

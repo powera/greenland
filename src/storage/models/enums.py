@@ -1071,6 +1071,359 @@ class GrammaticalForm(enum.Enum):
     VERB_SI_2P_FUTURE = "verb/si_2p_future"
     VERB_SI_3P_FUTURE = "verb/si_3p_future"
 
+    # Bulgarian noun forms (singular/plural only - each noun has a fixed gender m/f/n)
+    NOUN_BG_SINGULAR = "noun/bg_singular"
+    NOUN_BG_PLURAL = "noun/bg_plural"
+
+    # Bulgarian verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (сегашно време)
+    VERB_BG_1S_PRESENT = "verb/bg_1s_present"
+    VERB_BG_2S_PRESENT = "verb/bg_2s_present"
+    VERB_BG_3S_PRESENT = "verb/bg_3s_present"
+    VERB_BG_1P_PRESENT = "verb/bg_1p_present"
+    VERB_BG_2P_PRESENT = "verb/bg_2p_present"
+    VERB_BG_3P_PRESENT = "verb/bg_3p_present"
+    # Past tense (минало свършено време)
+    VERB_BG_1S_PAST = "verb/bg_1s_past"
+    VERB_BG_2S_PAST = "verb/bg_2s_past"
+    VERB_BG_3S_PAST = "verb/bg_3s_past"
+    VERB_BG_1P_PAST = "verb/bg_1p_past"
+    VERB_BG_2P_PAST = "verb/bg_2p_past"
+    VERB_BG_3P_PAST = "verb/bg_3p_past"
+    # Future tense (бъдеще време)
+    VERB_BG_1S_FUTURE = "verb/bg_1s_future"
+    VERB_BG_2S_FUTURE = "verb/bg_2s_future"
+    VERB_BG_3S_FUTURE = "verb/bg_3s_future"
+    VERB_BG_1P_FUTURE = "verb/bg_1p_future"
+    VERB_BG_2P_FUTURE = "verb/bg_2p_future"
+    VERB_BG_3P_FUTURE = "verb/bg_3p_future"
+
+    # Croatian noun forms (singular/plural only - each noun has a fixed gender m/f/n)
+    NOUN_HR_SINGULAR = "noun/hr_singular"
+    NOUN_HR_PLURAL = "noun/hr_plural"
+
+    # Croatian verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (prezent)
+    VERB_HR_1S_PRESENT = "verb/hr_1s_present"
+    VERB_HR_2S_PRESENT = "verb/hr_2s_present"
+    VERB_HR_3S_PRESENT = "verb/hr_3s_present"
+    VERB_HR_1P_PRESENT = "verb/hr_1p_present"
+    VERB_HR_2P_PRESENT = "verb/hr_2p_present"
+    VERB_HR_3P_PRESENT = "verb/hr_3p_present"
+    # Past tense (perfekt)
+    VERB_HR_1S_PAST = "verb/hr_1s_past"
+    VERB_HR_2S_PAST = "verb/hr_2s_past"
+    VERB_HR_3S_PAST = "verb/hr_3s_past"
+    VERB_HR_1P_PAST = "verb/hr_1p_past"
+    VERB_HR_2P_PAST = "verb/hr_2p_past"
+    VERB_HR_3P_PAST = "verb/hr_3p_past"
+    # Future tense (futur I)
+    VERB_HR_1S_FUTURE = "verb/hr_1s_future"
+    VERB_HR_2S_FUTURE = "verb/hr_2s_future"
+    VERB_HR_3S_FUTURE = "verb/hr_3s_future"
+    VERB_HR_1P_FUTURE = "verb/hr_1p_future"
+    VERB_HR_2P_FUTURE = "verb/hr_2p_future"
+    VERB_HR_3P_FUTURE = "verb/hr_3p_future"
+
+    # Czech noun forms (singular/plural only - each noun has a fixed gender m/f/n)
+    NOUN_CS_SINGULAR = "noun/cs_singular"
+    NOUN_CS_PLURAL = "noun/cs_plural"
+
+    # Czech verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (přítomný čas)
+    VERB_CS_1S_PRESENT = "verb/cs_1s_present"
+    VERB_CS_2S_PRESENT = "verb/cs_2s_present"
+    VERB_CS_3S_PRESENT = "verb/cs_3s_present"
+    VERB_CS_1P_PRESENT = "verb/cs_1p_present"
+    VERB_CS_2P_PRESENT = "verb/cs_2p_present"
+    VERB_CS_3P_PRESENT = "verb/cs_3p_present"
+    # Past tense (minulý čas)
+    VERB_CS_1S_PAST = "verb/cs_1s_past"
+    VERB_CS_2S_PAST = "verb/cs_2s_past"
+    VERB_CS_3S_PAST = "verb/cs_3s_past"
+    VERB_CS_1P_PAST = "verb/cs_1p_past"
+    VERB_CS_2P_PAST = "verb/cs_2p_past"
+    VERB_CS_3P_PAST = "verb/cs_3p_past"
+    # Future tense (budoucí čas)
+    VERB_CS_1S_FUTURE = "verb/cs_1s_future"
+    VERB_CS_2S_FUTURE = "verb/cs_2s_future"
+    VERB_CS_3S_FUTURE = "verb/cs_3s_future"
+    VERB_CS_1P_FUTURE = "verb/cs_1p_future"
+    VERB_CS_2P_FUTURE = "verb/cs_2p_future"
+    VERB_CS_3P_FUTURE = "verb/cs_3p_future"
+
+    # Danish noun forms (singular/plural only - each noun has a fixed gender c/n)
+    NOUN_DA_SINGULAR = "noun/da_singular"
+    NOUN_DA_PLURAL = "noun/da_plural"
+
+    # Danish verb forms (6 persons × 3 tenses = 18 forms)
+    # Note: Danish verbs don't conjugate by person, but we use the standard
+    # 6-person schema for consistency with other languages.
+    # Present tense (nutid)
+    VERB_DA_1S_PRESENT = "verb/da_1s_present"
+    VERB_DA_2S_PRESENT = "verb/da_2s_present"
+    VERB_DA_3S_PRESENT = "verb/da_3s_present"
+    VERB_DA_1P_PRESENT = "verb/da_1p_present"
+    VERB_DA_2P_PRESENT = "verb/da_2p_present"
+    VERB_DA_3P_PRESENT = "verb/da_3p_present"
+    # Past tense (datid)
+    VERB_DA_1S_PAST = "verb/da_1s_past"
+    VERB_DA_2S_PAST = "verb/da_2s_past"
+    VERB_DA_3S_PAST = "verb/da_3s_past"
+    VERB_DA_1P_PAST = "verb/da_1p_past"
+    VERB_DA_2P_PAST = "verb/da_2p_past"
+    VERB_DA_3P_PAST = "verb/da_3p_past"
+    # Future tense (fremtid)
+    VERB_DA_1S_FUTURE = "verb/da_1s_future"
+    VERB_DA_2S_FUTURE = "verb/da_2s_future"
+    VERB_DA_3S_FUTURE = "verb/da_3s_future"
+    VERB_DA_1P_FUTURE = "verb/da_1p_future"
+    VERB_DA_2P_FUTURE = "verb/da_2p_future"
+    VERB_DA_3P_FUTURE = "verb/da_3p_future"
+
+    # Estonian noun forms (singular/plural only - no grammatical gender)
+    NOUN_ET_SINGULAR = "noun/et_singular"
+    NOUN_ET_PLURAL = "noun/et_plural"
+
+    # Estonian verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (olevik)
+    VERB_ET_1S_PRESENT = "verb/et_1s_present"
+    VERB_ET_2S_PRESENT = "verb/et_2s_present"
+    VERB_ET_3S_PRESENT = "verb/et_3s_present"
+    VERB_ET_1P_PRESENT = "verb/et_1p_present"
+    VERB_ET_2P_PRESENT = "verb/et_2p_present"
+    VERB_ET_3P_PRESENT = "verb/et_3p_present"
+    # Past tense (lihtminevik)
+    VERB_ET_1S_PAST = "verb/et_1s_past"
+    VERB_ET_2S_PAST = "verb/et_2s_past"
+    VERB_ET_3S_PAST = "verb/et_3s_past"
+    VERB_ET_1P_PAST = "verb/et_1p_past"
+    VERB_ET_2P_PAST = "verb/et_2p_past"
+    VERB_ET_3P_PAST = "verb/et_3p_past"
+    # Future tense (tulevik - formed with saama + infinitive)
+    VERB_ET_1S_FUTURE = "verb/et_1s_future"
+    VERB_ET_2S_FUTURE = "verb/et_2s_future"
+    VERB_ET_3S_FUTURE = "verb/et_3s_future"
+    VERB_ET_1P_FUTURE = "verb/et_1p_future"
+    VERB_ET_2P_FUTURE = "verb/et_2p_future"
+    VERB_ET_3P_FUTURE = "verb/et_3p_future"
+
+    # Finnish noun forms (singular/plural only - no grammatical gender)
+    NOUN_FI_SINGULAR = "noun/fi_singular"
+    NOUN_FI_PLURAL = "noun/fi_plural"
+
+    # Finnish verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (preesens)
+    VERB_FI_1S_PRESENT = "verb/fi_1s_present"
+    VERB_FI_2S_PRESENT = "verb/fi_2s_present"
+    VERB_FI_3S_PRESENT = "verb/fi_3s_present"
+    VERB_FI_1P_PRESENT = "verb/fi_1p_present"
+    VERB_FI_2P_PRESENT = "verb/fi_2p_present"
+    VERB_FI_3P_PRESENT = "verb/fi_3p_present"
+    # Past tense (imperfekti)
+    VERB_FI_1S_PAST = "verb/fi_1s_past"
+    VERB_FI_2S_PAST = "verb/fi_2s_past"
+    VERB_FI_3S_PAST = "verb/fi_3s_past"
+    VERB_FI_1P_PAST = "verb/fi_1p_past"
+    VERB_FI_2P_PAST = "verb/fi_2p_past"
+    VERB_FI_3P_PAST = "verb/fi_3p_past"
+    # Future tense (futuuri - formed with tulla + present participle)
+    VERB_FI_1S_FUTURE = "verb/fi_1s_future"
+    VERB_FI_2S_FUTURE = "verb/fi_2s_future"
+    VERB_FI_3S_FUTURE = "verb/fi_3s_future"
+    VERB_FI_1P_FUTURE = "verb/fi_1p_future"
+    VERB_FI_2P_FUTURE = "verb/fi_2p_future"
+    VERB_FI_3P_FUTURE = "verb/fi_3p_future"
+
+    # Greek noun forms (singular/plural only - each noun has a fixed gender m/f/n)
+    NOUN_EL_SINGULAR = "noun/el_singular"
+    NOUN_EL_PLURAL = "noun/el_plural"
+
+    # Greek verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (ενεστώτας)
+    VERB_EL_1S_PRESENT = "verb/el_1s_present"
+    VERB_EL_2S_PRESENT = "verb/el_2s_present"
+    VERB_EL_3S_PRESENT = "verb/el_3s_present"
+    VERB_EL_1P_PRESENT = "verb/el_1p_present"
+    VERB_EL_2P_PRESENT = "verb/el_2p_present"
+    VERB_EL_3P_PRESENT = "verb/el_3p_present"
+    # Past tense (αόριστος)
+    VERB_EL_1S_PAST = "verb/el_1s_past"
+    VERB_EL_2S_PAST = "verb/el_2s_past"
+    VERB_EL_3S_PAST = "verb/el_3s_past"
+    VERB_EL_1P_PAST = "verb/el_1p_past"
+    VERB_EL_2P_PAST = "verb/el_2p_past"
+    VERB_EL_3P_PAST = "verb/el_3p_past"
+    # Future tense (μέλλοντας - θα + subjunctive)
+    VERB_EL_1S_FUTURE = "verb/el_1s_future"
+    VERB_EL_2S_FUTURE = "verb/el_2s_future"
+    VERB_EL_3S_FUTURE = "verb/el_3s_future"
+    VERB_EL_1P_FUTURE = "verb/el_1p_future"
+    VERB_EL_2P_FUTURE = "verb/el_2p_future"
+    VERB_EL_3P_FUTURE = "verb/el_3p_future"
+
+    # Hungarian noun forms (singular/plural only - no grammatical gender)
+    NOUN_HU_SINGULAR = "noun/hu_singular"
+    NOUN_HU_PLURAL = "noun/hu_plural"
+
+    # Hungarian verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (jelen idő)
+    VERB_HU_1S_PRESENT = "verb/hu_1s_present"
+    VERB_HU_2S_PRESENT = "verb/hu_2s_present"
+    VERB_HU_3S_PRESENT = "verb/hu_3s_present"
+    VERB_HU_1P_PRESENT = "verb/hu_1p_present"
+    VERB_HU_2P_PRESENT = "verb/hu_2p_present"
+    VERB_HU_3P_PRESENT = "verb/hu_3p_present"
+    # Past tense (múlt idő)
+    VERB_HU_1S_PAST = "verb/hu_1s_past"
+    VERB_HU_2S_PAST = "verb/hu_2s_past"
+    VERB_HU_3S_PAST = "verb/hu_3s_past"
+    VERB_HU_1P_PAST = "verb/hu_1p_past"
+    VERB_HU_2P_PAST = "verb/hu_2p_past"
+    VERB_HU_3P_PAST = "verb/hu_3p_past"
+    # Future tense (jövő idő - fog + infinitive)
+    VERB_HU_1S_FUTURE = "verb/hu_1s_future"
+    VERB_HU_2S_FUTURE = "verb/hu_2s_future"
+    VERB_HU_3S_FUTURE = "verb/hu_3s_future"
+    VERB_HU_1P_FUTURE = "verb/hu_1p_future"
+    VERB_HU_2P_FUTURE = "verb/hu_2p_future"
+    VERB_HU_3P_FUTURE = "verb/hu_3p_future"
+
+    # Irish noun forms (singular/plural only - each noun has a fixed gender m/f)
+    NOUN_GA_SINGULAR = "noun/ga_singular"
+    NOUN_GA_PLURAL = "noun/ga_plural"
+
+    # Irish verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (aimsir láithreach)
+    VERB_GA_1S_PRESENT = "verb/ga_1s_present"
+    VERB_GA_2S_PRESENT = "verb/ga_2s_present"
+    VERB_GA_3S_PRESENT = "verb/ga_3s_present"
+    VERB_GA_1P_PRESENT = "verb/ga_1p_present"
+    VERB_GA_2P_PRESENT = "verb/ga_2p_present"
+    VERB_GA_3P_PRESENT = "verb/ga_3p_present"
+    # Past tense (aimsir chaite)
+    VERB_GA_1S_PAST = "verb/ga_1s_past"
+    VERB_GA_2S_PAST = "verb/ga_2s_past"
+    VERB_GA_3S_PAST = "verb/ga_3s_past"
+    VERB_GA_1P_PAST = "verb/ga_1p_past"
+    VERB_GA_2P_PAST = "verb/ga_2p_past"
+    VERB_GA_3P_PAST = "verb/ga_3p_past"
+    # Future tense (aimsir fháistineach)
+    VERB_GA_1S_FUTURE = "verb/ga_1s_future"
+    VERB_GA_2S_FUTURE = "verb/ga_2s_future"
+    VERB_GA_3S_FUTURE = "verb/ga_3s_future"
+    VERB_GA_1P_FUTURE = "verb/ga_1p_future"
+    VERB_GA_2P_FUTURE = "verb/ga_2p_future"
+    VERB_GA_3P_FUTURE = "verb/ga_3p_future"
+
+    # Latvian noun forms (singular/plural only - each noun has a fixed gender m/f)
+    NOUN_LV_SINGULAR = "noun/lv_singular"
+    NOUN_LV_PLURAL = "noun/lv_plural"
+
+    # Latvian verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (tagadne)
+    VERB_LV_1S_PRESENT = "verb/lv_1s_present"
+    VERB_LV_2S_PRESENT = "verb/lv_2s_present"
+    VERB_LV_3S_PRESENT = "verb/lv_3s_present"
+    VERB_LV_1P_PRESENT = "verb/lv_1p_present"
+    VERB_LV_2P_PRESENT = "verb/lv_2p_present"
+    VERB_LV_3P_PRESENT = "verb/lv_3p_present"
+    # Past tense (pagātne)
+    VERB_LV_1S_PAST = "verb/lv_1s_past"
+    VERB_LV_2S_PAST = "verb/lv_2s_past"
+    VERB_LV_3S_PAST = "verb/lv_3s_past"
+    VERB_LV_1P_PAST = "verb/lv_1p_past"
+    VERB_LV_2P_PAST = "verb/lv_2p_past"
+    VERB_LV_3P_PAST = "verb/lv_3p_past"
+    # Future tense (nākotne)
+    VERB_LV_1S_FUTURE = "verb/lv_1s_future"
+    VERB_LV_2S_FUTURE = "verb/lv_2s_future"
+    VERB_LV_3S_FUTURE = "verb/lv_3s_future"
+    VERB_LV_1P_FUTURE = "verb/lv_1p_future"
+    VERB_LV_2P_FUTURE = "verb/lv_2p_future"
+    VERB_LV_3P_FUTURE = "verb/lv_3p_future"
+
+    # Maltese noun forms (singular/plural only - each noun has a fixed gender m/f)
+    NOUN_MT_SINGULAR = "noun/mt_singular"
+    NOUN_MT_PLURAL = "noun/mt_plural"
+
+    # Maltese verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (preżent)
+    VERB_MT_1S_PRESENT = "verb/mt_1s_present"
+    VERB_MT_2S_PRESENT = "verb/mt_2s_present"
+    VERB_MT_3S_PRESENT = "verb/mt_3s_present"
+    VERB_MT_1P_PRESENT = "verb/mt_1p_present"
+    VERB_MT_2P_PRESENT = "verb/mt_2p_present"
+    VERB_MT_3P_PRESENT = "verb/mt_3p_present"
+    # Past tense (passat)
+    VERB_MT_1S_PAST = "verb/mt_1s_past"
+    VERB_MT_2S_PAST = "verb/mt_2s_past"
+    VERB_MT_3S_PAST = "verb/mt_3s_past"
+    VERB_MT_1P_PAST = "verb/mt_1p_past"
+    VERB_MT_2P_PAST = "verb/mt_2p_past"
+    VERB_MT_3P_PAST = "verb/mt_3p_past"
+    # Future tense (futur - se + imperfect)
+    VERB_MT_1S_FUTURE = "verb/mt_1s_future"
+    VERB_MT_2S_FUTURE = "verb/mt_2s_future"
+    VERB_MT_3S_FUTURE = "verb/mt_3s_future"
+    VERB_MT_1P_FUTURE = "verb/mt_1p_future"
+    VERB_MT_2P_FUTURE = "verb/mt_2p_future"
+    VERB_MT_3P_FUTURE = "verb/mt_3p_future"
+
+    # Slovak noun forms (singular/plural only - each noun has a fixed gender m/f/n)
+    NOUN_SK_SINGULAR = "noun/sk_singular"
+    NOUN_SK_PLURAL = "noun/sk_plural"
+
+    # Slovak verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (prítomný čas)
+    VERB_SK_1S_PRESENT = "verb/sk_1s_present"
+    VERB_SK_2S_PRESENT = "verb/sk_2s_present"
+    VERB_SK_3S_PRESENT = "verb/sk_3s_present"
+    VERB_SK_1P_PRESENT = "verb/sk_1p_present"
+    VERB_SK_2P_PRESENT = "verb/sk_2p_present"
+    VERB_SK_3P_PRESENT = "verb/sk_3p_present"
+    # Past tense (minulý čas)
+    VERB_SK_1S_PAST = "verb/sk_1s_past"
+    VERB_SK_2S_PAST = "verb/sk_2s_past"
+    VERB_SK_3S_PAST = "verb/sk_3s_past"
+    VERB_SK_1P_PAST = "verb/sk_1p_past"
+    VERB_SK_2P_PAST = "verb/sk_2p_past"
+    VERB_SK_3P_PAST = "verb/sk_3p_past"
+    # Future tense (budúci čas)
+    VERB_SK_1S_FUTURE = "verb/sk_1s_future"
+    VERB_SK_2S_FUTURE = "verb/sk_2s_future"
+    VERB_SK_3S_FUTURE = "verb/sk_3s_future"
+    VERB_SK_1P_FUTURE = "verb/sk_1p_future"
+    VERB_SK_2P_FUTURE = "verb/sk_2p_future"
+    VERB_SK_3P_FUTURE = "verb/sk_3p_future"
+
+    # Slovenian noun forms (singular/plural only - each noun has a fixed gender m/f/n)
+    NOUN_SL_SINGULAR = "noun/sl_singular"
+    NOUN_SL_PLURAL = "noun/sl_plural"
+
+    # Slovenian verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (sedanjik)
+    VERB_SL_1S_PRESENT = "verb/sl_1s_present"
+    VERB_SL_2S_PRESENT = "verb/sl_2s_present"
+    VERB_SL_3S_PRESENT = "verb/sl_3s_present"
+    VERB_SL_1P_PRESENT = "verb/sl_1p_present"
+    VERB_SL_2P_PRESENT = "verb/sl_2p_present"
+    VERB_SL_3P_PRESENT = "verb/sl_3p_present"
+    # Past tense (preteklik)
+    VERB_SL_1S_PAST = "verb/sl_1s_past"
+    VERB_SL_2S_PAST = "verb/sl_2s_past"
+    VERB_SL_3S_PAST = "verb/sl_3s_past"
+    VERB_SL_1P_PAST = "verb/sl_1p_past"
+    VERB_SL_2P_PAST = "verb/sl_2p_past"
+    VERB_SL_3P_PAST = "verb/sl_3p_past"
+    # Future tense (prihodnjik)
+    VERB_SL_1S_FUTURE = "verb/sl_1s_future"
+    VERB_SL_2S_FUTURE = "verb/sl_2s_future"
+    VERB_SL_3S_FUTURE = "verb/sl_3s_future"
+    VERB_SL_1P_FUTURE = "verb/sl_1p_future"
+    VERB_SL_2P_FUTURE = "verb/sl_2p_future"
+    VERB_SL_3P_FUTURE = "verb/sl_3p_future"
+
     # Generic forms
     BASE_FORM = "base_form"
     OTHER = "other"

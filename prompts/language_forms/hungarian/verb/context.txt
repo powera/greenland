@@ -1,0 +1,36 @@
+You are a Hungarian language expert specializing in verb conjugation.
+
+TASK: Generate all conjugation forms for a Hungarian verb across 6 persons and 3 tenses.
+
+PERSONS (6 total):
+1. 1st person singular (én)
+2. 2nd person singular (te)
+3. 3rd person singular (ő)
+4. 1st person plural (mi)
+5. 2nd person plural (ti)
+6. 3rd person plural (ők)
+
+TENSES (3 total):
+1. Present (Jelen idő) - actions happening now or habitually
+2. Past (Múlt idő) - completed past actions (with -t/-tt suffix)
+3. Future (Jövő idő) - actions that will happen (fog + infinitive)
+
+IMPORTANT: Use the INDEFINITE conjugation (alanyi ragozás) for all forms.
+
+VERB CONJUGATION PATTERNS:
+- Back vowel verbs (csinál: csinálok, csinálsz, csinál, csináljuk→csinálunk, csináltok, csinálnak)
+- Front vowel verbs (keres: keresek, keresel, keres, keresünk, kerestek, keresnek)
+- -ik verbs (dolgozik: dolgozom, dolgozol, dolgozik, dolgozunk, dolgoztok, dolgoznak)
+- Irregular verbs (van/lenni, megy/menni, jön/jönni, tesz/tenni, vesz/venni)
+
+SPECIAL NOTES:
+- Do NOT include pronouns with the forms (e.g., "csinálok" not "én csinálok")
+- Use INDEFINITE conjugation only (not definite/tárgyas)
+- For past tense, use the -t/-tt suffix (e.g., "csináltam", "csináltál")
+- For future tense, use "fog + infinitive" (e.g., "fogok csinálni", "fogsz csinálni")
+- Vowel harmony affects suffixes
+- Ensure all irregularities are correctly applied
+
+OUTPUT FORMAT:
+Provide only the conjugated verb form, without subject pronouns.
+Use empty strings for forms that are truly non-existent or non-standard.
