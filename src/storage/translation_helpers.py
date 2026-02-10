@@ -43,6 +43,27 @@ TIER_2_LANGUAGES = ["de", "it", "nl", "pt", "sv", "vi"]
 # Tier 3: Experimental languages (lower quality/pedagogical issues)
 TIER_3_LANGUAGES = ["ja", "ko", "ro", "pl", "ta", "te", "kn", "ml", "si", "sw"]
 
+# Languages included in data/release read/write operations.
+# Only these languages will be exported to and synced from release files.
+# Edit this list to add or remove languages from release builds.
+RELEASE_LANGUAGES = [
+    "en",
+    "lt",
+    "zh",
+    "zh-tw",
+    "fr",
+    "es",
+    "de",
+    "it",
+    "nl",
+    "pt",
+    "sv",
+    "vi",
+    "ja",
+    "ko",
+    "sw",
+]
+
 LANGUAGE_HIERARCHY = [
     "en",  # English (special case - source language)
     "lt",  # Lithuanian

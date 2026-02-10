@@ -386,7 +386,7 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 
     from storage import translation_helpers
     from storage.database import create_database_session
-    from storage.models.schema import DerivativeForm, Lemma
+    from storage.models.schema import Lemma
 
     session = create_database_session(sqlite_path)
 
@@ -444,21 +444,28 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
             # Collect base records (now includes translations)
             base_records = []
 
+            release_lang_set = set(translation_helpers.RELEASE_LANGUAGES)
+
             for lemma in category_lemmas:
                 # Get all translations
                 all_translations = translation_helpers.get_all_translations(session, lemma)
 
-                # Build translations dict (only non-empty values)
+                # Build translations dict (only non-empty values, filtered to RELEASE_LANGUAGES)
                 translations_dict: Dict[str, str] = {}
                 for lang_code, translation in all_translations.items():
+                    if lang_code not in release_lang_set:
+                        continue
                     if translation and translation.strip():
                         all_languages.add(lang_code)
                         translations_dict[lang_code] = translation
 
-                # Get difficulty overrides
+                # Get difficulty overrides (filtered to RELEASE_LANGUAGES)
                 difficulty_overrides_dict: Dict[str, int] = {}
                 for override in lemma.difficulty_overrides:
-                    difficulty_overrides_dict[override.language_code] = override.difficulty_level
+                    if override.language_code in release_lang_set:
+                        difficulty_overrides_dict[override.language_code] = (
+                            override.difficulty_level
+                        )
 
                 # Base concept data with translations and difficulty_overrides
                 base_data: Dict[str, Any] = {
@@ -518,8 +525,10 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                         }
                     )
 
-                # Build per-language records for every language that has data
-                langs_with_data = set(forms_by_lang.keys()) | set(facts_by_lang.keys())
+                # Build per-language records for release languages that have data
+                langs_with_data = (
+                    set(forms_by_lang.keys()) | set(facts_by_lang.keys())
+                ) & release_lang_set
                 for lang in langs_with_data:
                     record: Dict[str, Any] = {"guid": lemma.guid}
                     if lang in forms_by_lang:
@@ -659,8 +668,13 @@ def _resolve_primary_lemma_category(sentence: Any) -> Tuple[str, str]:
 
 def _sentence_to_release_record(sentence: Any) -> Dict[str, Any]:
     """Convert a Sentence ORM object to a release JSONL record."""
+    from storage.translation_helpers import RELEASE_LANGUAGES
+
+    release_lang_set = set(RELEASE_LANGUAGES)
     translations: Dict[str, str] = {}
     for trans in sentence.translations:
+        if trans.language_code not in release_lang_set:
+            continue
         if trans.translation_text and trans.translation_text.strip():
             translations[trans.language_code] = trans.translation_text
 
