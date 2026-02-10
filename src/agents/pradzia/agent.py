@@ -10,6 +10,7 @@ including corpus configuration synchronization, data loading, and rank calculati
 
 import argparse
 import logging
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -98,10 +99,7 @@ class PradziaAgent:
         enabled_configs = corpus.get_enabled_corpus_configs()
 
         # Check which data files exist
-        import os
-
-        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-        data_dir = os.path.join(project_root, "src", "wordfreq", "data")
+        data_dir = constants.WORDFREQ_DATA_DIR
 
         file_status = []
         for config in all_configs:
@@ -282,12 +280,7 @@ class PradziaAgent:
             configs_to_load = corpus.get_enabled_corpus_configs()
 
         if dry_run:
-            import os
-
-            project_root = os.path.abspath(
-                os.path.join(os.path.dirname(__file__), "..", "..", "..")
-            )
-            data_dir = os.path.join(project_root, "src", "wordfreq", "data")
+            data_dir = constants.WORDFREQ_DATA_DIR
 
             plan = []
             for config in configs_to_load:

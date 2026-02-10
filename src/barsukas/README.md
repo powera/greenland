@@ -169,7 +169,7 @@ Error: Database not found at /path/to/linguistics.sqlite
 ```
 **Solution**: Set the correct database path:
 ```bash
-export BARSUKAS_DB_PATH=/Users/powera/repo/greenland/src/wordfreq/data/linguistics.sqlite
+export BARSUKAS_DB_PATH=/Users/powera/repo/greenland/data/wordfreq/linguistics.sqlite
 python app.py
 ```
 

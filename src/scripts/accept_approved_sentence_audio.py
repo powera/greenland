@@ -103,7 +103,7 @@ def main() -> None:
     parser.add_argument(
         "--db-path",
         type=str,
-        default="src/wordfreq/data/linguistics.sqlite",
+        default="data/wordfreq/linguistics.sqlite",
         help="Path to the database file",
     )
     args = parser.parse_args()

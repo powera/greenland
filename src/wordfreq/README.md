@@ -13,7 +13,6 @@ Source data files for word frequency analysis:
 - `subtlex.txt` - SUBTLEX subtitle corpus frequencies
 - `wiki_vital.json` - Wikipedia vital articles word frequencies
 - `compare.py` - Scripts for comparing frequency data across corpora
-- `wikipedia_data.py` - Wikipedia corpus processing utilities
 
 ### `dictionary/`
 Word list export and review tools:
@@ -152,4 +151,4 @@ All LLM queries go through `clients.unified_client.UnifiedLLMClient` and use pro
 See [agents/README.md](agents/README.md) for autonomous data quality and maintenance agents.
 
 ## Database Location
-The default SQLite database is at `src/wordfreq/data/linguistics.sqlite` (or as configured in `constants.WORDFREQ_DB_PATH`).
+The default SQLite database is at `data/wordfreq/linguistics.sqlite` (or as configured in `constants.WORDFREQ_DB_PATH`).

@@ -10,14 +10,14 @@
 #   5. Advise user to sync lemmas via Barsukas /sync UI
 #
 # Environment overrides:
-#   DB_PATH     - Path to SQLite database (default: src/wordfreq/data/linguistics.sqlite)
+#   DB_PATH     - Path to SQLite database (default: data/wordfreq/linguistics.sqlite)
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
-DB_PATH="${DB_PATH:-src/wordfreq/data/linguistics.sqlite}"
+DB_PATH="${DB_PATH:-data/wordfreq/linguistics.sqlite}"
 
 echo "=== Greenland Database Bootstrap ==="
 echo "Database: $DB_PATH"

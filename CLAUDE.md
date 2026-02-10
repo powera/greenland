@@ -17,7 +17,7 @@ generally making LLM calls.  Each agent is named with a Lithuanian animal
 name.
 
 src/storage contains the SQLAlchemy schema for the main database;
-the default location is src/wordfreq/data/linguistics.sqlite .
+the default location is data/wordfreq/linguistics.sqlite .
 
 src/storage/translation_helpers.py contains all language code
 manipulation functions and constants (LLM_FIELD_TO_LANG_CODE,

@@ -44,7 +44,6 @@ from storage.crud.lemma import get_lemma_by_guid
 from storage.models.schema import Lemma
 from storage.translation_helpers import LANGUAGE_HIERARCHY
 
-
 # =============================================================================
 # LANGUAGE GROUPINGS
 # =============================================================================
@@ -518,8 +517,8 @@ Examples:
     )
     parser.add_argument(
         "--db-path",
-        default="src/wordfreq/data/linguistics.sqlite",
-        help="Path to the database file (default: src/wordfreq/data/linguistics.sqlite)",
+        default="data/wordfreq/linguistics.sqlite",
+        help="Path to the database file (default: data/wordfreq/linguistics.sqlite)",
     )
 
     args = parser.parse_args()

@@ -30,9 +30,10 @@ KEY_DIR = os.path.join(PROJECT_ROOT, "keys")
 OUTPUT_DIR = os.path.join(os.path.dirname(PROJECT_ROOT), "greenland_output")
 
 # Wordfreq directories
-WORDFREQ_DB_PATH = os.path.join(SRC_DIR, "wordfreq", "data", "linguistics.sqlite")
+WORDFREQ_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "wordfreq")
+WORDFREQ_DB_PATH = os.path.join(WORDFREQ_DATA_DIR, "linguistics.sqlite")
 WORDFREQ_TEMPLATE_DIR = os.path.join(SRC_DIR, "wordfreq", "templates")
-IPA_DICT_PATH = os.path.join(SRC_DIR, "wordfreq", "data", "en_US_ipadict.txt")
+IPA_DICT_PATH = os.path.join(WORDFREQ_DATA_DIR, "en_US_ipadict.txt")
 
 # Wiki corpus directories
 # WIKI_CORPUS_BASE_PATH = os.path.join(PROJECT_ROOT, "data", "wikicorpus")

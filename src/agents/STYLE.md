@@ -644,7 +644,7 @@ def fix(self):
     session.query(Lemma).update(...)  # No try/except
 
 # Hardcoding paths
-db_path = "/home/user/greenland/src/wordfreq/data/linguistics.sqlite"
+db_path = "/home/user/greenland/data/wordfreq/linguistics.sqlite"
 
 # No confirmation for destructive operations
 def fix(self):

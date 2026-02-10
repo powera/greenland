@@ -230,8 +230,7 @@ def sync_corpus_configs_to_db(
     try:
         # Get existing corpora from database
         existing_corpora = {
-            corpus.name: corpus
-            for corpus in session.query(storage.models.schema.Corpus).all()
+            corpus.name: corpus for corpus in session.query(storage.models.schema.Corpus).all()
         }
         config_names = {config.name for config in CORPUS_CONFIGS}
 
@@ -489,9 +488,7 @@ def load_corpus(corpus_name: str, config: Optional["DataSourceConfig"] = None) -
         raise ValueError(f"Corpus '{corpus_name}' not found in configuration")
 
     # Build the full file path
-    # Assume data files are in src/wordfreq/data directory
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-    data_dir = os.path.join(project_root, "src", "wordfreq", "data")
+    data_dir = constants.WORDFREQ_DATA_DIR
     full_file_path = os.path.join(data_dir, corpus_config.file_path)
 
     # Check if file exists
