@@ -32,8 +32,8 @@ from storage.translation_helpers import (
 )
 from langtools.zh.converter import to_simplified, to_traditional
 from langtools.zh.pinyin_helper import generate_pinyin
-from wordfreq.trakaido.utils.data_models import ExportStats, create_export_stats
-from wordfreq.trakaido.utils.text_rendering import format_subtype_display_name
+from wireword.data_models import ExportStats, create_export_stats
+from wireword.text_rendering import format_subtype_display_name
 from wireword.helpers import (
     convert_to_wireword_grammatical_form_key,
     format_verb_entry,

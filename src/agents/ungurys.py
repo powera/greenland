@@ -32,7 +32,7 @@ from storage.translation_helpers import (
     TIER_2_LANGUAGES,
 )
 from storage.backend.factory import create_session
-from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
+from wireword.export_manager import TrakaidoExporter
 from wordfreq.tools.country_word_priorities import (
     get_supported_languages as get_country_override_languages,
 )

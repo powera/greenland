@@ -18,9 +18,10 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
 
 # Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
+GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
+
 
 import constants
 from agents.common.common_args import (
@@ -38,7 +39,7 @@ from storage.database import (
     initialize_corpora,
 )
 from storage.models.schema import Corpus  # Ensure Corpus model is imported
-from wordfreq.trakaido import json_to_database
+from agents.pradzia import json_to_database
 
 # Configure logging
 logging.basicConfig(
