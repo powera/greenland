@@ -6,6 +6,7 @@
 langtools/
 ├── __init__.py              # Package exports and docstring
 ├── collation.py             # Shared Latin-alphabet sort-key generation
+├── dialect_overrides.py     # Dialect variant registry (zh-tw, es-mx, pt-br, …)
 ├── README.md                # Plain-English overview (what the tools do)
 ├── STRUCTURE.md             # This file (architecture reference)
 │
@@ -125,6 +126,38 @@ Available scripts by language:
 | Lithuanian | yes   | yes   | yes        | yes     |
 | Portuguese | yes   | yes   | --         | --      |
 
+## dialect_overrides.py -- Dialect variant registry
+
+Centralised registry of dialect variants (e.g. zh-tw, es-mx, pt-br, fr-ca,
+en-gb) and their relationships to parent languages.  Each entry is a
+`DialectOverride` frozen dataclass that records:
+
+- **parent_lang**: the base language code the dialect derives from
+- **display_name / dialect_display_name**: short and prompt-friendly names
+- **text_transform / reverse_transform**: optional callables to convert text
+  between parent and dialect (e.g. Simplified ↔ Traditional Chinese via
+  `zh/converter.py`)
+- **sort_key_lang**: which language's sort-key logic to use (usually the parent)
+- **tts_locale**: BCP-47 locale for speech synthesis (e.g. `"pt-BR"`)
+- **llm_prompt_note**: extra instruction for LLM prompts
+
+Public helpers:
+
+| Function | Purpose |
+|----------|---------|
+| `is_dialect(code)` | Check if a code is a registered dialect |
+| `get_parent_language(code)` | Get parent lang (returns self for non-dialects) |
+| `get_dialect_display_name(code)` | Prompt-friendly name with dialect qualifier |
+| `get_dialects_for_language(parent)` | List all dialect codes for a parent |
+| `transform_to_dialect(code, text)` | Convert parent text → dialect |
+| `transform_from_dialect(code, text)` | Convert dialect text → parent |
+| `get_sort_key_language(code)` | Which lang's sort-key to use |
+| `get_tts_locale(code)` | BCP-47 TTS locale |
+| `get_llm_prompt_note(code)` | Extra LLM instruction for this dialect |
+
+Import from `langtools.dialect_overrides` rather than hard-coding dialect
+information in individual agents or routes.
+
 ## collation.py -- Shared sort-key generation
 
 Produces binary-sortable strings so that SQLite's default binary collation
@@ -166,6 +199,7 @@ Produces sort keys that match standard Korean dictionary order.
 
 ```
 collation.py                      (standalone, no imports from langtools)
+dialect_overrides.py              (imports zh/converter.py lazily, storage.translation_helpers lazily)
 
 zh/converter.py                   (standalone, uses opencc)
 zh/pinyin_helper.py               (imports zh/converter.py, uses pypinyin + jieba)
