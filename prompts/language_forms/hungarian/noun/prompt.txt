@@ -1,0 +1,6 @@
+Generate all Hungarian noun forms for the Hungarian noun "{noun}".
+
+English noun: {english_noun}
+Definition: {definition}{subtype_context}
+
+Please provide all 2 forms (singular and plural), using empty strings for forms that don't exist.
