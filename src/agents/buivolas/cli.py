@@ -26,7 +26,7 @@ from agents.common.common_args import (
     get_data_source_config,
 )
 from agents.common.lemma_selection import get_lemmas_for_agent
-from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
+from sentences.patterns.simple_patterns import SIMPLE_PATTERNS
 from storage.models.schema import Lemma
 
 logging.basicConfig(
