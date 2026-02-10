@@ -10,9 +10,9 @@ import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from sqlalchemy.orm import Session
-from wordfreq.storage import database as linguistic_db
-from wordfreq.storage.models.enums import GrammaticalForm
-from wordfreq.storage.translation_helpers import get_translation
+from storage import database as linguistic_db
+from storage.models.enums import GrammaticalForm
+from storage.translation_helpers import get_translation
 
 logger = logging.getLogger(__name__)
 
