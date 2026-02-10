@@ -58,16 +58,16 @@ from clients.audio.gpt_voices import (
 from clients.audio.polly_tts import PollyTTSClient, PollyVoice
 from clients.audio.manifest import generate_manifest
 from clients.audio.s3_uploader import S3AudioUploader
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.models.schema import (
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.models.schema import (
     AudioQualityReview,
     Lemma,
     Sentence,
     SentenceTranslation,
     SentenceWord,
 )
-from wordfreq.storage.translation_helpers import get_translation
+from storage.translation_helpers import get_translation
 
 # Configure logging
 logging.basicConfig(

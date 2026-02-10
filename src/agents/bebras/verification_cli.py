@@ -22,7 +22,7 @@ from agents.common.common_args import (
     confirm_operation,
     get_data_source_config,
 )
-from wordfreq.storage.models.schema import Lemma, Sentence
+from storage.models.schema import Lemma, Sentence
 
 from .verification import (
     DEFAULT_VERIFY_LANGUAGES,
@@ -192,7 +192,7 @@ def verify_words(args: argparse.Namespace) -> int:
             query = query.filter(Lemma.guid == args.guid)
         elif getattr(args, "unverified_only", False):
             # Only lemmas with unverified translations
-            from wordfreq.storage.models.schema import LemmaTranslation
+            from storage.models.schema import LemmaTranslation
 
             query = (
                 query.join(LemmaTranslation)
@@ -273,7 +273,7 @@ def verify_sentences(args: argparse.Namespace) -> int:
             query = query.filter(Sentence.id == args.sentence_id)
         elif getattr(args, "unverified_only", False):
             # Only sentences with unverified translations
-            from wordfreq.storage.models.schema import SentenceTranslation
+            from storage.models.schema import SentenceTranslation
 
             query = (
                 query.join(SentenceTranslation)

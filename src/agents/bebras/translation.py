@@ -14,9 +14,9 @@ from typing import Any, Dict, List
 from sqlalchemy.orm import Session
 
 from clients.unified_client import UnifiedLLMClient
-from wordfreq.storage.database import Sentence
-from wordfreq.storage.models.schema import SentenceWord
-from wordfreq.storage.translation_helpers import (
+from storage.database import Sentence
+from storage.models.schema import SentenceWord
+from storage.translation_helpers import (
     get_language_name,
     get_supported_languages,
 )

@@ -6,9 +6,9 @@ import logging
 import time
 from typing import Any, Dict, List, Optional
 
-from wordfreq.storage import database as linguistic_db
-from wordfreq.storage.models.enums import GrammaticalForm
-from wordfreq.storage.models.translations import Translation, TranslationSet
+from storage import database as linguistic_db
+from storage.models.enums import GrammaticalForm
+from storage.models.translations import Translation, TranslationSet
 from wordfreq.translation import definitions
 from wordfreq.translation.constants import VALID_POS_TYPES
 

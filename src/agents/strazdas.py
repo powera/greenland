@@ -58,10 +58,10 @@ from audioshoe.qwen import generate_audio as qwen_generate_audio
 from clients.audio import AudioFormat
 from clients.audio.manifest import generate_manifest
 from clients.audio.s3_uploader import S3AudioUploader
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.models.schema import AudioQualityReview, Lemma, LemmaTranslation
-from wordfreq.storage.translation_helpers import get_translation
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.models.schema import AudioQualityReview, Lemma, LemmaTranslation
+from storage.translation_helpers import get_translation
 
 # Configure logging
 logging.basicConfig(

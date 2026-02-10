@@ -14,7 +14,7 @@ src_dir = os.path.join(project_root, "src")
 sys.path.insert(0, src_dir)
 
 import wordfreq.dictionary.reviewer
-import wordfreq.storage.database
+import storage.database
 
 # Direct imports from the notebook
 import wordfreq.translation.client
@@ -24,15 +24,15 @@ CLIENT = wordfreq.translation.client.LinguisticClient()
 REVIEWER = wordfreq.dictionary.reviewer.LinguisticReviewer()
 
 # Create database session (from notebook cell)
-session = wordfreq.storage.database.create_database_session()
+session = storage.database.create_database_session()
 
 # Ensure all database tables exist
 print("Initializing database tables...")
-wordfreq.storage.database.ensure_tables_exist(session)
+storage.database.ensure_tables_exist(session)
 
 # Initialize corpora entries
 print("Initializing corpora...")
-wordfreq.storage.database.initialize_corpora(session)
+storage.database.initialize_corpora(session)
 
 # Import additional modules (from notebook cells)
 import wordfreq.frequency.analysis
@@ -50,7 +50,7 @@ for corpus_name, (imported, total) in results.items():
 
 # Import constants and calculate harmonic mean ranks (from notebook cells)
 import constants
-from wordfreq.storage.backend.config import DataSourceConfig
+from storage.backend.config import DataSourceConfig
 
 print("Calculating harmonic mean ranks...")
 config = DataSourceConfig(sqlite_path=constants.WORDFREQ_DB_PATH)

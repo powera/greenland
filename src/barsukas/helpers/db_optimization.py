@@ -13,9 +13,9 @@ from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import case, func
 from sqlalchemy.orm import Session
 
-from wordfreq.storage.models.grammar_fact import GrammarFact
-from wordfreq.storage.models.lemma_relation import LemmaRelationGroup, LemmaRelationMember
-from wordfreq.storage.models.schema import (
+from storage.models.grammar_fact import GrammarFact
+from storage.models.lemma_relation import LemmaRelationGroup, LemmaRelationMember
+from storage.models.schema import (
     AudioQualityReview,
     DerivativeForm,
     Lemma,
@@ -24,7 +24,7 @@ from wordfreq.storage.models.schema import (
     Sentence,
     SentenceWord,
 )
-from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
+from storage.translation_helpers import LANGUAGE_FIELDS
 
 
 def get_home_page_stats(session: Session) -> Dict[str, int]:

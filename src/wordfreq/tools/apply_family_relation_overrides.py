@@ -62,7 +62,7 @@ if TYPE_CHECKING:
 
 def _get_db_session(db_path: Optional[str]) -> "Session":
     """Lazy import and create database session."""
-    from wordfreq.storage.database import create_database_session
+    from storage.database import create_database_session
 
     return create_database_session(db_path) if db_path else create_database_session()
 

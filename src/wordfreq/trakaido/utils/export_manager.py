@@ -21,11 +21,11 @@ GREENLAND_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..
 sys.path.append(GREENLAND_SRC_PATH)
 
 import constants
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.backend.factory import create_session
-from wordfreq.storage.models.schema import Lemma, WordToken
-from wordfreq.storage.crud.difficulty_override import bulk_get_effective_difficulty_levels
-from wordfreq.storage.translation_helpers import (
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.backend.factory import create_session
+from storage.models.schema import Lemma, WordToken
+from storage.crud.difficulty_override import bulk_get_effective_difficulty_levels
+from storage.translation_helpers import (
     LANG_CODE_TO_LLM_FIELD,
     LANGUAGE_FIELDS,
     TIER_1_LANGUAGES,
@@ -150,7 +150,7 @@ class TrakaidoExporter:
         """
         from sqlalchemy import func
 
-        from wordfreq.storage.models.schema import LemmaDifficultyOverride
+        from storage.models.schema import LemmaDifficultyOverride
 
         logger.info(f"Querying database for trakaido data (language: {self.language_name})...")
 

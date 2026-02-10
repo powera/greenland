@@ -8,7 +8,7 @@ import logging
 import re
 from typing import Any, Optional, Tuple, cast
 
-from wordfreq.storage.models.schema import Lemma
+from storage.models.schema import Lemma
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ def link_audio_to_lemma(
 
     # For table-based translations (es, de, pt), query LemmaTranslation
     if language_code in ["es", "de", "pt"]:
-        from wordfreq.storage.models.schema import LemmaTranslation
+        from storage.models.schema import LemmaTranslation
 
         translation = (
             session.query(LemmaTranslation)
@@ -115,7 +115,7 @@ def validate_audio_translation(
 
     # For table-based translations (es, de, pt)
     if language_code in ["es", "de", "pt"]:
-        from wordfreq.storage.models.schema import LemmaTranslation
+        from storage.models.schema import LemmaTranslation
 
         translation = (
             session.query(LemmaTranslation)

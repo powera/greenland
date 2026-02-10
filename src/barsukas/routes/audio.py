@@ -46,14 +46,14 @@ from clients.audio.azure_tts import AzureVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.polly_tts import PollyVoice
 import constants
-from wordfreq.storage.models.schema import (
+from storage.models.schema import (
     AudioQualityReview,
     Lemma,
     LemmaDifficultyOverride,
     Sentence,
     SentenceTranslation,
 )
-from wordfreq.storage.queries.lemma import apply_effective_difficulty_filter
+from storage.queries.lemma import apply_effective_difficulty_filter
 
 bp = Blueprint("audio", __name__, url_prefix="/audio")
 logger = logging.getLogger(__name__)
@@ -449,7 +449,7 @@ def serve_audio_file(language: str, voice: str, filename: str) -> ResponseReturn
 
     # If not found, try legacy language name directory (e.g., 'lithuanian', 'chinese')
     if not file_path.exists():
-        from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
+        from storage.translation_helpers import LANGUAGE_NAMES
 
         legacy_name = LANGUAGE_NAMES.get(language, language).lower()
         file_path = Path(audio_base_dir) / legacy_name / voice / filename
@@ -781,7 +781,7 @@ def generate() -> ResponseReturnValue:
         # Create DataSourceConfig for agents
         from barsukas.config import Config
 
-        from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+        from storage.backend.config import BackendType, DataSourceConfig
 
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
@@ -856,7 +856,7 @@ def _generate_audio_piper(
     import hashlib
 
     from clients.audio.types import AudioFormat
-    from wordfreq.storage.translation_helpers import get_translation
+    from storage.translation_helpers import get_translation
 
     try:
         # Get translation for the language
@@ -943,7 +943,7 @@ def _generate_audio_coqui(
     import hashlib
 
     from clients.audio.types import AudioFormat
-    from wordfreq.storage.translation_helpers import get_translation
+    from storage.translation_helpers import get_translation
 
     try:
         # Get translation for the language

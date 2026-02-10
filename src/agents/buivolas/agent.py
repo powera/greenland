@@ -6,9 +6,9 @@ from typing import Any, Dict, Optional
 from agents.buivolas.guided_sentences import GuidedSentenceGenerator
 from agents.buivolas.llm_sentences import LlmSentenceGenerator
 from agents.buivolas.pattern_sentences import PatternSentenceGenerator
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.models.schema import Lemma
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import DataSourceConfig
+from storage.models.schema import Lemma
 
 logger = logging.getLogger(__name__)
 

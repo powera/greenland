@@ -12,9 +12,9 @@ from typing import Dict, List, Optional, Tuple
 from sqlalchemy.orm import Session
 
 from workqueue.tools import build_default_config, get_lemma_or_raise
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.models.schema import Lemma
-from wordfreq.storage.translation_helpers import (
+from storage.backend.config import DataSourceConfig
+from storage.models.schema import Lemma
+from storage.translation_helpers import (
     LANGUAGE_FIELDS,
     LANGUAGE_NAMES,
     convert_llm_response_to_lang_codes,
@@ -22,7 +22,7 @@ from wordfreq.storage.translation_helpers import (
     get_translation,
     set_translation,
 )
-from wordfreq.storage.crud.operation_log import log_translation_change
+from storage.crud.operation_log import log_translation_change
 from wordfreq.translation.client import LinguisticClient
 
 logger = logging.getLogger(__name__)

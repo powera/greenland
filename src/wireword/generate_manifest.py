@@ -20,7 +20,7 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
-from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
+from storage.translation_helpers import LANGUAGE_NAMES
 
 # Configure logging
 logger = logging.getLogger(__name__)

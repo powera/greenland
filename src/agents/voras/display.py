@@ -13,7 +13,7 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
-from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_language_name
+from storage.translation_helpers import LANGUAGE_FIELDS, get_language_name
 
 
 def print_regeneration_summary(results: Dict[str, Any], batch_mode: bool = False) -> None:

@@ -25,8 +25,8 @@ from audioshoe.piper import PiperVoice
 from audioshoe.qwen import QwenVoice
 from clients.audio import Voice
 from clients.audio.gpt_voices import GptVoice
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.models.schema import Lemma, Sentence, SentenceTranslation
+from storage.backend.config import DataSourceConfig
+from storage.models.schema import Lemma, Sentence, SentenceTranslation
 
 logger = logging.getLogger(__name__)
 
@@ -178,8 +178,8 @@ def _generate_audio_piper(
 
     from audioshoe.piper import PiperClient
     from clients.audio.types import AudioFormat
-    from wordfreq.storage.models.schema import AudioQualityReview
-    from wordfreq.storage.translation_helpers import get_translation
+    from storage.models.schema import AudioQualityReview
+    from storage.translation_helpers import get_translation
 
     try:
         # Get translation for the language
@@ -280,8 +280,8 @@ def _generate_audio_coqui(
 
     from audioshoe.coqui import CoquiClient
     from clients.audio.types import AudioFormat
-    from wordfreq.storage.models.schema import AudioQualityReview
-    from wordfreq.storage.translation_helpers import get_translation
+    from storage.models.schema import AudioQualityReview
+    from storage.translation_helpers import get_translation
 
     try:
         # Get translation for the language
@@ -449,7 +449,7 @@ def _generate_sentence_audio_openai(
 
     from clients.audio import generate_audio
     from clients.audio.types import AudioFormat
-    from wordfreq.storage.models.schema import AudioQualityReview
+    from storage.models.schema import AudioQualityReview
 
     try:
         openai_voice_enums = [Voice(v) for v in voice_names]
@@ -519,7 +519,7 @@ def _generate_sentence_audio_espeak(
 
     from audioshoe.espeak import EspeakNGClient
     from clients.audio.types import AudioFormat
-    from wordfreq.storage.models.schema import AudioQualityReview
+    from storage.models.schema import AudioQualityReview
 
     try:
         espeak_voice_enums = [EspeakVoice[v.upper()] for v in voice_names]
@@ -594,7 +594,7 @@ def _generate_sentence_audio_qwen(
 
     from audioshoe.qwen import QwenTTSClient
     from clients.audio.types import AudioFormat
-    from wordfreq.storage.models.schema import AudioQualityReview
+    from storage.models.schema import AudioQualityReview
 
     try:
         qwen_voice_enums = [QwenVoice[v.upper()] for v in voice_names]
@@ -668,7 +668,7 @@ def _generate_sentence_audio_piper(
 
     from audioshoe.piper import PiperClient
     from clients.audio.types import AudioFormat
-    from wordfreq.storage.models.schema import AudioQualityReview
+    from storage.models.schema import AudioQualityReview
 
     try:
         piper_voice_enums = [PiperVoice[v.upper()] for v in voice_names]
@@ -743,7 +743,7 @@ def _generate_sentence_audio_coqui(
 
     from audioshoe.coqui import CoquiClient
     from clients.audio.types import AudioFormat
-    from wordfreq.storage.models.schema import AudioQualityReview
+    from storage.models.schema import AudioQualityReview
 
     try:
         coqui_voice_enums = [CoquiVoice[v.upper()] for v in voice_names]
@@ -821,7 +821,7 @@ def _generate_sentence_audio_cloud(
     from clients.audio.google_tts import GoogleTTSClient, GoogleTtsVoice
     from clients.audio.polly_tts import PollyTTSClient, PollyVoice
     from clients.audio.types import AudioFormat
-    from wordfreq.storage.models.schema import AudioQualityReview
+    from storage.models.schema import AudioQualityReview
 
     try:
         generated_voices: List[Dict] = []

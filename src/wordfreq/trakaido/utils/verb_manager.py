@@ -19,9 +19,9 @@ import constants
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
-from wordfreq.storage.database import add_word_token, create_database_session
-from wordfreq.storage.models.schema import DerivativeForm, Lemma
-from wordfreq.storage.utils.guid import generate_guid
+from storage.database import add_word_token, create_database_session
+from storage.models.schema import DerivativeForm, Lemma
+from storage.utils.guid import generate_guid
 from wordfreq.translation.client import LinguisticClient
 
 from .data_models import ReviewResult, WordData

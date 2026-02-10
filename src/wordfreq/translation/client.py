@@ -8,9 +8,9 @@ from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import constants
 from clients.unified_client import UnifiedLLMClient
-from wordfreq.storage import database as linguistic_db
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.connection_pool import close_thread_sessions, get_session
+from storage import database as linguistic_db
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.connection_pool import close_thread_sessions, get_session
 
 # Import specialized modules
 from wordfreq.translation import (

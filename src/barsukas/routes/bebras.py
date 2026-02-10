@@ -32,7 +32,7 @@ import constants
 from agents.bebras.integrity import IntegrityChecker
 from barsukas.config import Config
 from barsukas.helpers.flash_helpers import flash_and_log
-from wordfreq.storage.models.schema import Lemma, Sentence
+from storage.models.schema import Lemma, Sentence
 
 logger = logging.getLogger(__name__)
 

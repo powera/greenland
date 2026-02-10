@@ -12,8 +12,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 import constants
-from wordfreq.storage import database as linguistic_db
-from wordfreq.storage.connection_pool import close_thread_sessions, get_session
+from storage import database as linguistic_db
+from storage.connection_pool import close_thread_sessions, get_session
 from wordfreq.translation.client import LinguisticClient
 
 # Configure logging
@@ -66,7 +66,7 @@ class WordProcessor:
             logger.setLevel(logging.DEBUG)
 
         # Initialize the database if needed
-        from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+        from storage.backend.config import BackendType, DataSourceConfig
 
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
@@ -81,7 +81,7 @@ class WordProcessor:
 
     def get_session(self) -> Any:
         """Get a thread-local database session."""
-        from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+        from storage.backend.config import BackendType, DataSourceConfig
 
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,

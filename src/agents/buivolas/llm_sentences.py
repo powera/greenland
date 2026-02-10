@@ -6,16 +6,16 @@ from typing import Any, Dict, List, Optional, cast
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.database import (
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import DataSourceConfig
+from storage.database import (
     Lemma,
     add_sentence,
     add_sentence_translation,
     add_sentence_word,
     calculate_minimum_level,
 )
-from wordfreq.storage.models.schema import SentencePatternWord
+from storage.models.schema import SentencePatternWord
 from wordfreq.tools.sentence_word_linker import find_lemma_by_text
 from agents.buivolas.pattern_sentences import strip_disambiguation
 

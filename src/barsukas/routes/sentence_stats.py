@@ -7,7 +7,7 @@ from flask.typing import ResponseReturnValue
 from sqlalchemy import func
 
 from barsukas.config import Config
-from wordfreq.storage.models.schema import Lemma, SentenceWord
+from storage.models.schema import Lemma, SentenceWord
 
 bp = Blueprint("sentence_stats", __name__, url_prefix="/sentence-stats")
 

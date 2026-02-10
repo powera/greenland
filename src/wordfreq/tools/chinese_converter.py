@@ -9,7 +9,7 @@ and provides database-aware helpers for getting Chinese translations.
 from typing import Any, Optional
 
 from langtools.zh.converter import to_simplified, to_traditional
-from wordfreq.storage.translation_helpers import get_translation
+from storage.translation_helpers import get_translation
 
 # Re-export for backwards compatibility
 __all__ = ["to_simplified", "to_traditional", "get_chinese_translation"]

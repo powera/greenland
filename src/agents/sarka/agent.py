@@ -26,18 +26,18 @@ import util.prompt_loader
 from agents.common.lemma_selection import LemmaQueryBuilder
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.crud.conversation import (
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import DataSourceConfig
+from storage.crud.conversation import (
     add_conversation,
     add_conversation_sentence,
     calculate_minimum_level,
     get_conversation_by_id,
 )
-from wordfreq.storage.crud.sentence import add_sentence, find_sentence_by_text
-from wordfreq.storage.crud.sentence_translation import add_sentence_translation
-from wordfreq.storage.crud.operation_log import log_operation
-from wordfreq.storage.models.schema import Conversation, ConversationSentence, Lemma, Sentence
+from storage.crud.sentence import add_sentence, find_sentence_by_text
+from storage.crud.sentence_translation import add_sentence_translation
+from storage.crud.operation_log import log_operation
+from storage.models.schema import Conversation, ConversationSentence, Lemma, Sentence
 
 logger = logging.getLogger(__name__)
 

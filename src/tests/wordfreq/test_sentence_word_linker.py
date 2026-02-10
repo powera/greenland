@@ -11,7 +11,7 @@ import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from wordfreq.storage.models.schema import (
+from storage.models.schema import (
     Base,
     DerivativeForm,
     Lemma,
@@ -545,7 +545,7 @@ class TestResolveLemmasForSentence(unittest.TestCase):
         """Pattern word with no lemma_id should fall through to text match."""
         # Add a pattern word without lemma_id (like "work horse" in the examples)
         # Need a pending_import to satisfy the check constraint
-        from wordfreq.storage.models.imports import PendingImport
+        from storage.models.imports import PendingImport
 
         pending = PendingImport(
             english_word="shape",

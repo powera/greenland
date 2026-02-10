@@ -15,11 +15,11 @@ import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from sqlalchemy.orm import Session
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
-from wordfreq.storage.crud.operation_log import log_operation
-from wordfreq.storage.models.schema import Lemma
-from wordfreq.storage.translation_helpers import get_translation
+from storage.backend.config import DataSourceConfig
+from storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
+from storage.crud.operation_log import log_operation
+from storage.models.schema import Lemma
+from storage.translation_helpers import get_translation
 
 logger = logging.getLogger(__name__)
 

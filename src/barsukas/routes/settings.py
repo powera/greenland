@@ -27,9 +27,9 @@ from flask import (
 from flask.typing import ResponseReturnValue
 from werkzeug.wrappers import Response
 
-from wordfreq.storage.backend import get_backend_type
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.models.schema import Lemma
+from storage.backend import get_backend_type
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.models.schema import Lemma
 
 if TYPE_CHECKING:
     from barsukas.app import BarsukasFlask
@@ -98,7 +98,7 @@ def migrate_form() -> ResponseReturnValue:
         cmd: list[str] = [
             sys.executable,
             "-m",
-            "wordfreq.storage.migrate",
+            "storage.migrate",
             direction,
             "--jsonl-dir",
             jsonl_dir,
@@ -167,7 +167,7 @@ def migrate() -> ResponseReturnValue:
         cmd: list[str] = [
             sys.executable,
             "-m",
-            "wordfreq.storage.migrate",
+            "storage.migrate",
             direction,
             "--jsonl-dir",
             jsonl_dir,

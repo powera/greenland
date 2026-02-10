@@ -17,10 +17,10 @@ from sqlalchemy.exc import OperationalError
 
 import constants
 from agents.common.common_args import get_data_source_config
-from wordfreq.storage import database as linguistic_db
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.connection_pool import get_session
-from wordfreq.storage.models.enums import GrammaticalForm
+from storage import database as linguistic_db
+from storage.backend.config import DataSourceConfig
+from storage.connection_pool import get_session
+from storage.models.enums import GrammaticalForm
 from wordfreq.translation.client import LinguisticClient
 
 # Retry settings for transient SQLite errors (e.g., database locked)

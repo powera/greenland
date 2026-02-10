@@ -32,7 +32,7 @@ from agents.common.common_args import (
     add_output_args,
     get_data_source_config,
 )
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from storage.backend.config import BackendType, DataSourceConfig
 from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
 
 # Supported languages and their codes

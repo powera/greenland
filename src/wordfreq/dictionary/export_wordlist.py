@@ -13,7 +13,7 @@ import sys
 from typing import Optional, TextIO
 
 import constants
-from wordfreq.storage import database as linguistic_db
+from storage import database as linguistic_db
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

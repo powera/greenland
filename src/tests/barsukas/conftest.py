@@ -14,7 +14,7 @@ from flask.testing import FlaskClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from wordfreq.storage.models.schema import (
+from storage.models.schema import (
     Base,
     DerivativeForm,
     Lemma,
@@ -33,7 +33,7 @@ def db_path(tmp_path: Path) -> str:
 @pytest.fixture()
 def db_engine(db_path: str) -> Generator:
     """Create a SQLAlchemy engine with all tables, yielding the engine."""
-    import wordfreq.storage.models  # noqa: F401 — register all models
+    import storage.models  # noqa: F401 — register all models
 
     engine = create_engine(f"sqlite:///{db_path}")
     Base.metadata.create_all(engine)
@@ -141,7 +141,7 @@ def app(db_path: str, db_engine) -> Flask:  # type: ignore[type-arg]
     """
     from barsukas.app import create_app
     from barsukas.config import Config
-    from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+    from storage.backend.config import BackendType, DataSourceConfig
 
     # Seed the database before the app touches it
     factory = sessionmaker(bind=db_engine)

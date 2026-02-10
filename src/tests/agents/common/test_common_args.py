@@ -25,7 +25,7 @@ from agents.common.common_args import (
     get_standard_db_path,
     validate_cache_args,
 )
-from wordfreq.storage.backend.config import BackendType
+from storage.backend.config import BackendType
 
 
 class TestAddCommonArgs(unittest.TestCase):

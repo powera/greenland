@@ -15,12 +15,12 @@ from sqlalchemy.orm import Session
 from workqueue.tools import build_default_config, get_lemma_or_raise
 import constants
 import util.prompt_loader
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.crud.derivative_form import add_derivative_form
-from wordfreq.storage.crud.grammar_fact import add_grammar_fact
-from wordfreq.storage.crud.word_token import add_word_token
-from wordfreq.storage.models.schema import Lemma
-from wordfreq.storage.translation_helpers import get_supported_languages, get_translation
+from storage.backend.config import DataSourceConfig
+from storage.crud.derivative_form import add_derivative_form
+from storage.crud.grammar_fact import add_grammar_fact
+from storage.crud.word_token import add_word_token
+from storage.models.schema import Lemma
+from storage.translation_helpers import get_supported_languages, get_translation
 from wordfreq.tools.text_utils import is_numeral
 from wordfreq.translation.client import LinguisticClient
 

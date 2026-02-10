@@ -19,7 +19,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from util.logging_config import get_logger
-from wordfreq.storage.models.imports import PendingImport, WordExclusion
+from storage.models.imports import PendingImport, WordExclusion
 from wordfreq.translation.client import LinguisticClient
 
 logger = get_logger(__name__)

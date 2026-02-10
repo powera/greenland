@@ -19,8 +19,8 @@ from benchmarks.lib.exemplars.base import (
     generate_report,
     register_exemplar,
 )
-from wordfreq.storage import database as linguistic_db
-from wordfreq.storage.models.enums import GrammaticalForm
+from storage import database as linguistic_db
+from storage.models.enums import GrammaticalForm
 
 # Get the context used by the actual wordfreq system
 wordfreq_context = util.prompt_loader.get_context("translation", "definitions")

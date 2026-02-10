@@ -12,8 +12,8 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, cast
 
 import constants
-from wordfreq.storage.database import create_database_session
-from wordfreq.storage.models.schema import (
+from storage.database import create_database_session
+from storage.models.schema import (
     Corpus,
     DerivativeForm,
     Lemma,
@@ -513,7 +513,7 @@ class IntegrityChecker:
 
         session = self.get_session()
         try:
-            from wordfreq.storage.models.schema import SentencePatternWord
+            from storage.models.schema import SentencePatternWord
 
             # Get all non-rejected sentences
             sentences = (
@@ -710,8 +710,8 @@ class IntegrityChecker:
 
         session = self.get_session()
         try:
-            from wordfreq.storage.models.schema import AudioQualityReview
-            from wordfreq.storage.translation_helpers import get_translation
+            from storage.models.schema import AudioQualityReview
+            from storage.translation_helpers import get_translation
 
             # Only check lemma audio (guid is set, sentence_id is not)
             audio_records = (

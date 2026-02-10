@@ -14,7 +14,7 @@ import clients.lib
 import constants
 from clients.keys import load_key
 from clients.types import Response, Schema
-from telemetry import LLMUsage
+from util.telemetry import LLMUsage
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

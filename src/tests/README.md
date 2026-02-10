@@ -87,7 +87,7 @@ For database tests, use in-memory SQLite:
 ```python
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from wordfreq.storage.models.schema import Base
+from storage.models.schema import Base
 
 @pytest.fixture
 def db_session():

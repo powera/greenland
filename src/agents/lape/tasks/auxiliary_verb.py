@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
-from wordfreq.storage.models.schema import Lemma
+from storage.models.schema import Lemma
 
 if TYPE_CHECKING:
     from agents.lape.agent import LapeAgent

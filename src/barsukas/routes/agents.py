@@ -16,9 +16,9 @@ from agents.papuga import PapugaAgent
 from agents.voras.agent import VorasAgent
 from barsukas.helpers.flash_helpers import flash_and_log, log_and_flash_error
 from workqueue.task_queue import TaskType, enqueue_task
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.models.schema import DerivativeForm, Lemma
-from wordfreq.storage.translation_helpers import get_supported_languages
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.models.schema import DerivativeForm, Lemma
+from storage.translation_helpers import get_supported_languages
 
 bp = Blueprint("agents", __name__, url_prefix="/agents")
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ def check_translations(lemma_id: int) -> ResponseReturnValue:
         agent = VorasAgent(config=config)
 
         # Gather translations for this word
-        from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
+        from storage.translation_helpers import LANGUAGE_FIELDS
 
         translations = {}
         for lc in LANGUAGE_FIELDS.keys():
@@ -171,7 +171,7 @@ def check_pronunciations(lemma_id: int) -> ResponseReturnValue:
         agent = PapugaAgent(config=config)
 
         # Check pronunciations (using dry_run=False to actually validate)
-        from wordfreq.storage.models.schema import Sentence, SentenceTranslation, SentenceWord
+        from storage.models.schema import Sentence, SentenceTranslation, SentenceWord
         from wordfreq.tools.llm_validators import validate_pronunciation
 
         issues = []
@@ -388,7 +388,7 @@ def apply_definition(lemma_id: int) -> ResponseReturnValue:
         g.db.commit()
 
         # Log the change
-        from wordfreq.storage.crud.operation_log import log_operation
+        from storage.crud.operation_log import log_operation
 
         log_operation(
             g.db,
@@ -515,7 +515,7 @@ def apply_disambiguation(lemma_id: int) -> ResponseReturnValue:
         g.db.commit()
 
         # Log the change
-        from wordfreq.storage.crud.operation_log import log_translation_change
+        from storage.crud.operation_log import log_translation_change
 
         log_translation_change(
             g.db,
@@ -557,7 +557,7 @@ def generate_sentences(lemma_id: int) -> ResponseReturnValue:
     try:
         # Import Buivolas agent for sentence creation
         from agents.buivolas import BuivolasAgent
-        from wordfreq.storage.models.schema import Sentence
+        from storage.models.schema import Sentence
 
         # Initialize agent
         config = DataSourceConfig(
@@ -641,7 +641,7 @@ def generate_sentences(lemma_id: int) -> ResponseReturnValue:
 def generate_grammar_fact(lemma_id: int) -> ResponseReturnValue:
     """Generate a grammar fact for a lemma using the LAPE agent (queued via task worker)."""
     from workqueue.handlers.lape import SUPPORTED_FACT_TYPES, validate_grammar_fact_request
-    from wordfreq.storage.crud.grammar_fact import get_grammar_fact_value
+    from storage.crud.grammar_fact import get_grammar_fact_value
 
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
@@ -715,7 +715,7 @@ def view_sentences(lemma_id: int) -> ResponseReturnValue:
         from sqlalchemy import or_
         from sqlalchemy.orm import joinedload
 
-        from wordfreq.storage.models.schema import (
+        from storage.models.schema import (
             Sentence,
             SentencePatternWord,
             SentenceWord,

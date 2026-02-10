@@ -11,8 +11,8 @@ from flask.typing import ResponseReturnValue
 from werkzeug.wrappers import Response
 
 from barsukas.helpers.flash_helpers import flash_and_log
-from wordfreq.storage.models.operation_log import OperationLog
-from wordfreq.storage.models.schema import Lemma
+from storage.models.operation_log import OperationLog
+from storage.models.schema import Lemma
 
 bp = Blueprint("operation_logs", __name__, url_prefix="/logs")
 

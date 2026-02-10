@@ -21,7 +21,7 @@ from sqlalchemy import case
 from sqlalchemy.orm import Query
 
 from langtools.zh.pinyin_helper import generate_pinyin
-from wordfreq.storage.models.schema import (
+from storage.models.schema import (
     Lemma,
     Sentence,
     SentenceTranslation,

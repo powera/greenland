@@ -9,9 +9,9 @@ from flask import Blueprint, Response, g, jsonify, request
 from flask.typing import ResponseReturnValue
 from sqlalchemy import func, or_
 
-from wordfreq.storage.crud.grammar_fact import get_grammar_facts
-from wordfreq.storage.crud.lemma import get_lemma_by_guid
-from wordfreq.storage.models import (
+from storage.crud.grammar_fact import get_grammar_facts
+from storage.crud.lemma import get_lemma_by_guid
+from storage.models import (
     DerivativeForm,
     GrammarFact,
     Lemma,
@@ -20,8 +20,8 @@ from wordfreq.storage.models import (
     SentenceTranslation,
     SentenceWord,
 )
-from wordfreq.storage.queries.lemma import build_lemma_search_query
-from wordfreq.storage.translation_helpers import LANGUAGE_HIERARCHY, get_all_translations
+from storage.queries.lemma import build_lemma_search_query
+from storage.translation_helpers import LANGUAGE_HIERARCHY, get_all_translations
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 

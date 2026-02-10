@@ -8,8 +8,8 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 import constants
-from wordfreq.storage import database as linguistic_db
-from wordfreq.storage.translation_helpers import get_translation
+from storage import database as linguistic_db
+from storage.translation_helpers import get_translation
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -310,7 +310,7 @@ class LinguisticReviewer:
         print(f"  • Rankings combine data from Wikipedia, news, and other text sources")
 
         print(f"\n{self.c.BLUE}Accessing Word Lists Programmatically:{self.c.ENDC}")
-        print(f"  {self.c.CYAN}from wordfreq.storage import database as linguistic_db{self.c.ENDC}")
+        print(f"  {self.c.CYAN}from storage import database as linguistic_db{self.c.ENDC}")
         print(f"  {self.c.CYAN}session = linguistic_db.create_database_session(){self.c.ENDC}")
         print(
             f"  {self.c.CYAN}words = linguistic_db.get_word_tokens_by_combined_frequency_rank(session, limit=1000){self.c.ENDC}"

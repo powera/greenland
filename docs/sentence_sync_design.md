@@ -180,7 +180,7 @@ This matches the existing pattern in `export_wireword_sentences.py:155-161`.
 
 ### Schema Change
 
-Add `guid` column to `Sentence` in `src/wordfreq/storage/models/schema.py`:
+Add `guid` column to `Sentence` in `src/storage/models/schema.py`:
 
 ```python
 guid: Mapped[Optional[str]] = mapped_column(
@@ -194,7 +194,7 @@ Fix `migrate.py:290` to use `:05d` instead of `:06d`.
 
 ### GUID Auto-Assignment
 
-Add a helper function (e.g. in a new `src/wordfreq/storage/crud/sentence_guid.py`
+Add a helper function (e.g. in a new `src/storage/crud/sentence_guid.py`
 or alongside existing sentence CRUD code) to allocate the next sentence GUID:
 
 ```python

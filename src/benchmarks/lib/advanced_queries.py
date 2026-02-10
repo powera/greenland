@@ -8,7 +8,7 @@ from enum import Enum
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from clients import unified_client
-from telemetry import LLMUsage
+from util.telemetry import LLMUsage
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

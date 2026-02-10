@@ -9,7 +9,7 @@ from flask import Blueprint, Response, g, render_template, request
 from flask.typing import ResponseReturnValue
 from sqlalchemy.orm import Query
 
-from wordfreq.storage.models.imports import PendingImport
+from storage.models.imports import PendingImport
 
 bp = Blueprint("pending_imports", __name__, url_prefix="/pending-imports")
 

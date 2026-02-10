@@ -7,15 +7,15 @@ from typing import Any, Dict, List, cast
 from flask import Blueprint, g, render_template
 from flask.typing import ResponseReturnValue
 
-from wordfreq.storage.models.enums import (
+from storage.models.enums import (
     AdjectiveSubtype,
     AdverbSubtype,
     NounSubtype,
     NumeralSubtype,
     VerbSubtype,
 )
-from wordfreq.storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
-from wordfreq.storage.models.schema import Lemma
+from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
+from storage.models.schema import Lemma
 
 bp = Blueprint("categories", __name__, url_prefix="/categories")
 

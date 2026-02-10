@@ -20,15 +20,15 @@ from agents.lape.tasks import (
     verb_reflexivity,
     verb_transitivity,
 )
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.crud.grammar_fact import (
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.crud.grammar_fact import (
     add_grammar_fact,
     get_grammar_fact_value,
 )
-from wordfreq.storage.crud.operation_log import log_operation
-from wordfreq.storage.models.schema import Lemma
-from wordfreq.storage.translation_helpers import get_translation
+from storage.crud.operation_log import log_operation
+from storage.models.schema import Lemma
+from storage.translation_helpers import get_translation
 from wordfreq.translation.client import LinguisticClient
 from clients.unified_client import UnifiedLLMClient
 

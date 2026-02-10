@@ -6,7 +6,7 @@ function for different purposes (to avoid type / initialization errors).
 The main purpose of the project is to create a multilingual linguistic
 database, and to generate files for the Trakaido language-learning app.
 
-Use DataSourceConfig (defined in src/wordfreq/storage/backend/config.py) to
+Use DataSourceConfig (defined in src/storage/backend/config.py) to
 pass configuration (db_path, model_name, debug, backend_type, etc.) to agents
 and other components. Do not pass db_path or similar parameters directly.
 
@@ -16,10 +16,10 @@ src/agents contains scripts to do bulk operations against the database,
 generally making LLM calls.  Each agent is named with a Lithuanian animal
 name.
 
-src/wordfreq/storage contains the SQLAlchemy schema for the main database;
+src/storage contains the SQLAlchemy schema for the main database;
 the default location is src/wordfreq/data/linguistics.sqlite .
 
-src/wordfreq/storage/translation_helpers.py contains all language code
+src/storage/translation_helpers.py contains all language code
 manipulation functions and constants (LLM_FIELD_TO_LANG_CODE,
 LANG_CODE_TO_LLM_FIELD, convert_llm_response_to_lang_codes, etc.).
 Do not create local language mappings - import from translation_helpers.py.
@@ -58,7 +58,7 @@ Also, always use ordinary form submits for POST data - do not do an AJAX-based
 submission.  Avoid using disappearing UX elements most of the time.
 
 When modifying files in data/release :
-* make sure the GUID prefixes match those in wordfreq/storage/models/guid_prefixes.py
+* make sure the GUID prefixes match those in storage/models/guid_prefixes.py
 * when creating a new "subtype", follow those instructions for updates
 * do not "change" GUIDs - keep the file sorted by GUID, and add new words at
   the end, leaving gaps in GUIDs for removed words is expected

@@ -21,9 +21,9 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 from agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
 from clients.batch_queue import BatchQueue, get_batch_manager
-from telemetry import CostConfig
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, set_translation
+from util.telemetry import CostConfig
+from storage.backend import create_session as create_backend_session
+from storage.translation_helpers import LANGUAGE_FIELDS, set_translation
 from sentences.translation import store_translation_results
 
 logger = logging.getLogger(__name__)
@@ -233,8 +233,8 @@ def _apply_sentence_translations(
 def _apply_voras_translations(
     requests: Iterable[BatchQueue], session: Any, batch_id: str
 ) -> Dict[str, int]:
-    from wordfreq.storage.crud.operation_log import log_translation_change
-    from wordfreq.storage.models.schema import Lemma
+    from storage.crud.operation_log import log_translation_change
+    from storage.models.schema import Lemma
 
     results = {"processed": 0, "updated": 0, "failed": 0}
 

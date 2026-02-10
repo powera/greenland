@@ -19,10 +19,10 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 from barsukas.config import Config
 import constants
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.backend.factory import create_session
-from wordfreq.storage.models.enums import GrammaticalForm
-from wordfreq.storage.models.schema import (
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.backend.factory import create_session
+from storage.models.enums import GrammaticalForm
+from storage.models.schema import (
     AudioQualityReview,
     ConversationSentence,
     Sentence,

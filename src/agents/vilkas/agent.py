@@ -30,10 +30,10 @@ import constants
 from agents.common.lemma_selection import find_lemma_by_guid
 from clients.barsukas_cache import BarsukasCacheClient
 from sqlalchemy.orm import Session
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.models.schema import DerivativeForm, Lemma
-from wordfreq.storage.translation_helpers import get_language_name, get_translation
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.models.schema import DerivativeForm, Lemma
+from storage.translation_helpers import get_language_name, get_translation
 from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.generate_forms_tasks import get_task_key, process_lemma_for_task
 

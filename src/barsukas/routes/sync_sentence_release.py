@@ -12,20 +12,20 @@ from flask import Blueprint, current_app, flash, g, redirect, render_template, r
 from flask.typing import ResponseReturnValue
 from sqlalchemy.orm import selectinload
 
-from wordfreq.storage.crud.operation_log import log_operation, log_translation_change
-from wordfreq.storage.migrate import (
+from storage.crud.operation_log import log_operation, log_translation_change
+from storage.migrate import (
     _resolve_primary_lemma_category,
     _sentence_to_release_record,
     _write_jsonl_atomic,
 )
-from wordfreq.storage.models.schema import (
+from storage.models.schema import (
     ConversationSentence,
     Lemma,
     Sentence,
     SentencePatternWord,
     SentenceTranslation,
 )
-from wordfreq.storage.translation_helpers import (
+from storage.translation_helpers import (
     LANGUAGE_HIERARCHY,
     LANGUAGE_NAMES,
 )

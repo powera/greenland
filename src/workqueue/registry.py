@@ -13,11 +13,11 @@ from barsukas.config import Config
 import constants
 from agents.lape import LapeAgent
 from agents.voras.agent import VorasAgent
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
-from wordfreq.storage.crud.operation_log import log_operation
-from wordfreq.storage.models.schema import Lemma
-from wordfreq.storage.translation_helpers import (
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
+from storage.crud.operation_log import log_operation
+from storage.models.schema import Lemma
+from storage.translation_helpers import (
     LANG_CODE_TO_LLM_FIELD,
     LANGUAGE_FIELDS,
     get_reference_translation,
@@ -92,7 +92,7 @@ def handle_voras_populate_translations(session: Any, payload: Dict) -> str:
         reference_translation = lemma.lemma_text
 
     # Build list of language names for LLM query
-    from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
+    from storage.translation_helpers import LANGUAGE_NAMES
 
     missing_lang_names = [LANGUAGE_NAMES.get(lc, lc).lower() for lc in missing_languages]
 

@@ -150,7 +150,7 @@ def main() -> None:
     from agents.common.lemma_selection import get_lemmas_for_agent
     from agents.sernas.agent import SernasAgent
     from agents.sernas.cli_display import display_batch_results
-    from wordfreq.storage.translation_helpers import get_supported_languages
+    from storage.translation_helpers import get_supported_languages
 
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -342,7 +342,7 @@ def main() -> None:
 
     # Handle regenerate mode (similar to populate but forces regeneration)
     if mode == "regenerate":
-        from wordfreq.storage.crud.grammar_fact import delete_grammar_fact
+        from storage.crud.grammar_fact import delete_grammar_fact
 
         # Process each language
         for lang_idx, language_code in enumerate(languages_to_process):

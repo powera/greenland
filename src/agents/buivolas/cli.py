@@ -27,7 +27,7 @@ from agents.common.common_args import (
 )
 from agents.common.lemma_selection import get_lemmas_for_agent
 from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
-from wordfreq.storage.models.schema import Lemma
+from storage.models.schema import Lemma
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"

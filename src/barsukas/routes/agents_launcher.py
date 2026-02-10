@@ -290,7 +290,7 @@ PIPELINE = [
 
 def check_database_empty() -> bool:
     """Check if the database is empty or if key tables are empty."""
-    from wordfreq.storage.models.schema import Lemma, WordToken
+    from storage.models.schema import Lemma, WordToken
 
     try:
         # Check if we have any lemmas or word tokens

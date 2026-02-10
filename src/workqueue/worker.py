@@ -16,8 +16,8 @@ from barsukas.config import Config
 import constants
 from workqueue.registry import TASK_HANDLERS
 from workqueue.task_queue import claim_next_task, mark_task_complete, mark_task_failed
-from wordfreq.storage.backend import configure_backend, create_session
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from storage.backend import configure_backend, create_session
+from storage.backend.config import BackendType, DataSourceConfig
 
 logger = logging.getLogger(__name__)
 STOP_EVENT = Event()

@@ -17,13 +17,13 @@ from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.polly_tts import PollyVoice
 from barsukas.helpers.lemma_display import get_difficulty_stats, group_derivative_forms
 from workqueue.task_queue import get_tasks_for_target
-from wordfreq.storage.crud.derivative_form import delete_derivative_form
-from wordfreq.storage.crud.difficulty_override import get_all_overrides_for_lemma
-from wordfreq.storage.crud.lemma import handle_lemma_type_subtype_change
-from wordfreq.storage.crud.operation_log import log_translation_change
-from wordfreq.storage.models.schema import DerivativeForm, Lemma
-from wordfreq.storage.queries.lemma import build_lemma_search_query
-from wordfreq.storage.translation_helpers import get_all_translations, get_supported_languages
+from storage.crud.derivative_form import delete_derivative_form
+from storage.crud.difficulty_override import get_all_overrides_for_lemma
+from storage.crud.lemma import handle_lemma_type_subtype_change
+from storage.crud.operation_log import log_translation_change
+from storage.models.schema import DerivativeForm, Lemma
+from storage.queries.lemma import build_lemma_search_query
+from storage.translation_helpers import get_all_translations, get_supported_languages
 
 bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
 
@@ -35,7 +35,7 @@ def add_lemma() -> ResponseReturnValue:
 
     from flask import current_app
 
-    from wordfreq.storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
+    from storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
 
     if request.method == "POST":
         if current_app.config.get("READONLY", False):
@@ -80,7 +80,7 @@ def add_lemma() -> ResponseReturnValue:
             return redirect(url_for("lemmas.view_lemma", lemma_id=existing.id))
 
         # Generate GUID based on pos_subtype
-        from wordfreq.storage.utils.guid import generate_guid
+        from storage.utils.guid import generate_guid
 
         try:
             guid = generate_guid(g.db, pos_type, pos_subtype)
@@ -135,7 +135,7 @@ def add_lemma() -> ResponseReturnValue:
 
         # Save initial translation if provided
         if initial_translation_lang and initial_translation_text:
-            from wordfreq.storage.translation_helpers import set_translation
+            from storage.translation_helpers import set_translation
 
             try:
                 set_translation(g.db, new_lemma, initial_translation_lang, initial_translation_text)
@@ -230,7 +230,7 @@ def list_lemmas() -> ResponseReturnValue:
 def view_lemma(lemma_id: int) -> ResponseReturnValue:
     """View a single lemma with all details."""
     from barsukas.helpers.db_optimization import get_lemma_view_data
-    from wordfreq.storage.crud.guid_tombstone import get_tombstones_by_lemma_id
+    from storage.crud.guid_tombstone import get_tombstones_by_lemma_id
 
     # Get all lemma data in optimized bulk queries (replaces 10+ separate queries)
     data = get_lemma_view_data(g.db, lemma_id)
@@ -532,7 +532,7 @@ def edit_lemma(lemma_id: int) -> ResponseReturnValue:
     # Get POS types and subtypes for dropdowns
     import json
 
-    from wordfreq.storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
+    from storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
 
     pos_types = sorted(list(VALID_POS_TYPES))
 
@@ -557,7 +557,7 @@ def delete_synonym(lemma_id: int, form_id: int) -> ResponseReturnValue:
     """Delete a single synonym or alternative form."""
     from flask import current_app
 
-    from wordfreq.storage.crud.grammar_fact import update_alternate_forms_facts_after_deletion
+    from storage.crud.grammar_fact import update_alternate_forms_facts_after_deletion
 
     if current_app.config.get("READONLY", False):
         flash("Cannot delete: running in read-only mode", "error")
@@ -612,7 +612,7 @@ def delete_all_synonyms(lemma_id: int) -> ResponseReturnValue:
     """Delete all synonyms and/or alternative forms for a lemma."""
     from flask import current_app
 
-    from wordfreq.storage.crud.grammar_fact import update_alternate_forms_facts_after_deletion
+    from storage.crud.grammar_fact import update_alternate_forms_facts_after_deletion
 
     if current_app.config.get("READONLY", False):
         flash("Cannot delete: running in read-only mode", "error")
@@ -685,7 +685,7 @@ def delete_all_synonyms(lemma_id: int) -> ResponseReturnValue:
     if deleted_count > 0:
         msg = f"Deleted {deleted_count} form(s)"
         if lang_code:
-            from wordfreq.storage.translation_helpers import get_supported_languages
+            from storage.translation_helpers import get_supported_languages
 
             language_names = get_supported_languages()
             msg += f" for {language_names.get(lang_code, lang_code)}"

@@ -12,9 +12,9 @@ from typing import Dict, List, Optional, Tuple
 from sqlalchemy.orm import Session
 
 from workqueue.tools import build_default_config, get_lemma_or_raise
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.models.schema import Lemma, LemmaTranslation
-from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS, get_translation
+from storage.backend.config import DataSourceConfig
+from storage.models.schema import Lemma, LemmaTranslation
+from storage.translation_helpers import LANGUAGE_FIELDS, get_translation
 from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.generate_forms_tasks import get_task_key, process_lemma_for_task
 

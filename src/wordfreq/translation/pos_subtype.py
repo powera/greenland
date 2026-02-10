@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, Tuple
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
-from wordfreq.storage import database as linguistic_db
+from storage import database as linguistic_db
 
 logger = logging.getLogger(__name__)
 

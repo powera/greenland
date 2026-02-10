@@ -24,7 +24,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from sqlalchemy.orm import Session
-from wordfreq.storage.crud.difficulty_override import (
+from storage.crud.difficulty_override import (
     add_difficulty_override,
     delete_difficulty_override,
     get_all_overrides_for_language,
@@ -32,8 +32,8 @@ from wordfreq.storage.crud.difficulty_override import (
     get_difficulty_override,
     get_effective_difficulty_level,
 )
-from wordfreq.storage.database import create_database_session
-from wordfreq.storage.models.schema import Lemma, LemmaDifficultyOverride
+from storage.database import create_database_session
+from storage.models.schema import Lemma, LemmaDifficultyOverride
 
 
 def set_override(

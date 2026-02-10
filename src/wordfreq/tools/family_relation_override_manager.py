@@ -10,8 +10,8 @@ This module provides the business logic for:
 
 Usage:
     from wordfreq.tools.family_relation_override_manager import FamilyRelationOverrideManager
-    from wordfreq.storage.backend.factory import create_session
-    from wordfreq.storage.backend.config import DataSourceConfig, BackendType
+    from storage.backend.factory import create_session
+    from storage.backend.config import DataSourceConfig, BackendType
 
     config = DataSourceConfig(backend_type=BackendType.SQLITE)
     session = create_session(config)
@@ -36,12 +36,12 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 from sqlalchemy.orm import Session
 
-from wordfreq.storage.crud.difficulty_override import (
+from storage.crud.difficulty_override import (
     add_difficulty_override,
     delete_difficulty_override,
     get_difficulty_override,
 )
-from wordfreq.storage.models.schema import Lemma, LemmaDifficultyOverride
+from storage.models.schema import Lemma, LemmaDifficultyOverride
 from wordfreq.tools.family_relation_priorities import (
     ALL_FAMILY_RELATIONS,
     get_excluded_terms_for_language,

@@ -15,8 +15,8 @@ from flask.typing import ResponseReturnValue
 
 import constants
 from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
-from wordfreq.storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord
-from wordfreq.storage.translation_helpers import get_languages_in_hierarchy
+from storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord
+from storage.translation_helpers import get_languages_in_hierarchy
 
 bp = Blueprint("pattern_sentences", __name__, url_prefix="/pattern-sentences")
 
@@ -50,8 +50,8 @@ def generate_llm_guided() -> ResponseReturnValue:
     """Generate sentences using LLM or Guided mode for a specific lemma."""
     from agents.buivolas import BuivolasAgent
     from barsukas.routes.agents import flash_and_log, log_and_flash_error
-    from wordfreq.storage.backend import BackendType
-    from wordfreq.storage.backend.config import DataSourceConfig
+    from storage.backend import BackendType
+    from storage.backend.config import DataSourceConfig
 
     # Get form parameters
     guid = request.form.get("guid", "").strip()

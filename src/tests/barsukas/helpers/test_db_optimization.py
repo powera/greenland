@@ -14,7 +14,7 @@ from barsukas.helpers.db_optimization import (
     get_lemma_list_filter_options,
     get_lemma_view_data,
 )
-from wordfreq.storage.models.schema import Lemma
+from storage.models.schema import Lemma
 
 
 class TestGetHomePageStats:

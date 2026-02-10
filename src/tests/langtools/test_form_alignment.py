@@ -34,7 +34,7 @@ import sys
 from pathlib import Path
 
 # Load enums module directly to avoid SQLAlchemy dependency
-enums_path = Path(__file__).parent.parent.parent / "wordfreq" / "storage" / "models" / "enums.py"
+enums_path = Path(__file__).parent.parent.parent / "storage" / "models" / "enums.py"
 spec = importlib.util.spec_from_file_location("enums", enums_path)
 if spec and spec.loader:
     enums_module = importlib.util.module_from_spec(spec)

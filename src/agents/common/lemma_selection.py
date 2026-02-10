@@ -36,7 +36,7 @@ from typing import Any, Callable, List, Optional
 from sqlalchemy.orm import Query
 
 from sqlalchemy.orm import Session
-from wordfreq.storage.models.schema import Lemma
+from storage.models.schema import Lemma
 
 
 class LemmaNotFoundError(Exception):
@@ -175,7 +175,7 @@ class LemmaQueryBuilder:
         Raises:
             ValueError: If language_code is not a recognized language
         """
-        from wordfreq.storage.translation_helpers import LANG_CODE_TO_LLM_FIELD
+        from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD
 
         if language_code not in LANG_CODE_TO_LLM_FIELD:
             raise ValueError(
@@ -183,7 +183,7 @@ class LemmaQueryBuilder:
                 f"Valid codes: {sorted(LANG_CODE_TO_LLM_FIELD.keys())}"
             )
 
-        from wordfreq.storage.models.schema import LemmaTranslation
+        from storage.models.schema import LemmaTranslation
 
         self.query = self.query.filter(
             Lemma.id.in_(
