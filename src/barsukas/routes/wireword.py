@@ -19,7 +19,7 @@ from flask import (
 from flask.typing import ResponseReturnValue
 
 from agents.ungurys import SUPPORTED_LANGUAGES, UngurysAgent
-from wordfreq.storage.backend.config import DataSourceConfig
+from storage.backend.config import DataSourceConfig
 
 if TYPE_CHECKING:
     from barsukas.app import BarsukasFlask

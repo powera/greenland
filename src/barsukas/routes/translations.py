@@ -8,9 +8,9 @@ from barsukas.config import Config
 from flask import Blueprint, flash, g, jsonify, redirect, request, url_for
 from werkzeug.wrappers import Response
 
-from wordfreq.storage.crud.operation_log import log_translation_change
-from wordfreq.storage.models.schema import Lemma
-from wordfreq.storage.translation_helpers import (
+from storage.crud.operation_log import log_translation_change
+from storage.models.schema import Lemma
+from storage.translation_helpers import (
     get_supported_languages,
     get_translation,
     set_translation,

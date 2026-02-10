@@ -10,15 +10,15 @@ from typing import Any, Dict, List, Optional, cast
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.database import (
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import DataSourceConfig
+from storage.database import (
     Lemma,
     add_sentence,
     add_sentence_translation,
 )
-from wordfreq.storage.models.imports import PendingImport
-from wordfreq.storage.models.schema import SentencePatternWord
+from storage.models.imports import PendingImport
+from storage.models.schema import SentencePatternWord
 from wordfreq.tools.sentence_word_linker import find_lemma_by_text
 from wordfreq.tools.vocabulary_budget import build_prompt_vocabulary_section
 

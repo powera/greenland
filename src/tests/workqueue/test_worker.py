@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, patch
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from wordfreq.storage.models.schema import Base, BarsukasTask
+from storage.models.schema import Base, BarsukasTask
 from workqueue.task_queue import TaskStatus, TaskType
 from workqueue.worker import process_task
 

@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Optional
 
-from wordfreq.storage.models.schema import BarsukasTask
+from storage.models.schema import BarsukasTask
 
 from workqueue.pipeline_order import get_pipeline_step
 

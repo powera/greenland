@@ -11,7 +11,7 @@ import constants
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from util.prompt_loader import get_context
-from wordfreq.storage import database as linguistic_db
+from storage import database as linguistic_db
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

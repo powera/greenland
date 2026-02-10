@@ -14,10 +14,10 @@ Supported languages:
 import logging
 from typing import Any, Dict, List, Tuple
 
-from wordfreq.storage import database as linguistic_db
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.connection_pool import get_session
-from wordfreq.storage.translation_helpers import get_translation
+from storage import database as linguistic_db
+from storage.backend.config import DataSourceConfig
+from storage.connection_pool import get_session
+from storage.translation_helpers import get_translation
 from wordfreq.translation.generate_forms_base import FormGenerationConfig
 
 logger = logging.getLogger(__name__)

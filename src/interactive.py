@@ -13,7 +13,7 @@ import wordfreq.dictionary.reviewer
 
 rv = wordfreq.dictionary.reviewer.LinguisticReviewer()
 
-import wordfreq.storage.database
+import storage.database
 import wordfreq.translation.processor
 
 prcs = wordfreq.translation.processor.WordProcessor(model=MODEL)

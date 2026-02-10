@@ -8,7 +8,7 @@ and checks coverage against the linguistics database.
 import re
 from typing import Any, Dict, List, Set
 
-from wordfreq.storage.models.schema import DerivativeForm, Lemma
+from storage.models.schema import DerivativeForm, Lemma
 
 
 def parse_wikitext_file(file_path: str) -> List[str]:

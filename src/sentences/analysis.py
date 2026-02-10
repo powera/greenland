@@ -5,7 +5,7 @@ from typing import List
 from sqlalchemy import func, literal, or_
 from sqlalchemy.orm import Session
 
-from wordfreq.storage.models.schema import (
+from storage.models.schema import (
     DerivativeForm,
     Lemma,
     SentencePatternWord,

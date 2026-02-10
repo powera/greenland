@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, List, Tuple
 
-from wordfreq.storage.queries.lemma import get_difficulty_stats
+from storage.queries.lemma import get_difficulty_stats
 
 
 def group_derivative_forms(derivative_forms: Any) -> Tuple[Dict, Dict, Dict, List[str]]:

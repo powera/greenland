@@ -44,8 +44,8 @@ from src.agents.common.common_args import (
     add_guid_arg, confirm_operation, get_data_source_config
 )
 from src.agents.common.lemma_selection import find_lemma_by_guid, get_lemmas_for_processing
-from wordfreq.storage.database import create_database_session
-from wordfreq.storage.models.schema import Lemma, DerivativeForm  # etc.
+from storage.database import create_database_session
+from storage.models.schema import Lemma, DerivativeForm  # etc.
 
 # Configure logging
 logging.basicConfig(
@@ -377,7 +377,7 @@ for i, item in enumerate(items, 1):
 ### Database Access
 
 ```python
-from wordfreq.storage.database import create_database_session
+from storage.database import create_database_session
 
 session = create_database_session(db_path)
 try:
@@ -558,7 +558,7 @@ lemmas = get_lemmas_for_processing(
 Only use raw SQLAlchemy queries when `lemma_selection` doesn't support your use case:
 
 ```python
-from wordfreq.storage.models.schema import Lemma
+from storage.models.schema import Lemma
 
 # Get lemmas with GUIDs (curated words)
 lemmas = session.query(Lemma).filter(
@@ -713,7 +713,7 @@ Avoid:
 
 ### Database Models
 
-Agents interact with SQLAlchemy models from `wordfreq.storage.models.schema`:
+Agents interact with SQLAlchemy models from `storage.models.schema`:
 - `Lemma` - Base word meanings
 - `WordToken` - Specific spellings
 - `DerivativeForm` - Grammatical forms

@@ -17,9 +17,9 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
 
 from clients.barsukas_cache import BarsukasCacheClient
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.models.schema import (
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import DataSourceConfig
+from storage.models.schema import (
     DerivativeForm,
     Lemma,
     SentenceTranslation,

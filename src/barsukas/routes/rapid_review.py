@@ -26,8 +26,8 @@ from sqlalchemy.orm import joinedload
 
 from barsukas.helpers.audio_helpers import validate_audio_translation
 from langtools.zh.pinyin_helper import generate_pinyin
-from wordfreq.storage.models.schema import AudioQualityReview, Lemma, Sentence, SentenceTranslation
-from wordfreq.storage.queries.lemma import apply_effective_difficulty_filter
+from storage.models.schema import AudioQualityReview, Lemma, Sentence, SentenceTranslation
+from storage.queries.lemma import apply_effective_difficulty_filter
 
 bp = Blueprint("rapid_review", __name__, url_prefix="/audio/rapid-review")
 

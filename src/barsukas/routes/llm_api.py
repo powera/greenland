@@ -28,8 +28,8 @@ import constants
 from agents.lokys import LokysAgent
 from agents.papuga import PapugaAgent
 from agents.voras.agent import VorasAgent
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.models.schema import Lemma
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.models.schema import Lemma
 
 from clients.keys import load_key
 
@@ -221,7 +221,7 @@ def api_check_translations() -> ResponseReturnValue:
         agent = VorasAgent(config=config)
 
         # Gather translations for this word
-        from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
+        from storage.translation_helpers import LANGUAGE_FIELDS
 
         translations = {}
         for lc in LANGUAGE_FIELDS.keys():

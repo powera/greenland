@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy.orm import Session
 
 from clients.unified_client import UnifiedLLMClient
-from wordfreq.storage.models.schema import (
+from storage.models.schema import (
     Lemma,
     LemmaTranslation,
     Sentence,
@@ -23,7 +23,7 @@ from wordfreq.storage.models.schema import (
     SentenceWord,
     SentencePatternWord,
 )
-from wordfreq.storage.translation_helpers import LANGUAGE_NAMES, get_translation
+from storage.translation_helpers import LANGUAGE_NAMES, get_translation
 
 logger = logging.getLogger(__name__)
 

@@ -13,7 +13,7 @@ import constants
 from constants import DEFAULT_MODEL
 
 if TYPE_CHECKING:
-    from wordfreq.storage.backend.config import DataSourceConfig
+    from storage.backend.config import DataSourceConfig
 
 
 def add_common_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
@@ -420,7 +420,7 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None) -> "D
     Returns:
         DataSourceConfig instance (always returns a valid config)
     """
-    from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+    from storage.backend.config import BackendType, DataSourceConfig
 
     # Determine backend type and paths
     backend_type = None

@@ -22,7 +22,7 @@ from agents.sarka.agent import (
     WORD_USAGE_TARGET,
 )
 from workqueue.task_queue import TaskStatus, enqueue_task
-from wordfreq.storage.models.schema import BarsukasTask
+from storage.models.schema import BarsukasTask
 
 logger = logging.getLogger(__name__)
 

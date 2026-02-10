@@ -20,15 +20,15 @@ import constants
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
-from wordfreq.storage.database import (
+from storage.database import (
     add_word_token,
     create_database_session,
     get_subtype_values_for_pos,
 )
-from wordfreq.storage.models.enums import GrammaticalForm
-from wordfreq.storage.models.schema import DerivativeForm, Lemma, WordToken
-from wordfreq.storage.translation_helpers import get_translation, set_translation
-from wordfreq.storage.utils.guid import generate_guid
+from storage.models.enums import GrammaticalForm
+from storage.models.schema import DerivativeForm, Lemma, WordToken
+from storage.translation_helpers import get_translation, set_translation
+from storage.utils.guid import generate_guid
 
 from .data_models import ReviewResult, WordData
 from .text_rendering import display_current_lemma_entry, display_word_data, get_user_confirmation

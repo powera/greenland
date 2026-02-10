@@ -63,10 +63,10 @@ Use **migrate.py** to export the database back to release format:
 
 ```bash
 # Export to data/release/lemmas (default)
-PYTHONPATH=src python src/wordfreq/storage/migrate.py sqlite-to-release
+PYTHONPATH=src python src/storage/migrate.py sqlite-to-release
 
 # Export to a custom directory
-PYTHONPATH=src python src/wordfreq/storage/migrate.py sqlite-to-release \
+PYTHONPATH=src python src/storage/migrate.py sqlite-to-release \
   --release-dir /path/to/output
 ```
 

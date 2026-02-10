@@ -13,11 +13,11 @@ from workqueue.tools import build_default_config
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from sqlalchemy.orm import Session
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.crud.conversation import add_conversation, add_conversation_sentence
-from wordfreq.storage.crud.operation_log import log_operation
-from wordfreq.storage.crud.sentence import add_sentence, find_sentence_by_text
-from wordfreq.storage.crud.sentence_translation import add_sentence_translation
+from storage.backend.config import DataSourceConfig
+from storage.crud.conversation import add_conversation, add_conversation_sentence
+from storage.crud.operation_log import log_operation
+from storage.crud.sentence import add_sentence, find_sentence_by_text
+from storage.crud.sentence_translation import add_sentence_translation
 import util.prompt_loader
 
 logger = logging.getLogger(__name__)

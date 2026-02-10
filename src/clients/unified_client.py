@@ -10,10 +10,10 @@ from clients import gemini_client, lmstudio_client, ollama_client
 from clients.anthropic import client as anthropic_client
 from clients.openai import client as openai_client
 from clients.types import Response, Schema
-from telemetry import LLMUsage
+from util.telemetry import LLMUsage
 
 if TYPE_CHECKING:
-    from wordfreq.storage.backend.config import DataSourceConfig
+    from storage.backend.config import DataSourceConfig
 
 # Optional metrics callback - can be set by applications (e.g., Barsukas) to record LLM metrics
 # Signature: (backend: str, model: str, duration_seconds: float, status: str,

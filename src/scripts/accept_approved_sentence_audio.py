@@ -21,8 +21,8 @@ if str(Path(__file__).parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from clients.audio.s3_uploader import S3AudioUploader, get_prod_audio_key, get_staging_audio_key
-from wordfreq.storage.models.schema import AudioQualityReview
-from wordfreq.storage.utils.session import create_database_session
+from storage.models.schema import AudioQualityReview
+from storage.utils.session import create_database_session
 
 
 def extract_staging_path_parts(

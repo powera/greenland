@@ -3,7 +3,7 @@
 """Generate Lithuanian verb forms using the shared task registry."""
 from typing import Any, Dict, List, Optional
 
-from wordfreq.storage.backend.config import DataSourceConfig
+from storage.backend.config import DataSourceConfig
 from wordfreq.translation.generate_forms_tasks import (
     FORM_GENERATION_TASKS,
     run_form_generation_task,

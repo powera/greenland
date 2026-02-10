@@ -12,7 +12,7 @@ from typing import Any, List, Optional
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
-from wordfreq.storage.database import Lemma
+from storage.database import Lemma
 
 logger = logging.getLogger(__name__)
 

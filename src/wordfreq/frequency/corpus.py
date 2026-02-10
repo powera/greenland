@@ -12,10 +12,10 @@ from sqlalchemy.orm import Session
 import constants
 import wordfreq.frequency.analysis
 import wordfreq.frequency.importer
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.connection_pool import get_session
-import wordfreq.storage.database
-import wordfreq.storage.models.schema
+from storage.backend.config import DataSourceConfig
+from storage.connection_pool import get_session
+import storage.database
+import storage.models.schema
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -219,10 +219,10 @@ def sync_corpus_configs_to_db(
     if session is None:
         if db_path:
             session_config = DataSourceConfig(sqlite_path=db_path)
-            session = wordfreq.storage.connection_pool.get_session(session_config)
+            session = storage.connection_pool.get_session(session_config)
         else:
             session_config = DataSourceConfig()
-            session = wordfreq.storage.connection_pool.get_session(session_config)
+            session = storage.connection_pool.get_session(session_config)
         should_close = True
     else:
         should_close = False
@@ -231,7 +231,7 @@ def sync_corpus_configs_to_db(
         # Get existing corpora from database
         existing_corpora = {
             corpus.name: corpus
-            for corpus in session.query(wordfreq.storage.models.schema.Corpus).all()
+            for corpus in session.query(storage.models.schema.Corpus).all()
         }
         config_names = {config.name for config in CORPUS_CONFIGS}
 
@@ -267,7 +267,7 @@ def sync_corpus_configs_to_db(
                     logger.info(f"Updated corpus configuration: {config.name}")
             else:
                 # Add new corpus
-                new_corpus = wordfreq.storage.models.schema.Corpus(
+                new_corpus = storage.models.schema.Corpus(
                     name=config.name,
                     description=config.description,
                     corpus_weight=config.corpus_weight,
@@ -326,26 +326,26 @@ def get_corpus_size(
     if session is None:
         if db_path:
             session_config = DataSourceConfig(sqlite_path=db_path)
-            session = wordfreq.storage.connection_pool.get_session(session_config)
+            session = storage.connection_pool.get_session(session_config)
         else:
             session_config = DataSourceConfig()
-            session = wordfreq.storage.connection_pool.get_session(session_config)
+            session = storage.connection_pool.get_session(session_config)
         should_close = True
     else:
         should_close = False
 
     try:
         corpus = (
-            session.query(wordfreq.storage.models.schema.Corpus)
-            .filter(wordfreq.storage.models.schema.Corpus.name == corpus_name)
+            session.query(storage.models.schema.Corpus)
+            .filter(storage.models.schema.Corpus.name == corpus_name)
             .first()
         )
         if not corpus:
             return 0
 
         count: int = (
-            session.query(wordfreq.storage.models.schema.WordFrequency)
-            .filter(wordfreq.storage.models.schema.WordFrequency.corpus_id == corpus.id)
+            session.query(storage.models.schema.WordFrequency)
+            .filter(storage.models.schema.WordFrequency.corpus_id == corpus.id)
             .count()
         )
         return count
@@ -376,18 +376,18 @@ def get_effective_unknown_rank(
     if session is None:
         if db_path:
             session_config = DataSourceConfig(sqlite_path=db_path)
-            session = wordfreq.storage.connection_pool.get_session(session_config)
+            session = storage.connection_pool.get_session(session_config)
         else:
             session_config = DataSourceConfig()
-            session = wordfreq.storage.connection_pool.get_session(session_config)
+            session = storage.connection_pool.get_session(session_config)
         should_close = True
     else:
         should_close = False
 
     try:
         corpus = (
-            session.query(wordfreq.storage.models.schema.Corpus)
-            .filter(wordfreq.storage.models.schema.Corpus.name == corpus_name)
+            session.query(storage.models.schema.Corpus)
+            .filter(storage.models.schema.Corpus.name == corpus_name)
             .first()
         )
         if not corpus:
@@ -411,7 +411,7 @@ def get_effective_unknown_rank(
 
 def get_corpus_configs_from_db(
     session: Optional[Session] = None, db_path: Optional[str] = None, enabled_only: bool = True
-) -> List[wordfreq.storage.models.schema.Corpus]:
+) -> List[storage.models.schema.Corpus]:
     """
     Get corpus configurations from the database.
 
@@ -426,19 +426,19 @@ def get_corpus_configs_from_db(
     if session is None:
         if db_path:
             session_config = DataSourceConfig(sqlite_path=db_path)
-            session = wordfreq.storage.connection_pool.get_session(session_config)
+            session = storage.connection_pool.get_session(session_config)
         else:
             session_config = DataSourceConfig()
-            session = wordfreq.storage.connection_pool.get_session(session_config)
+            session = storage.connection_pool.get_session(session_config)
         should_close = True
     else:
         should_close = False
 
     try:
-        query = session.query(wordfreq.storage.models.schema.Corpus)
+        query = session.query(storage.models.schema.Corpus)
         if enabled_only:
-            query = query.filter(wordfreq.storage.models.schema.Corpus.enabled == True)
-        result: list[wordfreq.storage.models.schema.Corpus] = query.all()
+            query = query.filter(storage.models.schema.Corpus.enabled == True)
+        result: list[storage.models.schema.Corpus] = query.all()
         return result
 
     finally:
@@ -481,7 +481,7 @@ def load_corpus(corpus_name: str, config: Optional["DataSourceConfig"] = None) -
     Raises:
         ValueError: If corpus_name is not found in configuration
     """
-    from wordfreq.storage.backend.config import DataSourceConfig
+    from storage.backend.config import DataSourceConfig
 
     # Find the corpus configuration
     corpus_config = get_corpus_config(corpus_name)
@@ -526,15 +526,15 @@ def load_all_corpora() -> Dict[str, tuple[int, int]]:
     logger.info("Initializing database and clients...")
 
     # Create database session
-    session = wordfreq.storage.database.create_database_session()
+    session = storage.database.create_database_session()
 
     # Ensure all database tables exist
     logger.info("Initializing database tables...")
-    wordfreq.storage.database.ensure_tables_exist(session)
+    storage.database.ensure_tables_exist(session)
 
     # Initialize corpora entries
     logger.info("Initializing corpora...")
-    wordfreq.storage.database.initialize_corpora(session)
+    storage.database.initialize_corpora(session)
 
     # Load all enabled corpora
     results = {}

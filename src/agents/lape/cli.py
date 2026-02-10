@@ -12,7 +12,7 @@ import sys
 from typing import Any, Dict, List
 
 from sqlalchemy.orm import Session
-from wordfreq.storage.models.schema import Lemma
+from storage.models.schema import Lemma
 
 from agents.common.common_args import (
     add_backend_args,
@@ -27,7 +27,7 @@ from agents.common.common_args import (
 from agents.common.lemma_selection import get_lemmas_for_agent
 from agents.lape.agent import LapeAgent
 from workqueue.task_queue import TaskStatus, enqueue_task
-from wordfreq.storage.models.schema import BarsukasTask
+from storage.models.schema import BarsukasTask
 
 logger = logging.getLogger(__name__)
 
@@ -319,7 +319,7 @@ def main() -> None:
 
     # COVERAGE MODE: Report what grammar facts are missing
     if mode == "coverage":
-        from wordfreq.storage.crud.grammar_fact import get_grammar_fact_value
+        from storage.crud.grammar_fact import get_grammar_fact_value
 
         logger.info("=" * 80)
         logger.info("LAPE AGENT - COVERAGE REPORT")

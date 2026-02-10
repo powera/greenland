@@ -14,16 +14,16 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.models.schema import (
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import DataSourceConfig
+from storage.models.schema import (
     DerivativeForm,
     Lemma,
     Sentence,
     SentenceTranslation,
     SentenceWord,
 )
-from wordfreq.storage.translation_helpers import get_translation
+from storage.translation_helpers import get_translation
 
 logger = logging.getLogger(__name__)
 

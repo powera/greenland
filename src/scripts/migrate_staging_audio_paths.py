@@ -34,9 +34,9 @@ from clients.audio.s3_uploader import (
     get_staging_audio_key,
     get_staging_manifest_key,
 )
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.models.schema import AudioQualityReview
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.models.schema import AudioQualityReview
 
 
 def is_old_format_path(key: str, agent: str) -> bool:

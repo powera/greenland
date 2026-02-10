@@ -24,7 +24,7 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy import func, literal, or_
 from sqlalchemy.orm import Session
 
-from wordfreq.storage.models.schema import (
+from storage.models.schema import (
     DerivativeForm,
     Lemma,
     SentencePatternWord,

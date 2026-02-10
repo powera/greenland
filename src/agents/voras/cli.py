@@ -30,10 +30,10 @@ from agents.common.common_args import (
 )
 from agents.common.lemma_selection import get_lemmas_for_agent
 from workqueue.task_queue import TaskStatus, enqueue_task
-from wordfreq.storage.models.schema import BarsukasTask
+from storage.models.schema import BarsukasTask
 
 # Import language mappings from translation_helpers (single source of truth)
-from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
+from storage.translation_helpers import LANGUAGE_FIELDS
 
 
 def get_argument_parser() -> argparse.ArgumentParser:
@@ -120,7 +120,7 @@ def _handle_single_lemma_populate(
         True if successful, False otherwise
     """
     from agents.voras import cli_display
-    from wordfreq.storage.translation_helpers import (
+    from storage.translation_helpers import (
         LANGUAGE_NAMES,
         convert_llm_response_to_lang_codes,
         get_reference_translation,
@@ -347,7 +347,7 @@ def main() -> None:
     # Import here to avoid circular imports
     from agents.voras import cli_display
     from agents.voras.agent import VorasAgent
-    from wordfreq.storage.models.schema import Lemma
+    from storage.models.schema import Lemma
 
     parser = get_argument_parser()
     args = parser.parse_args()

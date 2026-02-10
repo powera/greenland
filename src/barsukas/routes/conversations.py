@@ -12,18 +12,18 @@ from sqlalchemy import case
 from werkzeug.wrappers import Response
 
 from barsukas.helpers.flash_helpers import flash_and_log
-from wordfreq.storage.crud.sentence import (
+from storage.crud.sentence import (
     find_duplicate_sentences,
     get_sentence_conversation_count,
     merge_duplicate_sentences,
 )
-from wordfreq.storage.models.schema import (
+from storage.models.schema import (
     Conversation,
     ConversationSentence,
     Sentence,
     SentenceTranslation,
 )
-from wordfreq.storage.translation_helpers import get_supported_languages
+from storage.translation_helpers import get_supported_languages
 
 bp = Blueprint("conversations", __name__, url_prefix="/conversations")
 

@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
 if TYPE_CHECKING:
-    from wordfreq.storage.models.schema import AudioQualityReview
+    from storage.models.schema import AudioQualityReview
 
 from clients.audio.s3_uploader import S3AudioUploader
 
@@ -33,7 +33,7 @@ def accept_audio_for_production(
     Returns:
         Tuple of (success: bool, message: str)
     """
-    from wordfreq.storage.models.schema import AudioQualityReview
+    from storage.models.schema import AudioQualityReview
 
     # Get the audio review record
     audio_review = session.query(AudioQualityReview).filter_by(id=audio_review_id).first()
@@ -150,7 +150,7 @@ def get_pending_staging_audio(
     Returns:
         List of AudioQualityReview objects
     """
-    from wordfreq.storage.models.schema import AudioQualityReview
+    from storage.models.schema import AudioQualityReview
 
     query = session.query(AudioQualityReview).filter(
         AudioQualityReview.s3_staging_url.isnot(None),  # Has staging URL

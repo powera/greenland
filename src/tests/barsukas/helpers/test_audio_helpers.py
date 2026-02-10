@@ -7,7 +7,7 @@ from barsukas.helpers.audio_helpers import (
     link_audio_to_lemma,
     validate_audio_translation,
 )
-from wordfreq.storage.models.schema import Lemma, LemmaTranslation
+from storage.models.schema import Lemma, LemmaTranslation
 
 
 class TestLinkAudioToLemma:

@@ -17,16 +17,16 @@ from clients.batch_queue import (
 from clients.openai.batch_client import OpenAIBatchClient
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.models.schema import (
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import DataSourceConfig
+from storage.models.schema import (
     Lemma,
     LemmaTranslation,
     Sentence,
     SentenceTranslation,
     SentenceWord,
 )
-from wordfreq.storage.translation_helpers import (
+from storage.translation_helpers import (
     LANGUAGE_NAMES,
     TIER_1_LANGUAGES,
     TIER_2_LANGUAGES,

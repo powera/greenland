@@ -9,10 +9,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from wordfreq.patterns.simple_patterns import SIMPLE_PATTERNS
-from wordfreq.storage.backend import create_session as create_backend_session
+from storage.backend import create_session as create_backend_session
 from sqlalchemy.orm import Session
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.models.schema import (
+from storage.backend.config import DataSourceConfig
+from storage.models.schema import (
     Lemma,
     Sentence,
     SentenceTranslation,

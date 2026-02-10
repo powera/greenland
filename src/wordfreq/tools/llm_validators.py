@@ -614,7 +614,7 @@ def validate_pronunciation(
         )
 
     # Get language name from translation_helpers
-    from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
+    from storage.translation_helpers import LANGUAGE_NAMES
 
     language_name = LANGUAGE_NAMES.get(language_code, language_code)
 
@@ -883,7 +883,7 @@ def batch_generate_pronunciations(
     client = UnifiedLLMClient()
 
     # Get language name from translation_helpers
-    from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
+    from storage.translation_helpers import LANGUAGE_NAMES
 
     language_name = LANGUAGE_NAMES.get(language_code, language_code)
 

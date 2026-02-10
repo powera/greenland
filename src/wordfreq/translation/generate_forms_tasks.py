@@ -8,7 +8,7 @@ scripts.
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
 
-from wordfreq.storage.backend.config import DataSourceConfig
+from storage.backend.config import DataSourceConfig
 from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.generate_forms_base import (
     FormGenerationConfig,

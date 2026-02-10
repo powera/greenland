@@ -17,7 +17,7 @@ from flask.typing import ResponseReturnValue
 
 import constants
 from barsukas.routes.agents_launcher import running_tasks
-from wordfreq.storage.models.schema import Corpus, Lemma, WordFrequency, WordToken
+from storage.models.schema import Corpus, Lemma, WordFrequency, WordToken
 
 bp = Blueprint("pradzia", __name__, url_prefix="/pradzia")
 

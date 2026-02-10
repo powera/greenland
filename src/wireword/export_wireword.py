@@ -20,12 +20,12 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.backend.factory import create_session
-from wordfreq.storage.crud.difficulty_override import bulk_get_effective_difficulty_levels
-from wordfreq.storage.models.grammar_fact import GrammarFact
-from wordfreq.storage.models.schema import AudioQualityReview, DerivativeForm, Lemma, WordToken
-from wordfreq.storage.translation_helpers import (
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.backend.factory import create_session
+from storage.crud.difficulty_override import bulk_get_effective_difficulty_levels
+from storage.models.grammar_fact import GrammarFact
+from storage.models.schema import AudioQualityReview, DerivativeForm, Lemma, WordToken
+from storage.translation_helpers import (
     LANGUAGE_FIELDS,
     bulk_get_translations,
     get_translation,
@@ -83,7 +83,7 @@ class WirewordExporter:
             )
 
         # Get language name from translation_helpers
-        from wordfreq.storage.translation_helpers import get_language_name
+        from storage.translation_helpers import get_language_name
 
         self.language_name = get_language_name(language)
 
@@ -128,7 +128,7 @@ class WirewordExporter:
         """
         from sqlalchemy import func
 
-        from wordfreq.storage.models.schema import LemmaDifficultyOverride
+        from storage.models.schema import LemmaDifficultyOverride
 
         logger.info(f"Querying database for trakaido data (language: {self.language_name})...")
 
@@ -968,7 +968,7 @@ class WirewordExporter:
         """
         from sqlalchemy import func
 
-        from wordfreq.storage.models.schema import LemmaDifficultyOverride
+        from storage.models.schema import LemmaDifficultyOverride
 
         session = self.get_session()
         try:

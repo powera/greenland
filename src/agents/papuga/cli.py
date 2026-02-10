@@ -24,7 +24,7 @@ from agents.common.common_args import (
     validate_cache_args,
 )
 from agents.common.lemma_selection import get_lemmas_for_agent
-from wordfreq.storage.models.schema import DerivativeForm
+from storage.models.schema import DerivativeForm
 
 # Configure logging
 logging.basicConfig(

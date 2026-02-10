@@ -31,14 +31,14 @@ import sys
 sys.path.append(GREENLAND_SRC_PATH)
 
 import constants
-from wordfreq.storage.database import (
+from storage.database import (
     create_database_session,
     get_all_subtypes,
     get_lemmas_by_subtype,
     get_lemmas_by_subtype_and_level,
 )
-from wordfreq.storage.models.schema import DerivativeForm, Lemma
-from wordfreq.storage.translation_helpers import get_translation
+from storage.models.schema import DerivativeForm, Lemma
+from storage.translation_helpers import get_translation
 from langtools.zh.converter import to_simplified
 
 

@@ -7,7 +7,7 @@ import benchmarks.datastore.quals
 import benchmarks.lib_advanced_queries as lib_advanced_queries
 from clients import unified_client
 from clients.ollama_client import OllamaTimeoutError
-from telemetry import LLMUsage
+from util.telemetry import LLMUsage
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

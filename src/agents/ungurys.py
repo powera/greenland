@@ -25,13 +25,13 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.translation_helpers import (
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.translation_helpers import (
     LANGUAGE_NAMES,
     TIER_1_LANGUAGES,
     TIER_2_LANGUAGES,
 )
-from wordfreq.storage.backend.factory import create_session
+from storage.backend.factory import create_session
 from wordfreq.trakaido.utils.export_manager import TrakaidoExporter
 from wordfreq.tools.country_word_priorities import (
     get_supported_languages as get_country_override_languages,

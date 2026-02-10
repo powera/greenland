@@ -8,8 +8,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
-from wordfreq.storage import database as linguistic_db
-from wordfreq.storage.models.enums import GrammaticalForm
+from storage import database as linguistic_db
+from storage.models.enums import GrammaticalForm
 from wordfreq.translation.constants import VALID_POS_TYPES
 
 logger = logging.getLogger(__name__)

@@ -13,8 +13,8 @@ from sqlalchemy.orm import Session
 
 from workqueue.tools import build_default_config, get_lemma_or_raise
 import constants
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.models.schema import (
+from storage.backend.config import DataSourceConfig
+from storage.models.schema import (
     DerivativeForm,
     Lemma,
     Sentence,

@@ -8,8 +8,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
-from wordfreq.storage import database as linguistic_db
-from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
+from storage import database as linguistic_db
+from storage.translation_helpers import LANGUAGE_NAMES
 from wordfreq.translation.constants import DEFAULT_TRANSLATION_LANGUAGES
 
 logger = logging.getLogger(__name__)

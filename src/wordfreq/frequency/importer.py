@@ -12,10 +12,10 @@ from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 import constants
 import wordfreq.frequency.corpus
-from wordfreq.storage import database
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.connection_pool import get_session
-from wordfreq.storage.models.schema import Corpus, WordFrequency, WordToken
+from storage import database
+from storage.backend.config import DataSourceConfig
+from storage.connection_pool import get_session
+from storage.models.schema import Corpus, WordFrequency, WordToken
 from wordfreq.translation.client import LinguisticClient
 
 # Configure logging
@@ -57,8 +57,8 @@ def import_frequency_data(
     Returns:
         Tuple of (words imported, total words)
     """
-    from wordfreq.storage.backend import create_session
-    from wordfreq.storage.backend.config import DataSourceConfig
+    from storage.backend import create_session
+    from storage.backend.config import DataSourceConfig
 
     logger.info(
         f"Importing frequency data from {file_path} for corpus '{corpus_name}' (language: {language_code})"

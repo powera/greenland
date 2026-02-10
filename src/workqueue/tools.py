@@ -11,8 +11,8 @@ from typing import Any, Dict, Optional
 from barsukas.config import Config
 import constants
 from sqlalchemy.orm import Session
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.models.schema import Lemma
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.models.schema import Lemma
 
 
 def build_default_config() -> DataSourceConfig:
@@ -56,7 +56,7 @@ def get_lemma_or_raise(session: Session, lemma_id: int) -> Lemma:
     Example:
         >>> lemma = get_lemma_or_raise(session, payload["lemma_id"])
     """
-    from wordfreq.storage.models.schema import Lemma
+    from storage.models.schema import Lemma
 
     lemma: Optional[Lemma] = session.get(Lemma, lemma_id)
     if not lemma:

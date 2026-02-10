@@ -11,10 +11,10 @@ from sqlalchemy import case, func, or_
 
 import constants
 import wordfreq.frequency.corpus
-from wordfreq.storage import database
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.connection_pool import get_session
-from wordfreq.storage.models.schema import Corpus, WordFrequency, WordToken
+from storage import database
+from storage.backend.config import DataSourceConfig
+from storage.connection_pool import get_session
+from storage.models.schema import Corpus, WordFrequency, WordToken
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -56,8 +56,8 @@ def calculate_combined_ranks(
     Returns:
         List of words with their combined ranks and outlier information
     """
-    from wordfreq.storage.backend import create_session
-    from wordfreq.storage.backend.config import DataSourceConfig
+    from storage.backend import create_session
+    from storage.backend.config import DataSourceConfig
 
     logger.info("Calculating combined ranks using harmonic-geometric mean")
 

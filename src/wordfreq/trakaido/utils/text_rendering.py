@@ -9,7 +9,7 @@ text-based output in a consistent format.
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from wordfreq.storage.translation_helpers import get_translation
+from storage.translation_helpers import get_translation
 
 
 def format_subtype_display_name(subtype: str) -> str:

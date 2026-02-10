@@ -9,8 +9,8 @@ can be reused elsewhere.
 import logging
 from typing import Any, Dict
 
-from wordfreq.storage.models.schema import DerivativeForm, Lemma
-from wordfreq.storage.translation_helpers import get_translation
+from storage.models.schema import DerivativeForm, Lemma
+from storage.translation_helpers import get_translation
 
 logger = logging.getLogger(__name__)
 

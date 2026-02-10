@@ -13,7 +13,7 @@ from typing import Optional
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from wordfreq.storage.models.schema import Base, BarsukasTask
+from storage.models.schema import Base, BarsukasTask
 from workqueue.task_queue import (
     EnqueueResult,
     TaskStatus,

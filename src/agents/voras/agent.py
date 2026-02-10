@@ -36,11 +36,11 @@ from agents.common.lemma_selection import LemmaQueryBuilder, apply_limit_and_sam
 from agents.voras import coverage
 from clients.barsukas_cache import BarsukasCacheClient
 from clients.batch_queue import BatchRequestMetadata, get_batch_manager
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.crud.operation_log import log_translation_change
-from wordfreq.storage.models.schema import Lemma, LemmaTranslation
-from wordfreq.storage.translation_helpers import (
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.crud.operation_log import log_translation_change
+from storage.models.schema import Lemma, LemmaTranslation
+from storage.translation_helpers import (
     LANG_CODE_TO_LLM_FIELD,
     LANGUAGE_FIELDS,
     LANGUAGE_NAMES,
@@ -48,9 +48,9 @@ from wordfreq.storage.translation_helpers import (
     get_language_name,
     get_reference_translation,
 )
-from wordfreq.storage.translation_helpers import get_translation
-from wordfreq.storage.translation_helpers import get_translation as get_translation_helper
-from wordfreq.storage.translation_helpers import set_translation as set_translation_helper
+from storage.translation_helpers import get_translation
+from storage.translation_helpers import get_translation as get_translation_helper
+from storage.translation_helpers import set_translation as set_translation_helper
 from wordfreq.tools.llm_validators import validate_all_translations_for_word
 from wordfreq.translation.client import LinguisticClient
 

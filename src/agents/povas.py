@@ -33,11 +33,11 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 import constants
 from agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
-from wordfreq.storage import database as linguistic_db
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.models.schema import DerivativeForm, Lemma, WordToken
-from wordfreq.storage.translation_helpers import get_translation
+from storage import database as linguistic_db
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.models.schema import DerivativeForm, Lemma, WordToken
+from storage.translation_helpers import get_translation
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

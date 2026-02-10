@@ -30,14 +30,14 @@ from agents.common.common_args import (
     get_data_source_config,
 )
 from wordfreq.frequency import analysis, corpus
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.database import (
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.database import (
     create_database_session,
     ensure_tables_exist,
     initialize_corpora,
 )
-from wordfreq.storage.models.schema import Corpus  # Ensure Corpus model is imported
+from storage.models.schema import Corpus  # Ensure Corpus model is imported
 from wordfreq.trakaido import json_to_database
 
 # Configure logging
@@ -119,7 +119,7 @@ class PradziaAgent:
         # Check database state
         session = self.get_session()
         try:
-            from wordfreq.storage.models.schema import Corpus
+            from storage.models.schema import Corpus
 
             db_corpora = session.query(Corpus).all()
             db_corpus_info = [
@@ -177,7 +177,7 @@ class PradziaAgent:
             # For dry run, just check what would change
             session = self.get_session()
             try:
-                from wordfreq.storage.models.schema import Corpus
+                from storage.models.schema import Corpus
 
                 # Get existing corpora
                 existing_corpora = {c.name: c for c in session.query(Corpus).all()}
@@ -366,7 +366,7 @@ class PradziaAgent:
             # For dry run, just report what would happen
             session = self.get_session()
             try:
-                from wordfreq.storage.models.schema import Corpus, WordFrequency, WordToken
+                from storage.models.schema import Corpus, WordFrequency, WordToken
 
                 word_count = session.query(WordToken).count()
                 freq_count = session.query(WordFrequency).count()
@@ -424,7 +424,7 @@ class PradziaAgent:
         # Step 1: Check if database already has Lithuanian translations
         session = self.get_session()
         try:
-            from wordfreq.storage.models.schema import Lemma
+            from storage.models.schema import Lemma
 
             # Count lemmas with Lithuanian translations
             existing_lithuanian_count = (

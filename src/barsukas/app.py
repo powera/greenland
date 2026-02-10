@@ -62,8 +62,8 @@ from barsukas.routes import (
     translations,
     wireword,
 )
-from wordfreq.storage.backend import create_session, get_backend_type
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
+from storage.backend import create_session, get_backend_type
+from storage.backend.config import BackendType, DataSourceConfig
 
 
 class BarsukasFlask(Flask):

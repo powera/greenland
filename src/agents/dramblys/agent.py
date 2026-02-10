@@ -27,10 +27,10 @@ from agents.dramblys import staging, wordlist
 # Import validation and staging operations
 from agents.dramblys.validation import is_valid_word
 from util.logging_config import configure_logging, get_logger
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.models.imports import PendingImport, WordExclusion
-from wordfreq.storage.models.schema import Corpus, DerivativeForm, Lemma, WordFrequency, WordToken
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.models.imports import PendingImport, WordExclusion
+from storage.models.schema import Corpus, DerivativeForm, Lemma, WordFrequency, WordToken
 from wordfreq.translation.client import LinguisticClient
 
 # Configure logging

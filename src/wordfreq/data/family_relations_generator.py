@@ -37,12 +37,12 @@ from wordfreq.data.family_relations_sections import (
     SECTION_MAP,
     FamilyRelationSection,
 )
-from wordfreq.storage.backend.config import BackendType, DataSourceConfig
-from wordfreq.storage.backend.factory import create_session
-from wordfreq.storage.crud.difficulty_override import add_difficulty_override
-from wordfreq.storage.crud.lemma import get_lemma_by_guid
-from wordfreq.storage.models.schema import Lemma
-from wordfreq.storage.translation_helpers import LANGUAGE_HIERARCHY
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.backend.factory import create_session
+from storage.crud.difficulty_override import add_difficulty_override
+from storage.crud.lemma import get_lemma_by_guid
+from storage.models.schema import Lemma
+from storage.translation_helpers import LANGUAGE_HIERARCHY
 
 
 # =============================================================================

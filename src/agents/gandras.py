@@ -37,15 +37,15 @@ from agents.common.common_args import (
     add_processing_args,
     get_data_source_config,
 )
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.models.schema import (
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import DataSourceConfig
+from storage.models.schema import (
     AudioQualityReview,
     Lemma,
     Sentence,
     SentenceTranslation,
 )
-from wordfreq.storage.translation_helpers import get_translation
+from storage.translation_helpers import get_translation
 
 # Configure logging
 logging.basicConfig(

@@ -23,8 +23,8 @@ from barsukas.routes.categories import (
 )
 from langtools.collation import LATIN_SORT_KEY_LANGUAGES
 from langtools.ja.gojuon import KANA_TO_ROW, ROW_INITIALS, ROW_MEMBERS
-from wordfreq.storage.models.schema import Lemma, LemmaTranslation
-from wordfreq.storage.translation_helpers import LANGUAGE_NAMES
+from storage.models.schema import Lemma, LemmaTranslation
+from storage.translation_helpers import LANGUAGE_NAMES
 
 bp = Blueprint("peleda", __name__, url_prefix="/dictionary")
 

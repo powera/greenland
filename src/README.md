@@ -4,8 +4,8 @@
 
 ```
 src/
+├── storage/               # Database layer (ORM, models, CRUD)
 ├── wordfreq/              # Linguistic database system (core)
-│   ├── storage/           # Database layer (ORM, models, CRUD)
 │   ├── translation/       # LLM-based translation and form generation
 │   ├── frequency/         # Word frequency analysis
 │   ├── dictionary/        # Word list management and export
@@ -69,4 +69,4 @@ Path constants are defined in `src/constants.py`.
 Key tables: `lemmas`, `word_tokens`, `derivative_forms`, `lemma_translations`,
 `sentences`, `sentence_translations`, `grammar_facts`, `operation_logs`.
 
-See `wordfreq/storage/models/schema.py` for the full schema.
+See `storage/models/schema.py` for the full schema.

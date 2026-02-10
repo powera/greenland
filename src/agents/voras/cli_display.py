@@ -6,7 +6,7 @@ keeping the main CLI clean and focused on logic.
 
 from typing import Any, Dict, List
 
-from wordfreq.storage.translation_helpers import LANGUAGE_FIELDS
+from storage.translation_helpers import LANGUAGE_FIELDS
 
 
 def display_lemma_translations(lemma: Any, agent: Any, session: Any) -> List[str]:

@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, patch
 # Add the src directory to the path so we can import the module
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from wordfreq.storage.connection_pool import ConnectionPool, close_thread_sessions, get_session
+from storage.connection_pool import ConnectionPool, close_thread_sessions, get_session
 
 
 class TestConnectionPool(unittest.TestCase):
@@ -29,7 +29,7 @@ class TestConnectionPool(unittest.TestCase):
         ConnectionPool._initialized = False
 
         # Create a patch for the logger to avoid logging during tests
-        self.patch_logger = patch("wordfreq.storage.connection_pool.logger")
+        self.patch_logger = patch("storage.connection_pool.logger")
         self.mock_logger = self.patch_logger.start()
 
     def tearDown(self):

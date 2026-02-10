@@ -83,7 +83,7 @@ N05_042,fr,-1,"Not used in French"
 ### Programmatic Access
 
 ```python
-from wordfreq.storage.crud.difficulty_override import (
+from storage.crud.difficulty_override import (
     add_difficulty_override,
     get_effective_difficulty_level,
     get_difficulty_override

@@ -27,10 +27,10 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy.orm import Session
-from wordfreq.storage.backend import create_session as create_backend_session
-from wordfreq.storage.backend.config import DataSourceConfig
-from wordfreq.storage.models.schema import Lemma
-from wordfreq.storage.translation_helpers import get_translation
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import DataSourceConfig
+from storage.models.schema import Lemma
+from storage.translation_helpers import get_translation
 from wordfreq.tools.llm_validators import (
     suggest_disambiguation,
     validate_definition,
@@ -291,7 +291,7 @@ class LokysAgent:
         try:
             from sqlalchemy import func
 
-            from wordfreq.storage.translation_helpers import get_supported_languages
+            from storage.translation_helpers import get_supported_languages
 
             # Find lemma_text values that appear multiple times
             duplicates_query = (
@@ -534,7 +534,7 @@ class LokysAgent:
             - translations_by_guid: dict mapping GUID to translations
             - llm_suggestions: dict from suggest_disambiguation (if applicable)
         """
-        from wordfreq.storage.translation_helpers import get_supported_languages
+        from storage.translation_helpers import get_supported_languages
 
         # Find duplicates
         duplicates = (
@@ -633,7 +633,7 @@ class LokysAgent:
         reason: str = "no_duplicates",
     ) -> Dict[str, Any]:
         """Check for disambiguation needs when duplicates aren't sufficient."""
-        from wordfreq.storage.translation_helpers import get_supported_languages
+        from storage.translation_helpers import get_supported_languages
 
         has_parenthetical = "(" in lemma.lemma_text and ")" in lemma.lemma_text
         if has_parenthetical:

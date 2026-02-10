@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
-from telemetry import LLMUsage
+from util.telemetry import LLMUsage
 
 
 @dataclass

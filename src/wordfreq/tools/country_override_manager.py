@@ -10,7 +10,7 @@ This module provides the business logic for:
 
 Usage:
     from wordfreq.tools.country_override_manager import CountryOverrideManager
-    from wordfreq.storage.database import create_database_session
+    from storage.database import create_database_session
 
     session = create_database_session()
     manager = CountryOverrideManager(session)
@@ -34,12 +34,12 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 from sqlalchemy.orm import Session
 
-from wordfreq.storage.crud.difficulty_override import (
+from storage.crud.difficulty_override import (
     add_difficulty_override,
     get_all_overrides_for_lemma,
     get_difficulty_override,
 )
-from wordfreq.storage.models.schema import Lemma, LemmaDifficultyOverride
+from storage.models.schema import Lemma, LemmaDifficultyOverride
 from wordfreq.tools.country_word_priorities import (
     COUNTRY_TO_NATIONALITY_MAP,
     TIER_1_LEVEL,
@@ -404,7 +404,7 @@ class CountryOverrideManager:
         Returns:
             Number of overrides removed
         """
-        from wordfreq.storage.crud.difficulty_override import delete_difficulty_override
+        from storage.crud.difficulty_override import delete_difficulty_override
 
         count = 0
         for lemma in self.get_all_country_related_words():

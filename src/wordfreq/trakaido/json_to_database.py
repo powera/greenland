@@ -48,7 +48,7 @@ DEFAULT_JSON_PATH = os.path.join(os.path.dirname(__file__), "nouns.json")
 # Add paths for imports
 sys.path.append(GREENLAND_SRC_PATH)
 import constants
-from wordfreq.storage.database import (
+from storage.database import (
     add_alternative_form,
     add_derivative_form,
     add_lemma,
@@ -57,7 +57,7 @@ from wordfreq.storage.database import (
     get_word_token_by_text,
     update_lemma_translation,
 )
-from wordfreq.storage.models.schema import DerivativeForm, Lemma, WordToken
+from storage.models.schema import DerivativeForm, Lemma, WordToken
 
 english_alternative_map = {
     "bicycle": ["bike"],

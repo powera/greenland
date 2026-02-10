@@ -10,8 +10,8 @@ from unittest.mock import patch
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from wordfreq.storage.backend.config import BackendType
-from wordfreq.storage.models.schema import Base, Lemma
+from storage.backend.config import BackendType
+from storage.models.schema import Base, Lemma
 from workqueue.tools import (
     build_default_config,
     commit_or_raise,

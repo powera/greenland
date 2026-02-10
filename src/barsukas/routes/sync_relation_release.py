@@ -14,9 +14,9 @@ from flask import Blueprint, current_app, flash, g, redirect, render_template, r
 from flask.typing import ResponseReturnValue
 from sqlalchemy.orm import joinedload
 
-from wordfreq.storage.crud.operation_log import log_operation
-from wordfreq.storage.models.lemma_relation import LemmaRelationGroup, LemmaRelationMember
-from wordfreq.storage.models.schema import Lemma
+from storage.crud.operation_log import log_operation
+from storage.models.lemma_relation import LemmaRelationGroup, LemmaRelationMember
+from storage.models.schema import Lemma
 
 if TYPE_CHECKING:
     from barsukas.app import BarsukasFlask

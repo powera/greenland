@@ -19,7 +19,7 @@ from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.polly_tts import PollyVoice
 from barsukas.helpers.flash_helpers import flash_and_log
 from workqueue.task_queue import TaskType, enqueue_task, get_tasks_for_target
-from wordfreq.storage.models.schema import (
+from storage.models.schema import (
     AudioQualityReview,
     Conversation,
     ConversationSentence,
@@ -29,7 +29,7 @@ from wordfreq.storage.models.schema import (
     SentenceTranslation,
     SentenceWord,
 )
-from wordfreq.storage.translation_helpers import get_languages_in_hierarchy, get_supported_languages
+from storage.translation_helpers import get_languages_in_hierarchy, get_supported_languages
 
 bp = Blueprint("sentences", __name__, url_prefix="/sentences")
 
@@ -553,7 +553,7 @@ def accept_sentence(sentence_id: int) -> Response:
         has_all_translations = all(lang in existing_translations for lang in target_languages)
 
         # Batch load ALL lemma translations in ONE query for the missing translations check
-        from wordfreq.storage.models.schema import LemmaTranslation
+        from storage.models.schema import LemmaTranslation
 
         all_lemma_translations: dict[int, set[str]] = {}
         if lemma_ids:

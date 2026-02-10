@@ -1,0 +1,72 @@
+"""Statistics and reporting query functions."""
+
+from typing import Any, Dict, List
+
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
+
+from storage.models.schema import Corpus, DerivativeForm, Lemma, WordFrequency, WordToken
+
+
+def get_processing_stats(session: Session) -> Dict[str, Any]:
+    """Get statistics about the current processing state."""
+    total_word_tokens = session.query(func.count(WordToken.id)).scalar()
+    tokens_with_derivative_forms = (
+        session.query(func.count(WordToken.id)).join(DerivativeForm).scalar()
+    )
+
+    # Count totals
+    total_lemmas = session.query(func.count(Lemma.id)).scalar()
+    total_derivative_forms = session.query(func.count(DerivativeForm.id)).scalar()
+
+    return {
+        "total_word_tokens": total_word_tokens or 0,
+        "tokens_with_derivative_forms": tokens_with_derivative_forms or 0,
+        "total_lemmas": total_lemmas or 0,
+        "total_derivative_forms": total_derivative_forms or 0,
+        "percent_complete": (
+            (tokens_with_derivative_forms / total_word_tokens * 100) if total_word_tokens else 0
+        ),
+    }
+
+
+def list_problematic_words(session: Session, limit: int = 10) -> List[Dict[str, Any]]:
+    """
+    Get words that need review (unverified derivative forms).
+    Returns data in format expected by reviewer.py.
+    """
+    # Query derivative forms that are unverified
+    query = (
+        session.query(WordToken, DerivativeForm, Lemma, WordFrequency)
+        .join(DerivativeForm)
+        .join(Lemma)
+        .outerjoin(WordFrequency)
+        .outerjoin(Corpus, WordFrequency.corpus_id == Corpus.id)
+        .filter(DerivativeForm.verified == False)
+        .filter((Corpus.name == "wiki_vital") | (Corpus.name == None))
+        .order_by(WordFrequency.rank.nullslast())
+        .limit(limit)
+    )
+
+    results: List[Dict[str, Any]] = []
+    word_groups = {}
+
+    # Group by word token
+    for word_token, derivative_form, lemma, word_frequency in query:
+        word_text = word_token.token
+        if word_text not in word_groups:
+            word_groups[word_text] = {
+                "word": word_text,
+                "rank": word_frequency.rank if word_frequency else None,
+                "definitions": [],
+            }
+
+        word_groups[word_text]["definitions"].append(
+            {
+                "text": lemma.definition_text,
+                "pos": lemma.pos_type,
+                "verified": derivative_form.verified,
+            }
+        )
+
+    return list(word_groups.values())

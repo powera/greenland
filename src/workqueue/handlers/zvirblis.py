@@ -12,8 +12,8 @@ from sqlalchemy.orm import Session
 
 from workqueue.tools import get_lemma_or_raise
 import constants
-from wordfreq.storage.models.schema import Sentence, SentenceTranslation
-from wordfreq.storage.translation_helpers import get_supported_languages
+from storage.models.schema import Sentence, SentenceTranslation
+from storage.translation_helpers import get_supported_languages
 from sentences.translation import translate_sentence as do_translation
 
 

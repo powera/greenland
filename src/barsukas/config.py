@@ -69,7 +69,7 @@ class Config:
             return url
 
         # Build from template + key
-        from wordfreq.storage.backend.config import DataSourceConfig
+        from storage.backend.config import DataSourceConfig
 
         try:
             return DataSourceConfig.build_postgres_url()
