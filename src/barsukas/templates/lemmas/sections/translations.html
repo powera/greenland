@@ -33,7 +33,8 @@
                     </thead>
                     <tbody>
                         {% for lang_code, lang_name in language_names.items() %}
-                            <tr>
+                            {% set is_tier3 = lang_code in tier_3_languages %}
+                            <tr{% if is_tier3 %} class="tier-3-translation d-none"{% endif %}>
                                 <td><strong>{{ lang_name }}</strong> <small class="text-muted">({{ lang_code }})</small></td>
                                 <td>
                                     {% if translations[lang_code] %}
@@ -112,6 +113,9 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleTier3Btn">
+                    <i class="bi bi-chevron-down"></i> Show all languages ({{ tier_3_languages|length }} more)
+                </button>
             </div>
         </div>
     </div>

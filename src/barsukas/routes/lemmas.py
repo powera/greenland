@@ -23,7 +23,11 @@ from storage.crud.lemma import handle_lemma_type_subtype_change
 from storage.crud.operation_log import log_translation_change
 from storage.models.schema import DerivativeForm, Lemma
 from storage.queries.lemma import build_lemma_search_query
-from storage.translation_helpers import get_all_translations, get_supported_languages
+from storage.translation_helpers import (
+    TIER_3_LANGUAGES,
+    get_all_translations,
+    get_supported_languages,
+)
 
 bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
 
@@ -365,6 +369,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         google_voices=google_voices,
         related_lemmas=related_lemmas,
         queued_tasks=queued_tasks,
+        tier_3_languages=set(TIER_3_LANGUAGES),
     )
 
 

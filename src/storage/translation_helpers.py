@@ -38,10 +38,11 @@ _SORT_KEY_LANGUAGES = _CJK_SORT_KEY_LANGUAGES | LATIN_SORT_KEY_LANGUAGES
 TIER_1_LANGUAGES = ["lt", "zh", "fr", "es"]
 
 # Tier 2: Secondary supported languages
-TIER_2_LANGUAGES = ["de", "it", "nl", "pt", "sv", "vi"]
+TIER_2_LANGUAGES = ["de", "it", "nl", "pt", "sv"]
 
 # Tier 3: Experimental languages (lower quality/pedagogical issues)
 TIER_3_LANGUAGES = [
+    "vi",
     "ja",
     "ko",
     "ro",
