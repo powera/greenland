@@ -1,4 +1,4 @@
-"""Dari-specific type definitions for linguistic forms."""
+"""Ukrainian-specific type definitions for linguistic forms."""
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
@@ -8,11 +8,13 @@ from clients.wiktionary.types import NounNumberType
 
 @dataclass
 class NounDeclension:
-    """Dari noun declension results.
+    """Ukrainian noun declension results.
 
-    Dari (Afghan Persian) nouns form plurals with suffixes -ها (-ha) or
-    Arabic broken plurals.  Dari does not have grammatical gender on nouns.
-    Dari uses the Perso-Arabic script with the same alphabet as Farsi.
+    Ukrainian nouns have grammatical gender (masculine/feminine/neuter),
+    number (singular/plural), and decline for seven cases (nominative,
+    genitive, dative, accusative, instrumental, locative, vocative).
+    Ukrainian uses the Cyrillic script with letters specific to
+    Ukrainian (Ґ, Є, І, Ї).
     """
 
     word: str
@@ -38,14 +40,15 @@ class NounDeclension:
 
 @dataclass
 class VerbConjugation:
-    """Dari verb conjugation results.
+    """Ukrainian verb conjugation results.
 
-    Dari verbs conjugate for person, number, and tense.  The citation
-    form is the infinitive (masdar) ending in -دن (-dan) or -تن (-tan).
-    Main tenses include present, past (simple past), and future.
+    Ukrainian verbs conjugate for person, number, tense, and aspect.
+    Most verbs come in imperfective/perfective aspect pairs.  The
+    citation form is the infinitive ending in -ти (-ty) or -ться (-tys').
+    Main tenses include present, past, and future.
     """
 
-    word: str  # The infinitive (masdar) form
+    word: str  # The infinitive form
     forms: Dict[str, str] = field(default_factory=dict)
     alternatives: Dict[str, List[str]] = field(default_factory=dict)
     raw_template: Optional[str] = None

@@ -1595,15 +1595,6 @@ class GrammaticalForm(enum.Enum):
     VERB_PS_PAST = "verb/ps_past"
     VERB_PS_FUTURE = "verb/ps_future"
 
-    # Dari noun forms (singular/plural)
-    NOUN_PRS_SINGULAR = "noun/prs_singular"
-    NOUN_PRS_PLURAL = "noun/prs_plural"
-
-    # Dari verb forms (person/number/tense conjugation)
-    VERB_PRS_PRESENT = "verb/prs_present"
-    VERB_PRS_PAST = "verb/prs_past"
-    VERB_PRS_FUTURE = "verb/prs_future"
-
     # Persian noun forms (singular/plural)
     NOUN_FA_SINGULAR = "noun/fa_singular"
     NOUN_FA_PLURAL = "noun/fa_plural"
@@ -1648,6 +1639,15 @@ class GrammaticalForm(enum.Enum):
     VERB_TR_PRESENT = "verb/tr_present"
     VERB_TR_PAST = "verb/tr_past"
     VERB_TR_FUTURE = "verb/tr_future"
+
+    # Ukrainian noun forms (singular/plural - case/gender declension)
+    NOUN_UK_SINGULAR = "noun/uk_singular"
+    NOUN_UK_PLURAL = "noun/uk_plural"
+
+    # Ukrainian verb forms (person/number/tense conjugation)
+    VERB_UK_PRESENT = "verb/uk_present"
+    VERB_UK_PAST = "verb/uk_past"
+    VERB_UK_FUTURE = "verb/uk_future"
 
     # Generic forms
     BASE_FORM = "base_form"

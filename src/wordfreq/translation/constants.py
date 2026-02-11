@@ -265,12 +265,6 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "description": "Pashto translation in lemma form (Arabic script)",
         "instructions": "- Pashto: Provide standard Pashto in Arabic script in base form (masdar for verbs, singular for nouns)\n  - Use the standard Afghan Pashto dialect\n  - Do not include transliteration, just the Pashto script",
     },
-    "dari": {
-        "field": "dari_translation",
-        "code": "prs",
-        "description": "Dari (Afghan Persian) translation in lemma form (Perso-Arabic script)",
-        "instructions": "- Dari: Provide standard Dari (Afghan Persian) in Perso-Arabic script in base form (masdar for verbs, singular for nouns)\n  - Use Afghan Dari vocabulary and forms, not Iranian Farsi\n  - Do not include transliteration, just the Perso-Arabic characters",
-    },
     "persian": {
         "field": "persian_translation",
         "code": "fa",
@@ -300,5 +294,17 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "code": "tr",
         "description": "Turkish translation in lemma form",
         "instructions": "- Turkish: Provide standard Turkish (Turkey) in base form (infinitive for verbs ending in -mak/-mek, singular for nouns)",
+    },
+    "ukrainian": {
+        "field": "ukrainian_translation",
+        "code": "uk",
+        "description": "Ukrainian translation in lemma form (Cyrillic script)",
+        "instructions": "- Ukrainian: Provide standard Ukrainian in Cyrillic script in base form (infinitive for verbs, singular nominative for nouns)\n  - Use standard Ukrainian, not surzhyk or Russian loanwords\n  - Do not include transliteration, just the Cyrillic characters",
+    },
+    "bulgarian": {
+        "field": "bulgarian_translation",
+        "code": "bg",
+        "description": "Bulgarian translation in lemma form (Cyrillic script)",
+        "instructions": "- Bulgarian: Provide standard Bulgarian in Cyrillic script in base form (infinitive/da-construction for verbs, singular indefinite for nouns)\n  - Do not include transliteration, just the Cyrillic characters",
     },
 }
