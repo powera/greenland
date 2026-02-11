@@ -159,6 +159,29 @@
                 </div>
             </div>
         </div>
+
+        <!-- Secondary Translations -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100 {% if counts.secondary_translations > 0 %}border-secondary{% endif %}">
+                <div class="card-header">
+                    <i class="bi bi-translate"></i> Secondary Translations
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title {% if counts.secondary_translations > 0 %}{% else %}text-muted{% endif %}">
+                        {{ counts.secondary_translations }}
+                    </h3>
+                    <p class="card-text text-muted">
+                        Tier 3 language translations (Tamil, Kannada, etc.)
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('sync_release.secondary_translations') }}"
+                       class="btn btn-sm {% if counts.secondary_translations > 0 %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-arrow-right"></i> View &amp; Sync
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row mt-4">
