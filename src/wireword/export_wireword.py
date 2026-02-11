@@ -700,7 +700,12 @@ class WirewordExporter:
                 }
                 # Use base_english for English source, base_source for non-English source
                 if self.source_language == "en":
-                    wireword["base_english"] = entry["source_word"]
+                    source_word = entry["source_word"]
+                    # Append disambiguation to English source word if present
+                    # and the word doesn't already contain parentheses
+                    if lemma.disambiguation and source_word and "(" not in source_word:
+                        source_word = f"{source_word} ({lemma.disambiguation})"
+                    wireword["base_english"] = source_word
                 else:
                     wireword["base_source"] = entry["source_word"]
                 wireword.update(
@@ -763,8 +768,6 @@ class WirewordExporter:
                         grammar_metadata[fact.fact_type] = fact.fact_value
                     wireword["grammar_metadata"] = grammar_metadata
 
-                if lemma.disambiguation:
-                    wireword["disambiguation"] = lemma.disambiguation
                 if lemma.frequency_rank:
                     wireword["frequency_rank"] = lemma.frequency_rank
                 if lemma.notes:
@@ -1305,7 +1308,12 @@ class WirewordExporter:
                 }
                 # Use base_english for English source, base_source for non-English source
                 if self.source_language == "en":
-                    wireword["base_english"] = base_source
+                    verb_source = base_source
+                    # Append disambiguation to English source word if present
+                    # and the word doesn't already contain parentheses
+                    if lemma.disambiguation and verb_source and "(" not in verb_source:
+                        verb_source = f"{verb_source} ({lemma.disambiguation})"
+                    wireword["base_english"] = verb_source
                 else:
                     wireword["base_source"] = base_source
                 wireword.update(
@@ -1345,8 +1353,6 @@ class WirewordExporter:
                 if grammatical_forms:
                     wireword["grammatical_forms"] = grammatical_forms
 
-                if lemma.disambiguation:
-                    wireword["disambiguation"] = lemma.disambiguation
                 if lemma.notes:
                     wireword["notes"] = lemma.notes
 
