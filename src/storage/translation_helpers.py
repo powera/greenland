@@ -188,6 +188,7 @@ LANGUAGE_NAMES = {code: name for code, (_, name, _) in LANGUAGE_FIELDS.items()}
 LLM_FIELD_TO_LANG_CODE = {
     "lithuanian_translation": "lt",
     "chinese_translation": "zh",
+    "chinese_taiwan_translation": "zh-tw",
     "korean_translation": "ko",
     "french_translation": "fr",
     "spanish_translation": "es",
