@@ -16,6 +16,7 @@ from storage.models.schema import Lemma, LemmaTranslation
 from storage.translation_helpers import (
     LANGUAGE_NAMES,
     RELEASE_LANGUAGES,
+    SECONDARY_RELEASE_LANGUAGES,
     compute_sort_key,
     invalidate_audio_for_translation_change,
 )
@@ -170,6 +171,12 @@ def index() -> ResponseReturnValue:
     # Count translation differences (only for matching lemmas)
     translation_diffs = _count_translation_differences(release_lemmas, g.db)
 
+    # Count secondary translation differences
+    sec_translations = _load_secondary_translations(release_dir)
+    secondary_translation_diffs = _count_secondary_translation_differences(
+        release_lemmas, sec_translations, g.db
+    )
+
     counts = {
         "release_total": len(release_lemmas),
         "db_total": len(db_guids),
@@ -178,6 +185,7 @@ def index() -> ResponseReturnValue:
         "difficulty": difficulty_diffs,
         "changes": lemma_text_changes,
         "translations": translation_diffs,
+        "secondary_translations": secondary_translation_diffs,
     }
 
     return render_template(
@@ -1240,6 +1248,355 @@ def apply_translations() -> ResponseReturnValue:
     return redirect(url_for("sync_release.translations"))
 
 
+# =============================================================================
+# Secondary Translations (secondary.jsonl — Tier 3 languages)
+# =============================================================================
+
+
+def _find_secondary_translation_differences(
+    release_lemmas: Dict[str, Dict[str, Any]],
+    secondary_translations: Dict[str, Dict[str, str]],
+    db_session: Any,
+) -> List[Dict[str, Any]]:
+    """Find lemmas where secondary translations differ between release and SQLite.
+
+    Only considers lemmas where GUID exists in both release and DB
+    and lemma_text matches.
+    """
+    differences: List[Dict[str, Any]] = []
+
+    if not SECONDARY_RELEASE_LANGUAGES:
+        return differences
+
+    # We compare for all GUIDs in the base release (the canonical set)
+    release_guids = set(release_lemmas.keys())
+    if not release_guids:
+        return differences
+
+    batch_size = 500
+    guid_list = list(release_guids)
+
+    for i in range(0, len(guid_list), batch_size):
+        batch_guids = guid_list[i : i + batch_size]
+        db_lemmas = db_session.query(Lemma).filter(Lemma.guid.in_(batch_guids)).all()
+
+        lemma_by_id = {lemma.id: lemma for lemma in db_lemmas}
+        lemma_ids = list(lemma_by_id.keys())
+
+        # Batch fetch all translations for these lemmas
+        db_translations: Dict[int, Dict[str, str]] = {lid: {} for lid in lemma_ids}
+        if lemma_ids:
+            trans_rows = (
+                db_session.query(LemmaTranslation)
+                .filter(LemmaTranslation.lemma_id.in_(lemma_ids))
+                .all()
+            )
+            for tr in trans_rows:
+                if tr.translation:
+                    db_translations[tr.lemma_id][tr.language_code] = tr.translation
+
+        for db_lemma in db_lemmas:
+            release_data = release_lemmas.get(db_lemma.guid)
+            if not release_data:
+                continue
+
+            release_lemma_text = _get_release_lemma_text(release_data)
+            if db_lemma.lemma_text != release_lemma_text:
+                continue
+
+            sec_trans = secondary_translations.get(db_lemma.guid, {})
+            db_trans = db_translations.get(db_lemma.id, {})
+
+            lang_diffs: List[Dict[str, Any]] = []
+            for lang_code in SECONDARY_RELEASE_LANGUAGES:
+                release_val = (sec_trans.get(lang_code, "") or "").strip()
+                db_val = (db_trans.get(lang_code, "") or "").strip()
+
+                if release_val != db_val:
+                    lang_diffs.append(
+                        {
+                            "lang_code": lang_code,
+                            "lang_name": LANGUAGE_NAMES.get(lang_code, lang_code),
+                            "release_val": release_val,
+                            "db_val": db_val,
+                        }
+                    )
+
+            if lang_diffs:
+                differences.append(
+                    {
+                        "guid": db_lemma.guid,
+                        "lemma_id": db_lemma.id,
+                        "lemma_text": db_lemma.lemma_text,
+                        "definition": (
+                            db_lemma.definition_text[:60] if db_lemma.definition_text else ""
+                        ),
+                        "pos_type": db_lemma.pos_type,
+                        "pos_subtype": db_lemma.pos_subtype,
+                        "lang_diffs": lang_diffs,
+                        "diff_count": len(lang_diffs),
+                    }
+                )
+
+    differences.sort(key=lambda x: x["guid"])
+    return differences
+
+
+def _count_secondary_translation_differences(
+    release_lemmas: Dict[str, Dict[str, Any]],
+    secondary_translations: Dict[str, Dict[str, str]],
+    db_session: Any,
+) -> int:
+    """Count lemmas with secondary translation differences."""
+    count = 0
+
+    if not SECONDARY_RELEASE_LANGUAGES:
+        return count
+
+    release_guids = set(release_lemmas.keys())
+    if not release_guids:
+        return count
+
+    batch_size = 500
+    guid_list = list(release_guids)
+
+    for i in range(0, len(guid_list), batch_size):
+        batch_guids = guid_list[i : i + batch_size]
+        db_lemmas = db_session.query(Lemma).filter(Lemma.guid.in_(batch_guids)).all()
+
+        lemma_by_id = {lemma.id: lemma for lemma in db_lemmas}
+        lemma_ids = list(lemma_by_id.keys())
+
+        db_translations: Dict[int, Dict[str, str]] = {lid: {} for lid in lemma_ids}
+        if lemma_ids:
+            trans_rows = (
+                db_session.query(LemmaTranslation)
+                .filter(LemmaTranslation.lemma_id.in_(lemma_ids))
+                .all()
+            )
+            for tr in trans_rows:
+                if tr.translation:
+                    db_translations[tr.lemma_id][tr.language_code] = tr.translation
+
+        for db_lemma in db_lemmas:
+            release_data = release_lemmas.get(db_lemma.guid)
+            if not release_data:
+                continue
+
+            release_lemma_text = _get_release_lemma_text(release_data)
+            if db_lemma.lemma_text != release_lemma_text:
+                continue
+
+            sec_trans = secondary_translations.get(db_lemma.guid, {})
+            db_trans = db_translations.get(db_lemma.id, {})
+
+            for lang_code in SECONDARY_RELEASE_LANGUAGES:
+                release_val = (sec_trans.get(lang_code, "") or "").strip()
+                db_val = (db_trans.get(lang_code, "") or "").strip()
+
+                if release_val != db_val:
+                    count += 1
+                    break  # Just need to know this lemma has differences
+
+    return count
+
+
+@bp.route("/secondary-translations")
+def secondary_translations() -> ResponseReturnValue:
+    """Display secondary translation differences between release and SQLite."""
+    release_dir = _get_release_dir()
+
+    if not release_dir.exists():
+        flash(f"Release directory not found: {release_dir}", "error")
+        return redirect(url_for("sync_release.index"))
+
+    release_lemmas = _load_release_lemmas(release_dir)
+    if not release_lemmas:
+        flash("No lemmas found in release directory", "warning")
+        return redirect(url_for("sync_release.index"))
+
+    sec_translations = _load_secondary_translations(release_dir)
+    differences = _find_secondary_translation_differences(release_lemmas, sec_translations, g.db)
+
+    return render_template(
+        "sync_release/secondary_translations.html",
+        differences=differences,
+        release_dir=str(release_dir),
+        language_names=LANGUAGE_NAMES,
+    )
+
+
+@bp.route("/secondary-translations/apply", methods=["POST"])
+def apply_secondary_translations() -> ResponseReturnValue:
+    """Apply selected secondary translation changes."""
+    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
+    if app.config.get("READONLY", False):
+        flash("Database is in read-only mode", "error")
+        return redirect(url_for("sync_release.secondary_translations"))
+
+    # Parse form actions — same format as primary translations
+    actions: Dict[str, Dict[str, str]] = {}
+    for key, value in request.form.items():
+        if key.startswith("action_"):
+            remainder = key[len("action_") :]
+            underscore_pos = remainder.find("_")
+            if underscore_pos == -1:
+                continue
+            lemma_id = remainder[:underscore_pos]
+            lang_code = remainder[underscore_pos + 1 :]
+            if lemma_id not in actions:
+                actions[lemma_id] = {}
+            actions[lemma_id][lang_code] = value
+
+    if not actions:
+        flash("No changes selected", "warning")
+        return redirect(url_for("sync_release.secondary_translations"))
+
+    release_dir = _get_release_dir()
+    sec_translations = _load_secondary_translations(release_dir)
+
+    updated_db_count = 0
+    updated_release_count = 0
+    skipped_count = 0
+    error_count = 0
+
+    # Track release file updates: {dir_path: {guid: {lang_code: new_translation}}}
+    release_updates: Dict[Path, Dict[str, Dict[str, str]]] = {}
+
+    for lemma_id_str, lang_actions in actions.items():
+        try:
+            lemma_id_int = int(lemma_id_str)
+            lemma = g.db.query(Lemma).filter(Lemma.id == lemma_id_int).first()
+
+            if not lemma:
+                logger.warning(f"Lemma not found: {lemma_id_int}")
+                error_count += 1
+                continue
+
+            guid_sec_trans = sec_translations.get(lemma.guid, {})
+
+            for lang_code, action in lang_actions.items():
+                if action == "skip":
+                    skipped_count += 1
+                    continue
+
+                if action == "use_release":
+                    release_val = guid_sec_trans.get(lang_code, "")
+                    if release_val:
+                        trans_obj = (
+                            g.db.query(LemmaTranslation)
+                            .filter(
+                                LemmaTranslation.lemma_id == lemma.id,
+                                LemmaTranslation.language_code == lang_code,
+                            )
+                            .first()
+                        )
+
+                        if trans_obj:
+                            old_val = trans_obj.translation
+                            trans_obj.translation = release_val
+                            trans_obj.sort_key = compute_sort_key(lang_code, release_val)
+                        else:
+                            trans_obj = LemmaTranslation(
+                                lemma_id=lemma.id,
+                                language_code=lang_code,
+                                translation=release_val,
+                                sort_key=compute_sort_key(lang_code, release_val),
+                                verified=False,
+                            )
+                            g.db.add(trans_obj)
+                            old_val = None
+
+                        log_translation_change(
+                            session=g.db,
+                            source="sync-release-secondary",
+                            operation_type="translation_sync",
+                            lemma_id=lemma.id,
+                            language_code=lang_code,
+                            old_translation=old_val,
+                            new_translation=release_val,
+                        )
+
+                        invalidate_audio_for_translation_change(
+                            g.db, lemma.guid, lang_code, old_val, release_val
+                        )
+
+                        updated_db_count += 1
+                        logger.info(
+                            f"Updated DB secondary translation for "
+                            f"'{lemma.lemma_text}' ({lemma.guid}) "
+                            f"{lang_code}: '{old_val}' -> '{release_val}'"
+                        )
+                    else:
+                        skipped_count += 1
+
+                elif action == "use_db":
+                    trans_obj = (
+                        g.db.query(LemmaTranslation)
+                        .filter(
+                            LemmaTranslation.lemma_id == lemma.id,
+                            LemmaTranslation.language_code == lang_code,
+                        )
+                        .first()
+                    )
+
+                    db_val = trans_obj.translation if trans_obj else ""
+                    if db_val:
+                        dir_path = _find_secondary_file_dir_for_lemma(release_dir, lemma.guid)
+                        if dir_path:
+                            if dir_path not in release_updates:
+                                release_updates[dir_path] = {}
+                            if lemma.guid not in release_updates[dir_path]:
+                                release_updates[dir_path][lemma.guid] = {}
+                            release_updates[dir_path][lemma.guid][lang_code] = db_val
+                            updated_release_count += 1
+                            logger.info(
+                                f"Queued secondary release update for "
+                                f"'{lemma.lemma_text}' ({lemma.guid}) "
+                                f"{lang_code}: -> '{db_val}'"
+                            )
+                        else:
+                            logger.warning(f"Could not find release dir for GUID: " f"{lemma.guid}")
+                            error_count += 1
+                    else:
+                        skipped_count += 1
+
+        except Exception as e:
+            logger.error(f"Error processing lemma {lemma_id_str}: {e}")
+            error_count += 1
+
+    if updated_db_count > 0:
+        try:
+            g.db.commit()
+            flash(
+                f"Updated {updated_db_count} secondary translation(s) in database",
+                "success",
+            )
+        except Exception as e:
+            g.db.rollback()
+            flash(f"Error committing DB changes: {e}", "error")
+            logger.error(f"Commit error: {e}")
+
+    if release_updates:
+        try:
+            _apply_secondary_translation_updates(release_updates)
+            flash(
+                f"Updated {updated_release_count} secondary translation(s) " f"in release files",
+                "success",
+            )
+        except Exception as e:
+            flash(f"Error updating release files: {e}", "error")
+            logger.error(f"Release file update error: {e}")
+
+    if skipped_count > 0:
+        flash(f"Skipped {skipped_count} item(s)", "info")
+
+    if error_count > 0:
+        flash(f"Errors: {error_count}", "warning")
+
+    return redirect(url_for("sync_release.secondary_translations"))
+
+
 def _find_release_file_for_lemma(release_dir: Path, guid: str) -> Optional[Path]:
     """Find the base.jsonl file containing a specific GUID."""
     for base_file in release_dir.rglob("base.jsonl"):
@@ -1307,6 +1664,144 @@ def _apply_release_translation_updates(
 
         except Exception as e:
             logger.error(f"Error updating {file_path}: {e}")
+            raise
+
+
+def _load_secondary_translations(
+    release_dir: Path,
+) -> Dict[str, Dict[str, str]]:
+    """Load all secondary translations from data/release secondary.jsonl files.
+
+    Returns:
+        Dictionary mapping GUID to {lang_code: translation} for secondary languages.
+    """
+    secondary: Dict[str, Dict[str, str]] = {}
+
+    if not release_dir.exists():
+        logger.warning(f"Release directory not found: {release_dir}")
+        return secondary
+
+    for sec_file in release_dir.rglob("secondary.jsonl"):
+        try:
+            with open(sec_file, "r", encoding="utf-8") as f:
+                for line_num, line in enumerate(f, 1):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        data = json.loads(line)
+                        guid = data.get("guid")
+                        translations = data.get("translations", {})
+                        if guid and translations:
+                            if guid not in secondary:
+                                secondary[guid] = {}
+                            secondary[guid].update(translations)
+                    except json.JSONDecodeError as e:
+                        logger.error(f"JSON parse error in {sec_file}:{line_num}: {e}")
+        except Exception as e:
+            logger.error(f"Error reading {sec_file}: {e}")
+
+    return secondary
+
+
+def _find_secondary_file_for_lemma(release_dir: Path, guid: str) -> Optional[Path]:
+    """Find the secondary.jsonl file containing a specific GUID."""
+    for sec_file in release_dir.rglob("secondary.jsonl"):
+        try:
+            with open(sec_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        data = json.loads(line)
+                        if data.get("guid") == guid:
+                            return sec_file
+                    except json.JSONDecodeError:
+                        continue
+        except Exception:
+            continue
+    return None
+
+
+def _find_secondary_file_dir_for_lemma(release_dir: Path, guid: str) -> Optional[Path]:
+    """Find the directory that should contain a secondary.jsonl entry for a GUID.
+
+    Uses base.jsonl to locate the right category directory, since the GUID
+    may not yet exist in secondary.jsonl.
+    """
+    base_file = _find_release_file_for_lemma(release_dir, guid)
+    if base_file:
+        return base_file.parent
+    return None
+
+
+def _apply_secondary_translation_updates(
+    updates: Dict[Path, Dict[str, Dict[str, str]]],
+) -> None:
+    """Apply translation updates to secondary.jsonl files.
+
+    If a GUID doesn't exist in the file yet, it is appended.
+
+    Args:
+        updates: {directory_path: {guid: {lang_code: new_translation}}}
+    """
+    for dir_path, guid_updates in updates.items():
+        sec_file = dir_path / "secondary.jsonl"
+
+        # Read existing records
+        existing_lines: List[str] = []
+        seen_guids: set[str] = set()
+        if sec_file.exists():
+            try:
+                with open(sec_file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        stripped = line.strip()
+                        if not stripped:
+                            existing_lines.append(line)
+                            continue
+                        try:
+                            data = json.loads(stripped)
+                            guid = data.get("guid")
+                            if guid in guid_updates:
+                                seen_guids.add(guid)
+                                if "translations" not in data:
+                                    data["translations"] = {}
+                                for lang_code, new_val in guid_updates[guid].items():
+                                    if new_val:
+                                        data["translations"][lang_code] = new_val
+                                    else:
+                                        data["translations"].pop(lang_code, None)
+                                existing_lines.append(json.dumps(data, ensure_ascii=False) + "\n")
+                                logger.info(
+                                    f"Updated secondary translations for {guid} " f"in {sec_file}"
+                                )
+                            else:
+                                existing_lines.append(line)
+                        except json.JSONDecodeError:
+                            existing_lines.append(line)
+            except Exception as e:
+                logger.error(f"Error reading {sec_file}: {e}")
+                raise
+
+        # Append any GUIDs not already in the file
+        for guid, translations in guid_updates.items():
+            if guid not in seen_guids:
+                non_empty = {lc: t for lc, t in translations.items() if t}
+                if non_empty:
+                    new_record = {
+                        "guid": guid,
+                        "translations": non_empty,
+                    }
+                    existing_lines.append(json.dumps(new_record, ensure_ascii=False) + "\n")
+                    logger.info(f"Appended secondary translations for {guid} " f"in {sec_file}")
+
+        # Write back
+        try:
+            with open(sec_file, "w", encoding="utf-8") as f:
+                f.writelines(existing_lines)
+        except Exception as e:
+            logger.error(f"Error writing {sec_file}: {e}")
             raise
 
 

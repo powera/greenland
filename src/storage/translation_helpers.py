@@ -90,6 +90,11 @@ RELEASE_LANGUAGES = [
     "sw",
 ]
 
+# Languages included in data/release secondary.jsonl files.
+# These are Tier 3 languages NOT already in RELEASE_LANGUAGES.
+# They are stored separately from base.jsonl to keep the primary release lean.
+SECONDARY_RELEASE_LANGUAGES = [lang for lang in TIER_3_LANGUAGES if lang not in RELEASE_LANGUAGES]
+
 LANGUAGE_HIERARCHY = [
     "en",  # English (special case - source language)
     "lt",  # Lithuanian

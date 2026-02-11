@@ -445,6 +445,10 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
             base_records = []
 
             release_lang_set = set(translation_helpers.RELEASE_LANGUAGES)
+            secondary_lang_set = set(translation_helpers.SECONDARY_RELEASE_LANGUAGES)
+
+            # Collect secondary translation records alongside base records
+            secondary_records: List[Dict[str, Any]] = []
 
             for lemma in category_lemmas:
                 # Get all translations
@@ -452,12 +456,15 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 
                 # Build translations dict (only non-empty values, filtered to RELEASE_LANGUAGES)
                 translations_dict: Dict[str, str] = {}
+                secondary_translations_dict: Dict[str, str] = {}
                 for lang_code, translation in all_translations.items():
-                    if lang_code not in release_lang_set:
-                        continue
                     if translation and translation.strip():
-                        all_languages.add(lang_code)
-                        translations_dict[lang_code] = translation
+                        if lang_code in release_lang_set:
+                            all_languages.add(lang_code)
+                            translations_dict[lang_code] = translation
+                        elif lang_code in secondary_lang_set:
+                            all_languages.add(lang_code)
+                            secondary_translations_dict[lang_code] = translation
 
                 # Get difficulty overrides (filtered to RELEASE_LANGUAGES)
                 difficulty_overrides_dict: Dict[str, int] = {}
@@ -487,9 +494,22 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 
                 base_records.append(base_data)
 
+                # Secondary translations record (guid + translations only)
+                if secondary_translations_dict:
+                    secondary_records.append(
+                        {
+                            "guid": lemma.guid,
+                            "translations": secondary_translations_dict,
+                        }
+                    )
+
             # Write base.jsonl (now includes translations)
             base_file = category_dir / "base.jsonl"
             _write_jsonl_atomic(base_file, base_records)
+
+            # Write secondary.jsonl (secondary language translations)
+            secondary_file = category_dir / "secondary.jsonl"
+            _write_jsonl_atomic(secondary_file, secondary_records)
 
             # Collect per-language data (derivative_forms, grammar_facts)
             # keyed by language code -> list of per-lemma records
