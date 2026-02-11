@@ -247,4 +247,58 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "description": "Shona translation in lemma form",
         "instructions": "- Shona: Provide standard Shona in base form",
     },
+    "hindi": {
+        "field": "hindi_translation",
+        "code": "hi",
+        "description": "Hindi translation in lemma form (Devanagari script)",
+        "instructions": "- Hindi: Provide standard Hindi in Devanagari script in base form (infinitive for verbs, singular for nouns)\n  - Use Modern Standard Hindi as spoken in India\n  - Do not include transliteration, just the Devanagari characters",
+    },
+    "bengali": {
+        "field": "bengali_translation",
+        "code": "bn",
+        "description": "Bengali translation in lemma form (Bengali script)",
+        "instructions": "- Bengali: Provide standard Bengali in Bengali script in base form (infinitive for verbs, singular for nouns)\n  - Use standard Bangladeshi/West Bengali literary form\n  - Do not include transliteration, just the Bengali characters",
+    },
+    "pashto": {
+        "field": "pashto_translation",
+        "code": "ps",
+        "description": "Pashto translation in lemma form (Arabic script)",
+        "instructions": "- Pashto: Provide standard Pashto in Arabic script in base form (masdar for verbs, singular for nouns)\n  - Use the standard Afghan Pashto dialect\n  - Do not include transliteration, just the Pashto script",
+    },
+    "dari": {
+        "field": "dari_translation",
+        "code": "prs",
+        "description": "Dari (Afghan Persian) translation in lemma form (Perso-Arabic script)",
+        "instructions": "- Dari: Provide standard Dari (Afghan Persian) in Perso-Arabic script in base form (masdar for verbs, singular for nouns)\n  - Use Afghan Dari vocabulary and forms, not Iranian Farsi\n  - Do not include transliteration, just the Perso-Arabic characters",
+    },
+    "persian": {
+        "field": "persian_translation",
+        "code": "fa",
+        "description": "Persian (Farsi) translation in lemma form (Perso-Arabic script)",
+        "instructions": "- Persian: Provide standard Iranian Persian (Farsi) in Perso-Arabic script in base form (masdar for verbs, singular for nouns)\n  - Use Iranian Persian vocabulary and forms\n  - Do not include transliteration, just the Perso-Arabic characters",
+    },
+    "georgian": {
+        "field": "georgian_translation",
+        "code": "ka",
+        "description": "Georgian translation in lemma form (Mkhedruli script)",
+        "instructions": "- Georgian: Provide standard Georgian in Mkhedruli script in base form (masdar/infinitive for verbs, nominative singular for nouns)\n  - Do not include transliteration, just the Georgian characters",
+    },
+    "armenian": {
+        "field": "armenian_translation",
+        "code": "hy",
+        "description": "Armenian translation in lemma form (Armenian script)",
+        "instructions": "- Armenian: Provide standard Eastern Armenian in Armenian script in base form (infinitive for verbs, nominative singular for nouns)\n  - Use Eastern Armenian as the standard variant\n  - Do not include transliteration, just the Armenian characters",
+    },
+    "azerbaijani": {
+        "field": "azerbaijani_translation",
+        "code": "az",
+        "description": "Azerbaijani translation in lemma form (Latin script)",
+        "instructions": "- Azerbaijani: Provide standard Azerbaijani in Latin script in base form (infinitive for verbs ending in -maq/-mek, singular for nouns)",
+    },
+    "turkish": {
+        "field": "turkish_translation",
+        "code": "tr",
+        "description": "Turkish translation in lemma form",
+        "instructions": "- Turkish: Provide standard Turkish (Turkey) in base form (infinitive for verbs ending in -mak/-mek, singular for nouns)",
+    },
 }

@@ -68,6 +68,15 @@ TIER_3_LANGUAGES = [
     "so",
     "xh",
     "sn",
+    "hi",
+    "bn",
+    "ps",
+    "prs",
+    "fa",
+    "ka",
+    "hy",
+    "az",
+    "tr",
 ]
 
 # Languages included in data/release read/write operations.
@@ -133,6 +142,15 @@ LANGUAGE_HIERARCHY = [
     "so",  # Somali (experimental)
     "xh",  # Xhosa (experimental)
     "sn",  # Shona (experimental)
+    "hi",  # Hindi (experimental)
+    "bn",  # Bengali (experimental)
+    "ps",  # Pashto (experimental)
+    "prs",  # Dari (experimental)
+    "fa",  # Persian (experimental)
+    "ka",  # Georgian (experimental)
+    "hy",  # Armenian (experimental)
+    "az",  # Azerbaijani (experimental)
+    "tr",  # Turkish (experimental)
 ]
 
 # Language mappings
@@ -178,6 +196,15 @@ LANGUAGE_FIELDS = {
     "so": ("so", "Somali", True),
     "xh": ("xh", "Xhosa", True),
     "sn": ("sn", "Shona", True),
+    "hi": ("hi", "Hindi", True),
+    "bn": ("bn", "Bengali", True),
+    "ps": ("ps", "Pashto", True),
+    "prs": ("prs", "Dari", True),
+    "fa": ("fa", "Persian", True),
+    "ka": ("ka", "Georgian", True),
+    "hy": ("hy", "Armenian", True),
+    "az": ("az", "Azerbaijani", True),
+    "tr": ("tr", "Turkish", True),
 }
 
 # Language display names (for use in prompts, UIs, etc.)
@@ -223,6 +250,15 @@ LLM_FIELD_TO_LANG_CODE = {
     "somali_translation": "so",
     "xhosa_translation": "xh",
     "shona_translation": "sn",
+    "hindi_translation": "hi",
+    "bengali_translation": "bn",
+    "pashto_translation": "ps",
+    "dari_translation": "prs",
+    "persian_translation": "fa",
+    "georgian_translation": "ka",
+    "armenian_translation": "hy",
+    "azerbaijani_translation": "az",
+    "turkish_translation": "tr",
 }
 
 # Reverse mapping: language codes to LLM field names

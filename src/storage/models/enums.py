@@ -1568,6 +1568,87 @@ class GrammaticalForm(enum.Enum):
     VERB_SN_PAST = "verb/sn_past"
     VERB_SN_FUTURE = "verb/sn_future"
 
+    # Hindi noun forms (singular/plural - gender-based inflection)
+    NOUN_HI_SINGULAR = "noun/hi_singular"
+    NOUN_HI_PLURAL = "noun/hi_plural"
+
+    # Hindi verb forms (person/number/gender/tense conjugation)
+    VERB_HI_PRESENT = "verb/hi_present"
+    VERB_HI_PAST = "verb/hi_past"
+    VERB_HI_FUTURE = "verb/hi_future"
+
+    # Bengali noun forms (singular/plural)
+    NOUN_BN_SINGULAR = "noun/bn_singular"
+    NOUN_BN_PLURAL = "noun/bn_plural"
+
+    # Bengali verb forms (person/tense conjugation)
+    VERB_BN_PRESENT = "verb/bn_present"
+    VERB_BN_PAST = "verb/bn_past"
+    VERB_BN_FUTURE = "verb/bn_future"
+
+    # Pashto noun forms (singular/plural - gender/case inflection)
+    NOUN_PS_SINGULAR = "noun/ps_singular"
+    NOUN_PS_PLURAL = "noun/ps_plural"
+
+    # Pashto verb forms (person/number/gender/tense conjugation)
+    VERB_PS_PRESENT = "verb/ps_present"
+    VERB_PS_PAST = "verb/ps_past"
+    VERB_PS_FUTURE = "verb/ps_future"
+
+    # Dari noun forms (singular/plural)
+    NOUN_PRS_SINGULAR = "noun/prs_singular"
+    NOUN_PRS_PLURAL = "noun/prs_plural"
+
+    # Dari verb forms (person/number/tense conjugation)
+    VERB_PRS_PRESENT = "verb/prs_present"
+    VERB_PRS_PAST = "verb/prs_past"
+    VERB_PRS_FUTURE = "verb/prs_future"
+
+    # Persian noun forms (singular/plural)
+    NOUN_FA_SINGULAR = "noun/fa_singular"
+    NOUN_FA_PLURAL = "noun/fa_plural"
+
+    # Persian verb forms (person/number/tense conjugation)
+    VERB_FA_PRESENT = "verb/fa_present"
+    VERB_FA_PAST = "verb/fa_past"
+    VERB_FA_FUTURE = "verb/fa_future"
+
+    # Georgian noun forms (singular/plural - case declension)
+    NOUN_KA_SINGULAR = "noun/ka_singular"
+    NOUN_KA_PLURAL = "noun/ka_plural"
+
+    # Georgian verb forms (complex screeve system with person/tense)
+    VERB_KA_PRESENT = "verb/ka_present"
+    VERB_KA_PAST = "verb/ka_past"
+    VERB_KA_FUTURE = "verb/ka_future"
+
+    # Armenian noun forms (singular/plural - case declension)
+    NOUN_HY_SINGULAR = "noun/hy_singular"
+    NOUN_HY_PLURAL = "noun/hy_plural"
+
+    # Armenian verb forms (person/number/tense conjugation)
+    VERB_HY_PRESENT = "verb/hy_present"
+    VERB_HY_PAST = "verb/hy_past"
+    VERB_HY_FUTURE = "verb/hy_future"
+
+    # Azerbaijani noun forms (singular/plural - agglutinative with vowel harmony)
+    NOUN_AZ_SINGULAR = "noun/az_singular"
+    NOUN_AZ_PLURAL = "noun/az_plural"
+
+    # Azerbaijani verb forms (agglutinative person/tense/mood conjugation)
+    VERB_AZ_PRESENT = "verb/az_present"
+    VERB_AZ_PAST = "verb/az_past"
+    VERB_AZ_FUTURE = "verb/az_future"
+
+    # Turkish noun forms (singular/plural - agglutinative with vowel harmony)
+    NOUN_TR_SINGULAR = "noun/tr_singular"
+    NOUN_TR_PLURAL = "noun/tr_plural"
+
+    # Turkish verb forms (agglutinative person/tense/mood conjugation)
+    VERB_TR_PRESENT = "verb/tr_present"
+    VERB_TR_PAST = "verb/tr_past"
+    VERB_TR_FUTURE = "verb/tr_future"
+
     # Generic forms
     BASE_FORM = "base_form"
     OTHER = "other"
