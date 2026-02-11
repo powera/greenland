@@ -78,7 +78,7 @@ from benchmarks.lib.runners.antonym_runner import AntonymRunner
            the antonym of a word.""",
 )
 class AntonymBenchmark:
-    """Module container for spell check benchmark."""
+    """Module container for antonym benchmark."""
 
     pass
 
@@ -95,7 +95,7 @@ from benchmarks.lib.runners.definitions_runner import DefinitionsRunner
            the correct definition of words.""",
 )
 class DefinitionsBenchmark:
-    """Module container for spell check benchmark."""
+    """Module container for definitions benchmark."""
 
 
 from benchmarks.lib.generators.unit_conversion_generator import UnitConversionGenerator
@@ -171,7 +171,7 @@ for codepair in ["en_fr", "en_zh", "sw_ko"]:
                words from one language to another.""",
     )
     class TranslationBenchmark:
-        """Module container for spell check benchmark."""
+        """Module container for translation benchmark."""
 
         pass
 
