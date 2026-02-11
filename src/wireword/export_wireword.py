@@ -700,7 +700,12 @@ class WirewordExporter:
                 }
                 # Use base_english for English source, base_source for non-English source
                 if self.source_language == "en":
-                    wireword["base_english"] = entry["source_word"]
+                    source_word = entry["source_word"]
+                    # Append disambiguation to English source word if present
+                    # and the word doesn't already contain parentheses
+                    if lemma.disambiguation and source_word and "(" not in source_word:
+                        source_word = f"{source_word} ({lemma.disambiguation})"
+                    wireword["base_english"] = source_word
                 else:
                     wireword["base_source"] = entry["source_word"]
                 wireword.update(
@@ -1303,7 +1308,12 @@ class WirewordExporter:
                 }
                 # Use base_english for English source, base_source for non-English source
                 if self.source_language == "en":
-                    wireword["base_english"] = base_source
+                    verb_source = base_source
+                    # Append disambiguation to English source word if present
+                    # and the word doesn't already contain parentheses
+                    if lemma.disambiguation and verb_source and "(" not in verb_source:
+                        verb_source = f"{verb_source} ({lemma.disambiguation})"
+                    wireword["base_english"] = verb_source
                 else:
                     wireword["base_source"] = base_source
                 wireword.update(
