@@ -30,6 +30,16 @@
                         <small class="form-text text-muted">Select the target language for export (or "All Languages" to export all)</small>
                     </div>
 
+                    <div class="mb-4" id="source_language_group">
+                        <label for="source_language" class="form-label">Source Language</label>
+                        <select class="form-select" id="source_language" name="source_language">
+                            {% for code, name in source_languages.items() %}
+                                <option value="{{ code }}"{% if code == 'en' %} selected{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">The language shown to the learner (defaults to English)</small>
+                    </div>
+
                     <div class="mb-4" id="chinese_variant_group" style="display: none;">
                         <label class="form-label">Chinese Variant</label>
                         <div>

@@ -244,6 +244,7 @@ class WirewordSentenceExporter:
             if self.source_language != "en":
                 output["source_language"] = self.source_language
 
+            skipped_no_source = 0
             for sentence in sentences:
                 # Get all translations (already loaded via joinedload)
                 translations = {}
@@ -257,6 +258,11 @@ class WirewordSentenceExporter:
                     ):
                         translation_text = to_simplified(translation_text)
                     translations[trans.language_code] = translation_text
+
+                # Skip sentences missing a source language translation
+                if self.source_language != "en" and not translations.get(self.source_language):
+                    skipped_no_source += 1
+                    continue
 
                 # Filter to only include requested language + source language
                 if not include_all_languages:
@@ -324,6 +330,12 @@ class WirewordSentenceExporter:
                     sentence_entry["audio"] = audio_dict
 
                 output["sentences"].append(sentence_entry)
+
+            if skipped_no_source > 0:
+                logger.info(
+                    f"Skipped {skipped_no_source} sentences missing "
+                    f"{self.source_language} translation"
+                )
 
             return output
 

@@ -34,7 +34,9 @@ def _get_config() -> DataSourceConfig:
 
 
 def export_all_languages(
-    include_unreviewed_audio: bool = False, apply_level_overrides: bool = False
+    include_unreviewed_audio: bool = False,
+    apply_level_overrides: bool = False,
+    source_language: str = "en",
 ) -> ResponseReturnValue:
     """Export WireWord files for all supported languages (directory mode only)."""
     try:
@@ -55,6 +57,7 @@ def export_all_languages(
                         language=lang_code,
                         simplified_chinese=True,
                         include_unreviewed_audio=include_unreviewed_audio,
+                        source_language=source_language,
                     )
                     if apply_level_overrides:
                         agent_simplified.apply_level_overrides()
@@ -72,6 +75,7 @@ def export_all_languages(
                         language=lang_code,
                         simplified_chinese=False,
                         include_unreviewed_audio=include_unreviewed_audio,
+                        source_language=source_language,
                     )
                     if apply_level_overrides:
                         agent_traditional.apply_level_overrides()
@@ -88,6 +92,7 @@ def export_all_languages(
                         config=config,
                         language=lang_code,
                         include_unreviewed_audio=include_unreviewed_audio,
+                        source_language=source_language,
                     )
                     if apply_level_overrides:
                         agent.apply_level_overrides()
@@ -128,9 +133,9 @@ def export_all_languages(
 # Supported source languages for WireWord export
 SUPPORTED_SOURCE_LANGUAGES = {
     "en": "English",
-    "uk": "Ukrainian",
+    "kn": "Kannada",
     "bn": "Bengali",
-    "si": "Sinhala",
+    "uk": "Ukrainian",
 }
 
 
@@ -160,6 +165,7 @@ def export_wireword() -> ResponseReturnValue:
         return export_all_languages(
             include_unreviewed_audio=include_unreviewed_audio,
             apply_level_overrides=apply_level_overrides,
+            source_language=source_language,
         )
 
     # Validate language
