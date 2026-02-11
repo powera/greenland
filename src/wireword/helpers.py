@@ -112,7 +112,17 @@ def format_verb_entry(entry: Dict[str, Any], is_last: bool = False) -> str:
 
     # Determine the keys order - put grammatical_forms last
     keys_order = []
-    for key in ["guid", "base_target", "base_english", "corpus", "group", "level", "word_type"]:
+    for key in [
+        "guid",
+        "base_target",
+        "base_english",
+        "base_source",
+        "source_language",
+        "corpus",
+        "group",
+        "level",
+        "word_type",
+    ]:
         if key in entry:
             keys_order.append(key)
 

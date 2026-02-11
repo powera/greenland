@@ -27,6 +27,7 @@ from storage.models.grammar_fact import GrammarFact
 from storage.models.schema import AudioQualityReview, DerivativeForm, Lemma, WordToken
 from storage.translation_helpers import (
     LANGUAGE_FIELDS,
+    LANGUAGE_NAMES,
     bulk_get_translations,
     get_translation,
 )
@@ -56,6 +57,7 @@ class WirewordExporter:
         language: str = "lt",
         simplified_chinese: bool = True,
         include_unreviewed_audio: bool = False,
+        source_language: str = "en",
     ):
         """
         Initialize the WirewordExporter.
@@ -67,6 +69,8 @@ class WirewordExporter:
             simplified_chinese: If True and language is 'zh', convert to Simplified Chinese (default: True)
             include_unreviewed_audio: If True, include audio that exists in staging but hasn't been
                 reviewed yet. The manifest's audio_prefix will be changed to point to staging.
+            source_language: Source language code (default: 'en'). The language the learner already
+                knows. When not 'en', base_english is replaced with base_source in the output.
         """
         # Use provided config or create default SQLite config
         if config is None:
@@ -76,16 +80,24 @@ class WirewordExporter:
         self.language = language
         self.simplified_chinese = simplified_chinese
         self.include_unreviewed_audio = include_unreviewed_audio
+        self.source_language = source_language
 
         if language not in LANGUAGE_FIELDS:
             raise ValueError(
                 f"Unsupported language: {language}. Supported: {', '.join(LANGUAGE_FIELDS.keys())}"
             )
 
+        if source_language not in LANGUAGE_FIELDS:
+            raise ValueError(
+                f"Unsupported source language: {source_language}. "
+                f"Supported: {', '.join(LANGUAGE_FIELDS.keys())}"
+            )
+
         # Get language name from translation_helpers
         from storage.translation_helpers import get_language_name
 
         self.language_name = get_language_name(language)
+        self.source_language_name = get_language_name(source_language)
 
         if debug:
             logger.setLevel(logging.DEBUG)
@@ -94,19 +106,24 @@ class WirewordExporter:
         """Get database session."""
         return create_session(self.config)
 
-    def get_english_word_from_lemma(self, session: Any, lemma: Lemma) -> Optional[str]:
+    def get_source_word_from_lemma(self, session: Any, lemma: Lemma) -> Optional[str]:
         """
-        Get the primary English word for a lemma.
+        Get the source language word for a lemma.
+
+        When source_language is 'en', returns lemma_text (English).
+        Otherwise, fetches the translation for the source language.
 
         Args:
             session: Database session
             lemma: Lemma object
 
         Returns:
-            English word string or None if not found
+            Source language word string or None if not found
         """
-        text: Optional[str] = lemma.lemma_text
-        return text
+        if self.source_language == "en":
+            text: Optional[str] = lemma.lemma_text
+            return text
+        return get_translation(session, lemma, self.source_language)
 
     def query_trakaido_data_for_wireword(
         self,
@@ -180,6 +197,17 @@ class WirewordExporter:
             session, all_lemmas, self.language
         )
 
+        # For non-English source languages, bulk fetch source translations
+        source_translations_by_id: Dict[int, Optional[str]] = {}
+        if self.source_language != "en":
+            source_translations_by_id = bulk_get_translations(
+                session, all_lemmas, self.source_language
+            )
+            logger.info(
+                f"Fetched {sum(1 for v in source_translations_by_id.values() if v)} "
+                f"{self.source_language_name} source translations"
+            )
+
         # For Traditional Chinese export, also fetch zh-tw translations
         zh_tw_translations_by_id: Dict[int, Optional[str]] = {}
         if self.language == "zh" and not self.simplified_chinese:
@@ -191,6 +219,12 @@ class WirewordExporter:
         # Filter by translation availability using pre-fetched data
         lemmas = []
         for lemma in all_lemmas:
+            # For non-English source, also require source translation
+            if self.source_language != "en":
+                source_trans = source_translations_by_id.get(lemma.id)
+                if not source_trans or not source_trans.strip():
+                    continue
+
             # For Traditional Chinese, consider both zh and zh-tw translations
             if self.language == "zh" and not self.simplified_chinese:
                 zh_tw_trans = zh_tw_translations_by_id.get(lemma.id)
@@ -235,9 +269,15 @@ class WirewordExporter:
             if lemma_effective_level == -1:
                 continue
 
+            # Get source word: English lemma_text for English source, or translation for other sources
+            if self.source_language == "en":
+                source_word: Optional[str] = lemma.lemma_text
+            else:
+                source_word = source_translations_by_id.get(lemma.id)
+
             entry = {
                 "GUID": lemma.guid,
-                "english": self.get_english_word_from_lemma(session, lemma),
+                "source_word": source_word,
                 "target_language": target_translation,
                 "definition": lemma.definition_text,
                 "pos_type": lemma.pos_type,
@@ -557,7 +597,7 @@ class WirewordExporter:
                             gram_form = {
                                 "level": form_level,
                                 "target": form.derivative_form_text,
-                                "english": f"{entry['english']} (plural)",  # Simple plural English form
+                                "english": f"{entry['source_word']} (plural)",  # Simple plural source form
                             }
                             # Add pinyin for Chinese grammatical forms
                             if self.language == "zh":
@@ -587,7 +627,7 @@ class WirewordExporter:
                             gram_form = {
                                 "level": form_level,
                                 "target": form.derivative_form_text,
-                                "english": f"{entry['english']}{english_suffix}",
+                                "english": f"{entry['source_word']}{english_suffix}",
                             }
                             # Add pinyin for Chinese grammatical forms
                             if self.language == "zh":
@@ -620,7 +660,7 @@ class WirewordExporter:
                                 # If not found in database, use simple fallback
                                 if not english_label:
                                     english_label = generate_simple_grammatical_form_label(
-                                        form.grammatical_form, entry["english"]
+                                        form.grammatical_form, entry["source_word"]
                                     )
 
                                 gram_form = {
@@ -645,7 +685,7 @@ class WirewordExporter:
 
                 # Generate derivative noun phrases (e.g., "where is X") for appropriate nouns
                 derivative_phrases = self._generate_derivative_noun_phrases(
-                    lemma, entry["english"], entry["target_language"], entry["trakaido_level"]
+                    lemma, entry["source_word"], entry["target_language"], entry["trakaido_level"]
                 )
                 grammatical_forms.update(derivative_phrases)
 
@@ -654,15 +694,24 @@ class WirewordExporter:
                 assigned_corpus = corpus_assignments.get(corpus_key, "Trakaido")
 
                 # Create WireWord object
-                wireword = {
+                wireword: Dict[str, Any] = {
                     "guid": entry["GUID"],
                     "base_target": entry["target_language"],
-                    "base_english": entry["english"],
-                    "corpus": assigned_corpus,
-                    "group": format_subtype_display_name(entry["subtype"]),
-                    "level": entry["trakaido_level"],
-                    "word_type": normalize_pos_type(entry["pos_type"]),
                 }
+                # Use base_english for English source, base_source for non-English source
+                if self.source_language == "en":
+                    wireword["base_english"] = entry["source_word"]
+                else:
+                    wireword["base_source"] = entry["source_word"]
+                    wireword["source_language"] = self.source_language
+                wireword.update(
+                    {
+                        "corpus": assigned_corpus,
+                        "group": format_subtype_display_name(entry["subtype"]),
+                        "level": entry["trakaido_level"],
+                        "word_type": normalize_pos_type(entry["pos_type"]),
+                    }
+                )
 
                 # Add audio MD5 hashes for all available voices (from pre-fetched data)
                 if entry["GUID"]:
@@ -677,15 +726,24 @@ class WirewordExporter:
                         wireword["target_pinyin"] = pinyin
 
                 # Add optional fields
+                # Use source_alternatives/source_synonyms for non-English source languages
+                source_alt_key = (
+                    "english_alternatives"
+                    if self.source_language == "en"
+                    else "source_alternatives"
+                )
+                source_syn_key = (
+                    "english_synonyms" if self.source_language == "en" else "source_synonyms"
+                )
                 if english_alternatives:
-                    wireword["english_alternatives"] = english_alternatives
+                    wireword[source_alt_key] = english_alternatives
                 if target_alternatives:
                     wireword["target_alternatives"] = target_alternatives
                     # Add pinyin for Chinese alternatives
                     if self.language == "zh" and target_alternatives_pinyin:
                         wireword["target_alternatives_pinyin"] = target_alternatives_pinyin
                 if english_synonyms:
-                    wireword["english_synonyms"] = english_synonyms
+                    wireword[source_syn_key] = english_synonyms
                 if target_synonyms:
                     wireword["target_synonyms"] = target_synonyms
                     # Add pinyin for Chinese synonyms
@@ -928,6 +986,7 @@ class WirewordExporter:
             self.language,
             self.simplified_chinese,
             include_unreviewed_audio=self.include_unreviewed_audio,
+            source_language=self.source_language,
         )
         if manifest_success:
             results["files_created"].append(manifest_path)
@@ -1026,7 +1085,18 @@ class WirewordExporter:
             difficulty_levels_by_id = bulk_get_effective_difficulty_levels(
                 session, lemmas, self.language
             )
-            logger.info(f"Bulk fetched translations and difficulty levels")
+            logger.info("Bulk fetched translations and difficulty levels")
+
+            # For non-English source languages, bulk fetch source translations
+            verb_source_translations_by_id: Dict[int, Optional[str]] = {}
+            if self.source_language != "en":
+                verb_source_translations_by_id = bulk_get_translations(
+                    session, lemmas, self.source_language
+                )
+                logger.info(
+                    f"Fetched {sum(1 for v in verb_source_translations_by_id.values() if v)} "
+                    f"{self.source_language_name} source translations for verbs"
+                )
 
             # For Traditional Chinese export, also fetch zh-tw translations
             zh_tw_translations_by_id: Dict[int, Optional[str]] = {}
@@ -1096,8 +1166,11 @@ class WirewordExporter:
                 # Get derivative forms from pre-fetched data
                 derivative_forms = derivative_forms_by_lemma.get(lemma.id, [])
 
-                # Get base English and target language forms from pre-fetched data
-                base_english = self.get_english_word_from_lemma(session, lemma)
+                # Get base source and target language forms from pre-fetched data
+                if self.source_language == "en":
+                    base_source: Optional[str] = lemma.lemma_text
+                else:
+                    base_source = verb_source_translations_by_id.get(lemma.id)
                 base_target = translations_by_id.get(lemma.id)
 
                 # For Chinese, handle simplified vs traditional
@@ -1117,6 +1190,10 @@ class WirewordExporter:
 
                 # Skip verbs without target language translation
                 if not base_target or not base_target.strip():
+                    continue
+
+                # Skip verbs without source language translation (for non-English source)
+                if self.source_language != "en" and (not base_source or not base_source.strip()):
                     continue
 
                 # Build grammatical forms (conjugations)
@@ -1192,7 +1269,7 @@ class WirewordExporter:
                                     )
                                 # For other languages, use simple fallback
                                 english_label = generate_simple_grammatical_form_label(
-                                    form.grammatical_form, base_english or ""
+                                    form.grammatical_form, base_source or ""
                                 )
 
                             gram_form = {
@@ -1221,15 +1298,24 @@ class WirewordExporter:
                             grammatical_forms[wireword_key] = gram_form
 
                 # Create WireWord object
-                wireword = {
+                wireword: Dict[str, Any] = {
                     "guid": lemma.guid,
                     "base_target": base_target,
-                    "base_english": base_english,
-                    "corpus": "VERBS",
-                    "group": format_subtype_display_name(lemma.pos_subtype or "action"),
-                    "level": effective_lemma_level,
-                    "word_type": "verb",
                 }
+                # Use base_english for English source, base_source for non-English source
+                if self.source_language == "en":
+                    wireword["base_english"] = base_source
+                else:
+                    wireword["base_source"] = base_source
+                    wireword["source_language"] = self.source_language
+                wireword.update(
+                    {
+                        "corpus": "VERBS",
+                        "group": format_subtype_display_name(lemma.pos_subtype or "action"),
+                        "level": effective_lemma_level,
+                        "word_type": "verb",
+                    }
+                )
 
                 # Add audio MD5 hashes for all available voices (from pre-fetched data)
                 if lemma.guid:
@@ -1244,8 +1330,11 @@ class WirewordExporter:
                         wireword["target_pinyin"] = pinyin
 
                 # Add optional fields
+                verb_source_syn_key = (
+                    "english_synonyms" if self.source_language == "en" else "source_synonyms"
+                )
                 if english_synonyms:
-                    wireword["english_synonyms"] = english_synonyms
+                    wireword[verb_source_syn_key] = english_synonyms
                 if target_synonyms:
                     wireword["target_synonyms"] = target_synonyms
                     # Add pinyin for Chinese synonyms

@@ -125,10 +125,23 @@ def export_all_languages(
         return redirect(url_for("wireword.export_page"))
 
 
+# Supported source languages for WireWord export
+SUPPORTED_SOURCE_LANGUAGES = {
+    "en": "English",
+    "uk": "Ukrainian",
+    "bn": "Bengali",
+    "si": "Sinhala",
+}
+
+
 @bp.route("/")
 def export_page() -> ResponseReturnValue:
     """Display the WireWord export page."""
-    return render_template("wireword/export.html", languages=SUPPORTED_LANGUAGES)
+    return render_template(
+        "wireword/export.html",
+        languages=SUPPORTED_LANGUAGES,
+        source_languages=SUPPORTED_SOURCE_LANGUAGES,
+    )
 
 
 @bp.route("/export", methods=["POST"])
@@ -140,6 +153,7 @@ def export_wireword() -> ResponseReturnValue:
     pos_type = request.form.get("pos_type", "").strip()
     include_unreviewed_audio = request.form.get("include_unreviewed_audio") == "on"
     apply_level_overrides = request.form.get("apply_level_overrides") == "on"
+    source_language = request.form.get("source_language", "en").strip()
 
     # Handle "All Languages" option
     if language == "all":
@@ -177,6 +191,7 @@ def export_wireword() -> ResponseReturnValue:
             language=language if language != "zh-Hant" else "zh",
             simplified_chinese=simplified_chinese,
             include_unreviewed_audio=include_unreviewed_audio,
+            source_language=source_language,
         )
 
         # Apply level overrides if requested

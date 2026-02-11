@@ -104,6 +104,7 @@ def generate_manifest(
     language: str,
     simplified_chinese: bool = True,
     include_unreviewed_audio: bool = False,
+    source_language: str = "en",
 ) -> Tuple[bool, str]:
     """
     Generate wireword_manifest.json for the exported files.
@@ -113,6 +114,8 @@ def generate_manifest(
         language: Language code (e.g., "lt", "zh", "fr")
         simplified_chinese: For Chinese, whether simplified (True) or traditional (False)
         include_unreviewed_audio: If True, set audio_prefix to staging path
+        source_language: Source language code (default: "en"). When not "en", adds
+            source_language metadata to the manifest.
 
     Returns:
         Tuple of (success flag, manifest path)
@@ -158,6 +161,11 @@ def generate_manifest(
         "sentence_files": [],
         "auxiliary_files": [],
     }
+    # Add source language metadata when not English
+    if source_language != "en":
+        source_lang_name = LANGUAGE_NAMES.get(source_language, source_language).lower()
+        manifest["source_language"] = source_lang_name
+        manifest["source_language_code"] = source_language
 
     # Process word files
     word_files_info = [
