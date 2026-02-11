@@ -1,0 +1,61 @@
+"""Georgian-specific type definitions for linguistic forms."""
+
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional
+
+from clients.wiktionary.types import NounNumberType
+
+
+@dataclass
+class NounDeclension:
+    """Georgian noun declension results.
+
+    Georgian nouns decline for case (nominative, ergative, dative,
+    genitive, instrumental, adverbial, vocative) and number.  Georgian
+    does not have grammatical gender.  Georgian uses the Mkhedruli
+    script (the modern Georgian alphabet).
+    """
+
+    word: str
+    number_type: NounNumberType = NounNumberType.REGULAR
+    forms: Dict[str, str] = field(default_factory=dict)
+    alternatives: Dict[str, List[str]] = field(default_factory=dict)
+    raw_template: Optional[str] = None
+    confidence: float = 1.0
+    notes: Optional[str] = None
+
+    SINGULAR_FORMS = ["singular"]
+    PLURAL_FORMS = ["plural"]
+    ALL_FORMS = SINGULAR_FORMS + PLURAL_FORMS
+
+    def has_singular(self) -> bool:
+        """Check if this noun has singular forms."""
+        return any(self.forms.get(form) for form in self.SINGULAR_FORMS)
+
+    def has_plural(self) -> bool:
+        """Check if this noun has plural forms."""
+        return any(self.forms.get(form) for form in self.PLURAL_FORMS)
+
+
+@dataclass
+class VerbConjugation:
+    """Georgian verb conjugation results.
+
+    Georgian verbs have a complex conjugation system with multiple
+    screeves (tense-aspect-mood combinations).  The citation form is
+    typically the present tense 3rd person singular or the masdar
+    (verbal noun).  Main tenses include present, past (aorist), and
+    future.
+    """
+
+    word: str  # The citation form
+    forms: Dict[str, str] = field(default_factory=dict)
+    alternatives: Dict[str, List[str]] = field(default_factory=dict)
+    raw_template: Optional[str] = None
+    confidence: float = 1.0
+    notes: Optional[str] = None
+
+    PRESENT_FORMS = ["present"]
+    PAST_FORMS = ["past"]
+    FUTURE_FORMS = ["future"]
+    ALL_FORMS = PRESENT_FORMS + PAST_FORMS + FUTURE_FORMS

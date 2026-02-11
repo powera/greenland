@@ -270,6 +270,31 @@ _OM_MAP: Dict[str, str] = {}
 # Somali: standard A-Z Latin alphabet, no special characters needing remapping.
 _SO_MAP: Dict[str, str] = {}
 
+# Turkish: A B C Ç D E F G Ğ H I İ J K L M N O Ö P R S Ş T U Ü V Y Z
+# Ç, Ğ, İ, Ö, Ş, Ü are distinct letters after their base letters.
+# Note: Turkish has a unique I/İ distinction (dotless ı/I vs dotted i/İ).
+_TR_MAP: Dict[str, str] = {
+    "ç": "c{",
+    "ğ": "g{",
+    "ı": "i",  # dotless ı sorts as regular i position
+    "ö": "o{",
+    "ş": "s{",
+    "ü": "u{",
+}
+
+# Azerbaijani: A B C Ç D E Ə F G Ğ H X I İ J K Q L M N O Ö P R S Ş T U Ü V Y Z
+# Ç, Ə, Ğ, İ, Ö, Ş, Ü are distinct letters after their base letters.
+# Note: Like Turkish, Azerbaijani has the I/İ distinction.
+_AZ_MAP: Dict[str, str] = {
+    "ç": "c{",
+    "ə": "e{",
+    "ğ": "g{",
+    "ı": "i",  # dotless ı sorts as regular i position
+    "ö": "o{",
+    "ş": "s{",
+    "ü": "u{",
+}
+
 # Master table for position-remapped languages.
 _REMAP_LANGUAGES: Dict[str, Dict[str, str]] = {
     "lt": _LT_MAP,
@@ -299,6 +324,8 @@ _REMAP_LANGUAGES: Dict[str, Dict[str, str]] = {
     "sn": _SN_MAP,
     "om": _OM_MAP,
     "so": _SO_MAP,
+    "tr": _TR_MAP,
+    "az": _AZ_MAP,
 }
 
 # ---------------------------------------------------------------------------
@@ -382,6 +409,25 @@ def _strip_yoruba_igbo_tones(text: str) -> str:
     return unicodedata.normalize("NFC", stripped)
 
 
+def _turkish_lower(text: str) -> str:
+    """Turkish/Azerbaijani-aware lowercasing.
+
+    Handles the dotted/dotless I distinction:
+    - İ (U+0130, dotted capital I) -> i (U+0069, dotted lowercase i)
+    - I (U+0049, capital I) -> ı (U+0131, dotless lowercase ı)
+    All other characters use standard ``str.lower()``.
+    """
+    result: list[str] = []
+    for ch in text:
+        if ch == "\u0130":  # İ -> i
+            result.append("i")
+        elif ch == "I":  # I -> ı
+            result.append("\u0131")
+        else:
+            result.append(ch.lower())
+    return "".join(result)
+
+
 def generate_latin_sort_key(lang_code: str, text: str) -> Optional[str]:
     """Return a binary-sortable key for *text* in the given language.
 
@@ -404,6 +450,11 @@ def generate_latin_sort_key(lang_code: str, text: str) -> Optional[str]:
         # the base distinct letters (ẹ, ọ, ṣ in Yoruba; ị, ọ, ụ, ṅ in Igbo).
         elif lang_code in ("yo", "ig"):
             text = _strip_yoruba_igbo_tones(text)
+        # Turkish/Azerbaijani: handle the dotted/dotless I distinction.
+        # Python's str.lower() doesn't do Turkish-aware lowering, so we
+        # manually map İ -> i and I -> ı before the remap table lookup.
+        elif lang_code in ("tr", "az"):
+            text = _turkish_lower(text)
         parts: list[str] = []
         for ch in text:
             lower = ch.lower()
