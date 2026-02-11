@@ -194,7 +194,7 @@ def evaluate_response(*args, **kwargs) -> Tuple[ResponseEvaluation, Dict]:
 
 
 def validate_question(
-    self, question: BenchmarkQuestion, model: str = DEFAULT_VALIDATION_MODEL
+    question: BenchmarkQuestion, model: str = DEFAULT_VALIDATION_MODEL
 ) -> Tuple[bool, Optional[str]]:
     """
     Validate a question using an LLM for quality checks.
@@ -247,5 +247,5 @@ Respond with a JSON object with these fields:
         return validation["valid"], validation["reason"]
 
     except Exception as e:
-        logger.error(f"Validation error: {str(e)}")
+        logger.error("Validation error: %s", e)
         return False, f"Validation failed with error: {str(e)}"

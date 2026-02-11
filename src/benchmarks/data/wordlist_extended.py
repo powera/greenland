@@ -413,16 +413,6 @@ TRANSLATIONS: List[TranslationEntry] = [
         zh="星星",
     ),
     TranslationEntry(
-        en="to dance",
-        fr="danser",
-        de="tanzen",
-        ind="menari",
-        sw="kucheza ngoma",
-        ko="춤추다",
-        kn="ನೃತ್ಯ ಮಾಡು",
-        zh="跳舞",
-    ),
-    TranslationEntry(
         en="heavy",
         fr="lourd",
         de="schwer",

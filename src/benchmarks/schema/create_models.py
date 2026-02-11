@@ -21,6 +21,7 @@ def create_models():
     # create_ollama_models()
     create_lmstudio_models()
     create_remote_models()
+    create_translategemma_models()
 
 
 def create_ollama_models():
@@ -346,6 +347,22 @@ def create_lmstudio_models():
         1060,
         "Apache License",
         "lmstudio/lmstudio-community/SmolLM2-1.7B-Instruct-GGUF",
+        "local",
+    )
+
+
+def create_translategemma_models():
+    """Create TranslateGemma model definitions."""
+    s = datastore_common.create_database_and_session(str(BENCHMARKS_DB_PATH))
+
+    datastore_common.insert_model(
+        s,
+        "translategemma-3-4b",
+        "TranslateGemma 3 4B",
+        "2025-03-12",
+        4300,
+        "Gemma License",
+        "translategemma/translate-gemma-3-4b-it",
         "local",
     )
 

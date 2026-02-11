@@ -6,7 +6,7 @@ import time
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union
 
 import benchmarks.datastore.common  # Assuming datastore.common is available
-from clients import gemini_client, lmstudio_client, ollama_client
+from clients import gemini_client, lmstudio_client, ollama_client, translategemma_client
 from clients.anthropic import client as anthropic_client
 from clients.openai import client as openai_client
 from clients.types import Response, Schema
@@ -86,6 +86,9 @@ class UnifiedLLMClient:
         self.gemini = gemini_client.GeminiClient(
             timeout=timeout, debug=False, api_key=google_api_key
         )
+        self.translategemma = translategemma_client.TranslateGemmaClient(
+            timeout=timeout, debug=False
+        )
 
     @classmethod
     def from_config(
@@ -146,6 +149,7 @@ class UnifiedLLMClient:
             openai_client.OpenAIClient,
             anthropic_client.AnthropicClient,
             gemini_client.GeminiClient,
+            translategemma_client.TranslateGemmaClient,
         ],
         str,
     ]:
@@ -164,6 +168,7 @@ class UnifiedLLMClient:
             openai_client.OpenAIClient,
             anthropic_client.AnthropicClient,
             gemini_client.GeminiClient,
+            translategemma_client.TranslateGemmaClient,
             None,
         ] = None
         client_name: Optional[str] = None
@@ -203,7 +208,11 @@ class UnifiedLLMClient:
             if model_type == "remote":
                 raise ValueError(f"Unknown remote model type for {model_path}")
             else:  # local models
-                if model_path.startswith("lmstudio/"):
+                if model_path.startswith("translategemma/"):
+                    client = self.translategemma
+                    client_name = "TranslateGemma"
+                    normalized_model = model_path[len("translategemma/") :]
+                elif model_path.startswith("lmstudio/"):
                     client = self.lmstudio
                     client_name = "LMStudio"
                     normalized_model = model_path[len("lmstudio/") :]
@@ -231,6 +240,7 @@ class UnifiedLLMClient:
             openai_client.OpenAIClient,
             anthropic_client.AnthropicClient,
             gemini_client.GeminiClient,
+            translategemma_client.TranslateGemmaClient,
         ],
     ) -> str:
         """Get the backend name for a client instance.
@@ -239,7 +249,8 @@ class UnifiedLLMClient:
             client: The LLM client instance.
 
         Returns:
-            Backend name string (e.g., "openai", "anthropic", "gemini", "ollama", "lmstudio").
+            Backend name string (e.g., "openai", "anthropic", "gemini", "ollama",
+            "lmstudio", "translategemma").
         """
         if isinstance(client, openai_client.OpenAIClient):
             return "openai"
@@ -247,6 +258,8 @@ class UnifiedLLMClient:
             return "anthropic"
         elif isinstance(client, gemini_client.GeminiClient):
             return "gemini"
+        elif isinstance(client, translategemma_client.TranslateGemmaClient):
+            return "translategemma"
         elif isinstance(client, ollama_client.OllamaClient):
             return "ollama"
         elif isinstance(client, lmstudio_client.LMStudioClient):

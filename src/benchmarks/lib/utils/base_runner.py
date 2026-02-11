@@ -236,7 +236,7 @@ class BenchmarkRunner:
         except OllamaTimeoutError as e:
             return self.handle_timeout(question_id, e)
         except Exception as e:
-            logger.error(f"Error processing question {question_id}: {str(e)}")
+            logger.error("Error processing question %s: %s", question_id, e)
             return BenchmarkResult(
                 question_id=question_id,
                 score=0,
@@ -273,14 +273,14 @@ class BenchmarkRunner:
         # Load questions
         all_questions = self.load_questions()
         if not all_questions:
-            self.logger.error(f"No questions found for benchmark {self.metadata.code}")
+            self.logger.error("No questions found for benchmark %s", self.metadata.code)
             return []
 
         # Sample questions
         sample_questions = random.sample(all_questions, min(num_questions, len(all_questions)))
 
         # Process each question
-        self.logger.info(f"Running sample of {len(sample_questions)} questions")
+        self.logger.info("Running sample of %d questions", len(sample_questions))
         results = []
         for question in sample_questions:
             result = self.process_question(question)
@@ -290,7 +290,10 @@ class BenchmarkRunner:
         score = self.calculate_score(results)
         correct_count = sum(1 for r in results if r.score == 100)
         self.logger.info(
-            f"Sample complete. Score: {score}/100 ({correct_count}/{len(results)} correct)"
+            "Sample complete. Score: %d/100 (%d/%d correct)",
+            score,
+            correct_count,
+            len(results),
         )
 
         return results
@@ -300,18 +303,27 @@ class BenchmarkRunner:
         # Load questions for this benchmark
         questions = self.load_questions()
         if not questions:
-            logger.error(f"No questions found for benchmark {self.metadata.code}")
+            logger.error("No questions found for benchmark %s", self.metadata.code)
             return -1
 
         # Warm up the model
-        logger.info(f"Warming up model {self.model}...")
+        logger.info("Warming up model %s...", self.model)
         self.warm_up()
 
         # Process each question
-        logger.info(f"Running {self.metadata.code} benchmark with {len(questions)} questions...")
+        logger.info(
+            "Running %s benchmark with %d questions...",
+            self.metadata.code,
+            len(questions),
+        )
         results = []
         for idx, question in enumerate(questions):
-            logger.info(f"Processing question {idx+1}/{len(questions)}: {question['question_id']}")
+            logger.info(
+                "Processing question %d/%d: %s",
+                idx + 1,
+                len(questions),
+                question["question_id"],
+            )
             result = self.process_question(question)
             results.append(result)
 
@@ -319,11 +331,14 @@ class BenchmarkRunner:
         score = self.calculate_score(results)
         correct_count = sum(1 for r in results if r.score == 100)
         logger.info(
-            f"Benchmark complete. Score: {score}/100 ({correct_count}/{len(results)} correct)"
+            "Benchmark complete. Score: %d/100 (%d/%d correct)",
+            score,
+            correct_count,
+            len(results),
         )
 
         # Save results to database
         run_id = self.save_results(score, results)
-        logger.info(f"Results saved with run ID: {run_id}")
+        logger.info("Results saved with run ID: %s", run_id)
 
         return run_id
