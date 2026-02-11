@@ -763,6 +763,8 @@ class WirewordExporter:
                         grammar_metadata[fact.fact_type] = fact.fact_value
                     wireword["grammar_metadata"] = grammar_metadata
 
+                if lemma.disambiguation:
+                    wireword["disambiguation"] = lemma.disambiguation
                 if lemma.frequency_rank:
                     wireword["frequency_rank"] = lemma.frequency_rank
                 if lemma.notes:
@@ -1343,6 +1345,8 @@ class WirewordExporter:
                 if grammatical_forms:
                     wireword["grammatical_forms"] = grammatical_forms
 
+                if lemma.disambiguation:
+                    wireword["disambiguation"] = lemma.disambiguation
                 if lemma.notes:
                     wireword["notes"] = lemma.notes
 
