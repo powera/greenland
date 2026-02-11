@@ -117,7 +117,6 @@ def format_verb_entry(entry: Dict[str, Any], is_last: bool = False) -> str:
         "base_target",
         "base_english",
         "base_source",
-        "source_language",
         "corpus",
         "group",
         "level",

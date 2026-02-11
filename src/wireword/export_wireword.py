@@ -703,7 +703,6 @@ class WirewordExporter:
                     wireword["base_english"] = entry["source_word"]
                 else:
                     wireword["base_source"] = entry["source_word"]
-                    wireword["source_language"] = self.source_language
                 wireword.update(
                     {
                         "corpus": assigned_corpus,
@@ -1307,7 +1306,6 @@ class WirewordExporter:
                     wireword["base_english"] = base_source
                 else:
                     wireword["base_source"] = base_source
-                    wireword["source_language"] = self.source_language
                 wireword.update(
                     {
                         "corpus": "VERBS",

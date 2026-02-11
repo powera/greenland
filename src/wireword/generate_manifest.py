@@ -147,30 +147,44 @@ def generate_manifest(
         audio_prefix = "/prod"
 
     # Build manifest structure
+    # Key ordering matters for client compatibility: source_language fields
+    # must appear between generated_at and config.
     manifest: Dict[str, Any] = {
         "version": 1,
         "language": language_name,
         "language_code": language_code,
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "config": {
-            "audio_prefix": audio_prefix,
-            "available_voices": available_voices,
-            "default_voice": default_voice,
-        },
-        "word_files": [],
-        "sentence_files": [],
-        "auxiliary_files": [],
     }
-    # Add source language metadata when not English
+    # Add source language metadata between generated_at and config
+    source_lang_display: Optional[str] = None
     if source_language != "en":
         source_lang_name = LANGUAGE_NAMES.get(source_language, source_language).lower()
+        source_lang_display = LANGUAGE_NAMES.get(source_language, source_language)
         manifest["source_language"] = source_lang_name
         manifest["source_language_code"] = source_language
+    manifest["config"] = {
+        "audio_prefix": audio_prefix,
+        "available_voices": available_voices,
+        "default_voice": default_voice,
+    }
+    manifest["word_files"] = []
+    manifest["sentence_files"] = []
+    manifest["auxiliary_files"] = []
 
     # Process word files
+    # When source language is not English, include it in descriptions
+    if source_lang_display:
+        nouns_description = (
+            f"Words (nouns, adjectives, etc.) with {source_lang_display} translations"
+        )
+        verbs_description = f"Verbs with conjugations and {source_lang_display} translations"
+    else:
+        nouns_description = "Words (nouns, adjectives, etc.)"
+        verbs_description = "Verbs with conjugations"
+
     word_files_info = [
-        ("nouns", "wireword_nouns.json", "Nouns", "Words (nouns, adjectives, etc.)"),
-        ("verbs", "wireword_verbs.json", "Verbs", "Verbs with conjugations"),
+        ("nouns", "wireword_nouns.json", "Nouns", nouns_description),
+        ("verbs", "wireword_verbs.json", "Verbs", verbs_description),
     ]
 
     for file_id, filename, display_name, description in word_files_info:
