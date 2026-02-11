@@ -58,6 +58,8 @@ TIER_3_LANGUAGES = [
     "kn",
     "ml",
     "si",
+    "uk",
+    "bn",
     "sw",
     "ha",
     "yo",
@@ -133,6 +135,8 @@ LANGUAGE_HIERARCHY = [
     "kn",  # Kannada (experimental)
     "ml",  # Malayalam (experimental)
     "si",  # Sinhala (experimental)
+    "uk",  # Ukrainian (experimental)
+    "bn",  # Bengali (experimental)
     "sw",  # Swahili (experimental)
     "ha",  # Hausa (experimental)
     "yo",  # Yoruba (experimental)
@@ -189,6 +193,8 @@ LANGUAGE_FIELDS = {
     "kn": ("kn", "Kannada", True),
     "ml": ("ml", "Malayalam", True),
     "si": ("si", "Sinhala", True),
+    "uk": ("uk", "Ukrainian", True),
+    "bn": ("bn", "Bengali", True),
     "ha": ("ha", "Hausa", True),
     "yo": ("yo", "Yoruba", True),
     "ig": ("ig", "Igbo", True),
@@ -238,6 +244,8 @@ LLM_FIELD_TO_LANG_CODE = {
     "kannada_translation": "kn",
     "malayalam_translation": "ml",
     "sinhala_translation": "si",
+    "ukrainian_translation": "uk",
+    "bengali_translation": "bn",
     "thai_translation": "th",
     "malay_translation": "ms",
     "burmese_translation": "my",

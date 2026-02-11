@@ -63,6 +63,7 @@ class UngurysAgent:
         language: str = "lt",
         simplified_chinese: bool = True,
         include_unreviewed_audio: bool = False,
+        source_language: str = "en",
     ):
         """
         Initialize the Ungurys agent.
@@ -73,11 +74,15 @@ class UngurysAgent:
             simplified_chinese: For 'zh', whether to convert to Simplified (default: True)
             include_unreviewed_audio: If True, include audio that exists in staging but hasn't been
                 reviewed yet. The manifest's audio_prefix will be changed to point to staging.
+            source_language: Source language code (default: 'en'). The language the learner already
+                knows. When not 'en', output uses base_source instead of base_english, and output
+                directory uses a _from_{source} suffix (e.g. lang_lt_from_uk/).
         """
         self.config = config
         self.debug = config.debug
         self.simplified_chinese = simplified_chinese
         self.include_unreviewed_audio = include_unreviewed_audio
+        self.source_language = source_language
 
         # Handle language variants
         if language == "zh-Hant":
@@ -91,6 +96,10 @@ class UngurysAgent:
         else:
             self.language = language
             self.language_suffix = language
+
+        # Append source language suffix for non-English source languages
+        if self.source_language != "en":
+            self.language_suffix = f"{self.language_suffix}_from_{self.source_language}"
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
@@ -109,6 +118,7 @@ class UngurysAgent:
             language=self.language,
             simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
             include_unreviewed_audio=self.include_unreviewed_audio,
+            source_language=self.source_language,
         )
 
         # Initialize sentence exporter with Chinese variant support
@@ -118,6 +128,7 @@ class UngurysAgent:
             language=self.language,
             simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
             include_unreviewed_audio=self.include_unreviewed_audio,
+            source_language=self.source_language,
         )
 
         # Initialize conversation exporter with Chinese variant support
@@ -127,13 +138,17 @@ class UngurysAgent:
             language=self.language,
             simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
             include_unreviewed_audio=self.include_unreviewed_audio,
+            source_language=self.source_language,
         )
 
         variant_info = ""
         if self.language == "zh":
             variant_info = f" ({'Simplified' if self.simplified_chinese else 'Traditional'})"
+        source_info = ""
+        if self.source_language != "en":
+            source_info = f" from {LANGUAGE_NAMES.get(self.source_language, self.source_language)}"
         logger.info(
-            f"Initialized Ungurys agent for {SUPPORTED_LANGUAGES[self.language]}{variant_info} (lang_{self.language_suffix})"
+            f"Initialized Ungurys agent for {SUPPORTED_LANGUAGES[self.language]}{variant_info}{source_info} (lang_{self.language_suffix})"
         )
 
     def _apply_country_overrides(self) -> Dict[str, Any]:
@@ -931,6 +946,12 @@ def get_argument_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Skip applying family relation difficulty overrides before export.",
     )
+    parser.add_argument(
+        "--source-language",
+        default="en",
+        help="Source language code (default: en). The language the learner already knows. "
+        "Supported non-English sources: uk (Ukrainian), bn (Bengali), si (Sinhala).",
+    )
 
     return parser
 
@@ -953,6 +974,7 @@ def main() -> None:
         config=config,
         language=language,
         include_unreviewed_audio=args.include_unreviewed_audio,
+        source_language=args.source_language,
     )
 
     # Set default paths if not specified

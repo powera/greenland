@@ -46,6 +46,7 @@ class WirewordSentenceExporter:
         language: str = "lt",
         simplified_chinese: bool = True,
         include_unreviewed_audio: bool = False,
+        source_language: str = "en",
     ):
         """
         Initialize the WirewordSentenceExporter.
@@ -57,6 +58,8 @@ class WirewordSentenceExporter:
             simplified_chinese: If True and language is 'zh', convert to Simplified Chinese (default: True)
             include_unreviewed_audio: If True, include audio that exists in staging but hasn't been
                 reviewed yet.
+            source_language: Source language code (default: 'en'). The language the learner already
+                knows. When not 'en', source language translations are included instead of English.
         """
         # Use provided config or create default SQLite config
         if config is None:
@@ -66,6 +69,7 @@ class WirewordSentenceExporter:
         self.language = language
         self.simplified_chinese = simplified_chinese
         self.include_unreviewed_audio = include_unreviewed_audio
+        self.source_language = source_language
 
         if debug:
             logger.setLevel(logging.DEBUG)
@@ -237,6 +241,8 @@ class WirewordSentenceExporter:
                 "language": self.language,
                 "sentences": [],
             }
+            if self.source_language != "en":
+                output["source_language"] = self.source_language
 
             for sentence in sentences:
                 # Get all translations (already loaded via joinedload)
@@ -252,10 +258,12 @@ class WirewordSentenceExporter:
                         translation_text = to_simplified(translation_text)
                     translations[trans.language_code] = translation_text
 
-                # Filter to only include requested language + English
+                # Filter to only include requested language + source language
                 if not include_all_languages:
-                    filtered_translations = {"en": translations.get("en", "")}
-                    if self.language != "en" and self.language in translations:
+                    filtered_translations = {
+                        self.source_language: translations.get(self.source_language, "")
+                    }
+                    if self.language != self.source_language and self.language in translations:
                         filtered_translations[self.language] = translations[self.language]
                     translations = filtered_translations
 
