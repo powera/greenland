@@ -93,19 +93,14 @@ class TestExpandVerbFormsRegular(unittest.TestCase):
         self.assertEqual(result["1s_future"], "will go")
 
     def test_have(self) -> None:
-        """'have' has irregular 3s but regular person-inflection otherwise."""
-        base = {
-            "infinitive": "have",
-            "3s_present": "has",
-            "past": "had",
-            "past_participle": "had",
-            "present_participle": "having",
-        }
+        """'have' uses the irregular table for its 3s_present 'has'."""
+        base = {"infinitive": "have", "past": "had", "past_participle": "had"}
         result = expand_verb_forms(base)
 
         self.assertEqual(result["1s_present"], "have")
         self.assertEqual(result["3s_present"], "has")
         self.assertEqual(result["2p_present"], "have")
+        self.assertEqual(result["present_participle"], "having")
         # Past is uniform
         self.assertEqual(result["1s_past"], "had")
         self.assertEqual(result["3s_past"], "had")
@@ -220,19 +215,19 @@ class TestExpandVerbFormsMissingBase(unittest.TestCase):
         self.assertEqual(result, {})
 
     def test_only_infinitive(self) -> None:
-        """With only the infinitive, we can still produce present, future, imperative."""
+        """With only the infinitive, 3s_present and present_participle are generated."""
         result = expand_verb_forms({"infinitive": "play"})
 
         self.assertEqual(result["infinitive"], "play")
         self.assertEqual(result["1s_present"], "play")
         self.assertEqual(result["1s_future"], "will play")
         self.assertEqual(result["2s_imp"], "play")
-        # But no past or participles
+        # Auto-generated from infinitive
+        self.assertEqual(result["3s_present"], "plays")
+        self.assertEqual(result["present_participle"], "playing")
+        # But no past or past_participle (genuinely need LLM data)
         self.assertNotIn("1s_past", result)
-        self.assertNotIn("present_participle", result)
         self.assertNotIn("past_participle", result)
-        # No 3s_present without that base form
-        self.assertNotIn("3s_present", result)
 
     def test_only_past(self) -> None:
         """With only past, we get all past-tense person forms."""
@@ -243,21 +238,68 @@ class TestExpandVerbFormsMissingBase(unittest.TestCase):
         self.assertNotIn("1s_present", result)
         self.assertNotIn("infinitive", result)
 
-    def test_empty_string_values_ignored(self) -> None:
-        """Empty strings should not produce forms."""
+    def test_empty_string_values_auto_generated(self) -> None:
+        """Empty 3s_present / present_participle are auto-generated from infinitive."""
         base = {
             "infinitive": "play",
             "3s_present": "",
             "past": "played",
             "past_participle": "",
-            "present_participle": "playing",
+            "present_participle": "",
         }
         result = expand_verb_forms(base)
 
-        self.assertNotIn("3s_present", result)
+        # Auto-generated from infinitive
+        self.assertEqual(result["3s_present"], "plays")
+        self.assertEqual(result["present_participle"], "playing")
+        # past_participle was empty and cannot be auto-generated
         self.assertNotIn("past_participle", result)
         self.assertIn("1s_present", result)
-        self.assertIn("present_participle", result)
+
+
+class TestAutoGenerationFromInfinitive(unittest.TestCase):
+    """Test that 3s_present and present_participle are generated when missing."""
+
+    def test_3s_present_generated(self) -> None:
+        """When 3s_present is omitted, it is derived from the infinitive."""
+        base = {"infinitive": "watch", "past": "watched", "past_participle": "watched"}
+        result = expand_verb_forms(base)
+        self.assertEqual(result["3s_present"], "watches")
+
+    def test_present_participle_generated(self) -> None:
+        """When present_participle is omitted, it is derived from the infinitive."""
+        base = {"infinitive": "run", "past": "ran", "past_participle": "run"}
+        result = expand_verb_forms(base)
+        self.assertEqual(result["present_participle"], "running")
+
+    def test_explicit_overrides_auto(self) -> None:
+        """Explicitly supplied 3s_present / present_participle take precedence."""
+        base = {
+            "infinitive": "go",
+            "3s_present": "goes",
+            "past": "went",
+            "past_participle": "gone",
+            "present_participle": "going",
+        }
+        result = expand_verb_forms(base)
+        # Should use the explicit values, not the auto-generated ones
+        self.assertEqual(result["3s_present"], "goes")
+        self.assertEqual(result["present_participle"], "going")
+
+    def test_three_forms_produce_full_table(self) -> None:
+        """Just infinitive + past + past_participle should produce all 23 keys."""
+        base = {"infinitive": "talk", "past": "talked", "past_participle": "talked"}
+        result = expand_verb_forms(base)
+        self.assertEqual(len(result), 23)
+        self.assertEqual(result["3s_present"], "talks")
+        self.assertEqual(result["present_participle"], "talking")
+
+    def test_try_generates_correct_3s(self) -> None:
+        """Consonant+y verbs: try -> tries, not trys."""
+        base = {"infinitive": "try", "past": "tried", "past_participle": "tried"}
+        result = expand_verb_forms(base)
+        self.assertEqual(result["3s_present"], "tries")
+        self.assertEqual(result["present_participle"], "trying")
 
 
 class TestExpandVerbFormsAlignment(unittest.TestCase):
@@ -315,6 +357,22 @@ class TestIrregularConjugationsData(unittest.TestCase):
     def test_be_no_empty_values(self) -> None:
         for key, value in IRREGULAR_CONJUGATIONS["be"].items():
             self.assertTrue(value.strip(), f"'be' has empty value for key '{key}'")
+
+    def test_have_has_all_form_mapping_keys(self) -> None:
+        have_forms = IRREGULAR_CONJUGATIONS["have"]
+        for key in EXPECTED_VERB_FORM_KEYS:
+            self.assertIn(
+                key,
+                have_forms,
+                f"'have' irregular data missing VERB_FORM_MAPPING key '{key}'",
+            )
+
+    def test_have_3s_present_is_has(self) -> None:
+        self.assertEqual(IRREGULAR_CONJUGATIONS["have"]["3s_present"], "has")
+
+    def test_have_no_empty_values(self) -> None:
+        for key, value in IRREGULAR_CONJUGATIONS["have"].items():
+            self.assertTrue(value.strip(), f"'have' has empty value for key '{key}'")
 
 
 if __name__ == "__main__":
