@@ -1630,8 +1630,11 @@ class GrammaticalForm(enum.Enum):
     # Chinese noun forms (isolating language - base form only)
     NOUN_ZH_BASE = "noun/zh_base"
 
-    # Chinese verb forms (isolating language - base form only)
-    VERB_ZH_BASE = "verb/zh_base"
+    # Chinese verb forms (analytic aspect patterns)
+    VERB_ZH_BASE = "verb/zh_base"  # bare verb (买)
+    VERB_ZH_PERFECTIVE = "verb/zh_perfective"  # verb + 了 (买了) — completed action
+    VERB_ZH_EXPERIENTIAL = "verb/zh_experiential"  # verb + 过 (买过) — have done before
+    VERB_ZH_PROGRESSIVE = "verb/zh_progressive"  # 在 + verb (在买) — currently doing
 
     # Japanese noun forms (no morphological change - base form only)
     NOUN_JA_BASE = "noun/ja_base"

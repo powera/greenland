@@ -1,12 +1,15 @@
 """Chinese-specific type definitions for linguistic forms.
 
 Chinese is an isolating (analytic) language with no inflectional morphology.
-Nouns do not decline and verbs do not conjugate.  Grammatical relationships
-are expressed through word order, particles (了, 过, 着, 会, etc.), and
-separate function words rather than through changes to the word itself.
+Nouns do not decline.  Grammatical relationships are expressed through word
+order, particles, and separate function words.
 
-Because there is no morphological variation, each part of speech has only
-a single ``base`` form equal to the dictionary entry.
+Nouns have only a single ``base`` form.  Verbs store the bare form plus
+three common aspect patterns that are essential for learners:
+
+* **perfective** (了): completed action (买了 "bought")
+* **experiential** (过): have done before (买过 "have bought before")
+* **progressive** (在): currently in progress (在买 "is buying")
 """
 
 from dataclasses import dataclass, field
@@ -43,9 +46,14 @@ class NounDeclension:
 class VerbForms:
     """Chinese verb form results.
 
-    Chinese verbs do not conjugate.  Tense, aspect, and mood are expressed
-    analytically (e.g. 了 for perfective, 过 for experiential, 会 for
-    future/ability).  The single stored form is the bare verb.
+    Chinese verbs do not conjugate morphologically, but aspect is marked
+    analytically with particles.  We store the bare verb plus three common
+    aspect patterns:
+
+    * base        – bare verb (买)
+    * perfective  – verb + 了 (买了) — completed action
+    * experiential – verb + 过 (买过) — have done before
+    * progressive – 在 + verb (在买) — currently doing
     """
 
     word: str
@@ -56,7 +64,8 @@ class VerbForms:
     notes: Optional[str] = None
 
     BASE_FORMS = ["base"]
-    ALL_FORMS = BASE_FORMS
+    ASPECT_FORMS = ["perfective", "experiential", "progressive"]
+    ALL_FORMS = BASE_FORMS + ASPECT_FORMS
 
     def has_base(self) -> bool:
         """Check if this verb has a base form."""

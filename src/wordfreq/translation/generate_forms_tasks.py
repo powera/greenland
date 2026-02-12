@@ -403,7 +403,7 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             pos_type="verb",
             form_mapping=ZH_VERB_FORM_MAPPING,
             client_method_name="query_chinese_verb_forms",
-            min_forms_threshold=1,
+            min_forms_threshold=3,
             base_form_identifier="base",
             use_legacy_translation=False,
         )

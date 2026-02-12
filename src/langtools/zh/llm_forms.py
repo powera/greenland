@@ -2,10 +2,15 @@
 
 """Chinese language form generation.
 
-Chinese is an isolating language: nouns and verbs have no inflectional
-morphology.  The "forms" stored here are simply the base dictionary entry,
-which lets the rest of the pipeline treat Chinese the same as any other
-language without special-casing.
+Chinese is an isolating language with no inflectional morphology, but verbs
+combine with aspect particles in patterns that are essential for learners.
+We store the bare verb plus three common aspect patterns:
+
+* perfective (了): completed action  — 买了 "bought"
+* experiential (过): have done before — 买过 "have bought before"
+* progressive (在): in progress       — 在买 "is buying"
+
+Nouns have only a single base form.
 """
 
 import json
@@ -29,6 +34,9 @@ NOUN_FORM_MAPPING: Dict[str, GrammaticalForm] = {
 
 VERB_FORM_MAPPING: Dict[str, GrammaticalForm] = {
     "base": GrammaticalForm.VERB_ZH_BASE,
+    "perfective": GrammaticalForm.VERB_ZH_PERFECTIVE,
+    "experiential": GrammaticalForm.VERB_ZH_EXPERIENTIAL,
+    "progressive": GrammaticalForm.VERB_ZH_PROGRESSIVE,
 }
 
 
@@ -106,7 +114,7 @@ def query_chinese_noun_forms(
 def query_chinese_verb_forms(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for Chinese verb forms (base form only)."""
+    """Query LLM for Chinese verb forms (base + aspect patterns)."""
     session = get_session_func()
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
     zh_translation = get_translation(session, lemma, "zh") if lemma else None
@@ -121,8 +129,14 @@ def query_chinese_verb_forms(
         lemma.definition_text,
         lemma.pos_subtype,
     )
-    fields = ["base"]
-    form_properties = {f: SchemaProperty("string", f"Chinese {f} form") for f in fields}
+    fields = ["base", "perfective", "experiential", "progressive"]
+    form_descriptions = {
+        "base": "bare verb (e.g. 买)",
+        "perfective": "verb + 了 — completed action (e.g. 买了)",
+        "experiential": "verb + 过 — have done before (e.g. 买过)",
+        "progressive": "在 + verb — in progress (e.g. 在买)",
+    }
+    form_properties = {f: SchemaProperty("string", form_descriptions[f]) for f in fields}
 
     schema = Schema(
         name="ChineseVerbForms",
