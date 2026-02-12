@@ -623,32 +623,10 @@ class GrammaticalForm(enum.Enum):
     NOUN_SV_SINGULAR = "noun/sv_singular"
     NOUN_SV_PLURAL = "noun/sv_plural"
 
-    # Swedish verb forms (6 persons × 3 tenses = 18 forms)
-    # Note: Swedish verbs don't conjugate by person, but we use the standard
-    # 6-person schema for consistency with other languages.
-    # Present tense (presens)
-    VERB_SV_1S_PRESENT = "verb/sv_1s_present"
-    VERB_SV_2S_PRESENT = "verb/sv_2s_present"
-    VERB_SV_3S_PRESENT = "verb/sv_3s_present"
-    VERB_SV_1P_PRESENT = "verb/sv_1p_present"
-    VERB_SV_2P_PRESENT = "verb/sv_2p_present"
-    VERB_SV_3P_PRESENT = "verb/sv_3p_present"
-
-    # Past tense (preteritum)
-    VERB_SV_1S_PAST = "verb/sv_1s_past"
-    VERB_SV_2S_PAST = "verb/sv_2s_past"
-    VERB_SV_3S_PAST = "verb/sv_3s_past"
-    VERB_SV_1P_PAST = "verb/sv_1p_past"
-    VERB_SV_2P_PAST = "verb/sv_2p_past"
-    VERB_SV_3P_PAST = "verb/sv_3p_past"
-
-    # Future (futurum)
-    VERB_SV_1S_FUTURE = "verb/sv_1s_future"
-    VERB_SV_2S_FUTURE = "verb/sv_2s_future"
-    VERB_SV_3S_FUTURE = "verb/sv_3s_future"
-    VERB_SV_1P_FUTURE = "verb/sv_1p_future"
-    VERB_SV_2P_FUTURE = "verb/sv_2p_future"
-    VERB_SV_3P_FUTURE = "verb/sv_3p_future"
+    # Swedish verb forms (one form per tense — Swedish does not conjugate by person)
+    VERB_SV_PRESENT = "verb/sv_present"  # Presens: e.g. "talar", "springer"
+    VERB_SV_PAST = "verb/sv_past"  # Preteritum: e.g. "talade", "sprang"
+    VERB_SV_FUTURE = "verb/sv_future"  # Futurum: e.g. "ska tala", "ska springa"
 
     # Dutch noun forms (singular/plural only - each noun has a fixed gender)
     NOUN_NL_SINGULAR = "noun/nl_singular"

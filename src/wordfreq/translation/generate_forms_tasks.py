@@ -332,8 +332,8 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             pos_type="verb",
             form_mapping=SV_VERB_FORM_MAPPING,
             client_method_name="query_swedish_verb_conjugations",
-            min_forms_threshold=10,
-            base_form_identifier="1s_present",
+            min_forms_threshold=2,
+            base_form_identifier="present",
             use_legacy_translation=False,
         )
     ),
