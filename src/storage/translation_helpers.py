@@ -71,15 +71,24 @@ TIER_3_LANGUAGES = [
     "xh",
     "sn",
     "hi",
-    "bn",
     "ps",
     "fa",
     "ka",
     "hy",
     "az",
     "tr",
-    "uk",
     "bg",
+    "cs",
+    "el",
+    "et",
+    "fi",
+    "ga",
+    "hr",
+    "hu",
+    "lv",
+    "mt",
+    "sk",
+    "sl",
 ]
 
 # Languages included in data/release read/write operations.
@@ -148,15 +157,24 @@ LANGUAGE_HIERARCHY = [
     "xh",  # Xhosa (experimental)
     "sn",  # Shona (experimental)
     "hi",  # Hindi (experimental)
-    "bn",  # Bengali (experimental)
     "ps",  # Pashto (experimental)
     "fa",  # Persian (experimental)
     "ka",  # Georgian (experimental)
     "hy",  # Armenian (experimental)
     "az",  # Azerbaijani (experimental)
     "tr",  # Turkish (experimental)
-    "uk",  # Ukrainian (experimental)
     "bg",  # Bulgarian (experimental)
+    "cs",  # Czech (experimental)
+    "el",  # Greek (experimental)
+    "et",  # Estonian (experimental)
+    "fi",  # Finnish (experimental)
+    "ga",  # Irish (experimental)
+    "hr",  # Croatian (experimental)
+    "hu",  # Hungarian (experimental)
+    "lv",  # Latvian (experimental)
+    "mt",  # Maltese (experimental)
+    "sk",  # Slovak (experimental)
+    "sl",  # Slovenian (experimental)
 ]
 
 # Language mappings
@@ -205,15 +223,24 @@ LANGUAGE_FIELDS = {
     "xh": ("xh", "Xhosa", True),
     "sn": ("sn", "Shona", True),
     "hi": ("hi", "Hindi", True),
-    "bn": ("bn", "Bengali", True),
     "ps": ("ps", "Pashto", True),
     "fa": ("fa", "Persian", True),
     "ka": ("ka", "Georgian", True),
     "hy": ("hy", "Armenian", True),
     "az": ("az", "Azerbaijani", True),
     "tr": ("tr", "Turkish", True),
-    "uk": ("uk", "Ukrainian", True),
     "bg": ("bg", "Bulgarian", True),
+    "cs": ("cs", "Czech", True),
+    "el": ("el", "Greek", True),
+    "et": ("et", "Estonian", True),
+    "fi": ("fi", "Finnish", True),
+    "ga": ("ga", "Irish", True),
+    "hr": ("hr", "Croatian", True),
+    "hu": ("hu", "Hungarian", True),
+    "lv": ("lv", "Latvian", True),
+    "mt": ("mt", "Maltese", True),
+    "sk": ("sk", "Slovak", True),
+    "sl": ("sl", "Slovenian", True),
 }
 
 # Language display names (for use in prompts, UIs, etc.)
@@ -262,15 +289,24 @@ LLM_FIELD_TO_LANG_CODE = {
     "xhosa_translation": "xh",
     "shona_translation": "sn",
     "hindi_translation": "hi",
-    "bengali_translation": "bn",
     "pashto_translation": "ps",
     "persian_translation": "fa",
     "georgian_translation": "ka",
     "armenian_translation": "hy",
     "azerbaijani_translation": "az",
     "turkish_translation": "tr",
-    "ukrainian_translation": "uk",
     "bulgarian_translation": "bg",
+    "czech_translation": "cs",
+    "greek_translation": "el",
+    "estonian_translation": "et",
+    "finnish_translation": "fi",
+    "irish_translation": "ga",
+    "croatian_translation": "hr",
+    "hungarian_translation": "hu",
+    "latvian_translation": "lv",
+    "maltese_translation": "mt",
+    "slovak_translation": "sk",
+    "slovenian_translation": "sl",
 }
 
 # Reverse mapping: language codes to LLM field names
