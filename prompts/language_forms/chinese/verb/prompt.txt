@@ -1,0 +1,6 @@
+Confirm the base dictionary form for the Chinese verb "{verb}".
+
+English verb: {english_verb}
+Definition: {definition}{subtype_context}
+
+Please provide the bare verb form in simplified Chinese (without any aspect particles like 了, 过, 着).

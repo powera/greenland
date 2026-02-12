@@ -1627,6 +1627,35 @@ class GrammaticalForm(enum.Enum):
     VERB_UK_PAST = "verb/uk_past"
     VERB_UK_FUTURE = "verb/uk_future"
 
+    # Chinese noun forms (isolating language - base form only)
+    NOUN_ZH_BASE = "noun/zh_base"
+
+    # Chinese verb forms (isolating language - base form only)
+    VERB_ZH_BASE = "verb/zh_base"
+
+    # Japanese noun forms (no morphological change - base form only)
+    NOUN_JA_BASE = "noun/ja_base"
+
+    # Japanese verb forms (genuine conjugation)
+    VERB_JA_MASU = "verb/ja_masu"  # polite present (食べます)
+    VERB_JA_TE = "verb/ja_te"  # te-form (食べて)
+    VERB_JA_TA = "verb/ja_ta"  # past plain (食べた)
+    VERB_JA_NAI = "verb/ja_nai"  # negative plain (食べない)
+
+    # Korean noun forms (no morphological change - base form only)
+    NOUN_KO_BASE = "noun/ko_base"
+
+    # Korean verb forms (genuine conjugation - 해요체 polite forms)
+    VERB_KO_POLITE_PRESENT = "verb/ko_polite_present"  # 먹어요
+    VERB_KO_POLITE_PAST = "verb/ko_polite_past"  # 먹었어요
+    VERB_KO_POLITE_FUTURE = "verb/ko_polite_future"  # 먹을 거예요
+
+    # Vietnamese noun forms (isolating language - base form only)
+    NOUN_VI_BASE = "noun/vi_base"
+
+    # Vietnamese verb forms (isolating language - base form only)
+    VERB_VI_BASE = "verb/vi_base"
+
     # Generic forms
     BASE_FORM = "base_form"
     OTHER = "other"

@@ -47,6 +47,14 @@ from langtools.es.llm_forms import NOUN_FORM_MAPPING as ES_NOUN_FORM_MAPPING
 from langtools.es.llm_forms import VERB_FORM_MAPPING as ES_VERB_FORM_MAPPING
 from langtools.sv.llm_forms import NOUN_FORM_MAPPING as SV_NOUN_FORM_MAPPING
 from langtools.sv.llm_forms import VERB_FORM_MAPPING as SV_VERB_FORM_MAPPING
+from langtools.zh.llm_forms import NOUN_FORM_MAPPING as ZH_NOUN_FORM_MAPPING
+from langtools.zh.llm_forms import VERB_FORM_MAPPING as ZH_VERB_FORM_MAPPING
+from langtools.ja.llm_forms import NOUN_FORM_MAPPING as JA_NOUN_FORM_MAPPING
+from langtools.ja.llm_forms import VERB_FORM_MAPPING as JA_VERB_FORM_MAPPING
+from langtools.ko.llm_forms import NOUN_FORM_MAPPING as KO_NOUN_FORM_MAPPING
+from langtools.ko.llm_forms import VERB_FORM_MAPPING as KO_VERB_FORM_MAPPING
+from langtools.vi.llm_forms import NOUN_FORM_MAPPING as VI_NOUN_FORM_MAPPING
+from langtools.vi.llm_forms import VERB_FORM_MAPPING as VI_VERB_FORM_MAPPING
 
 
 @dataclass
@@ -373,6 +381,106 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             base_form_identifier="singular",
             use_legacy_translation=False,
             extract_gender=True,
+        )
+    ),
+    # Chinese (isolating - base form only)
+    "chinese_nouns": _needs_forms_task(
+        FormGenerationConfig(
+            language_code="zh",
+            language_name="Chinese",
+            pos_type="noun",
+            form_mapping=ZH_NOUN_FORM_MAPPING,
+            client_method_name="query_chinese_noun_forms",
+            min_forms_threshold=1,
+            base_form_identifier="base",
+            use_legacy_translation=False,
+        )
+    ),
+    "chinese_verbs": _needs_forms_task(
+        FormGenerationConfig(
+            language_code="zh",
+            language_name="Chinese",
+            pos_type="verb",
+            form_mapping=ZH_VERB_FORM_MAPPING,
+            client_method_name="query_chinese_verb_forms",
+            min_forms_threshold=1,
+            base_form_identifier="base",
+            use_legacy_translation=False,
+        )
+    ),
+    # Japanese (nouns: base only; verbs: genuine conjugation)
+    "japanese_nouns": _needs_forms_task(
+        FormGenerationConfig(
+            language_code="ja",
+            language_name="Japanese",
+            pos_type="noun",
+            form_mapping=JA_NOUN_FORM_MAPPING,
+            client_method_name="query_japanese_noun_forms",
+            min_forms_threshold=1,
+            base_form_identifier="base",
+            use_legacy_translation=False,
+        )
+    ),
+    "japanese_verbs": _needs_forms_task(
+        FormGenerationConfig(
+            language_code="ja",
+            language_name="Japanese",
+            pos_type="verb",
+            form_mapping=JA_VERB_FORM_MAPPING,
+            client_method_name="query_japanese_verb_conjugations",
+            min_forms_threshold=3,
+            base_form_identifier="masu_form",
+            use_legacy_translation=False,
+        )
+    ),
+    # Korean (nouns: base only; verbs: genuine conjugation)
+    "korean_nouns": _needs_forms_task(
+        FormGenerationConfig(
+            language_code="ko",
+            language_name="Korean",
+            pos_type="noun",
+            form_mapping=KO_NOUN_FORM_MAPPING,
+            client_method_name="query_korean_noun_forms",
+            min_forms_threshold=1,
+            base_form_identifier="base",
+            use_legacy_translation=False,
+        )
+    ),
+    "korean_verbs": _needs_forms_task(
+        FormGenerationConfig(
+            language_code="ko",
+            language_name="Korean",
+            pos_type="verb",
+            form_mapping=KO_VERB_FORM_MAPPING,
+            client_method_name="query_korean_verb_conjugations",
+            min_forms_threshold=2,
+            base_form_identifier="polite_present",
+            use_legacy_translation=False,
+        )
+    ),
+    # Vietnamese (isolating - base form only)
+    "vietnamese_nouns": _needs_forms_task(
+        FormGenerationConfig(
+            language_code="vi",
+            language_name="Vietnamese",
+            pos_type="noun",
+            form_mapping=VI_NOUN_FORM_MAPPING,
+            client_method_name="query_vietnamese_noun_forms",
+            min_forms_threshold=1,
+            base_form_identifier="base",
+            use_legacy_translation=False,
+        )
+    ),
+    "vietnamese_verbs": _needs_forms_task(
+        FormGenerationConfig(
+            language_code="vi",
+            language_name="Vietnamese",
+            pos_type="verb",
+            form_mapping=VI_VERB_FORM_MAPPING,
+            client_method_name="query_vietnamese_verb_forms",
+            min_forms_threshold=1,
+            base_form_identifier="base",
+            use_legacy_translation=False,
         )
     ),
 }

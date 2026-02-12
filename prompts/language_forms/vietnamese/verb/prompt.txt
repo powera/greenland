@@ -1,0 +1,6 @@
+Confirm the base dictionary form for the Vietnamese verb "{verb}".
+
+English verb: {english_verb}
+Definition: {definition}{subtype_context}
+
+Please provide the bare verb form (without any tense/aspect particles like đã, đang, sẽ).
