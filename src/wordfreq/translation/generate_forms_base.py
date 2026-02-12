@@ -484,8 +484,13 @@ def process_lemma_forms(
             return True
 
         # Query forms using the specified client method
-        client_method = getattr(client, form_config.client_method_name)
-        forms_dict, success = client_method(lemma_id)
+        if form_config.client_method_name == "query_language_forms":
+            forms_dict, success = client.query_language_forms(
+                form_config.language_code, form_config.pos_type, lemma_id
+            )
+        else:
+            client_method = getattr(client, form_config.client_method_name)
+            forms_dict, success = client_method(lemma_id)
 
         if not success or not forms_dict:
             logger.error(f"Failed to get forms for lemma ID {lemma_id}")

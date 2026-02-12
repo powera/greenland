@@ -415,6 +415,17 @@ class LinguisticClient:
         """Query LLM for Vietnamese verb forms."""
         return vietnamese.query_vietnamese_verb_forms(self.client, lemma_id, self.get_session)
 
+    # Generic form dispatch (for languages without a dedicated method above)
+    def query_language_forms(
+        self, language_code: str, pos_type: str, lemma_id: int
+    ) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for forms using the generic registry-based dispatch."""
+        from langtools.form_registry import FORM_SPECS
+        from langtools.llm_forms_base import query_forms
+
+        spec = FORM_SPECS[(language_code, pos_type)]
+        return query_forms(spec, self.client, lemma_id, self.get_session)
+
     # Legacy methods for compatibility
     def get_word_token_info(self, token_text: str) -> Dict[str, Any]:
         """Get comprehensive information about a word token using the new schema."""

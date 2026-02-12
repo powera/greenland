@@ -8,6 +8,7 @@ scripts.
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
 
+from langtools.form_registry import FORM_SPECS, LANG_NAMES
 from storage.backend.config import DataSourceConfig
 from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.generate_forms_base import (
@@ -484,6 +485,74 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
         )
     ),
 }
+
+
+def _auto_register_from_form_specs() -> None:
+    """Auto-register tasks for languages not already explicitly registered."""
+    already_registered = {
+        (t.config.language_code, t.config.pos_type) for t in FORM_GENERATION_TASKS.values()
+    }
+
+    # Default base_form_identifiers per noun pattern
+    _BASE_FORM_IDS = {
+        "noun": "singular",  # fallback; overridden for base-only nouns below
+        "verb": "1s_present",  # fallback; overridden for tense-only verbs below
+        "adjective": "positive",
+        "adverb": "positive",
+    }
+
+    for (lang_code, pos_type), spec in sorted(FORM_SPECS.items()):
+        if (lang_code, pos_type) in already_registered:
+            continue
+
+        # Determine base_form_identifier from the spec's form_fields
+        if spec.form_fields[0] == "base":
+            base_id = "base"
+        elif "singular" in spec.form_fields:
+            base_id = "singular"
+        elif "nominative_singular" in spec.form_fields:
+            base_id = "nominative_singular"
+        elif "1s_present" in spec.form_fields:
+            base_id = "1s_present"
+        elif "present" in spec.form_fields:
+            base_id = "present"
+        elif "polite_present" in spec.form_fields:
+            base_id = "polite_present"
+        elif "masu_form" in spec.form_fields:
+            base_id = "masu_form"
+        elif "positive" in spec.form_fields:
+            base_id = "positive"
+        else:
+            base_id = spec.form_fields[0]
+
+        # Reasonable defaults for min_forms_threshold
+        num_fields = len(spec.form_fields)
+        if num_fields <= 3:
+            threshold = 1
+        elif num_fields <= 8:
+            threshold = 2
+        else:
+            threshold = 3
+
+        lang_name = LANG_NAMES.get(lang_code, spec.language_name)
+        task_key = f"{lang_name.lower()}_{pos_type}s"
+        if pos_type == "noun" and "nominative_singular" in spec.form_fields:
+            task_key = f"{lang_name.lower()}_{pos_type}s"
+
+        config = FormGenerationConfig(
+            language_code=lang_code,
+            language_name=lang_name,
+            pos_type=pos_type,
+            form_mapping=spec.form_mapping,
+            client_method_name="query_language_forms",
+            min_forms_threshold=threshold,
+            base_form_identifier=base_id,
+            use_legacy_translation=False,
+        )
+        FORM_GENERATION_TASKS[task_key] = _needs_forms_task(config)
+
+
+_auto_register_from_form_specs()
 
 
 def run_form_generation_task(task_key: str) -> None:

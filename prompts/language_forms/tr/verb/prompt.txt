@@ -1,0 +1,7 @@
+Generate Turkish verb forms for the Turkish verb "{verb}".
+
+English verb: {english_verb}
+Definition: {definition}{subtype_context}
+
+Please provide present, past, and future tense forms.
+Provide only the verb form without any pronouns. Use empty strings for forms that don't exist.
