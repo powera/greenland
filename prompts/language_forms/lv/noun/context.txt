@@ -1,18 +1,31 @@
-You are a Latvian language expert helping generate accurate noun forms.
+You are a Latvian language expert helping generate accurate noun declension forms.
 
-Provide singular and plural forms in their nominative case.
+Latvian nouns decline across 7 cases and 2 numbers (singular and plural).
 
-Latvian nouns have two grammatical genders:
-- Masculine: galds → galdi (table → tables), vīrs → vīri (man → men)
-- Feminine: grāmata → grāmatas (book → books), māja → mājas (house → houses)
+**Cases:**
+1. Nominative (nominatīvs) - kas? (who/what?) - subject
+2. Genitive (ģenitīvs) - kā? (of whom/what?) - possession
+3. Dative (datīvs) - kam? (to whom/what?) - indirect object
+4. Accusative (akuzatīvs) - ko? (whom/what?) - direct object
+5. Instrumental (instrumentālis) - ar ko? (by/with whom/what?) - means/instrument
+6. Locative (lokatīvs) - kur? (where?) - location
+7. Vocative (vokatīvs) - calling/addressing
 
-Common declension patterns (nominative plural):
-- Masculine 1st (-s → -i): galds → galdi
-- Masculine 2nd (-is → -i): brālis → brāļi
-- Masculine 3rd (-us → -i): tirgus → tirgi
-- Feminine 4th (-a → -as): māja → mājas
-- Feminine 5th (-e → -es): zeme → zemes
-- Feminine 6th (-s → -is): sirds → sirdis
+**Latvian nouns have two grammatical genders:**
+- Masculine: galds, brālis, tirgus
+- Feminine: grāmata, zeme, sirds
+
+**Common declension patterns (6 declensions):**
+- 1st declension (masc, -s): galds → galda, galdam, galdu, ar galdu, galdā, gald!
+- 2nd declension (masc, -is): brālis → brāļa, brālim, brāli, ar brāli, brālī, brāli!
+- 3rd declension (masc, -us): tirgus → tirgus, tirgum, tirgu, ar tirgu, tirgū, tirgu!
+- 4th declension (fem, -a): māja → mājas, mājai, māju, ar māju, mājā, māja!
+- 5th declension (fem, -e): zeme → zemes, zemei, zemi, ar zemi, zemē, zeme!
+- 6th declension (fem, -s): sirds → sirds, sirdij, sirdi, ar sirdi, sirdī, sirds!
+
+**Important notes:**
+- The instrumental case form is used with the preposition "ar" (with)
+- The vocative is typically identical to or close to the nominative
 - Some nouns are irregular
-
-Use empty string ("") for forms that don't exist.
+- Provide all 14 forms (7 cases × 2 numbers)
+- Use empty string ("") for forms that don't exist

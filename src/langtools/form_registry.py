@@ -97,6 +97,17 @@ _LT_CASES: List[str] = [
 # German 4-case system
 _DE_CASES: List[str] = ["nominative", "accusative", "dative", "genitive"]
 
+# Latvian 7-case system (same cases as Lithuanian)
+_LV_CASES: List[str] = [
+    "nominative",
+    "genitive",
+    "dative",
+    "accusative",
+    "instrumental",
+    "locative",
+    "vocative",
+]
+
 # Polish 7-case system (same as Lithuanian)
 _PL_CASES: List[str] = [
     "nominative",
@@ -246,7 +257,6 @@ _PATTERN_A_LANGS: List[Tuple[str, str]] = [
     ("ga", "Irish"),
     ("hr", "Croatian"),
     ("hu", "Hungarian"),
-    ("lv", "Latvian"),
     ("mt", "Maltese"),
     ("ro", "Romanian"),
     ("si", "Sinhala"),
@@ -635,6 +645,76 @@ FORM_SPECS[("lt", "adverb")] = LanguageFormSpec(
     query_type="lithuanian_adverb_forms",
     schema_name="LithuanianAdverbForms",
     schema_description="Lithuanian adverb forms",
+)
+
+# --- Latvian: 14-case nouns, 6-person verbs, 28-form adjectives, 3-form adverbs ---
+
+_LV_NOUN_FIELDS: List[str] = []
+_LV_NOUN_MAPPING: Dict[str, GrammaticalForm] = {}
+for _case in _LV_CASES:
+    for _number in ["singular", "plural"]:
+        _field = f"{_case}_{_number}"
+        _LV_NOUN_FIELDS.append(_field)
+        _LV_NOUN_MAPPING[_field] = _gf(f"NOUN_LV_{_case.upper()}_{_number.upper()}")
+
+FORM_SPECS[("lv", "noun")] = LanguageFormSpec(
+    language_code="lv",
+    language_name="Latvian",
+    pos_type="noun",
+    form_mapping=_LV_NOUN_MAPPING,
+    form_fields=_LV_NOUN_FIELDS,
+    prompt_path="lv/noun",
+    query_type="latvian_noun_declensions",
+    schema_name="LatvianNounDeclensions",
+    schema_description="Latvian noun declensions",
+    extra_schema_properties={
+        "number_type": SchemaProperty(
+            "string",
+            "The number type of this noun",
+            enum=["regular", "plurale_tantum", "singulare_tantum"],
+        ),
+    },
+)
+
+FORM_SPECS[("lv", "verb")] = _make_6person_verb_spec("lv", "Latvian")
+
+_LV_ADJ_FIELDS: List[str] = []
+_LV_ADJ_MAPPING: Dict[str, GrammaticalForm] = {}
+for _case in _LV_CASES:
+    for _number in ["singular", "plural"]:
+        for _gender in ["m", "f"]:
+            _field = f"{_case}_{_number}_{_gender}"
+            _LV_ADJ_FIELDS.append(_field)
+            _LV_ADJ_MAPPING[_field] = _gf(
+                f"ADJ_LV_{_case.upper()}_{_number.upper()}_{_gender.upper()}"
+            )
+
+FORM_SPECS[("lv", "adjective")] = LanguageFormSpec(
+    language_code="lv",
+    language_name="Latvian",
+    pos_type="adjective",
+    form_mapping=_LV_ADJ_MAPPING,
+    form_fields=_LV_ADJ_FIELDS,
+    prompt_path="lv/adjective",
+    query_type="latvian_adjective_declensions",
+    schema_name="LatvianAdjectiveDeclensions",
+    schema_description="Latvian adjective declensions",
+)
+
+FORM_SPECS[("lv", "adverb")] = LanguageFormSpec(
+    language_code="lv",
+    language_name="Latvian",
+    pos_type="adverb",
+    form_mapping={
+        "positive": GrammaticalForm.ADVERB_LV_POSITIVE,
+        "comparative": GrammaticalForm.ADVERB_LV_COMPARATIVE,
+        "superlative": GrammaticalForm.ADVERB_LV_SUPERLATIVE,
+    },
+    form_fields=["positive", "comparative", "superlative"],
+    prompt_path="lv/adverb",
+    query_type="latvian_adverb_forms",
+    schema_name="LatvianAdverbForms",
+    schema_description="Latvian adverb forms",
 )
 
 # --- Polish: 14-case nouns + 6-person verbs ---

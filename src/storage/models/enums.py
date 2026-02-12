@@ -1294,9 +1294,25 @@ class GrammaticalForm(enum.Enum):
     VERB_GA_2P_FUTURE = "verb/ga_2p_future"
     VERB_GA_3P_FUTURE = "verb/ga_3p_future"
 
-    # Latvian noun forms (singular/plural only - each noun has a fixed gender m/f)
+    # Latvian noun forms (legacy singular/plural - kept for backward compatibility)
     NOUN_LV_SINGULAR = "noun/lv_singular"
     NOUN_LV_PLURAL = "noun/lv_plural"
+
+    # Latvian noun forms (7 cases × 2 numbers = 14 forms)
+    NOUN_LV_NOMINATIVE_SINGULAR = "noun/lv_nominative_singular"
+    NOUN_LV_GENITIVE_SINGULAR = "noun/lv_genitive_singular"
+    NOUN_LV_DATIVE_SINGULAR = "noun/lv_dative_singular"
+    NOUN_LV_ACCUSATIVE_SINGULAR = "noun/lv_accusative_singular"
+    NOUN_LV_INSTRUMENTAL_SINGULAR = "noun/lv_instrumental_singular"
+    NOUN_LV_LOCATIVE_SINGULAR = "noun/lv_locative_singular"
+    NOUN_LV_VOCATIVE_SINGULAR = "noun/lv_vocative_singular"
+    NOUN_LV_NOMINATIVE_PLURAL = "noun/lv_nominative_plural"
+    NOUN_LV_GENITIVE_PLURAL = "noun/lv_genitive_plural"
+    NOUN_LV_DATIVE_PLURAL = "noun/lv_dative_plural"
+    NOUN_LV_ACCUSATIVE_PLURAL = "noun/lv_accusative_plural"
+    NOUN_LV_INSTRUMENTAL_PLURAL = "noun/lv_instrumental_plural"
+    NOUN_LV_LOCATIVE_PLURAL = "noun/lv_locative_plural"
+    NOUN_LV_VOCATIVE_PLURAL = "noun/lv_vocative_plural"
 
     # Latvian verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (tagadne)
@@ -1320,6 +1336,45 @@ class GrammaticalForm(enum.Enum):
     VERB_LV_1P_FUTURE = "verb/lv_1p_future"
     VERB_LV_2P_FUTURE = "verb/lv_2p_future"
     VERB_LV_3P_FUTURE = "verb/lv_3p_future"
+
+    # Latvian adjective forms (7 cases × 2 numbers × 2 genders = 28 forms)
+    # Masculine singular
+    ADJ_LV_NOMINATIVE_SINGULAR_M = "adjective/lv_nominative_singular_m"
+    ADJ_LV_GENITIVE_SINGULAR_M = "adjective/lv_genitive_singular_m"
+    ADJ_LV_DATIVE_SINGULAR_M = "adjective/lv_dative_singular_m"
+    ADJ_LV_ACCUSATIVE_SINGULAR_M = "adjective/lv_accusative_singular_m"
+    ADJ_LV_INSTRUMENTAL_SINGULAR_M = "adjective/lv_instrumental_singular_m"
+    ADJ_LV_LOCATIVE_SINGULAR_M = "adjective/lv_locative_singular_m"
+    ADJ_LV_VOCATIVE_SINGULAR_M = "adjective/lv_vocative_singular_m"
+    # Feminine singular
+    ADJ_LV_NOMINATIVE_SINGULAR_F = "adjective/lv_nominative_singular_f"
+    ADJ_LV_GENITIVE_SINGULAR_F = "adjective/lv_genitive_singular_f"
+    ADJ_LV_DATIVE_SINGULAR_F = "adjective/lv_dative_singular_f"
+    ADJ_LV_ACCUSATIVE_SINGULAR_F = "adjective/lv_accusative_singular_f"
+    ADJ_LV_INSTRUMENTAL_SINGULAR_F = "adjective/lv_instrumental_singular_f"
+    ADJ_LV_LOCATIVE_SINGULAR_F = "adjective/lv_locative_singular_f"
+    ADJ_LV_VOCATIVE_SINGULAR_F = "adjective/lv_vocative_singular_f"
+    # Masculine plural
+    ADJ_LV_NOMINATIVE_PLURAL_M = "adjective/lv_nominative_plural_m"
+    ADJ_LV_GENITIVE_PLURAL_M = "adjective/lv_genitive_plural_m"
+    ADJ_LV_DATIVE_PLURAL_M = "adjective/lv_dative_plural_m"
+    ADJ_LV_ACCUSATIVE_PLURAL_M = "adjective/lv_accusative_plural_m"
+    ADJ_LV_INSTRUMENTAL_PLURAL_M = "adjective/lv_instrumental_plural_m"
+    ADJ_LV_LOCATIVE_PLURAL_M = "adjective/lv_locative_plural_m"
+    ADJ_LV_VOCATIVE_PLURAL_M = "adjective/lv_vocative_plural_m"
+    # Feminine plural
+    ADJ_LV_NOMINATIVE_PLURAL_F = "adjective/lv_nominative_plural_f"
+    ADJ_LV_GENITIVE_PLURAL_F = "adjective/lv_genitive_plural_f"
+    ADJ_LV_DATIVE_PLURAL_F = "adjective/lv_dative_plural_f"
+    ADJ_LV_ACCUSATIVE_PLURAL_F = "adjective/lv_accusative_plural_f"
+    ADJ_LV_INSTRUMENTAL_PLURAL_F = "adjective/lv_instrumental_plural_f"
+    ADJ_LV_LOCATIVE_PLURAL_F = "adjective/lv_locative_plural_f"
+    ADJ_LV_VOCATIVE_PLURAL_F = "adjective/lv_vocative_plural_f"
+
+    # Latvian adverb forms (3 comparative degrees)
+    ADVERB_LV_POSITIVE = "adverb/lv_positive"
+    ADVERB_LV_COMPARATIVE = "adverb/lv_comparative"
+    ADVERB_LV_SUPERLATIVE = "adverb/lv_superlative"
 
     # Maltese noun forms (singular/plural only - each noun has a fixed gender m/f)
     NOUN_MT_SINGULAR = "noun/mt_singular"
