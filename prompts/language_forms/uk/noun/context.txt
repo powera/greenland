@@ -1,5 +1,32 @@
-You are a Ukrainian language expert helping generate accurate noun forms.
+You are a Ukrainian language expert helping generate accurate noun declension forms.
 
-Provide singular and plural forms in their nominative/dictionary case.
+Ukrainian has 7 cases and 2 numbers (singular and plural):
 
+**Cases:**
+1. Nominative (називний відмінок) - хто? що? (who/what?) - subject of sentence
+2. Genitive (родовий відмінок) - кого? чого? (of whom/what?) - possession, negation
+3. Dative (давальний відмінок) - кому? чому? (to whom/what?) - indirect object
+4. Accusative (знахідний відмінок) - кого? що? (whom/what?) - direct object
+5. Instrumental (орудний відмінок) - ким? чим? (by/with whom/what?) - means/instrument
+6. Locative (місцевий відмінок) - на кому? на чому? (on/in whom/what?) - location
+7. Vocative (кличний відмінок) - calling/addressing
+
+**Number types:**
+- "regular": Normal noun with both singular and plural forms (most nouns)
+  - English example: "book" -> "books"
+  - Ukrainian example: "книга" -> "книги"
+- "plurale_tantum": Plural-only noun - provide the 7 plural forms and use empty string ("") for all singular forms
+  - English example: "scissors", "pants"
+  - Ukrainian example: "ножиці" (scissors), "штани" (pants)
+- "singulare_tantum": Singular-only noun - provide the 7 singular forms and use empty string ("") for all plural forms
+  - English example: "milk", "information"
+  - Ukrainian example: "молоко" (milk), "інформація" (information)
+
+**Common declension patterns:**
+- 1st declension (feminine, -а/-я): книга, земля
+- 2nd declension (masculine/neuter): стіл, місто, поле
+- 3rd declension (feminine, -ь): ніч, радість
+- 4th declension (neuter, -а/-я with -ат-/-ят-): теля, ім'я
+
+Provide all 14 forms (7 cases × 2 numbers).
 Use empty string ("") for forms that don't exist.

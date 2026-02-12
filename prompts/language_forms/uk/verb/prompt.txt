@@ -1,7 +1,7 @@
-Generate Ukrainian verb forms for the Ukrainian verb "{verb}".
+Generate all Ukrainian verb conjugation forms for the Ukrainian verb "{verb}".
 
 English verb: {english_verb}
 Definition: {definition}{subtype_context}
 
-Please provide present, past, and future tense forms.
-Provide only the verb form without any pronouns. Use empty strings for forms that don't exist.
+Please provide all 18 forms (6 persons × 3 tenses), using empty strings for forms that don't exist.
+Do NOT include pronouns with the verb forms.
