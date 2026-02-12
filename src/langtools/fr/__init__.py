@@ -33,6 +33,11 @@ from langtools.fr.utils import (
     is_elided_form,
     normalize_french_text,
 )
+from langtools.fr.conjugation import (
+    conjugate,
+    is_known_irregular,
+    list_irregular_verbs,
+)
 from langtools.fr.wiktionary import (
     FrenchParser,
     get_french_adjective_forms,
@@ -50,6 +55,10 @@ __all__ = [
     "FrenchGender",
     "NounDeclension",
     "VerbConjugation",
+    # Rule-based conjugation
+    "conjugate",
+    "is_known_irregular",
+    "list_irregular_verbs",
     # Convenience functions
     "get_french_adjective_forms",
     "get_french_adverb_forms",
