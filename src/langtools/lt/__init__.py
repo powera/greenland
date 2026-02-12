@@ -18,6 +18,7 @@ Or using convenience functions:
     forms, success = get_lithuanian_noun_forms("vilkas")
 """
 
+from langtools.lt.conjugation import conjugate_verb
 from langtools.lt.types import (
     AdjectiveDeclension,
     AdverbForms,
@@ -45,6 +46,8 @@ __all__ = [
     "AdverbForms",
     "NounDeclension",
     "VerbConjugation",
+    # Conjugation
+    "conjugate_verb",
     # Convenience functions
     "get_lithuanian_adjective_forms",
     "get_lithuanian_adverb_forms",
