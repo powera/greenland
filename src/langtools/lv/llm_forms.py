@@ -10,11 +10,13 @@ from langtools.llm_forms_base import query_forms
 from sqlalchemy.orm import Session
 from storage.models.enums import GrammaticalForm
 
+ADJECTIVE_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("lv", "adjective")].form_mapping
+ADVERB_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("lv", "adverb")].form_mapping
 NOUN_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("lv", "noun")].form_mapping
 VERB_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("lv", "verb")].form_mapping
 
 
-def query_latvian_noun_forms(
+def query_latvian_noun_declensions(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
     """Query LLM for Latvian noun forms."""
@@ -26,3 +28,17 @@ def query_latvian_verb_conjugations(
 ) -> Tuple[Dict[str, str], bool]:
     """Query LLM for Latvian verb forms."""
     return query_forms(FORM_SPECS[("lv", "verb")], client, lemma_id, get_session_func)
+
+
+def query_latvian_adjective_declensions(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Query LLM for Latvian adjective forms."""
+    return query_forms(FORM_SPECS[("lv", "adjective")], client, lemma_id, get_session_func)
+
+
+def query_latvian_adverb_forms(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Query LLM for Latvian adverb forms."""
+    return query_forms(FORM_SPECS[("lv", "adverb")], client, lemma_id, get_session_func)

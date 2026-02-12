@@ -38,6 +38,14 @@ from langtools.lt.llm_forms import (
 )
 from langtools.lt.llm_forms import NOUN_FORM_MAPPING as LT_NOUN_FORM_MAPPING
 from langtools.lt.llm_forms import VERB_FORM_MAPPING as LT_VERB_FORM_MAPPING
+from langtools.lv.llm_forms import (
+    ADJECTIVE_FORM_MAPPING as LV_ADJECTIVE_FORM_MAPPING,
+)
+from langtools.lv.llm_forms import (
+    ADVERB_FORM_MAPPING as LV_ADVERB_FORM_MAPPING,
+)
+from langtools.lv.llm_forms import NOUN_FORM_MAPPING as LV_NOUN_FORM_MAPPING
+from langtools.lv.llm_forms import VERB_FORM_MAPPING as LV_VERB_FORM_MAPPING
 from langtools.pt.llm_forms import NOUN_FORM_MAPPING as PT_NOUN_FORM_MAPPING
 from langtools.pt.llm_forms import VERB_FORM_MAPPING as PT_VERB_FORM_MAPPING
 from langtools.nl.llm_forms import NOUN_FORM_MAPPING as NL_NOUN_FORM_MAPPING
@@ -249,6 +257,55 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             base_form_identifier="positive",
             use_legacy_translation=True,
             translation_field_name="lithuanian_translation",
+        )
+    ),
+    # Latvian
+    "latvian_nouns": _translation_task(
+        FormGenerationConfig(
+            language_code="lv",
+            language_name="Latvian",
+            pos_type="noun",
+            form_mapping=LV_NOUN_FORM_MAPPING,
+            client_method_name="query_latvian_noun_declensions",
+            min_forms_threshold=3,
+            base_form_identifier="nominative_singular",
+            use_legacy_translation=False,
+        )
+    ),
+    "latvian_verbs": _translation_task(
+        FormGenerationConfig(
+            language_code="lv",
+            language_name="Latvian",
+            pos_type="verb",
+            form_mapping=LV_VERB_FORM_MAPPING,
+            client_method_name="query_latvian_verb_conjugations",
+            min_forms_threshold=6,
+            base_form_identifier="1s_present",
+            use_legacy_translation=False,
+        )
+    ),
+    "latvian_adjectives": _translation_task(
+        FormGenerationConfig(
+            language_code="lv",
+            language_name="Latvian",
+            pos_type="adjective",
+            form_mapping=LV_ADJECTIVE_FORM_MAPPING,
+            client_method_name="query_latvian_adjective_declensions",
+            min_forms_threshold=4,
+            base_form_identifier="nominative_singular_m",
+            use_legacy_translation=False,
+        )
+    ),
+    "latvian_adverbs": _translation_task(
+        FormGenerationConfig(
+            language_code="lv",
+            language_name="Latvian",
+            pos_type="adverb",
+            form_mapping=LV_ADVERB_FORM_MAPPING,
+            client_method_name="query_latvian_adverb_forms",
+            min_forms_threshold=1,
+            base_form_identifier="positive",
+            use_legacy_translation=False,
         )
     ),
     # Portuguese
