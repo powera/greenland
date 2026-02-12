@@ -23,28 +23,10 @@ NOUN_FORM_MAPPING: Dict[str, GrammaticalForm] = {
 }
 
 VERB_FORM_MAPPING: Dict[str, GrammaticalForm] = {
-    # Present (6 persons - Swedish verbs don't conjugate by person,
-    # but we use the standard schema for consistency)
-    "1s_present": GrammaticalForm.VERB_SV_1S_PRESENT,
-    "2s_present": GrammaticalForm.VERB_SV_2S_PRESENT,
-    "3s_present": GrammaticalForm.VERB_SV_3S_PRESENT,
-    "1p_present": GrammaticalForm.VERB_SV_1P_PRESENT,
-    "2p_present": GrammaticalForm.VERB_SV_2P_PRESENT,
-    "3p_present": GrammaticalForm.VERB_SV_3P_PRESENT,
-    # Past (6 persons)
-    "1s_past": GrammaticalForm.VERB_SV_1S_PAST,
-    "2s_past": GrammaticalForm.VERB_SV_2S_PAST,
-    "3s_past": GrammaticalForm.VERB_SV_3S_PAST,
-    "1p_past": GrammaticalForm.VERB_SV_1P_PAST,
-    "2p_past": GrammaticalForm.VERB_SV_2P_PAST,
-    "3p_past": GrammaticalForm.VERB_SV_3P_PAST,
-    # Future (6 persons)
-    "1s_future": GrammaticalForm.VERB_SV_1S_FUTURE,
-    "2s_future": GrammaticalForm.VERB_SV_2S_FUTURE,
-    "3s_future": GrammaticalForm.VERB_SV_3S_FUTURE,
-    "1p_future": GrammaticalForm.VERB_SV_1P_FUTURE,
-    "2p_future": GrammaticalForm.VERB_SV_2P_FUTURE,
-    "3p_future": GrammaticalForm.VERB_SV_3P_FUTURE,
+    # Swedish verbs do not conjugate by person — one form per tense.
+    "present": GrammaticalForm.VERB_SV_PRESENT,
+    "past": GrammaticalForm.VERB_SV_PAST,
+    "future": GrammaticalForm.VERB_SV_FUTURE,
 }
 
 
@@ -120,7 +102,7 @@ def query_swedish_noun_forms(
 def query_swedish_verb_conjugations(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for Swedish verb conjugations (6 persons × 3 tenses = 18 forms)."""
+    """Query LLM for Swedish verb forms (one form per tense, 3 total)."""
     session = get_session_func()
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
     swedish_translation = get_translation(session, lemma, "sv") if lemma else None
@@ -135,15 +117,12 @@ def query_swedish_verb_conjugations(
         lemma.definition_text,
         lemma.pos_subtype,
     )
-    tenses = [("present", "present"), ("past", "past"), ("future", "future")]
-    fields = [f"{p}_{t}" for t, _ in tenses for p in ["1s", "2s", "3s", "1p", "2p", "3p"]]
-    form_properties = {
-        f: SchemaProperty("string", f"Swedish {f.replace('_', ' ')}") for f in fields
-    }
+    fields = ["present", "past", "future"]
+    form_properties = {f: SchemaProperty("string", f"Swedish {f} tense form") for f in fields}
 
     schema = Schema(
         name="SwedishVerbConjugations",
-        description="Swedish verb conjugations",
+        description="Swedish verb conjugations (one form per tense — Swedish does not conjugate by person)",
         properties={
             "forms": SchemaProperty(
                 "object", "Dictionary of verb forms", properties=form_properties

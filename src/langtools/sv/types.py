@@ -49,7 +49,7 @@ class VerbConjugation:
     """Swedish verb conjugation results.
 
     Swedish verbs do not conjugate by person — all persons use the same form
-    per tense. Forms are organized by tense only.
+    per tense.  We store one form per tense rather than repeating it six times.
     """
 
     word: str  # The infinitive form
@@ -59,31 +59,10 @@ class VerbConjugation:
     confidence: float = 1.0
     notes: Optional[str] = None
 
-    # Present (Presens)
-    PRESENT_FORMS = [
-        "1s_present",
-        "2s_present",
-        "3s_present",
-        "1p_present",
-        "2p_present",
-        "3p_present",
-    ]
-    # Past (Preteritum)
-    PAST_FORMS = [
-        "1s_past",
-        "2s_past",
-        "3s_past",
-        "1p_past",
-        "2p_past",
-        "3p_past",
-    ]
-    # Future (Futurum - ska + infinitive)
-    FUTURE_FORMS = [
-        "1s_future",
-        "2s_future",
-        "3s_future",
-        "1p_future",
-        "2p_future",
-        "3p_future",
-    ]
+    # Present (Presens) — e.g. "talar", "springer"
+    PRESENT_FORMS = ["present"]
+    # Past (Preteritum) — e.g. "talade", "sprang"
+    PAST_FORMS = ["past"]
+    # Future (Futurum) — e.g. "ska tala", "ska springa"
+    FUTURE_FORMS = ["future"]
     ALL_FORMS = PRESENT_FORMS + PAST_FORMS + FUTURE_FORMS
