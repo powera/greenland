@@ -31,7 +31,7 @@ class LanguageFormSpec:
     pos_type: str  # "noun", "verb", "adjective", "adverb"
     form_mapping: Dict[str, GrammaticalForm]
     form_fields: List[str]  # ordered field names for the JSON schema
-    prompt_path: str  # e.g. "finnish/noun"
+    prompt_path: str  # e.g. "fi/noun"
     query_type: str  # for log_query, e.g. "finnish_noun_forms"
     schema_name: str  # e.g. "FinnishNounForms"
     schema_description: str  # e.g. "Finnish noun forms"
