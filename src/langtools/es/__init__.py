@@ -2,7 +2,8 @@
 
 This module provides Spanish-specific parsing for Wiktionary data,
 including noun forms, verb conjugations, adjective forms,
-and adverb forms.
+and adverb forms.  It also provides rule-based verb conjugation
+via the conjugation module.
 
 Example usage:
     from langtools.es.wiktionary import SpanishParser
@@ -17,8 +18,15 @@ Or using convenience functions:
     from langtools.es.wiktionary import get_spanish_noun_forms
 
     forms, success = get_spanish_noun_forms("perro")
+
+Rule-based conjugation (no network/LLM required):
+    from langtools.es.conjugation import conjugate
+
+    forms = conjugate("hablar")
+    # forms["1s_present"] == "hablo", etc.
 """
 
+from langtools.es.conjugation import conjugate, conjugate_safe
 from langtools.es.types import (
     AdjectiveDeclension,
     AdverbForms,
@@ -50,6 +58,9 @@ __all__ = [
     "NounDeclension",
     "SpanishGender",
     "VerbConjugation",
+    # Rule-based conjugation
+    "conjugate",
+    "conjugate_safe",
     # Convenience functions
     "get_spanish_adjective_forms",
     "get_spanish_adverb_forms",
