@@ -293,7 +293,6 @@ _PATTERN_B_LANGS: List[Tuple[str, str]] = [
     ("ps", "Pashto"),
     ("sn", "Shona"),
     ("so", "Somali"),
-    ("th", "Thai"),
     ("tl", "Filipino"),
     ("tr", "Turkish"),
     ("uk", "Ukrainian"),
@@ -715,6 +714,92 @@ FORM_SPECS[("lv", "adverb")] = LanguageFormSpec(
     query_type="latvian_adverb_forms",
     schema_name="LatvianAdverbForms",
     schema_description="Latvian adverb forms",
+)
+
+# --- Thai: isolating language with classifiers, aspect markers, and degree forms ---
+
+FORM_SPECS[("th", "noun")] = LanguageFormSpec(
+    language_code="th",
+    language_name="Thai",
+    pos_type="noun",
+    form_mapping={
+        "singular": GrammaticalForm.NOUN_TH_SINGULAR,
+        "plural": GrammaticalForm.NOUN_TH_PLURAL,
+    },
+    form_fields=["singular", "plural"],
+    prompt_path="th/noun",
+    query_type="thai_noun_forms",
+    schema_name="ThaiNounForms",
+    schema_description="Thai noun forms",
+    extra_schema_properties={
+        "classifier": SchemaProperty(
+            "string",
+            "The Thai classifier (ลักษณนาม) used with this noun, e.g. คน, ตัว, อัน",
+        ),
+    },
+)
+
+FORM_SPECS[("th", "verb")] = LanguageFormSpec(
+    language_code="th",
+    language_name="Thai",
+    pos_type="verb",
+    form_mapping={
+        "present": GrammaticalForm.VERB_TH_PRESENT,
+        "past": GrammaticalForm.VERB_TH_PAST,
+        "future": GrammaticalForm.VERB_TH_FUTURE,
+    },
+    form_fields=["present", "past", "future"],
+    prompt_path="th/verb",
+    query_type="thai_verb_forms",
+    schema_name="ThaiVerbForms",
+    schema_description="Thai verb forms with aspect markers",
+    form_descriptions={
+        "present": "base/habitual form (e.g. กิน)",
+        "past": "completed action with แล้ว (e.g. กินแล้ว)",
+        "future": "prospective with จะ (e.g. จะกิน)",
+    },
+)
+
+FORM_SPECS[("th", "adjective")] = LanguageFormSpec(
+    language_code="th",
+    language_name="Thai",
+    pos_type="adjective",
+    form_mapping={
+        "positive": GrammaticalForm.ADJ_TH_POSITIVE,
+        "comparative": GrammaticalForm.ADJ_TH_COMPARATIVE,
+        "superlative": GrammaticalForm.ADJ_TH_SUPERLATIVE,
+    },
+    form_fields=["positive", "comparative", "superlative"],
+    prompt_path="th/adjective",
+    query_type="thai_adjective_forms",
+    schema_name="ThaiAdjectiveForms",
+    schema_description="Thai adjective forms with degree modifiers",
+    form_descriptions={
+        "positive": "base adjective form (e.g. สวย)",
+        "comparative": "comparative with กว่า (e.g. สวยกว่า)",
+        "superlative": "superlative with ที่สุด (e.g. สวยที่สุด)",
+    },
+)
+
+FORM_SPECS[("th", "adverb")] = LanguageFormSpec(
+    language_code="th",
+    language_name="Thai",
+    pos_type="adverb",
+    form_mapping={
+        "positive": GrammaticalForm.ADVERB_TH_POSITIVE,
+        "comparative": GrammaticalForm.ADVERB_TH_COMPARATIVE,
+        "superlative": GrammaticalForm.ADVERB_TH_SUPERLATIVE,
+    },
+    form_fields=["positive", "comparative", "superlative"],
+    prompt_path="th/adverb",
+    query_type="thai_adverb_forms",
+    schema_name="ThaiAdverbForms",
+    schema_description="Thai adverb forms with degree modifiers",
+    form_descriptions={
+        "positive": "base adverb form (e.g. เร็ว)",
+        "comparative": "comparative with กว่า (e.g. เร็วกว่า)",
+        "superlative": "superlative with ที่สุด (e.g. เร็วที่สุด)",
+    },
 )
 
 # --- Polish: 14-case nouns + 6-person verbs ---

@@ -46,6 +46,14 @@ from langtools.lv.llm_forms import (
 )
 from langtools.lv.llm_forms import NOUN_FORM_MAPPING as LV_NOUN_FORM_MAPPING
 from langtools.lv.llm_forms import VERB_FORM_MAPPING as LV_VERB_FORM_MAPPING
+from langtools.th.llm_forms import (
+    ADJECTIVE_FORM_MAPPING as TH_ADJECTIVE_FORM_MAPPING,
+)
+from langtools.th.llm_forms import (
+    ADVERB_FORM_MAPPING as TH_ADVERB_FORM_MAPPING,
+)
+from langtools.th.llm_forms import NOUN_FORM_MAPPING as TH_NOUN_FORM_MAPPING
+from langtools.th.llm_forms import VERB_FORM_MAPPING as TH_VERB_FORM_MAPPING
 from langtools.pt.llm_forms import NOUN_FORM_MAPPING as PT_NOUN_FORM_MAPPING
 from langtools.pt.llm_forms import VERB_FORM_MAPPING as PT_VERB_FORM_MAPPING
 from langtools.nl.llm_forms import NOUN_FORM_MAPPING as NL_NOUN_FORM_MAPPING
@@ -303,6 +311,55 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             pos_type="adverb",
             form_mapping=LV_ADVERB_FORM_MAPPING,
             client_method_name="query_latvian_adverb_forms",
+            min_forms_threshold=1,
+            base_form_identifier="positive",
+            use_legacy_translation=False,
+        )
+    ),
+    # Thai
+    "thai_nouns": _translation_task(
+        FormGenerationConfig(
+            language_code="th",
+            language_name="Thai",
+            pos_type="noun",
+            form_mapping=TH_NOUN_FORM_MAPPING,
+            client_method_name="query_thai_noun_forms",
+            min_forms_threshold=1,
+            base_form_identifier="singular",
+            use_legacy_translation=False,
+        )
+    ),
+    "thai_verbs": _translation_task(
+        FormGenerationConfig(
+            language_code="th",
+            language_name="Thai",
+            pos_type="verb",
+            form_mapping=TH_VERB_FORM_MAPPING,
+            client_method_name="query_thai_verb_forms",
+            min_forms_threshold=1,
+            base_form_identifier="present",
+            use_legacy_translation=False,
+        )
+    ),
+    "thai_adjectives": _translation_task(
+        FormGenerationConfig(
+            language_code="th",
+            language_name="Thai",
+            pos_type="adjective",
+            form_mapping=TH_ADJECTIVE_FORM_MAPPING,
+            client_method_name="query_thai_adjective_forms",
+            min_forms_threshold=1,
+            base_form_identifier="positive",
+            use_legacy_translation=False,
+        )
+    ),
+    "thai_adverbs": _translation_task(
+        FormGenerationConfig(
+            language_code="th",
+            language_name="Thai",
+            pos_type="adverb",
+            form_mapping=TH_ADVERB_FORM_MAPPING,
+            client_method_name="query_thai_adverb_forms",
             min_forms_threshold=1,
             base_form_identifier="positive",
             use_legacy_translation=False,

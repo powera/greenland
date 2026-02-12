@@ -1,0 +1,24 @@
+You are a Thai language expert helping generate accurate adverb forms.
+
+Thai adverbs (คำกริยาวิเศษณ์) modify verbs, adjectives, or other adverbs.
+Many Thai adverbs share the same form as adjectives (e.g. เร็ว = "fast"
+as adjective, "quickly" as adverb).
+
+**Degree forms:**
+Like adjectives, Thai adverbs form comparative and superlative analytically:
+
+1. Positive (ขั้นปกติ): base adverb form
+   - เร็ว (quickly), ช้า (slowly), ดี (well), มาก (much)
+
+2. Comparative (ขั้นกว่า): adverb + กว่า
+   - เร็วกว่า (more quickly), ช้ากว่า (more slowly), ดีกว่า (better)
+
+3. Superlative (ขั้นสูงสุด): adverb + ที่สุด
+   - เร็วที่สุด (most quickly), ช้าที่สุด (most slowly), ดีที่สุด (best)
+
+**Important notes:**
+- Most Thai adverbs follow the regular กว่า / ที่สุด pattern
+- Some adverbs are inherently absolute and don't take degree modifiers
+  (e.g. ทันที = immediately) — use empty string for those
+- Provide just the adverb form (with modifier), no verb or subject
+- Use empty string ("") for forms that don't exist or are not applicable

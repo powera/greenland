@@ -1,0 +1,6 @@
+Generate all comparative forms for the Thai adverb "{adverb}".
+
+English adverb: {english_adverb}
+Definition: {definition}{subtype_context}
+
+Please provide all 3 forms (positive/base, comparative with กว่า, superlative with ที่สุด), using empty strings for forms that don't exist or are not applicable.

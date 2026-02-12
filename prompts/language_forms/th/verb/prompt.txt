@@ -3,5 +3,5 @@ Generate Thai verb forms for the Thai verb "{verb}".
 English verb: {english_verb}
 Definition: {definition}{subtype_context}
 
-Please provide present, past, and future tense forms.
-Provide only the verb form without any pronouns. Use empty strings for forms that don't exist.
+Please provide the present (base), past (with แล้ว), and future (with จะ) forms.
+Provide only the verb phrase without any pronouns. Use empty strings for forms that don't exist.

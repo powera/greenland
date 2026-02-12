@@ -1466,6 +1466,16 @@ class GrammaticalForm(enum.Enum):
     VERB_TH_PAST = "verb/th_past"
     VERB_TH_FUTURE = "verb/th_future"
 
+    # Thai adjective forms (comparative degrees using กว่า / ที่สุด)
+    ADJ_TH_POSITIVE = "adjective/th_positive"
+    ADJ_TH_COMPARATIVE = "adjective/th_comparative"
+    ADJ_TH_SUPERLATIVE = "adjective/th_superlative"
+
+    # Thai adverb forms (comparative degrees using กว่า / ที่สุด)
+    ADVERB_TH_POSITIVE = "adverb/th_positive"
+    ADVERB_TH_COMPARATIVE = "adverb/th_comparative"
+    ADVERB_TH_SUPERLATIVE = "adverb/th_superlative"
+
     # Malay noun forms (singular/plural - plural via reduplication e.g. buku-buku)
     NOUN_MS_SINGULAR = "noun/ms_singular"
     NOUN_MS_PLURAL = "noun/ms_plural"
