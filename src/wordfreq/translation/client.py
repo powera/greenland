@@ -30,6 +30,10 @@ from langtools.pt import llm_forms as portuguese
 from langtools.it import llm_forms as italian
 from langtools.nl import llm_forms as dutch
 from langtools.sv import llm_forms as swedish
+from langtools.zh import llm_forms as chinese
+from langtools.ja import llm_forms as japanese
+from langtools.ko import llm_forms as korean
+from langtools.vi import llm_forms as vietnamese
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -374,6 +378,42 @@ class LinguisticClient:
     def query_dutch_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
         """Query LLM for Dutch verb conjugations."""
         return dutch.query_dutch_verb_conjugations(self.client, lemma_id, self.get_session)
+
+    # Chinese forms
+    def query_chinese_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Chinese noun forms."""
+        return chinese.query_chinese_noun_forms(self.client, lemma_id, self.get_session)
+
+    def query_chinese_verb_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Chinese verb forms."""
+        return chinese.query_chinese_verb_forms(self.client, lemma_id, self.get_session)
+
+    # Japanese forms
+    def query_japanese_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Japanese noun forms."""
+        return japanese.query_japanese_noun_forms(self.client, lemma_id, self.get_session)
+
+    def query_japanese_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Japanese verb conjugations."""
+        return japanese.query_japanese_verb_conjugations(self.client, lemma_id, self.get_session)
+
+    # Korean forms
+    def query_korean_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Korean noun forms."""
+        return korean.query_korean_noun_forms(self.client, lemma_id, self.get_session)
+
+    def query_korean_verb_conjugations(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Korean verb conjugations."""
+        return korean.query_korean_verb_conjugations(self.client, lemma_id, self.get_session)
+
+    # Vietnamese forms
+    def query_vietnamese_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Vietnamese noun forms."""
+        return vietnamese.query_vietnamese_noun_forms(self.client, lemma_id, self.get_session)
+
+    def query_vietnamese_verb_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Vietnamese verb forms."""
+        return vietnamese.query_vietnamese_verb_forms(self.client, lemma_id, self.get_session)
 
     # Legacy methods for compatibility
     def get_word_token_info(self, token_text: str) -> Dict[str, Any]:

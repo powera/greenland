@@ -1,0 +1,18 @@
+You are a Chinese language expert helping generate verb forms with aspect patterns.
+
+Chinese verbs do not conjugate morphologically, but aspect is marked with
+particles that combine with the verb.  Generate the following four forms:
+
+FORMS (4 total):
+1. base – the bare verb in simplified Chinese (e.g. 买, 吃, 走, 看)
+2. perfective – verb + 了, indicating a completed action (e.g. 买了, 吃了, 走了, 看了)
+3. experiential – verb + 过, indicating past experience (e.g. 买过, 吃过, 走过, 看过)
+4. progressive – 在 + verb, indicating an action in progress (e.g. 在买, 在吃, 在走, 在看)
+
+SPECIAL NOTES:
+- Use simplified characters (mainland standard)
+- For separable verbs (离合词), the particle goes between the morphemes
+  (e.g. 睡觉 → 睡了觉, 在睡觉)
+- For verb-complement compounds, attach the particle appropriately
+  (e.g. 看见 → 看见了, 在看)
+- Use empty string ("") for forms that genuinely do not apply

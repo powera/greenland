@@ -1,0 +1,7 @@
+Generate the three 해요체 (polite informal) conjugation forms for the Korean verb "{verb}".
+
+English verb: {english_verb}
+Definition: {definition}{subtype_context}
+
+Please provide all 3 forms (polite_present, polite_past, polite_future), using empty strings for forms that do not exist.
+Provide only the conjugated verb without any subjects.

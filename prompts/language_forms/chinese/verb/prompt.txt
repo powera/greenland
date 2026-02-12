@@ -1,0 +1,6 @@
+Generate all four aspect forms for the Chinese verb "{verb}".
+
+English verb: {english_verb}
+Definition: {definition}{subtype_context}
+
+Please provide all 4 forms (base, perfective, experiential, progressive) in simplified Chinese, using empty strings for forms that do not apply.
