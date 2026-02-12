@@ -24,6 +24,10 @@ from langtools.en.types import (
     NounDeclension,
     VerbConjugation,
 )
+from langtools.en.conjugation import (
+    IRREGULAR_CONJUGATIONS,
+    expand_verb_forms,
+)
 from langtools.en.utils import (
     clean_form,
     generate_3s_present,
@@ -54,6 +58,9 @@ __all__ = [
     "get_english_adverb_forms",
     "get_english_noun_forms",
     "get_english_verb_forms",
+    # Conjugation expansion
+    "expand_verb_forms",
+    "IRREGULAR_CONJUGATIONS",
     # Utilities
     "clean_form",
     "generate_3s_present",
