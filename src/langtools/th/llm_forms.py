@@ -1,6 +1,11 @@
 #!/usr/bin/python3
 
-"""Thai language form generation."""
+"""Thai language form generation — thin shim over form_registry.
+
+All form specifications are derived from ``th/forms_config.py`` via
+:mod:`langtools.form_registry`.  This module re-exports the mappings
+and query functions for backward compatibility.
+"""
 
 from typing import Callable, Dict, Tuple
 
