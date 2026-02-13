@@ -1673,14 +1673,92 @@ class GrammaticalForm(enum.Enum):
     VERB_TR_PAST = "verb/tr_past"
     VERB_TR_FUTURE = "verb/tr_future"
 
-    # Ukrainian noun forms (singular/plural - case/gender declension)
+    # Ukrainian noun forms (legacy singular/plural - kept for backward compatibility)
     NOUN_UK_SINGULAR = "noun/uk_singular"
     NOUN_UK_PLURAL = "noun/uk_plural"
 
-    # Ukrainian verb forms (person/number/tense conjugation)
+    # Ukrainian noun forms (7 cases × 2 numbers = 14 forms)
+    NOUN_UK_NOMINATIVE_SINGULAR = "noun/uk_nominative_singular"
+    NOUN_UK_GENITIVE_SINGULAR = "noun/uk_genitive_singular"
+    NOUN_UK_DATIVE_SINGULAR = "noun/uk_dative_singular"
+    NOUN_UK_ACCUSATIVE_SINGULAR = "noun/uk_accusative_singular"
+    NOUN_UK_INSTRUMENTAL_SINGULAR = "noun/uk_instrumental_singular"
+    NOUN_UK_LOCATIVE_SINGULAR = "noun/uk_locative_singular"
+    NOUN_UK_VOCATIVE_SINGULAR = "noun/uk_vocative_singular"
+    NOUN_UK_NOMINATIVE_PLURAL = "noun/uk_nominative_plural"
+    NOUN_UK_GENITIVE_PLURAL = "noun/uk_genitive_plural"
+    NOUN_UK_DATIVE_PLURAL = "noun/uk_dative_plural"
+    NOUN_UK_ACCUSATIVE_PLURAL = "noun/uk_accusative_plural"
+    NOUN_UK_INSTRUMENTAL_PLURAL = "noun/uk_instrumental_plural"
+    NOUN_UK_LOCATIVE_PLURAL = "noun/uk_locative_plural"
+    NOUN_UK_VOCATIVE_PLURAL = "noun/uk_vocative_plural"
+
+    # Ukrainian verb forms (legacy tense-only - kept for backward compatibility)
     VERB_UK_PRESENT = "verb/uk_present"
     VERB_UK_PAST = "verb/uk_past"
     VERB_UK_FUTURE = "verb/uk_future"
+
+    # Ukrainian verb forms (6 persons × 3 tenses = 18 forms)
+    # Present tense (теперішній час)
+    VERB_UK_1S_PRESENT = "verb/uk_1s_present"
+    VERB_UK_2S_PRESENT = "verb/uk_2s_present"
+    VERB_UK_3S_PRESENT = "verb/uk_3s_present"
+    VERB_UK_1P_PRESENT = "verb/uk_1p_present"
+    VERB_UK_2P_PRESENT = "verb/uk_2p_present"
+    VERB_UK_3P_PRESENT = "verb/uk_3p_present"
+    # Past tense (минулий час)
+    VERB_UK_1S_PAST = "verb/uk_1s_past"
+    VERB_UK_2S_PAST = "verb/uk_2s_past"
+    VERB_UK_3S_PAST = "verb/uk_3s_past"
+    VERB_UK_1P_PAST = "verb/uk_1p_past"
+    VERB_UK_2P_PAST = "verb/uk_2p_past"
+    VERB_UK_3P_PAST = "verb/uk_3p_past"
+    # Future tense (майбутній час)
+    VERB_UK_1S_FUTURE = "verb/uk_1s_future"
+    VERB_UK_2S_FUTURE = "verb/uk_2s_future"
+    VERB_UK_3S_FUTURE = "verb/uk_3s_future"
+    VERB_UK_1P_FUTURE = "verb/uk_1p_future"
+    VERB_UK_2P_FUTURE = "verb/uk_2p_future"
+    VERB_UK_3P_FUTURE = "verb/uk_3p_future"
+
+    # Ukrainian adjective forms (7 cases × 2 numbers × 2 genders = 28 forms)
+    # Masculine singular
+    ADJ_UK_NOMINATIVE_SINGULAR_M = "adjective/uk_nominative_singular_m"
+    ADJ_UK_GENITIVE_SINGULAR_M = "adjective/uk_genitive_singular_m"
+    ADJ_UK_DATIVE_SINGULAR_M = "adjective/uk_dative_singular_m"
+    ADJ_UK_ACCUSATIVE_SINGULAR_M = "adjective/uk_accusative_singular_m"
+    ADJ_UK_INSTRUMENTAL_SINGULAR_M = "adjective/uk_instrumental_singular_m"
+    ADJ_UK_LOCATIVE_SINGULAR_M = "adjective/uk_locative_singular_m"
+    ADJ_UK_VOCATIVE_SINGULAR_M = "adjective/uk_vocative_singular_m"
+    # Feminine singular
+    ADJ_UK_NOMINATIVE_SINGULAR_F = "adjective/uk_nominative_singular_f"
+    ADJ_UK_GENITIVE_SINGULAR_F = "adjective/uk_genitive_singular_f"
+    ADJ_UK_DATIVE_SINGULAR_F = "adjective/uk_dative_singular_f"
+    ADJ_UK_ACCUSATIVE_SINGULAR_F = "adjective/uk_accusative_singular_f"
+    ADJ_UK_INSTRUMENTAL_SINGULAR_F = "adjective/uk_instrumental_singular_f"
+    ADJ_UK_LOCATIVE_SINGULAR_F = "adjective/uk_locative_singular_f"
+    ADJ_UK_VOCATIVE_SINGULAR_F = "adjective/uk_vocative_singular_f"
+    # Masculine plural
+    ADJ_UK_NOMINATIVE_PLURAL_M = "adjective/uk_nominative_plural_m"
+    ADJ_UK_GENITIVE_PLURAL_M = "adjective/uk_genitive_plural_m"
+    ADJ_UK_DATIVE_PLURAL_M = "adjective/uk_dative_plural_m"
+    ADJ_UK_ACCUSATIVE_PLURAL_M = "adjective/uk_accusative_plural_m"
+    ADJ_UK_INSTRUMENTAL_PLURAL_M = "adjective/uk_instrumental_plural_m"
+    ADJ_UK_LOCATIVE_PLURAL_M = "adjective/uk_locative_plural_m"
+    ADJ_UK_VOCATIVE_PLURAL_M = "adjective/uk_vocative_plural_m"
+    # Feminine plural
+    ADJ_UK_NOMINATIVE_PLURAL_F = "adjective/uk_nominative_plural_f"
+    ADJ_UK_GENITIVE_PLURAL_F = "adjective/uk_genitive_plural_f"
+    ADJ_UK_DATIVE_PLURAL_F = "adjective/uk_dative_plural_f"
+    ADJ_UK_ACCUSATIVE_PLURAL_F = "adjective/uk_accusative_plural_f"
+    ADJ_UK_INSTRUMENTAL_PLURAL_F = "adjective/uk_instrumental_plural_f"
+    ADJ_UK_LOCATIVE_PLURAL_F = "adjective/uk_locative_plural_f"
+    ADJ_UK_VOCATIVE_PLURAL_F = "adjective/uk_vocative_plural_f"
+
+    # Ukrainian adverb forms (3 comparative degrees)
+    ADVERB_UK_POSITIVE = "adverb/uk_positive"
+    ADVERB_UK_COMPARATIVE = "adverb/uk_comparative"
+    ADVERB_UK_SUPERLATIVE = "adverb/uk_superlative"
 
     # Chinese noun forms (isolating language - base form only)
     NOUN_ZH_BASE = "noun/zh_base"

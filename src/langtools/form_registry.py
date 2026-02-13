@@ -108,6 +108,17 @@ _LV_CASES: List[str] = [
     "vocative",
 ]
 
+# Ukrainian 7-case system (same cases as Lithuanian)
+_UK_CASES: List[str] = [
+    "nominative",
+    "genitive",
+    "dative",
+    "accusative",
+    "instrumental",
+    "locative",
+    "vocative",
+]
+
 # Polish 7-case system (same as Lithuanian)
 _PL_CASES: List[str] = [
     "nominative",
@@ -296,7 +307,6 @@ _PATTERN_B_LANGS: List[Tuple[str, str]] = [
     ("th", "Thai"),
     ("tl", "Filipino"),
     ("tr", "Turkish"),
-    ("uk", "Ukrainian"),
     ("xh", "Xhosa"),
     ("yo", "Yoruba"),
     ("zu", "Zulu"),
@@ -715,6 +725,76 @@ FORM_SPECS[("lv", "adverb")] = LanguageFormSpec(
     query_type="latvian_adverb_forms",
     schema_name="LatvianAdverbForms",
     schema_description="Latvian adverb forms",
+)
+
+# --- Ukrainian: 14-case nouns, 6-person verbs, 28-form adjectives, 3-form adverbs ---
+
+_UK_NOUN_FIELDS: List[str] = []
+_UK_NOUN_MAPPING: Dict[str, GrammaticalForm] = {}
+for _case in _UK_CASES:
+    for _number in ["singular", "plural"]:
+        _field = f"{_case}_{_number}"
+        _UK_NOUN_FIELDS.append(_field)
+        _UK_NOUN_MAPPING[_field] = _gf(f"NOUN_UK_{_case.upper()}_{_number.upper()}")
+
+FORM_SPECS[("uk", "noun")] = LanguageFormSpec(
+    language_code="uk",
+    language_name="Ukrainian",
+    pos_type="noun",
+    form_mapping=_UK_NOUN_MAPPING,
+    form_fields=_UK_NOUN_FIELDS,
+    prompt_path="uk/noun",
+    query_type="ukrainian_noun_declensions",
+    schema_name="UkrainianNounDeclensions",
+    schema_description="Ukrainian noun declensions",
+    extra_schema_properties={
+        "number_type": SchemaProperty(
+            "string",
+            "The number type of this noun",
+            enum=["regular", "plurale_tantum", "singulare_tantum"],
+        ),
+    },
+)
+
+FORM_SPECS[("uk", "verb")] = _make_6person_verb_spec("uk", "Ukrainian")
+
+_UK_ADJ_FIELDS: List[str] = []
+_UK_ADJ_MAPPING: Dict[str, GrammaticalForm] = {}
+for _case in _UK_CASES:
+    for _number in ["singular", "plural"]:
+        for _gender in ["m", "f"]:
+            _field = f"{_case}_{_number}_{_gender}"
+            _UK_ADJ_FIELDS.append(_field)
+            _UK_ADJ_MAPPING[_field] = _gf(
+                f"ADJ_UK_{_case.upper()}_{_number.upper()}_{_gender.upper()}"
+            )
+
+FORM_SPECS[("uk", "adjective")] = LanguageFormSpec(
+    language_code="uk",
+    language_name="Ukrainian",
+    pos_type="adjective",
+    form_mapping=_UK_ADJ_MAPPING,
+    form_fields=_UK_ADJ_FIELDS,
+    prompt_path="uk/adjective",
+    query_type="ukrainian_adjective_declensions",
+    schema_name="UkrainianAdjectiveDeclensions",
+    schema_description="Ukrainian adjective declensions",
+)
+
+FORM_SPECS[("uk", "adverb")] = LanguageFormSpec(
+    language_code="uk",
+    language_name="Ukrainian",
+    pos_type="adverb",
+    form_mapping={
+        "positive": GrammaticalForm.ADVERB_UK_POSITIVE,
+        "comparative": GrammaticalForm.ADVERB_UK_COMPARATIVE,
+        "superlative": GrammaticalForm.ADVERB_UK_SUPERLATIVE,
+    },
+    form_fields=["positive", "comparative", "superlative"],
+    prompt_path="uk/adverb",
+    query_type="ukrainian_adverb_forms",
+    schema_name="UkrainianAdverbForms",
+    schema_description="Ukrainian adverb forms",
 )
 
 # --- Polish: 14-case nouns + 6-person verbs ---
