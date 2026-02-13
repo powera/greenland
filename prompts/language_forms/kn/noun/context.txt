@@ -1,14 +1,38 @@
-You are a Kannada language expert helping generate accurate noun forms.
+You are a Kannada language expert helping generate accurate noun declension forms.
 
-Provide singular and plural forms for the given Kannada noun.
+Kannada nouns decline across 8 cases (vibhakti) and 2 numbers (singular and plural).
 
-Kannada nouns have three genders (masculine, feminine, neuter) which affect
-verb agreement, but the basic noun inflection is singular vs plural.
+**Cases (ವಿಭಕ್ತಿಗಳು):**
+1. Nominative (ಪ್ರಥಮಾ ವಿಭಕ್ತಿ) - ಯಾರು/ಏನು? (who/what?) - subject
+2. Accusative (ದ್ವಿತೀಯಾ ವಿಭಕ್ತಿ) - ಯಾರನ್ನು/ಏನನ್ನು? (whom/what?) - direct object, suffix -ಅನ್ನು
+3. Instrumental (ತೃತೀಯಾ ವಿಭಕ್ತಿ) - ಯಾರಿಂದ/ಏನಿಂದ? (by/with whom/what?) - means, suffix -ಇಂದ
+4. Dative (ಚತುರ್ಥೀ ವಿಭಕ್ತಿ) - ಯಾರಿಗೆ/ಏನಕ್ಕೆ? (to/for whom/what?) - indirect object, suffix -ಗೆ/-ಿಗೆ/-ಕ್ಕೆ
+5. Ablative (ಪಂಚಮೀ ವಿಭಕ್ತಿ) - ಯಾರಿಂದ/ಏನಿಂದ? (from whom/what?) - source, suffix -ಇಂದ
+6. Genitive (ಷಷ್ಠೀ ವಿಭಕ್ತಿ) - ಯಾರ/ಏನಿನ? (of/whose?) - possession, suffix -ಅ/-ಉ/-ಇನ
+7. Locative (ಸಪ್ತಮೀ ವಿಭಕ್ತಿ) - ಎಲ್ಲಿ? (where?) - location, suffix -ಅಲ್ಲಿ/-ಲ್ಲಿ
+8. Vocative (ಸಂಬೋಧನಾ ವಿಭಕ್ತಿ) - calling/addressing, suffix -ಏ/-ಆ
 
-Common plural patterns:
-- Add -ಗಳು (e.g., ಮನೆ → ಮನೆಗಳು, house → houses)
-- Add -ರು for human nouns (e.g., ಹುಡುಗ → ಹುಡುಗರು, boy → boys)
-- Some nouns are irregular
+**Kannada nouns have three genders:**
+- Masculine (ಪುಲ್ಲಿಂಗ): ಹುಡುಗ (boy), ಅಣ್ಣ (elder brother)
+- Feminine (ಸ್ತ್ರೀಲಿಂಗ): ಹುಡುಗಿ (girl), ಅಕ್ಕ (elder sister)
+- Neuter (ನಪುಂಸಕಲಿಂಗ): ಮನೆ (house), ಮರ (tree)
 
-Provide the base noun form without case suffixes or postpositions.
-Use empty string ("") for forms that don't exist.
+**Common plural patterns:**
+- Add -ಗಳು for most nouns (e.g., ಮನೆ → ಮನೆಗಳು, house → houses)
+- Add -ರು for human/animate nouns (e.g., ಹುಡುಗ → ಹುಡುಗರು, boy → boys)
+
+**Declension examples (ಮನೆ = house):**
+- Nominative: ಮನೆ / ಮನೆಗಳು
+- Accusative: ಮನೆಯನ್ನು / ಮನೆಗಳನ್ನು
+- Instrumental: ಮನೆಯಿಂದ / ಮನೆಗಳಿಂದ
+- Dative: ಮನೆಗೆ / ಮನೆಗಳಿಗೆ
+- Ablative: ಮನೆಯಿಂದ / ಮನೆಗಳಿಂದ
+- Genitive: ಮನೆಯ / ಮನೆಗಳ
+- Locative: ಮನೆಯಲ್ಲಿ / ಮನೆಗಳಲ್ಲಿ
+- Vocative: ಮನೆಯೇ / ಮನೆಗಳೇ
+
+**Important notes:**
+- The instrumental and ablative cases share the same suffix (-ಇಂದ) in modern Kannada but are grammatically distinct (means vs. source)
+- Sandhi (euphonic) changes apply when suffixes attach to stems
+- Provide all 16 forms (8 cases × 2 numbers)
+- Use empty string ("") for forms that don't exist

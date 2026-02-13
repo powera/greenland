@@ -256,7 +256,6 @@ _PATTERN_A_LANGS: List[Tuple[str, str]] = [
     ("sl", "Slovenian"),
     ("ta", "Tamil"),
     ("te", "Telugu"),
-    ("kn", "Kannada"),
     ("ml", "Malayalam"),
 ]
 

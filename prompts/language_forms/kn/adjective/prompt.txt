@@ -1,0 +1,6 @@
+Generate all comparative forms for the Kannada adjective "{adjective}".
+
+English adjective: {english_adjective}
+Definition: {definition}{subtype_context}
+
+Please provide all 3 forms (positive, comparative, superlative), using empty strings for forms that don't exist or are not applicable.

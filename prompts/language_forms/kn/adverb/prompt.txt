@@ -1,0 +1,6 @@
+Generate all comparative forms for the Kannada adverb "{adverb}".
+
+English adverb: {english_adverb}
+Definition: {definition}{subtype_context}
+
+Please provide all 3 forms (positive, comparative, superlative), using empty strings for forms that don't exist or are not applicable.
