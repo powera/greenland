@@ -48,10 +48,10 @@ class VerbConjugation:
     Japanese verbs conjugate into many forms.  We store the four most
     useful for learners:
 
-    * masu_form – polite non-past (e.g. 食べます)
-    * te_form   – conjunctive (e.g. 食べて)
-    * ta_form   – plain past (e.g. 食べた)
-    * nai_form  – plain negative (e.g. 食べない)
+    * masu – polite non-past (e.g. 食べます)
+    * te   – conjunctive (e.g. 食べて)
+    * ta   – plain past (e.g. 食べた)
+    * nai  – plain negative (e.g. 食べない)
 
     Verb groups:
     * Group 1 (五段動詞 godan): consonant-stem verbs (書く, 飲む, 話す, …)
@@ -66,8 +66,8 @@ class VerbConjugation:
     confidence: float = 1.0
     notes: Optional[str] = None
 
-    MASU_FORMS = ["masu_form"]
-    TE_FORMS = ["te_form"]
-    TA_FORMS = ["ta_form"]
-    NAI_FORMS = ["nai_form"]
+    MASU_FORMS = ["masu"]
+    TE_FORMS = ["te"]
+    TA_FORMS = ["ta"]
+    NAI_FORMS = ["nai"]
     ALL_FORMS = MASU_FORMS + TE_FORMS + TA_FORMS + NAI_FORMS

@@ -3,5 +3,5 @@ Generate the four key conjugation forms for the Japanese verb "{verb}".
 English verb: {english_verb}
 Definition: {definition}{subtype_context}
 
-Please provide all 4 forms (masu_form, te_form, ta_form, nai_form), using empty strings for forms that do not exist.
+Please provide all 4 forms (masu, te, ta, nai), using empty strings for forms that do not exist.
 Provide only the conjugated verb without any particles or subjects.
