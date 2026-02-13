@@ -239,7 +239,6 @@ _PATTERN_A_LANGS: List[Tuple[str, str]] = [
     ("cs", "Czech"),
     ("da", "Danish"),
     ("el", "Greek"),
-    ("et", "Estonian"),
     ("ga", "Irish"),
     ("hr", "Croatian"),
     ("hu", "Hungarian"),
