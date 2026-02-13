@@ -6,7 +6,7 @@ fully describes the forms, prompt path, query type, schema name, and enum
 mapping for one (language, POS) combination.
 """
 
-import importlib
+import importlib.util
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -86,18 +86,7 @@ LANG_NAMES: Dict[str, str] = {
 
 _PERSONS_6: List[str] = ["1s", "2s", "3s", "1p", "2p", "3p"]
 
-# Lithuanian 7-case system
-_LT_CASES: List[str] = [
-    "nominative",
-    "genitive",
-    "dative",
-    "accusative",
-    "instrumental",
-    "locative",
-    "vocative",
-]
-
-# Polish 7-case system (same as Lithuanian)
+# Polish 7-case system
 _PL_CASES: List[str] = [
     "nominative",
     "genitive",
@@ -234,7 +223,6 @@ FORM_SPECS: Dict[Tuple[str, str], LanguageFormSpec] = {}
 # Standard languages with singular/plural nouns and 6-person x 3-tense verbs.
 _PATTERN_A_LANGS: List[Tuple[str, str]] = [
     ("fi", "Finnish"),
-    ("es", "Spanish"),
     ("bg", "Bulgarian"),
     ("cs", "Czech"),
     ("da", "Danish"),
@@ -291,32 +279,6 @@ for _lc, _ln in _PATTERN_B_LANGS:
 
 # ===== Pattern C: CJK / isolating languages =====
 
-# --- Chinese ---
-FORM_SPECS[("zh", "noun")] = _make_base_noun_spec("zh", "Chinese")
-
-FORM_SPECS[("zh", "verb")] = LanguageFormSpec(
-    language_code="zh",
-    language_name="Chinese",
-    pos_type="verb",
-    form_mapping={
-        "base": GrammaticalForm.VERB_ZH_BASE,
-        "perfective": GrammaticalForm.VERB_ZH_PERFECTIVE,
-        "experiential": GrammaticalForm.VERB_ZH_EXPERIENTIAL,
-        "progressive": GrammaticalForm.VERB_ZH_PROGRESSIVE,
-    },
-    form_fields=["base", "perfective", "experiential", "progressive"],
-    prompt_path="zh/verb",
-    query_type="chinese_verb_forms",
-    schema_name="ChineseVerbForms",
-    schema_description="Chinese verb forms",
-    form_descriptions={
-        "base": "bare verb (e.g. 买)",
-        "perfective": "verb + 了 — completed action (e.g. 买了)",
-        "experiential": "verb + 过 — have done before (e.g. 买过)",
-        "progressive": "在 + verb — in progress (e.g. 在买)",
-    },
-)
-
 # --- Japanese ---
 FORM_SPECS[("ja", "noun")] = _make_base_noun_spec("ja", "Japanese")
 
@@ -357,238 +319,8 @@ FORM_SPECS[("ko", "verb")] = LanguageFormSpec(
 )
 
 
-# ===== Pattern D: English (source language) =====
-
-FORM_SPECS[("en", "noun")] = LanguageFormSpec(
-    language_code="en",
-    language_name="English",
-    pos_type="noun",
-    form_mapping={
-        "singular": GrammaticalForm.NOUN_EN_SINGULAR,
-        "plural": GrammaticalForm.NOUN_EN_PLURAL,
-    },
-    form_fields=["singular", "plural"],
-    prompt_path="en/noun",
-    query_type="english_noun_forms",
-    schema_name="EnglishNounForms",
-    schema_description="English noun forms",
-    is_source_language=True,
-    word_variable="noun",
-)
-
-FORM_SPECS[("en", "verb")] = LanguageFormSpec(
-    language_code="en",
-    language_name="English",
-    pos_type="verb",
-    form_mapping={
-        "infinitive": GrammaticalForm.VERB_INFINITIVE,
-        "present_participle": GrammaticalForm.VERB_PRESENT_PARTICIPLE,
-        "past_participle": GrammaticalForm.VERB_PAST_PARTICIPLE,
-        "1s_present": GrammaticalForm.VERB_EN_1S_PRESENT,
-        "2s_present": GrammaticalForm.VERB_EN_2S_PRESENT,
-        "3s_present": GrammaticalForm.VERB_EN_3S_PRESENT,
-        "1p_present": GrammaticalForm.VERB_EN_1P_PRESENT,
-        "2p_present": GrammaticalForm.VERB_EN_2P_PRESENT,
-        "3p_present": GrammaticalForm.VERB_EN_3P_PRESENT,
-        "1s_past": GrammaticalForm.VERB_EN_1S_PAST,
-        "2s_past": GrammaticalForm.VERB_EN_2S_PAST,
-        "3s_past": GrammaticalForm.VERB_EN_3S_PAST,
-        "1p_past": GrammaticalForm.VERB_EN_1P_PAST,
-        "2p_past": GrammaticalForm.VERB_EN_2P_PAST,
-        "3p_past": GrammaticalForm.VERB_EN_3P_PAST,
-        "1s_future": GrammaticalForm.VERB_EN_1S_FUTURE,
-        "2s_future": GrammaticalForm.VERB_EN_2S_FUTURE,
-        "3s_future": GrammaticalForm.VERB_EN_3S_FUTURE,
-        "1p_future": GrammaticalForm.VERB_EN_1P_FUTURE,
-        "2p_future": GrammaticalForm.VERB_EN_2P_FUTURE,
-        "3p_future": GrammaticalForm.VERB_EN_3P_FUTURE,
-        "2s_imp": GrammaticalForm.VERB_EN_2S_IMP,
-        "2p_imp": GrammaticalForm.VERB_EN_2P_IMP,
-    },
-    form_fields=[
-        "1s_present",
-        "2s_present",
-        "3s_present",
-        "1p_present",
-        "2p_present",
-        "3p_present",
-        "1s_past",
-        "2s_past",
-        "3s_past",
-        "1p_past",
-        "2p_past",
-        "3p_past",
-        "1s_future",
-        "2s_future",
-        "3s_future",
-        "1p_future",
-        "2p_future",
-        "3p_future",
-        "2s_imp",
-        "2p_imp",
-    ],
-    prompt_path="en/verb",
-    query_type="english_verb_conjugations",
-    schema_name="EnglishVerbConjugations",
-    schema_description="English verb conjugations",
-    is_source_language=True,
-    word_variable="verb",
-)
-
-FORM_SPECS[("en", "adjective")] = LanguageFormSpec(
-    language_code="en",
-    language_name="English",
-    pos_type="adjective",
-    form_mapping={
-        "positive": GrammaticalForm.ADJ_EN_POSITIVE,
-        "comparative": GrammaticalForm.ADJ_EN_COMPARATIVE,
-        "superlative": GrammaticalForm.ADJ_EN_SUPERLATIVE,
-    },
-    form_fields=["positive", "comparative", "superlative"],
-    prompt_path="en/adjective",
-    query_type="english_adjective_forms",
-    schema_name="EnglishAdjectiveForms",
-    schema_description="English adjective forms",
-    is_source_language=True,
-    word_variable="adjective",
-)
-
-FORM_SPECS[("en", "adverb")] = LanguageFormSpec(
-    language_code="en",
-    language_name="English",
-    pos_type="adverb",
-    form_mapping={
-        "positive": GrammaticalForm.ADVERB_EN_POSITIVE,
-        "comparative": GrammaticalForm.ADVERB_EN_COMPARATIVE,
-        "superlative": GrammaticalForm.ADVERB_EN_SUPERLATIVE,
-    },
-    form_fields=["positive", "comparative", "superlative"],
-    prompt_path="en/adverb",
-    query_type="english_adverb_forms",
-    schema_name="EnglishAdverbForms",
-    schema_description="English adverb forms",
-    is_source_language=True,
-    word_variable="adverb",
-)
-
-
 # ===== Special cases =====
-
-# --- French: singular/plural nouns with gender, verbs use imperfect ---
-
-FORM_SPECS[("fr", "noun")] = LanguageFormSpec(
-    language_code="fr",
-    language_name="French",
-    pos_type="noun",
-    form_mapping={
-        "singular": GrammaticalForm.NOUN_FR_SINGULAR,
-        "plural": GrammaticalForm.NOUN_FR_PLURAL,
-    },
-    form_fields=["singular", "plural"],
-    prompt_path="fr/noun",
-    query_type="french_noun_forms",
-    schema_name="FrenchNounForms",
-    schema_description="French noun forms with gender",
-    extra_schema_properties={
-        "gender": SchemaProperty("string", "Gender: 'masculine' or 'feminine'"),
-    },
-)
-
-_FR_VERB_FIELDS: List[str] = []
-_FR_VERB_MAPPING: Dict[str, GrammaticalForm] = {}
-for _tense_suffix in ["present", "impf", "future"]:
-    for _person in _PERSONS_6:
-        _field = f"{_person}_{_tense_suffix}"
-        _FR_VERB_FIELDS.append(_field)
-        _FR_VERB_MAPPING[_field] = _gf(f"VERB_FR_{_person.upper()}_{_tense_suffix.upper()}")
-# Past participle forms
-_FR_VERB_FIELDS.extend(["pc_m", "pc_f"])
-_FR_VERB_MAPPING["pc_m"] = GrammaticalForm.VERB_FR_PC_M
-_FR_VERB_MAPPING["pc_f"] = GrammaticalForm.VERB_FR_PC_F
-
-FORM_SPECS[("fr", "verb")] = LanguageFormSpec(
-    language_code="fr",
-    language_name="French",
-    pos_type="verb",
-    form_mapping=_FR_VERB_MAPPING,
-    form_fields=_FR_VERB_FIELDS,
-    prompt_path="fr/verb",
-    query_type="french_verb_conjugations",
-    schema_name="FrenchVerbConjugations",
-    schema_description="French verb conjugations",
-)
-
-# --- Lithuanian: 14-case nouns, 6-person verbs, 28-form adjectives, 3-form adverbs ---
-
-_LT_NOUN_FIELDS: List[str] = []
-_LT_NOUN_MAPPING: Dict[str, GrammaticalForm] = {}
-for _case in _LT_CASES:
-    for _number in ["singular", "plural"]:
-        _field = f"{_case}_{_number}"
-        _LT_NOUN_FIELDS.append(_field)
-        _LT_NOUN_MAPPING[_field] = _gf(f"NOUN_LT_{_case.upper()}_{_number.upper()}")
-
-FORM_SPECS[("lt", "noun")] = LanguageFormSpec(
-    language_code="lt",
-    language_name="Lithuanian",
-    pos_type="noun",
-    form_mapping=_LT_NOUN_MAPPING,
-    form_fields=_LT_NOUN_FIELDS,
-    prompt_path="lt/noun",
-    query_type="lithuanian_noun_declensions",
-    schema_name="LithuanianNounDeclensions",
-    schema_description="Lithuanian noun declensions",
-    extra_schema_properties={
-        "number_type": SchemaProperty(
-            "string",
-            "The number type of this noun",
-            enum=["regular", "plurale_tantum", "singulare_tantum"],
-        ),
-    },
-)
-
-FORM_SPECS[("lt", "verb")] = _make_6person_verb_spec("lt", "Lithuanian")
-
-_LT_ADJ_FIELDS: List[str] = []
-_LT_ADJ_MAPPING: Dict[str, GrammaticalForm] = {}
-for _case in _LT_CASES:
-    for _number in ["singular", "plural"]:
-        for _gender in ["m", "f"]:
-            _field = f"{_case}_{_number}_{_gender}"
-            _LT_ADJ_FIELDS.append(_field)
-            _LT_ADJ_MAPPING[_field] = _gf(
-                f"ADJ_LT_{_case.upper()}_{_number.upper()}_{_gender.upper()}"
-            )
-
-FORM_SPECS[("lt", "adjective")] = LanguageFormSpec(
-    language_code="lt",
-    language_name="Lithuanian",
-    pos_type="adjective",
-    form_mapping=_LT_ADJ_MAPPING,
-    form_fields=_LT_ADJ_FIELDS,
-    prompt_path="lt/adjective",
-    query_type="lithuanian_adjective_declensions",
-    schema_name="LithuanianAdjectiveDeclensions",
-    schema_description="Lithuanian adjective declensions",
-)
-
-FORM_SPECS[("lt", "adverb")] = LanguageFormSpec(
-    language_code="lt",
-    language_name="Lithuanian",
-    pos_type="adverb",
-    form_mapping={
-        "positive": GrammaticalForm.ADVERB_LT_POSITIVE,
-        "comparative": GrammaticalForm.ADVERB_LT_COMPARATIVE,
-        "superlative": GrammaticalForm.ADVERB_LT_SUPERLATIVE,
-    },
-    form_fields=["positive", "comparative", "superlative"],
-    prompt_path="lt/adverb",
-    query_type="lithuanian_adverb_forms",
-    schema_name="LithuanianAdverbForms",
-    schema_description="Lithuanian adverb forms",
-)
-
-# --- Latvian, Ukrainian, and future languages with forms_config ---
+# --- Config-driven languages (including Latvian, Ukrainian, and future languages) ---
 # Auto-discovered below in _auto_register_from_forms_configs()
 
 # --- Polish: 14-case nouns + 6-person verbs ---
@@ -658,10 +390,11 @@ def _build_spec_from_config(
 
     query_type = config.get("query_type", f"{lang_name.lower()}_{pos_type}_forms")
     schema_name = config.get("schema_name", f"{lang_name}{pos_type.capitalize()}Forms")
-    schema_desc = (
-        f"{lang_name} {pos_type} {'declensions' if pos_type in ('noun', 'adjective') else 'forms'}"
+    schema_desc = config.get(
+        "schema_description",
+        f"{lang_name} {pos_type} {'declensions' if pos_type in ('noun', 'adjective') else 'forms'}",
     )
-    if pos_type == "verb":
+    if pos_type == "verb" and "schema_description" not in config:
         schema_desc = f"{lang_name} verb conjugations"
 
     return LanguageFormSpec(
@@ -670,11 +403,14 @@ def _build_spec_from_config(
         pos_type=pos_type,
         form_mapping=form_mapping,
         form_fields=fields,
-        prompt_path=f"{lang_code}/{pos_type}",
+        prompt_path=config.get("prompt_path", f"{lang_code}/{pos_type}"),
         query_type=query_type,
         schema_name=schema_name,
         schema_description=schema_desc,
         extra_schema_properties=extra_props,
+        form_descriptions=config.get("form_descriptions"),
+        is_source_language=config.get("is_source_language", False),
+        word_variable=config.get("word_variable"),
     )
 
 
@@ -688,7 +424,11 @@ def _auto_register_from_forms_configs() -> None:
         lang_dir = config_path.parent.name
         mod_name = f"langtools.{lang_dir}.forms_config"
         try:
-            mod = importlib.import_module(mod_name)
+            spec = importlib.util.spec_from_file_location(mod_name, config_path)
+            if spec is None or spec.loader is None:
+                continue
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
         except Exception:
             continue
 
