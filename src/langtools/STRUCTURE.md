@@ -24,7 +24,7 @@ langtools/
 │       └── hangul_helper.py   # Hangul syllable decomposition into jamo
 │
 ├── Full-stack Western European modules
-│   │  (all have: types, utils, wiktionary parser, LLM forms, CLI scripts)
+│   │  (all have: types, utils, wiktionary parser, LLM forms)
 │   ├── en/                  # English
 │   ├── de/                  # German
 │   ├── es/                  # Spanish
@@ -32,7 +32,7 @@ langtools/
 │   └── lt/                  # Lithuanian
 │
 ├── Config-driven modules (forms_config.py as single source of truth)
-│   │  (forms_config + types + llm_forms shim + generate scripts)
+│   │  (forms_config + types + llm_forms shim)
 │   ├── lv/                  # Latvian   (7-case nouns, 6-person verbs, adjectives, adverbs)
 │   └── uk/                  # Ukrainian (7-case nouns, 6-person verbs, adjectives, adverbs)
 │
@@ -160,31 +160,13 @@ LLM query schema.
 No edits to `enums.py`, `form_registry.py`, `generate_forms_tasks.py`,
 or `client.py` are needed.
 
-### generate_*.py -- CLI task wrappers
+### Form generation
 
-Thin scripts that delegate to the shared task registry in
-`wordfreq.translation.generate_forms_tasks`:
-
-```python
-TASK_KEY = "english_nouns"
-def main():
-    run_form_generation_task(TASK_KEY)
-```
-
-Run with: `PYTHONPATH=src python src/langtools/en/generate_noun_forms.py`
-
-Available scripts by language:
-
-| Language   | Nouns | Verbs | Adjectives | Adverbs |
-|------------|-------|-------|------------|---------|
-| English    | yes   | yes   | yes        | yes     |
-| German     | yes   | yes   | --         | --      |
-| Spanish    | yes   | yes   | --         | --      |
-| French     | yes   | yes   | --         | --      |
-| Lithuanian | yes   | yes   | yes        | yes     |
-| Latvian    | yes   | yes   | yes        | yes     |
-| Ukrainian  | yes   | yes   | yes        | yes     |
-| Portuguese | yes   | yes   | --         | --      |
+Form generation is handled centrally by
+`wordfreq.translation.generate_forms_tasks`, which auto-discovers all
+registered language/POS combinations from `FORM_SPECS`.  Use
+`run_form_generation_task(task_key)` with keys like `"english_nouns"`
+or `"german_verbs"`.  The full set of keys is in `FORM_GENERATION_TASKS`.
 
 ## dialect_overrides.py -- Dialect variant registry
 
@@ -275,7 +257,6 @@ ko/hangul_helper.py               (standalone, pure Unicode arithmetic)
 <lang>/utils.py                   (imports <lang>/types.py)
 <lang>/wiktionary.py              (imports <lang>/utils.py, clients.wiktionary)
 <lang>/llm_forms.py               (imports form_registry, llm_forms_base)
-<lang>/generate_*.py              (imports wordfreq.translation.generate_forms_tasks)
 
 form_registry.py                  (imports form_patterns, llm_forms_base, enums;
                                    auto-discovers <lang>/forms_config.py)

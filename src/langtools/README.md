@@ -121,16 +121,13 @@ from langtools.ja.romaji_helper import generate_romaji
 generate_romaji("東京")  # "toukyou"
 ```
 
-## Running the CLI scripts
+## Running form generation
 
-The generate scripts populate the database with inflected forms for all
-lemmas of a given language and part of speech:
-
-```bash
-PYTHONPATH=src python src/langtools/en/generate_noun_forms.py
-PYTHONPATH=src python src/langtools/de/generate_verb_forms.py
-PYTHONPATH=src python src/langtools/lt/generate_adjective_forms.py
-```
+Form generation is driven by the task registry in
+`wordfreq.translation.generate_forms_tasks`.  Use
+`run_form_generation_task(task_key)` with keys like `"english_nouns"`,
+`"german_verbs"`, or `"lithuanian_adjectives"`.  Available task keys
+are listed in `FORM_GENERATION_TASKS`.
 
 See [STRUCTURE.md](STRUCTURE.md) for the full architecture reference,
 including the file layout within each language module, the dependency
