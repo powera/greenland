@@ -1,6 +1,6 @@
-Generate all Estonian noun declension forms for the Estonian noun "{noun}".
+Generate all Estonian adjective declension forms for the Estonian adjective "{adjective}".
 
-English noun: {english_noun}
+English adjective: {english_adjective}
 Definition: {definition}{subtype_context}
 
 Please provide all 28 forms (14 cases × 2 numbers), using empty strings for forms that don't exist.
