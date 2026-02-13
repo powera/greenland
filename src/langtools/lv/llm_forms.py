@@ -1,6 +1,9 @@
-#!/usr/bin/python3
+"""Latvian language form generation — thin shim over form_registry.
 
-"""Latvian language form generation."""
+All form specifications are derived from ``lv/forms_config.py`` via
+:mod:`langtools.form_registry`.  This module re-exports the mappings
+and query functions for backward compatibility.
+"""
 
 from typing import Callable, Dict, Tuple
 
@@ -19,26 +22,22 @@ VERB_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("lv", "verb")].form_
 def query_latvian_noun_declensions(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for Latvian noun forms."""
     return query_forms(FORM_SPECS[("lv", "noun")], client, lemma_id, get_session_func)
 
 
 def query_latvian_verb_conjugations(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for Latvian verb forms."""
     return query_forms(FORM_SPECS[("lv", "verb")], client, lemma_id, get_session_func)
 
 
 def query_latvian_adjective_declensions(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for Latvian adjective forms."""
     return query_forms(FORM_SPECS[("lv", "adjective")], client, lemma_id, get_session_func)
 
 
 def query_latvian_adverb_forms(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for Latvian adverb forms."""
     return query_forms(FORM_SPECS[("lv", "adverb")], client, lemma_id, get_session_func)

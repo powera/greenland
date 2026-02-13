@@ -38,22 +38,6 @@ from langtools.lt.llm_forms import (
 )
 from langtools.lt.llm_forms import NOUN_FORM_MAPPING as LT_NOUN_FORM_MAPPING
 from langtools.lt.llm_forms import VERB_FORM_MAPPING as LT_VERB_FORM_MAPPING
-from langtools.lv.llm_forms import (
-    ADJECTIVE_FORM_MAPPING as LV_ADJECTIVE_FORM_MAPPING,
-)
-from langtools.lv.llm_forms import (
-    ADVERB_FORM_MAPPING as LV_ADVERB_FORM_MAPPING,
-)
-from langtools.lv.llm_forms import NOUN_FORM_MAPPING as LV_NOUN_FORM_MAPPING
-from langtools.lv.llm_forms import VERB_FORM_MAPPING as LV_VERB_FORM_MAPPING
-from langtools.uk.llm_forms import (
-    ADJECTIVE_FORM_MAPPING as UK_ADJECTIVE_FORM_MAPPING,
-)
-from langtools.uk.llm_forms import (
-    ADVERB_FORM_MAPPING as UK_ADVERB_FORM_MAPPING,
-)
-from langtools.uk.llm_forms import NOUN_FORM_MAPPING as UK_NOUN_FORM_MAPPING
-from langtools.uk.llm_forms import VERB_FORM_MAPPING as UK_VERB_FORM_MAPPING
 from langtools.pt.llm_forms import NOUN_FORM_MAPPING as PT_NOUN_FORM_MAPPING
 from langtools.pt.llm_forms import VERB_FORM_MAPPING as PT_VERB_FORM_MAPPING
 from langtools.nl.llm_forms import NOUN_FORM_MAPPING as NL_NOUN_FORM_MAPPING
@@ -267,14 +251,14 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             translation_field_name="lithuanian_translation",
         )
     ),
-    # Latvian
+    # Latvian (form mappings from FORM_SPECS, generic dispatch)
     "latvian_nouns": _translation_task(
         FormGenerationConfig(
             language_code="lv",
             language_name="Latvian",
             pos_type="noun",
-            form_mapping=LV_NOUN_FORM_MAPPING,
-            client_method_name="query_latvian_noun_declensions",
+            form_mapping=FORM_SPECS[("lv", "noun")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=3,
             base_form_identifier="nominative_singular",
             use_legacy_translation=False,
@@ -285,8 +269,8 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             language_code="lv",
             language_name="Latvian",
             pos_type="verb",
-            form_mapping=LV_VERB_FORM_MAPPING,
-            client_method_name="query_latvian_verb_conjugations",
+            form_mapping=FORM_SPECS[("lv", "verb")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=6,
             base_form_identifier="1s_present",
             use_legacy_translation=False,
@@ -297,8 +281,8 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             language_code="lv",
             language_name="Latvian",
             pos_type="adjective",
-            form_mapping=LV_ADJECTIVE_FORM_MAPPING,
-            client_method_name="query_latvian_adjective_declensions",
+            form_mapping=FORM_SPECS[("lv", "adjective")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=4,
             base_form_identifier="nominative_singular_m",
             use_legacy_translation=False,
@@ -309,21 +293,21 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             language_code="lv",
             language_name="Latvian",
             pos_type="adverb",
-            form_mapping=LV_ADVERB_FORM_MAPPING,
-            client_method_name="query_latvian_adverb_forms",
+            form_mapping=FORM_SPECS[("lv", "adverb")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=1,
             base_form_identifier="positive",
             use_legacy_translation=False,
         )
     ),
-    # Ukrainian
+    # Ukrainian (form mappings from FORM_SPECS, generic dispatch)
     "ukrainian_nouns": _translation_task(
         FormGenerationConfig(
             language_code="uk",
             language_name="Ukrainian",
             pos_type="noun",
-            form_mapping=UK_NOUN_FORM_MAPPING,
-            client_method_name="query_ukrainian_noun_declensions",
+            form_mapping=FORM_SPECS[("uk", "noun")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=3,
             base_form_identifier="nominative_singular",
             use_legacy_translation=False,
@@ -334,8 +318,8 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             language_code="uk",
             language_name="Ukrainian",
             pos_type="verb",
-            form_mapping=UK_VERB_FORM_MAPPING,
-            client_method_name="query_ukrainian_verb_conjugations",
+            form_mapping=FORM_SPECS[("uk", "verb")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=6,
             base_form_identifier="1s_present",
             use_legacy_translation=False,
@@ -346,8 +330,8 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             language_code="uk",
             language_name="Ukrainian",
             pos_type="adjective",
-            form_mapping=UK_ADJECTIVE_FORM_MAPPING,
-            client_method_name="query_ukrainian_adjective_declensions",
+            form_mapping=FORM_SPECS[("uk", "adjective")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=4,
             base_form_identifier="nominative_singular_m",
             use_legacy_translation=False,
@@ -358,8 +342,8 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             language_code="uk",
             language_name="Ukrainian",
             pos_type="adverb",
-            form_mapping=UK_ADVERB_FORM_MAPPING,
-            client_method_name="query_ukrainian_adverb_forms",
+            form_mapping=FORM_SPECS[("uk", "adverb")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=1,
             base_form_identifier="positive",
             use_legacy_translation=False,

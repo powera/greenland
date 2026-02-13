@@ -1,6 +1,9 @@
-#!/usr/bin/python3
+"""Ukrainian language form generation — thin shim over form_registry.
 
-"""Ukrainian language form generation."""
+All form specifications are derived from ``uk/forms_config.py`` via
+:mod:`langtools.form_registry`.  This module re-exports the mappings
+and query functions for backward compatibility.
+"""
 
 from typing import Callable, Dict, Tuple
 
@@ -19,26 +22,22 @@ VERB_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("uk", "verb")].form_
 def query_ukrainian_noun_declensions(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for Ukrainian noun forms."""
     return query_forms(FORM_SPECS[("uk", "noun")], client, lemma_id, get_session_func)
 
 
 def query_ukrainian_verb_conjugations(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for Ukrainian verb forms."""
     return query_forms(FORM_SPECS[("uk", "verb")], client, lemma_id, get_session_func)
 
 
 def query_ukrainian_adjective_declensions(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for Ukrainian adjective forms."""
     return query_forms(FORM_SPECS[("uk", "adjective")], client, lemma_id, get_session_func)
 
 
 def query_ukrainian_adverb_forms(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for Ukrainian adverb forms."""
     return query_forms(FORM_SPECS[("uk", "adverb")], client, lemma_id, get_session_func)

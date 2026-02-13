@@ -7,6 +7,9 @@ langtools/
 ├── __init__.py              # Package exports and docstring
 ├── collation.py             # Shared Latin-alphabet sort-key generation
 ├── dialect_overrides.py     # Dialect variant registry (zh-tw, es-mx, pt-br, …)
+├── form_patterns.py         # Pattern expansion for forms_config dicts (NEW)
+├── form_registry.py         # Central registry: (lang, pos) → LanguageFormSpec
+├── llm_forms_base.py        # Shared query_forms() used by all per-language llm_forms
 ├── README.md                # Plain-English overview (what the tools do)
 ├── STRUCTURE.md             # This file (architecture reference)
 │
@@ -27,6 +30,11 @@ langtools/
 │   ├── es/                  # Spanish
 │   ├── fr/                  # French
 │   └── lt/                  # Lithuanian
+│
+├── Config-driven modules (forms_config.py as single source of truth)
+│   │  (forms_config + types + llm_forms shim + generate scripts)
+│   ├── lv/                  # Latvian   (7-case nouns, 6-person verbs, adjectives, adverbs)
+│   └── uk/                  # Ukrainian (7-case nouns, 6-person verbs, adjectives, adverbs)
 │
 ├── Partial Western European modules
 │   │  (types and LLM forms only; no Wiktionary parser)
@@ -102,6 +110,56 @@ Each file defines:
 - `query_*_forms()` functions -- builds a JSON schema, sends a prompt via
   `UnifiedLLMClient`, validates the response, and logs the query to the database
 
+### forms_config.py -- Declarative form definitions (config-driven modules)
+
+Languages that use the config-driven approach define their entire
+grammatical structure in a single `forms_config.py` file.  Everything
+else (enum members, `FORM_SPECS` entries, form generation tasks) is
+derived automatically.
+
+Each file exports:
+
+- `LANGUAGE_CODE` -- ISO 639-1 code (e.g. `"lv"`)
+- `LANGUAGE_NAME` -- display name (e.g. `"Latvian"`)
+- `NOUN_CONFIG`, `VERB_CONFIG`, etc. -- dicts describing each POS
+
+Config dicts specify a pattern `type` and the axes to expand:
+
+| Pattern type         | Axes                        | Example output fields                         |
+|----------------------|-----------------------------|-----------------------------------------------|
+| `"case_number"`      | cases × numbers             | `nominative_singular`, `genitive_plural`, ...  |
+| `"person_tense"`     | persons × tenses            | `1s_present`, `2s_past`, ...                   |
+| `"case_number_gender"` | cases × numbers × genders | `nominative_singular_m`, `dative_plural_f`, .. |
+| `"degree"`           | explicit list               | `positive`, `comparative`, `superlative`       |
+| `"singular_plural"`  | --                          | `singular`, `plural`                           |
+| `"tense_only"`       | tenses                      | `present`, `past`, `future`                    |
+| `"base_only"`        | --                          | `base`                                         |
+| `"explicit"`         | explicit list               | (whatever the config specifies)                |
+
+Optional `extra_schema` dict adds fields like `number_type` to the
+LLM query schema.
+
+**How auto-registration works:**
+
+1. `enums.py` scans `langtools/*/forms_config.py` at import time and
+   dynamically adds any missing `GrammaticalForm` enum members.
+2. `form_registry.py` does the same scan and builds `FORM_SPECS`
+   entries using `form_patterns.expand_fields()` / `expand_enum_names()`.
+3. `generate_forms_tasks.py` picks up form mappings from `FORM_SPECS`
+   and uses `client_method_name="query_language_forms"` (generic dispatch).
+4. `client.py`'s `__getattr__` resolves any `query_<lang>_<pos>_*`
+   method name to `query_language_forms(lang_code, pos_type, lemma_id)`.
+
+**Adding a new config-driven language** requires only:
+
+1. Create `langtools/<lang>/forms_config.py` with the config dicts.
+2. (Optional) Create `langtools/<lang>/llm_forms.py` as a thin shim
+   re-exporting `FORM_SPECS[(...)]` mappings, if other code needs
+   direct imports.
+
+No edits to `enums.py`, `form_registry.py`, `generate_forms_tasks.py`,
+or `client.py` are needed.
+
 ### generate_*.py -- CLI task wrappers
 
 Thin scripts that delegate to the shared task registry in
@@ -124,6 +182,8 @@ Available scripts by language:
 | Spanish    | yes   | yes   | --         | --      |
 | French     | yes   | yes   | --         | --      |
 | Lithuanian | yes   | yes   | yes        | yes     |
+| Latvian    | yes   | yes   | yes        | yes     |
+| Ukrainian  | yes   | yes   | yes        | yes     |
 | Portuguese | yes   | yes   | --         | --      |
 
 ## dialect_overrides.py -- Dialect variant registry
@@ -200,6 +260,7 @@ Produces sort keys that match standard Korean dictionary order.
 ```
 collation.py                      (standalone, no imports from langtools)
 dialect_overrides.py              (imports zh/converter.py lazily, storage.translation_helpers lazily)
+form_patterns.py                  (standalone, pure expansion logic)
 
 zh/converter.py                   (standalone, uses opencc)
 zh/pinyin_helper.py               (imports zh/converter.py, uses pypinyin + jieba)
@@ -209,11 +270,17 @@ ja/gojuon.py                      (standalone, pure data)
 
 ko/hangul_helper.py               (standalone, pure Unicode arithmetic)
 
+<lang>/forms_config.py            (standalone, pure data — config-driven modules only)
 <lang>/types.py                   (imports clients.wiktionary.types)
 <lang>/utils.py                   (imports <lang>/types.py)
 <lang>/wiktionary.py              (imports <lang>/utils.py, clients.wiktionary)
-<lang>/llm_forms.py               (imports clients, wordfreq.storage, util.prompt_loader)
+<lang>/llm_forms.py               (imports form_registry, llm_forms_base)
 <lang>/generate_*.py              (imports wordfreq.translation.generate_forms_tasks)
+
+form_registry.py                  (imports form_patterns, llm_forms_base, enums;
+                                   auto-discovers <lang>/forms_config.py)
+llm_forms_base.py                 (imports clients, storage, util.prompt_loader)
+storage/models/enums.py           (auto-discovers <lang>/forms_config.py via form_patterns)
 ```
 
 ## External library dependencies

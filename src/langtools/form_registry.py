@@ -6,9 +6,12 @@ fully describes the forms, prompt path, query type, schema name, and enum
 mapping for one (language, POS) combination.
 """
 
-from typing import Dict, List, Optional, Tuple
+import importlib
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 from clients.types import SchemaProperty
+from langtools.form_patterns import expand_enum_names, expand_fields
 from langtools.llm_forms_base import LanguageFormSpec
 from storage.models.enums import GrammaticalForm
 
@@ -96,28 +99,6 @@ _LT_CASES: List[str] = [
 
 # German 4-case system
 _DE_CASES: List[str] = ["nominative", "accusative", "dative", "genitive"]
-
-# Latvian 7-case system (same cases as Lithuanian)
-_LV_CASES: List[str] = [
-    "nominative",
-    "genitive",
-    "dative",
-    "accusative",
-    "instrumental",
-    "locative",
-    "vocative",
-]
-
-# Ukrainian 7-case system (same cases as Lithuanian)
-_UK_CASES: List[str] = [
-    "nominative",
-    "genitive",
-    "dative",
-    "accusative",
-    "instrumental",
-    "locative",
-    "vocative",
-]
 
 # Polish 7-case system (same as Lithuanian)
 _PL_CASES: List[str] = [
@@ -657,145 +638,8 @@ FORM_SPECS[("lt", "adverb")] = LanguageFormSpec(
     schema_description="Lithuanian adverb forms",
 )
 
-# --- Latvian: 14-case nouns, 6-person verbs, 28-form adjectives, 3-form adverbs ---
-
-_LV_NOUN_FIELDS: List[str] = []
-_LV_NOUN_MAPPING: Dict[str, GrammaticalForm] = {}
-for _case in _LV_CASES:
-    for _number in ["singular", "plural"]:
-        _field = f"{_case}_{_number}"
-        _LV_NOUN_FIELDS.append(_field)
-        _LV_NOUN_MAPPING[_field] = _gf(f"NOUN_LV_{_case.upper()}_{_number.upper()}")
-
-FORM_SPECS[("lv", "noun")] = LanguageFormSpec(
-    language_code="lv",
-    language_name="Latvian",
-    pos_type="noun",
-    form_mapping=_LV_NOUN_MAPPING,
-    form_fields=_LV_NOUN_FIELDS,
-    prompt_path="lv/noun",
-    query_type="latvian_noun_declensions",
-    schema_name="LatvianNounDeclensions",
-    schema_description="Latvian noun declensions",
-    extra_schema_properties={
-        "number_type": SchemaProperty(
-            "string",
-            "The number type of this noun",
-            enum=["regular", "plurale_tantum", "singulare_tantum"],
-        ),
-    },
-)
-
-FORM_SPECS[("lv", "verb")] = _make_6person_verb_spec("lv", "Latvian")
-
-_LV_ADJ_FIELDS: List[str] = []
-_LV_ADJ_MAPPING: Dict[str, GrammaticalForm] = {}
-for _case in _LV_CASES:
-    for _number in ["singular", "plural"]:
-        for _gender in ["m", "f"]:
-            _field = f"{_case}_{_number}_{_gender}"
-            _LV_ADJ_FIELDS.append(_field)
-            _LV_ADJ_MAPPING[_field] = _gf(
-                f"ADJ_LV_{_case.upper()}_{_number.upper()}_{_gender.upper()}"
-            )
-
-FORM_SPECS[("lv", "adjective")] = LanguageFormSpec(
-    language_code="lv",
-    language_name="Latvian",
-    pos_type="adjective",
-    form_mapping=_LV_ADJ_MAPPING,
-    form_fields=_LV_ADJ_FIELDS,
-    prompt_path="lv/adjective",
-    query_type="latvian_adjective_declensions",
-    schema_name="LatvianAdjectiveDeclensions",
-    schema_description="Latvian adjective declensions",
-)
-
-FORM_SPECS[("lv", "adverb")] = LanguageFormSpec(
-    language_code="lv",
-    language_name="Latvian",
-    pos_type="adverb",
-    form_mapping={
-        "positive": GrammaticalForm.ADVERB_LV_POSITIVE,
-        "comparative": GrammaticalForm.ADVERB_LV_COMPARATIVE,
-        "superlative": GrammaticalForm.ADVERB_LV_SUPERLATIVE,
-    },
-    form_fields=["positive", "comparative", "superlative"],
-    prompt_path="lv/adverb",
-    query_type="latvian_adverb_forms",
-    schema_name="LatvianAdverbForms",
-    schema_description="Latvian adverb forms",
-)
-
-# --- Ukrainian: 14-case nouns, 6-person verbs, 28-form adjectives, 3-form adverbs ---
-
-_UK_NOUN_FIELDS: List[str] = []
-_UK_NOUN_MAPPING: Dict[str, GrammaticalForm] = {}
-for _case in _UK_CASES:
-    for _number in ["singular", "plural"]:
-        _field = f"{_case}_{_number}"
-        _UK_NOUN_FIELDS.append(_field)
-        _UK_NOUN_MAPPING[_field] = _gf(f"NOUN_UK_{_case.upper()}_{_number.upper()}")
-
-FORM_SPECS[("uk", "noun")] = LanguageFormSpec(
-    language_code="uk",
-    language_name="Ukrainian",
-    pos_type="noun",
-    form_mapping=_UK_NOUN_MAPPING,
-    form_fields=_UK_NOUN_FIELDS,
-    prompt_path="uk/noun",
-    query_type="ukrainian_noun_declensions",
-    schema_name="UkrainianNounDeclensions",
-    schema_description="Ukrainian noun declensions",
-    extra_schema_properties={
-        "number_type": SchemaProperty(
-            "string",
-            "The number type of this noun",
-            enum=["regular", "plurale_tantum", "singulare_tantum"],
-        ),
-    },
-)
-
-FORM_SPECS[("uk", "verb")] = _make_6person_verb_spec("uk", "Ukrainian")
-
-_UK_ADJ_FIELDS: List[str] = []
-_UK_ADJ_MAPPING: Dict[str, GrammaticalForm] = {}
-for _case in _UK_CASES:
-    for _number in ["singular", "plural"]:
-        for _gender in ["m", "f"]:
-            _field = f"{_case}_{_number}_{_gender}"
-            _UK_ADJ_FIELDS.append(_field)
-            _UK_ADJ_MAPPING[_field] = _gf(
-                f"ADJ_UK_{_case.upper()}_{_number.upper()}_{_gender.upper()}"
-            )
-
-FORM_SPECS[("uk", "adjective")] = LanguageFormSpec(
-    language_code="uk",
-    language_name="Ukrainian",
-    pos_type="adjective",
-    form_mapping=_UK_ADJ_MAPPING,
-    form_fields=_UK_ADJ_FIELDS,
-    prompt_path="uk/adjective",
-    query_type="ukrainian_adjective_declensions",
-    schema_name="UkrainianAdjectiveDeclensions",
-    schema_description="Ukrainian adjective declensions",
-)
-
-FORM_SPECS[("uk", "adverb")] = LanguageFormSpec(
-    language_code="uk",
-    language_name="Ukrainian",
-    pos_type="adverb",
-    form_mapping={
-        "positive": GrammaticalForm.ADVERB_UK_POSITIVE,
-        "comparative": GrammaticalForm.ADVERB_UK_COMPARATIVE,
-        "superlative": GrammaticalForm.ADVERB_UK_SUPERLATIVE,
-    },
-    form_fields=["positive", "comparative", "superlative"],
-    prompt_path="uk/adverb",
-    query_type="ukrainian_adverb_forms",
-    schema_name="UkrainianAdverbForms",
-    schema_description="Ukrainian adverb forms",
-)
+# --- Latvian, Ukrainian, and future languages with forms_config ---
+# Auto-discovered below in _auto_register_from_forms_configs()
 
 # --- Polish: 14-case nouns + 6-person verbs ---
 
@@ -841,3 +685,102 @@ FORM_SPECS[("sv", "verb")] = LanguageFormSpec(
     schema_name="SwedishVerbConjugations",
     schema_description="Swedish verb conjugations",
 )
+
+
+# ---------------------------------------------------------------------------
+# Auto-discover langtools/*/forms_config.py and build FORM_SPECS entries
+# ---------------------------------------------------------------------------
+
+_POS_TYPE_MAP: Dict[str, str] = {
+    "noun": "noun",
+    "verb": "verb",
+    "adjective": "adjective",
+    "adverb": "adverb",
+}
+
+# POS-specific naming for query_type / schema_name suffixes
+_POS_QUERY_SUFFIX: Dict[str, str] = {
+    "noun": "forms",
+    "verb": "conjugations",
+    "adjective": "declensions",
+    "adverb": "forms",
+}
+
+
+def _build_spec_from_config(
+    lang_code: str,
+    lang_name: str,
+    pos_type: str,
+    config: Dict[str, Any],
+) -> LanguageFormSpec:
+    """Build a :class:`LanguageFormSpec` from a forms_config dict."""
+    fields = expand_fields(config)
+    enum_names = expand_enum_names(config, lang_code, pos_type)
+    form_mapping: Dict[str, GrammaticalForm] = {field: _gf(enum_names[field]) for field in fields}
+
+    # extra_schema_properties from config["extra_schema"]
+    extra_props: Optional[Dict[str, SchemaProperty]] = None
+    if "extra_schema" in config:
+        extra_props = {}
+        for prop_name, prop_def in config["extra_schema"].items():
+            type_str, description, *rest = prop_def
+            enum_vals = rest[0] if rest else None
+            extra_props[prop_name] = SchemaProperty(type_str, description, enum=enum_vals)
+
+    query_type = config.get("query_type", f"{lang_name.lower()}_{pos_type}_forms")
+    schema_name = config.get("schema_name", f"{lang_name}{pos_type.capitalize()}Forms")
+    schema_desc = (
+        f"{lang_name} {pos_type} {'declensions' if pos_type in ('noun', 'adjective') else 'forms'}"
+    )
+    if pos_type == "verb":
+        schema_desc = f"{lang_name} verb conjugations"
+
+    return LanguageFormSpec(
+        language_code=lang_code,
+        language_name=lang_name,
+        pos_type=pos_type,
+        form_mapping=form_mapping,
+        form_fields=fields,
+        prompt_path=f"{lang_code}/{pos_type}",
+        query_type=query_type,
+        schema_name=schema_name,
+        schema_description=schema_desc,
+        extra_schema_properties=extra_props,
+    )
+
+
+def _auto_register_from_forms_configs() -> None:
+    """Scan langtools/*/forms_config.py and register missing FORM_SPECS entries."""
+    langtools_dir = Path(__file__).resolve().parent
+    if not langtools_dir.is_dir():
+        return
+
+    for config_path in sorted(langtools_dir.glob("*/forms_config.py")):
+        lang_dir = config_path.parent.name
+        mod_name = f"langtools.{lang_dir}.forms_config"
+        try:
+            mod = importlib.import_module(mod_name)
+        except Exception:
+            continue
+
+        lang_code: str = getattr(mod, "LANGUAGE_CODE", lang_dir)
+        lang_name: str = getattr(mod, "LANGUAGE_NAME", lang_dir.capitalize())
+
+        for attr_name in sorted(dir(mod)):
+            if not attr_name.endswith("_CONFIG"):
+                continue
+            cfg = getattr(mod, attr_name)
+            if not isinstance(cfg, dict) or "type" not in cfg:
+                continue
+            pos_type = attr_name.removesuffix("_CONFIG").lower()
+            if pos_type not in _POS_TYPE_MAP:
+                continue
+
+            spec_key = (lang_code, pos_type)
+            if spec_key in FORM_SPECS:
+                continue  # hand-coded entry takes precedence
+
+            FORM_SPECS[spec_key] = _build_spec_from_config(lang_code, lang_name, pos_type, cfg)
+
+
+_auto_register_from_forms_configs()

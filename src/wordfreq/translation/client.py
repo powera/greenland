@@ -138,6 +138,58 @@ class LinguisticClient:
                 )
         return cast("LinguisticClient", cls._thread_local.instance)
 
+    # ------------------------------------------------------------------
+    # Generic __getattr__: route query_<lang>_<pos>_forms/conjugations/
+    # declensions to query_language_forms, so new languages don't need
+    # per-language methods on this class.
+    # ------------------------------------------------------------------
+
+    # Class-level cache: method_name → (lang_code, pos_type) or None
+    _query_method_cache: Dict[str, Optional[Tuple[str, str]]] = {}
+
+    @staticmethod
+    def _resolve_query_method(name: str) -> Optional[Tuple[str, str]]:
+        """Try to match *name* to a (lang_code, pos_type) via FORM_SPECS."""
+        from langtools.form_registry import FORM_SPECS, LANG_NAMES
+
+        # Invert LANG_NAMES for lookup: "latvian" → "lv"
+        name_to_code = {v.lower(): k for k, v in LANG_NAMES.items()}
+
+        # Expected patterns: query_{language}_{pos}_{suffix}
+        # e.g. query_latvian_noun_declensions, query_latvian_verb_conjugations
+        if not name.startswith("query_"):
+            return None
+        rest = name[len("query_") :]
+
+        # Try each known language name (longest first to avoid prefix conflicts)
+        for lang_name_lower in sorted(name_to_code, key=len, reverse=True):
+            if rest.startswith(lang_name_lower + "_"):
+                lang_code = name_to_code[lang_name_lower]
+                remainder = rest[len(lang_name_lower) + 1 :]
+                # remainder is like "noun_declensions", "verb_conjugations",
+                # "adjective_forms", "adverb_forms"
+                for pos in ("noun", "verb", "adjective", "adverb"):
+                    if remainder.startswith(pos):
+                        if (lang_code, pos) in FORM_SPECS:
+                            return (lang_code, pos)
+        return None
+
+    def __getattr__(self, name: str) -> Any:
+        # Only intercept query_* names that aren't already defined
+        if name.startswith("query_") and name != "query_language_forms":
+            cache = LinguisticClient._query_method_cache
+            if name not in cache:
+                cache[name] = self._resolve_query_method(name)
+            resolved = cache[name]
+            if resolved is not None:
+                lang_code, pos_type = resolved
+
+                def _dispatch(lemma_id: int) -> Tuple[Dict[str, str], bool]:
+                    return self.query_language_forms(lang_code, pos_type, lemma_id)
+
+                return _dispatch
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+
     def get_session(self) -> Any:
         """
         Get a thread-local database session.
