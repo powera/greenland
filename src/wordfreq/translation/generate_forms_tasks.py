@@ -6,7 +6,7 @@ scripts.
 """
 
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from langtools.form_registry import FORM_SPECS, LANG_NAMES
 from storage.backend.config import DataSourceConfig
@@ -18,32 +18,6 @@ from wordfreq.translation.generate_forms_base import (
     process_lemma_forms,
     run_form_generation,
 )
-from langtools.en.llm_forms import (
-    ADJECTIVE_FORM_MAPPING as EN_ADJECTIVE_FORM_MAPPING,
-)
-from langtools.en.llm_forms import (
-    ADVERB_FORM_MAPPING as EN_ADVERB_FORM_MAPPING,
-)
-from langtools.en.llm_forms import NOUN_FORM_MAPPING as EN_NOUN_FORM_MAPPING
-from langtools.en.llm_forms import VERB_FORM_MAPPING as EN_VERB_FORM_MAPPING
-from langtools.fr.llm_forms import NOUN_FORM_MAPPING as FR_NOUN_FORM_MAPPING
-from langtools.fr.llm_forms import VERB_FORM_MAPPING as FR_VERB_FORM_MAPPING
-from langtools.lt.llm_forms import (
-    ADJECTIVE_FORM_MAPPING as LT_ADJECTIVE_FORM_MAPPING,
-)
-from langtools.lt.llm_forms import (
-    ADVERB_FORM_MAPPING as LT_ADVERB_FORM_MAPPING,
-)
-from langtools.lt.llm_forms import NOUN_FORM_MAPPING as LT_NOUN_FORM_MAPPING
-from langtools.lt.llm_forms import VERB_FORM_MAPPING as LT_VERB_FORM_MAPPING
-from langtools.es.llm_forms import NOUN_FORM_MAPPING as ES_NOUN_FORM_MAPPING
-from langtools.es.llm_forms import VERB_FORM_MAPPING as ES_VERB_FORM_MAPPING
-from langtools.zh.llm_forms import NOUN_FORM_MAPPING as ZH_NOUN_FORM_MAPPING
-from langtools.zh.llm_forms import VERB_FORM_MAPPING as ZH_VERB_FORM_MAPPING
-from langtools.ja.llm_forms import NOUN_FORM_MAPPING as JA_NOUN_FORM_MAPPING
-from langtools.ja.llm_forms import VERB_FORM_MAPPING as JA_VERB_FORM_MAPPING
-from langtools.ko.llm_forms import NOUN_FORM_MAPPING as KO_NOUN_FORM_MAPPING
-from langtools.ko.llm_forms import VERB_FORM_MAPPING as KO_VERB_FORM_MAPPING
 
 
 @dataclass
@@ -72,573 +46,190 @@ def _needs_forms_task(
     return FormGenerationTask(config=config, lemma_fetcher=fetcher)
 
 
-FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
-    # English
-    "english_nouns": _needs_forms_task(
-        FormGenerationConfig(
-            language_code="en",
-            language_name="English",
-            pos_type="noun",
-            form_mapping=EN_NOUN_FORM_MAPPING,
-            client_method_name="query_english_noun_forms",
-            min_forms_threshold=1,
-            base_form_identifier="singular",
-            use_legacy_translation=False,
-            translation_field_name=None,
-            extract_gender=False,
-        )
-    ),
-    "english_verbs": _needs_forms_task(
-        FormGenerationConfig(
-            language_code="en",
-            language_name="English",
-            pos_type="verb",
-            form_mapping=EN_VERB_FORM_MAPPING,
-            client_method_name="query_english_verb_forms",
-            min_forms_threshold=5,
-            base_form_identifier="infinitive",
-            use_legacy_translation=False,
-            translation_field_name=None,
-            extract_gender=False,
-        )
-    ),
-    "english_adjectives": _needs_forms_task(
-        FormGenerationConfig(
-            language_code="en",
-            language_name="English",
-            pos_type="adjective",
-            form_mapping=EN_ADJECTIVE_FORM_MAPPING,
-            client_method_name="query_english_adjective_forms",
-            min_forms_threshold=2,
-            base_form_identifier="positive",
-            use_legacy_translation=False,
-            translation_field_name=None,
-            extract_gender=False,
-        )
-    ),
-    "english_adverbs": _needs_forms_task(
-        FormGenerationConfig(
-            language_code="en",
-            language_name="English",
-            pos_type="adverb",
-            form_mapping=EN_ADVERB_FORM_MAPPING,
-            client_method_name="query_english_adverb_forms",
-            min_forms_threshold=2,
-            base_form_identifier="positive",
-            use_legacy_translation=False,
-            translation_field_name=None,
-            extract_gender=False,
-        )
-    ),
-    # French
-    "french_verbs": _translation_task(
-        FormGenerationConfig(
-            language_code="fr",
-            language_name="French",
-            pos_type="verb",
-            form_mapping=FR_VERB_FORM_MAPPING,
-            client_method_name="query_french_verb_conjugations",
-            min_forms_threshold=25,
-            base_form_identifier="1s_present",
-            use_legacy_translation=True,
-            translation_field_name="french_translation",
-        )
-    ),
-    "french_nouns": _translation_task(
-        FormGenerationConfig(
-            language_code="fr",
-            language_name="French",
-            pos_type="noun",
-            form_mapping=FR_NOUN_FORM_MAPPING,
-            client_method_name="query_french_noun_forms",
-            min_forms_threshold=2,
-            base_form_identifier="singular",
-            use_legacy_translation=True,
-            translation_field_name="french_translation",
-            extract_gender=True,
-        )
-    ),
-    # German (form mappings from FORM_SPECS, generic dispatch)
-    "german_verbs": _translation_task(
-        FormGenerationConfig(
-            language_code="de",
-            language_name="German",
-            pos_type="verb",
-            form_mapping=FORM_SPECS[("de", "verb")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=10,
-            base_form_identifier="1s_present",
-            use_legacy_translation=True,
-            translation_field_name="german_translation",
-        )
-    ),
-    "german_nouns": _translation_task(
-        FormGenerationConfig(
-            language_code="de",
-            language_name="German",
-            pos_type="noun",
-            form_mapping=FORM_SPECS[("de", "noun")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=3,
-            base_form_identifier="nominative_singular",
-            use_legacy_translation=True,
-            translation_field_name="german_translation",
-            extract_gender=True,
-        )
-    ),
-    # Lithuanian
-    "lithuanian_verbs": _translation_task(
-        FormGenerationConfig(
-            language_code="lt",
-            language_name="Lithuanian",
-            pos_type="verb",
-            form_mapping=LT_VERB_FORM_MAPPING,
-            client_method_name="query_lithuanian_verb_conjugations",
-            min_forms_threshold=6,
-            base_form_identifier="1s_present",
-            use_legacy_translation=True,
-            translation_field_name="lithuanian_translation",
-        )
-    ),
-    "lithuanian_nouns": _translation_task(
-        FormGenerationConfig(
-            language_code="lt",
-            language_name="Lithuanian",
-            pos_type="noun",
-            form_mapping=LT_NOUN_FORM_MAPPING,
-            client_method_name="query_lithuanian_noun_declensions",
-            min_forms_threshold=3,
-            base_form_identifier="nominative_singular",
-            use_legacy_translation=True,
-            translation_field_name="lithuanian_translation",
-        )
-    ),
-    "lithuanian_adjectives": _translation_task(
-        FormGenerationConfig(
-            language_code="lt",
-            language_name="Lithuanian",
-            pos_type="adjective",
-            form_mapping=LT_ADJECTIVE_FORM_MAPPING,
-            client_method_name="query_lithuanian_adjective_declensions",
-            min_forms_threshold=4,
-            base_form_identifier="nominative_singular_m",
-            use_legacy_translation=True,
-            translation_field_name="lithuanian_translation",
-        )
-    ),
-    "lithuanian_adverbs": _translation_task(
-        FormGenerationConfig(
-            language_code="lt",
-            language_name="Lithuanian",
-            pos_type="adverb",
-            form_mapping=LT_ADVERB_FORM_MAPPING,
-            client_method_name="query_lithuanian_adverb_forms",
-            min_forms_threshold=1,
-            base_form_identifier="positive",
-            use_legacy_translation=True,
-            translation_field_name="lithuanian_translation",
-        )
-    ),
-    # Latvian (form mappings from FORM_SPECS, generic dispatch)
-    "latvian_nouns": _translation_task(
-        FormGenerationConfig(
-            language_code="lv",
-            language_name="Latvian",
-            pos_type="noun",
-            form_mapping=FORM_SPECS[("lv", "noun")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=3,
-            base_form_identifier="nominative_singular",
-            use_legacy_translation=False,
-        )
-    ),
-    "latvian_verbs": _translation_task(
-        FormGenerationConfig(
-            language_code="lv",
-            language_name="Latvian",
-            pos_type="verb",
-            form_mapping=FORM_SPECS[("lv", "verb")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=6,
-            base_form_identifier="1s_present",
-            use_legacy_translation=False,
-        )
-    ),
-    "latvian_adjectives": _translation_task(
-        FormGenerationConfig(
-            language_code="lv",
-            language_name="Latvian",
-            pos_type="adjective",
-            form_mapping=FORM_SPECS[("lv", "adjective")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=4,
-            base_form_identifier="nominative_singular_m",
-            use_legacy_translation=False,
-        )
-    ),
-    "latvian_adverbs": _translation_task(
-        FormGenerationConfig(
-            language_code="lv",
-            language_name="Latvian",
-            pos_type="adverb",
-            form_mapping=FORM_SPECS[("lv", "adverb")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=1,
-            base_form_identifier="positive",
-            use_legacy_translation=False,
-        )
-    ),
-    # Ukrainian (form mappings from FORM_SPECS, generic dispatch)
-    "ukrainian_nouns": _translation_task(
-        FormGenerationConfig(
-            language_code="uk",
-            language_name="Ukrainian",
-            pos_type="noun",
-            form_mapping=FORM_SPECS[("uk", "noun")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=3,
-            base_form_identifier="nominative_singular",
-            use_legacy_translation=False,
-        )
-    ),
-    "ukrainian_verbs": _translation_task(
-        FormGenerationConfig(
-            language_code="uk",
-            language_name="Ukrainian",
-            pos_type="verb",
-            form_mapping=FORM_SPECS[("uk", "verb")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=6,
-            base_form_identifier="1s_present",
-            use_legacy_translation=False,
-        )
-    ),
-    "ukrainian_adjectives": _translation_task(
-        FormGenerationConfig(
-            language_code="uk",
-            language_name="Ukrainian",
-            pos_type="adjective",
-            form_mapping=FORM_SPECS[("uk", "adjective")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=4,
-            base_form_identifier="nominative_singular_m",
-            use_legacy_translation=False,
-        )
-    ),
-    "ukrainian_adverbs": _translation_task(
-        FormGenerationConfig(
-            language_code="uk",
-            language_name="Ukrainian",
-            pos_type="adverb",
-            form_mapping=FORM_SPECS[("uk", "adverb")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=1,
-            base_form_identifier="positive",
-            use_legacy_translation=False,
-        )
-    ),
-    # Portuguese (form mappings from FORM_SPECS, generic dispatch)
-    "portuguese_verbs": _translation_task(
-        FormGenerationConfig(
-            language_code="pt",
-            language_name="Portuguese",
-            pos_type="verb",
-            form_mapping=FORM_SPECS[("pt", "verb")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=10,
-            base_form_identifier="1s_present",
-            use_legacy_translation=True,
-            translation_field_name="portuguese_translation",
-        )
-    ),
-    "portuguese_nouns": _translation_task(
-        FormGenerationConfig(
-            language_code="pt",
-            language_name="Portuguese",
-            pos_type="noun",
-            form_mapping=FORM_SPECS[("pt", "noun")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=2,
-            base_form_identifier="singular",
-            use_legacy_translation=True,
-            translation_field_name="portuguese_translation",
-            extract_gender=True,
-        )
-    ),
-    # Spanish
-    "spanish_verbs": _translation_task(
-        FormGenerationConfig(
-            language_code="es",
-            language_name="Spanish",
-            pos_type="verb",
-            form_mapping=ES_VERB_FORM_MAPPING,
-            client_method_name="query_spanish_verb_conjugations",
-            min_forms_threshold=10,
-            base_form_identifier="1s_present",
-            use_legacy_translation=True,
-            translation_field_name="spanish_translation",
-        )
-    ),
-    "spanish_nouns": _translation_task(
-        FormGenerationConfig(
-            language_code="es",
-            language_name="Spanish",
-            pos_type="noun",
-            form_mapping=ES_NOUN_FORM_MAPPING,
-            client_method_name="query_spanish_noun_forms",
-            min_forms_threshold=2,
-            base_form_identifier="singular",
-            use_legacy_translation=True,
-            translation_field_name="spanish_translation",
-            extract_gender=True,
-        )
-    ),
-    # Italian (form mappings from FORM_SPECS, generic dispatch)
-    "italian_verbs": _translation_task(
-        FormGenerationConfig(
-            language_code="it",
-            language_name="Italian",
-            pos_type="verb",
-            form_mapping=FORM_SPECS[("it", "verb")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=10,
-            base_form_identifier="1s_present",
-            use_legacy_translation=False,
-        )
-    ),
-    "italian_nouns": _translation_task(
-        FormGenerationConfig(
-            language_code="it",
-            language_name="Italian",
-            pos_type="noun",
-            form_mapping=FORM_SPECS[("it", "noun")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=2,
-            base_form_identifier="singular",
-            use_legacy_translation=False,
-            extract_gender=True,
-        )
-    ),
-    # Swedish (form mappings from FORM_SPECS, generic dispatch)
-    "swedish_verbs": _translation_task(
-        FormGenerationConfig(
-            language_code="sv",
-            language_name="Swedish",
-            pos_type="verb",
-            form_mapping=FORM_SPECS[("sv", "verb")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=2,
-            base_form_identifier="present",
-            use_legacy_translation=False,
-        )
-    ),
-    "swedish_nouns": _translation_task(
-        FormGenerationConfig(
-            language_code="sv",
-            language_name="Swedish",
-            pos_type="noun",
-            form_mapping=FORM_SPECS[("sv", "noun")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=2,
-            base_form_identifier="singular",
-            use_legacy_translation=False,
-        )
-    ),
-    # Dutch (form mappings from FORM_SPECS, generic dispatch)
-    "dutch_verbs": _translation_task(
-        FormGenerationConfig(
-            language_code="nl",
-            language_name="Dutch",
-            pos_type="verb",
-            form_mapping=FORM_SPECS[("nl", "verb")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=10,
-            base_form_identifier="1s_present",
-            use_legacy_translation=False,
-        )
-    ),
-    "dutch_nouns": _translation_task(
-        FormGenerationConfig(
-            language_code="nl",
-            language_name="Dutch",
-            pos_type="noun",
-            form_mapping=FORM_SPECS[("nl", "noun")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=2,
-            base_form_identifier="singular",
-            use_legacy_translation=False,
-            extract_gender=True,
-        )
-    ),
-    # Chinese (isolating - base form only)
-    "chinese_nouns": _needs_forms_task(
-        FormGenerationConfig(
-            language_code="zh",
-            language_name="Chinese",
-            pos_type="noun",
-            form_mapping=ZH_NOUN_FORM_MAPPING,
-            client_method_name="query_chinese_noun_forms",
-            min_forms_threshold=1,
-            base_form_identifier="base",
-            use_legacy_translation=False,
-        )
-    ),
-    "chinese_verbs": _needs_forms_task(
-        FormGenerationConfig(
-            language_code="zh",
-            language_name="Chinese",
-            pos_type="verb",
-            form_mapping=ZH_VERB_FORM_MAPPING,
-            client_method_name="query_chinese_verb_forms",
-            min_forms_threshold=3,
-            base_form_identifier="base",
-            use_legacy_translation=False,
-        )
-    ),
-    # Japanese (nouns: base only; verbs: genuine conjugation)
-    "japanese_nouns": _needs_forms_task(
-        FormGenerationConfig(
-            language_code="ja",
-            language_name="Japanese",
-            pos_type="noun",
-            form_mapping=JA_NOUN_FORM_MAPPING,
-            client_method_name="query_japanese_noun_forms",
-            min_forms_threshold=1,
-            base_form_identifier="base",
-            use_legacy_translation=False,
-        )
-    ),
-    "japanese_verbs": _needs_forms_task(
-        FormGenerationConfig(
-            language_code="ja",
-            language_name="Japanese",
-            pos_type="verb",
-            form_mapping=JA_VERB_FORM_MAPPING,
-            client_method_name="query_japanese_verb_conjugations",
-            min_forms_threshold=3,
-            base_form_identifier="masu_form",
-            use_legacy_translation=False,
-        )
-    ),
-    # Korean (nouns: base only; verbs: genuine conjugation)
-    "korean_nouns": _needs_forms_task(
-        FormGenerationConfig(
-            language_code="ko",
-            language_name="Korean",
-            pos_type="noun",
-            form_mapping=KO_NOUN_FORM_MAPPING,
-            client_method_name="query_korean_noun_forms",
-            min_forms_threshold=1,
-            base_form_identifier="base",
-            use_legacy_translation=False,
-        )
-    ),
-    "korean_verbs": _needs_forms_task(
-        FormGenerationConfig(
-            language_code="ko",
-            language_name="Korean",
-            pos_type="verb",
-            form_mapping=KO_VERB_FORM_MAPPING,
-            client_method_name="query_korean_verb_conjugations",
-            min_forms_threshold=2,
-            base_form_identifier="polite_present",
-            use_legacy_translation=False,
-        )
-    ),
-    # Vietnamese (form mappings from FORM_SPECS, generic dispatch)
-    "vietnamese_nouns": _needs_forms_task(
-        FormGenerationConfig(
-            language_code="vi",
-            language_name="Vietnamese",
-            pos_type="noun",
-            form_mapping=FORM_SPECS[("vi", "noun")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=1,
-            base_form_identifier="base",
-            use_legacy_translation=False,
-        )
-    ),
-    "vietnamese_verbs": _needs_forms_task(
-        FormGenerationConfig(
-            language_code="vi",
-            language_name="Vietnamese",
-            pos_type="verb",
-            form_mapping=FORM_SPECS[("vi", "verb")].form_mapping,
-            client_method_name="query_language_forms",
-            min_forms_threshold=1,
-            base_form_identifier="base",
-            use_legacy_translation=False,
-        )
-    ),
+# ---------------------------------------------------------------------------
+# Override table: only fields that differ from auto-computed defaults.
+#
+# Keys: (language_code, pos_type)
+# Values: dict with any of:
+#   "fetcher"        – "translation" or "needs_forms" (default: "needs_forms")
+#   "threshold"      – min_forms_threshold override
+#   "base_form"      – base_form_identifier override
+#   "gender"         – extract_gender (default: False)
+#   "client_method"  – client_method_name override (default: "query_language_forms")
+# ---------------------------------------------------------------------------
+
+_TASK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Any]] = {
+    # English — source language, needs_forms fetcher, named client methods
+    ("en", "noun"): {
+        "threshold": 1,
+        "client_method": "query_english_noun_forms",
+    },
+    ("en", "verb"): {
+        "threshold": 5,
+        "base_form": "infinitive",
+        "client_method": "query_english_verb_forms",
+    },
+    ("en", "adjective"): {
+        "threshold": 2,
+        "client_method": "query_english_adjective_forms",
+    },
+    ("en", "adverb"): {
+        "threshold": 2,
+        "client_method": "query_english_adverb_forms",
+    },
+    # French — translation fetcher, named client methods, gender on nouns
+    ("fr", "noun"): {
+        "fetcher": "translation",
+        "threshold": 2,
+        "gender": True,
+        "client_method": "query_french_noun_forms",
+    },
+    ("fr", "verb"): {
+        "fetcher": "translation",
+        "threshold": 25,
+        "client_method": "query_french_verb_conjugations",
+    },
+    # German — translation fetcher, gender on nouns
+    ("de", "noun"): {
+        "fetcher": "translation",
+        "threshold": 3,
+        "gender": True,
+    },
+    ("de", "verb"): {
+        "fetcher": "translation",
+        "threshold": 10,
+    },
+    # Lithuanian — translation fetcher, named client methods
+    ("lt", "noun"): {
+        "fetcher": "translation",
+        "client_method": "query_lithuanian_noun_declensions",
+    },
+    ("lt", "verb"): {
+        "fetcher": "translation",
+        "threshold": 6,
+        "client_method": "query_lithuanian_verb_conjugations",
+    },
+    ("lt", "adjective"): {
+        "fetcher": "translation",
+        "threshold": 4,
+        "client_method": "query_lithuanian_adjective_declensions",
+    },
+    ("lt", "adverb"): {
+        "fetcher": "translation",
+        "client_method": "query_lithuanian_adverb_forms",
+    },
+    # Latvian — translation fetcher
+    ("lv", "noun"): {"fetcher": "translation", "threshold": 3},
+    ("lv", "verb"): {"fetcher": "translation", "threshold": 6},
+    ("lv", "adjective"): {"fetcher": "translation", "threshold": 4},
+    ("lv", "adverb"): {"fetcher": "translation"},
+    # Ukrainian — translation fetcher
+    ("uk", "noun"): {"fetcher": "translation", "threshold": 3},
+    ("uk", "verb"): {"fetcher": "translation", "threshold": 6},
+    ("uk", "adjective"): {"fetcher": "translation", "threshold": 4},
+    ("uk", "adverb"): {"fetcher": "translation"},
+    # Spanish — translation fetcher, named client methods, gender on nouns
+    ("es", "noun"): {
+        "fetcher": "translation",
+        "threshold": 2,
+        "gender": True,
+        "client_method": "query_spanish_noun_forms",
+    },
+    ("es", "verb"): {
+        "fetcher": "translation",
+        "threshold": 10,
+        "client_method": "query_spanish_verb_conjugations",
+    },
+    # Italian — translation fetcher, gender on nouns
+    ("it", "noun"): {"fetcher": "translation", "threshold": 2, "gender": True},
+    ("it", "verb"): {"fetcher": "translation", "threshold": 10},
+    # Swedish — translation fetcher
+    ("sv", "noun"): {"fetcher": "translation", "threshold": 2},
+    ("sv", "verb"): {"fetcher": "translation", "threshold": 2},
+    # Dutch — translation fetcher, gender on nouns
+    ("nl", "noun"): {"fetcher": "translation", "threshold": 2, "gender": True},
+    ("nl", "verb"): {"fetcher": "translation", "threshold": 10},
+    # Portuguese — translation fetcher, gender on nouns
+    ("pt", "noun"): {"fetcher": "translation", "threshold": 2, "gender": True},
+    ("pt", "verb"): {"fetcher": "translation", "threshold": 10},
+    # Chinese — named client methods
+    ("zh", "noun"): {"client_method": "query_chinese_noun_forms"},
+    ("zh", "verb"): {"threshold": 3, "client_method": "query_chinese_verb_forms"},
+    # Japanese — named client methods
+    ("ja", "noun"): {"client_method": "query_japanese_noun_forms"},
+    ("ja", "verb"): {"threshold": 3, "client_method": "query_japanese_verb_conjugations"},
+    # Korean — named client methods
+    ("ko", "noun"): {"client_method": "query_korean_noun_forms"},
+    ("ko", "verb"): {"threshold": 2, "client_method": "query_korean_verb_conjugations"},
 }
 
 
-def _auto_register_from_form_specs() -> None:
-    """Auto-register tasks for languages not already explicitly registered."""
-    already_registered = {
-        (t.config.language_code, t.config.pos_type) for t in FORM_GENERATION_TASKS.values()
-    }
+def _compute_base_form(spec_fields: List[str]) -> str:
+    """Derive base_form_identifier from the spec's form_fields."""
+    if spec_fields[0] == "base":
+        return "base"
+    for candidate in [
+        "singular",
+        "nominative_singular",
+        "1s_present",
+        "present",
+        "polite_present",
+        "masu_form",
+        "positive",
+    ]:
+        if candidate in spec_fields:
+            return candidate
+    return spec_fields[0]
 
-    # Default base_form_identifiers per noun pattern
-    _BASE_FORM_IDS = {
-        "noun": "singular",  # fallback; overridden for base-only nouns below
-        "verb": "1s_present",  # fallback; overridden for tense-only verbs below
-        "adjective": "positive",
-        "adverb": "positive",
-    }
+
+def _compute_threshold(num_fields: int) -> int:
+    """Compute a reasonable default min_forms_threshold from field count."""
+    if num_fields <= 3:
+        return 1
+    elif num_fields <= 8:
+        return 2
+    else:
+        return 3
+
+
+def _build_all_tasks() -> Dict[str, FormGenerationTask]:
+    """Build every task from FORM_SPECS + overrides table."""
+    tasks: Dict[str, FormGenerationTask] = {}
 
     for (lang_code, pos_type), spec in sorted(FORM_SPECS.items()):
-        if (lang_code, pos_type) in already_registered:
-            continue
-
-        # Determine base_form_identifier from the spec's form_fields
-        if spec.form_fields[0] == "base":
-            base_id = "base"
-        elif "singular" in spec.form_fields:
-            base_id = "singular"
-        elif "nominative_singular" in spec.form_fields:
-            base_id = "nominative_singular"
-        elif "1s_present" in spec.form_fields:
-            base_id = "1s_present"
-        elif "present" in spec.form_fields:
-            base_id = "present"
-        elif "polite_present" in spec.form_fields:
-            base_id = "polite_present"
-        elif "masu_form" in spec.form_fields:
-            base_id = "masu_form"
-        elif "positive" in spec.form_fields:
-            base_id = "positive"
-        else:
-            base_id = spec.form_fields[0]
-
-        # Reasonable defaults for min_forms_threshold
-        num_fields = len(spec.form_fields)
-        if num_fields <= 3:
-            threshold = 1
-        elif num_fields <= 8:
-            threshold = 2
-        else:
-            threshold = 3
-
         lang_name = LANG_NAMES.get(lang_code, spec.language_name)
         task_key = f"{lang_name.lower()}_{pos_type}s"
-        if pos_type == "noun" and "nominative_singular" in spec.form_fields:
-            task_key = f"{lang_name.lower()}_{pos_type}s"
+
+        overrides = _TASK_OVERRIDES.get((lang_code, pos_type), {})
+
+        base_form = overrides.get("base_form", _compute_base_form(spec.form_fields))
+        threshold = overrides.get("threshold", _compute_threshold(len(spec.form_fields)))
+        client_method = overrides.get("client_method", "query_language_forms")
+        extract_gender = overrides.get("gender", False)
+        fetcher_type = overrides.get("fetcher", "needs_forms")
 
         config = FormGenerationConfig(
             language_code=lang_code,
             language_name=lang_name,
             pos_type=pos_type,
             form_mapping=spec.form_mapping,
-            client_method_name="query_language_forms",
+            client_method_name=client_method,
             min_forms_threshold=threshold,
-            base_form_identifier=base_id,
+            base_form_identifier=base_form,
             use_legacy_translation=False,
+            translation_field_name=None,
+            extract_gender=extract_gender,
         )
-        FORM_GENERATION_TASKS[task_key] = _needs_forms_task(config)
+
+        if fetcher_type == "translation":
+            tasks[task_key] = _translation_task(config)
+        else:
+            tasks[task_key] = _needs_forms_task(config)
+
+    return tasks
 
 
-_auto_register_from_form_specs()
+FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = _build_all_tasks()
 
 
 def run_form_generation_task(task_key: str) -> None:
