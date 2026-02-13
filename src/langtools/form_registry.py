@@ -86,17 +86,6 @@ LANG_NAMES: Dict[str, str] = {
 
 _PERSONS_6: List[str] = ["1s", "2s", "3s", "1p", "2p", "3p"]
 
-# Polish 7-case system
-_PL_CASES: List[str] = [
-    "nominative",
-    "genitive",
-    "dative",
-    "accusative",
-    "instrumental",
-    "locative",
-    "vocative",
-]
-
 
 # ---------------------------------------------------------------------------
 # Helper: resolve a GrammaticalForm enum member by attribute name
@@ -264,7 +253,6 @@ _PATTERN_B_LANGS: List[Tuple[str, str]] = [
     ("ps", "Pashto"),
     ("sn", "Shona"),
     ("so", "Somali"),
-    ("th", "Thai"),
     ("tl", "Filipino"),
     ("tr", "Turkish"),
     ("xh", "Xhosa"),
@@ -320,32 +308,8 @@ FORM_SPECS[("ko", "verb")] = LanguageFormSpec(
 
 
 # ===== Special cases =====
-# --- Config-driven languages (including Latvian, Ukrainian, and future languages) ---
+# --- Config-driven languages (including Latvian, Ukrainian, Polish, Thai, and others) ---
 # Auto-discovered below in _auto_register_from_forms_configs()
-
-# --- Polish: 14-case nouns + 6-person verbs ---
-
-_PL_NOUN_FIELDS: List[str] = []
-_PL_NOUN_MAPPING: Dict[str, GrammaticalForm] = {}
-for _case in _PL_CASES:
-    for _number in ["singular", "plural"]:
-        _field = f"{_case}_{_number}"
-        _PL_NOUN_FIELDS.append(_field)
-        _PL_NOUN_MAPPING[_field] = _gf(f"NOUN_PL_{_case.upper()}_{_number.upper()}")
-
-FORM_SPECS[("pl", "noun")] = LanguageFormSpec(
-    language_code="pl",
-    language_name="Polish",
-    pos_type="noun",
-    form_mapping=_PL_NOUN_MAPPING,
-    form_fields=_PL_NOUN_FIELDS,
-    prompt_path="pl/noun",
-    query_type="polish_noun_forms",
-    schema_name="PolishNounForms",
-    schema_description="Polish noun forms",
-)
-
-FORM_SPECS[("pl", "verb")] = _make_6person_verb_spec("pl", "Polish")
 
 
 # ---------------------------------------------------------------------------

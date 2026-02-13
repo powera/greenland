@@ -1,0 +1,6 @@
+Generate all Romanian adjective agreement forms for the Romanian adjective "{adjective}".
+
+English adjective: {english_adjective}
+Definition: {definition}{subtype_context}
+
+Please provide all 4 forms (2 numbers x 2 genders), using empty strings for forms that don't exist.

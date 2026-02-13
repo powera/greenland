@@ -22,3 +22,10 @@ VERB_CONFIG: Dict[str, Any] = {
     "query_type": "romanian_verb_conjugations",
     "schema_name": "RomanianVerbConjugations",
 }
+
+ADJECTIVE_CONFIG: Dict[str, Any] = {
+    "type": "explicit",
+    "forms": ["singular_m", "singular_f", "plural_m", "plural_f"],
+    "query_type": "romanian_adjective_forms",
+    "schema_name": "RomanianAdjectiveForms",
+}
