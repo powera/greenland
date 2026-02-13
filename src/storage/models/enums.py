@@ -1808,7 +1808,7 @@ class GrammaticalForm(enum.Enum):
 
 def _auto_extend_grammatical_form() -> None:
     """Scan forms_config modules and add missing GrammaticalForm members."""
-    import importlib
+    import importlib.util
     from pathlib import Path
 
     from langtools.form_patterns import get_all_enum_pairs
@@ -1824,7 +1824,11 @@ def _auto_extend_grammatical_form() -> None:
         lang_dir = config_path.parent.name
         mod_name = f"langtools.{lang_dir}.forms_config"
         try:
-            mod = importlib.import_module(mod_name)
+            spec = importlib.util.spec_from_file_location(mod_name, config_path)
+            if spec is None or spec.loader is None:
+                continue
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
         except Exception:
             continue
 
