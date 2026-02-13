@@ -97,9 +97,6 @@ _LT_CASES: List[str] = [
     "vocative",
 ]
 
-# German 4-case system
-_DE_CASES: List[str] = ["nominative", "accusative", "dative", "genitive"]
-
 # Polish 7-case system (same as Lithuanian)
 _PL_CASES: List[str] = [
     "nominative",
@@ -238,9 +235,6 @@ FORM_SPECS: Dict[Tuple[str, str], LanguageFormSpec] = {}
 _PATTERN_A_LANGS: List[Tuple[str, str]] = [
     ("fi", "Finnish"),
     ("es", "Spanish"),
-    ("pt", "Portuguese"),
-    ("it", "Italian"),
-    ("nl", "Dutch"),
     ("bg", "Bulgarian"),
     ("cs", "Czech"),
     ("da", "Danish"),
@@ -250,7 +244,6 @@ _PATTERN_A_LANGS: List[Tuple[str, str]] = [
     ("hr", "Croatian"),
     ("hu", "Hungarian"),
     ("mt", "Maltese"),
-    ("ro", "Romanian"),
     ("si", "Sinhala"),
     ("sk", "Slovak"),
     ("sl", "Slovenian"),
@@ -363,23 +356,6 @@ FORM_SPECS[("ko", "verb")] = LanguageFormSpec(
     query_type="korean_verb_conjugations",
     schema_name="KoreanVerbConjugations",
     schema_description="Korean verb conjugations",
-)
-
-# --- Vietnamese ---
-FORM_SPECS[("vi", "noun")] = _make_base_noun_spec("vi", "Vietnamese")
-
-FORM_SPECS[("vi", "verb")] = LanguageFormSpec(
-    language_code="vi",
-    language_name="Vietnamese",
-    pos_type="verb",
-    form_mapping={
-        "base": GrammaticalForm.VERB_VI_BASE,
-    },
-    form_fields=["base"],
-    prompt_path="vi/verb",
-    query_type="vietnamese_verb_forms",
-    schema_name="VietnameseVerbForms",
-    schema_description="Vietnamese verb forms",
 )
 
 
@@ -544,30 +520,6 @@ FORM_SPECS[("fr", "verb")] = LanguageFormSpec(
     schema_description="French verb conjugations",
 )
 
-# --- German: 8-case nouns + 6-person verbs ---
-
-_DE_NOUN_FIELDS: List[str] = []
-_DE_NOUN_MAPPING: Dict[str, GrammaticalForm] = {}
-for _case in _DE_CASES:
-    for _number in ["singular", "plural"]:
-        _field = f"{_case}_{_number}"
-        _DE_NOUN_FIELDS.append(_field)
-        _DE_NOUN_MAPPING[_field] = _gf(f"NOUN_DE_{_case.upper()}_{_number.upper()}")
-
-FORM_SPECS[("de", "noun")] = LanguageFormSpec(
-    language_code="de",
-    language_name="German",
-    pos_type="noun",
-    form_mapping=_DE_NOUN_MAPPING,
-    form_fields=_DE_NOUN_FIELDS,
-    prompt_path="de/noun",
-    query_type="german_noun_forms",
-    schema_name="GermanNounDeclensions",
-    schema_description="German noun declensions",
-)
-
-FORM_SPECS[("de", "verb")] = _make_6person_verb_spec("de", "German")
-
 # --- Lithuanian: 14-case nouns, 6-person verbs, 28-form adjectives, 3-form adverbs ---
 
 _LT_NOUN_FIELDS: List[str] = []
@@ -664,27 +616,6 @@ FORM_SPECS[("pl", "noun")] = LanguageFormSpec(
 )
 
 FORM_SPECS[("pl", "verb")] = _make_6person_verb_spec("pl", "Polish")
-
-# --- Swedish: singular/plural nouns + 3-tense verbs (no person) ---
-# Note: Swedish verbs use "conjugations" naming despite being tense-only.
-
-FORM_SPECS[("sv", "noun")] = _make_singular_plural_noun_spec("sv", "Swedish")
-
-FORM_SPECS[("sv", "verb")] = LanguageFormSpec(
-    language_code="sv",
-    language_name="Swedish",
-    pos_type="verb",
-    form_mapping={
-        "present": GrammaticalForm.VERB_SV_PRESENT,
-        "past": GrammaticalForm.VERB_SV_PAST,
-        "future": GrammaticalForm.VERB_SV_FUTURE,
-    },
-    form_fields=["present", "past", "future"],
-    prompt_path="sv/verb",
-    query_type="swedish_verb_conjugations",
-    schema_name="SwedishVerbConjugations",
-    schema_description="Swedish verb conjugations",
-)
 
 
 # ---------------------------------------------------------------------------

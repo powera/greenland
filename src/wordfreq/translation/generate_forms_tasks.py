@@ -28,8 +28,6 @@ from langtools.en.llm_forms import NOUN_FORM_MAPPING as EN_NOUN_FORM_MAPPING
 from langtools.en.llm_forms import VERB_FORM_MAPPING as EN_VERB_FORM_MAPPING
 from langtools.fr.llm_forms import NOUN_FORM_MAPPING as FR_NOUN_FORM_MAPPING
 from langtools.fr.llm_forms import VERB_FORM_MAPPING as FR_VERB_FORM_MAPPING
-from langtools.de.llm_forms import NOUN_FORM_MAPPING as DE_NOUN_FORM_MAPPING
-from langtools.de.llm_forms import VERB_FORM_MAPPING as DE_VERB_FORM_MAPPING
 from langtools.lt.llm_forms import (
     ADJECTIVE_FORM_MAPPING as LT_ADJECTIVE_FORM_MAPPING,
 )
@@ -38,24 +36,14 @@ from langtools.lt.llm_forms import (
 )
 from langtools.lt.llm_forms import NOUN_FORM_MAPPING as LT_NOUN_FORM_MAPPING
 from langtools.lt.llm_forms import VERB_FORM_MAPPING as LT_VERB_FORM_MAPPING
-from langtools.pt.llm_forms import NOUN_FORM_MAPPING as PT_NOUN_FORM_MAPPING
-from langtools.pt.llm_forms import VERB_FORM_MAPPING as PT_VERB_FORM_MAPPING
-from langtools.nl.llm_forms import NOUN_FORM_MAPPING as NL_NOUN_FORM_MAPPING
-from langtools.nl.llm_forms import VERB_FORM_MAPPING as NL_VERB_FORM_MAPPING
-from langtools.it.llm_forms import NOUN_FORM_MAPPING as IT_NOUN_FORM_MAPPING
-from langtools.it.llm_forms import VERB_FORM_MAPPING as IT_VERB_FORM_MAPPING
 from langtools.es.llm_forms import NOUN_FORM_MAPPING as ES_NOUN_FORM_MAPPING
 from langtools.es.llm_forms import VERB_FORM_MAPPING as ES_VERB_FORM_MAPPING
-from langtools.sv.llm_forms import NOUN_FORM_MAPPING as SV_NOUN_FORM_MAPPING
-from langtools.sv.llm_forms import VERB_FORM_MAPPING as SV_VERB_FORM_MAPPING
 from langtools.zh.llm_forms import NOUN_FORM_MAPPING as ZH_NOUN_FORM_MAPPING
 from langtools.zh.llm_forms import VERB_FORM_MAPPING as ZH_VERB_FORM_MAPPING
 from langtools.ja.llm_forms import NOUN_FORM_MAPPING as JA_NOUN_FORM_MAPPING
 from langtools.ja.llm_forms import VERB_FORM_MAPPING as JA_VERB_FORM_MAPPING
 from langtools.ko.llm_forms import NOUN_FORM_MAPPING as KO_NOUN_FORM_MAPPING
 from langtools.ko.llm_forms import VERB_FORM_MAPPING as KO_VERB_FORM_MAPPING
-from langtools.vi.llm_forms import NOUN_FORM_MAPPING as VI_NOUN_FORM_MAPPING
-from langtools.vi.llm_forms import VERB_FORM_MAPPING as VI_VERB_FORM_MAPPING
 
 
 @dataclass
@@ -170,14 +158,14 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             extract_gender=True,
         )
     ),
-    # German
+    # German (form mappings from FORM_SPECS, generic dispatch)
     "german_verbs": _translation_task(
         FormGenerationConfig(
             language_code="de",
             language_name="German",
             pos_type="verb",
-            form_mapping=DE_VERB_FORM_MAPPING,
-            client_method_name="query_german_verb_conjugations",
+            form_mapping=FORM_SPECS[("de", "verb")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=10,
             base_form_identifier="1s_present",
             use_legacy_translation=True,
@@ -189,10 +177,10 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             language_code="de",
             language_name="German",
             pos_type="noun",
-            form_mapping=DE_NOUN_FORM_MAPPING,
-            client_method_name="query_german_noun_forms",
+            form_mapping=FORM_SPECS[("de", "noun")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=3,
-            base_form_identifier="singular",
+            base_form_identifier="nominative_singular",
             use_legacy_translation=True,
             translation_field_name="german_translation",
             extract_gender=True,
@@ -349,14 +337,14 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             use_legacy_translation=False,
         )
     ),
-    # Portuguese
+    # Portuguese (form mappings from FORM_SPECS, generic dispatch)
     "portuguese_verbs": _translation_task(
         FormGenerationConfig(
             language_code="pt",
             language_name="Portuguese",
             pos_type="verb",
-            form_mapping=PT_VERB_FORM_MAPPING,
-            client_method_name="query_portuguese_verb_conjugations",
+            form_mapping=FORM_SPECS[("pt", "verb")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=10,
             base_form_identifier="1s_present",
             use_legacy_translation=True,
@@ -368,8 +356,8 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             language_code="pt",
             language_name="Portuguese",
             pos_type="noun",
-            form_mapping=PT_NOUN_FORM_MAPPING,
-            client_method_name="query_portuguese_noun_forms",
+            form_mapping=FORM_SPECS[("pt", "noun")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=2,
             base_form_identifier="singular",
             use_legacy_translation=True,
@@ -405,14 +393,14 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             extract_gender=True,
         )
     ),
-    # Italian
+    # Italian (form mappings from FORM_SPECS, generic dispatch)
     "italian_verbs": _translation_task(
         FormGenerationConfig(
             language_code="it",
             language_name="Italian",
             pos_type="verb",
-            form_mapping=IT_VERB_FORM_MAPPING,
-            client_method_name="query_italian_verb_conjugations",
+            form_mapping=FORM_SPECS[("it", "verb")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=10,
             base_form_identifier="1s_present",
             use_legacy_translation=False,
@@ -423,22 +411,22 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             language_code="it",
             language_name="Italian",
             pos_type="noun",
-            form_mapping=IT_NOUN_FORM_MAPPING,
-            client_method_name="query_italian_noun_forms",
+            form_mapping=FORM_SPECS[("it", "noun")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=2,
             base_form_identifier="singular",
             use_legacy_translation=False,
             extract_gender=True,
         )
     ),
-    # Swedish
+    # Swedish (form mappings from FORM_SPECS, generic dispatch)
     "swedish_verbs": _translation_task(
         FormGenerationConfig(
             language_code="sv",
             language_name="Swedish",
             pos_type="verb",
-            form_mapping=SV_VERB_FORM_MAPPING,
-            client_method_name="query_swedish_verb_conjugations",
+            form_mapping=FORM_SPECS[("sv", "verb")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=2,
             base_form_identifier="present",
             use_legacy_translation=False,
@@ -449,21 +437,21 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             language_code="sv",
             language_name="Swedish",
             pos_type="noun",
-            form_mapping=SV_NOUN_FORM_MAPPING,
-            client_method_name="query_swedish_noun_forms",
+            form_mapping=FORM_SPECS[("sv", "noun")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=2,
             base_form_identifier="singular",
             use_legacy_translation=False,
         )
     ),
-    # Dutch
+    # Dutch (form mappings from FORM_SPECS, generic dispatch)
     "dutch_verbs": _translation_task(
         FormGenerationConfig(
             language_code="nl",
             language_name="Dutch",
             pos_type="verb",
-            form_mapping=NL_VERB_FORM_MAPPING,
-            client_method_name="query_dutch_verb_conjugations",
+            form_mapping=FORM_SPECS[("nl", "verb")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=10,
             base_form_identifier="1s_present",
             use_legacy_translation=False,
@@ -474,8 +462,8 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             language_code="nl",
             language_name="Dutch",
             pos_type="noun",
-            form_mapping=NL_NOUN_FORM_MAPPING,
-            client_method_name="query_dutch_noun_forms",
+            form_mapping=FORM_SPECS[("nl", "noun")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=2,
             base_form_identifier="singular",
             use_legacy_translation=False,
@@ -557,14 +545,14 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             use_legacy_translation=False,
         )
     ),
-    # Vietnamese (isolating - base form only)
+    # Vietnamese (form mappings from FORM_SPECS, generic dispatch)
     "vietnamese_nouns": _needs_forms_task(
         FormGenerationConfig(
             language_code="vi",
             language_name="Vietnamese",
             pos_type="noun",
-            form_mapping=VI_NOUN_FORM_MAPPING,
-            client_method_name="query_vietnamese_noun_forms",
+            form_mapping=FORM_SPECS[("vi", "noun")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=1,
             base_form_identifier="base",
             use_legacy_translation=False,
@@ -575,8 +563,8 @@ FORM_GENERATION_TASKS: Dict[str, FormGenerationTask] = {
             language_code="vi",
             language_name="Vietnamese",
             pos_type="verb",
-            form_mapping=VI_VERB_FORM_MAPPING,
-            client_method_name="query_vietnamese_verb_forms",
+            form_mapping=FORM_SPECS[("vi", "verb")].form_mapping,
+            client_method_name="query_language_forms",
             min_forms_threshold=1,
             base_form_identifier="base",
             use_legacy_translation=False,
