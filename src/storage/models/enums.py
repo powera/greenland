@@ -1795,3 +1795,62 @@ class GrammaticalForm(enum.Enum):
     # Generic forms
     BASE_FORM = "base_form"
     OTHER = "other"
+
+
+# ---------------------------------------------------------------------------
+# Auto-generate GrammaticalForm members from langtools/*/forms_config.py
+# ---------------------------------------------------------------------------
+# Existing hand-written members are stable DB values and are never touched.
+# This block only *adds* members that are defined in a forms_config but not
+# yet present in the enum above, so new languages get their enum entries
+# without manual edits to this file.
+
+
+def _auto_extend_grammatical_form() -> None:
+    """Scan forms_config modules and add missing GrammaticalForm members."""
+    import importlib
+    from pathlib import Path
+
+    from langtools.form_patterns import get_all_enum_pairs
+
+    langtools_dir = Path(__file__).resolve().parent.parent.parent / "langtools"
+    if not langtools_dir.is_dir():
+        return
+
+    existing_values = {m.value for m in GrammaticalForm}
+    new_members: dict[str, str] = {}
+
+    for config_path in sorted(langtools_dir.glob("*/forms_config.py")):
+        lang_dir = config_path.parent.name
+        mod_name = f"langtools.{lang_dir}.forms_config"
+        try:
+            mod = importlib.import_module(mod_name)
+        except Exception:
+            continue
+
+        lang_code: str = getattr(mod, "LANGUAGE_CODE", lang_dir)
+        for attr_name in dir(mod):
+            if not attr_name.endswith("_CONFIG"):
+                continue
+            cfg = getattr(mod, attr_name)
+            if not isinstance(cfg, dict) or "type" not in cfg:
+                continue
+            # Derive pos_type from the attribute name: NOUN_CONFIG → noun
+            pos_type = attr_name.removesuffix("_CONFIG").lower()
+            for member_name, value_str in get_all_enum_pairs(cfg, lang_code, pos_type):
+                if value_str not in existing_values and member_name not in new_members:
+                    new_members[member_name] = value_str
+
+    # Dynamically extend the enum
+    if new_members:
+        # Use the stdlib approach: extend __members__ via _value2member_map_
+        for name, value in sorted(new_members.items()):
+            member = object.__new__(GrammaticalForm)
+            member._value_ = value
+            member._name_ = name
+            GrammaticalForm._value2member_map_[value] = member  # type: ignore[attr-defined]
+            GrammaticalForm._member_map_[name] = member  # type: ignore[attr-defined]
+            GrammaticalForm._member_names_.append(name)  # type: ignore[attr-defined]
+
+
+_auto_extend_grammatical_form()
