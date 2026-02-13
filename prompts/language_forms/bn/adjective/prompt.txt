@@ -1,0 +1,6 @@
+Generate all comparative forms for the Bengali adjective "{adjective}".
+
+English adjective: {english_adjective}
+Definition: {definition}{subtype_context}
+
+Please provide all 3 forms (positive/মূল, comparative/তুলনামূলক, superlative/সর্বোচ্চ), using empty strings for forms that don't exist or are not applicable.
