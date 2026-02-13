@@ -212,93 +212,47 @@ class GrammaticalForm(enum.Enum):
 
     # English verb forms (person_tense)
     # Present tense
-    VERB_EN_1S_PRESENT = "verb/en_1s_present"
-    VERB_EN_2S_PRESENT = "verb/en_2s_present"
-    VERB_EN_3S_PRESENT = "verb/en_3s_present"  # "eats" (gender-neutral)
     VERB_EN_3S_M_PRESENT = "verb/en_3s-m_present"  # "he eats"
     VERB_EN_3S_F_PRESENT = "verb/en_3s-f_present"  # "she eats"
-    VERB_EN_1P_PRESENT = "verb/en_1p_present"
-    VERB_EN_2P_PRESENT = "verb/en_2p_present"
-    VERB_EN_3P_PRESENT = "verb/en_3p_present"  # "eat" (gender-neutral)
     VERB_EN_3P_M_PRESENT = "verb/en_3p-m_present"  # "they(m.) eat"
     VERB_EN_3P_F_PRESENT = "verb/en_3p-f_present"  # "they(f.) eat"
 
     # Past tense
-    VERB_EN_1S_PAST = "verb/en_1s_past"
-    VERB_EN_2S_PAST = "verb/en_2s_past"
-    VERB_EN_3S_PAST = "verb/en_3s_past"  # "ate" (gender-neutral)
     VERB_EN_3S_M_PAST = "verb/en_3s-m_past"  # "he ate"
     VERB_EN_3S_F_PAST = "verb/en_3s-f_past"  # "she ate"
-    VERB_EN_1P_PAST = "verb/en_1p_past"
-    VERB_EN_2P_PAST = "verb/en_2p_past"
-    VERB_EN_3P_PAST = "verb/en_3p_past"  # "ate" (gender-neutral)
     VERB_EN_3P_M_PAST = "verb/en_3p-m_past"  # "they(m.) ate"
     VERB_EN_3P_F_PAST = "verb/en_3p-f_past"  # "they(f.) ate"
 
     # Future tense
-    VERB_EN_1S_FUTURE = "verb/en_1s_future"
-    VERB_EN_2S_FUTURE = "verb/en_2s_future"
-    VERB_EN_3S_FUTURE = "verb/en_3s_future"  # "will eat" (gender-neutral)
     VERB_EN_3S_M_FUTURE = "verb/en_3s-m_future"  # "he will eat"
     VERB_EN_3S_F_FUTURE = "verb/en_3s-f_future"  # "she will eat"
-    VERB_EN_1P_FUTURE = "verb/en_1p_future"
-    VERB_EN_2P_FUTURE = "verb/en_2p_future"
-    VERB_EN_3P_FUTURE = "verb/en_3p_future"  # "will eat" (gender-neutral)
     VERB_EN_3P_M_FUTURE = "verb/en_3p-m_future"  # "they(m.) will eat"
     VERB_EN_3P_F_FUTURE = "verb/en_3p-f_future"  # "they(f.) will eat"
 
     # Imperative
-    VERB_EN_2S_IMP = "verb/en_2s_imp"
-    VERB_EN_2P_IMP = "verb/en_2p_imp"
 
     # English noun forms (singular/plural only)
-    NOUN_EN_SINGULAR = "noun/en_singular"
-    NOUN_EN_PLURAL = "noun/en_plural"
 
     # English adjective forms (comparative degrees)
-    ADJ_EN_POSITIVE = "adjective/en_positive"
-    ADJ_EN_COMPARATIVE = "adjective/en_comparative"
-    ADJ_EN_SUPERLATIVE = "adjective/en_superlative"
 
     # English adverb forms (comparative degrees)
-    ADVERB_EN_POSITIVE = "adverb/en_positive"
-    ADVERB_EN_COMPARATIVE = "adverb/en_comparative"
-    ADVERB_EN_SUPERLATIVE = "adverb/en_superlative"
 
     # Lithuanian verb forms (person_tense with gender distinction)
     # Present tense
-    VERB_LT_1S_PRESENT = "verb/lt_1s_present"
-    VERB_LT_2S_PRESENT = "verb/lt_2s_present"
-    VERB_LT_3S_PRESENT = "verb/lt_3s_present"  # "dirba" (gender-neutral, verb doesn't change)
     VERB_LT_3S_M_PRESENT = "verb/lt_3s-m_present"
     VERB_LT_3S_F_PRESENT = "verb/lt_3s-f_present"
-    VERB_LT_1P_PRESENT = "verb/lt_1p_present"
-    VERB_LT_2P_PRESENT = "verb/lt_2p_present"
-    VERB_LT_3P_PRESENT = "verb/lt_3p_present"  # "dirba" (gender-neutral, verb doesn't change)
     VERB_LT_3P_M_PRESENT = "verb/lt_3p-m_present"
     VERB_LT_3P_F_PRESENT = "verb/lt_3p-f_present"
 
     # Past tense
-    VERB_LT_1S_PAST = "verb/lt_1s_past"
-    VERB_LT_2S_PAST = "verb/lt_2s_past"
-    VERB_LT_3S_PAST = "verb/lt_3s_past"  # "dirbo" (gender-neutral, verb doesn't change)
     VERB_LT_3S_M_PAST = "verb/lt_3s-m_past"
     VERB_LT_3S_F_PAST = "verb/lt_3s-f_past"
-    VERB_LT_1P_PAST = "verb/lt_1p_past"
-    VERB_LT_2P_PAST = "verb/lt_2p_past"
-    VERB_LT_3P_PAST = "verb/lt_3p_past"  # "dirbo" (gender-neutral, verb doesn't change)
     VERB_LT_3P_M_PAST = "verb/lt_3p-m_past"
     VERB_LT_3P_F_PAST = "verb/lt_3p-f_past"
 
     # Future tense
-    VERB_LT_1S_FUTURE = "verb/lt_1s_future"
-    VERB_LT_2S_FUTURE = "verb/lt_2s_future"
-    VERB_LT_3S_FUTURE = "verb/lt_3s_future"  # "dirbs" (gender-neutral, verb doesn't change)
     VERB_LT_3S_M_FUTURE = "verb/lt_3s-m_future"
     VERB_LT_3S_F_FUTURE = "verb/lt_3s-f_future"
-    VERB_LT_1P_FUTURE = "verb/lt_1p_future"
-    VERB_LT_2P_FUTURE = "verb/lt_2p_future"
-    VERB_LT_3P_FUTURE = "verb/lt_3p_future"  # "dirbs" (gender-neutral, verb doesn't change)
     VERB_LT_3P_M_FUTURE = "verb/lt_3p-m_future"
     VERB_LT_3P_F_FUTURE = "verb/lt_3p-f_future"
 
@@ -309,21 +263,6 @@ class GrammaticalForm(enum.Enum):
     NOUN_POSSESSIVE_PLURAL = "noun/possessive_plural"
 
     # Lithuanian noun forms (7 cases × 2 numbers)
-    NOUN_LT_NOMINATIVE_SINGULAR = "noun/lt_nominative_singular"
-    NOUN_LT_GENITIVE_SINGULAR = "noun/lt_genitive_singular"
-    NOUN_LT_DATIVE_SINGULAR = "noun/lt_dative_singular"
-    NOUN_LT_ACCUSATIVE_SINGULAR = "noun/lt_accusative_singular"
-    NOUN_LT_INSTRUMENTAL_SINGULAR = "noun/lt_instrumental_singular"
-    NOUN_LT_LOCATIVE_SINGULAR = "noun/lt_locative_singular"
-    NOUN_LT_VOCATIVE_SINGULAR = "noun/lt_vocative_singular"
-
-    NOUN_LT_NOMINATIVE_PLURAL = "noun/lt_nominative_plural"
-    NOUN_LT_GENITIVE_PLURAL = "noun/lt_genitive_plural"
-    NOUN_LT_DATIVE_PLURAL = "noun/lt_dative_plural"
-    NOUN_LT_ACCUSATIVE_PLURAL = "noun/lt_accusative_plural"
-    NOUN_LT_INSTRUMENTAL_PLURAL = "noun/lt_instrumental_plural"
-    NOUN_LT_LOCATIVE_PLURAL = "noun/lt_locative_plural"
-    NOUN_LT_VOCATIVE_PLURAL = "noun/lt_vocative_plural"
 
     # Adjective forms (English)
     ADJECTIVE_POSITIVE = "adjective/positive"
@@ -332,49 +271,16 @@ class GrammaticalForm(enum.Enum):
 
     # Lithuanian adjective forms (7 cases × 2 numbers × 2 genders = 28 forms)
     # Masculine singular
-    ADJ_LT_NOMINATIVE_SINGULAR_M = "adjective/lt_nominative_singular_m"
-    ADJ_LT_GENITIVE_SINGULAR_M = "adjective/lt_genitive_singular_m"
-    ADJ_LT_DATIVE_SINGULAR_M = "adjective/lt_dative_singular_m"
-    ADJ_LT_ACCUSATIVE_SINGULAR_M = "adjective/lt_accusative_singular_m"
-    ADJ_LT_INSTRUMENTAL_SINGULAR_M = "adjective/lt_instrumental_singular_m"
-    ADJ_LT_LOCATIVE_SINGULAR_M = "adjective/lt_locative_singular_m"
-    ADJ_LT_VOCATIVE_SINGULAR_M = "adjective/lt_vocative_singular_m"
 
     # Feminine singular
-    ADJ_LT_NOMINATIVE_SINGULAR_F = "adjective/lt_nominative_singular_f"
-    ADJ_LT_GENITIVE_SINGULAR_F = "adjective/lt_genitive_singular_f"
-    ADJ_LT_DATIVE_SINGULAR_F = "adjective/lt_dative_singular_f"
-    ADJ_LT_ACCUSATIVE_SINGULAR_F = "adjective/lt_accusative_singular_f"
-    ADJ_LT_INSTRUMENTAL_SINGULAR_F = "adjective/lt_instrumental_singular_f"
-    ADJ_LT_LOCATIVE_SINGULAR_F = "adjective/lt_locative_singular_f"
-    ADJ_LT_VOCATIVE_SINGULAR_F = "adjective/lt_vocative_singular_f"
 
     # Masculine plural
-    ADJ_LT_NOMINATIVE_PLURAL_M = "adjective/lt_nominative_plural_m"
-    ADJ_LT_GENITIVE_PLURAL_M = "adjective/lt_genitive_plural_m"
-    ADJ_LT_DATIVE_PLURAL_M = "adjective/lt_dative_plural_m"
-    ADJ_LT_ACCUSATIVE_PLURAL_M = "adjective/lt_accusative_plural_m"
-    ADJ_LT_INSTRUMENTAL_PLURAL_M = "adjective/lt_instrumental_plural_m"
-    ADJ_LT_LOCATIVE_PLURAL_M = "adjective/lt_locative_plural_m"
-    ADJ_LT_VOCATIVE_PLURAL_M = "adjective/lt_vocative_plural_m"
 
     # Feminine plural
-    ADJ_LT_NOMINATIVE_PLURAL_F = "adjective/lt_nominative_plural_f"
-    ADJ_LT_GENITIVE_PLURAL_F = "adjective/lt_genitive_plural_f"
-    ADJ_LT_DATIVE_PLURAL_F = "adjective/lt_dative_plural_f"
-    ADJ_LT_ACCUSATIVE_PLURAL_F = "adjective/lt_accusative_plural_f"
-    ADJ_LT_INSTRUMENTAL_PLURAL_F = "adjective/lt_instrumental_plural_f"
-    ADJ_LT_LOCATIVE_PLURAL_F = "adjective/lt_locative_plural_f"
-    ADJ_LT_VOCATIVE_PLURAL_F = "adjective/lt_vocative_plural_f"
 
     # Lithuanian adverb forms (comparative degrees)
-    ADVERB_LT_POSITIVE = "adverb/lt_positive"
-    ADVERB_LT_COMPARATIVE = "adverb/lt_comparative"
-    ADVERB_LT_SUPERLATIVE = "adverb/lt_superlative"
 
     # French noun forms (singular/plural only - each noun has a fixed gender)
-    NOUN_FR_SINGULAR = "noun/fr_singular"
-    NOUN_FR_PLURAL = "noun/fr_plural"
 
     # French adjective forms (2 genders × 2 numbers = 4 forms)
     ADJ_FR_SINGULAR_M = "adjective/fr_singular_m"
@@ -384,38 +290,20 @@ class GrammaticalForm(enum.Enum):
 
     # French verb forms (8 persons × 4 tenses = 32 forms)
     # Present tense (présent de l'indicatif)
-    VERB_FR_1S_PRESENT = "verb/fr_1s_present"
-    VERB_FR_2S_PRESENT = "verb/fr_2s_present"
-    VERB_FR_3S_PRESENT = "verb/fr_3s_present"  # "va" (gender-neutral)
     VERB_FR_3S_M_PRESENT = "verb/fr_3s-m_present"
     VERB_FR_3S_F_PRESENT = "verb/fr_3s-f_present"
-    VERB_FR_1P_PRESENT = "verb/fr_1p_present"
-    VERB_FR_2P_PRESENT = "verb/fr_2p_present"
-    VERB_FR_3P_PRESENT = "verb/fr_3p_present"  # "vont" (gender-neutral)
     VERB_FR_3P_M_PRESENT = "verb/fr_3p-m_present"
     VERB_FR_3P_F_PRESENT = "verb/fr_3p-f_present"
 
     # Imperfect (imparfait)
-    VERB_FR_1S_IMPF = "verb/fr_1s_impf"
-    VERB_FR_2S_IMPF = "verb/fr_2s_impf"
-    VERB_FR_3S_IMPF = "verb/fr_3s_impf"  # "allait" (gender-neutral)
     VERB_FR_3S_M_IMPF = "verb/fr_3s-m_impf"
     VERB_FR_3S_F_IMPF = "verb/fr_3s-f_impf"
-    VERB_FR_1P_IMPF = "verb/fr_1p_impf"
-    VERB_FR_2P_IMPF = "verb/fr_2p_impf"
-    VERB_FR_3P_IMPF = "verb/fr_3p_impf"  # "allaient" (gender-neutral)
     VERB_FR_3P_M_IMPF = "verb/fr_3p-m_impf"
     VERB_FR_3P_F_IMPF = "verb/fr_3p-f_impf"
 
     # Future (futur simple)
-    VERB_FR_1S_FUTURE = "verb/fr_1s_future"
-    VERB_FR_2S_FUTURE = "verb/fr_2s_future"
-    VERB_FR_3S_FUTURE = "verb/fr_3s_future"  # "ira" (gender-neutral)
     VERB_FR_3S_M_FUTURE = "verb/fr_3s-m_future"
     VERB_FR_3S_F_FUTURE = "verb/fr_3s-f_future"
-    VERB_FR_1P_FUTURE = "verb/fr_1p_future"
-    VERB_FR_2P_FUTURE = "verb/fr_2p_future"
-    VERB_FR_3P_FUTURE = "verb/fr_3p_future"  # "iront" (gender-neutral)
     VERB_FR_3P_M_FUTURE = "verb/fr_3p-m_future"
     VERB_FR_3P_F_FUTURE = "verb/fr_3p-f_future"
 
@@ -432,12 +320,8 @@ class GrammaticalForm(enum.Enum):
     VERB_FR_3P_F_PC = "verb/fr_3p-f_pc"
 
     # Past participles (masculine and feminine forms)
-    VERB_FR_PC_M = "verb/fr_pc_m"  # masculine past participle, e.g., "allé"
-    VERB_FR_PC_F = "verb/fr_pc_f"  # feminine past participle, e.g., "allée"
 
     # Spanish noun forms (singular/plural only - each noun has a fixed gender)
-    NOUN_ES_SINGULAR = "noun/es_singular"
-    NOUN_ES_PLURAL = "noun/es_plural"
 
     # Spanish adjective forms (2 genders × 2 numbers = 4 forms)
     ADJ_ES_SINGULAR_M = "adjective/es_singular_m"
@@ -447,52 +331,26 @@ class GrammaticalForm(enum.Enum):
 
     # Spanish verb forms (8 persons × 3 tenses = 24 forms)
     # Present tense (presente de indicativo)
-    VERB_ES_1S_PRESENT = "verb/es_1s_present"
-    VERB_ES_2S_PRESENT = "verb/es_2s_present"
-    VERB_ES_3S_PRESENT = "verb/es_3s_present"  # "va" (gender-neutral)
     VERB_ES_3S_M_PRESENT = "verb/es_3s-m_present"
     VERB_ES_3S_F_PRESENT = "verb/es_3s-f_present"
-    VERB_ES_1P_PRESENT = "verb/es_1p_present"
-    VERB_ES_2P_PRESENT = "verb/es_2p_present"
-    VERB_ES_3P_PRESENT = "verb/es_3p_present"  # "van" (gender-neutral)
     VERB_ES_3P_M_PRESENT = "verb/es_3p-m_present"
     VERB_ES_3P_F_PRESENT = "verb/es_3p-f_present"
 
     # Preterite (pretérito perfecto simple - simple past)
-    VERB_ES_1S_PAST = "verb/es_1s_past"
-    VERB_ES_2S_PAST = "verb/es_2s_past"
-    VERB_ES_3S_PAST = "verb/es_3s_past"  # "fue" (gender-neutral)
     VERB_ES_3S_M_PAST = "verb/es_3s-m_past"
     VERB_ES_3S_F_PAST = "verb/es_3s-f_past"
-    VERB_ES_1P_PAST = "verb/es_1p_past"
-    VERB_ES_2P_PAST = "verb/es_2p_past"
-    VERB_ES_3P_PAST = "verb/es_3p_past"  # "fueron" (gender-neutral)
     VERB_ES_3P_M_PAST = "verb/es_3p-m_past"
     VERB_ES_3P_F_PAST = "verb/es_3p-f_past"
 
     # Future (futuro simple)
-    VERB_ES_1S_FUTURE = "verb/es_1s_future"
-    VERB_ES_2S_FUTURE = "verb/es_2s_future"
-    VERB_ES_3S_FUTURE = "verb/es_3s_future"  # "irá" (gender-neutral)
     VERB_ES_3S_M_FUTURE = "verb/es_3s-m_future"
     VERB_ES_3S_F_FUTURE = "verb/es_3s-f_future"
-    VERB_ES_1P_FUTURE = "verb/es_1p_future"
-    VERB_ES_2P_FUTURE = "verb/es_2p_future"
-    VERB_ES_3P_FUTURE = "verb/es_3p_future"  # "irán" (gender-neutral)
     VERB_ES_3P_M_FUTURE = "verb/es_3p-m_future"
     VERB_ES_3P_F_FUTURE = "verb/es_3p-f_future"
 
     # German noun forms (4 cases × 2 numbers = 8 forms)
     # Singular
-    NOUN_DE_NOMINATIVE_SINGULAR = "noun/de_nominative_singular"
-    NOUN_DE_ACCUSATIVE_SINGULAR = "noun/de_accusative_singular"
-    NOUN_DE_DATIVE_SINGULAR = "noun/de_dative_singular"
-    NOUN_DE_GENITIVE_SINGULAR = "noun/de_genitive_singular"
     # Plural
-    NOUN_DE_NOMINATIVE_PLURAL = "noun/de_nominative_plural"
-    NOUN_DE_ACCUSATIVE_PLURAL = "noun/de_accusative_plural"
-    NOUN_DE_DATIVE_PLURAL = "noun/de_dative_plural"
-    NOUN_DE_GENITIVE_PLURAL = "noun/de_genitive_plural"
 
     # German adjective forms (2 genders × 2 numbers = 4 forms, simplified)
     ADJ_DE_SINGULAR_M = "adjective/de_singular_m"
@@ -502,44 +360,24 @@ class GrammaticalForm(enum.Enum):
 
     # German verb forms (8 persons × 3 tenses = 24 forms)
     # Present tense (Präsens)
-    VERB_DE_1S_PRESENT = "verb/de_1s_present"
-    VERB_DE_2S_PRESENT = "verb/de_2s_present"
-    VERB_DE_3S_PRESENT = "verb/de_3s_present"  # "geht" (gender-neutral)
     VERB_DE_3S_M_PRESENT = "verb/de_3s-m_present"
     VERB_DE_3S_F_PRESENT = "verb/de_3s-f_present"
-    VERB_DE_1P_PRESENT = "verb/de_1p_present"
-    VERB_DE_2P_PRESENT = "verb/de_2p_present"
-    VERB_DE_3P_PRESENT = "verb/de_3p_present"  # "gehen" (gender-neutral)
     VERB_DE_3P_M_PRESENT = "verb/de_3p-m_present"
     VERB_DE_3P_F_PRESENT = "verb/de_3p-f_present"
 
     # Perfect (Perfekt - compound past, most common in spoken German)
-    VERB_DE_1S_PAST = "verb/de_1s_past"
-    VERB_DE_2S_PAST = "verb/de_2s_past"
-    VERB_DE_3S_PAST = "verb/de_3s_past"  # "hat gegangen" (gender-neutral)
     VERB_DE_3S_M_PAST = "verb/de_3s-m_past"
     VERB_DE_3S_F_PAST = "verb/de_3s-f_past"
-    VERB_DE_1P_PAST = "verb/de_1p_past"
-    VERB_DE_2P_PAST = "verb/de_2p_past"
-    VERB_DE_3P_PAST = "verb/de_3p_past"  # "haben gegangen" (gender-neutral)
     VERB_DE_3P_M_PAST = "verb/de_3p-m_past"
     VERB_DE_3P_F_PAST = "verb/de_3p-f_past"
 
     # Future (Futur I)
-    VERB_DE_1S_FUTURE = "verb/de_1s_future"
-    VERB_DE_2S_FUTURE = "verb/de_2s_future"
-    VERB_DE_3S_FUTURE = "verb/de_3s_future"  # "wird gehen" (gender-neutral)
     VERB_DE_3S_M_FUTURE = "verb/de_3s-m_future"
     VERB_DE_3S_F_FUTURE = "verb/de_3s-f_future"
-    VERB_DE_1P_FUTURE = "verb/de_1p_future"
-    VERB_DE_2P_FUTURE = "verb/de_2p_future"
-    VERB_DE_3P_FUTURE = "verb/de_3p_future"  # "werden gehen" (gender-neutral)
     VERB_DE_3P_M_FUTURE = "verb/de_3p-m_future"
     VERB_DE_3P_F_FUTURE = "verb/de_3p-f_future"
 
     # Portuguese noun forms (singular/plural only - each noun has a fixed gender)
-    NOUN_PT_SINGULAR = "noun/pt_singular"
-    NOUN_PT_PLURAL = "noun/pt_plural"
 
     # Portuguese adjective forms (2 genders × 2 numbers = 4 forms)
     ADJ_PT_SINGULAR_M = "adjective/pt_singular_m"
@@ -549,44 +387,24 @@ class GrammaticalForm(enum.Enum):
 
     # Portuguese verb forms (8 persons × 3 tenses = 24 forms)
     # Present tense (presente do indicativo)
-    VERB_PT_1S_PRESENT = "verb/pt_1s_present"
-    VERB_PT_2S_PRESENT = "verb/pt_2s_present"
-    VERB_PT_3S_PRESENT = "verb/pt_3s_present"  # "vai" (gender-neutral)
     VERB_PT_3S_M_PRESENT = "verb/pt_3s-m_present"
     VERB_PT_3S_F_PRESENT = "verb/pt_3s-f_present"
-    VERB_PT_1P_PRESENT = "verb/pt_1p_present"
-    VERB_PT_2P_PRESENT = "verb/pt_2p_present"
-    VERB_PT_3P_PRESENT = "verb/pt_3p_present"  # "vão" (gender-neutral)
     VERB_PT_3P_M_PRESENT = "verb/pt_3p-m_present"
     VERB_PT_3P_F_PRESENT = "verb/pt_3p-f_present"
 
     # Preterite (pretérito perfeito - simple past)
-    VERB_PT_1S_PAST = "verb/pt_1s_past"
-    VERB_PT_2S_PAST = "verb/pt_2s_past"
-    VERB_PT_3S_PAST = "verb/pt_3s_past"  # "foi" (gender-neutral)
     VERB_PT_3S_M_PAST = "verb/pt_3s-m_past"
     VERB_PT_3S_F_PAST = "verb/pt_3s-f_past"
-    VERB_PT_1P_PAST = "verb/pt_1p_past"
-    VERB_PT_2P_PAST = "verb/pt_2p_past"
-    VERB_PT_3P_PAST = "verb/pt_3p_past"  # "foram" (gender-neutral)
     VERB_PT_3P_M_PAST = "verb/pt_3p-m_past"
     VERB_PT_3P_F_PAST = "verb/pt_3p-f_past"
 
     # Future (futuro do presente)
-    VERB_PT_1S_FUTURE = "verb/pt_1s_future"
-    VERB_PT_2S_FUTURE = "verb/pt_2s_future"
-    VERB_PT_3S_FUTURE = "verb/pt_3s_future"  # "irá" (gender-neutral)
     VERB_PT_3S_M_FUTURE = "verb/pt_3s-m_future"
     VERB_PT_3S_F_FUTURE = "verb/pt_3s-f_future"
-    VERB_PT_1P_FUTURE = "verb/pt_1p_future"
-    VERB_PT_2P_FUTURE = "verb/pt_2p_future"
-    VERB_PT_3P_FUTURE = "verb/pt_3p_future"  # "irão" (gender-neutral)
     VERB_PT_3P_M_FUTURE = "verb/pt_3p-m_future"
     VERB_PT_3P_F_FUTURE = "verb/pt_3p-f_future"
 
     # Italian noun forms (singular/plural only - each noun has a fixed gender)
-    NOUN_IT_SINGULAR = "noun/it_singular"
-    NOUN_IT_PLURAL = "noun/it_plural"
 
     # Italian adjective forms (2 genders × 2 numbers = 4 forms)
     ADJ_IT_SINGULAR_M = "adjective/it_singular_m"
@@ -596,41 +414,16 @@ class GrammaticalForm(enum.Enum):
 
     # Italian verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (presente indicativo)
-    VERB_IT_1S_PRESENT = "verb/it_1s_present"
-    VERB_IT_2S_PRESENT = "verb/it_2s_present"
-    VERB_IT_3S_PRESENT = "verb/it_3s_present"  # "va" (gender-neutral)
-    VERB_IT_1P_PRESENT = "verb/it_1p_present"
-    VERB_IT_2P_PRESENT = "verb/it_2p_present"
-    VERB_IT_3P_PRESENT = "verb/it_3p_present"  # "vanno" (gender-neutral)
 
     # Passato remoto (simple past)
-    VERB_IT_1S_PAST = "verb/it_1s_past"
-    VERB_IT_2S_PAST = "verb/it_2s_past"
-    VERB_IT_3S_PAST = "verb/it_3s_past"  # "andò" (gender-neutral)
-    VERB_IT_1P_PAST = "verb/it_1p_past"
-    VERB_IT_2P_PAST = "verb/it_2p_past"
-    VERB_IT_3P_PAST = "verb/it_3p_past"  # "andarono" (gender-neutral)
 
     # Future (futuro semplice)
-    VERB_IT_1S_FUTURE = "verb/it_1s_future"
-    VERB_IT_2S_FUTURE = "verb/it_2s_future"
-    VERB_IT_3S_FUTURE = "verb/it_3s_future"  # "andrà" (gender-neutral)
-    VERB_IT_1P_FUTURE = "verb/it_1p_future"
-    VERB_IT_2P_FUTURE = "verb/it_2p_future"
-    VERB_IT_3P_FUTURE = "verb/it_3p_future"  # "andranno" (gender-neutral)
 
     # Swedish noun forms (singular/plural only)
-    NOUN_SV_SINGULAR = "noun/sv_singular"
-    NOUN_SV_PLURAL = "noun/sv_plural"
 
     # Swedish verb forms (one form per tense — Swedish does not conjugate by person)
-    VERB_SV_PRESENT = "verb/sv_present"  # Presens: e.g. "talar", "springer"
-    VERB_SV_PAST = "verb/sv_past"  # Preteritum: e.g. "talade", "sprang"
-    VERB_SV_FUTURE = "verb/sv_future"  # Futurum: e.g. "ska tala", "ska springa"
 
     # Dutch noun forms (singular/plural only - each noun has a fixed gender)
-    NOUN_NL_SINGULAR = "noun/nl_singular"
-    NOUN_NL_PLURAL = "noun/nl_plural"
 
     # Dutch adjective forms (2 genders × 2 numbers = 4 forms)
     ADJ_NL_SINGULAR_M = "adjective/nl_singular_m"
@@ -640,28 +433,10 @@ class GrammaticalForm(enum.Enum):
 
     # Dutch verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (onvoltooid tegenwoordige tijd)
-    VERB_NL_1S_PRESENT = "verb/nl_1s_present"
-    VERB_NL_2S_PRESENT = "verb/nl_2s_present"
-    VERB_NL_3S_PRESENT = "verb/nl_3s_present"  # "gaat" (gender-neutral)
-    VERB_NL_1P_PRESENT = "verb/nl_1p_present"
-    VERB_NL_2P_PRESENT = "verb/nl_2p_present"
-    VERB_NL_3P_PRESENT = "verb/nl_3p_present"  # "gaan" (gender-neutral)
 
     # Past tense (onvoltooid verleden tijd / imperfectum)
-    VERB_NL_1S_PAST = "verb/nl_1s_past"
-    VERB_NL_2S_PAST = "verb/nl_2s_past"
-    VERB_NL_3S_PAST = "verb/nl_3s_past"  # "ging" (gender-neutral)
-    VERB_NL_1P_PAST = "verb/nl_1p_past"
-    VERB_NL_2P_PAST = "verb/nl_2p_past"
-    VERB_NL_3P_PAST = "verb/nl_3p_past"  # "gingen" (gender-neutral)
 
     # Future (onvoltooid toekomende tijd)
-    VERB_NL_1S_FUTURE = "verb/nl_1s_future"
-    VERB_NL_2S_FUTURE = "verb/nl_2s_future"
-    VERB_NL_3S_FUTURE = "verb/nl_3s_future"  # "zal gaan" (gender-neutral)
-    VERB_NL_1P_FUTURE = "verb/nl_1p_future"
-    VERB_NL_2P_FUTURE = "verb/nl_2p_future"
-    VERB_NL_3P_FUTURE = "verb/nl_3p_future"  # "zullen gaan" (gender-neutral)
 
     # Adverb forms
     ADVERB_POSITIVE = "adverb/positive"
@@ -835,8 +610,6 @@ class GrammaticalForm(enum.Enum):
     NUMERAL_KO_ORDINAL = "numeral/ko_ordinal"  # 첫째, 둘째, 셋째
 
     # Romanian noun forms (singular/plural only - each noun has a fixed gender m/f/n)
-    NOUN_RO_SINGULAR = "noun/ro_singular"
-    NOUN_RO_PLURAL = "noun/ro_plural"
 
     # Romanian adjective forms (2 genders × 2 numbers = 4 forms)
     ADJ_RO_SINGULAR_M = "adjective/ro_singular_m"
@@ -846,26 +619,8 @@ class GrammaticalForm(enum.Enum):
 
     # Romanian verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (prezent)
-    VERB_RO_1S_PRESENT = "verb/ro_1s_present"
-    VERB_RO_2S_PRESENT = "verb/ro_2s_present"
-    VERB_RO_3S_PRESENT = "verb/ro_3s_present"
-    VERB_RO_1P_PRESENT = "verb/ro_1p_present"
-    VERB_RO_2P_PRESENT = "verb/ro_2p_present"
-    VERB_RO_3P_PRESENT = "verb/ro_3p_present"
     # Past tense (perfect compus)
-    VERB_RO_1S_PAST = "verb/ro_1s_past"
-    VERB_RO_2S_PAST = "verb/ro_2s_past"
-    VERB_RO_3S_PAST = "verb/ro_3s_past"
-    VERB_RO_1P_PAST = "verb/ro_1p_past"
-    VERB_RO_2P_PAST = "verb/ro_2p_past"
-    VERB_RO_3P_PAST = "verb/ro_3p_past"
     # Future tense (viitor)
-    VERB_RO_1S_FUTURE = "verb/ro_1s_future"
-    VERB_RO_2S_FUTURE = "verb/ro_2s_future"
-    VERB_RO_3S_FUTURE = "verb/ro_3s_future"
-    VERB_RO_1P_FUTURE = "verb/ro_1p_future"
-    VERB_RO_2P_FUTURE = "verb/ro_2p_future"
-    VERB_RO_3P_FUTURE = "verb/ro_3p_future"
 
     # Polish noun forms (7 cases × 2 numbers = 14 forms)
     # Singular
@@ -974,26 +729,8 @@ class GrammaticalForm(enum.Enum):
 
     # Kannada verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (ವರ್ತಮಾನಕಾಲ)
-    VERB_KN_1S_PRESENT = "verb/kn_1s_present"
-    VERB_KN_2S_PRESENT = "verb/kn_2s_present"
-    VERB_KN_3S_PRESENT = "verb/kn_3s_present"
-    VERB_KN_1P_PRESENT = "verb/kn_1p_present"
-    VERB_KN_2P_PRESENT = "verb/kn_2p_present"
-    VERB_KN_3P_PRESENT = "verb/kn_3p_present"
     # Past tense (ಭೂತಕಾಲ)
-    VERB_KN_1S_PAST = "verb/kn_1s_past"
-    VERB_KN_2S_PAST = "verb/kn_2s_past"
-    VERB_KN_3S_PAST = "verb/kn_3s_past"
-    VERB_KN_1P_PAST = "verb/kn_1p_past"
-    VERB_KN_2P_PAST = "verb/kn_2p_past"
-    VERB_KN_3P_PAST = "verb/kn_3p_past"
     # Future tense (ಭವಿಷ್ಯತ್ಕಾಲ)
-    VERB_KN_1S_FUTURE = "verb/kn_1s_future"
-    VERB_KN_2S_FUTURE = "verb/kn_2s_future"
-    VERB_KN_3S_FUTURE = "verb/kn_3s_future"
-    VERB_KN_1P_FUTURE = "verb/kn_1p_future"
-    VERB_KN_2P_FUTURE = "verb/kn_2p_future"
-    VERB_KN_3P_FUTURE = "verb/kn_3p_future"
 
     # Malayalam noun forms (singular/plural only)
     NOUN_ML_SINGULAR = "noun/ml_singular"
@@ -1165,26 +902,8 @@ class GrammaticalForm(enum.Enum):
 
     # Estonian verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (olevik)
-    VERB_ET_1S_PRESENT = "verb/et_1s_present"
-    VERB_ET_2S_PRESENT = "verb/et_2s_present"
-    VERB_ET_3S_PRESENT = "verb/et_3s_present"
-    VERB_ET_1P_PRESENT = "verb/et_1p_present"
-    VERB_ET_2P_PRESENT = "verb/et_2p_present"
-    VERB_ET_3P_PRESENT = "verb/et_3p_present"
     # Past tense (lihtminevik)
-    VERB_ET_1S_PAST = "verb/et_1s_past"
-    VERB_ET_2S_PAST = "verb/et_2s_past"
-    VERB_ET_3S_PAST = "verb/et_3s_past"
-    VERB_ET_1P_PAST = "verb/et_1p_past"
-    VERB_ET_2P_PAST = "verb/et_2p_past"
-    VERB_ET_3P_PAST = "verb/et_3p_past"
     # Future tense (tulevik - formed with saama + infinitive)
-    VERB_ET_1S_FUTURE = "verb/et_1s_future"
-    VERB_ET_2S_FUTURE = "verb/et_2s_future"
-    VERB_ET_3S_FUTURE = "verb/et_3s_future"
-    VERB_ET_1P_FUTURE = "verb/et_1p_future"
-    VERB_ET_2P_FUTURE = "verb/et_2p_future"
-    VERB_ET_3P_FUTURE = "verb/et_3p_future"
 
     # Finnish noun forms (singular/plural only - no grammatical gender)
     NOUN_FI_SINGULAR = "noun/fi_singular"
@@ -1299,82 +1018,19 @@ class GrammaticalForm(enum.Enum):
     NOUN_LV_PLURAL = "noun/lv_plural"
 
     # Latvian noun forms (7 cases × 2 numbers = 14 forms)
-    NOUN_LV_NOMINATIVE_SINGULAR = "noun/lv_nominative_singular"
-    NOUN_LV_GENITIVE_SINGULAR = "noun/lv_genitive_singular"
-    NOUN_LV_DATIVE_SINGULAR = "noun/lv_dative_singular"
-    NOUN_LV_ACCUSATIVE_SINGULAR = "noun/lv_accusative_singular"
-    NOUN_LV_INSTRUMENTAL_SINGULAR = "noun/lv_instrumental_singular"
-    NOUN_LV_LOCATIVE_SINGULAR = "noun/lv_locative_singular"
-    NOUN_LV_VOCATIVE_SINGULAR = "noun/lv_vocative_singular"
-    NOUN_LV_NOMINATIVE_PLURAL = "noun/lv_nominative_plural"
-    NOUN_LV_GENITIVE_PLURAL = "noun/lv_genitive_plural"
-    NOUN_LV_DATIVE_PLURAL = "noun/lv_dative_plural"
-    NOUN_LV_ACCUSATIVE_PLURAL = "noun/lv_accusative_plural"
-    NOUN_LV_INSTRUMENTAL_PLURAL = "noun/lv_instrumental_plural"
-    NOUN_LV_LOCATIVE_PLURAL = "noun/lv_locative_plural"
-    NOUN_LV_VOCATIVE_PLURAL = "noun/lv_vocative_plural"
 
     # Latvian verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (tagadne)
-    VERB_LV_1S_PRESENT = "verb/lv_1s_present"
-    VERB_LV_2S_PRESENT = "verb/lv_2s_present"
-    VERB_LV_3S_PRESENT = "verb/lv_3s_present"
-    VERB_LV_1P_PRESENT = "verb/lv_1p_present"
-    VERB_LV_2P_PRESENT = "verb/lv_2p_present"
-    VERB_LV_3P_PRESENT = "verb/lv_3p_present"
     # Past tense (pagātne)
-    VERB_LV_1S_PAST = "verb/lv_1s_past"
-    VERB_LV_2S_PAST = "verb/lv_2s_past"
-    VERB_LV_3S_PAST = "verb/lv_3s_past"
-    VERB_LV_1P_PAST = "verb/lv_1p_past"
-    VERB_LV_2P_PAST = "verb/lv_2p_past"
-    VERB_LV_3P_PAST = "verb/lv_3p_past"
     # Future tense (nākotne)
-    VERB_LV_1S_FUTURE = "verb/lv_1s_future"
-    VERB_LV_2S_FUTURE = "verb/lv_2s_future"
-    VERB_LV_3S_FUTURE = "verb/lv_3s_future"
-    VERB_LV_1P_FUTURE = "verb/lv_1p_future"
-    VERB_LV_2P_FUTURE = "verb/lv_2p_future"
-    VERB_LV_3P_FUTURE = "verb/lv_3p_future"
 
     # Latvian adjective forms (7 cases × 2 numbers × 2 genders = 28 forms)
     # Masculine singular
-    ADJ_LV_NOMINATIVE_SINGULAR_M = "adjective/lv_nominative_singular_m"
-    ADJ_LV_GENITIVE_SINGULAR_M = "adjective/lv_genitive_singular_m"
-    ADJ_LV_DATIVE_SINGULAR_M = "adjective/lv_dative_singular_m"
-    ADJ_LV_ACCUSATIVE_SINGULAR_M = "adjective/lv_accusative_singular_m"
-    ADJ_LV_INSTRUMENTAL_SINGULAR_M = "adjective/lv_instrumental_singular_m"
-    ADJ_LV_LOCATIVE_SINGULAR_M = "adjective/lv_locative_singular_m"
-    ADJ_LV_VOCATIVE_SINGULAR_M = "adjective/lv_vocative_singular_m"
     # Feminine singular
-    ADJ_LV_NOMINATIVE_SINGULAR_F = "adjective/lv_nominative_singular_f"
-    ADJ_LV_GENITIVE_SINGULAR_F = "adjective/lv_genitive_singular_f"
-    ADJ_LV_DATIVE_SINGULAR_F = "adjective/lv_dative_singular_f"
-    ADJ_LV_ACCUSATIVE_SINGULAR_F = "adjective/lv_accusative_singular_f"
-    ADJ_LV_INSTRUMENTAL_SINGULAR_F = "adjective/lv_instrumental_singular_f"
-    ADJ_LV_LOCATIVE_SINGULAR_F = "adjective/lv_locative_singular_f"
-    ADJ_LV_VOCATIVE_SINGULAR_F = "adjective/lv_vocative_singular_f"
     # Masculine plural
-    ADJ_LV_NOMINATIVE_PLURAL_M = "adjective/lv_nominative_plural_m"
-    ADJ_LV_GENITIVE_PLURAL_M = "adjective/lv_genitive_plural_m"
-    ADJ_LV_DATIVE_PLURAL_M = "adjective/lv_dative_plural_m"
-    ADJ_LV_ACCUSATIVE_PLURAL_M = "adjective/lv_accusative_plural_m"
-    ADJ_LV_INSTRUMENTAL_PLURAL_M = "adjective/lv_instrumental_plural_m"
-    ADJ_LV_LOCATIVE_PLURAL_M = "adjective/lv_locative_plural_m"
-    ADJ_LV_VOCATIVE_PLURAL_M = "adjective/lv_vocative_plural_m"
     # Feminine plural
-    ADJ_LV_NOMINATIVE_PLURAL_F = "adjective/lv_nominative_plural_f"
-    ADJ_LV_GENITIVE_PLURAL_F = "adjective/lv_genitive_plural_f"
-    ADJ_LV_DATIVE_PLURAL_F = "adjective/lv_dative_plural_f"
-    ADJ_LV_ACCUSATIVE_PLURAL_F = "adjective/lv_accusative_plural_f"
-    ADJ_LV_INSTRUMENTAL_PLURAL_F = "adjective/lv_instrumental_plural_f"
-    ADJ_LV_LOCATIVE_PLURAL_F = "adjective/lv_locative_plural_f"
-    ADJ_LV_VOCATIVE_PLURAL_F = "adjective/lv_vocative_plural_f"
 
     # Latvian adverb forms (3 comparative degrees)
-    ADVERB_LV_POSITIVE = "adverb/lv_positive"
-    ADVERB_LV_COMPARATIVE = "adverb/lv_comparative"
-    ADVERB_LV_SUPERLATIVE = "adverb/lv_superlative"
 
     # Maltese noun forms (singular/plural only - each noun has a fixed gender m/f)
     NOUN_MT_SINGULAR = "noun/mt_singular"
@@ -1678,20 +1334,6 @@ class GrammaticalForm(enum.Enum):
     NOUN_UK_PLURAL = "noun/uk_plural"
 
     # Ukrainian noun forms (7 cases × 2 numbers = 14 forms)
-    NOUN_UK_NOMINATIVE_SINGULAR = "noun/uk_nominative_singular"
-    NOUN_UK_GENITIVE_SINGULAR = "noun/uk_genitive_singular"
-    NOUN_UK_DATIVE_SINGULAR = "noun/uk_dative_singular"
-    NOUN_UK_ACCUSATIVE_SINGULAR = "noun/uk_accusative_singular"
-    NOUN_UK_INSTRUMENTAL_SINGULAR = "noun/uk_instrumental_singular"
-    NOUN_UK_LOCATIVE_SINGULAR = "noun/uk_locative_singular"
-    NOUN_UK_VOCATIVE_SINGULAR = "noun/uk_vocative_singular"
-    NOUN_UK_NOMINATIVE_PLURAL = "noun/uk_nominative_plural"
-    NOUN_UK_GENITIVE_PLURAL = "noun/uk_genitive_plural"
-    NOUN_UK_DATIVE_PLURAL = "noun/uk_dative_plural"
-    NOUN_UK_ACCUSATIVE_PLURAL = "noun/uk_accusative_plural"
-    NOUN_UK_INSTRUMENTAL_PLURAL = "noun/uk_instrumental_plural"
-    NOUN_UK_LOCATIVE_PLURAL = "noun/uk_locative_plural"
-    NOUN_UK_VOCATIVE_PLURAL = "noun/uk_vocative_plural"
 
     # Ukrainian verb forms (legacy tense-only - kept for backward compatibility)
     VERB_UK_PRESENT = "verb/uk_present"
@@ -1700,74 +1342,20 @@ class GrammaticalForm(enum.Enum):
 
     # Ukrainian verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (теперішній час)
-    VERB_UK_1S_PRESENT = "verb/uk_1s_present"
-    VERB_UK_2S_PRESENT = "verb/uk_2s_present"
-    VERB_UK_3S_PRESENT = "verb/uk_3s_present"
-    VERB_UK_1P_PRESENT = "verb/uk_1p_present"
-    VERB_UK_2P_PRESENT = "verb/uk_2p_present"
-    VERB_UK_3P_PRESENT = "verb/uk_3p_present"
     # Past tense (минулий час)
-    VERB_UK_1S_PAST = "verb/uk_1s_past"
-    VERB_UK_2S_PAST = "verb/uk_2s_past"
-    VERB_UK_3S_PAST = "verb/uk_3s_past"
-    VERB_UK_1P_PAST = "verb/uk_1p_past"
-    VERB_UK_2P_PAST = "verb/uk_2p_past"
-    VERB_UK_3P_PAST = "verb/uk_3p_past"
     # Future tense (майбутній час)
-    VERB_UK_1S_FUTURE = "verb/uk_1s_future"
-    VERB_UK_2S_FUTURE = "verb/uk_2s_future"
-    VERB_UK_3S_FUTURE = "verb/uk_3s_future"
-    VERB_UK_1P_FUTURE = "verb/uk_1p_future"
-    VERB_UK_2P_FUTURE = "verb/uk_2p_future"
-    VERB_UK_3P_FUTURE = "verb/uk_3p_future"
 
     # Ukrainian adjective forms (7 cases × 2 numbers × 2 genders = 28 forms)
     # Masculine singular
-    ADJ_UK_NOMINATIVE_SINGULAR_M = "adjective/uk_nominative_singular_m"
-    ADJ_UK_GENITIVE_SINGULAR_M = "adjective/uk_genitive_singular_m"
-    ADJ_UK_DATIVE_SINGULAR_M = "adjective/uk_dative_singular_m"
-    ADJ_UK_ACCUSATIVE_SINGULAR_M = "adjective/uk_accusative_singular_m"
-    ADJ_UK_INSTRUMENTAL_SINGULAR_M = "adjective/uk_instrumental_singular_m"
-    ADJ_UK_LOCATIVE_SINGULAR_M = "adjective/uk_locative_singular_m"
-    ADJ_UK_VOCATIVE_SINGULAR_M = "adjective/uk_vocative_singular_m"
     # Feminine singular
-    ADJ_UK_NOMINATIVE_SINGULAR_F = "adjective/uk_nominative_singular_f"
-    ADJ_UK_GENITIVE_SINGULAR_F = "adjective/uk_genitive_singular_f"
-    ADJ_UK_DATIVE_SINGULAR_F = "adjective/uk_dative_singular_f"
-    ADJ_UK_ACCUSATIVE_SINGULAR_F = "adjective/uk_accusative_singular_f"
-    ADJ_UK_INSTRUMENTAL_SINGULAR_F = "adjective/uk_instrumental_singular_f"
-    ADJ_UK_LOCATIVE_SINGULAR_F = "adjective/uk_locative_singular_f"
-    ADJ_UK_VOCATIVE_SINGULAR_F = "adjective/uk_vocative_singular_f"
     # Masculine plural
-    ADJ_UK_NOMINATIVE_PLURAL_M = "adjective/uk_nominative_plural_m"
-    ADJ_UK_GENITIVE_PLURAL_M = "adjective/uk_genitive_plural_m"
-    ADJ_UK_DATIVE_PLURAL_M = "adjective/uk_dative_plural_m"
-    ADJ_UK_ACCUSATIVE_PLURAL_M = "adjective/uk_accusative_plural_m"
-    ADJ_UK_INSTRUMENTAL_PLURAL_M = "adjective/uk_instrumental_plural_m"
-    ADJ_UK_LOCATIVE_PLURAL_M = "adjective/uk_locative_plural_m"
-    ADJ_UK_VOCATIVE_PLURAL_M = "adjective/uk_vocative_plural_m"
     # Feminine plural
-    ADJ_UK_NOMINATIVE_PLURAL_F = "adjective/uk_nominative_plural_f"
-    ADJ_UK_GENITIVE_PLURAL_F = "adjective/uk_genitive_plural_f"
-    ADJ_UK_DATIVE_PLURAL_F = "adjective/uk_dative_plural_f"
-    ADJ_UK_ACCUSATIVE_PLURAL_F = "adjective/uk_accusative_plural_f"
-    ADJ_UK_INSTRUMENTAL_PLURAL_F = "adjective/uk_instrumental_plural_f"
-    ADJ_UK_LOCATIVE_PLURAL_F = "adjective/uk_locative_plural_f"
-    ADJ_UK_VOCATIVE_PLURAL_F = "adjective/uk_vocative_plural_f"
 
     # Ukrainian adverb forms (3 comparative degrees)
-    ADVERB_UK_POSITIVE = "adverb/uk_positive"
-    ADVERB_UK_COMPARATIVE = "adverb/uk_comparative"
-    ADVERB_UK_SUPERLATIVE = "adverb/uk_superlative"
 
     # Chinese noun forms (isolating language - base form only)
-    NOUN_ZH_BASE = "noun/zh_base"
 
     # Chinese verb forms (analytic aspect patterns)
-    VERB_ZH_BASE = "verb/zh_base"  # bare verb (买)
-    VERB_ZH_PERFECTIVE = "verb/zh_perfective"  # verb + 了 (买了) — completed action
-    VERB_ZH_EXPERIENTIAL = "verb/zh_experiential"  # verb + 过 (买过) — have done before
-    VERB_ZH_PROGRESSIVE = "verb/zh_progressive"  # 在 + verb (在买) — currently doing
 
     # Japanese noun forms (no morphological change - base form only)
     NOUN_JA_BASE = "noun/ja_base"
@@ -1787,10 +1375,8 @@ class GrammaticalForm(enum.Enum):
     VERB_KO_POLITE_FUTURE = "verb/ko_polite_future"  # 먹을 거예요
 
     # Vietnamese noun forms (isolating language - base form only)
-    NOUN_VI_BASE = "noun/vi_base"
 
     # Vietnamese verb forms (isolating language - base form only)
-    VERB_VI_BASE = "verb/vi_base"
 
     # Generic forms
     BASE_FORM = "base_form"
