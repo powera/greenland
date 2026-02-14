@@ -56,6 +56,7 @@ from barsukas.routes import (
     sentences,
     settings,
     sync_derivative_release,
+    sync_hub,
     sync_relation_release,
     sync_release,
     sync_sentence_release,
@@ -172,6 +173,7 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     app.register_blueprint(pattern_sentences.bp)
     app.register_blueprint(peleda.bp)
     app.register_blueprint(pradzia.bp)
+    app.register_blueprint(sync_hub.bp)
     app.register_blueprint(sync_release.bp)
     app.register_blueprint(sync_relation_release.bp)
     app.register_blueprint(sync_sentence_release.bp)

@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-bp = Blueprint("sync_release", __name__, url_prefix="/sync")
+bp = Blueprint("sync_release", __name__, url_prefix="/sync/lemmas")
 
 # Default path to data/release/lemmas
 # __file__ is src/barsukas/routes/sync_release.py
@@ -1263,9 +1263,31 @@ def _find_secondary_translation_differences(
     Only considers lemmas where GUID exists in both release and DB
     and lemma_text matches.
     """
+    return _find_secondary_translation_differences_filtered(
+        release_lemmas, secondary_translations, db_session, SECONDARY_RELEASE_LANGUAGES
+    )
+
+
+def _find_secondary_translation_differences_filtered(
+    release_lemmas: Dict[str, Dict[str, Any]],
+    secondary_translations: Dict[str, Dict[str, str]],
+    db_session: Any,
+    lang_codes_to_check: List[str],
+) -> List[Dict[str, Any]]:
+    """Find lemmas where secondary translations differ, checking only specified languages.
+
+    Args:
+        release_lemmas: Dictionary of release lemma data by GUID
+        secondary_translations: Dictionary of secondary translations by GUID
+        db_session: Database session
+        lang_codes_to_check: List of language codes to check for differences
+
+    Returns:
+        List of differences found
+    """
     differences: List[Dict[str, Any]] = []
 
-    if not SECONDARY_RELEASE_LANGUAGES:
+    if not lang_codes_to_check:
         return differences
 
     # We compare for all GUIDs in the base release (the canonical set)
@@ -1308,7 +1330,7 @@ def _find_secondary_translation_differences(
             db_trans = db_translations.get(db_lemma.id, {})
 
             lang_diffs: List[Dict[str, Any]] = []
-            for lang_code in SECONDARY_RELEASE_LANGUAGES:
+            for lang_code in lang_codes_to_check:
                 release_val = (sec_trans.get(lang_code, "") or "").strip()
                 db_val = (db_trans.get(lang_code, "") or "").strip()
 
@@ -1348,9 +1370,21 @@ def _count_secondary_translation_differences(
     db_session: Any,
 ) -> int:
     """Count lemmas with secondary translation differences."""
+    return _count_secondary_translation_differences_filtered(
+        release_lemmas, secondary_translations, db_session, SECONDARY_RELEASE_LANGUAGES
+    )
+
+
+def _count_secondary_translation_differences_filtered(
+    release_lemmas: Dict[str, Dict[str, Any]],
+    secondary_translations: Dict[str, Dict[str, str]],
+    db_session: Any,
+    lang_codes_to_check: List[str],
+) -> int:
+    """Count lemmas with secondary translation differences for specified languages."""
     count = 0
 
-    if not SECONDARY_RELEASE_LANGUAGES:
+    if not lang_codes_to_check:
         return count
 
     release_guids = set(release_lemmas.keys())
@@ -1390,7 +1424,7 @@ def _count_secondary_translation_differences(
             sec_trans = secondary_translations.get(db_lemma.guid, {})
             db_trans = db_translations.get(db_lemma.id, {})
 
-            for lang_code in SECONDARY_RELEASE_LANGUAGES:
+            for lang_code in lang_codes_to_check:
                 release_val = (sec_trans.get(lang_code, "") or "").strip()
                 db_val = (db_trans.get(lang_code, "") or "").strip()
 
@@ -1403,7 +1437,24 @@ def _count_secondary_translation_differences(
 
 @bp.route("/secondary-translations")
 def secondary_translations() -> ResponseReturnValue:
-    """Display secondary translation differences between release and SQLite."""
+    """Display language selection page for secondary translations."""
+    return render_template(
+        "sync_release/secondary_translations_select.html",
+        secondary_languages=SECONDARY_RELEASE_LANGUAGES,
+        language_names=LANGUAGE_NAMES,
+    )
+
+
+@bp.route("/secondary-translations/view")
+def secondary_translations_view() -> ResponseReturnValue:
+    """Display secondary translation differences for selected languages."""
+    # Get selected languages from query params
+    selected_langs = request.args.getlist("lang")
+
+    if not selected_langs:
+        flash("No languages selected", "warning")
+        return redirect(url_for("sync_release.secondary_translations"))
+
     release_dir = _get_release_dir()
 
     if not release_dir.exists():
@@ -1416,13 +1467,18 @@ def secondary_translations() -> ResponseReturnValue:
         return redirect(url_for("sync_release.index"))
 
     sec_translations = _load_secondary_translations(release_dir)
-    differences = _find_secondary_translation_differences(release_lemmas, sec_translations, g.db)
+
+    # Filter differences to only include selected languages
+    differences = _find_secondary_translation_differences_filtered(
+        release_lemmas, sec_translations, g.db, selected_langs
+    )
 
     return render_template(
-        "sync_release/secondary_translations.html",
+        "sync_release/secondary_translations_detail.html",
         differences=differences,
         release_dir=str(release_dir),
         language_names=LANGUAGE_NAMES,
+        selected_languages=selected_langs,
     )
 
 

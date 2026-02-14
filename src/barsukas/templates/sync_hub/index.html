@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Sync Hub{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="bi bi-arrow-left-right"></i> Sync Hub</h2>
+            <p class="text-muted">
+                Synchronize data between release files (<code>data/release</code>) and the working database.
+                Choose a category below to view and sync specific types of data.
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Lemmas -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-book"></i> Lemmas
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Sync base lemma data including:
+                    </p>
+                    <ul class="small">
+                        <li>Additions & Removals</li>
+                        <li>Text Changes</li>
+                        <li>Difficulty Levels</li>
+                        <li>Primary Translations</li>
+                        <li>Secondary Translations</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('sync_release.index') }}" class="btn btn-primary w-100">
+                        <i class="bi bi-arrow-right"></i> Open Lemma Sync
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Derivative Forms -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-diagram-3"></i> Derivative Forms
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Sync conjugations, declensions, and other derived word forms across all languages.
+                    </p>
+                    <ul class="small">
+                        <li>Per-language forms</li>
+                        <li>Grammatical patterns</li>
+                        <li>Pronunciations (IPA)</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('sync_derivative_release.index') }}" class="btn btn-success w-100">
+                        <i class="bi bi-arrow-right"></i> Open Derivative Sync
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Relations -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <i class="bi bi-diagram-2"></i> Relations
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Sync semantic relationships between lemmas.
+                    </p>
+                    <ul class="small">
+                        <li>Synonyms & Antonyms</li>
+                        <li>Derivational groups</li>
+                        <li>Thematic categories</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('sync_relation_release.index') }}" class="btn btn-info w-100">
+                        <i class="bi bi-arrow-right"></i> Open Relation Sync
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sentences -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <i class="bi bi-chat-left-text"></i> Sentences
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Sync example sentences and their translations.
+                    </p>
+                    <ul class="small">
+                        <li>Additions & Removals</li>
+                        <li>Text Changes</li>
+                        <li>Difficulty Levels</li>
+                        <li>Translations</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('sync_sentence_release.index') }}" class="btn btn-warning w-100">
+                        <i class="bi bi-arrow-right"></i> Open Sentence Sync
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-info-circle"></i> About Sync Operations
+                </div>
+                <div class="card-body">
+                    <p>
+                        The sync system compares release files with the database to identify differences.
+                        You can choose which version to keep for each conflict, or skip items you're unsure about.
+                    </p>
+                    <p class="mb-0">
+                        <strong>Common workflows:</strong>
+                    </p>
+                    <ul>
+                        <li><strong>After editing release files:</strong> Use sync to import new entries and update changed data.</li>
+                        <li><strong>After database updates:</strong> Export changes back to release files to keep them current.</li>
+                        <li><strong>Quality assurance:</strong> Review differences to catch inconsistencies or errors.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
