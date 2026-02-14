@@ -35,15 +35,18 @@ LANG_NAMES: Dict[str, str] = {
     "fi": "Finnish",
     "fr": "French",
     "ga": "Irish",
+    "gu": "Gujarati",
     "ha": "Hausa",
     "hi": "Hindi",
     "hr": "Croatian",
     "hu": "Hungarian",
     "hy": "Armenian",
+    "id": "Indonesian",
     "ig": "Igbo",
     "it": "Italian",
     "ja": "Japanese",
     "ka": "Georgian",
+    "kk": "Kazakh",
     "km": "Khmer",
     "kn": "Kannada",
     "ko": "Korean",
@@ -51,11 +54,14 @@ LANG_NAMES: Dict[str, str] = {
     "lt": "Lithuanian",
     "lv": "Latvian",
     "ml": "Malayalam",
+    "mr": "Marathi",
     "ms": "Malay",
     "mt": "Maltese",
     "my": "Burmese",
     "nl": "Dutch",
     "om": "Oromo",
+    "or": "Odia",
+    "pa": "Punjabi",
     "pl": "Polish",
     "ps": "Pashto",
     "pt": "Portuguese",
@@ -73,6 +79,8 @@ LANG_NAMES: Dict[str, str] = {
     "tl": "Filipino",
     "tr": "Turkish",
     "uk": "Ukrainian",
+    "ur": "Urdu",
+    "uz": "Uzbek",
     "vi": "Vietnamese",
     "xh": "Xhosa",
     "yo": "Yoruba",
@@ -190,8 +198,7 @@ FORM_SPECS: Dict[Tuple[str, str], LanguageFormSpec] = {}
 
 # ===== Pattern A: singular/plural nouns + 6-person verbs =====
 # Standard languages with singular/plural nouns and 6-person x 3-tense verbs.
-_PATTERN_A_LANGS: List[Tuple[str, str]] = [
-]
+_PATTERN_A_LANGS: List[Tuple[str, str]] = []
 
 for _lc, _ln in _PATTERN_A_LANGS:
     FORM_SPECS[(_lc, "noun")] = _make_singular_plural_noun_spec(_lc, _ln)
@@ -202,12 +209,20 @@ for _lc, _ln in _PATTERN_A_LANGS:
 _PATTERN_B_LANGS: List[Tuple[str, str]] = [
     ("az", "Azerbaijani"),
     ("fa", "Persian"),
+    ("gu", "Gujarati"),
     ("hy", "Armenian"),
+    ("id", "Indonesian"),
     ("ka", "Georgian"),
+    ("kk", "Kazakh"),
+    ("mr", "Marathi"),
     ("ms", "Malay"),
+    ("or", "Odia"),
+    ("pa", "Punjabi"),
     ("ps", "Pashto"),
     ("tl", "Filipino"),
     ("tr", "Turkish"),
+    ("ur", "Urdu"),
+    ("uz", "Uzbek"),
 ]
 
 for _lc, _ln in _PATTERN_B_LANGS:
