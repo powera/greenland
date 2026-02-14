@@ -191,17 +191,6 @@ FORM_SPECS: Dict[Tuple[str, str], LanguageFormSpec] = {}
 # ===== Pattern A: singular/plural nouns + 6-person verbs =====
 # Standard languages with singular/plural nouns and 6-person x 3-tense verbs.
 _PATTERN_A_LANGS: List[Tuple[str, str]] = [
-    ("fi", "Finnish"),
-    ("bg", "Bulgarian"),
-    ("cs", "Czech"),
-    ("da", "Danish"),
-    ("el", "Greek"),
-    ("ga", "Irish"),
-    ("hr", "Croatian"),
-    ("hu", "Hungarian"),
-    ("mt", "Maltese"),
-    ("sk", "Slovak"),
-    ("sl", "Slovenian"),
 ]
 
 for _lc, _ln in _PATTERN_A_LANGS:

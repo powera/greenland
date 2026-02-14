@@ -1,0 +1,40 @@
+"""Slovenian grammatical structure — single source of truth.
+
+Used by form_patterns.py to auto-generate enum members, form_registry entries,
+and task configurations.
+"""
+
+from typing import Any, Dict, List
+
+LANGUAGE_CODE = "sl"
+LANGUAGE_NAME = "Slovenian"
+
+CASES: List[str] = [
+    "nominative",
+    "genitive",
+    "dative",
+    "accusative",
+    "locative",
+    "instrumental",
+]
+
+NOUN_CONFIG: Dict[str, Any] = {
+    "type": "singular_plural",
+    "query_type": "slovenian_noun_forms",
+    "schema_name": "SlovenianNounForms",
+}
+
+VERB_CONFIG: Dict[str, Any] = {
+    "type": "person_tense",
+    "persons": ["1s", "2s", "3s", "1p", "2p", "3p"],
+    "tenses": ["present", "past", "future"],
+    "query_type": "slovenian_verb_conjugations",
+    "schema_name": "SlovenianVerbConjugations",
+}
+
+ADJECTIVE_CONFIG: Dict[str, Any] = {
+    "type": "explicit",
+    "forms": ["singular_m", "singular_f", "plural_m", "plural_f"],
+    "query_type": "slovenian_adjective_forms",
+    "schema_name": "SlovenianAdjectiveForms",
+}
