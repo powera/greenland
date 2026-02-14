@@ -26,6 +26,7 @@ from clients.batch_queue import (
     create_batch_database_session,
 )
 from clients.openai.batch_client import OpenAIBatchClient
+from clients.translategemma_client import TranslateGemmaClient
 from agents.common.common_args import (
     add_backend_args,
     add_common_args,
@@ -218,6 +219,178 @@ class ZvirblisAgent:
         finally:
             session.close()
 
+    def translate_sentences_simple(
+        self,
+        lemma: Lemma,
+        target_languages: List[str],
+        limit: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Translate sentences using TranslateGemma (simple text-only translations).
+
+        This method provides fast, simple translations without word-by-word breakdown.
+        It's suitable for basic sentence translation when detailed linguistic analysis
+        isn't needed.
+
+        Args:
+            lemma: Lemma to find sentences for
+            target_languages: Languages to translate to (e.g., ["fr", "de", "es"])
+            limit: Maximum number of sentences to translate
+
+        Returns:
+            Dictionary with translation results
+        """
+        session = self.get_session()
+        try:
+            required_languages = set(target_languages)
+            if "en" not in required_languages:
+                required_languages.add("en")
+
+            # Find sentences linked via SentenceWord OR SentencePatternWord
+            sentence_word_ids = (
+                session.query(SentenceWord.sentence_id)
+                .filter(SentenceWord.lemma_id == lemma.id)
+                .distinct()
+            )
+            pattern_word_ids = (
+                session.query(SentencePatternWord.sentence_id)
+                .filter(SentencePatternWord.lemma_id == lemma.id)
+                .distinct()
+            )
+
+            sentence_query = (
+                session.query(Sentence)
+                .filter((Sentence.id.in_(sentence_word_ids)) | (Sentence.id.in_(pattern_word_ids)))
+                .order_by(Sentence.id)
+            )
+
+            sentences = sentence_query.all()
+            if not sentences:
+                logger.warning("No sentences found linked to lemma %s", lemma.guid)
+                return {"success": False, "translated": 0, "errors": ["No sentences found"]}
+
+            already_complete = 0
+            for sentence in sentences:
+                existing_languages = self._get_sentence_languages(session, sentence.id)
+                if required_languages.issubset(existing_languages):
+                    already_complete += 1
+
+            if limit is not None and already_complete >= limit:
+                logger.info(
+                    "Already have %s sentences translated for %s; limit is %s",
+                    already_complete,
+                    lemma.guid,
+                    limit,
+                )
+                return {
+                    "success": True,
+                    "translated": 0,
+                    "already_translated": already_complete,
+                    "errors": [],
+                }
+
+            needed = None if limit is None else max(0, limit - already_complete)
+            translated_sentences = 0
+            translations_added = 0
+            errors = []
+
+            # Create TranslateGemma client (uses default Ollama backend)
+            translategemma = TranslateGemmaClient(debug=self.debug)
+
+            for sentence in sentences:
+                if needed is not None and translated_sentences >= needed:
+                    break
+
+                existing_languages = self._get_sentence_languages(session, sentence.id)
+                if required_languages.issubset(existing_languages):
+                    continue
+
+                # Get English source text
+                en_translation = (
+                    session.query(SentenceTranslation.translation_text)
+                    .filter(
+                        SentenceTranslation.sentence_id == sentence.id,
+                        SentenceTranslation.language_code == "en",
+                    )
+                    .scalar()
+                )
+
+                if not en_translation:
+                    logger.warning(
+                        "Sentence %s has no English source; skipping translation",
+                        sentence.id,
+                    )
+                    continue
+
+                # Translate to each target language
+                for lang in target_languages:
+                    if lang in existing_languages or lang == "en":
+                        continue
+
+                    try:
+                        response = translategemma.generate_translation(
+                            text=en_translation,
+                            source_lang="en",
+                            target_lang=lang,
+                        )
+
+                        if not response.response_text:
+                            logger.error(
+                                "Empty translation for sentence %s to %s",
+                                sentence.id,
+                                lang,
+                            )
+                            errors.append(f"Empty translation for sentence {sentence.id} to {lang}")
+                            continue
+
+                        # Store translation
+                        new_translation = SentenceTranslation(
+                            sentence_id=sentence.id,
+                            language_code=lang,
+                            translation_text=response.response_text,
+                            verified=False,
+                        )
+                        session.add(new_translation)
+                        translations_added += 1
+
+                        logger.info(
+                            "Translated sentence %s to %s: %s",
+                            sentence.id,
+                            lang,
+                            response.response_text,
+                        )
+
+                    except Exception as e:
+                        logger.error(
+                            "Failed to translate sentence %s to %s: %s",
+                            sentence.id,
+                            lang,
+                            e,
+                        )
+                        errors.append(f"Failed to translate sentence {sentence.id} to {lang}: {e}")
+
+                session.flush()
+
+                updated_languages = self._get_sentence_languages(session, sentence.id)
+                if required_languages.issubset(updated_languages):
+                    translated_sentences += 1
+
+            if translations_added:
+                session.commit()
+
+            return {
+                "success": True,
+                "translated": translated_sentences,
+                "translations_added": translations_added,
+                "already_translated": already_complete,
+                "errors": errors,
+            }
+
+        except Exception as e:
+            logger.error("Error translating sentences for %s: %s", lemma.guid, e, exc_info=True)
+            return {"success": False, "translated": 0, "errors": [str(e)]}
+        finally:
+            session.close()
+
     def submit_batch_translation(
         self,
         target_languages: List[str],
@@ -377,6 +550,21 @@ def get_argument_parser() -> argparse.ArgumentParser:
         ),
     )
 
+    parser.add_argument(
+        "--use-translategemma",
+        action="store_true",
+        help=(
+            "Use TranslateGemma for simple text-only translations (faster, cheaper, "
+            "but no word-by-word breakdown). Default uses GPT-5 with full linguistic analysis."
+        ),
+    )
+
+    parser.add_argument(
+        "--level",
+        type=int,
+        help="Translate sentences for all lemmas at this difficulty level (instead of single GUID)",
+    )
+
     subparsers = parser.add_subparsers(dest="command", help="Batch translation commands")
 
     submit_parser = subparsers.add_parser(
@@ -387,8 +575,30 @@ def get_argument_parser() -> argparse.ArgumentParser:
         "--languages",
         nargs="+",
         required=True,
-        choices=["lt", "zh", "ko", "fr", "de", "es", "pt", "sw", "vi", "ja", "it", "nl", "sv"],
-        help="Target languages to translate to",
+        choices=[
+            "lt",
+            "zh",
+            "ko",
+            "fr",
+            "de",
+            "es",
+            "pt",
+            "sw",
+            "vi",
+            "ja",
+            "it",
+            "nl",
+            "sv",
+            "ro",
+            "pl",
+            "th",
+            "ta",
+            "kn",
+            "uk",
+            "bn",
+            "hi",
+        ],
+        help="Target languages to translate to (primary + secondary languages)",
     )
     submit_parser.add_argument("--limit", type=int, help="Max sentences to translate")
     submit_parser.add_argument("--pattern-id", help="Only translate sentences from this pattern")
@@ -444,37 +654,109 @@ def main() -> int:
         logger.warning("No batch submitted (no untranslated sentences found)")
         return 0
 
-    if not args.guid:
-        logger.error("--guid is required to translate sentences")
+    # Either --guid or --level must be provided
+    if not args.guid and not args.level:
+        logger.error("Either --guid or --level is required to translate sentences")
+        return 1
+
+    if args.guid and args.level:
+        logger.error("Cannot specify both --guid and --level (use one or the other)")
         return 1
 
     session = agent.get_session()
-    try:
-        lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
-    finally:
+
+    # Get lemmas to process
+    if args.level:
+        # Get all lemmas at this difficulty level
+        lemmas = (
+            session.query(Lemma)
+            .filter(Lemma.difficulty_level == args.level)
+            .order_by(Lemma.guid)
+            .all()
+        )
         session.close()
 
-    if not lemma:
-        logger.error("Lemma %s not found", args.guid)
-        return 1
+        if not lemmas:
+            logger.error("No lemmas found at difficulty level %s", args.level)
+            return 1
 
-    result = agent.translate_sentences_for_lemma(
-        lemma=lemma,
-        target_languages=args.languages,
-        limit=args.translation_limit,
-    )
+        logger.info("Found %s lemmas at level %s", len(lemmas), args.level)
 
-    if result.get("success"):
-        logger.info(
-            "Added translations for %s sentence(s); newly completed=%s, already complete=%s",
-            result.get("translations_added", 0),
-            result.get("translated", 0),
-            result.get("already_translated", 0),
-        )
+        total_translated = 0
+        total_added = 0
+        total_errors = []
+
+        for i, lemma in enumerate(lemmas, 1):
+            logger.info("Processing lemma %s/%s: %s", i, len(lemmas), lemma.guid)
+
+            # Choose translation method based on --use-translategemma flag
+            if args.use_translategemma:
+                result = agent.translate_sentences_simple(
+                    lemma=lemma,
+                    target_languages=args.languages,
+                    limit=args.translation_limit,
+                )
+            else:
+                result = agent.translate_sentences_for_lemma(
+                    lemma=lemma,
+                    target_languages=args.languages,
+                    limit=args.translation_limit,
+                )
+
+            if result.get("success"):
+                total_translated += result.get("translated", 0)
+                total_added += result.get("translations_added", 0)
+            else:
+                total_errors.extend(result.get("errors", []))
+
+        logger.info("=" * 80)
+        logger.info("LEVEL %s TRANSLATION COMPLETE", args.level)
+        logger.info("Processed %s lemmas", len(lemmas))
+        logger.info("Newly completed sentences: %s", total_translated)
+        logger.info("Total translations added: %s", total_added)
+        if total_errors:
+            logger.warning("Errors encountered: %s", len(total_errors))
+        logger.info("=" * 80)
         return 0
 
-    logger.error("Translation failed: %s", result.get("errors"))
-    return 1
+    else:
+        # Single GUID mode
+        try:
+            lemma = session.query(Lemma).filter(Lemma.guid == args.guid).first()
+        finally:
+            session.close()
+
+        if not lemma:
+            logger.error("Lemma %s not found", args.guid)
+            return 1
+
+        # Choose translation method based on --use-translategemma flag
+        if args.use_translategemma:
+            logger.info("Using TranslateGemma for simple text-only translations")
+            result = agent.translate_sentences_simple(
+                lemma=lemma,
+                target_languages=args.languages,
+                limit=args.translation_limit,
+            )
+        else:
+            logger.info("Using GPT-5 for translations with word-by-word breakdown")
+            result = agent.translate_sentences_for_lemma(
+                lemma=lemma,
+                target_languages=args.languages,
+                limit=args.translation_limit,
+            )
+
+        if result.get("success"):
+            logger.info(
+                "Added translations for %s sentence(s); newly completed=%s, already complete=%s",
+                result.get("translations_added", 0),
+                result.get("translated", 0),
+                result.get("already_translated", 0),
+            )
+            return 0
+
+        logger.error("Translation failed: %s", result.get("errors"))
+        return 1
 
 
 if __name__ == "__main__":
