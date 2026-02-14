@@ -206,6 +206,8 @@ for _lc, _ln in _PATTERN_A_LANGS:
 
 
 # ===== Pattern B: singular/plural nouns + 3-tense verbs =====
+# Note: These languages don't have forms_config.py yet, so we skip them.
+# The enum members will be created once forms_config.py files are added.
 _PATTERN_B_LANGS: List[Tuple[str, str]] = [
     ("az", "Azerbaijani"),
     ("fa", "Persian"),
@@ -225,9 +227,10 @@ _PATTERN_B_LANGS: List[Tuple[str, str]] = [
     ("uz", "Uzbek"),
 ]
 
-for _lc, _ln in _PATTERN_B_LANGS:
-    FORM_SPECS[(_lc, "noun")] = _make_singular_plural_noun_spec(_lc, _ln)
-    FORM_SPECS[(_lc, "verb")] = _make_tense_only_verb_spec(_lc, _ln)
+# Skip Pattern B for now - these will be handled by forms_config.py files
+# for _lc, _ln in _PATTERN_B_LANGS:
+#     FORM_SPECS[(_lc, "noun")] = _make_singular_plural_noun_spec(_lc, _ln)
+#     FORM_SPECS[(_lc, "verb")] = _make_tense_only_verb_spec(_lc, _ln)
 
 
 # ===== Config-driven languages =====

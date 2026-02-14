@@ -9,7 +9,8 @@ from typing import Dict, List, Optional, Tuple
 
 import pydantic
 
-from clients import ollama_client, openai_client, unified_client
+from clients import ollama_client, unified_client
+from clients.openai import client as openai_client
 from benchmarks.lib.utils.data_models import BenchmarkQuestion
 
 # Configure logging
