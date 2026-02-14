@@ -174,7 +174,7 @@ def _compute_base_form(spec_fields: List[str]) -> str:
         "1s_present",
         "present",
         "polite_present",
-        "masu_form",
+        "masu",
         "positive",
     ]:
         if candidate in spec_fields:

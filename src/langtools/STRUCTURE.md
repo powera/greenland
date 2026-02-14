@@ -13,18 +13,8 @@ langtools/
 ├── README.md                # Plain-English overview (what the tools do)
 ├── STRUCTURE.md             # This file (architecture reference)
 │
-├── CJK modules (self-contained, no cross-dependencies)
-│   ├── zh/                  # Chinese
-│   │   ├── pinyin_helper.py   # Pinyin transliteration and ruby HTML
-│   │   └── converter.py       # Traditional/Simplified character conversion
-│   ├── ja/                  # Japanese
-│   │   ├── romaji_helper.py   # Romaji/hiragana conversion and ruby HTML
-│   │   └── gojuon.py          # Gojuon (五十音) syllabary ordering tables
-│   └── ko/                  # Korean
-│       └── hangul_helper.py   # Hangul syllable decomposition into jamo
-│
 ├── Full-stack Western European modules
-│   │  (all have: types, utils, wiktionary parser, LLM forms, CLI scripts)
+│   │  (all have: types, utils, wiktionary parser, LLM forms)
 │   ├── en/                  # English
 │   ├── de/                  # German
 │   ├── es/                  # Spanish
@@ -32,9 +22,31 @@ langtools/
 │   └── lt/                  # Lithuanian
 │
 ├── Config-driven modules (forms_config.py as single source of truth)
-│   │  (forms_config + types + llm_forms shim + generate scripts)
+│   │  (forms_config + types + llm_forms shim)
 │   ├── lv/                  # Latvian   (7-case nouns, 6-person verbs, adjectives, adverbs)
-│   └── uk/                  # Ukrainian (7-case nouns, 6-person verbs, adjectives, adverbs)
+│   ├── uk/                  # Ukrainian (7-case nouns, 6-person verbs, adjectives, adverbs)
+│   ├── bn/                  # Bengali   (4-case nouns, 5-person verbs, adjectives)
+│   ├── kn/                  # Kannada   (8-case nouns, 6-person verbs, adjectives, adverbs)
+│   ├── ta/                  # Tamil     (singular/plural nouns, 6-person verbs)
+│   ├── te/                  # Telugu    (singular/plural nouns, 6-person verbs)
+│   ├── ml/                  # Malayalam (singular/plural nouns, 6-person verbs)
+│   ├── si/                  # Sinhala   (singular/plural nouns, 6-person verbs)
+│   ├── hi/                  # Hindi     (singular/plural nouns, tense-only verbs)
+│   ├── my/                  # Burmese   (singular/plural nouns, tense-only verbs)
+│   ├── km/                  # Khmer     (singular/plural nouns, tense-only verbs)
+│   ├── lo/                  # Lao       (singular/plural nouns, tense-only verbs)
+│   ├── zh/                  # Chinese   (base-only nouns, explicit verb aspects)
+│   ├── ja/                  # Japanese  (base-only nouns, explicit verb forms)
+│   ├── ko/                  # Korean    (base-only nouns, explicit polite verbs)
+│   ├── th/                  # Thai      (singular/plural nouns, tense-only verbs)
+│   └── vi/                  # Vietnamese (base-only nouns, base-only verbs)
+│
+├── CJK helper modules (script-specific, alongside forms_config)
+│   ├── zh/pinyin_helper.py    # Pinyin transliteration and ruby HTML
+│   ├── zh/converter.py        # Traditional/Simplified character conversion
+│   ├── ja/romaji_helper.py    # Romaji/hiragana conversion and ruby HTML
+│   ├── ja/gojuon.py           # Gojuon (五十音) syllabary ordering tables
+│   └── ko/hangul_helper.py    # Hangul syllable decomposition into jamo
 │
 ├── Partial Western European modules
 │   │  (types and LLM forms only; no Wiktionary parser)
@@ -43,18 +55,10 @@ langtools/
 │   ├── pt/                  # Portuguese (types + llm_forms + generate scripts)
 │   └── sv/                  # Swedish   (types + llm_forms)
 │
-├── Partial Eastern European modules
-│   │  (types and LLM forms only; no Wiktionary parser)
-│   ├── ro/                  # Romanian  (types + llm_forms)
-│   └── pl/                  # Polish    (types + llm_forms)
-│
-└── South Asian modules
+└── Partial Eastern European modules
     │  (types and LLM forms only; no Wiktionary parser)
-    ├── ta/                  # Tamil     (types + llm_forms)
-    ├── te/                  # Telugu    (types + llm_forms)
-    ├── kn/                  # Kannada   (types + llm_forms)
-    ├── ml/                  # Malayalam (types + llm_forms)
-    └── si/                  # Sinhala   (types + llm_forms)
+    ├── ro/                  # Romanian  (types + llm_forms)
+    └── pl/                  # Polish    (types + llm_forms)
 ```
 
 ## File roles within a language module
@@ -160,31 +164,13 @@ LLM query schema.
 No edits to `enums.py`, `form_registry.py`, `generate_forms_tasks.py`,
 or `client.py` are needed.
 
-### generate_*.py -- CLI task wrappers
+### Form generation
 
-Thin scripts that delegate to the shared task registry in
-`wordfreq.translation.generate_forms_tasks`:
-
-```python
-TASK_KEY = "english_nouns"
-def main():
-    run_form_generation_task(TASK_KEY)
-```
-
-Run with: `PYTHONPATH=src python src/langtools/en/generate_noun_forms.py`
-
-Available scripts by language:
-
-| Language   | Nouns | Verbs | Adjectives | Adverbs |
-|------------|-------|-------|------------|---------|
-| English    | yes   | yes   | yes        | yes     |
-| German     | yes   | yes   | --         | --      |
-| Spanish    | yes   | yes   | --         | --      |
-| French     | yes   | yes   | --         | --      |
-| Lithuanian | yes   | yes   | yes        | yes     |
-| Latvian    | yes   | yes   | yes        | yes     |
-| Ukrainian  | yes   | yes   | yes        | yes     |
-| Portuguese | yes   | yes   | --         | --      |
+Form generation is handled centrally by
+`wordfreq.translation.generate_forms_tasks`, which auto-discovers all
+registered language/POS combinations from `FORM_SPECS`.  Use
+`run_form_generation_task(task_key)` with keys like `"english_nouns"`
+or `"german_verbs"`.  The full set of keys is in `FORM_GENERATION_TASKS`.
 
 ## dialect_overrides.py -- Dialect variant registry
 
@@ -275,7 +261,6 @@ ko/hangul_helper.py               (standalone, pure Unicode arithmetic)
 <lang>/utils.py                   (imports <lang>/types.py)
 <lang>/wiktionary.py              (imports <lang>/utils.py, clients.wiktionary)
 <lang>/llm_forms.py               (imports form_registry, llm_forms_base)
-<lang>/generate_*.py              (imports wordfreq.translation.generate_forms_tasks)
 
 form_registry.py                  (imports form_patterns, llm_forms_base, enums;
                                    auto-discovers <lang>/forms_config.py)
