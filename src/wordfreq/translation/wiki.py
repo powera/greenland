@@ -13,7 +13,14 @@ import unicodedata
 from typing import Dict, List, Optional, Tuple
 
 import requests  # type: ignore[import-untyped]
-from bs4 import BeautifulSoup  # type: ignore[import-not-found]
+
+try:
+    from bs4 import BeautifulSoup  # type: ignore[import-not-found]
+
+    BS4_AVAILABLE = True
+except ImportError:
+    BS4_AVAILABLE = False
+    BeautifulSoup = None  # type: ignore[assignment, misc]
 
 logger = logging.getLogger(__name__)
 
@@ -377,6 +384,11 @@ def extract_declension_from_html(html: str) -> Dict[str, str]:
     Returns:
         Dictionary mapping case names to forms
     """
+    if not BS4_AVAILABLE:
+        raise ImportError(
+            "BeautifulSoup4 (bs4) is required for parsing Wiktionary HTML tables. "
+            "Install it with: pip install beautifulsoup4"
+        )
     soup = BeautifulSoup(html, "html.parser")
 
     # Find the declension table - it typically has class "inflection-table"
