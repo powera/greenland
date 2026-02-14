@@ -4,7 +4,14 @@ import logging
 import re
 from typing import Dict, List, Optional, Tuple
 
-from bs4 import BeautifulSoup, Tag
+try:
+    from bs4 import BeautifulSoup, Tag  # type: ignore[import-not-found]
+
+    BS4_AVAILABLE = True
+except ImportError:
+    BS4_AVAILABLE = False
+    BeautifulSoup = None  # type: ignore[assignment, misc]
+    Tag = None  # type: ignore[assignment, misc]
 
 from clients.wiktionary import WiktionaryClient, extract_primary_form
 from clients.wiktionary.types import NounNumberType
@@ -171,6 +178,11 @@ class GermanParser:
         self, html: str
     ) -> Tuple[Dict[str, str], Dict[str, List[str]], NounNumberType]:
         """Parse a German noun declension HTML table."""
+        if not BS4_AVAILABLE:
+            raise ImportError(
+                "BeautifulSoup4 (bs4) is required for parsing Wiktionary HTML tables. "
+                "Install it with: pip install beautifulsoup4"
+            )
         soup = BeautifulSoup(html, "html.parser")
         forms: Dict[str, str] = {}
         alternatives: Dict[str, List[str]] = {}
@@ -311,6 +323,11 @@ class GermanParser:
 
     def _parse_verb_table(self, html: str) -> Tuple[Dict[str, str], Dict[str, List[str]]]:
         """Parse a German verb conjugation HTML table."""
+        if not BS4_AVAILABLE:
+            raise ImportError(
+                "BeautifulSoup4 (bs4) is required for parsing Wiktionary HTML tables. "
+                "Install it with: pip install beautifulsoup4"
+            )
         soup = BeautifulSoup(html, "html.parser")
         forms: Dict[str, str] = {}
         alternatives: Dict[str, List[str]] = {}
@@ -462,6 +479,11 @@ class GermanParser:
 
         Form names align with GrammaticalForm enum (singular_m, singular_f, etc.)
         """
+        if not BS4_AVAILABLE:
+            raise ImportError(
+                "BeautifulSoup4 (bs4) is required for parsing Wiktionary HTML tables. "
+                "Install it with: pip install beautifulsoup4"
+            )
         soup = BeautifulSoup(html, "html.parser")
         forms: Dict[str, str] = {}
         alternatives: Dict[str, List[str]] = {}
@@ -593,6 +615,11 @@ class GermanParser:
         self, html: str, wikitext: str, word: str
     ) -> Tuple[Dict[str, str], Dict[str, List[str]]]:
         """Parse adverb data from HTML and wikitext."""
+        if not BS4_AVAILABLE:
+            raise ImportError(
+                "BeautifulSoup4 (bs4) is required for parsing Wiktionary HTML tables. "
+                "Install it with: pip install beautifulsoup4"
+            )
         forms: Dict[str, str] = {}
         alternatives: Dict[str, List[str]] = {}
 

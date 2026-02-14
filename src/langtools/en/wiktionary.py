@@ -4,7 +4,14 @@ import logging
 import re
 from typing import Dict, List, Optional, Tuple
 
-from bs4 import BeautifulSoup, Tag
+try:
+    from bs4 import BeautifulSoup, Tag  # type: ignore[import-not-found]
+
+    BS4_AVAILABLE = True
+except ImportError:
+    BS4_AVAILABLE = False
+    BeautifulSoup = None  # type: ignore[assignment, misc]
+    Tag = None  # type: ignore[assignment, misc]
 
 from clients.wiktionary import WiktionaryClient, extract_primary_form
 from clients.wiktionary.types import NounNumberType
