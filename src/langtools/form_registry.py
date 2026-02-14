@@ -211,24 +211,14 @@ for _lc, _ln in _PATTERN_A_LANGS:
 
 # ===== Pattern B: singular/plural nouns + 3-tense verbs =====
 _PATTERN_B_LANGS: List[Tuple[str, str]] = [
-    ("sw", "Swahili"),
-    ("am", "Amharic"),
     ("az", "Azerbaijani"),
     ("fa", "Persian"),
-    ("ha", "Hausa"),
     ("hy", "Armenian"),
-    ("ig", "Igbo"),
     ("ka", "Georgian"),
     ("ms", "Malay"),
-    ("om", "Oromo"),
     ("ps", "Pashto"),
-    ("sn", "Shona"),
-    ("so", "Somali"),
     ("tl", "Filipino"),
     ("tr", "Turkish"),
-    ("xh", "Xhosa"),
-    ("yo", "Yoruba"),
-    ("zu", "Zulu"),
 ]
 
 for _lc, _ln in _PATTERN_B_LANGS:
