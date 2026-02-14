@@ -181,26 +181,6 @@ def _make_tense_only_verb_spec(lang_code: str, lang_name: str) -> LanguageFormSp
     )
 
 
-def _make_base_noun_spec(lang_code: str, lang_name: str) -> LanguageFormSpec:
-    """Create a LanguageFormSpec for a base-only noun (CJK / isolating)."""
-    upper = lang_code.upper()
-    lower_name = lang_name.lower()
-    form_mapping: Dict[str, GrammaticalForm] = {
-        "base": _gf(f"NOUN_{upper}_BASE"),
-    }
-    return LanguageFormSpec(
-        language_code=lang_code,
-        language_name=lang_name,
-        pos_type="noun",
-        form_mapping=form_mapping,
-        form_fields=["base"],
-        prompt_path=f"{lang_code}/noun",
-        query_type=f"{lower_name}_noun_forms",
-        schema_name=f"{lang_name}NounForms",
-        schema_description=f"{lang_name} noun forms",
-    )
-
-
 # ---------------------------------------------------------------------------
 # Build the complete FORM_SPECS dict
 # ---------------------------------------------------------------------------
@@ -220,12 +200,8 @@ _PATTERN_A_LANGS: List[Tuple[str, str]] = [
     ("hr", "Croatian"),
     ("hu", "Hungarian"),
     ("mt", "Maltese"),
-    ("si", "Sinhala"),
     ("sk", "Slovak"),
     ("sl", "Slovenian"),
-    ("ta", "Tamil"),
-    ("te", "Telugu"),
-    ("ml", "Malayalam"),
 ]
 
 for _lc, _ln in _PATTERN_A_LANGS:
@@ -235,16 +211,11 @@ for _lc, _ln in _PATTERN_A_LANGS:
 
 # ===== Pattern B: singular/plural nouns + 3-tense verbs =====
 _PATTERN_B_LANGS: List[Tuple[str, str]] = [
-    ("hi", "Hindi"),
-    ("bn", "Bengali"),
     ("az", "Azerbaijani"),
     ("fa", "Persian"),
     ("hy", "Armenian"),
     ("ka", "Georgian"),
-    ("km", "Khmer"),
-    ("lo", "Lao"),
     ("ms", "Malay"),
-    ("my", "Burmese"),
     ("ps", "Pashto"),
     ("tl", "Filipino"),
     ("tr", "Turkish"),
@@ -255,51 +226,9 @@ for _lc, _ln in _PATTERN_B_LANGS:
     FORM_SPECS[(_lc, "verb")] = _make_tense_only_verb_spec(_lc, _ln)
 
 
-# ===== Pattern C: CJK / isolating languages =====
-
-# --- Japanese ---
-FORM_SPECS[("ja", "noun")] = _make_base_noun_spec("ja", "Japanese")
-
-FORM_SPECS[("ja", "verb")] = LanguageFormSpec(
-    language_code="ja",
-    language_name="Japanese",
-    pos_type="verb",
-    form_mapping={
-        "masu_form": GrammaticalForm.VERB_JA_MASU,
-        "te_form": GrammaticalForm.VERB_JA_TE,
-        "ta_form": GrammaticalForm.VERB_JA_TA,
-        "nai_form": GrammaticalForm.VERB_JA_NAI,
-    },
-    form_fields=["masu_form", "te_form", "ta_form", "nai_form"],
-    prompt_path="ja/verb",
-    query_type="japanese_verb_conjugations",
-    schema_name="JapaneseVerbConjugations",
-    schema_description="Japanese verb conjugations",
-)
-
-# --- Korean ---
-FORM_SPECS[("ko", "noun")] = _make_base_noun_spec("ko", "Korean")
-
-FORM_SPECS[("ko", "verb")] = LanguageFormSpec(
-    language_code="ko",
-    language_name="Korean",
-    pos_type="verb",
-    form_mapping={
-        "polite_present": GrammaticalForm.VERB_KO_POLITE_PRESENT,
-        "polite_past": GrammaticalForm.VERB_KO_POLITE_PAST,
-        "polite_future": GrammaticalForm.VERB_KO_POLITE_FUTURE,
-    },
-    form_fields=["polite_present", "polite_past", "polite_future"],
-    prompt_path="ko/verb",
-    query_type="korean_verb_conjugations",
-    schema_name="KoreanVerbConjugations",
-    schema_description="Korean verb conjugations",
-)
-
-
-# ===== Special cases =====
-# --- Config-driven languages (including Latvian, Ukrainian, Polish, Thai, and others) ---
-# Auto-discovered below in _auto_register_from_forms_configs()
+# ===== Config-driven languages =====
+# All Asian languages, Latvian, Ukrainian, Polish, Thai, and others are
+# auto-discovered below from their langtools/*/forms_config.py files.
 
 
 # ---------------------------------------------------------------------------

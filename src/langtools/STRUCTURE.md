@@ -13,16 +13,6 @@ langtools/
 ├── README.md                # Plain-English overview (what the tools do)
 ├── STRUCTURE.md             # This file (architecture reference)
 │
-├── CJK modules (self-contained, no cross-dependencies)
-│   ├── zh/                  # Chinese
-│   │   ├── pinyin_helper.py   # Pinyin transliteration and ruby HTML
-│   │   └── converter.py       # Traditional/Simplified character conversion
-│   ├── ja/                  # Japanese
-│   │   ├── romaji_helper.py   # Romaji/hiragana conversion and ruby HTML
-│   │   └── gojuon.py          # Gojuon (五十音) syllabary ordering tables
-│   └── ko/                  # Korean
-│       └── hangul_helper.py   # Hangul syllable decomposition into jamo
-│
 ├── Full-stack Western European modules
 │   │  (all have: types, utils, wiktionary parser, LLM forms)
 │   ├── en/                  # English
@@ -34,7 +24,29 @@ langtools/
 ├── Config-driven modules (forms_config.py as single source of truth)
 │   │  (forms_config + types + llm_forms shim)
 │   ├── lv/                  # Latvian   (7-case nouns, 6-person verbs, adjectives, adverbs)
-│   └── uk/                  # Ukrainian (7-case nouns, 6-person verbs, adjectives, adverbs)
+│   ├── uk/                  # Ukrainian (7-case nouns, 6-person verbs, adjectives, adverbs)
+│   ├── bn/                  # Bengali   (4-case nouns, 5-person verbs, adjectives)
+│   ├── kn/                  # Kannada   (8-case nouns, 6-person verbs, adjectives, adverbs)
+│   ├── ta/                  # Tamil     (singular/plural nouns, 6-person verbs)
+│   ├── te/                  # Telugu    (singular/plural nouns, 6-person verbs)
+│   ├── ml/                  # Malayalam (singular/plural nouns, 6-person verbs)
+│   ├── si/                  # Sinhala   (singular/plural nouns, 6-person verbs)
+│   ├── hi/                  # Hindi     (singular/plural nouns, tense-only verbs)
+│   ├── my/                  # Burmese   (singular/plural nouns, tense-only verbs)
+│   ├── km/                  # Khmer     (singular/plural nouns, tense-only verbs)
+│   ├── lo/                  # Lao       (singular/plural nouns, tense-only verbs)
+│   ├── zh/                  # Chinese   (base-only nouns, explicit verb aspects)
+│   ├── ja/                  # Japanese  (base-only nouns, explicit verb forms)
+│   ├── ko/                  # Korean    (base-only nouns, explicit polite verbs)
+│   ├── th/                  # Thai      (singular/plural nouns, tense-only verbs)
+│   └── vi/                  # Vietnamese (base-only nouns, base-only verbs)
+│
+├── CJK helper modules (script-specific, alongside forms_config)
+│   ├── zh/pinyin_helper.py    # Pinyin transliteration and ruby HTML
+│   ├── zh/converter.py        # Traditional/Simplified character conversion
+│   ├── ja/romaji_helper.py    # Romaji/hiragana conversion and ruby HTML
+│   ├── ja/gojuon.py           # Gojuon (五十音) syllabary ordering tables
+│   └── ko/hangul_helper.py    # Hangul syllable decomposition into jamo
 │
 ├── Partial Western European modules
 │   │  (types and LLM forms only; no Wiktionary parser)
@@ -43,18 +55,10 @@ langtools/
 │   ├── pt/                  # Portuguese (types + llm_forms + generate scripts)
 │   └── sv/                  # Swedish   (types + llm_forms)
 │
-├── Partial Eastern European modules
-│   │  (types and LLM forms only; no Wiktionary parser)
-│   ├── ro/                  # Romanian  (types + llm_forms)
-│   └── pl/                  # Polish    (types + llm_forms)
-│
-└── South Asian modules
+└── Partial Eastern European modules
     │  (types and LLM forms only; no Wiktionary parser)
-    ├── ta/                  # Tamil     (types + llm_forms)
-    ├── te/                  # Telugu    (types + llm_forms)
-    ├── kn/                  # Kannada   (types + llm_forms)
-    ├── ml/                  # Malayalam (types + llm_forms)
-    └── si/                  # Sinhala   (types + llm_forms)
+    ├── ro/                  # Romanian  (types + llm_forms)
+    └── pl/                  # Polish    (types + llm_forms)
 ```
 
 ## File roles within a language module
