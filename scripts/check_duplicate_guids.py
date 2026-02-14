@@ -19,8 +19,16 @@ def main() -> int:
         print(f"ERROR: directory not found: {data_dir}", file=sys.stderr)
         return 1
 
+    # A GUID may appear in both base.jsonl and secondary.jsonl within the same
+    # directory (one entry each).  That is expected, not a duplicate.
+    # We flag a GUID as duplicate only when it appears in files that are NOT a
+    # base/secondary pair in the same directory, or more than once in any file.
+
     # guid -> list of (file, line_number)
     seen: dict[str, list[tuple[str, int]]] = {}
+
+    # Files whose stem is "base" or "secondary" form companion pairs.
+    COMPANION_STEMS = {"base", "secondary"}
 
     for jsonl_path in sorted(data_dir.rglob("*.jsonl")):
         with open(jsonl_path, encoding="utf-8") as fh:
@@ -42,7 +50,21 @@ def main() -> int:
                 location = (str(jsonl_path), line_num)
                 seen.setdefault(guid, []).append(location)
 
-    duplicates = {guid: locs for guid, locs in seen.items() if len(locs) > 1}
+    def _is_companion_pair(locs: list[tuple[str, int]]) -> bool:
+        """Return True if locs are exactly a base/secondary pair in one dir."""
+        if len(locs) != 2:
+            return False
+        paths = [Path(loc[0]) for loc in locs]
+        if paths[0].parent != paths[1].parent:
+            return False
+        stems = {p.stem for p in paths}
+        return stems == COMPANION_STEMS
+
+    duplicates = {
+        guid: locs
+        for guid, locs in seen.items()
+        if len(locs) > 1 and not _is_companion_pair(locs)
+    }
 
     if not duplicates:
         print(f"OK: {len(seen)} unique GUIDs, no duplicates.")
