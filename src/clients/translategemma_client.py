@@ -16,7 +16,6 @@ from typing import Any, Dict, Optional
 import requests
 from requests.exceptions import RequestException
 
-from clients.lmstudio_client import SERVER, PORT
 from clients.types import Response
 from storage.translation_helpers import LANGUAGE_NAMES
 from util.telemetry import LLMUsage
@@ -25,7 +24,19 @@ from util.telemetry import LLMUsage
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+# Backend configuration
+# - "ollama": Ollama API (localhost:11434, simple string format with strict prompting)
+# - "lmstudio": LMStudio API (remote server, structured format)
+BACKEND = "ollama"
+
+# Server configuration
+OLLAMA_SERVER = "100.118.20.30"  # Same host as LMStudio, running Ollama
+OLLAMA_PORT = 11434
+LMSTUDIO_SERVER = "100.118.20.30"
+LMSTUDIO_PORT = 9054
+
 DEFAULT_TIMEOUT = 250
+DEFAULT_MODEL = "translategemma:12b"  # Using 12b model instead of 4b
 
 
 class TranslateGemmaError(Exception):
@@ -51,16 +62,35 @@ class TranslateGemmaClient:
 
     def __init__(
         self,
-        server: str = SERVER,
-        port: int = PORT,
+        backend: str = BACKEND,
+        server: Optional[str] = None,
+        port: Optional[int] = None,
         timeout: int = DEFAULT_TIMEOUT,
         debug: bool = False,
+        model: str = DEFAULT_MODEL,
     ):
-        self.server = server
-        self.port = port
+        self.backend = backend
         self.timeout = timeout
-        self.base_url = f"http://{server}:{port}/v1"
         self.debug = debug
+        self.model = model
+
+        # Set server/port based on backend if not explicitly provided
+        if server is None:
+            self.server = OLLAMA_SERVER if backend == "ollama" else LMSTUDIO_SERVER
+        else:
+            self.server = server
+
+        if port is None:
+            self.port = OLLAMA_PORT if backend == "ollama" else LMSTUDIO_PORT
+        else:
+            self.port = port
+
+        # Set base URL based on backend
+        if backend == "ollama":
+            self.base_url = f"http://{self.server}:{self.port}/api"
+        else:  # lmstudio
+            self.base_url = f"http://{self.server}:{self.port}/v1"
+
         if self.debug:
             logger.setLevel(logging.DEBUG)
 
@@ -106,7 +136,6 @@ class TranslateGemmaClient:
         text: str,
         source_lang: str,
         target_lang: str,
-        model: str,
     ) -> Response:
         """Generate a translation using TranslateGemma's specific prompt format.
 
@@ -114,51 +143,85 @@ class TranslateGemmaClient:
             text: Text to translate
             source_lang: Source language code (e.g., 'en')
             target_lang: Target language code (e.g., 'fr')
-            model: Model identifier for LMStudio
 
         Returns:
             Response with translated text in response_text
         """
-        source_name = self._get_language_name(source_lang)
-        target_name = self._get_language_name(target_lang)
+        # Build message format based on backend
+        if self.backend == "ollama":
+            # Ollama: Detailed professional translator prompt
+            source_name = self._get_language_name(source_lang)
+            target_name = self._get_language_name(target_lang)
 
-        system_message = (
-            f"You are a professional translator from {source_name} to "
-            f"{target_name}. Provide only the translation without any explanation."
-        )
-        # TranslateGemma expects two blank lines before the text
-        user_message = f"\n\n{text}"
-
-        messages = [
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": user_message},
-        ]
+            user_message = (
+                f"You are a professional {source_name} ({source_lang}) to {target_name} ({target_lang}) translator. "
+                f"Your goal is to accurately convey the meaning and nuances of the original {source_name} text "
+                f"while adhering to {target_name} grammar, vocabulary, and cultural sensitivities. "
+                f"Produce only the {target_name} translation, without any additional explanations or commentary. "
+                f"Please translate the following {source_name} text into {target_name}:\n\n"
+                f"{text}"
+            )
+            messages = [
+                {"role": "user", "content": user_message},
+            ]
+        else:  # lmstudio
+            # LMStudio: Structured format with separate fields
+            # The content must be an array with one mapping containing:
+            # type, source_lang_code, target_lang_code, text, and image
+            messages = [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "source_lang_code": source_lang,
+                            "target_lang_code": target_lang,
+                            "text": text,
+                            "image": None,
+                        }
+                    ],
+                },
+            ]
 
         data: Dict[str, Any] = {
-            "model": model,
+            "model": self.model,
             "messages": messages,
             "stream": False,
         }
 
-        response = self._make_request("chat/completions", data)
+        # Use appropriate endpoint based on backend
+        endpoint = "chat" if self.backend == "ollama" else "chat/completions"
+        response = self._make_request(endpoint, data)
         response_data = response.json()
 
-        # Extract content from response
+        # Extract content based on backend response format
         content = ""
-        if "choices" in response_data and len(response_data["choices"]) > 0:
-            message = response_data["choices"][0].get("message", {})
-            content = message.get("content", "").strip()
+        if self.backend == "ollama":
+            # Ollama format: {"message": {"content": "..."}}
+            if "message" in response_data:
+                content = response_data["message"].get("content", "").strip()
+        else:  # lmstudio
+            # OpenAI/LMStudio format: {"choices": [{"message": {"content": "..."}}]}
+            if "choices" in response_data and len(response_data["choices"]) > 0:
+                message = response_data["choices"][0].get("message", {})
+                content = message.get("content", "").strip()
 
-        # Extract usage information
+        # Extract usage information based on backend
         usage: Optional[LLMUsage] = None
-        if "usage" in response_data:
-            usage_data = response_data["usage"]
-            converted_usage = {
-                "prompt_tokens": usage_data.get("prompt_tokens", 0),
-                "completion_tokens": usage_data.get("completion_tokens", 0),
-                "total_duration": response.elapsed.total_seconds() * 1000,
-            }
-            usage = LLMUsage.from_api_response(converted_usage, model=model)
+        if self.backend == "ollama":
+            # Ollama provides total_duration, prompt_eval_count, eval_count
+            if "total_duration" in response_data:
+                usage = LLMUsage.from_api_response(response_data, model=self.model)
+        else:  # lmstudio
+            # LMStudio provides usage object
+            if "usage" in response_data:
+                usage_data = response_data["usage"]
+                converted_usage = {
+                    "prompt_tokens": usage_data.get("prompt_tokens", 0),
+                    "completion_tokens": usage_data.get("completion_tokens", 0),
+                    "total_duration": response.elapsed.total_seconds() * 1000,
+                }
+                usage = LLMUsage.from_api_response(converted_usage, model=self.model)
 
         return Response(
             response_text=content,
@@ -169,12 +232,11 @@ class TranslateGemmaClient:
     def generate_chat(
         self,
         prompt: str,
-        model: str,
         brief: bool = False,
         json_schema: Optional[Any] = None,
         context: Optional[str] = None,
     ) -> Response:
-        """Generate a chat response for unified_client compatibility.
+        """Generate a chat response (translation only).
 
         TranslateGemma only supports translation, so this method extracts
         source/target language from the context string and treats the prompt
@@ -184,7 +246,6 @@ class TranslateGemmaClient:
 
         Args:
             prompt: Text to translate
-            model: Model identifier
             brief: Ignored (TranslateGemma responses are always brief)
             json_schema: Ignored (TranslateGemma doesn't support structured output)
             context: Expected to contain language pair info, e.g.,
@@ -205,7 +266,7 @@ class TranslateGemmaClient:
             if extracted:
                 source_lang, target_lang = extracted
 
-        return self.generate_translation(prompt, source_lang, target_lang, model)
+        return self.generate_translation(prompt, source_lang, target_lang)
 
     def _extract_language_pair(self, context: str) -> Optional[tuple[str, str]]:
         """Extract source and target language codes from a context string.
@@ -246,10 +307,10 @@ class TranslateGemmaClient:
 
         return None
 
-    def warm_model(self, model: str) -> bool:
+    def warm_model(self) -> bool:
         """Initialize model for faster first inference."""
         try:
-            data: Dict[str, Any] = {"model": model}
+            data: Dict[str, Any] = {"model": self.model}
             response = self._make_request("chat", data)
             return bool(response.status_code == 200)
         except TranslateGemmaError:
