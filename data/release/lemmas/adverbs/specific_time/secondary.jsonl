@@ -1,0 +1,7 @@
+{"guid": "D03_001", "translations": {"th": "วันนี้", "kn": "ಇಂದು", "uk": "сьогодні", "bn": "আজ", "ro": "astăzi", "pl": "dzisiaj", "ta": "இன்று", "hi": "आज"}}
+{"guid": "D03_002", "translations": {"th": "เมื่อวาน", "kn": "ನಿನ್ನೆ", "uk": "вчора", "bn": "গতকাল", "ro": "ieri", "pl": "wczoraj", "ta": "நேற்று", "hi": "कल"}}
+{"guid": "D03_003", "translations": {"th": "พรุ่งนี้", "kn": "ನಾಳೆ", "uk": "завтра", "bn": "কাল", "ro": "mâine", "pl": "jutro", "ta": "நாளை", "hi": "कल"}}
+{"guid": "D03_004", "translations": {"th": "คืนนี้", "kn": "ಇಂದು ರಾತ್ರಿ", "uk": "сьогодні ввечері", "bn": "আজ রাতে", "ro": "astăzi-noapte", "pl": "dziś wieczorem", "ta": "இன்று இரவு", "hi": "आज रात"}}
+{"guid": "D03_005", "translations": {"ro": "astăzi dimineață", "pl": "dzisiaj rano", "th": "เช้าวันนี้", "ta": "இன்று காலையில்", "kn": "ಈ ಬೆಳಗ್ಗೆ", "uk": "сьогодні вранці", "bn": "আজ সকালে", "hi": "आज सुबह"}}
+{"guid": "D03_006", "translations": {"ro": "astăzi după-amiază", "pl": "dzisiaj po południu", "th": "วันนี้ตอนบ่าย", "ta": "இன்று மதியம்", "kn": "ಇವತ್ತು ಮಧ್ಯಾಹ್ನ", "uk": "сьогодні вдень", "bn": "আজ দুপুরে", "hi": "आज दोपहर"}}
+{"guid": "D03_007", "translations": {"ro": "astăzi seara", "pl": "dzisiaj wieczorem", "th": "เย็นวันนี้", "ta": "இன்று மாலை", "kn": "ಇಂದು ಸಂಜೆ", "uk": "сьогодні ввечері", "bn": "আজ সন্ধ্যায়", "hi": "आज शाम"}}
