@@ -99,31 +99,21 @@
                             <i class="bi bi-arrow-left-right"></i> Sync
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark">
-                            <li><a class="dropdown-item" href="{{ url_for('sync_release.index') }}">
+                            <li><a class="dropdown-item" href="{{ url_for('sync_hub.index') }}">
                                 <i class="bi bi-house"></i> Sync Hub
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('sync_release.additions') }}">
-                                <i class="bi bi-plus-circle text-success"></i> Additions
+                            <li><a class="dropdown-item" href="{{ url_for('sync_release.index') }}">
+                                <i class="bi bi-book"></i> Lemmas
                             </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('sync_release.removals') }}">
-                                <i class="bi bi-dash-circle text-danger"></i> Removals
-                            </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('sync_release.difficulty') }}">
-                                <i class="bi bi-speedometer2 text-warning"></i> Difficulty
-                            </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('sync_release.changes') }}">
-                                <i class="bi bi-pencil text-info"></i> Text Changes
-                            </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('sync_release.translations') }}">
-                                <i class="bi bi-translate"></i> Translations
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('sync_sentence_release.index') }}">
-                                <i class="bi bi-chat-left-text"></i> Sentence Hub
+                            <li><a class="dropdown-item" href="{{ url_for('sync_derivative_release.index') }}">
+                                <i class="bi bi-diagram-3"></i> Derivative Forms
                             </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('sync_relation_release.index') }}">
-                                <i class="bi bi-diagram-3"></i> Relation Hub
+                                <i class="bi bi-diagram-2"></i> Relations
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('sync_sentence_release.index') }}">
+                                <i class="bi bi-chat-left-text"></i> Sentences
                             </a></li>
                         </ul>
                     </li>
