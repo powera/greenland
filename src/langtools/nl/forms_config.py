@@ -22,3 +22,11 @@ VERB_CONFIG: Dict[str, Any] = {
     "query_type": "dutch_verb_conjugations",
     "schema_name": "DutchVerbConjugations",
 }
+
+GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
+    "ADJ_NL_PLURAL_F": "adjective/nl_plural_f",
+    "ADJ_NL_PLURAL_M": "adjective/nl_plural_m",
+    "ADJ_NL_SINGULAR_F": "adjective/nl_singular_f",
+    "ADJ_NL_SINGULAR_M": "adjective/nl_singular_m",
+    "ADVERB_NL_BASE": "adverb/nl_base",
+}

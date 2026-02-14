@@ -212,22 +212,10 @@ class GrammaticalForm(enum.Enum):
 
     # English verb forms (person_tense)
     # Present tense
-    VERB_EN_3S_M_PRESENT = "verb/en_3s-m_present"  # "he eats"
-    VERB_EN_3S_F_PRESENT = "verb/en_3s-f_present"  # "she eats"
-    VERB_EN_3P_M_PRESENT = "verb/en_3p-m_present"  # "they(m.) eat"
-    VERB_EN_3P_F_PRESENT = "verb/en_3p-f_present"  # "they(f.) eat"
 
     # Past tense
-    VERB_EN_3S_M_PAST = "verb/en_3s-m_past"  # "he ate"
-    VERB_EN_3S_F_PAST = "verb/en_3s-f_past"  # "she ate"
-    VERB_EN_3P_M_PAST = "verb/en_3p-m_past"  # "they(m.) ate"
-    VERB_EN_3P_F_PAST = "verb/en_3p-f_past"  # "they(f.) ate"
 
     # Future tense
-    VERB_EN_3S_M_FUTURE = "verb/en_3s-m_future"  # "he will eat"
-    VERB_EN_3S_F_FUTURE = "verb/en_3s-f_future"  # "she will eat"
-    VERB_EN_3P_M_FUTURE = "verb/en_3p-m_future"  # "they(m.) will eat"
-    VERB_EN_3P_F_FUTURE = "verb/en_3p-f_future"  # "they(f.) will eat"
 
     # Imperative
 
@@ -239,22 +227,10 @@ class GrammaticalForm(enum.Enum):
 
     # Lithuanian verb forms (person_tense with gender distinction)
     # Present tense
-    VERB_LT_3S_M_PRESENT = "verb/lt_3s-m_present"
-    VERB_LT_3S_F_PRESENT = "verb/lt_3s-f_present"
-    VERB_LT_3P_M_PRESENT = "verb/lt_3p-m_present"
-    VERB_LT_3P_F_PRESENT = "verb/lt_3p-f_present"
 
     # Past tense
-    VERB_LT_3S_M_PAST = "verb/lt_3s-m_past"
-    VERB_LT_3S_F_PAST = "verb/lt_3s-f_past"
-    VERB_LT_3P_M_PAST = "verb/lt_3p-m_past"
-    VERB_LT_3P_F_PAST = "verb/lt_3p-f_past"
 
     # Future tense
-    VERB_LT_3S_M_FUTURE = "verb/lt_3s-m_future"
-    VERB_LT_3S_F_FUTURE = "verb/lt_3s-f_future"
-    VERB_LT_3P_M_FUTURE = "verb/lt_3p-m_future"
-    VERB_LT_3P_F_FUTURE = "verb/lt_3p-f_future"
 
     # Noun forms (English)
     NOUN_SINGULAR = "noun/singular"
@@ -283,134 +259,56 @@ class GrammaticalForm(enum.Enum):
     # French noun forms (singular/plural only - each noun has a fixed gender)
 
     # French adjective forms (2 genders × 2 numbers = 4 forms)
-    ADJ_FR_SINGULAR_M = "adjective/fr_singular_m"
-    ADJ_FR_PLURAL_M = "adjective/fr_plural_m"
-    ADJ_FR_SINGULAR_F = "adjective/fr_singular_f"
-    ADJ_FR_PLURAL_F = "adjective/fr_plural_f"
 
     # French verb forms (8 persons × 4 tenses = 32 forms)
     # Present tense (présent de l'indicatif)
-    VERB_FR_3S_M_PRESENT = "verb/fr_3s-m_present"
-    VERB_FR_3S_F_PRESENT = "verb/fr_3s-f_present"
-    VERB_FR_3P_M_PRESENT = "verb/fr_3p-m_present"
-    VERB_FR_3P_F_PRESENT = "verb/fr_3p-f_present"
 
     # Imperfect (imparfait)
-    VERB_FR_3S_M_IMPF = "verb/fr_3s-m_impf"
-    VERB_FR_3S_F_IMPF = "verb/fr_3s-f_impf"
-    VERB_FR_3P_M_IMPF = "verb/fr_3p-m_impf"
-    VERB_FR_3P_F_IMPF = "verb/fr_3p-f_impf"
 
     # Future (futur simple)
-    VERB_FR_3S_M_FUTURE = "verb/fr_3s-m_future"
-    VERB_FR_3S_F_FUTURE = "verb/fr_3s-f_future"
-    VERB_FR_3P_M_FUTURE = "verb/fr_3p-m_future"
-    VERB_FR_3P_F_FUTURE = "verb/fr_3p-f_future"
 
     # Passé composé (compound past with auxiliary)
-    VERB_FR_1S_PC = "verb/fr_1s_pc"
-    VERB_FR_2S_PC = "verb/fr_2s_pc"
-    VERB_FR_3S_PC = "verb/fr_3s_pc"  # "est allé" (gender-neutral, but participle may vary)
-    VERB_FR_3S_M_PC = "verb/fr_3s-m_pc"
-    VERB_FR_3S_F_PC = "verb/fr_3s-f_pc"
-    VERB_FR_1P_PC = "verb/fr_1p_pc"
-    VERB_FR_2P_PC = "verb/fr_2p_pc"
-    VERB_FR_3P_PC = "verb/fr_3p_pc"  # "sont allés" (gender-neutral, but participle may vary)
-    VERB_FR_3P_M_PC = "verb/fr_3p-m_pc"
-    VERB_FR_3P_F_PC = "verb/fr_3p-f_pc"
 
     # Past participles (masculine and feminine forms)
 
     # Spanish noun forms (singular/plural only - each noun has a fixed gender)
 
     # Spanish adjective forms (2 genders × 2 numbers = 4 forms)
-    ADJ_ES_SINGULAR_M = "adjective/es_singular_m"
-    ADJ_ES_PLURAL_M = "adjective/es_plural_m"
-    ADJ_ES_SINGULAR_F = "adjective/es_singular_f"
-    ADJ_ES_PLURAL_F = "adjective/es_plural_f"
 
     # Spanish verb forms (8 persons × 3 tenses = 24 forms)
     # Present tense (presente de indicativo)
-    VERB_ES_3S_M_PRESENT = "verb/es_3s-m_present"
-    VERB_ES_3S_F_PRESENT = "verb/es_3s-f_present"
-    VERB_ES_3P_M_PRESENT = "verb/es_3p-m_present"
-    VERB_ES_3P_F_PRESENT = "verb/es_3p-f_present"
 
     # Preterite (pretérito perfecto simple - simple past)
-    VERB_ES_3S_M_PAST = "verb/es_3s-m_past"
-    VERB_ES_3S_F_PAST = "verb/es_3s-f_past"
-    VERB_ES_3P_M_PAST = "verb/es_3p-m_past"
-    VERB_ES_3P_F_PAST = "verb/es_3p-f_past"
 
     # Future (futuro simple)
-    VERB_ES_3S_M_FUTURE = "verb/es_3s-m_future"
-    VERB_ES_3S_F_FUTURE = "verb/es_3s-f_future"
-    VERB_ES_3P_M_FUTURE = "verb/es_3p-m_future"
-    VERB_ES_3P_F_FUTURE = "verb/es_3p-f_future"
 
     # German noun forms (4 cases × 2 numbers = 8 forms)
     # Singular
     # Plural
 
     # German adjective forms (2 genders × 2 numbers = 4 forms, simplified)
-    ADJ_DE_SINGULAR_M = "adjective/de_singular_m"
-    ADJ_DE_PLURAL_M = "adjective/de_plural_m"
-    ADJ_DE_SINGULAR_F = "adjective/de_singular_f"
-    ADJ_DE_PLURAL_F = "adjective/de_plural_f"
 
     # German verb forms (8 persons × 3 tenses = 24 forms)
     # Present tense (Präsens)
-    VERB_DE_3S_M_PRESENT = "verb/de_3s-m_present"
-    VERB_DE_3S_F_PRESENT = "verb/de_3s-f_present"
-    VERB_DE_3P_M_PRESENT = "verb/de_3p-m_present"
-    VERB_DE_3P_F_PRESENT = "verb/de_3p-f_present"
 
     # Perfect (Perfekt - compound past, most common in spoken German)
-    VERB_DE_3S_M_PAST = "verb/de_3s-m_past"
-    VERB_DE_3S_F_PAST = "verb/de_3s-f_past"
-    VERB_DE_3P_M_PAST = "verb/de_3p-m_past"
-    VERB_DE_3P_F_PAST = "verb/de_3p-f_past"
 
     # Future (Futur I)
-    VERB_DE_3S_M_FUTURE = "verb/de_3s-m_future"
-    VERB_DE_3S_F_FUTURE = "verb/de_3s-f_future"
-    VERB_DE_3P_M_FUTURE = "verb/de_3p-m_future"
-    VERB_DE_3P_F_FUTURE = "verb/de_3p-f_future"
 
     # Portuguese noun forms (singular/plural only - each noun has a fixed gender)
 
     # Portuguese adjective forms (2 genders × 2 numbers = 4 forms)
-    ADJ_PT_SINGULAR_M = "adjective/pt_singular_m"
-    ADJ_PT_PLURAL_M = "adjective/pt_plural_m"
-    ADJ_PT_SINGULAR_F = "adjective/pt_singular_f"
-    ADJ_PT_PLURAL_F = "adjective/pt_plural_f"
 
     # Portuguese verb forms (8 persons × 3 tenses = 24 forms)
     # Present tense (presente do indicativo)
-    VERB_PT_3S_M_PRESENT = "verb/pt_3s-m_present"
-    VERB_PT_3S_F_PRESENT = "verb/pt_3s-f_present"
-    VERB_PT_3P_M_PRESENT = "verb/pt_3p-m_present"
-    VERB_PT_3P_F_PRESENT = "verb/pt_3p-f_present"
 
     # Preterite (pretérito perfeito - simple past)
-    VERB_PT_3S_M_PAST = "verb/pt_3s-m_past"
-    VERB_PT_3S_F_PAST = "verb/pt_3s-f_past"
-    VERB_PT_3P_M_PAST = "verb/pt_3p-m_past"
-    VERB_PT_3P_F_PAST = "verb/pt_3p-f_past"
 
     # Future (futuro do presente)
-    VERB_PT_3S_M_FUTURE = "verb/pt_3s-m_future"
-    VERB_PT_3S_F_FUTURE = "verb/pt_3s-f_future"
-    VERB_PT_3P_M_FUTURE = "verb/pt_3p-m_future"
-    VERB_PT_3P_F_FUTURE = "verb/pt_3p-f_future"
 
     # Italian noun forms (singular/plural only - each noun has a fixed gender)
 
     # Italian adjective forms (2 genders × 2 numbers = 4 forms)
-    ADJ_IT_SINGULAR_M = "adjective/it_singular_m"
-    ADJ_IT_PLURAL_M = "adjective/it_plural_m"
-    ADJ_IT_SINGULAR_F = "adjective/it_singular_f"
-    ADJ_IT_PLURAL_F = "adjective/it_plural_f"
 
     # Italian verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (presente indicativo)
@@ -426,10 +324,6 @@ class GrammaticalForm(enum.Enum):
     # Dutch noun forms (singular/plural only - each noun has a fixed gender)
 
     # Dutch adjective forms (2 genders × 2 numbers = 4 forms)
-    ADJ_NL_SINGULAR_M = "adjective/nl_singular_m"
-    ADJ_NL_PLURAL_M = "adjective/nl_plural_m"
-    ADJ_NL_SINGULAR_F = "adjective/nl_singular_f"
-    ADJ_NL_PLURAL_F = "adjective/nl_plural_f"
 
     # Dutch verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (onvoltooid tegenwoordige tijd)
@@ -444,81 +338,22 @@ class GrammaticalForm(enum.Enum):
     ADVERB_SUPERLATIVE = "adverb/superlative"
 
     # Language-specific adverb base forms (invariant adverbs)
-    ADVERB_EN_BASE = "adverb/en_base"
-    ADVERB_LT_BASE = "adverb/lt_base"
-    ADVERB_FR_BASE = "adverb/fr_base"
-    ADVERB_DE_BASE = "adverb/de_base"
-    ADVERB_ES_BASE = "adverb/es_base"
-    ADVERB_PT_BASE = "adverb/pt_base"
-    ADVERB_IT_BASE = "adverb/it_base"
-    ADVERB_SV_BASE = "adverb/sv_base"
-    ADVERB_NL_BASE = "adverb/nl_base"
     ADVERB_KO_BASE = "adverb/ko_base"
-    ADVERB_ZH_BASE = "adverb/zh_base"
 
     # Pronoun forms - English, French, Spanish, Portuguese (function-based, simplified)
     # Word itself indicates person/number/gender; tag indicates grammatical function
-    PRONOUN_EN_SUBJECTIVE = "pronoun/en_subjective"  # I, you, he, she, we, they
-    PRONOUN_EN_OBJECTIVE = "pronoun/en_objective"  # me, you, him, her, us, them
-    PRONOUN_EN_POSSESSIVE = (
-        "pronoun/en_possessive"  # mine, yours, his, hers, ours, theirs (standalone)
-    )
-    PRONOUN_EN_REFLEXIVE = (
-        "pronoun/en_reflexive"  # myself, yourself, himself, herself, ourselves, themselves
-    )
 
-    PRONOUN_FR_SUBJECTIVE = "pronoun/fr_subjective"  # je, tu, il, elle, nous, vous, ils, elles
-    PRONOUN_FR_OBJECTIVE = "pronoun/fr_objective"  # me, te, le, la, nous, vous, les
-    PRONOUN_FR_POSSESSIVE = (
-        "pronoun/fr_possessive"  # le mien, le tien, le sien (standalone possessives)
-    )
-    PRONOUN_FR_REFLEXIVE = "pronoun/fr_reflexive"  # me, te, se, nous, vous, se
 
-    PRONOUN_ES_SUBJECTIVE = (
-        "pronoun/es_subjective"  # yo, tú, él, ella, nosotros, vosotros, ellos, ellas
-    )
-    PRONOUN_ES_OBJECTIVE = "pronoun/es_objective"  # me, te, lo, la, nos, os, los, las
-    PRONOUN_ES_POSSESSIVE = "pronoun/es_possessive"  # mío, tuyo, suyo (standalone possessives)
-    PRONOUN_ES_REFLEXIVE = "pronoun/es_reflexive"  # me, te, se, nos, os, se
 
-    PRONOUN_PT_SUBJECTIVE = "pronoun/pt_subjective"  # eu, tu, ele, ela, nós, vós, eles, elas
-    PRONOUN_PT_OBJECTIVE = "pronoun/pt_objective"  # me, te, o, a, nos, vos, os, as
-    PRONOUN_PT_POSSESSIVE = "pronoun/pt_possessive"  # meu, teu, seu (standalone possessives)
-    PRONOUN_PT_REFLEXIVE = "pronoun/pt_reflexive"  # me, te, se, nos, vos, se
 
     # Pronoun forms - Lithuanian (case-based, simplified)
     # Word itself indicates person/number/gender; tag indicates grammatical case
-    PRONOUN_LT_NOMINATIVE = "pronoun/lt_nominative"  # aš, tu, jis, ji, mes, jūs, jie, jos
-    PRONOUN_LT_GENITIVE = "pronoun/lt_genitive"  # manęs, tavęs, jo, jos, mūsų, jūsų, jų
-    PRONOUN_LT_DATIVE = "pronoun/lt_dative"  # man, tau, jam, jai, mums, jums, jiems, joms
-    PRONOUN_LT_ACCUSATIVE = "pronoun/lt_accusative"  # mane, tave, jį, ją, mus, jus, juos, jas
-    PRONOUN_LT_INSTRUMENTAL = (
-        "pronoun/lt_instrumental"  # manimi, tavimi, juo, ja, mumis, jumis, jais, jomis
-    )
-    PRONOUN_LT_LOCATIVE = (
-        "pronoun/lt_locative"  # manyje, tavyje, jame, joje, mumyse, jumyse, juose, jose
-    )
-    PRONOUN_LT_POSSESSIVE = (
-        "pronoun/lt_possessive"  # mano, tavo, etc. (standalone possessive forms)
-    )
 
     # Pronoun forms - German (case-based, simplified)
     # Word itself indicates person/number/gender; tag indicates grammatical case
-    PRONOUN_DE_NOMINATIVE = "pronoun/de_nominative"  # ich, du, er, sie, es, wir, ihr, sie
-    PRONOUN_DE_ACCUSATIVE = "pronoun/de_accusative"  # mich, dich, ihn, sie, es, uns, euch, sie
-    PRONOUN_DE_DATIVE = "pronoun/de_dative"  # mir, dir, ihm, ihr, ihm, uns, euch, ihnen
-    PRONOUN_DE_GENITIVE = "pronoun/de_genitive"  # meiner, deiner, seiner, ihrer (rare)
-    PRONOUN_DE_POSSESSIVE = (
-        "pronoun/de_possessive"  # meiner/meine, deiner/deine (standalone possessives)
-    )
-    PRONOUN_DE_REFLEXIVE = "pronoun/de_reflexive"  # sich (reflexive pronoun)
 
     # Pronoun forms - Chinese (simplified)
     # Word itself indicates person/number/gender; tag indicates function
-    PRONOUN_ZH_SUBJECTIVE = (
-        "pronoun/zh_subjective"  # 我, 你, 他, 她, 它, 我们, 你们, 他们, 她们, 它们
-    )
-    PRONOUN_ZH_POSSESSIVE = "pronoun/zh_possessive"  # 我的, 你的, 他的, 她的, 它的 (with 的)
 
     # Pronoun forms - Korean (simplified)
     # Word itself indicates person/number/formality; tag indicates function
@@ -539,20 +374,6 @@ class GrammaticalForm(enum.Enum):
     ARTICLE = "article/base"
 
     # Language-specific article forms
-    ARTICLE_EN_BASE = "article/en_base"
-    ARTICLE_FR_MASCULINE_SINGULAR = "article/fr_masculine_singular"
-    ARTICLE_FR_FEMININE_SINGULAR = "article/fr_feminine_singular"
-    ARTICLE_FR_PLURAL = "article/fr_plural"
-    ARTICLE_DE_MASCULINE_SINGULAR = "article/de_masculine_singular"
-    ARTICLE_DE_FEMININE_SINGULAR = "article/de_feminine_singular"
-    ARTICLE_DE_NEUTER_SINGULAR = "article/de_neuter_singular"
-    ARTICLE_DE_PLURAL = "article/de_plural"
-    ARTICLE_ES_MASCULINE_SINGULAR = "article/es_masculine_singular"
-    ARTICLE_ES_FEMININE_SINGULAR = "article/es_feminine_singular"
-    ARTICLE_ES_PLURAL = "article/es_plural"
-    ARTICLE_PT_MASCULINE_SINGULAR = "article/pt_masculine_singular"
-    ARTICLE_PT_FEMININE_SINGULAR = "article/pt_feminine_singular"
-    ARTICLE_PT_PLURAL = "article/pt_plural"
 
     # Numeral forms
     # For numerals, the lemma form is typically masculine singular where gender applies.
@@ -560,49 +381,22 @@ class GrammaticalForm(enum.Enum):
     # Ordinal numerals answer "which position?" (first, second, third)
 
     # English numerals (invariant - no gender/case)
-    NUMERAL_EN_CARDINAL = "numeral/en_cardinal"  # one, two, three
-    NUMERAL_EN_ORDINAL = "numeral/en_ordinal"  # first, second, third
 
     # Lithuanian numerals (gender for 1-9, some case variation)
     # Lemma form is masculine nominative
-    NUMERAL_LT_CARDINAL_M = "numeral/lt_cardinal_m"  # vienas, du, trys (masculine)
-    NUMERAL_LT_CARDINAL_F = "numeral/lt_cardinal_f"  # viena, dvi, trys (feminine)
-    NUMERAL_LT_ORDINAL_M = "numeral/lt_ordinal_m"  # pirmas, antras (masculine)
-    NUMERAL_LT_ORDINAL_F = "numeral/lt_ordinal_f"  # pirma, antra (feminine)
 
     # German numerals (gender for ein/eine/ein only; others invariant)
     # Lemma form is masculine nominative
-    NUMERAL_DE_CARDINAL_M = "numeral/de_cardinal_m"  # ein (masculine)
-    NUMERAL_DE_CARDINAL_F = "numeral/de_cardinal_f"  # eine (feminine)
-    NUMERAL_DE_CARDINAL_N = "numeral/de_cardinal_n"  # ein (neuter)
-    NUMERAL_DE_ORDINAL = "numeral/de_ordinal"  # erste, zweite, dritte
 
     # French numerals (gender for un/une only; others invariant)
-    NUMERAL_FR_CARDINAL_M = "numeral/fr_cardinal_m"  # un (masculine)
-    NUMERAL_FR_CARDINAL_F = "numeral/fr_cardinal_f"  # une (feminine)
-    NUMERAL_FR_ORDINAL_M = "numeral/fr_ordinal_m"  # premier (masculine)
-    NUMERAL_FR_ORDINAL_F = "numeral/fr_ordinal_f"  # première (feminine)
 
     # Spanish numerals (gender for uno/una and ordinals)
-    NUMERAL_ES_CARDINAL_M = "numeral/es_cardinal_m"  # un, uno (masculine)
-    NUMERAL_ES_CARDINAL_F = "numeral/es_cardinal_f"  # una (feminine)
-    NUMERAL_ES_ORDINAL_M = "numeral/es_ordinal_m"  # primero (masculine)
-    NUMERAL_ES_ORDINAL_F = "numeral/es_ordinal_f"  # primera (feminine)
 
     # Portuguese numerals (gender for um/uma and ordinals)
-    NUMERAL_PT_CARDINAL_M = "numeral/pt_cardinal_m"  # um (masculine)
-    NUMERAL_PT_CARDINAL_F = "numeral/pt_cardinal_f"  # uma (feminine)
-    NUMERAL_PT_ORDINAL_M = "numeral/pt_ordinal_m"  # primeiro (masculine)
-    NUMERAL_PT_ORDINAL_F = "numeral/pt_ordinal_f"  # primeira (feminine)
 
     # Chinese numerals
     # Cardinal: 一, 二, 三 (standard counting form)
     # Quantity: 一, 两, 三 (两 used before measure words for "two")
-    NUMERAL_ZH_CARDINAL = "numeral/zh_cardinal"  # 一, 二, 三, 四, 五...
-    NUMERAL_ZH_QUANTITY = (
-        "numeral/zh_quantity"  # 一, 两, 三... (两 replaces 二 before measure words)
-    )
-    NUMERAL_ZH_ORDINAL = "numeral/zh_ordinal"  # 第一, 第二, 第三...
 
     # Korean numerals (native Korean vs Sino-Korean systems)
     NUMERAL_KO_NATIVE = "numeral/ko_native"  # 하나, 둘, 셋 (native Korean, for counting)
@@ -612,10 +406,6 @@ class GrammaticalForm(enum.Enum):
     # Romanian noun forms (singular/plural only - each noun has a fixed gender m/f/n)
 
     # Romanian adjective forms (2 genders × 2 numbers = 4 forms)
-    ADJ_RO_SINGULAR_M = "adjective/ro_singular_m"
-    ADJ_RO_PLURAL_M = "adjective/ro_plural_m"
-    ADJ_RO_SINGULAR_F = "adjective/ro_singular_f"
-    ADJ_RO_PLURAL_F = "adjective/ro_plural_f"
 
     # Romanian verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (prezent)
@@ -624,104 +414,28 @@ class GrammaticalForm(enum.Enum):
 
     # Polish noun forms (7 cases × 2 numbers = 14 forms)
     # Singular
-    NOUN_PL_NOMINATIVE_SINGULAR = "noun/pl_nominative_singular"
-    NOUN_PL_GENITIVE_SINGULAR = "noun/pl_genitive_singular"
-    NOUN_PL_DATIVE_SINGULAR = "noun/pl_dative_singular"
-    NOUN_PL_ACCUSATIVE_SINGULAR = "noun/pl_accusative_singular"
-    NOUN_PL_INSTRUMENTAL_SINGULAR = "noun/pl_instrumental_singular"
-    NOUN_PL_LOCATIVE_SINGULAR = "noun/pl_locative_singular"
-    NOUN_PL_VOCATIVE_SINGULAR = "noun/pl_vocative_singular"
     # Plural
-    NOUN_PL_NOMINATIVE_PLURAL = "noun/pl_nominative_plural"
-    NOUN_PL_GENITIVE_PLURAL = "noun/pl_genitive_plural"
-    NOUN_PL_DATIVE_PLURAL = "noun/pl_dative_plural"
-    NOUN_PL_ACCUSATIVE_PLURAL = "noun/pl_accusative_plural"
-    NOUN_PL_INSTRUMENTAL_PLURAL = "noun/pl_instrumental_plural"
-    NOUN_PL_LOCATIVE_PLURAL = "noun/pl_locative_plural"
-    NOUN_PL_VOCATIVE_PLURAL = "noun/pl_vocative_plural"
 
     # Polish adjective forms (2 genders × 2 numbers = 4 simplified forms)
-    ADJ_PL_SINGULAR_M = "adjective/pl_singular_m"
-    ADJ_PL_PLURAL_M = "adjective/pl_plural_m"
-    ADJ_PL_SINGULAR_F = "adjective/pl_singular_f"
-    ADJ_PL_PLURAL_F = "adjective/pl_plural_f"
 
     # Polish verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (czas teraźniejszy)
-    VERB_PL_1S_PRESENT = "verb/pl_1s_present"
-    VERB_PL_2S_PRESENT = "verb/pl_2s_present"
-    VERB_PL_3S_PRESENT = "verb/pl_3s_present"
-    VERB_PL_1P_PRESENT = "verb/pl_1p_present"
-    VERB_PL_2P_PRESENT = "verb/pl_2p_present"
-    VERB_PL_3P_PRESENT = "verb/pl_3p_present"
     # Past tense (czas przeszły)
-    VERB_PL_1S_PAST = "verb/pl_1s_past"
-    VERB_PL_2S_PAST = "verb/pl_2s_past"
-    VERB_PL_3S_PAST = "verb/pl_3s_past"
-    VERB_PL_1P_PAST = "verb/pl_1p_past"
-    VERB_PL_2P_PAST = "verb/pl_2p_past"
-    VERB_PL_3P_PAST = "verb/pl_3p_past"
     # Future tense (czas przyszły)
-    VERB_PL_1S_FUTURE = "verb/pl_1s_future"
-    VERB_PL_2S_FUTURE = "verb/pl_2s_future"
-    VERB_PL_3S_FUTURE = "verb/pl_3s_future"
-    VERB_PL_1P_FUTURE = "verb/pl_1p_future"
-    VERB_PL_2P_FUTURE = "verb/pl_2p_future"
-    VERB_PL_3P_FUTURE = "verb/pl_3p_future"
 
     # Tamil noun forms (singular/plural only)
-    NOUN_TA_SINGULAR = "noun/ta_singular"
-    NOUN_TA_PLURAL = "noun/ta_plural"
 
     # Tamil verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (நிகழ்காலம்)
-    VERB_TA_1S_PRESENT = "verb/ta_1s_present"
-    VERB_TA_2S_PRESENT = "verb/ta_2s_present"
-    VERB_TA_3S_PRESENT = "verb/ta_3s_present"
-    VERB_TA_1P_PRESENT = "verb/ta_1p_present"
-    VERB_TA_2P_PRESENT = "verb/ta_2p_present"
-    VERB_TA_3P_PRESENT = "verb/ta_3p_present"
     # Past tense (இறந்தகாலம்)
-    VERB_TA_1S_PAST = "verb/ta_1s_past"
-    VERB_TA_2S_PAST = "verb/ta_2s_past"
-    VERB_TA_3S_PAST = "verb/ta_3s_past"
-    VERB_TA_1P_PAST = "verb/ta_1p_past"
-    VERB_TA_2P_PAST = "verb/ta_2p_past"
-    VERB_TA_3P_PAST = "verb/ta_3p_past"
     # Future tense (எதிர்காலம்)
-    VERB_TA_1S_FUTURE = "verb/ta_1s_future"
-    VERB_TA_2S_FUTURE = "verb/ta_2s_future"
-    VERB_TA_3S_FUTURE = "verb/ta_3s_future"
-    VERB_TA_1P_FUTURE = "verb/ta_1p_future"
-    VERB_TA_2P_FUTURE = "verb/ta_2p_future"
-    VERB_TA_3P_FUTURE = "verb/ta_3p_future"
 
     # Telugu noun forms (singular/plural only)
-    NOUN_TE_SINGULAR = "noun/te_singular"
-    NOUN_TE_PLURAL = "noun/te_plural"
 
     # Telugu verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (వర్తమానకాలం)
-    VERB_TE_1S_PRESENT = "verb/te_1s_present"
-    VERB_TE_2S_PRESENT = "verb/te_2s_present"
-    VERB_TE_3S_PRESENT = "verb/te_3s_present"
-    VERB_TE_1P_PRESENT = "verb/te_1p_present"
-    VERB_TE_2P_PRESENT = "verb/te_2p_present"
-    VERB_TE_3P_PRESENT = "verb/te_3p_present"
     # Past tense (భూతకాలం)
-    VERB_TE_1S_PAST = "verb/te_1s_past"
-    VERB_TE_2S_PAST = "verb/te_2s_past"
-    VERB_TE_3S_PAST = "verb/te_3s_past"
-    VERB_TE_1P_PAST = "verb/te_1p_past"
-    VERB_TE_2P_PAST = "verb/te_2p_past"
-    VERB_TE_3P_PAST = "verb/te_3p_past"
     # Future tense (భవిష్యత్కాలం)
-    VERB_TE_1S_FUTURE = "verb/te_1s_future"
-    VERB_TE_2S_FUTURE = "verb/te_2s_future"
-    VERB_TE_3S_FUTURE = "verb/te_3s_future"
-    VERB_TE_1P_FUTURE = "verb/te_1p_future"
-    VERB_TE_2P_FUTURE = "verb/te_2p_future"
-    VERB_TE_3P_FUTURE = "verb/te_3p_future"
 
     # Kannada noun forms (singular/plural only)
     NOUN_KN_SINGULAR = "noun/kn_singular"
@@ -733,168 +447,48 @@ class GrammaticalForm(enum.Enum):
     # Future tense (ಭವಿಷ್ಯತ್ಕಾಲ)
 
     # Malayalam noun forms (singular/plural only)
-    NOUN_ML_SINGULAR = "noun/ml_singular"
-    NOUN_ML_PLURAL = "noun/ml_plural"
 
     # Malayalam verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (വർത്തമാനകാലം)
-    VERB_ML_1S_PRESENT = "verb/ml_1s_present"
-    VERB_ML_2S_PRESENT = "verb/ml_2s_present"
-    VERB_ML_3S_PRESENT = "verb/ml_3s_present"
-    VERB_ML_1P_PRESENT = "verb/ml_1p_present"
-    VERB_ML_2P_PRESENT = "verb/ml_2p_present"
-    VERB_ML_3P_PRESENT = "verb/ml_3p_present"
     # Past tense (ഭൂതകാലം)
-    VERB_ML_1S_PAST = "verb/ml_1s_past"
-    VERB_ML_2S_PAST = "verb/ml_2s_past"
-    VERB_ML_3S_PAST = "verb/ml_3s_past"
-    VERB_ML_1P_PAST = "verb/ml_1p_past"
-    VERB_ML_2P_PAST = "verb/ml_2p_past"
-    VERB_ML_3P_PAST = "verb/ml_3p_past"
     # Future tense (ഭാവികാലം)
-    VERB_ML_1S_FUTURE = "verb/ml_1s_future"
-    VERB_ML_2S_FUTURE = "verb/ml_2s_future"
-    VERB_ML_3S_FUTURE = "verb/ml_3s_future"
-    VERB_ML_1P_FUTURE = "verb/ml_1p_future"
-    VERB_ML_2P_FUTURE = "verb/ml_2p_future"
-    VERB_ML_3P_FUTURE = "verb/ml_3p_future"
 
     # Sinhala noun forms (singular/plural only)
-    NOUN_SI_SINGULAR = "noun/si_singular"
-    NOUN_SI_PLURAL = "noun/si_plural"
 
     # Sinhala verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (වර්තමාන කාලය)
-    VERB_SI_1S_PRESENT = "verb/si_1s_present"
-    VERB_SI_2S_PRESENT = "verb/si_2s_present"
-    VERB_SI_3S_PRESENT = "verb/si_3s_present"
-    VERB_SI_1P_PRESENT = "verb/si_1p_present"
-    VERB_SI_2P_PRESENT = "verb/si_2p_present"
-    VERB_SI_3P_PRESENT = "verb/si_3p_present"
     # Past tense (අතීත කාලය)
-    VERB_SI_1S_PAST = "verb/si_1s_past"
-    VERB_SI_2S_PAST = "verb/si_2s_past"
-    VERB_SI_3S_PAST = "verb/si_3s_past"
-    VERB_SI_1P_PAST = "verb/si_1p_past"
-    VERB_SI_2P_PAST = "verb/si_2p_past"
-    VERB_SI_3P_PAST = "verb/si_3p_past"
     # Future tense (අනාගත කාලය)
-    VERB_SI_1S_FUTURE = "verb/si_1s_future"
-    VERB_SI_2S_FUTURE = "verb/si_2s_future"
-    VERB_SI_3S_FUTURE = "verb/si_3s_future"
-    VERB_SI_1P_FUTURE = "verb/si_1p_future"
-    VERB_SI_2P_FUTURE = "verb/si_2p_future"
-    VERB_SI_3P_FUTURE = "verb/si_3p_future"
 
     # Bulgarian noun forms (singular/plural only - each noun has a fixed gender m/f/n)
-    NOUN_BG_SINGULAR = "noun/bg_singular"
-    NOUN_BG_PLURAL = "noun/bg_plural"
 
     # Bulgarian verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (сегашно време)
-    VERB_BG_1S_PRESENT = "verb/bg_1s_present"
-    VERB_BG_2S_PRESENT = "verb/bg_2s_present"
-    VERB_BG_3S_PRESENT = "verb/bg_3s_present"
-    VERB_BG_1P_PRESENT = "verb/bg_1p_present"
-    VERB_BG_2P_PRESENT = "verb/bg_2p_present"
-    VERB_BG_3P_PRESENT = "verb/bg_3p_present"
     # Past tense (минало свършено време)
-    VERB_BG_1S_PAST = "verb/bg_1s_past"
-    VERB_BG_2S_PAST = "verb/bg_2s_past"
-    VERB_BG_3S_PAST = "verb/bg_3s_past"
-    VERB_BG_1P_PAST = "verb/bg_1p_past"
-    VERB_BG_2P_PAST = "verb/bg_2p_past"
-    VERB_BG_3P_PAST = "verb/bg_3p_past"
     # Future tense (бъдеще време)
-    VERB_BG_1S_FUTURE = "verb/bg_1s_future"
-    VERB_BG_2S_FUTURE = "verb/bg_2s_future"
-    VERB_BG_3S_FUTURE = "verb/bg_3s_future"
-    VERB_BG_1P_FUTURE = "verb/bg_1p_future"
-    VERB_BG_2P_FUTURE = "verb/bg_2p_future"
-    VERB_BG_3P_FUTURE = "verb/bg_3p_future"
 
     # Croatian noun forms (singular/plural only - each noun has a fixed gender m/f/n)
-    NOUN_HR_SINGULAR = "noun/hr_singular"
-    NOUN_HR_PLURAL = "noun/hr_plural"
 
     # Croatian verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (prezent)
-    VERB_HR_1S_PRESENT = "verb/hr_1s_present"
-    VERB_HR_2S_PRESENT = "verb/hr_2s_present"
-    VERB_HR_3S_PRESENT = "verb/hr_3s_present"
-    VERB_HR_1P_PRESENT = "verb/hr_1p_present"
-    VERB_HR_2P_PRESENT = "verb/hr_2p_present"
-    VERB_HR_3P_PRESENT = "verb/hr_3p_present"
     # Past tense (perfekt)
-    VERB_HR_1S_PAST = "verb/hr_1s_past"
-    VERB_HR_2S_PAST = "verb/hr_2s_past"
-    VERB_HR_3S_PAST = "verb/hr_3s_past"
-    VERB_HR_1P_PAST = "verb/hr_1p_past"
-    VERB_HR_2P_PAST = "verb/hr_2p_past"
-    VERB_HR_3P_PAST = "verb/hr_3p_past"
     # Future tense (futur I)
-    VERB_HR_1S_FUTURE = "verb/hr_1s_future"
-    VERB_HR_2S_FUTURE = "verb/hr_2s_future"
-    VERB_HR_3S_FUTURE = "verb/hr_3s_future"
-    VERB_HR_1P_FUTURE = "verb/hr_1p_future"
-    VERB_HR_2P_FUTURE = "verb/hr_2p_future"
-    VERB_HR_3P_FUTURE = "verb/hr_3p_future"
 
     # Czech noun forms (singular/plural only - each noun has a fixed gender m/f/n)
-    NOUN_CS_SINGULAR = "noun/cs_singular"
-    NOUN_CS_PLURAL = "noun/cs_plural"
 
     # Czech verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (přítomný čas)
-    VERB_CS_1S_PRESENT = "verb/cs_1s_present"
-    VERB_CS_2S_PRESENT = "verb/cs_2s_present"
-    VERB_CS_3S_PRESENT = "verb/cs_3s_present"
-    VERB_CS_1P_PRESENT = "verb/cs_1p_present"
-    VERB_CS_2P_PRESENT = "verb/cs_2p_present"
-    VERB_CS_3P_PRESENT = "verb/cs_3p_present"
     # Past tense (minulý čas)
-    VERB_CS_1S_PAST = "verb/cs_1s_past"
-    VERB_CS_2S_PAST = "verb/cs_2s_past"
-    VERB_CS_3S_PAST = "verb/cs_3s_past"
-    VERB_CS_1P_PAST = "verb/cs_1p_past"
-    VERB_CS_2P_PAST = "verb/cs_2p_past"
-    VERB_CS_3P_PAST = "verb/cs_3p_past"
     # Future tense (budoucí čas)
-    VERB_CS_1S_FUTURE = "verb/cs_1s_future"
-    VERB_CS_2S_FUTURE = "verb/cs_2s_future"
-    VERB_CS_3S_FUTURE = "verb/cs_3s_future"
-    VERB_CS_1P_FUTURE = "verb/cs_1p_future"
-    VERB_CS_2P_FUTURE = "verb/cs_2p_future"
-    VERB_CS_3P_FUTURE = "verb/cs_3p_future"
 
     # Danish noun forms (singular/plural only - each noun has a fixed gender c/n)
-    NOUN_DA_SINGULAR = "noun/da_singular"
-    NOUN_DA_PLURAL = "noun/da_plural"
 
     # Danish verb forms (6 persons × 3 tenses = 18 forms)
     # Note: Danish verbs don't conjugate by person, but we use the standard
     # 6-person schema for consistency with other languages.
     # Present tense (nutid)
-    VERB_DA_1S_PRESENT = "verb/da_1s_present"
-    VERB_DA_2S_PRESENT = "verb/da_2s_present"
-    VERB_DA_3S_PRESENT = "verb/da_3s_present"
-    VERB_DA_1P_PRESENT = "verb/da_1p_present"
-    VERB_DA_2P_PRESENT = "verb/da_2p_present"
-    VERB_DA_3P_PRESENT = "verb/da_3p_present"
     # Past tense (datid)
-    VERB_DA_1S_PAST = "verb/da_1s_past"
-    VERB_DA_2S_PAST = "verb/da_2s_past"
-    VERB_DA_3S_PAST = "verb/da_3s_past"
-    VERB_DA_1P_PAST = "verb/da_1p_past"
-    VERB_DA_2P_PAST = "verb/da_2p_past"
-    VERB_DA_3P_PAST = "verb/da_3p_past"
     # Future tense (fremtid)
-    VERB_DA_1S_FUTURE = "verb/da_1s_future"
-    VERB_DA_2S_FUTURE = "verb/da_2s_future"
-    VERB_DA_3S_FUTURE = "verb/da_3s_future"
-    VERB_DA_1P_FUTURE = "verb/da_1p_future"
-    VERB_DA_2P_FUTURE = "verb/da_2p_future"
-    VERB_DA_3P_FUTURE = "verb/da_3p_future"
 
     # Estonian noun forms (singular/plural only - no grammatical gender)
     NOUN_ET_SINGULAR = "noun/et_singular"
@@ -906,112 +500,32 @@ class GrammaticalForm(enum.Enum):
     # Future tense (tulevik - formed with saama + infinitive)
 
     # Finnish noun forms (singular/plural only - no grammatical gender)
-    NOUN_FI_SINGULAR = "noun/fi_singular"
-    NOUN_FI_PLURAL = "noun/fi_plural"
 
     # Finnish verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (preesens)
-    VERB_FI_1S_PRESENT = "verb/fi_1s_present"
-    VERB_FI_2S_PRESENT = "verb/fi_2s_present"
-    VERB_FI_3S_PRESENT = "verb/fi_3s_present"
-    VERB_FI_1P_PRESENT = "verb/fi_1p_present"
-    VERB_FI_2P_PRESENT = "verb/fi_2p_present"
-    VERB_FI_3P_PRESENT = "verb/fi_3p_present"
     # Past tense (imperfekti)
-    VERB_FI_1S_PAST = "verb/fi_1s_past"
-    VERB_FI_2S_PAST = "verb/fi_2s_past"
-    VERB_FI_3S_PAST = "verb/fi_3s_past"
-    VERB_FI_1P_PAST = "verb/fi_1p_past"
-    VERB_FI_2P_PAST = "verb/fi_2p_past"
-    VERB_FI_3P_PAST = "verb/fi_3p_past"
     # Future tense (futuuri - formed with tulla + present participle)
-    VERB_FI_1S_FUTURE = "verb/fi_1s_future"
-    VERB_FI_2S_FUTURE = "verb/fi_2s_future"
-    VERB_FI_3S_FUTURE = "verb/fi_3s_future"
-    VERB_FI_1P_FUTURE = "verb/fi_1p_future"
-    VERB_FI_2P_FUTURE = "verb/fi_2p_future"
-    VERB_FI_3P_FUTURE = "verb/fi_3p_future"
 
     # Greek noun forms (singular/plural only - each noun has a fixed gender m/f/n)
-    NOUN_EL_SINGULAR = "noun/el_singular"
-    NOUN_EL_PLURAL = "noun/el_plural"
 
     # Greek verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (ενεστώτας)
-    VERB_EL_1S_PRESENT = "verb/el_1s_present"
-    VERB_EL_2S_PRESENT = "verb/el_2s_present"
-    VERB_EL_3S_PRESENT = "verb/el_3s_present"
-    VERB_EL_1P_PRESENT = "verb/el_1p_present"
-    VERB_EL_2P_PRESENT = "verb/el_2p_present"
-    VERB_EL_3P_PRESENT = "verb/el_3p_present"
     # Past tense (αόριστος)
-    VERB_EL_1S_PAST = "verb/el_1s_past"
-    VERB_EL_2S_PAST = "verb/el_2s_past"
-    VERB_EL_3S_PAST = "verb/el_3s_past"
-    VERB_EL_1P_PAST = "verb/el_1p_past"
-    VERB_EL_2P_PAST = "verb/el_2p_past"
-    VERB_EL_3P_PAST = "verb/el_3p_past"
     # Future tense (μέλλοντας - θα + subjunctive)
-    VERB_EL_1S_FUTURE = "verb/el_1s_future"
-    VERB_EL_2S_FUTURE = "verb/el_2s_future"
-    VERB_EL_3S_FUTURE = "verb/el_3s_future"
-    VERB_EL_1P_FUTURE = "verb/el_1p_future"
-    VERB_EL_2P_FUTURE = "verb/el_2p_future"
-    VERB_EL_3P_FUTURE = "verb/el_3p_future"
 
     # Hungarian noun forms (singular/plural only - no grammatical gender)
-    NOUN_HU_SINGULAR = "noun/hu_singular"
-    NOUN_HU_PLURAL = "noun/hu_plural"
 
     # Hungarian verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (jelen idő)
-    VERB_HU_1S_PRESENT = "verb/hu_1s_present"
-    VERB_HU_2S_PRESENT = "verb/hu_2s_present"
-    VERB_HU_3S_PRESENT = "verb/hu_3s_present"
-    VERB_HU_1P_PRESENT = "verb/hu_1p_present"
-    VERB_HU_2P_PRESENT = "verb/hu_2p_present"
-    VERB_HU_3P_PRESENT = "verb/hu_3p_present"
     # Past tense (múlt idő)
-    VERB_HU_1S_PAST = "verb/hu_1s_past"
-    VERB_HU_2S_PAST = "verb/hu_2s_past"
-    VERB_HU_3S_PAST = "verb/hu_3s_past"
-    VERB_HU_1P_PAST = "verb/hu_1p_past"
-    VERB_HU_2P_PAST = "verb/hu_2p_past"
-    VERB_HU_3P_PAST = "verb/hu_3p_past"
     # Future tense (jövő idő - fog + infinitive)
-    VERB_HU_1S_FUTURE = "verb/hu_1s_future"
-    VERB_HU_2S_FUTURE = "verb/hu_2s_future"
-    VERB_HU_3S_FUTURE = "verb/hu_3s_future"
-    VERB_HU_1P_FUTURE = "verb/hu_1p_future"
-    VERB_HU_2P_FUTURE = "verb/hu_2p_future"
-    VERB_HU_3P_FUTURE = "verb/hu_3p_future"
 
     # Irish noun forms (singular/plural only - each noun has a fixed gender m/f)
-    NOUN_GA_SINGULAR = "noun/ga_singular"
-    NOUN_GA_PLURAL = "noun/ga_plural"
 
     # Irish verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (aimsir láithreach)
-    VERB_GA_1S_PRESENT = "verb/ga_1s_present"
-    VERB_GA_2S_PRESENT = "verb/ga_2s_present"
-    VERB_GA_3S_PRESENT = "verb/ga_3s_present"
-    VERB_GA_1P_PRESENT = "verb/ga_1p_present"
-    VERB_GA_2P_PRESENT = "verb/ga_2p_present"
-    VERB_GA_3P_PRESENT = "verb/ga_3p_present"
     # Past tense (aimsir chaite)
-    VERB_GA_1S_PAST = "verb/ga_1s_past"
-    VERB_GA_2S_PAST = "verb/ga_2s_past"
-    VERB_GA_3S_PAST = "verb/ga_3s_past"
-    VERB_GA_1P_PAST = "verb/ga_1p_past"
-    VERB_GA_2P_PAST = "verb/ga_2p_past"
-    VERB_GA_3P_PAST = "verb/ga_3p_past"
     # Future tense (aimsir fháistineach)
-    VERB_GA_1S_FUTURE = "verb/ga_1s_future"
-    VERB_GA_2S_FUTURE = "verb/ga_2s_future"
-    VERB_GA_3S_FUTURE = "verb/ga_3s_future"
-    VERB_GA_1P_FUTURE = "verb/ga_1p_future"
-    VERB_GA_2P_FUTURE = "verb/ga_2p_future"
-    VERB_GA_3P_FUTURE = "verb/ga_3p_future"
 
     # Latvian noun forms (legacy singular/plural - kept for backward compatibility)
     NOUN_LV_SINGULAR = "noun/lv_singular"
@@ -1033,94 +547,29 @@ class GrammaticalForm(enum.Enum):
     # Latvian adverb forms (3 comparative degrees)
 
     # Maltese noun forms (singular/plural only - each noun has a fixed gender m/f)
-    NOUN_MT_SINGULAR = "noun/mt_singular"
-    NOUN_MT_PLURAL = "noun/mt_plural"
 
     # Maltese verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (preżent)
-    VERB_MT_1S_PRESENT = "verb/mt_1s_present"
-    VERB_MT_2S_PRESENT = "verb/mt_2s_present"
-    VERB_MT_3S_PRESENT = "verb/mt_3s_present"
-    VERB_MT_1P_PRESENT = "verb/mt_1p_present"
-    VERB_MT_2P_PRESENT = "verb/mt_2p_present"
-    VERB_MT_3P_PRESENT = "verb/mt_3p_present"
     # Past tense (passat)
-    VERB_MT_1S_PAST = "verb/mt_1s_past"
-    VERB_MT_2S_PAST = "verb/mt_2s_past"
-    VERB_MT_3S_PAST = "verb/mt_3s_past"
-    VERB_MT_1P_PAST = "verb/mt_1p_past"
-    VERB_MT_2P_PAST = "verb/mt_2p_past"
-    VERB_MT_3P_PAST = "verb/mt_3p_past"
     # Future tense (futur - se + imperfect)
-    VERB_MT_1S_FUTURE = "verb/mt_1s_future"
-    VERB_MT_2S_FUTURE = "verb/mt_2s_future"
-    VERB_MT_3S_FUTURE = "verb/mt_3s_future"
-    VERB_MT_1P_FUTURE = "verb/mt_1p_future"
-    VERB_MT_2P_FUTURE = "verb/mt_2p_future"
-    VERB_MT_3P_FUTURE = "verb/mt_3p_future"
 
     # Slovak noun forms (singular/plural only - each noun has a fixed gender m/f/n)
-    NOUN_SK_SINGULAR = "noun/sk_singular"
-    NOUN_SK_PLURAL = "noun/sk_plural"
 
     # Slovak verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (prítomný čas)
-    VERB_SK_1S_PRESENT = "verb/sk_1s_present"
-    VERB_SK_2S_PRESENT = "verb/sk_2s_present"
-    VERB_SK_3S_PRESENT = "verb/sk_3s_present"
-    VERB_SK_1P_PRESENT = "verb/sk_1p_present"
-    VERB_SK_2P_PRESENT = "verb/sk_2p_present"
-    VERB_SK_3P_PRESENT = "verb/sk_3p_present"
     # Past tense (minulý čas)
-    VERB_SK_1S_PAST = "verb/sk_1s_past"
-    VERB_SK_2S_PAST = "verb/sk_2s_past"
-    VERB_SK_3S_PAST = "verb/sk_3s_past"
-    VERB_SK_1P_PAST = "verb/sk_1p_past"
-    VERB_SK_2P_PAST = "verb/sk_2p_past"
-    VERB_SK_3P_PAST = "verb/sk_3p_past"
     # Future tense (budúci čas)
-    VERB_SK_1S_FUTURE = "verb/sk_1s_future"
-    VERB_SK_2S_FUTURE = "verb/sk_2s_future"
-    VERB_SK_3S_FUTURE = "verb/sk_3s_future"
-    VERB_SK_1P_FUTURE = "verb/sk_1p_future"
-    VERB_SK_2P_FUTURE = "verb/sk_2p_future"
-    VERB_SK_3P_FUTURE = "verb/sk_3p_future"
 
     # Slovenian noun forms (singular/plural only - each noun has a fixed gender m/f/n)
-    NOUN_SL_SINGULAR = "noun/sl_singular"
-    NOUN_SL_PLURAL = "noun/sl_plural"
 
     # Slovenian verb forms (6 persons × 3 tenses = 18 forms)
     # Present tense (sedanjik)
-    VERB_SL_1S_PRESENT = "verb/sl_1s_present"
-    VERB_SL_2S_PRESENT = "verb/sl_2s_present"
-    VERB_SL_3S_PRESENT = "verb/sl_3s_present"
-    VERB_SL_1P_PRESENT = "verb/sl_1p_present"
-    VERB_SL_2P_PRESENT = "verb/sl_2p_present"
-    VERB_SL_3P_PRESENT = "verb/sl_3p_present"
     # Past tense (preteklik)
-    VERB_SL_1S_PAST = "verb/sl_1s_past"
-    VERB_SL_2S_PAST = "verb/sl_2s_past"
-    VERB_SL_3S_PAST = "verb/sl_3s_past"
-    VERB_SL_1P_PAST = "verb/sl_1p_past"
-    VERB_SL_2P_PAST = "verb/sl_2p_past"
-    VERB_SL_3P_PAST = "verb/sl_3p_past"
     # Future tense (prihodnjik)
-    VERB_SL_1S_FUTURE = "verb/sl_1s_future"
-    VERB_SL_2S_FUTURE = "verb/sl_2s_future"
-    VERB_SL_3S_FUTURE = "verb/sl_3s_future"
-    VERB_SL_1P_FUTURE = "verb/sl_1p_future"
-    VERB_SL_2P_FUTURE = "verb/sl_2p_future"
-    VERB_SL_3P_FUTURE = "verb/sl_3p_future"
 
     # Thai noun forms (singular/plural - Thai nouns don't inflect, stored for pedagogy)
-    NOUN_TH_SINGULAR = "noun/th_singular"
-    NOUN_TH_PLURAL = "noun/th_plural"
 
     # Thai verb forms (isolating language - no person conjugation, tense via particles)
-    VERB_TH_PRESENT = "verb/th_present"
-    VERB_TH_PAST = "verb/th_past"
-    VERB_TH_FUTURE = "verb/th_future"
 
     # Malay noun forms (singular/plural - plural via reduplication e.g. buku-buku)
     NOUN_MS_SINGULAR = "noun/ms_singular"
@@ -1132,31 +581,16 @@ class GrammaticalForm(enum.Enum):
     VERB_MS_FUTURE = "verb/ms_future"
 
     # Burmese noun forms (singular/plural - plurality via particles တွေ/များ)
-    NOUN_MY_SINGULAR = "noun/my_singular"
-    NOUN_MY_PLURAL = "noun/my_plural"
 
     # Burmese verb forms (isolating - tense via sentence-final particles)
-    VERB_MY_PRESENT = "verb/my_present"
-    VERB_MY_PAST = "verb/my_past"
-    VERB_MY_FUTURE = "verb/my_future"
 
     # Khmer noun forms (singular/plural - no inflection, plurality via context)
-    NOUN_KM_SINGULAR = "noun/km_singular"
-    NOUN_KM_PLURAL = "noun/km_plural"
 
     # Khmer verb forms (isolating - no conjugation, tense via auxiliaries)
-    VERB_KM_PRESENT = "verb/km_present"
-    VERB_KM_PAST = "verb/km_past"
-    VERB_KM_FUTURE = "verb/km_future"
 
     # Lao noun forms (singular/plural - no inflection, plurality via classifiers)
-    NOUN_LO_SINGULAR = "noun/lo_singular"
-    NOUN_LO_PLURAL = "noun/lo_plural"
 
     # Lao verb forms (isolating - tense via particles ຈະ/ໄດ້/ແລ້ວ)
-    VERB_LO_PRESENT = "verb/lo_present"
-    VERB_LO_PAST = "verb/lo_past"
-    VERB_LO_FUTURE = "verb/lo_future"
 
     # Filipino (Tagalog) noun forms (singular/plural - plural via mga prefix)
     NOUN_TL_SINGULAR = "noun/tl_singular"
@@ -1168,103 +602,48 @@ class GrammaticalForm(enum.Enum):
     VERB_TL_FUTURE = "verb/tl_future"
 
     # Swahili noun forms (Bantu noun class system with singular/plural prefixes)
-    NOUN_SW_SINGULAR = "noun/sw_singular"
-    NOUN_SW_PLURAL = "noun/sw_plural"
 
     # Swahili verb forms (agglutinative - subject/tense/object prefixes on verb root)
-    VERB_SW_PRESENT = "verb/sw_present"
-    VERB_SW_PAST = "verb/sw_past"
-    VERB_SW_FUTURE = "verb/sw_future"
 
     # Hausa noun forms (singular/plural - plural via suffixes and internal vowel changes)
-    NOUN_HA_SINGULAR = "noun/ha_singular"
-    NOUN_HA_PLURAL = "noun/ha_plural"
 
     # Hausa verb forms (conjugates for person/tense with preverbal markers)
-    VERB_HA_PRESENT = "verb/ha_present"
-    VERB_HA_PAST = "verb/ha_past"
-    VERB_HA_FUTURE = "verb/ha_future"
 
     # Yoruba noun forms (isolating - no inflectional morphology on nouns)
-    NOUN_YO_SINGULAR = "noun/yo_singular"
-    NOUN_YO_PLURAL = "noun/yo_plural"
 
     # Yoruba verb forms (isolating - tense/aspect via preverbal particles)
-    VERB_YO_PRESENT = "verb/yo_present"
-    VERB_YO_PAST = "verb/yo_past"
-    VERB_YO_FUTURE = "verb/yo_future"
 
     # Igbo noun forms (singular/plural - some nouns use prefix changes)
-    NOUN_IG_SINGULAR = "noun/ig_singular"
-    NOUN_IG_PLURAL = "noun/ig_plural"
 
     # Igbo verb forms (root + suffixes for tense/aspect, tonal distinctions)
-    VERB_IG_PRESENT = "verb/ig_present"
-    VERB_IG_PAST = "verb/ig_past"
-    VERB_IG_FUTURE = "verb/ig_future"
 
     # Amharic noun forms (singular/plural - plural via suffix -ዎች/-ኦች)
-    NOUN_AM_SINGULAR = "noun/am_singular"
-    NOUN_AM_PLURAL = "noun/am_plural"
 
     # Amharic verb forms (Semitic root system with person/tense/mood conjugation)
-    VERB_AM_PRESENT = "verb/am_present"
-    VERB_AM_PAST = "verb/am_past"
-    VERB_AM_FUTURE = "verb/am_future"
 
     # Zulu noun forms (Bantu noun class system with singular/plural prefixes)
-    NOUN_ZU_SINGULAR = "noun/zu_singular"
-    NOUN_ZU_PLURAL = "noun/zu_plural"
 
     # Zulu verb forms (agglutinative - subject/tense/object concords on verb root)
-    VERB_ZU_PRESENT = "verb/zu_present"
-    VERB_ZU_PAST = "verb/zu_past"
-    VERB_ZU_FUTURE = "verb/zu_future"
 
     # Oromo noun forms (singular/plural - plural via suffixes -oota/-wwan/-lee)
-    NOUN_OM_SINGULAR = "noun/om_singular"
-    NOUN_OM_PLURAL = "noun/om_plural"
 
     # Oromo verb forms (conjugates for person/number/tense)
-    VERB_OM_PRESENT = "verb/om_present"
-    VERB_OM_PAST = "verb/om_past"
-    VERB_OM_FUTURE = "verb/om_future"
 
     # Somali noun forms (singular/plural - plural via suffixes and vowel changes)
-    NOUN_SO_SINGULAR = "noun/so_singular"
-    NOUN_SO_PLURAL = "noun/so_plural"
 
     # Somali verb forms (conjugates for person/number/tense)
-    VERB_SO_PRESENT = "verb/so_present"
-    VERB_SO_PAST = "verb/so_past"
-    VERB_SO_FUTURE = "verb/so_future"
 
     # Xhosa noun forms (Bantu noun class system with singular/plural prefixes)
-    NOUN_XH_SINGULAR = "noun/xh_singular"
-    NOUN_XH_PLURAL = "noun/xh_plural"
 
     # Xhosa verb forms (agglutinative - subject/tense/object concords on verb root)
-    VERB_XH_PRESENT = "verb/xh_present"
-    VERB_XH_PAST = "verb/xh_past"
-    VERB_XH_FUTURE = "verb/xh_future"
 
     # Shona noun forms (Bantu noun class system with singular/plural prefixes)
-    NOUN_SN_SINGULAR = "noun/sn_singular"
-    NOUN_SN_PLURAL = "noun/sn_plural"
 
     # Shona verb forms (agglutinative - subject/tense/object markers on verb root)
-    VERB_SN_PRESENT = "verb/sn_present"
-    VERB_SN_PAST = "verb/sn_past"
-    VERB_SN_FUTURE = "verb/sn_future"
 
     # Hindi noun forms (singular/plural - gender-based inflection)
-    NOUN_HI_SINGULAR = "noun/hi_singular"
-    NOUN_HI_PLURAL = "noun/hi_plural"
 
     # Hindi verb forms (person/number/gender/tense conjugation)
-    VERB_HI_PRESENT = "verb/hi_present"
-    VERB_HI_PAST = "verb/hi_past"
-    VERB_HI_FUTURE = "verb/hi_future"
 
     # Bengali noun forms (singular/plural)
     NOUN_BN_SINGULAR = "noun/bn_singular"
@@ -1358,21 +737,12 @@ class GrammaticalForm(enum.Enum):
     # Chinese verb forms (analytic aspect patterns)
 
     # Japanese noun forms (no morphological change - base form only)
-    NOUN_JA_BASE = "noun/ja_base"
 
     # Japanese verb forms (genuine conjugation)
-    VERB_JA_MASU = "verb/ja_masu"  # polite present (食べます)
-    VERB_JA_TE = "verb/ja_te"  # te-form (食べて)
-    VERB_JA_TA = "verb/ja_ta"  # past plain (食べた)
-    VERB_JA_NAI = "verb/ja_nai"  # negative plain (食べない)
 
     # Korean noun forms (no morphological change - base form only)
-    NOUN_KO_BASE = "noun/ko_base"
 
     # Korean verb forms (genuine conjugation - 해요체 polite forms)
-    VERB_KO_POLITE_PRESENT = "verb/ko_polite_present"  # 먹어요
-    VERB_KO_POLITE_PAST = "verb/ko_polite_past"  # 먹었어요
-    VERB_KO_POLITE_FUTURE = "verb/ko_polite_future"  # 먹을 거예요
 
     # Vietnamese noun forms (isolating language - base form only)
 
@@ -1419,6 +789,17 @@ def _auto_extend_grammatical_form() -> None:
             continue
 
         lang_code: str = getattr(mod, "LANGUAGE_CODE", lang_dir)
+
+        # Optional direct enum overrides for legacy/stable values that don't
+        # map cleanly to form-pattern expansion.
+        overrides = getattr(mod, "GRAMMATICAL_FORM_OVERRIDES", None)
+        if isinstance(overrides, dict):
+            for member_name, value_str in overrides.items():
+                if not isinstance(member_name, str) or not isinstance(value_str, str):
+                    continue
+                if value_str not in existing_values and member_name not in new_members:
+                    new_members[member_name] = value_str
+
         for attr_name in dir(mod):
             if not attr_name.endswith("_CONFIG"):
                 continue

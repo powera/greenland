@@ -23,3 +23,12 @@ VERB_CONFIG: Dict[str, Any] = {
         "progressive": "在 + verb — in progress (e.g. 在买)",
     },
 }
+
+GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
+    "ADVERB_ZH_BASE": "adverb/zh_base",
+    "NUMERAL_ZH_CARDINAL": "numeral/zh_cardinal",
+    "NUMERAL_ZH_ORDINAL": "numeral/zh_ordinal",
+    "NUMERAL_ZH_QUANTITY": "numeral/zh_quantity",
+    "PRONOUN_ZH_POSSESSIVE": "pronoun/zh_possessive",
+    "PRONOUN_ZH_SUBJECTIVE": "pronoun/zh_subjective",
+}

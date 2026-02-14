@@ -21,3 +21,7 @@ VERB_CONFIG: Dict[str, Any] = {
     "query_type": "swedish_verb_conjugations",
     "schema_name": "SwedishVerbConjugations",
 }
+
+GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
+    "ADVERB_SV_BASE": "adverb/sv_base",
+}

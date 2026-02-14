@@ -45,3 +45,26 @@ ADVERB_CONFIG: Dict[str, Any] = {
     "is_source_language": True,
     "word_variable": "adverb",
 }
+
+GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
+    "ADVERB_EN_BASE": "adverb/en_base",
+    "ARTICLE_EN_BASE": "article/en_base",
+    "NUMERAL_EN_CARDINAL": "numeral/en_cardinal",
+    "NUMERAL_EN_ORDINAL": "numeral/en_ordinal",
+    "PRONOUN_EN_OBJECTIVE": "pronoun/en_objective",
+    "PRONOUN_EN_POSSESSIVE": "pronoun/en_possessive",
+    "PRONOUN_EN_REFLEXIVE": "pronoun/en_reflexive",
+    "PRONOUN_EN_SUBJECTIVE": "pronoun/en_subjective",
+    "VERB_EN_3P_F_FUTURE": "verb/en_3p-f_future",
+    "VERB_EN_3P_F_PAST": "verb/en_3p-f_past",
+    "VERB_EN_3P_F_PRESENT": "verb/en_3p-f_present",
+    "VERB_EN_3P_M_FUTURE": "verb/en_3p-m_future",
+    "VERB_EN_3P_M_PAST": "verb/en_3p-m_past",
+    "VERB_EN_3P_M_PRESENT": "verb/en_3p-m_present",
+    "VERB_EN_3S_F_FUTURE": "verb/en_3s-f_future",
+    "VERB_EN_3S_F_PAST": "verb/en_3s-f_past",
+    "VERB_EN_3S_F_PRESENT": "verb/en_3s-f_present",
+    "VERB_EN_3S_M_FUTURE": "verb/en_3s-m_future",
+    "VERB_EN_3S_M_PAST": "verb/en_3s-m_past",
+    "VERB_EN_3S_M_PRESENT": "verb/en_3s-m_present",
+}
