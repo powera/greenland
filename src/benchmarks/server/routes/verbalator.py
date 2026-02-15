@@ -15,7 +15,9 @@ if str(Path(__file__).parent.parent.parent.parent) not in sys.path:
 
 import util.flesch_kincaid as fk
 from benchmarks.verbalator import common, prompt_builder, samples
-from clients import anthropic_client, ollama_client, openai_client
+from clients import ollama_client
+from clients.anthropic import client as anthropic_client
+from clients.openai import client as openai_client
 
 bp = Blueprint(
     "verbalator",
