@@ -48,13 +48,13 @@ class PollyVoice(Enum):
     LUPE = ("Lupe", "es", "f", "neural", "Spanish (US) female")
     PEDRO = ("Pedro", "es", "m", "neural", "Spanish (US) male")
     MIA = ("Mia", "es", "f", "neural", "Spanish (MX) female")
-    ANDRES = ("Andrés", "es", "m", "neural", "Spanish (MX) male")
+    ANDRES = ("Andres", "es", "m", "neural", "Spanish (MX) male")
     SERGIO = ("Sergio", "es", "m", "neural", "Spanish (ES) male")
     LUCIA = ("Lucia", "es", "f", "neural", "Spanish (ES) female")
 
     # French voices
-    LEA = ("Léa", "fr", "f", "neural", "French (FR) female")
-    REMI = ("Rémi", "fr", "m", "neural", "French (FR) male")
+    LEA = ("Lea", "fr", "f", "neural", "French (FR) female")
+    REMI = ("Remi", "fr", "m", "neural", "French (FR) male")
 
     # Korean voices
     SEOYEON = ("Seoyeon", "ko", "f", "neural", "Korean female")
