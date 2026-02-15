@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from storage import database as linguistic_db
-from storage.translation_helpers import LANGUAGE_NAMES
+from storage.translation_helpers import MAX_LLM_LANGUAGES_PER_OPERATION, LANGUAGE_NAMES
 from wordfreq.translation.constants import DEFAULT_TRANSLATION_LANGUAGES
 
 logger = logging.getLogger(__name__)
@@ -69,6 +69,14 @@ def query_translations(
             "swahili",
             "vietnamese",
         ]
+
+    if len(languages) > MAX_LLM_LANGUAGES_PER_OPERATION:
+        logger.warning(
+            "Translation generation requested %s languages; limiting to first %s",
+            len(languages),
+            MAX_LLM_LANGUAGES_PER_OPERATION,
+        )
+        languages = languages[:MAX_LLM_LANGUAGES_PER_OPERATION]
 
     # Build schema properties dynamically based on requested languages
     schema_properties = {}

@@ -29,7 +29,12 @@ from storage.models.schema import (
     SentenceTranslation,
     SentenceWord,
 )
-from storage.translation_helpers import get_languages_in_hierarchy, get_supported_languages
+from storage.translation_helpers import (
+    get_languages_in_hierarchy,
+    get_supported_languages,
+    get_tier_1_and_tier_2_languages,
+    normalize_llm_language_codes,
+)
 
 bp = Blueprint("sentences", __name__, url_prefix="/sentences")
 
@@ -458,6 +463,17 @@ def translate_sentence(sentence_id: int) -> Response:
         flash("Please select at least one language to translate to", "warning")
         return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
 
+    requested_language_count = len(selected_languages)
+    selected_languages = normalize_llm_language_codes(
+        selected_languages,
+        operation_name="Barsukas sentence translation",
+        all_expansion=get_tier_1_and_tier_2_languages(),
+    )
+
+    if not selected_languages:
+        flash("No valid target languages after normalization", "warning")
+        return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
+
     # Check if sentence has English translation
     en_translation = (
         g.db.query(SentenceTranslation)
@@ -489,6 +505,11 @@ def translate_sentence(sentence_id: int) -> Response:
                 f"Queued translation to: {', '.join(lang_names)}. Results will appear soon.",
                 "success",
             )
+            if requested_language_count > len(selected_languages):
+                flash(
+                    f"Requested {requested_language_count} languages; using first {len(selected_languages)}.",
+                    "warning",
+                )
         else:
             flash(
                 "A translation task for these languages is already in progress for this sentence.",

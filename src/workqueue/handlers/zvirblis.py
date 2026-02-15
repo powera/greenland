@@ -13,7 +13,11 @@ from sqlalchemy.orm import Session
 from workqueue.tools import get_lemma_or_raise
 import constants
 from storage.models.schema import Sentence, SentenceTranslation
-from storage.translation_helpers import get_supported_languages
+from storage.translation_helpers import (
+    get_supported_languages,
+    get_tier_1_and_tier_2_languages,
+    normalize_llm_language_codes,
+)
 from sentences.translation import translate_sentence as do_translation
 
 
@@ -29,7 +33,11 @@ def handle_translate_sentence(session: Session, payload: Dict) -> str:
         str: Result message describing what was translated
     """
     sentence_id = payload["sentence_id"]
-    selected_languages = payload["selected_languages"]
+    selected_languages = normalize_llm_language_codes(
+        payload["selected_languages"],
+        operation_name="Zvirblis workqueue sentence translation",
+        all_expansion=get_tier_1_and_tier_2_languages(),
+    )
 
     sentence = session.get(Sentence, sentence_id)
     if not sentence:

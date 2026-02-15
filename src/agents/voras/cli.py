@@ -33,7 +33,11 @@ from workqueue.task_queue import TaskStatus, enqueue_task
 from storage.models.schema import BarsukasTask
 
 # Import language mappings from translation_helpers (single source of truth)
-from storage.translation_helpers import LANGUAGE_FIELDS
+from storage.translation_helpers import (
+    LANGUAGE_FIELDS,
+    get_tier_1_and_tier_2_languages,
+    normalize_llm_language_codes,
+)
 
 
 def get_argument_parser() -> argparse.ArgumentParser:
@@ -81,7 +85,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         nargs="+",
         dest="languages",
         choices=list(LANGUAGE_FIELDS.keys()),
-        help="Specific language(s) to process (lt, zh, ko, fr, es, de, pt, sw, vi). Can specify multiple languages separated by spaces. If not specified, processes all languages.",
+        help="Specific language(s) to process (lt, zh, ko, fr, es, de, pt, sw, vi). Can specify multiple languages separated by spaces. If not specified, processes Tier-1 and Tier-2 languages.",
     )
 
     # Additional parameters
@@ -534,8 +538,10 @@ def main() -> None:
 
             session = agent.get_session()
             try:
-                languages_to_fix = (
-                    args.languages if args.languages else list(LANGUAGE_FIELDS.keys())
+                languages_to_fix = normalize_llm_language_codes(
+                    args.languages if args.languages else get_tier_1_and_tier_2_languages(),
+                    operation_name="Voras populate enqueue",
+                    all_expansion=get_tier_1_and_tier_2_languages(),
                 )
                 results = enqueue_voras_populate_work(
                     agent=agent,
