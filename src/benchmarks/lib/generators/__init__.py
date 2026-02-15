@@ -19,3 +19,7 @@ from benchmarks.lib.generators.spell_check_generator import SpellCheckGenerator
 from benchmarks.lib.generators.translations_generator import TranslationGenerator
 from benchmarks.lib.generators.unit_conversion_generator import UnitConversionGenerator
 from benchmarks.lib.generators.word_length_generator import WordLengthGenerator
+
+from benchmarks.lib.generators.sentence_decomposition_generator import (
+    SentenceDecompositionGenerator,
+)

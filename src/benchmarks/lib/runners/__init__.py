@@ -17,3 +17,5 @@ from benchmarks.lib.runners.spell_check_runner import SpellCheckRunner
 from benchmarks.lib.runners.translations_runner import TranslationRunner
 from benchmarks.lib.runners.unit_conversion_runner import UnitConversionRunner
 from benchmarks.lib.runners.word_length_runner import WordLengthRunner
+
+from benchmarks.lib.runners.sentence_decomposition_runner import SentenceDecompositionRunner

@@ -30,6 +30,7 @@ benchmarks/
 | 0032 | Part of Speech | Identify word grammatical roles |
 | 0033 | Lemma | Find base/dictionary form of words |
 | 0061 | English to IPA | Convert to phonetic transcription |
+| 0062 | Sentence Decomposition | Generate multilingual token-level sentence decomposition JSON |
 
 ## Usage
 
