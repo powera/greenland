@@ -17,7 +17,7 @@ from storage.connection_pool import get_session
 from storage.models.schema import Corpus, WordFrequency, WordToken
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Constants

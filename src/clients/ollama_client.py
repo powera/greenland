@@ -16,7 +16,7 @@ from clients.types import Response
 from util.telemetry import LLMUsage
 
 # Configure logging with DEBUG level option
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 SERVER = "100.123.16.86"
