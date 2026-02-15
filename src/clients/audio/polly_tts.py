@@ -41,34 +41,112 @@ class PollyVoice(Enum):
     Each value is (voice_id, language_code, gender, engine, description).
     """
 
+    # Arabic voices
+    HALA = ("Hala", "ar", "f", "neural", "Arabic (Gulf) female")
+    ZAYD = ("Zayd", "ar", "m", "neural", "Arabic (Gulf) male")
+
+    # Catalan voices
+    ARLET = ("Arlet", "ca", "f", "neural", "Catalan female")
+
+    # Czech voices
+    JITKA = ("Jitka", "cs", "f", "neural", "Czech female")
+
     # Chinese (Mandarin) voices
     ZHIYU = ("Zhiyu", "zh", "f", "neural", "Chinese Mandarin female")
 
+    # Chinese (Cantonese) voices
+    HIUJIN = ("Hiujin", "yue", "f", "neural", "Chinese Cantonese female")
+
+    # Danish voices
+    NAJA = ("Naja", "da", "f", "neural", "Danish female")
+    MADS = ("Mads", "da", "m", "neural", "Danish male")
+    SOFIE = ("Sofie", "da", "f", "neural", "Danish female (alt)")
+
+    # Dutch voices
+    LAURA = ("Laura", "nl", "f", "neural", "Dutch (NL) female")
+    RUBEN = ("Ruben", "nl", "m", "neural", "Dutch (NL) male")
+    LISA = ("Lisa", "nl", "f", "neural", "Dutch (BE) female")
+
+    # English voices
+    DANIELLE = ("Danielle", "en", "f", "neural", "English (US) female")
+    GREGORY = ("Gregory", "en", "m", "neural", "English (US) male")
+    JOANNA = ("Joanna", "en", "f", "neural", "English (US) female")
+    MATTHEW = ("Matthew", "en", "m", "neural", "English (US) male")
+    RUTH = ("Ruth", "en", "f", "neural", "English (US) female")
+    STEPHEN = ("Stephen", "en", "m", "neural", "English (US) male")
+    AMY = ("Amy", "en", "f", "neural", "English (GB) female")
+    EMMA = ("Emma", "en", "f", "neural", "English (GB) female")
+    BRIAN = ("Brian", "en", "m", "neural", "English (GB) male")
+    ARTHUR = ("Arthur", "en", "m", "neural", "English (GB) male")
+    NICOLE = ("Nicole", "en", "f", "neural", "English (AU) female")
+    RUSSELL = ("Russell", "en", "m", "neural", "English (AU) male")
+    ADITI = ("Aditi", "en", "f", "neural", "English (IN) female")
+    KAJAL_EN = ("Kajal", "en", "f", "neural", "English (IN) female (alt)")
+
+    # Finnish voices
+    SUVI = ("Suvi", "fi", "f", "neural", "Finnish female")
+
     # Spanish voices
     LUPE = ("Lupe", "es", "f", "neural", "Spanish (US) female")
-    PEDRO = ("Pedro", "es", "m", "neural", "Spanish (US) male")
+    MIGUEL = ("Miguel", "es", "m", "neural", "Spanish (US) male")
     MIA = ("Mia", "es", "f", "neural", "Spanish (MX) female")
     ANDRES = ("Andres", "es", "m", "neural", "Spanish (MX) male")
-    SERGIO = ("Sergio", "es", "m", "neural", "Spanish (ES) male")
     LUCIA = ("Lucia", "es", "f", "neural", "Spanish (ES) female")
+    SERGIO = ("Sergio", "es", "m", "neural", "Spanish (ES) male")
 
     # French voices
     LEA = ("Lea", "fr", "f", "neural", "French (FR) female")
     REMI = ("Remi", "fr", "m", "neural", "French (FR) male")
+    GABRIELLE = ("Gabrielle", "fr", "f", "neural", "French (CA) female")
+    LIAM = ("Liam", "fr", "m", "neural", "French (CA) male")
+    ISABELLE = ("Isabelle", "fr", "f", "neural", "French (BE) female")
+
+    # Hindi voices
+    KAJAL = ("Kajal", "hi", "f", "neural", "Hindi female")
+
+    # Icelandic voices
+    DORA = ("Dóra", "is", "f", "neural", "Icelandic female")
+    KARL = ("Karl", "is", "m", "neural", "Icelandic male")
+
+    # Italian voices
+    BIANCA = ("Bianca", "it", "f", "neural", "Italian female")
+    GIORGIO = ("Giorgio", "it", "m", "neural", "Italian male")
+
+    # Japanese voices
+    KAZUHA = ("Kazuha", "ja", "f", "neural", "Japanese female")
+    TOMOKO = ("Tomoko", "ja", "f", "neural", "Japanese female (alt)")
 
     # Korean voices
     SEOYEON = ("Seoyeon", "ko", "f", "neural", "Korean female")
+    JIHYE = ("Jihye", "ko", "f", "neural", "Korean female (alt)")
 
     # German voices
-    VICKI = ("Vicki", "de", "f", "neural", "German female")
-    DANIEL = ("Daniel", "de", "m", "neural", "German male")
+    VICKI = ("Vicki", "de", "f", "neural", "German (DE) female")
+    DANIEL = ("Daniel", "de", "m", "neural", "German (DE) male")
+    HANNAH = ("Hannah", "de", "f", "neural", "German (AT) female")
+    SABRINA = ("Sabrina", "de", "f", "neural", "German (CH) female")
+
+    # Norwegian voices
+    IDA = ("Ida", "nb", "f", "neural", "Norwegian female")
+
+    # Polish voices
+    EWA = ("Ewa", "pl", "f", "neural", "Polish female")
+    OLA = ("Ola", "pl", "f", "neural", "Polish female (alt)")
 
     # Portuguese voices
     CAMILA = ("Camila", "pt", "f", "neural", "Portuguese (BR) female")
-    THIAGO = ("Thiago", "pt", "m", "neural", "Portuguese (BR) male")
+    RICARDO = ("Ricardo", "pt", "m", "neural", "Portuguese (BR) male")
+    THIAGO = ("Thiago", "pt", "m", "neural", "Portuguese (BR) male (alt)")
+    INES = ("Inês", "pt", "f", "neural", "Portuguese (PT) female")
+
+    # Swedish voices
+    ELIN = ("Elin", "sv", "f", "neural", "Swedish female")
+
+    # Turkish voices
+    BURCU = ("Burcu", "tr", "f", "neural", "Turkish female")
 
     # Vietnamese voices
-    # (Polly does not have Vietnamese neural voices as of 2025)
+    # (Polly does not have Vietnamese neural voices as of 2026)
 
     @property
     def voice_id(self) -> str:
@@ -108,13 +186,28 @@ class PollyVoice(Enum):
 
 # Polly language code mapping: our codes -> Polly LanguageCode
 POLLY_LANGUAGE_CODES: Dict[str, str] = {
-    "zh": "cmn-CN",
-    "es": "es-ES",
-    "fr": "fr-FR",
-    "ko": "ko-KR",
+    "ar": "ar-AE",
+    "ca": "ca-ES",
+    "cs": "cs-CZ",
+    "da": "da-DK",
     "de": "de-DE",
-    "pt": "pt-BR",
     "en": "en-US",
+    "es": "es-ES",
+    "fi": "fi-FI",
+    "fr": "fr-FR",
+    "hi": "hi-IN",
+    "is": "is-IS",
+    "it": "it-IT",
+    "ja": "ja-JP",
+    "ko": "ko-KR",
+    "nb": "nb-NO",
+    "nl": "nl-NL",
+    "pl": "pl-PL",
+    "pt": "pt-BR",
+    "sv": "sv-SE",
+    "tr": "tr-TR",
+    "yue": "yue-CN",
+    "zh": "cmn-CN",
 }
 
 
