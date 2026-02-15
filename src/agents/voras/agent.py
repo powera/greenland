@@ -47,6 +47,8 @@ from storage.translation_helpers import (
     convert_llm_response_to_lang_codes,
     get_language_name,
     get_reference_translation,
+    get_tier_1_and_tier_2_languages,
+    normalize_llm_language_codes,
 )
 from storage.translation_helpers import get_translation
 from storage.translation_helpers import get_translation as get_translation_helper
@@ -632,11 +634,17 @@ class VorasAgent:
 
         # Handle language_code as string, list, or None
         if language_code is None:
-            languages_to_fix = list(LANGUAGE_FIELDS.keys())
+            languages_to_fix = get_tier_1_and_tier_2_languages()
         elif isinstance(language_code, str):
             languages_to_fix = [language_code]
         else:
             languages_to_fix = language_code
+
+        languages_to_fix = normalize_llm_language_codes(
+            languages_to_fix,
+            operation_name="Voras translation generation",
+            all_expansion=get_tier_1_and_tier_2_languages(),
+        )
 
         # Initialize results structure
         results: Dict[str, Any] = {

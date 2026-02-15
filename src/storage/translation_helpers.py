@@ -19,6 +19,8 @@ from storage.models.schema import AudioQualityReview, Lemma, LemmaTranslation
 
 logger = logging.getLogger(__name__)
 
+MAX_LLM_LANGUAGES_PER_OPERATION = 16
+
 # Languages that need a computed sort_key for dictionary ordering.
 # CJK languages use transliteration (pinyin, hiragana, jamo); accented Latin
 # languages use character remapping (see langtools.collation).
@@ -738,6 +740,54 @@ def get_supported_languages() -> Dict[str, str]:
         Example: {'es': 'Spanish', 'fr': 'French', ...}
     """
     return {code: name for code, (_, name, _) in LANGUAGE_FIELDS.items()}
+
+
+def get_tier_1_and_tier_2_languages() -> List[str]:
+    """Return the Tier-1 + Tier-2 language codes in order."""
+    return TIER_1_LANGUAGES + TIER_2_LANGUAGES
+
+
+def normalize_llm_language_codes(
+    languages: Optional[List[str]],
+    *,
+    operation_name: str,
+    all_expansion: Optional[List[str]] = None,
+    max_languages: int = MAX_LLM_LANGUAGES_PER_OPERATION,
+) -> List[str]:
+    """Normalize language codes for LLM operations.
+
+    - Expands ``all`` to ``all_expansion`` when provided.
+    - De-duplicates while preserving order.
+    - Enforces an upper bound for a single LLM operation.
+    """
+    if not languages:
+        normalized = []
+    else:
+        normalized = list(languages)
+
+    if "all" in normalized:
+        if all_expansion is None:
+            raise ValueError(f"{operation_name} does not support 'all' languages")
+        normalized = [lang for lang in normalized if lang != "all"]
+        normalized = all_expansion + normalized
+
+    seen: set[str] = set()
+    deduped: List[str] = []
+    for lang in normalized:
+        if lang not in seen:
+            seen.add(lang)
+            deduped.append(lang)
+
+    if len(deduped) > max_languages:
+        logger.warning(
+            "%s requested %s languages; limiting to first %s",
+            operation_name,
+            len(deduped),
+            max_languages,
+        )
+        deduped = deduped[:max_languages]
+
+    return deduped
 
 
 def get_languages_in_hierarchy() -> list:

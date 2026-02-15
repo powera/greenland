@@ -23,9 +23,17 @@ from storage.models.schema import (
     SentenceWord,
     SentencePatternWord,
 )
-from storage.translation_helpers import LANGUAGE_NAMES, get_translation
+from storage.translation_helpers import LANGUAGE_NAMES, get_translation, normalize_llm_language_codes
 
 logger = logging.getLogger(__name__)
+
+
+def _normalize_target_languages(target_languages: List[str]) -> List[str]:
+    """Normalize and cap target languages for a single sentence-translation LLM call."""
+    return normalize_llm_language_codes(
+        target_languages,
+        operation_name="Sentence translation",
+    )
 
 
 def build_translation_prompt(
@@ -43,6 +51,8 @@ def build_translation_prompt(
     Returns:
         Tuple of (context, prompt) strings
     """
+    target_languages = _normalize_target_languages(target_languages)
+
     # Get English translation
     en_translation = (
         session.query(SentenceTranslation)
@@ -180,6 +190,8 @@ def build_response_schema(
     Returns:
         Schema dict suitable for clients.lib.schema_from_dict()
     """
+    target_languages = _normalize_target_languages(target_languages)
+
     # Schema for individual word details - no descriptions to reduce token usage
     # (detailed field explanations are in the prompt context)
     word_schema: Dict[str, Any] = {
@@ -259,9 +271,13 @@ def translate_sentence(
     )
     include_english = len(english_words) == 0
 
+    normalized_target_languages = _normalize_target_languages(target_languages)
+
     # Build context, prompt and schema
-    context, prompt = build_translation_prompt(sentence, target_languages, session, include_english)
-    schema = build_response_schema(target_languages, include_english)
+    context, prompt = build_translation_prompt(
+        sentence, normalized_target_languages, session, include_english
+    )
+    schema = build_response_schema(normalized_target_languages, include_english)
 
     # Call LLM
     client = UnifiedLLMClient()

@@ -150,7 +150,10 @@ def main() -> None:
     from agents.common.lemma_selection import get_lemmas_for_agent
     from agents.sernas.agent import SernasAgent
     from agents.sernas.cli_display import display_batch_results
-    from storage.translation_helpers import get_supported_languages
+    from storage.translation_helpers import (
+        get_tier_1_and_tier_2_languages,
+        normalize_llm_language_codes,
+    )
 
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -174,9 +177,13 @@ def main() -> None:
         form_type = args.type
 
     # Get languages to process
+    requested_all_languages = bool(args.languages and "all" in args.languages)
     languages_to_process = args.languages if args.languages else ["en"]
-    if "all" in languages_to_process:
-        languages_to_process = ["en"] + list(get_supported_languages().keys())
+    languages_to_process = normalize_llm_language_codes(
+        languages_to_process,
+        operation_name="Sernas synonym generation",
+        all_expansion=get_tier_1_and_tier_2_languages(),
+    )
 
     # Determine mode from flags (default to coverage if none specified)
     if args.populate:
@@ -189,7 +196,7 @@ def main() -> None:
     # Handle coverage mode (report missing synonyms)
     if mode == "coverage":
         # Check specific languages or all languages
-        if len(languages_to_process) == 1 or "all" in args.languages:
+        if len(languages_to_process) == 1 or requested_all_languages:
             # Single language or all languages - use simpler report
             results = agent.check_missing_synonyms(
                 lemmas=lemmas,
