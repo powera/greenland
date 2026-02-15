@@ -238,6 +238,9 @@ class SentenceDecompositionBenchmark:
 register_generator("0061_english_to_ipa", EnglishToIPAGenerator)
 register_runner("0061_english_to_ipa", EnglishToIPARunner)
 
+register_generator("0062_sentence_decomposition", SentenceDecompositionGenerator)
+register_runner("0062_sentence_decomposition", SentenceDecompositionRunner)
+
 # Register the geography benchmark
 from benchmarks.lib.generators.geography_generator import GeographyGenerator
 from benchmarks.lib.runners.geography_runner import GeographyRunner

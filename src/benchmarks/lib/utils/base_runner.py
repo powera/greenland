@@ -4,6 +4,7 @@ import random
 from typing import Any, Dict, List, Optional, Tuple
 
 import benchmarks.datastore.benchmarks as datastore_benchmarks
+import benchmarks.datastore.common as datastore_common
 import benchmarks.benchmark_constants as benchmark_constants
 import benchmarks.validation
 from clients import unified_client
@@ -40,16 +41,21 @@ class BenchmarkRunner:
         self.metadata = metadata
         self.logger = logger  # TODO: don't use self
 
+        self.session = datastore_benchmarks.create_dev_session()
+
         # Handle quantization suffix in model names
+        # For remote API models, use the model codename as-is
         if "gpt-" in self.model or "claude-" in self.model or "gemini-" in self.model:
             self.remote_model = self.model
-        elif self.model.startswith("lmstudio/"):
-            self.remote_model = self.model
         else:
-            # Strip quantization suffix if present (e.g., ":Q4_0")
-            self.remote_model = ":".join(model.split(":")[:-1])
-
-        self.session = datastore_benchmarks.create_dev_session()
+            # Check if this is an lmstudio model by looking up model_path in database
+            model_info = datastore_common.get_model_by_codename(self.session, self.model)
+            if model_info and model_info.get("model_path", "").startswith("lmstudio/"):
+                # For lmstudio models, use the codename as-is (no quantization stripping)
+                self.remote_model = self.model
+            else:
+                # For Ollama models, strip quantization suffix if present (e.g., ":Q4_0")
+                self.remote_model = ":".join(model.split(":")[:-1])
 
     def load_questions(self) -> List[Dict]:
         """Load benchmark questions from database."""

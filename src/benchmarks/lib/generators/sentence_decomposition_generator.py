@@ -14,10 +14,20 @@ from benchmarks.lib.utils.data_models import (
     Difficulty,
     EvaluationCriteria,
 )
-from benchmarks.lib.utils.factory import generator
+from benchmarks.lib.utils.factory import generator, register_benchmark_metadata
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+# Define benchmark metadata
+BENCHMARK_METADATA = BenchmarkMetadata(
+    code="0062_sentence_decomposition",
+    name="Sentence Decomposition",
+    description="A benchmark to evaluate a model's ability to produce multilingual token-level sentence decomposition with grammatical metadata.",
+)
+
+# Register benchmark metadata
+register_benchmark_metadata(BENCHMARK_METADATA)
 
 
 @generator("0062_sentence_decomposition")
