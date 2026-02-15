@@ -214,6 +214,26 @@ class EnglishToIPABenchmark:
     pass
 
 
+
+from benchmarks.lib.generators.sentence_decomposition_generator import (
+    SentenceDecompositionGenerator,
+)
+from benchmarks.lib.runners.sentence_decomposition_runner import SentenceDecompositionRunner
+
+
+@benchmark(
+    code="0062_sentence_decomposition",
+    name="Sentence Decomposition",
+    description="""
+           A benchmark to evaluate a model's ability to produce multilingual
+           token-level sentence decomposition with grammatical metadata.""",
+)
+class SentenceDecompositionBenchmark:
+    """Module container for sentence decomposition benchmark."""
+
+    pass
+
+
 # Register the generator and runner classes
 register_generator("0061_english_to_ipa", EnglishToIPAGenerator)
 register_runner("0061_english_to_ipa", EnglishToIPARunner)

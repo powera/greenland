@@ -1,0 +1,234 @@
+[
+  {
+    "source_language": "en",
+    "source_sentence": "They are at the school.",
+    "translations": [
+      {
+        "language_code": "en",
+        "translation": "They are at the school."
+      },
+      {
+        "language_code": "lt",
+        "translation": "Jie yra mokykloje."
+      },
+      {
+        "language_code": "zh",
+        "translation": "他们在学校。"
+      },
+      {
+        "language_code": "fr",
+        "translation": "Ils sont à l'école."
+      },
+      {
+        "language_code": "es",
+        "translation": "Ellos están en la escuela."
+      },
+      {
+        "language_code": "nl",
+        "translation": "Ze zijn op school."
+      },
+      {
+        "language_code": "sv",
+        "translation": "De är på skolan."
+      },
+      {
+        "language_code": "kn",
+        "translation": "ಅವರು ಶಾಲೆಯಲ್ಲಿ ಇದ್ದಾರೆ."
+      },
+      {
+        "language_code": "uk",
+        "translation": "Вони зараз у школі."
+      },
+      {
+        "language_code": "bn",
+        "translation": "তারা স্কুলে আছে।"
+      }
+    ],
+    "decomposition": {
+      "languages": [
+        {
+          "language_code": "en",
+          "translation": "They are at the school.",
+          "word_count": 5,
+          "words": [
+            {
+              "position": 0,
+              "role": "pronoun",
+              "english_gloss": "they",
+              "surface_form": "They",
+              "grammatical_form": "pronoun/en_subjective",
+              "lemma": "No lemma",
+              "lemma_guid": "NONE"
+            },
+            {
+              "position": 1,
+              "role": "verb",
+              "english_gloss": "are",
+              "surface_form": "are",
+              "grammatical_form": "verb/en_3p_present",
+              "lemma": "No lemma",
+              "lemma_guid": "NONE"
+            },
+            {
+              "position": 2,
+              "role": "preposition",
+              "english_gloss": "at",
+              "surface_form": "at",
+              "grammatical_form": "preposition/base",
+              "lemma": "No lemma",
+              "lemma_guid": "NONE"
+            },
+            {
+              "position": 3,
+              "role": "article",
+              "english_gloss": "the",
+              "surface_form": "the",
+              "grammatical_form": "article/en_singular",
+              "lemma": "No lemma",
+              "lemma_guid": "NONE"
+            },
+            {
+              "position": 4,
+              "role": "noun",
+              "english_gloss": "school",
+              "surface_form": "school",
+              "grammatical_form": "noun/en_singular",
+              "lemma": "school (building)",
+              "lemma_guid": "N01_003"
+            }
+          ]
+        },
+        {
+          "language_code": "es",
+          "translation": "Ellos están en la escuela.",
+          "word_count": 5,
+          "words": [
+            {
+              "position": 0,
+              "role": "pronoun",
+              "english_gloss": "they",
+              "surface_form": "Ellos",
+              "grammatical_form": "pronoun/es_subjective",
+              "lemma": "No lemma",
+              "lemma_guid": "NONE"
+            },
+            {
+              "position": 1,
+              "role": "verb",
+              "english_gloss": "are",
+              "surface_form": "están",
+              "grammatical_form": "verb/es_3p_present",
+              "lemma": "No lemma",
+              "lemma_guid": "NONE"
+            },
+            {
+              "position": 2,
+              "role": "preposition",
+              "english_gloss": "in/at",
+              "surface_form": "en",
+              "grammatical_form": "preposition/base",
+              "lemma": "No lemma",
+              "lemma_guid": "NONE"
+            },
+            {
+              "position": 3,
+              "role": "article",
+              "english_gloss": "the",
+              "surface_form": "la",
+              "grammatical_form": "article/es_singular_f",
+              "lemma": "No lemma",
+              "lemma_guid": "NONE"
+            },
+            {
+              "position": 4,
+              "role": "noun",
+              "english_gloss": "school",
+              "surface_form": "escuela",
+              "grammatical_form": "noun/es_singular",
+              "lemma": "school (building)",
+              "lemma_guid": "N01_003"
+            }
+          ]
+        },
+        {
+          "language_code": "fr",
+          "translation": "Ils sont à l'école.",
+          "word_count": 5,
+          "words": [
+            {
+              "position": 0,
+              "role": "pronoun",
+              "english_gloss": "they",
+              "surface_form": "Ils",
+              "grammatical_form": "pronoun/fr_subjective",
+              "lemma": "No lemma",
+              "lemma_guid": "NONE"
+            },
+            {
+              "position": 1,
+              "role": "verb",
+              "english_gloss": "are",
+              "surface_form": "sont",
+              "grammatical_form": "verb/fr_3p_present",
+              "lemma": "No lemma",
+              "lemma_guid": "NONE"
+            },
+            {
+              "position": 2,
+              "role": "preposition",
+              "english_gloss": "at",
+              "surface_form": "à",
+              "grammatical_form": "preposition/base",
+              "lemma": "No lemma",
+              "lemma_guid": "NONE"
+            },
+            {
+              "position": 3,
+              "role": "article",
+              "english_gloss": "the (elided)",
+              "surface_form": "l'",
+              "grammatical_form": "article/fr_singular",
+              "lemma": "No lemma",
+              "lemma_guid": "NONE"
+            },
+            {
+              "position": 4,
+              "role": "noun",
+              "english_gloss": "school",
+              "surface_form": "école",
+              "grammatical_form": "noun/fr_singular",
+              "lemma": "school (building)",
+              "lemma_guid": "N01_003"
+            }
+          ]
+        }
+      ]
+    },
+    "candidate_lemmas": [
+      {
+        "guid": "N01_003",
+        "lemma": "school",
+        "disambiguation": "building",
+        "pos": "noun",
+        "definition": "an institution or building where people receive education",
+        "translations": {
+          "es": "escuela",
+          "fr": "école",
+          "lt": "mokykla"
+        }
+      },
+      {
+        "guid": "N19_025",
+        "lemma": "school",
+        "disambiguation": "group of fish",
+        "pos": "noun",
+        "definition": "a large group of fish swimming together",
+        "translations": {
+          "es": "banco de peces",
+          "fr": "banc de poissons",
+          "lt": "žuvių būrys"
+        }
+      }
+    ]
+  }
+]
