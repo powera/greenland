@@ -39,6 +39,106 @@ class AzureVoice(Enum):
     The voice_name is the full Azure voice identifier.
     """
 
+    # Amharic voices
+    AMEHA = ("am-ET-AmehaNeural", "am", "m", "Amharic male")
+    MEKDES = ("am-ET-MekdesNeural", "am", "f", "Amharic female")
+
+    # Arabic voices
+    SALMA = ("ar-EG-SalmaNeural", "ar", "f", "Arabic (Egypt) female")
+    SHAKIR = ("ar-EG-ShakirNeural", "ar", "m", "Arabic (Egypt) male")
+    ZARIYAH = ("ar-SA-ZariyahNeural", "ar", "f", "Arabic (Saudi) female")
+    HAMED = ("ar-SA-HamedNeural", "ar", "m", "Arabic (Saudi) male")
+
+    # Azerbaijani voices
+    BANU = ("az-AZ-BanuNeural", "az", "f", "Azerbaijani female")
+    BABEK = ("az-AZ-BabekNeural", "az", "m", "Azerbaijani male")
+
+    # Bengali voices
+    NABANITA = ("bn-IN-NabanitaNeural", "bn", "f", "Bengali female")
+    BASHKAR = ("bn-IN-BashkarNeural", "bn", "m", "Bengali male")
+
+    # Bulgarian voices
+    KALINA = ("bg-BG-KalinaNeural", "bg", "f", "Bulgarian female")
+    BORISLAV = ("bg-BG-BorislavNeural", "bg", "m", "Bulgarian male")
+
+    # Catalan voices
+    JOANA = ("ca-ES-JoanaNeural", "ca", "f", "Catalan female")
+    ENRIC = ("ca-ES-EnricNeural", "ca", "m", "Catalan male")
+
+    # Croatian voices
+    GABRIJELA = ("hr-HR-GabrijelaNeural", "hr", "f", "Croatian female")
+    SRECKO = ("hr-HR-SreckoNeural", "hr", "m", "Croatian male")
+
+    # Czech voices
+    VLASTA = ("cs-CZ-VlastaNeural", "cs", "f", "Czech female")
+    ANTONIN = ("cs-CZ-AntoninNeural", "cs", "m", "Czech male")
+
+    # Danish voices
+    CHRISTEL = ("da-DK-ChristelNeural", "da", "f", "Danish female")
+    JEPPE = ("da-DK-JeppeNeural", "da", "m", "Danish male")
+
+    # Dutch voices
+    COLETTE = ("nl-NL-ColetteNeural", "nl", "f", "Dutch female")
+    FENNA = ("nl-NL-FennaNeural", "nl", "f", "Dutch female (alt)")
+    MAARTEN = ("nl-NL-MaartenNeural", "nl", "m", "Dutch male")
+    DENA = ("nl-BE-DenaNeural", "nl", "f", "Dutch (Belgian) female")
+    ARNAUD = ("nl-BE-ArnaudNeural", "nl", "m", "Dutch (Belgian) male")
+
+    # English voices
+    AVA = ("en-US-AvaNeural", "en", "f", "English (US) female")
+    ANDREW = ("en-US-AndrewNeural", "en", "m", "English (US) male")
+    EMMA = ("en-US-EmmaNeural", "en", "f", "English (US) female (alt)")
+    BRIAN = ("en-US-BrianNeural", "en", "m", "English (US) male (alt)")
+    JENNY = ("en-US-JennyNeural", "en", "f", "English (US) female (alt2)")
+    ARIA = ("en-US-AriaNeural", "en", "f", "English (US) female (alt3)")
+    DAVIS = ("en-US-DavisNeural", "en", "m", "English (US) male (alt2)")
+    SONIA = ("en-GB-SoniaNeural", "en", "f", "English (GB) female")
+    RYAN = ("en-GB-RyanNeural", "en", "m", "English (GB) male")
+    LIBBY = ("en-GB-LibbyNeural", "en", "f", "English (GB) female (alt)")
+    NATASHA = ("en-AU-NatashaNeural", "en", "f", "English (AU) female")
+    WILLIAM = ("en-AU-WilliamNeural", "en", "m", "English (AU) male")
+    NEERJA = ("en-IN-NeerjaNeural", "en", "f", "English (IN) female")
+
+    # Estonian voices
+    ANU = ("et-EE-AnuNeural", "et", "f", "Estonian female")
+    KERT = ("et-EE-KertNeural", "et", "m", "Estonian male")
+
+    # Filipino voices
+    ROSA = ("fil-PH-RosaNeural", "tl", "f", "Filipino female")
+    ANGELO = ("fil-PH-AngeloNeural", "tl", "m", "Filipino male")
+
+    # Finnish voices
+    NOORA = ("fi-FI-NooraNeural", "fi", "f", "Finnish female")
+    HARRI = ("fi-FI-HarriNeural", "fi", "m", "Finnish male")
+
+    # Greek voices
+    ATHINA = ("el-GR-AthinaNeural", "el", "f", "Greek female")
+    NESTORAS = ("el-GR-NestorasNeural", "el", "m", "Greek male")
+
+    # Hebrew voices
+    HILA = ("he-IL-HilaNeural", "he", "f", "Hebrew female")
+    AVRI = ("he-IL-AvriNeural", "he", "m", "Hebrew male")
+
+    # Hindi voices
+    SWARA = ("hi-IN-SwaraNeural", "hi", "f", "Hindi female")
+    MADHUR = ("hi-IN-MadhurNeural", "hi", "m", "Hindi male")
+
+    # Hungarian voices
+    NOEMI = ("hu-HU-NoemiNeural", "hu", "f", "Hungarian female")
+    TAMAS = ("hu-HU-TamasNeural", "hu", "m", "Hungarian male")
+
+    # Icelandic voices
+    GUDRUN = ("is-IS-GudrunNeural", "is", "f", "Icelandic female")
+    GUNNAR = ("is-IS-GunnarNeural", "is", "m", "Icelandic male")
+
+    # Indonesian voices
+    ARDI = ("id-ID-ArdiNeural", "id", "m", "Indonesian male")
+    GADIS = ("id-ID-GadisNeural", "id", "f", "Indonesian female")
+
+    # Irish voices
+    EMILY = ("ga-IE-EmilyNeural", "ga", "f", "Irish female")
+    COLM = ("ga-IE-ColmNeural", "ga", "m", "Irish male")
+
     # Lithuanian voices
     ONA = ("lt-LT-OnaNeural", "lt", "f", "Lithuanian female")
     LEONAS = ("lt-LT-LeonasNeural", "lt", "m", "Lithuanian male")
@@ -48,36 +148,145 @@ class AzureVoice(Enum):
     YUNXI = ("zh-CN-YunxiNeural", "zh", "m", "Chinese male (cheerful)")
     XIAOYI = ("zh-CN-XiaoyiNeural", "zh", "f", "Chinese female (lively)")
     YUNJIAN = ("zh-CN-YunjianNeural", "zh", "m", "Chinese male (sports)")
+    XIAOYOU = ("zh-CN-XiaoyouNeural", "zh", "f", "Chinese female (child)")
+    YUNFAN = ("zh-CN-YunfanNeural", "zh", "m", "Chinese male (calm)")
 
     # Spanish voices
     ELVIRA = ("es-ES-ElviraNeural", "es", "f", "Spanish (ES) female")
     ALVARO = ("es-ES-AlvaroNeural", "es", "m", "Spanish (ES) male")
     DALIA = ("es-MX-DaliaNeural", "es", "f", "Spanish (MX) female")
     JORGE = ("es-MX-JorgeNeural", "es", "m", "Spanish (MX) male")
+    XIMENA = ("es-MX-XimenaNeural", "es", "f", "Spanish (MX) female (alt)")
 
     # French voices
     DENISE = ("fr-FR-DeniseNeural", "fr", "f", "French female")
     HENRI = ("fr-FR-HenriNeural", "fr", "m", "French male")
+    VIVIENNE = ("fr-FR-VivienneNeural", "fr", "f", "French female (alt)")
+    REMY = ("fr-FR-RemyNeural", "fr", "m", "French male (alt)")
+    SYLVIE = ("fr-CA-SylvieNeural", "fr", "f", "French (CA) female")
+    ANTOINE = ("fr-CA-AntoineNeural", "fr", "m", "French (CA) male")
+
+    # Georgian voices
+    EKA = ("ka-GE-EkaNeural", "ka", "f", "Georgian female")
+    GIORGI = ("ka-GE-GiorgiNeural", "ka", "m", "Georgian male")
+
+    # Italian voices
+    ISABELLA = ("it-IT-IsabellaNeural", "it", "f", "Italian female")
+    DIEGO = ("it-IT-DiegoNeural", "it", "m", "Italian male")
+    ELSA = ("it-IT-ElsaNeural", "it", "f", "Italian female (alt)")
+
+    # Japanese voices
+    NANAMI = ("ja-JP-NanamiNeural", "ja", "f", "Japanese female")
+    KEITA = ("ja-JP-KeitaNeural", "ja", "m", "Japanese male")
+    AOI = ("ja-JP-AoiNeural", "ja", "f", "Japanese female (alt)")
+    NAOKI = ("ja-JP-NaokiNeural", "ja", "m", "Japanese male (alt)")
+
+    # Kannada voices
+    SAPNA = ("kn-IN-SapnaNeural", "kn", "f", "Kannada female")
+    GAGAN = ("kn-IN-GaganNeural", "kn", "m", "Kannada male")
 
     # Korean voices
     SUNHI = ("ko-KR-SunHiNeural", "ko", "f", "Korean female")
     INJOONG = ("ko-KR-InJoonNeural", "ko", "m", "Korean male")
+    HYUNSU = ("ko-KR-HyunsuNeural", "ko", "m", "Korean male (alt)")
+
+    # Latvian voices
+    EVERITA = ("lv-LV-EveritaNeural", "lv", "f", "Latvian female")
+    NILS = ("lv-LV-NilsNeural", "lv", "m", "Latvian male")
+
+    # Malayalam voices
+    SOBHANA = ("ml-IN-SobhanaNeural", "ml", "f", "Malayalam female")
+    MIDHUN = ("ml-IN-MidhunNeural", "ml", "m", "Malayalam male")
+
+    # Maltese voices
+    GRACE = ("mt-MT-GraceNeural", "mt", "f", "Maltese female")
+    JOSEPH = ("mt-MT-JosephNeural", "mt", "m", "Maltese male")
 
     # German voices
     KATJA = ("de-DE-KatjaNeural", "de", "f", "German female")
     CONRAD = ("de-DE-ConradNeural", "de", "m", "German male")
+    AMALA = ("de-DE-AmalaNeural", "de", "f", "German female (alt)")
+    BERND = ("de-DE-BerndNeural", "de", "m", "German male (alt)")
+    INGRID = ("de-AT-IngridNeural", "de", "f", "German (AT) female")
+    JONAS = ("de-AT-JonasNeural", "de", "m", "German (AT) male")
+
+    # Norwegian voices
+    PERNILLE = ("nb-NO-PernilleNeural", "nb", "f", "Norwegian female")
+    FINN = ("nb-NO-FinnNeural", "nb", "m", "Norwegian male")
+
+    # Persian voices
+    DILARA = ("fa-IR-DilaraNeural", "fa", "f", "Persian female")
+    FARID = ("fa-IR-FaridNeural", "fa", "m", "Persian male")
+
+    # Polish voices
+    ZOFIA = ("pl-PL-ZofiaNeural", "pl", "f", "Polish female")
+    MAREK = ("pl-PL-MarekNeural", "pl", "m", "Polish male")
+    AGNIESZKA = ("pl-PL-AgnieszkaNeural", "pl", "f", "Polish female (alt)")
 
     # Portuguese voices
     FRANCISCA = ("pt-BR-FranciscaNeural", "pt", "f", "Portuguese (BR) female")
     ANTONIO = ("pt-BR-AntonioNeural", "pt", "m", "Portuguese (BR) male")
+    THALITA = ("pt-BR-ThalitaNeural", "pt", "f", "Portuguese (BR) female (alt)")
+    RAQUEL = ("pt-PT-RaquelNeural", "pt", "f", "Portuguese (PT) female")
+    DUARTE = ("pt-PT-DuarteNeural", "pt", "m", "Portuguese (PT) male")
+
+    # Romanian voices
+    ALINA = ("ro-RO-AlinaNeural", "ro", "f", "Romanian female")
+    EMIL = ("ro-RO-EmilNeural", "ro", "m", "Romanian male")
+
+    # Russian voices
+    SVETLANA = ("ru-RU-SvetlanaNeural", "ru", "f", "Russian female")
+    DMITRY = ("ru-RU-DmitryNeural", "ru", "m", "Russian male")
+    DARIYA = ("ru-RU-DariyaNeural", "ru", "f", "Russian female (alt)")
+
+    # Sinhala voices
+    THILINI = ("si-LK-ThiliniNeural", "si", "f", "Sinhala female")
+    SAMEERA = ("si-LK-SameeraNeural", "si", "m", "Sinhala male")
+
+    # Slovak voices
+    VIKTORIA = ("sk-SK-ViktoriaNeural", "sk", "f", "Slovak female")
+    LUKAS = ("sk-SK-LukasNeural", "sk", "m", "Slovak male")
+
+    # Slovenian voices
+    PETRA = ("sl-SI-PetraNeural", "sl", "f", "Slovenian female")
+    ROK = ("sl-SI-RokNeural", "sl", "m", "Slovenian male")
 
     # Swahili voices
     ZURI = ("sw-KE-ZuriNeural", "sw", "f", "Swahili female")
     RAFIKI = ("sw-KE-RafikiNeural", "sw", "m", "Swahili male")
 
+    # Swedish voices
+    SOFIE = ("sv-SE-SofieNeural", "sv", "f", "Swedish female")
+    MATTIAS = ("sv-SE-MattiasNeural", "sv", "m", "Swedish male")
+    HILLEVI = ("sv-SE-HilleviNeural", "sv", "f", "Swedish female (alt)")
+
+    # Tamil voices
+    PALLAVI = ("ta-IN-PallaviNeural", "ta", "f", "Tamil female")
+    VALLUVAR = ("ta-IN-ValluvarNeural", "ta", "m", "Tamil male")
+
+    # Telugu voices
+    SHRUTI = ("te-IN-ShrutiNeural", "te", "f", "Telugu female")
+    MOHAN = ("te-IN-MohanNeural", "te", "m", "Telugu male")
+
+    # Thai voices
+    PREMWADEE = ("th-TH-PremwadeeNeural", "th", "f", "Thai female")
+    NIWAT = ("th-TH-NiwatNeural", "th", "m", "Thai male")
+
+    # Turkish voices
+    EMEL = ("tr-TR-EmelNeural", "tr", "f", "Turkish female")
+    AHMET = ("tr-TR-AhmetNeural", "tr", "m", "Turkish male")
+
+    # Ukrainian voices
+    POLINA = ("uk-UA-PolinaNeural", "uk", "f", "Ukrainian female")
+    OSTAP = ("uk-UA-OstapNeural", "uk", "m", "Ukrainian male")
+
     # Vietnamese voices
     HOAIMY = ("vi-VN-HoaiMyNeural", "vi", "f", "Vietnamese female")
     NAMMINH = ("vi-VN-NamMinhNeural", "vi", "m", "Vietnamese male")
+
+    # Zulu voices
+    THANDO = ("zu-ZA-ThandoNeural", "zu", "f", "Zulu female")
+    THEMBA = ("zu-ZA-ThembaNeural", "zu", "m", "Zulu male")
 
     @property
     def voice_name(self) -> str:
