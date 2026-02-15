@@ -32,7 +32,7 @@ class TestPollyVoice(unittest.TestCase):
         """Test voice_id property."""
         self.assertEqual(PollyVoice.ZHIYU.voice_id, "Zhiyu")
         self.assertEqual(PollyVoice.LUPE.voice_id, "Lupe")
-        self.assertEqual(PollyVoice.LEA.voice_id, "Léa")
+        self.assertEqual(PollyVoice.LEA.voice_id, "Lea")
 
     def test_language_code(self) -> None:
         """Test language_code property."""
@@ -48,7 +48,7 @@ class TestPollyVoice(unittest.TestCase):
     def test_ui_name(self) -> None:
         """Test ui_name property."""
         self.assertEqual(PollyVoice.LUPE.ui_name, "polly-lupe")
-        self.assertEqual(PollyVoice.REMI.ui_name, "polly-rémi")
+        self.assertEqual(PollyVoice.REMI.ui_name, "polly-remi")
 
     def test_get_voices_for_language(self) -> None:
         """Test filtering voices by language."""
