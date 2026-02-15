@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from storage.backend.config import BackendType, DataSourceConfig
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 

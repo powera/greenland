@@ -36,7 +36,7 @@ from langtools.ko import llm_forms as korean
 from langtools.vi import llm_forms as vietnamese
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 

@@ -22,7 +22,7 @@ from audioshoe.espeak.types import EspeakVoice
 from clients.audio.types import AudioFormat, AudioGenerationResult
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 

@@ -138,7 +138,7 @@ def main() -> None:
     log_level = logging.DEBUG if args.debug else logging.INFO
     logging.basicConfig(
         level=log_level,
-        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+        format="%(asctime)s - %(levelname)s - %(name)s - %(filename)s:%(lineno)d - %(message)s",
         force=True,
     )
 

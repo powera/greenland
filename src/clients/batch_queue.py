@@ -25,7 +25,7 @@ import constants
 from clients.openai.batch_client import BatchStatus, OpenAIBatchClient
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Batch tracking database path

@@ -713,7 +713,7 @@ def test_clean_declension_form() -> bool:
 
 if __name__ == "__main__":
     # Set up logging for testing
-    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
 
     # Run unit tests first
     stress_tests_passed = test_stress_mark_removal()

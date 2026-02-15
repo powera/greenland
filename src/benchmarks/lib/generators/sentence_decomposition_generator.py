@@ -16,7 +16,7 @@ from benchmarks.lib.utils.data_models import (
 )
 from benchmarks.lib.utils.factory import generator
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 

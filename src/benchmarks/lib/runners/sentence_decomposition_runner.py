@@ -9,7 +9,7 @@ from benchmarks.lib.utils.base import BenchmarkRunner
 from benchmarks.lib.utils.data_models import BenchmarkMetadata
 from benchmarks.lib.utils.factory import runner
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 

@@ -9,7 +9,7 @@ from benchmarks.lib.utils.base import BenchmarkGenerator, BenchmarkRunner
 from benchmarks.lib.utils.data_models import BenchmarkMetadata
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Registry dictionaries to store generator and runner classes

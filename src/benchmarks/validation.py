@@ -14,7 +14,7 @@ from clients.openai import client as openai_client
 from benchmarks.lib.utils.data_models import BenchmarkQuestion
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Default model for validation and LLM-based question generation
