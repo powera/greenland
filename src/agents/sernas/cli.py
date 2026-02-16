@@ -65,11 +65,9 @@ def get_argument_parser() -> argparse.ArgumentParser:
             "synonym",
             "abbreviation",
             "expanded_form",
-            "alternate_spelling",
-            "alternative_form",
             "all",
         ],
-        help="[Check/Fix mode] Type to check/generate. Options: synonym, abbreviation, expanded_form, alternate_spelling, alternative_form (legacy), or all. Default: all",
+        help="[Check/Fix mode] Type to check/generate. Options: synonym, abbreviation, expanded_form, or all. Default: all",
     )
 
     # Override default languages to ['en']
@@ -350,6 +348,7 @@ def main() -> None:
     # Handle regenerate mode (similar to populate but forces regeneration)
     if mode == "regenerate":
         from storage.crud.grammar_fact import delete_grammar_fact
+        from storage.crud.operation_log import delete_synonym_scan_records
 
         # Process each language
         for lang_idx, language_code in enumerate(languages_to_process):
@@ -359,10 +358,9 @@ def main() -> None:
             session = agent.get_session()
             try:
                 for lemma in lemmas:
-                    delete_grammar_fact(session, lemma.id, language_code, "has_synonyms")
                     delete_grammar_fact(session, lemma.id, language_code, "has_abbreviations")
                     delete_grammar_fact(session, lemma.id, language_code, "has_expanded_forms")
-                    delete_grammar_fact(session, lemma.id, language_code, "has_alternate_spellings")
+                    delete_synonym_scan_records(session, lemma.id, language_code)
                 session.commit()
             finally:
                 session.close()

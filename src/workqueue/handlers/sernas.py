@@ -18,6 +18,7 @@ import util.prompt_loader
 from storage.backend.config import DataSourceConfig
 from storage.crud.derivative_form import add_derivative_form
 from storage.crud.grammar_fact import add_grammar_fact
+from storage.crud.operation_log import log_operation
 from storage.crud.word_token import add_word_token
 from storage.models.schema import Lemma
 from storage.translation_helpers import get_supported_languages, get_translation
@@ -31,7 +32,6 @@ SYNONYM_FORM_MAP = {
     "near_synonyms": "synonym_near",
     "regional_variants": "synonym_regional",
     "register_variants": "synonym_register",
-    "spelling_variants": "synonym_spelling",
     "synecdoche_variants": "synonym_synecdoche",
     "related_learner_equivalents": "synonym_related",
 }
@@ -118,7 +118,6 @@ def query_synonyms_from_llm(
                 "near_synonyms": {"type": "array", "items": {"type": "string"}},
                 "regional_variants": {"type": "array", "items": {"type": "string"}},
                 "register_variants": {"type": "array", "items": {"type": "string"}},
-                "spelling_variants": {"type": "array", "items": {"type": "string"}},
                 "synecdoche_variants": {"type": "array", "items": {"type": "string"}},
                 "related_learner_equivalents": {
                     "type": "array",
@@ -133,7 +132,6 @@ def query_synonyms_from_llm(
                 "near_synonyms",
                 "regional_variants",
                 "register_variants",
-                "spelling_variants",
                 "synecdoche_variants",
                 "related_learner_equivalents",
             ],
@@ -155,9 +153,6 @@ def query_synonyms_from_llm(
             "near_synonyms": result.get("near_synonyms", []),
             "regional_variants": result.get("regional_variants", []),
             "register_variants": result.get("register_variants", []),
-            "spelling_variants": result.get(
-                "spelling_variants", result.get("alternate_spellings", [])
-            ),
             "synecdoche_variants": result.get("synecdoche_variants", []),
             "related_learner_equivalents": result.get("related_learner_equivalents", []),
             "abbreviations": result.get("abbreviations", []),
@@ -199,7 +194,6 @@ def store_synonym_forms(
         "synonyms": 0,
         "abbreviations": 0,
         "expanded_forms": 0,
-        "spelling_variants": 0,
     }
 
     for group_name, forms in synonym_groups.items():
@@ -217,8 +211,6 @@ def store_synonym_forms(
                     verified=False,
                 )
                 stored_counts["synonyms"] += 1
-                if group_name == "spelling_variants":
-                    stored_counts["spelling_variants"] += 1
             except Exception as e:
                 logger.warning(f"Failed to store synonym '{synonym}' ({grammatical_form}): {e}")
 
@@ -257,14 +249,14 @@ def store_synonym_forms(
     return stored_counts
 
 
-def record_synonym_grammar_facts(
+def record_synonym_processing_metadata(
     session: Session,
     lemma_id: int,
     language_code: str,
     stored_counts: Dict[str, int],
 ) -> None:
     """
-    Record grammar facts to track what ŠERNAS found (or didn't find).
+    Record what ŠERNAS found and mark the lemma/language as processed.
 
     Args:
         session: Database session
@@ -272,14 +264,6 @@ def record_synonym_grammar_facts(
         language_code: Language code
         stored_counts: Dictionary with counts of stored forms by type
     """
-    add_grammar_fact(
-        session,
-        lemma_id,
-        language_code,
-        "has_synonyms",
-        "true" if stored_counts["synonyms"] > 0 else "false",
-        verified=True,
-    )
     add_grammar_fact(
         session,
         lemma_id,
@@ -296,13 +280,16 @@ def record_synonym_grammar_facts(
         "true" if stored_counts["expanded_forms"] > 0 else "false",
         verified=True,
     )
-    add_grammar_fact(
+    log_operation(
         session,
-        lemma_id,
-        language_code,
-        "has_alternate_spellings",
-        "false",
-        verified=True,
+        operation_type="synonym_scan",
+        source=f"sernas-agent:{language_code}",
+        lemma_id=lemma_id,
+        details={
+            "stored_synonyms": stored_counts["synonyms"],
+            "stored_abbreviations": stored_counts["abbreviations"],
+            "stored_expanded_forms": stored_counts["expanded_forms"],
+        },
     )
 
 
@@ -386,14 +373,6 @@ def generate_synonyms_for_lemma(
 
     abbreviations = _normalize_generated_forms(result.get("abbreviations", []), word)
     expanded_forms = _normalize_generated_forms(result.get("expanded_forms", []), word)
-    if result.get("alternate_spellings"):
-        synonym_groups["spelling_variants"].extend(
-            _normalize_generated_forms(result.get("alternate_spellings", []), word)
-        )
-        synonym_groups["spelling_variants"] = _normalize_generated_forms(
-            synonym_groups["spelling_variants"], word
-        )
-
     if dry_run:
         return {
             "dry_run": True,
@@ -403,7 +382,6 @@ def generate_synonyms_for_lemma(
             "synonyms": synonyms,
             "abbreviations": abbreviations,
             "expanded_forms": expanded_forms,
-            "spelling_variants": synonym_groups.get("spelling_variants", []),
             "synecdoche_variants": synonym_groups.get("synecdoche_variants", []),
             "total_count": len(synonyms) + len(abbreviations) + len(expanded_forms),
         }
@@ -418,8 +396,8 @@ def generate_synonyms_for_lemma(
         expanded_forms=expanded_forms,
     )
 
-    # Record grammar facts
-    record_synonym_grammar_facts(session, lemma.id, language_code, stored_counts)
+    # Record processing metadata
+    record_synonym_processing_metadata(session, lemma.id, language_code, stored_counts)
 
     logger.info(
         f"Stored {stored_counts['synonyms']} synonym variants, {stored_counts['abbreviations']} abbreviations, "
@@ -434,12 +412,10 @@ def generate_synonyms_for_lemma(
         "synonyms": synonyms,
         "abbreviations": abbreviations,
         "expanded_forms": expanded_forms,
-        "spelling_variants": synonym_groups.get("spelling_variants", []),
         "synecdoche_variants": synonym_groups.get("synecdoche_variants", []),
         "stored_synonyms": stored_counts["synonyms"],
         "stored_abbreviations": stored_counts["abbreviations"],
         "stored_expanded": stored_counts["expanded_forms"],
-        "stored_spelling_variants": stored_counts["spelling_variants"],
     }
 
 
