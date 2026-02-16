@@ -36,7 +36,15 @@ def group_derivative_forms(derivative_forms: Any) -> Tuple[Dict, Dict, Dict, Lis
             "alternate_spelling",
             "alternative_form",
         ]
-        is_synonym = form.grammatical_form == "synonym"
+        is_synonym = form.grammatical_form in [
+            "synonym",
+            "synonym_near",
+            "synonym_regional",
+            "synonym_register",
+            "synonym_related",
+            "synonym_spelling",
+            "synonym_synecdoche",
+        ]
 
         if is_synonym:
             if lang_code not in synonyms_by_language:

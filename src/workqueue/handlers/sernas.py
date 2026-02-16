@@ -26,6 +26,37 @@ from wordfreq.translation.client import LinguisticClient
 
 logger = logging.getLogger(__name__)
 
+SYNONYM_FORM_MAP = {
+    "synonyms": "synonym",
+    "near_synonyms": "synonym_near",
+    "regional_variants": "synonym_regional",
+    "register_variants": "synonym_register",
+    "spelling_variants": "synonym_spelling",
+    "synecdoche_variants": "synonym_synecdoche",
+    "related_learner_equivalents": "synonym_related",
+}
+
+
+def _normalize_generated_forms(forms: List[str], original_word: str) -> List[str]:
+    """Normalize LLM-generated form lists by trimming and deduplicating."""
+    normalized: List[str] = []
+    seen: set[str] = set()
+    original_normalized = original_word.strip().casefold()
+
+    for raw_form in forms:
+        clean_form = (raw_form or "").strip()
+        if not clean_form or is_numeral(clean_form):
+            continue
+        if clean_form.casefold() == original_normalized:
+            continue
+        dedup_key = clean_form.casefold()
+        if dedup_key in seen:
+            continue
+        seen.add(dedup_key)
+        normalized.append(clean_form)
+
+    return normalized
+
 
 def query_synonyms_from_llm(
     client: LinguisticClient,
@@ -47,7 +78,7 @@ def query_synonyms_from_llm(
         english_word: Original English lemma (for context)
 
     Returns:
-        Dictionary with synonyms, abbreviations, expanded_forms, alternate_spellings, and success flag
+        Dictionary with synonyms, abbreviations, expanded_forms, and synonym-variant buckets
     """
     # Get language name
     language_names = get_supported_languages()
@@ -83,11 +114,29 @@ def query_synonyms_from_llm(
             "properties": {
                 "abbreviations": {"type": "array", "items": {"type": "string"}},
                 "expanded_forms": {"type": "array", "items": {"type": "string"}},
-                "alternate_spellings": {"type": "array", "items": {"type": "string"}},
                 "synonyms": {"type": "array", "items": {"type": "string"}},
+                "near_synonyms": {"type": "array", "items": {"type": "string"}},
+                "regional_variants": {"type": "array", "items": {"type": "string"}},
+                "register_variants": {"type": "array", "items": {"type": "string"}},
+                "spelling_variants": {"type": "array", "items": {"type": "string"}},
+                "synecdoche_variants": {"type": "array", "items": {"type": "string"}},
+                "related_learner_equivalents": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                },
                 "explanation": {"type": "string"},
             },
-            "required": ["abbreviations", "expanded_forms", "alternate_spellings", "synonyms"],
+            "required": [
+                "abbreviations",
+                "expanded_forms",
+                "synonyms",
+                "near_synonyms",
+                "regional_variants",
+                "register_variants",
+                "spelling_variants",
+                "synecdoche_variants",
+                "related_learner_equivalents",
+            ],
         }
 
         response = client.client.generate_chat(
@@ -103,9 +152,16 @@ def query_synonyms_from_llm(
         return {
             "success": True,
             "synonyms": result.get("synonyms", []),
+            "near_synonyms": result.get("near_synonyms", []),
+            "regional_variants": result.get("regional_variants", []),
+            "register_variants": result.get("register_variants", []),
+            "spelling_variants": result.get(
+                "spelling_variants", result.get("alternate_spellings", [])
+            ),
+            "synecdoche_variants": result.get("synecdoche_variants", []),
+            "related_learner_equivalents": result.get("related_learner_equivalents", []),
             "abbreviations": result.get("abbreviations", []),
             "expanded_forms": result.get("expanded_forms", []),
-            "alternate_spellings": result.get("alternate_spellings", []),
             "explanation": result.get("explanation", ""),
         }
 
@@ -121,10 +177,9 @@ def store_synonym_forms(
     session: Session,
     lemma: Lemma,
     language_code: str,
-    synonyms: List[str],
+    synonym_groups: Dict[str, List[str]],
     abbreviations: List[str],
     expanded_forms: List[str],
-    alternate_spellings: List[str],
 ) -> Dict[str, int]:
     """
     Store synonym and alternative forms in the database.
@@ -133,10 +188,9 @@ def store_synonym_forms(
         session: Database session
         lemma: Lemma to associate forms with
         language_code: Language code
-        synonyms: List of synonym strings
+        synonym_groups: Dictionary of synonym-like forms keyed by category
         abbreviations: List of abbreviation strings
         expanded_forms: List of expanded form strings
-        alternate_spellings: List of alternate spelling strings
 
     Returns:
         Dictionary with counts of stored forms by type
@@ -145,24 +199,28 @@ def store_synonym_forms(
         "synonyms": 0,
         "abbreviations": 0,
         "expanded_forms": 0,
-        "alternate_spellings": 0,
+        "spelling_variants": 0,
     }
 
-    for synonym in synonyms:
-        try:
-            word_token = add_word_token(session, synonym, language_code)
-            add_derivative_form(
-                session=session,
-                lemma=lemma,
-                derivative_form_text=synonym,
-                language_code=language_code,
-                grammatical_form="synonym",
-                word_token=word_token,
-                verified=False,
-            )
-            stored_counts["synonyms"] += 1
-        except Exception as e:
-            logger.warning(f"Failed to store synonym '{synonym}': {e}")
+    for group_name, forms in synonym_groups.items():
+        grammatical_form = SYNONYM_FORM_MAP[group_name]
+        for synonym in forms:
+            try:
+                word_token = add_word_token(session, synonym, language_code)
+                add_derivative_form(
+                    session=session,
+                    lemma=lemma,
+                    derivative_form_text=synonym,
+                    language_code=language_code,
+                    grammatical_form=grammatical_form,
+                    word_token=word_token,
+                    verified=False,
+                )
+                stored_counts["synonyms"] += 1
+                if group_name == "spelling_variants":
+                    stored_counts["spelling_variants"] += 1
+            except Exception as e:
+                logger.warning(f"Failed to store synonym '{synonym}' ({grammatical_form}): {e}")
 
     for abbr in abbreviations:
         try:
@@ -195,22 +253,6 @@ def store_synonym_forms(
             stored_counts["expanded_forms"] += 1
         except Exception as e:
             logger.warning(f"Failed to store expanded form '{exp_form}': {e}")
-
-    for alt_spelling in alternate_spellings:
-        try:
-            word_token = add_word_token(session, alt_spelling, language_code)
-            add_derivative_form(
-                session=session,
-                lemma=lemma,
-                derivative_form_text=alt_spelling,
-                language_code=language_code,
-                grammatical_form="alternate_spelling",
-                word_token=word_token,
-                verified=False,
-            )
-            stored_counts["alternate_spellings"] += 1
-        except Exception as e:
-            logger.warning(f"Failed to store alternate spelling '{alt_spelling}': {e}")
 
     return stored_counts
 
@@ -259,7 +301,7 @@ def record_synonym_grammar_facts(
         lemma_id,
         language_code,
         "has_alternate_spellings",
-        "true" if stored_counts["alternate_spellings"] > 0 else "false",
+        "false",
         verified=True,
     )
 
@@ -329,11 +371,28 @@ def generate_synonyms_for_lemma(
             "language_code": language_code,
         }
 
-    # Extract results and filter out numerals
-    synonyms = [s for s in result.get("synonyms", []) if not is_numeral(s)]
-    abbreviations = [a for a in result.get("abbreviations", []) if not is_numeral(a)]
-    expanded_forms = [e for e in result.get("expanded_forms", []) if not is_numeral(e)]
-    alternate_spellings = [a for a in result.get("alternate_spellings", []) if not is_numeral(a)]
+    synonym_groups: Dict[str, List[str]] = {}
+    for group_name in SYNONYM_FORM_MAP:
+        synonym_groups[group_name] = _normalize_generated_forms(result.get(group_name, []), word)
+
+    synonyms = []
+    synonym_seen: set[str] = set()
+    for group_name in SYNONYM_FORM_MAP:
+        for synonym in synonym_groups[group_name]:
+            dedup_key = synonym.casefold()
+            if dedup_key not in synonym_seen:
+                synonym_seen.add(dedup_key)
+                synonyms.append(synonym)
+
+    abbreviations = _normalize_generated_forms(result.get("abbreviations", []), word)
+    expanded_forms = _normalize_generated_forms(result.get("expanded_forms", []), word)
+    if result.get("alternate_spellings"):
+        synonym_groups["spelling_variants"].extend(
+            _normalize_generated_forms(result.get("alternate_spellings", []), word)
+        )
+        synonym_groups["spelling_variants"] = _normalize_generated_forms(
+            synonym_groups["spelling_variants"], word
+        )
 
     if dry_run:
         return {
@@ -344,11 +403,9 @@ def generate_synonyms_for_lemma(
             "synonyms": synonyms,
             "abbreviations": abbreviations,
             "expanded_forms": expanded_forms,
-            "alternate_spellings": alternate_spellings,
-            "total_count": len(synonyms)
-            + len(abbreviations)
-            + len(expanded_forms)
-            + len(alternate_spellings),
+            "spelling_variants": synonym_groups.get("spelling_variants", []),
+            "synecdoche_variants": synonym_groups.get("synecdoche_variants", []),
+            "total_count": len(synonyms) + len(abbreviations) + len(expanded_forms),
         }
 
     # Store the forms in the database
@@ -356,18 +413,17 @@ def generate_synonyms_for_lemma(
         session=session,
         lemma=lemma,
         language_code=language_code,
-        synonyms=synonyms,
+        synonym_groups=synonym_groups,
         abbreviations=abbreviations,
         expanded_forms=expanded_forms,
-        alternate_spellings=alternate_spellings,
     )
 
     # Record grammar facts
     record_synonym_grammar_facts(session, lemma.id, language_code, stored_counts)
 
     logger.info(
-        f"Stored {stored_counts['synonyms']} synonyms, {stored_counts['abbreviations']} abbreviations, "
-        f"{stored_counts['expanded_forms']} expanded forms, and {stored_counts['alternate_spellings']} alternate spellings"
+        f"Stored {stored_counts['synonyms']} synonym variants, {stored_counts['abbreviations']} abbreviations, "
+        f"and {stored_counts['expanded_forms']} expanded forms"
     )
 
     return {
@@ -378,11 +434,12 @@ def generate_synonyms_for_lemma(
         "synonyms": synonyms,
         "abbreviations": abbreviations,
         "expanded_forms": expanded_forms,
-        "alternate_spellings": alternate_spellings,
+        "spelling_variants": synonym_groups.get("spelling_variants", []),
+        "synecdoche_variants": synonym_groups.get("synecdoche_variants", []),
         "stored_synonyms": stored_counts["synonyms"],
         "stored_abbreviations": stored_counts["abbreviations"],
         "stored_expanded": stored_counts["expanded_forms"],
-        "stored_spellings": stored_counts["alternate_spellings"],
+        "stored_spelling_variants": stored_counts["spelling_variants"],
     }
 
 
@@ -413,11 +470,7 @@ def handle_generate_synonyms(session: Session, payload: Dict) -> str:
         raise RuntimeError(result["error"])
 
     synonyms_count = result.get("stored_synonyms", 0)
-    alternatives_count = (
-        result.get("stored_abbreviations", 0)
-        + result.get("stored_expanded", 0)
-        + result.get("stored_spellings", 0)
-    )
+    alternatives_count = result.get("stored_abbreviations", 0) + result.get("stored_expanded", 0)
 
     session.commit()
     return f"Stored {synonyms_count} synonym(s) and {alternatives_count} alternative form(s)"

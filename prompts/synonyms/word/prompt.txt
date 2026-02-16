@@ -8,8 +8,14 @@ Context:
 Generate:
 1. **Abbreviations**: Shortened forms (e.g., "TV" for "television")
 2. **Expanded forms**: Longer/fuller forms (e.g., "television" for "TV")
-3. **Alternate spellings**: Valid spelling variants in THIS language only (not misspellings, not other languages) - include regional/dialect variants
-4. **Synonyms**: Words usable interchangeably in most contexts (not specific types/shades/varieties) - include regional/dialect variants
+3. **Synonyms and learner-equivalent variants**:
+   - `synonyms`: close to fully interchangeable
+   - `near_synonyms`: mostly interchangeable, nuance differences allowed
+   - `regional_variants`: regional/dialect alternatives
+   - `register_variants`: formal/informal variants
+   - `spelling_variants`: accepted spelling variants (especially for English)
+   - `synecdoche_variants`: practical part-whole/type-member substitutions used in everyday speech
+   - `related_learner_equivalents`: practical learner equivalents where distinctions are often secondary in everyday usage
 
 Remember: Empty arrays are expected and correct when no valid forms exist. Return each variant as a separate array item.
 

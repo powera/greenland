@@ -567,7 +567,15 @@ class WirewordExporter:
                         "alternate_spelling",
                         "alternative_form",
                     ]
-                    is_synonym = form.grammatical_form == "synonym"
+                    is_synonym = form.grammatical_form in [
+                        "synonym",
+                        "synonym_near",
+                        "synonym_regional",
+                        "synonym_register",
+                        "synonym_related",
+                        "synonym_spelling",
+                        "synonym_synecdoche",
+                    ]
 
                     # Handle different types of derivative forms
                     if form.language_code == "en":
@@ -649,7 +657,16 @@ class WirewordExporter:
                                 continue
                             # Generic handler for other grammatical forms (French verbs, Korean forms, etc.)
                             # Skip alternative_form and synonym as they're handled separately above
-                            if form.grammatical_form not in ["alternative_form", "synonym"]:
+                            if form.grammatical_form not in [
+                                "alternative_form",
+                                "synonym",
+                                "synonym_near",
+                                "synonym_regional",
+                                "synonym_register",
+                                "synonym_related",
+                                "synonym_spelling",
+                                "synonym_synecdoche",
+                            ]:
                                 form_level = max(entry["trakaido_level"], 4)
 
                                 # Try to look up English translation from pre-fetched data
@@ -1215,10 +1232,26 @@ class WirewordExporter:
 
                     # Handle different types of derivative forms
                     if form.language_code == "en":
-                        if form.grammatical_form == "synonym":
+                        if form.grammatical_form in [
+                            "synonym",
+                            "synonym_near",
+                            "synonym_regional",
+                            "synonym_register",
+                            "synonym_related",
+                            "synonym_spelling",
+                            "synonym_synecdoche",
+                        ]:
                             english_synonyms.append(form.derivative_form_text)
                     elif form.language_code == self.language:
-                        if form.grammatical_form == "synonym":
+                        if form.grammatical_form in [
+                            "synonym",
+                            "synonym_near",
+                            "synonym_regional",
+                            "synonym_register",
+                            "synonym_related",
+                            "synonym_spelling",
+                            "synonym_synecdoche",
+                        ]:
                             target_synonyms.append(form.derivative_form_text)
                             # Generate pinyin for Chinese synonyms
                             if self.language == "zh":
