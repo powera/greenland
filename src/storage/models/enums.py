@@ -210,127 +210,17 @@ class GrammaticalForm(enum.Enum):
     VERB_PRESENT_PARTICIPLE = "verb/present_participle"
     VERB_GERUND = "verb/gerund"
 
-    # English verb forms (person_tense)
-    # Present tense
-
-    # Past tense
-
-    # Future tense
-
-    # Imperative
-
-    # English noun forms (singular/plural only)
-
-    # English adjective forms (comparative degrees)
-
-    # English adverb forms (comparative degrees)
-
-    # Lithuanian verb forms (person_tense with gender distinction)
-    # Present tense
-
-    # Past tense
-
-    # Future tense
-
     # Noun forms (English)
     NOUN_SINGULAR = "noun/singular"
     NOUN_PLURAL = "noun/plural"
     NOUN_POSSESSIVE_SINGULAR = "noun/possessive_singular"
     NOUN_POSSESSIVE_PLURAL = "noun/possessive_plural"
 
-    # Lithuanian noun forms (7 cases × 2 numbers)
-
     # Adjective forms (English)
     ADJECTIVE_POSITIVE = "adjective/positive"
     ADJECTIVE_COMPARATIVE = "adjective/comparative"
     ADJECTIVE_SUPERLATIVE = "adjective/superlative"
 
-    # Lithuanian adjective forms (7 cases × 2 numbers × 2 genders = 28 forms)
-    # Masculine singular
-
-    # Feminine singular
-
-    # Masculine plural
-
-    # Feminine plural
-
-    # Lithuanian adverb forms (comparative degrees)
-
-    # French noun forms (singular/plural only - each noun has a fixed gender)
-
-    # French adjective forms (2 genders × 2 numbers = 4 forms)
-
-    # French verb forms (8 persons × 4 tenses = 32 forms)
-    # Present tense (présent de l'indicatif)
-
-    # Imperfect (imparfait)
-
-    # Future (futur simple)
-
-    # Passé composé (compound past with auxiliary)
-
-    # Past participles (masculine and feminine forms)
-
-    # Spanish noun forms (singular/plural only - each noun has a fixed gender)
-
-    # Spanish adjective forms (2 genders × 2 numbers = 4 forms)
-
-    # Spanish verb forms (8 persons × 3 tenses = 24 forms)
-    # Present tense (presente de indicativo)
-
-    # Preterite (pretérito perfecto simple - simple past)
-
-    # Future (futuro simple)
-
-    # German noun forms (4 cases × 2 numbers = 8 forms)
-    # Singular
-    # Plural
-
-    # German adjective forms (2 genders × 2 numbers = 4 forms, simplified)
-
-    # German verb forms (8 persons × 3 tenses = 24 forms)
-    # Present tense (Präsens)
-
-    # Perfect (Perfekt - compound past, most common in spoken German)
-
-    # Future (Futur I)
-
-    # Portuguese noun forms (singular/plural only - each noun has a fixed gender)
-
-    # Portuguese adjective forms (2 genders × 2 numbers = 4 forms)
-
-    # Portuguese verb forms (8 persons × 3 tenses = 24 forms)
-    # Present tense (presente do indicativo)
-
-    # Preterite (pretérito perfeito - simple past)
-
-    # Future (futuro do presente)
-
-    # Italian noun forms (singular/plural only - each noun has a fixed gender)
-
-    # Italian adjective forms (2 genders × 2 numbers = 4 forms)
-
-    # Italian verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (presente indicativo)
-
-    # Passato remoto (simple past)
-
-    # Future (futuro semplice)
-
-    # Swedish noun forms (singular/plural only)
-
-    # Swedish verb forms (one form per tense — Swedish does not conjugate by person)
-
-    # Dutch noun forms (singular/plural only - each noun has a fixed gender)
-
-    # Dutch adjective forms (2 genders × 2 numbers = 4 forms)
-
-    # Dutch verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (onvoltooid tegenwoordige tijd)
-
-    # Past tense (onvoltooid verleden tijd / imperfectum)
-
-    # Future (onvoltooid toekomende tijd)
 
     # Adverb forms
     ADVERB_POSITIVE = "adverb/positive"
@@ -340,20 +230,6 @@ class GrammaticalForm(enum.Enum):
     # Language-specific adverb base forms (invariant adverbs)
     ADVERB_KO_BASE = "adverb/ko_base"
 
-    # Pronoun forms - English, French, Spanish, Portuguese (function-based, simplified)
-    # Word itself indicates person/number/gender; tag indicates grammatical function
-
-
-
-
-    # Pronoun forms - Lithuanian (case-based, simplified)
-    # Word itself indicates person/number/gender; tag indicates grammatical case
-
-    # Pronoun forms - German (case-based, simplified)
-    # Word itself indicates person/number/gender; tag indicates grammatical case
-
-    # Pronoun forms - Chinese (simplified)
-    # Word itself indicates person/number/gender; tag indicates function
 
     # Pronoun forms - Korean (simplified)
     # Word itself indicates person/number/formality; tag indicates function
@@ -373,203 +249,27 @@ class GrammaticalForm(enum.Enum):
     DETERMINER = "determiner/base"
     ARTICLE = "article/base"
 
-    # Language-specific article forms
-
-    # Numeral forms
-    # For numerals, the lemma form is typically masculine singular where gender applies.
-    # Cardinal numerals answer "how many?" (one, two, three)
-    # Ordinal numerals answer "which position?" (first, second, third)
-
-    # English numerals (invariant - no gender/case)
-
-    # Lithuanian numerals (gender for 1-9, some case variation)
-    # Lemma form is masculine nominative
-
-    # German numerals (gender for ein/eine/ein only; others invariant)
-    # Lemma form is masculine nominative
-
-    # French numerals (gender for un/une only; others invariant)
-
-    # Spanish numerals (gender for uno/una and ordinals)
-
-    # Portuguese numerals (gender for um/uma and ordinals)
-
-    # Chinese numerals
-    # Cardinal: 一, 二, 三 (standard counting form)
-    # Quantity: 一, 两, 三 (两 used before measure words for "two")
 
     # Korean numerals (native Korean vs Sino-Korean systems)
     NUMERAL_KO_NATIVE = "numeral/ko_native"  # 하나, 둘, 셋 (native Korean, for counting)
     NUMERAL_KO_SINO = "numeral/ko_sino"  # 일, 이, 삼 (Sino-Korean, for dates/numbers)
     NUMERAL_KO_ORDINAL = "numeral/ko_ordinal"  # 첫째, 둘째, 셋째
 
-    # Romanian noun forms (singular/plural only - each noun has a fixed gender m/f/n)
-
-    # Romanian adjective forms (2 genders × 2 numbers = 4 forms)
-
-    # Romanian verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (prezent)
-    # Past tense (perfect compus)
-    # Future tense (viitor)
-
-    # Polish noun forms (7 cases × 2 numbers = 14 forms)
-    # Singular
-    # Plural
-
-    # Polish adjective forms (2 genders × 2 numbers = 4 simplified forms)
-
-    # Polish verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (czas teraźniejszy)
-    # Past tense (czas przeszły)
-    # Future tense (czas przyszły)
-
-    # Tamil noun forms (singular/plural only)
-
-    # Tamil verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (நிகழ்காலம்)
-    # Past tense (இறந்தகாலம்)
-    # Future tense (எதிர்காலம்)
-
-    # Telugu noun forms (singular/plural only)
-
-    # Telugu verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (వర్తమానకాలం)
-    # Past tense (భూతకాలం)
-    # Future tense (భవిష్యత్కాలం)
 
     # Kannada noun forms (singular/plural only)
     NOUN_KN_SINGULAR = "noun/kn_singular"
     NOUN_KN_PLURAL = "noun/kn_plural"
 
-    # Kannada verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (ವರ್ತಮಾನಕಾಲ)
-    # Past tense (ಭೂತಕಾಲ)
-    # Future tense (ಭವಿಷ್ಯತ್ಕಾಲ)
-
-    # Malayalam noun forms (singular/plural only)
-
-    # Malayalam verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (വർത്തമാനകാലം)
-    # Past tense (ഭൂതകാലം)
-    # Future tense (ഭാവികാലം)
-
-    # Sinhala noun forms (singular/plural only)
-
-    # Sinhala verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (වර්තමාන කාලය)
-    # Past tense (අතීත කාලය)
-    # Future tense (අනාගත කාලය)
-
-    # Bulgarian noun forms (singular/plural only - each noun has a fixed gender m/f/n)
-
-    # Bulgarian verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (сегашно време)
-    # Past tense (минало свършено време)
-    # Future tense (бъдеще време)
-
-    # Croatian noun forms (singular/plural only - each noun has a fixed gender m/f/n)
-
-    # Croatian verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (prezent)
-    # Past tense (perfekt)
-    # Future tense (futur I)
-
-    # Czech noun forms (singular/plural only - each noun has a fixed gender m/f/n)
-
-    # Czech verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (přítomný čas)
-    # Past tense (minulý čas)
-    # Future tense (budoucí čas)
-
-    # Danish noun forms (singular/plural only - each noun has a fixed gender c/n)
-
-    # Danish verb forms (6 persons × 3 tenses = 18 forms)
-    # Note: Danish verbs don't conjugate by person, but we use the standard
-    # 6-person schema for consistency with other languages.
-    # Present tense (nutid)
-    # Past tense (datid)
-    # Future tense (fremtid)
 
     # Estonian noun forms (singular/plural only - no grammatical gender)
     NOUN_ET_SINGULAR = "noun/et_singular"
     NOUN_ET_PLURAL = "noun/et_plural"
 
-    # Estonian verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (olevik)
-    # Past tense (lihtminevik)
-    # Future tense (tulevik - formed with saama + infinitive)
-
-    # Finnish noun forms (singular/plural only - no grammatical gender)
-
-    # Finnish verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (preesens)
-    # Past tense (imperfekti)
-    # Future tense (futuuri - formed with tulla + present participle)
-
-    # Greek noun forms (singular/plural only - each noun has a fixed gender m/f/n)
-
-    # Greek verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (ενεστώτας)
-    # Past tense (αόριστος)
-    # Future tense (μέλλοντας - θα + subjunctive)
-
-    # Hungarian noun forms (singular/plural only - no grammatical gender)
-
-    # Hungarian verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (jelen idő)
-    # Past tense (múlt idő)
-    # Future tense (jövő idő - fog + infinitive)
-
-    # Irish noun forms (singular/plural only - each noun has a fixed gender m/f)
-
-    # Irish verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (aimsir láithreach)
-    # Past tense (aimsir chaite)
-    # Future tense (aimsir fháistineach)
 
     # Latvian noun forms (legacy singular/plural - kept for backward compatibility)
     NOUN_LV_SINGULAR = "noun/lv_singular"
     NOUN_LV_PLURAL = "noun/lv_plural"
 
-    # Latvian noun forms (7 cases × 2 numbers = 14 forms)
-
-    # Latvian verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (tagadne)
-    # Past tense (pagātne)
-    # Future tense (nākotne)
-
-    # Latvian adjective forms (7 cases × 2 numbers × 2 genders = 28 forms)
-    # Masculine singular
-    # Feminine singular
-    # Masculine plural
-    # Feminine plural
-
-    # Latvian adverb forms (3 comparative degrees)
-
-    # Maltese noun forms (singular/plural only - each noun has a fixed gender m/f)
-
-    # Maltese verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (preżent)
-    # Past tense (passat)
-    # Future tense (futur - se + imperfect)
-
-    # Slovak noun forms (singular/plural only - each noun has a fixed gender m/f/n)
-
-    # Slovak verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (prítomný čas)
-    # Past tense (minulý čas)
-    # Future tense (budúci čas)
-
-    # Slovenian noun forms (singular/plural only - each noun has a fixed gender m/f/n)
-
-    # Slovenian verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (sedanjik)
-    # Past tense (preteklik)
-    # Future tense (prihodnjik)
-
-    # Thai noun forms (singular/plural - Thai nouns don't inflect, stored for pedagogy)
-
-    # Thai verb forms (isolating language - no person conjugation, tense via particles)
 
     # Malay noun forms (singular/plural - plural via reduplication e.g. buku-buku)
     NOUN_MS_SINGULAR = "noun/ms_singular"
@@ -580,17 +280,6 @@ class GrammaticalForm(enum.Enum):
     VERB_MS_PAST = "verb/ms_past"
     VERB_MS_FUTURE = "verb/ms_future"
 
-    # Burmese noun forms (singular/plural - plurality via particles တွေ/များ)
-
-    # Burmese verb forms (isolating - tense via sentence-final particles)
-
-    # Khmer noun forms (singular/plural - no inflection, plurality via context)
-
-    # Khmer verb forms (isolating - no conjugation, tense via auxiliaries)
-
-    # Lao noun forms (singular/plural - no inflection, plurality via classifiers)
-
-    # Lao verb forms (isolating - tense via particles ຈະ/ໄດ້/ແລ້ວ)
 
     # Filipino (Tagalog) noun forms (singular/plural - plural via mga prefix)
     NOUN_TL_SINGULAR = "noun/tl_singular"
@@ -601,49 +290,6 @@ class GrammaticalForm(enum.Enum):
     VERB_TL_PAST = "verb/tl_past"
     VERB_TL_FUTURE = "verb/tl_future"
 
-    # Swahili noun forms (Bantu noun class system with singular/plural prefixes)
-
-    # Swahili verb forms (agglutinative - subject/tense/object prefixes on verb root)
-
-    # Hausa noun forms (singular/plural - plural via suffixes and internal vowel changes)
-
-    # Hausa verb forms (conjugates for person/tense with preverbal markers)
-
-    # Yoruba noun forms (isolating - no inflectional morphology on nouns)
-
-    # Yoruba verb forms (isolating - tense/aspect via preverbal particles)
-
-    # Igbo noun forms (singular/plural - some nouns use prefix changes)
-
-    # Igbo verb forms (root + suffixes for tense/aspect, tonal distinctions)
-
-    # Amharic noun forms (singular/plural - plural via suffix -ዎች/-ኦች)
-
-    # Amharic verb forms (Semitic root system with person/tense/mood conjugation)
-
-    # Zulu noun forms (Bantu noun class system with singular/plural prefixes)
-
-    # Zulu verb forms (agglutinative - subject/tense/object concords on verb root)
-
-    # Oromo noun forms (singular/plural - plural via suffixes -oota/-wwan/-lee)
-
-    # Oromo verb forms (conjugates for person/number/tense)
-
-    # Somali noun forms (singular/plural - plural via suffixes and vowel changes)
-
-    # Somali verb forms (conjugates for person/number/tense)
-
-    # Xhosa noun forms (Bantu noun class system with singular/plural prefixes)
-
-    # Xhosa verb forms (agglutinative - subject/tense/object concords on verb root)
-
-    # Shona noun forms (Bantu noun class system with singular/plural prefixes)
-
-    # Shona verb forms (agglutinative - subject/tense/object markers on verb root)
-
-    # Hindi noun forms (singular/plural - gender-based inflection)
-
-    # Hindi verb forms (person/number/gender/tense conjugation)
 
     # Bengali noun forms (singular/plural)
     NOUN_BN_SINGULAR = "noun/bn_singular"
@@ -712,41 +358,12 @@ class GrammaticalForm(enum.Enum):
     NOUN_UK_SINGULAR = "noun/uk_singular"
     NOUN_UK_PLURAL = "noun/uk_plural"
 
-    # Ukrainian noun forms (7 cases × 2 numbers = 14 forms)
 
     # Ukrainian verb forms (legacy tense-only - kept for backward compatibility)
     VERB_UK_PRESENT = "verb/uk_present"
     VERB_UK_PAST = "verb/uk_past"
     VERB_UK_FUTURE = "verb/uk_future"
 
-    # Ukrainian verb forms (6 persons × 3 tenses = 18 forms)
-    # Present tense (теперішній час)
-    # Past tense (минулий час)
-    # Future tense (майбутній час)
-
-    # Ukrainian adjective forms (7 cases × 2 numbers × 2 genders = 28 forms)
-    # Masculine singular
-    # Feminine singular
-    # Masculine plural
-    # Feminine plural
-
-    # Ukrainian adverb forms (3 comparative degrees)
-
-    # Chinese noun forms (isolating language - base form only)
-
-    # Chinese verb forms (analytic aspect patterns)
-
-    # Japanese noun forms (no morphological change - base form only)
-
-    # Japanese verb forms (genuine conjugation)
-
-    # Korean noun forms (no morphological change - base form only)
-
-    # Korean verb forms (genuine conjugation - 해요체 polite forms)
-
-    # Vietnamese noun forms (isolating language - base form only)
-
-    # Vietnamese verb forms (isolating language - base form only)
 
     # Generic forms
     BASE_FORM = "base_form"
