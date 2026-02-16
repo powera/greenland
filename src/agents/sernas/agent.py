@@ -10,7 +10,6 @@ This agent generates synonyms and alternative forms for lemmas across all suppor
 languages. It distinguishes between:
 - Abbreviations: Shortened forms (e.g., "television" → "TV", "Doctor" → "Dr.")
 - Expanded forms: Longer/fuller forms (e.g., "thousand" → "one thousand", "TV" → "television")
-- Alternate spellings: Spelling variants (e.g., "gray" → "grey", "color" → "colour")
 - Synonyms: Different words with similar meanings (e.g., "street" → "road", "mad" → "angry")
 
 "Šernas" means "boar" in Lithuanian - persistent in finding similar things.
@@ -40,7 +39,8 @@ from agents.common.lemma_selection import LemmaQueryBuilder, find_lemma_by_guid
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.crud.derivative_form import add_derivative_form
-from storage.crud.grammar_fact import add_grammar_fact, get_alternate_forms_facts
+from storage.crud.grammar_fact import add_grammar_fact
+from storage.crud.operation_log import has_synonym_scan_record, log_operation
 from storage.crud.word_token import add_word_token
 from storage.models.schema import DerivativeForm, Lemma
 from storage.translation_helpers import get_supported_languages, get_translation
@@ -55,7 +55,6 @@ SYNONYM_FORM_MAP = {
     "near_synonyms": "synonym_near",
     "regional_variants": "synonym_regional",
     "register_variants": "synonym_register",
-    "spelling_variants": "synonym_spelling",
     "synecdoche_variants": "synonym_synecdoche",
     "related_learner_equivalents": "synonym_related",
 }
@@ -127,7 +126,7 @@ class SernasAgent:
         Args:
             lemmas: List of Lemma objects to check. If None, checks all curated lemmas.
             language_code: Language to check (e.g., 'en', 'lt'). If None, check all.
-            form_type: Type to check (e.g., 'synonym', 'abbreviation', 'expanded_form', 'alternate_spelling').
+            form_type: Type to check (e.g., 'synonym', 'abbreviation', 'expanded_form').
                       If None, checks all types.
 
         Returns:
@@ -153,13 +152,11 @@ class SernasAgent:
             if form_type:
                 form_types = [form_type]
             else:
-                # Check all types (including legacy 'alternative_form')
+                # Check all currently supported types
                 form_types = [
                     "synonym",
                     "abbreviation",
                     "expanded_form",
-                    "alternate_spelling",
-                    "alternative_form",
                 ]
 
             missing_by_language: Dict[str, List[Dict[str, Any]]] = {}
@@ -178,11 +175,8 @@ class SernasAgent:
                     if not translation or not translation.strip():
                         continue
 
-                    # Check if alternate forms facts have been recorded for this lemma/language
-                    facts = get_alternate_forms_facts(session, lemma.id, lang)
-
-                    # If no facts recorded, we need to run ŠERNAS
-                    if facts is None:
+                    # We consider a lemma/language "processed" once ŠERNAS ran at least once.
+                    if not has_synonym_scan_record(session, lemma.id, lang):
                         missing_by_language[lang].append(
                             {
                                 "guid": lemma.guid,
@@ -193,24 +187,6 @@ class SernasAgent:
                                 "difficulty_level": lemma.difficulty_level,
                             }
                         )
-                    # If form_type is specified, check if that specific fact is missing
-                    elif form_type:
-                        fact_key = (
-                            f"has_{form_type}s"
-                            if not form_type.endswith("s")
-                            else f"has_{form_type}"
-                        )
-                        if fact_key not in facts:
-                            missing_by_language[lang].append(
-                                {
-                                    "guid": lemma.guid,
-                                    "english": lemma.lemma_text,
-                                    "translation": translation,
-                                    "pos_type": lemma.pos_type,
-                                    "pos_subtype": lemma.pos_subtype,
-                                    "difficulty_level": lemma.difficulty_level,
-                                }
-                            )
 
             # Calculate statistics
             total_missing = sum(len(items) for items in missing_by_language.values())
@@ -306,14 +282,6 @@ class SernasAgent:
 
             abbreviations = _normalize_generated_forms(result.get("abbreviations", []), word)
             expanded_forms = _normalize_generated_forms(result.get("expanded_forms", []), word)
-            if result.get("alternate_spellings"):
-                synonym_groups["spelling_variants"].extend(
-                    _normalize_generated_forms(result.get("alternate_spellings", []), word)
-                )
-                synonym_groups["spelling_variants"] = _normalize_generated_forms(
-                    synonym_groups["spelling_variants"], word
-                )
-
             if dry_run:
                 return {
                     "dry_run": True,
@@ -323,7 +291,6 @@ class SernasAgent:
                     "synonyms": synonyms,
                     "abbreviations": abbreviations,
                     "expanded_forms": expanded_forms,
-                    "spelling_variants": synonym_groups.get("spelling_variants", []),
                     "synecdoche_variants": synonym_groups.get("synecdoche_variants", []),
                     "total_count": len(synonyms) + len(abbreviations) + len(expanded_forms),
                 }
@@ -332,7 +299,6 @@ class SernasAgent:
             stored_synonyms = 0
             stored_abbreviations = 0
             stored_expanded = 0
-            stored_spellings = 0
 
             for group_name, group_synonyms in synonym_groups.items():
                 grammatical_form = SYNONYM_FORM_MAP[group_name]
@@ -349,8 +315,6 @@ class SernasAgent:
                             verified=False,
                         )
                         stored_synonyms += 1
-                        if group_name == "spelling_variants":
-                            stored_spellings += 1
                     except Exception as e:
                         logger.warning(
                             f"Failed to store synonym '{synonym}' ({grammatical_form}): {e}"
@@ -388,15 +352,7 @@ class SernasAgent:
                 except Exception as e:
                     logger.warning(f"Failed to store expanded form '{exp_form}': {e}")
 
-            # Record grammar facts to track what ŠERNAS found (or didn't find)
-            add_grammar_fact(
-                session,
-                lemma.id,
-                language_code,
-                "has_synonyms",
-                "true" if stored_synonyms > 0 else "false",
-                verified=True,
-            )
+            # Record non-synonym grammar facts and scan metadata
             add_grammar_fact(
                 session,
                 lemma.id,
@@ -413,13 +369,16 @@ class SernasAgent:
                 "true" if stored_expanded > 0 else "false",
                 verified=True,
             )
-            add_grammar_fact(
+            log_operation(
                 session,
-                lemma.id,
-                language_code,
-                "has_alternate_spellings",
-                "false",
-                verified=True,
+                operation_type="synonym_scan",
+                source=f"sernas-agent:{language_code}",
+                lemma_id=lemma.id,
+                details={
+                    "stored_synonyms": stored_synonyms,
+                    "stored_abbreviations": stored_abbreviations,
+                    "stored_expanded_forms": stored_expanded,
+                },
             )
 
             session.commit()
@@ -436,12 +395,10 @@ class SernasAgent:
                 "synonyms": synonyms,
                 "abbreviations": abbreviations,
                 "expanded_forms": expanded_forms,
-                "spelling_variants": synonym_groups.get("spelling_variants", []),
                 "synecdoche_variants": synonym_groups.get("synecdoche_variants", []),
                 "stored_synonyms": stored_synonyms,
                 "stored_abbreviations": stored_abbreviations,
                 "stored_expanded": stored_expanded,
-                "stored_spellings": stored_spellings,
             }
 
         except Exception as e:
@@ -472,7 +429,7 @@ class SernasAgent:
             english_word: Original English lemma (for context)
 
         Returns:
-            Dictionary with synonyms, alternative_forms, and success flag
+            Dictionary with synonyms and related variant buckets, plus success flag
         """
         # Get language name
         language_names = get_supported_languages()
@@ -512,7 +469,6 @@ class SernasAgent:
                     "near_synonyms": {"type": "array", "items": {"type": "string"}},
                     "regional_variants": {"type": "array", "items": {"type": "string"}},
                     "register_variants": {"type": "array", "items": {"type": "string"}},
-                    "spelling_variants": {"type": "array", "items": {"type": "string"}},
                     "synecdoche_variants": {"type": "array", "items": {"type": "string"}},
                     "related_learner_equivalents": {
                         "type": "array",
@@ -527,7 +483,6 @@ class SernasAgent:
                     "near_synonyms",
                     "regional_variants",
                     "register_variants",
-                    "spelling_variants",
                     "synecdoche_variants",
                     "related_learner_equivalents",
                 ],
@@ -549,9 +504,6 @@ class SernasAgent:
                 "near_synonyms": result.get("near_synonyms", []),
                 "regional_variants": result.get("regional_variants", []),
                 "register_variants": result.get("register_variants", []),
-                "spelling_variants": result.get(
-                    "spelling_variants", result.get("alternate_spellings", [])
-                ),
                 "synecdoche_variants": result.get("synecdoche_variants", []),
                 "related_learner_equivalents": result.get("related_learner_equivalents", []),
                 "abbreviations": result.get("abbreviations", []),
@@ -583,7 +535,7 @@ class SernasAgent:
         Args:
             lemmas: List of Lemma objects to process. If None, processes all curated lemmas.
             language_code: Language to fix (e.g., 'en', 'lt'). If None, defaults to English.
-            form_type: Type to generate ('synonym' or 'alternative_form'). If None, generates both.
+            form_type: Type to generate ('synonym', 'abbreviation', or 'expanded_form').
             limit: Maximum number of lemmas to process
             model: LLM model to use
             throttle: Seconds to wait between API calls

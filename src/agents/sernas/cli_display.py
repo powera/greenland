@@ -15,7 +15,6 @@ def display_synonym_results(result: Dict[str, Any], dry_run: bool = False) -> No
                 - synonyms: List of synonyms
                 - abbreviations: List of abbreviations
                 - expanded_forms: List of expanded forms
-                - alternate_spellings: List of alternate spellings
         dry_run: If True, show as dry run output
 
     Example:
@@ -23,7 +22,6 @@ def display_synonym_results(result: Dict[str, Any], dry_run: bool = False) -> No
             "synonyms": ["road", "avenue"],
             "abbreviations": ["St"],
             "expanded_forms": ["Street"],
-            "alternate_spellings": []
         }
         display_synonym_results(result, dry_run=True)
     """
@@ -36,8 +34,6 @@ def display_synonym_results(result: Dict[str, Any], dry_run: bool = False) -> No
         print(f"  Abbreviations: {', '.join(result['abbreviations'])}")
     if result.get("expanded_forms"):
         print(f"  Expanded forms: {', '.join(result['expanded_forms'])}")
-    if result.get("alternate_spellings"):
-        print(f"  Alternate spellings: {', '.join(result['alternate_spellings'])}")
 
 
 def display_batch_results(

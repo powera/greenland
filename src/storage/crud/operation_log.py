@@ -5,6 +5,7 @@
 import json
 from typing import Any, Optional
 
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from storage.models.operation_log import OperationLog
@@ -141,3 +142,37 @@ def log_translation_change(
     session.add(log_entry)
     session.flush()
     return log_entry
+
+
+def has_synonym_scan_record(session: Session, lemma_id: int, language_code: str) -> bool:
+    """Return True when ŠERNAS has already scanned this lemma/language pair."""
+    source = f"sernas-agent:{language_code}"
+    return (
+        session.query(OperationLog.id)
+        .filter(
+            and_(
+                OperationLog.operation_type == "synonym_scan",
+                OperationLog.source == source,
+                OperationLog.lemma_id == lemma_id,
+            )
+        )
+        .first()
+        is not None
+    )
+
+
+def delete_synonym_scan_records(session: Session, lemma_id: int, language_code: str) -> int:
+    """Delete ŠERNAS synonym scan records for a lemma/language pair."""
+    source = f"sernas-agent:{language_code}"
+    deleted = (
+        session.query(OperationLog)
+        .filter(
+            and_(
+                OperationLog.operation_type == "synonym_scan",
+                OperationLog.source == source,
+                OperationLog.lemma_id == lemma_id,
+            )
+        )
+        .delete(synchronize_session=False)
+    )
+    return int(deleted)

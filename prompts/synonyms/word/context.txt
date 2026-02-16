@@ -24,7 +24,6 @@ GUIDELINES FOR EACH CATEGORY:
   * near_synonyms: close alternatives that are usually acceptable but may differ by nuance (e.g., "hat"/"cap")
   * regional_variants: region-preferred words (e.g., "lift"/"elevator")
   * register_variants: formal/informal alternatives used with similar intent
-  * spelling_variants: accepted spelling variants (for English especially, e.g., "gray"/"grey", "color"/"colour")
   * synecdoche_variants: part-whole/type-member practical substitutions learners encounter (e.g., "dog"/"puppy", gendered animal terms where gender is often secondary)
   * related_learner_equivalents: learner-relevant equivalents where fine-grained taxonomy distinctions are often not critical in beginner contexts
   * Do NOT include unrelated words, broad categories, or narrow technical species/shade names

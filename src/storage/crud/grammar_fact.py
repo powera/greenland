@@ -213,8 +213,8 @@ def get_alternate_forms_facts(
     """
     Get the alternate forms grammar facts for a lemma in a specific language.
 
-    These facts describe whether the word linguistically has synonyms, abbreviations,
-    expanded forms, or alternate spellings - NOT whether they're stored in the database.
+    These facts describe whether the word linguistically has abbreviations or
+    expanded forms - NOT whether they're stored in the database.
 
     Args:
         session: Database session
@@ -224,10 +224,8 @@ def get_alternate_forms_facts(
     Returns:
         Dictionary with boolean values for each category, or None if facts not recorded
         Example: {
-            'has_synonyms': False,          # Word has no synonyms
             'has_abbreviations': True,      # Word has abbreviations
             'has_expanded_forms': False,    # Word has no expanded forms
-            'has_alternate_spellings': True # Word has alternate spellings
         }
 
         Returns None if no facts have been recorded (we don't know yet)
@@ -249,10 +247,8 @@ def get_alternate_forms_facts(
             GrammarFact.language_code == language_code,
             GrammarFact.fact_type.in_(
                 [
-                    "has_synonyms",
                     "has_abbreviations",
                     "has_expanded_forms",
-                    "has_alternate_spellings",
                 ]
             ),
         )
@@ -264,10 +260,8 @@ def get_alternate_forms_facts(
 
     results = {}
     for fact_type in [
-        "has_synonyms",
         "has_abbreviations",
         "has_expanded_forms",
-        "has_alternate_spellings",
     ]:
         value = get_grammar_fact_value(session, lemma_id, language_code, fact_type)
         results[fact_type] = value == "true"
@@ -362,7 +356,7 @@ def update_alternate_forms_facts_after_deletion(
         lemma_id: ID of the lemma
         language_code: Language code (e.g., "en", "lt", "zh")
         deleted_form_type: Optional form type that was deleted
-                          (e.g., 'synonym', 'abbreviation', 'expanded_form', 'alternate_spelling')
+                          (e.g., 'synonym', 'abbreviation', 'expanded_form')
                           If None, recalculates all types
 
     Returns:
@@ -382,17 +376,8 @@ def update_alternate_forms_facts_after_deletion(
 
     # Map form types to grammar fact types
     form_to_fact_map = {
-        "synonym": "has_synonyms",
-        "synonym_near": "has_synonyms",
-        "synonym_regional": "has_synonyms",
-        "synonym_register": "has_synonyms",
-        "synonym_related": "has_synonyms",
-        "synonym_spelling": "has_synonyms",
-        "synonym_synecdoche": "has_synonyms",
         "abbreviation": "has_abbreviations",
         "expanded_form": "has_expanded_forms",
-        "alternate_spelling": "has_alternate_spellings",
-        "alternative_form": "has_alternate_spellings",  # Legacy mapping
     }
 
     # Determine which fact types to update
