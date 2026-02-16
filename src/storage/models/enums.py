@@ -210,77 +210,16 @@ class GrammaticalForm(enum.Enum):
     VERB_PRESENT_PARTICIPLE = "verb/present_participle"
     VERB_GERUND = "verb/gerund"
 
-    # English verb forms (person_tense)
-    # Present tense
-
-    # Past tense
-
-    # Future tense
-
-    # Imperative
-
-    # English noun forms (singular/plural only)
-
-    # English adjective forms (comparative degrees)
-
-    # English adverb forms (comparative degrees)
-
-    # Lithuanian verb forms (person_tense with gender distinction)
-    # Present tense
-
-    # Past tense
-
-    # Future tense
-
     # Noun forms (English)
     NOUN_SINGULAR = "noun/singular"
     NOUN_PLURAL = "noun/plural"
     NOUN_POSSESSIVE_SINGULAR = "noun/possessive_singular"
     NOUN_POSSESSIVE_PLURAL = "noun/possessive_plural"
 
-    # Lithuanian noun forms (7 cases × 2 numbers)
-
     # Adjective forms (English)
     ADJECTIVE_POSITIVE = "adjective/positive"
     ADJECTIVE_COMPARATIVE = "adjective/comparative"
     ADJECTIVE_SUPERLATIVE = "adjective/superlative"
-
-    # Lithuanian adjective forms (7 cases × 2 numbers × 2 genders = 28 forms)
-    # Masculine singular
-
-    # Feminine singular
-
-    # Masculine plural
-
-    # Feminine plural
-
-    # Lithuanian adverb forms (comparative degrees)
-
-    # French noun forms (singular/plural only - each noun has a fixed gender)
-
-    # French adjective forms (2 genders × 2 numbers = 4 forms)
-
-    # French verb forms (8 persons × 4 tenses = 32 forms)
-    # Present tense (présent de l'indicatif)
-
-    # Imperfect (imparfait)
-
-    # Future (futur simple)
-
-    # Passé composé (compound past with auxiliary)
-
-    # Past participles (masculine and feminine forms)
-
-    # Spanish noun forms (singular/plural only - each noun has a fixed gender)
-
-    # Spanish adjective forms (2 genders × 2 numbers = 4 forms)
-
-    # Spanish verb forms (8 persons × 3 tenses = 24 forms)
-    # Present tense (presente de indicativo)
-
-    # Preterite (pretérito perfecto simple - simple past)
-
-    # Future (futuro simple)
 
     # German noun forms (4 cases × 2 numbers = 8 forms)
     # Singular
@@ -340,20 +279,9 @@ class GrammaticalForm(enum.Enum):
     # Language-specific adverb base forms (invariant adverbs)
     ADVERB_KO_BASE = "adverb/ko_base"
 
-    # Pronoun forms - English, French, Spanish, Portuguese (function-based, simplified)
-    # Word itself indicates person/number/gender; tag indicates grammatical function
-
-
-
-
-    # Pronoun forms - Lithuanian (case-based, simplified)
-    # Word itself indicates person/number/gender; tag indicates grammatical case
-
-    # Pronoun forms - German (case-based, simplified)
-    # Word itself indicates person/number/gender; tag indicates grammatical case
-
-    # Pronoun forms - Chinese (simplified)
-    # Word itself indicates person/number/gender; tag indicates function
+    # Pronoun forms
+    # Most language-specific pronoun forms are configured dynamically via forms_config;
+    # only explicit enum values are listed here.
 
     # Pronoun forms - Korean (simplified)
     # Word itself indicates person/number/formality; tag indicates function
