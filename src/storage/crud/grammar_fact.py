@@ -383,6 +383,12 @@ def update_alternate_forms_facts_after_deletion(
     # Map form types to grammar fact types
     form_to_fact_map = {
         "synonym": "has_synonyms",
+        "synonym_near": "has_synonyms",
+        "synonym_regional": "has_synonyms",
+        "synonym_register": "has_synonyms",
+        "synonym_related": "has_synonyms",
+        "synonym_spelling": "has_synonyms",
+        "synonym_synecdoche": "has_synonyms",
         "abbreviation": "has_abbreviations",
         "expanded_form": "has_expanded_forms",
         "alternate_spelling": "has_alternate_spellings",

@@ -642,7 +642,19 @@ def delete_all_synonyms(lemma_id: int) -> ResponseReturnValue:
 
     # Apply form category filter
     if form_category == "synonyms":
-        query = query.filter(DerivativeForm.grammatical_form == "synonym")
+        query = query.filter(
+            DerivativeForm.grammatical_form.in_(
+                [
+                    "synonym",
+                    "synonym_near",
+                    "synonym_regional",
+                    "synonym_register",
+                    "synonym_related",
+                    "synonym_spelling",
+                    "synonym_synecdoche",
+                ]
+            )
+        )
     elif form_category == "alternatives":
         query = query.filter(
             DerivativeForm.grammatical_form.in_(
