@@ -1282,7 +1282,7 @@ class WirewordExporter:
 
                             # Apply tense-specific minimum levels for Lithuanian
                             elif self.language == "lt":
-                                # Extract tense from grammatical_form (format: "1s_past", "3p-m_future", etc.)
+                                # Extract tense from grammatical_form (format: "1s_past", "3p_future", etc.)
                                 if "_" in form.grammatical_form:
                                     tense_suffix = form.grammatical_form.split("_")[-1]
                                     if tense_suffix == "past":
@@ -1324,7 +1324,7 @@ class WirewordExporter:
                                     gram_form["target_pinyin"] = pinyin
 
                             # Convert grammatical form key to WireWord format
-                            # e.g., "verb/lt_3s_m_present" -> "3s-m_present"
+                            # e.g., "verb/lt_3s_present" -> "3s_present"
                             wireword_key = convert_to_wireword_grammatical_form_key(
                                 form.grammatical_form
                             )

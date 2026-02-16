@@ -17,7 +17,7 @@ def extract_conjugation_slot(grammatical_form_key: str) -> Optional[str]:
 
     Examples:
     - ``1s_present`` -> ``1s``
-    - ``3s-m_present`` -> ``3s``
+    - ``3s_present`` -> ``3s``
     - ``2p_future`` -> ``2p``
     """
     if "_" not in grammatical_form_key:
@@ -58,18 +58,18 @@ def convert_to_wireword_grammatical_form_key(grammatical_form: str) -> str:
     """
     Convert database grammatical form key format to WireWord format.
 
-    Converts from database format like "verb/lt_3s_m_present" or "verb/fr_1s_present"
-    to WireWord format like "3s-m_present" or "1s_present".
+    Converts from database format like "verb/lt_3s_present" or "verb/fr_1s_present"
+    to WireWord format like "3s_present" or "1s_present".
 
     The key transformations:
     - Remove "verb/{lang}_" prefix
-    - Replace underscores between person/number components with hyphens (3s_m -> 3s-m)
+    - Drop obsolete third-person gender tags (e.g., 3s_m -> 3s)
 
     Args:
-        grammatical_form: Database grammatical form key (e.g., "verb/lt_3s_m_present")
+        grammatical_form: Database grammatical form key (e.g., "verb/lt_3s_present")
 
     Returns:
-        WireWord format key (e.g., "3s-m_present")
+        WireWord format key (e.g., "3s_present")
     """
     # If already in WireWord format (no prefix), return as-is
     if not grammatical_form.startswith("verb/"):
@@ -85,25 +85,16 @@ def convert_to_wireword_grammatical_form_key(grammatical_form: str) -> str:
     # parts[1] is "1s_present" or "3s_m_present" or similar
     key_without_prefix = parts[1]
 
-    # Now convert underscores to hyphens in person/number part
-    # e.g., "3s_m_present" -> "3s-m_present"
-    # The pattern is: {person}{number}_{gender}_{tense}
-    # We want hyphens between person/number/gender, but underscore before tense
-
-    # Split by underscore to find components
+    # Normalize obsolete third-person gender tags.
+    # e.g., "3s_m_present" -> "3s_present"
     components = key_without_prefix.split("_")
     if len(components) == 2:
-        # Simple case: "1s_present" or "1p_past"
         return key_without_prefix
-    elif len(components) == 3:
-        # Has gender: "3s_m_present" -> "3s-m_present"
-        person_num = components[0]
-        gender = components[1]
-        tense = components[2]
-        return f"{person_num}-{gender}_{tense}"
-    else:
-        # Unexpected format, return as-is
-        return key_without_prefix
+    if len(components) == 3 and components[1] in {"m", "f"}:
+        person_num, _, tense = components
+        return f"{person_num}_{tense}"
+    # Unexpected format, return as-is
+    return key_without_prefix
 
 
 def format_verb_entry(entry: Dict[str, Any], is_last: bool = False) -> str:
