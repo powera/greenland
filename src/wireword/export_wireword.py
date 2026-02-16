@@ -40,6 +40,7 @@ from wireword.helpers import (
     format_verb_entry,
     generate_simple_grammatical_form_label,
     normalize_pos_type,
+    extract_conjugation_slot,
 )
 from wireword.generate_manifest import generate_manifest
 
@@ -1219,6 +1220,7 @@ class WirewordExporter:
 
                 # Build grammatical forms (conjugations)
                 grammatical_forms = {}
+                conjugation_mode_forms: Dict[str, Dict[str, str]] = {}
                 target_alternatives: List[str] = []
                 target_alternatives_pinyin: List[str] = []
                 english_synonyms = []
@@ -1334,6 +1336,13 @@ class WirewordExporter:
 
                             grammatical_forms[wireword_key] = gram_form
 
+                            slot = extract_conjugation_slot(wireword_key)
+                            if slot:
+                                conjugation_mode_forms[slot] = {
+                                    "source": english_label.strip(),
+                                    "target": form.derivative_form_text.strip(),
+                                }
+
                 # Create WireWord object
                 wireword: Dict[str, Any] = {
                     "guid": lemma.guid,
@@ -1385,6 +1394,23 @@ class WirewordExporter:
                 # Add grammatical forms (conjugations)
                 if grammatical_forms:
                     wireword["grammatical_forms"] = grammatical_forms
+
+                # Add de-normalized conjugation forms for Trakaido Conjugations mode.
+                # We always emit all six person/number slots and allow redundancy by design.
+                if conjugation_mode_forms:
+                    slot_order = ["1s", "2s", "3s", "1p", "2p", "3p"]
+                    fallback_source = (base_source or "").strip()
+                    fallback_target = (base_target or "").strip()
+                    wireword["conjugation_mode"] = {
+                        "format": "raw_forms_v1",
+                        "forms": {
+                            slot: conjugation_mode_forms.get(
+                                slot,
+                                {"source": fallback_source, "target": fallback_target},
+                            )
+                            for slot in slot_order
+                        },
+                    }
 
                 if lemma.notes:
                     wireword["notes"] = lemma.notes

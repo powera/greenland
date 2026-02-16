@@ -8,9 +8,24 @@ used by the WireWord exporter.
 
 import json
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
+
+def extract_conjugation_slot(grammatical_form_key: str) -> Optional[str]:
+    """Extract the person/number slot from a WireWord conjugation key.
+
+    Examples:
+    - ``1s_present`` -> ``1s``
+    - ``3s-m_present`` -> ``3s``
+    - ``2p_future`` -> ``2p``
+    """
+    if "_" not in grammatical_form_key:
+        return None
+
+    slot = grammatical_form_key.split("_", 1)[0]
+    slot = slot.split("-", 1)[0]
+    return slot if slot in {"1s", "2s", "3s", "1p", "2p", "3p"} else None
 
 
 def normalize_pos_type(pos_type: str) -> str:
