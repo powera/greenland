@@ -94,9 +94,17 @@ Return only valid JSON matching the provided schema."""
             "required": ["languages"],
         }
 
-    def _format_candidate_lemmas(self, candidate_lemmas: List[Dict[str, Any]]) -> str:
+    def _format_candidate_lemmas(
+        self,
+        candidate_lemmas: List[Dict[str, Any]],
+        source_language: str,
+        target_language: str,
+        helper_languages: List[str],
+    ) -> str:
         if not candidate_lemmas:
             return "- (none provided)"
+
+        allowed_languages = [source_language, target_language, *helper_languages[:3]]
 
         return "\n".join(
             (
@@ -104,7 +112,9 @@ Return only valid JSON matching the provided schema."""
                 f"POS: {item['pos']} | Definition: {item['definition']} | "
                 f"Translations: "
                 + ", ".join(
-                    f"{lang}={translation}" for lang, translation in item.get("translations", {}).items()
+                    f"{lang}={translation}"
+                    for lang, translation in item.get("translations", {}).items()
+                    if lang in allowed_languages
                 )
             )
             for item in candidate_lemmas
@@ -121,7 +131,13 @@ Return only valid JSON matching the provided schema."""
         helper_lines = "\n".join(
             f"- {entry['language_code']}: {entry['translation']}" for entry in helper_entries
         )
-        candidate_lines = self._format_candidate_lemmas(candidate_lemmas)
+        helper_languages = [entry["language_code"] for entry in helper_entries if entry.get("language_code")]
+        candidate_lines = self._format_candidate_lemmas(
+            candidate_lemmas,
+            source_language=source_language,
+            target_language=target_entry["language_code"],
+            helper_languages=helper_languages,
+        )
 
         return (
             f"Create a sentence decomposition JSON for ONE language only.\n"
@@ -130,6 +146,7 @@ Return only valid JSON matching the provided schema."""
             f"Target translation: \"{target_entry['translation']}\"\n\n"
             "Additional translations for disambiguation (1-3 helper languages):\n"
             f"{helper_lines if helper_lines else '- (none provided)'}\n\n"
+            "Lemma translation context: include source, target, and at most 3 helper languages.\n\n"
             "Candidate lemmas (must choose correct lemma_guid when a content word maps to one):\n"
             f"{candidate_lines}\n\n"
             "Grammatical form conventions (match translation prompt style):\n"
@@ -139,10 +156,11 @@ Return only valid JSON matching the provided schema."""
             "- Keep language code aligned with the target token language.\n"
             "- word_count must equal the number of word entries.\n\n"
             "Return schema requirements:\n"
-            "- Return exactly one entry in languages[] (the target language only).\n"
+            f"- Return exactly one entry in languages[] and set language_code to '{target_entry['language_code']}'.\n"
+            "- The languages[] breakdown must analyze tokens from the target translation only.\n"
             "- Each words[] item must include: position, role, english_gloss, surface_form, "
             "grammatical_form, lemma_guid, lemma.\n"
-            "- Use lemma_guid=NONE and lemma='No lemma' for function words without a selected candidate lemma."
+            "- Use lemma_guid=NONE for function words without a selected candidate lemma."
         )
 
     def _generate_from_file(self, **kwargs: Any) -> Iterator[BenchmarkQuestion]:

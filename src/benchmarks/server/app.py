@@ -32,6 +32,7 @@ def create_app(config_class=Config):
 
     app = Flask(__name__)
     app.config.from_object(config_class)
+    app.json.ensure_ascii = False
 
     # Verify database exists
     db_path = app.config["DB_PATH"]
