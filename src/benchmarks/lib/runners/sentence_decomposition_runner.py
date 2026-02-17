@@ -37,22 +37,61 @@ class SentenceDecompositionRunner(BenchmarkRunner):
         super().__init__(model, metadata)
 
     def prepare_prompt(self, question_data: Dict) -> Tuple[str, Optional[Dict], Optional[str]]:
-        prompt = question_data["question_text"]
+        raw_prompt = question_data["question_text"]
         schema = question_data.get("schema")
 
-        context = """
-        You are a multilingual linguistics expert.
-        Build a complete sentence decomposition for exactly one requested target language.
+        # Extract key information from the raw prompt
+        import re
 
-        Rules:
-        - Keep tokens in order.
-        - Keep positions zero-indexed.
-        - word_count must equal the number of entries in words.
-        - grammatical_form should capture language-specific inflectional detail when possible.
-        - lemma should be the base form or 'No lemma' when not applicable.
-        - Output only valid JSON matching the schema.
-        - languages must contain exactly one entry.
-        """
+        # Extract target language and translation (the most important parts)
+        target_lang_match = re.search(r'Target language: (\w+)', raw_prompt)
+        target_translation_match = re.search(r'Target translation: "(.*?)"', raw_prompt)
+        source_match = re.search(r'Source sentence \((\w+)\): "(.*?)"', raw_prompt)
+
+        target_lang = target_lang_match.group(1) if target_lang_match else "unknown"
+        target_translation = target_translation_match.group(1) if target_translation_match else ""
+        source_lang = source_match.group(1) if source_match else "en"
+        source_sentence = source_match.group(2) if source_match else ""
+
+        # Extract candidate lemmas section
+        candidate_section = ""
+        if "Candidate lemmas" in raw_prompt:
+            candidate_start = raw_prompt.find("Candidate lemmas")
+            candidate_end = raw_prompt.find("\n\nGrammatical form conventions")
+            if candidate_end > candidate_start:
+                candidate_section = raw_prompt[candidate_start:candidate_end].strip()
+
+        # Build clean, focused prompt
+        prompt = f"""Decompose this sentence into tokens with grammatical analysis.
+
+Target language: {target_lang}
+Sentence to analyze: "{target_translation}"
+
+Source ({source_lang}): "{source_sentence}"
+
+{candidate_section}
+
+Output requirements:
+- Return exactly ONE language entry (for {target_lang})
+- Include all tokens in order (zero-indexed positions)
+- For each token provide: position, role, english_gloss, surface_form, grammatical_form, lemma_guid, lemma
+- Use lemma_guid from candidate lemmas when applicable, otherwise use "NONE"
+- Use lemma from candidate lemmas when applicable, otherwise use "No lemma"
+- Set word_count to match the number of token entries"""
+
+        context = """You are a multilingual linguistics expert specializing in morphological analysis.
+Your task is to decompose sentences into tokens and provide detailed grammatical information for each token.
+
+Grammatical form format:
+- For inflected words: <role>/<language_code>_<morphology> (e.g., verb/es_3p_present, noun/fr_plural_f)
+- For uninflected function words: <role>/base (e.g., preposition/base)
+
+Important rules:
+- Maintain token order from the original sentence
+- Use zero-indexed positions
+- Ensure word_count equals the number of word entries
+- Output must contain exactly one language entry
+- Return only valid JSON matching the provided schema"""
 
         return prompt, schema, context
 
