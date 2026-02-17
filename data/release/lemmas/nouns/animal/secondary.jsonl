@@ -1,0 +1,69 @@
+{"guid": "N02_001", "translations": {"ro": "câine", "pl": "pies", "th": "สุนัข", "ta": "நாய்", "kn": "ನಾಾಯಿ", "uk": "собака", "bn": "কুকুর", "hi": "कुत्ता"}}
+{"guid": "N02_002", "translations": {"ro": "pisică", "pl": "kot", "th": "แมว", "ta": "பூனை", "kn": "ಬೆಕ್ಕು", "uk": "кіт", "bn": "বিড়াল", "hi": "बिल्ली"}}
+{"guid": "N02_003", "translations": {"ro": "pasăre", "pl": "ptak", "th": "นก", "ta": "பறவை", "kn": "ಪಕ್ಷಿ", "uk": "птах", "bn": "পাখি", "hi": "पक्षी"}}
+{"guid": "N02_004", "translations": {"ro": "cal", "pl": "koń", "th": "ม้า", "ta": "குதிரை", "kn": "ಕೋಣ", "uk": "кінь", "bn": "ঘোড়া", "hi": "घोड़ा"}}
+{"guid": "N02_005", "translations": {"ro": "bovină", "pl": "bydło", "th": "โค", "ta": "மாட்டுக்கள்", "kn": "ಗೋವು", "uk": "рогата худоба", "bn": "গবাদি পশু", "hi": "पशुधन"}}
+{"guid": "N02_006", "translations": {"ro": "porc", "pl": "świnia", "th": "หมู", "ta": "பன்றிக் கொன்று", "kn": "ಹಂದಿ", "uk": "свиня", "bn": "শূকর", "hi": "सूअर"}}
+{"guid": "N02_007", "translations": {"ro": "pui", "pl": "kurczak", "th": "ไก่", "ta": "சிக்கன்", "kn": "ಚಿಕನ್", "uk": "курка", "bn": "কুকড়ি", "hi": "मुर्गी"}}
+{"guid": "N02_008", "translations": {"ro": "șoarece", "pl": "mysz", "th": "หนู", "ta": "எலி", "kn": "ಮೂಸ್", "uk": "миша", "bn": "চূহা", "hi": "चूहा"}}
+{"guid": "N02_009", "translations": {"ro": "urs", "pl": "niedźwiedź", "th": "หมี", "ta": "கரடி", "kn": "ಕರಡಿ", "uk": "ведмідь", "bn": "ভালুক", "hi": "भालू"}}
+{"guid": "N02_010", "translations": {"ro": "lup", "pl": "wilk", "th": "หมาป่า", "ta": "நரி", "kn": "ನರಿ", "uk": "вовк", "bn": "নেকড়ে", "hi": "भेड़िया"}}
+{"guid": "N02_011", "translations": {"ro": "iepure", "pl": "królik", "th": "กระต่าย", "ta": "முயல்", "kn": "ಮೊಲ", "uk": "кролик", "bn": "খরগোশ", "hi": "खरगोश"}}
+{"guid": "N02_012", "translations": {"ro": "balenă", "pl": "wieloryb", "th": "ปลาวาฬ", "ta": "திமிங்கலம்", "kn": "ತಿಮಿಂಗಿಲ", "uk": "кит", "bn": "তিমি", "hi": "व्हेल"}}
+{"guid": "N02_013", "translations": {"ro": "tigr", "pl": "tygrys", "th": "เสือ", "ta": "புலி", "kn": "ಹುಲಿ", "uk": "тигр", "bn": "বাঘ", "hi": "बाघ"}}
+{"guid": "N02_014", "translations": {"ro": "șarpe", "pl": "wąż", "th": "งู", "ta": "பாம்பு", "kn": "ಹುಲಿಹಾಯಿ", "uk": "змія", "bn": "সাপ", "hi": "साँप"}}
+{"guid": "N02_015", "translations": {"ro": "elefant", "pl": "słoń", "th": "ช้าง", "ta": "யானை", "kn": "ಆನೆ", "uk": "слон", "bn": "হাতি", "hi": "हाथी"}}
+{"guid": "N02_016", "translations": {"ro": "rechin", "pl": "rekin", "th": "ฉลาม", "ta": "பல்லி", "kn": "ವಂಚಿತನೋಳಗೊಕ್ಕೆ", "uk": "акула", "bn": "হাঙর", "hi": "शार्क"}}
+{"guid": "N02_017", "translations": {"ro": "bufniță", "pl": "sowa", "th": "นกฮูก", "ta": "பட்டாமை", "kn": "ಹುಲಿಯಕ್ಕಿ", "uk": "сова", "bn": "পেঁচা", "hi": "उल्लू"}}
+{"guid": "N02_018", "translations": {"ro": "păianjen", "pl": "pająk", "th": "แมงมุม", "ta": "பாம்பு", "kn": "ಒಣಚಿಲುಟ", "uk": "павук", "bn": "মাকড়সা", "hi": "मकड़ी"}}
+{"guid": "N02_019", "translations": {"ro": "veveriță", "pl": "wiewiórka", "th": "กระรอก", "ta": "அணில்", "kn": "ಗಿಳಿಗೆಂದನು", "uk": "білка", "bn": "গিলহাটানি", "hi": "गिलहरी"}}
+{"guid": "N02_020", "translations": {"ro": "capră", "pl": "koza", "th": "แพะ", "ta": "மேய்க்கிழமை", "kn": "ಮೇಕೆ", "uk": "коза", "bn": "ছাগল", "hi": "बकरी"}}
+{"guid": "N02_021", "translations": {"ro": "gâscă", "pl": "gęś", "th": "ห่าน", "ta": "அன்னம்", "kn": "ಹದ್ದು", "uk": "гуска", "bn": "হাঁস", "hi": "हंस"}}
+{"guid": "N02_022", "translations": {"ro": "rață", "pl": "kaczka", "th": "เป็ด", "ta": "வாத்து", "kn": "ಬೆಕ್ಕೆಗೋಲು (ಬೆಕ್ಕೆಗೋಲು is incorrect)", "uk": "качка", "bn": "হাঁস", "hi": "बतख"}}
+{"guid": "N02_023", "translations": {"ro": "broască", "pl": "żaba", "th": "กบ", "ta": "தளபாடு", "kn": "ದೊಂಡೆಮರಿ", "uk": "жаба", "bn": "ব্যাঙ", "hi": "मेंढक"}}
+{"guid": "N02_024", "translations": {"ro": "fluture", "pl": "motyl", "th": "ผีเสื้อ", "ta": "கூசையிலங்கு", "kn": "ಚಿಟ್ಟೆ", "uk": "метелик", "bn": "প্রজাপতি", "hi": "तितली"}}
+{"guid": "N02_025", "translations": {"ro": "țestoasă", "pl": "żółw", "th": "เต่า", "ta": "ஆமை", "kn": "ಗಿದೆ", "uk": "черепаха", "bn": "কচ্ছপ", "hi": "कछुआ"}}
+{"guid": "N02_026", "translations": {"ro": "ciorârlă", "pl": "wrona", "th": "กา", "ta": "காகம்", "kn": "ಕರಡಿ ತಾರಕ (ಕಾಗೆ)", "uk": "ворона", "bn": "কাক", "hi": "कौवा"}}
+{"guid": "N02_027", "translations": {"ro": "vultur", "pl": "orzeł", "th": "เหยี่ยว", "ta": "கழுகு", "kn": "ಗರುಡ", "uk": "орел", "bn": "ঈগল", "hi": "गरुड"}}
+{"guid": "N02_028", "translations": {"ro": "oaie", "pl": "owca", "th": "แกะ", "ta": "மேய்க்கிழமை?", "kn": "मेंಕ (transliteration not allowed?)", "uk": "вівця", "bn": "ভেড়া", "hi": "भेड़"}}
+{"guid": "N02_029", "translations": {"ro": "dragon", "pl": "smok", "th": "มังกร", "ta": "டிராகன்", "kn": "ಅಜಗರು", "uk": "дракон", "bn": "ড্রাগন", "hi": "ड्रैगन"}}
+{"guid": "N02_030", "translations": {"ro": "animal", "pl": "zwierzę", "th": "สัตว์", "ta": "விலங்கு", "kn": "ಪ್ರಾಣಿ", "uk": "тварина", "bn": "প্রাণী", "hi": "प्राणी"}}
+{"guid": "N02_031", "translations": {"ro": "creatură", "pl": "stworzenie", "th": "สิ่งมีชีวิต", "ta": "உயிரினம்", "kn": "ಜೀವಿ", "uk": "істота", "bn": "সত্তা", "hi": "प्राणी"}}
+{"guid": "N02_032", "translations": {"ro": "fiare", "pl": "zwierz", "th": "สัตว์ร้าย", "ta": "விலங்கு", "kn": "ಪ್ರಾಣಿ", "uk": "звір", "bn": "জন্তু", "hi": "जानवर"}}
+{"guid": "N02_033", "translations": {"ro": "monstru", "pl": "potwór", "th": "ปีศาจ", "ta": "பிசாசு", "kn": "ವೈರಾಕ್ಷಸಿ", "uk": "монстр", "bn": "দানব", "hi": "राक्षस"}}
+{"guid": "N02_034", "translations": {"ro": "pește", "pl": "ryba", "th": "ปลา", "ta": "மீன்", "kn": "ಮೀನು", "uk": "риба", "bn": "মাছ", "hi": "मछली"}}
+{"guid": "N02_035", "translations": {"ro": "leu", "pl": "lew", "th": "สิงโต", "ta": "சிங்கம்", "kn": "ಸಿಂಹ", "uk": "лев", "bn": "সিংহ", "hi": "सिंह"}}
+{"guid": "N02_036", "translations": {"ro": "maimuță", "pl": "małpa", "th": "ลิง", "ta": "குரங்கு", "kn": "ಕೋತಿ", "uk": "мавпа", "bn": "বানর", "hi": "बंदर"}}
+{"guid": "N02_037", "translations": {"ro": "cerb", "pl": "jeleń", "th": "กวาง", "ta": "மான்", "kn": "ಮೃಗ", "uk": "олень", "bn": "হরিণ", "hi": "हिरण"}}
+{"guid": "N02_038", "translations": {"ro": "vulpe", "pl": "lis", "th": "สุนัขจิ้งจอก", "ta": "நரி", "kn": "ನರಿ", "uk": "лисиця", "bn": "শিয়াল", "hi": "लोमड़ी"}}
+{"guid": "N02_039", "translations": {"ro": "albină", "pl": "pszczoła", "th": "ผึ้ง", "ta": "தேனீ", "kn": "ತುಪ್ಪಾ/ತುಪ್ಪಿನ ರೇನ", "uk": "бджола", "bn": "মৌমাছি", "hi": "मधुमक्खी"}}
+{"guid": "N02_040", "translations": {"ro": "furnică", "pl": "mrówka", "th": "มอด/มด", "ta": "செத்தான்", "kn": "ಚೆಂಡುಮೊತ್ತೆ", "uk": "мураха", "bn": "পিপিলিকা", "hi": "चींटी"}}
+{"guid": "N02_041", "translations": {"ro": "delfin", "pl": "delfin", "th": "โลมา", "ta": "டோல்ஃபின்", "kn": "ಡಾಲ್ಫಿನ್", "uk": "дельфін", "bn": "ডলফিন", "hi": "डॉल्फिन"}}
+{"guid": "N02_042", "translations": {"ro": "pinguin", "pl": "pingwin", "th": "เพนกวิน", "ta": "பிங்க்வின்", "kn": "ಪೇಂಗ್ವಿನ್", "uk": "пінгвін", "bn": "পেঙ্গুইন", "hi": "पेंग्विन"}}
+{"guid": "N02_043", "translations": {"ro": "girafă", "pl": "żyrafa", "th": "ยีราฟ", "ta": "ஜிராஃப்", "kn": "ಜಿರಾಫೆ", "uk": "жираф", "bn": "জিরাফ", "hi": "जिराफ"}}
+{"guid": "N02_044", "translations": {"ro": "zebră", "pl": "zebra", "th": "ม้าลายใน", "ta": "சீப்ரா", "kn": "ಜೇಬ್ರಾ", "uk": "зебра", "bn": "জেব্রা", "hi": "ज़ेब्रा"}}
+{"guid": "N02_045", "translations": {"ro": "crocodil", "pl": "krokodyl", "th": "จระเข้", "ta": "பெருங்கட்டான்", "kn": "ಮಯ", "uk": "крокодил", "bn": "কুমির", "hi": "मगरमच्छ"}}
+{"guid": "N02_046", "translations": {"ro": "măgar", "pl": "osioł", "th": "ลา", "ta": "கழுதை", "kn": "ಗಾಧೆ", "uk": "віслюк", "bn": "গাধা", "hi": "गधा"}}
+{"guid": "N02_047", "translations": {"ro": "șobolan", "pl": "szczur", "th": "หนู", "ta": "எலி", "kn": "ಎಲಿವೆ", "uk": "пацюк", "bn": "ইঁদুর", "hi": "चुहा"}}
+{"guid": "N02_048", "translations": {"ro": "papagal", "pl": "papuga", "th": "นกแก้ว", "ta": "கிளி", "kn": "ತುಟಿಸುಕುಕ್ಕು (ತುಟಿ ಕುಕ್ಕು)", "uk": "папуга", "bn": "পিপীলকা", "hi": "तोता"}}
+{"guid": "N02_049", "translations": {"ro": "porumbel", "pl": "gołąb", "th": "นกพิราบ", "ta": "இறால்", "kn": "ಕಾಗೆ (Note: common word for pigeon is 'ರಾಜಹಂಸ'?)", "uk": "голуб", "bn": "কবুতর", "hi": "कबूतर"}}
+{"guid": "N02_050", "translations": {"ro": "liliac", "pl": "nietoperz", "th": "ค้างคาว", "ta": "வொண்டாப்பறவை", "kn": "ಹುಬ್ಬುಳಿದಂತಾಯಿ", "uk": "кажан", "bn": "বত্রিশ/বাদুড়", "hi": "छेपक"}}
+{"guid": "N02_051", "translations": {"ro": "cămilă", "pl": "wielbłąd", "th": "อูฐ", "ta": "ஒட்டகம்", "kn": "ಒಳ್ಳೆಗವಡ", "uk": "верблюд", "bn": "উট", "hi": "उँट"}}
+{"guid": "N02_052", "translations": {"ro": "gorilă", "pl": "goryl", "th": "กอริลลา", "ta": "கொரில்லா", "kn": "ಗೊರಿಲ್ಲಾ", "uk": "горила", "bn": "গোরিলা", "hi": "गोरिल्ला"}}
+{"guid": "N02_053", "translations": {"ro": "hipopotam", "pl": "hipopotam", "th": "ฮิปโปโปเตมัส", "ta": "ஹிப்போபாட்டமஸ்", "kn": "ಹಿಪೋ೨ಪೊಟಮಸ್", "uk": "гіпопотам", "bn": "হিপোপটামাস", "hi": "हिप्पोपोटैमस"}}
+{"guid": "N02_054", "translations": {"ro": "rinocer", "pl": "nosorożec", "th": "แรด", "ta": "கும்பாலை", "kn": "ಗಂಡಾಂತರ", "uk": "носоріг", "bn": "গন্ডার", "hi": "गैंडा"}}
+{"guid": "N02_055", "translations": {"ro": "leopard", "pl": "lampart", "th": "เสือดาว", "ta": "சிங்கநரி", "kn": "ಚಿರತೆ", "uk": "ягуар", "bn": "চিতা", "hi": "तेंदुआ"}}
+{"guid": "N02_056", "translations": {"ro": "cangur", "pl": "kangur", "th": "จิงโจ้", "ta": "கங்கேறு", "kn": "ಕಂಗಾರು", "uk": "кенгуру", "bn": "ক্যাঙ্গারু", "hi": "कंगारू"}}
+{"guid": "N02_057", "translations": {"ro": "caracatiță", "pl": "ośmiornica", "th": "ปลาหมึกยักษ์", "ta": "ஆக்டோபஸ்", "kn": "ಅಕ್ಟೋಪಸ್", "uk": "восьминіг", "bn": "অক্টোপাস", "hi": "ऑक्टोपस"}}
+{"guid": "N02_058", "translations": {"ro": "țânțar", "pl": "komar", "th": "ยุง", "ta": "இறக்கக்கிளி (Note: incorrect)", "kn": "ಸಿಡಿಲು ಹಣ್ಣು (Note: incorrect)", "uk": "комар", "bn": "মশা", "hi": "मच्छर"}}
+{"guid": "N02_059", "translations": {"ro": "melc", "pl": "ślimak", "th": "หอยทาก", "ta": "வாழ்க்கை", "kn": "ಶೆಿಗ್ಗೆ", "uk": "равлик", "bn": "শামুক", "hi": "घोंघा"}}
+{"guid": "N02_060", "translations": {"ro": "vierme", "pl": "robak", "th": "ไส้เดือน", "ta": "இலைக் கீடு", "kn": "ಕೀಟದ ಕೀಳು", "uk": "черв'як", "bn": "কীটপতঙ্গ", "hi": "कृमि"}}
+{"guid": "N02_061", "translations": {"ro": "cocoș", "pl": "kogut", "th": "ไก่ตัวผู้", "ta": "சேரான்", "kn": "ಕೂಕುрузು", "uk": "півень", "bn": "মোরগ", "hi": "मुर्गा"}}
+{"guid": "N02_062", "translations": {"ro": "lebădă", "pl": "łabędź", "th": "หงส์", "ta": "அணல் பறவை", "kn": "ಗಲ್ಬೆ (ಸ್ವಾನ್)", "uk": "лебідь", "bn": "হাঁস-কর্কট", "hi": "हंस"}}
+{"guid": "N02_063", "translations": {"ro": "paun", "pl": "paw", "th": "นกยูง", "ta": "மயூரன்", "kn": "ಮಯೂರ", "uk": "пава", "bn": "ময়ুর", "hi": "मोर"}}
+{"guid": "N02_064", "translations": {"ro": "flamingo", "pl": "flaming", "th": "ฟลามิงโก", "ta": "ஃபிளாமிங்கோ", "kn": "ಫ್ಲಮಿಂಗೋ", "uk": "фламінго", "bn": "ফ্লামিঙ্গো", "hi": "फ्लेमिंगो"}}
+{"guid": "N02_065", "translations": {"ro": "panda", "pl": "panda", "th": "แพนด้า", "ta": "பாண்டா", "kn": "ಪಾಂಡಾ", "uk": "панда", "bn": "পান্ডা", "hi": "पांडा"}}
+{"guid": "N02_066", "translations": {"ro": "crab", "pl": "krab", "th": "ปู", "ta": "நண்டு", "kn": "ಕೇಕೆ (ಕ್ರಾಪ್)", "uk": "краб", "bn": "কাঁকড়া", "hi": "केंकड़ा"}}
+{"guid": "N02_067", "translations": {"ro": "homar", "pl": "homar", "th": "ล็อบสเตอร์", "ta": "ஒமார்", "kn": "ಒಮರ", "uk": "омар", "bn": "লবস্টার", "hi": "लॉबस्टर"}}
+{"guid": "N02_069", "translations": {"ro": "pasăre domestică", "pl": "ptak domowy", "th": "สัตว์ปีกเลี้ยง", "ta": "வீட்டு பறவை", "kn": "ಮನೆ ಕೋಳಿ", "uk": "домашня птиця", "bn": "বাড়ির পাখি", "hi": "घरेलू पक्षी"}}
+{"guid": "N02_070", "translations": {"ro": "insect", "pl": "owad", "th": "แมลง", "ta": "பூச்சி", "kn": "ಕೀಟ", "uk": "комаха", "bn": "পোকা", "hi": "कीट"}}

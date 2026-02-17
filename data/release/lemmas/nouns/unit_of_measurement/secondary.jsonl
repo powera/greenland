@@ -1,0 +1,11 @@
+{"guid": "N34_001", "translations": {"ro": "metru", "pl": "metr", "th": "เมตร", "ta": "மீட்டர்", "kn": "ಮೀಟರ್", "uk": "метр", "bn": "মিটার", "hi": "मीटर"}}
+{"guid": "N34_002", "translations": {"ro": "centimetru", "pl": "centymetr", "th": "เซนติเมตร", "ta": "செந்திமீட்டர்", "kn": "ಸೆಂಟೀಮೀಟರ್", "uk": "сантиметр", "bn": "সেন্টিমিটার", "hi": "सेंटिमीटर"}}
+{"guid": "N34_003", "translations": {"ro": "kilometru", "pl": "kilometr", "th": "กิโลเมตร", "ta": "கிலோமீட்டர்", "kn": "ಕಿಲೊಮೀಟರ್", "uk": "кілометр", "bn": "কিলোমিটার", "hi": "किलोमीटर"}}
+{"guid": "N34_004", "translations": {"ro": "milă", "pl": "miara_mil (note: common lemma is \"mila\" but standard Polish for mile is \"mila\" with diacritic? Actually Polish 'mila' no diacritic)", "th": "ไมล์", "ta": "மைல்", "kn": "ಮೈಲು", "uk": "миля", "bn": "মাইল", "hi": "मील"}}
+{"guid": "N34_005", "translations": {"ro": "gram", "pl": "gram", "th": "กรัม", "ta": "கிராம்", "kn": "ಗ್ರಾಂ", "uk": "грам", "bn": "গ্রাম", "hi": "ग्राम"}}
+{"guid": "N34_006", "translations": {"ro": "kilogram", "pl": "kilogram", "th": "กิโลกรัม", "ta": "கிலோகிராம்", "kn": "ಕಿಲೋಗ್ರಾಂ", "uk": "кілограм", "bn": "কিলোগ্রাম", "hi": "किलोग्राम"}}
+{"guid": "N34_007", "translations": {"ro": "litru", "pl": "litr", "th": "ลิตร", "ta": "லிட்டர்", "kn": "ಲೀಟರ್", "uk": "літр", "bn": "লিটার", "hi": "लीटर"}}
+{"guid": "N34_008", "translations": {"ro": "mililitru", "pl": "mililitr", "th": "มิลลิลิตร", "ta": "மில்லிலிட்டர்", "kn": "ಮಿಲಿಲೀಟರ್", "uk": "мілілітр", "bn": "মিলিলিটার", "hi": "मिलिलीटर"}}
+{"guid": "N34_009", "translations": {"ro": "grad", "pl": "stopień", "th": "องศา", "ta": "டிகிரி", "kn": "ಡಿಗ್ರಿ", "uk": "ступінь", "bn": "ডিগ্রি", "hi": "डिग्री"}}
+{"guid": "N34_010", "translations": {"ro": "Celsius", "pl": "Celsjusz", "th": "เซลเซียส", "ta": "செல்சியஸ்", "kn": "ಸೆಲ್ಷಿಯಸ್", "uk": "Цельсій", "bn": "সেলসিয়াস", "hi": "सेल्सियस"}}
+{"guid": "N34_011", "translations": {"ro": "Fahrenheit", "pl": "Fahrenheit", "th": "ฟาเรนไฮต์", "ta": "பாரன்ஹெய்ட்", "kn": "ಫಾರೆನ್‌ಹೈಟ್", "uk": "Фаренгейт", "bn": "ফারেনহাইট", "hi": "फ़ारेनहाइट"}}

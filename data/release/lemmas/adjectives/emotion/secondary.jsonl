@@ -1,0 +1,27 @@
+{"guid": "A19_001", "translations": {"th": "มีความสุข", "kn": "ಸಂತೋಷವಾದ", "uk": "щасливий", "bn": "সুখী", "ro": "fericit", "pl": "szczęśliwy", "ta": "மகிழ்ச்சியான", "hi": "खुश"}}
+{"guid": "A19_002", "translations": {"th": "เศร้า", "kn": "ದುಃಖಿತ", "uk": "сумний", "bn": "দুঃখিত", "ro": "trist", "pl": "smutny", "ta": "சோகமான", "hi": "उदास"}}
+{"guid": "A19_003", "translations": {"th": "โกรธ", "kn": "ಕೋಪಗೊಂಡ", "uk": "злий", "bn": "ক্রোধাক্রান্ত", "ro": "supărat", "pl": "zły", "ta": "கோபமான", "hi": "गुस्सा"}}
+{"guid": "A19_004", "translations": {"th": "ตื่นเต้น", "kn": "ಉತ್ಸಾಹಿತ", "uk": "захоплений", "bn": "উৎফুল্ল", "ro": "entuziasmat", "pl": "podekscytowany", "ta": "உற்சாகமான", "hi": "उत्साहित"}}
+{"guid": "A19_005", "translations": {"th": "เหนื่อย", "kn": "ದಣಿದ", "uk": "втомлений", "bn": "ক্লান্ত", "ro": "obosit", "pl": "zmęczony", "ta": "சோர்வான", "hi": "थका"}}
+{"guid": "A19_006", "translations": {"th": "กลัว", "kn": "ಹೆದರಿದ", "uk": "наляканий", "bn": "ভীত", "ro": "speriat", "pl": "przestraszony", "ta": "பயந்த", "hi": "डरा"}}
+{"guid": "A19_007", "translations": {"th": "ประหลาดใจ", "kn": "ಆಶ್ಚರ್ಯಗೊಂಡ", "uk": "здивований", "bn": "বিস্মিত", "ro": "surprins", "pl": "zaskoczony", "ta": "ஆச்சரியமான", "hi": "आश्चर्यचकित"}}
+{"guid": "A19_008", "translations": {"th": "กังวล", "kn": "ಚಿಂತಿತ", "uk": "схвильований", "bn": "চিন্তিত", "ro": "îngrijorat", "pl": "zaniepokojony", "ta": "கவலையான", "hi": "चिन्तित"}}
+{"guid": "A19_009", "translations": {"th": "สงบ", "kn": "ಶಾಂತ", "uk": "спокійний", "bn": "শান্ত", "ro": "calm", "pl": "spokojny", "ta": "அமைதியான", "hi": "शांत"}}
+{"guid": "A19_010", "translations": {"th": "ประสาท", "kn": "ಆತಂಕಿತ", "uk": "нервовий", "bn": "উদ্বিগ্ন", "ro": "nervos", "pl": "nerwowy", "ta": "பதற்றமான", "hi": "नर्वस"}}
+{"guid": "A19_011", "translations": {"th": "สับสน", "kn": "ಗೊಂದಲಗೊಂಡ", "uk": "збентежений", "bn": "বিভ্রান্ত", "ro": "confuz", "pl": "zdezorientowany", "ta": "குழப்பமான", "hi": "भ्रमित"}}
+{"guid": "A19_012", "translations": {"th": "อาย", "kn": "ಮುಜುಗರಗೊಂಡ", "uk": "соромний", "bn": "লজ্জিত", "ro": "jenat", "pl": "zawstydzony", "ta": "வெட்கமான", "hi": "शर्मिंदा"}}
+{"guid": "A19_013", "translations": {"th": "ภาคภูมิใจ", "kn": "ಹೆಮ್ಮೆಯ", "uk": "гордий", "bn": "গর্বিত", "ro": "mândru", "pl": "dumny", "ta": "பெருமையான", "hi": "गर्वित"}}
+{"guid": "A19_014", "translations": {"th": "อิจฉา", "kn": "ಅಸೂಯೆಯ", "uk": "ревнивий", "bn": "ঈর্ষাবান", "ro": "gelos", "pl": "zazdrosny", "ta": "பொறாமையான", "hi": "ईर्ष्यालु"}}
+{"guid": "A19_015", "translations": {"th": "เหงา", "kn": "ಒಂಟಿಯಾದ", "uk": "самотній", "bn": "একাকী", "ro": "singur", "pl": "samotny", "ta": "தனிமையான", "hi": "एकाकी"}}
+{"guid": "A19_016", "translations": {"th": "ซาบซึ้ง", "kn": "ಕೃತಜ್ಞ", "uk": "вдячний", "bn": "কৃতজ্ঞ", "ro": "recunoscător", "pl": "wdzięczny", "ta": "நன்றியுள்ள", "hi": "कृतज्ञ"}}
+{"guid": "A19_017", "translations": {"th": "หงุดหงิด", "kn": "ಹತಾಶನಾದ", "uk": "розчарований", "bn": "হতাশ", "ro": "frustrat", "pl": "sfrustrowany", "ta": "விரக்தியான", "hi": "निराश"}}
+{"guid": "A19_018", "translations": {"th": "มีความหวัง", "kn": "ಭರವಸೆಯ", "uk": "сподівальний", "bn": "আশাবাদী", "ro": "plin de speranță", "pl": "pełen nadziei", "ta": "நம்பிக்கையான", "hi": "आशावादी"}}
+{"guid": "A19_019", "translations": {"th": "ผิดหวัง", "kn": "ನಿರಾಶೆಗೊಂಡ", "uk": "розчарований", "bn": "নিরাশ", "ro": "dezamăgit", "pl": "rozczarowany", "ta": "ஏமாற்றமான", "hi": "निराश"}}
+{"guid": "A19_020", "translations": {"th": "อยากรู้", "kn": "ಕುತೂಹಲಿ", "uk": "допитливий", "bn": "জিজ্ঞাসু", "ro": "curios", "pl": "ciekawy", "ta": "ஆர்வமான", "hi": "जिज्ञासु"}}
+{"guid": "A19_021", "translations": {"th": "เบื่อ", "kn": "ಬೇಸರಗೊಂಡ", "uk": "нудьгуючий", "bn": "ওই বোর", "ro": "plictisit", "pl": "znudzony", "ta": "சலிப்பான", "hi": "उबेड़ा"}}
+{"guid": "A19_022", "translations": {"th": "ร่าเริง", "kn": "ಹರ್ಷಚಿತ್ತ", "uk": "веселий", "bn": "আনন্দিত", "ro": "vesel", "pl": "wesoły", "ta": "உற்சாகமான", "hi": "खुश"}}
+{"guid": "A19_024", "translations": {"th": "วิตกกังวล", "kn": "ಆತಂಕದ", "uk": "стурбований", "bn": "উদ্বিগ্ন", "ro": "anxios", "pl": "niespokojny", "ta": "கவலையுள்ள", "hi": "चिंतित"}}
+{"guid": "A19_025", "translations": {"th": "ปีติยินดี", "kn": "ಆನಂದಕರ", "uk": "радісний", "bn": "আনন্দিত", "ro": "bucuros", "pl": "radosny", "ta": "மகிழ்ச்சிமிக்க", "hi": "आनंदित"}}
+{"guid": "A19_026", "translations": {"th": "ขยะแขยง", "kn": "ಅಸಹ್ಯಪಟ್ಟ", "ro": "dezgustat", "pl": "zniesmaczony", "ta": "வெறுப்படைந்த", "uk": "огидний", "bn": "ঘৃণিত", "hi": "घृणित"}}
+{"guid": "A19_027", "translations": {"th": "ละอายใจ", "kn": "ನಾಚಿಕೆಪಟ್ಟ", "ro": "rușinat", "pl": "zawstydzony", "ta": "வெட்கப்படுகிற", "uk": "соромний", "bn": "লজ্জিত", "hi": "शर्मिंदा"}}
+{"guid": "A19_028", "translations": {"th": "โล่งใจ", "kn": "ನಿರಾಳವಾದ", "ro": "ușurat", "pl": "odczuwający ulgę", "ta": "நிம்மதியான", "uk": "полегшений", "bn": "উরসাম", "hi": "राहतκα"}}
