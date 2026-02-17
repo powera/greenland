@@ -10,7 +10,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "am",
+        "2s": "are",
+        "3s": "is",
+        "1p": "are",
+        "2p": "are",
+        "3p": "are"
+      },
+      "past": {
+        "1s": "was",
+        "2s": "were",
+        "3s": "was",
+        "1p": "were",
+        "2p": "were",
+        "3p": "were"
+      },
+      "future": {
+        "1s": "will be",
+        "2s": "will be",
+        "3s": "will be",
+        "1p": "will be",
+        "2p": "will be",
+        "3p": "will be"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "being",
+      "past_participle": "been"
+    }
   },
   {
     "language_code": "en",
@@ -23,7 +53,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "have",
+        "2s": "have",
+        "3s": "has",
+        "1p": "have",
+        "2p": "have",
+        "3p": "have"
+      },
+      "past": {
+        "1s": "had",
+        "2s": "had",
+        "3s": "had",
+        "1p": "had",
+        "2p": "had",
+        "3p": "had"
+      },
+      "future": {
+        "1s": "will have",
+        "2s": "will have",
+        "3s": "will have",
+        "1p": "will have",
+        "2p": "will have",
+        "3p": "will have"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "having",
+      "past_participle": "had"
+    }
   },
   {
     "language_code": "en",
@@ -36,7 +96,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "work",
+        "2s": "work",
+        "3s": "works",
+        "1p": "work",
+        "2p": "work",
+        "3p": "work"
+      },
+      "past": {
+        "1s": "worked",
+        "2s": "worked",
+        "3s": "worked",
+        "1p": "worked",
+        "2p": "worked",
+        "3p": "worked"
+      },
+      "future": {
+        "1s": "will work",
+        "2s": "will work",
+        "3s": "will work",
+        "1p": "will work",
+        "2p": "will work",
+        "3p": "will work"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "working",
+      "past_participle": "worked"
+    }
   },
   {
     "language_code": "en",
@@ -49,7 +139,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "live",
+        "2s": "live",
+        "3s": "lives",
+        "1p": "live",
+        "2p": "live",
+        "3p": "live"
+      },
+      "past": {
+        "1s": "lived",
+        "2s": "lived",
+        "3s": "lived",
+        "1p": "lived",
+        "2p": "lived",
+        "3p": "lived"
+      },
+      "future": {
+        "1s": "will live",
+        "2s": "will live",
+        "3s": "will live",
+        "1p": "will live",
+        "2p": "will live",
+        "3p": "will live"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "living",
+      "past_participle": "lived"
+    }
   },
   {
     "language_code": "en",
@@ -62,7 +182,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "talk",
+        "2s": "talk",
+        "3s": "talks",
+        "1p": "talk",
+        "2p": "talk",
+        "3p": "talk"
+      },
+      "past": {
+        "1s": "talked",
+        "2s": "talked",
+        "3s": "talked",
+        "1p": "talked",
+        "2p": "talked",
+        "3p": "talked"
+      },
+      "future": {
+        "1s": "will talk",
+        "2s": "will talk",
+        "3s": "will talk",
+        "1p": "will talk",
+        "2p": "will talk",
+        "3p": "will talk"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "talking",
+      "past_participle": "talked"
+    }
   },
   {
     "language_code": "en",
@@ -75,7 +225,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "walk",
+        "2s": "walk",
+        "3s": "walks",
+        "1p": "walk",
+        "2p": "walk",
+        "3p": "walk"
+      },
+      "past": {
+        "1s": "walked",
+        "2s": "walked",
+        "3s": "walked",
+        "1p": "walked",
+        "2p": "walked",
+        "3p": "walked"
+      },
+      "future": {
+        "1s": "will walk",
+        "2s": "will walk",
+        "3s": "will walk",
+        "1p": "will walk",
+        "2p": "will walk",
+        "3p": "will walk"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "walking",
+      "past_participle": "walked"
+    }
   },
   {
     "language_code": "en",
@@ -88,7 +268,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "open",
+        "2s": "open",
+        "3s": "opens",
+        "1p": "open",
+        "2p": "open",
+        "3p": "open"
+      },
+      "past": {
+        "1s": "opened",
+        "2s": "opened",
+        "3s": "opened",
+        "1p": "opened",
+        "2p": "opened",
+        "3p": "opened"
+      },
+      "future": {
+        "1s": "will open",
+        "2s": "will open",
+        "3s": "will open",
+        "1p": "will open",
+        "2p": "will open",
+        "3p": "will open"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "opening",
+      "past_participle": "opened"
+    }
   },
   {
     "language_code": "en",
@@ -101,7 +311,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "train",
+        "2s": "train",
+        "3s": "trains",
+        "1p": "train",
+        "2p": "train",
+        "3p": "train"
+      },
+      "past": {
+        "1s": "trained",
+        "2s": "trained",
+        "3s": "trained",
+        "1p": "trained",
+        "2p": "trained",
+        "3p": "trained"
+      },
+      "future": {
+        "1s": "will train",
+        "2s": "will train",
+        "3s": "will train",
+        "1p": "will train",
+        "2p": "will train",
+        "3p": "will train"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "training",
+      "past_participle": "trained"
+    }
   },
   {
     "language_code": "fr",
@@ -114,7 +354,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "suis",
+        "2s": "es",
+        "3s": "est",
+        "1p": "sommes",
+        "2p": "êtes",
+        "3p": "sont"
+      },
+      "past": {
+        "1s": "ai été",
+        "2s": "as été",
+        "3s": "a été",
+        "1p": "avons été",
+        "2p": "avez été",
+        "3p": "ont été"
+      },
+      "future": {
+        "1s": "serai",
+        "2s": "seras",
+        "3s": "sera",
+        "1p": "serons",
+        "2p": "serez",
+        "3p": "seront"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "étant",
+      "past_participle": "été"
+    }
   },
   {
     "language_code": "fr",
@@ -127,7 +397,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "ai",
+        "2s": "as",
+        "3s": "a",
+        "1p": "avons",
+        "2p": "avez",
+        "3p": "ont"
+      },
+      "past": {
+        "1s": "ai eu",
+        "2s": "as eu",
+        "3s": "a eu",
+        "1p": "avons eu",
+        "2p": "avez eu",
+        "3p": "ont eu"
+      },
+      "future": {
+        "1s": "aurai",
+        "2s": "auras",
+        "3s": "aura",
+        "1p": "aurons",
+        "2p": "aurez",
+        "3p": "auront"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "ayant",
+      "past_participle": "eu"
+    }
   },
   {
     "language_code": "fr",
@@ -140,7 +440,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "travaille",
+        "2s": "travailles",
+        "3s": "travaille",
+        "1p": "travaillons",
+        "2p": "travaillez",
+        "3p": "travaillent"
+      },
+      "past": {
+        "1s": "ai travaillé",
+        "2s": "as travaillé",
+        "3s": "a travaillé",
+        "1p": "avons travaillé",
+        "2p": "avez travaillé",
+        "3p": "ont travaillé"
+      },
+      "future": {
+        "1s": "travaillerai",
+        "2s": "travailleras",
+        "3s": "travaillera",
+        "1p": "travaillerons",
+        "2p": "travaillerez",
+        "3p": "travailleront"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "travaillant",
+      "past_participle": "travaillé"
+    }
   },
   {
     "language_code": "fr",
@@ -153,7 +483,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "vis",
+        "2s": "vis",
+        "3s": "vit",
+        "1p": "vivons",
+        "2p": "vivez",
+        "3p": "vivent"
+      },
+      "past": {
+        "1s": "ai vécu",
+        "2s": "as vécu",
+        "3s": "a vécu",
+        "1p": "avons vécu",
+        "2p": "avez vécu",
+        "3p": "ont vécu"
+      },
+      "future": {
+        "1s": "vivrai",
+        "2s": "vivras",
+        "3s": "vivra",
+        "1p": "vivrons",
+        "2p": "vivrez",
+        "3p": "vivront"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "vivant",
+      "past_participle": "vécu"
+    }
   },
   {
     "language_code": "fr",
@@ -166,7 +526,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "parle",
+        "2s": "parles",
+        "3s": "parle",
+        "1p": "parlons",
+        "2p": "parlez",
+        "3p": "parlent"
+      },
+      "past": {
+        "1s": "ai parlé",
+        "2s": "as parlé",
+        "3s": "a parlé",
+        "1p": "avons parlé",
+        "2p": "avez parlé",
+        "3p": "ont parlé"
+      },
+      "future": {
+        "1s": "parlerai",
+        "2s": "parleras",
+        "3s": "parlera",
+        "1p": "parlerons",
+        "2p": "parlerez",
+        "3p": "parleront"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "parlant",
+      "past_participle": "parlé"
+    }
   },
   {
     "language_code": "fr",
@@ -179,7 +569,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "marche",
+        "2s": "marches",
+        "3s": "marche",
+        "1p": "marchons",
+        "2p": "marchez",
+        "3p": "marchent"
+      },
+      "past": {
+        "1s": "ai marché",
+        "2s": "as marché",
+        "3s": "a marché",
+        "1p": "avons marché",
+        "2p": "avez marché",
+        "3p": "ont marché"
+      },
+      "future": {
+        "1s": "marcherai",
+        "2s": "marcheras",
+        "3s": "marchera",
+        "1p": "marcherons",
+        "2p": "marcherez",
+        "3p": "marcheront"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "marchant",
+      "past_participle": "marché"
+    }
   },
   {
     "language_code": "fr",
@@ -192,7 +612,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "ouvre",
+        "2s": "ouvres",
+        "3s": "ouvre",
+        "1p": "ouvrons",
+        "2p": "ouvrez",
+        "3p": "ouvrent"
+      },
+      "past": {
+        "1s": "ai ouvert",
+        "2s": "as ouvert",
+        "3s": "a ouvert",
+        "1p": "avons ouvert",
+        "2p": "avez ouvert",
+        "3p": "ont ouvert"
+      },
+      "future": {
+        "1s": "ouvrirai",
+        "2s": "ouvriras",
+        "3s": "ouvrira",
+        "1p": "ouvrirons",
+        "2p": "ouvrirez",
+        "3p": "ouvriront"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "ouvrant",
+      "past_participle": "ouvert"
+    }
   },
   {
     "language_code": "fr",
@@ -205,7 +655,37 @@
       "present_participle",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "entraîne",
+        "2s": "entraînes",
+        "3s": "entraîne",
+        "1p": "entraînons",
+        "2p": "entraînez",
+        "3p": "entraînent"
+      },
+      "past": {
+        "1s": "ai entraîné",
+        "2s": "as entraîné",
+        "3s": "a entraîné",
+        "1p": "avons entraîné",
+        "2p": "avez entraîné",
+        "3p": "ont entraîné"
+      },
+      "future": {
+        "1s": "entraînerai",
+        "2s": "entraîneras",
+        "3s": "entraînera",
+        "1p": "entraînerons",
+        "2p": "entraînerez",
+        "3p": "entraîneront"
+      }
+    },
+    "extra_forms": {
+      "present_participle": "entraînant",
+      "past_participle": "entraîné"
+    }
   },
   {
     "language_code": "es",
@@ -218,7 +698,37 @@
       "gerund",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "soy",
+        "2s": "eres",
+        "3s": "es",
+        "1p": "somos",
+        "2p": "sois",
+        "3p": "son"
+      },
+      "past": {
+        "1s": "fui",
+        "2s": "fuiste",
+        "3s": "fue",
+        "1p": "fuimos",
+        "2p": "fuisteis",
+        "3p": "fueron"
+      },
+      "future": {
+        "1s": "seré",
+        "2s": "serás",
+        "3s": "será",
+        "1p": "seremos",
+        "2p": "seréis",
+        "3p": "serán"
+      }
+    },
+    "extra_forms": {
+      "gerund": "siendo",
+      "past_participle": "sido"
+    }
   },
   {
     "language_code": "es",
@@ -231,7 +741,37 @@
       "gerund",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "tengo",
+        "2s": "tienes",
+        "3s": "tiene",
+        "1p": "tenemos",
+        "2p": "tenéis",
+        "3p": "tienen"
+      },
+      "past": {
+        "1s": "tuve",
+        "2s": "tuviste",
+        "3s": "tuvo",
+        "1p": "tuvimos",
+        "2p": "tuvisteis",
+        "3p": "tuvieron"
+      },
+      "future": {
+        "1s": "tendré",
+        "2s": "tendrás",
+        "3s": "tendrá",
+        "1p": "tendremos",
+        "2p": "tendréis",
+        "3p": "tendrán"
+      }
+    },
+    "extra_forms": {
+      "gerund": "teniendo",
+      "past_participle": "tenido"
+    }
   },
   {
     "language_code": "es",
@@ -244,7 +784,37 @@
       "gerund",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "trabajo",
+        "2s": "trabajas",
+        "3s": "trabaja",
+        "1p": "trabajamos",
+        "2p": "trabajáis",
+        "3p": "trabajan"
+      },
+      "past": {
+        "1s": "trabajé",
+        "2s": "trabajaste",
+        "3s": "trabajó",
+        "1p": "trabajamos",
+        "2p": "trabajasteis",
+        "3p": "trabajaron"
+      },
+      "future": {
+        "1s": "trabajaré",
+        "2s": "trabajarás",
+        "3s": "trabajará",
+        "1p": "trabajaremos",
+        "2p": "trabajaréis",
+        "3p": "trabajarán"
+      }
+    },
+    "extra_forms": {
+      "gerund": "trabajando",
+      "past_participle": "trabajado"
+    }
   },
   {
     "language_code": "es",
@@ -257,7 +827,37 @@
       "gerund",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "vivo",
+        "2s": "vives",
+        "3s": "vive",
+        "1p": "vivimos",
+        "2p": "vivís",
+        "3p": "viven"
+      },
+      "past": {
+        "1s": "viví",
+        "2s": "viviste",
+        "3s": "vivió",
+        "1p": "vivimos",
+        "2p": "vivisteis",
+        "3p": "vivieron"
+      },
+      "future": {
+        "1s": "viviré",
+        "2s": "vivirás",
+        "3s": "vivirá",
+        "1p": "viviremos",
+        "2p": "viviréis",
+        "3p": "vivirán"
+      }
+    },
+    "extra_forms": {
+      "gerund": "viviendo",
+      "past_participle": "vivido"
+    }
   },
   {
     "language_code": "es",
@@ -270,7 +870,37 @@
       "gerund",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "hablo",
+        "2s": "hablas",
+        "3s": "habla",
+        "1p": "hablamos",
+        "2p": "habláis",
+        "3p": "hablan"
+      },
+      "past": {
+        "1s": "hablé",
+        "2s": "hablaste",
+        "3s": "habló",
+        "1p": "hablamos",
+        "2p": "hablasteis",
+        "3p": "hablaron"
+      },
+      "future": {
+        "1s": "hablaré",
+        "2s": "hablarás",
+        "3s": "hablará",
+        "1p": "hablaremos",
+        "2p": "hablaréis",
+        "3p": "hablarán"
+      }
+    },
+    "extra_forms": {
+      "gerund": "hablando",
+      "past_participle": "hablado"
+    }
   },
   {
     "language_code": "es",
@@ -283,7 +913,37 @@
       "gerund",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "camino",
+        "2s": "caminas",
+        "3s": "camina",
+        "1p": "caminamos",
+        "2p": "camináis",
+        "3p": "caminan"
+      },
+      "past": {
+        "1s": "caminé",
+        "2s": "caminaste",
+        "3s": "caminó",
+        "1p": "caminamos",
+        "2p": "caminasteis",
+        "3p": "caminaron"
+      },
+      "future": {
+        "1s": "caminaré",
+        "2s": "caminarás",
+        "3s": "caminará",
+        "1p": "caminaremos",
+        "2p": "caminaréis",
+        "3p": "caminarán"
+      }
+    },
+    "extra_forms": {
+      "gerund": "caminando",
+      "past_participle": "caminado"
+    }
   },
   {
     "language_code": "es",
@@ -296,7 +956,37 @@
       "gerund",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "abro",
+        "2s": "abres",
+        "3s": "abre",
+        "1p": "abrimos",
+        "2p": "abrís",
+        "3p": "abren"
+      },
+      "past": {
+        "1s": "abrí",
+        "2s": "abriste",
+        "3s": "abrió",
+        "1p": "abrimos",
+        "2p": "abristeis",
+        "3p": "abrieron"
+      },
+      "future": {
+        "1s": "abriré",
+        "2s": "abrirás",
+        "3s": "abrirá",
+        "1p": "abriremos",
+        "2p": "abriréis",
+        "3p": "abrirán"
+      }
+    },
+    "extra_forms": {
+      "gerund": "abriendo",
+      "past_participle": "abierto"
+    }
   },
   {
     "language_code": "es",
@@ -309,7 +999,37 @@
       "gerund",
       "past_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "entreno",
+        "2s": "entrenas",
+        "3s": "entrena",
+        "1p": "entrenamos",
+        "2p": "entrenáis",
+        "3p": "entrenan"
+      },
+      "past": {
+        "1s": "entrené",
+        "2s": "entrenaste",
+        "3s": "entrenó",
+        "1p": "entrenamos",
+        "2p": "entrenasteis",
+        "3p": "entrenaron"
+      },
+      "future": {
+        "1s": "entrenaré",
+        "2s": "entrenarás",
+        "3s": "entrenará",
+        "1p": "entrenaremos",
+        "2p": "entrenaréis",
+        "3p": "entrenarán"
+      }
+    },
+    "extra_forms": {
+      "gerund": "entrenando",
+      "past_participle": "entrenado"
+    }
   },
   {
     "language_code": "lt",
@@ -322,7 +1042,37 @@
       "present_active_participle",
       "past_active_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "esu",
+        "2s": "esi",
+        "3s": "yra",
+        "1p": "esame",
+        "2p": "esate",
+        "3p": "yra"
+      },
+      "past": {
+        "1s": "buvau",
+        "2s": "buvai",
+        "3s": "buvo",
+        "1p": "buvome",
+        "2p": "buvote",
+        "3p": "buvo"
+      },
+      "future": {
+        "1s": "būsiu",
+        "2s": "būsi",
+        "3s": "bus",
+        "1p": "būsime",
+        "2p": "būsite",
+        "3p": "bus"
+      }
+    },
+    "extra_forms": {
+      "present_active_participle": "esantis",
+      "past_active_participle": "buvęs"
+    }
   },
   {
     "language_code": "lt",
@@ -335,7 +1085,37 @@
       "present_active_participle",
       "past_active_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "turiu",
+        "2s": "turi",
+        "3s": "turi",
+        "1p": "turime",
+        "2p": "turite",
+        "3p": "turi"
+      },
+      "past": {
+        "1s": "turėjau",
+        "2s": "turėjai",
+        "3s": "turėjo",
+        "1p": "turėjome",
+        "2p": "turėjote",
+        "3p": "turėjo"
+      },
+      "future": {
+        "1s": "turėsiu",
+        "2s": "turėsi",
+        "3s": "turės",
+        "1p": "turėsime",
+        "2p": "turėsite",
+        "3p": "turės"
+      }
+    },
+    "extra_forms": {
+      "present_active_participle": "turintis",
+      "past_active_participle": "turėjęs"
+    }
   },
   {
     "language_code": "lt",
@@ -348,7 +1128,37 @@
       "present_active_participle",
       "past_active_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "dirbu",
+        "2s": "dirbi",
+        "3s": "dirba",
+        "1p": "dirbame",
+        "2p": "dirbate",
+        "3p": "dirba"
+      },
+      "past": {
+        "1s": "dirbau",
+        "2s": "dirbai",
+        "3s": "dirbo",
+        "1p": "dirbome",
+        "2p": "dirbote",
+        "3p": "dirbo"
+      },
+      "future": {
+        "1s": "dirbsiu",
+        "2s": "dirbsi",
+        "3s": "dirbs",
+        "1p": "dirbsime",
+        "2p": "dirbsite",
+        "3p": "dirbs"
+      }
+    },
+    "extra_forms": {
+      "present_active_participle": "dirbantis",
+      "past_active_participle": "dirbęs"
+    }
   },
   {
     "language_code": "lt",
@@ -361,7 +1171,37 @@
       "present_active_participle",
       "past_active_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "gyvenu",
+        "2s": "gyveni",
+        "3s": "gyvena",
+        "1p": "gyvename",
+        "2p": "gyvenate",
+        "3p": "gyvena"
+      },
+      "past": {
+        "1s": "gyvenau",
+        "2s": "gyvenai",
+        "3s": "gyveno",
+        "1p": "gyvenome",
+        "2p": "gyvenote",
+        "3p": "gyveno"
+      },
+      "future": {
+        "1s": "gyvensiu",
+        "2s": "gyvensi",
+        "3s": "gyvens",
+        "1p": "gyvensime",
+        "2p": "gyvensite",
+        "3p": "gyvens"
+      }
+    },
+    "extra_forms": {
+      "present_active_participle": "gyvenantis",
+      "past_active_participle": "gyvenęs"
+    }
   },
   {
     "language_code": "lt",
@@ -374,7 +1214,37 @@
       "present_active_participle",
       "past_active_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "kalbu",
+        "2s": "kalbi",
+        "3s": "kalba",
+        "1p": "kalbame",
+        "2p": "kalbate",
+        "3p": "kalba"
+      },
+      "past": {
+        "1s": "kalbėjau",
+        "2s": "kalbėjai",
+        "3s": "kalbėjo",
+        "1p": "kalbėjome",
+        "2p": "kalbėjote",
+        "3p": "kalbėjo"
+      },
+      "future": {
+        "1s": "kalbėsiu",
+        "2s": "kalbėsi",
+        "3s": "kalbės",
+        "1p": "kalbėsime",
+        "2p": "kalbėsite",
+        "3p": "kalbės"
+      }
+    },
+    "extra_forms": {
+      "present_active_participle": "kalbantis",
+      "past_active_participle": "kalbėjęs"
+    }
   },
   {
     "language_code": "lt",
@@ -387,7 +1257,37 @@
       "present_active_participle",
       "past_active_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "einu",
+        "2s": "eini",
+        "3s": "eina",
+        "1p": "einame",
+        "2p": "einate",
+        "3p": "eina"
+      },
+      "past": {
+        "1s": "ėjau",
+        "2s": "ėjai",
+        "3s": "ėjo",
+        "1p": "ėjome",
+        "2p": "ėjote",
+        "3p": "ėjo"
+      },
+      "future": {
+        "1s": "eisiu",
+        "2s": "eisi",
+        "3s": "eis",
+        "1p": "eisime",
+        "2p": "eisite",
+        "3p": "eis"
+      }
+    },
+    "extra_forms": {
+      "present_active_participle": "einantis",
+      "past_active_participle": "ėjęs"
+    }
   },
   {
     "language_code": "lt",
@@ -400,7 +1300,37 @@
       "present_active_participle",
       "past_active_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "atidarau",
+        "2s": "atidarai",
+        "3s": "atidaro",
+        "1p": "atidarome",
+        "2p": "atidarote",
+        "3p": "atidaro"
+      },
+      "past": {
+        "1s": "atidariau",
+        "2s": "atidarei",
+        "3s": "atidarė",
+        "1p": "atidarėme",
+        "2p": "atidarėte",
+        "3p": "atidarė"
+      },
+      "future": {
+        "1s": "atidarysiu",
+        "2s": "atidarysi",
+        "3s": "atidarys",
+        "1p": "atidarysime",
+        "2p": "atidarysite",
+        "3p": "atidarys"
+      }
+    },
+    "extra_forms": {
+      "present_active_participle": "atidarantis",
+      "past_active_participle": "atidaręs"
+    }
   },
   {
     "language_code": "lt",
@@ -413,7 +1343,37 @@
       "present_active_participle",
       "past_active_participle"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "treniruoju",
+        "2s": "treniruoji",
+        "3s": "treniruoja",
+        "1p": "treniruojame",
+        "2p": "treniruojate",
+        "3p": "treniruoja"
+      },
+      "past": {
+        "1s": "treniravau",
+        "2s": "treniravai",
+        "3s": "treniravo",
+        "1p": "treniravome",
+        "2p": "treniravote",
+        "3p": "treniravo"
+      },
+      "future": {
+        "1s": "treniruosiu",
+        "2s": "treniruosi",
+        "3s": "treniruos",
+        "1p": "treniruosime",
+        "2p": "treniruosite",
+        "3p": "treniruos"
+      }
+    },
+    "extra_forms": {
+      "present_active_participle": "treniruojantis",
+      "past_active_participle": "treniravęs"
+    }
   },
   {
     "language_code": "uk",
@@ -426,7 +1386,37 @@
       "past_participle",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "є",
+        "2s": "є",
+        "3s": "є",
+        "1p": "є",
+        "2p": "є",
+        "3p": "є"
+      },
+      "past": {
+        "1s": "був",
+        "2s": "був",
+        "3s": "був",
+        "1p": "були",
+        "2p": "були",
+        "3p": "були"
+      },
+      "future": {
+        "1s": "буду",
+        "2s": "будеш",
+        "3s": "буде",
+        "1p": "будемо",
+        "2p": "будете",
+        "3p": "будуть"
+      }
+    },
+    "extra_forms": {
+      "past_participle": "був",
+      "imperative_2s": "будь"
+    }
   },
   {
     "language_code": "uk",
@@ -439,7 +1429,37 @@
       "past_participle",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "маю",
+        "2s": "маєш",
+        "3s": "має",
+        "1p": "маємо",
+        "2p": "маєте",
+        "3p": "мають"
+      },
+      "past": {
+        "1s": "мав",
+        "2s": "мав",
+        "3s": "мав",
+        "1p": "мали",
+        "2p": "мали",
+        "3p": "мали"
+      },
+      "future": {
+        "1s": "матиму",
+        "2s": "матимеш",
+        "3s": "матиме",
+        "1p": "матимемо",
+        "2p": "матимете",
+        "3p": "матимуть"
+      }
+    },
+    "extra_forms": {
+      "past_participle": "мав",
+      "imperative_2s": "май"
+    }
   },
   {
     "language_code": "uk",
@@ -452,7 +1472,37 @@
       "past_participle",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "працюю",
+        "2s": "працюєш",
+        "3s": "працює",
+        "1p": "працюємо",
+        "2p": "працюєте",
+        "3p": "працюють"
+      },
+      "past": {
+        "1s": "працював",
+        "2s": "працював",
+        "3s": "працював",
+        "1p": "працювали",
+        "2p": "працювали",
+        "3p": "працювали"
+      },
+      "future": {
+        "1s": "працюватиму",
+        "2s": "працюватимеш",
+        "3s": "працюватиме",
+        "1p": "працюватимемо",
+        "2p": "працюватимете",
+        "3p": "працюватимуть"
+      }
+    },
+    "extra_forms": {
+      "past_participle": "працював",
+      "imperative_2s": "працюй"
+    }
   },
   {
     "language_code": "uk",
@@ -465,7 +1515,37 @@
       "past_participle",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "живу",
+        "2s": "живеш",
+        "3s": "живе",
+        "1p": "живемо",
+        "2p": "живете",
+        "3p": "живуть"
+      },
+      "past": {
+        "1s": "жив",
+        "2s": "жив",
+        "3s": "жив",
+        "1p": "жили",
+        "2p": "жили",
+        "3p": "жили"
+      },
+      "future": {
+        "1s": "житиму",
+        "2s": "житимеш",
+        "3s": "житиме",
+        "1p": "житимемо",
+        "2p": "житимете",
+        "3p": "житимуть"
+      }
+    },
+    "extra_forms": {
+      "past_participle": "жив",
+      "imperative_2s": "живи"
+    }
   },
   {
     "language_code": "uk",
@@ -478,7 +1558,37 @@
       "past_participle",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "говорю",
+        "2s": "говориш",
+        "3s": "говорить",
+        "1p": "говоримо",
+        "2p": "говорите",
+        "3p": "говорять"
+      },
+      "past": {
+        "1s": "говорив",
+        "2s": "говорив",
+        "3s": "говорив",
+        "1p": "говорили",
+        "2p": "говорили",
+        "3p": "говорили"
+      },
+      "future": {
+        "1s": "говоритиму",
+        "2s": "говоритимеш",
+        "3s": "говоритиме",
+        "1p": "говоритимемо",
+        "2p": "говоритимете",
+        "3p": "говоритимуть"
+      }
+    },
+    "extra_forms": {
+      "past_participle": "говорив",
+      "imperative_2s": "говори"
+    }
   },
   {
     "language_code": "uk",
@@ -491,7 +1601,37 @@
       "past_participle",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "ходжу",
+        "2s": "ходиш",
+        "3s": "ходить",
+        "1p": "ходимо",
+        "2p": "ходите",
+        "3p": "ходять"
+      },
+      "past": {
+        "1s": "ходив",
+        "2s": "ходив",
+        "3s": "ходив",
+        "1p": "ходили",
+        "2p": "ходили",
+        "3p": "ходили"
+      },
+      "future": {
+        "1s": "ходитиму",
+        "2s": "ходитимеш",
+        "3s": "ходитиме",
+        "1p": "ходитимемо",
+        "2p": "ходитимете",
+        "3p": "ходитимуть"
+      }
+    },
+    "extra_forms": {
+      "past_participle": "ходив",
+      "imperative_2s": "ходи"
+    }
   },
   {
     "language_code": "uk",
@@ -504,7 +1644,37 @@
       "past_participle",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "відкриваю",
+        "2s": "відкриваєш",
+        "3s": "відкриває",
+        "1p": "відкриваємо",
+        "2p": "відкриваєте",
+        "3p": "відкривають"
+      },
+      "past": {
+        "1s": "відкривав",
+        "2s": "відкривав",
+        "3s": "відкривав",
+        "1p": "відкривали",
+        "2p": "відкривали",
+        "3p": "відкривали"
+      },
+      "future": {
+        "1s": "відкриватиму",
+        "2s": "відкриватимеш",
+        "3s": "відкриватиме",
+        "1p": "відкриватимемо",
+        "2p": "відкриватимете",
+        "3p": "відкриватимуть"
+      }
+    },
+    "extra_forms": {
+      "past_participle": "відкривав",
+      "imperative_2s": "відкривай"
+    }
   },
   {
     "language_code": "uk",
@@ -517,7 +1687,37 @@
       "past_participle",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "треную",
+        "2s": "тренуєш",
+        "3s": "тренує",
+        "1p": "тренуємо",
+        "2p": "тренуєте",
+        "3p": "тренують"
+      },
+      "past": {
+        "1s": "тренував",
+        "2s": "тренував",
+        "3s": "тренував",
+        "1p": "тренували",
+        "2p": "тренували",
+        "3p": "тренували"
+      },
+      "future": {
+        "1s": "тренуватиму",
+        "2s": "тренуватимеш",
+        "3s": "тренуватиме",
+        "1p": "тренуватимемо",
+        "2p": "тренуватимете",
+        "3p": "тренуватимуть"
+      }
+    },
+    "extra_forms": {
+      "past_participle": "тренував",
+      "imperative_2s": "тренуй"
+    }
   },
   {
     "language_code": "bn",
@@ -530,7 +1730,37 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "আমি হই",
+        "2s": "তুমি হও",
+        "3s": "সে হয়",
+        "1p": "আমরা হই",
+        "2p": "তোমরা হও",
+        "3p": "তারা হয়"
+      },
+      "past": {
+        "1s": "আমি হয়েছিলাম",
+        "2s": "তুমি হয়েছিলে",
+        "3s": "সে হয়েছিল",
+        "1p": "আমরা হয়েছিলাম",
+        "2p": "তোমরা হয়েছিলে",
+        "3p": "তারা হয়েছিল"
+      },
+      "future": {
+        "1s": "আমি হব",
+        "2s": "তুমি হবে",
+        "3s": "সে হবে",
+        "1p": "আমরা হব",
+        "2p": "তোমরা হবে",
+        "3p": "তারা হবে"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "হওয়া",
+      "imperative_2s": "হও"
+    }
   },
   {
     "language_code": "bn",
@@ -543,7 +1773,37 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "আমার আছে",
+        "2s": "তোমার আছে",
+        "3s": "তার আছে",
+        "1p": "আমাদের আছে",
+        "2p": "তোমাদের আছে",
+        "3p": "তাদের আছে"
+      },
+      "past": {
+        "1s": "আমার ছিল",
+        "2s": "তোমার ছিল",
+        "3s": "তার ছিল",
+        "1p": "আমাদের ছিল",
+        "2p": "তোমাদের ছিল",
+        "3p": "তাদের ছিল"
+      },
+      "future": {
+        "1s": "আমার থাকবে",
+        "2s": "তোমার থাকবে",
+        "3s": "তার থাকবে",
+        "1p": "আমাদের থাকবে",
+        "2p": "তোমাদের থাকবে",
+        "3p": "তাদের থাকবে"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "থাকা",
+      "imperative_2s": "থাকো"
+    }
   },
   {
     "language_code": "bn",
@@ -556,7 +1816,37 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "আমি কাজ করি",
+        "2s": "তুমি কাজ করো",
+        "3s": "সে কাজ করে",
+        "1p": "আমরা কাজ করি",
+        "2p": "তোমরা কাজ করো",
+        "3p": "তারা কাজ করে"
+      },
+      "past": {
+        "1s": "আমি কাজ করেছি",
+        "2s": "তুমি কাজ করেছ",
+        "3s": "সে কাজ করেছে",
+        "1p": "আমরা কাজ করেছি",
+        "2p": "তোমরা কাজ করেছ",
+        "3p": "তারা কাজ করেছে"
+      },
+      "future": {
+        "1s": "আমি কাজ করব",
+        "2s": "তুমি কাজ করবে",
+        "3s": "সে কাজ করবে",
+        "1p": "আমরা কাজ করব",
+        "2p": "তোমরা কাজ করবে",
+        "3p": "তারা কাজ করবে"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "কাজ করা",
+      "imperative_2s": "কাজ করো"
+    }
   },
   {
     "language_code": "bn",
@@ -569,7 +1859,37 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "আমি বসবাস করি",
+        "2s": "তুমি বসবাস করো",
+        "3s": "সে বসবাস করে",
+        "1p": "আমরা বসবাস করি",
+        "2p": "তোমরা বসবাস করো",
+        "3p": "তারা বসবাস করে"
+      },
+      "past": {
+        "1s": "আমি বসবাস করেছি",
+        "2s": "তুমি বসবাস করেছ",
+        "3s": "সে বসবাস করেছে",
+        "1p": "আমরা বসবাস করেছি",
+        "2p": "তোমরা বসবাস করেছ",
+        "3p": "তারা বসবাস করেছে"
+      },
+      "future": {
+        "1s": "আমি বসবাস করব",
+        "2s": "তুমি বসবাস করবে",
+        "3s": "সে বসবাস করবে",
+        "1p": "আমরা বসবাস করব",
+        "2p": "তোমরা বসবাস করবে",
+        "3p": "তারা বসবাস করবে"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "বসবাস করা",
+      "imperative_2s": "বসবাস করো"
+    }
   },
   {
     "language_code": "bn",
@@ -582,7 +1902,37 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "আমি কথা বলি",
+        "2s": "তুমি কথা বলো",
+        "3s": "সে কথা বলে",
+        "1p": "আমরা কথা বলি",
+        "2p": "তোমরা কথা বলো",
+        "3p": "তারা কথা বলে"
+      },
+      "past": {
+        "1s": "আমি কথা বলেছি",
+        "2s": "তুমি কথা বলেছ",
+        "3s": "সে কথা বলেছে",
+        "1p": "আমরা কথা বলেছি",
+        "2p": "তোমরা কথা বলেছ",
+        "3p": "তারা কথা বলেছে"
+      },
+      "future": {
+        "1s": "আমি কথা বলব",
+        "2s": "তুমি কথা বলবে",
+        "3s": "সে কথা বলবে",
+        "1p": "আমরা কথা বলব",
+        "2p": "তোমরা কথা বলবে",
+        "3p": "তারা কথা বলবে"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "কথা বলা",
+      "imperative_2s": "কথা বলো"
+    }
   },
   {
     "language_code": "bn",
@@ -595,7 +1945,37 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "আমি হাঁটি",
+        "2s": "তুমি হাঁটো",
+        "3s": "সে হাঁটে",
+        "1p": "আমরা হাঁটি",
+        "2p": "তোমরা হাঁটো",
+        "3p": "তারা হাঁটে"
+      },
+      "past": {
+        "1s": "আমি হেঁটেছি",
+        "2s": "তুমি হেঁটেছ",
+        "3s": "সে হেঁটেছে",
+        "1p": "আমরা হেঁটেছি",
+        "2p": "তোমরা হেঁটেছ",
+        "3p": "তারা হেঁটেছে"
+      },
+      "future": {
+        "1s": "আমি হাঁটব",
+        "2s": "তুমি হাঁটবে",
+        "3s": "সে হাঁটবে",
+        "1p": "আমরা হাঁটব",
+        "2p": "তোমরা হাঁটবে",
+        "3p": "তারা হাঁটবে"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "হাঁটা",
+      "imperative_2s": "হাঁটো"
+    }
   },
   {
     "language_code": "bn",
@@ -608,7 +1988,37 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "আমি খুলি",
+        "2s": "তুমি খোলো",
+        "3s": "সে খোলে",
+        "1p": "আমরা খুলি",
+        "2p": "তোমরা খোলো",
+        "3p": "তারা খোলে"
+      },
+      "past": {
+        "1s": "আমি খুলেছি",
+        "2s": "তুমি খুলেছ",
+        "3s": "সে খুলেছে",
+        "1p": "আমরা খুলেছি",
+        "2p": "তোমরা খুলেছ",
+        "3p": "তারা খুলেছে"
+      },
+      "future": {
+        "1s": "আমি খুলব",
+        "2s": "তুমি খুলবে",
+        "3s": "সে খুলবে",
+        "1p": "আমরা খুলব",
+        "2p": "তোমরা খুলবে",
+        "3p": "তারা খুলবে"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "খোলা",
+      "imperative_2s": "খোলো"
+    }
   },
   {
     "language_code": "bn",
@@ -621,7 +2031,37 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "আমি প্রশিক্ষণ দিই",
+        "2s": "তুমি প্রশিক্ষণ দাও",
+        "3s": "সে প্রশিক্ষণ দেয়",
+        "1p": "আমরা প্রশিক্ষণ দিই",
+        "2p": "তোমরা প্রশিক্ষণ দাও",
+        "3p": "তারা প্রশিক্ষণ দেয়"
+      },
+      "past": {
+        "1s": "আমি প্রশিক্ষণ দিয়েছি",
+        "2s": "তুমি প্রশিক্ষণ দিয়েছ",
+        "3s": "সে প্রশিক্ষণ দিয়েছে",
+        "1p": "আমরা প্রশিক্ষণ দিয়েছি",
+        "2p": "তোমরা প্রশিক্ষণ দিয়েছ",
+        "3p": "তারা প্রশিক্ষণ দিয়েছে"
+      },
+      "future": {
+        "1s": "আমি প্রশিক্ষণ দেব",
+        "2s": "তুমি প্রশিক্ষণ দেবে",
+        "3s": "সে প্রশিক্ষণ দেবে",
+        "1p": "আমরা প্রশিক্ষণ দেব",
+        "2p": "তোমরা প্রশিক্ষণ দেবে",
+        "3p": "তারা প্রশিক্ষণ দেবে"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "প্রশিক্ষণ দেওয়া",
+      "imperative_2s": "প্রশিক্ষণ দাও"
+    }
   },
   {
     "language_code": "kn",
@@ -634,7 +2074,37 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "ನಾನು ಇರುತ್ತೇನೆ",
+        "2s": "ನೀನು ಇರುತ್ತೀಯ",
+        "3s": "ಅವನು ಇರುತ್ತಾನೆ",
+        "1p": "ನಾವು ಇರುತ್ತೇವೆ",
+        "2p": "ನೀವು ಇರುತ್ತೀರಿ",
+        "3p": "ಅವರು ಇರುತ್ತಾರೆ"
+      },
+      "past": {
+        "1s": "ನಾನು ಇದ್ದೆ",
+        "2s": "ನೀನು ಇದ್ದೆ",
+        "3s": "ಅವನು ಇದ್ದ",
+        "1p": "ನಾವು ಇದ್ದೆವು",
+        "2p": "ನೀವು ಇದ್ದಿರಿ",
+        "3p": "ಅವರು ಇದ್ದರು"
+      },
+      "future": {
+        "1s": "ನಾನು ಇರುತ್ತೇನೆ",
+        "2s": "ನೀನು ಇರುತ್ತೀಯ",
+        "3s": "ಅವನು ಇರುತ್ತಾನೆ",
+        "1p": "ನಾವು ಇರುತ್ತೇವೆ",
+        "2p": "ನೀವು ಇರುತ್ತೀರಿ",
+        "3p": "ಅವರು ಇರುತ್ತಾರೆ"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "ಇರುವುದು",
+      "imperative_2s": "ಇರು"
+    }
   },
   {
     "language_code": "kn",
@@ -647,7 +2117,37 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "ನಾನು ಹೊಂದಿದ್ದೇನೆ",
+        "2s": "ನೀನು ಹೊಂದಿದ್ದೀಯ",
+        "3s": "ಅವನು ಹೊಂದಿದ್ದಾನೆ",
+        "1p": "ನಾವು ಹೊಂದಿದ್ದೇವೆ",
+        "2p": "ನೀವು ಹೊಂದಿದ್ದೀರಿ",
+        "3p": "ಅವರು ಹೊಂದಿದ್ದಾರೆ"
+      },
+      "past": {
+        "1s": "ನಾನು ಹೊಂದಿದ್ದೆ",
+        "2s": "ನೀನು ಹೊಂದಿದ್ದೆ",
+        "3s": "ಅವನು ಹೊಂದಿದ್ದ",
+        "1p": "ನಾವು ಹೊಂದಿದ್ದೆವು",
+        "2p": "ನೀವು ಹೊಂದಿದ್ದಿರಿ",
+        "3p": "ಅವರು ಹೊಂದಿದ್ದರು"
+      },
+      "future": {
+        "1s": "ನಾನು ಹೊಂದಿರುವೆ",
+        "2s": "ನೀನು ಹೊಂದಿರುವೆ",
+        "3s": "ಅವನು ಹೊಂದಿರುವನು",
+        "1p": "ನಾವು ಹೊಂದಿರುವೆವು",
+        "2p": "ನೀವು ಹೊಂದಿರುವಿರಿ",
+        "3p": "ಅವರು ಹೊಂದಿರುವರು"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "ಹೊಂದಿರುವುದು",
+      "imperative_2s": "ಹೊಂದು"
+    }
   },
   {
     "language_code": "kn",
@@ -660,7 +2160,37 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "ನಾನು ಕೆಲಸಮಾಡುತ್ತೇನೆ",
+        "2s": "ನೀನು ಕೆಲಸಮಾಡುತ್ತೀಯ",
+        "3s": "ಅವನು ಕೆಲಸಮಾಡುತ್ತಾನೆ",
+        "1p": "ನಾವು ಕೆಲಸಮಾಡುತ್ತೇವೆ",
+        "2p": "ನೀವು ಕೆಲಸಮಾಡುತ್ತೀರಿ",
+        "3p": "ಅವರು ಕೆಲಸಮಾಡುತ್ತಾರೆ"
+      },
+      "past": {
+        "1s": "ನಾನು ಕೆಲಸಮಾಡಿದೆ",
+        "2s": "ನೀನು ಕೆಲಸಮಾಡಿದೆ",
+        "3s": "ಅವನು ಕೆಲಸಮಾಡಿದ",
+        "1p": "ನಾವು ಕೆಲಸಮಾಡಿದೆವು",
+        "2p": "ನೀವು ಕೆಲಸಮಾಡಿದಿರಿ",
+        "3p": "ಅವರು ಕೆಲಸಮಾಡಿದರು"
+      },
+      "future": {
+        "1s": "ನಾನು ಕೆಲಸಮಾಡುವೆ",
+        "2s": "ನೀನು ಕೆಲಸಮಾಡುವೆ",
+        "3s": "ಅವನು ಕೆಲಸಮಾಡುವನು",
+        "1p": "ನಾವು ಕೆಲಸಮಾಡುವೆವು",
+        "2p": "ನೀವು ಕೆಲಸಮಾಡುವಿರಿ",
+        "3p": "ಅವರು ಕೆಲಸಮಾಡುವರು"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "ಕೆಲಸಮಾಡುವುದು",
+      "imperative_2s": "ಕೆಲಸಮಾಡು"
+    }
   },
   {
     "language_code": "kn",
@@ -673,7 +2203,37 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "ನಾನು ಬಾಳುತ್ತೇನೆ",
+        "2s": "ನೀನು ಬಾಳುತ್ತೀಯ",
+        "3s": "ಅವನು ಬಾಳುತ್ತಾನೆ",
+        "1p": "ನಾವು ಬಾಳುತ್ತೇವೆ",
+        "2p": "ನೀವು ಬಾಳುತ್ತೀರಿ",
+        "3p": "ಅವರು ಬಾಳುತ್ತಾರೆ"
+      },
+      "past": {
+        "1s": "ನಾನು ಬಾಳಿದೆ",
+        "2s": "ನೀನು ಬಾಳಿದೆ",
+        "3s": "ಅವನು ಬಾಳಿದ",
+        "1p": "ನಾವು ಬಾಳಿದೆವು",
+        "2p": "ನೀವು ಬಾಳಿದಿರಿ",
+        "3p": "ಅವರು ಬಾಳಿದರು"
+      },
+      "future": {
+        "1s": "ನಾನು ಬಾಳುವೆ",
+        "2s": "ನೀನು ಬಾಳುವೆ",
+        "3s": "ಅವನು ಬಾಳುವನು",
+        "1p": "ನಾವು ಬಾಳುವೆವು",
+        "2p": "ನೀವು ಬಾಳುವಿರಿ",
+        "3p": "ಅವರು ಬಾಳುವರು"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "ಬಾಳುವುದು",
+      "imperative_2s": "ಬಾಳು"
+    }
   },
   {
     "language_code": "kn",
@@ -686,7 +2246,37 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "ನಾನು ಮಾತನಾಡುತ್ತೇನೆ",
+        "2s": "ನೀನು ಮಾತನಾಡುತ್ತೀಯ",
+        "3s": "ಅವನು ಮಾತನಾಡುತ್ತಾನೆ",
+        "1p": "ನಾವು ಮಾತನಾಡುತ್ತೇವೆ",
+        "2p": "ನೀವು ಮಾತನಾಡುತ್ತೀರಿ",
+        "3p": "ಅವರು ಮಾತನಾಡುತ್ತಾರೆ"
+      },
+      "past": {
+        "1s": "ನಾನು ಮಾತನಾಡಿದೆ",
+        "2s": "ನೀನು ಮಾತನಾಡಿದೆ",
+        "3s": "ಅವನು ಮಾತನಾಡಿದ",
+        "1p": "ನಾವು ಮಾತನಾಡಿದೆವು",
+        "2p": "ನೀವು ಮಾತನಾಡಿದಿರಿ",
+        "3p": "ಅವರು ಮಾತನಾಡಿದರು"
+      },
+      "future": {
+        "1s": "ನಾನು ಮಾತನಾಡುವೆ",
+        "2s": "ನೀನು ಮಾತನಾಡುವೆ",
+        "3s": "ಅವನು ಮಾತನಾಡುವನು",
+        "1p": "ನಾವು ಮಾತನಾಡುವೆವು",
+        "2p": "ನೀವು ಮಾತನಾಡುವಿರಿ",
+        "3p": "ಅವರು ಮಾತನಾಡುವರು"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "ಮಾತನಾಡುವುದು",
+      "imperative_2s": "ಮಾತನಾಡು"
+    }
   },
   {
     "language_code": "kn",
@@ -699,7 +2289,37 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "ನಾನು ನಡೆಯುತ್ತೇನೆ",
+        "2s": "ನೀನು ನಡೆಯುತ್ತೀಯ",
+        "3s": "ಅವನು ನಡೆಯುತ್ತಾನೆ",
+        "1p": "ನಾವು ನಡೆಯುತ್ತೇವೆ",
+        "2p": "ನೀವು ನಡೆಯುತ್ತೀರಿ",
+        "3p": "ಅವರು ನಡೆಯುತ್ತಾರೆ"
+      },
+      "past": {
+        "1s": "ನಾನು ನಡೆದೆ",
+        "2s": "ನೀನು ನಡೆದೆ",
+        "3s": "ಅವನು ನಡೆದ",
+        "1p": "ನಾವು ನಡೆದೆವು",
+        "2p": "ನೀವು ನಡೆದಿರಿ",
+        "3p": "ಅವರು ನಡೆದರು"
+      },
+      "future": {
+        "1s": "ನಾನು ನಡೆಯುವೆ",
+        "2s": "ನೀನು ನಡೆಯುವೆ",
+        "3s": "ಅವನು ನಡೆಯುವನು",
+        "1p": "ನಾವು ನಡೆಯುವೆವು",
+        "2p": "ನೀವು ನಡೆಯುವಿರಿ",
+        "3p": "ಅವರು ನಡೆಯುವರು"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "ನಡೆಯುವುದು",
+      "imperative_2s": "ನಡೆ"
+    }
   },
   {
     "language_code": "kn",
@@ -712,7 +2332,37 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "ನಾನು ತೆರೆಯುತ್ತೇನೆ",
+        "2s": "ನೀನು ತೆರೆಯುತ್ತೀಯ",
+        "3s": "ಅವನು ತೆರೆಯುತ್ತಾನೆ",
+        "1p": "ನಾವು ತೆರೆಯುತ್ತೇವೆ",
+        "2p": "ನೀವು ತೆರೆಯುತ್ತೀರಿ",
+        "3p": "ಅವರು ತೆರೆಯುತ್ತಾರೆ"
+      },
+      "past": {
+        "1s": "ನಾನು ತೆರೆದಿದ್ದೆ",
+        "2s": "ನೀನು ತೆರೆದಿದ್ದೆ",
+        "3s": "ಅವನು ತೆರೆದಿದ್ದ",
+        "1p": "ನಾವು ತೆರೆದಿದ್ದೆವು",
+        "2p": "ನೀವು ತೆರೆದಿದ್ದಿರಿ",
+        "3p": "ಅವರು ತೆರೆದಿದ್ದರು"
+      },
+      "future": {
+        "1s": "ನಾನು ತೆರೆಯುವೆ",
+        "2s": "ನೀನು ತೆರೆಯುವೆ",
+        "3s": "ಅವನು ತೆರೆಯುವನು",
+        "1p": "ನಾವು ತೆರೆಯುವೆವು",
+        "2p": "ನೀವು ತೆರೆಯುವಿರಿ",
+        "3p": "ಅವರು ತೆರೆಯುವರು"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "ತೆರೆಯುವುದು",
+      "imperative_2s": "ತೆರೆ"
+    }
   },
   {
     "language_code": "kn",
@@ -725,6 +2375,36 @@
       "verbal_noun",
       "imperative_2s"
     ],
-    "prompt_file": "prompts/en.txt"
+    "prompt_file": "prompts/en.txt",
+    "forms": {
+      "present": {
+        "1s": "ನಾನು ತರಬೇತಿನೀಡುತ್ತೇನೆ",
+        "2s": "ನೀನು ತರಬೇತಿನೀಡುತ್ತೀಯ",
+        "3s": "ಅವನು ತರಬೇತಿನೀಡುತ್ತಾನೆ",
+        "1p": "ನಾವು ತರಬೇತಿನೀಡುತ್ತೇವೆ",
+        "2p": "ನೀವು ತರಬೇತಿನೀಡುತ್ತೀರಿ",
+        "3p": "ಅವರು ತರಬೇತಿನೀಡುತ್ತಾರೆ"
+      },
+      "past": {
+        "1s": "ನಾನು ತರಬೇತಿನೀಡಿದೆ",
+        "2s": "ನೀನು ತರಬೇತಿನೀಡಿದೆ",
+        "3s": "ಅವನು ತರಬೇತಿನೀಡಿದ",
+        "1p": "ನಾವು ತರಬೇತಿನೀಡಿದೆವು",
+        "2p": "ನೀವು ತರಬೇತಿನೀಡಿದಿರಿ",
+        "3p": "ಅವರು ತರಬೇತಿನೀಡಿದರು"
+      },
+      "future": {
+        "1s": "ನಾನು ತರಬೇತಿನೀಡುವೆ",
+        "2s": "ನೀನು ತರಬೇತಿನೀಡುವೆ",
+        "3s": "ಅವನು ತರಬೇತಿನೀಡುವನು",
+        "1p": "ನಾವು ತರಬೇತಿನೀಡುವೆವು",
+        "2p": "ನೀವು ತರಬೇತಿನೀಡುವಿರಿ",
+        "3p": "ಅವರು ತರಬೇತಿನೀಡುವರು"
+      }
+    },
+    "extra_forms": {
+      "verbal_noun": "ತರಬೇತಿನೀಡುವುದು",
+      "imperative_2s": "ತರಬೇತಿನೀಡು"
+    }
   }
 ]
