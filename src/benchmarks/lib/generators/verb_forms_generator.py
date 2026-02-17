@@ -16,13 +16,16 @@ from benchmarks.lib.utils.data_models import (
 )
 from benchmarks.lib.utils.factory import generator, register_benchmark_metadata
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 BENCHMARK_METADATA = BenchmarkMetadata(
     code="0121_verb_forms",
     name="Verb Forms",
     description="Generate full person/tense verb forms across multiple languages.",
+    default_num_questions=56,
 )
 
 register_benchmark_metadata(BENCHMARK_METADATA)

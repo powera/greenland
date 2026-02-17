@@ -110,3 +110,4 @@ class BenchmarkMetadata:
     version: str = "1.0"  # Version of the benchmark
     tags: List[str] = field(default_factory=list)  # Tags for categorization
     max_score: int = 100  # Maximum possible score
+    default_num_questions: int = 40  # Default number of questions to generate
