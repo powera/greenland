@@ -4,7 +4,7 @@
 
 import ipaddress
 
-from flask import Blueprint, g, render_template, request, flash, redirect, url_for
+from flask import Blueprint, g, render_template, request, flash, redirect, url_for, Response
 from sqlalchemy import func
 
 from benchmarks.datastore.benchmarks import Benchmark, Question, Run
@@ -175,3 +175,16 @@ def run_benchmark(benchmark_name):
         run_authorized=_is_authorized_run_request(),
         worker_status=worker_status,
     )
+
+
+@bp.route("/tasks/<int:task_id>/output")
+def task_output(task_id: int):
+    """Show stdout/stderr captured for a worker task."""
+    from flask import current_app
+
+    worker = current_app.extensions["benchmark_run_worker"]
+    output = worker.get_task_output(task_id)
+    if output is None:
+        return "Task output was not found (it may have expired).", 404
+
+    return Response(output, mimetype="text/plain; charset=utf-8")

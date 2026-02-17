@@ -9,10 +9,13 @@ import os
 import queue
 import subprocess
 import sys
+import tempfile
 import threading
+import time
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +26,22 @@ class BenchmarkRunRequest:
 
     benchmark_name: str
     model_name: str
+    task_id: int
+
+
+@dataclass
+class BenchmarkTask:
+    """Tracks status and output paths for a queued worker task."""
+
+    task_id: int
+    benchmark_name: str
+    model_name: str
+    state: str
+    enqueued_at: datetime
+    started_at: Optional[datetime] = None
+    finished_at: Optional[datetime] = None
+    exit_code: Optional[int] = None
+    output_path: Optional[Path] = None
 
 
 class BenchmarkRunWorker:
@@ -31,35 +50,83 @@ class BenchmarkRunWorker:
     def __init__(self) -> None:
         self._queue: "queue.Queue[BenchmarkRunRequest]" = queue.Queue()
         self._current: Optional[BenchmarkRunRequest] = None
+        self._tasks: dict[int, BenchmarkTask] = {}
+        self._next_task_id = 1
+        self._output_dir = Path(tempfile.gettempdir()) / "benchmark_server_worker"
+        self._output_dir.mkdir(parents=True, exist_ok=True)
+        self._output_retention_seconds = 24 * 60 * 60
         self._state_lock = threading.Lock()
         self._thread = threading.Thread(target=self._run_forever, daemon=True, name="benchmark-run-worker")
         self._thread.start()
 
     def enqueue(self, benchmark_name: str, model_name: str) -> int:
         """Queue a benchmark run and return the resulting queue depth."""
-        request = BenchmarkRunRequest(benchmark_name=benchmark_name, model_name=model_name)
+        with self._state_lock:
+            task_id = self._next_task_id
+            self._next_task_id += 1
+            task = BenchmarkTask(
+                task_id=task_id,
+                benchmark_name=benchmark_name,
+                model_name=model_name,
+                state="queued",
+                enqueued_at=datetime.now(timezone.utc),
+                output_path=self._output_dir / f"task-{task_id}.log",
+            )
+            self._tasks[task_id] = task
+            self._cleanup_expired_outputs_locked()
+
+        request = BenchmarkRunRequest(benchmark_name=benchmark_name, model_name=model_name, task_id=task_id)
         self._queue.put(request)
         return self._queue.qsize()
 
-    def status(self) -> dict:
+    def status(self) -> dict[str, Any]:
         """Expose queue + active-run status for templates/routes."""
         with self._state_lock:
             current = self._current
+            self._cleanup_expired_outputs_locked()
+            queued_tasks = [
+                self._serialize_task(task)
+                for task in sorted(self._tasks.values(), key=lambda t: t.task_id)
+                if task.state == "queued"
+            ]
+            recent_tasks = [
+                self._serialize_task(task)
+                for task in sorted(self._tasks.values(), key=lambda t: t.task_id, reverse=True)
+                if task.state in {"completed", "failed"}
+            ][:10]
         return {
             "active": None
             if current is None
             else {
+                "task_id": current.task_id,
                 "benchmark_name": current.benchmark_name,
                 "model_name": current.model_name,
             },
             "queued": self._queue.qsize(),
+            "queued_tasks": queued_tasks,
+            "recent_tasks": recent_tasks,
         }
+
+    def get_task_output(self, task_id: int) -> Optional[str]:
+        """Return captured output for a task if available."""
+        with self._state_lock:
+            task = self._tasks.get(task_id)
+            output_path = task.output_path if task else None
+
+        if not output_path or not output_path.exists():
+            return None
+
+        return output_path.read_text(encoding="utf-8", errors="replace")
 
     def _run_forever(self) -> None:
         while True:
             request = self._queue.get()
             with self._state_lock:
                 self._current = request
+                task = self._tasks.get(request.task_id)
+                if task:
+                    task.state = "running"
+                    task.started_at = datetime.now(timezone.utc)
 
             try:
                 self._run_request(request)
@@ -92,28 +159,78 @@ class BenchmarkRunWorker:
         ]
 
         logger.info("Running benchmark via worker: %s", " ".join(cmd))
-        result = subprocess.run(
-            cmd,
-            cwd=str(repo_root),
-            env=env,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+        task = self._tasks.get(request.task_id)
+        output_path = task.output_path if task else self._output_dir / f"task-{request.task_id}.log"
+
+        with output_path.open("w", encoding="utf-8") as output_file:
+            result = subprocess.run(
+                cmd,
+                cwd=str(repo_root),
+                env=env,
+                stdout=output_file,
+                stderr=subprocess.STDOUT,
+                text=True,
+                check=False,
+            )
+
+        with self._state_lock:
+            completed_task = self._tasks.get(request.task_id)
+            if completed_task:
+                completed_task.finished_at = datetime.now(timezone.utc)
+                completed_task.exit_code = result.returncode
+                completed_task.state = "completed" if result.returncode == 0 else "failed"
 
         if result.returncode == 0:
             logger.info(
-                "Completed benchmark run benchmark=%s model=%s",
+                "Completed benchmark run benchmark=%s model=%s task_id=%s",
                 request.benchmark_name,
                 request.model_name,
+                request.task_id,
             )
             return
 
+        output_tail = self._read_output_tail(output_path)
+
         logger.error(
-            "Benchmark run failed benchmark=%s model=%s exit=%s stdout=%s stderr=%s",
+            "Benchmark run failed benchmark=%s model=%s task_id=%s exit=%s output=%s",
             request.benchmark_name,
             request.model_name,
+            request.task_id,
             result.returncode,
-            result.stdout[-2000:],
-            result.stderr[-2000:],
+            output_tail,
         )
+
+    @staticmethod
+    def _serialize_task(task: BenchmarkTask) -> dict[str, Any]:
+        return {
+            "task_id": task.task_id,
+            "benchmark_name": task.benchmark_name,
+            "model_name": task.model_name,
+            "state": task.state,
+            "enqueued_at": task.enqueued_at.isoformat(),
+            "started_at": task.started_at.isoformat() if task.started_at else None,
+            "finished_at": task.finished_at.isoformat() if task.finished_at else None,
+            "exit_code": task.exit_code,
+        }
+
+    @staticmethod
+    def _read_output_tail(path: Path, max_chars: int = 2000) -> str:
+        if not path.exists():
+            return ""
+
+        output = path.read_text(encoding="utf-8", errors="replace")
+        return output[-max_chars:]
+
+    def _cleanup_expired_outputs_locked(self) -> None:
+        now = time.time()
+        for task_id, task in list(self._tasks.items()):
+            if not task.finished_at:
+                continue
+
+            if (now - task.finished_at.timestamp()) <= self._output_retention_seconds:
+                continue
+
+            if task.output_path and task.output_path.exists():
+                task.output_path.unlink(missing_ok=True)
+
+            del self._tasks[task_id]
