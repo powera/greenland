@@ -19,3 +19,5 @@ from benchmarks.lib.runners.unit_conversion_runner import UnitConversionRunner
 from benchmarks.lib.runners.word_length_runner import WordLengthRunner
 
 from benchmarks.lib.runners.sentence_decomposition_runner import SentenceDecompositionRunner
+
+from benchmarks.lib.runners.verb_forms_runner import VerbFormsRunner

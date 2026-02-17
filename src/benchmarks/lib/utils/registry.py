@@ -244,6 +244,8 @@ register_runner("0062_sentence_decomposition", SentenceDecompositionRunner)
 # Register the geography benchmark
 from benchmarks.lib.generators.geography_generator import GeographyGenerator
 from benchmarks.lib.runners.geography_runner import GeographyRunner
+from benchmarks.lib.generators.verb_forms_generator import VerbFormsGenerator
+from benchmarks.lib.runners.verb_forms_runner import VerbFormsRunner
 
 
 @benchmark(
@@ -262,3 +264,20 @@ class GeographyBenchmark:
 
 register_generator("0120_geography", GeographyGenerator)
 register_runner("0120_geography", GeographyRunner)
+
+
+@benchmark(
+    code="0121_verb_forms",
+    name="Verb Forms",
+    description="""
+           A benchmark to evaluate a model's ability to generate full verb-form
+           paradigms across persons and tenses in multiple languages.""",
+)
+class VerbFormsBenchmark:
+    """Module container for verb forms benchmark."""
+
+    pass
+
+
+register_generator("0121_verb_forms", VerbFormsGenerator)
+register_runner("0121_verb_forms", VerbFormsRunner)

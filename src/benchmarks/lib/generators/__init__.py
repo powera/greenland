@@ -23,3 +23,5 @@ from benchmarks.lib.generators.word_length_generator import WordLengthGenerator
 from benchmarks.lib.generators.sentence_decomposition_generator import (
     SentenceDecompositionGenerator,
 )
+
+from benchmarks.lib.generators.verb_forms_generator import VerbFormsGenerator
