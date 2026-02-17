@@ -112,14 +112,11 @@
 <table class="table table-bordered" style="width: auto;">
   <tr><td>Model</td><td>
     <select name="model" class="form-select">
-      <option value="gemma2:2b">gemma2:2b (1.6GB)</option>
-      <option value="gemma2:9b">gemma2:9b (5.4GB)</option>
-      <option value="llama3.1:8b">llama3.1:8b (4.7GB)</option>
-      <option value="phi3:3.8b">phi3:3.8b (2.2GB)</option>
-      <option value="phi3:14b">phi3:14b (7.9GB)</option>
-      <option value="mistral-nemo:12b">mistral-nemo:12b (7.1GB)</option>
-      <option value="gpt4o-mini">gpt4o-mini (remote; $0.6/1mil tokens)</option>
-      <option value="claude3-haiku">claude3-haiku (remote; $1.25/1mil tokens)</option>
+      {% for m in models %}
+        <option value="{{ m.codename }}"{% if m.codename == default_model %} selected{% endif %}>
+          {{- m.displayname }} ({{ m.model_type }}{% if m.model_type != 'remote' and m.filesize_mb %}, {{ m.filesize_mb }}MB{% endif %})
+        </option>
+      {% endfor %}
     </select>
   </td></tr>
   <tr><td>Prompt</td><td>
