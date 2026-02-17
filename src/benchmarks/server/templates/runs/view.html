@@ -123,14 +123,14 @@
                         </div>
                         <div class="mb-2">
                             <strong>Expected:</strong>
-                            <pre class="bg-light p-2 mb-0"><code>{{ expected_answer | tojson(indent=2) if expected_answer is mapping or expected_answer is sequence else expected_answer }}</code></pre>
+                            <pre class="bg-light p-2 mb-0"><code>{{ expected_answer | tojson(indent=2) if expected_answer is defined and (expected_answer is mapping or expected_answer is sequence) else expected_answer }}</code></pre>
                         </div>
                         {% endif %}
 
                         {% if detail.debug_json %}
                         <div class="mb-2">
                             <strong>Got:</strong>
-                            <pre class="bg-danger-subtle p-2 mb-0"><code>{{ model_response | tojson(indent=2) if model_response is mapping or model_response is sequence else (model_response or '-') }}</code></pre>
+                            <pre class="bg-danger-subtle p-2 mb-0"><code>{{ model_response | tojson(indent=2) if model_response is defined and (model_response is mapping or model_response is sequence) else (model_response or '-') }}</code></pre>
                         </div>
 
                         {% if run_data.benchmark_name == '0062_sentence_decomposition' and detail.debug_json.scoring_breakdown %}

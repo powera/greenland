@@ -19,7 +19,9 @@ from benchmarks.lib.utils.data_models import (
 )
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Constants
@@ -346,5 +348,9 @@ class BenchmarkRunner:
         # Save results to database
         run_id = self.save_results(score, results)
         logger.info("Results saved with run ID: %s", run_id)
+
+        # Unload model to free memory for the next benchmark
+        logger.info("Unloading model %s...", self.model)
+        unified_client.unload_model(self.remote_model)
 
         return run_id
