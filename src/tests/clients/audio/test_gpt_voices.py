@@ -39,6 +39,11 @@ class TestGptVoiceEnum(unittest.TestCase):
         self.assertEqual(GptVoice.GPT_ZH_M1.language_code, "zh")
         self.assertEqual(GptVoice.GPT_ES_F2.language_code, "es")
         self.assertEqual(GptVoice.GPT_FR_M2.language_code, "fr")
+        self.assertEqual(GptVoice.GPT_IT_F1.language_code, "it")
+        self.assertEqual(GptVoice.GPT_PT_M1.language_code, "pt")
+        self.assertEqual(GptVoice.GPT_NL_F2.language_code, "nl")
+        self.assertEqual(GptVoice.GPT_DE_M2.language_code, "de")
+        self.assertEqual(GptVoice.GPT_SV_F1.language_code, "sv")
 
     def test_gender_property(self) -> None:
         """Test gender property returns correct values."""
@@ -78,6 +83,8 @@ class TestGptVoiceEnum(unittest.TestCase):
         self.assertEqual(GptVoice.GPT_ZH_M2.ui_name, "gpt-zh-m2")
         self.assertEqual(GptVoice.GPT_ES_F2.ui_name, "gpt-es-f2")
         self.assertEqual(GptVoice.GPT_FR_M1.ui_name, "gpt-fr-m1")
+        self.assertEqual(GptVoice.GPT_IT_F2.ui_name, "gpt-it-f2")
+        self.assertEqual(GptVoice.GPT_SV_M1.ui_name, "gpt-sv-m1")
 
     def test_openai_voice_name_property(self) -> None:
         """Test openai_voice_name returns the string value."""
@@ -148,6 +155,14 @@ class TestGptVoicePathName(unittest.TestCase):
         self.assertEqual(GptVoice.GPT_FR_F2.path_name, "sophie")
         self.assertEqual(GptVoice.GPT_FR_M1.path_name, "pierre")
         self.assertEqual(GptVoice.GPT_FR_M2.path_name, "jean")
+
+    def test_secondary_language_path_names(self) -> None:
+        """Test secondary language voice path names."""
+        self.assertEqual(GptVoice.GPT_IT_F1.path_name, "giulia")
+        self.assertEqual(GptVoice.GPT_PT_M1.path_name, "joao")
+        self.assertEqual(GptVoice.GPT_NL_M2.path_name, "joris")
+        self.assertEqual(GptVoice.GPT_DE_F2.path_name, "lea")
+        self.assertEqual(GptVoice.GPT_SV_M2.path_name, "oskar")
 
 
 class TestGptVoiceLookup(unittest.TestCase):
@@ -236,7 +251,7 @@ class TestSupportedLanguages(unittest.TestCase):
 
     def test_supported_languages(self) -> None:
         """Test that supported languages are correctly defined."""
-        self.assertEqual(set(SUPPORTED_LANGUAGES), {"lt", "zh", "es", "fr"})
+        self.assertEqual(set(SUPPORTED_LANGUAGES), {"lt", "zh", "es", "fr", "it", "pt", "nl", "de", "sv"})
 
     def test_default_voices_for_all_languages(self) -> None:
         """Test that default voices are defined for all supported languages."""
