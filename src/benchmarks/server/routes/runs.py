@@ -3,6 +3,7 @@
 """Run routes - view run details and comparisons."""
 
 import json
+import re
 
 from flask import Blueprint, g, render_template, request
 
@@ -14,6 +15,15 @@ bp = Blueprint("runs", __name__, url_prefix="/runs")
 
 def _correctness_threshold(benchmark_name: str) -> int:
     return 70 if benchmark_name == "0062_sentence_decomposition" else 100
+
+
+def _question_sort_key(detail: dict) -> tuple[int, str]:
+    """Sort benchmark question IDs by numeric suffix when available."""
+    question_id = detail.get("question_id") or ""
+    match = re.search(r":(\d+)$", question_id)
+    if match:
+        return int(match.group(1)), question_id
+    return 10**9, question_id
 
 
 @bp.route("/<int:run_id>")
@@ -38,10 +48,7 @@ def view_run(run_id):
     total_time = sum(d["eval_msec"] or 0 for d in run_data["details"])
     avg_time = total_time / total_questions if total_questions > 0 else 0
 
-
-    # Group questions by correctness for easier viewing
-    correct_questions = [d for d in run_data["details"] if (d.get("score") or 0) >= threshold]
-    incorrect_questions = [d for d in run_data["details"] if (d.get("score") or 0) < threshold]
+    ordered_questions = sorted(run_data["details"], key=_question_sort_key)
 
     return render_template(
         "runs/view.html",
@@ -52,8 +59,7 @@ def view_run(run_id):
         correct_count=correct_count,
         incorrect_count=incorrect_count,
         avg_time=avg_time,
-        correct_questions=correct_questions,
-        incorrect_questions=incorrect_questions,
+        ordered_questions=ordered_questions,
         correctness_threshold=threshold,
     )
 

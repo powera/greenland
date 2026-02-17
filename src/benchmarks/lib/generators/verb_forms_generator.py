@@ -102,6 +102,8 @@ class VerbFormsGenerator(BenchmarkGenerator):
                     "language_code": sample["language_code"],
                     "lemma": sample["target_infinitive"],
                     "required_extra_forms": required_extra_forms,
+                    "forms": sample.get("forms", {}),
+                    "extra_forms": sample.get("extra_forms", {}),
                 }
 
                 yield BenchmarkQuestion(
