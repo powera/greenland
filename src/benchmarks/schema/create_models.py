@@ -122,6 +122,42 @@ def create_remote_models():
         "remote",
     )
 
+    # Ministral
+    datastore_common.insert_model(
+        s,
+        "ministral-3-14b-lms",
+        "Ministral 3 14B Reasoning (LMStudio)",
+        "2025-10-01",
+        9000,
+        "Apache License",
+        "lmstudio/mistralai/ministral-3-14b-reasoning",
+        "local",
+    )
+
+    # Phi-4
+    datastore_common.insert_model(
+        s,
+        "phi-4-14b-lms",
+        "Phi-4 14B (LMStudio)",
+        "2025-01-08",
+        9100,
+        "MIT License",
+        "lmstudio/microsoft/phi-4",
+        "local",
+    )
+
+    # Qwen3 VL
+    datastore_common.insert_model(
+        s,
+        "qwen3-vl-8b-lms",
+        "QWEN3 VL 8B (LMStudio)",
+        "2025-05-20",
+        5000,
+        "Apache License",
+        "lmstudio/qwen/qwen3-vl-8b",
+        "local",
+    )
+
 
 def create_translategemma_models():
     """Create TranslateGemma model definitions."""
