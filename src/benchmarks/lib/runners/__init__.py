@@ -14,6 +14,7 @@ from benchmarks.lib.runners.letter_count_runner import LetterCountRunner
 from benchmarks.lib.runners.part_of_speech_runner import PartOfSpeechRunner
 from benchmarks.lib.runners.pinyin_letter_count_runner import PinyinLetterCountRunner
 from benchmarks.lib.runners.spell_check_runner import SpellCheckRunner
+from benchmarks.lib.runners.synonyms_runner import SynonymsRunner
 from benchmarks.lib.runners.translations_runner import TranslationRunner
 from benchmarks.lib.runners.unit_conversion_runner import UnitConversionRunner
 from benchmarks.lib.runners.word_length_runner import WordLengthRunner
