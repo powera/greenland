@@ -16,6 +16,7 @@ from benchmarks.lib.generators.pinyin_letter_count_generator import (
     PinyinLetterCountGenerator,
 )
 from benchmarks.lib.generators.spell_check_generator import SpellCheckGenerator
+from benchmarks.lib.generators.synonyms_generator import SynonymsGenerator
 from benchmarks.lib.generators.translations_generator import TranslationGenerator
 from benchmarks.lib.generators.unit_conversion_generator import UnitConversionGenerator
 from benchmarks.lib.generators.word_length_generator import WordLengthGenerator
