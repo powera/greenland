@@ -126,11 +126,30 @@ def handle_generate_audio(session: Session, payload: Dict) -> str:
     else:
         # Default to OpenAI - convert Voice names to GptVoice objects
         gpt_voice_list: List[GptVoice] = []
+        invalid_voice_names: List[str] = []
         for v in voice_names:
-            openai_voice = Voice(v)
+            try:
+                openai_voice = Voice(v)
+            except ValueError:
+                invalid_voice_names.append(v)
+                continue
             gpt_voice = GptVoice.from_openai_voice(openai_voice, language_code)
             if gpt_voice is not None:
                 gpt_voice_list.append(gpt_voice)
+
+        if invalid_voice_names:
+            raise RuntimeError(
+                "Invalid OpenAI voice names: "
+                + ", ".join(invalid_voice_names)
+            )
+
+        if not gpt_voice_list:
+            supported_languages = sorted({voice.language_code for voice in GptVoice})
+            raise RuntimeError(
+                "OpenAI audio is not configured for language "
+                f"'{language_code}'. Supported languages: {', '.join(supported_languages)}"
+            )
+
         vieversys_agent = VieversysAgent(config=config, output_dir=audio_output_dir)
         result = vieversys_agent.generate_audio_for_lemma(
             session,

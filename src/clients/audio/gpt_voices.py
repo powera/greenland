@@ -143,6 +143,36 @@ class GptVoice(Enum):
     GPT_FR_M1 = ("fr", "m", 1, Voice.ASH)
     GPT_FR_M2 = ("fr", "m", 2, Voice.ECHO)
 
+    # Italian voices
+    GPT_IT_F1 = ("it", "f", 1, Voice.NOVA)
+    GPT_IT_F2 = ("it", "f", 2, Voice.ALLOY)
+    GPT_IT_M1 = ("it", "m", 1, Voice.ASH)
+    GPT_IT_M2 = ("it", "m", 2, Voice.ECHO)
+
+    # Portuguese voices
+    GPT_PT_F1 = ("pt", "f", 1, Voice.NOVA)
+    GPT_PT_F2 = ("pt", "f", 2, Voice.ALLOY)
+    GPT_PT_M1 = ("pt", "m", 1, Voice.ASH)
+    GPT_PT_M2 = ("pt", "m", 2, Voice.ECHO)
+
+    # Dutch voices
+    GPT_NL_F1 = ("nl", "f", 1, Voice.NOVA)
+    GPT_NL_F2 = ("nl", "f", 2, Voice.ALLOY)
+    GPT_NL_M1 = ("nl", "m", 1, Voice.ASH)
+    GPT_NL_M2 = ("nl", "m", 2, Voice.ECHO)
+
+    # German voices
+    GPT_DE_F1 = ("de", "f", 1, Voice.NOVA)
+    GPT_DE_F2 = ("de", "f", 2, Voice.ALLOY)
+    GPT_DE_M1 = ("de", "m", 1, Voice.ASH)
+    GPT_DE_M2 = ("de", "m", 2, Voice.ECHO)
+
+    # Swedish voices
+    GPT_SV_F1 = ("sv", "f", 1, Voice.NOVA)
+    GPT_SV_F2 = ("sv", "f", 2, Voice.ALLOY)
+    GPT_SV_M1 = ("sv", "m", 1, Voice.ASH)
+    GPT_SV_M2 = ("sv", "m", 2, Voice.ECHO)
+
     @property
     def language_code(self) -> str:
         """Get the language code for this voice."""
@@ -252,11 +282,17 @@ DEFAULT_GPT_VOICES: Dict[str, List[GptVoice]] = {
     "zh": [GptVoice.GPT_ZH_F1, GptVoice.GPT_ZH_M1],
     "es": [GptVoice.GPT_ES_F1, GptVoice.GPT_ES_M1],
     "fr": [GptVoice.GPT_FR_F1, GptVoice.GPT_FR_M1],
+    "it": [GptVoice.GPT_IT_F1, GptVoice.GPT_IT_M1],
+    "pt": [GptVoice.GPT_PT_F1, GptVoice.GPT_PT_M1],
+    "nl": [GptVoice.GPT_NL_F1, GptVoice.GPT_NL_M1],
+    "de": [GptVoice.GPT_DE_F1, GptVoice.GPT_DE_M1],
+    "sv": [GptVoice.GPT_SV_F1, GptVoice.GPT_SV_M1],
 }
 
 # All voices per language (all 4 variants)
 ALL_GPT_VOICES: Dict[str, List[GptVoice]] = {
-    lang: GptVoice.get_voices_for_language(lang) for lang in ["lt", "zh", "es", "fr"]
+    lang: GptVoice.get_voices_for_language(lang)
+    for lang in ["lt", "zh", "es", "fr", "it", "pt", "nl", "de", "sv"]
 }
 
 # Supported languages
@@ -296,6 +332,41 @@ CHARACTER_NAMES: Dict[str, Dict[str, str]] = {
         "m1": "Pierre",  # Male, primary (Ash)
         "m2": "Jean",  # Male, secondary (Echo)
     },
+    # Italian
+    "it": {
+        "f1": "Giulia",  # Female, primary (Nova)
+        "f2": "Chiara",  # Female, secondary (Alloy)
+        "m1": "Luca",  # Male, primary (Ash)
+        "m2": "Marco",  # Male, secondary (Echo)
+    },
+    # Portuguese
+    "pt": {
+        "f1": "Ana",  # Female, primary (Nova)
+        "f2": "Beatriz",  # Female, secondary (Alloy)
+        "m1": "Joao",  # Male, primary (Ash)
+        "m2": "Tiago",  # Male, secondary (Echo)
+    },
+    # Dutch
+    "nl": {
+        "f1": "Sanne",  # Female, primary (Nova)
+        "f2": "Lotte",  # Female, secondary (Alloy)
+        "m1": "Daan",  # Male, primary (Ash)
+        "m2": "Joris",  # Male, secondary (Echo)
+    },
+    # German
+    "de": {
+        "f1": "Anna",  # Female, primary (Nova)
+        "f2": "Lea",  # Female, secondary (Alloy)
+        "m1": "Lukas",  # Male, primary (Ash)
+        "m2": "Felix",  # Male, secondary (Echo)
+    },
+    # Swedish
+    "sv": {
+        "f1": "Elsa",  # Female, primary (Nova)
+        "f2": "Alva",  # Female, secondary (Alloy)
+        "m1": "Erik",  # Male, primary (Ash)
+        "m2": "Oskar",  # Male, secondary (Echo)
+    },
 }
 
 # Language display names for character descriptions
@@ -304,6 +375,11 @@ LANGUAGE_DISPLAY_NAMES: Dict[str, str] = {
     "zh": "Chinese",
     "es": "Spanish",
     "fr": "French",
+    "it": "Italian",
+    "pt": "Portuguese",
+    "nl": "Dutch",
+    "de": "German",
+    "sv": "Swedish",
 }
 
 
