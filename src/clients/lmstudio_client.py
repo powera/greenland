@@ -16,7 +16,9 @@ from clients.types import Response
 from util.telemetry import LLMUsage
 
 # Configure logging with DEBUG level option
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 SERVER = "100.118.20.30"
@@ -155,9 +157,14 @@ class LMStudioClient:
             return "", None, None
 
     def warm_model(self, model: str) -> bool:
-        """Initialize model for faster first inference."""
+        """Load model into memory using LM Studio's model load endpoint."""
+        url = f"http://{self.server}:{self.port}/api/v1/models/load"
         try:
-            response = self._make_request("chat", {"model": model})
+            if self.debug:
+                logger.debug("Loading model via %s: %s", url, model)
+            response = requests.post(url, json={"model": model}, timeout=self.timeout)
+            if self.debug:
+                logger.debug("Load response: %s %s", response.status_code, response.text)
             return bool(response.status_code == 200)
         except LMStudioError:
             return False
