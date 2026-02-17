@@ -47,7 +47,7 @@
     <div class="col-md-2">
         <div class="card stat-card">
             <div class="card-body">
-                <h6 class="text-muted">Correct</h6>
+                <h6 class="text-muted">Correct (≥{{ correctness_threshold }})</h6>
                 <h4 class="text-success">{{ correct_count }}/{{ total_questions }}</h4>
             </div>
         </div>
@@ -55,7 +55,7 @@
     <div class="col-md-2">
         <div class="card stat-card">
             <div class="card-body">
-                <h6 class="text-muted">Incorrect</h6>
+                <h6 class="text-muted">Incorrect (&lt;{{ correctness_threshold }})</h6>
                 <h4 class="text-danger">{{ incorrect_count }}</h4>
             </div>
         </div>
@@ -105,22 +105,32 @@
                 {% for detail in incorrect_questions %}
                 <div class="card mb-3">
                     <div class="card-body">
-                        <h6 class="card-subtitle mb-2 text-muted">Question: {{ detail.question_id }}</h6>
+                        <h6 class="card-subtitle mb-2 text-muted">Question: {{ detail.question_id }} (score: {{ detail.score or 0 }})</h6>
+
+                        {% set question_text = detail.question_info_json.question_text if detail.question_info_json else none %}
+                        {% set expected_answer = detail.question_info_json.correct_answer if detail.question_info_json else none %}
+                        {% if not expected_answer and detail.debug_json %}
+                            {% set expected_answer = detail.debug_json.expected or detail.debug_json.expected_answer %}
+                        {% endif %}
+                        {% set model_response = detail.debug_json.response if detail.debug_json else none %}
+                        {% if not model_response and detail.debug_json %}
+                            {% set model_response = detail.debug_json.model_answer or detail.debug_json.model_response %}
+                        {% endif %}
 
                         {% if detail.question_info_json %}
                         <div class="mb-2">
-                            <strong>Question:</strong> {{ detail.question_info_json.question }}
+                            <strong>Question:</strong> {{ question_text or '-' }}
                         </div>
                         <div class="mb-2">
                             <strong>Expected:</strong>
-                            <code class="bg-light p-1">{{ detail.question_info_json.correct_answer }}</code>
+                            <pre class="bg-light p-2 mb-0"><code>{{ expected_answer | tojson(indent=2) if expected_answer is mapping or expected_answer is sequence else expected_answer }}</code></pre>
                         </div>
                         {% endif %}
 
                         {% if detail.debug_json %}
                         <div class="mb-2">
                             <strong>Got:</strong>
-                            <code class="bg-danger-subtle p-1">{{ detail.debug_json.response }}</code>
+                            <pre class="bg-danger-subtle p-2 mb-0"><code>{{ model_response | tojson(indent=2) if model_response is mapping or model_response is sequence else (model_response or '-') }}</code></pre>
                         </div>
                         {% endif %}
 
@@ -170,6 +180,7 @@
                                     <th>Question ID</th>
                                     <th>Question</th>
                                     <th>Answer</th>
+                                    <th>Score</th>
                                     <th>Time</th>
                                 </tr>
                             </thead>
@@ -179,16 +190,18 @@
                                     <td><small>{{ detail.question_id }}</small></td>
                                     <td>
                                         {% if detail.question_info_json %}
-                                        {{ detail.question_info_json.question }}
+                                        {{ detail.question_info_json.question_text or '-' }}
                                         {% else %}
                                         -
                                         {% endif %}
                                     </td>
                                     <td>
                                         {% if detail.debug_json %}
-                                        <code class="bg-light p-1">{{ detail.debug_json.response }}</code>
+                                        {% set correct_response = detail.debug_json.response or detail.debug_json.model_answer or detail.debug_json.model_response %}
+                                        <pre class="bg-light p-1 mb-0"><code>{{ correct_response | tojson(indent=2) if correct_response is mapping or correct_response is sequence else (correct_response or '-') }}</code></pre>
                                         {% endif %}
                                     </td>
+                                    <td><small>{{ detail.score or 0 }}</small></td>
                                     <td><small>{{ detail.eval_msec or 0 }}ms</small></td>
                                 </tr>
                                 {% endfor %}

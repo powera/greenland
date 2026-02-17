@@ -12,6 +12,10 @@ from benchmarks.datastore.common import Model
 bp = Blueprint("runs", __name__, url_prefix="/runs")
 
 
+def _correctness_threshold(benchmark_name: str) -> int:
+    return 70 if benchmark_name == "0062_sentence_decomposition" else 100
+
+
 @bp.route("/<int:run_id>")
 def view_run(run_id):
     """View detailed results for a specific run."""
@@ -27,15 +31,17 @@ def view_run(run_id):
 
     # Calculate statistics
     total_questions = len(run_data["details"])
-    correct_count = sum(1 for d in run_data["details"] if d["score"] == 100)
+    threshold = _correctness_threshold(run_data["benchmark_name"])
+    correct_count = sum(1 for d in run_data["details"] if (d.get("score") or 0) >= threshold)
     incorrect_count = total_questions - correct_count
 
     total_time = sum(d["eval_msec"] or 0 for d in run_data["details"])
     avg_time = total_time / total_questions if total_questions > 0 else 0
 
+
     # Group questions by correctness for easier viewing
-    correct_questions = [d for d in run_data["details"] if d["score"] == 100]
-    incorrect_questions = [d for d in run_data["details"] if d["score"] != 100]
+    correct_questions = [d for d in run_data["details"] if (d.get("score") or 0) >= threshold]
+    incorrect_questions = [d for d in run_data["details"] if (d.get("score") or 0) < threshold]
 
     return render_template(
         "runs/view.html",
@@ -48,6 +54,7 @@ def view_run(run_id):
         avg_time=avg_time,
         correct_questions=correct_questions,
         incorrect_questions=incorrect_questions,
+        correctness_threshold=threshold,
     )
 
 
@@ -74,7 +81,8 @@ def compare_runs():
 
             # Calculate stats
             total_questions = len(run_data["details"])
-            correct_count = sum(1 for d in run_data["details"] if d["score"] == 100)
+            threshold = _correctness_threshold(run_data["benchmark_name"])
+            correct_count = sum(1 for d in run_data["details"] if (d.get("score") or 0) >= threshold)
             avg_time = (
                 sum(d["eval_msec"] or 0 for d in run_data["details"]) / total_questions
                 if total_questions > 0
