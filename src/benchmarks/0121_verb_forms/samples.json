@@ -1,0 +1,730 @@
+[
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "verb_guid": "V06_001",
+    "english_lemma": "be",
+    "target_infinitive": "be",
+    "is_irregular": true,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "verb_guid": "V06_002",
+    "english_lemma": "have",
+    "target_infinitive": "have",
+    "is_irregular": true,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "verb_guid": "V01_007",
+    "english_lemma": "work",
+    "target_infinitive": "work",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "verb_guid": "V11_004",
+    "english_lemma": "live",
+    "target_infinitive": "live",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "verb_guid": "V09_001",
+    "english_lemma": "talk",
+    "target_infinitive": "talk",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "verb_guid": "V12_001",
+    "english_lemma": "walk",
+    "target_infinitive": "walk",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "verb_guid": "V01_014",
+    "english_lemma": "open",
+    "target_infinitive": "open",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "verb_guid": "V07_001",
+    "english_lemma": "train",
+    "target_infinitive": "train",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "fr",
+    "language_name": "French",
+    "verb_guid": "V06_001",
+    "english_lemma": "be",
+    "target_infinitive": "être",
+    "is_irregular": true,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "fr",
+    "language_name": "French",
+    "verb_guid": "V06_002",
+    "english_lemma": "have",
+    "target_infinitive": "avoir",
+    "is_irregular": true,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "fr",
+    "language_name": "French",
+    "verb_guid": "V01_007",
+    "english_lemma": "work",
+    "target_infinitive": "travailler",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "fr",
+    "language_name": "French",
+    "verb_guid": "V11_004",
+    "english_lemma": "live",
+    "target_infinitive": "vivre",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "fr",
+    "language_name": "French",
+    "verb_guid": "V09_001",
+    "english_lemma": "talk",
+    "target_infinitive": "parler",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "fr",
+    "language_name": "French",
+    "verb_guid": "V12_001",
+    "english_lemma": "walk",
+    "target_infinitive": "marcher",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "fr",
+    "language_name": "French",
+    "verb_guid": "V01_014",
+    "english_lemma": "open",
+    "target_infinitive": "ouvrir",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "fr",
+    "language_name": "French",
+    "verb_guid": "V07_001",
+    "english_lemma": "train",
+    "target_infinitive": "entraîner",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_participle",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "es",
+    "language_name": "Spanish",
+    "verb_guid": "V06_001",
+    "english_lemma": "be",
+    "target_infinitive": "ser",
+    "is_irregular": true,
+    "required_extra_forms": [
+      "gerund",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "es",
+    "language_name": "Spanish",
+    "verb_guid": "V06_002",
+    "english_lemma": "have",
+    "target_infinitive": "tener",
+    "is_irregular": true,
+    "required_extra_forms": [
+      "gerund",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "es",
+    "language_name": "Spanish",
+    "verb_guid": "V01_007",
+    "english_lemma": "work",
+    "target_infinitive": "trabajar",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "gerund",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "es",
+    "language_name": "Spanish",
+    "verb_guid": "V11_004",
+    "english_lemma": "live",
+    "target_infinitive": "vivir",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "gerund",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "es",
+    "language_name": "Spanish",
+    "verb_guid": "V09_001",
+    "english_lemma": "talk",
+    "target_infinitive": "hablar",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "gerund",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "es",
+    "language_name": "Spanish",
+    "verb_guid": "V12_001",
+    "english_lemma": "walk",
+    "target_infinitive": "caminar",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "gerund",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "es",
+    "language_name": "Spanish",
+    "verb_guid": "V01_014",
+    "english_lemma": "open",
+    "target_infinitive": "abrir",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "gerund",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "es",
+    "language_name": "Spanish",
+    "verb_guid": "V07_001",
+    "english_lemma": "train",
+    "target_infinitive": "entrenar",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "gerund",
+      "past_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "lt",
+    "language_name": "Lithuanian",
+    "verb_guid": "V06_001",
+    "english_lemma": "be",
+    "target_infinitive": "būti",
+    "is_irregular": true,
+    "required_extra_forms": [
+      "present_active_participle",
+      "past_active_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "lt",
+    "language_name": "Lithuanian",
+    "verb_guid": "V06_002",
+    "english_lemma": "have",
+    "target_infinitive": "turėti",
+    "is_irregular": true,
+    "required_extra_forms": [
+      "present_active_participle",
+      "past_active_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "lt",
+    "language_name": "Lithuanian",
+    "verb_guid": "V01_007",
+    "english_lemma": "work",
+    "target_infinitive": "dirbti",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_active_participle",
+      "past_active_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "lt",
+    "language_name": "Lithuanian",
+    "verb_guid": "V11_004",
+    "english_lemma": "live",
+    "target_infinitive": "gyventi",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_active_participle",
+      "past_active_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "lt",
+    "language_name": "Lithuanian",
+    "verb_guid": "V09_001",
+    "english_lemma": "talk",
+    "target_infinitive": "kalbėti",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_active_participle",
+      "past_active_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "lt",
+    "language_name": "Lithuanian",
+    "verb_guid": "V12_001",
+    "english_lemma": "walk",
+    "target_infinitive": "eiti",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_active_participle",
+      "past_active_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "lt",
+    "language_name": "Lithuanian",
+    "verb_guid": "V01_014",
+    "english_lemma": "open",
+    "target_infinitive": "atidaryti",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_active_participle",
+      "past_active_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "lt",
+    "language_name": "Lithuanian",
+    "verb_guid": "V07_001",
+    "english_lemma": "train",
+    "target_infinitive": "treniruoti",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "present_active_participle",
+      "past_active_participle"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "uk",
+    "language_name": "Ukrainian",
+    "verb_guid": "V06_001",
+    "english_lemma": "be",
+    "target_infinitive": "бути",
+    "is_irregular": true,
+    "required_extra_forms": [
+      "past_participle",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "uk",
+    "language_name": "Ukrainian",
+    "verb_guid": "V06_002",
+    "english_lemma": "have",
+    "target_infinitive": "мати",
+    "is_irregular": true,
+    "required_extra_forms": [
+      "past_participle",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "uk",
+    "language_name": "Ukrainian",
+    "verb_guid": "V01_007",
+    "english_lemma": "work",
+    "target_infinitive": "працювати",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "past_participle",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "uk",
+    "language_name": "Ukrainian",
+    "verb_guid": "V11_004",
+    "english_lemma": "live",
+    "target_infinitive": "жити",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "past_participle",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "uk",
+    "language_name": "Ukrainian",
+    "verb_guid": "V09_001",
+    "english_lemma": "talk",
+    "target_infinitive": "говорити",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "past_participle",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "uk",
+    "language_name": "Ukrainian",
+    "verb_guid": "V12_001",
+    "english_lemma": "walk",
+    "target_infinitive": "ходити",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "past_participle",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "uk",
+    "language_name": "Ukrainian",
+    "verb_guid": "V01_014",
+    "english_lemma": "open",
+    "target_infinitive": "відкривати",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "past_participle",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "uk",
+    "language_name": "Ukrainian",
+    "verb_guid": "V07_001",
+    "english_lemma": "train",
+    "target_infinitive": "тренувати",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "past_participle",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "bn",
+    "language_name": "Bengali",
+    "verb_guid": "V06_001",
+    "english_lemma": "be",
+    "target_infinitive": "হওয়া",
+    "is_irregular": true,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "bn",
+    "language_name": "Bengali",
+    "verb_guid": "V06_002",
+    "english_lemma": "have",
+    "target_infinitive": "থাকা",
+    "is_irregular": true,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "bn",
+    "language_name": "Bengali",
+    "verb_guid": "V01_007",
+    "english_lemma": "work",
+    "target_infinitive": "কাজ করা",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "bn",
+    "language_name": "Bengali",
+    "verb_guid": "V11_004",
+    "english_lemma": "live",
+    "target_infinitive": "বসবাস করা",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "bn",
+    "language_name": "Bengali",
+    "verb_guid": "V09_001",
+    "english_lemma": "talk",
+    "target_infinitive": "কথা বলা",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "bn",
+    "language_name": "Bengali",
+    "verb_guid": "V12_001",
+    "english_lemma": "walk",
+    "target_infinitive": "হাঁটা",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "bn",
+    "language_name": "Bengali",
+    "verb_guid": "V01_014",
+    "english_lemma": "open",
+    "target_infinitive": "খোলা",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "bn",
+    "language_name": "Bengali",
+    "verb_guid": "V07_001",
+    "english_lemma": "train",
+    "target_infinitive": "প্রশিক্ষণ দেওয়া",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "kn",
+    "language_name": "Kannada",
+    "verb_guid": "V06_001",
+    "english_lemma": "be",
+    "target_infinitive": "ಇರು",
+    "is_irregular": true,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "kn",
+    "language_name": "Kannada",
+    "verb_guid": "V06_002",
+    "english_lemma": "have",
+    "target_infinitive": "ಹೊಂದಿರು",
+    "is_irregular": true,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "kn",
+    "language_name": "Kannada",
+    "verb_guid": "V01_007",
+    "english_lemma": "work",
+    "target_infinitive": "ಕೆಲಸಮಾಡು",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "kn",
+    "language_name": "Kannada",
+    "verb_guid": "V11_004",
+    "english_lemma": "live",
+    "target_infinitive": "ಬಾಳು",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "kn",
+    "language_name": "Kannada",
+    "verb_guid": "V09_001",
+    "english_lemma": "talk",
+    "target_infinitive": "ಮಾತನಾಡು",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "kn",
+    "language_name": "Kannada",
+    "verb_guid": "V12_001",
+    "english_lemma": "walk",
+    "target_infinitive": "ನಡೆಯು",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "kn",
+    "language_name": "Kannada",
+    "verb_guid": "V01_014",
+    "english_lemma": "open",
+    "target_infinitive": "ತೆರೆ",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  },
+  {
+    "language_code": "kn",
+    "language_name": "Kannada",
+    "verb_guid": "V07_001",
+    "english_lemma": "train",
+    "target_infinitive": "ತರಬೇತಿನೀಡು",
+    "is_irregular": false,
+    "required_extra_forms": [
+      "verbal_noun",
+      "imperative_2s"
+    ],
+    "prompt_file": "prompts/en.txt"
+  }
+]
