@@ -1,0 +1,36 @@
+{
+  "question_data": {
+    "correct_answer": {
+      "languages": [
+        {
+          "language_code": "lt",
+          "translation": "Mano sūnus eina į mokyklą.",
+          "word_count": 5,
+          "words": [
+            {"position": 0, "role": "determiner", "english_gloss": "my", "surface_form": "Mano", "grammatical_form": "pronoun/lt_possessive", "lemma_guid": "NONE", "lemma": "No lemma"},
+            {"position": 1, "role": "subject", "english_gloss": "son", "surface_form": "sūnus", "grammatical_form": "noun/lt_nominative_singular", "lemma_guid": "N35_036", "lemma": "son"},
+            {"position": 2, "role": "verb", "english_gloss": "goes", "surface_form": "eina", "grammatical_form": "verb/lt_3s_present", "lemma_guid": "V12_004", "lemma": "go"},
+            {"position": 3, "role": "preposition", "english_gloss": "to", "surface_form": "į", "grammatical_form": "preposition/base", "lemma_guid": "NONE", "lemma": "No lemma"},
+            {"position": 4, "role": "object", "english_gloss": "school", "surface_form": "mokyklą", "grammatical_form": "noun/lt_accusative_singular", "lemma_guid": "N07_002", "lemma": "school (institution)"}
+          ]
+        }
+      ]
+    }
+  },
+  "response": {
+    "languages": [
+      {
+        "language_code": "lt",
+        "translation": "Mano sūnus eina į mokyklą.",
+        "word_count": 5,
+        "words": [
+          {"position": 0, "role": "pronoun", "english_gloss": "mine", "surface_form": "Mano", "grammatical_form": "determiner/base", "lemma_guid": "NONE", "lemma": "mano"},
+          {"position": 1, "role": "noun", "english_gloss": "boy", "surface_form": "sūnus", "grammatical_form": "noun/lt_nom", "lemma_guid": "N35_036", "lemma": "sūnus"},
+          {"position": 2, "role": "predicate", "english_gloss": "walks", "surface_form": "eina", "grammatical_form": "verb/lt_present", "lemma_guid": "V12_004", "lemma": "eiti"},
+          {"position": 3, "role": "particle", "english_gloss": "toward", "surface_form": "į", "grammatical_form": "adposition/base", "lemma_guid": "NONE", "lemma": "į"},
+          {"position": 4, "role": "noun", "english_gloss": "academy", "surface_form": "mokyklą", "grammatical_form": "noun/lt_singular", "lemma_guid": "N07_002", "lemma": "mokykla"}
+        ]
+      }
+    ]
+  }
+}

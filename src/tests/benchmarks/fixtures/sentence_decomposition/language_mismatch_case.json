@@ -1,0 +1,28 @@
+{
+  "question_data": {
+    "correct_answer": {
+      "languages": [
+        {
+          "language_code": "lt",
+          "translation": "Mano sūnus eina į mokyklą.",
+          "word_count": 1,
+          "words": [
+            {"position": 0, "role": "subject", "english_gloss": "son", "surface_form": "sūnus", "grammatical_form": "noun/lt_nominative_singular", "lemma_guid": "N35_036", "lemma": "son"}
+          ]
+        }
+      ]
+    }
+  },
+  "response": {
+    "languages": [
+      {
+        "language_code": "es",
+        "translation": "Mi hijo va a la escuela.",
+        "word_count": 1,
+        "words": [
+          {"position": 0, "role": "subject", "english_gloss": "son", "surface_form": "hijo", "grammatical_form": "noun/es_singular", "lemma_guid": "N35_036", "lemma": "hijo"}
+        ]
+      }
+    ]
+  }
+}

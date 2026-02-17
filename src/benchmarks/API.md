@@ -45,6 +45,17 @@ PYTHONPATH=src python src/benchmarks/run_benchmark.py missing
 PYTHONPATH=src python src/benchmarks/run_benchmark.py missing --blacklist-models translategemma-3-4b --blacklist-benchmarks 0062_sentence_decomposition
 ```
 
+### rescore
+
+Rescore existing runs using the current benchmark scoring implementation.
+Useful after scoring logic changes (for example `0062_sentence_decomposition`).
+
+```bash
+PYTHONPATH=src python src/benchmarks/run_benchmark.py rescore 0062_sentence_decomposition
+PYTHONPATH=src python src/benchmarks/run_benchmark.py rescore 0062_sentence_decomposition --model gpt-5-nano
+PYTHONPATH=src python src/benchmarks/benchmarks.py rescore 0062_sentence_decomposition --dry-run
+```
+
 ## Python API (`run_benchmark` module)
 
 ```python
@@ -56,6 +67,7 @@ from benchmarks.run_benchmark import (
     get_all_model_codenames,    # list model codenames from DB
     get_all_benchmarks,         # list benchmark codes
     get_benchmark_info,         # list benchmarks with metadata
+    rescore_benchmark_runs,     # rescore historical runs with updated scoring
 )
 ```
 

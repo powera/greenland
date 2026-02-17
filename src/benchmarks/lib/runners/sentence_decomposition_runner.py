@@ -25,13 +25,13 @@ class SentenceDecompositionRunner(BenchmarkRunner):
     CORRECTNESS_THRESHOLD = 70
 
     WORD_FIELD_WEIGHTS = {
-        "position": 0.05,
-        "role": 0.20,
-        "english_gloss": 0.15,
-        "surface_form": 0.25,
-        "grammatical_form": 0.15,
-        "lemma_guid": 0.10,
-        "lemma": 0.10,
+        "position": 0.15,
+        "surface_form": 0.45,
+        "lemma_guid": 0.20,
+        "role": 0.08,
+        "english_gloss": 0.04,
+        "grammatical_form": 0.04,
+        "lemma": 0.04,
     }
 
     def __init__(self, model: str, metadata: BenchmarkMetadata):
@@ -123,10 +123,16 @@ Important rules:
         return normalized
 
     def _score_word(self, expected_word: Dict[str, Any], model_word: Dict[str, Any]) -> float:
+        word_score, _ = self._score_word_with_details(expected_word, model_word)
+        return word_score
+
+    def _score_word_with_details(self, expected_word: Dict[str, Any], model_word: Dict[str, Any]) -> Tuple[float, Dict[str, Any]]:
         score = 0.0
         total = sum(self.WORD_FIELD_WEIGHTS.values())
         if total <= 0:
-            return 0.0
+            return 0.0, {"fields": {}, "anchor_match": False, "word_score": 0.0}
+
+        field_matches: Dict[str, bool] = {}
 
         for field, weight in self.WORD_FIELD_WEIGHTS.items():
             expected_value = expected_word.get(field)
@@ -135,20 +141,127 @@ Important rules:
             # Lemma text may vary by normalization/language; prefer GUID alignment.
             if field == "lemma" and expected_word.get("lemma_guid") == model_word.get("lemma_guid"):
                 score += weight
+                field_matches[field] = True
                 continue
 
             if expected_value == model_value:
                 score += weight
+                field_matches[field] = True
                 continue
 
             if field == "english_gloss" and self._is_gloss_match(expected_value, model_value):
                 score += weight
+                field_matches[field] = True
                 continue
 
             if field == "grammatical_form":
-                score += weight * self._grammatical_form_similarity(expected_value, model_value)
+                grammar_similarity = self._grammatical_form_similarity(expected_value, model_value)
+                score += weight * grammar_similarity
+                field_matches[field] = grammar_similarity > 0
+                continue
 
-        return score / total
+            field_matches[field] = False
+
+        word_score = score / total
+        anchor_match = (
+            field_matches.get("position", False)
+            and field_matches.get("surface_form", False)
+            and field_matches.get("lemma_guid", False)
+        )
+
+        return word_score, {
+            "fields": field_matches,
+            "anchor_match": anchor_match,
+            "word_score": round(word_score, 4),
+        }
+
+    def _is_punctuation_token(self, word: Dict[str, Any]) -> bool:
+        surface_form = word.get("surface_form")
+        if not isinstance(surface_form, str) or not surface_form.strip():
+            return False
+        return bool(re.fullmatch(r"[^\w\s]+", surface_form.strip(), flags=re.UNICODE))
+
+    def _score_language_entry_with_breakdown(self, expected: Dict[str, Any], model: Dict[str, Any]) -> Tuple[float, Dict[str, Any]]:
+        breakdown: Dict[str, Any] = {
+            "language_match": False,
+            "translation_match": False,
+            "translation_points": 0.0,
+            "structure_match": False,
+            "structure_points": 0.0,
+            "token_component": 0.0,
+            "punctuation_penalty": 0.0,
+            "punctuation_tokens": [],
+            "token_details": [],
+            "deductions": [],
+        }
+
+        if expected.get("language_code") != model.get("language_code"):
+            breakdown["deductions"].append("language_code mismatch")
+            return 0.0, breakdown
+
+        breakdown["language_match"] = True
+
+        if expected.get("translation") == model.get("translation"):
+            breakdown["translation_match"] = True
+            breakdown["translation_points"] = 0.15
+        else:
+            breakdown["deductions"].append("translation mismatch (-15)")
+
+        expected_words = [w for w in expected.get("words", []) if isinstance(w, dict)]
+        model_words_raw = [w for w in model.get("words", []) if isinstance(w, dict)]
+        punctuation_tokens = [w for w in model_words_raw if self._is_punctuation_token(w)]
+        model_words = [w for w in model_words_raw if not self._is_punctuation_token(w)]
+
+        breakdown["punctuation_tokens"] = punctuation_tokens
+        if punctuation_tokens:
+            breakdown["punctuation_penalty"] = 0.05
+            breakdown["deductions"].append("punctuation token present (-5)")
+
+        model_by_pos = {word.get("position"): word for word in model_words if word.get("position") is not None}
+
+        if len(expected_words) == len(model_words):
+            breakdown["structure_match"] = True
+            breakdown["structure_points"] = 0.05
+        else:
+            breakdown["deductions"].append("word count mismatch (-5)")
+
+        token_component = 0.0
+        if expected_words:
+            token_score = 0.0
+            for expected_word in expected_words:
+                position = expected_word.get("position")
+                model_word = model_by_pos.get(position)
+                token_detail: Dict[str, Any] = {
+                    "position": position,
+                    "expected_surface_form": expected_word.get("surface_form"),
+                    "model_surface_form": model_word.get("surface_form") if model_word else None,
+                    "matched": model_word is not None,
+                }
+                if model_word is not None:
+                    word_score, word_breakdown = self._score_word_with_details(expected_word, model_word)
+                    token_score += word_score
+                    token_detail.update(word_breakdown)
+                else:
+                    token_detail.update({"fields": {}, "anchor_match": False, "word_score": 0.0})
+                breakdown["token_details"].append(token_detail)
+
+            token_component = 0.80 * (token_score / len(expected_words))
+            breakdown["token_component"] = round(token_component, 4)
+
+        score = (
+            breakdown["translation_points"]
+            + breakdown["structure_points"]
+            + token_component
+            - breakdown["punctuation_penalty"]
+        )
+
+        if not breakdown["deductions"]:
+            breakdown["deductions"].append("none")
+
+        breakdown["raw_score"] = round(score, 4)
+        breakdown["final_score"] = round(min(max(score, 0.0), 1.0), 4)
+
+        return min(max(score, 0.0), 1.0), breakdown
 
     def _is_gloss_match(self, expected: Any, model: Any) -> bool:
         if not isinstance(expected, str) or not isinstance(model, str):
@@ -182,38 +295,8 @@ Important rules:
         return 0.0
 
     def _score_language_entry(self, expected: Dict[str, Any], model: Dict[str, Any]) -> float:
-        score = 0.0
-
-        # Require target language to match exactly.
-        if expected.get("language_code") != model.get("language_code"):
-            return 0.0
-
-        # 15% translation fidelity.
-        if expected.get("translation") == model.get("translation"):
-            score += 0.15
-
-        expected_words = [w for w in expected.get("words", []) if isinstance(w, dict)]
-        model_by_pos = {
-            word.get("position"): word
-            for word in model.get("words", [])
-            if isinstance(word, dict) and word.get("position") is not None
-        }
-
-        # 5% structural token count.
-        if len(expected_words) == len(model.get("words", [])):
-            score += 0.05
-
-        # 80% token-level metadata accuracy.
-        if expected_words:
-            token_score = 0.0
-            for expected_word in expected_words:
-                position = expected_word.get("position")
-                model_word = model_by_pos.get(position)
-                if model_word is not None:
-                    token_score += self._score_word(expected_word, model_word)
-            score += 0.80 * (token_score / len(expected_words))
-
-        return min(max(score, 0.0), 1.0)
+        score, _ = self._score_language_entry_with_breakdown(expected, model)
+        return score
 
     def score_response(self, question_data: Dict, response: Any) -> int:
         if not isinstance(response, dict):
@@ -233,7 +316,8 @@ Important rules:
         expected_entry = self._normalize_language_entry(expected_languages[0])
         model_entry = self._normalize_language_entry(model_languages[0])
 
-        return int(round(self._score_language_entry(expected_entry, model_entry) * 100))
+        score, _ = self._score_language_entry_with_breakdown(expected_entry, model_entry)
+        return int(round(score * 100))
 
     def evaluate_response(self, question_data: Dict, response: Any) -> bool:
         return self.score_response(question_data, response) >= self.CORRECTNESS_THRESHOLD
@@ -297,4 +381,33 @@ Important rules:
             "model_answer": model_answer,
             "expected_answer": question_data.get("correct_answer"),
             "is_correct": is_correct,
+            "response_payload": model_answer,
+            "question_snapshot": question_data,
+            "scoring_version": "0062-v2-anchor-weighted",
+            "scoring_breakdown": self._build_scoring_breakdown(question_data, model_answer),
         }
+
+    def _build_scoring_breakdown(self, question_data: Dict[str, Any], model_answer: Any) -> Optional[Dict[str, Any]]:
+        if not isinstance(model_answer, dict):
+            return None
+
+        expected = question_data.get("correct_answer", {})
+        if not isinstance(expected, dict):
+            return None
+
+        expected_languages = expected.get("languages", [])
+        model_languages = model_answer.get("languages", [])
+        if not isinstance(expected_languages, list) or not isinstance(model_languages, list):
+            return None
+        if len(expected_languages) != 1 or len(model_languages) != 1:
+            return {
+                "error": "expected exactly one language entry in expected and model response",
+                "expected_language_count": len(expected_languages),
+                "model_language_count": len(model_languages),
+            }
+
+        expected_entry = self._normalize_language_entry(expected_languages[0])
+        model_entry = self._normalize_language_entry(model_languages[0])
+        score, breakdown = self._score_language_entry_with_breakdown(expected_entry, model_entry)
+        breakdown["score"] = int(round(score * 100))
+        return breakdown

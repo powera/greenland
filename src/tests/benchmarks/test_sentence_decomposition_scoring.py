@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 """Unit tests for benchmark 0062 sentence decomposition scoring behavior."""
 
+import json
 import sys
 import types
+from pathlib import Path
 
 # The benchmark runner imports validation utilities that depend on pydantic,
 # which is unavailable in this test environment.
@@ -16,6 +18,14 @@ if "pydantic" not in sys.modules:
     sys.modules["pydantic"] = pydantic_stub
 
 from benchmarks.lib.runners.sentence_decomposition_runner import SentenceDecompositionRunner
+
+
+FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures" / "sentence_decomposition"
+
+
+def _load_fixture(name: str):
+    with (FIXTURES_DIR / name).open(encoding="utf-8") as handle:
+        return json.load(handle)
 
 
 def test_0062_allows_close_morphology_and_gloss_variants_for_partial_credit():
@@ -138,3 +148,45 @@ def test_0062_allows_close_morphology_and_gloss_variants_for_partial_credit():
     score = runner.score_response({"correct_answer": expected}, got)
 
     assert score >= runner.CORRECTNESS_THRESHOLD
+
+
+def test_0062_punctuation_token_is_single_flat_five_point_penalty():
+    runner = SentenceDecompositionRunner.__new__(SentenceDecompositionRunner)
+    payload = _load_fixture("punctuation_penalty_case.json")
+
+    score = runner.score_response(payload["question_data"], payload["response"])
+
+    assert score == 95
+
+
+def test_0062_anchor_fields_keep_score_high_even_when_secondary_fields_vary():
+    runner = SentenceDecompositionRunner.__new__(SentenceDecompositionRunner)
+    payload = _load_fixture("anchor_priority_case.json")
+
+    score = runner.score_response(payload["question_data"], payload["response"])
+
+    assert score >= 80
+
+
+def test_0062_language_mismatch_still_scores_zero():
+    runner = SentenceDecompositionRunner.__new__(SentenceDecompositionRunner)
+    payload = _load_fixture("language_mismatch_case.json")
+
+    score = runner.score_response(payload["question_data"], payload["response"])
+
+    assert score == 0
+
+
+def test_0062_debug_info_contains_payload_for_future_rescoring():
+    runner = SentenceDecompositionRunner.__new__(SentenceDecompositionRunner)
+    question_data = {"question_text": "q", "correct_answer": {"languages": []}}
+
+    class _Response:
+        structured_data = {"languages": []}
+        response_text = "raw"
+
+    debug = runner.build_debug_info(question_data, _Response(), is_correct=False)
+
+    assert debug["response_payload"] == {"languages": []}
+    assert debug["question_snapshot"] == question_data
+    assert debug["scoring_version"] == "0062-v2-anchor-weighted"

@@ -132,6 +132,53 @@
                             <strong>Got:</strong>
                             <pre class="bg-danger-subtle p-2 mb-0"><code>{{ model_response | tojson(indent=2) if model_response is mapping or model_response is sequence else (model_response or '-') }}</code></pre>
                         </div>
+
+                        {% if run_data.benchmark_name == '0062_sentence_decomposition' and detail.debug_json.scoring_breakdown %}
+                        {% set breakdown = detail.debug_json.scoring_breakdown %}
+                        <div class="mb-2">
+                            <strong>0062 Scoring Breakdown:</strong>
+                            <div class="small">
+                                <div>Translation points: {{ ((breakdown.translation_points or 0) * 100)|round(1) }}</div>
+                                <div>Structure points: {{ ((breakdown.structure_points or 0) * 100)|round(1) }}</div>
+                                <div>Token component: {{ ((breakdown.token_component or 0) * 100)|round(1) }}</div>
+                                <div>Punctuation penalty: -{{ ((breakdown.punctuation_penalty or 0) * 100)|round(1) }}</div>
+                                <div>Deductions: {{ breakdown.deductions|join(', ') if breakdown.deductions else 'none' }}</div>
+                            </div>
+                        </div>
+
+                        {% if breakdown.token_details %}
+                        <div class="table-responsive mb-2">
+                            <table class="table table-sm table-bordered align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Pos</th>
+                                        <th>Expected</th>
+                                        <th>Actual</th>
+                                        <th>Anchor Match<br><small>(surface + lemma_guid + position)</small></th>
+                                        <th>Word Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for token in breakdown.token_details %}
+                                    <tr>
+                                        <td>{{ token.position }}</td>
+                                        <td>{{ token.expected_surface_form or '-' }}</td>
+                                        <td>{{ token.model_surface_form or '-' }}</td>
+                                        <td>
+                                            {% if token.anchor_match %}
+                                                <span class="badge bg-success">match</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">mismatch</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ ((token.word_score or 0) * 100)|round(1) }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+                        {% endif %}
                         {% endif %}
 
                         {% if detail.thought_process %}
