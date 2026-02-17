@@ -2,19 +2,21 @@
 
 """Main interface for running benchmarks."""
 
+import argparse
+import json
 import logging
 import traceback
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import benchmarks.datastore.benchmarks as datastore_benchmarks
 import benchmarks.datastore.common as datastore_common
-from benchmarks.scripts.delete_benchmark import delete_benchmark_completely
 from benchmarks.lib.utils.factory import (
     get_all_benchmark_codes,
     get_benchmark_metadata,
     get_generator,
     get_runner,
 )
+from benchmarks.scripts.delete_benchmark import delete_benchmark_completely
 
 # Configure logging
 logging.basicConfig(
@@ -24,38 +26,19 @@ logger = logging.getLogger(__name__)
 
 
 def get_all_model_codenames() -> List[str]:
-    """
-    Get a list of all model codenames from the database.
-
-    Returns:
-        List of model codenames
-    """
+    """Get a list of all model codenames from the database."""
     session = datastore_common.create_dev_session()
     models = datastore_common.list_all_models(session)
     return [model["codename"] for model in models]
 
 
 def get_all_benchmarks() -> List[str]:
-    """
-    Get a list of all registered benchmark codes.
-
-    Returns:
-        List of benchmark codes
-    """
+    """Get a list of all registered benchmark codes."""
     return get_all_benchmark_codes()
 
 
 def run_benchmark(benchmark_code: str, model: str) -> Optional[int]:
-    """
-    Run a specific benchmark for a model.
-
-    Args:
-        benchmark_code: Benchmark code to run
-        model: Model codename to benchmark
-
-    Returns:
-        Run ID if successful, None otherwise
-    """
+    """Run a specific benchmark for a model."""
     logger.info("Running benchmark %s for model %s", benchmark_code, model)
 
     try:
@@ -64,7 +47,6 @@ def run_benchmark(benchmark_code: str, model: str) -> Optional[int]:
             logger.error("Failed to create runner for benchmark %s", benchmark_code)
             return None
 
-        # Execute the benchmark
         run_id = runner.run()
 
         logger.info(
@@ -78,24 +60,147 @@ def run_benchmark(benchmark_code: str, model: str) -> Optional[int]:
         return None
 
 
+def _extract_model_response(debug_json: Any) -> Optional[Any]:
+    if not isinstance(debug_json, dict):
+        return None
+    for key in ("model_answer", "response", "model_response", "response_payload"):
+        if key in debug_json:
+            return debug_json[key]
+    return None
+
+
+def _extract_question_data(question_info_json: Any, debug_json: Any) -> Optional[Dict[str, Any]]:
+    if isinstance(question_info_json, dict) and "correct_answer" in question_info_json:
+        return question_info_json
+
+    if not isinstance(debug_json, dict):
+        return None
+
+    expected = debug_json.get("expected_answer") or debug_json.get("expected")
+    if isinstance(expected, dict):
+        return {"correct_answer": expected}
+
+    question_snapshot = debug_json.get("question_snapshot")
+    if isinstance(question_snapshot, dict) and "correct_answer" in question_snapshot:
+        return question_snapshot
+
+    return None
+
+
+def rescore_benchmark_runs(
+    benchmark_code: str,
+    model: Optional[str] = None,
+    session=None,
+    dry_run: bool = False,
+) -> Dict[str, int]:
+    """Rescore historical run_detail rows for a benchmark using current runner scoring logic."""
+    if not session:
+        session = datastore_common.create_dev_session()
+
+    run_query = session.query(datastore_benchmarks.Run).filter(
+        datastore_benchmarks.Run.benchmark_name == benchmark_code
+    )
+    if model:
+        run_query = run_query.filter(datastore_benchmarks.Run.model_name == model)
+
+    runs = run_query.order_by(datastore_benchmarks.Run.run_id.asc()).all()
+
+    summary = {
+        "runs_considered": len(runs),
+        "runs_updated": 0,
+        "details_rescored": 0,
+        "details_skipped": 0,
+    }
+
+    for run in runs:
+        runner = get_runner(benchmark_code, run.model_name)
+        if not runner or not hasattr(runner, "score_response"):
+            logger.warning(
+                "Skipping run_id=%s because runner for %s/%s has no score_response",
+                run.run_id,
+                benchmark_code,
+                run.model_name,
+            )
+            summary["details_skipped"] += session.query(datastore_benchmarks.RunDetail).filter(
+                datastore_benchmarks.RunDetail.run_id == run.run_id
+            ).count()
+            continue
+
+        rows = (
+            session.query(datastore_benchmarks.RunDetail, datastore_benchmarks.Question)
+            .join(
+                datastore_benchmarks.Question,
+                datastore_benchmarks.RunDetail.question_id == datastore_benchmarks.Question.question_id,
+            )
+            .filter(datastore_benchmarks.RunDetail.run_id == run.run_id)
+            .all()
+        )
+
+        rescored_values: List[int] = []
+        run_changed = False
+
+        for detail, question in rows:
+            debug_json = datastore_common.decode_json(detail.debug_json)
+            question_info = datastore_common.decode_json(question.question_info_json)
+            model_response = _extract_model_response(debug_json)
+            question_data = _extract_question_data(question_info, debug_json)
+
+            if model_response is None or not isinstance(question_data, dict):
+                summary["details_skipped"] += 1
+                continue
+
+            try:
+                rescored = int(runner.score_response(question_data, model_response))
+            except Exception as error:
+                logger.warning(
+                    "Failed to rescore run_id=%s question_id=%s: %s",
+                    run.run_id,
+                    detail.question_id,
+                    error,
+                )
+                summary["details_skipped"] += 1
+                continue
+
+            rescored_values.append(rescored)
+            summary["details_rescored"] += 1
+
+            if detail.score != rescored:
+                run_changed = True
+
+            if not dry_run:
+                detail.score = rescored
+                if isinstance(debug_json, dict):
+                    debug_json.setdefault("response_payload", model_response)
+                    debug_json.setdefault("question_snapshot", question_data)
+                    debug_json.setdefault("scoring_runner", runner.__class__.__name__)
+                    detail.debug_json = json.dumps(debug_json)
+
+        if not rescored_values:
+            continue
+
+        new_run_score = int(round(sum(rescored_values) / len(rescored_values)))
+        if run.normed_score != new_run_score:
+            run_changed = True
+
+        if not dry_run:
+            run.normed_score = new_run_score
+
+        if run_changed:
+            summary["runs_updated"] += 1
+
+    if not dry_run:
+        session.commit()
+
+    return summary
+
+
 def run_all_benchmarks_for_model(
     model: str, blacklist_benchmarks: Optional[Set[str]] = None
 ) -> List[Tuple[str, Optional[int]]]:
-    """
-    Run all available benchmarks for a specific model.
-
-    Args:
-        model: Model codename to benchmark
-        blacklist_benchmarks: Optional set of benchmarks to exclude
-
-    Returns:
-        List of (benchmark_code, run_id) tuples, run_id is None if benchmark failed
-    """
+    """Run all available benchmarks for a specific model."""
     logger.info("Running all benchmarks for model %s", model)
 
     blacklist_benchmarks = blacklist_benchmarks or set()
-
-    # Get all available benchmarks excluding blacklisted ones
     benchmarks = [b for b in get_all_benchmarks() if b not in blacklist_benchmarks]
 
     results = []
@@ -119,7 +224,6 @@ def run_all_benchmarks_for_model(
             logger.error(traceback.format_exc())
             results.append((benchmark_code, None))
 
-    # Log summary
     successful = sum(1 for _, run_id in results if run_id is not None)
     logger.info("Completed %d/%d benchmarks for model %s", successful, len(results), model)
 
@@ -131,47 +235,33 @@ def run_missing_benchmarks(
     blacklist_benchmarks: Optional[Set[str]] = None,
     session=None,
 ) -> List[Tuple[str, str]]:
-    """
-    Run all benchmarks that don't have results yet.
-
-    Args:
-        blacklist_models: Optional set of models to exclude
-        blacklist_benchmarks: Optional set of benchmarks to exclude
-        session: Optional database session
-
-    Returns:
-        List of (model, benchmark) pairs that were run
-    """
+    """Run all benchmarks that don't have results yet."""
     if not session:
         session = datastore_common.create_dev_session()
 
     blacklist_models = blacklist_models or set()
     blacklist_benchmarks = blacklist_benchmarks or set()
 
-    # Get all models and benchmarks
     models = [m for m in get_all_model_codenames() if m not in blacklist_models]
     benchmarks = [b for b in get_all_benchmarks() if b not in blacklist_benchmarks]
 
-    # Get existing scores
     scores = datastore_benchmarks.get_highest_benchmark_scores(session)
 
-    # Find missing benchmark/model combinations
     missing = []
     for benchmark in benchmarks:
         for model in models:
             if (benchmark, model) not in scores:
                 missing.append((model, benchmark))
 
-    # Run missing benchmarks
     run_pairs = []
-    for model, benchmark in missing:
-        logger.info("Running missing benchmark: %s for %s", benchmark, model)
+    for model_name, benchmark in missing:
+        logger.info("Running missing benchmark: %s for %s", benchmark, model_name)
         try:
-            run_id = run_benchmark(benchmark, model)
+            run_id = run_benchmark(benchmark, model_name)
             if run_id:
-                run_pairs.append((model, benchmark))
+                run_pairs.append((model_name, benchmark))
         except Exception as e:
-            logger.error("Failed to run %s for %s: %s", benchmark, model, str(e))
+            logger.error("Failed to run %s for %s: %s", benchmark, model_name, str(e))
             logger.error(traceback.format_exc())
 
     return run_pairs
@@ -180,17 +270,7 @@ def run_missing_benchmarks(
 def generate_benchmark_questions(
     benchmark_code: str, num_questions: int = 40, session=None
 ) -> bool:
-    """
-    Generate questions for a benchmark and load them into the database.
-
-    Args:
-        benchmark_code: Benchmark code
-        num_questions: Number of questions to generate
-        session: Optional database session
-
-    Returns:
-        True if successful, False otherwise
-    """
+    """Generate questions for a benchmark and load them into the database."""
     logger.info("Generating questions for benchmark %s", benchmark_code)
 
     try:
@@ -199,7 +279,6 @@ def generate_benchmark_questions(
             logger.error("Failed to create generator for benchmark %s", benchmark_code)
             return False
 
-        # Generate and load questions
         generator.load_to_database(num_questions=num_questions)
 
         logger.info("Successfully generated questions for benchmark %s", benchmark_code)
@@ -214,17 +293,7 @@ def generate_benchmark_questions(
 def regenerate_benchmark_questions(
     benchmark_code: str, num_questions: int = 40, session=None
 ) -> bool:
-    """
-    Delete existing questions for a benchmark and regenerate from scratch.
-
-    Args:
-        benchmark_code: Benchmark code
-        num_questions: Number of questions to generate
-        session: Optional database session
-
-    Returns:
-        True if successful, False otherwise
-    """
+    """Delete existing questions for a benchmark and regenerate from scratch."""
     logger.info("Regenerating questions for benchmark %s", benchmark_code)
 
     if not session:
@@ -243,12 +312,7 @@ def regenerate_benchmark_questions(
 
 
 def get_benchmark_info() -> List[Dict]:
-    """
-    Get information about all registered benchmarks.
-
-    Returns:
-        List of benchmark metadata dictionaries
-    """
+    """Get information about all registered benchmarks."""
     result = []
     for code in get_all_benchmark_codes():
         metadata = get_benchmark_metadata(code)
@@ -264,26 +328,20 @@ def get_benchmark_info() -> List[Dict]:
     return result
 
 
-# Command-line interface if script is run directly
-if __name__ == "__main__":
-    import argparse
-
+def main() -> None:
     parser = argparse.ArgumentParser(description="Run benchmarks for language models")
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
-    # Run benchmark command
     run_parser = subparsers.add_parser("run", help="Run a benchmark")
     run_parser.add_argument("benchmark", help="Benchmark code")
     run_parser.add_argument("model", help="Model codename")
 
-    # Generate questions command
     gen_parser = subparsers.add_parser("generate", help="Generate benchmark questions")
     gen_parser.add_argument("benchmark", help="Benchmark code")
     gen_parser.add_argument(
         "--num-questions", type=int, default=40, help="Number of questions to generate"
     )
 
-    # Regenerate questions command (delete existing, then generate fresh)
     regen_parser = subparsers.add_parser(
         "regenerate", help="Delete existing questions and regenerate from scratch"
     )
@@ -292,16 +350,20 @@ if __name__ == "__main__":
         "--num-questions", type=int, default=40, help="Number of questions to generate"
     )
 
-    # List benchmarks command
-    list_parser = subparsers.add_parser("list", help="List available benchmarks")
+    subparsers.add_parser("list", help="List available benchmarks")
+    subparsers.add_parser("models", help="List available models")
 
-    # List models command
-    models_parser = subparsers.add_parser("models", help="List available models")
-
-    # Run missing benchmarks command
     missing_parser = subparsers.add_parser("missing", help="Run missing benchmarks")
     missing_parser.add_argument("--blacklist-models", nargs="+", help="Models to exclude")
     missing_parser.add_argument("--blacklist-benchmarks", nargs="+", help="Benchmarks to exclude")
+
+    rescore_parser = subparsers.add_parser(
+        "rescore",
+        help="Rescore existing run results for a benchmark using current scoring logic",
+    )
+    rescore_parser.add_argument("benchmark", help="Benchmark code, e.g. 0062_sentence_decomposition")
+    rescore_parser.add_argument("--model", help="Optional model codename filter")
+    rescore_parser.add_argument("--dry-run", action="store_true", help="Preview without updating DB")
 
     args = parser.parse_args()
 
@@ -352,3 +414,19 @@ if __name__ == "__main__":
                 print(f"  {benchmark} for {model}")
         else:
             print("No missing benchmarks found or all runs failed.")
+
+    elif args.command == "rescore":
+        summary = rescore_benchmark_runs(
+            benchmark_code=args.benchmark,
+            model=args.model,
+            dry_run=args.dry_run,
+        )
+        mode = "DRY RUN" if args.dry_run else "UPDATED"
+        print(
+            f"[{mode}] runs_considered={summary['runs_considered']} runs_updated={summary['runs_updated']} "
+            f"details_rescored={summary['details_rescored']} details_skipped={summary['details_skipped']}"
+        )
+
+
+if __name__ == "__main__":
+    main()
