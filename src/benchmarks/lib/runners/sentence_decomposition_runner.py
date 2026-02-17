@@ -72,11 +72,11 @@ Source ({source_lang}): "{source_sentence}"
 {candidate_section}
 
 Output requirements:
-- Return exactly ONE language entry (for {target_lang})
+- Return exactly ONE language entry and set language_code to "{target_lang}"
+- The languages[] breakdown must analyze tokens from "{target_translation}" only
 - Include all tokens in order (zero-indexed positions)
 - For each token provide: position, role, english_gloss, surface_form, grammatical_form, lemma_guid, lemma
 - Use lemma_guid from candidate lemmas when applicable, otherwise use "NONE"
-- Use lemma from candidate lemmas when applicable, otherwise use "No lemma"
 - Set word_count to match the number of token entries"""
 
         context = """You are a multilingual linguistics expert specializing in morphological analysis.
