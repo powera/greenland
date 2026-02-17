@@ -4,6 +4,7 @@
 
 import json
 import logging
+import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from clients import unified_client
@@ -138,8 +139,47 @@ Important rules:
 
             if expected_value == model_value:
                 score += weight
+                continue
+
+            if field == "english_gloss" and self._is_gloss_match(expected_value, model_value):
+                score += weight
+                continue
+
+            if field == "grammatical_form":
+                score += weight * self._grammatical_form_similarity(expected_value, model_value)
 
         return score / total
+
+    def _is_gloss_match(self, expected: Any, model: Any) -> bool:
+        if not isinstance(expected, str) or not isinstance(model, str):
+            return False
+
+        expected_norm = expected.strip().lower()
+        model_norm = model.strip().lower()
+
+        if expected_norm == model_norm:
+            return True
+
+        # Minor inflection differences in glosses (e.g., "go" vs "goes") are acceptable.
+        singularized_expected = re.sub(r"(es|s)$", "", expected_norm)
+        singularized_model = re.sub(r"(es|s)$", "", model_norm)
+        return bool(singularized_expected and singularized_expected == singularized_model)
+
+    def _grammatical_form_similarity(self, expected: Any, model: Any) -> float:
+        if not isinstance(expected, str) or not isinstance(model, str):
+            return 0.0
+
+        expected_norm = expected.strip().lower()
+        model_norm = model.strip().lower()
+        if expected_norm == model_norm:
+            return 1.0
+
+        # Consider morphology-compatible extensions as partial credit:
+        # noun/lt_nominative_singular ~= noun/lt_nominative_singular_m
+        if expected_norm.startswith(f"{model_norm}_") or model_norm.startswith(f"{expected_norm}_"):
+            return 0.5
+
+        return 0.0
 
     def _score_language_entry(self, expected: Dict[str, Any], model: Dict[str, Any]) -> float:
         score = 0.0
