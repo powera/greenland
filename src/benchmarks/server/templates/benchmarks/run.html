@@ -43,8 +43,10 @@
                     <div class="alert alert-info">
                         <i class="bi bi-cpu"></i>
                         <strong>Worker busy:</strong>
-                        Currently running <code>{{ worker_status.active.benchmark_name }}</code>
+                        Task #{{ worker_status.active.task_id }} is running
+                        <code>{{ worker_status.active.benchmark_name }}</code>
                         on <code>{{ worker_status.active.model_name }}</code>.
+                        <a href="{{ url_for('benchmarks.task_output', task_id=worker_status.active.task_id) }}" class="ms-2">view output</a>
                     </div>
                     {% endif %}
 
@@ -52,6 +54,43 @@
                     <div class="alert alert-secondary">
                         <i class="bi bi-hourglass-split"></i>
                         <strong>Queue:</strong> {{ worker_status.queued }} run(s) waiting.
+                    </div>
+                    {% endif %}
+
+                    {% if worker_status.queued_tasks %}
+                    <div class="mb-3">
+                        <h6 class="mb-2">Jobs in workqueue</h6>
+                        <ul class="list-group">
+                            {% for task in worker_status.queued_tasks %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>
+                                    #{{ task.task_id }} <code>{{ task.benchmark_name }}</code> on <code>{{ task.model_name }}</code>
+                                </span>
+                                <a href="{{ url_for('benchmarks.task_output', task_id=task.task_id) }}" class="btn btn-sm btn-outline-secondary">Output</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    {% if worker_status.recent_tasks %}
+                    <div class="mb-3">
+                        <h6 class="mb-2">Recent task output (last 10)</h6>
+                        <ul class="list-group">
+                            {% for task in worker_status.recent_tasks %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>
+                                    #{{ task.task_id }} <code>{{ task.benchmark_name }}</code> on <code>{{ task.model_name }}</code>
+                                    {% if task.state == 'completed' %}
+                                    <span class="badge text-bg-success">completed</span>
+                                    {% else %}
+                                    <span class="badge text-bg-danger">failed</span>
+                                    {% endif %}
+                                </span>
+                                <a href="{{ url_for('benchmarks.task_output', task_id=task.task_id) }}" class="btn btn-sm btn-outline-secondary">Output</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
                     </div>
                     {% endif %}
 
