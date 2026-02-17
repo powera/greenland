@@ -59,6 +59,20 @@ def _load_runner_module():
     factory_module.runner = runner
     sys.modules.setdefault("benchmarks.lib.utils.factory", factory_module)
 
+
+    runners_pkg = types.ModuleType("benchmarks.lib.runners")
+    runners_pkg.__path__ = []
+    sys.modules.setdefault("benchmarks.lib.runners", runners_pkg)
+
+    partial_path = Path(__file__).with_name("partial_credit_runner.py")
+    partial_spec = importlib.util.spec_from_file_location(
+        "benchmarks.lib.runners.partial_credit_runner", partial_path
+    )
+    partial_module = importlib.util.module_from_spec(partial_spec)
+    assert partial_spec and partial_spec.loader
+    partial_spec.loader.exec_module(partial_module)
+    sys.modules["benchmarks.lib.runners.partial_credit_runner"] = partial_module
+
     module_path = Path(__file__).with_name("verb_forms_runner.py")
     spec = importlib.util.spec_from_file_location("verb_forms_runner_under_test", module_path)
     module = importlib.util.module_from_spec(spec)

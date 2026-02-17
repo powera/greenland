@@ -6,19 +6,18 @@ import logging
 from typing import Any, Dict, Optional, Tuple
 
 from benchmarks.synonyms_scoring import score_synonyms_response
-from benchmarks.lib.utils.base import BenchmarkRunner
+from benchmarks.lib.runners.partial_credit_runner import PartialCreditRunner
 from benchmarks.lib.utils.factory import runner
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 BENCHMARK_CODE = "0111_synonyms"
-PASSING_SCORE_PERCENT = 80.0
-
-
 @runner(BENCHMARK_CODE)
-class SynonymsRunner(BenchmarkRunner):
+class SynonymsRunner(PartialCreditRunner):
     """Runner for checking multilingual noun synonym generation."""
+
+    CORRECTNESS_THRESHOLD = 80
 
     def prepare_prompt(self, question_data: Dict) -> Tuple[str, Optional[Dict], Optional[str]]:
         prompt = question_data["question_text"]
@@ -29,8 +28,8 @@ class SynonymsRunner(BenchmarkRunner):
         )
         return prompt, schema, context
 
-    def evaluate_response(self, question_data: Dict, response: Any) -> bool:
-        return score_synonyms_response(question_data, response) >= PASSING_SCORE_PERCENT
+    def score_response(self, question_data: Dict, response: Any) -> int:
+        return int(round(score_synonyms_response(question_data, response)))
 
     def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
         response_data = response.structured_data if hasattr(response, "structured_data") else response
@@ -41,7 +40,7 @@ class SynonymsRunner(BenchmarkRunner):
             "model_answer": response_data,
             "model_response_text": response_text,
             "score_percent": score_percent,
-            "pass_threshold_percent": PASSING_SCORE_PERCENT,
+            "pass_threshold_percent": self.CORRECTNESS_THRESHOLD,
             "is_correct": is_correct,
             "correct_answer": question_data.get("correct_answer", {}),
         }
