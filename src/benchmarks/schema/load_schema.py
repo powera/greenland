@@ -13,6 +13,7 @@ if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from benchmarks.benchmark_constants import BENCHMARKS_DB_PATH
+import benchmarks.datastore.benchmarks  # noqa: F401 - registers tables with Base
 from benchmarks.datastore.common import create_database_and_session
 
 
