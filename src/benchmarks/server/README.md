@@ -48,6 +48,9 @@ The server will be available at http://127.0.0.1:5556
 - `BENCH_SERVER_SECRET_KEY`: Flask secret key (default: dev key)
 - `BENCH_SERVER_DEBUG`: Enable debug mode (true/false)
 - `BENCH_SERVER_DB_PATH`: Path to database
+- `BENCH_SERVER_RUNNER_ENABLED`: Enable/disable benchmark runs from UI (default: true)
+- `BENCH_SERVER_RUNNER_ALLOWED_CIDRS`: Comma-separated CIDRs allowed to start runs (default includes loopback, RFC1918, and TailScale `100.64.0.0/10`)
+- `BENCH_SERVER_RUNNER_BLOCK_PROXIED_REQUESTS`: Reject requests carrying proxy headers like `X-Forwarded-For` (default: true)
 
 ## Features
 
@@ -62,7 +65,7 @@ The server will be available at http://127.0.0.1:5556
 - List all available benchmarks
 - View benchmark details and leaderboards
 - See question counts and statistics
-- (TODO) Run benchmarks from UI
+- Run benchmarks from UI via a single-threaded worker queue
 
 ### Models
 - List all registered models
@@ -113,7 +116,7 @@ This web interface complements the existing CLI tools:
 
 ## Future Enhancements
 
-- [ ] Run benchmarks directly from UI (with job queue)
+- [ ] Real-time benchmark run progress updates
 - [ ] Trend charts showing performance over time
 - [ ] Export results to CSV/JSON
 - [ ] Annotations/notes on runs
@@ -139,6 +142,8 @@ Default port is 5556 to avoid conflicts:
 ## Notes
 
 - The server runs on localhost (127.0.0.1) only for security
+- Benchmark runs are queued and executed one-at-a-time by a background worker
+- Run-triggering requests are gated to local/private CIDRs and reject proxied headers by default
 - Read-only mode can be enabled via config
 - The application is designed to eventually merge with Barsukas
 - Currently maintains separate database (benchmarks.db vs linguistics.sqlite)

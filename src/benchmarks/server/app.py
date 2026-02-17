@@ -20,6 +20,7 @@ from benchmarks.server.config import Config
 from flask import Flask, g, redirect, render_template, url_for
 
 from benchmarks.datastore.common import create_database_and_session
+from benchmarks.server.benchmark_worker import BenchmarkRunWorker
 
 
 def create_app(config_class=Config):
@@ -48,6 +49,7 @@ def create_app(config_class=Config):
         return create_database_and_session(str(app.db_path))
 
     app.db_session_factory = session_factory
+    app.extensions["benchmark_run_worker"] = BenchmarkRunWorker()
 
     # Request handling
     @app.before_request
