@@ -39,13 +39,36 @@
                         </div>
                     </div>
 
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle"></i> <strong>Note:</strong> Benchmark execution is not yet implemented in the UI.
-                        Use the CLI tool <code>PYTHONPATH=src python src/lib/run_benchmark.py</code> to run benchmarks.
+                    {% if worker_status.active %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-cpu"></i>
+                        <strong>Worker busy:</strong>
+                        Currently running <code>{{ worker_status.active.benchmark_name }}</code>
+                        on <code>{{ worker_status.active.model_name }}</code>.
                     </div>
+                    {% endif %}
+
+                    {% if worker_status.queued %}
+                    <div class="alert alert-secondary">
+                        <i class="bi bi-hourglass-split"></i>
+                        <strong>Queue:</strong> {{ worker_status.queued }} run(s) waiting.
+                    </div>
+                    {% endif %}
+
+                    {% if not run_enabled %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-slash-circle"></i>
+                        Benchmark execution is disabled on this server.
+                    </div>
+                    {% elif not run_authorized %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-shield-exclamation"></i>
+                        Benchmark execution is allowed only from direct local/private network IPs.
+                    </div>
+                    {% endif %}
 
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-success" disabled>
+                        <button type="submit" class="btn btn-success" {% if not run_enabled or not run_authorized %}disabled{% endif %}>
                             <i class="bi bi-play-fill"></i> Start Benchmark Run
                         </button>
                         <a href="{{ url_for('benchmarks.view_benchmark', benchmark_name=benchmark.codename) }}"

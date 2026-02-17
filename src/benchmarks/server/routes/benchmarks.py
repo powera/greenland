@@ -2,6 +2,8 @@
 
 """Benchmark routes - list and view benchmark details."""
 
+import ipaddress
+
 from flask import Blueprint, g, render_template, request, flash, redirect, url_for
 from sqlalchemy import func
 
@@ -9,6 +11,28 @@ from benchmarks.datastore.benchmarks import Benchmark, Question, Run
 from benchmarks.datastore.common import Model
 
 bp = Blueprint("benchmarks", __name__, url_prefix="/benchmarks")
+
+
+def _is_authorized_run_request() -> bool:
+    """Allow benchmark runs only from direct local-network clients."""
+    from flask import current_app
+
+    if current_app.config.get("BENCHMARK_RUNNER_BLOCK_PROXIED_REQUESTS", True):
+        for header in ("X-Forwarded-For", "X-Real-IP", "Forwarded", "Via"):
+            if request.headers.get(header):
+                return False
+
+    remote_addr = request.remote_addr
+    if not remote_addr:
+        return False
+
+    try:
+        remote_ip = ipaddress.ip_address(remote_addr)
+    except ValueError:
+        return False
+
+    allowed_networks = current_app.config.get("BENCHMARK_RUNNER_ALLOWED_CIDRS", ())
+    return any(remote_ip in network for network in allowed_networks)
 
 
 @bp.route("/")
@@ -98,8 +122,16 @@ def run_benchmark(benchmark_name):
     from flask import current_app
 
     if request.method == "POST":
+        if not current_app.config.get("BENCHMARK_RUNNER_ENABLED", True):
+            flash("Benchmark execution is disabled on this server", "error")
+            return redirect(url_for("benchmarks.view_benchmark", benchmark_name=benchmark_name))
+
         if current_app.config.get("READONLY", False):
             flash("Cannot run benchmark: running in read-only mode", "error")
+            return redirect(url_for("benchmarks.view_benchmark", benchmark_name=benchmark_name))
+
+        if not _is_authorized_run_request():
+            flash("Benchmark execution is allowed only from local/private direct network clients", "error")
             return redirect(url_for("benchmarks.view_benchmark", benchmark_name=benchmark_name))
 
         model_name = request.form.get("model_name", "").strip()
@@ -108,11 +140,21 @@ def run_benchmark(benchmark_name):
             flash("Model selection is required", "error")
             return redirect(url_for("benchmarks.run_benchmark", benchmark_name=benchmark_name))
 
-        # TODO: Implement async job queue for running benchmarks
-        # For now, just show a message
+        benchmark = g.db.query(Benchmark).filter(Benchmark.codename == benchmark_name).first()
+        if not benchmark:
+            flash("Benchmark not found", "error")
+            return redirect(url_for("benchmarks.list_benchmarks"))
+
+        model = g.db.query(Model).filter(Model.codename == model_name).first()
+        if not model:
+            flash("Selected model was not found", "error")
+            return redirect(url_for("benchmarks.run_benchmark", benchmark_name=benchmark_name))
+
+        worker = current_app.extensions["benchmark_run_worker"]
+        queue_depth = worker.enqueue(benchmark_name=benchmark_name, model_name=model_name)
         flash(
-            f"Benchmark execution not yet implemented. Would run {benchmark_name} on {model_name}",
-            "warning",
+            f"Queued benchmark run for {benchmark_name} on {model_name}. Jobs ahead in queue: {max(queue_depth - 1, 0)}",
+            "success",
         )
         return redirect(url_for("benchmarks.view_benchmark", benchmark_name=benchmark_name))
 
@@ -123,9 +165,13 @@ def run_benchmark(benchmark_name):
 
     # Get all models
     models = g.db.query(Model).order_by(Model.displayname).all()
+    worker_status = current_app.extensions["benchmark_run_worker"].status()
 
     return render_template(
         "benchmarks/run.html",
         benchmark=benchmark,
         models=models,
+        run_enabled=current_app.config.get("BENCHMARK_RUNNER_ENABLED", True),
+        run_authorized=_is_authorized_run_request(),
+        worker_status=worker_status,
     )
