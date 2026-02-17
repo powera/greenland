@@ -1,0 +1,158 @@
+#!/usr/bin/python3
+
+"""Unit tests for 0121 verb forms scoring."""
+
+import importlib.util
+import sys
+import types
+import unittest
+from pathlib import Path
+
+
+def _load_runner_module():
+    # Provide lightweight stubs so this unit test can run without full benchmark deps.
+    clients_module = types.ModuleType("clients")
+    clients_module.unified_client = object()
+    sys.modules.setdefault("clients", clients_module)
+
+    ollama_module = types.ModuleType("clients.ollama_client")
+
+    class OllamaTimeoutError(Exception):
+        pass
+
+    ollama_module.OllamaTimeoutError = OllamaTimeoutError
+    sys.modules.setdefault("clients.ollama_client", ollama_module)
+
+    base_module = types.ModuleType("benchmarks.lib.utils.base")
+
+    class BenchmarkRunner:
+        def __init__(self, model, metadata):
+            self.model = model
+            self.metadata = metadata
+
+    base_module.BenchmarkRunner = BenchmarkRunner
+    sys.modules.setdefault("benchmarks.lib.utils.base", base_module)
+
+    data_models_module = types.ModuleType("benchmarks.lib.utils.data_models")
+
+    class BenchmarkMetadata:
+        def __init__(self, code, name, description):
+            self.code = code
+            self.name = name
+            self.description = description
+
+    class BenchmarkResult:
+        pass
+
+    data_models_module.BenchmarkMetadata = BenchmarkMetadata
+    data_models_module.BenchmarkResult = BenchmarkResult
+    sys.modules.setdefault("benchmarks.lib.utils.data_models", data_models_module)
+
+    factory_module = types.ModuleType("benchmarks.lib.utils.factory")
+
+    def runner(_code):
+        def decorator(cls):
+            return cls
+
+        return decorator
+
+    factory_module.runner = runner
+    sys.modules.setdefault("benchmarks.lib.utils.factory", factory_module)
+
+    module_path = Path(__file__).with_name("verb_forms_runner.py")
+    spec = importlib.util.spec_from_file_location("verb_forms_runner_under_test", module_path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec and spec.loader
+    spec.loader.exec_module(module)
+    return module
+
+
+RUNNER_MODULE = _load_runner_module()
+VerbFormsRunner = RUNNER_MODULE.VerbFormsRunner
+
+
+class TestVerbFormsScoring(unittest.TestCase):
+    def setUp(self):
+        # Score methods do not require full base-runner initialization.
+        self.runner = VerbFormsRunner.__new__(VerbFormsRunner)
+
+    def test_partial_credit_for_etre_imparfait_vs_passe_compose(self):
+        question_data = {
+            "correct_answer": {
+                "language_code": "fr",
+                "lemma": "être",
+                "required_extra_forms": ["present_participle", "past_participle"],
+                "extra_forms": {
+                    "past_participle": "été",
+                    "present_participle": "étant",
+                },
+                "forms": {
+                    "future": {
+                        "1p": "serons",
+                        "1s": "serai",
+                        "2p": "serez",
+                        "2s": "seras",
+                        "3p": "seront",
+                        "3s": "sera",
+                    },
+                    "past": {
+                        "1p": "avons été",
+                        "1s": "ai été",
+                        "2p": "avez été",
+                        "2s": "as été",
+                        "3p": "ont été",
+                        "3s": "a été",
+                    },
+                    "present": {
+                        "1p": "sommes",
+                        "1s": "suis",
+                        "2p": "êtes",
+                        "2s": "es",
+                        "3p": "sont",
+                        "3s": "est",
+                    },
+                },
+            }
+        }
+
+        response = {
+            "language_code": "fr",
+            "lemma": "être",
+            "extra_forms": {
+                "past_participle": "été",
+                "present_participle": "étant",
+            },
+            "forms": {
+                "future": {
+                    "1p": "serons",
+                    "1s": "serai",
+                    "2p": "serez",
+                    "2s": "seras",
+                    "3p": "seront",
+                    "3s": "sera",
+                },
+                "past": {
+                    "1p": "étions",
+                    "1s": "étais",
+                    "2p": "étiez",
+                    "2s": "étais",
+                    "3p": "étaient",
+                    "3s": "était",
+                },
+                "present": {
+                    "1p": "sommes",
+                    "1s": "suis",
+                    "2p": "êtes",
+                    "2s": "es",
+                    "3p": "sont",
+                    "3s": "est",
+                },
+            },
+        }
+
+        score = self.runner.score_response(question_data, response)
+        self.assertEqual(score, 56)
+
+
+if __name__ == "__main__":
+    unittest.main()
