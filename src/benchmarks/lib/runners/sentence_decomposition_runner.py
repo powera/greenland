@@ -77,20 +77,29 @@ Output requirements:
 - Include all tokens in order (zero-indexed positions)
 - For each token provide: position, role, english_gloss, surface_form, grammatical_form, lemma_guid, lemma
 - Use lemma_guid from candidate lemmas when applicable, otherwise use "NONE"
-- Set word_count to match the number of token entries"""
+- Set word_count to match the number of token entries
+- IMPORTANT: Do NOT include punctuation as standalone tokens in words[]"""
 
         context = """You are a multilingual linguistics expert specializing in morphological analysis.
 Your task is to decompose sentences into tokens and provide detailed grammatical information for each token.
 
 Grammatical form format:
-- For inflected words: <role>/<language_code>_<morphology> (e.g., verb/es_3p_present, noun/fr_plural_f)
-- For uninflected function words: <role>/base (e.g., preposition/base)
+- Use <role>/<language_code>_<morphology> for inflected words.
+- Person/number notation: 1s, 2s, 3s, 1p, 2p, 3p.
+- Include gender only when the surface form differs by gender (e.g., 3s-f, singular_f).
+- Tense/aspect examples: present, past, future, impf, pc, inf.
+- Case languages (lt, de): include case + number (e.g., noun/de_accusative_singular).
+- Non-case languages (en, fr, es, pt, ko, zh): nouns should use number only (e.g., noun/fr_singular).
+- Pronouns: pronoun/<lang>_subjective|objective|possessive|reflexive (or case labels for case languages).
+- Numerals: numeral/<lang>_cardinal|ordinal.
+- For uninflected function words: <role>/base (e.g., preposition/base).
 
 Important rules:
 - Maintain token order from the original sentence
 - Use zero-indexed positions
 - Ensure word_count equals the number of word entries
 - Output must contain exactly one language entry
+- Do NOT include punctuation marks as separate words
 - Return only valid JSON matching the provided schema"""
 
         return prompt, schema, context
@@ -121,6 +130,12 @@ Important rules:
         for field, weight in self.WORD_FIELD_WEIGHTS.items():
             expected_value = expected_word.get(field)
             model_value = model_word.get(field)
+
+            # Lemma text may vary by normalization/language; prefer GUID alignment.
+            if field == "lemma" and expected_word.get("lemma_guid") == model_word.get("lemma_guid"):
+                score += weight
+                continue
+
             if expected_value == model_value:
                 score += weight
 
