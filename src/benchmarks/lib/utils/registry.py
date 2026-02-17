@@ -214,7 +214,6 @@ class EnglishToIPABenchmark:
     pass
 
 
-
 from benchmarks.lib.generators.sentence_decomposition_generator import (
     SentenceDecompositionGenerator,
 )
@@ -272,6 +271,7 @@ register_runner("0120_geography", GeographyRunner)
     description="""
            A benchmark to evaluate a model's ability to generate full verb-form
            paradigms across persons and tenses in multiple languages.""",
+    default_num_questions=56,
 )
 class VerbFormsBenchmark:
     """Module container for verb forms benchmark."""

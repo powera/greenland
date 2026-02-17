@@ -121,16 +121,19 @@ def rescore_benchmark_runs(
                 benchmark_code,
                 run.model_name,
             )
-            summary["details_skipped"] += session.query(datastore_benchmarks.RunDetail).filter(
-                datastore_benchmarks.RunDetail.run_id == run.run_id
-            ).count()
+            summary["details_skipped"] += (
+                session.query(datastore_benchmarks.RunDetail)
+                .filter(datastore_benchmarks.RunDetail.run_id == run.run_id)
+                .count()
+            )
             continue
 
         rows = (
             session.query(datastore_benchmarks.RunDetail, datastore_benchmarks.Question)
             .join(
                 datastore_benchmarks.Question,
-                datastore_benchmarks.RunDetail.question_id == datastore_benchmarks.Question.question_id,
+                datastore_benchmarks.RunDetail.question_id
+                == datastore_benchmarks.Question.question_id,
             )
             .filter(datastore_benchmarks.RunDetail.run_id == run.run_id)
             .all()
@@ -268,7 +271,7 @@ def run_missing_benchmarks(
 
 
 def generate_benchmark_questions(
-    benchmark_code: str, num_questions: int = 40, session=None
+    benchmark_code: str, num_questions: Optional[int] = None, session=None
 ) -> bool:
     """Generate questions for a benchmark and load them into the database."""
     logger.info("Generating questions for benchmark %s", benchmark_code)
@@ -278,6 +281,10 @@ def generate_benchmark_questions(
         if not generator:
             logger.error("Failed to create generator for benchmark %s", benchmark_code)
             return False
+
+        if num_questions is None:
+            metadata = get_benchmark_metadata(benchmark_code)
+            num_questions = metadata.default_num_questions if metadata else 40
 
         generator.load_to_database(num_questions=num_questions)
 
@@ -291,7 +298,7 @@ def generate_benchmark_questions(
 
 
 def regenerate_benchmark_questions(
-    benchmark_code: str, num_questions: int = 40, session=None
+    benchmark_code: str, num_questions: Optional[int] = None, session=None
 ) -> bool:
     """Delete existing questions for a benchmark and regenerate from scratch."""
     logger.info("Regenerating questions for benchmark %s", benchmark_code)
@@ -339,7 +346,10 @@ def main() -> None:
     gen_parser = subparsers.add_parser("generate", help="Generate benchmark questions")
     gen_parser.add_argument("benchmark", help="Benchmark code")
     gen_parser.add_argument(
-        "--num-questions", type=int, default=40, help="Number of questions to generate"
+        "--num-questions",
+        type=int,
+        default=None,
+        help="Number of questions to generate (default: per-benchmark setting)",
     )
 
     regen_parser = subparsers.add_parser(
@@ -347,7 +357,10 @@ def main() -> None:
     )
     regen_parser.add_argument("benchmark", help="Benchmark code")
     regen_parser.add_argument(
-        "--num-questions", type=int, default=40, help="Number of questions to generate"
+        "--num-questions",
+        type=int,
+        default=None,
+        help="Number of questions to generate (default: per-benchmark setting)",
     )
 
     subparsers.add_parser("list", help="List available benchmarks")
@@ -361,9 +374,13 @@ def main() -> None:
         "rescore",
         help="Rescore existing run results for a benchmark using current scoring logic",
     )
-    rescore_parser.add_argument("benchmark", help="Benchmark code, e.g. 0062_sentence_decomposition")
+    rescore_parser.add_argument(
+        "benchmark", help="Benchmark code, e.g. 0062_sentence_decomposition"
+    )
     rescore_parser.add_argument("--model", help="Optional model codename filter")
-    rescore_parser.add_argument("--dry-run", action="store_true", help="Preview without updating DB")
+    rescore_parser.add_argument(
+        "--dry-run", action="store_true", help="Preview without updating DB"
+    )
 
     args = parser.parse_args()
 

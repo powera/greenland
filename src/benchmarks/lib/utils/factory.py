@@ -9,7 +9,9 @@ from benchmarks.lib.utils.base import BenchmarkGenerator, BenchmarkRunner
 from benchmarks.lib.utils.data_models import BenchmarkMetadata
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Registry dictionaries to store generator and runner classes
@@ -153,7 +155,7 @@ def runner(benchmark_code: str):
 
 
 # Decorator for initializing a benchmark (metadata, generator, runner)
-def benchmark(code: str, name: str, description: Optional[str] = None):
+def benchmark(code: str, name: str, description: Optional[str] = None, **kwargs: Any):
     """
     Decorator to initialize a benchmark.
 
@@ -163,11 +165,12 @@ def benchmark(code: str, name: str, description: Optional[str] = None):
         code: Unique benchmark identifier
         name: Display name
         description: Optional description
+        **kwargs: Additional BenchmarkMetadata fields (e.g. default_num_questions)
     """
 
     def decorator(module):
         metadata = BenchmarkMetadata(
-            code=code, name=name, description=description or module.__doc__
+            code=code, name=name, description=description or module.__doc__, **kwargs
         )
         register_benchmark_metadata(metadata)
         return module

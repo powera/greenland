@@ -15,14 +15,18 @@ from benchmarks.lib.utils.data_models import (
 )
 from benchmarks.lib.utils.factory import benchmark, generator
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 BENCHMARK_CODE = "0111_synonyms"
 BENCHMARK_NAME = "Multilingual Synonym Generation"
-BENCHMARK_DESCRIPTION = "Tests whether a model can generate synonyms for common nouns across multiple languages."
+BENCHMARK_DESCRIPTION = (
+    "Tests whether a model can generate synonyms for common nouns across multiple languages."
+)
 
-benchmark(BENCHMARK_CODE, BENCHMARK_NAME, BENCHMARK_DESCRIPTION)(__name__)
+benchmark(BENCHMARK_CODE, BENCHMARK_NAME, BENCHMARK_DESCRIPTION, default_num_questions=64)(__name__)
 
 
 @generator(BENCHMARK_CODE)
@@ -55,7 +59,12 @@ class SynonymsGenerator(BenchmarkGenerator):
                 },
                 category=f"synonyms_{language_code.lower()}",
                 difficulty=Difficulty.MEDIUM,
-                tags=["synonyms", "generation", f"lang:{language_code.lower()}", f"concept:{concept}"],
+                tags=[
+                    "synonyms",
+                    "generation",
+                    f"lang:{language_code.lower()}",
+                    f"concept:{concept}",
+                ],
                 schema={
                     "type": "object",
                     "properties": {
