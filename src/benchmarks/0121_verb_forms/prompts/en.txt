@@ -2,4 +2,5 @@ Generate verb forms for the specified target language and verb.
 Return valid JSON only (no prose).
 Output forms in the target language indicated by Language code / Language name.
 Use person keys exactly: 1s, 2s, 3s, 1p, 2p, 3p for present, past, and future.
+For the "past" tense, provide the language's default perfect/completed past form (e.g., French passé composé), not an imperfect/habitual past.
 Also include all required extra form keys listed in Required extra forms.
