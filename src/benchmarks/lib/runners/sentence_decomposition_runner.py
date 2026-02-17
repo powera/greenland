@@ -34,6 +34,10 @@ class SentenceDecompositionRunner(BenchmarkRunner):
         "lemma": 0.04,
     }
 
+    DEFAULT_INSERTION_PENALTY = 0.18
+    LOW_CONTENT_INSERTION_PENALTY = 0.08
+    DELETION_PENALTY = 0.30
+
     def __init__(self, model: str, metadata: BenchmarkMetadata):
         super().__init__(model, metadata)
 
@@ -126,15 +130,20 @@ Important rules:
         word_score, _ = self._score_word_with_details(expected_word, model_word)
         return word_score
 
-    def _score_word_with_details(self, expected_word: Dict[str, Any], model_word: Dict[str, Any]) -> Tuple[float, Dict[str, Any]]:
+    def _score_word_with_details(
+        self, expected_word: Dict[str, Any], model_word: Dict[str, Any], include_position: bool = True
+    ) -> Tuple[float, Dict[str, Any]]:
         score = 0.0
-        total = sum(self.WORD_FIELD_WEIGHTS.values())
+        fields_to_score = [field for field in self.WORD_FIELD_WEIGHTS if include_position or field != "position"]
+        total = sum(self.WORD_FIELD_WEIGHTS[field] for field in fields_to_score)
         if total <= 0:
             return 0.0, {"fields": {}, "anchor_match": False, "word_score": 0.0}
 
         field_matches: Dict[str, bool] = {}
 
         for field, weight in self.WORD_FIELD_WEIGHTS.items():
+            if not include_position and field == "position":
+                continue
             expected_value = expected_word.get(field)
             model_value = model_word.get(field)
 
@@ -164,7 +173,7 @@ Important rules:
 
         word_score = score / total
         anchor_match = (
-            field_matches.get("position", False)
+            (not include_position or field_matches.get("position", False))
             and field_matches.get("surface_form", False)
             and field_matches.get("lemma_guid", False)
         )
@@ -180,6 +189,78 @@ Important rules:
         if not isinstance(surface_form, str) or not surface_form.strip():
             return False
         return bool(re.fullmatch(r"[^\w\s]+", surface_form.strip(), flags=re.UNICODE))
+
+    def _is_low_content_token(self, word: Dict[str, Any]) -> bool:
+        role = str(word.get("role", "")).strip().lower()
+        grammatical_form = str(word.get("grammatical_form", "")).strip().lower()
+
+        low_content_roles = {
+            "particle",
+            "determiner",
+            "article",
+            "auxiliary",
+            "preposition",
+            "conjunction",
+            "marker",
+            "case_marker",
+            "clitic",
+        }
+        if role in low_content_roles:
+            return True
+
+        if grammatical_form.endswith("/base") and role not in {"noun", "verb", "adjective", "adverb", "pronoun", "numeral"}:
+            return True
+
+        return False
+
+    def _insertion_penalty(self, model_word: Dict[str, Any]) -> float:
+        return self.LOW_CONTENT_INSERTION_PENALTY if self._is_low_content_token(model_word) else self.DEFAULT_INSERTION_PENALTY
+
+    def _align_words(
+        self, expected_words: List[Dict[str, Any]], model_words: List[Dict[str, Any]]
+    ) -> Tuple[List[Tuple[Optional[int], Optional[int]]], float]:
+        """Align expected/model token streams with DP to avoid cascade errors from token splits."""
+        n = len(expected_words)
+        m = len(model_words)
+        dp = [[0.0 for _ in range(m + 1)] for _ in range(n + 1)]
+        back: List[List[Tuple[Optional[int], Optional[int]]]] = [[(None, None) for _ in range(m + 1)] for _ in range(n + 1)]
+
+        for i in range(1, n + 1):
+            dp[i][0] = dp[i - 1][0] - self.DELETION_PENALTY
+            back[i][0] = (i - 1, 0)
+
+        for j in range(1, m + 1):
+            dp[0][j] = dp[0][j - 1] - self._insertion_penalty(model_words[j - 1])
+            back[0][j] = (0, j - 1)
+
+        for i in range(1, n + 1):
+            for j in range(1, m + 1):
+                match_score, _ = self._score_word_with_details(expected_words[i - 1], model_words[j - 1], include_position=False)
+                options = [
+                    (dp[i - 1][j - 1] + match_score, (i - 1, j - 1)),
+                    (dp[i - 1][j] - self.DELETION_PENALTY, (i - 1, j)),
+                    (dp[i][j - 1] - self._insertion_penalty(model_words[j - 1]), (i, j - 1)),
+                ]
+                best_score, prev = max(options, key=lambda option: option[0])
+                dp[i][j] = best_score
+                back[i][j] = prev
+
+        alignment: List[Tuple[Optional[int], Optional[int]]] = []
+        i, j = n, m
+        while i > 0 or j > 0:
+            prev_i, prev_j = back[i][j]
+            if prev_i is None or prev_j is None:
+                break
+            if prev_i == i - 1 and prev_j == j - 1:
+                alignment.append((i - 1, j - 1))
+            elif prev_i == i - 1 and prev_j == j:
+                alignment.append((i - 1, None))
+            else:
+                alignment.append((None, j - 1))
+            i, j = prev_i, prev_j
+
+        alignment.reverse()
+        return alignment, dp[n][m]
 
     def _score_language_entry_with_breakdown(self, expected: Dict[str, Any], model: Dict[str, Any]) -> Tuple[float, Dict[str, Any]]:
         breakdown: Dict[str, Any] = {
@@ -217,20 +298,25 @@ Important rules:
             breakdown["punctuation_penalty"] = 0.05
             breakdown["deductions"].append("punctuation token present (-5)")
 
-        model_by_pos = {word.get("position"): word for word in model_words if word.get("position") is not None}
-
-        if len(expected_words) == len(model_words):
-            breakdown["structure_match"] = True
-            breakdown["structure_points"] = 0.05
-        else:
-            breakdown["deductions"].append("word count mismatch (-5)")
-
         token_component = 0.0
         if expected_words:
+            alignment, _ = self._align_words(expected_words, model_words)
+            aligned_expected = 0
             token_score = 0.0
-            for expected_word in expected_words:
+            inserted_tokens: List[Dict[str, Any]] = []
+
+            for expected_index, model_index in alignment:
+                if expected_index is None and model_index is not None:
+                    inserted_tokens.append(model_words[model_index])
+                    continue
+
+                if expected_index is None:
+                    continue
+
+                aligned_expected += 1
+                expected_word = expected_words[expected_index]
+                model_word = model_words[model_index] if model_index is not None else None
                 position = expected_word.get("position")
-                model_word = model_by_pos.get(position)
                 token_detail: Dict[str, Any] = {
                     "position": position,
                     "expected_surface_form": expected_word.get("surface_form"),
@@ -244,6 +330,29 @@ Important rules:
                 else:
                     token_detail.update({"fields": {}, "anchor_match": False, "word_score": 0.0})
                 breakdown["token_details"].append(token_detail)
+
+            if len(expected_words) == len(model_words):
+                breakdown["structure_match"] = True
+                breakdown["structure_points"] = 0.05
+            elif inserted_tokens and all(self._is_low_content_token(word) for word in inserted_tokens):
+                breakdown["structure_points"] = 0.03
+                breakdown["deductions"].append("minor extra low-content token(s) (-2)")
+            else:
+                breakdown["deductions"].append("word count mismatch (-5)")
+
+            if aligned_expected < len(expected_words):
+                for expected_word in expected_words[aligned_expected:]:
+                    breakdown["token_details"].append(
+                        {
+                            "position": expected_word.get("position"),
+                            "expected_surface_form": expected_word.get("surface_form"),
+                            "model_surface_form": None,
+                            "matched": False,
+                            "fields": {},
+                            "anchor_match": False,
+                            "word_score": 0.0,
+                        }
+                    )
 
             token_component = 0.80 * (token_score / len(expected_words))
             breakdown["token_component"] = round(token_component, 4)
@@ -383,7 +492,7 @@ Important rules:
             "is_correct": is_correct,
             "response_payload": model_answer,
             "question_snapshot": question_data,
-            "scoring_version": "0062-v2-anchor-weighted",
+            "scoring_version": "0062-v3-dp-alignment",
             "scoring_breakdown": self._build_scoring_breakdown(question_data, model_answer),
         }
 
