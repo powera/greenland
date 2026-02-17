@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Set, Tuple
 
 import benchmarks.datastore.benchmarks as datastore_benchmarks
 import benchmarks.datastore.common as datastore_common
+from benchmarks.scripts.delete_benchmark import delete_benchmark_completely
 from benchmarks.lib.utils.factory import (
     get_all_benchmark_codes,
     get_benchmark_metadata,
@@ -16,7 +17,9 @@ from benchmarks.lib.utils.factory import (
 )
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -174,12 +177,15 @@ def run_missing_benchmarks(
     return run_pairs
 
 
-def generate_benchmark_questions(benchmark_code: str, session=None) -> bool:
+def generate_benchmark_questions(
+    benchmark_code: str, num_questions: int = 40, session=None
+) -> bool:
     """
     Generate questions for a benchmark and load them into the database.
 
     Args:
         benchmark_code: Benchmark code
+        num_questions: Number of questions to generate
         session: Optional database session
 
     Returns:
@@ -194,7 +200,7 @@ def generate_benchmark_questions(benchmark_code: str, session=None) -> bool:
             return False
 
         # Generate and load questions
-        generator.load_to_database()
+        generator.load_to_database(num_questions=num_questions)
 
         logger.info("Successfully generated questions for benchmark %s", benchmark_code)
         return True
@@ -203,6 +209,37 @@ def generate_benchmark_questions(benchmark_code: str, session=None) -> bool:
         logger.error("Error generating questions for benchmark %s: %s", benchmark_code, str(e))
         logger.error(traceback.format_exc())
         return False
+
+
+def regenerate_benchmark_questions(
+    benchmark_code: str, num_questions: int = 40, session=None
+) -> bool:
+    """
+    Delete existing questions for a benchmark and regenerate from scratch.
+
+    Args:
+        benchmark_code: Benchmark code
+        num_questions: Number of questions to generate
+        session: Optional database session
+
+    Returns:
+        True if successful, False otherwise
+    """
+    logger.info("Regenerating questions for benchmark %s", benchmark_code)
+
+    if not session:
+        session = datastore_common.create_dev_session()
+
+    try:
+        delete_benchmark_completely(session, benchmark_code)
+    except Exception as e:
+        logger.error("Error deleting benchmark %s: %s", benchmark_code, str(e))
+        logger.error(traceback.format_exc())
+        return False
+
+    return generate_benchmark_questions(
+        benchmark_code, num_questions=num_questions, session=session
+    )
 
 
 def get_benchmark_info() -> List[Dict]:
@@ -242,6 +279,18 @@ if __name__ == "__main__":
     # Generate questions command
     gen_parser = subparsers.add_parser("generate", help="Generate benchmark questions")
     gen_parser.add_argument("benchmark", help="Benchmark code")
+    gen_parser.add_argument(
+        "--num-questions", type=int, default=40, help="Number of questions to generate"
+    )
+
+    # Regenerate questions command (delete existing, then generate fresh)
+    regen_parser = subparsers.add_parser(
+        "regenerate", help="Delete existing questions and regenerate from scratch"
+    )
+    regen_parser.add_argument("benchmark", help="Benchmark code")
+    regen_parser.add_argument(
+        "--num-questions", type=int, default=40, help="Number of questions to generate"
+    )
 
     # List benchmarks command
     list_parser = subparsers.add_parser("list", help="List available benchmarks")
@@ -264,11 +313,16 @@ if __name__ == "__main__":
             print("Benchmark failed.")
 
     elif args.command == "generate":
-        success = generate_benchmark_questions(args.benchmark)
+        success = generate_benchmark_questions(args.benchmark, num_questions=args.num_questions)
         if success:
             print(f"Successfully generated questions for {args.benchmark}")
+
+    elif args.command == "regenerate":
+        success = regenerate_benchmark_questions(args.benchmark, num_questions=args.num_questions)
+        if success:
+            print(f"Successfully regenerated questions for {args.benchmark}")
         else:
-            print(f"Failed to generate questions for {args.benchmark}")
+            print(f"Failed to regenerate questions for {args.benchmark}")
 
     elif args.command == "list":
         benchmarks = get_benchmark_info()

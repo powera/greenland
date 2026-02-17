@@ -15,7 +15,7 @@ if str(Path(__file__).parent.parent.parent.parent) not in sys.path:
 import util.flesch_kincaid as fk
 from benchmarks.datastore.common import Model
 from benchmarks.verbalator import common, prompt_builder, samples
-from clients.unified_client import UnifiedClient
+from clients.unified_client import UnifiedLLMClient as UnifiedClient
 
 bp = Blueprint(
     "verbalator",
