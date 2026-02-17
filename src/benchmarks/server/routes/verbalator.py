@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from flask import Blueprint, g, render_template, request, jsonify
+from flask import Blueprint, current_app, g, jsonify, render_template, request
 
 # Add src to path if not already present
 if str(Path(__file__).parent.parent.parent.parent) not in sys.path:
@@ -53,6 +53,21 @@ def _get_models() -> List[Dict[str, Any]]:
     ]
 
 
+def _is_local_model(model: Optional[Model]) -> bool:
+    """Return whether the selected model is local to this machine."""
+    return bool(model and model.model_type != "remote")
+
+
+def _is_benchmark_worker_busy() -> bool:
+    """Return whether the benchmark workqueue has running or queued jobs."""
+    worker = current_app.extensions.get("benchmark_run_worker")
+    if worker is None:
+        return False
+
+    worker_status = worker.status()
+    return bool(worker_status.get("active") or worker_status.get("queued", 0) > 0)
+
+
 @bp.route("/")
 def index():
     """Show the verbalator query interface."""
@@ -81,6 +96,19 @@ def query():
         model_codename = data.get("model", DEFAULT_MODEL)
         db_model = g.db.query(Model).filter(Model.codename == model_codename).first()
         model_path = db_model.model_path if db_model and db_model.model_path else model_codename
+
+        if _is_local_model(db_model) and _is_benchmark_worker_busy():
+            return (
+                jsonify(
+                    {
+                        "error": (
+                            "Local model requests are blocked while the benchmark workqueue has"
+                            " active or queued jobs."
+                        )
+                    }
+                ),
+                409,
+            )
 
         # Generate response via unified client (handles OpenAI, Anthropic, LMStudio, etc.)
         entry = data.get("entry")
