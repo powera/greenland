@@ -2,11 +2,14 @@
 
 """Runner for multilingual verb-form production benchmark."""
 
+import json
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
+from clients import unified_client
+from clients.ollama_client import OllamaTimeoutError
 from benchmarks.lib.utils.base import BenchmarkRunner
-from benchmarks.lib.utils.data_models import BenchmarkMetadata
+from benchmarks.lib.utils.data_models import BenchmarkMetadata, BenchmarkResult
 from benchmarks.lib.utils.factory import runner
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
@@ -130,6 +133,48 @@ class VerbFormsRunner(BenchmarkRunner):
 
     def evaluate_response(self, question_data: Dict, response: Any) -> bool:
         return self.score_response(question_data, response) >= CORRECTNESS_THRESHOLD
+
+    def process_question(self, question: Dict) -> BenchmarkResult:
+        question_data = json.loads(question["question_info_json"])
+        question_id = question["question_id"]
+
+        try:
+            prompt, schema, context = self.prepare_prompt(question_data)
+            response = unified_client.generate_chat(
+                prompt=prompt, model=self.remote_model, json_schema=schema, context=context
+            )
+
+            model_answer = schema and response.structured_data or response.response_text
+            score = self.score_response(question_data, model_answer)
+            is_correct = score >= CORRECTNESS_THRESHOLD
+
+            debug_info = self.build_debug_info(question_data, response, is_correct)
+
+            return BenchmarkResult(
+                question_id=question_id,
+                score=score,
+                eval_msec=int(response.usage.total_msec),
+                debug_json=json.dumps(debug_info) if debug_info else None,
+                thought_process=(
+                    response.additional_thought if response.additional_thought else None
+                ),
+            )
+
+        except OllamaTimeoutError as error:
+            return self.handle_timeout(question_id, error)
+        except Exception as error:
+            logger.error("Error processing question %s: %s", question_id, error)
+            return BenchmarkResult(
+                question_id=question_id,
+                score=0,
+                eval_msec=0,
+                debug_json=json.dumps({"error": str(error)}),
+            )
+
+    def calculate_score(self, results: List[BenchmarkResult]) -> int:
+        if not results:
+            return 0
+        return int(round(sum(result.score for result in results) / len(results)))
 
     def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict[str, Any]:
         if hasattr(response, "structured_data") and response.structured_data:
