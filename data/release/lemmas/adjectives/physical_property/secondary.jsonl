@@ -39,7 +39,7 @@
 {"guid": "A18_039", "translations": {"th": "ตาบอด", "kn": "ಕುರುಡ", "uk": "сліпий", "bn": "অন্ধ", "ro": "orb", "pl": "ślepy", "ta": "குருடான", "hi": "अंधा"}}
 {"guid": "A18_040", "translations": {"th": "บาดเจ็บ", "kn": "ಗಾಯಗೊಂಡ", "uk": "поранений", "bn": "আহত", "ro": "rănit", "pl": "ranny", "ta": "காயமடைந்த", "hi": "घायल"}}
 {"guid": "A18_041", "translations": {"th": "ตื่น", "kn": "ಎಚ್ಚರವಾದ", "uk": "несплячий", "bn": "জাগ্রত", "ro": "treaz", "pl": "przebudzony", "ta": "விழிப்பான", "hi": "जागृत"}}
-{"guid": "A18_042", "translations": {"th": "สนใจ", "kn": "ಆಸಕ್ತ", "uk": "зацікавлений", "bn": "আগ্রহী", "ro": "interesat", "pl": "zainteresowany", "ta": "ஆர்வமுள்ள", "hi": "रुचि\u0004d\nf"}}
+{"guid": "A18_042", "translations": {"th": "สนใจ", "kn": "ಆಸಕ್ತ", "uk": "зацікавлений", "bn": "আগ্রহী", "ro": "interesat", "pl": "zainteresowany", "ta": "ஆர்வமுள்ள", "hi": "रुच"}}
 {"guid": "A18_043", "translations": {"th": "แช่แข็ง", "kn": "ಹೆಪ್ಪುಗಟ್ಟಿದ", "uk": "замерзлий", "bn": "জমাট", "ro": "înghețat", "pl": "zamrożony", "ta": "உறைந்த", "hi": "जमāया"}}
 {"guid": "A18_045", "translations": {"th": "ที่ชื่อว่า", "kn": "ಹೆಸರಿಸಲಾದ", "uk": "іменований", "bn": "নামক", "ro": "numit", "pl": "nazwany", "ta": "பெயரிடப்பட்ட", "hi": "नामित"}}
 {"guid": "A18_046", "translations": {"th": "เบา", "kn": "ಹಗುರವಾದ", "uk": "легкий", "bn": "হালকা", "ro": "ușor", "pl": "lekki", "ta": "இலகுவான", "hi": "हल्का"}}

@@ -55,7 +55,7 @@
 {"guid": "N17_207", "translations": {"ro": "mină", "pl": "kopalnia", "th": "เหมือง", "ta": "கணி", "kn": "ಖನಿ", "uk": "шахта", "bn": "খনি", "hi": "खदान"}}
 {"guid": "N17_208", "translations": {"ro": "fund", "pl": "dno", "th": "ก้น", "ta": "அடிப்பு", "kn": "ತಳಭಾಗ", "uk": "дно", "bn": "তল", "hi": "तल"}}
 {"guid": "N17_209", "translations": {"ro": "stare", "pl": "stan", "th": "สถานะ", "ta": "நிலை", "kn": "ಸ್ಥಿತಿ", "uk": "стан", "bn": "অবস্থা", "hi": "अवस्था"}}
-{"guid": "N17_210", "translations": {"ro": "dobândă", "pl": "oprocentowanie", "th": "ดอกเบี้ย", "ta": "வட்டி", "kn": "ಹೊರAnna—incorrect? I'm ChatGPT; must provide translations only. Let's craft properly.", "uk": "відсоток", "bn": "সুদি", "hi": "ब्याज"}}
+{"guid": "N17_210", "translations": {"ro": "dobândă", "pl": "oprocentowanie", "th": "ดอกเบี้ย", "ta": "வட்டி", "kn": "ಹೊರ", "uk": "відсоток", "bn": "সুদি", "hi": "ब्याज"}}
 {"guid": "N17_211", "translations": {"ro": "putere", "pl": "władza", "th": "อำนาจ", "ta": "அறம்", "kn": "ಶಕ್ತಿ", "uk": "влада", "bn": "ক্ষমতা", "hi": "शक्ति"}}
 {"guid": "N17_213", "translations": {"ro": "justiție", "pl": "sprawiedliwość", "th": "ความยุติธรรม", "ta": "நியாயம்", "kn": "ನ್ಯಾಯ", "uk": "правосуддя", "bn": "ন্যায়", "hi": "न्याय"}}
 {"guid": "N17_214", "translations": {"ro": "valoare", "pl": "wartość", "th": "คุณค่า", "ta": "மதிப்பு", "kn": "ಮೌಲ್ಯ", "uk": "цінність", "bn": "মূল্য", "hi": "मूल्य"}}
