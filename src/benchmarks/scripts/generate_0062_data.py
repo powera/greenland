@@ -19,8 +19,22 @@ if str(Path(__file__).parent.parent.parent) not in sys.path:
 import argparse
 import json
 import logging
+import re
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Set
+
+DECOMPOSITION_LANGUAGES = {"zh", "lt", "es", "fr"}
+
+
+def simplify_gloss(gloss: str) -> str:
+    """Strip parenthetical annotations and take only the first slash-alternative."""
+    gloss = re.sub(r"\s*\([^)]*\)", "", gloss)
+    gloss = gloss.split(" / ")[0]
+    gloss = gloss.strip()
+    if gloss and gloss[0].isupper() and not gloss.isupper():
+        gloss = gloss[0].lower() + gloss[1:]
+    return gloss
+
 
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload
@@ -35,7 +49,9 @@ from storage.models.schema import (
     SentenceWord,
 )
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -130,7 +146,7 @@ def get_sentences_with_full_sentenceword_data(
             # Only include languages that have sentenceword data
             decomposition_languages: List[Dict[str, Any]] = []
 
-            for lang_code in sorted(languages_with_words):
+            for lang_code in sorted(languages_with_words & DECOMPOSITION_LANGUAGES):
                 # Get sentencewords for this language
                 lang_words = [sw for sw in sentence.words if sw.language_code == lang_code]
 
@@ -152,7 +168,7 @@ def get_sentences_with_full_sentenceword_data(
                     word_entry = {
                         "position": sw.position,
                         "role": sw.word_role,
-                        "english_gloss": sw.english_text or "",
+                        "english_gloss": simplify_gloss(sw.english_text or ""),
                         "surface_form": sw.declined_form or sw.target_language_text or "",
                         "grammatical_form": sw.grammatical_form or f"{sw.word_role}/base",
                     }
