@@ -38,7 +38,9 @@ def set_llm_metrics_callback(
 
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Default timeout values (in seconds)
@@ -261,6 +263,15 @@ class UnifiedLLMClient:
             logger.debug("Warming up model: %s", normalized_model)
         return client.warm_model(normalized_model)
 
+    def unload_model(self, model: str) -> bool:
+        """Unload model from memory (LMStudio only; no-op for other backends)."""
+        client, normalized_model = self._get_client(model)
+        if isinstance(client, lmstudio_client.LMStudioClient):
+            if self.debug:
+                logger.debug("Unloading model: %s", normalized_model)
+            return client.unload_model(normalized_model)
+        return True
+
     def generate_chat(
         self,
         prompt: str,
@@ -404,6 +415,11 @@ def _get_client() -> UnifiedLLMClient:
 def warm_model(model: str, timeout: Optional[float] = None) -> bool:
     """Warm up a model for faster first inference."""
     return _get_client().warm_model(model, timeout)
+
+
+def unload_model(model: str) -> bool:
+    """Unload a model from memory."""
+    return _get_client().unload_model(model)
 
 
 def generate_chat(

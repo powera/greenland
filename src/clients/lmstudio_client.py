@@ -169,6 +169,19 @@ class LMStudioClient:
         except LMStudioError:
             return False
 
+    def unload_model(self, model: str) -> bool:
+        """Unload model from memory using LM Studio's model unload endpoint."""
+        url = f"http://{self.server}:{self.port}/api/v1/models/unload"
+        try:
+            if self.debug:
+                logger.debug("Unloading model via %s: %s", url, model)
+            response = requests.post(url, json={"instance_id": model}, timeout=self.timeout)
+            if self.debug:
+                logger.debug("Unload response: %s %s", response.status_code, response.text)
+            return bool(response.status_code == 200)
+        except RequestException:
+            return False
+
     def generate_chat(
         self,
         prompt: str,
@@ -299,6 +312,10 @@ def _get_client() -> LMStudioClient:
 # Expose key functions at module level for API compatibility
 def warm_model(model: str) -> bool:
     return _get_client().warm_model(model)
+
+
+def unload_model(model: str) -> bool:
+    return _get_client().unload_model(model)
 
 
 def generate_chat(
