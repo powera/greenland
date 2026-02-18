@@ -14,22 +14,20 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-PERSON_SLOTS = ["1s", "2s", "3s", "1p", "2p", "3p"]
-TENSES = ["present", "past", "future"]
-
+CORRECTNESS_THRESHOLD = 70
 
 @runner("0121_verb_forms")
 class VerbFormsRunner(PartialCreditRunner):
     """Runner for verb forms benchmark tests."""
 
-    CORRECTNESS_THRESHOLD = 70
+    CORRECTNESS_THRESHOLD = CORRECTNESS_THRESHOLD
 
     def prepare_prompt(self, question_data: Dict) -> Tuple[str, Optional[Dict], Optional[str]]:
         prompt = question_data["question_text"]
         schema = question_data.get("schema")
         context = (
             "You are a linguistics assistant. Return valid JSON only. "
-            "Do not omit required person-tense slots."
+            "Do not omit any required verb-form slots."
         )
         return prompt, schema, context
 
@@ -56,12 +54,22 @@ class VerbFormsRunner(PartialCreditRunner):
         if not isinstance(forms, dict):
             return False
 
-        for tense in TENSES:
-            tense_forms = forms.get(tense)
-            if not isinstance(tense_forms, dict):
-                return False
-            for person in PERSON_SLOTS:
-                if not self._has_nonempty_string(tense_forms.get(person)):
+        expected_forms = expected.get("forms", {})
+        if not isinstance(expected_forms, dict):
+            return False
+
+        for form_key, expected_value in expected_forms.items():
+            actual_value = forms.get(form_key)
+            if isinstance(expected_value, dict):
+                if not isinstance(actual_value, dict):
+                    return False
+                for nested_key, nested_expected in expected_value.items():
+                    if isinstance(nested_expected, str) and not self._has_nonempty_string(
+                        actual_value.get(nested_key)
+                    ):
+                        return False
+            elif isinstance(expected_value, str):
+                if not self._has_nonempty_string(actual_value):
                     return False
 
         extras = response.get("extra_forms")
@@ -107,17 +115,22 @@ class VerbFormsRunner(PartialCreditRunner):
         expected_forms = expected.get("forms", {})
         model_forms = response.get("forms", {}) if isinstance(response, dict) else {}
 
-        for tense in TENSES:
-            expected_tense = expected_forms.get(tense, {})
-            model_tense = model_forms.get(tense, {}) if isinstance(model_forms, dict) else {}
-            for person in PERSON_SLOTS:
-                expected_value = expected_tense.get(person)
-                if not isinstance(expected_value, str):
-                    continue
+        for form_key, expected_value in expected_forms.items():
+            actual_value = model_forms.get(form_key) if isinstance(model_forms, dict) else None
+
+            if isinstance(expected_value, dict):
+                actual_nested = actual_value if isinstance(actual_value, dict) else {}
+                for nested_key, nested_expected in expected_value.items():
+                    if not isinstance(nested_expected, str):
+                        continue
+                    total_slots += 1
+                    if self._normalize(actual_nested.get(nested_key), lang_code) == self._normalize(
+                        nested_expected, lang_code
+                    ):
+                        exact_matches += 1
+            elif isinstance(expected_value, str):
                 total_slots += 1
-                if self._normalize(model_tense.get(person), lang_code) == self._normalize(
-                    expected_value, lang_code
-                ):
+                if self._normalize(actual_value, lang_code) == self._normalize(expected_value, lang_code):
                     exact_matches += 1
 
         expected_extras = expected.get("extra_forms", {})

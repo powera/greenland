@@ -278,6 +278,38 @@ class TestVerbFormsScoring(unittest.TestCase):
         score = self.runner.score_response(question_data, response)
         self.assertEqual(score, 100)
 
+    def test_non_person_language_slots_are_scored(self):
+        question_data = {
+            "correct_answer": {
+                "language_code": "ja",
+                "lemma": "食べる",
+                "required_extra_forms": ["te"],
+                "extra_forms": {"te": "食べて"},
+                "forms": {
+                    "dictionary": "食べる",
+                    "masu_present": "食べます",
+                    "masu_past": "食べました",
+                    "nai": "食べない",
+                },
+            }
+        }
+
+        response = {
+            "language_code": "ja",
+            "lemma": "食べる",
+            "required_extra_forms": ["te"],
+            "extra_forms": {"te": "食べて"},
+            "forms": {
+                "dictionary": "食べる",
+                "masu_present": "食べます",
+                "masu_past": "食べました",
+                "nai": "食べない",
+            },
+        }
+
+        score = self.runner.score_response(question_data, response)
+        self.assertEqual(score, 100)
+
 
 if __name__ == "__main__":
     unittest.main()

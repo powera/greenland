@@ -11,6 +11,7 @@ from clients.unified_client import UnifiedLLMClient
 from storage.backend.config import DataSourceConfig
 
 import util.prompt_loader
+from langtools.verb_forms import get_language_verb_forms_config
 
 logger = logging.getLogger(__name__)
 
@@ -29,12 +30,19 @@ def build_verb_forms_prompt(
 
     prompt_path = f"{language_code.lower()}/verb"
     context = util.prompt_loader.get_context("language_forms", prompt_path)
+    language_config = get_language_verb_forms_config(language_code)
+    prompt_note = language_config.get("prompt_note", "")
+
     prompt = util.prompt_loader.get_prompt("language_forms", prompt_path).format(
         verb=word,
         english_verb=english_word or word,
         definition=definition,
         subtype_context=subtype_context,
     )
+
+    if isinstance(prompt_note, str) and prompt_note.strip():
+        prompt = f"{prompt}\n\nAdditional language-specific guidance:\n{prompt_note.strip()}"
+
     return f"{context}\n\n{prompt}"
 
 
