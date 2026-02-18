@@ -1,0 +1,12 @@
+Template sentence: {template_sentence}
+
+Word translations for reference:
+{word_translations}
+
+Translate this sentence naturally into: {target_language_names}.
+
+{english_instruction}
+
+Use the provided word translations where appropriate, but prioritize natural translations.
+If the target language expresses the concept differently, use natural phrasing and map words to their actual meanings, not the English lemmas.
+Only include GUIDs for words that genuinely correspond to the referenced lemma's meaning.

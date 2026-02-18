@@ -16,6 +16,7 @@ from benchmarks.lib.utils.data_models import (
 )
 from benchmarks.lib.utils.factory import generator, register_benchmark_metadata
 from sentences.decomposition import (
+    build_sentence_decomposition_context,
     build_sentence_decomposition_prompt,
     build_single_language_decomposition_schema,
 )
@@ -46,40 +47,12 @@ class SentenceDecompositionGenerator(BenchmarkGenerator):
         self.can_generate_with_llm = False
         self.questions_file_path = "samples.json"
 
-        self.context = """You are a multilingual linguistics expert.
-Generate token-level decomposition for ONE target language per request.
-Return only valid JSON matching the provided schema."""
+        self.context = build_sentence_decomposition_context()
 
         self._samples: Optional[List[Dict[str, Any]]] = None
 
     def _response_schema(self) -> Dict[str, Any]:
         return build_single_language_decomposition_schema()
-
-    def _format_candidate_lemmas(
-        self,
-        candidate_lemmas: List[Dict[str, Any]],
-        source_language: str,
-        target_language: str,
-        helper_languages: List[str],
-    ) -> str:
-        if not candidate_lemmas:
-            return "- (none provided)"
-
-        allowed_languages = [source_language, target_language, *helper_languages[:3]]
-
-        return "\n".join(
-            (
-                f"- {item['guid']} - {item['lemma']} ({item['disambiguation']}) | "
-                f"POS: {item['pos']} | Definition: {item['definition']} | "
-                f"Translations: "
-                + ", ".join(
-                    f"{lang}={translation}"
-                    for lang, translation in item.get("translations", {}).items()
-                    if lang in allowed_languages
-                )
-            )
-            for item in candidate_lemmas
-        )
 
     def _build_question_text(
         self,

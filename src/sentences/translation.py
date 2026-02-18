@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from clients.unified_client import UnifiedLLMClient
 from sentences.decomposition import (
     build_decomposition_schema,
-    build_translate_and_decompose_prompt_from_english,
+    build_prompt_for_translate_and_decompose,
     query_sentence_decomposition,
 )
 from storage.models.schema import (
@@ -56,7 +56,7 @@ def build_translation_prompt(
     Returns:
         Tuple of (context, prompt) strings
     """
-    return build_translate_and_decompose_prompt_from_english(
+    return build_prompt_for_translate_and_decompose(
         sentence,
         _normalize_target_languages(target_languages),
         session,

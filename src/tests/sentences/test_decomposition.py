@@ -2,6 +2,8 @@
 
 from sentences.decomposition import (
     build_decomposition_schema,
+    build_sentence_decomposition_context,
+    build_prompt_for_translate_and_decompose,
     build_sentence_decomposition_prompt,
     build_single_language_decomposition_schema,
 )
@@ -30,7 +32,10 @@ def test_build_sentence_decomposition_prompt_includes_core_sections() -> None:
     assert 'Target translation: "Leo un libro"' in prompt
     assert "Candidate lemmas" in prompt
     assert "lemma_guid=NONE" in prompt
-    assert "de_accusative_singular" in prompt
+    assert "de_accusative_singular" not in prompt
+
+    context = build_sentence_decomposition_context()
+    assert "de_accusative_singular" in context
 
 
 def test_build_decomposition_schema_has_words_for_target_languages() -> None:
@@ -48,3 +53,7 @@ def test_build_single_language_schema_limits_languages_to_one() -> None:
 
     assert schema["properties"]["languages"]["minItems"] == 1
     assert schema["properties"]["languages"]["maxItems"] == 1
+
+
+def test_build_translate_and_decompose_prompt_name_is_available() -> None:
+    assert callable(build_prompt_for_translate_and_decompose)
