@@ -13,7 +13,7 @@ import tempfile
 import threading
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Optional
 
@@ -55,6 +55,7 @@ class BenchmarkRunWorker:
         self._output_dir = Path(tempfile.gettempdir()) / "benchmark_server_worker"
         self._output_dir.mkdir(parents=True, exist_ok=True)
         self._output_retention_seconds = 24 * 60 * 60
+        self._history_window = timedelta(hours=24)
 
         # Interactive local-model slot used by Verbalator local-model queries.
         # While occupied, benchmark queue items remain queued but do not start.
@@ -115,6 +116,7 @@ class BenchmarkRunWorker:
             current = self._current
             self._cleanup_expired_outputs_locked()
             self._expire_interactive_local_job_locked(time.time())
+            now_utc = datetime.now(timezone.utc)
             queued_tasks = [
                 self._serialize_task(task)
                 for task in sorted(self._tasks.values(), key=lambda t: t.task_id)
@@ -123,8 +125,9 @@ class BenchmarkRunWorker:
             recent_tasks = [
                 self._serialize_task(task)
                 for task in sorted(self._tasks.values(), key=lambda t: t.task_id, reverse=True)
-                if task.state in {"completed", "failed"}
-            ][:10]
+                if task.state in {"completed", "failed", "canceled"}
+                and task.enqueued_at >= now_utc - self._history_window
+            ]
         return {
             "active": None
             if current is None
@@ -133,11 +136,23 @@ class BenchmarkRunWorker:
                 "benchmark_name": current.benchmark_name,
                 "model_name": current.model_name,
             },
-            "queued": self._queue.qsize(),
+            "queued": len(queued_tasks),
             "queued_tasks": queued_tasks,
             "recent_tasks": recent_tasks,
             "interactive_local_job": self._serialize_interactive_local_job(),
         }
+
+    def cancel_task(self, task_id: int) -> bool:
+        """Cancel a queued task. Returns True when cancellation succeeds."""
+        with self._state_lock:
+            task = self._tasks.get(task_id)
+            if not task or task.state != "queued":
+                return False
+
+            task.state = "canceled"
+            task.finished_at = datetime.now(timezone.utc)
+            task.exit_code = None
+            return True
 
     def get_task_output(self, task_id: int) -> Optional[str]:
         """Return captured output for a task if available."""
@@ -153,6 +168,13 @@ class BenchmarkRunWorker:
     def _run_forever(self) -> None:
         while True:
             request = self._queue.get()
+
+            with self._state_lock:
+                task = self._tasks.get(request.task_id)
+                if not task or task.state == "canceled":
+                    self._queue.task_done()
+                    continue
+
             self._wait_for_interactive_local_job_to_finish()
 
             with self._state_lock:
