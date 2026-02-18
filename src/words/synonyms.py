@@ -7,7 +7,7 @@ import logging
 from typing import Any, Dict, Optional
 
 from clients.unified_client import UnifiedLLMClient
-from langtools.direction import get_language_direction_note
+from langtools.directions import get_language_direction_note
 from storage.backend.config import DataSourceConfig
 from storage.translation_helpers import get_supported_languages
 

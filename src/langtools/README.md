@@ -96,6 +96,17 @@ are used depending on whether accented characters are separate letters
 (position remapping) or just decorated versions of base letters (diacritic
 stripping).
 
+
+### Prompt direction hints
+
+Langtools now includes optional per-language prompt direction notes used by shared
+word-generation helpers.
+
+- `langtools/directions.py` provides `get_language_direction_note(language_code)`
+  and dynamically resolves `langtools.<code>.directions`.
+- `langtools/ko/directions.py` adds a Korean note requiring Hangul output.
+- `langtools/zh/directions.py` adds a Chinese note requiring Simplified/Mainland output.
+
 ## Quick examples
 
 ```python
