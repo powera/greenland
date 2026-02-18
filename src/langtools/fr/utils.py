@@ -117,6 +117,53 @@ def detect_gender_from_article(article: str) -> str:
     return ""
 
 
+def strip_subject_pronoun(text: str) -> str:
+    """Strip a French subject pronoun from the beginning of a conjugated verb form.
+
+    Handles simple pronouns (je, tu, il, elle, on, nous, vous, ils, elles),
+    combined forms (ils/elles, il/elle/on, il/elle), and the elided j' form.
+
+    Args:
+        text: A French conjugated verb form, possibly prefixed with a subject pronoun.
+
+    Returns:
+        The bare verb form, stripped and lowercased.
+    """
+    normalized = text.strip().lower()
+    if not normalized:
+        return ""
+
+    # Handle elided j' first (e.g. "j'ouvre" -> "ouvre", "j'ai ouvert" -> "ai ouvert")
+    if normalized.startswith("j'") or normalized.startswith("j\u2019"):
+        return normalized[2:].strip()
+
+    # Combined pronoun forms (must check before simple pronouns)
+    combined_pronouns = ["ils/elles ", "il/elle/on ", "il/elle "]
+    for pronoun in combined_pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun) :].strip()
+
+    # Simple subject pronouns
+    simple_pronouns = [
+        "elles ",
+        "elle ",
+        "nous ",
+        "vous ",
+        "ils ",
+        "il ",
+        "je ",
+        "tu ",
+        "on ",
+    ]
+    for pronoun in simple_pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun) :].strip()
+
+    # TODO: Does not strip reflexive pronouns (me/te/se/nous/vous) from
+    # subject+reflexive combinations like "je me lève" or "il s'assoit".
+    return normalized
+
+
 def is_elided_form(word: str) -> bool:
     """
     Check if a word would cause elision (starts with vowel or silent h).
