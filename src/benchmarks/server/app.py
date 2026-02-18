@@ -51,6 +51,12 @@ def create_app(config_class=Config):
     app.db_session_factory = session_factory
     app.extensions["benchmark_run_worker"] = BenchmarkRunWorker()
 
+    @app.context_processor
+    def inject_worker_status():
+        """Expose benchmark worker status globally (navbar indicators, etc.)."""
+        worker = app.extensions.get("benchmark_run_worker")
+        return {"navbar_worker_status": worker.status() if worker else None}
+
     # Request handling
     @app.before_request
     def before_request():

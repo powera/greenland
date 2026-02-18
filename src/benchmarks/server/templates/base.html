@@ -92,6 +92,31 @@
                             <i class="bi bi-chat-text"></i> Verbalator
                         </a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-list-task"></i>
+                            Queue
+                            {% if navbar_worker_status and navbar_worker_status.queued %}
+                            <span class="badge text-bg-warning ms-1">{{ navbar_worker_status.queued }}</span>
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('benchmarks.queue_status') }}">
+                                    <i class="bi bi-clock-history"></i> View queue and 24h logs
+                                </a>
+                            </li>
+                            {% if navbar_worker_status and navbar_worker_status.active %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <span class="dropdown-item-text small text-white-50">
+                                    Running: #{{ navbar_worker_status.active.task_id }}
+                                    {{ navbar_worker_status.active.benchmark_name }} on {{ navbar_worker_status.active.model_name }}
+                                </span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">

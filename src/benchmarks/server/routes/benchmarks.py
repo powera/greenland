@@ -188,3 +188,43 @@ def task_output(task_id: int):
         return "Task output was not found (it may have expired).", 404
 
     return Response(output, mimetype="text/plain; charset=utf-8")
+
+
+@bp.route("/queue")
+def queue_status():
+    """Display benchmark worker queue and recent run logs."""
+    from flask import current_app
+
+    worker_status = current_app.extensions["benchmark_run_worker"].status()
+    return render_template(
+        "benchmarks/queue.html",
+        worker_status=worker_status,
+        run_enabled=current_app.config.get("BENCHMARK_RUNNER_ENABLED", True),
+        run_authorized=_is_authorized_run_request(),
+    )
+
+
+@bp.route("/tasks/<int:task_id>/cancel", methods=["POST"])
+def cancel_task(task_id: int):
+    """Cancel a queued benchmark worker task."""
+    from flask import current_app
+
+    if not current_app.config.get("BENCHMARK_RUNNER_ENABLED", True):
+        flash("Benchmark execution is disabled on this server", "error")
+        return redirect(url_for("benchmarks.queue_status"))
+
+    if current_app.config.get("READONLY", False):
+        flash("Cannot cancel tasks: running in read-only mode", "error")
+        return redirect(url_for("benchmarks.queue_status"))
+
+    if not _is_authorized_run_request():
+        flash("Task cancellation is allowed only from local/private direct network clients", "error")
+        return redirect(url_for("benchmarks.queue_status"))
+
+    worker = current_app.extensions["benchmark_run_worker"]
+    if worker.cancel_task(task_id):
+        flash(f"Canceled queued task #{task_id}", "success")
+    else:
+        flash(f"Task #{task_id} was not queued (it may already be running or finished)", "warning")
+
+    return redirect(url_for("benchmarks.queue_status"))

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Benchmark Queue{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1><i class="bi bi-list-task"></i> Benchmark Queue</h1>
+        <p class="lead">Queued tasks, active run, and task logs from the past 24 hours.</p>
+    </div>
+</div>
+
+{% if worker_status.active %}
+<div class="alert alert-info">
+    <i class="bi bi-cpu"></i>
+    <strong>Active run:</strong>
+    Task #{{ worker_status.active.task_id }} is running
+    <code>{{ worker_status.active.benchmark_name }}</code>
+    on <code>{{ worker_status.active.model_name }}</code>.
+    <a href="{{ url_for('benchmarks.task_output', task_id=worker_status.active.task_id) }}" class="ms-2">view output</a>
+</div>
+{% endif %}
+
+{% if not run_enabled %}
+<div class="alert alert-warning">
+    <i class="bi bi-slash-circle"></i>
+    Benchmark execution is disabled on this server.
+</div>
+{% elif not run_authorized %}
+<div class="alert alert-warning">
+    <i class="bi bi-shield-exclamation"></i>
+    Task cancellation is allowed only from direct local/private network IPs.
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-hourglass-split"></i> Waiting Queue ({{ worker_status.queued }})</h5>
+            </div>
+            <div class="card-body">
+                {% if worker_status.queued_tasks %}
+                <div class="list-group">
+                    {% for task in worker_status.queued_tasks %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center gap-2">
+                            <div>
+                                <div>#{{ task.task_id }} <code>{{ task.benchmark_name }}</code> on <code>{{ task.model_name }}</code></div>
+                                <small class="text-muted">Queued at {{ task.enqueued_at }}</small>
+                            </div>
+                            <form method="post" action="{{ url_for('benchmarks.cancel_task', task_id=task.task_id) }}" class="m-0">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        {% if not run_enabled or not run_authorized %}disabled{% endif %}>
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No queued tasks.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Completed / Failed / Canceled (last 24h)</h5>
+            </div>
+            <div class="card-body">
+                {% if worker_status.recent_tasks %}
+                <div class="list-group">
+                    {% for task in worker_status.recent_tasks %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                        <div>
+                            <div>#{{ task.task_id }} <code>{{ task.benchmark_name }}</code> on <code>{{ task.model_name }}</code></div>
+                            <small class="text-muted">
+                                {% if task.state == 'completed' %}
+                                <span class="badge text-bg-success">completed</span>
+                                {% elif task.state == 'failed' %}
+                                <span class="badge text-bg-danger">failed</span>
+                                {% else %}
+                                <span class="badge text-bg-secondary">canceled</span>
+                                {% endif %}
+                                queued {{ task.enqueued_at }}
+                            </small>
+                        </div>
+                        <a href="{{ url_for('benchmarks.task_output', task_id=task.task_id) }}" class="btn btn-sm btn-outline-secondary">Output</a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No task logs in the past 24 hours.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
