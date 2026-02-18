@@ -1,9 +1,10 @@
 """Spanish-specific utility functions."""
 
 import unicodedata
-from typing import List, Optional, Tuple
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
-from langtools.es.types import SpanishGender
+if TYPE_CHECKING:
+    from langtools.es.types import SpanishGender
 
 
 def normalize_spanish_text(text: str) -> str:
@@ -75,7 +76,7 @@ def extract_article(text: str) -> Tuple[str, str]:
     return "", text
 
 
-def detect_gender_from_article(article: str) -> Optional[SpanishGender]:
+def detect_gender_from_article(article: str) -> Optional["SpanishGender"]:
     """
     Detect Spanish grammatical gender from article.
 
@@ -90,14 +91,18 @@ def detect_gender_from_article(article: str) -> Optional[SpanishGender]:
     feminine = {"la", "las", "una", "unas"}
 
     if article_lower in masculine:
+        from langtools.es.types import SpanishGender
+
         return SpanishGender.MASCULINE
     elif article_lower in feminine:
+        from langtools.es.types import SpanishGender
+
         return SpanishGender.FEMININE
 
     return None
 
 
-def detect_gender_from_word(word: str) -> Optional[SpanishGender]:
+def detect_gender_from_word(word: str) -> Optional["SpanishGender"]:
     """
     Attempt to detect Spanish grammatical gender from word ending.
 
@@ -113,10 +118,42 @@ def detect_gender_from_word(word: str) -> Optional[SpanishGender]:
 
     # Common masculine endings
     if word_lower.endswith(("o", "or", "aje", "an")):
+        from langtools.es.types import SpanishGender
+
         return SpanishGender.MASCULINE
 
     # Common feminine endings
     if word_lower.endswith(("a", "ión", "dad", "tad", "tud", "umbre", "ie", "ez")):
+        from langtools.es.types import SpanishGender
+
         return SpanishGender.FEMININE
 
     return None
+
+def strip_subject_pronoun(text: str) -> str:
+    """Strip a Spanish subject pronoun from the beginning of a verb phrase."""
+    normalized = normalize_spanish_text(text.strip().lower())
+    if not normalized:
+        return ""
+
+    pronouns = [
+        "yo ",
+        "tú ",
+        "tu ",
+        "él ",
+        "el ",
+        "ella ",
+        "usted ",
+        "nosotros ",
+        "nosotras ",
+        "vosotros ",
+        "vosotras ",
+        "ustedes ",
+        "ellos ",
+        "ellas ",
+    ]
+    for pronoun in pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun):].strip()
+    return normalized
+

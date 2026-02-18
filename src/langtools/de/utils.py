@@ -106,3 +106,16 @@ def detect_gender_from_article(article: str) -> str:
         return "f"
 
     return ""
+
+def strip_subject_pronoun(text: str) -> str:
+    """Strip a German subject pronoun from the beginning of a verb phrase."""
+    normalized = normalize_german_text(text.strip().lower())
+    if not normalized:
+        return ""
+
+    pronouns = ["ich ", "du ", "er ", "sie ", "es ", "wir ", "ihr "]
+    for pronoun in pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun) :].strip()
+    return normalized
+

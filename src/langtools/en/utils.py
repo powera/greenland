@@ -3,6 +3,19 @@
 from typing import List
 
 
+def strip_subject_pronoun(text: str) -> str:
+    """Strip an English subject pronoun from the beginning of a verb phrase."""
+    normalized = text.strip().lower()
+    if not normalized:
+        return ""
+
+    pronouns = ["i ", "you ", "he ", "she ", "it ", "we ", "they "]
+    for pronoun in pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun) :].strip()
+    return normalized
+
+
 def clean_form(text: str) -> List[str]:
     """
     Clean an English grammatical form by handling alternatives.
