@@ -11,10 +11,8 @@ from clients.ollama_client import OllamaTimeoutError
 from benchmarks.lib.utils.base import BenchmarkRunner
 from benchmarks.lib.utils.data_models import AnswerType, BenchmarkMetadata, BenchmarkResult
 from benchmarks.lib.utils.factory import benchmark, get_benchmark_metadata, runner
-from benchmarks.lib.generators.translations_generator import (
-    VALID_LANGS,
-    get_translation_metadata,
-)
+from benchmarks.lib.generators.translations_generator import VALID_LANGS, get_translation_metadata
+from words import build_single_target_translation_prompt
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
@@ -49,14 +47,6 @@ class TranslationRunner(BenchmarkRunner):
         if self.origin_lang == self.target_lang:
             raise ValueError("Origin and target languages must be different")
 
-    def get_system_context(self) -> str:
-        """Get system context for translation task."""
-        return f"""You are helping with a language translation task.
-When translating a word from {self.origin_lang.upper()} to {self.target_lang.upper()}:
-- Provide the most direct and common translation
-- Give only the base form of the word
-- Do not include articles unless they are part of the standard translation
-- Do not provide explanations or alternative translations"""
 
     @staticmethod
     def create_language_pair_runner(
@@ -77,29 +67,26 @@ When translating a word from {self.origin_lang.upper()} to {self.target_lang.upp
         return TranslationRunner(model, metadata)
 
     def prepare_prompt(self, question_data: Dict) -> Tuple[str, Optional[Dict], Optional[str]]:
-        """
-        Prepare prompt, schema, and context for the translation question.
-
-        Args:
-            question_data: Question data from database
-
-        Returns:
-            Tuple of (prompt, schema, context)
-        """
-        # Extract question text
+        """Prepare prompt, schema, and context for the translation question."""
         question_text = question_data.get("question_text", "")
+        origin_word = ""
+        if '"' in question_text:
+            parts = question_text.split('"')
+            if len(parts) >= 3:
+                origin_word = parts[1]
 
-        # Define response schema
-        schema = {
-            "type": "object",
-            "properties": {"translation": {"type": "string"}},
-            "required": ["translation"],
-        }
+        candidates: Optional[List[str]] = None
+        if question_data.get("answer_type") == AnswerType.MULTIPLE_CHOICE.value:
+            candidates = question_data.get("choices", [])
 
-        # Get system context
-        context = self.get_system_context()
+        context, prompt, schema = build_single_target_translation_prompt(
+            source_word=origin_word or question_text,
+            source_language=self.origin_lang,
+            target_language=self.target_lang,
+            candidate_translations=candidates,
+        )
 
-        return question_text, schema, context
+        return prompt, schema, context
 
     def evaluate_response(self, question_data: Dict, response: Any) -> bool:
         """
