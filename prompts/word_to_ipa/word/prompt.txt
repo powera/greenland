@@ -1,0 +1,4 @@
+Generate the IPA pronunciation for this word:
+Language: {language_name} ({language_code})
+Word: {word}
+{definition_line}{sentence_line}Respond with only the IPA transcription.

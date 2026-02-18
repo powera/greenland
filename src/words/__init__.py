@@ -4,7 +4,10 @@
 
 from words.synonyms import build_synonyms_prompt, query_synonyms
 from words.verb_forms import build_verb_forms_prompt, query_verb_forms
-from words.ipa_pronunciation import build_ipa_pronunciation_prompt
+from words.ipa_pronunciation import (
+    build_ipa_pronunciation_prompt,
+    query_ipa_pronunciation,
+)
 
 __all__ = [
     "build_synonyms_prompt",
@@ -12,4 +15,5 @@ __all__ = [
     "build_verb_forms_prompt",
     "query_verb_forms",
     "build_ipa_pronunciation_prompt",
+    "query_ipa_pronunciation",
 ]

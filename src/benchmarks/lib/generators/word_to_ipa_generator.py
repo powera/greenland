@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 # Define benchmark metadata
 BENCHMARK_METADATA = BenchmarkMetadata(
-    code="0061_english_to_ipa",
+    code="0061_word_to_ipa",
     name="Word to IPA Pronunciation",
     description="A benchmark to evaluate a model's ability to convert words from multiple languages to IPA pronunciation.",
 )
@@ -52,8 +52,8 @@ def _format_question_text(item: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-@generator("0061_english_to_ipa")
-class EnglishToIPAGenerator(BenchmarkGenerator):
+@generator("0061_word_to_ipa")
+class WordToIPAGenerator(BenchmarkGenerator):
     """Generator for word-to-IPA benchmark questions."""
 
     def __init__(self, metadata: BenchmarkMetadata, session=None):
@@ -64,7 +64,7 @@ class EnglishToIPAGenerator(BenchmarkGenerator):
         self.can_generate_with_llm = True
         self.can_generate_locally = False
 
-        self.questions_file_path = "words_ipa_multilingual.json"
+        self.questions_file_path = "words_ipa.json"
 
         self.context = """You are a helpful assistant creating benchmark questions to test language models'
 ability to convert words from many languages to IPA (International Phonetic Alphabet) pronunciation.

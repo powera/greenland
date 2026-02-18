@@ -18,14 +18,14 @@ logger = logging.getLogger(__name__)
 
 # Define benchmark metadata
 BENCHMARK_METADATA = BenchmarkMetadata(
-    code="0061_english_to_ipa",
+    code="0061_word_to_ipa",
     name="Word to IPA Pronunciation",
     description="A benchmark to evaluate a model's ability to convert words in multiple languages to IPA pronunciation.",
 )
 
 
-@runner("0061_english_to_ipa")
-class EnglishToIPARunner(BenchmarkRunner):
+@runner("0061_word_to_ipa")
+class WordToIPARunner(BenchmarkRunner):
     """Runner for word-to-IPA benchmark."""
 
     def __init__(self, model: str, metadata: BenchmarkMetadata):
