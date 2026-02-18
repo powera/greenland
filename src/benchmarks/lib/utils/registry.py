@@ -197,19 +197,19 @@ class PinyinLetterCountBenchmark:
     pass
 
 
-from benchmarks.lib.generators.english_to_ipa_generator import EnglishToIPAGenerator
-from benchmarks.lib.runners.english_to_ipa_runner import EnglishToIPARunner
+from benchmarks.lib.generators.word_to_ipa_generator import WordToIPAGenerator
+from benchmarks.lib.runners.word_to_ipa_runner import WordToIPARunner
 
 
 @benchmark(
-    code="0061_english_to_ipa",
-    name="English to IPA",
+    code="0061_word_to_ipa",
+    name="Word to IPA",
     description="""
-           A benchmark to evaluate a model's ability to convert English words 
+           A benchmark to evaluate a model's ability to convert words from multiple languages 
            to their IPA (International Phonetic Alphabet) pronunciation.""",
 )
-class EnglishToIPABenchmark:
-    """Module container for English to IPA benchmark."""
+class WordToIPABenchmark:
+    """Module container for Word to IPA benchmark."""
 
     pass
 
@@ -234,8 +234,8 @@ class SentenceDecompositionBenchmark:
 
 
 # Register the generator and runner classes
-register_generator("0061_english_to_ipa", EnglishToIPAGenerator)
-register_runner("0061_english_to_ipa", EnglishToIPARunner)
+register_generator("0061_word_to_ipa", WordToIPAGenerator)
+register_runner("0061_word_to_ipa", WordToIPARunner)
 
 register_generator("0062_sentence_decomposition", SentenceDecompositionGenerator)
 register_runner("0062_sentence_decomposition", SentenceDecompositionRunner)

@@ -5,7 +5,7 @@
 # Import all generators to register them with the factory
 from benchmarks.lib.generators.antonym_generator import AntonymGenerator
 from benchmarks.lib.generators.definitions_generator import DefinitionsGenerator
-from benchmarks.lib.generators.english_to_ipa_generator import EnglishToIPAGenerator
+from benchmarks.lib.generators.word_to_ipa_generator import WordToIPAGenerator
 
 # Knowledge generators
 from benchmarks.lib.generators.geography_generator import GeographyGenerator

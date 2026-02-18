@@ -5,7 +5,7 @@
 # Import all runners to register them with the factory
 from benchmarks.lib.runners.antonym_runner import AntonymRunner
 from benchmarks.lib.runners.definitions_runner import DefinitionsRunner
-from benchmarks.lib.runners.english_to_ipa_runner import EnglishToIPARunner
+from benchmarks.lib.runners.word_to_ipa_runner import WordToIPARunner
 
 # Knowledge questions
 from benchmarks.lib.runners.geography_runner import GeographyRunner
