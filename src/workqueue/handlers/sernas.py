@@ -6,7 +6,6 @@ between the Barsukas task worker and the SernasAgent CLI.
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -23,7 +22,7 @@ from storage.models.schema import Lemma
 from storage.translation_helpers import get_translation
 from wordfreq.tools.text_utils import is_numeral
 from wordfreq.translation.client import LinguisticClient
-from words import build_synonyms_prompt
+from words import query_synonyms
 
 logger = logging.getLogger(__name__)
 
@@ -80,73 +79,30 @@ def query_synonyms_from_llm(
     Returns:
         Dictionary with synonyms, abbreviations, expanded_forms, and synonym-variant buckets
     """
-    prompt = build_synonyms_prompt(
+    result = query_synonyms(
         language_code,
         word,
+        client=client.client,
+        model=client.model,
         pos_type=pos_type,
         english_word=english_word,
         definition=definition or "",
     )
+    if not result.get("success"):
+        return result
 
-    try:
-        # Query the LLM using generate_chat with JSON schema
-        json_schema = {
-            "type": "object",
-            "properties": {
-                "abbreviations": {"type": "array", "items": {"type": "string"}},
-                "expanded_forms": {"type": "array", "items": {"type": "string"}},
-                "synonyms": {"type": "array", "items": {"type": "string"}},
-                "near_synonyms": {"type": "array", "items": {"type": "string"}},
-                "regional_variants": {"type": "array", "items": {"type": "string"}},
-                "register_variants": {"type": "array", "items": {"type": "string"}},
-                "synecdoche_variants": {"type": "array", "items": {"type": "string"}},
-                "related_learner_equivalents": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                },
-                "explanation": {"type": "string"},
-            },
-            "required": [
-                "abbreviations",
-                "expanded_forms",
-                "synonyms",
-                "near_synonyms",
-                "regional_variants",
-                "register_variants",
-                "synecdoche_variants",
-                "related_learner_equivalents",
-            ],
-        }
-
-        response = client.client.generate_chat(
-            prompt=prompt, model=client.model, json_schema=json_schema
-        )
-
-        if not response.structured_data:
-            return {"success": False, "error": "Empty response from LLM"}
-
-        # Use structured data from response
-        result = response.structured_data
-
-        return {
-            "success": True,
-            "synonyms": result.get("synonyms", []),
-            "near_synonyms": result.get("near_synonyms", []),
-            "regional_variants": result.get("regional_variants", []),
-            "register_variants": result.get("register_variants", []),
-            "synecdoche_variants": result.get("synecdoche_variants", []),
-            "related_learner_equivalents": result.get("related_learner_equivalents", []),
-            "abbreviations": result.get("abbreviations", []),
-            "expanded_forms": result.get("expanded_forms", []),
-            "explanation": result.get("explanation", ""),
-        }
-
-    except json.JSONDecodeError as e:
-        logger.error(f"Failed to parse JSON response: {e}")
-        return {"success": False, "error": f"Invalid JSON response: {e}"}
-    except Exception as e:
-        logger.error(f"Error querying LLM: {e}")
-        return {"success": False, "error": str(e)}
+    return {
+        "success": True,
+        "synonyms": result.get("synonyms", []),
+        "near_synonyms": result.get("near_synonyms", []),
+        "regional_variants": result.get("regional_variants", []),
+        "register_variants": result.get("register_variants", []),
+        "synecdoche_variants": result.get("synecdoche_variants", []),
+        "related_learner_equivalents": result.get("related_learner_equivalents", []),
+        "abbreviations": result.get("abbreviations", []),
+        "expanded_forms": result.get("expanded_forms", []),
+        "explanation": result.get("explanation", ""),
+    }
 
 
 def store_synonym_forms(
