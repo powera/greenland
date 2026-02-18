@@ -55,6 +55,14 @@ class BenchmarkRunWorker:
         self._output_dir = Path(tempfile.gettempdir()) / "benchmark_server_worker"
         self._output_dir.mkdir(parents=True, exist_ok=True)
         self._output_retention_seconds = 24 * 60 * 60
+
+        # Interactive local-model slot used by Verbalator local-model queries.
+        # While occupied, benchmark queue items remain queued but do not start.
+        self._interactive_local_model: Optional[str] = None
+        self._interactive_local_owner: Optional[str] = None
+        self._interactive_local_last_touch: Optional[float] = None
+        self._interactive_local_ttl_seconds = 120.0
+
         self._state_lock = threading.Lock()
         self._thread = threading.Thread(target=self._run_forever, daemon=True, name="benchmark-run-worker")
         self._thread.start()
@@ -79,11 +87,34 @@ class BenchmarkRunWorker:
         self._queue.put(request)
         return self._queue.qsize()
 
+    def touch_interactive_local_job(self, model_name: str, owner: str = "verbalator") -> bool:
+        """Acquire/refresh the interactive local-model slot.
+
+        Returns False when a benchmark run is currently active or a different interactive
+        local model owns the slot and has not expired yet.
+        """
+        now = time.time()
+        with self._state_lock:
+            self._expire_interactive_local_job_locked(now)
+
+            # Never let a new interactive job begin while a benchmark is actively running.
+            if self._current is not None:
+                return False
+
+            if self._interactive_local_model and self._interactive_local_model != model_name:
+                return False
+
+            self._interactive_local_model = model_name
+            self._interactive_local_owner = owner
+            self._interactive_local_last_touch = now
+            return True
+
     def status(self) -> dict[str, Any]:
         """Expose queue + active-run status for templates/routes."""
         with self._state_lock:
             current = self._current
             self._cleanup_expired_outputs_locked()
+            self._expire_interactive_local_job_locked(time.time())
             queued_tasks = [
                 self._serialize_task(task)
                 for task in sorted(self._tasks.values(), key=lambda t: t.task_id)
@@ -105,6 +136,7 @@ class BenchmarkRunWorker:
             "queued": self._queue.qsize(),
             "queued_tasks": queued_tasks,
             "recent_tasks": recent_tasks,
+            "interactive_local_job": self._serialize_interactive_local_job(),
         }
 
     def get_task_output(self, task_id: int) -> Optional[str]:
@@ -121,6 +153,8 @@ class BenchmarkRunWorker:
     def _run_forever(self) -> None:
         while True:
             request = self._queue.get()
+            self._wait_for_interactive_local_job_to_finish()
+
             with self._state_lock:
                 self._current = request
                 task = self._tasks.get(request.task_id)
@@ -213,6 +247,17 @@ class BenchmarkRunWorker:
             "exit_code": task.exit_code,
         }
 
+    def _serialize_interactive_local_job(self) -> Optional[dict[str, Any]]:
+        if not self._interactive_local_model or self._interactive_local_last_touch is None:
+            return None
+
+        expires_at = self._interactive_local_last_touch + self._interactive_local_ttl_seconds
+        return {
+            "model_name": self._interactive_local_model,
+            "owner": self._interactive_local_owner,
+            "expires_at": datetime.fromtimestamp(expires_at, tz=timezone.utc).isoformat(),
+        }
+
     @staticmethod
     def _read_output_tail(path: Path, max_chars: int = 2000) -> str:
         if not path.exists():
@@ -220,6 +265,28 @@ class BenchmarkRunWorker:
 
         output = path.read_text(encoding="utf-8", errors="replace")
         return output[-max_chars:]
+
+    def _has_active_interactive_local_job_locked(self, now: float) -> bool:
+        self._expire_interactive_local_job_locked(now)
+        return self._interactive_local_model is not None
+
+    def _expire_interactive_local_job_locked(self, now: float) -> None:
+        if self._interactive_local_last_touch is None:
+            return
+
+        if now - self._interactive_local_last_touch <= self._interactive_local_ttl_seconds:
+            return
+
+        self._interactive_local_model = None
+        self._interactive_local_owner = None
+        self._interactive_local_last_touch = None
+
+    def _wait_for_interactive_local_job_to_finish(self) -> None:
+        while True:
+            with self._state_lock:
+                if not self._has_active_interactive_local_job_locked(time.time()):
+                    return
+            time.sleep(0.2)
 
     def _cleanup_expired_outputs_locked(self) -> None:
         now = time.time()

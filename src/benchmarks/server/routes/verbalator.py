@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from flask import Blueprint, g, render_template, request, jsonify
+from flask import Blueprint, current_app, g, jsonify, render_template, request
 
 # Add src to path if not already present
 if str(Path(__file__).parent.parent.parent.parent) not in sys.path:
@@ -53,6 +53,24 @@ def _get_models() -> List[Dict[str, Any]]:
     ]
 
 
+def _is_local_model(model: Optional[Model]) -> bool:
+    """Return whether the selected model is local to this machine."""
+    return bool(model and model.model_type != "remote")
+
+
+def _can_start_local_query(model_name: str) -> bool:
+    """Reserve or refresh the interactive local-model slot for Verbalator."""
+    worker = current_app.extensions.get("benchmark_run_worker")
+    if worker is None:
+        return True
+
+    touch = getattr(worker, "touch_interactive_local_job", None)
+    if touch is None:
+        return False
+
+    return bool(touch(model_name=model_name, owner="verbalator"))
+
+
 @bp.route("/")
 def index():
     """Show the verbalator query interface."""
@@ -81,6 +99,19 @@ def query():
         model_codename = data.get("model", DEFAULT_MODEL)
         db_model = g.db.query(Model).filter(Model.codename == model_codename).first()
         model_path = db_model.model_path if db_model and db_model.model_path else model_codename
+
+        if _is_local_model(db_model) and not _can_start_local_query(model_path):
+            return (
+                jsonify(
+                    {
+                        "error": (
+                            "Local model is currently busy with benchmark or another local-model"
+                            " Verbalator session."
+                        )
+                    }
+                ),
+                409,
+            )
 
         # Generate response via unified client (handles OpenAI, Anthropic, LMStudio, etc.)
         entry = data.get("entry")
