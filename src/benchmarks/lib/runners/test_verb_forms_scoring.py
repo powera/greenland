@@ -59,7 +59,6 @@ def _load_runner_module():
     factory_module.runner = runner
     sys.modules.setdefault("benchmarks.lib.utils.factory", factory_module)
 
-
     runners_pkg = types.ModuleType("benchmarks.lib.runners")
     runners_pkg.__path__ = []
     sys.modules.setdefault("benchmarks.lib.runners", runners_pkg)
@@ -166,6 +165,85 @@ class TestVerbFormsScoring(unittest.TestCase):
 
         score = self.runner.score_response(question_data, response)
         self.assertEqual(score, 56)
+
+    def test_french_pronoun_stripping_scores_100(self):
+        """LLM responses with subject pronouns should match bare verb forms."""
+        question_data = {
+            "correct_answer": {
+                "language_code": "fr",
+                "lemma": "ouvrir",
+                "required_extra_forms": ["present_participle", "past_participle"],
+                "extra_forms": {
+                    "past_participle": "ouvert",
+                    "present_participle": "ouvrant",
+                },
+                "forms": {
+                    "present": {
+                        "1s": "ouvre",
+                        "2s": "ouvres",
+                        "3s": "ouvre",
+                        "1p": "ouvrons",
+                        "2p": "ouvrez",
+                        "3p": "ouvrent",
+                    },
+                    "past": {
+                        "1s": "ai ouvert",
+                        "2s": "as ouvert",
+                        "3s": "a ouvert",
+                        "1p": "avons ouvert",
+                        "2p": "avez ouvert",
+                        "3p": "ont ouvert",
+                    },
+                    "future": {
+                        "1s": "ouvrirai",
+                        "2s": "ouvriras",
+                        "3s": "ouvrira",
+                        "1p": "ouvrirons",
+                        "2p": "ouvrirez",
+                        "3p": "ouvriront",
+                    },
+                },
+            }
+        }
+
+        # Response includes subject pronouns
+        response = {
+            "language_code": "fr",
+            "lemma": "ouvrir",
+            "extra_forms": {
+                "past_participle": "ouvert",
+                "present_participle": "ouvrant",
+            },
+            "forms": {
+                "present": {
+                    "1s": "j'ouvre",
+                    "2s": "tu ouvres",
+                    "3s": "il/elle ouvre",
+                    "1p": "nous ouvrons",
+                    "2p": "vous ouvrez",
+                    "3p": "ils/elles ouvrent",
+                },
+                "past": {
+                    "1s": "j'ai ouvert",
+                    "2s": "tu as ouvert",
+                    "3s": "il a ouvert",
+                    "1p": "nous avons ouvert",
+                    "2p": "vous avez ouvert",
+                    "3p": "ils ont ouvert",
+                },
+                "future": {
+                    "1s": "j'ouvrirai",
+                    "2s": "tu ouvriras",
+                    "3s": "il ouvrira",
+                    "1p": "nous ouvrirons",
+                    "2p": "vous ouvrirez",
+                    "3p": "ils ouvriront",
+                },
+            },
+        }
+
+        score = self.runner.score_response(question_data, response)
+        self.assertEqual(score, 100)
 
 
 if __name__ == "__main__":

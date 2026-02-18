@@ -7,12 +7,17 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from benchmarks.lib.runners.partial_credit_runner import PartialCreditRunner
 from benchmarks.lib.utils.factory import runner
+from langtools.fr.utils import strip_subject_pronoun
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 PERSON_SLOTS = ["1s", "2s", "3s", "1p", "2p", "3p"]
 TENSES = ["present", "past", "future"]
+
+
 @runner("0121_verb_forms")
 class VerbFormsRunner(PartialCreditRunner):
     """Runner for verb forms benchmark tests."""
@@ -31,8 +36,13 @@ class VerbFormsRunner(PartialCreditRunner):
     def _has_nonempty_string(self, value: Any) -> bool:
         return isinstance(value, str) and bool(value.strip())
 
-    def _normalize(self, value: Any) -> str:
-        return value.strip().lower() if isinstance(value, str) else ""
+    def _normalize(self, value: Any, language_code: str = "") -> str:
+        if not isinstance(value, str):
+            return ""
+        normalized = value.strip().lower()
+        if language_code == "fr":
+            normalized = strip_subject_pronoun(normalized)
+        return normalized
 
     def _is_structurally_valid(self, question_data: Dict, response: Any) -> bool:
         expected = question_data.get("correct_answer", {})
@@ -90,6 +100,8 @@ class VerbFormsRunner(PartialCreditRunner):
             # Backward-compatible behavior for datasets that only validate structure.
             return 100
 
+        lang_code = expected.get("language_code", "")
+
         total_slots = 0
         exact_matches = 0
 
@@ -104,7 +116,9 @@ class VerbFormsRunner(PartialCreditRunner):
                 if not isinstance(expected_value, str):
                     continue
                 total_slots += 1
-                if self._normalize(model_tense.get(person)) == self._normalize(expected_value):
+                if self._normalize(model_tense.get(person), lang_code) == self._normalize(
+                    expected_value, lang_code
+                ):
                     exact_matches += 1
 
         expected_extras = expected.get("extra_forms", {})
@@ -113,7 +127,9 @@ class VerbFormsRunner(PartialCreditRunner):
             if not isinstance(expected_value, str):
                 continue
             total_slots += 1
-            if self._normalize(model_extras.get(key)) == self._normalize(expected_value):
+            if self._normalize(model_extras.get(key), lang_code) == self._normalize(
+                expected_value, lang_code
+            ):
                 exact_matches += 1
 
         if total_slots == 0:
@@ -123,8 +139,9 @@ class VerbFormsRunner(PartialCreditRunner):
         score = (percent_exact * 80.0) + (20.0 if exact_matches == total_slots else 0.0)
         return int(round(score))
 
-
-    def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict[str, Any]:
+    def build_debug_info(
+        self, question_data: Dict, response: Any, is_correct: bool
+    ) -> Dict[str, Any]:
         if hasattr(response, "structured_data") and response.structured_data:
             model_answer = response.structured_data
         else:

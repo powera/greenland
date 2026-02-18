@@ -32,6 +32,7 @@ from langtools.fr.utils import (
     extract_article,
     is_elided_form,
     normalize_french_text,
+    strip_subject_pronoun,
 )
 from langtools.fr.conjugation import (
     conjugate,
@@ -70,4 +71,5 @@ __all__ = [
     "extract_article",
     "is_elided_form",
     "normalize_french_text",
+    "strip_subject_pronoun",
 ]
