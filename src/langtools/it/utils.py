@@ -7,6 +7,11 @@ def strip_subject_pronoun(text: str) -> str:
     if not normalized:
         return ""
 
+    combined_pronouns = ["lui/lei ", "lei/lui ", "lui / lei ", "lei / lui "]
+    for pronoun in combined_pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun) :].strip()
+
     pronouns = ["io ", "tu ", "lui ", "lei ", "noi ", "voi ", "loro "]
     for pronoun in pronouns:
         if normalized.startswith(pronoun):

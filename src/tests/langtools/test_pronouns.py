@@ -28,6 +28,26 @@ class TestStripPronoun(unittest.TestCase):
             with self.subTest(language_code=language_code, text=text):
                 self.assertEqual(strip_pronoun(language_code, text), expected)
 
+    def test_he_she_pair_forms(self) -> None:
+        cases = [
+            ("fr", "il/elle ouvre", "ouvre"),
+            ("en", "he/she walks", "walks"),
+            ("es", "él/ella habla", "habla"),
+            ("lt", "jis/ji eina", "eina"),
+            ("it", "lui/lei parla", "parla"),
+            ("kn", "ಅವನು/ಅವಳು ಬರೆಯುತ್ತಾನೆ", "ಬರೆಯುತ್ತಾನೆ"),
+            ("uk", "він/вона пише", "пише"),
+            ("bn", "সে/তিনি লেখে", "লেখে"),
+            ("de", "er/sie geht", "geht"),
+            ("nl", "hij/zij loopt", "loopt"),
+            ("pt", "ele/ela fala", "fala"),
+            ("sv", "han/hon går", "går"),
+            ("zh", "他/她学习", "学习"),
+        ]
+        for language_code, text, expected in cases:
+            with self.subTest(language_code=language_code, text=text):
+                self.assertEqual(strip_pronoun(language_code, text), expected)
+
     def test_best_effort_returns_input_when_missing(self) -> None:
         self.assertEqual(strip_pronoun("zz", "foo"), "foo")
 

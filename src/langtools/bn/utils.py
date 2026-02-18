@@ -86,6 +86,11 @@ def strip_subject_pronoun(text: str) -> str:
     if not normalized:
         return ""
 
+    combined_pronouns = ["সে/তিনি ", "তিনি/সে ", "সে / তিনি ", "তিনি / সে "]
+    for pronoun in combined_pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun):].strip()
+
     pronouns = ["আমি ", "তুমি ", "আপনি ", "সে ", "তিনি ", "আমরা ", "তোমরা ", "আপনারা ", "তারা "]
     for pronoun in pronouns:
         if normalized.startswith(pronoun):

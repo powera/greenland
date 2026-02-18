@@ -99,6 +99,11 @@ def strip_subject_pronoun(text: str) -> str:
     if not normalized:
         return ""
 
+    combined_pronouns = ["він/вона ", "вона/він ", "він / вона ", "вона / він "]
+    for pronoun in combined_pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun):].strip()
+
     pronouns = ["я ", "ти ", "він ", "вона ", "воно ", "ми ", "ви ", "вони "]
     for pronoun in pronouns:
         if normalized.startswith(pronoun):

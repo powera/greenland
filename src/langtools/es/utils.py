@@ -136,6 +136,11 @@ def strip_subject_pronoun(text: str) -> str:
     if not normalized:
         return ""
 
+    combined_pronouns = ["él/ella ", "ella/él ", "el/ella ", "ella/el ", "él / ella ", "ella / él "]
+    for pronoun in combined_pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun):].strip()
+
     pronouns = [
         "yo ",
         "tú ",

@@ -113,6 +113,11 @@ def strip_subject_pronoun(text: str) -> str:
     if not normalized:
         return ""
 
+    combined_pronouns = ["er/sie ", "sie/er ", "er / sie ", "sie / er "]
+    for pronoun in combined_pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun) :].strip()
+
     pronouns = ["ich ", "du ", "er ", "sie ", "es ", "wir ", "ihr "]
     for pronoun in pronouns:
         if normalized.startswith(pronoun):

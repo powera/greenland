@@ -7,6 +7,11 @@ def strip_subject_pronoun(text: str) -> str:
     if not normalized:
         return ""
 
+    combined_pronouns = ["ele/ela ", "ela/ele ", "ele / ela ", "ela / ele "]
+    for pronoun in combined_pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun) :].strip()
+
     pronouns = ["eu ", "tu ", "ele ", "ela ", "você ", "voce ", "nós ", "nos ", "vós ", "vos ", "vocês ", "voces ", "eles ", "elas "]
     for pronoun in pronouns:
         if normalized.startswith(pronoun):

@@ -9,6 +9,11 @@ def strip_subject_pronoun(text: str) -> str:
     if not normalized:
         return ""
 
+    combined_pronouns = ["he/she ", "she/he ", "he / she ", "she / he "]
+    for pronoun in combined_pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun) :].strip()
+
     pronouns = ["i ", "you ", "he ", "she ", "it ", "we ", "they "]
     for pronoun in pronouns:
         if normalized.startswith(pronoun):

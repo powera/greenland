@@ -7,6 +7,11 @@ def strip_subject_pronoun(text: str) -> str:
     if not normalized:
         return ""
 
+    combined_pronouns = ["han/hon ", "hon/han ", "han / hon ", "hon / han "]
+    for pronoun in combined_pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun) :].strip()
+
     pronouns = ["jag ", "du ", "han ", "hon ", "den ", "det ", "vi ", "ni ", "de "]
     for pronoun in pronouns:
         if normalized.startswith(pronoun):

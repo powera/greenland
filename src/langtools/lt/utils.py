@@ -133,6 +133,11 @@ def strip_subject_pronoun(text: str) -> str:
     if not normalized:
         return ""
 
+    combined_pronouns = ["jis/ji ", "ji/jis ", "jis / ji ", "ji / jis "]
+    for pronoun in combined_pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun):].strip()
+
     pronouns = ["aš ", "tu ", "jis ", "ji ", "mes ", "jūs ", "jie ", "jos "]
     for pronoun in pronouns:
         if normalized.startswith(pronoun):
