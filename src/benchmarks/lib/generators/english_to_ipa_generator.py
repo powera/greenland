@@ -1,12 +1,10 @@
 #!/usr/bin/python3
 
-"""Generator for the English-to-IPA benchmark."""
+"""Generator for the word-to-IPA benchmark."""
 
-import json
 import logging
-import os
 import random
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Dict, Iterator
 
 from benchmarks.lib.utils.base_generator import BenchmarkGenerator
 from benchmarks.lib.utils.data_models import (
@@ -25,31 +23,52 @@ logger = logging.getLogger(__name__)
 # Define benchmark metadata
 BENCHMARK_METADATA = BenchmarkMetadata(
     code="0061_english_to_ipa",
-    name="English to IPA Pronunciation",
-    description="A benchmark to evaluate a model's ability to convert English words to their IPA pronunciation.",
+    name="Word to IPA Pronunciation",
+    description="A benchmark to evaluate a model's ability to convert words from multiple languages to IPA pronunciation.",
 )
+
+
+def _format_question_text(item: Dict[str, Any]) -> str:
+    """Format a consistent, parseable question text payload."""
+    language_name = item.get("language_name", "English")
+    language_code = item.get("language_code", "en").lower()
+    word = item["word"]
+
+    lines = [
+        "Generate the IPA pronunciation for this word:",
+        f"Language: {language_name} ({language_code})",
+        f"Word: {word}",
+    ]
+
+    definition = item.get("definition", "").strip()
+    sentence = item.get("sentence", "").strip()
+
+    if definition:
+        lines.append(f"Definition: {definition}")
+    if sentence:
+        lines.append(f"Sentence: {sentence}")
+
+    lines.append("Respond with only the IPA transcription.")
+    return "\n".join(lines)
 
 
 @generator("0061_english_to_ipa")
 class EnglishToIPAGenerator(BenchmarkGenerator):
-    """Generator for English-to-IPA benchmark questions."""
+    """Generator for word-to-IPA benchmark questions."""
 
     def __init__(self, metadata: BenchmarkMetadata, session=None):
         """Initialize generator with benchmark metadata."""
         super().__init__(metadata, session)
 
-        # Configure available generation strategies
         self.can_load_from_file = True
         self.can_generate_with_llm = True
         self.can_generate_locally = False
 
-        # Set file paths for file-based generation
-        self.questions_file_path = "words_ipa.json"
+        self.questions_file_path = "words_ipa_multilingual.json"
 
-        # Set context for LLM-based generation
-        self.context = """You are a helpful assistant creating benchmark questions to test language models' 
-ability to convert English words to their IPA (International Phonetic Alphabet) pronunciation.
-When providing IPA pronunciations, use American English pronunciation as the default."""
+        self.context = """You are a helpful assistant creating benchmark questions to test language models'
+ability to convert words from many languages to IPA (International Phonetic Alphabet) pronunciation.
+Include language and optionally sentence/definition context when needed for disambiguation."""
 
     def _generate_from_file(self, **kwargs: Any) -> Iterator[BenchmarkQuestion]:
         """Generate questions from predefined JSON file."""
@@ -57,144 +76,134 @@ When providing IPA pronunciations, use American English pronunciation as the def
             return
 
         try:
-            # Load words and their IPA pronunciations from the JSON file
             words_data = self.load_json_file(self.questions_file_path)
 
             for item in words_data:
-                word = item["word"]
-                sentence = item["sentence"]
+                language_code = item.get("language_code", "en").lower()
+                language_name = item.get("language_name", language_code)
+                question_text = _format_question_text(item)
 
-                # Format the question text
-                question_text = (
-                    f"Convert the word '{word}' to IPA pronunciation. Context: {sentence}"
-                )
-
-                # Create the question object
                 question = BenchmarkQuestion(
                     question_text=question_text,
                     answer_type=AnswerType.FREE_TEXT,
                     correct_answer=item["ipa"],
-                    category="English Pronunciation",
+                    category=f"{language_name} Pronunciation",
                     difficulty=Difficulty(item.get("difficulty", "medium")),
-                    tags=["ipa", "pronunciation", "english"],
+                    tags=["ipa", "pronunciation", language_code],
                     evaluation_criteria=EvaluationCriteria(
-                        exact_match=False,  # Don't require exact match because of potential variations
-                        contains=False,  # Full pronunciation should be correct, not just contain part
-                        case_sensitive=True,  # IPA symbols are case-sensitive
+                        exact_match=False,
+                        contains=False,
+                        case_sensitive=True,
                     ),
                 )
 
-                # If there are alternative pronunciations, add them to evaluation criteria
                 if "alternatives" in item and item["alternatives"]:
                     question.evaluation_criteria.alternatives = item["alternatives"]
 
                 yield question
 
-        except Exception as e:
-            logger.error(f"Error generating questions from file: {e}")
+        except Exception as error:
+            logger.error("Error generating questions from file: %s", error)
 
     def _generate_with_llm(self, **kwargs: Any) -> Iterator[BenchmarkQuestion]:
         """Generate questions using a language model."""
         if not self.can_generate_with_llm:
             return
 
-        # Define the schema for LLM-generated questions
         schema = {
             "type": "object",
             "properties": {
-                "word": {"type": "string", "description": "The English word to be pronounced"},
+                "language_name": {"type": "string", "description": "Name of the language"},
+                "language_code": {"type": "string", "description": "ISO-639 language code"},
+                "word": {"type": "string", "description": "The word to pronounce"},
+                "definition": {
+                    "type": "string",
+                    "description": "Short meaning note for disambiguation (optional)",
+                },
                 "sentence": {
                     "type": "string",
-                    "description": "A sentence using the word for context",
+                    "description": "Sentence context only if disambiguation is needed",
                 },
                 "ipa": {
                     "type": "string",
-                    "description": "The IPA pronunciation of the word (American English)",
+                    "description": "IPA pronunciation for the given language",
                 },
                 "difficulty": {"type": "string", "enum": ["easy", "medium", "hard"]},
                 "alternatives": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "Alternative valid IPA pronunciations (British, Australian, etc.)",
+                    "description": "Alternative valid IPA pronunciations",
                 },
             },
-            "required": ["word", "sentence", "ipa"],
+            "required": ["language_name", "language_code", "word", "ipa"],
         }
 
-        # Categories of words that are interesting for IPA conversion
-        word_categories = [
-            "Words with silent letters (knight, psychology, subtle)",
-            "Words with unusual pronunciation (choir, colonel, island)",
-            "Homographs with different pronunciations (read, wound, tear)",
-            "Words with irregular stress patterns (photography, biology)",
-            "Words with multiple accepted pronunciations (either, tomato, caramel)",
-            "Words that differ in American vs British pronunciation (schedule, leisure)",
-            "Words with diphthongs (coin, town, face)",
-            "Words with consonant clusters (strengths, sixths)",
+        language_groups = [
+            "Germanic languages (English, German, Dutch, Swedish)",
+            "Romance languages (Spanish, French, Italian, Portuguese)",
+            "Slavic languages (Russian, Polish, Czech)",
+            "Semitic languages (Arabic, Hebrew)",
+            "Indic languages (Hindi, Bengali)",
+            "East Asian languages (Japanese, Korean, Mandarin)",
         ]
 
-        # Generate questions by using the LLM to create words and their IPA
-        batch_size = 5  # Generate 5 questions per prompt
+        batch_size = 5
         difficulty_levels = ["easy", "medium", "hard"]
 
         for difficulty in difficulty_levels:
-            # Select two random categories to focus on
-            categories = random.sample(word_categories, 2)
+            categories = random.sample(language_groups, 2)
             category_desc = "\n".join([f"- {cat}" for cat in categories])
 
-            # Create a prompt for generating a batch of questions
             prompt = f"""
-Create {batch_size} English words for an English-to-IPA pronunciation benchmark.
+Create {batch_size} multilingual word-to-IPA benchmark items.
 
-Focus on {difficulty} difficulty words from these categories:
+Focus on {difficulty} words from these language groups:
 {category_desc}
 
-For each word:
-1. Provide the word itself
-2. A natural-sounding sentence using the word to clarify its meaning
-3. The correct IPA pronunciation using American English
-4. Any alternative valid pronunciations (British, Australian variants, etc.)
+For each item include:
+1. language_name
+2. language_code
+3. word
+4. ipa
+5. optional definition or sentence ONLY when context is needed for pronunciation disambiguation
+6. optional alternative IPA variants
 
-Use precise IPA notation with proper stress marks. 
-Ensure the words are appropriate for testing pronunciation skills.
+Prefer straightforward examples; avoid deliberately ambiguous homographs unless context clearly resolves them.
 """
 
             try:
-                # Get LLM response
-                response = self.get_llm_question(
-                    prompt=prompt, schema={"type": "array", "items": schema}
-                )
+                response = self.get_llm_question(prompt=prompt, schema={"type": "array", "items": schema})
 
                 if isinstance(response, list):
                     for item in response:
                         try:
-                            # Format the question text
-                            question_text = f"Convert the word '{item['word']}' to IPA pronunciation. Context: {item['sentence']}"
-
-                            # Create the question object
-                            alternatives = item.get("alternatives", [])
+                            language_code = item.get("language_code", "xx").lower()
+                            language_name = item.get("language_name", language_code)
+                            question_text = _format_question_text(item)
 
                             question = BenchmarkQuestion(
                                 question_text=question_text,
                                 answer_type=AnswerType.FREE_TEXT,
                                 correct_answer=item["ipa"],
-                                category="English Pronunciation",
+                                category=f"{language_name} Pronunciation",
                                 difficulty=Difficulty(item.get("difficulty", difficulty)),
-                                tags=["ipa", "pronunciation", "english", "llm_generated"],
+                                tags=["ipa", "pronunciation", language_code, "llm_generated"],
                                 evaluation_criteria=EvaluationCriteria(
-                                    exact_match=False, contains=False, case_sensitive=True
+                                    exact_match=False,
+                                    contains=False,
+                                    case_sensitive=True,
                                 ),
                             )
 
-                            # Add alternatives if provided
+                            alternatives = item.get("alternatives", [])
                             if alternatives:
                                 question.evaluation_criteria.alternatives = alternatives
 
                             yield question
 
-                        except Exception as e:
-                            logger.error(f"Error processing LLM-generated question: {e}")
+                        except Exception as error:
+                            logger.error("Error processing LLM-generated question: %s", error)
                             continue
 
-            except Exception as e:
-                logger.error(f"Error generating questions with LLM: {e}")
+            except Exception as error:
+                logger.error("Error generating questions with LLM: %s", error)

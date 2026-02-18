@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-"""Runner for the English-to-IPA benchmark."""
+"""Runner for the word-to-IPA benchmark."""
 
 import json
 import logging
@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from benchmarks.lib.utils.base_runner import BenchmarkRunner
 from benchmarks.lib.utils.data_models import BenchmarkMetadata, BenchmarkResult
 from benchmarks.lib.utils.factory import runner
+from words import build_ipa_pronunciation_prompt
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
@@ -18,14 +19,14 @@ logger = logging.getLogger(__name__)
 # Define benchmark metadata
 BENCHMARK_METADATA = BenchmarkMetadata(
     code="0061_english_to_ipa",
-    name="English to IPA Pronunciation",
-    description="A benchmark to evaluate a model's ability to convert English words to their IPA pronunciation.",
+    name="Word to IPA Pronunciation",
+    description="A benchmark to evaluate a model's ability to convert words in multiple languages to IPA pronunciation.",
 )
 
 
 @runner("0061_english_to_ipa")
 class EnglishToIPARunner(BenchmarkRunner):
-    """Runner for English-to-IPA benchmark."""
+    """Runner for word-to-IPA benchmark."""
 
     def __init__(self, model: str, metadata: BenchmarkMetadata):
         """Initialize runner with model and benchmark metadata."""
@@ -41,19 +42,34 @@ class EnglishToIPARunner(BenchmarkRunner):
         Returns:
             Tuple of (prompt, schema, context)
         """
-        # Get the question text
         question_text = question_data.get("question_text", "")
+        language_code = "en"
+        word = ""
+        definition = ""
+        sentence = ""
 
-        # Create a context that explains the task and expectations
-        context = """You are a linguistic expert specializing in phonetics. 
-Your task is to provide the IPA (International Phonetic Alphabet) pronunciation for English words.
-Use American English pronunciation as your default standard.
-Provide only the IPA transcription with no additional text or explanation.
-Include stress markers and all appropriate IPA symbols.
-"""
+        for line in question_text.splitlines():
+            if line.startswith("Language:"):
+                language_value = line.split(":", 1)[1].strip()
+                language_code = language_value.split("(")[-1].rstrip(")").strip().lower()
+            elif line.startswith("Word:"):
+                word = line.split(":", 1)[1].strip()
+            elif line.startswith("Definition:"):
+                definition = line.split(":", 1)[1].strip()
+            elif line.startswith("Sentence:"):
+                sentence = line.split(":", 1)[1].strip()
 
-        # Create a prompt from the question text
-        prompt = question_text
+        if not word:
+            match = re.search(r"word ['\"]([^'\"]+)['\"]", question_text, re.IGNORECASE)
+            word = match.group(1).strip() if match else question_text.strip()
+
+        combined_prompt = build_ipa_pronunciation_prompt(
+            language_code,
+            word,
+            definition=definition,
+            sentence=sentence,
+        )
+        context, prompt = combined_prompt.split("\n\n", 1)
 
         # Define a schema to ensure the response is just the IPA
         schema = {

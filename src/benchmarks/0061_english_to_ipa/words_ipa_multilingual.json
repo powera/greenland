@@ -1,0 +1,101 @@
+[
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "cat",
+    "definition": "a small domesticated feline animal",
+    "ipa": "kæt",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "read",
+    "sentence": "Please read the first paragraph aloud.",
+    "ipa": "ɹid",
+    "difficulty": "medium",
+    "alternatives": ["riːd"]
+  },
+  {
+    "language_code": "es",
+    "language_name": "Spanish",
+    "word": "casa",
+    "definition": "house or home",
+    "ipa": "ˈkasa",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "fr",
+    "language_name": "French",
+    "word": "bonjour",
+    "definition": "hello or good day",
+    "ipa": "bɔ̃ʒuʁ",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "de",
+    "language_name": "German",
+    "word": "danke",
+    "definition": "thank you",
+    "ipa": "ˈdaŋkə",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "it",
+    "language_name": "Italian",
+    "word": "ciao",
+    "definition": "hello or goodbye",
+    "ipa": "ˈtʃaːo",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "pt",
+    "language_name": "Portuguese",
+    "word": "obrigado",
+    "definition": "thank you",
+    "ipa": "oβɾiˈɡadu",
+    "difficulty": "medium",
+    "alternatives": ["obɾiˈɡadu"]
+  },
+  {
+    "language_code": "ru",
+    "language_name": "Russian",
+    "word": "спасибо",
+    "definition": "thank you",
+    "ipa": "spɐˈsʲibə",
+    "difficulty": "medium",
+    "alternatives": []
+  },
+  {
+    "language_code": "ja",
+    "language_name": "Japanese",
+    "word": "こんにちは",
+    "definition": "hello",
+    "ipa": "koɲɲitɕiwa",
+    "difficulty": "medium",
+    "alternatives": []
+  },
+  {
+    "language_code": "ko",
+    "language_name": "Korean",
+    "word": "안녕하세요",
+    "definition": "hello",
+    "ipa": "aɲjʌŋhasejo",
+    "difficulty": "medium",
+    "alternatives": []
+  },
+  {
+    "language_code": "ar",
+    "language_name": "Arabic",
+    "word": "مرحبا",
+    "definition": "hello",
+    "ipa": "marħaban",
+    "difficulty": "medium",
+    "alternatives": ["marħaba"]
+  }
+]
