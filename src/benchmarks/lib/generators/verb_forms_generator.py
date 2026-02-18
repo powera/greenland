@@ -15,6 +15,8 @@ from benchmarks.lib.utils.data_models import (
     EvaluationCriteria,
 )
 from benchmarks.lib.utils.factory import generator, register_benchmark_metadata
+from storage.backend.config import DataSourceConfig
+from words import build_verb_forms_prompt
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
@@ -84,9 +86,16 @@ class VerbFormsGenerator(BenchmarkGenerator):
                 self._samples = self.load_json_file(self.questions_file_path)
 
             for sample in self._samples:
-                prompt_lines = self.load_text_file(sample["prompt_file"])
-                prompt_prefix = "\n".join(prompt_lines)
                 required_extra_forms = sample.get("required_extra_forms", [])
+                benchmark_config = kwargs.get("config")
+                if benchmark_config is None:
+                    benchmark_config = DataSourceConfig()
+
+                prompt_prefix = build_verb_forms_prompt(
+                    sample["language_code"],
+                    sample["target_infinitive"],
+                    benchmark_config,
+                )
 
                 question_text = (
                     f"{prompt_prefix}\n\n"

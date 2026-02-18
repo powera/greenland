@@ -14,6 +14,8 @@ from benchmarks.lib.utils.data_models import (
     EvaluationCriteria,
 )
 from benchmarks.lib.utils.factory import benchmark, generator
+from storage.backend.config import DataSourceConfig
+from words import build_synonyms_prompt
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
@@ -50,8 +52,13 @@ class SynonymsGenerator(BenchmarkGenerator):
             mandatory_synonyms = sample.get("mandatory_synonyms", [])
             optional_synonyms = sample.get("optional_synonyms", [])
 
+            prompt_word = sample.get("word", concept)
+            benchmark_config = kwargs.get("config")
+            if benchmark_config is None:
+                benchmark_config = DataSourceConfig()
+
             yield BenchmarkQuestion(
-                question_text=sample["prompt"],
+                question_text=build_synonyms_prompt(language_code, prompt_word, benchmark_config),
                 answer_type=AnswerType.JSON,
                 correct_answer={
                     "mandatory_synonyms": mandatory_synonyms,

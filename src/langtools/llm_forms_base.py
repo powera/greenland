@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional, Tuple
 
 import util.prompt_loader
+from words import query_verb_forms
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from sqlalchemy.orm import Session
@@ -118,26 +119,42 @@ def query_forms(
         prompt_kwargs[spec.word_variable] = target_word
 
     try:
-        context = util.prompt_loader.get_context("language_forms", spec.prompt_path)
-        prompt = util.prompt_loader.get_prompt("language_forms", spec.prompt_path).format(
-            **prompt_kwargs
-        )
-        response = client.generate_chat(
-            prompt=prompt,
-            model=client.default_model,
-            json_schema=schema,
-            context=context,
-        )
+        if spec.pos_type == "verb":
+            response_data = query_verb_forms(
+                spec.language_code,
+                target_word,
+                client=client,
+                model=client.default_model,
+                json_schema=schema,
+                english_word=english_word,
+                definition=definition,
+                subtype_context=f" (category: {pos_subtype})" if pos_subtype else "",
+            )
+            if not response_data.get("success"):
+                return {}, False
+            prompt = "[shared words.query_verb_forms prompt]"
+        else:
+            context = util.prompt_loader.get_context("language_forms", spec.prompt_path)
+            prompt = util.prompt_loader.get_prompt("language_forms", spec.prompt_path).format(
+                **prompt_kwargs
+            )
+            response = client.generate_chat(
+                prompt=prompt,
+                model=client.default_model,
+                json_schema=schema,
+                context=context,
+            )
+            response_data = response.structured_data if response.structured_data else {}
         linguistic_db.log_query(
             session,
             word=target_word,
             query_type=spec.query_type,
             prompt=prompt,
-            response=json.dumps(response.structured_data),
+            response=json.dumps(response_data),
             model=client.default_model,
         )
-        if response.structured_data and "forms" in response.structured_data:
-            return response.structured_data["forms"], True
+        if "forms" in response_data and isinstance(response_data["forms"], dict):
+            return response_data["forms"], True
         return {}, False
     except Exception as e:
         logger.error(

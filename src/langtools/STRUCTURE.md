@@ -7,6 +7,7 @@ langtools/
 ├── __init__.py              # Package exports and docstring
 ├── collation.py             # Shared Latin-alphabet sort-key generation
 ├── dialect_overrides.py     # Dialect variant registry (zh-tw, es-mx, pt-br, …)
+├── directions.py            # Dispatcher for optional language prompt-direction notes
 ├── form_patterns.py         # Pattern expansion for forms_config dicts (NEW)
 ├── form_registry.py         # Central registry: (lang, pos) → LanguageFormSpec
 ├── llm_forms_base.py        # Shared query_forms() used by all per-language llm_forms
@@ -255,6 +256,8 @@ ja/romaji_helper.py               (standalone, uses pykakasi)
 ja/gojuon.py                      (standalone, pure data)
 
 ko/hangul_helper.py               (standalone, pure Unicode arithmetic)
+ko/directions.py                  (optional prompt-direction notes)
+zh/directions.py                  (optional prompt-direction notes; Simplified/Mainland guidance)
 
 <lang>/forms_config.py            (standalone, pure data — config-driven modules only)
 <lang>/types.py                   (imports clients.wiktionary.types)

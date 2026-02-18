@@ -52,4 +52,5 @@ Available language modules:
 Shared modules:
 - langtools.collation: Latin-alphabet sort-key generation
 - langtools.dialect_overrides: Dialect variant registry (zh-tw, es-mx, pt-br, etc.)
+- langtools.directions: Language-specific prompt direction note dispatcher
 """
