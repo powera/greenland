@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from benchmarks.lib.runners.partial_credit_runner import PartialCreditRunner
 from benchmarks.lib.utils.factory import runner
-from langtools.fr.utils import strip_subject_pronoun
+from langtools.pronouns import strip_pronoun
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
@@ -40,8 +40,7 @@ class VerbFormsRunner(PartialCreditRunner):
         if not isinstance(value, str):
             return ""
         normalized = value.strip().lower()
-        if language_code == "fr":
-            normalized = strip_subject_pronoun(normalized)
+        normalized = strip_pronoun(language_code, normalized)
         return normalized
 
     def _is_structurally_valid(self, question_data: Dict, response: Any) -> bool:

@@ -126,3 +126,21 @@ def clean_form(text: str) -> List[str]:
     cleaned_forms = [f for f in cleaned_forms if f]
 
     return cleaned_forms
+
+def strip_subject_pronoun(text: str) -> str:
+    """Strip a Lithuanian subject pronoun from the beginning of a verb phrase."""
+    normalized = normalize_lithuanian_text(text.strip().lower())
+    if not normalized:
+        return ""
+
+    combined_pronouns = ["jis/ji ", "ji/jis ", "jis / ji ", "ji / jis "]
+    for pronoun in combined_pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun):].strip()
+
+    pronouns = ["aš ", "tu ", "jis ", "ji ", "mes ", "jūs ", "jie ", "jos "]
+    for pronoun in pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun):].strip()
+    return normalized
+

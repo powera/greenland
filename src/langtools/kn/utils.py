@@ -97,3 +97,21 @@ def clean_form(text: str) -> List[str]:
     cleaned_forms = [f for f in cleaned_forms if f]
 
     return cleaned_forms
+
+def strip_subject_pronoun(text: str) -> str:
+    """Strip a Kannada subject pronoun from the beginning of a verb phrase."""
+    normalized = normalize_kannada_text(text.strip().lower())
+    if not normalized:
+        return ""
+
+    combined_pronouns = ["ಅವನು/ಅವಳು ", "ಅವಳು/ಅವನು ", "ಅವನು / ಅವಳು ", "ಅವಳು / ಅವನು "]
+    for pronoun in combined_pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun):].strip()
+
+    pronouns = ["ನಾನು ", "ನೀನು ", "ಅವನು ", "ಅವಳು ", "ಅದು ", "ನಾವು ", "ನೀವು ", "ಅವರು "]
+    for pronoun in pronouns:
+        if normalized.startswith(pronoun):
+            return normalized[len(pronoun):].strip()
+    return normalized
+
