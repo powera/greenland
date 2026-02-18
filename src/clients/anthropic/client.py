@@ -197,27 +197,21 @@ class AnthropicClient:
                 ),
             }
 
-            # Add schema explanation to system prompt for better results
-            # Create a clean version of the schema for display, omitting unnecessary implementation details
-            display_schema = {
-                "type": "object",
-                "properties": anthropic_schema.get("properties", {}),
-                "required": anthropic_schema.get("required", []),
-            }
+            # Keep schema guidance short. The full schema is already provided via
+            # tools.input_schema above, and embedding it again in system text can
+            # dramatically inflate input token usage for structured benchmarks.
+            schema_instruction = "Return only the structured tool output that matches the schema exactly."
 
-            schema_prefix = f"""Please provide a response that matches exactly this schema:
-{json.dumps(display_schema, indent=2)}
-
-Your response must be valid JSON that follows the above schema."""
-
-            if (
-                self.cache and context and len(context) > 512
-            ):  # Only cache if also a (long) system prompt
+            if self.cache and context and len(context) > 512:
                 system_content.append(
-                    {"type": "text", "text": schema_prefix, "cache_control": {"type": "ephemeral"}}
+                    {
+                        "type": "text",
+                        "text": schema_instruction,
+                        "cache_control": {"type": "ephemeral"},
+                    }
                 )
             else:
-                system_content.append({"type": "text", "text": schema_prefix})
+                system_content.append({"type": "text", "text": schema_instruction})
 
         # Add system content if we have any
         if system_content:
