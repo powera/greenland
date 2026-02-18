@@ -112,6 +112,8 @@
                             {% set model_response = detail.debug_json.model_answer or detail.debug_json.model_response %}
                         {% endif %}
                         {% set is_correct = (detail.score or 0) >= correctness_threshold %}
+                        {% set expected_is_json = expected_answer is not undefined and (expected_answer is mapping or (expected_answer is sequence and expected_answer is not string)) %}
+                        {% set response_is_json = model_response is not undefined and (model_response is mapping or (model_response is sequence and model_response is not string)) %}
 
                         <div class="accordion-item mb-2 border {% if is_correct %}border-success{% else %}border-danger{% endif %}">
                             <h2 class="accordion-header" id="heading{{ loop.index }}">
@@ -134,11 +136,11 @@
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <strong>Expected</strong>
-                                            <pre class="bg-light p-2 mb-0"><code>{{ expected_answer | tojson(indent=2) if expected_answer is mapping or expected_answer is sequence else (expected_answer or '-') }}</code></pre>
+                                            <pre class="bg-light p-2 mb-0"><code>{{ expected_answer | tojson(indent=2) if expected_is_json else (expected_answer or '-') }}</code></pre>
                                         </div>
                                         <div class="col-md-6">
                                             <strong>Provided</strong>
-                                            <pre class="{% if is_correct %}bg-success-subtle{% else %}bg-danger-subtle{% endif %} p-2 mb-0"><code>{{ model_response | tojson(indent=2) if model_response is mapping or model_response is sequence else (model_response or '-') }}</code></pre>
+                                            <pre class="{% if is_correct %}bg-success-subtle{% else %}bg-danger-subtle{% endif %} p-2 mb-0"><code>{{ model_response | tojson(indent=2) if response_is_json else (model_response or '-') }}</code></pre>
                                         </div>
                                     </div>
 
