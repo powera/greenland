@@ -41,7 +41,8 @@ class BenchmarkTask:
     started_at: Optional[datetime] = None
     finished_at: Optional[datetime] = None
     exit_code: Optional[int] = None
-    output_path: Optional[Path] = None
+    stdout_path: Optional[Path] = None
+    stderr_path: Optional[Path] = None
 
 
 class BenchmarkRunWorker:
@@ -79,7 +80,8 @@ class BenchmarkRunWorker:
                 model_name=model_name,
                 state="queued",
                 enqueued_at=datetime.now(timezone.utc),
-                output_path=self._output_dir / f"task-{task_id}.log",
+                stdout_path=self._output_dir / f"task-{task_id}.stdout.log",
+                stderr_path=self._output_dir / f"task-{task_id}.stderr.log",
             )
             self._tasks[task_id] = task
             self._cleanup_expired_outputs_locked()
@@ -158,12 +160,25 @@ class BenchmarkRunWorker:
         """Return captured output for a task if available."""
         with self._state_lock:
             task = self._tasks.get(task_id)
-            output_path = task.output_path if task else None
+            stdout_path = task.stdout_path if task else None
+            stderr_path = task.stderr_path if task else None
 
-        if not output_path or not output_path.exists():
+        if not stdout_path and not stderr_path:
             return None
 
-        return output_path.read_text(encoding="utf-8", errors="replace")
+        stdout = self._read_output(stdout_path)
+        stderr = self._read_output(stderr_path)
+
+        if stdout is None and stderr is None:
+            return None
+
+        output_parts: list[str] = []
+        if stdout is not None:
+            output_parts.append("== STDOUT ==\n" + stdout)
+        if stderr is not None:
+            output_parts.append("== STDERR ==\n" + stderr)
+
+        return "\n\n".join(output_parts)
 
     def _run_forever(self) -> None:
         while True:
@@ -216,15 +231,19 @@ class BenchmarkRunWorker:
 
         logger.info("Running benchmark via worker: %s", " ".join(cmd))
         task = self._tasks.get(request.task_id)
-        output_path = task.output_path if task else self._output_dir / f"task-{request.task_id}.log"
+        stdout_path = task.stdout_path if task else self._output_dir / f"task-{request.task_id}.stdout.log"
+        stderr_path = task.stderr_path if task else self._output_dir / f"task-{request.task_id}.stderr.log"
 
-        with output_path.open("w", encoding="utf-8") as output_file:
+        with (
+            stdout_path.open("w", encoding="utf-8") as stdout_file,
+            stderr_path.open("w", encoding="utf-8") as stderr_file,
+        ):
             result = subprocess.run(
                 cmd,
                 cwd=str(repo_root),
                 env=env,
-                stdout=output_file,
-                stderr=subprocess.STDOUT,
+                stdout=stdout_file,
+                stderr=stderr_file,
                 text=True,
                 check=False,
             )
@@ -245,16 +264,25 @@ class BenchmarkRunWorker:
             )
             return
 
-        output_tail = self._read_output_tail(output_path)
+        output_tail = self._read_output_tail(stdout_path)
+        error_tail = self._read_output_tail(stderr_path)
 
         logger.error(
-            "Benchmark run failed benchmark=%s model=%s task_id=%s exit=%s output=%s",
+            "Benchmark run failed benchmark=%s model=%s task_id=%s exit=%s stdout=%s stderr=%s",
             request.benchmark_name,
             request.model_name,
             request.task_id,
             result.returncode,
             output_tail,
+            error_tail,
         )
+
+    @staticmethod
+    def _read_output(path: Optional[Path]) -> Optional[str]:
+        if not path or not path.exists():
+            return None
+
+        return path.read_text(encoding="utf-8", errors="replace")
 
     @staticmethod
     def _serialize_task(task: BenchmarkTask) -> dict[str, Any]:
@@ -319,7 +347,10 @@ class BenchmarkRunWorker:
             if (now - task.finished_at.timestamp()) <= self._output_retention_seconds:
                 continue
 
-            if task.output_path and task.output_path.exists():
-                task.output_path.unlink(missing_ok=True)
+            if task.stdout_path and task.stdout_path.exists():
+                task.stdout_path.unlink(missing_ok=True)
+
+            if task.stderr_path and task.stderr_path.exists():
+                task.stderr_path.unlink(missing_ok=True)
 
             del self._tasks[task_id]
