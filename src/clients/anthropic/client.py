@@ -200,7 +200,7 @@ class AnthropicClient:
             # Keep schema guidance short. The full schema is already provided via
             # tools.input_schema above, and embedding it again in system text can
             # dramatically inflate input token usage for structured benchmarks.
-            schema_instruction = "Return only the structured tool output that matches the schema exactly."
+            schema_instruction = "Return only tool output matching the schema."
 
             if self.cache and context and len(context) > 512:
                 system_content.append(

@@ -225,14 +225,9 @@ class LMStudioClient:
 
             clean_schema = clients.lib.to_ollama_schema(schema_obj)
 
-            # Add schema explanation to system prompt for better results
-            # Create a clean version of the schema for display, omitting unnecessary implementation details
-            display_schema = clean_schema.get("properties", {})
-
-            schema_prompt = f"""Please provide a response that matches exactly this schema:
-{json.dumps(display_schema, indent=2)}
-
-Your response must be valid JSON that follows the above schema."""
+            # Keep schema guidance concise. The full JSON schema is already sent
+            # in response_format.json_schema.schema below.
+            schema_prompt = "Match the response schema."
 
             messages.append({"role": "user", "content": schema_prompt})
             messages.append({"role": "user", "content": prompt})
