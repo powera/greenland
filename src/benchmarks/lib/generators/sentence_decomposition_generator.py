@@ -15,6 +15,11 @@ from benchmarks.lib.utils.data_models import (
     EvaluationCriteria,
 )
 from benchmarks.lib.utils.factory import generator, register_benchmark_metadata
+from sentences.decomposition import (
+    build_sentence_decomposition_context,
+    build_sentence_decomposition_prompt,
+    build_single_language_decomposition_schema,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -42,83 +47,12 @@ class SentenceDecompositionGenerator(BenchmarkGenerator):
         self.can_generate_with_llm = False
         self.questions_file_path = "samples.json"
 
-        self.context = """You are a multilingual linguistics expert.
-Generate token-level decomposition for ONE target language per request.
-Return only valid JSON matching the provided schema."""
+        self.context = build_sentence_decomposition_context()
 
         self._samples: Optional[List[Dict[str, Any]]] = None
 
     def _response_schema(self) -> Dict[str, Any]:
-        return {
-            "type": "object",
-            "properties": {
-                "languages": {
-                    "type": "array",
-                    "minItems": 1,
-                    "maxItems": 1,
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "language_code": {"type": "string"},
-                            "translation": {"type": "string"},
-                            "word_count": {"type": "integer"},
-                            "words": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "position": {"type": "integer"},
-                                        "role": {"type": "string"},
-                                        "english_gloss": {"type": "string"},
-                                        "surface_form": {"type": "string"},
-                                        "grammatical_form": {"type": "string"},
-                                        "lemma_guid": {"type": "string"},
-                                        "lemma": {"type": "string"},
-                                    },
-                                    "required": [
-                                        "position",
-                                        "role",
-                                        "english_gloss",
-                                        "surface_form",
-                                        "grammatical_form",
-                                        "lemma_guid",
-                                        "lemma",
-                                    ],
-                                },
-                            },
-                        },
-                        "required": ["language_code", "translation", "word_count", "words"],
-                    },
-                }
-            },
-            "required": ["languages"],
-        }
-
-    def _format_candidate_lemmas(
-        self,
-        candidate_lemmas: List[Dict[str, Any]],
-        source_language: str,
-        target_language: str,
-        helper_languages: List[str],
-    ) -> str:
-        if not candidate_lemmas:
-            return "- (none provided)"
-
-        allowed_languages = [source_language, target_language, *helper_languages[:3]]
-
-        return "\n".join(
-            (
-                f"- {item['guid']} - {item['lemma']} ({item['disambiguation']}) | "
-                f"POS: {item['pos']} | Definition: {item['definition']} | "
-                f"Translations: "
-                + ", ".join(
-                    f"{lang}={translation}"
-                    for lang, translation in item.get("translations", {}).items()
-                    if lang in allowed_languages
-                )
-            )
-            for item in candidate_lemmas
-        )
+        return build_single_language_decomposition_schema()
 
     def _build_question_text(
         self,
@@ -128,48 +62,13 @@ Return only valid JSON matching the provided schema."""
         helper_entries: List[Dict[str, Any]],
         candidate_lemmas: List[Dict[str, Any]],
     ) -> str:
-        helper_lines = "\n".join(
-            f"- {entry['language_code']}: {entry['translation']}" for entry in helper_entries
-        )
-        helper_languages = [entry["language_code"] for entry in helper_entries if entry.get("language_code")]
-        candidate_lines = self._format_candidate_lemmas(
-            candidate_lemmas,
+        return build_sentence_decomposition_prompt(
+            source_sentence=source_sentence,
             source_language=source_language,
             target_language=target_entry["language_code"],
-            helper_languages=helper_languages,
-        )
-
-        return (
-            f"Create a sentence decomposition JSON for ONE language only.\n"
-            f"Source sentence ({source_language}): \"{source_sentence}\"\n"
-            f"Target language: {target_entry['language_code']}\n"
-            f"Target translation: \"{target_entry['translation']}\"\n\n"
-            "Additional translations for disambiguation (1-3 helper languages):\n"
-            f"{helper_lines if helper_lines else '- (none provided)'}\n\n"
-            "Lemma translation context: include source, target, and at most 3 helper languages.\n\n"
-            "Candidate lemmas (must choose correct lemma_guid when a content word maps to one):\n"
-            f"{candidate_lines}\n\n"
-            "Grammatical form conventions (match translation prompt style):\n"
-            "- Use format: <role>/<language_code>_<morphology> for inflected items.\n"
-            "- Part-of-speech prefix should match role (verb, noun, adjective, adverb, pronoun, numeral, etc.).\n"
-            "- Person/number notation: 1s, 2s, 3s, 1p, 2p, 3p.\n"
-            "- Include gender only when the surface form differs by gender (examples: 3s-m, 3s-f, singular_f).\n"
-            "- Tense/aspect examples: present, past, future, impf, pc, inf.\n"
-            "- Case languages (lt, de): include case + number (example: noun/de_accusative_singular).\n"
-            "- Non-case languages (en, fr, es, pt, ko, zh): use number only for nouns (example: noun/fr_singular).\n"
-            "- Pronouns: pronoun/<lang>_subjective|objective|possessive|reflexive (case label for case languages).\n"
-            "- Numerals: numeral/<lang>_cardinal|ordinal (or language-specific subtype where applicable).\n"
-            "- Examples: verb/es_3p_present, pronoun/fr_subjective, article/es_singular_f, noun/en_singular.\n"
-            "- For uninflected closed-class words, use <role>/base (example: preposition/base).\n"
-            "- Keep language code aligned with the target token language.\n"
-            "- IMPORTANT: Do NOT include punctuation as a word/token in words[].\n"
-            "- word_count must equal the number of word entries.\n\n"
-            "Return schema requirements:\n"
-            f"- Return exactly one entry in languages[] and set language_code to '{target_entry['language_code']}'.\n"
-            "- The languages[] breakdown must analyze tokens from the target translation only.\n"
-            "- Each words[] item must include: position, role, english_gloss, surface_form, "
-            "grammatical_form, lemma_guid, lemma.\n"
-            "- Use lemma_guid=NONE for function words without a selected candidate lemma."
+            target_translation=target_entry["translation"],
+            helper_translations=helper_entries,
+            candidate_lemmas=candidate_lemmas,
         )
 
     def _generate_from_file(self, **kwargs: Any) -> Iterator[BenchmarkQuestion]:

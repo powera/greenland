@@ -55,7 +55,9 @@ class SentenceDecompositionRunner(PartialCreditRunner):
         candidate_section = ""
         if "Candidate lemmas" in raw_prompt:
             candidate_start = raw_prompt.find("Candidate lemmas")
-            candidate_end = raw_prompt.find("\n\nGrammatical form conventions")
+            candidate_end = raw_prompt.find("\n\nReturn schema requirements")
+            if candidate_end <= candidate_start:
+                candidate_end = raw_prompt.find("\n\nGrammatical form conventions")
             if candidate_end > candidate_start:
                 candidate_section = raw_prompt[candidate_start:candidate_end].strip()
 

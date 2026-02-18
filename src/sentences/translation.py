@@ -10,11 +10,16 @@ This module provides reusable translation functionality that can be used by:
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 from sqlalchemy.orm import Session
 
 from clients.unified_client import UnifiedLLMClient
+from sentences.decomposition import (
+    build_decomposition_schema,
+    build_prompt_for_translate_and_decompose,
+    query_sentence_decomposition,
+)
 from storage.models.schema import (
     Lemma,
     LemmaTranslation,
@@ -23,7 +28,7 @@ from storage.models.schema import (
     SentenceWord,
     SentencePatternWord,
 )
-from storage.translation_helpers import LANGUAGE_NAMES, get_translation, normalize_llm_language_codes
+from storage.translation_helpers import normalize_llm_language_codes
 
 logger = logging.getLogger(__name__)
 
@@ -51,130 +56,12 @@ def build_translation_prompt(
     Returns:
         Tuple of (context, prompt) strings
     """
-    target_languages = _normalize_target_languages(target_languages)
-
-    # Get English translation
-    en_translation = (
-        session.query(SentenceTranslation)
-        .filter_by(sentence_id=sentence.id, language_code="en")
-        .first()
+    return build_prompt_for_translate_and_decompose(
+        sentence,
+        _normalize_target_languages(target_languages),
+        session,
+        include_english=include_english,
     )
-
-    if not en_translation:
-        raise ValueError(f"Sentence {sentence.id} has no English translation")
-
-    template_text = en_translation.translation_text
-
-    # Build word translations reference from pattern definition (permanent record)
-    pattern_words = (
-        session.query(SentencePatternWord)
-        .filter_by(sentence_id=sentence.id)
-        .order_by(SentencePatternWord.position)
-        .all()
-    )
-
-    word_translations = {}
-    for pattern_word in pattern_words:
-        lemma = session.query(Lemma).filter_by(id=pattern_word.lemma_id).first()
-        if not lemma:
-            continue
-
-        # Use English lemma text as the key (e.g., "fork", "apartment")
-        english_text = pattern_word.english_text
-        word_translations[english_text] = {
-            "guid": lemma.guid if lemma.guid else "",
-            "role": pattern_word.slot_name,  # Use slot_name from pattern
-        }
-
-        for lang in target_languages:
-            trans = get_translation(session, lemma, lang)
-            if trans:
-                word_translations[english_text][lang] = trans
-
-    # Build context (general instructions only)
-    context_lines = [
-        "You are translating a simple language learning sentence.",
-        "",
-        "For each target language, provide detailed word-by-word breakdown including:",
-        "- word: the actual inflected form as it appears in the sentence",
-        "- english: English translation of this specific word/phrase",
-        "- guid: the GUID for this word if provided in the word reference (e.g., 'N08_001'), or empty string if not provided",
-        "- role: grammatical role (subject, verb, object, adjective, adverb, article, preposition, determiner, pronoun, etc.)",
-        "- grammatical_form: Use format 'pos/lang_details' where:",
-        "  * pos = part of speech (verb, noun, adjective, adverb, pronoun, preposition, conjunction, article, etc.)",
-        "  * lang = language code for the target language (en, lt, fr, de, es, pt, ko, zh)",
-        "  * details = specific form using this notation:",
-        "    - Person/number: 1s, 2s, 3s, 1p, 2p, 3p (no gender unless the WORD FORM itself differs by gender)",
-        "    - Gender ONLY when word form differs: use hyphen for person (3s-m, 3s-f, 3p-m, 3p-f) or underscore for case (singular_m, plural_f)",
-        "    - Tense: present, past, future, impf, pc (passé composé), inf (infinitive), etc.",
-        "    - Case (Lithuanian, German only): nominative, accusative, genitive, dative, instrumental, locative, vocative",
-        "    - For languages WITHOUT grammatical case (English, French, Spanish, Portuguese, Korean, Chinese):",
-        "      Use ONLY singular/plural without case: 'noun/en_singular', 'noun/fr_plural', 'noun/zh_singular'",
-        "    - For languages WITH grammatical case (Lithuanian, German):",
-        "      Use case_number: 'noun/lt_nominative_singular', 'noun/de_accusative_plural'",
-        "    - Combine with underscores: nominative_singular, accusative_plural_m, etc.",
-        "  * Examples:",
-        "    - 'verb/lt_3s_present' (Lithuanian 'dirba' - same form for he/she)",
-        "    - 'verb/fr_3s_present' (French 'va' - same form for he/she)",
-        "    - 'verb/fr_past_participle_f' (French 'partagée' - feminine participle)",
-        "    - 'noun/de_accusative_singular' (German noun in accusative)",
-        "    - 'adjective/es_plural_f' (Spanish feminine plural adjective)",
-        "  * PRONOUNS: pronoun/LANG_function where function is subjective, objective, possessive, reflexive",
-        "    - Case languages (lt, de): pronoun/LANG_case (nominative, accusative, genitive, dative, etc.)",
-        "  * NUMERALS: numeral/LANG_type where type is cardinal or ordinal",
-        "    - Lemma form is cardinal, masculine where gender applies",
-        "    - Add _m, _f, _n suffix for gendered forms (lt, de, fr, es, pt)",
-        "    - Chinese: zh_cardinal (二), zh_quantity (两 before measure words), zh_ordinal (第二)",
-        "    - Korean: ko_native (둘), ko_sino (이), ko_ordinal (둘째)",
-        "  * For invariant words: preposition/base, conjunction/base, article/base",
-        "",
-        "IMPORTANT: Do NOT include punctuation marks as separate words in the breakdown.",
-        "Provide words in the order they appear in the translated sentence.",
-    ]
-
-    # Build main prompt (the specific task with all relevant data)
-    prompt_lines = [f"Template sentence: {template_text}", "", "Word translations for reference:"]
-
-    for english_word, translations in word_translations.items():
-        guid = translations.get("guid", "")
-        role = translations.get("role", "")
-        trans_items = [
-            (lang, trans) for lang, trans in translations.items() if lang not in ("guid", "role")
-        ]
-        trans_str = ", ".join([f"{lang}={trans}" for lang, trans in trans_items])
-
-        # Format: "fork [object] (GUID: N08_001): lt=šakutė, zh=叉子, ..."
-        role_str = f" [{role}]" if role else ""
-        guid_str = f" (GUID: {guid})" if guid else ""
-        prompt_lines.append(f"  {english_word}{role_str}{guid_str}: {trans_str}")
-
-    prompt_lines.append("")
-    prompt_lines.append(
-        f"Translate this sentence naturally into: {', '.join([LANGUAGE_NAMES[lang] for lang in target_languages if lang in LANGUAGE_NAMES])}."
-    )
-    prompt_lines.append("")
-
-    if include_english:
-        prompt_lines.append(
-            "IMPORTANT: Also provide a grammatically correct English version (fixing issues like singular/plural, articles, etc.)."
-        )
-    else:
-        prompt_lines.append(
-            "IMPORTANT: The English translation with word-by-word breakdown is already complete. Do NOT include English in your response."
-        )
-
-    prompt_lines.append(
-        "Use the provided word translations where appropriate, but prioritize natural translations. "
-        "If the target language expresses the concept differently (e.g., 'I like water' in Lithuanian "
-        "is 'Man patinka vanduo' using 'patikti' not 'mėgti', or 'I had lunch' in Chinese is '我吃了午饭' "
-        "using 'eat' not 'have'), use the natural phrasing and map words to their actual meanings, not "
-        "the English lemmas. Only include GUIDs for words that genuinely correspond to the referenced "
-        "lemma's meaning."
-    )
-
-    prompt = "\n".join(prompt_lines)
-
-    return "\n".join(context_lines), prompt
 
 
 def build_response_schema(
@@ -190,58 +77,10 @@ def build_response_schema(
     Returns:
         Schema dict suitable for clients.lib.schema_from_dict()
     """
-    target_languages = _normalize_target_languages(target_languages)
-
-    # Schema for individual word details - no descriptions to reduce token usage
-    # (detailed field explanations are in the prompt context)
-    word_schema: Dict[str, Any] = {
-        "type": "object",
-        "properties": {
-            "word": {"type": "string"},
-            "english": {"type": "string"},
-            "guid": {"type": "string"},
-            "role": {"type": "string"},
-            "grammatical_form": {"type": ["string", "null"]},
-        },
-        "required": ["word", "english", "guid", "role", "grammatical_form"],
-        "additionalProperties": False,
-    }
-
-    # Build properties for sentences and word arrays
-    schema_properties: Dict[str, Any] = {}
-    required_fields: List[str] = []
-
-    # Include English word breakdown if requested
-    if include_english:
-        schema_properties["en"] = {
-            "type": "string",
-            "description": "Grammatically corrected English sentence",
-        }
-        schema_properties["words_en"] = {
-            "type": "array",
-            "description": "English word breakdown",
-            "items": word_schema,
-        }
-        required_fields.extend(["en", "words_en"])
-
-    # Add sentence and words array for each target language
-    for lang in target_languages:
-        lang_name = LANGUAGE_NAMES.get(lang, lang)
-        schema_properties[lang] = {"type": "string", "description": f"{lang_name} translation"}
-        schema_properties[f"words_{lang}"] = {
-            "type": "array",
-            "description": f"{lang_name} word breakdown",
-            "items": word_schema,
-        }
-        required_fields.extend([lang, f"words_{lang}"])
-
-    # Return just the inner schema, not the OpenAI Batch API wrapper
-    return {
-        "type": "object",
-        "properties": schema_properties,
-        "required": required_fields,
-        "additionalProperties": False,
-    }
+    return build_decomposition_schema(
+        target_languages=_normalize_target_languages(target_languages),
+        include_english=include_english,
+    )
 
 
 def translate_sentence(
@@ -279,18 +118,17 @@ def translate_sentence(
     )
     schema = build_response_schema(normalized_target_languages, include_english)
 
-    # Call LLM
     client = UnifiedLLMClient()
-    result = client.generate_chat(prompt=prompt, model=model, json_schema=schema, context=context)
-
-    # Parse response - check both structured_data and response_text
-    if result.structured_data:
-        translations = result.structured_data
-    elif result.response_text:
-        # Parse JSON from response_text
-        translations = json.loads(result.response_text)
-    else:
-        raise ValueError("No response data found in LLM result")
+    result = query_sentence_decomposition(
+        prompt=prompt,
+        client=client,
+        model=model,
+        json_schema=schema,
+        context=context,
+    )
+    if not result.get("success"):
+        raise ValueError(result.get("error", "No response data found in LLM result"))
+    translations = {k: v for k, v in result.items() if k != "success"}
 
     # Store translations in database
     store_translation_results(sentence_id, translations, session)
