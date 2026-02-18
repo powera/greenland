@@ -14,16 +14,16 @@ from sqlalchemy.orm import Session
 
 from workqueue.tools import build_default_config, get_lemma_or_raise
 import constants
-import util.prompt_loader
 from storage.backend.config import DataSourceConfig
 from storage.crud.derivative_form import add_derivative_form
 from storage.crud.grammar_fact import add_grammar_fact
 from storage.crud.operation_log import log_operation
 from storage.crud.word_token import add_word_token
 from storage.models.schema import Lemma
-from storage.translation_helpers import get_supported_languages, get_translation
+from storage.translation_helpers import get_translation
 from wordfreq.tools.text_utils import is_numeral
 from wordfreq.translation.client import LinguisticClient
+from words import build_synonyms_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -80,32 +80,13 @@ def query_synonyms_from_llm(
     Returns:
         Dictionary with synonyms, abbreviations, expanded_forms, and synonym-variant buckets
     """
-    # Get language name
-    language_names = get_supported_languages()
-    if language_code == "en":
-        language_name = "English"
-    else:
-        language_name = language_names.get(language_code, language_code)
-
-    # Load prompt templates from files
-    context = util.prompt_loader.get_context("synonyms", "word")
-    prompt_template = util.prompt_loader.get_prompt("synonyms", "word")
-
-    # Add language-specific notes (Chinese is already covered in context.txt)
-    language_note = ""
-    if language_code == "ko":
-        language_note = "- For Korean, provide words in Hangul (e.g., 거리, 길 for 'street')"
-
-    # Build prompt with variables
-    prompt_body = prompt_template.replace("{{language_name}}", language_name)
-    prompt_body = prompt_body.replace("{{word}}", word)
-    prompt_body = prompt_body.replace("{{pos_type}}", pos_type)
-    prompt_body = prompt_body.replace("{{english_word}}", english_word)
-    prompt_body = prompt_body.replace("{{definition}}", definition or "")
-    prompt_body = prompt_body.replace("{{language_note}}", language_note)
-
-    # Combine context and prompt
-    prompt = f"{context}\n\n{prompt_body}"
+    prompt = build_synonyms_prompt(
+        language_code,
+        word,
+        pos_type=pos_type,
+        english_word=english_word,
+        definition=definition or "",
+    )
 
     try:
         # Query the LLM using generate_chat with JSON schema

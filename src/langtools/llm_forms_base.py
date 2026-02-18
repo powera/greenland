@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional, Tuple
 
 import util.prompt_loader
+from words import build_verb_forms_prompt
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from sqlalchemy.orm import Session
@@ -118,10 +119,20 @@ def query_forms(
         prompt_kwargs[spec.word_variable] = target_word
 
     try:
-        context = util.prompt_loader.get_context("language_forms", spec.prompt_path)
-        prompt = util.prompt_loader.get_prompt("language_forms", spec.prompt_path).format(
-            **prompt_kwargs
-        )
+        if spec.pos_type == "verb":
+            combined_prompt = build_verb_forms_prompt(
+                spec.language_code,
+                target_word,
+                english_word=english_word,
+                definition=definition,
+                subtype_context=f" (category: {pos_subtype})" if pos_subtype else "",
+            )
+            context, prompt = combined_prompt.split("\n\n", 1)
+        else:
+            context = util.prompt_loader.get_context("language_forms", spec.prompt_path)
+            prompt = util.prompt_loader.get_prompt("language_forms", spec.prompt_path).format(
+                **prompt_kwargs
+            )
         response = client.generate_chat(
             prompt=prompt,
             model=client.default_model,
