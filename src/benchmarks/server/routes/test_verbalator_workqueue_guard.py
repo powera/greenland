@@ -25,30 +25,27 @@ class _FakeDB:
 
 
 class _FakeWorker:
-    def __init__(self, status_payload):
-        self._status_payload = status_payload
+    def __init__(self, allow_local_query):
+        self.allow_local_query = allow_local_query
 
-    def status(self):
-        return self._status_payload
+    def touch_interactive_local_job(self, **_kwargs):
+        return self.allow_local_query
 
 
-def test_is_benchmark_worker_busy_states():
+def test_can_start_local_query_uses_worker_slot():
     app = Flask(__name__)
 
     with app.app_context():
-        app.extensions["benchmark_run_worker"] = _FakeWorker({"active": None, "queued": 0})
-        assert verbalator._is_benchmark_worker_busy() is False
+        app.extensions["benchmark_run_worker"] = _FakeWorker(allow_local_query=True)
+        assert verbalator._can_start_local_query("llama3") is True
 
-        app.extensions["benchmark_run_worker"] = _FakeWorker({"active": {"task_id": 1}, "queued": 0})
-        assert verbalator._is_benchmark_worker_busy() is True
-
-        app.extensions["benchmark_run_worker"] = _FakeWorker({"active": None, "queued": 2})
-        assert verbalator._is_benchmark_worker_busy() is True
+        app.extensions["benchmark_run_worker"] = _FakeWorker(allow_local_query=False)
+        assert verbalator._can_start_local_query("llama3") is False
 
 
-def test_query_blocks_local_model_when_workqueue_busy(monkeypatch):
+def test_query_blocks_local_model_when_worker_denies_slot(monkeypatch):
     app = Flask(__name__)
-    app.extensions["benchmark_run_worker"] = _FakeWorker({"active": {"task_id": 7}, "queued": 0})
+    app.extensions["benchmark_run_worker"] = _FakeWorker(allow_local_query=False)
 
     local_model = SimpleNamespace(model_type="ollama", model_path="llama3", codename="local")
 
@@ -69,4 +66,4 @@ def test_query_blocks_local_model_when_workqueue_busy(monkeypatch):
         response, status = verbalator.query()
 
     assert status == 409
-    assert "blocked" in response.get_json()["error"].lower()
+    assert "busy" in response.get_json()["error"].lower()

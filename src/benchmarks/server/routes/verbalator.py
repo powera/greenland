@@ -58,14 +58,17 @@ def _is_local_model(model: Optional[Model]) -> bool:
     return bool(model and model.model_type != "remote")
 
 
-def _is_benchmark_worker_busy() -> bool:
-    """Return whether the benchmark workqueue has running or queued jobs."""
+def _can_start_local_query(model_name: str) -> bool:
+    """Reserve or refresh the interactive local-model slot for Verbalator."""
     worker = current_app.extensions.get("benchmark_run_worker")
     if worker is None:
+        return True
+
+    touch = getattr(worker, "touch_interactive_local_job", None)
+    if touch is None:
         return False
 
-    worker_status = worker.status()
-    return bool(worker_status.get("active") or worker_status.get("queued", 0) > 0)
+    return bool(touch(model_name=model_name, owner="verbalator"))
 
 
 @bp.route("/")
@@ -97,13 +100,13 @@ def query():
         db_model = g.db.query(Model).filter(Model.codename == model_codename).first()
         model_path = db_model.model_path if db_model and db_model.model_path else model_codename
 
-        if _is_local_model(db_model) and _is_benchmark_worker_busy():
+        if _is_local_model(db_model) and not _can_start_local_query(model_path):
             return (
                 jsonify(
                     {
                         "error": (
-                            "Local model requests are blocked while the benchmark workqueue has"
-                            " active or queued jobs."
+                            "Local model is currently busy with benchmark or another local-model"
+                            " Verbalator session."
                         )
                     }
                 ),
