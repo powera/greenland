@@ -14,11 +14,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+CORRECTNESS_THRESHOLD = 70
+
 @runner("0121_verb_forms")
 class VerbFormsRunner(PartialCreditRunner):
     """Runner for verb forms benchmark tests."""
 
-    CORRECTNESS_THRESHOLD = 70
+    CORRECTNESS_THRESHOLD = CORRECTNESS_THRESHOLD
 
     def prepare_prompt(self, question_data: Dict) -> Tuple[str, Optional[Dict], Optional[str]]:
         prompt = question_data["question_text"]
