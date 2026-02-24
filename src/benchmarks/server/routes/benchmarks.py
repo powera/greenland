@@ -59,6 +59,7 @@ def _get_unsynced_benchmark_codes(session) -> list[dict]:
                         "code": metadata.code,
                         "name": metadata.name,
                         "description": metadata.description,
+                        "category": metadata.category,
                     }
                 )
     return sorted(unsynced, key=lambda x: x["code"])
@@ -120,6 +121,7 @@ def sync_benchmarks():
 
     added = 0
     already_present = 0
+    updated = 0
     for code in get_all_benchmark_codes():
         metadata = get_benchmark_metadata(code)
         if not metadata:
@@ -129,14 +131,22 @@ def sync_benchmarks():
             codename=metadata.code,
             displayname=metadata.name,
             description=metadata.description,
+            category=metadata.category,
         )
         if success:
             added += 1
         else:
             already_present += 1
+            # Update the category for existing benchmarks
+            existing = g.db.query(Benchmark).filter(Benchmark.codename == code).first()
+            if existing and existing.category != metadata.category:
+                existing.category = metadata.category
+                updated += 1
 
+    g.db.commit()
     flash(
-        f"Sync complete: {added} benchmark(s) added, {already_present} already present.",
+        f"Sync complete: {added} benchmark(s) added, {already_present} already present"
+        + (f", {updated} category update(s)." if updated else "."),
         "success",
     )
     return redirect(url_for("benchmarks.list_benchmarks"))

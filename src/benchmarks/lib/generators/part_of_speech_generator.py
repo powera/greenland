@@ -15,11 +15,20 @@ from benchmarks.lib.utils.data_models import (
     Difficulty,
     EvaluationCriteria,
 )
-from benchmarks.lib.utils.factory import generator
+from benchmarks.lib.utils.factory import benchmark, generator
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
+benchmark(
+    "0032_part_of_speech",
+    "Part of Speech",
+    "Tests ability to identify the grammatical part of speech for a given word.",
+    category="word processing",
+)(__name__)
 
 # Supported parts of speech for the benchmark
 PARTS_OF_SPEECH = [

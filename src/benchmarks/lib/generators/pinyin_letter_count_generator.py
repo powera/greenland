@@ -21,7 +21,9 @@ from benchmarks.lib.utils.data_models import (
 from benchmarks.lib.utils.factory import generator, register_benchmark_metadata
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Sample Chinese sentences
@@ -43,6 +45,7 @@ BENCHMARK_METADATA = BenchmarkMetadata(
     code="0051_pinyin_letters",
     name="Pinyin Letter Count",
     description="A benchmark to evaluate a model's ability to count how many times a specific letter appears in the Pinyin representation of a Chinese sentence.",
+    category="token processing",
 )
 
 # Register benchmark metadata

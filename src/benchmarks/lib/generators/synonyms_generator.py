@@ -28,7 +28,13 @@ BENCHMARK_DESCRIPTION = (
     "Tests whether a model can generate synonyms for common nouns across multiple languages."
 )
 
-benchmark(BENCHMARK_CODE, BENCHMARK_NAME, BENCHMARK_DESCRIPTION, default_num_questions=64)(__name__)
+benchmark(
+    BENCHMARK_CODE,
+    BENCHMARK_NAME,
+    BENCHMARK_DESCRIPTION,
+    default_num_questions=64,
+    category="word processing",
+)(__name__)
 
 
 @generator(BENCHMARK_CODE)

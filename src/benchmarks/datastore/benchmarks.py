@@ -28,7 +28,7 @@ class Benchmark(Base):
     codename: Mapped[str] = mapped_column(String, primary_key=True)
     displayname: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-
+    category: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     license_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     # Relationships
@@ -93,6 +93,7 @@ def insert_benchmark(
     codename: str,
     displayname: str,
     description: Optional[str] = None,
+    category: Optional[str] = None,
     license_name: Optional[str] = None,
 ) -> tuple[bool, str]:
     """Insert a new benchmark into the database.
@@ -101,6 +102,7 @@ def insert_benchmark(
     :param codename: Identifier for the benchmark
     :param displayname: Human-readable name of the benchmark
     :param description: Optional description of the benchmark
+    :param category: Optional category (e.g., "word processing", "translation")
     :param license_name: Optional license information
     :return: Tuple (success_boolean, message)
     """
@@ -109,6 +111,7 @@ def insert_benchmark(
             codename=codename,
             displayname=displayname,
             description=description,
+            category=category,
             license_name=license_name,
         )
         session.add(new_benchmark)
@@ -216,6 +219,7 @@ def list_all_benchmarks(session) -> List[Dict]:
             "codename": benchmark.codename,
             "displayname": benchmark.displayname,
             "description": benchmark.description,
+            "category": benchmark.category,
             "license_name": benchmark.license_name,
         }
         for benchmark in benchmarks

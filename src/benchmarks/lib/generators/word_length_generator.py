@@ -15,11 +15,20 @@ from benchmarks.lib.utils.data_models import (
     Difficulty,
     EvaluationCriteria,
 )
-from benchmarks.lib.utils.factory import generator
+from benchmarks.lib.utils.factory import benchmark, generator
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
+benchmark(
+    "0011_word_length",
+    "Word Length",
+    "Tests ability to determine the number of characters in a word.",
+    category="token processing",
+)(__name__)
 
 
 @generator("0011_word_length")

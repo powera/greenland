@@ -18,7 +18,9 @@ from benchmarks.lib.utils.data_models import (
 from benchmarks.lib.utils.factory import benchmark, generator
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Register benchmark metadata
@@ -27,7 +29,9 @@ BENCHMARK_NAME = "Antonym Identification"
 BENCHMARK_DESCRIPTION = "Tests ability to identify the correct antonym from a list of options."
 
 # Apply benchmark decorator to this module
-benchmark(BENCHMARK_CODE, BENCHMARK_NAME, BENCHMARK_DESCRIPTION)(__name__)
+benchmark(BENCHMARK_CODE, BENCHMARK_NAME, BENCHMARK_DESCRIPTION, category="word processing")(
+    __name__
+)
 
 
 @generator(BENCHMARK_CODE)

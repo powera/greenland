@@ -85,10 +85,13 @@ def index():
             "run_ts": run_ts,
         }
 
+    categories = sorted({b.category for b in benchmarks if b.category})
+
     return render_template(
         "dashboard/index.html",
         models=models,
         benchmarks=benchmarks,
         scores=scores,
+        categories=categories,
         current_time=datetime.now().strftime("%B %d, %Y at %H:%M"),
     )

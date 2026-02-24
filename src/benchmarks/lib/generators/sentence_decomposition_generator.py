@@ -21,7 +21,9 @@ from sentences.decomposition import (
     build_single_language_decomposition_schema,
 )
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Define benchmark metadata
@@ -29,6 +31,7 @@ BENCHMARK_METADATA = BenchmarkMetadata(
     code="0062_sentence_decomposition",
     name="Sentence Decomposition",
     description="A benchmark to evaluate a model's ability to produce multilingual token-level sentence decomposition with grammatical metadata.",
+    category="word processing",
 )
 
 # Register benchmark metadata

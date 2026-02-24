@@ -20,7 +20,9 @@ from benchmarks.lib.utils.data_models import (
 from benchmarks.lib.utils.factory import benchmark, generator, register_benchmark_metadata
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Define valid language codes (includes both wordlist_extended and database export languages)
@@ -75,6 +77,7 @@ def get_translation_metadata(origin_lang: str, target_lang: str) -> BenchmarkMet
         description=description,
         version="1.0",
         tags=["translation", origin_lang, target_lang],
+        category="translation",
     )
 
 
