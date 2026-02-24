@@ -169,7 +169,7 @@ Provide your answer as concisely as possible.
             "category": question_data.get("category", "Unknown"),
             "difficulty": question_data.get("difficulty", "medium"),
             "choices": choices_formatted,
-            "correct_answer": question_data.get("correct_answer"),
-            "model_response": actual_response,
+            "expected": question_data.get("correct_answer"),
+            "response": actual_response,
             "is_correct": is_correct,
         }

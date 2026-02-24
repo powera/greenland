@@ -10,7 +10,9 @@ from benchmarks.lib.utils.base import BenchmarkRunner
 from benchmarks.lib.utils.factory import runner
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Define benchmark code for this runner
@@ -49,7 +51,7 @@ candidates is the antonym of the given word. Respond with only the antonym word.
     def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
         """Build debug information for antonym benchmark results."""
         return {
-            "model_answer": response.structured_data.get("antonym", ""),
-            "correct_answer": question_data["correct_answer"].get("antonym", ""),
+            "response": response.structured_data.get("antonym", ""),
+            "expected": question_data["correct_answer"].get("antonym", ""),
             "is_correct": is_correct,
         }

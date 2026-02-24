@@ -10,7 +10,9 @@ from benchmarks.lib.utils.base_runner import BenchmarkRunner
 from benchmarks.lib.utils.data_models import AnswerType, BenchmarkMetadata, BenchmarkResult
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -106,15 +108,15 @@ class LemmaRunner(BenchmarkRunner):
         if hasattr(response, "structured_data") and response.structured_data:
             return {
                 "inflected_word": inflected_word,
-                "model_response": response.structured_data.get("lemma", ""),
-                "correct_lemma": question_data.get("correct_answer", ""),
+                "response": response.structured_data.get("lemma", ""),
+                "expected": question_data.get("correct_answer", ""),
                 "response_text": response.response_text,
                 "is_correct": is_correct,
             }
         else:
             return {
                 "inflected_word": inflected_word,
-                "model_response": str(response),
-                "correct_lemma": question_data.get("correct_answer", ""),
+                "response": str(response),
+                "expected": question_data.get("correct_answer", ""),
                 "is_correct": is_correct,
             }
