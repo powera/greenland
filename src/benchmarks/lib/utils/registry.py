@@ -260,7 +260,7 @@ from benchmarks.lib.runners.verb_forms_runner import VerbFormsRunner
 
 
 @benchmark(
-    code="0120_geography",
+    code="0151_geography",
     name="Geography Knowledge",
     description="""
            A benchmark to evaluate a model's knowledge of world geography through
@@ -274,8 +274,8 @@ class GeographyBenchmark:
     pass
 
 
-register_generator("0120_geography", GeographyGenerator)
-register_runner("0120_geography", GeographyRunner)
+register_generator("0151_geography", GeographyGenerator)
+register_runner("0151_geography", GeographyRunner)
 
 
 @benchmark(
