@@ -1,0 +1,14 @@
+[
+  {"premise_1": "All mammals are warm-blooded.", "premise_2": "All whales are mammals.", "conclusion": "Therefore, all whales are warm-blooded.", "is_valid": true, "difficulty": "easy"},
+  {"premise_1": "All poets are writers.", "premise_2": "Some writers are teachers.", "conclusion": "Therefore, some poets are teachers.", "is_valid": false, "difficulty": "medium"},
+  {"premise_1": "No reptiles are warm-blooded.", "premise_2": "All snakes are reptiles.", "conclusion": "Therefore, no snakes are warm-blooded.", "is_valid": true, "difficulty": "easy"},
+  {"premise_1": "All painters are artists.", "premise_2": "Some artists are musicians.", "conclusion": "Therefore, some painters are musicians.", "is_valid": false, "difficulty": "medium"},
+  {"premise_1": "All squares are rectangles.", "premise_2": "No rectangles are circles.", "conclusion": "Therefore, no squares are circles.", "is_valid": true, "difficulty": "easy"},
+  {"premise_1": "Some birds are flightless.", "premise_2": "All penguins are birds.", "conclusion": "Therefore, some penguins are flightless.", "is_valid": false, "difficulty": "medium"},
+  {"premise_1": "All metals conduct electricity.", "premise_2": "Copper is a metal.", "conclusion": "Therefore, copper conducts electricity.", "is_valid": true, "difficulty": "easy"},
+  {"premise_1": "No fruits are vegetables.", "premise_2": "Some tomatoes are fruits.", "conclusion": "Therefore, some tomatoes are not vegetables.", "is_valid": true, "difficulty": "medium"},
+  {"premise_1": "All doctors have medical degrees.", "premise_2": "Sarah has a medical degree.", "conclusion": "Therefore, Sarah is a doctor.", "is_valid": false, "difficulty": "medium"},
+  {"premise_1": "All planets orbit stars.", "premise_2": "Earth is a planet.", "conclusion": "Therefore, Earth orbits a star.", "is_valid": true, "difficulty": "easy"},
+  {"premise_1": "No insects are mammals.", "premise_2": "All bees are insects.", "conclusion": "Therefore, no bees are mammals.", "is_valid": true, "difficulty": "easy"},
+  {"premise_1": "Some students are athletes.", "premise_2": "All athletes are disciplined.", "conclusion": "Therefore, some students are disciplined.", "is_valid": true, "difficulty": "hard"}
+]

@@ -277,6 +277,84 @@ class GeographyBenchmark:
 register_generator("0151_geography", GeographyGenerator)
 register_runner("0151_geography", GeographyRunner)
 
+from benchmarks.lib.generators.syllogism_validity_generator import SyllogismValidityGenerator
+from benchmarks.lib.runners.syllogism_validity_runner import SyllogismValidityRunner
+from benchmarks.lib.generators.book_author_match_generator import BookAuthorMatchGenerator
+from benchmarks.lib.runners.book_author_match_runner import BookAuthorMatchRunner
+from benchmarks.lib.generators.food_category_classification_generator import FoodCategoryClassificationGenerator
+from benchmarks.lib.runners.food_category_classification_runner import FoodCategoryClassificationRunner
+from benchmarks.lib.generators.historical_event_year_generator import HistoricalEventYearGenerator
+from benchmarks.lib.runners.historical_event_year_runner import HistoricalEventYearRunner
+
+
+@benchmark(
+    code="0152_syllogism_validity",
+    name="Syllogism Validity",
+    description="""
+           A benchmark to evaluate whether a model can determine if short
+           categorical syllogisms are logically valid.""",
+    category="general knowledge",
+)
+class SyllogismValidityBenchmark:
+    """Module container for syllogism validity benchmark."""
+
+    pass
+
+
+register_generator("0152_syllogism_validity", SyllogismValidityGenerator)
+register_runner("0152_syllogism_validity", SyllogismValidityRunner)
+
+
+@benchmark(
+    code="0153_book_author_match",
+    name="Book Author Match",
+    description="""
+           A benchmark to evaluate matching famous books to their correct authors.""",
+    category="general knowledge",
+)
+class BookAuthorMatchBenchmark:
+    """Module container for book-author benchmark."""
+
+    pass
+
+
+register_generator("0153_book_author_match", BookAuthorMatchGenerator)
+register_runner("0153_book_author_match", BookAuthorMatchRunner)
+
+
+@benchmark(
+    code="0154_food_category_classification",
+    name="Food Category Classification",
+    description="""
+           A benchmark to evaluate classification of food items by category.""",
+    category="general knowledge",
+)
+class FoodCategoryClassificationBenchmark:
+    """Module container for food category benchmark."""
+
+    pass
+
+
+register_generator("0154_food_category_classification", FoodCategoryClassificationGenerator)
+register_runner("0154_food_category_classification", FoodCategoryClassificationRunner)
+
+
+@benchmark(
+    code="0155_historical_event_year",
+    name="Historical Event Year",
+    description="""
+           A benchmark to evaluate selecting the correct year for major historical events.""",
+    category="general knowledge",
+)
+class HistoricalEventYearBenchmark:
+    """Module container for historical event year benchmark."""
+
+    pass
+
+
+register_generator("0155_historical_event_year", HistoricalEventYearGenerator)
+register_runner("0155_historical_event_year", HistoricalEventYearRunner)
+
 
 @benchmark(
     code="0121_verb_forms",
