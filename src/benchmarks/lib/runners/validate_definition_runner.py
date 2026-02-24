@@ -48,7 +48,11 @@ class ValidateDefinitionRunner(BenchmarkRunner):
 
             actual_is_valid = result.get("is_valid")
             expected_is_valid = expected["is_valid"]
-            is_correct = actual_is_valid == expected_is_valid
+
+            # None means the validator call failed; score 0 regardless of expected.
+            # With a valid response actual_is_valid is bool, so None != bool is always False.
+            is_fallback = actual_is_valid is None
+            is_correct = (not is_fallback) and (actual_is_valid == expected_is_valid)
             score = 100 if is_correct else 0
 
             debug_info = {
@@ -59,6 +63,7 @@ class ValidateDefinitionRunner(BenchmarkRunner):
                 "actual_is_valid": actual_is_valid,
                 "issues": result.get("issues"),
                 "confidence": result.get("confidence"),
+                "fallback_detected": is_fallback,
                 "is_correct": is_correct,
             }
 

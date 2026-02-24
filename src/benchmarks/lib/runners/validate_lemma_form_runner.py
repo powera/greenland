@@ -47,7 +47,11 @@ class ValidateLemmaFormRunner(BenchmarkRunner):
 
             actual_is_lemma = result.get("is_lemma")
             expected_is_lemma = expected["is_lemma"]
-            is_correct = actual_is_lemma == expected_is_lemma
+
+            # None means the validator call failed; score 0 regardless of expected.
+            # With a valid response actual_is_lemma is bool, so None != bool is always False.
+            is_fallback = actual_is_lemma is None
+            is_correct = (not is_fallback) and (actual_is_lemma == expected_is_lemma)
             score = 100 if is_correct else 0
 
             debug_info = {
@@ -59,6 +63,7 @@ class ValidateLemmaFormRunner(BenchmarkRunner):
                 "expected_suggested_lemma": expected.get("suggested_lemma"),
                 "confidence": result.get("confidence"),
                 "reason": result.get("reason"),
+                "fallback_detected": is_fallback,
                 "is_correct": is_correct,
             }
 

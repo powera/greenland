@@ -48,6 +48,14 @@ class ValidateTranslationRunner(BenchmarkRunner):
                 model=self.remote_model,
             )
 
+            # None for is_correct/is_lemma_form means the validator call failed.
+            # If any expected language returned None, the entire response is unreliable.
+            any_fallback = any(
+                result.get(lc, {}).get("is_correct") is None
+                or result.get(lc, {}).get("is_lemma_form") is None
+                for lc in expected
+            )
+
             # Partial credit: count matching boolean fields across all expected languages
             total_checks = 0
             matching_checks = 0
@@ -72,13 +80,22 @@ class ValidateTranslationRunner(BenchmarkRunner):
                         }
 
                 lang_debug["suggested_translation"] = lang_actual.get("suggested_translation")
+                lang_debug["fallback_detected"] = (
+                    lang_actual.get("is_correct") is None
+                    or lang_actual.get("is_lemma_form") is None
+                )
                 per_language_debug[lang_code] = lang_debug
 
-            score = int((matching_checks / total_checks) * 100) if total_checks > 0 else 0
+            score = (
+                0
+                if any_fallback
+                else (int((matching_checks / total_checks) * 100) if total_checks > 0 else 0)
+            )
 
             debug_info = {
                 "english_word": inputs["english_word"],
                 "pos_type": inputs["pos_type"],
+                "fallback_detected": any_fallback,
                 "total_checks": total_checks,
                 "matching_checks": matching_checks,
                 "score": score,
