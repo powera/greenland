@@ -9,4 +9,4 @@ cd "$(dirname "$0")/../.."
 export PYTHONPATH=src
 
 # Run the benchmark server
-python src/benchmarks/server/app.py "$@"
+python src/benchmarks/server/app.py "$@" --host=0.0.0.0

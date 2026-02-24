@@ -34,14 +34,12 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Category</label>
-                        <div class="btn-group w-100 flex-wrap" role="group">
-                            <input type="radio" class="btn-check" name="categoryFilter" id="catAll" value="all" checked>
-                            <label class="btn btn-outline-secondary" for="catAll">All</label>
+                        <select class="form-select" id="categoryFilter">
+                            <option value="all">All</option>
                             {% for cat in categories %}
-                            <input type="radio" class="btn-check" name="categoryFilter" id="cat_{{ loop.index }}" value="{{ cat }}">
-                            <label class="btn btn-outline-secondary" for="cat_{{ loop.index }}">{{ cat | title }}</label>
+                            <option value="{{ cat }}">{{ cat | title }}</option>
                             {% endfor %}
-                        </div>
+                        </select>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Sort Benchmarks</label>
