@@ -271,7 +271,11 @@ def run_missing_benchmarks(
 
 
 def generate_benchmark_questions(
-    benchmark_code: str, num_questions: Optional[int] = None, session=None
+    benchmark_code: str,
+    num_questions: Optional[int] = None,
+    session=None,
+    require_llm_confirmation: bool = False,
+    llm_confirmation_granted: bool = False,
 ) -> bool:
     """Generate questions for a benchmark and load them into the database."""
     logger.info("Generating questions for benchmark %s", benchmark_code)
@@ -281,6 +285,23 @@ def generate_benchmark_questions(
         if not generator:
             logger.error("Failed to create generator for benchmark %s", benchmark_code)
             return False
+
+        if require_llm_confirmation and getattr(generator, "can_generate_with_llm", False):
+            if not llm_confirmation_granted:
+                print(
+                    f"Benchmark {benchmark_code} may use an LLM ({generator.__class__.__name__}). "
+                    "Continue? [y/N]: ",
+                    end="",
+                    flush=True,
+                )
+                try:
+                    response = input().strip().lower()
+                except EOFError:
+                    response = ""
+
+                if response not in {"y", "yes"}:
+                    logger.info("Cancelled generation for %s because LLM usage was not confirmed.", benchmark_code)
+                    return False
 
         if num_questions is None:
             metadata = get_benchmark_metadata(benchmark_code)
@@ -298,7 +319,11 @@ def generate_benchmark_questions(
 
 
 def regenerate_benchmark_questions(
-    benchmark_code: str, num_questions: Optional[int] = None, session=None
+    benchmark_code: str,
+    num_questions: Optional[int] = None,
+    session=None,
+    require_llm_confirmation: bool = False,
+    llm_confirmation_granted: bool = False,
 ) -> bool:
     """Delete existing questions for a benchmark and regenerate from scratch."""
     logger.info("Regenerating questions for benchmark %s", benchmark_code)
@@ -314,7 +339,11 @@ def regenerate_benchmark_questions(
         return False
 
     return generate_benchmark_questions(
-        benchmark_code, num_questions=num_questions, session=session
+        benchmark_code,
+        num_questions=num_questions,
+        session=session,
+        require_llm_confirmation=require_llm_confirmation,
+        llm_confirmation_granted=llm_confirmation_granted,
     )
 
 
@@ -373,6 +402,8 @@ def init_all_benchmarks(
     skip_existing: bool = True,
     num_questions: Optional[int] = None,
     session=None,
+    require_llm_confirmation: bool = False,
+    llm_confirmation_granted: bool = False,
 ) -> Dict[str, Any]:
     """Sync all registered benchmarks to the DB and generate questions for empty ones.
 
@@ -414,7 +445,13 @@ def init_all_benchmarks(
                 continue
 
         logger.info("Generating questions for %s", code)
-        success = generate_benchmark_questions(code, num_questions=num_questions, session=session)
+        success = generate_benchmark_questions(
+            code,
+            num_questions=num_questions,
+            session=session,
+            require_llm_confirmation=require_llm_confirmation,
+            llm_confirmation_granted=llm_confirmation_granted,
+        )
         if success:
             summary["generated"].append(code)
         else:
@@ -439,6 +476,11 @@ def main() -> None:
         default=None,
         help="Number of questions to generate (default: per-benchmark setting)",
     )
+    gen_parser.add_argument(
+        "--yes-llm",
+        action="store_true",
+        help="Skip LLM usage confirmation prompt when a generator can call an LLM",
+    )
 
     regen_parser = subparsers.add_parser(
         "regenerate", help="Delete existing questions and regenerate from scratch"
@@ -449,6 +491,11 @@ def main() -> None:
         type=int,
         default=None,
         help="Number of questions to generate (default: per-benchmark setting)",
+    )
+    regen_parser.add_argument(
+        "--yes-llm",
+        action="store_true",
+        help="Skip LLM usage confirmation prompt when a generator can call an LLM",
     )
 
     subparsers.add_parser("list", help="List available benchmarks")
@@ -478,6 +525,11 @@ def main() -> None:
         default=None,
         help="Override the per-benchmark default question count",
     )
+    init_all_parser.add_argument(
+        "--yes-llm",
+        action="store_true",
+        help="Skip LLM usage confirmation prompt when generators can call an LLM",
+    )
 
     rescore_parser = subparsers.add_parser(
         "rescore",
@@ -501,12 +553,22 @@ def main() -> None:
             print("Benchmark failed.")
 
     elif args.command == "generate":
-        success = generate_benchmark_questions(args.benchmark, num_questions=args.num_questions)
+        success = generate_benchmark_questions(
+            args.benchmark,
+            num_questions=args.num_questions,
+            require_llm_confirmation=True,
+            llm_confirmation_granted=args.yes_llm,
+        )
         if success:
             print(f"Successfully generated questions for {args.benchmark}")
 
     elif args.command == "regenerate":
-        success = regenerate_benchmark_questions(args.benchmark, num_questions=args.num_questions)
+        success = regenerate_benchmark_questions(
+            args.benchmark,
+            num_questions=args.num_questions,
+            require_llm_confirmation=True,
+            llm_confirmation_granted=args.yes_llm,
+        )
         if success:
             print(f"Successfully regenerated questions for {args.benchmark}")
         else:
@@ -564,6 +626,8 @@ def main() -> None:
         init_summary = init_all_benchmarks(
             skip_existing=not args.force,
             num_questions=args.num_questions,
+            require_llm_confirmation=True,
+            llm_confirmation_granted=args.yes_llm,
         )
         sync = init_summary["synced"]
         print(f"Sync: {sync['added']} added, {sync['already_present']} already present.")
