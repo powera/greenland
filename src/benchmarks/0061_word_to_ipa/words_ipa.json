@@ -33,7 +33,7 @@
     "definition": "hello or good day",
     "ipa": "bɔ̃ʒuʁ",
     "difficulty": "easy",
-    "alternatives": ["bɔ̃.ʒuʁ"]
+    "alternatives": []
   },
   {
     "language_code": "de",
@@ -60,7 +60,7 @@
     "definition": "thank you",
     "ipa": "oβɾiˈɡadu",
     "difficulty": "medium",
-    "alternatives": ["obɾiˈɡadu", "oβɾiˈɣaðu"]
+    "alternatives": ["obɾiˈɡadu"]
   },
   {
     "language_code": "ru",
@@ -87,7 +87,7 @@
     "definition": "hello",
     "ipa": "aɲjʌŋhasejo",
     "difficulty": "medium",
-    "alternatives": ["an.njʌŋ.ha.se.jo"]
+    "alternatives": []
   },
   {
     "language_code": "ar",
