@@ -1,0 +1,322 @@
+[
+  {
+    "word": "cat",
+    "language_code": "en",
+    "language_name": "English",
+    "syllabification": "cat",
+    "syllable_count": 1,
+    "difficulty": "easy"
+  },
+  {
+    "word": "tree",
+    "language_code": "en",
+    "language_name": "English",
+    "syllabification": "tree",
+    "syllable_count": 1,
+    "difficulty": "easy"
+  },
+  {
+    "word": "apple",
+    "language_code": "en",
+    "language_name": "English",
+    "syllabification": "ap\u00b7ple",
+    "syllable_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "umbrella",
+    "language_code": "en",
+    "language_name": "English",
+    "syllabification": "um\u00b7brel\u00b7la",
+    "syllable_count": 3,
+    "difficulty": "medium"
+  },
+  {
+    "word": "beautiful",
+    "language_code": "en",
+    "language_name": "English",
+    "syllabification": "beau\u00b7ti\u00b7ful",
+    "syllable_count": 3,
+    "difficulty": "medium"
+  },
+  {
+    "word": "education",
+    "language_code": "en",
+    "language_name": "English",
+    "syllabification": "ed\u00b7u\u00b7ca\u00b7tion",
+    "syllable_count": 4,
+    "difficulty": "medium"
+  },
+  {
+    "word": "strength",
+    "language_code": "en",
+    "language_name": "English",
+    "syllabification": "strength",
+    "syllable_count": 1,
+    "difficulty": "easy"
+  },
+  {
+    "word": "programming",
+    "language_code": "en",
+    "language_name": "English",
+    "syllabification": "pro\u00b7gram\u00b7ming",
+    "syllable_count": 3,
+    "difficulty": "medium"
+  },
+  {
+    "word": "communication",
+    "language_code": "en",
+    "language_name": "English",
+    "syllabification": "com\u00b7mu\u00b7ni\u00b7ca\u00b7tion",
+    "syllable_count": 5,
+    "difficulty": "hard"
+  },
+  {
+    "word": "strawberry",
+    "language_code": "en",
+    "language_name": "English",
+    "syllabification": "straw\u00b7ber\u00b7ry",
+    "syllable_count": 3,
+    "difficulty": "medium"
+  },
+  {
+    "word": "ami",
+    "language_code": "fr",
+    "language_name": "French",
+    "syllabification": "a\u00b7mi",
+    "syllable_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "\u00e9cole",
+    "language_code": "fr",
+    "language_name": "French",
+    "syllabification": "\u00e9\u00b7cole",
+    "syllable_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "libert\u00e9",
+    "language_code": "fr",
+    "language_name": "French",
+    "syllabification": "li\u00b7ber\u00b7t\u00e9",
+    "syllable_count": 3,
+    "difficulty": "easy"
+  },
+  {
+    "word": "maison",
+    "language_code": "fr",
+    "language_name": "French",
+    "syllabification": "mai\u00b7son",
+    "syllable_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "ch\u00e2teau",
+    "language_code": "fr",
+    "language_name": "French",
+    "syllabification": "ch\u00e2\u00b7teau",
+    "syllable_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "r\u00e9volution",
+    "language_code": "fr",
+    "language_name": "French",
+    "syllabification": "r\u00e9\u00b7vo\u00b7lu\u00b7tion",
+    "syllable_count": 4,
+    "difficulty": "medium"
+  },
+  {
+    "word": "\u00e9poque",
+    "language_code": "fr",
+    "language_name": "French",
+    "syllabification": "\u00e9\u00b7poque",
+    "syllable_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "intelligence",
+    "language_code": "fr",
+    "language_name": "French",
+    "syllabification": "in\u00b7tel\u00b7li\u00b7gence",
+    "syllable_count": 4,
+    "difficulty": "medium"
+  },
+  {
+    "word": "conversation",
+    "language_code": "fr",
+    "language_name": "French",
+    "syllabification": "con\u00b7ver\u00b7sa\u00b7tion",
+    "syllable_count": 4,
+    "difficulty": "medium"
+  },
+  {
+    "word": "beaut\u00e9",
+    "language_code": "fr",
+    "language_name": "French",
+    "syllabification": "beau\u00b7t\u00e9",
+    "syllable_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "casa",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "syllabification": "ca\u00b7sa",
+    "syllable_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "amigo",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "syllabification": "a\u00b7mi\u00b7go",
+    "syllable_count": 3,
+    "difficulty": "easy"
+  },
+  {
+    "word": "se\u00f1or",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "syllabification": "se\u00b7\u00f1or",
+    "syllable_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "m\u00fasica",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "syllabification": "m\u00fa\u00b7si\u00b7ca",
+    "syllable_count": 3,
+    "difficulty": "easy"
+  },
+  {
+    "word": "coraz\u00f3n",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "syllabification": "co\u00b7ra\u00b7z\u00f3n",
+    "syllable_count": 3,
+    "difficulty": "medium"
+  },
+  {
+    "word": "educaci\u00f3n",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "syllabification": "e\u00b7du\u00b7ca\u00b7ci\u00f3n",
+    "syllable_count": 4,
+    "difficulty": "medium"
+  },
+  {
+    "word": "universidad",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "syllabification": "u\u00b7ni\u00b7ver\u00b7si\u00b7dad",
+    "syllable_count": 5,
+    "difficulty": "hard"
+  },
+  {
+    "word": "comunicaci\u00f3n",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "syllabification": "co\u00b7mu\u00b7ni\u00b7ca\u00b7ci\u00f3n",
+    "syllable_count": 5,
+    "difficulty": "hard"
+  },
+  {
+    "word": "extraordinario",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "syllabification": "ex\u00b7tra\u00b7or\u00b7di\u00b7na\u00b7rio",
+    "syllable_count": 6,
+    "difficulty": "hard"
+  },
+  {
+    "word": "primavera",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "syllabification": "pri\u00b7ma\u00b7ve\u00b7ra",
+    "syllable_count": 4,
+    "difficulty": "medium"
+  },
+  {
+    "word": "cane",
+    "language_code": "it",
+    "language_name": "Italian",
+    "syllabification": "ca\u00b7ne",
+    "syllable_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "amore",
+    "language_code": "it",
+    "language_name": "Italian",
+    "syllabification": "a\u00b7mo\u00b7re",
+    "syllable_count": 3,
+    "difficulty": "easy"
+  },
+  {
+    "word": "libro",
+    "language_code": "it",
+    "language_name": "Italian",
+    "syllabification": "li\u00b7bro",
+    "syllable_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "bambino",
+    "language_code": "it",
+    "language_name": "Italian",
+    "syllabification": "bam\u00b7bi\u00b7no",
+    "syllable_count": 3,
+    "difficulty": "easy"
+  },
+  {
+    "word": "universit\u00e0",
+    "language_code": "it",
+    "language_name": "Italian",
+    "syllabification": "u\u00b7ni\u00b7ver\u00b7si\u00b7t\u00e0",
+    "syllable_count": 5,
+    "difficulty": "hard"
+  },
+  {
+    "word": "bellissimo",
+    "language_code": "it",
+    "language_name": "Italian",
+    "syllabification": "bel\u00b7lis\u00b7si\u00b7mo",
+    "syllable_count": 4,
+    "difficulty": "medium"
+  },
+  {
+    "word": "comunicazione",
+    "language_code": "it",
+    "language_name": "Italian",
+    "syllabification": "co\u00b7mu\u00b7ni\u00b7ca\u00b7zio\u00b7ne",
+    "syllable_count": 6,
+    "difficulty": "hard"
+  },
+  {
+    "word": "meraviglioso",
+    "language_code": "it",
+    "language_name": "Italian",
+    "syllabification": "me\u00b7ra\u00b7vi\u00b7glio\u00b7so",
+    "syllable_count": 5,
+    "difficulty": "hard"
+  },
+  {
+    "word": "straordinario",
+    "language_code": "it",
+    "language_name": "Italian",
+    "syllabification": "stra\u00b7or\u00b7di\u00b7na\u00b7rio",
+    "syllable_count": 5,
+    "difficulty": "hard"
+  },
+  {
+    "word": "pianoforte",
+    "language_code": "it",
+    "language_name": "Italian",
+    "syllabification": "pia\u00b7no\u00b7for\u00b7te",
+    "syllable_count": 4,
+    "difficulty": "medium"
+  }
+]

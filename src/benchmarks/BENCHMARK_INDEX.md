@@ -18,6 +18,8 @@ This document captures the current benchmark lineup and proposes a numbering out
 |---|---|---|---|---|
 | 0011 | `word_length` | Word Length | token processing | implemented |
 | 0012 | `letter_count` | Letter Count | token processing | implemented |
+| 0013 | `vowel_count` | Vowel Count | token processing | implemented |
+| 0014 | `syllable_count` | Syllable Count | token processing | implemented |
 | 0015 | `spell_check` | Spell Check | word processing | implemented |
 | 0016 | `antonym` | Antonym Check | word processing | implemented |
 | 0020 | `definitions` | Definitions | word processing | implemented |
@@ -62,8 +64,8 @@ This is a lightweight roadmap that preserves existing IDs and adds selective uni
 - `0062_sentence_decomposition`
 
 #### Suggested unimplemented additions
-- `0013_vowel_count` — count vowels in a token.
-- `0014_syllable_count` — estimate/count syllables for single words.
+- `0013_vowel_count` — count vowels in a token. *(implemented)*
+- `0014_syllable_count` — estimate/count syllables for single words. *(implemented)*
 - `0024_percentage_math` — simple percent increase/decrease arithmetic.
 - `0026_time_arithmetic` — add/subtract times and durations.
 - `0034_pluralization` — singular/plural generation and validation.
