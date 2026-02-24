@@ -1,0 +1,14 @@
+[
+  {"event": "The signing of the United States Declaration of Independence", "year": 1776, "difficulty": "easy"},
+  {"event": "The fall of the Berlin Wall", "year": 1989, "difficulty": "easy"},
+  {"event": "The first moon landing (Apollo 11)", "year": 1969, "difficulty": "easy"},
+  {"event": "The start of World War I", "year": 1914, "difficulty": "easy"},
+  {"event": "The end of World War II in Europe (VE Day)", "year": 1945, "difficulty": "easy"},
+  {"event": "Christopher Columbus's first voyage to the Americas", "year": 1492, "difficulty": "easy"},
+  {"event": "The French Revolution begins", "year": 1789, "difficulty": "medium"},
+  {"event": "India gains independence from British rule", "year": 1947, "difficulty": "medium"},
+  {"event": "The Russian Revolution (October Revolution)", "year": 1917, "difficulty": "medium"},
+  {"event": "The Magna Carta is sealed", "year": 1215, "difficulty": "hard"},
+  {"event": "The coronation of Charlemagne as Holy Roman Emperor", "year": 800, "difficulty": "hard"},
+  {"event": "The Chernobyl nuclear disaster", "year": 1986, "difficulty": "medium"}
+]

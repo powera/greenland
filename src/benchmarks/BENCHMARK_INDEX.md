@@ -35,6 +35,10 @@ This document captures the current benchmark lineup and proposes a numbering out
 | 0131 | `validate_definition` | Validate Definition (lokys) | agent regression | implemented |
 | 0132 | `validate_translation` | Validate Translation (voras) | agent regression | implemented |
 | 0151 | `geography` | Geography Knowledge | knowledge | implemented (renumbered from 0120) |
+| 0152 | `syllogism_validity` | Syllogism Validity | knowledge | implemented |
+| 0153 | `book_author_match` | Book Author Match | knowledge | implemented |
+| 0154 | `food_category_classification` | Food Category Classification | knowledge | implemented |
+| 0155 | `historical_event_year` | Historical Event Year | knowledge | implemented |
 
 ### Renumber note
 
@@ -91,10 +95,6 @@ This is a lightweight roadmap that preserves existing IDs and adds selective uni
 
 #### Suggested unimplemented additions
 - `0150_multihop_facts` — two-hop factual reasoning from short contexts.
-- `0152_syllogism_validity` — determine whether simple syllogisms are logically valid.
-- `0153_book_author_match` — match books to their authors.
-- `0154_food_category_classification` — classify foods (e.g., meat/cheese/pasta/fruit/etc.).
-- `0155_historical_event_year` — choose the correct year for major historical events.
 
 ### 0200 boundary note
 

@@ -27,3 +27,9 @@ from benchmarks.lib.runners.verb_forms_runner import VerbFormsRunner
 from benchmarks.lib.runners.validate_lemma_form_runner import ValidateLemmaFormRunner
 from benchmarks.lib.runners.validate_definition_runner import ValidateDefinitionRunner
 from benchmarks.lib.runners.validate_translation_runner import ValidateTranslationRunner
+
+# Knowledge benchmarks 0152-0155
+from benchmarks.lib.runners.syllogism_validity_runner import SyllogismValidityRunner
+from benchmarks.lib.runners.book_author_match_runner import BookAuthorMatchRunner
+from benchmarks.lib.runners.food_category_classification_runner import FoodCategoryClassificationRunner
+from benchmarks.lib.runners.historical_event_year_runner import HistoricalEventYearRunner
