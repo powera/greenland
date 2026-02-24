@@ -11,7 +11,9 @@ from benchmarks.lib.utils.data_models import BenchmarkMetadata
 from benchmarks.lib.utils.factory import runner
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Benchmark code
@@ -100,9 +102,9 @@ Be as precise as possible and follow standard conversion formulas."""
         # Enhanced debug info
         return {
             "question": question_data.get("question_text"),
-            "expected_value": question_data.get("correct_answer"),
+            "expected": question_data.get("correct_answer"),
             "tolerance": question_data.get("evaluation_criteria", {}).get("tolerance", 0.01),
-            "actual_value": actual_value,
+            "response": actual_value,
             "full_response": response_text,
             "is_correct": is_correct,
         }

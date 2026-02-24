@@ -11,7 +11,9 @@ from benchmarks.lib.utils.data_models import BenchmarkMetadata
 from benchmarks.lib.utils.factory import runner
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -132,7 +134,7 @@ class PinyinLetterCountRunner(BenchmarkRunner):
         # Build debug info
         return {
             "question": question_text,
-            "expected_count": expected_count,
-            "model_count": model_count,
+            "expected": expected_count,
+            "response": model_count,
             "is_correct": is_correct,
         }
