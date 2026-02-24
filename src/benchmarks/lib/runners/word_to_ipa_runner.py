@@ -130,6 +130,78 @@ class WordToIPARunner(BenchmarkRunner):
         # If we get here, the answer is incorrect
         return False
 
+    def score_response(self, question_data: Dict, response: Any) -> int:
+        """Score a response on a 0-100 scale.
+
+        Rules:
+        - exact/accepted match: 100
+        - otherwise: Levenshtein similarity ratio scaled from 60
+          (e.g. 80% -> 48, 50% -> 30)
+        """
+        if isinstance(response, dict) and "ipa" in response:
+            model_answer = response["ipa"].strip()
+        else:
+            model_answer = str(response).strip()
+
+        normalized_model = self._normalize_ipa(model_answer)
+        if not normalized_model:
+            return 0
+
+        candidates = [self._normalize_ipa(question_data.get("correct_answer", ""))]
+        if (
+            "evaluation_criteria" in question_data
+            and "alternatives" in question_data["evaluation_criteria"]
+        ):
+            candidates.extend(
+                self._normalize_ipa(alt)
+                for alt in question_data["evaluation_criteria"]["alternatives"]
+            )
+
+        # For rescoring/partial credit, reserve 100 for strict accepted matches only.
+        if any(normalized_model == expected for expected in candidates if expected):
+            return 100
+
+        best_ratio = max(
+            (self._similarity_ratio(normalized_model, expected) for expected in candidates if expected),
+            default=0.0,
+        )
+        return int(round(60 * best_ratio))
+
+    def _similarity_ratio(self, left: str, right: str) -> float:
+        """Compute Levenshtein similarity ratio in [0, 1]."""
+        if left == right:
+            return 1.0
+        if not left or not right:
+            return 0.0
+
+        max_len = max(len(left), len(right))
+        if max_len == 0:
+            return 1.0
+
+        distance = self._levenshtein_distance(left, right)
+        return max(0.0, 1.0 - (distance / max_len))
+
+    def _levenshtein_distance(self, left: str, right: str) -> int:
+        """Compute Levenshtein edit distance between two strings."""
+        if left == right:
+            return 0
+        if not left:
+            return len(right)
+        if not right:
+            return len(left)
+
+        previous_row = list(range(len(right) + 1))
+        for i, left_char in enumerate(left, start=1):
+            current_row = [i]
+            for j, right_char in enumerate(right, start=1):
+                insert_cost = current_row[j - 1] + 1
+                delete_cost = previous_row[j] + 1
+                substitute_cost = previous_row[j - 1] + (left_char != right_char)
+                current_row.append(min(insert_cost, delete_cost, substitute_cost))
+            previous_row = current_row
+
+        return previous_row[-1]
+
     def _normalize_ipa(self, ipa_string: str) -> str:
         """
         Normalize an IPA string for consistent comparison.
