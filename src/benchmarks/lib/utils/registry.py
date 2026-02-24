@@ -23,8 +23,9 @@ from benchmarks.lib.runners.word_length_runner import WordLengthRunner
     code="0011_word_length",
     name="Word Length",
     description="""
-           A benchmark to evaluate a model's ability to count 
+           A benchmark to evaluate a model's ability to count
            the total number of letters in a given word.""",
+    category="token processing",
 )
 class WordLengthBenchmark:
     """Module container for word length benchmark."""
@@ -40,8 +41,9 @@ from benchmarks.lib.runners.letter_count_runner import LetterCountRunner
     code="0012_letter_count",
     name="Letter Count",
     description="""
-           A benchmark to evaluate a model's ability to count 
+           A benchmark to evaluate a model's ability to count
            how many times a specific letter appears in a word.""",
+    category="token processing",
 )
 class LetterCountBenchmark:
     """Module container for letter count benchmark."""
@@ -57,8 +59,9 @@ from benchmarks.lib.runners.spell_check_runner import SpellCheckRunner
     code="0015_spell_check",
     name="Spell Check",
     description="""
-           A benchmark to evaluate a model's ability to identify 
+           A benchmark to evaluate a model's ability to identify
            misspelled words in a sentence and provide their correct spelling.""",
+    category="word processing",
 )
 class SpellCheckBenchmark:
     """Module container for spell check benchmark."""
@@ -74,8 +77,9 @@ from benchmarks.lib.runners.antonym_runner import AntonymRunner
     code="0016_antonym",
     name="Antonym Check",
     description="""
-           A benchmark to evaluate a model's ability to identify 
+           A benchmark to evaluate a model's ability to identify
            the antonym of a word.""",
+    category="word processing",
 )
 class AntonymBenchmark:
     """Module container for antonym benchmark."""
@@ -91,8 +95,9 @@ from benchmarks.lib.runners.definitions_runner import DefinitionsRunner
     code="0020_definitions",
     name="Definitions",
     description="""
-           A benchmark to evaluate a model's ability to identify 
+           A benchmark to evaluate a model's ability to identify
            the correct definition of words.""",
+    category="word processing",
 )
 class DefinitionsBenchmark:
     """Module container for definitions benchmark."""
@@ -106,8 +111,9 @@ from benchmarks.lib.runners.unit_conversion_runner import UnitConversionRunner
     code="0022_unit_conversion",
     name="Unit Conversion",
     description="""
-           A benchmark to evaluate a model's ability to accurately convert 
+           A benchmark to evaluate a model's ability to accurately convert
            between different units of measurement.""",
+    category="general knowledge",
 )
 class UnitConversionBenchmark:
     """Module container for unit conversion benchmark."""
@@ -125,6 +131,7 @@ from benchmarks.lib.runners.part_of_speech_runner import PartOfSpeechRunner
     description="""
            A benchmark to evaluate a model's ability to identify
            the part of speech of a specific word in a sentence.""",
+    category="word processing",
 )
 class PartOfSpeechBenchmark:
     """Module container for part of speech benchmark."""
@@ -140,12 +147,13 @@ from benchmarks.lib.runners.lemma_runner import LemmaRunner
     code="0033_lemma",
     name="Lemma Identification",
     description="""
-         A benchmark to evaluate a model's ability to identify the lemma (base form) 
+         A benchmark to evaluate a model's ability to identify the lemma (base form)
          of a given word. The lemma is the dictionary form:
          - For nouns: the singular form (e.g., "cats" → "cat")
          - For verbs: the infinitive form without "to" (e.g., "running" → "run")
          - For adjectives: the positive form (e.g., "better" → "good")
          """,
+    category="word processing",
 )
 class LemmaBenchmark:
     """Module container for lemma identification benchmark."""
@@ -167,8 +175,9 @@ for codepair in ["en_fr", "en_zh", "sw_ko"]:
         code=benchmark_code,
         name=f"Translation {codepair}",
         description="""
-               A benchmark to evaluate a model's ability to translate 
+               A benchmark to evaluate a model's ability to translate
                words from one language to another.""",
+        category="translation",
     )
     class TranslationBenchmark:
         """Module container for translation benchmark."""
@@ -187,9 +196,10 @@ from benchmarks.lib.runners.pinyin_letter_count_runner import PinyinLetterCountR
 @benchmark(
     code="0051_pinyin_letters",
     name="Pinyin Letter Count",
-    description="""A benchmark to evaluate a model's ability to count 
-           how many times a specific letter appears in the Pinyin representation 
+    description="""A benchmark to evaluate a model's ability to count
+           how many times a specific letter appears in the Pinyin representation
            of a Chinese sentence.""",
+    category="token processing",
 )
 class PinyinLetterCountBenchmark:
     """Module container for Pinyin letter count benchmark."""
@@ -205,8 +215,9 @@ from benchmarks.lib.runners.word_to_ipa_runner import WordToIPARunner
     code="0061_word_to_ipa",
     name="Word to IPA",
     description="""
-           A benchmark to evaluate a model's ability to convert words from multiple languages 
+           A benchmark to evaluate a model's ability to convert words from multiple languages
            to their IPA (International Phonetic Alphabet) pronunciation.""",
+    category="token processing",
 )
 class WordToIPABenchmark:
     """Module container for Word to IPA benchmark."""
@@ -226,6 +237,7 @@ from benchmarks.lib.runners.sentence_decomposition_runner import SentenceDecompo
     description="""
            A benchmark to evaluate a model's ability to produce multilingual
            token-level sentence decomposition with grammatical metadata.""",
+    category="word processing",
 )
 class SentenceDecompositionBenchmark:
     """Module container for sentence decomposition benchmark."""
@@ -254,6 +266,7 @@ from benchmarks.lib.runners.verb_forms_runner import VerbFormsRunner
            A benchmark to evaluate a model's knowledge of world geography through
            multiple-choice questions about countries, capitals, physical features,
            and other geographical information.""",
+    category="general knowledge",
 )
 class GeographyBenchmark:
     """Module container for geography benchmark."""
@@ -271,6 +284,7 @@ register_runner("0120_geography", GeographyRunner)
     description="""
            A benchmark to evaluate a model's ability to generate full verb-form
            paradigms across persons and tenses in multiple languages.""",
+    category="word processing",
     default_num_questions=56,
 )
 class VerbFormsBenchmark:
@@ -293,6 +307,7 @@ from benchmarks.lib.runners.validate_lemma_form_runner import ValidateLemmaFormR
            A regression benchmark for the lokys agent's validate_lemma_form() function.
            Tests whether the LLM correctly identifies if a word is in its base/lemma form
            and suggests the correct form when it is not.""",
+    category="agent regression",
     default_num_questions=25,
 )
 class ValidateLemmaFormBenchmark:
@@ -315,6 +330,7 @@ from benchmarks.lib.runners.validate_definition_runner import ValidateDefinition
            A regression benchmark for the lokys agent's validate_definition() function.
            Tests whether the LLM correctly identifies well-formed vs. problematic word
            definitions (e.g. circular definitions, translations used as definitions).""",
+    category="agent regression",
     default_num_questions=25,
 )
 class ValidateDefinitionBenchmark:
@@ -337,6 +353,7 @@ from benchmarks.lib.runners.validate_translation_runner import ValidateTranslati
            A regression benchmark for the voras agent's validate_all_translations_for_word()
            function. Tests whether the LLM correctly identifies semantically incorrect or
            non-lemma translations across multiple target languages.""",
+    category="agent regression",
     default_num_questions=20,
 )
 class ValidateTranslationBenchmark:

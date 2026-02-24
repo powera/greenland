@@ -300,7 +300,10 @@ def generate_benchmark_questions(
                     response = ""
 
                 if response not in {"y", "yes"}:
-                    logger.info("Cancelled generation for %s because LLM usage was not confirmed.", benchmark_code)
+                    logger.info(
+                        "Cancelled generation for %s because LLM usage was not confirmed.",
+                        benchmark_code,
+                    )
                     return False
 
         if num_questions is None:
@@ -388,12 +391,25 @@ def sync_benchmarks_to_db(session=None) -> Dict[str, int]:
             codename=metadata.code,
             displayname=metadata.name,
             description=metadata.description,
+            category=metadata.category,
         )
         if success:
             summary["added"] += 1
             logger.info("Synced benchmark to DB: %s", code)
         else:
             summary["already_present"] += 1
+            # Update category for existing benchmarks.
+            # Note: insert_benchmark does a rollback on IntegrityError,
+            # so we must commit category updates individually.
+            existing = (
+                session.query(datastore_benchmarks.Benchmark)
+                .filter(datastore_benchmarks.Benchmark.codename == code)
+                .first()
+            )
+            if existing and existing.category != metadata.category:
+                existing.category = metadata.category
+                session.commit()
+                summary["updated"] = summary.get("updated", 0) + 1
 
     return summary
 
@@ -617,10 +633,14 @@ def main() -> None:
 
     elif args.command == "sync-benchmarks":
         sync_summary = sync_benchmarks_to_db()
-        print(
+        updated = sync_summary.get("updated", 0)
+        msg = (
             f"Sync complete: {sync_summary['added']} added, "
-            f"{sync_summary['already_present']} already present."
+            f"{sync_summary['already_present']} already present"
         )
+        if updated:
+            msg += f", {updated} category update(s)"
+        print(msg + ".")
 
     elif args.command == "init-all":
         init_summary = init_all_benchmarks(

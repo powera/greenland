@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     const modelTypeRadios = document.querySelectorAll('input[name="modelType"]');
-    const categoryRadios = document.querySelectorAll('input[name="categoryFilter"]');
+    const categorySelect = document.getElementById('categoryFilter');
     const searchBox = document.getElementById('searchBox');
     const benchmarkSortSelect = document.getElementById('benchmarkSort');
     const resultsTable = document.getElementById('resultsTable');
@@ -55,8 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function filterTable() {
         const modelType = document.querySelector('input[name="modelType"]:checked').value;
-        const categoryChecked = document.querySelector('input[name="categoryFilter"]:checked');
-        const selectedCategory = categoryChecked ? categoryChecked.value : 'all';
+        const selectedCategory = categorySelect ? categorySelect.value : 'all';
         const searchTerm = searchBox.value.toLowerCase();
 
         // Filter columns (models)
@@ -91,9 +90,9 @@ document.addEventListener('DOMContentLoaded', function() {
         radio.addEventListener('change', filterTable);
     });
 
-    categoryRadios.forEach(radio => {
-        radio.addEventListener('change', filterTable);
-    });
+    if (categorySelect) {
+        categorySelect.addEventListener('change', filterTable);
+    }
 
     searchBox.addEventListener('input', filterTable);
 
