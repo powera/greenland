@@ -8,45 +8,82 @@
         <h1><i class="bi bi-list-check"></i> Benchmarks</h1>
         <p class="lead">Available benchmark suites</p>
     </div>
+    {% if unsynced_benchmarks %}
+    <div class="col-auto d-flex align-items-end">
+        <form method="post" action="{{ url_for('benchmarks.sync_benchmarks') }}">
+            <button type="submit" class="btn btn-warning">
+                <i class="bi bi-arrow-repeat"></i> Sync {{ unsynced_benchmarks|length }} unregistered benchmark(s)
+            </button>
+        </form>
+    </div>
+    {% endif %}
 </div>
+
+{% if unsynced_benchmarks %}
+<div class="alert alert-warning" role="alert">
+    <strong><i class="bi bi-exclamation-triangle"></i>
+    {{ unsynced_benchmarks|length }} benchmark(s) are registered in code but not yet in the database.</strong>
+    Click "Sync" above to add them, then use "Generate" on each to create questions.
+    <ul class="mb-0 mt-2">
+        {% for b in unsynced_benchmarks %}
+        <li><code>{{ b.code }}</code> &mdash; {{ b.name }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
 
 <div class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="benchmarksTable">
                         <thead class="table-light">
                             <tr>
-                                <th>Name</th>
-                                <th class="text-center">Questions</th>
-                                <th class="text-center">Runs</th>
-                                <th class="text-center">Avg Score</th>
-                                <th class="text-center">Last Run</th>
+                                <th class="sortable" data-col="0" style="cursor:pointer;">
+                                    Name <i class="bi bi-arrow-down-up sort-icon"></i>
+                                </th>
+                                <th class="text-center sortable" data-col="1" style="cursor:pointer;">
+                                    Questions <i class="bi bi-arrow-down-up sort-icon"></i>
+                                </th>
+                                <th class="text-center sortable" data-col="2" style="cursor:pointer;">
+                                    Runs <i class="bi bi-arrow-down-up sort-icon"></i>
+                                </th>
+                                <th class="text-center sortable" data-col="3" style="cursor:pointer;">
+                                    Avg Score <i class="bi bi-arrow-down-up sort-icon"></i>
+                                </th>
+                                <th class="text-center sortable" data-col="4" style="cursor:pointer;">
+                                    Last Run <i class="bi bi-arrow-down-up sort-icon"></i>
+                                </th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for data in benchmarks_data %}
                             <tr>
-                                <td>
+                                <td data-val="{{ data.benchmark.displayname }}">
                                     <strong>{{ data.benchmark.displayname }}</strong>
                                     {% if data.benchmark.description %}
                                     <br><small class="text-muted">{{ data.benchmark.description }}</small>
                                     {% endif %}
+                                    {% if data.needs_questions %}
+                                    <br><span class="badge bg-warning text-dark">No questions &mdash; generate first</span>
+                                    {% endif %}
                                 </td>
-                                <td class="text-center">
-                                    <span class="badge bg-secondary">{{ data.question_count }}</span>
+                                <td class="text-center" data-val="{{ data.question_count }}">
+                                    <span class="badge {% if data.question_count == 0 %}bg-secondary{% else %}bg-primary{% endif %}">
+                                        {{ data.question_count }}
+                                    </span>
                                 </td>
-                                <td class="text-center">{{ data.run_count }}</td>
-                                <td class="text-center">
+                                <td class="text-center" data-val="{{ data.run_count }}">{{ data.run_count }}</td>
+                                <td class="text-center" data-val="{{ data.avg_score if data.avg_score else -1 }}">
                                     {% if data.avg_score %}
                                     <strong>{{ data.avg_score }}</strong>/100
                                     {% else %}
                                     <span class="text-muted">-</span>
                                     {% endif %}
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center" data-val="{{ data.last_run.strftime('%Y%m%d%H%M') if data.last_run else '' }}">
                                     {% if data.last_run %}
                                     <small>{{ data.last_run.strftime('%Y-%m-%d %H:%M') }}</small>
                                     {% else %}
@@ -59,8 +96,12 @@
                                         <i class="bi bi-eye"></i> View
                                     </a>
                                     <a href="{{ url_for('benchmarks.run_benchmark', benchmark_name=data.benchmark.codename) }}"
-                                       class="btn btn-sm btn-success">
+                                       class="btn btn-sm {% if data.needs_questions %}btn-outline-secondary{% else %}btn-success{% endif %}">
+                                        {% if data.needs_questions %}
+                                        <i class="bi bi-gear"></i> Generate
+                                        {% else %}
                                         <i class="bi bi-play"></i> Run
+                                        {% endif %}
                                     </a>
                                 </td>
                             </tr>
@@ -72,4 +113,60 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const table = document.getElementById('benchmarksTable');
+    if (!table) return;
+
+    let sortCol = 0;
+    let sortAsc = true;
+
+    function sortTable(col) {
+        if (sortCol === col) {
+            sortAsc = !sortAsc;
+        } else {
+            sortCol = col;
+            sortAsc = true;
+        }
+
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        rows.sort(function (a, b) {
+            const aCell = a.querySelectorAll('td')[col];
+            const bCell = b.querySelectorAll('td')[col];
+            const aVal = (aCell ? aCell.dataset.val : '') || '';
+            const bVal = (bCell ? bCell.dataset.val : '') || '';
+
+            const aNum = parseFloat(aVal);
+            const bNum = parseFloat(bVal);
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return sortAsc ? aNum - bNum : bNum - aNum;
+            }
+            return sortAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
+
+        rows.forEach(r => tbody.appendChild(r));
+
+        table.querySelectorAll('th.sortable').forEach(function (th, idx) {
+            const icon = th.querySelector('.sort-icon');
+            if (!icon) return;
+            if (idx === col) {
+                icon.className = 'bi sort-icon ' + (sortAsc ? 'bi-arrow-up' : 'bi-arrow-down');
+            } else {
+                icon.className = 'bi bi-arrow-down-up sort-icon';
+            }
+        });
+    }
+
+    table.querySelectorAll('th.sortable').forEach(function (th) {
+        th.addEventListener('click', function () {
+            sortTable(parseInt(this.dataset.col));
+        });
+    });
+});
+</script>
 {% endblock %}

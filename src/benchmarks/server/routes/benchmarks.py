@@ -7,8 +7,9 @@ import ipaddress
 from flask import Blueprint, g, render_template, request, flash, redirect, url_for, Response
 from sqlalchemy import func
 
-from benchmarks.datastore.benchmarks import Benchmark, Question, Run
+from benchmarks.datastore.benchmarks import Benchmark, Question, Run, insert_benchmark
 from benchmarks.datastore.common import Model
+from benchmarks.lib.utils.factory import get_all_benchmark_codes, get_benchmark_metadata
 
 bp = Blueprint("benchmarks", __name__, url_prefix="/benchmarks")
 
@@ -33,6 +34,24 @@ def _is_authorized_run_request() -> bool:
 
     allowed_networks = current_app.config.get("BENCHMARK_RUNNER_ALLOWED_CIDRS", ())
     return any(remote_ip in network for network in allowed_networks)
+
+
+def _get_unsynced_benchmark_codes(session) -> list[dict]:
+    """Return metadata for benchmarks registered in code but missing from the DB."""
+    db_codes = {row.codename for row in session.query(Benchmark.codename).all()}
+    unsynced = []
+    for code in get_all_benchmark_codes():
+        if code not in db_codes:
+            metadata = get_benchmark_metadata(code)
+            if metadata:
+                unsynced.append(
+                    {
+                        "code": metadata.code,
+                        "name": metadata.name,
+                        "description": metadata.description,
+                    }
+                )
+    return sorted(unsynced, key=lambda x: x["code"])
 
 
 @bp.route("/")
@@ -63,10 +82,54 @@ def list_benchmarks():
                 "run_count": run_count or 0,
                 "avg_score": round(avg_score, 1) if avg_score else None,
                 "last_run": last_run,
+                "needs_questions": (question_count or 0) == 0,
             }
         )
 
-    return render_template("benchmarks/list.html", benchmarks_data=benchmarks_data)
+    unsynced = _get_unsynced_benchmark_codes(g.db)
+
+    return render_template(
+        "benchmarks/list.html",
+        benchmarks_data=benchmarks_data,
+        unsynced_benchmarks=unsynced,
+    )
+
+
+@bp.route("/sync", methods=["POST"])
+def sync_benchmarks():
+    """Sync all code-registered benchmarks into the database (no question generation)."""
+    from flask import current_app
+
+    if not _is_authorized_run_request():
+        flash("Benchmark sync is allowed only from local/private direct network clients", "error")
+        return redirect(url_for("benchmarks.list_benchmarks"))
+
+    if current_app.config.get("READONLY", False):
+        flash("Cannot sync benchmarks: running in read-only mode", "error")
+        return redirect(url_for("benchmarks.list_benchmarks"))
+
+    added = 0
+    already_present = 0
+    for code in get_all_benchmark_codes():
+        metadata = get_benchmark_metadata(code)
+        if not metadata:
+            continue
+        success, _msg = insert_benchmark(
+            g.db,
+            codename=metadata.code,
+            displayname=metadata.name,
+            description=metadata.description,
+        )
+        if success:
+            added += 1
+        else:
+            already_present += 1
+
+    flash(
+        f"Sync complete: {added} benchmark(s) added, {already_present} already present.",
+        "success",
+    )
+    return redirect(url_for("benchmarks.list_benchmarks"))
 
 
 @bp.route("/<benchmark_name>")
@@ -131,7 +194,10 @@ def run_benchmark(benchmark_name):
             return redirect(url_for("benchmarks.view_benchmark", benchmark_name=benchmark_name))
 
         if not _is_authorized_run_request():
-            flash("Benchmark execution is allowed only from local/private direct network clients", "error")
+            flash(
+                "Benchmark execution is allowed only from local/private direct network clients",
+                "error",
+            )
             return redirect(url_for("benchmarks.view_benchmark", benchmark_name=benchmark_name))
 
         model_name = request.form.get("model_name", "").strip()
@@ -218,7 +284,9 @@ def cancel_task(task_id: int):
         return redirect(url_for("benchmarks.queue_status"))
 
     if not _is_authorized_run_request():
-        flash("Task cancellation is allowed only from local/private direct network clients", "error")
+        flash(
+            "Task cancellation is allowed only from local/private direct network clients", "error"
+        )
         return redirect(url_for("benchmarks.queue_status"))
 
     worker = current_app.extensions["benchmark_run_worker"]
