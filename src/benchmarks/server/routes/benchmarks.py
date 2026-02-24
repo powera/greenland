@@ -3,15 +3,25 @@
 """Benchmark routes - list and view benchmark details."""
 
 import ipaddress
+import json
 
 from flask import Blueprint, g, render_template, request, flash, redirect, url_for, Response
 from sqlalchemy import func
 
 from benchmarks.datastore.benchmarks import Benchmark, Question, Run, insert_benchmark
-from benchmarks.datastore.common import Model
+from benchmarks.datastore.common import Model, decode_json
 from benchmarks.lib.utils.factory import get_all_benchmark_codes, get_benchmark_metadata
 
 bp = Blueprint("benchmarks", __name__, url_prefix="/benchmarks")
+
+
+def _extract_prompt_details(question_info: dict) -> dict:
+    """Extract prompt-related fields from a question payload."""
+    return {
+        key: value
+        for key, value in question_info.items()
+        if isinstance(key, str) and "prompt" in key.lower()
+    }
 
 
 def _is_authorized_run_request() -> bool:
@@ -147,6 +157,31 @@ def view_benchmark(benchmark_name):
         .scalar()
     )
 
+    raw_questions = (
+        g.db.query(Question)
+        .filter(Question.benchmark_name == benchmark_name)
+        .order_by(Question.question_id)
+        .limit(100)
+        .all()
+    )
+
+    question_previews = []
+    for question in raw_questions:
+        question_info = decode_json(question.question_info_json)
+        prompt_details = _extract_prompt_details(question_info)
+        question_previews.append(
+            {
+                "question_id": question.question_id,
+                "question_text": question_info.get("question_text") or question_info.get("question"),
+                "prompt_details": prompt_details,
+                "question_info_pretty": json.dumps(
+                    question_info,
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+            }
+        )
+
     # Get best run for each model on this benchmark
     subquery = (
         g.db.query(
@@ -175,6 +210,7 @@ def view_benchmark(benchmark_name):
         "benchmarks/view.html",
         benchmark=benchmark,
         question_count=question_count,
+        question_previews=question_previews,
         leaderboard=leaderboard,
     )
 
