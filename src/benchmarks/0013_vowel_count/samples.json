@@ -1,0 +1,282 @@
+[
+  {
+    "word": "cat",
+    "language_code": "en",
+    "language_name": "English",
+    "vowel_count": 1,
+    "difficulty": "easy"
+  },
+  {
+    "word": "tree",
+    "language_code": "en",
+    "language_name": "English",
+    "vowel_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "apple",
+    "language_code": "en",
+    "language_name": "English",
+    "vowel_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "umbrella",
+    "language_code": "en",
+    "language_name": "English",
+    "vowel_count": 3,
+    "difficulty": "medium"
+  },
+  {
+    "word": "beautiful",
+    "language_code": "en",
+    "language_name": "English",
+    "vowel_count": 5,
+    "difficulty": "medium"
+  },
+  {
+    "word": "education",
+    "language_code": "en",
+    "language_name": "English",
+    "vowel_count": 5,
+    "difficulty": "medium"
+  },
+  {
+    "word": "strength",
+    "language_code": "en",
+    "language_name": "English",
+    "vowel_count": 1,
+    "difficulty": "easy"
+  },
+  {
+    "word": "programming",
+    "language_code": "en",
+    "language_name": "English",
+    "vowel_count": 3,
+    "difficulty": "medium"
+  },
+  {
+    "word": "communication",
+    "language_code": "en",
+    "language_name": "English",
+    "vowel_count": 6,
+    "difficulty": "hard"
+  },
+  {
+    "word": "strawberry",
+    "language_code": "en",
+    "language_name": "English",
+    "vowel_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "ami",
+    "language_code": "fr",
+    "language_name": "French",
+    "vowel_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "\u00e9cole",
+    "language_code": "fr",
+    "language_name": "French",
+    "vowel_count": 3,
+    "difficulty": "easy"
+  },
+  {
+    "word": "libert\u00e9",
+    "language_code": "fr",
+    "language_name": "French",
+    "vowel_count": 3,
+    "difficulty": "easy"
+  },
+  {
+    "word": "maison",
+    "language_code": "fr",
+    "language_name": "French",
+    "vowel_count": 3,
+    "difficulty": "easy"
+  },
+  {
+    "word": "ch\u00e2teau",
+    "language_code": "fr",
+    "language_name": "French",
+    "vowel_count": 4,
+    "difficulty": "medium"
+  },
+  {
+    "word": "r\u00e9volution",
+    "language_code": "fr",
+    "language_name": "French",
+    "vowel_count": 5,
+    "difficulty": "medium"
+  },
+  {
+    "word": "\u00e9poque",
+    "language_code": "fr",
+    "language_name": "French",
+    "vowel_count": 4,
+    "difficulty": "medium"
+  },
+  {
+    "word": "intelligence",
+    "language_code": "fr",
+    "language_name": "French",
+    "vowel_count": 5,
+    "difficulty": "hard"
+  },
+  {
+    "word": "conversation",
+    "language_code": "fr",
+    "language_name": "French",
+    "vowel_count": 5,
+    "difficulty": "hard"
+  },
+  {
+    "word": "beaut\u00e9",
+    "language_code": "fr",
+    "language_name": "French",
+    "vowel_count": 4,
+    "difficulty": "medium"
+  },
+  {
+    "word": "casa",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "vowel_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "amigo",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "vowel_count": 3,
+    "difficulty": "easy"
+  },
+  {
+    "word": "se\u00f1or",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "vowel_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "m\u00fasica",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "vowel_count": 3,
+    "difficulty": "easy"
+  },
+  {
+    "word": "coraz\u00f3n",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "vowel_count": 3,
+    "difficulty": "medium"
+  },
+  {
+    "word": "educaci\u00f3n",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "vowel_count": 5,
+    "difficulty": "medium"
+  },
+  {
+    "word": "universidad",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "vowel_count": 5,
+    "difficulty": "medium"
+  },
+  {
+    "word": "comunicaci\u00f3n",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "vowel_count": 6,
+    "difficulty": "hard"
+  },
+  {
+    "word": "extraordinario",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "vowel_count": 7,
+    "difficulty": "hard"
+  },
+  {
+    "word": "primavera",
+    "language_code": "es",
+    "language_name": "Spanish",
+    "vowel_count": 4,
+    "difficulty": "medium"
+  },
+  {
+    "word": "cane",
+    "language_code": "it",
+    "language_name": "Italian",
+    "vowel_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "amore",
+    "language_code": "it",
+    "language_name": "Italian",
+    "vowel_count": 3,
+    "difficulty": "easy"
+  },
+  {
+    "word": "libro",
+    "language_code": "it",
+    "language_name": "Italian",
+    "vowel_count": 2,
+    "difficulty": "easy"
+  },
+  {
+    "word": "bambino",
+    "language_code": "it",
+    "language_name": "Italian",
+    "vowel_count": 3,
+    "difficulty": "easy"
+  },
+  {
+    "word": "universit\u00e0",
+    "language_code": "it",
+    "language_name": "Italian",
+    "vowel_count": 5,
+    "difficulty": "medium"
+  },
+  {
+    "word": "bellissimo",
+    "language_code": "it",
+    "language_name": "Italian",
+    "vowel_count": 4,
+    "difficulty": "medium"
+  },
+  {
+    "word": "comunicazione",
+    "language_code": "it",
+    "language_name": "Italian",
+    "vowel_count": 7,
+    "difficulty": "hard"
+  },
+  {
+    "word": "meraviglioso",
+    "language_code": "it",
+    "language_name": "Italian",
+    "vowel_count": 6,
+    "difficulty": "hard"
+  },
+  {
+    "word": "straordinario",
+    "language_code": "it",
+    "language_name": "Italian",
+    "vowel_count": 6,
+    "difficulty": "hard"
+  },
+  {
+    "word": "pianoforte",
+    "language_code": "it",
+    "language_name": "Italian",
+    "vowel_count": 5,
+    "difficulty": "medium"
+  }
+]

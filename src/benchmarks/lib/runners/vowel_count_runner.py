@@ -1,0 +1,99 @@
+#!/usr/bin/python3
+
+"""Runner for vowel count benchmark."""
+
+import logging
+from typing import Any, Dict, Optional, Tuple
+
+from benchmarks.lib.utils.base import BenchmarkRunner
+from benchmarks.lib.utils.factory import runner
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+
+@runner("0013_vowel_count")
+class VowelCountRunner(BenchmarkRunner):
+    """Runner for testing a model's ability to count vowels in words across Latin-alphabet languages."""
+
+    def prepare_prompt(self, question_data: Dict) -> Tuple[str, Optional[Dict], Optional[str]]:
+        """
+        Prepare prompt for vowel count question.
+
+        Args:
+            question_data: Question data from database
+
+        Returns:
+            Tuple of (prompt, schema, context)
+        """
+        prompt = question_data.get("question_text", "")
+
+        schema = {
+            "type": "object",
+            "properties": {
+                "vowel_count": {
+                    "type": "integer",
+                    "description": "The number of vowels in the word",
+                }
+            },
+            "required": ["vowel_count"],
+        }
+
+        context = (
+            "You are performing a vowel counting task. "
+            "Count every occurrence of a vowel letter in the given word. "
+            "Vowels are: a, e, i, o, u and their accented forms "
+            "(such as à, â, é, è, ê, í, î, ó, ô, ú, û, and similar). "
+            "The letter y is not counted as a vowel. "
+            "Provide your answer as a single integer in the specified JSON format."
+        )
+
+        return prompt, schema, context
+
+    def evaluate_response(self, question_data: Dict, response: Any) -> bool:
+        """
+        Evaluate if the vowel count is correct.
+
+        Args:
+            question_data: Question data from database
+            response: Model response (structured dictionary)
+
+        Returns:
+            Boolean indicating whether the response is correct
+        """
+        expected_count = int(question_data.get("correct_answer", 0))
+
+        actual_count: Optional[int] = None
+        if isinstance(response, dict) and "vowel_count" in response:
+            try:
+                actual_count = int(response["vowel_count"])
+            except (ValueError, TypeError):
+                return False
+        else:
+            try:
+                actual_count = int(response)
+            except (ValueError, TypeError):
+                return False
+
+        return actual_count == expected_count
+
+    def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
+        """Build debug information for benchmark results."""
+        if hasattr(response, "structured_data") and response.structured_data:
+            return {
+                "prompt": question_data.get("question_text", ""),
+                "response": response.structured_data,
+                "expected": question_data.get("correct_answer"),
+                "is_correct": is_correct,
+            }
+        else:
+            return {
+                "prompt": question_data.get("question_text", ""),
+                "response": response.response_text,
+                "expected": question_data.get("correct_answer"),
+                "is_correct": is_correct,
+            }
