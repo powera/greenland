@@ -34,7 +34,7 @@ def index():
     models = g.db.query(Model).order_by(Model.displayname).all()
 
     # Get all benchmarks
-    benchmarks = g.db.query(Benchmark).order_by(Benchmark.displayname).all()
+    benchmarks = g.db.query(Benchmark).order_by(Benchmark.codename).all()
 
     # Get highest scoring run for each (benchmark, model) combination
     # Also calculate average eval time
