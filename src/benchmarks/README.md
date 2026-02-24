@@ -32,6 +32,11 @@ benchmarks/
 | 0061 | English to IPA | Convert to phonetic transcription |
 | 0062 | Sentence Decomposition | Generate multilingual token-level sentence decomposition JSON |
 
+
+## Numbering and roadmap
+
+See `BENCHMARK_INDEX.md` for the maintained benchmark inventory, numbering guidance, and proposed unimplemented benchmark slots through `0200`.
+
 ## Usage
 
 ### Running a Benchmark
