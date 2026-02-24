@@ -15,23 +15,121 @@
     "sentence": "Please read the first paragraph aloud.",
     "ipa": "ɹid",
     "difficulty": "medium",
-    "alternatives": ["riːd"]
+    "alternatives": [
+      "riːd"
+    ]
   },
   {
-    "language_code": "es",
-    "language_name": "Spanish",
-    "word": "casa",
-    "definition": "house or home",
-    "ipa": "ˈkasa",
+    "language_code": "en",
+    "language_name": "English",
+    "word": "read",
+    "sentence": "Yesterday, I read the same story.",
+    "ipa": "ɹɛd",
+    "difficulty": "medium",
+    "alternatives": [
+      "red"
+    ]
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "water",
+    "definition": "a clear liquid used for drinking",
+    "ipa": "ˈwɔtɚ",
+    "difficulty": "easy",
+    "alternatives": [
+      "ˈwɔːtə"
+    ]
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "music",
+    "definition": "organized sound for listening",
+    "ipa": "ˈmjuzɪk",
+    "difficulty": "easy",
+    "alternatives": [
+      "ˈmjuːzɪk"
+    ]
+  },
+  {
+    "language_code": "fr",
+    "language_name": "French",
+    "word": "bonjour",
+    "definition": "good day",
+    "ipa": "bɔ̃ʒuʁ",
     "difficulty": "easy",
     "alternatives": []
   },
   {
     "language_code": "fr",
     "language_name": "French",
-    "word": "bonjour",
-    "definition": "hello or good day",
-    "ipa": "bɔ̃ʒuʁ",
+    "word": "merci",
+    "definition": "thank you",
+    "ipa": "mɛʁsi",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "fr",
+    "language_name": "French",
+    "word": "maison",
+    "definition": "house",
+    "ipa": "mɛzɔ̃",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "fr",
+    "language_name": "French",
+    "word": "pomme",
+    "definition": "apple",
+    "ipa": "pɔm",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "lt",
+    "language_name": "Lithuanian",
+    "word": "labas",
+    "definition": "hello",
+    "ipa": "ˈlɐbɐs",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "lt",
+    "language_name": "Lithuanian",
+    "word": "ačiū",
+    "definition": "thank you",
+    "ipa": "ɐˈt͡ɕuː",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "lt",
+    "language_name": "Lithuanian",
+    "word": "namas",
+    "definition": "house",
+    "ipa": "ˈnɐmɐs",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "es",
+    "language_name": "Spanish",
+    "word": "casa",
+    "definition": "house",
+    "ipa": "ˈkasa",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "es",
+    "language_name": "Spanish",
+    "word": "agua",
+    "definition": "water",
+    "ipa": "ˈaɣwa",
     "difficulty": "easy",
     "alternatives": []
   },
@@ -45,11 +143,29 @@
     "alternatives": []
   },
   {
+    "language_code": "de",
+    "language_name": "German",
+    "word": "wasser",
+    "definition": "water",
+    "ipa": "ˈvasɐ",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
     "language_code": "it",
     "language_name": "Italian",
     "word": "ciao",
-    "definition": "hello or goodbye",
+    "definition": "hello",
     "ipa": "ˈtʃaːo",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "it",
+    "language_name": "Italian",
+    "word": "casa",
+    "definition": "house",
+    "ipa": "ˈkaːza",
     "difficulty": "easy",
     "alternatives": []
   },
@@ -59,43 +175,63 @@
     "word": "obrigado",
     "definition": "thank you",
     "ipa": "oβɾiˈɡadu",
-    "difficulty": "medium",
-    "alternatives": ["obɾiˈɡadu"]
+    "difficulty": "easy",
+    "alternatives": [
+      "obɾiˈɡadu"
+    ]
+  },
+  {
+    "language_code": "pt",
+    "language_name": "Portuguese",
+    "word": "casa",
+    "definition": "house",
+    "ipa": "ˈkazɐ",
+    "difficulty": "easy",
+    "alternatives": []
   },
   {
     "language_code": "ru",
     "language_name": "Russian",
-    "word": "спасибо",
-    "definition": "thank you",
-    "ipa": "spɐˈsʲibə",
-    "difficulty": "medium",
-    "alternatives": []
-  },
-  {
-    "language_code": "ja",
-    "language_name": "Japanese",
-    "word": "こんにちは",
-    "definition": "hello",
-    "ipa": "koɲɲitɕiwa",
-    "difficulty": "medium",
+    "word": "кот",
+    "definition": "cat",
+    "ipa": "kot",
+    "difficulty": "easy",
     "alternatives": []
   },
   {
     "language_code": "ko",
     "language_name": "Korean",
-    "word": "안녕하세요",
-    "definition": "hello",
-    "ipa": "aɲjʌŋhasejo",
-    "difficulty": "medium",
+    "word": "개",
+    "definition": "dog",
+    "ipa": "kɛ",
+    "difficulty": "easy",
     "alternatives": []
   },
   {
-    "language_code": "ar",
-    "language_name": "Arabic",
-    "word": "مرحبا",
-    "definition": "hello",
-    "ipa": "marħaban",
-    "difficulty": "medium",
-    "alternatives": ["marħaba"]
+    "language_code": "ja",
+    "language_name": "Japanese",
+    "word": "あお",
+    "definition": "blue",
+    "ipa": "ao",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "th",
+    "language_name": "Thai",
+    "word": "แมว",
+    "definition": "cat",
+    "ipa": "mɛːw",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "hi",
+    "language_name": "Hindi",
+    "word": "नीला",
+    "definition": "blue",
+    "ipa": "niːlaː",
+    "difficulty": "easy",
+    "alternatives": []
   }
 ]
