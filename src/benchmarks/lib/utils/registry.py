@@ -281,3 +281,69 @@ class VerbFormsBenchmark:
 
 register_generator("0121_verb_forms", VerbFormsGenerator)
 register_runner("0121_verb_forms", VerbFormsRunner)
+
+from benchmarks.lib.generators.validate_lemma_form_generator import ValidateLemmaFormGenerator
+from benchmarks.lib.runners.validate_lemma_form_runner import ValidateLemmaFormRunner
+
+
+@benchmark(
+    code="0130_validate_lemma_form",
+    name="Validate Lemma Form (lokys)",
+    description="""
+           A regression benchmark for the lokys agent's validate_lemma_form() function.
+           Tests whether the LLM correctly identifies if a word is in its base/lemma form
+           and suggests the correct form when it is not.""",
+    default_num_questions=25,
+)
+class ValidateLemmaFormBenchmark:
+    """Module container for validate_lemma_form agent benchmark."""
+
+    pass
+
+
+register_generator("0130_validate_lemma_form", ValidateLemmaFormGenerator)
+register_runner("0130_validate_lemma_form", ValidateLemmaFormRunner)
+
+from benchmarks.lib.generators.validate_definition_generator import ValidateDefinitionGenerator
+from benchmarks.lib.runners.validate_definition_runner import ValidateDefinitionRunner
+
+
+@benchmark(
+    code="0131_validate_definition",
+    name="Validate Definition (lokys)",
+    description="""
+           A regression benchmark for the lokys agent's validate_definition() function.
+           Tests whether the LLM correctly identifies well-formed vs. problematic word
+           definitions (e.g. circular definitions, translations used as definitions).""",
+    default_num_questions=25,
+)
+class ValidateDefinitionBenchmark:
+    """Module container for validate_definition agent benchmark."""
+
+    pass
+
+
+register_generator("0131_validate_definition", ValidateDefinitionGenerator)
+register_runner("0131_validate_definition", ValidateDefinitionRunner)
+
+from benchmarks.lib.generators.validate_translation_generator import ValidateTranslationGenerator
+from benchmarks.lib.runners.validate_translation_runner import ValidateTranslationRunner
+
+
+@benchmark(
+    code="0132_validate_translation",
+    name="Validate Translation (voras)",
+    description="""
+           A regression benchmark for the voras agent's validate_all_translations_for_word()
+           function. Tests whether the LLM correctly identifies semantically incorrect or
+           non-lemma translations across multiple target languages.""",
+    default_num_questions=20,
+)
+class ValidateTranslationBenchmark:
+    """Module container for validate_all_translations_for_word agent benchmark."""
+
+    pass
+
+
+register_generator("0132_validate_translation", ValidateTranslationGenerator)
+register_runner("0132_validate_translation", ValidateTranslationRunner)

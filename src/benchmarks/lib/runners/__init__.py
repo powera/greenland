@@ -22,3 +22,8 @@ from benchmarks.lib.runners.word_length_runner import WordLengthRunner
 from benchmarks.lib.runners.sentence_decomposition_runner import SentenceDecompositionRunner
 
 from benchmarks.lib.runners.verb_forms_runner import VerbFormsRunner
+
+# Agent regression benchmark runners
+from benchmarks.lib.runners.validate_lemma_form_runner import ValidateLemmaFormRunner
+from benchmarks.lib.runners.validate_definition_runner import ValidateDefinitionRunner
+from benchmarks.lib.runners.validate_translation_runner import ValidateTranslationRunner
