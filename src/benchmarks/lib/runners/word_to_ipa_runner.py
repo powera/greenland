@@ -5,6 +5,7 @@
 import json
 import logging
 import re
+import unicodedata
 from typing import Any, Dict, List, Optional, Tuple
 
 from benchmarks.lib.utils.base_runner import BenchmarkRunner
@@ -155,8 +156,12 @@ class WordToIPARunner(BenchmarkRunner):
                 extracted = re.sub(pattern, replacement, ipa_string)
                 break
 
-        # Remove any surrounding whitespace
-        normalized = extracted.strip()
+        # Remove any surrounding whitespace and normalize Unicode composition.
+        normalized = unicodedata.normalize("NFC", extracted.strip())
+
+        # Normalize equivalent affricate tie-bar forms (e.g., t͡ɕ -> tɕ).
+        # This keeps comparison robust across common IPA rendering variants.
+        normalized = normalized.replace("͡", "").replace("͜", "")
 
         # Remove any explanatory text before or after the IPA
         # This is a simple heuristic - we look for the longest contiguous segment with IPA-like characters
@@ -219,6 +224,14 @@ class WordToIPARunner(BenchmarkRunner):
             "r": set(["r", "ɹ"]),
             "t": set(["t", "ɾ"]),  # Especially for American English
             "ɾ": set(["ɾ", "t"]),
+            # Common spirantization/lenition variants in broad transcriptions.
+            "ɡ": set(["ɡ", "g", "ɣ"]),
+            "g": set(["g", "ɡ", "ɣ"]),
+            "ɣ": set(["ɣ", "ɡ", "g"]),
+            "d": set(["d", "ð"]),
+            "ð": set(["ð", "d"]),
+            "b": set(["b", "β"]),
+            "β": set(["β", "b"]),
         }
 
         # Count match points
