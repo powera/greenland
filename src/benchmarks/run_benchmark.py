@@ -335,6 +335,94 @@ def get_benchmark_info() -> List[Dict]:
     return result
 
 
+def sync_benchmarks_to_db(session=None) -> Dict[str, int]:
+    """Ensure every code-registered benchmark has a row in the database.
+
+    This does *not* generate questions.  It only inserts the benchmark
+    metadata (codename, displayname, description) so that the web server
+    can show all benchmarks and allow runs to be queued.
+
+    Returns a summary dict with keys ``added`` and ``already_present``.
+    """
+    if not session:
+        session = datastore_common.create_dev_session()
+
+    summary = {"added": 0, "already_present": 0}
+
+    for code in get_all_benchmark_codes():
+        metadata = get_benchmark_metadata(code)
+        if not metadata:
+            continue
+
+        success, msg = datastore_benchmarks.insert_benchmark(
+            session,
+            codename=metadata.code,
+            displayname=metadata.name,
+            description=metadata.description,
+        )
+        if success:
+            summary["added"] += 1
+            logger.info("Synced benchmark to DB: %s", code)
+        else:
+            summary["already_present"] += 1
+
+    return summary
+
+
+def init_all_benchmarks(
+    skip_existing: bool = True,
+    num_questions: Optional[int] = None,
+    session=None,
+) -> Dict[str, Any]:
+    """Sync all registered benchmarks to the DB and generate questions for empty ones.
+
+    Args:
+        skip_existing: When True (default), skip benchmarks that already have
+            questions.  Set to False to regenerate questions even for benchmarks
+            that already have them.
+        num_questions: Override the per-benchmark default question count.
+        session: Optional database session.
+
+    Returns:
+        Summary dict with keys ``synced``, ``generated``, ``skipped``,
+        ``failed``.
+    """
+    if not session:
+        session = datastore_common.create_dev_session()
+
+    sync_summary = sync_benchmarks_to_db(session)
+
+    summary: Dict[str, Any] = {
+        "synced": sync_summary,
+        "generated": [],
+        "skipped": [],
+        "failed": [],
+    }
+
+    all_codes = sorted(get_all_benchmark_codes())
+
+    for code in all_codes:
+        if skip_existing:
+            question_count = (
+                session.query(datastore_benchmarks.Question)
+                .filter(datastore_benchmarks.Question.benchmark_name == code)
+                .count()
+            )
+            if question_count > 0:
+                logger.info("Skipping %s – already has %d questions", code, question_count)
+                summary["skipped"].append(code)
+                continue
+
+        logger.info("Generating questions for %s", code)
+        success = generate_benchmark_questions(code, num_questions=num_questions, session=session)
+        if success:
+            summary["generated"].append(code)
+        else:
+            summary["failed"].append(code)
+
+    return summary
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run benchmarks for language models")
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
@@ -369,6 +457,27 @@ def main() -> None:
     missing_parser = subparsers.add_parser("missing", help="Run missing benchmarks")
     missing_parser.add_argument("--blacklist-models", nargs="+", help="Models to exclude")
     missing_parser.add_argument("--blacklist-benchmarks", nargs="+", help="Benchmarks to exclude")
+
+    subparsers.add_parser(
+        "sync-benchmarks",
+        help="Ensure all code-registered benchmarks have a DB row (no question generation)",
+    )
+
+    init_all_parser = subparsers.add_parser(
+        "init-all",
+        help="Sync benchmarks to DB and generate questions for those that have none",
+    )
+    init_all_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Regenerate questions even for benchmarks that already have questions",
+    )
+    init_all_parser.add_argument(
+        "--num-questions",
+        type=int,
+        default=None,
+        help="Override the per-benchmark default question count",
+    )
 
     rescore_parser = subparsers.add_parser(
         "rescore",
@@ -427,8 +536,8 @@ def main() -> None:
 
         if run_pairs:
             print("Successfully ran the following benchmarks:")
-            for model, benchmark in run_pairs:
-                print(f"  {benchmark} for {model}")
+            for run_model, run_benchmark_code in run_pairs:
+                print(f"  {run_benchmark_code} for {run_model}")
         else:
             print("No missing benchmarks found or all runs failed.")
 
@@ -443,6 +552,27 @@ def main() -> None:
             f"[{mode}] runs_considered={summary['runs_considered']} runs_updated={summary['runs_updated']} "
             f"details_rescored={summary['details_rescored']} details_skipped={summary['details_skipped']}"
         )
+
+    elif args.command == "sync-benchmarks":
+        sync_summary = sync_benchmarks_to_db()
+        print(
+            f"Sync complete: {sync_summary['added']} added, "
+            f"{sync_summary['already_present']} already present."
+        )
+
+    elif args.command == "init-all":
+        init_summary = init_all_benchmarks(
+            skip_existing=not args.force,
+            num_questions=args.num_questions,
+        )
+        sync = init_summary["synced"]
+        print(f"Sync: {sync['added']} added, {sync['already_present']} already present.")
+        if init_summary["generated"]:
+            print(f"Generated questions for: {', '.join(init_summary['generated'])}")
+        if init_summary["skipped"]:
+            print(f"Skipped (already had questions): {', '.join(init_summary['skipped'])}")
+        if init_summary["failed"]:
+            print(f"FAILED: {', '.join(init_summary['failed'])}")
 
 
 if __name__ == "__main__":

@@ -32,5 +32,11 @@ from benchmarks.lib.generators import *
 # Import all runners
 from benchmarks.lib.runners import *
 
+# Import registry last so all generators/runners are already loaded when it runs.
+# This registers benchmark metadata (@benchmark decorators) for all benchmarks,
+# and also registers generator/runner classes for benchmarks that don't use
+# @generator/@runner decorators in their own files.
+import benchmarks.lib.utils.registry as _benchmark_registry  # noqa: F401, E402
+
 # Version info
 __version__ = "1.0.0"
