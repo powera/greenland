@@ -5,6 +5,7 @@
 import json
 import logging
 import re
+import unicodedata
 from typing import Any, Dict, List, Optional, Tuple
 
 from benchmarks.lib.utils.base_runner import BenchmarkRunner
@@ -155,8 +156,16 @@ class WordToIPARunner(BenchmarkRunner):
                 extracted = re.sub(pattern, replacement, ipa_string)
                 break
 
-        # Remove any surrounding whitespace
-        normalized = extracted.strip()
+        # Remove any surrounding whitespace and normalize Unicode composition.
+        normalized = unicodedata.normalize("NFC", extracted.strip())
+
+        # Normalize equivalent affricate tie-bar forms (e.g., t͡ɕ -> tɕ).
+        # This keeps comparison robust across common IPA rendering variants.
+        normalized = normalized.replace("͡", "").replace("͜", "")
+
+        # Normalize syllable delimiters commonly emitted by models (e.g., bɔ̃.ʒuʁ).
+        normalized = normalized.replace(".", "")
+
 
         # Remove any explanatory text before or after the IPA
         # This is a simple heuristic - we look for the longest contiguous segment with IPA-like characters
@@ -196,8 +205,7 @@ class WordToIPARunner(BenchmarkRunner):
         if not model_answer or not correct_answer:
             return False
 
-        # Compare character by character and count matches
-        # Allow for slight variations in symbols, especially for similar sounds
+        # Allow slight symbol variation across broad/narrow transcriptions.
         similar_chars = {
             "i": set(["i", "ɪ", "iː"]),
             "ɪ": set(["ɪ", "i", "iː"]),
@@ -219,29 +227,48 @@ class WordToIPARunner(BenchmarkRunner):
             "r": set(["r", "ɹ"]),
             "t": set(["t", "ɾ"]),  # Especially for American English
             "ɾ": set(["ɾ", "t"]),
+            # Common spirantization/lenition variants in broad transcriptions.
+            "ɡ": set(["ɡ", "g", "ɣ"]),
+            "g": set(["g", "ɡ", "ɣ"]),
+            "ɣ": set(["ɣ", "ɡ", "g"]),
+            "d": set(["d", "ð"]),
+            "ð": set(["ð", "d"]),
+            "b": set(["b", "β"]),
+            "β": set(["β", "b"]),
+            "ɲ": set(["ɲ", "n"]),
+            "n": set(["n", "ɲ"]),
         }
 
-        # Count match points
-        total_points = max(len(model_answer), len(correct_answer))
-        match_points: float = 0
+        def substitution_cost(a: str, b: str) -> float:
+            if a == b:
+                return 0.0
+            if a in similar_chars.get(b, set()) or b in similar_chars.get(a, set()):
+                return 0.5
+            return 1.0
 
-        # Dynamic programming approach for alignment and scoring
         m, n = len(model_answer), len(correct_answer)
         if m == 0 or n == 0:
             return False
 
-        # Simple character-by-character comparison
-        for i in range(min(m, n)):
-            if model_answer[i] == correct_answer[i]:
-                match_points += 1
-            elif model_answer[i] in similar_chars.get(correct_answer[i], set()) or correct_answer[
-                i
-            ] in similar_chars.get(model_answer[i], set()):
-                match_points += 0.5
+        # Weighted Levenshtein distance to tolerate insertions/deletions,
+        # not just positionally-aligned substitutions.
+        dp = [[0.0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            dp[i][0] = float(i)
+        for j in range(1, n + 1):
+            dp[0][j] = float(j)
 
-        # Calculate similarity ratio
-        similarity = match_points / total_points
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                sub_cost = substitution_cost(model_answer[i - 1], correct_answer[j - 1])
+                dp[i][j] = min(
+                    dp[i - 1][j] + 1.0,  # deletion
+                    dp[i][j - 1] + 1.0,  # insertion
+                    dp[i - 1][j - 1] + sub_cost,  # substitution/match
+                )
 
+        max_len = max(m, n)
+        similarity = 1.0 - (dp[m][n] / max_len)
         return similarity >= threshold
 
     def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
