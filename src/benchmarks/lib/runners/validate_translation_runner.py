@@ -10,6 +10,7 @@ No DB access is required.
 
 import json
 import logging
+import time
 from typing import Any, Dict, Optional, Tuple
 
 from benchmarks.lib.utils.base_runner import BenchmarkRunner
@@ -41,12 +42,14 @@ class ValidateTranslationRunner(BenchmarkRunner):
         expected: Dict[str, Dict[str, bool]] = correct_answer["expected"]
 
         try:
+            start_time = time.time()
             result = validate_all_translations_for_word(
                 english_word=inputs["english_word"],
                 translations=inputs["translations"],
                 pos_type=inputs["pos_type"],
                 model=self.remote_model,
             )
+            elapsed_msec = int((time.time() - start_time) * 1000)
 
             # None for is_correct/is_lemma_form means the validator call failed.
             # If any expected language returned None, the entire response is unreliable.
@@ -93,12 +96,14 @@ class ValidateTranslationRunner(BenchmarkRunner):
             )
 
             debug_info = {
+                "response": result,
+                "expected": expected,
+                "is_correct": score == 100,
                 "english_word": inputs["english_word"],
                 "pos_type": inputs["pos_type"],
                 "fallback_detected": any_fallback,
                 "total_checks": total_checks,
                 "matching_checks": matching_checks,
-                "score": score,
                 "per_language": per_language_debug,
             }
 
@@ -114,7 +119,7 @@ class ValidateTranslationRunner(BenchmarkRunner):
             return BenchmarkResult(
                 question_id=question_id,
                 score=score,
-                eval_msec=0,
+                eval_msec=elapsed_msec,
                 debug_json=json.dumps(debug_info),
             )
 

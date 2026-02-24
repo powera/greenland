@@ -9,6 +9,7 @@ is_lemma boolean from the sample. No DB access is required.
 
 import json
 import logging
+import time
 from typing import Any, Dict, Optional, Tuple
 
 from benchmarks.lib.utils.base_runner import BenchmarkRunner
@@ -39,11 +40,13 @@ class ValidateLemmaFormRunner(BenchmarkRunner):
         expected: Dict[str, Any] = correct_answer["expected"]
 
         try:
+            start_time = time.time()
             result = validate_lemma_form(
                 word=inputs["word"],
                 pos_type=inputs["pos_type"],
                 model=self.remote_model,
             )
+            elapsed_msec = int((time.time() - start_time) * 1000)
 
             actual_is_lemma = result.get("is_lemma")
             expected_is_lemma = expected["is_lemma"]
@@ -55,16 +58,12 @@ class ValidateLemmaFormRunner(BenchmarkRunner):
             score = 100 if is_correct else 0
 
             debug_info = {
+                "response": result,
+                "expected": expected,
+                "is_correct": is_correct,
                 "word": inputs["word"],
                 "pos_type": inputs["pos_type"],
-                "expected_is_lemma": expected_is_lemma,
-                "actual_is_lemma": actual_is_lemma,
-                "suggested_lemma": result.get("suggested_lemma"),
-                "expected_suggested_lemma": expected.get("suggested_lemma"),
-                "confidence": result.get("confidence"),
-                "reason": result.get("reason"),
                 "fallback_detected": is_fallback,
-                "is_correct": is_correct,
             }
 
             logger.info(
@@ -79,7 +78,7 @@ class ValidateLemmaFormRunner(BenchmarkRunner):
             return BenchmarkResult(
                 question_id=question_id,
                 score=score,
-                eval_msec=0,
+                eval_msec=elapsed_msec,
                 debug_json=json.dumps(debug_info),
             )
 
