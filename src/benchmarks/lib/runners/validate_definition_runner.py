@@ -9,6 +9,7 @@ is_valid boolean from the sample. No DB access is required.
 
 import json
 import logging
+import time
 from typing import Any, Dict, Optional, Tuple
 
 from benchmarks.lib.utils.base_runner import BenchmarkRunner
@@ -39,12 +40,14 @@ class ValidateDefinitionRunner(BenchmarkRunner):
         expected: Dict[str, Any] = correct_answer["expected"]
 
         try:
+            start_time = time.time()
             result = validate_definition(
                 word=inputs["word"],
                 definition=inputs["definition"],
                 pos_type=inputs["pos_type"],
                 model=self.remote_model,
             )
+            elapsed_msec = int((time.time() - start_time) * 1000)
 
             actual_is_valid = result.get("is_valid")
             expected_is_valid = expected["is_valid"]
@@ -56,15 +59,13 @@ class ValidateDefinitionRunner(BenchmarkRunner):
             score = 100 if is_correct else 0
 
             debug_info = {
+                "response": result,
+                "expected": expected,
+                "is_correct": is_correct,
                 "word": inputs["word"],
                 "pos_type": inputs["pos_type"],
                 "definition_preview": inputs["definition"][:80],
-                "expected_is_valid": expected_is_valid,
-                "actual_is_valid": actual_is_valid,
-                "issues": result.get("issues"),
-                "confidence": result.get("confidence"),
                 "fallback_detected": is_fallback,
-                "is_correct": is_correct,
             }
 
             logger.info(
@@ -79,7 +80,7 @@ class ValidateDefinitionRunner(BenchmarkRunner):
             return BenchmarkResult(
                 question_id=question_id,
                 score=score,
-                eval_msec=0,
+                eval_msec=elapsed_msec,
                 debug_json=json.dumps(debug_info),
             )
 
