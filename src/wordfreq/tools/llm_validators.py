@@ -78,7 +78,7 @@ def validate_lemma_form(
         else:
             logger.error(f"No structured data received for lemma validation of '{word}'")
             return {
-                "is_lemma": True,  # Assume correct if validation fails
+                "is_lemma": None,
                 "suggested_lemma": word,
                 "reason": "Validation failed",
                 "confidence": 0.0,
@@ -87,7 +87,7 @@ def validate_lemma_form(
     except Exception as e:
         logger.error(f"Error validating lemma form for '{word}': {e}")
         return {
-            "is_lemma": True,
+            "is_lemma": None,
             "suggested_lemma": word,
             "reason": f"Error: {str(e)}",
             "confidence": 0.0,
@@ -170,8 +170,8 @@ def validate_translation(
                 f"No structured data received for translation validation of '{english_word}' → '{translation}'"
             )
             return {
-                "is_correct": True,  # Assume correct if validation fails
-                "is_lemma_form": True,
+                "is_correct": None,
+                "is_lemma_form": None,
                 "suggested_translation": translation,
                 "issues": ["Validation failed"],
                 "confidence": 0.0,
@@ -180,8 +180,8 @@ def validate_translation(
     except Exception as e:
         logger.error(f"Error validating translation '{english_word}' → '{translation}': {e}")
         return {
-            "is_correct": True,
-            "is_lemma_form": True,
+            "is_correct": None,
+            "is_lemma_form": None,
             "suggested_translation": translation,
             "issues": [f"Error: {str(e)}"],
             "confidence": 0.0,
@@ -264,7 +264,7 @@ def validate_definition(
         else:
             logger.error(f"No structured data received for definition validation of '{word}'")
             return {
-                "is_valid": True,  # Assume valid if validation fails
+                "is_valid": None,
                 "issues": ["Validation failed"],
                 "suggested_definition": "",
                 "confidence": 0.0,
@@ -273,7 +273,7 @@ def validate_definition(
     except Exception as e:
         logger.error(f"Error validating definition for '{word}': {e}")
         return {
-            "is_valid": True,
+            "is_valid": None,
             "issues": [f"Error: {str(e)}"],
             "suggested_definition": "",
             "confidence": 0.0,
@@ -414,10 +414,8 @@ Language guidance: Validate for {language_list}.
             results = {}
             for lang_code in translations.keys():
                 results[lang_code] = {
-                    "is_correct": response.structured_data.get(f"{lang_code}_is_correct", True),
-                    "is_lemma_form": response.structured_data.get(
-                        f"{lang_code}_is_lemma_form", True
-                    ),
+                    "is_correct": response.structured_data.get(f"{lang_code}_is_correct"),
+                    "is_lemma_form": response.structured_data.get(f"{lang_code}_is_lemma_form"),
                     "suggested_translation": response.structured_data.get(
                         f"{lang_code}_suggested", ""
                     ),
@@ -431,8 +429,8 @@ Language guidance: Validate for {language_list}.
             )
             return {
                 lang_code: {
-                    "is_correct": True,
-                    "is_lemma_form": True,
+                    "is_correct": None,
+                    "is_lemma_form": None,
                     "suggested_translation": "",
                     "issues": ["Validation failed"],
                     "confidence": 0.0,
@@ -444,8 +442,8 @@ Language guidance: Validate for {language_list}.
         logger.error(f"Error validating translations for '{english_word}': {e}")
         return {
             lang_code: {
-                "is_correct": True,
-                "is_lemma_form": True,
+                "is_correct": None,
+                "is_lemma_form": None,
                 "suggested_translation": "",
                 "issues": [f"Error: {str(e)}"],
                 "confidence": 0.0,

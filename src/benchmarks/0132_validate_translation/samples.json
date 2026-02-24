@@ -1,0 +1,182 @@
+[
+  {
+    "english_word": "shoe", "pos_type": "noun",
+    "translations": {"lt": "batai", "fr": "chaussure", "zh": "鞋子"},
+    "expected": {
+      "lt": {"is_correct": false, "is_lemma_form": false},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "zh": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "cat", "pos_type": "noun",
+    "translations": {"lt": "katė", "fr": "chat", "ko": "고양이"},
+    "expected": {
+      "lt": {"is_correct": true, "is_lemma_form": true},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "ko": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "run", "pos_type": "verb",
+    "translations": {"lt": "bėgti", "fr": "courir", "zh": "跑"},
+    "expected": {
+      "lt": {"is_correct": true, "is_lemma_form": true},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "zh": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "eat", "pos_type": "verb",
+    "translations": {"lt": "valgė", "fr": "manger", "ko": "먹다"},
+    "expected": {
+      "lt": {"is_correct": false, "is_lemma_form": false},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "ko": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "house", "pos_type": "noun",
+    "translations": {"lt": "namas", "fr": "maison", "sw": "nyumba"},
+    "expected": {
+      "lt": {"is_correct": true, "is_lemma_form": true},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "sw": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "child", "pos_type": "noun",
+    "translations": {"lt": "vaikai", "fr": "enfant", "zh": "孩子"},
+    "expected": {
+      "lt": {"is_correct": false, "is_lemma_form": false},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "zh": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "water", "pos_type": "noun",
+    "translations": {"lt": "vanduo", "ko": "물", "vi": "nước"},
+    "expected": {
+      "lt": {"is_correct": true, "is_lemma_form": true},
+      "ko": {"is_correct": true, "is_lemma_form": true},
+      "vi": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "happy", "pos_type": "adjective",
+    "translations": {"lt": "laimingas", "fr": "heureux", "ko": "행복한"},
+    "expected": {
+      "lt": {"is_correct": true, "is_lemma_form": true},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "ko": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "book", "pos_type": "noun",
+    "translations": {"lt": "knyga", "fr": "livres", "zh": "书"},
+    "expected": {
+      "lt": {"is_correct": true, "is_lemma_form": true},
+      "fr": {"is_correct": false, "is_lemma_form": false},
+      "zh": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "write", "pos_type": "verb",
+    "translations": {"lt": "rašyti", "fr": "écrire", "sw": "andika"},
+    "expected": {
+      "lt": {"is_correct": true, "is_lemma_form": true},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "sw": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "fast", "pos_type": "adjective",
+    "translations": {"lt": "greitas", "fr": "rapide", "ko": "빠른"},
+    "expected": {
+      "lt": {"is_correct": true, "is_lemma_form": true},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "ko": {"is_correct": false, "is_lemma_form": false}
+    }
+  },
+  {
+    "english_word": "dog", "pos_type": "noun",
+    "translations": {"lt": "šuo", "fr": "chien", "vi": "chó"},
+    "expected": {
+      "lt": {"is_correct": true, "is_lemma_form": true},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "vi": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "go", "pos_type": "verb",
+    "translations": {"lt": "eina", "fr": "aller", "zh": "去"},
+    "expected": {
+      "lt": {"is_correct": false, "is_lemma_form": false},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "zh": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "small", "pos_type": "adjective",
+    "translations": {"lt": "mažas", "ko": "작은", "sw": "kidogo"},
+    "expected": {
+      "lt": {"is_correct": true, "is_lemma_form": true},
+      "ko": {"is_correct": false, "is_lemma_form": false},
+      "sw": {"is_correct": false, "is_lemma_form": false}
+    }
+  },
+  {
+    "english_word": "table", "pos_type": "noun",
+    "translations": {"lt": "stalas", "fr": "table", "zh": "桌子"},
+    "expected": {
+      "lt": {"is_correct": true, "is_lemma_form": true},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "zh": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "sing", "pos_type": "verb",
+    "translations": {"lt": "dainuoti", "fr": "chanter", "ko": "노래하다"},
+    "expected": {
+      "lt": {"is_correct": true, "is_lemma_form": true},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "ko": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "knife", "pos_type": "noun",
+    "translations": {"lt": "peilis", "fr": "couteaux", "zh": "刀"},
+    "expected": {
+      "lt": {"is_correct": true, "is_lemma_form": true},
+      "fr": {"is_correct": false, "is_lemma_form": false},
+      "zh": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "read", "pos_type": "verb",
+    "translations": {"lt": "skaityti", "fr": "lire", "vi": "đọc"},
+    "expected": {
+      "lt": {"is_correct": true, "is_lemma_form": true},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "vi": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "swim", "pos_type": "verb",
+    "translations": {"lt": "plaukė", "fr": "nager", "ko": "수영하다"},
+    "expected": {
+      "lt": {"is_correct": false, "is_lemma_form": false},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "ko": {"is_correct": true, "is_lemma_form": true}
+    }
+  },
+  {
+    "english_word": "wolf", "pos_type": "noun",
+    "translations": {"lt": "vilkas", "fr": "loup", "sw": "mbwa mwitu"},
+    "expected": {
+      "lt": {"is_correct": true, "is_lemma_form": true},
+      "fr": {"is_correct": true, "is_lemma_form": true},
+      "sw": {"is_correct": true, "is_lemma_form": true}
+    }
+  }
+]

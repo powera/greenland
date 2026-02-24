@@ -26,3 +26,8 @@ from benchmarks.lib.generators.sentence_decomposition_generator import (
 )
 
 from benchmarks.lib.generators.verb_forms_generator import VerbFormsGenerator
+
+# Agent regression benchmark generators
+from benchmarks.lib.generators.validate_lemma_form_generator import ValidateLemmaFormGenerator
+from benchmarks.lib.generators.validate_definition_generator import ValidateDefinitionGenerator
+from benchmarks.lib.generators.validate_translation_generator import ValidateTranslationGenerator

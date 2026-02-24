@@ -1,0 +1,152 @@
+[
+  {
+    "word": "hat", "pos_type": "noun",
+    "definition": "skrybėlė",
+    "is_valid": false,
+    "expected_issues": ["Contains translation only"]
+  },
+  {
+    "word": "cat", "pos_type": "noun",
+    "definition": "A small domesticated carnivorous mammal with soft fur, a short snout, and retractile claws",
+    "is_valid": true,
+    "expected_issues": []
+  },
+  {
+    "word": "run", "pos_type": "verb",
+    "definition": "",
+    "is_valid": false,
+    "expected_issues": ["Empty definition"]
+  },
+  {
+    "word": "table", "pos_type": "noun",
+    "definition": "A piece of furniture with a flat top and legs, used for eating, working, or placing items on",
+    "is_valid": true,
+    "expected_issues": []
+  },
+  {
+    "word": "happy", "pos_type": "adjective",
+    "definition": "happy",
+    "is_valid": false,
+    "expected_issues": ["Circular definition"]
+  },
+  {
+    "word": "bank", "pos_type": "noun",
+    "definition": "A financial institution that accepts deposits and makes loans",
+    "is_valid": true,
+    "expected_issues": []
+  },
+  {
+    "word": "eat", "pos_type": "verb",
+    "definition": "To consume food by putting it in the mouth and swallowing it",
+    "is_valid": true,
+    "expected_issues": []
+  },
+  {
+    "word": "blue", "pos_type": "adjective",
+    "definition": "mėlynas",
+    "is_valid": false,
+    "expected_issues": ["Contains translation only"]
+  },
+  {
+    "word": "dog", "pos_type": "noun",
+    "definition": "A thing",
+    "is_valid": false,
+    "expected_issues": ["Too vague"]
+  },
+  {
+    "word": "write", "pos_type": "verb",
+    "definition": "To mark letters, words, or other symbols on a surface with a pen, pencil, or similar implement",
+    "is_valid": true,
+    "expected_issues": []
+  },
+  {
+    "word": "shoe", "pos_type": "noun",
+    "definition": "A covering for the foot, typically made of leather, with a sturdy sole and heel",
+    "is_valid": true,
+    "expected_issues": []
+  },
+  {
+    "word": "sing", "pos_type": "verb",
+    "definition": "To produce musical sounds with the voice",
+    "is_valid": true,
+    "expected_issues": []
+  },
+  {
+    "word": "child", "pos_type": "noun",
+    "definition": "vaikas",
+    "is_valid": false,
+    "expected_issues": ["Contains translation only"]
+  },
+  {
+    "word": "fast", "pos_type": "adjective",
+    "definition": "Moving or capable of moving at high speed; quick",
+    "is_valid": true,
+    "expected_issues": []
+  },
+  {
+    "word": "go", "pos_type": "verb",
+    "definition": "go is a verb meaning to move or travel",
+    "is_valid": false,
+    "expected_issues": ["Uses the word being defined"]
+  },
+  {
+    "word": "house", "pos_type": "noun",
+    "definition": "A building used as a dwelling by one or more families or households",
+    "is_valid": true,
+    "expected_issues": []
+  },
+  {
+    "word": "book", "pos_type": "noun",
+    "definition": "knyga - a bound collection of pages",
+    "is_valid": false,
+    "expected_issues": ["Mixes translation with definition"]
+  },
+  {
+    "word": "swim", "pos_type": "verb",
+    "definition": "To move through water by moving parts of the body",
+    "is_valid": true,
+    "expected_issues": []
+  },
+  {
+    "word": "knife", "pos_type": "noun",
+    "definition": "A cutting instrument with a sharp blade, used for cutting food or as a weapon",
+    "is_valid": true,
+    "expected_issues": []
+  },
+  {
+    "word": "beautiful", "pos_type": "adjective",
+    "definition": "Very beautiful",
+    "is_valid": false,
+    "expected_issues": ["Circular definition", "Too vague"]
+  },
+  {
+    "word": "speak", "pos_type": "verb",
+    "definition": "To say words aloud; to communicate by talking",
+    "is_valid": true,
+    "expected_issues": []
+  },
+  {
+    "word": "wolf", "pos_type": "noun",
+    "definition": "A large wild carnivorous mammal of the dog family, living and hunting in packs",
+    "is_valid": true,
+    "expected_issues": []
+  },
+  {
+    "word": "buy", "pos_type": "verb",
+    "definition": "pirkti",
+    "is_valid": false,
+    "expected_issues": ["Contains translation only"]
+  },
+  {
+    "word": "quickly", "pos_type": "adverb",
+    "definition": "At a fast speed; rapidly",
+    "is_valid": true,
+    "expected_issues": []
+  },
+  {
+    "word": "child", "pos_type": "noun",
+    "definition": "A young human being below the age of puberty or below the legal age of majority",
+    "is_valid": true,
+    "expected_issues": []
+  }
+]
