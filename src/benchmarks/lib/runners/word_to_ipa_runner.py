@@ -163,6 +163,13 @@ class WordToIPARunner(BenchmarkRunner):
         # This keeps comparison robust across common IPA rendering variants.
         normalized = normalized.replace("͡", "").replace("͜", "")
 
+        # Normalize syllable delimiters commonly emitted by models (e.g., bɔ̃.ʒuʁ).
+        normalized = normalized.replace(".", "")
+
+        # Normalize a common palatal nasal variant in broad transcriptions used for Korean
+        # greetings: an.nj... ~= aɲj...
+        normalized = normalized.replace("n.nj", "ɲj").replace("nnj", "ɲj")
+
         # Remove any explanatory text before or after the IPA
         # This is a simple heuristic - we look for the longest contiguous segment with IPA-like characters
         ipa_chars = set("ɪiɛeæaɑɔoʊuʌəɚɝɜː̩̯̆͡ˌˈʰʷ.ptksʒʃθðŋnmɹrlvfbdgzʤʧywχѲ")
