@@ -44,6 +44,8 @@
                     <div class="col-md-3">
                         <label class="form-label">Sort Benchmarks</label>
                         <select class="form-select" id="benchmarkSort">
+                            <option value="key-asc" selected>Key (0010 → 9999)</option>
+                            <option value="key-desc">Key (9999 → 0010)</option>
                             <option value="name-asc">Name (A → Z)</option>
                             <option value="name-desc">Name (Z → A)</option>
                             <option value="avg-desc">Avg Score (high → low)</option>
@@ -88,6 +90,7 @@
                             {% for benchmark in benchmarks %}
                             <tr class="benchmark-row"
                                 data-benchmark-name="{{ benchmark.displayname }}"
+                                data-benchmark-key="{{ benchmark.codename }}"
                                 data-category="{{ benchmark.category or '' }}">
                                 <td>
                                     <a href="{{ url_for('benchmarks.view_benchmark', benchmark_name=benchmark.codename) }}"

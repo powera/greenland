@@ -29,13 +29,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function sortRows() {
-        const sortVal = benchmarkSortSelect ? benchmarkSortSelect.value : 'name-asc';
+        const sortVal = benchmarkSortSelect ? benchmarkSortSelect.value : 'key-asc';
         const tbody = resultsTable.querySelector('tbody');
         const rows = Array.from(tbody.querySelectorAll('.benchmark-row'));
 
         rows.sort(function(a, b) {
+            const keyA = (a.dataset.benchmarkKey || '').toLowerCase();
+            const keyB = (b.dataset.benchmarkKey || '').toLowerCase();
             const nameA = (a.dataset.benchmarkName || '').toLowerCase();
             const nameB = (b.dataset.benchmarkName || '').toLowerCase();
+
+            if (sortVal === 'key-asc') return keyA.localeCompare(keyB);
+            if (sortVal === 'key-desc') return keyB.localeCompare(keyA);
             if (sortVal === 'name-asc') return nameA.localeCompare(nameB);
             if (sortVal === 'name-desc') return nameB.localeCompare(nameA);
 
