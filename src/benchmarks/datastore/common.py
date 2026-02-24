@@ -6,7 +6,17 @@ import datetime
 import json
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import TIMESTAMP, ForeignKey, Integer, String, Text, create_engine, event, func
+from sqlalchemy import (
+    TIMESTAMP,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    create_engine,
+    event,
+    func,
+    text,
+)
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
 from sqlalchemy.sql import func
@@ -83,6 +93,15 @@ def create_database_and_session(db_path=None):
     )
     event.listens_for(engine, "connect")(_configure_sqlite_connection)
     Base.metadata.create_all(engine)
+
+    # Migrate existing databases to add new columns that may not exist yet
+    with engine.connect() as conn:
+        result = conn.execute(text("PRAGMA table_info(benchmark)"))
+        existing_cols = {row[1] for row in result}
+        if "category" not in existing_cols:
+            conn.execute(text("ALTER TABLE benchmark ADD COLUMN category TEXT"))
+            conn.commit()
+
     Session = sessionmaker(bind=engine)
     return Session()
 

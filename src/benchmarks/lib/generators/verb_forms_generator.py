@@ -29,9 +29,11 @@ BENCHMARK_METADATA = BenchmarkMetadata(
     name="Verb Forms",
     description="Generate full person/tense verb forms across multiple languages.",
     default_num_questions=56,
+    category="word processing",
 )
 
 register_benchmark_metadata(BENCHMARK_METADATA)
+
 
 @generator("0121_verb_forms")
 class VerbFormsGenerator(BenchmarkGenerator):
@@ -46,7 +48,9 @@ class VerbFormsGenerator(BenchmarkGenerator):
         self.questions_file_path = "samples.json"
         self._samples: Optional[List[Dict[str, Any]]] = None
 
-    def _response_schema(self, language_code: str, required_extra_forms: List[str]) -> Dict[str, Any]:
+    def _response_schema(
+        self, language_code: str, required_extra_forms: List[str]
+    ) -> Dict[str, Any]:
         language_config = get_language_verb_forms_config(language_code)
         person_slots = language_config.get("person_slots", [])
         core_slots = language_config.get("core_slots", [])

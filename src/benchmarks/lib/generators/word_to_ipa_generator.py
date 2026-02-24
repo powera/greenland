@@ -14,10 +14,12 @@ from benchmarks.lib.utils.data_models import (
     Difficulty,
     EvaluationCriteria,
 )
-from benchmarks.lib.utils.factory import generator
+from benchmarks.lib.utils.factory import generator, register_benchmark_metadata
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Define benchmark metadata
@@ -25,7 +27,10 @@ BENCHMARK_METADATA = BenchmarkMetadata(
     code="0061_word_to_ipa",
     name="Word to IPA Pronunciation",
     description="A benchmark to evaluate a model's ability to convert words from multiple languages to IPA pronunciation.",
+    category="token processing",
 )
+
+register_benchmark_metadata(BENCHMARK_METADATA)
 
 
 def _format_question_text(item: Dict[str, Any]) -> str:
@@ -172,7 +177,9 @@ Prefer straightforward examples; avoid deliberately ambiguous homographs unless 
 """
 
             try:
-                response = self.get_llm_question(prompt=prompt, schema={"type": "array", "items": schema})
+                response = self.get_llm_question(
+                    prompt=prompt, schema={"type": "array", "items": schema}
+                )
 
                 if isinstance(response, list):
                     for item in response:

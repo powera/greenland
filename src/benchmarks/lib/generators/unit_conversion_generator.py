@@ -15,14 +15,23 @@ from benchmarks.lib.utils.data_models import (
     Difficulty,
     EvaluationCriteria,
 )
-from benchmarks.lib.utils.factory import generator
+from benchmarks.lib.utils.factory import benchmark, generator
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Benchmark code
 BENCHMARK_CODE = "0022_unit_conversion"
+
+benchmark(
+    BENCHMARK_CODE,
+    "Unit Conversion",
+    "Tests ability to perform unit conversions accurately.",
+    category="general knowledge",
+)(__name__)
 
 # Default unit conversions if no file is provided
 DEFAULT_CONVERSIONS = [

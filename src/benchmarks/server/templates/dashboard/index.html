@@ -33,6 +33,17 @@
                         </div>
                     </div>
                     <div class="col-md-3">
+                        <label class="form-label">Category</label>
+                        <div class="btn-group w-100 flex-wrap" role="group">
+                            <input type="radio" class="btn-check" name="categoryFilter" id="catAll" value="all" checked>
+                            <label class="btn btn-outline-secondary" for="catAll">All</label>
+                            {% for cat in categories %}
+                            <input type="radio" class="btn-check" name="categoryFilter" id="cat_{{ loop.index }}" value="{{ cat }}">
+                            <label class="btn btn-outline-secondary" for="cat_{{ loop.index }}">{{ cat | title }}</label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
                         <label class="form-label">Sort Benchmarks</label>
                         <select class="form-select" id="benchmarkSort">
                             <option value="name-asc">Name (A → Z)</option>
@@ -41,7 +52,7 @@
                             <option value="avg-asc">Avg Score (low → high)</option>
                         </select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <label class="form-label">Search</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-search"></i></span>
@@ -77,12 +88,15 @@
                         </thead>
                         <tbody>
                             {% for benchmark in benchmarks %}
-                            <tr class="benchmark-row" data-benchmark-name="{{ benchmark.displayname }}">
+                            <tr class="benchmark-row"
+                                data-benchmark-name="{{ benchmark.displayname }}"
+                                data-category="{{ benchmark.category or '' }}">
                                 <td>
                                     <a href="{{ url_for('benchmarks.view_benchmark', benchmark_name=benchmark.codename) }}"
                                        class="text-decoration-none">
                                         <strong>{{ benchmark.displayname }}</strong>
                                     </a>
+                                    <br><small class="text-muted font-monospace">{{ benchmark.codename }}</small>
                                     {% if benchmark.description %}
                                     <br><small class="text-muted">{{ benchmark.description[:80] }}...</small>
                                     {% endif %}
@@ -125,97 +139,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const modelTypeRadios = document.querySelectorAll('input[name="modelType"]');
-    const searchBox = document.getElementById('searchBox');
-    const benchmarkSortSelect = document.getElementById('benchmarkSort');
-    const resultsTable = document.getElementById('resultsTable');
-    const noResults = document.getElementById('noResults');
-
-    function getVisibleScores(row) {
-        // Collect numeric scores from visible model columns in this row
-        const scores = [];
-        const cells = row.querySelectorAll('td.model-col');
-        cells.forEach(cell => {
-            if (cell.style.display === 'none') return;
-            const badge = cell.querySelector('.score-badge');
-            if (badge) {
-                const val = parseInt(badge.textContent.trim(), 10);
-                if (!isNaN(val)) scores.push(val);
-            }
-        });
-        return scores;
-    }
-
-    function avgOrNull(scores) {
-        if (!scores.length) return null;
-        return scores.reduce((a, b) => a + b, 0) / scores.length;
-    }
-
-    function sortRows() {
-        const sortVal = benchmarkSortSelect ? benchmarkSortSelect.value : 'name-asc';
-        const tbody = resultsTable.querySelector('tbody');
-        const rows = Array.from(tbody.querySelectorAll('.benchmark-row'));
-
-        rows.sort(function(a, b) {
-            const nameA = (a.dataset.benchmarkName || '').toLowerCase();
-            const nameB = (b.dataset.benchmarkName || '').toLowerCase();
-            if (sortVal === 'name-asc') return nameA.localeCompare(nameB);
-            if (sortVal === 'name-desc') return nameB.localeCompare(nameA);
-
-            const avgA = avgOrNull(getVisibleScores(a));
-            const avgB = avgOrNull(getVisibleScores(b));
-            // Rows with no scores go last
-            if (avgA === null && avgB === null) return nameA.localeCompare(nameB);
-            if (avgA === null) return 1;
-            if (avgB === null) return -1;
-            if (sortVal === 'avg-desc') return avgB - avgA;
-            if (sortVal === 'avg-asc') return avgA - avgB;
-            return 0;
-        });
-
-        rows.forEach(r => tbody.appendChild(r));
-    }
-
-    function filterTable() {
-        const modelType = document.querySelector('input[name="modelType"]:checked').value;
-        const searchTerm = searchBox.value.toLowerCase();
-
-        // Filter columns (models)
-        const modelCols = resultsTable.querySelectorAll('.model-col');
-        modelCols.forEach(col => {
-            const colModelType = col.dataset.modelType;
-            const showCol = (modelType === 'all' || modelType === colModelType);
-            col.style.display = showCol ? '' : 'none';
-        });
-
-        // Filter rows (benchmarks)
-        const rows = resultsTable.querySelectorAll('tbody .benchmark-row');
-        let visibleCount = 0;
-        rows.forEach(row => {
-            const benchmarkText = row.textContent.toLowerCase();
-            const showRow = benchmarkText.includes(searchTerm);
-            row.style.display = showRow ? '' : 'none';
-            if (showRow) visibleCount++;
-        });
-
-        // Sort after filtering so average scores reflect visible columns
-        sortRows();
-
-        // Show/hide no results message
-        noResults.style.display = visibleCount === 0 ? 'block' : 'none';
-    }
-
-    modelTypeRadios.forEach(radio => {
-        radio.addEventListener('change', filterTable);
-    });
-
-    searchBox.addEventListener('input', filterTable);
-
-    if (benchmarkSortSelect) {
-        benchmarkSortSelect.addEventListener('change', filterTable);
-    }
-});
-</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

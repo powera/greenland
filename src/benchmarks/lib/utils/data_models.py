@@ -109,5 +109,6 @@ class BenchmarkMetadata:
     description: Optional[str] = None  # Description
     version: str = "1.0"  # Version of the benchmark
     tags: List[str] = field(default_factory=list)  # Tags for categorization
+    category: Optional[str] = None  # Primary category (e.g., "token processing", "word processing")
     max_score: int = 100  # Maximum possible score
     default_num_questions: int = 40  # Default number of questions to generate

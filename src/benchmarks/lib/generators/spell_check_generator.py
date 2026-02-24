@@ -19,14 +19,23 @@ from benchmarks.lib.utils.data_models import (
     Difficulty,
     EvaluationCriteria,
 )
-from benchmarks.lib.utils.factory import generator
+from benchmarks.lib.utils.factory import benchmark, generator
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Define benchmark code
 BENCHMARK_CODE = "0015_spell_check"
+
+benchmark(
+    BENCHMARK_CODE,
+    "Spell Check",
+    "Tests ability to identify and correct misspelled words.",
+    category="word processing",
+)(__name__)
 
 
 @generator(BENCHMARK_CODE)

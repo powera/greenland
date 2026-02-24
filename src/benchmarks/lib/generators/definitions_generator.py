@@ -23,7 +23,12 @@ BENCHMARK_DESCRIPTION = "Tests ability to match definitions to correct words."
 
 
 # Apply benchmark decorator to this module
-@benchmark(code=BENCHMARK_CODE, name=BENCHMARK_NAME, description=BENCHMARK_DESCRIPTION)
+@benchmark(
+    code=BENCHMARK_CODE,
+    name=BENCHMARK_NAME,
+    description=BENCHMARK_DESCRIPTION,
+    category="word processing",
+)
 class DefinitionsBenchmarkModule:
     """Module for word definitions benchmark."""
 

@@ -1,0 +1,103 @@
+/* Dashboard filtering, sorting, and search logic */
+
+document.addEventListener('DOMContentLoaded', function() {
+    const modelTypeRadios = document.querySelectorAll('input[name="modelType"]');
+    const categoryRadios = document.querySelectorAll('input[name="categoryFilter"]');
+    const searchBox = document.getElementById('searchBox');
+    const benchmarkSortSelect = document.getElementById('benchmarkSort');
+    const resultsTable = document.getElementById('resultsTable');
+    const noResults = document.getElementById('noResults');
+
+    function getVisibleScores(row) {
+        // Collect numeric scores from visible model columns in this row
+        const scores = [];
+        const cells = row.querySelectorAll('td.model-col');
+        cells.forEach(cell => {
+            if (cell.style.display === 'none') return;
+            const badge = cell.querySelector('.score-badge');
+            if (badge) {
+                const val = parseInt(badge.textContent.trim(), 10);
+                if (!isNaN(val)) scores.push(val);
+            }
+        });
+        return scores;
+    }
+
+    function avgOrNull(scores) {
+        if (!scores.length) return null;
+        return scores.reduce((a, b) => a + b, 0) / scores.length;
+    }
+
+    function sortRows() {
+        const sortVal = benchmarkSortSelect ? benchmarkSortSelect.value : 'name-asc';
+        const tbody = resultsTable.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('.benchmark-row'));
+
+        rows.sort(function(a, b) {
+            const nameA = (a.dataset.benchmarkName || '').toLowerCase();
+            const nameB = (b.dataset.benchmarkName || '').toLowerCase();
+            if (sortVal === 'name-asc') return nameA.localeCompare(nameB);
+            if (sortVal === 'name-desc') return nameB.localeCompare(nameA);
+
+            const avgA = avgOrNull(getVisibleScores(a));
+            const avgB = avgOrNull(getVisibleScores(b));
+            // Rows with no scores go last
+            if (avgA === null && avgB === null) return nameA.localeCompare(nameB);
+            if (avgA === null) return 1;
+            if (avgB === null) return -1;
+            if (sortVal === 'avg-desc') return avgB - avgA;
+            if (sortVal === 'avg-asc') return avgA - avgB;
+            return 0;
+        });
+
+        rows.forEach(r => tbody.appendChild(r));
+    }
+
+    function filterTable() {
+        const modelType = document.querySelector('input[name="modelType"]:checked').value;
+        const categoryChecked = document.querySelector('input[name="categoryFilter"]:checked');
+        const selectedCategory = categoryChecked ? categoryChecked.value : 'all';
+        const searchTerm = searchBox.value.toLowerCase();
+
+        // Filter columns (models)
+        const modelCols = resultsTable.querySelectorAll('.model-col');
+        modelCols.forEach(col => {
+            const colModelType = col.dataset.modelType;
+            const showCol = (modelType === 'all' || modelType === colModelType);
+            col.style.display = showCol ? '' : 'none';
+        });
+
+        // Filter rows (benchmarks)
+        const rows = resultsTable.querySelectorAll('tbody .benchmark-row');
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const benchmarkText = row.textContent.toLowerCase();
+            const rowCategory = row.dataset.category || '';
+            const matchesSearch = benchmarkText.includes(searchTerm);
+            const matchesCategory = (selectedCategory === 'all' || rowCategory === selectedCategory);
+            const showRow = matchesSearch && matchesCategory;
+            row.style.display = showRow ? '' : 'none';
+            if (showRow) visibleCount++;
+        });
+
+        // Sort after filtering so average scores reflect visible columns
+        sortRows();
+
+        // Show/hide no results message
+        noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+
+    modelTypeRadios.forEach(radio => {
+        radio.addEventListener('change', filterTable);
+    });
+
+    categoryRadios.forEach(radio => {
+        radio.addEventListener('change', filterTable);
+    });
+
+    searchBox.addEventListener('input', filterTable);
+
+    if (benchmarkSortSelect) {
+        benchmarkSortSelect.addEventListener('change', filterTable);
+    }
+});
