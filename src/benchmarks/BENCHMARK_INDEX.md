@@ -23,7 +23,9 @@ This document captures the current benchmark lineup and proposes a numbering out
 | 0015 | `spell_check` | Spell Check | word processing | implemented |
 | 0016 | `antonym` | Antonym Check | word processing | implemented |
 | 0020 | `definitions` | Definitions | word processing | implemented |
+| 0021 | `simple_arithmetic` | Simple Arithmetic | simple math | implemented |
 | 0022 | `unit_conversion` | Unit Conversion | general knowledge | implemented |
+| 0024 | `percentage_math` | Fractions and Percentages | simple math | implemented |
 | 0032 | `part_of_speech` | Part of Speech | word processing | implemented |
 | 0033 | `lemma` | Lemma Identification | word processing | implemented |
 | 0050 | `translation_en_fr` | Translation en_fr | translation | implemented |
@@ -56,10 +58,14 @@ This is a lightweight roadmap that preserves existing IDs and adds selective uni
 #### Implemented
 - `0011_word_length`
 - `0012_letter_count`
+- `0013_vowel_count`
+- `0014_syllable_count`
 - `0015_spell_check`
 - `0016_antonym`
 - `0020_definitions`
+- `0021_simple_arithmetic`
 - `0022_unit_conversion`
+- `0024_percentage_math`
 - `0032_part_of_speech`
 - `0033_lemma`
 - `0050_translation_*`
@@ -68,9 +74,6 @@ This is a lightweight roadmap that preserves existing IDs and adds selective uni
 - `0062_sentence_decomposition`
 
 #### Suggested unimplemented additions
-- `0013_vowel_count` — count vowels in a token. *(implemented)*
-- `0014_syllable_count` — estimate/count syllables for single words. *(implemented)*
-- `0024_percentage_math` — simple percent increase/decrease arithmetic.
 - `0026_time_arithmetic` — add/subtract times and durations.
 - `0034_pluralization` — singular/plural generation and validation.
 - `0036_word_segmentation` — split compounds or run-on tokens into words.

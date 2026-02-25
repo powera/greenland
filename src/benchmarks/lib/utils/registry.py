@@ -51,6 +51,12 @@ class LetterCountBenchmark:
     pass
 
 
+from benchmarks.lib.generators.vowel_count_generator import VowelCountGenerator
+from benchmarks.lib.runners.vowel_count_runner import VowelCountRunner
+
+from benchmarks.lib.generators.syllable_count_generator import SyllableCountGenerator
+from benchmarks.lib.runners.syllable_count_runner import SyllableCountRunner
+
 from benchmarks.lib.generators.spell_check_generator import SpellCheckGenerator
 from benchmarks.lib.runners.spell_check_runner import SpellCheckRunner
 
@@ -103,6 +109,24 @@ class DefinitionsBenchmark:
     """Module container for definitions benchmark."""
 
 
+from benchmarks.lib.generators.simple_arithmetic_generator import SimpleArithmeticGenerator
+from benchmarks.lib.runners.simple_arithmetic_runner import SimpleArithmeticRunner
+
+
+@benchmark(
+    code="0021_simple_arithmetic",
+    name="Simple Arithmetic",
+    description="""
+           A benchmark to evaluate a model's ability to perform basic arithmetic:
+           addition, subtraction, multiplication, and division.""",
+    category="simple math",
+)
+class SimpleArithmeticBenchmark:
+    """Module container for simple arithmetic benchmark."""
+
+    pass
+
+
 from benchmarks.lib.generators.unit_conversion_generator import UnitConversionGenerator
 from benchmarks.lib.runners.unit_conversion_runner import UnitConversionRunner
 
@@ -117,6 +141,24 @@ from benchmarks.lib.runners.unit_conversion_runner import UnitConversionRunner
 )
 class UnitConversionBenchmark:
     """Module container for unit conversion benchmark."""
+
+    pass
+
+
+from benchmarks.lib.generators.percentage_math_generator import PercentageMathGenerator
+from benchmarks.lib.runners.percentage_math_runner import PercentageMathRunner
+
+
+@benchmark(
+    code="0024_percentage_math",
+    name="Fractions and Percentages",
+    description="""
+           A benchmark to evaluate a model's ability to calculate percentages and fractions,
+           including percent-of, fraction-of, and percent change problems.""",
+    category="simple math",
+)
+class PercentageMathBenchmark:
+    """Module container for fractions and percentages benchmark."""
 
     pass
 
@@ -281,8 +323,12 @@ from benchmarks.lib.generators.syllogism_validity_generator import SyllogismVali
 from benchmarks.lib.runners.syllogism_validity_runner import SyllogismValidityRunner
 from benchmarks.lib.generators.book_author_match_generator import BookAuthorMatchGenerator
 from benchmarks.lib.runners.book_author_match_runner import BookAuthorMatchRunner
-from benchmarks.lib.generators.food_category_classification_generator import FoodCategoryClassificationGenerator
-from benchmarks.lib.runners.food_category_classification_runner import FoodCategoryClassificationRunner
+from benchmarks.lib.generators.food_category_classification_generator import (
+    FoodCategoryClassificationGenerator,
+)
+from benchmarks.lib.runners.food_category_classification_runner import (
+    FoodCategoryClassificationRunner,
+)
 from benchmarks.lib.generators.historical_event_year_generator import HistoricalEventYearGenerator
 from benchmarks.lib.runners.historical_event_year_runner import HistoricalEventYearRunner
 
