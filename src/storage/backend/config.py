@@ -1,11 +1,51 @@
 """Configuration for data sources (storage backends, cache, LLM)."""
 
 import os
+import socket
 from enum import Enum
 from typing import Optional
 
 import constants
 from clients.keys import load_key
+
+# Cached result of IPv6 reachability check (None = not yet checked)
+_ipv6_reachable_cache: Optional[bool] = None
+
+
+def _is_ipv6_reachable() -> bool:
+    """Check if the Supabase direct host is reachable via IPv6.
+
+    Attempts a TCP connection to the Supabase direct-connection host using the
+    IPv6 address family.  The result is cached so subsequent calls are free.
+
+    Returns:
+        True if an IPv6 connection could be established, False otherwise.
+    """
+    global _ipv6_reachable_cache
+    if _ipv6_reachable_cache is not None:
+        return _ipv6_reachable_cache
+
+    host = "db.srouvwdghrmwkxnzyzqz.supabase.co"
+    port = 5432
+    reachable = False
+    try:
+        addrs = socket.getaddrinfo(host, port, socket.AF_INET6, socket.SOCK_STREAM)
+        if addrs:
+            af, socktype, proto, _canonname, sockaddr = addrs[0]
+            sock = socket.socket(af, socktype, proto)
+            sock.settimeout(3.0)
+            try:
+                sock.connect(sockaddr)
+                reachable = True
+            except (OSError, socket.error):
+                reachable = False
+            finally:
+                sock.close()
+    except (socket.gaierror, OSError):
+        reachable = False
+
+    _ipv6_reachable_cache = reachable
+    return reachable
 
 
 class BackendType(Enum):
@@ -169,17 +209,25 @@ class DataSourceConfig:
         Uses the URL template from constants.POSTGRES_URL_TEMPLATE and sets the
         schema to constants.POSTGRES_SCHEMA via the options parameter.
 
+        If the Supabase direct host is not reachable via IPv6, automatically falls
+        back to constants.POSTGRES_POOLER_URL_TEMPLATE (the shared pooler, which
+        uses IPv4) so the application works in IPv4-only environments.
+
         Returns:
             Complete PostgreSQL connection URL with schema configured
 
         Raises:
             ValueError: If password file not found or template invalid
         """
-        url_template = constants.POSTGRES_URL_TEMPLATE
-
         # Load password (required=True raises RuntimeError if not found)
         password = load_key("postgres", required=True)
         assert password is not None  # satisfied by required=True
+
+        # Choose between direct (IPv6) and shared pooler (IPv4) URL
+        if _is_ipv6_reachable():
+            url_template = constants.POSTGRES_URL_TEMPLATE
+        else:
+            url_template = constants.POSTGRES_POOLER_URL_TEMPLATE
 
         # Replace placeholder with actual password
         if "[YOUR-PASSWORD]" not in url_template:
