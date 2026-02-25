@@ -23,6 +23,7 @@
                                 <th>Model</th>
                                 <th>Benchmark</th>
                                 <th class="text-center">Score</th>
+                                <th class="text-end">Cost</th>
                                 <th>Date</th>
                                 <th>Permanent&nbsp;link</th>
                             </tr>
@@ -52,6 +53,9 @@
                                     {% else %}
                                     <span class="text-muted">—</span>
                                     {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if run.total_cost %}${{ '%.4f'|format(run.total_cost) }}{% else %}—{% endif %}
                                 </td>
                                 <td>
                                     <small>{{ run.run_ts.strftime('%Y-%m-%d %H:%M:%S') if run.run_ts else '—' }}</small>

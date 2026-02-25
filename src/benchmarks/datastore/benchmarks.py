@@ -297,7 +297,14 @@ def get_recent_runs(session, limit: int = 50) -> List[Dict]:
     :param limit: Maximum number of runs to return
     :return: List of run summary dicts
     """
-    runs = session.query(Run).order_by(Run.run_ts.desc()).limit(limit).all()
+    runs = (
+        session.query(Run, func.sum(RunDetail.cost_usd).label("total_cost"))
+        .outerjoin(RunDetail, Run.run_id == RunDetail.run_id)
+        .group_by(Run.run_id)
+        .order_by(Run.run_ts.desc())
+        .limit(limit)
+        .all()
+    )
     return [
         {
             "run_id": run.run_id,
@@ -305,8 +312,9 @@ def get_recent_runs(session, limit: int = 50) -> List[Dict]:
             "benchmark_name": run.benchmark_name,
             "normed_score": run.normed_score,
             "run_ts": run.run_ts,
+            "total_cost": total_cost,
         }
-        for run in runs
+        for run, total_cost in runs
     ]
 
 
