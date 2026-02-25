@@ -7,7 +7,7 @@ This document captures the current benchmark lineup and numbering through `0200`
 - `0010`–`0099`: token-based, word-based, and simple math/transformation benchmarks.
 - `0101`–`0149`: linguistics benchmarks (language, translation, morphology, sentence structure).
 - `0150`–`0199`: knowledge benchmarks (facts, world knowledge, reasoning-over-facts).
-- `0200`: safety classification benchmark family entry point.
+- `0200`–`0299`: planning, navigation, text transformation, and combinatorial reasoning benchmarks.
 
 ## Current implemented benchmarks
 
@@ -70,12 +70,48 @@ This document captures the current benchmark lineup and numbering through `0200`
 ### 0150–0199: knowledge
 - `0150_multihop_facts` — two-hop factual reasoning from short contexts.
 
-### 0200+
-- `0200` marks safety classification (e.g., benign vs unsafe prompt intent).
+### 0200–0299: planning, navigation, text transformation
+See the dedicated section below for the full proposed list.
 
+
+## Overlap analysis (non-001X benchmarks)
+
+The following overlapping pairs were reviewed. Benchmarks marked **keep** remain; any
+consolidation is noted.
+
+| Benchmark A | Benchmark B | Overlap | Decision |
+|---|---|---|---|
+| `0032_part_of_speech` | `0062_sentence_decomposition` | **High** – decomposition explicitly outputs POS tags for every token, so 0032 is a strict subset of 0062. | Keep both: 0032 isolates the POS signal; 0062 tests holistic token-level annotation. Acceptable duplication of signal. |
+| `0016_antonym` | `0111_synonyms` | **Low-medium** – both probe lexical-semantic relationships, but in opposite directions and with different answer mechanics. | Keep both. |
+| `0122_lemma` | `0130_validate_lemma_form` | **Medium** – both involve lemmatization. 0122 is a production task; 0130 is a binary validation + correction task. | Keep both; they are distinct task types (generate vs. validate). |
+| `0108/0109/0110` (translation) | each other | **Medium** – identical methodology, different language pairs. | Keep all three; performance differences across language pairs are informative. |
+| `0021_simple_arithmetic` | `0024_percentage_math` | **Low** – both require arithmetic, but 0024 adds ratio and percent-change semantics. | Keep both. |
+| `0021_simple_arithmetic` | `0026_time_arithmetic` | **Low** – time arithmetic requires clock-domain knowledge (modular 60/24) on top of basic arithmetic. | Keep both. |
 
 ## Similar lemma-related benchmarks
 
 - `0122_lemma`: core lemmatization task (given a word form, return lemma).
 - `0130_validate_lemma_form`: agent-regression validator task (judge whether a form is lemma and suggest correction).
 - They are related but not the same benchmark objective.
+
+## Proposed benchmarks: 0200–0299 (planning, transformation, navigation)
+
+The 0200–0299 series targets **planning, spatial reasoning, and structured transformation** tasks.
+These require multi-step reasoning rather than a single fact lookup or arithmetic operation.
+
+### Numbering policy for this range
+
+`0200`–`0299`: planning, navigation, text transformation, and combinatorial reasoning benchmarks.
+
+| Code | Slug | Name | Category | Status | Notes |
+|---|---|---|---|---|---|
+| 0200 | `blockworld` | Blockworld Task Planning | planning | proposed | Given a start stack configuration and a goal configuration, produce the minimal ordered sequence of `move(block, from, to)` operations. |
+| 0210 | `ed_golf` | Ed Command Golf | text transformation | proposed | Given a source string and a target string, produce the shortest `ed` script (sequence of `ed` commands) that transforms source → target. Scored by command count. |
+| 0220 | `maze_navigation` | ASCII Maze Navigation | navigation | proposed | Given a maze rendered in ASCII (`#` walls, `.` open, `S` start, `E` end), produce the sequence of steps (N/S/E/W or up/down/left/right) to reach the exit. |
+| 0230 | `sokoban` | Sokoban Puzzle | planning | proposed | Given a Sokoban board (ASCII, small grid), produce a valid sequence of player moves to push all boxes onto goal squares. |
+| 0240 | `river_crossing` | River Crossing Puzzle | planning | proposed | Classic river-crossing puzzles (farmer/fox/hen/grain and variants); produce a valid ordered crossing plan. |
+| 0250 | `hanoi` | Tower of Hanoi | planning | proposed | Given N disks and 3 pegs, produce the minimal move sequence; N in range 3–6 to keep output tractable. |
+| 0260 | `logic_grid` | Logic Grid Puzzle | reasoning | proposed | Einstein/Zebra-style constraint satisfaction: given clues, deduce the unique assignment of attributes to positions. |
+| 0270 | `path_planning` | Grid Path Planning | navigation | proposed | Given a grid with obstacles and a start/end cell, produce the shortest path as a list of (row, col) steps. Validates correctness and optimality. |
+| 0280 | `regex_synthesis` | Regex Synthesis | text transformation | proposed | Given a set of positive and negative example strings, produce a regular expression that matches all positives and rejects all negatives. |
+| 0290 | `program_trace` | Simple Program Trace | reasoning | proposed | Given a tiny program in a well-defined toy language (assignments, if, while with bounded loops), trace its execution and report the final variable values. |
