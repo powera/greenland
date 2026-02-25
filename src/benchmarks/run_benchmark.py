@@ -239,6 +239,7 @@ def run_missing_benchmarks(
     blacklist_models: Optional[Set[str]] = None,
     blacklist_benchmarks: Optional[Set[str]] = None,
     session=None,
+    only_model: Optional[str] = None,
 ) -> List[Tuple[str, str]]:
     """Run all benchmarks that don't have results yet."""
     if not session:
@@ -247,7 +248,10 @@ def run_missing_benchmarks(
     blacklist_models = blacklist_models or set()
     blacklist_benchmarks = blacklist_benchmarks or set()
 
-    models = [m for m in get_all_model_codenames() if m not in blacklist_models]
+    if only_model:
+        models = [only_model]
+    else:
+        models = [m for m in get_all_model_codenames() if m not in blacklist_models]
     benchmarks = [b for b in get_all_benchmarks() if b not in blacklist_benchmarks]
 
     scores = datastore_benchmarks.get_highest_benchmark_scores(session)
@@ -542,6 +546,7 @@ def main() -> None:
     subparsers.add_parser("models", help="List available models")
 
     missing_parser = subparsers.add_parser("missing", help="Run missing benchmarks")
+    missing_parser.add_argument("--model", help="Only run missing benchmarks for this model")
     missing_parser.add_argument("--blacklist-models", nargs="+", help="Models to exclude")
     missing_parser.add_argument("--blacklist-benchmarks", nargs="+", help="Benchmarks to exclude")
 
@@ -651,7 +656,9 @@ def main() -> None:
             set(args.blacklist_benchmarks) if args.blacklist_benchmarks else set()
         )
 
-        run_pairs = run_missing_benchmarks(blacklist_models, blacklist_benchmarks)
+        run_pairs = run_missing_benchmarks(
+            blacklist_models, blacklist_benchmarks, only_model=getattr(args, "model", None)
+        )
 
         if run_pairs:
             print("Successfully ran the following benchmarks:")
