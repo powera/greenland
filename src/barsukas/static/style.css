@@ -285,3 +285,31 @@ ruby.with-separator rt {
     border-radius: 0.5rem;
     margin-bottom: 1rem;
 }
+
+/* ---- Benchmarks section ---- */
+.score-badge {
+    display: inline-flex;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.score-excellent { background-color: #1b5e20; }
+.score-good { background-color: #4caf50; }
+.score-average { background-color: #ff9800; }
+.score-below-average { background-color: #f44336; }
+.score-poor { background-color: #b71c1c; }
+
+.stat-card {
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}

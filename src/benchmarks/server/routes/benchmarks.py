@@ -12,7 +12,7 @@ from benchmarks.datastore.benchmarks import Benchmark, Question, Run, insert_ben
 from benchmarks.datastore.common import Model, decode_json
 from benchmarks.lib.utils.factory import get_all_benchmark_codes, get_benchmark_metadata
 
-bp = Blueprint("benchmarks", __name__, url_prefix="/benchmarks")
+bp = Blueprint("benchmarks", __name__, url_prefix="/benchmarks", template_folder="../templates")
 
 
 def _extract_prompt_details(question_info: dict) -> dict:
@@ -70,7 +70,7 @@ def list_benchmarks():
     """List all benchmarks with their statistics."""
     # Get all benchmarks with question counts and run statistics
     benchmarks_query = (
-        g.db.query(
+        g.bench_db.query(
             Benchmark,
             func.count(Question.question_id).label("question_count"),
             func.count(Run.run_id).label("run_count"),
@@ -97,7 +97,7 @@ def list_benchmarks():
             }
         )
 
-    unsynced = _get_unsynced_benchmark_codes(g.db)
+    unsynced = _get_unsynced_benchmark_codes(g.bench_db)
 
     return render_template(
         "benchmarks/list.html",
@@ -127,7 +127,7 @@ def sync_benchmarks():
         if not metadata:
             continue
         success, _msg = insert_benchmark(
-            g.db,
+            g.bench_db,
             codename=metadata.code,
             displayname=metadata.name,
             description=metadata.description,
@@ -138,12 +138,12 @@ def sync_benchmarks():
         else:
             already_present += 1
             # Update the category for existing benchmarks
-            existing = g.db.query(Benchmark).filter(Benchmark.codename == code).first()
+            existing = g.bench_db.query(Benchmark).filter(Benchmark.codename == code).first()
             if existing and existing.category != metadata.category:
                 existing.category = metadata.category
                 updated += 1
 
-    g.db.commit()
+    g.bench_db.commit()
     flash(
         f"Sync complete: {added} benchmark(s) added, {already_present} already present"
         + (f", {updated} category update(s)." if updated else "."),
@@ -156,19 +156,19 @@ def sync_benchmarks():
 def view_benchmark(benchmark_name):
     """View detailed information about a specific benchmark including leaderboard."""
     # Get benchmark
-    benchmark = g.db.query(Benchmark).filter(Benchmark.codename == benchmark_name).first()
+    benchmark = g.bench_db.query(Benchmark).filter(Benchmark.codename == benchmark_name).first()
     if not benchmark:
         return "Benchmark not found", 404
 
     # Get question count
     question_count = (
-        g.db.query(func.count(Question.question_id))
+        g.bench_db.query(func.count(Question.question_id))
         .filter(Question.benchmark_name == benchmark_name)
         .scalar()
     )
 
     raw_questions = (
-        g.db.query(Question)
+        g.bench_db.query(Question)
         .filter(Question.benchmark_name == benchmark_name)
         .order_by(Question.question_id)
         .limit(100)
@@ -182,7 +182,8 @@ def view_benchmark(benchmark_name):
         question_previews.append(
             {
                 "question_id": question.question_id,
-                "question_text": question_info.get("question_text") or question_info.get("question"),
+                "question_text": question_info.get("question_text")
+                or question_info.get("question"),
                 "prompt_details": prompt_details,
                 "question_info_pretty": json.dumps(
                     question_info,
@@ -194,7 +195,7 @@ def view_benchmark(benchmark_name):
 
     # Get best run for each model on this benchmark
     subquery = (
-        g.db.query(
+        g.bench_db.query(
             Run.model_name,
             func.max(Run.normed_score).label("max_score"),
         )
@@ -205,7 +206,7 @@ def view_benchmark(benchmark_name):
 
     # Get the actual runs with model info
     leaderboard = (
-        g.db.query(Run, Model)
+        g.bench_db.query(Run, Model)
         .join(Model, Run.model_name == Model.codename)
         .join(
             subquery,
@@ -252,12 +253,12 @@ def run_benchmark(benchmark_name):
             flash("Model selection is required", "error")
             return redirect(url_for("benchmarks.run_benchmark", benchmark_name=benchmark_name))
 
-        benchmark = g.db.query(Benchmark).filter(Benchmark.codename == benchmark_name).first()
+        benchmark = g.bench_db.query(Benchmark).filter(Benchmark.codename == benchmark_name).first()
         if not benchmark:
             flash("Benchmark not found", "error")
             return redirect(url_for("benchmarks.list_benchmarks"))
 
-        model = g.db.query(Model).filter(Model.codename == model_name).first()
+        model = g.bench_db.query(Model).filter(Model.codename == model_name).first()
         if not model:
             flash("Selected model was not found", "error")
             return redirect(url_for("benchmarks.run_benchmark", benchmark_name=benchmark_name))
@@ -271,12 +272,12 @@ def run_benchmark(benchmark_name):
         return redirect(url_for("benchmarks.view_benchmark", benchmark_name=benchmark_name))
 
     # GET request - show form
-    benchmark = g.db.query(Benchmark).filter(Benchmark.codename == benchmark_name).first()
+    benchmark = g.bench_db.query(Benchmark).filter(Benchmark.codename == benchmark_name).first()
     if not benchmark:
         return "Benchmark not found", 404
 
     # Get all models
-    models = g.db.query(Model).order_by(Model.displayname).all()
+    models = g.bench_db.query(Model).order_by(Model.displayname).all()
     worker_status = current_app.extensions["benchmark_run_worker"].status()
 
     return render_template(

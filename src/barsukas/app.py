@@ -72,6 +72,7 @@ class BarsukasFlask(Flask):
 
     backend_config: DataSourceConfig
     db_session_factory: Callable[[], Session]
+    bench_db_session_factory: Optional[Callable[[], Session]]
 
 
 def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None) -> BarsukasFlask:
@@ -178,6 +179,63 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     app.register_blueprint(sync_relation_release.bp)
     app.register_blueprint(sync_sentence_release.bp)
     app.register_blueprint(sync_derivative_release.bp)
+
+    # --- Benchmarks integration ---
+    # Barsukas always uses PostgreSQL to access the benchmarks schema.
+    # The benchmarks section is only enabled when the postgres URL can be built.
+    bench_postgres_url: Optional[str] = None
+    try:
+        from benchmarks.config import BenchmarkConfig
+
+        bench_postgres_url = BenchmarkConfig.build_postgres_url()
+    except Exception as bench_exc:
+        print(f"Benchmarks DB not available, section disabled: {bench_exc}", file=sys.stderr)
+
+    if bench_postgres_url:
+        from benchmarks.datastore.common import create_postgres_session
+        from benchmarks.server.benchmark_worker import BenchmarkRunWorker
+        from benchmarks.server.routes import benchmarks as bench_benchmarks
+        from benchmarks.server.routes import dashboard as bench_dashboard
+        from benchmarks.server.routes import models as bench_models
+        from benchmarks.server.routes import runs as bench_runs
+
+        # Capture url in closure
+        _bench_postgres_url: str = bench_postgres_url
+
+        def bench_session_factory() -> Session:
+            return create_postgres_session(_bench_postgres_url)
+
+        app.bench_db_session_factory = bench_session_factory
+        app.extensions["benchmark_run_worker"] = BenchmarkRunWorker()
+        app.config["BENCHMARKS_ENABLED"] = True
+
+        # Benchmarks blueprints, all nested under /benchmarks/
+        # bench_benchmarks.bp already has url_prefix="/benchmarks"
+        app.register_blueprint(bench_benchmarks.bp)
+        app.register_blueprint(bench_dashboard.bp, url_prefix="/benchmarks/dashboard")
+        app.register_blueprint(bench_models.bp, url_prefix="/benchmarks/models")
+        app.register_blueprint(bench_runs.bp, url_prefix="/benchmarks/runs")
+
+        @app.before_request
+        def before_bench_request() -> None:
+            """Set up benchmarks database session."""
+            g.bench_db = bench_session_factory()
+
+        @app.teardown_appcontext
+        def shutdown_bench_session(exception: Optional[BaseException]) -> None:
+            """Clean up benchmarks database session."""
+            bench_db = g.pop("bench_db", None)
+            if bench_db is not None:
+                bench_db.close()
+
+        @app.context_processor
+        def inject_bench_worker_status() -> Dict[str, Any]:
+            """Expose benchmark worker status to templates (navbar queue indicator)."""
+            worker = app.extensions.get("benchmark_run_worker")
+            return {"navbar_worker_status": worker.status() if worker else None}
+
+    else:
+        app.config["BENCHMARKS_ENABLED"] = False
 
     # Register Jinja2 filters for Pinyin (Chinese) and Romaji (Japanese)
     app.jinja_env.filters["pinyin"] = generate_pinyin

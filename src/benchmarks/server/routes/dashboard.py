@@ -10,7 +10,13 @@ from sqlalchemy import func
 from benchmarks.datastore.benchmarks import Benchmark, Run, RunDetail
 from benchmarks.datastore.common import Model
 
-bp = Blueprint("dashboard", __name__, url_prefix="/dashboard")
+bp = Blueprint(
+    "dashboard",
+    __name__,
+    url_prefix="/dashboard",
+    template_folder="../templates",
+    static_folder="../static",
+)
 
 
 def get_score_color(score):
@@ -31,15 +37,15 @@ def get_score_color(score):
 def index():
     """Display the main benchmark dashboard with model-benchmark matrix."""
     # Get all models
-    models = g.db.query(Model).order_by(Model.displayname).all()
+    models = g.bench_db.query(Model).order_by(Model.displayname).all()
 
     # Get all benchmarks
-    benchmarks = g.db.query(Benchmark).order_by(Benchmark.codename).all()
+    benchmarks = g.bench_db.query(Benchmark).order_by(Benchmark.codename).all()
 
     # Get highest scoring run for each (benchmark, model) combination
     # Also calculate average eval time
     subquery = (
-        g.db.query(
+        g.bench_db.query(
             Run.benchmark_name,
             Run.model_name,
             func.max(Run.normed_score).label("max_score"),
@@ -50,7 +56,7 @@ def index():
 
     # Join to get the actual run IDs and calculate avg eval time
     runs_data = (
-        g.db.query(
+        g.bench_db.query(
             Run.run_id,
             Run.benchmark_name,
             Run.model_name,
@@ -70,7 +76,9 @@ def index():
     avg_times = {}
     for run_id, bench_name, model_name, score, run_ts in runs_data:
         avg_time = (
-            g.db.query(func.avg(RunDetail.eval_msec)).filter(RunDetail.run_id == run_id).scalar()
+            g.bench_db.query(func.avg(RunDetail.eval_msec))
+            .filter(RunDetail.run_id == run_id)
+            .scalar()
         )
         avg_times[run_id] = avg_time or 0
 

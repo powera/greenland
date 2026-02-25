@@ -89,12 +89,12 @@ def create_app(config_class=Config, postgres_url: Optional[str] = None):
     @app.before_request
     def before_request():
         """Set up database session before each request."""
-        g.db = app.db_session_factory()
+        g.bench_db = app.db_session_factory()
 
     @app.teardown_appcontext
     def teardown_db(exception=None):
         """Close database session after each request."""
-        db = g.pop("db", None)
+        db = g.pop("bench_db", None)
         if db is not None:
             db.close()
 
