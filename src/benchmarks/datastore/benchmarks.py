@@ -5,7 +5,7 @@
 import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import TIMESTAMP, ForeignKey, Integer, String
+from sqlalchemy import TIMESTAMP, Float, ForeignKey, Integer, String
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
@@ -76,7 +76,8 @@ class RunDetail(Base):
     run_id: Mapped[int] = mapped_column(ForeignKey("run.run_id"), primary_key=True)
     eval_msec: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     debug_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    thought_process: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Add this line
+    thought_process: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    cost_usd: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 
     question_id: Mapped[str] = mapped_column(
         String, ForeignKey("question.question_id"), primary_key=True
@@ -193,6 +194,7 @@ def insert_run(
                     eval_msec=detail.get("eval_msec"),
                     debug_json=detail.get("debug_json"),
                     thought_process=detail.get("thought_process", None),
+                    cost_usd=detail.get("cost_usd", None),
                 )
                 session.add(run_detail)
 
@@ -281,6 +283,7 @@ def get_run_by_run_id(run_id: int, session=None) -> Optional[Dict]:
                 "question_info_json": decode_json(question.question_info_json),
                 "debug_json": decode_json(detail.debug_json),
                 "thought_process": detail.thought_process,
+                "cost_usd": detail.cost_usd,
             }
             for detail, question in run_details
         ],
@@ -366,6 +369,7 @@ def get_highest_scoring_run_details(
                 "eval_msec": detail.eval_msec,
                 "question_info_json": decode_json(question.question_info_json),
                 "debug_json": decode_json(detail.debug_json),
+                "cost_usd": detail.cost_usd,
             }
             for detail, question in run_details
         ],

@@ -98,6 +98,7 @@ class BenchmarkResult:
     eval_msec: int  # Evaluation time in milliseconds
     debug_json: Optional[str] = None  # Debug information (model response, etc.)
     thought_process: Optional[str] = None  # Add this line to store model's reasoning
+    cost_usd: Optional[float] = None  # Estimated LLM cost in USD
 
 
 @dataclass

@@ -239,6 +239,7 @@ class BenchmarkRunner:
                 thought_process=(
                     response.additional_thought if response.additional_thought else None
                 ),
+                cost_usd=response.usage.cost if response.usage else None,
             )
 
         except OllamaTimeoutError as e:
