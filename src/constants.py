@@ -45,4 +45,6 @@ WIKI_INDEX_SCHEMA_PATH = os.path.join(SRC_DIR, "benchmarks", "schema", "wiki_ind
 # PostgreSQL configuration
 # Template URL with placeholder for password - the actual password is loaded from keys/postgres.key
 POSTGRES_URL_TEMPLATE = "postgresql://postgres:[YOUR-PASSWORD]@db.srouvwdghrmwkxnzyzqz.supabase.co:5432/postgres?sslmode=require"
+# Shared pooler URL used as fallback when IPv6 is unavailable (IPv4-only environments)
+POSTGRES_POOLER_URL_TEMPLATE = "postgresql://postgres.srouvwdghrmwkxnzyzqz:[YOUR-PASSWORD]@aws-0-us-west-2.pooler.supabase.com:5432/postgres?sslmode=require"
 POSTGRES_SCHEMA = "trakaido"
