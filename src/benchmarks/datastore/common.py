@@ -130,10 +130,27 @@ def create_postgres_session(postgres_url: str):
             pool_pre_ping=True,
             pool_recycle=3600,
         )
+
+        # PgBouncer (Supabase pooler) silently drops the options=
+        # search_path parameter from connection URLs, so we must set
+        # search_path explicitly on every new connection.
+        schema = BENCHMARKS_POSTGRES_SCHEMA
+
+        @event.listens_for(engine, "connect")
+        def _set_search_path(dbapi_conn: Any, connection_record: Any) -> None:
+            cursor = dbapi_conn.cursor()
+            cursor.execute(f"SET search_path TO {schema}")
+            cursor.close()
+
         # Ensure the benchmarks schema exists before creating tables.
         with engine.connect() as conn:
-            conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {BENCHMARKS_POSTGRES_SCHEMA}"))
+            conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
             conn.commit()
+
+        # Import benchmarks models so all ORM classes are registered with
+        # Base before create_all (Benchmark, Question, Run, RunDetail).
+        import benchmarks.datastore.benchmarks  # noqa: F401
+
         Base.metadata.create_all(engine)
         _postgres_engine_cache[postgres_url] = engine
 
