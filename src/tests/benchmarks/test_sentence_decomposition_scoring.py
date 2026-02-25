@@ -19,7 +19,6 @@ if "pydantic" not in sys.modules:
 
 from benchmarks.lib.runners.sentence_decomposition_runner import SentenceDecompositionRunner
 
-
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures" / "sentence_decomposition"
 
 
@@ -192,6 +191,41 @@ def test_0062_debug_info_contains_payload_for_future_rescoring():
     assert debug["scoring_version"] == "0062-v3-dp-alignment"
 
 
+def test_0062_lt_inessive_scores_same_as_locative():
+    """LLMs sometimes use cross-linguistic "inessive" for the Lithuanian locative.
+
+    Both labels refer to the same case form and should receive full credit.
+    """
+    runner = SentenceDecompositionRunner.__new__(SentenceDecompositionRunner)
+
+    assert (
+        runner._grammatical_form_similarity(
+            "noun/lt_locative_singular", "noun/lt_inessive_singular"
+        )
+        == 1.0
+    )
+
+    assert (
+        runner._grammatical_form_similarity(
+            "noun/lt_locative_singular", "noun/lt_singular_inessive"
+        )
+        == 1.0
+    )
+
+    assert (
+        runner._grammatical_form_similarity("noun/lt_locative_plural", "noun/lt_inessive_plural")
+        == 1.0
+    )
+
+    # Unrelated cases must still score zero.
+    assert (
+        runner._grammatical_form_similarity(
+            "noun/lt_locative_singular", "noun/lt_genitive_singular"
+        )
+        == 0.0
+    )
+
+
 def test_0062_split_tokens_do_not_cascade_mismatch_scores():
     runner = SentenceDecompositionRunner.__new__(SentenceDecompositionRunner)
 
@@ -202,10 +236,42 @@ def test_0062_split_tokens_do_not_cascade_mismatch_scores():
                 "translation": "她昨天去了医院。",
                 "word_count": 4,
                 "words": [
-                    {"english_gloss": "she", "grammatical_form": "pronoun/zh_subjective", "lemma": "No lemma", "lemma_guid": "NONE", "position": 0, "role": "pronoun", "surface_form": "她"},
-                    {"english_gloss": "yesterday", "grammatical_form": "adverb/zh", "lemma": "yesterday", "lemma_guid": "D03_002", "position": 1, "role": "adverb", "surface_form": "昨天"},
-                    {"english_gloss": "went", "grammatical_form": "verb/zh_3s_past", "lemma": "go", "lemma_guid": "V12_004", "position": 2, "role": "verb", "surface_form": "去了"},
-                    {"english_gloss": "hospital", "grammatical_form": "noun/zh_singular", "lemma": "hospital", "lemma_guid": "N07_003", "position": 3, "role": "noun", "surface_form": "医院"},
+                    {
+                        "english_gloss": "she",
+                        "grammatical_form": "pronoun/zh_subjective",
+                        "lemma": "No lemma",
+                        "lemma_guid": "NONE",
+                        "position": 0,
+                        "role": "pronoun",
+                        "surface_form": "她",
+                    },
+                    {
+                        "english_gloss": "yesterday",
+                        "grammatical_form": "adverb/zh",
+                        "lemma": "yesterday",
+                        "lemma_guid": "D03_002",
+                        "position": 1,
+                        "role": "adverb",
+                        "surface_form": "昨天",
+                    },
+                    {
+                        "english_gloss": "went",
+                        "grammatical_form": "verb/zh_3s_past",
+                        "lemma": "go",
+                        "lemma_guid": "V12_004",
+                        "position": 2,
+                        "role": "verb",
+                        "surface_form": "去了",
+                    },
+                    {
+                        "english_gloss": "hospital",
+                        "grammatical_form": "noun/zh_singular",
+                        "lemma": "hospital",
+                        "lemma_guid": "N07_003",
+                        "position": 3,
+                        "role": "noun",
+                        "surface_form": "医院",
+                    },
                 ],
             }
         ]
@@ -218,11 +284,51 @@ def test_0062_split_tokens_do_not_cascade_mismatch_scores():
                 "translation": "她昨天去了医院。",
                 "word_count": 5,
                 "words": [
-                    {"english_gloss": "she", "grammatical_form": "pronoun/zh_subjective", "lemma": "她", "lemma_guid": "NONE", "position": 0, "role": "pronoun", "surface_form": "她"},
-                    {"english_gloss": "yesterday", "grammatical_form": "adverb/base", "lemma": "昨天", "lemma_guid": "D03_002", "position": 1, "role": "adverb", "surface_form": "昨天"},
-                    {"english_gloss": "go", "grammatical_form": "verb/zh_past", "lemma": "去", "lemma_guid": "V12_004", "position": 2, "role": "verb", "surface_form": "去"},
-                    {"english_gloss": "(perfective aspect marker)", "grammatical_form": "particle/base", "lemma": "了", "lemma_guid": "NONE", "position": 3, "role": "particle", "surface_form": "了"},
-                    {"english_gloss": "hospital", "grammatical_form": "noun/zh_singular", "lemma": "医院", "lemma_guid": "N07_003", "position": 4, "role": "noun", "surface_form": "医院"},
+                    {
+                        "english_gloss": "she",
+                        "grammatical_form": "pronoun/zh_subjective",
+                        "lemma": "她",
+                        "lemma_guid": "NONE",
+                        "position": 0,
+                        "role": "pronoun",
+                        "surface_form": "她",
+                    },
+                    {
+                        "english_gloss": "yesterday",
+                        "grammatical_form": "adverb/base",
+                        "lemma": "昨天",
+                        "lemma_guid": "D03_002",
+                        "position": 1,
+                        "role": "adverb",
+                        "surface_form": "昨天",
+                    },
+                    {
+                        "english_gloss": "go",
+                        "grammatical_form": "verb/zh_past",
+                        "lemma": "去",
+                        "lemma_guid": "V12_004",
+                        "position": 2,
+                        "role": "verb",
+                        "surface_form": "去",
+                    },
+                    {
+                        "english_gloss": "(perfective aspect marker)",
+                        "grammatical_form": "particle/base",
+                        "lemma": "了",
+                        "lemma_guid": "NONE",
+                        "position": 3,
+                        "role": "particle",
+                        "surface_form": "了",
+                    },
+                    {
+                        "english_gloss": "hospital",
+                        "grammatical_form": "noun/zh_singular",
+                        "lemma": "医院",
+                        "lemma_guid": "N07_003",
+                        "position": 4,
+                        "role": "noun",
+                        "surface_form": "医院",
+                    },
                 ],
             }
         ]
