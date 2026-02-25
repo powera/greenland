@@ -194,6 +194,7 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     if bench_postgres_url:
         from benchmarks.datastore.common import create_postgres_session
         from benchmarks.server.benchmark_worker import BenchmarkRunWorker
+        from benchmarks.server.config import Config as BenchmarkServerConfig
         from benchmarks.server.routes import benchmarks as bench_benchmarks
         from benchmarks.server.routes import dashboard as bench_dashboard
         from benchmarks.server.routes import models as bench_models
@@ -208,6 +209,18 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
         app.bench_db_session_factory = bench_session_factory
         app.extensions["benchmark_run_worker"] = BenchmarkRunWorker()
         app.config["BENCHMARKS_ENABLED"] = True
+
+        # Copy runner access-control config from the benchmarks server Config so
+        # _is_authorized_run_request() works correctly in Barsukas.  Without these
+        # keys, BENCHMARK_RUNNER_ALLOWED_CIDRS defaults to () and the run/sync/
+        # cancel endpoints are always blocked even in non-readonly personas.
+        app.config["BENCHMARK_RUNNER_ENABLED"] = BenchmarkServerConfig.BENCHMARK_RUNNER_ENABLED
+        app.config["BENCHMARK_RUNNER_ALLOWED_CIDRS"] = (
+            BenchmarkServerConfig.BENCHMARK_RUNNER_ALLOWED_CIDRS
+        )
+        app.config["BENCHMARK_RUNNER_BLOCK_PROXIED_REQUESTS"] = (
+            BenchmarkServerConfig.BENCHMARK_RUNNER_BLOCK_PROXIED_REQUESTS
+        )
 
         # Benchmarks blueprints, all nested under /benchmarks/
         # bench_benchmarks.bp already has url_prefix="/benchmarks"
