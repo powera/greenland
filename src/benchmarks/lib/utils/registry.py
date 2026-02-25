@@ -163,6 +163,24 @@ class PercentageMathBenchmark:
     pass
 
 
+from benchmarks.lib.generators.time_arithmetic_generator import TimeArithmeticGenerator
+from benchmarks.lib.runners.time_arithmetic_runner import TimeArithmeticRunner
+
+
+@benchmark(
+    code="0026_time_arithmetic",
+    name="Time Arithmetic",
+    description="""
+           A benchmark to evaluate a model's ability to add and subtract
+           durations from clock times in 24-hour HH:MM format.""",
+    category="simple math",
+)
+class TimeArithmeticBenchmark:
+    """Module container for time arithmetic benchmark."""
+
+    pass
+
+
 from benchmarks.lib.generators.part_of_speech_generator import PartOfSpeechGenerator
 from benchmarks.lib.runners.part_of_speech_runner import PartOfSpeechRunner
 

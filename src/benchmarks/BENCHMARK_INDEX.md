@@ -25,6 +25,7 @@ This document captures the current benchmark lineup and numbering through `0200`
 | 0021 | `simple_arithmetic` | Simple Arithmetic | simple math | implemented |
 | 0022 | `unit_conversion` | Unit Conversion | general knowledge | implemented |
 | 0024 | `percentage_math` | Fractions and Percentages | simple math | implemented |
+| 0026 | `time_arithmetic` | Time Arithmetic | simple math | implemented |
 | 0032 | `part_of_speech` | Part of Speech | word processing | implemented |
 | 0051 | `pinyin_letters` | Pinyin Letter Count | token processing | implemented |
 | 0061 | `word_to_ipa` | Word to IPA | token processing | implemented |
@@ -51,12 +52,11 @@ This document captures the current benchmark lineup and numbering through `0200`
 - `0050_translation_en_zh` → `0109_translation_en_zh`.
 - `0050_translation_sw_ko` → `0110_translation_sw_ko`.
 - `0111_synonyms` is now explicitly registered and listed as implemented.
-- `0035_simple_haystack` is currently unregistered and should be treated as archived until implementation is restored.
+- `0035_simple_haystack` assets were removed from the repository.
 
 ## Proposed unimplemented additions
 
 ### 0010–0099: token/word/simple math
-- `0026_time_arithmetic` — add/subtract times and durations.
 - `0034_pluralization` — singular/plural generation and validation.
 - `0036_word_segmentation` — split compounds or run-on tokens into words.
 - `0040_character_normalization` — Unicode/case/diacritic normalization checks.
@@ -72,3 +72,10 @@ This document captures the current benchmark lineup and numbering through `0200`
 
 ### 0200+
 - `0200` marks safety classification (e.g., benign vs unsafe prompt intent).
+
+
+## Similar lemma-related benchmarks
+
+- `0122_lemma`: core lemmatization task (given a word form, return lemma).
+- `0130_validate_lemma_form`: agent-regression validator task (judge whether a form is lemma and suggest correction).
+- They are related but not the same benchmark objective.
