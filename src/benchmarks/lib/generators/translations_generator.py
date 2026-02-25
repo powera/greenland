@@ -64,7 +64,8 @@ def get_translation_metadata(origin_lang: str, target_lang: str) -> BenchmarkMet
     Returns:
         BenchmarkMetadata object
     """
-    benchmark_code = f"0050_translation_{origin_lang}_{target_lang}"
+    code_map = {("en", "fr"): "0108_translation_en_fr", ("en", "zh"): "0109_translation_en_zh", ("sw", "ko"): "0110_translation_sw_ko"}
+    benchmark_code = code_map.get((origin_lang, target_lang), f"0149_translation_{origin_lang}_{target_lang}")
     benchmark_name = f"Translation ({origin_lang.upper()} → {target_lang.upper()})"
     description = (
         f"Tests ability to translate {origin_lang.upper()} words to "
@@ -81,7 +82,7 @@ def get_translation_metadata(origin_lang: str, target_lang: str) -> BenchmarkMet
     )
 
 
-@generator("0050_translation")
+@generator("0108_translation_en_fr")
 class TranslationGenerator(BenchmarkGenerator):
     """Generator for translation benchmark questions."""
 

@@ -186,7 +186,7 @@ from benchmarks.lib.runners.lemma_runner import LemmaRunner
 
 
 @benchmark(
-    code="0033_lemma",
+    code="0122_lemma",
     name="Lemma Identification",
     description="""
          A benchmark to evaluate a model's ability to identify the lemma (base form)
@@ -204,14 +204,14 @@ class LemmaBenchmark:
 
 
 # Register generator and runner
-register_generator("0033_lemma", LemmaGenerator)
-register_runner("0033_lemma", LemmaRunner)
+register_generator("0122_lemma", LemmaGenerator)
+register_runner("0122_lemma", LemmaRunner)
 
 from benchmarks.lib.generators.translations_generator import TranslationGenerator
 from benchmarks.lib.runners.translations_runner import TranslationRunner
 
-for codepair in ["en_fr", "en_zh", "sw_ko"]:
-    benchmark_code = f"0050_translation_{codepair}"
+translation_codes = {"en_fr": "0108_translation_en_fr", "en_zh": "0109_translation_en_zh", "sw_ko": "0110_translation_sw_ko"}
+for codepair, benchmark_code in translation_codes.items():
 
     @benchmark(
         code=benchmark_code,
@@ -400,6 +400,28 @@ class HistoricalEventYearBenchmark:
 
 register_generator("0155_historical_event_year", HistoricalEventYearGenerator)
 register_runner("0155_historical_event_year", HistoricalEventYearRunner)
+
+from benchmarks.lib.generators.synonyms_generator import SynonymsGenerator
+from benchmarks.lib.runners.synonyms_runner import SynonymsRunner
+
+
+@benchmark(
+    code="0111_synonyms",
+    name="Multilingual Synonym Generation",
+    description="""
+           A benchmark to evaluate a model's ability to generate noun synonyms
+           in multiple languages.""",
+    category="word processing",
+    default_num_questions=64,
+)
+class SynonymsBenchmark:
+    """Module container for multilingual synonym benchmark."""
+
+    pass
+
+
+register_generator("0111_synonyms", SynonymsGenerator)
+register_runner("0111_synonyms", SynonymsRunner)
 
 
 @benchmark(
