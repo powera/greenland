@@ -64,6 +64,14 @@
                                 {% endfor %}
                             </tr>
                             <tr>
+                                <td><strong>Cost</strong></td>
+                                {% for run_info in runs %}
+                                <td class="text-center">
+                                    {% if run_info.total_cost %}${{ '%.4f'|format(run_info.total_cost) }}{% else %}—{% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
                                 <td><strong>Run Date</strong></td>
                                 {% for run_info in runs %}
                                 <td class="text-center">

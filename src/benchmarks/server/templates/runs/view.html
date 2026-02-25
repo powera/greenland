@@ -59,7 +59,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card stat-card">
             <div class="card-body">
                 <h6 class="text-muted">Avg Response Time</h6>
@@ -67,6 +67,16 @@
             </div>
         </div>
     </div>
+    {% if total_cost %}
+    <div class="col-md-1">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="text-muted">Cost</h6>
+                <h4>${{ '%.4f'|format(total_cost) }}</h4>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <div class="row mb-4">
@@ -125,7 +135,7 @@
                                                 {% if is_correct %}Correct{% else %}Incorrect{% endif %}
                                             </span>
                                         </span>
-                                        <span class="small text-muted">Score: {{ detail.score or 0 }} • {{ detail.eval_msec or 0 }}ms</span>
+                                        <span class="small text-muted">Score: {{ detail.score or 0 }} • {{ detail.eval_msec or 0 }}ms{% if detail.cost_usd %} • ${{ '%.4f'|format(detail.cost_usd) }}{% endif %}</span>
                                     </div>
                                 </button>
                             </h2>
