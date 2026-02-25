@@ -11,11 +11,13 @@ from benchmarks.lib.utils.data_models import AnswerType, BenchmarkMetadata
 from benchmarks.lib.utils.factory import runner
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
-@runner("0020_definitions")
+@runner("0031_definitions")
 class DefinitionsRunner(BenchmarkRunner):
     """Runner for testing word definition abilities."""
 
