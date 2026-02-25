@@ -86,12 +86,17 @@ class SpellCheckGenerator(BenchmarkGenerator):
         # Shuffle the word files to get different questions each time
         random.shuffle(self.word_files)
 
+        # Sample a fixed number of sentences per file so that all files
+        # contribute equally (instead of exhausting early files first).
+        sentences_per_file = 4
+
         for filename in self.word_files:
             try:
                 # Load the JSON file for this word
                 word_data = self.load_json_file(f"{filename}.json")
+                random.shuffle(word_data)
 
-                for item in word_data:
+                for item in word_data[:sentences_per_file]:
                     if not all(k in item for k in ["sentence", "incorrect", "correct"]):
                         logger.warning(f"Skipping incomplete item in {filename}.json: {item}")
                         continue

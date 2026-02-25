@@ -21,13 +21,16 @@ class KnowledgeMultipleChoiceRunner(BenchmarkRunner):
         prompt = (
             f"{question_data.get('question_text', '')}\n\n"
             f"Options:\n{options}\n\n"
-            "Respond with either the option number or the exact option text."
+            "First explain your reasoning, then give the exact text of the correct option as your answer. Do not include the option number."
         )
 
         schema = {
             "type": "object",
-            "properties": {"answer": {"type": "string"}},
-            "required": ["answer"],
+            "properties": {
+                "reasoning": {"type": "string"},
+                "answer": {"type": "string"},
+            },
+            "required": ["reasoning", "answer"],
         }
         return prompt, schema, self.context
 
@@ -35,14 +38,12 @@ class KnowledgeMultipleChoiceRunner(BenchmarkRunner):
         correct = str(question_data.get("correct_answer", "")).strip().lower()
         choices = [str(choice) for choice in question_data.get("choices", [])]
 
-        actual = response.get("answer") if isinstance(response, dict) and "answer" in response else response
+        actual = (
+            response.get("answer")
+            if isinstance(response, dict) and "answer" in response
+            else response
+        )
         actual_norm = str(actual).strip().lower()
-
-        if actual_norm.isdigit():
-            index = int(actual_norm) - 1
-            if 0 <= index < len(choices):
-                return choices[index].strip().lower() == correct
-            return False
 
         for choice in choices:
             if actual_norm == choice.strip().lower():

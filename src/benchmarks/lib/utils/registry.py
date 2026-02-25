@@ -81,7 +81,7 @@ from benchmarks.lib.runners.antonym_runner import AntonymRunner
 
 @benchmark(
     code="0016_antonym",
-    name="Antonym Check",
+    name="Antonym Identification",
     description="""
            A benchmark to evaluate a model's ability to identify
            the antonym of a word.""",
@@ -228,7 +228,11 @@ register_runner("0122_lemma", LemmaRunner)
 from benchmarks.lib.generators.translations_generator import TranslationGenerator
 from benchmarks.lib.runners.translations_runner import TranslationRunner
 
-translation_codes = {"en_fr": "0108_translation_en_fr", "en_zh": "0109_translation_en_zh", "sw_ko": "0110_translation_sw_ko"}
+translation_codes = {
+    "en_fr": "0108_translation_en_fr",
+    "en_zh": "0109_translation_en_zh",
+    "sw_ko": "0110_translation_sw_ko",
+}
 for codepair, benchmark_code in translation_codes.items():
 
     @benchmark(
