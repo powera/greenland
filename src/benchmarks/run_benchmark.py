@@ -5,11 +5,13 @@
 import argparse
 import json
 import logging
+import sys
 import traceback
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import benchmarks.datastore.benchmarks as datastore_benchmarks
 import benchmarks.datastore.common as datastore_common
+from benchmarks.config import BenchmarkConfig
 from benchmarks.lib.utils.factory import (
     get_all_benchmark_codes,
     get_benchmark_metadata,
@@ -476,8 +478,30 @@ def init_all_benchmarks(
     return summary
 
 
+def _resolve_postgres_url(args: argparse.Namespace) -> Optional[str]:
+    """Determine the PostgreSQL URL from CLI flags, if any."""
+    if getattr(args, "db_url", None) and args.db_url.startswith("postgresql://"):
+        return args.db_url
+    if getattr(args, "postgres", False):
+        try:
+            return BenchmarkConfig.build_postgres_url()
+        except Exception as exc:
+            print(f"Error building PostgreSQL URL: {exc}", file=sys.stderr)
+            sys.exit(1)
+    return None
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run benchmarks for language models")
+    parser.add_argument(
+        "--postgres",
+        action="store_true",
+        help="Use PostgreSQL (Supabase) backend; reads keys/postgres.key",
+    )
+    parser.add_argument(
+        "--db-url",
+        help="Full PostgreSQL connection URL (overrides --postgres key-file lookup)",
+    )
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
     run_parser = subparsers.add_parser("run", help="Run a benchmark")
@@ -560,6 +584,23 @@ def main() -> None:
     )
 
     args = parser.parse_args()
+
+    # When a postgres backend is requested, monkey-patch create_dev_session so
+    # that all internal code (runners, generators, etc.) that calls it will
+    # transparently use the PostgreSQL connection instead of SQLite.
+    postgres_url = _resolve_postgres_url(args)
+    if postgres_url:
+        print("Using storage backend: postgres (Supabase)")
+        _original_create_dev_session = datastore_common.create_dev_session
+
+        def _postgres_dev_session():
+            return datastore_common.create_postgres_session(postgres_url)
+
+        datastore_common.create_dev_session = _postgres_dev_session
+        # Also patch the reference used by datastore_benchmarks, since it may
+        # have imported create_dev_session at module load time.
+        if hasattr(datastore_benchmarks, "create_dev_session"):
+            datastore_benchmarks.create_dev_session = _postgres_dev_session
 
     if args.command == "run":
         run_id = run_benchmark(args.benchmark, args.model)
