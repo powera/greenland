@@ -43,6 +43,21 @@ def _create_engine(db_path: str) -> "Engine":
             pool_size=5,  # Keep 5 connections ready in the pool
             max_overflow=10,  # Allow up to 15 total connections during bursts
         )
+
+        if db_path.startswith("postgresql://"):
+            # PgBouncer (Supabase pooler) silently drops the options=
+            # search_path parameter from connection URLs, so we must set
+            # search_path explicitly on every new connection.
+            import constants as _constants
+
+            pg_schema = _constants.POSTGRES_SCHEMA
+
+            @event.listens_for(engine, "connect")
+            def _set_pg_search_path(dbapi_conn: Any, connection_record: Any) -> None:
+                cursor = dbapi_conn.cursor()
+                cursor.execute(f"SET search_path TO {pg_schema}")
+                cursor.close()
+
     else:
         # SQLite - use file path
         connection_string = f"sqlite:///{db_path}"
