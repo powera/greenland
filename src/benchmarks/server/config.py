@@ -27,6 +27,10 @@ class Config:
     # Database settings
     DB_PATH = os.environ.get("BENCH_SERVER_DB_PATH", str(BENCHMARKS_DB_PATH))
 
+    # PostgreSQL / Supabase settings (used when BENCH_STORAGE_BACKEND=postgres)
+    STORAGE_BACKEND = os.environ.get("BENCH_STORAGE_BACKEND", "sqlite").lower()
+    POSTGRES_URL = os.environ.get("BENCH_POSTGRES_URL", "")
+
     # Pagination
     ITEMS_PER_PAGE = 50
 
@@ -34,7 +38,9 @@ class Config:
     READONLY = False  # Can be overridden at runtime
 
     # Benchmark runner controls
-    BENCHMARK_RUNNER_ENABLED = os.environ.get("BENCH_SERVER_RUNNER_ENABLED", "true").lower() == "true"
+    BENCHMARK_RUNNER_ENABLED = (
+        os.environ.get("BENCH_SERVER_RUNNER_ENABLED", "true").lower() == "true"
+    )
     BENCHMARK_RUNNER_ALLOWED_CIDRS = tuple(
         ip_network(cidr.strip())
         for cidr in os.environ.get(

@@ -31,6 +31,9 @@ BENCHMARK_TESTS_DIR = BENCHMARKS_DIR
 # Default model for benchmarks
 DEFAULT_BENCHMARK_MODEL = "gpt-4o-mini"
 
+# PostgreSQL schema for benchmarks (used when connecting to Supabase)
+BENCHMARKS_POSTGRES_SCHEMA = "benchmarks"
+
 # Server defaults
 DEFAULT_SERVER_PORT = 5556
 DEFAULT_SERVER_HOST = "127.0.0.1"

@@ -17,11 +17,15 @@ from sqlalchemy import (
     func,
     text,
 )
+from sqlalchemy.engine import Engine
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
 from sqlalchemy.sql import func
 
-from benchmarks.benchmark_constants import BENCHMARKS_DB_PATH
+from benchmarks.benchmark_constants import BENCHMARKS_DB_PATH, BENCHMARKS_POSTGRES_SCHEMA
+
+# Cache for PostgreSQL engines to avoid creating multiple connection pools.
+_postgres_engine_cache: Dict[str, Engine] = {}
 
 
 class Base(DeclarativeBase):
@@ -106,6 +110,37 @@ def create_database_and_session(db_path=None):
     return Session()
 
 
+def create_postgres_session(postgres_url: str):
+    """Create a database session for a PostgreSQL (Supabase) backend.
+
+    Engines are cached by URL so that multiple calls reuse the same connection
+    pool. On first use the benchmarks schema is created (if absent) and all
+    ORM tables are created via Base.metadata.create_all.
+
+    Args:
+        postgres_url: Full PostgreSQL connection URL (including search_path option)
+
+    Returns:
+        SQLAlchemy session
+    """
+    if postgres_url not in _postgres_engine_cache:
+        engine = create_engine(
+            postgres_url,
+            echo=False,
+            pool_pre_ping=True,
+            pool_recycle=3600,
+        )
+        # Ensure the benchmarks schema exists before creating tables.
+        with engine.connect() as conn:
+            conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {BENCHMARKS_POSTGRES_SCHEMA}"))
+            conn.commit()
+        Base.metadata.create_all(engine)
+        _postgres_engine_cache[postgres_url] = engine
+
+    session_factory = sessionmaker(bind=_postgres_engine_cache[postgres_url])
+    return session_factory()
+
+
 def create_session_from_config(config):
     """Create a database session from a BenchmarkConfig object.
 
@@ -115,6 +150,8 @@ def create_session_from_config(config):
     Returns:
         SQLAlchemy session
     """
+    if getattr(config, "postgres_url", None):
+        return create_postgres_session(config.postgres_url)
     return create_database_and_session(config.db_path)
 
 

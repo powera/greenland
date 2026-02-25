@@ -177,10 +177,24 @@ def get_highest_qual_scores(session) -> Dict:
     :param session: SQLAlchemy session
     :return: Dict with (qual_test, model) tuple as key and dict containing score and run_id as value
     """
+    max_scores_subq = (
+        session.query(
+            QualRun.qual_test_name,
+            QualRun.model_name,
+            func.max(QualRun.avg_score).label("max_score"),
+        )
+        .group_by(QualRun.qual_test_name, QualRun.model_name)
+        .subquery()
+    )
+
     highest_scores = (
         session.query(QualRun.qual_test_name, QualRun.model_name, QualRun.avg_score, QualRun.run_id)
-        .order_by(QualRun.avg_score)
-        .distinct(QualRun.qual_test_name, QualRun.model_name)
+        .join(
+            max_scores_subq,
+            (QualRun.qual_test_name == max_scores_subq.c.qual_test_name)
+            & (QualRun.model_name == max_scores_subq.c.model_name)
+            & (QualRun.avg_score == max_scores_subq.c.max_score),
+        )
         .all()
     )
 
