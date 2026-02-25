@@ -6,6 +6,11 @@ refer to the same grammatical concept, accounting for:
 - Language-specific case name aliases (e.g. Lithuanian "inessive" → "locative")
 - Consistent component ordering conventions (canonical: case → number → gender)
 
+Per-language aliases are defined in ``langtools/<lang>/case_equivalences.py``
+as a module-level ``CASE_ALIASES`` dict.  The file is loaded on first use via
+``importlib`` (bypassing the language package's ``__init__.py``) so that only
+languages actually encountered in form strings incur any import cost.
+
 Example usage::
 
     from langtools.form_equivalences import (
@@ -23,19 +28,44 @@ Example usage::
     # -> True
 """
 
+import importlib.util
 import re
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from langtools.lt.case_equivalences import LT_CASE_ALIASES
+# Directory that contains per-language subdirectories (i.e. src/langtools/).
+_LANGTOOLS_DIR = Path(__file__).parent
 
-# Language-specific case term aliases: {lang_code: {alias: canonical}}
-_LANG_CASE_ALIASES: Dict[str, Dict[str, str]] = {
-    "lt": LT_CASE_ALIASES,
-}
+# Cache: lang_code -> alias dict (populated on first request per language).
+_alias_cache: Dict[str, Dict[str, str]] = {}
 
 # Component categories used for canonical ordering: case → number → gender
 _NUMBER_TERMS: frozenset = frozenset({"singular", "plural"})
 _GENDER_TERMS: frozenset = frozenset({"m", "f", "n"})
+
+
+def _get_lang_aliases(lang: str) -> Dict[str, str]:
+    """Return the case-alias map for *lang*, loading it lazily on first call.
+
+    Reads ``langtools/<lang>/case_equivalences.py`` directly via
+    ``importlib.util.spec_from_file_location`` so that the language
+    package's ``__init__.py`` is never executed.  Languages with no alias
+    file return an empty dict and are cached as such.
+    """
+    if lang in _alias_cache:
+        return _alias_cache[lang]
+
+    aliases: Dict[str, str] = {}
+    alias_file = _LANGTOOLS_DIR / lang / "case_equivalences.py"
+    if alias_file.exists():
+        spec = importlib.util.spec_from_file_location(f"_form_alias_{lang}", alias_file)
+        if spec is not None and spec.loader is not None:
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)  # type: ignore[union-attr]
+            aliases = getattr(module, "CASE_ALIASES", {})
+
+    _alias_cache[lang] = aliases
+    return aliases
 
 
 def _parse_form_string(form: str) -> Optional[Tuple[str, str, List[str]]]:
@@ -64,7 +94,7 @@ def _normalize_components(lang: str, components: List[str]) -> List[str]:
         ["singular", "inessive"] → ["locative", "singular"]
         ["singular", "locative", "f"] → ["locative", "singular", "f"]
     """
-    aliases = _LANG_CASE_ALIASES.get(lang, {})
+    aliases = _get_lang_aliases(lang)
     resolved = [aliases.get(c, c) for c in components]
 
     number_parts = [c for c in resolved if c in _NUMBER_TERMS]
