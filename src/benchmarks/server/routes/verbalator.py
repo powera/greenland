@@ -38,9 +38,17 @@ def _get_unified_client() -> UnifiedClient:
 def _get_models() -> List[Dict[str, Any]]:
     """Fetch all models from DB, remote first then local, each sorted by displayname."""
     remote = (
-        g.db.query(Model).filter(Model.model_type == "remote").order_by(Model.displayname).all()
+        g.bench_db.query(Model)
+        .filter(Model.model_type == "remote")
+        .order_by(Model.displayname)
+        .all()
     )
-    local = g.db.query(Model).filter(Model.model_type != "remote").order_by(Model.displayname).all()
+    local = (
+        g.bench_db.query(Model)
+        .filter(Model.model_type != "remote")
+        .order_by(Model.displayname)
+        .all()
+    )
     return [
         {
             "codename": m.codename,
@@ -97,7 +105,7 @@ def query():
 
         # Look up model_path from DB using the posted codename
         model_codename = data.get("model", DEFAULT_MODEL)
-        db_model = g.db.query(Model).filter(Model.codename == model_codename).first()
+        db_model = g.bench_db.query(Model).filter(Model.codename == model_codename).first()
         model_path = db_model.model_path if db_model and db_model.model_path else model_codename
 
         if _is_local_model(db_model) and not _can_start_local_query(model_path):

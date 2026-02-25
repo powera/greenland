@@ -8,7 +8,7 @@ from sqlalchemy import func
 from benchmarks.datastore.benchmarks import Run
 from benchmarks.datastore.common import Model
 
-bp = Blueprint("models", __name__, url_prefix="/models")
+bp = Blueprint("models", __name__, url_prefix="/models", template_folder="../templates")
 
 
 @bp.route("/")
@@ -16,7 +16,7 @@ def list_models():
     """List all models with their aggregate statistics."""
     # Get all models with run counts and average scores
     models_query = (
-        g.db.query(
+        g.bench_db.query(
             Model,
             func.count(Run.run_id).label("run_count"),
             func.avg(Run.normed_score).label("avg_score"),
@@ -46,12 +46,14 @@ def list_models():
 def view_model(model_name):
     """View detailed information about a specific model."""
     # Get model
-    model = g.db.query(Model).filter(Model.codename == model_name).first()
+    model = g.bench_db.query(Model).filter(Model.codename == model_name).first()
     if not model:
         return "Model not found", 404
 
     # Get all runs for this model with benchmark info
-    runs = g.db.query(Run).filter(Run.model_name == model_name).order_by(Run.run_ts.desc()).all()
+    runs = (
+        g.bench_db.query(Run).filter(Run.model_name == model_name).order_by(Run.run_ts.desc()).all()
+    )
 
     # Calculate best score per benchmark
     best_scores: dict[str, int] = {}

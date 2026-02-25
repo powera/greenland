@@ -132,6 +132,40 @@
                             </a></li>
                         </ul>
                     </li>
+                    {% if config.get('BENCHMARKS_ENABLED', False) %}
+                    <!-- Benchmarks tab -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-speedometer2"></i> Benchmarks
+                            {% if navbar_worker_status and navbar_worker_status.queued %}
+                            <span class="badge text-bg-warning ms-1">{{ navbar_worker_status.queued }}</span>
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><a class="dropdown-item" href="{{ url_for('dashboard.index') }}">
+                                <i class="bi bi-grid-3x3-gap"></i> Dashboard
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('benchmarks.list_benchmarks') }}">
+                                <i class="bi bi-list-check"></i> Benchmarks
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('models.list_models') }}">
+                                <i class="bi bi-cpu"></i> Models
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('runs.list_runs') }}">
+                                <i class="bi bi-clock-history"></i> Recent Runs
+                            </a></li>
+                            {% if not config.get('READONLY', False) %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('benchmarks.queue_status') }}">
+                                <i class="bi bi-list-task"></i> Queue
+                                {% if navbar_worker_status and navbar_worker_status.queued %}
+                                <span class="badge text-bg-warning ms-1">{{ navbar_worker_status.queued }}</span>
+                                {% endif %}
+                            </a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    {% endif %}
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">

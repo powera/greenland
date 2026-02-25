@@ -16,13 +16,13 @@ from benchmarks.datastore.benchmarks import (
 )
 from benchmarks.datastore.common import Model
 
-bp = Blueprint("runs", __name__, url_prefix="/runs")
+bp = Blueprint("runs", __name__, url_prefix="/runs", template_folder="../templates")
 
 
 @bp.route("/")
 def list_runs():
     """List recent benchmark runs."""
-    runs = get_recent_runs(g.db)
+    runs = get_recent_runs(g.bench_db)
     return render_template("runs/list.html", runs=runs)
 
 
@@ -43,14 +43,14 @@ def _question_sort_key(detail: dict) -> tuple[int, str]:
 def view_run(run_id):
     """View detailed results for a specific run."""
     # Get run details using existing function
-    run_data = get_run_by_run_id(run_id, g.db)
+    run_data = get_run_by_run_id(run_id, g.bench_db)
 
     if not run_data:
         return "Run not found", 404
 
     # Get model and benchmark info from database
-    run = g.db.query(Run).filter(Run.run_id == run_id).first()
-    model = g.db.query(Model).filter(Model.codename == run.model_name).first()
+    run = g.bench_db.query(Run).filter(Run.run_id == run_id).first()
+    model = g.bench_db.query(Model).filter(Model.codename == run.model_name).first()
 
     # Calculate statistics
     total_questions = len(run_data["details"])
@@ -95,11 +95,11 @@ def compare_runs():
     # Get data for each run
     runs_data = []
     for run_id in run_ids:
-        run_data = get_run_by_run_id(run_id, g.db)
+        run_data = get_run_by_run_id(run_id, g.bench_db)
         if run_data:
             # Get model info
-            run = g.db.query(Run).filter(Run.run_id == run_id).first()
-            model = g.db.query(Model).filter(Model.codename == run.model_name).first()
+            run = g.bench_db.query(Run).filter(Run.run_id == run_id).first()
+            model = g.bench_db.query(Model).filter(Model.codename == run.model_name).first()
 
             # Calculate stats
             total_questions = len(run_data["details"])
