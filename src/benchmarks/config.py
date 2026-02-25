@@ -70,7 +70,9 @@ class BenchmarkConfig:
         postgres_url: Optional[str] = None
         if backend == "postgres":
             postgres_url = os.environ.get("BENCH_POSTGRES_URL")
-            if not postgres_url:
+            if postgres_url:
+                postgres_url = cls.normalize_postgres_url(postgres_url)
+            else:
                 postgres_url = cls.build_postgres_url()
 
         return cls(
@@ -97,20 +99,30 @@ class BenchmarkConfig:
 
         base_url = DataSourceConfig.build_postgres_url()
 
-        # Replace the trakaido schema with the benchmarks schema.
-        # The base URL ends with options=-csearch_path%3D<schema>
-        schema = BENCHMARKS_POSTGRES_SCHEMA
-        import urllib.parse
+        # Replace any inherited schema/path settings with benchmarks.
+        return cls.normalize_postgres_url(base_url)
 
-        if "search_path" in base_url:
+    @classmethod
+    def normalize_postgres_url(cls, postgres_url: str) -> str:
+        """Ensure a PostgreSQL URL targets the benchmarks schema.
+
+        This is applied to auto-built URLs and user-provided BENCH_POSTGRES_URL
+        values so pooled/direct Supabase URLs are handled consistently.
+
+        Args:
+            postgres_url: Any PostgreSQL connection URL
+
+        Returns:
+            URL with options=-csearch_path%3Dbenchmarks present
+        """
+        schema = BENCHMARKS_POSTGRES_SCHEMA
+        if "search_path" in postgres_url:
             # Strip the existing search_path option and replace with ours.
             # The option is appended as &options=... or ?options=...
-            base_url = _replace_search_path(base_url, schema)
-        else:
-            sep = "&" if "?" in base_url else "?"
-            base_url = f"{base_url}{sep}options=-csearch_path%3D{schema}"
+            return _replace_search_path(postgres_url, schema)
 
-        return base_url
+        sep = "&" if "?" in postgres_url else "?"
+        return f"{postgres_url}{sep}options=-csearch_path%3D{schema}"
 
     @property
     def using_postgres(self) -> bool:
