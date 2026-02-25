@@ -481,7 +481,7 @@ def init_all_benchmarks(
 def _resolve_postgres_url(args: argparse.Namespace) -> Optional[str]:
     """Determine the PostgreSQL URL from CLI flags, if any."""
     if getattr(args, "db_url", None) and args.db_url.startswith("postgresql://"):
-        return args.db_url
+        return BenchmarkConfig.normalize_postgres_url(args.db_url)
     if getattr(args, "postgres", False):
         try:
             return BenchmarkConfig.build_postgres_url()

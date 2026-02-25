@@ -55,6 +55,7 @@ def create_app(config_class=Config, postgres_url: Optional[str] = None):
                 sys.exit(1)
 
     if resolved_postgres_url:
+        resolved_postgres_url = BenchmarkConfig.normalize_postgres_url(resolved_postgres_url)
         print("Using storage backend: postgres (Supabase)")
         app.config["DB_PATH"] = "PostgreSQL (Supabase)"
         app.config["USING_POSTGRES"] = True
