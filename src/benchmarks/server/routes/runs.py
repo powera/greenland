@@ -7,10 +7,23 @@ import re
 
 from flask import Blueprint, g, render_template, request
 
-from benchmarks.datastore.benchmarks import get_run_by_run_id, Question, Run, RunDetail
+from benchmarks.datastore.benchmarks import (
+    get_recent_runs,
+    get_run_by_run_id,
+    Question,
+    Run,
+    RunDetail,
+)
 from benchmarks.datastore.common import Model
 
 bp = Blueprint("runs", __name__, url_prefix="/runs")
+
+
+@bp.route("/")
+def list_runs():
+    """List recent benchmark runs."""
+    runs = get_recent_runs(g.db)
+    return render_template("runs/list.html", runs=runs)
 
 
 def _correctness_threshold(benchmark_name: str) -> int:
@@ -88,7 +101,9 @@ def compare_runs():
             # Calculate stats
             total_questions = len(run_data["details"])
             threshold = _correctness_threshold(run_data["benchmark_name"])
-            correct_count = sum(1 for d in run_data["details"] if (d.get("score") or 0) >= threshold)
+            correct_count = sum(
+                1 for d in run_data["details"] if (d.get("score") or 0) >= threshold
+            )
             avg_time = (
                 sum(d["eval_msec"] or 0 for d in run_data["details"]) / total_questions
                 if total_questions > 0

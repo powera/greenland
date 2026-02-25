@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Recent Runs{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1><i class="bi bi-clock-history"></i> Recent Runs</h1>
+        <p class="text-muted">The 50 most recent benchmark runs, newest first. Click a run to see per-question details.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                {% if runs %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Run&nbsp;ID</th>
+                                <th>Model</th>
+                                <th>Benchmark</th>
+                                <th class="text-center">Score</th>
+                                <th>Date</th>
+                                <th>Permanent&nbsp;link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for run in runs %}
+                            <tr>
+                                <td class="font-monospace text-muted">{{ run.run_id }}</td>
+                                <td>{{ run.model_name }}</td>
+                                <td>
+                                    <a href="{{ url_for('benchmarks.view_benchmark', benchmark_name=run.benchmark_name) }}"
+                                       class="text-decoration-none">
+                                        {{ run.benchmark_name }}
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    {% if run.normed_score is not none %}
+                                    <div class="score-badge mx-auto"
+                                         style="background-color:
+                                         {% if run.normed_score >= 90 %}#1b5e20
+                                         {% elif run.normed_score >= 75 %}#4caf50
+                                         {% elif run.normed_score >= 50 %}#ff9800
+                                         {% elif run.normed_score >= 25 %}#f44336
+                                         {% else %}#b71c1c{% endif %};">
+                                        {{ run.normed_score }}
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ run.run_ts.strftime('%Y-%m-%d %H:%M:%S') if run.run_ts else '—' }}</small>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('runs.view_run', run_id=run.run_id) }}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-link-45deg"></i> View details
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No benchmark runs found.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
