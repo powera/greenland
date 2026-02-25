@@ -287,6 +287,26 @@ def get_run_by_run_id(run_id: int, session=None) -> Optional[Dict]:
     }
 
 
+def get_recent_runs(session, limit: int = 50) -> List[Dict]:
+    """Retrieve the most recent benchmark runs, ordered by timestamp descending.
+
+    :param session: SQLAlchemy session
+    :param limit: Maximum number of runs to return
+    :return: List of run summary dicts
+    """
+    runs = session.query(Run).order_by(Run.run_ts.desc()).limit(limit).all()
+    return [
+        {
+            "run_id": run.run_id,
+            "model_name": run.model_name,
+            "benchmark_name": run.benchmark_name,
+            "normed_score": run.normed_score,
+            "run_ts": run.run_ts,
+        }
+        for run in runs
+    ]
+
+
 def get_highest_benchmark_scores(session) -> Dict:
     """Get the highest benchmark scores for each (benchmark, model) combination with run IDs.
 
