@@ -316,10 +316,24 @@ def get_highest_benchmark_scores(session) -> Dict:
     :param session: SQLAlchemy session
     :return: Dict with (benchmark, model) tuple as key and dict containing score and run_id as value
     """
+    max_scores_subq = (
+        session.query(
+            Run.benchmark_name,
+            Run.model_name,
+            func.max(Run.normed_score).label("max_score"),
+        )
+        .group_by(Run.benchmark_name, Run.model_name)
+        .subquery()
+    )
+
     highest_scores = (
         session.query(Run.benchmark_name, Run.model_name, Run.normed_score, Run.run_id)
-        .order_by(Run.benchmark_name, Run.model_name, Run.normed_score.desc())
-        .distinct(Run.benchmark_name, Run.model_name)
+        .join(
+            max_scores_subq,
+            (Run.benchmark_name == max_scores_subq.c.benchmark_name)
+            & (Run.model_name == max_scores_subq.c.model_name)
+            & (Run.normed_score == max_scores_subq.c.max_score),
+        )
         .all()
     )
 
