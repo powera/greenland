@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lin
 logger = logging.getLogger(__name__)
 
 
-@runner("0050_translation")
+@runner("0108_translation_en_fr")
 class TranslationRunner(BenchmarkRunner):
     """Runner for translation benchmark."""
 

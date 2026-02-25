@@ -10,7 +10,7 @@ def delete_benchmark_completely(session, benchmark_code: str) -> bool:
 
     Args:
         session: SQLAlchemy session
-        benchmark_code: Benchmark code to delete (e.g., "0050_translation_es_sw")
+        benchmark_code: Benchmark code to delete (e.g., "0199_translation_es_sw")
 
     Returns:
         True if successful, False otherwise
@@ -67,4 +67,4 @@ def delete_benchmark_completely(session, benchmark_code: str) -> bool:
 
 
 # Usage example:
-# delete_benchmark_completely(session, "0050_translation_es_sw")
+# delete_benchmark_completely(session, "0199_translation_es_sw")
