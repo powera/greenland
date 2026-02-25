@@ -179,7 +179,7 @@ def get_highest_qual_scores(session) -> Dict:
     """
     highest_scores = (
         session.query(QualRun.qual_test_name, QualRun.model_name, QualRun.avg_score, QualRun.run_id)
-        .order_by(QualRun.avg_score)
+        .order_by(QualRun.qual_test_name, QualRun.model_name, QualRun.avg_score.desc())
         .distinct(QualRun.qual_test_name, QualRun.model_name)
         .all()
     )

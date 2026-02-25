@@ -318,7 +318,7 @@ def get_highest_benchmark_scores(session) -> Dict:
     """
     highest_scores = (
         session.query(Run.benchmark_name, Run.model_name, Run.normed_score, Run.run_id)
-        .order_by(Run.normed_score)
+        .order_by(Run.benchmark_name, Run.model_name, Run.normed_score.desc())
         .distinct(Run.benchmark_name, Run.model_name)
         .all()
     )
