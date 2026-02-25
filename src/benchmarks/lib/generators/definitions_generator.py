@@ -17,7 +17,7 @@ from benchmarks.lib.utils.data_models import (
 from benchmarks.lib.utils.factory import benchmark, generator
 
 # Define benchmark metadata
-BENCHMARK_CODE = "0020_definitions"
+BENCHMARK_CODE = "0031_definitions"
 BENCHMARK_NAME = "Word Definitions"
 BENCHMARK_DESCRIPTION = "Tests ability to match definitions to correct words."
 

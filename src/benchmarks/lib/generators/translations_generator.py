@@ -8,7 +8,6 @@ from pathlib import Path
 import random
 from typing import Any, Dict, Iterator, List, Optional
 
-from benchmarks.data.wordlist_extended import TRANSLATIONS, TranslationEntry
 from benchmarks.lib.utils.base_generator import BenchmarkGenerator
 from benchmarks.lib.utils.data_models import (
     AnswerType,
@@ -25,24 +24,22 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Define valid language codes (includes both wordlist_extended and database export languages)
+# Valid language codes present in data/release lemma JSONL files.
 VALID_LANGS = {
     "en",
-    "fr",
-    "de",
-    "ind",
-    "sw",
-    "ko",
-    "kn",
-    "zh",
     "lt",
+    "zh",
+    "fr",
     "es",
+    "de",
     "it",
     "nl",
     "pt",
     "sv",
     "vi",
     "ja",
+    "ko",
+    "sw",
 }
 
 # Release dataset constraints for translation benchmark generation
@@ -64,8 +61,14 @@ def get_translation_metadata(origin_lang: str, target_lang: str) -> BenchmarkMet
     Returns:
         BenchmarkMetadata object
     """
-    code_map = {("en", "fr"): "0108_translation_en_fr", ("en", "zh"): "0109_translation_en_zh", ("sw", "ko"): "0110_translation_sw_ko"}
-    benchmark_code = code_map.get((origin_lang, target_lang), f"0149_translation_{origin_lang}_{target_lang}")
+    code_map = {
+        ("en", "fr"): "0108_translation_en_fr",
+        ("en", "zh"): "0109_translation_en_zh",
+        ("sw", "ko"): "0110_translation_sw_ko",
+    }
+    benchmark_code = code_map.get(
+        (origin_lang, target_lang), f"0149_translation_{origin_lang}_{target_lang}"
+    )
     benchmark_name = f"Translation ({origin_lang.upper()} → {target_lang.upper()})"
     description = (
         f"Tests ability to translate {origin_lang.upper()} words to "
@@ -112,26 +115,18 @@ class TranslationGenerator(BenchmarkGenerator):
             raise ValueError("Origin and target languages must be different")
 
         # Set up generation strategy flags
-        self.can_generate_locally = True  # We can generate locally from wordlist
+        self.can_generate_locally = False
         self.can_generate_with_llm = True  # We can also use LLM for more diverse translations
         self.can_load_from_file = True  # We can load from exported translations file
 
-        # Strategy order: prefer file, then local wordlist, then LLM
-        self.strategy_order = ["file", "local", "llm"]
+        # Strategy order: prefer release-data file, then LLM
+        self.strategy_order = ["file", "llm"]
 
         # Set LLM context for generation
         self.context = f"""You are a helpful assistant creating translation questions.
         You will translate words from {self.origin_lang.upper()} to {self.target_lang.upper()}.
         Always provide accurate translations and include any important cultural or linguistic context.
         """
-
-    def get_translation(self, entry: TranslationEntry, lang: str) -> str:
-        """Get translation for a specific language from entry."""
-        return getattr(entry, lang, "")
-
-    def get_translation_details(self, entry: TranslationEntry, lang: str) -> Optional[str]:
-        """Get translation details for a specific language from entry."""
-        return getattr(entry, f"{lang}_details", None)
 
     def _create_question(
         self,
@@ -287,45 +282,7 @@ class TranslationGenerator(BenchmarkGenerator):
                     choices=choices,
                 )
 
-    def _generate_locally(self, **kwargs) -> Iterator[BenchmarkQuestion]:
-        """
-        Generate translation questions from local wordlist.
-
-        Yields:
-            BenchmarkQuestion objects one at a time
-        """
-        # Filter for entries that have valid translations for both languages
-        valid_entries = [
-            entry
-            for entry in TRANSLATIONS
-            if self.get_translation(entry, self.origin_lang)
-            and self.get_translation(entry, self.target_lang)
-        ]
-
-        if not valid_entries:
-            logger.warning(
-                "No valid translations found for %s to %s",
-                self.origin_lang,
-                self.target_lang,
-            )
-            return
-
-        # Shuffle entries to get different questions each time
-        random.shuffle(valid_entries)
-
-        # Generate and yield questions
-        for entry in valid_entries:
-            origin_word = self.get_translation(entry, self.origin_lang)
-            target_word = self.get_translation(entry, self.target_lang)
-
-            # Create and yield question
-            yield self._create_question(
-                origin_word=origin_word,
-                target_word=target_word,
-                category=f"translation_{self.origin_lang}_{self.target_lang}",
-            )
-
-    def _generate_with_llm(self, **kwargs) -> Iterator[BenchmarkQuestion]:
+    def _generate_with_llm(self, **kwargs: Any) -> Iterator[BenchmarkQuestion]:
         """
         Generate translation questions using an LLM.
 

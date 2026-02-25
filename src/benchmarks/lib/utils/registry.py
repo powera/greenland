@@ -98,7 +98,7 @@ from benchmarks.lib.runners.definitions_runner import DefinitionsRunner
 
 
 @benchmark(
-    code="0020_definitions",
+    code="0031_definitions",
     name="Definitions",
     description="""
            A benchmark to evaluate a model's ability to identify
