@@ -5,6 +5,7 @@ This script adds model entries to the benchmarks database for various
 local and remote LLM models.
 """
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -13,18 +14,26 @@ if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from benchmarks.benchmark_constants import BENCHMARKS_DB_PATH
+from benchmarks.config import BenchmarkConfig
 from benchmarks.datastore import common as datastore_common
 
 
-def create_models():
+def _get_session(postgres_url=None):
+    """Create a DB session, using postgres if a URL is provided."""
+    if postgres_url:
+        return datastore_common.create_postgres_session(postgres_url)
+    return datastore_common.create_database_and_session(str(BENCHMARKS_DB_PATH))
+
+
+def create_models(postgres_url=None):
     """Create all model definitions."""
-    create_remote_models()
-    create_translategemma_models()
+    create_remote_models(postgres_url)
+    create_local_models(postgres_url)
 
 
-def create_remote_models():
+def create_remote_models(postgres_url=None):
     """Create remote API model definitions."""
-    s = datastore_common.create_database_and_session(str(BENCHMARKS_DB_PATH))
+    s = _get_session(postgres_url)
 
     # OpenAI GPT-5 family
     datastore_common.insert_model(
@@ -58,7 +67,7 @@ def create_remote_models():
         "remote",
     )
 
-    # Anthropic Claude
+    # Anthropic Claude 4.6
     datastore_common.insert_model(
         s,
         "claude-opus-4-6",
@@ -71,12 +80,12 @@ def create_remote_models():
     )
     datastore_common.insert_model(
         s,
-        "claude-sonnet-4-5",
-        "Claude Sonnet 4.5",
-        "2025-09-29",
+        "claude-sonnet-4-6",
+        "Claude Sonnet 4.6",
+        "2026-02-05",
         0,
         "Closed Model",
-        "claude-sonnet-4-5-20250929",
+        "claude-sonnet-4-6",
         "remote",
     )
     datastore_common.insert_model(
@@ -90,67 +99,36 @@ def create_remote_models():
         "remote",
     )
 
-    # Google Gemini
-    datastore_common.insert_model(
-        s,
-        "gemini-2.5-pro",
-        "Gemini 2.5 Pro",
-        "2025-06-01",
-        0,
-        "Closed Model",
-        "gemini-2.5-pro",
-        "remote",
-    )
-    datastore_common.insert_model(
-        s,
-        "gemini-2.5-flash",
-        "Gemini 2.5 Flash",
-        "2025-06-01",
-        0,
-        "Closed Model",
-        "gemini-2.5-flash",
-        "remote",
-    )
-    datastore_common.insert_model(
-        s,
-        "gemini-2.5-flash-lite",
-        "Gemini 2.5 Flash Lite",
-        "2025-07-01",
-        0,
-        "Closed Model",
-        "gemini-2.5-flash-lite",
-        "remote",
-    )
 
-    # Ministral
+def create_local_models(postgres_url=None):
+    """Create local (LMStudio) model definitions."""
+    s = _get_session(postgres_url)
+
+    # Qwen3 family (3 sizes)
     datastore_common.insert_model(
         s,
-        "ministral-3-14b-lms",
-        "Ministral 3 14B Reasoning (LMStudio)",
-        "2025-10-01",
-        9000,
+        "qwen3-1.7b-lms",
+        "Qwen3 1.7B (LMStudio)",
+        "2025-04-29",
+        1100,
         "Apache License",
-        "lmstudio/mistralai/ministral-3-14b-reasoning",
+        "lmstudio/lmstudio-community/Qwen3-1.7B-GGUF",
         "local",
     )
-
-    # Phi-4
     datastore_common.insert_model(
         s,
-        "phi-4-14b-lms",
-        "Phi-4 14B (LMStudio)",
-        "2025-01-08",
-        9100,
-        "MIT License",
-        "lmstudio/microsoft/phi-4",
+        "qwen3-4b-lms",
+        "Qwen3 4B (LMStudio)",
+        "2025-04-29",
+        2800,
+        "Apache License",
+        "lmstudio/lmstudio-community/Qwen3-4B-GGUF",
         "local",
     )
-
-    # Qwen3 VL
     datastore_common.insert_model(
         s,
         "qwen3-vl-8b-lms",
-        "QWEN3 VL 8B (LMStudio)",
+        "Qwen3 VL 8B (LMStudio)",
         "2025-05-20",
         5000,
         "Apache License",
@@ -158,26 +136,86 @@ def create_remote_models():
         "local",
     )
 
-
-def create_translategemma_models():
-    """Create TranslateGemma model definitions."""
-    s = datastore_common.create_database_and_session(str(BENCHMARKS_DB_PATH))
-
+    # Meta Llama
     datastore_common.insert_model(
         s,
-        "translategemma-3-4b",
-        "TranslateGemma 3 4B",
-        "2025-03-12",
-        4300,
+        "llama-3.2-1b-lms",
+        "Llama 3.2 1B (LMStudio)",
+        "2024-09-25",
+        1300,
+        "Llama License",
+        "lmstudio/meta-llama/llama-3.2-1b-instruct",
+        "local",
+    )
+    datastore_common.insert_model(
+        s,
+        "llama-3-8b-lms",
+        "Llama 3 8B (LMStudio)",
+        "2024-04-18",
+        4900,
+        "Llama License",
+        "lmstudio/meta-llama/meta-llama-3-8b-instruct",
+        "local",
+    )
+
+    # Other small models
+    datastore_common.insert_model(
+        s,
+        "smollm2-1.7b-lms",
+        "SmolLM2 1.7B (LMStudio)",
+        "2024-11-01",
+        1100,
+        "Apache License",
+        "lmstudio/HuggingFaceTB/smollm2-1.7b-instruct",
+        "local",
+    )
+    datastore_common.insert_model(
+        s,
+        "gemma-2-2b-lms",
+        "Gemma 2 2B (LMStudio)",
+        "2024-06-27",
+        1500,
         "Gemma License",
-        "translategemma/translate-gemma-3-4b-it",
+        "lmstudio/google/gemma-2-2b-it",
+        "local",
+    )
+    datastore_common.insert_model(
+        s,
+        "granite-3.2-8b-lms",
+        "Granite 3.2 8B (LMStudio)",
+        "2025-02-26",
+        4900,
+        "Apache License",
+        "lmstudio/ibm/granite-3.2-8b",
         "local",
     )
 
 
 def main():
-    create_models()
+    parser = argparse.ArgumentParser(description="Populate benchmark DB with model definitions")
+    parser.add_argument(
+        "--postgres",
+        action="store_true",
+        help="Use PostgreSQL (Supabase) backend; reads keys/postgres.key",
+    )
+    parser.add_argument(
+        "--db-url",
+        help="Full PostgreSQL connection URL (overrides --postgres key-file lookup)",
+    )
+    args = parser.parse_args()
+
+    postgres_url = None
+    if args.db_url and args.db_url.startswith("postgresql://"):
+        postgres_url = BenchmarkConfig.normalize_postgres_url(args.db_url)
+    elif args.postgres:
+        postgres_url = BenchmarkConfig.build_postgres_url()
+
+    if postgres_url:
+        print("Using storage backend: postgres (Supabase)")
+
+    create_models(postgres_url)
+    print("Done.")
 
 
 if __name__ == "__main__":
-    create_models()
+    main()
