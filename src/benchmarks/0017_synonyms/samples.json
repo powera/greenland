@@ -89,14 +89,14 @@
     "concept": "dog",
     "word": "dog",
     "candidates": [
-      "canine",
+      "hound",
       "feline",
       "equine",
       "bovine",
-      "lupine",
-      "ursine"
+      "ursine",
+      "otter"
     ],
-    "synonym": "canine",
+    "synonym": "hound",
     "difficulty": "medium",
     "category": "animals",
     "language_name": "English"
@@ -361,14 +361,14 @@
     "concept": "bag",
     "word": "bolsa",
     "candidates": [
-      "bolso",
+      "saco",
       "sombrero",
       "silla",
       "felicidad",
       "tomate",
       "perro"
     ],
-    "synonym": "bolso",
+    "synonym": "saco",
     "difficulty": "easy",
     "category": "containers",
     "language_name": "Spanish"
