@@ -119,6 +119,39 @@ def get_all_benchmark_codes() -> list[str]:
     return list(_benchmark_metadata.keys())
 
 
+def get_enabled_benchmark_codes() -> list[str]:
+    """Get registered benchmark codes that are in the ENABLED_BENCHMARKS set.
+
+    Returns:
+        Sorted list of enabled benchmark codes
+    """
+    from benchmarks.config import ENABLED_BENCHMARKS
+
+    return sorted(code for code in _benchmark_metadata if code in ENABLED_BENCHMARKS)
+
+
+def resolve_benchmark_code(prefix: str) -> str:
+    """Resolve a benchmark code prefix (e.g. '0017') to the full code (e.g. '0017_synonyms').
+
+    If the prefix already matches a registered code exactly, it is returned as-is.
+    Otherwise, searches for a unique registered code that starts with the prefix.
+
+    Raises:
+        SystemExit: If the prefix matches zero or multiple codes.
+    """
+    if prefix in _benchmark_metadata:
+        return prefix
+
+    matches = [code for code in _benchmark_metadata if code.startswith(prefix)]
+    if len(matches) == 1:
+        return matches[0]
+    if len(matches) == 0:
+        print(f"Error: no benchmark matches prefix '{prefix}'")
+        raise SystemExit(1)
+    print(f"Error: prefix '{prefix}' is ambiguous; matches: {', '.join(sorted(matches))}")
+    raise SystemExit(1)
+
+
 def get_benchmark_metadata(benchmark_code: str) -> Optional[BenchmarkMetadata]:
     """
     Get metadata for a benchmark code.

@@ -21,6 +21,7 @@ from benchmarks.lib.utils.factory import (
     generator,
     get_all_benchmark_codes,
     get_benchmark_metadata,
+    get_enabled_benchmark_codes,
     get_generator,
     get_runner,
     runner,

@@ -15,8 +15,10 @@ from benchmarks.config import BenchmarkConfig
 from benchmarks.lib.utils.factory import (
     get_all_benchmark_codes,
     get_benchmark_metadata,
+    get_enabled_benchmark_codes,
     get_generator,
     get_runner,
+    resolve_benchmark_code,
 )
 from benchmarks.scripts.delete_benchmark import delete_benchmark_completely
 
@@ -239,7 +241,7 @@ def run_missing_benchmarks(
     session=None,
     only_model: Optional[str] = None,
 ) -> List[Tuple[str, str]]:
-    """Run all benchmarks that don't have results yet."""
+    """Run all enabled benchmarks that don't have results yet."""
     if not session:
         session = datastore_common.create_dev_session()
 
@@ -250,7 +252,7 @@ def run_missing_benchmarks(
         models = [only_model]
     else:
         models = [m for m in get_all_model_codenames() if m not in blacklist_models]
-    benchmarks = [b for b in get_all_benchmarks() if b not in blacklist_benchmarks]
+    benchmarks = [b for b in get_enabled_benchmark_codes() if b not in blacklist_benchmarks]
 
     scores = datastore_benchmarks.get_highest_benchmark_scores(session)
 
@@ -425,7 +427,11 @@ def init_all_benchmarks(
     require_llm_confirmation: bool = False,
     llm_confirmation_granted: bool = False,
 ) -> Dict[str, Any]:
-    """Sync all registered benchmarks to the DB and generate questions for empty ones.
+    """Sync all registered benchmarks to the DB and generate questions for enabled ones.
+
+    Only benchmarks listed in ENABLED_BENCHMARKS (see benchmarks/config.py)
+    have questions generated.  All registered benchmarks are still synced to
+    the DB so their metadata is available.
 
     Args:
         skip_existing: When True (default), skip benchmarks that already have
@@ -450,7 +456,7 @@ def init_all_benchmarks(
         "failed": [],
     }
 
-    all_codes = sorted(get_all_benchmark_codes())
+    all_codes = get_enabled_benchmark_codes()
 
     for code in all_codes:
         if skip_existing:
@@ -604,6 +610,10 @@ def main() -> None:
         # have imported create_dev_session at module load time.
         if hasattr(datastore_benchmarks, "create_dev_session"):
             datastore_benchmarks.create_dev_session = _postgres_dev_session
+
+    # Resolve short benchmark prefixes (e.g. "0017" -> "0017_synonyms")
+    if hasattr(args, "benchmark"):
+        args.benchmark = resolve_benchmark_code(args.benchmark)
 
     if args.command == "run":
         run_id = run_benchmark(args.benchmark, args.model)
