@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 CORRECTNESS_THRESHOLD = 70
 
+
 @runner("0121_verb_forms")
 class VerbFormsRunner(PartialCreditRunner):
     """Runner for verb forms benchmark tests."""
@@ -130,7 +131,9 @@ class VerbFormsRunner(PartialCreditRunner):
                         exact_matches += 1
             elif isinstance(expected_value, str):
                 total_slots += 1
-                if self._normalize(actual_value, lang_code) == self._normalize(expected_value, lang_code):
+                if self._normalize(actual_value, lang_code) == self._normalize(
+                    expected_value, lang_code
+                ):
                     exact_matches += 1
 
         expected_extras = expected.get("extra_forms", {})
@@ -162,7 +165,6 @@ class VerbFormsRunner(PartialCreditRunner):
         score = self.score_response(question_data, model_answer)
 
         return {
-            "prompt": question_data.get("question_text", ""),
             "model_answer": model_answer,
             "expected_answer": question_data.get("correct_answer", {}),
             "score": score,

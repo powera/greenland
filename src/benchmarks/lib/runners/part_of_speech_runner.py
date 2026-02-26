@@ -11,7 +11,9 @@ from benchmarks.lib.utils.data_models import BenchmarkMetadata
 from benchmarks.lib.utils.factory import runner
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -116,7 +118,6 @@ class PartOfSpeechRunner(BenchmarkRunner):
             model_answer = response.response_text
 
         return {
-            "prompt": question_data.get("question_text", ""),
             "model_answer": model_answer,
             "expected_answer": question_data.get("correct_answer"),
             "is_correct": is_correct,
