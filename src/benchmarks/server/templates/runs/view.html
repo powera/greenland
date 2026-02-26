@@ -16,8 +16,8 @@
     </div>
 </div>
 
-<div class="row mb-4">
-    <div class="col-md-3">
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-md">
         <div class="card stat-card">
             <div class="card-body">
                 <h6 class="text-muted">Model</h6>
@@ -25,7 +25,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-2">
+    <div class="col-sm-6 col-md">
         <div class="card stat-card">
             <div class="card-body">
                 <h6 class="text-muted">Score</h6>
@@ -43,7 +43,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-2">
+    <div class="col-sm-6 col-md">
         <div class="card stat-card">
             <div class="card-body">
                 <h6 class="text-muted">Correct (≥{{ correctness_threshold }})</h6>
@@ -51,7 +51,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-2">
+    <div class="col-sm-6 col-md">
         <div class="card stat-card">
             <div class="card-body">
                 <h6 class="text-muted">Incorrect (&lt;{{ correctness_threshold }})</h6>
@@ -59,20 +59,26 @@
             </div>
         </div>
     </div>
-    <div class="col-md-2">
+    <div class="col-sm-6 col-md">
         <div class="card stat-card">
             <div class="card-body">
-                <h6 class="text-muted">Avg Response Time</h6>
+                <h6 class="text-muted">Avg Time</h6>
                 <h4>{{ '%.1f'|format(avg_time) }}ms</h4>
             </div>
         </div>
     </div>
     {% if total_cost %}
-    <div class="col-md-1">
+    <div class="col-sm-6 col-md">
         <div class="card stat-card">
             <div class="card-body">
                 <h6 class="text-muted">Cost</h6>
-                <h4>${{ '%.4f'|format(total_cost) }}</h4>
+                <h4>
+                    {% if total_cost < 0.001 %}
+                    {{ '%.0f'|format(total_cost * 1000000) }}µ$
+                    {% else %}
+                    ${{ '%.4f'|format(total_cost) }}
+                    {% endif %}
+                </h4>
             </div>
         </div>
     </div>
@@ -135,7 +141,7 @@
                                                 {% if is_correct %}Correct{% else %}Incorrect{% endif %}
                                             </span>
                                         </span>
-                                        <span class="small text-muted">Score: {{ detail.score or 0 }} • {{ detail.eval_msec or 0 }}ms{% if detail.cost_usd %} • ${{ '%.4f'|format(detail.cost_usd) }}{% endif %}</span>
+                                        <span class="small text-muted">Score: {{ detail.score or 0 }} • {{ detail.eval_msec or 0 }}ms{% if detail.cost_usd %} • {% if detail.cost_usd < 0.001 %}{{ '%.0f'|format(detail.cost_usd * 1000000) }}µ${% else %}${{ '%.4f'|format(detail.cost_usd) }}{% endif %}{% endif %}</span>
                                     </div>
                                 </button>
                             </h2>
