@@ -1,63 +1,64 @@
 # Greenland Database Agents
 
-This directory contains Claude Code custom agents that wrap the Greenland database operation tools (src/agents).
+This directory contains agent-facing documentation for the Greenland repo and
+cross-repo context for the wider Trakaido ecosystem.
 
-## Available Agents
+## What lives here
 
-### Core Validation & Processing
-- **lokys** - English lemma validation (forms and definitions)
-- **dramblys** - Missing words detection and processing
-- **vilkas** - Word forms generation (declensions, conjugations)
-- **voras** - Multi-lingual translation management
-- **papuga** - Pronunciation (IPA) validation and generation
-- **sernas** - Synonym and alternative form generation
+- **AGENTS.md** - Scope + structure notes for this folder
+- **README.md** - This file; quick orientation and maintenance workflow
+- **peer-repo/** - High-level status snapshots for sibling repositories
+  - `trakaido-status.md` - App clients (React/Swift/Kotlin) and content consumer
+  - `greenland-status.md` - Linguistic data generation and export pipeline
+  - `atacama-status.md` - API/CMS/backend services
+  - `README.md` - Status file template + update checklist
+- **scripts/** - Lightweight helpers for validating `.agents` docs
 
-### Audio Generation
-- **strazdas** - eSpeak-NG audio generation
-- **vieversys** - OpenAI TTS audio generation
+## Why this exists
 
-### Export & Utilities
-- **ungurys** - WireWord export
-- **elnias** - Bootstrap export
-- **bebras** - Sentence-word link management
-- **zvirblis** - Sentence generation
+When working in Greenland, tasks often require context from **Trakaido** and
+**Atacama**. This folder gives agents a predictable place to check ecosystem
+status before making assumptions about where code lives.
 
-## How These Agents Work
+## Fast cross-repo orientation
 
-Each agent is a Claude Code custom agent that knows:
-1. What the underlying Python tool does
-2. How to invoke it with the correct PYTHONPATH
-3. What command-line arguments are available
-4. Common usage patterns and examples
+If a task references UI behavior (for example Kotlin app screens), verify the
+repository first before editing:
 
-## General Pattern
-
-All agents follow this invocation pattern:
 ```bash
-PYTHONPATH=src python3 src/agents/<agent-name> [options]
+# From /workspace/greenland
+for d in ../trakaido ../atacama .; do
+  if [ -d "$d/.git" ]; then
+    echo "repo: $d"
+  fi
+done
 ```
 
-## Common Command-Line Arguments
+Then use the matching status file in `peer-repo/` for context.
 
-Most agents support these standardized arguments:
-- `--guid <guid>` - Process a single item by GUID
-- `--db-path <path>` - Database path (usually auto-detected)
-- `--model <model>` - LLM model to use (default: gpt-5-mini)
-- `--limit <n>` - Maximum number of items to process
-- `--output <file>` - Output JSON file for reports
-- `--yes` - Skip confirmation prompts
-- `--dry-run` - Preview changes without committing
-- `--debug` - Enable debug logging
+## Greenland agent invocation pattern
 
-## Using These Agents
+All Greenland Python agents follow:
 
-To use an agent, simply reference it in your conversation with Claude:
-```
-@lokys Can you validate the lemma with GUID abc123?
+```bash
+PYTHONPATH=src python3 src/agents/<agent-name>.py [options]
 ```
 
-Claude will then understand how to invoke the lokys tool with the appropriate arguments.
+Examples:
 
-## Agent Development
+```bash
+PYTHONPATH=src python3 src/agents/lokys.py --help
+PYTHONPATH=src python3 src/agents/ungurys.py --help
+```
 
-These agents were created as part of the command-line standardization effort. All underlying Python tools use the common_args module (src/agents/common_args.py) for consistent argument handling.
+## Maintenance workflow for `.agents`
+
+1. Update the relevant `peer-repo/*-status.md` file.
+2. Keep the first heading as `# <Repo> - Current Status`.
+3. Run the validation helper:
+
+```bash
+bash .agents/scripts/validate_agents_docs.sh
+```
+
+4. Commit doc changes with a message that references `.agents`.
