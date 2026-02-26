@@ -3,468 +3,884 @@
     "language_code": "EN",
     "concept": "hat",
     "word": "hat",
-    "candidates": ["cap", "scarf", "coat", "hood", "glove", "boot"],
+    "candidates": [
+      "cap",
+      "scarf",
+      "coat",
+      "hood",
+      "glove",
+      "boot"
+    ],
     "synonym": "cap",
     "difficulty": "easy",
-    "category": "clothing"
+    "category": "clothing",
+    "language_name": "English"
   },
   {
     "language_code": "EN",
     "concept": "bag",
     "word": "bag",
-    "candidates": ["sack", "basket", "trunk", "box", "shelf", "case"],
+    "candidates": [
+      "sack",
+      "basket",
+      "trunk",
+      "box",
+      "shelf",
+      "case"
+    ],
     "synonym": "sack",
     "difficulty": "easy",
-    "category": "containers"
+    "category": "containers",
+    "language_name": "English"
   },
   {
     "language_code": "EN",
     "concept": "chair",
     "word": "chair",
-    "candidates": ["seat", "table", "desk", "couch", "floor", "shelf"],
+    "candidates": [
+      "seat",
+      "table",
+      "desk",
+      "couch",
+      "floor",
+      "shelf"
+    ],
     "synonym": "seat",
     "difficulty": "easy",
-    "category": "furniture"
+    "category": "furniture",
+    "language_name": "English"
   },
   {
     "language_code": "EN",
     "concept": "happiness",
     "word": "happiness",
-    "candidates": ["joy", "sadness", "fear", "anger", "love", "peace"],
+    "candidates": [
+      "joy",
+      "sadness",
+      "fear",
+      "anger",
+      "love",
+      "peace"
+    ],
     "synonym": "joy",
     "difficulty": "easy",
-    "category": "emotions"
+    "category": "emotions",
+    "language_name": "English"
   },
   {
     "language_code": "EN",
     "concept": "refrigerator",
     "word": "refrigerator",
-    "candidates": ["fridge", "oven", "stove", "kettle", "toaster", "microwave"],
+    "candidates": [
+      "fridge",
+      "oven",
+      "stove",
+      "kettle",
+      "toaster",
+      "microwave"
+    ],
     "synonym": "fridge",
     "difficulty": "easy",
-    "category": "appliances"
+    "category": "appliances",
+    "language_name": "English"
   },
   {
     "language_code": "EN",
     "concept": "dog",
     "word": "dog",
-    "candidates": ["canine", "feline", "equine", "bovine", "lupine", "ursine"],
-    "synonym": "canine",
+    "candidates": [
+      "hound",
+      "feline",
+      "equine",
+      "bovine",
+      "ursine",
+      "otter"
+    ],
+    "synonym": "hound",
     "difficulty": "medium",
-    "category": "animals"
+    "category": "animals",
+    "language_name": "English"
   },
   {
     "language_code": "ZH",
-    "concept": "hat",
-    "word": "帽子",
-    "candidates": ["帽", "袋子", "椅子", "幸福", "老虎", "狗"],
-    "synonym": "帽",
+    "concept": "tomato",
+    "word": "西红柿",
+    "candidates": [
+      "番茄",
+      "帽子",
+      "袋子",
+      "椅子",
+      "幸福",
+      "狗"
+    ],
+    "synonym": "番茄",
     "difficulty": "easy",
-    "category": "clothing"
+    "category": "food",
+    "language_name": "Chinese"
   },
   {
     "language_code": "ZH",
     "concept": "bag",
     "word": "袋子",
-    "candidates": ["包", "帽子", "椅子", "幸福", "冰箱", "老虎"],
+    "candidates": [
+      "包",
+      "帽子",
+      "椅子",
+      "幸福",
+      "冰箱",
+      "老虎"
+    ],
     "synonym": "包",
     "difficulty": "easy",
-    "category": "containers"
+    "category": "containers",
+    "language_name": "Chinese"
   },
   {
     "language_code": "ZH",
     "concept": "chair",
     "word": "椅子",
-    "candidates": ["座椅", "帽子", "袋子", "幸福", "冰箱", "老虎"],
+    "candidates": [
+      "座椅",
+      "帽子",
+      "袋子",
+      "幸福",
+      "冰箱",
+      "老虎"
+    ],
     "synonym": "座椅",
     "difficulty": "easy",
-    "category": "furniture"
+    "category": "furniture",
+    "language_name": "Chinese"
   },
   {
     "language_code": "ZH",
     "concept": "happiness",
     "word": "幸福",
-    "candidates": ["快乐", "帽子", "袋子", "椅子", "冰箱", "狗"],
+    "candidates": [
+      "快乐",
+      "帽子",
+      "袋子",
+      "椅子",
+      "冰箱",
+      "狗"
+    ],
     "synonym": "快乐",
     "difficulty": "easy",
-    "category": "emotions"
+    "category": "emotions",
+    "language_name": "Chinese"
   },
   {
     "language_code": "ZH",
     "concept": "tomato",
     "word": "番茄",
-    "candidates": ["西红柿", "帽子", "袋子", "椅子", "老虎", "狗"],
+    "candidates": [
+      "西红柿",
+      "帽子",
+      "袋子",
+      "椅子",
+      "老虎",
+      "狗"
+    ],
     "synonym": "西红柿",
     "difficulty": "easy",
-    "category": "food"
+    "category": "food",
+    "language_name": "Chinese"
   },
   {
     "language_code": "ZH",
     "concept": "refrigerator",
     "word": "冰箱",
-    "candidates": ["冰柜", "帽子", "幸福", "番茄", "老虎", "狗"],
+    "candidates": [
+      "冰柜",
+      "帽子",
+      "幸福",
+      "番茄",
+      "老虎",
+      "狗"
+    ],
     "synonym": "冰柜",
     "difficulty": "easy",
-    "category": "appliances"
+    "category": "appliances",
+    "language_name": "Chinese"
   },
   {
     "language_code": "ZH",
     "concept": "tiger",
     "word": "老虎",
-    "candidates": ["虎", "帽子", "袋子", "椅子", "幸福", "狗"],
+    "candidates": [
+      "虎",
+      "帽子",
+      "袋子",
+      "椅子",
+      "幸福",
+      "狗"
+    ],
     "synonym": "虎",
     "difficulty": "easy",
-    "category": "animals"
+    "category": "animals",
+    "language_name": "Chinese"
   },
   {
     "language_code": "ZH",
     "concept": "dog",
     "word": "狗",
-    "candidates": ["犬", "帽子", "袋子", "幸福", "冰箱", "老虎"],
+    "candidates": [
+      "犬",
+      "帽子",
+      "袋子",
+      "幸福",
+      "冰箱",
+      "老虎"
+    ],
     "synonym": "犬",
     "difficulty": "easy",
-    "category": "animals"
+    "category": "animals",
+    "language_name": "Chinese"
   },
   {
     "language_code": "FR",
     "concept": "hat",
     "word": "chapeau",
-    "candidates": ["couvre-chef", "sac", "chaise", "bonheur", "réfrigérateur", "chien"],
+    "candidates": [
+      "couvre-chef",
+      "sac",
+      "chaise",
+      "bonheur",
+      "réfrigérateur",
+      "chien"
+    ],
     "synonym": "couvre-chef",
     "difficulty": "medium",
-    "category": "clothing"
+    "category": "clothing",
+    "language_name": "French"
   },
   {
     "language_code": "FR",
     "concept": "bag",
     "word": "sac",
-    "candidates": ["sacoche", "chapeau", "chaise", "bonheur", "réfrigérateur", "chien"],
+    "candidates": [
+      "sacoche",
+      "chapeau",
+      "chaise",
+      "bonheur",
+      "réfrigérateur",
+      "chien"
+    ],
     "synonym": "sacoche",
     "difficulty": "medium",
-    "category": "containers"
+    "category": "containers",
+    "language_name": "French"
   },
   {
     "language_code": "FR",
     "concept": "chair",
     "word": "chaise",
-    "candidates": ["siège", "chapeau", "sac", "bonheur", "tomate", "chien"],
+    "candidates": [
+      "siège",
+      "chapeau",
+      "sac",
+      "bonheur",
+      "tomate",
+      "chien"
+    ],
     "synonym": "siège",
     "difficulty": "medium",
-    "category": "furniture"
+    "category": "furniture",
+    "language_name": "French"
   },
   {
     "language_code": "FR",
     "concept": "happiness",
     "word": "bonheur",
-    "candidates": ["joie", "chapeau", "sac", "chaise", "réfrigérateur", "tigre"],
+    "candidates": [
+      "joie",
+      "chapeau",
+      "sac",
+      "chaise",
+      "réfrigérateur",
+      "tigre"
+    ],
     "synonym": "joie",
     "difficulty": "easy",
-    "category": "emotions"
+    "category": "emotions",
+    "language_name": "French"
   },
   {
     "language_code": "FR",
     "concept": "refrigerator",
     "word": "réfrigérateur",
-    "candidates": ["frigo", "chapeau", "bonheur", "tomate", "tigre", "chien"],
+    "candidates": [
+      "frigo",
+      "chapeau",
+      "bonheur",
+      "tomate",
+      "tigre",
+      "chien"
+    ],
     "synonym": "frigo",
     "difficulty": "easy",
-    "category": "appliances"
+    "category": "appliances",
+    "language_name": "French"
   },
   {
     "language_code": "FR",
     "concept": "dog",
     "word": "chien",
-    "candidates": ["canidé", "chapeau", "sac", "bonheur", "réfrigérateur", "tigre"],
+    "candidates": [
+      "canidé",
+      "chapeau",
+      "sac",
+      "bonheur",
+      "réfrigérateur",
+      "tigre"
+    ],
     "synonym": "canidé",
     "difficulty": "medium",
-    "category": "animals"
+    "category": "animals",
+    "language_name": "French"
   },
   {
     "language_code": "ES",
     "concept": "hat",
     "word": "sombrero",
-    "candidates": ["gorro", "bolsa", "silla", "felicidad", "tomate", "refrigerador"],
+    "candidates": [
+      "gorro",
+      "bolsa",
+      "silla",
+      "felicidad",
+      "tomate",
+      "refrigerador"
+    ],
     "synonym": "gorro",
     "difficulty": "easy",
-    "category": "clothing"
+    "category": "clothing",
+    "language_name": "Spanish"
   },
   {
     "language_code": "ES",
     "concept": "bag",
     "word": "bolsa",
-    "candidates": ["bolso", "sombrero", "silla", "felicidad", "tomate", "perro"],
-    "synonym": "bolso",
+    "candidates": [
+      "saco",
+      "sombrero",
+      "silla",
+      "felicidad",
+      "tomate",
+      "perro"
+    ],
+    "synonym": "saco",
     "difficulty": "easy",
-    "category": "containers"
+    "category": "containers",
+    "language_name": "Spanish"
   },
   {
     "language_code": "ES",
     "concept": "chair",
     "word": "silla",
-    "candidates": ["asiento", "sombrero", "bolsa", "felicidad", "refrigerador", "perro"],
+    "candidates": [
+      "asiento",
+      "sombrero",
+      "bolsa",
+      "felicidad",
+      "refrigerador",
+      "perro"
+    ],
     "synonym": "asiento",
     "difficulty": "easy",
-    "category": "furniture"
+    "category": "furniture",
+    "language_name": "Spanish"
   },
   {
     "language_code": "ES",
     "concept": "happiness",
     "word": "felicidad",
-    "candidates": ["alegría", "sombrero", "bolsa", "silla", "tomate", "tigre"],
+    "candidates": [
+      "alegría",
+      "sombrero",
+      "bolsa",
+      "silla",
+      "tomate",
+      "tigre"
+    ],
     "synonym": "alegría",
     "difficulty": "easy",
-    "category": "emotions"
+    "category": "emotions",
+    "language_name": "Spanish"
   },
   {
     "language_code": "ES",
     "concept": "tomato",
     "word": "tomate",
-    "candidates": ["jitomate", "sombrero", "silla", "felicidad", "refrigerador", "perro"],
+    "candidates": [
+      "jitomate",
+      "sombrero",
+      "silla",
+      "felicidad",
+      "refrigerador",
+      "perro"
+    ],
     "synonym": "jitomate",
     "difficulty": "medium",
-    "category": "food"
+    "category": "food",
+    "language_name": "Spanish"
   },
   {
     "language_code": "ES",
     "concept": "refrigerator",
     "word": "refrigerador",
-    "candidates": ["nevera", "sombrero", "bolsa", "felicidad", "tomate", "perro"],
+    "candidates": [
+      "nevera",
+      "sombrero",
+      "bolsa",
+      "felicidad",
+      "tomate",
+      "perro"
+    ],
     "synonym": "nevera",
     "difficulty": "easy",
-    "category": "appliances"
+    "category": "appliances",
+    "language_name": "Spanish"
   },
   {
     "language_code": "ES",
     "concept": "dog",
     "word": "perro",
-    "candidates": ["can", "sombrero", "bolsa", "silla", "tomate", "tigre"],
+    "candidates": [
+      "can",
+      "sombrero",
+      "bolsa",
+      "silla",
+      "tomate",
+      "tigre"
+    ],
     "synonym": "can",
     "difficulty": "medium",
-    "category": "animals"
+    "category": "animals",
+    "language_name": "Spanish"
   },
   {
     "language_code": "LT",
     "concept": "hat",
     "word": "skrybėlė",
-    "candidates": ["kepurė", "maišelis", "kėdė", "laimė", "šaldytuvas", "šuo"],
+    "candidates": [
+      "kepurė",
+      "maišelis",
+      "kėdė",
+      "laimė",
+      "šaldytuvas",
+      "šuo"
+    ],
     "synonym": "kepurė",
     "difficulty": "easy",
-    "category": "clothing"
+    "category": "clothing",
+    "language_name": "Lithuanian"
   },
   {
     "language_code": "LT",
     "concept": "bag",
     "word": "maišelis",
-    "candidates": ["krepšys", "skrybėlė", "kėdė", "laimė", "pomidoras", "šuo"],
+    "candidates": [
+      "krepšys",
+      "skrybėlė",
+      "kėdė",
+      "laimė",
+      "pomidoras",
+      "šuo"
+    ],
     "synonym": "krepšys",
     "difficulty": "easy",
-    "category": "containers"
+    "category": "containers",
+    "language_name": "Lithuanian"
   },
   {
     "language_code": "LT",
     "concept": "chair",
     "word": "kėdė",
-    "candidates": ["sėdynė", "skrybėlė", "maišelis", "laimė", "šaldytuvas", "tigras"],
+    "candidates": [
+      "sėdynė",
+      "skrybėlė",
+      "maišelis",
+      "laimė",
+      "šaldytuvas",
+      "tigras"
+    ],
     "synonym": "sėdynė",
     "difficulty": "easy",
-    "category": "furniture"
+    "category": "furniture",
+    "language_name": "Lithuanian"
   },
   {
     "language_code": "LT",
     "concept": "happiness",
     "word": "laimė",
-    "candidates": ["džiaugsmas", "skrybėlė", "maišelis", "kėdė", "pomidoras", "šuo"],
+    "candidates": [
+      "džiaugsmas",
+      "skrybėlė",
+      "maišelis",
+      "kėdė",
+      "pomidoras",
+      "šuo"
+    ],
     "synonym": "džiaugsmas",
     "difficulty": "easy",
-    "category": "emotions"
+    "category": "emotions",
+    "language_name": "Lithuanian"
   },
   {
     "language_code": "LT",
     "concept": "refrigerator",
     "word": "šaldytuvas",
-    "candidates": ["šaldiklis", "skrybėlė", "laimė", "pomidoras", "tigras", "šuo"],
+    "candidates": [
+      "šaldiklis",
+      "skrybėlė",
+      "laimė",
+      "pomidoras",
+      "tigras",
+      "šuo"
+    ],
     "synonym": "šaldiklis",
     "difficulty": "easy",
-    "category": "appliances"
+    "category": "appliances",
+    "language_name": "Lithuanian"
   },
   {
     "language_code": "LT",
     "concept": "dog",
     "word": "šuo",
-    "candidates": ["šunelis", "skrybėlė", "kėdė", "laimė", "šaldytuvas", "tigras"],
-    "synonym": "šunelis",
+    "candidates": [
+      "šuva",
+      "skrybėlė",
+      "kėdė",
+      "laimė",
+      "šaldytuvas",
+      "tigras"
+    ],
+    "synonym": "šuva",
     "difficulty": "easy",
-    "category": "animals"
+    "category": "animals",
+    "language_name": "Lithuanian"
   },
   {
     "language_code": "UK",
     "concept": "hat",
     "word": "капелюх",
-    "candidates": ["шапка", "сумка", "стілець", "щастя", "холодильник", "собака"],
+    "candidates": [
+      "шапка",
+      "сумка",
+      "стілець",
+      "щастя",
+      "холодильник",
+      "собака"
+    ],
     "synonym": "шапка",
     "difficulty": "easy",
-    "category": "clothing"
+    "category": "clothing",
+    "language_name": "Ukrainian"
   },
   {
     "language_code": "UK",
     "concept": "bag",
     "word": "сумка",
-    "candidates": ["торба", "капелюх", "стілець", "щастя", "помідор", "собака"],
+    "candidates": [
+      "торба",
+      "капелюх",
+      "стілець",
+      "щастя",
+      "помідор",
+      "собака"
+    ],
     "synonym": "торба",
     "difficulty": "easy",
-    "category": "containers"
+    "category": "containers",
+    "language_name": "Ukrainian"
   },
   {
     "language_code": "UK",
     "concept": "chair",
     "word": "стілець",
-    "candidates": ["сидіння", "капелюх", "сумка", "щастя", "холодильник", "тигр"],
+    "candidates": [
+      "сидіння",
+      "капелюх",
+      "сумка",
+      "щастя",
+      "холодильник",
+      "тигр"
+    ],
     "synonym": "сидіння",
     "difficulty": "easy",
-    "category": "furniture"
+    "category": "furniture",
+    "language_name": "Ukrainian"
   },
   {
     "language_code": "UK",
     "concept": "happiness",
     "word": "щастя",
-    "candidates": ["радість", "капелюх", "сумка", "стілець", "помідор", "собака"],
+    "candidates": [
+      "радість",
+      "капелюх",
+      "сумка",
+      "стілець",
+      "помідор",
+      "собака"
+    ],
     "synonym": "радість",
     "difficulty": "easy",
-    "category": "emotions"
+    "category": "emotions",
+    "language_name": "Ukrainian"
   },
   {
     "language_code": "UK",
     "concept": "tomato",
     "word": "помідор",
-    "candidates": ["томат", "капелюх", "стілець", "щастя", "холодильник", "собака"],
+    "candidates": [
+      "томат",
+      "капелюх",
+      "стілець",
+      "щастя",
+      "холодильник",
+      "собака"
+    ],
     "synonym": "томат",
     "difficulty": "easy",
-    "category": "food"
+    "category": "food",
+    "language_name": "Ukrainian"
   },
   {
     "language_code": "UK",
     "concept": "refrigerator",
     "word": "холодильник",
-    "candidates": ["холодильна шафа", "капелюх", "сумка", "щастя", "помідор", "тигр"],
+    "candidates": [
+      "холодильна шафа",
+      "капелюх",
+      "сумка",
+      "щастя",
+      "помідор",
+      "тигр"
+    ],
     "synonym": "холодильна шафа",
     "difficulty": "easy",
-    "category": "appliances"
+    "category": "appliances",
+    "language_name": "Ukrainian"
   },
   {
     "language_code": "UK",
     "concept": "dog",
     "word": "собака",
-    "candidates": ["пес", "капелюх", "сумка", "щастя", "холодильник", "тигр"],
+    "candidates": [
+      "пес",
+      "капелюх",
+      "сумка",
+      "щастя",
+      "холодильник",
+      "тигр"
+    ],
     "synonym": "пес",
     "difficulty": "easy",
-    "category": "animals"
+    "category": "animals",
+    "language_name": "Ukrainian"
   },
   {
     "language_code": "BN",
     "concept": "hat",
     "word": "টুপি",
-    "candidates": ["মাথার টুপি", "ব্যাগ", "চেয়ার", "সুখ", "ফ্রিজ", "কুকুর"],
+    "candidates": [
+      "মাথার টুপি",
+      "ব্যাগ",
+      "চেয়ার",
+      "সুখ",
+      "ফ্রিজ",
+      "কুকুর"
+    ],
     "synonym": "মাথার টুপি",
     "difficulty": "easy",
-    "category": "clothing"
+    "category": "clothing",
+    "language_name": "Bengali"
   },
   {
     "language_code": "BN",
     "concept": "bag",
     "word": "ব্যাগ",
-    "candidates": ["থলে", "টুপি", "চেয়ার", "সুখ", "টমেটো", "কুকুর"],
+    "candidates": [
+      "থলে",
+      "টুপি",
+      "চেয়ার",
+      "সুখ",
+      "টমেটো",
+      "কুকুর"
+    ],
     "synonym": "থলে",
     "difficulty": "easy",
-    "category": "containers"
+    "category": "containers",
+    "language_name": "Bengali"
   },
   {
     "language_code": "BN",
     "concept": "chair",
     "word": "চেয়ার",
-    "candidates": ["আসন", "টুপি", "ব্যাগ", "সুখ", "ফ্রিজ", "বাঘ"],
+    "candidates": [
+      "আসন",
+      "টুপি",
+      "ব্যাগ",
+      "সুখ",
+      "ফ্রিজ",
+      "বাঘ"
+    ],
     "synonym": "আসন",
     "difficulty": "easy",
-    "category": "furniture"
+    "category": "furniture",
+    "language_name": "Bengali"
   },
   {
     "language_code": "BN",
     "concept": "happiness",
     "word": "সুখ",
-    "candidates": ["আনন্দ", "টুপি", "ব্যাগ", "চেয়ার", "টমেটো", "বাঘ"],
+    "candidates": [
+      "আনন্দ",
+      "টুপি",
+      "ব্যাগ",
+      "চেয়ার",
+      "টমেটো",
+      "বাঘ"
+    ],
     "synonym": "আনন্দ",
     "difficulty": "easy",
-    "category": "emotions"
+    "category": "emotions",
+    "language_name": "Bengali"
   },
   {
     "language_code": "BN",
     "concept": "refrigerator",
     "word": "ফ্রিজ",
-    "candidates": ["শীতলপেটি", "টুপি", "সুখ", "টমেটো", "বাঘ", "কুকুর"],
+    "candidates": [
+      "শীতলপেটি",
+      "টুপি",
+      "সুখ",
+      "টমেটো",
+      "বাঘ",
+      "কুকুর"
+    ],
     "synonym": "শীতলপেটি",
     "difficulty": "easy",
-    "category": "appliances"
+    "category": "appliances",
+    "language_name": "Bengali"
   },
   {
     "language_code": "BN",
     "concept": "dog",
     "word": "কুকুর",
-    "candidates": ["শ্বান", "টুপি", "ব্যাগ", "সুখ", "ফ্রিজ", "বাঘ"],
+    "candidates": [
+      "শ্বান",
+      "টুপি",
+      "ব্যাগ",
+      "সুখ",
+      "ফ্রিজ",
+      "বাঘ"
+    ],
     "synonym": "শ্বান",
     "difficulty": "medium",
-    "category": "animals"
+    "category": "animals",
+    "language_name": "Bengali"
   },
   {
     "language_code": "KN",
     "concept": "hat",
     "word": "ಟೋಪಿ",
-    "candidates": ["ತಲೆಯ ಟೋಪಿ", "ಚೀಲ", "ಕುರ್ಚಿ", "ಸಂತೋಷ", "ಫ್ರಿಜ್", "ನಾಯಿ"],
+    "candidates": [
+      "ತಲೆಯ ಟೋಪಿ",
+      "ಚೀಲ",
+      "ಕುರ್ಚಿ",
+      "ಸಂತೋಷ",
+      "ಫ್ರಿಜ್",
+      "ನಾಯಿ"
+    ],
     "synonym": "ತಲೆಯ ಟೋಪಿ",
     "difficulty": "easy",
-    "category": "clothing"
+    "category": "clothing",
+    "language_name": "Kannada"
   },
   {
     "language_code": "KN",
     "concept": "bag",
     "word": "ಚೀಲ",
-    "candidates": ["ಚೀಲಿಕೆ", "ಟೋಪಿ", "ಕುರ್ಚಿ", "ಸಂತೋಷ", "ಟೊಮ್ಯಾಟೊ", "ನಾಯಿ"],
+    "candidates": [
+      "ಚೀಲಿಕೆ",
+      "ಟೋಪಿ",
+      "ಕುರ್ಚಿ",
+      "ಸಂತೋಷ",
+      "ಟೊಮ್ಯಾಟೊ",
+      "ನಾಯಿ"
+    ],
     "synonym": "ಚೀಲಿಕೆ",
     "difficulty": "easy",
-    "category": "containers"
+    "category": "containers",
+    "language_name": "Kannada"
   },
   {
     "language_code": "KN",
     "concept": "chair",
     "word": "ಕುರ್ಚಿ",
-    "candidates": ["ಆಸನ", "ಟೋಪಿ", "ಚೀಲ", "ಸಂತೋಷ", "ಫ್ರಿಜ್", "ಹುಲಿ"],
+    "candidates": [
+      "ಆಸನ",
+      "ಟೋಪಿ",
+      "ಚೀಲ",
+      "ಸಂತೋಷ",
+      "ಫ್ರಿಜ್",
+      "ಹುಲಿ"
+    ],
     "synonym": "ಆಸನ",
     "difficulty": "easy",
-    "category": "furniture"
+    "category": "furniture",
+    "language_name": "Kannada"
   },
   {
     "language_code": "KN",
     "concept": "happiness",
     "word": "ಸಂತೋಷ",
-    "candidates": ["ಆನಂದ", "ಟೋಪಿ", "ಚೀಲ", "ಕುರ್ಚಿ", "ಟೊಮ್ಯಾಟೊ", "ನಾಯಿ"],
+    "candidates": [
+      "ಆನಂದ",
+      "ಟೋಪಿ",
+      "ಚೀಲ",
+      "ಕುರ್ಚಿ",
+      "ಟೊಮ್ಯಾಟೊ",
+      "ನಾಯಿ"
+    ],
     "synonym": "ಆನಂದ",
     "difficulty": "easy",
-    "category": "emotions"
+    "category": "emotions",
+    "language_name": "Kannada"
   },
   {
     "language_code": "KN",
     "concept": "refrigerator",
     "word": "ಫ್ರಿಜ್",
-    "candidates": ["ಶೀತಲಪೆಟ್ಟಿಗೆ", "ಟೋಪಿ", "ಸಂತೋಷ", "ಟೊಮ್ಯಾಟೊ", "ಹುಲಿ", "ನಾಯಿ"],
+    "candidates": [
+      "ಶೀತಲಪೆಟ್ಟಿಗೆ",
+      "ಟೋಪಿ",
+      "ಸಂತೋಷ",
+      "ಟೊಮ್ಯಾಟೊ",
+      "ಹುಲಿ",
+      "ನಾಯಿ"
+    ],
     "synonym": "ಶೀತಲಪೆಟ್ಟಿಗೆ",
     "difficulty": "easy",
-    "category": "appliances"
+    "category": "appliances",
+    "language_name": "Kannada"
   },
   {
     "language_code": "KN",
     "concept": "dog",
     "word": "ನಾಯಿ",
-    "candidates": ["ಶ್ವಾನ", "ಟೋಪಿ", "ಚೀಲ", "ಸಂತೋಷ", "ಫ್ರಿಜ್", "ಹುಲಿ"],
+    "candidates": [
+      "ಶ್ವಾನ",
+      "ಟೋಪಿ",
+      "ಚೀಲ",
+      "ಸಂತೋಷ",
+      "ಫ್ರಿಜ್",
+      "ಹುಲಿ"
+    ],
     "synonym": "ಶ್ವಾನ",
     "difficulty": "medium",
-    "category": "animals"
+    "category": "animals",
+    "language_name": "Kannada"
   }
 ]
