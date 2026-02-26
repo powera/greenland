@@ -181,6 +181,63 @@ class TimeArithmeticBenchmark:
     pass
 
 
+from benchmarks.lib.generators.word_problems_generator import WordProblemsGenerator
+from benchmarks.lib.runners.word_problems_runner import WordProblemsRunner
+
+
+@benchmark(
+    code="0023_word_problems",
+    name="Math Word Problems",
+    description="""
+           A benchmark to evaluate a model's ability to read math word problems
+           and extract the relevant numbers to compute the correct answer.
+           Approximately one third of questions contain distractor/unused information.""",
+    category="simple math",
+)
+class WordProblemsBenchmark:
+    """Module container for math word problems benchmark."""
+
+    pass
+
+
+from benchmarks.lib.generators.algebra_generator import AlgebraGenerator
+from benchmarks.lib.runners.algebra_runner import AlgebraRunner
+
+
+@benchmark(
+    code="0025_algebra",
+    name="Algebra",
+    description="""
+           A benchmark to evaluate a model's ability to solve linear and quadratic
+           equations with integer solutions. Includes single-variable linear equations
+           (ax + b = c) and quadratic equations with one or two integer roots.""",
+    category="simple math",
+)
+class AlgebraBenchmark:
+    """Module container for algebra benchmark."""
+
+    pass
+
+
+from benchmarks.lib.generators.geometry_generator import GeometryGenerator
+from benchmarks.lib.runners.geometry_runner import GeometryRunner
+
+
+@benchmark(
+    code="0027_geometry",
+    name="Geometry",
+    description="""
+           A benchmark to evaluate a model's ability to calculate area, perimeter,
+           and volume for standard shapes: rectangles, triangles, rectangular boxes,
+           and circles (using π ≈ 3.14159).""",
+    category="simple math",
+)
+class GeometryBenchmark:
+    """Module container for geometry benchmark."""
+
+    pass
+
+
 from benchmarks.lib.generators.part_of_speech_generator import PartOfSpeechGenerator
 from benchmarks.lib.runners.part_of_speech_runner import PartOfSpeechRunner
 
