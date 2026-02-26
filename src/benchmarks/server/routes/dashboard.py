@@ -5,7 +5,7 @@
 from datetime import datetime
 
 from flask import Blueprint, g, render_template
-from sqlalchemy import func
+from sqlalchemy import case, func
 
 from benchmarks.datastore.benchmarks import Benchmark, Run, RunDetail
 from benchmarks.datastore.common import Model
@@ -36,14 +36,22 @@ def get_score_color(score):
 @bp.route("/")
 def index():
     """Display the main benchmark dashboard with model-benchmark matrix."""
-    # Get all models
-    models = g.bench_db.query(Model).order_by(Model.displayname).all()
+    # Get models with at least one run, ordered with remote models first.
+    models = (
+        g.bench_db.query(Model)
+        .filter(g.bench_db.query(Run.run_id).filter(Run.model_name == Model.codename).exists())
+        .order_by(
+            case((Model.model_type == "remote", 0), else_=1),
+            Model.displayname,
+        )
+        .all()
+    )
 
     # Get all benchmarks
     benchmarks = g.bench_db.query(Benchmark).order_by(Benchmark.codename).all()
 
     # Get highest scoring run for each (benchmark, model) combination
-    # Also calculate average eval time
+    # Also calculate average eval time and average cost per question.
     subquery = (
         g.bench_db.query(
             Run.benchmark_name,
@@ -74,6 +82,7 @@ def index():
 
     # Calculate average eval times for each run
     avg_times = {}
+    avg_costs = {}
     for run_id, bench_name, model_name, score, run_ts in runs_data:
         avg_time = (
             g.bench_db.query(func.avg(RunDetail.eval_msec))
@@ -81,6 +90,13 @@ def index():
             .scalar()
         )
         avg_times[run_id] = avg_time or 0
+
+        avg_cost_usd = (
+            g.bench_db.query(func.avg(RunDetail.cost_usd))
+            .filter(RunDetail.run_id == run_id)
+            .scalar()
+        )
+        avg_costs[run_id] = avg_cost_usd or 0
 
     # Build scores dictionary
     scores = {}
@@ -90,6 +106,7 @@ def index():
             "value": score,
             "color": get_score_color(score),
             "avg_eval_time": avg_times.get(run_id, 0),
+            "avg_cost_usd": avg_costs.get(run_id, 0),
             "run_ts": run_ts,
         }
 
