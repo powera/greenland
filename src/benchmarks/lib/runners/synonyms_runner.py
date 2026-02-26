@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 
-"""Runner for multilingual noun synonym benchmark."""
+"""Runner for multilingual noun synonym identification benchmark."""
 
 import logging
 from typing import Any, Dict, Optional, Tuple
 
-from benchmarks.synonyms_scoring import score_synonyms_response
-from benchmarks.lib.runners.partial_credit_runner import PartialCreditRunner
+from benchmarks.lib.utils.base import BenchmarkRunner
 from benchmarks.lib.utils.factory import runner
 
 logging.basicConfig(
@@ -18,37 +17,36 @@ BENCHMARK_CODE = "0017_synonyms"
 
 
 @runner(BENCHMARK_CODE)
-class SynonymsRunner(PartialCreditRunner):
-    """Runner for checking multilingual noun synonym generation."""
-
-    CORRECTNESS_THRESHOLD = 80
+class SynonymsRunner(BenchmarkRunner):
+    """Runner for checking multilingual noun synonym identification."""
 
     def prepare_prompt(self, question_data: Dict) -> Tuple[str, Optional[Dict], Optional[str]]:
         prompt = question_data["question_text"]
-        schema = question_data.get("schema")
+        schema = question_data.get(
+            "schema",
+            {
+                "type": "object",
+                "properties": {"synonym": {"type": "string"}},
+                "required": ["synonym"],
+            },
+        )
         context = (
-            "You are taking a multilingual vocabulary test. "
-            "Return only JSON that matches the schema and includes noun synonyms in the requested language."
+            "You are a linguistics assistant. For each question, identify which word from the"
+            " provided candidates is a synonym of the given word. Respond with only the synonym word."
         )
         return prompt, schema, context
 
-    def score_response(self, question_data: Dict, response: Any) -> int:
-        return int(round(score_synonyms_response(question_data, response)))
+    def evaluate_response(self, question_data: Dict, response: Any) -> bool:
+        """Case-insensitive comparison of the synonym field."""
+        if not isinstance(response, dict):
+            return False
+        expected = question_data.get("correct_answer", {}).get("synonym", "")
+        actual = response.get("synonym", "")
+        return str(actual).strip().lower() == str(expected).strip().lower()
 
     def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
-        response_data = (
-            response.structured_data if hasattr(response, "structured_data") else response
-        )
-        response_text = (
-            response.response_text if hasattr(response, "response_text") else str(response)
-        )
-        score_percent = score_synonyms_response(question_data, response_data or response_text)
-
         return {
-            "response": response_data,
-            "model_response_text": response_text,
-            "score_percent": score_percent,
-            "pass_threshold_percent": self.CORRECTNESS_THRESHOLD,
+            "response": response.structured_data.get("synonym", ""),
+            "expected": question_data["correct_answer"].get("synonym", ""),
             "is_correct": is_correct,
-            "expected": question_data.get("correct_answer", {}),
         }

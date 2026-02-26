@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-"""Generator for multilingual noun synonym benchmark questions."""
+"""Generator for multilingual noun synonym identification benchmark questions."""
 
 import logging
 from typing import Any, Iterator
@@ -14,8 +14,6 @@ from benchmarks.lib.utils.data_models import (
     EvaluationCriteria,
 )
 from benchmarks.lib.utils.factory import benchmark, generator
-from storage.backend.config import DataSourceConfig
-from words import build_synonyms_prompt
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
@@ -23,25 +21,26 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 BENCHMARK_CODE = "0017_synonyms"
-BENCHMARK_NAME = "Multilingual Synonym Generation"
+BENCHMARK_NAME = "Multilingual Synonym Identification"
 BENCHMARK_DESCRIPTION = (
-    "Tests whether a model can generate synonyms for common nouns across multiple languages."
+    "Tests whether a model can identify the correct synonym for a noun from a list of candidates"
+    " across multiple languages."
 )
 
 benchmark(
     BENCHMARK_CODE,
     BENCHMARK_NAME,
     BENCHMARK_DESCRIPTION,
-    default_num_questions=64,
+    default_num_questions=52,
     category="word processing",
 )(__name__)
 
 
 @generator(BENCHMARK_CODE)
 class SynonymsGenerator(BenchmarkGenerator):
-    """Generator for multilingual noun synonym questions."""
+    """Generator for multilingual noun synonym identification questions."""
 
-    def __init__(self, metadata: BenchmarkMetadata, session=None):
+    def __init__(self, metadata: BenchmarkMetadata, session: Any = None) -> None:
         super().__init__(metadata, session)
 
         self.can_load_from_file = True
@@ -50,48 +49,41 @@ class SynonymsGenerator(BenchmarkGenerator):
         self.questions_file_path = "samples.json"
 
     def _generate_from_file(self, **kwargs: Any) -> Iterator[BenchmarkQuestion]:
-        samples = self.load_json_file(self.questions_file_path)
+        samples = self.load_json_file("samples.json")
 
         for sample in samples:
             language_code = sample["language_code"]
             concept = sample["concept"]
-            mandatory_synonyms = sample.get("mandatory_synonyms", [])
-            optional_synonyms = sample.get("optional_synonyms", [])
-
-            prompt_word = sample.get("word", concept)
-            benchmark_config = kwargs.get("config")
-            if benchmark_config is None:
-                benchmark_config = DataSourceConfig()
+            word = sample["word"]
+            candidates = sample["candidates"]
+            synonym = sample["synonym"]
+            difficulty = Difficulty(sample.get("difficulty", "medium"))
+            category = sample.get("category", concept)
 
             yield BenchmarkQuestion(
-                question_text=build_synonyms_prompt(language_code, prompt_word, benchmark_config),
+                question_text=(
+                    f'Which of these words is a synonym of "{word}" in {language_code}:'
+                    f" {', '.join(candidates)}"
+                ),
                 answer_type=AnswerType.JSON,
-                correct_answer={
-                    "mandatory_synonyms": mandatory_synonyms,
-                    "optional_synonyms": optional_synonyms,
-                },
+                correct_answer={"synonym": synonym},
                 category=f"synonyms_{language_code.lower()}",
-                difficulty=Difficulty.MEDIUM,
+                difficulty=difficulty,
+                choices=candidates,
                 tags=[
                     "synonyms",
-                    "generation",
+                    "identification",
                     f"lang:{language_code.lower()}",
                     f"concept:{concept}",
+                    f"category:{category}",
                 ],
                 schema={
                     "type": "object",
-                    "properties": {
-                        "synonyms": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "minItems": 0,
-                        }
-                    },
-                    "required": ["synonyms"],
+                    "properties": {"synonym": {"type": "string"}},
+                    "required": ["synonym"],
                 },
                 evaluation_criteria=EvaluationCriteria(
-                    exact_match=False,
+                    exact_match=True,
                     case_sensitive=False,
-                    required_fields=["synonyms"],
                 ),
             )
