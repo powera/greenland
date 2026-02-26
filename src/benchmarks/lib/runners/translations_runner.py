@@ -15,11 +15,13 @@ from benchmarks.lib.generators.translations_generator import VALID_LANGS, get_tr
 from words import build_single_target_translation_prompt
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
-@runner("0108_translation_en_fr")
+@runner("0101_translation_en_fr")
 class TranslationRunner(BenchmarkRunner):
     """Runner for translation benchmark."""
 
@@ -46,7 +48,6 @@ class TranslationRunner(BenchmarkRunner):
             raise ValueError(f"Language codes must be one of: {', '.join(VALID_LANGS)}")
         if self.origin_lang == self.target_lang:
             raise ValueError("Origin and target languages must be different")
-
 
     @staticmethod
     def create_language_pair_runner(
