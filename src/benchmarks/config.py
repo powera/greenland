@@ -15,6 +15,42 @@ from benchmarks.benchmark_constants import (
 )
 
 
+# Benchmark codes that are considered production-ready for init-all / missing.
+# Other registered benchmarks still exist in the registry and can be run
+# individually, but they are excluded from bulk operations by default.
+ENABLED_BENCHMARKS: frozenset[str] = frozenset(
+    [
+        # 001X: token processing
+        "0011_word_length",
+        "0012_letter_count",
+        "0013_vowel_count",
+        "0014_syllable_count",
+        "0015_spell_check",
+        "0016_antonym",
+        "0017_synonyms",
+        "0018_pinyin_letters",
+        # 002X: simple math
+        "0021_simple_arithmetic",
+        "0022_unit_conversion",
+        "0023_word_problems",
+        "0024_percentage_math",
+        "0025_algebra",
+        "0026_time_arithmetic",
+        "0027_geometry",
+        # 010X: translation
+        "0101_translation_en_fr",
+        "0102_translation_en_es",
+        "0103_translation_en_de",
+        "0104_translation_fr_es",
+        "0105_translation_en_zh",
+        "0106_translation_en_ja",
+        "0107_translation_fr_ko",
+        "0108_translation_it_lt",
+        "0109_translation_ja_lt",
+    ]
+)
+
+
 class BenchmarkConfig:
     """Configuration for benchmark operations.
 
