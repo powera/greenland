@@ -1,73 +1,50 @@
 # Greenland
 
-A multilingual linguistic database and content generation system for the
-**Trakaido** language-learning app.
+Greenland is the core data and tooling repository for the **Trakaido** language-learning app.
+It combines a multilingual linguistic database, editing interfaces, automation agents,
+and language-model evaluation tools.
 
-**Python 3.12+** | **14 languages** | **SQLite-based**
+**Python 3.12+** | **SQLite-backed** | **14 supported languages**
 
----
+## Main Components
 
-## What It Does
+- **WordFreq data layer**: stores lemmas, translations, forms, sentences, and metadata.
+- **Barsukas web editor**: Flask UI for browsing, editing, and reviewing linguistic content.
+- **Automation agents**: task-focused scripts for data QA, generation, and maintenance.
+- **Benchmarks**: framework for generating and scoring model responses on language tasks.
+- **Langtools**: language-specific utilities (forms, romanization, sorting helpers).
 
-1. **Linguistic Database (WordFreq)** - Multi-language word frequency and translation database with LLM-powered analysis
-2. **Web Editor (Barsukas)** - Flask interface for browsing and editing the linguistics database
-3. **Autonomous Agents** - Lithuanian-animal-named scripts for bulk database maintenance via LLM calls
-4. **LLM Benchmarks** - Framework for testing and comparing language model capabilities
+## Supported Languages
 
-### Supported Languages
+English, Lithuanian, Chinese (Simplified), French, German, Spanish, Portuguese,
+Korean, Swahili, Vietnamese, Japanese, Italian, Dutch, Swedish.
 
-English, Lithuanian, Chinese (simplified), French, German, Spanish, Portuguese,
-Korean, Swahili, Vietnamese, Japanese, Italian, Dutch, Swedish
+## Quick Start
 
----
-
-## Getting Started
-
-See [INSTALL.md](INSTALL.md) for environment setup, dependencies, and database initialization.
-
-### Quick Commands
+See [INSTALL.md](INSTALL.md) for full setup and initialization.
 
 ```bash
-# Run the web editor (port 5555)
+# Run the Barsukas editor (default: http://127.0.0.1:5555)
 PYTHONPATH=src python src/barsukas/app.py
 
-# Interactive shell with preloaded tools
+# Open an interactive shell with project imports
 PYTHONPATH=src python -i src/interactive.py
-
-# Run an agent (example: translation coverage check)
-PYTHONPATH=src python src/agents/voras.py --mode coverage
 
 # Run tests
 python run_tests.py
 ```
 
----
-
 ## Repository Layout
 
-```
+```text
 greenland/
-├── src/                       # Source code (see src/README.md)
-├── data/release/              # Release data files (wordlists, sentences)
-├── prompts/                   # LLM prompt templates
-├── docs/                      # Documentation
-├── hooks/                     # Git hooks (pre-commit for black)
-├── pyproject.toml             # Project configuration
-└── run_tests.py               # Test runner
+├── src/                 # Application and tooling source code
+├── data/release/        # Versioned release data files
+├── prompts/             # Prompt templates used by agents/tools
+├── docs/                # Project documentation
+├── hooks/               # Git hooks (pre-commit config)
+├── pyproject.toml       # Python/tooling configuration
+└── run_tests.py         # Test runner entry point
 ```
 
-See [src/README.md](src/README.md) for source code structure, agent details,
-and database schema.
-
----
-
-## Development
-
-- **Formatting:** `black` with 100-char line length
-- **Type checking:** `mypy` on all modified files
-- **Testing:** `python run_tests.py` (pytest-based)
-- **Imports:** Always use absolute imports from `src/` root
-- **Running scripts:** Always use `PYTHONPATH=src python src/...`
-- **Pre-commit hooks:** `git config core.hooksPath hooks`
-
-See [INSTALL.md](INSTALL.md) for full setup instructions.
+For source-level structure, see [src/README.md](src/README.md).
