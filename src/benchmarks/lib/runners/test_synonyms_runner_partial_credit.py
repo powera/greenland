@@ -98,6 +98,26 @@ class TestSynonymsRunner(unittest.TestCase):
         self.assertEqual(debug["expected"], "cap")
         self.assertTrue(debug["is_correct"])
 
+    def test_evaluate_response_correct(self) -> None:
+        question_data = {"correct_answer": {"synonym": "cap"}}
+        self.assertTrue(self.runner.evaluate_response(question_data, {"synonym": "cap"}))
+
+    def test_evaluate_response_wrong(self) -> None:
+        question_data = {"correct_answer": {"synonym": "cap"}}
+        self.assertFalse(self.runner.evaluate_response(question_data, {"synonym": "scarf"}))
+
+    def test_evaluate_response_case_insensitive(self) -> None:
+        question_data = {"correct_answer": {"synonym": "cap"}}
+        self.assertTrue(self.runner.evaluate_response(question_data, {"synonym": "Cap"}))
+
+    def test_evaluate_response_whitespace_trimmed(self) -> None:
+        question_data = {"correct_answer": {"synonym": "cap"}}
+        self.assertTrue(self.runner.evaluate_response(question_data, {"synonym": "  cap  "}))
+
+    def test_evaluate_response_non_dict_fails(self) -> None:
+        question_data = {"correct_answer": {"synonym": "cap"}}
+        self.assertFalse(self.runner.evaluate_response(question_data, "cap"))
+
 
 if __name__ == "__main__":
     unittest.main()

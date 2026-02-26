@@ -36,6 +36,14 @@ class SynonymsRunner(BenchmarkRunner):
         )
         return prompt, schema, context
 
+    def evaluate_response(self, question_data: Dict, response: Any) -> bool:
+        """Case-insensitive comparison of the synonym field."""
+        if not isinstance(response, dict):
+            return False
+        expected = question_data.get("correct_answer", {}).get("synonym", "")
+        actual = response.get("synonym", "")
+        return str(actual).strip().lower() == str(expected).strip().lower()
+
     def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
         return {
             "response": response.structured_data.get("synonym", ""),
