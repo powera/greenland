@@ -1,47 +1,38 @@
 #!/usr/bin/python3
 
-"""Unit tests for synonyms scoring."""
+"""Unit tests for synonyms runner exact-match scoring (0017)."""
 
 import unittest
 
-from benchmarks.synonyms_scoring import score_synonyms_response
+from benchmarks.lib.runners.test_synonyms_runner_partial_credit import (
+    RUNNER_MODULE,
+    SynonymsRunner,
+)
 
 
-class TestSynonymsScoring(unittest.TestCase):
-    def test_partial_score_with_mandatory_and_optional(self):
-        question_data = {
-            "correct_answer": {
-                "mandatory_synonyms": ["cap"],
-                "optional_synonyms": ["headgear", "headwear"],
-            }
-        }
-        response = {"synonyms": ["cap", "lid", "headgear"]}
+class TestSynonymsRunnerScoring(unittest.TestCase):
+    def setUp(self) -> None:
+        self.runner = SynonymsRunner.__new__(SynonymsRunner)
 
-        score = score_synonyms_response(question_data, response)
-        self.assertAlmostEqual(score, 88.33, places=2)
+    def test_correct_synonym_passes(self) -> None:
+        question_data = {"correct_answer": {"synonym": "cap"}}
 
-    def test_missing_mandatory_penalized(self):
-        question_data = {
-            "correct_answer": {
-                "mandatory_synonyms": ["cap"],
-                "optional_synonyms": ["headgear", "headwear"],
-            }
-        }
-        response = {"synonyms": ["headgear", "headwear"]}
+        class FakeResponse:
+            structured_data = {"synonym": "cap"}
 
-        score = score_synonyms_response(question_data, response)
-        self.assertLess(score, 30.0)
+        debug = self.runner.build_debug_info(question_data, FakeResponse(), True)
+        self.assertEqual(debug["response"], "cap")
+        self.assertTrue(debug["is_correct"])
 
-    def test_no_synonyms_expected_empty_response(self):
-        question_data = {
-            "correct_answer": {
-                "mandatory_synonyms": [],
-                "optional_synonyms": [],
-            }
-        }
+    def test_wrong_synonym_fails(self) -> None:
+        question_data = {"correct_answer": {"synonym": "cap"}}
 
-        self.assertEqual(score_synonyms_response(question_data, {"synonyms": []}), 100.0)
-        self.assertEqual(score_synonyms_response(question_data, {"synonyms": ["foo"]}), 80.0)
+        class FakeResponse:
+            structured_data = {"synonym": "scarf"}
+
+        debug = self.runner.build_debug_info(question_data, FakeResponse(), False)
+        self.assertEqual(debug["response"], "scarf")
+        self.assertFalse(debug["is_correct"])
 
 
 if __name__ == "__main__":

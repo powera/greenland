@@ -3,679 +3,468 @@
     "language_code": "EN",
     "concept": "hat",
     "word": "hat",
-    "prompt": "Generate synonyms for the noun \"hat\" in EN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "cap"
-    ],
-    "optional_synonyms": [
-      "headgear",
-      "headwear"
-    ]
+    "candidates": ["cap", "scarf", "coat", "hood", "glove", "boot"],
+    "synonym": "cap",
+    "difficulty": "easy",
+    "category": "clothing"
   },
   {
     "language_code": "EN",
     "concept": "bag",
     "word": "bag",
-    "prompt": "Generate synonyms for the noun \"bag\" in EN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "sack"
-    ],
-    "optional_synonyms": [
-      "pouch",
-      "satchel",
-      "handbag"
-    ]
+    "candidates": ["sack", "basket", "trunk", "box", "shelf", "case"],
+    "synonym": "sack",
+    "difficulty": "easy",
+    "category": "containers"
   },
   {
     "language_code": "EN",
     "concept": "chair",
     "word": "chair",
-    "prompt": "Generate synonyms for the noun \"chair\" in EN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "seat"
-    ],
-    "optional_synonyms": []
+    "candidates": ["seat", "table", "desk", "couch", "floor", "shelf"],
+    "synonym": "seat",
+    "difficulty": "easy",
+    "category": "furniture"
   },
   {
     "language_code": "EN",
     "concept": "happiness",
     "word": "happiness",
-    "prompt": "Generate synonyms for the noun \"happiness\" in EN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "joy"
-    ],
-    "optional_synonyms": [
-      "contentment",
-      "delight",
-      "bliss"
-    ]
-  },
-  {
-    "language_code": "EN",
-    "concept": "tomato",
-    "word": "tomato",
-    "prompt": "Generate synonyms for the noun \"tomato\" in EN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [],
-    "optional_synonyms": []
+    "candidates": ["joy", "sadness", "fear", "anger", "love", "peace"],
+    "synonym": "joy",
+    "difficulty": "easy",
+    "category": "emotions"
   },
   {
     "language_code": "EN",
     "concept": "refrigerator",
     "word": "refrigerator",
-    "prompt": "Generate synonyms for the noun \"refrigerator\" in EN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "fridge"
-    ],
-    "optional_synonyms": [
-      "icebox"
-    ]
-  },
-  {
-    "language_code": "EN",
-    "concept": "tiger",
-    "word": "tiger",
-    "prompt": "Generate synonyms for the noun \"tiger\" in EN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [],
-    "optional_synonyms": []
+    "candidates": ["fridge", "oven", "stove", "kettle", "toaster", "microwave"],
+    "synonym": "fridge",
+    "difficulty": "easy",
+    "category": "appliances"
   },
   {
     "language_code": "EN",
     "concept": "dog",
     "word": "dog",
-    "prompt": "Generate synonyms for the noun \"dog\" in EN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "canine"
-    ],
-    "optional_synonyms": [
-      "pooch",
-      "doggie"
-    ]
+    "candidates": ["canine", "feline", "equine", "bovine", "lupine", "ursine"],
+    "synonym": "canine",
+    "difficulty": "medium",
+    "category": "animals"
   },
   {
     "language_code": "ZH",
     "concept": "hat",
     "word": "帽子",
-    "prompt": "Generate synonyms for the noun \"帽子\" in ZH. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "帽"
-    ],
-    "optional_synonyms": [
-      "礼帽"
-    ]
+    "candidates": ["帽", "袋子", "椅子", "幸福", "老虎", "狗"],
+    "synonym": "帽",
+    "difficulty": "easy",
+    "category": "clothing"
   },
   {
     "language_code": "ZH",
     "concept": "bag",
     "word": "袋子",
-    "prompt": "Generate synonyms for the noun \"袋子\" in ZH. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "包"
-    ],
-    "optional_synonyms": [
-      "提包"
-    ]
+    "candidates": ["包", "帽子", "椅子", "幸福", "冰箱", "老虎"],
+    "synonym": "包",
+    "difficulty": "easy",
+    "category": "containers"
   },
   {
     "language_code": "ZH",
     "concept": "chair",
     "word": "椅子",
-    "prompt": "Generate synonyms for the noun \"椅子\" in ZH. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "座椅"
-    ],
-    "optional_synonyms": []
+    "candidates": ["座椅", "帽子", "袋子", "幸福", "冰箱", "老虎"],
+    "synonym": "座椅",
+    "difficulty": "easy",
+    "category": "furniture"
   },
   {
     "language_code": "ZH",
     "concept": "happiness",
     "word": "幸福",
-    "prompt": "Generate synonyms for the noun \"幸福\" in ZH. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "快乐"
-    ],
-    "optional_synonyms": [
-      "喜悦"
-    ]
+    "candidates": ["快乐", "帽子", "袋子", "椅子", "冰箱", "狗"],
+    "synonym": "快乐",
+    "difficulty": "easy",
+    "category": "emotions"
   },
   {
     "language_code": "ZH",
     "concept": "tomato",
     "word": "番茄",
-    "prompt": "Generate synonyms for the noun \"番茄\" in ZH. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "西红柿"
-    ],
-    "optional_synonyms": []
+    "candidates": ["西红柿", "帽子", "袋子", "椅子", "老虎", "狗"],
+    "synonym": "西红柿",
+    "difficulty": "easy",
+    "category": "food"
   },
   {
     "language_code": "ZH",
     "concept": "refrigerator",
     "word": "冰箱",
-    "prompt": "Generate synonyms for the noun \"冰箱\" in ZH. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "冰柜"
-    ],
-    "optional_synonyms": [
-      "冷藏箱"
-    ]
+    "candidates": ["冰柜", "帽子", "幸福", "番茄", "老虎", "狗"],
+    "synonym": "冰柜",
+    "difficulty": "easy",
+    "category": "appliances"
   },
   {
     "language_code": "ZH",
     "concept": "tiger",
     "word": "老虎",
-    "prompt": "Generate synonyms for the noun \"老虎\" in ZH. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "虎"
-    ],
-    "optional_synonyms": []
+    "candidates": ["虎", "帽子", "袋子", "椅子", "幸福", "狗"],
+    "synonym": "虎",
+    "difficulty": "easy",
+    "category": "animals"
   },
   {
     "language_code": "ZH",
     "concept": "dog",
     "word": "狗",
-    "prompt": "Generate synonyms for the noun \"狗\" in ZH. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "犬"
-    ],
-    "optional_synonyms": [
-      "狗狗"
-    ]
+    "candidates": ["犬", "帽子", "袋子", "幸福", "冰箱", "老虎"],
+    "synonym": "犬",
+    "difficulty": "easy",
+    "category": "animals"
   },
   {
     "language_code": "FR",
     "concept": "hat",
     "word": "chapeau",
-    "prompt": "Generate synonyms for the noun \"chapeau\" in FR. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "couvre-chef"
-    ],
-    "optional_synonyms": []
+    "candidates": ["couvre-chef", "sac", "chaise", "bonheur", "réfrigérateur", "chien"],
+    "synonym": "couvre-chef",
+    "difficulty": "medium",
+    "category": "clothing"
   },
   {
     "language_code": "FR",
     "concept": "bag",
     "word": "sac",
-    "prompt": "Generate synonyms for the noun \"sac\" in FR. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "sacoche"
-    ],
-    "optional_synonyms": [
-      "besace"
-    ]
+    "candidates": ["sacoche", "chapeau", "chaise", "bonheur", "réfrigérateur", "chien"],
+    "synonym": "sacoche",
+    "difficulty": "medium",
+    "category": "containers"
   },
   {
     "language_code": "FR",
     "concept": "chair",
     "word": "chaise",
-    "prompt": "Generate synonyms for the noun \"chaise\" in FR. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "siège"
-    ],
-    "optional_synonyms": []
+    "candidates": ["siège", "chapeau", "sac", "bonheur", "tomate", "chien"],
+    "synonym": "siège",
+    "difficulty": "medium",
+    "category": "furniture"
   },
   {
     "language_code": "FR",
     "concept": "happiness",
     "word": "bonheur",
-    "prompt": "Generate synonyms for the noun \"bonheur\" in FR. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "joie"
-    ],
-    "optional_synonyms": [
-      "félicité",
-      "contentement"
-    ]
-  },
-  {
-    "language_code": "FR",
-    "concept": "tomato",
-    "word": "tomate",
-    "prompt": "Generate synonyms for the noun \"tomate\" in FR. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [],
-    "optional_synonyms": []
+    "candidates": ["joie", "chapeau", "sac", "chaise", "réfrigérateur", "tigre"],
+    "synonym": "joie",
+    "difficulty": "easy",
+    "category": "emotions"
   },
   {
     "language_code": "FR",
     "concept": "refrigerator",
     "word": "réfrigérateur",
-    "prompt": "Generate synonyms for the noun \"réfrigérateur\" in FR. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "frigo"
-    ],
-    "optional_synonyms": []
-  },
-  {
-    "language_code": "FR",
-    "concept": "tiger",
-    "word": "tigre",
-    "prompt": "Generate synonyms for the noun \"tigre\" in FR. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [],
-    "optional_synonyms": []
+    "candidates": ["frigo", "chapeau", "bonheur", "tomate", "tigre", "chien"],
+    "synonym": "frigo",
+    "difficulty": "easy",
+    "category": "appliances"
   },
   {
     "language_code": "FR",
     "concept": "dog",
     "word": "chien",
-    "prompt": "Generate synonyms for the noun \"chien\" in FR. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "canidé"
-    ],
-    "optional_synonyms": [
-      "toutou"
-    ]
+    "candidates": ["canidé", "chapeau", "sac", "bonheur", "réfrigérateur", "tigre"],
+    "synonym": "canidé",
+    "difficulty": "medium",
+    "category": "animals"
   },
   {
     "language_code": "ES",
     "concept": "hat",
     "word": "sombrero",
-    "prompt": "Generate synonyms for the noun \"sombrero\" in ES. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "gorro"
-    ],
-    "optional_synonyms": [
-      "cachucha"
-    ]
+    "candidates": ["gorro", "bolsa", "silla", "felicidad", "tomate", "refrigerador"],
+    "synonym": "gorro",
+    "difficulty": "easy",
+    "category": "clothing"
   },
   {
     "language_code": "ES",
     "concept": "bag",
     "word": "bolsa",
-    "prompt": "Generate synonyms for the noun \"bolsa\" in ES. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "bolso"
-    ],
-    "optional_synonyms": [
-      "saco"
-    ]
+    "candidates": ["bolso", "sombrero", "silla", "felicidad", "tomate", "perro"],
+    "synonym": "bolso",
+    "difficulty": "easy",
+    "category": "containers"
   },
   {
     "language_code": "ES",
     "concept": "chair",
     "word": "silla",
-    "prompt": "Generate synonyms for the noun \"silla\" in ES. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "asiento"
-    ],
-    "optional_synonyms": []
+    "candidates": ["asiento", "sombrero", "bolsa", "felicidad", "refrigerador", "perro"],
+    "synonym": "asiento",
+    "difficulty": "easy",
+    "category": "furniture"
   },
   {
     "language_code": "ES",
     "concept": "happiness",
     "word": "felicidad",
-    "prompt": "Generate synonyms for the noun \"felicidad\" in ES. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "alegría"
-    ],
-    "optional_synonyms": [
-      "dicha",
-      "gozo"
-    ]
+    "candidates": ["alegría", "sombrero", "bolsa", "silla", "tomate", "tigre"],
+    "synonym": "alegría",
+    "difficulty": "easy",
+    "category": "emotions"
   },
   {
     "language_code": "ES",
     "concept": "tomato",
     "word": "tomate",
-    "prompt": "Generate synonyms for the noun \"tomate\" in ES. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "jitomate"
-    ],
-    "optional_synonyms": []
+    "candidates": ["jitomate", "sombrero", "silla", "felicidad", "refrigerador", "perro"],
+    "synonym": "jitomate",
+    "difficulty": "medium",
+    "category": "food"
   },
   {
     "language_code": "ES",
     "concept": "refrigerator",
     "word": "refrigerador",
-    "prompt": "Generate synonyms for the noun \"refrigerador\" in ES. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "nevera"
-    ],
-    "optional_synonyms": [
-      "frigorífico",
-      "heladera"
-    ]
-  },
-  {
-    "language_code": "ES",
-    "concept": "tiger",
-    "word": "tigre",
-    "prompt": "Generate synonyms for the noun \"tigre\" in ES. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [],
-    "optional_synonyms": []
+    "candidates": ["nevera", "sombrero", "bolsa", "felicidad", "tomate", "perro"],
+    "synonym": "nevera",
+    "difficulty": "easy",
+    "category": "appliances"
   },
   {
     "language_code": "ES",
     "concept": "dog",
     "word": "perro",
-    "prompt": "Generate synonyms for the noun \"perro\" in ES. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "can"
-    ],
-    "optional_synonyms": [
-      "chucho"
-    ]
+    "candidates": ["can", "sombrero", "bolsa", "silla", "tomate", "tigre"],
+    "synonym": "can",
+    "difficulty": "medium",
+    "category": "animals"
   },
   {
     "language_code": "LT",
     "concept": "hat",
     "word": "skrybėlė",
-    "prompt": "Generate synonyms for the noun \"skrybėlė\" in LT. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "kepurė"
-    ],
-    "optional_synonyms": []
+    "candidates": ["kepurė", "maišelis", "kėdė", "laimė", "šaldytuvas", "šuo"],
+    "synonym": "kepurė",
+    "difficulty": "easy",
+    "category": "clothing"
   },
   {
     "language_code": "LT",
     "concept": "bag",
     "word": "maišelis",
-    "prompt": "Generate synonyms for the noun \"maišelis\" in LT. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "krepšys"
-    ],
-    "optional_synonyms": [
-      "tašė"
-    ]
+    "candidates": ["krepšys", "skrybėlė", "kėdė", "laimė", "pomidoras", "šuo"],
+    "synonym": "krepšys",
+    "difficulty": "easy",
+    "category": "containers"
   },
   {
     "language_code": "LT",
     "concept": "chair",
     "word": "kėdė",
-    "prompt": "Generate synonyms for the noun \"kėdė\" in LT. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "sėdynė"
-    ],
-    "optional_synonyms": []
+    "candidates": ["sėdynė", "skrybėlė", "maišelis", "laimė", "šaldytuvas", "tigras"],
+    "synonym": "sėdynė",
+    "difficulty": "easy",
+    "category": "furniture"
   },
   {
     "language_code": "LT",
     "concept": "happiness",
     "word": "laimė",
-    "prompt": "Generate synonyms for the noun \"laimė\" in LT. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "džiaugsmas"
-    ],
-    "optional_synonyms": [
-      "palaima"
-    ]
-  },
-  {
-    "language_code": "LT",
-    "concept": "tomato",
-    "word": "pomidoras",
-    "prompt": "Generate synonyms for the noun \"pomidoras\" in LT. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [],
-    "optional_synonyms": []
+    "candidates": ["džiaugsmas", "skrybėlė", "maišelis", "kėdė", "pomidoras", "šuo"],
+    "synonym": "džiaugsmas",
+    "difficulty": "easy",
+    "category": "emotions"
   },
   {
     "language_code": "LT",
     "concept": "refrigerator",
     "word": "šaldytuvas",
-    "prompt": "Generate synonyms for the noun \"šaldytuvas\" in LT. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "šaldiklis"
-    ],
-    "optional_synonyms": []
-  },
-  {
-    "language_code": "LT",
-    "concept": "tiger",
-    "word": "tigras",
-    "prompt": "Generate synonyms for the noun \"tigras\" in LT. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [],
-    "optional_synonyms": []
+    "candidates": ["šaldiklis", "skrybėlė", "laimė", "pomidoras", "tigras", "šuo"],
+    "synonym": "šaldiklis",
+    "difficulty": "easy",
+    "category": "appliances"
   },
   {
     "language_code": "LT",
     "concept": "dog",
     "word": "šuo",
-    "prompt": "Generate synonyms for the noun \"šuo\" in LT. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "šunelis"
-    ],
-    "optional_synonyms": []
+    "candidates": ["šunelis", "skrybėlė", "kėdė", "laimė", "šaldytuvas", "tigras"],
+    "synonym": "šunelis",
+    "difficulty": "easy",
+    "category": "animals"
   },
   {
     "language_code": "UK",
     "concept": "hat",
     "word": "капелюх",
-    "prompt": "Generate synonyms for the noun \"капелюх\" in UK. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "шапка"
-    ],
-    "optional_synonyms": []
+    "candidates": ["шапка", "сумка", "стілець", "щастя", "холодильник", "собака"],
+    "synonym": "шапка",
+    "difficulty": "easy",
+    "category": "clothing"
   },
   {
     "language_code": "UK",
     "concept": "bag",
     "word": "сумка",
-    "prompt": "Generate synonyms for the noun \"сумка\" in UK. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "торба"
-    ],
-    "optional_synonyms": [
-      "пакунок"
-    ]
+    "candidates": ["торба", "капелюх", "стілець", "щастя", "помідор", "собака"],
+    "synonym": "торба",
+    "difficulty": "easy",
+    "category": "containers"
   },
   {
     "language_code": "UK",
     "concept": "chair",
     "word": "стілець",
-    "prompt": "Generate synonyms for the noun \"стілець\" in UK. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "сидіння"
-    ],
-    "optional_synonyms": []
+    "candidates": ["сидіння", "капелюх", "сумка", "щастя", "холодильник", "тигр"],
+    "synonym": "сидіння",
+    "difficulty": "easy",
+    "category": "furniture"
   },
   {
     "language_code": "UK",
     "concept": "happiness",
     "word": "щастя",
-    "prompt": "Generate synonyms for the noun \"щастя\" in UK. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "радість"
-    ],
-    "optional_synonyms": [
-      "втіха"
-    ]
+    "candidates": ["радість", "капелюх", "сумка", "стілець", "помідор", "собака"],
+    "synonym": "радість",
+    "difficulty": "easy",
+    "category": "emotions"
   },
   {
     "language_code": "UK",
     "concept": "tomato",
     "word": "помідор",
-    "prompt": "Generate synonyms for the noun \"помідор\" in UK. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "томат"
-    ],
-    "optional_synonyms": []
+    "candidates": ["томат", "капелюх", "стілець", "щастя", "холодильник", "собака"],
+    "synonym": "томат",
+    "difficulty": "easy",
+    "category": "food"
   },
   {
     "language_code": "UK",
     "concept": "refrigerator",
     "word": "холодильник",
-    "prompt": "Generate synonyms for the noun \"холодильник\" in UK. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "холодильна шафа"
-    ],
-    "optional_synonyms": [
-      "рефрижератор"
-    ]
-  },
-  {
-    "language_code": "UK",
-    "concept": "tiger",
-    "word": "тигр",
-    "prompt": "Generate synonyms for the noun \"тигр\" in UK. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [],
-    "optional_synonyms": []
+    "candidates": ["холодильна шафа", "капелюх", "сумка", "щастя", "помідор", "тигр"],
+    "synonym": "холодильна шафа",
+    "difficulty": "easy",
+    "category": "appliances"
   },
   {
     "language_code": "UK",
     "concept": "dog",
     "word": "собака",
-    "prompt": "Generate synonyms for the noun \"собака\" in UK. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "пес"
-    ],
-    "optional_synonyms": [
-      "собака"
-    ]
+    "candidates": ["пес", "капелюх", "сумка", "щастя", "холодильник", "тигр"],
+    "synonym": "пес",
+    "difficulty": "easy",
+    "category": "animals"
   },
   {
     "language_code": "BN",
     "concept": "hat",
     "word": "টুপি",
-    "prompt": "Generate synonyms for the noun \"টুপি\" in BN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "মাথার টুপি"
-    ],
-    "optional_synonyms": []
+    "candidates": ["মাথার টুপি", "ব্যাগ", "চেয়ার", "সুখ", "ফ্রিজ", "কুকুর"],
+    "synonym": "মাথার টুপি",
+    "difficulty": "easy",
+    "category": "clothing"
   },
   {
     "language_code": "BN",
     "concept": "bag",
     "word": "ব্যাগ",
-    "prompt": "Generate synonyms for the noun \"ব্যাগ\" in BN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "থলে"
-    ],
-    "optional_synonyms": [
-      "ঝোলা"
-    ]
+    "candidates": ["থলে", "টুপি", "চেয়ার", "সুখ", "টমেটো", "কুকুর"],
+    "synonym": "থলে",
+    "difficulty": "easy",
+    "category": "containers"
   },
   {
     "language_code": "BN",
     "concept": "chair",
     "word": "চেয়ার",
-    "prompt": "Generate synonyms for the noun \"চেয়ার\" in BN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "আসন"
-    ],
-    "optional_synonyms": []
+    "candidates": ["আসন", "টুপি", "ব্যাগ", "সুখ", "ফ্রিজ", "বাঘ"],
+    "synonym": "আসন",
+    "difficulty": "easy",
+    "category": "furniture"
   },
   {
     "language_code": "BN",
     "concept": "happiness",
     "word": "সুখ",
-    "prompt": "Generate synonyms for the noun \"সুখ\" in BN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "আনন্দ"
-    ],
-    "optional_synonyms": [
-      "প্রসন্নতা"
-    ]
-  },
-  {
-    "language_code": "BN",
-    "concept": "tomato",
-    "word": "টমেটো",
-    "prompt": "Generate synonyms for the noun \"টমেটো\" in BN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [],
-    "optional_synonyms": []
+    "candidates": ["আনন্দ", "টুপি", "ব্যাগ", "চেয়ার", "টমেটো", "বাঘ"],
+    "synonym": "আনন্দ",
+    "difficulty": "easy",
+    "category": "emotions"
   },
   {
     "language_code": "BN",
     "concept": "refrigerator",
     "word": "ফ্রিজ",
-    "prompt": "Generate synonyms for the noun \"ফ্রিজ\" in BN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "শীতলপেটি"
-    ],
-    "optional_synonyms": []
-  },
-  {
-    "language_code": "BN",
-    "concept": "tiger",
-    "word": "বাঘ",
-    "prompt": "Generate synonyms for the noun \"বাঘ\" in BN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [],
-    "optional_synonyms": []
+    "candidates": ["শীতলপেটি", "টুপি", "সুখ", "টমেটো", "বাঘ", "কুকুর"],
+    "synonym": "শীতলপেটি",
+    "difficulty": "easy",
+    "category": "appliances"
   },
   {
     "language_code": "BN",
     "concept": "dog",
     "word": "কুকুর",
-    "prompt": "Generate synonyms for the noun \"কুকুর\" in BN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "শ্বান"
-    ],
-    "optional_synonyms": []
+    "candidates": ["শ্বান", "টুপি", "ব্যাগ", "সুখ", "ফ্রিজ", "বাঘ"],
+    "synonym": "শ্বান",
+    "difficulty": "medium",
+    "category": "animals"
   },
   {
     "language_code": "KN",
     "concept": "hat",
     "word": "ಟೋಪಿ",
-    "prompt": "Generate synonyms for the noun \"ಟೋಪಿ\" in KN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "ತಲೆಯ ಟೋಪಿ"
-    ],
-    "optional_synonyms": []
+    "candidates": ["ತಲೆಯ ಟೋಪಿ", "ಚೀಲ", "ಕುರ್ಚಿ", "ಸಂತೋಷ", "ಫ್ರಿಜ್", "ನಾಯಿ"],
+    "synonym": "ತಲೆಯ ಟೋಪಿ",
+    "difficulty": "easy",
+    "category": "clothing"
   },
   {
     "language_code": "KN",
     "concept": "bag",
     "word": "ಚೀಲ",
-    "prompt": "Generate synonyms for the noun \"ಚೀಲ\" in KN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "ಚೀಲಿಕೆ"
-    ],
-    "optional_synonyms": []
+    "candidates": ["ಚೀಲಿಕೆ", "ಟೋಪಿ", "ಕುರ್ಚಿ", "ಸಂತೋಷ", "ಟೊಮ್ಯಾಟೊ", "ನಾಯಿ"],
+    "synonym": "ಚೀಲಿಕೆ",
+    "difficulty": "easy",
+    "category": "containers"
   },
   {
     "language_code": "KN",
     "concept": "chair",
     "word": "ಕುರ್ಚಿ",
-    "prompt": "Generate synonyms for the noun \"ಕುರ್ಚಿ\" in KN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "ಆಸನ"
-    ],
-    "optional_synonyms": []
+    "candidates": ["ಆಸನ", "ಟೋಪಿ", "ಚೀಲ", "ಸಂತೋಷ", "ಫ್ರಿಜ್", "ಹುಲಿ"],
+    "synonym": "ಆಸನ",
+    "difficulty": "easy",
+    "category": "furniture"
   },
   {
     "language_code": "KN",
     "concept": "happiness",
     "word": "ಸಂತೋಷ",
-    "prompt": "Generate synonyms for the noun \"ಸಂತೋಷ\" in KN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "ಆನಂದ"
-    ],
-    "optional_synonyms": [
-      "ಹರ್ಷ"
-    ]
-  },
-  {
-    "language_code": "KN",
-    "concept": "tomato",
-    "word": "ಟೊಮ್ಯಾಟೊ",
-    "prompt": "Generate synonyms for the noun \"ಟೊಮ್ಯಾಟೊ\" in KN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [],
-    "optional_synonyms": []
+    "candidates": ["ಆನಂದ", "ಟೋಪಿ", "ಚೀಲ", "ಕುರ್ಚಿ", "ಟೊಮ್ಯಾಟೊ", "ನಾಯಿ"],
+    "synonym": "ಆನಂದ",
+    "difficulty": "easy",
+    "category": "emotions"
   },
   {
     "language_code": "KN",
     "concept": "refrigerator",
     "word": "ಫ್ರಿಜ್",
-    "prompt": "Generate synonyms for the noun \"ಫ್ರಿಜ್\" in KN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "ಶೀತಲಪೆಟ್ಟಿಗೆ"
-    ],
-    "optional_synonyms": []
-  },
-  {
-    "language_code": "KN",
-    "concept": "tiger",
-    "word": "ಹುಲಿ",
-    "prompt": "Generate synonyms for the noun \"ಹುಲಿ\" in KN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [],
-    "optional_synonyms": []
+    "candidates": ["ಶೀತಲಪೆಟ್ಟಿಗೆ", "ಟೋಪಿ", "ಸಂತೋಷ", "ಟೊಮ್ಯಾಟೊ", "ಹುಲಿ", "ನಾಯಿ"],
+    "synonym": "ಶೀತಲಪೆಟ್ಟಿಗೆ",
+    "difficulty": "easy",
+    "category": "appliances"
   },
   {
     "language_code": "KN",
     "concept": "dog",
     "word": "ನಾಯಿ",
-    "prompt": "Generate synonyms for the noun \"ನಾಯಿ\" in KN. Return JSON with key \"synonyms\" as an array of words in the same language. If there are no true common-usage synonyms, return an empty array.",
-    "mandatory_synonyms": [
-      "ಶ್ವಾನ"
-    ],
-    "optional_synonyms": []
+    "candidates": ["ಶ್ವಾನ", "ಟೋಪಿ", "ಚೀಲ", "ಸಂತೋಷ", "ಫ್ರಿಜ್", "ಹುಲಿ"],
+    "synonym": "ಶ್ವಾನ",
+    "difficulty": "medium",
+    "category": "animals"
   }
 ]
