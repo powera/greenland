@@ -4,6 +4,7 @@
 
 import datetime
 import json
+import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import (
@@ -26,6 +27,7 @@ from benchmarks.benchmark_constants import BENCHMARKS_DB_PATH, BENCHMARKS_POSTGR
 
 # Cache for PostgreSQL engines to avoid creating multiple connection pools.
 _postgres_engine_cache: Dict[str, Engine] = {}
+logger = logging.getLogger(__name__)
 
 
 class Base(DeclarativeBase):
@@ -124,38 +126,59 @@ def create_postgres_session(postgres_url: str):
         SQLAlchemy session
     """
     if postgres_url not in _postgres_engine_cache:
-        engine = create_engine(
-            postgres_url,
-            echo=False,
-            pool_pre_ping=True,
-            pool_recycle=3600,
-        )
-
-        # PgBouncer (Supabase pooler) silently drops the options=
-        # search_path parameter from connection URLs, so we must set
-        # search_path explicitly on every new connection.
-        schema = BENCHMARKS_POSTGRES_SCHEMA
-
-        @event.listens_for(engine, "connect")
-        def _set_search_path(dbapi_conn: Any, connection_record: Any) -> None:
-            cursor = dbapi_conn.cursor()
-            cursor.execute(f"SET search_path TO {schema}")
-            cursor.close()
-
-        # Ensure the benchmarks schema exists before creating tables.
-        with engine.connect() as conn:
-            conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
-            conn.commit()
-
-        # Import benchmarks models so all ORM classes are registered with
-        # Base before create_all (Benchmark, Question, Run, RunDetail).
-        import benchmarks.datastore.benchmarks  # noqa: F401
-
-        Base.metadata.create_all(engine)
-        _postgres_engine_cache[postgres_url] = engine
+        _postgres_engine_cache[postgres_url] = _initialize_postgres_engine(postgres_url)
+    else:
+        try:
+            _probe_postgres_engine(_postgres_engine_cache[postgres_url])
+        except SQLAlchemyError:
+            logger.warning(
+                "Cached PostgreSQL engine health check failed; disposing pool and retrying with a new engine.",
+                exc_info=True,
+            )
+            _postgres_engine_cache[postgres_url].dispose()
+            _postgres_engine_cache[postgres_url] = _initialize_postgres_engine(postgres_url)
 
     session_factory = sessionmaker(bind=_postgres_engine_cache[postgres_url])
     return session_factory()
+
+
+def _probe_postgres_engine(engine: Engine) -> None:
+    """Run a quick connectivity probe to detect dead pooled connections."""
+    with engine.connect() as conn:
+        conn.execute(text("SELECT 1"))
+
+
+def _initialize_postgres_engine(postgres_url: str) -> Engine:
+    """Create and initialize a PostgreSQL engine for benchmarks storage."""
+    engine = create_engine(
+        postgres_url,
+        echo=False,
+        pool_pre_ping=True,
+        pool_recycle=3600,
+    )
+
+    # PgBouncer (Supabase pooler) silently drops the options=
+    # search_path parameter from connection URLs, so we must set
+    # search_path explicitly on every new connection.
+    schema = BENCHMARKS_POSTGRES_SCHEMA
+
+    @event.listens_for(engine, "connect")
+    def _set_search_path(dbapi_conn: Any, connection_record: Any) -> None:
+        cursor = dbapi_conn.cursor()
+        cursor.execute(f"SET search_path TO {schema}")
+        cursor.close()
+
+    # Ensure the benchmarks schema exists before creating tables.
+    with engine.connect() as conn:
+        conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
+        conn.commit()
+
+    # Import benchmarks models so all ORM classes are registered with
+    # Base before create_all (Benchmark, Question, Run, RunDetail).
+    import benchmarks.datastore.benchmarks  # noqa: F401
+
+    Base.metadata.create_all(engine)
+    return engine
 
 
 def create_session_from_config(config):
