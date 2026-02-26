@@ -1,80 +1,40 @@
 # Benchmarks
 
-Framework for evaluating language model performance on linguistic and cognitive tasks.
+`src/benchmarks` provides Greenland's benchmark harness for evaluating LLMs on
+linguistic and reasoning-oriented tasks.
 
-## Directory Structure
+## What it includes
 
-```
+- **Question generation** from benchmark datasets.
+- **Runner execution** against local or remote model backends.
+- **Scoring + persistence** into SQLite via the datastore layer.
+- **Web dashboard** for browsing runs and comparing outcomes.
+- **Exemplars workflow** for qualitative model comparisons.
+
+## Directory overview
+
+```text
 benchmarks/
-├── lib/                    # Core benchmark framework
-│   ├── generators/         # Question generation for each benchmark
-│   ├── runners/            # Benchmark execution and scoring
-│   ├── exemplars/          # Qualitative model comparison framework
-│   └── utils/              # Shared base classes and data models
-├── server/                 # Flask web UI for viewing results
-├── datastore/              # Database access layer
-├── schema/                 # SQLAlchemy models and migrations
-├── 00XX_*/                 # Benchmark-specific test data
-├── benchmark_constants.py  # Paths and configuration
-└── config.py               # Server configuration
+├── lib/               # Framework core: generators, runners, utilities
+├── datastore/         # Database access and persistence helpers
+├── schema/            # DB schema/model setup scripts
+├── server/            # Flask UI for run/result browsing
+├── 00XX_*/            # Benchmark-specific source datasets
+└── run_benchmark.py   # Main CLI entry point
 ```
 
-## Available Benchmarks
-
-| Code | Name | Description |
-|------|------|-------------|
-| 0015 | Spell Check | Identify misspelled words |
-| 0016 | Antonym | Identify antonyms from candidates |
-| 0020 | Definitions | Match words to definitions |
-| 0022 | Unit Conversion | Convert between measurement units |
-| 0032 | Part of Speech | Identify word grammatical roles |
-| 0033 | Lemma | Find base/dictionary form of words |
-| 0061 | English to IPA | Convert to phonetic transcription |
-| 0062 | Sentence Decomposition | Generate multilingual token-level sentence decomposition JSON |
-
-
-## Numbering and roadmap
-
-See `BENCHMARK_INDEX.md` for the maintained benchmark inventory, numbering guidance, and proposed unimplemented benchmark slots through `0200`.
-
-## Usage
-
-### Running a Benchmark
-
-```python
-from benchmarks.lib.utils.factory import get_runner
-from benchmarks.lib.utils.data_models import BenchmarkMetadata
-
-runner = get_runner("0016_antonym", model="gpt-4o-mini")
-run_id = runner.run()
-```
-
-### Generating Questions
-
-```python
-from benchmarks.lib.utils.factory import get_generator
-
-generator = get_generator("0016_antonym")
-questions = list(generator.generate_questions_iter(count=10))
-```
-
-### Web Interface
+## Common commands
 
 ```bash
-./launch_server.sh
-# Visit http://localhost:5556/dashboard
+# One-time setup
+PYTHONPATH=src python src/benchmarks/schema/load_schema.py
+PYTHONPATH=src python src/benchmarks/schema/create_models.py
+
+# Generate questions for a benchmark
+PYTHONPATH=src python src/benchmarks/run_benchmark.py generate 0016_antonym
+
+# Run a benchmark against a model
+PYTHONPATH=src python src/benchmarks/run_benchmark.py run 0016_antonym gpt-4o-mini
 ```
 
-## Architecture
-
-- **Generators** create benchmark questions using file, local, or LLM strategies
-- **Runners** execute benchmarks against models and store results
-- **Exemplars** compare model responses qualitatively (no scoring)
-
-Each benchmark has a generator in `lib/generators/` and runner in `lib/runners/`.
-Base classes in `lib/utils/` provide shared functionality.
-
-## Database
-
-Results stored in `schema/benchmarks.db` (SQLite). The datastore layer
-provides CRUD operations for benchmarks, questions, runs, and models.
+See `BENCHMARK_INDEX.md` for benchmark numbering/inventory and `API.md` for CLI details.
