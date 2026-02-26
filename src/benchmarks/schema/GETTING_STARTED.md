@@ -38,7 +38,7 @@ be run. Questions are generated from JSON files in each benchmark directory.
 # Generate for a specific benchmark
 PYTHONPATH=src python src/benchmarks/run_benchmark.py generate 0016_antonym
 
-# Available benchmarks: 0016_antonym, 0020_definitions, 0051_pinyin_letters, 0062_sentence_decomposition
+# Available benchmarks: 0016_antonym, 0020_definitions, 0018_pinyin_letters, 0062_sentence_decomposition
 ```
 
 ### 4. Run a benchmark
@@ -76,7 +76,7 @@ PYTHONPATH=src python src/benchmarks/schema/load_schema.py
 PYTHONPATH=src python src/benchmarks/schema/create_models.py
 PYTHONPATH=src python src/benchmarks/run_benchmark.py generate 0016_antonym
 PYTHONPATH=src python src/benchmarks/run_benchmark.py generate 0020_definitions
-PYTHONPATH=src python src/benchmarks/run_benchmark.py generate 0051_pinyin_letters
+PYTHONPATH=src python src/benchmarks/run_benchmark.py generate 0018_pinyin_letters
 PYTHONPATH=src python src/benchmarks/run_benchmark.py generate 0062_sentence_decomposition
 ```
 

@@ -14,7 +14,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-BENCHMARK_CODE = "0111_synonyms"
+BENCHMARK_CODE = "0017_synonyms"
 
 
 @runner(BENCHMARK_CODE)

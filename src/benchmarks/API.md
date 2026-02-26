@@ -96,7 +96,7 @@ generator.load_to_database()
 |------|------|
 | `0016_antonym` | Antonym Identification |
 | `0020_definitions` | Word Definitions |
-| `0051_pinyin_letters` | Pinyin Letter Count |
+| `0018_pinyin_letters` | Pinyin Letter Count |
 | `0062_sentence_decomposition` | Sentence Decomposition |
 
 ## Model codenames

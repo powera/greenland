@@ -42,7 +42,7 @@ SAMPLE_SENTENCES = [
 
 # Define benchmark metadata
 BENCHMARK_METADATA = BenchmarkMetadata(
-    code="0051_pinyin_letters",
+    code="0018_pinyin_letters",
     name="Pinyin Letter Count",
     description="A benchmark to evaluate a model's ability to count how many times a specific letter appears in the Pinyin representation of a Chinese sentence.",
     category="token processing",
@@ -52,7 +52,7 @@ BENCHMARK_METADATA = BenchmarkMetadata(
 register_benchmark_metadata(BENCHMARK_METADATA)
 
 
-@generator("0051_pinyin_letters")
+@generator("0018_pinyin_letters")
 class PinyinLetterCountGenerator(BenchmarkGenerator):
     """Generator for Pinyin letter count benchmark questions."""
 
