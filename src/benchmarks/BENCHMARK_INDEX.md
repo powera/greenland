@@ -37,6 +37,7 @@ This document captures the current benchmark lineup and numbering through `0299`
 | 0027 | `geometry` | Geometry | simple math | implemented |
 | 0031 | `definitions` | Definitions | word processing | implemented |
 | 0032 | `part_of_speech` | Part of Speech | word processing | implemented |
+| 0033 | `plural` | Plural Generation | word processing | implemented |
 | 0061 | `word_to_ipa` | Word to IPA | token processing | implemented |
 | 0062 | `sentence_decomposition` | Sentence Decomposition | word processing | implemented |
 | 0101 | `translation_en_fr` | Translation en_fr | translation | implemented |

@@ -256,6 +256,28 @@ class PartOfSpeechBenchmark:
     pass
 
 
+from benchmarks.lib.generators.plural_generator import PluralGenerator
+from benchmarks.lib.runners.plural_runner import PluralRunner
+
+
+@benchmark(
+    code="0033_plural",
+    name="Plural Generation",
+    description="""
+           A benchmark to evaluate a model's ability to produce the correct plural
+           form of English nouns, covering regular, -es, -ies, -ves, irregular,
+           invariant, and Latin/Greek pluralization rules.""",
+    category="word processing",
+)
+class PluralBenchmark:
+    """Module container for plural generation benchmark."""
+
+    pass
+
+
+register_generator("0033_plural", PluralGenerator)
+register_runner("0033_plural", PluralRunner)
+
 from benchmarks.lib.generators.lemma_generator import LemmaGenerator
 from benchmarks.lib.runners.lemma_runner import LemmaRunner
 
