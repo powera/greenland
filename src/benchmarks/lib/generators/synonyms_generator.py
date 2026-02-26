@@ -3,6 +3,7 @@
 """Generator for multilingual noun synonym identification benchmark questions."""
 
 import logging
+import random
 from typing import Any, Iterator
 
 from benchmarks.lib.utils.base import BenchmarkGenerator
@@ -53,16 +54,19 @@ class SynonymsGenerator(BenchmarkGenerator):
 
         for sample in samples:
             language_code = sample["language_code"]
+            language_name = sample.get("language_name", language_code)
             concept = sample["concept"]
             word = sample["word"]
-            candidates = sample["candidates"]
+            candidates = list(sample["candidates"])
             synonym = sample["synonym"]
             difficulty = Difficulty(sample.get("difficulty", "medium"))
             category = sample.get("category", concept)
 
+            random.shuffle(candidates)
+
             yield BenchmarkQuestion(
                 question_text=(
-                    f'Which of these words is a synonym of "{word}" in {language_code}:'
+                    f'Which of these words is a synonym of "{word}" in {language_name}:'
                     f" {', '.join(candidates)}"
                 ),
                 answer_type=AnswerType.JSON,
