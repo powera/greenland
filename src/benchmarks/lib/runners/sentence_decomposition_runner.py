@@ -9,7 +9,9 @@ from typing import Any, Dict, List, Optional, Tuple
 from benchmarks.lib.runners.partial_credit_runner import PartialCreditRunner
 from benchmarks.lib.utils.factory import runner
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -42,7 +44,7 @@ class SentenceDecompositionRunner(PartialCreditRunner):
         import re
 
         # Extract target language and translation (the most important parts)
-        target_lang_match = re.search(r'Target language: (\w+)', raw_prompt)
+        target_lang_match = re.search(r"Target language: (\w+)", raw_prompt)
         target_translation_match = re.search(r'Target translation: "(.*?)"', raw_prompt)
         source_match = re.search(r'Source sentence \((\w+)\): "(.*?)"', raw_prompt)
 
@@ -115,7 +117,9 @@ Important rules:
 
     def _normalize_language_entry(self, item: Dict[str, Any]) -> Dict[str, Any]:
         normalized = self._normalize(item)
-        words: List[Dict[str, Any]] = [row for row in normalized.get("words", []) if isinstance(row, dict)]
+        words: List[Dict[str, Any]] = [
+            row for row in normalized.get("words", []) if isinstance(row, dict)
+        ]
         words_sorted = sorted(words, key=lambda row: row.get("position", 0))
         normalized["words"] = words_sorted
         normalized["word_count"] = len(words_sorted)
@@ -126,10 +130,15 @@ Important rules:
         return word_score
 
     def _score_word_with_details(
-        self, expected_word: Dict[str, Any], model_word: Dict[str, Any], include_position: bool = True
+        self,
+        expected_word: Dict[str, Any],
+        model_word: Dict[str, Any],
+        include_position: bool = True,
     ) -> Tuple[float, Dict[str, Any]]:
         score = 0.0
-        fields_to_score = [field for field in self.WORD_FIELD_WEIGHTS if include_position or field != "position"]
+        fields_to_score = [
+            field for field in self.WORD_FIELD_WEIGHTS if include_position or field != "position"
+        ]
         total = sum(self.WORD_FIELD_WEIGHTS[field] for field in fields_to_score)
         if total <= 0:
             return 0.0, {"fields": {}, "anchor_match": False, "word_score": 0.0}
@@ -203,13 +212,24 @@ Important rules:
         if role in low_content_roles:
             return True
 
-        if grammatical_form.endswith("/base") and role not in {"noun", "verb", "adjective", "adverb", "pronoun", "numeral"}:
+        if grammatical_form.endswith("/base") and role not in {
+            "noun",
+            "verb",
+            "adjective",
+            "adverb",
+            "pronoun",
+            "numeral",
+        }:
             return True
 
         return False
 
     def _insertion_penalty(self, model_word: Dict[str, Any]) -> float:
-        return self.LOW_CONTENT_INSERTION_PENALTY if self._is_low_content_token(model_word) else self.DEFAULT_INSERTION_PENALTY
+        return (
+            self.LOW_CONTENT_INSERTION_PENALTY
+            if self._is_low_content_token(model_word)
+            else self.DEFAULT_INSERTION_PENALTY
+        )
 
     def _align_words(
         self, expected_words: List[Dict[str, Any]], model_words: List[Dict[str, Any]]
@@ -218,7 +238,9 @@ Important rules:
         n = len(expected_words)
         m = len(model_words)
         dp = [[0.0 for _ in range(m + 1)] for _ in range(n + 1)]
-        back: List[List[Tuple[Optional[int], Optional[int]]]] = [[(None, None) for _ in range(m + 1)] for _ in range(n + 1)]
+        back: List[List[Tuple[Optional[int], Optional[int]]]] = [
+            [(None, None) for _ in range(m + 1)] for _ in range(n + 1)
+        ]
 
         for i in range(1, n + 1):
             dp[i][0] = dp[i - 1][0] - self.DELETION_PENALTY
@@ -230,7 +252,9 @@ Important rules:
 
         for i in range(1, n + 1):
             for j in range(1, m + 1):
-                match_score, _ = self._score_word_with_details(expected_words[i - 1], model_words[j - 1], include_position=False)
+                match_score, _ = self._score_word_with_details(
+                    expected_words[i - 1], model_words[j - 1], include_position=False
+                )
                 options = [
                     (dp[i - 1][j - 1] + match_score, (i - 1, j - 1)),
                     (dp[i - 1][j] - self.DELETION_PENALTY, (i - 1, j)),
@@ -257,7 +281,9 @@ Important rules:
         alignment.reverse()
         return alignment, dp[n][m]
 
-    def _score_language_entry_with_breakdown(self, expected: Dict[str, Any], model: Dict[str, Any]) -> Tuple[float, Dict[str, Any]]:
+    def _score_language_entry_with_breakdown(
+        self, expected: Dict[str, Any], model: Dict[str, Any]
+    ) -> Tuple[float, Dict[str, Any]]:
         breakdown: Dict[str, Any] = {
             "language_match": False,
             "translation_match": False,
@@ -319,7 +345,9 @@ Important rules:
                     "matched": model_word is not None,
                 }
                 if model_word is not None:
-                    word_score, word_breakdown = self._score_word_with_details(expected_word, model_word)
+                    word_score, word_breakdown = self._score_word_with_details(
+                        expected_word, model_word
+                    )
                     token_score += word_score
                     token_detail.update(word_breakdown)
                 else:
@@ -329,7 +357,9 @@ Important rules:
             if len(expected_words) == len(model_words):
                 breakdown["structure_match"] = True
                 breakdown["structure_points"] = 0.05
-            elif inserted_tokens and all(self._is_low_content_token(word) for word in inserted_tokens):
+            elif inserted_tokens and all(
+                self._is_low_content_token(word) for word in inserted_tokens
+            ):
                 breakdown["structure_points"] = 0.03
                 breakdown["deductions"].append("minor extra low-content token(s) (-2)")
             else:
@@ -423,7 +453,6 @@ Important rules:
         score, _ = self._score_language_entry_with_breakdown(expected_entry, model_entry)
         return int(round(score * 100))
 
-
     def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
         if hasattr(response, "structured_data") and response.structured_data:
             model_answer = response.structured_data
@@ -431,7 +460,6 @@ Important rules:
             model_answer = response.response_text
 
         return {
-            "prompt": question_data.get("question_text", ""),
             # Keep legacy keys so existing run views can render reliably.
             "response": model_answer,
             "expected": question_data.get("correct_answer"),
@@ -439,13 +467,13 @@ Important rules:
             "model_answer": model_answer,
             "expected_answer": question_data.get("correct_answer"),
             "is_correct": is_correct,
-            "response_payload": model_answer,
-            "question_snapshot": question_data,
             "scoring_version": "0062-v3-dp-alignment",
             "scoring_breakdown": self._build_scoring_breakdown(question_data, model_answer),
         }
 
-    def _build_scoring_breakdown(self, question_data: Dict[str, Any], model_answer: Any) -> Optional[Dict[str, Any]]:
+    def _build_scoring_breakdown(
+        self, question_data: Dict[str, Any], model_answer: Any
+    ) -> Optional[Dict[str, Any]]:
         if not isinstance(model_answer, dict):
             return None
 

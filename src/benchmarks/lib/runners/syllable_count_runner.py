@@ -83,14 +83,12 @@ class SyllableCountRunner(BenchmarkRunner):
         """Build debug information for benchmark results."""
         if hasattr(response, "structured_data") and response.structured_data:
             return {
-                "prompt": question_data.get("question_text", ""),
                 "response": response.structured_data,
                 "expected": question_data.get("correct_answer"),
                 "is_correct": is_correct,
             }
         else:
             return {
-                "prompt": question_data.get("question_text", ""),
                 "response": response.response_text,
                 "expected": question_data.get("correct_answer"),
                 "is_correct": is_correct,

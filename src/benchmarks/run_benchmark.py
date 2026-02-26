@@ -175,8 +175,6 @@ def rescore_benchmark_runs(
             if not dry_run:
                 detail.score = rescored
                 if isinstance(debug_json, dict):
-                    debug_json.setdefault("response_payload", model_response)
-                    debug_json.setdefault("question_snapshot", question_data)
                     debug_json.setdefault("scoring_runner", runner.__class__.__name__)
                     detail.debug_json = json.dumps(debug_json)
 

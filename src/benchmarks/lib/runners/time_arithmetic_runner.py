@@ -63,7 +63,6 @@ class TimeArithmeticRunner(BenchmarkRunner):
     def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
         actual = _extract_time_string(response)
         return {
-            "prompt": question_data.get("question_text", ""),
             "response": actual,
             "expected": question_data.get("correct_answer"),
             "is_correct": is_correct,
