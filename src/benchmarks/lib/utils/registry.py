@@ -315,7 +315,7 @@ from benchmarks.lib.runners.pinyin_letter_count_runner import PinyinLetterCountR
 
 
 @benchmark(
-    code="0051_pinyin_letters",
+    code="0018_pinyin_letters",
     name="Pinyin Letter Count",
     description="""A benchmark to evaluate a model's ability to count
            how many times a specific letter appears in the Pinyin representation
@@ -485,7 +485,7 @@ from benchmarks.lib.runners.synonyms_runner import SynonymsRunner
 
 
 @benchmark(
-    code="0111_synonyms",
+    code="0017_synonyms",
     name="Multilingual Synonym Generation",
     description="""
            A benchmark to evaluate a model's ability to generate noun synonyms
@@ -499,8 +499,8 @@ class SynonymsBenchmark:
     pass
 
 
-register_generator("0111_synonyms", SynonymsGenerator)
-register_runner("0111_synonyms", SynonymsRunner)
+register_generator("0017_synonyms", SynonymsGenerator)
+register_runner("0017_synonyms", SynonymsRunner)
 
 
 @benchmark(

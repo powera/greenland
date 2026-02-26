@@ -17,7 +17,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-@runner("0051_pinyin_letters")
+@runner("0018_pinyin_letters")
 class PinyinLetterCountRunner(BenchmarkRunner):
     """Runner for Pinyin letter count benchmark."""
 

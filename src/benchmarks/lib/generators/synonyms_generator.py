@@ -22,7 +22,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-BENCHMARK_CODE = "0111_synonyms"
+BENCHMARK_CODE = "0017_synonyms"
 BENCHMARK_NAME = "Multilingual Synonym Generation"
 BENCHMARK_DESCRIPTION = (
     "Tests whether a model can generate synonyms for common nouns across multiple languages."

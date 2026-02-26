@@ -25,7 +25,9 @@ This document captures the current benchmark lineup and numbering through `0299`
 | 0013 | `vowel_count` | Vowel Count | token processing | implemented |
 | 0014 | `syllable_count` | Syllable Count | token processing | implemented |
 | 0015 | `spell_check` | Spell Check | word processing | implemented |
-| 0016 | `antonym` | Antonym Check | word processing | implemented |
+| 0016 | `antonym` | Antonym Identification | word processing | implemented |
+| 0017 | `synonyms` | Multilingual Synonym Generation | word processing | implemented |
+| 0018 | `pinyin_letters` | Pinyin Letter Count | token processing | implemented |
 | 0021 | `simple_arithmetic` | Simple Arithmetic | simple math | implemented |
 | 0022 | `unit_conversion` | Unit Conversion | simple math | implemented |
 | 0023 | `word_problems` | Math Word Problems | simple math | implemented |
@@ -35,13 +37,11 @@ This document captures the current benchmark lineup and numbering through `0299`
 | 0027 | `geometry` | Geometry | simple math | implemented |
 | 0031 | `definitions` | Definitions | word processing | implemented |
 | 0032 | `part_of_speech` | Part of Speech | word processing | implemented |
-| 0051 | `pinyin_letters` | Pinyin Letter Count | token processing | implemented |
 | 0061 | `word_to_ipa` | Word to IPA | token processing | implemented |
 | 0062 | `sentence_decomposition` | Sentence Decomposition | word processing | implemented |
 | 0108 | `translation_en_fr` | Translation en_fr | translation | implemented |
 | 0109 | `translation_en_zh` | Translation en_zh | translation | implemented |
 | 0110 | `translation_sw_ko` | Translation sw_ko | translation | implemented |
-| 0111 | `synonyms` | Multilingual Synonym Generation | word processing | implemented |
 | 0121 | `verb_forms` | Verb Forms | word processing | implemented |
 | 0122 | `lemma` | Lemma Identification | word processing | implemented |
 | 0130 | `validate_lemma_form` | Validate Lemma Form (lokys) | agent regression | implemented |
@@ -52,16 +52,6 @@ This document captures the current benchmark lineup and numbering through `0299`
 | 0153 | `book_author_match` | Book Author Match | general knowledge | implemented |
 | 0154 | `food_category_classification` | Food Category Classification | general knowledge | implemented |
 | 0155 | `historical_event_year` | Historical Event Year | general knowledge | implemented |
-
-## Numbering changes applied
-
-- `0033_lemma` → `0122_lemma`.
-- `0050_translation_en_fr` → `0108_translation_en_fr`.
-- `0050_translation_en_zh` → `0109_translation_en_zh`.
-- `0050_translation_sw_ko` → `0110_translation_sw_ko`.
-- `0111_synonyms` is now explicitly registered and listed as implemented.
-- `0035_simple_haystack` assets were removed from the repository.
-- `0020_definitions` → `0031_definitions` (002X reserved for basic math; 003X for word processing).
 
 ## Proposed unimplemented additions
 
@@ -95,7 +85,7 @@ consolidation is noted.
 | Benchmark A | Benchmark B | Overlap | Decision |
 |---|---|---|---|
 | `0032_part_of_speech` | `0062_sentence_decomposition` | **High** – decomposition explicitly outputs POS tags for every token, so 0032 is a strict subset of 0062. | Keep both: 0032 isolates the POS signal; 0062 tests holistic token-level annotation. Acceptable duplication of signal. |
-| `0016_antonym` | `0111_synonyms` | **Low-medium** – both probe lexical-semantic relationships, but in opposite directions and with different answer mechanics. | Keep both. |
+| `0016_antonym` | `0017_synonyms` | **Low-medium** – both probe lexical-semantic relationships, but in opposite directions and with different answer mechanics. | Keep both. |
 | `0122_lemma` | `0130_validate_lemma_form` | **Medium** – both involve lemmatization. 0122 is a production task; 0130 is a binary validation + correction task. | Keep both; they are distinct task types (generate vs. validate). |
 | `0108/0109/0110` (translation) | each other | **Medium** – identical methodology, different language pairs. | Keep all three; performance differences across language pairs are informative. |
 | `0021_simple_arithmetic` | `0024_percentage_math` | **Low** – both require arithmetic, but 0024 adds ratio and percent-change semantics. | Keep both. |
