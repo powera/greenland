@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 benchmark(
     "0033_plural",
-    "Plural Generation",
+    "English Plural Generation",
     "Tests ability to produce the correct plural form of English nouns, "
     "including regular, irregular, invariant, and Latin/Greek forms.",
     category="word processing",

@@ -262,7 +262,7 @@ from benchmarks.lib.runners.plural_runner import PluralRunner
 
 @benchmark(
     code="0033_plural",
-    name="Plural Generation",
+    name="English Plural Generation",
     description="""
            A benchmark to evaluate a model's ability to produce the correct plural
            form of English nouns, covering regular, -es, -ies, -ves, irregular,
