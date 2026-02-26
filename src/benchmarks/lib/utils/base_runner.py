@@ -186,6 +186,46 @@ class BenchmarkRunner:
             debug_json=json.dumps({"error": "Request timeout", "details": str(error)}),
         )
 
+    def _extract_error_text(self, result: BenchmarkResult) -> str:
+        """Extract a normalized error string from benchmark debug metadata."""
+        if not result.debug_json:
+            return ""
+        try:
+            payload = json.loads(result.debug_json)
+        except (TypeError, json.JSONDecodeError):
+            return ""
+        if not isinstance(payload, dict):
+            return ""
+        error = payload.get("error")
+        return str(error).lower() if error else ""
+
+    def _is_server_error(self, result: BenchmarkResult) -> bool:
+        """Return True for transport/server failures (but not unexpected-response errors)."""
+        error_text = self._extract_error_text(result)
+        if not error_text:
+            return False
+        if "unexpected response" in error_text:
+            return False
+        server_markers = [
+            "server error",
+            "error 5",
+            "http 5",
+            "bad gateway",
+            "service unavailable",
+            "gateway timeout",
+            "connection refused",
+            "connection aborted",
+            "connection reset",
+            "temporarily unavailable",
+            "request timeout",
+            "timed out",
+        ]
+        return any(marker in error_text for marker in server_markers)
+
+    def _is_successful_result(self, result: BenchmarkResult) -> bool:
+        """Return True when a question finished with a model response (correct or incorrect)."""
+        return bool(result.eval_msec > 0 and not self._extract_error_text(result))
+
     def calculate_score(self, results: List[BenchmarkResult]) -> int:
         """
         Calculate overall benchmark score from individual results.
@@ -326,6 +366,8 @@ class BenchmarkRunner:
             len(questions),
         )
         results = []
+        server_error_count = 0
+        aborted_for_server_errors = False
         for idx, question in enumerate(questions):
             logger.info(
                 "Processing question %d/%d: %s",
@@ -335,6 +377,34 @@ class BenchmarkRunner:
             )
             result = self.process_question(question)
             results.append(result)
+
+            if self._is_server_error(result):
+                server_error_count += 1
+                if server_error_count > 3:
+                    logger.error(
+                        "Aborting benchmark %s for model %s after %d server errors",
+                        self.metadata.code,
+                        self.model,
+                        server_error_count,
+                    )
+                    aborted_for_server_errors = True
+                    break
+
+        if aborted_for_server_errors:
+            logger.info("Unloading model %s after aborted run...", self.model)
+            unified_client.unload_model(self.remote_model)
+            return -1
+
+        successful_results = [result for result in results if self._is_successful_result(result)]
+        if not successful_results:
+            logger.warning(
+                "No successful responses for benchmark %s model %s; skipping database write",
+                self.metadata.code,
+                self.model,
+            )
+            logger.info("Unloading model %s...", self.model)
+            unified_client.unload_model(self.remote_model)
+            return -1
 
         # Calculate score
         score = self.calculate_score(results)
