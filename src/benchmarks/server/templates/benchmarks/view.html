@@ -58,63 +58,8 @@
     </div>
 </div>
 
-<!-- Questions -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0"><i class="bi bi-patch-question"></i> Questions</h5>
-                {% if question_count > question_previews|length %}
-                <small class="text-muted">Showing first {{ question_previews|length }} of {{ question_count }}</small>
-                {% endif %}
-            </div>
-            <div class="card-body">
-                {% if question_previews %}
-                <div class="accordion" id="questionsAccordion">
-                    {% for question in question_previews %}
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="questionHeading{{ loop.index }}">
-                            <button class="accordion-button collapsed" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#questionCollapse{{ loop.index }}"
-                                    aria-expanded="false" aria-controls="questionCollapse{{ loop.index }}">
-                                <code>{{ question.question_id }}</code>
-                                {% if question.question_text %}
-                                <span class="ms-2 text-truncate">{{ question.question_text }}</span>
-                                {% endif %}
-                            </button>
-                        </h2>
-                        <div id="questionCollapse{{ loop.index }}" class="accordion-collapse collapse"
-                             aria-labelledby="questionHeading{{ loop.index }}" data-bs-parent="#questionsAccordion">
-                            <div class="accordion-body">
-                                {% if question.question_text %}
-                                <h6>Question</h6>
-                                <pre class="bg-light p-3 border rounded"><code>{{ question.question_text }}</code></pre>
-                                {% endif %}
-
-                                {% if question.prompt_details %}
-                                <h6>Prompt details</h6>
-                                <pre class="bg-light p-3 border rounded"><code>{{ question.prompt_details | tojson(indent=2) }}</code></pre>
-                                {% endif %}
-
-                                <h6>Question payload</h6>
-                                <pre class="bg-light p-3 border rounded"><code>{{ question.question_info_pretty }}</code></pre>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="alert alert-info mb-0">
-                    <i class="bi bi-info-circle"></i> No questions generated for this benchmark yet.
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Leaderboard -->
-<div class="row">
+<div class="row mb-4">
     <div class="col-12">
         <div class="card">
             <div class="card-header">
@@ -182,6 +127,61 @@
                     <i class="bi bi-info-circle"></i> No runs yet for this benchmark.
                     <a href="{{ url_for('benchmarks.run_benchmark', benchmark_name=benchmark.codename) }}"
                        class="alert-link">Run it now</a>!
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Questions -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0"><i class="bi bi-patch-question"></i> Questions</h5>
+                {% if question_count > question_previews|length %}
+                <small class="text-muted">Showing first {{ question_previews|length }} of {{ question_count }}</small>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if question_previews %}
+                <div class="accordion" id="questionsAccordion">
+                    {% for question in question_previews %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="questionHeading{{ loop.index }}">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#questionCollapse{{ loop.index }}"
+                                    aria-expanded="false" aria-controls="questionCollapse{{ loop.index }}">
+                                <code>{{ question.question_id }}</code>
+                                {% if question.question_text %}
+                                <span class="ms-2 text-truncate">{{ question.question_text }}</span>
+                                {% endif %}
+                            </button>
+                        </h2>
+                        <div id="questionCollapse{{ loop.index }}" class="accordion-collapse collapse"
+                             aria-labelledby="questionHeading{{ loop.index }}" data-bs-parent="#questionsAccordion">
+                            <div class="accordion-body">
+                                {% if question.question_text %}
+                                <h6>Question</h6>
+                                <pre class="bg-light p-3 border rounded"><code>{{ question.question_text }}</code></pre>
+                                {% endif %}
+
+                                {% if question.prompt_details %}
+                                <h6>Prompt details</h6>
+                                <pre class="bg-light p-3 border rounded"><code>{{ question.prompt_details | tojson(indent=2) }}</code></pre>
+                                {% endif %}
+
+                                <h6>Question payload</h6>
+                                <pre class="bg-light p-3 border rounded"><code>{{ question.question_info_pretty }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle"></i> No questions generated for this benchmark yet.
                 </div>
                 {% endif %}
             </div>
