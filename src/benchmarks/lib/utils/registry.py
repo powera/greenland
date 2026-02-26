@@ -286,9 +286,15 @@ from benchmarks.lib.generators.translations_generator import TranslationGenerato
 from benchmarks.lib.runners.translations_runner import TranslationRunner
 
 translation_codes = {
-    "en_fr": "0108_translation_en_fr",
-    "en_zh": "0109_translation_en_zh",
-    "sw_ko": "0110_translation_sw_ko",
+    "en_fr": "0101_translation_en_fr",
+    "en_es": "0102_translation_en_es",
+    "en_de": "0103_translation_en_de",
+    "fr_es": "0104_translation_fr_es",
+    "en_zh": "0105_translation_en_zh",
+    "en_ja": "0106_translation_en_ja",
+    "fr_ko": "0107_translation_fr_ko",
+    "it_lt": "0108_translation_it_lt",
+    "ja_lt": "0109_translation_ja_lt",
 }
 for codepair, benchmark_code in translation_codes.items():
 

@@ -39,9 +39,15 @@ This document captures the current benchmark lineup and numbering through `0299`
 | 0032 | `part_of_speech` | Part of Speech | word processing | implemented |
 | 0061 | `word_to_ipa` | Word to IPA | token processing | implemented |
 | 0062 | `sentence_decomposition` | Sentence Decomposition | word processing | implemented |
-| 0108 | `translation_en_fr` | Translation en_fr | translation | implemented |
-| 0109 | `translation_en_zh` | Translation en_zh | translation | implemented |
-| 0110 | `translation_sw_ko` | Translation sw_ko | translation | implemented |
+| 0101 | `translation_en_fr` | Translation en_fr | translation | implemented |
+| 0102 | `translation_en_es` | Translation en_es | translation | implemented |
+| 0103 | `translation_en_de` | Translation en_de | translation | implemented |
+| 0104 | `translation_fr_es` | Translation fr_es | translation | implemented |
+| 0105 | `translation_en_zh` | Translation en_zh | translation | implemented |
+| 0106 | `translation_en_ja` | Translation en_ja | translation | implemented |
+| 0107 | `translation_fr_ko` | Translation fr_ko | translation | implemented |
+| 0108 | `translation_it_lt` | Translation it_lt | translation | implemented |
+| 0109 | `translation_ja_lt` | Translation ja_lt | translation | implemented |
 | 0121 | `verb_forms` | Verb Forms | word processing | implemented |
 | 0122 | `lemma` | Lemma Identification | word processing | implemented |
 | 0130 | `validate_lemma_form` | Validate Lemma Form (lokys) | agent regression | implemented |
@@ -87,7 +93,7 @@ consolidation is noted.
 | `0032_part_of_speech` | `0062_sentence_decomposition` | **High** – decomposition explicitly outputs POS tags for every token, so 0032 is a strict subset of 0062. | Keep both: 0032 isolates the POS signal; 0062 tests holistic token-level annotation. Acceptable duplication of signal. |
 | `0016_antonym` | `0017_synonyms` | **Low-medium** – both probe lexical-semantic relationships, but in opposite directions and with different answer mechanics. | Keep both. |
 | `0122_lemma` | `0130_validate_lemma_form` | **Medium** – both involve lemmatization. 0122 is a production task; 0130 is a binary validation + correction task. | Keep both; they are distinct task types (generate vs. validate). |
-| `0108/0109/0110` (translation) | each other | **Medium** – identical methodology, different language pairs. | Keep all three; performance differences across language pairs are informative. |
+| `0101`–`0109` (translation) | each other | **Medium** – identical methodology, different language pairs. | Keep all nine; performance differences across language pairs are informative. |
 | `0021_simple_arithmetic` | `0024_percentage_math` | **Low** – both require arithmetic, but 0024 adds ratio and percent-change semantics. | Keep both. |
 | `0021_simple_arithmetic` | `0026_time_arithmetic` | **Low** – time arithmetic requires clock-domain knowledge (modular 60/24) on top of basic arithmetic. | Keep both. |
 

@@ -62,9 +62,15 @@ def get_translation_metadata(origin_lang: str, target_lang: str) -> BenchmarkMet
         BenchmarkMetadata object
     """
     code_map = {
-        ("en", "fr"): "0108_translation_en_fr",
-        ("en", "zh"): "0109_translation_en_zh",
-        ("sw", "ko"): "0110_translation_sw_ko",
+        ("en", "fr"): "0101_translation_en_fr",
+        ("en", "es"): "0102_translation_en_es",
+        ("en", "de"): "0103_translation_en_de",
+        ("fr", "es"): "0104_translation_fr_es",
+        ("en", "zh"): "0105_translation_en_zh",
+        ("en", "ja"): "0106_translation_en_ja",
+        ("fr", "ko"): "0107_translation_fr_ko",
+        ("it", "lt"): "0108_translation_it_lt",
+        ("ja", "lt"): "0109_translation_ja_lt",
     }
     benchmark_code = code_map.get(
         (origin_lang, target_lang), f"0149_translation_{origin_lang}_{target_lang}"
@@ -85,7 +91,7 @@ def get_translation_metadata(origin_lang: str, target_lang: str) -> BenchmarkMet
     )
 
 
-@generator("0108_translation_en_fr")
+@generator("0101_translation_en_fr")
 class TranslationGenerator(BenchmarkGenerator):
     """Generator for translation benchmark questions."""
 
@@ -426,4 +432,16 @@ class LanguagePairGenerator:
 
 if __name__ == "__main__":
     # When run directly, generate data for all language pairs
-    LanguagePairGenerator.generate_specific_pairs([("en", "fr"), ("en", "zh"), ("sw", "ko")])
+    LanguagePairGenerator.generate_specific_pairs(
+        [
+            ("en", "fr"),
+            ("en", "es"),
+            ("en", "de"),
+            ("fr", "es"),
+            ("en", "zh"),
+            ("en", "ja"),
+            ("fr", "ko"),
+            ("it", "lt"),
+            ("ja", "lt"),
+        ]
+    )
