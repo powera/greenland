@@ -71,6 +71,7 @@ class UnifiedLLMClient:
         self.timeout = timeout
         self.debug = debug
         self.default_model: Optional[str] = None
+        self._model_resolution_cache: Dict[str, Tuple[str, str]] = {}
         if debug:
             logger.setLevel(logging.DEBUG)
             logger.debug("Initialized UnifiedLLMClient (timeout=%ds)", timeout)
@@ -171,6 +172,21 @@ class UnifiedLLMClient:
         client_name: Optional[str] = None
         normalized_model = model
 
+        # Fast path: reuse previous resolution for this model codename.
+        cached = self._model_resolution_cache.get(model)
+        if cached is not None:
+            cached_client_name, cached_normalized_model = cached
+            if cached_client_name == "openai":
+                return self.openai, cached_normalized_model
+            if cached_client_name == "anthropic":
+                return self.anthropic, cached_normalized_model
+            if cached_client_name == "gemini":
+                return self.gemini, cached_normalized_model
+            if cached_client_name == "ollama":
+                return self.ollama, cached_normalized_model
+            if cached_client_name == "lmstudio":
+                return self.lmstudio, cached_normalized_model
+
         # Check if this is a commercial API model first (skip database lookup)
         # These models can be routed directly based on their name
         # Exception: gpt-oss models should use database lookup
@@ -189,7 +205,10 @@ class UnifiedLLMClient:
         else:
             # For all other models, get the actual model path from database
             session = benchmarks.datastore.common.create_dev_session()
-            model_info = benchmarks.datastore.common.get_model_by_codename(session, model)
+            try:
+                model_info = benchmarks.datastore.common.get_model_by_codename(session, model)
+            finally:
+                session.close()
             if not model_info:
                 raise ValueError(f"Model '{model}' not found in database")
 
@@ -222,6 +241,9 @@ class UnifiedLLMClient:
 
         if client is None:
             raise ValueError(f"Could not determine client for model: {model}")
+
+        backend_name = self._get_backend_name(client)
+        self._model_resolution_cache[model] = (backend_name, normalized_model)
 
         return client, normalized_model
 
