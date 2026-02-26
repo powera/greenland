@@ -28,8 +28,11 @@ This document captures the current benchmark lineup and numbering through `0299`
 | 0016 | `antonym` | Antonym Check | word processing | implemented |
 | 0021 | `simple_arithmetic` | Simple Arithmetic | simple math | implemented |
 | 0022 | `unit_conversion` | Unit Conversion | simple math | implemented |
+| 0023 | `word_problems` | Math Word Problems | simple math | implemented |
 | 0024 | `percentage_math` | Fractions and Percentages | simple math | implemented |
+| 0025 | `algebra` | Algebra | simple math | implemented |
 | 0026 | `time_arithmetic` | Time Arithmetic | simple math | implemented |
+| 0027 | `geometry` | Geometry | simple math | implemented |
 | 0031 | `definitions` | Definitions | word processing | implemented |
 | 0032 | `part_of_speech` | Part of Speech | word processing | implemented |
 | 0051 | `pinyin_letters` | Pinyin Letter Count | token processing | implemented |
