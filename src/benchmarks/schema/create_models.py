@@ -3,6 +3,21 @@
 
 This script adds model entries to the benchmarks database for various
 local and remote LLM models.
+
+Terminology for insert_model parameters:
+  codename     — short unique identifier used on CLI and in benchmark results
+                 (e.g. "qwen3-4b-lms", "claude-opus-4-6")
+  displayname  — human-readable label shown in dashboards / reports
+  launch_date  — model release date (YYYY-MM-DD)
+  filesize_mb  — approximate GGUF/on-disk size in MB (0 for remote API models)
+  license_name — SPDX-style or short license name
+  model_path   — identifier passed to the unified client to load/query the model.
+                 For remote models this is the API model ID (e.g. "gpt-5.2").
+                 For LMStudio local models it is "lmstudio/<org>/<model-name>";
+                 the "lmstudio/" prefix selects the LMStudio backend and the
+                 remainder (e.g. "meta-llama/llama-3.2-1b-instruct") is passed
+                 directly to LMStudio's load/chat API.
+  model_type   — "remote" (API) or "local" (LMStudio)
 """
 
 import argparse
@@ -16,6 +31,10 @@ if str(Path(__file__).parent.parent.parent) not in sys.path:
 from benchmarks.benchmark_constants import BENCHMARKS_DB_PATH
 from benchmarks.config import BenchmarkConfig
 from benchmarks.datastore import common as datastore_common
+from clients.lmstudio_client import LMStudioClient
+
+
+LMSTUDIO_PREFIX = "lmstudio/"
 
 
 def _get_session(postgres_url=None):
@@ -23,6 +42,41 @@ def _get_session(postgres_url=None):
     if postgres_url:
         return datastore_common.create_postgres_session(postgres_url)
     return datastore_common.create_database_and_session(str(BENCHMARKS_DB_PATH))
+
+
+def _insert_lmstudio_model(
+    session,
+    *,
+    codename: str,
+    displayname: str,
+    launch_date: str,
+    filesize_mb: int,
+    license_name: str,
+    lmstudio_model: str,
+) -> None:
+    """Insert a local model that is served via LMStudio.
+
+    Args:
+        codename: Short unique ID for CLI / benchmark results (e.g. "qwen3-4b-lms").
+        displayname: Human-readable name for dashboards (e.g. "Qwen3 4B (LMStudio)").
+        launch_date: Model release date, YYYY-MM-DD.
+        filesize_mb: Approximate on-disk size in MB.
+        license_name: Short license identifier.
+        lmstudio_model: The identifier LMStudio uses to load this model,
+            e.g. "meta-llama/llama-3.2-1b-instruct".  Stored in the DB as
+            "lmstudio/<lmstudio_model>" so the unified client routes it to
+            the LMStudio backend.
+    """
+    datastore_common.insert_model(
+        session,
+        codename=codename,
+        displayname=displayname,
+        launch_date=launch_date,
+        filesize_mb=filesize_mb,
+        license_name=license_name,
+        model_path=LMSTUDIO_PREFIX + lmstudio_model,
+        model_type="local",
+    )
 
 
 def create_models(postgres_url=None):
@@ -38,65 +92,65 @@ def create_remote_models(postgres_url=None):
     # OpenAI GPT-5 family
     datastore_common.insert_model(
         s,
-        "gpt-5.2",
-        "GPT-5.2",
-        "2025-12-11",
-        0,
-        "Closed Model",
-        "gpt-5.2",
-        "remote",
+        codename="gpt-5.2",
+        displayname="GPT-5.2",
+        launch_date="2025-12-11",
+        filesize_mb=0,
+        license_name="Closed Model",
+        model_path="gpt-5.2",
+        model_type="remote",
     )
     datastore_common.insert_model(
         s,
-        "gpt-5-mini",
-        "GPT-5 mini",
-        "2025-08-07",
-        0,
-        "Closed Model",
-        "gpt-5-mini",
-        "remote",
+        codename="gpt-5-mini",
+        displayname="GPT-5 mini",
+        launch_date="2025-08-07",
+        filesize_mb=0,
+        license_name="Closed Model",
+        model_path="gpt-5-mini",
+        model_type="remote",
     )
     datastore_common.insert_model(
         s,
-        "gpt-5-nano",
-        "GPT-5 nano",
-        "2025-08-07",
-        0,
-        "Closed Model",
-        "gpt-5-nano",
-        "remote",
+        codename="gpt-5-nano",
+        displayname="GPT-5 nano",
+        launch_date="2025-08-07",
+        filesize_mb=0,
+        license_name="Closed Model",
+        model_path="gpt-5-nano",
+        model_type="remote",
     )
 
     # Anthropic Claude 4.6
     datastore_common.insert_model(
         s,
-        "claude-opus-4-6",
-        "Claude Opus 4.6",
-        "2026-02-05",
-        0,
-        "Closed Model",
-        "claude-opus-4-6",
-        "remote",
+        codename="claude-opus-4-6",
+        displayname="Claude Opus 4.6",
+        launch_date="2026-02-05",
+        filesize_mb=0,
+        license_name="Closed Model",
+        model_path="claude-opus-4-6",
+        model_type="remote",
     )
     datastore_common.insert_model(
         s,
-        "claude-sonnet-4-6",
-        "Claude Sonnet 4.6",
-        "2026-02-05",
-        0,
-        "Closed Model",
-        "claude-sonnet-4-6",
-        "remote",
+        codename="claude-sonnet-4-6",
+        displayname="Claude Sonnet 4.6",
+        launch_date="2026-02-05",
+        filesize_mb=0,
+        license_name="Closed Model",
+        model_path="claude-sonnet-4-6",
+        model_type="remote",
     )
     datastore_common.insert_model(
         s,
-        "claude-haiku-4-5",
-        "Claude Haiku 4.5",
-        "2025-10-01",
-        0,
-        "Closed Model",
-        "claude-haiku-4-5-20251001",
-        "remote",
+        codename="claude-haiku-4-5",
+        displayname="Claude Haiku 4.5",
+        launch_date="2025-10-01",
+        filesize_mb=0,
+        license_name="Closed Model",
+        model_path="claude-haiku-4-5-20251001",
+        model_type="remote",
     )
 
 
@@ -104,91 +158,201 @@ def create_local_models(postgres_url=None):
     """Create local (LMStudio) model definitions."""
     s = _get_session(postgres_url)
 
-    # Qwen3 family (3 sizes)
-    datastore_common.insert_model(
+    # --- Qwen3 family (3 sizes) ---
+
+    _insert_lmstudio_model(
         s,
-        "qwen3-1.7b-lms",
-        "Qwen3 1.7B (LMStudio)",
-        "2025-04-29",
-        1100,
-        "Apache License",
-        "lmstudio/lmstudio-community/Qwen3-1.7B-GGUF",
-        "local",
+        codename="qwen3-1.7b-lms",
+        displayname="Qwen3 1.7B (LMStudio)",
+        launch_date="2025-04-29",
+        filesize_mb=1100,
+        license_name="Apache License",
+        lmstudio_model="lmstudio-community/Qwen3-1.7B-GGUF",
     )
-    datastore_common.insert_model(
+    _insert_lmstudio_model(
         s,
-        "qwen3-4b-lms",
-        "Qwen3 4B (LMStudio)",
-        "2025-04-29",
-        2800,
-        "Apache License",
-        "lmstudio/lmstudio-community/Qwen3-4B-GGUF",
-        "local",
+        codename="qwen3-4b-lms",
+        displayname="Qwen3 4B (LMStudio)",
+        launch_date="2025-04-29",
+        filesize_mb=2800,
+        license_name="Apache License",
+        lmstudio_model="lmstudio-community/Qwen3-4B-GGUF",
     )
-    datastore_common.insert_model(
+    _insert_lmstudio_model(
         s,
-        "qwen3-vl-8b-lms",
-        "Qwen3 VL 8B (LMStudio)",
-        "2025-05-20",
-        5000,
-        "Apache License",
-        "lmstudio/qwen/qwen3-vl-8b",
-        "local",
+        codename="qwen3-vl-8b-lms",
+        displayname="Qwen3 VL 8B (LMStudio)",
+        launch_date="2025-05-20",
+        filesize_mb=5000,
+        license_name="Apache License",
+        lmstudio_model="qwen/qwen3-vl-8b",
     )
 
-    # Meta Llama
-    datastore_common.insert_model(
+    # --- Meta Llama ---
+
+    _insert_lmstudio_model(
         s,
-        "llama-3.2-1b-lms",
-        "Llama 3.2 1B (LMStudio)",
-        "2024-09-25",
-        1300,
-        "Llama License",
-        "lmstudio/meta-llama/llama-3.2-1b-instruct",
-        "local",
+        codename="llama-2-7b-lms",
+        displayname="Llama 2 7B (LMStudio)",
+        launch_date="2023-07-18",
+        filesize_mb=4900,
+        license_name="Llama License",
+        lmstudio_model="TheBloke/Llama-2-7B-GGUF",
     )
-    datastore_common.insert_model(
+    _insert_lmstudio_model(
         s,
-        "llama-3-8b-lms",
-        "Llama 3 8B (LMStudio)",
-        "2024-04-18",
-        4900,
-        "Llama License",
-        "lmstudio/meta-llama/meta-llama-3-8b-instruct",
-        "local",
+        codename="llama-3.2-1b-lms",
+        displayname="Llama 3.2 1B (LMStudio)",
+        launch_date="2024-09-25",
+        filesize_mb=1300,
+        license_name="Llama License",
+        lmstudio_model="meta-llama/llama-3.2-1b-instruct",
+    )
+    _insert_lmstudio_model(
+        s,
+        codename="llama-3-8b-lms",
+        displayname="Llama 3 8B (LMStudio)",
+        launch_date="2024-04-18",
+        filesize_mb=4900,
+        license_name="Llama License",
+        lmstudio_model="meta-llama/meta-llama-3-8b-instruct",
     )
 
-    # Other small models
-    datastore_common.insert_model(
+    # --- Other small models ---
+
+    _insert_lmstudio_model(
         s,
-        "smollm2-1.7b-lms",
-        "SmolLM2 1.7B (LMStudio)",
-        "2024-11-01",
-        1100,
-        "Apache License",
-        "lmstudio/HuggingFaceTB/smollm2-1.7b-instruct",
-        "local",
+        codename="smollm2-1.7b-lms",
+        displayname="SmolLM2 1.7B (LMStudio)",
+        launch_date="2024-11-01",
+        filesize_mb=1100,
+        license_name="Apache License",
+        lmstudio_model="HuggingFaceTB/smollm2-1.7b-instruct",
     )
-    datastore_common.insert_model(
+    _insert_lmstudio_model(
         s,
-        "gemma-2-2b-lms",
-        "Gemma 2 2B (LMStudio)",
-        "2024-06-27",
-        1500,
-        "Gemma License",
-        "lmstudio/google/gemma-2-2b-it",
-        "local",
+        codename="gemma-2b-lms",
+        displayname="Gemma 2B (LMStudio)",
+        launch_date="2024-02-21",
+        filesize_mb=1500,
+        license_name="Gemma License",
+        lmstudio_model="codegood/gemma-2b-it-Q4_K_M-GGUF",
     )
-    datastore_common.insert_model(
+    _insert_lmstudio_model(
         s,
-        "granite-3.2-8b-lms",
-        "Granite 3.2 8B (LMStudio)",
-        "2025-02-26",
-        4900,
-        "Apache License",
-        "lmstudio/ibm/granite-3.2-8b",
-        "local",
+        codename="gemma-2-2b-lms",
+        displayname="Gemma 2 2B (LMStudio)",
+        launch_date="2024-06-27",
+        filesize_mb=1500,
+        license_name="Gemma License",
+        lmstudio_model="google/gemma-2-2b-it",
     )
+    _insert_lmstudio_model(
+        s,
+        codename="granite-3.2-8b-lms",
+        displayname="Granite 3.2 8B (LMStudio)",
+        launch_date="2025-02-26",
+        filesize_mb=4900,
+        license_name="Apache License",
+        lmstudio_model="ibm/granite-3.2-8b",
+    )
+
+    # --- Mistral and AllenAI ---
+
+    _insert_lmstudio_model(
+        s,
+        codename="ministral-8b-lms",
+        displayname="Ministral 8B (LMStudio)",
+        launch_date="2024-10-16",
+        filesize_mb=4900,
+        license_name="Mistral Research License",
+        lmstudio_model="mistralai/ministral-8b-instruct-2410",
+    )
+    _insert_lmstudio_model(
+        s,
+        codename="olmo-3-7b-lms",
+        displayname="OLMo 3 7B (LMStudio)",
+        launch_date="2024-11-27",
+        filesize_mb=4300,
+        license_name="Apache License",
+        lmstudio_model="allenai/olmo-3-7b-instruct",
+    )
+
+    # --- 2024 flagship class (<=8B) models ---
+
+    _insert_lmstudio_model(
+        s,
+        codename="llama-3.1-8b-lms",
+        displayname="Llama 3.1 8B (LMStudio)",
+        launch_date="2024-07-23",
+        filesize_mb=4900,
+        license_name="Llama License",
+        lmstudio_model="meta-llama/llama-3.1-8b-instruct",
+    )
+    _insert_lmstudio_model(
+        s,
+        codename="qwen2.5-7b-lms",
+        displayname="Qwen2.5 7B (LMStudio)",
+        launch_date="2024-09-19",
+        filesize_mb=4300,
+        license_name="Apache License",
+        lmstudio_model="Qwen/Qwen2.5-7B-Instruct",
+    )
+    _insert_lmstudio_model(
+        s,
+        codename="phi-3.5-mini-lms",
+        displayname="Phi-3.5 Mini (LMStudio)",
+        launch_date="2024-08-20",
+        filesize_mb=2500,
+        license_name="MIT License",
+        lmstudio_model="microsoft/phi-3.5-mini-instruct",
+    )
+
+
+def request_lmstudio_install_for_local_models(postgres_url=None):
+    """Request LMStudio to install local models from the benchmark model table.
+
+    Installs models serially to avoid LMStudio timeouts from parallel downloads.
+    """
+    s = _get_session(postgres_url)
+    lmstudio_client = LMStudioClient(debug=False)
+
+    local_models = [
+        model
+        for model in datastore_common.list_all_models(s)
+        if model.get("model_type") == "local"
+        and isinstance(model.get("model_path"), str)
+        and model["model_path"].startswith(LMSTUDIO_PREFIX)
+    ]
+
+    if not local_models:
+        print("No LMStudio local models found in benchmark model table.")
+        return
+
+    print(f"Requesting LMStudio install for {len(local_models)} model(s), serially...")
+
+    installed_count = 0
+    failed_models = []
+
+    for index, model in enumerate(local_models, start=1):
+        model_path = model["model_path"]
+        # Strip the "lmstudio/" routing prefix to get the identifier
+        # that LMStudio's load API expects.
+        lmstudio_identifier = model_path[len(LMSTUDIO_PREFIX) :]
+        codename = model["codename"]
+
+        print(f"[{index}/{len(local_models)}] Installing {codename}: {lmstudio_identifier}")
+        was_loaded = lmstudio_client.warm_model(lmstudio_identifier)
+
+        if was_loaded:
+            installed_count += 1
+            lmstudio_client.unload_model(lmstudio_identifier)
+        else:
+            failed_models.append(codename)
+
+    print(f"LMStudio install requests complete: {installed_count}/{len(local_models)} succeeded")
+    if failed_models:
+        print(f"Failed installs: {', '.join(failed_models)}")
 
 
 def main():
@@ -202,6 +366,11 @@ def main():
         "--db-url",
         help="Full PostgreSQL connection URL (overrides --postgres key-file lookup)",
     )
+    parser.add_argument(
+        "--install-local-lmstudio",
+        action="store_true",
+        help="Request LMStudio to install all local models in the benchmark DB (serially)",
+    )
     args = parser.parse_args()
 
     postgres_url = None
@@ -214,6 +383,10 @@ def main():
         print("Using storage backend: postgres (Supabase)")
 
     create_models(postgres_url)
+
+    if args.install_local_lmstudio:
+        request_lmstudio_install_for_local_models(postgres_url)
+
     print("Done.")
 
 
