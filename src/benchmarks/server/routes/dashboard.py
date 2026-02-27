@@ -3,6 +3,7 @@
 """Dashboard routes - main scoreboard view."""
 
 from datetime import datetime
+import json
 
 from flask import Blueprint, g, render_template
 from sqlalchemy import case, func
@@ -31,6 +32,28 @@ def get_score_color(score):
         return "#f44336"  # Below average - red
     else:
         return "#b71c1c"  # Poor - dark red
+
+
+def _extract_usage_from_debug(debug_json: str | None) -> tuple[int, int]:
+    """Extract token usage from run_detail.debug_json."""
+    if not debug_json:
+        return 0, 0
+
+    try:
+        debug_data = json.loads(debug_json)
+    except (TypeError, ValueError):
+        return 0, 0
+
+    usage_data = debug_data.get("usage")
+    if not isinstance(usage_data, dict):
+        return 0, 0
+
+    tokens_in = usage_data.get("tokens_in")
+    tokens_out = usage_data.get("tokens_out")
+    return (
+        tokens_in if isinstance(tokens_in, int) else 0,
+        tokens_out if isinstance(tokens_out, int) else 0,
+    )
 
 
 @bp.route("/")
@@ -80,23 +103,32 @@ def index():
         .all()
     )
 
-    # Calculate average eval times for each run
+    # Calculate average eval times, costs, and token usage for each run
     avg_times = {}
     avg_costs = {}
+    avg_tokens = {}
     for run_id, bench_name, model_name, score, run_ts in runs_data:
-        avg_time = (
-            g.bench_db.query(func.avg(RunDetail.eval_msec))
-            .filter(RunDetail.run_id == run_id)
-            .scalar()
-        )
-        avg_times[run_id] = avg_time or 0
+        run_details = g.bench_db.query(RunDetail).filter(RunDetail.run_id == run_id).all()
 
-        avg_cost_usd = (
-            g.bench_db.query(func.avg(RunDetail.cost_usd))
-            .filter(RunDetail.run_id == run_id)
-            .scalar()
-        )
-        avg_costs[run_id] = avg_cost_usd or 0
+        eval_values = [detail.eval_msec for detail in run_details if detail.eval_msec is not None]
+        avg_times[run_id] = (sum(eval_values) / len(eval_values)) if eval_values else 0
+
+        cost_values = [detail.cost_usd for detail in run_details if detail.cost_usd is not None]
+        avg_costs[run_id] = (sum(cost_values) / len(cost_values)) if cost_values else 0
+
+        usage_pairs = [_extract_usage_from_debug(detail.debug_json) for detail in run_details]
+        usage_pairs = [
+            (tokens_in, tokens_out)
+            for tokens_in, tokens_out in usage_pairs
+            if tokens_in or tokens_out
+        ]
+        if usage_pairs:
+            avg_tokens[run_id] = {
+                "tokens_in": sum(tokens_in for tokens_in, _ in usage_pairs) / len(usage_pairs),
+                "tokens_out": sum(tokens_out for _, tokens_out in usage_pairs) / len(usage_pairs),
+            }
+        else:
+            avg_tokens[run_id] = {"tokens_in": 0, "tokens_out": 0}
 
     # Build scores dictionary
     scores = {}
@@ -107,6 +139,8 @@ def index():
             "color": get_score_color(score),
             "avg_eval_time": avg_times.get(run_id, 0),
             "avg_cost_usd": avg_costs.get(run_id, 0),
+            "avg_tokens_in": avg_tokens.get(run_id, {}).get("tokens_in", 0),
+            "avg_tokens_out": avg_tokens.get(run_id, {}).get("tokens_out", 0),
             "run_ts": run_ts,
         }
 

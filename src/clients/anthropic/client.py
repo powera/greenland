@@ -17,7 +17,9 @@ from clients.types import Response, Schema
 from util.telemetry import LLMUsage
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Model identifiers
@@ -269,11 +271,15 @@ class AnthropicClient:
             logger.error("Unexpected response format from Anthropic API")
             structured_data = {"error": "Unexpected response format"}
 
+        usage_data = completion_data["usage"]
         usage = LLMUsage.from_api_response(
             {
-                "prompt_tokens": completion_data["usage"]["input_tokens"],
-                "completion_tokens": completion_data["usage"]["output_tokens"],
+                "prompt_tokens": usage_data["input_tokens"],
+                "completion_tokens": usage_data["output_tokens"],
                 "total_duration": duration_ms,
+                # Preserve Anthropic token accounting details for debugging.
+                "cache_creation_input_tokens": usage_data.get("cache_creation_input_tokens", 0),
+                "cache_read_input_tokens": usage_data.get("cache_read_input_tokens", 0),
             },
             model=model,
         )

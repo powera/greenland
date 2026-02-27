@@ -295,18 +295,22 @@ class BenchmarkRunner:
 
     def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
         """Build debug information for benchmark results."""
+        usage_info = response.usage.to_dict() if getattr(response, "usage", None) else None
+
         # Default implementation - subclasses can override
         if hasattr(response, "structured_data") and response.structured_data:
             return {
                 "response": response.structured_data,
                 "expected": question_data.get("correct_answer"),
                 "is_correct": is_correct,
+                "usage": usage_info,
             }
         else:
             return {
                 "response": response.response_text,
                 "expected": question_data.get("correct_answer"),
                 "is_correct": is_correct,
+                "usage": usage_info,
             }
 
     def run_sample(self, num_questions: int = 5) -> List[BenchmarkResult]:

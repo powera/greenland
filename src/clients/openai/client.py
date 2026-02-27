@@ -17,7 +17,9 @@ from clients.types import Response
 from util.telemetry import LLMUsage
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Model identifiers
@@ -226,11 +228,16 @@ class OpenAIClient:
 
         # Calculate token usage
         usage_data = response_data.get("usage", {})
+        output_tokens_details = usage_data.get("output_tokens_details", {})
+        input_tokens_details = usage_data.get("input_tokens_details", {})
         usage = LLMUsage.from_api_response(
             {
                 "prompt_tokens": usage_data.get("input_tokens", 0),
                 "completion_tokens": usage_data.get("output_tokens", 0),
                 "total_duration": duration_ms,
+                # Keep token detail fields in metadata for debugging dashboards.
+                "reasoning_tokens": output_tokens_details.get("reasoning_tokens", 0),
+                "cached_tokens": input_tokens_details.get("cached_tokens", 0),
             },
             model=model,
         )

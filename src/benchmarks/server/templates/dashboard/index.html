@@ -111,7 +111,7 @@
                                        class="text-decoration-none">
                                         <div class="score-badge mx-auto"
                                              style="background-color: {{ score_data.color }};"
-                                             title="Score: {{ score_data.value }}/100, Avg time: {{ '%.1f'|format(score_data.avg_eval_time) }}ms, Avg cost: {{ '%.0f'|format(score_data.avg_cost_usd * 1000000) }}µ$">
+                                             title="Score: {{ score_data.value }}/100, Avg time: {{ '%.1f'|format(score_data.avg_eval_time) }}ms, Avg cost: {{ '%.0f'|format(score_data.avg_cost_usd * 1000000) }}µ$, Avg tokens: {{ '%.0f'|format(score_data.avg_tokens_in) }} in / {{ '%.0f'|format(score_data.avg_tokens_out) }} out">
                                             {{ score_data.value }}
                                         </div>
                                         <div class="small text-muted mt-1">
@@ -119,6 +119,9 @@
                                         </div>
                                         <div class="small text-muted">
                                             {{ '%.0f'|format(score_data.avg_cost_usd * 1000000) }}µ$
+                                        </div>
+                                        <div class="small text-muted">
+                                            {{ '%.0f'|format(score_data.avg_tokens_in) }}→{{ '%.0f'|format(score_data.avg_tokens_out) }} tok
                                         </div>
                                     </a>
                                     {% else %}
