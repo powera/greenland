@@ -51,6 +51,12 @@ class LMStudioRequestError(LMStudioError):
     pass
 
 
+class LMStudioModelMismatchError(LMStudioError):
+    """Raised when LMStudio responds with a model different from the requested model."""
+
+    pass
+
+
 class LMStudioClient:
     """Client for making requests to LMStudio API with optional two-phase responses."""
 
@@ -72,6 +78,9 @@ class LMStudioClient:
     def _make_request(self, endpoint: str, data: Dict) -> requests.Response:
         """Make HTTP request to LMStudio API."""
         url = f"{self.base_url}/{endpoint}"
+
+        if endpoint == "chat/completions" and "model" not in data:
+            raise LMStudioRequestError("LMStudio chat/completions request missing required 'model'")
 
         if self.debug:
             logger.debug("Request to %s: %s", url, json.dumps(data, indent=2))
@@ -105,6 +114,17 @@ class LMStudioClient:
 
         try:
             response_data = response.json()
+            response_model = response_data.get("model")
+            if not isinstance(response_model, str) or not response_model:
+                raise LMStudioModelMismatchError(
+                    "LMStudio response did not include a valid model identifier"
+                )
+
+            if not self._models_match(requested_model=model, response_model=response_model):
+                raise LMStudioModelMismatchError(
+                    "LMStudio response model mismatch: "
+                    f"requested '{model}' but response used '{response_model}'"
+                )
 
             # Extract the message content from the choices array
             content = ""
@@ -161,6 +181,17 @@ class LMStudioClient:
             # Handle JSON parsing errors
             print(f"Error parsing response: {e}")
             return "", None, None
+
+    def _normalize_model_name_for_compare(self, model_name: str) -> str:
+        normalized_name = model_name.strip().lower()
+        if normalized_name.startswith("lmstudio/"):
+            normalized_name = normalized_name[len("lmstudio/") :]
+        return normalized_name
+
+    def _models_match(self, requested_model: str, response_model: str) -> bool:
+        normalized_requested_model = self._normalize_model_name_for_compare(requested_model)
+        normalized_response_model = self._normalize_model_name_for_compare(response_model)
+        return normalized_requested_model == normalized_response_model
 
     def warm_model(self, model: str) -> bool:
         """Load model into memory using LM Studio's model load endpoint."""
@@ -332,6 +363,9 @@ class LMStudioClient:
             logger.debug(
                 "Chat request: model=%s, brief=%s, schema=%s", model, brief, bool(json_schema)
             )
+
+        if not model:
+            raise LMStudioRequestError("LMStudio generate_chat requires a non-empty model")
 
         # Phase 1: Get response (either free-form or JSON)
         messages = []
