@@ -190,6 +190,60 @@ def create_local_models(postgres_url=None):
         "local",
     )
 
+    # Mistral and AllenAI
+    datastore_common.insert_model(
+        s,
+        "ministral-8b-lms",
+        "Ministral 8B (LMStudio)",
+        "2024-10-16",
+        4900,
+        "Mistral Research License",
+        "lmstudio/mistralai/ministral-8b-instruct-2410",
+        "local",
+    )
+    datastore_common.insert_model(
+        s,
+        "olmo-3-7b-lms",
+        "OLMo 3 7B (LMStudio)",
+        "2024-11-27",
+        4300,
+        "Apache License",
+        "lmstudio/allenai/olmo-2-1124-7b-instruct",
+        "local",
+    )
+
+    # 2024 flagship class (<=8B) models still available
+    datastore_common.insert_model(
+        s,
+        "llama-3.1-8b-lms",
+        "Llama 3.1 8B (LMStudio)",
+        "2024-07-23",
+        4900,
+        "Llama License",
+        "lmstudio/meta-llama/llama-3.1-8b-instruct",
+        "local",
+    )
+    datastore_common.insert_model(
+        s,
+        "qwen2.5-7b-lms",
+        "Qwen2.5 7B (LMStudio)",
+        "2024-09-19",
+        4300,
+        "Apache License",
+        "lmstudio/Qwen/Qwen2.5-7B-Instruct",
+        "local",
+    )
+    datastore_common.insert_model(
+        s,
+        "phi-3.5-mini-lms",
+        "Phi-3.5 Mini (LMStudio)",
+        "2024-08-20",
+        2500,
+        "MIT License",
+        "lmstudio/microsoft/phi-3.5-mini-instruct",
+        "local",
+    )
+
 
 def main():
     parser = argparse.ArgumentParser(description="Populate benchmark DB with model definitions")
