@@ -150,7 +150,7 @@ def _probe_postgres_engine(engine: Engine) -> None:
 
 def _initialize_postgres_engine(postgres_url: str) -> Engine:
     """Create and initialize a PostgreSQL engine for benchmarks storage."""
-    engine = create_engine(
+    base_engine = create_engine(
         postgres_url,
         echo=False,
         pool_pre_ping=True,
@@ -160,16 +160,21 @@ def _initialize_postgres_engine(postgres_url: str) -> Engine:
     # PgBouncer (Supabase pooler) silently drops the options=
     # search_path parameter from connection URLs, so we must set
     # search_path explicitly on every new connection.
+    #
+    # We also apply schema_translate_map so every ORM-generated SQL statement
+    # uses an explicit benchmarks.<table> schema prefix instead of depending on
+    # the backend's default schema.
     schema = BENCHMARKS_POSTGRES_SCHEMA
+    engine = base_engine.execution_options(schema_translate_map={None: schema})
 
-    @event.listens_for(engine, "connect")
+    @event.listens_for(base_engine, "connect")
     def _set_search_path(dbapi_conn: Any, connection_record: Any) -> None:
         cursor = dbapi_conn.cursor()
         cursor.execute(f"SET search_path TO {schema}")
         cursor.close()
 
     # Ensure the benchmarks schema exists before creating tables.
-    with engine.connect() as conn:
+    with base_engine.connect() as conn:
         conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
         conn.commit()
 
