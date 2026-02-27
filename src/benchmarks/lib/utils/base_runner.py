@@ -347,8 +347,20 @@ class BenchmarkRunner:
 
         return results
 
+    def close(self) -> None:
+        """Close the database session, returning the connection to the pool."""
+        if self.session is not None:
+            self.session.close()
+
     def run(self) -> int:
         """Execute the benchmark and return the run ID."""
+        try:
+            return self._run_inner()
+        finally:
+            self.close()
+
+    def _run_inner(self) -> int:
+        """Execute the benchmark (session lifetime managed by run())."""
         # Load questions for this benchmark
         questions = self.load_questions()
         if not questions:

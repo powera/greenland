@@ -150,11 +150,20 @@ def _probe_postgres_engine(engine: Engine) -> None:
 
 def _initialize_postgres_engine(postgres_url: str) -> Engine:
     """Create and initialize a PostgreSQL engine for benchmarks storage."""
+    # When using an IPv4 transaction-mode pooler (e.g. Supabase PgBouncer),
+    # the pooler itself manages connections.  Keep SQLAlchemy's client-side
+    # pool small so we don't exhaust the pooler's connection limit:
+    #   pool_size=2 — a small number of kept-alive connections
+    #   max_overflow=3 — burst allowance beyond pool_size
+    # Sessions MUST be closed explicitly (call session.close()) so connections
+    # are returned promptly rather than waiting for GC.
     base_engine = create_engine(
         postgres_url,
         echo=False,
         pool_pre_ping=True,
-        pool_recycle=3600,
+        pool_recycle=300,
+        pool_size=2,
+        max_overflow=3,
     )
 
     # PgBouncer (Supabase pooler) silently drops the options=

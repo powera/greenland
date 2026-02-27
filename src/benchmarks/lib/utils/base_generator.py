@@ -25,7 +25,9 @@ from benchmarks.lib.utils.data_models import (
 )
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Default model for validation and LLM-based question generation
@@ -58,6 +60,7 @@ class BenchmarkGenerator:
             session: Optional database session
         """
         self.metadata = metadata
+        self._owns_session = session is None
         self.session = session or datastore_benchmarks.create_dev_session()
         self.auto_validate = auto_validate
         self.validation_model = DEFAULT_VALIDATION_MODEL
@@ -623,3 +626,8 @@ class BenchmarkGenerator:
 
         logger.info(f"Successfully saved {len(question_ids)} questions to database")
         return question_ids
+
+    def close(self) -> None:
+        """Close the database session if this generator owns it."""
+        if self._owns_session and self.session is not None:
+            self.session.close()
