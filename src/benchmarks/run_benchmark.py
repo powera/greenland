@@ -339,13 +339,17 @@ def generate_benchmark_questions(
                         "Cancelled generation for %s because LLM usage was not confirmed.",
                         benchmark_code,
                     )
+                    generator.close()
                     return False
 
         if num_questions is None:
             metadata = get_benchmark_metadata(benchmark_code)
             num_questions = metadata.default_num_questions if metadata else 40
 
-        generator.load_to_database(num_questions=num_questions)
+        try:
+            generator.load_to_database(num_questions=num_questions)
+        finally:
+            generator.close()
 
         logger.info("Successfully generated questions for benchmark %s", benchmark_code)
         return True
