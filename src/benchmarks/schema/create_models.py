@@ -16,6 +16,7 @@ if str(Path(__file__).parent.parent.parent) not in sys.path:
 from benchmarks.benchmark_constants import BENCHMARKS_DB_PATH
 from benchmarks.config import BenchmarkConfig
 from benchmarks.datastore import common as datastore_common
+from clients.lmstudio_client import LMStudioClient
 
 
 def _get_session(postgres_url=None):
@@ -208,7 +209,7 @@ def create_local_models(postgres_url=None):
         "2024-11-27",
         4300,
         "Apache License",
-        "lmstudio/allenai/olmo-2-1124-7b-instruct",
+        "lmstudio/allenai/olmo-3-7b-instruct",
         "local",
     )
 
@@ -245,6 +246,50 @@ def create_local_models(postgres_url=None):
     )
 
 
+def request_lmstudio_install_for_local_models(postgres_url=None):
+    """Request LMStudio to install local models from the benchmark model table.
+
+    Installs models serially to avoid LMStudio timeouts from parallel downloads.
+    """
+    s = _get_session(postgres_url)
+    lmstudio_client = LMStudioClient(debug=False)
+
+    local_models = [
+        model
+        for model in datastore_common.list_all_models(s)
+        if model.get("model_type") == "local"
+        and isinstance(model.get("model_path"), str)
+        and model["model_path"].startswith("lmstudio/")
+    ]
+
+    if not local_models:
+        print("No LMStudio local models found in benchmark model table.")
+        return
+
+    print(f"Requesting LMStudio install for {len(local_models)} model(s), serially...")
+
+    installed_count = 0
+    failed_models = []
+
+    for index, model in enumerate(local_models, start=1):
+        model_path = model["model_path"]
+        normalized_model = model_path[len("lmstudio/") :]
+        codename = model["codename"]
+
+        print(f"[{index}/{len(local_models)}] Installing {codename}: {normalized_model}")
+        was_loaded = lmstudio_client.warm_model(normalized_model)
+
+        if was_loaded:
+            installed_count += 1
+            lmstudio_client.unload_model(normalized_model)
+        else:
+            failed_models.append(codename)
+
+    print(f"LMStudio install requests complete: {installed_count}/{len(local_models)} succeeded")
+    if failed_models:
+        print(f"Failed installs: {', '.join(failed_models)}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Populate benchmark DB with model definitions")
     parser.add_argument(
@@ -255,6 +300,11 @@ def main():
     parser.add_argument(
         "--db-url",
         help="Full PostgreSQL connection URL (overrides --postgres key-file lookup)",
+    )
+    parser.add_argument(
+        "--install-local-lmstudio",
+        action="store_true",
+        help="Request LMStudio to install all local models in the benchmark DB (serially)",
     )
     args = parser.parse_args()
 
@@ -268,6 +318,10 @@ def main():
         print("Using storage backend: postgres (Supabase)")
 
     create_models(postgres_url)
+
+    if args.install_local_lmstudio:
+        request_lmstudio_install_for_local_models(postgres_url)
+
     print("Done.")
 
 
