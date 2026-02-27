@@ -29,11 +29,27 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_all_model_codenames() -> List[str]:
-    """Get a list of all model codenames from the database."""
+def get_all_model_codenames(prioritize_local: bool = False) -> List[str]:
+    """Get model codenames from the database.
+
+    Args:
+        prioritize_local: If True, return local models before remote models.
+    """
     session = datastore_common.create_dev_session()
-    models = datastore_common.list_all_models(session)
-    return [model["codename"] for model in models]
+    try:
+        models = datastore_common.list_all_models(session)
+    finally:
+        session.close()
+
+    if prioritize_local:
+        models.sort(
+            key=lambda model_record: (
+                model_record.get("model_type") != "local",
+                str(model_record.get("displayname", "")).lower(),
+            )
+        )
+
+    return [str(model_record["codename"]) for model_record in models]
 
 
 def get_all_benchmarks() -> List[str]:
@@ -242,38 +258,51 @@ def run_missing_benchmarks(
     only_model: Optional[str] = None,
 ) -> List[Tuple[str, str]]:
     """Run all enabled benchmarks that don't have results yet."""
-    if not session:
+    created_session = session is None
+    if created_session:
         session = datastore_common.create_dev_session()
 
-    blacklist_models = blacklist_models or set()
-    blacklist_benchmarks = blacklist_benchmarks or set()
+    try:
+        blacklist_models = blacklist_models or set()
+        blacklist_benchmarks = blacklist_benchmarks or set()
 
-    if only_model:
-        models = [only_model]
-    else:
-        models = [m for m in get_all_model_codenames() if m not in blacklist_models]
-    benchmarks = [b for b in get_enabled_benchmark_codes() if b not in blacklist_benchmarks]
+        if only_model:
+            models = [only_model]
+        else:
+            models = [
+                model_codename
+                for model_codename in get_all_model_codenames(prioritize_local=True)
+                if model_codename not in blacklist_models
+            ]
+        benchmarks = [
+            benchmark_code
+            for benchmark_code in get_enabled_benchmark_codes()
+            if benchmark_code not in blacklist_benchmarks
+        ]
 
-    scores = datastore_benchmarks.get_highest_benchmark_scores(session)
+        scores = datastore_benchmarks.get_highest_benchmark_scores(session)
 
-    missing = []
-    for benchmark in benchmarks:
-        for model in models:
-            if (benchmark, model) not in scores:
-                missing.append((model, benchmark))
+        missing: List[Tuple[str, str]] = []
+        for model_name in models:
+            for benchmark_code in benchmarks:
+                if (benchmark_code, model_name) not in scores:
+                    missing.append((model_name, benchmark_code))
 
-    run_pairs = []
-    for model_name, benchmark in missing:
-        logger.info("Running missing benchmark: %s for %s", benchmark, model_name)
-        try:
-            run_id = run_benchmark(benchmark, model_name)
-            if run_id:
-                run_pairs.append((model_name, benchmark))
-        except Exception as e:
-            logger.error("Failed to run %s for %s: %s", benchmark, model_name, str(e))
-            logger.error(traceback.format_exc())
+        run_pairs = []
+        for model_name, benchmark_code in missing:
+            logger.info("Running missing benchmark: %s for %s", benchmark_code, model_name)
+            try:
+                run_id = run_benchmark(benchmark_code, model_name)
+                if run_id:
+                    run_pairs.append((model_name, benchmark_code))
+            except Exception as error:
+                logger.error("Failed to run %s for %s: %s", benchmark_code, model_name, str(error))
+                logger.error(traceback.format_exc())
 
-    return run_pairs
+        return run_pairs
+    finally:
+        if created_session and session is not None:
+            session.close()
 
 
 def generate_benchmark_questions(
