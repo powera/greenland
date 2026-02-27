@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 # Constants
 DEFAULT_TOLERANCE = 0.01
+MAX_BENCHMARK_ERRORS = 3
 
 
 class BenchmarkRunner:
@@ -226,6 +227,10 @@ class BenchmarkRunner:
         """Return True when a question finished with a model response (correct or incorrect)."""
         return bool(result.eval_msec > 0 and not self._extract_error_text(result))
 
+    def _is_error_result(self, result: BenchmarkResult) -> bool:
+        """Return True when a question result contains an execution error."""
+        return bool(self._extract_error_text(result))
+
     def calculate_score(self, results: List[BenchmarkResult]) -> int:
         """
         Calculate overall benchmark score from individual results.
@@ -378,8 +383,8 @@ class BenchmarkRunner:
             len(questions),
         )
         results = []
-        server_error_count = 0
-        aborted_for_server_errors = False
+        error_count = 0
+        aborted_for_errors = False
         for idx, question in enumerate(questions):
             logger.info(
                 "Processing question %d/%d: %s",
@@ -390,19 +395,19 @@ class BenchmarkRunner:
             result = self.process_question(question)
             results.append(result)
 
-            if self._is_server_error(result):
-                server_error_count += 1
-                if server_error_count > 3:
+            if self._is_error_result(result):
+                error_count += 1
+                if error_count >= MAX_BENCHMARK_ERRORS:
                     logger.error(
-                        "Aborting benchmark %s for model %s after %d server errors",
+                        "Aborting benchmark %s for model %s after %d errors",
                         self.metadata.code,
                         self.model,
-                        server_error_count,
+                        error_count,
                     )
-                    aborted_for_server_errors = True
+                    aborted_for_errors = True
                     break
 
-        if aborted_for_server_errors:
+        if aborted_for_errors:
             logger.info("Unloading model %s after aborted run...", self.model)
             unified_client.unload_model(self.remote_model)
             return -1

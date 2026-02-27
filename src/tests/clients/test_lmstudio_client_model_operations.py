@@ -118,6 +118,24 @@ def test_generate_chat_sends_requested_model(monkeypatch):
     assert response.response_text == "hello"
 
 
+def test_generate_chat_accepts_response_model_alias(monkeypatch):
+    client = LMStudioClient(timeout=40, debug=False)
+
+    def fake_make_request(endpoint: str, data: Dict[str, Any]) -> _FakeChatResponse:
+        return _FakeChatResponse(
+            {
+                "model": "llama-2-7b",
+                "choices": [{"message": {"content": "alias works"}}],
+            }
+        )
+
+    monkeypatch.setattr(client, "_make_request", fake_make_request)
+
+    response = client.generate_chat(prompt="hi", model="TheBloke/Llama-2-7B-GGUF")
+
+    assert response.response_text == "alias works"
+
+
 def test_generate_chat_raises_on_response_model_mismatch(monkeypatch):
     client = LMStudioClient(timeout=40, debug=False)
 

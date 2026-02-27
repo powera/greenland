@@ -188,10 +188,25 @@ class LMStudioClient:
             normalized_name = normalized_name[len("lmstudio/") :]
         return normalized_name
 
+    def _model_aliases_for_compare(self, model_name: str) -> set[str]:
+        """Return acceptable aliases for matching model identifiers from LM Studio."""
+        normalized_name = self._normalize_model_name_for_compare(model_name)
+        aliases = {normalized_name}
+        if "/" in normalized_name:
+            aliases.add(normalized_name.split("/")[-1])
+
+        aliases_with_gguf_stripped: set[str] = set()
+        for alias in aliases:
+            if alias.endswith("-gguf"):
+                aliases_with_gguf_stripped.add(alias[: -len("-gguf")])
+        aliases.update(aliases_with_gguf_stripped)
+
+        return aliases
+
     def _models_match(self, requested_model: str, response_model: str) -> bool:
-        normalized_requested_model = self._normalize_model_name_for_compare(requested_model)
-        normalized_response_model = self._normalize_model_name_for_compare(response_model)
-        return normalized_requested_model == normalized_response_model
+        requested_aliases = self._model_aliases_for_compare(requested_model)
+        response_aliases = self._model_aliases_for_compare(response_model)
+        return not requested_aliases.isdisjoint(response_aliases)
 
     def warm_model(self, model: str) -> bool:
         """Load model into memory using LM Studio's model load endpoint."""
