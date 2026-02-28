@@ -47,6 +47,8 @@ _RELEASE_LEMMAS_DIR = Path(__file__).resolve().parents[4] / "data" / "release" /
 _SUPPORTED_POS_TYPES = {"nouns", "verbs", "adjectives"}
 _MIN_CATEGORY_SIZE = 10
 _DISTRACTOR_COUNT = 5
+_MAX_QUESTIONS_PER_CATEGORY = 4
+_EXCLUDED_NOUN_SUBTYPES = {"country", "nationality", "city"}
 
 
 # Define benchmark metadata creator
@@ -190,6 +192,24 @@ class TranslationGenerator(BenchmarkGenerator):
     def _release_category_key(self, pos_type: str, pos_subtype: str) -> str:
         return f"{pos_type}:{pos_subtype}"
 
+    def _is_single_word(self, text: str) -> bool:
+        return len(text.split()) == 1
+
+    def _is_allowed_release_entry(
+        self, pos_type: str, pos_subtype: str, entry: Dict[str, Any]
+    ) -> bool:
+        if pos_type == "nouns" and pos_subtype in _EXCLUDED_NOUN_SUBTYPES:
+            return False
+
+        translations = entry.get("translations") or {}
+        origin_word = (translations.get(self.origin_lang) or "").strip()
+        target_word = (translations.get(self.target_lang) or "").strip()
+
+        if not origin_word or not target_word:
+            return False
+
+        return self._is_single_word(origin_word) and self._is_single_word(target_word)
+
     def _load_release_entries(self) -> Dict[str, List[Dict[str, str]]]:
         """Load release entries grouped by category for supported POS classes."""
         categories: Dict[str, List[Dict[str, str]]] = {}
@@ -211,12 +231,12 @@ class TranslationGenerator(BenchmarkGenerator):
                             continue
 
                         entry = json.loads(line)
+                        if not self._is_allowed_release_entry(pos_type, pos_subtype, entry):
+                            continue
+
                         translations = entry.get("translations") or {}
                         origin_word = (translations.get(self.origin_lang) or "").strip()
                         target_word = (translations.get(self.target_lang) or "").strip()
-
-                        if not origin_word or not target_word:
-                            continue
 
                         entries.append(
                             {
@@ -276,6 +296,7 @@ class TranslationGenerator(BenchmarkGenerator):
         for category_key in category_keys:
             entries = categories[category_key]
             random.shuffle(entries)
+            question_count = 0
 
             for entry in entries:
                 choices = self._build_choices(entry["target_word"], entries)
@@ -287,6 +308,9 @@ class TranslationGenerator(BenchmarkGenerator):
                     category=category_key,
                     choices=choices,
                 )
+                question_count += 1
+                if question_count >= _MAX_QUESTIONS_PER_CATEGORY:
+                    break
 
     def _generate_with_llm(self, **kwargs: Any) -> Iterator[BenchmarkQuestion]:
         """
