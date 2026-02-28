@@ -21,6 +21,7 @@
                                 <th>Name</th>
                                 <th>Size</th>
                                 <th>Launch Date</th>
+                                <th>Benchmark Tier</th>
                                 <th class="text-center">Runs</th>
                                 <th class="text-center">Avg Score</th>
                                 <th class="text-center">Last Run</th>
@@ -52,6 +53,9 @@
                                     {% else %}
                                     <span class="text-muted">-</span>
                                     {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge text-bg-secondary">{{ data.max_tier_label }}</span>
                                 </td>
                                 <td class="text-center">{{ data.run_count }}</td>
                                 <td class="text-center">

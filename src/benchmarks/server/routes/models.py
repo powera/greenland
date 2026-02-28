@@ -7,6 +7,7 @@ from sqlalchemy import func
 
 from benchmarks.datastore.benchmarks import Run
 from benchmarks.datastore.common import Model
+from benchmarks.tiers import get_tier_label
 
 bp = Blueprint("models", __name__, url_prefix="/models", template_folder="../templates")
 
@@ -36,6 +37,7 @@ def list_models():
                 "run_count": run_count or 0,
                 "avg_score": round(avg_score, 1) if avg_score else None,
                 "last_run": last_run,
+                "max_tier_label": get_tier_label(model.max_benchmark_tier),
             }
         )
 
@@ -69,4 +71,5 @@ def view_model(model_name):
         model=model,
         runs=runs,
         best_scores=best_scores,
+        max_tier_label=get_tier_label(model.max_benchmark_tier),
     )

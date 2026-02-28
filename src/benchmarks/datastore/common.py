@@ -48,6 +48,7 @@ class Model(Base):
     model_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     lmstudio_model_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     model_type: Mapped[str] = mapped_column(String, nullable=False, default="local")
+    max_benchmark_tier: Mapped[int] = mapped_column(Integer, nullable=False, default=2)
 
     # benchmark runs and qual runs are populated in those files.
 
@@ -112,6 +113,8 @@ def create_database_and_session(db_path=None):
         model_cols = {row[1] for row in model_result}
         if "lmstudio_model_name" not in model_cols:
             conn.execute(text("ALTER TABLE model ADD COLUMN lmstudio_model_name TEXT"))
+        if "max_benchmark_tier" not in model_cols:
+            conn.execute(text("ALTER TABLE model ADD COLUMN max_benchmark_tier INTEGER DEFAULT 2"))
 
         run_detail_result = conn.execute(text("PRAGMA table_info(run_detail)"))
         run_detail_cols = {row[1] for row in run_detail_result}
@@ -211,6 +214,11 @@ def _initialize_postgres_engine(postgres_url: str) -> Engine:
             text(f"ALTER TABLE {schema}.model ADD COLUMN IF NOT EXISTS lmstudio_model_name TEXT")
         )
         conn.execute(
+            text(
+                f"ALTER TABLE {schema}.model ADD COLUMN IF NOT EXISTS max_benchmark_tier INTEGER NOT NULL DEFAULT 2"
+            )
+        )
+        conn.execute(
             text(f"ALTER TABLE {schema}.run_detail ADD COLUMN IF NOT EXISTS tokens_used INTEGER")
         )
         conn.commit()
@@ -242,6 +250,7 @@ def insert_model(
     model_path: Optional[str] = None,
     lmstudio_model_name: Optional[str] = None,
     model_type: str = "local",
+    max_benchmark_tier: int = 2,
 ):
     """Insert a new model into the database."""
     try:
@@ -254,6 +263,7 @@ def insert_model(
             model_path=model_path,
             lmstudio_model_name=lmstudio_model_name,
             model_type=model_type,
+            max_benchmark_tier=max_benchmark_tier,
         )
         session.add(new_model)
         session.commit()
@@ -277,6 +287,7 @@ def upsert_model(
     model_path: Optional[str] = None,
     lmstudio_model_name: Optional[str] = None,
     model_type: str = "local",
+    max_benchmark_tier: int = 2,
 ) -> Tuple[bool, str]:
     """Insert a model, or update it if the codename already exists."""
     try:
@@ -289,6 +300,7 @@ def upsert_model(
             existing.model_path = model_path
             existing.lmstudio_model_name = lmstudio_model_name
             existing.model_type = model_type
+            existing.max_benchmark_tier = max_benchmark_tier
             session.commit()
             return True, f"Model '{codename}' successfully updated"
 
@@ -301,6 +313,7 @@ def upsert_model(
             model_path=model_path,
             lmstudio_model_name=lmstudio_model_name,
             model_type=model_type,
+            max_benchmark_tier=max_benchmark_tier,
         )
         session.add(new_model)
         session.commit()
@@ -328,6 +341,7 @@ def list_all_models(session):
             "model_path": model.model_path,
             "lmstudio_model_name": model.lmstudio_model_name,
             "model_type": model.model_type,
+            "max_benchmark_tier": model.max_benchmark_tier,
         }
         for model in models
     ]
@@ -353,6 +367,7 @@ def get_model_by_codename(session, codename: str):
         "model_path": model.model_path,
         "lmstudio_model_name": model.lmstudio_model_name,
         "model_type": model.model_type,
+        "max_benchmark_tier": model.max_benchmark_tier,
     }
 
 

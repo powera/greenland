@@ -10,6 +10,18 @@
     </div>
 </div>
 
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-light border">
+            <strong>Tier legend:</strong>
+            {% for tier in tier_definitions.values() %}
+            <span class="ms-2"><span class="badge text-bg-secondary">{{ tier.label }}</span> {{ tier.description }}</span>
+            {% endfor %}
+            <span class="ms-2"><span class="badge text-bg-light border">N/A</span> model is intentionally excluded from that tier.</span>
+        </div>
+    </div>
+</div>
+
 <!-- Filter Controls -->
 <div class="row mb-4">
     <div class="col-12">
@@ -98,6 +110,7 @@
                                         <strong>{{ benchmark.displayname }}</strong>
                                     </a>
                                     <br><small class="text-muted font-monospace">{{ benchmark.codename }}</small>
+                                    <span class="badge text-bg-secondary">{{ tier_definitions[benchmark_tiers[benchmark.codename]].label }}</span>
                                     {% if benchmark.description %}
                                     <br><small class="text-muted">{{ benchmark.description[:80] }}...</small>
                                     {% endif %}
@@ -121,6 +134,9 @@
                                             {{ '%.0f'|format(score_data.avg_cost_usd * 1000000) }}µ$
                                         </div>
                                     </a>
+                                    {% elif not eligibility[(benchmark.codename, model.codename)] %}
+                                    <span class="badge text-bg-light border"
+                                          title="Excluded by model tier policy">N/A</span>
                                     {% else %}
                                     <span class="text-muted">-</span>
                                     {% endif %}

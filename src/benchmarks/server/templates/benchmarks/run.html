@@ -14,6 +14,7 @@
         </nav>
         <h1><i class="bi bi-play-fill"></i> Run Benchmark</h1>
         <p class="lead">{{ benchmark.displayname }}</p>
+        <p class="text-muted mb-0">This benchmark is in <strong>{{ benchmark_tier_label }}</strong>.</p>
     </div>
 </div>
 
@@ -27,15 +28,16 @@
                         <label for="model_name" class="form-label">Model</label>
                         <select class="form-select" id="model_name" name="model_name" required>
                             <option value="">-- Select a model --</option>
-                            {% for model in models %}
-                            <option value="{{ model.codename }}">
-                                {{ model.displayname }}
-                                {% if model.filesize_mb %}- {{ model.filesize_mb }} MB{% endif %}
+                            {% for option in model_options %}
+                            <option value="{{ option.model.codename }}" {% if not option.supported %}disabled{% endif %}>
+                                {{ option.model.displayname }}
+                                {% if option.model.filesize_mb %}- {{ option.model.filesize_mb }} MB{% endif %}
+                                {% if not option.supported %}(max {{ tier_definitions[option.max_tier].label }}){% endif %}
                             </option>
                             {% endfor %}
                         </select>
                         <div class="form-text">
-                            Select the model to run this benchmark against.
+                            Models that cannot run this benchmark tier are shown as disabled.
                         </div>
                     </div>
 

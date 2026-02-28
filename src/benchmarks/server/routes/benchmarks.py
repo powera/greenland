@@ -11,6 +11,13 @@ from sqlalchemy import func
 from benchmarks.datastore.benchmarks import Benchmark, Question, Run, insert_benchmark
 from benchmarks.datastore.common import Model, decode_json
 from benchmarks.lib.utils.factory import get_all_benchmark_codes, get_benchmark_metadata
+from benchmarks.tiers import (
+    BENCHMARK_TIERS,
+    get_benchmark_tier,
+    get_model_max_tier,
+    get_tier_label,
+    model_can_run_benchmark,
+)
 
 bp = Blueprint("benchmarks", __name__, url_prefix="/benchmarks", template_folder="../templates")
 
@@ -263,6 +270,15 @@ def run_benchmark(benchmark_name):
             flash("Selected model was not found", "error")
             return redirect(url_for("benchmarks.run_benchmark", benchmark_name=benchmark_name))
 
+        if not model_can_run_benchmark(model, benchmark_name):
+            benchmark_tier = get_benchmark_tier(benchmark_name)
+            flash(
+                f"{model.displayname} is limited to {get_tier_label(get_model_max_tier(model))} and "
+                f"cannot run {get_tier_label(benchmark_tier)} tasks.",
+                "error",
+            )
+            return redirect(url_for("benchmarks.run_benchmark", benchmark_name=benchmark_name))
+
         worker = current_app.extensions["benchmark_run_worker"]
         queue_depth = worker.enqueue(benchmark_name=benchmark_name, model_name=model_name)
         flash(
@@ -278,12 +294,24 @@ def run_benchmark(benchmark_name):
 
     # Get all models
     models = g.bench_db.query(Model).order_by(Model.displayname).all()
+    benchmark_tier = get_benchmark_tier(benchmark_name)
+    model_options = [
+        {
+            "model": model,
+            "supported": model_can_run_benchmark(model, benchmark_name),
+            "max_tier": get_model_max_tier(model),
+        }
+        for model in models
+    ]
     worker_status = current_app.extensions["benchmark_run_worker"].status()
 
     return render_template(
         "benchmarks/run.html",
         benchmark=benchmark,
-        models=models,
+        model_options=model_options,
+        benchmark_tier=benchmark_tier,
+        benchmark_tier_label=get_tier_label(benchmark_tier),
+        tier_definitions=BENCHMARK_TIERS,
         run_enabled=current_app.config.get("BENCHMARK_RUNNER_ENABLED", True),
         run_authorized=_is_authorized_run_request(),
         worker_status=worker_status,
