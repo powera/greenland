@@ -31,6 +31,11 @@ BENCHMARK_TIERS: dict[int, BenchmarkTier] = {
         label="Tier 2 (Full)",
         description="All benchmark tasks.",
     ),
+    3: BenchmarkTier(
+        level=3,
+        label="Tier 3 (Advanced)",
+        description="Reserved for future advanced benchmarks (opt-in by model).",
+    ),
 }
 
 _SCREENING_TRANSLATION_CODES = {f"{value:04d}" for value in range(101, 110)}
@@ -67,4 +72,7 @@ def model_can_run_benchmark(model: Any, benchmark_code: str) -> bool:
 
 def get_tier_label(level: int) -> str:
     """Return a human label for a tier level."""
-    return BENCHMARK_TIERS.get(level, BENCHMARK_TIERS[2]).label
+    tier = BENCHMARK_TIERS.get(level)
+    if tier is not None:
+        return tier.label
+    return f"Tier {level}"

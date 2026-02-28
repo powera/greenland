@@ -235,6 +235,7 @@ def create_local_models(postgres_url=None):
         filesize_mb=1300,
         license_name="Llama License",
         lmstudio_model="bartowski/Llama-3.2-1B-Instruct-GGUF/Llama-3.2-1B-Instruct-Q8_0.gguf",
+        max_benchmark_tier=1,
     )
     _insert_lmstudio_model(
         s,
@@ -256,6 +257,7 @@ def create_local_models(postgres_url=None):
         filesize_mb=1100,
         license_name="Apache License",
         lmstudio_model="HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF/smollm2-1.7b-instruct-q4_k_m.gguf",
+        max_benchmark_tier=1,
     )
     _insert_lmstudio_model(
         s,
@@ -265,6 +267,7 @@ def create_local_models(postgres_url=None):
         filesize_mb=1500,
         license_name="Gemma License",
         lmstudio_model="codegood/gemma-2b-it-Q4_K_M-GGUF/gemma-2b-it.Q4_K_M.gguf",
+        max_benchmark_tier=1,
     )
     _insert_lmstudio_model(
         s,
@@ -334,6 +337,7 @@ def create_local_models(postgres_url=None):
         filesize_mb=2500,
         license_name="MIT License",
         lmstudio_model="mlx-community/Phi-3.5-mini-instruct-4bit",
+        max_benchmark_tier=1,
     )
 
     # --- Larger models (>8B) ---

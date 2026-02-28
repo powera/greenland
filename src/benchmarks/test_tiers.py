@@ -12,6 +12,7 @@ _SPEC.loader.exec_module(_MODULE)
 get_benchmark_tier = _MODULE.get_benchmark_tier
 get_model_max_tier = _MODULE.get_model_max_tier
 model_can_run_benchmark = _MODULE.model_can_run_benchmark
+get_tier_label = _MODULE.get_tier_label
 
 
 def test_get_benchmark_tier_assigns_screening_benchmarks():
@@ -34,3 +35,8 @@ def test_model_tier_helpers_guard_eligibility():
     assert model_can_run_benchmark(restricted_model, "0016_antonym")
     assert not model_can_run_benchmark(restricted_model, "0152_syllogism_validity")
     assert model_can_run_benchmark(unrestricted_model, "0152_syllogism_validity")
+
+
+def test_get_tier_label_supports_future_tiers():
+    assert get_tier_label(3) == "Tier 3 (Advanced)"
+    assert get_tier_label(4) == "Tier 4"
