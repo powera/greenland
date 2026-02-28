@@ -45,8 +45,8 @@ VALID_LANGS = {
 # Release dataset constraints for translation benchmark generation
 _RELEASE_LEMMAS_DIR = Path(__file__).resolve().parents[4] / "data" / "release" / "lemmas"
 _SUPPORTED_POS_TYPES = {"nouns", "verbs", "adjectives"}
-_MIN_CATEGORY_SIZE = 10
 _DISTRACTOR_COUNT = 5
+_MIN_CATEGORY_SIZE = _DISTRACTOR_COUNT + 1
 _MAX_QUESTIONS_PER_CATEGORY = 4
 _EXCLUDED_NOUN_SUBTYPES = {"country", "nationality", "city"}
 
@@ -246,6 +246,8 @@ class TranslationGenerator(BenchmarkGenerator):
                             }
                         )
 
+                # Keep categories that can support one multiple-choice question
+                # (correct answer + required same-category distractors).
                 if len(entries) >= _MIN_CATEGORY_SIZE:
                     categories[category_key] = entries
 
