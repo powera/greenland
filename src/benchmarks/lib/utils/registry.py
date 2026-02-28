@@ -137,7 +137,7 @@ from benchmarks.lib.runners.unit_conversion_runner import UnitConversionRunner
     description="""
            A benchmark to evaluate a model's ability to accurately convert
            between different units of measurement.""",
-    category="general knowledge",
+    category="simple math",
 )
 class UnitConversionBenchmark:
     """Module container for unit conversion benchmark."""

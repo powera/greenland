@@ -94,9 +94,19 @@ class BenchmarkGenerator:
             codename=self.metadata.code,
             displayname=self.metadata.name,
             description=self.metadata.description or self.__doc__,
+            category=self.metadata.category,
         )
         if not success and "already exists" not in msg:
             logger.error("Failed to create benchmark: %s", msg)
+        elif not success and self.metadata.category:
+            existing = (
+                self.session.query(datastore_benchmarks.Benchmark)
+                .filter(datastore_benchmarks.Benchmark.codename == self.metadata.code)
+                .first()
+            )
+            if existing and existing.category != self.metadata.category:
+                existing.category = self.metadata.category
+                self.session.commit()
 
     def load_json_file(self, filename: str, subdir: Optional[str] = None) -> Any:
         """

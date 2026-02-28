@@ -30,7 +30,7 @@ benchmark(
     BENCHMARK_CODE,
     "Unit Conversion",
     "Tests ability to perform unit conversions accurately.",
-    category="general knowledge",
+    category="simple math",
 )(__name__)
 
 # Default unit conversions if no file is provided
