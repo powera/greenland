@@ -9,6 +9,7 @@ from benchmarks.datastore.benchmarks import (
     insert_question,
     insert_run,
     list_all_benchmarks,
+    get_run_by_run_id,
     load_all_questions_for_benchmark,
 )
 from benchmarks.datastore.common import insert_model, list_all_models
@@ -141,6 +142,38 @@ class TestDatastore(unittest.TestCase):
         )
         self.assertTrue(success)
         self.assertIsInstance(run_id, int)
+
+    def test_insert_run_persists_tokens_used(self):
+        """
+        Test inserting a run detail that includes token usage metadata
+        """
+        insert_model(self.session, "test_model", "Test Model")
+        insert_benchmark(self.session, "test_benchmark", "Test Benchmark", "Test Description")
+        insert_question(
+            self.session, "test_question_tokens", "test_benchmark", json.dumps({"test": "data"})
+        )
+
+        run_details = [
+            {
+                "question_id": "test_question_tokens",
+                "score": 100,
+                "eval_msec": 120,
+                "tokens_used": 321,
+            }
+        ]
+
+        success, run_id = insert_run(
+            self.session,
+            "test_model",
+            "test_benchmark",
+            100,
+            run_details=run_details,
+        )
+
+        self.assertTrue(success)
+        run_data = get_run_by_run_id(run_id, self.session)
+        self.assertIsNotNone(run_data)
+        self.assertEqual(run_data["details"][0]["tokens_used"], 321)
 
     def test_list_all_models(self):
         """

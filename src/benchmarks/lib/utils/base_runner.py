@@ -285,6 +285,7 @@ class BenchmarkRunner:
                     response.additional_thought if response.additional_thought else None
                 ),
                 cost_usd=response.usage.cost if response.usage else None,
+                tokens_used=response.usage.total_tokens if response.usage else None,
             )
 
         except OllamaTimeoutError as e:

@@ -113,6 +113,11 @@ def create_database_and_session(db_path=None):
         if "lmstudio_model_name" not in model_cols:
             conn.execute(text("ALTER TABLE model ADD COLUMN lmstudio_model_name TEXT"))
 
+        run_detail_result = conn.execute(text("PRAGMA table_info(run_detail)"))
+        run_detail_cols = {row[1] for row in run_detail_result}
+        if "tokens_used" not in run_detail_cols:
+            conn.execute(text("ALTER TABLE run_detail ADD COLUMN tokens_used INTEGER"))
+
         conn.commit()
 
     Session = sessionmaker(bind=engine)
@@ -204,6 +209,9 @@ def _initialize_postgres_engine(postgres_url: str) -> Engine:
     with base_engine.connect() as conn:
         conn.execute(
             text(f"ALTER TABLE {schema}.model ADD COLUMN IF NOT EXISTS lmstudio_model_name TEXT")
+        )
+        conn.execute(
+            text(f"ALTER TABLE {schema}.run_detail ADD COLUMN IF NOT EXISTS tokens_used INTEGER")
         )
         conn.commit()
 
