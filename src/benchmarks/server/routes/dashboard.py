@@ -9,6 +9,7 @@ from sqlalchemy import case, func
 
 from benchmarks.datastore.benchmarks import Benchmark, Run, RunDetail
 from benchmarks.datastore.common import Model
+from benchmarks.tiers import BENCHMARK_TIERS, get_benchmark_tier, model_can_run_benchmark
 
 bp = Blueprint(
     "dashboard",
@@ -105,12 +106,23 @@ def index():
         }
 
     categories = sorted({b.category for b in benchmarks if b.category})
+    eligibility = {
+        (benchmark.codename, model.codename): model_can_run_benchmark(model, benchmark.codename)
+        for benchmark in benchmarks
+        for model in models
+    }
+    benchmark_tiers = {
+        benchmark.codename: get_benchmark_tier(benchmark.codename) for benchmark in benchmarks
+    }
 
     return render_template(
         "dashboard/index.html",
         models=models,
         benchmarks=benchmarks,
         scores=scores,
+        eligibility=eligibility,
+        benchmark_tiers=benchmark_tiers,
+        tier_definitions=BENCHMARK_TIERS,
         categories=categories,
         current_time=datetime.now().strftime("%B %d, %Y at %H:%M"),
     )

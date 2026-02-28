@@ -72,6 +72,7 @@ def _insert_lmstudio_model(
     license_name: str,
     lmstudio_model: str,
     lmstudio_model_name: Optional[str] = None,
+    max_benchmark_tier: int = 2,
 ) -> None:
     """Insert a local model that is served via LMStudio.
 
@@ -100,6 +101,7 @@ def _insert_lmstudio_model(
         model_path=LMSTUDIO_PREFIX + lmstudio_model,
         lmstudio_model_name=local_model_name,
         model_type="local",
+        max_benchmark_tier=max_benchmark_tier,
     )
 
 
@@ -223,6 +225,7 @@ def create_local_models(postgres_url=None):
         license_name="Llama License",
         lmstudio_model="TheBloke/Llama-2-7B-GGUF/llama-2-7b.Q4_K_S.gguf",
         lmstudio_model_name="llama-2-7b",
+        max_benchmark_tier=1,
     )
     _insert_lmstudio_model(
         s,
