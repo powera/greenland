@@ -259,6 +259,50 @@ def insert_model(
         return False, f"Error inserting model: {str(e)}"
 
 
+def upsert_model(
+    session,
+    codename: str,
+    displayname: str,
+    launch_date: Optional[str] = None,
+    filesize_mb: Optional[int] = None,
+    license_name: Optional[str] = None,
+    model_path: Optional[str] = None,
+    lmstudio_model_name: Optional[str] = None,
+    model_type: str = "local",
+) -> Tuple[bool, str]:
+    """Insert a model, or update it if the codename already exists."""
+    try:
+        existing = session.query(Model).filter(Model.codename == codename).first()
+        if existing is not None:
+            existing.displayname = displayname
+            existing.launch_date = launch_date
+            existing.filesize_mb = filesize_mb
+            existing.license_name = license_name
+            existing.model_path = model_path
+            existing.lmstudio_model_name = lmstudio_model_name
+            existing.model_type = model_type
+            session.commit()
+            return True, f"Model '{codename}' successfully updated"
+
+        new_model = Model(
+            codename=codename,
+            displayname=displayname,
+            launch_date=launch_date,
+            filesize_mb=filesize_mb,
+            license_name=license_name,
+            model_path=model_path,
+            lmstudio_model_name=lmstudio_model_name,
+            model_type=model_type,
+        )
+        session.add(new_model)
+        session.commit()
+        return True, f"Model '{codename}' successfully inserted"
+
+    except SQLAlchemyError as e:
+        session.rollback()
+        return False, f"Error upserting model: {str(e)}"
+
+
 def list_all_models(session):
     """List all models in the database.
 
