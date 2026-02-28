@@ -62,7 +62,9 @@ def index():
         .subquery()
     )
 
-    # Join to get the actual run IDs and calculate avg eval time
+    # Join to get the actual run IDs and calculate averages for the run details
+    # in the same query. This avoids per-run aggregate queries, which are
+    # expensive with high DB latency.
     runs_data = (
         g.bench_db.query(
             Run.run_id,
@@ -70,6 +72,8 @@ def index():
             Run.model_name,
             Run.normed_score,
             Run.run_ts,
+            func.avg(RunDetail.eval_msec).label("avg_eval_time"),
+            func.avg(RunDetail.cost_usd).label("avg_cost_usd"),
         )
         .join(
             subquery,
@@ -77,36 +81,26 @@ def index():
             & (Run.model_name == subquery.c.model_name)
             & (Run.normed_score == subquery.c.max_score),
         )
+        .outerjoin(RunDetail, RunDetail.run_id == Run.run_id)
+        .group_by(
+            Run.run_id,
+            Run.benchmark_name,
+            Run.model_name,
+            Run.normed_score,
+            Run.run_ts,
+        )
         .all()
     )
 
-    # Calculate average eval times for each run
-    avg_times = {}
-    avg_costs = {}
-    for run_id, bench_name, model_name, score, run_ts in runs_data:
-        avg_time = (
-            g.bench_db.query(func.avg(RunDetail.eval_msec))
-            .filter(RunDetail.run_id == run_id)
-            .scalar()
-        )
-        avg_times[run_id] = avg_time or 0
-
-        avg_cost_usd = (
-            g.bench_db.query(func.avg(RunDetail.cost_usd))
-            .filter(RunDetail.run_id == run_id)
-            .scalar()
-        )
-        avg_costs[run_id] = avg_cost_usd or 0
-
     # Build scores dictionary
     scores = {}
-    for run_id, bench_name, model_name, score, run_ts in runs_data:
+    for run_id, bench_name, model_name, score, run_ts, avg_eval_time, avg_cost_usd in runs_data:
         scores[(bench_name, model_name)] = {
             "run_id": run_id,
             "value": score,
             "color": get_score_color(score),
-            "avg_eval_time": avg_times.get(run_id, 0),
-            "avg_cost_usd": avg_costs.get(run_id, 0),
+            "avg_eval_time": avg_eval_time or 0,
+            "avg_cost_usd": avg_cost_usd or 0,
             "run_ts": run_ts,
         }
 
