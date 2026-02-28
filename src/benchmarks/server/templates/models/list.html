@@ -20,6 +20,7 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Size</th>
+                                <th>Launch Date</th>
                                 <th class="text-center">Runs</th>
                                 <th class="text-center">Avg Score</th>
                                 <th class="text-center">Last Run</th>
@@ -41,6 +42,13 @@
                                 <td>
                                     {% if data.model.filesize_mb %}
                                     {{ data.model.filesize_mb }} MB
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if data.model.launch_date %}
+                                    {{ data.model.launch_date }}
                                     {% else %}
                                     <span class="text-muted">-</span>
                                     {% endif %}

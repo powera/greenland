@@ -99,6 +99,7 @@ class BenchmarkResult:
     debug_json: Optional[str] = None  # Debug information (model response, etc.)
     thought_process: Optional[str] = None  # Add this line to store model's reasoning
     cost_usd: Optional[float] = None  # Estimated LLM cost in USD
+    tokens_used: Optional[int] = None  # Total tokens consumed for this response
 
 
 @dataclass

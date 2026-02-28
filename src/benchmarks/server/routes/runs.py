@@ -62,6 +62,7 @@ def view_run(run_id):
     avg_time = total_time / total_questions if total_questions > 0 else 0
 
     total_cost = sum(d.get("cost_usd") or 0 for d in run_data["details"])
+    total_tokens = sum((d.get("tokens_used") or 0) for d in run_data["details"])
 
     ordered_questions = sorted(run_data["details"], key=_question_sort_key)
 
@@ -75,6 +76,7 @@ def view_run(run_id):
         incorrect_count=incorrect_count,
         avg_time=avg_time,
         total_cost=total_cost,
+        total_tokens=total_tokens,
         ordered_questions=ordered_questions,
         correctness_threshold=threshold,
     )
@@ -113,6 +115,7 @@ def compare_runs():
                 else 0
             )
             total_cost = sum(d.get("cost_usd") or 0 for d in run_data["details"])
+            total_tokens = sum((d.get("tokens_used") or 0) for d in run_data["details"])
 
             runs_data.append(
                 {
@@ -124,6 +127,7 @@ def compare_runs():
                     "total_questions": total_questions,
                     "avg_time": avg_time,
                     "total_cost": total_cost,
+                    "total_tokens": total_tokens,
                 }
             )
 

@@ -78,6 +78,7 @@ class RunDetail(Base):
     debug_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     thought_process: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     cost_usd: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    tokens_used: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     question_id: Mapped[str] = mapped_column(
         String, ForeignKey("question.question_id"), primary_key=True
@@ -195,6 +196,7 @@ def insert_run(
                     debug_json=detail.get("debug_json"),
                     thought_process=detail.get("thought_process", None),
                     cost_usd=detail.get("cost_usd", None),
+                    tokens_used=detail.get("tokens_used", None),
                 )
                 session.add(run_detail)
 
@@ -284,6 +286,7 @@ def get_run_by_run_id(run_id: int, session=None) -> Optional[Dict]:
                 "debug_json": decode_json(detail.debug_json),
                 "thought_process": detail.thought_process,
                 "cost_usd": detail.cost_usd,
+                "tokens_used": detail.tokens_used,
             }
             for detail, question in run_details
         ],
@@ -392,6 +395,7 @@ def get_highest_scoring_run_details(
                 "question_info_json": decode_json(question.question_info_json),
                 "debug_json": decode_json(detail.debug_json),
                 "cost_usd": detail.cost_usd,
+                "tokens_used": detail.tokens_used,
             }
             for detail, question in run_details
         ],

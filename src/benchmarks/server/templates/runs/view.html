@@ -67,6 +67,14 @@
             </div>
         </div>
     </div>
+    <div class="col-sm-6 col-md">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="text-muted">Tokens Used</h6>
+                <h4>{{ total_tokens }}</h4>
+            </div>
+        </div>
+    </div>
     {% if total_cost %}
     <div class="col-sm-6 col-md">
         <div class="card stat-card">
@@ -141,7 +149,7 @@
                                                 {% if is_correct %}Correct{% else %}Incorrect{% endif %}
                                             </span>
                                         </span>
-                                        <span class="small text-muted">Score: {{ detail.score or 0 }} • {{ detail.eval_msec or 0 }}ms{% if detail.cost_usd %} • {% if detail.cost_usd < 0.001 %}{{ '%.0f'|format(detail.cost_usd * 1000000) }}µ${% else %}${{ '%.4f'|format(detail.cost_usd) }}{% endif %}{% endif %}</span>
+                                        <span class="small text-muted">Score: {{ detail.score or 0 }} • {{ detail.eval_msec or 0 }}ms{% if detail.tokens_used is not none %} • {{ detail.tokens_used }} tokens{% endif %}{% if detail.cost_usd %} • {% if detail.cost_usd < 0.001 %}{{ '%.0f'|format(detail.cost_usd * 1000000) }}µ${% else %}${{ '%.4f'|format(detail.cost_usd) }}{% endif %}{% endif %}</span>
                                     </div>
                                 </button>
                             </h2>
