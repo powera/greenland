@@ -46,6 +46,7 @@ class Model(Base):
     filesize_mb: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     license_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     model_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    lmstudio_model_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     model_type: Mapped[str] = mapped_column(String, nullable=False, default="local")
 
     # benchmark runs and qual runs are populated in those files.
@@ -106,7 +107,13 @@ def create_database_and_session(db_path=None):
         existing_cols = {row[1] for row in result}
         if "category" not in existing_cols:
             conn.execute(text("ALTER TABLE benchmark ADD COLUMN category TEXT"))
-            conn.commit()
+
+        model_result = conn.execute(text("PRAGMA table_info(model)"))
+        model_cols = {row[1] for row in model_result}
+        if "lmstudio_model_name" not in model_cols:
+            conn.execute(text("ALTER TABLE model ADD COLUMN lmstudio_model_name TEXT"))
+
+        conn.commit()
 
     Session = sessionmaker(bind=engine)
     return Session()
@@ -192,6 +199,14 @@ def _initialize_postgres_engine(postgres_url: str) -> Engine:
     import benchmarks.datastore.benchmarks  # noqa: F401
 
     Base.metadata.create_all(engine)
+
+    # Lightweight migration for existing deployments missing new model fields.
+    with base_engine.connect() as conn:
+        conn.execute(
+            text(f"ALTER TABLE {schema}.model ADD COLUMN IF NOT EXISTS lmstudio_model_name TEXT")
+        )
+        conn.commit()
+
     return engine
 
 
@@ -217,6 +232,7 @@ def insert_model(
     filesize_mb: Optional[int] = None,
     license_name: Optional[str] = None,
     model_path: Optional[str] = None,
+    lmstudio_model_name: Optional[str] = None,
     model_type: str = "local",
 ):
     """Insert a new model into the database."""
@@ -228,6 +244,7 @@ def insert_model(
             filesize_mb=filesize_mb,
             license_name=license_name,
             model_path=model_path,
+            lmstudio_model_name=lmstudio_model_name,
             model_type=model_type,
         )
         session.add(new_model)
@@ -257,6 +274,7 @@ def list_all_models(session):
             "filesize_mb": model.filesize_mb,
             "license_name": model.license_name,
             "model_path": model.model_path,
+            "lmstudio_model_name": model.lmstudio_model_name,
             "model_type": model.model_type,
         }
         for model in models
@@ -281,6 +299,7 @@ def get_model_by_codename(session, codename: str):
         "filesize_mb": model.filesize_mb,
         "license_name": model.license_name,
         "model_path": model.model_path,
+        "lmstudio_model_name": model.lmstudio_model_name,
         "model_type": model.model_type,
     }
 

@@ -118,7 +118,7 @@ def test_generate_chat_sends_requested_model(monkeypatch):
     assert response.response_text == "hello"
 
 
-def test_generate_chat_accepts_response_model_alias(monkeypatch):
+def test_generate_chat_accepts_expected_response_model_name(monkeypatch):
     client = LMStudioClient(timeout=40, debug=False)
 
     def fake_make_request(endpoint: str, data: Dict[str, Any]) -> _FakeChatResponse:
@@ -131,27 +131,13 @@ def test_generate_chat_accepts_response_model_alias(monkeypatch):
 
     monkeypatch.setattr(client, "_make_request", fake_make_request)
 
-    response = client.generate_chat(prompt="hi", model="TheBloke/Llama-2-7B-GGUF")
+    response = client.generate_chat(
+        prompt="hi",
+        model="TheBloke/Llama-2-7B-GGUF",
+        expected_response_model="llama-2-7b",
+    )
 
     assert response.response_text == "alias works"
-
-
-def test_generate_chat_accepts_response_model_quantization_alias(monkeypatch):
-    client = LMStudioClient(timeout=40, debug=False)
-
-    def fake_make_request(endpoint: str, data: Dict[str, Any]) -> _FakeChatResponse:
-        return _FakeChatResponse(
-            {
-                "model": "bartowski/llama-2-7b-instruct-q4_k_m",
-                "choices": [{"message": {"content": "quant alias works"}}],
-            }
-        )
-
-    monkeypatch.setattr(client, "_make_request", fake_make_request)
-
-    response = client.generate_chat(prompt="hi", model="TheBloke/Llama-2-7B-GGUF")
-
-    assert response.response_text == "quant alias works"
 
 
 def test_generate_chat_raises_on_response_model_mismatch(monkeypatch):

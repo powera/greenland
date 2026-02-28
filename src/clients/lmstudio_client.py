@@ -102,7 +102,10 @@ class LMStudioClient:
             raise LMStudioRequestError(error_msg) from e
 
     def _process_chat_response(
-        self, response: requests.Response, model: str
+        self,
+        response: requests.Response,
+        model: str,
+        expected_response_model: Optional[str] = None,
     ) -> tuple[str, Optional[LLMUsage], Optional[str]]:
         """Process chat response and extract content, usage info, and additional thoughts."""
         result = ""
@@ -120,10 +123,13 @@ class LMStudioClient:
                     "LMStudio response did not include a valid model identifier"
                 )
 
-            if not self._models_match(requested_model=model, response_model=response_model):
+            expected_model = expected_response_model or model
+            if not self._models_match(
+                requested_model=expected_model, response_model=response_model
+            ):
                 raise LMStudioModelMismatchError(
                     "LMStudio response model mismatch: "
-                    f"requested '{model}' but response used '{response_model}'"
+                    f"requested '{expected_model}' but response used '{response_model}'"
                 )
 
             # Extract the message content from the choices array
@@ -188,60 +194,10 @@ class LMStudioClient:
             normalized_name = normalized_name[len("lmstudio/") :]
         return normalized_name
 
-    def _canonical_model_slug(self, model_name: str) -> str:
-        """Build a canonical model slug resilient to registry/prefix and format differences."""
-        normalized_name = self._normalize_model_name_for_compare(model_name)
-        model_leaf = normalized_name.split("/")[-1]
-        raw_tokens = [token for token in re.split(r"[^a-z0-9]+", model_leaf) if token]
-
-        ignored_tokens = {
-            "gguf",
-            "ggml",
-            "gptq",
-            "awq",
-            "mlx",
-            "exl2",
-            "imatrix",
-            "thebloke",
-            "lmstudio",
-            "community",
-            "instruct",
-            "chat",
-            "k",
-            "m",
-            "s",
-            "l",
-        }
-
-        canonical_tokens: list[str] = []
-        for token in raw_tokens:
-            if token in ignored_tokens:
-                continue
-            if re.fullmatch(r"q\d+(?:_k_[msl])?", token):
-                continue
-            if token in {"fp16", "f16", "f32", "int4", "int8"}:
-                continue
-            canonical_tokens.append(token)
-
-        return "-".join(canonical_tokens)
-
-    def _model_aliases_for_compare(self, model_name: str) -> set[str]:
-        """Return acceptable aliases for matching model identifiers from LM Studio."""
-        normalized_name = self._normalize_model_name_for_compare(model_name)
-        aliases = {normalized_name}
-        if "/" in normalized_name:
-            aliases.add(normalized_name.split("/")[-1])
-
-        canonical_slug = self._canonical_model_slug(normalized_name)
-        if canonical_slug:
-            aliases.add(canonical_slug)
-
-        return aliases
-
     def _models_match(self, requested_model: str, response_model: str) -> bool:
-        requested_aliases = self._model_aliases_for_compare(requested_model)
-        response_aliases = self._model_aliases_for_compare(response_model)
-        return not requested_aliases.isdisjoint(response_aliases)
+        normalized_requested_model = self._normalize_model_name_for_compare(requested_model)
+        normalized_response_model = self._normalize_model_name_for_compare(response_model)
+        return normalized_requested_model == normalized_response_model
 
     def warm_model(self, model: str) -> bool:
         """Load model into memory using LM Studio's model load endpoint."""
@@ -391,6 +347,7 @@ class LMStudioClient:
         brief: bool = False,
         json_schema: Optional[Any] = None,
         context: Optional[str] = None,
+        expected_response_model: Optional[str] = None,
     ) -> Response:
         """
         Generate chat completion using LMStudio API.
@@ -401,6 +358,7 @@ class LMStudioClient:
             brief: Whether to limit response length
             json_schema: Schema for structured response
             context: Optional context to include before the prompt
+            expected_response_model: Optional model name expected in LM Studio response
 
         Returns:
             Response data class
@@ -461,7 +419,7 @@ class LMStudioClient:
 
         response = self._make_request("chat/completions", data)
         response_text, response_usage, additional_thought = self._process_chat_response(
-            response, model
+            response, model, expected_response_model=expected_response_model
         )
 
         # Handle JSON responses
@@ -524,6 +482,7 @@ def generate_chat(
     brief: bool = False,
     json_schema: Optional[Any] = None,
     context: Optional[str] = None,
+    expected_response_model: Optional[str] = None,
 ) -> Response:
     """
     Generate a chat response.
@@ -531,4 +490,11 @@ def generate_chat(
     Returns:
         Response data class containing response_text, structured_data, usage_info, and additional_thought
     """
-    return _get_client().generate_chat(prompt, model, brief, json_schema, context)
+    return _get_client().generate_chat(
+        prompt,
+        model,
+        brief,
+        json_schema,
+        context,
+        expected_response_model=expected_response_model,
+    )
