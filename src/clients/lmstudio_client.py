@@ -102,7 +102,10 @@ class LMStudioClient:
             raise LMStudioRequestError(error_msg) from e
 
     def _process_chat_response(
-        self, response: requests.Response, model: str
+        self,
+        response: requests.Response,
+        model: str,
+        expected_response_model: Optional[str] = None,
     ) -> tuple[str, Optional[LLMUsage], Optional[str]]:
         """Process chat response and extract content, usage info, and additional thoughts."""
         result = ""
@@ -120,10 +123,13 @@ class LMStudioClient:
                     "LMStudio response did not include a valid model identifier"
                 )
 
-            if not self._models_match(requested_model=model, response_model=response_model):
+            expected_model = expected_response_model or model
+            if not self._models_match(
+                requested_model=expected_model, response_model=response_model
+            ):
                 raise LMStudioModelMismatchError(
                     "LMStudio response model mismatch: "
-                    f"requested '{model}' but response used '{response_model}'"
+                    f"requested '{expected_model}' but response used '{response_model}'"
                 )
 
             # Extract the message content from the choices array
@@ -341,6 +347,7 @@ class LMStudioClient:
         brief: bool = False,
         json_schema: Optional[Any] = None,
         context: Optional[str] = None,
+        expected_response_model: Optional[str] = None,
     ) -> Response:
         """
         Generate chat completion using LMStudio API.
@@ -351,6 +358,7 @@ class LMStudioClient:
             brief: Whether to limit response length
             json_schema: Schema for structured response
             context: Optional context to include before the prompt
+            expected_response_model: Optional model name expected in LM Studio response
 
         Returns:
             Response data class
@@ -411,7 +419,7 @@ class LMStudioClient:
 
         response = self._make_request("chat/completions", data)
         response_text, response_usage, additional_thought = self._process_chat_response(
-            response, model
+            response, model, expected_response_model=expected_response_model
         )
 
         # Handle JSON responses
@@ -474,6 +482,7 @@ def generate_chat(
     brief: bool = False,
     json_schema: Optional[Any] = None,
     context: Optional[str] = None,
+    expected_response_model: Optional[str] = None,
 ) -> Response:
     """
     Generate a chat response.
@@ -481,4 +490,11 @@ def generate_chat(
     Returns:
         Response data class containing response_text, structured_data, usage_info, and additional_thought
     """
-    return _get_client().generate_chat(prompt, model, brief, json_schema, context)
+    return _get_client().generate_chat(
+        prompt,
+        model,
+        brief,
+        json_schema,
+        context,
+        expected_response_model=expected_response_model,
+    )

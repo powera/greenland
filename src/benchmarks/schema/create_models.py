@@ -17,12 +17,15 @@ Terminology for insert_model parameters:
                  the "lmstudio/" prefix selects the LMStudio backend and the
                  remainder (e.g. "meta-llama/llama-3.2-1b-instruct") is passed
                  directly to LMStudio's load/chat API.
+  lmstudio_model_name — short model ID returned by LM Studio responses for local
+                 models (e.g. "llama-2-7b").
   model_type   — "remote" (API) or "local" (LMStudio)
 """
 
 import argparse
 import sys
 from pathlib import Path
+from typing import Optional
 
 # Add src to path if not already present
 if str(Path(__file__).parent.parent.parent) not in sys.path:
@@ -53,6 +56,7 @@ def _insert_lmstudio_model(
     filesize_mb: int,
     license_name: str,
     lmstudio_model: str,
+    lmstudio_model_name: Optional[str] = None,
 ) -> None:
     """Insert a local model that is served via LMStudio.
 
@@ -63,10 +67,14 @@ def _insert_lmstudio_model(
         filesize_mb: Approximate on-disk size in MB.
         license_name: Short license identifier.
         lmstudio_model: The identifier LMStudio uses to load this model,
-            e.g. "meta-llama/llama-3.2-1b-instruct".  Stored in the DB as
+            e.g. "meta-llama/llama-3.2-1b-instruct". Stored in the DB as
             "lmstudio/<lmstudio_model>" so the unified client routes it to
             the LMStudio backend.
+        lmstudio_model_name: Short identifier returned by LM Studio responses.
+            If omitted, defaults to codename with a trailing "-lms" removed.
     """
+    local_model_name = lmstudio_model_name or codename.removesuffix("-lms")
+
     datastore_common.insert_model(
         session,
         codename=codename,
@@ -75,6 +83,7 @@ def _insert_lmstudio_model(
         filesize_mb=filesize_mb,
         license_name=license_name,
         model_path=LMSTUDIO_PREFIX + lmstudio_model,
+        lmstudio_model_name=local_model_name,
         model_type="local",
     )
 
@@ -198,6 +207,7 @@ def create_local_models(postgres_url=None):
         filesize_mb=4900,
         license_name="Llama License",
         lmstudio_model="TheBloke/Llama-2-7B-GGUF",
+        lmstudio_model_name="llama-2-7b",
     )
     _insert_lmstudio_model(
         s,

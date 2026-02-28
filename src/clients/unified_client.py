@@ -71,7 +71,7 @@ class UnifiedLLMClient:
         self.timeout = timeout
         self.debug = debug
         self.default_model: Optional[str] = None
-        self._model_resolution_cache: Dict[str, Tuple[str, str]] = {}
+        self._model_resolution_cache: Dict[str, Tuple[str, str, Optional[str]]] = {}
         if debug:
             logger.setLevel(logging.DEBUG)
             logger.debug("Initialized UnifiedLLMClient (timeout=%ds)", timeout)
@@ -151,6 +151,7 @@ class UnifiedLLMClient:
             gemini_client.GeminiClient,
         ],
         str,
+        Optional[str],
     ]:
         """
         Get appropriate client for model and normalize model name.
@@ -159,7 +160,7 @@ class UnifiedLLMClient:
             model: Original model name/identifier (codename)
 
         Returns:
-            Tuple of (client, normalized_model_name)
+            Tuple of (client, normalized_model_name, expected_response_model_name)
         """
         client: Union[
             ollama_client.OllamaClient,
@@ -171,21 +172,22 @@ class UnifiedLLMClient:
         ] = None
         client_name: Optional[str] = None
         normalized_model = model
+        expected_response_model: Optional[str] = None
 
         # Fast path: reuse previous resolution for this model codename.
         cached = self._model_resolution_cache.get(model)
         if cached is not None:
-            cached_client_name, cached_normalized_model = cached
+            cached_client_name, cached_normalized_model, cached_expected_response_model = cached
             if cached_client_name == "openai":
-                return self.openai, cached_normalized_model
+                return self.openai, cached_normalized_model, cached_expected_response_model
             if cached_client_name == "anthropic":
-                return self.anthropic, cached_normalized_model
+                return self.anthropic, cached_normalized_model, cached_expected_response_model
             if cached_client_name == "gemini":
-                return self.gemini, cached_normalized_model
+                return self.gemini, cached_normalized_model, cached_expected_response_model
             if cached_client_name == "ollama":
-                return self.ollama, cached_normalized_model
+                return self.ollama, cached_normalized_model, cached_expected_response_model
             if cached_client_name == "lmstudio":
-                return self.lmstudio, cached_normalized_model
+                return self.lmstudio, cached_normalized_model, cached_expected_response_model
 
         # Check if this is a commercial API model first (skip database lookup)
         # These models can be routed directly based on their name
@@ -214,6 +216,7 @@ class UnifiedLLMClient:
 
             model_path = model_info.get("model_path")
             model_type = model_info.get("model_type")
+            lmstudio_model_name = model_info.get("lmstudio_model_name")
 
             if not model_path or not model_type:
                 raise ValueError(
@@ -228,6 +231,11 @@ class UnifiedLLMClient:
                     client = self.lmstudio
                     client_name = "LMStudio"
                     normalized_model = model_path[len("lmstudio/") :]
+                    expected_response_model = (
+                        lmstudio_model_name
+                        if isinstance(lmstudio_model_name, str) and lmstudio_model_name
+                        else None
+                    )
                 else:
                     # Default to Ollama for local models
                     client = self.ollama
@@ -243,9 +251,13 @@ class UnifiedLLMClient:
             raise ValueError(f"Could not determine client for model: {model}")
 
         backend_name = self._get_backend_name(client)
-        self._model_resolution_cache[model] = (backend_name, normalized_model)
+        self._model_resolution_cache[model] = (
+            backend_name,
+            normalized_model,
+            expected_response_model,
+        )
 
-        return client, normalized_model
+        return client, normalized_model, expected_response_model
 
     def _get_backend_name(
         self,
@@ -280,14 +292,14 @@ class UnifiedLLMClient:
 
     def warm_model(self, model: str, timeout: Optional[float] = None) -> bool:
         """Initialize model for faster first inference."""
-        client, normalized_model = self._get_client(model)
+        client, normalized_model, expected_response_model = self._get_client(model)
         if self.debug:
             logger.debug("Warming up model: %s", normalized_model)
         return client.warm_model(normalized_model)
 
     def unload_model(self, model: str) -> bool:
         """Unload model from memory (LMStudio only; no-op for other backends)."""
-        client, normalized_model = self._get_client(model)
+        client, normalized_model, expected_response_model = self._get_client(model)
         if isinstance(client, lmstudio_client.LMStudioClient):
             if self.debug:
                 logger.debug("Unloading model: %s", normalized_model)
@@ -337,7 +349,7 @@ class UnifiedLLMClient:
             )
 
         # Get the appropriate client for this model
-        client, normalized_model = self._get_client(model)
+        client, normalized_model, expected_response_model = self._get_client(model)
 
         # Determine backend name for metrics and logging
         backend_name = self._get_backend_name(client)
@@ -361,13 +373,17 @@ class UnifiedLLMClient:
         tokens_out = 0
 
         try:
-            result = client.generate_chat(
-                prompt=prompt,
-                model=normalized_model,
-                brief=brief,
-                json_schema=json_schema,
-                context=context,
-            )
+            generate_kwargs: Dict[str, Any] = {
+                "prompt": prompt,
+                "model": normalized_model,
+                "brief": brief,
+                "json_schema": json_schema,
+                "context": context,
+            }
+            if isinstance(client, lmstudio_client.LMStudioClient):
+                generate_kwargs["expected_response_model"] = expected_response_model
+
+            result = client.generate_chat(**generate_kwargs)
 
             # Extract token usage if available
             if result.usage:
