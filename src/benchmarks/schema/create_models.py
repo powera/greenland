@@ -36,6 +36,21 @@ from benchmarks.config import BenchmarkConfig
 from benchmarks.datastore import common as datastore_common
 from clients.lmstudio_client import LMStudioClient
 
+# When True, _insert_lmstudio_model and insert_model calls use upsert semantics.
+_UPDATE_MODE = False
+
+
+def _model_write(session, **kwargs) -> None:
+    """Insert or upsert a model depending on _UPDATE_MODE.
+
+    Prints the result message from the datastore helper.
+    """
+    if _UPDATE_MODE:
+        _ok, msg = datastore_common.upsert_model(session, **kwargs)
+    else:
+        _ok, msg = datastore_common.insert_model(session, **kwargs)
+    print(msg)
+
 
 LMSTUDIO_PREFIX = "lmstudio/"
 
@@ -75,7 +90,7 @@ def _insert_lmstudio_model(
     """
     local_model_name = lmstudio_model_name or codename.removesuffix("-lms")
 
-    datastore_common.insert_model(
+    _model_write(
         session,
         codename=codename,
         displayname=displayname,
@@ -99,7 +114,7 @@ def create_remote_models(postgres_url=None):
     s = _get_session(postgres_url)
 
     # OpenAI GPT-5 family
-    datastore_common.insert_model(
+    _model_write(
         s,
         codename="gpt-5.2",
         displayname="GPT-5.2",
@@ -109,7 +124,7 @@ def create_remote_models(postgres_url=None):
         model_path="gpt-5.2",
         model_type="remote",
     )
-    datastore_common.insert_model(
+    _model_write(
         s,
         codename="gpt-5-mini",
         displayname="GPT-5 mini",
@@ -119,7 +134,7 @@ def create_remote_models(postgres_url=None):
         model_path="gpt-5-mini",
         model_type="remote",
     )
-    datastore_common.insert_model(
+    _model_write(
         s,
         codename="gpt-5-nano",
         displayname="GPT-5 nano",
@@ -131,7 +146,7 @@ def create_remote_models(postgres_url=None):
     )
 
     # Anthropic Claude 4.6
-    datastore_common.insert_model(
+    _model_write(
         s,
         codename="claude-opus-4-6",
         displayname="Claude Opus 4.6",
@@ -141,7 +156,7 @@ def create_remote_models(postgres_url=None):
         model_path="claude-opus-4-6",
         model_type="remote",
     )
-    datastore_common.insert_model(
+    _model_write(
         s,
         codename="claude-sonnet-4-6",
         displayname="Claude Sonnet 4.6",
@@ -151,7 +166,7 @@ def create_remote_models(postgres_url=None):
         model_path="claude-sonnet-4-6",
         model_type="remote",
     )
-    datastore_common.insert_model(
+    _model_write(
         s,
         codename="claude-haiku-4-5",
         displayname="Claude Haiku 4.5",
@@ -176,7 +191,7 @@ def create_local_models(postgres_url=None):
         launch_date="2025-04-29",
         filesize_mb=1100,
         license_name="Apache License",
-        lmstudio_model="lmstudio-community/Qwen3-1.7B-GGUF",
+        lmstudio_model="lmstudio-community/Qwen3-1.7B-GGUF/Qwen3-1.7B-Q6_K.gguf",
     )
     _insert_lmstudio_model(
         s,
@@ -185,7 +200,7 @@ def create_local_models(postgres_url=None):
         launch_date="2025-04-29",
         filesize_mb=2800,
         license_name="Apache License",
-        lmstudio_model="lmstudio-community/Qwen3-4B-GGUF",
+        lmstudio_model="lmstudio-community/Qwen3-4B-GGUF/Qwen3-4B-Q4_K_M.gguf",
     )
     _insert_lmstudio_model(
         s,
@@ -206,7 +221,7 @@ def create_local_models(postgres_url=None):
         launch_date="2023-07-18",
         filesize_mb=4900,
         license_name="Llama License",
-        lmstudio_model="TheBloke/Llama-2-7B-GGUF",
+        lmstudio_model="TheBloke/Llama-2-7B-GGUF/llama-2-7b.Q4_K_S.gguf",
         lmstudio_model_name="llama-2-7b",
     )
     _insert_lmstudio_model(
@@ -216,7 +231,7 @@ def create_local_models(postgres_url=None):
         launch_date="2024-09-25",
         filesize_mb=1300,
         license_name="Llama License",
-        lmstudio_model="meta-llama/llama-3.2-1b-instruct",
+        lmstudio_model="bartowski/Llama-3.2-1B-Instruct-GGUF/Llama-3.2-1B-Instruct-Q8_0.gguf",
     )
     _insert_lmstudio_model(
         s,
@@ -225,7 +240,7 @@ def create_local_models(postgres_url=None):
         launch_date="2024-04-18",
         filesize_mb=4900,
         license_name="Llama License",
-        lmstudio_model="meta-llama/meta-llama-3-8b-instruct",
+        lmstudio_model="lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct-Q4_K_M.gguf",
     )
 
     # --- Other small models ---
@@ -237,7 +252,7 @@ def create_local_models(postgres_url=None):
         launch_date="2024-11-01",
         filesize_mb=1100,
         license_name="Apache License",
-        lmstudio_model="HuggingFaceTB/smollm2-1.7b-instruct",
+        lmstudio_model="HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF/smollm2-1.7b-instruct-q4_k_m.gguf",
     )
     _insert_lmstudio_model(
         s,
@@ -246,7 +261,7 @@ def create_local_models(postgres_url=None):
         launch_date="2024-02-21",
         filesize_mb=1500,
         license_name="Gemma License",
-        lmstudio_model="codegood/gemma-2b-it-Q4_K_M-GGUF",
+        lmstudio_model="codegood/gemma-2b-it-Q4_K_M-GGUF/gemma-2b-it.Q4_K_M.gguf",
     )
     _insert_lmstudio_model(
         s,
@@ -255,7 +270,7 @@ def create_local_models(postgres_url=None):
         launch_date="2024-06-27",
         filesize_mb=1500,
         license_name="Gemma License",
-        lmstudio_model="google/gemma-2-2b-it",
+        lmstudio_model="mlx-community/gemma-2-2b-it-4bit",
     )
     _insert_lmstudio_model(
         s,
@@ -276,7 +291,7 @@ def create_local_models(postgres_url=None):
         launch_date="2024-10-16",
         filesize_mb=4900,
         license_name="Mistral Research License",
-        lmstudio_model="mistralai/ministral-8b-instruct-2410",
+        lmstudio_model="bartowski/Ministral-8B-Instruct-2410-GGUF/Ministral-8B-Instruct-2410-Q4_K_S.gguf",
     )
     _insert_lmstudio_model(
         s,
@@ -285,7 +300,7 @@ def create_local_models(postgres_url=None):
         launch_date="2024-11-27",
         filesize_mb=4300,
         license_name="Apache License",
-        lmstudio_model="allenai/olmo-3-7b-instruct",
+        lmstudio_model="lmstudio-community/Olmo-3-7B-Instruct-GGUF/Olmo-3-7B-Instruct-Q4_K_M.gguf",
     )
 
     # --- 2024 flagship class (<=8B) models ---
@@ -297,7 +312,7 @@ def create_local_models(postgres_url=None):
         launch_date="2024-07-23",
         filesize_mb=4900,
         license_name="Llama License",
-        lmstudio_model="meta-llama/llama-3.1-8b-instruct",
+        lmstudio_model="lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf",
     )
     _insert_lmstudio_model(
         s,
@@ -315,7 +330,40 @@ def create_local_models(postgres_url=None):
         launch_date="2024-08-20",
         filesize_mb=2500,
         license_name="MIT License",
-        lmstudio_model="microsoft/phi-3.5-mini-instruct",
+        lmstudio_model="mlx-community/Phi-3.5-mini-instruct-4bit",
+    )
+
+    # --- Larger models (>8B) ---
+
+    _insert_lmstudio_model(
+        s,
+        codename="phi-4-lms",
+        displayname="Phi-4 (LMStudio)",
+        launch_date="2024-12-12",
+        filesize_mb=9100,
+        license_name="MIT License",
+        lmstudio_model="microsoft/phi-4",
+        lmstudio_model_name="microsoft/phi-4",
+    )
+    _insert_lmstudio_model(
+        s,
+        codename="gemma-2-9b-lms",
+        displayname="Gemma 2 9B (LMStudio)",
+        launch_date="2024-06-27",
+        filesize_mb=5800,
+        license_name="Gemma License",
+        lmstudio_model="google/gemma-2-9b",
+        lmstudio_model_name="google/gemma-2-9b",
+    )
+    _insert_lmstudio_model(
+        s,
+        codename="gemma-3-12b-lms",
+        displayname="Gemma 3 12B (LMStudio)",
+        launch_date="2025-03-12",
+        filesize_mb=8100,
+        license_name="Gemma License",
+        lmstudio_model="google/gemma-3-12b",
+        lmstudio_model_name="google/gemma-3-12b",
     )
 
 
@@ -377,11 +425,19 @@ def main():
         help="Full PostgreSQL connection URL (overrides --postgres key-file lookup)",
     )
     parser.add_argument(
+        "--update",
+        action="store_true",
+        help="Update existing model entries instead of skipping them (upsert mode)",
+    )
+    parser.add_argument(
         "--install-local-lmstudio",
         action="store_true",
         help="Request LMStudio to install all local models in the benchmark DB (serially)",
     )
     args = parser.parse_args()
+
+    global _UPDATE_MODE
+    _UPDATE_MODE = args.update
 
     postgres_url = None
     if args.db_url and args.db_url.startswith("postgresql://"):
@@ -391,6 +447,8 @@ def main():
 
     if postgres_url:
         print("Using storage backend: postgres (Supabase)")
+    if _UPDATE_MODE:
+        print("Update mode enabled: existing models will be updated")
 
     create_models(postgres_url)
 
