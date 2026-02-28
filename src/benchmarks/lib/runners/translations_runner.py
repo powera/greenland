@@ -12,6 +12,7 @@ from benchmarks.lib.utils.base import BenchmarkRunner
 from benchmarks.lib.utils.data_models import AnswerType, BenchmarkMetadata, BenchmarkResult
 from benchmarks.lib.utils.factory import benchmark, get_benchmark_metadata, runner
 from benchmarks.lib.generators.translations_generator import VALID_LANGS, get_translation_metadata
+import util.prompt_loader
 from words import build_single_target_translation_prompt
 
 # Configure logging
@@ -80,13 +81,14 @@ class TranslationRunner(BenchmarkRunner):
         if question_data.get("answer_type") == AnswerType.MULTIPLE_CHOICE.value:
             candidates = question_data.get("choices", [])
 
-        context, prompt, schema = build_single_target_translation_prompt(
+        _unused_context, prompt, schema = build_single_target_translation_prompt(
             source_word=origin_word or question_text,
             source_language=self.origin_lang,
             target_language=self.target_lang,
             candidate_translations=candidates,
         )
 
+        context = util.prompt_loader.get_context("translation", "word_benchmark")
         return prompt, schema, context
 
     def evaluate_response(self, question_data: Dict, response: Any) -> bool:
