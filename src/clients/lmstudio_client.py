@@ -188,6 +188,43 @@ class LMStudioClient:
             normalized_name = normalized_name[len("lmstudio/") :]
         return normalized_name
 
+    def _canonical_model_slug(self, model_name: str) -> str:
+        """Build a canonical model slug resilient to registry/prefix and format differences."""
+        normalized_name = self._normalize_model_name_for_compare(model_name)
+        model_leaf = normalized_name.split("/")[-1]
+        raw_tokens = [token for token in re.split(r"[^a-z0-9]+", model_leaf) if token]
+
+        ignored_tokens = {
+            "gguf",
+            "ggml",
+            "gptq",
+            "awq",
+            "mlx",
+            "exl2",
+            "imatrix",
+            "thebloke",
+            "lmstudio",
+            "community",
+            "instruct",
+            "chat",
+            "k",
+            "m",
+            "s",
+            "l",
+        }
+
+        canonical_tokens: list[str] = []
+        for token in raw_tokens:
+            if token in ignored_tokens:
+                continue
+            if re.fullmatch(r"q\d+(?:_k_[msl])?", token):
+                continue
+            if token in {"fp16", "f16", "f32", "int4", "int8"}:
+                continue
+            canonical_tokens.append(token)
+
+        return "-".join(canonical_tokens)
+
     def _model_aliases_for_compare(self, model_name: str) -> set[str]:
         """Return acceptable aliases for matching model identifiers from LM Studio."""
         normalized_name = self._normalize_model_name_for_compare(model_name)
@@ -195,11 +232,9 @@ class LMStudioClient:
         if "/" in normalized_name:
             aliases.add(normalized_name.split("/")[-1])
 
-        aliases_with_gguf_stripped: set[str] = set()
-        for alias in aliases:
-            if alias.endswith("-gguf"):
-                aliases_with_gguf_stripped.add(alias[: -len("-gguf")])
-        aliases.update(aliases_with_gguf_stripped)
+        canonical_slug = self._canonical_model_slug(normalized_name)
+        if canonical_slug:
+            aliases.add(canonical_slug)
 
         return aliases
 
