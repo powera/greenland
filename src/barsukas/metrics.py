@@ -292,10 +292,11 @@ class RequestMetricsMiddleware:
             # Record latency
             REQUEST_LATENCY.labels(method=request.method, endpoint=endpoint).observe(duration)
 
-            # Record request count
-            REQUEST_COUNT.labels(
-                method=request.method, endpoint=endpoint, status_code=response.status_code
-            ).inc()
+            # Record request count (exclude noisy 404 scans/probes)
+            if response.status_code != 404:
+                REQUEST_COUNT.labels(
+                    method=request.method, endpoint=endpoint, status_code=response.status_code
+                ).inc()
 
         return response
 
