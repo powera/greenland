@@ -107,6 +107,41 @@ def _extract_question_data(question_info_json: Any, debug_json: Any) -> Optional
     return None
 
 
+def _refresh_debug_json(
+    runner: Any,
+    question_data: Dict[str, Any],
+    model_response: Any,
+    rescored: int,
+    existing_debug_json: Any,
+) -> str:
+    refreshed_debug: Dict[str, Any] = {}
+    if isinstance(existing_debug_json, dict):
+        refreshed_debug.update(existing_debug_json)
+
+    if hasattr(runner, "build_debug_info"):
+        raw_threshold = getattr(runner, "CORRECTNESS_THRESHOLD", 100)
+        try:
+            threshold = int(raw_threshold)
+        except (TypeError, ValueError):
+            threshold = 100
+
+        is_correct = rescored >= threshold
+
+        try:
+            runner_debug = runner.build_debug_info(question_data, model_response, is_correct)
+            if isinstance(runner_debug, dict):
+                refreshed_debug.update(runner_debug)
+        except Exception as error:
+            logger.warning(
+                "Failed to refresh debug_json with build_debug_info for runner=%s: %s",
+                runner.__class__.__name__,
+                error,
+            )
+
+    refreshed_debug["scoring_runner"] = runner.__class__.__name__
+    return json.dumps(refreshed_debug)
+
+
 def rescore_benchmark_runs(
     benchmark_code: str,
     model: Optional[str] = None,
@@ -192,9 +227,13 @@ def rescore_benchmark_runs(
 
             if not dry_run:
                 detail.score = rescored
-                if isinstance(debug_json, dict):
-                    debug_json.setdefault("scoring_runner", runner.__class__.__name__)
-                    detail.debug_json = json.dumps(debug_json)
+                detail.debug_json = _refresh_debug_json(
+                    runner,
+                    question_data,
+                    model_response,
+                    rescored,
+                    debug_json,
+                )
 
         if not rescored_values:
             continue
