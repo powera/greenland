@@ -1,53 +1,26 @@
 /* Dashboard filtering, sorting, and search logic */
 
 document.addEventListener('DOMContentLoaded', function() {
-    const modelTypeRadios = document.querySelectorAll('input[name="modelType"]');
+    const modelScopeSelect = document.getElementById('modelScope');
+    const benchmarkTierFilter = document.getElementById('benchmarkTierFilter');
     const categorySelect = document.getElementById('categoryFilter');
     const searchBox = document.getElementById('searchBox');
     const benchmarkSortSelect = document.getElementById('benchmarkSort');
-    const viewPresetSelect = document.getElementById('viewPreset');
     const resultsTable = document.getElementById('resultsTable');
     const noResults = document.getElementById('noResults');
 
-    function setModelTypeSelection(modelType) {
-        const selectedRadio = document.querySelector(`input[name="modelType"][value="${modelType}"]`);
-        if (selectedRadio) {
-            selectedRadio.checked = true;
-        }
-    }
+    function getModelScopeConfig() {
+        const selectedScope = modelScopeSelect ? modelScopeSelect.value : 'remote';
 
-    function applyViewPreset() {
-        const preset = viewPresetSelect ? viewPresetSelect.value : 'all';
-        const rows = resultsTable.querySelectorAll('tbody .benchmark-row');
-
-        if (preset === 'remote') {
-            setModelTypeSelection('remote');
-            rows.forEach(row => {
-                row.dataset.presetVisible = '1';
-            });
-            return;
+        if (selectedScope === 'local-tier1') {
+            return { modelType: 'local', tierPredicate: tierValue => tierValue === '1' };
         }
 
-        if (preset === 'local-tier1') {
-            setModelTypeSelection('local');
-            rows.forEach(row => {
-                row.dataset.presetVisible = row.dataset.tier === '1' ? '1' : '0';
-            });
-            return;
+        if (selectedScope === 'local-tier2plus') {
+            return { modelType: 'local', tierPredicate: tierValue => tierValue !== '1' };
         }
 
-        if (preset === 'local-tier2plus') {
-            setModelTypeSelection('local');
-            rows.forEach(row => {
-                row.dataset.presetVisible = row.dataset.tier !== '1' ? '1' : '0';
-            });
-            return;
-        }
-
-        setModelTypeSelection('all');
-        rows.forEach(row => {
-            row.dataset.presetVisible = '1';
-        });
+        return { modelType: 'remote', tierPredicate: () => true };
     }
 
     function getVisibleScores(row) {
@@ -99,16 +72,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function filterTable() {
-        applyViewPreset();
-
-        const modelType = document.querySelector('input[name="modelType"]:checked').value;
+        const scopeConfig = getModelScopeConfig();
         const selectedCategory = categorySelect ? categorySelect.value : 'all';
+        const selectedBenchmarkTier = benchmarkTierFilter ? benchmarkTierFilter.value : 'all';
         const searchTerm = searchBox.value.toLowerCase();
 
         const modelCols = resultsTable.querySelectorAll('.model-col');
         modelCols.forEach(col => {
             const colModelType = col.dataset.modelType;
-            const showCol = (modelType === 'all' || modelType === colModelType);
+            const showCol = colModelType === scopeConfig.modelType;
             col.style.display = showCol ? '' : 'none';
         });
 
@@ -117,10 +89,12 @@ document.addEventListener('DOMContentLoaded', function() {
         rows.forEach(row => {
             const benchmarkText = row.textContent.toLowerCase();
             const rowCategory = row.dataset.category || '';
+            const rowTier = row.dataset.tier || '';
             const matchesSearch = benchmarkText.includes(searchTerm);
             const matchesCategory = (selectedCategory === 'all' || rowCategory === selectedCategory);
-            const matchesPreset = row.dataset.presetVisible !== '0';
-            const showRow = matchesSearch && matchesCategory && matchesPreset;
+            const matchesTier = (selectedBenchmarkTier === 'all' || rowTier === selectedBenchmarkTier);
+            const matchesScope = scopeConfig.tierPredicate(rowTier);
+            const showRow = matchesSearch && matchesCategory && matchesTier && matchesScope;
             row.style.display = showRow ? '' : 'none';
             if (showRow) visibleCount++;
         });
@@ -129,17 +103,12 @@ document.addEventListener('DOMContentLoaded', function() {
         noResults.style.display = visibleCount === 0 ? 'block' : 'none';
     }
 
-    modelTypeRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            if (viewPresetSelect && viewPresetSelect.value !== 'all') {
-                viewPresetSelect.value = 'all';
-            }
-            filterTable();
-        });
-    });
+    if (modelScopeSelect) {
+        modelScopeSelect.addEventListener('change', filterTable);
+    }
 
-    if (viewPresetSelect) {
-        viewPresetSelect.addEventListener('change', filterTable);
+    if (benchmarkTierFilter) {
+        benchmarkTierFilter.addEventListener('change', filterTable);
     }
 
     if (categorySelect) {

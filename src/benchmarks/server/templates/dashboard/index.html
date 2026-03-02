@@ -13,11 +13,19 @@
 <div class="row mb-4">
     <div class="col-12">
         <div class="alert alert-light border">
-            <strong>Tier legend:</strong>
-            {% for tier in tier_definitions.values() %}
-            <span class="ms-2"><span class="badge text-bg-secondary">{{ tier.short_label }}</span> {{ tier.label }} — {{ tier.description }}</span>
-            {% endfor %}
-            <span class="ms-2"><span class="badge text-bg-light border">N/A</span> model is intentionally excluded from that tier.</span>
+            <strong>Tier legend</strong>
+            <div class="mt-2">
+                {% for tier in tier_definitions.values() %}
+                <div class="mb-1">
+                    <span class="badge text-bg-secondary">{{ tier.short_label }}</span>
+                    {{ tier.label }}
+                </div>
+                {% endfor %}
+                <div>
+                    <span class="badge text-bg-light border">N/A</span>
+                    Excluded by model policy.
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -32,26 +40,21 @@
                 </h5>
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <label class="form-label">View Preset</label>
-                        <select class="form-select" id="viewPreset">
-                            <option value="remote" selected>Remote models</option>
-                            <option value="local-tier1">Local models · Tier 1</option>
-                            <option value="local-tier2plus">Local models · Tier 2+</option>
-                            <option value="all">All models · all tiers</option>
+                        <label class="form-label">Model Scope</label>
+                        <select class="form-select" id="modelScope">
+                            <option value="remote" selected>Remote</option>
+                            <option value="local-tier1">Local (Tier 1)</option>
+                            <option value="local-tier2plus">Local (Tier 2)</option>
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Model Type</label>
-                        <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="modelType" id="typeAll" value="all">
-                            <label class="btn btn-outline-primary" for="typeAll">All</label>
-
-                            <input type="radio" class="btn-check" name="modelType" id="typeLocal" value="local">
-                            <label class="btn btn-outline-primary" for="typeLocal">Local</label>
-
-                            <input type="radio" class="btn-check" name="modelType" id="typeRemote" value="remote">
-                            <label class="btn btn-outline-primary" for="typeRemote">Remote</label>
-                        </div>
+                        <label class="form-label">Benchmark Tier</label>
+                        <select class="form-select" id="benchmarkTierFilter">
+                            <option value="all" selected>All tiers</option>
+                            {% for tier in tier_definitions.values() %}
+                            <option value="{{ tier.id }}">{{ tier.short_label }} · {{ tier.label }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Category</label>
