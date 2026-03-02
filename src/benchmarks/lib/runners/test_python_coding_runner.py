@@ -36,6 +36,28 @@ def gcd_checked(a, b):
     assert runner.score_response(question_data, response) == 100
 
 
+def test_python_coding_runner_allows_isinstance_builtin() -> None:
+    runner = _runner()
+    question_data = {
+        "correct_answer": {
+            "function_name": "classify",
+            "test_cases": [
+                {"args": [5], "expected": "int"},
+                {"args": ["x"], "expected": "other"},
+            ],
+        }
+    }
+
+    response = """
+def classify(value):
+    if isinstance(value, int):
+        return \"int\"
+    return \"other\"
+"""
+
+    assert runner.score_response(question_data, response) == 100
+
+
 def test_python_coding_runner_blocks_imports() -> None:
     runner = _runner()
     question_data = {
