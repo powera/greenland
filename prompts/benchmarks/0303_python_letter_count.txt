@@ -1,0 +1,7 @@
+Write Python 3.12 code only.
+Define exactly one function named count_target_letter(text, target).
+Return how many times the target letter appears in the string.
+Count should be case-insensitive.
+Raise TypeError for non-string input, and raise ValueError if target is not exactly one character.
+Do not use any imports (no numpy, requests, or other libraries).
+Return only Python code.

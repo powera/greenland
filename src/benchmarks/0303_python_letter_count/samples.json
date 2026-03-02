@@ -1,0 +1,20 @@
+[
+  {
+    "question": "Write a Python 3.12 function for 'how many times does the target letter appear in a string'.",
+    "correct_answer": {
+      "function_name": "count_target_letter",
+      "test_cases": [
+        {"args": ["banana", "a"], "expected": 3},
+        {"args": ["Mississippi", "s"], "expected": 4},
+        {"args": ["Hello", "l"], "expected": 2},
+        {"args": ["Abracadabra", "a"], "expected": 5},
+        {"args": ["CaseSensitive", "c"], "expected": 1},
+        {"args": ["", "x"], "expected": 0},
+        {"args": ["aaaa", "a"], "expected": 4},
+        {"args": ["letter", "tt"], "expected_exception": "ValueError"},
+        {"args": [42, "a"], "expected_exception": "TypeError"},
+        {"args": ["abc", 1], "expected_exception": "TypeError"}
+      ]
+    }
+  }
+]

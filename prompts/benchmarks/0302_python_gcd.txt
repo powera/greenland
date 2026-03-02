@@ -1,0 +1,7 @@
+Write Python 3.12 code only.
+Define exactly one function named gcd_checked(a, b).
+It must return the greatest common divisor of two integers.
+Raise TypeError if either argument is not an int.
+Raise ValueError if either argument is <= 0.
+Do not use any imports (no numpy, requests, or other libraries).
+Return only Python code.

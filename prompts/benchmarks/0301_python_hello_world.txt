@@ -1,0 +1,5 @@
+Write Python 3.12 code only.
+Define exactly one function named hello_world.
+The function must print exactly: Hello world
+Do not use any imports (no numpy, requests, or other libraries).
+Return only Python code.

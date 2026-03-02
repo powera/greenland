@@ -1,0 +1,7 @@
+Write Python 3.12 code only.
+Define exactly one function named min_coins_for_amount(amount, coins).
+Return the minimum number of coins needed to make the amount exactly.
+If exact change is impossible, raise ValueError.
+Raise TypeError for invalid input types.
+Do not use any imports (no numpy, requests, or other libraries).
+Return only Python code.

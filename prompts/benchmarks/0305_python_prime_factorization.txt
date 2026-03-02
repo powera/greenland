@@ -1,0 +1,7 @@
+Write Python 3.12 code only.
+Define exactly one function named prime_factors(n).
+Return a list of prime factors in ascending order, with repetition.
+Raise TypeError if n is not an int.
+Raise ValueError if n <= 1.
+Do not use any imports (no numpy, requests, or other libraries).
+Return only Python code.
