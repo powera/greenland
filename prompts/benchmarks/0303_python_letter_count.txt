@@ -4,6 +4,7 @@ Return how many times the target letter appears in the string.
 Count should be case-insensitive.
 Raise TypeError for non-string input, and raise ValueError if target is not exactly one character.
 Do not use any imports (no numpy, requests, or other libraries).
+Sandbox note: dunder attribute access is blocked (for example, type(x).__name__). Avoid names/attributes starting with '__'.
 
 Expected output format:
 - Return exactly one fenced Markdown code block starting with ```python and ending with ```.
