@@ -1,0 +1,20 @@
+[
+  {
+    "question": "Write a Python 3.12 function for prime factorization.",
+    "correct_answer": {
+      "function_name": "prime_factors",
+      "test_cases": [
+        {"args": [2], "expected": [2]},
+        {"args": [12], "expected": [2, 2, 3]},
+        {"args": [36], "expected": [2, 2, 3, 3]},
+        {"args": [97], "expected": [97]},
+        {"args": [999], "expected": [3, 3, 3, 37]},
+        {"args": [1024], "expected": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]},
+        {"args": [1], "expected_exception": "ValueError"},
+        {"args": [0], "expected_exception": "ValueError"},
+        {"args": [-10], "expected_exception": "ValueError"},
+        {"args": [3.14], "expected_exception": "TypeError"}
+      ]
+    }
+  }
+]

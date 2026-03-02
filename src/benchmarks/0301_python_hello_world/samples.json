@@ -1,0 +1,11 @@
+[
+  {
+    "question": "Write a Python 3.12 function that prints Hello world.",
+    "correct_answer": {
+      "function_name": "hello_world",
+      "test_cases": [
+        {"args": [], "expected": "Hello world", "capture_stdout": true}
+      ]
+    }
+  }
+]

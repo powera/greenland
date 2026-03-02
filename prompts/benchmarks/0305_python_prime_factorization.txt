@@ -1,0 +1,15 @@
+Write Python 3.12 code only.
+Define exactly one function named prime_factors(n).
+Return a list of prime factors in ascending order, with repetition.
+Raise TypeError if n is not an int.
+Raise ValueError if n <= 1.
+Do not use any imports (no numpy, requests, or other libraries).
+
+Expected output format:
+- Return exactly one fenced Markdown code block starting with ```python and ending with ```.
+- Put only valid Python code inside that block (no prose before/after).
+- Use 4 spaces for indentation (not tabs).
+- Do not return JSON and do not wrap code in a "function" key.
+
+Sample input/output behavior:
+- prime_factors(36) -> [2, 2, 3, 3]

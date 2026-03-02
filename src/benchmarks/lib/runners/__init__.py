@@ -32,5 +32,15 @@ from benchmarks.lib.runners.validate_translation_runner import ValidateTranslati
 # Knowledge benchmarks 0152-0155
 from benchmarks.lib.runners.syllogism_validity_runner import SyllogismValidityRunner
 from benchmarks.lib.runners.book_author_match_runner import BookAuthorMatchRunner
-from benchmarks.lib.runners.food_category_classification_runner import FoodCategoryClassificationRunner
+from benchmarks.lib.runners.food_category_classification_runner import (
+    FoodCategoryClassificationRunner,
+)
 from benchmarks.lib.runners.historical_event_year_runner import HistoricalEventYearRunner
+
+from benchmarks.lib.runners.python_coding_runner import (
+    PythonCoinChangeRunner,
+    PythonGCDRunner,
+    PythonHelloWorldRunner,
+    PythonLetterFrequencyRunner,
+    PythonPrimeFactorizationRunner,
+)

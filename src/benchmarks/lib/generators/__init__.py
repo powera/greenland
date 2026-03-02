@@ -36,5 +36,15 @@ from benchmarks.lib.generators.validate_translation_generator import ValidateTra
 # Knowledge benchmarks 0152-0155
 from benchmarks.lib.generators.syllogism_validity_generator import SyllogismValidityGenerator
 from benchmarks.lib.generators.book_author_match_generator import BookAuthorMatchGenerator
-from benchmarks.lib.generators.food_category_classification_generator import FoodCategoryClassificationGenerator
+from benchmarks.lib.generators.food_category_classification_generator import (
+    FoodCategoryClassificationGenerator,
+)
 from benchmarks.lib.generators.historical_event_year_generator import HistoricalEventYearGenerator
+
+from benchmarks.lib.generators.python_coding_generators import (
+    PythonCoinChangeGenerator,
+    PythonGCDGenerator,
+    PythonHelloWorldGenerator,
+    PythonLetterCountGenerator,
+    PythonPrimeFactorizationGenerator,
+)

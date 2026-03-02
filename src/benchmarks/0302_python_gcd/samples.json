@@ -1,0 +1,20 @@
+[
+  {
+    "question": "Write a Python 3.12 function that calculates GCD (greatest common denominator) and raises exceptions for invalid input.",
+    "correct_answer": {
+      "function_name": "gcd_checked",
+      "test_cases": [
+        {"args": [54, 24], "expected": 6},
+        {"args": [48, 18], "expected": 6},
+        {"args": [17, 13], "expected": 1},
+        {"args": [100, 10], "expected": 10},
+        {"args": [270, 192], "expected": 6},
+        {"args": [1, 1], "expected": 1},
+        {"args": [0, 5], "expected_exception": "ValueError"},
+        {"args": [-4, 6], "expected_exception": "ValueError"},
+        {"args": [3.5, 2], "expected_exception": "TypeError"},
+        {"args": ["9", 3], "expected_exception": "TypeError"}
+      ]
+    }
+  }
+]

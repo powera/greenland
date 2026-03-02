@@ -13,6 +13,7 @@ This document captures the current benchmark lineup and numbering through `0299`
 - `022X`: game-strategy benchmarks.
 - `023X`: computer tool-use benchmarks (ed, regex, shell).
 - `024X`: task-planning / blockworld benchmarks.
+- `0301`–`0350`: Python coding benchmarks.
 
 ## Current implemented benchmarks
 
@@ -59,6 +60,11 @@ This document captures the current benchmark lineup and numbering through `0299`
 | 0153 | `book_author_match` | Book Author Match | general knowledge | implemented |
 | 0154 | `food_category_classification` | Food Category Classification | general knowledge | implemented |
 | 0155 | `historical_event_year` | Historical Event Year | general knowledge | implemented |
+| 0301 | `python_hello_world` | Python Hello World Function | coding | implemented |
+| 0302 | `python_gcd` | Python GCD With Validation | coding | implemented |
+| 0303 | `python_letter_count` | Python Letter Count in String | coding | implemented |
+| 0304 | `python_coin_change` | Python Minimum Coin Change | coding | implemented |
+| 0305 | `python_prime_factorization` | Python Prime Factorization | coding | implemented |
 
 ## Proposed unimplemented additions
 
