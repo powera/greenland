@@ -31,6 +31,8 @@ DEFAULT_TIMEOUT = 250
 MODEL_OPERATION_TIMEOUT = 30
 MODEL_OPERATION_RETRIES = 3
 MODEL_OPERATION_RETRY_DELAY = 1.0
+MODEL_LOADING_STATES = {"loading", "queued", "initializing", "starting"}
+MODEL_READY_STATES = {"loaded", "ready", "idle"}
 
 
 class LMStudioError(Exception):
@@ -330,13 +332,15 @@ class LMStudioClient:
                     loaded_model = model_entry.get("model")
 
                     candidate_ids = [model_id, instance_id, loaded_model]
-                    if any(candidate_id == model for candidate_id in candidate_ids):
-                        return True
-                    if any(
-                        isinstance(candidate_id, str) and candidate_id.endswith(f"/{model}")
-                        for candidate_id in candidate_ids
-                    ):
-                        return True
+                    model_matches = any(candidate_id == model for candidate_id in candidate_ids)
+                    if not model_matches:
+                        model_matches = any(
+                            isinstance(candidate_id, str) and candidate_id.endswith(f"/{model}")
+                            for candidate_id in candidate_ids
+                        )
+
+                    if model_matches:
+                        return self._is_model_entry_ready(model_entry)
 
                 return False
             except RequestException:
@@ -345,6 +349,33 @@ class LMStudioClient:
                 continue
 
         return None
+
+    def _is_model_entry_ready(self, model_entry: Dict[str, Any]) -> bool:
+        state_values = [
+            model_entry.get("state"),
+            model_entry.get("status"),
+            model_entry.get("load_status"),
+        ]
+        for state_value in state_values:
+            if isinstance(state_value, str):
+                normalized_state = state_value.strip().lower()
+                if normalized_state in MODEL_LOADING_STATES:
+                    return False
+                if normalized_state in MODEL_READY_STATES:
+                    return True
+
+        loaded_flags = [
+            model_entry.get("loaded"),
+            model_entry.get("is_loaded"),
+            model_entry.get("ready"),
+        ]
+        for loaded_flag in loaded_flags:
+            if isinstance(loaded_flag, bool):
+                return loaded_flag
+
+        # If the model appears in LM Studio's model list and there is no
+        # explicit loading signal, treat it as ready for backwards compatibility.
+        return True
 
     def generate_chat(
         self,
