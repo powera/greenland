@@ -6,8 +6,7 @@ import json
 import logging
 import re
 import time
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import requests
 from requests.exceptions import ConnectTimeout, ReadTimeout, RequestException
@@ -29,10 +28,8 @@ DEFAULT_MODEL = (
 )
 DEFAULT_TIMEOUT = 250
 MODEL_OPERATION_TIMEOUT = 30
-MODEL_OPERATION_RETRIES = 3
-MODEL_OPERATION_RETRY_DELAY = 1.0
-MODEL_LOADING_STATES = {"loading", "queued", "initializing", "starting"}
-MODEL_READY_STATES = {"loaded", "ready", "idle"}
+MODEL_READY_POLL_TIMEOUT = 120
+MODEL_READY_POLL_INTERVAL = 2.0
 
 
 class LMStudioError(Exception):
@@ -202,180 +199,122 @@ class LMStudioClient:
         return normalized_requested_model == normalized_response_model
 
     def warm_model(self, model: str) -> bool:
-        """Load model into memory using LM Studio's model load endpoint."""
+        """Ensure model is the only loaded model and wait until it is ready.
+
+        If the model is already loaded and ready, returns True immediately.
+        Any other loaded models are unloaded first to avoid multiple copies
+        consuming memory simultaneously.
+        """
+        # Fast path: already loaded/idle.
+        state = self._get_model_state(model)
+        if state in ("loaded", "idle"):
+            logger.info("Model %s is already loaded and ready.", model)
+            return True
+
+        # Unload any other loaded models before loading the target.
+        for other_id in self._get_loaded_model_ids():
+            if not self._id_matches_model(other_id, model):
+                logger.info("Unloading model %s before loading %s.", other_id, model)
+                self.unload_model(other_id)
+
+        # Send load POST (may block or time out — that's OK).
+        self._send_load_request(model)
+
+        # Poll until loaded or timeout.
+        deadline = time.time() + MODEL_READY_POLL_TIMEOUT
+        while time.time() < deadline:
+            poll_state = self._get_model_state(model)
+            if poll_state in ("loaded", "idle"):
+                return True
+            if poll_state == "not-loaded":
+                # Not loading at all — retry the load request.
+                self._send_load_request(model)
+            time.sleep(MODEL_READY_POLL_INTERVAL)
+
+        logger.warning("Model %s did not become ready within %ss", model, MODEL_READY_POLL_TIMEOUT)
+        return False
+
+    def _get_model_state(self, model: str) -> Optional[str]:
+        """Return the state string for model from /api/v0/models, or None if unreachable/not found.
+
+        State values: "loading", "not-loaded", "loaded", "idle".
+        Matches by exact id or by the last path component (e.g. "gemma-2-2b-it"
+        matches "google/gemma-2-2b-it").
+        """
+        url = f"http://{self.server}:{self.port}/api/v0/models"
+        operation_timeout = min(self.timeout, MODEL_OPERATION_TIMEOUT)
+        try:
+            response = requests.get(url, timeout=operation_timeout)
+            if not response.ok:
+                return None
+            entries = response.json().get("data", [])
+            if not isinstance(entries, list):
+                return None
+            for entry in entries:
+                if not isinstance(entry, dict):
+                    continue
+                entry_id = entry.get("id")
+                if not isinstance(entry_id, str):
+                    continue
+                if self._id_matches_model(entry_id, model):
+                    state = entry.get("state")
+                    return state if isinstance(state, str) else None
+            return None
+        except (RequestException, ValueError):
+            return None
+
+    def _get_loaded_model_ids(self) -> List[str]:
+        """Return ids of all models that are not in state "not-loaded" per /api/v0/models."""
+        url = f"http://{self.server}:{self.port}/api/v0/models"
+        operation_timeout = min(self.timeout, MODEL_OPERATION_TIMEOUT)
+        try:
+            response = requests.get(url, timeout=operation_timeout)
+            if not response.ok:
+                return []
+            entries = response.json().get("data", [])
+            if not isinstance(entries, list):
+                return []
+            result: List[str] = []
+            for entry in entries:
+                if not isinstance(entry, dict):
+                    continue
+                if entry.get("state") == "not-loaded":
+                    continue
+                entry_id = entry.get("id")
+                if isinstance(entry_id, str) and entry_id:
+                    result.append(entry_id)
+            return result
+        except (RequestException, ValueError):
+            return []
+
+    def _id_matches_model(self, entry_id: str, model: str) -> bool:
+        """Return True if the /api/v0/models id matches the caller-supplied model name."""
+        return entry_id == model or model.endswith("/" + entry_id)
+
+    def _send_load_request(self, model: str) -> None:
+        """Send a load POST for model; ignore errors (caller polls for readiness)."""
         url = f"http://{self.server}:{self.port}/api/v1/models/load"
-        return self._run_model_operation(
-            operation_name="load",
-            url=url,
-            payload={"model": model},
-            verify_loaded=True,
-            model=model,
-        )
+        operation_timeout = min(self.timeout, MODEL_OPERATION_TIMEOUT)
+        try:
+            if self.debug:
+                logger.debug("Load POST for model %s", model)
+            requests.post(url, json={"model": model}, timeout=operation_timeout)
+        except (ConnectTimeout, ReadTimeout, RequestException) as exc:
+            if self.debug:
+                logger.debug("Load POST for %s failed: %s", model, exc)
 
     def unload_model(self, model: str) -> bool:
         """Unload model from memory using LM Studio's model unload endpoint."""
         url = f"http://{self.server}:{self.port}/api/v1/models/unload"
-        unload_payload = {
-            # Some LM Studio versions expect one field or the other.
-            "instance_id": model,
-            "model": model,
-        }
-        return self._run_model_operation(
-            operation_name="unload",
-            url=url,
-            payload=unload_payload,
-            verify_loaded=False,
-            model=model,
-        )
-
-    def _run_model_operation(
-        self,
-        operation_name: str,
-        url: str,
-        payload: Dict[str, str],
-        verify_loaded: bool,
-        model: str,
-    ) -> bool:
         operation_timeout = min(self.timeout, MODEL_OPERATION_TIMEOUT)
-        for attempt_number in range(1, MODEL_OPERATION_RETRIES + 1):
-            operation_response_succeeded = False
-            try:
-                if self.debug:
-                    logger.debug(
-                        "%s model via %s (attempt %s/%s): %s",
-                        operation_name.capitalize(),
-                        url,
-                        attempt_number,
-                        MODEL_OPERATION_RETRIES,
-                        payload,
-                    )
-
-                response = requests.post(url, json=payload, timeout=operation_timeout)
-                if self.debug:
-                    logger.debug(
-                        "%s response: %s %s",
-                        operation_name.capitalize(),
-                        response.status_code,
-                        response.text,
-                    )
-
-                if self._is_successful_model_operation_response(response, operation_name):
-                    operation_response_succeeded = True
-            except (ConnectTimeout, ReadTimeout):
-                if self.debug:
-                    logger.debug(
-                        "%s timed out on attempt %s/%s",
-                        operation_name.capitalize(),
-                        attempt_number,
-                        MODEL_OPERATION_RETRIES,
-                    )
-            except RequestException as exc:
-                if self.debug:
-                    logger.debug(
-                        "%s failed on attempt %s/%s: %s",
-                        operation_name.capitalize(),
-                        attempt_number,
-                        MODEL_OPERATION_RETRIES,
-                        exc,
-                    )
-
-            is_model_loaded = self._is_model_loaded(model)
-            if is_model_loaded is not None and is_model_loaded == verify_loaded:
+        try:
+            response = requests.post(url, json={"instance_id": model}, timeout=operation_timeout)
+            if response.ok:
                 return True
-
-            if operation_response_succeeded and is_model_loaded is None:
-                # Fallback for older LM Studio variants where model list endpoints
-                # are unavailable but operation endpoint succeeded.
-                return True
-
-            if attempt_number < MODEL_OPERATION_RETRIES:
-                time.sleep(MODEL_OPERATION_RETRY_DELAY * attempt_number)
-
-        return False
-
-    def _is_successful_model_operation_response(
-        self, response: requests.Response, operation_name: str
-    ) -> bool:
-        if 200 <= response.status_code < 300:
-            return True
-
-        response_text = response.text.lower()
-        if operation_name == "load":
-            return "already loaded" in response_text
-        if operation_name == "unload":
+            response_text = response.text.lower()
             return "not loaded" in response_text or "already unloaded" in response_text
-        return False
-
-    def _is_model_loaded(self, model: str) -> Optional[bool]:
-        model_endpoints = [
-            f"http://{self.server}:{self.port}/v1/models",
-            f"http://{self.server}:{self.port}/api/v1/models",
-        ]
-        operation_timeout = min(self.timeout, MODEL_OPERATION_TIMEOUT)
-
-        for endpoint_url in model_endpoints:
-            try:
-                response = requests.get(endpoint_url, timeout=operation_timeout)
-                if not response.ok:
-                    continue
-
-                response_data = response.json()
-                model_entries = response_data.get("data", [])
-                if not isinstance(model_entries, list):
-                    continue
-
-                for model_entry in model_entries:
-                    if not isinstance(model_entry, dict):
-                        continue
-                    model_id = model_entry.get("id")
-                    instance_id = model_entry.get("instance_id")
-                    loaded_model = model_entry.get("model")
-
-                    candidate_ids = [model_id, instance_id, loaded_model]
-                    model_matches = any(candidate_id == model for candidate_id in candidate_ids)
-                    if not model_matches:
-                        model_matches = any(
-                            isinstance(candidate_id, str) and candidate_id.endswith(f"/{model}")
-                            for candidate_id in candidate_ids
-                        )
-
-                    if model_matches:
-                        return self._is_model_entry_ready(model_entry)
-
-                return False
-            except RequestException:
-                continue
-            except ValueError:
-                continue
-
-        return None
-
-    def _is_model_entry_ready(self, model_entry: Dict[str, Any]) -> bool:
-        state_values = [
-            model_entry.get("state"),
-            model_entry.get("status"),
-            model_entry.get("load_status"),
-        ]
-        for state_value in state_values:
-            if isinstance(state_value, str):
-                normalized_state = state_value.strip().lower()
-                if normalized_state in MODEL_LOADING_STATES:
-                    return False
-                if normalized_state in MODEL_READY_STATES:
-                    return True
-
-        loaded_flags = [
-            model_entry.get("loaded"),
-            model_entry.get("is_loaded"),
-            model_entry.get("ready"),
-        ]
-        for loaded_flag in loaded_flags:
-            if isinstance(loaded_flag, bool):
-                return loaded_flag
-
-        # If the model appears in LM Studio's model list and there is no
-        # explicit loading signal, treat it as ready for backwards compatibility.
-        return True
+        except (ConnectTimeout, ReadTimeout, RequestException):
+            return False
 
     def generate_chat(
         self,
