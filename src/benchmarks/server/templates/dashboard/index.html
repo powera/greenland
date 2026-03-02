@@ -42,9 +42,10 @@
                     <div class="col-md-3">
                         <label class="form-label">Model Scope</label>
                         <select class="form-select" id="modelScope">
-                            <option value="remote" selected>Remote</option>
+                            <option value="all" selected>All</option>
+                            <option value="remote">Remote</option>
                             <option value="local-tier1">Local (Tier 1)</option>
-                            <option value="local-tier2plus">Local (Tier 2)</option>
+                            <option value="local-tier2">Local (Tier 2)</option>
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -52,7 +53,7 @@
                         <select class="form-select" id="benchmarkTierFilter">
                             <option value="all" selected>All tiers</option>
                             {% for tier in tier_definitions.values() %}
-                            <option value="{{ tier.id }}">{{ tier.short_label }} · {{ tier.label }}</option>
+                            <option value="{{ tier.level }}">{{ tier.short_label }} · {{ tier.label }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -80,7 +81,7 @@
                         <label class="form-label">Search</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="text" class="form-control" id="searchBox" placeholder="Search models or benchmarks...">
+                            <input type="text" class="form-control" id="searchBox" placeholder="Search benchmarks...">
                         </div>
                     </div>
                 </div>
@@ -101,7 +102,8 @@
                                 <th>Benchmark</th>
                                 {% for model in models %}
                                 <th class="text-center model-col"
-                                    data-model-type="{{ model.model_type }}">
+                                    data-model-type="{{ model.model_type }}"
+                                    data-model-tier="{{ model.max_benchmark_tier }}">
                                     <div class="small">{{ model.displayname }}</div>
                                     <div class="text-muted small">
                                         {% if model.filesize_mb %}{{ model.filesize_mb }} MB{% endif %}
@@ -130,7 +132,8 @@
                                 </td>
                                 {% for model in models %}
                                 <td class="text-center model-col"
-                                    data-model-type="{{ model.model_type }}">
+                                    data-model-type="{{ model.model_type }}"
+                                    data-model-tier="{{ model.max_benchmark_tier }}">
                                     {% if (benchmark.codename, model.codename) in scores %}
                                     {% set score_data = scores[(benchmark.codename, model.codename)] %}
                                     <a href="{{ url_for('runs.view_run', run_id=score_data.run_id) }}"

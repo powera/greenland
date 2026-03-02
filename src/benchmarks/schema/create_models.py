@@ -106,9 +106,19 @@ def _insert_lmstudio_model(
 
 
 def create_models(postgres_url=None):
-    """Create all model definitions."""
-    create_remote_models(postgres_url)
-    create_local_models(postgres_url)
+    """Create all model definitions.
+
+    Always runs in upsert mode so model metadata changes (including tier limits)
+    are applied for existing rows.
+    """
+    global _UPDATE_MODE
+    previous_update_mode = _UPDATE_MODE
+    _UPDATE_MODE = True
+    try:
+        create_remote_models(postgres_url)
+        create_local_models(postgres_url)
+    finally:
+        _UPDATE_MODE = previous_update_mode
 
 
 def create_remote_models(postgres_url=None):

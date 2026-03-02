@@ -23,7 +23,9 @@
                                 <th>Launch Date</th>
                                 <th>Benchmark Tier</th>
                                 <th class="text-center">Runs</th>
-                                <th class="text-center">Avg Score</th>
+                                <th class="text-center">Avg Score (All)</th>
+                                <th class="text-center">Avg Score (Tier 1)</th>
+                                <th class="text-center">Avg Score (Tier 2)</th>
                                 <th class="text-center">Last Run</th>
                                 <th>Actions</th>
                             </tr>
@@ -59,8 +61,22 @@
                                 </td>
                                 <td class="text-center">{{ data.run_count }}</td>
                                 <td class="text-center">
-                                    {% if data.avg_score %}
+                                    {% if data.avg_score is not none %}
                                     <strong>{{ data.avg_score }}</strong>/100
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if data.avg_score_tier_1 is not none %}
+                                    <strong>{{ data.avg_score_tier_1 }}</strong>/100
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if data.avg_score_tier_2 is not none %}
+                                    <strong>{{ data.avg_score_tier_2 }}</strong>/100
                                     {% else %}
                                     <span class="text-muted">-</span>
                                     {% endif %}
