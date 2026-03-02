@@ -157,14 +157,52 @@
 
                                     <div class="row g-3">
                                         <div class="col-md-6">
-                                            <strong>Expected</strong>
+                                            <strong>{{ detail.expected_label or "Expected" }}</strong>
                                             <pre class="bg-light p-2 mb-0"><code>{{ detail.expected_display if detail.expected_display is defined and detail.expected_display is not none else '-' }}</code></pre>
                                         </div>
                                         <div class="col-md-6">
-                                            <strong>Provided</strong>
+                                            <strong>{{ detail.response_label or "Provided" }}</strong>
                                             <pre class="{% if is_correct %}bg-success-subtle{% else %}bg-danger-subtle{% endif %} p-2 mb-0"><code>{{ detail.response_display if detail.response_display is defined and detail.response_display is not none else '-' }}</code></pre>
                                         </div>
                                     </div>
+
+                                    {% if detail.test_case_results %}
+                                    <div class="mt-3">
+                                        <strong>Test case results</strong>
+                                        <div class="table-responsive mt-2">
+                                            <table class="table table-sm table-bordered mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Status</th>
+                                                        <th>Args</th>
+                                                        <th>Expected</th>
+                                                        <th>Actual</th>
+                                                        <th>Error</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for case in detail.test_case_results %}
+                                                    <tr>
+                                                        <td>{{ case.index if case.index is defined else loop.index0 }}</td>
+                                                        <td>
+                                                            {% if case.passed %}
+                                                            <span class="badge bg-success">Pass</span>
+                                                            {% else %}
+                                                            <span class="badge bg-danger">Fail</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td><code>{{ case.args if case.args is defined else '-' }}</code></td>
+                                                        <td><code>{{ case.expected_exception if case.expected_exception is defined and case.expected_exception else case.expected if case.expected is defined else '-' }}</code></td>
+                                                        <td><code>{{ case.actual_exception if case.actual_exception is defined else case.stdout if case.capture_stdout else case.result if case.result is defined else '-' }}</code></td>
+                                                        <td><code>{{ case.error if case.error is defined else '-' }}</code></td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    {% endif %}
 
                                     {% if run_data.benchmark_name == '0062_sentence_decomposition' and detail.debug_json and detail.debug_json.scoring_breakdown %}
                                     {% set breakdown = detail.debug_json.scoring_breakdown %}

@@ -136,49 +136,77 @@ class PythonCodingRunnerBase(PartialCreditRunner):
             signal.setitimer(signal.ITIMER_REAL, 0.0)
             signal.signal(signal.SIGALRM, previous_handler)
 
-    def score_response(self, question_data: Dict[str, Any], response: Any) -> int:
+    def _evaluate_response(
+        self, question_data: Dict[str, Any], response: Any
+    ) -> tuple[int, list[dict[str, Any]]]:
         code = self._extract_code(response)
         safety_error = self._validate_ast_safety(code)
         if safety_error is not None:
-            return 0
+            return 0, [{"error": safety_error}]
 
         function_name = question_data.get("correct_answer", {}).get("function_name")
         if not isinstance(function_name, str) or not function_name:
-            return 0
+            return 0, [{"error": "Missing function_name in correct_answer"}]
 
         execution_globals: Dict[str, Any] = {"__builtins__": _SAFE_BUILTINS}
         try:
             exec(code, execution_globals)
-        except Exception:
-            return 0
+        except Exception as error:
+            return 0, [{"error": f"Execution failed: {error.__class__.__name__}"}]
 
         target_function = execution_globals.get(function_name)
         if not callable(target_function):
-            return 0
+            return 0, [{"error": f"Function '{function_name}' is not callable"}]
 
         test_cases = question_data.get("correct_answer", {}).get("test_cases", [])
         if not isinstance(test_cases, list) or not test_cases:
-            return 0
+            return 0, [{"error": "No valid test_cases were provided"}]
 
         passed_count = 0
+        case_results: list[dict[str, Any]] = []
 
-        for test_case in test_cases:
+        for test_case_index, test_case in enumerate(test_cases):
             if not isinstance(test_case, dict):
+                case_results.append(
+                    {
+                        "index": test_case_index,
+                        "passed": False,
+                        "error": "Invalid test case format",
+                    }
+                )
                 continue
             args = test_case.get("args", [])
-            expected = test_case.get("expected")
+            expected_value = test_case.get("expected")
             expected_exception = test_case.get("expected_exception")
 
             if not isinstance(args, list):
+                case_results.append(
+                    {
+                        "index": test_case_index,
+                        "args": args,
+                        "passed": False,
+                        "error": "args must be a list",
+                    }
+                )
                 continue
 
             capture_stdout = bool(test_case.get("capture_stdout", False))
             stdout_buffer = io.StringIO()
+            case_result: dict[str, Any] = {
+                "index": test_case_index,
+                "args": args,
+                "expected": expected_value,
+                "expected_exception": expected_exception,
+                "capture_stdout": capture_stdout,
+                "passed": False,
+            }
 
             try:
                 with contextlib.redirect_stdout(stdout_buffer):
                     result = self._run_with_timeout(target_function, tuple(args))
             except _TimeoutError:
+                case_result["error"] = "Execution timed out"
+                case_results.append(case_result)
                 continue
             except Exception as error:
                 if (
@@ -186,32 +214,56 @@ class PythonCodingRunnerBase(PartialCreditRunner):
                     and error.__class__.__name__ == expected_exception
                 ):
                     passed_count += 1
+                    case_result["passed"] = True
+                    case_result["actual_exception"] = error.__class__.__name__
+                else:
+                    case_result["actual_exception"] = error.__class__.__name__
+                    case_result["error"] = str(error)
+                case_results.append(case_result)
                 continue
 
             if isinstance(expected_exception, str):
+                case_result["result"] = result
+                case_result["error"] = (
+                    f"Expected exception '{expected_exception}' but function returned normally"
+                )
+                case_results.append(case_result)
                 continue
 
             if capture_stdout:
-                if stdout_buffer.getvalue().strip() == str(expected).strip():
+                stdout_text = stdout_buffer.getvalue().strip()
+                case_result["stdout"] = stdout_text
+                if stdout_text == str(expected_value).strip():
                     passed_count += 1
+                    case_result["passed"] = True
+                case_results.append(case_result)
                 continue
 
-            if result == expected:
+            case_result["result"] = result
+            if result == expected_value:
                 passed_count += 1
+                case_result["passed"] = True
+            case_results.append(case_result)
 
-        return int(round((passed_count / len(test_cases)) * 100))
+        score = int(round((passed_count / len(test_cases)) * 100))
+        return score, case_results
+
+    def score_response(self, question_data: Dict[str, Any], response: Any) -> int:
+        score, _ = self._evaluate_response(question_data, response)
+        return score
 
     def build_debug_info(
         self, question_data: Dict, response: Any, is_correct: bool
     ) -> Dict[str, Any]:
         model_answer = getattr(response, "response_text", response)
-        score = self.score_response(question_data, model_answer)
+        score, test_case_results = self._evaluate_response(question_data, model_answer)
         return {
             "response": model_answer,
             "score": score,
             "correctness_threshold": self.CORRECTNESS_THRESHOLD,
             "is_correct": is_correct,
             "function_name": question_data.get("correct_answer", {}).get("function_name"),
+            "test_case_results": test_case_results,
         }
 
 

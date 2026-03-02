@@ -44,6 +44,10 @@ def _format_json_for_display(value: object) -> str:
     return json.dumps(value, indent=2, ensure_ascii=False)
 
 
+def _is_python_coding_benchmark(question_id: str) -> bool:
+    return bool(re.match(r"^03\d{2}_python_", question_id))
+
+
 @bp.route("/<int:run_id>")
 def view_run(run_id):
     """View detailed results for a specific run."""
@@ -83,11 +87,26 @@ def view_run(run_id):
         if model_response is None:
             model_response = debug_json.get("model_answer", debug_json.get("model_response"))
 
-        detail["expected_display"] = (
-            _format_json_for_display(expected_answer)
-            if isinstance(expected_answer, (dict, list, tuple))
-            else expected_answer
-        )
+        question_id = detail.get("question_id") or ""
+        if _is_python_coding_benchmark(question_id):
+            expected_answer = question_info_json.get("correct_answer", {})
+            detail["expected_label"] = "Test cases"
+            detail["expected_display"] = _format_json_for_display(
+                expected_answer.get("test_cases", [])
+                if isinstance(expected_answer, dict)
+                else expected_answer
+            )
+            detail["response_label"] = "Submitted code"
+            detail["test_case_results"] = debug_json.get("test_case_results")
+        else:
+            detail["expected_label"] = "Expected"
+            detail["expected_display"] = (
+                _format_json_for_display(expected_answer)
+                if isinstance(expected_answer, (dict, list, tuple))
+                else expected_answer
+            )
+            detail["response_label"] = "Provided"
+
         detail["response_display"] = (
             _format_json_for_display(model_response)
             if isinstance(model_response, (dict, list, tuple))
