@@ -287,6 +287,9 @@ def _build_spec_from_config(
     if pos_type == "verb" and "schema_description" not in config:
         schema_desc = f"{lang_name} verb conjugations"
 
+    word_variable_config = config.get("word_variable")
+    word_variable = word_variable_config if isinstance(word_variable_config, str) else ""
+
     return LanguageFormSpec(
         language_code=lang_code,
         language_name=lang_name,
@@ -300,7 +303,7 @@ def _build_spec_from_config(
         extra_schema_properties=extra_props,
         form_descriptions=config.get("form_descriptions"),
         is_source_language=config.get("is_source_language", False),
-        word_variable=config.get("word_variable"),
+        word_variable=word_variable,
     )
 
 

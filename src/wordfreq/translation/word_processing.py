@@ -53,7 +53,7 @@ def determine_default_grammatical_form(word_text: str, pos_type: str, lemma_text
         elif word_text.endswith("ed"):
             return GrammaticalForm.VERB_PAST_PARTICIPLE.value
         elif word_text.endswith("s"):
-            return GrammaticalForm.VERB_EN_3S_PRESENT.value
+            return GrammaticalForm.OTHER.value
 
     elif pos_lower == "noun":
         if word_text.endswith("s") and not lemma_text.endswith("s"):

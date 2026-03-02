@@ -120,11 +120,20 @@ def query_forms(
 
     try:
         if spec.pos_type == "verb":
+            model_name = client.default_model
+            if model_name is None:
+                logger.error(
+                    "No default model configured for %s %s forms",
+                    spec.language_name,
+                    spec.pos_type,
+                )
+                return {}, False
+
             response_data = query_verb_forms(
                 spec.language_code,
                 target_word,
                 client=client,
-                model=client.default_model,
+                model=model_name,
                 json_schema=schema,
                 english_word=english_word,
                 definition=definition,
