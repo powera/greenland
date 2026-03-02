@@ -59,3 +59,40 @@ def test_run_aborts_after_three_errors(monkeypatch):
     assert run_id == -1
     assert processed_question_ids == ["q1", "q2", "q3"]
     assert unload_calls == [runner.remote_model]
+
+
+def test_run_keeps_lmstudio_model_loaded_after_success(monkeypatch):
+    monkeypatch.setattr(
+        "benchmarks.lib.utils.base_runner.datastore_benchmarks.create_dev_session",
+        lambda: object(),
+    )
+    monkeypatch.setattr(
+        "benchmarks.lib.utils.base_runner.datastore_common.get_model_by_codename",
+        lambda session, model: {"model_path": "lmstudio/lmstudio-community/qwen"},
+    )
+
+    runner = _DummyRunner("qwen-local", BenchmarkMetadata(code="0013", name="test"))
+
+    questions = [{"question_id": "q1", "question_info_json": json.dumps({"correct_answer": "x"})}]
+    monkeypatch.setattr(runner, "load_questions", lambda: questions)
+    monkeypatch.setattr(runner, "warm_up", lambda: None)
+
+    monkeypatch.setattr(
+        runner,
+        "process_question",
+        lambda question: BenchmarkResult(
+            question_id=question["question_id"], score=100, eval_msec=1
+        ),
+    )
+    monkeypatch.setattr(runner, "save_results", lambda score, details: 42)
+
+    unload_calls = []
+    monkeypatch.setattr(
+        "benchmarks.lib.utils.base_runner.unified_client.unload_model",
+        lambda model: unload_calls.append(model),
+    )
+
+    run_id = runner._run_inner()
+
+    assert run_id == 42
+    assert unload_calls == []

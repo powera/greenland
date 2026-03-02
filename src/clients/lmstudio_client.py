@@ -236,6 +236,7 @@ class LMStudioClient:
     ) -> bool:
         operation_timeout = min(self.timeout, MODEL_OPERATION_TIMEOUT)
         for attempt_number in range(1, MODEL_OPERATION_RETRIES + 1):
+            operation_response_succeeded = False
             try:
                 if self.debug:
                     logger.debug(
@@ -257,7 +258,7 @@ class LMStudioClient:
                     )
 
                 if self._is_successful_model_operation_response(response, operation_name):
-                    return True
+                    operation_response_succeeded = True
             except (ConnectTimeout, ReadTimeout):
                 if self.debug:
                     logger.debug(
@@ -278,6 +279,11 @@ class LMStudioClient:
 
             is_model_loaded = self._is_model_loaded(model)
             if is_model_loaded is not None and is_model_loaded == verify_loaded:
+                return True
+
+            if operation_response_succeeded and is_model_loaded is None:
+                # Fallback for older LM Studio variants where model list endpoints
+                # are unavailable but operation endpoint succeeded.
                 return True
 
             if attempt_number < MODEL_OPERATION_RETRIES:
