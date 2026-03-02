@@ -50,15 +50,18 @@ class BenchmarkRunner:
         # For remote API models, use the model codename as-is
         if "gpt-" in self.model or "claude-" in self.model or "gemini-" in self.model:
             self.remote_model = self.model
+            self.is_lmstudio_model = False
         else:
             # Check if this is an lmstudio model by looking up model_path in database
             model_info = datastore_common.get_model_by_codename(self.session, self.model)
             if model_info and model_info.get("model_path", "").startswith("lmstudio/"):
                 # For lmstudio models, use the codename as-is (no quantization stripping)
                 self.remote_model = self.model
+                self.is_lmstudio_model = True
             else:
                 # For Ollama models, strip quantization suffix if present (e.g., ":Q4_0")
                 self.remote_model = ":".join(model.split(":")[:-1])
+                self.is_lmstudio_model = False
 
     def load_questions(self) -> List[Dict]:
         """Load benchmark questions from database."""
@@ -365,6 +368,19 @@ class BenchmarkRunner:
         finally:
             self.close()
 
+    def _cleanup_model(self, reason: str) -> None:
+        """Release model resources after a run when appropriate."""
+        if self.is_lmstudio_model:
+            logger.info(
+                "Keeping LM Studio model %s loaded after %s to avoid reload thrash.",
+                self.model,
+                reason,
+            )
+            return
+
+        logger.info("Unloading model %s after %s...", self.model, reason)
+        unified_client.unload_model(self.remote_model)
+
     def _run_inner(self) -> int:
         """Execute the benchmark (session lifetime managed by run())."""
         # Load questions for this benchmark
@@ -409,8 +425,7 @@ class BenchmarkRunner:
                     break
 
         if aborted_for_errors:
-            logger.info("Unloading model %s after aborted run...", self.model)
-            unified_client.unload_model(self.remote_model)
+            self._cleanup_model("aborted run")
             return -1
 
         successful_results = [result for result in results if self._is_successful_result(result)]
@@ -420,8 +435,7 @@ class BenchmarkRunner:
                 self.metadata.code,
                 self.model,
             )
-            logger.info("Unloading model %s...", self.model)
-            unified_client.unload_model(self.remote_model)
+            self._cleanup_model("run with no successful responses")
             return -1
 
         # Calculate score
@@ -439,7 +453,6 @@ class BenchmarkRunner:
         logger.info("Results saved with run ID: %s", run_id)
 
         # Unload model to free memory for the next benchmark
-        logger.info("Unloading model %s...", self.model)
-        unified_client.unload_model(self.remote_model)
+        self._cleanup_model("completed run")
 
         return run_id

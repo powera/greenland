@@ -95,6 +95,29 @@ def test_warm_model_retries_and_returns_false(monkeypatch):
     assert len(post_attempts) == 3
 
 
+def test_warm_model_retries_when_load_reports_success_but_status_is_not_loaded(monkeypatch):
+    client = LMStudioClient(timeout=40, debug=False)
+    post_attempts: List[int] = []
+    load_checks: List[int] = []
+
+    def fake_post(url: str, json: Dict[str, Any], timeout: float) -> _FakeResponse:
+        post_attempts.append(1)
+        return _FakeResponse(200, "ok", {"status": "loading"})
+
+    def fake_get(url: str, timeout: float) -> _FakeResponse:
+        load_checks.append(1)
+        if len(load_checks) < 3:
+            return _FakeResponse(200, "ok", {"data": []})
+        return _FakeResponse(200, "ok", {"data": [{"id": "lmstudio-community/qwen"}]})
+
+    monkeypatch.setattr("clients.lmstudio_client.requests.post", fake_post)
+    monkeypatch.setattr("clients.lmstudio_client.requests.get", fake_get)
+    monkeypatch.setattr("clients.lmstudio_client.time.sleep", lambda *_: None)
+
+    assert client.warm_model("lmstudio-community/qwen") is True
+    assert len(post_attempts) == 3
+
+
 def test_generate_chat_sends_requested_model(monkeypatch):
     client = LMStudioClient(timeout=40, debug=False)
     captured_request: Dict[str, Any] = {}
