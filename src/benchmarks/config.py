@@ -37,6 +37,22 @@ ENABLED_BENCHMARKS: frozenset[str] = frozenset(
         "0025_algebra",
         "0026_time_arithmetic",
         "0027_geometry",
+        # 003X: language
+        "0031_definitions",
+        "0032_part_of_speech",
+        "0033_plural",
+        # 015X: knowledge
+        "0151_geography",
+        "0152_syllogism_validity",
+        "0153_book_author_match",
+        "0154_food_category_classification",
+        "0155_historical_event_year",
+        # 030X: coding
+        "0301_python_hello_world",
+        "0302_python_gcd",
+        "0303_python_letter_count",
+        "0304_python_coin_change",
+        "0305_python_prime_factorization",
         # 010X: translation
         "0101_translation_en_fr",
         "0102_translation_en_es",
