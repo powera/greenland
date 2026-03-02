@@ -10,17 +10,45 @@ document.addEventListener('DOMContentLoaded', function() {
     const noResults = document.getElementById('noResults');
 
     function getModelScopeConfig() {
-        const selectedScope = modelScopeSelect ? modelScopeSelect.value : 'remote';
+        const selectedScope = modelScopeSelect ? modelScopeSelect.value : 'all';
+
+        if (selectedScope === 'all') {
+            return {
+                modelPredicate: () => true,
+                benchmarkPredicate: () => true,
+                forceBenchmarkTier: null,
+            };
+        }
+
+        if (selectedScope === 'remote') {
+            return {
+                modelPredicate: (modelType) => modelType === 'remote',
+                benchmarkPredicate: () => true,
+                forceBenchmarkTier: null,
+            };
+        }
 
         if (selectedScope === 'local-tier1') {
-            return { modelType: 'local', tierPredicate: tierValue => tierValue === '1' };
+            return {
+                modelPredicate: (modelType, modelTier) => modelType === 'local' && modelTier === '1',
+                benchmarkPredicate: (benchmarkTier) => benchmarkTier === '1',
+                forceBenchmarkTier: '1',
+            };
         }
 
-        if (selectedScope === 'local-tier2plus') {
-            return { modelType: 'local', tierPredicate: tierValue => tierValue !== '1' };
+        if (selectedScope === 'local-tier2') {
+            return {
+                modelPredicate: (modelType, modelTier) => modelType === 'local' && modelTier !== '1',
+                benchmarkPredicate: () => true,
+                forceBenchmarkTier: null,
+            };
         }
 
-        return { modelType: 'remote', tierPredicate: () => true };
+        return {
+            modelPredicate: () => true,
+            benchmarkPredicate: () => true,
+            forceBenchmarkTier: null,
+        };
     }
 
     function getVisibleScores(row) {
@@ -74,13 +102,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function filterTable() {
         const scopeConfig = getModelScopeConfig();
         const selectedCategory = categorySelect ? categorySelect.value : 'all';
-        const selectedBenchmarkTier = benchmarkTierFilter ? benchmarkTierFilter.value : 'all';
+        const selectedBenchmarkTier = scopeConfig.forceBenchmarkTier || (benchmarkTierFilter ? benchmarkTierFilter.value : 'all');
         const searchTerm = searchBox.value.toLowerCase();
+
+        if (benchmarkTierFilter) {
+            benchmarkTierFilter.value = selectedBenchmarkTier;
+            benchmarkTierFilter.disabled = scopeConfig.forceBenchmarkTier !== null;
+        }
 
         const modelCols = resultsTable.querySelectorAll('.model-col');
         modelCols.forEach(col => {
             const colModelType = col.dataset.modelType;
-            const showCol = colModelType === scopeConfig.modelType;
+            const colModelTier = col.dataset.modelTier;
+            const showCol = scopeConfig.modelPredicate(colModelType, colModelTier);
             col.style.display = showCol ? '' : 'none';
         });
 
@@ -93,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const matchesSearch = benchmarkText.includes(searchTerm);
             const matchesCategory = (selectedCategory === 'all' || rowCategory === selectedCategory);
             const matchesTier = (selectedBenchmarkTier === 'all' || rowTier === selectedBenchmarkTier);
-            const matchesScope = scopeConfig.tierPredicate(rowTier);
+            const matchesScope = scopeConfig.benchmarkPredicate(rowTier);
             const showRow = matchesSearch && matchesCategory && matchesTier && matchesScope;
             row.style.display = showRow ? '' : 'none';
             if (showRow) visibleCount++;

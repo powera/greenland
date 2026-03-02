@@ -7,15 +7,21 @@ from sqlalchemy import func
 
 from benchmarks.datastore.benchmarks import Run
 from benchmarks.datastore.common import Model
-from benchmarks.tiers import get_tier_label
+from benchmarks.tiers import get_benchmark_tier, get_tier_label
 
 bp = Blueprint("models", __name__, url_prefix="/models", template_folder="../templates")
+
+
+def _average_or_none(values: list[float]) -> float | None:
+    """Return the arithmetic average for non-empty values."""
+    if not values:
+        return None
+    return round(sum(values) / len(values), 1)
 
 
 @bp.route("/")
 def list_models():
     """List all models with their aggregate statistics."""
-    # Get all models with run counts and average scores
     models_query = (
         g.bench_db.query(
             Model,
@@ -29,13 +35,36 @@ def list_models():
         .all()
     )
 
+    model_benchmark_scores = (
+        g.bench_db.query(
+            Run.model_name,
+            Run.benchmark_name,
+            func.avg(Run.normed_score).label("benchmark_avg_score"),
+        )
+        .group_by(Run.model_name, Run.benchmark_name)
+        .all()
+    )
+
+    tier_scores_by_model: dict[str, dict[int, list[float]]] = {}
+    for model_name, benchmark_name, benchmark_avg_score in model_benchmark_scores:
+        if benchmark_avg_score is None:
+            continue
+        benchmark_tier = get_benchmark_tier(str(benchmark_name))
+        if benchmark_tier not in {1, 2}:
+            continue
+        per_model_scores = tier_scores_by_model.setdefault(str(model_name), {1: [], 2: []})
+        per_model_scores[benchmark_tier].append(float(benchmark_avg_score))
+
     models_data = []
     for model, run_count, avg_score, last_run in models_query:
+        model_tier_scores = tier_scores_by_model.get(model.codename, {1: [], 2: []})
         models_data.append(
             {
                 "model": model,
                 "run_count": run_count or 0,
-                "avg_score": round(avg_score, 1) if avg_score else None,
+                "avg_score": round(avg_score, 1) if avg_score is not None else None,
+                "avg_score_tier_1": _average_or_none(model_tier_scores[1]),
+                "avg_score_tier_2": _average_or_none(model_tier_scores[2]),
                 "last_run": last_run,
                 "max_tier_label": get_tier_label(model.max_benchmark_tier),
             }
