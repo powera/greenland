@@ -36,6 +36,32 @@ def gcd_checked(a, b):
     assert runner.score_response(question_data, response) == 100
 
 
+def test_python_coding_runner_accepts_multiple_expected_exceptions() -> None:
+    runner = _runner()
+    question_data = {
+        "correct_answer": {
+            "function_name": "validate_positive_int",
+            "test_cases": [
+                {
+                    "args": [3.14],
+                    "expected_exception": ["TypeError", "ValueError"],
+                }
+            ],
+        }
+    }
+
+    response = """
+def validate_positive_int(value):
+    if value <= 0:
+        raise ValueError("must be positive")
+    if not isinstance(value, int):
+        raise TypeError("int required")
+    return value
+"""
+
+    assert runner.score_response(question_data, response) == 100
+
+
 def test_python_coding_runner_allows_isinstance_builtin() -> None:
     runner = _runner()
     question_data = {
