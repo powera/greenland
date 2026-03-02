@@ -3,7 +3,8 @@
 """Benchmark tier/grouping helpers.
 
 Tier 1 contains screening benchmarks that weak models can run quickly.
-Tier 2 contains the full benchmark catalog.
+Tier 2 contains the main operational benchmark suites.
+Tier 3 contains heavier/advanced benchmarks.
 """
 
 import re
@@ -30,19 +31,28 @@ BENCHMARK_TIERS: dict[int, BenchmarkTier] = {
     ),
     2: BenchmarkTier(
         level=2,
-        label="Tier 2 (Full)",
-        short_label="T2+",
-        description="Full benchmark catalog.",
+        label="Tier 2 (Core)",
+        short_label="T2",
+        description="Core benchmark suites used for regular model evaluation.",
     ),
     3: BenchmarkTier(
         level=3,
         label="Tier 3 (Advanced)",
         short_label="T3",
-        description="Reserved for future advanced benchmarks (opt-in by model).",
+        description="Advanced and more expensive benchmarks (opt-in by model).",
     ),
 }
 
 _SCREENING_TRANSLATION_CODES = {f"{value:04d}" for value in range(101, 110)}
+_CORE_BENCHMARK_CODES = (
+    {f"{value:04d}" for value in range(31, 34)}
+    | {f"{value:04d}" for value in range(151, 156)}
+    | {f"{value:04d}" for value in range(301, 306)}
+)
+_ADVANCED_BENCHMARK_CODES = {
+    "0061",
+    "0062",
+} | {f"{value:04d}" for value in range(111, 151)}
 
 
 def get_benchmark_tier(benchmark_code: str) -> int:
@@ -57,6 +67,12 @@ def get_benchmark_tier(benchmark_code: str) -> int:
 
     if match.group(1) in _SCREENING_TRANSLATION_CODES:
         return 1
+
+    if match.group(1) in _CORE_BENCHMARK_CODES:
+        return 2
+
+    if match.group(1) in _ADVANCED_BENCHMARK_CODES:
+        return 3
 
     return 2
 
