@@ -21,6 +21,7 @@ from benchmarks.lib.utils.factory import (
     resolve_benchmark_code,
 )
 from benchmarks.scripts.delete_benchmark import delete_benchmark_completely
+from benchmarks.tiers import BENCHMARK_TIERS, get_benchmark_tier
 
 # Configure logging
 logging.basicConfig(
@@ -295,6 +296,7 @@ def run_missing_benchmarks(
     blacklist_benchmarks: Optional[Set[str]] = None,
     session=None,
     only_model: Optional[str] = None,
+    tier: Optional[int] = None,
 ) -> List[Tuple[str, str]]:
     """Run all enabled benchmarks that don't have results yet."""
     created_session = session is None
@@ -317,6 +319,7 @@ def run_missing_benchmarks(
             benchmark_code
             for benchmark_code in get_enabled_benchmark_codes()
             if benchmark_code not in blacklist_benchmarks
+            and (tier is None or get_benchmark_tier(benchmark_code) == tier)
         ]
 
         scores = datastore_benchmarks.get_highest_benchmark_scores(session)
@@ -625,6 +628,12 @@ def main() -> None:
     missing_parser.add_argument("--model", help="Only run missing benchmarks for this model")
     missing_parser.add_argument("--blacklist-models", nargs="+", help="Models to exclude")
     missing_parser.add_argument("--blacklist-benchmarks", nargs="+", help="Benchmarks to exclude")
+    missing_parser.add_argument(
+        "--tier",
+        type=int,
+        choices=sorted(BENCHMARK_TIERS.keys()),
+        help="Only run missing benchmarks in the specified tier",
+    )
 
     subparsers.add_parser(
         "sync-benchmarks",
@@ -731,13 +740,19 @@ def main() -> None:
             print(f"  {model}")
 
     elif args.command == "missing":
+        if args.tier is not None and args.blacklist_benchmarks:
+            parser.error("--tier cannot be used together with --blacklist-benchmarks")
+
         blacklist_models = set(args.blacklist_models) if args.blacklist_models else set()
         blacklist_benchmarks = (
             set(args.blacklist_benchmarks) if args.blacklist_benchmarks else set()
         )
 
         run_pairs = run_missing_benchmarks(
-            blacklist_models, blacklist_benchmarks, only_model=getattr(args, "model", None)
+            blacklist_models,
+            blacklist_benchmarks,
+            only_model=getattr(args, "model", None),
+            tier=args.tier,
         )
 
         if run_pairs:

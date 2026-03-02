@@ -22,8 +22,11 @@ def test_get_benchmark_tier_assigns_screening_benchmarks():
 
 
 def test_get_benchmark_tier_defaults_to_full_for_other_benchmarks():
-    assert get_benchmark_tier("0062_sentence_decomposition") == 2
+    assert get_benchmark_tier("0031_definitions") == 2
     assert get_benchmark_tier("0152_syllogism_validity") == 2
+    assert get_benchmark_tier("0304_python_coin_change") == 2
+    assert get_benchmark_tier("0062_sentence_decomposition") == 3
+    assert get_benchmark_tier("0111_translation_fi_et") == 3
     assert get_benchmark_tier("bad_code") == 2
 
 

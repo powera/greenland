@@ -89,3 +89,66 @@ def test_run_missing_benchmarks_groups_by_model_and_closes_owned_session(monkeyp
     ]
     assert run_pairs == run_calls
     assert fake_session.closed is True
+
+
+def test_run_missing_benchmarks_filters_by_tier(monkeypatch) -> None:
+    fake_session = _FakeSession()
+    run_calls = []
+
+    monkeypatch.setattr(
+        run_benchmark.datastore_common,
+        "create_dev_session",
+        lambda: fake_session,
+    )
+    monkeypatch.setattr(
+        run_benchmark,
+        "get_all_model_codenames",
+        lambda prioritize_local=False: ["local-model"],
+    )
+    monkeypatch.setattr(
+        run_benchmark,
+        "get_enabled_benchmark_codes",
+        lambda: ["0031_definitions", "0062_sentence_decomposition"],
+    )
+    monkeypatch.setattr(
+        run_benchmark.datastore_benchmarks,
+        "get_highest_benchmark_scores",
+        lambda _session: set(),
+    )
+
+    def fake_run(benchmark_code: str, model_name: str) -> int:
+        run_calls.append((model_name, benchmark_code))
+        return 456
+
+    monkeypatch.setattr(run_benchmark, "run_benchmark", fake_run)
+
+    run_pairs = run_benchmark.run_missing_benchmarks(tier=3)
+
+    assert run_calls == [("local-model", "0062_sentence_decomposition")]
+    assert run_pairs == run_calls
+
+
+def test_missing_cli_rejects_tier_with_blacklist(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(
+        run_benchmark.sys,
+        "argv",
+        [
+            "run_benchmark.py",
+            "missing",
+            "--tier",
+            "1",
+            "--blacklist-benchmarks",
+            "0016_antonym",
+        ],
+    )
+
+    try:
+        run_benchmark.main()
+        assert (
+            False
+        ), "Expected argparse to exit when --tier and --blacklist-benchmarks are combined"
+    except SystemExit as exc:
+        assert exc.code == 2
+
+    stderr = capsys.readouterr().err
+    assert "--tier cannot be used together with --blacklist-benchmarks" in stderr
