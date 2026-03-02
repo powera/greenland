@@ -28,7 +28,7 @@ DEFAULT_MODEL = (
 )
 DEFAULT_TIMEOUT = 250
 MODEL_OPERATION_TIMEOUT = 30
-MODEL_READY_POLL_TIMEOUT = 120
+MODEL_READY_POLL_TIMEOUT = 600
 MODEL_READY_POLL_INTERVAL = 2.0
 
 
@@ -198,13 +198,21 @@ class LMStudioClient:
         normalized_response_model = self._normalize_model_name_for_compare(response_model)
         return normalized_requested_model == normalized_response_model
 
-    def warm_model(self, model: str) -> bool:
+    def warm_model(self, model: str, load_name: Optional[str] = None) -> bool:
         """Ensure model is the only loaded model and wait until it is ready.
 
         If the model is already loaded and ready, returns True immediately.
         Any other loaded models are unloaded first to avoid multiple copies
         consuming memory simultaneously.
+
+        Args:
+            model: Model identifier used for state polling (matched against /api/v0/models id).
+            load_name: Model identifier to send in the load POST body.  Defaults to model.
+                       Should be the bare id returned by LM Studio (e.g. "qwen3-4b"), not
+                       the full GGUF path, so the load API accepts it.
         """
+        effective_load_name = load_name or model
+
         # Fast path: already loaded/idle.
         state = self._get_model_state(model)
         if state in ("loaded", "idle"):
@@ -218,7 +226,7 @@ class LMStudioClient:
                 self.unload_model(other_id)
 
         # Send load POST (may block or time out — that's OK).
-        self._send_load_request(model)
+        self._send_load_request(effective_load_name)
 
         # Poll until loaded or timeout.
         deadline = time.time() + MODEL_READY_POLL_TIMEOUT
@@ -228,7 +236,7 @@ class LMStudioClient:
                 return True
             if poll_state == "not-loaded":
                 # Not loading at all — retry the load request.
-                self._send_load_request(model)
+                self._send_load_request(effective_load_name)
             time.sleep(MODEL_READY_POLL_INTERVAL)
 
         logger.warning("Model %s did not become ready within %ss", model, MODEL_READY_POLL_TIMEOUT)

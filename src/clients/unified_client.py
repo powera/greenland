@@ -295,6 +295,11 @@ class UnifiedLLMClient:
         client, normalized_model, expected_response_model = self._get_client(model)
         if self.debug:
             logger.debug("Warming up model: %s", normalized_model)
+        if isinstance(client, lmstudio_client.LMStudioClient):
+            # Use lmstudio_model_name (expected_response_model) as the bare id for both
+            # state polling and the load POST — it matches /api/v0/models "id" field.
+            poll_name = expected_response_model or normalized_model
+            return client.warm_model(poll_name, load_name=poll_name)
         return client.warm_model(normalized_model)
 
     def unload_model(self, model: str) -> bool:
