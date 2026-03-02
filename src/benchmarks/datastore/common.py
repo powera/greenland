@@ -208,21 +208,6 @@ def _initialize_postgres_engine(postgres_url: str) -> Engine:
 
     Base.metadata.create_all(engine)
 
-    # Lightweight migration for existing deployments missing new model fields.
-    with base_engine.connect() as conn:
-        conn.execute(
-            text(f"ALTER TABLE {schema}.model ADD COLUMN IF NOT EXISTS lmstudio_model_name TEXT")
-        )
-        conn.execute(
-            text(
-                f"ALTER TABLE {schema}.model ADD COLUMN IF NOT EXISTS max_benchmark_tier INTEGER NOT NULL DEFAULT 2"
-            )
-        )
-        conn.execute(
-            text(f"ALTER TABLE {schema}.run_detail ADD COLUMN IF NOT EXISTS tokens_used INTEGER")
-        )
-        conn.commit()
-
     return engine
 
 

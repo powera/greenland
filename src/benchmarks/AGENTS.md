@@ -33,6 +33,28 @@ Gemini) and local models (LM Studio, Ollama, TranslateGemma).
 
 See existing benchmarks (e.g. `0016_antonym`) for examples.
 
+## Model path naming conventions
+
+LM Studio model entries in the database use these fields:
+
+- `model_path`: `"lmstudio/<org>/<model-name>"` — e.g.
+  `"lmstudio/lmstudio-community/Qwen3-4B-GGUF/Qwen3-4B-Q4_K_M.gguf"`.
+  The `lmstudio/` prefix routes to the LMStudio backend; the remainder is
+  passed to LMStudio's load and chat APIs as the model identifier.
+- `lmstudio_model_name`: the short bare `id` that LM Studio returns in API
+  responses — e.g. `"qwen3-4b"`. This is what `/api/v0/models` returns in
+  the `"id"` field (no publisher prefix, no path or quantization suffix).
+  Used for response-model verification and for the load API payload.
+
+The canonical source of truth for these values is PostgreSQL (Supabase).
+After updating Postgres, sync local SQLite with:
+
+```bash
+PYTHONPATH=src python src/benchmarks/schema/create_models.py
+```
+
+(runs in upsert mode by default, so existing rows are updated)
+
 ## Quick reference
 
 ```bash
