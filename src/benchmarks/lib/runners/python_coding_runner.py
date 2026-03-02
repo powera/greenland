@@ -23,6 +23,7 @@ _SAFE_BUILTINS: Dict[str, Any] = {
     "enumerate": enumerate,
     "Exception": Exception,
     "float": float,
+    "isinstance": isinstance,
     "int": int,
     "len": len,
     "list": list,
