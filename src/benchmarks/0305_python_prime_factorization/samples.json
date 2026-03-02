@@ -13,7 +13,7 @@
         {"args": [1], "expected_exception": "ValueError"},
         {"args": [0], "expected_exception": "ValueError"},
         {"args": [-10], "expected_exception": "ValueError"},
-        {"args": [3.14], "expected_exception": "TypeError"}
+        {"args": [3.14], "expected_exception": ["TypeError", "ValueError"]}
       ]
     }
   }

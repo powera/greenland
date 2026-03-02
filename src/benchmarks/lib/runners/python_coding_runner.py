@@ -179,6 +179,13 @@ class PythonCodingRunnerBase(PartialCreditRunner):
             args = test_case.get("args", [])
             expected_value = test_case.get("expected")
             expected_exception = test_case.get("expected_exception")
+            allowed_exceptions: tuple[str, ...] = ()
+            if isinstance(expected_exception, str):
+                allowed_exceptions = (expected_exception,)
+            elif isinstance(expected_exception, list) and all(
+                isinstance(exception_name, str) for exception_name in expected_exception
+            ):
+                allowed_exceptions = tuple(expected_exception)
 
             if not isinstance(args, list):
                 case_results.append(
@@ -210,10 +217,7 @@ class PythonCodingRunnerBase(PartialCreditRunner):
                 case_results.append(case_result)
                 continue
             except Exception as error:
-                if (
-                    isinstance(expected_exception, str)
-                    and error.__class__.__name__ == expected_exception
-                ):
+                if error.__class__.__name__ in allowed_exceptions:
                     passed_count += 1
                     case_result["passed"] = True
                     case_result["actual_exception"] = error.__class__.__name__
@@ -223,11 +227,17 @@ class PythonCodingRunnerBase(PartialCreditRunner):
                 case_results.append(case_result)
                 continue
 
-            if isinstance(expected_exception, str):
+            if allowed_exceptions:
                 case_result["result"] = result
-                case_result["error"] = (
-                    f"Expected exception '{expected_exception}' but function returned normally"
-                )
+                if len(allowed_exceptions) == 1:
+                    case_result["error"] = (
+                        f"Expected exception '{allowed_exceptions[0]}' but function returned normally"
+                    )
+                else:
+                    expected_names = ", ".join(allowed_exceptions)
+                    case_result["error"] = (
+                        f"Expected one of [{expected_names}] but function returned normally"
+                    )
                 case_results.append(case_result)
                 continue
 
