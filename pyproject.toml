@@ -90,6 +90,8 @@ module = [
     "werkzeug.*",
     "jinja2.*",
     "pydantic.*",
+    "bs4",
+    "bs4.*",
 ]
 ignore_missing_imports = true
 

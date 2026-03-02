@@ -7,10 +7,12 @@ Example usage:
     from langtools.or.types import NounDeclension, VerbConjugation
 """
 
-from langtools.or.types import (
-    NounDeclension,
-    VerbConjugation,
-)
+from importlib import import_module
+
+_types_module = import_module("langtools.or.types")
+
+NounDeclension = _types_module.NounDeclension
+VerbConjugation = _types_module.VerbConjugation
 
 __all__ = [
     # Types
