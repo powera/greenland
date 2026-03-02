@@ -4,4 +4,12 @@ Return how many times the target letter appears in the string.
 Count should be case-insensitive.
 Raise TypeError for non-string input, and raise ValueError if target is not exactly one character.
 Do not use any imports (no numpy, requests, or other libraries).
-Return only Python code.
+
+Expected output format:
+- Return exactly one fenced Markdown code block starting with ```python and ending with ```.
+- Put only valid Python code inside that block (no prose before/after).
+- Use 4 spaces for indentation (not tabs).
+- Do not return JSON and do not wrap code in a "function" key.
+
+Sample input/output behavior:
+- count_target_letter("Mississippi", "s") -> 4

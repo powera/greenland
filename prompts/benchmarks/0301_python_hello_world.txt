@@ -2,4 +2,9 @@ Write Python 3.12 code only.
 Define exactly one function named hello_world.
 The function must print exactly: Hello world
 Do not use any imports (no numpy, requests, or other libraries).
-Return only Python code.
+
+Expected output format:
+- Return exactly one fenced Markdown code block starting with ```python and ending with ```.
+- Put only valid Python code inside that block (no prose before/after).
+- Use 4 spaces for indentation (not tabs).
+- Do not return JSON and do not wrap code in a "function" key.

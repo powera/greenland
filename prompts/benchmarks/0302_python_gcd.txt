@@ -4,4 +4,12 @@ It must return the greatest common divisor of two integers.
 Raise TypeError if either argument is not an int.
 Raise ValueError if either argument is <= 0.
 Do not use any imports (no numpy, requests, or other libraries).
-Return only Python code.
+
+Expected output format:
+- Return exactly one fenced Markdown code block starting with ```python and ending with ```.
+- Put only valid Python code inside that block (no prose before/after).
+- Use 4 spaces for indentation (not tabs).
+- Do not return JSON and do not wrap code in a "function" key.
+
+Sample input/output behavior:
+- gcd_checked(54, 24) -> 6
