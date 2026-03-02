@@ -330,6 +330,13 @@ def run_missing_benchmarks(
                 if (benchmark_code, model_name) not in scores:
                     missing.append((model_name, benchmark_code))
 
+        # Close the session before running benchmarks — each run_benchmark call
+        # manages its own session, and holding this one open across many long-
+        # running LLM calls causes the PostgreSQL connection to time out.
+        if created_session and session is not None:
+            session.close()
+            session = None
+
         run_pairs = []
         for model_name, benchmark_code in missing:
             logger.info("Running missing benchmark: %s for %s", benchmark_code, model_name)
