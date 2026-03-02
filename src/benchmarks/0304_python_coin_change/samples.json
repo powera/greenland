@@ -4,16 +4,107 @@
     "correct_answer": {
       "function_name": "min_coins_for_amount",
       "test_cases": [
-        {"args": [78, [1, 4, 22]], "expected": 9},
-        {"args": [0, [1, 4, 22]], "expected": 0},
-        {"args": [8, [1, 4, 22]], "expected": 2},
-        {"args": [44, [1, 4, 22]], "expected": 2},
-        {"args": [23, [1, 4, 22]], "expected": 2},
-        {"args": [7, [2, 4]], "expected_exception": "ValueError"},
-        {"args": [11, [5, 6]], "expected": 2},
-        {"args": [3, [2]], "expected_exception": "ValueError"},
-        {"args": [10, "124"], "expected_exception": "TypeError"},
-        {"args": [-1, [1, 2]], "expected_exception": "ValueError"}
+        {
+          "args": [
+            78,
+            [
+              1,
+              4,
+              22
+            ]
+          ],
+          "expected": 6
+        },
+        {
+          "args": [
+            0,
+            [
+              1,
+              4,
+              22
+            ]
+          ],
+          "expected": 0
+        },
+        {
+          "args": [
+            8,
+            [
+              1,
+              4,
+              22
+            ]
+          ],
+          "expected": 2
+        },
+        {
+          "args": [
+            44,
+            [
+              1,
+              4,
+              22
+            ]
+          ],
+          "expected": 2
+        },
+        {
+          "args": [
+            23,
+            [
+              1,
+              4,
+              22
+            ]
+          ],
+          "expected": 2
+        },
+        {
+          "args": [
+            7,
+            [
+              2,
+              4
+            ]
+          ],
+          "expected_exception": "ValueError"
+        },
+        {
+          "args": [
+            11,
+            [
+              5,
+              6
+            ]
+          ],
+          "expected": 2
+        },
+        {
+          "args": [
+            3,
+            [
+              2
+            ]
+          ],
+          "expected_exception": "ValueError"
+        },
+        {
+          "args": [
+            10,
+            "124"
+          ],
+          "expected_exception": "TypeError"
+        },
+        {
+          "args": [
+            -1,
+            [
+              1,
+              2
+            ]
+          ],
+          "expected_exception": "ValueError"
+        }
       ]
     }
   }

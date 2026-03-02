@@ -48,14 +48,17 @@ class PartialCreditRunner(BenchmarkRunner):
             if "correctness_threshold" not in debug_info:
                 debug_info["correctness_threshold"] = self.CORRECTNESS_THRESHOLD
 
+            usage = response.usage
             return BenchmarkResult(
                 question_id=question_id,
                 score=score,
-                eval_msec=int(response.usage.total_msec),
+                eval_msec=int(usage.total_msec) if usage else 0,
                 debug_json=json.dumps(debug_info) if debug_info else None,
                 thought_process=(
                     response.additional_thought if response.additional_thought else None
                 ),
+                cost_usd=usage.cost if usage else None,
+                tokens_used=usage.total_tokens if usage else None,
             )
 
         except OllamaTimeoutError as error:

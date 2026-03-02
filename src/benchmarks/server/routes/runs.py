@@ -48,6 +48,10 @@ def _is_python_coding_benchmark(question_id: str) -> bool:
     return bool(re.match(r"^03\d{2}_python_", question_id))
 
 
+def _is_python_coding_run(benchmark_name: str) -> bool:
+    return bool(re.match(r"^03\d{2}_python_", benchmark_name))
+
+
 @bp.route("/<int:run_id>")
 def view_run(run_id):
     """View detailed results for a specific run."""
@@ -74,6 +78,7 @@ def view_run(run_id):
     total_tokens = sum((d.get("tokens_used") or 0) for d in run_data["details"])
 
     ordered_questions = sorted(run_data["details"], key=_question_sort_key)
+    is_python_coding_run = _is_python_coding_run(run_data["benchmark_name"])
 
     for detail in ordered_questions:
         question_info_json = detail.get("question_info_json") or {}
@@ -90,12 +95,6 @@ def view_run(run_id):
         question_id = detail.get("question_id") or ""
         if _is_python_coding_benchmark(question_id):
             expected_answer = question_info_json.get("correct_answer", {})
-            detail["expected_label"] = "Test cases"
-            detail["expected_display"] = _format_json_for_display(
-                expected_answer.get("test_cases", [])
-                if isinstance(expected_answer, dict)
-                else expected_answer
-            )
             detail["response_label"] = "Submitted code"
             detail["test_case_results"] = debug_json.get("test_case_results")
         else:
@@ -126,6 +125,7 @@ def view_run(run_id):
         total_tokens=total_tokens,
         ordered_questions=ordered_questions,
         correctness_threshold=threshold,
+        is_python_coding_run=is_python_coding_run,
     )
 
 
