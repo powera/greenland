@@ -113,6 +113,79 @@
     </div>
 </div>
 
+{% if is_python_coding_run %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-list-check"></i> Coding question results ({{ total_questions }})</h5>
+            </div>
+            <div class="card-body">
+                {% for detail in ordered_questions %}
+                {% set question_text = detail.question_info_json.question_text if detail.question_info_json else none %}
+                {% set is_correct = (detail.score or 0) >= correctness_threshold %}
+                <div class="border rounded p-3 mb-3 {% if is_correct %}border-success{% else %}border-danger{% endif %}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <strong>{{ detail.question_id }}</strong>
+                            <span class="ms-2 badge {% if is_correct %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if is_correct %}Correct{% else %}Incorrect{% endif %}
+                            </span>
+                        </div>
+                        <span class="small text-muted">Score: {{ detail.score or 0 }} • {{ detail.eval_msec or 0 }}ms{% if detail.tokens_used is not none %} • {{ detail.tokens_used }} tokens{% endif %}{% if detail.cost_usd %} • {% if detail.cost_usd < 0.001 %}{{ '%.0f'|format(detail.cost_usd * 1000000) }}µ${% else %}${{ '%.4f'|format(detail.cost_usd) }}{% endif %}{% endif %}</span>
+                    </div>
+
+                    <div class="mb-3"><strong>Question:</strong> {{ question_text or '-' }}</div>
+
+                    <div class="mb-3">
+                        <strong>Submitted code</strong>
+                        <pre class="{% if is_correct %}bg-success-subtle{% else %}bg-danger-subtle{% endif %} p-2 mb-0"><code>{{ detail.response_display if detail.response_display is defined and detail.response_display is not none else '-' }}</code></pre>
+                    </div>
+
+                    {% if detail.test_case_results %}
+                    <div>
+                        <strong>Test case results</strong>
+                        <div class="table-responsive mt-2">
+                            <table class="table table-sm table-bordered mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Status</th>
+                                        <th>Args</th>
+                                        <th>Expected</th>
+                                        <th>Actual</th>
+                                        <th>Error</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for case in detail.test_case_results %}
+                                    <tr>
+                                        <td>{{ case.index if case.index is defined else loop.index0 }}</td>
+                                        <td>
+                                            {% if case.passed %}
+                                            <span class="badge bg-success">Pass</span>
+                                            {% else %}
+                                            <span class="badge bg-danger">Fail</span>
+                                            {% endif %}
+                                        </td>
+                                        <td><code>{{ case.args if case.args is defined else '-' }}</code></td>
+                                        <td><code>{{ case.expected_exception if case.expected_exception is defined and case.expected_exception else case.expected if case.expected is defined else '-' }}</code></td>
+                                        <td><code>{{ case.actual_exception if case.actual_exception is defined else case.stdout if case.capture_stdout else case.result if case.result is defined else '-' }}</code></td>
+                                        <td><code>{{ case.error if case.error is defined else '-' }}</code></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
 <div class="row mb-4">
     <div class="col-12">
         <div class="card">
@@ -127,14 +200,6 @@
                     <div class="accordion" id="runQuestionAccordion">
                         {% for detail in ordered_questions %}
                         {% set question_text = detail.question_info_json.question_text if detail.question_info_json else none %}
-                        {% set expected_answer = detail.question_info_json.correct_answer if detail.question_info_json else none %}
-                        {% if (expected_answer is none or expected_answer is undefined) and detail.debug_json %}
-                            {% set expected_answer = detail.debug_json.expected if detail.debug_json.expected is defined else detail.debug_json.expected_answer %}
-                        {% endif %}
-                        {% set model_response = detail.debug_json.response if detail.debug_json else none %}
-                        {% if (model_response is none or model_response is undefined) and detail.debug_json %}
-                            {% set model_response = detail.debug_json.model_answer if detail.debug_json.model_answer is defined else detail.debug_json.model_response %}
-                        {% endif %}
                         {% set is_correct = (detail.score or 0) >= correctness_threshold %}
 
                         <div class="accordion-item mb-2 border {% if is_correct %}border-success{% else %}border-danger{% endif %}">
@@ -165,44 +230,6 @@
                                             <pre class="{% if is_correct %}bg-success-subtle{% else %}bg-danger-subtle{% endif %} p-2 mb-0"><code>{{ detail.response_display if detail.response_display is defined and detail.response_display is not none else '-' }}</code></pre>
                                         </div>
                                     </div>
-
-                                    {% if detail.test_case_results %}
-                                    <div class="mt-3">
-                                        <strong>Test case results</strong>
-                                        <div class="table-responsive mt-2">
-                                            <table class="table table-sm table-bordered mb-0">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Status</th>
-                                                        <th>Args</th>
-                                                        <th>Expected</th>
-                                                        <th>Actual</th>
-                                                        <th>Error</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {% for case in detail.test_case_results %}
-                                                    <tr>
-                                                        <td>{{ case.index if case.index is defined else loop.index0 }}</td>
-                                                        <td>
-                                                            {% if case.passed %}
-                                                            <span class="badge bg-success">Pass</span>
-                                                            {% else %}
-                                                            <span class="badge bg-danger">Fail</span>
-                                                            {% endif %}
-                                                        </td>
-                                                        <td><code>{{ case.args if case.args is defined else '-' }}</code></td>
-                                                        <td><code>{{ case.expected_exception if case.expected_exception is defined and case.expected_exception else case.expected if case.expected is defined else '-' }}</code></td>
-                                                        <td><code>{{ case.actual_exception if case.actual_exception is defined else case.stdout if case.capture_stdout else case.result if case.result is defined else '-' }}</code></td>
-                                                        <td><code>{{ case.error if case.error is defined else '-' }}</code></td>
-                                                    </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                    {% endif %}
 
                                     {% if run_data.benchmark_name == '0062_sentence_decomposition' and detail.debug_json and detail.debug_json.scoring_breakdown %}
                                     {% set breakdown = detail.debug_json.scoring_breakdown %}
@@ -236,4 +263,5 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock %}
