@@ -84,6 +84,45 @@ def classify(value):
     assert runner.score_response(question_data, response) == 100
 
 
+def test_python_coding_runner_allows_type_builtin() -> None:
+    runner = _runner()
+    question_data = {
+        "correct_answer": {
+            "function_name": "is_exact_int",
+            "test_cases": [
+                {"args": [5], "expected": True},
+                {"args": [True], "expected": False},
+            ],
+        }
+    }
+
+    response = """
+def is_exact_int(value):
+    return type(value) is int
+"""
+
+    assert runner.score_response(question_data, response) == 100
+
+
+def test_python_coding_runner_allows_sorted_builtin() -> None:
+    runner = _runner()
+    question_data = {
+        "correct_answer": {
+            "function_name": "normalize",
+            "test_cases": [
+                {"args": [[3, 1, 2]], "expected": [1, 2, 3]},
+            ],
+        }
+    }
+
+    response = """
+def normalize(values):
+    return sorted(values)
+"""
+
+    assert runner.score_response(question_data, response) == 100
+
+
 def test_python_coding_runner_blocks_imports() -> None:
     runner = _runner()
     question_data = {
