@@ -1,14 +1,102 @@
 [
-  {"food": "salmon", "category": "seafood", "difficulty": "easy"},
-  {"food": "cheddar", "category": "dairy", "difficulty": "easy"},
-  {"food": "spaghetti", "category": "pasta", "difficulty": "easy"},
-  {"food": "blueberry", "category": "fruit", "difficulty": "easy"},
-  {"food": "spinach", "category": "vegetable", "difficulty": "easy"},
-  {"food": "tofu", "category": "protein", "difficulty": "medium"},
-  {"food": "chickpeas", "category": "legume", "difficulty": "medium"},
-  {"food": "quinoa", "category": "grain", "difficulty": "medium"},
-  {"food": "almond", "category": "nut", "difficulty": "easy"},
-  {"food": "yogurt", "category": "dairy", "difficulty": "easy"},
-  {"food": "lentils", "category": "legume", "difficulty": "medium"},
-  {"food": "duck", "category": "poultry", "difficulty": "easy"}
+  {
+    "food": "salmon",
+    "category": "seafood",
+    "difficulty": "easy"
+  },
+  {
+    "food": "cheddar",
+    "category": "dairy",
+    "difficulty": "easy"
+  },
+  {
+    "food": "spaghetti",
+    "category": "pasta",
+    "difficulty": "easy"
+  },
+  {
+    "food": "blueberry",
+    "category": "fruit",
+    "difficulty": "easy"
+  },
+  {
+    "food": "spinach",
+    "category": "vegetable",
+    "difficulty": "easy"
+  },
+  {
+    "food": "tofu",
+    "category": "protein",
+    "difficulty": "medium"
+  },
+  {
+    "food": "chickpeas",
+    "category": "legume",
+    "difficulty": "medium"
+  },
+  {
+    "food": "quinoa",
+    "category": "grain",
+    "difficulty": "medium"
+  },
+  {
+    "food": "almond",
+    "category": "nut",
+    "difficulty": "easy"
+  },
+  {
+    "food": "duck",
+    "category": "poultry",
+    "difficulty": "easy"
+  },
+  {
+    "food": "shrimp",
+    "category": "seafood",
+    "difficulty": "easy"
+  },
+  {
+    "food": "barley",
+    "category": "grain",
+    "difficulty": "medium"
+  },
+  {
+    "food": "black beans",
+    "category": "legume",
+    "difficulty": "easy"
+  },
+  {
+    "food": "pistachio",
+    "category": "nut",
+    "difficulty": "medium"
+  },
+  {
+    "food": "kale",
+    "category": "vegetable",
+    "difficulty": "easy"
+  },
+  {
+    "food": "mango",
+    "category": "fruit",
+    "difficulty": "easy"
+  },
+  {
+    "food": "ricotta",
+    "category": "dairy",
+    "difficulty": "medium"
+  },
+  {
+    "food": "turkey",
+    "category": "poultry",
+    "difficulty": "easy"
+  },
+  {
+    "food": "tempeh",
+    "category": "protein",
+    "difficulty": "hard"
+  },
+  {
+    "food": "farfalle",
+    "category": "pasta",
+    "difficulty": "medium"
+  }
 ]

@@ -17,6 +17,7 @@ class BenchmarkTier:
 
     level: int
     label: str
+    short_label: str
     description: str
 
 
@@ -24,16 +25,19 @@ BENCHMARK_TIERS: dict[int, BenchmarkTier] = {
     1: BenchmarkTier(
         level=1,
         label="Tier 1 (Screening)",
+        short_label="T1",
         description="Simple baseline tasks (0010–0029 and translation sanity checks 0101–0109).",
     ),
     2: BenchmarkTier(
         level=2,
         label="Tier 2 (Full)",
-        description="All benchmark tasks.",
+        short_label="T2+",
+        description="Full benchmark catalog.",
     ),
     3: BenchmarkTier(
         level=3,
         label="Tier 3 (Advanced)",
+        short_label="T3",
         description="Reserved for future advanced benchmarks (opt-in by model).",
     ),
 }

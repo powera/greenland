@@ -1,14 +1,92 @@
 [
-  {"event": "The signing of the United States Declaration of Independence", "year": 1776, "difficulty": "easy"},
-  {"event": "The fall of the Berlin Wall", "year": 1989, "difficulty": "easy"},
-  {"event": "The first moon landing (Apollo 11)", "year": 1969, "difficulty": "easy"},
-  {"event": "The start of World War I", "year": 1914, "difficulty": "easy"},
-  {"event": "The end of World War II in Europe (VE Day)", "year": 1945, "difficulty": "easy"},
-  {"event": "Christopher Columbus's first voyage to the Americas", "year": 1492, "difficulty": "easy"},
-  {"event": "The French Revolution begins", "year": 1789, "difficulty": "medium"},
-  {"event": "India gains independence from British rule", "year": 1947, "difficulty": "medium"},
-  {"event": "The Russian Revolution (October Revolution)", "year": 1917, "difficulty": "medium"},
-  {"event": "The Magna Carta is sealed", "year": 1215, "difficulty": "hard"},
-  {"event": "The coronation of Charlemagne as Holy Roman Emperor", "year": 800, "difficulty": "hard"},
-  {"event": "The Chernobyl nuclear disaster", "year": 1986, "difficulty": "medium"}
+  {
+    "event": "The signing of the United States Declaration of Independence",
+    "year": 1776,
+    "difficulty": "easy"
+  },
+  {
+    "event": "The fall of the Berlin Wall",
+    "year": 1989,
+    "difficulty": "easy"
+  },
+  {
+    "event": "The first moon landing (Apollo 11)",
+    "year": 1969,
+    "difficulty": "easy"
+  },
+  {
+    "event": "The start of World War I",
+    "year": 1914,
+    "difficulty": "easy"
+  },
+  {
+    "event": "The end of World War II in Europe (VE Day)",
+    "year": 1945,
+    "difficulty": "easy"
+  },
+  {
+    "event": "Christopher Columbus's first voyage to the Americas",
+    "year": 1492,
+    "difficulty": "easy"
+  },
+  {
+    "event": "The French Revolution begins",
+    "year": 1789,
+    "difficulty": "medium"
+  },
+  {
+    "event": "India gains independence from British rule",
+    "year": 1947,
+    "difficulty": "medium"
+  },
+  {
+    "event": "The October Revolution in Russia",
+    "year": 1917,
+    "difficulty": "medium"
+  },
+  {
+    "event": "The Chernobyl nuclear disaster",
+    "year": 1986,
+    "difficulty": "medium"
+  },
+  {
+    "event": "The Magna Carta is sealed",
+    "year": 1215,
+    "difficulty": "hard"
+  },
+  {
+    "event": "The coronation of Charlemagne as Holy Roman Emperor",
+    "year": 800,
+    "difficulty": "hard"
+  },
+  {
+    "event": "The invention of the World Wide Web (proposal by Tim Berners-Lee)",
+    "year": 1989,
+    "difficulty": "medium"
+  },
+  {
+    "event": "The dissolution of the Soviet Union",
+    "year": 1991,
+    "difficulty": "medium"
+  },
+  {
+    "event": "Nelson Mandela is elected President of South Africa",
+    "year": 1994,
+    "difficulty": "medium"
+  },
+  {
+    "event": "The publication of Isaac Newton's Principia Mathematica",
+    "year": 1687,
+    "difficulty": "hard"
+  },
+  {
+    "event": "The Wright brothers' first powered flight",
+    "year": 1903,
+    "difficulty": "medium"
+  },
+  {
+    "event": "The beginning of the Protestant Reformation (Luther's 95 Theses)",
+    "year": 1517,
+    "difficulty": "hard"
+  }
 ]
