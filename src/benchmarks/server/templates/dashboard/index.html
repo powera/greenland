@@ -15,7 +15,7 @@
         <div class="alert alert-light border">
             <strong>Tier legend:</strong>
             {% for tier in tier_definitions.values() %}
-            <span class="ms-2"><span class="badge text-bg-secondary">{{ tier.label }}</span> {{ tier.description }}</span>
+            <span class="ms-2"><span class="badge text-bg-secondary">{{ tier.short_label }}</span> {{ tier.label }} — {{ tier.description }}</span>
             {% endfor %}
             <span class="ms-2"><span class="badge text-bg-light border">N/A</span> model is intentionally excluded from that tier.</span>
         </div>
@@ -32,9 +32,18 @@
                 </h5>
                 <div class="row g-3">
                     <div class="col-md-3">
+                        <label class="form-label">View Preset</label>
+                        <select class="form-select" id="viewPreset">
+                            <option value="remote" selected>Remote models</option>
+                            <option value="local-tier1">Local models · Tier 1</option>
+                            <option value="local-tier2plus">Local models · Tier 2+</option>
+                            <option value="all">All models · all tiers</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
                         <label class="form-label">Model Type</label>
                         <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="modelType" id="typeAll" value="all" checked>
+                            <input type="radio" class="btn-check" name="modelType" id="typeAll" value="all">
                             <label class="btn btn-outline-primary" for="typeAll">All</label>
 
                             <input type="radio" class="btn-check" name="modelType" id="typeLocal" value="local">
@@ -91,7 +100,7 @@
                                 <th class="text-center model-col"
                                     data-model-type="{{ model.model_type }}">
                                     <div class="small">{{ model.displayname }}</div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">
+                                    <div class="text-muted small">
                                         {% if model.filesize_mb %}{{ model.filesize_mb }} MB{% endif %}
                                     </div>
                                 </th>
@@ -103,14 +112,15 @@
                             <tr class="benchmark-row"
                                 data-benchmark-name="{{ benchmark.displayname }}"
                                 data-benchmark-key="{{ benchmark.codename }}"
-                                data-category="{{ benchmark.category or '' }}">
+                                data-category="{{ benchmark.category or '' }}"
+                                data-tier="{{ benchmark_tiers[benchmark.codename] }}">
                                 <td>
                                     <a href="{{ url_for('benchmarks.view_benchmark', benchmark_name=benchmark.codename) }}"
                                        class="text-decoration-none">
                                         <strong>{{ benchmark.displayname }}</strong>
                                     </a>
                                     <br><small class="text-muted font-monospace">{{ benchmark.codename }}</small>
-                                    <span class="badge text-bg-secondary">{{ tier_definitions[benchmark_tiers[benchmark.codename]].label }}</span>
+                                    <span class="badge text-bg-light border text-secondary">{{ tier_definitions[benchmark_tiers[benchmark.codename]].short_label }}</span>
                                     {% if benchmark.description %}
                                     <br><small class="text-muted">{{ benchmark.description[:80] }}...</small>
                                     {% endif %}

@@ -1,14 +1,92 @@
 [
-  {"book": "1984", "author": "George Orwell", "difficulty": "easy"},
-  {"book": "Pride and Prejudice", "author": "Jane Austen", "difficulty": "easy"},
-  {"book": "Moby-Dick", "author": "Herman Melville", "difficulty": "medium"},
-  {"book": "The Great Gatsby", "author": "F. Scott Fitzgerald", "difficulty": "easy"},
-  {"book": "Crime and Punishment", "author": "Fyodor Dostoevsky", "difficulty": "medium"},
-  {"book": "One Hundred Years of Solitude", "author": "Gabriel García Márquez", "difficulty": "medium"},
-  {"book": "The Hobbit", "author": "J.R.R. Tolkien", "difficulty": "easy"},
-  {"book": "Frankenstein", "author": "Mary Shelley", "difficulty": "easy"},
-  {"book": "The Catcher in the Rye", "author": "J.D. Salinger", "difficulty": "easy"},
-  {"book": "The Name of the Rose", "author": "Umberto Eco", "difficulty": "hard"},
-  {"book": "Beloved", "author": "Toni Morrison", "difficulty": "medium"},
-  {"book": "The Trial", "author": "Franz Kafka", "difficulty": "medium"}
+  {
+    "book": "1984",
+    "author": "George Orwell",
+    "difficulty": "easy"
+  },
+  {
+    "book": "Pride and Prejudice",
+    "author": "Jane Austen",
+    "difficulty": "easy"
+  },
+  {
+    "book": "The Great Gatsby",
+    "author": "F. Scott Fitzgerald",
+    "difficulty": "easy"
+  },
+  {
+    "book": "The Hobbit",
+    "author": "J.R.R. Tolkien",
+    "difficulty": "easy"
+  },
+  {
+    "book": "Frankenstein",
+    "author": "Mary Shelley",
+    "difficulty": "easy"
+  },
+  {
+    "book": "The Catcher in the Rye",
+    "author": "J.D. Salinger",
+    "difficulty": "easy"
+  },
+  {
+    "book": "To Kill a Mockingbird",
+    "author": "Harper Lee",
+    "difficulty": "easy"
+  },
+  {
+    "book": "Brave New World",
+    "author": "Aldous Huxley",
+    "difficulty": "easy"
+  },
+  {
+    "book": "Moby-Dick",
+    "author": "Herman Melville",
+    "difficulty": "medium"
+  },
+  {
+    "book": "Crime and Punishment",
+    "author": "Fyodor Dostoevsky",
+    "difficulty": "medium"
+  },
+  {
+    "book": "One Hundred Years of Solitude",
+    "author": "Gabriel García Márquez",
+    "difficulty": "medium"
+  },
+  {
+    "book": "Beloved",
+    "author": "Toni Morrison",
+    "difficulty": "medium"
+  },
+  {
+    "book": "The Trial",
+    "author": "Franz Kafka",
+    "difficulty": "medium"
+  },
+  {
+    "book": "The Stranger",
+    "author": "Albert Camus",
+    "difficulty": "medium"
+  },
+  {
+    "book": "Invisible Man",
+    "author": "Ralph Ellison",
+    "difficulty": "medium"
+  },
+  {
+    "book": "The Name of the Rose",
+    "author": "Umberto Eco",
+    "difficulty": "hard"
+  },
+  {
+    "book": "Ulysses",
+    "author": "James Joyce",
+    "difficulty": "hard"
+  },
+  {
+    "book": "The Brothers Karamazov",
+    "author": "Fyodor Dostoevsky",
+    "difficulty": "hard"
+  }
 ]
