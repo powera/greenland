@@ -72,7 +72,7 @@ def _insert_lmstudio_model(
     license_name: str,
     lmstudio_model: str,
     lmstudio_model_name: Optional[str] = None,
-    max_benchmark_tier: int = 2,
+    max_benchmark_tier: int = 1,
 ) -> None:
     """Insert a local model that is served via LMStudio.
 
@@ -135,6 +135,7 @@ def create_remote_models(postgres_url=None):
         license_name="Closed Model",
         model_path="gpt-5.2",
         model_type="remote",
+        max_benchmark_tier=3,
     )
     _model_write(
         s,
@@ -145,6 +146,7 @@ def create_remote_models(postgres_url=None):
         license_name="Closed Model",
         model_path="gpt-5-mini",
         model_type="remote",
+        max_benchmark_tier=2,
     )
     _model_write(
         s,
@@ -155,6 +157,7 @@ def create_remote_models(postgres_url=None):
         license_name="Closed Model",
         model_path="gpt-5-nano",
         model_type="remote",
+        max_benchmark_tier=2,
     )
 
     # Anthropic Claude 4.6
@@ -167,6 +170,7 @@ def create_remote_models(postgres_url=None):
         license_name="Closed Model",
         model_path="claude-opus-4-6",
         model_type="remote",
+        max_benchmark_tier=3,
     )
     _model_write(
         s,
@@ -177,6 +181,7 @@ def create_remote_models(postgres_url=None):
         license_name="Closed Model",
         model_path="claude-sonnet-4-6",
         model_type="remote",
+        max_benchmark_tier=2,
     )
     _model_write(
         s,
@@ -187,6 +192,7 @@ def create_remote_models(postgres_url=None):
         license_name="Closed Model",
         model_path="claude-haiku-4-5-20251001",
         model_type="remote",
+        max_benchmark_tier=2,
     )
 
 
@@ -204,6 +210,7 @@ def create_local_models(postgres_url=None):
         filesize_mb=1100,
         license_name="Apache License",
         lmstudio_model="lmstudio-community/Qwen3-1.7B-GGUF/Qwen3-1.7B-Q6_K.gguf",
+        max_benchmark_tier=2,
     )
     _insert_lmstudio_model(
         s,
@@ -213,6 +220,7 @@ def create_local_models(postgres_url=None):
         filesize_mb=2800,
         license_name="Apache License",
         lmstudio_model="lmstudio-community/Qwen3-4B-GGUF/Qwen3-4B-Q4_K_M.gguf",
+        max_benchmark_tier=2,
     )
     _insert_lmstudio_model(
         s,
@@ -222,6 +230,7 @@ def create_local_models(postgres_url=None):
         filesize_mb=5000,
         license_name="Apache License",
         lmstudio_model="qwen/qwen3-vl-8b",
+        max_benchmark_tier=2,
     )
 
     # --- Meta Llama ---
@@ -255,6 +264,7 @@ def create_local_models(postgres_url=None):
         filesize_mb=4900,
         license_name="Llama License",
         lmstudio_model="lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct-Q4_K_M.gguf",
+        max_benchmark_tier=2,
     )
 
     # --- Other small models ---
@@ -287,6 +297,7 @@ def create_local_models(postgres_url=None):
         filesize_mb=1500,
         license_name="Gemma License",
         lmstudio_model="mlx-community/gemma-2-2b-it-4bit",
+        max_benchmark_tier=2,
     )
     _insert_lmstudio_model(
         s,
@@ -296,6 +307,7 @@ def create_local_models(postgres_url=None):
         filesize_mb=4900,
         license_name="Apache License",
         lmstudio_model="ibm/granite-3.2-8b",
+        max_benchmark_tier=2,
     )
 
     # --- Mistral and AllenAI ---
@@ -308,6 +320,7 @@ def create_local_models(postgres_url=None):
         filesize_mb=4900,
         license_name="Mistral Research License",
         lmstudio_model="bartowski/Ministral-8B-Instruct-2410-GGUF/Ministral-8B-Instruct-2410-Q4_K_S.gguf",
+        max_benchmark_tier=2,
     )
     _insert_lmstudio_model(
         s,
@@ -317,6 +330,7 @@ def create_local_models(postgres_url=None):
         filesize_mb=4300,
         license_name="Apache License",
         lmstudio_model="lmstudio-community/Olmo-3-7B-Instruct-GGUF/Olmo-3-7B-Instruct-Q4_K_M.gguf",
+        max_benchmark_tier=2,
     )
 
     # --- 2024 flagship class (<=8B) models ---
@@ -329,6 +343,7 @@ def create_local_models(postgres_url=None):
         filesize_mb=4900,
         license_name="Llama License",
         lmstudio_model="lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf",
+        max_benchmark_tier=2,
     )
     _insert_lmstudio_model(
         s,
@@ -338,6 +353,7 @@ def create_local_models(postgres_url=None):
         filesize_mb=4300,
         license_name="Apache License",
         lmstudio_model="Qwen/Qwen2.5-7B-Instruct",
+        max_benchmark_tier=2,
     )
     _insert_lmstudio_model(
         s,
@@ -361,6 +377,7 @@ def create_local_models(postgres_url=None):
         license_name="MIT License",
         lmstudio_model="microsoft/phi-4",
         lmstudio_model_name="microsoft/phi-4",
+        max_benchmark_tier=2,
     )
     _insert_lmstudio_model(
         s,
@@ -371,6 +388,7 @@ def create_local_models(postgres_url=None):
         license_name="Gemma License",
         lmstudio_model="google/gemma-2-9b",
         lmstudio_model_name="google/gemma-2-9b",
+        max_benchmark_tier=2,
     )
     _insert_lmstudio_model(
         s,
@@ -381,6 +399,7 @@ def create_local_models(postgres_url=None):
         license_name="Gemma License",
         lmstudio_model="google/gemma-3-12b",
         lmstudio_model_name="google/gemma-3-12b",
+        max_benchmark_tier=2,
     )
 
 

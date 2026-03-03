@@ -87,7 +87,7 @@ def get_model_capability_level(model: Any) -> int:
     max_tier_value = getattr(model, "max_benchmark_tier", None)
     if isinstance(max_tier_value, int) and max_tier_value >= 1:
         return max_tier_value
-    return 2
+    return 1
 
 
 def model_can_run_benchmark(model: Any, benchmark_code: str) -> bool:

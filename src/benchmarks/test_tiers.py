@@ -41,6 +41,11 @@ def test_model_capability_helpers_guard_eligibility():
     assert model_can_run_benchmark(unrestricted_model, "0152_syllogism_validity")
 
 
+def test_model_capability_level_defaults_to_level_1_when_missing():
+    model_without_tier = SimpleNamespace()
+    assert get_model_capability_level(model_without_tier) == 1
+
+
 def test_get_tier_label_supports_future_tiers():
     assert get_tier_label(3) == "Tier 3 (Advanced)"
     assert get_tier_label(4) == "Tier 4"
