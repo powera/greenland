@@ -389,6 +389,13 @@ class BenchmarkRunner:
             logger.error("No questions found for benchmark %s", self.metadata.code)
             return -1
 
+        # Release the DB connection before the LLM inference loop.  The loop
+        # can take hours for slow local models; PostgreSQL (and PgBouncer) will
+        # close idle connections long before then, causing a
+        # "server closed the connection unexpectedly" error when save_results()
+        # is finally called.  We reopen a fresh session just before saving.
+        self.close()
+
         # Warm up the model
         logger.info("Warming up model %s...", self.model)
         self.warm_up()
@@ -447,6 +454,11 @@ class BenchmarkRunner:
             correct_count,
             len(results),
         )
+
+        # Open a fresh session for the DB write — the original session was
+        # closed above to avoid holding the connection open across the long
+        # LLM inference loop.
+        self.session = datastore_benchmarks.create_dev_session()
 
         # Save results to database
         run_id = self.save_results(score, results)
