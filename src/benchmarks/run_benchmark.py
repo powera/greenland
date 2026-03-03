@@ -30,6 +30,29 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def _max_tier_for_model_capability(model_capability_level: int) -> Optional[int]:
+    """Return the highest benchmark tier a model capability level can run.
+
+    Rules for missing-benchmark automation:
+    - capability level 1 -> tiers 1-2
+    - capability level 2 -> tiers 1-5
+    - capability level 3+ -> unrestricted
+    """
+    if model_capability_level <= 1:
+        return 2
+    if model_capability_level == 2:
+        return 5
+    return None
+
+
+def _model_can_run_tier_for_missing(model_capability_level: int, benchmark_tier: int) -> bool:
+    """Return whether a model capability level can run a benchmark tier."""
+    max_tier = _max_tier_for_model_capability(model_capability_level)
+    if max_tier is None:
+        return True
+    return benchmark_tier <= max_tier
+
+
 def get_all_model_codenames(prioritize_local: bool = False) -> List[str]:
     """Get model codenames from the database.
 
@@ -307,6 +330,12 @@ def run_missing_benchmarks(
         blacklist_models = blacklist_models or set()
         blacklist_benchmarks = blacklist_benchmarks or set()
 
+        all_models = datastore_common.list_all_models(session)
+        model_capability_levels = {
+            str(model_record["codename"]): int(model_record.get("max_benchmark_tier", 1))
+            for model_record in all_models
+        }
+
         if only_model:
             models = [only_model]
         else:
@@ -326,7 +355,11 @@ def run_missing_benchmarks(
 
         missing: List[Tuple[str, str]] = []
         for model_name in models:
+            model_capability_level = model_capability_levels.get(model_name, 1)
             for benchmark_code in benchmarks:
+                benchmark_tier = get_benchmark_tier(benchmark_code)
+                if not _model_can_run_tier_for_missing(model_capability_level, benchmark_tier):
+                    continue
                 if (benchmark_code, model_name) not in scores:
                     missing.append((model_name, benchmark_code))
 
