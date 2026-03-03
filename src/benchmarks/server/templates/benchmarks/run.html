@@ -32,12 +32,12 @@
                             <option value="{{ option.model.codename }}" {% if not option.supported %}disabled{% endif %}>
                                 {{ option.model.displayname }}
                                 {% if option.model.filesize_mb %}- {{ option.model.filesize_mb }} MB{% endif %}
-                                {% if not option.supported %}(max {{ tier_definitions[option.max_tier].label }}){% endif %}
+                                {% if not option.supported %}(max {{ option.model_capability_label }}){% endif %}
                             </option>
                             {% endfor %}
                         </select>
                         <div class="form-text">
-                            Models that cannot run this benchmark tier are shown as disabled.
+                            Models that cannot run this benchmark tier are shown as disabled based on capability level.
                         </div>
                     </div>
 

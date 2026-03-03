@@ -28,17 +28,17 @@ document.addEventListener('DOMContentLoaded', function() {
             };
         }
 
-        if (selectedScope === 'local-tier1') {
+        if (selectedScope === 'local-level1') {
             return {
-                modelPredicate: (modelType, modelTier) => modelType === 'local' && modelTier === '1',
+                modelPredicate: (modelType, modelLevel) => modelType === 'local' && modelLevel === '1',
                 benchmarkPredicate: (benchmarkTier) => benchmarkTier === '1',
                 forceBenchmarkTier: '1',
             };
         }
 
-        if (selectedScope === 'local-tier2') {
+        if (selectedScope === 'local-level2plus') {
             return {
-                modelPredicate: (modelType, modelTier) => modelType === 'local' && modelTier !== '1',
+                modelPredicate: (modelType, modelLevel) => modelType === 'local' && modelLevel !== '1',
                 benchmarkPredicate: () => true,
                 forceBenchmarkTier: null,
             };
@@ -113,8 +113,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const modelCols = resultsTable.querySelectorAll('.model-col');
         modelCols.forEach(col => {
             const colModelType = col.dataset.modelType;
-            const colModelTier = col.dataset.modelTier;
-            const showCol = scopeConfig.modelPredicate(colModelType, colModelTier);
+            const colModelLevel = col.dataset.modelLevel;
+            const showCol = scopeConfig.modelPredicate(colModelType, colModelLevel);
             col.style.display = showCol ? '' : 'none';
         });
 

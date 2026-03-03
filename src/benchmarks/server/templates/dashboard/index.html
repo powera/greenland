@@ -44,8 +44,8 @@
                         <select class="form-select" id="modelScope">
                             <option value="all" selected>All</option>
                             <option value="remote">Remote</option>
-                            <option value="local-tier1">Local (Tier 1)</option>
-                            <option value="local-tier2">Local (Tier 2)</option>
+                            <option value="local-level1">Local (Level 1)</option>
+                            <option value="local-level2plus">Local (Level 2+)</option>
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -103,7 +103,7 @@
                                 {% for model in models %}
                                 <th class="text-center model-col"
                                     data-model-type="{{ model.model_type }}"
-                                    data-model-tier="{{ model.max_benchmark_tier }}">
+                                    data-model-level="{{ model.max_benchmark_tier }}">
                                     <div class="small">{{ model.displayname }}</div>
                                     <div class="text-muted small">
                                         {% if model.filesize_mb %}{{ model.filesize_mb }} MB{% endif %}
@@ -133,7 +133,7 @@
                                 {% for model in models %}
                                 <td class="text-center model-col"
                                     data-model-type="{{ model.model_type }}"
-                                    data-model-tier="{{ model.max_benchmark_tier }}">
+                                    data-model-level="{{ model.max_benchmark_tier }}">
                                     {% if (benchmark.codename, model.codename) in scores %}
                                     {% set score_data = scores[(benchmark.codename, model.codename)] %}
                                     <a href="{{ url_for('runs.view_run', run_id=score_data.run_id) }}"
@@ -152,7 +152,7 @@
                                     </a>
                                     {% elif not eligibility[(benchmark.codename, model.codename)] %}
                                     <span class="badge text-bg-light border"
-                                          title="Excluded by model tier policy">N/A</span>
+                                          title="Excluded by model capability policy">N/A</span>
                                     {% else %}
                                     <span class="text-muted">-</span>
                                     {% endif %}

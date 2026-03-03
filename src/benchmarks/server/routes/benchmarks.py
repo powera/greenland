@@ -14,7 +14,8 @@ from benchmarks.lib.utils.factory import get_all_benchmark_codes, get_benchmark_
 from benchmarks.tiers import (
     BENCHMARK_TIERS,
     get_benchmark_tier,
-    get_model_max_tier,
+    get_model_capability_label,
+    get_model_capability_level,
     get_tier_label,
     model_can_run_benchmark,
 )
@@ -273,7 +274,7 @@ def run_benchmark(benchmark_name):
         if not model_can_run_benchmark(model, benchmark_name):
             benchmark_tier = get_benchmark_tier(benchmark_name)
             flash(
-                f"{model.displayname} is limited to {get_tier_label(get_model_max_tier(model))} and "
+                f"{model.displayname} is limited to {get_model_capability_label(get_model_capability_level(model))} and "
                 f"cannot run {get_tier_label(benchmark_tier)} tasks.",
                 "error",
             )
@@ -299,7 +300,8 @@ def run_benchmark(benchmark_name):
         {
             "model": model,
             "supported": model_can_run_benchmark(model, benchmark_name),
-            "max_tier": get_model_max_tier(model),
+            "model_capability_level": get_model_capability_level(model),
+            "model_capability_label": get_model_capability_label(get_model_capability_level(model)),
         }
         for model in models
     ]

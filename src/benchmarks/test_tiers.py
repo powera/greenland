@@ -10,9 +10,10 @@ _MODULE = util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(_MODULE)
 
 get_benchmark_tier = _MODULE.get_benchmark_tier
-get_model_max_tier = _MODULE.get_model_max_tier
+get_model_capability_level = _MODULE.get_model_capability_level
 model_can_run_benchmark = _MODULE.model_can_run_benchmark
 get_tier_label = _MODULE.get_tier_label
+get_model_capability_label = _MODULE.get_model_capability_label
 
 
 def test_get_benchmark_tier_assigns_screening_benchmarks():
@@ -30,11 +31,11 @@ def test_get_benchmark_tier_defaults_to_full_for_other_benchmarks():
     assert get_benchmark_tier("bad_code") == 2
 
 
-def test_model_tier_helpers_guard_eligibility():
+def test_model_capability_helpers_guard_eligibility():
     restricted_model = SimpleNamespace(max_benchmark_tier=1)
     unrestricted_model = SimpleNamespace(max_benchmark_tier=2)
 
-    assert get_model_max_tier(restricted_model) == 1
+    assert get_model_capability_level(restricted_model) == 1
     assert model_can_run_benchmark(restricted_model, "0016_antonym")
     assert not model_can_run_benchmark(restricted_model, "0152_syllogism_validity")
     assert model_can_run_benchmark(unrestricted_model, "0152_syllogism_validity")
@@ -43,3 +44,8 @@ def test_model_tier_helpers_guard_eligibility():
 def test_get_tier_label_supports_future_tiers():
     assert get_tier_label(3) == "Tier 3 (Advanced)"
     assert get_tier_label(4) == "Tier 4"
+
+
+def test_get_model_capability_label_supports_future_levels():
+    assert get_model_capability_label(2) == "Level 2"
+    assert get_model_capability_label(4) == "Level 4"
