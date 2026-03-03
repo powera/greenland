@@ -200,6 +200,42 @@ def create_local_models(postgres_url=None):
     """Create local (LMStudio) model definitions."""
     s = _get_session(postgres_url)
 
+    # --- Qwen3.5 family (3 sizes) ---
+
+    _insert_lmstudio_model(
+        s,
+        codename="qwen3.5-2b-lms",
+        displayname="Qwen3.5 2B (LMStudio)",
+        launch_date="2026-03-03",
+        filesize_mb=2700,
+        license_name="Apache License",
+        lmstudio_model="qwen3.5-2b",
+        lmstudio_model_name="qwen3.5-2b",
+        max_benchmark_tier=2,
+    )
+    _insert_lmstudio_model(
+        s,
+        codename="qwen3.5-4b-lms",
+        displayname="Qwen3.5 4B (LMStudio)",
+        launch_date="2026-03-03",
+        filesize_mb=3400,
+        license_name="Apache License",
+        lmstudio_model="qwen3.5-4b",
+        lmstudio_model_name="qwen3.5-4b",
+        max_benchmark_tier=2,
+    )
+    _insert_lmstudio_model(
+        s,
+        codename="qwen3.5-9b-lms",
+        displayname="Qwen3.5 9B (LMStudio)",
+        launch_date="2026-03-03",
+        filesize_mb=6600,
+        license_name="Apache License",
+        lmstudio_model="qwen/qwen3.5-9b",
+        lmstudio_model_name="qwen/qwen3.5-9b",
+        max_benchmark_tier=2,
+    )
+
     # --- Qwen3 family (3 sizes) ---
 
     _insert_lmstudio_model(
@@ -364,6 +400,20 @@ def create_local_models(postgres_url=None):
         license_name="MIT License",
         lmstudio_model="mlx-community/Phi-3.5-mini-instruct-4bit",
         max_benchmark_tier=1,
+    )
+
+    # --- OpenAI OSS ---
+
+    _insert_lmstudio_model(
+        s,
+        codename="gpt-oss-20b-lms",
+        displayname="GPT OSS 20B (LMStudio)",
+        launch_date="2026-03-03",
+        filesize_mb=12100,
+        license_name="MIT License",
+        lmstudio_model="openai/gpt-oss-20b",
+        lmstudio_model_name="openai/gpt-oss-20b",
+        max_benchmark_tier=2,
     )
 
     # --- Larger models (>8B) ---
