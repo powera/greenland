@@ -68,6 +68,14 @@ def test_run_missing_benchmarks_groups_by_model_and_closes_owned_session(monkeyp
         lambda: ["001_first", "002_second"],
     )
     monkeypatch.setattr(
+        run_benchmark.datastore_common,
+        "list_all_models",
+        lambda _session: [
+            {"codename": "local-model", "max_benchmark_tier": 1},
+            {"codename": "remote-model", "max_benchmark_tier": 2},
+        ],
+    )
+    monkeypatch.setattr(
         run_benchmark.datastore_benchmarks,
         "get_highest_benchmark_scores",
         lambda _session: set(),
@@ -111,6 +119,11 @@ def test_run_missing_benchmarks_filters_by_tier(monkeypatch) -> None:
         lambda: ["0031_definitions", "0062_sentence_decomposition"],
     )
     monkeypatch.setattr(
+        run_benchmark.datastore_common,
+        "list_all_models",
+        lambda _session: [{"codename": "local-model", "max_benchmark_tier": 3}],
+    )
+    monkeypatch.setattr(
         run_benchmark.datastore_benchmarks,
         "get_highest_benchmark_scores",
         lambda _session: set(),
@@ -125,6 +138,67 @@ def test_run_missing_benchmarks_filters_by_tier(monkeypatch) -> None:
     run_pairs = run_benchmark.run_missing_benchmarks(tier=3)
 
     assert run_calls == [("local-model", "0062_sentence_decomposition")]
+    assert run_pairs == run_calls
+
+
+def test_run_missing_benchmarks_applies_capability_tier_rules(monkeypatch) -> None:
+    fake_session = _FakeSession()
+    run_calls = []
+
+    monkeypatch.setattr(
+        run_benchmark.datastore_common,
+        "create_dev_session",
+        lambda: fake_session,
+    )
+    monkeypatch.setattr(
+        run_benchmark,
+        "get_all_model_codenames",
+        lambda prioritize_local=False: ["cap1", "cap2", "cap3"],
+    )
+    monkeypatch.setattr(
+        run_benchmark,
+        "get_enabled_benchmark_codes",
+        lambda: [
+            "0016_antonym",  # tier 1
+            "0031_definitions",  # tier 2
+            "0062_sentence_decomposition",  # tier 3
+        ],
+    )
+    monkeypatch.setattr(
+        run_benchmark.datastore_common,
+        "list_all_models",
+        lambda _session: [
+            {"codename": "cap1", "max_benchmark_tier": 1},
+            {"codename": "cap2", "max_benchmark_tier": 2},
+            {"codename": "cap3", "max_benchmark_tier": 3},
+        ],
+    )
+    monkeypatch.setattr(
+        run_benchmark.datastore_benchmarks,
+        "get_highest_benchmark_scores",
+        lambda _session: set(),
+    )
+
+    def fake_run(benchmark_code: str, model_name: str) -> int:
+        run_calls.append((model_name, benchmark_code))
+        return 999
+
+    monkeypatch.setattr(run_benchmark, "run_benchmark", fake_run)
+
+    run_pairs = run_benchmark.run_missing_benchmarks()
+
+    assert ("cap1", "0016_antonym") in run_calls
+    assert ("cap1", "0031_definitions") in run_calls
+    assert ("cap1", "0062_sentence_decomposition") not in run_calls
+
+    assert ("cap2", "0016_antonym") in run_calls
+    assert ("cap2", "0031_definitions") in run_calls
+    assert ("cap2", "0062_sentence_decomposition") in run_calls
+
+    assert ("cap3", "0016_antonym") in run_calls
+    assert ("cap3", "0031_definitions") in run_calls
+    assert ("cap3", "0062_sentence_decomposition") in run_calls
+
     assert run_pairs == run_calls
 
 

@@ -78,16 +78,21 @@ def get_benchmark_tier(benchmark_code: str) -> int:
 
 
 def get_model_max_tier(model: Any) -> int:
-    """Return the max tier a model should run."""
+    """Deprecated alias for get_model_capability_level."""
+    return get_model_capability_level(model)
+
+
+def get_model_capability_level(model: Any) -> int:
+    """Return the maximum benchmark tier a model can run."""
     max_tier_value = getattr(model, "max_benchmark_tier", None)
     if isinstance(max_tier_value, int) and max_tier_value >= 1:
         return max_tier_value
-    return 2
+    return 1
 
 
 def model_can_run_benchmark(model: Any, benchmark_code: str) -> bool:
     """Return whether a model is eligible for a benchmark based on tiers."""
-    return get_model_max_tier(model) >= get_benchmark_tier(benchmark_code)
+    return get_model_capability_level(model) >= get_benchmark_tier(benchmark_code)
 
 
 def get_tier_label(level: int) -> str:
@@ -96,3 +101,8 @@ def get_tier_label(level: int) -> str:
     if tier is not None:
         return tier.label
     return f"Tier {level}"
+
+
+def get_model_capability_label(level: int) -> str:
+    """Return a human label for model capability levels."""
+    return f"Level {level}"

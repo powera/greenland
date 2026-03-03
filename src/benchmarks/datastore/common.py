@@ -48,7 +48,7 @@ class Model(Base):
     model_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     lmstudio_model_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     model_type: Mapped[str] = mapped_column(String, nullable=False, default="local")
-    max_benchmark_tier: Mapped[int] = mapped_column(Integer, nullable=False, default=2)
+    max_benchmark_tier: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
     # benchmark runs and qual runs are populated in those files.
 
@@ -114,7 +114,7 @@ def create_database_and_session(db_path=None):
         if "lmstudio_model_name" not in model_cols:
             conn.execute(text("ALTER TABLE model ADD COLUMN lmstudio_model_name TEXT"))
         if "max_benchmark_tier" not in model_cols:
-            conn.execute(text("ALTER TABLE model ADD COLUMN max_benchmark_tier INTEGER DEFAULT 2"))
+            conn.execute(text("ALTER TABLE model ADD COLUMN max_benchmark_tier INTEGER DEFAULT 1"))
 
         run_detail_result = conn.execute(text("PRAGMA table_info(run_detail)"))
         run_detail_cols = {row[1] for row in run_detail_result}
@@ -235,7 +235,7 @@ def insert_model(
     model_path: Optional[str] = None,
     lmstudio_model_name: Optional[str] = None,
     model_type: str = "local",
-    max_benchmark_tier: int = 2,
+    max_benchmark_tier: int = 1,
 ):
     """Insert a new model into the database."""
     try:
@@ -272,7 +272,7 @@ def upsert_model(
     model_path: Optional[str] = None,
     lmstudio_model_name: Optional[str] = None,
     model_type: str = "local",
-    max_benchmark_tier: int = 2,
+    max_benchmark_tier: int = 1,
 ) -> Tuple[bool, str]:
     """Insert a model, or update it if the codename already exists."""
     try:
