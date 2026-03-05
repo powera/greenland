@@ -43,6 +43,21 @@ bp = Blueprint("agents_launcher", __name__, url_prefix="/agents-launcher")
 # Format: {task_id: {"process": Popen, "output": [], "complete": bool, "returncode": int}}
 running_tasks = {}
 
+
+def _resolve_agent_script_path(agent_script: str) -> Path:
+    """Resolve script path for single-file and package-style agents."""
+    configured_path = Path(constants.AGENTS_DIR) / agent_script
+    if configured_path.exists():
+        return configured_path
+
+    module_name = agent_script[:-3] if agent_script.endswith(".py") else agent_script
+    fallback_cli_path = Path(constants.AGENTS_DIR) / module_name / "cli.py"
+    if fallback_cli_path.exists():
+        return fallback_cli_path
+
+    return configured_path
+
+
 # Define all agents in order from the README
 AGENTS = [
     {
@@ -179,7 +194,7 @@ AGENTS = [
         "display_name": "Ungurys",
         "subtitle": "WireWord Export",
         "description": "Exports word data to WireWord API format for external applications.",
-        "script": "ungurys.py",
+        "script": "ungurys/cli.py",
         "icon": "bi-box-arrow-right",
         "use_dynamic_form": True,
     },
@@ -378,10 +393,13 @@ def execute_agent(agent_name: str) -> ResponseReturnValue:
     # Build command
     # Type narrowing: agent["script"] is guaranteed to be a string from AGENTS definitions
     agent_script: str = agent["script"]  # type: ignore[assignment]
-    script_path = Path(constants.AGENTS_DIR) / agent_script
+    script_path = _resolve_agent_script_path(agent_script)
 
     if not script_path.exists():
-        flash_and_log(f"Script not found: {script_path}", "error")
+        flash_and_log(
+            f"Script not found for {agent_script}: {script_path}",
+            "error",
+        )
         return redirect(url_for("agents_launcher.launch_form", agent_name=agent_name))
 
     # Build arguments
