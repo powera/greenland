@@ -492,11 +492,11 @@ def translate_sentence(sentence_id: int) -> Response:
         # Enqueue translation task to work queue
         result = enqueue_task(
             g.db,
-            task_type=TaskType.TRANSLATE_SENTENCE,
+            task_type=TaskType.SENTENCES_TRANSLATE,
             target_type="sentence",
             target_id=sentence_id,
             payload={"sentence_id": sentence_id, "selected_languages": selected_languages},
-            dedup_key=f"{TaskType.TRANSLATE_SENTENCE}:{sentence_id}:{':'.join(sorted(selected_languages))}",
+            dedup_key=f"{TaskType.SENTENCES_TRANSLATE}:{sentence_id}:{':'.join(sorted(selected_languages))}",
         )
 
         if result.created:

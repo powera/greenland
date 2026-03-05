@@ -33,6 +33,7 @@ from workqueue.tools import (
     get_lemma_or_raise,
     extract_payload_param,
     commit_or_raise,
+    workqueue_payload_handler,
 )
 
 __all__ = [
@@ -58,4 +59,5 @@ __all__ = [
     "get_lemma_or_raise",
     "extract_payload_param",
     "commit_or_raise",
+    "workqueue_payload_handler",
 ]

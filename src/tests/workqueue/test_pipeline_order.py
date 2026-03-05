@@ -19,12 +19,19 @@ class TestGetPipelineStep(unittest.TestCase):
 
     def test_known_task_types(self) -> None:
         """Each known task type returns its defined step number."""
+        self.assertEqual(get_pipeline_step("words.translations"), 2)
         self.assertEqual(get_pipeline_step("add_missing_translations"), 2)
+        self.assertEqual(get_pipeline_step("words.forms"), 3)
         self.assertEqual(get_pipeline_step("generate_forms"), 3)
+        self.assertEqual(get_pipeline_step("words.pronunciations"), 4)
         self.assertEqual(get_pipeline_step("generate_pronunciations"), 4)
+        self.assertEqual(get_pipeline_step("words.synonyms"), 5)
         self.assertEqual(get_pipeline_step("generate_synonyms"), 5)
+        self.assertEqual(get_pipeline_step("words.grammar_facts"), 6)
         self.assertEqual(get_pipeline_step("generate_grammar_fact"), 6)
+        self.assertEqual(get_pipeline_step("sentences.translate"), 8)
         self.assertEqual(get_pipeline_step("translate_sentence"), 8)
+        self.assertEqual(get_pipeline_step("audio.generate.lemma"), 9)
         self.assertEqual(get_pipeline_step("generate_audio"), 9)
 
     def test_unknown_task_type_returns_none(self) -> None:
@@ -84,8 +91,14 @@ class TestHasEarlierStep(unittest.TestCase):
                 earlier = ordered_types[i]
                 later = ordered_types[j]
                 with self.subTest(earlier=earlier, later=later):
-                    self.assertTrue(has_earlier_step(earlier, later))
-                    self.assertFalse(has_earlier_step(later, earlier))
+                    earlier_step = TASK_PIPELINE_ORDER[earlier]
+                    later_step = TASK_PIPELINE_ORDER[later]
+                    if earlier_step < later_step:
+                        self.assertTrue(has_earlier_step(earlier, later))
+                        self.assertFalse(has_earlier_step(later, earlier))
+                    else:
+                        self.assertFalse(has_earlier_step(earlier, later))
+                        self.assertFalse(has_earlier_step(later, earlier))
 
 
 if __name__ == "__main__":

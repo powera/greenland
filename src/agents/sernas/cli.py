@@ -114,11 +114,12 @@ def enqueue_sernas_work(
                 dedup_key = f"sernas_{lemma.id}_{language_code}_{form_type or 'all'}"
                 result = enqueue_task(
                     session,
-                    task_type="sernas_generate_synonyms",
+                    task_type="words.synonyms",
                     target_type="lemma",
                     target_id=lemma.id,
                     payload={
-                        "language_code": language_code,
+                        "lang_code": language_code,
+                        "lemma_id": lemma.id,
                         "form_type": form_type,
                         "lemma_guid": lemma.guid,
                         "lemma_text": lemma.lemma_text,

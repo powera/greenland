@@ -4,6 +4,10 @@ Autonomous agents for database maintenance and data processing. Named after Lith
 
 Run agents with: `PYTHONPATH=src python src/agents/<agent>.py --help`
 
+## Architecture direction
+
+As of the queue-first transition, agent CLIs are moving toward **work discovery and enqueueing**, while execution is centralized in `src/workqueue/handlers/`. See `WORKQUEUE_REFACTOR_PLAN.md` for the migration plan and target architecture.
+
 ## Quick Reference
 
 | Agent | Lithuanian | Purpose |

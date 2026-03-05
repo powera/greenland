@@ -131,13 +131,13 @@ def enqueue_papuga_work(
             dedup_key = f"papuga_{form.id}"
             result = enqueue_task(
                 session,
-                task_type="papuga_generate_pronunciation",
+                task_type="words.pronunciations",
                 target_type="derivative_form",
                 target_id=form.id,
                 payload={
                     "form_id": form.id,
                     "form_text": form.derivative_form_text,
-                    "language_code": form.language_code,
+                    "lang_code": form.language_code,
                     "lemma_id": form.lemma_id,
                 },
                 dedup_key=dedup_key,

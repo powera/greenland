@@ -16,19 +16,27 @@ from typing import Dict, Optional
 TASK_PIPELINE_ORDER: Dict[str, int] = {
     # Step 1: LOKYS - Validate English Lemma (no workqueue task yet)
     # Step 2: VORAS - Generate Translations
+    "words.translations": 2,
+    "words.translations.regenerate": 2,
     "add_missing_translations": 2,
     # Step 3: VILKAS - Generate Word Forms
+    "words.forms": 3,
     "generate_forms": 3,
     # Step 4: PAPUGA - Generate Pronunciations
+    "words.pronunciations": 4,
     "generate_pronunciations": 4,
     # Step 5: ŠERNAS - Generate Synonyms
+    "words.synonyms": 5,
     "generate_synonyms": 5,
     # Step 6: LAPE - Generate Grammar Facts
+    "words.grammar_facts": 6,
     "generate_grammar_fact": 6,
     # Step 7: BUIVOLAS - Generate Example Sentences (no workqueue task yet)
     # Step 8: ŽVIRBLIS - Translate Sentences
+    "sentences.translate": 8,
     "translate_sentence": 8,
     # Step 9: VIEVERSYS - Generate Audio
+    "audio.generate.lemma": 9,
     "generate_audio": 9,
     # Step 10: BEBRAS - Final Integrity Check (no workqueue task yet)
 }

@@ -673,7 +673,7 @@ def generate_grammar_fact(lemma_id: int) -> ResponseReturnValue:
         # Enqueue grammar fact generation task
         result = enqueue_task(
             g.db,
-            task_type=TaskType.GENERATE_GRAMMAR_FACT,
+            task_type=TaskType.WORDS_GRAMMAR_FACTS,
             target_type="lemma",
             target_id=lemma_id,
             payload={
@@ -681,7 +681,7 @@ def generate_grammar_fact(lemma_id: int) -> ResponseReturnValue:
                 "fact_type": fact_type,
                 "language_code": language_code,
             },
-            dedup_key=f"{TaskType.GENERATE_GRAMMAR_FACT}:{lemma_id}:{fact_type}:{language_code}",
+            dedup_key=f"{TaskType.WORDS_GRAMMAR_FACTS}:{lemma_id}:{fact_type}:{language_code}",
         )
 
         if result.created:
