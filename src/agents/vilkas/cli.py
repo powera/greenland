@@ -178,11 +178,12 @@ def enqueue_vilkas_work(
                 dedup_key = f"vilkas_{lang}_{pos}_{lemma.id}"
                 result = enqueue_task(
                     session,
-                    task_type="vilkas_generate_forms",
+                    task_type="words.forms",
                     target_type="lemma",
                     target_id=lemma.id,
                     payload={
                         "language_code": lang,
+                        "lemma_id": lemma.id,
                         "pos_type": pos,
                         "lemma_guid": lemma.guid,
                         "lemma_text": lemma.lemma_text,

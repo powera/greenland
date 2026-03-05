@@ -8,6 +8,11 @@ This document provides guidance for AI assistants working with or creating auton
 
 ## Overview
 
+### Transition note (queue-first architecture)
+
+The current architecture is transitioning to a queue-first model: agent CLIs should primarily **discover work and enqueue tasks**.
+Execution/mutation logic should live in `src/workqueue/handlers/` using capability-based task types rather than agent-name task types.
+
 Agents are autonomous Python scripts that perform database maintenance, quality assurance, and data processing tasks. Each agent is named after a Lithuanian animal and operates independently without user interaction, making them suitable for scheduled jobs or CI/CD pipelines.
 
 **Philosophy:** Agents should be autonomous, idempotent, and safe to run multiple times.

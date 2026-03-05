@@ -244,12 +244,13 @@ def enqueue_voras_populate_work(
             dedup_key = f"voras_populate_{lemma.id}"
             result = enqueue_task(
                 session,
-                task_type="voras_populate_translations",
+                task_type="words.translations",
                 target_type="lemma",
                 target_id=lemma.id,
                 payload={
                     "lemma_guid": lemma.guid,
                     "lemma_text": lemma.lemma_text,
+                    "lemma_id": lemma.id,
                     "languages": languages_to_fix,
                 },
                 dedup_key=dedup_key,
@@ -297,12 +298,13 @@ def enqueue_voras_regenerate_work(
             dedup_key = f"voras_regenerate_{lemma.id}"
             result = enqueue_task(
                 session,
-                task_type="voras_regenerate_translations",
+                task_type="words.translations.regenerate",
                 target_type="lemma",
                 target_id=lemma.id,
                 payload={
                     "lemma_guid": lemma.guid,
                     "lemma_text": lemma.lemma_text,
+                    "lemma_id": lemma.id,
                 },
                 dedup_key=dedup_key,
             )
@@ -326,7 +328,7 @@ def enqueue_voras_regenerate_work(
 def get_voras_queue_stats(session: Any) -> Dict[str, Dict[str, int]]:
     """Get statistics for voras tasks in the queue."""
     stats = {}
-    for task_type in ["voras_populate_translations", "voras_regenerate_translations"]:
+    for task_type in ["words.translations", "words.translations.regenerate"]:
         stats[task_type] = {
             "pending": session.query(BarsukasTask)
             .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.PENDING)

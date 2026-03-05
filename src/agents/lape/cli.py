@@ -197,12 +197,13 @@ def enqueue_grammar_fact_work(
                     dedup_key = f"lape_{fact_type}_{lemma.id}_{language_code}"
                     result = enqueue_task(
                         session,
-                        task_type="lape_generate_grammar_fact",
+                        task_type="words.grammar_facts",
                         target_type="lemma",
                         target_id=lemma.id,
                         payload={
                             "fact_type": fact_type,
-                            "language_code": language_code,
+                            "lang_code": language_code,
+                            "lemma_id": lemma.id,
                             "lemma_guid": lemma.guid,
                             "lemma_text": lemma.lemma_text,
                         },
@@ -230,7 +231,7 @@ def enqueue_grammar_fact_work(
 
 def get_lape_queue_stats(session: Session) -> Dict[str, int]:
     """Get statistics for lape tasks in the queue."""
-    task_type = "lape_generate_grammar_fact"
+    task_type = "words.grammar_facts"
     return {
         "pending": session.query(BarsukasTask)
         .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.PENDING)

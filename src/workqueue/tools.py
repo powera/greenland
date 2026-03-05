@@ -6,7 +6,8 @@ to eliminate repetitive code.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from functools import wraps
+from typing import Any, Callable, Dict, Optional, TypeVar
 
 from barsukas.config import Config
 import constants
@@ -116,3 +117,26 @@ def commit_or_raise(session: Session, error_prefix: str = "Database error") -> N
     except Exception as e:
         session.rollback()
         raise RuntimeError(f"{error_prefix}: {e}") from e
+
+
+TaskCallable = TypeVar("TaskCallable", bound=Callable[..., str])
+
+
+def workqueue_payload_handler() -> (
+    Callable[[TaskCallable], Callable[[Session, Dict[str, Any]], str]]
+):
+    """Wrap a do_* task function into a standard workqueue `(session, payload)` handler.
+
+    The wrapped function keeps direct-call ergonomics for agents during migration
+    (for example, `do_generate_forms(session, lemma_id=1, lang_code='lt')`) while
+    the worker can call the generated `handle_*` wrapper with payload dicts.
+    """
+
+    def decorator(func: TaskCallable) -> Callable[[Session, Dict[str, Any]], str]:
+        @wraps(func)
+        def wrapped(session: Session, payload: Dict[str, Any]) -> str:
+            return func(session=session, **payload)
+
+        return wrapped
+
+    return decorator

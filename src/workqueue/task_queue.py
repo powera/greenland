@@ -36,14 +36,25 @@ class TaskStatus:
 
 
 class TaskType:
-    ADD_MISSING_TRANSLATIONS = "add_missing_translations"
-    GENERATE_PRONUNCIATIONS = "generate_pronunciations"
-    GENERATE_FORMS = "generate_forms"
-    GENERATE_SYNONYMS = "generate_synonyms"
-    TRANSLATE_SENTENCE = "translate_sentence"
-    GENERATE_AUDIO = "generate_audio"
-    GENERATE_SENTENCE_AUDIO = "generate_sentence_audio"
-    GENERATE_GRAMMAR_FACT = "generate_grammar_fact"
+    WORDS_TRANSLATIONS = "words.translations"
+    WORDS_TRANSLATIONS_REGENERATE = "words.translations.regenerate"
+    WORDS_PRONUNCIATIONS = "words.pronunciations"
+    WORDS_FORMS = "words.forms"
+    WORDS_SYNONYMS = "words.synonyms"
+    WORDS_GRAMMAR_FACTS = "words.grammar_facts"
+    SENTENCES_TRANSLATE = "sentences.translate"
+    AUDIO_GENERATE_LEMMA = "audio.generate.lemma"
+    AUDIO_GENERATE_SENTENCE = "audio.generate.sentence"
+
+    # Legacy aliases retained for compatibility during migration
+    ADD_MISSING_TRANSLATIONS = WORDS_TRANSLATIONS
+    GENERATE_PRONUNCIATIONS = WORDS_PRONUNCIATIONS
+    GENERATE_FORMS = WORDS_FORMS
+    GENERATE_SYNONYMS = WORDS_SYNONYMS
+    GENERATE_GRAMMAR_FACT = WORDS_GRAMMAR_FACTS
+    TRANSLATE_SENTENCE = SENTENCES_TRANSLATE
+    GENERATE_AUDIO = AUDIO_GENERATE_LEMMA
+    GENERATE_SENTENCE_AUDIO = AUDIO_GENERATE_SENTENCE
 
 
 @dataclass

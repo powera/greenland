@@ -1051,7 +1051,7 @@ def generate_single(guid: str) -> ResponseReturnValue:
         # Enqueue audio generation task
         result = enqueue_task(
             g.db,
-            task_type=TaskType.GENERATE_AUDIO,
+            task_type=TaskType.AUDIO_GENERATE_LEMMA,
             target_type="lemma",
             target_id=lemma.id,
             payload={
@@ -1061,7 +1061,7 @@ def generate_single(guid: str) -> ResponseReturnValue:
                 "tts_engine": tts_engine,
                 "use_ipa": use_ipa,
             },
-            dedup_key=f"{TaskType.GENERATE_AUDIO}:{lemma.id}:{language_code}:{tts_engine}",
+            dedup_key=f"{TaskType.AUDIO_GENERATE_LEMMA}:{lemma.id}:{language_code}:{tts_engine}",
         )
 
         if request.is_json:
@@ -1158,7 +1158,7 @@ def generate_sentence_audio(sentence_id: int) -> ResponseReturnValue:
         # Enqueue audio generation task for sentence
         result = enqueue_task(
             g.db,
-            task_type=TaskType.GENERATE_SENTENCE_AUDIO,
+            task_type=TaskType.AUDIO_GENERATE_SENTENCE,
             target_type="sentence",
             target_id=sentence_id,
             payload={
@@ -1167,7 +1167,7 @@ def generate_sentence_audio(sentence_id: int) -> ResponseReturnValue:
                 "voices": voices,
                 "tts_engine": tts_engine,
             },
-            dedup_key=f"{TaskType.GENERATE_SENTENCE_AUDIO}:{sentence_id}:{language_code}:{tts_engine}",
+            dedup_key=f"{TaskType.AUDIO_GENERATE_SENTENCE}:{sentence_id}:{language_code}:{tts_engine}",
         )
 
         if request.is_json:
