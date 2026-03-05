@@ -18,7 +18,11 @@ from flask import (
 )
 from flask.typing import ResponseReturnValue
 
-from agents.ungurys import SUPPORTED_LANGUAGES, UngurysAgent
+from agents.ungurys import (
+    SUPPORTED_LANGUAGES,
+    SUPPORTED_NON_ENGLISH_SOURCE_LANGUAGES,
+    UngurysAgent,
+)
 from storage.backend.config import DataSourceConfig
 
 if TYPE_CHECKING:
@@ -133,9 +137,10 @@ def export_all_languages(
 # Supported source languages for WireWord export
 SUPPORTED_SOURCE_LANGUAGES = {
     "en": "English",
-    "kn": "Kannada",
-    "bn": "Bengali",
-    "uk": "Ukrainian",
+    **{
+        language_code: SUPPORTED_LANGUAGES.get(language_code, language_code)
+        for language_code in SUPPORTED_NON_ENGLISH_SOURCE_LANGUAGES
+    },
 }
 
 

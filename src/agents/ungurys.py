@@ -41,11 +41,15 @@ from wordfreq.tools.family_relation_priorities import (
 )
 from wireword.export_wireword_conversations import WirewordConversationExporter
 from wireword.export_wireword_sentences import WirewordSentenceExporter
+from workqueue.task_queue import TaskType, enqueue_task
 
 # Supported languages: Tier 1 and Tier 2 (excludes experimental tier 3)
 SUPPORTED_LANGUAGES = {
     lang_code: LANGUAGE_NAMES[lang_code] for lang_code in TIER_1_LANGUAGES + TIER_2_LANGUAGES
 }
+
+# Explicitly supported non-English source languages for WireWord export variants.
+SUPPORTED_NON_ENGLISH_SOURCE_LANGUAGES = ("uk", "bn", "kn", "pl", "ro")
 
 # Configure logging
 logging.basicConfig(
@@ -83,6 +87,14 @@ class UngurysAgent:
         self.simplified_chinese = simplified_chinese
         self.include_unreviewed_audio = include_unreviewed_audio
         self.source_language = source_language
+
+        supported_source_languages = {"en", *SUPPORTED_NON_ENGLISH_SOURCE_LANGUAGES}
+        if self.source_language not in supported_source_languages:
+            supported_source_display = ", ".join(sorted(supported_source_languages))
+            raise ValueError(
+                f"Unsupported source language: {self.source_language}. "
+                f"Supported: {supported_source_display}"
+            )
 
         # Handle language variants
         if language == "zh-Hant":
@@ -886,8 +898,12 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Language options
     language_help = f'Language code (default: lt). Supported: {", ".join(f"{k}={v}" for k, v in SUPPORTED_LANGUAGES.items())}, zh-Hant=Chinese (Traditional)'
+    language_choices = sorted(SUPPORTED_LANGUAGES.keys()) + ["zh-Hant"]
     parser.add_argument(
-        "--language", choices=["lt", "zh", "zh-Hant", "ko", "fr"], default="lt", help=language_help
+        "--language",
+        choices=language_choices,
+        default="lt",
+        help=language_help,
     )
     parser.add_argument(
         "--traditional",
@@ -899,8 +915,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--mode",
         choices=["single", "directory", "both"],
-        default="single",
-        help="Export mode: single file, directory structure, or both (default: single)",
+        default="directory",
+        help="Export mode: single file, directory structure, or both (default: directory)",
     )
 
     # Output paths
@@ -950,7 +966,14 @@ def get_argument_parser() -> argparse.ArgumentParser:
         "--source-language",
         default="en",
         help="Source language code (default: en). The language the learner already knows. "
-        "Supported non-English sources: uk (Ukrainian), bn (Bengali), si (Sinhala).",
+        "Supported non-English sources: uk (Ukrainian), bn (Bengali), kn (Kannada), "
+        "pl (Polish), ro (Romanian).",
+    )
+    parser.add_argument(
+        "--use-workqueue",
+        action="store_true",
+        default=False,
+        help="Enqueue directory exports for background processing by workqueue worker.",
     )
 
     return parser
@@ -968,6 +991,38 @@ def main() -> None:
     language = args.language
     if args.traditional and args.language == "zh":
         language = "zh-Hant"
+
+    if args.use_workqueue:
+        if args.mode != "directory":
+            raise ValueError("--use-workqueue currently supports only --mode directory")
+
+        with create_session(config) as session:
+            dedup_key = f"{TaskType.WIREWORD_EXPORT_DIRECTORY}:{language}:{args.source_language}:{args.include_unreviewed_audio}"
+            result = enqueue_task(
+                session,
+                task_type=TaskType.WIREWORD_EXPORT_DIRECTORY,
+                target_type="wireword_export",
+                target_id=None,
+                payload={
+                    "language": language,
+                    "source_language": args.source_language,
+                    "include_unreviewed_audio": args.include_unreviewed_audio,
+                    "apply_level_overrides": not args.skip_country_overrides
+                    or not args.skip_family_relation_overrides,
+                },
+                dedup_key=dedup_key,
+            )
+            session.commit()
+
+        action = "Enqueued" if result.created else "Already queued"
+        logger.info(
+            "%s WireWord directory export task %s for %s from %s",
+            action,
+            result.task.id,
+            language,
+            args.source_language,
+        )
+        return
 
     # Create agent with config
     agent = UngurysAgent(

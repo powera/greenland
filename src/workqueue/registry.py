@@ -9,6 +9,7 @@ from __future__ import annotations
 from workqueue.handlers.audio import handle_audio_generate_lemma, handle_audio_generate_sentence
 from workqueue.handlers.sarka import handle_generate_conversation, handle_generate_definition
 from workqueue.handlers.sentences import handle_sentences_translate
+from workqueue.handlers.wireword import handle_wireword_export_directory
 from workqueue.handlers.words import (
     handle_words_forms,
     handle_words_grammar_facts,
@@ -31,6 +32,7 @@ TASK_HANDLERS = {
     "audio.generate.sentence": handle_audio_generate_sentence,
     "conversations.generate": handle_generate_conversation,
     "conversations.definitions": handle_generate_definition,
+    "wireword.export.directory": handle_wireword_export_directory,
     # Backward-compatible aliases (legacy snake_case)
     "add_missing_translations": handle_words_translations,
     "generate_pronunciations": handle_words_pronunciations,
