@@ -17,7 +17,7 @@ The 3rd person past determines the past tense type:
 Additional tenses derived from the infinitive stem:
   - Conditional (tariamoji nuosaka): infinitive stem + conditional endings
   - Imperative (liepiamoji nuosaka): infinitive stem + k / kite
-  - Habitual past (būtasis kartinis): infinitive stem + davo (invariant)
+  - Habitual past (būtasis dažninis): infinitive stem + davo (invariant)
 
 The only truly irregular verb is būti (to be), whose present tense
 cannot be derived mechanically and is hard-coded.
@@ -54,7 +54,7 @@ _BUTI_FORMS: Dict[str, str] = {
     "2s_conditional": "būtum",
     "3s_conditional": "būtų",
     "1p_conditional": "būtume",
-    "2p_conditional": "būtute",
+    "2p_conditional": "būtumėte",
     "3p_conditional": "būtų",
     "2s_imperative": "būk",
     "2p_imperative": "būkite",
@@ -248,7 +248,7 @@ def _conjugate_conditional(infinitive: str) -> Optional[Dict[str, str]]:
       2s: stem + tum
       3s: stem + tų
       1p: stem + tume
-      2p: stem + tute
+      2p: stem + tumėte
       3p: stem + tų  (same as 3s)
     """
     stem = _get_infinitive_stem(infinitive)
@@ -259,7 +259,7 @@ def _conjugate_conditional(infinitive: str) -> Optional[Dict[str, str]]:
         "2s_conditional": stem + "tum",
         "3s_conditional": stem + "tų",
         "1p_conditional": stem + "tume",
-        "2p_conditional": stem + "tute",
+        "2p_conditional": stem + "tumėte",
         "3p_conditional": stem + "tų",
     }
 
@@ -281,7 +281,7 @@ def _conjugate_imperative(infinitive: str) -> Optional[Dict[str, str]]:
 
 
 def _conjugate_habitual_past(infinitive: str) -> Optional[Dict[str, str]]:
-    """Derive the habitual past (būtasis kartinis laikas) from the infinitive.
+    """Derive the habitual past (būtasis dažninis laikas) from the infinitive.
 
     The habitual past is invariant across all persons: infinitive stem + davo.
     This form expresses repeated or habitual past action ("used to...").
