@@ -215,7 +215,7 @@ class TestExpandVerbFormsMissingBase(unittest.TestCase):
         self.assertEqual(result, {})
 
     def test_only_infinitive(self) -> None:
-        """With only the infinitive, 3s_present and present_participle are generated."""
+        """With only the infinitive, all forms are generated mechanically."""
         result = expand_verb_forms({"infinitive": "play"})
 
         self.assertEqual(result["infinitive"], "play")
@@ -225,9 +225,9 @@ class TestExpandVerbFormsMissingBase(unittest.TestCase):
         # Auto-generated from infinitive
         self.assertEqual(result["3s_present"], "plays")
         self.assertEqual(result["present_participle"], "playing")
-        # But no past or past_participle (genuinely need LLM data)
-        self.assertNotIn("1s_past", result)
-        self.assertNotIn("past_participle", result)
+        # Past and past_participle are now auto-generated from infinitive
+        self.assertEqual(result["1s_past"], "played")
+        self.assertEqual(result["past_participle"], "played")
 
     def test_only_past(self) -> None:
         """With only past, we get all past-tense person forms."""
@@ -252,8 +252,8 @@ class TestExpandVerbFormsMissingBase(unittest.TestCase):
         # Auto-generated from infinitive
         self.assertEqual(result["3s_present"], "plays")
         self.assertEqual(result["present_participle"], "playing")
-        # past_participle was empty and cannot be auto-generated
-        self.assertNotIn("past_participle", result)
+        # past_participle is now derived from past when past is provided
+        self.assertEqual(result["past_participle"], "played")
         self.assertIn("1s_present", result)
 
 
