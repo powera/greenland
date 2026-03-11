@@ -4,15 +4,14 @@ This module documents the Conjugations mode payload added by WireWord.
 
 Context
 -------
-Conjugations mode now uses a de-normalized export that passes through the
-stored per-slot forms directly from the database.
+Conjugations mode now uses per-tense tables that pass through stored
+source/target forms directly from the database.
 
-The payload exports *raw* forms per slot:
-- EN/source: ``walk / walk / walks``
-- Target: corresponding raw target forms
-
-Redundancy is expected and supported. If all six slots are identical, all six are
-still exported.
+The payload exports *raw* forms by tense and slot:
+- Tense keys: preferred ``pres``/``past``/``fut`` for compatibility, plus
+  language-specific keys when finer tense distinctions exist (for example
+  ``imparfait``, ``perfect``, ``future_i``, ``preterite``).
+- Slots: ``1s``, ``2s``, ``3s``, ``1p``, ``2p``, ``3p``
 """
 
 from __future__ import annotations
@@ -20,6 +19,7 @@ from __future__ import annotations
 from typing import Dict, Final, TypedDict
 
 CONJUGATION_SLOT_ORDER: Final[tuple[str, ...]] = ("1s", "2s", "3s", "1p", "2p", "3p")
+CONJUGATION_RECOMMENDED_TENSE_KEYS: Final[tuple[str, ...]] = ("pres", "past", "fut")
 
 
 class ConjugationRawForm(TypedDict):
@@ -33,7 +33,7 @@ class ConjugationModePayload(TypedDict):
     """WireWord payload consumed by Trakaido Conjugations mode."""
 
     format: str
-    forms: Dict[str, ConjugationRawForm]
+    tables: Dict[str, Dict[str, ConjugationRawForm]]
 
 
 def payload_example() -> ConjugationModePayload:
@@ -43,13 +43,15 @@ def payload_example() -> ConjugationModePayload:
     """
 
     return {
-        "format": "raw_forms_v1",
-        "forms": {
-            "1s": {"source": "walk", "target": "vaikštau"},
-            "2s": {"source": "walk", "target": "vaikštai"},
-            "3s": {"source": "walks", "target": "vaikšto"},
-            "1p": {"source": "walk", "target": "vaikštome"},
-            "2p": {"source": "walk", "target": "vaikštote"},
-            "3p": {"source": "walk", "target": "vaikšto"},
+        "format": "raw_forms_v2",
+        "tables": {
+            "pres": {
+                "1s": {"source": "walk (1s present)", "target": "vaikštau"},
+                "2s": {"source": "walk (2s present)", "target": "vaikštai"},
+                "3s": {"source": "walks (3s present)", "target": "vaikšto"},
+            },
+            "fut": {
+                "1s": {"source": "will walk (1s future)", "target": "vaikščiosiu"},
+            },
         },
     }

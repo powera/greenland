@@ -12,6 +12,7 @@ from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
+
 def extract_conjugation_slot(grammatical_form_key: str) -> Optional[str]:
     """Extract the person/number slot from a WireWord conjugation key.
 
@@ -26,6 +27,38 @@ def extract_conjugation_slot(grammatical_form_key: str) -> Optional[str]:
     slot = grammatical_form_key.split("_", 1)[0]
     slot = slot.split("-", 1)[0]
     return slot if slot in {"1s", "2s", "3s", "1p", "2p", "3p"} else None
+
+
+def extract_conjugation_tense(grammatical_form_key: str) -> Optional[str]:
+    """Extract a normalized tense key from a WireWord conjugation key.
+
+    The grammatical form key is expected to start with a person/number slot and
+    then include a tense descriptor (which may contain underscores).
+
+    Normalization keeps v2 compatibility for common tense aliases while allowing
+    richer tense inventories for languages that distinguish additional forms.
+
+    Examples:
+    - ``1s_present`` -> ``pres``
+    - ``3p_pc`` -> ``past``
+    - ``2s_future_i`` -> ``future_i``
+    - ``1p_imparfait`` -> ``imparfait``
+    """
+    if "_" not in grammatical_form_key:
+        return None
+
+    _, tense_suffix = grammatical_form_key.split("_", 1)
+    tense = tense_suffix.lower()
+
+    tense_mappings = {
+        "present": "pres",
+        "pres": "pres",
+        "past": "past",
+        "pc": "past",
+        "future": "fut",
+        "fut": "fut",
+    }
+    return tense_mappings.get(tense, tense)
 
 
 def normalize_pos_type(pos_type: str) -> str:
