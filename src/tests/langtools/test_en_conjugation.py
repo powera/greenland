@@ -374,6 +374,19 @@ class TestIrregularConjugationsData(unittest.TestCase):
         for key, value in IRREGULAR_CONJUGATIONS["have"].items():
             self.assertTrue(value.strip(), f"'have' has empty value for key '{key}'")
 
+    def test_newly_added_irregular_verb_examples(self) -> None:
+        shake_forms = IRREGULAR_CONJUGATIONS["shake"]
+        self.assertEqual(shake_forms["1s_past"], "shook")
+        self.assertEqual(shake_forms["past_participle"], "shaken")
+
+        steal_forms = IRREGULAR_CONJUGATIONS["steal"]
+        self.assertEqual(steal_forms["3s_present"], "steals")
+        self.assertEqual(steal_forms["past_participle"], "stolen")
+
+    def test_irregular_list_expanded_size(self) -> None:
+        # 1 fully explicit (be) + 104 irregular base-form entries.
+        self.assertEqual(len(IRREGULAR_CONJUGATIONS), 105)
+
 
 if __name__ == "__main__":
     unittest.main()
