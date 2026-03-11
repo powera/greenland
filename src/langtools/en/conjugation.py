@@ -19,7 +19,7 @@ when not supplied explicitly.
 
 from typing import Dict, Optional
 
-from langtools.en.utils import generate_3s_present, generate_present_participle
+from langtools.en.utils import generate_3s_present, generate_past_tense, generate_present_participle
 
 # ---------------------------------------------------------------------------
 # Irregular conjugations keyed by infinitive.
@@ -141,6 +141,10 @@ def expand_verb_forms(
         third_sg = generate_3s_present(infinitive)
     if infinitive and not pres_part:
         pres_part = generate_present_participle(infinitive)
+    if infinitive and not past:
+        past = generate_past_tense(infinitive)
+    if past and not past_part:
+        past_part = past
 
     result: Dict[str, str] = {}
 
