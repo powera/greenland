@@ -48,6 +48,14 @@ from wireword.generate_manifest import generate_manifest
 # Configure logging
 logger = logging.getLogger(__name__)
 
+LANGUAGE_EXPORT_MAX_LEVELS: Dict[str, int] = {
+    "lt": 30,
+    "es": 20,
+    "fr": 20,
+    "zh": 20,
+}
+DEFAULT_EXPORT_MAX_LEVEL = 10
+
 
 class WirewordExporter:
     """Exporter for WireWord API format."""
@@ -107,6 +115,10 @@ class WirewordExporter:
     def get_session(self) -> Any:
         """Get database session."""
         return create_session(self.config)
+
+    def _get_max_export_level(self) -> int:
+        """Return the highest difficulty level allowed for this export language."""
+        return LANGUAGE_EXPORT_MAX_LEVELS.get(self.language, DEFAULT_EXPORT_MAX_LEVEL)
 
     def get_source_word_from_lemma(self, session: Any, lemma: Lemma) -> Optional[str]:
         """
@@ -246,6 +258,12 @@ class WirewordExporter:
 
         # Build export data using pre-fetched translations and difficulty levels
         export_data = []
+        max_export_level = self._get_max_export_level()
+        logger.info(
+            "Applying max export level %s for language %s",
+            max_export_level,
+            self.language,
+        )
         for lemma in lemmas:
             target_translation = translations_by_id.get(lemma.id)
 
@@ -269,6 +287,10 @@ class WirewordExporter:
 
             # Skip words at level -1 (excluded from all wireword exports)
             if lemma_effective_level == -1:
+                continue
+
+            # Skip words above the language-specific export cap
+            if lemma_effective_level > max_export_level:
                 continue
 
             # Get source word: English lemma_text for English source, or translation for other sources
@@ -1176,6 +1198,12 @@ class WirewordExporter:
 
             # Transform to WireWord format using pre-fetched data
             wireword_data = []
+            max_export_level = self._get_max_export_level()
+            logger.info(
+                "Applying max export level %s for language %s",
+                max_export_level,
+                self.language,
+            )
             for lemma in lemmas:
                 # Get effective difficulty level from pre-fetched data
                 effective_lemma_level = difficulty_levels_by_id.get(lemma.id)
@@ -1184,6 +1212,10 @@ class WirewordExporter:
 
                 # Skip words at level -1 (excluded from all wireword exports)
                 if effective_lemma_level == -1:
+                    continue
+
+                # Skip words above the language-specific export cap
+                if effective_lemma_level > max_export_level:
                     continue
 
                 # Get derivative forms from pre-fetched data
