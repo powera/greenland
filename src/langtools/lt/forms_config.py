@@ -33,7 +33,8 @@ NOUN_CONFIG: Dict[str, Any] = {
 VERB_CONFIG: Dict[str, Any] = {
     "type": "person_tense",
     "persons": ["1s", "2s", "3s", "1p", "2p", "3p"],
-    "tenses": ["present", "past", "future"],
+    "tenses": ["present", "past", "future", "conditional"],
+    "extra_forms": ["2s_imperative", "2p_imperative", "habitual_past"],
     "query_type": "lithuanian_verb_conjugations",
     "schema_name": "LithuanianVerbConjugations",
 }
