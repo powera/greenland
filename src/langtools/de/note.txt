@@ -1,0 +1,40 @@
+  Structure: 25 forms per verb, 71 verbs
+                                                                                                     
+  Each verb stores 4 tenses × 6 persons + partizip_ii = 25 values.
+                                                                                                     
+  Which forms are truly irregular vs. predictable?
+
+  Fully predictable (could be derived mechanically):
+
+  1. Future I (6 forms) — always werden/wirst/wird/werden/werdet/werden + infinitive. Zero
+  exceptions. These never need to be stored.
+  2. Perfect (5 of 6 forms) — the auxiliary (haben/sein) conjugation is regular, and the person
+  agreement follows a fixed pattern (habe/hast/hat/haben/habt/haben or bin/bist/ist/sind/seid/sind).
+  Once you know the partizip_ii and which auxiliary to use, all 6 perfect forms are derivable.
+  3. Present tense (4 of 6 forms) — for most "irregular" verbs, only 2s and 3s present have stem
+  changes (e.g., gibst/gibt, fährst/fährt). The 1s, 1p, 2p, 3p typically follow regular patterns from
+   the infinitive stem.
+  4. Preterite (4 of 6 forms) — once you know the preterite stem (e.g., gab, fuhr), the person
+  endings are regular: 1s/3s have no ending, 2s adds -st, 1p/3p add -en, 2p adds -t.
+
+  What's actually irregular per verb?
+
+  For most verbs, the truly unpredictable information is just:
+  - Preterite stem (e.g., backen → buk)
+  - Partizip II (e.g., gebacken)
+  - 2s/3s present stem change (e.g., geben → gibst/gibt)
+  - Auxiliary choice (haben vs sein)
+
+  That's roughly 3-4 values instead of 25. You could store ~85% less data and derive the rest
+  mechanically.
+
+  Recommendation
+
+  You could reduce storage to a compact irregular-stems table:
+  "backen": {"pret_stem": "buk", "partizip_ii": "gebacken", "pres_stem_23": "back", "aux": "haben"}
+
+  The tradeoff: a few verbs (notably sein, haben, werden, modals) are deeply irregular and would
+  still need full forms. But for the ~60 strong/mixed verbs, a stem-based approach would cover them
+  with 4 values instead of 25.
+
+
