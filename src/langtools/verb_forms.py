@@ -25,6 +25,7 @@ def _default_config() -> Dict[str, Any]:
     return {
         "person_slots": list(DEFAULT_PERSON_SLOTS),
         "core_slots": [dict(slot) for slot in DEFAULT_CORE_SLOTS],
+        "extra_slots": [],
         "prompt_note": "",
     }
 
@@ -56,6 +57,12 @@ def _sanitize_config(raw: Any) -> Dict[str, Any]:
         if core_slots:
             config["core_slots"] = core_slots
 
+    raw_extra = raw.get("extra_slots")
+    if isinstance(raw_extra, list):
+        extra_slots = [slot for slot in raw_extra if isinstance(slot, str) and slot.strip()]
+        if extra_slots or raw_extra == []:
+            config["extra_slots"] = extra_slots
+
     prompt_note = raw.get("prompt_note")
     if isinstance(prompt_note, str):
         config["prompt_note"] = prompt_note
@@ -79,4 +86,3 @@ def get_language_verb_forms_config(language_code: str) -> Dict[str, Any]:
         return _sanitize_config(getter())
 
     return _default_config()
-

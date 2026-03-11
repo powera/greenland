@@ -19,6 +19,7 @@ from agents.common.common_args import (
     get_data_source_config,
 )
 from clients.unified_client import UnifiedLLMClient
+from langtools.verb_forms import get_language_verb_forms_config
 from storage.backend.config import DataSourceConfig
 from words.verb_forms import build_verb_forms_prompt
 
@@ -35,14 +36,52 @@ class SeskasAgent:
         self.model_paths = model_paths
         self.client = UnifiedLLMClient.from_config(config, timeout=timeout)
 
-    def _response_schema(self) -> dict[str, Any]:
+    def _response_schema(self, language_code: str) -> dict[str, Any]:
+        language_config = get_language_verb_forms_config(language_code)
+        person_slots = language_config.get("person_slots", [])
+        core_slots = language_config.get("core_slots", [])
+        extra_slots = language_config.get("extra_slots", [])
+
+        form_properties: dict[str, Any] = {}
+        required_form_keys: list[str] = []
+        for slot in core_slots:
+            key = slot.get("key") if isinstance(slot, dict) else None
+            kind = slot.get("kind") if isinstance(slot, dict) else None
+            if not isinstance(key, str) or not key:
+                continue
+
+            required_form_keys.append(key)
+            if kind == "person_map":
+                form_properties[key] = {
+                    "type": "object",
+                    "properties": {person: {"type": "string"} for person in person_slots},
+                    "required": person_slots,
+                    "additionalProperties": False,
+                }
+            else:
+                form_properties[key] = {"type": "string"}
+
+        extra_form_properties = {
+            slot: {"type": "string"} for slot in extra_slots if isinstance(slot, str) and slot
+        }
+
         return {
             "type": "object",
             "properties": {
                 "language_code": {"type": "string"},
                 "lemma": {"type": "string"},
-                "forms": {"type": "object", "additionalProperties": True},
-                "extra_forms": {"type": "object", "additionalProperties": {"type": "string"}},
+                "forms": {
+                    "type": "object",
+                    "properties": form_properties,
+                    "required": required_form_keys,
+                    "additionalProperties": False,
+                },
+                "extra_forms": {
+                    "type": "object",
+                    "properties": extra_form_properties,
+                    "required": list(extra_form_properties.keys()),
+                    "additionalProperties": False,
+                },
             },
             "required": ["language_code", "lemma", "forms", "extra_forms"],
             "additionalProperties": False,
@@ -63,7 +102,7 @@ class SeskasAgent:
         results_by_model: dict[str, dict[str, dict[str, Any]]] = {
             model_path: {} for model_path in self.model_paths
         }
-        schema = self._response_schema()
+        schema = self._response_schema(language_code)
 
         for model_path in self.model_paths:
             LOGGER.info("Running model %s across %d verbs", model_path, len(verb_lemmas))
