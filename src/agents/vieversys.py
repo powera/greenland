@@ -1618,6 +1618,38 @@ def main() -> None:
                     if agent.get_translation_text(session, lemma, args.language):
                         lemmas_with_translation.append(lemma)
             lemma_count = len(lemmas_with_translation)
+
+            selected_voice_names: List[str]
+            if cloud_voice_names:
+                selected_voice_names = cloud_voice_names
+            elif voices:
+                selected_voice_names = [voice.path_name for voice in voices]
+            else:
+                selected_voice_names = [
+                    voice.path_name for voice in DEFAULT_GPT_VOICES.get(args.language, [])
+                ]
+
+            lemma_guids = [lemma.guid for lemma in lemmas_with_translation]
+            total_voice_combinations = lemma_count * len(selected_voice_names)
+            existing_voice_combinations = 0
+
+            if lemma_guids and selected_voice_names:
+                existing_rows = (
+                    session.query(AudioQualityReview.guid, AudioQualityReview.voice_name)
+                    .filter(
+                        AudioQualityReview.language_code == args.language,
+                        AudioQualityReview.guid.in_(lemma_guids),
+                        AudioQualityReview.voice_name.in_(selected_voice_names),
+                    )
+                    .distinct()
+                    .all()
+                )
+                existing_voice_combinations = len(existing_rows)
+
+            missing_voice_combinations = max(
+                0,
+                total_voice_combinations - existing_voice_combinations,
+            )
         finally:
             session.close()
 
@@ -1640,6 +1672,14 @@ def main() -> None:
                 estimated_calls,
                 engine_label,
             )
+            if args.mode == "populate-only":
+                logger.info(
+                    "Populate-only dry-run: %s/%s lemma+voice combinations already have audio; "
+                    "%s combinations would be generated.",
+                    existing_voice_combinations,
+                    total_voice_combinations,
+                    missing_voice_combinations,
+                )
             return
 
         # Confirm before running (unless --yes was provided)
