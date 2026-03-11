@@ -1684,8 +1684,20 @@ def main() -> None:
 
         # Confirm before running (unless --yes was provided)
         if not args.yes:
+            confirmation_message = (
+                f"This will generate audio for {lemma_count} lemmas with {voice_count} voices each.\n"
+                f"Total API calls: {estimated_calls}\n"
+                f"This will use {engine_label} TTS API and may incur costs."
+            )
+            if args.mode == "populate-only":
+                confirmation_message = (
+                    f"{confirmation_message}\n"
+                    f"Existing lemma+voice audio combinations: "
+                    f"{existing_voice_combinations}/{total_voice_combinations}\n"
+                    f"Combinations to generate: {missing_voice_combinations}"
+                )
             if not confirm_operation(
-                message=f"This will generate audio for {lemma_count} lemmas with {voice_count} voices each.\nTotal API calls: {estimated_calls}\nThis will use {engine_label} TTS API and may incur costs.",
+                message=confirmation_message,
                 estimated_calls=estimated_calls,
                 skip_confirmation=args.yes,
                 dry_run=False,
