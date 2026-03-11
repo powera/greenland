@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from barsukas.config import Config
 from flask import Blueprint, Response, g, jsonify, request
 from flask.typing import ResponseReturnValue
-from sqlalchemy import func, or_
+from sqlalchemy import and_, case, func, or_
 
 from storage.crud.grammar_fact import get_grammar_facts
 from storage.crud.lemma import get_lemma_by_guid
@@ -20,6 +20,7 @@ from storage.models import (
     SentenceTranslation,
     SentenceWord,
 )
+from storage.models.schema import AudioQualityReview
 from storage.queries.lemma import build_lemma_search_query
 from storage.translation_helpers import LANGUAGE_HIERARCHY, get_all_translations
 
@@ -221,6 +222,19 @@ def api_info() -> ResponseReturnValue:
                     "required": False,
                     "description": "Number of results to skip for pagination (default: 0)",
                 },
+            ],
+        },
+        {
+            "path": "/api/v1/metadata/words",
+            "method": "GET",
+            "description": "Get per-language lemma counts and metadata coverage (audio, derivative forms, subtypes)",
+            "parameters": [
+                {
+                    "name": "language",
+                    "type": "query",
+                    "required": False,
+                    "description": "Filter to a specific language code (e.g., 'en', 'zh', 'lt')",
+                }
             ],
         },
         {
@@ -871,3 +885,154 @@ def get_lemma_sentences(guid: str) -> ResponseReturnValue:
         metadata["requested_language"] = language_filter
 
     return _build_success_response(sentences_data, metadata)
+
+
+def _has_translation_expression(language_code: str) -> Any:
+    """Build a SQL expression that indicates whether a lemma is available in the language."""
+    if language_code == "en":
+        return Lemma.lemma_text.isnot(None)
+
+    return and_(
+        LemmaTranslation.language_code == language_code,
+        LemmaTranslation.translation.isnot(None),
+        LemmaTranslation.translation != "",
+    )
+
+
+@bp.route("/v1/metadata/words")
+def get_word_metadata() -> ResponseReturnValue:
+    """Get per-language metadata counts for lemma coverage, audio, and derivative forms."""
+    requested_language = request.args.get("language", "").strip().lower()
+
+    translation_languages = {
+        row[0]
+        for row in g.db.query(LemmaTranslation.language_code)
+        .filter(LemmaTranslation.translation.isnot(None), LemmaTranslation.translation != "")
+        .distinct()
+        .all()
+    }
+    derivative_languages = {
+        row[0] for row in g.db.query(DerivativeForm.language_code).distinct().all()
+    }
+    audio_languages = {
+        row[0]
+        for row in g.db.query(AudioQualityReview.language_code)
+        .filter(
+            AudioQualityReview.guid.isnot(None),
+            AudioQualityReview.sentence_id.is_(None),
+            AudioQualityReview.grammatical_form.is_(None),
+        )
+        .distinct()
+        .all()
+    }
+
+    available_languages = (
+        set(LANGUAGE_HIERARCHY) | translation_languages | derivative_languages | audio_languages
+    )
+
+    if requested_language and requested_language not in available_languages:
+        return _build_error_response(
+            f"Language '{requested_language}' not found in metadata sources",
+            404,
+        )
+
+    ordered_languages = [lang for lang in LANGUAGE_HIERARCHY if lang in available_languages]
+    extra_languages = sorted(lang for lang in available_languages if lang not in LANGUAGE_HIERARCHY)
+    all_languages = ordered_languages + extra_languages
+
+    selected_languages = [requested_language] if requested_language else all_languages
+
+    summary_data: Dict[str, Any] = {}
+
+    for current_language in selected_languages:
+        if current_language == "en":
+            base_query = g.db.query(Lemma.id, Lemma.pos_subtype).filter(
+                Lemma.lemma_text.isnot(None)
+            )
+        else:
+            base_query = (
+                g.db.query(Lemma.id, Lemma.pos_subtype)
+                .join(LemmaTranslation, LemmaTranslation.lemma_id == Lemma.id)
+                .filter(_has_translation_expression(current_language))
+                .distinct()
+            )
+
+        base_subquery = base_query.subquery()
+
+        total_words = g.db.query(func.count()).select_from(base_subquery).scalar() or 0
+
+        subtype_rows = (
+            g.db.query(
+                case(
+                    (base_subquery.c.pos_subtype.is_(None), "unspecified"),
+                    else_=base_subquery.c.pos_subtype,
+                ).label("subtype"),
+                func.count().label("count"),
+            )
+            .group_by("subtype")
+            .order_by("subtype")
+            .all()
+        )
+        words_by_subtype = {row.subtype: row.count for row in subtype_rows}
+
+        derivative_count = (
+            g.db.query(func.count(func.distinct(base_subquery.c.id)))
+            .select_from(base_subquery)
+            .join(
+                DerivativeForm,
+                and_(
+                    DerivativeForm.lemma_id == base_subquery.c.id,
+                    DerivativeForm.language_code == current_language,
+                ),
+            )
+            .scalar()
+            or 0
+        )
+
+        audio_count = (
+            g.db.query(func.count(func.distinct(base_subquery.c.id)))
+            .select_from(base_subquery)
+            .join(Lemma, Lemma.id == base_subquery.c.id)
+            .join(
+                AudioQualityReview,
+                and_(
+                    AudioQualityReview.guid == Lemma.guid,
+                    AudioQualityReview.language_code == current_language,
+                    AudioQualityReview.sentence_id.is_(None),
+                    AudioQualityReview.grammatical_form.is_(None),
+                ),
+            )
+            .scalar()
+            or 0
+        )
+
+        words_without_audio = total_words - audio_count
+        words_without_derivatives = total_words - derivative_count
+
+        summary_data[current_language] = {
+            "total_words": total_words,
+            "words_by_subtype": words_by_subtype,
+            "audio": {
+                "with_audio": audio_count,
+                "without_audio": words_without_audio,
+            },
+            "derivative_forms": {
+                "with_derivative_forms": derivative_count,
+                "without_derivative_forms": words_without_derivatives,
+            },
+        }
+
+    metadata: Dict[str, Any] = {
+        "languages": selected_languages,
+        "count": len(selected_languages),
+        "notes": {
+            "word_definition": "A lemma with populated text in that language (lemma_text for 'en', non-empty lemma_translations.translation otherwise)",
+            "audio_definition": "A lemma-level audio_quality_reviews row (guid set, sentence_id null, grammatical_form null)",
+            "derivative_definition": "At least one derivative_forms row for the lemma in that language",
+        },
+    }
+
+    if requested_language:
+        metadata["requested_language"] = requested_language
+
+    return _build_success_response(summary_data, metadata)
