@@ -29,6 +29,7 @@ As of the queue-first transition, agent CLIs are moving toward **work discovery 
 | **elnias** | deer | Bootstrap export (minimal format) |
 | **strazdas** | thrush | Audio generation (eSpeak-NG) |
 | **vieversys** | lark | Audio generation (OpenAI TTS) |
+| **seskas** | ferret | Multi-model verb-conjugation consensus generator |
 
 ## Common Arguments
 
@@ -204,6 +205,15 @@ strazdas.py --voices Ona Jonas        # Specify voice names
 ```bash
 vieversys.py --language en            # Generate English audio
 vieversys.py --voice alloy            # Specify OpenAI voice
+```
+
+### seskas (Verb Conjugation Consensus)
+
+```bash
+seskas.py --language lt --verbs-file data/verbs/lt.txt
+seskas.py --language es --verbs-file /tmp/es_verbs.txt --output src/langtools/es/generated_conjugations.py
+seskas.py --language pl --verbs-file /tmp/pl_verbs.txt --model-paths qwen3-4b-lms phi-4-lms gemma-3-12b-lms
+seskas.py --language lt --verbs-file /tmp/lt_verbs.txt --on-existing merge
 ```
 
 ## Creating New Agents
