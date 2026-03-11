@@ -1561,14 +1561,24 @@ def main() -> None:
             voice_count = len(voices) if voices else len(DEFAULT_GPT_VOICES.get(args.language, []))
             estimated_calls = args.sentence_limit * voice_count
 
+            if args.dry_run:
+                logger.info(
+                    "Dry-run mode: would generate sentence audio for up to %s sentences "
+                    "with %s voices each (estimated API calls: ~%s). No TTS calls made.",
+                    args.sentence_limit,
+                    voice_count,
+                    estimated_calls,
+                )
+                return
+
             # Confirm before running (unless --yes was provided)
-            if not args.yes and not args.dry_run:
+            if not args.yes:
                 guid_msg = f" for lemma {args.guid}" if args.guid else ""
                 if not confirm_operation(
                     message=f"This will generate audio for up to {args.sentence_limit} sentences{guid_msg} with {voice_count} voices each.\nTotal API calls: ~{estimated_calls}\nThis will use OpenAI TTS API and may incur costs.",
                     estimated_calls=estimated_calls,
                     skip_confirmation=args.yes,
-                    dry_run=args.dry_run,
+                    dry_run=False,
                 ):
                     print("Aborted.")
                     sys.exit(0)
@@ -1599,34 +1609,46 @@ def main() -> None:
             logger.info("=" * 80)
             return
 
+        # Count lemmas with translations for confirmation and dry-run summaries
+        session = agent.get_session()
+        try:
+            lemmas_with_translation = []
+            if lemmas:
+                for lemma in lemmas:
+                    if agent.get_translation_text(session, lemma, args.language):
+                        lemmas_with_translation.append(lemma)
+            lemma_count = len(lemmas_with_translation)
+        finally:
+            session.close()
+
+        if cloud_voice_names:
+            voice_count = len(cloud_voice_names)
+        elif voices:
+            voice_count = len(voices)
+        else:
+            voice_count = len(DEFAULT_GPT_VOICES.get(args.language, []))
+        estimated_calls = lemma_count * voice_count
+
+        engine_label = tts_engine.title() if tts_engine != "openai" else "OpenAI"
+
+        if args.dry_run:
+            logger.info(
+                "Dry-run mode: would generate lemma audio for %s lemmas with %s voices each "
+                "(estimated API calls: %s) using %s TTS. No TTS calls made.",
+                lemma_count,
+                voice_count,
+                estimated_calls,
+                engine_label,
+            )
+            return
+
         # Confirm before running (unless --yes was provided)
-        if not args.yes and not args.dry_run:
-            # Count lemmas with translations
-            session = agent.get_session()
-            try:
-                lemmas_with_translation = []
-                if lemmas:
-                    for lemma in lemmas:
-                        if agent.get_translation_text(session, lemma, args.language):
-                            lemmas_with_translation.append(lemma)
-                lemma_count = len(lemmas_with_translation)
-            finally:
-                session.close()
-
-            if cloud_voice_names:
-                voice_count = len(cloud_voice_names)
-            elif voices:
-                voice_count = len(voices)
-            else:
-                voice_count = len(DEFAULT_GPT_VOICES.get(args.language, []))
-            estimated_calls = lemma_count * voice_count
-
-            engine_label = tts_engine.title() if tts_engine != "openai" else "OpenAI"
+        if not args.yes:
             if not confirm_operation(
                 message=f"This will generate audio for {lemma_count} lemmas with {voice_count} voices each.\nTotal API calls: {estimated_calls}\nThis will use {engine_label} TTS API and may incur costs.",
                 estimated_calls=estimated_calls,
                 skip_confirmation=args.yes,
-                dry_run=args.dry_run,
+                dry_run=False,
             ):
                 print("Aborted.")
                 sys.exit(0)
