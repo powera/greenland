@@ -1,6 +1,54 @@
 """Rule-based Portuguese verb conjugation for common regular patterns."""
 
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Set, Tuple
+
+# Irregular verbs that must NOT be mechanically conjugated.
+_IRREGULAR_VERBS: Set[str] = {
+    # Fully irregular
+    "ser",
+    "estar",
+    "ir",
+    "ter",
+    "haver",
+    "ser",
+    # Irregular present / preterite / participle
+    "fazer",
+    "dizer",
+    "trazer",
+    "poder",
+    "pôr",
+    "por",
+    "querer",
+    "saber",
+    "ver",
+    "vir",
+    "dar",
+    "ler",
+    "crer",
+    "rir",
+    "ouvir",
+    "pedir",
+    "medir",
+    "sentir",
+    "dormir",
+    "subir",
+    "fugir",
+    "seguir",
+    "vestir",
+    "mentir",
+    "servir",
+    "repetir",
+    "preferir",
+    "sugerir",
+    "divertir",
+    "cobrir",
+    "descobrir",
+    "engolir",
+    # Orthographic / stem-changing
+    "perder",
+    "valer",
+    "caber",
+}
 
 _PRESENT_ENDINGS: Dict[str, Tuple[str, str, str, str, str, str]] = {
     "ar": ("o", "as", "a", "amos", "ais", "am"),
@@ -28,6 +76,9 @@ def conjugate(infinitive: str) -> Optional[Dict[str, str]]:
             break
 
     if not verb_class:
+        return None
+
+    if infinitive_value in _IRREGULAR_VERBS:
         return None
 
     stem = infinitive_value[:-2]

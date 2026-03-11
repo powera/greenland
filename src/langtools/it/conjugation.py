@@ -1,6 +1,65 @@
 """Rule-based Italian verb conjugation for common regular patterns."""
 
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Set, Tuple
+
+# Irregular verbs that must NOT be mechanically conjugated.
+# These are routed to the LLM fallback instead.
+_IRREGULAR_VERBS: Set[str] = {
+    # Fully irregular
+    "essere",
+    "avere",
+    "andare",
+    "fare",
+    "stare",
+    "dare",
+    "dire",
+    # Modal / semi-irregular
+    "potere",
+    "volere",
+    "dovere",
+    "sapere",
+    # Stem-changing / irregular present
+    "venire",
+    "tenere",
+    "uscire",
+    "salire",
+    "morire",
+    "rimanere",
+    "porre",
+    "trarre",
+    "tradurre",
+    "condurre",
+    "bere",
+    "sedere",
+    "piacere",
+    "tacere",
+    # -isco verbs (capire-type -ire verbs with inchoative infix)
+    "capire",
+    "finire",
+    "preferire",
+    "costruire",
+    "pulire",
+    "spedire",
+    "colpire",
+    "guarire",
+    "obbedire",
+    "ubbidire",
+    "suggerire",
+    "inserire",
+    "riferire",
+    "sostituire",
+    "contribuire",
+    "distribuire",
+    "attribuire",
+    "diminuire",
+    "eseguire",
+    "istruire",
+    "restituire",
+    "unire",
+    "agire",
+    "reagire",
+    "gestire",
+}
 
 _PRESENT_ENDINGS: Dict[str, Tuple[str, str, str, str, str, str]] = {
     "are": ("o", "i", "a", "iamo", "ate", "ano"),
@@ -28,6 +87,9 @@ def conjugate(infinitive: str) -> Optional[Dict[str, str]]:
             break
 
     if not verb_class:
+        return None
+
+    if infinitive_value in _IRREGULAR_VERBS:
         return None
 
     stem = infinitive_value[: -len(verb_class)]
