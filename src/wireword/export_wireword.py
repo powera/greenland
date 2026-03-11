@@ -41,6 +41,7 @@ from wireword.helpers import (
     generate_simple_grammatical_form_label,
     normalize_pos_type,
     extract_conjugation_slot,
+    extract_conjugation_tense,
 )
 from wireword.generate_manifest import generate_manifest
 
@@ -1220,7 +1221,7 @@ class WirewordExporter:
 
                 # Build grammatical forms (conjugations)
                 grammatical_forms = {}
-                conjugation_mode_forms: Dict[str, Dict[str, str]] = {}
+                conjugation_mode_tables: Dict[str, Dict[str, Dict[str, str]]] = {}
                 target_alternatives: List[str] = []
                 target_alternatives_pinyin: List[str] = []
                 english_synonyms = []
@@ -1337,8 +1338,10 @@ class WirewordExporter:
                             grammatical_forms[wireword_key] = gram_form
 
                             slot = extract_conjugation_slot(wireword_key)
-                            if slot:
-                                conjugation_mode_forms[slot] = {
+                            tense = extract_conjugation_tense(wireword_key)
+                            if slot and tense:
+                                tense_table = conjugation_mode_tables.setdefault(tense, {})
+                                tense_table[slot] = {
                                     "source": english_label.strip(),
                                     "target": form.derivative_form_text.strip(),
                                 }
@@ -1395,21 +1398,14 @@ class WirewordExporter:
                 if grammatical_forms:
                     wireword["grammatical_forms"] = grammatical_forms
 
-                # Add de-normalized conjugation forms for Trakaido Conjugations mode.
-                # We always emit all six person/number slots and allow redundancy by design.
-                if conjugation_mode_forms:
-                    slot_order = ["1s", "2s", "3s", "1p", "2p", "3p"]
-                    fallback_source = (base_source or "").strip()
-                    fallback_target = (base_target or "").strip()
+                # Add conjugation tables for Trakaido Conjugations mode.
+                # Preserve only explicit tense+slot pairs present in grammatical_forms.
+                # Tense keys keep compatible aliases (pres/past/fut) and allow
+                # language-specific variants (e.g., imparfait, future_i).
+                if conjugation_mode_tables:
                     wireword["conjugation_mode"] = {
-                        "format": "raw_forms_v1",
-                        "forms": {
-                            slot: conjugation_mode_forms.get(
-                                slot,
-                                {"source": fallback_source, "target": fallback_target},
-                            )
-                            for slot in slot_order
-                        },
+                        "format": "raw_forms_v2",
+                        "tables": conjugation_mode_tables,
                     }
 
                 if lemma.notes:
