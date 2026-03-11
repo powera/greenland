@@ -191,6 +191,27 @@ def add_backend_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser
     return parser
 
 
+def add_benchmarks_backend_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+    """Add benchmark-datastore backend arguments.
+
+    Args:
+        parser: The argument parser to add arguments to
+
+    Returns:
+        The same parser with benchmark backend arguments added
+    """
+    parser.add_argument(
+        "--benchmarks-use-postgres",
+        action="store_true",
+        help=(
+            "Use PostgreSQL for benchmark metadata lookups (model registry). "
+            "If --postgres is set, this is also treated as enabled."
+        ),
+    )
+
+    return parser
+
+
 def add_language_args(
     parser: argparse.ArgumentParser, multiple: bool = False
 ) -> argparse.ArgumentParser:
@@ -481,3 +502,27 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None) -> "D
         model=model,
         debug=debug,
     )
+
+
+def configure_benchmarks_session_backend(args: Any) -> None:
+    """Configure benchmark datastore session factory from CLI args.
+
+    This currently monkey-patches benchmarks.datastore.common.create_dev_session
+    so model/codename lookups (used by UnifiedLLMClient) can target the
+    benchmarks PostgreSQL schema when requested.
+    """
+    import benchmarks.datastore.common as datastore_common
+    from benchmarks.config import BenchmarkConfig
+
+    use_postgres = bool(getattr(args, "benchmarks_use_postgres", False)) or bool(
+        getattr(args, "postgres", False)
+    )
+    if not use_postgres:
+        return
+
+    postgres_url = BenchmarkConfig.build_postgres_url()
+
+    def _postgres_dev_session() -> Any:
+        return datastore_common.create_postgres_session(postgres_url)
+
+    datastore_common.create_dev_session = _postgres_dev_session

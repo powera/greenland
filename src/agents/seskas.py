@@ -12,7 +12,12 @@ from typing import Any
 if str(Path(__file__).parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from agents.common.common_args import add_common_args, get_data_source_config
+from agents.common.common_args import (
+    add_benchmarks_backend_args,
+    add_common_args,
+    configure_benchmarks_session_backend,
+    get_data_source_config,
+)
 from clients.unified_client import UnifiedLLMClient
 from storage.backend.config import DataSourceConfig
 from words.verb_forms import build_verb_forms_prompt
@@ -222,6 +227,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Per-request timeout in seconds for local model calls",
     )
     add_common_args(parser)
+    add_benchmarks_backend_args(parser)
     return parser
 
 
@@ -234,6 +240,7 @@ def main() -> None:
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
+    configure_benchmarks_session_backend(args)
     config = get_data_source_config(args, default_model=args.model_paths[0])
     agent = SeskasAgent(config=config, model_paths=args.model_paths, timeout=args.timeout)
 
