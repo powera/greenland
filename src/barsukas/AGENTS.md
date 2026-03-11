@@ -8,3 +8,5 @@ BARSUKAS is the main web UX for interacting with the linguistic database.
 - Ask the developer to test changes in their local browser
 - Use Bootstrap 5 classes for styling (already included in base.html)
 - Follow existing patterns for forms, buttons, and navigation
+- API route reference for automation lives at `src/barsukas/routes/API.md`
+
