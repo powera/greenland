@@ -104,7 +104,7 @@ IRREGULAR_CONJUGATIONS: Dict[str, Dict[str, str]] = {
     },
 }
 
-IRREGULAR_BASE_FORMS_SEED: Dict[str, IrregularBaseForms] = {
+IRREGULAR_BASE_FORMS: Dict[str, IrregularBaseForms] = {
     "begin": {"past": "began", "past_participle": "begun"},
     "break": {"past": "broke", "past_participle": "broken"},
     "bring": {"past": "brought"},
@@ -134,9 +134,6 @@ IRREGULAR_BASE_FORMS_SEED: Dict[str, IrregularBaseForms] = {
     "take": {"past": "took", "past_participle": "taken"},
     "think": {"past": "thought"},
     "write": {"past": "wrote", "past_participle": "written"},
-}
-
-IRREGULAR_BASE_FORMS_ADDITIONAL: Dict[str, IrregularBaseForms] = {
     "arise": {"past": "arose", "past_participle": "arisen"},
     "awake": {"past": "awoke", "past_participle": "awoken"},
     "bear": {"past": "bore", "past_participle": "borne"},
@@ -212,11 +209,6 @@ IRREGULAR_BASE_FORMS_ADDITIONAL: Dict[str, IrregularBaseForms] = {
     "stand": {"past": "stood"},
     "steal": {"past": "stole", "past_participle": "stolen"},
     "stick": {"past": "stuck"},
-}
-
-IRREGULAR_BASE_FORMS: Dict[str, IrregularBaseForms] = {
-    **IRREGULAR_BASE_FORMS_SEED,
-    **IRREGULAR_BASE_FORMS_ADDITIONAL,
 }
 
 

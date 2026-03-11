@@ -384,7 +384,7 @@ class TestIrregularConjugationsData(unittest.TestCase):
         self.assertEqual(steal_forms["past_participle"], "stolen")
 
     def test_irregular_list_expanded_size(self) -> None:
-        # 1 fully explicit (be) + 29 seed + 75 additional.
+        # 1 fully explicit (be) + 104 irregular base-form entries.
         self.assertEqual(len(IRREGULAR_CONJUGATIONS), 105)
 
 
