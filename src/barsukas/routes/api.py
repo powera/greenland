@@ -238,6 +238,19 @@ def api_info() -> ResponseReturnValue:
             ],
         },
         {
+            "path": "/api/v1/metadata/sentences",
+            "method": "GET",
+            "description": "Get per-language sentence counts and metadata coverage (audio, verification, pattern types)",
+            "parameters": [
+                {
+                    "name": "language",
+                    "type": "query",
+                    "required": False,
+                    "description": "Filter to a specific language code (e.g., 'en', 'zh', 'lt')",
+                }
+            ],
+        },
+        {
             "path": "/api/v1/lemma/<guid>",
             "method": "GET",
             "description": "Get basic information about a lemma",
@@ -1029,6 +1042,128 @@ def get_word_metadata() -> ResponseReturnValue:
             "word_definition": "A lemma with populated text in that language (lemma_text for 'en', non-empty lemma_translations.translation otherwise)",
             "audio_definition": "A lemma-level audio_quality_reviews row (guid set, sentence_id null, grammatical_form null)",
             "derivative_definition": "At least one derivative_forms row for the lemma in that language",
+        },
+    }
+
+    if requested_language:
+        metadata["requested_language"] = requested_language
+
+    return _build_success_response(summary_data, metadata)
+
+
+@bp.route("/v1/metadata/sentences")
+def get_sentence_metadata() -> ResponseReturnValue:
+    """Get per-language metadata counts for sentence coverage and sentence-level audio."""
+    requested_language = request.args.get("language", "").strip().lower()
+
+    sentence_translation_languages = {
+        row[0]
+        for row in g.db.query(SentenceTranslation.language_code)
+        .filter(
+            SentenceTranslation.translation_text.isnot(None),
+            SentenceTranslation.translation_text != "",
+        )
+        .distinct()
+        .all()
+    }
+    sentence_audio_languages = {
+        row[0]
+        for row in g.db.query(AudioQualityReview.language_code)
+        .filter(AudioQualityReview.sentence_id.isnot(None))
+        .distinct()
+        .all()
+    }
+
+    available_languages = (
+        set(LANGUAGE_HIERARCHY) | sentence_translation_languages | sentence_audio_languages
+    )
+
+    if requested_language and requested_language not in available_languages:
+        return _build_error_response(
+            f"Language '{requested_language}' not found in metadata sources",
+            404,
+        )
+
+    ordered_languages = [lang for lang in LANGUAGE_HIERARCHY if lang in available_languages]
+    extra_languages = sorted(lang for lang in available_languages if lang not in LANGUAGE_HIERARCHY)
+    all_languages = ordered_languages + extra_languages
+
+    selected_languages = [requested_language] if requested_language else all_languages
+
+    summary_data: Dict[str, Any] = {}
+
+    for current_language in selected_languages:
+        base_query = (
+            g.db.query(Sentence.id, Sentence.pattern_type, Sentence.verified)
+            .join(SentenceTranslation, SentenceTranslation.sentence_id == Sentence.id)
+            .filter(
+                SentenceTranslation.language_code == current_language,
+                SentenceTranslation.translation_text.isnot(None),
+                SentenceTranslation.translation_text != "",
+            )
+            .distinct()
+        )
+
+        base_subquery = base_query.subquery()
+
+        total_sentences = g.db.query(func.count()).select_from(base_subquery).scalar() or 0
+
+        pattern_rows = (
+            g.db.query(
+                case(
+                    (base_subquery.c.pattern_type.is_(None), "unspecified"),
+                    else_=base_subquery.c.pattern_type,
+                ).label("pattern_type"),
+                func.count().label("count"),
+            )
+            .group_by("pattern_type")
+            .order_by("pattern_type")
+            .all()
+        )
+        sentences_by_pattern = {row.pattern_type: row.count for row in pattern_rows}
+
+        audio_count = (
+            g.db.query(func.count(func.distinct(base_subquery.c.id)))
+            .select_from(base_subquery)
+            .join(
+                AudioQualityReview,
+                and_(
+                    AudioQualityReview.sentence_id == base_subquery.c.id,
+                    AudioQualityReview.language_code == current_language,
+                ),
+            )
+            .scalar()
+            or 0
+        )
+
+        verified_count = (
+            g.db.query(func.count())
+            .select_from(base_subquery)
+            .filter(base_subquery.c.verified.is_(True))
+            .scalar()
+            or 0
+        )
+
+        summary_data[current_language] = {
+            "total_sentences": total_sentences,
+            "sentences_by_pattern": sentences_by_pattern,
+            "audio": {
+                "with_audio": audio_count,
+                "without_audio": total_sentences - audio_count,
+            },
+            "verification": {
+                "verified": verified_count,
+                "unverified": total_sentences - verified_count,
+            },
+        }
+
+    metadata: Dict[str, Any] = {
+        "languages": selected_languages,
+        "count": len(selected_languages),
+        "notes": {
+            "sentence_definition": "A sentence with non-empty sentence_translations.translation_text in that language",
+            "audio_definition": "At least one sentence-level audio_quality_reviews row for the sentence and language (sentence_id set)",
+            "verification_definition": "Sentence.verified value among sentences counted in that language",
         },
     }
 
