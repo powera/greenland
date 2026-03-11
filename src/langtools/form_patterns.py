@@ -45,7 +45,9 @@ def expand_fields(config: Dict[str, Any]) -> List[str]:
         return ["singular", "plural"]
 
     if pattern == "person_tense":
-        return [f"{person}_{tense}" for tense in config["tenses"] for person in config["persons"]]
+        fields = [f"{person}_{tense}" for tense in config["tenses"] for person in config["persons"]]
+        fields.extend(config.get("extra_forms", []))
+        return fields
 
     if pattern == "tense_only":
         return list(config["tenses"])

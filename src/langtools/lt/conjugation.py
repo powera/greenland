@@ -14,6 +14,11 @@ The 3rd person past determines the past tense type:
   - ė-preterite: ends in -ė (e.g., kentė, rašė, valgė)
   - o-preterite: ends in -o (e.g., dirbo, mylėjo, ėjo)
 
+Additional tenses derived from the infinitive stem:
+  - Conditional (tariamoji nuosaka): infinitive stem + conditional endings
+  - Imperative (liepiamoji nuosaka): infinitive stem + k / kite
+  - Habitual past (būtasis dažninis): infinitive stem + davo (invariant)
+
 The only truly irregular verb is būti (to be), whose present tense
 cannot be derived mechanically and is hard-coded.
 """
@@ -45,6 +50,15 @@ _BUTI_FORMS: Dict[str, str] = {
     "1p_future": "būsime",
     "2p_future": "būsite",
     "3p_future": "būs",
+    "1s_conditional": "būčiau",
+    "2s_conditional": "būtum",
+    "3s_conditional": "būtų",
+    "1p_conditional": "būtume",
+    "2p_conditional": "būtumėte",
+    "3p_conditional": "būtų",
+    "2s_imperative": "būk",
+    "2p_imperative": "būkite",
+    "habitual_past": "būdavo",
 }
 
 
@@ -216,15 +230,81 @@ def _conjugate_future(infinitive: str) -> Dict[str, str]:
     }
 
 
+def _get_infinitive_stem(infinitive: str) -> Optional[str]:
+    """Strip the -ti suffix to get the infinitive stem.
+
+    Returns None for reflexive verbs (-tis) and unrecognized forms.
+    """
+    if infinitive.endswith("ti") and not infinitive.endswith("tis"):
+        return infinitive[:-2]
+    return None
+
+
+def _conjugate_conditional(infinitive: str) -> Optional[Dict[str, str]]:
+    """Derive all conditional (tariamoji nuosaka) forms from the infinitive.
+
+    The conditional is formed from the infinitive stem with these endings:
+      1s: stem + čiau
+      2s: stem + tum
+      3s: stem + tų
+      1p: stem + tume
+      2p: stem + tumėte
+      3p: stem + tų  (same as 3s)
+    """
+    stem = _get_infinitive_stem(infinitive)
+    if stem is None:
+        return None
+    return {
+        "1s_conditional": stem + "čiau",
+        "2s_conditional": stem + "tum",
+        "3s_conditional": stem + "tų",
+        "1p_conditional": stem + "tume",
+        "2p_conditional": stem + "tumėte",
+        "3p_conditional": stem + "tų",
+    }
+
+
+def _conjugate_imperative(infinitive: str) -> Optional[Dict[str, str]]:
+    """Derive imperative (liepiamoji nuosaka) forms from the infinitive.
+
+    The imperative is formed from the infinitive stem:
+      2s: stem + k
+      2p: stem + kite
+    """
+    stem = _get_infinitive_stem(infinitive)
+    if stem is None:
+        return None
+    return {
+        "2s_imperative": stem + "k",
+        "2p_imperative": stem + "kite",
+    }
+
+
+def _conjugate_habitual_past(infinitive: str) -> Optional[Dict[str, str]]:
+    """Derive the habitual past (būtasis dažninis laikas) from the infinitive.
+
+    The habitual past is invariant across all persons: infinitive stem + davo.
+    This form expresses repeated or habitual past action ("used to...").
+    """
+    stem = _get_infinitive_stem(infinitive)
+    if stem is None:
+        return None
+    return {
+        "habitual_past": stem + "davo",
+    }
+
+
 def conjugate_verb(infinitive: str, present_3: str, past_3: str) -> Optional[Dict[str, str]]:
-    """Generate all 18 Lithuanian verb forms from three principal parts.
+    """Generate all Lithuanian verb forms from three principal parts.
 
     Given the infinitive, 3rd person present, and 3rd person past,
-    mechanically derives all 6 person forms for present, past, and
-    future tenses (6 × 3 = 18 forms).
+    mechanically derives forms for present, past, future, conditional,
+    imperative, and habitual past tenses (32 forms total).
 
     Note: 3rd person singular and plural are identical in Lithuanian,
-    so both 3s and 3p keys are set to the same value.
+    so both 3s and 3p keys are set to the same value for finite tenses.
+    The conditional likewise has identical 3s/3p forms.
+    The habitual past is invariant across all persons ("habitual_past").
 
     Args:
         infinitive: The infinitive form (e.g., "dirbti").
@@ -232,7 +312,7 @@ def conjugate_verb(infinitive: str, present_3: str, past_3: str) -> Optional[Dic
         past_3: The 3rd person past form (e.g., "dirbo").
 
     Returns:
-        Dict mapping form keys to conjugated forms (18 entries),
+        Dict mapping form keys to conjugated forms,
         or None if the verb cannot be conjugated mechanically
         (e.g., unrecognized endings).
     """
@@ -257,9 +337,18 @@ def conjugate_verb(infinitive: str, present_3: str, past_3: str) -> Optional[Dic
         return None
 
     future_forms = _conjugate_future(infinitive)
+    conditional_forms = _conjugate_conditional(infinitive)
+    imperative_forms = _conjugate_imperative(infinitive)
+    habitual_past_forms = _conjugate_habitual_past(infinitive)
 
     all_forms: Dict[str, str] = {}
     all_forms.update(present_forms)
     all_forms.update(past_forms)
     all_forms.update(future_forms)
+    if conditional_forms is not None:
+        all_forms.update(conditional_forms)
+    if imperative_forms is not None:
+        all_forms.update(imperative_forms)
+    if habitual_past_forms is not None:
+        all_forms.update(habitual_past_forms)
     return all_forms

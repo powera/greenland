@@ -4,9 +4,13 @@ import pytest
 
 from langtools.lt.conjugation import (
     conjugate_verb,
+    _conjugate_conditional,
     _conjugate_future,
+    _conjugate_habitual_past,
+    _conjugate_imperative,
     _conjugate_past,
     _conjugate_present,
+    _get_infinitive_stem,
     _make_future_stem,
     _palatalize_final,
 )
@@ -189,6 +193,142 @@ class TestConjugateFuture:
         assert forms["2p_future"] == "vešite"
 
 
+class TestGetInfinitiveStem:
+    """Test infinitive stem extraction."""
+
+    def test_regular(self) -> None:
+        assert _get_infinitive_stem("dirbti") == "dirb"
+
+    def test_vowel_stem(self) -> None:
+        assert _get_infinitive_stem("rašyti") == "rašy"
+
+    def test_long_vowel_stem(self) -> None:
+        assert _get_infinitive_stem("mylėti") == "mylė"
+
+    def test_reflexive_returns_none(self) -> None:
+        assert _get_infinitive_stem("mokytis") is None
+
+    def test_unrecognized_returns_none(self) -> None:
+        assert _get_infinitive_stem("xyz") is None
+
+
+class TestConjugateConditional:
+    """Test conditional (tariamoji nuosaka) derivation from infinitive."""
+
+    def test_consonant_stem(self) -> None:
+        """dirbti → dirb + conditional endings."""
+        forms = _conjugate_conditional("dirbti")
+        assert forms is not None
+        assert forms["1s_conditional"] == "dirbčiau"
+        assert forms["2s_conditional"] == "dirbtum"
+        assert forms["3s_conditional"] == "dirbtų"
+        assert forms["1p_conditional"] == "dirbtume"
+        assert forms["2p_conditional"] == "dirbtute"
+        assert forms["3p_conditional"] == "dirbtų"
+
+    def test_vowel_stem(self) -> None:
+        """rašyti → rašy + conditional endings."""
+        forms = _conjugate_conditional("rašyti")
+        assert forms is not None
+        assert forms["1s_conditional"] == "rašyčiau"
+        assert forms["3s_conditional"] == "rašytų"
+
+    def test_long_vowel_stem(self) -> None:
+        """mylėti → mylė + conditional endings."""
+        forms = _conjugate_conditional("mylėti")
+        assert forms is not None
+        assert forms["1s_conditional"] == "mylėčiau"
+        assert forms["3s_conditional"] == "mylėtų"
+
+    def test_short_stem(self) -> None:
+        """eiti → ei + conditional endings."""
+        forms = _conjugate_conditional("eiti")
+        assert forms is not None
+        assert forms["1s_conditional"] == "eičiau"
+        assert forms["3s_conditional"] == "eitų"
+
+    def test_3s_equals_3p(self) -> None:
+        forms = _conjugate_conditional("dirbti")
+        assert forms is not None
+        assert forms["3s_conditional"] == forms["3p_conditional"]
+
+    def test_reflexive_returns_none(self) -> None:
+        assert _conjugate_conditional("mokytis") is None
+
+
+class TestConjugateImperative:
+    """Test imperative (liepiamoji nuosaka) derivation from infinitive."""
+
+    def test_consonant_stem(self) -> None:
+        """dirbti → dirbk / dirbkite."""
+        forms = _conjugate_imperative("dirbti")
+        assert forms is not None
+        assert forms["2s_imperative"] == "dirbk"
+        assert forms["2p_imperative"] == "dirbkite"
+
+    def test_vowel_stem(self) -> None:
+        """rašyti → rašyk / rašykite."""
+        forms = _conjugate_imperative("rašyti")
+        assert forms is not None
+        assert forms["2s_imperative"] == "rašyk"
+        assert forms["2p_imperative"] == "rašykite"
+
+    def test_long_vowel_stem(self) -> None:
+        """mylėti → mylėk / mylėkite."""
+        forms = _conjugate_imperative("mylėti")
+        assert forms is not None
+        assert forms["2s_imperative"] == "mylėk"
+        assert forms["2p_imperative"] == "mylėkite"
+
+    def test_short_stem(self) -> None:
+        """eiti → eik / eikite."""
+        forms = _conjugate_imperative("eiti")
+        assert forms is not None
+        assert forms["2s_imperative"] == "eik"
+        assert forms["2p_imperative"] == "eikite"
+
+    def test_sibilant_stem(self) -> None:
+        """kęsti → kęsk / kęskite."""
+        forms = _conjugate_imperative("kęsti")
+        assert forms is not None
+        assert forms["2s_imperative"] == "kęsk"
+        assert forms["2p_imperative"] == "kęskite"
+
+    def test_reflexive_returns_none(self) -> None:
+        assert _conjugate_imperative("mokytis") is None
+
+
+class TestConjugateHabitualPast:
+    """Test habitual past (būtasis kartinis) derivation from infinitive."""
+
+    def test_consonant_stem(self) -> None:
+        """dirbti → dirbdavo."""
+        forms = _conjugate_habitual_past("dirbti")
+        assert forms is not None
+        assert forms["habitual_past"] == "dirbdavo"
+
+    def test_vowel_stem(self) -> None:
+        """rašyti → rašydavo."""
+        forms = _conjugate_habitual_past("rašyti")
+        assert forms is not None
+        assert forms["habitual_past"] == "rašydavo"
+
+    def test_long_vowel_stem(self) -> None:
+        """mylėti → mylėdavo."""
+        forms = _conjugate_habitual_past("mylėti")
+        assert forms is not None
+        assert forms["habitual_past"] == "mylėdavo"
+
+    def test_short_stem(self) -> None:
+        """eiti → eidavo."""
+        forms = _conjugate_habitual_past("eiti")
+        assert forms is not None
+        assert forms["habitual_past"] == "eidavo"
+
+    def test_reflexive_returns_none(self) -> None:
+        assert _conjugate_habitual_past("mokytis") is None
+
+
 class TestConjugateVerb:
     """Integration tests for full verb conjugation."""
 
@@ -214,6 +354,14 @@ class TestConjugateVerb:
         assert forms["3s_future"] == "dirbs"
         assert forms["1p_future"] == "dirbsime"
         assert forms["2p_future"] == "dirbsite"
+        # Conditional
+        assert forms["1s_conditional"] == "dirbčiau"
+        assert forms["3s_conditional"] == "dirbtų"
+        # Imperative
+        assert forms["2s_imperative"] == "dirbk"
+        assert forms["2p_imperative"] == "dirbkite"
+        # Habitual past
+        assert forms["habitual_past"] == "dirbdavo"
 
     def test_myleti_conj_ii_o_preterite(self) -> None:
         """mylėti (to love): Conj II, o-preterite."""
@@ -305,17 +453,22 @@ class TestConjugateVerb:
         assert forms["3s_past"] == "buvo"
         assert forms["1s_future"] == "būsiu"
         assert forms["3s_future"] == "būs"
+        assert forms["1s_conditional"] == "būčiau"
+        assert forms["3s_conditional"] == "būtų"
+        assert forms["2s_imperative"] == "būk"
+        assert forms["2p_imperative"] == "būkite"
+        assert forms["habitual_past"] == "būdavo"
 
     def test_reflexive_returns_none(self) -> None:
         """Reflexive verbs are not supported yet."""
         forms = conjugate_verb("mokytis", "mokosi", "mokėsi")
         assert forms is None
 
-    def test_returns_18_forms(self) -> None:
-        """All results should have exactly 18 form keys."""
+    def test_returns_27_forms(self) -> None:
+        """All results should have exactly 27 form keys."""
         forms = conjugate_verb("dirbti", "dirba", "dirbo")
         assert forms is not None
-        assert len(forms) == 18
+        assert len(forms) == 27
         expected_keys = {
             "1s_present",
             "2s_present",
@@ -335,6 +488,15 @@ class TestConjugateVerb:
             "1p_future",
             "2p_future",
             "3p_future",
+            "1s_conditional",
+            "2s_conditional",
+            "3s_conditional",
+            "1p_conditional",
+            "2p_conditional",
+            "3p_conditional",
+            "2s_imperative",
+            "2p_imperative",
+            "habitual_past",
         }
         assert set(forms.keys()) == expected_keys
 
