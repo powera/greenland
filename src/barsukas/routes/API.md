@@ -32,7 +32,7 @@ Base prefix: `/api`.
 - `GET /api/v1/lemma/<guid>/sentences[?language=<code>]`
   - Example sentences using the lemma.
 
-## Metadata endpoint (for aggregate counting)
+## Metadata endpoints (for aggregate counting)
 
 - `GET /api/v1/metadata/words[?language=<code>]`
 
@@ -43,13 +43,28 @@ Returns per-language aggregate counts with this shape:
 - `audio.with_audio` / `audio.without_audio`
 - `derivative_forms.with_derivative_forms` / `derivative_forms.without_derivative_forms`
 
-### Counting rules
+### Word counting rules
 
 - Language lemma universe:
   - `en`: lemmas with non-null `lemma_text`
   - non-`en`: lemmas with non-empty `lemma_translations.translation` in that language
 - "with audio": lemma-level audio rows in `audio_quality_reviews` (`guid` set, `sentence_id` null, `grammatical_form` null)
 - "with derivative forms": at least one `derivative_forms` row for that lemma in that language
+
+- `GET /api/v1/metadata/sentences[?language=<code>]`
+
+Returns per-language aggregate counts with this shape:
+
+- `total_sentences`
+- `sentences_by_pattern`
+- `audio.with_audio` / `audio.without_audio`
+- `verification.verified` / `verification.unverified`
+
+### Sentence counting rules
+
+- Language sentence universe: sentences with non-empty `sentence_translations.translation_text` in that language
+- "with audio": at least one sentence-level row in `audio_quality_reviews` (`sentence_id` set) for the same language
+- "verified": `sentences.verified` among the language sentence universe
 
 ## Response conventions
 
