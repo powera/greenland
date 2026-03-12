@@ -120,6 +120,32 @@ class WirewordExporter:
         """Return the highest difficulty level allowed for this export language."""
         return LANGUAGE_EXPORT_MAX_LEVELS.get(self.language, DEFAULT_EXPORT_MAX_LEVEL)
 
+    def _format_missing_verb_translation_warning(
+        self, missing_forms: List[Tuple[int, str, str]]
+    ) -> str:
+        """Build an actionable warning for missing English verb form translations."""
+        total_missing = len(missing_forms)
+        preview_limit = 10
+        preview_rows = missing_forms[:preview_limit]
+        preview_lines = [
+            (
+                f"- lemma_id={lemma_id}, lemma_text='{lemma_text}', "
+                f"grammatical_form='{grammatical_form}'"
+            )
+            for lemma_id, lemma_text, grammatical_form in preview_rows
+        ]
+        hidden_count = total_missing - len(preview_rows)
+        if hidden_count > 0:
+            preview_lines.append(f"- ... and {hidden_count} more missing forms")
+
+        details = "\n".join(preview_lines)
+        return (
+            "Missing English translations in database for verb forms. "
+            f"Found {total_missing} missing form(s).\n"
+            f"{details}\n"
+            "Falling back to generated English labels for the missing forms."
+        )
+
     def get_source_word_from_lemma(self, session: Any, lemma: Lemma) -> Optional[str]:
         """
         Get the source language word for a lemma.
@@ -1204,6 +1230,7 @@ class WirewordExporter:
                 max_export_level,
                 self.language,
             )
+            missing_english_forms: List[Tuple[int, str, str]] = []
             for lemma in lemmas:
                 # Get effective difficulty level from pre-fetched data
                 effective_lemma_level = difficulty_levels_by_id.get(lemma.id)
@@ -1330,16 +1357,11 @@ class WirewordExporter:
                                 english_forms_by_lemma, lemma.id, form.grammatical_form
                             )
 
-                            # If not found in database, fail hard for Lithuanian
+                            # If not found in database, use simple generated fallback label.
                             if not english_label:
-                                if self.language == "lt":
-                                    raise ValueError(
-                                        f"Missing English translation in database for Lithuanian verb form: "
-                                        f"lemma_id={lemma.id}, lemma_text='{lemma.lemma_text}', "
-                                        f"grammatical_form='{form.grammatical_form}'. "
-                                        f"All Lithuanian verb conjugations must have English translations in the database."
-                                    )
-                                # For other languages, use simple fallback
+                                missing_english_forms.append(
+                                    (lemma.id, lemma.lemma_text, form.grammatical_form)
+                                )
                                 english_label = generate_simple_grammatical_form_label(
                                     form.grammatical_form, base_source or ""
                                 )
@@ -1450,6 +1472,9 @@ class WirewordExporter:
                 wireword["tags"] = tags
 
                 wireword_data.append(wireword)
+
+            if missing_english_forms:
+                logger.warning(self._format_missing_verb_translation_warning(missing_english_forms))
 
             # Calculate basic stats
             # ExportStats is already imported at module level
