@@ -11,7 +11,9 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
+from storage.config.grammar_facts import RELEASE_GRAMMAR_FACT_TYPES
 from storage.crud.operation_log import log_operation, log_translation_change
+from storage.models.grammar_fact import GrammarFact
 from storage.models.schema import Lemma, LemmaTranslation
 from storage.translation_helpers import (
     LANGUAGE_NAMES,
@@ -71,6 +73,60 @@ def _load_release_lemmas(release_dir: Path) -> Dict[str, Dict[str, Any]]:
             logger.error(f"Error reading {base_file}: {e}")
 
     return release_lemmas
+
+
+def _load_release_grammar_facts(
+    release_dir: Path,
+) -> Dict[str, List[Dict[str, str]]]:
+    """Load grammar facts from per-language JSONL files in data/release/lemmas.
+
+    Only loads fact types listed in RELEASE_GRAMMAR_FACT_TYPES for each language.
+
+    Returns:
+        Dictionary mapping GUID to list of {fact_type, fact_value, language_code}.
+    """
+    grammar_facts: Dict[str, List[Dict[str, str]]] = {}
+
+    if not release_dir.exists():
+        return grammar_facts
+
+    for lang_code, allowed_types in RELEASE_GRAMMAR_FACT_TYPES.items():
+        lang_filename = f"{lang_code}.jsonl"
+        for lang_file in release_dir.rglob(lang_filename):
+            try:
+                with open(lang_file, "r", encoding="utf-8") as f:
+                    for line_num, raw_line in enumerate(f, 1):
+                        raw_line = raw_line.strip()
+                        if not raw_line:
+                            continue
+                        try:
+                            data = json.loads(raw_line)
+                        except json.JSONDecodeError as e:
+                            logger.error(f"JSON parse error in {lang_file}:{line_num}: {e}")
+                            continue
+
+                        guid = data.get("guid")
+                        if not guid:
+                            continue
+
+                        facts_list = data.get("grammar_facts", [])
+                        for fact in facts_list:
+                            fact_type = fact.get("fact_type", "")
+                            fact_value = fact.get("fact_value", "")
+                            if fact_type in allowed_types and fact_value:
+                                if guid not in grammar_facts:
+                                    grammar_facts[guid] = []
+                                grammar_facts[guid].append(
+                                    {
+                                        "fact_type": fact_type,
+                                        "fact_value": fact_value,
+                                        "language_code": lang_code,
+                                    }
+                                )
+            except Exception as e:
+                logger.error(f"Error reading {lang_file}: {e}")
+
+    return grammar_facts
 
 
 def _parse_concept_label(concept_label: str) -> Tuple[str, Optional[str]]:
@@ -475,8 +531,10 @@ def apply_additions() -> ResponseReturnValue:
 
     release_dir = _get_release_dir()
     release_lemmas = _load_release_lemmas(release_dir)
+    release_grammar_facts = _load_release_grammar_facts(release_dir)
 
     imported_count = 0
+    grammar_fact_count = 0
     error_count = 0
 
     for guid in selected_guids:
@@ -518,6 +576,18 @@ def apply_additions() -> ResponseReturnValue:
                 )
                 g.db.add(trans)
 
+            # Add grammar facts from language files
+            guid_facts = release_grammar_facts.get(guid, [])
+            for fact_entry in guid_facts:
+                grammar_fact = GrammarFact(
+                    lemma_id=lemma.id,
+                    language_code=fact_entry["language_code"],
+                    fact_type=fact_entry["fact_type"],
+                    fact_value=fact_entry["fact_value"],
+                )
+                g.db.add(grammar_fact)
+                grammar_fact_count += 1
+
             log_operation(
                 session=g.db,
                 source="sync-release",
@@ -528,6 +598,7 @@ def apply_additions() -> ResponseReturnValue:
                     "guid": guid,
                     "pos_type": release_data.get("pos_type", ""),
                     "translation_count": len(translations),
+                    "grammar_fact_count": len(guid_facts),
                 },
             )
 
@@ -541,7 +612,10 @@ def apply_additions() -> ResponseReturnValue:
     if imported_count > 0:
         try:
             g.db.commit()
-            flash(f"Imported {imported_count} lemma(s)", "success")
+            msg = f"Imported {imported_count} lemma(s)"
+            if grammar_fact_count > 0:
+                msg += f" with {grammar_fact_count} grammar fact(s)"
+            flash(msg, "success")
         except Exception as e:
             g.db.rollback()
             flash(f"Error committing changes: {e}", "error")

@@ -65,8 +65,8 @@ def query_lithuanian_verb_conjugations(
     if lemma and lemma.pos_type.lower() == "verb":
         lithuanian_verb = get_translation(session, lemma, "lt")
         if lithuanian_verb:
-            # Try principal parts from lt.jsonl release data first
-            release_parts = get_principal_parts(lemma.guid) if lemma.guid else None
+            # Try principal parts from grammar facts DB
+            release_parts = get_principal_parts(session, lemma.guid) if lemma.guid else None
             if release_parts:
                 principal_parts: Tuple[str, str, str] | None = (
                     lithuanian_verb.strip(),
@@ -80,7 +80,7 @@ def query_lithuanian_verb_conjugations(
             if principal_parts:
                 conjugation_forms = conjugate_verb(*principal_parts)
                 if conjugation_forms:
-                    source = "release lt.jsonl" if release_parts else "translation principal parts"
+                    source = "grammar_facts DB" if release_parts else "translation principal parts"
                     linguistic_db.log_query(
                         session,
                         word=lithuanian_verb,
