@@ -20,6 +20,7 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
+from langtools.manifest_grammar import get_manifest_conjugation_config
 from storage.translation_helpers import LANGUAGE_NAMES
 
 # Configure logging
@@ -32,139 +33,6 @@ LANGUAGE_VOICE_NAMES: Dict[str, List[str]] = {
     "zh": ["meiling", "zhiyuan"],
     "fr": ["marie", "pierre"],
     "ko": ["yuna", "minho"],  # Placeholder names for Korean
-}
-
-CONJUGATION_TENSE_METADATA: Dict[str, List[Dict[str, Any]]] = {
-    "lt": [
-        {
-            "id": "past",
-            "label": "Past Tense",
-            "order": 1,
-            "has_persons": True,
-            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
-            "description": "Simple past forms used in everyday speech.",
-        },
-        {
-            "id": "pres",
-            "label": "Present Tense",
-            "order": 2,
-            "has_persons": True,
-            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
-            "description": "Present indicative conjugations.",
-        },
-        {
-            "id": "fut",
-            "label": "Future Tense",
-            "order": 3,
-            "has_persons": True,
-            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
-            "description": "Future tense conjugations.",
-        },
-        {
-            "id": "conditional",
-            "label": "Conditional Mood",
-            "order": 4,
-            "has_persons": True,
-            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
-            "description": "Conditional forms such as 'would eat'.",
-        },
-        {
-            "id": "imperative",
-            "label": "Imperative",
-            "order": 5,
-            "has_persons": True,
-            "person_slots": ["2s", "2p"],
-            "description": "Command forms, usually second person only.",
-        },
-    ],
-    "fr": [
-        {
-            "id": "past",
-            "label": "Passé composé",
-            "order": 1,
-            "has_persons": True,
-            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
-            "description": "Primary spoken past tense (composed form).",
-        },
-        {
-            "id": "pres",
-            "label": "Présent",
-            "order": 2,
-            "has_persons": True,
-            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
-            "description": "Present indicative conjugations.",
-        },
-        {
-            "id": "fut",
-            "label": "Futur simple",
-            "order": 3,
-            "has_persons": True,
-            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
-            "description": "Simple future conjugations.",
-        },
-        {
-            "id": "impf",
-            "label": "Imparfait",
-            "order": 4,
-            "has_persons": True,
-            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
-            "description": "Imperfect past for habitual or ongoing actions.",
-        },
-    ],
-    "es": [
-        {
-            "id": "past",
-            "label": "Past Tense",
-            "order": 1,
-            "has_persons": True,
-            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
-            "description": "Simple past forms used in core conjugation activities.",
-        },
-        {
-            "id": "pres",
-            "label": "Present Tense",
-            "order": 2,
-            "has_persons": True,
-            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
-            "description": "Present indicative conjugations.",
-        },
-        {
-            "id": "fut",
-            "label": "Future Tense",
-            "order": 3,
-            "has_persons": True,
-            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
-            "description": "Future tense conjugations.",
-        },
-    ],
-}
-
-
-CONJUGATION_PERSON_LABELS: Dict[str, Dict[str, str]] = {
-    "lt": {
-        "1s": "aš",
-        "2s": "tu",
-        "3s": "jis/ji",
-        "1p": "mes",
-        "2p": "jūs",
-        "3p": "jie/jos",
-    },
-    "fr": {
-        "1s": "je",
-        "2s": "tu",
-        "3s": "il/elle/on",
-        "1p": "nous",
-        "2p": "vous",
-        "3p": "ils/elles",
-    },
-    "es": {
-        "1s": "yo",
-        "2s": "tú",
-        "3s": "él/ella/usted",
-        "1p": "nosotros",
-        "2p": "vosotros",
-        "3p": "ellos/ellas/ustedes",
-    },
 }
 
 
@@ -300,18 +168,10 @@ def generate_manifest(
         "available_voices": available_voices,
         "default_voice": default_voice,
     }
-    tense_metadata = CONJUGATION_TENSE_METADATA.get(language)
-    person_labels = CONJUGATION_PERSON_LABELS.get(language)
-    if tense_metadata or person_labels:
-        conjugation_config: Dict[str, Any] = {}
-        if tense_metadata:
-            conjugation_config["tenses"] = tense_metadata
-        if person_labels:
-            conjugation_config["person_labels"] = person_labels
+    conjugation_manifest_config = get_manifest_conjugation_config(language)
+    if conjugation_manifest_config:
         manifest["config"]["grammar"] = {
-            "conjugation": {
-                **conjugation_config,
-            }
+            "conjugation": conjugation_manifest_config,
         }
     manifest["word_files"] = []
     manifest["sentence_files"] = []
