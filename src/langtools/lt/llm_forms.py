@@ -11,6 +11,7 @@ from clients.unified_client import UnifiedLLMClient
 from langtools.form_registry import FORM_SPECS
 from langtools.llm_forms_base import query_forms
 from langtools.lt.conjugation import conjugate_verb
+from langtools.lt.principal_parts import get_principal_parts
 from sqlalchemy.orm import Session
 from storage import database as linguistic_db
 from storage.models.enums import GrammaticalForm
@@ -64,10 +65,22 @@ def query_lithuanian_verb_conjugations(
     if lemma and lemma.pos_type.lower() == "verb":
         lithuanian_verb = get_translation(session, lemma, "lt")
         if lithuanian_verb:
-            principal_parts = _parse_principal_parts(lithuanian_verb)
+            # Try principal parts from lt.jsonl release data first
+            release_parts = get_principal_parts(lemma.guid) if lemma.guid else None
+            if release_parts:
+                principal_parts: Tuple[str, str, str] | None = (
+                    lithuanian_verb.strip(),
+                    release_parts[0],
+                    release_parts[1],
+                )
+            else:
+                # Fall back to parsing principal parts from the translation string
+                principal_parts = _parse_principal_parts(lithuanian_verb)
+
             if principal_parts:
                 conjugation_forms = conjugate_verb(*principal_parts)
                 if conjugation_forms:
+                    source = "release lt.jsonl" if release_parts else "translation principal parts"
                     linguistic_db.log_query(
                         session,
                         word=lithuanian_verb,
@@ -76,7 +89,7 @@ def query_lithuanian_verb_conjugations(
                         response=json.dumps(
                             {
                                 "forms": conjugation_forms,
-                                "notes": "mechanical from translation principal parts",
+                                "notes": f"mechanical from {source}",
                                 "mechanical": True,
                             }
                         ),
