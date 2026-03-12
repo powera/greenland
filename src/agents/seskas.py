@@ -24,7 +24,7 @@ from storage.backend.config import DataSourceConfig
 from words.verb_forms import build_verb_forms_prompt
 
 LOGGER = logging.getLogger(__name__)
-DEFAULT_MODEL_PATHS = ["qwen3-4b-lms", "phi-4-lms", "gemma-3-12b-lms"]
+DEFAULT_MODEL_PATHS = ["qwen3.5-9b-lms", "phi-4-lms", "gemma-3-12b-lms"]
 DEFAULT_OUTPUT_FILENAME = "generated_conjugations.py"
 
 
@@ -254,7 +254,7 @@ def build_parser() -> argparse.ArgumentParser:
         nargs="+",
         default=DEFAULT_MODEL_PATHS,
         help=(
-            "Model codenames to query in sequence (default: qwen3-4b-lms phi-4-lms "
+            "Model codenames to query in sequence (default: qwen3.5-9b-lms phi-4-lms "
             "gemma-3-12b-lms). These should match benchmarks/schema/create_models.py "
             "entries so UnifiedLLMClient can resolve LMStudio model_path values."
         ),
