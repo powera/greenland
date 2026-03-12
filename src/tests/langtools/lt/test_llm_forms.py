@@ -35,7 +35,7 @@ class TestLithuanianMechanicalLlmForms(unittest.TestCase):
         )
 
     def test_uses_mechanical_conjugation(self) -> None:
-        lemma = SimpleNamespace(id=1, pos_type="verb", lemma_text="to work")
+        lemma = SimpleNamespace(id=1, pos_type="verb", lemma_text="to work", guid=None)
         client = cast(Any, SimpleNamespace(default_model="fake-model"))
 
         with (

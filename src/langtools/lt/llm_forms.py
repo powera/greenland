@@ -66,7 +66,8 @@ def query_lithuanian_verb_conjugations(
         lithuanian_verb = get_translation(session, lemma, "lt")
         if lithuanian_verb:
             # Try principal parts from grammar facts DB
-            release_parts = get_principal_parts(session, lemma.guid) if lemma.guid else None
+            guid = getattr(lemma, "guid", None)
+            release_parts = get_principal_parts(session, guid) if guid else None
             if release_parts:
                 principal_parts: Tuple[str, str, str] | None = (
                     lithuanian_verb.strip(),
