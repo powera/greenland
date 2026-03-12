@@ -172,25 +172,58 @@ fi
 echo ""
 
 cleanup() {
+    # Prevent re-entrant cleanup (EXIT trap can run after INT/TERM trap)
+    if [[ "${SHUTDOWN_IN_PROGRESS:-0}" -eq 1 ]]; then
+        return
+    fi
+    SHUTDOWN_IN_PROGRESS=1
+
     echo ""
     echo "Shutting down Barsukas..."
 
-    # Stop the unified server if it's running
+    # Stop the unified server process group if it's running.
+    # Using a process group ensures child processes are terminated too.
     if [[ -n "$SERVER_PID" ]] && kill -0 "$SERVER_PID" 2>/dev/null; then
-        echo "Stopping Barsukas server (pid $SERVER_PID)"
-        kill -TERM "$SERVER_PID" 2>/dev/null
-        wait "$SERVER_PID" 2>/dev/null
+        local server_pgid="${SERVER_PGID:-$SERVER_PID}"
+        echo "Stopping Barsukas server process group (pgid $server_pgid)"
+
+        # Ask for graceful shutdown first
+        kill -TERM "-$server_pgid" 2>/dev/null || true
+
+        # Give the process group a moment to shut down cleanly
+        for _ in {1..20}; do
+            if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+                break
+            fi
+            sleep 0.1
+        done
+
+        # Escalate if still alive
+        if kill -0 "$SERVER_PID" 2>/dev/null; then
+            echo "Server still running; force-killing process group (pgid $server_pgid)"
+            kill -KILL "-$server_pgid" 2>/dev/null || true
+        fi
+
+        wait "$SERVER_PID" 2>/dev/null || true
     fi
 }
 
-trap cleanup EXIT INT TERM
+handle_signal() {
+    cleanup
+    exit 130
+}
+
+trap handle_signal INT TERM
+trap cleanup EXIT
 
 # Run the unified app (Flask + Worker in same process) in a loop for auto-restart
 # Exit code 0 = normal shutdown, don't restart
 # Exit code 42 = restart requested, restart immediately
 while true; do
-    python unified_app.py $HOST_ARGS --port "$PORT" $PERSONA_ARGS "$@" &
+    # Start in a dedicated process group so Ctrl+C cleanup can stop all children.
+    setsid python unified_app.py $HOST_ARGS --port "$PORT" $PERSONA_ARGS "$@" &
     SERVER_PID=$!
+    SERVER_PGID=$SERVER_PID
     wait "$SERVER_PID"
     EXIT_CODE=$?
 
