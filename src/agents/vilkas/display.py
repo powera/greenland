@@ -20,7 +20,7 @@ def print_fix_confirmation(lang_name: str, form_type: str, needs_fix: int, args:
     if args.limit:
         print(f"Limit: {args.limit}")
     print(f"Model: {args.model}")
-    if args.language == "lt":
+    if args.languages and "lt" in args.languages:
         print(f"Source: {args.source}")
     print(f"Throttle: {args.throttle}s between calls")
     print(f"{'='*60}")

@@ -11,6 +11,7 @@ from clients.unified_client import UnifiedLLMClient
 from langtools.form_registry import FORM_SPECS
 from langtools.llm_forms_base import query_forms
 from langtools.lt.conjugation import conjugate_verb
+from langtools.lt.principal_parts import get_principal_parts
 from sqlalchemy.orm import Session
 from storage import database as linguistic_db
 from storage.models.enums import GrammaticalForm
@@ -64,10 +65,48 @@ def query_lithuanian_verb_conjugations(
     if lemma and lemma.pos_type.lower() == "verb":
         lithuanian_verb = get_translation(session, lemma, "lt")
         if lithuanian_verb:
-            principal_parts = _parse_principal_parts(lithuanian_verb)
+            # Try principal parts from grammar facts DB
+            guid = getattr(lemma, "guid", None)
+            release_parts = get_principal_parts(session, guid) if guid else None
+            if release_parts:
+                # Extract clean infinitive from translation string.
+                # Legacy formats like "dirbti, dirba, dirbo" or
+                # "dirbti (dirba, dirbo)" need parsing; a plain single-word
+                # translation like "dirbti" is used directly.
+                # If the translation is complex (multi-synonym, annotated)
+                # and can't be parsed, treat as a mechanical-conjugation
+                # miss and fall through to LLM.
+                parsed = _parse_principal_parts(lithuanian_verb)
+                clean_verb = lithuanian_verb.strip()
+                if parsed:
+                    infinitive = parsed[0]
+                elif " " not in clean_verb and "," not in clean_verb:
+                    # Single-word translation is a clean infinitive
+                    infinitive = clean_verb
+                else:
+                    # Can't extract a clean infinitive — skip mechanical
+                    infinitive = None
+
+                if infinitive is not None:
+                    principal_parts: Tuple[str, str, str] | None = (
+                        infinitive,
+                        release_parts[0],
+                        release_parts[1],
+                    )
+                else:
+                    principal_parts = None
+            else:
+                # Fall back to parsing principal parts from the translation string
+                principal_parts = _parse_principal_parts(lithuanian_verb)
+
             if principal_parts:
-                conjugation_forms = conjugate_verb(*principal_parts)
+                conjugation_forms = conjugate_verb(
+                    infinitive=principal_parts[0],
+                    present_3=principal_parts[1],
+                    past_3=principal_parts[2],
+                )
                 if conjugation_forms:
+                    source = "grammar_facts DB" if release_parts else "translation principal parts"
                     linguistic_db.log_query(
                         session,
                         word=lithuanian_verb,
@@ -76,7 +115,7 @@ def query_lithuanian_verb_conjugations(
                         response=json.dumps(
                             {
                                 "forms": conjugation_forms,
-                                "notes": "mechanical from translation principal parts",
+                                "notes": f"mechanical from {source}",
                                 "mechanical": True,
                             }
                         ),

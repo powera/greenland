@@ -35,7 +35,7 @@ class TestLithuanianMechanicalLlmForms(unittest.TestCase):
         )
 
     def test_uses_mechanical_conjugation(self) -> None:
-        lemma = SimpleNamespace(id=1, pos_type="verb", lemma_text="to work")
+        lemma = SimpleNamespace(id=1, pos_type="verb", lemma_text="to work", guid=None)
         client = cast(Any, SimpleNamespace(default_model="fake-model"))
 
         with (
@@ -51,3 +51,52 @@ class TestLithuanianMechanicalLlmForms(unittest.TestCase):
         self.assertEqual(forms["1s_future"], "dirbsiu")
         mock_query_forms.assert_not_called()
         mock_log_query.assert_called_once()
+
+    def test_db_principal_parts_with_legacy_translation(self) -> None:
+        """When DB grammar facts exist but translation is in legacy format,
+        the infinitive should be extracted cleanly (not the whole string)."""
+        lemma = SimpleNamespace(id=1, pos_type="verb", lemma_text="to work", guid="V02_001")
+        client = cast(Any, SimpleNamespace(default_model="fake-model"))
+
+        with (
+            patch(
+                "langtools.lt.llm_forms.get_translation",
+                return_value="dirbti, dirba, dirbo",
+            ),
+            patch(
+                "langtools.lt.llm_forms.get_principal_parts",
+                return_value=("dirba", "dirbo"),
+            ),
+            patch("langtools.lt.llm_forms.query_forms") as mock_query_forms,
+            patch("langtools.lt.llm_forms.linguistic_db.log_query"),
+        ):
+            get_session = cast(Callable[[], Any], lambda: _FakeSession(lemma))
+            forms, ok = query_lithuanian_verb_conjugations(client, 1, get_session)
+
+        self.assertTrue(ok)
+        # The infinitive should be "dirbti", not "dirbti, dirba, dirbo"
+        self.assertEqual(forms["1s_future"], "dirbsiu")
+        self.assertEqual(forms["1s_present"], "dirbu")
+        mock_query_forms.assert_not_called()
+
+    def test_db_principal_parts_with_clean_translation(self) -> None:
+        """When DB grammar facts exist and translation is just the infinitive."""
+        lemma = SimpleNamespace(id=1, pos_type="verb", lemma_text="to work", guid="V02_001")
+        client = cast(Any, SimpleNamespace(default_model="fake-model"))
+
+        with (
+            patch("langtools.lt.llm_forms.get_translation", return_value="dirbti"),
+            patch(
+                "langtools.lt.llm_forms.get_principal_parts",
+                return_value=("dirba", "dirbo"),
+            ),
+            patch("langtools.lt.llm_forms.query_forms") as mock_query_forms,
+            patch("langtools.lt.llm_forms.linguistic_db.log_query"),
+        ):
+            get_session = cast(Callable[[], Any], lambda: _FakeSession(lemma))
+            forms, ok = query_lithuanian_verb_conjugations(client, 1, get_session)
+
+        self.assertTrue(ok)
+        self.assertEqual(forms["1s_future"], "dirbsiu")
+        self.assertEqual(forms["1s_present"], "dirbu")
+        mock_query_forms.assert_not_called()

@@ -25,6 +25,7 @@ if __name__ == "__main__":
 import constants
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
+from storage.config.grammar_facts import RELEASE_GRAMMAR_FACT_TYPES
 
 
 def export_sqlalchemy_to_jsonl(source_config: DataSourceConfig, jsonl_dir: str) -> None:
@@ -529,21 +530,20 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                         "phonetic": form.phonetic_pronunciation,
                     }
 
-                # Group grammar facts by language
+                # Group grammar facts by language (only whitelisted types)
                 facts_by_lang: Dict[str, List[Dict[str, Any]]] = {}
                 for fact in lemma.grammar_facts:
                     lang = fact.language_code
-                    if lang not in facts_by_lang:
-                        facts_by_lang[lang] = []
-                    facts_by_lang[lang].append(
-                        {
-                            "language_code": fact.language_code,
-                            "fact_type": fact.fact_type,
-                            "fact_value": fact.fact_value,
-                            "notes": fact.notes,
-                            "verified": fact.verified,
-                        }
-                    )
+                    allowed_types = RELEASE_GRAMMAR_FACT_TYPES.get(lang)
+                    if allowed_types and fact.fact_type in allowed_types:
+                        if lang not in facts_by_lang:
+                            facts_by_lang[lang] = []
+                        facts_by_lang[lang].append(
+                            {
+                                "fact_type": fact.fact_type,
+                                "fact_value": fact.fact_value,
+                            }
+                        )
 
                 # Build per-language records for release languages that have data
                 langs_with_data = (
