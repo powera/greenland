@@ -140,6 +140,34 @@ CONJUGATION_TENSE_METADATA: Dict[str, List[Dict[str, Any]]] = {
 }
 
 
+CONJUGATION_PERSON_LABELS: Dict[str, Dict[str, str]] = {
+    "lt": {
+        "1s": "aš",
+        "2s": "tu",
+        "3s": "jis/ji",
+        "1p": "mes",
+        "2p": "jūs",
+        "3p": "jie/jos",
+    },
+    "fr": {
+        "1s": "je",
+        "2s": "tu",
+        "3s": "il/elle/on",
+        "1p": "nous",
+        "2p": "vous",
+        "3p": "ils/elles",
+    },
+    "es": {
+        "1s": "yo",
+        "2s": "tú",
+        "3s": "él/ella/usted",
+        "1p": "nosotros",
+        "2p": "vosotros",
+        "3p": "ellos/ellas/ustedes",
+    },
+}
+
+
 def calculate_file_md5(filepath: str) -> str:
     """Calculate MD5 hash of a file's contents."""
     with open(filepath, "rb") as f:
@@ -273,10 +301,16 @@ def generate_manifest(
         "default_voice": default_voice,
     }
     tense_metadata = CONJUGATION_TENSE_METADATA.get(language)
-    if tense_metadata:
+    person_labels = CONJUGATION_PERSON_LABELS.get(language)
+    if tense_metadata or person_labels:
+        conjugation_config: Dict[str, Any] = {}
+        if tense_metadata:
+            conjugation_config["tenses"] = tense_metadata
+        if person_labels:
+            conjugation_config["person_labels"] = person_labels
         manifest["config"]["grammar"] = {
             "conjugation": {
-                "tenses": tense_metadata,
+                **conjugation_config,
             }
         }
     manifest["word_files"] = []
