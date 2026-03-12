@@ -34,6 +34,111 @@ LANGUAGE_VOICE_NAMES: Dict[str, List[str]] = {
     "ko": ["yuna", "minho"],  # Placeholder names for Korean
 }
 
+CONJUGATION_TENSE_METADATA: Dict[str, List[Dict[str, Any]]] = {
+    "lt": [
+        {
+            "id": "past",
+            "label": "Past Tense",
+            "order": 1,
+            "has_persons": True,
+            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
+            "description": "Simple past forms used in everyday speech.",
+        },
+        {
+            "id": "pres",
+            "label": "Present Tense",
+            "order": 2,
+            "has_persons": True,
+            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
+            "description": "Present indicative conjugations.",
+        },
+        {
+            "id": "fut",
+            "label": "Future Tense",
+            "order": 3,
+            "has_persons": True,
+            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
+            "description": "Future tense conjugations.",
+        },
+        {
+            "id": "conditional",
+            "label": "Conditional Mood",
+            "order": 4,
+            "has_persons": True,
+            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
+            "description": "Conditional forms such as 'would eat'.",
+        },
+        {
+            "id": "imperative",
+            "label": "Imperative",
+            "order": 5,
+            "has_persons": True,
+            "person_slots": ["2s", "2p"],
+            "description": "Command forms, usually second person only.",
+        },
+    ],
+    "fr": [
+        {
+            "id": "past",
+            "label": "Passé composé",
+            "order": 1,
+            "has_persons": True,
+            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
+            "description": "Primary spoken past tense (composed form).",
+        },
+        {
+            "id": "pres",
+            "label": "Présent",
+            "order": 2,
+            "has_persons": True,
+            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
+            "description": "Present indicative conjugations.",
+        },
+        {
+            "id": "fut",
+            "label": "Futur simple",
+            "order": 3,
+            "has_persons": True,
+            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
+            "description": "Simple future conjugations.",
+        },
+        {
+            "id": "impf",
+            "label": "Imparfait",
+            "order": 4,
+            "has_persons": True,
+            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
+            "description": "Imperfect past for habitual or ongoing actions.",
+        },
+    ],
+    "es": [
+        {
+            "id": "past",
+            "label": "Past Tense",
+            "order": 1,
+            "has_persons": True,
+            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
+            "description": "Simple past forms used in core conjugation activities.",
+        },
+        {
+            "id": "pres",
+            "label": "Present Tense",
+            "order": 2,
+            "has_persons": True,
+            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
+            "description": "Present indicative conjugations.",
+        },
+        {
+            "id": "fut",
+            "label": "Future Tense",
+            "order": 3,
+            "has_persons": True,
+            "person_slots": ["1s", "2s", "3s", "1p", "2p", "3p"],
+            "description": "Future tense conjugations.",
+        },
+    ],
+}
+
 
 def calculate_file_md5(filepath: str) -> str:
     """Calculate MD5 hash of a file's contents."""
@@ -167,6 +272,13 @@ def generate_manifest(
         "available_voices": available_voices,
         "default_voice": default_voice,
     }
+    tense_metadata = CONJUGATION_TENSE_METADATA.get(language)
+    if tense_metadata:
+        manifest["config"]["grammar"] = {
+            "conjugation": {
+                "tenses": tense_metadata,
+            }
+        }
     manifest["word_files"] = []
     manifest["sentence_files"] = []
     manifest["auxiliary_files"] = []
