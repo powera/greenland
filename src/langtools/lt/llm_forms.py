@@ -69,8 +69,13 @@ def query_lithuanian_verb_conjugations(
             guid = getattr(lemma, "guid", None)
             release_parts = get_principal_parts(session, guid) if guid else None
             if release_parts:
+                # Extract clean infinitive: the translation string may be
+                # in legacy format like "dirbti, dirba, dirbo" or
+                # "dirbti (dirba, dirbo)" — parse out just the infinitive.
+                parsed = _parse_principal_parts(lithuanian_verb)
+                infinitive = parsed[0] if parsed else lithuanian_verb.strip()
                 principal_parts: Tuple[str, str, str] | None = (
-                    lithuanian_verb.strip(),
+                    infinitive,
                     release_parts[0],
                     release_parts[1],
                 )
@@ -79,7 +84,11 @@ def query_lithuanian_verb_conjugations(
                 principal_parts = _parse_principal_parts(lithuanian_verb)
 
             if principal_parts:
-                conjugation_forms = conjugate_verb(*principal_parts)
+                conjugation_forms = conjugate_verb(
+                    infinitive=principal_parts[0],
+                    present_3=principal_parts[1],
+                    past_3=principal_parts[2],
+                )
                 if conjugation_forms:
                     source = "grammar_facts DB" if release_parts else "translation principal parts"
                     linguistic_db.log_query(

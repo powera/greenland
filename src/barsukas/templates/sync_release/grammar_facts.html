@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Sync Grammar Facts{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_release.index') }}">Sync</a></li>
+                    <li class="breadcrumb-item active">Grammar Facts</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-journal-text"></i> Sync Grammar Facts</h2>
+            <p class="text-muted">
+                Existing words with missing or different grammar facts in the database.
+                Select items to import from release files.
+            </p>
+        </div>
+    </div>
+
+    {% if not differences %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i> All grammar facts are in sync!
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-check"></i> Differences: {{ differences|length }} lemma(s)</span>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleAll(true)">
+                    Select All
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">
+                    Deselect All
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('sync_release.apply_grammar_facts') }}">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 40px;">
+                                    <input type="checkbox" id="select-all-cb" onchange="toggleAll(this.checked)">
+                                </th>
+                                <th>GUID</th>
+                                <th>Word</th>
+                                <th>Category</th>
+                                <th>Fact Changes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for diff in differences %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="guid-cb" name="selected_guids" value="{{ diff.guid }}">
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('lemmas.view_lemma', lemma_id=diff.lemma_id) }}" target="_blank">
+                                        <code>{{ diff.guid }}</code>
+                                    </a>
+                                </td>
+                                <td><strong>{{ diff.lemma_text }}</strong></td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ diff.pos_type }}</span>
+                                </td>
+                                <td>
+                                    {% for fd in diff.fact_diffs %}
+                                    <div class="mb-1">
+                                        <code>{{ fd.language_code }}:{{ fd.fact_type }}</code>
+                                        {% if fd.db_value %}
+                                        <span class="badge bg-warning text-dark">{{ fd.db_value }}</span>
+                                        <i class="bi bi-arrow-right"></i>
+                                        {% else %}
+                                        <span class="badge bg-light text-dark">missing</span>
+                                        <i class="bi bi-arrow-right"></i>
+                                        {% endif %}
+                                        <span class="badge bg-primary">{{ fd.release_value }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <a href="{{ url_for('sync_release.index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Apply Selected
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleAll(checked) {
+    document.querySelectorAll('.guid-cb').forEach(function(cb) {
+        cb.checked = checked;
+    });
+    document.getElementById('select-all-cb').checked = checked;
+}
+</script>
+{% endblock %}

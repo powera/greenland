@@ -233,6 +233,10 @@ def index() -> ResponseReturnValue:
         release_lemmas, sec_translations, g.db
     )
 
+    # Count grammar fact differences for existing GUIDs
+    release_grammar = _load_release_grammar_facts(release_dir)
+    grammar_fact_diffs = len(_find_grammar_fact_differences(release_grammar, g.db))
+
     counts = {
         "release_total": len(release_lemmas),
         "db_total": len(db_guids),
@@ -242,6 +246,7 @@ def index() -> ResponseReturnValue:
         "changes": lemma_text_changes,
         "translations": translation_diffs,
         "secondary_translations": secondary_translation_diffs,
+        "grammar_facts": grammar_fact_diffs,
     }
 
     return render_template(
@@ -625,6 +630,212 @@ def apply_additions() -> ResponseReturnValue:
         flash(f"Errors: {error_count}", "warning")
 
     return redirect(url_for("sync_release.additions"))
+
+
+# =============================================================================
+# Grammar Facts (upsert grammar facts for existing GUIDs)
+# =============================================================================
+
+
+def _find_grammar_fact_differences(
+    release_grammar_facts: Dict[str, List[Dict[str, str]]], db_session: Any
+) -> List[Dict[str, Any]]:
+    """Find existing GUIDs where grammar facts differ between release and DB.
+
+    Returns list of dicts with guid, lemma_id, lemma_text, and per-fact diffs.
+    """
+    differences: List[Dict[str, Any]] = []
+
+    # Only look at GUIDs that exist in DB
+    guids_with_facts = list(release_grammar_facts.keys())
+    if not guids_with_facts:
+        return differences
+
+    batch_size = 500
+    for i in range(0, len(guids_with_facts), batch_size):
+        batch = guids_with_facts[i : i + batch_size]
+        db_lemmas = db_session.query(Lemma).filter(Lemma.guid.in_(batch)).all()
+
+        for db_lemma in db_lemmas:
+            release_facts = release_grammar_facts.get(db_lemma.guid, [])
+            fact_diffs: List[Dict[str, Optional[str]]] = []
+
+            for rel_fact in release_facts:
+                lang_code = rel_fact["language_code"]
+                fact_type = rel_fact["fact_type"]
+                release_value = rel_fact["fact_value"]
+
+                # Look up current DB value
+                db_fact = (
+                    db_session.query(GrammarFact)
+                    .filter(
+                        GrammarFact.lemma_id == db_lemma.id,
+                        GrammarFact.language_code == lang_code,
+                        GrammarFact.fact_type == fact_type,
+                    )
+                    .first()
+                )
+                db_value = db_fact.fact_value if db_fact else None
+
+                if db_value != release_value:
+                    fact_diffs.append(
+                        {
+                            "language_code": lang_code,
+                            "fact_type": fact_type,
+                            "release_value": release_value,
+                            "db_value": db_value,
+                        }
+                    )
+
+            if fact_diffs:
+                differences.append(
+                    {
+                        "guid": db_lemma.guid,
+                        "lemma_id": db_lemma.id,
+                        "lemma_text": db_lemma.lemma_text,
+                        "pos_type": db_lemma.pos_type,
+                        "fact_diffs": fact_diffs,
+                    }
+                )
+
+    differences.sort(key=lambda x: x["guid"])
+    return differences
+
+
+@bp.route("/grammar-facts")
+def grammar_facts() -> ResponseReturnValue:
+    """Display grammar fact differences for existing GUIDs."""
+    release_dir = _get_release_dir()
+
+    if not release_dir.exists():
+        flash(f"Release directory not found: {release_dir}", "error")
+        return redirect(url_for("sync_release.index"))
+
+    release_grammar = _load_release_grammar_facts(release_dir)
+    if not release_grammar:
+        flash("No grammar facts found in release directory", "warning")
+        return redirect(url_for("sync_release.index"))
+
+    differences = _find_grammar_fact_differences(release_grammar, g.db)
+
+    return render_template(
+        "sync_release/grammar_facts.html",
+        differences=differences,
+        release_dir=str(release_dir),
+    )
+
+
+@bp.route("/grammar-facts/apply", methods=["POST"])
+def apply_grammar_facts() -> ResponseReturnValue:
+    """Upsert selected grammar facts from release into DB."""
+    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
+    if app.config.get("READONLY", False):
+        flash("Database is in read-only mode", "error")
+        return redirect(url_for("sync_release.grammar_facts"))
+
+    selected_guids = request.form.getlist("selected_guids")
+    if not selected_guids:
+        flash("No lemmas selected for grammar fact sync", "warning")
+        return redirect(url_for("sync_release.grammar_facts"))
+
+    release_dir = _get_release_dir()
+    release_grammar = _load_release_grammar_facts(release_dir)
+
+    updated_count = 0
+    added_count = 0
+    error_count = 0
+
+    for guid in selected_guids:
+        release_facts = release_grammar.get(guid, [])
+        if not release_facts:
+            continue
+
+        db_lemma = g.db.query(Lemma).filter(Lemma.guid == guid).first()
+        if not db_lemma:
+            logger.warning(f"Lemma not found for GUID: {guid}")
+            error_count += 1
+            continue
+
+        try:
+            guid_updated = 0
+            guid_added = 0
+            for rel_fact in release_facts:
+                lang_code = rel_fact["language_code"]
+                fact_type = rel_fact["fact_type"]
+                release_value = rel_fact["fact_value"]
+
+                existing = (
+                    g.db.query(GrammarFact)
+                    .filter(
+                        GrammarFact.lemma_id == db_lemma.id,
+                        GrammarFact.language_code == lang_code,
+                        GrammarFact.fact_type == fact_type,
+                    )
+                    .first()
+                )
+
+                if existing:
+                    if existing.fact_value != release_value:
+                        old_value = existing.fact_value
+                        existing.fact_value = release_value
+                        guid_updated += 1
+                        logger.info(
+                            f"Updated grammar fact for '{db_lemma.lemma_text}' "
+                            f"({guid}): {fact_type} {old_value} -> {release_value}"
+                        )
+                else:
+                    new_fact = GrammarFact(
+                        lemma_id=db_lemma.id,
+                        language_code=lang_code,
+                        fact_type=fact_type,
+                        fact_value=release_value,
+                    )
+                    g.db.add(new_fact)
+                    guid_added += 1
+                    logger.info(
+                        f"Added grammar fact for '{db_lemma.lemma_text}' "
+                        f"({guid}): {fact_type}={release_value}"
+                    )
+
+            updated_count += guid_updated
+            added_count += guid_added
+
+            log_operation(
+                session=g.db,
+                source="sync-release",
+                operation_type="grammar_fact_sync",
+                lemma_id=db_lemma.id,
+                details={
+                    "guid": guid,
+                    "lemma_text": db_lemma.lemma_text,
+                    "facts_updated": guid_updated,
+                    "facts_added": guid_added,
+                },
+            )
+
+        except Exception as e:
+            logger.error(f"Error syncing grammar facts for GUID {guid}: {e}")
+            error_count += 1
+
+    total_changes = updated_count + added_count
+    if total_changes > 0:
+        try:
+            g.db.commit()
+            msg_parts = []
+            if added_count > 0:
+                msg_parts.append(f"added {added_count}")
+            if updated_count > 0:
+                msg_parts.append(f"updated {updated_count}")
+            flash(f"Grammar facts: {', '.join(msg_parts)}", "success")
+        except Exception as e:
+            g.db.rollback()
+            flash(f"Error committing changes: {e}", "error")
+            logger.error(f"Commit error: {e}")
+
+    if error_count > 0:
+        flash(f"Errors: {error_count}", "warning")
+
+    return redirect(url_for("sync_release.grammar_facts"))
 
 
 # =============================================================================

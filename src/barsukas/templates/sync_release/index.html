@@ -137,6 +137,29 @@
             </div>
         </div>
 
+        <!-- Grammar Facts -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100 {% if counts.grammar_facts > 0 %}border-primary{% endif %}">
+                <div class="card-header">
+                    <i class="bi bi-journal-text text-primary"></i> Grammar Facts
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title {% if counts.grammar_facts > 0 %}text-primary{% else %}text-muted{% endif %}">
+                        {{ counts.grammar_facts }}
+                    </h3>
+                    <p class="card-text text-muted">
+                        Missing or different grammar facts for existing words
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('sync_release.grammar_facts') }}"
+                       class="btn btn-sm {% if counts.grammar_facts > 0 %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-arrow-right"></i> View &amp; Sync
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- Translations -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.translations > 0 %}border-secondary{% endif %}">
