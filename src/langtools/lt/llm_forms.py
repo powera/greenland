@@ -69,16 +69,32 @@ def query_lithuanian_verb_conjugations(
             guid = getattr(lemma, "guid", None)
             release_parts = get_principal_parts(session, guid) if guid else None
             if release_parts:
-                # Extract clean infinitive: the translation string may be
-                # in legacy format like "dirbti, dirba, dirbo" or
-                # "dirbti (dirba, dirbo)" — parse out just the infinitive.
+                # Extract clean infinitive from translation string.
+                # Legacy formats like "dirbti, dirba, dirbo" or
+                # "dirbti (dirba, dirbo)" need parsing; a plain single-word
+                # translation like "dirbti" is used directly.
+                # If the translation is complex (multi-synonym, annotated)
+                # and can't be parsed, treat as a mechanical-conjugation
+                # miss and fall through to LLM.
                 parsed = _parse_principal_parts(lithuanian_verb)
-                infinitive = parsed[0] if parsed else lithuanian_verb.strip()
-                principal_parts: Tuple[str, str, str] | None = (
-                    infinitive,
-                    release_parts[0],
-                    release_parts[1],
-                )
+                clean_verb = lithuanian_verb.strip()
+                if parsed:
+                    infinitive = parsed[0]
+                elif " " not in clean_verb and "," not in clean_verb:
+                    # Single-word translation is a clean infinitive
+                    infinitive = clean_verb
+                else:
+                    # Can't extract a clean infinitive — skip mechanical
+                    infinitive = None
+
+                if infinitive is not None:
+                    principal_parts: Tuple[str, str, str] | None = (
+                        infinitive,
+                        release_parts[0],
+                        release_parts[1],
+                    )
+                else:
+                    principal_parts = None
             else:
                 # Fall back to parsing principal parts from the translation string
                 principal_parts = _parse_principal_parts(lithuanian_verb)

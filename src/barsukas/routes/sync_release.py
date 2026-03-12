@@ -656,6 +656,16 @@ def _find_grammar_fact_differences(
         batch = guids_with_facts[i : i + batch_size]
         db_lemmas = db_session.query(Lemma).filter(Lemma.guid.in_(batch)).all()
 
+        # Batch-load all grammar facts for these lemmas to avoid N+1 queries
+        lemma_ids = [db_lemma.id for db_lemma in db_lemmas]
+        all_db_facts = (
+            db_session.query(GrammarFact).filter(GrammarFact.lemma_id.in_(lemma_ids)).all()
+        )
+        # Index by (lemma_id, language_code, fact_type) for O(1) lookup
+        db_facts_index: Dict[Tuple[int, str, str], str] = {
+            (f.lemma_id, f.language_code, f.fact_type): f.fact_value for f in all_db_facts
+        }
+
         for db_lemma in db_lemmas:
             release_facts = release_grammar_facts.get(db_lemma.guid, [])
             fact_diffs: List[Dict[str, Optional[str]]] = []
@@ -665,17 +675,7 @@ def _find_grammar_fact_differences(
                 fact_type = rel_fact["fact_type"]
                 release_value = rel_fact["fact_value"]
 
-                # Look up current DB value
-                db_fact = (
-                    db_session.query(GrammarFact)
-                    .filter(
-                        GrammarFact.lemma_id == db_lemma.id,
-                        GrammarFact.language_code == lang_code,
-                        GrammarFact.fact_type == fact_type,
-                    )
-                    .first()
-                )
-                db_value = db_fact.fact_value if db_fact else None
+                db_value = db_facts_index.get((db_lemma.id, lang_code, fact_type))
 
                 if db_value != release_value:
                     fact_diffs.append(
