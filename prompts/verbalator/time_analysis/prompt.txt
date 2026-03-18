@@ -1,0 +1,6 @@
+Analyze the following text and estimate its temporal context — when it was
+likely written and/or when the events described took place.
+
+Text: "{text}"
+
+Identify temporal clues and provide your estimated date range with confidence level.

@@ -1,0 +1,11 @@
+Create a sentence decomposition JSON for ONE language only.
+Text to analyze ({source_language}): "{source_text}"
+Target language for decomposition: {target_language}
+
+{candidate_lemmas_section}
+
+Return schema requirements:
+- Return exactly one entry in languages[] and set language_code to '{target_language}'.
+- The languages[] breakdown must analyze tokens from the text in the target language.
+- Each words[] item must include: position, role, english_gloss, surface_form, grammatical_form, lemma_guid, lemma.
+- Use lemma_guid=NONE for function words without a selected candidate lemma.
