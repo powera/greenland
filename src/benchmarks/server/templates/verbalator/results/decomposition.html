@@ -1,0 +1,29 @@
+{% if result and result.languages and result.languages[0] %}
+{% set lang = result.languages[0] %}
+<p><strong>Language:</strong> {{ lang.language_code }}
+   &mdash; <strong>Translation:</strong> {{ lang.translation }}
+   &mdash; <strong>Words:</strong> {{ lang.word_count }}</p>
+<table class="result-table">
+  <thead>
+    <tr>
+      <th>#</th><th>Surface Form</th><th>Lemma</th><th>Role</th>
+      <th>English Gloss</th><th>Grammatical Form</th><th>GUID</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for w in lang.words %}
+    <tr>
+      <td>{{ w.position }}</td>
+      <td>{{ w.surface_form }}</td>
+      <td>{{ w.lemma }}</td>
+      <td>{{ w.role }}</td>
+      <td>{{ w.english_gloss }}</td>
+      <td><code>{{ w.grammatical_form }}</code></td>
+      <td><code>{{ w.lemma_guid }}</code></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<em>No decomposition data returned.</em>
+{% endif %}

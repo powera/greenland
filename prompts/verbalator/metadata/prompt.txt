@@ -1,0 +1,5 @@
+Analyze the following text and extract its metadata properties.
+
+Text: "{text}"
+
+Provide a structured analysis of the text's linguistic and stylistic metadata.

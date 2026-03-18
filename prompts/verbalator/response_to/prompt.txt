@@ -1,0 +1,9 @@
+Analyze whether the following text is a response to the provided context.
+
+Context (preceding text/conversation):
+"{context}"
+
+Text to analyze:
+"{text}"
+
+Determine the relationship between the text and its context.

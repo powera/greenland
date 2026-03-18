@@ -2,6 +2,8 @@
 
 """Verbalator routes - custom LLM query interface."""
 
+import json
+import logging
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -16,6 +18,10 @@ import util.flesch_kincaid as fk
 from benchmarks.datastore.common import Model
 from benchmarks.verbalator import common, prompt_builder, samples
 from clients.unified_client import UnifiedLLMClient as UnifiedClient
+import verbalator.actions  # noqa: F401 – triggers action registration
+from verbalator.action_registry import get_action, list_actions
+
+logger = logging.getLogger(__name__)
 
 bp = Blueprint(
     "verbalator",
@@ -82,12 +88,14 @@ def _can_start_local_query(model_name: str) -> bool:
 @bp.route("/")
 def index():
     """Show the verbalator query interface."""
+    actions = [a.to_dict() for a in list_actions()]
     return render_template(
         "verbalator/index.html",
         prompts=common.PROMPTS,
         samples=samples.ALL_SAMPLES,
         models=_get_models(),
         default_model=DEFAULT_MODEL,
+        actions=actions,
     )
 
 
@@ -141,4 +149,85 @@ def query():
     except (ValueError, KeyError) as e:
         return jsonify({"error": str(e)}), 400
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+def _resolve_model_path(model_codename: str) -> Tuple[str, Optional[Model]]:
+    """Look up model_path from DB using the posted codename."""
+    db_model = g.bench_db.query(Model).filter(Model.codename == model_codename).first()
+    model_path = db_model.model_path if db_model and db_model.model_path else model_codename
+    return model_path, db_model
+
+
+@bp.route("/action", methods=["POST"])
+def run_action():
+    """Run a verbalator action and return structured JSON results."""
+    try:
+        data = request.get_json()
+        action_name = data.get("action_name")
+        if not action_name:
+            return jsonify({"error": "No action_name provided"}), 400
+
+        action = get_action(action_name)
+        text = data.get("text", "")
+        if not text.strip():
+            return jsonify({"error": "No text provided"}), 400
+
+        context_text: Optional[str] = data.get("context")
+        target_language: Optional[str] = data.get("target_language")
+        model_codename = data.get("model", DEFAULT_MODEL)
+
+        model_path, db_model = _resolve_model_path(model_codename)
+
+        if _is_local_model(db_model) and not _can_start_local_query(model_path):
+            return (
+                jsonify(
+                    {
+                        "error": (
+                            "Local model is currently busy with benchmark or "
+                            "another local-model Verbalator session."
+                        )
+                    }
+                ),
+                409,
+            )
+
+        # Build prompt and schema from the action
+        system_context, prompt = action.build_prompt(
+            text=text,
+            context=context_text,
+            target_language=target_language,
+        )
+        schema = action.build_schema()
+
+        # Call LLM with structured JSON output
+        client = _get_unified_client()
+        response = client.generate_chat(
+            prompt=prompt,
+            model=model_path,
+            json_schema=schema,
+            context=system_context,
+        )
+
+        # Parse result
+        result: Any = response.structured_data or response.response_text
+        if isinstance(result, str):
+            try:
+                result = json.loads(result)
+            except json.JSONDecodeError:
+                return jsonify({"error": "Invalid JSON response from LLM"}), 500
+
+        return jsonify(
+            {
+                "action": action_name,
+                "result": result,
+                "usage": response.usage.to_dict(),
+                "template": action.get_template_name(),
+            }
+        )
+
+    except KeyError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        logger.exception("Error running action %s", data.get("action_name"))
         return jsonify({"error": str(e)}), 500
