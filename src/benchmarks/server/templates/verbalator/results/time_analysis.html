@@ -1,0 +1,20 @@
+{% if result %}
+<table class="result-table">
+  <tbody>
+    <tr><th>Estimated Era</th><td>{{ result.estimated_era }}</td></tr>
+    <tr><th>Date Range</th><td>{{ result.date_range_start }} &ndash; {{ result.date_range_end }}</td></tr>
+    <tr><th>Confidence</th><td>{{ result.confidence }}</td></tr>
+    <tr><th>Reasoning</th><td>{{ result.reasoning }}</td></tr>
+  </tbody>
+</table>
+{% if result.temporal_clues %}
+<h6 class="mt-2">Temporal Clues</h6>
+<ul>
+  {% for c in result.temporal_clues %}
+  <li><strong>{{ c.clue }}</strong>: {{ c.implication }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% else %}
+<em>No time analysis returned.</em>
+{% endif %}

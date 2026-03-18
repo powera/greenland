@@ -1,0 +1,16 @@
+{% if result %}
+<table class="result-table">
+  <tbody>
+    <tr><th>Language</th><td>{{ result.language }}</td></tr>
+    <tr><th>Dialect</th><td>{{ result.dialect }}</td></tr>
+    <tr><th>Register</th><td>{{ result.register }}</td></tr>
+    <tr><th>Formality</th><td>{{ result.formality }}</td></tr>
+    <tr><th>Length Category</th><td>{{ result.estimated_length_category }}</td></tr>
+    <tr><th>Author Type</th><td>{{ result.author_type }}</td></tr>
+    <tr><th>Genre</th><td>{{ result.genre }}</td></tr>
+    <tr><th>Key Topics</th><td>{{ result.key_topics | join(', ') }}</td></tr>
+  </tbody>
+</table>
+{% else %}
+<em>No metadata returned.</em>
+{% endif %}

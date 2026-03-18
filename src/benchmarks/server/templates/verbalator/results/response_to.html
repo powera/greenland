@@ -1,0 +1,20 @@
+{% if result %}
+<table class="result-table">
+  <tbody>
+    <tr><th>Is Response?</th><td>{{ 'Yes' if result.is_response else 'No' }}</td></tr>
+    <tr><th>Responding To</th><td>{{ result.responding_to_summary }}</td></tr>
+    <tr><th>Relationship</th><td>{{ result.relationship_type }}</td></tr>
+    <tr><th>Confidence</th><td>{{ result.confidence }}</td></tr>
+  </tbody>
+</table>
+{% if result.key_references %}
+<h6 class="mt-2">Key References</h6>
+<ul>
+  {% for ref in result.key_references %}
+  <li><strong>{{ ref.reference }}</strong> &rarr; {{ ref.refers_to }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% else %}
+<em>No response-to analysis returned.</em>
+{% endif %}

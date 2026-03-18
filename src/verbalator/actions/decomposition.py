@@ -28,16 +28,10 @@ class DecompositionAction(ActionBase):
         target_language = target_language or "en"
 
         # Build candidate lemmas section if DB session is available
-        candidate_lemmas_section = self._build_candidate_section(
-            text, target_language, session
-        )
+        candidate_lemmas_section = self._build_candidate_section(text, target_language, session)
 
-        system_context = util.prompt_loader.get_context(
-            _PROMPT_CATEGORY, _PROMPT_TYPE
-        )
-        prompt = util.prompt_loader.get_prompt(
-            _PROMPT_CATEGORY, _PROMPT_TYPE
-        ).format(
+        system_context = util.prompt_loader.get_context(_PROMPT_CATEGORY, _PROMPT_TYPE)
+        prompt = util.prompt_loader.get_prompt(_PROMPT_CATEGORY, _PROMPT_TYPE).format(
             source_language=target_language,
             source_text=text,
             target_language=target_language,
@@ -79,8 +73,7 @@ class DecompositionAction(ActionBase):
                     session.query(DerivativeForm)
                     .filter(
                         DerivativeForm.language_code == target_language,
-                        func.lower(DerivativeForm.derivative_form_text)
-                        == clean_word.lower(),
+                        func.lower(DerivativeForm.derivative_form_text) == clean_word.lower(),
                     )
                     .limit(10)
                     .all()
@@ -91,11 +84,7 @@ class DecompositionAction(ActionBase):
                         continue
                     seen_lemma_ids.add(df.lemma_id)
 
-                    lemma = (
-                        session.query(Lemma)
-                        .filter(Lemma.id == df.lemma_id)
-                        .first()
-                    )
+                    lemma = session.query(Lemma).filter(Lemma.id == df.lemma_id).first()
                     if not lemma:
                         continue
 
@@ -109,8 +98,7 @@ class DecompositionAction(ActionBase):
                     trans_str = f" | {target_language}={trans}" if trans else ""
 
                     candidate_lines.append(
-                        f"- {guid} - {english} ({disambiguation}) | "
-                        f"POS: {pos}{trans_str}"
+                        f"- {guid} - {english} ({disambiguation}) | " f"POS: {pos}{trans_str}"
                     )
 
             if candidate_lines:

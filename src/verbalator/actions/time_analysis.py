@@ -25,12 +25,8 @@ class TimeAnalysisAction(ActionBase):
         target_language: Optional[str] = None,
         session: Optional[Any] = None,
     ) -> Tuple[str, str]:
-        system_context = util.prompt_loader.get_context(
-            _PROMPT_CATEGORY, _PROMPT_TYPE
-        )
-        prompt = util.prompt_loader.get_prompt(
-            _PROMPT_CATEGORY, _PROMPT_TYPE
-        ).format(text=text)
+        system_context = util.prompt_loader.get_context(_PROMPT_CATEGORY, _PROMPT_TYPE)
+        prompt = util.prompt_loader.get_prompt(_PROMPT_CATEGORY, _PROMPT_TYPE).format(text=text)
         return system_context, prompt
 
     def build_schema(self, **kwargs: Any) -> Dict[str, Any]:
