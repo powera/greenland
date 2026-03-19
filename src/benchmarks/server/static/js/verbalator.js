@@ -113,6 +113,14 @@ function renderActionResult(container, data) {
         body.innerHTML = renderTimeAnalysis(result);
     } else if (actionName === 'response_to') {
         body.innerHTML = renderResponseTo(result);
+    } else if (actionName === 'attribution') {
+        body.innerHTML = renderAttribution(result);
+    } else if (actionName === 'sarcasm') {
+        body.innerHTML = renderSarcasm(result);
+    } else if (actionName === 'pronunciation') {
+        body.innerHTML = renderPronunciation(result);
+    } else if (actionName === 'comprehension') {
+        body.innerHTML = renderComprehension(result);
     } else {
         body.innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
     }
@@ -293,10 +301,130 @@ function updateUsage(usage) {
     costEl.textContent = '$' + (prev + (usage.cost || 0)).toFixed(6);
 }
 
+function renderAttribution(r) {
+    if (!r) return '<em>No data</em>';
+    var html = '<table class="result-table"><tbody>'
+        + '<tr><th>Has Quotations?</th><td>' + (r.has_quotations ? 'Yes' : 'No') + '</td></tr>'
+        + '<tr><th>Summary</th><td>' + escapeHtml(r.summary || '') + '</td></tr>'
+        + '</tbody></table>';
+
+    if (r.quotations && r.quotations.length) {
+        html += '<h6 class="mt-2">Quotations</h6>';
+        html += '<table class="result-table"><thead><tr>'
+            + '<th>Quoted Text</th><th>Type</th><th>Attributed?</th>'
+            + '<th>Attributed To</th><th>Needs Attribution?</th><th>Suggested Source</th>'
+            + '</tr></thead><tbody>';
+        r.quotations.forEach(function(q) {
+            var needsClass = q.needs_attribution ? ' style="color:#c5221f;font-weight:600"' : '';
+            html += '<tr>'
+                + '<td>' + escapeHtml(q.quoted_text) + '</td>'
+                + '<td>' + escapeHtml((q.quotation_type || '').replace(/_/g, ' ')) + '</td>'
+                + '<td>' + (q.is_attributed ? 'Yes' : 'No') + '</td>'
+                + '<td>' + escapeHtml(q.attributed_to || '') + '</td>'
+                + '<td' + needsClass + '>' + (q.needs_attribution ? 'Yes' : 'No') + '</td>'
+                + '<td>' + escapeHtml(q.suggested_source || '') + '</td>'
+                + '</tr>';
+        });
+        html += '</tbody></table>';
+    }
+    return html;
+}
+
+function renderSarcasm(r) {
+    if (!r) return '<em>No data</em>';
+    var confPct = { very_low: 10, low: 30, medium: 50, high: 75, very_high: 95 };
+    var pct = confPct[r.confidence] || 50;
+    var color = pct >= 75 ? '#34a853' : pct >= 50 ? '#fbbc04' : '#ea4335';
+
+    var html = '<table class="result-table"><tbody>'
+        + '<tr><th>Contains Sarcasm?</th><td>' + (r.contains_sarcasm ? 'Yes' : 'No') + '</td></tr>'
+        + '<tr><th>Overall Tone</th><td>' + escapeHtml(r.overall_tone || '') + '</td></tr>'
+        + '<tr><th>Confidence</th><td>' + escapeHtml(r.confidence || '')
+        + ' <span class="confidence-meter"><span class="fill" style="width:' + pct + '%;background:' + color + '"></span></span>'
+        + '</td></tr>'
+        + '<tr><th>Reasoning</th><td>' + escapeHtml(r.reasoning || '') + '</td></tr>'
+        + '</tbody></table>';
+
+    if (r.instances && r.instances.length) {
+        html += '<h6 class="mt-2">Sarcastic Passages</h6>';
+        r.instances.forEach(function(inst) {
+            html += '<div style="border-left:3px solid #a0522d;padding:6px 10px;margin-bottom:8px;background:#fdf6f3">'
+                + '<p><strong>Passage:</strong> ' + escapeHtml(inst.passage) + '</p>'
+                + '<p><strong>Type:</strong> ' + escapeHtml((inst.sarcasm_type || '').replace(/_/g, ' ')) + '</p>'
+                + '<p><strong>Literal:</strong> ' + escapeHtml(inst.literal_meaning) + '</p>'
+                + '<p><strong>Intended:</strong> ' + escapeHtml(inst.intended_meaning) + '</p>'
+                + '<p><strong>Clues:</strong> ' + (inst.clues || []).map(escapeHtml).join(', ') + '</p>'
+                + '</div>';
+        });
+    }
+    return html;
+}
+
+function renderPronunciation(r) {
+    if (!r) return '<em>No data</em>';
+    var html = '<table class="result-table"><tbody>'
+        + '<tr><th>Language</th><td>' + escapeHtml(r.language || '') + '</td></tr>'
+        + '<tr><th>Summary</th><td>' + escapeHtml(r.summary || '') + '</td></tr>'
+        + '</tbody></table>';
+
+    if (r.words && r.words.length) {
+        html += '<h6 class="mt-2">Difficult Words</h6>';
+        html += '<table class="result-table"><thead><tr>'
+            + '<th>Word</th><th>Difficulty</th><th>IPA</th><th>Reasons</th>'
+            + '</tr></thead><tbody>';
+        r.words.forEach(function(w) {
+            var diffClass = w.difficulty === 'very_hard' ? ' style="color:#c5221f;font-weight:600"'
+                : w.difficulty === 'hard' ? ' style="color:#e37400;font-weight:600"' : '';
+            html += '<tr>'
+                + '<td>' + escapeHtml(w.word) + '</td>'
+                + '<td' + diffClass + '>' + escapeHtml((w.difficulty || '').replace(/_/g, ' ')) + '</td>'
+                + '<td><code>' + escapeHtml(w.ipa || '') + '</code></td>'
+                + '<td>' + (w.reasons || []).map(escapeHtml).join('; ') + '</td>'
+                + '</tr>';
+        });
+        html += '</tbody></table>';
+    }
+    return html;
+}
+
+function renderComprehension(r) {
+    if (!r) return '<em>No data</em>';
+    var html = '<table class="result-table"><tbody>'
+        + '<tr><th>Language</th><td>' + escapeHtml(r.language || '') + '</td></tr>'
+        + '<tr><th>Summary</th><td>' + escapeHtml(r.summary || '') + '</td></tr>'
+        + '</tbody></table>';
+
+    if (r.words && r.words.length) {
+        html += '<h6 class="mt-2">Difficult Words</h6>';
+        html += '<table class="result-table"><thead><tr>'
+            + '<th>Word</th><th>Difficulty</th><th>Explanation</th><th>Reasons</th>'
+            + '</tr></thead><tbody>';
+        r.words.forEach(function(w) {
+            var diffClass = w.difficulty === 'very_hard' ? ' style="color:#c5221f;font-weight:600"'
+                : w.difficulty === 'hard' ? ' style="color:#e37400;font-weight:600"' : '';
+            html += '<tr>'
+                + '<td>' + escapeHtml(w.word) + '</td>'
+                + '<td' + diffClass + '>' + escapeHtml((w.difficulty || '').replace(/_/g, ' ')) + '</td>'
+                + '<td>' + escapeHtml(w.simplified_explanation || '') + '</td>'
+                + '<td>' + (w.reasons || []).map(escapeHtml).join('; ') + '</td>'
+                + '</tr>';
+        });
+        html += '</tbody></table>';
+    }
+    return html;
+}
+
 function getColorClass(actionName) {
-    var blues = ['metadata', 'time_analysis', 'response_to'];
-    if (blues.indexOf(actionName) !== -1) return 'blue';
-    return 'green';
+    /* Mirror verbalator/colors.py COLOR_ORDER mapping. */
+    var colorMap = {
+        'metadata': 'blue', 'time_analysis': 'blue', 'response_to': 'blue',
+        'decomposition': 'green',
+        'attribution': 'yellow',
+        'sarcasm': 'xantham',
+        'pronunciation': 'color-pending',
+        'comprehension': 'color-pending'
+    };
+    return colorMap[actionName] || 'blue';
 }
 
 function formatActionName(name) {

@@ -1,0 +1,5 @@
+Analyze the following text for quotations that may need attribution.
+
+Text: "{text}"
+
+Identify all quotations, paraphrases, and references, and assess their attribution status.

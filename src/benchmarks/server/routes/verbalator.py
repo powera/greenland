@@ -20,6 +20,7 @@ from benchmarks.verbalator import common, prompt_builder, samples
 from clients.unified_client import UnifiedLLMClient as UnifiedClient
 import verbalator.actions  # noqa: F401 – triggers action registration
 from verbalator.action_registry import get_action, list_actions
+from verbalator.colors import COLOR_ORDER
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +97,7 @@ def index():
         models=_get_models(),
         default_model=DEFAULT_MODEL,
         actions=actions,
+        color_order=COLOR_ORDER,
     )
 
 

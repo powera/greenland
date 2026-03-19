@@ -111,6 +111,18 @@
     background: #e6f4ea;
     border-left: 4px solid #34a853;
 }
+.action-group-yellow {
+    background: #fef7e0;
+    border-left: 4px solid #f9ab00;
+}
+.action-group-xantham {
+    background: #fce8e0;
+    border-left: 4px solid #a0522d;
+}
+.action-group-color-pending {
+    background: #f0f0f0;
+    border-left: 4px solid #999999;
+}
 .action-label {
     display: block;
     padding: 3px 0;
@@ -141,6 +153,18 @@
 .action-result-card.green .card-header {
     background: #e6f4ea;
     color: #137333;
+}
+.action-result-card.yellow .card-header {
+    background: #fef7e0;
+    color: #b06000;
+}
+.action-result-card.xantham .card-header {
+    background: #fce8e0;
+    color: #8b3a1a;
+}
+.action-result-card.color-pending .card-header {
+    background: #f0f0f0;
+    color: #555555;
 }
 
 /* Result tables */

@@ -1,0 +1,5 @@
+Identify words in the following text that a learner of {target_language} would find difficult to pronounce.
+
+Text: "{text}"
+
+Tag each difficult word with its difficulty level, reasons, and IPA transcription.
