@@ -8,7 +8,9 @@ from enum import Enum, auto
 from typing import Any, Dict, Optional
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -23,6 +25,8 @@ class ModelTier(Enum):
     GPT_5_NANO = auto()  # gpt-5-nano models
     GPT_5_MINI = auto()  # gpt-5-mini models
     GPT_52 = auto()  # gpt-5.2 models
+    GPT_54_NANO = auto()  # gpt-5.4-nano models
+    GPT_54_MINI = auto()  # gpt-5.4-mini models
 
     # Anthropic models
     CLAUDE_HAIKU = auto()  # claude-3-5-haiku models
@@ -46,6 +50,8 @@ class CostConfig:
         ModelTier.GPT_5_NANO: {"input": 0.05, "output": 0.4},
         ModelTier.GPT_5_MINI: {"input": 0.25, "output": 2.0},
         ModelTier.GPT_52: {"input": 1.75, "output": 14.0},
+        ModelTier.GPT_54_NANO: {"input": 0.20, "output": 1.25},
+        ModelTier.GPT_54_MINI: {"input": 0.75, "output": 4.50},
     }
 
     # Anthropic costs per million tokens
@@ -74,6 +80,10 @@ class CostConfig:
             return ModelTier.GPT_41_MINI
         elif "gpt-4o" in model_lower:
             return ModelTier.GPT4
+        elif "gpt-5.4-nano" in model_lower:
+            return ModelTier.GPT_54_NANO
+        elif "gpt-5.4-mini" in model_lower:
+            return ModelTier.GPT_54_MINI
         elif "gpt-5-nano" in model_lower:
             return ModelTier.GPT_5_NANO
         elif "gpt-5-mini" in model_lower:
@@ -89,7 +99,9 @@ class CostConfig:
             if "flash" in model_lower:
                 return ModelTier.GEMINI_FLASH
 
-        # Default to Ollama for unknown models
+        # Local/Ollama models: fall back to compute-time pricing.
+        # For remote models that reach here, estimate_cost() will log a warning
+        # and return 0.0 rather than silently using Ollama time-based pricing.
         return ModelTier.OLLAMA
 
     @classmethod
@@ -118,8 +130,18 @@ class CostConfig:
 
         tier = cls.get_model_tier(model)
 
-        # Handle Ollama models (cost based on compute time)
+        # Handle Ollama/local models (cost based on compute time)
         if tier == ModelTier.OLLAMA:
+            # Remote API models that weren't recognized should not fall back
+            # to Ollama time-based pricing — return 0 and warn instead.
+            model_lower = model.lower()
+            if any(prefix in model_lower for prefix in ("gpt-", "claude", "gemini")):
+                logger.warning(
+                    "No token pricing configured for remote model '%s'. "
+                    "Add it to CostConfig in telemetry.py.",
+                    model,
+                )
+                return 0.0
             compute_seconds = compute_ms / 1000
             return compute_seconds * cls.OLLAMA_COST_PER_SEC
 

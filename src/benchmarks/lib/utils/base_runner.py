@@ -289,6 +289,8 @@ class BenchmarkRunner:
                 ),
                 cost_usd=response.usage.cost if response.usage else None,
                 tokens_used=response.usage.total_tokens if response.usage else None,
+                tokens_in=response.usage.tokens_in if response.usage else None,
+                tokens_out=response.usage.tokens_out if response.usage else None,
             )
 
         except OllamaTimeoutError as e:
