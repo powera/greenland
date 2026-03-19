@@ -1,0 +1,5 @@
+Analyze the following text for Personally Identifying Information (PII).
+
+Text: "{text}"
+
+Identify any PII, classify its type, and assess whether it appears to be real or fictional.

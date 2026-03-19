@@ -1,0 +1,5 @@
+Analyze the following text for politically sensitive content that may need editorial review.
+
+Text: "{text}"
+
+Identify sensitive political topics, their severity, and which regions or audiences are most affected.

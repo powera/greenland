@@ -31,7 +31,7 @@ COLORS: Dict[str, ColorDef] = {
         background="#e6f4ea",
         border="#34a853",
         text="#137333",
-        description="morphological / structural",
+        description="technical / structural / knowledge",
     ),
     "yellow": ColorDef(
         display_name="Yellow",
@@ -46,6 +46,13 @@ COLORS: Dict[str, ColorDef] = {
         border="#a0522d",
         text="#8b3a1a",
         description="sarcasm / tone",
+    ),
+    "violet": ColorDef(
+        display_name="Violet",
+        background="#f3e8fd",
+        border="#673ab7",
+        text="#4a148c",
+        description="content filters / sensitivity",
     ),
     "color-pending": ColorDef(
         display_name="Pending",

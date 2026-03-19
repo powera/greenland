@@ -15,6 +15,7 @@ It runs as part of the benchmarks web server (Flask) and is accessible at
 src/verbalator/              Core action framework
   action_base.py             ActionBase ABC — defines the interface every action must implement
   action_registry.py         Global registry; actions self-register at import time
+  colors.py                  Color group definitions (follows atacama spectrum system)
   actions/                   One module per action (each calls register() at the bottom)
 
 src/benchmarks/server/routes/verbalator.py   Flask blueprint — /verbalator/* routes
@@ -27,6 +28,22 @@ prompts/verbalator/{action_name}/            Prompt files loaded by util.prompt_
   context.txt                                System/context prompt
   prompt.txt                                 User prompt template (with {placeholders})
 ```
+
+
+## Color groups
+
+Actions are organized into color groups following the atacama spectrum system
+(see `aml_parser/colorblocks.py` in the atacama repo). Each color represents a
+category of analysis. Colors are defined in `src/verbalator/colors.py`.
+
+| Color | Description | Actions |
+|-------|-------------|---------|
+| **Blue** | Analysis / metadata | Text Metadata, Time Analysis, Response-To |
+| **Green** | Technical / structural / knowledge | Sentence Decomposition, Knowledge Prerequisites, Numeric Precision |
+| **Yellow** | Quotation / attribution | Quotation Attribution |
+| **Xantham** | Sarcasm / tone | Sarcasm Detection |
+| **Violet** | Content filters / sensitivity | Content Filter, PII Detection, Sensitive Political Topics, Data Exfil/Infiltration |
+| **Pending** | Color not yet assigned | Pronunciation Difficulty, Comprehension Difficulty |
 
 
 ## Actions
@@ -47,19 +64,56 @@ Actions also declare metadata used by the UI:
 | `name` | `"metadata"` | Machine identifier, used in API calls |
 | `display_name` | `"Text Metadata"` | Human-readable label |
 | `description` | `"Analyze language, register, ..."` | Shown in the UI |
-| `color_group` | `"blue"` or `"green"` | Groups actions visually in the UI |
+| `color_group` | `"blue"`, `"violet"`, etc. | Groups actions visually in the UI (see colors.py) |
 | `needs_context` | `True` / `False` | Shows the "context" input field |
 | `needs_target_language` | `True` / `False` | Shows the "target language" selector |
 
 
 ### Current actions
 
-| Action | Color | Description | Special inputs |
-|--------|-------|-------------|----------------|
-| **Sentence Decomposition** (`decomposition`) | green | Word-by-word morphological breakdown with lemma matching from the DB | `target_language`, DB session |
-| **Text Metadata** (`metadata`) | blue | Detect language, register, formality, genre, and key topics | none |
-| **Time Analysis** (`time_analysis`) | blue | Estimate when text was written or when described events occurred | none |
-| **Response-To** (`response_to`) | blue | Analyze whether text is responding to given context | `context` |
+**Blue — Analysis / metadata**
+
+| Action | Description | Special inputs |
+|--------|-------------|----------------|
+| **Text Metadata** (`metadata`) | Detect language, register, formality, genre, and key topics | — |
+| **Time Analysis** (`time_analysis`) | Estimate when text was written or when described events occurred | — |
+| **Response-To** (`response_to`) | Analyze whether text is responding to given context | `context` |
+
+**Green — Technical / structural / knowledge**
+
+| Action | Description | Special inputs |
+|--------|-------------|----------------|
+| **Sentence Decomposition** (`decomposition`) | Word-by-word morphological breakdown with lemma matching from the DB | `target_language`, DB session |
+| **Knowledge Prerequisites** (`knowledge_prereq`) | Identify domain knowledge needed (biology, physics, history, etc.) | — |
+| **Numeric Precision** (`numeric_precision`) | Flag numbers with excessive precision and check authority/sourcing | — |
+
+**Yellow — Quotation / attribution**
+
+| Action | Description | Special inputs |
+|--------|-------------|----------------|
+| **Quotation Attribution** (`attribution`) | Identify quotations and whether they need attribution | — |
+
+**Xantham — Sarcasm / tone**
+
+| Action | Description | Special inputs |
+|--------|-------------|----------------|
+| **Sarcasm Detection** (`sarcasm`) | Detect sarcasm, irony, and overconfident tone | `context` |
+
+**Violet — Content filters / sensitivity**
+
+| Action | Description | Special inputs |
+|--------|-------------|----------------|
+| **Content Filter** (`content_filter`) | Flag violence, narcotics, sex, gambling, nuclear weapons | — |
+| **PII Detection** (`pii_detection`) | Identify Personally Identifying Information | — |
+| **Sensitive Political Topics** (`sensitive_politics`) | Flag politically sensitive content for editorial review | — |
+| **Data Exfil/Infiltration** (`data_exfil`) | Detect URLs, links, and data exfiltration/infiltration vectors | — |
+
+**Pending — Color not yet assigned**
+
+| Action | Description | Special inputs |
+|--------|-------------|----------------|
+| **Pronunciation Difficulty** (`pronunciation`) | Tag words likely to be queried for pronunciation difficulty | `target_language` |
+| **Comprehension Difficulty** (`comprehension`) | Tag words likely to be queried for comprehension difficulty | `target_language`, `context` |
 
 
 ## Adding a new action
@@ -83,7 +137,7 @@ class YourAction(ActionBase):
     name = "your_action"
     display_name = "Your Action"
     description = "One-line description for the UI"
-    color_group = "blue"          # "blue" or "green"
+    color_group = "blue"          # see colors.py for options
     needs_context = False         # set True if you need the context input
     needs_target_language = False  # set True if you need a language selector
 
@@ -129,15 +183,19 @@ register(YourAction())
 3. **Register the import** in `src/verbalator/actions/__init__.py`:
 
 ```python
-import verbalator.actions.your_action  # noqa: F401
+from verbalator.actions import your_action  # noqa: F401
 ```
 
 4. **Add a frontend renderer** in `src/benchmarks/server/static/js/verbalator.js`.
-   The JS file contains a `renderActionResult(actionName, result)` function with
-   a switch on `actionName` — add a case for `"your_action"` that returns HTML
-   for the structured result.
+   Add a `renderYourAction(result)` function that returns HTML, and wire it
+   into the `renderActionResult` dispatch. Also add the action name to the
+   `colorMap` in `getColorClass()`.
 
-5. **Test it**: start the server and select your action in the Actions tab at
+5. **If using a new color group**, add it to `src/verbalator/colors.py` and
+   add matching CSS classes in `verbalator.css` for both `.action-group-{color}`
+   and `.action-result-card.{color} .card-header`.
+
+6. **Test it**: start the server and select your action in the Actions tab at
    `/verbalator/`.
 
 

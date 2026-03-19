@@ -1,0 +1,5 @@
+Analyze the following text for numbers with excessive precision and assess the sourcing/authority behind each figure.
+
+Text: "{text}"
+
+For each number found, evaluate whether its precision is warranted and whether it is properly sourced.
