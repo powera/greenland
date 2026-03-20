@@ -38,13 +38,13 @@ category of analysis. Colors are defined in `src/verbalator/colors.py`.
 
 | Color | Description | Actions |
 |-------|-------------|---------|
-| **Blue** | Analysis / metadata | Text Metadata, Time Analysis, Context Analysis |
-| **Green** | Technical / structural / knowledge | Sentence Decomposition, Knowledge Prerequisites, Numeric Precision |
-| **Yellow** | Quotation / attribution / rhetoric / structure | Quotation Attribution, Narrative Structure, Audience Analysis, Rhetorical Purpose |
+| **Xantham** | Sarcasm / tone | Sarcasm Detection, Humor Detection |
+| **Red** | Editorial / critique / review | Style Critique, Expand / Compress, Spelling & Grammar |
 | **Orange** | Vocabulary / pronunciation difficulty | Pronunciation Difficulty, Comprehension Difficulty, Jargon & Slang |
-| **Red** | Editorial / critique / review | Style Critique, Expand / Compress |
-| **Xantham** | Sarcasm / tone | Sarcasm Detection |
-| **Violet** | Content filters / sensitivity | Content Filter, PII Detection, Sensitive Political Topics, Data Exfil/Infiltration, Author Opinions, Privacy & Secrecy |
+| **Yellow** | Quotation / attribution / rhetoric / structure | Quotation Attribution, Narrative Structure, Audience Analysis, Rhetorical Purpose |
+| **Green** | Technical / structural / knowledge | Sentence Decomposition, Knowledge Prerequisites, Numeric Precision, Logical Fallacies |
+| **Blue** | Analysis / metadata | Text Metadata, Time Analysis, Context Analysis |
+| **Violet** | Content filters / sensitivity | Content Filter, PII Detection, Sensitive Political Topics, Data Exfil/Infiltration, Author Opinions, Privacy & Secrecy, Adversarial Content |
 
 
 ## Actions
@@ -72,21 +72,28 @@ Actions also declare metadata used by the UI:
 
 ### Current actions
 
-**Blue — Analysis / metadata**
+**Xantham — Sarcasm / tone**
 
 | Action | Description | Special inputs |
 |--------|-------------|----------------|
-| **Text Metadata** (`metadata`) | Detect language, register, formality, genre, and key topics | — |
-| **Time Analysis** (`time_analysis`) | Estimate when text was written or when described events occurred | — |
-| **Context Analysis** (`context_analysis`) | Analyze relationship to provided context and implicit situational assumptions | `context` |
+| **Sarcasm Detection** (`sarcasm`) | Detect sarcasm, irony, and overconfident tone | `context` |
+| **Humor Detection** (`humor_detection`) | Detect jokes, puns, wordplay, and humorous intent | `context` |
 
-**Green — Technical / structural / knowledge**
+**Red — Editorial / critique / review**
 
 | Action | Description | Special inputs |
 |--------|-------------|----------------|
-| **Sentence Decomposition** (`decomposition`) | Word-by-word morphological breakdown with lemma matching from the DB | `target_language`, DB session |
-| **Knowledge Prerequisites** (`knowledge_prereq`) | Identify domain knowledge needed (biology, physics, history, etc.) | — |
-| **Numeric Precision** (`numeric_precision`) | Flag numbers with excessive precision and check authority/sourcing | — |
+| **Style Critique** (`style_critique`) | Critique the author's stylistic choices: word choice, sentence structure, clarity, voice | — |
+| **Expand / Compress** (`expand_compress`) | Summarize, expand, or join texts with suggested modifications and transitions | `context` |
+| **Spelling & Grammar** (`spelling_grammar`) | Check for spelling errors, grammatical mistakes, and punctuation issues | `target_language` |
+
+**Orange — Vocabulary / pronunciation difficulty**
+
+| Action | Description | Special inputs |
+|--------|-------------|----------------|
+| **Pronunciation Difficulty** (`pronunciation`) | Tag words likely to be queried for pronunciation difficulty | `target_language` |
+| **Comprehension Difficulty** (`comprehension`) | Tag words likely to be queried for comprehension difficulty | `target_language`, `context` |
+| **Jargon & Slang** (`jargon_slang`) | Identify jargon, slang, colloquialisms, and informal language | `target_language` |
 
 **Yellow — Quotation / attribution / rhetoric / structure**
 
@@ -97,26 +104,22 @@ Actions also declare metadata used by the UI:
 | **Audience Analysis** (`audience_analysis`) | Identify the intended audience of the text | — |
 | **Rhetorical Purpose** (`rhetorical_purpose`) | Identify what the text is trying to accomplish (persuade, inform, entertain, instruct) | — |
 
-**Orange — Vocabulary / pronunciation difficulty**
+**Green — Technical / structural / knowledge**
 
 | Action | Description | Special inputs |
 |--------|-------------|----------------|
-| **Pronunciation Difficulty** (`pronunciation`) | Tag words likely to be queried for pronunciation difficulty | `target_language` |
-| **Comprehension Difficulty** (`comprehension`) | Tag words likely to be queried for comprehension difficulty | `target_language`, `context` |
-| **Jargon & Slang** (`jargon_slang`) | Identify jargon, slang, colloquialisms, and informal language | `target_language` |
+| **Sentence Decomposition** (`decomposition`) | Word-by-word morphological breakdown with lemma matching from the DB | `target_language`, DB session |
+| **Knowledge Prerequisites** (`knowledge_prereq`) | Identify domain knowledge needed (biology, physics, history, etc.) | — |
+| **Numeric Precision** (`numeric_precision`) | Flag numbers with excessive precision and check authority/sourcing | — |
+| **Logical Fallacies** (`logical_fallacies`) | Detect logical fallacies, bad statistics, and reasoning errors | — |
 
-**Red — Editorial / critique / review**
-
-| Action | Description | Special inputs |
-|--------|-------------|----------------|
-| **Style Critique** (`style_critique`) | Critique the author's stylistic choices: word choice, sentence structure, clarity, voice | — |
-| **Expand / Compress** (`expand_compress`) | Summarize, expand, or join texts with suggested modifications and transitions | `context` |
-
-**Xantham — Sarcasm / tone**
+**Blue — Analysis / metadata**
 
 | Action | Description | Special inputs |
 |--------|-------------|----------------|
-| **Sarcasm Detection** (`sarcasm`) | Detect sarcasm, irony, and overconfident tone | `context` |
+| **Text Metadata** (`metadata`) | Detect language, register, formality, genre, and key topics | — |
+| **Time Analysis** (`time_analysis`) | Estimate when text was written or when described events occurred | — |
+| **Context Analysis** (`context_analysis`) | Analyze relationship to provided context and implicit situational assumptions | `context` |
 
 **Violet — Content filters / sensitivity**
 
@@ -128,6 +131,7 @@ Actions also declare metadata used by the UI:
 | **Data Exfil/Infiltration** (`data_exfil`) | Detect URLs, links, and data exfiltration/infiltration vectors | — |
 | **Author Opinions** (`author_opinion`) | Detect the author's personal opinions, preferences, and subjective judgments | — |
 | **Privacy & Secrecy** (`privacy_secrecy`) | Detect discussions of cryptography, privacy, secrecy, and censorship | — |
+| **Adversarial Content** (`adversarial_content`) | Detect prompt injection, instruction overrides, and adversarial manipulation | — |
 
 
 ## Adding a new action

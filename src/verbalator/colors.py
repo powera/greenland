@@ -17,35 +17,14 @@ class ColorDef(NamedTuple):
     description: str
 
 
-# Ordered roughly by spectrum position.
+# Ordered by spectrum position: infrared → red → ... → violet.
 COLORS: Dict[str, ColorDef] = {
-    "blue": ColorDef(
-        display_name="Blue",
-        background="#e8f0fe",
-        border="#4285f4",
-        text="#1a73e8",
-        description="analysis / metadata",
-    ),
-    "green": ColorDef(
-        display_name="Green",
-        background="#e6f4ea",
-        border="#34a853",
-        text="#137333",
-        description="technical / structural / knowledge",
-    ),
-    "yellow": ColorDef(
-        display_name="Yellow",
-        background="#fef7e0",
-        border="#f9ab00",
-        text="#b06000",
-        description="quotation / attribution / rhetoric / structure",
-    ),
-    "orange": ColorDef(
-        display_name="Orange",
-        background="#fef0e1",
-        border="#e8710a",
-        text="#c25e00",
-        description="vocabulary / pronunciation difficulty",
+    "xantham": ColorDef(
+        display_name="Xantham",
+        background="#fce8e0",
+        border="#a0522d",
+        text="#8b3a1a",
+        description="sarcasm / tone",
     ),
     "red": ColorDef(
         display_name="Red",
@@ -54,12 +33,33 @@ COLORS: Dict[str, ColorDef] = {
         text="#b31412",
         description="editorial / critique / review",
     ),
-    "xantham": ColorDef(
-        display_name="Xantham",
-        background="#fce8e0",
-        border="#a0522d",
-        text="#8b3a1a",
-        description="sarcasm / tone",
+    "orange": ColorDef(
+        display_name="Orange",
+        background="#fef0e1",
+        border="#e8710a",
+        text="#c25e00",
+        description="vocabulary / pronunciation difficulty",
+    ),
+    "yellow": ColorDef(
+        display_name="Yellow",
+        background="#fef7e0",
+        border="#f9ab00",
+        text="#b06000",
+        description="quotation / attribution / rhetoric / structure",
+    ),
+    "green": ColorDef(
+        display_name="Green",
+        background="#e6f4ea",
+        border="#34a853",
+        text="#137333",
+        description="technical / structural / knowledge",
+    ),
+    "blue": ColorDef(
+        display_name="Blue",
+        background="#e8f0fe",
+        border="#4285f4",
+        text="#1a73e8",
+        description="analysis / metadata",
     ),
     "violet": ColorDef(
         display_name="Violet",
