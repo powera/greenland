@@ -100,6 +100,8 @@ class BenchmarkResult:
     thought_process: Optional[str] = None  # Add this line to store model's reasoning
     cost_usd: Optional[float] = None  # Estimated LLM cost in USD
     tokens_used: Optional[int] = None  # Total tokens consumed for this response
+    tokens_in: Optional[int] = None  # Input/prompt tokens (for cost re-estimation)
+    tokens_out: Optional[int] = None  # Output/completion tokens (for cost re-estimation)
 
 
 @dataclass

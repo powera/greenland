@@ -122,7 +122,12 @@ def create_models(postgres_url=None):
 
 
 def create_remote_models(postgres_url=None):
-    """Create remote API model definitions."""
+    """Create remote API model definitions.
+
+    When adding a new remote model here, also add its per-token pricing
+    to CostConfig in src/util/telemetry.py so that benchmark cost
+    estimates are accurate.
+    """
     s = _get_session(postgres_url)
 
     # OpenAI GPT-5 family
@@ -156,6 +161,30 @@ def create_remote_models(postgres_url=None):
         filesize_mb=0,
         license_name="Closed Model",
         model_path="gpt-5-nano",
+        model_type="remote",
+        max_benchmark_tier=2,
+    )
+
+    # OpenAI GPT-5.4 family
+    _model_write(
+        s,
+        codename="gpt-5.4-mini",
+        displayname="GPT-5.4 mini",
+        launch_date="2026-03-17",
+        filesize_mb=0,
+        license_name="Closed Model",
+        model_path="gpt-5.4-mini",
+        model_type="remote",
+        max_benchmark_tier=2,
+    )
+    _model_write(
+        s,
+        codename="gpt-5.4-nano",
+        displayname="GPT-5.4 nano",
+        launch_date="2026-03-17",
+        filesize_mb=0,
+        license_name="Closed Model",
+        model_path="gpt-5.4-nano",
         model_type="remote",
         max_benchmark_tier=2,
     )

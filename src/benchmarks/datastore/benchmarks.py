@@ -79,6 +79,8 @@ class RunDetail(Base):
     thought_process: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     cost_usd: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     tokens_used: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    tokens_in: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    tokens_out: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     question_id: Mapped[str] = mapped_column(
         String, ForeignKey("question.question_id"), primary_key=True
@@ -197,6 +199,8 @@ def insert_run(
                     thought_process=detail.get("thought_process", None),
                     cost_usd=detail.get("cost_usd", None),
                     tokens_used=detail.get("tokens_used", None),
+                    tokens_in=detail.get("tokens_in", None),
+                    tokens_out=detail.get("tokens_out", None),
                 )
                 session.add(run_detail)
 
@@ -287,6 +291,8 @@ def get_run_by_run_id(run_id: int, session=None) -> Optional[Dict]:
                 "thought_process": detail.thought_process,
                 "cost_usd": detail.cost_usd,
                 "tokens_used": detail.tokens_used,
+                "tokens_in": detail.tokens_in,
+                "tokens_out": detail.tokens_out,
             }
             for detail, question in run_details
         ],
@@ -396,6 +402,8 @@ def get_highest_scoring_run_details(
                 "debug_json": decode_json(detail.debug_json),
                 "cost_usd": detail.cost_usd,
                 "tokens_used": detail.tokens_used,
+                "tokens_in": detail.tokens_in,
+                "tokens_out": detail.tokens_out,
             }
             for detail, question in run_details
         ],

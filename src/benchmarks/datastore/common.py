@@ -120,6 +120,10 @@ def create_database_and_session(db_path=None):
         run_detail_cols = {row[1] for row in run_detail_result}
         if "tokens_used" not in run_detail_cols:
             conn.execute(text("ALTER TABLE run_detail ADD COLUMN tokens_used INTEGER"))
+        if "tokens_in" not in run_detail_cols:
+            conn.execute(text("ALTER TABLE run_detail ADD COLUMN tokens_in INTEGER"))
+        if "tokens_out" not in run_detail_cols:
+            conn.execute(text("ALTER TABLE run_detail ADD COLUMN tokens_out INTEGER"))
 
         conn.commit()
 

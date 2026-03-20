@@ -59,6 +59,8 @@ class PartialCreditRunner(BenchmarkRunner):
                 ),
                 cost_usd=usage.cost if usage else None,
                 tokens_used=usage.total_tokens if usage else None,
+                tokens_in=usage.tokens_in if usage else None,
+                tokens_out=usage.tokens_out if usage else None,
             )
 
         except OllamaTimeoutError as error:
