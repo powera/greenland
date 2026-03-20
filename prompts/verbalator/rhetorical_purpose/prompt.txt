@@ -1,0 +1,5 @@
+Analyze the following text to identify its rhetorical purpose and techniques.
+
+Text: "{text}"
+
+Determine the primary and secondary purposes, identify specific rhetorical techniques used, and explain their effects.

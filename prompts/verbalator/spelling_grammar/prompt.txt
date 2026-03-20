@@ -1,0 +1,5 @@
+Check the following text for spelling errors, grammatical mistakes, and punctuation issues. The text is in {target_language}.
+
+Text: "{text}"
+
+Identify each error, classify its type, suggest a correction, and explain why it is an error.

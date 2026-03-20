@@ -1,0 +1,7 @@
+Identify words in the following text that a learner of {target_language} would find difficult to understand.
+
+Text: "{text}"
+
+Context: "{context}"
+
+Tag each difficult word with its difficulty level, reasons, and a simplified explanation.

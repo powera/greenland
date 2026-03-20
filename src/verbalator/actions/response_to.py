@@ -1,4 +1,4 @@
-"""Response-to analysis action."""
+"""Contextual analysis action."""
 
 from typing import Any, Dict, Optional, Tuple
 
@@ -7,13 +7,13 @@ from verbalator.action_base import ActionBase
 from verbalator.action_registry import register
 
 _PROMPT_CATEGORY = "verbalator"
-_PROMPT_TYPE = "response_to"
+_PROMPT_TYPE = "context_analysis"
 
 
-class ResponseToAction(ActionBase):
-    name = "response_to"
-    display_name = "Response-To"
-    description = "Analyze whether text is responding to given context"
+class ContextAnalysisAction(ActionBase):
+    name = "context_analysis"
+    display_name = "Context Analysis"
+    description = "Analyze the text's relationship to provided context and its implicit situational assumptions"
     color_group = "blue"
     needs_context = True
     needs_target_language = False
@@ -38,52 +38,104 @@ class ResponseToAction(ActionBase):
             "properties": {
                 "is_response": {
                     "type": "boolean",
-                    "description": "Whether the text is a response to the context",
+                    "description": "Whether the text appears to be a response to the provided context",
                 },
-                "responding_to_summary": {
+                "relationship_to_context": {
                     "type": "string",
-                    "description": "Summary of what the text is responding to",
+                    "enum": [
+                        "direct_reply",
+                        "rebuttal",
+                        "elaboration",
+                        "agreement",
+                        "continuation",
+                        "tangential",
+                        "unrelated",
+                        "unclear",
+                    ],
+                    "description": "How the text relates to the provided context",
                 },
-                "relationship_type": {
-                    "type": "string",
-                    "description": "Type of relationship (reply, rebuttal, elaboration, agreement, etc.)",
-                },
-                "key_references": {
+                "context_references": {
                     "type": "array",
                     "items": {
                         "type": "object",
                         "properties": {
-                            "reference": {
+                            "passage": {
                                 "type": "string",
-                                "description": "The reference or callback in the text",
+                                "description": "The passage in the text that references the context",
                             },
                             "refers_to": {
                                 "type": "string",
                                 "description": "What part of the context it refers to",
                             },
                         },
-                        "required": ["reference", "refers_to"],
+                        "required": ["passage", "refers_to"],
                     },
-                    "description": "Key references from the text back to the context",
+                    "description": "Explicit references from the text back to the provided context",
+                },
+                "assumed_knowledge": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "assumption": {
+                                "type": "string",
+                                "description": "Something the text assumes the reader already knows",
+                            },
+                            "evidence": {
+                                "type": "string",
+                                "description": "The passage that reveals this assumption",
+                            },
+                            "found_in_context": {
+                                "type": "boolean",
+                                "description": "Whether this assumed knowledge is present in the provided context",
+                            },
+                        },
+                        "required": ["assumption", "evidence", "found_in_context"],
+                    },
+                    "description": "Knowledge the text assumes the reader has, based on what is stated vs. left implicit",
+                },
+                "situational_clues": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "clue": {
+                                "type": "string",
+                                "description": "A passage that reveals something about the situation",
+                            },
+                            "implies": {
+                                "type": "string",
+                                "description": "What this clue suggests about the surrounding situation",
+                            },
+                        },
+                        "required": ["clue", "implies"],
+                    },
+                    "description": "Clues about the broader situation (conversation, event, medium) the text exists in",
                 },
                 "confidence": {
                     "type": "string",
                     "enum": ["very_low", "low", "medium", "high", "very_high"],
                     "description": "Confidence level in the analysis",
                 },
+                "summary": {
+                    "type": "string",
+                    "description": "Brief overview of the text's contextual situation",
+                },
             },
             "required": [
                 "is_response",
-                "responding_to_summary",
-                "relationship_type",
-                "key_references",
+                "relationship_to_context",
+                "context_references",
+                "assumed_knowledge",
+                "situational_clues",
                 "confidence",
+                "summary",
             ],
             "additionalProperties": False,
         }
 
     def get_template_name(self) -> str:
-        return "verbalator/results/response_to.html"
+        return "verbalator/results/context_analysis.html"
 
 
-register(ResponseToAction())
+register(ContextAnalysisAction())

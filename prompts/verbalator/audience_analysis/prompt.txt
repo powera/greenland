@@ -1,0 +1,5 @@
+Analyze the following text to identify its intended audience.
+
+Text: "{text}"
+
+Determine who the text is written for, the assumed expertise level, and what textual clues reveal the intended audience.

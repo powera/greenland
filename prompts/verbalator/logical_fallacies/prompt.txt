@@ -1,0 +1,5 @@
+Analyze the following text for logical fallacies, bad statistics, and reasoning errors.
+
+Text: "{text}"
+
+Identify each fallacy, classify its type and severity, and assess the overall reasoning quality.

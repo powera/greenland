@@ -1,0 +1,5 @@
+Analyze the following text for its narrative and organizational structure.
+
+Text: "{text}"
+
+Determine the structural type, break it into segments, and assess the overall coherence.

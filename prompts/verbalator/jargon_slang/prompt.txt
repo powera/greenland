@@ -1,0 +1,5 @@
+Analyze the following text for jargon, slang, colloquialisms, and informal language. The text is in {target_language}.
+
+Text: "{text}"
+
+Identify each specialized or informal term, classify its type, provide a standard equivalent, and assess its accessibility to a general audience.

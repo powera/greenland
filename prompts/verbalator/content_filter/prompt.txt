@@ -1,0 +1,5 @@
+Analyze the following text for references to violence, narcotics, sexual content, gambling, and nuclear weapons.
+
+Text: "{text}"
+
+Check each content category and identify specific instances with their severity.

@@ -1,0 +1,5 @@
+Analyze the following text and identify what domain knowledge is needed to understand it.
+
+Text: "{text}"
+
+List each knowledge domain required, the level needed, and the specific concepts that demand that knowledge.

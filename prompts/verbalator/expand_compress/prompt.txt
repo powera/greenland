@@ -1,0 +1,7 @@
+Analyze the following text and suggest modifications to summarize, expand, or join it.
+
+Text: "{text}"
+
+Additional text (for joining): "{context}"
+
+Suggest specific modifications with rationale and provide the complete modified text.

@@ -37,7 +37,7 @@
     </td></tr>
     <tr><td>Actions</td><td>
       <div id="action-checkboxes">
-        {% for color in ['blue', 'green'] %}
+        {% for color in color_order %}
           {% set group_actions = actions | selectattr('color_group', 'equalto', color) | list %}
           {% if group_actions %}
           <div class="action-group action-group-{{ color }}">

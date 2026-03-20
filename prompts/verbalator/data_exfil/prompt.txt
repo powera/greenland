@@ -1,0 +1,5 @@
+Analyze the following text for direct and indirect references to URLs, links, and other data exfiltration or infiltration vectors.
+
+Text: "{text}"
+
+Identify all vectors, classify their type and direction, and assess their severity.

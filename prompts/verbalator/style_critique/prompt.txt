@@ -1,0 +1,5 @@
+Critique the writing style of the following text.
+
+Text: "{text}"
+
+Evaluate word choice, sentence structure, clarity, voice, and other stylistic elements. Identify strengths and weaknesses with specific examples.

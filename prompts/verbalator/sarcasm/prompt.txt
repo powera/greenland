@@ -1,0 +1,7 @@
+Analyze the following text for sarcasm, irony, and non-literal tone.
+
+Text: "{text}"
+
+Context: "{context}"
+
+Identify any sarcastic or ironic passages, explain the literal vs. intended meaning, and assess the overall tone.

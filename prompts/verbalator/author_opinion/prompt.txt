@@ -1,0 +1,5 @@
+Analyze the following text for the author's personal opinions, preferences, and subjective judgments.
+
+Text: "{text}"
+
+Identify each opinion, classify its type and sentiment, and assess the overall objectivity of the text.
