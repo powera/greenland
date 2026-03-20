@@ -1,0 +1,7 @@
+Analyze the following text for humor, jokes, puns, wordplay, and comedic intent.
+
+Text: "{text}"
+
+Context: "{context}"
+
+Identify humorous passages, classify the type of humor, and assess whether the humor is likely to be understood by a general audience.

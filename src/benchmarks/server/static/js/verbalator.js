@@ -111,7 +111,7 @@ function renderActionResult(container, data) {
         body.innerHTML = renderMetadata(result);
     } else if (actionName === 'time_analysis') {
         body.innerHTML = renderTimeAnalysis(result);
-    } else if (actionName === 'response_to') {
+    } else if (actionName === 'context_analysis') {
         body.innerHTML = renderResponseTo(result);
     } else if (actionName === 'attribution') {
         body.innerHTML = renderAttribution(result);
@@ -598,13 +598,15 @@ function renderNumericPrecision(r) {
 function getColorClass(actionName) {
     /* Mirror verbalator/colors.py COLOR_ORDER mapping. */
     var colorMap = {
-        'metadata': 'blue', 'time_analysis': 'blue', 'response_to': 'blue',
-        'decomposition': 'green', 'knowledge_prereq': 'green', 'numeric_precision': 'green',
-        'attribution': 'yellow',
-        'sarcasm': 'xantham',
+        'metadata': 'blue', 'time_analysis': 'blue', 'context_analysis': 'blue',
+        'decomposition': 'green', 'knowledge_prereq': 'green', 'numeric_precision': 'green', 'logical_fallacies': 'green',
+        'attribution': 'yellow', 'audience_analysis': 'yellow', 'narrative_structure': 'yellow', 'rhetorical_purpose': 'yellow',
+        'sarcasm': 'xantham', 'humor_detection': 'xantham',
         'content_filter': 'violet', 'pii_detection': 'violet', 'sensitive_politics': 'violet', 'data_exfil': 'violet',
-        'pronunciation': 'color-pending',
-        'comprehension': 'color-pending'
+        'author_opinion': 'violet', 'privacy_secrecy': 'violet', 'adversarial_content': 'violet',
+        'pronunciation': 'orange', 'jargon_slang': 'orange',
+        'comprehension': 'orange',
+        'expand_compress': 'red', 'spelling_grammar': 'red', 'style_critique': 'red'
     };
     return colorMap[actionName] || 'blue';
 }

@@ -1,0 +1,5 @@
+Analyze the following text for discussions of cryptography, privacy, secrecy, and censorship.
+
+Text: "{text}"
+
+Identify each relevant topic, classify how it is framed, and explain why the passage is relevant.
