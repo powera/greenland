@@ -38,12 +38,13 @@ category of analysis. Colors are defined in `src/verbalator/colors.py`.
 
 | Color | Description | Actions |
 |-------|-------------|---------|
-| **Blue** | Analysis / metadata | Text Metadata, Time Analysis, Response-To |
+| **Blue** | Analysis / metadata | Text Metadata, Time Analysis, Context Analysis |
 | **Green** | Technical / structural / knowledge | Sentence Decomposition, Knowledge Prerequisites, Numeric Precision |
-| **Yellow** | Quotation / attribution | Quotation Attribution |
+| **Yellow** | Quotation / attribution / rhetoric / structure | Quotation Attribution, Narrative Structure, Audience Analysis, Rhetorical Purpose |
+| **Orange** | Vocabulary / pronunciation difficulty | Pronunciation Difficulty, Comprehension Difficulty, Jargon & Slang |
+| **Red** | Editorial / critique / review | Style Critique, Expand / Compress |
 | **Xantham** | Sarcasm / tone | Sarcasm Detection |
-| **Violet** | Content filters / sensitivity | Content Filter, PII Detection, Sensitive Political Topics, Data Exfil/Infiltration |
-| **Pending** | Color not yet assigned | Pronunciation Difficulty, Comprehension Difficulty |
+| **Violet** | Content filters / sensitivity | Content Filter, PII Detection, Sensitive Political Topics, Data Exfil/Infiltration, Author Opinions, Privacy & Secrecy |
 
 
 ## Actions
@@ -77,7 +78,7 @@ Actions also declare metadata used by the UI:
 |--------|-------------|----------------|
 | **Text Metadata** (`metadata`) | Detect language, register, formality, genre, and key topics | — |
 | **Time Analysis** (`time_analysis`) | Estimate when text was written or when described events occurred | — |
-| **Response-To** (`response_to`) | Analyze whether text is responding to given context | `context` |
+| **Context Analysis** (`context_analysis`) | Analyze relationship to provided context and implicit situational assumptions | `context` |
 
 **Green — Technical / structural / knowledge**
 
@@ -87,11 +88,29 @@ Actions also declare metadata used by the UI:
 | **Knowledge Prerequisites** (`knowledge_prereq`) | Identify domain knowledge needed (biology, physics, history, etc.) | — |
 | **Numeric Precision** (`numeric_precision`) | Flag numbers with excessive precision and check authority/sourcing | — |
 
-**Yellow — Quotation / attribution**
+**Yellow — Quotation / attribution / rhetoric / structure**
 
 | Action | Description | Special inputs |
 |--------|-------------|----------------|
 | **Quotation Attribution** (`attribution`) | Identify quotations and whether they need attribution | — |
+| **Narrative Structure** (`narrative_structure`) | Analyze whether the text is a single narrative, vignettes, listicle, argument, etc. | — |
+| **Audience Analysis** (`audience_analysis`) | Identify the intended audience of the text | — |
+| **Rhetorical Purpose** (`rhetorical_purpose`) | Identify what the text is trying to accomplish (persuade, inform, entertain, instruct) | — |
+
+**Orange — Vocabulary / pronunciation difficulty**
+
+| Action | Description | Special inputs |
+|--------|-------------|----------------|
+| **Pronunciation Difficulty** (`pronunciation`) | Tag words likely to be queried for pronunciation difficulty | `target_language` |
+| **Comprehension Difficulty** (`comprehension`) | Tag words likely to be queried for comprehension difficulty | `target_language`, `context` |
+| **Jargon & Slang** (`jargon_slang`) | Identify jargon, slang, colloquialisms, and informal language | `target_language` |
+
+**Red — Editorial / critique / review**
+
+| Action | Description | Special inputs |
+|--------|-------------|----------------|
+| **Style Critique** (`style_critique`) | Critique the author's stylistic choices: word choice, sentence structure, clarity, voice | — |
+| **Expand / Compress** (`expand_compress`) | Summarize, expand, or join texts with suggested modifications and transitions | `context` |
 
 **Xantham — Sarcasm / tone**
 
@@ -103,17 +122,12 @@ Actions also declare metadata used by the UI:
 
 | Action | Description | Special inputs |
 |--------|-------------|----------------|
-| **Content Filter** (`content_filter`) | Flag violence, narcotics, sex, gambling, nuclear weapons | — |
+| **Content Filter** (`content_filter`) | Flag violence, firearms, narcotics, alcohol/tobacco, sex, gambling, nuclear weapons, religion | — |
 | **PII Detection** (`pii_detection`) | Identify Personally Identifying Information | — |
 | **Sensitive Political Topics** (`sensitive_politics`) | Flag politically sensitive content for editorial review | — |
 | **Data Exfil/Infiltration** (`data_exfil`) | Detect URLs, links, and data exfiltration/infiltration vectors | — |
-
-**Pending — Color not yet assigned**
-
-| Action | Description | Special inputs |
-|--------|-------------|----------------|
-| **Pronunciation Difficulty** (`pronunciation`) | Tag words likely to be queried for pronunciation difficulty | `target_language` |
-| **Comprehension Difficulty** (`comprehension`) | Tag words likely to be queried for comprehension difficulty | `target_language`, `context` |
+| **Author Opinions** (`author_opinion`) | Detect the author's personal opinions, preferences, and subjective judgments | — |
+| **Privacy & Secrecy** (`privacy_secrecy`) | Detect discussions of cryptography, privacy, secrecy, and censorship | — |
 
 
 ## Adding a new action

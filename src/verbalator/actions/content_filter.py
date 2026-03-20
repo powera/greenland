@@ -13,7 +13,7 @@ _PROMPT_TYPE = "content_filter"
 class ContentFilterAction(ActionBase):
     name = "content_filter"
     display_name = "Content Filter"
-    description = "Flag references to violence, narcotics, sex, gambling, and nuclear weapons"
+    description = "Flag references to violence, firearms, narcotics, alcohol/tobacco, sex, gambling, nuclear weapons, and religion"
     color_group = "violet"
     needs_context = False
     needs_target_language = False
@@ -48,10 +48,13 @@ class ContentFilterAction(ActionBase):
                                 "type": "string",
                                 "enum": [
                                     "violence",
+                                    "firearms",
                                     "narcotics",
+                                    "alcohol_tobacco",
                                     "sexual_content",
                                     "gambling",
                                     "nuclear_weapons",
+                                    "religion",
                                 ],
                                 "description": "The content category",
                             },

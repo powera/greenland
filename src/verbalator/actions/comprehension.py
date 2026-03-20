@@ -14,7 +14,7 @@ class ComprehensionAction(ActionBase):
     name = "comprehension"
     display_name = "Comprehension Difficulty"
     description = "Tag words likely to be queried for comprehension difficulty"
-    color_group = "color-pending"
+    color_group = "orange"
     needs_context = True
     needs_target_language = True
 

@@ -14,7 +14,7 @@ class PronunciationAction(ActionBase):
     name = "pronunciation"
     display_name = "Pronunciation Difficulty"
     description = "Tag words likely to be queried for pronunciation difficulty"
-    color_group = "color-pending"
+    color_group = "orange"
     needs_context = False
     needs_target_language = True
 

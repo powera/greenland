@@ -38,7 +38,21 @@ COLORS: Dict[str, ColorDef] = {
         background="#fef7e0",
         border="#f9ab00",
         text="#b06000",
-        description="quotation / attribution",
+        description="quotation / attribution / rhetoric / structure",
+    ),
+    "orange": ColorDef(
+        display_name="Orange",
+        background="#fef0e1",
+        border="#e8710a",
+        text="#c25e00",
+        description="vocabulary / pronunciation difficulty",
+    ),
+    "red": ColorDef(
+        display_name="Red",
+        background="#fce8e8",
+        border="#d93025",
+        text="#b31412",
+        description="editorial / critique / review",
     ),
     "xantham": ColorDef(
         display_name="Xantham",
