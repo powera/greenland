@@ -37,7 +37,7 @@
     <div class="col-md-4">
         <div class="card stat-card">
             <div class="card-body">
-                <h5 class="card-title text-muted">Total Runs</h5>
+                <h5 class="card-title text-muted">Leaderboard Entries</h5>
                 <h2 class="card-text text-info">{{ leaderboard|length }}</h2>
             </div>
         </div>
@@ -48,15 +48,29 @@
                 <h5 class="card-title text-muted">Best Score</h5>
                 <h2 class="card-text text-success">
                     {% if leaderboard %}
-                    {{ leaderboard[0][0].normed_score }}/100
+                    {{ leaderboard[0].metrics.effective_score }}/100
                     {% else %}
                     -
                     {% endif %}
                 </h2>
+                {% if excluded_question_count %}
+                <div class="small text-muted mt-2">{{ excluded_question_count }} question exclusion{% if excluded_question_count != 1 %}s{% endif %} applied to aggregate scores.</div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+{% if excluded_question_count %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-warning mb-0">
+            <strong>{{ excluded_question_count }} question exclusion{% if excluded_question_count != 1 %}s{% endif %}</strong>
+            are currently applied to this benchmark. Leaderboard scores and latency summaries are recalculated using only active questions.
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <!-- Leaderboard -->
 <div class="row mb-4">
@@ -79,7 +93,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for run, model in leaderboard %}
+                            {% for entry in leaderboard %}
+                            {% set run = entry.run %}
+                            {% set model = entry.model %}
+                            {% set metrics = entry.metrics %}
                             <tr>
                                 <td>
                                     {% if loop.index == 1 %}
@@ -100,13 +117,23 @@
                                 <td class="text-center">
                                     <div class="score-badge mx-auto"
                                          style="background-color:
-                                         {% if run.normed_score >= 90 %}#1b5e20
-                                         {% elif run.normed_score >= 75 %}#4caf50
-                                         {% elif run.normed_score >= 50 %}#ff9800
-                                         {% elif run.normed_score >= 25 %}#f44336
+                                         {% if metrics.effective_score >= 90 %}#1b5e20
+                                         {% elif metrics.effective_score >= 75 %}#4caf50
+                                         {% elif metrics.effective_score >= 50 %}#ff9800
+                                         {% elif metrics.effective_score >= 25 %}#f44336
                                          {% else %}#b71c1c{% endif %};">
-                                        {{ run.normed_score }}
+                                        {{ metrics.effective_score }}
                                     </div>
+                                    <div class="small text-muted mt-1">{{ '%.1f'|format(metrics.median_time_msec) }}ms median</div>
+                                    {% if metrics.outlier_count or metrics.excluded_question_count or metrics.price_diagnostics.has_mismatch %}
+                                    <div class="small text-warning-emphasis">
+                                        {% if metrics.outlier_count %}{{ metrics.outlier_count }} latency outlier{% if metrics.outlier_count != 1 %}s{% endif %}{% endif %}
+                                        {% if metrics.outlier_count and (metrics.excluded_question_count or metrics.price_diagnostics.has_mismatch) %} · {% endif %}
+                                        {% if metrics.excluded_question_count %}{{ metrics.excluded_question_count }} excluded Q{% endif %}
+                                        {% if metrics.excluded_question_count and metrics.price_diagnostics.has_mismatch %} · {% endif %}
+                                        {% if metrics.price_diagnostics.has_mismatch %}cost warning{% endif %}
+                                    </div>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     <small>{{ run.run_ts.strftime('%Y-%m-%d %H:%M:%S') }}</small>
@@ -157,11 +184,36 @@
                                 {% if question.question_text %}
                                 <span class="ms-2 text-truncate">{{ question.question_text }}</span>
                                 {% endif %}
+                                {% if question.is_excluded %}
+                                <span class="badge bg-warning text-dark ms-2">Excluded</span>
+                                {% endif %}
                             </button>
                         </h2>
                         <div id="questionCollapse{{ loop.index }}" class="accordion-collapse collapse"
                              aria-labelledby="questionHeading{{ loop.index }}" data-bs-parent="#questionsAccordion">
                             <div class="accordion-body">
+                                {% if question.is_excluded %}
+                                <div class="alert alert-warning">
+                                    <strong>Excluded from aggregate scoring.</strong>
+                                    {{ question.exclusion_reason or "No reason recorded." }}
+                                </div>
+                                <form method="post" action="{{ url_for('benchmarks.include_question', question_id=question.question_id) }}" class="mb-3">
+                                    <input type="hidden" name="benchmark_name" value="{{ benchmark.codename }}">
+                                    <button type="submit" class="btn btn-outline-success btn-sm">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Re-include question
+                                    </button>
+                                </form>
+                                {% else %}
+                                <form method="post" action="{{ url_for('benchmarks.exclude_question', question_id=question.question_id) }}" class="mb-3">
+                                    <input type="hidden" name="benchmark_name" value="{{ benchmark.codename }}">
+                                    <label for="reason{{ loop.index }}" class="form-label"><strong>Exclude from all benchmark aggregates</strong></label>
+                                    <textarea class="form-control mb-2" id="reason{{ loop.index }}" name="reason" rows="2" placeholder="Explain why this question is invalid or ambiguous." required></textarea>
+                                    <button type="submit" class="btn btn-outline-warning btn-sm">
+                                        <i class="bi bi-slash-circle"></i> Exclude question
+                                    </button>
+                                </form>
+                                {% endif %}
+
                                 {% if question.question_text %}
                                 <h6>Question</h6>
                                 <pre class="bg-light p-3 border rounded"><code>{{ question.question_text }}</code></pre>

@@ -41,26 +41,29 @@
                                 <td class="text-center">
                                     <div class="score-badge mx-auto"
                                          style="background-color:
-                                         {% if run_info.run_data.normed_score >= 90 %}#1b5e20
-                                         {% elif run_info.run_data.normed_score >= 75 %}#4caf50
-                                         {% elif run_info.run_data.normed_score >= 50 %}#ff9800
-                                         {% elif run_info.run_data.normed_score >= 25 %}#f44336
+                                         {% if run_info.effective_score >= 90 %}#1b5e20
+                                         {% elif run_info.effective_score >= 75 %}#4caf50
+                                         {% elif run_info.effective_score >= 50 %}#ff9800
+                                         {% elif run_info.effective_score >= 25 %}#f44336
                                          {% else %}#b71c1c{% endif %};">
-                                        {{ run_info.run_data.normed_score }}
+                                        {{ run_info.effective_score }}
                                     </div>
+                                    {% if run_info.effective_score != run_info.run_data.normed_score %}
+                                    <div class="small text-muted mt-1">stored: {{ run_info.run_data.normed_score }}</div>
+                                    {% endif %}
                                 </td>
                                 {% endfor %}
                             </tr>
                             <tr>
                                 <td><strong>Correct / Total</strong></td>
                                 {% for run_info in runs %}
-                                <td class="text-center">{{ run_info.correct_count }} / {{ run_info.total_questions }}</td>
+                                <td class="text-center">{{ run_info.correct_count }} / {{ run_info.included_question_count }}</td>
                                 {% endfor %}
                             </tr>
                             <tr>
-                                <td><strong>Avg Response Time</strong></td>
+                                <td><strong>Median Response Time</strong></td>
                                 {% for run_info in runs %}
-                                <td class="text-center">{{ '%.1f'|format(run_info.avg_time) }}ms</td>
+                                <td class="text-center">{{ '%.1f'|format(run_info.median_time) }}ms</td>
                                 {% endfor %}
                             </tr>
                             <tr>

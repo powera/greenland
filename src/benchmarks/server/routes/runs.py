@@ -15,6 +15,7 @@ from benchmarks.datastore.benchmarks import (
     RunDetail,
 )
 from benchmarks.datastore.common import Model
+from benchmarks.server.analysis import analyze_run_details, correctness_threshold
 
 bp = Blueprint("runs", __name__, url_prefix="/runs", template_folder="../templates")
 
@@ -24,10 +25,6 @@ def list_runs():
     """List recent benchmark runs."""
     runs = get_recent_runs(g.bench_db)
     return render_template("runs/list.html", runs=runs)
-
-
-def _correctness_threshold(benchmark_name: str) -> int:
-    return 70 if benchmark_name == "0062_sentence_decomposition" else 100
 
 
 def _question_sort_key(detail: dict) -> tuple[int, str]:
@@ -65,20 +62,16 @@ def view_run(run_id):
     run = g.bench_db.query(Run).filter(Run.run_id == run_id).first()
     model = g.bench_db.query(Model).filter(Model.codename == run.model_name).first()
 
-    # Calculate statistics
-    total_questions = len(run_data["details"])
-    threshold = _correctness_threshold(run_data["benchmark_name"])
-    correct_count = sum(1 for d in run_data["details"] if (d.get("score") or 0) >= threshold)
-    incorrect_count = total_questions - correct_count
-
-    total_time = sum(d["eval_msec"] or 0 for d in run_data["details"])
-    avg_time = total_time / total_questions if total_questions > 0 else 0
-
-    total_cost = sum(d.get("cost_usd") or 0 for d in run_data["details"])
-    total_tokens = sum((d.get("tokens_used") or 0) for d in run_data["details"])
-
     ordered_questions = sorted(run_data["details"], key=_question_sort_key)
     is_python_coding_run = _is_python_coding_run(run_data["benchmark_name"])
+    metrics = analyze_run_details(
+        run_data["benchmark_name"],
+        ordered_questions,
+        model_path=model.model_path if model else None,
+        model_type=model.model_type if model else None,
+    )
+    total_questions = len(run_data["details"])
+    threshold = correctness_threshold(run_data["benchmark_name"])
 
     for detail in ordered_questions:
         question_info_json = detail.get("question_info_json") or {}
@@ -118,14 +111,20 @@ def view_run(run_id):
         model=model,
         run=run,
         total_questions=total_questions,
-        correct_count=correct_count,
-        incorrect_count=incorrect_count,
-        avg_time=avg_time,
-        total_cost=total_cost,
-        total_tokens=total_tokens,
+        correct_count=metrics.correct_count,
+        incorrect_count=metrics.incorrect_count,
+        avg_time=metrics.avg_time_msec,
+        median_time=metrics.median_time_msec,
+        total_cost=metrics.total_cost_usd,
+        total_tokens=metrics.total_tokens,
         ordered_questions=ordered_questions,
         correctness_threshold=threshold,
         is_python_coding_run=is_python_coding_run,
+        included_question_count=metrics.included_question_count,
+        excluded_question_count=metrics.excluded_question_count,
+        effective_score=metrics.effective_score,
+        outlier_count=metrics.outlier_count,
+        price_diagnostics=metrics.price_diagnostics,
     )
 
 
@@ -152,17 +151,13 @@ def compare_runs():
 
             # Calculate stats
             total_questions = len(run_data["details"])
-            threshold = _correctness_threshold(run_data["benchmark_name"])
-            correct_count = sum(
-                1 for d in run_data["details"] if (d.get("score") or 0) >= threshold
+            threshold = correctness_threshold(run_data["benchmark_name"])
+            metrics = analyze_run_details(
+                run_data["benchmark_name"],
+                run_data["details"],
+                model_path=model.model_path if model else None,
+                model_type=model.model_type if model else None,
             )
-            avg_time = (
-                sum(d["eval_msec"] or 0 for d in run_data["details"]) / total_questions
-                if total_questions > 0
-                else 0
-            )
-            total_cost = sum(d.get("cost_usd") or 0 for d in run_data["details"])
-            total_tokens = sum((d.get("tokens_used") or 0) for d in run_data["details"])
 
             runs_data.append(
                 {
@@ -170,11 +165,17 @@ def compare_runs():
                     "run_data": run_data,
                     "model": model,
                     "run": run,
-                    "correct_count": correct_count,
+                    "correct_count": metrics.correct_count,
                     "total_questions": total_questions,
-                    "avg_time": avg_time,
-                    "total_cost": total_cost,
-                    "total_tokens": total_tokens,
+                    "avg_time": metrics.avg_time_msec,
+                    "total_cost": metrics.total_cost_usd,
+                    "total_tokens": metrics.total_tokens,
+                    "effective_score": metrics.effective_score,
+                    "included_question_count": metrics.included_question_count,
+                    "excluded_question_count": metrics.excluded_question_count,
+                    "median_time": metrics.median_time_msec,
+                    "price_diagnostics": metrics.price_diagnostics,
+                    "threshold": threshold,
                 }
             )
 
