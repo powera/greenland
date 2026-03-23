@@ -3,11 +3,12 @@
 
 This script loads lemma data through the existing storage backend layer, then
 groups entries by their word form in a requested language and classifies
-collisions into three buckets:
+collisions into four buckets:
 
-1. Same word but different POS
-2. Meaning collisions (same surface form, same POS, different concepts)
-3. Duplicates (same surface form, same POS, same concept listed multiple times)
+1. Related word forms (same surface form, same concept family, different POS)
+2. Same word but different POS for unrelated concepts
+3. Meaning collisions (same surface form, same POS, different concepts)
+4. Duplicates (same surface form, same POS, same concept listed multiple times)
 
 By default this reads from the release JSONL data under ``data/release/lemmas``
 via the JSONL backend, which internally populates a temporary SQLite database
@@ -64,6 +65,14 @@ class LemmaEntry:
         return (
             normalize_text(self.lemma_text),
             normalize_text(self.definition_text),
+            normalize_text(self.disambiguation),
+        )
+
+    @property
+    def lemma_identity_key(self) -> tuple[str, str]:
+        """Return a normalized lemma identity across related POS forms."""
+        return (
+            normalize_text(self.lemma_text),
             normalize_text(self.disambiguation),
         )
 
@@ -145,15 +154,52 @@ def group_by_word(entries: Iterable[LemmaEntry]) -> dict[str, list[LemmaEntry]]:
     return dict(grouped_entries)
 
 
+def classify_related_word_forms(
+    grouped_entries: dict[str, list[LemmaEntry]],
+) -> list[tuple[str, list[LemmaEntry]]]:
+    """Find words that reuse the same lemma identity across multiple POS labels."""
+    related_groups: list[tuple[str, list[LemmaEntry]]] = []
+    for entries in grouped_entries.values():
+        entries_by_lemma_identity: DefaultDict[tuple[str, str], list[LemmaEntry]] = defaultdict(
+            list
+        )
+        for entry in entries:
+            entries_by_lemma_identity[entry.lemma_identity_key].append(entry)
+
+        for related_entries in entries_by_lemma_identity.values():
+            pos_types = {entry.pos_type for entry in related_entries}
+            if len(related_entries) > 1 and len(pos_types) > 1:
+                related_groups.append(
+                    (related_entries[0].word, sorted(related_entries, key=_entry_sort_key))
+                )
+    return sorted(related_groups, key=lambda item: normalize_text(item[0]))
+
+
 def classify_same_word_different_pos(
     grouped_entries: dict[str, list[LemmaEntry]],
 ) -> list[tuple[str, list[LemmaEntry]]]:
-    """Find words that occur under multiple POS labels."""
+    """Find unexpected same-word collisions across unrelated POS entries."""
     collisions: list[tuple[str, list[LemmaEntry]]] = []
     for entries in grouped_entries.values():
-        pos_labels = {entry.pos_label for entry in entries}
-        if len(entries) > 1 and len(pos_labels) > 1:
-            collisions.append((entries[0].word, sorted(entries, key=_entry_sort_key)))
+        entries_by_lemma_identity: DefaultDict[tuple[str, str], list[LemmaEntry]] = defaultdict(
+            list
+        )
+        for entry in entries:
+            entries_by_lemma_identity[entry.lemma_identity_key].append(entry)
+
+        related_identity_keys = {
+            lemma_identity_key
+            for lemma_identity_key, related_entries in entries_by_lemma_identity.items()
+            if len({entry.pos_type for entry in related_entries}) > 1
+        }
+        unexpected_entries = [
+            entry for entry in entries if entry.lemma_identity_key not in related_identity_keys
+        ]
+        unexpected_pos_types = {entry.pos_type for entry in unexpected_entries}
+        if len(unexpected_entries) > 1 and len(unexpected_pos_types) > 1:
+            collisions.append(
+                (unexpected_entries[0].word, sorted(unexpected_entries, key=_entry_sort_key))
+            )
     return sorted(collisions, key=lambda item: normalize_text(item[0]))
 
 
@@ -165,7 +211,7 @@ def classify_meaning_collisions(
     for entries in grouped_entries.values():
         entries_by_pos: DefaultDict[str, list[LemmaEntry]] = defaultdict(list)
         for entry in entries:
-            entries_by_pos[entry.pos_label].append(entry)
+            entries_by_pos[entry.pos_type].append(entry)
         for pos_label, pos_entries in entries_by_pos.items():
             concept_keys = {entry.concept_key for entry in pos_entries}
             if len(pos_entries) > 1 and len(concept_keys) > 1:
@@ -183,7 +229,7 @@ def classify_duplicates(
     for entries in grouped_entries.values():
         concept_groups: DefaultDict[tuple[str, str, str, str], list[LemmaEntry]] = defaultdict(list)
         for entry in entries:
-            group_key = (entry.pos_label, *entry.concept_key)
+            group_key = (entry.pos_type, *entry.concept_key)
             concept_groups[group_key].append(entry)
         for group_key, duplicate_entries in concept_groups.items():
             if len(duplicate_entries) > 1:
@@ -221,9 +267,25 @@ def format_entry(entry: LemmaEntry) -> str:
     return f"- {entry.pos_label}: {concept_text} [guid={entry.guid}]"
 
 
+def print_related_word_forms(groups: Sequence[tuple[str, list[LemmaEntry]]]) -> None:
+    """Print groups classified as related word forms."""
+    print(f"=== Related word forms ({len(groups)}) ===")
+    if not groups:
+        print("None")
+        print()
+        return
+
+    for word, entries in groups:
+        pos_summary = ", ".join(sorted({entry.pos_label for entry in entries}))
+        print(f"{word} -> {pos_summary}")
+        for entry in entries:
+            print(format_entry(entry))
+        print()
+
+
 def print_same_word_different_pos(groups: Sequence[tuple[str, list[LemmaEntry]]]) -> None:
     """Print groups classified as same word, different POS."""
-    print(f"=== Same word, different POS ({len(groups)}) ===")
+    print(f"=== Same word, different POS collisions ({len(groups)}) ===")
     if not groups:
         print("None")
         print()
@@ -272,6 +334,7 @@ def print_duplicates(
 def print_summary(
     language_code: str,
     entries: Sequence[LemmaEntry],
+    related_word_forms: Sequence[tuple[str, list[LemmaEntry]]],
     same_word_different_pos: Sequence[tuple[str, list[LemmaEntry]]],
     meaning_collisions: Sequence[tuple[str, str, list[LemmaEntry]]],
     duplicates: Sequence[tuple[str, str, tuple[str, str, str], list[LemmaEntry]]],
@@ -288,7 +351,8 @@ def print_summary(
     if getattr(args, "db_path", None):
         print(f"DB path: {args.db_path}")
     print(f"Entries scanned: {len(entries)}")
-    print(f"Same word, different POS groups: {len(same_word_different_pos)}")
+    print(f"Related word form groups: {len(related_word_forms)}")
+    print(f"Same word, different POS collision groups: {len(same_word_different_pos)}")
     print(f"Meaning collision groups: {len(meaning_collisions)}")
     print(f"Duplicate groups: {len(duplicates)}")
     print()
@@ -306,6 +370,7 @@ def main() -> int:
 
     entries = load_entries(language_code, args)
     grouped_entries = group_by_word(entries)
+    related_word_forms = classify_related_word_forms(grouped_entries)
     same_word_different_pos = classify_same_word_different_pos(grouped_entries)
     meaning_collisions = classify_meaning_collisions(grouped_entries)
     duplicates = classify_duplicates(grouped_entries)
@@ -313,11 +378,13 @@ def main() -> int:
     print_summary(
         language_code=language_code,
         entries=entries,
+        related_word_forms=related_word_forms,
         same_word_different_pos=same_word_different_pos,
         meaning_collisions=meaning_collisions,
         duplicates=duplicates,
         args=args,
     )
+    print_related_word_forms(related_word_forms)
     print_same_word_different_pos(same_word_different_pos)
     print_meaning_collisions(meaning_collisions)
     print_duplicates(duplicates)
