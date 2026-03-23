@@ -14,11 +14,13 @@ from clients.openai import client as openai_client
 from benchmarks.lib.utils.data_models import BenchmarkQuestion
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Default model for validation and LLM-based question generation
-DEFAULT_VALIDATION_MODEL = "gpt-4o-mini-2024-07-18"
+DEFAULT_VALIDATION_MODEL = "gpt-5.4-mini"
 DEFAULT_GENERATION_MODEL = "gemma2:9b"
 
 

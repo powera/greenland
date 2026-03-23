@@ -12,7 +12,7 @@ Example request:
     {
         "guid": "N03_003",
         "lang_code": "en",
-        "model": "gpt-5-mini",
+        "model": "gpt-5.4-mini",
         "openai_api_key": "sk-..."
     }
 """
@@ -134,7 +134,7 @@ def api_info() -> ResponseReturnValue:
             "description": "Check translations for a lemma using LLM validation",
             "parameters": {
                 "guid": "Required. GUID of the lemma (e.g., 'N03_003')",
-                "model": "Optional. LLM model to use (default: gpt-5-mini)",
+                "model": "Optional. LLM model to use (default: gpt-5.4-mini)",
                 "openai_api_key": "Optional. OpenAI API key (for gpt-* models)",
                 "anthropic_api_key": "Optional. Anthropic API key (for claude-* models)",
                 "google_api_key": "Optional. Google API key (for gemini-* models)",
@@ -195,7 +195,7 @@ def api_check_translations() -> ResponseReturnValue:
 
     Request body (JSON):
         guid: Required. GUID of the lemma (e.g., 'N03_003')
-        model: Optional. LLM model to use (default: gpt-5-mini)
+        model: Optional. LLM model to use (default: gpt-5.4-mini)
         openai_api_key: Optional. OpenAI API key (for gpt-* models)
         anthropic_api_key: Optional. Anthropic API key (for claude-* models)
         google_api_key: Optional. Google API key (for gemini-* models)

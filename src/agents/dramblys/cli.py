@@ -37,7 +37,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Common arguments
     add_common_args(parser)
-    add_llm_args(parser, default_model="gpt-5-mini")
+    add_llm_args(parser, default_model="gpt-5.4-mini")
     add_output_args(parser)
     add_processing_args(parser)
     add_backend_args(parser)

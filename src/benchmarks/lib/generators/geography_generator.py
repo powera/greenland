@@ -18,7 +18,7 @@ from benchmarks.lib.utils.data_models import (
 logger = logging.getLogger(__name__)
 
 # Default model for LLM-based generation
-DEFAULT_GENERATION_MODEL = "gpt-4o-mini-2024-07-18"
+DEFAULT_GENERATION_MODEL = "gpt-5.4-mini"
 
 
 class GeographyGenerator(BenchmarkGenerator):
@@ -56,7 +56,7 @@ class GeographyGenerator(BenchmarkGenerator):
         """
 
         # Set validation model to use for geography questions
-        self.validation_model = "gpt-4o-mini-2024-07-18"
+        self.validation_model = "gpt-5.4-mini"
 
         # Track which types of questions we've used
         self._used_countries: set[str] = set()

@@ -133,7 +133,7 @@ class SentenceGenerator:
         return sentences
 
     def generate_with_llm(
-        self, pattern: Dict[str, Any], target_language: str, model: str = "gpt-4o-mini"
+        self, pattern: Dict[str, Any], target_language: str, model: str = "gpt-5.4-mini"
     ) -> Optional[Dict[str, Any]]:
         """
         Use LLM to generate a properly structured sentence from pattern components.

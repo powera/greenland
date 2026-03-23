@@ -302,7 +302,7 @@ class BebrasAgent:
                     source_text=sentence_text,
                     source_language=source_language,
                     target_languages=target_languages,
-                    model=self.config.model or "gpt-5-mini",
+                    model=self.config.model or "gpt-5.4-mini",
                 )
 
             session.flush()

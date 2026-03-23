@@ -88,7 +88,11 @@ def list_pending_imports(
 
 
 def approve_pending_import(
-    session: Any, pending_import_id: int, db_path: str, model: str = "gpt-5-mini", debug: bool = False
+    session: Any,
+    pending_import_id: int,
+    db_path: str,
+    model: str = "gpt-5.4-mini",
+    debug: bool = False,
 ) -> Dict[str, Any]:
     """
     Approve a pending import and convert it to a full Lemma/DerivativeForm entry.
@@ -247,7 +251,7 @@ def stage_missing_words_for_import(
     missing_words: List[Dict[str, Any]],
     db_path: str,
     limit: Optional[int] = None,
-    model: str = "gpt-5-mini",
+    model: str = "gpt-5.4-mini",
     throttle: float = 1.0,
     dry_run: bool = False,
     target_language: str = "lt",

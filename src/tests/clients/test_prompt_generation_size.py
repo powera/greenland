@@ -5,7 +5,7 @@ import os
 import statistics
 import sys
 import unittest
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, cast
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
@@ -68,7 +68,7 @@ class PromptGenerationSizeTestCase(unittest.TestCase):
         client.debug = False
         client.api_key = "test-key"
         client.headers = {"Authorization": "Bearer test-key", "Content-Type": "application/json"}
-        client.encoder = None
+        client.encoder = cast(Any, None)
 
         def _fake_response(**kwargs: Any) -> Tuple[Dict[str, Any], float]:
             captured.update(kwargs)
@@ -88,7 +88,7 @@ class PromptGenerationSizeTestCase(unittest.TestCase):
         client._create_response = _fake_response  # type: ignore[method-assign]
         client.generate_chat(
             prompt=prompt,
-            model="gpt-5-mini",
+            model="gpt-5.4-mini",
             json_schema=self.RESPONSE_SCHEMA,
             context=context,
         )
@@ -124,7 +124,7 @@ class PromptGenerationSizeTestCase(unittest.TestCase):
         client.debug = False
         client.api_key = "test-key"
         client.headers = {"Content-Type": "application/json"}
-        client.encoder = None
+        client.encoder = cast(Any, None)
 
         def _fake_response(model: str, **kwargs: Any) -> Tuple[Dict[str, Any], float]:
             captured["model"] = model
@@ -165,6 +165,7 @@ class PromptGenerationSizeTestCase(unittest.TestCase):
                 @staticmethod
                 def json() -> Dict[str, Any]:
                     return {
+                        "model": "mistral",
                         "choices": [{"message": {"content": "{}"}}],
                         "usage": {"prompt_tokens": 0, "completion_tokens": 0},
                     }
@@ -242,6 +243,19 @@ class PromptGenerationSizeTestCase(unittest.TestCase):
                     f"Prompt size mismatch for {query['name']}: {prompt_sizes}. "
                     f"Threshold is {self.MAX_DEVIATION:.0%}. Violations: {violations}",
                 )
+
+    def test_openai_gpt54_mini_uses_minimal_reasoning_settings(self) -> None:
+        payload = self._capture_openai(
+            prompt="Translate 'flower' to French.",
+            context="You are a translation assistant.",
+        )
+
+        self.assertEqual(payload["model"], "gpt-5.4-mini")
+        self.assertEqual(payload["reasoning"], {"effort": "minimal"})
+        self.assertEqual(payload["text"]["verbosity"], "low")
+        self.assertIn("format", payload["text"])
+        self.assertNotIn("temperature", payload)
+        self.assertEqual(payload["max_output_tokens"], 4096)
 
 
 if __name__ == "__main__":

@@ -40,7 +40,7 @@ All agents use standardized arguments from `agents/common/common_args.py`:
 --debug             Enable debug logging
 --yes, -y           Skip confirmation prompts
 --dry-run           Preview changes without committing
---model MODEL       LLM model (default: gpt-5-mini)
+--model MODEL       LLM model (default: gpt-5.4-mini)
 --throttle SECS     Delay between API calls (default: 1.0)
 --limit N           Maximum items to process
 --sample-rate RATE  Fraction to process (0.0-1.0)

@@ -10,10 +10,12 @@ from clients.ollama_client import OllamaTimeoutError
 from util.telemetry import LLMUsage
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
-EVALUATOR_MODEL = "gpt-4o-mini"
+EVALUATOR_MODEL = "gpt-5.4-mini"
 TARGET_LENGTH = 500  # Standard length for all responses
 
 

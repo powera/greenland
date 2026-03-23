@@ -711,7 +711,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         self,
         top_n: int = 5000,
         limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
+        model: str = "gpt-5.4-mini",
         throttle: float = 1.0,
         dry_run: bool = False,
         target_language: str = "lt",
@@ -760,7 +760,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         self,
         top_n: int = 5000,
         limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
+        model: str = "gpt-5.4-mini",
         throttle: float = 1.0,
         dry_run: bool = False,
     ) -> Dict[str, Any]:
@@ -881,7 +881,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
             session.close()
 
     def approve_pending_import(
-        self, pending_import_id: int, model: str = "gpt-5-mini"
+        self, pending_import_id: int, model: str = "gpt-5.4-mini"
     ) -> Dict[str, Any]:
         """Delegate to staging module."""
         session = self.get_session()

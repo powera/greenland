@@ -121,7 +121,7 @@ def query_definitions(
     prompt = prompt_template.format(word=word)
 
     # Get model name from parameter or client attribute
-    model_name: str = cast(str, model or getattr(client, "model", "gpt-5-mini"))
+    model_name: str = cast(str, model or getattr(client, "model", "gpt-5.4-mini"))
 
     try:
         # Make a single API call without retries

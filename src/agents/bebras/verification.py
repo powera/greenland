@@ -37,8 +37,9 @@ from storage.translation_helpers import (
 logger = logging.getLogger(__name__)
 
 # Model language support - which languages each model can reliably verify
-# Based on user specification: only gpt-5-mini, supporting lt zh fr es de it nl pt sv
+# GPT-5.4 Mini is the default verifier, supporting lt zh fr es de it nl pt sv.
 MODEL_LANGUAGE_SUPPORT: Dict[str, List[str]] = {
+    "gpt-5.4-mini": ["lt", "zh", "zh-tw", "fr", "es", "de", "it", "nl", "pt", "sv"],
     "gpt-5-mini": ["lt", "zh", "zh-tw", "fr", "es", "de", "it", "nl", "pt", "sv"],
 }
 
@@ -64,7 +65,7 @@ def get_supported_languages(model: str) -> List[str]:
     """Get list of languages supported by a model for verification.
 
     Args:
-        model: Model name (e.g., 'gpt-5-mini')
+        model: Model name (e.g., 'gpt-5.4-mini')
 
     Returns:
         List of language codes the model can verify
@@ -118,7 +119,7 @@ class VerificationAgent:
         """
         self.config = config
         self.debug = config.debug
-        self.model = config.model or "gpt-5-mini"
+        self.model = config.model or "gpt-5.4-mini"
         self.llm_client = UnifiedLLMClient.from_config(config)
 
         # Initialize batch processing components

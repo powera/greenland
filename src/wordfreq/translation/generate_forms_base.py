@@ -27,7 +27,9 @@ from wordfreq.translation.client import LinguisticClient
 MAX_RETRIES = 3
 RETRY_BASE_DELAY = 1.0  # seconds, doubles each retry
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -606,7 +608,7 @@ def run_form_generation(
     parser.add_argument("--limit", type=int, help="Limit number of lemmas")
     parser.add_argument("--throttle", type=float, default=1.0, help="Seconds between calls")
     parser.add_argument("--db-path", type=str, default=constants.WORDFREQ_DB_PATH)
-    parser.add_argument("--model", type=str, default="gpt-5-mini")
+    parser.add_argument("--model", type=str, default="gpt-5.4-mini")
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--yes", "-y", action="store_true", help="Skip confirmation prompt")
     args = parser.parse_args()

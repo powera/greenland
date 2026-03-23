@@ -54,7 +54,7 @@
                             <label for="model" class="form-label">LLM Model</label>
                             <select class="form-select" id="model">
                                 {% for value, label in models %}
-                                <option value="{{ value }}"{% if value == 'gpt-5-mini' %} selected{% endif %}>
+                                <option value="{{ value }}"{% if value == 'gpt-5.4-mini' %} selected{% endif %}>
                                     {{ label }}
                                 </option>
                                 {% endfor %}

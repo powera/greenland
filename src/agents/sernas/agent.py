@@ -209,7 +209,7 @@ class SernasAgent:
             session.close()
 
     def generate_synonyms_for_lemma(
-        self, lemma_id: int, language_code: str, model: str = "gpt-5-mini", dry_run: bool = False
+        self, lemma_id: int, language_code: str, model: str = "gpt-5.4-mini", dry_run: bool = False
     ) -> Dict[str, Any]:
         """
         Generate synonyms and alternative forms for a specific lemma and language.
@@ -525,7 +525,7 @@ class SernasAgent:
         language_code: Optional[str] = None,
         form_type: Optional[str] = None,
         limit: Optional[int] = None,
-        model: str = "gpt-5-mini",
+        model: str = "gpt-5.4-mini",
         throttle: float = 1.0,
         dry_run: bool = False,
     ) -> Dict[str, Any]:

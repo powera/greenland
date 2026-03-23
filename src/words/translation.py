@@ -13,7 +13,7 @@ from storage.translation_helpers import get_supported_languages
 import util.prompt_loader
 
 logger = logging.getLogger(__name__)
-_DEFAULT_TRANSLATION_MODEL = "gpt-5-mini"
+_DEFAULT_TRANSLATION_MODEL = "gpt-5.4-mini"
 
 
 def _language_name(language_code: str) -> str:
@@ -74,9 +74,7 @@ def build_multi_target_translation_prompt(
     normalized_targets: List[str] = [language.lower() for language in target_languages]
     context = util.prompt_loader.get_context("translation", "word")
 
-    target_lines = "\n".join(
-        f"- {code}: {_language_name(code)}" for code in normalized_targets
-    )
+    target_lines = "\n".join(f"- {code}: {_language_name(code)}" for code in normalized_targets)
     prompt = (
         f'Translate the single word "{source_word}" from {_language_name(source_language)} into each requested target language.\n'
         "Return lemma/base-form translations only.\n"

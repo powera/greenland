@@ -239,7 +239,7 @@ Run a structured action.
 {
   "action_name": "metadata",
   "text": "Text to analyze",
-  "model": "gpt-5-mini",
+  "model": "gpt-5.4-mini",
   "context": "Optional surrounding context",
   "target_language": "es"
 }
@@ -263,7 +263,7 @@ Run a free-form query with style controls.
 {
   "prompt": "style",
   "entry": "Text to analyze",
-  "model": "gpt-5-mini",
+  "model": "gpt-5.4-mini",
   "verbosity": 2,
   "reading_level": 2,
   "sports": 0,

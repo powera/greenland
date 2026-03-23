@@ -103,7 +103,7 @@ def log_translation_change(
 
     Args:
         session: Database session
-        source: Source of the operation (e.g., "voras-agent", "gpt-5-mini", "manual-import")
+        source: Source of the operation (e.g., "voras-agent", "gpt-5.4-mini", "manual-import")
         operation_type: Type of operation (e.g., "translation", "definition", "import")
         lemma_id: ID of the lemma being modified
         language_code: Language code of the translation (e.g., "fr", "es", "de")

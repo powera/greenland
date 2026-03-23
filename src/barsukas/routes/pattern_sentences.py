@@ -517,7 +517,7 @@ def accept_sentence(sentence_id: int) -> ResponseReturnValue:
         if not has_all_translations:
             from sentences.translation import translate_sentence
 
-            translate_sentence(sentence_id, target_languages, g.db, model="gpt-5-mini")
+            translate_sentence(sentence_id, target_languages, g.db, model="gpt-5.4-mini")
 
         # Auto-populate the level if not set
         if sentence.minimum_level is None:
