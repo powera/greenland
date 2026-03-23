@@ -251,7 +251,7 @@ class DerivativeForm(Base):
     phonetic_pronunciation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     # Rhyme family key derived from IPA (e.g., "æt" for words rhyming with "cat").
-    # Computed by langtools.en.rhyme_key.compute_rhyme_key(); currently English only.
+    # Computed by the shared langtools/storage rhyme-key helpers for supported languages.
     rhyme_key: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)
 
     # Metadata

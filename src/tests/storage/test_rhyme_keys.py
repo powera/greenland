@@ -7,10 +7,17 @@ from storage.models.schema import Base, DerivativeForm, Lemma
 from storage.rhyme_keys import compute_rhyme_key_from_ipa
 
 
-def test_compute_rhyme_key_from_ipa_only_applies_to_english() -> None:
-    """Only English IPA should produce a stored rhyme key."""
+def test_compute_rhyme_key_from_ipa_supports_enabled_languages() -> None:
+    """Enabled languages should map IPA to stored rhyme keys."""
     assert compute_rhyme_key_from_ipa("/kæt/", "en") == "æt"
-    assert compute_rhyme_key_from_ipa("/kæt/", "fr") is None
+    assert compute_rhyme_key_from_ipa("/kanˈsjon/", "es") == "on"
+    assert compute_rhyme_key_from_ipa("/ʃɑ̃te/", "fr") == "e"
+    assert compute_rhyme_key_from_ipa("/kɐlˈba/", "lt") == "a"
+
+
+def test_compute_rhyme_key_from_ipa_returns_none_for_unsupported_languages() -> None:
+    """Unsupported languages or empty IPA should not produce rhyme keys."""
+    assert compute_rhyme_key_from_ipa("/kæt/", "de") is None
     assert compute_rhyme_key_from_ipa(None, "en") is None
 
 
@@ -43,12 +50,13 @@ def test_derivative_form_rhyme_key_is_set_on_insert_and_update() -> None:
 
         assert derivative_form.rhyme_key == "æt"
 
-        derivative_form.ipa_pronunciation = "/dɔɡ/"
+        derivative_form.language_code = "es"
+        derivative_form.ipa_pronunciation = "/kanˈsjon/"
         session.commit()
 
-        assert derivative_form.rhyme_key == "ɔɡ"
+        assert derivative_form.rhyme_key == "on"
 
-        derivative_form.language_code = "fr"
+        derivative_form.language_code = "de"
         session.commit()
 
         assert derivative_form.rhyme_key is None

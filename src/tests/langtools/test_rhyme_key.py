@@ -1,11 +1,12 @@
-"""Tests for langtools.en.rhyme_key — IPA-to-rhyme-key extraction."""
+"""Tests for shared IPA-to-rhyme-key extraction helpers."""
 
 import pytest
 
-from langtools.en.rhyme_key import (
+from langtools.rhyme_keys import (
     compute_rhyme_key,
     rhyme_key_final_sound,
     rhyme_key_penultimate_sound,
+    rhyme_keys_available,
 )
 
 # ---------------------------------------------------------------------------
@@ -127,3 +128,26 @@ class TestRhymeKeyPenultimateSound:
 
     def test_empty(self) -> None:
         assert rhyme_key_penultimate_sound("") == ""
+
+
+class TestRhymeKeyLanguageSupport:
+    """Coverage for the shared language-availability and non-English paths."""
+
+    def test_available_languages(self) -> None:
+        assert rhyme_keys_available("en") is True
+        assert rhyme_keys_available("lt") is True
+        assert rhyme_keys_available("es") is True
+        assert rhyme_keys_available("fr") is True
+        assert rhyme_keys_available("de") is False
+
+    def test_spanish_rhyme_key(self) -> None:
+        assert compute_rhyme_key("/kanˈsjon/", "es") == "on"
+
+    def test_lithuanian_rhyme_key(self) -> None:
+        assert compute_rhyme_key("/kɐlˈba/", "lt") == "a"
+
+    def test_french_rhyme_key_without_stress_marker(self) -> None:
+        assert compute_rhyme_key("/ʃɑ̃te/", "fr") == "e"
+
+    def test_unsupported_language_returns_none(self) -> None:
+        assert compute_rhyme_key("/haus/", "de") is None

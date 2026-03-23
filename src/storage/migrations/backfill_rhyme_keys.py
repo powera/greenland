@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Backfill: Compute rhyme_key for English derivative forms that have IPA data.
+Backfill: Compute rhyme_key for supported-language derivative forms that have IPA data.
 
-Processes all derivative_forms rows where language_code='en',
-ipa_pronunciation IS NOT NULL, and rhyme_key IS NULL, computing and
-storing the rhyme key in batches.
+Processes all derivative_forms rows where language_code is supported by the
+shared rhyme-key helpers, ipa_pronunciation IS NOT NULL, and rhyme_key IS NULL,
+computing and storing the rhyme key in batches.
 """
 
 import argparse
@@ -16,6 +16,7 @@ if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from constants import WORDFREQ_DB_PATH
+from langtools.rhyme_keys import RHYME_KEY_LANGUAGES
 from storage.rhyme_keys import compute_rhyme_key_from_ipa
 from storage.backend import create_session
 from storage.backend.config import BackendType, DataSourceConfig
@@ -39,14 +40,14 @@ def build_data_source_config(db_path: str, use_postgres: bool) -> DataSourceConf
 
 
 def backfill_rhyme_keys(config: DataSourceConfig, *, dry_run: bool = False) -> None:
-    """Compute and store rhyme_key for all qualifying English derivative forms."""
+    """Compute and store rhyme_key for all qualifying derivative forms."""
     session = create_session(config)
 
     try:
         rows = (
             session.query(DerivativeForm)
             .filter(
-                DerivativeForm.language_code == "en",
+                DerivativeForm.language_code.in_(sorted(RHYME_KEY_LANGUAGES)),
                 DerivativeForm.ipa_pronunciation.isnot(None),
                 DerivativeForm.rhyme_key.is_(None),
             )
@@ -54,7 +55,7 @@ def backfill_rhyme_keys(config: DataSourceConfig, *, dry_run: bool = False) -> N
         )
 
         total = len(rows)
-        print(f"Found {total} English derivative forms with IPA but no rhyme_key")
+        print(f"Found {total} supported-language derivative forms with IPA but no rhyme_key")
 
         keyed = 0
         skipped = 0
@@ -110,7 +111,9 @@ def backfill_rhyme_keys(config: DataSourceConfig, *, dry_run: bool = False) -> N
 
 def main() -> int:
     """Run the backfill."""
-    parser = argparse.ArgumentParser(description="Backfill rhyme_key for English derivative forms")
+    parser = argparse.ArgumentParser(
+        description="Backfill rhyme_key for supported derivative forms"
+    )
     parser.add_argument(
         "--dry-run",
         action="store_true",
