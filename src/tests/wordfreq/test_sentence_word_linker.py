@@ -147,6 +147,20 @@ class TestFindLemmaByText(unittest.TestCase):
         # Should find apple from DB, not return eat
         self.assertEqual(result.guid, "N01_001")
 
+    def test_grammatical_english_word_returns_none(self) -> None:
+        """Configured grammatical words should not be linked to lemmas."""
+        article_lemma = Lemma(
+            lemma_text="the",
+            definition_text="definite article",
+            pos_type="noun",
+            guid="N01_004",
+        )
+        self.session.add(article_lemma)
+        self.session.commit()
+
+        result = find_lemma_by_text(self.session, "the", "noun")
+        self.assertIsNone(result)
+
 
 class TestResolveLemmaForWord(unittest.TestCase):
     """Test the cascade in resolve_lemma_for_word (no LLM)."""
@@ -333,6 +347,59 @@ class TestResolveLemmaForWord(unittest.TestCase):
         self.assertEqual(result.method, "unresolved")
         self.assertIsNone(result.lemma)
         self.assertEqual(result.confidence, 0.0)
+
+    def test_english_grammatical_word_is_not_resolved(self) -> None:
+        """English grammatical words should short-circuit to unresolved lemma links."""
+        article_lemma = Lemma(
+            lemma_text="the",
+            definition_text="definite article",
+            pos_type="noun",
+            guid="N36_099",
+        )
+        self.session.add(article_lemma)
+        self.session.commit()
+
+        result = resolve_lemma_for_word(self.session, english_text="the", word_role="noun")
+        self.assertEqual(result.method, "grammatical_word")
+        self.assertIsNone(result.lemma)
+        self.assertEqual(result.confidence, 1.0)
+
+    def test_spanish_and_french_grammatical_words_are_skipped_in_derivatives(self) -> None:
+        """Configured ES/FR grammatical tokens should not drive derivative matches."""
+        article_lemma = Lemma(
+            lemma_text="article placeholder",
+            definition_text="fake article lemma for test coverage",
+            pos_type="noun",
+            guid="N36_100",
+        )
+        self.session.add(article_lemma)
+        self.session.flush()
+        self.session.add_all(
+            [
+                DerivativeForm(
+                    lemma_id=article_lemma.id,
+                    derivative_form_text="el",
+                    language_code="es",
+                    grammatical_form="base",
+                ),
+                DerivativeForm(
+                    lemma_id=article_lemma.id,
+                    derivative_form_text="le",
+                    language_code="fr",
+                    grammatical_form="base",
+                ),
+            ]
+        )
+        self.session.commit()
+
+        result = resolve_lemma_for_word(
+            self.session,
+            english_text="",
+            forms_by_language={"es": "el", "fr": "le"},
+            min_derivative_languages=2,
+        )
+        self.assertEqual(result.method, "unresolved")
+        self.assertIsNone(result.lemma)
 
     def test_guid_takes_precedence_over_text(self) -> None:
         """Even if text would match 'see', GUID for teacher should win."""

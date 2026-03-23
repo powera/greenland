@@ -19,7 +19,9 @@ from storage.models.schema import Corpus, WordFrequency, WordToken
 from wordfreq.translation.client import LinguisticClient
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Regular expression to detect words containing numerals
@@ -287,16 +289,20 @@ def import_frequency_data(
                 logger.warning(f"Token not found after batch create: {word_text}")
                 continue
 
-            rank = data.get("rank")
-            frequency = data.get("frequency")
+            rank_value = data.get("rank")
+            frequency_value = data.get("frequency")
+            resolved_rank: Optional[int] = int(rank_value) if rank_value is not None else None
+            resolved_frequency: Optional[float] = (
+                float(frequency_value) if frequency_value is not None else None
+            )
 
             existing_freq = freq_map.get(word_obj.id)
             if existing_freq:
                 # Update existing record
-                if rank is not None:
-                    existing_freq.rank = rank
-                if frequency is not None:
-                    existing_freq.frequency = frequency
+                if resolved_rank is not None:
+                    existing_freq.rank = resolved_rank
+                if resolved_frequency is not None:
+                    existing_freq.frequency = resolved_frequency
                 update_count += 1
             else:
                 # Prepare new frequency record for bulk insert
@@ -304,8 +310,8 @@ def import_frequency_data(
                     WordFrequency(
                         word_token_id=word_obj.id,
                         corpus_id=corpus.id,
-                        rank=rank,
-                        frequency=frequency,
+                        rank=resolved_rank,
+                        frequency=resolved_frequency,
                     )
                 )
 
@@ -371,7 +377,7 @@ def import_frequency_data(
 
 def process_stopwords(refresh: bool = False, model: Optional[str] = None) -> Dict[str, bool]:
     """
-    Process all stop words from util/stopwords.py using linguistic_client.process_word.
+    Process all stop words from util.stopwords using linguistic_client.process_word.
 
     Args:
         refresh: If True, delete existing definitions and re-process all stop words
