@@ -3,12 +3,29 @@
 import logging
 from typing import Dict, List, Optional
 
+from sqlalchemy import ColumnElement, or_
 from sqlalchemy.orm import Session
 
 from storage.crud.word_token import add_word_token
 from storage.models.schema import DerivativeForm, Lemma, WordToken
 
 logger = logging.getLogger(__name__)
+
+
+def needs_pronunciation_update_filter() -> ColumnElement[bool]:
+    """Return a reusable filter for forms missing IPA or phonetic pronunciation.
+
+    Treats both NULL and empty-string values as missing so callers can use one
+    consistent definition everywhere Papuga looks for incomplete pronunciation
+    data.
+    """
+
+    return or_(
+        DerivativeForm.ipa_pronunciation.is_(None),
+        DerivativeForm.ipa_pronunciation == "",
+        DerivativeForm.phonetic_pronunciation.is_(None),
+        DerivativeForm.phonetic_pronunciation == "",
+    )
 
 
 def add_derivative_form(
@@ -214,13 +231,7 @@ def get_derivative_forms_without_pronunciation(
 ) -> List[DerivativeForm]:
     """Get derivative forms that need pronunciation information."""
     result: list[DerivativeForm] = (
-        session.query(DerivativeForm)
-        .filter(
-            (DerivativeForm.ipa_pronunciation == None)
-            | (DerivativeForm.phonetic_pronunciation == None)
-        )
-        .limit(limit)
-        .all()
+        session.query(DerivativeForm).filter(needs_pronunciation_update_filter()).limit(limit).all()
     )
     return result
 

@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from workqueue.tools import build_default_config, get_lemma_or_raise
 import constants
 from storage.backend.config import DataSourceConfig
+from storage.crud.derivative_form import needs_pronunciation_update_filter
 from storage.models.schema import (
     DerivativeForm,
     Lemma,
@@ -118,8 +119,7 @@ def generate_pronunciations_for_lemma(
         .filter(
             DerivativeForm.lemma_id == lemma.id,
             DerivativeForm.language_code == lang_code,
-            DerivativeForm.ipa_pronunciation.is_(None),
-            DerivativeForm.phonetic_pronunciation.is_(None),
+            needs_pronunciation_update_filter(),
         )
         .all()
     )

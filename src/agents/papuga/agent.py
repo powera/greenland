@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 from clients.barsukas_cache import BarsukasCacheClient
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import DataSourceConfig
+from storage.crud.derivative_form import needs_pronunciation_update_filter
 from storage.models.schema import (
     DerivativeForm,
     Lemma,
@@ -272,10 +273,7 @@ class PapugaAgent:
         session = self.get_session()
         try:
             # Get derivative forms without pronunciations
-            query = session.query(DerivativeForm).filter(
-                DerivativeForm.ipa_pronunciation.is_(None),
-                DerivativeForm.phonetic_pronunciation.is_(None),
-            )
+            query = session.query(DerivativeForm).filter(needs_pronunciation_update_filter())
 
             # Filter by lemmas list if provided
             if lemmas is not None:
@@ -358,10 +356,7 @@ class PapugaAgent:
         session = self.get_session()
         try:
             # Get derivative forms without pronunciations
-            query = session.query(DerivativeForm).filter(
-                DerivativeForm.ipa_pronunciation.is_(None),
-                DerivativeForm.phonetic_pronunciation.is_(None),
-            )
+            query = session.query(DerivativeForm).filter(needs_pronunciation_update_filter())
 
             # Filter by lemmas list if provided
             if lemmas is not None:

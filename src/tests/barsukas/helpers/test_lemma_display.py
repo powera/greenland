@@ -5,7 +5,7 @@ from typing import List
 
 import pytest
 
-from barsukas.helpers.lemma_display import group_derivative_forms
+from barsukas.helpers.lemma_display import group_derivative_forms, group_populated_pronunciations
 
 
 def _form(language_code: str, grammatical_form: str, text: str = "x") -> SimpleNamespace:
@@ -91,3 +91,49 @@ class TestGroupDerivativeForms:
         assert list(synonyms.keys()) == ["en"]
         assert list(alternatives.keys()) == ["en"]
         assert langs == ["en"]
+
+
+class TestGroupPopulatedPronunciations:
+    """Tests for the pronunciation grouping helper."""
+
+    def test_empty_input(self) -> None:
+        assert group_populated_pronunciations([]) == {}
+
+    def test_groups_forms_with_either_pronunciation_field(self) -> None:
+        populated = [
+            SimpleNamespace(
+                language_code="en",
+                grammatical_form="base",
+                derivative_form_text="eat",
+                ipa_pronunciation="/iːt/",
+                phonetic_pronunciation=None,
+            ),
+            SimpleNamespace(
+                language_code="fr",
+                grammatical_form="base",
+                derivative_form_text="manger",
+                ipa_pronunciation=None,
+                phonetic_pronunciation="mahn-ZHAY",
+            ),
+        ]
+
+        grouped = group_populated_pronunciations(populated)
+
+        assert list(grouped.keys()) == ["en", "fr"]
+        assert grouped["en"][0].derivative_form_text == "eat"
+        assert grouped["fr"][0].derivative_form_text == "manger"
+
+    def test_skips_forms_without_populated_pronunciation_fields(self) -> None:
+        grouped = group_populated_pronunciations(
+            [
+                SimpleNamespace(
+                    language_code="en",
+                    grammatical_form="base",
+                    derivative_form_text="eat",
+                    ipa_pronunciation="",
+                    phonetic_pronunciation="",
+                )
+            ]
+        )
+
+        assert grouped == {}
