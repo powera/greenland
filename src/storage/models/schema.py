@@ -3,7 +3,7 @@
 """Database models for storing linguistic information about words."""
 
 import datetime
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from sqlalchemy import (
     TIMESTAMP,
@@ -15,11 +15,14 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    event,
     func,
     literal_column,
 )
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+from storage.rhyme_keys import sync_derivative_form_rhyme_key
 
 
 class Base(DeclarativeBase):
@@ -139,6 +142,12 @@ class LemmaTranslation(Base):
     translation: Mapped[str] = mapped_column(
         String, nullable=False, index=True
     )  # Base form of the translation (indexed for search)
+    ipa_pronunciation: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )  # IPA pronunciation for the lemma/base translation
+    phonetic_pronunciation: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )  # Simplified/romanized pronunciation for the lemma/base translation
     definition_text: Mapped[Optional[str]] = mapped_column(
         Text, nullable=True
     )  # Definition in this language
@@ -240,6 +249,10 @@ class DerivativeForm(Base):
     # Pronunciations for this specific form
     ipa_pronunciation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     phonetic_pronunciation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
+    # Rhyme family key derived from IPA (e.g., "æt" for words rhyming with "cat").
+    # Computed by the shared langtools/storage rhyme-key helpers for supported languages.
+    rhyme_key: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)
 
     # Metadata
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -723,3 +736,14 @@ class ConversationSentence(Base):
     # Relationships
     conversation = relationship("Conversation", back_populates="conversation_sentences")
     sentence = relationship("Sentence")
+
+
+@event.listens_for(DerivativeForm, "before_insert")
+@event.listens_for(DerivativeForm, "before_update")
+def _sync_derivative_form_rhyme_key_before_save(
+    _mapper: Any,
+    _connection: Any,
+    target: DerivativeForm,
+) -> None:
+    """Keep rhyme keys synchronized with the derivative form's IPA."""
+    sync_derivative_form_rhyme_key(target)

@@ -15,7 +15,12 @@ from audioshoe.qwen.types import QwenVoice
 from clients.audio.azure_tts import AzureVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.polly_tts import PollyVoice
-from barsukas.helpers.lemma_display import get_difficulty_stats, group_derivative_forms
+from barsukas.helpers.lemma_display import (
+    build_lemma_pronunciation_rows,
+    get_difficulty_stats,
+    group_derivative_forms,
+    group_populated_pronunciations,
+)
 from workqueue.task_queue import get_tasks_for_target
 from storage.crud.derivative_form import delete_derivative_form
 from storage.crud.difficulty_override import get_all_overrides_for_lemma
@@ -247,6 +252,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
     # Extract pre-fetched data
     translations = data["translations"]
     definitions = data["definitions"]
+    translation_pronunciations = data["translation_pronunciations"]
     language_names = get_supported_languages()
     overrides = data["overrides"]
     effective_levels = data["effective_levels"]
@@ -267,6 +273,13 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         alternative_forms_by_language,
         all_synonym_languages,
     ) = group_derivative_forms(derivative_forms)
+    pronunciation_forms_by_language = group_populated_pronunciations(derivative_forms)
+    pronunciation_languages = sorted({form.language_code for form in derivative_forms})
+    lemma_pronunciation_rows = build_lemma_pronunciation_rows(
+        derivative_forms,
+        translations,
+        translation_pronunciations,
+    )
 
     # Get tombstone entries for this lemma
     tombstones = get_tombstones_by_lemma_id(g.db, lemma_id)
@@ -351,6 +364,10 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         effective_levels=effective_levels,
         difficulty_stats=difficulty_stats,
         forms_by_language=forms_by_language,
+        derivative_forms=derivative_forms,
+        pronunciation_forms_by_language=pronunciation_forms_by_language,
+        pronunciation_languages=pronunciation_languages,
+        lemma_pronunciation_rows=lemma_pronunciation_rows,
         audio_files=audio_files,
         synonyms_by_language=synonyms_by_language,
         alternative_forms_by_language=alternative_forms_by_language,

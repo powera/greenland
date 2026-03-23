@@ -13,58 +13,140 @@
                             {% endif %}>
                         <i class="bi bi-plus-circle"></i> Generate Forms
                     </button>
-                    {% if forms_by_language and forms_by_language.get('en') %}
-                        <form method="post" action="{{ url_for('agents.check_pronunciations', lemma_id=lemma.id) }}" style="display: inline;">
-                            <button type="submit" class="btn btn-sm btn-light"
-                                    title="{% if config.get('ALLOW_OUTBOUND_CALLS', True) %}Check pronunciations using AI{% else %}Not available in hosted mode{% endif %}"
-                                    {% if not config.get('ALLOW_OUTBOUND_CALLS', True) %}disabled{% endif %}>
-                                <i class="bi bi-robot"></i> Check Pronunciations
-                            </button>
-                        </form>
-                        <form method="post" action="{{ url_for('agents.generate_pronunciations', lemma_id=lemma.id) }}" style="display: inline;">
-                            <input type="hidden" name="lang_code" value="en">
-                            <button type="submit" class="btn btn-sm btn-success"
-                                    title="{% if config.get('ALLOW_OUTBOUND_CALLS', True) %}Generate missing pronunciations using AI{% else %}Not available in hosted mode{% endif %}"
-                                    {% if not config.get('ALLOW_OUTBOUND_CALLS', True) %}disabled{% endif %}>
-                                <i class="bi bi-volume-up"></i> Generate Pronunciations
-                            </button>
-                        </form>
-                    {% endif %}
+                    <form method="post" action="{{ url_for('agents.check_pronunciations', lemma_id=lemma.id) }}" style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-light"
+                                title="{% if not pronunciation_forms_by_language %}No pronunciations exist yet to check{% elif config.get('ALLOW_OUTBOUND_CALLS', True) %}Check pronunciations using AI{% else %}Not available in hosted mode{% endif %}"
+                                {% if (not pronunciation_forms_by_language) or (not config.get('ALLOW_OUTBOUND_CALLS', True)) %}disabled{% endif %}>
+                            <i class="bi bi-robot"></i> Check Pronunciations
+                        </button>
+                    </form>
+                    <button type="button" class="btn btn-sm btn-success"
+                            {% if pronunciation_languages and config.get('ALLOW_OUTBOUND_CALLS', True) %}
+                            data-bs-toggle="modal" data-bs-target="#generatePronunciationsModal"
+                            {% elif not pronunciation_languages %}
+                            disabled title="Generate forms first so there is a word form to pronounce"
+                            {% else %}
+                            disabled title="Not available in hosted mode"
+                            {% endif %}>
+                        <i class="bi bi-volume-up"></i> Generate Pronunciations
+                    </button>
                 </div>
             </div>
             <div class="card-body">
+                {% if lemma_pronunciation_rows %}
+                    <h5 class="mt-1">Lemma/base pronunciations</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Language</th>
+                                    <th>Lemma/Base Form</th>
+                                    <th>IPA</th>
+                                    <th>Phonetic</th>
+                                    <th>Source</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lang_code, pronunciation in lemma_pronunciation_rows.items() %}
+                                    <tr>
+                                        <td><strong>{{ language_names.get(lang_code, lang_code) }}</strong></td>
+                                        <td>
+                                            <strong>{{ pronunciation.text or '-' }}</strong>
+                                            {% if pronunciation.grammatical_form and pronunciation.grammatical_form != 'lemma_translation' %}
+                                                <div><code>{{ pronunciation.grammatical_form }}</code></div>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ pronunciation.ipa or '-' }}</td>
+                                        <td>{{ pronunciation.phonetic or '-' }}</td>
+                                        <td>
+                                            {% if pronunciation.source == 'lemma_translation' %}
+                                                <span class="badge bg-info text-dark">translation</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">base form</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <hr>
+                {% endif %}
+
+                {% if pronunciation_forms_by_language %}
+                    <h5 class="mt-1">Existing pronunciations</h5>
+                    {% for lang_code, pronunciation_forms in pronunciation_forms_by_language.items() %}
+                    <h6 class="mt-3">
+                        {{ language_names.get(lang_code, lang_code) }}
+                        <span class="badge bg-secondary">{{ pronunciation_forms|length }} form(s)</span>
+                    </h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Form</th>
+                                    <th>Grammatical Form</th>
+                                    <th>IPA</th>
+                                    <th>Phonetic</th>
+                                    <th>Base</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for form in pronunciation_forms %}
+                                    <tr>
+                                        <td><strong>{{ form.derivative_form_text }}</strong></td>
+                                        <td><code>{{ form.grammatical_form }}</code></td>
+                                        <td>{{ form.ipa_pronunciation or '-' }}</td>
+                                        <td>{{ form.phonetic_pronunciation or '-' }}</td>
+                                        <td>
+                                            {% if form.is_base_form %}
+                                                <i class="bi bi-check-circle-fill text-success" title="Base form"></i>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endfor %}
+                    <hr>
+                {% endif %}
+
                 {% if forms_by_language %}
+                    <h5 class="mt-1">Grammatical forms</h5>
                     {% for lang_code, forms in forms_by_language.items() %}
                     <h5 class="mt-3">
                         {{ language_names.get(lang_code, lang_code) }}
                         <span class="badge bg-secondary">{{ forms|length }} form(s)</span>
                     </h5>
-                    <table class="table table-sm table-hover">
-                        <thead>
-                            <tr>
-                                <th>Form</th>
-                                <th>Grammatical Form</th>
-                                <th>IPA</th>
-                                <th>Phonetic</th>
-                                <th>Base</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for form in forms %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
                                 <tr>
-                                    <td><strong>{{ form.derivative_form_text }}</strong></td>
-                                    <td><code>{{ form.grammatical_form }}</code></td>
-                                    <td>{{ form.ipa_pronunciation or '-' }}</td>
-                                    <td>{{ form.phonetic_pronunciation or '-' }}</td>
-                                    <td>
-                                        {% if form.is_base_form %}
-                                            <i class="bi bi-check-circle-fill text-success" title="Base form"></i>
-                                        {% endif %}
-                                    </td>
+                                    <th>Form</th>
+                                    <th>Grammatical Form</th>
+                                    <th>IPA</th>
+                                    <th>Phonetic</th>
+                                    <th>Base</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {% for form in forms %}
+                                    <tr>
+                                        <td><strong>{{ form.derivative_form_text }}</strong></td>
+                                        <td><code>{{ form.grammatical_form }}</code></td>
+                                        <td>{{ form.ipa_pronunciation or '-' }}</td>
+                                        <td>{{ form.phonetic_pronunciation or '-' }}</td>
+                                        <td>
+                                            {% if form.is_base_form %}
+                                                <i class="bi bi-check-circle-fill text-success" title="Base form"></i>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                     {% endfor %}
                 {% else %}
                     <p class="text-muted">
@@ -73,6 +155,40 @@
                     </p>
                 {% endif %}
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Pronunciations Modal -->
+<div class="modal fade" id="generatePronunciationsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Generate Pronunciations</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{{ url_for('agents.generate_pronunciations', lemma_id=lemma.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="pronunciation_lang_code" class="form-label">Language</label>
+                        <select class="form-select" id="pronunciation_lang_code" name="lang_code" required>
+                            {% for lang_code in pronunciation_languages %}
+                                <option value="{{ lang_code }}">{{ language_names.get(lang_code, lang_code) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Note:</strong> This fills in any missing IPA or phonetic pronunciation data for the selected language.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-robot"></i> Generate
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

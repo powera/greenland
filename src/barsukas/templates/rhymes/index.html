@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Rhyming Dictionary{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/rhymes.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="h4 mb-0"><i class="bi bi-music-note-list"></i> Rhyming Dictionary</h1>
+            <span class="text-muted">{{ total_families }} rhyme families</span>
+        </div>
+    </div>
+</div>
+
+<!-- Tier 1: Final sound navigation -->
+{% if final_sounds %}
+<nav class="rhyme-nav mb-3" aria-label="Final sound navigation">
+    <span class="rhyme-nav-label text-muted small me-2">Ending sound:</span>
+    {% for sound, count in final_sounds %}
+        {% if sound == selected_sound %}
+            <span class="rhyme-sound rhyme-sound-active" title="{{ count }} families">{{ sound }}</span>
+        {% else %}
+            <a href="{{ url_for('rhymes.index', sound=sound) }}"
+               class="rhyme-sound" title="{{ count }} families">{{ sound }}</a>
+        {% endif %}
+    {% endfor %}
+</nav>
+{% endif %}
+
+<!-- Tier 2: Penultimate sound sub-navigation -->
+{% if penultimate_sounds|length > 1 %}
+<nav class="rhyme-nav rhyme-nav-tier2 mb-3" aria-label="Vowel sound navigation">
+    <span class="rhyme-nav-label text-muted small me-2">Vowel:</span>
+    <a href="{{ url_for('rhymes.index', sound=selected_sound) }}"
+       class="rhyme-sound rhyme-sound-sm {% if not selected_penultimate %}rhyme-sound-active{% endif %}">All</a>
+    {% for pen in penultimate_sounds %}
+        {% if pen == selected_penultimate %}
+            <span class="rhyme-sound rhyme-sound-sm rhyme-sound-active">{{ pen }}</span>
+        {% else %}
+            <a href="{{ url_for('rhymes.index', sound=selected_sound, pen=pen) }}"
+               class="rhyme-sound rhyme-sound-sm">{{ pen }}</a>
+        {% endif %}
+    {% endfor %}
+</nav>
+{% endif %}
+
+<!-- Rhyme families table -->
+<div class="rhyme-page">
+    <table class="table table-sm table-hover">
+        <thead>
+            <tr>
+                <th>Rhyme Key</th>
+                <th>Example</th>
+                <th class="text-end">Words</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for family in families %}
+                <tr>
+                    <td class="rhyme-key-cell">
+                        <a href="{{ url_for('rhymes.family', key=family.rhyme_key) }}"
+                           class="rhyme-key-link">-{{ family.rhyme_key }}</a>
+                    </td>
+                    <td class="text-muted">{{ family.example_word }}</td>
+                    <td class="text-end">{{ family.word_count }}</td>
+                </tr>
+            {% endfor %}
+            {% if not families %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted py-4">
+                        No rhyme families found.
+                        {% if selected_sound %}Try a different ending sound.{% endif %}
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

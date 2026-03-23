@@ -5,7 +5,11 @@ from typing import List
 
 import pytest
 
-from barsukas.helpers.lemma_display import group_derivative_forms
+from barsukas.helpers.lemma_display import (
+    build_lemma_pronunciation_rows,
+    group_derivative_forms,
+    group_populated_pronunciations,
+)
 
 
 def _form(language_code: str, grammatical_form: str, text: str = "x") -> SimpleNamespace:
@@ -91,3 +95,93 @@ class TestGroupDerivativeForms:
         assert list(synonyms.keys()) == ["en"]
         assert list(alternatives.keys()) == ["en"]
         assert langs == ["en"]
+
+
+class TestGroupPopulatedPronunciations:
+    """Tests for the pronunciation grouping helper."""
+
+    def test_empty_input(self) -> None:
+        assert group_populated_pronunciations([]) == {}
+
+    def test_groups_forms_with_either_pronunciation_field(self) -> None:
+        populated = [
+            SimpleNamespace(
+                language_code="en",
+                grammatical_form="base",
+                derivative_form_text="eat",
+                ipa_pronunciation="/iːt/",
+                phonetic_pronunciation=None,
+            ),
+            SimpleNamespace(
+                language_code="fr",
+                grammatical_form="base",
+                derivative_form_text="manger",
+                ipa_pronunciation=None,
+                phonetic_pronunciation="mahn-ZHAY",
+            ),
+        ]
+
+        grouped = group_populated_pronunciations(populated)
+
+        assert list(grouped.keys()) == ["en", "fr"]
+        assert grouped["en"][0].derivative_form_text == "eat"
+        assert grouped["fr"][0].derivative_form_text == "manger"
+
+    def test_skips_forms_without_populated_pronunciation_fields(self) -> None:
+        grouped = group_populated_pronunciations(
+            [
+                SimpleNamespace(
+                    language_code="en",
+                    grammatical_form="base",
+                    derivative_form_text="eat",
+                    ipa_pronunciation="",
+                    phonetic_pronunciation="",
+                )
+            ]
+        )
+
+        assert grouped == {}
+
+
+class TestBuildLemmaPronunciationRows:
+    """Tests for lemma/base pronunciation row aggregation."""
+
+    def test_prefers_translation_pronunciations_and_falls_back_to_base_form(self) -> None:
+        derivative_forms = [
+            SimpleNamespace(
+                language_code="en",
+                grammatical_form="infinitive",
+                derivative_form_text="eat",
+                is_base_form=True,
+                ipa_pronunciation="/iːt/",
+                phonetic_pronunciation="EET",
+            ),
+            SimpleNamespace(
+                language_code="es",
+                grammatical_form="infinitive",
+                derivative_form_text="comer",
+                is_base_form=True,
+                ipa_pronunciation="/koˈmeɾ/",
+                phonetic_pronunciation="koh-MEHR",
+            ),
+        ]
+
+        rows = build_lemma_pronunciation_rows(
+            derivative_forms=derivative_forms,
+            translations={"en": "eat", "es": "comer"},
+            translation_pronunciations={"en": (None, None), "es": ("/koˈmeɾ/", "ko-MEHR")},
+        )
+
+        assert rows["en"]["source"] == "base_form"
+        assert rows["en"]["ipa"] == "/iːt/"
+        assert rows["es"]["source"] == "lemma_translation"
+        assert rows["es"]["phonetic"] == "ko-MEHR"
+
+    def test_skips_languages_without_any_pronunciation_data(self) -> None:
+        rows = build_lemma_pronunciation_rows(
+            derivative_forms=[],
+            translations={"en": "eat", "fr": "manger"},
+            translation_pronunciations={"en": (None, None), "fr": (None, None)},
+        )
+
+        assert rows == {}

@@ -9,17 +9,25 @@ from __future__ import annotations
 import logging
 from typing import Dict, List, Optional, Tuple
 
+from sqlalchemy import case
 from sqlalchemy.orm import Session
 
 from workqueue.tools import build_default_config, get_lemma_or_raise
 import constants
 from storage.backend.config import DataSourceConfig
+from storage.crud.derivative_form import needs_pronunciation_update_filter
 from storage.models.schema import (
     DerivativeForm,
     Lemma,
     Sentence,
     SentenceTranslation,
     SentenceWord,
+)
+from storage.translation_helpers import (
+    LANGUAGE_FIELDS,
+    get_translation,
+    get_translation_pronunciations,
+    set_translation_pronunciations,
 )
 from wordfreq.tools.llm_validators import generate_pronunciation
 
@@ -55,6 +63,7 @@ def generate_pronunciation_for_form(
     pos_type: str,
     definition: Optional[str],
     example_sentence: Optional[str],
+    english_translation: Optional[str] = None,
     model: Optional[str] = None,
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     """
@@ -79,6 +88,9 @@ def generate_pronunciation_for_form(
         definition=definition,
         example_sentence=example_sentence,
         model=model,
+        language_code=form.language_code,
+        grammatical_form=form.grammatical_form,
+        english_translation=english_translation,
     )
 
     ipa = result.get("ipa_pronunciation")
@@ -112,26 +124,36 @@ def generate_pronunciations_for_lemma(
     if config is None:
         config = build_default_config()
 
+    translation_text = get_translation(session, lemma, lang_code)
+    translation_ipa, translation_phonetic = get_translation_pronunciations(
+        session, lemma, lang_code
+    )
+    supports_translation_pronunciations = LANGUAGE_FIELDS.get(lang_code, (None, None, False))[2]
+    translation_missing = bool(
+        supports_translation_pronunciations
+        and translation_text
+        and (not translation_ipa or not translation_phonetic)
+    )
+
     # Find forms missing pronunciations
     forms_missing_pronunciations = (
         session.query(DerivativeForm)
         .filter(
             DerivativeForm.lemma_id == lemma.id,
             DerivativeForm.language_code == lang_code,
-            DerivativeForm.ipa_pronunciation.is_(None),
-            DerivativeForm.phonetic_pronunciation.is_(None),
+            needs_pronunciation_update_filter(),
         )
         .all()
     )
 
-    if not forms_missing_pronunciations:
+    if not forms_missing_pronunciations and not translation_missing:
         return 0, []
 
     # Get example sentence for context
     example_text = get_example_sentence_for_lemma(session, lemma.id)
 
     generated_count = 0
-    errors = []
+    errors: List[str] = []
 
     for form in forms_missing_pronunciations:
         success, ipa, phonetic = generate_pronunciation_for_form(
@@ -139,6 +161,7 @@ def generate_pronunciations_for_lemma(
             pos_type=lemma.pos_type,
             definition=lemma.definition_text,
             example_sentence=example_text,
+            english_translation=lemma.lemma_text if lang_code != "en" else None,
             model=config.model,
         )
 
@@ -151,6 +174,66 @@ def generate_pronunciations_for_lemma(
             generated_count += 1
         else:
             errors.append(f"No pronunciation generated for '{form.derivative_form_text}'")
+
+    if translation_missing and translation_text:
+        existing_base_form = (
+            session.query(DerivativeForm)
+            .filter(
+                DerivativeForm.lemma_id == lemma.id,
+                DerivativeForm.language_code == lang_code,
+                DerivativeForm.is_base_form == True,
+            )
+            .order_by(
+                case(
+                    (
+                        DerivativeForm.derivative_form_text == translation_text,
+                        0,
+                    ),
+                    else_=1,
+                ),
+                DerivativeForm.id,
+            )
+            .first()
+        )
+        ipa_value = translation_ipa or (
+            existing_base_form.ipa_pronunciation if existing_base_form else None
+        )
+        phonetic_value = translation_phonetic or (
+            existing_base_form.phonetic_pronunciation if existing_base_form else None
+        )
+
+        if not ipa_value or not phonetic_value:
+            success, generated_ipa, generated_phonetic = generate_pronunciation_for_form(
+                form=DerivativeForm(
+                    lemma_id=lemma.id,
+                    derivative_form_text=translation_text,
+                    language_code=lang_code,
+                    grammatical_form="lemma_translation",
+                    is_base_form=True,
+                ),
+                pos_type=lemma.pos_type,
+                definition=lemma.definition_text,
+                example_sentence=example_text,
+                english_translation=lemma.lemma_text if lang_code != "en" else None,
+                model=config.model,
+            )
+            if success:
+                ipa_value = generated_ipa or ipa_value
+                phonetic_value = generated_phonetic or phonetic_value
+            else:
+                errors.append(
+                    f"No pronunciation generated for lemma translation '{translation_text}'"
+                )
+
+        if ipa_value or phonetic_value:
+            set_translation_pronunciations(
+                session,
+                lemma,
+                lang_code,
+                ipa_pronunciation=ipa_value,
+                phonetic_pronunciation=phonetic_value,
+            )
+            generated_count += 1
 
     return generated_count, errors
 

@@ -22,7 +22,11 @@ from storage.models import (
 )
 from storage.models.schema import AudioQualityReview
 from storage.queries.lemma import build_lemma_search_query
-from storage.translation_helpers import LANGUAGE_HIERARCHY, get_all_translations
+from storage.translation_helpers import (
+    LANGUAGE_HIERARCHY,
+    get_all_translations,
+    get_translation_pronunciations,
+)
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -756,31 +760,36 @@ def get_lemma_pronunciations(guid: str) -> ResponseReturnValue:
 
     language_filter = request.args.get("language", "").strip().lower()
 
-    # Query base forms with pronunciations
-    query = g.db.query(DerivativeForm).filter(
-        DerivativeForm.lemma_id == lemma.id,
-        DerivativeForm.is_base_form == True,
-    )
-
-    if language_filter:
-        query = query.filter(DerivativeForm.language_code == language_filter)
-
-    base_forms = query.all()
-
     # Build pronunciations dictionary (only include if at least one pronunciation exists)
     pronunciations: Dict[str, Dict[str, Any]] = {}
     languages_present: set = set()
+    language_codes = [language_filter] if language_filter else sorted(LANGUAGE_HIERARCHY)
 
-    for form in base_forms:
-        ipa = form.ipa_pronunciation
-        phonetic = form.phonetic_pronunciation
+    for language_code in language_codes:
+        translation_ipa, translation_phonetic = get_translation_pronunciations(
+            g.db, lemma, language_code
+        )
 
-        # Only include if at least one pronunciation is populated
-        if ipa or phonetic:
-            languages_present.add(form.language_code)
-            pronunciations[form.language_code] = {
-                "ipa": _serialize_value(ipa),
-                "phonetic": _serialize_value(phonetic),
+        base_form = (
+            g.db.query(DerivativeForm)
+            .filter(
+                DerivativeForm.lemma_id == lemma.id,
+                DerivativeForm.language_code == language_code,
+                DerivativeForm.is_base_form == True,
+            )
+            .first()
+        )
+
+        ipa_value = translation_ipa or (base_form.ipa_pronunciation if base_form else None)
+        phonetic_value = translation_phonetic or (
+            base_form.phonetic_pronunciation if base_form else None
+        )
+
+        if ipa_value or phonetic_value:
+            languages_present.add(language_code)
+            pronunciations[language_code] = {
+                "ipa": _serialize_value(ipa_value),
+                "phonetic": _serialize_value(phonetic_value),
             }
 
     metadata: Dict[str, Any] = {

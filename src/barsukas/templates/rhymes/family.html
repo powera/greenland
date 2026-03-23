@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Rhyme Family: -{{ rhyme_key or '?' }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/rhymes.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <a href="{{ url_for('rhymes.index', sound=final_sound) }}" class="text-muted small">
+            <i class="bi bi-arrow-left"></i> Back to rhyme index
+        </a>
+    </div>
+</div>
+
+{% if rhyme_key %}
+<div class="row mb-3">
+    <div class="col">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="h4 mb-0">
+                <i class="bi bi-music-note-list"></i>
+                Words rhyming with <span class="rhyme-key-display">-{{ rhyme_key }}</span>
+            </h1>
+            <span class="text-muted">{{ words|length }} words</span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Main content -->
+    <div class="{% if related_families %}col-md-9{% else %}col-12{% endif %}">
+        <table class="table table-sm table-hover">
+            <thead>
+                <tr>
+                    <th>Word</th>
+                    <th>IPA</th>
+                    <th>Form</th>
+                    <th>POS</th>
+                    <th>Level</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for word in words %}
+                    {% for form in word.forms %}
+                        <tr>
+                            {% if loop.first %}
+                                <td rowspan="{{ word.forms|length }}">
+                                    <a href="{{ url_for('lemmas.view_lemma', lemma_id=word.id) }}">{{ word.lemma_text }}</a>
+                                    {%- if word.disambiguation %}
+                                        <span class="text-muted small"> ({{ word.disambiguation }})</span>
+                                    {%- endif %}
+                                </td>
+                            {% endif %}
+                            <td class="rhyme-ipa">/{{ form.ipa }}/</td>
+                            <td class="small text-muted">{{ form.text }}{% if form.grammatical_form %} <span class="badge bg-secondary">{{ form.grammatical_form }}</span>{% endif %}</td>
+                            {% if loop.first %}
+                                <td rowspan="{{ word.forms|length }}">{{ word.pos_type or '' }}</td>
+                                <td rowspan="{{ word.forms|length }}">
+                                    {% if word.difficulty_level is not none and word.difficulty_level >= 0 %}
+                                        {{ word.difficulty_level }}
+                                    {% else %}
+                                        <span class="text-muted">&mdash;</span>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+                {% if not words %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            No words found for this rhyme key.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Related families sidebar -->
+    {% if related_families %}
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Related rhymes (-{{ final_sound }})</h6>
+            </div>
+            <div class="list-group list-group-flush rhyme-related-list">
+                {% for rel in related_families %}
+                    <a href="{{ url_for('rhymes.family', key=rel.rhyme_key) }}"
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-1">
+                        <span class="rhyme-key-link">-{{ rel.rhyme_key }}</span>
+                        <span class="badge bg-secondary rounded-pill">{{ rel.word_count }}</span>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% else %}
+<div class="row">
+    <div class="col">
+        <div class="alert alert-info">
+            No rhyme key specified. <a href="{{ url_for('rhymes.index') }}">Browse rhyme families</a>.
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
