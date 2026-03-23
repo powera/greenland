@@ -299,3 +299,55 @@ def test_generate_pronunciations_for_lemma_reuses_existing_base_form_pronunciati
     finally:
         session.close()
         engine.dispose()
+
+
+def test_generate_pronunciations_for_lemma_updates_rhyme_key_for_english_forms() -> None:
+    """English pronunciation generation should keep the derivative rhyme key in sync."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+
+    session = Session(engine)
+    try:
+        lemma = Lemma(
+            lemma_text="cat",
+            definition_text="a feline",
+            pos_type="noun",
+            guid="N00_006",
+        )
+        session.add(lemma)
+        session.flush()
+        session.add(
+            DerivativeForm(
+                lemma_id=lemma.id,
+                derivative_form_text="cat",
+                language_code="en",
+                grammatical_form="singular",
+                is_base_form=True,
+                ipa_pronunciation=None,
+                phonetic_pronunciation=None,
+            )
+        )
+        session.commit()
+
+        with patch(
+            "workqueue.handlers.papuga.generate_pronunciation_for_form",
+            return_value=(True, "/kæt/", "KAT"),
+        ):
+            generated_count, errors = generate_pronunciations_for_lemma(
+                session=session,
+                lemma=lemma,
+                lang_code="en",
+                config=_build_config(),
+            )
+            session.commit()
+
+        refreshed_form = (
+            session.query(DerivativeForm).filter(DerivativeForm.lemma_id == lemma.id).one()
+        )
+        assert generated_count == 1
+        assert errors == []
+        assert refreshed_form.ipa_pronunciation == "/kæt/"
+        assert refreshed_form.rhyme_key == "æt"
+    finally:
+        session.close()
+        engine.dispose()

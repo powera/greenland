@@ -3,7 +3,7 @@
 """Database models for storing linguistic information about words."""
 
 import datetime
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from sqlalchemy import (
     TIMESTAMP,
@@ -15,11 +15,14 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    event,
     func,
     literal_column,
 )
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+from storage.rhyme_keys import sync_derivative_form_rhyme_key
 
 
 class Base(DeclarativeBase):
@@ -733,3 +736,14 @@ class ConversationSentence(Base):
     # Relationships
     conversation = relationship("Conversation", back_populates="conversation_sentences")
     sentence = relationship("Sentence")
+
+
+@event.listens_for(DerivativeForm, "before_insert")
+@event.listens_for(DerivativeForm, "before_update")
+def _sync_derivative_form_rhyme_key_before_save(
+    _mapper: Any,
+    _connection: Any,
+    target: DerivativeForm,
+) -> None:
+    """Keep rhyme keys synchronized with the derivative form's IPA."""
+    sync_derivative_form_rhyme_key(target)
