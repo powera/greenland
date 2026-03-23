@@ -24,6 +24,7 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy import func, literal, or_
 from sqlalchemy.orm import Session
 
+from langtools.grammatical_words import is_grammatical_word
 from storage.models.schema import (
     DerivativeForm,
     Lemma,
@@ -57,7 +58,7 @@ class ResolvedLemma:
     english_text: str
     lemma: Optional[Lemma]
     method: str  # "guid", "source_lemma", "exact_text", "ilike_text",
-    #              "derivative_form", "llm", "unresolved"
+    #              "derivative_form", "llm", "grammatical_word", "unresolved"
     confidence: float  # 0.0 to 1.0
     candidates: List[Lemma] = field(default_factory=list)
     slot_name: Optional[str] = None
@@ -86,6 +87,10 @@ def find_lemma_by_text(
         Matching Lemma or None
     """
     if not word_text:
+        return None
+
+    if is_grammatical_word(word_text, "en"):
+        logger.debug("Skipping grammatical English word during lemma lookup: %s", word_text)
         return None
 
     # Check source lemma first
@@ -188,6 +193,15 @@ def resolve_lemma_for_word(
                 candidates=[lemma],
             )
         logger.warning("GUID %s not found in database", guid)
+
+    if effective_english and is_grammatical_word(effective_english, "en"):
+        return ResolvedLemma(
+            position=0,
+            english_text=effective_english,
+            lemma=None,
+            method="grammatical_word",
+            confidence=1.0,
+        )
 
     # Strategy 2: Source lemma match
     if source_lemma and effective_english:
@@ -493,6 +507,14 @@ def _match_derivative_forms(
 
     for lang_code, declined_form in forms_by_language.items():
         if not declined_form:
+            continue
+
+        if is_grammatical_word(declined_form, lang_code):
+            logger.debug(
+                "Skipping grammatical %s word during derivative matching: %s",
+                lang_code,
+                declined_form,
+            )
             continue
 
         if lang_code in SUBSTRING_MATCH_LANGUAGES:

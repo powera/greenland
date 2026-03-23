@@ -8,6 +8,7 @@ and checks coverage against the linguistics database.
 import re
 from typing import Any, Dict, List, Set
 
+from langtools.en.grammatical_words import ENGLISH_GRAMMATICAL_WORDS_WITH_CONTRACTIONS
 from storage.models.schema import DerivativeForm, Lemma
 
 
@@ -83,14 +84,7 @@ def get_grammatical_stopwords() -> Set[str]:
     Returns:
         Set of lowercased grammatical stopwords
     """
-    from util.stopwords import CONTRACTIONS, all_stopwords
-
-    result: Set[str] = set()
-    for word in all_stopwords:
-        result.add(word.lower())
-    for word in CONTRACTIONS:
-        result.add(word.lower())
-    return result
+    return set(ENGLISH_GRAMMATICAL_WORDS_WITH_CONTRACTIONS)
 
 
 def get_existing_english_words(session: Any) -> Set[str]:

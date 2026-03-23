@@ -13,7 +13,14 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
-import util.stopwords
+from util.stopwords import (
+    COMMON_ADVERBS,
+    COMMON_NOUNS,
+    COMMON_VERBS,
+    CONTRACTIONS,
+    MISC_WORDS,
+    all_stopwords,
+)
 
 
 def is_valid_word(word: str) -> bool:
@@ -29,21 +36,21 @@ def is_valid_word(word: str) -> bool:
     word_lower = word.lower()
 
     # Skip stopwords - check all categories
-    if word_lower in util.stopwords.all_stopwords:
+    if word_lower in all_stopwords:
         return False
 
     # Also check common words that shouldn't be priorities
-    if word_lower in util.stopwords.COMMON_VERBS:
+    if word_lower in COMMON_VERBS:
         return False
-    if word_lower in util.stopwords.COMMON_NOUNS:
+    if word_lower in COMMON_NOUNS:
         return False
-    if word_lower in util.stopwords.COMMON_ADVERBS:
+    if word_lower in COMMON_ADVERBS:
         return False
-    if word_lower in util.stopwords.MISC_WORDS:
+    if word_lower in MISC_WORDS:
         return False
 
     # Check contractions
-    if word in util.stopwords.CONTRACTIONS:
+    if word in CONTRACTIONS:
         return False
 
     # Must contain at least one letter
