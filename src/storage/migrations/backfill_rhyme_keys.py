@@ -16,7 +16,7 @@ if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from constants import WORDFREQ_DB_PATH
-from langtools.en.rhyme_key import compute_rhyme_key
+from storage.rhyme_keys import compute_rhyme_key_from_ipa
 from storage.backend import create_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import DerivativeForm
@@ -69,7 +69,9 @@ def backfill_rhyme_keys(config: DataSourceConfig, *, dry_run: bool = False) -> N
                 )
                 continue
 
-            rhyme_key_value = compute_rhyme_key(ipa_pronunciation, "en")
+            rhyme_key_value = compute_rhyme_key_from_ipa(
+                ipa_pronunciation, derivative_form.language_code
+            )
             if rhyme_key_value:
                 if not dry_run:
                     derivative_form.rhyme_key = rhyme_key_value
