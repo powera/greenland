@@ -5,6 +5,7 @@ from datetime import datetime
 
 from benchmarks.datastore.benchmarks import (
     create_database_and_session,
+    set_question_exclusion,
     insert_benchmark,
     insert_question,
     insert_run,
@@ -174,6 +175,49 @@ class TestDatastore(unittest.TestCase):
         run_data = get_run_by_run_id(run_id, self.session)
         self.assertIsNotNone(run_data)
         self.assertEqual(run_data["details"][0]["tokens_used"], 321)
+
+    def test_set_question_exclusion_updates_run_detail_payload(self):
+        """
+        Test excluded-question metadata is returned with run detail payloads
+        """
+        insert_model(self.session, "test_model", "Test Model")
+        insert_benchmark(self.session, "test_benchmark", "Test Benchmark", "Test Description")
+        insert_question(
+            self.session,
+            "test_question_exclusion",
+            "test_benchmark",
+            json.dumps({"question_text": "Ambiguous?"}),
+        )
+
+        success, message = set_question_exclusion(
+            self.session,
+            "test_question_exclusion",
+            is_excluded=True,
+            exclusion_reason="Ambiguous wording",
+        )
+        self.assertTrue(success)
+        self.assertIn("exclusion updated", message)
+
+        success, run_id = insert_run(
+            self.session,
+            "test_model",
+            "test_benchmark",
+            100,
+            run_details=[
+                {
+                    "question_id": "test_question_exclusion",
+                    "score": 0,
+                    "eval_msec": 999,
+                }
+            ],
+        )
+        self.assertTrue(success)
+        run_data = get_run_by_run_id(run_id, self.session)
+        self.assertTrue(run_data["details"][0]["is_question_excluded"])
+        self.assertEqual(
+            run_data["details"][0]["question_exclusion_reason"],
+            "Ambiguous wording",
+        )
 
     def test_list_all_models(self):
         """

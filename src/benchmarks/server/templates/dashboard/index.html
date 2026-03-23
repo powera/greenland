@@ -25,6 +25,10 @@
                     <span class="badge text-bg-light border">N/A</span>
                     Excluded by model policy.
                 </div>
+                <div class="mt-2 small text-muted">
+                    Dashboard defaults to <strong>remote</strong> + <strong>word processing</strong>.
+                    Latency is shown as the <strong>median</strong> for non-excluded questions, and suspiciously slow incorrect outliers are ignored in that latency summary.
+                </div>
             </div>
         </div>
     </div>
@@ -42,8 +46,8 @@
                     <div class="col-md-3">
                         <label class="form-label">Model Scope</label>
                         <select class="form-select" id="modelScope">
-                            <option value="all" selected>All</option>
-                            <option value="remote">Remote</option>
+                            <option value="all">All</option>
+                            <option value="remote" selected>Remote</option>
                             <option value="local-level1">Local (Level 1)</option>
                             <option value="local-level2plus">Local (Level 2+)</option>
                         </select>
@@ -62,7 +66,7 @@
                         <select class="form-select" id="categoryFilter">
                             <option value="all">All</option>
                             {% for cat in categories %}
-                            <option value="{{ cat }}">{{ cat | title }}</option>
+                            <option value="{{ cat }}"{% if cat == 'word processing' %} selected{% endif %}>{{ cat | title }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -140,15 +144,24 @@
                                        class="text-decoration-none">
                                         <div class="score-badge mx-auto"
                                              style="background-color: {{ score_data.color }};"
-                                             title="Score: {{ score_data.value }}/100, Avg time: {{ '%.1f'|format(score_data.avg_eval_time) }}ms, Avg cost: {{ '%.0f'|format(score_data.avg_cost_usd * 1000000) }}µ$">
+                                             title="Score: {{ score_data.value }}/100, Median time: {{ '%.1f'|format(score_data.median_eval_time) }}ms, Avg cost: {{ '%.0f'|format(score_data.avg_cost_usd * 1000000) }}µ${% if score_data.outlier_count %}, Ignored latency outliers: {{ score_data.outlier_count }}{% endif %}{% if score_data.excluded_question_count %}, Excluded questions: {{ score_data.excluded_question_count }}{% endif %}{% if score_data.price_diagnostics.has_mismatch %}, Cost warning{% endif %}">
                                             {{ score_data.value }}
                                         </div>
                                         <div class="small text-muted mt-1">
-                                            {{ '%.1f'|format(score_data.avg_eval_time) }}ms
+                                            {{ '%.1f'|format(score_data.median_eval_time) }}ms median
                                         </div>
                                         <div class="small text-muted">
                                             {{ '%.0f'|format(score_data.avg_cost_usd * 1000000) }}µ$
                                         </div>
+                                        {% if score_data.outlier_count or score_data.price_diagnostics.has_mismatch or score_data.excluded_question_count %}
+                                        <div class="small text-warning-emphasis">
+                                            {% if score_data.outlier_count %}<span title="Incorrect long-tail latency outliers ignored">{{ score_data.outlier_count }} latency outlier{% if score_data.outlier_count != 1 %}s{% endif %}</span>{% endif %}
+                                            {% if score_data.outlier_count and (score_data.price_diagnostics.has_mismatch or score_data.excluded_question_count) %} · {% endif %}
+                                            {% if score_data.price_diagnostics.has_mismatch %}<span title="{{ score_data.price_diagnostics.message }}">cost warning</span>{% endif %}
+                                            {% if score_data.price_diagnostics.has_mismatch and score_data.excluded_question_count %} · {% endif %}
+                                            {% if score_data.excluded_question_count %}<span title="Question exclusions are removed from aggregate scores">{{ score_data.excluded_question_count }} excluded Q</span>{% endif %}
+                                        </div>
+                                        {% endif %}
                                     </a>
                                     {% elif not eligibility[(benchmark.codename, model.codename)] %}
                                     <span class="badge text-bg-light border"

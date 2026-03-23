@@ -32,14 +32,17 @@
                 <h3>
                     <div class="score-badge"
                          style="background-color:
-                         {% if run_data.normed_score >= 90 %}#1b5e20
-                         {% elif run_data.normed_score >= 75 %}#4caf50
-                         {% elif run_data.normed_score >= 50 %}#ff9800
-                         {% elif run_data.normed_score >= 25 %}#f44336
+                         {% if effective_score >= 90 %}#1b5e20
+                         {% elif effective_score >= 75 %}#4caf50
+                         {% elif effective_score >= 50 %}#ff9800
+                         {% elif effective_score >= 25 %}#f44336
                          {% else %}#b71c1c{% endif %};">
-                        {{ run_data.normed_score }}
+                        {{ effective_score }}
                     </div>
                 </h3>
+                {% if effective_score != run_data.normed_score %}
+                <div class="small text-muted mt-2">Stored run score {{ run_data.normed_score }} recalculated to {{ effective_score }} after question exclusions.</div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -47,7 +50,7 @@
         <div class="card stat-card">
             <div class="card-body">
                 <h6 class="text-muted">Correct (≥{{ correctness_threshold }})</h6>
-                <h4 class="text-success">{{ correct_count }}/{{ total_questions }}</h4>
+                <h4 class="text-success">{{ correct_count }}/{{ included_question_count }}</h4>
             </div>
         </div>
     </div>
@@ -62,8 +65,11 @@
     <div class="col-sm-6 col-md">
         <div class="card stat-card">
             <div class="card-body">
-                <h6 class="text-muted">Avg Time</h6>
-                <h4>{{ '%.1f'|format(avg_time) }}ms</h4>
+                <h6 class="text-muted">Median Time</h6>
+                <h4>{{ '%.1f'|format(median_time) }}ms</h4>
+                {% if outlier_count %}
+                <div class="small text-muted mt-2">{{ outlier_count }} slow incorrect outlier{% if outlier_count != 1 %}s{% endif %} ignored for latency.</div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -92,6 +98,35 @@
     </div>
     {% endif %}
 </div>
+
+{% if excluded_question_count %}
+<div class="alert alert-warning">
+    <strong>{{ excluded_question_count }} question{% if excluded_question_count != 1 %}s are{% else %} is{% endif %} excluded</strong>
+    from aggregate scoring for this run. Aggregate cards above are recalculated using the {{ included_question_count }} active question{% if included_question_count != 1 %}s{% endif %} only.
+</div>
+{% endif %}
+
+{% if price_diagnostics.status == 'warning' %}
+<div class="alert alert-warning">
+    <strong>{{ price_diagnostics.label }}.</strong>
+    {{ price_diagnostics.message }}
+    {% if price_diagnostics.estimated_total_cost_usd is not none %}
+    Stored total:
+    {% if price_diagnostics.stored_total_cost_usd < 0.001 %}
+    {{ '%.0f'|format(price_diagnostics.stored_total_cost_usd * 1000000) }}µ$
+    {% else %}
+    ${{ '%.4f'|format(price_diagnostics.stored_total_cost_usd) }}
+    {% endif %}
+    · Current estimate:
+    {% if price_diagnostics.estimated_total_cost_usd < 0.001 %}
+    {{ '%.0f'|format(price_diagnostics.estimated_total_cost_usd * 1000000) }}µ$
+    {% else %}
+    ${{ '%.4f'|format(price_diagnostics.estimated_total_cost_usd) }}
+    {% endif %}
+    ({{ price_diagnostics.coverage }})
+    {% endif %}
+</div>
+{% endif %}
 
 <div class="row mb-4">
     <div class="col-12">
@@ -123,7 +158,7 @@
             <div class="card-body">
                 {% for detail in ordered_questions %}
                 {% set question_text = detail.question_info_json.question_text if detail.question_info_json else none %}
-                {% set is_correct = (detail.score or 0) >= correctness_threshold %}
+                {% set is_correct = detail.is_correct %}
                 <div class="border rounded p-3 mb-3 {% if is_correct %}border-success{% else %}border-danger{% endif %}">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div>
@@ -131,9 +166,24 @@
                             <span class="ms-2 badge {% if is_correct %}bg-success{% else %}bg-danger{% endif %}">
                                 {% if is_correct %}Correct{% else %}Incorrect{% endif %}
                             </span>
+                            {% if detail.is_question_excluded %}
+                            <span class="ms-2 badge bg-warning text-dark">Excluded</span>
+                            {% endif %}
+                            {% if detail.is_latency_outlier %}
+                            <span class="ms-2 badge bg-secondary">Latency outlier</span>
+                            {% endif %}
                         </div>
                         <span class="small text-muted">Score: {{ detail.score or 0 }} • {{ detail.eval_msec or 0 }}ms{% if detail.tokens_used is not none %} • {{ detail.tokens_used }} tokens{% endif %}{% if detail.cost_usd %} • {% if detail.cost_usd < 0.001 %}{{ '%.0f'|format(detail.cost_usd * 1000000) }}µ${% else %}${{ '%.4f'|format(detail.cost_usd) }}{% endif %}{% endif %}</span>
                     </div>
+                    {% if detail.is_question_excluded %}
+                    <div class="alert alert-warning py-2">
+                        Excluded from aggregate scoring. {{ detail.question_exclusion_reason or "No reason recorded." }}
+                    </div>
+                    {% elif detail.is_latency_outlier %}
+                    <div class="alert alert-secondary py-2">
+                        Incorrect response with unusually high latency; excluded from aggregate latency summaries.
+                    </div>
+                    {% endif %}
 
                     <div class="mb-3"><strong>Question:</strong> {{ question_text or '-' }}</div>
 
@@ -200,7 +250,7 @@
                     <div class="accordion" id="runQuestionAccordion">
                         {% for detail in ordered_questions %}
                         {% set question_text = detail.question_info_json.question_text if detail.question_info_json else none %}
-                        {% set is_correct = (detail.score or 0) >= correctness_threshold %}
+                        {% set is_correct = detail.is_correct %}
 
                         <div class="accordion-item mb-2 border {% if is_correct %}border-success{% else %}border-danger{% endif %}">
                             <h2 class="accordion-header" id="heading{{ loop.index }}">
@@ -211,6 +261,12 @@
                                             <span class="ms-2 badge {% if is_correct %}bg-success{% else %}bg-danger{% endif %}">
                                                 {% if is_correct %}Correct{% else %}Incorrect{% endif %}
                                             </span>
+                                            {% if detail.is_question_excluded %}
+                                            <span class="ms-2 badge bg-warning text-dark">Excluded</span>
+                                            {% endif %}
+                                            {% if detail.is_latency_outlier %}
+                                            <span class="ms-2 badge bg-secondary">Latency outlier</span>
+                                            {% endif %}
                                         </span>
                                         <span class="small text-muted">Score: {{ detail.score or 0 }} • {{ detail.eval_msec or 0 }}ms{% if detail.tokens_used is not none %} • {{ detail.tokens_used }} tokens{% endif %}{% if detail.cost_usd %} • {% if detail.cost_usd < 0.001 %}{{ '%.0f'|format(detail.cost_usd * 1000000) }}µ${% else %}${{ '%.4f'|format(detail.cost_usd) }}{% endif %}{% endif %}</span>
                                     </div>
@@ -218,6 +274,15 @@
                             </h2>
                             <div id="question{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#runQuestionAccordion">
                                 <div class="accordion-body">
+                                    {% if detail.is_question_excluded %}
+                                    <div class="alert alert-warning">
+                                        Excluded from aggregate scoring. {{ detail.question_exclusion_reason or "No reason recorded." }}
+                                    </div>
+                                    {% elif detail.is_latency_outlier %}
+                                    <div class="alert alert-secondary">
+                                        Incorrect response with unusually high latency; excluded from aggregate latency summaries.
+                                    </div>
+                                    {% endif %}
                                     <div class="mb-3"><strong>Question:</strong> {{ question_text or '-' }}</div>
 
                                     <div class="row g-3">
