@@ -22,6 +22,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 from langtools.manifest_grammar import get_manifest_conjugation_config
 from storage.translation_helpers import LANGUAGE_NAMES
+from wireword.readings import get_manifest_reading_config
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -32,6 +33,7 @@ LANGUAGE_VOICE_NAMES: Dict[str, List[str]] = {
     "lt": ["ruta", "jonas"],
     "zh": ["meiling", "zhiyuan"],
     "fr": ["marie", "pierre"],
+    "ja": ["sakura", "haruto"],  # Placeholder names for Japanese
     "ko": ["yuna", "minho"],  # Placeholder names for Korean
 }
 
@@ -168,6 +170,9 @@ def generate_manifest(
         "available_voices": available_voices,
         "default_voice": default_voice,
     }
+    reading_manifest_config = get_manifest_reading_config(language)
+    if reading_manifest_config:
+        manifest["config"]["reading"] = reading_manifest_config
     conjugation_manifest_config = get_manifest_conjugation_config(language)
     if conjugation_manifest_config:
         manifest["config"]["grammar"] = {

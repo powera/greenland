@@ -32,8 +32,11 @@ from storage.translation_helpers import (
     get_translation,
 )
 from langtools.zh.converter import to_simplified, to_traditional
-from langtools.zh.pinyin_helper import generate_pinyin
 from wireword.data_models import ExportStats, create_export_stats
+from wireword.readings import (
+    build_target_reading_fields,
+    build_target_reading_list_fields,
+)
 from wireword.text_rendering import format_subtype_display_name
 from wireword.helpers import (
     convert_to_wireword_grammatical_form_key,
@@ -598,10 +601,8 @@ class WirewordExporter:
                 # Build alternatives, synonyms, and grammatical forms
                 english_alternatives = []
                 target_alternatives = []
-                target_alternatives_pinyin = []  # For Chinese pinyin
                 english_synonyms = []
                 target_synonyms = []
-                target_synonyms_pinyin = []  # For Chinese pinyin
                 grammatical_forms = {}
 
                 for form in derivative_forms:
@@ -636,16 +637,8 @@ class WirewordExporter:
                     elif form.language_code == self.language:
                         if is_alternative:
                             target_alternatives.append(form.derivative_form_text)
-                            # Generate pinyin for Chinese alternatives (keep arrays parallel)
-                            if self.language == "zh":
-                                pinyin = generate_pinyin(form.derivative_form_text)
-                                target_alternatives_pinyin.append(pinyin if pinyin else "")
                         elif is_synonym:
                             target_synonyms.append(form.derivative_form_text)
-                            # Generate pinyin for Chinese synonyms (keep arrays parallel)
-                            if self.language == "zh":
-                                pinyin = generate_pinyin(form.derivative_form_text)
-                                target_synonyms_pinyin.append(pinyin if pinyin else "")
                         elif form.grammatical_form == "plural_nominative":
                             # Skip derivative forms for Lithuanian nouns (they're handled by special cases like "where is X")
                             if self.language == "lt" and lemma.pos_type == "noun":
@@ -657,11 +650,12 @@ class WirewordExporter:
                                 "target": form.derivative_form_text,
                                 "english": f"{entry['source_word']} (plural)",  # Simple plural source form
                             }
-                            # Add pinyin for Chinese grammatical forms
-                            if self.language == "zh":
-                                pinyin = generate_pinyin(form.derivative_form_text)
-                                if pinyin:
-                                    gram_form["target_pinyin"] = pinyin
+                            gram_form.update(
+                                build_target_reading_fields(
+                                    self.language,
+                                    form.derivative_form_text,
+                                )
+                            )
 
                             # Add audio MD5 hashes for this grammatical form (from pre-fetched data)
                             form_audio = audio_by_guid_form.get(
@@ -687,11 +681,12 @@ class WirewordExporter:
                                 "target": form.derivative_form_text,
                                 "english": f"{entry['source_word']}{english_suffix}",
                             }
-                            # Add pinyin for Chinese grammatical forms
-                            if self.language == "zh":
-                                pinyin = generate_pinyin(form.derivative_form_text)
-                                if pinyin:
-                                    gram_form["target_pinyin"] = pinyin
+                            gram_form.update(
+                                build_target_reading_fields(
+                                    self.language,
+                                    form.derivative_form_text,
+                                )
+                            )
 
                             # Add audio MD5 hashes for this grammatical form (from pre-fetched data)
                             form_audio = audio_by_guid_form.get(
@@ -735,11 +730,12 @@ class WirewordExporter:
                                     "target": form.derivative_form_text,
                                     "english": english_label,
                                 }
-                                # Add pinyin for Chinese grammatical forms
-                                if self.language == "zh":
-                                    pinyin = generate_pinyin(form.derivative_form_text)
-                                    if pinyin:
-                                        gram_form["target_pinyin"] = pinyin
+                                gram_form.update(
+                                    build_target_reading_fields(
+                                        self.language,
+                                        form.derivative_form_text,
+                                    )
+                                )
 
                                 # Add audio MD5 hashes for this grammatical form (from pre-fetched data)
                                 form_audio = audio_by_guid_form.get(
@@ -790,11 +786,12 @@ class WirewordExporter:
                     if audio_hashes:
                         wireword["audio"] = audio_hashes
 
-                # Add pinyin for Chinese language exports
-                if self.language == "zh" and entry["target_language"]:
-                    pinyin = generate_pinyin(entry["target_language"])
-                    if pinyin:
-                        wireword["target_pinyin"] = pinyin
+                wireword.update(
+                    build_target_reading_fields(
+                        self.language,
+                        entry["target_language"],
+                    )
+                )
 
                 # Add optional fields
                 # Use source_alternatives/source_synonyms for non-English source languages
@@ -810,16 +807,24 @@ class WirewordExporter:
                     wireword[source_alt_key] = english_alternatives
                 if target_alternatives:
                     wireword["target_alternatives"] = target_alternatives
-                    # Add pinyin for Chinese alternatives
-                    if self.language == "zh" and target_alternatives_pinyin:
-                        wireword["target_alternatives_pinyin"] = target_alternatives_pinyin
+                    wireword.update(
+                        build_target_reading_list_fields(
+                            self.language,
+                            target_alternatives,
+                            "target_alternatives",
+                        )
+                    )
                 if english_synonyms:
                     wireword[source_syn_key] = english_synonyms
                 if target_synonyms:
                     wireword["target_synonyms"] = target_synonyms
-                    # Add pinyin for Chinese synonyms
-                    if self.language == "zh" and target_synonyms_pinyin:
-                        wireword["target_synonyms_pinyin"] = target_synonyms_pinyin
+                    wireword.update(
+                        build_target_reading_list_fields(
+                            self.language,
+                            target_synonyms,
+                            "target_synonyms",
+                        )
+                    )
 
                 # Add grammatical forms (for both verbs and nouns with declensions)
                 if grammatical_forms:
@@ -1282,10 +1287,8 @@ class WirewordExporter:
                 grammatical_forms = {}
                 conjugation_mode_tables: Dict[str, Dict[str, Dict[str, str]]] = {}
                 target_alternatives: List[str] = []
-                target_alternatives_pinyin: List[str] = []
                 english_synonyms = []
                 target_synonyms = []
-                target_synonyms_pinyin = []
 
                 for form in derivative_forms:
                     if form.is_base_form:
@@ -1315,10 +1318,6 @@ class WirewordExporter:
                             "synonym_synecdoche",
                         ]:
                             target_synonyms.append(form.derivative_form_text)
-                            # Generate pinyin for Chinese synonyms
-                            if self.language == "zh":
-                                pinyin = generate_pinyin(form.derivative_form_text)
-                                target_synonyms_pinyin.append(pinyin if pinyin else "")
                         elif form.grammatical_form != "infinitive":
                             # This is a conjugated form
                             form_level = max(effective_lemma_level, 1)
@@ -1371,12 +1370,12 @@ class WirewordExporter:
                                 "target": form.derivative_form_text,
                                 "english": english_label,
                             }
-
-                            # Add pinyin for Chinese grammatical forms
-                            if self.language == "zh":
-                                pinyin = generate_pinyin(form.derivative_form_text)
-                                if pinyin:
-                                    gram_form["target_pinyin"] = pinyin
+                            gram_form.update(
+                                build_target_reading_fields(
+                                    self.language,
+                                    form.derivative_form_text,
+                                )
+                            )
 
                             # Convert grammatical form key to WireWord format
                             # e.g., "verb/lt_3s_present" -> "3s_present"
@@ -1430,11 +1429,7 @@ class WirewordExporter:
                     if audio_hashes:
                         wireword["audio"] = audio_hashes
 
-                # Add pinyin for Chinese language exports
-                if self.language == "zh" and base_target:
-                    pinyin = generate_pinyin(base_target)
-                    if pinyin:
-                        wireword["target_pinyin"] = pinyin
+                wireword.update(build_target_reading_fields(self.language, base_target))
 
                 # Add optional fields
                 verb_source_syn_key = (
@@ -1444,9 +1439,13 @@ class WirewordExporter:
                     wireword[verb_source_syn_key] = english_synonyms
                 if target_synonyms:
                     wireword["target_synonyms"] = target_synonyms
-                    # Add pinyin for Chinese synonyms
-                    if self.language == "zh" and target_synonyms_pinyin:
-                        wireword["target_synonyms_pinyin"] = target_synonyms_pinyin
+                    wireword.update(
+                        build_target_reading_list_fields(
+                            self.language,
+                            target_synonyms,
+                            "target_synonyms",
+                        )
+                    )
 
                 # Add grammatical forms (conjugations)
                 if grammatical_forms:
