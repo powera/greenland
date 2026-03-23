@@ -16,6 +16,7 @@ from clients.audio.azure_tts import AzureVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.polly_tts import PollyVoice
 from barsukas.helpers.lemma_display import (
+    build_lemma_pronunciation_rows,
     get_difficulty_stats,
     group_derivative_forms,
     group_populated_pronunciations,
@@ -251,6 +252,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
     # Extract pre-fetched data
     translations = data["translations"]
     definitions = data["definitions"]
+    translation_pronunciations = data["translation_pronunciations"]
     language_names = get_supported_languages()
     overrides = data["overrides"]
     effective_levels = data["effective_levels"]
@@ -273,6 +275,11 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
     ) = group_derivative_forms(derivative_forms)
     pronunciation_forms_by_language = group_populated_pronunciations(derivative_forms)
     pronunciation_languages = sorted({form.language_code for form in derivative_forms})
+    lemma_pronunciation_rows = build_lemma_pronunciation_rows(
+        derivative_forms,
+        translations,
+        translation_pronunciations,
+    )
 
     # Get tombstone entries for this lemma
     tombstones = get_tombstones_by_lemma_id(g.db, lemma_id)
@@ -360,6 +367,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         derivative_forms=derivative_forms,
         pronunciation_forms_by_language=pronunciation_forms_by_language,
         pronunciation_languages=pronunciation_languages,
+        lemma_pronunciation_rows=lemma_pronunciation_rows,
         audio_files=audio_files,
         synonyms_by_language=synonyms_by_language,
         alternative_forms_by_language=alternative_forms_by_language,

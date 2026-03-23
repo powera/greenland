@@ -1,8 +1,11 @@
 """Lemma display and UI helper functions for Barsukas."""
 
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from storage.queries.lemma import get_difficulty_stats
+
+
+LemmaPronunciationRow = Dict[str, Optional[str]]
 
 
 def group_derivative_forms(derivative_forms: Any) -> Tuple[Dict, Dict, Dict, List[str]]:
@@ -91,6 +94,60 @@ def group_populated_pronunciations(derivative_forms: Any) -> Dict[str, List[Any]
     return pronunciations_by_language
 
 
+def build_lemma_pronunciation_rows(
+    derivative_forms: Sequence[Any],
+    translations: Mapping[str, Optional[str]],
+    translation_pronunciations: Mapping[str, Tuple[Optional[str], Optional[str]]],
+) -> Dict[str, LemmaPronunciationRow]:
+    """Build per-language lemma/base pronunciation rows for the lemma page.
+
+    Translation-level pronunciations take priority when present, but the helper
+    falls back to an existing base-form derivative so English lemma/base IPA is
+    still visible even though English does not use ``LemmaTranslation`` rows for
+    pronunciation storage.
+    """
+    base_forms_by_language: Dict[str, Any] = {}
+    for form in derivative_forms:
+        if form.is_base_form and form.language_code not in base_forms_by_language:
+            base_forms_by_language[form.language_code] = form
+
+    all_languages = sorted(set(translations.keys()) | set(base_forms_by_language.keys()))
+    pronunciation_rows: Dict[str, LemmaPronunciationRow] = {}
+
+    for language_code in all_languages:
+        translation_ipa, translation_phonetic = translation_pronunciations.get(
+            language_code, (None, None)
+        )
+        base_form = base_forms_by_language.get(language_code)
+        base_ipa = getattr(base_form, "ipa_pronunciation", None) if base_form else None
+        base_phonetic = getattr(base_form, "phonetic_pronunciation", None) if base_form else None
+
+        ipa_value = translation_ipa or base_ipa
+        phonetic_value = translation_phonetic or base_phonetic
+        if not (ipa_value or phonetic_value):
+            continue
+
+        display_text = translations.get(language_code) or getattr(
+            base_form, "derivative_form_text", None
+        )
+        pronunciation_rows[language_code] = {
+            "text": display_text,
+            "ipa": ipa_value,
+            "phonetic": phonetic_value,
+            "grammatical_form": getattr(base_form, "grammatical_form", "lemma_translation"),
+            "source": (
+                "lemma_translation" if translation_ipa or translation_phonetic else "base_form"
+            ),
+        }
+
+    return pronunciation_rows
+
+
 # Re-export for backwards compatibility and convenience
 # Routes can import from here for UI-related helpers
-__all__ = ["get_difficulty_stats", "group_derivative_forms", "group_populated_pronunciations"]
+__all__ = [
+    "build_lemma_pronunciation_rows",
+    "get_difficulty_stats",
+    "group_derivative_forms",
+    "group_populated_pronunciations",
+]

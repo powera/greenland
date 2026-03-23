@@ -12,7 +12,7 @@ Tier 2 (endings): Within that final sound, browse distinct rhyme keys
 Family detail:    View all words sharing a single rhyme key.
 """
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 from flask import Blueprint, g, render_template, request
 from flask.typing import ResponseReturnValue
@@ -34,40 +34,8 @@ RHYME_ITEMS_PER_PAGE = 200
 # ---------------------------------------------------------------------------
 
 
-def _distinct_final_sounds() -> List[Tuple[str, int]]:
-    """Return (final_sound, family_count) pairs sorted by family count desc.
-
-    Each "final sound" groups multiple rhyme keys together (e.g., all keys
-    ending in "t": æt, ɪt, ʌt, …).  We compute this in Python from the
-    distinct rhyme keys since the grouping logic lives in Python.
-    """
-    rows = (
-        g.db.query(DerivativeForm.rhyme_key)
-        .filter(
-            DerivativeForm.language_code == "en",
-            DerivativeForm.rhyme_key.isnot(None),
-        )
-        .distinct()
-        .all()
-    )
-
-    sound_counts: Dict[str, int] = {}
-    for (rk,) in rows:
-        fs = rhyme_key_final_sound(rk)
-        if fs:
-            sound_counts[fs] = sound_counts.get(fs, 0) + 1
-
-    return sorted(sound_counts.items(), key=lambda x: (-x[1], x[0]))
-
-
-def _rhyme_families_for_final_sound(
-    final_sound: str,
-) -> List[Dict[str, Any]]:
-    """Return rhyme family dicts for all keys whose final sound matches.
-
-    Each dict has: rhyme_key, penultimate, word_count, example_word.
-    """
-    # Fetch all distinct rhyme keys with counts and an example word.
+def _rhyme_family_rows() -> List[Tuple[str, int, str]]:
+    """Return grouped rhyme-family rows limited to keys with 2+ distinct lemmas."""
     rows = (
         g.db.query(
             DerivativeForm.rhyme_key,
@@ -82,9 +50,34 @@ def _rhyme_families_for_final_sound(
         .having(func.count(func.distinct(DerivativeForm.lemma_id)) >= 2)
         .all()
     )
+    return cast(List[Tuple[str, int, str]], rows)
 
+
+def _distinct_final_sounds() -> List[Tuple[str, int]]:
+    """Return (final_sound, family_count) pairs sorted by family count desc.
+
+    Each "final sound" groups multiple rhyme keys together (e.g., all keys
+    ending in "t": æt, ɪt, ʌt, …).  We compute this in Python from the
+    distinct rhyme keys since the grouping logic lives in Python.
+    """
+    sound_counts: Dict[str, int] = {}
+    for rk, _, _ in _rhyme_family_rows():
+        fs = rhyme_key_final_sound(rk)
+        if fs:
+            sound_counts[fs] = sound_counts.get(fs, 0) + 1
+
+    return sorted(sound_counts.items(), key=lambda x: (-x[1], x[0]))
+
+
+def _rhyme_families_for_final_sound(
+    final_sound: str,
+) -> List[Dict[str, Any]]:
+    """Return rhyme family dicts for all keys whose final sound matches.
+
+    Each dict has: rhyme_key, penultimate, word_count, example_word.
+    """
     families: List[Dict[str, Any]] = []
-    for rk, count, example in rows:
+    for rk, count, example in _rhyme_family_rows():
         fs = rhyme_key_final_sound(rk)
         if fs == final_sound:
             families.append(

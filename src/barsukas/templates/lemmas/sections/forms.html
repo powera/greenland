@@ -33,6 +33,46 @@
                 </div>
             </div>
             <div class="card-body">
+                {% if lemma_pronunciation_rows %}
+                    <h5 class="mt-1">Lemma/base pronunciations</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Language</th>
+                                    <th>Lemma/Base Form</th>
+                                    <th>IPA</th>
+                                    <th>Phonetic</th>
+                                    <th>Source</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lang_code, pronunciation in lemma_pronunciation_rows.items() %}
+                                    <tr>
+                                        <td><strong>{{ language_names.get(lang_code, lang_code) }}</strong></td>
+                                        <td>
+                                            <strong>{{ pronunciation.text or '-' }}</strong>
+                                            {% if pronunciation.grammatical_form and pronunciation.grammatical_form != 'lemma_translation' %}
+                                                <div><code>{{ pronunciation.grammatical_form }}</code></div>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ pronunciation.ipa or '-' }}</td>
+                                        <td>{{ pronunciation.phonetic or '-' }}</td>
+                                        <td>
+                                            {% if pronunciation.source == 'lemma_translation' %}
+                                                <span class="badge bg-info text-dark">translation</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">base form</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <hr>
+                {% endif %}
+
                 {% if pronunciation_forms_by_language %}
                     <h5 class="mt-1">Existing pronunciations</h5>
                     {% for lang_code, pronunciation_forms in pronunciation_forms_by_language.items() %}
