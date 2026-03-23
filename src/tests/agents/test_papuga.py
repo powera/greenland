@@ -351,3 +351,48 @@ def test_generate_pronunciations_for_lemma_updates_rhyme_key_for_english_forms()
     finally:
         session.close()
         engine.dispose()
+
+
+def test_generate_pronunciations_for_lemma_creates_english_base_form_when_missing() -> None:
+    """Lemma-only English entries should still get a stored base-form pronunciation."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+
+    session = Session(engine)
+    try:
+        lemma = Lemma(
+            lemma_text="quickly",
+            definition_text="at a fast speed",
+            pos_type="adverb",
+            guid="D00_007",
+        )
+        session.add(lemma)
+        session.commit()
+
+        with patch(
+            "workqueue.handlers.papuga.generate_pronunciation_for_form",
+            return_value=(True, "/ˈkwɪkli/", "KWIK-lee"),
+        ):
+            generated_count, errors = generate_pronunciations_for_lemma(
+                session=session,
+                lemma=lemma,
+                lang_code="en",
+                config=_build_config(),
+            )
+            session.commit()
+
+        generated_form = (
+            session.query(DerivativeForm)
+            .filter(DerivativeForm.lemma_id == lemma.id, DerivativeForm.language_code == "en")
+            .one()
+        )
+        assert generated_count == 1
+        assert errors == []
+        assert generated_form.derivative_form_text == "quickly"
+        assert generated_form.grammatical_form == "positive"
+        assert generated_form.is_base_form is True
+        assert generated_form.ipa_pronunciation == "/ˈkwɪkli/"
+        assert generated_form.phonetic_pronunciation == "KWIK-lee"
+    finally:
+        session.close()
+        engine.dispose()

@@ -17,6 +17,7 @@ from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.polly_tts import PollyVoice
 from barsukas.helpers.lemma_display import (
     build_lemma_pronunciation_rows,
+    get_pronunciation_languages,
     get_difficulty_stats,
     group_derivative_forms,
     group_populated_pronunciations,
@@ -274,7 +275,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         all_synonym_languages,
     ) = group_derivative_forms(derivative_forms)
     pronunciation_forms_by_language = group_populated_pronunciations(derivative_forms)
-    pronunciation_languages = sorted({form.language_code for form in derivative_forms})
+    pronunciation_languages = get_pronunciation_languages(derivative_forms, translations)
     lemma_pronunciation_rows = build_lemma_pronunciation_rows(
         derivative_forms,
         translations,

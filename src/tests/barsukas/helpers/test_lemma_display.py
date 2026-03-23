@@ -7,6 +7,7 @@ import pytest
 
 from barsukas.helpers.lemma_display import (
     build_lemma_pronunciation_rows,
+    get_pronunciation_languages,
     group_derivative_forms,
     group_populated_pronunciations,
 )
@@ -185,3 +186,15 @@ class TestBuildLemmaPronunciationRows:
         )
 
         assert rows == {}
+
+
+class TestGetPronunciationLanguages:
+    """Tests for eligible pronunciation language selection."""
+
+    def test_includes_languages_from_forms_and_translations(self) -> None:
+        languages = get_pronunciation_languages(
+            derivative_forms=[_form("fr", "infinitive", "manger")],
+            translations={"en": "eat", "es": "comer", "de": None, "it": "  "},
+        )
+
+        assert languages == ["en", "es", "fr"]
