@@ -23,9 +23,12 @@ from storage.crud.derivative_form import needs_pronunciation_update_filter
 from storage.models.schema import (
     DerivativeForm,
     Lemma,
+    LemmaTranslation,
     SentenceTranslation,
     SentenceWord,
 )
+from storage.translation_helpers import get_translation_pronunciations
+from workqueue.handlers.papuga import generate_pronunciations_for_lemma
 from wordfreq.tools.llm_validators import (
     batch_generate_pronunciations,
     generate_pronunciation,
@@ -294,6 +297,24 @@ class PapugaAgent:
                 query = query.limit(limit)
 
             missing_forms = query.all()
+            translation_query = session.query(LemmaTranslation).filter(
+                (LemmaTranslation.ipa_pronunciation.is_(None))
+                | (LemmaTranslation.ipa_pronunciation == "")
+                | (LemmaTranslation.phonetic_pronunciation.is_(None))
+                | (LemmaTranslation.phonetic_pronunciation == "")
+            )
+            if lemmas is not None:
+                lemma_ids = [lemma_obj.id for lemma_obj in lemmas]
+                translation_query = translation_query.filter(
+                    LemmaTranslation.lemma_id.in_(lemma_ids)
+                )
+            elif lemma_id:
+                translation_query = translation_query.filter(LemmaTranslation.lemma_id == lemma_id)
+
+            if only_english:
+                translation_query = translation_query.filter(LemmaTranslation.language_code == "en")
+
+            missing_translations = translation_query.order_by(LemmaTranslation.id).all()
 
             # Get lemma info for reporting
             missing_list = []
@@ -307,13 +328,29 @@ class PapugaAgent:
                         "pos_type": lemma.pos_type if lemma else None,
                         "grammatical_form": form.grammatical_form,
                         "is_base_form": form.is_base_form,
+                        "target_type": "derivative_form",
                     }
                 )
 
-            logger.info(f"Found {len(missing_forms)} forms missing pronunciations")
+            for translation_obj in missing_translations[:100]:
+                lemma = session.query(Lemma).filter(Lemma.id == translation_obj.lemma_id).first()
+                missing_list.append(
+                    {
+                        "translation_id": translation_obj.id,
+                        "word": translation_obj.translation,
+                        "lemma_guid": lemma.guid if lemma else None,
+                        "pos_type": lemma.pos_type if lemma else None,
+                        "grammatical_form": "lemma_translation",
+                        "is_base_form": True,
+                        "target_type": "lemma_translation",
+                    }
+                )
+
+            total_missing = len(missing_forms) + len(missing_translations)
+            logger.info(f"Found {total_missing} pronunciation targets missing pronunciations")
 
             return {
-                "total_missing": len(missing_forms),
+                "total_missing": total_missing,
                 "missing_forms": missing_list,
                 "only_english": only_english,
                 "only_base_forms": only_base_forms,
@@ -374,7 +411,7 @@ class PapugaAgent:
             query = query.order_by(DerivativeForm.lemma_id, DerivativeForm.language_code)
 
             forms = query.all()
-            logger.info(f"Found {len(forms)} forms to populate")
+            logger.info(f"Found {len(forms)} derivative forms to populate")
 
             # Group forms by (lemma_id, language_code) for intelligent batching
             from collections import defaultdict
@@ -384,6 +421,30 @@ class PapugaAgent:
             for form in forms:
                 key = (form.lemma_id, form.language_code)
                 forms_by_lemma_lang[key].append(form)
+
+            translation_query = session.query(LemmaTranslation).filter(
+                (LemmaTranslation.ipa_pronunciation.is_(None))
+                | (LemmaTranslation.ipa_pronunciation == "")
+                | (LemmaTranslation.phonetic_pronunciation.is_(None))
+                | (LemmaTranslation.phonetic_pronunciation == "")
+            )
+            if lemmas is not None:
+                lemma_ids = [lemma_obj.id for lemma_obj in lemmas]
+                translation_query = translation_query.filter(
+                    LemmaTranslation.lemma_id.in_(lemma_ids)
+                )
+            elif lemma_id:
+                translation_query = translation_query.filter(LemmaTranslation.lemma_id == lemma_id)
+
+            if only_english:
+                translation_query = translation_query.filter(LemmaTranslation.language_code == "en")
+
+            translation_pairs = {
+                (translation_obj.lemma_id, translation_obj.language_code)
+                for translation_obj in translation_query.all()
+            }
+            for lemma_language_pair in translation_pairs:
+                forms_by_lemma_lang.setdefault(lemma_language_pair, [])
 
             # Apply limit to number of lemma/language combinations
             lemma_lang_pairs = list(forms_by_lemma_lang.keys())
@@ -432,6 +493,33 @@ class PapugaAgent:
                         f"({lang_code}, {num_forms} form{'s' if num_forms != 1 else ''}) [{mode}]..."
                     )
 
+                    translation_ipa, translation_phonetic = get_translation_pronunciations(
+                        session, lemma, lang_code
+                    )
+                    missing_translation_pronunciation = (
+                        not translation_ipa or not translation_phonetic
+                    )
+
+                    if num_forms == 0:
+                        try:
+                            generated_count, generation_errors = generate_pronunciations_for_lemma(
+                                session=session,
+                                lemma=lemma,
+                                lang_code=lang_code,
+                                config=self.config,
+                            )
+                            populated_count += generated_count
+                            failed_count += len(generation_errors)
+                            session.commit()
+                        except Exception as generation_error:
+                            logger.error(
+                                "  Failed to generate pronunciation for lemma translation: %s",
+                                generation_error,
+                            )
+                            failed_count += 1
+                            session.rollback()
+                        continue
+
                     # Choose strategy based on number of forms
                     if num_forms == 1:
                         # Single form: use individual generation (no batch scaffolding)
@@ -463,6 +551,17 @@ class PapugaAgent:
                                     f"(confidence: {result['confidence']:.2f})"
                                 )
                                 populated_count += 1
+                                if missing_translation_pronunciation:
+                                    generated_count, generation_errors = (
+                                        generate_pronunciations_for_lemma(
+                                            session=session,
+                                            lemma=lemma,
+                                            lang_code=lang_code,
+                                            config=self.config,
+                                        )
+                                    )
+                                    populated_count += max(generated_count - 1, 0)
+                                    failed_count += len(generation_errors)
                             else:
                                 logger.warning(
                                     f"  Low confidence ({result['confidence']:.2f}), skipping"
@@ -540,6 +639,17 @@ class PapugaAgent:
                             )
                             populated_count += batch_populated
                             failed_count += batch_failed
+                            if missing_translation_pronunciation:
+                                generated_count, generation_errors = (
+                                    generate_pronunciations_for_lemma(
+                                        session=session,
+                                        lemma=lemma,
+                                        lang_code=lang_code,
+                                        config=self.config,
+                                    )
+                                )
+                                populated_count += max(generated_count - batch_populated, 0)
+                                failed_count += len(generation_errors)
 
                         except Exception as e:
                             logger.error(f"  Failed to process batch: {e}")

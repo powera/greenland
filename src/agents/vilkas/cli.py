@@ -8,7 +8,7 @@ This module handles all CLI argument parsing and the main entry point.
 import argparse
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from agents.common.common_args import (
     add_backend_args,
@@ -49,6 +49,50 @@ LANGUAGE_NAMES = {
     "nl": "Dutch",
     "en": "English",
 }
+
+
+def parse_task_selection(
+    task: str, selected_languages: List[str]
+) -> tuple[Optional[str], Optional[str], str]:
+    """Parse a Vilkas task string into language, POS type, and display label."""
+    if task == "all":
+        form_label = (
+            f"all forms ({', '.join(selected_languages)})"
+            if selected_languages
+            else "all forms (all languages)"
+        )
+        return None, None, form_label
+
+    language_code: Optional[str] = None
+    inferred_pos_type: Optional[str] = None
+    form_type_label = "forms"
+
+    task_parts = task.split("-")
+    if len(task_parts) >= 2:
+        language_code = task_parts[0]
+        form_category = task_parts[1]
+
+        if form_category == "noun":
+            inferred_pos_type = "noun"
+            if language_code in ["lt", "de"]:
+                form_type_label = (
+                    f"{LANGUAGE_NAMES.get(language_code, language_code)} noun declensions"
+                )
+            else:
+                form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} noun forms"
+        elif form_category == "verb":
+            inferred_pos_type = "verb"
+            form_type_label = (
+                f"{LANGUAGE_NAMES.get(language_code, language_code)} verb conjugations"
+            )
+        elif form_category == "adjective":
+            inferred_pos_type = "adjective"
+            form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} adjective forms"
+        elif form_category == "adverb":
+            inferred_pos_type = "adverb"
+            form_type_label = f"{LANGUAGE_NAMES.get(language_code, language_code)} adverb forms"
+
+    return language_code, inferred_pos_type, form_type_label
 
 
 def get_argument_parser() -> argparse.ArgumentParser:
@@ -285,54 +329,11 @@ def main() -> None:
 
     # Handle populate mode
     if mode == "populate":
-        # Parse --task parameter to get language and form type
-        language_code = None
-        inferred_pos_type = None
-        form_type_label = "forms"
+        language_code, inferred_pos_type, form_type_label = parse_task_selection(
+            args.task, selected_languages
+        )
 
-        # Task parameter determines language and POS
-        if args.task and args.task != "all":
-            # Parse task string: "{lang}-{type}-{suffix}"
-            # e.g., "lt-noun-declensions", "fr-verb-conjugations", "lt-adjective-forms"
-            parts = args.task.split("-")
-            if len(parts) >= 2:
-                language_code = parts[0]
-                form_category = parts[1]  # noun, verb, adjective
-
-                # Map form category to POS type and label
-                if form_category == "noun":
-                    inferred_pos_type = "noun"
-                    # Use "declensions" for case languages (LT, DE), "forms" for others
-                    if language_code in ["lt", "de"]:
-                        form_type_label = (
-                            f"{LANGUAGE_NAMES.get(language_code, language_code)} noun declensions"
-                        )
-                    else:
-                        form_type_label = (
-                            f"{LANGUAGE_NAMES.get(language_code, language_code)} noun forms"
-                        )
-                elif form_category == "verb":
-                    inferred_pos_type = "verb"
-                    form_type_label = (
-                        f"{LANGUAGE_NAMES.get(language_code, language_code)} verb conjugations"
-                    )
-                elif form_category == "adjective":
-                    inferred_pos_type = "adjective"
-                    form_type_label = (
-                        f"{LANGUAGE_NAMES.get(language_code, language_code)} adjective forms"
-                    )
-                elif form_category == "adverb":
-                    inferred_pos_type = "adverb"
-                    form_type_label = (
-                        f"{LANGUAGE_NAMES.get(language_code, language_code)} adverb forms"
-                    )
-        elif args.task == "all":
-            language_code = None  # Process all languages
-            if args.languages:
-                form_type_label = f"all forms ({', '.join(selected_languages)})"
-            else:
-                form_type_label = "all forms (all languages)"
-        elif args.languages and language_code not in selected_languages:
+        if args.languages and language_code is not None and language_code not in selected_languages:
             print(
                 f"Error: Language '{language_code}' is not included in --languages: "
                 f"{', '.join(selected_languages)}"
@@ -452,9 +453,46 @@ def main() -> None:
     # Coverage mode - report what needs work
     if mode == "coverage":
         print("\n=== Coverage Report ===\n")
+        language_code, inferred_pos_type, _form_type_label = parse_task_selection(
+            args.task, selected_languages
+        )
 
-        # Run full check which reports all coverage stats
-        results = agent.run_full_check(output_file=args.output)
+        if args.task == "all":
+            coverage_languages_and_pos: List[tuple[str, str]] = []
+            for selected_language in selected_languages:
+                for pos_type in SUPPORTED_TASKS[selected_language]:
+                    coverage_languages_and_pos.append((selected_language, pos_type))
+
+            for task_number, (selected_language, pos_type) in enumerate(
+                coverage_languages_and_pos, start=1
+            ):
+                display_language_header(
+                    selected_language, task_number, len(coverage_languages_and_pos)
+                )
+                coverage_results = agent.fix_missing_forms(
+                    lemmas=lemmas,
+                    language_code=selected_language,
+                    pos_type=pos_type,
+                    limit=args.limit,
+                    model=args.model,
+                    throttle=args.throttle,
+                    dry_run=True,
+                    use_wiktionary=args.use_wiktionary,
+                )
+                display.print_fix_results(coverage_results, dry_run=True)
+        else:
+            assert language_code is not None, "language_code must be set for single task"
+            coverage_results = agent.fix_missing_forms(
+                lemmas=lemmas,
+                language_code=language_code,
+                pos_type=inferred_pos_type,
+                limit=args.limit,
+                model=args.model,
+                throttle=args.throttle,
+                dry_run=True,
+                use_wiktionary=args.use_wiktionary,
+            )
+            display.print_fix_results(coverage_results, dry_run=True)
         return
 
 

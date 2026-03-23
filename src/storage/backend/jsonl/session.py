@@ -361,10 +361,13 @@ class JSONLSession(BaseSession):
         translations = []
         for lemma in self._storage.lemmas.values():
             for lang_code, translation_text in lemma.translations.items():
+                pronunciation_data = lemma.translation_pronunciations.get(lang_code, {})
                 trans = models.LemmaTranslation(
                     lemma_id=lemma.id,
                     language_code=lang_code,
                     translation=translation_text,
+                    ipa_pronunciation=pronunciation_data.get("ipa_pronunciation"),
+                    phonetic_pronunciation=pronunciation_data.get("phonetic_pronunciation"),
                     sort_key=compute_sort_key(lang_code, translation_text),
                     lemma=lemma,
                 )
@@ -551,6 +554,13 @@ class JSONLSession(BaseSession):
 
         if isinstance(instance, models.LemmaTranslation):
             lemma.translations[instance.language_code] = instance.translation
+            if instance.ipa_pronunciation or instance.phonetic_pronunciation:
+                lemma.translation_pronunciations[instance.language_code] = {
+                    "ipa_pronunciation": instance.ipa_pronunciation,
+                    "phonetic_pronunciation": instance.phonetic_pronunciation,
+                }
+            else:
+                lemma.translation_pronunciations.pop(instance.language_code, None)
         elif isinstance(instance, models.LemmaDifficultyOverride):
             lemma.difficulty_overrides[instance.language_code] = instance.difficulty_level
 
