@@ -40,9 +40,10 @@ from wordfreq.tools.family_relation_priorities import (
 from wireword.export_wireword_conversations import WirewordConversationExporter
 from wireword.export_wireword_sentences import WirewordSentenceExporter
 
-# Supported languages: Tier 1 and Tier 2 (excludes experimental tier 3)
+# Supported languages: Tier 1, Tier 2, plus Japanese for WireWord exports.
 SUPPORTED_LANGUAGES = {
-    lang_code: LANGUAGE_NAMES[lang_code] for lang_code in TIER_1_LANGUAGES + TIER_2_LANGUAGES
+    lang_code: LANGUAGE_NAMES[lang_code]
+    for lang_code in TIER_1_LANGUAGES + TIER_2_LANGUAGES + ["ja"]
 }
 
 # Explicitly supported non-English source languages for WireWord export variants.

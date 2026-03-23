@@ -30,7 +30,7 @@ from storage.models.schema import (
     SentenceWord,
 )
 from langtools.zh.converter import to_simplified
-from langtools.zh.pinyin_helper import generate_pinyin
+from wireword.readings import build_translation_reading_fields
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -308,12 +308,12 @@ class WirewordSentenceExporter:
                     "linked_words": linked_words,
                 }
 
-                # Add pinyin for Chinese translations (inside translations dict
-                # so apps can access it as translations["pinyin"])
-                if self.language == "zh" and self.language in translations:
-                    pinyin = generate_pinyin(translations[self.language])
-                    if pinyin:
-                        translations["pinyin"] = pinyin
+                translations.update(
+                    build_translation_reading_fields(
+                        self.language,
+                        translations.get(self.language),
+                    )
+                )
 
                 # Include optional metadata
                 if sentence.source_filename:
