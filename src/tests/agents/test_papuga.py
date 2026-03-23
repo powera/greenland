@@ -238,3 +238,64 @@ def test_generate_pronunciations_for_lemma_updates_lemma_translation() -> None:
     finally:
         session.close()
         engine.dispose()
+
+
+def test_generate_pronunciations_for_lemma_reuses_existing_base_form_pronunciations() -> None:
+    """Translation pronunciation backfill should reuse an already-populated base form."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+
+    session = Session(engine)
+    try:
+        lemma = Lemma(
+            lemma_text="eat",
+            definition_text="to consume food",
+            pos_type="verb",
+            guid="V00_005",
+        )
+        session.add(lemma)
+        session.flush()
+        session.add(
+            LemmaTranslation(
+                lemma_id=lemma.id,
+                language_code="es",
+                translation="comer",
+                ipa_pronunciation=None,
+                phonetic_pronunciation=None,
+            )
+        )
+        session.add(
+            DerivativeForm(
+                lemma_id=lemma.id,
+                derivative_form_text="comer",
+                language_code="es",
+                grammatical_form="infinitive",
+                is_base_form=True,
+                ipa_pronunciation="/koˈmeɾ/",
+                phonetic_pronunciation="koh-MEHR",
+            )
+        )
+        session.commit()
+
+        with patch("workqueue.handlers.papuga.generate_pronunciation_for_form") as mocked_generate:
+            generated_count, errors = generate_pronunciations_for_lemma(
+                session=session,
+                lemma=lemma,
+                lang_code="es",
+                config=_build_config(),
+            )
+
+        translation_row = (
+            session.query(LemmaTranslation)
+            .filter(LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == "es")
+            .first()
+        )
+        assert generated_count == 1
+        assert errors == []
+        assert translation_row is not None
+        assert translation_row.ipa_pronunciation == "/koˈmeɾ/"
+        assert translation_row.phonetic_pronunciation == "koh-MEHR"
+        mocked_generate.assert_not_called()
+    finally:
+        session.close()
+        engine.dispose()

@@ -5,7 +5,11 @@ from typing import List
 
 import pytest
 
-from barsukas.helpers.lemma_display import group_derivative_forms, group_populated_pronunciations
+from barsukas.helpers.lemma_display import (
+    build_lemma_pronunciation_rows,
+    group_derivative_forms,
+    group_populated_pronunciations,
+)
 
 
 def _form(language_code: str, grammatical_form: str, text: str = "x") -> SimpleNamespace:
@@ -137,3 +141,47 @@ class TestGroupPopulatedPronunciations:
         )
 
         assert grouped == {}
+
+
+class TestBuildLemmaPronunciationRows:
+    """Tests for lemma/base pronunciation row aggregation."""
+
+    def test_prefers_translation_pronunciations_and_falls_back_to_base_form(self) -> None:
+        derivative_forms = [
+            SimpleNamespace(
+                language_code="en",
+                grammatical_form="infinitive",
+                derivative_form_text="eat",
+                is_base_form=True,
+                ipa_pronunciation="/iːt/",
+                phonetic_pronunciation="EET",
+            ),
+            SimpleNamespace(
+                language_code="es",
+                grammatical_form="infinitive",
+                derivative_form_text="comer",
+                is_base_form=True,
+                ipa_pronunciation="/koˈmeɾ/",
+                phonetic_pronunciation="koh-MEHR",
+            ),
+        ]
+
+        rows = build_lemma_pronunciation_rows(
+            derivative_forms=derivative_forms,
+            translations={"en": "eat", "es": "comer"},
+            translation_pronunciations={"en": (None, None), "es": ("/koˈmeɾ/", "ko-MEHR")},
+        )
+
+        assert rows["en"]["source"] == "base_form"
+        assert rows["en"]["ipa"] == "/iːt/"
+        assert rows["es"]["source"] == "lemma_translation"
+        assert rows["es"]["phonetic"] == "ko-MEHR"
+
+    def test_skips_languages_without_any_pronunciation_data(self) -> None:
+        rows = build_lemma_pronunciation_rows(
+            derivative_forms=[],
+            translations={"en": "eat", "fr": "manger"},
+            translation_pronunciations={"en": (None, None), "fr": (None, None)},
+        )
+
+        assert rows == {}

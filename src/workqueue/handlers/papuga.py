@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 from typing import Dict, List, Optional, Tuple
 
+from sqlalchemy import case
 from sqlalchemy.orm import Session
 
 from workqueue.tools import build_default_config, get_lemma_or_raise
@@ -23,6 +24,7 @@ from storage.models.schema import (
     SentenceWord,
 )
 from storage.translation_helpers import (
+    LANGUAGE_FIELDS,
     get_translation,
     get_translation_pronunciations,
     set_translation_pronunciations,
@@ -126,8 +128,11 @@ def generate_pronunciations_for_lemma(
     translation_ipa, translation_phonetic = get_translation_pronunciations(
         session, lemma, lang_code
     )
+    supports_translation_pronunciations = LANGUAGE_FIELDS.get(lang_code, (None, None, False))[2]
     translation_missing = bool(
-        translation_text and (not translation_ipa or not translation_phonetic)
+        supports_translation_pronunciations
+        and translation_text
+        and (not translation_ipa or not translation_phonetic)
     )
 
     # Find forms missing pronunciations
@@ -171,17 +176,30 @@ def generate_pronunciations_for_lemma(
             errors.append(f"No pronunciation generated for '{form.derivative_form_text}'")
 
     if translation_missing and translation_text:
-        base_form_match = next(
-            (
-                form
-                for form in forms_missing_pronunciations
-                if form.is_base_form and form.derivative_form_text == translation_text
-            ),
-            None,
+        existing_base_form = (
+            session.query(DerivativeForm)
+            .filter(
+                DerivativeForm.lemma_id == lemma.id,
+                DerivativeForm.language_code == lang_code,
+                DerivativeForm.is_base_form == True,
+            )
+            .order_by(
+                case(
+                    (
+                        DerivativeForm.derivative_form_text == translation_text,
+                        0,
+                    ),
+                    else_=1,
+                ),
+                DerivativeForm.id,
+            )
+            .first()
         )
-        ipa_value = base_form_match.ipa_pronunciation if base_form_match else translation_ipa
-        phonetic_value = (
-            base_form_match.phonetic_pronunciation if base_form_match else translation_phonetic
+        ipa_value = translation_ipa or (
+            existing_base_form.ipa_pronunciation if existing_base_form else None
+        )
+        phonetic_value = translation_phonetic or (
+            existing_base_form.phonetic_pronunciation if existing_base_form else None
         )
 
         if not ipa_value or not phonetic_value:
