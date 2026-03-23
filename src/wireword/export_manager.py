@@ -39,13 +39,14 @@ logger = logging.getLogger(__name__)
 class TrakaidoExporter:
     """Main class for exporting trakaido data in various formats."""
 
-    # Language configuration mapping - generated from tier 1 and tier 2 languages
+    # Language configuration mapping - generated from tier 1 and tier 2 languages, plus
+    # Japanese which is explicitly supported by the WireWord export flow.
     LANGUAGE_CONFIG = {
         lang_code: {
             "name": LANGUAGE_FIELDS[lang_code][1],  # Display name
             "field": LANG_CODE_TO_LLM_FIELD[lang_code],  # LLM field name
         }
-        for lang_code in TIER_1_LANGUAGES + TIER_2_LANGUAGES
+        for lang_code in TIER_1_LANGUAGES + TIER_2_LANGUAGES + ["ja"]
     }
 
     def __init__(
