@@ -221,7 +221,13 @@ trap cleanup EXIT
 # Exit code 42 = restart requested, restart immediately
 while true; do
     # Start in a dedicated process group so Ctrl+C cleanup can stop all children.
-    setsid python unified_app.py $HOST_ARGS --port "$PORT" $PERSONA_ARGS "$@" &
+    # setsid is Linux-only; on macOS, use perl to call POSIX::setsid().
+    if command -v setsid >/dev/null 2>&1; then
+        setsid python unified_app.py $HOST_ARGS --port "$PORT" $PERSONA_ARGS "$@" &
+    else
+        perl -e 'use POSIX qw(setsid); setsid(); exec @ARGV' \
+            python unified_app.py $HOST_ARGS --port "$PORT" $PERSONA_ARGS "$@" &
+    fi
     SERVER_PID=$!
     SERVER_PGID=$SERVER_PID
     wait "$SERVER_PID"
