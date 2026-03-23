@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session
 from agents.papuga.agent import PapugaAgent
 from agents.papuga.cli import enqueue_papuga_work
 from storage.backend.config import BackendType, DataSourceConfig
-from storage.models.schema import Base, DerivativeForm, Lemma
+from storage.models.schema import Base, DerivativeForm, Lemma, LemmaTranslation
+from workqueue.handlers.papuga import generate_pronunciations_for_lemma
 
 
 def _build_config() -> DataSourceConfig:
@@ -144,6 +145,96 @@ def test_enqueue_papuga_work_enqueues_once_per_lemma_language() -> None:
         assert captured_calls[0]["target_type"] == "lemma"
         assert captured_calls[0]["target_id"] == lemma.id
         assert captured_calls[0]["payload"] == {"lang_code": "en", "lemma_id": lemma.id}
+    finally:
+        session.close()
+        engine.dispose()
+
+
+def test_check_missing_pronunciations_includes_lemma_translation_targets() -> None:
+    """Coverage mode should include lemma translations with missing pronunciation data."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+
+    session = Session(engine)
+    try:
+        lemma = Lemma(
+            lemma_text="dog",
+            definition_text="a domesticated canine",
+            pos_type="noun",
+            guid="N00_003",
+        )
+        session.add(lemma)
+        session.flush()
+        session.add(
+            LemmaTranslation(
+                lemma_id=lemma.id,
+                language_code="es",
+                translation="perro",
+                ipa_pronunciation=None,
+                phonetic_pronunciation=None,
+            )
+        )
+        session.commit()
+
+        agent = PapugaAgent(config=_build_config())
+        with patch.object(agent, "get_session", return_value=session):
+            result = agent.check_missing_pronunciations(lemma_id=lemma.id, only_english=False)
+
+        assert result["total_missing"] == 1
+        assert result["missing_forms"][0]["target_type"] == "lemma_translation"
+        assert result["missing_forms"][0]["word"] == "perro"
+    finally:
+        session.close()
+        engine.dispose()
+
+
+def test_generate_pronunciations_for_lemma_updates_lemma_translation() -> None:
+    """Generating pronunciation data should also fill lemma translation pronunciation fields."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+
+    session = Session(engine)
+    try:
+        lemma = Lemma(
+            lemma_text="dog",
+            definition_text="a domesticated canine",
+            pos_type="noun",
+            guid="N00_004",
+        )
+        session.add(lemma)
+        session.flush()
+        session.add(
+            LemmaTranslation(
+                lemma_id=lemma.id,
+                language_code="es",
+                translation="perro",
+                ipa_pronunciation=None,
+                phonetic_pronunciation=None,
+            )
+        )
+        session.commit()
+
+        with patch(
+            "workqueue.handlers.papuga.generate_pronunciation_for_form",
+            return_value=(True, "/ˈpero/", "PEH-roh"),
+        ):
+            generated_count, errors = generate_pronunciations_for_lemma(
+                session=session,
+                lemma=lemma,
+                lang_code="es",
+                config=_build_config(),
+            )
+
+        translation_row = (
+            session.query(LemmaTranslation)
+            .filter(LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == "es")
+            .first()
+        )
+        assert generated_count == 1
+        assert errors == []
+        assert translation_row is not None
+        assert translation_row.ipa_pronunciation == "/ˈpero/"
+        assert translation_row.phonetic_pronunciation == "PEH-roh"
     finally:
         session.close()
         engine.dispose()

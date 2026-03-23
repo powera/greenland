@@ -160,6 +160,9 @@ class Lemma:
     audio_hashes: Dict[str, Dict[str, str]] = field(
         default_factory=dict
     )  # lang_code -> {voice -> hash}
+    translation_pronunciations: Dict[str, Dict[str, Optional[str]]] = field(
+        default_factory=dict
+    )  # lang_code -> {"ipa_pronunciation": str|None, "phonetic_pronunciation": str|None}
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSONL serialization."""
@@ -191,6 +194,7 @@ class Lemma:
         data.setdefault("base_forms", {})
         data.setdefault("grammar_facts", [])
         data.setdefault("audio_hashes", {})
+        data.setdefault("translation_pronunciations", {})
 
         # Set defaults for runtime fields that won't be in JSONL
         data.setdefault("verified", False)
@@ -211,6 +215,8 @@ class LemmaTranslation:
     lemma_id: Optional[int] = None
     language_code: str = ""
     translation: str = ""
+    ipa_pronunciation: Optional[str] = None
+    phonetic_pronunciation: Optional[str] = None
     sort_key: Optional[str] = None
     verified: bool = False
     added_at: Optional[datetime.datetime] = None

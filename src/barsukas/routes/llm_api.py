@@ -379,10 +379,10 @@ def api_generate_pronunciations() -> ResponseReturnValue:
                 "guid": guid,
                 "lemma_text": lemma.lemma_text,
                 "lang_code": lang_code,
-                "populated_count": result.get("populated_count", 0),
-                "failed_count": result.get("failed_count", 0),
-                "batch_count": result.get("batch_count", 0),
-                "single_count": result.get("single_count", 0),
+                "populated_count": result.get("populated_count", result.get("populated", 0)),
+                "failed_count": result.get("failed_count", result.get("failed", 0)),
+                "batch_count": result.get("batch_count", result.get("batch_calls", 0)),
+                "single_count": result.get("single_count", result.get("single_calls", 0)),
             }
         )
 

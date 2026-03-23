@@ -139,6 +139,12 @@ class LemmaTranslation(Base):
     translation: Mapped[str] = mapped_column(
         String, nullable=False, index=True
     )  # Base form of the translation (indexed for search)
+    ipa_pronunciation: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )  # IPA pronunciation for the lemma/base translation
+    phonetic_pronunciation: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )  # Simplified/romanized pronunciation for the lemma/base translation
     definition_text: Mapped[Optional[str]] = mapped_column(
         Text, nullable=True
     )  # Definition in this language

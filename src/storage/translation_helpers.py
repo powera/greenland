@@ -385,6 +385,79 @@ def get_definition(session: Session, lemma: Lemma, lang_code: str) -> Optional[s
         return lemma.definition_text if lemma else None
 
 
+def get_translation_pronunciations(
+    session: Session, lemma: Lemma, lang_code: str
+) -> Tuple[Optional[str], Optional[str]]:
+    """Get lemma/base-form pronunciation for a translation in the specified language."""
+    if lang_code not in LANGUAGE_FIELDS:
+        raise ValueError(f"Unsupported language code: {lang_code}")
+
+    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+
+    if use_translation_table:
+        translation_obj = (
+            session.query(LemmaTranslation)
+            .filter(
+                LemmaTranslation.lemma_id == lemma.id,
+                LemmaTranslation.language_code == field_name,
+            )
+            .first()
+        )
+        if not translation_obj:
+            return None, None
+        return translation_obj.ipa_pronunciation, translation_obj.phonetic_pronunciation
+
+    return None, None
+
+
+def set_translation_pronunciations(
+    session: Session,
+    lemma: Lemma,
+    lang_code: str,
+    ipa_pronunciation: Optional[str] = None,
+    phonetic_pronunciation: Optional[str] = None,
+) -> Tuple[Optional[str], Optional[str]]:
+    """Set lemma/base-form pronunciation data for a translation."""
+    if lang_code not in LANGUAGE_FIELDS:
+        raise ValueError(f"Unsupported language code: {lang_code}")
+
+    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+
+    if not use_translation_table:
+        return None, None
+
+    old_ipa, old_phonetic = get_translation_pronunciations(session, lemma, lang_code)
+    translation_obj = (
+        session.query(LemmaTranslation)
+        .filter(
+            LemmaTranslation.lemma_id == lemma.id,
+            LemmaTranslation.language_code == field_name,
+        )
+        .first()
+    )
+
+    if translation_obj is None:
+        translation_text = get_translation(session, lemma, lang_code)
+        if not translation_text:
+            raise ValueError(f"Cannot set pronunciation for {lang_code} without translation")
+        translation_obj = LemmaTranslation(
+            lemma_id=lemma.id,
+            language_code=field_name,
+            translation=translation_text,
+            ipa_pronunciation=ipa_pronunciation,
+            phonetic_pronunciation=phonetic_pronunciation,
+            verified=False,
+        )
+        session.add(translation_obj)
+    else:
+        if ipa_pronunciation is not None:
+            translation_obj.ipa_pronunciation = ipa_pronunciation
+        if phonetic_pronunciation is not None:
+            translation_obj.phonetic_pronunciation = phonetic_pronunciation
+
+    return old_ipa, old_phonetic
+
+
 def get_all_translations(session: Session, lemma: Lemma) -> Dict[str, Optional[str]]:
     """
     Get all translations for a lemma.

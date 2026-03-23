@@ -209,6 +209,20 @@ class JSONLStorage(BaseStorage):
                             if lang_code == "en":
                                 lemma.definition_text = data["definition_text"]
 
+                        lemma_translation_pronunciation: Dict[str, Optional[str]] = {}
+                        if "ipa_pronunciation" in data:
+                            lemma_translation_pronunciation["ipa_pronunciation"] = data.get(
+                                "ipa_pronunciation"
+                            )
+                        if "phonetic_pronunciation" in data:
+                            lemma_translation_pronunciation["phonetic_pronunciation"] = data.get(
+                                "phonetic_pronunciation"
+                            )
+                        if lemma_translation_pronunciation:
+                            lemma.translation_pronunciations[lang_code] = (
+                                lemma_translation_pronunciation
+                            )
+
                         if "frequency_rank" in data:
                             if lang_code == "en":
                                 lemma.frequency_rank = data["frequency_rank"]
@@ -735,6 +749,17 @@ class JSONLStorage(BaseStorage):
             # Backward compatibility: use definition_text for English
             data["definition_text"] = lemma.definition_text
             has_data = True
+
+        translation_pronunciation = lemma.translation_pronunciations.get(lang_code)
+        if translation_pronunciation:
+            ipa_value = translation_pronunciation.get("ipa_pronunciation")
+            phonetic_value = translation_pronunciation.get("phonetic_pronunciation")
+            if ipa_value:
+                data["ipa_pronunciation"] = ipa_value
+                has_data = True
+            if phonetic_value:
+                data["phonetic_pronunciation"] = phonetic_value
+                has_data = True
 
         # English-only fields
         if lang_code == "en":
