@@ -73,6 +73,24 @@ def group_derivative_forms(derivative_forms: Any) -> Tuple[Dict, Dict, Dict, Lis
     )
 
 
+def group_populated_pronunciations(derivative_forms: Any) -> Dict[str, List[Any]]:
+    """Group forms that already have IPA or phonetic data by language."""
+    pronunciations_by_language: Dict[str, List[Any]] = {}
+
+    for form in derivative_forms:
+        has_ipa = bool((form.ipa_pronunciation or "").strip())
+        has_phonetic = bool((form.phonetic_pronunciation or "").strip())
+        if not (has_ipa or has_phonetic):
+            continue
+
+        language_code = form.language_code
+        if language_code not in pronunciations_by_language:
+            pronunciations_by_language[language_code] = []
+        pronunciations_by_language[language_code].append(form)
+
+    return pronunciations_by_language
+
+
 # Re-export for backwards compatibility and convenience
 # Routes can import from here for UI-related helpers
-__all__ = ["get_difficulty_stats", "group_derivative_forms"]
+__all__ = ["get_difficulty_stats", "group_derivative_forms", "group_populated_pronunciations"]

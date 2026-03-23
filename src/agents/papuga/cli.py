@@ -24,6 +24,7 @@ from agents.common.common_args import (
     validate_cache_args,
 )
 from agents.common.lemma_selection import get_lemmas_for_agent
+from storage.crud.derivative_form import needs_pronunciation_update_filter
 from storage.models.schema import DerivativeForm
 
 # Configure logging
@@ -116,8 +117,7 @@ def enqueue_papuga_work(
     lemma_ids = [l.id for l in lemmas]
     query = session.query(DerivativeForm).filter(
         DerivativeForm.lemma_id.in_(lemma_ids),
-        DerivativeForm.ipa_pronunciation.is_(None),
-        DerivativeForm.phonetic_pronunciation.is_(None),
+        needs_pronunciation_update_filter(),
     )
     if only_english:
         query = query.filter(DerivativeForm.language_code == "en")
@@ -125,20 +125,19 @@ def enqueue_papuga_work(
         query = query.filter(DerivativeForm.is_base_form == True)
 
     forms = query.all()
+    lemma_language_pairs = sorted({(form.lemma_id, form.language_code) for form in forms})
 
-    for form in forms:
+    for lemma_id, language_code in lemma_language_pairs:
         if not dry_run:
-            dedup_key = f"papuga_{form.id}"
+            dedup_key = f"words.pronunciations:{lemma_id}:{language_code}"
             result = enqueue_task(
                 session,
                 task_type="words.pronunciations",
-                target_type="derivative_form",
-                target_id=form.id,
+                target_type="lemma",
+                target_id=lemma_id,
                 payload={
-                    "form_id": form.id,
-                    "form_text": form.derivative_form_text,
-                    "lang_code": form.language_code,
-                    "lemma_id": form.lemma_id,
+                    "lang_code": language_code,
+                    "lemma_id": lemma_id,
                 },
                 dedup_key=dedup_key,
             )
@@ -231,8 +230,7 @@ def main() -> None:
         try:
             # Count forms without pronunciations
             query = session.query(DerivativeForm).filter(
-                DerivativeForm.ipa_pronunciation.is_(None),
-                DerivativeForm.phonetic_pronunciation.is_(None),
+                needs_pronunciation_update_filter(),
             )
             if lemma_id:
                 query = query.filter(DerivativeForm.lemma_id == lemma_id)
