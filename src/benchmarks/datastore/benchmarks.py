@@ -44,6 +44,8 @@ class Question(Base):
     question_id: Mapped[str] = mapped_column(String, primary_key=True)
     benchmark_name: Mapped[str] = mapped_column(String, ForeignKey("benchmark.codename"))
     question_info_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    is_excluded: Mapped[bool] = mapped_column(default=False, nullable=False)
+    exclusion_reason: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     # Relationships
     benchmark: Mapped["Benchmark"] = relationship(back_populates="questions")
@@ -162,12 +164,31 @@ def insert_question(
         return False, f"Error inserting question: {str(e)}"
 
 
+def set_question_exclusion(
+    session,
+    question_id: str,
+    *,
+    is_excluded: bool,
+    exclusion_reason: Optional[str] = None,
+) -> tuple[bool, str]:
+    """Update whether a question is excluded from aggregate benchmark statistics."""
+    question = session.query(Question).filter(Question.question_id == question_id).first()
+    if question is None:
+        return False, f"Question '{question_id}' not found"
+
+    question.is_excluded = is_excluded
+    question.exclusion_reason = exclusion_reason if is_excluded else None
+    session.commit()
+    return True, f"Question '{question_id}' exclusion updated"
+
+
 def insert_run(
     session,
     model_name: str,
     benchmark_name: str,
     normed_score: int,
     run_details: Optional[List[Dict]] = None,
+    run_ts: Optional[datetime.datetime] = None,
 ) -> tuple[bool, Any]:
     """Insert a new run into the database.
 
@@ -176,6 +197,7 @@ def insert_run(
     :param benchmark_name: Codename of the benchmark
     :param normed_score: Overall score; 100=perfect, 0=random output
     :param run_details: Optional list of run details (dict with question_id and score)
+    :param run_ts: Optional explicit timestamp for the run
     :return: Tuple (success_boolean, run_id_or_message)
     """
     try:
@@ -183,7 +205,7 @@ def insert_run(
             model_name=model_name,
             benchmark_name=benchmark_name,
             normed_score=normed_score,
-            run_ts=func.current_timestamp(),
+            run_ts=run_ts or func.current_timestamp(),
         )
         session.add(new_run)
         session.flush()
@@ -287,6 +309,8 @@ def get_run_by_run_id(run_id: int, session=None) -> Optional[Dict]:
                 "score": detail.score,
                 "eval_msec": detail.eval_msec,
                 "question_info_json": decode_json(question.question_info_json),
+                "is_question_excluded": question.is_excluded,
+                "question_exclusion_reason": question.exclusion_reason,
                 "debug_json": decode_json(detail.debug_json),
                 "thought_process": detail.thought_process,
                 "cost_usd": detail.cost_usd,
@@ -399,6 +423,8 @@ def get_highest_scoring_run_details(
                 "score": detail.score,
                 "eval_msec": detail.eval_msec,
                 "question_info_json": decode_json(question.question_info_json),
+                "is_question_excluded": question.is_excluded,
+                "question_exclusion_reason": question.exclusion_reason,
                 "debug_json": decode_json(detail.debug_json),
                 "cost_usd": detail.cost_usd,
                 "tokens_used": detail.tokens_used,

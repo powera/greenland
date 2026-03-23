@@ -2,14 +2,22 @@
 
 """Benchmark routes - list and view benchmark details."""
 
-import ipaddress
 import json
+import ipaddress
 
 from flask import Blueprint, g, render_template, request, flash, redirect, url_for, Response
 from sqlalchemy import func
 
-from benchmarks.datastore.benchmarks import Benchmark, Question, Run, insert_benchmark
+from benchmarks.datastore.benchmarks import (
+    Benchmark,
+    Question,
+    Run,
+    RunDetail,
+    insert_benchmark,
+    set_question_exclusion,
+)
 from benchmarks.datastore.common import Model, decode_json
+from benchmarks.server.analysis import analyze_run_details
 from benchmarks.lib.utils.factory import get_all_benchmark_codes, get_benchmark_metadata
 from benchmarks.tiers import (
     BENCHMARK_TIERS,
@@ -198,32 +206,88 @@ def view_benchmark(benchmark_name):
                     ensure_ascii=False,
                     indent=2,
                 ),
+                "is_excluded": question.is_excluded,
+                "exclusion_reason": question.exclusion_reason,
             }
         )
 
-    # Get best run for each model on this benchmark
-    subquery = (
-        g.bench_db.query(
-            Run.model_name,
-            func.max(Run.normed_score).label("max_score"),
-        )
-        .filter(Run.benchmark_name == benchmark_name)
-        .group_by(Run.model_name)
-        .subquery()
-    )
-
-    # Get the actual runs with model info
-    leaderboard = (
-        g.bench_db.query(Run, Model)
+    leaderboard_rows = (
+        g.bench_db.query(Run, Model, RunDetail, Question)
         .join(Model, Run.model_name == Model.codename)
-        .join(
-            subquery,
-            (Run.model_name == subquery.c.model_name) & (Run.normed_score == subquery.c.max_score),
-        )
+        .outerjoin(RunDetail, RunDetail.run_id == Run.run_id)
+        .outerjoin(Question, RunDetail.question_id == Question.question_id)
         .filter(Run.benchmark_name == benchmark_name)
-        .order_by(Run.normed_score.desc(), Run.run_ts.asc())
+        .order_by(Run.model_name, Run.run_id)
         .all()
     )
+    best_runs_by_model: dict[str, dict] = {}
+    current_model_name = None
+    current_run_id = None
+    current_run = None
+    current_model = None
+    current_details: list[dict] = []
+    for run, model, detail, question in leaderboard_rows + [(None, None, None, None)]:
+        row_model_name = run.model_name if run is not None else None
+        row_run_id = run.run_id if run is not None else None
+        if current_run is not None and (
+            row_model_name != current_model_name or row_run_id != current_run_id
+        ):
+            metrics = analyze_run_details(
+                current_run.benchmark_name,
+                current_details,
+                model_path=current_model.model_path if current_model else None,
+                model_type=current_model.model_type if current_model else None,
+            )
+            candidate = {
+                "run": current_run,
+                "model": current_model,
+                "metrics": metrics,
+            }
+            if current_model_name is None:
+                current_details = []
+                continue
+            existing = best_runs_by_model.get(current_model_name)
+            if existing is None or (
+                candidate["metrics"].effective_score,
+                candidate["run"].run_ts,
+                candidate["run"].run_id,
+            ) > (
+                existing["metrics"].effective_score,
+                existing["run"].run_ts,
+                existing["run"].run_id,
+            ):
+                best_runs_by_model[current_model_name] = candidate
+
+            current_details = []
+
+        current_model_name = row_model_name
+        current_run_id = row_run_id
+        current_run = run
+        current_model = model
+        if detail is not None:
+            current_details.append(
+                {
+                    "question_id": detail.question_id,
+                    "score": detail.score,
+                    "eval_msec": detail.eval_msec,
+                    "cost_usd": detail.cost_usd,
+                    "tokens_used": detail.tokens_used,
+                    "tokens_in": detail.tokens_in,
+                    "tokens_out": detail.tokens_out,
+                    "is_question_excluded": bool(question.is_excluded) if question else False,
+                }
+            )
+
+    leaderboard = sorted(
+        best_runs_by_model.values(),
+        key=lambda entry: (
+            entry["metrics"].effective_score,
+            entry["run"].run_ts,
+            entry["run"].run_id,
+        ),
+        reverse=True,
+    )
+    excluded_question_count = sum(1 for question in question_previews if question["is_excluded"])
 
     return render_template(
         "benchmarks/view.html",
@@ -231,7 +295,64 @@ def view_benchmark(benchmark_name):
         question_count=question_count,
         question_previews=question_previews,
         leaderboard=leaderboard,
+        excluded_question_count=excluded_question_count,
     )
+
+
+@bp.route("/questions/<question_id>/exclude", methods=["POST"])
+def exclude_question(question_id: str):
+    """Exclude a benchmark question from aggregate results."""
+    from flask import current_app
+
+    benchmark_name = request.form.get("benchmark_name", "").strip()
+    if current_app.config.get("READONLY", False):
+        flash("Cannot update question exclusions: running in read-only mode", "error")
+        return redirect(url_for("benchmarks.view_benchmark", benchmark_name=benchmark_name))
+
+    if not _is_authorized_run_request():
+        flash(
+            "Question exclusion changes are allowed only from local/private direct clients", "error"
+        )
+        return redirect(url_for("benchmarks.view_benchmark", benchmark_name=benchmark_name))
+
+    reason = request.form.get("reason", "").strip()
+    if not reason:
+        flash("Please provide a reason when excluding a question.", "error")
+        return redirect(url_for("benchmarks.view_benchmark", benchmark_name=benchmark_name))
+
+    success, message = set_question_exclusion(
+        g.bench_db,
+        question_id,
+        is_excluded=True,
+        exclusion_reason=reason,
+    )
+    flash(message, "success" if success else "error")
+    return redirect(url_for("benchmarks.view_benchmark", benchmark_name=benchmark_name))
+
+
+@bp.route("/questions/<question_id>/include", methods=["POST"])
+def include_question(question_id: str):
+    """Re-include a benchmark question in aggregate results."""
+    from flask import current_app
+
+    benchmark_name = request.form.get("benchmark_name", "").strip()
+    if current_app.config.get("READONLY", False):
+        flash("Cannot update question exclusions: running in read-only mode", "error")
+        return redirect(url_for("benchmarks.view_benchmark", benchmark_name=benchmark_name))
+
+    if not _is_authorized_run_request():
+        flash(
+            "Question exclusion changes are allowed only from local/private direct clients", "error"
+        )
+        return redirect(url_for("benchmarks.view_benchmark", benchmark_name=benchmark_name))
+
+    success, message = set_question_exclusion(
+        g.bench_db,
+        question_id,
+        is_excluded=False,
+    )
+    flash(message, "success" if success else "error")
+    return redirect(url_for("benchmarks.view_benchmark", benchmark_name=benchmark_name))
 
 
 @bp.route("/<benchmark_name>/run", methods=["GET", "POST"])

@@ -62,6 +62,82 @@ def _configure_sqlite_connection(dbapi_conn, connection_record):
     cursor.close()
 
 
+def _migrate_sqlite_schema(conn) -> None:
+    """Apply additive schema migrations for SQLite benchmark databases."""
+    result = conn.execute(text("PRAGMA table_info(benchmark)"))
+    existing_cols = {row[1] for row in result}
+    if "category" not in existing_cols:
+        conn.execute(text("ALTER TABLE benchmark ADD COLUMN category TEXT"))
+
+    model_result = conn.execute(text("PRAGMA table_info(model)"))
+    model_cols = {row[1] for row in model_result}
+    if "lmstudio_model_name" not in model_cols:
+        conn.execute(text("ALTER TABLE model ADD COLUMN lmstudio_model_name TEXT"))
+    if "max_benchmark_tier" not in model_cols:
+        conn.execute(text("ALTER TABLE model ADD COLUMN max_benchmark_tier INTEGER DEFAULT 1"))
+
+    run_detail_result = conn.execute(text("PRAGMA table_info(run_detail)"))
+    run_detail_cols = {row[1] for row in run_detail_result}
+    if "tokens_used" not in run_detail_cols:
+        conn.execute(text("ALTER TABLE run_detail ADD COLUMN tokens_used INTEGER"))
+    if "tokens_in" not in run_detail_cols:
+        conn.execute(text("ALTER TABLE run_detail ADD COLUMN tokens_in INTEGER"))
+    if "tokens_out" not in run_detail_cols:
+        conn.execute(text("ALTER TABLE run_detail ADD COLUMN tokens_out INTEGER"))
+
+    question_result = conn.execute(text("PRAGMA table_info(question)"))
+    question_cols = {row[1] for row in question_result}
+    if "is_excluded" not in question_cols:
+        conn.execute(text("ALTER TABLE question ADD COLUMN is_excluded INTEGER DEFAULT 0 NOT NULL"))
+    if "exclusion_reason" not in question_cols:
+        conn.execute(text("ALTER TABLE question ADD COLUMN exclusion_reason TEXT"))
+
+
+def _migrate_postgres_schema(conn) -> None:
+    """Apply additive schema migrations for PostgreSQL benchmark databases."""
+    schema = BENCHMARKS_POSTGRES_SCHEMA
+    existing_columns = {
+        (row[0], row[1])
+        for row in conn.execute(
+            text(
+                """
+                SELECT table_name, column_name
+                FROM information_schema.columns
+                WHERE table_schema = :schema
+                  AND table_name IN ('benchmark', 'model', 'run_detail', 'question')
+                """
+            ),
+            {"schema": schema},
+        )
+    }
+
+    statements = [
+        (("benchmark", "category"), "ALTER TABLE benchmark ADD COLUMN category TEXT"),
+        (
+            ("model", "lmstudio_model_name"),
+            "ALTER TABLE model ADD COLUMN lmstudio_model_name TEXT",
+        ),
+        (
+            ("model", "max_benchmark_tier"),
+            "ALTER TABLE model ADD COLUMN max_benchmark_tier INTEGER DEFAULT 1",
+        ),
+        (("run_detail", "tokens_used"), "ALTER TABLE run_detail ADD COLUMN tokens_used INTEGER"),
+        (("run_detail", "tokens_in"), "ALTER TABLE run_detail ADD COLUMN tokens_in INTEGER"),
+        (("run_detail", "tokens_out"), "ALTER TABLE run_detail ADD COLUMN tokens_out INTEGER"),
+        (
+            ("question", "is_excluded"),
+            "ALTER TABLE question ADD COLUMN is_excluded BOOLEAN DEFAULT FALSE NOT NULL",
+        ),
+        (
+            ("question", "exclusion_reason"),
+            "ALTER TABLE question ADD COLUMN exclusion_reason TEXT",
+        ),
+    ]
+    for column_key, statement in statements:
+        if column_key not in existing_columns:
+            conn.execute(text(statement))
+
+
 def create_dev_session():
     """Create a database session for development.
 
@@ -104,27 +180,7 @@ def create_database_and_session(db_path=None):
 
     # Migrate existing databases to add new columns that may not exist yet
     with engine.connect() as conn:
-        result = conn.execute(text("PRAGMA table_info(benchmark)"))
-        existing_cols = {row[1] for row in result}
-        if "category" not in existing_cols:
-            conn.execute(text("ALTER TABLE benchmark ADD COLUMN category TEXT"))
-
-        model_result = conn.execute(text("PRAGMA table_info(model)"))
-        model_cols = {row[1] for row in model_result}
-        if "lmstudio_model_name" not in model_cols:
-            conn.execute(text("ALTER TABLE model ADD COLUMN lmstudio_model_name TEXT"))
-        if "max_benchmark_tier" not in model_cols:
-            conn.execute(text("ALTER TABLE model ADD COLUMN max_benchmark_tier INTEGER DEFAULT 1"))
-
-        run_detail_result = conn.execute(text("PRAGMA table_info(run_detail)"))
-        run_detail_cols = {row[1] for row in run_detail_result}
-        if "tokens_used" not in run_detail_cols:
-            conn.execute(text("ALTER TABLE run_detail ADD COLUMN tokens_used INTEGER"))
-        if "tokens_in" not in run_detail_cols:
-            conn.execute(text("ALTER TABLE run_detail ADD COLUMN tokens_in INTEGER"))
-        if "tokens_out" not in run_detail_cols:
-            conn.execute(text("ALTER TABLE run_detail ADD COLUMN tokens_out INTEGER"))
-
+        _migrate_sqlite_schema(conn)
         conn.commit()
 
     Session = sessionmaker(bind=engine)
@@ -211,6 +267,9 @@ def _initialize_postgres_engine(postgres_url: str) -> Engine:
     import benchmarks.datastore.benchmarks  # noqa: F401
 
     Base.metadata.create_all(engine)
+    with base_engine.connect() as conn:
+        _migrate_postgres_schema(conn)
+        conn.commit()
 
     return engine
 
