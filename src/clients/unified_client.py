@@ -117,7 +117,7 @@ class UnifiedLLMClient:
 
             # For API server use with runtime API keys:
             config = DataSourceConfig(
-                model="gpt-5-mini",
+                model="gpt-5.4-mini",
                 openai_api_key="sk-...",
             )
             client = UnifiedLLMClient.from_config(config)

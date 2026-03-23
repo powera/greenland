@@ -30,7 +30,7 @@ bp = Blueprint(
     url_prefix="/verbalator",
 )
 
-DEFAULT_MODEL = "gpt-5-mini"
+DEFAULT_MODEL = "gpt-5.4-mini"
 
 _unified_client: Optional[UnifiedClient] = None
 

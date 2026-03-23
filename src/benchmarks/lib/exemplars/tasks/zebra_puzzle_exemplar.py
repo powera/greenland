@@ -73,7 +73,7 @@ def run_neighborhood_puzzle_exemplar(models=None, num_models=3):
         models = all_models[: min(num_models, len(all_models))]
         if not models:
             print("No models available in database. Using default models.")
-            models = ["gpt-4o-mini-2024-07-18", "gemma2:9b"]
+            models = ["gpt-5.4-mini", "gemma2:9b"]
 
     compare_models("neighborhood_puzzle", models)
     report_path = generate_report("neighborhood_puzzle")

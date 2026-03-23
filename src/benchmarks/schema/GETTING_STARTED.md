@@ -98,7 +98,7 @@ Note: this will discard all previous run results.
 ## Current registered models
 
 **Remote:**
-- `gpt-5.2`, `gpt-5-mini`, `gpt-5-nano` (OpenAI)
+- `gpt-5.2`, `gpt-5.4-mini`, `gpt-5-mini`, `gpt-5-nano` (OpenAI)
 - `claude-opus-4-6`, `claude-sonnet-4-5`, `claude-haiku-4-5` (Anthropic)
 - `gemini-2.5-pro`, `gemini-2.5-flash`, `gemini-2.5-flash-lite` (Google)
 

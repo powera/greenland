@@ -84,7 +84,7 @@ def build_response_schema(
 
 
 def translate_sentence(
-    sentence_id: int, target_languages: List[str], session: Session, model: str = "gpt-5-mini"
+    sentence_id: int, target_languages: List[str], session: Session, model: str = "gpt-5.4-mini"
 ) -> Dict[str, Any]:
     """
     Translate a single sentence to target languages using LLM.

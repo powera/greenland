@@ -54,7 +54,7 @@ def run_wars_of_roses_exemplar(models=None, num_models=3):
         models = all_models[: min(num_models, len(all_models))]
         if not models:
             print("No models available in database. Using default models.")
-            models = ["gpt-4o-mini-2024-07-18", "smollm2:360m"]
+            models = ["gpt-5.4-mini", "smollm2:360m"]
 
     compare_models("wars_of_roses_essay", models)
     report_path = generate_report("wars_of_roses_essay")

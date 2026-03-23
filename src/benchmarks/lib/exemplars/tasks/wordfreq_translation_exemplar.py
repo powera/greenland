@@ -200,7 +200,7 @@ def run_wordfreq_exemplar(
         models = all_models[: min(num_models, len(all_models))]
         if not models:
             print("No models available in database. Using default models.")
-            models = ["gpt-4o-mini-2024-07-18", "claude-3-5-haiku-20241022"]
+            models = ["gpt-5.4-mini", "claude-3-5-haiku-20241022"]
 
     results = []
     for model in models:

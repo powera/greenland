@@ -97,7 +97,7 @@ def run_single_exemplar(
         model_names = runner.get_model_names()[:3]  # Use top 3 models by default
         if not model_names:
             print("No models found in database. Using default model.")
-            model_names = ["gpt-4o-mini-2024-07-18"]
+            model_names = ["gpt-5.4-mini"]
 
     print(f"Running exemplar '{exemplar_id}' with models: {', '.join(model_names)}")
 
@@ -137,7 +137,7 @@ def run_all_exemplars(model_name: Optional[str] = None, generate_html: bool = Tr
             model_name = model_names[0]
         else:
             print("No models found in database. Using default model.")
-            model_name = "gpt-4o-mini-2024-07-18"
+            model_name = "gpt-5.4-mini"
 
     exemplars = registry.list_exemplars()
 

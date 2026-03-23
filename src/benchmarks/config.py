@@ -92,7 +92,7 @@ class BenchmarkConfig:
         Args:
             db_path: Path to benchmarks SQLite database (default: benchmark_constants.BENCHMARKS_DB_PATH)
             postgres_url: PostgreSQL connection URL for Supabase backend
-            model: LLM model to use for running benchmarks (e.g., "gpt-4o-mini", "claude-sonnet-4")
+            model: LLM model to use for running benchmarks (e.g., "gpt-5.4-mini", "claude-sonnet-4")
             debug: Enable debug logging
         """
         self.db_path = db_path or str(BENCHMARKS_DB_PATH)

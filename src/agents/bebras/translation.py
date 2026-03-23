@@ -35,7 +35,7 @@ def ensure_translations(
     source_text: str,
     source_language: str,
     target_languages: List[str],
-    model: str = "gpt-5-mini",
+    model: str = "gpt-5.4-mini",
     verified: bool = False,
 ) -> Dict[str, Any]:
     """

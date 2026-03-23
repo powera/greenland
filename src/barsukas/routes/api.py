@@ -91,7 +91,7 @@ def auto_populate_lemma() -> ResponseReturnValue:
         # Use LLM to generate definition, POS type, and POS subtype
         from wordfreq.translation.client import LinguisticClient
 
-        client = LinguisticClient(model="gpt-5-mini", db_path=Config.DB_PATH, debug=Config.DEBUG)
+        client = LinguisticClient(model="gpt-5.4-mini", db_path=Config.DB_PATH, debug=Config.DEBUG)
 
         # Build prompt for LLM
         if translation and lang_code:
@@ -133,7 +133,7 @@ The definition should be suitable for language learners."""
         )
 
         response = client.client.generate_chat(
-            prompt=prompt, model="gpt-5-mini", json_schema=schema, timeout=30
+            prompt=prompt, model="gpt-5.4-mini", json_schema=schema, timeout=30
         )
 
         if not response.structured_data:

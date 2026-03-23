@@ -17,11 +17,13 @@ from clients.types import Response
 from util.telemetry import LLMUsage
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Model identifiers
-TEST_MODEL = "gpt-4o-mini-2024-07-18"
+TEST_MODEL = "gpt-5.4-mini"
 PROD_MODEL = "gpt-4o-2024-11-20"
 DEFAULT_MODEL = TEST_MODEL
 DEFAULT_TIMEOUT = 50
@@ -29,6 +31,11 @@ API_BASE = "https://api.openai.com/v1"
 
 
 F = TypeVar("F", bound=Callable[..., Any])
+
+
+def _is_gpt5_nano_or_mini_model(model: str) -> bool:
+    """Return whether the model is a GPT-5 nano/mini variant."""
+    return model.startswith("gpt-5") and (model.endswith("-nano") or model.endswith("-mini"))
 
 
 def measure_completion(func: F) -> Callable[..., tuple[Any, float]]:
@@ -141,12 +148,12 @@ class OpenAIClient:
 
         # Determine which token limit parameter to use based on model
         # Newer reasoning models (o1, gpt-5, o3) require max_output_tokens
-        reasoning_models = ["o1-", "gpt-5-", "o3-"]
+        reasoning_models = ["o1-", "gpt-5", "o3-"]
         uses_output_tokens = any(model.startswith(prefix) for prefix in reasoning_models)
 
         # gpt-5 models don't support custom temperature (only default value of 1)
-        is_gpt5_model = model.startswith("gpt-5-")
-        is_gpt5_nano_or_mini = model.startswith("gpt-5-nano") or model.startswith("gpt-5-mini")
+        is_gpt5_model = model.startswith("gpt-5")
+        is_gpt5_nano_or_mini = _is_gpt5_nano_or_mini_model(model)
 
         token_limit = 512 if brief else 4096
         request_kwargs: Dict[str, Any] = {
@@ -169,7 +176,7 @@ class OpenAIClient:
             # For non-reasoning models, we still use max_output_tokens in Responses API
             request_kwargs["max_output_tokens"] = token_limit
 
-        # Set reasoning and text parameters for gpt-5-nano and gpt-5-mini
+        # Set reasoning and text parameters for GPT-5 nano and mini variants
         if is_gpt5_nano_or_mini:
             request_kwargs["reasoning"] = {"effort": "minimal"}
             # Only set text verbosity if not overridden by JSON schema below
@@ -200,7 +207,7 @@ class OpenAIClient:
                 }
             }
 
-            # For gpt-5-nano and gpt-5-mini, also include verbosity
+            # For GPT-5 nano and mini variants, also include verbosity
             if is_gpt5_nano_or_mini:
                 text_config["verbosity"] = "low"
 

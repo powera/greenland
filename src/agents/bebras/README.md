@@ -50,7 +50,7 @@ python bebras.py --check-integrity --check orphaned
 ```python
 from agents.bebras import BebrasAgent
 
-agent = BebrasAgent(model="gpt-5-mini")
+agent = BebrasAgent(model="gpt-5.4-mini")
 
 # Process a sentence
 result = agent.process_sentence(
@@ -91,7 +91,7 @@ batch_result = agent.process_sentence_batch(
 | `--file` | File with sentences (one per line) | Required* |
 | `--source` | Source language code | `en` |
 | `--languages` | Target language codes | `lt zh fr es` |
-| `--model` | LLM model to use | `gpt-5-mini` |
+| `--model` | LLM model to use | `gpt-5.4-mini` |
 | `--verified` | Mark sentences as verified | `False` |
 | `--debug` | Enable debug logging | `False` |
 | `--json` | Output results as JSON | `False` |

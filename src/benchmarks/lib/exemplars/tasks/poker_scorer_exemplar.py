@@ -57,7 +57,7 @@ def run_poker_hand_exemplar(models=None, num_models=3):
         models = all_models[: min(num_models, len(all_models))]
         if not models:
             print("No models available in database. Using default models.")
-            models = ["gpt-4o-mini-2024-07-18", "smollm2:360m"]
+            models = ["gpt-5.4-mini", "smollm2:360m"]
 
     compare_models("poker_hand_scorer", models)
     report_path = generate_report("poker_hand_scorer")

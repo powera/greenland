@@ -31,8 +31,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Default model for validation and LLM-based question generation
-DEFAULT_VALIDATION_MODEL = "gpt-4o-mini-2024-07-18"
-DEFAULT_GENERATION_MODEL = "gpt-5-mini"
+DEFAULT_VALIDATION_MODEL = "gpt-5.4-mini"
+DEFAULT_GENERATION_MODEL = "gpt-5.4-mini"
 
 
 class BenchmarkGenerator:

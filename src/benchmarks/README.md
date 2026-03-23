@@ -34,7 +34,7 @@ PYTHONPATH=src python src/benchmarks/schema/create_models.py
 PYTHONPATH=src python src/benchmarks/run_benchmark.py generate 0016_antonym
 
 # Run a benchmark against a model
-PYTHONPATH=src python src/benchmarks/run_benchmark.py run 0016_antonym gpt-4o-mini
+PYTHONPATH=src python src/benchmarks/run_benchmark.py run 0016_antonym gpt-5.4-mini
 ```
 
 See `BENCHMARK_INDEX.md` for benchmark numbering/inventory and `API.md` for CLI details.

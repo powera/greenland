@@ -1,6 +1,6 @@
 import os
 
-DEFAULT_MODEL = "gpt-5-mini"
+DEFAULT_MODEL = "gpt-5.4-mini"
 
 # Get the src directory
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))

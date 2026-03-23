@@ -121,7 +121,7 @@ Examples:
 def _add_common_verify_args(parser: argparse.ArgumentParser) -> None:
     """Add arguments common to all verify subcommands."""
     add_common_args(parser)
-    add_llm_args(parser, default_model="gpt-5-mini")
+    add_llm_args(parser, default_model="gpt-5.4-mini")
     add_backend_args(parser)
     add_processing_args(parser)
     add_language_args(parser, multiple=True)
@@ -148,7 +148,7 @@ def _add_common_verify_args(parser: argparse.ArgumentParser) -> None:
 def _add_batch_args(parser: argparse.ArgumentParser) -> None:
     """Add arguments for batch submission subcommands."""
     add_common_args(parser)
-    add_llm_args(parser, default_model="gpt-5-mini")
+    add_llm_args(parser, default_model="gpt-5.4-mini")
     add_backend_args(parser)
     add_language_args(parser, multiple=True)
 
@@ -176,7 +176,7 @@ def verify_words(args: argparse.Namespace) -> int:
     try:
         # Determine languages to verify
         languages = getattr(args, "languages", None) or DEFAULT_VERIFY_LANGUAGES
-        languages = filter_languages_for_model(languages, config.model or "gpt-5-mini")
+        languages = filter_languages_for_model(languages, config.model or "gpt-5.4-mini")
 
         if not languages:
             logger.error(f"No supported languages for model {config.model}")
@@ -257,7 +257,7 @@ def verify_sentences(args: argparse.Namespace) -> int:
     try:
         # Determine languages to verify
         languages = getattr(args, "languages", None) or DEFAULT_VERIFY_LANGUAGES
-        languages = filter_languages_for_model(languages, config.model or "gpt-5-mini")
+        languages = filter_languages_for_model(languages, config.model or "gpt-5.4-mini")
 
         if not languages:
             logger.error(f"No supported languages for model {config.model}")

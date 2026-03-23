@@ -60,7 +60,7 @@ def multi_cross_run_to_json(slug_dict: Dict[str, str]) -> Dict:
     return result
 
 
-def add_model_for_slug(slug: str, model: str = "gpt-4o-mini", persona: str = "") -> Dict:
+def add_model_for_slug(slug: str, model: str = "gpt-5.4-mini", persona: str = "") -> Dict:
     """Add results for a new model to existing results for a slug."""
     cache_file = os.path.join(CACHE_DIR, f"{slug}.json")
 
@@ -70,14 +70,14 @@ def add_model_for_slug(slug: str, model: str = "gpt-4o-mini", persona: str = "")
     prompt = result["prompt"]
     existing_models = [x["model"] for x in result["results"]]
 
-    if model == "gpt-4o-mini":
+    if model == "gpt-5.4-mini":
         if persona:
             response, usage = openai_client.answer_question(prompt, persona=persona)
-            model_name = f"gpt-4o-mini/{persona}"
+            model_name = f"gpt-5.4-mini/{persona}"
         else:
             if model not in existing_models:
                 response, usage = openai_client.answer_question(prompt)
-                model_name = "gpt-4o-mini"
+                model_name = "gpt-5.4-mini"
             else:
                 return add_critique(slug)
     elif model in OLLAMA_MODELS:
@@ -245,7 +245,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run model comparisons")
     parser.add_argument("--slug", help="Slug to process")
     parser.add_argument(
-        "--model", help="Model to add (defaults to gpt-4o-mini)", default="gpt-4o-mini"
+        "--model", help="Model to add (defaults to gpt-5.4-mini)", default="gpt-5.4-mini"
     )
     parser.add_argument("--persona", help="Optional persona for GPT-4 Mini model")
     parser.add_argument("--prompts", type=json.loads, help="JSON dict of slug:prompt pairs to run")

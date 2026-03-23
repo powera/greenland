@@ -102,7 +102,7 @@ class DataSourceConfig:
             postgres_url: PostgreSQL connection URL (e.g., postgresql://user:pass@host:5432/db)
             barsukas_url: URL of BARSUKAS server for cached translations (e.g., http://server:5000)
             cache_only: If True, only use cached translations and fail if not in cache
-            model: LLM model to use (e.g., "gpt-4o-mini", "claude-sonnet-4")
+            model: LLM model to use (e.g., "gpt-5.4-mini", "claude-sonnet-4")
             debug: Enable debug logging
         """
         # Determine backend type from env var or default

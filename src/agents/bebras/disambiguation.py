@@ -83,7 +83,7 @@ def find_best_lemma_match(
 
 
 def disambiguate_lemma(
-    candidates: List[Lemma], lemma_text: str, disambiguation_hint: str, model: str = "gpt-5-mini"
+    candidates: List[Lemma], lemma_text: str, disambiguation_hint: str, model: str = "gpt-5.4-mini"
 ) -> Optional[Lemma]:
     """
     Use LLM to disambiguate between multiple lemma candidates.

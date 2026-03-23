@@ -63,7 +63,7 @@ logger = logging.getLogger(__name__)
 class MyAgent:
     """Agent for doing XYZ."""
 
-    def __init__(self, db_path: str = None, debug: bool = False, model: str = "gpt-5-mini"):
+    def __init__(self, db_path: str = None, debug: bool = False, model: str = "gpt-5.4-mini"):
         """Initialize the agent."""
         self.db_path = db_path or constants.WORDFREQ_DB_PATH
         self.debug = debug
@@ -403,7 +403,7 @@ from wordfreq.tools.llm_validators import validate_lemma_form
 result = validate_lemma_form(
     lemma_text="shoes",
     pos_type="noun",
-    model="gpt-5-mini"
+    model="gpt-5.4-mini"
 )
 
 if not result['is_lemma']:

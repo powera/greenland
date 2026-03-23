@@ -38,13 +38,13 @@ python -m lib.exemplars.cli list --models
 python -m lib.exemplars.cli run granite_definition
 
 # Run a specific exemplar with specified models
-python -m lib.exemplars.cli run wars_of_roses_essay --models gpt-4o-mini-2024-07-18 smollm2:360m
+python -m lib.exemplars.cli run wars_of_roses_essay --models gpt-5.4-mini smollm2:360m
 
 # Run all exemplars with the first model from the database
 python -m lib.exemplars.cli run
 
 # Run all exemplars with a specific model
-python -m lib.exemplars.cli run --models gpt-4o-mini-2024-07-18
+python -m lib.exemplars.cli run --models gpt-5.4-mini
 
 # Generate reports for all exemplars
 python -m lib.exemplars.cli report
@@ -64,7 +64,7 @@ available_models = runner.get_model_names()
 print(f"Available models: {available_models}")
 
 # Run with specific models
-run_granite_definition_exemplar(models=["gpt-4o-mini-2024-07-18", "smollm2:360m"])
+run_granite_definition_exemplar(models=["gpt-5.4-mini", "smollm2:360m"])
 
 # Or use the general functions
 from lib.exemplars import compare_models, generate_report
@@ -104,7 +104,7 @@ register_exemplar(
 # Function to run this exemplar
 def run_custom_exemplar(models=None):
     if models is None:
-        models = ["gpt-4o-mini-2024-07-18", "claude-3-sonnet-20240229"]
+        models = ["gpt-5.4-mini", "claude-3-sonnet-20240229"]
     compare_models("custom_exemplar", models)
     return generate_report("custom_exemplar")
 

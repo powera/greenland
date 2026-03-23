@@ -106,6 +106,7 @@ Use codenames (not full model paths) when running benchmarks:
 | Codename | Provider |
 |----------|----------|
 | `gpt-5.2` | OpenAI |
+| `gpt-5.4-mini` | OpenAI |
 | `gpt-5-mini` | OpenAI |
 | `gpt-5-nano` | OpenAI |
 | `claude-opus-4-6` | Anthropic |

@@ -167,7 +167,7 @@ class ZvirblisAgent:
                     source_text=en_translation,
                     source_language="en",
                     target_languages=target_languages,
-                    model=self.config.model or "gpt-5-mini",
+                    model=self.config.model or "gpt-5.4-mini",
                     verified=False,
                 )
 
@@ -479,9 +479,9 @@ class ZvirblisAgent:
                     "response_format": response_format,
                 }
 
-                # Minimize reasoning tokens for gpt-5-mini/nano (translation doesn't need deep reasoning)
+                # Minimize reasoning tokens for gpt-5.4-mini/nano (translation doesn't need deep reasoning)
                 if self.config.model and (
-                    self.config.model.startswith("gpt-5-mini")
+                    self.config.model.startswith("gpt-5.4-mini")
                     or self.config.model.startswith("gpt-5-nano")
                 ):
                     request_body["reasoning_effort"] = "minimal"
@@ -536,7 +536,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Translate sentences for a lemma GUID")
 
     add_common_args(parser)
-    add_llm_args(parser, default_model="gpt-5-mini")
+    add_llm_args(parser, default_model="gpt-5.4-mini")
     add_guid_arg(parser, help_text="Translate sentences for this specific lemma GUID")
     add_language_args(parser, multiple=True)
     add_backend_args(parser)

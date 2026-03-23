@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def validate_lemma_form(
-    word: str, pos_type: str, model: Optional[str] = "gpt-5-mini"
+    word: str, pos_type: str, model: Optional[str] = "gpt-5.4-mini"
 ) -> Dict[str, Any]:
     """
     Validate that a word is in its correct lemma (base) form.
@@ -99,7 +99,7 @@ def validate_translation(
     translation: str,
     target_language: str,
     pos_type: str,
-    model: str = "gpt-5-mini",
+    model: str = "gpt-5.4-mini",
 ) -> Dict[str, Any]:
     """
     Validate that a translation is correct and in lemma form.
@@ -192,7 +192,7 @@ def validate_definition(
     word: str,
     definition: str,
     pos_type: str,
-    model: Optional[str] = "gpt-5-mini",
+    model: Optional[str] = "gpt-5.4-mini",
     translation_language: Optional[str] = None,
     translation_text: Optional[str] = None,
 ) -> Dict[str, Any]:
@@ -281,7 +281,7 @@ def validate_definition(
 
 
 def batch_validate_lemmas(
-    words: List[Dict[str, str]], model: str = "gpt-5-mini", confidence_threshold: float = 0.7
+    words: List[Dict[str, str]], model: str = "gpt-5.4-mini", confidence_threshold: float = 0.7
 ) -> List[Dict[str, Any]]:
     """
     Validate multiple words for lemma form.
@@ -312,7 +312,7 @@ def validate_all_translations_for_word(
     english_word: str,
     translations: Dict[str, str],
     pos_type: str,
-    model: Optional[str] = "gpt-5-mini",
+    model: Optional[str] = "gpt-5.4-mini",
 ) -> Dict[str, Any]:
     """
     Validate all translations for a single word in one LLM call.
@@ -453,7 +453,9 @@ Language guidance: Validate for {language_list}.
 
 
 def batch_validate_translations(
-    translations: List[Dict[str, str]], model: str = "gpt-5-mini", confidence_threshold: float = 0.7
+    translations: List[Dict[str, str]],
+    model: str = "gpt-5.4-mini",
+    confidence_threshold: float = 0.7,
 ) -> List[Dict[str, Any]]:
     """
     Validate multiple translations.
@@ -503,7 +505,7 @@ def validate_pronunciation(
     pos_type: str,
     example_sentence: Optional[str] = None,
     definition: Optional[str] = None,
-    model: str = "gpt-5-mini",
+    model: str = "gpt-5.4-mini",
     language_code: str = "en",
     grammatical_form: Optional[str] = None,
     english_translation: Optional[str] = None,
@@ -787,7 +789,7 @@ def generate_pronunciation(
     pos_type: str,
     example_sentence: Optional[str] = None,
     definition: Optional[str] = None,
-    model: str = "gpt-5-mini",
+    model: str = "gpt-5.4-mini",
     language_code: str = "en",
     grammatical_form: Optional[str] = None,
     english_translation: Optional[str] = None,
@@ -843,7 +845,7 @@ def batch_generate_pronunciations(
     definition: str,
     pos_type: str,
     forms: List[Dict[str, str]],
-    model: str = "gpt-5-mini",
+    model: str = "gpt-5.4-mini",
     language_code: str = "en",
     english_translation: Optional[str] = None,
 ) -> Dict[str, Dict[str, Any]]:
@@ -990,7 +992,7 @@ def batch_generate_pronunciations(
 
 
 def suggest_disambiguation(
-    word: str, definitions: List[Dict[str, Any]], model: Optional[str] = "gpt-5-mini"
+    word: str, definitions: List[Dict[str, Any]], model: Optional[str] = "gpt-5.4-mini"
 ) -> Dict[str, Any]:
     """
     Suggest short disambiguation terms for multiple meanings of the same word.
@@ -1074,7 +1076,7 @@ def validate_disambiguation_need(
     definition: str,
     translations: Optional[Dict[str, str]] = None,
     has_parenthetical: bool = False,
-    model: Optional[str] = "gpt-5-mini",
+    model: Optional[str] = "gpt-5.4-mini",
 ) -> Dict[str, Any]:
     """
     Validate whether a lemma needs parenthetical disambiguation.
