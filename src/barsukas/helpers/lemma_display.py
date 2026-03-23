@@ -1,6 +1,6 @@
 """Lemma display and UI helper functions for Barsukas."""
 
-from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Set, Tuple
 
 from storage.queries.lemma import get_difficulty_stats
 
@@ -94,6 +94,27 @@ def group_populated_pronunciations(derivative_forms: Any) -> Dict[str, List[Any]
     return pronunciations_by_language
 
 
+def get_pronunciation_languages(
+    derivative_forms: Sequence[Any],
+    translations: Mapping[str, Optional[str]],
+) -> List[str]:
+    """Return languages eligible for pronunciation generation on the lemma page.
+
+    This includes languages that already have derivative forms as well as
+    languages where only a lemma/base translation exists. That allows Barsukas
+    to offer pronunciation generation for lemma-only entries.
+    """
+    eligible_languages: Set[str] = {
+        form.language_code for form in derivative_forms if getattr(form, "language_code", None)
+    }
+
+    for language_code, translation_text in translations.items():
+        if (translation_text or "").strip():
+            eligible_languages.add(language_code)
+
+    return sorted(eligible_languages)
+
+
 def build_lemma_pronunciation_rows(
     derivative_forms: Sequence[Any],
     translations: Mapping[str, Optional[str]],
@@ -148,6 +169,7 @@ def build_lemma_pronunciation_rows(
 __all__ = [
     "build_lemma_pronunciation_rows",
     "get_difficulty_stats",
+    "get_pronunciation_languages",
     "group_derivative_forms",
     "group_populated_pronunciations",
 ]

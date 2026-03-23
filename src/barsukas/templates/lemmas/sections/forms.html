@@ -24,7 +24,7 @@
                             {% if pronunciation_languages and config.get('ALLOW_OUTBOUND_CALLS', True) %}
                             data-bs-toggle="modal" data-bs-target="#generatePronunciationsModal"
                             {% elif not pronunciation_languages %}
-                            disabled title="Generate forms first so there is a word form to pronounce"
+                            disabled title="Add a lemma or translation first so there is text to pronounce"
                             {% else %}
                             disabled title="Not available in hosted mode"
                             {% endif %}>
@@ -179,7 +179,7 @@
                     </div>
                     <div class="alert alert-info mb-0">
                         <i class="bi bi-info-circle"></i>
-                        <strong>Note:</strong> This fills in any missing IPA or phonetic pronunciation data for the selected language.
+                        <strong>Note:</strong> This fills in any missing IPA or phonetic pronunciation data for the selected language, including lemma-only entries when no extra forms exist yet.
                     </div>
                 </div>
                 <div class="modal-footer">
