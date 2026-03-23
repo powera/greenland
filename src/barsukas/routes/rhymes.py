@@ -18,7 +18,7 @@ from flask import Blueprint, g, render_template, request
 from flask.typing import ResponseReturnValue
 from sqlalchemy import func
 
-from langtools.en.rhyme_key import (
+from langtools.rhyme_keys import (
     rhyme_key_final_sound,
     rhyme_key_penultimate_sound,
 )

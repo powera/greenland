@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-from langtools.en.rhyme_key import compute_rhyme_key
+from langtools.rhyme_keys import compute_rhyme_key, rhyme_keys_available
 
 if TYPE_CHECKING:
     from storage.models.schema import DerivativeForm
@@ -16,10 +16,10 @@ def compute_rhyme_key_from_ipa(
 ) -> Optional[str]:
     """Return the stored rhyme key for a derivative form pronunciation.
 
-    At the moment rhyme keys are only defined for English IPA. For other
-    languages, or for empty pronunciations, the stored value should be ``None``.
+    Only languages advertised by ``rhyme_keys_available()`` produce stored
+    rhyme keys. Other languages, or empty pronunciations, return ``None``.
     """
-    if language_code != "en":
+    if not rhyme_keys_available(language_code):
         return None
     if not ipa_pronunciation or not ipa_pronunciation.strip():
         return None
