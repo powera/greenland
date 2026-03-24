@@ -2,14 +2,20 @@
 
 from typing import Final
 
+from langtools.de.grammatical_words import GERMAN_GRAMMATICAL_WORDS
 from langtools.en.grammatical_words import ENGLISH_GRAMMATICAL_WORDS_WITH_CONTRACTIONS
 from langtools.es.grammatical_words import SPANISH_GRAMMATICAL_WORDS
 from langtools.fr.grammatical_words import FRENCH_GRAMMATICAL_WORDS
+from langtools.lt.grammatical_words import LITHUANIAN_GRAMMATICAL_WORDS
+from langtools.zh.grammatical_words import CHINESE_GRAMMATICAL_WORDS
 
 GRAMMATICAL_WORDS_BY_LANGUAGE: Final[dict[str, frozenset[str]]] = {
+    "de": GERMAN_GRAMMATICAL_WORDS,
     "en": ENGLISH_GRAMMATICAL_WORDS_WITH_CONTRACTIONS,
     "es": SPANISH_GRAMMATICAL_WORDS,
     "fr": FRENCH_GRAMMATICAL_WORDS,
+    "lt": LITHUANIAN_GRAMMATICAL_WORDS,
+    "zh": CHINESE_GRAMMATICAL_WORDS,
 }
 
 
