@@ -1,13 +1,29 @@
-"""English grammatical/function-word data."""
+"""English grammatical/function-word data.
+
+Words are split into two tiers:
+
+* **grammatical_only** – pure grammar that should never be linked to a lemma
+  (articles, personal pronouns, auxiliary verbs, contractions).
+* **also_lemma** – function words that *also* appear (or could appear) as
+  teachable lemma entries in data/release (conjunctions, prepositions,
+  interrogative pronouns, determiners other than articles).
+
+The legacy ``ENGLISH_GRAMMATICAL_WORDS_BY_CATEGORY`` dict and the broad
+``ENGLISH_GRAMMATICAL_WORDS_WITH_CONTRACTIONS`` frozenset are kept for
+backward compatibility with ``util/stopwords.py`` and ``dramblys``.
+"""
 
 from typing import Final
 
-ENGLISH_GRAMMATICAL_WORDS_BY_CATEGORY: Final[dict[str, list[str]]] = {
-    "pronouns": [
+# ── tier 1: always grammatical, never a lemma ──────────────────────────
+
+ENGLISH_GRAMMATICAL_ONLY_BY_CATEGORY: Final[dict[str, list[str]]] = {
+    "personal_pronouns": [
         "I",
         "me",
         "my",
         "myself",
+        "mine",
         "we",
         "us",
         "our",
@@ -34,12 +50,11 @@ ENGLISH_GRAMMATICAL_WORDS_BY_CATEGORY: Final[dict[str, list[str]]] = {
         "their",
         "theirs",
         "themselves",
-        "who",
-        "whom",
-        "whose",
-        "which",
-        "what",
-        "that",
+    ],
+    "articles": [
+        "a",
+        "an",
+        "the",
     ],
     "auxiliary_verbs": [
         "am",
@@ -65,6 +80,23 @@ ENGLISH_GRAMMATICAL_WORDS_BY_CATEGORY: Final[dict[str, list[str]]] = {
         "must",
         "can",
         "could",
+    ],
+}
+
+ENGLISH_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
+    word.lower() for words in ENGLISH_GRAMMATICAL_ONLY_BY_CATEGORY.values() for word in words
+)
+
+# ── tier 2: function words that are (or could be) lemmas ───────────────
+
+ENGLISH_ALSO_LEMMA_BY_CATEGORY: Final[dict[str, list[str]]] = {
+    "interrogative_pronouns": [
+        "who",
+        "whom",
+        "whose",
+        "which",
+        "what",
+        "that",
     ],
     "prepositions": [
         "at",
@@ -110,9 +142,6 @@ ENGLISH_GRAMMATICAL_WORDS_BY_CATEGORY: Final[dict[str, list[str]]] = {
         "nor",
     ],
     "determiners": [
-        "a",
-        "an",
-        "the",
         "this",
         "that",
         "these",
@@ -129,6 +158,12 @@ ENGLISH_GRAMMATICAL_WORDS_BY_CATEGORY: Final[dict[str, list[str]]] = {
         "neither",
     ],
 }
+
+ENGLISH_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
+    word.lower() for words in ENGLISH_ALSO_LEMMA_BY_CATEGORY.values() for word in words
+)
+
+# ── contractions (always grammatical) ──────────────────────────────────
 
 ENGLISH_GRAMMATICAL_CONTRACTIONS: Final[list[str]] = [
     "don't",
@@ -169,11 +204,30 @@ ENGLISH_GRAMMATICAL_CONTRACTIONS: Final[list[str]] = [
     "ain't",
 ]
 
-ENGLISH_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
-    word.lower()
-    for category_words in ENGLISH_GRAMMATICAL_WORDS_BY_CATEGORY.values()
-    for word in category_words
+ENGLISH_GRAMMATICAL_ONLY_WITH_CONTRACTIONS: Final[frozenset[str]] = frozenset(
+    ENGLISH_GRAMMATICAL_ONLY | {word.lower() for word in ENGLISH_GRAMMATICAL_CONTRACTIONS}
 )
+
+# ── backward-compatible broad sets ─────────────────────────────────────
+
+ENGLISH_GRAMMATICAL_WORDS_BY_CATEGORY: Final[dict[str, list[str]]] = {
+    "pronouns": (
+        ENGLISH_GRAMMATICAL_ONLY_BY_CATEGORY["personal_pronouns"]
+        + ENGLISH_ALSO_LEMMA_BY_CATEGORY["interrogative_pronouns"]
+    ),
+    "auxiliary_verbs": ENGLISH_GRAMMATICAL_ONLY_BY_CATEGORY["auxiliary_verbs"],
+    "prepositions": ENGLISH_ALSO_LEMMA_BY_CATEGORY["prepositions"],
+    "conjunctions": ENGLISH_ALSO_LEMMA_BY_CATEGORY["conjunctions"],
+    "determiners": (
+        ENGLISH_GRAMMATICAL_ONLY_BY_CATEGORY["articles"]
+        + ENGLISH_ALSO_LEMMA_BY_CATEGORY["determiners"]
+    ),
+}
+
+ENGLISH_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
+    ENGLISH_GRAMMATICAL_ONLY | ENGLISH_ALSO_LEMMA
+)
+
 ENGLISH_GRAMMATICAL_WORDS_WITH_CONTRACTIONS: Final[frozenset[str]] = frozenset(
     ENGLISH_GRAMMATICAL_WORDS | {word.lower() for word in ENGLISH_GRAMMATICAL_CONTRACTIONS}
 )

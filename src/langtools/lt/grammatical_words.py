@@ -1,10 +1,18 @@
-"""Lithuanian grammatical/function-word data."""
+"""Lithuanian grammatical/function-word data.
+
+* **grammatical_only** – personal/reflexive/possessive pronouns (all case
+  forms), auxiliary *būti* forms, particles.
+* **also_lemma** – prepositions, conjunctions, interrogative/relative pronouns,
+  and demonstratives that have (or could have) data/release entries.
+"""
 
 from typing import Final
 
-LITHUANIAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
+# ── tier 1: always grammatical, never a lemma ──────────────────────────
+
+LITHUANIAN_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
     {
-        # Personal pronouns (all cases)
+        # Personal pronouns — all cases
         "aš",
         "manęs",
         "man",
@@ -62,6 +70,37 @@ LITHUANIAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
         "mano",
         "tavo",
         "savo",
+        # Particles
+        "ar",
+        "ne",
+        "jau",
+        "dar",
+        "tik",
+        "net",
+        "gi",
+        "pat",
+        "vis",
+        "juk",
+        "tad",
+        "gal",
+        "tai",
+        "štai",
+        "turbūt",
+        "nebent",
+        # Auxiliary / semi-auxiliary (būti forms)
+        "būti",
+        "yra",
+        "buvo",
+        "bus",
+        "būtų",
+        "būna",
+    }
+)
+
+# ── tier 2: function words that are (or could be) lemmas ───────────────
+
+LITHUANIAN_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
+    {
         # Demonstrative pronouns
         "šis",
         "ši",
@@ -71,7 +110,7 @@ LITHUANIAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
         "ta",
         "tie",
         "tos",
-        # Interrogative / relative
+        # Interrogative / relative pronouns
         "kas",
         "ko",
         "kam",
@@ -122,29 +161,11 @@ LITHUANIAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
         "kai",
         "negu",
         "todėl",
-        # Particles
-        "ar",
-        "ne",
-        "jau",
-        "dar",
-        "tik",
-        "net",
-        "gi",
-        "pat",
-        "vis",
-        "juk",
-        "tad",
-        "gal",
-        "tai",
-        "štai",
-        "turbūt",
-        "nebent",
-        # Auxiliary / semi-auxiliary
-        "būti",
-        "yra",
-        "buvo",
-        "bus",
-        "būtų",
-        "būna",
     }
+)
+
+# ── combined set ───────────────────────────────────────────────────────
+
+LITHUANIAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
+    LITHUANIAN_GRAMMATICAL_ONLY | LITHUANIAN_ALSO_LEMMA
 )

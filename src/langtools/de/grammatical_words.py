@@ -1,8 +1,17 @@
-"""German grammatical/function-word data."""
+"""German grammatical/function-word data.
+
+* **grammatical_only** – articles (all case/gender forms), personal pronouns,
+  possessive determiners, contracted preposition+article forms, auxiliary and
+  modal verb conjugations, negation words, particles.
+* **also_lemma** – prepositions, conjunctions, interrogative pronouns,
+  demonstrative and indefinite determiners that have data/release entries.
+"""
 
 from typing import Final
 
-GERMAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
+# ── tier 1: always grammatical, never a lemma ──────────────────────────
+
+GERMAN_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
     {
         # Definite articles (all cases / genders)
         "der",
@@ -35,7 +44,7 @@ GERMAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
         "dir",
         "ihm",
         "ihnen",
-        # Possessive pronouns / determiners (base forms)
+        # Possessive determiners (all inflected forms)
         "mein",
         "meine",
         "meinen",
@@ -72,17 +81,121 @@ GERMAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
         "eurem",
         "eurer",
         "eures",
-        # Demonstrative determiners
-        "dieser",
-        "diese",
-        "dieses",
-        "diesen",
-        "diesem",
-        "jener",
-        "jene",
-        "jenes",
-        "jenen",
-        "jenem",
+        # Contracted preposition + article forms
+        "am",
+        "ans",
+        "aufs",
+        "beim",
+        "im",
+        "ins",
+        "vom",
+        "zum",
+        "zur",
+        # Negation
+        "nicht",
+        "kein",
+        "keine",
+        "keinen",
+        "keinem",
+        "keiner",
+        "keines",
+        # Particles
+        "noch",
+        "schon",
+        "ja",
+        "nein",
+        "doch",
+        "nur",
+        "auch",
+        "mal",
+        "eben",
+        "halt",
+        "wohl",
+        "bloß",
+        "etwa",
+        # Indefinite pronouns (not teachable as lemmas)
+        "man",
+        "jemand",
+        "niemand",
+        "etwas",
+        "nichts",
+        # Auxiliary verbs — sein
+        "bin",
+        "bist",
+        "ist",
+        "sind",
+        "seid",
+        "war",
+        "warst",
+        "waren",
+        "wart",
+        # Auxiliary verbs — haben
+        "habe",
+        "hast",
+        "hat",
+        "haben",
+        "habt",
+        "hatte",
+        "hatten",
+        # Auxiliary verbs — werden
+        "werde",
+        "wirst",
+        "wird",
+        "werden",
+        "werdet",
+        "wurde",
+        "wurden",
+        # Modal verbs — können
+        "kann",
+        "kannst",
+        "können",
+        "könnt",
+        "konnte",
+        "konnten",
+        # Modal verbs — dürfen
+        "darf",
+        "darfst",
+        "dürfen",
+        "dürft",
+        "durfte",
+        "durften",
+        # Modal verbs — müssen
+        "muss",
+        "musst",
+        "müssen",
+        "müsst",
+        "musste",
+        "mussten",
+        # Modal verbs — sollen
+        "soll",
+        "sollst",
+        "sollen",
+        "sollt",
+        "sollte",
+        "sollten",
+        # Modal verbs — wollen
+        "will",
+        "willst",
+        "wollen",
+        "wollt",
+        "wollte",
+        "wollten",
+        # Modal verbs — mögen
+        "mag",
+        "magst",
+        "mögen",
+        "mögt",
+        "mochte",
+        "mochten",
+        "möchte",
+        "möchten",
+    }
+)
+
+# ── tier 2: function words that are (or could be) lemmas ───────────────
+
+GERMAN_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
+    {
         # Prepositions
         "an",
         "auf",
@@ -113,16 +226,6 @@ GERMAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
         "wegen",
         "während",
         "gegenüber",
-        # Contracted preposition + article forms
-        "am",
-        "ans",
-        "aufs",
-        "beim",
-        "im",
-        "ins",
-        "vom",
-        "zum",
-        "zur",
         # Conjunctions
         "und",
         "oder",
@@ -144,29 +247,7 @@ GERMAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
         "solange",
         "indem",
         "weder",
-        "noch",
         "sowohl",
-        # Negation / particles
-        "nicht",
-        "kein",
-        "keine",
-        "keinen",
-        "keinem",
-        "keiner",
-        "keines",
-        "noch",
-        "schon",
-        "ja",
-        "nein",
-        "doch",
-        "nur",
-        "auch",
-        "mal",
-        "eben",
-        "halt",
-        "wohl",
-        "bloß",
-        "etwa",
         # Interrogative pronouns
         "wer",
         "wen",
@@ -182,13 +263,18 @@ GERMAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
         "welches",
         "welchen",
         "welchem",
-        # Relative pronouns (overlap with articles is intentional)
-        # Indefinite pronouns
-        "man",
-        "jemand",
-        "niemand",
-        "etwas",
-        "nichts",
+        # Demonstrative determiners
+        "dieser",
+        "diese",
+        "dieses",
+        "diesen",
+        "diesem",
+        "jener",
+        "jene",
+        "jenes",
+        "jenen",
+        "jenem",
+        # Indefinite determiners
         "jeder",
         "jede",
         "jedes",
@@ -198,69 +284,11 @@ GERMAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
         "alles",
         "einige",
         "manche",
-        # Auxiliary verbs
-        "sein",
-        "ist",
-        "bin",
-        "bist",
-        "sind",
-        "seid",
-        "war",
-        "warst",
-        "waren",
-        "wart",
-        "haben",
-        "habe",
-        "hast",
-        "hat",
-        "habt",
-        "hatte",
-        "hatten",
-        "werden",
-        "werde",
-        "wirst",
-        "wird",
-        "werdet",
-        "wurde",
-        "wurden",
-        # Modal verbs
-        "können",
-        "kann",
-        "kannst",
-        "könnt",
-        "konnte",
-        "konnten",
-        "dürfen",
-        "darf",
-        "darfst",
-        "dürft",
-        "durfte",
-        "durften",
-        "müssen",
-        "muss",
-        "musst",
-        "müsst",
-        "musste",
-        "mussten",
-        "sollen",
-        "soll",
-        "sollst",
-        "sollt",
-        "sollte",
-        "sollten",
-        "wollen",
-        "will",
-        "willst",
-        "wollt",
-        "wollte",
-        "wollten",
-        "mögen",
-        "mag",
-        "magst",
-        "mögt",
-        "mochte",
-        "mochten",
-        "möchte",
-        "möchten",
     }
+)
+
+# ── combined set ───────────────────────────────────────────────────────
+
+GERMAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
+    GERMAN_GRAMMATICAL_ONLY | GERMAN_ALSO_LEMMA
 )
