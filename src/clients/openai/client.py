@@ -38,6 +38,17 @@ def _is_gpt5_nano_or_mini_model(model: str) -> bool:
     return model.startswith("gpt-5") and (model.endswith("-nano") or model.endswith("-mini"))
 
 
+def _reasoning_effort_for_model(model: str, requested_effort: str) -> str:
+    """Return the appropriate reasoning effort string for a model.
+
+    gpt-5.4-series models do not support 'minimal'; map it to 'low'.
+    Other models use the requested effort unchanged.
+    """
+    if model.startswith("gpt-5.4") and requested_effort == "minimal":
+        return "low"
+    return requested_effort
+
+
 def measure_completion(func: F) -> Callable[..., tuple[Any, float]]:
     """Decorator to measure completion API call duration."""
 
@@ -178,7 +189,7 @@ class OpenAIClient:
 
         # Set reasoning and text parameters for GPT-5 nano and mini variants
         if is_gpt5_nano_or_mini:
-            request_kwargs["reasoning"] = {"effort": "minimal"}
+            request_kwargs["reasoning"] = {"effort": _reasoning_effort_for_model(model, "minimal")}
             # Only set text verbosity if not overridden by JSON schema below
             if not json_schema:
                 request_kwargs["text"] = {"verbosity": "low"}
