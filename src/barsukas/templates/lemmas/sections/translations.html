@@ -27,6 +27,7 @@
                         <tr>
                             <th>Language</th>
                             <th>Translation</th>
+                            <th>Disambiguation</th>
                             <th>Definition</th>
                             <th>Actions</th>
                         </tr>
@@ -52,6 +53,13 @@
                                         {% endif %}
                                     {% else %}
                                         <span class="text-muted fst-italic">Not set</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if translation_disambiguations[lang_code] %}
+                                        <span class="badge bg-info text-dark">{{ translation_disambiguations[lang_code] }}</span>
+                                    {% else %}
+                                        <span class="text-muted fst-italic">-</span>
                                     {% endif %}
                                 </td>
                                 <td>
@@ -101,6 +109,19 @@
                                                         Warning: Translation contains "/" character
                                                     </div>
                                                 </div>
+                                                {% if lang_code != 'en' %}
+                                                <div class="mb-3">
+                                                    <label for="disambiguation{{ lang_code }}" class="form-label">
+                                                        Disambiguation <small class="text-muted">(optional)</small>
+                                                    </label>
+                                                    <input type="text" class="form-control" id="disambiguation{{ lang_code }}"
+                                                           name="disambiguation" value="{{ translation_disambiguations[lang_code] or '' }}"
+                                                           placeholder="e.g., medžiaga, žmogaus">
+                                                    <div class="form-text">
+                                                        Shown in the app when this word is ambiguous in {{ lang_name }}
+                                                    </div>
+                                                </div>
+                                                {% endif %}
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

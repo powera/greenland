@@ -175,12 +175,15 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any = None) -> Any:
     """
     from storage.backend.jsonl import models as jsonl_models
 
-    # Build translations from the pre-loaded translations relationship
+    # Build translations and disambiguations from the pre-loaded translations relationship
     # This avoids the N+1 query problem when relationships are loaded with selectinload
     translations: Dict[str, str] = {"en": lemma.lemma_text}
+    translation_disambiguations: Dict[str, str] = {}
     for trans in lemma.translations:
         if trans.translation:
             translations[trans.language_code] = trans.translation
+        if trans.disambiguation:
+            translation_disambiguations[trans.language_code] = trans.disambiguation
 
     # Get difficulty overrides
     difficulty_overrides = {}
@@ -246,6 +249,7 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any = None) -> Any:
         updated_at=lemma.updated_at,
         # Language-specific data (translations now go in base.jsonl)
         translations=translations,
+        translation_disambiguations=translation_disambiguations,
         difficulty_overrides=difficulty_overrides,
         derivative_forms=derivative_forms,
         base_forms={},  # Populated when no derivative has is_base_form=true

@@ -566,6 +566,7 @@ def apply_additions() -> ResponseReturnValue:
 
             # Add translations
             translations = release_data.get("translations", {})
+            translation_disambiguations = release_data.get("translation_disambiguations", {})
             for lang_code, translation_text in translations.items():
                 if lang_code == "en":  # English is stored as lemma_text
                     continue
@@ -576,6 +577,7 @@ def apply_additions() -> ResponseReturnValue:
                     lemma_id=lemma.id,
                     language_code=lang_code,
                     translation=translation_text,
+                    disambiguation=translation_disambiguations.get(lang_code),
                     sort_key=compute_sort_key(lang_code, translation_text),
                     verified=False,
                 )
@@ -1412,6 +1414,7 @@ def apply_translations() -> ResponseReturnValue:
                 continue
 
             release_translations = release_data.get("translations", {})
+            release_disambiguations = release_data.get("translation_disambiguations", {})
 
             for lang_code, action in lang_actions.items():
                 if action == "skip":
@@ -1421,6 +1424,7 @@ def apply_translations() -> ResponseReturnValue:
                 if action == "use_release":
                     # Copy from release to DB
                     release_val = release_translations.get(lang_code, "")
+                    release_disambig = release_disambiguations.get(lang_code)
                     if release_val:
                         trans_obj = (
                             g.db.query(LemmaTranslation)
@@ -1434,12 +1438,14 @@ def apply_translations() -> ResponseReturnValue:
                         if trans_obj:
                             old_val = trans_obj.translation
                             trans_obj.translation = release_val
+                            trans_obj.disambiguation = release_disambig
                             trans_obj.sort_key = compute_sort_key(lang_code, release_val)
                         else:
                             trans_obj = LemmaTranslation(
                                 lemma_id=lemma.id,
                                 language_code=lang_code,
                                 translation=release_val,
+                                disambiguation=release_disambig,
                                 sort_key=compute_sort_key(lang_code, release_val),
                                 verified=False,
                             )
@@ -1481,6 +1487,7 @@ def apply_translations() -> ResponseReturnValue:
                     )
 
                     db_val = trans_obj.translation if trans_obj else ""
+                    db_disambig = trans_obj.disambiguation if trans_obj else None
                     if db_val:
                         # Find the release file for this lemma
                         file_path = _find_release_file_for_lemma(release_dir, lemma.guid)
@@ -1490,6 +1497,11 @@ def apply_translations() -> ResponseReturnValue:
                             if lemma.guid not in release_updates[file_path]:
                                 release_updates[file_path][lemma.guid] = {}
                             release_updates[file_path][lemma.guid][lang_code] = db_val
+                            # Also export disambiguation if set
+                            if db_disambig:
+                                release_updates[file_path][lemma.guid][
+                                    f"_disambig_{lang_code}"
+                                ] = db_disambig
                             updated_release_count += 1
                             logger.info(
                                 f"Queued release update for '{lemma.lemma_text}' "
@@ -1989,8 +2001,18 @@ def _apply_release_translation_updates(
                             # Update translations for this lemma
                             if "translations" not in data:
                                 data["translations"] = {}
-                            for lang_code, new_val in guid_updates[guid].items():
-                                data["translations"][lang_code] = new_val
+                            disambig_updates: Dict[str, str] = {}
+                            for update_key, new_val in guid_updates[guid].items():
+                                if update_key.startswith("_disambig_"):
+                                    disambig_lang = update_key[len("_disambig_") :]
+                                    disambig_updates[disambig_lang] = new_val
+                                else:
+                                    data["translations"][update_key] = new_val
+                            # Apply disambiguation updates
+                            if disambig_updates:
+                                if "translation_disambiguations" not in data:
+                                    data["translation_disambiguations"] = {}
+                                data["translation_disambiguations"].update(disambig_updates)
                             # Re-serialize with consistent formatting
                             updated_lines.append(json.dumps(data, ensure_ascii=False) + "\n")
                             logger.info(f"Updated translations for {guid} in {file_path}")

@@ -163,6 +163,9 @@ class Lemma:
     translation_pronunciations: Dict[str, Dict[str, Optional[str]]] = field(
         default_factory=dict
     )  # lang_code -> {"ipa_pronunciation": str|None, "phonetic_pronunciation": str|None}
+    translation_disambiguations: Dict[str, str] = field(
+        default_factory=dict
+    )  # lang_code -> disambiguation string
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSONL serialization."""
@@ -195,6 +198,7 @@ class Lemma:
         data.setdefault("grammar_facts", [])
         data.setdefault("audio_hashes", {})
         data.setdefault("translation_pronunciations", {})
+        data.setdefault("translation_disambiguations", {})
 
         # Set defaults for runtime fields that won't be in JSONL
         data.setdefault("verified", False)
@@ -218,6 +222,7 @@ class LemmaTranslation:
     ipa_pronunciation: Optional[str] = None
     phonetic_pronunciation: Optional[str] = None
     sort_key: Optional[str] = None
+    disambiguation: Optional[str] = None
     verified: bool = False
     added_at: Optional[datetime.datetime] = None
     updated_at: Optional[datetime.datetime] = None

@@ -232,9 +232,10 @@ def get_lemma_view_data(session: Session, lemma_id: int) -> Dict[str, Any]:
         session.query(LemmaTranslation).filter(LemmaTranslation.lemma_id == lemma_id).all()
     )
 
-    # Build translations, definitions, and translation-level pronunciation dicts
+    # Build translations, definitions, disambiguations, and translation-level pronunciation dicts
     translations: Dict[str, Optional[str]] = {"en": lemma.lemma_text}
     definitions: Dict[str, Optional[str]] = {"en": lemma.definition_text}
+    translation_disambiguations: Dict[str, Optional[str]] = {"en": None}
     translation_pronunciations: Dict[str, Tuple[Optional[str], Optional[str]]] = {
         "en": (None, None)
     }
@@ -242,6 +243,7 @@ def get_lemma_view_data(session: Session, lemma_id: int) -> Dict[str, Any]:
     for translation_row in translation_rows:
         translations[translation_row.language_code] = translation_row.translation
         definitions[translation_row.language_code] = translation_row.definition_text
+        translation_disambiguations[translation_row.language_code] = translation_row.disambiguation
         translation_pronunciations[translation_row.language_code] = (
             translation_row.ipa_pronunciation,
             translation_row.phonetic_pronunciation,
@@ -253,6 +255,8 @@ def get_lemma_view_data(session: Session, lemma_id: int) -> Dict[str, Any]:
             translations[lang_code] = None
         if lang_code not in definitions:
             definitions[lang_code] = None
+        if lang_code not in translation_disambiguations:
+            translation_disambiguations[lang_code] = None
         if lang_code not in translation_pronunciations:
             translation_pronunciations[lang_code] = (None, None)
 
@@ -356,6 +360,7 @@ def get_lemma_view_data(session: Session, lemma_id: int) -> Dict[str, Any]:
         "lemma": lemma,
         "translations": translations,
         "definitions": definitions,
+        "translation_disambiguations": translation_disambiguations,
         "translation_pronunciations": translation_pronunciations,
         "overrides": overrides,
         "effective_levels": effective_levels,

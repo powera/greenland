@@ -707,6 +707,110 @@ def set_translation(
     return old_translation, translation
 
 
+def get_translation_disambiguation(session: Session, lemma: Lemma, lang_code: str) -> Optional[str]:
+    """Get disambiguation for a lemma's translation in the specified language.
+
+    Args:
+        session: Database session
+        lemma: Lemma object
+        lang_code: Language code (e.g., 'lt', 'fr', 'zh')
+
+    Returns:
+        Disambiguation string if set, None otherwise
+    """
+    if lang_code not in LANGUAGE_FIELDS:
+        raise ValueError(f"Unsupported language code: {lang_code}")
+
+    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+
+    if not use_translation_table:
+        # English uses Lemma.disambiguation (concept-level)
+        return None
+
+    translation_obj = (
+        session.query(LemmaTranslation)
+        .filter(
+            LemmaTranslation.lemma_id == lemma.id,
+            LemmaTranslation.language_code == field_name,
+        )
+        .first()
+    )
+    return translation_obj.disambiguation if translation_obj else None
+
+
+def set_translation_disambiguation(
+    session: Session,
+    lemma: Lemma,
+    lang_code: str,
+    disambiguation: Optional[str],
+) -> Tuple[Optional[str], Optional[str]]:
+    """Set disambiguation for a lemma's translation in the specified language.
+
+    Args:
+        session: Database session
+        lemma: Lemma object
+        lang_code: Language code (e.g., 'lt', 'fr', 'zh')
+        disambiguation: Disambiguation string to set, or None to clear
+
+    Returns:
+        Tuple of (old_disambiguation, new_disambiguation)
+
+    Raises:
+        ValueError: If lang_code is not supported or translation doesn't exist
+    """
+    if lang_code not in LANGUAGE_FIELDS:
+        raise ValueError(f"Unsupported language code: {lang_code}")
+
+    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+
+    if not use_translation_table:
+        raise ValueError(
+            "Cannot set translation disambiguation for English (use Lemma.disambiguation)"
+        )
+
+    translation_obj = (
+        session.query(LemmaTranslation)
+        .filter(
+            LemmaTranslation.lemma_id == lemma.id,
+            LemmaTranslation.language_code == field_name,
+        )
+        .first()
+    )
+
+    if translation_obj is None:
+        raise ValueError(f"Cannot set disambiguation for {lang_code} without a translation")
+
+    old_disambiguation = translation_obj.disambiguation
+    # Normalize empty string to None
+    translation_obj.disambiguation = disambiguation if disambiguation else None
+
+    return old_disambiguation, disambiguation
+
+
+def get_all_translation_disambiguations(session: Session, lemma: Lemma) -> Dict[str, Optional[str]]:
+    """Get all translation disambiguations for a lemma.
+
+    Args:
+        session: Database session
+        lemma: Lemma object
+
+    Returns:
+        Dictionary mapping language codes to disambiguation strings.
+    """
+    translation_rows = (
+        session.query(LemmaTranslation).filter(LemmaTranslation.lemma_id == lemma.id).all()
+    )
+
+    disambiguations: Dict[str, Optional[str]] = {}
+    for lang_code in LANGUAGE_FIELDS.keys():
+        disambiguations[lang_code] = None
+
+    for row in translation_rows:
+        disambiguations[row.language_code] = row.disambiguation
+
+    return disambiguations
+
+
 def set_definition(
     session: Session, lemma: Lemma, lang_code: str, definition: str
 ) -> Tuple[Optional[str], str]:

@@ -216,14 +216,16 @@ class JSONLSession(BaseSession):
 
             # Add translations
             for lang_code, translation in jsonl_lemma.translations.items():
-                translations.append(
-                    {
-                        "lemma_id": jsonl_lemma.id,
-                        "language_code": lang_code,
-                        "translation": translation,
-                        "sort_key": compute_sort_key(lang_code, translation),
-                    }
-                )
+                trans_entry: dict = {
+                    "lemma_id": jsonl_lemma.id,
+                    "language_code": lang_code,
+                    "translation": translation,
+                    "sort_key": compute_sort_key(lang_code, translation),
+                }
+                disambig = jsonl_lemma.translation_disambiguations.get(lang_code)
+                if disambig:
+                    trans_entry["disambiguation"] = disambig
+                translations.append(trans_entry)
 
             # Add grammar facts
             for fact_data in jsonl_lemma.grammar_facts:

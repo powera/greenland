@@ -253,6 +253,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
     # Extract pre-fetched data
     translations = data["translations"]
     definitions = data["definitions"]
+    translation_disambiguations = data["translation_disambiguations"]
     translation_pronunciations = data["translation_pronunciations"]
     language_names = get_supported_languages()
     overrides = data["overrides"]
@@ -360,6 +361,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         lemma=lemma,
         translations=translations,
         definitions=definitions,
+        translation_disambiguations=translation_disambiguations,
         language_names=language_names,
         overrides=overrides,
         effective_levels=effective_levels,

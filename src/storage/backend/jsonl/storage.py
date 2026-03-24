@@ -130,6 +130,10 @@ class JSONLStorage(BaseStorage):
                         if "difficulty_overrides" in data:
                             lemma.difficulty_overrides = data["difficulty_overrides"]
 
+                        # Load translation_disambiguations from base.jsonl
+                        if "translation_disambiguations" in data:
+                            lemma.translation_disambiguations = data["translation_disambiguations"]
+
                         # Populate lemma_text and definition_text from concept fields
                         # or from translations dict for backward compatibility
                         if "en" in lemma.translations:
@@ -234,6 +238,11 @@ class JSONLStorage(BaseStorage):
                         if "disambiguation" in data:
                             if lang_code == "en":
                                 lemma.disambiguation = data["disambiguation"]
+
+                        if "translation_disambiguation" in data:
+                            lemma.translation_disambiguations[lang_code] = data[
+                                "translation_disambiguation"
+                            ]
 
                         if "confidence" in data:
                             if lang_code == "en":
@@ -505,6 +514,7 @@ class JSONLStorage(BaseStorage):
         languages_to_save.update(lemma.base_forms.keys())
         languages_to_save.update(lemma.audio_hashes.keys())
         languages_to_save.update(lemma.definitions.keys())
+        languages_to_save.update(lemma.translation_disambiguations.keys())
 
         # Extract grammar_facts languages
         for fact in lemma.grammar_facts:
@@ -640,6 +650,10 @@ class JSONLStorage(BaseStorage):
         if lemma.difficulty_overrides:
             data["difficulty_overrides"] = lemma.difficulty_overrides
 
+        # Translation disambiguations per language (e.g., {"lt": "medžiaga"})
+        if lemma.translation_disambiguations:
+            data["translation_disambiguations"] = lemma.translation_disambiguations
+
         if lemma.notes:
             data["notes"] = lemma.notes
 
@@ -760,6 +774,12 @@ class JSONLStorage(BaseStorage):
             if phonetic_value:
                 data["phonetic_pronunciation"] = phonetic_value
                 has_data = True
+
+        # Translation disambiguation (any language)
+        translation_disambig = lemma.translation_disambiguations.get(lang_code)
+        if translation_disambig:
+            data["translation_disambiguation"] = translation_disambig
+            has_data = True
 
         # English-only fields
         if lang_code == "en":
