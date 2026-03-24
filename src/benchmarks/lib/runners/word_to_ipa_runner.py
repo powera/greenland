@@ -6,6 +6,7 @@ import json
 import logging
 import re
 import unicodedata
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from benchmarks.lib.utils.base_runner import BenchmarkRunner
@@ -14,8 +15,14 @@ from benchmarks.lib.utils.factory import runner
 from words import build_ipa_pronunciation_prompt
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
+# Load IPA character set from JSON to avoid encoding issues with Unicode in source files.
+_IPA_CHARS_PATH = Path(__file__).parent / "ipa_chars.json"
+_IPA_CHARS: frozenset = frozenset(json.loads(_IPA_CHARS_PATH.read_text(encoding="utf-8"))["chars"])
 
 # Define benchmark metadata
 BENCHMARK_METADATA = BenchmarkMetadata(
@@ -135,7 +142,7 @@ class WordToIPARunner(BenchmarkRunner):
 
         Rules:
         - exact/accepted match: 100
-        - otherwise: Levenshtein similarity ratio scaled from 60
+        - otherwise: phonetic-weighted Levenshtein similarity ratio scaled from 60
           (e.g. 80% -> 48, 50% -> 30)
         """
         if isinstance(response, dict) and "ipa" in response:
@@ -162,45 +169,83 @@ class WordToIPARunner(BenchmarkRunner):
             return 100
 
         best_ratio = max(
-            (self._similarity_ratio(normalized_model, expected) for expected in candidates if expected),
+            (
+                self._weighted_similarity_ratio(normalized_model, expected)
+                for expected in candidates
+                if expected
+            ),
             default=0.0,
         )
         return int(round(60 * best_ratio))
 
-    def _similarity_ratio(self, left: str, right: str) -> float:
-        """Compute Levenshtein similarity ratio in [0, 1]."""
+    def _weighted_similarity_ratio(self, left: str, right: str) -> float:
+        """Compute phonetic-weighted Levenshtein similarity ratio in [0, 1].
+
+        Uses the same similar_chars substitution costs as _is_close_match so that
+        phonetically equivalent IPA variants score higher than completely different ones.
+        """
         if left == right:
             return 1.0
         if not left or not right:
             return 0.0
 
-        max_len = max(len(left), len(right))
-        if max_len == 0:
+        m, n = len(left), len(right)
+        max_len = max(m, n)
+
+        similar_chars = {
+            "i": {"i", "ɪ"},
+            "ɪ": {"ɪ", "i"},
+            "e": {"e", "ɛ"},
+            "ɛ": {"ɛ", "e"},
+            "æ": {"æ", "a", "ɑ"},
+            "a": {"a", "æ", "ɑ"},
+            "ɑ": {"ɑ", "a", "æ", "ɒ"},
+            "ɒ": {"ɒ", "ɑ", "o", "ɔ"},
+            "ɔ": {"ɔ", "o", "ɒ"},
+            "o": {"o", "ɔ", "ɒ"},
+            "u": {"u", "ʊ"},
+            "ʊ": {"ʊ", "u"},
+            "ʌ": {"ʌ", "ə", "ɜ"},
+            "ə": {"ə", "ʌ", "ɜ", "ɚ"},
+            "ɝ": {"ɝ", "ɚ", "ɜ"},
+            "ɚ": {"ɚ", "ɝ", "ə"},
+            "ɹ": {"ɹ", "r"},
+            "r": {"r", "ɹ"},
+            "t": {"t", "ɾ"},
+            "ɾ": {"ɾ", "t"},
+            "ɡ": {"ɡ", "g"},
+            "g": {"g", "ɡ"},
+            "d": {"d", "ð"},
+            "ð": {"ð", "d"},
+            "b": {"b", "β"},
+            "β": {"β", "b"},
+            "ɲ": {"ɲ", "n"},
+            "n": {"n", "ɲ"},
+        }
+
+        def substitution_cost(a: str, b: str) -> float:
+            if a == b:
+                return 0.0
+            if a in similar_chars.get(b, set()) or b in similar_chars.get(a, set()):
+                return 0.5
             return 1.0
 
-        distance = self._levenshtein_distance(left, right)
-        return max(0.0, 1.0 - (distance / max_len))
+        dp = [[0.0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            dp[i][0] = float(i)
+        for j in range(1, n + 1):
+            dp[0][j] = float(j)
 
-    def _levenshtein_distance(self, left: str, right: str) -> int:
-        """Compute Levenshtein edit distance between two strings."""
-        if left == right:
-            return 0
-        if not left:
-            return len(right)
-        if not right:
-            return len(left)
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                sub_cost = substitution_cost(left[i - 1], right[j - 1])
+                dp[i][j] = min(
+                    dp[i - 1][j] + 1.0,
+                    dp[i][j - 1] + 1.0,
+                    dp[i - 1][j - 1] + sub_cost,
+                )
 
-        previous_row = list(range(len(right) + 1))
-        for i, left_char in enumerate(left, start=1):
-            current_row = [i]
-            for j, right_char in enumerate(right, start=1):
-                insert_cost = current_row[j - 1] + 1
-                delete_cost = previous_row[j] + 1
-                substitute_cost = previous_row[j - 1] + (left_char != right_char)
-                current_row.append(min(insert_cost, delete_cost, substitute_cost))
-            previous_row = current_row
-
-        return previous_row[-1]
+        return max(0.0, 1.0 - (dp[m][n] / max_len))
 
     def _normalize_ipa(self, ipa_string: str) -> str:
         """
@@ -238,22 +283,20 @@ class WordToIPARunner(BenchmarkRunner):
         # Normalize syllable delimiters commonly emitted by models (e.g., bɔ̃.ʒuʁ).
         normalized = normalized.replace(".", "")
 
-
-        # Remove any explanatory text before or after the IPA
-        # This is a simple heuristic - we look for the longest contiguous segment with IPA-like characters
-        ipa_chars = set("ɪiɛeæaɑɔoʊuʌəɚɝɜː̩̯̆͡ˌˈʰʷ.ptksʒʃθðŋnmɹrlvfbdgzʤʧywχѲ")
+        # Remove any explanatory text before or after the IPA.
+        # Find the segment with the highest proportion of known IPA characters.
         segments = re.findall(r"[^\s,;:]+", normalized)
         if segments:
-            # Find the segment with the highest percentage of IPA characters
             best_segment = max(
                 segments,
                 key=lambda s: (
-                    sum(1 for c in s.lower() if c in ipa_chars) / len(s) if len(s) > 0 else 0
+                    sum(1 for c in s.lower() if c in _IPA_CHARS) / len(s) if len(s) > 0 else 0
                 ),
             )
             if (
                 best_segment
-                and sum(1 for c in best_segment.lower() if c in ipa_chars) / len(best_segment) > 0.5
+                and sum(1 for c in best_segment.lower() if c in _IPA_CHARS) / len(best_segment)
+                > 0.5
             ):
                 normalized = best_segment
 

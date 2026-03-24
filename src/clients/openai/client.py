@@ -38,15 +38,36 @@ def _is_gpt5_nano_or_mini_model(model: str) -> bool:
     return model.startswith("gpt-5") and (model.endswith("-nano") or model.endswith("-mini"))
 
 
-def _reasoning_effort_for_model(model: str, requested_effort: str) -> str:
-    """Return the appropriate reasoning effort string for a model.
+# Valid reasoning effort values by model family.
+# gpt-5.4-* supports: "none", "low", "medium", "high"
+# Other reasoning models (o1, o3, gpt-5.x non-5.4) support: "minimal", "low", "medium", "high"
+_GPT54_VALID_EFFORTS = frozenset(["none", "low", "medium", "high"])
+_DEFAULT_VALID_EFFORTS = frozenset(["minimal", "low", "medium", "high"])
 
-    gpt-5.4-series models do not support 'minimal'; map it to 'low'.
-    Other models use the requested effort unchanged.
+
+def _reasoning_effort_for_model(model: str, requested_effort: str) -> Optional[str]:
+    """Return the appropriate reasoning effort string for a model, or None to omit reasoning.
+
+    gpt-5.4-series supports "none" (disables reasoning), "low", "medium", "high".
+    Other models support "minimal", "low", "medium", "high".
+    "minimal" is mapped to "low" for gpt-5.4-series.
+    Returns None if effort is "none" for non-gpt-5.4 models (best-effort disable).
+
+    Raises ValueError for invalid effort values.
     """
-    if model.startswith("gpt-5.4") and requested_effort == "minimal":
-        return "low"
-    return requested_effort
+    if model.startswith("gpt-5.4"):
+        valid = _GPT54_VALID_EFFORTS
+        effort = "low" if requested_effort == "minimal" else requested_effort
+    else:
+        valid = _DEFAULT_VALID_EFFORTS
+        effort = requested_effort
+
+    if effort not in valid:
+        raise ValueError(
+            f"Invalid reasoning effort '{requested_effort}' for model '{model}'. "
+            f"Valid values: {sorted(valid)}"
+        )
+    return effort
 
 
 def measure_completion(func: F) -> Callable[..., tuple[Any, float]]:
@@ -189,7 +210,10 @@ class OpenAIClient:
 
         # Set reasoning and text parameters for GPT-5 nano and mini variants
         if is_gpt5_nano_or_mini:
-            request_kwargs["reasoning"] = {"effort": _reasoning_effort_for_model(model, "minimal")}
+            effort = _reasoning_effort_for_model(
+                model, "none" if model.startswith("gpt-5.4") else "minimal"
+            )
+            request_kwargs["reasoning"] = {"effort": effort}
             # Only set text verbosity if not overridden by JSON schema below
             if not json_schema:
                 request_kwargs["text"] = {"verbosity": "low"}
@@ -226,18 +250,25 @@ class OpenAIClient:
 
         response_data, duration_ms = self._create_response(**request_kwargs)
 
-        # Extract response content from Responses API structure
+        # Extract response content and reasoning from Responses API structure
         response_content = ""
+        reasoning_text: Optional[str] = None
         if response_data.get("output"):
-            # Look for the message output item (not reasoning)
             for output_item in response_data["output"]:
-                if output_item.get("type") == "message" and output_item.get("content"):
-                    for content_item in output_item["content"]:
+                item_type = output_item.get("type")
+                if item_type == "reasoning":
+                    # Capture reasoning summary if present
+                    summary_parts = []
+                    for content_item in output_item.get("summary", []):
+                        if content_item.get("type") == "summary_text":
+                            summary_parts.append(content_item.get("text", ""))
+                    if summary_parts:
+                        reasoning_text = "\n".join(summary_parts)
+                elif item_type == "message" and not response_content:
+                    for content_item in output_item.get("content", []):
                         if content_item.get("type") == "output_text":
                             response_content = content_item.get("text", "")
                             break
-                    if response_content:
-                        break
 
         if self.debug:
             logger.debug("Response content: %s", response_content)
@@ -276,7 +307,12 @@ class OpenAIClient:
                 logger.debug("No response text or structured data")
             logger.debug("Usage metrics: %s", usage.to_dict())
 
-        return Response(response_text=response_text, structured_data=structured_data, usage=usage)
+        return Response(
+            response_text=response_text,
+            structured_data=structured_data,
+            usage=usage,
+            additional_thought=reasoning_text,
+        )
 
 
 # Lazy client instance - only created when first accessed
