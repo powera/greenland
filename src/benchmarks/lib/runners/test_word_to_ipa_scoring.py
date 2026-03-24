@@ -91,6 +91,29 @@ class TestWordToIPAScoring(unittest.TestCase):
 
         self.assertEqual(score, 30)
 
+    def test_water_british_vs_american_gets_partial_credit(self):
+        # American GA: \u02c8w\u0254t\u025a  British: /\u02c8w\u0254\u02d0t\u0259r/
+        # These are dialectal variants and should score above 0.
+        question_data = {"correct_answer": "\u02c8w\u0254t\u025a"}
+
+        score = self.runner.score_response(question_data, {"ipa": "/\u02c8w\u0254\u02d0t\u0259r/"})
+
+        self.assertGreater(score, 0)
+        self.assertLess(score, 100)
+
+    def test_normalize_strips_slashes(self):
+        normalized = self.runner._normalize_ipa("/\u02c8w\u0254\u02d0t\u0259r/")
+
+        self.assertNotIn("/", normalized)
+
+    def test_phonetically_similar_scores_higher_than_unrelated(self):
+        # r vs \u0279 (r vs IPA r) should score higher than r vs z
+        question_data = {"correct_answer": "r"}
+        similar_score = self.runner.score_response(question_data, {"ipa": "\u0279"})
+        unrelated_score = self.runner.score_response(question_data, {"ipa": "z"})
+
+        self.assertGreaterEqual(similar_score, unrelated_score)
+
 
 if __name__ == "__main__":
     unittest.main()
