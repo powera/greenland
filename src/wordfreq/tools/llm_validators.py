@@ -19,6 +19,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
+from ipa.generation import generate_ipa_pronunciation
 
 logger = logging.getLogger(__name__)
 
@@ -818,9 +819,21 @@ def generate_pronunciation(
         - confidence: float 0-1
         - notes: str with additional pronunciation notes
     """
+    ipa_client = UnifiedLLMClient()
+    ipa_result = generate_ipa_pronunciation(
+        language_code=language_code,
+        word=word,
+        client=ipa_client,
+        model=model,
+        definition=definition or "",
+        sentence=example_sentence or "",
+        grammatical_form=grammatical_form or "",
+    )
+    generated_ipa = ipa_result.get("ipa", "") if ipa_result.get("success") else ""
+
     result = validate_pronunciation(
         word=word,
-        ipa_pronunciation=None,
+        ipa_pronunciation=generated_ipa or None,
         phonetic_pronunciation=None,
         pos_type=pos_type,
         example_sentence=example_sentence,
@@ -887,6 +900,21 @@ def batch_generate_pronunciations(
 
     language_name = LANGUAGE_NAMES.get(language_code, language_code)
 
+    ipa_client = UnifiedLLMClient()
+    ipa_by_form: Dict[str, str] = {}
+    for form_info in forms:
+        ipa_result = generate_ipa_pronunciation(
+            language_code=language_code,
+            word=form_info["word"],
+            client=ipa_client,
+            model=model,
+            definition=definition,
+            sentence="",
+            grammatical_form=form_info["form"],
+        )
+        if ipa_result.get("success"):
+            ipa_by_form[form_info["form"]] = str(ipa_result.get("ipa", ""))
+
     # Build schema with properties for each form
     form_properties = {}
     for form_info in forms:
@@ -948,7 +976,7 @@ def batch_generate_pronunciations(
                 form_key = form_info["form"]
                 safe_key = form_key.replace("/", "_").replace("-", "_")
 
-                ipa = response.structured_data.get(f"{safe_key}_ipa", "")
+                ipa = ipa_by_form.get(form_key, response.structured_data.get(f"{safe_key}_ipa", ""))
                 phonetic = response.structured_data.get(f"{safe_key}_phonetic", "")
                 confidence = response.structured_data.get(f"{safe_key}_confidence", 0.0)
 

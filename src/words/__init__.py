@@ -12,6 +12,7 @@ from words.translation import (
 from words.verb_forms import build_verb_forms_prompt, query_verb_forms
 from words.ipa_pronunciation import (
     build_ipa_pronunciation_prompt,
+    generate_ipa_pronunciation,
     query_ipa_pronunciation,
 )
 
@@ -25,5 +26,6 @@ __all__ = [
     "build_verb_forms_prompt",
     "query_verb_forms",
     "build_ipa_pronunciation_prompt",
+    "generate_ipa_pronunciation",
     "query_ipa_pronunciation",
 ]
