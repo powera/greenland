@@ -19,7 +19,10 @@ from sqlalchemy.orm import Session
 from clients.barsukas_cache import BarsukasCacheClient
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import DataSourceConfig
-from storage.crud.derivative_form import needs_pronunciation_update_filter
+from storage.crud.derivative_form import (
+    needs_pronunciation_update_filter,
+    pronunciation_required_filter,
+)
 from storage.models.schema import (
     DerivativeForm,
     Lemma,
@@ -255,6 +258,7 @@ class PapugaAgent:
         limit: Optional[int] = None,
         only_english: bool = True,
         only_base_forms: bool = False,
+        all_forms_pronunciation: bool = False,
         lemma_id: Optional[int] = None,
         lemmas: Optional[List[Lemma]] = None,
     ) -> Dict[str, Any]:
@@ -276,7 +280,12 @@ class PapugaAgent:
         session = self.get_session()
         try:
             # Get derivative forms without pronunciations
-            query = session.query(DerivativeForm).filter(needs_pronunciation_update_filter())
+            query = session.query(DerivativeForm).filter(
+                needs_pronunciation_update_filter(),
+                pronunciation_required_filter(
+                    include_optional_forms=all_forms_pronunciation,
+                ),
+            )
 
             # Filter by lemmas list if provided
             if lemmas is not None:
@@ -354,6 +363,7 @@ class PapugaAgent:
                 "missing_forms": missing_list,
                 "only_english": only_english,
                 "only_base_forms": only_base_forms,
+                "all_forms_pronunciation": all_forms_pronunciation,
             }
 
         except Exception as e:
@@ -367,6 +377,7 @@ class PapugaAgent:
         limit: Optional[int] = None,
         only_english: bool = True,
         only_base_forms: bool = False,
+        all_forms_pronunciation: bool = False,
         dry_run: bool = False,
         lemma_id: Optional[int] = None,
         lemmas: Optional[List[Lemma]] = None,
@@ -393,7 +404,12 @@ class PapugaAgent:
         session = self.get_session()
         try:
             # Get derivative forms without pronunciations
-            query = session.query(DerivativeForm).filter(needs_pronunciation_update_filter())
+            query = session.query(DerivativeForm).filter(
+                needs_pronunciation_update_filter(),
+                pronunciation_required_filter(
+                    include_optional_forms=all_forms_pronunciation,
+                ),
+            )
 
             # Filter by lemmas list if provided
             if lemmas is not None:
@@ -507,6 +523,7 @@ class PapugaAgent:
                                 lemma=lemma,
                                 lang_code=lang_code,
                                 config=self.config,
+                                all_forms_pronunciation=all_forms_pronunciation,
                             )
                             populated_count += generated_count
                             failed_count += len(generation_errors)
@@ -558,6 +575,7 @@ class PapugaAgent:
                                             lemma=lemma,
                                             lang_code=lang_code,
                                             config=self.config,
+                                            all_forms_pronunciation=all_forms_pronunciation,
                                         )
                                     )
                                     populated_count += max(generated_count - 1, 0)
@@ -646,6 +664,7 @@ class PapugaAgent:
                                         lemma=lemma,
                                         lang_code=lang_code,
                                         config=self.config,
+                                        all_forms_pronunciation=all_forms_pronunciation,
                                     )
                                 )
                                 populated_count += max(generated_count - batch_populated, 0)

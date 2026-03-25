@@ -144,7 +144,11 @@ def test_enqueue_papuga_work_enqueues_once_per_lemma_language() -> None:
         assert len(captured_calls) == 1
         assert captured_calls[0]["target_type"] == "lemma"
         assert captured_calls[0]["target_id"] == lemma.id
-        assert captured_calls[0]["payload"] == {"lang_code": "en", "lemma_id": lemma.id}
+        assert captured_calls[0]["payload"] == {
+            "lang_code": "en",
+            "lemma_id": lemma.id,
+            "all_forms_pronunciation": False,
+        }
     finally:
         session.close()
         engine.dispose()
@@ -393,6 +397,194 @@ def test_generate_pronunciations_for_lemma_creates_english_base_form_when_missin
         assert generated_form.is_base_form is True
         assert generated_form.ipa_pronunciation == "/ˈkwɪkli/"
         assert generated_form.phonetic_pronunciation == "KWIK-lee"
+    finally:
+        session.close()
+        engine.dispose()
+
+
+def test_generate_pronunciations_for_lemma_skips_english_future_by_default() -> None:
+    """Default pronunciation generation should skip optional English *_future forms."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+
+    session = Session(engine)
+    try:
+        lemma = Lemma(
+            lemma_text="walk",
+            definition_text="to move on foot",
+            pos_type="verb",
+            guid="V00_008",
+        )
+        session.add(lemma)
+        session.flush()
+        session.add_all(
+            [
+                DerivativeForm(
+                    lemma_id=lemma.id,
+                    derivative_form_text="walk",
+                    language_code="en",
+                    grammatical_form="infinitive",
+                    is_base_form=True,
+                    ipa_pronunciation=None,
+                    phonetic_pronunciation=None,
+                ),
+                DerivativeForm(
+                    lemma_id=lemma.id,
+                    derivative_form_text="will walk",
+                    language_code="en",
+                    grammatical_form="1s_future",
+                    is_base_form=False,
+                    ipa_pronunciation=None,
+                    phonetic_pronunciation=None,
+                ),
+            ]
+        )
+        session.commit()
+
+        with patch(
+            "workqueue.handlers.papuga.generate_pronunciation_for_form",
+            return_value=(True, "/wɔk/", "WAWK"),
+        ) as mocked_generate:
+            generated_count, errors = generate_pronunciations_for_lemma(
+                session=session,
+                lemma=lemma,
+                lang_code="en",
+                config=_build_config(),
+            )
+            session.commit()
+
+        refreshed_forms = (
+            session.query(DerivativeForm)
+            .filter(DerivativeForm.lemma_id == lemma.id)
+            .order_by(DerivativeForm.id)
+            .all()
+        )
+        assert generated_count == 1
+        assert errors == []
+        assert mocked_generate.call_count == 1
+        assert refreshed_forms[0].ipa_pronunciation == "/wɔk/"
+        assert refreshed_forms[1].ipa_pronunciation is None
+    finally:
+        session.close()
+        engine.dispose()
+
+
+def test_generate_pronunciations_for_lemma_includes_english_future_with_override() -> None:
+    """Override mode should include optional English *_future forms."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+
+    session = Session(engine)
+    try:
+        lemma = Lemma(
+            lemma_text="walk",
+            definition_text="to move on foot",
+            pos_type="verb",
+            guid="V00_009",
+        )
+        session.add(lemma)
+        session.flush()
+        session.add_all(
+            [
+                DerivativeForm(
+                    lemma_id=lemma.id,
+                    derivative_form_text="walk",
+                    language_code="en",
+                    grammatical_form="infinitive",
+                    is_base_form=True,
+                    ipa_pronunciation=None,
+                    phonetic_pronunciation=None,
+                ),
+                DerivativeForm(
+                    lemma_id=lemma.id,
+                    derivative_form_text="will walk",
+                    language_code="en",
+                    grammatical_form="1s_future",
+                    is_base_form=False,
+                    ipa_pronunciation=None,
+                    phonetic_pronunciation=None,
+                ),
+            ]
+        )
+        session.commit()
+
+        with patch(
+            "workqueue.handlers.papuga.generate_pronunciation_for_form",
+            return_value=(True, "/wɔk/", "WAWK"),
+        ) as mocked_generate:
+            generated_count, errors = generate_pronunciations_for_lemma(
+                session=session,
+                lemma=lemma,
+                lang_code="en",
+                config=_build_config(),
+                all_forms_pronunciation=True,
+            )
+            session.commit()
+
+        refreshed_forms = (
+            session.query(DerivativeForm)
+            .filter(DerivativeForm.lemma_id == lemma.id)
+            .order_by(DerivativeForm.id)
+            .all()
+        )
+        assert generated_count == 2
+        assert errors == []
+        assert mocked_generate.call_count == 2
+        assert refreshed_forms[0].ipa_pronunciation == "/wɔk/"
+        assert refreshed_forms[1].ipa_pronunciation == "/wɔk/"
+    finally:
+        session.close()
+        engine.dispose()
+
+
+def test_enqueue_papuga_work_respects_optional_form_override() -> None:
+    """Queue selection should skip English *_future by default and include with override."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+
+    session = Session(engine)
+    try:
+        lemma = Lemma(
+            lemma_text="jump",
+            definition_text="to leap",
+            pos_type="verb",
+            guid="V00_010",
+        )
+        session.add(lemma)
+        session.flush()
+        session.add(
+            DerivativeForm(
+                lemma_id=lemma.id,
+                derivative_form_text="will jump",
+                language_code="en",
+                grammatical_form="1s_future",
+                is_base_form=False,
+                ipa_pronunciation=None,
+                phonetic_pronunciation=None,
+            )
+        )
+        session.commit()
+
+        with patch("workqueue.task_queue.enqueue_task") as mocked_enqueue:
+            default_results = enqueue_papuga_work(
+                session=session,
+                lemmas=[lemma],
+                only_english=True,
+                all_forms_pronunciation=False,
+                dry_run=False,
+            )
+            override_results = enqueue_papuga_work(
+                session=session,
+                lemmas=[lemma],
+                only_english=True,
+                all_forms_pronunciation=True,
+                dry_run=False,
+            )
+
+        assert default_results["enqueued"] == 0
+        assert override_results["enqueued"] == 1
+        assert mocked_enqueue.call_count == 1
+        assert mocked_enqueue.call_args.kwargs["payload"]["all_forms_pronunciation"] is True
     finally:
         session.close()
         engine.dispose()

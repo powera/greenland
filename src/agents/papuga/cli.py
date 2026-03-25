@@ -24,7 +24,10 @@ from agents.common.common_args import (
     validate_cache_args,
 )
 from agents.common.lemma_selection import get_lemmas_for_agent
-from storage.crud.derivative_form import needs_pronunciation_update_filter
+from storage.crud.derivative_form import (
+    needs_pronunciation_update_filter,
+    pronunciation_required_filter,
+)
 from storage.models.schema import DerivativeForm
 
 # Configure logging
@@ -77,6 +80,11 @@ def get_argument_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Only process base forms (populate mode only)",
     )
+    parser.add_argument(
+        "--all-forms-pronunciation",
+        action="store_true",
+        help="Force pronunciation generation for all forms (legacy behavior)",
+    )
 
     # Workqueue arguments
     parser.add_argument(
@@ -94,6 +102,7 @@ def enqueue_papuga_work(
     lemmas: List[Any],
     only_english: bool = True,
     base_forms_only: bool = False,
+    all_forms_pronunciation: bool = False,
     dry_run: bool = False,
 ) -> Dict[str, Any]:
     """Enqueue pronunciation generation work items to the queue.
@@ -103,6 +112,7 @@ def enqueue_papuga_work(
         lemmas: List of lemmas to process
         only_english: Only process English forms
         base_forms_only: Only process base forms
+        all_forms_pronunciation: Include optional forms (legacy behavior)
         dry_run: If True, don't actually enqueue
 
     Returns:
@@ -118,6 +128,7 @@ def enqueue_papuga_work(
     query = session.query(DerivativeForm).filter(
         DerivativeForm.lemma_id.in_(lemma_ids),
         needs_pronunciation_update_filter(),
+        pronunciation_required_filter(include_optional_forms=all_forms_pronunciation),
     )
     if only_english:
         query = query.filter(DerivativeForm.language_code == "en")
@@ -138,6 +149,7 @@ def enqueue_papuga_work(
                 payload={
                     "lang_code": language_code,
                     "lemma_id": lemma_id,
+                    "all_forms_pronunciation": all_forms_pronunciation,
                 },
                 dedup_key=dedup_key,
             )
@@ -210,6 +222,7 @@ def main() -> None:
                 lemmas=lemmas,
                 only_english=only_english,
                 base_forms_only=args.base_forms_only,
+                all_forms_pronunciation=args.all_forms_pronunciation,
                 dry_run=args.dry_run,
             )
 
@@ -231,6 +244,7 @@ def main() -> None:
             # Count forms without pronunciations
             query = session.query(DerivativeForm).filter(
                 needs_pronunciation_update_filter(),
+                pronunciation_required_filter(include_optional_forms=args.all_forms_pronunciation),
             )
             if lemma_id:
                 query = query.filter(DerivativeForm.lemma_id == lemma_id)
@@ -265,6 +279,7 @@ def main() -> None:
             limit=args.limit,
             only_english=only_english,
             only_base_forms=args.base_forms_only,
+            all_forms_pronunciation=args.all_forms_pronunciation,
             lemma_id=lemma_id,
             lemmas=lemmas,
         )
@@ -276,6 +291,7 @@ def main() -> None:
             limit=args.limit,
             only_english=only_english,
             only_base_forms=args.base_forms_only,
+            all_forms_pronunciation=args.all_forms_pronunciation,
             dry_run=args.dry_run,
             lemma_id=lemma_id,
             lemmas=lemmas,
