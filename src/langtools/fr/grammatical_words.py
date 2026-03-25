@@ -12,6 +12,14 @@ Tiers 1–2 have no analogues in data/release; tiers 3–4 do.
 
 from typing import Final
 
+from langtools.grammatical_word_schema import (
+    ALSO_LEMMA_SUBCATEGORIES,
+    GRAMMATICAL_ONLY_SUBCATEGORIES,
+    GrammaticalWordsBySubcategory,
+    build_subcategory_mapping,
+    union_subcategories,
+)
+
 # ── tier 1: personal pronouns ──────────────────────────────────────────
 
 FRENCH_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
@@ -110,12 +118,27 @@ FRENCH_NON_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
 
 # ── aggregate sets ─────────────────────────────────────────────────────
 
-FRENCH_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
-    FRENCH_PERSONAL_PRONOUNS | FRENCH_GRAMMATICAL_WORDS
+FRENCH_GRAMMATICAL_WORDS_BY_SUBCATEGORY: Final[GrammaticalWordsBySubcategory] = (
+    build_subcategory_mapping(
+        personal_pronouns=FRENCH_PERSONAL_PRONOUNS,
+        grammatical_words=FRENCH_GRAMMATICAL_WORDS,
+        function_words=FRENCH_FUNCTION_WORDS,
+        non_personal_pronouns=FRENCH_NON_PERSONAL_PRONOUNS,
+        articles=frozenset({"le", "la", "les", "l'", "un", "une", "du", "de", "des"}),
+        contractions=frozenset({"au", "aux"}),
+        prepositions=frozenset({"à", "sur"}),
+        conjunctions=frozenset({"et"}),
+        interrogatives=frozenset({"qui", "que", "quel", "quelle", "quels", "quelles", "où"}),
+        demonstratives=frozenset({"ce", "cet", "cette", "ces"}),
+    )
 )
 
-FRENCH_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
-    FRENCH_FUNCTION_WORDS | FRENCH_NON_PERSONAL_PRONOUNS
+FRENCH_GRAMMATICAL_ONLY: Final[frozenset[str]] = union_subcategories(
+    FRENCH_GRAMMATICAL_WORDS_BY_SUBCATEGORY, GRAMMATICAL_ONLY_SUBCATEGORIES
+)
+
+FRENCH_ALSO_LEMMA: Final[frozenset[str]] = union_subcategories(
+    FRENCH_GRAMMATICAL_WORDS_BY_SUBCATEGORY, ALSO_LEMMA_SUBCATEGORIES
 )
 
 FRENCH_ALL_TIERS: Final[frozenset[str]] = frozenset(FRENCH_GRAMMATICAL_ONLY | FRENCH_ALSO_LEMMA)
