@@ -7,8 +7,13 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 from clients.unified_client import UnifiedLLMClient
+from langtools.grammatical_words import is_function_word, is_grammatical_word
 from storage.models.schema import Lemma, Sentence, SentencePatternWord, SentenceTranslation
-from storage.translation_helpers import LANGUAGE_NAMES, get_translation, normalize_llm_language_codes
+from storage.translation_helpers import (
+    LANGUAGE_NAMES,
+    get_translation,
+    normalize_llm_language_codes,
+)
 
 import util.prompt_loader
 
@@ -16,6 +21,49 @@ logger = logging.getLogger(__name__)
 
 _TRANSLATE_DECOMPOSE_PROMPT_PATH = "translate_and_decompose"
 _SINGLE_LANGUAGE_PROMPT_PATH = "single_language"
+
+_NO_LEMMA_MARKERS = {"", "none", "null"}
+_NO_LEMMA_TEXT_MARKERS = {"", "no lemma", "none", "null"}
+
+
+def find_unresolved_non_grammatical_words(
+    words: List[Dict[str, Any]], language_code: str
+) -> List[Dict[str, Any]]:
+    """Return decomposition words that have no lemma and are not grammatical/function words."""
+
+    unresolved_words: List[Dict[str, Any]] = []
+    normalized_language_code = language_code.strip().lower()
+
+    for word_row in words:
+        lemma_guid_value = str(word_row.get("lemma_guid", "")).strip().lower()
+        lemma_text_value = str(word_row.get("lemma", "")).strip().lower()
+        has_lemma = (
+            lemma_guid_value not in _NO_LEMMA_MARKERS
+            and lemma_text_value not in _NO_LEMMA_TEXT_MARKERS
+        )
+        if has_lemma:
+            continue
+
+        surface_form = str(word_row.get("surface_form", "")).strip()
+        if not surface_form:
+            unresolved_words.append(word_row)
+            continue
+
+        is_grammatical = is_grammatical_word(surface_form, normalized_language_code)
+        is_function = is_function_word(surface_form, normalized_language_code)
+        if is_grammatical or is_function:
+            continue
+
+        unresolved_words.append(word_row)
+
+    return unresolved_words
+
+
+def all_words_are_lemmas_or_grammatical(words: List[Dict[str, Any]], language_code: str) -> bool:
+    """Return True when every word has a lemma or is a grammatical/function word."""
+
+    unresolved_words = find_unresolved_non_grammatical_words(words, language_code)
+    return len(unresolved_words) == 0
 
 
 def _normalize_target_languages(target_languages: List[str]) -> List[str]:
@@ -141,7 +189,9 @@ def build_sentence_decomposition_prompt(
     else:
         candidate_lines = "- (none provided)"
 
-    return util.prompt_loader.get_prompt("sentence_decomposition", _SINGLE_LANGUAGE_PROMPT_PATH).format(
+    return util.prompt_loader.get_prompt(
+        "sentence_decomposition", _SINGLE_LANGUAGE_PROMPT_PATH
+    ).format(
         source_sentence=source_sentence,
         source_language=source_language,
         target_language=target_language,
@@ -151,7 +201,9 @@ def build_sentence_decomposition_prompt(
     )
 
 
-def build_decomposition_schema(*, target_languages: List[str], include_english: bool = True) -> Dict[str, Any]:
+def build_decomposition_schema(
+    *, target_languages: List[str], include_english: bool = True
+) -> Dict[str, Any]:
     """Schema for translate+decompose requests (ZVIRBLIS and sentence translator)."""
     target_languages = _normalize_target_languages(target_languages)
     word_schema: Dict[str, Any] = {
