@@ -1,5 +1,11 @@
-"""Compatibility wrappers for IPA rhyme-key helpers."""
+"""IPA utilities package."""
 
+from ipa.normalization import (
+    are_ipa_equivalent,
+    is_ipa_levenshtein_match,
+    normalize_ipa,
+    weighted_similarity_ratio,
+)
 from ipa.rhyme_keys import (
     IPA_VOWELS,
     RHYME_KEY_LANGUAGES,
@@ -10,6 +16,10 @@ from ipa.rhyme_keys import (
 )
 
 __all__ = [
+    "normalize_ipa",
+    "weighted_similarity_ratio",
+    "are_ipa_equivalent",
+    "is_ipa_levenshtein_match",
     "RHYME_KEY_LANGUAGES",
     "IPA_VOWELS",
     "rhyme_keys_available",
