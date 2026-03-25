@@ -401,6 +401,45 @@ class TestResolveLemmaForWord(unittest.TestCase):
         self.assertEqual(result.method, "unresolved")
         self.assertIsNone(result.lemma)
 
+    def test_spanish_tier3_function_word_can_still_resolve_by_derivative_match(self) -> None:
+        """Tier-3 words (also-lemma) should not be skipped as pure grammatical tokens."""
+        preposition_lemma = Lemma(
+            lemma_text="in",
+            definition_text="inside, within",
+            pos_type="preposition",
+            guid="P36_001",
+        )
+        self.session.add(preposition_lemma)
+        self.session.flush()
+        self.session.add_all(
+            [
+                DerivativeForm(
+                    lemma_id=preposition_lemma.id,
+                    derivative_form_text="en",
+                    language_code="es",
+                    grammatical_form="base",
+                ),
+                DerivativeForm(
+                    lemma_id=preposition_lemma.id,
+                    derivative_form_text="dans",
+                    language_code="fr",
+                    grammatical_form="base",
+                ),
+            ]
+        )
+        self.session.commit()
+
+        result = resolve_lemma_for_word(
+            self.session,
+            english_text="",
+            forms_by_language={"es": "en", "fr": "dans"},
+            min_derivative_languages=2,
+        )
+        self.assertEqual(result.method, "derivative_form")
+        self.assertIsNotNone(result.lemma)
+        assert result.lemma is not None
+        self.assertEqual(result.lemma.guid, "P36_001")
+
     def test_guid_takes_precedence_over_text(self) -> None:
         """Even if text would match 'see', GUID for teacher should win."""
         result = resolve_lemma_for_word(
