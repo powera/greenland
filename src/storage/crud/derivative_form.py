@@ -3,13 +3,26 @@
 import logging
 from typing import Dict, List, Optional
 
-from sqlalchemy import ColumnElement, or_
+from sqlalchemy import ColumnElement, and_, not_, or_, true
 from sqlalchemy.orm import Session
 
 from storage.crud.word_token import add_word_token
 from storage.models.schema import DerivativeForm, Lemma, WordToken
 
 logger = logging.getLogger(__name__)
+
+COMMON_SURFACED_GRAMMATICAL_FORMS: set[str] = {
+    "lemma",
+    "infinitive",
+    "singular",
+    "plural",
+    "positive",
+    "present",
+    "past",
+    "past_tense",
+    "third_person_singular_present",
+    "third_person_plural_present",
+}
 
 
 def needs_pronunciation_update_filter() -> ColumnElement[bool]:
@@ -25,6 +38,31 @@ def needs_pronunciation_update_filter() -> ColumnElement[bool]:
         DerivativeForm.ipa_pronunciation == "",
         DerivativeForm.phonetic_pronunciation.is_(None),
         DerivativeForm.phonetic_pronunciation == "",
+    )
+
+
+def pronunciation_required_filter(include_optional_forms: bool = False) -> ColumnElement[bool]:
+    """Return filter for forms that should receive pronunciation generation by default.
+
+    Conservative defaults:
+    - Always include base forms.
+    - Include commonly surfaced inflections.
+    - Skip English periphrastic futures (``*_future``) unless explicitly requested.
+    """
+
+    if include_optional_forms:
+        return true()
+
+    common_form_filter = DerivativeForm.grammatical_form.in_(COMMON_SURFACED_GRAMMATICAL_FORMS)
+    skip_english_future_filter = not_(
+        and_(
+            DerivativeForm.language_code == "en",
+            DerivativeForm.grammatical_form.like("%_future"),
+        )
+    )
+    return and_(
+        or_(DerivativeForm.is_base_form.is_(True), common_form_filter),
+        skip_english_future_filter,
     )
 
 

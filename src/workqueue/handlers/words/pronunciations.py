@@ -12,11 +12,17 @@ def do_generate_pronunciations(
     session: Any,
     lemma_id: int,
     lang_code: str = "en",
+    all_forms_pronunciation: bool = False,
     **_: Any,
 ) -> str:
     """Generate pronunciations for all missing forms on a lemma."""
     lemma = get_lemma_or_raise(session, lemma_id)
-    generated_count, errors = generate_pronunciations_for_lemma(session, lemma, lang_code)
+    generated_count, errors = generate_pronunciations_for_lemma(
+        session,
+        lemma,
+        lang_code,
+        all_forms_pronunciation=all_forms_pronunciation,
+    )
     session.commit()
 
     if generated_count == 0 and not errors:
@@ -27,6 +33,16 @@ def do_generate_pronunciations(
 
 
 @workqueue_payload_handler()
-def handle_words_pronunciations(session: Any, lemma_id: int, lang_code: str = "en") -> str:
+def handle_words_pronunciations(
+    session: Any,
+    lemma_id: int,
+    lang_code: str = "en",
+    all_forms_pronunciation: bool = False,
+) -> str:
     """Workqueue wrapper for pronunciation generation."""
-    return do_generate_pronunciations(session=session, lemma_id=lemma_id, lang_code=lang_code)
+    return do_generate_pronunciations(
+        session=session,
+        lemma_id=lemma_id,
+        lang_code=lang_code,
+        all_forms_pronunciation=all_forms_pronunciation,
+    )

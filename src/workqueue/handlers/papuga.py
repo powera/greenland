@@ -15,7 +15,11 @@ from sqlalchemy.orm import Session
 from workqueue.tools import build_default_config, get_lemma_or_raise
 import constants
 from storage.backend.config import DataSourceConfig
-from storage.crud.derivative_form import add_derivative_form, needs_pronunciation_update_filter
+from storage.crud.derivative_form import (
+    add_derivative_form,
+    needs_pronunciation_update_filter,
+    pronunciation_required_filter,
+)
 from storage.models.schema import (
     DerivativeForm,
     Lemma,
@@ -116,6 +120,7 @@ def generate_pronunciations_for_lemma(
     lemma: Lemma,
     lang_code: str = "en",
     config: Optional[DataSourceConfig] = None,
+    all_forms_pronunciation: bool = False,
 ) -> Tuple[int, List[str]]:
     """
     Generate pronunciations for all forms of a lemma missing them.
@@ -128,6 +133,7 @@ def generate_pronunciations_for_lemma(
         lemma: Lemma to generate pronunciations for
         lang_code: Language code (default: "en")
         config: DataSourceConfig (uses default if not provided)
+        all_forms_pronunciation: Include optional forms (legacy behavior)
 
     Returns:
         Tuple of (generated_count, list of error messages)
@@ -175,6 +181,9 @@ def generate_pronunciations_for_lemma(
             DerivativeForm.lemma_id == lemma.id,
             DerivativeForm.language_code == lang_code,
             needs_pronunciation_update_filter(),
+            pronunciation_required_filter(
+                include_optional_forms=all_forms_pronunciation,
+            ),
         )
         .all()
     )
@@ -299,10 +308,16 @@ def handle_generate_pronunciations(session: Session, payload: Dict) -> str:
     """
     lemma_id = payload["lemma_id"]
     lang_code = payload.get("lang_code", "en")
+    all_forms_pronunciation = payload.get("all_forms_pronunciation", False)
 
     lemma = get_lemma_or_raise(session, lemma_id)
 
-    generated_count, errors = generate_pronunciations_for_lemma(session, lemma, lang_code)
+    generated_count, errors = generate_pronunciations_for_lemma(
+        session,
+        lemma,
+        lang_code,
+        all_forms_pronunciation=all_forms_pronunciation,
+    )
 
     session.commit()
 
