@@ -1,5 +1,11 @@
 """IPA utilities package."""
 
+from ipa.generation import (
+    IPA_PRONUNCIATION_JSON_SCHEMA,
+    build_ipa_pronunciation_prompt,
+    generate_ipa_pronunciation,
+    query_ipa_pronunciation,
+)
 from ipa.normalization import (
     are_ipa_equivalent,
     is_ipa_levenshtein_match,
@@ -16,6 +22,10 @@ from ipa.rhyme_keys import (
 )
 
 __all__ = [
+    "IPA_PRONUNCIATION_JSON_SCHEMA",
+    "build_ipa_pronunciation_prompt",
+    "generate_ipa_pronunciation",
+    "query_ipa_pronunciation",
     "normalize_ipa",
     "weighted_similarity_ratio",
     "are_ipa_equivalent",

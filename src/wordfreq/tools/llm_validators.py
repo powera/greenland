@@ -19,7 +19,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
-from words.ipa_pronunciation import generate_ipa_pronunciation
+from ipa.generation import generate_ipa_pronunciation
 
 logger = logging.getLogger(__name__)
 
