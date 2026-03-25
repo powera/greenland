@@ -229,6 +229,19 @@ def api_info() -> ResponseReturnValue:
             ],
         },
         {
+            "path": "/api/v1/models",
+            "method": "GET",
+            "description": "List LLM models registered in the benchmarks database (requires postgres)",
+            "parameters": [
+                {
+                    "name": "q",
+                    "type": "query",
+                    "required": False,
+                    "description": "Case-insensitive substring search across codename, displayname, model_path, lmstudio_model_name",
+                }
+            ],
+        },
+        {
             "path": "/api/v1/metadata/words",
             "method": "GET",
             "description": "Get per-language lemma counts and metadata coverage (audio, derivative forms, subtypes)",
@@ -1180,3 +1193,54 @@ def get_sentence_metadata() -> ResponseReturnValue:
         metadata["requested_language"] = requested_language
 
     return _build_success_response(summary_data, metadata)
+
+
+@bp.route("/v1/models")
+def list_models() -> ResponseReturnValue:
+    """Search LLM models registered in the benchmarks database.
+
+    Query parameters:
+        - q: Optional. Case-insensitive substring search across codename, displayname,
+             model_path, and lmstudio_model_name fields.
+    """
+    bench_db = g.get("bench_db")
+    if bench_db is None:
+        return _build_error_response(
+            "Model registry not available (benchmarks database not configured)", 503
+        )
+
+    from benchmarks.datastore.common import Model
+
+    query = bench_db.query(Model).order_by(Model.codename)
+
+    search_term = request.args.get("q", "").strip()
+    if search_term:
+        pattern = f"%{search_term}%"
+        query = query.filter(
+            or_(
+                Model.codename.ilike(pattern),
+                Model.displayname.ilike(pattern),
+                Model.model_path.ilike(pattern),
+                Model.lmstudio_model_name.ilike(pattern),
+            )
+        )
+
+    models = query.all()
+
+    models_data = [
+        {
+            "codename": m.codename,
+            "displayname": m.displayname,
+            "model_path": m.model_path,
+            "model_type": m.model_type,
+            "lmstudio_model_name": m.lmstudio_model_name,
+            "launch_date": str(m.launch_date) if m.launch_date else None,
+            "license_name": m.license_name,
+        }
+        for m in models
+    ]
+
+    return _build_success_response(
+        models_data,
+        {"count": len(models_data), "search": search_term or None},
+    )

@@ -32,6 +32,14 @@ Base prefix: `/api`.
 - `GET /api/v1/lemma/<guid>/sentences[?language=<code>]`
   - Example sentences using the lemma.
 
+## Model registry
+
+- `GET /api/v1/models[?q=<search>]`
+  - List LLM models from the benchmarks database (requires postgres backend).
+  - `q`: optional substring search across codename, displayname, model_path, lmstudio_model_name.
+  - Returns array of `{codename, displayname, model_path, model_type, lmstudio_model_name, launch_date, license_name}`.
+  - Returns HTTP 503 if benchmarks database is not configured.
+
 ## Metadata endpoints (for aggregate counting)
 
 - `GET /api/v1/metadata/words[?language=<code>]`
