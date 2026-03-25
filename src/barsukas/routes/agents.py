@@ -746,3 +746,180 @@ def view_sentences(lemma_id: int) -> ResponseReturnValue:
     except Exception as e:
         log_and_flash_error(e, "viewing sentences")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+
+
+@bp.route("/check-translation-disambiguation/<int:lemma_id>/<lang_code>", methods=["POST"])
+def check_translation_disambiguation(lemma_id: int, lang_code: str) -> ResponseReturnValue:
+    """Find lemmas sharing the same translation in lang_code and suggest disambiguations."""
+    from storage.models.schema import LemmaTranslation
+    from storage.translation_helpers import (
+        LANGUAGE_NAMES,
+        get_all_translations,
+    )
+
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
+
+    language_name = LANGUAGE_NAMES.get(lang_code, lang_code)
+
+    # Get this lemma's translation in the target language
+    this_trans = (
+        g.db.query(LemmaTranslation)
+        .filter(
+            LemmaTranslation.lemma_id == lemma_id,
+            LemmaTranslation.language_code == lang_code,
+        )
+        .first()
+    )
+    if not this_trans or not this_trans.translation:
+        flash(f"No {language_name} translation set for this lemma", "error")
+        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+
+    translation_word = this_trans.translation.strip()
+
+    # Find all other lemmas with the same translation in this language
+    matching_rows = (
+        g.db.query(LemmaTranslation)
+        .filter(
+            LemmaTranslation.language_code == lang_code,
+            LemmaTranslation.translation == translation_word,
+        )
+        .all()
+    )
+
+    if len(matching_rows) < 2:
+        flash(
+            f'No other lemmas share the {language_name} translation "{translation_word}" '
+            f"- disambiguation not needed",
+            "info",
+        )
+        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+
+    # Load the matching lemmas
+    matching_lemma_ids = [row.lemma_id for row in matching_rows]
+    matching_lemmas = (
+        g.db.query(Lemma).filter(Lemma.id.in_(matching_lemma_ids), Lemma.guid.isnot(None)).all()
+    )
+
+    if len(matching_lemmas) < 2:
+        flash(
+            f'No other active lemmas share the {language_name} translation "{translation_word}"',
+            "info",
+        )
+        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+
+    # Build disambiguation info for each lemma
+    disambiguation_row_lookup = {row.lemma_id: row for row in matching_rows}
+    meanings = []
+    lemma_lookup = {}
+    for ml in matching_lemmas:
+        lemma_lookup[ml.guid] = ml
+        all_trans = get_all_translations(g.db, ml)
+        other_translations = {
+            lc: t for lc, t in all_trans.items() if t and lc not in ("en", lang_code)
+        }
+        meanings.append(
+            {
+                "guid": ml.guid,
+                "english_word": ml.lemma_text,
+                "definition": ml.definition_text or "",
+                "other_translations": other_translations,
+            }
+        )
+
+    # Call LLM
+    try:
+        from wordfreq.tools.llm_validators import suggest_translation_disambiguation
+
+        llm_result = suggest_translation_disambiguation(
+            translation_word=translation_word,
+            target_language=language_name,
+            target_lang_code=lang_code,
+            meanings=meanings,
+        )
+    except Exception as e:
+        log_and_flash_error(e, "generating translation disambiguation suggestions")
+        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+
+    if not llm_result.get("success") or not llm_result.get("suggestions"):
+        flash(
+            f'Found {len(matching_lemmas)} lemmas sharing "{translation_word}" in {language_name}, '
+            f"but could not generate suggestions. Try setting disambiguation manually.",
+            "warning",
+        )
+        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+
+    return render_template(
+        "agents/translation_disambiguation_suggestions.html",
+        lemma=lemma,
+        lang_code=lang_code,
+        language_name=language_name,
+        translation_word=translation_word,
+        matching_lemmas=matching_lemmas,
+        suggestions=llm_result["suggestions"],
+        disambiguation_row_lookup=disambiguation_row_lookup,
+    )
+
+
+@bp.route(
+    "/apply-translation-disambiguation/<int:lemma_id>/<lang_code>",
+    methods=["POST"],
+)
+def apply_translation_disambiguation(lemma_id: int, lang_code: str) -> ResponseReturnValue:
+    """Apply an AI-suggested translation disambiguation."""
+    from storage.models.schema import LemmaTranslation
+    from storage.translation_helpers import LANGUAGE_NAMES
+
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
+
+    new_disambiguation = request.form.get("disambiguation", "").strip()
+    return_to_lemma_id = request.form.get("return_to_lemma_id", type=int)
+
+    if not new_disambiguation:
+        flash("No disambiguation provided", "error")
+        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+
+    language_name = LANGUAGE_NAMES.get(lang_code, lang_code)
+
+    try:
+        trans_obj = (
+            g.db.query(LemmaTranslation)
+            .filter(
+                LemmaTranslation.lemma_id == lemma_id,
+                LemmaTranslation.language_code == lang_code,
+            )
+            .first()
+        )
+
+        if not trans_obj:
+            flash(f"No {language_name} translation found for this lemma", "error")
+            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+
+        old_disambiguation = trans_obj.disambiguation
+        trans_obj.disambiguation = new_disambiguation
+        g.db.commit()
+
+        flash(
+            f'Set {language_name} disambiguation for "{lemma.lemma_text}" '
+            f'({lemma.guid}): "{new_disambiguation}"',
+            "success",
+        )
+
+    except Exception as e:
+        g.db.rollback()
+        log_and_flash_error(e, "applying translation disambiguation")
+
+    # Return to the original lemma that triggered the check
+    target_lemma_id = return_to_lemma_id or lemma_id
+    return redirect(
+        url_for(
+            "agents.check_translation_disambiguation",
+            lemma_id=target_lemma_id,
+            lang_code=lang_code,
+        )
+    )
