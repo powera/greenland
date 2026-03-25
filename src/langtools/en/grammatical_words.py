@@ -1,12 +1,30 @@
-"""English grammatical/function-word data."""
+"""English grammatical/function-word data.
+
+Four tiers, from most grammatical to most lemma-like:
+
+1. **personal_pronouns** – I, me, my, he, she, … (not in data/release)
+2. **grammatical_words** – articles, auxiliaries, contractions (not in data/release)
+3. **function_words** – conjunctions, prepositions (in data/release)
+4. **non_personal_pronouns** – who, this, that, each, … (in data/release)
+
+Tiers 1–2 have no analogues in data/release; tiers 3–4 do.
+
+Legacy exports (``ENGLISH_GRAMMATICAL_WORDS_BY_CATEGORY``,
+``ENGLISH_GRAMMATICAL_WORDS_WITH_CONTRACTIONS``) are kept for backward
+compatibility with ``util/stopwords.py`` and ``dramblys``.
+"""
 
 from typing import Final
 
-ENGLISH_GRAMMATICAL_WORDS_BY_CATEGORY: Final[dict[str, list[str]]] = {
-    "pronouns": [
+# ── tier 1: personal pronouns ──────────────────────────────────────────
+
+ENGLISH_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
+    w.lower()
+    for w in [
         "I",
         "me",
         "my",
+        "mine",
         "myself",
         "we",
         "us",
@@ -34,101 +52,42 @@ ENGLISH_GRAMMATICAL_WORDS_BY_CATEGORY: Final[dict[str, list[str]]] = {
         "their",
         "theirs",
         "themselves",
-        "who",
-        "whom",
-        "whose",
-        "which",
-        "what",
-        "that",
-    ],
-    "auxiliary_verbs": [
-        "am",
-        "is",
-        "are",
-        "was",
-        "were",
-        "be",
-        "been",
-        "being",
-        "have",
-        "has",
-        "had",
-        "do",
-        "does",
-        "did",
-        "shall",
-        "will",
-        "should",
-        "would",
-        "may",
-        "might",
-        "must",
-        "can",
-        "could",
-    ],
-    "prepositions": [
-        "at",
-        "by",
-        "for",
-        "from",
-        "in",
-        "into",
-        "of",
-        "off",
-        "on",
-        "onto",
-        "out",
-        "over",
-        "to",
-        "under",
-        "up",
-        "with",
-        "about",
-        "above",
-        "after",
-        "before",
-        "between",
-        "during",
-        "through",
-        "upon",
-        "without",
-    ],
-    "conjunctions": [
-        "and",
-        "but",
-        "if",
-        "or",
-        "because",
-        "as",
-        "until",
-        "while",
-        "though",
-        "so",
-        "than",
-        "since",
-        "till",
-        "nor",
-    ],
-    "determiners": [
-        "a",
-        "an",
-        "the",
-        "this",
-        "that",
-        "these",
-        "those",
-        "some",
-        "all",
-        "any",
-        "every",
-        "no",
-        "such",
-        "another",
-        "each",
-        "either",
-        "neither",
-    ],
-}
+    ]
+)
+
+# ── tier 2: grammatical words (articles, auxiliaries, contractions) ────
+
+ENGLISH_ARTICLES: Final[list[str]] = [
+    "a",
+    "an",
+    "the",
+]
+
+ENGLISH_AUXILIARY_VERBS: Final[list[str]] = [
+    "am",
+    "is",
+    "are",
+    "was",
+    "were",
+    "be",
+    "been",
+    "being",
+    "have",
+    "has",
+    "had",
+    "do",
+    "does",
+    "did",
+    "shall",
+    "will",
+    "should",
+    "would",
+    "may",
+    "might",
+    "must",
+    "can",
+    "could",
+]
 
 ENGLISH_GRAMMATICAL_CONTRACTIONS: Final[list[str]] = [
     "don't",
@@ -170,10 +129,119 @@ ENGLISH_GRAMMATICAL_CONTRACTIONS: Final[list[str]] = [
 ]
 
 ENGLISH_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
-    word.lower()
-    for category_words in ENGLISH_GRAMMATICAL_WORDS_BY_CATEGORY.values()
-    for word in category_words
+    [w.lower() for w in ENGLISH_ARTICLES]
+    + [w.lower() for w in ENGLISH_AUXILIARY_VERBS]
+    + [w.lower() for w in ENGLISH_GRAMMATICAL_CONTRACTIONS]
 )
-ENGLISH_GRAMMATICAL_WORDS_WITH_CONTRACTIONS: Final[frozenset[str]] = frozenset(
-    ENGLISH_GRAMMATICAL_WORDS | {word.lower() for word in ENGLISH_GRAMMATICAL_CONTRACTIONS}
+
+# ── tier 3: function words (conjunctions, prepositions) ───────────────
+
+ENGLISH_PREPOSITIONS: Final[list[str]] = [
+    "at",
+    "by",
+    "for",
+    "from",
+    "in",
+    "into",
+    "of",
+    "off",
+    "on",
+    "onto",
+    "out",
+    "over",
+    "to",
+    "under",
+    "up",
+    "with",
+    "about",
+    "above",
+    "after",
+    "before",
+    "between",
+    "during",
+    "through",
+    "upon",
+    "without",
+]
+
+ENGLISH_CONJUNCTIONS: Final[list[str]] = [
+    "and",
+    "but",
+    "if",
+    "or",
+    "because",
+    "as",
+    "until",
+    "while",
+    "though",
+    "so",
+    "than",
+    "since",
+    "till",
+    "nor",
+]
+
+ENGLISH_FUNCTION_WORDS: Final[frozenset[str]] = frozenset(
+    [w.lower() for w in ENGLISH_PREPOSITIONS] + [w.lower() for w in ENGLISH_CONJUNCTIONS]
 )
+
+# ── tier 4: non-personal pronouns / determiners ───────────────────────
+
+ENGLISH_INTERROGATIVE_PRONOUNS: Final[list[str]] = [
+    "who",
+    "whom",
+    "whose",
+    "which",
+    "what",
+    "that",
+]
+
+ENGLISH_DETERMINERS: Final[list[str]] = [
+    "this",
+    "that",
+    "these",
+    "those",
+    "some",
+    "all",
+    "any",
+    "every",
+    "no",
+    "such",
+    "another",
+    "each",
+    "either",
+    "neither",
+]
+
+ENGLISH_NON_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
+    [w.lower() for w in ENGLISH_INTERROGATIVE_PRONOUNS] + [w.lower() for w in ENGLISH_DETERMINERS]
+)
+
+# ── aggregate sets ─────────────────────────────────────────────────────
+
+# Tiers 1+2: linker skips these (not in data/release)
+ENGLISH_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
+    ENGLISH_PERSONAL_PRONOUNS | ENGLISH_GRAMMATICAL_WORDS
+)
+
+# Tiers 3+4: linker should resolve these (in data/release)
+ENGLISH_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
+    ENGLISH_FUNCTION_WORDS | ENGLISH_NON_PERSONAL_PRONOUNS
+)
+
+# All four tiers combined
+ENGLISH_ALL_TIERS: Final[frozenset[str]] = frozenset(ENGLISH_GRAMMATICAL_ONLY | ENGLISH_ALSO_LEMMA)
+
+# ── backward-compatible exports ────────────────────────────────────────
+
+ENGLISH_GRAMMATICAL_ONLY_WITH_CONTRACTIONS: Final[frozenset[str]] = ENGLISH_GRAMMATICAL_ONLY
+
+ENGLISH_GRAMMATICAL_WORDS_BY_CATEGORY: Final[dict[str, list[str]]] = {
+    "pronouns": (sorted(ENGLISH_PERSONAL_PRONOUNS) + ENGLISH_INTERROGATIVE_PRONOUNS),
+    "auxiliary_verbs": ENGLISH_AUXILIARY_VERBS,
+    "prepositions": ENGLISH_PREPOSITIONS,
+    "conjunctions": ENGLISH_CONJUNCTIONS,
+    "determiners": ENGLISH_ARTICLES + ENGLISH_DETERMINERS,
+}
+
+ENGLISH_GRAMMATICAL_WORDS_WITH_CONTRACTIONS: Final[frozenset[str]] = ENGLISH_ALL_TIERS
