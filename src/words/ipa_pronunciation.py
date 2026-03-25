@@ -33,6 +33,7 @@ def build_ipa_pronunciation_prompt(
     *,
     definition: str = "",
     sentence: str = "",
+    grammatical_form: str = "",
 ) -> str:
     """Build a reusable prompt for generating IPA pronunciation of one word."""
     _ = config  # reserved for future prompt variations
@@ -45,9 +46,12 @@ def build_ipa_pronunciation_prompt(
         else language_names.get(normalized_language, normalized_language)
     )
 
-    context = util.prompt_loader.get_context("word_to_ipa", "word")
-    prompt_template = util.prompt_loader.get_prompt("word_to_ipa", "word")
+    context = util.prompt_loader.get_context("pronunciation", "ipa")
+    prompt_template = util.prompt_loader.get_prompt("pronunciation", "ipa")
 
+    grammatical_form_line = (
+        f"Grammatical form: {grammatical_form.strip()}\n" if grammatical_form.strip() else ""
+    )
     definition_line = f"Definition: {definition.strip()}\n" if definition.strip() else ""
     sentence_line = f"Sentence: {sentence.strip()}\n" if sentence.strip() else ""
 
@@ -55,6 +59,7 @@ def build_ipa_pronunciation_prompt(
         language_name=language_name,
         language_code=normalized_language,
         word=word,
+        grammatical_form_line=grammatical_form_line,
         definition_line=definition_line,
         sentence_line=sentence_line,
     )
@@ -62,7 +67,7 @@ def build_ipa_pronunciation_prompt(
     return f"{context}\n\n{prompt}"
 
 
-def query_ipa_pronunciation(
+def generate_ipa_pronunciation(
     language_code: str,
     word: str,
     *,
@@ -71,6 +76,7 @@ def query_ipa_pronunciation(
     config: Optional[DataSourceConfig] = None,
     definition: str = "",
     sentence: str = "",
+    grammatical_form: str = "",
     json_schema: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Run the shared IPA prompt against an LLM and return structured data."""
@@ -80,6 +86,7 @@ def query_ipa_pronunciation(
         config=config,
         definition=definition,
         sentence=sentence,
+        grammatical_form=grammatical_form,
     )
     context, prompt = combined_prompt.split("\n\n", 1)
 
@@ -91,7 +98,9 @@ def query_ipa_pronunciation(
             context=context,
         )
     except Exception as error:
-        logger.error("Error querying IPA pronunciation for '%s' (%s): %s", word, language_code, error)
+        logger.error(
+            "Error querying IPA pronunciation for '%s' (%s): %s", word, language_code, error
+        )
         return {"success": False, "error": str(error)}
 
     if not response.structured_data:
@@ -110,3 +119,29 @@ def query_ipa_pronunciation(
     merged: Dict[str, Any] = {"success": True}
     merged.update(result)
     return merged
+
+
+def query_ipa_pronunciation(
+    language_code: str,
+    word: str,
+    *,
+    client: UnifiedLLMClient,
+    model: str,
+    config: Optional[DataSourceConfig] = None,
+    definition: str = "",
+    sentence: str = "",
+    grammatical_form: str = "",
+    json_schema: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Backward-compatible wrapper for IPA generation calls."""
+    return generate_ipa_pronunciation(
+        language_code=language_code,
+        word=word,
+        client=client,
+        model=model,
+        config=config,
+        definition=definition,
+        sentence=sentence,
+        grammatical_form=grammatical_form,
+        json_schema=json_schema,
+    )
