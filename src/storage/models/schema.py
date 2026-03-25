@@ -155,6 +155,11 @@ class LemmaTranslation(Base):
         String, nullable=True, index=True
     )  # Romanized/phonetic form for sorting (e.g. pinyin for zh, kana for ja, jamo for ko)
 
+    # Disambiguation for translations that share the same word in the target language.
+    # E.g., Lithuanian "oda" can mean both "skin" and "leather", so we store a
+    # Lithuanian disambiguator like "žmogaus" or "medžiaga" to display alongside.
+    disambiguation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
     # Metadata
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())

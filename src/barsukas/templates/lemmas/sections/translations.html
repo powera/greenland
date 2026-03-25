@@ -27,6 +27,7 @@
                         <tr>
                             <th>Language</th>
                             <th>Translation</th>
+                            <th>Disambiguation</th>
                             <th>Definition</th>
                             <th>Actions</th>
                         </tr>
@@ -55,6 +56,13 @@
                                     {% endif %}
                                 </td>
                                 <td>
+                                    {% if translation_disambiguations[lang_code] %}
+                                        <span class="badge bg-info text-dark">{{ translation_disambiguations[lang_code] }}</span>
+                                    {% else %}
+                                        <span class="text-muted fst-italic">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
                                     {% if definitions[lang_code] %}
                                         <small class="text-muted">{{ definitions[lang_code][:80] }}{% if definitions[lang_code]|length > 80 %}...{% endif %}</small>
                                     {% else %}
@@ -71,6 +79,15 @@
                                             {% endif %}>
                                         <i class="bi bi-pencil"></i> Edit
                                     </button>
+                                    {% if lang_code != 'en' and translations[lang_code] %}
+                                    <form method="post" action="{{ url_for('agents.check_translation_disambiguation', lemma_id=lemma.id, lang_code=lang_code) }}" style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-info"
+                                                title="{% if config.get('ALLOW_OUTBOUND_CALLS', True) %}Suggest disambiguation using AI{% else %}Not available in hosted mode{% endif %}"
+                                                {% if not config.get('ALLOW_OUTBOUND_CALLS', True) or config.get('READONLY', False) %}disabled{% endif %}>
+                                            <i class="bi bi-robot"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
                                 </td>
                             </tr>
 
@@ -101,6 +118,19 @@
                                                         Warning: Translation contains "/" character
                                                     </div>
                                                 </div>
+                                                {% if lang_code != 'en' %}
+                                                <div class="mb-3">
+                                                    <label for="disambiguation{{ lang_code }}" class="form-label">
+                                                        Disambiguation <small class="text-muted">(optional)</small>
+                                                    </label>
+                                                    <input type="text" class="form-control" id="disambiguation{{ lang_code }}"
+                                                           name="disambiguation" value="{{ translation_disambiguations[lang_code] or '' }}"
+                                                           placeholder="e.g., medžiaga, žmogaus">
+                                                    <div class="form-text">
+                                                        Shown in the app when this word is ambiguous in {{ lang_name }}
+                                                    </div>
+                                                </div>
+                                                {% endif %}
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

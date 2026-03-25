@@ -1098,6 +1098,94 @@ Provide a short disambiguation term for each definition."""
         return {"success": False, "error": str(e), "suggestions": {}}
 
 
+def suggest_translation_disambiguation(
+    translation_word: str,
+    target_language: str,
+    target_lang_code: str,
+    meanings: List[Dict[str, Any]],
+    model: Optional[str] = "gpt-5.4-mini",
+) -> Dict[str, Any]:
+    """Suggest short disambiguation terms in the target language for a shared translation.
+
+    When multiple English concepts share the same translation in a target language
+    (e.g., Lithuanian "oda" = "skin" AND "leather"), this function asks the LLM
+    to suggest short disambiguation terms IN THE TARGET LANGUAGE.
+
+    Args:
+        translation_word: The shared translation word (e.g., "oda")
+        target_language: Display name of the target language (e.g., "Lithuanian")
+        target_lang_code: Language code (e.g., "lt")
+        meanings: List of dicts with 'guid', 'english_word', 'definition',
+                  and optionally 'other_translations' (translations in other languages)
+        model: LLM model to use
+
+    Returns:
+        {"success": True, "suggestions": {guid: "disambiguation_term", ...}}
+    """
+    client = UnifiedLLMClient()
+
+    meanings_text = []
+    for i, item in enumerate(meanings, 1):
+        meaning_desc = (
+            f"{i}. GUID: {item['guid']}\n"
+            f"   English word: {item['english_word']}\n"
+            f"   Definition: {item['definition']}"
+        )
+        if "other_translations" in item and item["other_translations"]:
+            trans_examples = ", ".join(
+                f"{lang}: {trans}" for lang, trans in list(item["other_translations"].items())[:4]
+            )
+            meaning_desc += f"\n   Other translations: {trans_examples}"
+        meanings_text.append(meaning_desc)
+
+    prompt = f"""You are helping to disambiguate different meanings of the {target_language} word "{translation_word}".
+
+This word is used as the {target_language} translation for {len(meanings)} different English concepts. For each one, suggest a SHORT disambiguation term IN {target_language.upper()} (1-2 words maximum) that would be shown in parentheses after the word to clarify which meaning is intended.
+
+The disambiguation should be:
+- Written in {target_language} (not English)
+- Very short (1-2 words, preferably 1)
+- Clear and descriptive for a {target_language} speaker
+- Use lowercase unless grammar requires otherwise
+- For example, for Lithuanian "oda": meanings "skin" and "leather" could be disambiguated as "žmogaus" (human's) and "medžiaga" (material)
+
+Meanings:
+{chr(10).join(meanings_text)}
+
+Provide a short {target_language} disambiguation term for each meaning."""
+
+    schema = Schema(
+        name="TranslationDisambiguationSuggestions",
+        description=f"Suggested {target_language} disambiguation terms for each meaning",
+        properties={
+            f"disambiguation_{i+1}": SchemaProperty(
+                "string",
+                f"Short {target_language} disambiguation term for meaning {i+1} (GUID: {item['guid']})",
+            )
+            for i, item in enumerate(meanings)
+        },
+    )
+
+    try:
+        response = client.generate_chat(prompt=prompt, model=model, json_schema=schema)
+
+        if not response.structured_data:
+            logger.error("No structured data received for translation disambiguation")
+            return {"success": False, "error": "No structured data received", "suggestions": {}}
+
+        suggestions: Dict[str, str] = {}
+        for i, item in enumerate(meanings):
+            key = f"disambiguation_{i+1}"
+            if key in response.structured_data:
+                suggestions[item["guid"]] = response.structured_data[key].strip()
+
+        return {"success": True, "suggestions": suggestions}
+
+    except Exception as e:
+        logger.error(f"Error getting translation disambiguation suggestions: {e}")
+        return {"success": False, "error": str(e), "suggestions": {}}
+
+
 def validate_disambiguation_need(
     word: str,
     pos_type: str,

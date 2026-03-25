@@ -14,6 +14,7 @@ from storage.translation_helpers import (
     get_supported_languages,
     get_translation,
     set_translation,
+    set_translation_disambiguation,
 )
 
 bp = Blueprint("translations", __name__, url_prefix="/translations")
@@ -40,6 +41,7 @@ def update_translation(lemma_id: int, lang_code: str) -> Response:
 
     # Get new translation value and optional return_to parameter
     new_translation = request.form.get("translation", "").strip()
+    new_disambiguation = request.form.get("disambiguation", "").strip() or None
     return_to = request.form.get("return_to", "").strip()
 
     if not new_translation:
@@ -52,6 +54,10 @@ def update_translation(lemma_id: int, lang_code: str) -> Response:
     try:
         # Update translation using helper
         old_translation, new_translation = set_translation(g.db, lemma, lang_code, new_translation)
+
+        # Update disambiguation if provided (non-English languages only)
+        if lang_code != "en":
+            set_translation_disambiguation(g.db, lemma, lang_code, new_disambiguation)
 
         # Log the change
         log_translation_change(
