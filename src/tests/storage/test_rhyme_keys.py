@@ -63,3 +63,70 @@ def test_derivative_form_rhyme_key_is_set_on_insert_and_update() -> None:
     finally:
         session.close()
         engine.dispose()
+
+
+def test_derivative_form_single_word_future_still_gets_rhyme_key() -> None:
+    """Single-token future forms should still be rhyme-indexed."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+
+    session = Session(engine)
+    try:
+        lemma = Lemma(
+            lemma_text="read",
+            definition_text="to interpret written text",
+            pos_type="verb",
+            guid="V00_010",
+        )
+        session.add(lemma)
+        session.flush()
+
+        derivative_form = DerivativeForm(
+            lemma_id=lemma.id,
+            derivative_form_text="shallread",
+            language_code="en",
+            grammatical_form="verb/en_1s_future",
+            is_base_form=False,
+            ipa_pronunciation="/ʃælɹiːd/",
+        )
+        session.add(derivative_form)
+        session.commit()
+
+        assert derivative_form.rhyme_key is not None
+    finally:
+        session.close()
+        engine.dispose()
+
+
+def test_derivative_form_multi_word_future_keeps_ipa_but_skips_rhyme_key() -> None:
+    """Periphrastic future forms should preserve IPA while leaving rhyme_key empty."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+
+    session = Session(engine)
+    try:
+        lemma = Lemma(
+            lemma_text="read",
+            definition_text="to interpret written text",
+            pos_type="verb",
+            guid="V00_011",
+        )
+        session.add(lemma)
+        session.flush()
+
+        derivative_form = DerivativeForm(
+            lemma_id=lemma.id,
+            derivative_form_text="will read",
+            language_code="en",
+            grammatical_form="verb/en_1s_future",
+            is_base_form=False,
+            ipa_pronunciation="/wɪl ɹiːd/",
+        )
+        session.add(derivative_form)
+        session.commit()
+
+        assert derivative_form.ipa_pronunciation == "/wɪl ɹiːd/"
+        assert derivative_form.rhyme_key is None
+    finally:
+        session.close()
+        engine.dispose()
