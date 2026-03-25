@@ -8,7 +8,6 @@ from typing import Any, Dict, Optional
 
 from clients.unified_client import UnifiedLLMClient
 from storage.backend.config import DataSourceConfig
-from storage.translation_helpers import get_supported_languages
 
 import util.prompt_loader
 
@@ -37,6 +36,11 @@ def build_ipa_pronunciation_prompt(
 ) -> str:
     """Build a reusable prompt for generating IPA pronunciation of one word."""
     _ = config  # reserved for future prompt variations
+
+    # Deferred import to avoid circular import:
+    # ipa.generation → storage.translation_helpers → storage.models.schema → storage.rhyme_keys
+    # → langtools.rhyme_keys → ipa.__init__ → ipa.generation
+    from storage.translation_helpers import get_supported_languages
 
     normalized_language = language_code.lower()
     language_names = get_supported_languages()
