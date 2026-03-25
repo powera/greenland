@@ -1,33 +1,24 @@
 """German grammatical/function-word data.
 
-* **grammatical_only** – articles (all case/gender forms), personal pronouns,
-  possessive determiners, contracted preposition+article forms, auxiliary and
-  modal verb conjugations, negation words, particles.
-* **also_lemma** – prepositions, conjunctions, interrogative pronouns,
-  demonstrative and indefinite determiners that have data/release entries.
+Four tiers:
+
+1. **personal_pronouns** – ich, du, er, sie, … + possessive determiners
+2. **grammatical_words** – articles, contracted forms, kein-forms,
+   auxiliaries, modals, particles, indefinite pronouns (man, jemand, …)
+3. **function_words** – prepositions, conjunctions
+4. **non_personal_pronouns** – interrogatives (wer, was, …),
+   demonstratives (dieser, jener, …), indefinite determiners (jeder, alle, …)
+
+Tiers 1–2 have no analogues in data/release; tiers 3–4 do.
 """
 
 from typing import Final
 
-# ── tier 1: always grammatical, never a lemma ──────────────────────────
+# ── tier 1: personal pronouns ──────────────────────────────────────────
 
-GERMAN_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
+GERMAN_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
     {
-        # Definite articles (all cases / genders)
-        "der",
-        "die",
-        "das",
-        "den",
-        "dem",
-        "des",
-        # Indefinite articles (all cases / genders)
-        "ein",
-        "eine",
-        "einen",
-        "einem",
-        "einer",
-        "eines",
-        # Personal pronouns
+        # Personal pronouns (all cases)
         "ich",
         "du",
         "er",
@@ -81,6 +72,27 @@ GERMAN_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
         "eurem",
         "eurer",
         "eures",
+    }
+)
+
+# ── tier 2: grammatical words ─────────────────────────────────────────
+
+GERMAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
+    {
+        # Definite articles (all cases / genders)
+        "der",
+        "die",
+        "das",
+        "den",
+        "dem",
+        "des",
+        # Indefinite articles (all cases / genders)
+        "ein",
+        "eine",
+        "einen",
+        "einem",
+        "einer",
+        "eines",
         # Contracted preposition + article forms
         "am",
         "ans",
@@ -192,9 +204,9 @@ GERMAN_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
     }
 )
 
-# ── tier 2: function words that are (or could be) lemmas ───────────────
+# ── tier 3: function words (prepositions, conjunctions) ───────────────
 
-GERMAN_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
+GERMAN_FUNCTION_WORDS: Final[frozenset[str]] = frozenset(
     {
         # Prepositions
         "an",
@@ -248,6 +260,13 @@ GERMAN_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
         "indem",
         "weder",
         "sowohl",
+    }
+)
+
+# ── tier 4: non-personal pronouns ─────────────────────────────────────
+
+GERMAN_NON_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
+    {
         # Interrogative pronouns
         "wer",
         "wen",
@@ -287,8 +306,14 @@ GERMAN_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
     }
 )
 
-# ── combined set ───────────────────────────────────────────────────────
+# ── aggregate sets ─────────────────────────────────────────────────────
 
-GERMAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
-    GERMAN_GRAMMATICAL_ONLY | GERMAN_ALSO_LEMMA
+GERMAN_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
+    GERMAN_PERSONAL_PRONOUNS | GERMAN_GRAMMATICAL_WORDS
 )
+
+GERMAN_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
+    GERMAN_FUNCTION_WORDS | GERMAN_NON_PERSONAL_PRONOUNS
+)
+
+GERMAN_ALL_TIERS: Final[frozenset[str]] = frozenset(GERMAN_GRAMMATICAL_ONLY | GERMAN_ALSO_LEMMA)

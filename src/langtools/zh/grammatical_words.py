@@ -1,20 +1,44 @@
 """Chinese grammatical/function-word data.
 
-* **grammatical_only** – structural particles (的/地/得), aspect markers
-  (了/着/过), modal particles, personal pronouns, plural marker, negation,
-  grammatical adverbs, and the *bǎ/bèi/ràng* construction markers.
-* **also_lemma** – coverbs/prepositions that double as verbs (从/到/给/…),
-  conjunctions, demonstratives, interrogatives, copula 是, existential 有,
-  and auxiliaries with independent verb senses (想/能/会/要).
+Four tiers:
 
-Measure words are excluded even when awkward to translate.
+1. **personal_pronouns** – 我, 你, 他, 她, 我们, 自己, …
+2. **grammatical_words** – structural particles (的/地/得), aspect markers
+   (了/着/过), modal particles, construction markers (把/被/让), negation,
+   grammatical adverbs, pure auxiliaries (可以, 应该, …)
+3. **function_words** – coverb-prepositions (从/到/给/…), conjunctions
+   (和/或/但是/…), copula 是, existential 有, auxiliaries with verb senses
+   (想/能/会/要)
+4. **non_personal_pronouns** – demonstratives (这/那), interrogatives
+   (谁/什么/哪里), determiners (每/各/某)
+
+Tiers 1–2 have no analogues in data/release; tiers 3–4 do.
 """
 
 from typing import Final
 
-# ── tier 1: always grammatical, never a lemma ──────────────────────────
+# ── tier 1: personal pronouns ──────────────────────────────────────────
 
-CHINESE_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
+CHINESE_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
+    {
+        "我",
+        "你",
+        "他",
+        "她",
+        "它",
+        "我们",
+        "你们",
+        "他们",
+        "她们",
+        "自己",
+        # Plural marker
+        "们",
+    }
+)
+
+# ── tier 2: grammatical words ─────────────────────────────────────────
+
+CHINESE_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
     {
         # Structural particles
         "的",
@@ -33,19 +57,6 @@ CHINESE_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
         "嘛",
         "哦",
         "啦",
-        # Personal pronouns
-        "我",
-        "你",
-        "他",
-        "她",
-        "它",
-        "我们",
-        "你们",
-        "他们",
-        "她们",
-        "自己",
-        # Plural marker
-        "们",
         # Construction markers
         "把",
         "被",
@@ -56,7 +67,7 @@ CHINESE_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
         "别",
         "未",
         "非",
-        # Grammatical adverbs (modify verb/sentence structure)
+        # Grammatical adverbs
         "就",
         "都",
         "也",
@@ -87,9 +98,9 @@ CHINESE_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
     }
 )
 
-# ── tier 2: function words that are (or could be) lemmas ───────────────
+# ── tier 3: function words ────────────────────────────────────────────
 
-CHINESE_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
+CHINESE_FUNCTION_WORDS: Final[frozenset[str]] = frozenset(
     {
         # Coverbs / prepositions (also full verbs)
         "在",
@@ -126,6 +137,23 @@ CHINESE_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
         "不但",
         "不仅",
         "既",
+        # Copula / existence
+        "是",
+        "有",
+        # Auxiliaries with independent verb senses
+        "会",
+        "能",
+        "要",
+        "想",
+        # Negation that doubles as lemma
+        "没有",
+    }
+)
+
+# ── tier 4: non-personal pronouns ─────────────────────────────────────
+
+CHINESE_NON_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
+    {
         # Demonstratives / determiners
         "这",
         "那",
@@ -141,25 +169,22 @@ CHINESE_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
         "什么",
         "哪里",
         "哪儿",
+        # Demonstrative location words
         "这里",
         "那里",
         "这儿",
         "那儿",
-        # Copula / existence
-        "是",
-        "有",
-        # Auxiliaries with independent verb senses
-        "会",
-        "能",
-        "要",
-        "想",
-        # Negation that doubles as lemma
-        "没有",
     }
 )
 
-# ── combined set ───────────────────────────────────────────────────────
+# ── aggregate sets ─────────────────────────────────────────────────────
 
-CHINESE_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
-    CHINESE_GRAMMATICAL_ONLY | CHINESE_ALSO_LEMMA
+CHINESE_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
+    CHINESE_PERSONAL_PRONOUNS | CHINESE_GRAMMATICAL_WORDS
 )
+
+CHINESE_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
+    CHINESE_FUNCTION_WORDS | CHINESE_NON_PERSONAL_PRONOUNS
+)
+
+CHINESE_ALL_TIERS: Final[frozenset[str]] = frozenset(CHINESE_GRAMMATICAL_ONLY | CHINESE_ALSO_LEMMA)

@@ -1,66 +1,79 @@
 """Lithuanian grammatical/function-word data.
 
-* **grammatical_only** – personal/reflexive/possessive pronouns (all case
-  forms), auxiliary *būti* forms, particles.
-* **also_lemma** – prepositions, conjunctions, interrogative/relative pronouns,
-  and demonstratives that have (or could have) data/release entries.
+Four tiers:
+
+1. **personal_pronouns** – aš, tu, jis, ji, … (all case forms),
+   reflexive (savęs …), possessive (mano, tavo, savo)
+2. **grammatical_words** – auxiliary *būti* forms, particles (ar, ne, jau, …)
+3. **function_words** – prepositions (į, iš, su, …), conjunctions (ir, bet, …)
+4. **non_personal_pronouns** – demonstratives (šis, tas, …),
+   interrogative / relative (kas, kuris, koks, …)
+
+Tiers 1–2 have no analogues in data/release; tiers 3–4 do.
 """
 
 from typing import Final
 
-# ── tier 1: always grammatical, never a lemma ──────────────────────────
+# ── tier 1: personal pronouns ──────────────────────────────────────────
 
-LITHUANIAN_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
+LITHUANIAN_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
     {
-        # Personal pronouns — all cases
+        # aš – all cases
         "aš",
         "manęs",
         "man",
         "mane",
         "manimi",
         "manyje",
+        # tu – all cases
         "tu",
         "tavęs",
         "tau",
         "tave",
         "tavimi",
         "tavyje",
+        # jis – all cases
         "jis",
         "jo",
         "jam",
         "jį",
         "juo",
         "jame",
+        # ji – all cases
         "ji",
         "jos",
         "jai",
         "ją",
         "ja",
         "joje",
+        # mes – all cases
         "mes",
         "mūsų",
         "mums",
         "mus",
         "mumis",
         "mumyse",
+        # jūs – all cases
         "jūs",
         "jūsų",
         "jums",
         "jus",
         "jumis",
         "jumyse",
+        # jie – all cases
         "jie",
         "jų",
         "jiems",
         "juos",
         "jais",
         "juose",
+        # jos (fem. plural) – all cases
         "jos",
         "joms",
         "jas",
         "jomis",
         "jose",
-        # Reflexive pronoun
+        # Reflexive
         "savęs",
         "sau",
         "save",
@@ -70,6 +83,13 @@ LITHUANIAN_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
         "mano",
         "tavo",
         "savo",
+    }
+)
+
+# ── tier 2: grammatical words (auxiliaries, particles) ────────────────
+
+LITHUANIAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
+    {
         # Particles
         "ar",
         "ne",
@@ -97,31 +117,10 @@ LITHUANIAN_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
     }
 )
 
-# ── tier 2: function words that are (or could be) lemmas ───────────────
+# ── tier 3: function words (prepositions, conjunctions) ───────────────
 
-LITHUANIAN_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
+LITHUANIAN_FUNCTION_WORDS: Final[frozenset[str]] = frozenset(
     {
-        # Demonstrative pronouns
-        "šis",
-        "ši",
-        "šie",
-        "šios",
-        "tas",
-        "ta",
-        "tie",
-        "tos",
-        # Interrogative / relative pronouns
-        "kas",
-        "ko",
-        "kam",
-        "ką",
-        "kuo",
-        "kuris",
-        "kuri",
-        "kurie",
-        "kurios",
-        "koks",
-        "kokia",
         # Prepositions
         "į",
         "iš",
@@ -164,8 +163,44 @@ LITHUANIAN_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
     }
 )
 
-# ── combined set ───────────────────────────────────────────────────────
+# ── tier 4: non-personal pronouns (demonstratives, interrogatives) ────
 
-LITHUANIAN_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
+LITHUANIAN_NON_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
+    {
+        # Demonstrative pronouns
+        "šis",
+        "ši",
+        "šie",
+        "šios",
+        "tas",
+        "ta",
+        "tie",
+        "tos",
+        # Interrogative / relative pronouns
+        "kas",
+        "ko",
+        "kam",
+        "ką",
+        "kuo",
+        "kuris",
+        "kuri",
+        "kurie",
+        "kurios",
+        "koks",
+        "kokia",
+    }
+)
+
+# ── aggregate sets ─────────────────────────────────────────────────────
+
+LITHUANIAN_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
+    LITHUANIAN_PERSONAL_PRONOUNS | LITHUANIAN_GRAMMATICAL_WORDS
+)
+
+LITHUANIAN_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
+    LITHUANIAN_FUNCTION_WORDS | LITHUANIAN_NON_PERSONAL_PRONOUNS
+)
+
+LITHUANIAN_ALL_TIERS: Final[frozenset[str]] = frozenset(
     LITHUANIAN_GRAMMATICAL_ONLY | LITHUANIAN_ALSO_LEMMA
 )
