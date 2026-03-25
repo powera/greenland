@@ -48,6 +48,22 @@ from langtools.fr.grammatical_words import (
     FRENCH_NON_PERSONAL_PRONOUNS,
     FRENCH_PERSONAL_PRONOUNS,
 )
+from langtools.it.grammatical_words import (
+    ITALIAN_ALL_TIERS,
+    ITALIAN_ALSO_LEMMA,
+    ITALIAN_FUNCTION_WORDS,
+    ITALIAN_GRAMMATICAL_ONLY,
+    ITALIAN_NON_PERSONAL_PRONOUNS,
+    ITALIAN_PERSONAL_PRONOUNS,
+)
+from langtools.ja.grammatical_words import (
+    JAPANESE_ALL_TIERS,
+    JAPANESE_ALSO_LEMMA,
+    JAPANESE_FUNCTION_WORDS,
+    JAPANESE_GRAMMATICAL_ONLY,
+    JAPANESE_NON_PERSONAL_PRONOUNS,
+    JAPANESE_PERSONAL_PRONOUNS,
+)
 from langtools.lt.grammatical_words import (
     LITHUANIAN_ALL_TIERS,
     LITHUANIAN_ALSO_LEMMA,
@@ -55,6 +71,30 @@ from langtools.lt.grammatical_words import (
     LITHUANIAN_GRAMMATICAL_ONLY,
     LITHUANIAN_NON_PERSONAL_PRONOUNS,
     LITHUANIAN_PERSONAL_PRONOUNS,
+)
+from langtools.nl.grammatical_words import (
+    DUTCH_ALL_TIERS,
+    DUTCH_ALSO_LEMMA,
+    DUTCH_FUNCTION_WORDS,
+    DUTCH_GRAMMATICAL_ONLY,
+    DUTCH_NON_PERSONAL_PRONOUNS,
+    DUTCH_PERSONAL_PRONOUNS,
+)
+from langtools.pt.grammatical_words import (
+    PORTUGUESE_ALL_TIERS,
+    PORTUGUESE_ALSO_LEMMA,
+    PORTUGUESE_FUNCTION_WORDS,
+    PORTUGUESE_GRAMMATICAL_ONLY,
+    PORTUGUESE_NON_PERSONAL_PRONOUNS,
+    PORTUGUESE_PERSONAL_PRONOUNS,
+)
+from langtools.sv.grammatical_words import (
+    SWEDISH_ALL_TIERS,
+    SWEDISH_ALSO_LEMMA,
+    SWEDISH_FUNCTION_WORDS,
+    SWEDISH_GRAMMATICAL_ONLY,
+    SWEDISH_NON_PERSONAL_PRONOUNS,
+    SWEDISH_PERSONAL_PRONOUNS,
 )
 from langtools.zh.grammatical_words import (
     CHINESE_ALL_TIERS,
@@ -65,6 +105,8 @@ from langtools.zh.grammatical_words import (
     CHINESE_PERSONAL_PRONOUNS,
 )
 
+# TODO: Switch to conditional/lazy imports so registry setup is cheaper.
+
 # ── per-tier dicts ─────────────────────────────────────────────────────
 
 PERSONAL_PRONOUNS_BY_LANGUAGE: Final[dict[str, frozenset[str]]] = {
@@ -72,7 +114,12 @@ PERSONAL_PRONOUNS_BY_LANGUAGE: Final[dict[str, frozenset[str]]] = {
     "en": ENGLISH_PERSONAL_PRONOUNS,
     "es": SPANISH_PERSONAL_PRONOUNS,
     "fr": FRENCH_PERSONAL_PRONOUNS,
+    "it": ITALIAN_PERSONAL_PRONOUNS,
+    "ja": JAPANESE_PERSONAL_PRONOUNS,
     "lt": LITHUANIAN_PERSONAL_PRONOUNS,
+    "nl": DUTCH_PERSONAL_PRONOUNS,
+    "pt": PORTUGUESE_PERSONAL_PRONOUNS,
+    "sv": SWEDISH_PERSONAL_PRONOUNS,
     "zh": CHINESE_PERSONAL_PRONOUNS,
 }
 
@@ -81,7 +128,12 @@ NON_PERSONAL_PRONOUNS_BY_LANGUAGE: Final[dict[str, frozenset[str]]] = {
     "en": ENGLISH_NON_PERSONAL_PRONOUNS,
     "es": SPANISH_NON_PERSONAL_PRONOUNS,
     "fr": FRENCH_NON_PERSONAL_PRONOUNS,
+    "it": ITALIAN_NON_PERSONAL_PRONOUNS,
+    "ja": JAPANESE_NON_PERSONAL_PRONOUNS,
     "lt": LITHUANIAN_NON_PERSONAL_PRONOUNS,
+    "nl": DUTCH_NON_PERSONAL_PRONOUNS,
+    "pt": PORTUGUESE_NON_PERSONAL_PRONOUNS,
+    "sv": SWEDISH_NON_PERSONAL_PRONOUNS,
     "zh": CHINESE_NON_PERSONAL_PRONOUNS,
 }
 
@@ -90,7 +142,12 @@ FUNCTION_WORDS_BY_LANGUAGE: Final[dict[str, frozenset[str]]] = {
     "en": ENGLISH_FUNCTION_WORDS,
     "es": SPANISH_FUNCTION_WORDS,
     "fr": FRENCH_FUNCTION_WORDS,
+    "it": ITALIAN_FUNCTION_WORDS,
+    "ja": JAPANESE_FUNCTION_WORDS,
     "lt": LITHUANIAN_FUNCTION_WORDS,
+    "nl": DUTCH_FUNCTION_WORDS,
+    "pt": PORTUGUESE_FUNCTION_WORDS,
+    "sv": SWEDISH_FUNCTION_WORDS,
     "zh": CHINESE_FUNCTION_WORDS,
 }
 
@@ -102,7 +159,12 @@ GRAMMATICAL_ONLY_BY_LANGUAGE: Final[dict[str, frozenset[str]]] = {
     "en": ENGLISH_GRAMMATICAL_ONLY,
     "es": SPANISH_GRAMMATICAL_ONLY,
     "fr": FRENCH_GRAMMATICAL_ONLY,
+    "it": ITALIAN_GRAMMATICAL_ONLY,
+    "ja": JAPANESE_GRAMMATICAL_ONLY,
     "lt": LITHUANIAN_GRAMMATICAL_ONLY,
+    "nl": DUTCH_GRAMMATICAL_ONLY,
+    "pt": PORTUGUESE_GRAMMATICAL_ONLY,
+    "sv": SWEDISH_GRAMMATICAL_ONLY,
     "zh": CHINESE_GRAMMATICAL_ONLY,
 }
 
@@ -112,7 +174,12 @@ ALSO_LEMMA_BY_LANGUAGE: Final[dict[str, frozenset[str]]] = {
     "en": ENGLISH_ALSO_LEMMA,
     "es": SPANISH_ALSO_LEMMA,
     "fr": FRENCH_ALSO_LEMMA,
+    "it": ITALIAN_ALSO_LEMMA,
+    "ja": JAPANESE_ALSO_LEMMA,
     "lt": LITHUANIAN_ALSO_LEMMA,
+    "nl": DUTCH_ALSO_LEMMA,
+    "pt": PORTUGUESE_ALSO_LEMMA,
+    "sv": SWEDISH_ALSO_LEMMA,
     "zh": CHINESE_ALSO_LEMMA,
 }
 
@@ -122,7 +189,12 @@ GRAMMATICAL_WORDS_BY_LANGUAGE: Final[dict[str, frozenset[str]]] = {
     "en": ENGLISH_ALL_TIERS,
     "es": SPANISH_ALL_TIERS,
     "fr": FRENCH_ALL_TIERS,
+    "it": ITALIAN_ALL_TIERS,
+    "ja": JAPANESE_ALL_TIERS,
     "lt": LITHUANIAN_ALL_TIERS,
+    "nl": DUTCH_ALL_TIERS,
+    "pt": PORTUGUESE_ALL_TIERS,
+    "sv": SWEDISH_ALL_TIERS,
     "zh": CHINESE_ALL_TIERS,
 }
 
