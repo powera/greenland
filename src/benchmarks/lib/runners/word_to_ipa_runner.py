@@ -2,16 +2,14 @@
 
 """Runner for the word-to-IPA benchmark."""
 
-import json
 import logging
 import re
-import unicodedata
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from benchmarks.lib.utils.base_runner import BenchmarkRunner
 from benchmarks.lib.utils.data_models import BenchmarkMetadata, BenchmarkResult
 from benchmarks.lib.utils.factory import runner
+from ipa import are_ipa_equivalent, normalize_ipa, weighted_similarity_ratio
 from words import build_ipa_pronunciation_prompt
 
 # Configure logging
@@ -19,10 +17,6 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
-# Load IPA character set from JSON to avoid encoding issues with Unicode in source files.
-_IPA_CHARS_PATH = Path(__file__).parent / "ipa_chars.json"
-_IPA_CHARS: frozenset = frozenset(json.loads(_IPA_CHARS_PATH.read_text(encoding="utf-8"))["chars"])
 
 # Define benchmark metadata
 BENCHMARK_METADATA = BenchmarkMetadata(
@@ -131,7 +125,7 @@ class WordToIPARunner(BenchmarkRunner):
                     return True
 
         # Check for close matches with slight variations (allow small differences)
-        if self._is_close_match(model_answer, correct_answer):
+        if are_ipa_equivalent(model_answer, correct_answer):
             return True
 
         # If we get here, the answer is incorrect
@@ -170,7 +164,7 @@ class WordToIPARunner(BenchmarkRunner):
 
         best_ratio = max(
             (
-                self._weighted_similarity_ratio(normalized_model, expected)
+                weighted_similarity_ratio(normalized_model, expected)
                 for expected in candidates
                 if expected
             ),
@@ -179,128 +173,12 @@ class WordToIPARunner(BenchmarkRunner):
         return int(round(60 * best_ratio))
 
     def _weighted_similarity_ratio(self, left: str, right: str) -> float:
-        """Compute phonetic-weighted Levenshtein similarity ratio in [0, 1].
-
-        Uses the same similar_chars substitution costs as _is_close_match so that
-        phonetically equivalent IPA variants score higher than completely different ones.
-        """
-        if left == right:
-            return 1.0
-        if not left or not right:
-            return 0.0
-
-        m, n = len(left), len(right)
-        max_len = max(m, n)
-
-        similar_chars = {
-            "i": {"i", "ɪ"},
-            "ɪ": {"ɪ", "i"},
-            "e": {"e", "ɛ"},
-            "ɛ": {"ɛ", "e"},
-            "æ": {"æ", "a", "ɑ"},
-            "a": {"a", "æ", "ɑ"},
-            "ɑ": {"ɑ", "a", "æ", "ɒ"},
-            "ɒ": {"ɒ", "ɑ", "o", "ɔ"},
-            "ɔ": {"ɔ", "o", "ɒ"},
-            "o": {"o", "ɔ", "ɒ"},
-            "u": {"u", "ʊ"},
-            "ʊ": {"ʊ", "u"},
-            "ʌ": {"ʌ", "ə", "ɜ"},
-            "ə": {"ə", "ʌ", "ɜ", "ɚ"},
-            "ɝ": {"ɝ", "ɚ", "ɜ"},
-            "ɚ": {"ɚ", "ɝ", "ə"},
-            "ɹ": {"ɹ", "r"},
-            "r": {"r", "ɹ"},
-            "t": {"t", "ɾ"},
-            "ɾ": {"ɾ", "t"},
-            "ɡ": {"ɡ", "g"},
-            "g": {"g", "ɡ"},
-            "d": {"d", "ð"},
-            "ð": {"ð", "d"},
-            "b": {"b", "β"},
-            "β": {"β", "b"},
-            "ɲ": {"ɲ", "n"},
-            "n": {"n", "ɲ"},
-        }
-
-        def substitution_cost(a: str, b: str) -> float:
-            if a == b:
-                return 0.0
-            if a in similar_chars.get(b, set()) or b in similar_chars.get(a, set()):
-                return 0.5
-            return 1.0
-
-        dp = [[0.0] * (n + 1) for _ in range(m + 1)]
-        for i in range(1, m + 1):
-            dp[i][0] = float(i)
-        for j in range(1, n + 1):
-            dp[0][j] = float(j)
-
-        for i in range(1, m + 1):
-            for j in range(1, n + 1):
-                sub_cost = substitution_cost(left[i - 1], right[j - 1])
-                dp[i][j] = min(
-                    dp[i - 1][j] + 1.0,
-                    dp[i][j - 1] + 1.0,
-                    dp[i - 1][j - 1] + sub_cost,
-                )
-
-        return max(0.0, 1.0 - (dp[m][n] / max_len))
+        """Backward-compatible wrapper around shared IPA similarity logic."""
+        return weighted_similarity_ratio(left, right)
 
     def _normalize_ipa(self, ipa_string: str) -> str:
-        """
-        Normalize an IPA string for consistent comparison.
-
-        Args:
-            ipa_string: The IPA string to normalize
-
-        Returns:
-            Normalized IPA string
-        """
-        # Remove any text that's not part of the IPA (common with model responses)
-        # Look for brackets, slashes, or other common IPA delimiters
-        ipa_markers = [
-            (r"/(.+?)/", r"\1"),  # Extract content between /.../ slashes
-            (r"\[(.+?)\]", r"\1"),  # Extract content between [...] brackets
-            (r"\((.+?)\)", r"\1"),  # Extract content between (...) parentheses
-        ]
-
-        # Try to extract IPA from delimiters
-        extracted = ipa_string
-        for pattern, replacement in ipa_markers:
-            match = re.search(pattern, ipa_string)
-            if match:
-                extracted = re.sub(pattern, replacement, ipa_string)
-                break
-
-        # Remove any surrounding whitespace and normalize Unicode composition.
-        normalized = unicodedata.normalize("NFC", extracted.strip())
-
-        # Normalize equivalent affricate tie-bar forms (e.g., t͡ɕ -> tɕ).
-        # This keeps comparison robust across common IPA rendering variants.
-        normalized = normalized.replace("͡", "").replace("͜", "")
-
-        # Normalize syllable delimiters commonly emitted by models (e.g., bɔ̃.ʒuʁ).
-        normalized = normalized.replace(".", "")
-
-        # Remove any explanatory text before or after the IPA.
-        # Find the segment with the highest proportion of known IPA characters.
-        segments = re.findall(r"[^\s,;:]+", normalized)
-        if segments:
-            best_segment = max(
-                segments,
-                key=lambda s: (
-                    sum(1 for c in s.lower() if c in _IPA_CHARS) / len(s) if len(s) > 0 else 0
-                ),
-            )
-            if (
-                best_segment
-                and sum(1 for c in best_segment.lower() if c in _IPA_CHARS) / len(best_segment)
-                > 0.5
-            ):
-                normalized = best_segment
-
-        return normalized
+        """Backward-compatible wrapper around shared IPA normalization logic."""
+        return normalize_ipa(ipa_string)
 
     def _is_close_match(
         self, model_answer: str, correct_answer: str, threshold: float = 0.8
@@ -316,75 +194,7 @@ class WordToIPARunner(BenchmarkRunner):
         Returns:
             Boolean indicating whether the answers are close enough
         """
-        # If either string is empty, they're not close
-        if not model_answer or not correct_answer:
-            return False
-
-        # Allow slight symbol variation across broad/narrow transcriptions.
-        similar_chars = {
-            "i": set(["i", "ɪ", "iː"]),
-            "ɪ": set(["ɪ", "i", "iː"]),
-            "e": set(["e", "ɛ", "eɪ"]),
-            "ɛ": set(["ɛ", "e", "eɪ"]),
-            "æ": set(["æ", "a", "ɑ"]),
-            "a": set(["a", "æ", "ɑ"]),
-            "ɑ": set(["ɑ", "a", "æ", "ɒ"]),
-            "ɒ": set(["ɒ", "ɑ", "o", "ɔ"]),
-            "ɔ": set(["ɔ", "o", "ɒ"]),
-            "o": set(["o", "ɔ", "ɒ", "oʊ"]),
-            "u": set(["u", "ʊ", "uː"]),
-            "ʊ": set(["ʊ", "u", "uː"]),
-            "ʌ": set(["ʌ", "ə", "ɜ"]),
-            "ə": set(["ə", "ʌ", "ɜ", "ɚ"]),
-            "ɝ": set(["ɝ", "ɚ", "ɜ"]),
-            "ɚ": set(["ɚ", "ɝ", "ə"]),
-            "ɹ": set(["ɹ", "r"]),
-            "r": set(["r", "ɹ"]),
-            "t": set(["t", "ɾ"]),  # Especially for American English
-            "ɾ": set(["ɾ", "t"]),
-            # Common spirantization/lenition variants in broad transcriptions.
-            "ɡ": set(["ɡ", "g", "ɣ"]),
-            "g": set(["g", "ɡ", "ɣ"]),
-            "ɣ": set(["ɣ", "ɡ", "g"]),
-            "d": set(["d", "ð"]),
-            "ð": set(["ð", "d"]),
-            "b": set(["b", "β"]),
-            "β": set(["β", "b"]),
-            "ɲ": set(["ɲ", "n"]),
-            "n": set(["n", "ɲ"]),
-        }
-
-        def substitution_cost(a: str, b: str) -> float:
-            if a == b:
-                return 0.0
-            if a in similar_chars.get(b, set()) or b in similar_chars.get(a, set()):
-                return 0.5
-            return 1.0
-
-        m, n = len(model_answer), len(correct_answer)
-        if m == 0 or n == 0:
-            return False
-
-        # Weighted Levenshtein distance to tolerate insertions/deletions,
-        # not just positionally-aligned substitutions.
-        dp = [[0.0] * (n + 1) for _ in range(m + 1)]
-        for i in range(1, m + 1):
-            dp[i][0] = float(i)
-        for j in range(1, n + 1):
-            dp[0][j] = float(j)
-
-        for i in range(1, m + 1):
-            for j in range(1, n + 1):
-                sub_cost = substitution_cost(model_answer[i - 1], correct_answer[j - 1])
-                dp[i][j] = min(
-                    dp[i - 1][j] + 1.0,  # deletion
-                    dp[i][j - 1] + 1.0,  # insertion
-                    dp[i - 1][j - 1] + sub_cost,  # substitution/match
-                )
-
-        max_len = max(m, n)
-        similarity = 1.0 - (dp[m][n] / max_len)
-        return similarity >= threshold
+        return are_ipa_equivalent(model_answer, correct_answer, threshold)
 
     def build_debug_info(self, question_data: Dict, response: Any, is_correct: bool) -> Dict:
         """Build debug information for benchmark results."""
