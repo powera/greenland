@@ -61,6 +61,14 @@ usage and arguments.
 
 ---
 
+
+## Configuration convention
+
+Pass runtime backend/model settings via `storage.backend.config.DataSourceConfig`
+rather than passing `db_path`, `model_name`, or similar values directly.
+
+---
+
 ## Database
 
 The primary database is **`data/wordfreq/linguistics.sqlite`** (gitignored).
