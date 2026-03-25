@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-RHYME_KEY_LANGUAGES: frozenset[str] = frozenset({"en", "lt", "es", "fr"})
+from langtools.rhyme_languages import RHYME_KEY_LANGUAGES
 
 # Broad IPA vowel inventory covering the currently supported rhyme-key languages.
 IPA_VOWELS: frozenset[str] = frozenset("iɪeɛæɑɒɔʊuʌəɜɚɝaoɐœøyʏɨɯɒ̃ɛ̃ɔ̃ɑ̃ɶɤɞɘɵɜ̃ɒ̈ʉɒ̈")

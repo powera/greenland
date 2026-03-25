@@ -9,7 +9,7 @@
 {% block content %}
 <div class="row mb-3">
     <div class="col">
-        <a href="{{ url_for('rhymes.index', sound=final_sound) }}" class="text-muted small">
+        <a href="{{ url_for('rhymes.index', sound=final_sound, language=selected_language) }}" class="text-muted small">
             <i class="bi bi-arrow-left"></i> Back to rhyme index
         </a>
     </div>
@@ -88,7 +88,7 @@
             </div>
             <div class="list-group list-group-flush rhyme-related-list">
                 {% for rel in related_families %}
-                    <a href="{{ url_for('rhymes.family', key=rel.rhyme_key) }}"
+                    <a href="{{ url_for('rhymes.family', key=rel.rhyme_key, language=selected_language) }}"
                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-1">
                         <span class="rhyme-key-link">-{{ rel.rhyme_key }}</span>
                         <span class="badge bg-secondary rounded-pill">{{ rel.word_count }}</span>
@@ -104,7 +104,7 @@
 <div class="row">
     <div class="col">
         <div class="alert alert-info">
-            No rhyme key specified. <a href="{{ url_for('rhymes.index') }}">Browse rhyme families</a>.
+            No rhyme key specified. <a href="{{ url_for('rhymes.index', language=selected_language) }}">Browse rhyme families</a>.
         </div>
     </div>
 </div>

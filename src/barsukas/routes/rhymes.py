@@ -19,6 +19,7 @@ from flask.typing import ResponseReturnValue
 from sqlalchemy import func
 
 from langtools.rhyme_keys import (
+    RHYME_KEY_LANGUAGES,
     rhyme_key_final_sound,
     rhyme_key_penultimate_sound,
 )
@@ -34,7 +35,15 @@ RHYME_ITEMS_PER_PAGE = 200
 # ---------------------------------------------------------------------------
 
 
-def _rhyme_family_rows() -> List[Tuple[str, int, str]]:
+def _validated_language_code(raw_language: Optional[str]) -> str:
+    """Return a valid rhyme-key language code, defaulting to English."""
+    candidate = (raw_language or "en").strip().lower()
+    if candidate in RHYME_KEY_LANGUAGES:
+        return candidate
+    return "en"
+
+
+def _rhyme_family_rows(language_code: str) -> List[Tuple[str, int, str]]:
     """Return grouped rhyme-family rows limited to keys with 2+ distinct lemmas."""
     rows = (
         g.db.query(
@@ -43,7 +52,7 @@ def _rhyme_family_rows() -> List[Tuple[str, int, str]]:
             func.min(DerivativeForm.derivative_form_text).label("example_word"),
         )
         .filter(
-            DerivativeForm.language_code == "en",
+            DerivativeForm.language_code == language_code,
             DerivativeForm.rhyme_key.isnot(None),
         )
         .group_by(DerivativeForm.rhyme_key)
@@ -53,7 +62,7 @@ def _rhyme_family_rows() -> List[Tuple[str, int, str]]:
     return cast(List[Tuple[str, int, str]], rows)
 
 
-def _distinct_final_sounds() -> List[Tuple[str, int]]:
+def _distinct_final_sounds(language_code: str) -> List[Tuple[str, int]]:
     """Return (final_sound, family_count) pairs sorted by family count desc.
 
     Each "final sound" groups multiple rhyme keys together (e.g., all keys
@@ -61,7 +70,7 @@ def _distinct_final_sounds() -> List[Tuple[str, int]]:
     distinct rhyme keys since the grouping logic lives in Python.
     """
     sound_counts: Dict[str, int] = {}
-    for rk, _, _ in _rhyme_family_rows():
+    for rk, _, _ in _rhyme_family_rows(language_code):
         fs = rhyme_key_final_sound(rk)
         if fs:
             sound_counts[fs] = sound_counts.get(fs, 0) + 1
@@ -71,13 +80,14 @@ def _distinct_final_sounds() -> List[Tuple[str, int]]:
 
 def _rhyme_families_for_final_sound(
     final_sound: str,
+    language_code: str,
 ) -> List[Dict[str, Any]]:
     """Return rhyme family dicts for all keys whose final sound matches.
 
     Each dict has: rhyme_key, penultimate, word_count, example_word.
     """
     families: List[Dict[str, Any]] = []
-    for rk, count, example in _rhyme_family_rows():
+    for rk, count, example in _rhyme_family_rows(language_code):
         fs = rhyme_key_final_sound(rk)
         if fs == final_sound:
             families.append(
@@ -96,6 +106,7 @@ def _rhyme_families_for_final_sound(
 
 def _family_words(
     rhyme_key_value: str,
+    language_code: str,
 ) -> List[Dict[str, Any]]:
     """Return word dicts for all lemmas in a given rhyme family."""
     rows = (
@@ -111,7 +122,7 @@ def _family_words(
         )
         .join(DerivativeForm, DerivativeForm.lemma_id == Lemma.id)
         .filter(
-            DerivativeForm.language_code == "en",
+            DerivativeForm.language_code == language_code,
             DerivativeForm.rhyme_key == rhyme_key_value,
             Lemma.guid.isnot(None),
         )
@@ -150,7 +161,8 @@ def _family_words(
 @bp.route("/")
 def index() -> ResponseReturnValue:
     """Rhyming dictionary index — two-tier browse by ending sound."""
-    final_sounds = _distinct_final_sounds()
+    selected_language = _validated_language_code(request.args.get("language"))
+    final_sounds = _distinct_final_sounds(selected_language)
 
     # If a final sound is selected, show its rhyme families.
     selected_sound: Optional[str] = request.args.get("sound", "").strip() or None
@@ -168,7 +180,7 @@ def index() -> ResponseReturnValue:
     selected_penultimate: Optional[str] = None
 
     if selected_sound:
-        families = _rhyme_families_for_final_sound(selected_sound)
+        families = _rhyme_families_for_final_sound(selected_sound, selected_language)
 
         # Tier 2: collect distinct penultimate sounds for sub-navigation.
         pen_set: Dict[str, int] = {}
@@ -196,12 +208,14 @@ def index() -> ResponseReturnValue:
         selected_penultimate=selected_penultimate,
         families=families,
         total_families=total_families,
+        selected_language=selected_language,
     )
 
 
 @bp.route("/family")
 def family() -> ResponseReturnValue:
     """Detail view for a single rhyme family."""
+    selected_language = _validated_language_code(request.args.get("language"))
     rhyme_key_value: Optional[str] = request.args.get("key", "").strip() or None
 
     if not rhyme_key_value:
@@ -211,15 +225,16 @@ def family() -> ResponseReturnValue:
             words=[],
             related_families=[],
             final_sound="",
+            selected_language=selected_language,
         )
 
-    words = _family_words(rhyme_key_value)
+    words = _family_words(rhyme_key_value, selected_language)
 
     # Find related families: same final sound, different penultimate.
     final_sound = rhyme_key_final_sound(rhyme_key_value)
     related: List[Dict[str, Any]] = []
     if final_sound:
-        all_families = _rhyme_families_for_final_sound(final_sound)
+        all_families = _rhyme_families_for_final_sound(final_sound, selected_language)
         related = [f for f in all_families if f["rhyme_key"] != rhyme_key_value]
 
     return render_template(
@@ -228,4 +243,5 @@ def family() -> ResponseReturnValue:
         words=words,
         related_families=related,
         final_sound=final_sound,
+        selected_language=selected_language,
     )
