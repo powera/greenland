@@ -24,7 +24,7 @@
         {% if sound == selected_sound %}
             <span class="rhyme-sound rhyme-sound-active" title="{{ count }} families">{{ sound }}</span>
         {% else %}
-            <a href="{{ url_for('rhymes.index', sound=sound) }}"
+            <a href="{{ url_for('rhymes.index', sound=sound, language=selected_language) }}"
                class="rhyme-sound" title="{{ count }} families">{{ sound }}</a>
         {% endif %}
     {% endfor %}
@@ -35,13 +35,13 @@
 {% if penultimate_sounds|length > 1 %}
 <nav class="rhyme-nav rhyme-nav-tier2 mb-3" aria-label="Vowel sound navigation">
     <span class="rhyme-nav-label text-muted small me-2">Vowel:</span>
-    <a href="{{ url_for('rhymes.index', sound=selected_sound) }}"
+    <a href="{{ url_for('rhymes.index', sound=selected_sound, language=selected_language) }}"
        class="rhyme-sound rhyme-sound-sm {% if not selected_penultimate %}rhyme-sound-active{% endif %}">All</a>
     {% for pen in penultimate_sounds %}
         {% if pen == selected_penultimate %}
             <span class="rhyme-sound rhyme-sound-sm rhyme-sound-active">{{ pen }}</span>
         {% else %}
-            <a href="{{ url_for('rhymes.index', sound=selected_sound, pen=pen) }}"
+            <a href="{{ url_for('rhymes.index', sound=selected_sound, pen=pen, language=selected_language) }}"
                class="rhyme-sound rhyme-sound-sm">{{ pen }}</a>
         {% endif %}
     {% endfor %}
@@ -62,7 +62,7 @@
             {% for family in families %}
                 <tr>
                     <td class="rhyme-key-cell">
-                        <a href="{{ url_for('rhymes.family', key=family.rhyme_key) }}"
+                        <a href="{{ url_for('rhymes.family', key=family.rhyme_key, language=selected_language) }}"
                            class="rhyme-key-link">-{{ family.rhyme_key }}</a>
                     </td>
                     <td class="text-muted">{{ family.example_word }}</td>

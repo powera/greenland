@@ -2,12 +2,12 @@
 
 from ipa.rhyme_keys import (
     IPA_VOWELS,
-    RHYME_KEY_LANGUAGES,
     compute_rhyme_key,
     rhyme_key_final_sound,
     rhyme_key_penultimate_sound,
     rhyme_keys_available,
 )
+from langtools.rhyme_languages import RHYME_KEY_LANGUAGES
 
 __all__ = [
     "RHYME_KEY_LANGUAGES",
