@@ -14,189 +14,140 @@ Tiers 3–4 do (linker should resolve them to lemmas).
 ``is_function_word`` checks all four tiers (the broad set).
 """
 
-from typing import Final
+from collections.abc import Iterator, Mapping
+from dataclasses import dataclass
+from functools import lru_cache
+import importlib
+from typing import Final, Literal, cast
 
-from langtools.de.grammatical_words import (
-    GERMAN_ALL_TIERS,
-    GERMAN_ALSO_LEMMA,
-    GERMAN_FUNCTION_WORDS,
-    GERMAN_GRAMMATICAL_ONLY,
-    GERMAN_NON_PERSONAL_PRONOUNS,
-    GERMAN_PERSONAL_PRONOUNS,
-)
-from langtools.en.grammatical_words import (
-    ENGLISH_ALL_TIERS,
-    ENGLISH_ALSO_LEMMA,
-    ENGLISH_FUNCTION_WORDS,
-    ENGLISH_GRAMMATICAL_ONLY,
-    ENGLISH_NON_PERSONAL_PRONOUNS,
-    ENGLISH_PERSONAL_PRONOUNS,
-)
-from langtools.es.grammatical_words import (
-    SPANISH_ALL_TIERS,
-    SPANISH_ALSO_LEMMA,
-    SPANISH_FUNCTION_WORDS,
-    SPANISH_GRAMMATICAL_ONLY,
-    SPANISH_NON_PERSONAL_PRONOUNS,
-    SPANISH_PERSONAL_PRONOUNS,
-)
-from langtools.fr.grammatical_words import (
-    FRENCH_ALL_TIERS,
-    FRENCH_ALSO_LEMMA,
-    FRENCH_FUNCTION_WORDS,
-    FRENCH_GRAMMATICAL_ONLY,
-    FRENCH_NON_PERSONAL_PRONOUNS,
-    FRENCH_PERSONAL_PRONOUNS,
-)
-from langtools.it.grammatical_words import (
-    ITALIAN_ALL_TIERS,
-    ITALIAN_ALSO_LEMMA,
-    ITALIAN_FUNCTION_WORDS,
-    ITALIAN_GRAMMATICAL_ONLY,
-    ITALIAN_NON_PERSONAL_PRONOUNS,
-    ITALIAN_PERSONAL_PRONOUNS,
-)
-from langtools.ja.grammatical_words import (
-    JAPANESE_ALL_TIERS,
-    JAPANESE_ALSO_LEMMA,
-    JAPANESE_FUNCTION_WORDS,
-    JAPANESE_GRAMMATICAL_ONLY,
-    JAPANESE_NON_PERSONAL_PRONOUNS,
-    JAPANESE_PERSONAL_PRONOUNS,
-)
-from langtools.lt.grammatical_words import (
-    LITHUANIAN_ALL_TIERS,
-    LITHUANIAN_ALSO_LEMMA,
-    LITHUANIAN_FUNCTION_WORDS,
-    LITHUANIAN_GRAMMATICAL_ONLY,
-    LITHUANIAN_NON_PERSONAL_PRONOUNS,
-    LITHUANIAN_PERSONAL_PRONOUNS,
-)
-from langtools.nl.grammatical_words import (
-    DUTCH_ALL_TIERS,
-    DUTCH_ALSO_LEMMA,
-    DUTCH_FUNCTION_WORDS,
-    DUTCH_GRAMMATICAL_ONLY,
-    DUTCH_NON_PERSONAL_PRONOUNS,
-    DUTCH_PERSONAL_PRONOUNS,
-)
-from langtools.pt.grammatical_words import (
-    PORTUGUESE_ALL_TIERS,
-    PORTUGUESE_ALSO_LEMMA,
-    PORTUGUESE_FUNCTION_WORDS,
-    PORTUGUESE_GRAMMATICAL_ONLY,
-    PORTUGUESE_NON_PERSONAL_PRONOUNS,
-    PORTUGUESE_PERSONAL_PRONOUNS,
-)
-from langtools.sv.grammatical_words import (
-    SWEDISH_ALL_TIERS,
-    SWEDISH_ALSO_LEMMA,
-    SWEDISH_FUNCTION_WORDS,
-    SWEDISH_GRAMMATICAL_ONLY,
-    SWEDISH_NON_PERSONAL_PRONOUNS,
-    SWEDISH_PERSONAL_PRONOUNS,
-)
-from langtools.zh.grammatical_words import (
-    CHINESE_ALL_TIERS,
-    CHINESE_ALSO_LEMMA,
-    CHINESE_FUNCTION_WORDS,
-    CHINESE_GRAMMATICAL_ONLY,
-    CHINESE_NON_PERSONAL_PRONOUNS,
-    CHINESE_PERSONAL_PRONOUNS,
-)
 
-# TODO: Switch to conditional/lazy imports so registry setup is cheaper.
+@dataclass(frozen=True)
+class _LanguageTierData:
+    personal_pronouns: frozenset[str]
+    grammatical_only: frozenset[str]
+    function_words: frozenset[str]
+    non_personal_pronouns: frozenset[str]
+    also_lemma: frozenset[str]
+    all_tiers: frozenset[str]
 
-# ── per-tier dicts ─────────────────────────────────────────────────────
 
-PERSONAL_PRONOUNS_BY_LANGUAGE: Final[dict[str, frozenset[str]]] = {
-    "de": GERMAN_PERSONAL_PRONOUNS,
-    "en": ENGLISH_PERSONAL_PRONOUNS,
-    "es": SPANISH_PERSONAL_PRONOUNS,
-    "fr": FRENCH_PERSONAL_PRONOUNS,
-    "it": ITALIAN_PERSONAL_PRONOUNS,
-    "ja": JAPANESE_PERSONAL_PRONOUNS,
-    "lt": LITHUANIAN_PERSONAL_PRONOUNS,
-    "nl": DUTCH_PERSONAL_PRONOUNS,
-    "pt": PORTUGUESE_PERSONAL_PRONOUNS,
-    "sv": SWEDISH_PERSONAL_PRONOUNS,
-    "zh": CHINESE_PERSONAL_PRONOUNS,
+_LANGUAGE_MODULE_PATHS: Final[dict[str, str]] = {
+    "de": "langtools.de.grammatical_words",
+    "en": "langtools.en.grammatical_words",
+    "es": "langtools.es.grammatical_words",
+    "fr": "langtools.fr.grammatical_words",
+    "it": "langtools.it.grammatical_words",
+    "ja": "langtools.ja.grammatical_words",
+    "lt": "langtools.lt.grammatical_words",
+    "nl": "langtools.nl.grammatical_words",
+    "pt": "langtools.pt.grammatical_words",
+    "sv": "langtools.sv.grammatical_words",
+    "zh": "langtools.zh.grammatical_words",
 }
 
-NON_PERSONAL_PRONOUNS_BY_LANGUAGE: Final[dict[str, frozenset[str]]] = {
-    "de": GERMAN_NON_PERSONAL_PRONOUNS,
-    "en": ENGLISH_NON_PERSONAL_PRONOUNS,
-    "es": SPANISH_NON_PERSONAL_PRONOUNS,
-    "fr": FRENCH_NON_PERSONAL_PRONOUNS,
-    "it": ITALIAN_NON_PERSONAL_PRONOUNS,
-    "ja": JAPANESE_NON_PERSONAL_PRONOUNS,
-    "lt": LITHUANIAN_NON_PERSONAL_PRONOUNS,
-    "nl": DUTCH_NON_PERSONAL_PRONOUNS,
-    "pt": PORTUGUESE_NON_PERSONAL_PRONOUNS,
-    "sv": SWEDISH_NON_PERSONAL_PRONOUNS,
-    "zh": CHINESE_NON_PERSONAL_PRONOUNS,
+_LANGUAGE_CONSTANT_PREFIXES: Final[dict[str, str]] = {
+    "de": "GERMAN",
+    "en": "ENGLISH",
+    "es": "SPANISH",
+    "fr": "FRENCH",
+    "it": "ITALIAN",
+    "ja": "JAPANESE",
+    "lt": "LITHUANIAN",
+    "nl": "DUTCH",
+    "pt": "PORTUGUESE",
+    "sv": "SWEDISH",
+    "zh": "CHINESE",
 }
 
-FUNCTION_WORDS_BY_LANGUAGE: Final[dict[str, frozenset[str]]] = {
-    "de": GERMAN_FUNCTION_WORDS,
-    "en": ENGLISH_FUNCTION_WORDS,
-    "es": SPANISH_FUNCTION_WORDS,
-    "fr": FRENCH_FUNCTION_WORDS,
-    "it": ITALIAN_FUNCTION_WORDS,
-    "ja": JAPANESE_FUNCTION_WORDS,
-    "lt": LITHUANIAN_FUNCTION_WORDS,
-    "nl": DUTCH_FUNCTION_WORDS,
-    "pt": PORTUGUESE_FUNCTION_WORDS,
-    "sv": SWEDISH_FUNCTION_WORDS,
-    "zh": CHINESE_FUNCTION_WORDS,
-}
 
-# ── aggregate dicts ────────────────────────────────────────────────────
+@lru_cache(maxsize=None)
+def _load_language_tiers(language_code: str) -> _LanguageTierData:
+    module_path = _LANGUAGE_MODULE_PATHS.get(language_code)
+    constant_prefix = _LANGUAGE_CONSTANT_PREFIXES.get(language_code)
+    if module_path is None or constant_prefix is None:
+        raise KeyError(language_code)
+
+    language_module = importlib.import_module(module_path)
+
+    def _read_tier(suffix: str) -> frozenset[str]:
+        value = getattr(language_module, f"{constant_prefix}_{suffix}")
+        if not isinstance(value, frozenset):
+            return frozenset(value)
+        return value
+
+    return _LanguageTierData(
+        personal_pronouns=_read_tier("PERSONAL_PRONOUNS"),
+        grammatical_only=_read_tier("GRAMMATICAL_ONLY"),
+        function_words=_read_tier("FUNCTION_WORDS"),
+        non_personal_pronouns=_read_tier("NON_PERSONAL_PRONOUNS"),
+        also_lemma=_read_tier("ALSO_LEMMA"),
+        all_tiers=_read_tier("ALL_TIERS"),
+    )
+
+
+_TierName = Literal[
+    "personal_pronouns",
+    "grammatical_only",
+    "function_words",
+    "non_personal_pronouns",
+    "also_lemma",
+    "all_tiers",
+]
+
+
+def _get_tier_for_language(language_code: str, tier_name: _TierName) -> frozenset[str] | None:
+    try:
+        language_data = _load_language_tiers(language_code)
+    except KeyError:
+        return None
+    return cast(frozenset[str], getattr(language_data, tier_name))
+
+
+class _LanguageTierMapping(Mapping[str, frozenset[str]]):
+    def __init__(self, tier_name: _TierName) -> None:
+        self._tier_name = tier_name
+
+    def __getitem__(self, language_code: str) -> frozenset[str]:
+        tier = _get_tier_for_language(language_code, self._tier_name)
+        if tier is None:
+            raise KeyError(language_code)
+        return tier
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(_LANGUAGE_MODULE_PATHS)
+
+    def __len__(self) -> int:
+        return len(_LANGUAGE_MODULE_PATHS)
+
+
+# ── per-tier dict-like registries ──────────────────────────────────────
+
+PERSONAL_PRONOUNS_BY_LANGUAGE: Final[Mapping[str, frozenset[str]]] = _LanguageTierMapping(
+    "personal_pronouns"
+)
+
+NON_PERSONAL_PRONOUNS_BY_LANGUAGE: Final[Mapping[str, frozenset[str]]] = _LanguageTierMapping(
+    "non_personal_pronouns"
+)
+
+FUNCTION_WORDS_BY_LANGUAGE: Final[Mapping[str, frozenset[str]]] = _LanguageTierMapping(
+    "function_words"
+)
+
+# ── aggregate dict-like registries ─────────────────────────────────────
 
 # Tiers 1+2: linker skips these (not in data/release).
-GRAMMATICAL_ONLY_BY_LANGUAGE: Final[dict[str, frozenset[str]]] = {
-    "de": GERMAN_GRAMMATICAL_ONLY,
-    "en": ENGLISH_GRAMMATICAL_ONLY,
-    "es": SPANISH_GRAMMATICAL_ONLY,
-    "fr": FRENCH_GRAMMATICAL_ONLY,
-    "it": ITALIAN_GRAMMATICAL_ONLY,
-    "ja": JAPANESE_GRAMMATICAL_ONLY,
-    "lt": LITHUANIAN_GRAMMATICAL_ONLY,
-    "nl": DUTCH_GRAMMATICAL_ONLY,
-    "pt": PORTUGUESE_GRAMMATICAL_ONLY,
-    "sv": SWEDISH_GRAMMATICAL_ONLY,
-    "zh": CHINESE_GRAMMATICAL_ONLY,
-}
+GRAMMATICAL_ONLY_BY_LANGUAGE: Final[Mapping[str, frozenset[str]]] = _LanguageTierMapping(
+    "grammatical_only"
+)
 
 # Tiers 3+4: linker should resolve these to lemmas.
-ALSO_LEMMA_BY_LANGUAGE: Final[dict[str, frozenset[str]]] = {
-    "de": GERMAN_ALSO_LEMMA,
-    "en": ENGLISH_ALSO_LEMMA,
-    "es": SPANISH_ALSO_LEMMA,
-    "fr": FRENCH_ALSO_LEMMA,
-    "it": ITALIAN_ALSO_LEMMA,
-    "ja": JAPANESE_ALSO_LEMMA,
-    "lt": LITHUANIAN_ALSO_LEMMA,
-    "nl": DUTCH_ALSO_LEMMA,
-    "pt": PORTUGUESE_ALSO_LEMMA,
-    "sv": SWEDISH_ALSO_LEMMA,
-    "zh": CHINESE_ALSO_LEMMA,
-}
+ALSO_LEMMA_BY_LANGUAGE: Final[Mapping[str, frozenset[str]]] = _LanguageTierMapping("also_lemma")
 
 # All four tiers (broadest).
-GRAMMATICAL_WORDS_BY_LANGUAGE: Final[dict[str, frozenset[str]]] = {
-    "de": GERMAN_ALL_TIERS,
-    "en": ENGLISH_ALL_TIERS,
-    "es": SPANISH_ALL_TIERS,
-    "fr": FRENCH_ALL_TIERS,
-    "it": ITALIAN_ALL_TIERS,
-    "ja": JAPANESE_ALL_TIERS,
-    "lt": LITHUANIAN_ALL_TIERS,
-    "nl": DUTCH_ALL_TIERS,
-    "pt": PORTUGUESE_ALL_TIERS,
-    "sv": SWEDISH_ALL_TIERS,
-    "zh": CHINESE_ALL_TIERS,
-}
+GRAMMATICAL_WORDS_BY_LANGUAGE: Final[Mapping[str, frozenset[str]]] = _LanguageTierMapping(
+    "all_tiers"
+)
 
 
 def normalize_grammatical_word(word: str) -> str:
@@ -214,10 +165,11 @@ def is_grammatical_word(word: str, language_code: str) -> bool:
     normalized = normalize_grammatical_word(word)
     if not normalized:
         return False
-    words = GRAMMATICAL_ONLY_BY_LANGUAGE.get(language_code)
-    if words is None:
+
+    grammatical_only = _get_tier_for_language(language_code, "grammatical_only")
+    if grammatical_only is None:
         return False
-    return normalized in words
+    return normalized in grammatical_only
 
 
 def is_function_word(word: str, language_code: str) -> bool:
@@ -228,7 +180,8 @@ def is_function_word(word: str, language_code: str) -> bool:
     normalized = normalize_grammatical_word(word)
     if not normalized:
         return False
-    words = GRAMMATICAL_WORDS_BY_LANGUAGE.get(language_code)
-    if words is None:
+
+    all_tiers = _get_tier_for_language(language_code, "all_tiers")
+    if all_tiers is None:
         return False
-    return normalized in words
+    return normalized in all_tiers
