@@ -2,12 +2,37 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, cast
 
 from langtools.rhyme_keys import compute_rhyme_key, rhyme_keys_available
 
 if TYPE_CHECKING:
     from storage.models.schema import DerivativeForm
+
+
+def is_derivative_form_rhyme_indexable(derivative_form: "DerivativeForm") -> bool:
+    """Return ``True`` when a derivative form should receive a stored rhyme key.
+
+    We intentionally skip rhyme indexing for multi-word periphrastic tense forms.
+    Minimum enforced policy: English future-tense forms (``*_future``) that
+    contain whitespace are excluded from rhyme-key storage.
+    """
+    form_text = derivative_form.derivative_form_text or ""
+    normalized_form = form_text.strip()
+    if not normalized_form:
+        return False
+
+    if len(normalized_form.split()) <= 1:
+        return True
+
+    grammatical_form = derivative_form.grammatical_form or ""
+    is_english_future_form = derivative_form.language_code == "en" and grammatical_form.endswith(
+        "_future"
+    )
+    if is_english_future_form:
+        return False
+
+    return True
 
 
 def compute_rhyme_key_from_ipa(
@@ -23,11 +48,15 @@ def compute_rhyme_key_from_ipa(
         return None
     if not ipa_pronunciation or not ipa_pronunciation.strip():
         return None
-    return compute_rhyme_key(ipa_pronunciation, language_code)
+    return cast(Optional[str], compute_rhyme_key(ipa_pronunciation, language_code))
 
 
 def sync_derivative_form_rhyme_key(derivative_form: "DerivativeForm") -> Optional[str]:
     """Recompute and assign the rhyme key for a derivative form in place."""
+    if not is_derivative_form_rhyme_indexable(derivative_form):
+        derivative_form.rhyme_key = None
+        return None
+
     rhyme_key = compute_rhyme_key_from_ipa(
         derivative_form.ipa_pronunciation,
         derivative_form.language_code,
