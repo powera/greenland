@@ -14,6 +14,14 @@ Tiers 1–2 have no analogues in data/release; tiers 3–4 do.
 
 from typing import Final
 
+from langtools.grammatical_word_schema import (
+    ALSO_LEMMA_SUBCATEGORIES,
+    GRAMMATICAL_ONLY_SUBCATEGORIES,
+    GrammaticalWordsBySubcategory,
+    build_subcategory_mapping,
+    union_subcategories,
+)
+
 # ── tier 1: personal pronouns ──────────────────────────────────────────
 
 GERMAN_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
@@ -308,12 +316,114 @@ GERMAN_NON_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
 
 # ── aggregate sets ─────────────────────────────────────────────────────
 
-GERMAN_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
-    GERMAN_PERSONAL_PRONOUNS | GERMAN_GRAMMATICAL_WORDS
+GERMAN_GRAMMATICAL_WORDS_BY_SUBCATEGORY: Final[GrammaticalWordsBySubcategory] = (
+    build_subcategory_mapping(
+        personal_pronouns=GERMAN_PERSONAL_PRONOUNS,
+        grammatical_words=GERMAN_GRAMMATICAL_WORDS,
+        function_words=GERMAN_FUNCTION_WORDS,
+        non_personal_pronouns=GERMAN_NON_PERSONAL_PRONOUNS,
+        articles=frozenset(
+            {
+                "der",
+                "die",
+                "das",
+                "den",
+                "dem",
+                "des",
+                "ein",
+                "eine",
+                "einen",
+                "einem",
+                "einer",
+                "eines",
+            }
+        ),
+        auxiliaries=frozenset(
+            {
+                "bin",
+                "bist",
+                "ist",
+                "sind",
+                "seid",
+                "war",
+                "waren",
+                "habe",
+                "hast",
+                "hat",
+                "haben",
+                "habt",
+                "werde",
+                "wirst",
+                "wird",
+                "werden",
+                "werdet",
+                "wurde",
+                "wurden",
+            }
+        ),
+        contractions=frozenset({"am", "ans", "aufs", "beim", "im", "ins", "vom", "zum", "zur"}),
+        prepositions=frozenset(
+            {
+                "an",
+                "auf",
+                "aus",
+                "bei",
+                "bis",
+                "durch",
+                "für",
+                "gegen",
+                "in",
+                "mit",
+                "nach",
+                "ohne",
+                "über",
+                "um",
+                "unter",
+                "von",
+                "vor",
+                "zu",
+                "zwischen",
+            }
+        ),
+        interrogatives=frozenset(
+            {
+                "wer",
+                "wen",
+                "wem",
+                "wessen",
+                "was",
+                "wo",
+                "wann",
+                "warum",
+                "wie",
+                "welcher",
+                "welche",
+                "welches",
+            }
+        ),
+        demonstratives=frozenset(
+            {
+                "dieser",
+                "diese",
+                "dieses",
+                "diesen",
+                "diesem",
+                "jener",
+                "jene",
+                "jenes",
+                "jenen",
+                "jenem",
+            }
+        ),
+    )
 )
 
-GERMAN_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
-    GERMAN_FUNCTION_WORDS | GERMAN_NON_PERSONAL_PRONOUNS
+GERMAN_GRAMMATICAL_ONLY: Final[frozenset[str]] = union_subcategories(
+    GERMAN_GRAMMATICAL_WORDS_BY_SUBCATEGORY, GRAMMATICAL_ONLY_SUBCATEGORIES
+)
+
+GERMAN_ALSO_LEMMA: Final[frozenset[str]] = union_subcategories(
+    GERMAN_GRAMMATICAL_WORDS_BY_SUBCATEGORY, ALSO_LEMMA_SUBCATEGORIES
 )
 
 GERMAN_ALL_TIERS: Final[frozenset[str]] = frozenset(GERMAN_GRAMMATICAL_ONLY | GERMAN_ALSO_LEMMA)

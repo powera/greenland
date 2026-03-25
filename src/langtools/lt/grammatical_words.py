@@ -14,6 +14,14 @@ Tiers 1–2 have no analogues in data/release; tiers 3–4 do.
 
 from typing import Final
 
+from langtools.grammatical_word_schema import (
+    ALSO_LEMMA_SUBCATEGORIES,
+    GRAMMATICAL_ONLY_SUBCATEGORIES,
+    GrammaticalWordsBySubcategory,
+    build_subcategory_mapping,
+    union_subcategories,
+)
+
 # ── tier 1: personal pronouns ──────────────────────────────────────────
 
 LITHUANIAN_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
@@ -193,12 +201,91 @@ LITHUANIAN_NON_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
 
 # ── aggregate sets ─────────────────────────────────────────────────────
 
-LITHUANIAN_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
-    LITHUANIAN_PERSONAL_PRONOUNS | LITHUANIAN_GRAMMATICAL_WORDS
+LITHUANIAN_GRAMMATICAL_WORDS_BY_SUBCATEGORY: Final[GrammaticalWordsBySubcategory] = (
+    build_subcategory_mapping(
+        personal_pronouns=LITHUANIAN_PERSONAL_PRONOUNS,
+        grammatical_words=LITHUANIAN_GRAMMATICAL_WORDS,
+        function_words=LITHUANIAN_FUNCTION_WORDS,
+        non_personal_pronouns=LITHUANIAN_NON_PERSONAL_PRONOUNS,
+        auxiliaries=frozenset({"būti", "yra", "buvo", "bus", "būtų", "būna"}),
+        particles=frozenset(
+            {
+                "ar",
+                "ne",
+                "jau",
+                "dar",
+                "tik",
+                "net",
+                "gi",
+                "pat",
+                "vis",
+                "juk",
+                "tad",
+                "gal",
+                "tai",
+                "štai",
+                "turbūt",
+                "nebent",
+            }
+        ),
+        prepositions=frozenset(
+            {
+                "į",
+                "iš",
+                "su",
+                "be",
+                "per",
+                "po",
+                "ant",
+                "prie",
+                "nuo",
+                "iki",
+                "tarp",
+                "dėl",
+                "apie",
+                "už",
+                "virš",
+                "šalia",
+                "link",
+                "prieš",
+                "pagal",
+                "pro",
+            }
+        ),
+        conjunctions=frozenset(
+            {
+                "ir",
+                "arba",
+                "bet",
+                "o",
+                "tačiau",
+                "nes",
+                "kad",
+                "jei",
+                "jeigu",
+                "nors",
+                "kol",
+                "taigi",
+                "nei",
+                "jog",
+                "kai",
+                "negu",
+                "todėl",
+            }
+        ),
+        interrogatives=frozenset(
+            {"kas", "ko", "kam", "ką", "kuo", "kuris", "kuri", "kurie", "kurios", "koks", "kokia"}
+        ),
+        demonstratives=frozenset({"šis", "ši", "šie", "šios", "tas", "ta", "tie", "tos"}),
+    )
 )
 
-LITHUANIAN_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
-    LITHUANIAN_FUNCTION_WORDS | LITHUANIAN_NON_PERSONAL_PRONOUNS
+LITHUANIAN_GRAMMATICAL_ONLY: Final[frozenset[str]] = union_subcategories(
+    LITHUANIAN_GRAMMATICAL_WORDS_BY_SUBCATEGORY, GRAMMATICAL_ONLY_SUBCATEGORIES
+)
+
+LITHUANIAN_ALSO_LEMMA: Final[frozenset[str]] = union_subcategories(
+    LITHUANIAN_GRAMMATICAL_WORDS_BY_SUBCATEGORY, ALSO_LEMMA_SUBCATEGORIES
 )
 
 LITHUANIAN_ALL_TIERS: Final[frozenset[str]] = frozenset(

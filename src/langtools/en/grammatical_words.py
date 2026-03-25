@@ -16,6 +16,14 @@ compatibility with ``util/stopwords.py`` and ``dramblys``.
 
 from typing import Final
 
+from langtools.grammatical_word_schema import (
+    ALSO_LEMMA_SUBCATEGORIES,
+    GRAMMATICAL_ONLY_SUBCATEGORIES,
+    GrammaticalWordsBySubcategory,
+    build_subcategory_mapping,
+    union_subcategories,
+)
+
 # ── tier 1: personal pronouns ──────────────────────────────────────────
 
 ENGLISH_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
@@ -219,14 +227,31 @@ ENGLISH_NON_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
 
 # ── aggregate sets ─────────────────────────────────────────────────────
 
+ENGLISH_GRAMMATICAL_WORDS_BY_SUBCATEGORY: Final[GrammaticalWordsBySubcategory] = (
+    build_subcategory_mapping(
+        personal_pronouns=ENGLISH_PERSONAL_PRONOUNS,
+        grammatical_words=ENGLISH_GRAMMATICAL_WORDS,
+        function_words=ENGLISH_FUNCTION_WORDS,
+        non_personal_pronouns=ENGLISH_NON_PERSONAL_PRONOUNS,
+        articles=frozenset(word.lower() for word in ENGLISH_ARTICLES),
+        auxiliaries=frozenset(word.lower() for word in ENGLISH_AUXILIARY_VERBS),
+        contractions=frozenset(word.lower() for word in ENGLISH_GRAMMATICAL_CONTRACTIONS),
+        prepositions=frozenset(word.lower() for word in ENGLISH_PREPOSITIONS),
+        conjunctions=frozenset(word.lower() for word in ENGLISH_CONJUNCTIONS),
+        determiners=frozenset(word.lower() for word in ENGLISH_DETERMINERS),
+        interrogatives=frozenset(word.lower() for word in ENGLISH_INTERROGATIVE_PRONOUNS),
+        demonstratives=frozenset({"this", "that", "these", "those"}),
+    )
+)
+
 # Tiers 1+2: linker skips these (not in data/release)
-ENGLISH_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
-    ENGLISH_PERSONAL_PRONOUNS | ENGLISH_GRAMMATICAL_WORDS
+ENGLISH_GRAMMATICAL_ONLY: Final[frozenset[str]] = union_subcategories(
+    ENGLISH_GRAMMATICAL_WORDS_BY_SUBCATEGORY, GRAMMATICAL_ONLY_SUBCATEGORIES
 )
 
 # Tiers 3+4: linker should resolve these (in data/release)
-ENGLISH_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
-    ENGLISH_FUNCTION_WORDS | ENGLISH_NON_PERSONAL_PRONOUNS
+ENGLISH_ALSO_LEMMA: Final[frozenset[str]] = union_subcategories(
+    ENGLISH_GRAMMATICAL_WORDS_BY_SUBCATEGORY, ALSO_LEMMA_SUBCATEGORIES
 )
 
 # All four tiers combined

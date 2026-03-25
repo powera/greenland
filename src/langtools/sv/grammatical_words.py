@@ -2,6 +2,14 @@
 
 from typing import Final
 
+from langtools.grammatical_word_schema import (
+    ALSO_LEMMA_SUBCATEGORIES,
+    GRAMMATICAL_ONLY_SUBCATEGORIES,
+    GrammaticalWordsBySubcategory,
+    build_subcategory_mapping,
+    union_subcategories,
+)
+
 SWEDISH_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
     {
         "jag",
@@ -120,12 +128,53 @@ SWEDISH_NON_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
     }
 )
 
-SWEDISH_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
-    SWEDISH_PERSONAL_PRONOUNS | SWEDISH_GRAMMATICAL_WORDS
+SWEDISH_GRAMMATICAL_WORDS_BY_SUBCATEGORY: Final[GrammaticalWordsBySubcategory] = (
+    build_subcategory_mapping(
+        personal_pronouns=SWEDISH_PERSONAL_PRONOUNS,
+        grammatical_words=SWEDISH_GRAMMATICAL_WORDS,
+        function_words=SWEDISH_FUNCTION_WORDS,
+        non_personal_pronouns=SWEDISH_NON_PERSONAL_PRONOUNS,
+        articles=frozenset({"en", "ett", "den", "det"}),
+        auxiliaries=frozenset(
+            {
+                "är",
+                "var",
+                "vara",
+                "blir",
+                "blev",
+                "ha",
+                "har",
+                "hade",
+                "ska",
+                "skall",
+                "skulle",
+                "kan",
+                "kunde",
+                "får",
+                "fick",
+                "måste",
+                "må",
+                "vill",
+                "ville",
+            }
+        ),
+        particles=frozenset({"inte", "ju", "väl", "också", "bara", "redan", "än"}),
+        prepositions=frozenset(
+            {"i", "på", "med", "av", "för", "till", "från", "om", "utan", "under", "över", "mellan"}
+        ),
+        conjunctions=frozenset({"och", "eller", "men", "att", "som", "eftersom", "när", "ifall"}),
+        determiners=frozenset({"någon", "något", "några", "ingen", "inget", "inga"}),
+        interrogatives=frozenset({"vem", "vad", "vilken", "vilket", "vilka"}),
+        demonstratives=frozenset({"denna", "detta", "dessa", "den", "det", "de"}),
+    )
 )
 
-SWEDISH_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
-    SWEDISH_FUNCTION_WORDS | SWEDISH_NON_PERSONAL_PRONOUNS
+SWEDISH_GRAMMATICAL_ONLY: Final[frozenset[str]] = union_subcategories(
+    SWEDISH_GRAMMATICAL_WORDS_BY_SUBCATEGORY, GRAMMATICAL_ONLY_SUBCATEGORIES
+)
+
+SWEDISH_ALSO_LEMMA: Final[frozenset[str]] = union_subcategories(
+    SWEDISH_GRAMMATICAL_WORDS_BY_SUBCATEGORY, ALSO_LEMMA_SUBCATEGORIES
 )
 
 SWEDISH_ALL_TIERS: Final[frozenset[str]] = frozenset(SWEDISH_GRAMMATICAL_ONLY | SWEDISH_ALSO_LEMMA)

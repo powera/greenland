@@ -12,6 +12,14 @@ Tiers 1–2 have no analogues in data/release; tiers 3–4 do.
 
 from typing import Final
 
+from langtools.grammatical_word_schema import (
+    ALSO_LEMMA_SUBCATEGORIES,
+    GRAMMATICAL_ONLY_SUBCATEGORIES,
+    GrammaticalWordsBySubcategory,
+    build_subcategory_mapping,
+    union_subcategories,
+)
+
 # ── tier 1: personal pronouns ──────────────────────────────────────────
 
 SPANISH_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
@@ -139,12 +147,44 @@ SPANISH_NON_PERSONAL_PRONOUNS: Final[frozenset[str]] = frozenset(
 
 # ── aggregate sets ─────────────────────────────────────────────────────
 
-SPANISH_GRAMMATICAL_ONLY: Final[frozenset[str]] = frozenset(
-    SPANISH_PERSONAL_PRONOUNS | SPANISH_GRAMMATICAL_WORDS
+SPANISH_GRAMMATICAL_WORDS_BY_SUBCATEGORY: Final[GrammaticalWordsBySubcategory] = (
+    build_subcategory_mapping(
+        personal_pronouns=SPANISH_PERSONAL_PRONOUNS,
+        grammatical_words=SPANISH_GRAMMATICAL_WORDS,
+        function_words=SPANISH_FUNCTION_WORDS,
+        non_personal_pronouns=SPANISH_NON_PERSONAL_PRONOUNS,
+        articles=frozenset({"el", "la", "los", "las", "un", "una", "unos", "unas"}),
+        contractions=frozenset({"al", "del"}),
+        prepositions=frozenset({"a", "con", "de", "en", "para", "por"}),
+        conjunctions=frozenset({"y"}),
+        interrogatives=frozenset(
+            {"qué", "quién", "quiénes", "cuál", "cuáles", "dónde", "cuándo", "cómo"}
+        ),
+        demonstratives=frozenset(
+            {
+                "este",
+                "esta",
+                "estos",
+                "estas",
+                "ese",
+                "esa",
+                "esos",
+                "esas",
+                "aquel",
+                "aquella",
+                "aquellos",
+                "aquellas",
+            }
+        ),
+    )
 )
 
-SPANISH_ALSO_LEMMA: Final[frozenset[str]] = frozenset(
-    SPANISH_FUNCTION_WORDS | SPANISH_NON_PERSONAL_PRONOUNS
+SPANISH_GRAMMATICAL_ONLY: Final[frozenset[str]] = union_subcategories(
+    SPANISH_GRAMMATICAL_WORDS_BY_SUBCATEGORY, GRAMMATICAL_ONLY_SUBCATEGORIES
+)
+
+SPANISH_ALSO_LEMMA: Final[frozenset[str]] = union_subcategories(
+    SPANISH_GRAMMATICAL_WORDS_BY_SUBCATEGORY, ALSO_LEMMA_SUBCATEGORIES
 )
 
 SPANISH_ALL_TIERS: Final[frozenset[str]] = frozenset(SPANISH_GRAMMATICAL_ONLY | SPANISH_ALSO_LEMMA)
