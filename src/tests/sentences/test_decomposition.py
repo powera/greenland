@@ -215,3 +215,41 @@ def test_negative_case_spanish_fair_without_lemma_fails_check() -> None:
     assert len(unresolved) == 1
     assert unresolved[0]["surface_form"] == "feria"
     assert not all_words_are_lemmas_or_grammatical(words, "es")
+
+
+def test_find_unresolved_non_grammatical_words_unknown_language_has_no_grammar_fallback() -> None:
+    words = [
+        {
+            "position": 0,
+            "role": "article",
+            "english_gloss": "the",
+            "surface_form": "the",
+            "grammatical_form": "article/en_singular",
+            "lemma_guid": "NONE",
+            "lemma": "No lemma",
+        }
+    ]
+
+    unresolved = find_unresolved_non_grammatical_words(words, "xx")
+
+    assert len(unresolved) == 1
+    assert unresolved[0]["surface_form"] == "the"
+
+
+def test_find_unresolved_non_grammatical_words_keeps_skip_for_known_grammatical_tokens() -> None:
+    words = [
+        {
+            "position": 0,
+            "role": "article",
+            "english_gloss": "the",
+            "surface_form": "le",
+            "grammatical_form": "noun/fr_singular",
+            "lemma_guid": "NONE",
+            "lemma": "No lemma",
+        }
+    ]
+
+    unresolved = find_unresolved_non_grammatical_words(words, "fr")
+
+    assert unresolved == []
+    assert all_words_are_lemmas_or_grammatical(words, "fr")
