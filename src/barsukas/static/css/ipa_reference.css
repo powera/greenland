@@ -1,0 +1,24 @@
+.ipa-symbol {
+    font-family: "Noto Sans", "DejaVu Sans", "Segoe UI Symbol", sans-serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    cursor: help;
+}
+
+.ipa-matrix th,
+.ipa-matrix td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.ipa-matrix th:first-child,
+.ipa-matrix td:first-child {
+    text-align: left;
+    font-weight: 600;
+    min-width: 9rem;
+}
+
+.ipa-na {
+    color: #8892a0;
+    background-color: #f8f9fa;
+}

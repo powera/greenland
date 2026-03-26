@@ -345,6 +345,11 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
             total_sentences=stats["total_sentences"],
         )
 
+    @app.route("/ipa-reference")
+    def ipa_reference() -> Any:
+        """Static IPA reference page for pronunciation symbols."""
+        return render_template("ipa_reference.html")
+
     @app.context_processor
     def utility_processor() -> Dict[str, Any]:
         """Add utility functions to Jinja templates."""
