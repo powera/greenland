@@ -121,23 +121,13 @@
                             <li><a class="dropdown-item" href="{{ url_for('sync_sentence_release.index') }}">
                                 <i class="bi bi-chat-left-text"></i> Sentences
                             </a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
-                    <!-- Logs dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-journal-text"></i> Logs
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('operation_logs.list_logs') }}">
                                 <i class="bi bi-journal-text"></i> Operation Logs
                             </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('settings.index') }}">
-                                <i class="bi bi-gear"></i> Settings
-                            </a></li>
                         </ul>
                     </li>
+                    {% endif %}
                     {% if config.get('BENCHMARKS_ENABLED', False) %}
                     <!-- Benchmarks tab -->
                     <li class="nav-item dropdown">
@@ -175,9 +165,9 @@
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <span class="navbar-text text-white-50">
+                        <a class="nav-link text-white-50" href="{{ url_for('settings.index') }}">
                             <small><i class="bi bi-database"></i> linguistics.sqlite</small>
-                        </span>
+                        </a>
                     </li>
                 </ul>
             </div>

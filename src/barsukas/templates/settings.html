@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container mt-4">
     <h1><i class="bi bi-gear"></i> Settings</h1>
-    <p class="text-muted">Configure storage backends and export database to different formats</p>
+    <p class="text-muted">Configure Barsukas backend and runtime options</p>
 
     {% if not config.get('ALLOW_OUTBOUND_CALLS', True) %}
     <div class="card mb-4">
@@ -70,90 +70,6 @@
             <div class="alert alert-info mt-3">
                 <strong>Note:</strong> Switching backends requires restarting Barsukas with a different
                 <code>STORAGE_BACKEND</code> environment variable.
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if not config.get('READONLY', False) %}
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h2 class="mb-0"><i class="bi bi-box-arrow-right"></i> Export Database to JSONL Format</h2>
-        </div>
-        <div class="card-body">
-            <p>Export your entire database to JSONL (JSON Lines) format for:</p>
-            <ul>
-                <li><strong>Version Control:</strong> Store database content in Git with meaningful diffs</li>
-                <li><strong>Backup:</strong> Create human-readable backups of all linguistic data</li>
-                <li><strong>Migration:</strong> Switch to JSONL backend for Git-based storage workflow</li>
-                <li><strong>Data Exchange:</strong> Share database content in a portable text format</li>
-            </ul>
-
-            <form method="POST" action="{{ url_for('settings.migrate_form') }}">
-                {% if current_backend == 'sqlite' %}
-                <div class="mb-3">
-                    <label for="sqlite-path" class="form-label">SQLite Database Path</label>
-                    <input type="text" class="form-control" name="sqlite_path"
-                           value="{{ backend_config.sqlite_path or '' }}" required>
-                    <small class="form-text text-muted">Path to the SQLite database file</small>
-                </div>
-                {% elif current_backend == 'postgres' %}
-                <div class="mb-3">
-                    <div class="alert alert-secondary">
-                        <i class="bi bi-database"></i> <strong>Source:</strong> PostgreSQL database (connection configured via environment)
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="mb-3">
-                    <label for="jsonl-dir" class="form-label">JSONL Output Directory</label>
-                    <input type="text" class="form-control" name="jsonl_dir"
-                           value="data/working" required>
-                    <small class="form-text text-muted">Directory where JSONL files will be written</small>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-lg">
-                    <i class="bi bi-box-arrow-right"></i> Export {{ current_backend.upper() }} to JSONL
-                </button>
-            </form>
-
-            <div class="alert alert-info mt-3">
-                <i class="bi bi-info-circle"></i> <strong>Note:</strong> This exports the complete database including lemmas, sentences, translations, audio references, and all metadata. For app-specific exports (WireWord, HTML, Bootstrap), use the <a href="{{ url_for('exports.exports_page') }}" class="alert-link">Exports page</a>.
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if not config.get('READONLY', False) %}
-    <div class="card mb-4">
-        <div class="card-header bg-warning">
-            <h2 class="mb-0"><i class="bi bi-arrow-down-circle"></i> Sync Difficulty Levels from Release Data</h2>
-        </div>
-        <div class="card-body">
-            <p>Update difficulty levels in the database from the golden release data (<code>data/release/lemmas/</code>).</p>
-            <p>This is useful after editing difficulty levels in the release JSONL files and wanting to apply those changes to the running database.</p>
-
-            <form method="POST" action="{{ url_for('settings.sync_difficulty_levels') }}">
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" name="dry_run" id="dry-run" checked>
-                    <label class="form-check-label" for="dry-run">
-                        Dry run (preview changes without applying)
-                    </label>
-                </div>
-
-                <button type="submit" class="btn btn-warning">
-                    <i class="bi bi-arrow-down-circle"></i> Sync Difficulty Levels
-                </button>
-            </form>
-
-            <div class="alert alert-secondary mt-3">
-                <i class="bi bi-info-circle"></i> <strong>How it works:</strong>
-                <ul class="mb-0 mt-2">
-                    <li>Reads all <code>*.jsonl</code> files from <code>data/release/lemmas/**</code></li>
-                    <li>Matches GUIDs between release data and database lemmas</li>
-                    <li>Updates <code>difficulty_level</code> where values differ</li>
-                    <li>Reports statistics on changes made</li>
-                </ul>
             </div>
         </div>
     </div>
