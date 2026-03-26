@@ -53,6 +53,165 @@
     ]
   },
   {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "hello",
+    "definition": "a greeting",
+    "ipa": "həˈloʊ",
+    "difficulty": "easy",
+    "alternatives": [
+      "hɛˈloʊ"
+    ]
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "school",
+    "definition": "an institution for education",
+    "ipa": "skul",
+    "difficulty": "easy",
+    "alternatives": [
+      "skuːl"
+    ]
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "thought",
+    "definition": "an idea formed in the mind",
+    "ipa": "θɔt",
+    "difficulty": "medium",
+    "alternatives": []
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "through",
+    "definition": "from one end to the other",
+    "ipa": "θɹu",
+    "difficulty": "medium",
+    "alternatives": [
+      "θɹuː"
+    ]
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "beautiful",
+    "definition": "pleasing to the senses",
+    "ipa": "ˈbjutɪfəl",
+    "difficulty": "medium",
+    "alternatives": [
+      "ˈbjuːtɪfəl"
+    ]
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "strength",
+    "definition": "the quality of being strong",
+    "ipa": "stɹɛŋθ",
+    "difficulty": "medium",
+    "alternatives": []
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "knight",
+    "definition": "an armored medieval warrior",
+    "ipa": "naɪt",
+    "difficulty": "hard",
+    "alternatives": []
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "pneumonia",
+    "definition": "a lung infection",
+    "ipa": "njuˈmoʊniə",
+    "difficulty": "hard",
+    "alternatives": [
+      "nuˈmoʊniə"
+    ]
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "choir",
+    "definition": "a group of singers",
+    "ipa": "kwaɪɚ",
+    "difficulty": "hard",
+    "alternatives": [
+      "kwaɪər"
+    ]
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "colonel",
+    "definition": "a military rank",
+    "ipa": "ˈkɝnəl",
+    "difficulty": "hard",
+    "alternatives": [
+      "ˈkɜːnəl"
+    ]
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "queue",
+    "definition": "a line of people waiting",
+    "ipa": "kju",
+    "difficulty": "medium",
+    "alternatives": [
+      "kjuː"
+    ]
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "Wednesday",
+    "definition": "the fourth day of the week",
+    "ipa": "ˈwɛnzdeɪ",
+    "difficulty": "medium",
+    "alternatives": [
+      "ˈwɛnzdi"
+    ]
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "February",
+    "definition": "the second month of the year",
+    "ipa": "ˈfɛbjuɛɹi",
+    "difficulty": "medium",
+    "alternatives": [
+      "ˈfɛbruɛɹi",
+      "ˈfɛbjuəri"
+    ]
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "chocolate",
+    "definition": "a sweet food made from cacao",
+    "ipa": "ˈtʃɔklɪt",
+    "difficulty": "easy",
+    "alternatives": [
+      "ˈtʃɑklɪt",
+      "ˈtʃɒklɪt"
+    ]
+  },
+  {
+    "language_code": "en",
+    "language_name": "English",
+    "word": "island",
+    "definition": "land surrounded by water",
+    "ipa": "ˈaɪlənd",
+    "difficulty": "medium",
+    "alternatives": []
+  },
+  {
     "language_code": "fr",
     "language_name": "French",
     "word": "bonjour",
@@ -89,6 +248,17 @@
     "alternatives": []
   },
   {
+    "language_code": "fr",
+    "language_name": "French",
+    "word": "fenêtre",
+    "definition": "window",
+    "ipa": "fəˈnɛtʁ",
+    "difficulty": "medium",
+    "alternatives": [
+      "fənɛtʁ"
+    ]
+  },
+  {
     "language_code": "lt",
     "language_name": "Lithuanian",
     "word": "labas",
@@ -116,6 +286,24 @@
     "alternatives": []
   },
   {
+    "language_code": "lt",
+    "language_name": "Lithuanian",
+    "word": "vanduo",
+    "definition": "water",
+    "ipa": "ˈvɐnduɔ",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "lt",
+    "language_name": "Lithuanian",
+    "word": "katė",
+    "definition": "cat",
+    "ipa": "ˈkɐtɛː",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
     "language_code": "es",
     "language_name": "Spanish",
     "word": "casa",
@@ -130,6 +318,37 @@
     "word": "agua",
     "definition": "water",
     "ipa": "ˈaɣwa",
+    "difficulty": "easy",
+    "alternatives": []
+  },
+  {
+    "language_code": "es",
+    "language_name": "Spanish",
+    "word": "gracias",
+    "definition": "thank you",
+    "ipa": "ˈɡɾasjas",
+    "difficulty": "easy",
+    "alternatives": [
+      "ˈɡɾaθjas"
+    ]
+  },
+  {
+    "language_code": "es",
+    "language_name": "Spanish",
+    "word": "ciudad",
+    "definition": "city",
+    "ipa": "θjuˈðað",
+    "difficulty": "medium",
+    "alternatives": [
+      "sjuˈðað"
+    ]
+  },
+  {
+    "language_code": "es",
+    "language_name": "Spanish",
+    "word": "perro",
+    "definition": "dog",
+    "ipa": "ˈpero",
     "difficulty": "easy",
     "alternatives": []
   },
@@ -150,6 +369,35 @@
     "ipa": "ˈvasɐ",
     "difficulty": "easy",
     "alternatives": []
+  },
+  {
+    "language_code": "de",
+    "language_name": "German",
+    "word": "ich",
+    "definition": "I (first person singular pronoun)",
+    "ipa": "ɪç",
+    "difficulty": "medium",
+    "alternatives": []
+  },
+  {
+    "language_code": "de",
+    "language_name": "German",
+    "word": "schön",
+    "definition": "beautiful",
+    "ipa": "ʃøːn",
+    "difficulty": "medium",
+    "alternatives": []
+  },
+  {
+    "language_code": "de",
+    "language_name": "German",
+    "word": "straße",
+    "definition": "street",
+    "ipa": "ˈʃtʁaːsə",
+    "difficulty": "medium",
+    "alternatives": [
+      "ˈʃtraːsə"
+    ]
   },
   {
     "language_code": "it",
