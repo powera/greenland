@@ -139,10 +139,17 @@ def _migrate_postgres_schema(conn) -> None:
 
 
 def create_dev_session():
-    """Create a database session for development.
+    """Create a database session.
 
-    Uses the default benchmarks database path from benchmark_constants.
+    Uses PostgreSQL by default (via BenchmarkConfig.from_env()), falling back
+    to the local SQLite file only when BENCH_STORAGE_BACKEND=sqlite is set.
     """
+    from benchmarks.config import BenchmarkConfig
+
+    config = BenchmarkConfig.from_env()
+    if config.using_postgres and config.postgres_url:
+        return create_postgres_session(config.postgres_url)
+
     db_path = BENCHMARKS_DB_PATH
     engine = create_engine(
         f"sqlite:///{db_path}",
