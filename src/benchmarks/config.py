@@ -105,7 +105,7 @@ class BenchmarkConfig:
         """Create configuration from environment variables.
 
         Environment variables:
-            BENCH_STORAGE_BACKEND: "sqlite" or "postgres" (default: "sqlite")
+            BENCH_STORAGE_BACKEND: "sqlite" or "postgres" (default: "postgres")
             BENCHMARKS_DB_PATH: Path to benchmarks database (optional, sqlite only)
             BENCH_POSTGRES_URL: Full PostgreSQL URL (optional; built from key file if absent)
             BENCHMARK_MODEL: Default LLM model to use (optional)
@@ -114,7 +114,7 @@ class BenchmarkConfig:
         Returns:
             BenchmarkConfig instance
         """
-        backend = os.environ.get("BENCH_STORAGE_BACKEND", "sqlite").lower()
+        backend = os.environ.get("BENCH_STORAGE_BACKEND", "postgres").lower()
         db_path = os.environ.get("BENCHMARKS_DB_PATH")
         model = os.environ.get("BENCHMARK_MODEL")
         debug = os.environ.get("DEBUG", "false").lower() == "true"
