@@ -1,0 +1,5 @@
+{"guid": "N44_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "sword", "is_base_form": true, "ipa": "/sɔːrd/", "phonetic": "SOR-d"}, {"grammatical_form": "noun/en_plural", "text": "swords", "is_base_form": false}]}
+{"guid": "N44_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "shield", "is_base_form": true, "ipa": "/ʃiːld/", "phonetic": "SHEELD"}, {"grammatical_form": "noun/en_plural", "text": "shields", "is_base_form": false}]}
+{"guid": "N44_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "weapon", "is_base_form": true, "ipa": "/ˈwɛpən/", "phonetic": "WEP-uhn"}, {"grammatical_form": "noun/en_plural", "text": "weapons", "is_base_form": false}]}
+{"guid": "N44_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "gun", "is_base_form": true, "ipa": "/ɡʌn/", "phonetic": "GUN"}, {"grammatical_form": "noun/en_plural", "text": "guns", "is_base_form": false}]}
+{"guid": "N44_005", "forms": [{"grammatical_form": "singular", "text": "staff (stick)", "is_base_form": true, "ipa": "/stɑːf/", "phonetic": "STAF"}]}

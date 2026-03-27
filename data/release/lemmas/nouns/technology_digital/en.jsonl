@@ -1,0 +1,9 @@
+{"guid": "N52_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "internet", "is_base_form": true, "ipa": "/ɪnˈtɜːrnɛt/", "phonetic": "IN-ter-net"}, {"grammatical_form": "noun/en_plural", "text": "internets", "is_base_form": false}]}
+{"guid": "N52_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "email", "is_base_form": true, "ipa": "[ɛˈmeɪl]", "phonetic": "EH-meyl"}, {"grammatical_form": "noun/en_plural", "text": "emails", "is_base_form": false}]}
+{"guid": "N52_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "website", "is_base_form": true, "ipa": "/ˈwɛb.saɪt/", "phonetic": "WEB-b-site"}, {"grammatical_form": "noun/en_plural", "text": "websites", "is_base_form": false}]}
+{"guid": "N52_004", "forms": [{"grammatical_form": "singular", "text": "social media", "is_base_form": true, "ipa": "ˈsoʊʃəl ˈmiːdiə", "phonetic": "SOH-shəl MEE-dee-ə"}]}
+{"guid": "N52_005", "forms": [{"grammatical_form": "singular", "text": "programming", "is_base_form": true, "ipa": "/ˈproʊɡræmɪŋ/", "phonetic": "PROH-grame-ning"}]}
+{"guid": "N52_006", "forms": [{"grammatical_form": "singular", "text": "data", "is_base_form": true, "ipa": "/ˈdeɪtə/", "phonetic": "DAY-tuh"}]}
+{"guid": "N52_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "network", "is_base_form": true, "ipa": "/ˈnɛt.wɔrk/", "phonetic": "NET-wərk"}, {"grammatical_form": "noun/en_plural", "text": "networks", "is_base_form": false}]}
+{"guid": "N52_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "server", "is_base_form": true, "ipa": "/ˈsɝːvər/", "phonetic": "SER-vər"}, {"grammatical_form": "noun/en_plural", "text": "servers", "is_base_form": false}]}
+{"guid": "N52_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "video game", "is_base_form": true, "ipa": "/ˈviː.di.oʊ ɡeɪm/", "phonetic": "Vee-dee-oh GAYM"}, {"grammatical_form": "noun/en_plural", "text": "video games", "is_base_form": false}]}

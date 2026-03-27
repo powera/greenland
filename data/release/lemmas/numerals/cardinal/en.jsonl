@@ -1,0 +1,30 @@
+{"guid": "Z01_001", "forms": [{"grammatical_form": "lemma", "text": "zero", "is_base_form": true, "ipa": "/ˈzɪəroʊ/", "phonetic": "ZEE-ah-roy"}]}
+{"guid": "Z01_002", "forms": [{"grammatical_form": "lemma", "text": "one", "is_base_form": true, "ipa": "/wʌn/", "phonetic": "WUN"}]}
+{"guid": "Z01_003", "forms": [{"grammatical_form": "lemma", "text": "two", "is_base_form": true, "ipa": "/tuː/", "phonetic": "TOO"}]}
+{"guid": "Z01_004", "forms": [{"grammatical_form": "lemma", "text": "three", "is_base_form": true, "ipa": "/θriː/", "phonetic": "THREE"}]}
+{"guid": "Z01_005", "forms": [{"grammatical_form": "lemma", "text": "four", "is_base_form": true, "ipa": "/fɔːr/", "phonetic": "FOHR"}]}
+{"guid": "Z01_006", "forms": [{"grammatical_form": "lemma", "text": "five", "is_base_form": true, "ipa": "/faɪv/", "phonetic": "FAI-v"}]}
+{"guid": "Z01_007", "forms": [{"grammatical_form": "lemma", "text": "six", "is_base_form": true, "ipa": "/sɪks/", "phonetic": "SIXS"}]}
+{"guid": "Z01_008", "forms": [{"grammatical_form": "lemma", "text": "seven", "is_base_form": true, "ipa": "ˈsɛvən", "phonetic": "SEV-ən"}]}
+{"guid": "Z01_009", "forms": [{"grammatical_form": "lemma", "text": "eight", "is_base_form": true, "ipa": "/eɪt/", "phonetic": "EYT"}]}
+{"guid": "Z01_010", "forms": [{"grammatical_form": "lemma", "text": "nine", "is_base_form": true, "ipa": "/naɪn/", "phonetic": "NAHN"}]}
+{"guid": "Z01_011", "forms": [{"grammatical_form": "lemma", "text": "ten", "is_base_form": true, "ipa": "/tɛn/", "phonetic": "TEN"}]}
+{"guid": "Z01_012", "forms": [{"grammatical_form": "lemma", "text": "eleven", "is_base_form": true, "ipa": "/ɛˈlɛvən/", "phonetic": "EH-luh-vuhn"}]}
+{"guid": "Z01_013", "forms": [{"grammatical_form": "lemma", "text": "twelve", "is_base_form": true, "ipa": "/twɛlv/", "phonetic": "TWELLV"}]}
+{"guid": "Z01_014", "forms": [{"grammatical_form": "lemma", "text": "thirteen", "is_base_form": true, "ipa": "/ˈθɜrtiːn/", "phonetic": "THUR-tin"}]}
+{"guid": "Z01_015", "forms": [{"grammatical_form": "lemma", "text": "fourteen", "is_base_form": true, "ipa": "/fɔːrˈtiːn/", "phonetic": "FOUR-teen"}]}
+{"guid": "Z01_016", "forms": [{"grammatical_form": "lemma", "text": "fifteen", "is_base_form": true, "ipa": "/fɪfˈtiːn/", "phonetic": "FIF-teen"}]}
+{"guid": "Z01_017", "forms": [{"grammatical_form": "lemma", "text": "sixteen", "is_base_form": true, "ipa": "/sɪksˈtiːn/", "phonetic": "SIKS-teen"}]}
+{"guid": "Z01_018", "forms": [{"grammatical_form": "lemma", "text": "seventeen", "is_base_form": true, "ipa": "/sɛvˈtiːn/", "phonetic": "SEV-teen"}]}
+{"guid": "Z01_019", "forms": [{"grammatical_form": "lemma", "text": "eighteen", "is_base_form": true, "ipa": "/ɛˈtˈiːn/", "phonetic": "EE-teen"}]}
+{"guid": "Z01_020", "forms": [{"grammatical_form": "lemma", "text": "nineteen", "is_base_form": true, "ipa": "/naɪˈtiːn/", "phonetic": "NIGH-teen"}]}
+{"guid": "Z01_021", "forms": [{"grammatical_form": "lemma", "text": "twenty", "is_base_form": true, "ipa": "/ˈtwɛnti/", "phonetic": "TWEN-tee"}]}
+{"guid": "Z01_022", "forms": [{"grammatical_form": "lemma", "text": "thirty", "is_base_form": true, "ipa": "/ˈθɜːrti/", "phonetic": "THOOR-tee"}]}
+{"guid": "Z01_023", "forms": [{"grammatical_form": "lemma", "text": "forty", "is_base_form": true, "ipa": "/ˈfɔɹti/", "phonetic": "FORT-ee"}]}
+{"guid": "Z01_024", "forms": [{"grammatical_form": "lemma", "text": "fifty", "is_base_form": true, "ipa": "/ˈfɪf.ti/", "phonetic": "FIFF-tih"}]}
+{"guid": "Z01_025", "forms": [{"grammatical_form": "lemma", "text": "sixty", "is_base_form": true, "ipa": "/ˈsɪksti/", "phonetic": "SIK-stee"}]}
+{"guid": "Z01_026", "forms": [{"grammatical_form": "lemma", "text": "seventy", "is_base_form": true, "ipa": "/ˈsɛvənti/", "phonetic": "SEV-uhn-ti"}]}
+{"guid": "Z01_027", "forms": [{"grammatical_form": "lemma", "text": "eighty", "is_base_form": true, "ipa": "[ˈeɪti]", "phonetic": "EY-ti"}]}
+{"guid": "Z01_028", "forms": [{"grammatical_form": "lemma", "text": "ninety", "is_base_form": true, "ipa": "/ˌnaɪnti/", "phonetic": "NIN-ty"}]}
+{"guid": "Z01_029", "forms": [{"grammatical_form": "lemma", "text": "one hundred", "is_base_form": true, "ipa": "/wʌn ˈhʌndrəd/", "phonetic": "WOHN HUND-rid"}]}
+{"guid": "Z01_030", "forms": [{"grammatical_form": "lemma", "text": "one thousand", "is_base_form": true, "ipa": "/wʌn ˈthaʊzənd/", "phonetic": "WUN thowz-nd"}]}

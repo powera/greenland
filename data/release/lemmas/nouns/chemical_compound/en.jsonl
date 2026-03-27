@@ -1,0 +1,4 @@
+{"guid": "N15_001", "forms": [{"grammatical_form": "singular", "text": "oxygen", "is_base_form": true, "ipa": "/ˈɑksɪdʒən/", "phonetic": "AKS-ih-juh-nən"}]}
+{"guid": "N15_002", "forms": [{"grammatical_form": "singular", "text": "carbon dioxide", "is_base_form": true, "ipa": "/ˈkɑrbən ˌdaɪ ɑːkˌsaɪd/", "phonetic": "CAR-buhn DYE-ox-aid"}]}
+{"guid": "N15_003", "forms": [{"grammatical_form": "singular", "text": "lithium", "is_base_form": true, "ipa": "/ˈlɪθ.i.əm/", "phonetic": "LITH-ee-əm"}]}
+{"guid": "N15_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "acid", "is_base_form": true, "ipa": "/ˈæs.ɪd/", "phonetic": "AS-id"}, {"grammatical_form": "noun/en_plural", "text": "acids", "is_base_form": false, "ipa": "/ˈæsɪdz/", "phonetic": "AS-ids"}]}
