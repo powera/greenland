@@ -8,10 +8,13 @@ orphaned records, missing required fields, and constraint violations.
 
 import argparse
 import logging
+import re
 from datetime import datetime
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 import constants
+from sqlalchemy import or_
+from ipa import has_ipa_characters
 from storage.database import create_database_session
 from storage.models.schema import (
     Corpus,
@@ -28,6 +31,14 @@ logger = logging.getLogger(__name__)
 
 class IntegrityChecker:
     """Database integrity checker."""
+
+    _PROMPT_LEAK_HINTS: Tuple[str, ...] = (
+        "the user wants",
+        "i should provide",
+        "pronunciation of the word",
+        "simplified phonetic representation",
+        "ipa pronunciation",
+    )
 
     def __init__(self, db_path: Optional[str] = None, debug: bool = False):
         """
@@ -482,6 +493,167 @@ class IntegrityChecker:
         finally:
             session.close()
 
+    def _get_max_pronunciation_length(self, lemma_text: Optional[str]) -> int:
+        """Return a max pronunciation length based on source text length."""
+        if not lemma_text:
+            return 40
+
+        source_len = len(lemma_text.strip())
+        # Single words stay fairly strict; phrases/sentences get proportionally more room.
+        return max(20, source_len * 4 + 8)
+
+    def _is_suspicious_pronunciation_text(
+        self,
+        pronunciation_text: str,
+        source_text: Optional[str],
+        field_name: str,
+    ) -> Tuple[bool, List[str]]:
+        """Return whether pronunciation text looks like leaked instructions/bad content."""
+        reasons: List[str] = []
+        normalized_text = pronunciation_text.strip()
+        lowercase_text = normalized_text.lower()
+
+        max_length = self._get_max_pronunciation_length(source_text)
+        if len(normalized_text) > max_length:
+            reasons.append(f"too_long_for_source_text:max={max_length}")
+
+        for hint in self._PROMPT_LEAK_HINTS:
+            if hint in lowercase_text:
+                reasons.append(f"contains_prompt_phrase:{hint}")
+
+        ascii_word_matches = re.findall(r"[A-Za-z]{3,}", normalized_text)
+        if len(ascii_word_matches) >= 4:
+            reasons.append("contains_many_ascii_words")
+
+        if "\n" in normalized_text:
+            reasons.append("contains_newline")
+
+        if field_name == "ipa":
+            slash_count = normalized_text.count("/")
+            has_ipa_like_characters = has_ipa_characters(normalized_text)
+            if slash_count < 2 and not has_ipa_like_characters and len(ascii_word_matches) >= 2:
+                reasons.append("lacks_ipa_delimiters_or_symbols")
+        else:
+            if re.search(r"[{}[\]<>]", normalized_text):
+                reasons.append("contains_structural_characters")
+            if ":" in normalized_text and len(ascii_word_matches) >= 2:
+                reasons.append("contains_colon_with_words")
+
+        return (len(reasons) > 0, reasons)
+
+    def check_pronunciation_fields(self, fix: bool = False) -> Dict[str, Any]:
+        """Check IPA/phonetic fields for clearly invalid prompt-leak content.
+
+        If fix=True and either IPA or phonetic is suspicious for a form,
+        both pronunciation fields are cleared.
+        """
+        logger.info("Checking pronunciation fields for suspicious content...")
+
+        session = self.get_session()
+        try:
+            forms_with_pronunciations = (
+                session.query(DerivativeForm)
+                .filter(
+                    or_(
+                        (DerivativeForm.ipa_pronunciation.isnot(None))
+                        & (DerivativeForm.ipa_pronunciation != ""),
+                        (DerivativeForm.phonetic_pronunciation.isnot(None))
+                        & (DerivativeForm.phonetic_pronunciation != ""),
+                    )
+                )
+                .all()
+            )
+
+            suspicious_entries: List[Dict[str, Any]] = []
+            fixed_count = 0
+            for form in forms_with_pronunciations:
+                ipa_value = str(form.ipa_pronunciation or "")
+                phonetic_value = str(form.phonetic_pronunciation or "")
+                source_text = form.derivative_form_text or (
+                    form.lemma.lemma_text if form.lemma else None
+                )
+
+                ipa_is_suspicious = False
+                ipa_reasons: List[str] = []
+                if ipa_value:
+                    ipa_is_suspicious, ipa_reasons = self._is_suspicious_pronunciation_text(
+                        ipa_value,
+                        source_text,
+                        "ipa",
+                    )
+
+                phonetic_is_suspicious = False
+                phonetic_reasons: List[str] = []
+                if phonetic_value:
+                    phonetic_is_suspicious, phonetic_reasons = (
+                        self._is_suspicious_pronunciation_text(
+                            phonetic_value,
+                            source_text,
+                            "phonetic",
+                        )
+                    )
+
+                if not ipa_is_suspicious and not phonetic_is_suspicious:
+                    continue
+
+                bad_fields: List[str] = []
+                reasons: Dict[str, List[str]] = {}
+                if ipa_is_suspicious:
+                    bad_fields.append("ipa")
+                    reasons["ipa"] = ipa_reasons
+                if phonetic_is_suspicious:
+                    bad_fields.append("phonetic")
+                    reasons["phonetic"] = phonetic_reasons
+
+                suspicious_entries.append(
+                    {
+                        "id": form.id,
+                        "guid": form.lemma.guid if form.lemma else None,
+                        "lemma_text": form.lemma.lemma_text if form.lemma else None,
+                        "derivative_form_text": form.derivative_form_text,
+                        "grammatical_form": form.grammatical_form,
+                        "language_code": form.language_code,
+                        "ipa_pronunciation": ipa_value,
+                        "phonetic_pronunciation": phonetic_value,
+                        "bad_fields": bad_fields,
+                        "reasons": reasons,
+                    }
+                )
+
+                if fix:
+                    form.ipa_pronunciation = None
+                    form.phonetic_pronunciation = None
+                    fixed_count += 1
+
+            if fix and fixed_count > 0:
+                session.commit()
+
+            logger.info(
+                f"Found {len(suspicious_entries)} suspicious pronunciation entries "
+                f"(out of {len(forms_with_pronunciations)} forms with pronunciations)"
+            )
+
+            return {
+                "total_checked": len(forms_with_pronunciations),
+                "suspicious_count": len(suspicious_entries),
+                "fixed_count": fixed_count if fix else 0,
+                "suspicious_entries": suspicious_entries,
+            }
+
+        except Exception as e:
+            logger.error(f"Error checking pronunciation fields: {e}")
+            if fix:
+                session.rollback()
+            return {
+                "error": str(e),
+                "total_checked": 0,
+                "suspicious_count": 0,
+                "fixed_count": 0,
+                "suspicious_entries": [],
+            }
+        finally:
+            session.close()
+
     def _get_period_for_language(self, language_code: str) -> str:
         """Return the appropriate period character for a language.
 
@@ -850,6 +1022,7 @@ class IntegrityChecker:
                 "sentences_missing_punctuation": self.check_sentences_missing_punctuation(),
                 "sentence_levels": self.check_sentence_levels(),
                 "audio_translation_mismatches": self.check_audio_translation_mismatches(),
+                "pronunciation_fields": self.check_pronunciation_fields(),
             },
         }
 
@@ -940,6 +1113,14 @@ class IntegrityChecker:
         if audio_mismatches.get("by_language"):
             for lang, count in sorted(audio_mismatches["by_language"].items()):
                 logger.info(f"    {lang}: {count}")
+        logger.info("")
+
+        pronunciation_issues = checks["pronunciation_fields"]
+        logger.info("PRONUNCIATION FIELD ISSUES:")
+        logger.info(
+            f"  Suspicious entries: {pronunciation_issues['suspicious_count']} "
+            f"(out of {pronunciation_issues['total_checked']} forms with pronunciations)"
+        )
 
         total_issues = (
             checks["orphaned_derivative_forms"]["orphaned_count"]
@@ -953,6 +1134,7 @@ class IntegrityChecker:
             + missing_punct["missing_count"]
             + sentence_levels["issue_count"]
             + audio_mismatches["mismatch_count"]
+            + pronunciation_issues["suspicious_count"]
         )
 
         logger.info("")
@@ -978,6 +1160,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
             "missing-punctuation",
             "sentence-levels",
             "audio-mismatches",
+            "pronunciation-fields",
             "all",
         ],
         default="all",
@@ -986,7 +1169,10 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--fix",
         action="store_true",
-        help="Fix issues where possible (missing-punctuation, sentence-levels, audio-mismatches)",
+        help=(
+            "Fix issues where possible "
+            "(missing-punctuation, sentence-levels, audio-mismatches, pronunciation-fields)"
+        ),
     )
 
     return parser
@@ -1117,6 +1303,34 @@ def main() -> None:
                         f"db={item.get('current_translation')!r} "
                         f"({item.get('reason')})"
                     )
+
+    elif args.check == "pronunciation-fields":
+        results = checker.check_pronunciation_fields(fix=args.fix)
+        print(
+            f"\nSuspicious pronunciation entries: {results['suspicious_count']} "
+            f"(out of {results['total_checked']} forms with pronunciations)"
+        )
+        if args.fix:
+            print(f"Fixed: {results.get('fixed_count', 0)}")
+        suspicious_entries = cast(List[Dict[str, Any]], results.get("suspicious_entries") or [])
+        if suspicious_entries:
+            print("\nExamples:")
+            for item in suspicious_entries[:10]:
+                ipa_preview = str(item.get("ipa_pronunciation", ""))
+                if len(ipa_preview) > 90:
+                    ipa_preview = f"{ipa_preview[:90]}..."
+                phonetic_preview = str(item.get("phonetic_pronunciation", ""))
+                if len(phonetic_preview) > 90:
+                    phonetic_preview = f"{phonetic_preview[:90]}..."
+                print(
+                    f"  [{item.get('language_code')}] "
+                    f"{item.get('guid') or 'no-guid'} "
+                    f"{item.get('derivative_form_text')!r}: "
+                    f"ipa={ipa_preview!r} "
+                    f"phonetic={phonetic_preview!r} "
+                    f"bad_fields={item.get('bad_fields')} "
+                    f"reasons={item.get('reasons')}"
+                )
 
     else:  # all
         checker.run_full_check(output_file=args.output)

@@ -98,6 +98,11 @@ INTEGRITY_CHECKS = [
         "Audio Mismatches",
         "Audio files whose expected text no longer matches the current translation",
     ),
+    (
+        "pronunciation-fields",
+        "Pronunciation Fields",
+        "IPA fields that look like leaked prompts/instructions instead of pronunciations",
+    ),
 ]
 
 
@@ -265,6 +270,7 @@ def find_duplicates_integrity() -> ResponseReturnValue:
         "missing-punctuation": lambda: checker.check_sentences_missing_punctuation(fix=fix_issues),
         "sentence-levels": lambda: checker.check_sentence_levels(fix=fix_issues),
         "audio-mismatches": lambda: checker.check_audio_translation_mismatches(fix=fix_issues),
+        "pronunciation-fields": lambda: checker.check_pronunciation_fields(fix=fix_issues),
     }
 
     runner = check_map.get(check_type)

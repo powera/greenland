@@ -2,6 +2,7 @@
 
 from ipa import (
     are_ipa_equivalent,
+    has_ipa_characters,
     is_ipa_levenshtein_match,
     normalize_ipa,
     weighted_similarity_ratio,
@@ -28,3 +29,11 @@ def test_are_ipa_equivalent_for_close_dialects() -> None:
 
 def test_is_ipa_levenshtein_match_alias() -> None:
     assert is_ipa_levenshtein_match("kæt", "kæt")
+
+
+def test_has_ipa_characters_detects_real_ipa() -> None:
+    assert has_ipa_characters("/ˈwɔːtər/")
+
+
+def test_has_ipa_characters_rejects_plain_english_sentence() -> None:
+    assert not has_ipa_characters("The user wants pronunciation help.")
