@@ -8,6 +8,7 @@ from ipa.generation import (
 )
 from ipa.normalization import (
     are_ipa_equivalent,
+    has_ipa_characters,
     is_ipa_levenshtein_match,
     normalize_ipa,
     weighted_similarity_ratio,
@@ -27,6 +28,7 @@ __all__ = [
     "generate_ipa_pronunciation",
     "query_ipa_pronunciation",
     "normalize_ipa",
+    "has_ipa_characters",
     "weighted_similarity_ratio",
     "are_ipa_equivalent",
     "is_ipa_levenshtein_match",

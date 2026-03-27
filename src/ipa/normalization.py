@@ -81,6 +81,24 @@ def normalize_ipa(ipa_value: str) -> str:
     return normalized
 
 
+def has_ipa_characters(text: str, minimum_count: int = 1) -> bool:
+    """Return whether text contains at least `minimum_count` distinctive IPA characters.
+
+    Distinctive means known IPA characters outside plain ASCII (e.g., ʃ, ə, ɡ, ˈ).
+    This avoids treating normal English prose as IPA just because ASCII letters overlap.
+    """
+    if minimum_count < 1:
+        minimum_count = 1
+
+    normalized_text = unicodedata.normalize("NFC", text)
+    distinctive_count = sum(
+        1
+        for character in normalized_text
+        if ord(character) > 127 and character.lower() in _IPA_CHARS
+    )
+    return distinctive_count >= minimum_count
+
+
 def weighted_similarity_ratio(left: str, right: str) -> float:
     """Compute a phonetic-weighted Levenshtein similarity ratio in [0, 1]."""
     if left == right:

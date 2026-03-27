@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional, Tuple, cast
 
 import constants
 from sqlalchemy import or_
+from ipa import has_ipa_characters
 from storage.database import create_database_session
 from storage.models.schema import (
     Corpus,
@@ -528,9 +529,8 @@ class IntegrityChecker:
             reasons.append("contains_newline")
 
         if field_name == "ipa":
-            ipa_like_character_pattern = r"[ɐ-ʯːˈˌʰʲ̩̯̃̊θðʃʒŋɹɾɡəæɑɔɪʊɛœøɲʎçʁʔ]"
             slash_count = normalized_text.count("/")
-            has_ipa_like_characters = bool(re.search(ipa_like_character_pattern, normalized_text))
+            has_ipa_like_characters = has_ipa_characters(normalized_text)
             if slash_count < 2 and not has_ipa_like_characters and len(ascii_word_matches) >= 2:
                 reasons.append("lacks_ipa_delimiters_or_symbols")
         else:
