@@ -512,6 +512,7 @@ class IntegrityChecker:
         reasons: List[str] = []
         normalized_text = pronunciation_text.strip()
         lowercase_text = normalized_text.lower()
+        ascii_word_matches = re.findall(r"[A-Za-z]{3,}", normalized_text)
 
         max_length = self._get_max_pronunciation_length(source_text)
         if len(normalized_text) > max_length:
@@ -521,8 +522,9 @@ class IntegrityChecker:
             if hint in lowercase_text:
                 reasons.append(f"contains_prompt_phrase:{hint}")
 
-        ascii_word_matches = re.findall(r"[A-Za-z]{3,}", normalized_text)
-        if len(ascii_word_matches) >= 4:
+        if len(ascii_word_matches) >= 4 and not self._looks_like_phonetic_syllables(
+            normalized_text, field_name
+        ):
             reasons.append("contains_many_ascii_words")
 
         if "\n" in normalized_text:
@@ -540,6 +542,25 @@ class IntegrityChecker:
                 reasons.append("contains_colon_with_words")
 
         return (len(reasons) > 0, reasons)
+
+    def _looks_like_phonetic_syllables(self, pronunciation_text: str, field_name: str) -> bool:
+        """Return whether text resembles syllabified English-friendly phonetics."""
+        if field_name != "phonetic" or "-" not in pronunciation_text:
+            return False
+
+        letter_tokens = re.findall(r"[A-Za-z]+", pronunciation_text)
+        if len(letter_tokens) < 2:
+            return False
+
+        long_token_count = sum(1 for token in letter_tokens if len(token) > 6)
+        if long_token_count > 0:
+            return False
+
+        punctuation_stripped = pronunciation_text.replace("(", "").replace(")", "")
+        punctuation_stripped = punctuation_stripped.replace("/", "").replace(" ", "")
+        has_expected_characters = bool(re.fullmatch(r"[A-Za-z'–—-]+", punctuation_stripped))
+
+        return has_expected_characters
 
     def check_pronunciation_fields(self, fix: bool = False) -> Dict[str, Any]:
         """Check IPA/phonetic fields for clearly invalid prompt-leak content.
