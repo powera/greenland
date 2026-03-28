@@ -403,12 +403,14 @@ class RequestMetricsMiddleware:
         start_time = getattr(g, "request_start_time", None)
         if start_time is not None:
             duration = time.perf_counter() - start_time
+            is_unmapped_404 = response.status_code == 404 and request.endpoint is None
 
             # Get endpoint name (use rule or path)
             endpoint = request.endpoint or request.path
 
-            # Record latency
-            REQUEST_LATENCY.labels(method=request.method, endpoint=endpoint).observe(duration)
+            # Record latency (exclude noisy unmatched-route 404 scan/probe requests)
+            if not is_unmapped_404:
+                REQUEST_LATENCY.labels(method=request.method, endpoint=endpoint).observe(duration)
 
             # Record request count (exclude noisy 404 scans/probes)
             if response.status_code != 404:
