@@ -17,7 +17,13 @@ from typing import Any, Callable, Dict, Optional, cast
 
 from barsukas.config import Config
 from flask import Flask, Response, g, render_template
-from barsukas.metrics import RequestMetricsMiddleware, get_metrics_output, record_llm_call
+from barsukas.metrics import (
+    RequestMetricsMiddleware,
+    get_metrics_output,
+    instrument_sqlalchemy_engine,
+    record_llm_call,
+    set_server_mode_metrics,
+)
 from sqlalchemy.orm import Session
 
 from langtools.ja.romaji_helper import (
@@ -132,6 +138,14 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
 
     # Store backend config in app
     app.backend_config = backend_config
+    app.config["SERVER_MODE"] = "readwrite"
+
+    set_server_mode_metrics(
+        server_mode=app.config["SERVER_MODE"],
+        backend=backend_config.backend_type.value,
+        readonly=bool(app.config.get("READONLY", False)),
+        debug=bool(app.config.get("DEBUG", False)),
+    )
 
     # Register LLM metrics callback so unified_client reports metrics
     try:
@@ -144,9 +158,22 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
 
     # Create a session factory function that returns new sessions
     def session_factory() -> Session:
-        return create_session(backend_config)
+        return cast(Session, create_session(backend_config))
 
     app.db_session_factory = session_factory
+    try:
+        probe_session = app.db_session_factory()
+        engine = probe_session.get_bind()
+        if engine is not None:
+            instrument_sqlalchemy_engine(engine)
+    except Exception as setup_error:
+        logging.getLogger(__name__).warning(
+            "Failed to enable SQLAlchemy metrics auto-instrumentation: %s",
+            setup_error,
+        )
+    finally:
+        if "probe_session" in locals():
+            probe_session.close()
 
     # Register blueprints
     app.register_blueprint(lemmas.bp)
@@ -206,7 +233,7 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
         _bench_postgres_url: str = bench_postgres_url
 
         def bench_session_factory() -> Session:
-            return create_postgres_session(_bench_postgres_url)
+            return cast(Session, create_postgres_session(_bench_postgres_url))
 
         app.bench_db_session_factory = bench_session_factory
         app.extensions["benchmark_run_worker"] = BenchmarkRunWorker()
@@ -327,6 +354,18 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     @app.route("/metrics")
     def metrics() -> Response:
         """Expose Prometheus metrics endpoint."""
+        backend_type = app.backend_config.backend_type.value
+        readonly = bool(app.config.get("READONLY", False))
+        debug = bool(app.config.get("DEBUG", False))
+        server_mode = "readonly" if readonly else "readwrite"
+
+        set_server_mode_metrics(
+            server_mode=server_mode,
+            backend=backend_type,
+            readonly=readonly,
+            debug=debug,
+        )
+
         return Response(get_metrics_output(), mimetype="text/plain; charset=utf-8")
 
     @app.route("/")
