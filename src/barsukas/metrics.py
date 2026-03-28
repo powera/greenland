@@ -84,6 +84,26 @@ if HAS_PROMETHEUS:
         registry=REGISTRY,
     )
 
+    # Server mode metrics
+    SERVER_MODE_INFO = Gauge(
+        "barsukas_server_mode_info",
+        "Static server mode metadata (value is always 1)",
+        ["server_mode", "backend", "readonly", "debug"],
+        registry=REGISTRY,
+    )
+
+    SERVER_READ_ONLY = Gauge(
+        "barsukas_server_read_only",
+        "Whether Barsukas is running in read-only mode (1=true, 0=false)",
+        registry=REGISTRY,
+    )
+
+    SERVER_DEBUG = Gauge(
+        "barsukas_server_debug",
+        "Whether Barsukas debug mode is enabled (1=true, 0=false)",
+        registry=REGISTRY,
+    )
+
     # LLM call metrics
     LLM_CALL_COUNT = Counter(
         "barsukas_llm_calls_total",
@@ -148,6 +168,9 @@ else:
     LLM_CALL_COUNT = _NOOP  # type: ignore[assignment]
     LLM_CALL_LATENCY = _NOOP  # type: ignore[assignment]
     LLM_TOKENS_TOTAL = _NOOP  # type: ignore[assignment]
+    SERVER_MODE_INFO = _NOOP  # type: ignore[assignment]
+    SERVER_READ_ONLY = _NOOP  # type: ignore[assignment]
+    SERVER_DEBUG = _NOOP  # type: ignore[assignment]
     CPU_USAGE = _NOOP  # type: ignore[assignment]
     MEMORY_USAGE_BYTES = _NOOP  # type: ignore[assignment]
     MEMORY_USAGE_PERCENT = _NOOP  # type: ignore[assignment]
@@ -207,6 +230,101 @@ def get_metrics_output() -> bytes:
         return b""
     update_resource_metrics()
     return generate_latest(REGISTRY)  # type: ignore[no-any-return]
+
+
+def set_server_mode_metrics(
+    server_mode: str,
+    backend: str,
+    readonly: bool,
+    debug: bool,
+) -> None:
+    """Record server mode metrics."""
+    readonly_label = "true" if readonly else "false"
+    debug_label = "true" if debug else "false"
+
+    SERVER_MODE_INFO.labels(
+        server_mode=server_mode,
+        backend=backend,
+        readonly=readonly_label,
+        debug=debug_label,
+    ).set(1.0)
+    SERVER_READ_ONLY.set(1.0 if readonly else 0.0)
+    SERVER_DEBUG.set(1.0 if debug else 0.0)
+
+
+def _extract_sql_operation(statement: str) -> str:
+    """Extract a normalized SQL operation name from a SQL statement."""
+    sql_text = statement.strip()
+    if not sql_text:
+        return "unknown"
+
+    operation = sql_text.split(maxsplit=1)[0].lower()
+    if operation in {"select", "insert", "update", "delete"}:
+        return operation
+    if operation in {"pragma", "show", "set"}:
+        return operation
+    if operation.startswith("with"):
+        return "with"
+    return "other"
+
+
+def instrument_sqlalchemy_engine(engine: Any) -> None:
+    """Auto-instrument a SQLAlchemy engine to track query latency/count."""
+    try:
+        from sqlalchemy import event
+    except ImportError:
+        return
+
+    if getattr(engine, "_barsukas_metrics_instrumented", False):
+        return
+
+    @event.listens_for(engine, "before_cursor_execute")
+    def _before_cursor_execute(
+        conn: Any,
+        cursor: Any,
+        statement: str,
+        parameters: Any,
+        context: Any,
+        executemany: bool,
+    ) -> None:
+        del conn, cursor, parameters, executemany
+        context._barsukas_query_start_time = time.perf_counter()
+        context._barsukas_query_operation = _extract_sql_operation(statement)
+
+    @event.listens_for(engine, "after_cursor_execute")
+    def _after_cursor_execute(
+        conn: Any,
+        cursor: Any,
+        statement: str,
+        parameters: Any,
+        context: Any,
+        executemany: bool,
+    ) -> None:
+        del conn, cursor, statement, parameters, executemany
+        start_time = getattr(context, "_barsukas_query_start_time", None)
+        operation = getattr(context, "_barsukas_query_operation", "query")
+        if start_time is None:
+            return
+        duration = time.perf_counter() - start_time
+        DB_QUERY_LATENCY.labels(operation=operation).observe(duration)
+        DB_QUERY_COUNT.labels(operation=operation).inc()
+
+    @event.listens_for(engine, "handle_error")
+    def _handle_error(exception_context: Any) -> None:
+        execution_context = getattr(exception_context, "execution_context", None)
+        if execution_context is None:
+            operation = _extract_sql_operation(str(getattr(exception_context, "statement", "")))
+            DB_QUERY_COUNT.labels(operation=operation).inc()
+            return
+
+        start_time = getattr(execution_context, "_barsukas_query_start_time", None)
+        operation = getattr(execution_context, "_barsukas_query_operation", "query")
+        if start_time is not None:
+            duration = time.perf_counter() - start_time
+            DB_QUERY_LATENCY.labels(operation=operation).observe(duration)
+        DB_QUERY_COUNT.labels(operation=operation).inc()
+
+    engine._barsukas_metrics_instrumented = True
 
 
 @contextmanager
