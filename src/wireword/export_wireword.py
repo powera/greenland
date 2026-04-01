@@ -59,6 +59,9 @@ LANGUAGE_EXPORT_MAX_LEVELS: Dict[str, int] = {
 }
 DEFAULT_EXPORT_MAX_LEVEL = 10
 
+# Number of difficulty levels per split file (e.g. levels 1-5, 6-10, …)
+LEVEL_RANGE_SIZE = 5
+
 
 class WirewordExporter:
     """Exporter for WireWord API format."""
@@ -989,17 +992,58 @@ class WirewordExporter:
 
         return derivative_phrases
 
-    def export_wireword_directory(self, output_dir: str) -> Tuple[bool, Dict[str, Any]]:
+    def _get_level_ranges(self) -> List[Tuple[int, int]]:
+        """Return level ranges for splitting word files (e.g. [(1,5), (6,10), …])."""
+        max_level = self._get_max_export_level()
+        ranges: List[Tuple[int, int]] = []
+        for start in range(1, max_level + 1, LEVEL_RANGE_SIZE):
+            end = min(start + LEVEL_RANGE_SIZE - 1, max_level)
+            ranges.append((start, end))
+        return ranges
+
+    def _write_combined_wireword_file(
+        self,
+        filepath: str,
+        wireword_data: List[Dict[str, Any]],
+        pretty_print: bool = True,
+    ) -> None:
+        """Write wireword data (mixed nouns and verbs) to a JSON file."""
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, "w", encoding="utf-8") as f:
+            if pretty_print:
+                f.write("[\n")
+                for i, entry in enumerate(wireword_data):
+                    is_last = i == len(wireword_data) - 1
+                    if entry.get("word_type") == "verb" and entry.get("grammatical_forms"):
+                        f.write(format_verb_entry(entry, is_last=is_last))
+                    else:
+                        line = json.dumps(entry, ensure_ascii=False, separators=(", ", ": "))
+                        if not is_last:
+                            f.write(f"  {line},\n")
+                        else:
+                            f.write(f"  {line}\n")
+                f.write("]\n")
+            else:
+                json.dump(wireword_data, f, ensure_ascii=False, separators=(",", ":"))
+
+    def export_wireword_directory(
+        self, output_dir: str, cdn_base: Optional[str] = None
+    ) -> Tuple[bool, Dict[str, Any]]:
         """
         Export WireWord format files to directory structure.
-        Creates two files: wireword_verbs.json and wireword_nouns.json
+        Creates one file per level range (e.g. wireword_levels_1_5.json)
+        containing both nouns and verbs for those levels.
 
         Args:
             output_dir: Base output directory (e.g., lang_lt/generated)
+            cdn_base: Optional CDN base URL (e.g. "https://wireword.trakaido.com").
+                When set, the manifest uses MD5-hash filenames for CDN caching.
 
         Returns:
             Tuple of (success flag, export results dictionary)
         """
+        import tempfile
+
         # Create wireword subdirectory
         wireword_dir = os.path.join(output_dir, "wireword")
         os.makedirs(wireword_dir, exist_ok=True)
@@ -1010,47 +1054,78 @@ class WirewordExporter:
             "subtypes_exported": set(),
         }
 
-        # Export verbs to wireword_verbs.json
-        verbs_path = os.path.join(wireword_dir, "wireword_verbs.json")
-        logger.info(f"Exporting verbs to {verbs_path}...")
+        # Export verbs to a temporary file
+        verbs_tmp_path = os.path.join(tempfile.gettempdir(), "wireword_verbs_tmp.json")
+        logger.info("Exporting verbs to temporary file...")
         verbs_success, verbs_stats = self.export_verbs_to_wireword_format(
-            output_path=verbs_path,
+            output_path=verbs_tmp_path,
             include_without_guid=False,
             include_unverified=True,
-            pretty_print=True,
+            pretty_print=False,
         )
 
+        verbs_data: List[Dict[str, Any]] = []
         if verbs_success:
-            results["files_created"].append(verbs_path)
+            with open(verbs_tmp_path, "r", encoding="utf-8") as f:
+                verbs_data = json.load(f)
             if verbs_stats:
                 for level in verbs_stats.level_distribution.keys():
                     results["levels_exported"].add(int(level))
-            logger.info(f"✅ Exported verbs to {verbs_path}")
+            logger.info(f"✅ Loaded {len(verbs_data)} verb entries")
         else:
-            logger.error(f"❌ Failed to export verbs")
-            return False, results
+            logger.warning("No verbs found (may be expected for some languages)")
 
-        # Export non-verbs to wireword_nouns.json
-        nouns_path = os.path.join(wireword_dir, "wireword_nouns.json")
-        logger.info(f"Exporting non-verbs to {nouns_path}...")
+        # Export non-verbs to a temporary file
+        nouns_tmp_path = os.path.join(tempfile.gettempdir(), "wireword_nouns_tmp.json")
+        logger.info("Exporting non-verbs to temporary file...")
         nouns_success, nouns_stats = self.export_to_wireword_format(
-            output_path=nouns_path,
+            output_path=nouns_tmp_path,
             include_without_guid=False,
             include_unverified=True,
-            pretty_print=True,
+            pretty_print=False,
         )
 
+        nouns_data: List[Dict[str, Any]] = []
         if nouns_success:
-            results["files_created"].append(nouns_path)
+            with open(nouns_tmp_path, "r", encoding="utf-8") as f:
+                nouns_data = json.load(f)
             if nouns_stats:
                 for level in nouns_stats.level_distribution.keys():
                     results["levels_exported"].add(int(level))
                 for pos_type in nouns_stats.pos_distribution.keys():
                     results["subtypes_exported"].add(pos_type)
-            logger.info(f"✅ Exported non-verbs to {nouns_path}")
+            logger.info(f"✅ Loaded {len(nouns_data)} non-verb entries")
         else:
-            logger.error(f"❌ Failed to export non-verbs")
+            logger.warning("No non-verb entries found")
+
+        # Clean up temporary files
+        for tmp_path in (verbs_tmp_path, nouns_tmp_path):
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+
+        if not verbs_data and not nouns_data:
+            logger.error("❌ No data to export")
             return False, results
+
+        # Combine all words and sort by level then GUID
+        all_words = nouns_data + verbs_data
+        all_words.sort(key=lambda w: (w.get("level", 0), w.get("guid", "")))
+
+        # Split into level-range files
+        level_ranges = self._get_level_ranges()
+        for start, end in level_ranges:
+            range_words = [w for w in all_words if start <= w.get("level", 0) <= end]
+            if not range_words:
+                continue
+            filename = f"wireword_levels_{start}_{end}.json"
+            filepath = os.path.join(wireword_dir, filename)
+            self._write_combined_wireword_file(filepath, range_words)
+            results["files_created"].append(filepath)
+            logger.info(
+                f"✅ Wrote {len(range_words)} entries to {filename} " f"(levels {start}-{end})"
+            )
 
         # Convert sets to sorted lists for JSON serialization
         results["levels_exported"] = sorted(list(results["levels_exported"]))
@@ -1063,13 +1138,15 @@ class WirewordExporter:
             self.simplified_chinese,
             include_unreviewed_audio=self.include_unreviewed_audio,
             source_language=self.source_language,
+            cdn_base=cdn_base,
         )
         if manifest_success:
             results["files_created"].append(manifest_path)
             results["manifest_path"] = manifest_path
 
         logger.info(
-            f"✅ WireWord directory export completed: {len(results['files_created'])} files created"
+            f"✅ WireWord directory export completed: "
+            f"{len(results['files_created'])} files created"
         )
         return True, results
 
