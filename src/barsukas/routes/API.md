@@ -42,7 +42,7 @@ Base prefix: `/api`.
 
 ## Metadata endpoints (for aggregate counting)
 
-- `GET /api/v1/metadata/words[?language=<code>]`
+- `GET /api/v1/metadata/words[?language=<code>][&max_difficulty=<int>]`
 
 Returns per-language aggregate counts with this shape:
 
@@ -58,8 +58,11 @@ Returns per-language aggregate counts with this shape:
   - non-`en`: lemmas with non-empty `lemma_translations.translation` in that language
 - "with audio": lemma-level audio rows in `audio_quality_reviews` (`guid` set, `sentence_id` null, `grammatical_form` null)
 - "with derivative forms": at least one `derivative_forms` row for that lemma in that language
+- `max_difficulty`: if supplied, restricts to words whose effective difficulty
+  (`COALESCE(lemma_difficulty_overrides.difficulty_level, lemma.difficulty_level)` for the
+  requested language) is between 1 and `max_difficulty` inclusive (excludes -1 / NULL)
 
-- `GET /api/v1/metadata/sentences[?language=<code>]`
+- `GET /api/v1/metadata/sentences[?language=<code>][&max_difficulty=<int>]`
 
 Returns per-language aggregate counts with this shape:
 
@@ -73,6 +76,8 @@ Returns per-language aggregate counts with this shape:
 - Language sentence universe: sentences with non-empty `sentence_translations.translation_text` in that language
 - "with audio": at least one sentence-level row in `audio_quality_reviews` (`sentence_id` set) for the same language
 - "verified": `sentences.verified` among the language sentence universe
+- `max_difficulty`: if supplied, restricts to sentences whose `minimum_level` is between
+  1 and `max_difficulty` inclusive (excludes NULL / unset sentences)
 
 ## Response conventions
 
