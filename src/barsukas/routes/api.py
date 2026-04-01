@@ -20,7 +20,7 @@ from storage.models import (
     SentenceTranslation,
     SentenceWord,
 )
-from storage.models.schema import AudioQualityReview
+from storage.models.schema import AudioQualityReview, LemmaDifficultyOverride
 from storage.queries.lemma import build_lemma_search_query
 from storage.translation_helpers import (
     LANGUAGE_HIERARCHY,
@@ -936,8 +936,22 @@ def _has_translation_expression(language_code: str) -> Any:
 
 @bp.route("/v1/metadata/words")
 def get_word_metadata() -> ResponseReturnValue:
-    """Get per-language metadata counts for lemma coverage, audio, and derivative forms."""
+    """Get per-language metadata counts for lemma coverage, audio, and derivative forms.
+
+    Optional query params:
+      language=<code>       Filter to a single language.
+      max_difficulty=<int>  Only count words whose effective difficulty (COALESCE of
+                            per-language override and base lemma difficulty) is between
+                            1 and max_difficulty inclusive (excludes -1 / unset).
+    """
     requested_language = request.args.get("language", "").strip().lower()
+    max_difficulty_param = request.args.get("max_difficulty", "").strip()
+    max_difficulty: Optional[int] = None
+    if max_difficulty_param:
+        try:
+            max_difficulty = int(max_difficulty_param)
+        except ValueError:
+            return _build_error_response("max_difficulty must be an integer", 400)
 
     translation_languages = {
         row[0]
@@ -990,6 +1004,25 @@ def get_word_metadata() -> ResponseReturnValue:
                 .join(LemmaTranslation, LemmaTranslation.lemma_id == Lemma.id)
                 .filter(_has_translation_expression(current_language))
                 .distinct()
+            )
+
+        if max_difficulty is not None:
+            # COALESCE(override.difficulty_level, lemma.difficulty_level) BETWEEN 1 AND max_difficulty
+            # We must join Lemma back (it is already the root of the query) and left-join overrides.
+            effective_difficulty = case(
+                (
+                    LemmaDifficultyOverride.difficulty_level.isnot(None),
+                    LemmaDifficultyOverride.difficulty_level,
+                ),
+                else_=Lemma.difficulty_level,
+            )
+            base_query = base_query.outerjoin(
+                LemmaDifficultyOverride,
+                (LemmaDifficultyOverride.lemma_id == Lemma.id)
+                & (LemmaDifficultyOverride.language_code == current_language),
+            ).filter(
+                effective_difficulty >= 1,
+                effective_difficulty <= max_difficulty,
             )
 
         base_subquery = base_query.subquery()
@@ -1069,14 +1102,29 @@ def get_word_metadata() -> ResponseReturnValue:
 
     if requested_language:
         metadata["requested_language"] = requested_language
+    if max_difficulty is not None:
+        metadata["max_difficulty"] = max_difficulty
 
     return _build_success_response(summary_data, metadata)
 
 
 @bp.route("/v1/metadata/sentences")
 def get_sentence_metadata() -> ResponseReturnValue:
-    """Get per-language metadata counts for sentence coverage and sentence-level audio."""
+    """Get per-language metadata counts for sentence coverage and sentence-level audio.
+
+    Optional query params:
+      language=<code>       Filter to a single language.
+      max_difficulty=<int>  Only count sentences whose minimum_level is between
+                            1 and max_difficulty inclusive (excludes NULL / unset).
+    """
     requested_language = request.args.get("language", "").strip().lower()
+    max_difficulty_param = request.args.get("max_difficulty", "").strip()
+    max_difficulty_sentences: Optional[int] = None
+    if max_difficulty_param:
+        try:
+            max_difficulty_sentences = int(max_difficulty_param)
+        except ValueError:
+            return _build_error_response("max_difficulty must be an integer", 400)
 
     sentence_translation_languages = {
         row[0]
@@ -1115,14 +1163,23 @@ def get_sentence_metadata() -> ResponseReturnValue:
     summary_data: Dict[str, Any] = {}
 
     for current_language in selected_languages:
+        sentence_filters = [
+            SentenceTranslation.language_code == current_language,
+            SentenceTranslation.translation_text.isnot(None),
+            SentenceTranslation.translation_text != "",
+        ]
+        if max_difficulty_sentences is not None:
+            sentence_filters.extend(
+                [
+                    Sentence.minimum_level.isnot(None),
+                    Sentence.minimum_level >= 1,
+                    Sentence.minimum_level <= max_difficulty_sentences,
+                ]
+            )
         base_query = (
             g.db.query(Sentence.id, Sentence.pattern_type, Sentence.verified)
             .join(SentenceTranslation, SentenceTranslation.sentence_id == Sentence.id)
-            .filter(
-                SentenceTranslation.language_code == current_language,
-                SentenceTranslation.translation_text.isnot(None),
-                SentenceTranslation.translation_text != "",
-            )
+            .filter(*sentence_filters)
             .distinct()
         )
 
@@ -1191,6 +1248,8 @@ def get_sentence_metadata() -> ResponseReturnValue:
 
     if requested_language:
         metadata["requested_language"] = requested_language
+    if max_difficulty_sentences is not None:
+        metadata["max_difficulty"] = max_difficulty_sentences
 
     return _build_success_response(summary_data, metadata)
 
