@@ -59,18 +59,16 @@
                         <select class="form-select" id="export_type" name="export_type" required onchange="toggleFilterOptions()">
                             <option value="directory" selected>Default (recommended)</option>
                             <option value="single">Single File (filtered)</option>
-                            <option value="verbs">Verbs Only</option>
                         </select>
                         <small class="form-text text-muted">
-                            <strong>Default:</strong> Creates four files (wireword_verbs.json, wireword_nouns.json, wireword_sentences.json, and wireword_manifest.json) in data/trakaido_wordlists/lang_XX/generated/wireword/<br>
-                            <strong>Single File:</strong> Downloads one JSON file with optional filters<br>
-                            <strong>Verbs Only:</strong> Downloads just the verbs file
+                            <strong>Default:</strong> Creates level-range files (wireword_levels_1_5.json, etc.), wireword_sentences.json, and wireword_manifest_v2.json in data/trakaido_wordlists/lang_XX/generated/wireword/<br>
+                            <strong>Single File:</strong> Downloads one JSON file with optional filters
                         </small>
                     </div>
 
                     <div id="filter_options" style="display: none;">
                         <div class="alert alert-info">
-                            <i class="bi bi-info-circle"></i> Optional filters for Single File or Verbs Only exports
+                            <i class="bi bi-info-circle"></i> Optional filters for Single File export
                         </div>
 
                         <div class="row mb-3">
@@ -158,17 +156,15 @@
 
                 <h6>Export Types:</h6>
                 <ul>
-                    <li><strong>Default (recommended):</strong> Creates four files in <code>data/trakaido_wordlists/lang_XX/generated/wireword/</code>:
+                    <li><strong>Default (recommended):</strong> Creates files in <code>data/trakaido_wordlists/lang_XX/generated/wireword/</code>:
                         <ul>
-                            <li><code>wireword_verbs.json</code> - All verb conjugations</li>
-                            <li><code>wireword_nouns.json</code> - All non-verbs (nouns, adjectives, etc.)</li>
+                            <li><code>wireword_levels_1_5.json</code>, <code>wireword_levels_6_10.json</code>, etc. - Words and verbs split by difficulty level range</li>
                             <li><code>wireword_sentences.json</code> - All sentences with level ≠ -1 and target language translation</li>
-                            <li><code>wireword_manifest.json</code> - Manifest with MD5 checksums and file metadata for cache validation</li>
+                            <li><code>wireword_manifest_v2.json</code> - Manifest with MD5 checksums, level metadata, and file info</li>
                         </ul>
                         This is what Trakaido expects.
                     </li>
                     <li><strong>Single File:</strong> Downloads a single JSON file with all words (or filtered subset)</li>
-                    <li><strong>Verbs Only:</strong> Downloads just the verb conjugations file</li>
                 </ul>
 
                 <h6>Supported Languages:</h6>
@@ -205,7 +201,7 @@ function toggleChineseOptions() {
 function toggleFilterOptions() {
     const exportType = document.getElementById('export_type').value;
     const filterOptions = document.getElementById('filter_options');
-    filterOptions.style.display = (exportType === 'single' || exportType === 'verbs') ? 'block' : 'none';
+    filterOptions.style.display = (exportType === 'single') ? 'block' : 'none';
 
     // Only show sentence option for directory exports
     const sentenceOptions = document.getElementById('sentence_options');

@@ -284,29 +284,6 @@ def export_wireword() -> ResponseReturnValue:
                 flash("Export failed. Check the logs for details.", "error")
                 return redirect(url_for("wireword.export_page"))
 
-        elif export_type == "verbs":
-            # Export verbs only
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as tmp_file:
-                tmp_path = tmp_file.name
-
-            success, stats = agent.export_wireword_verbs(
-                output_path=tmp_path, difficulty_level=difficulty_filter, include_unverified=True
-            )
-
-            if success:
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"wireword_verbs_{language}_{timestamp}.json"
-
-                return send_file(
-                    tmp_path,
-                    as_attachment=True,
-                    download_name=filename,
-                    mimetype="application/json",
-                )
-            else:
-                flash("Export failed. Check the logs for details.", "error")
-                return redirect(url_for("wireword.export_page"))
-
         else:
             flash(f"Invalid export type: {export_type}", "error")
             return redirect(url_for("wireword.export_page"))
