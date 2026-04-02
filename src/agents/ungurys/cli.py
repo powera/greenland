@@ -6,7 +6,12 @@ from __future__ import annotations
 import argparse
 
 from agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
-from agents.ungurys.agent import SUPPORTED_LANGUAGES, UngurysAgent, logger
+from agents.ungurys.agent import (
+    SUPPORTED_LANGUAGES,
+    SUPPORTED_NON_ENGLISH_SOURCE_LANGUAGES,
+    UngurysAgent,
+    logger,
+)
 from storage.backend.factory import create_session
 from workqueue.task_queue import TaskType, enqueue_task
 
@@ -90,6 +95,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         "--source-language",
         default="en",
         help="Source language code (default: en). The language the learner already knows. "
+        "Use 'all' to export all source-language variants in one run. "
         "Supported non-English sources: uk (Ukrainian), bn (Bengali), kn (Kannada), "
         "pl (Polish), ro (Romanian).",
     )
@@ -132,6 +138,12 @@ def main() -> None:
     # Create configuration from args (always returns a valid config with defaults)
     config = get_data_source_config(args)
 
+    selected_source_languages = (
+        ["en", *SUPPORTED_NON_ENGLISH_SOURCE_LANGUAGES]
+        if args.source_language == "all"
+        else [args.source_language]
+    )
+
     # Handle Traditional Chinese flag
     language = args.language
     if args.traditional and args.language == "zh":
@@ -159,39 +171,49 @@ def main() -> None:
             raise ValueError("--use-workqueue currently supports only --mode directory")
 
         with create_session(config) as session:
-            dedup_key = f"{TaskType.WIREWORD_EXPORT_DIRECTORY}:{language}:{args.source_language}:{args.include_unreviewed_audio}"
-            result = enqueue_task(
-                session,
-                task_type=TaskType.WIREWORD_EXPORT_DIRECTORY,
-                target_type="wireword_export",
-                target_id=None,
-                payload={
-                    "language": language,
-                    "source_language": args.source_language,
-                    "include_unreviewed_audio": args.include_unreviewed_audio,
-                    "apply_level_overrides": not args.skip_country_overrides
-                    or not args.skip_family_relation_overrides,
-                },
-                dedup_key=dedup_key,
-            )
+            queued_total = 0
+            for selected_source_language in selected_source_languages:
+                dedup_key = (
+                    f"{TaskType.WIREWORD_EXPORT_DIRECTORY}:{language}:"
+                    f"{selected_source_language}:{args.include_unreviewed_audio}"
+                )
+                result = enqueue_task(
+                    session,
+                    task_type=TaskType.WIREWORD_EXPORT_DIRECTORY,
+                    target_type="wireword_export",
+                    target_id=None,
+                    payload={
+                        "language": language,
+                        "source_language": selected_source_language,
+                        "include_unreviewed_audio": args.include_unreviewed_audio,
+                        "apply_level_overrides": not args.skip_country_overrides
+                        or not args.skip_family_relation_overrides,
+                    },
+                    dedup_key=dedup_key,
+                )
+                action = "Enqueued" if result.created else "Already queued"
+                logger.info(
+                    "%s WireWord directory export task %s for %s from %s",
+                    action,
+                    result.task.id,
+                    language,
+                    selected_source_language,
+                )
+                if result.created:
+                    queued_total += 1
             session.commit()
-
-        action = "Enqueued" if result.created else "Already queued"
-        logger.info(
-            "%s WireWord directory export task %s for %s from %s",
-            action,
-            result.task.id,
-            language,
-            args.source_language,
-        )
+        logger.info("Queued %s source language export task(s)", queued_total)
         return
+
+    if args.source_language == "all" and args.mode != "directory":
+        raise ValueError("--source-language all currently supports only --mode directory")
 
     # Create agent with config
     agent = UngurysAgent(
         config=config,
         language=language,
         include_unreviewed_audio=args.include_unreviewed_audio,
-        source_language=args.source_language,
+        source_language=selected_source_languages[0],
     )
 
     # Set default paths if not specified
@@ -206,17 +228,24 @@ def main() -> None:
         )
 
     # Run export
-    agent.run_export(
-        output_path=args.output,
-        output_dir=args.output_dir,
-        difficulty_level=args.level,
-        pos_type=args.pos_type,
-        pos_subtype=args.pos_subtype,
-        limit=args.limit,
-        include_without_guid=args.include_without_guid,
-        include_unverified=args.include_unverified,
-        export_mode=args.mode,
-        skip_country_overrides=args.skip_country_overrides,
-        skip_family_relation_overrides=args.skip_family_relation_overrides,
-        cdn_upload=cdn_upload,
-    )
+    for selected_source_language in selected_source_languages:
+        source_agent = UngurysAgent(
+            config=config,
+            language=language,
+            include_unreviewed_audio=args.include_unreviewed_audio,
+            source_language=selected_source_language,
+        )
+        source_agent.run_export(
+            output_path=args.output,
+            output_dir=args.output_dir,
+            difficulty_level=args.level,
+            pos_type=args.pos_type,
+            pos_subtype=args.pos_subtype,
+            limit=args.limit,
+            include_without_guid=args.include_without_guid,
+            include_unverified=args.include_unverified,
+            export_mode=args.mode,
+            skip_country_overrides=args.skip_country_overrides,
+            skip_family_relation_overrides=args.skip_family_relation_overrides,
+            cdn_upload=cdn_upload,
+        )

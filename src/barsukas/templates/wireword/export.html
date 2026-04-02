@@ -62,7 +62,7 @@
                         </select>
                         <small class="form-text text-muted">
                             <strong>Default:</strong> Creates level-range files (wireword_levels_1_5.json, etc.), wireword_sentences.json, and wireword_manifest_v2.json in data/trakaido_wordlists/lang_XX/generated/wireword/<br>
-                            <strong>Single File:</strong> Downloads one JSON file with optional filters
+                            <strong>Single File:</strong> Downloads one JSON file with optional filters (not available for "All source languages")
                         </small>
                     </div>
 
@@ -182,14 +182,20 @@
 <script>
 function toggleChineseOptions() {
     const language = document.getElementById('language').value;
+    const sourceLanguage = document.getElementById('source_language').value;
     const chineseGroup = document.getElementById('chinese_variant_group');
     const exportType = document.getElementById('export_type');
+    const singleOption = exportType.querySelector('option[value="single"]');
+    const allSourcesSelected = sourceLanguage === 'all';
 
     // Show Chinese options only for Chinese language (not for "All Languages")
     chineseGroup.style.display = (language === 'zh') ? 'block' : 'none';
 
-    // Disable export type options when "All Languages" is selected
-    if (language === 'all') {
+    // Disable single-file export when "All Languages" or "All source languages" is selected
+    if (singleOption) {
+        singleOption.disabled = (language === 'all' || allSourcesSelected);
+    }
+    if (language === 'all' || allSourcesSelected) {
         // Force directory mode for "All Languages"
         exportType.value = 'directory';
         exportType.disabled = true;
@@ -212,6 +218,10 @@ function toggleFilterOptions() {
 document.addEventListener('DOMContentLoaded', function() {
     toggleChineseOptions();
     toggleFilterOptions();
+    document.getElementById('source_language').addEventListener('change', function() {
+        toggleChineseOptions();
+        toggleFilterOptions();
+    });
 });
 </script>
 {% endblock %}
