@@ -480,6 +480,19 @@ def create_local_models(postgres_url=None):
         lmstudio_model_name="google/gemma-3-12b",
         max_benchmark_tier=2,
     )
+    _insert_lmstudio_model(
+        s,
+        codename="gemma-4-e4b-it-lms",
+        displayname="Gemma 4 E4B IT (LMStudio)",
+        launch_date="2025-04-09",
+        filesize_mb=3200,
+        license_name="Gemma License",
+        lmstudio_model=("lmstudio-community/gemma-4-E4B-it-GGUF" "/gemma-4-E4B-it-Q4_K_M.gguf"),
+        # Keep this aligned with LM Studio /api/v0/models "id" for this model.
+        # If your local id differs, pass --update after adjusting this value.
+        lmstudio_model_name="gemma-4-e4b-it",
+        max_benchmark_tier=2,
+    )
 
 
 def request_lmstudio_install_for_local_models(postgres_url=None):
