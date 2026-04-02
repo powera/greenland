@@ -39,13 +39,14 @@ def get_argument_parser() -> argparse.ArgumentParser:
         "--mode",
         choices=["single", "directory", "both"],
         default="directory",
-        help="Export mode: single file, directory structure, or both (default: directory)",
+        help="Export mode (default: directory). 'single' and 'both' are "
+        "DEPRECATED — they produce legacy noun/verb-split files.",
     )
 
     # Output paths
     parser.add_argument(
         "--output",
-        help="Output path for single-file export (default: data/trakaido_wordlists/lang_{language}/generated/wireword/wireword_nouns.json)",
+        help="[DEPRECATED] Output path for single-file (noun-only) export.",
     )
     parser.add_argument(
         "--output-dir",
@@ -99,14 +100,28 @@ def get_argument_parser() -> argparse.ArgumentParser:
         help="Enqueue directory exports for background processing by workqueue worker.",
     )
     parser.add_argument(
-        "--cdn-upload",
+        "--no-cdn-upload",
         action="store_true",
         default=False,
-        help="Upload non-manifest wireword files to the trakaido-wireword CDN bucket "
-        "and generate the v2 manifest with MD5-hash filenames.",
+        help="Skip uploading wireword files to the CDN. By default, directory "
+        "exports upload to the trakaido-wireword bucket and generate the v2 "
+        "manifest with MD5-hash filenames (if DO Spaces credentials are available).",
     )
 
     return parser
+
+
+def _cdn_credentials_available() -> bool:
+    """Return True if Digital Ocean Spaces credentials are configured."""
+    import os
+    from pathlib import Path
+
+    import constants
+
+    if os.getenv("DO_SPACES_KEY") and os.getenv("DO_SPACES_SECRET"):
+        return True
+    key_file = Path(constants.KEY_DIR) / "digitalocean.key"
+    return key_file.exists()
 
 
 def main() -> None:
@@ -121,6 +136,23 @@ def main() -> None:
     language = args.language
     if args.traditional and args.language == "zh":
         language = "zh-Hant"
+
+    # Deprecation warnings for legacy export modes
+    if args.mode in ("single", "both"):
+        logger.warning(
+            "⚠️  --mode %s is DEPRECATED. The directory export now produces "
+            "level-range files containing both nouns and verbs.",
+            args.mode,
+        )
+
+    # Resolve CDN upload: enabled by default when credentials exist,
+    # unless --no-cdn-upload is passed.
+    cdn_upload = not args.no_cdn_upload and _cdn_credentials_available()
+    if not args.no_cdn_upload and not cdn_upload:
+        logger.info(
+            "CDN upload skipped — no DO Spaces credentials found. "
+            "Set DO_SPACES_KEY/DO_SPACES_SECRET or create keys/digitalocean.key."
+        )
 
     if args.use_workqueue:
         if args.mode != "directory":
@@ -186,5 +218,5 @@ def main() -> None:
         export_mode=args.mode,
         skip_country_overrides=args.skip_country_overrides,
         skip_family_relation_overrides=args.skip_family_relation_overrides,
-        cdn_upload=args.cdn_upload,
+        cdn_upload=cdn_upload,
     )

@@ -720,29 +720,34 @@ class UngurysAgent:
                 "directory": actual_dir,
             }
 
-        # Always export verbs to separate file (regardless of export mode)
-        logger.info("Exporting verbs to separate wireword_verbs.json file...")
-        verb_success, verb_stats = self.export_wireword_verbs(
-            output_path=None,  # Use default path
-            include_without_guid=include_without_guid,
-            include_unverified=include_unverified,
-        )
-        results["exports"]["verbs"] = {
-            "success": verb_success,
-            "stats": verb_stats,
-            "note": "Verbs are always exported to separate wireword_verbs.json file",
-        }
+        # Legacy: export separate verb/sentence files for single/both modes.
+        # In directory mode these are already included in the level-range files
+        # and the directory export handles sentences too.
+        if export_mode in ["single", "both"]:
+            logger.warning(
+                "⚠️  Exporting legacy separate wireword_verbs.json "
+                "(deprecated — use directory mode)"
+            )
+            verb_success, verb_stats = self.export_wireword_verbs(
+                output_path=None,
+                include_without_guid=include_without_guid,
+                include_unverified=include_unverified,
+            )
+            results["exports"]["verbs"] = {
+                "success": verb_success,
+                "stats": verb_stats,
+                "note": "Legacy separate verb file (deprecated)",
+            }
 
-        # Always export sentences to separate file (regardless of export mode)
-        logger.info("Exporting sentences to wireword_sentences.json file...")
-        sentence_success, sentence_count = self.export_wireword_sentences(
-            output_path=None,  # Use default path
-        )
-        results["exports"]["sentences"] = {
-            "success": sentence_success,
-            "count": sentence_count,
-            "note": "Sentences are always exported to wireword_sentences.json file",
-        }
+            logger.info("Exporting sentences to wireword_sentences.json file...")
+            sentence_success, sentence_count = self.export_wireword_sentences(
+                output_path=None,
+            )
+            results["exports"]["sentences"] = {
+                "success": sentence_success,
+                "count": sentence_count,
+                "note": "Sentences exported to wireword_sentences.json file",
+            }
 
         # TODO: Re-enable conversation export when we have conversations
         # Conversation export is disabled - we currently have no conversations
