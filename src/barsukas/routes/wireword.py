@@ -4,7 +4,7 @@
 
 import tempfile
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from flask import (
     Blueprint,
@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from barsukas.app import BarsukasFlask
 
 bp = Blueprint("wireword", __name__, url_prefix="/wireword")
+ALL_SOURCE_LANGUAGE_OPTION = "all"
 
 
 def _get_config() -> DataSourceConfig:
@@ -40,74 +41,85 @@ def _get_config() -> DataSourceConfig:
 def export_all_languages(
     include_unreviewed_audio: bool = False,
     apply_level_overrides: bool = False,
-    source_language: str = "en",
+    source_languages: list[str] | None = None,
 ) -> ResponseReturnValue:
     """Export WireWord files for all supported languages (directory mode only)."""
     try:
         # Create DataSourceConfig
         config = _get_config()
+        selected_source_languages = source_languages or ["en"]
 
-        all_results = {}
-        errors = []
+        all_results: dict[str, dict[str, Any]] = {}
+        errors: list[str] = []
 
-        # Export for each supported language
-        for lang_code, lang_name in SUPPORTED_LANGUAGES.items():
-            try:
-                # Handle Chinese: export both Simplified and Traditional
-                if lang_code == "zh":
-                    # Export Simplified Chinese
-                    agent_simplified = UngurysAgent(
-                        config=config,
-                        language=lang_code,
-                        simplified_chinese=True,
-                        include_unreviewed_audio=include_unreviewed_audio,
-                        source_language=source_language,
-                    )
-                    if apply_level_overrides:
-                        agent_simplified.apply_level_overrides()
-                    success_simp, results_simp = agent_simplified.export_wireword_directory()
-                    all_results[f"{lang_name} (Simplified)"] = {
-                        "success": success_simp,
-                        "results": results_simp,
-                    }
-                    if not success_simp:
-                        errors.append(f"{lang_name} (Simplified)")
+        for source_language in selected_source_languages:
+            source_display = SUPPORTED_SOURCE_LANGUAGES.get(source_language, source_language)
 
-                    # Export Traditional Chinese
-                    agent_traditional = UngurysAgent(
-                        config=config,
-                        language=lang_code,
-                        simplified_chinese=False,
-                        include_unreviewed_audio=include_unreviewed_audio,
-                        source_language=source_language,
-                    )
-                    if apply_level_overrides:
-                        agent_traditional.apply_level_overrides()
-                    success_trad, results_trad = agent_traditional.export_wireword_directory()
-                    all_results[f"{lang_name} (Traditional)"] = {
-                        "success": success_trad,
-                        "results": results_trad,
-                    }
-                    if not success_trad:
-                        errors.append(f"{lang_name} (Traditional)")
-                else:
-                    # Export other languages
-                    agent = UngurysAgent(
-                        config=config,
-                        language=lang_code,
-                        include_unreviewed_audio=include_unreviewed_audio,
-                        source_language=source_language,
-                    )
-                    if apply_level_overrides:
-                        agent.apply_level_overrides()
-                    success, results = agent.export_wireword_directory()
-                    all_results[lang_name] = {"success": success, "results": results}
-                    if not success:
-                        errors.append(lang_name)
+            # Export for each supported language
+            for lang_code, lang_name in SUPPORTED_LANGUAGES.items():
+                result_label = (
+                    f"{lang_name} from {source_display}"
+                    if source_language != "en"
+                    else f"{lang_name} from English"
+                )
+                try:
+                    # Handle Chinese: export both Simplified and Traditional
+                    if lang_code == "zh":
+                        # Export Simplified Chinese
+                        agent_simplified = UngurysAgent(
+                            config=config,
+                            language=lang_code,
+                            simplified_chinese=True,
+                            include_unreviewed_audio=include_unreviewed_audio,
+                            source_language=source_language,
+                        )
+                        if apply_level_overrides:
+                            agent_simplified.apply_level_overrides()
+                        success_simp, results_simp = agent_simplified.export_wireword_directory()
+                        simplified_label = f"{result_label} (Simplified)"
+                        all_results[simplified_label] = {
+                            "success": success_simp,
+                            "results": results_simp,
+                        }
+                        if not success_simp:
+                            errors.append(simplified_label)
 
-            except Exception as e:
-                errors.append(f"{lang_name}: {str(e)}")
-                all_results[lang_name] = {"success": False, "error": str(e)}
+                        # Export Traditional Chinese
+                        agent_traditional = UngurysAgent(
+                            config=config,
+                            language=lang_code,
+                            simplified_chinese=False,
+                            include_unreviewed_audio=include_unreviewed_audio,
+                            source_language=source_language,
+                        )
+                        if apply_level_overrides:
+                            agent_traditional.apply_level_overrides()
+                        success_trad, results_trad = agent_traditional.export_wireword_directory()
+                        traditional_label = f"{result_label} (Traditional)"
+                        all_results[traditional_label] = {
+                            "success": success_trad,
+                            "results": results_trad,
+                        }
+                        if not success_trad:
+                            errors.append(traditional_label)
+                    else:
+                        # Export other languages
+                        agent = UngurysAgent(
+                            config=config,
+                            language=lang_code,
+                            include_unreviewed_audio=include_unreviewed_audio,
+                            source_language=source_language,
+                        )
+                        if apply_level_overrides:
+                            agent.apply_level_overrides()
+                        success, results = agent.export_wireword_directory()
+                        all_results[result_label] = {"success": success, "results": results}
+                        if not success:
+                            errors.append(result_label)
+
+                except Exception as e:
+                    errors.append(f"{result_label}: {str(e)}")
+                    all_results[result_label] = {"success": False, "error": str(e)}
 
         # Show results
         if errors:
@@ -136,6 +148,7 @@ def export_all_languages(
 
 # Supported source languages for WireWord export
 SUPPORTED_SOURCE_LANGUAGES = {
+    ALL_SOURCE_LANGUAGE_OPTION: "All source languages",
     "en": "English",
     **{
         language_code: SUPPORTED_LANGUAGES.get(language_code, language_code)
@@ -164,13 +177,26 @@ def export_wireword() -> ResponseReturnValue:
     include_unreviewed_audio = request.form.get("include_unreviewed_audio") == "on"
     apply_level_overrides = request.form.get("apply_level_overrides") == "on"
     source_language = request.form.get("source_language", "en").strip()
+    all_source_languages = source_language == ALL_SOURCE_LANGUAGE_OPTION
+    selected_source_languages = (
+        ["en", *SUPPORTED_NON_ENGLISH_SOURCE_LANGUAGES]
+        if all_source_languages
+        else [source_language]
+    )
+
+    if export_type == "single" and all_source_languages:
+        flash(
+            'Single file export does not support "All source languages". Use Default export.',
+            "error",
+        )
+        return redirect(url_for("wireword.export_page"))
 
     # Handle "All Languages" option
     if language == "all":
         return export_all_languages(
             include_unreviewed_audio=include_unreviewed_audio,
             apply_level_overrides=apply_level_overrides,
-            source_language=source_language,
+            source_languages=selected_source_languages,
         )
 
     # Validate language
@@ -215,6 +241,45 @@ def export_wireword() -> ResponseReturnValue:
             )
             if country_applied or family_applied:
                 flash("Applied difficulty level overrides before export", "info")
+
+        if export_type == "directory" and all_source_languages:
+            variant_results: dict[str, dict[str, Any]] = {}
+            variant_errors: list[str] = []
+            for selected_source_language in selected_source_languages:
+                source_label = SUPPORTED_SOURCE_LANGUAGES.get(
+                    selected_source_language, selected_source_language
+                )
+                variant_agent = UngurysAgent(
+                    config=config,
+                    language=language if language != "zh-Hant" else "zh",
+                    simplified_chinese=simplified_chinese,
+                    include_unreviewed_audio=include_unreviewed_audio,
+                    source_language=selected_source_language,
+                )
+                if apply_level_overrides:
+                    variant_agent.apply_level_overrides()
+                success, results = variant_agent.export_wireword_directory()
+                variant_results[source_label] = {
+                    "success": success,
+                    "results": results,
+                    "output_dir": variant_agent.get_language_output_dir(),
+                }
+                if not success:
+                    variant_errors.append(source_label)
+
+            if variant_errors:
+                flash(
+                    f'Export completed with errors for source language(s): {", ".join(variant_errors)}',
+                    "warning",
+                )
+            else:
+                flash("Successfully exported WireWord files for all source languages!", "success")
+
+            return render_template(
+                "wireword/results_all.html",
+                all_results=variant_results,
+                errors=variant_errors,
+            )
 
         if export_type == "directory":
             # Export to directory structure (includes sentences automatically via UNGURYS)
