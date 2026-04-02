@@ -414,7 +414,9 @@ class TrakaidoExporter:
         )
         return exporter.export_to_wireword_format(output_path, **kwargs)
 
-    def export_wireword_directory(self, output_dir: str) -> Tuple[bool, Dict[str, Any]]:
+    def export_wireword_directory(
+        self, output_dir: str, cdn_base: Optional[str] = None
+    ) -> Tuple[bool, Dict[str, Any]]:
         """Delegate to WirewordExporter. See wireword/export_wireword.py for details."""
         from wireword.export_wireword import WirewordExporter
 
@@ -426,7 +428,7 @@ class TrakaidoExporter:
             include_unreviewed_audio=self.include_unreviewed_audio,
             source_language=self.source_language,
         )
-        return exporter.export_wireword_directory(output_dir)
+        return exporter.export_wireword_directory(output_dir, cdn_base=cdn_base)
 
     def export_verbs_to_wireword_format(
         self, output_path: str, **kwargs: Any

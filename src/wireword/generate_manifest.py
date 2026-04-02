@@ -2,14 +2,16 @@
 """
 WireWord manifest generator.
 
-Generates wireword_manifest.json files that describe available data files
+Generates wireword_manifest_v2.json files that describe available data files
 for a language, including MD5 checksums for cache validation.
 """
 
+import glob
 import hashlib
 import json
 import logging
 import os
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -108,9 +110,13 @@ def generate_manifest(
     simplified_chinese: bool = True,
     include_unreviewed_audio: bool = False,
     source_language: str = "en",
+    cdn_base: Optional[str] = None,
 ) -> Tuple[bool, str]:
     """
-    Generate wireword_manifest.json for the exported files.
+    Generate wireword_manifest_v2.json for the exported files.
+
+    Discovers ``wireword_levels_*.json`` files in *wireword_dir* and produces
+    one word_files entry per level-range file.
 
     Args:
         wireword_dir: The wireword output directory containing the exported files
@@ -119,11 +125,14 @@ def generate_manifest(
         include_unreviewed_audio: If True, set audio_prefix to staging path
         source_language: Source language code (default: "en"). When not "en", adds
             source_language metadata to the manifest.
+        cdn_base: Optional CDN base URL (e.g. "https://wireword.trakaido.com").
+            When set, non-manifest filenames in the manifest use the file's MD5
+            hash so they can be served as immutable cache objects.
 
     Returns:
         Tuple of (success flag, manifest path)
     """
-    manifest_path = os.path.join(wireword_dir, "wireword_manifest.json")
+    manifest_path = os.path.join(wireword_dir, "wireword_manifest_v2.json")
 
     # Determine language name and code
     if language == "zh" and not simplified_chinese:
@@ -165,11 +174,14 @@ def generate_manifest(
         source_lang_display = LANGUAGE_NAMES.get(source_language, source_language)
         manifest["source_language"] = source_lang_name
         manifest["source_language_code"] = source_language
-    manifest["config"] = {
+    config: Dict[str, Any] = {
         "audio_prefix": audio_prefix,
         "available_voices": available_voices,
         "default_voice": default_voice,
     }
+    if cdn_base:
+        config["cdn_base"] = cdn_base
+    manifest["config"] = config
     reading_manifest_config = get_manifest_reading_config(language)
     if reading_manifest_config:
         manifest["config"]["reading"] = reading_manifest_config
@@ -182,57 +194,65 @@ def generate_manifest(
     manifest["sentence_files"] = []
     manifest["auxiliary_files"] = []
 
-    # Process word files
-    # When source language is not English, include it in descriptions
-    if source_lang_display:
-        nouns_description = (
-            f"Words (nouns, adjectives, etc.) with {source_lang_display} translations"
-        )
-        verbs_description = f"Verbs with conjugations and {source_lang_display} translations"
-    else:
-        nouns_description = "Words (nouns, adjectives, etc.)"
-        verbs_description = "Verbs with conjugations"
+    # Process word files – discover wireword_levels_*.json files
+    level_file_pattern = os.path.join(wireword_dir, "wireword_levels_*.json")
 
-    word_files_info = [
-        ("nouns", "wireword_nouns.json", "Nouns", nouns_description),
-        ("verbs", "wireword_verbs.json", "Verbs", verbs_description),
-    ]
+    # Sort numerically by start level so manifest entries are monotonic by
+    # difficulty (lexicographic sort would put e.g. 11_15 before 1_5).
+    def _level_sort_key(path: str) -> Tuple[int, int]:
+        m = re.search(r"wireword_levels_(\d+)_(\d+)\.json", path)
+        return (int(m.group(1)), int(m.group(2))) if m else (0, 0)
 
-    for file_id, filename, display_name, description in word_files_info:
-        filepath = os.path.join(wireword_dir, filename)
-        if os.path.exists(filepath):
-            file_stats = get_word_file_stats(filepath)
-            file_entry: Dict[str, Any] = {
-                "id": file_id,
-                "filename": filename,
-                "display_name": display_name,
-                "description": description,
-                "type": "words",
-                "md5": calculate_file_md5(filepath),
-                "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "required": True,
-            }
-            if file_stats.get("count"):
-                file_entry["word_count"] = file_stats["count"]
-            if file_stats.get("levels"):
-                file_entry["levels"] = file_stats["levels"]
-            if file_stats.get("groups"):
-                file_entry["groups"] = file_stats["groups"]
+    level_files = sorted(glob.glob(level_file_pattern), key=_level_sort_key)
 
-            manifest["word_files"].append(file_entry)
+    for filepath in level_files:
+        disk_filename = os.path.basename(filepath)
+        match = re.match(r"wireword_levels_(\d+)_(\d+)\.json", disk_filename)
+        if not match:
+            continue
+        start_level = int(match.group(1))
+        end_level = int(match.group(2))
+
+        file_id = f"levels_{start_level}_{end_level}"
+        display_name = f"Levels {start_level}-{end_level}"
+        file_md5 = calculate_file_md5(filepath)
+
+        # When cdn_base is set, use the MD5 hash as the manifest filename
+        # so the CDN can serve the file as an immutable object.
+        manifest_filename = f"{file_md5}.json" if cdn_base else disk_filename
+
+        file_stats = get_word_file_stats(filepath)
+        file_entry: Dict[str, Any] = {
+            "id": file_id,
+            "filename": manifest_filename,
+            "display_name": display_name,
+            "type": "words",
+            "md5": file_md5,
+            "levels": list(range(start_level, end_level + 1)),
+            "required": True,
+        }
+        if file_stats.get("count"):
+            file_entry["word_count"] = file_stats["count"]
+        if file_stats.get("groups"):
+            file_entry["groups"] = file_stats["groups"]
+
+        manifest["word_files"].append(file_entry)
 
     # Process sentence files
     sentences_path = os.path.join(wireword_dir, "wireword_sentences.json")
     if os.path.exists(sentences_path):
         sentence_stats = get_sentence_file_stats(sentences_path)
+        sentences_md5 = calculate_file_md5(sentences_path)
+        sentences_manifest_filename = (
+            f"{sentences_md5}.json" if cdn_base else "wireword_sentences.json"
+        )
         sentence_entry: Dict[str, Any] = {
             "id": "sentences",
-            "filename": "wireword_sentences.json",
+            "filename": sentences_manifest_filename,
             "display_name": "Practice Sentences",
             "description": "Sentences for context-based learning",
             "type": "sentences",
-            "md5": calculate_file_md5(sentences_path),
-            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "md5": sentences_md5,
             "required": False,
         }
         if sentence_stats.get("count"):
@@ -254,14 +274,17 @@ def generate_manifest(
         except IOError:
             conversation_count = 0
 
+        conversations_md5 = calculate_file_md5(conversations_path)
+        conversations_manifest_filename = (
+            f"{conversations_md5}.jsonl" if cdn_base else "wireword_conversations.jsonl"
+        )
         conversation_entry: Dict[str, Any] = {
             "id": "conversations",
-            "filename": "wireword_conversations.jsonl",
+            "filename": conversations_manifest_filename,
             "display_name": "Conversations",
             "description": "Practice conversations for dialogue-based learning",
             "type": "conversations",
-            "md5": calculate_file_md5(conversations_path),
-            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "md5": conversations_md5,
             "required": False,
             "conversation_count": conversation_count,
         }
