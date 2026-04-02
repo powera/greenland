@@ -196,7 +196,14 @@ def generate_manifest(
 
     # Process word files – discover wireword_levels_*.json files
     level_file_pattern = os.path.join(wireword_dir, "wireword_levels_*.json")
-    level_files = sorted(glob.glob(level_file_pattern))
+
+    # Sort numerically by start level so manifest entries are monotonic by
+    # difficulty (lexicographic sort would put e.g. 11_15 before 1_5).
+    def _level_sort_key(path: str) -> Tuple[int, int]:
+        m = re.search(r"wireword_levels_(\d+)_(\d+)\.json", path)
+        return (int(m.group(1)), int(m.group(2))) if m else (0, 0)
+
+    level_files = sorted(glob.glob(level_file_pattern), key=_level_sort_key)
 
     for filepath in level_files:
         disk_filename = os.path.basename(filepath)

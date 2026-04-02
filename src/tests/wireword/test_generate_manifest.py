@@ -229,3 +229,17 @@ def test_generate_manifest_level_file_word_count_and_groups(tmp_path: Path) -> N
     wf = manifest["word_files"][0]
     assert wf["word_count"] == 2
     assert wf["groups"] == ["Animals", "Food"]
+
+
+def test_generate_manifest_sorts_level_files_numerically(tmp_path: Path) -> None:
+    """Level-range files are sorted by start level, not lexicographically."""
+    _write_level_file(tmp_path, 11, 15)
+    _write_level_file(tmp_path, 1, 5)
+    _write_level_file(tmp_path, 6, 10)
+
+    success, manifest_path = generate_manifest(str(tmp_path), "lt")
+
+    assert success
+    manifest = _load_manifest(manifest_path)
+    ids = [wf["id"] for wf in manifest["word_files"]]
+    assert ids == ["levels_1_5", "levels_6_10", "levels_11_15"]

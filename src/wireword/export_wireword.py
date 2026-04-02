@@ -1054,56 +1054,70 @@ class WirewordExporter:
             "subtypes_exported": set(),
         }
 
-        # Export verbs to a temporary file
-        verbs_tmp_path = os.path.join(tempfile.gettempdir(), "wireword_verbs_tmp.json")
-        logger.info("Exporting verbs to temporary file...")
-        verbs_success, verbs_stats = self.export_verbs_to_wireword_format(
-            output_path=verbs_tmp_path,
-            include_without_guid=False,
-            include_unverified=True,
-            pretty_print=False,
-        )
+        # Use unique temp files so concurrent exports don't collide
+        verbs_tmp_fd, verbs_tmp_path = tempfile.mkstemp(suffix=".json", prefix="wireword_verbs_")
+        os.close(verbs_tmp_fd)
+        nouns_tmp_fd, nouns_tmp_path = tempfile.mkstemp(suffix=".json", prefix="wireword_nouns_")
+        os.close(nouns_tmp_fd)
 
-        verbs_data: List[Dict[str, Any]] = []
-        if verbs_success:
-            with open(verbs_tmp_path, "r", encoding="utf-8") as f:
-                verbs_data = json.load(f)
-            if verbs_stats:
-                for level in verbs_stats.level_distribution.keys():
-                    results["levels_exported"].add(int(level))
-            logger.info(f"✅ Loaded {len(verbs_data)} verb entries")
-        else:
-            logger.warning("No verbs found (may be expected for some languages)")
-
-        # Export non-verbs to a temporary file
-        nouns_tmp_path = os.path.join(tempfile.gettempdir(), "wireword_nouns_tmp.json")
-        logger.info("Exporting non-verbs to temporary file...")
-        nouns_success, nouns_stats = self.export_to_wireword_format(
-            output_path=nouns_tmp_path,
-            include_without_guid=False,
-            include_unverified=True,
-            pretty_print=False,
-        )
-
-        nouns_data: List[Dict[str, Any]] = []
-        if nouns_success:
-            with open(nouns_tmp_path, "r", encoding="utf-8") as f:
-                nouns_data = json.load(f)
-            if nouns_stats:
-                for level in nouns_stats.level_distribution.keys():
-                    results["levels_exported"].add(int(level))
-                for pos_type in nouns_stats.pos_distribution.keys():
-                    results["subtypes_exported"].add(pos_type)
-            logger.info(f"✅ Loaded {len(nouns_data)} non-verb entries")
-        else:
-            logger.warning("No non-verb entries found")
-
-        # Clean up temporary files
-        for tmp_path in (verbs_tmp_path, nouns_tmp_path):
+        try:
+            # Export verbs to a temporary file.
+            # (False, None) means no matching data — acceptable for some
+            # languages.  A real failure raises an exception.
+            logger.info("Exporting verbs to temporary file...")
+            verbs_data: List[Dict[str, Any]] = []
             try:
-                os.unlink(tmp_path)
-            except OSError:
-                pass
+                verbs_success, verbs_stats = self.export_verbs_to_wireword_format(
+                    output_path=verbs_tmp_path,
+                    include_without_guid=False,
+                    include_unverified=True,
+                    pretty_print=False,
+                )
+                if verbs_success:
+                    with open(verbs_tmp_path, "r", encoding="utf-8") as f:
+                        verbs_data = json.load(f)
+                    if verbs_stats:
+                        for level in verbs_stats.level_distribution.keys():
+                            results["levels_exported"].add(int(level))
+                    logger.info(f"✅ Loaded {len(verbs_data)} verb entries")
+                else:
+                    logger.info("No verbs found (may be expected for some languages)")
+            except Exception:
+                logger.error("❌ Verb export failed with an error")
+                return False, results
+
+            # Export non-verbs to a temporary file.
+            logger.info("Exporting non-verbs to temporary file...")
+            nouns_data: List[Dict[str, Any]] = []
+            try:
+                nouns_success, nouns_stats = self.export_to_wireword_format(
+                    output_path=nouns_tmp_path,
+                    include_without_guid=False,
+                    include_unverified=True,
+                    pretty_print=False,
+                )
+                if nouns_success:
+                    with open(nouns_tmp_path, "r", encoding="utf-8") as f:
+                        nouns_data = json.load(f)
+                    if nouns_stats:
+                        for level in nouns_stats.level_distribution.keys():
+                            results["levels_exported"].add(int(level))
+                        for pos_type in nouns_stats.pos_distribution.keys():
+                            results["subtypes_exported"].add(pos_type)
+                    logger.info(f"✅ Loaded {len(nouns_data)} non-verb entries")
+                else:
+                    logger.info("No non-verb entries found")
+            except Exception:
+                logger.error("❌ Non-verb export failed with an error")
+                return False, results
+
+        finally:
+            # Clean up temporary files
+            for tmp_path in (verbs_tmp_path, nouns_tmp_path):
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
 
         if not verbs_data and not nouns_data:
             logger.error("❌ No data to export")
