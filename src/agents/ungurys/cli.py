@@ -98,6 +98,13 @@ def get_argument_parser() -> argparse.ArgumentParser:
         default=False,
         help="Enqueue directory exports for background processing by workqueue worker.",
     )
+    parser.add_argument(
+        "--cdn-upload",
+        action="store_true",
+        default=False,
+        help="Upload non-manifest wireword files to the trakaido-wireword CDN bucket "
+        "and generate the v2 manifest with MD5-hash filenames.",
+    )
 
     return parser
 
@@ -179,4 +186,5 @@ def main() -> None:
         export_mode=args.mode,
         skip_country_overrides=args.skip_country_overrides,
         skip_family_relation_overrides=args.skip_family_relation_overrides,
+        cdn_upload=args.cdn_upload,
     )

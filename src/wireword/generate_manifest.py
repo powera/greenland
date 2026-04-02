@@ -2,7 +2,7 @@
 """
 WireWord manifest generator.
 
-Generates wireword_manifest.json files that describe available data files
+Generates wireword_manifest_v2.json files that describe available data files
 for a language, including MD5 checksums for cache validation.
 """
 
@@ -113,7 +113,7 @@ def generate_manifest(
     cdn_base: Optional[str] = None,
 ) -> Tuple[bool, str]:
     """
-    Generate wireword_manifest.json for the exported files.
+    Generate wireword_manifest_v2.json for the exported files.
 
     Discovers ``wireword_levels_*.json`` files in *wireword_dir* and produces
     one word_files entry per level-range file.
@@ -132,7 +132,7 @@ def generate_manifest(
     Returns:
         Tuple of (success flag, manifest path)
     """
-    manifest_path = os.path.join(wireword_dir, "wireword_manifest.json")
+    manifest_path = os.path.join(wireword_dir, "wireword_manifest_v2.json")
 
     # Determine language name and code
     if language == "zh" and not simplified_chinese:

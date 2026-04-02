@@ -349,30 +349,45 @@ class UngurysAgent:
 
         return success, stats
 
+    def _get_cdn_language_code(self) -> str:
+        """Return the language code used for CDN paths and the manifest."""
+        if self.language == "zh" and not self.simplified_chinese:
+            return "zh_Hant"
+        return self.language
+
     def export_wireword_directory(
-        self, output_dir: Optional[str] = None
+        self,
+        output_dir: Optional[str] = None,
+        cdn_upload: bool = False,
     ) -> Tuple[bool, Dict[str, Any]]:
         """
         Export WireWord format files to directory structure.
-        Creates separate files for each level and subtype.
+        Creates one file per level range containing both nouns and verbs.
 
         Args:
             output_dir: Base output directory (e.g., lang_lt/generated).
                        If None, uses language-specific path from get_language_output_dir()
+            cdn_upload: If True, upload non-manifest files to the
+                trakaido-wireword CDN bucket and generate the manifest with
+                cdn_base so filenames use MD5 hashes.
 
         Returns:
             Tuple of (success flag, export results dictionary)
         """
+        from clients.wireword.cdn_uploader import WIREWORD_CDN_BASE
+
         # Use language-specific directory if not provided
         if output_dir is None:
             output_dir = self.get_language_output_dir()
+
+        cdn_base: Optional[str] = WIREWORD_CDN_BASE if cdn_upload else None
 
         logger.info(
             f"Starting WireWord directory export for {SUPPORTED_LANGUAGES[self.language]}..."
         )
         logger.info(f"Output directory: {output_dir}/wireword/")
 
-        success, results = self.exporter.export_wireword_directory(output_dir)
+        success, results = self.exporter.export_wireword_directory(output_dir, cdn_base=cdn_base)
 
         if success:
             logger.info(f"Successfully exported to {output_dir}/wireword/")
@@ -410,10 +425,31 @@ class UngurysAgent:
                 logger.info(f"  Exported categorychoice.json to {category_path}")
             else:
                 logger.warning("  Category choice export failed")
+
+            # Upload non-manifest files to CDN
+            if cdn_upload:
+                logger.info("Uploading wireword files to CDN...")
+                cdn_success, cdn_results = self._upload_to_cdn(wireword_dir)
+                results["cdn_upload"] = {
+                    "success": cdn_success,
+                    "files_uploaded": len(cdn_results),
+                }
+                if cdn_success:
+                    logger.info(f"  ✅ Uploaded {len(cdn_results)} files to CDN")
+                else:
+                    logger.warning("  ⚠️ Some CDN uploads failed")
         else:
             logger.error(f"Failed to export to {output_dir}")
 
         return success, results
+
+    def _upload_to_cdn(self, wireword_dir: str) -> Tuple[bool, list[Dict[str, str]]]:
+        """Upload non-manifest wireword files to the CDN bucket."""
+        from clients.wireword.cdn_uploader import WirewordCdnUploader
+
+        language_code = self._get_cdn_language_code()
+        uploader = WirewordCdnUploader()
+        return uploader.upload_wireword_directory(wireword_dir, language_code)
 
     def export_wireword_verbs(
         self,
@@ -594,6 +630,7 @@ class UngurysAgent:
         export_mode: str = "directory",
         skip_country_overrides: bool = False,
         skip_family_relation_overrides: bool = False,
+        cdn_upload: bool = False,
     ) -> Dict[str, Any]:
         """
         Run the WireWord export with specified parameters.
@@ -610,6 +647,7 @@ class UngurysAgent:
             export_mode: Export mode ('single', 'directory', or 'both')
             skip_country_overrides: Skip applying country difficulty overrides (default: False)
             skip_family_relation_overrides: Skip applying family relation difficulty overrides (default: False)
+            cdn_upload: Upload non-manifest files to CDN and use MD5 filenames in manifest (default: False)
 
         Returns:
             Dictionary with export results
@@ -671,7 +709,9 @@ class UngurysAgent:
 
         # Directory export
         if export_mode in ["directory", "both"]:
-            success, export_results = self.export_wireword_directory(output_dir)
+            success, export_results = self.export_wireword_directory(
+                output_dir, cdn_upload=cdn_upload
+            )
             # Get the actual directory used (in case output_dir was None and default was used)
             actual_dir = output_dir if output_dir else self.get_language_output_dir()
             results["exports"]["directory"] = {
@@ -866,7 +906,7 @@ class UngurysAgent:
             if manifest["success"]:
                 logger.info("  Status: SUCCESS")
                 logger.info(f"  Path: {manifest.get('path', '')}")
-                logger.info("  File: wireword_manifest.json")
+                logger.info("  File: wireword_manifest_v2.json")
             else:
                 logger.info("  Status: FAILED")
             logger.info("")
