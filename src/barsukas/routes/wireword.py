@@ -49,6 +49,25 @@ def _cdn_credentials_available() -> bool:
     return key_file.exists()
 
 
+def _flash_cdn_upload_status(results: dict[str, Any]) -> None:
+    """Flash CDN upload status when export includes CDN metadata."""
+    cdn_result: Any = results.get("cdn_upload")
+    if not isinstance(cdn_result, dict):
+        return
+
+    uploaded_count = cdn_result.get("files_uploaded")
+    if not isinstance(uploaded_count, int):
+        uploaded_count = 0
+
+    if cdn_result.get("success"):
+        flash(f"CDN upload successful: {uploaded_count} files uploaded.", "success")
+    else:
+        flash(
+            "CDN upload failed or partially failed. Check server logs for per-file errors.",
+            "warning",
+        )
+
+
 def export_all_languages(
     include_unreviewed_audio: bool = False,
     apply_level_overrides: bool = False,
@@ -309,6 +328,7 @@ def export_wireword() -> ResponseReturnValue:
         if export_type == "directory":
             # Export to directory structure (includes sentences automatically via UNGURYS)
             success, results = agent.export_wireword_directory(cdn_upload=cdn_upload)
+            _flash_cdn_upload_status(results)
 
             if success:
                 files_created = results.get("files_created", [])
@@ -342,6 +362,7 @@ def export_wireword() -> ResponseReturnValue:
                     levels_exported=levels_exported,
                     subtypes_exported=subtypes_exported,
                     output_dir=agent.get_language_output_dir(),
+                    cdn_upload=results.get("cdn_upload"),
                 )
             else:
                 flash("Export failed. Check the logs for details.", "error")
