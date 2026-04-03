@@ -99,6 +99,7 @@
                                     <th>POS</th>
                                     <th>Source</th>
                                     <th>Added</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -129,6 +130,16 @@
                                             {% endif %}
                                         </td>
                                         <td><small>{{ item.added_at.strftime('%Y-%m-%d') }}</small></td>
+                                        <td>
+                                            <div class="d-flex gap-1">
+                                                <form method="post" action="{{ url_for('pending_imports.approve', pending_import_id=item.id) }}">
+                                                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                                </form>
+                                                <form method="post" action="{{ url_for('pending_imports.reject', pending_import_id=item.id) }}">
+                                                    <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                                </form>
+                                            </div>
+                                        </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>

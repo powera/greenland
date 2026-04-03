@@ -5,7 +5,18 @@
 from typing import Any, cast
 
 from barsukas.config import Config
-from flask import Blueprint, Response, g, render_template, request
+from agents.dramblys.staging import approve_pending_import, reject_pending_import
+from flask import (
+    Blueprint,
+    Response,
+    current_app,
+    flash,
+    g,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from flask.typing import ResponseReturnValue
 from sqlalchemy.orm import Query
 
@@ -117,6 +128,59 @@ def list_pending_imports() -> ResponseReturnValue:
         sources=sources,
         languages=languages,
     )
+
+
+@bp.route("/<int:pending_import_id>/approve", methods=["POST"])
+def approve(pending_import_id: int) -> ResponseReturnValue:
+    """Approve a pending import entry and import it into lemmas."""
+    if current_app.config.get("READONLY", False):
+        flash("Cannot modify data in read-only mode", "error")
+        return redirect(request.referrer or url_for("pending_imports.list_pending_imports"))
+
+    try:
+        db_path_value = str(current_app.config.get("DB_PATH", Config.DB_PATH))
+        model_name = str(current_app.config.get("DEFAULT_LLM_MODEL", "gpt-5.4-mini"))
+        result = approve_pending_import(
+            session=g.db,
+            pending_import_id=pending_import_id,
+            db_path=db_path_value,
+            model=model_name,
+            debug=bool(current_app.config.get("DEBUG", False)),
+        )
+        if result.get("success"):
+            flash(result.get("message", f"Approved pending import #{pending_import_id}"), "success")
+        else:
+            flash(result.get("error", "Failed to approve pending import"), "error")
+    except Exception as exc:
+        g.db.rollback()
+        flash(f"Error approving pending import: {exc}", "error")
+
+    return redirect(request.referrer or url_for("pending_imports.list_pending_imports"))
+
+
+@bp.route("/<int:pending_import_id>/reject", methods=["POST"])
+def reject(pending_import_id: int) -> ResponseReturnValue:
+    """Reject a pending import entry and remove it from pending list."""
+    if current_app.config.get("READONLY", False):
+        flash("Cannot modify data in read-only mode", "error")
+        return redirect(request.referrer or url_for("pending_imports.list_pending_imports"))
+
+    try:
+        result = reject_pending_import(
+            session=g.db,
+            pending_import_id=pending_import_id,
+            reason="barsukas_manual_rejection",
+            add_to_exclusions=True,
+        )
+        if result.get("success"):
+            flash(result.get("message", f"Rejected pending import #{pending_import_id}"), "success")
+        else:
+            flash(result.get("error", "Failed to reject pending import"), "error")
+    except Exception as exc:
+        g.db.rollback()
+        flash(f"Error rejecting pending import: {exc}", "error")
+
+    return redirect(request.referrer or url_for("pending_imports.list_pending_imports"))
 
 
 @bp.route("/export.txt")
