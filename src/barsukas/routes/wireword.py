@@ -2,10 +2,13 @@
 
 """Routes for WireWord export functionality."""
 
+import os
 import tempfile
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+import constants
 from flask import (
     Blueprint,
     current_app,
@@ -38,9 +41,18 @@ def _get_config() -> DataSourceConfig:
     return app.backend_config
 
 
+def _cdn_credentials_available() -> bool:
+    """Return True if DigitalOcean Spaces credentials are configured."""
+    if os.getenv("DO_SPACES_KEY") and os.getenv("DO_SPACES_SECRET"):
+        return True
+    key_file = Path(constants.KEY_DIR) / "digitalocean.key"
+    return key_file.exists()
+
+
 def export_all_languages(
     include_unreviewed_audio: bool = False,
     apply_level_overrides: bool = False,
+    cdn_upload: bool = False,
     source_languages: list[str] | None = None,
 ) -> ResponseReturnValue:
     """Export WireWord files for all supported languages (directory mode only)."""
@@ -75,7 +87,9 @@ def export_all_languages(
                         )
                         if apply_level_overrides:
                             agent_simplified.apply_level_overrides()
-                        success_simp, results_simp = agent_simplified.export_wireword_directory()
+                        success_simp, results_simp = agent_simplified.export_wireword_directory(
+                            cdn_upload=cdn_upload
+                        )
                         simplified_label = f"{result_label} (Simplified)"
                         all_results[simplified_label] = {
                             "success": success_simp,
@@ -94,7 +108,9 @@ def export_all_languages(
                         )
                         if apply_level_overrides:
                             agent_traditional.apply_level_overrides()
-                        success_trad, results_trad = agent_traditional.export_wireword_directory()
+                        success_trad, results_trad = agent_traditional.export_wireword_directory(
+                            cdn_upload=cdn_upload
+                        )
                         traditional_label = f"{result_label} (Traditional)"
                         all_results[traditional_label] = {
                             "success": success_trad,
@@ -112,7 +128,7 @@ def export_all_languages(
                         )
                         if apply_level_overrides:
                             agent.apply_level_overrides()
-                        success, results = agent.export_wireword_directory()
+                        success, results = agent.export_wireword_directory(cdn_upload=cdn_upload)
                         all_results[result_label] = {"success": success, "results": results}
                         if not success:
                             errors.append(result_label)
@@ -183,6 +199,14 @@ def export_wireword() -> ResponseReturnValue:
         if all_source_languages
         else [source_language]
     )
+    upload_to_cdn_requested = request.form.get("upload_to_cdn", "on") == "on"
+    cdn_upload = upload_to_cdn_requested and _cdn_credentials_available()
+
+    if upload_to_cdn_requested and not cdn_upload:
+        flash(
+            "DigitalOcean Spaces credentials not found; exporting locally without CDN upload.",
+            "warning",
+        )
 
     if export_type == "single" and all_source_languages:
         flash(
@@ -196,6 +220,7 @@ def export_wireword() -> ResponseReturnValue:
         return export_all_languages(
             include_unreviewed_audio=include_unreviewed_audio,
             apply_level_overrides=apply_level_overrides,
+            cdn_upload=cdn_upload,
             source_languages=selected_source_languages,
         )
 
@@ -258,7 +283,7 @@ def export_wireword() -> ResponseReturnValue:
                 )
                 if apply_level_overrides:
                     variant_agent.apply_level_overrides()
-                success, results = variant_agent.export_wireword_directory()
+                success, results = variant_agent.export_wireword_directory(cdn_upload=cdn_upload)
                 variant_results[source_label] = {
                     "success": success,
                     "results": results,
@@ -283,7 +308,7 @@ def export_wireword() -> ResponseReturnValue:
 
         if export_type == "directory":
             # Export to directory structure (includes sentences automatically via UNGURYS)
-            success, results = agent.export_wireword_directory()
+            success, results = agent.export_wireword_directory(cdn_upload=cdn_upload)
 
             if success:
                 files_created = results.get("files_created", [])
