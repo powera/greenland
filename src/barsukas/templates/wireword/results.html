@@ -35,6 +35,22 @@
                             <code>{{ output_dir }}/wireword/</code>
                         </div>
 
+                        {% if cdn_upload %}
+                            {% if cdn_upload.success %}
+                                <div class="alert alert-success mt-3">
+                                    <i class="bi bi-cloud-check"></i>
+                                    <strong>CDN Upload:</strong> Successful
+                                    ({{ cdn_upload.files_uploaded }} files uploaded).
+                                </div>
+                            {% else %}
+                                <div class="alert alert-warning mt-3">
+                                    <i class="bi bi-cloud-slash"></i>
+                                    <strong>CDN Upload:</strong> Failed or partial failure.
+                                    Check server logs for per-file upload errors.
+                                </div>
+                            {% endif %}
+                        {% endif %}
+
                         <div class="row mt-4">
                             <div class="col-md-4">
                                 <div class="card border-primary">

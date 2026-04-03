@@ -23,6 +23,7 @@
                             <th>Language</th>
                             <th>Status</th>
                             <th>Files Created</th>
+                            <th>CDN Upload</th>
                             <th>Details</th>
                         </tr>
                     </thead>
@@ -46,6 +47,22 @@
                                     {{ result.results.files_created|length }} files
                                 {% else %}
                                     -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if result.results and result.results.cdn_upload %}
+                                    {% if result.results.cdn_upload.success %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-cloud-check"></i>
+                                            {{ result.results.cdn_upload.files_uploaded }} uploaded
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="bi bi-cloud-slash"></i> Failed/Partial
+                                        </span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">Not requested</span>
                                 {% endif %}
                             </td>
                             <td>
