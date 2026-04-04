@@ -27,24 +27,26 @@
         <i class="bi bi-arrow-left"></i> Back
     </a>
     {% else %}
-    <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle"></i> <strong>Warning:</strong> Deleting lemmas will also delete their translations, audio, and other related data. This cannot be undone.
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> These lemmas exist in SQLite but not in <code>data/release</code>.
+        They may have been created via Pending Imports or added directly. Use <strong>Export to Release</strong>
+        to write them to the release files, or <strong>Delete</strong> to remove them from SQLite.
     </div>
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-list-check"></i> Orphaned Lemmas: {{ removals|length }}</span>
+            <span><i class="bi bi-list-check"></i> SQLite-only Lemmas: {{ removals|length }}</span>
             <div>
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">
                     Deselect All
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="toggleAll(true)">
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleAll(true)">
                     Select All
                 </button>
             </div>
         </div>
         <div class="card-body">
-            <form method="post" action="{{ url_for('sync_release.apply_removals') }}" onsubmit="return confirmDelete()">
+            <form id="lemma-form" method="post" action="">
                 <div class="table-responsive">
                     <table class="table table-sm table-hover">
                         <thead class="table-light">
@@ -100,9 +102,14 @@
                     <a href="{{ url_for('sync_release.index') }}" class="btn btn-secondary">
                         <i class="bi bi-arrow-left"></i> Back
                     </a>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> Delete Selected
-                    </button>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary" onclick="submitExport()">
+                            <i class="bi bi-box-arrow-up"></i> Export to Release
+                        </button>
+                        <button type="button" class="btn btn-danger" onclick="submitDelete()">
+                            <i class="bi bi-trash"></i> Delete Selected
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -118,13 +125,30 @@ function toggleAll(checked) {
     document.getElementById('select-all-checkbox').checked = checked;
 }
 
-function confirmDelete() {
+function submitExport() {
     var selected = document.querySelectorAll('.item-checkbox:checked').length;
     if (selected === 0) {
         alert('No lemmas selected');
-        return false;
+        return;
     }
-    return confirm('Are you sure you want to delete ' + selected + ' lemma(s)? This cannot be undone.');
+    if (confirm('Export ' + selected + ' lemma(s) to data/release?')) {
+        var form = document.getElementById('lemma-form');
+        form.action = '{{ url_for("sync_release.export_removals_to_release") }}';
+        form.submit();
+    }
+}
+
+function submitDelete() {
+    var selected = document.querySelectorAll('.item-checkbox:checked').length;
+    if (selected === 0) {
+        alert('No lemmas selected');
+        return;
+    }
+    if (confirm('Are you sure you want to delete ' + selected + ' lemma(s)? This cannot be undone.')) {
+        var form = document.getElementById('lemma-form');
+        form.action = '{{ url_for("sync_release.apply_removals") }}';
+        form.submit();
+    }
 }
 </script>
 {% endblock %}
