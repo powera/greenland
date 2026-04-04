@@ -64,6 +64,15 @@
                     <dt class="col-sm-3">Frequency Rank</dt>
                     <dd class="col-sm-9">{{ item.frequency_rank or '—' }}</dd>
 
+                    <dt class="col-sm-3">Example Sentence</dt>
+                    <dd class="col-sm-9">
+                        <div id="exampleSentenceDisplay">{{ item.example_sentence or '—' }}</div>
+                        <textarea class="form-control form-control-sm mt-1" id="exampleSentenceInput"
+                            rows="2" placeholder="e.g. The patient waited in the hospital ward."
+                            >{{ item.example_sentence or '' }}</textarea>
+                        <small class="text-muted">Sent to LLM for context when staging.</small>
+                    </dd>
+
                     <dt class="col-sm-3">Notes</dt>
                     <dd class="col-sm-9">{{ item.notes or '—' }}</dd>
 
@@ -159,10 +168,11 @@
         stageError.classList.add('d-none');
         stageResults.classList.add('d-none');
 
+        const exampleSentence = document.getElementById('exampleSentenceInput').value.trim();
         fetch('{{ url_for("pending_imports.stage", pending_import_id=item.id) }}', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({})
+            body: JSON.stringify({example_sentence: exampleSentence || null})
         })
         .then(function (resp) { return resp.json(); })
         .then(function (data) {

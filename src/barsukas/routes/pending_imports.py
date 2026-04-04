@@ -230,8 +230,17 @@ def stage(pending_import_id: int) -> ResponseReturnValue:
     try:
         from wordfreq.translation.client import LinguisticClient
 
+        # Accept an updated example_sentence from the request and save it before querying
+        body = request.get_json(silent=True) or {}
+        example_sentence = body.get("example_sentence") or None
+        if example_sentence and example_sentence != pending.example_sentence:
+            pending.example_sentence = example_sentence
+            g.db.flush()
+
         client = LinguisticClient(model=model_name, db_path=db_path, debug=debug)
-        definitions_list, llm_success = client.query_definitions(pending.english_word)
+        definitions_list, llm_success = client.query_definitions(
+            pending.english_word, example_sentence=pending.example_sentence
+        )
 
         if not llm_success or not definitions_list:
             return jsonify(

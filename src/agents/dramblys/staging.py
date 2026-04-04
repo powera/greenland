@@ -157,6 +157,8 @@ def approve_pending_import(
         # pos_subtype (needed for GUID) and translations.
         client = LinguisticClient(model=model, db_path=db_path, debug=debug)
 
+        example_sentence: Optional[str] = pending.example_sentence
+
         if pending_pos_type and pending_pos_subtype:
             # Already staged via the detail page — use stored values to avoid a redundant LLM call.
             logger.info(
@@ -171,7 +173,9 @@ def approve_pending_import(
                 }
             ]
         else:
-            definitions_list, llm_success = client.query_definitions(word)
+            definitions_list, llm_success = client.query_definitions(
+                word, example_sentence=example_sentence
+            )
             if not llm_success or not definitions_list:
                 logger.error(f"LLM query for definitions of '{word}' failed")
                 return {

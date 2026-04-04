@@ -106,7 +106,12 @@
                                 {% for item in imports %}
                                     <tr>
                                         <td>{{ item.id }}</td>
-                                        <td><strong>{{ item.english_word }}</strong></td>
+                                        <td>
+                                            <strong>{{ item.english_word }}</strong>
+                                            {% if item.example_sentence %}
+                                            <i class="bi bi-chat-quote text-info ms-1" title="{{ item.example_sentence }}"></i>
+                                            {% endif %}
+                                        </td>
                                         <td><small>{{ item.definition | truncate(50) }}</small></td>
                                         <td>
                                             <span class="badge bg-info">{{ item.disambiguation_language }}</span>

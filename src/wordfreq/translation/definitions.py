@@ -16,7 +16,11 @@ logger = logging.getLogger(__name__)
 
 
 def query_definitions(
-    client: Any, word: str, get_session_func: Callable, model: Optional[str] = None
+    client: Any,
+    word: str,
+    get_session_func: Callable,
+    model: Optional[str] = None,
+    example_sentence: Optional[str] = None,
 ) -> Tuple[List[Dict[str, Any]], bool]:
     """
     Query LLM for definitions, POS, and lemma information.
@@ -119,6 +123,8 @@ def query_definitions(
     context = util.prompt_loader.get_context("translation", "definitions")
     prompt_template = util.prompt_loader.get_prompt("translation", "definitions")
     prompt = prompt_template.format(word=word)
+    if example_sentence:
+        prompt += f'\n\nContext: this word appears in the sentence: "{example_sentence}"'
 
     # Get model name from parameter or client attribute
     model_name: str = cast(str, model or getattr(client, "model", "gpt-5.4-mini"))
