@@ -236,8 +236,24 @@ def approve_pending_import(
             session.delete(pending)
             session.commit()
 
-            logger.info(f"Successfully approved and imported '{word}'")
-            return {"success": True, "word": word, "message": f"Successfully imported '{word}'"}
+            # Look up the newly created lemma so callers can trigger follow-on tasks
+            from storage.models.schema import Lemma
+
+            new_lemma = (
+                session.query(Lemma)
+                .filter(Lemma.lemma_text == word)
+                .order_by(Lemma.id.desc())
+                .first()
+            )
+            new_lemma_id: Optional[int] = new_lemma.id if new_lemma else None
+
+            logger.info(f"Successfully approved and imported '{word}' (lemma_id={new_lemma_id})")
+            return {
+                "success": True,
+                "word": word,
+                "lemma_id": new_lemma_id,
+                "message": f"Successfully imported '{word}'",
+            }
         else:
             logger.error(f"Failed to import '{word}'")
             return {"success": False, "word": word, "error": f"Failed to import '{word}'"}

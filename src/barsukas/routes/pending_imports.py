@@ -7,6 +7,7 @@ from typing import Any, cast
 
 from barsukas.config import Config
 from agents.dramblys.staging import approve_pending_import, reject_pending_import
+from workqueue.task_queue import TaskType, enqueue_task
 from flask import (
     Blueprint,
     Response,
@@ -153,6 +154,22 @@ def approve(pending_import_id: int) -> ResponseReturnValue:
         )
         if result.get("success"):
             flash(result.get("message", f"Approved pending import #{pending_import_id}"), "success")
+            new_lemma_id = result.get("lemma_id")
+            if new_lemma_id:
+                try:
+                    enqueue_task(
+                        g.db,
+                        task_type=TaskType.ADD_MISSING_TRANSLATIONS,
+                        target_type="lemma",
+                        target_id=new_lemma_id,
+                        payload={"lemma_id": new_lemma_id},
+                        dedup_key=f"{TaskType.ADD_MISSING_TRANSLATIONS}:{new_lemma_id}",
+                    )
+                    flash("Queued translation generation for all tier 1/2 languages.", "info")
+                except Exception as enqueue_exc:
+                    logger.warning(
+                        "Could not enqueue translations for lemma %s: %s", new_lemma_id, enqueue_exc
+                    )
         else:
             flash(result.get("error", "Failed to approve pending import"), "error")
     except Exception as exc:
