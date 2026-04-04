@@ -231,6 +231,7 @@ class GenysAgent:
         limit: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Process a document and stage missing words to PendingImport."""
+        logger.debug("Phase: initialization - loading input document")
         document_path = Path(input_path)
         source_name = document_path.name
         document_text = document_path.read_text(encoding="utf-8")
@@ -241,6 +242,14 @@ class GenysAgent:
             selected_sentences = all_sentences
 
         target_languages = self.choose_target_languages(document_language)
+        logger.debug(
+            "Phase: initialization complete - document=%s language=%s total_sentences=%d selected_sentences=%d target_languages=%s",
+            source_name,
+            document_language,
+            len(all_sentences),
+            len(selected_sentences),
+            ",".join(target_languages),
+        )
 
         stats: Dict[str, Any] = {
             "document": source_name,
@@ -258,8 +267,10 @@ class GenysAgent:
         }
 
         if not selected_sentences:
+            logger.debug("Phase: complete - no sentences selected for processing")
             return stats
 
+        logger.debug("Phase: database session - opening session and loading pending imports")
         session = self.get_session()
         processed_glosses: Set[str] = set()
         lemma_gloss_cache: Dict[str, Set[int]] = {}
@@ -267,8 +278,18 @@ class GenysAgent:
 
         try:
             existing_pending_glosses = self._load_pending_glosses(session)
+            logger.debug(
+                "Phase: sentence processing - loaded existing pending imports: %d entries",
+                len(existing_pending_glosses),
+            )
 
             for sentence_index, sentence_text in enumerate(selected_sentences):
+                logger.debug(
+                    "Phase: sentence %d/%d - decomposition start - sentence=%r",
+                    sentence_index + 1,
+                    len(selected_sentences),
+                    sentence_text,
+                )
                 decomposition_result = self._query_decomposition(sentence_text, target_languages)
                 if not decomposition_result.get("success"):
                     logger.warning(
@@ -278,6 +299,11 @@ class GenysAgent:
                     )
                     stats["errors"] += 1
                     continue
+                logger.debug(
+                    "Phase: sentence %d/%d - decomposition complete",
+                    sentence_index + 1,
+                    len(selected_sentences),
+                )
 
                 sentence_words_for_storage: Optional[List[Dict[str, Any]]] = None
                 if store_sentences:
@@ -329,6 +355,12 @@ class GenysAgent:
 
                 for normalized_gloss, concept in concepts_by_gloss.items():
                     if normalized_gloss in processed_glosses:
+                        logger.debug(
+                            "Phase: sentence %d/%d - skipping gloss already processed in run: %s",
+                            sentence_index + 1,
+                            len(selected_sentences),
+                            normalized_gloss,
+                        )
                         continue
                     processed_glosses.add(normalized_gloss)
 
@@ -369,10 +401,22 @@ class GenysAgent:
                     )
                     if exists_in_database:
                         stats["already_in_database"] += 1
+                        logger.debug(
+                            "Phase: sentence %d/%d - gloss already in database: %s",
+                            sentence_index + 1,
+                            len(selected_sentences),
+                            normalized_gloss,
+                        )
                         continue
 
                     if normalized_gloss in existing_pending_glosses:
                         stats["existing_pending"] += 1
+                        logger.debug(
+                            "Phase: sentence %d/%d - gloss already in pending imports: %s",
+                            sentence_index + 1,
+                            len(selected_sentences),
+                            normalized_gloss,
+                        )
                         continue
 
                     pending_import = PendingImport(
@@ -388,6 +432,14 @@ class GenysAgent:
                     )
 
                     stats["staged_for_review"] += 1
+                    logger.debug(
+                        "Phase: sentence %d/%d - staged pending import - gloss=%s pos=%s source_surface=%r",
+                        sentence_index + 1,
+                        len(selected_sentences),
+                        english_gloss_value,
+                        concept["pos_type"],
+                        concept["surface_document"],
+                    )
                     if not dry_run:
                         session.add(pending_import)
                         existing_pending_glosses.add(normalized_gloss)
@@ -431,15 +483,27 @@ class GenysAgent:
                         )
 
                 if throttle_seconds > 0 and sentence_index < len(selected_sentences) - 1:
+                    logger.debug(
+                        "Phase: sentence %d/%d - throttling for %.2f seconds",
+                        sentence_index + 1,
+                        len(selected_sentences),
+                        throttle_seconds,
+                    )
                     time.sleep(throttle_seconds)
 
             if not dry_run:
+                logger.debug("Phase: database commit - committing pending changes")
                 session.commit()
+            else:
+                logger.debug("Phase: dry run - skipping database commit")
 
         except Exception:
+            logger.exception("Phase: error - rolling back transaction")
             session.rollback()
             raise
         finally:
+            logger.debug("Phase: cleanup - closing database session")
             session.close()
 
+        logger.debug("Phase: complete - processing finished")
         return stats
