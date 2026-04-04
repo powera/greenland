@@ -1,0 +1,5 @@
+Translate the following {source_language} sentence into each of these languages:
+
+{target_languages_with_notes}
+
+Sentence: {sentence}
