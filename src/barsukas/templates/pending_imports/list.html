@@ -132,6 +132,7 @@
                                         <td><small>{{ item.added_at.strftime('%Y-%m-%d') }}</small></td>
                                         <td>
                                             <div class="d-flex gap-1">
+                                                <a href="{{ url_for('pending_imports.detail', pending_import_id=item.id) }}" class="btn btn-outline-primary btn-sm">Detail</a>
                                                 <form method="post" action="{{ url_for('pending_imports.approve', pending_import_id=item.id) }}">
                                                     <button type="submit" class="btn btn-success btn-sm">Approve</button>
                                                 </form>
