@@ -79,6 +79,18 @@ Returns per-language aggregate counts with this shape:
 - `max_difficulty`: if supplied, restricts to sentences whose `minimum_level` is between
   1 and `max_difficulty` inclusive (excludes NULL / unset sentences)
 
+## Pending imports
+
+- `GET /pending-imports/api/duplicates`
+  - Find pending imports that are duplicates of existing lemmas (direct match or form-of-lemma match).
+  - Only checks imports where `definition == english_word` (not yet staged).
+  - Each result has: pending import fields + `match_type` ("direct"/"form"), `matched_lemma_guid`, `matched_lemma_text`, `matched_pos_type`.
+
+- `GET /pending-imports/api/list[?search=...][&pos_type=...][&pos_subtype=...][&source=...][&language=...][&page=N]`
+  - List pending imports as JSON. Supports the same filters as the HTML list view.
+  - Returns `{"data": [...], "metadata": {"total": N, "page": P, "total_pages": T}}`.
+  - Each item: `id`, `english_word`, `definition`, `disambiguation_translation`, `disambiguation_language`, `pos_type`, `pos_subtype`, `example_sentence`, `source`, `frequency_rank`, `notes`, `added_at`.
+
 ## Response conventions
 
 - Success: `{"data": ... , "metadata": ...}` (metadata optional)
