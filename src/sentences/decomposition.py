@@ -8,7 +8,13 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from clients.unified_client import UnifiedLLMClient
 from langtools.grammatical_words import is_function_word, is_grammatical_word
-from storage.models.schema import Lemma, Sentence, SentencePatternWord, SentenceTranslation
+from storage.models.schema import (
+    Lemma,
+    Sentence,
+    SentencePatternWord,
+    SentenceTranslation,
+    SentenceWord,
+)
 from storage.translation_helpers import (
     LANGUAGE_NAMES,
     get_translation,
@@ -98,14 +104,41 @@ def build_prompt_for_translate_and_decompose(
         .all()
     )
 
-    word_translation_lines: List[str] = []
+    # Collect lemma_id -> (english_text, role) from pattern words first
+    seen_lemma_ids: set[int] = set()
+    lemma_entries: List[tuple[int, str, str]] = []  # (lemma_id, english_text, role)
     for pattern_word in pattern_words:
-        lemma = session.query(Lemma).filter_by(id=pattern_word.lemma_id).first()
+        if pattern_word.lemma_id and pattern_word.lemma_id not in seen_lemma_ids:
+            seen_lemma_ids.add(pattern_word.lemma_id)
+            lemma_entries.append(
+                (
+                    pattern_word.lemma_id,
+                    pattern_word.english_text or "",
+                    pattern_word.slot_name or "",
+                )
+            )
+
+    # Also collect lemmas from SentenceWord (e.g. sentences imported via genys)
+    sentence_words = (
+        session.query(SentenceWord)
+        .filter(
+            SentenceWord.sentence_id == sentence.id,
+            SentenceWord.lemma_id.isnot(None),
+        )
+        .order_by(SentenceWord.position)
+        .all()
+    )
+    for sw in sentence_words:
+        if sw.lemma_id not in seen_lemma_ids:
+            seen_lemma_ids.add(sw.lemma_id)
+            lemma_entries.append((sw.lemma_id, sw.english_text or "", sw.word_role or ""))
+
+    word_translation_lines: List[str] = []
+    for lemma_id, english_text, role in lemma_entries:
+        lemma = session.query(Lemma).filter_by(id=lemma_id).first()
         if not lemma:
             continue
 
-        english_text = pattern_word.english_text
-        role = pattern_word.slot_name or ""
         guid = lemma.guid if lemma.guid else ""
 
         trans_items: List[str] = []
