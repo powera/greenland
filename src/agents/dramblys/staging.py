@@ -87,6 +87,31 @@ def list_pending_imports(
         return {"error": str(e), "count": 0, "pending_imports": []}
 
 
+def _find_duplicate_lemma(
+    session: Any,
+    word: str,
+    pos_type: Optional[str],
+    pos_subtype: Optional[str],
+) -> Optional[Any]:
+    """Check if a lemma already exists for this word/POS/subtype combination.
+
+    Returns the first matching Lemma, or None if no duplicate found.
+    """
+    from sqlalchemy import func
+
+    from storage.models.schema import Lemma
+
+    query = session.query(Lemma).filter(func.lower(Lemma.lemma_text) == word.strip().lower())
+
+    if pos_type:
+        query = query.filter(Lemma.pos_type == pos_type)
+
+    if pos_subtype:
+        query = query.filter(Lemma.pos_subtype == pos_subtype)
+
+    return query.first()
+
+
 def approve_pending_import(
     session: Any,
     pending_import_id: int,
@@ -97,7 +122,9 @@ def approve_pending_import(
     """
     Approve a pending import and convert it to a full Lemma/DerivativeForm entry.
 
-    This is step 2 of the two-step import process.
+    This is step 2 of the two-step import process.  Queries the LLM for full
+    definitions (including pos_subtype and translations), checks for duplicate
+    lemmas, then creates the lemma with a proper GUID.
 
     Args:
         session: Database session
@@ -120,31 +147,58 @@ def approve_pending_import(
             return {"error": f"Pending import ID {pending_import_id} not found", "success": False}
 
         word = pending.english_word
-        definition = pending.definition
-        pos_type = pending.pos_type
-        pos_subtype = pending.pos_subtype
+        pending_definition = pending.definition
+        pending_pos_type = pending.pos_type
 
-        logger.info(f"Approving word '{word}' (sense: {definition[:60]}...)")
+        logger.info(f"Approving word '{word}' (sense: {pending_definition[:60]}...)")
 
-        # Construct a minimal definition structure from pending_import data
-        # This matches the schema from definitions.py
-        definitions_list = [
-            {
-                "definition": definition,
-                "pos": pos_type,
-                "pos_subtype": pos_subtype,
-                "lemma": word,  # Use the word itself as lemma for now
-                "is_base_form": True,  # Assume base form
-                "grammatical_form": None,  # Will be determined by process_word
-                # Translations will need to be generated later if needed
-            }
-        ]
-
-        # Use LinguisticClient to process the word with the specific definition
+        # Use LinguisticClient to get full definitions from the LLM, including
+        # pos_subtype (needed for GUID) and translations.
         client = LinguisticClient(model=model, db_path=db_path, debug=debug)
 
+        definitions_list, llm_success = client.query_definitions(word)
+        if not llm_success or not definitions_list:
+            logger.error(f"LLM query for definitions of '{word}' failed")
+            return {
+                "success": False,
+                "word": word,
+                "error": f"Failed to get definitions from LLM for '{word}'",
+            }
+
+        # If the pending import has a pos_type, keep only definitions that
+        # match that POS so we don't create unrelated senses.
+        if pending_pos_type:
+            matching_defs = [d for d in definitions_list if d.get("pos") == pending_pos_type]
+            # Fall back to the full list if nothing matched (LLM may use
+            # slightly different POS labels).
+            if matching_defs:
+                definitions_list = matching_defs
+
+        # Check for duplicates: for each definition the LLM returned, see if a
+        # lemma with the same word + POS type + subtype already exists.
+        filtered_definitions: List[Dict[str, Any]] = []
+        for def_data in definitions_list:
+            llm_pos_type = def_data.get("pos")
+            llm_pos_subtype = def_data.get("pos_subtype")
+            existing = _find_duplicate_lemma(session, word, llm_pos_type, llm_pos_subtype)
+            if existing:
+                logger.info(
+                    f"Skipping duplicate: '{word}' already exists as "
+                    f"{llm_pos_type}/{llm_pos_subtype} (lemma id={existing.id}, "
+                    f"guid={existing.guid})"
+                )
+            else:
+                filtered_definitions.append(def_data)
+
+        if not filtered_definitions:
+            # Every sense already exists — remove the pending import and report.
+            session.delete(pending)
+            session.commit()
+            msg = f"'{word}' already exists in the database for all senses; removed from pending."
+            logger.info(msg)
+            return {"success": True, "word": word, "message": msg}
+
         try:
-            # Pass the definitions_list to avoid re-querying the LLM
             from wordfreq.translation import word_processing
 
             success = word_processing.process_word(
@@ -152,7 +206,7 @@ def approve_pending_import(
                 word,
                 client.get_session,
                 refresh=False,
-                definitions_list=definitions_list,
+                definitions_list=filtered_definitions,
             )
         except ValueError as e:
             # Handle subtype validation errors
