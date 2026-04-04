@@ -149,6 +149,7 @@ def approve_pending_import(
         word = pending.english_word
         pending_definition = pending.definition
         pending_pos_type = pending.pos_type
+        pending_pos_subtype = pending.pos_subtype
 
         logger.info(f"Approving word '{word}' (sense: {pending_definition[:60]}...)")
 
@@ -156,23 +157,41 @@ def approve_pending_import(
         # pos_subtype (needed for GUID) and translations.
         client = LinguisticClient(model=model, db_path=db_path, debug=debug)
 
-        definitions_list, llm_success = client.query_definitions(word)
-        if not llm_success or not definitions_list:
-            logger.error(f"LLM query for definitions of '{word}' failed")
-            return {
-                "success": False,
-                "word": word,
-                "error": f"Failed to get definitions from LLM for '{word}'",
-            }
+        example_sentence: Optional[str] = pending.example_sentence
 
-        # If the pending import has a pos_type, keep only definitions that
-        # match that POS so we don't create unrelated senses.
-        if pending_pos_type:
-            matching_defs = [d for d in definitions_list if d.get("pos") == pending_pos_type]
-            # Fall back to the full list if nothing matched (LLM may use
-            # slightly different POS labels).
-            if matching_defs:
-                definitions_list = matching_defs
+        if pending_pos_type and pending_pos_subtype:
+            # Already staged via the detail page — use stored values to avoid a redundant LLM call.
+            logger.info(
+                f"Using pre-staged data for '{word}': {pending_pos_type}/{pending_pos_subtype}"
+            )
+            definitions_list: List[Dict[str, Any]] = [
+                {
+                    "pos": pending_pos_type,
+                    "pos_subtype": pending_pos_subtype,
+                    "definition": pending_definition,
+                    "lemma": word,
+                }
+            ]
+        else:
+            definitions_list, llm_success = client.query_definitions(
+                word, example_sentence=example_sentence
+            )
+            if not llm_success or not definitions_list:
+                logger.error(f"LLM query for definitions of '{word}' failed")
+                return {
+                    "success": False,
+                    "word": word,
+                    "error": f"Failed to get definitions from LLM for '{word}'",
+                }
+
+            # If the pending import has a pos_type, keep only definitions that
+            # match that POS so we don't create unrelated senses.
+            if pending_pos_type:
+                matching_defs = [d for d in definitions_list if d.get("pos") == pending_pos_type]
+                # Fall back to the full list if nothing matched (LLM may use
+                # slightly different POS labels).
+                if matching_defs:
+                    definitions_list = matching_defs
 
         # Check for duplicates: for each definition the LLM returned, see if a
         # lemma with the same word + POS type + subtype already exists.
@@ -221,8 +240,24 @@ def approve_pending_import(
             session.delete(pending)
             session.commit()
 
-            logger.info(f"Successfully approved and imported '{word}'")
-            return {"success": True, "word": word, "message": f"Successfully imported '{word}'"}
+            # Look up the newly created lemma so callers can trigger follow-on tasks
+            from storage.models.schema import Lemma
+
+            new_lemma = (
+                session.query(Lemma)
+                .filter(Lemma.lemma_text == word)
+                .order_by(Lemma.id.desc())
+                .first()
+            )
+            new_lemma_id: Optional[int] = new_lemma.id if new_lemma else None
+
+            logger.info(f"Successfully approved and imported '{word}' (lemma_id={new_lemma_id})")
+            return {
+                "success": True,
+                "word": word,
+                "lemma_id": new_lemma_id,
+                "message": f"Successfully imported '{word}'",
+            }
         else:
             logger.error(f"Failed to import '{word}'")
             return {"success": False, "word": word, "error": f"Failed to import '{word}'"}

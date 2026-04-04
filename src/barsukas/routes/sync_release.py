@@ -965,6 +965,164 @@ def apply_removals() -> ResponseReturnValue:
     return redirect(url_for("sync_release.removals"))
 
 
+def _build_release_entry_from_db(lemma: Lemma) -> Dict[str, Any]:
+    """Build a data/release base.jsonl entry from a Lemma and its translations."""
+    # Build translations dict with en first (from lemma_text), then RELEASE_LANGUAGES order
+    translations: Dict[str, str] = {"en": lemma.lemma_text}
+    translation_disambiguations: Dict[str, str] = {}
+
+    lang_to_trans: Dict[str, LemmaTranslation] = {t.language_code: t for t in lemma.translations}
+
+    for lang_code in RELEASE_LANGUAGES:
+        if lang_code == "en":
+            continue
+        trans_obj = lang_to_trans.get(lang_code)
+        if trans_obj and trans_obj.translation:
+            translations[lang_code] = trans_obj.translation
+            if trans_obj.disambiguation:
+                translation_disambiguations[lang_code] = trans_obj.disambiguation
+
+    # Build concept_label: "word (disambiguation)" if disambiguation exists
+    concept_label = lemma.lemma_text
+    if lemma.disambiguation:
+        concept_label = f"{lemma.lemma_text} ({lemma.disambiguation})"
+
+    entry: Dict[str, Any] = {
+        "guid": lemma.guid,
+        "pos_type": lemma.pos_type,
+        "pos_subtype": lemma.pos_subtype or "",
+        "concept_label": concept_label,
+        "concept_definition": lemma.definition_text or "",
+        "translations": translations,
+        "difficulty_level": lemma.difficulty_level if lemma.difficulty_level is not None else -1,
+    }
+
+    if translation_disambiguations:
+        entry["translation_disambiguations"] = translation_disambiguations
+
+    return entry
+
+
+def _get_release_file_path_for_lemma(release_dir: Path, lemma: Lemma) -> Optional[Path]:
+    """Return the base.jsonl path for a lemma based on pos_type/pos_subtype."""
+    if not lemma.pos_type or not lemma.pos_subtype:
+        return None
+    # Map pos_type to plural directory name (e.g. "noun" -> "nouns")
+    pos_dir_map = {
+        "noun": "nouns",
+        "verb": "verbs",
+        "adjective": "adjectives",
+        "adverb": "adverbs",
+        "conjunction": "conjunctions",
+        "pronoun": "pronouns",
+        "preposition": "prepositions",
+        "interjection": "interjections",
+        "determiner": "determiners",
+        "article": "articles",
+        "numeral": "numerals",
+        "misc": "misc",
+    }
+    pos_dir = pos_dir_map.get(lemma.pos_type)
+    if not pos_dir:
+        return None
+    return release_dir / pos_dir / lemma.pos_subtype / "base.jsonl"
+
+
+def _append_lemma_to_release_file(file_path: Path, entry: Dict[str, Any]) -> None:
+    """Append a lemma entry to a base.jsonl file, keeping lines sorted by GUID."""
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    existing_lines: List[str] = []
+    if file_path.exists():
+        with open(file_path, "r", encoding="utf-8") as f:
+            existing_lines = [line for line in f if line.strip()]
+
+    # Append the new entry and re-sort by GUID
+    new_line = json.dumps(entry, ensure_ascii=False) + "\n"
+    existing_lines.append(new_line)
+
+    def _guid_sort_key(line: str) -> str:
+        try:
+            return str(json.loads(line).get("guid", ""))
+        except json.JSONDecodeError:
+            return ""
+
+    existing_lines.sort(key=_guid_sort_key)
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.writelines(existing_lines)
+
+
+@bp.route("/removals/export", methods=["POST"])
+def export_removals_to_release() -> ResponseReturnValue:
+    """Export selected SQLite-only lemmas to data/release base.jsonl files."""
+    selected_ids = request.form.getlist("selected_ids")
+
+    if not selected_ids:
+        flash("No lemmas selected for export", "warning")
+        return redirect(url_for("sync_release.removals"))
+
+    release_dir = _get_release_dir()
+    exported_count = 0
+    error_count = 0
+
+    for lemma_id_str in selected_ids:
+        try:
+            lemma_id = int(lemma_id_str)
+            lemma = g.db.query(Lemma).filter(Lemma.id == lemma_id).first()
+
+            if not lemma:
+                logger.warning(f"Lemma not found: {lemma_id}")
+                error_count += 1
+                continue
+
+            if not lemma.guid:
+                logger.warning(f"Lemma {lemma_id} has no GUID, skipping export")
+                error_count += 1
+                continue
+
+            file_path = _get_release_file_path_for_lemma(release_dir, lemma)
+            if file_path is None:
+                logger.warning(
+                    f"Cannot determine release file for lemma {lemma.guid} "
+                    f"(pos_type={lemma.pos_type}, pos_subtype={lemma.pos_subtype})"
+                )
+                error_count += 1
+                continue
+
+            entry = _build_release_entry_from_db(lemma)
+            _append_lemma_to_release_file(file_path, entry)
+
+            log_operation(
+                session=g.db,
+                source="sync-release",
+                operation_type="lemma_export",
+                lemma_id=lemma.id,
+                details={
+                    "lemma_text": lemma.lemma_text,
+                    "guid": lemma.guid,
+                    "pos_type": lemma.pos_type,
+                    "release_file": str(file_path.relative_to(release_dir.parent.parent)),
+                },
+            )
+
+            exported_count += 1
+            logger.info(f"Exported lemma '{lemma.lemma_text}' ({lemma.guid}) to {file_path}")
+
+        except Exception as e:
+            logger.error(f"Error exporting lemma {lemma_id_str}: {e}")
+            error_count += 1
+
+    if exported_count > 0:
+        g.db.commit()
+        flash(f"Exported {exported_count} lemma(s) to data/release", "success")
+
+    if error_count > 0:
+        flash(f"Errors: {error_count}", "warning")
+
+    return redirect(url_for("sync_release.removals"))
+
+
 # =============================================================================
 # Changes (lemma_text differs between release and SQLite)
 # =============================================================================

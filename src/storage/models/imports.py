@@ -32,6 +32,9 @@ class PendingImport(Base):
         String, nullable=True, index=True
     )  # e.g., animals, physical_action
 
+    # Example sentence showing this word in context (helps LLM pick the right sense)
+    example_sentence: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
     # Optional metadata
     source: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Where this came from
     frequency_rank: Mapped[Optional[int]] = mapped_column(

@@ -2,16 +2,20 @@
 
 """Routes for viewing pending imports."""
 
+import logging
 from typing import Any, cast
 
 from barsukas.config import Config
 from agents.dramblys.staging import approve_pending_import, reject_pending_import
+from workqueue.task_queue import TaskType, enqueue_task
 from flask import (
     Blueprint,
     Response,
+    abort,
     current_app,
     flash,
     g,
+    jsonify,
     redirect,
     render_template,
     request,
@@ -23,6 +27,7 @@ from sqlalchemy.orm import Query
 from storage.models.imports import PendingImport
 
 bp = Blueprint("pending_imports", __name__, url_prefix="/pending-imports")
+logger = logging.getLogger(__name__)
 
 
 def _build_filtered_query() -> Query[Any]:
@@ -149,13 +154,29 @@ def approve(pending_import_id: int) -> ResponseReturnValue:
         )
         if result.get("success"):
             flash(result.get("message", f"Approved pending import #{pending_import_id}"), "success")
+            new_lemma_id = result.get("lemma_id")
+            if new_lemma_id:
+                try:
+                    enqueue_task(
+                        g.db,
+                        task_type=TaskType.ADD_MISSING_TRANSLATIONS,
+                        target_type="lemma",
+                        target_id=new_lemma_id,
+                        payload={"lemma_id": new_lemma_id},
+                        dedup_key=f"{TaskType.ADD_MISSING_TRANSLATIONS}:{new_lemma_id}",
+                    )
+                    flash("Queued translation generation for all tier 1/2 languages.", "info")
+                except Exception as enqueue_exc:
+                    logger.warning(
+                        "Could not enqueue translations for lemma %s: %s", new_lemma_id, enqueue_exc
+                    )
         else:
             flash(result.get("error", "Failed to approve pending import"), "error")
     except Exception as exc:
         g.db.rollback()
         flash(f"Error approving pending import: {exc}", "error")
 
-    return redirect(request.referrer or url_for("pending_imports.list_pending_imports"))
+    return redirect(url_for("pending_imports.list_pending_imports"))
 
 
 @bp.route("/<int:pending_import_id>/reject", methods=["POST"])
@@ -180,7 +201,75 @@ def reject(pending_import_id: int) -> ResponseReturnValue:
         g.db.rollback()
         flash(f"Error rejecting pending import: {exc}", "error")
 
-    return redirect(request.referrer or url_for("pending_imports.list_pending_imports"))
+    return redirect(url_for("pending_imports.list_pending_imports"))
+
+
+@bp.route("/<int:pending_import_id>/detail")
+def detail(pending_import_id: int) -> ResponseReturnValue:
+    """Show detail/status page for a single pending import."""
+    pending = g.db.query(PendingImport).filter(PendingImport.id == pending_import_id).first()
+    if not pending:
+        abort(404)
+    return render_template("pending_imports/detail.html", item=pending)
+
+
+@bp.route("/<int:pending_import_id>/stage", methods=["POST"])
+def stage(pending_import_id: int) -> ResponseReturnValue:
+    """AJAX endpoint: query LLM and store pos_subtype/definition back into PendingImport."""
+    if current_app.config.get("READONLY", False):
+        return jsonify({"success": False, "error": "Cannot modify data in read-only mode"}), 403
+
+    pending = g.db.query(PendingImport).filter(PendingImport.id == pending_import_id).first()
+    if not pending:
+        return jsonify({"success": False, "error": "Pending import not found"}), 404
+
+    model_name = str(current_app.config.get("DEFAULT_LLM_MODEL", "gpt-5.4-mini"))
+    db_path = str(current_app.config.get("DB_PATH", Config.DB_PATH))
+    debug = bool(current_app.config.get("DEBUG", False))
+
+    try:
+        from wordfreq.translation.client import LinguisticClient
+
+        # Accept an updated example_sentence from the request and save it before querying
+        body = request.get_json(silent=True) or {}
+        example_sentence = body.get("example_sentence") or None
+        if example_sentence and example_sentence != pending.example_sentence:
+            pending.example_sentence = example_sentence
+            g.db.flush()
+
+        client = LinguisticClient(model=model_name, db_path=db_path, debug=debug)
+        definitions_list, llm_success = client.query_definitions(
+            pending.english_word, example_sentence=pending.example_sentence
+        )
+
+        if not llm_success or not definitions_list:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": f"LLM returned no definitions for '{pending.english_word}'",
+                }
+            )
+
+        # Filter to matching pos_type if the pending import has one
+        if pending.pos_type:
+            matching = [d for d in definitions_list if d.get("pos") == pending.pos_type]
+            if matching:
+                definitions_list = matching
+
+        # Use the first matching definition to populate the stored fields
+        first = definitions_list[0]
+        pending.pos_type = first.get("pos") or pending.pos_type
+        pending.pos_subtype = first.get("pos_subtype") or pending.pos_subtype
+        if first.get("definition"):
+            pending.definition = first["definition"]
+        g.db.commit()
+
+        return jsonify({"success": True, "definitions": definitions_list})
+
+    except Exception as exc:
+        g.db.rollback()
+        logger.exception("Error staging pending import %d", pending_import_id)
+        return jsonify({"success": False, "error": str(exc)}), 500
 
 
 @bp.route("/export.txt")

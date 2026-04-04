@@ -106,7 +106,12 @@
                                 {% for item in imports %}
                                     <tr>
                                         <td>{{ item.id }}</td>
-                                        <td><strong>{{ item.english_word }}</strong></td>
+                                        <td>
+                                            <strong>{{ item.english_word }}</strong>
+                                            {% if item.example_sentence %}
+                                            <i class="bi bi-chat-quote text-info ms-1" title="{{ item.example_sentence }}"></i>
+                                            {% endif %}
+                                        </td>
                                         <td><small>{{ item.definition | truncate(50) }}</small></td>
                                         <td>
                                             <span class="badge bg-info">{{ item.disambiguation_language }}</span>
@@ -132,6 +137,7 @@
                                         <td><small>{{ item.added_at.strftime('%Y-%m-%d') }}</small></td>
                                         <td>
                                             <div class="d-flex gap-1">
+                                                <a href="{{ url_for('pending_imports.detail', pending_import_id=item.id) }}" class="btn btn-outline-primary btn-sm">Detail</a>
                                                 <form method="post" action="{{ url_for('pending_imports.approve', pending_import_id=item.id) }}">
                                                     <button type="submit" class="btn btn-success btn-sm">Approve</button>
                                                 </form>

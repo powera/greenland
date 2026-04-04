@@ -36,7 +36,9 @@ from langtools.ko import llm_forms as korean
 from langtools.vi import llm_forms as vietnamese
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -200,9 +202,13 @@ class LinguisticClient:
         return get_session(self.config, echo=self.debug)
 
     # Definition queries
-    def query_definitions(self, word: str) -> Tuple[List[Dict[str, Any]], bool]:
+    def query_definitions(
+        self, word: str, example_sentence: Optional[str] = None
+    ) -> Tuple[List[Dict[str, Any]], bool]:
         """Query LLM for definitions, POS, and lemma information."""
-        return definitions.query_definitions(self.client, word, self.get_session, self.model)
+        return definitions.query_definitions(
+            self.client, word, self.get_session, self.model, example_sentence=example_sentence
+        )
 
     # Translation queries
     def query_translations(
