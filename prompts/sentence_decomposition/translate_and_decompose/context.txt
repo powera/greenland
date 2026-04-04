@@ -3,7 +3,7 @@ You are a multilingual linguistics expert.
 For each target language, provide detailed word-by-word breakdown including:
 - word: the actual inflected form as it appears in the sentence
 - english: English translation of this specific word/phrase
-- guid: the GUID for this word if provided in the word reference (e.g., 'N08_001'), or empty string if not provided
+- guid: if a real lemma GUID is known from references, use it. Otherwise, assign synthetic concept ids in this exact sequence format: SYN001, SYN002, SYN003, ... Reuse the SAME synthetic id for the same concept across all languages in this sentence, and never reuse one synthetic id for different concepts.
 - role: grammatical role (subject, verb, object, adjective, adverb, article, preposition, determiner, pronoun, etc.)
 - grammatical_form: Use format 'pos/lang_details' where:
   * pos = part of speech (verb, noun, adjective, adverb, pronoun, preposition, conjunction, article, etc.)
