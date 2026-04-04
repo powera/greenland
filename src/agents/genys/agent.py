@@ -133,6 +133,10 @@ class GenysAgent:
     def _normalize_english_gloss(raw_gloss: Any) -> str:
         return str(raw_gloss or "").strip()
 
+    @staticmethod
+    def _normalize_concept_guid(raw_guid: Any) -> str:
+        return str(raw_guid or "").strip().lower()
+
     def _query_decomposition(
         self,
         sentence_text: str,
@@ -306,6 +310,8 @@ class GenysAgent:
                 )
 
                 sentence_words_for_storage: Optional[List[Dict[str, Any]]] = None
+                sentence_has_db_changes = False
+                sentence_new_pending_glosses: Set[str] = set()
                 if store_sentences:
                     sentence_words_for_storage = self._get_words_for_language(
                         decomposition_result,
@@ -317,13 +323,14 @@ class GenysAgent:
                             target_languages[0],
                         )
 
-                concepts_by_gloss: Dict[str, Dict[str, Any]] = defaultdict(
+                concepts_by_key: Dict[str, Dict[str, Any]] = defaultdict(
                     lambda: {
                         "forms_by_language": {},
                         "surface_document": None,
                         "pos_type": None,
                         "role": None,
                         "english_gloss": None,
+                        "concept_guid": None,
                     }
                 )
 
@@ -334,6 +341,7 @@ class GenysAgent:
                         surface_form = self._normalize_surface_form(word_entry.get("word"))
                         english_gloss = self._normalize_english_gloss(word_entry.get("english"))
                         role = self._normalize_word_role(word_entry.get("role"))
+                        concept_guid = self._normalize_concept_guid(word_entry.get("guid"))
 
                         if not surface_form or not english_gloss:
                             continue
@@ -346,23 +354,32 @@ class GenysAgent:
                             stats["function_words_skipped"] += 1
                             continue
 
-                        concept_row = concepts_by_gloss[english_gloss.lower()]
+                        concept_key = (
+                            f"guid:{concept_guid}"
+                            if concept_guid
+                            else f"gloss:{english_gloss.lower()}"
+                        )
+                        concept_row = concepts_by_key[concept_key]
                         concept_row["forms_by_language"][language_code] = surface_form
                         concept_row["role"] = concept_row["role"] or role
                         concept_row["english_gloss"] = concept_row["english_gloss"] or english_gloss
+                        concept_row["concept_guid"] = concept_row["concept_guid"] or concept_guid
                         mapped_pos_type = ROLE_POS_MAP.get(role)
                         concept_row["pos_type"] = concept_row["pos_type"] or mapped_pos_type
 
-                for normalized_gloss, concept in concepts_by_gloss.items():
-                    if normalized_gloss in processed_glosses:
+                for concept_key, concept in concepts_by_key.items():
+                    normalized_gloss = str(concept.get("english_gloss") or "").strip().lower()
+                    if not normalized_gloss:
+                        continue
+                    if concept_key in processed_glosses:
                         logger.debug(
-                            "Phase: sentence %d/%d - skipping gloss already processed in run: %s",
+                            "Phase: sentence %d/%d - skipping concept already processed in run: %s",
                             sentence_index + 1,
                             len(selected_sentences),
-                            normalized_gloss,
+                            concept_key,
                         )
                         continue
-                    processed_glosses.add(normalized_gloss)
+                    processed_glosses.add(concept_key)
 
                     forms_by_language: Dict[str, str] = concept["forms_by_language"]
                     english_gloss_value = str(
@@ -378,12 +395,6 @@ class GenysAgent:
                     if concept["surface_document"] is None:
                         concept["surface_document"] = next(iter(forms_by_language.values()), "")
 
-                    lemma_ids_for_gloss = self._lemma_ids_for_english_gloss(
-                        session,
-                        normalized_gloss,
-                        lemma_gloss_cache,
-                    )
-
                     matched_languages_by_lemma: Dict[int, Set[str]] = defaultdict(set)
                     for language_code, surface_form in forms_by_language.items():
                         derivative_lemma_ids = self._lemma_ids_for_derivative(
@@ -392,29 +403,51 @@ class GenysAgent:
                             surface_form,
                             derivative_cache,
                         )
-                        for lemma_id in lemma_ids_for_gloss.intersection(derivative_lemma_ids):
+                        for lemma_id in derivative_lemma_ids:
                             matched_languages_by_lemma[lemma_id].add(language_code)
 
+                    lemma_ids_for_gloss = self._lemma_ids_for_english_gloss(
+                        session,
+                        normalized_gloss,
+                        lemma_gloss_cache,
+                    )
+                    if lemma_ids_for_gloss:
+                        filtered_by_gloss: Dict[int, Set[str]] = {
+                            lemma_id: matched_languages_by_lemma[lemma_id]
+                            for lemma_id in lemma_ids_for_gloss
+                            if lemma_id in matched_languages_by_lemma
+                        }
+                    else:
+                        filtered_by_gloss = {}
+
                     exists_in_database = any(
+                        len(language_matches) >= 2
+                        for language_matches in filtered_by_gloss.values()
+                    ) or any(
                         len(language_matches) >= 2
                         for language_matches in matched_languages_by_lemma.values()
                     )
                     if exists_in_database:
                         stats["already_in_database"] += 1
                         logger.debug(
-                            "Phase: sentence %d/%d - gloss already in database: %s",
+                            "Phase: sentence %d/%d - concept already in database: key=%s gloss=%s",
                             sentence_index + 1,
                             len(selected_sentences),
+                            concept_key,
                             normalized_gloss,
                         )
                         continue
 
-                    if normalized_gloss in existing_pending_glosses:
+                    if (
+                        normalized_gloss in existing_pending_glosses
+                        or concept_key in existing_pending_glosses
+                    ):
                         stats["existing_pending"] += 1
                         logger.debug(
-                            "Phase: sentence %d/%d - gloss already in pending imports: %s",
+                            "Phase: sentence %d/%d - concept already in pending imports: key=%s gloss=%s",
                             sentence_index + 1,
                             len(selected_sentences),
+                            concept_key,
                             normalized_gloss,
                         )
                         continue
@@ -442,7 +475,9 @@ class GenysAgent:
                     )
                     if not dry_run:
                         session.add(pending_import)
-                        existing_pending_glosses.add(normalized_gloss)
+                        sentence_has_db_changes = True
+                        sentence_new_pending_glosses.add(normalized_gloss)
+                        sentence_new_pending_glosses.add(concept_key)
 
                 if store_sentences and sentence_words_for_storage is not None and not dry_run:
                     sentence_row = add_sentence(
@@ -481,6 +516,22 @@ class GenysAgent:
                             declined_form=self._normalize_surface_form(word_entry.get("word"))
                             or None,
                         )
+                    sentence_has_db_changes = True
+
+                if not dry_run and sentence_has_db_changes:
+                    logger.debug(
+                        "Phase: sentence %d/%d - committing database transaction",
+                        sentence_index + 1,
+                        len(selected_sentences),
+                    )
+                    session.commit()
+                    existing_pending_glosses.update(sentence_new_pending_glosses)
+                elif dry_run:
+                    logger.debug(
+                        "Phase: sentence %d/%d - dry run, skipping database transaction",
+                        sentence_index + 1,
+                        len(selected_sentences),
+                    )
 
                 if throttle_seconds > 0 and sentence_index < len(selected_sentences) - 1:
                     logger.debug(
@@ -490,12 +541,6 @@ class GenysAgent:
                         throttle_seconds,
                     )
                     time.sleep(throttle_seconds)
-
-            if not dry_run:
-                logger.debug("Phase: database commit - committing pending changes")
-                session.commit()
-            else:
-                logger.debug("Phase: dry run - skipping database commit")
 
         except Exception:
             logger.exception("Phase: error - rolling back transaction")

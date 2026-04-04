@@ -209,8 +209,9 @@ def store_translation_results(
             # Find matching lemma by GUID if provided
             lemma_id = None
             guid = word_data.get("guid", "").strip()
+            is_synthetic_guid = guid.startswith("SYN") and guid[3:].isdigit()
 
-            if guid:
+            if guid and not is_synthetic_guid:
                 # Look up lemma by GUID
                 lemma = session.query(Lemma).filter_by(guid=guid).first()
                 if lemma:
