@@ -384,6 +384,35 @@ class GenysAgent:
             return []
         return [w for w in words if isinstance(w, dict)]
 
+    @staticmethod
+    def _check_decomposition_completeness(
+        english_text: str, words: List[Dict[str, Any]], sentence_label: str
+    ) -> None:
+        """Warn if any token in *english_text* is absent from the decomposition surface forms."""
+        surface_forms: Set[str] = set()
+        for w in words:
+            sf = str(w.get("surface_form") or "").strip().lower()
+            # Also cover multi-word surface forms by adding each sub-token
+            for part in re.split(r"\s+", sf):
+                part = part.strip(".,!?;:\"'()[]{}—-")
+                if part:
+                    surface_forms.add(part)
+
+        tokens = tokenize(english_text, "en")
+        missing = []
+        for token in tokens:
+            normalized = token.strip(".,!?;:\"'()[]{}—-").lower()
+            if normalized and normalized not in surface_forms:
+                missing.append(token)
+
+        if missing:
+            logger.warning(
+                "Phase 3 completeness check FAILED at %s: %d token(s) missing from decomposition: %s",
+                sentence_label,
+                len(missing),
+                ", ".join(missing),
+            )
+
     # ------------------------------------------------------------------ #
     # Shared helpers                                                      #
     # ------------------------------------------------------------------ #
@@ -525,6 +554,15 @@ class GenysAgent:
                 logger.debug("Phase 3 complete - %s", sentence_label)
 
                 words = self._extract_words_from_phase3(decomposition_result)
+
+                # ── Sanity-check decomposition completeness ─────────────
+                english_text_for_check = (
+                    sentence_text if document_language == "en" else translations.get("en", "")
+                )
+                if english_text_for_check:
+                    self._check_decomposition_completeness(
+                        english_text_for_check, words, sentence_label
+                    )
 
                 # ── Store sentence (optional) ───────────────────────────
                 sentence_has_db_changes = False

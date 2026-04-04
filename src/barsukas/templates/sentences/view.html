@@ -507,6 +507,8 @@
                                             {% if word.lemma.difficulty_level is not none %}
                                                 <span class="badge bg-info" style="font-size: 0.7rem;">L{{ word.lemma.difficulty_level }}</span>
                                             {% endif %}
+                                        {% elif word.role in ('pronoun', 'article', 'preposition', 'conjunction', 'determiner', 'particle') %}
+                                            <span class="text-muted">{{ word.role | upper }}</span>
                                         {% else %}
                                             <span class="text-muted fst-italic">No lemma</span>
                                         {% endif %}
