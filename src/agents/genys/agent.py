@@ -689,6 +689,10 @@ class GenysAgent:
                         continue
 
                     mapped_pos_type = ROLE_POS_MAP.get(role)
+                    # Use the English sentence text as context for LLM disambiguation
+                    english_sentence = (
+                        sentence_text if document_language == "en" else translations.get("en", "")
+                    )
                     pending_import = PendingImport(
                         english_word=english_gloss,
                         definition=english_gloss,
@@ -699,6 +703,7 @@ class GenysAgent:
                         source=f"genys/{source_name}",
                         frequency_rank=None,
                         notes=f"From document: {source_name}",
+                        example_sentence=english_sentence or None,
                     )
 
                     stats["staged_for_review"] += 1
