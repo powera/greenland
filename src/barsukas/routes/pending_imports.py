@@ -272,6 +272,128 @@ def stage(pending_import_id: int) -> ResponseReturnValue:
         return jsonify({"success": False, "error": str(exc)}), 500
 
 
+@bp.route("/api/duplicates")
+def api_duplicates() -> ResponseReturnValue:
+    """JSON API: find pending imports that are duplicates of existing lemmas.
+
+    A duplicate is either:
+    - A direct match: an existing lemma with the same lemma_text and pos_type.
+    - A form match: the pending english_word appears as a DerivativeForm
+      (language_code='en') of an existing lemma with the same pos_type.
+
+    Only pending imports where definition == english_word (no real definition
+    yet) are checked, since staged imports with real definitions need human
+    review regardless.
+
+    Returns {"data": [...]} where each item has pending import fields plus
+    "match_type" ("direct" or "form"), "matched_lemma_guid", "matched_lemma_text".
+    """
+    from storage.models.schema import DerivativeForm
+    from storage.models import Lemma
+
+    # Only check imports that have not yet been staged (definition = english_word)
+    pending_list = (
+        g.db.query(PendingImport)
+        .filter(PendingImport.definition == PendingImport.english_word)
+        .order_by(PendingImport.added_at.desc())
+        .all()
+    )
+
+    results = []
+
+    for item in pending_list:
+        word_lower = item.english_word.lower()
+        pos = item.pos_type
+
+        # 1. Direct lemma match
+        direct_query = g.db.query(Lemma).filter(
+            Lemma.lemma_text.ilike(word_lower)
+        )
+        if pos:
+            direct_query = direct_query.filter(Lemma.pos_type == pos)
+        direct_match = direct_query.first()
+        if direct_match:
+            results.append({
+                "id": item.id,
+                "english_word": item.english_word,
+                "pos_type": item.pos_type,
+                "source": item.source,
+                "added_at": item.added_at.isoformat() if item.added_at else None,
+                "match_type": "direct",
+                "matched_lemma_guid": direct_match.guid,
+                "matched_lemma_text": direct_match.lemma_text,
+                "matched_pos_type": direct_match.pos_type,
+            })
+            continue
+
+        # 2. Derivative form match (e.g. "telling" → lemma "tell")
+        form_query = (
+            g.db.query(DerivativeForm, Lemma)
+            .join(Lemma, DerivativeForm.lemma_id == Lemma.id)
+            .filter(
+                DerivativeForm.derivative_form_text.ilike(word_lower),
+                DerivativeForm.language_code == "en",
+            )
+        )
+        if pos:
+            form_query = form_query.filter(Lemma.pos_type == pos)
+        form_match = form_query.first()
+        if form_match:
+            _form, matched_lemma = form_match
+            results.append({
+                "id": item.id,
+                "english_word": item.english_word,
+                "pos_type": item.pos_type,
+                "source": item.source,
+                "added_at": item.added_at.isoformat() if item.added_at else None,
+                "match_type": "form",
+                "matched_lemma_guid": matched_lemma.guid,
+                "matched_lemma_text": matched_lemma.lemma_text,
+                "matched_pos_type": matched_lemma.pos_type,
+            })
+
+    return jsonify({"data": results, "metadata": {"total": len(results), "checked": len(pending_list)}})
+
+
+@bp.route("/api/list")
+def api_list() -> ResponseReturnValue:
+    """JSON API: list pending imports with optional filtering.
+
+    Supports the same query parameters as the HTML list view:
+    search, pos_type, pos_subtype, source, language, page.
+    Returns {"data": [...], "metadata": {"total": N, "page": P, "total_pages": T}}.
+    """
+    page = request.args.get("page", 1, type=int)
+    query = _build_filtered_query()
+    total = query.count()
+    imports = query.limit(Config.ITEMS_PER_PAGE).offset((page - 1) * Config.ITEMS_PER_PAGE).all()
+    total_pages = (total + Config.ITEMS_PER_PAGE - 1) // Config.ITEMS_PER_PAGE
+
+    data = [
+        {
+            "id": item.id,
+            "english_word": item.english_word,
+            "definition": item.definition,
+            "disambiguation_translation": item.disambiguation_translation,
+            "disambiguation_language": item.disambiguation_language,
+            "pos_type": item.pos_type,
+            "pos_subtype": item.pos_subtype,
+            "example_sentence": item.example_sentence,
+            "source": item.source,
+            "frequency_rank": item.frequency_rank,
+            "notes": item.notes,
+            "added_at": item.added_at.isoformat() if item.added_at else None,
+        }
+        for item in imports
+    ]
+    return jsonify(
+        {
+            "data": data,
+            "metadata": {"total": total, "page": page, "total_pages": total_pages},
+        }
+    )
+
+
 @bp.route("/export.txt")
 def export_text() -> Response:
     """Export filtered pending imports as a tab-separated text file."""

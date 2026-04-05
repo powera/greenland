@@ -689,6 +689,47 @@ class GenysAgent:
                         continue
 
                     mapped_pos_type = ROLE_POS_MAP.get(role)
+
+                    # Check for duplicate: direct lemma match or derivative form match
+                    direct_lemma_ids = self._lemma_ids_for_english_gloss(
+                        session, normalized_gloss, gloss_cache
+                    )
+                    if mapped_pos_type:
+                        direct_lemma_ids = {
+                            lid
+                            for lid in direct_lemma_ids
+                            if session.query(Lemma.id)
+                            .filter(Lemma.id == lid, Lemma.pos_type == mapped_pos_type)
+                            .first()
+                        }
+                    if direct_lemma_ids:
+                        stats["already_in_database"] += 1
+                        logger.debug(
+                            "Phase 3 - %s - word already in database as lemma: %s",
+                            sentence_label,
+                            normalized_gloss,
+                        )
+                        continue
+
+                    form_lemma_ids = self._lemma_ids_for_derivative(
+                        session, "en", normalized_gloss, derivative_cache
+                    )
+                    if mapped_pos_type:
+                        form_lemma_ids = {
+                            lid
+                            for lid in form_lemma_ids
+                            if session.query(Lemma.id)
+                            .filter(Lemma.id == lid, Lemma.pos_type == mapped_pos_type)
+                            .first()
+                        }
+                    if form_lemma_ids:
+                        stats["already_in_database"] += 1
+                        logger.debug(
+                            "Phase 3 - %s - word already in database as derivative form: %s",
+                            sentence_label,
+                            normalized_gloss,
+                        )
+                        continue
                     # Use the English sentence text as context for LLM disambiguation
                     english_sentence = (
                         sentence_text if document_language == "en" else translations.get("en", "")
