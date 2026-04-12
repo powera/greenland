@@ -347,6 +347,7 @@ class WirewordSentenceExporter:
         output_path: str,
         include_all_languages: bool = False,
         exclude_conversation_sentences: bool = True,
+        min_sentences_to_export: int = 0,
     ) -> int:
         """Export sentences to a JSON file.
 
@@ -355,6 +356,9 @@ class WirewordSentenceExporter:
             include_all_languages: Include all translations
             exclude_conversation_sentences: Exclude sentences that are part of conversations
                 (default: True). These are exported separately in wireword_conversations.jsonl.
+            min_sentences_to_export: Minimum sentence count required to export sentence data.
+                When the exported sentence count is below this threshold, an empty payload is
+                written instead. Defaults to 0 (no minimum threshold).
 
         Returns:
             Number of sentences exported
@@ -367,11 +371,22 @@ class WirewordSentenceExporter:
         # Create output directory if needed
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
 
+        sentence_count = len(data["sentences"])
+        if sentence_count < min_sentences_to_export:
+            logger.warning(
+                "Sentence export count (%s) is below minimum threshold (%s); "
+                "writing empty sentence export to %s",
+                sentence_count,
+                min_sentences_to_export,
+                output_path,
+            )
+            data = {"sentences": []}
+            sentence_count = 0
+
         # Write to file
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
-        sentence_count = len(data["sentences"])
         logger.info(f"Exported {sentence_count} sentences to {output_path}")
 
         return sentence_count

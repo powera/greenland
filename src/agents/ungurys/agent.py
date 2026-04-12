@@ -55,6 +55,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+MIN_WIREWORD_SENTENCE_EXPORT_COUNT = 25
+
 
 class UngurysAgent:
     """Agent for exporting word data to WireWord format."""
@@ -526,6 +528,7 @@ class UngurysAgent:
                 output_path=output_path,
                 include_all_languages=False,
                 exclude_conversation_sentences=True,
+                min_sentences_to_export=MIN_WIREWORD_SENTENCE_EXPORT_COUNT,
             )
             logger.info(f"Successfully exported {count} sentences to {output_path}")
             return True, count
