@@ -14,6 +14,7 @@ from flask.typing import ResponseReturnValue
 from sqlalchemy import func
 from sqlalchemy.orm import Query
 
+from barsukas.helpers.strings import SUPPORTED_UI_LANGS, load_barsukas_strings
 from barsukas.routes.categories import (
     ADJECTIVE_GROUPS,
     ADVERB_GROUPS,
@@ -33,18 +34,18 @@ DICT_ITEMS_PER_PAGE = 200
 
 # Languages available as a source (browsing) language.
 # Order determines display in the dropdown.
-DICTIONARY_SOURCE_LANGUAGES: List[Tuple[str, str]] = [
-    ("en", "English"),
-    ("lt", "Lithuanian"),
-    ("zh", "Chinese"),
-    ("fr", "French"),
-    ("es", "Spanish"),
-    ("de", "German"),
-    ("it", "Italian"),
-    ("pt", "Portuguese"),
-    ("ja", "Japanese"),
-    ("ko", "Korean"),
-    ("vi", "Vietnamese"),
+DICTIONARY_SOURCE_LANGUAGES: List[str] = [
+    "en",
+    "lt",
+    "zh",
+    "fr",
+    "es",
+    "de",
+    "it",
+    "pt",
+    "ja",
+    "ko",
+    "vi",
 ]
 
 # The pool of translation languages to display alongside headwords.
@@ -104,6 +105,18 @@ def _get_display_langs(source_lang: str) -> List[str]:
 def _get_alphabet(source_lang: str) -> List[str]:
     """Return the alphabet to use for the letter bar."""
     return LANGUAGE_ALPHABETS.get(source_lang, list("ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+
+
+def _localized_language_names(ui_lang: str) -> Dict[str, str]:
+    """Return language names in the selected UI language with English fallback."""
+    strings = load_barsukas_strings(namespace="languages", ui_lang=ui_lang)
+    result: Dict[str, str] = {}
+    for code in DICTIONARY_SOURCE_LANGUAGES:
+        result[code] = strings.get(code, LANGUAGE_NAMES.get(code, code))
+    for code in DICTIONARY_DISPLAY_POOL:
+        if code not in result:
+            result[code] = strings.get(code, LANGUAGE_NAMES.get(code, code))
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -227,9 +240,9 @@ def _available_letters(lang: str) -> set[str]:
             return {KANA_TO_ROW.get(c, c) for c in raw_initials}
         elif lang == "zh":
             return {c.upper() for c in raw_initials if c.isalpha()}
-        else:
-            # Korean jamo — direct match.
-            return raw_initials
+
+        # Korean jamo — direct match.
+        return raw_initials
 
     # Latin-alphabet languages (including those with sort keys).
     rows = (
@@ -321,14 +334,17 @@ def dictionary() -> ResponseReturnValue:
     """Dictionary browse view."""
     lang = request.args.get("lang", "en").strip().lower()
     sort = request.args.get("sort", "alpha").strip().lower()
+    ui_lang = request.args.get("ui", "en").strip().lower()
     page = request.args.get("page", 1, type=int)
 
     # Validate inputs.
-    valid_codes = {code for code, _ in DICTIONARY_SOURCE_LANGUAGES}
+    valid_codes = set(DICTIONARY_SOURCE_LANGUAGES)
     if lang not in valid_codes:
         lang = "en"
     if sort not in ("alpha", "level", "category"):
         sort = "alpha"
+    if ui_lang not in SUPPORTED_UI_LANGS:
+        ui_lang = "en"
 
     display_langs = _get_display_langs(lang)
     alphabet = _get_alphabet(lang)
@@ -404,8 +420,8 @@ def dictionary() -> ResponseReturnValue:
             )
             .all()
         )
-        for r in rows:
-            translations_map.setdefault(r.lemma_id, {})[r.language_code] = r.translation
+        for row in rows:
+            translations_map.setdefault(row.lemma_id, {})[row.language_code] = row.translation
 
     # --- Build entry dicts for template ---
 
@@ -428,9 +444,23 @@ def dictionary() -> ResponseReturnValue:
             }
         )
 
+    dictionary_strings = load_barsukas_strings(namespace="dictionary", ui_lang=ui_lang)
+    navigation_strings = load_barsukas_strings(namespace="navigation", ui_lang=ui_lang)
+    pagination_strings = load_barsukas_strings(namespace="pagination", ui_lang=ui_lang)
+
+    entries_label_template = dictionary_strings.get("entries_count", "{count} entries")
+    entries_label = entries_label_template.format(count=total)
+
+    language_names = _localized_language_names(ui_lang)
+    available_languages: List[Tuple[str, str]] = [
+        (code, language_names.get(code, LANGUAGE_NAMES.get(code, code)))
+        for code in DICTIONARY_SOURCE_LANGUAGES
+    ]
+
     return render_template(
         "dictionary/index.html",
         lang=lang,
+        ui_lang=ui_lang,
         letter=letter,
         sort=sort,
         selected_level=selected_level,
@@ -444,6 +474,10 @@ def dictionary() -> ResponseReturnValue:
         display_langs=display_langs,
         alphabet=alphabet,
         available_letters=available_letters,
-        available_languages=DICTIONARY_SOURCE_LANGUAGES,
-        language_names=LANGUAGE_NAMES,
+        available_languages=available_languages,
+        language_names=language_names,
+        dictionary_strings=dictionary_strings,
+        navigation_strings=navigation_strings,
+        pagination_strings=pagination_strings,
+        entries_label=entries_label,
     )

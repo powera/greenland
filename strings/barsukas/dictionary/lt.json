@@ -1,0 +1,14 @@
+{
+  "title": "Žodynas",
+  "source_language": "Pradinė kalba",
+  "entries_count": "{count} įrašų",
+  "pos": "Kalbos dalis",
+  "category": "Kategorija",
+  "sort_alpha": "Abėcėlė",
+  "sort_level": "Lygis",
+  "sort_category": "Kategorija",
+  "no_entries": "Įrašų nėra",
+  "no_entries_for_letter": "Šiai raidei įrašų nėra.",
+  "no_entries_for_level": "Šiam lygiui įrašų nėra.",
+  "no_entries_for_category": "Šiai kategorijai įrašų nėra."
+}
