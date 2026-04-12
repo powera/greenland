@@ -3,7 +3,7 @@
 """
 Rhyming dictionary routes.
 
-Provides a two-tier browse of rhyme families derived from English IPA
+Provides a two-tier browse of rhyme families derived from language-specific IPA
 pronunciations stored on DerivativeForm.rhyme_key.
 
 Tier 1 (index):  Select a final sound (consonant or vowel cluster).
@@ -24,6 +24,7 @@ from langtools.rhyme_keys import (
     rhyme_key_penultimate_sound,
 )
 from storage.models.schema import DerivativeForm, Lemma
+from storage.translation_helpers import get_supported_languages
 
 bp = Blueprint("rhymes", __name__, url_prefix="/rhymes")
 
@@ -41,6 +42,15 @@ def _validated_language_code(raw_language: Optional[str]) -> str:
     if candidate in RHYME_KEY_LANGUAGES:
         return candidate
     return "en"
+
+
+def _rhyme_language_options() -> List[Tuple[str, str]]:
+    """Return sorted (language_code, language_name) options for rhyme browsing."""
+    language_names = get_supported_languages()
+    options: List[Tuple[str, str]] = []
+    for language_code in sorted(RHYME_KEY_LANGUAGES):
+        options.append((language_code, language_names.get(language_code, language_code)))
+    return options
 
 
 def _rhyme_family_rows(language_code: str) -> List[Tuple[str, int, str]]:
@@ -209,6 +219,7 @@ def index() -> ResponseReturnValue:
         families=families,
         total_families=total_families,
         selected_language=selected_language,
+        language_options=_rhyme_language_options(),
     )
 
 
@@ -244,4 +255,5 @@ def family() -> ResponseReturnValue:
         related_families=related,
         final_sound=final_sound,
         selected_language=selected_language,
+        language_options=_rhyme_language_options(),
     )

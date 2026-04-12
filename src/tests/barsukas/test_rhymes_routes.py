@@ -143,6 +143,9 @@ def test_rhyme_index_renders_french_and_spanish_families(client: FlaskClient, db
     fr_response = client.get("/rhymes/?language=fr")
     assert fr_response.status_code == 200
     fr_html = fr_response.data.decode()
+    assert 'name="language"' in fr_html
+    assert 'option value="fr"' in fr_html
+    assert 'option value="es"' in fr_html
     assert "-e" in fr_html
     assert "chanter" in fr_html or "danser" in fr_html
 

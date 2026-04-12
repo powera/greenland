@@ -15,6 +15,23 @@
     </div>
 </div>
 
+<form method="get" class="row g-2 align-items-end mb-3">
+    <input type="hidden" name="key" value="{{ rhyme_key or '' }}">
+    <div class="col-auto">
+        <label for="language" class="form-label mb-1">Language</label>
+        <select class="form-select form-select-sm" id="language" name="language">
+            {% for lang_code, lang_name in language_options %}
+                <option value="{{ lang_code }}" {% if lang_code == selected_language %}selected{% endif %}>
+                    {{ lang_name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Apply</button>
+    </div>
+</form>
+
 {% if rhyme_key %}
 <div class="row mb-3">
     <div class="col">
