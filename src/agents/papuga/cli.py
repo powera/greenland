@@ -8,7 +8,7 @@ This module handles all CLI argument parsing and the main entry point.
 import argparse
 import logging
 import sys
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from agents.common.common_args import (
     add_backend_args,
@@ -37,6 +37,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def _parse_language_codes(raw_languages: Optional[str]) -> Optional[List[str]]:
+    """Parse a comma-separated language-code string into normalized codes."""
+    if not raw_languages:
+        return None
+    normalized_codes = sorted(
+        {language.strip().lower() for language in raw_languages.split(",") if language.strip()}
+    )
+    return normalized_codes if normalized_codes else None
+
+
 def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection.
 
@@ -60,6 +70,11 @@ def get_argument_parser() -> argparse.ArgumentParser:
     # Papuga-specific arguments
     parser.add_argument(
         "--all-languages", action="store_true", help="Process all languages (default: English only)"
+    )
+    parser.add_argument(
+        "--languages",
+        type=str,
+        help="Comma-separated language codes to process (e.g., 'fr,es')",
     )
 
     # Mode selection - mutually exclusive flags
@@ -101,6 +116,7 @@ def enqueue_papuga_work(
     session: Any,
     lemmas: List[Any],
     only_english: bool = True,
+    language_codes: Optional[List[str]] = None,
     base_forms_only: bool = False,
     all_forms_pronunciation: bool = False,
     dry_run: bool = False,
@@ -111,6 +127,7 @@ def enqueue_papuga_work(
         session: Database session
         lemmas: List of lemmas to process
         only_english: Only process English forms
+        language_codes: Optional explicit languages to process (overrides only_english)
         base_forms_only: Only process base forms
         all_forms_pronunciation: Include optional forms (legacy behavior)
         dry_run: If True, don't actually enqueue
@@ -130,8 +147,9 @@ def enqueue_papuga_work(
         needs_pronunciation_update_filter(),
         pronunciation_required_filter(include_optional_forms=all_forms_pronunciation),
     )
-    if only_english:
-        query = query.filter(DerivativeForm.language_code == "en")
+    selected_languages = language_codes if language_codes else (["en"] if only_english else None)
+    if selected_languages:
+        query = query.filter(DerivativeForm.language_code.in_(selected_languages))
     if base_forms_only:
         query = query.filter(DerivativeForm.is_base_form == True)
 
@@ -176,6 +194,8 @@ def main() -> None:
 
     parser = get_argument_parser()
     args = parser.parse_args()
+    if args.all_languages and args.languages:
+        parser.error("--all-languages and --languages cannot be used together")
 
     # Validate cache arguments
     validate_cache_args(args)
@@ -189,7 +209,8 @@ def main() -> None:
     else:
         mode = "coverage"  # default
 
-    only_english = not args.all_languages
+    selected_languages = _parse_language_codes(args.languages)
+    only_english = not args.all_languages and selected_languages is None
 
     # Get lemmas to process (either single lemma from --guid or batch)
     agent_temp = PapugaAgent(config=config)
@@ -221,6 +242,7 @@ def main() -> None:
                 session=session,
                 lemmas=lemmas,
                 only_english=only_english,
+                language_codes=selected_languages,
                 base_forms_only=args.base_forms_only,
                 all_forms_pronunciation=args.all_forms_pronunciation,
                 dry_run=args.dry_run,
@@ -248,7 +270,9 @@ def main() -> None:
             )
             if lemma_id:
                 query = query.filter(DerivativeForm.lemma_id == lemma_id)
-            if only_english:
+            if selected_languages:
+                query = query.filter(DerivativeForm.language_code.in_(selected_languages))
+            elif only_english:
                 query = query.filter(DerivativeForm.language_code == "en")
             if args.base_forms_only:
                 query = query.filter(DerivativeForm.is_base_form == True)
@@ -278,6 +302,7 @@ def main() -> None:
         result = agent.check_missing_pronunciations(
             limit=args.limit,
             only_english=only_english,
+            language_codes=selected_languages,
             only_base_forms=args.base_forms_only,
             all_forms_pronunciation=args.all_forms_pronunciation,
             lemma_id=lemma_id,
@@ -290,6 +315,7 @@ def main() -> None:
         result = agent.populate_missing_pronunciations(
             limit=args.limit,
             only_english=only_english,
+            language_codes=selected_languages,
             only_base_forms=args.base_forms_only,
             all_forms_pronunciation=args.all_forms_pronunciation,
             dry_run=args.dry_run,

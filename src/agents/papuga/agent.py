@@ -75,6 +75,22 @@ class PapugaAgent:
             )
         return self.cache_client
 
+    @staticmethod
+    def _resolve_language_codes(
+        *,
+        only_english: bool,
+        language_codes: Optional[List[str]],
+    ) -> Optional[List[str]]:
+        """Return normalized language codes to filter by, or ``None`` for all languages."""
+        if language_codes:
+            normalized_codes = sorted(
+                {language.strip().lower() for language in language_codes if language.strip()}
+            )
+            return normalized_codes if normalized_codes else None
+        if only_english:
+            return ["en"]
+        return None
+
     def _get_example_sentence(self, session: Session, lemma: Lemma) -> Optional[str]:
         """
         Get an example sentence featuring this lemma from the new sentences system.
@@ -119,6 +135,7 @@ class PapugaAgent:
         sample_rate: float = 1.0,
         confidence_threshold: float = 0.7,
         only_english: bool = True,
+        language_codes: Optional[List[str]] = None,
         dry_run: bool = False,
         lemma_id: Optional[int] = None,
         lemmas: Optional[List[Lemma]] = None,
@@ -131,6 +148,7 @@ class PapugaAgent:
             sample_rate: Fraction of forms to sample (0.0-1.0)
             confidence_threshold: Minimum confidence to flag issues
             only_english: Only check English forms (language_code='en')
+            language_codes: Optional explicit languages to process (overrides only_english)
             dry_run: If True, don't make LLM API calls, just count what would be checked
             lemma_id: Optional lemma ID to filter to a specific lemma
             lemmas: Optional pre-filtered list of lemmas to check
@@ -155,8 +173,12 @@ class PapugaAgent:
             elif lemma_id:
                 query = query.filter(DerivativeForm.lemma_id == lemma_id)
 
-            if only_english:
-                query = query.filter(DerivativeForm.language_code == "en")
+            selected_languages = self._resolve_language_codes(
+                only_english=only_english,
+                language_codes=language_codes,
+            )
+            if selected_languages:
+                query = query.filter(DerivativeForm.language_code.in_(selected_languages))
 
             query = query.order_by(DerivativeForm.id)
 
@@ -257,6 +279,7 @@ class PapugaAgent:
         self,
         limit: Optional[int] = None,
         only_english: bool = True,
+        language_codes: Optional[List[str]] = None,
         only_base_forms: bool = False,
         all_forms_pronunciation: bool = False,
         lemma_id: Optional[int] = None,
@@ -268,6 +291,7 @@ class PapugaAgent:
         Args:
             limit: Maximum number to report
             only_english: Only check English forms (language_code='en')
+            language_codes: Optional explicit languages to process (overrides only_english)
             only_base_forms: Only check base forms (is_base_form=True)
             lemma_id: Optional lemma ID to filter to a specific lemma
             lemmas: Optional pre-filtered list of lemmas to check
@@ -294,8 +318,12 @@ class PapugaAgent:
             elif lemma_id:
                 query = query.filter(DerivativeForm.lemma_id == lemma_id)
 
-            if only_english:
-                query = query.filter(DerivativeForm.language_code == "en")
+            selected_languages = self._resolve_language_codes(
+                only_english=only_english,
+                language_codes=language_codes,
+            )
+            if selected_languages:
+                query = query.filter(DerivativeForm.language_code.in_(selected_languages))
 
             if only_base_forms:
                 query = query.filter(DerivativeForm.is_base_form == True)
@@ -320,8 +348,10 @@ class PapugaAgent:
             elif lemma_id:
                 translation_query = translation_query.filter(LemmaTranslation.lemma_id == lemma_id)
 
-            if only_english:
-                translation_query = translation_query.filter(LemmaTranslation.language_code == "en")
+            if selected_languages:
+                translation_query = translation_query.filter(
+                    LemmaTranslation.language_code.in_(selected_languages)
+                )
 
             missing_translations = translation_query.order_by(LemmaTranslation.id).all()
 
@@ -362,6 +392,7 @@ class PapugaAgent:
                 "total_missing": total_missing,
                 "missing_forms": missing_list,
                 "only_english": only_english,
+                "language_codes": selected_languages,
                 "only_base_forms": only_base_forms,
                 "all_forms_pronunciation": all_forms_pronunciation,
             }
@@ -376,6 +407,7 @@ class PapugaAgent:
         self,
         limit: Optional[int] = None,
         only_english: bool = True,
+        language_codes: Optional[List[str]] = None,
         only_base_forms: bool = False,
         all_forms_pronunciation: bool = False,
         dry_run: bool = False,
@@ -391,6 +423,7 @@ class PapugaAgent:
         Args:
             limit: Maximum number of lemmas to process
             only_english: Only process English forms
+            language_codes: Optional explicit languages to process (overrides only_english)
             only_base_forms: Only process base forms
             dry_run: If True, don't actually update the database
             lemma_id: Optional lemma ID to filter to a specific lemma
@@ -418,8 +451,12 @@ class PapugaAgent:
             elif lemma_id:
                 query = query.filter(DerivativeForm.lemma_id == lemma_id)
 
-            if only_english:
-                query = query.filter(DerivativeForm.language_code == "en")
+            selected_languages = self._resolve_language_codes(
+                only_english=only_english,
+                language_codes=language_codes,
+            )
+            if selected_languages:
+                query = query.filter(DerivativeForm.language_code.in_(selected_languages))
 
             if only_base_forms:
                 query = query.filter(DerivativeForm.is_base_form == True)
@@ -452,8 +489,10 @@ class PapugaAgent:
             elif lemma_id:
                 translation_query = translation_query.filter(LemmaTranslation.lemma_id == lemma_id)
 
-            if only_english:
-                translation_query = translation_query.filter(LemmaTranslation.language_code == "en")
+            if selected_languages:
+                translation_query = translation_query.filter(
+                    LemmaTranslation.language_code.in_(selected_languages)
+                )
 
             translation_pairs = {
                 (translation_obj.lemma_id, translation_obj.language_code)
@@ -706,6 +745,7 @@ class PapugaAgent:
         sample_rate: float = 1.0,
         confidence_threshold: float = 0.7,
         only_english: bool = True,
+        language_codes: Optional[List[str]] = None,
         dry_run: bool = False,
         lemma_id: Optional[int] = None,
         lemmas: Optional[List[Lemma]] = None,
@@ -719,6 +759,7 @@ class PapugaAgent:
             sample_rate: Fraction to sample (0.0-1.0)
             confidence_threshold: Minimum confidence to flag issues
             only_english: Only check English forms
+            language_codes: Optional explicit languages to process (overrides only_english)
             dry_run: If True, don't make LLM API calls, just count what would be checked
             lemma_id: Optional lemma ID to filter to a specific lemma
             lemmas: Optional pre-filtered list of lemmas to check
@@ -735,6 +776,7 @@ class PapugaAgent:
             "sample_rate": sample_rate,
             "confidence_threshold": confidence_threshold,
             "only_english": only_english,
+            "language_codes": language_codes,
             "dry_run": dry_run,
             "checks": {},
         }
@@ -745,6 +787,7 @@ class PapugaAgent:
             sample_rate=sample_rate,
             confidence_threshold=confidence_threshold,
             only_english=only_english,
+            language_codes=language_codes,
             dry_run=dry_run,
             lemma_id=lemma_id,
             lemmas=lemmas,
@@ -754,6 +797,7 @@ class PapugaAgent:
         results["checks"]["missing_pronunciations"] = self.check_missing_pronunciations(
             limit=limit,
             only_english=only_english,
+            language_codes=language_codes,
             only_base_forms=False,
             lemma_id=lemma_id,
             lemmas=lemmas,

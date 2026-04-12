@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from agents.papuga.agent import PapugaAgent
-from agents.papuga.cli import enqueue_papuga_work
+from agents.papuga.cli import _parse_language_codes, enqueue_papuga_work
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import Base, DerivativeForm, Lemma, LemmaTranslation
 from workqueue.handlers.papuga import generate_pronunciations_for_lemma
@@ -121,7 +121,7 @@ def test_enqueue_papuga_work_enqueues_once_per_lemma_language() -> None:
         )
         session.commit()
 
-        captured_calls = []
+        captured_calls: list[dict[str, object]] = []
 
         class _Result:
             created = True
@@ -149,6 +149,81 @@ def test_enqueue_papuga_work_enqueues_once_per_lemma_language() -> None:
             "lemma_id": lemma.id,
             "all_forms_pronunciation": False,
         }
+    finally:
+        session.close()
+        engine.dispose()
+
+
+def test_parse_language_codes_normalizes_and_deduplicates() -> None:
+    """CLI language parsing should normalize case/spacing and remove duplicates."""
+    assert _parse_language_codes(" FR,es, fr ,ES ") == ["es", "fr"]
+    assert _parse_language_codes("") is None
+
+
+def test_enqueue_papuga_work_filters_selected_languages() -> None:
+    """Workqueue enqueue should honor explicit language filters."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+
+    session = Session(engine)
+    try:
+        lemma = Lemma(
+            lemma_text="run",
+            definition_text="to move quickly",
+            pos_type="verb",
+            guid="V00_00X",
+        )
+        session.add(lemma)
+        session.flush()
+
+        session.add_all(
+            [
+                DerivativeForm(
+                    lemma_id=lemma.id,
+                    derivative_form_text="run",
+                    language_code="en",
+                    grammatical_form="infinitive",
+                    is_base_form=True,
+                    ipa_pronunciation=None,
+                    phonetic_pronunciation=None,
+                ),
+                DerivativeForm(
+                    lemma_id=lemma.id,
+                    derivative_form_text="corro",
+                    language_code="es",
+                    grammatical_form="present_1s",
+                    is_base_form=False,
+                    ipa_pronunciation=None,
+                    phonetic_pronunciation=None,
+                ),
+            ]
+        )
+        session.commit()
+
+        captured_calls = []
+
+        class _Result:
+            created = True
+
+        def _fake_enqueue_task(db_session: Session, **kwargs: object) -> _Result:
+            captured_calls.append(kwargs)
+            return _Result()
+
+        with patch("workqueue.task_queue.enqueue_task", side_effect=_fake_enqueue_task):
+            results = enqueue_papuga_work(
+                session=session,
+                lemmas=[lemma],
+                only_english=False,
+                language_codes=["es"],
+                all_forms_pronunciation=True,
+                dry_run=False,
+            )
+
+        assert results["enqueued"] == 1
+        assert len(captured_calls) == 1
+        payload = captured_calls[0]["payload"]
+        assert isinstance(payload, dict)
+        assert payload["lang_code"] == "es"
     finally:
         session.close()
         engine.dispose()
