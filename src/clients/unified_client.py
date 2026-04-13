@@ -348,11 +348,6 @@ class UnifiedLLMClient:
                 raise ValueError("No model specified and no default_model configured")
             model = self.default_model
 
-        if self.debug:
-            logger.debug(
-                "Chat request: model=%s, brief=%s, schema=%s", model, brief, bool(json_schema)
-            )
-
         # Get the appropriate client for this model
         client, normalized_model, expected_response_model = self._get_client(model)
 
@@ -362,13 +357,21 @@ class UnifiedLLMClient:
         if self.debug:
             if normalized_model != model:
                 logger.debug(
-                    "Using %s client for model: %s (normalized from %s)",
+                    "Chat request via %s: model=%s (normalized from %s), brief=%s, schema=%s",
                     backend_name,
                     normalized_model,
                     model,
+                    brief,
+                    bool(json_schema),
                 )
             else:
-                logger.debug("Using %s client for model: %s", backend_name, model)
+                logger.debug(
+                    "Chat request via %s: model=%s, brief=%s, schema=%s",
+                    backend_name,
+                    model,
+                    brief,
+                    bool(json_schema),
+                )
             client.debug = True
 
         # Track timing for metrics
