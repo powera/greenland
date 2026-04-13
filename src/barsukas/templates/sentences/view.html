@@ -188,9 +188,7 @@
                                 <td>{{ word.english_text }}</td>
                                 <td>
                                     {% if word.lemma %}
-                                        <a href="{{ url_for('lemmas.view_lemma', lemma_id=word.lemma_id) }}">
-                                            {{ word.lemma_display_text }}
-                                        </a>
+                                        <a href="{{ url_for('lemmas.view_lemma', lemma_id=word.lemma_id) }}">{{ word.lemma_display_text }}</a>
                                         {% if word.lemma.guid %}
                                             <small class="text-muted">({{ word.lemma.guid }})</small>
                                         {% endif %}
