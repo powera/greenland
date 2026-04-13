@@ -528,12 +528,13 @@ def verify_pronunciations(args: argparse.Namespace) -> int:
 
     items: List[PronunciationCheckItem] = []
     required_fields = ("word", "chinese_hint", "ipa", "phonetic")
-    for item in payload:
+    for index, item in enumerate(payload, start=1):
         if not isinstance(item, dict) or any(field not in item for field in required_fields):
             logger.error("Each item must include: word, chinese_hint, ipa, phonetic.")
             return 1
         items.append(
             {
+                "entry_id": str(item.get("entry_id", f"item_{index:02d}")),
                 "word": str(item["word"]),
                 "chinese_hint": str(item["chinese_hint"]),
                 "ipa": str(item["ipa"]),
@@ -547,7 +548,16 @@ def verify_pronunciations(args: argparse.Namespace) -> int:
         incorrect_action=incorrect_action,
         dry_run=args.dry_run,
     )
-    print(json.dumps({"wrong_words": result["wrong_words"]}, ensure_ascii=False, indent=2))
+    print(
+        json.dumps(
+            {
+                "wrong_entries": result["wrong_entries"],
+                "wrong_words": result["wrong_words"],
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
     return 0
 
 

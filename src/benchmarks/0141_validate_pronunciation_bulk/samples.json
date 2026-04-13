@@ -6,124 +6,145 @@
         "word": "record",
         "chinese_hint": "记录（动词）",
         "ipa": "rɪˈkɔrd",
-        "phonetic": "rih-KORD"
+        "phonetic": "rih-KORD",
+        "entry_id": "case_01_perfect_item_01"
       },
       {
         "word": "record",
         "chinese_hint": "唱片；记录（名词）",
         "ipa": "ˈrɛkərd",
-        "phonetic": "REK-erd"
+        "phonetic": "REK-erd",
+        "entry_id": "case_01_perfect_item_02"
       },
       {
         "word": "present",
         "chinese_hint": "赠送；呈现（动词）",
         "ipa": "prɪˈzɛnt",
-        "phonetic": "prih-ZENT"
+        "phonetic": "prih-ZENT",
+        "entry_id": "case_01_perfect_item_03"
       },
       {
         "word": "present",
         "chinese_hint": "礼物；现在（名词/形容词）",
         "ipa": "ˈprɛzənt",
-        "phonetic": "PREZ-ent"
+        "phonetic": "PREZ-ent",
+        "entry_id": "case_01_perfect_item_04"
       },
       {
         "word": "lead",
         "chinese_hint": "带领（动词）",
         "ipa": "lid",
-        "phonetic": "leed"
+        "phonetic": "leed",
+        "entry_id": "case_01_perfect_item_05"
       },
       {
         "word": "lead",
         "chinese_hint": "铅（金属）",
         "ipa": "lɛd",
-        "phonetic": "led"
+        "phonetic": "led",
+        "entry_id": "case_01_perfect_item_06"
       },
       {
         "word": "wind",
         "chinese_hint": "风（名词）",
         "ipa": "wɪnd",
-        "phonetic": "wind"
+        "phonetic": "wind",
+        "entry_id": "case_01_perfect_item_07"
       },
       {
         "word": "wind",
         "chinese_hint": "缠绕（动词）",
         "ipa": "waɪnd",
-        "phonetic": "wynd"
+        "phonetic": "wynd",
+        "entry_id": "case_01_perfect_item_08"
       },
       {
         "word": "bass",
         "chinese_hint": "低音；鲈鱼（鱼）",
         "ipa": "bæs",
-        "phonetic": "bass"
+        "phonetic": "bass",
+        "entry_id": "case_01_perfect_item_09"
       },
       {
         "word": "bass",
         "chinese_hint": "低音（音乐）",
         "ipa": "beɪs",
-        "phonetic": "base"
+        "phonetic": "base",
+        "entry_id": "case_01_perfect_item_10"
       },
       {
         "word": "close",
         "chinese_hint": "关闭（动词）",
         "ipa": "kloʊz",
-        "phonetic": "klohz"
+        "phonetic": "klohz",
+        "entry_id": "case_01_perfect_item_11"
       },
       {
         "word": "close",
         "chinese_hint": "接近的（形容词）",
         "ipa": "kloʊs",
-        "phonetic": "klohs"
+        "phonetic": "klohs",
+        "entry_id": "case_01_perfect_item_12"
       },
       {
         "word": "bow",
         "chinese_hint": "弓（武器）",
         "ipa": "boʊ",
-        "phonetic": "boh"
+        "phonetic": "boh",
+        "entry_id": "case_01_perfect_item_13"
       },
       {
         "word": "bow",
         "chinese_hint": "鞠躬（动词）",
         "ipa": "baʊ",
-        "phonetic": "bau"
+        "phonetic": "bau",
+        "entry_id": "case_01_perfect_item_14"
       },
       {
         "word": "tear",
         "chinese_hint": "眼泪（名词）",
         "ipa": "tɪr",
-        "phonetic": "teer"
+        "phonetic": "teer",
+        "entry_id": "case_01_perfect_item_15"
       },
       {
         "word": "tear",
         "chinese_hint": "撕裂（动词）",
         "ipa": "tɛr",
-        "phonetic": "tare"
+        "phonetic": "tare",
+        "entry_id": "case_01_perfect_item_16"
       },
       {
         "word": "read",
         "chinese_hint": "阅读（现在时）",
         "ipa": "rid",
-        "phonetic": "reed"
+        "phonetic": "reed",
+        "entry_id": "case_01_perfect_item_17"
       },
       {
         "word": "read",
         "chinese_hint": "阅读（过去时）",
         "ipa": "rɛd",
-        "phonetic": "red"
+        "phonetic": "red",
+        "entry_id": "case_01_perfect_item_18"
       },
       {
         "word": "minute",
         "chinese_hint": "分钟（名词）",
         "ipa": "ˈmɪnɪt",
-        "phonetic": "MIN-it"
+        "phonetic": "MIN-it",
+        "entry_id": "case_01_perfect_item_19"
       },
       {
         "word": "minute",
         "chinese_hint": "极小的（形容词）",
         "ipa": "maɪˈn(j)ut",
-        "phonetic": "my-NYOOT"
+        "phonetic": "my-NYOOT",
+        "entry_id": "case_01_perfect_item_20"
       }
     ],
-    "wrong_words": []
+    "wrong_words": [],
+    "wrong_entries": []
   },
   {
     "case_id": "case_02_two_wrong",
@@ -132,126 +153,158 @@
         "word": "record",
         "chinese_hint": "记录（动词）",
         "ipa": "rɪˈkɔrd",
-        "phonetic": "rih-KORD"
+        "phonetic": "rih-KORD",
+        "entry_id": "case_02_two_wrong_item_01"
       },
       {
         "word": "record",
         "chinese_hint": "唱片；记录（名词）",
         "ipa": "ˈrɛkərd",
-        "phonetic": "REK-erd"
+        "phonetic": "REK-erd",
+        "entry_id": "case_02_two_wrong_item_02"
       },
       {
         "word": "present",
         "chinese_hint": "赠送；呈现（动词）",
         "ipa": "prɪˈzɛnt",
-        "phonetic": "prih-ZENT"
+        "phonetic": "prih-ZENT",
+        "entry_id": "case_02_two_wrong_item_03"
       },
       {
         "word": "present",
         "chinese_hint": "礼物；现在（名词/形容词）",
         "ipa": "ˈprɛzənt",
-        "phonetic": "PREZ-ent"
+        "phonetic": "PREZ-ent",
+        "entry_id": "case_02_two_wrong_item_04"
       },
       {
         "word": "lead",
         "chinese_hint": "带领（动词）",
         "ipa": "lɛd",
-        "phonetic": "leed"
+        "phonetic": "leed",
+        "entry_id": "case_02_two_wrong_item_05"
       },
       {
         "word": "lead",
         "chinese_hint": "铅（金属）",
         "ipa": "lɛd",
-        "phonetic": "led"
+        "phonetic": "led",
+        "entry_id": "case_02_two_wrong_item_06"
       },
       {
         "word": "wind",
         "chinese_hint": "风（名词）",
         "ipa": "wɪnd",
-        "phonetic": "wind"
+        "phonetic": "wind",
+        "entry_id": "case_02_two_wrong_item_07"
       },
       {
         "word": "wind",
         "chinese_hint": "缠绕（动词）",
         "ipa": "waɪnd",
-        "phonetic": "wynd"
+        "phonetic": "wynd",
+        "entry_id": "case_02_two_wrong_item_08"
       },
       {
         "word": "bass",
         "chinese_hint": "低音；鲈鱼（鱼）",
         "ipa": "bæs",
-        "phonetic": "bass"
+        "phonetic": "bass",
+        "entry_id": "case_02_two_wrong_item_09"
       },
       {
         "word": "bass",
         "chinese_hint": "低音（音乐）",
         "ipa": "beɪs",
-        "phonetic": "base"
+        "phonetic": "base",
+        "entry_id": "case_02_two_wrong_item_10"
       },
       {
         "word": "close",
         "chinese_hint": "关闭（动词）",
         "ipa": "kloʊz",
-        "phonetic": "klohz"
+        "phonetic": "klohz",
+        "entry_id": "case_02_two_wrong_item_11"
       },
       {
         "word": "close",
         "chinese_hint": "接近的（形容词）",
         "ipa": "kloʊs",
-        "phonetic": "klohz"
+        "phonetic": "klohz",
+        "entry_id": "case_02_two_wrong_item_12"
       },
       {
         "word": "bow",
         "chinese_hint": "弓（武器）",
         "ipa": "boʊ",
-        "phonetic": "boh"
+        "phonetic": "boh",
+        "entry_id": "case_02_two_wrong_item_13"
       },
       {
         "word": "bow",
         "chinese_hint": "鞠躬（动词）",
         "ipa": "baʊ",
-        "phonetic": "bau"
+        "phonetic": "bau",
+        "entry_id": "case_02_two_wrong_item_14"
       },
       {
         "word": "tear",
         "chinese_hint": "眼泪（名词）",
         "ipa": "tɪr",
-        "phonetic": "teer"
+        "phonetic": "teer",
+        "entry_id": "case_02_two_wrong_item_15"
       },
       {
         "word": "tear",
         "chinese_hint": "撕裂（动词）",
         "ipa": "tɛr",
-        "phonetic": "tare"
+        "phonetic": "tare",
+        "entry_id": "case_02_two_wrong_item_16"
       },
       {
         "word": "read",
         "chinese_hint": "阅读（现在时）",
         "ipa": "rid",
-        "phonetic": "reed"
+        "phonetic": "reed",
+        "entry_id": "case_02_two_wrong_item_17"
       },
       {
         "word": "read",
         "chinese_hint": "阅读（过去时）",
         "ipa": "rɛd",
-        "phonetic": "red"
+        "phonetic": "red",
+        "entry_id": "case_02_two_wrong_item_18"
       },
       {
         "word": "minute",
         "chinese_hint": "分钟（名词）",
         "ipa": "ˈmɪnɪt",
-        "phonetic": "MIN-it"
+        "phonetic": "MIN-it",
+        "entry_id": "case_02_two_wrong_item_19"
       },
       {
         "word": "minute",
         "chinese_hint": "极小的（形容词）",
         "ipa": "maɪˈn(j)ut",
-        "phonetic": "my-NYOOT"
+        "phonetic": "my-NYOOT",
+        "entry_id": "case_02_two_wrong_item_20"
       }
     ],
     "wrong_words": [
       "lead",
       "close"
+    ],
+    "wrong_entries": [
+      {
+        "entry_id": "case_02_two_wrong_item_05",
+        "word": "lead",
+        "issue_type": "ipa"
+      },
+      {
+        "entry_id": "case_02_two_wrong_item_12",
+        "word": "close",
+        "issue_type": "phonetic"
+      }
     ]
   },
   {
@@ -261,127 +314,164 @@
         "word": "record",
         "chinese_hint": "记录（动词）",
         "ipa": "rɪˈkɔrd",
-        "phonetic": "REK-erd"
+        "phonetic": "REK-erd",
+        "entry_id": "case_03_three_wrong_item_01"
       },
       {
         "word": "record",
         "chinese_hint": "唱片；记录（名词）",
         "ipa": "ˈrɛkərd",
-        "phonetic": "REK-erd"
+        "phonetic": "REK-erd",
+        "entry_id": "case_03_three_wrong_item_02"
       },
       {
         "word": "present",
         "chinese_hint": "赠送；呈现（动词）",
         "ipa": "prɪˈzɛnt",
-        "phonetic": "prih-ZENT"
+        "phonetic": "prih-ZENT",
+        "entry_id": "case_03_three_wrong_item_03"
       },
       {
         "word": "present",
         "chinese_hint": "礼物；现在（名词/形容词）",
         "ipa": "ˈprɛzənt",
-        "phonetic": "PREZ-ent"
+        "phonetic": "PREZ-ent",
+        "entry_id": "case_03_three_wrong_item_04"
       },
       {
         "word": "lead",
         "chinese_hint": "带领（动词）",
         "ipa": "lid",
-        "phonetic": "leed"
+        "phonetic": "leed",
+        "entry_id": "case_03_three_wrong_item_05"
       },
       {
         "word": "lead",
         "chinese_hint": "铅（金属）",
         "ipa": "lɛd",
-        "phonetic": "led"
+        "phonetic": "led",
+        "entry_id": "case_03_three_wrong_item_06"
       },
       {
         "word": "wind",
         "chinese_hint": "风（名词）",
         "ipa": "wɪnd",
-        "phonetic": "wind"
+        "phonetic": "wind",
+        "entry_id": "case_03_three_wrong_item_07"
       },
       {
         "word": "wind",
         "chinese_hint": "缠绕（动词）",
         "ipa": "wɪnd",
-        "phonetic": "wynd"
+        "phonetic": "wynd",
+        "entry_id": "case_03_three_wrong_item_08"
       },
       {
         "word": "bass",
         "chinese_hint": "低音；鲈鱼（鱼）",
         "ipa": "bæs",
-        "phonetic": "bass"
+        "phonetic": "bass",
+        "entry_id": "case_03_three_wrong_item_09"
       },
       {
         "word": "bass",
         "chinese_hint": "低音（音乐）",
         "ipa": "beɪs",
-        "phonetic": "base"
+        "phonetic": "base",
+        "entry_id": "case_03_three_wrong_item_10"
       },
       {
         "word": "close",
         "chinese_hint": "关闭（动词）",
         "ipa": "kloʊz",
-        "phonetic": "klohz"
+        "phonetic": "klohz",
+        "entry_id": "case_03_three_wrong_item_11"
       },
       {
         "word": "close",
         "chinese_hint": "接近的（形容词）",
         "ipa": "kloʊs",
-        "phonetic": "klohs"
+        "phonetic": "klohs",
+        "entry_id": "case_03_three_wrong_item_12"
       },
       {
         "word": "bow",
         "chinese_hint": "弓（武器）",
         "ipa": "boʊ",
-        "phonetic": "boh"
+        "phonetic": "boh",
+        "entry_id": "case_03_three_wrong_item_13"
       },
       {
         "word": "bow",
         "chinese_hint": "鞠躬（动词）",
         "ipa": "baʊ",
-        "phonetic": "boh"
+        "phonetic": "boh",
+        "entry_id": "case_03_three_wrong_item_14"
       },
       {
         "word": "tear",
         "chinese_hint": "眼泪（名词）",
         "ipa": "tɪr",
-        "phonetic": "teer"
+        "phonetic": "teer",
+        "entry_id": "case_03_three_wrong_item_15"
       },
       {
         "word": "tear",
         "chinese_hint": "撕裂（动词）",
         "ipa": "tɛr",
-        "phonetic": "tare"
+        "phonetic": "tare",
+        "entry_id": "case_03_three_wrong_item_16"
       },
       {
         "word": "read",
         "chinese_hint": "阅读（现在时）",
         "ipa": "rid",
-        "phonetic": "reed"
+        "phonetic": "reed",
+        "entry_id": "case_03_three_wrong_item_17"
       },
       {
         "word": "read",
         "chinese_hint": "阅读（过去时）",
         "ipa": "rɛd",
-        "phonetic": "red"
+        "phonetic": "red",
+        "entry_id": "case_03_three_wrong_item_18"
       },
       {
         "word": "minute",
         "chinese_hint": "分钟（名词）",
         "ipa": "ˈmɪnɪt",
-        "phonetic": "MIN-it"
+        "phonetic": "MIN-it",
+        "entry_id": "case_03_three_wrong_item_19"
       },
       {
         "word": "minute",
         "chinese_hint": "极小的（形容词）",
         "ipa": "maɪˈn(j)ut",
-        "phonetic": "my-NYOOT"
+        "phonetic": "my-NYOOT",
+        "entry_id": "case_03_three_wrong_item_20"
       }
     ],
     "wrong_words": [
       "record",
       "wind",
       "bow"
+    ],
+    "wrong_entries": [
+      {
+        "entry_id": "case_03_three_wrong_item_01",
+        "word": "record",
+        "issue_type": "phonetic"
+      },
+      {
+        "entry_id": "case_03_three_wrong_item_08",
+        "word": "wind",
+        "issue_type": "ipa"
+      },
+      {
+        "entry_id": "case_03_three_wrong_item_14",
+        "word": "bow",
+        "issue_type": "phonetic"
+      }
     ]
   },
   {
@@ -391,121 +481,141 @@
         "word": "record",
         "chinese_hint": "记录（动词）",
         "ipa": "rɪˈkɔrd",
-        "phonetic": "rih-KORD"
+        "phonetic": "rih-KORD",
+        "entry_id": "case_04_four_wrong_item_01"
       },
       {
         "word": "record",
         "chinese_hint": "唱片；记录（名词）",
         "ipa": "ˈrɛkərd",
-        "phonetic": "REK-erd"
+        "phonetic": "REK-erd",
+        "entry_id": "case_04_four_wrong_item_02"
       },
       {
         "word": "present",
         "chinese_hint": "赠送；呈现（动词）",
         "ipa": "prɪˈzɛnt",
-        "phonetic": "prih-ZENT"
+        "phonetic": "prih-ZENT",
+        "entry_id": "case_04_four_wrong_item_03"
       },
       {
         "word": "present",
         "chinese_hint": "礼物；现在（名词/形容词）",
         "ipa": "ˈprɛzənt",
-        "phonetic": "PREZ-ent"
+        "phonetic": "PREZ-ent",
+        "entry_id": "case_04_four_wrong_item_04"
       },
       {
         "word": "lead",
         "chinese_hint": "带领（动词）",
         "ipa": "lid",
-        "phonetic": "leed"
+        "phonetic": "leed",
+        "entry_id": "case_04_four_wrong_item_05"
       },
       {
         "word": "lead",
         "chinese_hint": "铅（金属）",
         "ipa": "lɛd",
-        "phonetic": "leed"
+        "phonetic": "leed",
+        "entry_id": "case_04_four_wrong_item_06"
       },
       {
         "word": "wind",
         "chinese_hint": "风（名词）",
         "ipa": "wɪnd",
-        "phonetic": "wind"
+        "phonetic": "wind",
+        "entry_id": "case_04_four_wrong_item_07"
       },
       {
         "word": "wind",
         "chinese_hint": "缠绕（动词）",
         "ipa": "waɪnd",
-        "phonetic": "wynd"
+        "phonetic": "wynd",
+        "entry_id": "case_04_four_wrong_item_08"
       },
       {
         "word": "bass",
         "chinese_hint": "低音；鲈鱼（鱼）",
         "ipa": "bæs",
-        "phonetic": "bass"
+        "phonetic": "bass",
+        "entry_id": "case_04_four_wrong_item_09"
       },
       {
         "word": "bass",
         "chinese_hint": "低音（音乐）",
         "ipa": "bæs",
-        "phonetic": "base"
+        "phonetic": "base",
+        "entry_id": "case_04_four_wrong_item_10"
       },
       {
         "word": "close",
         "chinese_hint": "关闭（动词）",
         "ipa": "kloʊz",
-        "phonetic": "klohz"
+        "phonetic": "klohz",
+        "entry_id": "case_04_four_wrong_item_11"
       },
       {
         "word": "close",
         "chinese_hint": "接近的（形容词）",
         "ipa": "kloʊs",
-        "phonetic": "klohs"
+        "phonetic": "klohs",
+        "entry_id": "case_04_four_wrong_item_12"
       },
       {
         "word": "bow",
         "chinese_hint": "弓（武器）",
         "ipa": "boʊ",
-        "phonetic": "boh"
+        "phonetic": "boh",
+        "entry_id": "case_04_four_wrong_item_13"
       },
       {
         "word": "bow",
         "chinese_hint": "鞠躬（动词）",
         "ipa": "baʊ",
-        "phonetic": "bau"
+        "phonetic": "bau",
+        "entry_id": "case_04_four_wrong_item_14"
       },
       {
         "word": "tear",
         "chinese_hint": "眼泪（名词）",
         "ipa": "tɪr",
-        "phonetic": "teer"
+        "phonetic": "teer",
+        "entry_id": "case_04_four_wrong_item_15"
       },
       {
         "word": "tear",
         "chinese_hint": "撕裂（动词）",
         "ipa": "tɪr",
-        "phonetic": "tare"
+        "phonetic": "tare",
+        "entry_id": "case_04_four_wrong_item_16"
       },
       {
         "word": "read",
         "chinese_hint": "阅读（现在时）",
         "ipa": "rid",
-        "phonetic": "reed"
+        "phonetic": "reed",
+        "entry_id": "case_04_four_wrong_item_17"
       },
       {
         "word": "read",
         "chinese_hint": "阅读（过去时）",
         "ipa": "rɛd",
-        "phonetic": "red"
+        "phonetic": "red",
+        "entry_id": "case_04_four_wrong_item_18"
       },
       {
         "word": "minute",
         "chinese_hint": "分钟（名词）",
         "ipa": "ˈmɪnɪt",
-        "phonetic": "MIN-it"
+        "phonetic": "MIN-it",
+        "entry_id": "case_04_four_wrong_item_19"
       },
       {
         "word": "minute",
         "chinese_hint": "极小的（形容词）",
         "ipa": "maɪˈn(j)ut",
-        "phonetic": "MIN-it"
+        "phonetic": "MIN-it",
+        "entry_id": "case_04_four_wrong_item_20"
       }
     ],
     "wrong_words": [
@@ -513,6 +623,28 @@
       "bass",
       "tear",
       "minute"
+    ],
+    "wrong_entries": [
+      {
+        "entry_id": "case_04_four_wrong_item_06",
+        "word": "lead",
+        "issue_type": "phonetic"
+      },
+      {
+        "entry_id": "case_04_four_wrong_item_10",
+        "word": "bass",
+        "issue_type": "ipa"
+      },
+      {
+        "entry_id": "case_04_four_wrong_item_16",
+        "word": "tear",
+        "issue_type": "ipa"
+      },
+      {
+        "entry_id": "case_04_four_wrong_item_20",
+        "word": "minute",
+        "issue_type": "phonetic"
+      }
     ]
   },
   {
@@ -522,121 +654,141 @@
         "word": "record",
         "chinese_hint": "记录（动词）",
         "ipa": "rɪˈkɔrd",
-        "phonetic": "rih-KORD"
+        "phonetic": "rih-KORD",
+        "entry_id": "case_05_five_wrong_item_01"
       },
       {
         "word": "record",
         "chinese_hint": "唱片；记录（名词）",
         "ipa": "ˈrɛkərd",
-        "phonetic": "REK-erd"
+        "phonetic": "REK-erd",
+        "entry_id": "case_05_five_wrong_item_02"
       },
       {
         "word": "present",
         "chinese_hint": "赠送；呈现（动词）",
         "ipa": "ˈprɛzənt",
-        "phonetic": "prih-ZENT"
+        "phonetic": "prih-ZENT",
+        "entry_id": "case_05_five_wrong_item_03"
       },
       {
         "word": "present",
         "chinese_hint": "礼物；现在（名词/形容词）",
         "ipa": "ˈprɛzənt",
-        "phonetic": "PREZ-ent"
+        "phonetic": "PREZ-ent",
+        "entry_id": "case_05_five_wrong_item_04"
       },
       {
         "word": "lead",
         "chinese_hint": "带领（动词）",
         "ipa": "lid",
-        "phonetic": "leed"
+        "phonetic": "leed",
+        "entry_id": "case_05_five_wrong_item_05"
       },
       {
         "word": "lead",
         "chinese_hint": "铅（金属）",
         "ipa": "lɛd",
-        "phonetic": "led"
+        "phonetic": "led",
+        "entry_id": "case_05_five_wrong_item_06"
       },
       {
         "word": "wind",
         "chinese_hint": "风（名词）",
         "ipa": "wɪnd",
-        "phonetic": "wynd"
+        "phonetic": "wynd",
+        "entry_id": "case_05_five_wrong_item_07"
       },
       {
         "word": "wind",
         "chinese_hint": "缠绕（动词）",
         "ipa": "waɪnd",
-        "phonetic": "wynd"
+        "phonetic": "wynd",
+        "entry_id": "case_05_five_wrong_item_08"
       },
       {
         "word": "bass",
         "chinese_hint": "低音；鲈鱼（鱼）",
         "ipa": "bæs",
-        "phonetic": "bass"
+        "phonetic": "bass",
+        "entry_id": "case_05_five_wrong_item_09"
       },
       {
         "word": "bass",
         "chinese_hint": "低音（音乐）",
         "ipa": "beɪs",
-        "phonetic": "base"
+        "phonetic": "base",
+        "entry_id": "case_05_five_wrong_item_10"
       },
       {
         "word": "close",
         "chinese_hint": "关闭（动词）",
         "ipa": "kloʊs",
-        "phonetic": "klohz"
+        "phonetic": "klohz",
+        "entry_id": "case_05_five_wrong_item_11"
       },
       {
         "word": "close",
         "chinese_hint": "接近的（形容词）",
         "ipa": "kloʊs",
-        "phonetic": "klohs"
+        "phonetic": "klohs",
+        "entry_id": "case_05_five_wrong_item_12"
       },
       {
         "word": "bow",
         "chinese_hint": "弓（武器）",
         "ipa": "boʊ",
-        "phonetic": "boh"
+        "phonetic": "boh",
+        "entry_id": "case_05_five_wrong_item_13"
       },
       {
         "word": "bow",
         "chinese_hint": "鞠躬（动词）",
         "ipa": "baʊ",
-        "phonetic": "bau"
+        "phonetic": "bau",
+        "entry_id": "case_05_five_wrong_item_14"
       },
       {
         "word": "tear",
         "chinese_hint": "眼泪（名词）",
         "ipa": "tɪr",
-        "phonetic": "teer"
+        "phonetic": "teer",
+        "entry_id": "case_05_five_wrong_item_15"
       },
       {
         "word": "tear",
         "chinese_hint": "撕裂（动词）",
         "ipa": "tɛr",
-        "phonetic": "tare"
+        "phonetic": "tare",
+        "entry_id": "case_05_five_wrong_item_16"
       },
       {
         "word": "read",
         "chinese_hint": "阅读（现在时）",
         "ipa": "rid",
-        "phonetic": "red"
+        "phonetic": "red",
+        "entry_id": "case_05_five_wrong_item_17"
       },
       {
         "word": "read",
         "chinese_hint": "阅读（过去时）",
         "ipa": "rɛd",
-        "phonetic": "red"
+        "phonetic": "red",
+        "entry_id": "case_05_five_wrong_item_18"
       },
       {
         "word": "minute",
         "chinese_hint": "分钟（名词）",
         "ipa": "maɪˈn(j)ut",
-        "phonetic": "MIN-it"
+        "phonetic": "MIN-it",
+        "entry_id": "case_05_five_wrong_item_19"
       },
       {
         "word": "minute",
         "chinese_hint": "极小的（形容词）",
         "ipa": "maɪˈn(j)ut",
-        "phonetic": "my-NYOOT"
+        "phonetic": "my-NYOOT",
+        "entry_id": "case_05_five_wrong_item_20"
       }
     ],
     "wrong_words": [
@@ -645,6 +797,33 @@
       "close",
       "read",
       "minute"
+    ],
+    "wrong_entries": [
+      {
+        "entry_id": "case_05_five_wrong_item_03",
+        "word": "present",
+        "issue_type": "ipa"
+      },
+      {
+        "entry_id": "case_05_five_wrong_item_07",
+        "word": "wind",
+        "issue_type": "phonetic"
+      },
+      {
+        "entry_id": "case_05_five_wrong_item_11",
+        "word": "close",
+        "issue_type": "ipa"
+      },
+      {
+        "entry_id": "case_05_five_wrong_item_17",
+        "word": "read",
+        "issue_type": "phonetic"
+      },
+      {
+        "entry_id": "case_05_five_wrong_item_19",
+        "word": "minute",
+        "issue_type": "ipa"
+      }
     ]
   }
 ]

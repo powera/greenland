@@ -32,10 +32,10 @@ class ValidatePronunciationBulkGenerator(BenchmarkGenerator):
         for sample in samples:
             case_id = sample["case_id"]
             entries = sample["entries"]
-            wrong_words = sample["wrong_words"]
+            wrong_entries = sample["wrong_entries"]
 
-            difficulty = Difficulty.EASY if not wrong_words else Difficulty.MEDIUM
-            if len(wrong_words) >= 4:
+            difficulty = Difficulty.EASY if not wrong_entries else Difficulty.MEDIUM
+            if len(wrong_entries) >= 4:
                 difficulty = Difficulty.HARD
 
             yield BenchmarkQuestion(
@@ -43,7 +43,7 @@ class ValidatePronunciationBulkGenerator(BenchmarkGenerator):
                 answer_type=AnswerType.JSON,
                 correct_answer={
                     "inputs": {"entries": entries},
-                    "expected": {"wrong_words": wrong_words},
+                    "expected": {"wrong_entries": wrong_entries},
                 },
                 category="agent_regression_pronunciation",
                 difficulty=difficulty,
@@ -57,6 +57,6 @@ class ValidatePronunciationBulkGenerator(BenchmarkGenerator):
                 evaluation_criteria=EvaluationCriteria(
                     exact_match=True,
                     case_sensitive=False,
-                    required_fields=["wrong_words"],
+                    required_fields=["wrong_entries"],
                 ),
             )
