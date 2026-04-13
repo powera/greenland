@@ -551,7 +551,8 @@ def verify_pronunciations(args: argparse.Namespace) -> int:
     print(
         json.dumps(
             {
-                "wrong_entries": result["wrong_entries"],
+                "wrong_ipa_entries": result["wrong_ipa_entries"],
+                "wrong_phonetic_entries": result["wrong_phonetic_entries"],
                 "wrong_words": result["wrong_words"],
             },
             ensure_ascii=False,
