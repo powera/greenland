@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Sync Sentence Release Data{% endblock %}
+{% block title %}Sync Sentence {{ STRINGS.sync.release }} Data{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -8,11 +8,11 @@
         <div class="col">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('sync_release.index') }}">Sync Lemmas</a></li>
-                    <li class="breadcrumb-item active">Sync Sentences</li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_release.index') }}">{{ STRINGS.sync.lemmas_title }}</a></li>
+                    <li class="breadcrumb-item active">{{ STRINGS.sync.sentences_title }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-arrow-left-right"></i> Sync Sentence Release Data</h2>
+            <h2><i class="bi bi-arrow-left-right"></i> Sync Sentence {{ STRINGS.sync.release }} Data</h2>
             <p class="text-muted">
                 Compare the sentence files (<code>data/release/sentences</code>) with the working database.
                 Conversation sentences are excluded.
@@ -24,12 +24,12 @@
         <div class="col">
             <div class="card">
                 <div class="card-header">
-                    <i class="bi bi-info-circle"></i> Summary
+                    <i class="bi bi-info-circle"></i> {{ STRINGS.sync.summary }}
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p class="mb-1"><strong>Release files location:</strong> <code>{{ release_dir }}</code></p>
+                            <p class="mb-1"><strong>{{ STRINGS.sync.release }} files location:</strong> <code>{{ release_dir }}</code></p>
                             <p class="mb-1"><strong>Sentences in release files:</strong> {{ counts.release_total }}</p>
                             <p class="mb-0"><strong>Sentences in database:</strong> {{ counts.db_total }}</p>
                         </div>
@@ -40,11 +40,11 @@
     </div>
 
     <div class="row">
-        <!-- Additions -->
+        <!-- {{ STRINGS.sync.additions }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.additions > 0 %}border-success{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-plus-circle text-success"></i> Additions
+                    <i class="bi bi-plus-circle text-success"></i> {{ STRINGS.sync.additions }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.additions > 0 %}text-success{% else %}text-muted{% endif %}">
@@ -57,17 +57,17 @@
                 <div class="card-footer">
                     <a href="{{ url_for('sync_sentence_release.additions') }}"
                        class="btn btn-sm {% if counts.additions > 0 %}btn-success{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-arrow-right"></i> View &amp; Import
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_import }}
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Removals -->
+        <!-- {{ STRINGS.sync.removals }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.removals > 0 %}border-danger{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-dash-circle text-danger"></i> Removals
+                    <i class="bi bi-dash-circle text-danger"></i> {{ STRINGS.sync.removals }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.removals > 0 %}text-danger{% else %}text-muted{% endif %}">
@@ -80,13 +80,13 @@
                 <div class="card-footer">
                     <a href="{{ url_for('sync_sentence_release.removals') }}"
                        class="btn btn-sm {% if counts.removals > 0 %}btn-danger{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-arrow-right"></i> View &amp; Delete
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_delete }}
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Level Changes -->
+        <!-- Level {{ STRINGS.sync.changes }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.level > 0 %}border-warning{% endif %}">
                 <div class="card-header">
@@ -103,40 +103,40 @@
                 <div class="card-footer">
                     <a href="{{ url_for('sync_sentence_release.level') }}"
                        class="btn btn-sm {% if counts.level > 0 %}btn-warning{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-arrow-right"></i> View &amp; Sync
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_sync }}
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- English Text Changes -->
+        <!-- English Text {{ STRINGS.sync.changes }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.changes > 0 %}border-info{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-pencil text-info"></i> Text Changes
+                    <i class="bi bi-pencil text-info"></i> Text {{ STRINGS.sync.changes }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.changes > 0 %}text-info{% else %}text-muted{% endif %}">
                         {{ counts.changes }}
                     </h3>
                     <p class="card-text text-muted">
-                        Same GUID but English sentence text differs
+                        Same {{ STRINGS.sync.guid }} but English sentence text differs
                     </p>
                 </div>
                 <div class="card-footer">
                     <a href="{{ url_for('sync_sentence_release.changes') }}"
                        class="btn btn-sm {% if counts.changes > 0 %}btn-info{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-arrow-right"></i> View &amp; Sync
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_sync }}
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Translations -->
+        <!-- {{ STRINGS.sync.translations }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.translations > 0 %}border-secondary{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-translate"></i> Translations
+                    <i class="bi bi-translate"></i> {{ STRINGS.sync.translations }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.translations > 0 %}{% else %}text-muted{% endif %}">
@@ -149,7 +149,7 @@
                 <div class="card-footer">
                     <a href="{{ url_for('sync_sentence_release.translations') }}"
                        class="btn btn-sm {% if counts.translations > 0 %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-arrow-right"></i> View &amp; Sync
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_sync }}
                     </a>
                 </div>
             </div>

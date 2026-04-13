@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Sync - Relation Member Differences{% endblock %}
+{% block title %}Sync - Relation Member {{ STRINGS.sync.differences }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -8,11 +8,11 @@
         <div class="col">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('sync_relation_release.index') }}">Sync Relations</a></li>
-                    <li class="breadcrumb-item active">Member Differences</li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_relation_release.index') }}">{{ STRINGS.sync.relations_title }}</a></li>
+                    <li class="breadcrumb-item active">Member {{ STRINGS.sync.differences }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-people text-warning"></i> Member Differences</h2>
+            <h2><i class="bi bi-people text-warning"></i> Member {{ STRINGS.sync.differences }}</h2>
             <p class="text-muted">
                 Relation groups that exist in both release and database but have different member lemmas.
             </p>
@@ -21,7 +21,7 @@
 
     {% if not differences %}
     <div class="alert alert-success">
-        <i class="bi bi-check-circle"></i> No member differences found. Release and database are in sync.
+        <i class="bi bi-check-circle"></i> No member differences found. {{ STRINGS.sync.release }} and database are in sync.
     </div>
     <a href="{{ url_for('sync_relation_release.index') }}" class="btn btn-secondary">
         <i class="bi bi-arrow-left"></i> Back
@@ -38,21 +38,21 @@
                 <div class="btn-group btn-group-sm" role="group">
                     <input type="radio" class="btn-check" name="action_{{ diff.group_id }}"
                            id="release_{{ diff.group_id }}" value="use_release">
-                    <label class="btn btn-outline-success" for="release_{{ diff.group_id }}">Use Release</label>
+                    <label class="btn btn-outline-success" for="release_{{ diff.group_id }}">Use {{ STRINGS.sync.release }}</label>
 
                     <input type="radio" class="btn-check" name="action_{{ diff.group_id }}"
                            id="db_{{ diff.group_id }}" value="use_db">
-                    <label class="btn btn-outline-primary" for="db_{{ diff.group_id }}">Use DB</label>
+                    <label class="btn btn-outline-primary" for="db_{{ diff.group_id }}">{{ STRINGS.sync.use_db }}</label>
 
                     <input type="radio" class="btn-check" name="action_{{ diff.group_id }}"
                            id="skip_{{ diff.group_id }}" value="skip" checked>
-                    <label class="btn btn-outline-secondary" for="skip_{{ diff.group_id }}">Skip</label>
+                    <label class="btn btn-outline-secondary" for="skip_{{ diff.group_id }}">{{ STRINGS.sync.skip }}</label>
                 </div>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <h6 class="text-success"><i class="bi bi-file-earmark"></i> Release Members</h6>
+                        <h6 class="text-success"><i class="bi bi-file-earmark"></i> {{ STRINGS.sync.release }} Members</h6>
                         <ul class="list-unstyled mb-0">
                             {% for guid in diff.release_members %}
                             <li>
@@ -88,7 +88,7 @@
                 <i class="bi bi-arrow-left"></i> Back
             </a>
             <button type="submit" class="btn btn-warning">
-                <i class="bi bi-check-lg"></i> Apply Selected Changes
+                <i class="bi bi-check-lg"></i> {{ STRINGS.sync.apply_selected }} {{ STRINGS.sync.changes }}
             </button>
         </div>
     </form>

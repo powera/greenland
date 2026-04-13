@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Sync Derivative Forms{% endblock %}
+{% block title %}{{ STRINGS.sync.derivatives_title }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -12,7 +12,7 @@
                     <li class="breadcrumb-item active">Derivative Forms</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-diagram-3"></i> Sync Derivative Forms</h2>
+            <h2><i class="bi bi-diagram-3"></i> {{ STRINGS.sync.derivatives_title }}</h2>
             <p class="text-muted">
                 Compare per-language derivative form files (<code>data/release/lemmas/.../{lang}.jsonl</code>)
                 with the working database. Each language has its own file alongside the <code>base.jsonl</code>.
@@ -35,10 +35,10 @@
         <div class="col">
             <div class="card">
                 <div class="card-header">
-                    <i class="bi bi-info-circle"></i> Summary
+                    <i class="bi bi-info-circle"></i> {{ STRINGS.sync.summary }}
                 </div>
                 <div class="card-body">
-                    <p class="mb-1"><strong>Release directory:</strong> <code>{{ release_dir }}</code></p>
+                    <p class="mb-1"><strong>{{ STRINGS.sync.release }} directory:</strong> <code>{{ release_dir }}</code></p>
                     <p class="mb-0"><strong>Languages with data:</strong> {{ lang_counts|length }}</p>
                 </div>
             </div>
@@ -47,18 +47,18 @@
 
     <div class="card">
         <div class="card-header">
-            <i class="bi bi-translate"></i> Per-Language Status
+            <i class="bi bi-translate"></i> Per-Language {{ STRINGS.sync.status }}
         </div>
         <div class="card-body p-0">
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
                         <th>Language</th>
-                        <th class="text-center">Release</th>
-                        <th class="text-center">Database</th>
-                        <th class="text-center text-success">Additions</th>
-                        <th class="text-center text-danger">Removals</th>
-                        <th class="text-center text-warning">Changes</th>
+                        <th class="text-center">{{ STRINGS.sync.release }}</th>
+                        <th class="text-center">{{ STRINGS.sync.database }}</th>
+                        <th class="text-center text-success">{{ STRINGS.sync.additions }}</th>
+                        <th class="text-center text-danger">{{ STRINGS.sync.removals }}</th>
+                        <th class="text-center text-warning">{{ STRINGS.sync.changes }}</th>
                         <th class="text-center">Total Diffs</th>
                         <th></th>
                     </tr>
@@ -103,7 +103,7 @@
                         <td>
                             <a href="{{ url_for('sync_derivative_release.language_detail', lang_code=lc.lang_code) }}"
                                class="btn btn-sm {% if lc.total_diffs > 0 %}btn-primary{% else %}btn-outline-secondary{% endif %}">
-                                <i class="bi bi-arrow-right"></i> Details
+                                <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.details }}
                             </a>
                         </td>
                     </tr>
@@ -116,7 +116,7 @@
     <div class="row mt-4">
         <div class="col">
             <a href="{{ url_for('sync_release.index') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Back to Lemma Sync
+                <i class="bi bi-arrow-left"></i> {{ STRINGS.sync.back_to_lemma_sync }}
             </a>
         </div>
     </div>

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Sync - Text Changes{% endblock %}
+{% block title %}Sync - Text {{ STRINGS.sync.changes }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -9,13 +9,13 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ url_for('sync_release.index') }}">Sync</a></li>
-                    <li class="breadcrumb-item active">Text Changes</li>
+                    <li class="breadcrumb-item active">Text {{ STRINGS.sync.changes }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-pencil text-info"></i> Lemma Text Changes</h2>
+            <h2><i class="bi bi-pencil text-info"></i> Lemma Text {{ STRINGS.sync.changes }}</h2>
             <p class="text-muted">
-                Same GUID but different lemma_text between SQLite and <code>data/release</code>.
-                Changes can go in either direction.
+                Same {{ STRINGS.sync.guid }} but different lemma_text between SQLite and <code>data/release</code>.
+                {{ STRINGS.sync.changes }} can go in either direction.
             </p>
         </div>
     </div>
@@ -30,16 +30,16 @@
     {% else %}
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-list-check"></i> Text Changes: {{ changes|length }}</span>
+            <span><i class="bi bi-list-check"></i> Text {{ STRINGS.sync.changes }}: {{ changes|length }}</span>
             <div>
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll('skip')">
-                    Skip All
+                    {{ STRINGS.sync.skip }} All
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-warning" onclick="selectAll('use_db')">
                     Use All DB
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-info" onclick="selectAll('use_release')">
-                    Use All Release
+                    Use All {{ STRINGS.sync.release }}
                 </button>
             </div>
         </div>
@@ -49,10 +49,10 @@
                     <table class="table table-sm table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>GUID</th>
-                                <th>Category</th>
+                                <th>{{ STRINGS.sync.guid }}</th>
+                                <th>{{ STRINGS.sync.category }}</th>
                                 <th>SQLite Text</th>
-                                <th>Release Text</th>
+                                <th>{{ STRINGS.sync.release }} Text</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -86,9 +86,9 @@
                                 </td>
                                 <td>
                                     <select class="form-select form-select-sm action-select" name="action_{{ item.lemma_id }}" style="min-width: 140px;">
-                                        <option value="skip">Skip</option>
-                                        <option value="use_db">Use DB</option>
-                                        <option value="use_release">Use Release</option>
+                                        <option value="skip">{{ STRINGS.sync.skip }}</option>
+                                        <option value="use_db">{{ STRINGS.sync.use_db }}</option>
+                                        <option value="use_release">Use {{ STRINGS.sync.release }}</option>
                                     </select>
                                 </td>
                             </tr>
@@ -102,7 +102,7 @@
                         <i class="bi bi-arrow-left"></i> Back
                     </a>
                     <button type="submit" class="btn btn-info">
-                        <i class="bi bi-check-lg"></i> Apply Changes
+                        <i class="bi bi-check-lg"></i> Apply {{ STRINGS.sync.changes }}
                     </button>
                 </div>
             </form>

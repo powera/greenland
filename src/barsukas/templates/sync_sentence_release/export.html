@@ -8,13 +8,13 @@
         <div class="col">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('sync_sentence_release.index') }}">Sync Sentences</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_sentence_release.index') }}">{{ STRINGS.sync.sentences_title }}</a></li>
                     <li class="breadcrumb-item active">Export</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-download text-primary"></i> Export DB Sentences to Release</h2>
+            <h2><i class="bi bi-download text-primary"></i> Export DB Sentences to {{ STRINGS.sync.release }}</h2>
             <p class="text-muted">
-                Sentence GUIDs that exist in SQLite but not in <code>data/release/sentences</code>.
+                Sentence {{ STRINGS.sync.guid }}s that exist in SQLite but not in <code>data/release/sentences</code>.
                 Conversation sentences are excluded.
             </p>
         </div>
@@ -22,7 +22,7 @@
 
     {% if not exportable %}
     <div class="alert alert-success">
-        <i class="bi bi-check-circle"></i> No sentences to export. Release files are up to date with database.
+        <i class="bi bi-check-circle"></i> No sentences to export. {{ STRINGS.sync.release }} files are up to date with database.
     </div>
     <a href="{{ url_for('sync_sentence_release.index') }}" class="btn btn-secondary">
         <i class="bi bi-arrow-left"></i> Back
@@ -33,10 +33,10 @@
             <span><i class="bi bi-list-check"></i> Exportable Sentences: {{ exportable|length }}</span>
             <div>
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">
-                    Deselect All
+                    {{ STRINGS.sync.deselect_all }}
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleAll(true)">
-                    Select All
+                    {{ STRINGS.sync.select_all }}
                 </button>
             </div>
         </div>
@@ -49,7 +49,7 @@
                                 <th style="width: 40px;">
                                     <input type="checkbox" id="select-all-checkbox" onchange="toggleAll(this.checked)">
                                 </th>
-                                <th>GUID</th>
+                                <th>{{ STRINGS.sync.guid }}</th>
                                 <th>English Text</th>
                                 <th>Pattern</th>
                                 <th class="text-center">Level</th>

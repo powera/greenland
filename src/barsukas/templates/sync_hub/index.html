@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Sync Hub{% endblock %}
+{% block title %}{{ STRINGS.sync.hub_title }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col">
-            <h2><i class="bi bi-arrow-left-right"></i> Sync Hub</h2>
+            <h2><i class="bi bi-arrow-left-right"></i> {{ STRINGS.sync.hub_title }}</h2>
             <p class="text-muted">
                 Synchronize data between release files (<code>data/release</code>) and the working database.
                 Choose a category below to view and sync specific types of data.
@@ -26,11 +26,11 @@
                         Sync base lemma data including:
                     </p>
                     <ul class="small">
-                        <li>Additions & Removals</li>
-                        <li>Text Changes</li>
-                        <li>Difficulty Levels</li>
-                        <li>Primary Translations</li>
-                        <li>Secondary Translations</li>
+                        <li>{{ STRINGS.sync.additions }} & {{ STRINGS.sync.removals }}</li>
+                        <li>Text {{ STRINGS.sync.changes }}</li>
+                        <li>{{ STRINGS.sync.difficulty }} Levels</li>
+                        <li>Primary {{ STRINGS.sync.translations }}</li>
+                        <li>Secondary {{ STRINGS.sync.translations }}</li>
                     </ul>
                 </div>
                 <div class="card-footer">
@@ -100,10 +100,10 @@
                         Sync example sentences and their translations.
                     </p>
                     <ul class="small">
-                        <li>Additions & Removals</li>
-                        <li>Text Changes</li>
-                        <li>Difficulty Levels</li>
-                        <li>Translations</li>
+                        <li>{{ STRINGS.sync.additions }} & {{ STRINGS.sync.removals }}</li>
+                        <li>Text {{ STRINGS.sync.changes }}</li>
+                        <li>{{ STRINGS.sync.difficulty }} Levels</li>
+                        <li>{{ STRINGS.sync.translations }}</li>
                     </ul>
                 </div>
                 <div class="card-footer">

@@ -8,11 +8,11 @@
         <div class="col">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('sync_relation_release.index') }}">Sync Relations</a></li>
-                    <li class="breadcrumb-item active">Removals</li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_relation_release.index') }}">{{ STRINGS.sync.relations_title }}</a></li>
+                    <li class="breadcrumb-item active">{{ STRINGS.sync.removals }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-dash-circle text-danger"></i> Relation Groups Not in Release</h2>
+            <h2><i class="bi bi-dash-circle text-danger"></i> Relation Groups Not in {{ STRINGS.sync.release }}</h2>
             <p class="text-muted">
                 Relation groups that exist in the database but not in <code>data/release/lemma_relations</code>.
             </p>
@@ -21,7 +21,7 @@
 
     {% if not removals %}
     <div class="alert alert-success">
-        <i class="bi bi-check-circle"></i> No orphaned relation groups found. Database matches release.
+        <i class="bi bi-check-circle"></i> No orphaned relation groups found. {{ STRINGS.sync.database }} matches release.
     </div>
     <a href="{{ url_for('sync_relation_release.index') }}" class="btn btn-secondary">
         <i class="bi bi-arrow-left"></i> Back
@@ -36,10 +36,10 @@
             <span><i class="bi bi-list-check"></i> Orphaned Groups: {{ removals|length }}</span>
             <div>
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">
-                    Deselect All
+                    {{ STRINGS.sync.deselect_all }}
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-danger" onclick="toggleAll(true)">
-                    Select All
+                    {{ STRINGS.sync.select_all }}
                 </button>
             </div>
         </div>
