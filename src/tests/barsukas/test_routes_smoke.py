@@ -31,6 +31,12 @@ class TestLemmaRoutes:
         response = client.get("/lemmas/?pos_type=verb")
         assert response.status_code == 200
 
+    def test_lemma_list_clear_button_uses_string_value(self, client: FlaskClient) -> None:
+        response = client.get("/lemmas/")
+        assert response.status_code == 200
+        html = response.data.decode()
+        assert "built-in method" not in html
+
     def test_view_lemma_returns_200(self, client: FlaskClient) -> None:
         response = client.get("/lemmas/1")
         assert response.status_code == 200
