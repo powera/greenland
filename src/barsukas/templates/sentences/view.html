@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Sentence #{{ sentence.id }}{% endblock %}
+{% block title %}{{ STRINGS.sentences.sentence }} #{{ sentence.id }}{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('sentences.list_sentences') }}">Sentences</a></li>
-                <li class="breadcrumb-item active">Sentence #{{ sentence.id }}</li>
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">{{ STRINGS.navigation.home }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('sentences.list_sentences') }}">{{ STRINGS.navigation.sentences }}</a></li>
+                <li class="breadcrumb-item active">{{ STRINGS.sentences.sentence }} #{{ sentence.id }}</li>
             </ol>
         </nav>
     </div>
@@ -20,39 +20,39 @@
     <div class="col">
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-info-circle"></i> Sentence Metadata
+                <i class="bi bi-info-circle"></i> {{ STRINGS.sentences.metadata }}
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
                         <dl class="row">
-                            <dt class="col-sm-5">Sentence ID:</dt>
+                            <dt class="col-sm-5">{{ STRINGS.sentences.sentence_id }}</dt>
                             <dd class="col-sm-7"><code>#{{ sentence.id }}</code></dd>
 
                             {% if sentence.pattern_type %}
-                                <dt class="col-sm-5">Pattern Type:</dt>
+                                <dt class="col-sm-5">{{ STRINGS.sentences.pattern_type }}</dt>
                                 <dd class="col-sm-7"><span class="badge bg-secondary">{{ sentence.pattern_type }}</span></dd>
                             {% endif %}
 
                             {% if sentence.tense %}
-                                <dt class="col-sm-5">Tense:</dt>
+                                <dt class="col-sm-5">{{ STRINGS.sentences.tense }}</dt>
                                 <dd class="col-sm-7"><span class="badge bg-light text-dark">{{ sentence.tense }}</span></dd>
                             {% endif %}
                         </dl>
                     </div>
                     <div class="col-md-6">
                         <dl class="row">
-                            <dt class="col-sm-5">Minimum Level:</dt>
+                            <dt class="col-sm-5">{{ STRINGS.sentences.minimum_level }}</dt>
                             <dd class="col-sm-7">
                                 {% if sentence.minimum_level is not none %}
-                                    <span class="badge bg-info difficulty-badge">Level {{ sentence.minimum_level }}</span>
+                                    <span class="badge bg-info difficulty-badge">{{ STRINGS.sentences.level }} {{ sentence.minimum_level }}</span>
                                 {% else %}
-                                    <span class="text-muted">Not set</span>
+                                    <span class="text-muted">{{ STRINGS.sentences.not_set }}</span>
                                 {% endif %}
                                 <form method="POST" action="{{ url_for('sentences.update_level', sentence_id=sentence.id) }}" class="d-inline-block ms-2">
                                     <div class="input-group input-group-sm" style="max-width: 280px;">
                                         <input type="number" name="minimum_level" class="form-control form-control-sm"
-                                               placeholder="New level" value="{{ sentence.minimum_level if sentence.minimum_level is not none else '' }}"
+                                               placeholder="{{ STRINGS.sentences.new_level }}" value="{{ sentence.minimum_level if sentence.minimum_level is not none else '' }}"
                                                style="max-width: 80px;"
                                                {% if config.get('READONLY', False) %}disabled{% endif %}>
                                         <button type="submit" class="btn btn-sm btn-primary"
@@ -62,34 +62,34 @@
                                 <form method="POST" action="{{ url_for('sentences.auto_populate_level', sentence_id=sentence.id) }}" class="d-inline-block ms-1">
                                     <button type="submit" class="btn btn-sm btn-success" title="Auto-populate level from max word difficulty"
                                             {% if config.get('READONLY', False) %}disabled{% endif %}>
-                                        <i class="bi bi-magic"></i> Auto
+                                        <i class="bi bi-magic"></i> {{ STRINGS.sentences.auto }}
                                     </button>
                                 </form>
                             </dd>
 
-                            <dt class="col-sm-5">Verified:</dt>
+                            <dt class="col-sm-5">{{ STRINGS.sentences.verified_label }}</dt>
                             <dd class="col-sm-7">
                                 {% if sentence.verified %}
-                                    <i class="bi bi-check-circle-fill text-success"></i> Yes
+                                    <i class="bi bi-check-circle-fill text-success"></i> {{ STRINGS.sentences.yes }}
                                     <form method="POST" action="{{ url_for('sentences.unverify_sentence', sentence_id=sentence.id) }}" class="d-inline-block ms-2">
                                         <button type="submit" class="btn btn-sm btn-outline-danger"
                                                 onclick="return confirm('Reject this verified sentence? It will be unverified and marked as rejected.')"
                                                 {% if config.get('READONLY', False) %}disabled title="Not available in hosted mode"{% endif %}>
-                                            <i class="bi bi-x-circle"></i> Reject
+                                            <i class="bi bi-x-circle"></i> {{ STRINGS.sentences.reject }}
                                         </button>
                                     </form>
                                 {% else %}
-                                    <i class="bi bi-x-circle text-muted"></i> No
+                                    <i class="bi bi-x-circle text-muted"></i> {{ STRINGS.sentences.no }}
                                 {% endif %}
                             </dd>
 
                             {% if sentence.source_filename %}
-                                <dt class="col-sm-5">Source:</dt>
+                                <dt class="col-sm-5">{{ STRINGS.sentences.source }}</dt>
                                 <dd class="col-sm-7"><code>{{ sentence.source_filename }}</code></dd>
                             {% endif %}
 
                             {% if sentence.notes %}
-                                <dt class="col-sm-5">Notes:</dt>
+                                <dt class="col-sm-5">{{ STRINGS.sentences.notes }}</dt>
                                 <dd class="col-sm-7">{{ sentence.notes }}</dd>
                             {% endif %}
                         </dl>
@@ -168,16 +168,16 @@
     <div class="col">
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-diagram-3"></i> Sentence Pattern
+                <i class="bi bi-diagram-3"></i> {{ STRINGS.sentences.sentence_pattern }}
             </div>
             <div class="card-body">
                 <table class="table table-sm table-hover">
                     <thead>
                         <tr>
-                            <th>Position</th>
-                            <th>Slot Name</th>
-                            <th>English Text</th>
-                            <th>Lemma</th>
+                            <th>{{ STRINGS.sentences.position }}</th>
+                            <th>{{ STRINGS.sentences.slot_name }}</th>
+                            <th>{{ STRINGS.sentences.english_text }}</th>
+                            <th>{{ STRINGS.sentences.lemma }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -189,7 +189,7 @@
                                 <td>
                                     {% if word.lemma %}
                                         <a href="{{ url_for('lemmas.view_lemma', lemma_id=word.lemma_id) }}">
-                                            {{ word.lemma.lemma_text }}
+                                            {{ word.lemma_display_text }}
                                         </a>
                                         {% if word.lemma.guid %}
                                             <small class="text-muted">({{ word.lemma.guid }})</small>
@@ -198,7 +198,7 @@
                                             <span class="badge bg-info" style="font-size: 0.7rem;">L{{ word.lemma.difficulty_level }}</span>
                                         {% endif %}
                                     {% else %}
-                                        <span class="text-muted fst-italic">No lemma</span>
+                                        <span class="text-muted fst-italic">{{ STRINGS.sentences.no_lemma }}</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -465,24 +465,24 @@
     <div class="col">
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-book"></i> Vocabulary Words
+                <i class="bi bi-book"></i> {{ STRINGS.sentences.vocabulary_words }}
             </div>
             <div class="card-body">
                 {% for lang_code in words_by_language.keys()|sort %}
                     {% set lang_name = language_names.get(lang_code, lang_code) %}
                     <h5 class="mt-3">
                         {{ lang_name }}
-                        <span class="badge bg-secondary">{{ words_by_language[lang_code]|length }} word(s)</span>
+                        <span class="badge bg-secondary">{{ STRINGS.sentences.words_found }} {{ words_by_language[lang_code]|length }}</span>
                     </h5>
                     <table class="table table-sm table-hover">
                         <thead>
                             <tr>
-                                <th>Position</th>
-                                <th>Role</th>
-                                <th>English</th>
+                                <th>{{ STRINGS.sentences.position }}</th>
+                                <th>{{ STRINGS.sentences.role }}</th>
+                                <th>{{ STRINGS.sentences.english }}</th>
                                 <th>{{ lang_name }}</th>
-                                <th>Grammatical Form</th>
-                                <th>Lemma</th>
+                                <th>{{ STRINGS.sentences.grammatical_form }}</th>
+                                <th>{{ STRINGS.sentences.lemma }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -502,7 +502,7 @@
                                     <td>
                                         {% if word.lemma %}
                                             <a href="{{ url_for('lemmas.view_lemma', lemma_id=word.lemma_id) }}">
-                                                {{ word.lemma.lemma_text }}
+                                                {{ word.lemma_display_text }}
                                             </a>
                                             {% if word.lemma.difficulty_level is not none %}
                                                 <span class="badge bg-info" style="font-size: 0.7rem;">L{{ word.lemma.difficulty_level }}</span>
@@ -510,7 +510,7 @@
                                         {% elif word.role in ('pronoun', 'article', 'preposition', 'conjunction', 'determiner', 'particle') %}
                                             <span class="text-muted">{{ word.role | upper }}</span>
                                         {% else %}
-                                            <span class="text-muted fst-italic">No lemma</span>
+                                            <span class="text-muted fst-italic">{{ STRINGS.sentences.no_lemma }}</span>
                                         {% endif %}
                                     </td>
                                 </tr>

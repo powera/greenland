@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}Browse Sentences{% endblock %}
+{% block title %}{{ STRINGS.sentences.browse_title }}{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <h1><i class="bi bi-chat-left-quote"></i> Browse Sentences</h1>
-                <p class="text-muted">{{ total }} sentence{{ 's' if total != 1 else '' }} found</p>
+                <h1><i class="bi bi-chat-left-quote"></i> {{ STRINGS.sentences.browse_title }}</h1>
+                <p class="text-muted">{{ STRINGS.sentences.sentences_found }} {{ total }}</p>
             </div>
             <div>
                 <a href="{{ url_for('sentence_rapid_review.index') }}"
                    class="btn btn-primary {% if config.get('READONLY', False) %}disabled{% endif %}"
                    {% if config.get('READONLY', False) %}aria-disabled="true" tabindex="-1"{% endif %}>
-                    <i class="bi bi-lightning-charge"></i> Rapid Review
+                    <i class="bi bi-lightning-charge"></i> {{ STRINGS.sentences.rapid_review }}
                 </a>
             </div>
         </div>
@@ -26,14 +26,14 @@
     <form method="get" action="{{ url_for('sentences.list_sentences') }}">
         <div class="row g-3">
             <div class="col-md-6">
-                <label for="search" class="form-label">Search</label>
+                <label for="search" class="form-label">{{ STRINGS.common.search }}</label>
                 <input type="text" class="form-control" id="search" name="search"
-                       value="{{ search }}" placeholder="Search in any language...">
+                       value="{{ search }}" placeholder="{{ STRINGS.sentences.search_placeholder }}">
             </div>
             <div class="col-md-3">
-                <label for="pattern_type" class="form-label">Pattern Type</label>
+                <label for="pattern_type" class="form-label">{{ STRINGS.sentences.pattern_type }}</label>
                 <select class="form-select" id="pattern_type" name="pattern_type">
-                    <option value="">All</option>
+                    <option value="">{{ STRINGS.common.all }}</option>
                     {% for pt in pattern_types %}
                         <option value="{{ pt }}" {% if pt == pattern_type %}selected{% endif %}>
                             {{ pt }}
@@ -42,26 +42,26 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <label for="minimum_level" class="form-label">Level Filter</label>
+                <label for="minimum_level" class="form-label">{{ STRINGS.sentences.level_filter }}</label>
                 <select class="form-select" id="minimum_level" name="minimum_level">
-                    <option value="">All levels</option>
-                    <option value="null" {% if minimum_level == 'null' %}selected{% endif %}>No level set</option>
+                    <option value="">{{ STRINGS.sentences.all_levels }}</option>
+                    <option value="null" {% if minimum_level == 'null' %}selected{% endif %}>{{ STRINGS.sentences.no_level_set }}</option>
                     {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
                         <option value="{{ i }}+" {% if minimum_level == i|string ~ '+' %}selected{% endif %}>
-                            Level {{ i }}+
+                            {{ STRINGS.sentences.level }} {{ i }}+
                         </option>
                     {% endfor %}
                     {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
                         <option value="{{ i }}" {% if minimum_level == i|string %}selected{% endif %}>
-                            Exactly {{ i }}
+                            {{ STRINGS.sentences.exactly }} {{ i }}
                         </option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-md-2">
-                <label for="has_translation" class="form-label">Has Translation</label>
+                <label for="has_translation" class="form-label">{{ STRINGS.sentences.has_translation }}</label>
                 <select class="form-select" id="has_translation" name="has_translation">
-                    <option value="">Any</option>
+                    <option value="">{{ STRINGS.sentences.any }}</option>
                     {% for lang in languages %}
                         <option value="{{ lang.code }}" {% if has_translation == lang.code %}selected{% endif %}>
                             {{ lang.name }}
@@ -70,26 +70,26 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">Filter Options</label>
+                <label class="form-label">{{ STRINGS.sentences.filter_options }}</label>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="exclude_rejected" name="exclude_rejected" value="yes"
                            {% if exclude_rejected == 'yes' %}checked{% endif %}>
-                    <label class="form-check-label" for="exclude_rejected">Exclude rejected</label>
+                    <label class="form-check-label" for="exclude_rejected">{{ STRINGS.sentences.exclude_rejected }}</label>
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="exclude_verified" name="exclude_verified" value="yes"
                            {% if exclude_verified == 'yes' %}checked{% endif %}>
-                    <label class="form-check-label" for="exclude_verified">Exclude verified</label>
+                    <label class="form-check-label" for="exclude_verified">{{ STRINGS.sentences.exclude_verified }}</label>
                 </div>
             </div>
         </div>
         <div class="row mt-3">
             <div class="col">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search"></i> Search
+                    <i class="bi bi-search"></i> {{ STRINGS.common.search }}
                 </button>
                 <a href="{{ url_for('sentences.list_sentences') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-x-circle"></i> Clear
+                    <i class="bi bi-x-circle"></i> {{ STRINGS.common.clear }}
                 </a>
             </div>
         </div>
@@ -108,10 +108,10 @@
                                 <h5 class="card-title">
                                     <a href="{{ url_for('sentences.view_sentence', sentence_id=sentence.id) }}"
                                        class="text-decoration-none">
-                                        Sentence #{{ sentence.id }}
+                                        {{ STRINGS.sentences.sentence }} #{{ sentence.id }}
                                     </a>
                                     {% if sentence.verified %}
-                                        <i class="bi bi-check-circle-fill text-success" title="Verified"></i>
+                                        <i class="bi bi-check-circle-fill text-success" title="{{ STRINGS.sentences.verified }}"></i>
                                     {% endif %}
                                 </h5>
                                 <p class="card-text">
@@ -125,9 +125,9 @@
                                         <span class="badge bg-light text-dark me-2">{{ sentence.tense }}</span>
                                     {% endif %}
                                     {% if sentence.minimum_level is not none %}
-                                        <span class="badge bg-info difficulty-badge">Level {{ sentence.minimum_level }}</span>
+                                        <span class="badge bg-info difficulty-badge">{{ STRINGS.sentences.level }} {{ sentence.minimum_level }}</span>
                                     {% else %}
-                                        <span class="badge bg-warning difficulty-badge">No level</span>
+                                        <span class="badge bg-warning difficulty-badge">{{ STRINGS.sentences.no_level }}</span>
                                     {% endif %}
                                 </div>
                             </div>
@@ -135,38 +135,38 @@
                                 <div class="d-flex flex-wrap justify-content-end gap-1">
                                     <a href="{{ url_for('sentences.view_sentence', sentence_id=sentence.id) }}"
                                        class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i> View
+                                        <i class="bi bi-eye"></i> {{ STRINGS.common.view }}
                                     </a>
                                     {% if sentence.verified %}
-                                    <span class="badge bg-success align-self-center">Verified</span>
+                                    <span class="badge bg-success align-self-center">{{ STRINGS.sentences.verified }}</span>
                                     {% elif sentence.rejected %}
-                                    <span class="badge bg-danger align-self-center">Rejected</span>
+                                    <span class="badge bg-danger align-self-center">{{ STRINGS.sentences.rejected }}</span>
                                     {% else %}
                                     {% set has_translations = sentence.translations|length > 1 %}
                                     {% set has_level = sentence.minimum_level is not none %}
                                     {% set is_ready_to_verify = has_translations and has_level %}
                                     {% if not is_ready_to_verify %}
                                     <form method="POST" action="{{ url_for('sentences.accept_sentence', sentence_id=sentence.id) }}" class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-success" title="Generate translations and set level"
-                                                onclick="return confirm('Accept this sentence? This will generate translations for all languages and set the level based on word difficulty.')"
+                                        <button type="submit" class="btn btn-sm btn-success" title="{{ STRINGS.sentences.accept_title }}"
+                                                onclick="return confirm('{{ STRINGS.sentences.accept_confirm }}')"
                                                 {% if config.get('READONLY', False) %}disabled{% endif %}>
-                                            <i class="bi bi-check-circle"></i> Accept
+                                            <i class="bi bi-check-circle"></i> {{ STRINGS.sentences.accept }}
                                         </button>
                                     </form>
                                     {% else %}
                                     <form method="POST" action="{{ url_for('sentences.verify_sentence', sentence_id=sentence.id) }}" class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-primary" title="Mark as verified"
-                                                onclick="return confirm('Verify this sentence? It will be removed from the list.')"
+                                        <button type="submit" class="btn btn-sm btn-primary" title="{{ STRINGS.sentences.verify_title }}"
+                                                onclick="return confirm('{{ STRINGS.sentences.verify_confirm }}')"
                                                 {% if config.get('READONLY', False) %}disabled{% endif %}>
-                                            <i class="bi bi-check-circle-fill"></i> Verify
+                                            <i class="bi bi-check-circle-fill"></i> {{ STRINGS.sentences.verify }}
                                         </button>
                                     </form>
                                     {% endif %}
                                     <form method="POST" action="{{ url_for('sentences.reject_sentence', sentence_id=sentence.id) }}" class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Mark as rejected (won't be regenerated)"
-                                                onclick="return confirm('Reject this sentence? It will not be regenerated.')"
+                                        <button type="submit" class="btn btn-sm btn-danger" title="{{ STRINGS.sentences.reject_title }}"
+                                                onclick="return confirm('{{ STRINGS.sentences.reject_confirm }}')"
                                                 {% if config.get('READONLY', False) %}disabled{% endif %}>
-                                            <i class="bi bi-x-circle"></i> Reject
+                                            <i class="bi bi-x-circle"></i> {{ STRINGS.sentences.reject }}
                                         </button>
                                     </form>
                                     {% endif %}
@@ -183,7 +183,7 @@
                     <ul class="pagination justify-content-center">
                         <li class="page-item {% if page == 1 %}disabled{% endif %}">
                             <a class="page-link" href="{{ url_for('sentences.list_sentences', page=page-1, search=search, pattern_type=pattern_type, minimum_level=minimum_level, has_translation=has_translation, exclude_rejected=exclude_rejected, exclude_verified=exclude_verified) }}">
-                                Previous
+                                {{ STRINGS.pagination.prev }}
                             </a>
                         </li>
 
@@ -203,7 +203,7 @@
 
                         <li class="page-item {% if page == total_pages %}disabled{% endif %}">
                             <a class="page-link" href="{{ url_for('sentences.list_sentences', page=page+1, search=search, pattern_type=pattern_type, minimum_level=minimum_level, has_translation=has_translation, exclude_rejected=exclude_rejected, exclude_verified=exclude_verified) }}">
-                                Next
+                                {{ STRINGS.pagination.next }}
                             </a>
                         </li>
                     </ul>
@@ -211,7 +211,7 @@
             {% endif %}
         {% else %}
             <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> No sentences found matching your criteria.
+                <i class="bi bi-info-circle"></i> {{ STRINGS.sentences.no_results }}
             </div>
         {% endif %}
     </div>

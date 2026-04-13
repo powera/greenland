@@ -24,6 +24,7 @@ from storage.models.schema import (
     Conversation,
     ConversationSentence,
     Lemma,
+    LemmaTranslation,
     Sentence,
     SentencePatternWord,
     SentenceTranslation,
@@ -200,10 +201,26 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         if pw.lemma_id:
             all_lemma_ids.add(pw.lemma_id)
 
-    lemmas_by_id = {}
+    lemmas_by_id: dict[int, Lemma] = {}
+    lemma_display_by_id: dict[int, str] = {}
+    ui_lang = getattr(g, "ui_lang", "en")
     if all_lemma_ids:
         lemmas = g.db.query(Lemma).filter(Lemma.id.in_(all_lemma_ids)).all()
         lemmas_by_id = {lemma.id: lemma for lemma in lemmas}
+        lemma_display_by_id = {lemma.id: lemma.lemma_text for lemma in lemmas}
+
+        if ui_lang != "en":
+            localized_translations = (
+                g.db.query(LemmaTranslation)
+                .filter(
+                    LemmaTranslation.lemma_id.in_(all_lemma_ids),
+                    LemmaTranslation.language_code == ui_lang,
+                )
+                .all()
+            )
+            for translation in localized_translations:
+                if translation.translation:
+                    lemma_display_by_id[translation.lemma_id] = translation.translation
 
     # Group sentence words by language
     words_by_language: dict[str, list[dict[str, Any]]] = {}
@@ -222,6 +239,9 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
                 "grammatical_form": sw.grammatical_form,
                 "lemma": lemma,
                 "lemma_id": sw.lemma_id,
+                "lemma_display_text": (
+                    lemma_display_by_id.get(lemma.id, lemma.lemma_text) if lemma else None
+                ),
             }
         )
 
@@ -236,6 +256,9 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
                 "english_text": pw.english_text,
                 "lemma": lemma,
                 "lemma_id": pw.lemma_id,
+                "lemma_display_text": (
+                    lemma_display_by_id.get(lemma.id, lemma.lemma_text) if lemma else None
+                ),
             }
         )
 
