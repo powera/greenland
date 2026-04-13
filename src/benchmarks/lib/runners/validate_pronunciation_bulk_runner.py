@@ -21,6 +21,63 @@ BENCHMARK_CODE = "0141_validate_pronunciation_bulk"
 class ValidatePronunciationBulkRunner(BenchmarkRunner):
     """Run pronunciation-list validation and score wrong-word extraction accuracy."""
 
+    @staticmethod
+    def _normalize_entry_ids(entries: Any) -> set[str]:
+        """Extract normalized entry IDs from a response/expected entry list."""
+        normalized_ids: set[str] = set()
+        if not isinstance(entries, list):
+            return normalized_ids
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            entry_id = str(entry.get("entry_id", "")).strip().lower()
+            if entry_id:
+                normalized_ids.add(entry_id)
+        return normalized_ids
+
+    @classmethod
+    def _score_from_entry_sets(
+        cls,
+        expected_wrong_ipa_entries: Any,
+        expected_wrong_phonetic_entries: Any,
+        actual_wrong_ipa_entries: Any,
+        actual_wrong_phonetic_entries: Any,
+    ) -> Tuple[int, Dict[str, Any]]:
+        """Score according to missing-vs-extra rule for wrong-word extraction."""
+        expected_wrong_ids = cls._normalize_entry_ids(expected_wrong_ipa_entries).union(
+            cls._normalize_entry_ids(expected_wrong_phonetic_entries)
+        )
+        actual_wrong_ids = cls._normalize_entry_ids(actual_wrong_ipa_entries).union(
+            cls._normalize_entry_ids(actual_wrong_phonetic_entries)
+        )
+
+        missing_ids = sorted(expected_wrong_ids - actual_wrong_ids)
+        extra_ids = sorted(actual_wrong_ids - expected_wrong_ids)
+
+        if missing_ids:
+            return 0, {
+                "expected_wrong_ids": sorted(expected_wrong_ids),
+                "actual_wrong_ids": sorted(actual_wrong_ids),
+                "missing_ids": missing_ids,
+                "extra_ids": extra_ids,
+                "missing_count": len(missing_ids),
+                "extra_count": len(extra_ids),
+            }
+
+        if not extra_ids:
+            score = 100
+        else:
+            score = max(0, 80 - (10 * len(extra_ids)))
+
+        return score, {
+            "expected_wrong_ids": sorted(expected_wrong_ids),
+            "actual_wrong_ids": sorted(actual_wrong_ids),
+            "missing_ids": missing_ids,
+            "extra_ids": extra_ids,
+            "missing_count": len(missing_ids),
+            "extra_count": len(extra_ids),
+        }
+
     def prepare_prompt(
         self, question_data: Dict[str, Any]
     ) -> Tuple[str, Optional[Dict[str, Any]], Optional[str]]:
@@ -48,38 +105,26 @@ class ValidatePronunciationBulkRunner(BenchmarkRunner):
             elapsed_msec = int((time.time() - start_time) * 1000)
 
             structured_data = response.structured_data or {}
-            wrong_entries = structured_data.get("wrong_entries", [])
-            if not isinstance(wrong_entries, list):
-                wrong_entries = []
+            wrong_ipa_entries = structured_data.get("wrong_ipa_entries", [])
+            wrong_phonetic_entries = structured_data.get("wrong_phonetic_entries", [])
 
-            normalized_actual = sorted(
-                (
-                    str(entry.get("entry_id", "")).strip().lower(),
-                    str(entry.get("word", "")).strip().lower(),
-                    str(entry.get("issue_type", "")).strip().lower(),
-                )
-                for entry in wrong_entries
-                if isinstance(entry, dict)
+            score, scoring_breakdown = self._score_from_entry_sets(
+                expected_wrong_ipa_entries=expected.get("wrong_ipa_entries", []),
+                expected_wrong_phonetic_entries=expected.get("wrong_phonetic_entries", []),
+                actual_wrong_ipa_entries=wrong_ipa_entries,
+                actual_wrong_phonetic_entries=wrong_phonetic_entries,
             )
-            normalized_expected = sorted(
-                (
-                    str(entry.get("entry_id", "")).strip().lower(),
-                    str(entry.get("word", "")).strip().lower(),
-                    str(entry.get("issue_type", "")).strip().lower(),
-                )
-                for entry in expected["wrong_entries"]
-                if isinstance(entry, dict)
-            )
-
-            is_correct = normalized_actual == normalized_expected
-            score = 100 if is_correct else 0
+            is_correct = score == 100
 
             debug_info = {
-                "response": {"wrong_entries": wrong_entries},
+                "response": {
+                    "wrong_ipa_entries": wrong_ipa_entries,
+                    "wrong_phonetic_entries": wrong_phonetic_entries,
+                },
                 "expected": expected,
-                "normalized_actual": normalized_actual,
-                "normalized_expected": normalized_expected,
+                "scoring": scoring_breakdown,
                 "is_correct": is_correct,
+                "score": score,
             }
 
             return BenchmarkResult(
