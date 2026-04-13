@@ -597,6 +597,12 @@ register_runner("0131_validate_definition", ValidateDefinitionRunner)
 
 from benchmarks.lib.generators.validate_translation_generator import ValidateTranslationGenerator
 from benchmarks.lib.runners.validate_translation_runner import ValidateTranslationRunner
+from benchmarks.lib.generators.validate_pronunciation_bulk_generator import (
+    ValidatePronunciationBulkGenerator,
+)
+from benchmarks.lib.runners.validate_pronunciation_bulk_runner import (
+    ValidatePronunciationBulkRunner,
+)
 
 
 @benchmark(
@@ -617,3 +623,23 @@ class ValidateTranslationBenchmark:
 
 register_generator("0132_validate_translation", ValidateTranslationGenerator)
 register_runner("0132_validate_translation", ValidateTranslationRunner)
+
+
+@benchmark(
+    code="0141_validate_pronunciation_bulk",
+    name="Validate Bulk IPA/Phonetic (bebras)",
+    description="""
+           A regression benchmark for Bebras bulk pronunciation verification.
+           Tests whether the model returns only words with wrong IPA/phonetic
+           mappings from 20-word lists with English + Chinese disambiguation.""",
+    category="agent regression",
+    default_num_questions=5,
+)
+class ValidatePronunciationBulkBenchmark:
+    """Module container for bulk pronunciation verification benchmark."""
+
+    pass
+
+
+register_generator("0141_validate_pronunciation_bulk", ValidatePronunciationBulkGenerator)
+register_runner("0141_validate_pronunciation_bulk", ValidatePronunciationBulkRunner)

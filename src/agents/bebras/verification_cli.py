@@ -27,6 +27,8 @@ from storage.models.schema import Lemma, Sentence
 from .verification import (
     DEFAULT_VERIFY_LANGUAGES,
     MODEL_LANGUAGE_SUPPORT,
+    IncorrectPronunciationAction,
+    PronunciationCheckItem,
     VerificationAgent,
     filter_languages_for_model,
     get_dialect_display_name,
@@ -113,6 +115,25 @@ Examples:
         action="store_true",
         default=True,
         help="Also verify linked lemmas (default: True)",
+    )
+
+    pronunciation_parser = subparsers.add_parser(
+        "pronunciations",
+        help="Bulk verify IPA/phonetic entries (10-50 items) and return wrong words only",
+    )
+    add_common_args(pronunciation_parser)
+    add_llm_args(pronunciation_parser, default_model="gpt-5.4-mini")
+    add_backend_args(pronunciation_parser)
+    pronunciation_parser.add_argument(
+        "--input-json",
+        required=True,
+        help="Path to JSON list with items: word, chinese_hint, ipa, phonetic",
+    )
+    pronunciation_parser.add_argument(
+        "--incorrect-action",
+        choices=["log", "remove", "regenerate"],
+        default="log",
+        help="How Bebras should handle incorrect words",
     )
 
     return parser
@@ -493,6 +514,43 @@ def submit_batch_sentences(args: argparse.Namespace) -> int:
     return 0
 
 
+def verify_pronunciations(args: argparse.Namespace) -> int:
+    """Bulk verify IPA/phonetic pronunciations from a JSON list."""
+    config = get_data_source_config(args)
+    agent = VerificationAgent(config)
+
+    with open(args.input_json, "r", encoding="utf-8") as input_file:
+        payload = json.load(input_file)
+
+    if not isinstance(payload, list):
+        logger.error("Input JSON must be a list of pronunciation items.")
+        return 1
+
+    items: List[PronunciationCheckItem] = []
+    required_fields = ("word", "chinese_hint", "ipa", "phonetic")
+    for item in payload:
+        if not isinstance(item, dict) or any(field not in item for field in required_fields):
+            logger.error("Each item must include: word, chinese_hint, ipa, phonetic.")
+            return 1
+        items.append(
+            {
+                "word": str(item["word"]),
+                "chinese_hint": str(item["chinese_hint"]),
+                "ipa": str(item["ipa"]),
+                "phonetic": str(item["phonetic"]),
+            }
+        )
+
+    incorrect_action: IncorrectPronunciationAction = args.incorrect_action
+    result = agent.verify_bulk_pronunciations(
+        items=items,
+        incorrect_action=incorrect_action,
+        dry_run=args.dry_run,
+    )
+    print(json.dumps({"wrong_words": result["wrong_words"]}, ensure_ascii=False, indent=2))
+    return 0
+
+
 def main() -> Optional[int]:
     """Main entry point for the verification CLI."""
     parser = get_argument_parser()
@@ -511,6 +569,8 @@ def main() -> Optional[int]:
         return submit_batch_words(args)
     elif args.verify_type == "submit-batch-sentences":
         return submit_batch_sentences(args)
+    elif args.verify_type == "pronunciations":
+        return verify_pronunciations(args)
     else:
         parser.print_help()
         return 1

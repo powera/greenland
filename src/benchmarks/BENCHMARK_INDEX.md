@@ -55,6 +55,7 @@ This document captures the current benchmark lineup and numbering through `0299`
 | 0130 | `validate_lemma_form` | Validate Lemma Form (lokys) | agent regression | implemented |
 | 0131 | `validate_definition` | Validate Definition (lokys) | agent regression | implemented |
 | 0132 | `validate_translation` | Validate Translation (voras) | agent regression | implemented |
+| 0141 | `validate_pronunciation_bulk` | Validate Bulk IPA/Phonetic (bebras) | agent regression | implemented |
 | 0151 | `geography` | Geography Knowledge | general knowledge | implemented |
 | 0152 | `syllogism_validity` | Syllogism Validity | general knowledge | implemented |
 | 0153 | `book_author_match` | Book Author Match | general knowledge | implemented |
