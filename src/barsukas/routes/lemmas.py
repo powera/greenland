@@ -27,7 +27,7 @@ from storage.crud.derivative_form import delete_derivative_form
 from storage.crud.difficulty_override import get_all_overrides_for_lemma
 from storage.crud.lemma import handle_lemma_type_subtype_change
 from storage.crud.operation_log import log_translation_change
-from storage.models.schema import DerivativeForm, Lemma
+from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
 from storage.queries.lemma import build_lemma_search_query
 from storage.translation_helpers import (
     TIER_3_LANGUAGES,
@@ -197,6 +197,11 @@ def list_lemmas() -> ResponseReturnValue:
     pos_type = request.args.get("pos_type", "").strip()
     pos_subtype = request.args.get("pos_subtype", "").strip()
     difficulty = request.args.get("difficulty", "", type=str).strip()
+    supported_languages = get_supported_languages()
+    requested_display_lang = getattr(g, "ui_lang", "en")
+    display_language_code = (
+        requested_display_lang if requested_display_lang in supported_languages else "en"
+    )
 
     # Build filtered and ordered query
     query = build_lemma_search_query(
@@ -205,11 +210,61 @@ def list_lemmas() -> ResponseReturnValue:
         pos_type=pos_type or None,
         pos_subtype=pos_subtype or None,
         difficulty=difficulty or None,
+        display_language_code=display_language_code,
     )
 
     # Paginate
     total = query.count()
     lemmas = query.limit(Config.ITEMS_PER_PAGE).offset((page - 1) * Config.ITEMS_PER_PAGE).all()
+
+    lemma_ids = [lemma.id for lemma in lemmas]
+    translation_languages = {"en", display_language_code}
+    translations_by_lemma: dict[int, dict[str, LemmaTranslation]] = {}
+    if lemma_ids:
+        translation_rows = (
+            g.db.query(LemmaTranslation)
+            .filter(
+                LemmaTranslation.lemma_id.in_(lemma_ids),
+                LemmaTranslation.language_code.in_(list(translation_languages)),
+            )
+            .all()
+        )
+        for translation_row in translation_rows:
+            if translation_row.lemma_id not in translations_by_lemma:
+                translations_by_lemma[translation_row.lemma_id] = {}
+            translations_by_lemma[translation_row.lemma_id][
+                translation_row.language_code
+            ] = translation_row
+
+    lemma_cards: list[dict[str, Any]] = []
+    for lemma in lemmas:
+        lemma_translations = translations_by_lemma.get(lemma.id, {})
+        display_translation = lemma_translations.get(display_language_code)
+        display_lemma_text = (
+            display_translation.translation
+            if display_language_code != "en"
+            and display_translation
+            and display_translation.translation
+            else lemma.lemma_text
+        )
+        if display_language_code == "en":
+            display_definition = lemma.definition_text
+        elif display_translation and display_translation.definition_text:
+            display_definition = display_translation.definition_text
+        else:
+            display_definition = f"{lemma.lemma_text}: {lemma.definition_text}"
+
+        lemma_cards.append(
+            {
+                "id": lemma.id,
+                "display_lemma_text": display_lemma_text,
+                "display_definition": display_definition,
+                "pos_type": lemma.pos_type,
+                "pos_subtype": lemma.pos_subtype,
+                "difficulty_level": lemma.difficulty_level,
+                "verified": lemma.verified,
+            }
+        )
 
     # Get filter options in optimized queries (replaces 2 separate DISTINCT queries)
     from barsukas.helpers.db_optimization import get_lemma_list_filter_options
@@ -223,7 +278,7 @@ def list_lemmas() -> ResponseReturnValue:
 
     return render_template(
         "lemmas/list.html",
-        lemmas=lemmas,
+        lemmas=lemma_cards,
         page=page,
         total_pages=total_pages,
         total=total,
@@ -233,6 +288,7 @@ def list_lemmas() -> ResponseReturnValue:
         difficulty=difficulty,
         pos_types=pos_types,
         pos_subtypes=pos_subtypes,
+        display_language_code=display_language_code,
     )
 
 

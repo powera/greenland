@@ -36,7 +36,7 @@
                     <option value="">{{ STRINGS.common.all }}</option>
                     {% for pt in pos_types %}
                         <option value="{{ pt }}" {% if pt == pos_type %}selected{% endif %}>
-                            {{ pt }}
+                            {{ STRINGS.parts_of_speech.get(pt, pt|replace('_', ' ')|title) }}
                         </option>
                     {% endfor %}
                 </select>
@@ -91,17 +91,17 @@
                                 <h5 class="card-title">
                                     <a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}"
                                        class="text-decoration-none">
-                                        {{ lemma.lemma_text }}
+                                        {{ lemma.display_lemma_text }}
                                     </a>
                                     {% if lemma.verified %}
                                         <i class="bi bi-check-circle-fill text-success" title="Verified"></i>
                                     {% endif %}
                                 </h5>
                                 <p class="card-text lemma-definition">
-                                    {{ lemma.definition_text[:150] }}{% if lemma.definition_text|length > 150 %}...{% endif %}
+                                    {{ lemma.display_definition[:150] }}{% if lemma.display_definition|length > 150 %}...{% endif %}
                                 </p>
                                 <div class="text-muted-small">
-                                    <span class="badge bg-secondary pos-badge me-2">{{ lemma.pos_type }}</span>
+                                    <span class="badge bg-secondary pos-badge me-2">{{ STRINGS.parts_of_speech.get(lemma.pos_type, (lemma.pos_type or '')|replace('_', ' ')|title) }}</span>
                                     {% if lemma.pos_subtype %}
                                         <a href="{{ url_for('lemmas.list_lemmas', pos_subtype=lemma.pos_subtype) }}" class="text-decoration-none">
                                             <span class="badge bg-light text-dark me-2">{{ lemma.pos_subtype }}</span>

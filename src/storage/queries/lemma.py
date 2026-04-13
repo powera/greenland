@@ -87,6 +87,7 @@ def build_lemma_search_query(
     pos_type: Optional[str] = None,
     pos_subtype: Optional[str] = None,
     difficulty: Optional[str] = None,
+    display_language_code: str = "en",
 ) -> Query[Lemma]:
     """
     Build a filtered and ordered lemma query for search/listing.
@@ -103,6 +104,16 @@ def build_lemma_search_query(
     """
     # Build base query
     query = session.query(Lemma)
+
+    # Join display language translation for sorting/relevance in non-English views
+    display_translation_joined = False
+    if display_language_code != "en":
+        query = query.outerjoin(
+            LemmaTranslation,
+            (LemmaTranslation.lemma_id == Lemma.id)
+            & (LemmaTranslation.language_code == display_language_code),
+        )
+        display_translation_joined = True
 
     # Apply search filter
     if search:
@@ -168,7 +179,15 @@ def build_lemma_search_query(
             (func.lower(Lemma.vietnamese_translation).contains(search_lower), 6),
             else_=7,
         )
-        query = query.order_by(relevance, func.lower(Lemma.lemma_text))
+        if display_translation_joined:
+            display_text_order = func.lower(
+                func.coalesce(
+                    LemmaTranslation.sort_key, LemmaTranslation.translation, Lemma.lemma_text
+                )
+            )
+            query = query.order_by(relevance, display_text_order)
+        else:
+            query = query.order_by(relevance, func.lower(Lemma.lemma_text))
     else:
         # No search: order by difficulty level first, then case-insensitive alphabetically
         # Put NULL levels at the end, then -1 (not applicable), then levels 1-9
@@ -177,6 +196,14 @@ def build_lemma_search_query(
             (Lemma.difficulty_level == -1, 98),  # -1 (not applicable) second to last
             else_=Lemma.difficulty_level,
         )
-        query = query.order_by(level_order, func.lower(Lemma.lemma_text))
+        if display_translation_joined:
+            display_text_order = func.lower(
+                func.coalesce(
+                    LemmaTranslation.sort_key, LemmaTranslation.translation, Lemma.lemma_text
+                )
+            )
+            query = query.order_by(level_order, display_text_order)
+        else:
+            query = query.order_by(level_order, func.lower(Lemma.lemma_text))
 
     return query
