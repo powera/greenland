@@ -1,0 +1,19 @@
+{
+  "noun": "Daiktavardis",
+  "verb": "Veiksmažodis",
+  "adjective": "Būdvardis",
+  "adverb": "Prieveiksmis",
+  "numeral": "Skaitvardis",
+  "pronoun": "Įvardis",
+  "preposition": "Prielinksnis",
+  "conjunction": "Jungtukas",
+  "interjection": "Jaustukas",
+  "determiner": "Pažymimasis žodis",
+  "article": "Artikelis",
+  "particle": "Dalelytė",
+  "noun_plural": "Daiktavardžiai",
+  "verb_plural": "Veiksmažodžiai",
+  "adjective_plural": "Būdvardžiai",
+  "adverb_plural": "Prieveiksmiai",
+  "numeral_plural": "Skaitvardžiai"
+}

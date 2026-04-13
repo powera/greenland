@@ -85,13 +85,29 @@ _POS_SUBTYPE_GROUPS: Dict[str, Dict[str, List[str]]] = {
     "numeral": {"Numerals": ["cardinal", "ordinal"]},
 }
 
-# Display names for the POS type headers in the dropdown.
+# Fallback display names for the POS type headers in the category dropdown.
 _POS_DISPLAY_NAMES: Dict[str, str] = {
     "noun": "Nouns",
     "verb": "Verbs",
     "adjective": "Adjectives",
     "adverb": "Adverbs",
     "numeral": "Numerals",
+}
+
+# Fallback display names for row-level POS values in the dictionary table.
+_POS_SINGULAR_DISPLAY_NAMES: Dict[str, str] = {
+    "noun": "Noun",
+    "verb": "Verb",
+    "adjective": "Adjective",
+    "adverb": "Adverb",
+    "numeral": "Numeral",
+    "pronoun": "Pronoun",
+    "preposition": "Preposition",
+    "conjunction": "Conjunction",
+    "interjection": "Interjection",
+    "determiner": "Determiner",
+    "article": "Article",
+    "particle": "Particle",
 }
 
 
@@ -288,9 +304,7 @@ def _available_categories() -> set[Tuple[str, str]]:
     return {(r[0], r[1]) for r in rows}
 
 
-def _build_category_options(
-    available: set[Tuple[str, str]],
-) -> List[Dict[str, Any]]:
+def _build_category_options(available: set[Tuple[str, str]]) -> List[Dict[str, Any]]:
     """Build a grouped list of category options for the dropdown.
 
     Returns a list of dicts, each with:
@@ -317,7 +331,6 @@ def _build_category_options(
             result.append(
                 {
                     "pos_type": pos_type,
-                    "label": _POS_DISPLAY_NAMES.get(pos_type, pos_type.title()),
                     "items": items,
                 }
             )
@@ -444,13 +457,6 @@ def dictionary() -> ResponseReturnValue:
             }
         )
 
-    dictionary_strings = load_barsukas_strings(namespace="dictionary", ui_lang=ui_lang)
-    navigation_strings = load_barsukas_strings(namespace="navigation", ui_lang=ui_lang)
-    pagination_strings = load_barsukas_strings(namespace="pagination", ui_lang=ui_lang)
-
-    entries_label_template = dictionary_strings.get("entries_count", "{count} entries")
-    entries_label = entries_label_template.format(count=total)
-
     language_names = _localized_language_names(ui_lang)
     available_languages: List[Tuple[str, str]] = [
         (code, language_names.get(code, LANGUAGE_NAMES.get(code, code)))
@@ -476,8 +482,6 @@ def dictionary() -> ResponseReturnValue:
         available_letters=available_letters,
         available_languages=available_languages,
         language_names=language_names,
-        dictionary_strings=dictionary_strings,
-        navigation_strings=navigation_strings,
-        pagination_strings=pagination_strings,
-        entries_label=entries_label,
+        pos_singular_fallbacks=_POS_SINGULAR_DISPLAY_NAMES,
+        pos_group_fallbacks=_POS_DISPLAY_NAMES,
     )

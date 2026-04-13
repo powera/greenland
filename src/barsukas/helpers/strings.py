@@ -36,3 +36,20 @@ def _load_namespace_file(namespace: str, ui_lang: str) -> Dict[str, Any]:
 def load_barsukas_strings(namespace: str, ui_lang: str) -> Dict[str, Any]:
     """Public helper for route handlers to fetch namespace strings."""
     return _load_namespace_file(namespace=namespace, ui_lang=ui_lang)
+
+
+@lru_cache(maxsize=8)
+def load_all_barsukas_strings(ui_lang: str) -> Dict[str, Dict[str, Any]]:
+    """Load all Barsukas string namespaces for a UI language."""
+    if ui_lang not in SUPPORTED_UI_LANGS:
+        ui_lang = "en"
+
+    namespaces = sorted(
+        item.name
+        for item in _STRINGS_ROOT.iterdir()
+        if item.is_dir() and not item.name.startswith(".")
+    )
+    return {
+        namespace: _load_namespace_file(namespace=namespace, ui_lang=ui_lang)
+        for namespace in namespaces
+    }
