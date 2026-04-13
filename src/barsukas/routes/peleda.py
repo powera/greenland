@@ -85,31 +85,6 @@ _POS_SUBTYPE_GROUPS: Dict[str, Dict[str, List[str]]] = {
     "numeral": {"Numerals": ["cardinal", "ordinal"]},
 }
 
-# Fallback display names for the POS type headers in the category dropdown.
-_POS_DISPLAY_NAMES: Dict[str, str] = {
-    "noun": "Nouns",
-    "verb": "Verbs",
-    "adjective": "Adjectives",
-    "adverb": "Adverbs",
-    "numeral": "Numerals",
-}
-
-# Fallback display names for row-level POS values in the dictionary table.
-_POS_SINGULAR_DISPLAY_NAMES: Dict[str, str] = {
-    "noun": "Noun",
-    "verb": "Verb",
-    "adjective": "Adjective",
-    "adverb": "Adverb",
-    "numeral": "Numeral",
-    "pronoun": "Pronoun",
-    "preposition": "Preposition",
-    "conjunction": "Conjunction",
-    "interjection": "Interjection",
-    "determiner": "Determiner",
-    "article": "Article",
-    "particle": "Particle",
-}
-
 
 def _get_display_langs(source_lang: str) -> List[str]:
     """Return the 3 translation columns to show for a given source language."""
@@ -479,6 +454,4 @@ def dictionary() -> ResponseReturnValue:
         available_letters=available_letters,
         available_languages=available_languages,
         language_names=language_names,
-        pos_singular_fallbacks=_POS_SINGULAR_DISPLAY_NAMES,
-        pos_group_fallbacks=_POS_DISPLAY_NAMES,
     )
