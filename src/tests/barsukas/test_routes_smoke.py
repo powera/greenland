@@ -1,25 +1,62 @@
 """Smoke tests for Barsukas GET routes.
 
 These tests use the Flask test client with a temporary SQLite database
-to verify that key pages render without errors.  They do NOT test
+to verify that key pages render without errors. They do NOT test
 business logic — only that templates render and return 200.
 """
+
+from dataclasses import dataclass
 
 import pytest
 from flask.testing import FlaskClient
 
 
-class TestLemmaRoutes:
-    """Smoke tests for /lemmas routes."""
+@dataclass(frozen=True)
+class RouteSmokeCase:
+    """Single smoke-test case for a route."""
 
-    def test_lemma_list_returns_200(self, client: FlaskClient) -> None:
-        response = client.get("/lemmas/")
+    name: str
+    path: str
+    expected_text: str
+
+
+ROUTE_SMOKE_CASES: tuple[RouteSmokeCase, ...] = (
+    RouteSmokeCase(name="lemmas", path="/lemmas/", expected_text="eat"),
+    RouteSmokeCase(name="sentences", path="/sentences/", expected_text="I eat"),
+    RouteSmokeCase(name="dictionary", path="/dictionary/?letter=E", expected_text="eat"),
+    RouteSmokeCase(name="sync", path="/sync/", expected_text="sync"),
+)
+
+
+class TestRouteSmoke:
+    """Reusable smoke checks for top-level Barsukas sections."""
+
+    @pytest.mark.parametrize("case", ROUTE_SMOKE_CASES, ids=lambda case: case.name)
+    def test_section_page_returns_200(self, client: FlaskClient, case: RouteSmokeCase) -> None:
+        response = client.get(case.path)
         assert response.status_code == 200
 
-    def test_lemma_list_contains_seed_lemma(self, client: FlaskClient) -> None:
-        response = client.get("/lemmas/")
+    @pytest.mark.parametrize("case", ROUTE_SMOKE_CASES, ids=lambda case: case.name)
+    def test_section_page_contains_expected_text(
+        self, client: FlaskClient, case: RouteSmokeCase
+    ) -> None:
+        response = client.get(case.path)
+        assert response.status_code == 200
+        html = response.data.decode().lower()
+        assert case.expected_text.lower() in html
+
+    @pytest.mark.parametrize("case", ROUTE_SMOKE_CASES, ids=lambda case: case.name)
+    def test_section_page_does_not_render_builtin_method_text(
+        self, client: FlaskClient, case: RouteSmokeCase
+    ) -> None:
+        response = client.get(case.path)
+        assert response.status_code == 200
         html = response.data.decode()
-        assert "eat" in html
+        assert "built-in method" not in html
+
+
+class TestLemmaRoutes:
+    """Smoke tests for /lemmas routes."""
 
     def test_lemma_list_search(self, client: FlaskClient) -> None:
         response = client.get("/lemmas/?search=house")
@@ -30,12 +67,6 @@ class TestLemmaRoutes:
     def test_lemma_list_filter_by_pos_type(self, client: FlaskClient) -> None:
         response = client.get("/lemmas/?pos_type=verb")
         assert response.status_code == 200
-
-    def test_lemma_list_clear_button_uses_string_value(self, client: FlaskClient) -> None:
-        response = client.get("/lemmas/")
-        assert response.status_code == 200
-        html = response.data.decode()
-        assert "built-in method" not in html
 
     def test_view_lemma_returns_200(self, client: FlaskClient) -> None:
         response = client.get("/lemmas/1")
