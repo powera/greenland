@@ -18,6 +18,7 @@ from flask import Blueprint, g, render_template, request
 from flask.typing import ResponseReturnValue
 from sqlalchemy import func
 
+from barsukas.helpers.strings import load_barsukas_strings
 from langtools.rhyme_keys import (
     RHYME_KEY_LANGUAGES,
     rhyme_key_final_sound,
@@ -47,9 +48,14 @@ def _validated_language_code(raw_language: Optional[str]) -> str:
 def _rhyme_language_options() -> List[Tuple[str, str]]:
     """Return sorted (language_code, language_name) options for rhyme browsing."""
     language_names = get_supported_languages()
+    ui_lang = getattr(g, "ui_lang", "en")
+    localized_names = load_barsukas_strings(namespace="languages", ui_lang=ui_lang)
     options: List[Tuple[str, str]] = []
     for language_code in sorted(RHYME_KEY_LANGUAGES):
-        options.append((language_code, language_names.get(language_code, language_code)))
+        localized_name = localized_names.get(
+            language_code, language_names.get(language_code, language_code)
+        )
+        options.append((language_code, localized_name))
     return options
 
 

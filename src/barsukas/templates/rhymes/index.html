@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Rhyming Dictionary{% endblock %}
+{% block title %}{{ STRINGS.rhymes.title }}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/rhymes.css') }}">
@@ -10,15 +10,15 @@
 <div class="row mb-3">
     <div class="col">
         <div class="d-flex justify-content-between align-items-center">
-            <h1 class="h4 mb-0"><i class="bi bi-music-note-list"></i> Rhyming Dictionary</h1>
-            <span class="text-muted">{{ total_families }} rhyme families</span>
+            <h1 class="h4 mb-0"><i class="bi bi-music-note-list"></i> {{ STRINGS.rhymes.title }}</h1>
+            <span class="text-muted">{{ STRINGS.rhymes.families_count }}: {{ total_families }}</span>
         </div>
     </div>
 </div>
 
 <form method="get" class="row g-2 align-items-end mb-3">
     <div class="col-auto">
-        <label for="language" class="form-label mb-1">Language</label>
+        <label for="language" class="form-label mb-1">{{ STRINGS.common.language }}</label>
         <select class="form-select form-select-sm" id="language" name="language">
             {% for lang_code, lang_name in language_options %}
                 <option value="{{ lang_code }}" {% if lang_code == selected_language %}selected{% endif %}>
@@ -34,14 +34,14 @@
         <input type="hidden" name="pen" value="{{ selected_penultimate }}">
     {% endif %}
     <div class="col-auto">
-        <button type="submit" class="btn btn-sm btn-outline-secondary">Apply</button>
+        <button type="submit" class="btn btn-sm btn-outline-secondary">{{ STRINGS.common.apply }}</button>
     </div>
 </form>
 
 <!-- Tier 1: Final sound navigation -->
 {% if final_sounds %}
 <nav class="rhyme-nav mb-3" aria-label="Final sound navigation">
-    <span class="rhyme-nav-label text-muted small me-2">Ending sound:</span>
+    <span class="rhyme-nav-label text-muted small me-2">{{ STRINGS.rhymes.ending_sound }}:</span>
     {% for sound, count in final_sounds %}
         {% if sound == selected_sound %}
             <span class="rhyme-sound rhyme-sound-active" title="{{ count }} families">{{ sound }}</span>
@@ -56,9 +56,9 @@
 <!-- Tier 2: Penultimate sound sub-navigation -->
 {% if penultimate_sounds|length > 1 %}
 <nav class="rhyme-nav rhyme-nav-tier2 mb-3" aria-label="Vowel sound navigation">
-    <span class="rhyme-nav-label text-muted small me-2">Vowel:</span>
+    <span class="rhyme-nav-label text-muted small me-2">{{ STRINGS.rhymes.vowel }}:</span>
     <a href="{{ url_for('rhymes.index', sound=selected_sound, language=selected_language) }}"
-       class="rhyme-sound rhyme-sound-sm {% if not selected_penultimate %}rhyme-sound-active{% endif %}">All</a>
+       class="rhyme-sound rhyme-sound-sm {% if not selected_penultimate %}rhyme-sound-active{% endif %}">{{ STRINGS.common.all }}</a>
     {% for pen in penultimate_sounds %}
         {% if pen == selected_penultimate %}
             <span class="rhyme-sound rhyme-sound-sm rhyme-sound-active">{{ pen }}</span>
@@ -75,9 +75,9 @@
     <table class="table table-sm table-hover">
         <thead>
             <tr>
-                <th>Rhyme Key</th>
-                <th>Example</th>
-                <th class="text-end">Words</th>
+                <th>{{ STRINGS.rhymes.rhyme_key }}</th>
+                <th>{{ STRINGS.rhymes.example }}</th>
+                <th class="text-end">{{ STRINGS.rhymes.words }}</th>
             </tr>
         </thead>
         <tbody>
@@ -94,8 +94,8 @@
             {% if not families %}
                 <tr>
                     <td colspan="3" class="text-center text-muted py-4">
-                        No rhyme families found.
-                        {% if selected_sound %}Try a different ending sound.{% endif %}
+                        {{ STRINGS.rhymes.no_families }}
+                        {% if selected_sound %}{{ STRINGS.rhymes.try_other_ending }}{% endif %}
                     </td>
                 </tr>
             {% endif %}

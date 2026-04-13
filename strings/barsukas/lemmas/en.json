@@ -1,0 +1,14 @@
+{
+  "browse_title": "Browse Lemmas",
+  "found_count": "Lemmas found",
+  "add_new": "Add New Lemma",
+  "search_placeholder": "Lemma text or definition...",
+  "pos_type": "POS Type",
+  "subcategory": "Subcategory",
+  "difficulty": "Difficulty",
+  "no_level_set": "No level set",
+  "excluded": "Excluded",
+  "excluded_short": "Excluded",
+  "level": "Level",
+  "no_results": "No lemmas found matching your criteria."
+}
