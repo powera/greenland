@@ -14,7 +14,7 @@ from flask.typing import ResponseReturnValue
 from sqlalchemy import func
 from sqlalchemy.orm import Query
 
-from barsukas.helpers.strings import SUPPORTED_UI_LANGS, load_barsukas_strings
+from barsukas.helpers.strings import load_barsukas_strings
 from barsukas.routes.categories import (
     ADJECTIVE_GROUPS,
     ADVERB_GROUPS,
@@ -347,7 +347,7 @@ def dictionary() -> ResponseReturnValue:
     """Dictionary browse view."""
     lang = request.args.get("lang", "en").strip().lower()
     sort = request.args.get("sort", "alpha").strip().lower()
-    ui_lang = request.args.get("ui", "en").strip().lower()
+    ui_lang = getattr(g, "ui_lang", "en")
     page = request.args.get("page", 1, type=int)
 
     # Validate inputs.
@@ -356,9 +356,6 @@ def dictionary() -> ResponseReturnValue:
         lang = "en"
     if sort not in ("alpha", "level", "category"):
         sort = "alpha"
-    if ui_lang not in SUPPORTED_UI_LANGS:
-        ui_lang = "en"
-
     display_langs = _get_display_langs(lang)
     alphabet = _get_alphabet(lang)
 

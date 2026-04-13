@@ -19,7 +19,6 @@
 <!-- Language selector and sort control -->
 <div class="dict-controls mb-3">
     <form method="get" action="{{ url_for('peleda.dictionary') }}" class="row g-2 align-items-end">
-        <input type="hidden" name="ui" value="{{ ui_lang }}">
         <div class="col-auto">
             <label for="lang" class="form-label mb-0 small text-muted">{{ STRINGS.dictionary.source_language }}</label>
             <select class="form-select form-select-sm" id="lang" name="lang" onchange="this.form.submit()">
@@ -64,7 +63,7 @@
         {% if l == letter %}
             <span class="dict-letter dict-letter-active">{{ l }}</span>
         {% elif l in available_letters %}
-            <a href="{{ url_for('peleda.dictionary', lang=lang, letter=l, sort='alpha', ui=ui_lang) }}"
+            <a href="{{ url_for('peleda.dictionary', lang=lang, letter=l, sort='alpha') }}"
                class="dict-letter">{{ l }}</a>
         {% else %}
             <span class="dict-letter dict-letter-disabled">{{ l }}</span>
@@ -78,7 +77,7 @@
         {% if lv == selected_level %}
             <span class="dict-letter dict-letter-active">{{ lv }}</span>
         {% else %}
-            <a href="{{ url_for('peleda.dictionary', lang=lang, sort='level', level=lv, ui=ui_lang) }}"
+            <a href="{{ url_for('peleda.dictionary', lang=lang, sort='level', level=lv) }}"
                class="dict-letter">{{ lv }}</a>
         {% endif %}
     {% endfor %}
@@ -148,11 +147,11 @@
 <!-- Pagination -->
 {% if total_pages > 1 %}
     {% if sort == 'category' %}
-        {% set page_params = {'lang': lang, 'sort': 'category', 'category': selected_category, 'ui': ui_lang} %}
+        {% set page_params = {'lang': lang, 'sort': 'category', 'category': selected_category} %}
     {% elif sort == 'level' %}
-        {% set page_params = {'lang': lang, 'sort': 'level', 'level': selected_level, 'ui': ui_lang} %}
+        {% set page_params = {'lang': lang, 'sort': 'level', 'level': selected_level} %}
     {% else %}
-        {% set page_params = {'lang': lang, 'sort': 'alpha', 'letter': letter, 'ui': ui_lang} %}
+        {% set page_params = {'lang': lang, 'sort': 'alpha', 'letter': letter} %}
     {% endif %}
     <nav class="mt-3" aria-label="Page navigation">
         <ul class="pagination pagination-sm justify-content-center">
