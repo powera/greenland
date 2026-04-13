@@ -359,8 +359,6 @@ def dictionary() -> ResponseReturnValue:
     if ui_lang not in SUPPORTED_UI_LANGS:
         ui_lang = "en"
 
-    pos_strings = load_barsukas_strings(namespace="parts_of_speech", ui_lang=ui_lang)
-
     display_langs = _get_display_langs(lang)
     alphabet = _get_alphabet(lang)
 
@@ -459,13 +457,6 @@ def dictionary() -> ResponseReturnValue:
             }
         )
 
-    dictionary_strings = load_barsukas_strings(namespace="dictionary", ui_lang=ui_lang)
-    navigation_strings = load_barsukas_strings(namespace="navigation", ui_lang=ui_lang)
-    pagination_strings = load_barsukas_strings(namespace="pagination", ui_lang=ui_lang)
-
-    entries_label_template = dictionary_strings.get("entries_count", "{count} entries")
-    entries_label = entries_label_template.format(count=total)
-
     language_names = _localized_language_names(ui_lang)
     available_languages: List[Tuple[str, str]] = [
         (code, language_names.get(code, LANGUAGE_NAMES.get(code, code)))
@@ -491,11 +482,6 @@ def dictionary() -> ResponseReturnValue:
         available_letters=available_letters,
         available_languages=available_languages,
         language_names=language_names,
-        dictionary_strings=dictionary_strings,
-        navigation_strings=navigation_strings,
-        pagination_strings=pagination_strings,
-        entries_label=entries_label,
-        pos_strings=pos_strings,
         pos_singular_fallbacks=_POS_SINGULAR_DISPLAY_NAMES,
         pos_group_fallbacks=_POS_DISPLAY_NAMES,
     )
