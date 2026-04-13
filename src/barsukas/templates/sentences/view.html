@@ -214,14 +214,14 @@
     <div class="col">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-translate"></i> Translations</span>
+                <span><i class="bi bi-translate"></i> {{ STRINGS.sentences.translations }}</span>
                 <button class="btn btn-sm btn-primary"
                         {% if config.get('ALLOW_OUTBOUND_CALLS', True) %}
                         data-bs-toggle="collapse" data-bs-target="#translateForm"
                         {% else %}
                         disabled title="Not available in hosted mode"
                         {% endif %}>
-                    <i class="bi bi-plus-circle"></i> Add Translation
+                    <i class="bi bi-plus-circle"></i> {{ STRINGS.sentences.add_translation }}
                 </button>
             </div>
             <div class="card-body">
@@ -229,7 +229,7 @@
                 <div class="collapse mb-3" id="translateForm">
                     <div class="card card-body bg-light">
                         <form method="POST" action="{{ url_for('sentences.translate_sentence', sentence_id=sentence.id) }}" id="translateForm">
-                            <h6>Select languages to translate to:</h6>
+                            <h6>{{ STRINGS.sentences.select_languages_to_translate_to }}</h6>
                             <div class="row" id="languageCheckboxes">
                                 {% for lang_code, lang_name in language_names.items() %}
                                     {% if lang_code != 'en' and not translations.get(lang_code) %}
@@ -247,13 +247,13 @@
                             </div>
                             <div class="mt-3">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-translate"></i> Translate Selected
+                                    <i class="bi bi-translate"></i> {{ STRINGS.sentences.translate_selected }}
                                 </button>
                                 <button type="button" class="btn btn-success" onclick="selectAllLanguages()">
-                                    <i class="bi bi-check-all"></i> Select All
+                                    <i class="bi bi-check-all"></i> {{ STRINGS.sentences.select_all }}
                                 </button>
                                 <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#translateForm">
-                                    Cancel
+                                    {{ STRINGS.sentences.cancel }}
                                 </button>
                             </div>
                         </form>
@@ -272,8 +272,8 @@
                 <table class="table table-hover translation-table">
                     <thead>
                         <tr>
-                            <th style="width: 20%;">Language</th>
-                            <th>Translation</th>
+                            <th style="width: 20%;">{{ STRINGS.common.language }}</th>
+                            <th>{{ STRINGS.sentences.translation }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -295,7 +295,7 @@
                         {% endfor %}
                         {% if not translations %}
                             <tr>
-                                <td colspan="2" class="text-muted fst-italic text-center">No translations available</td>
+                                <td colspan="2" class="text-muted fst-italic text-center">{{ STRINGS.sentences.no_translations_available }}</td>
                             </tr>
                         {% endif %}
                     </tbody>
@@ -310,14 +310,14 @@
     <div class="col">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-music-note-beamed"></i> Audio Files</span>
+                <span><i class="bi bi-music-note-beamed"></i> {{ STRINGS.sentences.audio_files }}</span>
                 <button type="button" class="btn btn-sm btn-success"
                         {% if config.get('ALLOW_OUTBOUND_CALLS', True) %}
                         data-bs-toggle="modal" data-bs-target="#generateSentenceAudioModal"
                         {% else %}
                         disabled title="Not available in hosted mode"
                         {% endif %}>
-                    <i class="bi bi-mic-fill"></i> Generate Audio
+                    <i class="bi bi-mic-fill"></i> {{ STRINGS.sentences.generate_audio }}
                 </button>
             </div>
             <div class="card-body">
@@ -326,16 +326,16 @@
                     {% set lang_name = language_names.get(lang_code, lang_code) %}
                     <h5 class="mt-3">
                         {{ lang_name }}
-                        <span class="badge bg-secondary">{{ audio_by_language[lang_code]|length }} file(s)</span>
+                        <span class="badge bg-secondary">{{ STRINGS.sentences.audio_files_count|replace('{count}', audio_by_language[lang_code]|length|string) }}</span>
                     </h5>
                     <table class="table table-sm">
                         <thead>
                             <tr>
-                                <th>Voice</th>
-                                <th>Expected Text</th>
-                                <th>Status</th>
-                                <th>Audio</th>
-                                <th>Actions</th>
+                                <th>{{ STRINGS.sentences.voice }}</th>
+                                <th>{{ STRINGS.sentences.expected_text }}</th>
+                                <th>{{ STRINGS.sentences.status }}</th>
+                                <th>{{ STRINGS.sentences.audio }}</th>
+                                <th>{{ STRINGS.sentences.actions }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -350,26 +350,26 @@
                                 </td>
                                 <td>
                                     {% if audio.status == 'pending_review' %}
-                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    <span class="badge bg-warning text-dark">{{ STRINGS.sentences.pending }}</span>
                                     {% elif audio.status == 'approved' %}
-                                    <span class="badge bg-success">Approved</span>
+                                    <span class="badge bg-success">{{ STRINGS.sentences.approved }}</span>
                                     {% elif audio.status == 'approved_with_issues' %}
-                                    <span class="badge bg-info">Acceptable</span>
+                                    <span class="badge bg-info">{{ STRINGS.sentences.acceptable }}</span>
                                     {% elif audio.status == 'needs_replacement' %}
-                                    <span class="badge bg-danger">Needs Fix</span>
+                                    <span class="badge bg-danger">{{ STRINGS.sentences.needs_fix }}</span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     <button class="btn btn-sm btn-outline-secondary play-audio-btn-sentence"
                                             data-audio-url="{{ url_for('audio.serve_audio_file', language=audio.language_code, voice=audio.voice_name, filename=audio.filename) }}"
-                                            title="Play audio">
+                                            title="{{ STRINGS.sentences.play_audio }}">
                                         <i class="bi bi-play-circle"></i>
                                     </button>
                                 </td>
                                 <td>
                                     <a href="{{ url_for('audio.review_file', review_id=audio.id) }}"
                                        class="btn btn-sm btn-outline-primary {% if config.get('READONLY', False) %}disabled{% endif %}"
-                                       title="Review audio"
+                                       title="{{ STRINGS.sentences.review_audio }}"
                                        {% if config.get('READONLY', False) %}aria-disabled="true" tabindex="-1"{% endif %}>
                                         <i class="bi bi-pencil"></i>
                                     </a>
@@ -381,8 +381,8 @@
                 {% endfor %}
                 {% else %}
                 <p class="text-muted">
-                    <i class="bi bi-info-circle"></i> No audio files have been generated for this sentence yet.
-                    Click "Generate Audio" to create audio files.
+                    <i class="bi bi-info-circle"></i> {{ STRINGS.sentences.no_audio_for_sentence }}
+                    {{ STRINGS.sentences.click_generate_audio_for_files }}
                 </p>
                 {% endif %}
             </div>
@@ -395,19 +395,19 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Generate Audio for Sentence</h5>
+                <h5 class="modal-title">{{ STRINGS.sentences.generate_audio_for_sentence }}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form method="post" action="{{ url_for('audio.generate_sentence_audio', sentence_id=sentence.id) }}">
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label">Sentence</label>
+                    <label class="form-label">{{ STRINGS.sentences.sentence }}</label>
                     <p class="form-control-plaintext">
                         <code>#{{ sentence.id }}</code>
                     </p>
                 </div>
                 <div class="mb-3">
-                    <label for="sentence_audio_tts_engine" class="form-label">TTS Engine <span class="text-danger">*</span></label>
+                    <label for="sentence_audio_tts_engine" class="form-label">{{ STRINGS.sentences.tts_engine }} <span class="text-danger">*</span></label>
                     <select class="form-select" id="sentence_audio_tts_engine" name="tts_engine" required>
                         <option value="openai">OpenAI (paid, high quality)</option>
                         <option value="espeak-ng">eSpeak-NG (free, synthetic)</option>
@@ -418,37 +418,37 @@
                         <option value="azure">Azure Cognitive TTS (paid, neural)</option>
                         <option value="google">Google Cloud TTS (paid, Wavenet/Neural2)</option>
                     </select>
-                    <div class="form-text">Choose TTS engine: OpenAI (paid), eSpeak (fast), Piper (neural), Coqui (voice cloning), or Qwen3 (multilingual)</div>
+                    <div class="form-text">{{ STRINGS.sentences.choose_tts_engine }}</div>
                 </div>
                 <div class="mb-3">
-                    <label for="sentence_audio_language" class="form-label">Language <span class="text-danger">*</span></label>
+                    <label for="sentence_audio_language" class="form-label">{{ STRINGS.common.language }} <span class="text-danger">*</span></label>
                     <select class="form-select" id="sentence_audio_language" name="language" required>
-                        <option value="">Select a language...</option>
+                        <option value="">{{ STRINGS.sentences.select_language }}</option>
                         {% for lang_code, lang_name in language_names.items() %}
                             {% if translations.get(lang_code) %}
                             <option value="{{ lang_code }}">{{ lang_name }} ({{ translations[lang_code][:50] }}{% if translations[lang_code]|length > 50 %}...{% endif %})</option>
                             {% endif %}
                         {% endfor %}
                     </select>
-                    <div class="form-text">Only languages with translations are shown</div>
+                    <div class="form-text">{{ STRINGS.sentences.only_languages_with_translations }}</div>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Voices <span class="text-danger">*</span></label>
-                    <div class="form-text mb-2" id="sentence-audio-voice-help">Select voices to generate</div>
+                    <label class="form-label">{{ STRINGS.sentences.voices }} <span class="text-danger">*</span></label>
+                    <div class="form-text mb-2" id="sentence-audio-voice-help">{{ STRINGS.sentences.select_voices_to_generate }}</div>
                     <div id="sentence-audio-voices-container">
-                        <div class="text-muted">Please select a language and TTS engine</div>
+                        <div class="text-muted">{{ STRINGS.sentences.select_language_and_tts_engine }}</div>
                     </div>
                 </div>
                 <div class="alert alert-info" id="sentence-audio-engine-info">
                     <i class="bi bi-info-circle"></i>
-                    <strong>Note:</strong> Audio will be generated and saved to a temporary directory.
-                    Review records will be created with status "pending_review".
+                    <strong>{{ STRINGS.sentences.note }}:</strong> {{ STRINGS.sentences.audio_generation_note }}
+                    {{ STRINGS.sentences.review_records_pending_note }}
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ STRINGS.sentences.cancel }}</button>
                 <button type="submit" class="btn btn-success">
-                    <i class="bi bi-mic-fill"></i> Generate Audio
+                    <i class="bi bi-mic-fill"></i> {{ STRINGS.sentences.generate_audio }}
                 </button>
             </div>
             </form>
