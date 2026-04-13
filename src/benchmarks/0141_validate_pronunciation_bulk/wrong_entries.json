@@ -1,0 +1,91 @@
+[
+  {
+    "case_id": "case_01_perfect",
+    "wrong_ipa_entries": [],
+    "wrong_phonetic_entries": []
+  },
+  {
+    "case_id": "case_02_two_wrong",
+    "wrong_ipa_entries": [
+      {
+        "entry_id": "E005",
+        "wrong_ipa": "pɛnˈsɪl"
+      }
+    ],
+    "wrong_phonetic_entries": [
+      {
+        "entry_id": "E012",
+        "wrong_phonetic": "TEE-ger"
+      }
+    ]
+  },
+  {
+    "case_id": "case_03_three_wrong",
+    "wrong_ipa_entries": [
+      {
+        "entry_id": "E008",
+        "wrong_ipa": "ˈɡɑrdeɪn"
+      }
+    ],
+    "wrong_phonetic_entries": [
+      {
+        "entry_id": "E001",
+        "wrong_phonetic": "uh-PULL"
+      },
+      {
+        "entry_id": "E014",
+        "wrong_phonetic": "CANE-duhl"
+      }
+    ]
+  },
+  {
+    "case_id": "case_04_four_wrong",
+    "wrong_ipa_entries": [
+      {
+        "entry_id": "E010",
+        "wrong_ipa": "pləˈnɛt"
+      },
+      {
+        "entry_id": "E016",
+        "wrong_ipa": "ˈθuːndər"
+      }
+    ],
+    "wrong_phonetic_entries": [
+      {
+        "entry_id": "E006",
+        "wrong_phonetic": "kee-CHEN"
+      },
+      {
+        "entry_id": "E020",
+        "wrong_phonetic": "VEE-oh-lin"
+      }
+    ]
+  },
+  {
+    "case_id": "case_05_five_wrong",
+    "wrong_ipa_entries": [
+      {
+        "entry_id": "E003",
+        "wrong_ipa": "raɪvər"
+      },
+      {
+        "entry_id": "E011",
+        "wrong_ipa": "ˈsaɪlvər"
+      },
+      {
+        "entry_id": "E019",
+        "wrong_ipa": "koʊˈfi"
+      }
+    ],
+    "wrong_phonetic_entries": [
+      {
+        "entry_id": "E007",
+        "wrong_phonetic": "wine-doh"
+      },
+      {
+        "entry_id": "E017",
+        "wrong_phonetic": "my-ROAR"
+      }
+    ]
+  }
+]
