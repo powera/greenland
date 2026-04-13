@@ -15,7 +15,7 @@
             <h2><i class="bi bi-translate text-purple"></i> {{ STRINGS.sync.sync_sentence_translations_title }}</h2>
             <p class="text-muted">
                 Translation differences between SQLite and <code>data/release/sentences</code>
-                for sentences with matching English text. {{ STRINGS.sync.changes_either_direction }}
+                {{ STRINGS.sync.sentence_translations_desc }}
             </p>
         </div>
     </div>
@@ -33,7 +33,7 @@
             <span><i class="bi bi-list-check"></i> Sentences with differences: {{ differences|length }}</span>
             <div>
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll('skip')">
-                    {{ STRINGS.sync.skip }} All
+                    {{ STRINGS.sync.skip_all }}
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-warning" onclick="selectAll('use_db')">
                     Use All DB
@@ -63,7 +63,7 @@
                         <table class="table table-sm table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 120px;">Language</th>
+                                    <th style="width: 120px;">{{ STRINGS.common.language }}</th>
                                     <th>SQLite (DB)</th>
                                     <th>{{ STRINGS.sync.release }}</th>
                                     <th style="width: 150px;">Action</th>

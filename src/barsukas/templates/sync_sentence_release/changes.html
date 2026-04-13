@@ -12,7 +12,7 @@
                     <li class="breadcrumb-item active">{{ STRINGS.sync.text_changes }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-pencil text-info"></i> English {{ STRINGS.sync.text_changes }}</h2>
+            <h2><i class="bi bi-pencil text-info"></i> {{ STRINGS.sync.english_text_changes }}</h2>
             <p class="text-muted">
                 {{ STRINGS.sync.same_guid_diff_english_sentence|safe }}
                 {{ STRINGS.sync.changes_either_direction }}
@@ -33,7 +33,7 @@
             <span><i class="bi bi-list-check"></i> {{ STRINGS.sync.text_changes }}: {{ changes|length }}</span>
             <div>
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll('skip')">
-                    {{ STRINGS.sync.skip }} All
+                    {{ STRINGS.sync.skip_all }}
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-warning" onclick="selectAll('use_db')">
                     Use All DB

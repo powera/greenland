@@ -50,7 +50,7 @@
     <div class="card mb-4">
         <div class="card-header bg-success bg-opacity-10">
             <i class="bi bi-plus-circle text-success"></i>
-            <strong>{{ STRINGS.sync.additions }}</strong> &mdash; {{ additions|length }} lemma(s) in release but not in DB
+            {{ STRINGS.sync.derivative_additions_header|replace("{count}", additions|length|string) }}
         </div>
         <div class="card-body">
             <form method="post" action="{{ url_for('sync_derivative_release.apply_additions', lang_code=lang_code) }}">
@@ -62,9 +62,9 @@
                             </th>
                             <th>{{ STRINGS.sync.guid }}</th>
                             <th>Lemma</th>
-                            <th>Type</th>
-                            <th class="text-center">Forms</th>
-                            <th>Preview</th>
+                            <th>{{ STRINGS.sync.type }}</th>
+                            <th class="text-center">{{ STRINGS.sync.forms }}</th>
+                            <th>{{ STRINGS.sync.preview }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -115,9 +115,9 @@
                         <tr>
                             <th>{{ STRINGS.sync.guid }}</th>
                             <th>Lemma</th>
-                            <th>Type</th>
-                            <th class="text-center">Forms</th>
-                            <th>Preview</th>
+                            <th>{{ STRINGS.sync.type }}</th>
+                            <th class="text-center">{{ STRINGS.sync.forms }}</th>
+                            <th>{{ STRINGS.sync.preview }}</th>
                             <th style="width: 160px;">Action</th>
                         </tr>
                     </thead>
@@ -174,7 +174,7 @@
     <div class="card mb-4">
         <div class="card-header bg-warning bg-opacity-10">
             <i class="bi bi-pencil text-warning"></i>
-            <strong>{{ STRINGS.sync.changes }}</strong> &mdash; {{ changes|length }} lemma(s) with differing forms
+            {{ STRINGS.sync.derivative_changes_header|replace("{count}", changes|length|string) }}
         </div>
         <div class="card-body">
             <form method="post" action="{{ url_for('sync_derivative_release.apply_changes', lang_code=lang_code) }}">
@@ -260,9 +260,9 @@
                     <button type="button" class="btn btn-sm btn-outline-secondary"
                             onclick="setAllSelects('.change-action', 'skip')">{{ STRINGS.sync.all_skip }}</button>
                     <button type="button" class="btn btn-sm btn-outline-warning"
-                            onclick="setAllSelects('.change-action', 'use_db')">All {{ STRINGS.sync.use_db }}</button>
+                            onclick="setAllSelects('.change-action', 'use_db')">{{ STRINGS.sync.all_use_db }}</button>
                     <button type="button" class="btn btn-sm btn-outline-primary"
-                            onclick="setAllSelects('.change-action', 'use_release')">All {{ STRINGS.sync.use_release }}</button>
+                            onclick="setAllSelects('.change-action', 'use_release')">{{ STRINGS.sync.all_use_release }}</button>
                     <div class="flex-grow-1"></div>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-check-lg"></i> {{ STRINGS.sync.apply_changes }}

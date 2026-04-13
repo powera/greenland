@@ -12,9 +12,9 @@
                     <li class="breadcrumb-item active">{{ STRINGS.sync.removals }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-dash-circle text-danger"></i> Sentences Not in {{ STRINGS.sync.release }}</h2>
+            <h2><i class="bi bi-dash-circle text-danger"></i> {{ STRINGS.sync.sentences_not_in_release }}</h2>
             <p class="text-muted">
-                Sentence {{ STRINGS.sync.guid }}s that exist in SQLite but not in <code>data/release/sentences</code>.
+                {{ STRINGS.sync.sentences_removals_desc|safe }}
                 Conversation sentences are excluded.
             </p>
         </div>

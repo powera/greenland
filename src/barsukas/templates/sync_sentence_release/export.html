@@ -12,9 +12,9 @@
                     <li class="breadcrumb-item active">Export</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-download text-primary"></i> Export DB Sentences to {{ STRINGS.sync.release }}</h2>
+            <h2><i class="bi bi-download text-primary"></i> {{ STRINGS.sync.export_db_sentences_to_release }}</h2>
             <p class="text-muted">
-                Sentence {{ STRINGS.sync.guid }}s that exist in SQLite but not in <code>data/release/sentences</code>.
+                {{ STRINGS.sync.sentences_removals_desc|safe }}
                 Conversation sentences are excluded.
             </p>
         </div>
@@ -22,7 +22,7 @@
 
     {% if not exportable %}
     <div class="alert alert-success">
-        <i class="bi bi-check-circle"></i> No sentences to export. {{ STRINGS.sync.release }} files are up to date with database.
+        <i class="bi bi-check-circle"></i> {{ STRINGS.sync.no_sentences_to_export }}
     </div>
     <a href="{{ url_for('sync_sentence_release.index') }}" class="btn btn-secondary">
         <i class="bi bi-arrow-left"></i> Back
