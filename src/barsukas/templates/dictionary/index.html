@@ -40,7 +40,7 @@
             <label for="category" class="form-label mb-0 small text-muted">{{ STRINGS.dictionary.category }}</label>
             <select class="form-select form-select-sm dict-category-select" id="category" name="category" onchange="this.form.submit()">
                 {% for group in category_options %}
-                    <optgroup label="{{ STRINGS.parts_of_speech.get(group.pos_type ~ '_plural', pos_group_fallbacks.get(group.pos_type, group.pos_type|title)) }}">
+                    <optgroup label="{{ STRINGS.parts_of_speech.get(group.pos_type ~ '_plural', group.pos_type|title) }}">
                         {% for item in group["items"] %}
                             <option value="{{ item.value }}" {% if item.value == selected_category %}selected{% endif %}>{{ item.display_name }}</option>
                         {% endfor %}
@@ -122,7 +122,7 @@
                             {% endif %}
                         </td>
                     {% endfor %}
-                    <td class="dict-pos">{{ STRINGS.parts_of_speech.get(entry.pos_type, pos_singular_fallbacks.get(entry.pos_type, (entry.pos_type or '')|replace('_', ' ')|title)) }}</td>
+                    <td class="dict-pos">{{ STRINGS.parts_of_speech.get(entry.pos_type, (entry.pos_type or '')|replace('_', ' ')|title) }}</td>
                 </tr>
             {% endfor %}
             {% if not entries %}
