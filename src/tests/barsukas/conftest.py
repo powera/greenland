@@ -21,6 +21,7 @@ from storage.models.schema import (
     LemmaDifficultyOverride,
     LemmaTranslation,
     Sentence,
+    SentenceTranslation,
 )
 
 
@@ -118,6 +119,29 @@ def _seed_database(session: Session) -> None:
         ),
     ]
     session.add_all(forms)
+
+    sentence1 = Sentence(
+        id=1,
+        guid="S_00001",
+        pattern_type="SVO",
+        minimum_level=1,
+        verified=False,
+        rejected=False,
+    )
+    session.add(sentence1)
+    session.flush()
+
+    sentence_translation_en = SentenceTranslation(
+        sentence_id=1,
+        language_code="en",
+        translation_text="I eat",
+    )
+    sentence_translation_lt = SentenceTranslation(
+        sentence_id=1,
+        language_code="lt",
+        translation_text="Aš valgau",
+    )
+    session.add_all([sentence_translation_en, sentence_translation_lt])
 
     session.commit()
 
