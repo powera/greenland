@@ -48,20 +48,34 @@ class ValidatePronunciationBulkRunner(BenchmarkRunner):
             elapsed_msec = int((time.time() - start_time) * 1000)
 
             structured_data = response.structured_data or {}
-            wrong_words = structured_data.get("wrong_words", [])
-            if not isinstance(wrong_words, list):
-                wrong_words = []
+            wrong_entries = structured_data.get("wrong_entries", [])
+            if not isinstance(wrong_entries, list):
+                wrong_entries = []
 
-            normalized_actual = sorted(str(word).strip().lower() for word in wrong_words)
+            normalized_actual = sorted(
+                (
+                    str(entry.get("entry_id", "")).strip().lower(),
+                    str(entry.get("word", "")).strip().lower(),
+                    str(entry.get("issue_type", "")).strip().lower(),
+                )
+                for entry in wrong_entries
+                if isinstance(entry, dict)
+            )
             normalized_expected = sorted(
-                str(word).strip().lower() for word in expected["wrong_words"]
+                (
+                    str(entry.get("entry_id", "")).strip().lower(),
+                    str(entry.get("word", "")).strip().lower(),
+                    str(entry.get("issue_type", "")).strip().lower(),
+                )
+                for entry in expected["wrong_entries"]
+                if isinstance(entry, dict)
             )
 
             is_correct = normalized_actual == normalized_expected
             score = 100 if is_correct else 0
 
             debug_info = {
-                "response": {"wrong_words": wrong_words},
+                "response": {"wrong_entries": wrong_entries},
                 "expected": expected,
                 "normalized_actual": normalized_actual,
                 "normalized_expected": normalized_expected,

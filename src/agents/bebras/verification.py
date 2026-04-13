@@ -7,7 +7,7 @@ It does NOT regenerate content - it only validates and returns "correct"/"incorr
 """
 
 import logging
-from typing import Any, Dict, List, Literal, Optional, Tuple, TypedDict
+from typing import Any, Dict, List, Literal, Optional, Tuple, TypedDict, cast
 
 from clients.batch_queue import (
     BatchQueueManager,
@@ -64,9 +64,10 @@ LANGUAGE_DIALECT_NAMES: Dict[str, str] = {
 IncorrectPronunciationAction = Literal["log", "remove", "regenerate"]
 
 
-class PronunciationCheckItem(TypedDict):
+class PronunciationCheckItem(TypedDict, total=False):
     """Single pronunciation entry used by bulk IPA/phonetic validation."""
 
+    entry_id: str
     word: str
     chinese_hint: str
     ipa: str
@@ -89,29 +90,39 @@ def build_bulk_pronunciation_verification_prompt(items: List[PronunciationCheckI
         "Check this list and identify pronunciation problems.",
         "A problem means incorrect IPA, incorrect phonetic spelling, "
         "or IPA/phonetic mismatch for the intended English sense.",
-        "List only wrong words.",
+        "List only wrong entries by entry_id, with issue_type set to ipa, phonetic, or both.",
         "",
     ]
     for index, item in enumerate(items, start=1):
+        entry_id = str(item.get("entry_id", f"item_{index:02d}"))
         prompt_lines.append(
-            f'{index}. English: "{item["word"]}" | Chinese: "{item["chinese_hint"]}" '
+            f'{index}. ID: "{entry_id}" | English: "{item["word"]}" | Chinese: "{item["chinese_hint"]}" '
             f'| IPA: "{item["ipa"]}" | Phonetic: "{item["phonetic"]}"'
         )
     return "\n".join(prompt_lines)
 
 
 def build_bulk_pronunciation_verification_schema() -> Dict[str, Any]:
-    """Build JSON schema that only permits listing incorrect words."""
+    """Build JSON schema that only permits listing incorrect entries."""
     return {
         "type": "object",
         "properties": {
-            "wrong_words": {
+            "wrong_entries": {
                 "type": "array",
-                "description": "Only the English words with IPA/phonetic problems.",
-                "items": {"type": "string"},
+                "description": "Only entries with pronunciation problems.",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "entry_id": {"type": "string"},
+                        "word": {"type": "string"},
+                        "issue_type": {"type": "string", "enum": ["ipa", "phonetic", "both"]},
+                    },
+                    "required": ["entry_id", "word", "issue_type"],
+                    "additionalProperties": False,
+                },
             }
         },
-        "required": ["wrong_words"],
+        "required": ["wrong_entries"],
         "additionalProperties": False,
     }
 
@@ -706,13 +717,36 @@ IMPORTANT:
             timeout=90,
         )
         structured_data = response.structured_data or {}
-        raw_wrong_words = structured_data.get("wrong_words", [])
-        wrong_words = [word for word in raw_wrong_words if isinstance(word, str) and word.strip()]
+        raw_wrong_entries = structured_data.get("wrong_entries", [])
+        normalized_items: List[PronunciationCheckItem] = []
+        for index, item in enumerate(items, start=1):
+            normalized_item = dict(item)
+            normalized_item["entry_id"] = str(item.get("entry_id", f"item_{index:02d}"))
+            normalized_items.append(cast(PronunciationCheckItem, normalized_item))
 
-        wrong_word_set = set(wrong_words)
-        wrong_items = [item for item in items if item["word"] in wrong_word_set]
+        valid_issue_types = {"ipa", "phonetic", "both"}
+        wrong_entries: List[Dict[str, str]] = []
+        for entry in raw_wrong_entries if isinstance(raw_wrong_entries, list) else []:
+            if not isinstance(entry, dict):
+                continue
+            entry_id = str(entry.get("entry_id", "")).strip()
+            word = str(entry.get("word", "")).strip()
+            issue_type = str(entry.get("issue_type", "")).strip().lower()
+            if not entry_id or not word or issue_type not in valid_issue_types:
+                continue
+            wrong_entries.append(
+                {
+                    "entry_id": entry_id,
+                    "word": word,
+                    "issue_type": issue_type,
+                }
+            )
 
-        self._hook_log_correct_pronunciation_verifications(items, wrong_word_set)
+        wrong_id_set = {entry["entry_id"] for entry in wrong_entries}
+        wrong_word_set = {entry["word"] for entry in wrong_entries}
+        wrong_items = [item for item in normalized_items if item["entry_id"] in wrong_id_set]
+
+        self._hook_log_correct_pronunciation_verifications(normalized_items, wrong_word_set)
         action_summary = self._handle_incorrect_pronunciation_words(
             wrong_items=wrong_items,
             action=incorrect_action,
@@ -720,9 +754,10 @@ IMPORTANT:
         )
 
         return {
-            "wrong_words": wrong_words,
-            "checked_count": len(items),
-            "wrong_count": len(wrong_words),
+            "wrong_entries": wrong_entries,
+            "wrong_words": sorted(wrong_word_set),
+            "checked_count": len(normalized_items),
+            "wrong_count": len(wrong_entries),
             "incorrect_action": incorrect_action,
             "action_summary": action_summary,
         }
