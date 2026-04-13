@@ -1,0 +1,19 @@
+{
+  "title": "Rimų žodynas",
+  "families_count": "Rimų šeimų",
+  "family_title": "Rimų šeima",
+  "ending_sound": "Galinis garsas",
+  "vowel": "Balsis",
+  "rhyme_key": "Rimo raktas",
+  "example": "Pavyzdys",
+  "words": "Žodžiai",
+  "no_families": "Rimų šeimų nerasta.",
+  "try_other_ending": "Pabandykite kitą galinį garsą.",
+  "back_to_index": "Atgal į rimų sąrašą",
+  "words_rhyming_with": "Žodžiai, rimuojantys su",
+  "words_count": "Žodžiai",
+  "no_words_for_key": "Šiam rimo raktui žodžių nerasta.",
+  "related_rhymes": "Susiję rimai",
+  "no_key_specified": "Nenurodytas rimo raktas.",
+  "browse_families": "Naršyti rimų šeimas"
+}

@@ -1,0 +1,14 @@
+{
+  "browse_title": "Lemų naršymas",
+  "found_count": "Rasta lemų",
+  "add_new": "Pridėti naują lemą",
+  "search_placeholder": "Lemos tekstas arba apibrėžimas...",
+  "pos_type": "Kalbos dalis",
+  "subcategory": "Subkategorija",
+  "difficulty": "Sunkumas",
+  "no_level_set": "Lygis nenustatytas",
+  "excluded": "Neįtrauktas",
+  "excluded_short": "Neįtrauktas",
+  "level": "Lygis",
+  "no_results": "Pagal jūsų kriterijus lemų nerasta."
+}

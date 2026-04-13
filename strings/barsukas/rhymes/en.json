@@ -1,0 +1,19 @@
+{
+  "title": "Rhyming Dictionary",
+  "families_count": "Rhyme families",
+  "family_title": "Rhyme Family",
+  "ending_sound": "Ending sound",
+  "vowel": "Vowel",
+  "rhyme_key": "Rhyme Key",
+  "example": "Example",
+  "words": "Words",
+  "no_families": "No rhyme families found.",
+  "try_other_ending": "Try a different ending sound.",
+  "back_to_index": "Back to rhyme index",
+  "words_rhyming_with": "Words rhyming with",
+  "words_count": "Words",
+  "no_words_for_key": "No words found for this rhyme key.",
+  "related_rhymes": "Related rhymes",
+  "no_key_specified": "No rhyme key specified.",
+  "browse_families": "Browse rhyme families"
+}

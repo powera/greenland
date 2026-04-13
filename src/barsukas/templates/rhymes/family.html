@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Rhyme Family: -{{ rhyme_key or '?' }}{% endblock %}
+{% block title %}{{ STRINGS.rhymes.family_title }}: -{{ rhyme_key or '?' }}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/rhymes.css') }}">
@@ -10,7 +10,7 @@
 <div class="row mb-3">
     <div class="col">
         <a href="{{ url_for('rhymes.index', sound=final_sound, language=selected_language) }}" class="text-muted small">
-            <i class="bi bi-arrow-left"></i> Back to rhyme index
+            <i class="bi bi-arrow-left"></i> {{ STRINGS.rhymes.back_to_index }}
         </a>
     </div>
 </div>
@@ -18,7 +18,7 @@
 <form method="get" class="row g-2 align-items-end mb-3">
     <input type="hidden" name="key" value="{{ rhyme_key or '' }}">
     <div class="col-auto">
-        <label for="language" class="form-label mb-1">Language</label>
+        <label for="language" class="form-label mb-1">{{ STRINGS.common.language }}</label>
         <select class="form-select form-select-sm" id="language" name="language">
             {% for lang_code, lang_name in language_options %}
                 <option value="{{ lang_code }}" {% if lang_code == selected_language %}selected{% endif %}>
@@ -28,7 +28,7 @@
         </select>
     </div>
     <div class="col-auto">
-        <button type="submit" class="btn btn-sm btn-outline-secondary">Apply</button>
+        <button type="submit" class="btn btn-sm btn-outline-secondary">{{ STRINGS.common.apply }}</button>
     </div>
 </form>
 
@@ -38,9 +38,9 @@
         <div class="d-flex justify-content-between align-items-center">
             <h1 class="h4 mb-0">
                 <i class="bi bi-music-note-list"></i>
-                Words rhyming with <span class="rhyme-key-display">-{{ rhyme_key }}</span>
+                {{ STRINGS.rhymes.words_rhyming_with }} <span class="rhyme-key-display">-{{ rhyme_key }}</span>
             </h1>
-            <span class="text-muted">{{ words|length }} words</span>
+            <span class="text-muted">{{ STRINGS.rhymes.words_count }}: {{ words|length }}</span>
         </div>
     </div>
 </div>
@@ -51,11 +51,11 @@
         <table class="table table-sm table-hover">
             <thead>
                 <tr>
-                    <th>Word</th>
-                    <th>IPA</th>
-                    <th>Form</th>
-                    <th>POS</th>
-                    <th>Level</th>
+                    <th>{{ STRINGS.linguistics.word }}</th>
+                    <th>{{ STRINGS.linguistics.ipa }}</th>
+                    <th>{{ STRINGS.linguistics.form }}</th>
+                    <th>{{ STRINGS.linguistics.pos }}</th>
+                    <th>{{ STRINGS.linguistics.level }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -88,7 +88,7 @@
                 {% if not words %}
                     <tr>
                         <td colspan="5" class="text-center text-muted py-4">
-                            No words found for this rhyme key.
+                            {{ STRINGS.rhymes.no_words_for_key }}
                         </td>
                     </tr>
                 {% endif %}
@@ -101,7 +101,7 @@
     <div class="col-md-3">
         <div class="card">
             <div class="card-header">
-                <h6 class="mb-0">Related rhymes (-{{ final_sound }})</h6>
+                <h6 class="mb-0">{{ STRINGS.rhymes.related_rhymes }} (-{{ final_sound }})</h6>
             </div>
             <div class="list-group list-group-flush rhyme-related-list">
                 {% for rel in related_families %}
@@ -121,7 +121,7 @@
 <div class="row">
     <div class="col">
         <div class="alert alert-info">
-            No rhyme key specified. <a href="{{ url_for('rhymes.index', language=selected_language) }}">Browse rhyme families</a>.
+            {{ STRINGS.rhymes.no_key_specified }} <a href="{{ url_for('rhymes.index', language=selected_language) }}">{{ STRINGS.rhymes.browse_families }}</a>.
         </div>
     </div>
 </div>
