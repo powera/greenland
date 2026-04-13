@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Sync Relation Release Data{% endblock %}
+{% block title %}{{ STRINGS.sync.sync_relation_release_data_title }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -8,11 +8,11 @@
         <div class="col">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('sync_release.index') }}">Sync Lemmas</a></li>
-                    <li class="breadcrumb-item active">Sync Relations</li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_release.index') }}">{{ STRINGS.sync.lemmas_title }}</a></li>
+                    <li class="breadcrumb-item active">{{ STRINGS.sync.relations_title }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-diagram-3"></i> Sync Relation Release Data</h2>
+            <h2><i class="bi bi-diagram-3"></i> {{ STRINGS.sync.sync_relation_release_data_title }}</h2>
             <p class="text-muted">
                 Compare the relation group files (<code>data/release/lemma_relations</code>) with the working database.
                 Relation groups link lemmas that share a morphological root (e.g. rectangle/rectangular).
@@ -24,12 +24,12 @@
         <div class="col">
             <div class="card">
                 <div class="card-header">
-                    <i class="bi bi-info-circle"></i> Summary
+                    <i class="bi bi-info-circle"></i> {{ STRINGS.sync.summary }}
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p class="mb-1"><strong>Release files location:</strong> <code>{{ release_dir }}</code></p>
+                            <p class="mb-1"><strong>{{ STRINGS.sync.release_files_location }}</strong> <code>{{ release_dir }}</code></p>
                             <p class="mb-1"><strong>Groups in release files:</strong> {{ counts.release_total }}</p>
                             <p class="mb-0"><strong>Groups in database:</strong> {{ counts.db_total }}</p>
                         </div>
@@ -44,7 +44,7 @@
         <div class="col">
             <div class="card border-primary">
                 <div class="card-header bg-primary text-white">
-                    <i class="bi bi-download"></i> Export Database Relations
+                    <i class="bi bi-download"></i> {{ STRINGS.sync.export_database_relations }}
                 </div>
                 <div class="card-body">
                     <p>
@@ -63,11 +63,11 @@
     {% endif %}
 
     <div class="row">
-        <!-- Additions -->
+        <!-- {{ STRINGS.sync.additions }} -->
         <div class="col-md-6 col-lg-4 mb-3">
             <div class="card h-100 {% if counts.additions > 0 %}border-success{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-plus-circle text-success"></i> Additions
+                    <i class="bi bi-plus-circle text-success"></i> {{ STRINGS.sync.additions }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.additions > 0 %}text-success{% else %}text-muted{% endif %}">
@@ -80,17 +80,17 @@
                 <div class="card-footer">
                     <a href="{{ url_for('sync_relation_release.additions') }}"
                        class="btn btn-sm {% if counts.additions > 0 %}btn-success{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-arrow-right"></i> View &amp; Import
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_import }}
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Removals -->
+        <!-- {{ STRINGS.sync.removals }} -->
         <div class="col-md-6 col-lg-4 mb-3">
             <div class="card h-100 {% if counts.removals > 0 %}border-danger{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-dash-circle text-danger"></i> Removals
+                    <i class="bi bi-dash-circle text-danger"></i> {{ STRINGS.sync.removals }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.removals > 0 %}text-danger{% else %}text-muted{% endif %}">
@@ -103,17 +103,17 @@
                 <div class="card-footer">
                     <a href="{{ url_for('sync_relation_release.removals') }}"
                        class="btn btn-sm {% if counts.removals > 0 %}btn-danger{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-arrow-right"></i> View &amp; Delete
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_delete }}
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Member Differences -->
+        <!-- {{ STRINGS.sync.member_differences }} -->
         <div class="col-md-6 col-lg-4 mb-3">
             <div class="card h-100 {% if counts.differences > 0 %}border-warning{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-people text-warning"></i> Member Differences
+                    <i class="bi bi-people text-warning"></i> {{ STRINGS.sync.member_differences }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.differences > 0 %}text-warning{% else %}text-muted{% endif %}">
@@ -126,7 +126,7 @@
                 <div class="card-footer">
                     <a href="{{ url_for('sync_relation_release.differences') }}"
                        class="btn btn-sm {% if counts.differences > 0 %}btn-warning{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-arrow-right"></i> View &amp; Sync
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_sync }}
                     </a>
                 </div>
             </div>

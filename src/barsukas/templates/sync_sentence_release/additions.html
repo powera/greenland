@@ -8,20 +8,20 @@
         <div class="col">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('sync_sentence_release.index') }}">Sync Sentences</a></li>
-                    <li class="breadcrumb-item active">Additions</li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_sentence_release.index') }}">{{ STRINGS.sync.sentences_title }}</a></li>
+                    <li class="breadcrumb-item active">{{ STRINGS.sync.additions }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-plus-circle text-success"></i> New Sentences in Release</h2>
+            <h2><i class="bi bi-plus-circle text-success"></i> {{ STRINGS.sync.new_sentences_in_release }}</h2>
             <p class="text-muted">
-                Sentence GUIDs that exist in <code>data/release/sentences</code> but not in SQLite.
+                {{ STRINGS.sync.sentences_additions_desc|safe }}
             </p>
         </div>
     </div>
 
     {% if blocked %}
     <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle"></i> <strong>{{ blocked|length }} sentence(s) blocked</strong> due to missing lemma GUIDs.
+        <i class="bi bi-exclamation-triangle"></i> <strong>{{ blocked|length }} sentence(s) blocked</strong> {{ STRINGS.sync.blocked_missing_lemma_guids }}
         Import the missing lemmas first via <a href="{{ url_for('sync_release.additions') }}">Lemma Sync</a>.
         <ul class="mb-0 mt-2">
             {% for item in blocked %}
@@ -47,10 +47,10 @@
             <span><i class="bi bi-list-check"></i> New Sentences: {{ additions|length }}</span>
             <div>
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">
-                    Deselect All
+                    {{ STRINGS.sync.deselect_all }}
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-success" onclick="toggleAll(true)">
-                    Select All
+                    {{ STRINGS.sync.select_all }}
                 </button>
             </div>
         </div>
@@ -63,11 +63,11 @@
                                 <th style="width: 40px;">
                                     <input type="checkbox" id="select-all-checkbox" onchange="toggleAll(this.checked)">
                                 </th>
-                                <th>GUID</th>
+                                <th>{{ STRINGS.sync.guid }}</th>
                                 <th>English Text</th>
                                 <th>Pattern</th>
                                 <th class="text-center">Level</th>
-                                <th>Translations</th>
+                                <th>{{ STRINGS.sync.translations }}</th>
                             </tr>
                         </thead>
                         <tbody>

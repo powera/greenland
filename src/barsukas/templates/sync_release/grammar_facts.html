@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Sync Grammar Facts{% endblock %}
+{% block title %}{{ STRINGS.sync.sync_grammar_facts_title }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -9,10 +9,10 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ url_for('sync_release.index') }}">Sync</a></li>
-                    <li class="breadcrumb-item active">Grammar Facts</li>
+                    <li class="breadcrumb-item active">{{ STRINGS.sync.grammar_facts }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-journal-text"></i> Sync Grammar Facts</h2>
+            <h2><i class="bi bi-journal-text"></i> {{ STRINGS.sync.sync_grammar_facts_title }}</h2>
             <p class="text-muted">
                 Existing words with missing or different grammar facts in the database.
                 Select items to import from release files.
@@ -27,13 +27,13 @@
     {% else %}
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-list-check"></i> Differences: {{ differences|length }} lemma(s)</span>
+            <span><i class="bi bi-list-check"></i> {{ STRINGS.sync.differences }}: {{ differences|length }} lemma(s)</span>
             <div>
                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleAll(true)">
-                    Select All
+                    {{ STRINGS.sync.select_all }}
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">
-                    Deselect All
+                    {{ STRINGS.sync.deselect_all }}
                 </button>
             </div>
         </div>
@@ -46,10 +46,10 @@
                                 <th style="width: 40px;">
                                     <input type="checkbox" id="select-all-cb" onchange="toggleAll(this.checked)">
                                 </th>
-                                <th>GUID</th>
-                                <th>Word</th>
-                                <th>Category</th>
-                                <th>Fact Changes</th>
+                                <th>{{ STRINGS.sync.guid }}</th>
+                                <th>{{ STRINGS.linguistics.word }}</th>
+                                <th>{{ STRINGS.sync.category }}</th>
+                                <th>{{ STRINGS.sync.fact_changes }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -93,7 +93,7 @@
                         <i class="bi bi-arrow-left"></i> Back
                     </a>
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-lg"></i> Apply Selected
+                        <i class="bi bi-check-lg"></i> {{ STRINGS.sync.apply_selected }}
                     </button>
                 </div>
             </form>

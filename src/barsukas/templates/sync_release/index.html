@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Sync Lemmas{% endblock %}
+{% block title %}{{ STRINGS.sync.lemmas_title }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col">
-            <h2><i class="bi bi-book"></i> Sync Lemmas</h2>
+            <h2><i class="bi bi-book"></i> {{ STRINGS.sync.lemmas_title }}</h2>
             <p class="text-muted">
                 Compare lemma data in release files (<code>data/release/lemmas</code>) with the working database.
                 Choose an operation below to view and sync specific types of differences.
@@ -29,7 +29,7 @@
         <div class="col">
             <div class="card">
                 <div class="card-header">
-                    <i class="bi bi-info-circle"></i> Summary
+                    <i class="bi bi-info-circle"></i> {{ STRINGS.sync.summary }}
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -45,11 +45,11 @@
     </div>
 
     <div class="row">
-        <!-- Additions -->
+        <!-- {{ STRINGS.sync.additions }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.additions > 0 %}border-success{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-plus-circle text-success"></i> Additions
+                    <i class="bi bi-plus-circle text-success"></i> {{ STRINGS.sync.additions }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.additions > 0 %}text-success{% else %}text-muted{% endif %}">
@@ -62,17 +62,17 @@
                 <div class="card-footer">
                     <a href="{{ url_for('sync_release.additions') }}"
                        class="btn btn-sm {% if counts.additions > 0 %}btn-success{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-arrow-right"></i> View &amp; Import
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_import }}
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Removals -->
+        <!-- {{ STRINGS.sync.removals }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.removals > 0 %}border-danger{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-dash-circle text-danger"></i> Removals
+                    <i class="bi bi-dash-circle text-danger"></i> {{ STRINGS.sync.removals }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.removals > 0 %}text-danger{% else %}text-muted{% endif %}">
@@ -85,17 +85,17 @@
                 <div class="card-footer">
                     <a href="{{ url_for('sync_release.removals') }}"
                        class="btn btn-sm {% if counts.removals > 0 %}btn-danger{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-arrow-right"></i> View &amp; Delete
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_delete }}
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Difficulty Changes -->
+        <!-- {{ STRINGS.sync.difficulty }} {{ STRINGS.sync.changes }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.difficulty > 0 %}border-warning{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-speedometer2 text-warning"></i> Difficulty
+                    <i class="bi bi-speedometer2 text-warning"></i> {{ STRINGS.sync.difficulty }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.difficulty > 0 %}text-warning{% else %}text-muted{% endif %}">
@@ -108,17 +108,17 @@
                 <div class="card-footer">
                     <a href="{{ url_for('sync_release.difficulty') }}"
                        class="btn btn-sm {% if counts.difficulty > 0 %}btn-warning{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-arrow-right"></i> View &amp; Sync
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_sync }}
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Lemma Text Changes -->
+        <!-- {{ STRINGS.sync.lemma_text_changes }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.changes > 0 %}border-info{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-pencil text-info"></i> Text Changes
+                    <i class="bi bi-pencil text-info"></i> {{ STRINGS.sync.text_changes }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.changes > 0 %}text-info{% else %}text-muted{% endif %}">
@@ -131,17 +131,17 @@
                 <div class="card-footer">
                     <a href="{{ url_for('sync_release.changes') }}"
                        class="btn btn-sm {% if counts.changes > 0 %}btn-info{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-arrow-right"></i> View &amp; Sync
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_sync }}
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Grammar Facts -->
+        <!-- {{ STRINGS.sync.grammar_facts }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.grammar_facts > 0 %}border-primary{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-journal-text text-primary"></i> Grammar Facts
+                    <i class="bi bi-journal-text text-primary"></i> {{ STRINGS.sync.grammar_facts }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.grammar_facts > 0 %}text-primary{% else %}text-muted{% endif %}">
@@ -154,17 +154,17 @@
                 <div class="card-footer">
                     <a href="{{ url_for('sync_release.grammar_facts') }}"
                        class="btn btn-sm {% if counts.grammar_facts > 0 %}btn-primary{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-arrow-right"></i> View &amp; Sync
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_sync }}
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Translations -->
+        <!-- {{ STRINGS.sync.translations }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.translations > 0 %}border-secondary{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-translate"></i> Translations
+                    <i class="bi bi-translate"></i> {{ STRINGS.sync.translations }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.translations > 0 %}{% else %}text-muted{% endif %}">
@@ -177,17 +177,17 @@
                 <div class="card-footer">
                     <a href="{{ url_for('sync_release.translations') }}"
                        class="btn btn-sm {% if counts.translations > 0 %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-arrow-right"></i> View &amp; Sync
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_sync }}
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Secondary Translations -->
+        <!-- {{ STRINGS.sync.secondary_translations }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.secondary_translations > 0 %}border-secondary{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-translate"></i> Secondary Translations
+                    <i class="bi bi-translate"></i> {{ STRINGS.sync.secondary_translations }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.secondary_translations > 0 %}{% else %}text-muted{% endif %}">
@@ -200,7 +200,7 @@
                 <div class="card-footer">
                     <a href="{{ url_for('sync_release.secondary_translations') }}"
                        class="btn btn-sm {% if counts.secondary_translations > 0 %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
-                        <i class="bi bi-arrow-right"></i> View &amp; Sync
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_sync }}
                     </a>
                 </div>
             </div>
@@ -210,7 +210,7 @@
     <div class="row mt-4">
         <div class="col">
             <a href="{{ url_for('sync_hub.index') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Back to Sync Hub
+                <i class="bi bi-arrow-left"></i> {{ STRINGS.sync.back_to_sync_hub }}
             </a>
         </div>
     </div>

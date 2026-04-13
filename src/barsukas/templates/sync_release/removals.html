@@ -9,12 +9,12 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ url_for('sync_release.index') }}">Sync</a></li>
-                    <li class="breadcrumb-item active">Removals</li>
+                    <li class="breadcrumb-item active">{{ STRINGS.sync.removals }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-dash-circle text-danger"></i> Lemmas Not in Release</h2>
+            <h2><i class="bi bi-dash-circle text-danger"></i> {{ STRINGS.sync.lemmas_not_in_release }}</h2>
             <p class="text-muted">
-                GUIDs that exist in SQLite but not in <code>data/release</code>.
+                {{ STRINGS.sync.lemmas_removals_desc|safe }}
             </p>
         </div>
     </div>
@@ -29,7 +29,7 @@
     {% else %}
     <div class="alert alert-info">
         <i class="bi bi-info-circle"></i> These lemmas exist in SQLite but not in <code>data/release</code>.
-        They may have been created via Pending Imports or added directly. Use <strong>Export to Release</strong>
+        {{ STRINGS.sync.removals_export_hint_prefix|safe }}
         to write them to the release files, or <strong>Delete</strong> to remove them from SQLite.
     </div>
 
@@ -38,10 +38,10 @@
             <span><i class="bi bi-list-check"></i> SQLite-only Lemmas: {{ removals|length }}</span>
             <div>
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">
-                    Deselect All
+                    {{ STRINGS.sync.deselect_all }}
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleAll(true)">
-                    Select All
+                    {{ STRINGS.sync.select_all }}
                 </button>
             </div>
         </div>
@@ -54,9 +54,9 @@
                                 <th style="width: 40px;">
                                     <input type="checkbox" id="select-all-checkbox" onchange="toggleAll(this.checked)">
                                 </th>
-                                <th>GUID</th>
-                                <th>Word</th>
-                                <th>Category</th>
+                                <th>{{ STRINGS.sync.guid }}</th>
+                                <th>{{ STRINGS.linguistics.word }}</th>
+                                <th>{{ STRINGS.sync.category }}</th>
                                 <th class="text-center">Level</th>
                             </tr>
                         </thead>
@@ -104,7 +104,7 @@
                     </a>
                     <div class="btn-group">
                         <button type="button" class="btn btn-primary" onclick="submitExport()">
-                            <i class="bi bi-box-arrow-up"></i> Export to Release
+                            <i class="bi bi-box-arrow-up"></i> {{ STRINGS.sync.export_to_release }}
                         </button>
                         <button type="button" class="btn btn-danger" onclick="submitDelete()">
                             <i class="bi bi-trash"></i> Delete Selected

@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Secondary Translations - Select Languages{% endblock %}
+{% block title %}{{ STRINGS.sync.secondary_translations_select_title }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col">
-            <h2><i class="bi bi-translate"></i> Secondary Translations - Select Languages</h2>
+            <h2><i class="bi bi-translate"></i> {{ STRINGS.sync.secondary_translations_select_title }}</h2>
             <p class="text-muted">
                 Choose which secondary (Tier 3) languages to sync. You can select one or more languages to compare.
             </p>
@@ -45,7 +45,7 @@
 
                         <div class="d-flex gap-2">
                             <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll()">
-                                <i class="bi bi-check-all"></i> Select All
+                                <i class="bi bi-check-all"></i> {{ STRINGS.sync.select_all }}
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectNone()">
                                 <i class="bi bi-x"></i> Select None
@@ -59,10 +59,10 @@
         <div class="row">
             <div class="col">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-arrow-right"></i> View Differences
+                    <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_differences }}
                 </button>
                 <a href="{{ url_for('sync_release.index') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Back to Lemma Sync
+                    <i class="bi bi-arrow-left"></i> {{ STRINGS.sync.back_to_lemma_sync }}
                 </a>
             </div>
         </div>
