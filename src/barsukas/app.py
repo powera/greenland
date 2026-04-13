@@ -17,7 +17,12 @@ from typing import Any, Callable, Dict, Optional, cast
 
 from barsukas.config import Config
 from barsukas.helpers.strings import SUPPORTED_UI_LANGS, load_all_barsukas_strings
-from flask import Flask, Response, g, render_template, request
+from barsukas.helpers.ui_language import (
+    UI_LANGUAGE_COOKIE,
+    normalize_ui_language,
+    resolve_ui_language,
+)
+from flask import Flask, Response, g, redirect, render_template, request, url_for
 from barsukas.metrics import (
     RequestMetricsMiddleware,
     get_metrics_output,
@@ -334,6 +339,7 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     def before_request() -> None:
         """Set up database session and start request timing for metrics."""
         g.db = app.db_session_factory()
+        g.ui_lang = resolve_ui_language(request)
         RequestMetricsMiddleware.before_request()
 
     @app.teardown_appcontext
@@ -350,7 +356,25 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     @app.after_request
     def after_request(response: Response) -> Response:
         """Record request metrics after response is generated."""
+        selected_ui_lang = getattr(g, "set_ui_lang_cookie", None)
+        if selected_ui_lang:
+            response.set_cookie(
+                UI_LANGUAGE_COOKIE,
+                selected_ui_lang,
+                max_age=60 * 60 * 24 * 365,
+                samesite="Lax",
+            )
         return cast(Response, RequestMetricsMiddleware.after_request(response))
+
+    @app.post("/ui-language")
+    def set_ui_language() -> Any:
+        """Persist UI language selection in a cookie, then return to the target page."""
+        selected_ui_lang = normalize_ui_language(request.form.get("ui_lang")) or "en"
+        g.set_ui_lang_cookie = selected_ui_lang
+        next_url = request.form.get("next_url", "").strip()
+        if not next_url.startswith("/"):
+            next_url = url_for("index")
+        return redirect(next_url)
 
     @app.route("/metrics")
     def metrics() -> Response:
@@ -393,12 +417,11 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     @app.context_processor
     def utility_processor() -> Dict[str, Any]:
         """Add utility values to Jinja templates."""
-        ui_lang = request.args.get("ui", "en").strip().lower()
-        if ui_lang not in SUPPORTED_UI_LANGS:
-            ui_lang = "en"
+        ui_lang = getattr(g, "ui_lang", "en")
         return {
             "config": app.config,
             "UI_LANG": ui_lang,
+            "SUPPORTED_UI_LANGS": sorted(SUPPORTED_UI_LANGS),
             "STRINGS": load_all_barsukas_strings(ui_lang),
         }
 

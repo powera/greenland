@@ -164,6 +164,25 @@
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav ms-auto">
+                    <li class="nav-item me-2">
+                        <form method="post" action="{{ url_for('set_ui_language') }}" class="d-flex align-items-center">
+                            <input type="hidden" name="next_url" value="{{ request.full_path if request.query_string else request.path }}">
+                            <label for="ui-lang-selector" class="visually-hidden">{{ STRINGS.navigation.get('ui_language', 'UI language') }}</label>
+                            <select
+                                id="ui-lang-selector"
+                                name="ui_lang"
+                                class="form-select form-select-sm"
+                                onchange="this.form.submit()"
+                                aria-label="{{ STRINGS.navigation.get('ui_language', 'UI language') }}"
+                            >
+                                {% for code in SUPPORTED_UI_LANGS %}
+                                    <option value="{{ code }}" {% if code == UI_LANG %}selected{% endif %}>
+                                        {{ STRINGS.languages.get(code, code|upper) }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link text-white-50" href="{{ url_for('settings.index') }}">
                             <small><i class="bi bi-database"></i> linguistics.sqlite</small>
