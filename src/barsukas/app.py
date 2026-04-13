@@ -16,7 +16,8 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Optional, cast
 
 from barsukas.config import Config
-from flask import Flask, Response, g, render_template
+from barsukas.helpers.strings import SUPPORTED_UI_LANGS, load_all_barsukas_strings
+from flask import Flask, Response, g, render_template, request
 from barsukas.metrics import (
     RequestMetricsMiddleware,
     get_metrics_output,
@@ -391,8 +392,15 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
 
     @app.context_processor
     def utility_processor() -> Dict[str, Any]:
-        """Add utility functions to Jinja templates."""
-        return {"config": app.config}
+        """Add utility values to Jinja templates."""
+        ui_lang = request.args.get("ui", "en").strip().lower()
+        if ui_lang not in SUPPORTED_UI_LANGS:
+            ui_lang = "en"
+        return {
+            "config": app.config,
+            "UI_LANG": ui_lang,
+            "STRINGS": load_all_barsukas_strings(ui_lang),
+        }
 
     return app
 
