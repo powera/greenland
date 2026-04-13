@@ -502,7 +502,7 @@ class PapugaAgent:
                 forms_by_lemma_lang.setdefault(lemma_language_pair, [])
 
             # Apply limit to number of lemma/language combinations
-            lemma_lang_pairs = list(forms_by_lemma_lang.keys())
+            lemma_lang_pairs = sorted(forms_by_lemma_lang.keys())
             if limit:
                 lemma_lang_pairs = lemma_lang_pairs[:limit]
                 logger.info(f"Limiting to {limit} lemma/language combinations")
@@ -583,6 +583,12 @@ class PapugaAgent:
                             populated_count += generated_count
                             failed_count += len(generation_errors)
                             session.commit()
+                            new_ipa, new_phonetic = get_translation_pronunciations(
+                                session, lemma, lang_code
+                            )
+                            logger.info(f"  Generated: IPA={new_ipa}, Phonetic={new_phonetic}")
+                            if generation_errors:
+                                logger.warning(f"  Errors: {'; '.join(generation_errors)}")
                         except Exception as generation_error:
                             logger.error(
                                 "  Failed to generate pronunciation for lemma translation: %s",
