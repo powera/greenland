@@ -85,13 +85,29 @@ _POS_SUBTYPE_GROUPS: Dict[str, Dict[str, List[str]]] = {
     "numeral": {"Numerals": ["cardinal", "ordinal"]},
 }
 
-# Display names for the POS type headers in the dropdown.
+# Fallback display names for the POS type headers in the category dropdown.
 _POS_DISPLAY_NAMES: Dict[str, str] = {
     "noun": "Nouns",
     "verb": "Verbs",
     "adjective": "Adjectives",
     "adverb": "Adverbs",
     "numeral": "Numerals",
+}
+
+# Fallback display names for row-level POS values in the dictionary table.
+_POS_SINGULAR_DISPLAY_NAMES: Dict[str, str] = {
+    "noun": "Noun",
+    "verb": "Verb",
+    "adjective": "Adjective",
+    "adverb": "Adverb",
+    "numeral": "Numeral",
+    "pronoun": "Pronoun",
+    "preposition": "Preposition",
+    "conjunction": "Conjunction",
+    "interjection": "Interjection",
+    "determiner": "Determiner",
+    "article": "Article",
+    "particle": "Particle",
 }
 
 
@@ -289,7 +305,7 @@ def _available_categories() -> set[Tuple[str, str]]:
 
 
 def _build_category_options(
-    available: set[Tuple[str, str]],
+    available: set[Tuple[str, str]], pos_group_labels: Dict[str, str]
 ) -> List[Dict[str, Any]]:
     """Build a grouped list of category options for the dropdown.
 
@@ -317,7 +333,9 @@ def _build_category_options(
             result.append(
                 {
                     "pos_type": pos_type,
-                    "label": _POS_DISPLAY_NAMES.get(pos_type, pos_type.title()),
+                    "label": pos_group_labels.get(
+                        pos_type, _POS_DISPLAY_NAMES.get(pos_type, pos_type.title())
+                    ),
                     "items": items,
                 }
             )
@@ -346,6 +364,15 @@ def dictionary() -> ResponseReturnValue:
     if ui_lang not in SUPPORTED_UI_LANGS:
         ui_lang = "en"
 
+    pos_strings = load_barsukas_strings(namespace="parts_of_speech", ui_lang=ui_lang)
+    pos_display_names: Dict[str, str] = {
+        key: pos_strings.get(key, fallback) for key, fallback in _POS_SINGULAR_DISPLAY_NAMES.items()
+    }
+    pos_group_display_names: Dict[str, str] = {
+        key: pos_strings.get(f"{key}_plural", fallback)
+        for key, fallback in _POS_DISPLAY_NAMES.items()
+    }
+
     display_langs = _get_display_langs(lang)
     alphabet = _get_alphabet(lang)
 
@@ -361,7 +388,7 @@ def dictionary() -> ResponseReturnValue:
 
     if sort == "category":
         available = _available_categories()
-        category_options = _build_category_options(available)
+        category_options = _build_category_options(available, pos_group_display_names)
         selected_category = request.args.get("category", "").strip()
 
         # Validate selected_category is a real option.
@@ -439,6 +466,9 @@ def dictionary() -> ResponseReturnValue:
                 "headword": headword,
                 "disambiguation": lm.disambiguation,
                 "pos_type": lm.pos_type,
+                "pos_display": pos_display_names.get(
+                    lm.pos_type or "", (lm.pos_type or "").replace("_", " ").title()
+                ),
                 "difficulty_level": lm.difficulty_level,
                 "translations": trans,
             }

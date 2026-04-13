@@ -1,0 +1,19 @@
+{
+  "noun": "Noun",
+  "verb": "Verb",
+  "adjective": "Adjective",
+  "adverb": "Adverb",
+  "numeral": "Numeral",
+  "pronoun": "Pronoun",
+  "preposition": "Preposition",
+  "conjunction": "Conjunction",
+  "interjection": "Interjection",
+  "determiner": "Determiner",
+  "article": "Article",
+  "particle": "Particle",
+  "noun_plural": "Nouns",
+  "verb_plural": "Verbs",
+  "adjective_plural": "Adjectives",
+  "adverb_plural": "Adverbs",
+  "numeral_plural": "Numerals"
+}
