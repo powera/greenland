@@ -12,7 +12,7 @@
                     <li class="breadcrumb-item active">{{ STRINGS.sync.additions }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-plus-circle text-success"></i> New Relation Groups in {{ STRINGS.sync.release }}</h2>
+            <h2><i class="bi bi-plus-circle text-success"></i> {{ STRINGS.sync.new_relation_groups_in_release }}</h2>
             <p class="text-muted">
                 Relation groups that exist in <code>data/release/lemma_relations</code> but not in the database.
             </p>
@@ -21,7 +21,7 @@
 
     {% if blocked %}
     <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle"></i> <strong>{{ blocked|length }} group(s) blocked</strong> due to missing lemma {{ STRINGS.sync.guid }}s.
+        <i class="bi bi-exclamation-triangle"></i> <strong>{{ blocked|length }} group(s) blocked</strong> {{ STRINGS.sync.blocked_missing_lemma_guids }}
         Import the missing lemmas first via <a href="{{ url_for('sync_release.additions') }}">Lemma Sync</a>.
         <ul class="mb-0 mt-2">
             {% for item in blocked %}
@@ -36,7 +36,7 @@
 
     {% if not additions %}
     <div class="alert alert-success">
-        <i class="bi bi-check-circle"></i> No new relation groups to import. {{ STRINGS.sync.database }} is up to date with release.
+        <i class="bi bi-check-circle"></i> {{ STRINGS.sync.no_new_relation_groups }}
     </div>
     <a href="{{ url_for('sync_relation_release.index') }}" class="btn btn-secondary">
         <i class="bi bi-arrow-left"></i> Back

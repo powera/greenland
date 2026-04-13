@@ -29,7 +29,7 @@
             <form method="post" action="{{ url_for('sync_derivative_release.export_all', lang_code=lang_code) }}"
                   onsubmit="return confirm('Export all {{ db_count }} {{ lang_name }} lemma(s) from DB to release files?');">
                 <button type="submit" class="btn btn-outline-primary">
-                    <i class="bi bi-upload"></i> Export All DB &rarr; {{ STRINGS.sync.release }}
+                    <i class="bi bi-upload"></i> {{ STRINGS.sync.export_all_db_to_release }}
                 </button>
             </form>
         </div>
@@ -158,7 +158,7 @@
                     <button type="button" class="btn btn-sm btn-outline-secondary"
                             onclick="setAllSelects('.removal-action', 'export')">All Export</button>
                     <button type="button" class="btn btn-sm btn-outline-secondary"
-                            onclick="setAllSelects('.removal-action', 'skip')">All {{ STRINGS.sync.skip }}</button>
+                            onclick="setAllSelects('.removal-action', 'skip')">{{ STRINGS.sync.all_skip }}</button>
                     <div class="flex-grow-1"></div>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-check-lg"></i> Apply
@@ -201,7 +201,7 @@
                                     name="action_{{ item.guid }}">
                                 <option value="skip">{{ STRINGS.sync.skip }}</option>
                                 <option value="use_db">{{ STRINGS.sync.use_db }}</option>
-                                <option value="use_release">Use {{ STRINGS.sync.release }}</option>
+                                <option value="use_release">{{ STRINGS.sync.use_release }}</option>
                             </select>
                         </div>
                     </div>
@@ -258,14 +258,14 @@
 
                 <div class="d-flex gap-2 mt-3">
                     <button type="button" class="btn btn-sm btn-outline-secondary"
-                            onclick="setAllSelects('.change-action', 'skip')">All {{ STRINGS.sync.skip }}</button>
+                            onclick="setAllSelects('.change-action', 'skip')">{{ STRINGS.sync.all_skip }}</button>
                     <button type="button" class="btn btn-sm btn-outline-warning"
                             onclick="setAllSelects('.change-action', 'use_db')">All {{ STRINGS.sync.use_db }}</button>
                     <button type="button" class="btn btn-sm btn-outline-primary"
-                            onclick="setAllSelects('.change-action', 'use_release')">All Use {{ STRINGS.sync.release }}</button>
+                            onclick="setAllSelects('.change-action', 'use_release')">All {{ STRINGS.sync.use_release }}</button>
                     <div class="flex-grow-1"></div>
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-lg"></i> Apply {{ STRINGS.sync.changes }}
+                        <i class="bi bi-check-lg"></i> {{ STRINGS.sync.apply_changes }}
                     </button>
                 </div>
             </form>

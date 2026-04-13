@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Sync Sentence {{ STRINGS.sync.release }} Data{% endblock %}
+{% block title %}{{ STRINGS.sync.sync_sentence_release_data_title }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -12,7 +12,7 @@
                     <li class="breadcrumb-item active">{{ STRINGS.sync.sentences_title }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-arrow-left-right"></i> Sync Sentence {{ STRINGS.sync.release }} Data</h2>
+            <h2><i class="bi bi-arrow-left-right"></i> {{ STRINGS.sync.sync_sentence_release_data_title }}</h2>
             <p class="text-muted">
                 Compare the sentence files (<code>data/release/sentences</code>) with the working database.
                 Conversation sentences are excluded.
@@ -29,7 +29,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p class="mb-1"><strong>{{ STRINGS.sync.release }} files location:</strong> <code>{{ release_dir }}</code></p>
+                            <p class="mb-1"><strong>{{ STRINGS.sync.release_files_location }}</strong> <code>{{ release_dir }}</code></p>
                             <p class="mb-1"><strong>Sentences in release files:</strong> {{ counts.release_total }}</p>
                             <p class="mb-0"><strong>Sentences in database:</strong> {{ counts.db_total }}</p>
                         </div>
@@ -86,7 +86,7 @@
             </div>
         </div>
 
-        <!-- Level {{ STRINGS.sync.changes }} -->
+        <!-- {{ STRINGS.sync.level_changes }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.level > 0 %}border-warning{% endif %}">
                 <div class="card-header">
@@ -109,18 +109,18 @@
             </div>
         </div>
 
-        <!-- English Text {{ STRINGS.sync.changes }} -->
+        <!-- English {{ STRINGS.sync.text_changes }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.changes > 0 %}border-info{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-pencil text-info"></i> Text {{ STRINGS.sync.changes }}
+                    <i class="bi bi-pencil text-info"></i> {{ STRINGS.sync.text_changes }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.changes > 0 %}text-info{% else %}text-muted{% endif %}">
                         {{ counts.changes }}
                     </h3>
                     <p class="card-text text-muted">
-                        Same {{ STRINGS.sync.guid }} but English sentence text differs
+                        {{ STRINGS.sync.same_guid_english_differs }}
                     </p>
                 </div>
                 <div class="card-footer">

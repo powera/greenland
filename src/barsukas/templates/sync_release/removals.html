@@ -12,7 +12,7 @@
                     <li class="breadcrumb-item active">{{ STRINGS.sync.removals }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-dash-circle text-danger"></i> Lemmas Not in {{ STRINGS.sync.release }}</h2>
+            <h2><i class="bi bi-dash-circle text-danger"></i> {{ STRINGS.sync.lemmas_not_in_release }}</h2>
             <p class="text-muted">
                 {{ STRINGS.sync.guid }}s that exist in SQLite but not in <code>data/release</code>.
             </p>
@@ -29,7 +29,7 @@
     {% else %}
     <div class="alert alert-info">
         <i class="bi bi-info-circle"></i> These lemmas exist in SQLite but not in <code>data/release</code>.
-        They may have been created via Pending Imports or added directly. Use <strong>Export to {{ STRINGS.sync.release }}</strong>
+        {{ STRINGS.sync.removals_export_hint_prefix|safe }}
         to write them to the release files, or <strong>Delete</strong> to remove them from SQLite.
     </div>
 
@@ -104,7 +104,7 @@
                     </a>
                     <div class="btn-group">
                         <button type="button" class="btn btn-primary" onclick="submitExport()">
-                            <i class="bi bi-box-arrow-up"></i> Export to {{ STRINGS.sync.release }}
+                            <i class="bi bi-box-arrow-up"></i> {{ STRINGS.sync.export_to_release }}
                         </button>
                         <button type="button" class="btn btn-danger" onclick="submitDelete()">
                             <i class="bi bi-trash"></i> Delete Selected

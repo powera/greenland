@@ -12,16 +12,16 @@
                     <li class="breadcrumb-item active">{{ STRINGS.sync.additions }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-plus-circle text-success"></i> New Sentences in {{ STRINGS.sync.release }}</h2>
+            <h2><i class="bi bi-plus-circle text-success"></i> {{ STRINGS.sync.new_sentences_in_release }}</h2>
             <p class="text-muted">
-                Sentence {{ STRINGS.sync.guid }}s that exist in <code>data/release/sentences</code> but not in SQLite.
+                {{ STRINGS.sync.sentences_additions_desc|safe }}
             </p>
         </div>
     </div>
 
     {% if blocked %}
     <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle"></i> <strong>{{ blocked|length }} sentence(s) blocked</strong> due to missing lemma {{ STRINGS.sync.guid }}s.
+        <i class="bi bi-exclamation-triangle"></i> <strong>{{ blocked|length }} sentence(s) blocked</strong> {{ STRINGS.sync.blocked_missing_lemma_guids }}
         Import the missing lemmas first via <a href="{{ url_for('sync_release.additions') }}">Lemma Sync</a>.
         <ul class="mb-0 mt-2">
             {% for item in blocked %}

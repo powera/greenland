@@ -114,11 +114,11 @@
             </div>
         </div>
 
-        <!-- Lemma Text {{ STRINGS.sync.changes }} -->
+        <!-- Lemma {{ STRINGS.sync.text_changes }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.changes > 0 %}border-info{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-pencil text-info"></i> Text {{ STRINGS.sync.changes }}
+                    <i class="bi bi-pencil text-info"></i> {{ STRINGS.sync.text_changes }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.changes > 0 %}text-info{% else %}text-muted{% endif %}">
@@ -183,11 +183,11 @@
             </div>
         </div>
 
-        <!-- Secondary {{ STRINGS.sync.translations }} -->
+        <!-- {{ STRINGS.sync.secondary_translations }} -->
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100 {% if counts.secondary_translations > 0 %}border-secondary{% endif %}">
                 <div class="card-header">
-                    <i class="bi bi-translate"></i> Secondary {{ STRINGS.sync.translations }}
+                    <i class="bi bi-translate"></i> {{ STRINGS.sync.secondary_translations }}
                 </div>
                 <div class="card-body">
                     <h3 class="card-title {% if counts.secondary_translations > 0 %}{% else %}text-muted{% endif %}">
@@ -210,7 +210,7 @@
     <div class="row mt-4">
         <div class="col">
             <a href="{{ url_for('sync_hub.index') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Back to {{ STRINGS.sync.hub_title }}
+                <i class="bi bi-arrow-left"></i> {{ STRINGS.sync.back_to_sync_hub }}
             </a>
         </div>
     </div>

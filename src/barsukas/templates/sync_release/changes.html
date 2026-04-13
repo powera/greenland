@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Sync - Text {{ STRINGS.sync.changes }}{% endblock %}
+{% block title %}Sync - {{ STRINGS.sync.text_changes }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -9,13 +9,13 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ url_for('sync_release.index') }}">Sync</a></li>
-                    <li class="breadcrumb-item active">Text {{ STRINGS.sync.changes }}</li>
+                    <li class="breadcrumb-item active">{{ STRINGS.sync.text_changes }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-pencil text-info"></i> Lemma Text {{ STRINGS.sync.changes }}</h2>
+            <h2><i class="bi bi-pencil text-info"></i> Lemma {{ STRINGS.sync.text_changes }}</h2>
             <p class="text-muted">
                 Same {{ STRINGS.sync.guid }} but different lemma_text between SQLite and <code>data/release</code>.
-                {{ STRINGS.sync.changes }} can go in either direction.
+                {{ STRINGS.sync.changes_either_direction }}
             </p>
         </div>
     </div>
@@ -30,7 +30,7 @@
     {% else %}
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-list-check"></i> Text {{ STRINGS.sync.changes }}: {{ changes|length }}</span>
+            <span><i class="bi bi-list-check"></i> {{ STRINGS.sync.text_changes }}: {{ changes|length }}</span>
             <div>
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll('skip')">
                     {{ STRINGS.sync.skip }} All
@@ -39,7 +39,7 @@
                     Use All DB
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-info" onclick="selectAll('use_release')">
-                    Use All {{ STRINGS.sync.release }}
+                    {{ STRINGS.sync.use_all_release }}
                 </button>
             </div>
         </div>
@@ -52,7 +52,7 @@
                                 <th>{{ STRINGS.sync.guid }}</th>
                                 <th>{{ STRINGS.sync.category }}</th>
                                 <th>SQLite Text</th>
-                                <th>{{ STRINGS.sync.release }} Text</th>
+                                <th>{{ STRINGS.sync.release_text }}</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -88,7 +88,7 @@
                                     <select class="form-select form-select-sm action-select" name="action_{{ item.lemma_id }}" style="min-width: 140px;">
                                         <option value="skip">{{ STRINGS.sync.skip }}</option>
                                         <option value="use_db">{{ STRINGS.sync.use_db }}</option>
-                                        <option value="use_release">Use {{ STRINGS.sync.release }}</option>
+                                        <option value="use_release">{{ STRINGS.sync.use_release }}</option>
                                     </select>
                                 </td>
                             </tr>
@@ -102,7 +102,7 @@
                         <i class="bi bi-arrow-left"></i> Back
                     </a>
                     <button type="submit" class="btn btn-info">
-                        <i class="bi bi-check-lg"></i> Apply {{ STRINGS.sync.changes }}
+                        <i class="bi bi-check-lg"></i> {{ STRINGS.sync.apply_changes }}
                     </button>
                 </div>
             </form>
