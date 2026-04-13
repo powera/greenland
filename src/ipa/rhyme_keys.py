@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+import unicodedata
 from typing import Optional
 
 from langtools.rhyme_languages import RHYME_KEY_LANGUAGES
 
-# Broad IPA vowel inventory covering the currently supported rhyme-key languages.
-IPA_VOWELS: frozenset[str] = frozenset("iɪeɛæɑɒɔʊuʌəɜɚɝaoɐœøyʏɨɯɒ̃ɛ̃ɔ̃ɑ̃ɶɤɞɘɵɜ̃ɒ̈ʉɒ̈")
+# Single-codepoint IPA vowel base characters.  Do NOT include multi-codepoint
+# sequences here (e.g. ɔ̃ = ɔ + U+0303): Python frozenset iteration would
+# split them and accidentally admit bare combining diacritics as "vowels".
+# Combining diacritics (Unicode category Mn) are handled separately via
+# _is_combining() so that nasal/long vowels are treated as a single nucleus.
+IPA_VOWELS: frozenset[str] = frozenset("iɪeɛæɑɒɔʊuʌəɜɚɝaoɐœøyʏɨɯɶɤɞɘɵʉ")
 
 _IPA_DELIMITERS: str = "/[]"
 _PRIMARY_STRESS: str = "ˈ"
@@ -51,10 +56,20 @@ def _find_first_vowel(ipa: str, start: int = 0) -> Optional[int]:
 
 
 def _find_last_vowel(ipa: str) -> Optional[int]:
-    """Return the index of the last IPA vowel character in *ipa*."""
-    for index in range(len(ipa) - 1, -1, -1):
+    """Return the index of the last IPA vowel nucleus start in *ipa*.
+
+    Skips backwards over combining diacritics (Unicode category Mn) so that
+    nasal/modified vowels like ɔ̃ (ɔ + U+0303) are treated as a single nucleus
+    whose start index is the base vowel character.
+    """
+    index = len(ipa) - 1
+    while index >= 0:
+        if unicodedata.category(ipa[index]) == "Mn":
+            index -= 1
+            continue
         if ipa[index] in IPA_VOWELS:
             return index
+        index -= 1
     return None
 
 
@@ -88,22 +103,52 @@ def compute_rhyme_key(ipa: str, language_code: str = "en") -> Optional[str]:
     return rhyme if rhyme else None
 
 
+def _last_nucleus_start(s: str) -> int:
+    """Return the start index of the last vowel nucleus (base vowel + combining marks).
+
+    Walks backwards skipping combining diacritics, then back to include any
+    leading combining marks that belong to the same nucleus.  Returns 0 if the
+    whole string is one nucleus.
+    """
+    index = len(s) - 1
+    # Skip trailing combining marks
+    while index >= 0 and unicodedata.category(s[index]) == "Mn":
+        index -= 1
+    # index is now on the base vowel (or a consonant if no vowel found)
+    return index
+
+
+def _ends_with_vowel_nucleus(s: str) -> bool:
+    """Return True if *s* ends with a vowel nucleus (base vowel + optional combining marks)."""
+    idx = _last_nucleus_start(s)
+    return idx >= 0 and s[idx] in IPA_VOWELS
+
+
 def rhyme_key_final_sound(rhyme_key: str) -> str:
     """Extract the final phoneme from a rhyme key for tier-1 navigation."""
     if not rhyme_key:
         return ""
 
-    last = rhyme_key[-1]
-    if last == "ː" and len(rhyme_key) >= 2:
+    # Handle long-vowel marker
+    if rhyme_key.endswith("ː") and len(rhyme_key) >= 2:
         return rhyme_key[-2:]
 
-    if last in IPA_VOWELS:
-        index = len(rhyme_key) - 1
-        while index > 0 and rhyme_key[index - 1] in IPA_VOWELS:
-            index -= 1
+    if _ends_with_vowel_nucleus(rhyme_key):
+        # Walk back to collect the full trailing vowel sequence
+        # (multiple adjacent vowels count as one diphthong/nucleus group)
+        index = _last_nucleus_start(rhyme_key)
+        # Include any preceding base vowels that form a diphthong
+        while index > 0:
+            prev = _last_nucleus_start(rhyme_key[:index])
+            if prev >= 0 and rhyme_key[prev] in IPA_VOWELS:
+                index = prev
+            else:
+                break
         return rhyme_key[index:]
 
-    return last
+    # Consonant ending: return just the last character (+ any combining marks)
+    index = _last_nucleus_start(rhyme_key)
+    return rhyme_key[index:]
 
 
 def rhyme_key_penultimate_sound(rhyme_key: str) -> str:
@@ -116,14 +161,18 @@ def rhyme_key_penultimate_sound(rhyme_key: str) -> str:
     if not prefix:
         return ""
 
-    last_of_prefix = prefix[-1]
-    if last_of_prefix == "ː" and len(prefix) >= 2:
+    if prefix.endswith("ː") and len(prefix) >= 2:
         return prefix[-2:]
 
-    if last_of_prefix in IPA_VOWELS:
-        index = len(prefix) - 1
-        while index > 0 and prefix[index - 1] in IPA_VOWELS:
-            index -= 1
+    if _ends_with_vowel_nucleus(prefix):
+        index = _last_nucleus_start(prefix)
+        while index > 0:
+            prev = _last_nucleus_start(prefix[:index])
+            if prev >= 0 and prefix[prev] in IPA_VOWELS:
+                index = prev
+            else:
+                break
         return prefix[index:]
 
-    return last_of_prefix
+    index = _last_nucleus_start(prefix)
+    return prefix[index:]

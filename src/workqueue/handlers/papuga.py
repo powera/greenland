@@ -262,6 +262,20 @@ def generate_pronunciations_for_lemma(
             )
             generated_count += 1
 
+            # If no base DerivativeForm exists yet, create one so the rhyme key
+            # event listener fires and the word appears in the rhyming dictionary.
+            if existing_base_form is None:
+                add_derivative_form(
+                    session=session,
+                    lemma=lemma,
+                    derivative_form_text=translation_text,
+                    language_code=lang_code,
+                    grammatical_form=_get_default_base_grammatical_form(lemma.pos_type),
+                    is_base_form=True,
+                    ipa_pronunciation=ipa_value,
+                    phonetic_pronunciation=phonetic_value,
+                )
+
     if needs_english_lemma_pronunciation and translation_text:
         success, generated_ipa, generated_phonetic = generate_pronunciation_for_form(
             form=DerivativeForm(
