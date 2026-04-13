@@ -17,7 +17,7 @@ from flask import (
     request,
 )
 from flask.typing import ResponseReturnValue
-from sqlalchemy import case
+from sqlalchemy import and_, case, or_
 from sqlalchemy.orm import Query
 
 from langtools.zh.pinyin_helper import generate_pinyin
@@ -240,14 +240,28 @@ def index() -> ResponseReturnValue:
 
 
 def get_next_sentence(
-    current_id: int,
+    current_sentence: Sentence,
     status_filter: str,
     level_filter: str,
     pattern_filter: str,
 ) -> Optional[Dict[str, Any]]:
-    """Get the next sentence after current_id matching filters."""
+    """Get the next sentence in review sort order matching filters."""
     query = build_sentence_query(status_filter, level_filter, pattern_filter)
-    query = query.filter(Sentence.id > current_id)
+
+    current_level_order = (
+        current_sentence.minimum_level if current_sentence.minimum_level is not None else 99
+    )
+    sentence_level_order = case(
+        (Sentence.minimum_level.is_(None), 99), else_=Sentence.minimum_level
+    )
+
+    # Match index ordering: (minimum_level with NULL as 99, id)
+    query = query.filter(
+        or_(
+            sentence_level_order > current_level_order,
+            and_(sentence_level_order == current_level_order, Sentence.id > current_sentence.id),
+        )
+    )
 
     sentences_with_translations = find_sentences_with_translations(query, limit=1)
 
@@ -294,7 +308,7 @@ def verify(sentence_id: int) -> ResponseReturnValue:
         g.db.commit()
 
         # Get next sentence
-        next_sentence = get_next_sentence(sentence_id, status_filter, level_filter, pattern_filter)
+        next_sentence = get_next_sentence(sentence, status_filter, level_filter, pattern_filter)
 
         if next_sentence:
             return jsonify(
@@ -333,7 +347,7 @@ def reject(sentence_id: int) -> ResponseReturnValue:
         g.db.commit()
 
         # Get next sentence
-        next_sentence = get_next_sentence(sentence_id, status_filter, level_filter, pattern_filter)
+        next_sentence = get_next_sentence(sentence, status_filter, level_filter, pattern_filter)
 
         if next_sentence:
             return jsonify(
@@ -368,7 +382,7 @@ def skip(sentence_id: int) -> ResponseReturnValue:
 
     try:
         # Get next sentence
-        next_sentence = get_next_sentence(sentence_id, status_filter, level_filter, pattern_filter)
+        next_sentence = get_next_sentence(sentence, status_filter, level_filter, pattern_filter)
 
         if next_sentence:
             return jsonify(
