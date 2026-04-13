@@ -541,13 +541,6 @@ class PapugaAgent:
                         continue
 
                     num_forms = len(forms_to_process)
-                    mode = "BATCH" if num_forms > 1 else "SINGLE"
-
-                    logger.info(
-                        f"Processing {idx}/{len(lemma_lang_pairs)}: '{lemma.lemma_text}' "
-                        f"({lang_code}, {num_forms} form{'s' if num_forms != 1 else ''}) [{mode}]..."
-                    )
-
                     translation_ipa, translation_phonetic = get_translation_pronunciations(
                         session, lemma, lang_code
                     )
@@ -556,6 +549,29 @@ class PapugaAgent:
                     )
 
                     if num_forms == 0:
+                        mode = "LEMMA_ONLY"
+                    elif num_forms == 1:
+                        mode = "SINGLE"
+                    else:
+                        mode = "BATCH"
+
+                    logger.info(
+                        f"Processing {idx}/{len(lemma_lang_pairs)}: '{lemma.lemma_text}' "
+                        f"({lang_code}, {num_forms} form{'s' if num_forms != 1 else ''}) [{mode}]..."
+                    )
+                    logger.debug(
+                        f"  Lemma id={lemma.id} guid={lemma.guid} pos={lemma.pos_type} "
+                        f"translation_ipa={'yes' if translation_ipa else 'missing'} "
+                        f"translation_phonetic={'yes' if translation_phonetic else 'missing'}"
+                    )
+
+                    if num_forms == 0:
+                        if not missing_translation_pronunciation:
+                            logger.debug(
+                                f"  Skipping '{lemma.lemma_text}' ({lang_code}): no derivative "
+                                f"forms and translation pronunciation already present"
+                            )
+                            continue
                         try:
                             generated_count, generation_errors = generate_pronunciations_for_lemma(
                                 session=session,
@@ -584,6 +600,16 @@ class PapugaAgent:
 
                         # Get example sentence if available
                         example_text = self._get_example_sentence(session, lemma)
+                        logger.debug(
+                            f"  Form: '{form.derivative_form_text}' "
+                            f"(grammatical_form={form.grammatical_form}, "
+                            f"is_base_form={form.is_base_form})"
+                        )
+                        logger.debug(
+                            f"  Context: example_sentence={'yes' if example_text else 'none'}, "
+                            f"definition={'yes' if lemma.definition_text else 'none'}, "
+                            f"model={self.config.model or 'gpt-4o'}"
+                        )
 
                         try:
                             result = generate_pronunciation(
@@ -645,6 +671,16 @@ class PapugaAgent:
                                 }
                             )
                             form_id_map[form.grammatical_form] = form
+
+                        logger.debug(
+                            f"  Batch forms: "
+                            f"{[f['form'] + '=' + f['word'] for f in forms_list]}"
+                        )
+                        logger.debug(
+                            f"  Context: model={self.config.model or 'gpt-4o'}, "
+                            f"definition={'yes' if lemma.definition_text else 'none'}, "
+                            f"missing_translation_pronunciation={missing_translation_pronunciation}"
+                        )
 
                         try:
                             # Make batch pronunciation call
