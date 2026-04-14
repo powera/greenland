@@ -1,12 +1,9 @@
 {
   "title": "Dictionary",
   "source_language": "Source language",
-  "entries_count": "{count} entries",
+  "entries_count": "Entries",
   "pos": "POS",
-  "category": "Category",
   "sort_alpha": "Alphabetical",
-  "sort_level": "Level",
-  "sort_category": "Category",
   "no_entries": "No entries",
   "no_entries_for_letter": "No entries for this letter.",
   "no_entries_for_level": "No entries for this level.",

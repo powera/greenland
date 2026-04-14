@@ -48,7 +48,7 @@
                     <option value="null" {% if minimum_level == 'null' %}selected{% endif %}>{{ STRINGS.sentences.no_level_set }}</option>
                     {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
                         <option value="{{ i }}+" {% if minimum_level == i|string ~ '+' %}selected{% endif %}>
-                            {{ STRINGS.sentences.level }} {{ i }}+
+                            {{ STRINGS.common.level }} {{ i }}+
                         </option>
                     {% endfor %}
                     {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
@@ -125,7 +125,7 @@
                                         <span class="badge bg-light text-dark me-2">{{ sentence.tense }}</span>
                                     {% endif %}
                                     {% if sentence.minimum_level is not none %}
-                                        <span class="badge bg-info difficulty-badge">{{ STRINGS.sentences.level }} {{ sentence.minimum_level }}</span>
+                                        <span class="badge bg-info difficulty-badge">{{ STRINGS.common.level }} {{ sentence.minimum_level }}</span>
                                     {% else %}
                                         <span class="badge bg-warning difficulty-badge">{{ STRINGS.sentences.no_level }}</span>
                                     {% endif %}
