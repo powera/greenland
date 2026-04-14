@@ -139,61 +139,61 @@
     <div class="col-xl-8">
         <div class="card h-100">
             <div class="card-header">
-                <i class="bi bi-record-circle"></i> Vowels — 2D Chart
+                <i class="bi bi-record-circle"></i> Vowels — Classic Trapezoid Layout
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm table-bordered align-middle ipa-matrix">
-                        <thead>
-                            <tr>
-                                <th>Height \\ Backness</th>
-                                <th>Front</th>
-                                <th>Central</th>
-                                <th>Back</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th>Close</th>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Close front vowel: fleece">i</span></td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Near-close central vowel">ɨ</span></td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Close back vowel: goose">u</span></td>
-                            </tr>
-                            <tr>
-                                <th>Near-close</th>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Near-close near-front vowel: kit">ɪ</span></td>
-                                <td class="ipa-na">—</td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Near-close near-back vowel: foot">ʊ</span></td>
-                            </tr>
-                            <tr>
-                                <th>Close-mid</th>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Close-mid front vowel: café">e</span></td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Mid central vowel: schwa">ə</span></td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Close-mid back vowel">o</span></td>
-                            </tr>
-                            <tr>
-                                <th>Open-mid</th>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Open-mid front vowel: dress">ɛ</span></td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Open-mid central vowel">ɜ</span></td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Open-mid back rounded vowel: thought">ɔ</span></td>
-                            </tr>
-                            <tr>
-                                <th>Near-open</th>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Near-open front vowel: trap">æ</span></td>
-                                <td class="ipa-na">—</td>
-                                <td class="ipa-na">—</td>
-                            </tr>
-                            <tr>
-                                <th>Open</th>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Open front vowel">a</span></td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Open central vowel">ä</span></td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Open back vowel: palm">ɑ</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="ipa-vowel-classic" role="img" aria-label="Classic IPA vowel trapezoid with front, central, and back columns by vowel height.">
+                    <div class="ipa-vowel-columns">
+                        <span>Front</span>
+                        <span>Central</span>
+                        <span>Back</span>
+                    </div>
+
+                    <div class="ipa-vowel-height-labels">
+                        <span>Close</span>
+                        <span>Close-mid</span>
+                        <span>Open-mid</span>
+                        <span>Open</span>
+                    </div>
+
+                    <div class="ipa-vowel-plot">
+                        <div class="ipa-vowel-guides" aria-hidden="true">
+                            <span class="ipa-guide ipa-guide-front"></span>
+                            <span class="ipa-guide ipa-guide-central"></span>
+                            <span class="ipa-guide ipa-guide-back"></span>
+                            <span class="ipa-guide ipa-guide-close-mid"></span>
+                            <span class="ipa-guide ipa-guide-open-mid"></span>
+                            <span class="ipa-guide ipa-guide-open"></span>
+                        </div>
+
+                        <span class="ipa-symbol ipa-vowel-symbol v-i" data-bs-toggle="tooltip" title="Close front vowel: fleece">i</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-y" data-bs-toggle="tooltip" title="Close front rounded vowel">y</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-ii" data-bs-toggle="tooltip" title="Close central unrounded vowel">ɨ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-uu" data-bs-toggle="tooltip" title="Close back rounded vowel: goose">u</span>
+
+                        <span class="ipa-symbol ipa-vowel-symbol v-i-small" data-bs-toggle="tooltip" title="Near-close near-front vowel: kit">ɪ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-u-small" data-bs-toggle="tooltip" title="Near-close near-back vowel: foot">ʊ</span>
+
+                        <span class="ipa-symbol ipa-vowel-symbol v-e" data-bs-toggle="tooltip" title="Close-mid front vowel: café">e</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-oe" data-bs-toggle="tooltip" title="Close-mid front rounded vowel">ø</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-schwa" data-bs-toggle="tooltip" title="Mid central vowel: schwa">ə</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-o" data-bs-toggle="tooltip" title="Close-mid back rounded vowel">o</span>
+
+                        <span class="ipa-symbol ipa-vowel-symbol v-e-open" data-bs-toggle="tooltip" title="Open-mid front vowel: dress">ɛ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-oe-open" data-bs-toggle="tooltip" title="Open-mid front rounded vowel">œ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-turned-v" data-bs-toggle="tooltip" title="Open-mid central vowel">ɜ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-lambda" data-bs-toggle="tooltip" title="Open-mid back unrounded vowel">ʌ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-open-o" data-bs-toggle="tooltip" title="Open-mid back rounded vowel: thought">ɔ</span>
+
+                        <span class="ipa-symbol ipa-vowel-symbol v-ae" data-bs-toggle="tooltip" title="Near-open front vowel: trap">æ</span>
+
+                        <span class="ipa-symbol ipa-vowel-symbol v-a" data-bs-toggle="tooltip" title="Open front vowel">a</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-alpha" data-bs-toggle="tooltip" title="Open back unrounded vowel: palm">ɑ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-open-back-o" data-bs-toggle="tooltip" title="Open back rounded vowel">ɒ</span>
+                    </div>
                 </div>
                 <p class="text-muted small mb-0">
-                    Notes: this is a practical reference subset for Barsukas editing, not the full IPA inventory.
+                    Where symbols appear in pairs, the one on the right is rounded. This remains a practical Barsukas subset, not the full IPA inventory.
                 </p>
             </div>
         </div>
