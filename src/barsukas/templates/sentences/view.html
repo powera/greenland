@@ -45,7 +45,7 @@
                             <dt class="col-sm-5">{{ STRINGS.sentences.minimum_level }}</dt>
                             <dd class="col-sm-7">
                                 {% if sentence.minimum_level is not none %}
-                                    <span class="badge bg-info difficulty-badge">{{ STRINGS.common.level }} {{ sentence.minimum_level }}</span>
+                                    <span class="badge bg-info difficulty-badge">{{ LSTR.level }} {{ sentence.minimum_level }}</span>
                                 {% else %}
                                     <span class="text-muted">{{ STRINGS.sentences.not_set }}</span>
                                 {% endif %}
@@ -214,7 +214,7 @@
     <div class="col">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-translate"></i> {{ STRINGS.common.translations }}</span>
+                <span><i class="bi bi-translate"></i> {{ LSTR.translations }}</span>
                 <button class="btn btn-sm btn-primary"
                         {% if config.get('ALLOW_OUTBOUND_CALLS', True) %}
                         data-bs-toggle="collapse" data-bs-target="#translateForm"
@@ -272,8 +272,8 @@
                 <table class="table table-hover translation-table">
                     <thead>
                         <tr>
-                            <th style="width: 20%;">{{ STRINGS.common.language }}</th>
-                            <th>{{ STRINGS.common.translation }}</th>
+                            <th style="width: 20%;">{{ LSTR.language }}</th>
+                            <th>{{ LSTR.translation }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -333,7 +333,7 @@
                             <tr>
                                 <th>{{ STRINGS.sentences.voice }}</th>
                                 <th>{{ STRINGS.sentences.expected_text }}</th>
-                                <th>{{ STRINGS.common.status }}</th>
+                                <th>{{ LSTR.status }}</th>
                                 <th>{{ STRINGS.sentences.audio }}</th>
                                 <th>{{ STRINGS.sentences.actions }}</th>
                             </tr>
@@ -421,7 +421,7 @@
                     <div class="form-text">{{ STRINGS.sentences.choose_tts_engine }}</div>
                 </div>
                 <div class="mb-3">
-                    <label for="sentence_audio_language" class="form-label">{{ STRINGS.common.language }} <span class="text-danger">*</span></label>
+                    <label for="sentence_audio_language" class="form-label">{{ LSTR.language }} <span class="text-danger">*</span></label>
                     <select class="form-select" id="sentence_audio_language" name="language" required>
                         <option value="">{{ STRINGS.sentences.select_language }}</option>
                         {% for lang_code, lang_name in language_names.items() %}

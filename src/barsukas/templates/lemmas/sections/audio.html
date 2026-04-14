@@ -18,10 +18,10 @@
                 <table class="table table-sm">
                     <thead>
                         <tr>
-                            <th>{{ STRINGS.common.language }}</th>
+                            <th>{{ LSTR.language }}</th>
                             <th>{{ STRINGS.sentences.voice }}</th>
                             <th>{{ STRINGS.sentences.expected_text }}</th>
-                            <th>{{ STRINGS.common.status }}</th>
+                            <th>{{ LSTR.status }}</th>
                             <th>{{ STRINGS.sentences.issues }}</th>
                             <th>{{ STRINGS.sentences.audio }}</th>
                             <th>{{ STRINGS.sentences.actions }}</th>
@@ -124,7 +124,7 @@
                     <div class="form-text">{{ STRINGS.sentences.choose_tts_engine_for_audio_generation }}</div>
                 </div>
                 <div class="mb-3">
-                    <label for="audio_language" class="form-label">{{ STRINGS.common.language }} <span class="text-danger">*</span></label>
+                    <label for="audio_language" class="form-label">{{ LSTR.language }} <span class="text-danger">*</span></label>
                     <select class="form-select" id="audio_language" name="language" required>
                         <option value="">{{ STRINGS.sentences.select_language }}</option>
                         {% for lang_code, lang_name in language_names.items() %}

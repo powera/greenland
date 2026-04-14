@@ -26,14 +26,14 @@
     <form method="get" action="{{ url_for('sentences.list_sentences') }}">
         <div class="row g-3">
             <div class="col-md-6">
-                <label for="search" class="form-label">{{ STRINGS.common.search }}</label>
+                <label for="search" class="form-label">{{ LSTR.search }}</label>
                 <input type="text" class="form-control" id="search" name="search"
                        value="{{ search }}" placeholder="{{ STRINGS.sentences.search_placeholder }}">
             </div>
             <div class="col-md-3">
                 <label for="pattern_type" class="form-label">{{ STRINGS.sentences.pattern_type }}</label>
                 <select class="form-select" id="pattern_type" name="pattern_type">
-                    <option value="">{{ STRINGS.common.all }}</option>
+                    <option value="">{{ LSTR.all }}</option>
                     {% for pt in pattern_types %}
                         <option value="{{ pt }}" {% if pt == pattern_type %}selected{% endif %}>
                             {{ pt }}
@@ -48,7 +48,7 @@
                     <option value="null" {% if minimum_level == 'null' %}selected{% endif %}>{{ STRINGS.sentences.no_level_set }}</option>
                     {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
                         <option value="{{ i }}+" {% if minimum_level == i|string ~ '+' %}selected{% endif %}>
-                            {{ STRINGS.common.level }} {{ i }}+
+                            {{ LSTR.level }} {{ i }}+
                         </option>
                     {% endfor %}
                     {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
@@ -86,10 +86,10 @@
         <div class="row mt-3">
             <div class="col">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search"></i> {{ STRINGS.common.search }}
+                    <i class="bi bi-search"></i> {{ LSTR.search }}
                 </button>
                 <a href="{{ url_for('sentences.list_sentences') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-x-circle"></i> {{ STRINGS.common.clear }}
+                    <i class="bi bi-x-circle"></i> {{ LSTR.clear }}
                 </a>
             </div>
         </div>
@@ -125,7 +125,7 @@
                                         <span class="badge bg-light text-dark me-2">{{ sentence.tense }}</span>
                                     {% endif %}
                                     {% if sentence.minimum_level is not none %}
-                                        <span class="badge bg-info difficulty-badge">{{ STRINGS.common.level }} {{ sentence.minimum_level }}</span>
+                                        <span class="badge bg-info difficulty-badge">{{ LSTR.level }} {{ sentence.minimum_level }}</span>
                                     {% else %}
                                         <span class="badge bg-warning difficulty-badge">{{ STRINGS.sentences.no_level }}</span>
                                     {% endif %}
@@ -135,7 +135,7 @@
                                 <div class="d-flex flex-wrap justify-content-end gap-1">
                                     <a href="{{ url_for('sentences.view_sentence', sentence_id=sentence.id) }}"
                                        class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i> {{ STRINGS.common.view }}
+                                        <i class="bi bi-eye"></i> {{ LSTR.view }}
                                     </a>
                                     {% if sentence.verified %}
                                     <span class="badge bg-success align-self-center">{{ STRINGS.sentences.verified }}</span>
