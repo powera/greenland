@@ -30,14 +30,14 @@
         <div class="col-auto">
             <label for="sort" class="form-label mb-0 small text-muted">{{ STRINGS.navigation.sort_by }}</label>
             <select class="form-select form-select-sm" id="sort" name="sort" onchange="this.form.submit()">
-                <option value="alpha" {% if sort == 'alpha' %}selected{% endif %}>{{ STRINGS.common.label_sort_order_alphabetical }}</option>
-                <option value="level" {% if sort == 'level' %}selected{% endif %}>{{ STRINGS.common.level }}</option>
-                <option value="category" {% if sort == 'category' %}selected{% endif %}>{{ STRINGS.common.category }}</option>
+                <option value="alpha" {% if sort == 'alpha' %}selected{% endif %}>{{ LSTR.label_sort_order_alphabetical }}</option>
+                <option value="level" {% if sort == 'level' %}selected{% endif %}>{{ LSTR.level }}</option>
+                <option value="category" {% if sort == 'category' %}selected{% endif %}>{{ LSTR.category }}</option>
             </select>
         </div>
         {% if sort == 'category' %}
         <div class="col-auto">
-            <label for="category" class="form-label mb-0 small text-muted">{{ STRINGS.common.category }}</label>
+            <label for="category" class="form-label mb-0 small text-muted">{{ LSTR.category }}</label>
             <select class="form-select form-select-sm dict-category-select" id="category" name="category" onchange="this.form.submit()">
                 {% for group in category_options %}
                     <optgroup label="{{ STRINGS.parts_of_speech.get(group.pos_type ~ '_plural', group.pos_type|title) }}">
@@ -93,7 +93,7 @@
                 {% for code in display_langs %}
                     <th class="dict-trans-col">{{ language_names[code] }}</th>
                 {% endfor %}
-                <th class="dict-pos-col">{{ STRINGS.common.label_part_of_speech }}</th>
+                <th class="dict-pos-col">{{ LSTR.label_part_of_speech }}</th>
             </tr>
         </thead>
         <tbody>

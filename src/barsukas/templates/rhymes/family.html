@@ -18,7 +18,7 @@
 <form method="get" class="row g-2 align-items-end mb-3">
     <input type="hidden" name="key" value="{{ rhyme_key or '' }}">
     <div class="col-auto">
-        <label for="language" class="form-label mb-1">{{ STRINGS.common.language }}</label>
+        <label for="language" class="form-label mb-1">{{ LSTR.language }}</label>
         <select class="form-select form-select-sm" id="language" name="language">
             {% for lang_code, lang_name in language_options %}
                 <option value="{{ lang_code }}" {% if lang_code == selected_language %}selected{% endif %}>
@@ -28,7 +28,7 @@
         </select>
     </div>
     <div class="col-auto">
-        <button type="submit" class="btn btn-sm btn-outline-secondary">{{ STRINGS.common.apply }}</button>
+        <button type="submit" class="btn btn-sm btn-outline-secondary">{{ LSTR.apply }}</button>
     </div>
 </form>
 
@@ -52,10 +52,10 @@
             <thead>
                 <tr>
                     <th>{{ STRINGS.linguistics.word }}</th>
-                    <th>{{ STRINGS.common.abbreviation_international_phonetic_alphabet }}</th>
+                    <th>{{ LSTR.abbreviation_international_phonetic_alphabet }}</th>
                     <th>{{ STRINGS.linguistics.form }}</th>
-                    <th>{{ STRINGS.common.abbreviation_part_of_speech }}</th>
-                    <th>{{ STRINGS.common.level }}</th>
+                    <th>{{ LSTR.abbreviation_part_of_speech }}</th>
+                    <th>{{ LSTR.level }}</th>
                 </tr>
             </thead>
             <tbody>

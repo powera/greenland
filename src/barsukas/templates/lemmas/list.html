@@ -26,14 +26,14 @@
     <form method="get" action="{{ url_for('lemmas.list_lemmas') }}">
         <div class="row g-3">
             <div class="col-md-5">
-                <label for="search" class="form-label">{{ STRINGS.common.search }}</label>
+                <label for="search" class="form-label">{{ LSTR.search }}</label>
                 <input type="text" class="form-control" id="search" name="search"
                        value="{{ search }}" placeholder="{{ STRINGS.lemmas.search_placeholder }}">
             </div>
             <div class="col-md-2">
                 <label for="pos_type" class="form-label">{{ STRINGS.lemmas.pos_type }}</label>
                 <select class="form-select" id="pos_type" name="pos_type">
-                    <option value="">{{ STRINGS.common.all }}</option>
+                    <option value="">{{ LSTR.all }}</option>
                     {% for pt in pos_types %}
                         <option value="{{ pt }}" {% if pt == pos_type %}selected{% endif %}>
                             {{ STRINGS.parts_of_speech.get(pt, pt|replace('_', ' ')|title) }}
@@ -44,7 +44,7 @@
             <div class="col-md-2">
                 <label for="pos_subtype" class="form-label">{{ STRINGS.lemmas.subcategory }}</label>
                 <select class="form-select" id="pos_subtype" name="pos_subtype">
-                    <option value="">{{ STRINGS.common.all }}</option>
+                    <option value="">{{ LSTR.all }}</option>
                     {% for pst in pos_subtypes %}
                         <option value="{{ pst }}" {% if pst == pos_subtype %}selected{% endif %}>
                             {{ pst }}
@@ -55,12 +55,12 @@
             <div class="col-md-3">
                 <label for="difficulty" class="form-label">{{ STRINGS.lemmas.difficulty }}</label>
                 <select class="form-select" id="difficulty" name="difficulty">
-                    <option value="">{{ STRINGS.common.all }}</option>
+                    <option value="">{{ LSTR.all }}</option>
                     <option value="null" {% if difficulty == 'null' %}selected{% endif %}>{{ STRINGS.lemmas.no_level_set }}</option>
                     <option value="-1" {% if difficulty == '-1' %}selected{% endif %}>{{ STRINGS.lemmas.excluded }}</option>
                     {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
                         <option value="{{ i }}" {% if difficulty == i|string %}selected{% endif %}>
-                            {{ STRINGS.common.level }} {{ i }}
+                            {{ LSTR.level }} {{ i }}
                         </option>
                     {% endfor %}
                 </select>
@@ -69,10 +69,10 @@
         <div class="row mt-3">
             <div class="col">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search"></i> {{ STRINGS.common.search }}
+                    <i class="bi bi-search"></i> {{ LSTR.search }}
                 </button>
                 <a href="{{ url_for('lemmas.list_lemmas') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-x-circle"></i> {{ STRINGS.common["clear"] }}
+                    <i class="bi bi-x-circle"></i> {{ LSTR.clear }}
                 </a>
             </div>
         </div>
@@ -111,7 +111,7 @@
                                         {% if lemma.difficulty_level == -1 %}
                                             <span class="badge bg-warning difficulty-badge">{{ STRINGS.lemmas.excluded_short }}</span>
                                         {% else %}
-                                            <span class="badge bg-info difficulty-badge">{{ STRINGS.common.level }} {{ lemma.difficulty_level }}</span>
+                                            <span class="badge bg-info difficulty-badge">{{ LSTR.level }} {{ lemma.difficulty_level }}</span>
                                         {% endif %}
                                     {% endif %}
                                 </div>
@@ -119,12 +119,12 @@
                             <div class="col-md-4 text-end">
                                 <a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}"
                                    class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-eye"></i> {{ STRINGS.common.view }}
+                                    <i class="bi bi-eye"></i> {{ LSTR.view }}
                                 </a>
                                 <a href="{{ url_for('lemmas.edit_lemma', lemma_id=lemma.id) }}"
                                    class="btn btn-sm btn-outline-secondary {% if config.get('READONLY', False) %}disabled{% endif %}"
                                    {% if config.get('READONLY', False) %}aria-disabled="true" tabindex="-1"{% endif %}>
-                                    <i class="bi bi-pencil"></i> {{ STRINGS.common.edit }}
+                                    <i class="bi bi-pencil"></i> {{ LSTR.edit }}
                                 </a>
                             </div>
                         </div>
