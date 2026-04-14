@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}IPA Reference{% endblock %}
+{% block title %}{{ STRINGS.ipa.page_title }}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/ipa_reference.css') }}">
@@ -12,7 +12,7 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">IPA Reference</li>
+                <li class="breadcrumb-item active" aria-current="page">{{ STRINGS.ipa.page_title }}</li>
             </ol>
         </nav>
     </div>
@@ -22,16 +22,16 @@
     <div class="col-lg-11">
         <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-soundwave"></i> IPA Reference
+                <i class="bi bi-soundwave"></i> {{ STRINGS.ipa.page_title }}
             </div>
             <div class="card-body">
                 <p class="mb-3">
-                    This page is a quick guide for the International Phonetic Alphabet (IPA) symbols shown in Barsukas.
-                    Use it when adding or reviewing pronunciation notes.
+                    {{ STRINGS.ipa.intro_line_1 }}
+                    {{ STRINGS.ipa.intro_line_2 }}
                 </p>
                 <p class="text-muted mb-0">
-                    This follows the traditional chart style: consonants are organized by <strong>manner × place</strong> of articulation, and vowels by <strong>height × backness</strong>.
-                    Hover over symbols for quick details. This guide is static and does not query the database.
+                    {{ STRINGS.ipa.intro_line_3 }}
+                    {{ STRINGS.ipa.intro_line_4 }}
                 </p>
             </div>
         </div>
@@ -42,86 +42,86 @@
     <div class="col-12">
         <div class="card h-100">
             <div class="card-header">
-                <i class="bi bi-grid-3x3-gap"></i> Consonants (Pulmonic) — 2D Chart
+                <i class="bi bi-grid-3x3-gap"></i> {{ STRINGS.ipa.consonants_title }}
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-sm table-bordered align-middle ipa-matrix">
                         <thead>
                             <tr>
-                                <th>Manner \\ Place</th>
-                                <th>Bilabial</th>
-                                <th>Labiodental</th>
-                                <th>Dental</th>
-                                <th>Alveolar</th>
-                                <th>Postalveolar</th>
-                                <th>Palatal</th>
-                                <th>Velar</th>
-                                <th>Glottal</th>
+                                <th>{{ STRINGS.ipa.consonants_manner_place }}</th>
+                                <th>{{ STRINGS.ipa.place_bilabial }}</th>
+                                <th>{{ STRINGS.ipa.place_labiodental }}</th>
+                                <th>{{ STRINGS.ipa.place_dental }}</th>
+                                <th>{{ STRINGS.ipa.place_alveolar }}</th>
+                                <th>{{ STRINGS.ipa.place_postalveolar }}</th>
+                                <th>{{ STRINGS.ipa.place_palatal }}</th>
+                                <th>{{ STRINGS.ipa.place_velar }}</th>
+                                <th>{{ STRINGS.ipa.place_glottal }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <th>Plosive</th>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Voiceless/voiced bilabial plosives: pin/bin">p b</span></td>
+                                <th>{{ STRINGS.ipa.manner_plosive }}</th>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_plosive_bilabial }}">p b</span></td>
                                 <td class="ipa-na">—</td>
                                 <td class="ipa-na">—</td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Voiceless/voiced alveolar plosives: ten/den">t d</span></td>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_plosive_alveolar }}">t d</span></td>
                                 <td class="ipa-na">—</td>
                                 <td class="ipa-na">—</td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Voiceless/voiced velar plosives: cat/gap">k g</span></td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Glottal stop in many accents: uh-oh">ʔ</span></td>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_plosive_velar }}">k g</span></td>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_glottal_stop }}">ʔ</span></td>
                             </tr>
                             <tr>
-                                <th>Nasal</th>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Bilabial nasal: man">m</span></td>
+                                <th>{{ STRINGS.ipa.manner_nasal }}</th>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_nasal_bilabial }}">m</span></td>
                                 <td class="ipa-na">—</td>
                                 <td class="ipa-na">—</td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Alveolar nasal: no">n</span></td>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_nasal_alveolar }}">n</span></td>
                                 <td class="ipa-na">—</td>
                                 <td class="ipa-na">—</td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Velar nasal: sing">ŋ</span></td>
-                                <td class="ipa-na">—</td>
-                            </tr>
-                            <tr>
-                                <th>Fricative</th>
-                                <td class="ipa-na">—</td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Voiceless/voiced labiodental fricatives: fan/van">f v</span></td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Voiceless/voiced dental fricatives: thin/this">θ ð</span></td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Voiceless/voiced alveolar fricatives: sip/zip">s z</span></td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Voiceless/voiced postalveolar fricatives: ship/measure">ʃ ʒ</span></td>
-                                <td class="ipa-na">—</td>
-                                <td class="ipa-na">—</td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Voiceless glottal fricative: hat">h</span></td>
-                            </tr>
-                            <tr>
-                                <th>Affricate</th>
-                                <td class="ipa-na">—</td>
-                                <td class="ipa-na">—</td>
-                                <td class="ipa-na">—</td>
-                                <td class="ipa-na">—</td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Voiceless/voiced postalveolar affricates: church/judge">tʃ dʒ</span></td>
-                                <td class="ipa-na">—</td>
-                                <td class="ipa-na">—</td>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_nasal_velar }}">ŋ</span></td>
                                 <td class="ipa-na">—</td>
                             </tr>
                             <tr>
-                                <th>Approximant</th>
+                                <th>{{ STRINGS.ipa.manner_fricative }}</th>
+                                <td class="ipa-na">—</td>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_fricative_labiodental }}">f v</span></td>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_fricative_dental }}">θ ð</span></td>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_fricative_alveolar }}">s z</span></td>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_fricative_postalveolar }}">ʃ ʒ</span></td>
+                                <td class="ipa-na">—</td>
+                                <td class="ipa-na">—</td>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_fricative_glottal }}">h</span></td>
+                            </tr>
+                            <tr>
+                                <th>{{ STRINGS.ipa.manner_affricate }}</th>
                                 <td class="ipa-na">—</td>
                                 <td class="ipa-na">—</td>
                                 <td class="ipa-na">—</td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Alveolar approximant: red">ɹ</span></td>
                                 <td class="ipa-na">—</td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Palatal approximant: yes">j</span></td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Labial-velar approximant: we">w</span></td>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_affricate_postalveolar }}">tʃ dʒ</span></td>
+                                <td class="ipa-na">—</td>
+                                <td class="ipa-na">—</td>
                                 <td class="ipa-na">—</td>
                             </tr>
                             <tr>
-                                <th>Lateral approximant</th>
+                                <th>{{ STRINGS.ipa.manner_approximant }}</th>
                                 <td class="ipa-na">—</td>
                                 <td class="ipa-na">—</td>
                                 <td class="ipa-na">—</td>
-                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="Alveolar lateral approximant: light">l</span></td>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_approximant_alveolar }}">ɹ</span></td>
+                                <td class="ipa-na">—</td>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_approximant_palatal }}">j</span></td>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_approximant_labial_velar }}">w</span></td>
+                                <td class="ipa-na">—</td>
+                            </tr>
+                            <tr>
+                                <th>{{ STRINGS.ipa.manner_lateral_approximant }}</th>
+                                <td class="ipa-na">—</td>
+                                <td class="ipa-na">—</td>
+                                <td class="ipa-na">—</td>
+                                <td><span class="ipa-symbol" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_lateral_alveolar }}">l</span></td>
                                 <td class="ipa-na">—</td>
                                 <td class="ipa-na">—</td>
                                 <td class="ipa-na">—</td>
@@ -139,21 +139,21 @@
     <div class="col-xl-8">
         <div class="card h-100">
             <div class="card-header">
-                <i class="bi bi-record-circle"></i> Vowels — Classic Trapezoid Layout
+                <i class="bi bi-record-circle"></i> {{ STRINGS.ipa.vowels_title }}
             </div>
             <div class="card-body">
-                <div class="ipa-vowel-classic" role="img" aria-label="Classic IPA vowel trapezoid with front, central, and back columns by vowel height.">
+                <div class="ipa-vowel-classic" role="img" aria-label="{{ STRINGS.ipa.vowel_plot_aria }}">
                     <div class="ipa-vowel-columns">
-                        <span>Front</span>
-                        <span>Central</span>
-                        <span>Back</span>
+                        <span>{{ STRINGS.ipa.vowel_front }}</span>
+                        <span>{{ STRINGS.ipa.vowel_central }}</span>
+                        <span>{{ STRINGS.ipa.vowel_back }}</span>
                     </div>
 
                     <div class="ipa-vowel-height-labels">
-                        <span>Close</span>
-                        <span>Close-mid</span>
-                        <span>Open-mid</span>
-                        <span>Open</span>
+                        <span>{{ STRINGS.ipa.vowel_close }}</span>
+                        <span>{{ STRINGS.ipa.vowel_close_mid }}</span>
+                        <span>{{ STRINGS.ipa.vowel_open_mid }}</span>
+                        <span>{{ STRINGS.ipa.vowel_open }}</span>
                     </div>
 
                     <div class="ipa-vowel-plot">
@@ -166,34 +166,35 @@
                             <span class="ipa-guide ipa-guide-open"></span>
                         </div>
 
-                        <span class="ipa-symbol ipa-vowel-symbol v-i" data-bs-toggle="tooltip" title="Close front vowel: fleece">i</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-y" data-bs-toggle="tooltip" title="Close front rounded vowel">y</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-ii" data-bs-toggle="tooltip" title="Close central unrounded vowel">ɨ</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-uu" data-bs-toggle="tooltip" title="Close back rounded vowel: goose">u</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-i" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_i }}">i</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-y" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_y }}">y</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-ii" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_ii }}">ɨ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-uu" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_u }}">u</span>
 
-                        <span class="ipa-symbol ipa-vowel-symbol v-i-small" data-bs-toggle="tooltip" title="Near-close near-front vowel: kit">ɪ</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-u-small" data-bs-toggle="tooltip" title="Near-close near-back vowel: foot">ʊ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-i-small" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_i_small }}">ɪ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-u-small" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_u_small }}">ʊ</span>
 
-                        <span class="ipa-symbol ipa-vowel-symbol v-e" data-bs-toggle="tooltip" title="Close-mid front vowel: café">e</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-oe" data-bs-toggle="tooltip" title="Close-mid front rounded vowel">ø</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-schwa" data-bs-toggle="tooltip" title="Mid central vowel: schwa">ə</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-o" data-bs-toggle="tooltip" title="Close-mid back rounded vowel">o</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-e" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_e }}">e</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-oe" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_oe }}">ø</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-schwa" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_schwa }}">ə</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-o" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_o }}">o</span>
 
-                        <span class="ipa-symbol ipa-vowel-symbol v-e-open" data-bs-toggle="tooltip" title="Open-mid front vowel: dress">ɛ</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-oe-open" data-bs-toggle="tooltip" title="Open-mid front rounded vowel">œ</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-turned-v" data-bs-toggle="tooltip" title="Open-mid central vowel">ɜ</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-lambda" data-bs-toggle="tooltip" title="Open-mid back unrounded vowel">ʌ</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-open-o" data-bs-toggle="tooltip" title="Open-mid back rounded vowel: thought">ɔ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-e-open" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_e_open }}">ɛ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-oe-open" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_oe_open }}">œ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-turned-v" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_turned_v }}">ɜ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-lambda" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_lambda }}">ʌ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-open-o" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_open_o }}">ɔ</span>
 
-                        <span class="ipa-symbol ipa-vowel-symbol v-ae" data-bs-toggle="tooltip" title="Near-open front vowel: trap">æ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-ae" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_ae }}">æ</span>
 
-                        <span class="ipa-symbol ipa-vowel-symbol v-a" data-bs-toggle="tooltip" title="Open front vowel">a</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-alpha" data-bs-toggle="tooltip" title="Open back unrounded vowel: palm">ɑ</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-open-back-o" data-bs-toggle="tooltip" title="Open back rounded vowel">ɒ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-a" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_a }}">a</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-alpha" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_alpha }}">ɑ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-open-back-o" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_open_back_o }}">ɒ</span>
                     </div>
                 </div>
                 <p class="text-muted small mb-0">
-                    Where symbols appear in pairs, the one on the right is rounded. This remains a practical Barsukas subset, not the full IPA inventory.
+                    {{ STRINGS.ipa.vowel_note_pairs }}
+                    {{ STRINGS.ipa.vowel_note_subset }}
                 </p>
             </div>
         </div>
