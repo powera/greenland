@@ -121,7 +121,7 @@
                                                 {% if lang_code != 'en' %}
                                                 <div class="mb-3">
                                                     <label for="disambiguation{{ lang_code }}" class="form-label">
-                                                        {{ STRINGS.sentences.disambiguation }} <small class="text-muted">({{ STRINGS.sentences.optional }})</small>
+                                                        {{ STRINGS.sentences.disambiguation }} <small class="text-muted">({{ STRINGS.common.token_optional }})</small>
                                                     </label>
                                                     <input type="text" class="form-control" id="disambiguation{{ lang_code }}"
                                                            name="disambiguation" value="{{ translation_disambiguations[lang_code] or '' }}"

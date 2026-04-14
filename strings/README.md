@@ -42,6 +42,18 @@ Rule of thumb: pages should use shared namespaces for generic labels, but avoid
 importing another module's namespace (for example, `lemmas` should not use
 `rhymes` keys).
 
+## Key naming conventions
+
+To make key intent obvious in templates, use prefixes:
+
+- `token_*` for single words/tokens (`token_import`, `token_optional`)
+- `label_*` for form/table labels and short UI phrases (`label_part_of_speech`)
+- `message_*` for full-sentence user-facing messages and confirmations
+- `abbreviation_*` for acronym-style labels (`abbreviation_international_phonetic_alphabet`)
+
+When creating new keys, prefer descriptive names over short jargon-heavy names.
+For example, use `label_part_of_speech` instead of `pos`.
+
 ## File format
 
 - Files are UTF-8 JSON objects.
@@ -65,6 +77,9 @@ Barsukas loads all namespaces into a global `STRINGS` object for templates.
 - Access dynamic keys with `.get(...)` when needed.
 - For counts, keep text and number as separate template blocks:
   - `{{ STRINGS.dictionary.entries_count }}: {{ total }}`
+- New forward-looking accessors are also available:
+  - `LSTR` for short labels/terms (with `CURRENT`/`OTHER` support)
+  - `SSTR` for sentence-level strings with explicit namespaces
 
 ## Fallback behavior
 

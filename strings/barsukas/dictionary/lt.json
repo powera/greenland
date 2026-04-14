@@ -7,5 +7,7 @@
   "no_entries": "Įrašų nėra",
   "no_entries_for_letter": "Šiai raidei įrašų nėra.",
   "no_entries_for_level": "Šiam lygiui įrašų nėra.",
-  "no_entries_for_category": "Šiai kategorijai įrašų nėra."
+  "no_entries_for_category": "Šiai kategorijai įrašų nėra.",
+  "label_sort_order_alphabetical": "Abėcėlė",
+  "label_part_of_speech": "Kalbos dalis"
 }

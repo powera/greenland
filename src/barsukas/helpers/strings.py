@@ -5,7 +5,7 @@
 import json
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, cast
+from typing import Any, Dict, Optional, Sequence, cast
 
 SUPPORTED_UI_LANGS = frozenset({"en", "lt"})
 _STRINGS_ROOT = Path(__file__).resolve().parents[3] / "strings" / "barsukas"
@@ -53,3 +53,108 @@ def load_all_barsukas_strings(ui_lang: str) -> Dict[str, Dict[str, Any]]:
         namespace: _load_namespace_file(namespace=namespace, ui_lang=ui_lang)
         for namespace in namespaces
     }
+
+
+class _StringPathNode:
+    """Lazy accessor object used by Jinja for LSTR/SSTR paths."""
+
+    def __init__(
+        self,
+        resolver: "StringAccessor",
+        segments: Optional[Sequence[str]] = None,
+    ) -> None:
+        self._resolver = resolver
+        self._segments = tuple(segments or ())
+
+    def __getattr__(self, name: str) -> "_StringPathNode":
+        return _StringPathNode(self._resolver, (*self._segments, name))
+
+    def get(self, default: str = "") -> str:
+        """Resolve current path with optional default."""
+        return self._resolver.resolve(self._segments, default=default)
+
+    def __str__(self) -> str:
+        return self._resolver.resolve(self._segments, default="")
+
+
+class StringAccessor:
+    """Template accessor for legacy STRINGS namespaces and new LSTR/SSTR paths."""
+
+    def __init__(
+        self,
+        strings_by_namespace: Dict[str, Dict[str, Any]],
+        mode: str,
+        default_module: str = "common",
+    ) -> None:
+        self._strings_by_namespace = strings_by_namespace
+        self._mode = mode
+        self._default_module = default_module
+
+    def __getattr__(self, name: str) -> _StringPathNode:
+        return _StringPathNode(self, (name,))
+
+    def resolve(self, segments: Sequence[str], default: str = "") -> str:
+        """Resolve a dotted path to a string value.
+
+        Modes:
+        - lstr: default shared namespace with CURRENT/OTHER support.
+        - sstr: explicit namespace required (first segment).
+        """
+        if not segments:
+            return default
+
+        if self._mode == "lstr":
+            return self._resolve_lstr(segments, default=default)
+
+        if self._mode == "sstr":
+            return self._resolve_sstr(segments, default=default)
+
+        return default
+
+    def _resolve_lstr(self, segments: Sequence[str], default: str = "") -> str:
+        head = segments[0]
+
+        if head == "CURRENT":
+            key = ".".join(segments[1:])
+            return self._get_value(self._default_module, key, default=default)
+
+        if head == "OTHER" and len(segments) >= 3:
+            namespace = segments[1]
+            key = ".".join(segments[2:])
+            return self._get_value(namespace, key, default=default)
+
+        if head in self._strings_by_namespace and len(segments) >= 2:
+            key = ".".join(segments[1:])
+            return self._get_value(head, key, default=default)
+
+        key = ".".join(segments)
+        return self._get_value("common", key, default=default)
+
+    def _resolve_sstr(self, segments: Sequence[str], default: str = "") -> str:
+        if len(segments) < 2:
+            return default
+
+        namespace = segments[0]
+        key = ".".join(segments[1:])
+        return self._get_value(namespace, key, default=default)
+
+    def _get_value(self, namespace: str, key: str, default: str = "") -> str:
+        namespace_strings = self._strings_by_namespace.get(namespace, {})
+        value = namespace_strings.get(key, default)
+        if value is None:
+            return default
+        return str(value)
+
+
+def create_lstr_accessor(
+    strings_by_namespace: Dict[str, Dict[str, Any]], default_module: str
+) -> StringAccessor:
+    """Create accessor for short lemma-like strings (LSTR)."""
+    return StringAccessor(strings_by_namespace, mode="lstr", default_module=default_module)
+
+
+def create_sstr_accessor(
+    strings_by_namespace: Dict[str, Dict[str, Any]], default_module: str
+) -> StringAccessor:
+    """Create accessor for sentence strings (SSTR)."""
+    return StringAccessor(strings_by_namespace, mode="sstr", default_module=default_module)
