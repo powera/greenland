@@ -1,10 +1,15 @@
 {
   "all": "Visi",
   "apply": "Taikyti",
+  "back": "Atgal",
+  "category": "Kategorija",
   "clear": "Išvalyti",
   "edit": "Redaguoti",
   "language": "Kalba",
+  "level": "Lygis",
   "search": "Paieška",
-  "view": "Peržiūrėti",
-  "back": "Atgal"
+  "status": "Būsena",
+  "translation": "Vertimas",
+  "translations": "Vertimai",
+  "view": "Peržiūrėti"
 }

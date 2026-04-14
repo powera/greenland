@@ -1,10 +1,15 @@
 {
   "all": "All",
   "apply": "Apply",
+  "back": "Back",
+  "category": "Category",
   "clear": "Clear",
   "edit": "Edit",
   "language": "Language",
+  "level": "Level",
   "search": "Search",
-  "view": "View",
-  "back": "Back"
+  "status": "Status",
+  "translation": "Translation",
+  "translations": "Translations",
+  "view": "View"
 }

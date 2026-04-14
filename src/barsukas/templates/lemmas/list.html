@@ -60,7 +60,7 @@
                     <option value="-1" {% if difficulty == '-1' %}selected{% endif %}>{{ STRINGS.lemmas.excluded }}</option>
                     {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
                         <option value="{{ i }}" {% if difficulty == i|string %}selected{% endif %}>
-                            {{ STRINGS.lemmas.level }} {{ i }}
+                            {{ STRINGS.common.level }} {{ i }}
                         </option>
                     {% endfor %}
                 </select>
@@ -111,7 +111,7 @@
                                         {% if lemma.difficulty_level == -1 %}
                                             <span class="badge bg-warning difficulty-badge">{{ STRINGS.lemmas.excluded_short }}</span>
                                         {% else %}
-                                            <span class="badge bg-info difficulty-badge">{{ STRINGS.lemmas.level }} {{ lemma.difficulty_level }}</span>
+                                            <span class="badge bg-info difficulty-badge">{{ STRINGS.common.level }} {{ lemma.difficulty_level }}</span>
                                         {% endif %}
                                     {% endif %}
                                 </div>

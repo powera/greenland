@@ -50,7 +50,7 @@
     <div class="card mb-4">
         <div class="card-header bg-success bg-opacity-10">
             <i class="bi bi-plus-circle text-success"></i>
-            {{ STRINGS.sync.derivative_additions_header|replace("{count}", additions|length|string) }}
+            {{ STRINGS.sync.additions }} — {{ additions|length }} {{ STRINGS.sync.derivative_additions_subtitle }}
         </div>
         <div class="card-body">
             <form method="post" action="{{ url_for('sync_derivative_release.apply_additions', lang_code=lang_code) }}">
@@ -174,7 +174,7 @@
     <div class="card mb-4">
         <div class="card-header bg-warning bg-opacity-10">
             <i class="bi bi-pencil text-warning"></i>
-            {{ STRINGS.sync.derivative_changes_header|replace("{count}", changes|length|string) }}
+            {{ STRINGS.sync.changes }} — {{ changes|length }} {{ STRINGS.sync.derivative_changes_subtitle }}
         </div>
         <div class="card-body">
             <form method="post" action="{{ url_for('sync_derivative_release.apply_changes', lang_code=lang_code) }}">
@@ -209,7 +209,7 @@
                         <table class="table table-sm table-bordered mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 80px;">{{ STRINGS.sync.status }}</th>
+                                    <th style="width: 80px;">{{ STRINGS.common.status }}</th>
                                     <th>Grammatical Form</th>
                                     <th>DB</th>
                                     <th>{{ STRINGS.sync.release }}</th>

@@ -3,7 +3,7 @@
     <div class="col">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-translate"></i> {{ STRINGS.sentences.translations }}</span>
+                <span><i class="bi bi-translate"></i> {{ STRINGS.common.translations }}</span>
                 <div>
                     <form method="post" action="{{ url_for('agents.check_translations', lemma_id=lemma.id) }}" style="display: inline;">
                         <button type="submit" class="btn btn-sm btn-light"
@@ -26,7 +26,7 @@
                     <thead>
                         <tr>
                             <th>{{ STRINGS.common.language }}</th>
-                            <th>{{ STRINGS.sentences.translation }}</th>
+                            <th>{{ STRINGS.common.translation }}</th>
                             <th>{{ STRINGS.sentences.disambiguation }}</th>
                             <th>{{ STRINGS.sentences.definition }}</th>
                             <th>{{ STRINGS.sentences.actions }}</th>
@@ -96,7 +96,7 @@
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title">{{ STRINGS.sentences.edit_translation_title|replace('{language}', lang_name) }}</h5>
+                                            <h5 class="modal-title">{{ STRINGS.sentences.edit_translation_title }} — {{ lang_name }}</h5>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                         </div>
                                         <form method="post" action="{{ url_for('translations.update_translation', lemma_id=lemma.id, lang_code=lang_code) }}">
@@ -107,7 +107,7 @@
                                                 </div>
                                                 <div class="mb-3">
                                                     <label for="translation{{ lang_code }}" class="form-label">
-                                                        {{ STRINGS.sentences.translation_for_language|replace('{language}', lang_name) }}
+                                                        {{ STRINGS.common.translation }} ({{ lang_name }})
                                                     </label>
                                                     <input type="text" class="form-control" id="translation{{ lang_code }}"
                                                            name="translation" value="{{ translations[lang_code] or '' }}"
@@ -127,7 +127,7 @@
                                                            name="disambiguation" value="{{ translation_disambiguations[lang_code] or '' }}"
                                                            placeholder="{{ STRINGS.sentences.disambiguation_example_placeholder }}">
                                                     <div class="form-text">
-                                                        {{ STRINGS.sentences.disambiguation_help_text|replace('{language}', lang_name) }}
+                                                        {{ STRINGS.sentences.disambiguation_help_text }}
                                                     </div>
                                                 </div>
                                                 {% endif %}
@@ -144,7 +144,7 @@
                     </tbody>
                 </table>
                 <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleTier3Btn">
-                    <i class="bi bi-chevron-down"></i> {{ STRINGS.sentences.show_all_languages_more|replace('{count}', tier_3_languages|length|string) }}
+                    <i class="bi bi-chevron-down"></i> {{ STRINGS.sentences.show_all_languages_more }} ({{ tier_3_languages|length }})
                 </button>
             </div>
         </div>
