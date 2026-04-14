@@ -21,10 +21,13 @@ from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.database import (
     Lemma,
+    SentenceWord,
     add_sentence,
     add_sentence_translation,
     add_sentence_word,
     calculate_minimum_level,
+    find_lemma_by_guid,
+    update_sentence_word,
 )
 
 logger = logging.getLogger(__name__)
@@ -139,6 +142,10 @@ class BebrasAgent:
                             "type": "string",
                             "description": "Grammatical form (e.g., plural, past_tense)",
                         },
+                        "guid": {
+                            "type": "string",
+                            "description": "Optional lemma GUID when known (e.g., V12_006)",
+                        },
                     },
                     "required": ["word", "lemma", "pos", "role"],
                 },
@@ -189,14 +196,30 @@ class BebrasAgent:
                 lemma_text = word_data.get("lemma")
                 pos = word_data.get("pos")
                 disambiguation_hint = word_data.get("disambiguation", "")
+                provided_guid = str(word_data.get("guid", "")).strip()
 
-                # Try to find matching lemma
-                lemma = find_best_lemma_match(
-                    session=session,
-                    lemma_text=lemma_text,
-                    pos=pos,
-                    disambiguation_hint=disambiguation_hint,
-                )
+                # Try explicit GUID first if provided by upstream analysis
+                lemma: Optional[Lemma] = None
+                is_synthetic_guid = provided_guid.startswith("SYN") and provided_guid[3:].isdigit()
+                if provided_guid and not is_synthetic_guid:
+                    lemma = find_lemma_by_guid(session=session, guid=provided_guid)
+                    if lemma:
+                        logger.info(
+                            f"Linked '{lemma_text}' using provided GUID {provided_guid} ({lemma.lemma_text})"
+                        )
+                    else:
+                        logger.warning(
+                            f"Provided GUID {provided_guid} not found for '{lemma_text}'; falling back to text matching"
+                        )
+
+                # Fall back to text/POS disambiguation matching
+                if lemma is None:
+                    lemma = find_best_lemma_match(
+                        session=session,
+                        lemma_text=lemma_text,
+                        pos=pos,
+                        disambiguation_hint=disambiguation_hint,
+                    )
 
                 if lemma:
                     linked_count += 1
@@ -208,20 +231,44 @@ class BebrasAgent:
                         {"word": lemma_text, "pos": pos, "hint": disambiguation_hint}
                     )
 
-                # Create SentenceWord record
-                add_sentence_word(
-                    session=session,
-                    sentence=sentence,
-                    position=position,
-                    word_role=word_data.get("role", "unknown"),
-                    lemma=lemma,
-                    english_text=lemma_text,
-                    target_language_text=lemma_text,  # Will be updated with translations
-                    grammatical_form=word_data.get("grammatical_form"),
-                    language_code=source_language,
+                source_word_text = word_data.get("word", lemma_text)
+                existing_word: Optional[SentenceWord] = (
+                    session.query(SentenceWord)
+                    .filter_by(
+                        sentence_id=sentence.id,
+                        language_code=source_language,
+                        position=position,
+                    )
+                    .first()
                 )
 
-            session.commit()
+                if existing_word:
+                    update_sentence_word(
+                        session=session,
+                        sentence_word=existing_word,
+                        word_role=word_data.get("role", "unknown"),
+                        lemma=lemma,
+                        english_text=source_word_text,
+                        target_language_text=lemma_text,
+                        grammatical_form=word_data.get("grammatical_form"),
+                    )
+                else:
+                    add_sentence_word(
+                        session=session,
+                        sentence=sentence,
+                        position=position,
+                        word_role=word_data.get("role", "unknown"),
+                        lemma=lemma,
+                        english_text=source_word_text,
+                        target_language_text=lemma_text,
+                        grammatical_form=word_data.get("grammatical_form"),
+                        language_code=source_language,
+                    )
+
+            if close_session:
+                session.commit()
+            else:
+                session.flush()
 
             return {
                 "success": True,
@@ -292,22 +339,8 @@ class BebrasAgent:
                 verified=verified,
             )
 
-            # Step 4: Add target language translations if requested
-            if target_languages:
-                from .translation import ensure_translations
-
-                ensure_translations(
-                    session=session,
-                    sentence=sentence,
-                    source_text=sentence_text,
-                    source_language=source_language,
-                    target_languages=target_languages,
-                    model=self.config.model or "gpt-5.4-mini",
-                )
-
-            session.flush()
-
-            # Step 5: Link sentence to words
+            # Step 4: Link source sentence words first (GUID/lemma detection)
+            # so translation storage does not attempt to regenerate English word rows.
             link_result = self.link_sentence_to_words(
                 sentence=sentence,
                 analysis=analysis,
@@ -315,6 +348,28 @@ class BebrasAgent:
                 target_languages=target_languages,
                 session=session,
             )
+
+            if not link_result.get("success"):
+                raise RuntimeError(link_result.get("error", "Failed linking sentence words"))
+
+            # Step 5: Add target language translations if requested
+            if target_languages:
+                from .translation import ensure_translations
+
+                translation_result = ensure_translations(
+                    session=session,
+                    sentence=sentence,
+                    source_text=sentence_text,
+                    source_language=source_language,
+                    target_languages=target_languages,
+                    model=self.config.model or "gpt-5.4-mini",
+                )
+                if not translation_result.get("success"):
+                    raise RuntimeError(
+                        translation_result.get("error", "Failed generating translations")
+                    )
+
+            session.flush()
 
             # Step 6: Calculate minimum difficulty level
             calculate_minimum_level(session, sentence)
