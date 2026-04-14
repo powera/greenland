@@ -9,6 +9,29 @@ from typing import Any, Dict, Optional, Sequence, cast
 
 SUPPORTED_UI_LANGS = frozenset({"en", "lt"})
 _STRINGS_ROOT = Path(__file__).resolve().parents[3] / "strings" / "barsukas"
+_LEGACY_NAMESPACE_ALIASES = {
+    "linguistics": "common.linguistics",
+    "parts_of_speech": "common.linguistics",
+    "pagination": "common.pagination",
+}
+
+
+def _namespace_path_from_string(namespace: str) -> Path:
+    return _STRINGS_ROOT.joinpath(*namespace.split("."))
+
+
+def _discover_namespaces() -> list[str]:
+    namespace_set: set[str] = set()
+    for json_path in _STRINGS_ROOT.rglob("en.json"):
+        namespace_dir = json_path.parent
+        try:
+            relative_parts = namespace_dir.relative_to(_STRINGS_ROOT).parts
+        except ValueError:
+            continue
+        if not relative_parts:
+            continue
+        namespace_set.add(".".join(relative_parts))
+    return sorted(namespace_set)
 
 
 @lru_cache(maxsize=64)
@@ -17,8 +40,9 @@ def _load_namespace_file(namespace: str, ui_lang: str) -> Dict[str, Any]:
     if ui_lang not in SUPPORTED_UI_LANGS:
         ui_lang = "en"
 
-    namespace_path = _STRINGS_ROOT / namespace / f"{ui_lang}.json"
-    fallback_path = _STRINGS_ROOT / namespace / "en.json"
+    namespace_root = _namespace_path_from_string(namespace)
+    namespace_path = namespace_root / f"{ui_lang}.json"
+    fallback_path = namespace_root / "en.json"
 
     if namespace_path.exists():
         with namespace_path.open("r", encoding="utf-8") as handle:
@@ -44,15 +68,29 @@ def load_all_barsukas_strings(ui_lang: str) -> Dict[str, Dict[str, Any]]:
     if ui_lang not in SUPPORTED_UI_LANGS:
         ui_lang = "en"
 
-    namespaces = sorted(
-        item.name
-        for item in _STRINGS_ROOT.iterdir()
-        if item.is_dir() and not item.name.startswith(".")
-    )
-    return {
+    namespaces = _discover_namespaces()
+    strings_by_namespace = {
         namespace: _load_namespace_file(namespace=namespace, ui_lang=ui_lang)
         for namespace in namespaces
     }
+    for alias, target in _LEGACY_NAMESPACE_ALIASES.items():
+        if alias not in strings_by_namespace and target in strings_by_namespace:
+            strings_by_namespace[alias] = strings_by_namespace[target]
+
+    for namespace in namespaces:
+        if "." not in namespace:
+            continue
+        parent_name, child_name = namespace.rsplit(".", 1)
+        parent_namespace = strings_by_namespace.get(parent_name)
+        child_namespace = strings_by_namespace.get(namespace)
+        if parent_namespace is None or child_namespace is None:
+            continue
+        existing_child = parent_namespace.get(child_name)
+        if isinstance(existing_child, dict):
+            existing_child.update(child_namespace)
+        else:
+            parent_namespace[child_name] = child_namespace
+    return strings_by_namespace
 
 
 class _StringPathNode:

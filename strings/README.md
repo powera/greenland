@@ -7,7 +7,14 @@ This repository stores UI translation strings in JSON files under namespaced fol
 - `strings/barsukas/<namespace>/en.json`
 - `strings/barsukas/<namespace>/lt.json`
 
-Each `<namespace>` groups related keys (for example: `navigation`, `pagination`, `dictionary`, `lemmas`, `rhymes`, `languages`, `common`, `linguistics`).
+Each `<namespace>` groups related keys (for example: `navigation`, `dictionary`, `lemmas`, `rhymes`, `languages`, `common`).
+Nested namespaces are supported using subdirectories, such as:
+
+- `strings/barsukas/common/pagination/en.json` → `common.pagination`
+- `strings/barsukas/common/linguistics/en.json` → `common.linguistics`
+
+Current convention: keep shared namespaces at two components (for example,
+`common.pagination`, `common.linguistics`).
 
 ## Namespace scope (shared vs module-specific)
 
@@ -18,16 +25,14 @@ namespaces isolated to their own views.
 
 - `strings/barsukas/common/en.json`
 - `strings/barsukas/common/lt.json`
-- `strings/barsukas/linguistics/en.json`
-- `strings/barsukas/linguistics/lt.json`
+- `strings/barsukas/common/linguistics/en.json`
+- `strings/barsukas/common/linguistics/lt.json`
 - `strings/barsukas/navigation/en.json`
 - `strings/barsukas/navigation/lt.json`
-- `strings/barsukas/pagination/en.json`
-- `strings/barsukas/pagination/lt.json`
+- `strings/barsukas/common/pagination/en.json`
+- `strings/barsukas/common/pagination/lt.json`
 - `strings/barsukas/languages/en.json`
 - `strings/barsukas/languages/lt.json`
-- `strings/barsukas/parts_of_speech/en.json`
-- `strings/barsukas/parts_of_speech/lt.json`
 
 ### Module-specific namespaces
 

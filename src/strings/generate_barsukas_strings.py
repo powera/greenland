@@ -27,7 +27,7 @@ ATTRIBUTE_ALLOWLIST = {
 }
 NAMESPACE_ALIAS = {
     "sync_release": "sync",
-    "parts_of_speech": "parts_of_speech",
+    "parts_of_speech": "common.linguistics",
 }
 ENTITY_PATTERN = re.compile(r"^(?:&[a-zA-Z]+;|&#\d+;|&#x[0-9a-fA-F]+;)+$")
 JINJA_OR_COMMENT_PATTERN = re.compile(r"<!--.*?-->|\{\{.*?\}\}|\{\%.*?\%\}|\{\#.*?\#\}", re.DOTALL)
@@ -69,14 +69,18 @@ class CatalogState:
 
     def _load_catalogs(self) -> None:
         self.strings_root.mkdir(parents=True, exist_ok=True)
-        for namespace_dir in sorted(self.strings_root.iterdir()):
+        for en_path in sorted(self.strings_root.rglob("en.json")):
+            namespace_dir = en_path.parent
             if not namespace_dir.is_dir():
                 continue
-            namespace = namespace_dir.name
-            self.namespace_dirs.add(namespace)
-            en_path = namespace_dir / "en.json"
-            if not en_path.exists():
+            try:
+                relative_parts = namespace_dir.relative_to(self.strings_root).parts
+            except ValueError:
                 continue
+            if not relative_parts:
+                continue
+            namespace = ".".join(relative_parts)
+            self.namespace_dirs.add(namespace)
             with en_path.open("r", encoding="utf-8") as handle:
                 loaded = json.load(handle)
             catalog = {str(key): str(value) for key, value in loaded.items()}
@@ -123,7 +127,7 @@ class CatalogState:
 
     def write(self) -> None:
         for namespace in sorted(self.namespace_dirs):
-            namespace_dir = self.strings_root / namespace
+            namespace_dir = self.strings_root.joinpath(*namespace.split("."))
             namespace_dir.mkdir(parents=True, exist_ok=True)
             english_catalog = self.catalogs.get(namespace, {})
             english_sorted = {
