@@ -11,5 +11,13 @@
   "status": "Būsena",
   "translation": "Vertimas",
   "translations": "Vertimai",
-  "view": "Peržiūrėti"
+  "view": "Peržiūrėti",
+  "token_database": "Duomenų bazė",
+  "token_export": "Eksportuoti",
+  "token_import": "Importuoti",
+  "token_optional": "Pasirinktina",
+  "abbreviation_international_phonetic_alphabet": "IPA",
+  "abbreviation_part_of_speech": "Kalbos dalis",
+  "label_part_of_speech": "Kalbos dalis",
+  "label_sort_order_alphabetical": "Abėcėlė"
 }

@@ -101,5 +101,6 @@
   "vocabulary_words": "Vocabulary Words",
   "role": "Role",
   "english": "English",
-  "grammatical_form": "Grammatical Form"
+  "grammatical_form": "Grammatical Form",
+  "token_optional": "Optional"
 }

@@ -30,7 +30,7 @@
         <div class="col-auto">
             <label for="sort" class="form-label mb-0 small text-muted">{{ STRINGS.navigation.sort_by }}</label>
             <select class="form-select form-select-sm" id="sort" name="sort" onchange="this.form.submit()">
-                <option value="alpha" {% if sort == 'alpha' %}selected{% endif %}>{{ STRINGS.dictionary.sort_alpha }}</option>
+                <option value="alpha" {% if sort == 'alpha' %}selected{% endif %}>{{ STRINGS.common.label_sort_order_alphabetical }}</option>
                 <option value="level" {% if sort == 'level' %}selected{% endif %}>{{ STRINGS.common.level }}</option>
                 <option value="category" {% if sort == 'category' %}selected{% endif %}>{{ STRINGS.common.category }}</option>
             </select>
@@ -93,7 +93,7 @@
                 {% for code in display_langs %}
                     <th class="dict-trans-col">{{ language_names[code] }}</th>
                 {% endfor %}
-                <th class="dict-pos-col">{{ STRINGS.dictionary.pos }}</th>
+                <th class="dict-pos-col">{{ STRINGS.common.label_part_of_speech }}</th>
             </tr>
         </thead>
         <tbody>

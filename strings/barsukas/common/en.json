@@ -11,5 +11,13 @@
   "status": "Status",
   "translation": "Translation",
   "translations": "Translations",
-  "view": "View"
+  "view": "View",
+  "token_database": "Database",
+  "token_export": "Export",
+  "token_import": "Import",
+  "token_optional": "Optional",
+  "abbreviation_international_phonetic_alphabet": "IPA",
+  "abbreviation_part_of_speech": "POS",
+  "label_part_of_speech": "Part of Speech",
+  "label_sort_order_alphabetical": "Alphabetical"
 }

@@ -101,5 +101,6 @@
   "vocabulary_words": "Žodyno žodžiai",
   "role": "Vaidmuo",
   "english": "Anglų",
-  "grammatical_form": "Gramatinė forma"
+  "grammatical_form": "Gramatinė forma",
+  "token_optional": "Pasirinktina"
 }
