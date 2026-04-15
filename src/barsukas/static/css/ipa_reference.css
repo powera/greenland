@@ -23,156 +23,159 @@
     background-color: #f8f9fa;
 }
 
-.ipa-vowel-classic {
-    position: relative;
+/*
+ * Classic IPA vowel trapezoid.
+ *
+ * The chart is a 2x2 CSS grid:
+ *   row 1: corner spacer  | column labels (front / central / back)
+ *   row 2: row labels     | plot (trapezoid + vowel symbols)
+ *
+ * Column labels and row labels are absolutely positioned inside their grid
+ * cells using the same percentage coordinates as the vowels in the plot, so
+ * the labels always line up with the rows/columns they describe.
+ */
+
+.ipa-vowel-chart {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    grid-template-rows: 2.25rem 1fr;
+    column-gap: 0.75rem;
+    row-gap: 0.25rem;
     width: 100%;
-    max-width: 52rem;
-    margin: 0 auto 1rem auto;
-    padding-left: 7rem;
+    max-width: 44rem;
+    margin: 0 auto 0.5rem auto;
 }
 
-.ipa-vowel-columns {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    margin-bottom: 0.5rem;
-    font-size: clamp(1rem, 2.2vw, 2.5rem);
-    font-weight: 600;
-    text-align: center;
+.ipa-vowel-corner {
+    grid-column: 1;
+    grid-row: 1;
 }
 
-.ipa-vowel-height-labels {
+.ipa-vowel-col-labels {
+    grid-column: 2;
+    grid-row: 1;
+    position: relative;
+}
+
+.ipa-col-label {
     position: absolute;
-    left: 0;
-    top: 3.5rem;
-    width: 6rem;
-    display: grid;
-    grid-template-rows: repeat(4, 5rem);
-    align-items: center;
-    font-size: 1.05rem;
+    bottom: 0;
+    transform: translateX(-50%);
+    font-size: clamp(0.95rem, 1.6vw, 1.35rem);
+    font-weight: 600;
+    white-space: nowrap;
 }
+
+.ipa-col-front   { left: 13%; }
+.ipa-col-central { left: 50%; }
+.ipa-col-back    { left: 89%; }
+
+.ipa-vowel-row-labels {
+    grid-column: 1;
+    grid-row: 2;
+    position: relative;
+}
+
+.ipa-row-label {
+    position: absolute;
+    right: 0;
+    transform: translateY(-50%);
+    text-align: right;
+    font-size: 0.95rem;
+    line-height: 1.15;
+    white-space: nowrap;
+}
+
+.ipa-row-close    { top: 8%; }
+.ipa-row-close-mid { top: 38%; }
+.ipa-row-open-mid  { top: 60%; }
+.ipa-row-open      { top: 90%; }
 
 .ipa-vowel-plot {
+    grid-column: 2;
+    grid-row: 2;
     position: relative;
-    height: min(20rem, 50vw);
-    min-height: 16rem;
-    border-radius: 0.35rem;
-    overflow: hidden;
+    height: min(22rem, 55vw);
+    min-height: 17rem;
     isolation: isolate;
 }
 
 .ipa-vowel-guides {
     position: absolute;
     inset: 0;
+    width: 100%;
+    height: 100%;
     z-index: 1;
     pointer-events: none;
 }
 
-.ipa-vowel-guides .ipa-guide {
-    position: absolute;
-    display: block;
-    background-color: #252a33;
-    opacity: 0.62;
-}
-
-.ipa-guide-front {
-    left: 10%;
-    top: 12%;
-    width: 2px;
-    height: 74%;
-    transform: rotate(-32deg);
-    transform-origin: top;
-}
-
-.ipa-guide-central {
-    left: 49%;
-    top: 12%;
-    width: 2px;
-    height: 68%;
-    transform: rotate(-18deg);
-    transform-origin: top;
-}
-
-.ipa-guide-back {
-    right: 10%;
-    top: 10%;
-    width: 2px;
-    height: 78%;
-}
-
-.ipa-guide-close-mid {
-    left: 25%;
-    top: 30%;
-    width: 54%;
-    height: 2px;
-}
-
-.ipa-guide-open-mid {
-    left: 37%;
-    top: 57%;
-    width: 44%;
-    height: 2px;
-}
-
-.ipa-guide-open {
-    left: 53%;
-    top: 82%;
-    width: 30%;
-    height: 2px;
+.ipa-vowel-guides line {
+    stroke: #3b4252;
+    stroke-width: 1.2;
+    vector-effect: non-scaling-stroke;
+    opacity: 0.55;
 }
 
 .ipa-vowel-symbol {
     position: absolute;
     z-index: 2;
-    font-size: clamp(2rem, 4.8vw, 3.3rem);
+    transform: translate(-50%, -50%);
+    font-size: clamp(1.6rem, 3.8vw, 2.4rem);
     line-height: 1;
     font-weight: 700;
 }
 
-.v-i { left: 4%; top: 5%; }
-.v-y { left: 14%; top: 5%; }
-.v-ii { left: 45%; top: 6%; }
-.v-uu { left: 83%; top: 5%; }
+/* Close row (high vowels) */
+.v-i  { left: 8%;  top: 8%; }
+.v-y  { left: 20%; top: 8%; }
+.v-ii { left: 50%; top: 8%; }
+.v-uu { left: 89%; top: 8%; }
 
-.v-i-small { left: 24%; top: 22%; }
-.v-u-small { left: 72%; top: 22%; }
+/* Near-close row */
+.v-i-small { left: 26%; top: 23%; }
+.v-u-small { left: 80%; top: 23%; }
 
-.v-e { left: 17%; top: 34%; }
-.v-oe { left: 29%; top: 34%; }
-.v-schwa { left: 51%; top: 40%; }
-.v-o { left: 74%; top: 34%; }
+/* Close-mid row */
+.v-e     { left: 22%; top: 38%; }
+.v-oe    { left: 33%; top: 38%; }
+.v-schwa { left: 56%; top: 49%; }
+.v-o     { left: 82%; top: 38%; }
 
-.v-e-open { left: 31%; top: 56%; }
-.v-oe-open { left: 42%; top: 56%; }
-.v-turned-v { left: 56%; top: 56%; }
-.v-lambda { left: 74%; top: 56%; }
-.v-open-o { left: 85%; top: 56%; }
+/* Open-mid row */
+.v-e-open   { left: 32%; top: 60%; }
+.v-oe-open  { left: 43%; top: 60%; }
+.v-turned-v { left: 60%; top: 60%; }
+.v-lambda   { left: 75%; top: 60%; }
+.v-open-o   { left: 87%; top: 60%; }
 
-.v-ae { left: 29%; top: 73%; }
+/* Near-open row */
+.v-ae { left: 34%; top: 75%; }
 
-.v-a { left: 44%; top: 83%; }
-.v-alpha { left: 74%; top: 83%; }
-.v-open-back-o { left: 87%; top: 83%; }
+/* Open row */
+.v-a           { left: 42%; top: 90%; }
+.v-alpha       { left: 74%; top: 90%; }
+.v-open-back-o { left: 87%; top: 90%; }
 
-@media (max-width: 991px) {
-    .ipa-vowel-classic {
-        padding-left: 0;
+@media (max-width: 767px) {
+    .ipa-vowel-chart {
+        grid-template-columns: 6rem 1fr;
+        column-gap: 0.4rem;
     }
 
-    .ipa-vowel-height-labels {
-        position: static;
-        width: auto;
-        grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: auto;
-        margin-bottom: 0.75rem;
-        text-align: center;
+    .ipa-row-label {
+        font-size: 0.8rem;
+    }
+
+    .ipa-col-label {
+        font-size: 1rem;
     }
 
     .ipa-vowel-plot {
-        height: 17.5rem;
+        height: 17rem;
         min-height: 14rem;
     }
 
     .ipa-vowel-symbol {
-        font-size: clamp(1.8rem, 6vw, 2.4rem);
+        font-size: clamp(1.3rem, 5vw, 1.9rem);
     }
 }
