@@ -28,6 +28,7 @@ from storage.models.schema import (
 from storage.translation_helpers import (
     LANGUAGE_HIERARCHY,
     LANGUAGE_NAMES,
+    RELEASE_LANGUAGES,
 )
 
 if TYPE_CHECKING:
@@ -1452,6 +1453,95 @@ def _find_exportable_sentences(
     return exportable
 
 
+def _normalize_release_sentence_for_compare(release_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Normalize release JSONL sentence data for comparison with DB export records."""
+    normalized: Dict[str, Any] = {"guid": release_data.get("guid")}
+
+    for field_name in ("pattern_type", "tense", "minimum_level", "notes"):
+        if field_name in release_data:
+            normalized[field_name] = release_data[field_name]
+
+    release_lang_set = set(RELEASE_LANGUAGES)
+    release_translations = release_data.get("translations", {})
+    translations: Dict[str, str] = {}
+    for lang_code, translation_text in release_translations.items():
+        if lang_code not in release_lang_set:
+            continue
+        if translation_text and str(translation_text).strip():
+            translations[lang_code] = str(translation_text)
+    if translations:
+        normalized["translations"] = translations
+
+    pattern_words = release_data.get("pattern_words", [])
+    if isinstance(pattern_words, list) and pattern_words:
+        normalized_words: List[Dict[str, Any]] = []
+        sorted_words = sorted(pattern_words, key=lambda p: p.get("position", 0))
+        for pattern_word in sorted_words:
+            normalized_words.append(
+                {
+                    "position": pattern_word.get("position", 0),
+                    "slot_name": pattern_word.get("slot_name"),
+                    "lemma_guid": pattern_word.get("lemma_guid"),
+                    "english_text": pattern_word.get("english_text"),
+                }
+            )
+        normalized["pattern_words"] = normalized_words
+
+    return normalized
+
+
+def _find_sync_back_candidates(
+    release_sentences: Dict[str, Dict[str, Any]], db_session: Any
+) -> List[Dict[str, Any]]:
+    """Find sentences that exist in both DB and release, but differ from DB canonical record."""
+    conversation_ids = _get_conversation_sentence_ids(db_session)
+    db_rows = db_session.query(Sentence.id, Sentence.guid).filter(Sentence.guid.isnot(None)).all()
+    db_guid_to_id = {guid: sentence_id for sentence_id, guid in db_rows if guid}
+    common_guids = sorted(set(release_sentences.keys()) & set(db_guid_to_id.keys()))
+    if not common_guids:
+        return []
+
+    candidates: List[Dict[str, Any]] = []
+    batch_size = 500
+    for index in range(0, len(common_guids), batch_size):
+        batch = common_guids[index : index + batch_size]
+        db_sentences = (
+            db_session.query(Sentence)
+            .filter(Sentence.guid.in_(batch))
+            .options(
+                selectinload(Sentence.translations),
+                selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
+            )
+            .all()
+        )
+
+        for db_sentence in db_sentences:
+            if db_sentence.id in conversation_ids:
+                continue
+
+            release_data = release_sentences.get(db_sentence.guid)
+            if not release_data:
+                continue
+
+            db_record = _sentence_to_release_record(db_sentence)
+            normalized_release = _normalize_release_sentence_for_compare(release_data)
+            if db_record == normalized_release:
+                continue
+
+            candidates.append(
+                {
+                    "guid": db_sentence.guid,
+                    "sentence_id": db_sentence.id,
+                    "english_text": _get_db_sentence_english(db_session, db_sentence)[:120],
+                    "pattern_type": db_sentence.pattern_type or "",
+                    "minimum_level": db_sentence.minimum_level,
+                }
+            )
+
+    candidates.sort(key=lambda x: x["guid"])
+    return candidates
+
+
 @bp.route("/export")
 def export() -> ResponseReturnValue:
     """Display DB sentences that are not yet in release JSONL files."""
@@ -1459,10 +1549,12 @@ def export() -> ResponseReturnValue:
     release_sentences = _load_release_sentences(release_dir)
 
     exportable = _find_exportable_sentences(release_sentences, g.db)
+    sync_back_candidates = _find_sync_back_candidates(release_sentences, g.db)
 
     return render_template(
         "sync_sentence_release/export.html",
         exportable=exportable,
+        sync_back_candidates=sync_back_candidates,
         release_dir=str(release_dir),
     )
 
@@ -1581,4 +1673,90 @@ def apply_export() -> ResponseReturnValue:
     g.db.commit()
 
     flash(f"Exported {exported_count} sentence(s) to release files", "success")
+    return redirect(url_for("sync_sentence_release.export"))
+
+
+@bp.route("/export/sync-back", methods=["POST"])
+def apply_export_sync_back() -> ResponseReturnValue:
+    """Overwrite existing release sentence records with canonical SQLite records."""
+    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
+    if app.config.get("READONLY", False):
+        flash("Database is in read-only mode", "error")
+        return redirect(url_for("sync_sentence_release.export"))
+
+    selected_guids = request.form.getlist("selected_guids")
+    if not selected_guids:
+        flash("No sentences selected for sync-back", "warning")
+        return redirect(url_for("sync_sentence_release.export"))
+
+    release_dir = _get_sentence_release_dir()
+    conversation_ids = _get_conversation_sentence_ids(g.db)
+    db_sentences = (
+        g.db.query(Sentence)
+        .filter(Sentence.guid.in_(selected_guids))
+        .options(
+            selectinload(Sentence.translations),
+            selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
+        )
+        .all()
+    )
+    db_by_guid = {
+        sentence.guid: sentence for sentence in db_sentences if sentence.id not in conversation_ids
+    }
+
+    if not db_by_guid:
+        flash("No valid sentences found for sync-back", "warning")
+        return redirect(url_for("sync_sentence_release.export"))
+
+    updated_count = 0
+    for guid in selected_guids:
+        sentence = db_by_guid.get(guid)
+        if not sentence:
+            continue
+
+        new_record = _sentence_to_release_record(sentence)
+        release_file = _find_release_file_for_sentence(release_dir, guid)
+
+        # If no existing file is found (unexpected for sync-back), append via export category.
+        if not release_file:
+            category = _resolve_primary_lemma_category(sentence)
+            dir_name = _TYPE_TO_DIR.get(category[0], category[0])
+            category_dir = release_dir / dir_name / category[1]
+            category_dir.mkdir(parents=True, exist_ok=True)
+            release_file = category_dir / "base.jsonl"
+
+        existing_records: List[Dict[str, Any]] = []
+        replaced = False
+        if release_file.exists():
+            with open(release_file, "r", encoding="utf-8") as source_file:
+                for line in source_file:
+                    stripped = line.strip()
+                    if not stripped:
+                        continue
+                    try:
+                        data = json.loads(stripped)
+                    except json.JSONDecodeError:
+                        continue
+                    existing_guid = data.get("guid")
+                    if existing_guid == guid:
+                        existing_records.append(new_record)
+                        replaced = True
+                    else:
+                        existing_records.append(data)
+        if not replaced:
+            existing_records.append(new_record)
+
+        existing_records.sort(key=lambda record: record.get("guid", ""))
+        _write_jsonl_atomic(release_file, existing_records)
+        updated_count += 1
+
+    log_operation(
+        session=g.db,
+        source="sync-release",
+        operation_type="sentence_sync_back",
+        details={"updated_count": updated_count, "selected_guids": selected_guids},
+    )
+    g.db.commit()
+
+    flash(f"Synced {updated_count} sentence(s) from SQLite to release files", "success")
     return redirect(url_for("sync_sentence_release.export"))
