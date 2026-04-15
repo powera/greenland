@@ -17,6 +17,20 @@ Make it obvious whether a string is:
 - `SSTR` = sentence-length strings
 - `CSTR` = multi-sentence text blocks
 
+Generator mapping (`generate_barsukas_strings.py`) follows this automatically
+using heuristics:
+- short/token-like text → `LSTR`
+- sentence-like text → `SSTR`
+- 2+ sentence blocks → `CSTR`
+
+Override the next extracted segment with template comments when needed:
+- `<!-- strings:short -->`
+- `<!-- strings:sentence -->`
+- `<!-- strings:multi -->`
+
+Skip extraction for intentional literals:
+- `<!-- strings:do-not-transform -->`
+
 ---
 
 ## LSTR namespace rules

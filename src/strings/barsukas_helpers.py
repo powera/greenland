@@ -237,6 +237,13 @@ class StringAccessor:
         if len(segments) < 2:
             return default
 
+        for index in range(len(segments) - 1, 0, -1):
+            namespace = ".".join(segments[:index])
+            if namespace not in self._strings_by_namespace:
+                continue
+            key = ".".join(segments[index:])
+            return self._get_value(namespace, key, default=default)
+
         namespace = segments[0]
         key = ".".join(segments[1:])
         return self._get_value(namespace, key, default=default)

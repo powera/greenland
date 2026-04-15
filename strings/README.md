@@ -98,6 +98,33 @@ Canonical examples:
 
 `CSTR` has no implicit `common` fallback and must be addressed as `CSTR.<namespace>.<key>`.
 
+## Generator classification and template directives
+
+`src/strings/generate_barsukas_strings.py` now classifies extracted text before
+rendering template expressions:
+
+- short labels/tokens → `{{ LSTR.<key> }}`
+- sentence-like text → `{{ SSTR.<namespace>.<key> }}`
+- multi-sentence blocks → `{{ CSTR.<namespace>.<key> }}`
+
+Default classification uses punctuation and length heuristics, and can be
+overridden for the *next extracted segment* with comments:
+
+- `<!-- strings:short -->`
+- `<!-- strings:sentence -->`
+- `<!-- strings:multi -->`
+
+Use an explicit escape marker to keep an intentional literal string unchanged:
+
+- `<!-- strings:do-not-transform -->`
+
+Example:
+
+```html
+<span><!-- strings:sentence -->Search</span>
+<span><!-- strings:do-not-transform -->Literal prototype text</span>
+```
+
 ## CSTR migration rules
 
 When converting multiple sentence keys into one long block:

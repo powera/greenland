@@ -42,6 +42,15 @@ def test_sstr_requires_namespace() -> None:
     assert str(sstr.edit_title) == ""
 
 
+def test_sstr_resolves_multi_segment_namespace_paths() -> None:
+    strings_by_namespace = {
+        "common.pagination": {"next": "Next"},
+    }
+    sstr = create_sstr_accessor(strings_by_namespace, default_module="common")
+
+    assert str(sstr.common.pagination.next) == "Next"
+
+
 def test_cstr_requires_namespace() -> None:
     strings_by_namespace = {
         "ipa": {"intro_block": "<p>Intro block.</p>"},
