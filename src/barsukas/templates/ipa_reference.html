@@ -142,57 +142,60 @@
                 <i class="bi bi-record-circle"></i> {{ STRINGS.ipa.vowels_title }}
             </div>
             <div class="card-body">
-                <div class="ipa-vowel-classic" role="img" aria-label="{{ STRINGS.ipa.vowel_plot_aria }}">
-                    <div class="ipa-vowel-columns">
-                        <span>{{ STRINGS.ipa.vowel_front }}</span>
-                        <span>{{ STRINGS.ipa.vowel_central }}</span>
-                        <span>{{ STRINGS.ipa.vowel_back }}</span>
+                <div class="ipa-vowel-chart" role="img" aria-label="{{ STRINGS.ipa.vowel_plot_aria }}">
+                    <div class="ipa-vowel-corner" aria-hidden="true"></div>
+
+                    <div class="ipa-vowel-col-labels">
+                        <span class="ipa-col-label ipa-col-front">{{ STRINGS.ipa.vowel_front }}</span>
+                        <span class="ipa-col-label ipa-col-central">{{ STRINGS.ipa.vowel_central }}</span>
+                        <span class="ipa-col-label ipa-col-back">{{ STRINGS.ipa.vowel_back }}</span>
                     </div>
 
-                    <div class="ipa-vowel-height-labels">
-                        <span>{{ STRINGS.ipa.vowel_close }}</span>
-                        <span>{{ STRINGS.ipa.vowel_close_mid }}</span>
-                        <span>{{ STRINGS.ipa.vowel_open_mid }}</span>
-                        <span>{{ STRINGS.ipa.vowel_open }}</span>
+                    <div class="ipa-vowel-row-labels">
+                        <span class="ipa-row-label ipa-row-close">{{ STRINGS.ipa.vowel_close }}</span>
+                        <span class="ipa-row-label ipa-row-close-mid">{{ STRINGS.ipa.vowel_close_mid }}</span>
+                        <span class="ipa-row-label ipa-row-open-mid">{{ STRINGS.ipa.vowel_open_mid }}</span>
+                        <span class="ipa-row-label ipa-row-open">{{ STRINGS.ipa.vowel_open }}</span>
                     </div>
 
                     <div class="ipa-vowel-plot">
-                        <div class="ipa-vowel-guides" aria-hidden="true">
-                            <span class="ipa-guide ipa-guide-front"></span>
-                            <span class="ipa-guide ipa-guide-central"></span>
-                            <span class="ipa-guide ipa-guide-back"></span>
-                            <span class="ipa-guide ipa-guide-close-mid"></span>
-                            <span class="ipa-guide ipa-guide-open-mid"></span>
-                            <span class="ipa-guide ipa-guide-open"></span>
-                        </div>
+                        <svg class="ipa-vowel-guides" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                            <line x1="6" y1="6" x2="94" y2="6" />
+                            <line x1="94" y1="6" x2="94" y2="90" />
+                            <line x1="40" y1="90" x2="94" y2="90" />
+                            <line x1="6" y1="6" x2="40" y2="90" />
+                            <line x1="50" y1="6" x2="65" y2="90" />
+                            <line x1="17" y1="38" x2="94" y2="38" />
+                            <line x1="28" y1="60" x2="94" y2="60" />
+                        </svg>
 
-                        <span class="ipa-symbol ipa-vowel-symbol v-i" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_i }}">i</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-y" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_y }}">y</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-i"  data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_i }}">i</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-y"  data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_y }}">y</span>
                         <span class="ipa-symbol ipa-vowel-symbol v-ii" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_ii }}">ɨ</span>
                         <span class="ipa-symbol ipa-vowel-symbol v-uu" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_u }}">u</span>
 
                         <span class="ipa-symbol ipa-vowel-symbol v-i-small" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_i_small }}">ɪ</span>
                         <span class="ipa-symbol ipa-vowel-symbol v-u-small" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_u_small }}">ʊ</span>
 
-                        <span class="ipa-symbol ipa-vowel-symbol v-e" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_e }}">e</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-oe" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_oe }}">ø</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-e"     data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_e }}">e</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-oe"    data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_oe }}">ø</span>
                         <span class="ipa-symbol ipa-vowel-symbol v-schwa" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_schwa }}">ə</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-o" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_o }}">o</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-o"     data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_o }}">o</span>
 
-                        <span class="ipa-symbol ipa-vowel-symbol v-e-open" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_e_open }}">ɛ</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-oe-open" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_oe_open }}">œ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-e-open"   data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_e_open }}">ɛ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-oe-open"  data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_oe_open }}">œ</span>
                         <span class="ipa-symbol ipa-vowel-symbol v-turned-v" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_turned_v }}">ɜ</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-lambda" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_lambda }}">ʌ</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-open-o" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_open_o }}">ɔ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-lambda"   data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_lambda }}">ʌ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-open-o"   data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_open_o }}">ɔ</span>
 
                         <span class="ipa-symbol ipa-vowel-symbol v-ae" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_ae }}">æ</span>
 
-                        <span class="ipa-symbol ipa-vowel-symbol v-a" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_a }}">a</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-alpha" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_alpha }}">ɑ</span>
-                        <span class="ipa-symbol ipa-vowel-symbol v-open-back-o" data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_open_back_o }}">ɒ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-a"            data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_a }}">a</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-alpha"        data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_alpha }}">ɑ</span>
+                        <span class="ipa-symbol ipa-vowel-symbol v-open-back-o"  data-bs-toggle="tooltip" title="{{ STRINGS.ipa.tip_vowel_open_back_o }}">ɒ</span>
                     </div>
                 </div>
-                <p class="text-muted small mb-0">
+                <p class="text-muted small mb-0 mt-3">
                     {{ STRINGS.ipa.vowel_note_pairs }}
                     {{ STRINGS.ipa.vowel_note_subset }}
                 </p>
