@@ -35,7 +35,9 @@ JINJA_OR_COMMENT_PATTERN = re.compile(r"<!--.*?-->|\{\{.*?\}\}|\{\%.*?\%\}|\{\#.
 TAG_PATTERN = re.compile(r"<[^>]+>", re.DOTALL)
 ATTRIBUTE_PATTERN = re.compile(r"([:\w-]+)\s*=\s*([\"'])(.*?)\2", re.DOTALL)
 SENTENCE_END_PATTERN = re.compile(r"[.!?](?:\s|$)")
-AccessorName = Literal["STRINGS", "CSTR"]
+DIRECTIVE_PATTERN = re.compile(r"<!--\s*strings:(?P<name>[-\w]+)\s*-->", re.IGNORECASE)
+AccessorName = Literal["LSTR", "SSTR", "CSTR"]
+TextKind = Literal["short", "sentence", "multi_sentence"]
 
 
 @dataclass(frozen=True)
@@ -60,6 +62,20 @@ class CatalogUpdateStats:
     reused_common_count: int = 0
     new_key_count: int = 0
     collisions_resolved: int = 0
+
+
+@dataclass(frozen=True)
+class ClassificationDirective:
+    start: int
+    end: int
+    name: str
+
+
+@dataclass(frozen=True)
+class ExtractionCandidate:
+    span: Span
+    text: str
+    namespace: str
 
 
 class CatalogState:
@@ -193,6 +209,32 @@ def is_multi_sentence_block(text: str) -> bool:
     return sentence_count >= 2
 
 
+def classify_extracted_segment(
+    text: str,
+    override: TextKind | None = None,
+) -> TextKind:
+    if override is not None:
+        return override
+
+    stripped = text.strip()
+    if is_multi_sentence_block(stripped):
+        return "multi_sentence"
+
+    token_count = len(re.findall(r"[A-Za-z0-9]+(?:['-][A-Za-z0-9]+)?", stripped))
+    has_sentence_ending = bool(SENTENCE_END_PATTERN.search(stripped))
+    has_line_break = "\n" in stripped
+
+    if has_sentence_ending and token_count >= 3:
+        return "sentence"
+    if has_line_break and token_count >= 6:
+        return "sentence"
+    if token_count >= 9:
+        return "sentence"
+    if len(stripped) >= 70 and token_count >= 5:
+        return "sentence"
+    return "short"
+
+
 def get_template_namespace(template_path: Path) -> str:
     relative_path = template_path.relative_to(TEMPLATES_ROOT)
     root_part = relative_path.parts[0] if len(relative_path.parts) > 1 else "common"
@@ -277,6 +319,29 @@ def split_unprotected_segments(segment_span: Span, protected_spans: list[Span]) 
     return [entry for entry in slices if entry.start < entry.end]
 
 
+def parse_classification_directives(content: str) -> list[ClassificationDirective]:
+    directives: list[ClassificationDirective] = []
+    for match in DIRECTIVE_PATTERN.finditer(content):
+        directives.append(
+            ClassificationDirective(
+                start=match.start(),
+                end=match.end(),
+                name=match.group("name").casefold(),
+            )
+        )
+    return directives
+
+
+def resolve_override_kind(directive_name: str) -> TextKind | None:
+    if directive_name in {"short", "label", "token", "lstr"}:
+        return "short"
+    if directive_name in {"sentence", "sstr"}:
+        return "sentence"
+    if directive_name in {"multi", "multi_sentence", "paragraph", "cstr"}:
+        return "multi_sentence"
+    return None
+
+
 def build_text_replacement(
     content: str,
     span: Span,
@@ -285,6 +350,7 @@ def build_text_replacement(
     cstr_catalog_state: CatalogState,
     standard_stats: CatalogUpdateStats,
     cstr_stats: CatalogUpdateStats,
+    override_kind: TextKind | None = None,
 ) -> Replacement | None:
     original_segment = content[span.start : span.end]
     trimmed = original_segment.strip()
@@ -299,10 +365,14 @@ def build_text_replacement(
         original_segment[len(original_segment) - trailing_length :] if trailing_length else ""
     )
 
-    replacement_accessor: AccessorName = "STRINGS"
+    segment_kind = classify_extracted_segment(trimmed, override=override_kind)
+
+    replacement_accessor: AccessorName = "LSTR"
     selected_catalog_state = standard_catalog_state
     selected_stats = standard_stats
-    if is_multi_sentence_block(trimmed):
+    if segment_kind == "sentence":
+        replacement_accessor = "SSTR"
+    if segment_kind == "multi_sentence":
         replacement_accessor = "CSTR"
         selected_catalog_state = cstr_catalog_state
         selected_stats = cstr_stats
@@ -313,7 +383,10 @@ def build_text_replacement(
         preferred_namespace=namespace,
         stats=selected_stats,
     )
-    expression = f"{{{{ {replacement_accessor}.{selected_namespace}.{selected_key} }}}}"
+    if replacement_accessor == "LSTR":
+        expression = f"{{{{ {replacement_accessor}.{selected_key} }}}}"
+    else:
+        expression = f"{{{{ {replacement_accessor}.{selected_namespace}.{selected_key} }}}}"
     return Replacement(
         start=span.start,
         end=span.end,
@@ -334,9 +407,11 @@ def plan_template_replacements(
 ) -> list[Replacement]:
     content = template_path.read_text(encoding="utf-8")
     protected_spans = find_protected_spans(content)
+    directives = parse_classification_directives(content)
     namespace = get_template_namespace(template_path)
 
     planned: list[Replacement] = []
+    candidates: list[ExtractionCandidate] = []
 
     for tag_match in TAG_PATTERN.finditer(content):
         tag_span = Span(tag_match.start(), tag_match.end())
@@ -357,38 +432,62 @@ def plan_template_replacements(
                 continue
             value_start = tag_match.start() + attr_match.start(3)
             value_end = tag_match.start() + attr_match.end(3)
-            selected_namespace, selected_key = standard_catalog_state.resolve_or_create_key(
-                normalized_text=normalized,
-                original_text=attribute_value.strip(),
-                preferred_namespace=namespace,
-                stats=standard_stats,
-            )
-            planned.append(
-                Replacement(
-                    start=value_start,
-                    end=value_end,
-                    replacement_text=f"{{{{ STRINGS.{selected_namespace}.{selected_key} }}}}",
-                    original_text=attribute_value.strip(),
-                    namespace=selected_namespace,
-                    string_key=selected_key,
-                    accessor_name="STRINGS",
+            candidates.append(
+                ExtractionCandidate(
+                    span=Span(value_start, value_end),
+                    text=attribute_value,
+                    namespace=namespace,
                 )
             )
 
     for text_match in re.finditer(r">([^<]+)<", content, flags=re.DOTALL):
         candidate_span = Span(text_match.start(1), text_match.end(1))
         for piece in split_unprotected_segments(candidate_span, protected_spans):
-            replacement = build_text_replacement(
-                content=content,
-                span=piece,
-                namespace=namespace,
-                standard_catalog_state=standard_catalog_state,
-                cstr_catalog_state=cstr_catalog_state,
-                standard_stats=standard_stats,
-                cstr_stats=cstr_stats,
+            candidates.append(
+                ExtractionCandidate(
+                    span=piece,
+                    text=content[piece.start : piece.end],
+                    namespace=namespace,
+                )
             )
-            if replacement is not None:
-                planned.append(replacement)
+
+    sorted_candidates = sorted(candidates, key=lambda item: item.span.start)
+    pending_directives = sorted(directives, key=lambda item: item.start)
+    directive_index = 0
+
+    for candidate in sorted_candidates:
+        applied_directive: ClassificationDirective | None = None
+        while (
+            directive_index < len(pending_directives)
+            and pending_directives[directive_index].end <= candidate.span.start
+        ):
+            applied_directive = pending_directives[directive_index]
+            directive_index += 1
+
+        if applied_directive is not None and applied_directive.name in {
+            "literal",
+            "no_transform",
+            "do_not_transform",
+            "do-not-transform",
+            "skip",
+        }:
+            continue
+
+        override_kind = (
+            resolve_override_kind(applied_directive.name) if applied_directive is not None else None
+        )
+        replacement = build_text_replacement(
+            content=content,
+            span=candidate.span,
+            namespace=candidate.namespace,
+            standard_catalog_state=standard_catalog_state,
+            cstr_catalog_state=cstr_catalog_state,
+            standard_stats=standard_stats,
+            cstr_stats=cstr_stats,
+            override_kind=override_kind,
+        )
+        if replacement is not None:
+            planned.append(replacement)
 
     deduped_by_range: dict[tuple[int, int], Replacement] = {}
     for replacement in planned:
