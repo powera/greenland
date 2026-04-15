@@ -24,6 +24,7 @@ from storage.models.schema import (
     Sentence,
     SentencePatternWord,
     SentenceTranslation,
+    SentenceWord,
 )
 from storage.translation_helpers import (
     LANGUAGE_HIERARCHY,
@@ -1487,6 +1488,50 @@ def _normalize_release_sentence_for_compare(release_data: Dict[str, Any]) -> Dic
             )
         normalized["pattern_words"] = normalized_words
 
+    words = release_data.get("words", [])
+    if isinstance(words, list) and words:
+        normalized_words_data: List[Dict[str, Any]] = []
+        sorted_sentence_words = sorted(
+            words, key=lambda item: (item.get("language_code", ""), item.get("position", 0))
+        )
+        for word_data in sorted_sentence_words:
+            normalized_words_data.append(
+                {
+                    "language_code": word_data.get("language_code"),
+                    "position": word_data.get("position", 0),
+                    "word_role": word_data.get("word_role"),
+                    "lemma_guid": word_data.get("lemma_guid"),
+                    "english_text": word_data.get("english_text"),
+                    "target_language_text": word_data.get("target_language_text"),
+                    "grammatical_form": word_data.get("grammatical_form"),
+                    "grammatical_case": word_data.get("grammatical_case"),
+                    "declined_form": word_data.get("declined_form"),
+                }
+            )
+        normalized["words"] = normalized_words_data
+
+    audio = release_data.get("audio", [])
+    if isinstance(audio, list) and audio:
+        normalized_audio_data: List[Dict[str, Any]] = []
+        sorted_audio = sorted(
+            audio, key=lambda item: (item.get("language_code", ""), item.get("voice_name", ""))
+        )
+        for audio_data in sorted_audio:
+            normalized_audio_data.append(
+                {
+                    "language_code": audio_data.get("language_code"),
+                    "voice_name": audio_data.get("voice_name"),
+                    "filename": audio_data.get("filename"),
+                    "status": audio_data.get("status"),
+                    "expected_text": audio_data.get("expected_text"),
+                    "manifest_md5": audio_data.get("manifest_md5"),
+                    "s3_prod_url": audio_data.get("s3_prod_url"),
+                    "s3_staging_url": audio_data.get("s3_staging_url"),
+                    "staging_agent": audio_data.get("staging_agent"),
+                }
+            )
+        normalized["audio"] = normalized_audio_data
+
     return normalized
 
 
@@ -1511,6 +1556,8 @@ def _find_sync_back_candidates(
             .options(
                 selectinload(Sentence.translations),
                 selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
+                selectinload(Sentence.words).selectinload(SentenceWord.lemma),
+                selectinload(Sentence.audio_reviews),
             )
             .all()
         )
@@ -1588,6 +1635,8 @@ def apply_export() -> ResponseReturnValue:
         .options(
             selectinload(Sentence.translations),
             selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
+            selectinload(Sentence.words).selectinload(SentenceWord.lemma),
+            selectinload(Sentence.audio_reviews),
         )
         .all()
     )
@@ -1697,6 +1746,8 @@ def apply_export_sync_back() -> ResponseReturnValue:
         .options(
             selectinload(Sentence.translations),
             selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
+            selectinload(Sentence.words).selectinload(SentenceWord.lemma),
+            selectinload(Sentence.audio_reviews),
         )
         .all()
     )

@@ -323,6 +323,7 @@ class Sentence(Base):
     pattern_words = relationship(
         "SentencePatternWord", back_populates="sentence", cascade="all, delete-orphan"
     )
+    audio_reviews = relationship("AudioQualityReview", back_populates="sentence")
     conversation_sentences = relationship("ConversationSentence", back_populates="sentence")
 
 
@@ -620,7 +621,7 @@ class AudioQualityReview(Base):
 
     # Relationships
     lemma = relationship("Lemma")
-    sentence = relationship("Sentence")
+    sentence = relationship("Sentence", back_populates="audio_reviews")
 
     @hybrid_property
     def display_voice(self) -> str:
