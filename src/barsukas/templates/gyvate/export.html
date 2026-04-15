@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}GYVATE STRINGS Export{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="bi bi-translate"></i> GYVATE STRINGS Export</h2>
+        <p class="text-muted">Generate STRINGS keys and language catalogs for Barsukas or any similarly-structured project.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-gear"></i> Export Configuration
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('gyvate.export_strings') }}">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="project_root" class="form-label">Project Root</label>
+                            <input class="form-control" id="project_root" name="project_root" value="{{ default_project_root }}" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="template_path" class="form-label">Templates Path</label>
+                            <input class="form-control" id="template_path" name="template_path" value="{{ default_template_path }}" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="strings_path" class="form-label">STRINGS Path</label>
+                            <input class="form-control" id="strings_path" name="strings_path" value="{{ default_strings_path }}" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Scope</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="scope_templates" name="scopes" value="templates" checked>
+                            <label class="form-check-label" for="scope_templates">
+                                Templates (<code>*.html</code>)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="scope_modules" name="scopes" value="modules">
+                            <label class="form-check-label" for="scope_modules">
+                                Modules (<code>*.py</code> scan/report)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Mode</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="mode_dry" name="mode" value="dry" checked>
+                            <label class="form-check-label" for="mode_dry">Dry run (preview changes)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="mode_write" name="mode" value="write">
+                            <label class="form-check-label" for="mode_write">Write changes</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Target Languages</label>
+                        <div class="row g-2 mb-2">
+                            {% for lang_code in ['lt', 'es', 'fr', 'de', 'ko', 'zh', 'ja'] %}
+                            <div class="col-md-3 col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="target_languages" id="lang_{{ lang_code }}" value="{{ lang_code }}" {% if lang_code in default_target_languages %}checked{% endif %}>
+                                    <label class="form-check-label" for="lang_{{ lang_code }}">{{ lang_code }}</label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <label for="target_languages_csv" class="form-label">Additional language codes (comma-separated)</label>
+                        <input class="form-control" id="target_languages_csv" name="target_languages_csv" placeholder="e.g. it,pt-BR,sv">
+                    </div>
+
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Home
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-play-circle"></i> Run GYVATE
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

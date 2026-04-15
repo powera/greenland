@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}GYVATE Results{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('gyvate.export_page') }}">GYVATE Export</a></li>
+                <li class="breadcrumb-item active">Results</li>
+            </ol>
+        </nav>
+        <h2><i class="bi bi-check-circle"></i> GYVATE Export Results</h2>
+        <p class="text-muted">Mode: <strong>{{ result.mode }}</strong></p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-info-circle"></i> Summary
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="border rounded p-3">
+                            <div class="h4 mb-0">{{ result.templates_changed }}</div>
+                            <small class="text-muted">Templates Changed</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="border rounded p-3">
+                            <div class="h4 mb-0">{{ result.replacements_total }}</div>
+                            <small class="text-muted">Replacements</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="border rounded p-3">
+                            <div class="h4 mb-0">{{ result.new_key_count }}</div>
+                            <small class="text-muted">New Keys</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="border rounded p-3">
+                            <div class="h4 mb-0">{{ result.module_files_scanned }}</div>
+                            <small class="text-muted">Module Files Scanned</small>
+                        </div>
+                    </div>
+                </div>
+
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Project Root:</strong> <code>{{ result.project_root }}</code></li>
+                    <li class="list-group-item"><strong>Templates Path:</strong> <code>{{ result.template_path }}</code></li>
+                    <li class="list-group-item"><strong>STRINGS Path:</strong> <code>{{ result.strings_path }}</code></li>
+                    <li class="list-group-item"><strong>Scope:</strong> {{ result.scopes|join(', ') }}</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-table"></i> Per-language Generation Status</div>
+            <div class="card-body">
+                {% if result.language_statuses %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Language</th>
+                                <th>Status</th>
+                                <th>Namespaces</th>
+                                <th>Keys Added</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lang_status in result.language_statuses %}
+                            <tr>
+                                <td><code>{{ lang_status.language }}</code></td>
+                                <td><span class="badge bg-info text-dark">{{ lang_status.status }}</span></td>
+                                <td>{{ lang_status.namespaces_processed }}</td>
+                                <td>{{ lang_status.keys_added }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                    <p class="text-muted mb-0">No non-English target languages selected.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-list-check"></i> Template Replacements</div>
+            <div class="card-body">
+                {% if result.template_changes %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Template</th>
+                                    <th>Replacements</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for change in result.template_changes %}
+                                <tr>
+                                    <td><code>{{ change.template_path }}</code></td>
+                                    <td>{{ change.replacement_count }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No template replacements were needed.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-plus-circle"></i> New STRINGS Keys</div>
+            <div class="card-body">
+                {% if result.new_keys_by_namespace %}
+                    {% for namespace, keys in result.new_keys_by_namespace.items() %}
+                    <div class="mb-3">
+                        <h6><code>{{ namespace }}</code></h6>
+                        <p class="mb-0">
+                            {% for key in keys %}
+                                <span class="badge bg-secondary me-1">{{ key }}</span>
+                            {% endfor %}
+                        </p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted mb-0">No new keys were created.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a href="{{ url_for('gyvate.export_page') }}" class="btn btn-primary">
+                <i class="bi bi-arrow-repeat"></i> Run Again
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <i class="bi bi-house"></i> Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
