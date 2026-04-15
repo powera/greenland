@@ -92,6 +92,9 @@
                             <li><a class="dropdown-item" href="{{ url_for('exports.exports_page') }}">
                                 <i class="bi bi-download"></i> {{ STRINGS.navigation.get('exports', 'Exports') }}
                             </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('gyvate.export_page') }}">
+                                <i class="bi bi-translate"></i> GYVATE STRINGS Export
+                            </a></li>
                             {% endif %}
                             <li><a class="dropdown-item" href="{{ url_for('batch_operations.list_batches') }}">
                                 <i class="bi bi-collection"></i> {{ STRINGS.navigation.get('batch_jobs', 'Batch Jobs') }}
