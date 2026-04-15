@@ -5,8 +5,10 @@
 from strings.barsukas_helpers import (
     SUPPORTED_UI_LANGS,
     StringAccessor,
+    create_cstr_accessor,
     create_lstr_accessor,
     create_sstr_accessor,
+    load_all_barsukas_cstr_strings,
     load_all_barsukas_strings,
     load_barsukas_strings,
 )
@@ -14,8 +16,10 @@ from strings.barsukas_helpers import (
 __all__ = [
     "SUPPORTED_UI_LANGS",
     "StringAccessor",
+    "create_cstr_accessor",
     "create_lstr_accessor",
     "create_sstr_accessor",
+    "load_all_barsukas_cstr_strings",
     "load_all_barsukas_strings",
     "load_barsukas_strings",
 ]

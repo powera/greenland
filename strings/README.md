@@ -6,12 +6,15 @@ This repository stores UI translation strings in JSON files under namespaced fol
 
 - `strings/barsukas/<namespace>/en.json`
 - `strings/barsukas/<namespace>/lt.json`
+- `strings/barsukas/cstr/<namespace>/en.json`
+- `strings/barsukas/cstr/<namespace>/lt.json`
 
 Each `<namespace>` groups related keys (for example: `navigation`, `dictionary`, `lemmas`, `rhymes`, `languages`, `common`).
 Nested namespaces are supported using subdirectories, such as:
 
 - `strings/barsukas/common/pagination/en.json` → `common.pagination`
 - `strings/barsukas/common/linguistics/en.json` → `common.linguistics`
+- `strings/barsukas/cstr/ipa/en.json` → `CSTR.ipa.*`
 
 Current convention: keep shared namespaces at two components (for example,
 `common.pagination`, `common.linguistics`).
@@ -85,6 +88,29 @@ Barsukas loads all namespaces into a global `STRINGS` object for templates.
 - New forward-looking accessors are also available:
   - `LSTR` for short labels/terms (with `CURRENT`/`OTHER` support)
   - `SSTR` for sentence-level strings with explicit namespaces
+  - `CSTR` for multi-sentence blocks with explicit namespaces (loaded only from `strings/barsukas/cstr/*`)
+
+Canonical examples:
+
+- `{{ LSTR.linguistics.verb }}`
+- `{{ SSTR.lemmas.no_results }}`
+- `{{ CSTR.ipa.intro_block|safe }}`
+
+`CSTR` has no implicit `common` fallback and must be addressed as `CSTR.<namespace>.<key>`.
+
+## CSTR migration rules
+
+When converting multiple sentence keys into one long block:
+
+1. Create the new key in `strings/barsukas/cstr/<namespace>/{en,lt}.json`.
+2. Keep the key module-local (`<namespace>`), do not move it to `common`.
+3. Update templates to use only `CSTR.<namespace>.<key>` for that block.
+4. Remove the old sentence keys from `strings/barsukas/<namespace>/{en,lt}.json` once migrated.
+
+Example migration (`ipa_reference.html`):
+
+- Before: `intro_line_1` … `intro_line_4` in `strings/barsukas/ipa/*.json`
+- After: `intro_block` in `strings/barsukas/cstr/ipa/*.json` and template call `CSTR.ipa.intro_block`
 
 ## Fallback behavior
 

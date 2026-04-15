@@ -25,14 +25,7 @@
                 <i class="bi bi-soundwave"></i> {{ STRINGS.ipa.page_title }}
             </div>
             <div class="card-body">
-                <p class="mb-3">
-                    {{ STRINGS.ipa.intro_line_1 }}
-                    {{ STRINGS.ipa.intro_line_2 }}
-                </p>
-                <p class="text-muted mb-0">
-                    {{ STRINGS.ipa.intro_line_3 }}
-                    {{ STRINGS.ipa.intro_line_4 }}
-                </p>
+                {{ CSTR.ipa.intro_block | safe }}
             </div>
         </div>
     </div>

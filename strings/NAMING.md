@@ -1,6 +1,6 @@
 # Barsukas STRINGS Naming Design (LSTR / SSTR / CSTR, namespace rules)
 
-This is a design-only proposal for clearer string naming.
+This document defines the canonical naming and placement rules for Barsukas string accessors.
 
 ## Primary objective
 
@@ -15,7 +15,7 @@ Make it obvious whether a string is:
 
 - `LSTR` = short strings (single lemma/term/short phrase)
 - `SSTR` = sentence-length strings
-- `CSTR` = 3+ sentence text blocks
+- `CSTR` = multi-sentence text blocks
 
 ---
 
@@ -57,18 +57,23 @@ Examples:
 
 No implicit `common` default for `SSTR`/`CSTR`.
 
+`CSTR` is additionally stored in a separate directory tree:
+
+- `strings/barsukas/cstr/<namespace>/en.json`
+- `strings/barsukas/cstr/<namespace>/lt.json`
+
+`CSTR` content is module/page-local only. Do not place `CSTR` entries in `common`.
+
 ---
 
 ## File/source mapping guidance
-
-This proposal is naming-focused; implementation can map these paths to existing
-JSON files however is most practical. Conceptually:
 
 - `LSTR.<key_path>` resolves to shared/common files first
   - example source idea: `common/linguistics/*.json`
 - `LSTR.CURRENT.*` resolves in-page namespace
 - `LSTR.OTHER.<ns>.*` resolves that explicit namespace
-- `SSTR.<ns>.*` and `CSTR.<ns>.*` resolve directly in namespace `<ns>`
+- `SSTR.<ns>.*` resolves directly in `strings/barsukas/<ns>/*.json`
+- `CSTR.<ns>.*` resolves directly in `strings/barsukas/cstr/<ns>/*.json`
 
 ---
 
@@ -107,6 +112,7 @@ JSON files however is most practical. Conceptually:
 ### Long text blocks
 
 - `CSTR.sync.lemma.release_sync_intro`
+- `CSTR.ipa.intro_block`
 
 ---
 
@@ -120,6 +126,14 @@ JSON files however is most practical. Conceptually:
    - `SSTR`/`CSTR` require explicit namespace
    - disallow new ambiguous keys (`pos`, `ipa`, `sort_alpha`)
 5. Remove compatibility aliases after deprecation window.
+
+### CSTR-specific migration checklist
+
+1. Identify a cluster of sentence keys that always render together.
+2. Replace that cluster with one block key in `strings/barsukas/cstr/<namespace>/*.json`.
+3. Update template usage to `CSTR.<namespace>.<key>`.
+4. Delete the replaced sentence keys from regular namespace files (`strings/barsukas/<namespace>/*.json`).
+5. Keep ownership local to the page/module namespace (no `common` relocation).
 
 ---
 

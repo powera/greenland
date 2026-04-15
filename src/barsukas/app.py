@@ -18,8 +18,10 @@ from typing import Any, Callable, Dict, Optional, cast
 from barsukas.config import Config
 from barsukas.helpers.strings import (
     SUPPORTED_UI_LANGS,
+    create_cstr_accessor,
     create_lstr_accessor,
     create_sstr_accessor,
+    load_all_barsukas_cstr_strings,
     load_all_barsukas_strings,
 )
 from barsukas.helpers.ui_language import (
@@ -426,9 +428,11 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
         """Add utility values to Jinja templates."""
         ui_lang = getattr(g, "ui_lang", "en")
         strings_by_namespace = load_all_barsukas_strings(ui_lang)
+        cstr_by_namespace = load_all_barsukas_cstr_strings(ui_lang)
         default_module = getattr(g, "strings_default_module", "common")
         lstr = create_lstr_accessor(strings_by_namespace, default_module=default_module)
         sstr = create_sstr_accessor(strings_by_namespace, default_module=default_module)
+        cstr = create_cstr_accessor(cstr_by_namespace, default_module=default_module)
 
         return {
             "config": app.config,
@@ -437,6 +441,7 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
             "STRINGS": strings_by_namespace,
             "LSTR": lstr,
             "SSTR": sstr,
+            "CSTR": cstr,
         }
 
     return app

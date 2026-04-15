@@ -11,11 +11,12 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Literal
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TEMPLATES_ROOT = REPO_ROOT / "src" / "barsukas" / "templates"
 STRINGS_ROOT = REPO_ROOT / "strings" / "barsukas"
+CSTR_STRINGS_ROOT = STRINGS_ROOT / "cstr"
 ATTRIBUTE_ALLOWLIST = {
     "title",
     "placeholder",
@@ -33,6 +34,8 @@ ENTITY_PATTERN = re.compile(r"^(?:&[a-zA-Z]+;|&#\d+;|&#x[0-9a-fA-F]+;)+$")
 JINJA_OR_COMMENT_PATTERN = re.compile(r"<!--.*?-->|\{\{.*?\}\}|\{\%.*?\%\}|\{\#.*?\#\}", re.DOTALL)
 TAG_PATTERN = re.compile(r"<[^>]+>", re.DOTALL)
 ATTRIBUTE_PATTERN = re.compile(r"([:\w-]+)\s*=\s*([\"'])(.*?)\2", re.DOTALL)
+SENTENCE_END_PATTERN = re.compile(r"[.!?](?:\s|$)")
+AccessorName = Literal["STRINGS", "CSTR"]
 
 
 @dataclass(frozen=True)
@@ -49,6 +52,7 @@ class Replacement:
     original_text: str
     namespace: str
     string_key: str
+    accessor_name: AccessorName
 
 
 @dataclass
@@ -59,8 +63,9 @@ class CatalogUpdateStats:
 
 
 class CatalogState:
-    def __init__(self, strings_root: Path) -> None:
+    def __init__(self, strings_root: Path, allow_common_reuse: bool = True) -> None:
         self.strings_root = strings_root
+        self.allow_common_reuse = allow_common_reuse
         self.catalogs: dict[str, dict[str, str]] = {}
         self.reverse_lookup: dict[str, list[tuple[str, str]]] = {}
         self.new_keys: dict[str, set[str]] = {}
@@ -106,10 +111,13 @@ class CatalogState:
     ) -> tuple[str, str]:
         existing_locations = self.reverse_lookup.get(normalized_text, [])
         if existing_locations:
-            common_match = next((item for item in existing_locations if item[0] == "common"), None)
-            if common_match is not None:
-                stats.reused_common_count += 1
-                return common_match
+            if self.allow_common_reuse:
+                common_match = next(
+                    (item for item in existing_locations if item[0] == "common"), None
+                )
+                if common_match is not None:
+                    stats.reused_common_count += 1
+                    return common_match
             return sorted(existing_locations)[0]
 
         namespace = preferred_namespace
@@ -178,6 +186,11 @@ def should_ignore_text(normalized_text: str) -> bool:
     if normalized_text.replace("bi", "").replace("-", "").strip() == "":
         return True
     return False
+
+
+def is_multi_sentence_block(text: str) -> bool:
+    sentence_count = len(SENTENCE_END_PATTERN.findall(text))
+    return sentence_count >= 2
 
 
 def get_template_namespace(template_path: Path) -> str:
@@ -268,8 +281,10 @@ def build_text_replacement(
     content: str,
     span: Span,
     namespace: str,
-    catalog_state: CatalogState,
-    stats: CatalogUpdateStats,
+    standard_catalog_state: CatalogState,
+    cstr_catalog_state: CatalogState,
+    standard_stats: CatalogUpdateStats,
+    cstr_stats: CatalogUpdateStats,
 ) -> Replacement | None:
     original_segment = content[span.start : span.end]
     trimmed = original_segment.strip()
@@ -284,13 +299,21 @@ def build_text_replacement(
         original_segment[len(original_segment) - trailing_length :] if trailing_length else ""
     )
 
-    selected_namespace, selected_key = catalog_state.resolve_or_create_key(
+    replacement_accessor: AccessorName = "STRINGS"
+    selected_catalog_state = standard_catalog_state
+    selected_stats = standard_stats
+    if is_multi_sentence_block(trimmed):
+        replacement_accessor = "CSTR"
+        selected_catalog_state = cstr_catalog_state
+        selected_stats = cstr_stats
+
+    selected_namespace, selected_key = selected_catalog_state.resolve_or_create_key(
         normalized_text=normalized,
         original_text=trimmed,
         preferred_namespace=namespace,
-        stats=stats,
+        stats=selected_stats,
     )
-    expression = f"{{{{ STRINGS.{selected_namespace}.{selected_key} }}}}"
+    expression = f"{{{{ {replacement_accessor}.{selected_namespace}.{selected_key} }}}}"
     return Replacement(
         start=span.start,
         end=span.end,
@@ -298,13 +321,16 @@ def build_text_replacement(
         original_text=trimmed,
         namespace=selected_namespace,
         string_key=selected_key,
+        accessor_name=replacement_accessor,
     )
 
 
 def plan_template_replacements(
     template_path: Path,
-    catalog_state: CatalogState,
-    stats: CatalogUpdateStats,
+    standard_catalog_state: CatalogState,
+    cstr_catalog_state: CatalogState,
+    standard_stats: CatalogUpdateStats,
+    cstr_stats: CatalogUpdateStats,
 ) -> list[Replacement]:
     content = template_path.read_text(encoding="utf-8")
     protected_spans = find_protected_spans(content)
@@ -331,11 +357,11 @@ def plan_template_replacements(
                 continue
             value_start = tag_match.start() + attr_match.start(3)
             value_end = tag_match.start() + attr_match.end(3)
-            selected_namespace, selected_key = catalog_state.resolve_or_create_key(
+            selected_namespace, selected_key = standard_catalog_state.resolve_or_create_key(
                 normalized_text=normalized,
                 original_text=attribute_value.strip(),
                 preferred_namespace=namespace,
-                stats=stats,
+                stats=standard_stats,
             )
             planned.append(
                 Replacement(
@@ -345,6 +371,7 @@ def plan_template_replacements(
                     original_text=attribute_value.strip(),
                     namespace=selected_namespace,
                     string_key=selected_key,
+                    accessor_name="STRINGS",
                 )
             )
 
@@ -355,8 +382,10 @@ def plan_template_replacements(
                 content=content,
                 span=piece,
                 namespace=namespace,
-                catalog_state=catalog_state,
-                stats=stats,
+                standard_catalog_state=standard_catalog_state,
+                cstr_catalog_state=cstr_catalog_state,
+                standard_stats=standard_stats,
+                cstr_stats=cstr_stats,
             )
             if replacement is not None:
                 planned.append(replacement)
@@ -376,15 +405,29 @@ def apply_replacements(content: str, replacements: Iterable[Replacement]) -> str
     return updated
 
 
-def compute_plan() -> tuple[dict[Path, list[Replacement]], CatalogState, CatalogUpdateStats]:
-    catalog_state = CatalogState(STRINGS_ROOT)
-    stats = CatalogUpdateStats()
+def compute_plan() -> tuple[
+    dict[Path, list[Replacement]],
+    CatalogState,
+    CatalogState,
+    CatalogUpdateStats,
+    CatalogUpdateStats,
+]:
+    standard_catalog_state = CatalogState(STRINGS_ROOT)
+    cstr_catalog_state = CatalogState(CSTR_STRINGS_ROOT, allow_common_reuse=False)
+    standard_stats = CatalogUpdateStats()
+    cstr_stats = CatalogUpdateStats()
     template_plans: dict[Path, list[Replacement]] = {}
     for template_path in sorted(TEMPLATES_ROOT.rglob("*.html")):
-        replacements = plan_template_replacements(template_path, catalog_state, stats)
+        replacements = plan_template_replacements(
+            template_path,
+            standard_catalog_state,
+            cstr_catalog_state,
+            standard_stats,
+            cstr_stats,
+        )
         if replacements:
             template_plans[template_path] = replacements
-    return (template_plans, catalog_state, stats)
+    return (template_plans, standard_catalog_state, cstr_catalog_state, standard_stats, cstr_stats)
 
 
 def parse_args() -> argparse.Namespace:
@@ -406,10 +449,20 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     arguments = parse_args()
-    template_plans, catalog_state, stats = compute_plan()
+    (
+        template_plans,
+        standard_catalog_state,
+        cstr_catalog_state,
+        standard_stats,
+        cstr_stats,
+    ) = compute_plan()
 
     replacement_total = sum(len(items) for items in template_plans.values())
-    change_needed = bool(template_plans or any(catalog_state.new_keys.values()))
+    change_needed = bool(
+        template_plans
+        or any(standard_catalog_state.new_keys.values())
+        or any(cstr_catalog_state.new_keys.values())
+    )
 
     if arguments.count:
         print(replacement_total)
@@ -420,26 +473,33 @@ def main() -> int:
         print(f"{relative_template}: {len(replacements)} replacement(s)")
         for replacement in replacements:
             print(
-                f"  - '{replacement.original_text}' -> STRINGS.{replacement.namespace}.{replacement.string_key}"
+                f"  - '{replacement.original_text}' -> "
+                f"{replacement.accessor_name}.{replacement.namespace}.{replacement.string_key}"
             )
 
-    for namespace, keys in sorted(catalog_state.new_keys.items()):
+    for namespace, keys in sorted(standard_catalog_state.new_keys.items()):
         if keys:
             print(f"new keys [{namespace}]: {', '.join(sorted(keys))}")
+    for namespace, keys in sorted(cstr_catalog_state.new_keys.items()):
+        if keys:
+            print(f"new CSTR keys [{namespace}]: {', '.join(sorted(keys))}")
 
     print("summary:")
     print(f"  templates changed: {len(template_plans)}")
     print(f"  total replacements: {replacement_total}")
-    print(f"  reused common: {stats.reused_common_count}")
-    print(f"  new keys: {stats.new_key_count}")
-    print(f"  collisions resolved: {stats.collisions_resolved}")
+    print(f"  reused common (STRINGS): {standard_stats.reused_common_count}")
+    print(f"  new keys (STRINGS): {standard_stats.new_key_count}")
+    print(f"  collisions resolved (STRINGS): {standard_stats.collisions_resolved}")
+    print(f"  new keys (CSTR): {cstr_stats.new_key_count}")
+    print(f"  collisions resolved (CSTR): {cstr_stats.collisions_resolved}")
 
     if arguments.write and change_needed:
         for template_path, replacements in template_plans.items():
             original_content = template_path.read_text(encoding="utf-8")
             updated_content = apply_replacements(original_content, replacements)
             template_path.write_text(updated_content, encoding="utf-8")
-        catalog_state.write()
+        standard_catalog_state.write()
+        cstr_catalog_state.write()
 
     if arguments.check and change_needed:
         return 1
