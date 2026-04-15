@@ -17,7 +17,7 @@
                 <i class="bi bi-gear"></i> Export Configuration
             </div>
             <div class="card-body">
-                <form method="post" action="{{ url_for('gyvate.export_strings') }}">
+                <form method="post" action="{{ url_for('gyvate.export_strings') }}" enctype="multipart/form-data">
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="project_root" class="form-label">Project Root</label>
@@ -75,6 +75,36 @@
                         </div>
                         <label for="target_languages_csv" class="form-label">Additional language codes (comma-separated)</label>
                         <input class="form-control" id="target_languages_csv" name="target_languages_csv" placeholder="e.g. it,pt-BR,sv">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="english_strings_files" class="form-label">English STRINGS files (optional)</label>
+                        <input
+                            class="form-control"
+                            id="english_strings_files"
+                            name="english_strings_files"
+                            type="file"
+                            multiple
+                            accept=".json"
+                        >
+                        <small class="form-text text-muted">
+                            Upload one or more <code>en.json</code> files. File names may include paths like
+                            <code>common/en.json</code> to map namespaces.
+                        </small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="english_strings_bundle" class="form-label">English STRINGS ZIP bundle (optional)</label>
+                        <input
+                            class="form-control"
+                            id="english_strings_bundle"
+                            name="english_strings_bundle"
+                            type="file"
+                            accept=".zip"
+                        >
+                        <small class="form-text text-muted">
+                            ZIP should contain one or more <code>*/en.json</code> files. Uploaded catalogs can be used as source input for translation catalog generation.
+                        </small>
                     </div>
 
                     <hr>

@@ -4,6 +4,9 @@
 
 from __future__ import annotations
 
+import json
+import zipfile
+from io import BytesIO
 from pathlib import Path
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
@@ -37,6 +40,58 @@ def _normalize_languages(raw_languages: list[str], csv_languages: str) -> list[s
     return sorted(merged)
 
 
+def _normalize_namespace_from_path(relative_path: str) -> str:
+    normalized_path = relative_path.strip().replace("\\", "/")
+    if normalized_path.endswith("/en.json"):
+        normalized_path = normalized_path[: -len("/en.json")]
+    elif normalized_path.endswith("en.json"):
+        normalized_path = normalized_path[: -len("en.json")]
+
+    namespace = normalized_path.strip("/").replace("/", ".")
+    if not namespace:
+        raise ValueError(f'Could not infer namespace from path "{relative_path}"')
+    return namespace
+
+
+def _parse_uploaded_catalog_json(raw_bytes: bytes, source_name: str) -> dict[str, str]:
+    loaded = json.loads(raw_bytes.decode("utf-8"))
+    if not isinstance(loaded, dict):
+        raise ValueError(f"{source_name} must contain a JSON object")
+    return {str(key_name): str(value_text) for key_name, value_text in loaded.items()}
+
+
+def _load_uploaded_english_catalogs() -> dict[str, dict[str, str]]:
+    uploaded_catalogs: dict[str, dict[str, str]] = {}
+
+    uploaded_files = [
+        entry for entry in request.files.getlist("english_strings_files") if entry.filename
+    ]
+    for uploaded_file in uploaded_files:
+        assert uploaded_file.filename is not None
+        namespace = _normalize_namespace_from_path(uploaded_file.filename)
+        uploaded_catalogs[namespace] = _parse_uploaded_catalog_json(
+            uploaded_file.read(),
+            uploaded_file.filename,
+        )
+
+    zip_bundle = request.files.get("english_strings_bundle")
+    if not zip_bundle or not zip_bundle.filename:
+        return uploaded_catalogs
+
+    zip_data = zip_bundle.read()
+    with zipfile.ZipFile(BytesIO(zip_data)) as zip_handle:
+        for entry_name in zip_handle.namelist():
+            if entry_name.endswith("/") or not entry_name.endswith("en.json"):
+                continue
+            namespace = _normalize_namespace_from_path(entry_name)
+            with zip_handle.open(entry_name) as zip_entry:
+                uploaded_catalogs[namespace] = _parse_uploaded_catalog_json(
+                    zip_entry.read(),
+                    entry_name,
+                )
+    return uploaded_catalogs
+
+
 @bp.route("/")
 def export_page() -> ResponseReturnValue:
     """Display the GYVATE STRINGS export form."""
@@ -66,6 +121,11 @@ def export_strings() -> ResponseReturnValue:
     selected_languages = request.form.getlist("target_languages")
     language_csv = request.form.get("target_languages_csv", "")
     target_languages = _normalize_languages(selected_languages, language_csv)
+    try:
+        uploaded_english_catalogs = _load_uploaded_english_catalogs()
+    except (ValueError, json.JSONDecodeError, zipfile.BadZipFile) as upload_error:
+        flash(f"Invalid uploaded STRINGS input: {upload_error}", "error")
+        return redirect(url_for("gyvate.export_page"))
 
     agent = GyvateAgent(config=_get_config())
     result = agent.run_export(
@@ -74,6 +134,7 @@ def export_strings() -> ResponseReturnValue:
         strings_path=strings_path,
         scopes=selected_scopes,
         target_languages=target_languages,
+        uploaded_english_catalogs=uploaded_english_catalogs,
         write_mode=write_mode,
     )
 

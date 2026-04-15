@@ -49,6 +49,7 @@ class GyvateServiceResult:
     new_keys_by_namespace: dict[str, list[str]]
     template_changes: list[TemplateChangeSummary]
     language_statuses: list[LanguageGenerationStatus]
+    uploaded_english_catalogs: int
     error: str | None = None
 
 
@@ -66,6 +67,7 @@ class GyvateStringsExportService:
         strings_path: str,
         scopes: list[str],
         target_languages: list[str],
+        uploaded_english_catalogs: dict[str, dict[str, str]],
         write_mode: bool,
     ) -> GyvateServiceResult:
         """Compute and optionally apply STRINGS extraction and catalog generation."""
@@ -83,6 +85,12 @@ class GyvateStringsExportService:
                 templates_root=templates_root,
                 strings_root=strings_root,
                 include_templates="templates" in scopes,
+            )
+            self._merge_uploaded_english_catalogs(
+                strings_root=strings_root,
+                catalog_state=catalog_state,
+                uploaded_english_catalogs=uploaded_english_catalogs,
+                write_mode=write_mode,
             )
             module_files_scanned = self._count_module_files(root_dir) if "modules" in scopes else 0
 
@@ -126,6 +134,7 @@ class GyvateStringsExportService:
                 },
                 template_changes=template_changes,
                 language_statuses=language_statuses,
+                uploaded_english_catalogs=len(uploaded_english_catalogs),
             )
         except Exception as error:  # pragma: no cover - defensive route safety
             return GyvateServiceResult(
@@ -144,8 +153,42 @@ class GyvateStringsExportService:
                 new_keys_by_namespace={},
                 template_changes=[],
                 language_statuses=[],
+                uploaded_english_catalogs=len(uploaded_english_catalogs),
                 error=str(error),
             )
+
+    def _merge_uploaded_english_catalogs(
+        self,
+        *,
+        strings_root: Path,
+        catalog_state: barsukas_generator.CatalogState,
+        uploaded_english_catalogs: dict[str, dict[str, str]],
+        write_mode: bool,
+    ) -> None:
+        for namespace, uploaded_catalog in uploaded_english_catalogs.items():
+            catalog_state.ensure_namespace(namespace)
+            english_catalog = catalog_state.catalogs.setdefault(namespace, {})
+            for key_name, english_text in uploaded_catalog.items():
+                normalized_text = barsukas_generator.normalize_for_lookup(english_text)
+                if normalized_text:
+                    existing_locations = catalog_state.reverse_lookup.setdefault(
+                        normalized_text, []
+                    )
+                    if (namespace, key_name) not in existing_locations:
+                        existing_locations.append((namespace, key_name))
+                english_catalog[key_name] = english_text
+
+            if not write_mode:
+                continue
+
+            namespace_dir = strings_root.joinpath(*namespace.split("."))
+            namespace_dir.mkdir(parents=True, exist_ok=True)
+            sorted_catalog = {
+                key_name: english_catalog[key_name] for key_name in sorted(english_catalog)
+            }
+            with (namespace_dir / "en.json").open("w", encoding="utf-8") as english_handle:
+                json.dump(sorted_catalog, english_handle, ensure_ascii=False, indent=2)
+                english_handle.write("\n")
 
     def _compute_template_plan(
         self,

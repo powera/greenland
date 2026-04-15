@@ -21,6 +21,7 @@ class GyvateAgent:
         strings_path: str,
         scopes: list[str],
         target_languages: list[str],
+        uploaded_english_catalogs: dict[str, dict[str, str]],
         write_mode: bool,
     ) -> GyvateServiceResult:
         """Run a STRINGS export operation via the reusable backend service."""
@@ -31,6 +32,7 @@ class GyvateAgent:
             strings_path=strings_path,
             scopes=scopes,
             target_languages=target_languages,
+            uploaded_english_catalogs=uploaded_english_catalogs,
             write_mode=write_mode,
         )
 
