@@ -17,6 +17,15 @@
                 {{ STRINGS.sync.sentences_removals_desc|safe }}
                 Conversation sentences are excluded.
             </p>
+            <div class="alert alert-info mt-3 mb-0">
+                <i class="bi bi-info-circle"></i>
+                Want to remove database-only sentences instead of exporting them?
+                Use
+                <a href="{{ url_for('sync_sentence_release.removals') }}" class="alert-link">
+                    Removals
+                </a>
+                to delete those SQLite records.
+            </div>
         </div>
     </div>
 

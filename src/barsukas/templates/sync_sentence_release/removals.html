@@ -17,6 +17,15 @@
                 {{ STRINGS.sync.sentences_removals_desc|safe }}
                 Conversation sentences are excluded.
             </p>
+            <div class="alert alert-info mt-3 mb-0">
+                <i class="bi bi-info-circle"></i>
+                Want to keep these sentences in SQLite and write them to release files instead?
+                Use
+                <a href="{{ url_for('sync_sentence_release.export') }}" class="alert-link">
+                    Export / Sync Back
+                </a>
+                rather than deleting them here.
+            </div>
         </div>
     </div>
 
