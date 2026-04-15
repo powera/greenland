@@ -35,10 +35,10 @@ from sqlalchemy.exc import IntegrityError
 
 from agents.strazdas import StrazdasAgent
 from agents.vieversys import VieversysAgent
-from audioshoe.coqui import CoquiClient, CoquiVoice
+from audioshoe.coqui import CoquiVoice
 from audioshoe.espeak import EspeakVoice
 from audioshoe.qwen.types import QwenVoice
-from audioshoe.piper import PiperClient, PiperVoice
+from audioshoe.piper import PiperVoice
 from barsukas.helpers.audio_helpers import link_audio_to_lemma, validate_audio_translation
 from clients.audio import Voice
 from clients.audio.gpt_voices import GptVoice
@@ -859,6 +859,8 @@ def _generate_audio_piper(
     from storage.translation_helpers import get_translation
 
     try:
+        from audioshoe.piper import PiperClient
+
         # Get translation for the language
         translation = get_translation(session, lemma, language_code)
         if not translation:
@@ -946,6 +948,8 @@ def _generate_audio_coqui(
     from storage.translation_helpers import get_translation
 
     try:
+        from audioshoe.coqui import CoquiClient
+
         # Get translation for the language
         translation = get_translation(session, lemma, language_code)
         if not translation:

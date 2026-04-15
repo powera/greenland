@@ -134,6 +134,11 @@ def main() -> None:
         if persona.use_postgres:
             args.postgres = True
 
+    # Safety rule: read-only mode never starts the background worker.
+    if args.readonly and not args.no_worker:
+        logger.info("Read-only mode enabled: disabling task worker")
+        args.no_worker = True
+
     # Set up logging
     log_level = logging.DEBUG if args.debug else logging.INFO
     logging.basicConfig(
