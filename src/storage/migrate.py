@@ -596,6 +596,7 @@ def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> Non
         Lemma,
         Sentence,
         SentencePatternWord,
+        SentenceWord,
     )
 
     session = create_database_session(sqlite_path)
@@ -627,6 +628,8 @@ def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> Non
             .options(
                 selectinload(Sentence.translations),
                 selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
+                selectinload(Sentence.words).selectinload(SentenceWord.lemma),
+                selectinload(Sentence.audio_reviews),
             )
             .order_by(Sentence.guid)
             .all()
@@ -729,6 +732,50 @@ def _sentence_to_release_record(sentence: Any) -> Dict[str, Any]:
         record["pattern_words"] = pattern_words
     if sentence.notes:
         record["notes"] = sentence.notes
+
+    words: List[Dict[str, Any]] = []
+    for sentence_word in sorted(
+        sentence.words, key=lambda current_word: (current_word.language_code, current_word.position)
+    ):
+        lemma_guid = (
+            sentence_word.lemma.guid if sentence_word.lemma and sentence_word.lemma.guid else None
+        )
+        words.append(
+            {
+                "language_code": sentence_word.language_code,
+                "position": sentence_word.position,
+                "word_role": sentence_word.word_role,
+                "lemma_guid": lemma_guid,
+                "english_text": sentence_word.english_text,
+                "target_language_text": sentence_word.target_language_text,
+                "grammatical_form": sentence_word.grammatical_form,
+                "grammatical_case": sentence_word.grammatical_case,
+                "declined_form": sentence_word.declined_form,
+            }
+        )
+    if words:
+        record["words"] = words
+
+    audio: List[Dict[str, Any]] = []
+    for audio_review in sorted(
+        sentence.audio_reviews,
+        key=lambda current_audio: (current_audio.language_code, current_audio.voice_name),
+    ):
+        audio.append(
+            {
+                "language_code": audio_review.language_code,
+                "voice_name": audio_review.voice_name,
+                "filename": audio_review.filename,
+                "status": audio_review.status,
+                "expected_text": audio_review.expected_text,
+                "manifest_md5": audio_review.manifest_md5,
+                "s3_prod_url": audio_review.s3_prod_url,
+                "s3_staging_url": audio_review.s3_staging_url,
+                "staging_agent": audio_review.staging_agent,
+            }
+        )
+    if audio:
+        record["audio"] = audio
 
     return record
 
