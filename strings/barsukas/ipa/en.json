@@ -1,9 +1,5 @@
 {
   "page_title": "IPA Reference",
-  "intro_line_1": "This page is a quick guide for the International Phonetic Alphabet (IPA) symbols shown in Barsukas.",
-  "intro_line_2": "Use it when adding or reviewing pronunciation notes.",
-  "intro_line_3": "This follows the traditional chart style: consonants are organized by manner × place of articulation, and vowels by height × backness.",
-  "intro_line_4": "Hover over symbols for quick details. This guide is static and does not query the database.",
   "consonants_title": "Consonants (Pulmonic) — 2D Chart",
   "consonants_manner_place": "Manner \\\\ Place",
   "place_bilabial": "Bilabial",

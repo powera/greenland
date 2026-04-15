@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional, Sequence, cast
 
 SUPPORTED_UI_LANGS = frozenset({"en", "lt"})
 _STRINGS_ROOT = Path(__file__).resolve().parents[2] / "strings" / "barsukas"
+_CSTR_ROOT = _STRINGS_ROOT / "cstr"
 _LEGACY_NAMESPACE_ALIASES = {
     "linguistics": "common.linguistics",
     "parts_of_speech": "common.linguistics",
@@ -18,6 +19,10 @@ _LEGACY_NAMESPACE_ALIASES = {
 
 def _namespace_path_from_string(namespace: str) -> Path:
     return _STRINGS_ROOT.joinpath(*namespace.split("."))
+
+
+def _cstr_namespace_path_from_string(namespace: str) -> Path:
+    return _CSTR_ROOT.joinpath(*namespace.split("."))
 
 
 def _discover_namespaces() -> list[str]:
@@ -34,6 +39,22 @@ def _discover_namespaces() -> list[str]:
     return sorted(namespace_set)
 
 
+def _discover_cstr_namespaces() -> list[str]:
+    namespace_set: set[str] = set()
+    if not _CSTR_ROOT.exists():
+        return []
+    for json_path in _CSTR_ROOT.rglob("en.json"):
+        namespace_dir = json_path.parent
+        try:
+            relative_parts = namespace_dir.relative_to(_CSTR_ROOT).parts
+        except ValueError:
+            continue
+        if not relative_parts:
+            continue
+        namespace_set.add(".".join(relative_parts))
+    return sorted(namespace_set)
+
+
 @lru_cache(maxsize=64)
 def _load_namespace_file(namespace: str, ui_lang: str) -> Dict[str, Any]:
     """Load one namespace JSON file with English fallback."""
@@ -41,6 +62,29 @@ def _load_namespace_file(namespace: str, ui_lang: str) -> Dict[str, Any]:
         ui_lang = "en"
 
     namespace_root = _namespace_path_from_string(namespace)
+    namespace_path = namespace_root / f"{ui_lang}.json"
+    fallback_path = namespace_root / "en.json"
+
+    if namespace_path.exists():
+        with namespace_path.open("r", encoding="utf-8") as handle:
+            loaded = json.load(handle)
+            return cast(Dict[str, Any], loaded)
+
+    if fallback_path.exists():
+        with fallback_path.open("r", encoding="utf-8") as handle:
+            loaded = json.load(handle)
+            return cast(Dict[str, Any], loaded)
+
+    return {}
+
+
+@lru_cache(maxsize=64)
+def _load_cstr_namespace_file(namespace: str, ui_lang: str) -> Dict[str, Any]:
+    """Load one CSTR namespace JSON file with English fallback."""
+    if ui_lang not in SUPPORTED_UI_LANGS:
+        ui_lang = "en"
+
+    namespace_root = _cstr_namespace_path_from_string(namespace)
     namespace_path = namespace_root / f"{ui_lang}.json"
     fallback_path = namespace_root / "en.json"
 
@@ -93,6 +137,19 @@ def load_all_barsukas_strings(ui_lang: str) -> Dict[str, Dict[str, Any]]:
     return strings_by_namespace
 
 
+@lru_cache(maxsize=8)
+def load_all_barsukas_cstr_strings(ui_lang: str) -> Dict[str, Dict[str, Any]]:
+    """Load all Barsukas CSTR namespaces for a UI language."""
+    if ui_lang not in SUPPORTED_UI_LANGS:
+        ui_lang = "en"
+
+    namespaces = _discover_cstr_namespaces()
+    return {
+        namespace: _load_cstr_namespace_file(namespace=namespace, ui_lang=ui_lang)
+        for namespace in namespaces
+    }
+
+
 class _StringPathNode:
     """Lazy accessor object used by Jinja for LSTR/SSTR paths."""
 
@@ -118,7 +175,7 @@ class _StringPathNode:
 
 
 class StringAccessor:
-    """Template accessor for legacy STRINGS namespaces and new LSTR/SSTR paths."""
+    """Template accessor for legacy STRINGS namespaces and new LSTR/SSTR/CSTR paths."""
 
     def __init__(
         self,
@@ -141,6 +198,7 @@ class StringAccessor:
         Modes:
         - lstr: default shared namespace with CURRENT/OTHER support.
         - sstr: explicit namespace required (first segment).
+        - cstr: explicit namespace required (first segment).
         """
         if not segments:
             return default
@@ -149,6 +207,9 @@ class StringAccessor:
             return self._resolve_lstr(segments, default=default)
 
         if self._mode == "sstr":
+            return self._resolve_sstr(segments, default=default)
+
+        if self._mode == "cstr":
             return self._resolve_sstr(segments, default=default)
 
         return default
@@ -200,3 +261,10 @@ def create_sstr_accessor(
 ) -> StringAccessor:
     """Create accessor for sentence strings (SSTR)."""
     return StringAccessor(strings_by_namespace, mode="sstr", default_module=default_module)
+
+
+def create_cstr_accessor(
+    strings_by_namespace: Dict[str, Dict[str, Any]], default_module: str
+) -> StringAccessor:
+    """Create accessor for long multi-sentence block strings (CSTR)."""
+    return StringAccessor(strings_by_namespace, mode="cstr", default_module=default_module)

@@ -3,7 +3,11 @@
 from markupsafe import escape
 
 from barsukas.helpers.strings import SUPPORTED_UI_LANGS
-from strings.barsukas_helpers import create_lstr_accessor, create_sstr_accessor
+from strings.barsukas_helpers import (
+    create_cstr_accessor,
+    create_lstr_accessor,
+    create_sstr_accessor,
+)
 
 
 def test_lstr_resolves_common_default_path() -> None:
@@ -36,6 +40,16 @@ def test_sstr_requires_namespace() -> None:
 
     assert str(sstr.sentences.edit_title) == "Edit sentence"
     assert str(sstr.edit_title) == ""
+
+
+def test_cstr_requires_namespace() -> None:
+    strings_by_namespace = {
+        "ipa": {"intro_block": "<p>Intro block.</p>"},
+    }
+    cstr = create_cstr_accessor(strings_by_namespace, default_module="common")
+
+    assert str(cstr.ipa.intro_block) == "<p>Intro block.</p>"
+    assert str(cstr.intro_block) == ""
 
 
 def test_accessors_do_not_expose_dunder_attributes_to_markupsafe() -> None:
