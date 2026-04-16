@@ -326,6 +326,19 @@ def api_info() -> ResponseReturnValue:
             ],
         },
         {
+            "path": "/api/v1/lemma/<guid>/audio",
+            "method": "GET",
+            "description": "Get lemma-level and form-level audio availability by language",
+            "parameters": [
+                {
+                    "name": "language",
+                    "type": "query",
+                    "required": False,
+                    "description": "Filter to specific language code (e.g., 'en', 'lt', 'fr')",
+                }
+            ],
+        },
+        {
             "path": "/api/v1/lemma/<guid>/sentences",
             "method": "GET",
             "description": "Get example sentences that use this lemma",
@@ -815,6 +828,114 @@ def get_lemma_pronunciations(guid: str) -> ResponseReturnValue:
         metadata["is_populated"] = language_filter in pronunciations
 
     return _build_success_response(pronunciations, metadata)
+
+
+@bp.route("/v1/lemma/<guid>/audio")
+def get_lemma_audio(guid: str) -> ResponseReturnValue:
+    """
+    Get audio availability for a lemma by language.
+
+    Query parameters:
+        - language: Optional. Filter to a specific language code (e.g., 'en', 'lt', 'fr')
+
+    Returns a dictionary mapping language codes to:
+        - has_lemma_audio: Whether lemma-level audio exists for this language
+        - form_audio_count: Number of distinct grammatical forms with form-level audio
+
+    Only languages with at least one audio row (lemma-level or form-level) are included.
+
+    Example:
+        GET /api/v1/lemma/N01_001/audio
+        GET /api/v1/lemma/N01_001/audio?language=lt
+    """
+    lemma = get_lemma_by_guid(g.db, guid)
+
+    if not lemma:
+        return _build_error_response(f"Lemma with GUID '{guid}' not found", 404)
+
+    language_filter = request.args.get("language", "").strip().lower()
+
+    has_lemma_audio_expr = func.max(
+        case(
+            (AudioQualityReview.grammatical_form.is_(None), 1),
+            else_=0,
+        )
+    ).label("has_lemma_audio")
+    form_audio_count_expr = func.count(
+        func.distinct(
+            case(
+                (
+                    AudioQualityReview.grammatical_form.is_not(None),
+                    AudioQualityReview.grammatical_form,
+                ),
+                else_=None,
+            )
+        )
+    ).label("form_audio_count")
+
+    audio_query = (
+        g.db.query(
+            AudioQualityReview.language_code.label("language_code"),
+            has_lemma_audio_expr,
+            form_audio_count_expr,
+        )
+        .filter(
+            AudioQualityReview.guid == lemma.guid,
+            AudioQualityReview.sentence_id.is_(None),
+        )
+        .group_by(AudioQualityReview.language_code)
+    )
+
+    if language_filter:
+        audio_query = audio_query.filter(AudioQualityReview.language_code == language_filter)
+
+    audio_rows = audio_query.all()
+
+    language_audio: Dict[str, Dict[str, Any]] = {}
+    for row in audio_rows:
+        language_audio[row.language_code] = {
+            "has_lemma_audio": bool(row.has_lemma_audio),
+            "form_audio_count": int(row.form_audio_count or 0),
+        }
+
+    if language_filter:
+        language_codes = [language_filter]
+    else:
+        hierarchy_languages = [lang for lang in LANGUAGE_HIERARCHY if lang in language_audio]
+        extra_languages = sorted(
+            [lang for lang in language_audio if lang not in LANGUAGE_HIERARCHY]
+        )
+        language_codes = hierarchy_languages + extra_languages
+
+    audio_data: Dict[str, Dict[str, Any]] = {}
+    languages_with_lemma_audio: List[str] = []
+    languages_with_any_audio: List[str] = []
+
+    for language_code in language_codes:
+        current_audio = language_audio.get(language_code)
+        if not current_audio:
+            continue
+
+        has_lemma_audio = current_audio["has_lemma_audio"]
+        form_audio_count = current_audio["form_audio_count"]
+
+        if has_lemma_audio or form_audio_count > 0:
+            audio_data[language_code] = current_audio
+            languages_with_any_audio.append(language_code)
+            if has_lemma_audio:
+                languages_with_lemma_audio.append(language_code)
+
+    metadata: Dict[str, Any] = {
+        "guid": guid,
+        "languages_with_lemma_audio": languages_with_lemma_audio,
+        "languages_with_any_audio": languages_with_any_audio,
+    }
+
+    if language_filter:
+        metadata["requested_language"] = language_filter
+        metadata["is_populated"] = language_filter in audio_data
+
+    return _build_success_response(audio_data, metadata)
 
 
 @bp.route("/v1/lemma/<guid>/sentences")
