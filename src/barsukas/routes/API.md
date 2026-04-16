@@ -30,7 +30,7 @@ Base prefix: `/api`.
   - Base-form IPA/phonetic pronunciations by language.
 
 - `GET /api/v1/lemma/<guid>/audio[?language=<code>]`
-  - Audio availability by language with `has_lemma_audio` and `form_audio_count`.
+  - Audio availability by language with `has_lemma_audio`, `form_audio_count`, and `audio_files` (includes `manifest_md5` and URL pointers).
 
 - `GET /api/v1/lemma/<guid>/sentences[?language=<code>]`
   - Example sentences using the lemma.
