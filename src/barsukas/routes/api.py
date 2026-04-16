@@ -841,6 +841,7 @@ def get_lemma_audio(guid: str) -> ResponseReturnValue:
     Returns a dictionary mapping language codes to:
         - has_lemma_audio: Whether lemma-level audio exists for this language
         - form_audio_count: Number of distinct grammatical forms with form-level audio
+        - audio_files: Audio file pointers (md5 + URL metadata)
 
     Only languages with at least one audio row (lemma-level or form-level) are included.
 
@@ -891,12 +892,43 @@ def get_lemma_audio(guid: str) -> ResponseReturnValue:
 
     audio_rows = audio_query.all()
 
+    details_query = g.db.query(AudioQualityReview).filter(
+        AudioQualityReview.guid == lemma.guid,
+        AudioQualityReview.sentence_id.is_(None),
+    )
+    if language_filter:
+        details_query = details_query.filter(AudioQualityReview.language_code == language_filter)
+    detail_rows = details_query.order_by(
+        AudioQualityReview.language_code,
+        AudioQualityReview.grammatical_form,
+        AudioQualityReview.voice_name,
+    ).all()
+
     language_audio: Dict[str, Dict[str, Any]] = {}
     for row in audio_rows:
         language_audio[row.language_code] = {
             "has_lemma_audio": bool(row.has_lemma_audio),
             "form_audio_count": int(row.form_audio_count or 0),
         }
+
+    files_by_language: Dict[str, List[Dict[str, Any]]] = {}
+    for detail_row in detail_rows:
+        detail_language = detail_row.language_code
+        if detail_language not in files_by_language:
+            files_by_language[detail_language] = []
+
+        files_by_language[detail_language].append(
+            {
+                "grammatical_form": _serialize_value(detail_row.grammatical_form),
+                "voice_name": detail_row.voice_name,
+                "display_voice": detail_row.display_voice,
+                "manifest_md5": detail_row.manifest_md5,
+                "audio_url": _serialize_value(detail_row.s3_prod_url or detail_row.s3_staging_url),
+                "s3_prod_url": _serialize_value(detail_row.s3_prod_url),
+                "s3_staging_url": _serialize_value(detail_row.s3_staging_url),
+                "status": detail_row.status,
+            }
+        )
 
     if language_filter:
         language_codes = [language_filter]
@@ -920,7 +952,11 @@ def get_lemma_audio(guid: str) -> ResponseReturnValue:
         form_audio_count = current_audio["form_audio_count"]
 
         if has_lemma_audio or form_audio_count > 0:
-            audio_data[language_code] = current_audio
+            audio_data[language_code] = {
+                "has_lemma_audio": has_lemma_audio,
+                "form_audio_count": form_audio_count,
+                "audio_files": files_by_language.get(language_code, []),
+            }
             languages_with_any_audio.append(language_code)
             if has_lemma_audio:
                 languages_with_lemma_audio.append(language_code)
