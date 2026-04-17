@@ -91,14 +91,28 @@ class TestRegularIr(unittest.TestCase):
         self.assertEqual(self.forms["3s_future"], "partirá")
 
 
-class TestIrregularVerbsReturnNone(unittest.TestCase):
-    """Irregular verbs must return None to trigger LLM fallback."""
+class TestHardcodedIrregularVerbs(unittest.TestCase):
+    """Common irregular verbs should be hard-coded for deterministic output."""
 
     def test_ser(self) -> None:
-        self.assertIsNone(conjugate("ser"))
+        result = conjugate("ser")
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual(result["1s_present"], "sou")
+        self.assertEqual(result["3s_past"], "foi")
+        self.assertEqual(result["3p_future"], "serão")
 
     def test_estar(self) -> None:
-        self.assertIsNone(conjugate("estar"))
+        result = conjugate("estar")
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual(result["1s_present"], "estou")
+        self.assertEqual(result["3s_past"], "esteve")
+        self.assertEqual(result["2p_future"], "estareis")
+
+
+class TestIrregularVerbsFallback(unittest.TestCase):
+    """Non-hardcoded irregular verbs should return None to trigger LLM fallback."""
 
     def test_ir(self) -> None:
         self.assertIsNone(conjugate("ir"))

@@ -410,6 +410,10 @@ class LinguisticClient:
             self.client, lemma_id, self.get_session
         )
 
+    def query_portuguese_adjective_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
+        """Query LLM for Portuguese adjective forms."""
+        return portuguese.query_portuguese_adjective_forms(self.client, lemma_id, self.get_session)
+
     # Italian forms
     def query_italian_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
         """Query LLM for Italian noun forms."""
