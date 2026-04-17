@@ -152,6 +152,11 @@ _TASK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Any]] = {
     # Portuguese — translation fetcher, gender on nouns
     ("pt", "noun"): {"fetcher": "translation", "threshold": 2, "gender": True},
     ("pt", "verb"): {"fetcher": "translation", "threshold": 10},
+    ("pt", "adjective"): {
+        "fetcher": "translation",
+        "threshold": 4,
+        "client_method": "query_portuguese_adjective_forms",
+    },
     # Chinese — named client methods
     ("zh", "noun"): {"client_method": "query_chinese_noun_forms"},
     ("zh", "verb"): {"threshold": 3, "client_method": "query_chinese_verb_forms"},

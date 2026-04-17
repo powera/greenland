@@ -23,6 +23,13 @@ VERB_CONFIG: Dict[str, Any] = {
     "schema_name": "PortugueseVerbConjugations",
 }
 
+ADJECTIVE_CONFIG: Dict[str, Any] = {
+    "type": "explicit",
+    "forms": ["singular_m", "singular_f", "plural_m", "plural_f"],
+    "query_type": "portuguese_adjective_forms",
+    "schema_name": "PortugueseAdjectiveForms",
+}
+
 GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
     "ADJ_PT_PLURAL_F": "adjective/pt_plural_f",
     "ADJ_PT_PLURAL_M": "adjective/pt_plural_m",
