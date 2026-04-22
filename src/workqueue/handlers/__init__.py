@@ -5,6 +5,7 @@ from workqueue.handlers.sarka import handle_generate_conversation
 from workqueue.handlers.sentences import handle_sentences_translate
 from workqueue.handlers.wireword import handle_wireword_export_directory
 from workqueue.handlers.words import (
+    handle_words_embeddings,
     handle_words_forms,
     handle_words_grammar_facts,
     handle_words_pronunciations,
@@ -19,6 +20,7 @@ __all__ = [
     "handle_words_grammar_facts",
     "handle_audio_generate_sentence",
     "handle_sentences_translate",
+    "handle_words_embeddings",
     "handle_words_forms",
     "handle_words_pronunciations",
     "handle_words_synonyms",

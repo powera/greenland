@@ -22,6 +22,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+from storage.models.pgvector import PGVector
 from storage.rhyme_keys import sync_derivative_form_rhyme_key
 
 
@@ -120,6 +121,9 @@ class Lemma(Base):
     relation_memberships = relationship(
         "LemmaRelationMember", back_populates="lemma", cascade="all, delete-orphan"
     )
+    embeddings = relationship(
+        "LemmaEmbedding", back_populates="lemma", cascade="all, delete-orphan"
+    )
 
 
 class LemmaTranslation(Base):
@@ -202,6 +206,37 @@ class LemmaDifficultyOverride(Base):
 
     # Relationships
     lemma = relationship("Lemma", back_populates="difficulty_overrides")
+
+
+class LemmaEmbedding(Base):
+    """Vector embeddings for semantic lemma similarity search."""
+
+    __tablename__ = "lemma_embeddings"
+    __table_args__ = (
+        UniqueConstraint(
+            "lemma_id",
+            "language_code",
+            "text_source",
+            "model_name",
+            name="uq_lemma_embedding",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    lemma_id: Mapped[int] = mapped_column(ForeignKey("lemmas.id"), nullable=False, index=True)
+    language_code: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    text_source: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    source_text: Mapped[str] = mapped_column(Text, nullable=False)
+    model_name: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    embedding_dim: Mapped[int] = mapped_column(Integer, nullable=False)
+    embedding: Mapped[str] = mapped_column(PGVector(1536), nullable=False)  # type: ignore[arg-type]
+    embedding_norm: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )
+
+    lemma = relationship("Lemma", back_populates="embeddings")
 
 
 class DerivativeForm(Base):

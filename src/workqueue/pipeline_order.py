@@ -28,10 +28,13 @@ TASK_PIPELINE_ORDER: Dict[str, int] = {
     # Step 5: ŠERNAS - Generate Synonyms
     "words.synonyms": 5,
     "generate_synonyms": 5,
+    # Step 6: WORD2VEC - Refresh semantic embeddings
+    "words.embeddings": 6,
+    "word2vec_refresh_embeddings": 6,
     # Step 6: LAPE - Generate Grammar Facts
     "words.grammar_facts": 6,
     "generate_grammar_fact": 6,
-    # Step 7: BUIVOLAS - Generate Example Sentences (no workqueue task yet)
+    # Step 8: BUIVOLAS - Generate Example Sentences (no workqueue task yet)
     # Step 8: ŽVIRBLIS - Translate Sentences
     "sentences.translate": 8,
     "translate_sentence": 8,

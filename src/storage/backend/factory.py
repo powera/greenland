@@ -89,6 +89,7 @@ def _ensure_tables_exist(engine: "Engine") -> None:
     Args:
         engine: SQLAlchemy engine
     """
+    from sqlalchemy import text
     from sqlalchemy.orm import Session
 
     # Import models package to ensure ALL models (including OperationLog,
@@ -97,6 +98,10 @@ def _ensure_tables_exist(engine: "Engine") -> None:
     import storage.models  # noqa: F401
     from storage.models.schema import Base
 
+    if engine.dialect.name == "postgresql":
+        with engine.begin() as conn:
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+
     Base.metadata.create_all(engine)
 
     # Add missing columns to existing tables
@@ -104,6 +109,21 @@ def _ensure_tables_exist(engine: "Engine") -> None:
 
     with Session(engine) as session:
         ensure_tables_exist(session)
+        if engine.dialect.name == "postgresql":
+            session.execute(
+                text(
+                    "CREATE INDEX IF NOT EXISTS ix_lemma_embeddings_model_lang "
+                    "ON lemma_embeddings (model_name, language_code)"
+                )
+            )
+            session.execute(
+                text(
+                    "CREATE INDEX IF NOT EXISTS ix_lemma_embeddings_vector_cosine "
+                    "ON lemma_embeddings USING ivfflat (embedding vector_cosine_ops) "
+                    "WITH (lists = 100)"
+                )
+            )
+            session.commit()
 
 
 def configure_backend(config: DataSourceConfig) -> None:
