@@ -41,6 +41,7 @@ class TaskType:
     WORDS_PRONUNCIATIONS = "words.pronunciations"
     WORDS_FORMS = "words.forms"
     WORDS_SYNONYMS = "words.synonyms"
+    WORDS_EMBEDDINGS = "words.embeddings"
     WORDS_GRAMMAR_FACTS = "words.grammar_facts"
     SENTENCES_TRANSLATE = "sentences.translate"
     AUDIO_GENERATE_LEMMA = "audio.generate.lemma"

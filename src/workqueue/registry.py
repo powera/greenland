@@ -11,6 +11,7 @@ from workqueue.handlers.sarka import handle_generate_conversation, handle_genera
 from workqueue.handlers.sentences import handle_sentences_translate
 from workqueue.handlers.wireword import handle_wireword_export_directory
 from workqueue.handlers.words import (
+    handle_words_embeddings,
     handle_words_forms,
     handle_words_grammar_facts,
     handle_words_pronunciations,
@@ -26,6 +27,7 @@ TASK_HANDLERS = {
     "words.forms": handle_words_forms,
     "words.pronunciations": handle_words_pronunciations,
     "words.synonyms": handle_words_synonyms,
+    "words.embeddings": handle_words_embeddings,
     "words.grammar_facts": handle_words_grammar_facts,
     "sentences.translate": handle_sentences_translate,
     "audio.generate.lemma": handle_audio_generate_lemma,
@@ -48,6 +50,7 @@ TASK_HANDLERS = {
     "papuga_generate_pronunciation": handle_words_pronunciations,
     "vilkas_generate_forms": handle_words_forms,
     "sernas_generate_synonyms": handle_words_synonyms,
+    "word2vec_refresh_embeddings": handle_words_embeddings,
     "lape_generate_grammar_fact": handle_words_grammar_facts,
     "sarka_generate_conversation": handle_generate_conversation,
     "sarka_generate_definition": handle_generate_definition,

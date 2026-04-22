@@ -48,6 +48,10 @@ def ensure_tables_exist(session: Session) -> None:
     """
     engine = session.get_bind().engine
 
+    if engine.dialect.name == "postgresql":
+        with engine.begin() as conn:
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+
     # First create any missing tables
     Base.metadata.create_all(engine)
 

@@ -3,6 +3,7 @@
 """Shared word-level generation helpers used by benchmarks and app flows."""
 
 from words.synonyms import build_synonyms_prompt, query_synonyms
+from words.word2vec import rebuild_embeddings, refresh_lemma_embedding, suggest_similar_lemmas
 from words.translation import (
     build_multi_target_translation_prompt,
     build_single_target_translation_prompt,
@@ -19,6 +20,9 @@ from words.ipa_pronunciation import (
 __all__ = [
     "build_synonyms_prompt",
     "query_synonyms",
+    "refresh_lemma_embedding",
+    "rebuild_embeddings",
+    "suggest_similar_lemmas",
     "build_single_target_translation_prompt",
     "build_multi_target_translation_prompt",
     "query_single_word_translation",
