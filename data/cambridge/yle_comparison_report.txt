@@ -1,0 +1,594 @@
+=== Summary ===
+  starters   490 YLE entries ->  337 matched, 108 missing,  26 missing-compound,  19 skipped,  19 pos-mismatch,   1 excluded-but-in-yle
+  movers     388 YLE entries ->  264 matched,  80 missing,  29 missing-compound,  15 skipped,  25 pos-mismatch,   2 excluded-but-in-yle
+  flyers     505 YLE entries ->  323 matched, 132 missing,  32 missing-compound,  18 skipped,  15 pos-mismatch,   1 excluded-but-in-yle
+
+=== Missing from DB (by level) ===
+  [starters] English (adj,n) -- School
+  [starters] I (pron) -- -
+  [starters] Mr (title) -- -
+  [starters] Mrs (title) -- -
+  [starters] OK (adj,dis) -- -
+  [starters] a (det) -- -
+  [starters] a lot (adv,pron) -- -
+  [starters] a lot of (det) -- -
+  [starters] alien (n) -- Toys
+  [starters] alphabet (n) -- School
+  [starters] an (det) -- -
+  [starters] at (prep) -- -
+  [starters] ball (n) -- Sports & leisure, Toys
+  [starters] balloon (n) -- Toys
+  [starters] baseball cap (n) -- Clothes
+  [starters] bat (as sports equipment) Ben (n) -- -
+  [starters] bike (n) -- Sports & leisure, Toys, Transport
+  [starters] birthday (n) -- Time
+  [starters] board game (n) -- Toys
+  [starters] bookshop (n) -- Places & directions
+  [starters] boots (n) -- Clothes
+  [starters] bounce (v) -- Sports & leisure
+  [starters] burger (n) -- Food & drink
+  [starters] can (v) -- -
+  [starters] candy (UK sweet(s)) (n) -- -
+  [starters] chips (n) -- Food & drink
+  [starters] clap (v) -- -
+  [starters] class (n) -- School
+  [starters] classmate (n) -- Family & friends
+  [starters] classroom (n) -- School
+  [starters] clothes (n) -- Clothes
+  [starters] cool (adj,excl) -- -
+  [starters] cow (n) -- Animals
+  [starters] crayon (n) -- School
+  [starters] cupboard (n) -- The home, School
+  [starters] dad (n) -- Family & friends
+  [starters] do (v) -- -
+  [starters] don’t worry (excl) -- -
+  [starters] double (adj) -- -
+  [starters] fantastic (adj,excl) -- -
+  [starters] for (prep) -- -
+  [starters] fries (n) -- Food & drink
+  [starters] fun (adj,n) -- -
+  [starters] glasses (n) -- Clothes
+  [starters] go to bed (v) -- -
+  [starters] go to sleep (v) -- -
+  [starters] grandma (n) -- Family & friends
+  [starters] grandpa (n) -- Family & friends
+  [starters] handbag (n) -- Clothes
+  [starters] have got (v) -- -
+  [starters] he (pron) -- -
+  [starters] her (poss) -- -
+  [starters] hers (pron) -- -
+  [starters] hi (excl) -- -
+  [starters] him (pron) -- -
+  [starters] hippo (n) -- Animals
+  [starters] his (poss) -- -
+  [starters] hobby (n) -- Sports & leisure
+  [starters] hooray (excl) -- -
+  [starters] how old (int) -- -
+  [starters] ice cream (n) -- Food & drink
+  [starters] in (prep) -- Places & directions, Time
+  [starters] in front of (prep) -- Places & directions
+  [starters] it (pron) -- -
+  [starters] its (poss) -- -
+  [starters] jellyfish (n) -- Animals
+  [starters] keyboard (n) -- School
+  [starters] kid (n) -- Family & friends
+  [starters] kite (n) -- Sports & leisure
+  [starters] kiwi (n) -- Food & drink
+  [starters] letter (n) -- -
+  [starters] let’s (v) -- -
+  [starters] lizard (n) -- Animals
+  [starters] look at (v) -- -
+  [starters] lots (adv,pron) -- -
+  [starters] lots of (det) -- -
+  [starters] mat (n) -- The home
+  [starters] me (pron) -- -
+  [starters] me too (dis) -- -
+  [starters] meatballs (n) -- Food & drink
+  [starters] motorbike (n) -- Toys
+  [starters] mum (n) -- Family & friends
+  [starters] my (poss) -- -
+  [starters] next to (prep) -- -
+  [starters] not (adv) -- -
+  [starters] of (prep) -- -
+  [starters] oh (dis) -- -
+  [starters] oh dear (excl) -- -
+  [starters] on (prep) -- Places & directions
+  [starters] our (poss) -- -
+  [starters] ours (pron) -- -
+  [starters] pardon (int) -- -
+  [starters] pet (n) -- Animals
+  [starters] piano (n) -- Sports & leisure
+  [starters] pick up (v) -- -
+  [starters] pie (n) -- Food & drink
+  [starters] playground (n) -- Places & directions, School
+  [starters] polar bear (n) -- Animals
+  [starters] poster (n) -- School
+  [starters] right (dis) -- -
+  [starters] right (adj) -- -
+  [starters] robot (n) -- Toys
+  [starters] rug (n) -- The home
+  [starters] ruler (n) -- School
+  [starters] scary (adj) -- -
+  [starters] see you (excl) -- -
+  [starters] she (pron) -- -
+  [starters] shell (n) -- The world around us
+  [starters] silly (adj) -- -
+  [starters] skateboard (n) -- Sports & leisure
+  [starters] sofa (n) -- The home
+  [starters] sport (n) -- Sports & leisure
+  [starters] story (n) -- School, Sports & leisure
+  [starters] sweet(s) (US candy) (n) -- -
+  [starters] table tennis (n) -- Sports & leisure
+  [starters] tablet (n) -- -
+  [starters] teddy (n) -- Toys
+  [starters] tennis racket (n) -- Sports & leisure
+  [starters] thanks (dis) -- -
+  [starters] the (det) -- -
+  [starters] their (poss) -- -
+  [starters] theirs (pron) -- -
+  [starters] them (pron) -- -
+  [starters] then (dis) -- -
+  [starters] they (pron) -- -
+  [starters] tick (n,v) -- School
+  [starters] ugly (adj) -- -
+  [starters] us (pron) -- -
+  [starters] we (pron) -- -
+  [starters] well done (dis) -- -
+  [starters] would like (v) -- -
+  [starters] you (pron) -- -
+  [starters] your (poss) -- -
+  [starters] yours (pron) -- -
+  [movers] CD (n) -- Sports & leisure
+  [movers] DVD (n) -- Sports & leisure
+  [movers] address (n) -- The home
+  [movers] after (prep) -- Time
+  [movers] all right (adj,adv) -- -
+  [movers] at (prep) -- -
+  [movers] be called (v) -- -
+  [movers] beard (n) -- The body and the face
+  [movers] before (prep) -- Time
+  [movers] best (adj,adv) -- -
+  [movers] better (adj,adv) -- -
+  [movers] blond (adj) -- The body and the face
+  [movers] boring (adj) -- -
+  [movers] brilliant (adj,excl) -- -
+  [movers] bus station (n) -- Places & directions, Transport
+  [movers] bus stop (n) -- Places & directions, Transport
+  [movers] by (prep) -- -
+  [movers] café (n) -- Places & directions
+  [movers] cage (n) -- Animals
+  [movers] car park (n) -- Places & directions
+  [movers] centre (n) -- Places & directions
+  [movers] cinema (n) -- Places & directions, Sports & leisure
+  [movers] circus (n) -- Places & directions, Work
+  [movers] clever (adj) -- -
+  [movers] cloudy (adj) -- Weather
+  [movers] clown (n) -- Work
+  [movers] come on (excl) -- -
+  [movers] comic (n) -- Sports & leisure
+  [movers] comic book (n) -- Sports & leisure
+  [movers] countryside (n) -- The world around us
+  [movers] curly (adj) -- The body and the face
+  [movers] dance (n,v) -- Sports & leisure
+  [movers] difference (n) -- -
+  [movers] downstairs (adv,n) -- The home
+  [movers] dress up (v) -- -
+  [movers] e-book (n) -- -
+  [movers] earache (n) -- Health
+  [movers] exciting (adj) -- -
+  [movers] film (US movie) star (n) -- -
+  [movers] funfair (n) -- Places & directions
+  [movers] get dressed (v) -- -
+  [movers] get off (v) -- -
+  [movers] get on (v) -- -
+  [movers] get undressed (v) -- -
+  [movers] get up (v) -- -
+  [movers] go shopping (v) -- Sports & leisure
+  [movers] goal (n) -- Sports & leisure
+  [movers] grown-up (n) -- Family & friends
+  [movers] have (got) to (v) -- -
+  [movers] holiday (n) -- Sports & leisure
+  [movers] hop (v) -- Sports & leisure
+  [movers] how much (adv,int) -- -
+  [movers] how often (adv,int) -- -
+  [movers] hundred (n) -- Numbers
+  [movers] ice skates (n) -- Sports & leisure
+  [movers] ice skating (n) -- Sports & leisure
+  [movers] into (prep) -- -
+  [movers] invite (v) -- -
+  [movers] jungle (n) -- -
+  [movers] kitten (n) -- Animals
+  [movers] look for (v) -- -
+  [movers] milkshake (n) -- Food & drink
+  [movers] model (n) -- Toys
+  [movers] moustache (n) -- The body and the face
+  [movers] must (v) -- -
+  [movers] naughty (adj) -- -
+  [movers] noodles (n) -- Food & drink
+  [movers] on (adv,prep) -- -
+  [movers] out of (prep) -- -
+  [movers] o’clock (adv) -- Time
+  [movers] pair (n) -- Numbers
+  [movers] pirate (n) -- Work
+  [movers] player (n) -- Sports & leisure
+  [movers] pool (n) -- Sports & leisure
+  [movers] pop star (n) -- Work
+  [movers] practise (v) -- Sports & leisure
+  [movers] puppy (n) -- Animals
+  [movers] put on (v) -- -
+  [movers] rainbow (n) -- Weather
+  [movers] roller skates (n) -- Sports & leisure
+  [movers] roller skating (n) -- Sports & leisure
+  [movers] sauce (n) -- Food & drink
+  [movers] score (v) -- Sports & leisure
+  [movers] shall (v) -- -
+  [movers] shopping centre something (pron) -- -
+  [movers] shower (n) -- The home
+  [movers] skate (n,v) -- Sports & leisure
+  [movers] sports centre sweater (n) -- -
+  [movers] stair (n) -- The home
+  [movers] station (n) -- Places & directions, Transport
+  [movers] stomach-ache (n) -- Health
+  [movers] sunny (adj) -- Weather
+  [movers] supermarket (n) -- Places & directions
+  [movers] swimming pool (n) -- -
+  [movers] swimsuit (n) -- Clothes
+  [movers] text (n,v) -- School, Sports & leisure
+  [movers] then (adv) -- -
+  [movers] thirsty (adj) -- Food & drink
+  [movers] toothache (n) -- Health
+  [movers] toothpaste (n) -- The home
+  [movers] treasure (n) -- -
+  [movers] vegetable (n) -- Food & drink
+  [movers] video (n,v) -- Sports & leisure
+  [movers] village (n) -- The world around us
+  [movers] weak (adj) -- -
+  [movers] windy (adj) -- Weather
+  [movers] world (n) -- The world around us
+  [movers] worst (adj,adv) -- -
+  [movers] would (v) -- -
+  [flyers] a few (det) -- -
+  [flyers] a little (adv,det) -- -
+  [flyers] a.m. (for time) agree (v) -- -
+  [flyers] adventure (n) -- -
+  [flyers] after (adv,conj) -- Time
+  [flyers] amazing (adj,excl) -- -
+  [flyers] anything (pron) -- -
+  [flyers] arrive (v) -- -
+  [flyers] as (adv) -- -
+  [flyers] as ... as (adv) -- -
+  [flyers] astronaut (n) -- Work
+  [flyers] at the moment (adv) -- -
+  [flyers] backpack (n) -- School, Sports & leisure
+  [flyers] beetle (n) -- Animals
+  [flyers] before (adv,conj) -- Time
+  [flyers] bin (n) -- School
+  [flyers] biscuit (n) -- Food & drink
+  [flyers] by myself (adv) -- -
+  [flyers] by yourself (adv) -- -
+  [flyers] calendar (n) -- Time
+  [flyers] cartoon (n) -- Sports & leisure
+  [flyers] cereal (n) -- Food & drink
+  [flyers] channel (n) -- Sports & leisure
+  [flyers] chat (v) -- -
+  [flyers] chemist (n) -- Health, Places & directions
+  [flyers] club (n) -- Places & directions, School
+  [flyers] college (n) -- Places & directions, School
+  [flyers] cooker (n) -- The home
+  [flyers] cookie (n) -- Food & drink
+  [flyers] costume (n) -- Clothes
+  [flyers] could (v) -- -
+  [flyers] crown (n) -- Clothes
+  [flyers] cycle (v) -- -
+  [flyers] delicious (adj) -- -
+  [flyers] designer (n) -- Work
+  [flyers] diary (n) -- The home, Sports & leisure
+  [flyers] dictionary (n) -- School
+  [flyers] dinosaur (n) -- Animals
+  [flyers] drum (n) -- Sports & leisure
+  [flyers] entrance (n) -- The home, The world around us
+  [flyers] environment (n) -- The world around us
+  [flyers] ever (adv) -- -
+  [flyers] excellent (adj,excl) -- -
+  [flyers] exit (n) -- The world around us
+  [flyers] expensive (adj) -- -
+  [flyers] explore (v) -- -
+  [flyers] extinct (adj) -- Animals
+  [flyers] fall over (v) -- Health
+  [flyers] festival (n) -- Sports & leisure
+  [flyers] fetch (v) -- -
+  [flyers] find out (v) -- -
+  [flyers] fire engine (n) -- -
+  [flyers] fire fighter (n) -- Work
+  [flyers] foggy (adj) -- Weather
+  [flyers] for (prep) -- -
+  [flyers] fridge (n) -- The home
+  [flyers] frightening (adj) -- -
+  [flyers] furry (adj) -- -
+  [flyers] get to (v) -- Places & directions
+  [flyers] glue (n,v) -- School
+  [flyers] go away (excl) -- -
+  [flyers] go out (v) -- -
+  [flyers] horrible (adj) -- -
+  [flyers] how long (adv,int) -- Time
+  [flyers] if you want (excl) -- -
+  [flyers] in a minute (excl) -- -
+  [flyers] interesting (adj) -- -
+  [flyers] invitation (n) -- Sports & leisure
+  [flyers] kilometre king (n) -- -
+  [flyers] later (adv) -- Time
+  [flyers] left (adj,n) -- -
+  [flyers] letter (n) -- -
+  [flyers] light (adj,n) -- -
+  [flyers] look after (v) -- -
+  [flyers] look like (v) -- -
+  [flyers] lovely (adj) -- -
+  [flyers] magazine (n) -- Sports & leisure
+  [flyers] make sure (v) -- -
+  [flyers] match (n) -- -
+  [flyers] member (n) -- Sports & leisure
+  [flyers] midday (n) -- Time
+  [flyers] might (v) -- -
+  [flyers] million (n) -- Numbers
+  [flyers] mix (v) -- -
+  [flyers] motorway (n) -- Transport
+  [flyers] nest (n) -- Animals
+  [flyers] newspaper (n) -- Work
+  [flyers] no problem (excl) -- -
+  [flyers] no-one (pron) -- -
+  [flyers] of course (adv) -- -
+  [flyers] olives (n) -- Food & drink
+  [flyers] over (adv,prep) -- Places & directions
+  [flyers] p.m. (for time) pizza (n) -- -
+  [flyers] passenger (n) -- Transport
+  [flyers] platform (n) -- Transport
+  [flyers] pleased (adj) -- -
+  [flyers] police station (n) -- Places & directions, Work
+  [flyers] pop music (n) -- Sports & leisure
+  [flyers] popular (adj) -- -
+  [flyers] postcard (n) -- -
+  [flyers] prize (n) -- Sports & leisure
+  [flyers] programme pajamas (n) -- -
+  [flyers] queen (n) -- Work
+  [flyers] quiz (n) -- Sports & leisure
+  [flyers] racing (adj) -- Transport
+  [flyers] railway (n) -- Transport
+  [flyers] repeat (v) -- -
+  [flyers] right (adj) -- Places & directions
+  [flyers] right (n) -- Places & directions
+  [flyers] rock music (n) -- Sports & leisure
+  [flyers] rocket (n) -- Transport, Work
+  [flyers] rucksack (n) -- School
+  [flyers] score (n) -- Sports & leisure
+  [flyers] search (n,v) -- -
+  [flyers] shampoo (n) -- The home
+  [flyers] should (v) -- -
+  [flyers] since (prep) -- -
+  [flyers] singer (n) -- Work
+  [flyers] ski (n,v) -- Sports & leisure
+  [flyers] skyscraper (n) -- Places & directions
+  [flyers] sledge (n,v) -- Sports & leisure
+  [flyers] snowball (n) -- Sports & leisure
+  [flyers] snowboard (n) -- Sports & leisure
+  [flyers] snowboarding (n) -- Sports & leisure
+  [flyers] snowman (n) -- Sports & leisure
+  [flyers] spaceship (n) -- Transport
+  [flyers] spend (v) -- -
+  [flyers] spotted (adj) -- Clothes, Colours
+  [flyers] straight on (adv) -- Places & directions
+  [flyers] stripe (n) -- Clothes, Colours
+  [flyers] striped (adj) -- Clothes, Colours
+  [flyers] student (n) -- School
+  [flyers] subject (n) -- School
+  [flyers] sunglasses (n) -- Clothes
+  [flyers] surname (n) -- Family & friends
+  [flyers] swing (n,v) -- The home, Sports & leisure
+  [flyers] thousand (n) -- Numbers
+  [flyers] tidy (adj,v) -- -
+  [flyers] timetable (n) -- School
+  [flyers] tomorrow (adv,n) -- Time
+  [flyers] tonight (adv,n) -- Time
+  [flyers] tortoise (n) -- Animals
+  [flyers] tour (n) -- Transport
+  [flyers] traffic (n) -- Transport
+  [flyers] trainers (n) -- Clothes
+  [flyers] tune (n) -- Sports & leisure
+  [flyers] turn off (v) -- -
+  [flyers] turn on (v) -- -
+  [flyers] tyre (n) -- Sports & leisure
+  [flyers] unfriendly (adj) -- -
+  [flyers] unhappy (adj) -- -
+  [flyers] uniform (n) -- Clothes
+  [flyers] university (n) -- Places & directions, School
+  [flyers] unkind (adj) -- -
+  [flyers] untidy (adj) -- -
+  [flyers] unusual (adj) -- -
+  [flyers] violin (n) -- Sports & leisure
+  [flyers] wifi (n) -- -
+  [flyers] winner (n) -- Sports & leisure
+  [flyers] wonderful (adj) -- -
+  [flyers] x-ray (n) -- Health
+  [flyers] yet (adv) -- -
+  [flyers] yoghurt (n) -- Food & drink
+  [flyers] you’re welcome (excl) -- -
+
+=== Difficulty outliers (per YLE level) ===
+  [starters] expected band 1-6
+    highest DB difficulty in starters:
+       31  'board' (noun, lemma id=2589)
+       31  'pen' (noun, lemma id=2610)
+       31  'school' (noun, lemma id=2592)
+       31  'sentence' (noun, lemma id=2585)
+       30  'animal' (noun, lemma id=1204)
+       30  'afternoon' (noun, lemma id=1873)
+       30  'board' (noun, lemma id=1332)
+       30  'brother' (noun, lemma id=1385)
+       30  'body' (noun, lemma id=801)
+       30  'bus' (noun, lemma id=586)
+  [movers] expected band 7-15
+    highest DB difficulty in movers:
+       31  'bat' (noun, lemma id=2451)
+       31  'call' (verb, lemma id=2630)
+       31  'coat' (noun, lemma id=2548)
+       31  'field' (noun, lemma id=2417)
+       31  'field' (noun, lemma id=2539)
+       31  'rock' (noun, lemma id=2533)
+       31  'sweet' (adjective, lemma id=2394)
+       31  'star' (noun, lemma id=2404)
+       31  'star' (noun, lemma id=2597)
+       31  'top' (noun, lemma id=2453)
+    lowest DB difficulty in movers:
+        1  'hospital' (noun, lemma id=668)
+        1  'library' (noun, lemma id=674)
+        1  'soup' (noun, lemma id=1075)
+        2  'bottle' (noun, lemma id=1023)
+        2  'bowl' (noun, lemma id=1794)
+        2  'cup' (noun, lemma id=1014)
+        2  'fish' (noun, lemma id=1636)
+        2  'plate' (noun, lemma id=1015)
+        2  'towel' (noun, lemma id=1027)
+        3  'buy' (verb, lemma id=1479)
+  [flyers] expected band 16-30
+    highest DB difficulty in flyers:
+       31  'date' (noun, lemma id=2414)
+       31  'date' (noun, lemma id=2587)
+       31  'jam' (noun, lemma id=2583)
+       31  'key' (noun, lemma id=2447)
+       31  'key' (noun, lemma id=2532)
+       31  'lie' (verb, lemma id=2629)
+       31  'ring' (noun, lemma id=2418)
+       31  'stamp' (noun, lemma id=2471)
+       31  'spring' (noun, lemma id=2452)
+       31  'spring' (noun, lemma id=2459)
+    lowest DB difficulty in flyers:
+        1  'fire station' (noun, lemma id=676)
+        1  'glove' (noun, lemma id=1154)
+        1  'hotel' (noun, lemma id=672)
+        1  'museum' (noun, lemma id=675)
+        1  'restaurant' (noun, lemma id=671)
+        1  'salt' (noun, lemma id=1067)
+        1  'sugar' (noun, lemma id=1066)
+        2  'bicycle' (noun, lemma id=591)
+        2  'fork' (noun, lemma id=1012)
+        2  'key' (noun, lemma id=1017)
+
+=== POS mismatches ===
+  [starters] [yle: v] 'complete' -- DB has adjective
+  [starters] [yle: int] 'how' -- DB has pronoun
+  [starters] [yle: int] 'how many' -- DB has pronoun
+  [starters] [yle: pron] 'mine' -- DB has noun
+  [starters] [yle: adv,det] 'no' -- DB has interjection
+  [starters] [yle: det,pron] 'one' -- DB has numeral
+  [starters] [yle: v] 'spell' -- DB has noun
+  [starters] [yle: dis] 'so' -- DB has conjunction
+  [starters] [yle: adj,int] 'sorry' -- DB has interjection
+  [starters] [yle: n] 'train' -- DB has verb
+  [starters] [yle: det,pron] 'that' -- DB has conjunction
+  [starters] [yle: v] 'take a photo/picture' -- DB has noun
+  [starters] [yle: int] 'where' -- DB has pronoun
+  [starters] [yle: int] 'which' -- DB has pronoun
+  [starters] [yle: dis] 'well' -- DB has adverb,noun
+  [starters] [yle: int] 'who' -- DB has pronoun
+  [starters] [yle: int] 'whose' -- DB has pronoun
+  [starters] [yle: int] 'what' -- DB has pronoun
+  [starters] [yle: adv] 'yes' -- DB has interjection
+  [movers] [yle: prep] 'around' -- DB has adverb
+  [movers] [yle: prep] 'along' -- DB has adverb
+  [movers] [yle: n] 'break' -- DB has verb
+  [movers] [yle: n] 'drive' -- DB has verb
+  [movers] [yle: n] 'elevator' -- DB has verb
+  [movers] [yle: adj] 'fair' -- DB has noun
+  [movers] [yle: v] 'fish' -- DB has noun
+  [movers] [yle: adj,excl] 'fine' -- DB has noun
+  [movers] [yle: n] 'fly' -- DB has verb
+  [movers] [yle: adj,adv] 'first' -- DB has numeral
+  [movers] [yle: adv] 'how' -- DB has pronoun
+  [movers] [yle: n] 'kick' -- DB has verb
+  [movers] [yle: n] 'kind' -- DB has adjective
+  [movers] [yle: n] 'lift' -- DB has verb
+  [movers] [yle: prep] 'opposite' -- DB has adjective
+  [movers] [yle: n] 'present' -- DB has adjective
+  [movers] [yle: n] 'ride' -- DB has verb
+  [movers] [yle: v] 'shop' -- DB has noun
+  [movers] [yle: n] 'swim' -- DB has verb
+  [movers] [yle: adj,adv] 'second' -- DB has noun,numeral
+  [movers] [yle: adj,adv] 'third' -- DB has numeral
+  [movers] [yle: adv,conj,int] 'when' -- DB has pronoun
+  [movers] [yle: n] 'walk' -- DB has verb
+  [movers] [yle: v] 'water' -- DB has noun
+  [movers] [yle: int] 'why' -- DB has pronoun
+  [flyers] [yle: adj] 'alone' -- DB has adverb
+  [flyers] [yle: v] 'camp' -- DB has noun
+  [flyers] [yle: adj,pron] 'enough' -- DB has adverb
+  [flyers] [yle: adj] 'glass' -- DB has noun
+  [flyers] [yle: v] 'land' -- DB has noun
+  [flyers] [yle: n] 'lift' -- DB has verb
+  [flyers] [yle: v] 'mind' -- DB has noun
+  [flyers] [yle: adj] 'online' -- DB has adverb
+  [flyers] [yle: adj] 'same' -- DB has determiner
+  [flyers] [yle: adj] 'several' -- DB has determiner
+  [flyers] [yle: prep] 'until' -- DB has conjunction
+  [flyers] [yle: v] 'whistle' -- DB has noun
+  [flyers] [yle: n] 'win' -- DB has verb
+  [flyers] [yle: v] 'will' -- DB has noun
+  [flyers] [yle: n] 'zero' -- DB has numeral
+
+=== Excluded lemmas that appear in YLE ===
+  [starters] 'make' (verb, lemma id=1468) -- difficulty_level=-1 override for 'en'
+  [movers] 'second' (noun, lemma id=1259) -- difficulty_level=-1 override for 'en'
+  [movers] 'worse' (adjective, lemma id=193) -- difficulty_level=-1 override for 'en'
+  [flyers] 'spring' (noun, lemma id=1254) -- difficulty_level=-1 override for 'en'
+
+=== Skipped (proper names) ===
+  [starters] Alice (proper_name)
+  [starters] Ann/Anna (proper_name)
+  [starters] Alex (proper_name)
+  [starters] Bill (proper_name)
+  [starters] Dan (proper_name)
+  [starters] Eva (proper_name)
+  [starters] Grace (proper_name)
+  [starters] Hugo (proper_name)
+  [starters] Jill (proper_name)
+  [starters] Kim (proper_name)
+  [starters] Lucy (proper_name)
+  [starters] Mark (proper_name)
+  [starters] Matt (proper_name)
+  [starters] May (proper_name)
+  [starters] Nick (proper_name)
+  [starters] Pat (proper_name)
+  [starters] Sam (proper_name)
+  [starters] Sue (proper_name)
+  [starters] Tom (proper_name)
+  [movers] Charlie (proper_name)
+  [movers] Clare (proper_name)
+  [movers] Daisy (proper_name)
+  [movers] Fred (proper_name)
+  [movers] Jack (proper_name)
+  [movers] Jim (proper_name)
+  [movers] Jane (proper_name)
+  [movers] Julia (proper_name)
+  [movers] Lily (proper_name)
+  [movers] Mary (proper_name)
+  [movers] Paul (proper_name)
+  [movers] Peter (proper_name)
+  [movers] Sally (proper_name)
+  [movers] Vicky (proper_name)
+  [movers] Zoe (proper_name)
+  [flyers] Betty (proper_name)
+  [flyers] David (proper_name)
+  [flyers] Emma (proper_name)
+  [flyers] Frank (proper_name)
+  [flyers] George (proper_name)
+  [flyers] Holly (proper_name)
+  [flyers] Helen (proper_name)
+  [flyers] Harry (proper_name)
+  [flyers] Katy (proper_name)
+  [flyers] may (proper_name)
+  [flyers] Michael (proper_name)
+  [flyers] May (proper_name)
+  [flyers] Oliver (proper_name)
+  [flyers] Robert (proper_name)
+  [flyers] Richard (proper_name)
+  [flyers] Sarah (proper_name)
+  [flyers] Sophia (proper_name)
+  [flyers] William (proper_name)

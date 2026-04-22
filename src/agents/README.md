@@ -30,6 +30,7 @@ As of the queue-first transition, agent CLIs are moving toward **work discovery 
 | **strazdas** | thrush | Audio generation (eSpeak-NG) |
 | **vieversys** | lark | Audio generation (OpenAI TTS) |
 | **seskas** | ferret | Multi-model verb-conjugation consensus generator |
+| **vanagas** | hawk | External wordlist comparison (Cambridge YLE vs lemma DB) |
 
 ## Common Arguments
 
@@ -215,6 +216,22 @@ seskas.py --language es --verbs-file /tmp/es_verbs.txt --output src/langtools/es
 seskas.py --language pl --verbs-file /tmp/pl_verbs.txt --model-paths qwen3-4b-lms phi-4-lms gemma-3-12b-lms
 seskas.py --language lt --verbs-file /tmp/lt_verbs.txt --on-existing merge
 ```
+
+### vanagas (YLE Wordlist Comparison)
+
+Read-only, no LLM calls. Cross-references the Cambridge YLE wordlist
+(`data/cambridge/yle_wordlist.json`, produced by `src/scripts/extract_yle_wordlist.py`)
+against `Lemma.lemma_text` and reports coverage gaps, POS mismatches, excluded
+lemmas, and difficulty outliers per YLE level.
+
+```bash
+vanagas.py                                # write text report to data/cambridge/yle_comparison_report.txt
+vanagas.py --format json                  # write JSON to data/cambridge/yle_comparison_report.json
+vanagas.py --levels starters --stdout     # starters only, print to stdout
+vanagas.py --output /tmp/yle.txt          # override output path
+```
+
+Output: `data/cambridge/yle_comparison_report.{txt,json}`
 
 ## Creating New Agents
 
