@@ -33,8 +33,9 @@ _SORT_KEY_LANGUAGES = _CJK_SORT_KEY_LANGUAGES | LATIN_SORT_KEY_LANGUAGES
 
 # Language hierarchy: ordered from most reliable/primary to experimental
 # Tier 1: Primary supported languages
-# Tier 2: Secondary supported languages (alphabetical: DE IT NL PT SV VI)
-# Tier 3: Experimental languages with accuracy/pedagogical issues (alphabetical: GD KO SW)
+# Tier 2: Secondary supported languages
+# Tier 3: Experimental languages with moderate coverage
+# Tier 4: Experimental languages with minimal coverage / lowest quality
 
 # Tier 1: Primary supported languages
 TIER_1_LANGUAGES = ["lt", "zh", "fr", "es"]
@@ -50,19 +51,24 @@ TIER_3_LANGUAGES = [
     "ro",
     "pl",
     "th",
+    "ta",
+    "kn",
+    "uk",
+    "bn",
+    "sw",
+    "hi",
+]
+
+# Tier 4: Additional experimental languages with minimal coverage
+TIER_4_LANGUAGES = [
     "ms",
     "my",
     "km",
     "lo",
     "tl",
-    "ta",
     "te",
-    "kn",
     "ml",
     "si",
-    "uk",
-    "bn",
-    "sw",
     "ha",
     "yo",
     "ig",
@@ -72,7 +78,6 @@ TIER_3_LANGUAGES = [
     "so",
     "xh",
     "sn",
-    "hi",
     "ps",
     "fa",
     "ka",
@@ -115,9 +120,11 @@ RELEASE_LANGUAGES = [
 ]
 
 # Languages included in data/release secondary.jsonl files.
-# These are Tier 3 languages NOT already in RELEASE_LANGUAGES.
+# These are Tier 3 and Tier 4 languages NOT already in RELEASE_LANGUAGES.
 # They are stored separately from base.jsonl to keep the primary release lean.
-SECONDARY_RELEASE_LANGUAGES = [lang for lang in TIER_3_LANGUAGES if lang not in RELEASE_LANGUAGES]
+SECONDARY_RELEASE_LANGUAGES = [
+    lang for lang in (TIER_3_LANGUAGES + TIER_4_LANGUAGES) if lang not in RELEASE_LANGUAGES
+]
 
 LANGUAGE_HIERARCHY = [
     "en",  # English (special case - source language)
