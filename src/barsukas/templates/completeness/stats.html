@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Completeness Stats{% endblock %}
+
+{% macro page_link(p) -%}
+{{ url_for('completeness.stats', scope=scope, page=p, min_level=min_level, max_level=max_level) }}
+{%- endmacro %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <h1><i class="bi bi-table"></i> Completeness Stats</h1>
+        <p class="text-muted">
+            Per-{{ 'lemma' if scope == 'lemmas' else 'sentence' }} coverage of translations, IPA, audio, and synonym groups.
+            <a href="{{ url_for('completeness.index') }}">&larr; Back to summary</a>
+        </p>
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link {% if scope == 'lemmas' %}active{% endif %}"
+           href="{{ url_for('completeness.stats', scope='lemmas', min_level=min_level, max_level=max_level) }}">
+            Lemmas
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if scope == 'sentences' %}active{% endif %}"
+           href="{{ url_for('completeness.stats', scope='sentences', min_level=min_level, max_level=max_level) }}">
+            Sentences
+        </a>
+    </li>
+</ul>
+
+<div class="search-form mb-3">
+    <form method="get" action="{{ url_for('completeness.stats') }}">
+        <input type="hidden" name="scope" value="{{ scope }}">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-2">
+                <label for="min_level" class="form-label">Min Trakaido Level</label>
+                <select class="form-select" id="min_level" name="min_level">
+                    <option value="">Any</option>
+                    {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
+                        <option value="{{ i }}" {% if min_level == i|string %}selected{% endif %}>{{ i }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="max_level" class="form-label">Max Trakaido Level</label>
+                <select class="form-select" id="max_level" name="max_level">
+                    <option value="">Any</option>
+                    {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
+                        <option value="{{ i }}" {% if max_level == i|string %}selected{% endif %}>{{ i }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel"></i> Apply
+                </button>
+                <a href="{{ url_for('completeness.stats', scope=scope) }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Clear
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="row mb-3">
+    <div class="col">
+        <span class="badge bg-secondary">Matching rows: {{ total }}</span>
+    </div>
+</div>
+
+{% if rows %}
+<div class="table-responsive">
+    <table class="table table-hover table-sm align-middle">
+        <thead class="table-light">
+            <tr>
+                {% if scope == 'lemmas' %}
+                <th>Lemma</th>
+                <th>POS</th>
+                <th class="text-center">Level</th>
+                <th class="text-center" title="Total translations across all languages">Trans (all)</th>
+                <th class="text-center">Tier 1</th>
+                <th class="text-center">Tier 2</th>
+                <th class="text-center">Tier 3</th>
+                <th class="text-center" title="Translations with IPA pronunciation (tier 1/2)">IPA</th>
+                <th class="text-center" title="Audio files (total / production-ready)">Audio</th>
+                <th class="text-center" title="Relation / synonym group memberships">Relations</th>
+                <th class="text-center" title="Sentences using this lemma (total / verified)">Sentences</th>
+                {% else %}
+                <th>Sentence (EN)</th>
+                <th>GUID</th>
+                <th class="text-center">Level</th>
+                <th class="text-center">Trans (all)</th>
+                <th class="text-center">Tier 1</th>
+                <th class="text-center">Tier 2</th>
+                <th class="text-center">Tier 3</th>
+                <th class="text-center">Audio</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in rows %}
+            <tr>
+            {% if scope == 'lemmas' %}
+                <td>
+                    <a href="{{ url_for('lemmas.view_lemma', lemma_id=row.id) }}" class="fw-bold text-decoration-none">
+                        {{ row.lemma_text }}
+                    </a>
+                    {% if row.guid %}<br><small class="text-muted">{{ row.guid }}</small>{% endif %}
+                </td>
+                <td><span class="badge bg-secondary">{{ row.pos_type }}</span></td>
+                <td class="text-center">
+                    {% if row.difficulty_level is not none %}
+                        {% if row.difficulty_level == -1 %}
+                            <span class="badge bg-warning">Excl</span>
+                        {% else %}
+                            <span class="badge bg-info">{{ row.difficulty_level }}</span>
+                        {% endif %}
+                    {% else %}<span class="text-muted">–</span>{% endif %}
+                </td>
+                <td class="text-center">{{ row.trans_total }}</td>
+                <td class="text-center">
+                    <span class="badge {% if row.tier1_count == tier1_total %}bg-success{% elif row.tier1_count == 0 %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                        {{ row.tier1_count }}/{{ tier1_total }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <span class="badge {% if row.tier2_count == tier2_total %}bg-success{% elif row.tier2_count == 0 %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                        {{ row.tier2_count }}/{{ tier2_total }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <span class="badge {% if row.tier3_count == tier3_total %}bg-success{% elif row.tier3_count == 0 %}bg-light text-dark{% else %}bg-warning text-dark{% endif %}">
+                        {{ row.tier3_count }}/{{ tier3_total }}
+                    </span>
+                </td>
+                <td class="text-center">{{ row.ipa_count }}</td>
+                <td class="text-center">
+                    {{ row.audio_total }}
+                    {% if row.audio_prod %}<small class="text-success">({{ row.audio_prod }}✓)</small>{% endif %}
+                </td>
+                <td class="text-center">{{ row.relation_count }}</td>
+                <td class="text-center">
+                    {{ row.sentence_count }}
+                    {% if row.sentence_verified_count %}<small class="text-success">({{ row.sentence_verified_count }}✓)</small>{% endif %}
+                </td>
+            {% else %}
+                <td>
+                    <a href="{{ url_for('sentences.view_sentence', sentence_id=row.id) }}" class="text-decoration-none">
+                        {{ row.preview_text[:100] if row.preview_text else '(no English text)' }}{% if row.preview_text and row.preview_text|length > 100 %}…{% endif %}
+                    </a>
+                </td>
+                <td><small class="text-muted">{{ row.guid or '' }}</small></td>
+                <td class="text-center">
+                    {% if row.minimum_level is not none %}
+                        <span class="badge bg-info">{{ row.minimum_level }}</span>
+                    {% else %}<span class="text-muted">–</span>{% endif %}
+                </td>
+                <td class="text-center">{{ row.trans_total }}</td>
+                <td class="text-center">
+                    <span class="badge {% if row.tier1_count == tier1_total %}bg-success{% elif row.tier1_count == 0 %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                        {{ row.tier1_count }}/{{ tier1_total }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <span class="badge {% if row.tier2_count == tier2_total %}bg-success{% elif row.tier2_count == 0 %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                        {{ row.tier2_count }}/{{ tier2_total }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <span class="badge {% if row.tier3_count == tier3_total %}bg-success{% elif row.tier3_count == 0 %}bg-light text-dark{% else %}bg-warning text-dark{% endif %}">
+                        {{ row.tier3_count }}/{{ tier3_total }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    {{ row.audio_total }}
+                    {% if row.audio_prod %}<small class="text-success">({{ row.audio_prod }}✓)</small>{% endif %}
+                </td>
+            {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if total_pages > 1 %}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if page == 1 %}disabled{% endif %}">
+            <a class="page-link" href="{{ page_link(page - 1) }}">Previous</a>
+        </li>
+        {% for p in range(1, total_pages + 1) %}
+            {% if p == page or (p <= 3 or p > total_pages - 3 or (p >= page - 2 and p <= page + 2)) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="{{ page_link(p) }}">{{ p }}</a>
+                </li>
+            {% elif (p == 4 and page > 6) or (p == total_pages - 3 and page < total_pages - 5) %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+        {% endfor %}
+        <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+            <a class="page-link" href="{{ page_link(page + 1) }}">Next</a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> No rows match the current filters.
+</div>
+{% endif %}
+
+{% endblock %}

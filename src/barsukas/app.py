@@ -58,6 +58,7 @@ from barsukas.routes import (
     batch_operations,
     bebras,
     categories,
+    completeness,
     conversations,
     exports,
     lemmas,
@@ -196,6 +197,7 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
     app.register_blueprint(sentence_stats.bp)
     app.register_blueprint(conversations.bp)
     app.register_blueprint(categories.bp)
+    app.register_blueprint(completeness.bp)
     app.register_blueprint(translations.bp)
     app.register_blueprint(overrides.bp)
     app.register_blueprint(agents.bp)

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Data Completeness{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <h1><i class="bi bi-clipboard-data"></i> Data Completeness</h1>
+        <p class="text-muted">
+            Per-language summary of translations, IPA, and audio files.
+            Counts respect the selected Trakaido level range.
+            <a href="{{ url_for('completeness.stats') }}">Detailed per-row stats &rarr;</a>
+        </p>
+    </div>
+</div>
+
+<div class="search-form mb-3">
+    <form method="get" action="{{ url_for('completeness.index') }}">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-2">
+                <label for="min_level" class="form-label">Min Trakaido Level</label>
+                <select class="form-select" id="min_level" name="min_level">
+                    <option value="">Any</option>
+                    {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
+                        <option value="{{ i }}" {% if min_level == i|string %}selected{% endif %}>{{ i }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="max_level" class="form-label">Max Trakaido Level</label>
+                <select class="form-select" id="max_level" name="max_level">
+                    <option value="">Any</option>
+                    {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
+                        <option value="{{ i }}" {% if max_level == i|string %}selected{% endif %}>{{ i }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel"></i> Apply
+                </button>
+                <a href="{{ url_for('completeness.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Clear
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="row mb-3">
+    <div class="col">
+        <span class="badge bg-secondary">Lemmas in scope: {{ totals.total_lemmas }}</span>
+        <span class="badge bg-secondary">Sentences in scope: {{ totals.total_sentences }}</span>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover table-sm align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Language</th>
+                <th class="text-center">Tier</th>
+                <th class="text-center" title="Lemma translations in this language">Lemma translations</th>
+                <th class="text-center" title="Verified lemma translations">Verified</th>
+                <th class="text-center" title="Lemma translations with IPA pronunciation">IPA</th>
+                <th class="text-center" title="Lemma audio files (total / production-ready)">Lemma audio</th>
+                <th class="text-center" title="Sentence translations in this language">Sentence translations</th>
+                <th class="text-center" title="Sentence audio files (total / production-ready)">Sentence audio</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in rows %}
+            <tr>
+                <td><code>{{ row.language_code }}</code></td>
+                <td class="text-center">
+                    {% if row.tier == '1' %}
+                        <span class="badge bg-primary">1</span>
+                    {% elif row.tier == '2' %}
+                        <span class="badge bg-info text-dark">2</span>
+                    {% elif row.tier == '3' %}
+                        <span class="badge bg-light text-dark">3</span>
+                    {% elif row.tier == '4' %}
+                        <span class="badge bg-secondary-subtle text-secondary-emphasis">4</span>
+                    {% else %}
+                        <span class="text-muted">–</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">{{ row.lemma_translations }}</td>
+                <td class="text-center">{{ row.lemma_verified }}</td>
+                <td class="text-center">{{ row.lemma_ipa }}</td>
+                <td class="text-center">
+                    {{ row.lemma_audio_total }}
+                    {% if row.lemma_audio_prod %}<small class="text-success">({{ row.lemma_audio_prod }}✓)</small>{% endif %}
+                </td>
+                <td class="text-center">{{ row.sentence_translations }}</td>
+                <td class="text-center">
+                    {{ row.sentence_audio_total }}
+                    {% if row.sentence_audio_prod %}<small class="text-success">({{ row.sentence_audio_prod }}✓)</small>{% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<p class="text-muted small">
+    <code>✓</code> = count of audio files promoted to the production bucket.
+</p>
+{% endblock %}
