@@ -14,11 +14,13 @@ from clients.keys import load_key
 from .types import AudioFormat, AudioGenerationResult, Voice
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Model configuration
-DEFAULT_MODEL = "gpt-4o-mini-tts"
+DEFAULT_MODEL = "gpt-4o-mini-tts-2025-12-15"
 API_BASE = "https://api.openai.com/v1"
 DEFAULT_TIMEOUT = 60
 

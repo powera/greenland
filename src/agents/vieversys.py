@@ -67,7 +67,12 @@ from storage.models.schema import (
     SentenceTranslation,
     SentenceWord,
 )
-from storage.translation_helpers import get_translation
+from storage.translation_helpers import (
+    TIER_1_LANGUAGES,
+    TIER_2_LANGUAGES,
+    TIER_3_LANGUAGES,
+    get_translation,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -1311,8 +1316,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-dir", help="Output directory for generated audio")
     parser.add_argument(
         "--language",
-        choices=["lt", "zh", "es", "fr", "ko", "de", "pt", "sw", "vi"],
-        help="Target language code (required for populate-only and regenerate modes)",
+        choices=sorted(TIER_1_LANGUAGES + TIER_2_LANGUAGES + TIER_3_LANGUAGES),
+        help="Target language code (tier 1-3 languages; required for populate-only and regenerate modes)",
     )
     parser.add_argument(
         "--tts-engine",
