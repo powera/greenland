@@ -315,7 +315,13 @@ class WirewordExporter:
                         target_translation = to_traditional(target_translation)
 
             # Get effective difficulty level from pre-fetched data
-            lemma_effective_level: int = difficulty_levels_by_id.get(lemma.id) or 0
+            raw_level = difficulty_levels_by_id.get(lemma.id)
+
+            # Skip words with no difficulty level assigned
+            if raw_level is None:
+                continue
+
+            lemma_effective_level: int = raw_level
 
             # Skip words at level -1 (excluded from all wireword exports)
             if lemma_effective_level == -1:
@@ -1330,8 +1336,10 @@ class WirewordExporter:
             for lemma in lemmas:
                 # Get effective difficulty level from pre-fetched data
                 effective_lemma_level = difficulty_levels_by_id.get(lemma.id)
+
+                # Skip words with no difficulty level assigned
                 if effective_lemma_level is None:
-                    effective_lemma_level = 1  # Default to level 1 if not set
+                    continue
 
                 # Skip words at level -1 (excluded from all wireword exports)
                 if effective_lemma_level == -1:
