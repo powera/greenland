@@ -149,9 +149,13 @@ class WirewordSentenceExporter:
 
         session = self.get_session()
         try:
-            # Build query: get all sentences
+            # Build query: get all non-rejected sentences
             # OPTIMIZATION: Eager load translations to avoid N+1 queries
-            query = session.query(Sentence).options(joinedload(Sentence.translations))
+            query = (
+                session.query(Sentence)
+                .filter(Sentence.rejected == False)
+                .options(joinedload(Sentence.translations))
+            )
 
             all_sentences = query.all()
             logger.info(f"Found {len(all_sentences)} sentences")
