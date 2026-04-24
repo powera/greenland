@@ -83,8 +83,17 @@ def build_prompt_for_translate_and_decompose(
     *,
     include_english: bool = True,
     source_language: str = "en",
+    candidate_lemmas: Optional[List[Lemma]] = None,
 ) -> Tuple[str, str]:
-    """Build context + prompt for translating and decomposing one sentence."""
+    """Build context + prompt for translating and decomposing one sentence.
+
+    ``candidate_lemmas`` is an optional ranked list of Lemmas the LLM should
+    prefer when a word in the sentence corresponds to one of these meanings.
+    Typically sourced from pivot-disambiguated candidate lookup for sentences
+    that have no SentencePatternWord.lemma_id rows yet. Rendered as a flat
+    block alongside the existing word_translations block; the two are
+    independent.
+    """
     target_languages = _normalize_target_languages(target_languages)
 
     source_translation = (
@@ -152,6 +161,28 @@ def build_prompt_for_translate_and_decompose(
         trans_str = ", ".join(trans_items)
         word_translation_lines.append(f"  {english_text}{role_str}{guid_str}: {trans_str}")
 
+    candidate_lines: List[str] = []
+    if candidate_lemmas:
+        seen_candidate_ids: set[int] = set()
+        for lemma in candidate_lemmas:
+            if not lemma or lemma.id in seen_candidate_ids or lemma.id in seen_lemma_ids:
+                continue
+            seen_candidate_ids.add(lemma.id)
+            candidate_guid = lemma.guid or ""
+            candidate_trans_items: List[str] = []
+            for lang in target_languages:
+                candidate_trans = get_translation(session, lemma, lang)
+                if candidate_trans:
+                    candidate_trans_items.append(f"{lang}={candidate_trans}")
+            disambiguation_str = f" ({lemma.disambiguation})" if lemma.disambiguation else ""
+            pos_str = f" [{lemma.pos_type}]" if lemma.pos_type else ""
+            candidate_guid_str = f" (GUID: {candidate_guid})" if candidate_guid else ""
+            candidate_trans_str = ", ".join(candidate_trans_items)
+            candidate_lines.append(
+                f"  {lemma.lemma_text}{disambiguation_str}{pos_str}"
+                f"{candidate_guid_str}: {candidate_trans_str}"
+            )
+
     english_instruction = (
         "IMPORTANT: Also provide a grammatically correct English version "
         "(fixing issues like singular/plural, articles, etc.)."
@@ -168,6 +199,7 @@ def build_prompt_for_translate_and_decompose(
     ).format(
         template_sentence=source_translation.translation_text,
         word_translations="\n".join(word_translation_lines) or "- (none provided)",
+        candidate_lemmas="\n".join(candidate_lines) or "- (none provided)",
         target_language_names=", ".join(language_names),
         english_instruction=english_instruction,
     )

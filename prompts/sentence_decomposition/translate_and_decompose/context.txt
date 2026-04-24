@@ -29,3 +29,11 @@ For each target language, provide detailed word-by-word breakdown including:
 
 IMPORTANT: Do NOT include punctuation marks as separate words in the breakdown.
 Provide words in the order they appear in the translated sentence.
+
+Candidate lemma selection:
+- When a "Candidate lemmas" section is provided, the listed GUIDs are
+  pre-filtered using evidence from multiple pivot translations. Prefer these
+  GUIDs when a word in the sentence corresponds to one of these meanings.
+- The same GUID should be reused across all target languages for the same
+  concept. Only assign a synthetic SYN id when no listed candidate matches
+  the intended meaning.

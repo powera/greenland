@@ -3,6 +3,9 @@ Template sentence: {template_sentence}
 Word translations for reference:
 {word_translations}
 
+Candidate lemmas (prefer these GUIDs when a word in the sentence matches one of these meanings):
+{candidate_lemmas}
+
 Translate this sentence naturally into: {target_language_names}.
 
 {english_instruction}

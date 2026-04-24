@@ -61,6 +61,52 @@ def test_build_translate_and_decompose_prompt_name_is_available() -> None:
     assert callable(build_prompt_for_translate_and_decompose)
 
 
+def test_translate_and_decompose_prompt_renders_candidate_lemmas() -> None:
+    """candidate_lemmas kwarg should render a dedicated block in the prompt."""
+    from sqlalchemy.orm import Session
+
+    from storage.models.schema import Lemma
+    from tests.sentences.candidate_lookup_fixture import (
+        add_test_sentence,
+        build_test_engine,
+        seed_test_database,
+    )
+
+    engine = build_test_engine()
+    session = Session(engine)
+    try:
+        seed_test_database(session)
+        sentence = add_test_sentence(session, {"en": "I can see him"})
+
+        can_modal = session.query(Lemma).filter_by(guid="TEST_CAN_MODAL").first()
+        can_container = session.query(Lemma).filter_by(guid="TEST_CAN_CONTAINER").first()
+        assert can_modal is not None and can_container is not None
+
+        _, prompt_with = build_prompt_for_translate_and_decompose(
+            sentence,
+            ["fr", "es"],
+            session,
+            source_language="en",
+            candidate_lemmas=[can_modal, can_container],
+        )
+        _, prompt_without = build_prompt_for_translate_and_decompose(
+            sentence,
+            ["fr", "es"],
+            session,
+            source_language="en",
+        )
+
+        assert "TEST_CAN_MODAL" in prompt_with
+        assert "TEST_CAN_CONTAINER" in prompt_with
+        assert "(modal)" in prompt_with
+        assert "fr=pouvoir" in prompt_with
+
+        assert "TEST_CAN_MODAL" not in prompt_without
+        assert "- (none provided)" in prompt_without
+    finally:
+        session.close()
+
+
 def test_all_words_are_lemmas_or_grammatical_handles_spanish_example() -> None:
     words = [
         {
