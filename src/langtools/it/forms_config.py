@@ -23,6 +23,13 @@ VERB_CONFIG: Dict[str, Any] = {
     "schema_name": "ItalianVerbConjugations",
 }
 
+ADJECTIVE_CONFIG: Dict[str, Any] = {
+    "type": "explicit",
+    "forms": ["singular_m", "singular_f", "plural_m", "plural_f"],
+    "query_type": "italian_adjective_forms",
+    "schema_name": "ItalianAdjectiveForms",
+}
+
 GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
     "ADJ_IT_PLURAL_F": "adjective/it_plural_f",
     "ADJ_IT_PLURAL_M": "adjective/it_plural_m",

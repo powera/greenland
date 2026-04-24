@@ -90,16 +90,24 @@ class TestRegularIre(unittest.TestCase):
         self.assertEqual(self.forms["3s_future"], "partirà")
 
 
-class TestIrregularVerbsReturnNone(unittest.TestCase):
-    """Irregular verbs must return None to trigger LLM fallback."""
+class TestIrregularVerbsHandling(unittest.TestCase):
+    """Common irregulars are hard-coded; other irregulars still fall back."""
 
-    def test_essere(self) -> None:
-        self.assertIsNone(conjugate("essere"))
+    def test_essere_is_hardcoded(self) -> None:
+        forms = conjugate("essere")
+        self.assertIsNotNone(forms)
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "sono")
+        self.assertEqual(forms["3s_future"], "sarà")
 
-    def test_avere(self) -> None:
-        self.assertIsNone(conjugate("avere"))
+    def test_avere_is_hardcoded(self) -> None:
+        forms = conjugate("avere")
+        self.assertIsNotNone(forms)
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "ho")
+        self.assertEqual(forms["1s_future"], "avrò")
 
-    def test_andare(self) -> None:
+    def test_andare_still_falls_back(self) -> None:
         self.assertIsNone(conjugate("andare"))
 
     def test_fare(self) -> None:
@@ -138,6 +146,17 @@ class TestFormCompleteness(unittest.TestCase):
         for person in ("1s", "2s", "3s", "1p", "2p", "3p"):
             for tense in ("present", "past", "future"):
                 self.assertIn(f"{person}_{tense}", result)
+
+
+class TestPrincipalPartsOverrides(unittest.TestCase):
+    """Principal parts from grammar facts should override default stems."""
+
+    def test_principal_parts_override(self) -> None:
+        forms = conjugate("mangiare", present_1s="mangio", future_1s="mangerò")
+        self.assertIsNotNone(forms)
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "mangio")
+        self.assertEqual(forms["3s_future"], "mangerà")
 
 
 if __name__ == "__main__":
