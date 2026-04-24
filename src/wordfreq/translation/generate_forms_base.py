@@ -321,8 +321,31 @@ def extract_gender_from_forms(
         gender = _detect_gender_from_article(forms_dict, config.language_code)
         if gender:
             return gender
+        if config.language_code == "lt":
+            gender = _detect_lithuanian_gender_from_nominative(forms_dict)
+            if gender:
+                return gender
 
     # If no gender could be determined, return None
+    return None
+
+
+def _detect_lithuanian_gender_from_nominative(forms_dict: Dict[str, str]) -> Optional[str]:
+    """Infer Lithuanian noun gender from nominative singular ending."""
+    nominative = forms_dict.get("nominative_singular")
+    if not nominative or not isinstance(nominative, str):
+        return None
+    normalized_nominative = nominative.strip().lower()
+    if not normalized_nominative:
+        return None
+
+    masculine_suffixes = ("as", "is", "ys", "us", "ius")
+    feminine_suffixes = ("a", "ė")
+
+    if normalized_nominative.endswith(masculine_suffixes):
+        return "masculine"
+    if normalized_nominative.endswith(feminine_suffixes):
+        return "feminine"
     return None
 
 

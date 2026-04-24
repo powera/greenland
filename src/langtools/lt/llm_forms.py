@@ -11,8 +11,10 @@ from clients.unified_client import UnifiedLLMClient
 from langtools.form_registry import FORM_SPECS
 from langtools.llm_forms_base import query_forms
 from langtools.lt.conjugation import conjugate_verb
+from langtools.lt.declension import decline_noun
 from langtools.lt.principal_parts import get_principal_parts
 from sqlalchemy.orm import Session
+from storage.crud.grammar_fact import get_grammatical_gender
 from storage import database as linguistic_db
 from storage.models.enums import GrammaticalForm
 from storage.translation_helpers import get_translation
@@ -51,7 +53,55 @@ def _parse_principal_parts(translation_text: str) -> Tuple[str, str, str] | None
 def query_lithuanian_noun_declensions(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
-    """Query LLM for Lithuanian noun forms."""
+    """Generate Lithuanian noun declensions mechanically when safe, else use LLM."""
+    session = get_session_func()
+    lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+
+    if lemma and lemma.pos_type.lower() == "noun":
+        lithuanian_noun = get_translation(session, lemma, "lt")
+        if lithuanian_noun:
+            known_gender = get_grammatical_gender(session, lemma.id, "lt")
+            mechanical_forms = decline_noun(lithuanian_noun, grammatical_gender=known_gender)
+            if mechanical_forms:
+                inferred_gender = mechanical_forms.get("gender")
+                declension_class = mechanical_forms.get("declension_class")
+                if inferred_gender:
+                    linguistic_db.add_grammar_fact(
+                        session,
+                        lemma_id=lemma.id,
+                        language_code="lt",
+                        fact_type="gender",
+                        fact_value=inferred_gender,
+                        notes="Inferred from mechanical Lithuanian noun declension",
+                        verified=False,
+                    )
+                if declension_class:
+                    linguistic_db.add_grammar_fact(
+                        session,
+                        lemma_id=lemma.id,
+                        language_code="lt",
+                        fact_type="declension",
+                        fact_value=declension_class,
+                        notes="Inferred from mechanical Lithuanian noun declension",
+                        verified=False,
+                    )
+                linguistic_db.log_query(
+                    session,
+                    word=lithuanian_noun,
+                    query_type="lithuanian_noun_declensions",
+                    prompt="[mechanical langtools.lt.declension]",
+                    response=json.dumps(
+                        {
+                            "forms": mechanical_forms,
+                            "notes": "mechanical from declension class by suffix",
+                            "mechanical": True,
+                        }
+                    ),
+                    model=client.default_model,
+                )
+                return mechanical_forms, True
+            logger.info("Falling back to LLM for Lithuanian noun '%s'", lithuanian_noun)
+
     return query_forms(FORM_SPECS[("lt", "noun")], client, lemma_id, get_session_func)
 
 

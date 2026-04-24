@@ -19,6 +19,11 @@ Or using convenience functions:
 """
 
 from langtools.lt.conjugation import conjugate_verb
+from langtools.lt.declension import (
+    decline_noun,
+    get_declension_requirements,
+    get_supported_declension_classes,
+)
 from langtools.lt.types import (
     AdjectiveDeclension,
     AdverbForms,
@@ -46,8 +51,11 @@ __all__ = [
     "AdverbForms",
     "NounDeclension",
     "VerbConjugation",
-    # Conjugation
+    # Conjugation / declension
     "conjugate_verb",
+    "decline_noun",
+    "get_declension_requirements",
+    "get_supported_declension_classes",
     # Convenience functions
     "get_lithuanian_adjective_forms",
     "get_lithuanian_adverb_forms",
