@@ -6,6 +6,7 @@ to eliminate repetitive code.
 
 from __future__ import annotations
 
+import os
 from functools import wraps
 from typing import Any, Callable, Dict, Optional, TypeVar
 
@@ -33,6 +34,7 @@ def build_default_config() -> DataSourceConfig:
     return DataSourceConfig(
         backend_type=BackendType.SQLITE,
         sqlite_path=Config.DB_PATH,
+        use_word2vec=os.environ.get("USE_WORD2VEC", "false").lower() == "true",
         model=constants.DEFAULT_MODEL,
         debug=Config.DEBUG,
     )

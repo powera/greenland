@@ -97,7 +97,11 @@ class BarsukasFlask(Flask):
     bench_db_session_factory: Optional[Callable[[], Session]]
 
 
-def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None) -> BarsukasFlask:
+def create_app(
+    config_class: type[Config] = Config,
+    db_url: Optional[str] = None,
+    use_word2vec: bool = False,
+) -> BarsukasFlask:
     """Create and configure the Flask application.
 
     Args:
@@ -112,6 +116,8 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
 
     app = BarsukasFlask(__name__)
     app.config.from_object(config_class)
+    if use_word2vec:
+        os.environ["USE_WORD2VEC"] = "true"
 
     # Set up storage backend
     postgres_url = db_url if db_url and db_url.startswith("postgresql://") else None
@@ -131,7 +137,9 @@ def create_app(config_class: type[Config] = Config, db_url: Optional[str] = None
         # PostgreSQL backend
         print("Using storage backend: postgres")
         backend_config = DataSourceConfig(
-            backend_type=BackendType.POSTGRES, postgres_url=postgres_url
+            backend_type=BackendType.POSTGRES,
+            postgres_url=postgres_url,
+            use_word2vec=use_word2vec,
         )
         app.config["DB_PATH"] = "PostgreSQL (Supabase)"  # For display
         app.config["USING_POSTGRES"] = True
@@ -469,9 +477,16 @@ def main() -> None:
         type=str,
         help="PostgreSQL connection URL (e.g., postgresql://user:pass@host:5432/dbname)",
     )
+    parser.add_argument(
+        "--use-word2vec",
+        "--use_word2vec",
+        dest="use_word2vec",
+        action="store_true",
+        help="Enable pgvector embedding read/write operations (opt-in)",
+    )
     args = parser.parse_args()
 
-    app = create_app(db_url=args.db_url)
+    app = create_app(db_url=args.db_url, use_word2vec=args.use_word2vec)
 
     if args.debug:
         app.config["DEBUG"] = True
@@ -481,6 +496,7 @@ def main() -> None:
 
     print(f"Starting Barsukas on http://{args.host}:{args.port}")
     print(f"Database: {app.config['DB_PATH']}")
+    print(f"Word2Vec/pgvector: {'ENABLED' if args.use_word2vec else 'DISABLED'}")
     if args.readonly:
         print("Running in READ-ONLY mode - no edits allowed")
     print(f"Press Ctrl+C to stop")

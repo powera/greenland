@@ -23,6 +23,7 @@ def build_data_source_config(db_path: str, use_postgres: bool) -> DataSourceConf
         return DataSourceConfig(
             backend_type=BackendType.POSTGRES,
             postgres_url=DataSourceConfig.build_postgres_url(),
+            use_word2vec=True,
         )
     return DataSourceConfig(
         backend_type=BackendType.SQLITE,

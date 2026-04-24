@@ -10,6 +10,7 @@ future **manual synonym-adding** workflows.
 - Add backfill and workqueue support.
 - Do **not** modify Barsukas UI yet.
 - Do **not** run database update/backfill yet.
+- Keep feature behind an explicit opt-in flag (`--use_word2vec` / `USE_WORD2VEC=true`).
 
 ## Rollout Steps
 
@@ -20,6 +21,7 @@ future **manual synonym-adding** workflows.
 5. Workqueue integration
 6. Barsukas API/UI integration (future)
 7. Manual synonym action wiring (future)
+8. Flag-gated rollout controls
 
 ## Status
 
@@ -53,8 +55,13 @@ future **manual synonym-adding** workflows.
    - Registered handler in workqueue registry and exports.
    - Added pipeline ordering entry.
 
+8. **Flag-gated rollout controls**
+   - Added `use_word2vec` to `DataSourceConfig`.
+   - Added `--use-word2vec/--use_word2vec` to Barsukas launchers and worker.
+   - Added `--use-word2vec/--use_word2vec` to shared agent CLI args.
+   - Enforced runtime guard in `words.word2vec` to require explicit opt-in.
+
 ### ⏳ Not yet done (by design)
 
 6. Barsukas route/template integration for displaying suggestion candidates.
 7. Manual “add as synonym” UX/action from ranked candidates.
-

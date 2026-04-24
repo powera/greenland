@@ -96,6 +96,13 @@ def main() -> None:
         help="Use PostgreSQL backend (builds URL from constants + keys/postgres.key)",
     )
     parser.add_argument(
+        "--use-word2vec",
+        "--use_word2vec",
+        dest="use_word2vec",
+        action="store_true",
+        help="Enable pgvector embedding read/write operations (opt-in)",
+    )
+    parser.add_argument(
         "--persona",
         type=str,
         choices=["prod", "golden", "hosted", "local"],
@@ -147,6 +154,9 @@ def main() -> None:
         force=True,
     )
 
+    if args.use_word2vec:
+        os.environ["USE_WORD2VEC"] = "true"
+
     # Determine backend type
     if args.postgres or os.environ.get("USE_POSTGRES_BACKEND") == "true":
         # PostgreSQL mode - build URL from template + key
@@ -197,6 +207,7 @@ def main() -> None:
         logger.info("API keys: DISABLED (no local keys)")
     if persona and not persona.allow_outbound_calls:
         logger.info("Outbound calls: LLM only (no external APIs)")
+    logger.info("Word2Vec/pgvector: %s", "ENABLED" if args.use_word2vec else "DISABLED")
     logger.info("=" * 80)
 
     # Set up signal handlers for graceful shutdown

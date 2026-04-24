@@ -45,6 +45,7 @@ def _configure_backend_once() -> None:
         backend_config = DataSourceConfig(
             backend_type=BackendType.POSTGRES,
             postgres_url=postgres_url,
+            use_word2vec=os.environ.get("USE_WORD2VEC", "false").lower() == "true",
             model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
@@ -53,6 +54,7 @@ def _configure_backend_once() -> None:
         backend_config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
+            use_word2vec=os.environ.get("USE_WORD2VEC", "false").lower() == "true",
             model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
@@ -120,7 +122,16 @@ def main() -> None:
     parser.add_argument(
         "--poll-interval", type=float, default=2.0, help="Seconds to wait when queue is empty"
     )
+    parser.add_argument(
+        "--use-word2vec",
+        "--use_word2vec",
+        dest="use_word2vec",
+        action="store_true",
+        help="Enable pgvector embedding read/write operations (opt-in)",
+    )
     args = parser.parse_args()
+    if args.use_word2vec:
+        os.environ["USE_WORD2VEC"] = "true"
 
     logging.basicConfig(
         level=logging.INFO,
