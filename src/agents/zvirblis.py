@@ -12,7 +12,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -56,9 +56,16 @@ logger = logging.getLogger(__name__)
 class ZvirblisAgent:
     """Agent for translating sentences linked to vocabulary words."""
 
-    def __init__(self, config: DataSourceConfig):
+    def __init__(
+        self,
+        config: DataSourceConfig,
+        pivot_languages: Optional[Sequence[str]] = None,
+    ):
         self.config = config
         self.debug = config.debug
+        self.pivot_languages: Optional[List[str]] = (
+            list(pivot_languages) if pivot_languages else None
+        )
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
@@ -169,6 +176,7 @@ class ZvirblisAgent:
                     target_languages=target_languages,
                     model=self.config.model or "gpt-5.4-mini",
                     verified=False,
+                    pivot_languages=self.pivot_languages,
                 )
 
                 if result.get("success"):
@@ -565,6 +573,17 @@ def get_argument_parser() -> argparse.ArgumentParser:
         help="Translate sentences for all lemmas at this difficulty level (instead of single GUID)",
     )
 
+    parser.add_argument(
+        "--pivot-languages",
+        default="bn,uk,kn",
+        help=(
+            "Comma-separated pivot languages used to disambiguate candidate lemmas "
+            "for sentences without SentencePatternWord lemma links (default: bn,uk,kn). "
+            "Pivot translations must already exist as SentenceTranslation rows. "
+            "Pass an empty string to disable pivot disambiguation."
+        ),
+    )
+
     subparsers = parser.add_subparsers(dest="command", help="Batch translation commands")
 
     submit_parser = subparsers.add_parser(
@@ -618,7 +637,9 @@ def main() -> int:
     args = parser.parse_args()
 
     config = get_data_source_config(args)
-    agent = ZvirblisAgent(config=config)
+    pivot_languages_arg = getattr(args, "pivot_languages", "") or ""
+    pivot_languages = [lang.strip() for lang in pivot_languages_arg.split(",") if lang.strip()]
+    agent = ZvirblisAgent(config=config, pivot_languages=pivot_languages or None)
 
     if args.command == "submit-batch":
         target_languages = [lang for lang in args.languages if lang != "en"]

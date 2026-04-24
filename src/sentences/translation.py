@@ -10,7 +10,7 @@ This module provides reusable translation functionality that can be used by:
 
 import json
 import logging
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
@@ -42,7 +42,12 @@ def _normalize_target_languages(target_languages: List[str]) -> List[str]:
 
 
 def build_translation_prompt(
-    sentence: Sentence, target_languages: List[str], session: Session, include_english: bool = True
+    sentence: Sentence,
+    target_languages: List[str],
+    session: Session,
+    include_english: bool = True,
+    *,
+    candidate_lemmas: Optional[List[Lemma]] = None,
 ) -> Tuple[str, str]:
     """
     Build LLM prompt for translating a sentence.
@@ -52,6 +57,7 @@ def build_translation_prompt(
         target_languages: List of language codes to translate to
         session: Database session for lemma lookups
         include_english: Whether to request English translation with word-by-word POS info
+        candidate_lemmas: Optional ranked list of Lemmas the LLM should prefer.
 
     Returns:
         Tuple of (context, prompt) strings
@@ -61,6 +67,7 @@ def build_translation_prompt(
         _normalize_target_languages(target_languages),
         session,
         include_english=include_english,
+        candidate_lemmas=candidate_lemmas,
     )
 
 

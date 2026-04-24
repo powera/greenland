@@ -9,13 +9,14 @@ word-by-word breakdown with part-of-speech and lemma links.
 
 import json
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Sequence
 
 from sqlalchemy.orm import Session
 
 from clients.unified_client import UnifiedLLMClient
+from sentences.candidate_lookup import find_candidate_lemmas_by_english_word
 from storage.database import Sentence
-from storage.models.schema import SentenceWord
+from storage.models.schema import Lemma, SentencePatternWord, SentenceWord
 from storage.translation_helpers import (
     get_language_name,
     get_supported_languages,
@@ -37,6 +38,8 @@ def ensure_translations(
     target_languages: List[str],
     model: str = "gpt-5.4-mini",
     verified: bool = False,
+    *,
+    pivot_languages: Optional[Sequence[str]] = None,
 ) -> Dict[str, Any]:
     """
     Ensure translations exist for a sentence in all target languages.
@@ -52,6 +55,9 @@ def ensure_translations(
         target_languages: List of target language codes
         model: LLM model to use for translation
         verified: Whether translations are verified (unused, kept for API compatibility)
+        pivot_languages: When provided and the sentence has no SentencePatternWord
+            lemma rows, disambiguate candidate lemmas using these pivot-language
+            translations (must already be present as SentenceTranslation rows).
 
     Returns:
         Dictionary with translation results
@@ -78,10 +84,49 @@ def ensure_translations(
     )
     include_english = len(english_words) == 0
 
+    candidate_lemmas: Optional[List[Lemma]] = None
+    if pivot_languages:
+        has_pattern_lemmas = (
+            session.query(SentencePatternWord.id)
+            .filter(
+                SentencePatternWord.sentence_id == sentence.id,
+                SentencePatternWord.lemma_id.isnot(None),
+            )
+            .first()
+            is not None
+        )
+        if not has_pattern_lemmas:
+            grouped = find_candidate_lemmas_by_english_word(
+                session,
+                sentence.id,
+                pivot_languages=pivot_languages,
+                target_languages=needed_languages,
+            )
+            seen_lemma_ids: set[int] = set()
+            flattened: List[Lemma] = []
+            for english_word, candidates in grouped.items():
+                for candidate in candidates:
+                    lemma = session.query(Lemma).filter_by(guid=candidate.guid).first()
+                    if lemma is None or lemma.id in seen_lemma_ids:
+                        continue
+                    seen_lemma_ids.add(lemma.id)
+                    flattened.append(lemma)
+            if flattened:
+                candidate_lemmas = flattened
+                logger.info(
+                    "Pattern-less sentence %s: supplying %d candidate lemmas from pivot lookup",
+                    sentence.id,
+                    len(flattened),
+                )
+
     try:
         # Build comprehensive prompt with word reference data
         context, prompt = build_translation_prompt(
-            sentence, needed_languages, session, include_english
+            sentence,
+            needed_languages,
+            session,
+            include_english,
+            candidate_lemmas=candidate_lemmas,
         )
     except ValueError as e:
         logger.error(f"Failed to build translation prompt: {e}")
