@@ -143,6 +143,11 @@ _TASK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Any]] = {
     # Italian — translation fetcher, gender on nouns
     ("it", "noun"): {"fetcher": "translation", "threshold": 2, "gender": True},
     ("it", "verb"): {"fetcher": "translation", "threshold": 10},
+    ("it", "adjective"): {
+        "fetcher": "translation",
+        "threshold": 4,
+        "client_method": "query_italian_adjective_forms",
+    },
     # Swedish — translation fetcher
     ("sv", "noun"): {"fetcher": "translation", "threshold": 2},
     ("sv", "verb"): {"fetcher": "translation", "threshold": 2},
