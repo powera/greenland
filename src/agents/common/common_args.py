@@ -51,6 +51,13 @@ def add_common_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         action="store_true",
         help="Preview changes without committing to database",
     )
+    parser.add_argument(
+        "--use-word2vec",
+        "--use_word2vec",
+        dest="use_word2vec",
+        action="store_true",
+        help="Enable pgvector embedding read/write operations (opt-in)",
+    )
 
     return parser
 
@@ -491,6 +498,7 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None) -> "D
 
     # Get debug flag
     debug = args.debug if hasattr(args, "debug") else False
+    use_word2vec = args.use_word2vec if hasattr(args, "use_word2vec") else False
 
     return DataSourceConfig(
         backend_type=backend_type,
@@ -499,6 +507,7 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None) -> "D
         postgres_url=postgres_url,
         barsukas_url=barsukas_url,
         cache_only=cache_only,
+        use_word2vec=use_word2vec,
         model=model,
         debug=debug,
     )

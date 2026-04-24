@@ -53,6 +53,10 @@ def _require_postgres(config: DataSourceConfig) -> None:
         raise EmbeddingBackendError(
             "word2vec requires BackendType.POSTGRES with pgvector; SQLite is not supported."
         )
+    if not config.use_word2vec:
+        raise EmbeddingBackendError(
+            "word2vec is disabled. Re-run with --use_word2vec (or USE_WORD2VEC=true)."
+        )
 
 
 def _get_openai_embedding(text: str, model_name: str, timeout_seconds: int = 30) -> List[float]:

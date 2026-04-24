@@ -72,6 +72,7 @@ class DataSourceConfig:
     postgres_url: Optional[str]
     barsukas_url: Optional[str]
     cache_only: bool
+    use_word2vec: bool
     model: Optional[str]
     debug: bool
     # Optional API keys for runtime injection (used by API server)
@@ -87,6 +88,7 @@ class DataSourceConfig:
         postgres_url: Optional[str] = None,
         barsukas_url: Optional[str] = None,
         cache_only: bool = False,
+        use_word2vec: bool = False,
         model: Optional[str] = None,
         debug: bool = False,
         openai_api_key: Optional[str] = None,
@@ -102,6 +104,7 @@ class DataSourceConfig:
             postgres_url: PostgreSQL connection URL (e.g., postgresql://user:pass@host:5432/db)
             barsukas_url: URL of BARSUKAS server for cached translations (e.g., http://server:5000)
             cache_only: If True, only use cached translations and fail if not in cache
+            use_word2vec: Enable pgvector embedding read/write operations
             model: LLM model to use (e.g., "gpt-5.4-mini", "claude-sonnet-4")
             debug: Enable debug logging
         """
@@ -139,6 +142,7 @@ class DataSourceConfig:
         # Cache configuration
         self.barsukas_url = barsukas_url.rstrip("/") if barsukas_url else None
         self.cache_only = cache_only
+        self.use_word2vec = use_word2vec
 
         # Validate cache_only requires barsukas_url
         if self.cache_only and not self.barsukas_url:
@@ -167,6 +171,7 @@ class DataSourceConfig:
             POSTGRES_URL: PostgreSQL connection URL (optional, built from template if not set)
             BARSUKAS_CACHE_URL: URL of BARSUKAS cache server (optional)
             CACHE_ONLY: "true" or "false" (default: "false")
+            USE_WORD2VEC: "true" or "false" (default: "false")
             LLM_MODEL: Default LLM model to use (optional)
             DEBUG: "true" or "false" (default: "false")
 
@@ -180,6 +185,7 @@ class DataSourceConfig:
         jsonl_data_dir = os.environ.get("JSONL_DATA_DIR")
         barsukas_url = os.environ.get("BARSUKAS_CACHE_URL")
         cache_only = os.environ.get("CACHE_ONLY", "false").lower() == "true"
+        use_word2vec = os.environ.get("USE_WORD2VEC", "false").lower() == "true"
         model = os.environ.get("LLM_MODEL")
         debug = os.environ.get("DEBUG", "false").lower() == "true"
 
@@ -198,6 +204,7 @@ class DataSourceConfig:
             postgres_url=postgres_url,
             barsukas_url=barsukas_url,
             cache_only=cache_only,
+            use_word2vec=use_word2vec,
             model=model,
             debug=debug,
         )
@@ -266,6 +273,8 @@ class DataSourceConfig:
             parts.append(f"barsukas_url={self.barsukas_url}")
         if self.cache_only:
             parts.append("cache_only=True")
+        if self.use_word2vec:
+            parts.append("use_word2vec=True")
         if self.model:
             parts.append(f"model={self.model}")
         if self.debug:
