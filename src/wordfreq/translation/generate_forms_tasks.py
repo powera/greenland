@@ -102,6 +102,7 @@ _TASK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Any]] = {
     # Lithuanian — translation fetcher, named client methods
     ("lt", "noun"): {
         "fetcher": "translation",
+        "gender": True,
         "client_method": "query_lithuanian_noun_declensions",
     },
     ("lt", "verb"): {
