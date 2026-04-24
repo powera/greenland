@@ -39,6 +39,15 @@ def get_argument_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Store source sentences and sentence words in sentence tables",
     )
+    parser.add_argument(
+        "--pivot-languages",
+        default="bn,uk,kn",
+        help=(
+            "Comma-separated pivot languages used to disambiguate ambiguous English "
+            "words via sentence-level translations (default: bn,uk,kn). Pass an empty "
+            "string to disable pivot disambiguation."
+        ),
+    )
 
     return parser
 
@@ -77,6 +86,8 @@ def main() -> None:
     ):
         return
 
+    pivot_languages = [lang.strip() for lang in args.pivot_languages.split(",") if lang.strip()]
+
     results = agent.process_document(
         input_path=args.input,
         document_language=args.language,
@@ -84,6 +95,7 @@ def main() -> None:
         dry_run=args.dry_run,
         throttle_seconds=args.throttle,
         limit=args.limit,
+        pivot_languages=pivot_languages,
     )
 
     print(f"Document: {results['document']} ({results['document_language']})")

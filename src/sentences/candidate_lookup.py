@@ -254,6 +254,53 @@ def _build_candidate(
     )
 
 
+def _run_candidate_lookup(
+    session: Session,
+    english_text: str,
+    pivot_translations: Dict[str, str],
+    target_languages: Sequence[str],
+    pivot_languages: Sequence[str],
+    max_candidates_per_word: int,
+) -> Dict[str, List[CandidateLemma]]:
+    """Core candidate-lookup algorithm. Takes plain strings, not sentence IDs."""
+    translation_langs: List[str] = []
+    for lang in list(target_languages) + list(pivot_languages):
+        if lang not in translation_langs:
+            translation_langs.append(lang)
+
+    english_tokens = _unique_tokens(english_text, "en")
+    if not english_tokens:
+        return {}
+
+    pivot_tokens_by_language: Dict[str, List[str]] = {
+        lang: _all_tokens(text, lang) for lang, text in pivot_translations.items() if text
+    }
+
+    result: Dict[str, List[CandidateLemma]] = {}
+    for english_token in english_tokens:
+        lemmas = _find_english_candidate_lemmas(session, english_token)
+        if not lemmas:
+            continue
+        built: List[CandidateLemma] = []
+        for lemma in lemmas:
+            score, confirmed = _score_pivot_confirmations(
+                session, lemma.id, pivot_tokens_by_language
+            )
+            candidate = _build_candidate(session, lemma, translation_langs, score, confirmed)
+            if candidate is not None:
+                built.append(candidate)
+        if not built:
+            continue
+
+        built.sort(key=lambda c: (-c.pivot_match_score, c.lemma_text.lower(), c.guid))
+        if any(c.pivot_match_score > 0 for c in built):
+            filtered = [c for c in built if c.pivot_match_score > 0]
+        else:
+            filtered = built
+        result[english_token] = filtered[:max_candidates_per_word]
+    return result
+
+
 def find_candidate_lemmas_by_english_word(
     session: Session,
     sentence_id: int,
@@ -292,14 +339,9 @@ def find_candidate_lemmas_by_english_word(
         (ties broken by lemma_text for determinism) and capped. Words with
         no candidates are omitted.
     """
-    pivot_languages = list(pivot_languages or DEFAULT_PIVOT_LANGUAGES)
-    target_languages = list(target_languages or [])
-    translation_langs: List[str] = []
-    for lang in list(target_languages) + list(pivot_languages):
-        if lang not in translation_langs:
-            translation_langs.append(lang)
+    effective_pivots = list(pivot_languages or DEFAULT_PIVOT_LANGUAGES)
+    effective_targets = list(target_languages or [])
 
-    # Load English sentence text.
     english_trans = (
         session.query(SentenceTranslation)
         .filter_by(sentence_id=sentence_id, language_code="en")
@@ -309,50 +351,58 @@ def find_candidate_lemmas_by_english_word(
         logger.debug("Sentence %s has no English translation; returning empty", sentence_id)
         return {}
 
-    english_tokens = _unique_tokens(english_trans.translation_text, "en")
-    if not english_tokens:
-        return {}
-
-    # Load pivot translations and tokenize.
-    pivot_tokens_by_language: Dict[str, List[str]] = {}
-    if pivot_languages:
+    pivot_translations: Dict[str, str] = {}
+    if effective_pivots:
         pivot_rows = (
             session.query(SentenceTranslation)
             .filter(
                 SentenceTranslation.sentence_id == sentence_id,
-                SentenceTranslation.language_code.in_(list(pivot_languages)),
+                SentenceTranslation.language_code.in_(effective_pivots),
             )
             .all()
         )
-        for row in pivot_rows:
-            pivot_tokens_by_language[row.language_code] = _all_tokens(
-                row.translation_text, row.language_code
-            )
+        pivot_translations = {row.language_code: row.translation_text for row in pivot_rows}
 
-    result: Dict[str, List[CandidateLemma]] = {}
-    for english_token in english_tokens:
-        lemmas = _find_english_candidate_lemmas(session, english_token)
-        if not lemmas:
-            continue
-        built: List[CandidateLemma] = []
-        for lemma in lemmas:
-            score, confirmed = _score_pivot_confirmations(
-                session, lemma.id, pivot_tokens_by_language
-            )
-            candidate = _build_candidate(session, lemma, translation_langs, score, confirmed)
-            if candidate is not None:
-                built.append(candidate)
-        if not built:
-            continue
+    return _run_candidate_lookup(
+        session,
+        english_text=english_trans.translation_text,
+        pivot_translations=pivot_translations,
+        target_languages=effective_targets,
+        pivot_languages=effective_pivots,
+        max_candidates_per_word=max_candidates_per_word,
+    )
 
-        # Sort: score desc, then lemma_text asc for determinism.
-        built.sort(key=lambda c: (-c.pivot_match_score, c.lemma_text.lower(), c.guid))
 
-        # Drop score-0 candidates when at least one scores.
-        if any(c.pivot_match_score > 0 for c in built):
-            filtered = [c for c in built if c.pivot_match_score > 0]
-        else:
-            filtered = built
+def find_candidate_lemmas_from_translations(
+    session: Session,
+    *,
+    english_text: str,
+    pivot_translations: Dict[str, str],
+    pivot_languages: Optional[Sequence[str]] = None,
+    target_languages: Optional[Sequence[str]] = None,
+    max_candidates_per_word: int = DEFAULT_MAX_CANDIDATES_PER_WORD,
+) -> Dict[str, List[CandidateLemma]]:
+    """In-memory variant of find_candidate_lemmas_by_english_word.
 
-        result[english_token] = filtered[:max_candidates_per_word]
-    return result
+    Accepts the English sentence and pivot translations as plain strings
+    instead of reading them from SentenceTranslation rows. Use this when the
+    sentence has not yet been persisted (e.g., Genys runs decomposition
+    before deciding whether to store the sentence).
+
+    ``pivot_translations`` should be ``{lang_code: translation_text}``.
+    Entries whose keys are not in ``pivot_languages`` (after defaulting) are
+    ignored.
+    """
+    effective_pivots = list(pivot_languages or DEFAULT_PIVOT_LANGUAGES)
+    effective_targets = list(target_languages or [])
+    filtered_pivots = {
+        lang: text for lang, text in pivot_translations.items() if lang in effective_pivots
+    }
+    return _run_candidate_lookup(
+        session,
+        english_text=english_text,
+        pivot_translations=filtered_pivots,
+        target_languages=effective_targets,
+        pivot_languages=effective_pivots,
+        max_candidates_per_word=max_candidates_per_word,
+    )

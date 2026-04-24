@@ -183,6 +183,20 @@ def build_sentence_decomposition_context() -> str:
     return util.prompt_loader.get_context("sentence_decomposition", _SINGLE_LANGUAGE_PROMPT_PATH)
 
 
+def _format_candidate_line(item: Dict[str, Any], allowed_languages: List[str]) -> str:
+    """Format one candidate lemma as a single bullet line."""
+    translations = ", ".join(
+        f"{lang}={translation}"
+        for lang, translation in item.get("translations", {}).items()
+        if lang in allowed_languages
+    )
+    return (
+        f"  - {item['guid']} - {item['lemma']} ({item['disambiguation']}) | "
+        f"POS: {item['pos']} | Definition: {item['definition']} | "
+        f"Translations: {translations}"
+    )
+
+
 def build_sentence_decomposition_prompt(
     *,
     source_sentence: str,
@@ -191,8 +205,21 @@ def build_sentence_decomposition_prompt(
     target_translation: str,
     helper_translations: Optional[List[Dict[str, str]]] = None,
     candidate_lemmas: Optional[List[Dict[str, Any]]] = None,
+    candidate_lemmas_by_english_word: Optional[Dict[str, List[Dict[str, Any]]]] = None,
 ) -> str:
-    """Build prompt for decomposing one already-provided translation."""
+    """Build prompt for decomposing one already-provided translation.
+
+    Candidate lemmas can be supplied in two shapes:
+      * ``candidate_lemmas`` — flat list, rendered as a single bullet list.
+      * ``candidate_lemmas_by_english_word`` — grouped by English surface
+        word, rendered as "English word "<token>":" headings with nested
+        candidates. When supplied this takes precedence; it makes ambiguity
+        explicit (e.g., two senses of "can" listed under the same heading).
+
+    Items (in either shape) must be dict-like with keys ``guid``, ``lemma``,
+    ``disambiguation``, ``pos``, ``definition``, and ``translations``
+    (a mapping of language_code -> surface form).
+    """
     helper_translations = helper_translations or []
     candidate_lemmas = candidate_lemmas or []
 
@@ -205,19 +232,18 @@ def build_sentence_decomposition_prompt(
     ]
     allowed_languages = [source_language, target_language, *helper_languages[:3]]
 
-    if candidate_lemmas:
+    if candidate_lemmas_by_english_word:
+        blocks: List[str] = []
+        for english_word, items in candidate_lemmas_by_english_word.items():
+            if not items:
+                continue
+            lines = [f'English word "{english_word}":']
+            lines.extend(_format_candidate_line(item, allowed_languages) for item in items)
+            blocks.append("\n".join(lines))
+        candidate_lines = "\n".join(blocks) if blocks else "- (none provided)"
+    elif candidate_lemmas:
         candidate_lines = "\n".join(
-            (
-                f"- {item['guid']} - {item['lemma']} ({item['disambiguation']}) | "
-                f"POS: {item['pos']} | Definition: {item['definition']} | "
-                "Translations: "
-                + ", ".join(
-                    f"{lang}={translation}"
-                    for lang, translation in item.get("translations", {}).items()
-                    if lang in allowed_languages
-                )
-            )
-            for item in candidate_lemmas
+            _format_candidate_line(item, allowed_languages) for item in candidate_lemmas
         )
     else:
         candidate_lines = "- (none provided)"
