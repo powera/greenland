@@ -15,6 +15,7 @@ from sentences.candidate_lookup import (
     CandidateLemma,
     DEFAULT_PIVOT_LANGUAGES,
     find_candidate_lemmas_by_english_word,
+    find_candidate_lemmas_from_translations,
 )
 from tests.sentences.candidate_lookup_fixture import (
     add_test_sentence,
@@ -268,6 +269,35 @@ class TestCapAndTargetLanguages(CandidateLookupTestCase):
 class TestDefaultPivots(CandidateLookupTestCase):
     def test_default_pivot_languages_constant(self) -> None:
         self.assertEqual(DEFAULT_PIVOT_LANGUAGES, ["bn", "uk", "kn"])
+
+
+class TestInMemoryVariant(CandidateLookupTestCase):
+    def test_from_translations_matches_from_sentence(self) -> None:
+        translations = {
+            "en": "I can play today",
+            "bn": "আমি আজ পারা",
+            "uk": "Я можу грати сьогодні",
+            "kn": "ನಾನು ಇಂದು ಸಾಧ್ಯ ಆಡಲು",
+        }
+        sentence = add_test_sentence(self.session, translations)
+
+        from_db = find_candidate_lemmas_by_english_word(
+            self.session, sentence.id, target_languages=["fr", "es"]
+        )
+        in_memory = find_candidate_lemmas_from_translations(
+            self.session,
+            english_text=translations["en"],
+            pivot_translations={
+                "bn": translations["bn"],
+                "uk": translations["uk"],
+                "kn": translations["kn"],
+            },
+            target_languages=["fr", "es"],
+        )
+        self.assertEqual(
+            {k: [c.guid for c in v] for k, v in from_db.items()},
+            {k: [c.guid for c in v] for k, v in in_memory.items()},
+        )
 
 
 if __name__ == "__main__":

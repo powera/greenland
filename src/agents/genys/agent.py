@@ -4,7 +4,6 @@
 import logging
 import re
 import time
-from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
@@ -15,6 +14,11 @@ from langtools.dialect_overrides import get_dialect_display_name, get_llm_prompt
 from langtools.grammatical_words import is_function_word
 from langtools.tokenizer import tokenize
 from sentences.analysis import SUBSTRING_MATCH_LANGUAGES
+from sentences.candidate_lookup import (
+    DEFAULT_PIVOT_LANGUAGES,
+    CandidateLemma,
+    find_candidate_lemmas_from_translations,
+)
 from sentences.decomposition import (
     build_sentence_decomposition_context,
     build_sentence_decomposition_prompt,
@@ -28,11 +32,7 @@ from storage.crud.sentence_translation import add_sentence_translation
 from storage.crud.sentence_word import add_sentence_word
 from storage.models.imports import PendingImport
 from storage.models.schema import DerivativeForm, Lemma
-from storage.translation_helpers import (
-    LANGUAGE_NAMES,
-    get_translation,
-    normalize_llm_language_codes,
-)
+from storage.translation_helpers import LANGUAGE_NAMES, normalize_llm_language_codes
 from util.prompt_loader import get_context, get_prompt
 
 logger = logging.getLogger(__name__)
@@ -235,81 +235,34 @@ class GenysAgent:
     def _phase2_candidate_lemmas(
         self,
         session: Any,
-        sentence_text: str,
-        document_language: str,
+        english_text: str,
         translations: Dict[str, str],
-        derivative_cache: Dict[Tuple[str, str], Set[int]],
-        gloss_cache: Dict[str, Set[int]],
-        all_languages: Sequence[str],
-    ) -> List[Dict[str, Any]]:
-        """Phase 2: tokenize the sentence and translations, query DB for candidate lemmas.
+        pivot_languages: Sequence[str],
+        target_languages: Sequence[str],
+    ) -> Dict[str, List[CandidateLemma]]:
+        """Phase 2: look up candidate lemmas grouped by English surface word.
 
-        Returns a list of candidate dicts in the format expected by
-        build_sentence_decomposition_prompt:
-          {guid, lemma, disambiguation, pos, definition, translations: {lang: form}}
+        Delegates to sentences.candidate_lookup.find_candidate_lemmas_from_translations.
+        Returns the grouped {english_word: [CandidateLemma, ...]} form that
+        the decomposition prompt builder now accepts.
         """
-        # Collect tokens per language
-        tokens_by_language: Dict[str, List[str]] = {}
-        tokens_by_language[document_language] = tokenize(sentence_text, document_language)
-        for lang, translation_text in translations.items():
-            tokens_by_language[lang] = tokenize(translation_text, lang)
-
-        # Gather all candidate lemma IDs and which languages matched them
-        matched_languages_by_lemma: Dict[int, Set[str]] = defaultdict(set)
-
-        for lang, tokens in tokens_by_language.items():
-            for token in tokens:
-                token_stripped = token.strip()
-                if not token_stripped:
-                    continue
-                lemma_ids = self._lemma_ids_for_derivative(
-                    session, lang, token_stripped, derivative_cache
-                )
-                # For English tokens also try gloss lookup
-                if lang == "en":
-                    lemma_ids = lemma_ids | self._lemma_ids_for_english_gloss(
-                        session, token_stripped, gloss_cache
-                    )
-                for lemma_id in lemma_ids:
-                    matched_languages_by_lemma[lemma_id].add(lang)
-
-        if not matched_languages_by_lemma:
-            return []
-
-        # Load lemma objects and build candidate list
-        all_lemma_ids = list(matched_languages_by_lemma.keys())
-        lemmas: List[Lemma] = session.query(Lemma).filter(Lemma.id.in_(all_lemma_ids)).all()
-
-        candidates: List[Dict[str, Any]] = []
-        for lemma in lemmas:
-            if lemma.guid is None:
-                continue
-            trans_map: Dict[str, str] = {}
-            for lang in all_languages:
-                try:
-                    translation_value = get_translation(session, lemma, lang)
-                    if translation_value:
-                        trans_map[lang] = translation_value
-                except (ValueError, KeyError):
-                    pass
-            candidates.append(
-                {
-                    "guid": lemma.guid,
-                    "lemma": lemma.lemma_text,
-                    "disambiguation": lemma.disambiguation or "",
-                    "pos": lemma.pos_type,
-                    "definition": lemma.definition_text,
-                    "translations": trans_map,
-                }
-            )
-
-        logger.debug(
-            "Phase 2: found %d candidate lemmas from %d tokens across %d languages",
-            len(candidates),
-            sum(len(t) for t in tokens_by_language.values()),
-            len(tokens_by_language),
+        pivot_translations = {
+            lang: text for lang, text in translations.items() if lang in pivot_languages
+        }
+        grouped = find_candidate_lemmas_from_translations(
+            session,
+            english_text=english_text,
+            pivot_translations=pivot_translations,
+            pivot_languages=pivot_languages,
+            target_languages=target_languages,
         )
-        return candidates
+        total = sum(len(v) for v in grouped.values())
+        logger.debug(
+            "Phase 2: found %d candidates across %d English words",
+            total,
+            len(grouped),
+        )
+        return grouped
 
     # ------------------------------------------------------------------ #
     # Phase 3: per-word decomposition with candidate lemmas (LLM)        #
@@ -320,7 +273,7 @@ class GenysAgent:
         sentence_text: str,
         document_language: str,
         translations: Dict[str, str],
-        candidate_lemmas: List[Dict[str, Any]],
+        candidate_lemmas_by_english_word: Dict[str, List[CandidateLemma]],
     ) -> Dict[str, Any]:
         """Phase 3: decompose the English translation into per-word breakdown.
 
@@ -350,13 +303,29 @@ class GenysAgent:
                 0, {"language_code": document_language, "translation": sentence_text}
             )
 
+        # Adapt CandidateLemma dataclass -> dict shape expected by the prompt builder.
+        candidates_as_dicts: Dict[str, List[Dict[str, Any]]] = {
+            english_word: [
+                {
+                    "guid": candidate.guid,
+                    "lemma": candidate.lemma_text,
+                    "disambiguation": candidate.disambiguation,
+                    "pos": candidate.pos,
+                    "definition": candidate.definition,
+                    "translations": candidate.translations,
+                }
+                for candidate in candidates
+            ]
+            for english_word, candidates in candidate_lemmas_by_english_word.items()
+        }
+
         prompt = build_sentence_decomposition_prompt(
             source_sentence=english_text,
             source_language="en",
             target_language="en",
             target_translation=english_text,
             helper_translations=helper_translations,
-            candidate_lemmas=candidate_lemmas,
+            candidate_lemmas_by_english_word=candidates_as_dicts,
         )
         context = build_sentence_decomposition_context()
         schema = build_single_language_decomposition_schema()
@@ -445,13 +414,15 @@ class GenysAgent:
         dry_run: bool = False,
         throttle_seconds: float = 1.0,
         limit: Optional[int] = None,
+        pivot_languages: Optional[Sequence[str]] = None,
     ) -> Dict[str, Any]:
         """Process a document and stage missing words to PendingImport.
 
         Three phases per sentence:
-          1. LLM: sentence-level translation into target languages only.
-          2. DB: tokenize all translations and query for candidate lemmas.
-          3. LLM: per-word decomposition with candidate lemmas as context.
+          1. LLM: sentence-level translation into target + pivot languages.
+          2. DB: query for candidate lemmas grouped by English surface word,
+             ranked by how many pivot translations confirm each sense.
+          3. LLM: per-word decomposition with grouped candidates as context.
         """
         logger.debug("Phase: initialization - loading input document")
         document_path = Path(input_path)
@@ -461,17 +432,25 @@ class GenysAgent:
         selected_sentences = all_sentences[:limit] if limit is not None else all_sentences
 
         target_languages = self.choose_target_languages(document_language)
-        # All languages available for candidate lemma translation lookup
-        all_languages = [document_language] + list(target_languages)
+        effective_pivots: List[str] = [
+            lang
+            for lang in (
+                pivot_languages if pivot_languages is not None else DEFAULT_PIVOT_LANGUAGES
+            )
+            if lang != document_language.strip().lower() and lang not in target_languages
+        ]
+        # Phase 1 translates into the union of targets + pivots.
+        phase1_languages = list(target_languages) + effective_pivots
 
         logger.debug(
             "Phase: initialization complete - document=%s language=%s "
-            "total_sentences=%d selected_sentences=%d target_languages=%s",
+            "total_sentences=%d selected_sentences=%d target_languages=%s pivot_languages=%s",
             source_name,
             document_language,
             len(all_sentences),
             len(selected_sentences),
             ",".join(target_languages),
+            ",".join(effective_pivots),
         )
 
         stats: Dict[str, Any] = {
@@ -486,6 +465,7 @@ class GenysAgent:
             "existing_pending": 0,
             "errors": 0,
             "target_languages": target_languages,
+            "pivot_languages": effective_pivots,
             "dry_run": dry_run,
         }
 
@@ -512,7 +492,7 @@ class GenysAgent:
                 # ── Phase 1: translate ──────────────────────────────────
                 logger.debug("Phase 1 start - %s - sentence=%r", sentence_label, sentence_text)
                 translations = self._phase1_translate(
-                    sentence_text, document_language, target_languages
+                    sentence_text, document_language, phase1_languages
                 )
                 if not translations:
                     logger.warning("Phase 1 failed for %s, skipping", sentence_label)
@@ -522,17 +502,23 @@ class GenysAgent:
 
                 # ── Phase 2: candidate lemmas ───────────────────────────
                 logger.debug("Phase 2 start - %s", sentence_label)
-                candidate_lemmas = self._phase2_candidate_lemmas(
-                    session,
-                    sentence_text,
-                    document_language,
-                    translations,
-                    derivative_cache,
-                    gloss_cache,
-                    all_languages,
+                english_for_lookup = (
+                    sentence_text if document_language == "en" else translations.get("en", "")
                 )
+                if english_for_lookup:
+                    candidate_lemmas = self._phase2_candidate_lemmas(
+                        session,
+                        english_for_lookup,
+                        translations,
+                        effective_pivots,
+                        target_languages,
+                    )
+                else:
+                    candidate_lemmas = {}
                 logger.debug(
-                    "Phase 2 complete - %s - %d candidates", sentence_label, len(candidate_lemmas)
+                    "Phase 2 complete - %s - %d English words with candidates",
+                    sentence_label,
+                    len(candidate_lemmas),
                 )
 
                 # ── Phase 3: per-word decomposition ────────────────────

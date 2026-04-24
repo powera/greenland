@@ -20,3 +20,11 @@ Important rules:
 - Output must contain exactly one language entry
 - Do NOT include punctuation marks as separate words
 - Return only valid JSON matching the provided schema
+
+Candidate lemma selection:
+- When candidate lemmas are grouped under an "English word" heading, the
+  group enumerates senses competing for the same surface token. Pick
+  exactly one lemma_guid per occurrence, using the helper-language
+  translations as evidence for which sense applies.
+- If no candidate matches the intended meaning, return lemma_guid=NONE
+  rather than forcing a wrong match.
