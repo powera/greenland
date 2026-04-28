@@ -15,6 +15,7 @@ Generate:
    - `register_variants`: formal/informal variants
    - `synecdoche_variants`: practical part-whole/type-member substitutions used in everyday speech
    - `related_learner_equivalents`: practical learner equivalents where distinctions are often secondary in everyday usage
+   - `alternate_spellings`: orthographic variants of the SAME word (e.g., "gray"/"grey", "color"/"colour", "favorite"/"favourite"). Only true spelling variants — not different words with similar meaning.
 
 Remember: Empty arrays are expected and correct when no valid forms exist. Return each variant as a separate array item.
 

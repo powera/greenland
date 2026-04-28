@@ -26,6 +26,7 @@ GUIDELINES FOR EACH CATEGORY:
   * register_variants: formal/informal alternatives used with similar intent
   * synecdoche_variants: part-whole/type-member practical substitutions learners encounter (e.g., "dog"/"puppy", gendered animal terms where gender is often secondary)
   * related_learner_equivalents: learner-relevant equivalents where fine-grained taxonomy distinctions are often not critical in beginner contexts
+  * alternate_spellings: orthographic variants of the SAME word, not different words. Examples: "gray"/"grey", "color"/"colour", "favorite"/"favourite", "judgment"/"judgement". Do NOT put different words with similar meaning here (those go in regional_variants or synonyms). Return empty when the word has no spelling variants.
   * Do NOT include unrelated words, broad categories, or narrow technical species/shade names
   * Prefer high-frequency, practical words learners will actually encounter
 
