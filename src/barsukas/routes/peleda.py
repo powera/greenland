@@ -24,7 +24,6 @@ from barsukas.routes.categories import (
 )
 from langtools.collation import LATIN_SORT_KEY_LANGUAGES
 from langtools.ja.gojuon import KANA_TO_ROW, ROW_INITIALS, ROW_MEMBERS
-from storage.lexeme import list_lexemes_for_lemma
 from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
 from storage.translation_helpers import LANGUAGE_NAMES
 
@@ -470,11 +469,11 @@ LEXEME_ITEMS_PER_PAGE = 100
 
 @bp.route("/lexemes")
 def lexemes() -> ResponseReturnValue:
-    """Extended dictionary: one row per (lemma, language) lexeme.
+    """Extended dictionary: one row per DerivativeForm.
 
-    Each entry shows the lemma's base form in the chosen language, an
-    inflection count, the (now sense-unique) synonyms, and the lemma's
-    disambiguation so homograph senses are visually distinct.
+    Every inflection, synonym, abbreviation, and base form gets its own
+    entry — so e.g. "read", "reads", "reading", "read" (past), "peruse"
+    each appear as separate rows, all linking back to the parent lemma.
     """
     lang = request.args.get("lang", "en").strip().lower()
     ui_lang = getattr(g, "ui_lang", "en")
@@ -490,52 +489,51 @@ def lexemes() -> ResponseReturnValue:
     if not (len(letter) == 1 and letter in alphabet):
         letter = alphabet[0] if alphabet else "A"
 
-    # Restrict to lemmas that actually have at least one DerivativeForm in
-    # the chosen language — otherwise there's no lexeme to show.
+    letter_variants = [letter.upper(), letter.lower()]
     base_query = (
-        _query_by_letter(lang, letter)
-        .join(DerivativeForm, DerivativeForm.lemma_id == Lemma.id)
-        .filter(DerivativeForm.language_code == lang)
-        .distinct()
+        g.db.query(DerivativeForm, Lemma)
+        .join(Lemma, Lemma.id == DerivativeForm.lemma_id)
+        .filter(
+            DerivativeForm.language_code == lang,
+            func.substr(DerivativeForm.derivative_form_text, 1, 1).in_(letter_variants),
+        )
+        .order_by(
+            func.lower(DerivativeForm.derivative_form_text),
+            DerivativeForm.id,
+        )
     )
 
     total = base_query.count()
     total_pages = max(1, (total + LEXEME_ITEMS_PER_PAGE - 1) // LEXEME_ITEMS_PER_PAGE)
     page = max(1, min(page, total_pages))
 
-    lemmas_page: List[Lemma] = (
+    rows: List[Tuple[DerivativeForm, Lemma]] = (
         base_query.limit(LEXEME_ITEMS_PER_PAGE).offset((page - 1) * LEXEME_ITEMS_PER_PAGE).all()
     )
 
     entries: List[Dict[str, Any]] = []
-    for lm in lemmas_page:
-        # list_lexemes_for_lemma returns one Lexeme per language with forms;
-        # pick the one for the active language.
-        lexeme = next(
-            (lx for lx in list_lexemes_for_lemma(g.db, lm.id) if lx.language_code == lang),
-            None,
-        )
-        if lexeme is None:
-            continue
-
-        base = lexeme.base_form
-        synonyms = sorted({f.derivative_form_text for f in lexeme.synonyms})
-        inflection_count = len(lexeme.inflections)
-
+    for form, lm in rows:
         entries.append(
             {
-                "id": lm.id,
-                "headword": (base.derivative_form_text if base else lm.lemma_text),
-                "english": lm.lemma_text,
+                "form_text": form.derivative_form_text,
+                "grammatical_form": form.grammatical_form,
+                "is_base_form": form.is_base_form,
+                "lemma_id": lm.id,
+                "lemma_text": lm.lemma_text,
                 "disambiguation": lm.disambiguation,
                 "pos_type": lm.pos_type,
                 "difficulty_level": lm.difficulty_level,
-                "inflection_count": inflection_count,
-                "synonyms": synonyms,
             }
         )
 
-    available_letters = _available_letters(lang)
+    available_letter_rows = (
+        g.db.query(func.substr(DerivativeForm.derivative_form_text, 1, 1))
+        .filter(DerivativeForm.language_code == lang)
+        .distinct()
+        .all()
+    )
+    available_letters = {r[0].upper() for r in available_letter_rows if r[0] and r[0].isalpha()}
+
     language_names = _localized_language_names(ui_lang)
     available_languages: List[Tuple[str, str]] = [
         (code, language_names.get(code, LANGUAGE_NAMES.get(code, code)))
