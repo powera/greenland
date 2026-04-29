@@ -24,7 +24,8 @@ from barsukas.routes.categories import (
 )
 from langtools.collation import LATIN_SORT_KEY_LANGUAGES
 from langtools.ja.gojuon import KANA_TO_ROW, ROW_INITIALS, ROW_MEMBERS
-from storage.models.schema import Lemma, LemmaTranslation
+from storage.lexeme import list_lexemes_for_lemma
+from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
 from storage.translation_helpers import LANGUAGE_NAMES
 
 bp = Blueprint("peleda", __name__, url_prefix="/dictionary")
@@ -450,6 +451,106 @@ def dictionary() -> ResponseReturnValue:
         total_pages=total_pages,
         entries=entries,
         display_langs=display_langs,
+        alphabet=alphabet,
+        available_letters=available_letters,
+        available_languages=available_languages,
+        language_names=language_names,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Extended dictionary: one row per Lexeme (Lemma × language)
+# ---------------------------------------------------------------------------
+
+
+# Items per page for lexeme view; lower than DICT_ITEMS_PER_PAGE because
+# each row carries multiple forms.
+LEXEME_ITEMS_PER_PAGE = 100
+
+
+@bp.route("/lexemes")
+def lexemes() -> ResponseReturnValue:
+    """Extended dictionary: one row per (lemma, language) lexeme.
+
+    Each entry shows the lemma's base form in the chosen language, an
+    inflection count, the (now sense-unique) synonyms, and the lemma's
+    disambiguation so homograph senses are visually distinct.
+    """
+    lang = request.args.get("lang", "en").strip().lower()
+    ui_lang = getattr(g, "ui_lang", "en")
+    page = request.args.get("page", 1, type=int)
+
+    if lang not in set(DICTIONARY_SOURCE_LANGUAGES):
+        lang = "en"
+
+    alphabet = _get_alphabet(lang)
+    letter = request.args.get("letter", "").strip()
+    if lang not in _CJK_SORT_KEY_LANGUAGES:
+        letter = letter.upper()
+    if not (len(letter) == 1 and letter in alphabet):
+        letter = alphabet[0] if alphabet else "A"
+
+    # Restrict to lemmas that actually have at least one DerivativeForm in
+    # the chosen language — otherwise there's no lexeme to show.
+    base_query = (
+        _query_by_letter(lang, letter)
+        .join(DerivativeForm, DerivativeForm.lemma_id == Lemma.id)
+        .filter(DerivativeForm.language_code == lang)
+        .distinct()
+    )
+
+    total = base_query.count()
+    total_pages = max(1, (total + LEXEME_ITEMS_PER_PAGE - 1) // LEXEME_ITEMS_PER_PAGE)
+    page = max(1, min(page, total_pages))
+
+    lemmas_page: List[Lemma] = (
+        base_query.limit(LEXEME_ITEMS_PER_PAGE).offset((page - 1) * LEXEME_ITEMS_PER_PAGE).all()
+    )
+
+    entries: List[Dict[str, Any]] = []
+    for lm in lemmas_page:
+        # list_lexemes_for_lemma returns one Lexeme per language with forms;
+        # pick the one for the active language.
+        lexeme = next(
+            (lx for lx in list_lexemes_for_lemma(g.db, lm.id) if lx.language_code == lang),
+            None,
+        )
+        if lexeme is None:
+            continue
+
+        base = lexeme.base_form
+        synonyms = sorted({f.derivative_form_text for f in lexeme.synonyms})
+        inflection_count = len(lexeme.inflections)
+
+        entries.append(
+            {
+                "id": lm.id,
+                "headword": (base.derivative_form_text if base else lm.lemma_text),
+                "english": lm.lemma_text,
+                "disambiguation": lm.disambiguation,
+                "pos_type": lm.pos_type,
+                "difficulty_level": lm.difficulty_level,
+                "inflection_count": inflection_count,
+                "synonyms": synonyms,
+            }
+        )
+
+    available_letters = _available_letters(lang)
+    language_names = _localized_language_names(ui_lang)
+    available_languages: List[Tuple[str, str]] = [
+        (code, language_names.get(code, LANGUAGE_NAMES.get(code, code)))
+        for code in DICTIONARY_SOURCE_LANGUAGES
+    ]
+
+    return render_template(
+        "dictionary/lexemes.html",
+        lang=lang,
+        ui_lang=ui_lang,
+        letter=letter,
+        page=page,
+        total=total,
+        total_pages=total_pages,
+        entries=entries,
         alphabet=alphabet,
         available_letters=available_letters,
         available_languages=available_languages,
