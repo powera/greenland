@@ -10,10 +10,10 @@
 <div class="row mb-3">
     <div class="col">
         <div class="d-flex justify-content-between align-items-center">
-            <h1 class="h4 mb-0"><i class="bi bi-journal-richtext"></i> Extended Dictionary (Lexemes)</h1>
+            <h1 class="h4 mb-0"><i class="bi bi-journal-richtext"></i> Extended Dictionary (every form)</h1>
             <span class="text-muted">
                 <a href="{{ url_for('peleda.dictionary', lang=lang) }}" class="me-3">&larr; Lemma view</a>
-                Lexemes: {{ total }}
+                Forms: {{ total }}
             </span>
         </div>
     </div>
@@ -50,39 +50,33 @@
     <table class="dict-table">
         <thead>
             <tr>
-                <th class="dict-headword-col">{{ language_names[lang] }}</th>
-                {% if lang != 'en' %}<th class="dict-trans-col">English</th>{% endif %}
+                <th class="dict-headword-col">Form</th>
+                <th>Grammatical form</th>
+                <th>Lemma</th>
                 <th class="dict-pos-col">POS</th>
-                <th>Inflections</th>
-                <th>Synonyms</th>
             </tr>
         </thead>
         <tbody>
             {% for entry in entries %}
                 <tr class="dict-entry">
                     <td class="dict-headword">
-                        <a href="{{ url_for('lemmas.view_lemma', lemma_id=entry.id) }}"
-                           class="dict-headword-link">{{ entry.headword }}</a>
+                        <span class="dict-headword-link">{{ entry.form_text }}</span>
+                        {%- if entry.is_base_form %} <span class="badge bg-secondary">base</span>{% endif %}
+                    </td>
+                    <td><span class="text-muted">{{ entry.grammatical_form|replace('_', ' ') }}</span></td>
+                    <td>
+                        <a href="{{ url_for('lemmas.view_lemma', lemma_id=entry.lemma_id) }}">
+                            {{ entry.lemma_text }}
+                        </a>
                         {%- if entry.disambiguation %}<span class="dict-disambig"> ({{ entry.disambiguation }})</span>{% endif %}
                     </td>
-                    {% if lang != 'en' %}
-                        <td class="dict-translation">{{ entry.english }}</td>
-                    {% endif %}
                     <td class="dict-pos">{{ (entry.pos_type or '')|replace('_', ' ')|title }}</td>
-                    <td>{{ entry.inflection_count }}</td>
-                    <td>
-                        {% if entry.synonyms %}
-                            {{ entry.synonyms|join(', ') }}
-                        {% else %}
-                            <span class="dict-missing">&mdash;</span>
-                        {% endif %}
-                    </td>
                 </tr>
             {% endfor %}
             {% if not entries %}
                 <tr>
-                    <td colspan="{% if lang != 'en' %}5{% else %}4{% endif %}" class="text-center text-muted py-4">
-                        No lexemes for this letter.
+                    <td colspan="4" class="text-center text-muted py-4">
+                        No forms for this letter.
                     </td>
                 </tr>
             {% endif %}
