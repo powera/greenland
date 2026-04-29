@@ -24,7 +24,7 @@ from storage.crud.derivative_form import add_derivative_form
 from storage.crud.grammar_fact import add_grammar_fact
 from storage.crud.operation_log import log_operation
 from storage.crud.word_token import add_word_token
-from storage.models.schema import Lemma
+from storage.models.schema import SYNONYM_GRAMMATICAL_FORMS, DerivativeForm, Lemma
 from storage.translation_helpers import get_supported_languages, get_translation
 from wordfreq.tools.text_utils import is_numeral
 
@@ -45,6 +45,10 @@ SYNONYM_FORM_MAP: Dict[str, str] = {
     "related_learner_equivalents": "synonym_related",
     "alternate_spellings": "synonym_spelling",
 }
+
+assert set(SYNONYM_FORM_MAP.values()) == set(
+    SYNONYM_GRAMMATICAL_FORMS
+), "SYNONYM_FORM_MAP values must match storage.models.schema.SYNONYM_GRAMMATICAL_FORMS"
 
 
 SYNONYMS_JSON_SCHEMA: Dict[str, Any] = {
@@ -249,6 +253,26 @@ def store_synonym_forms(
     for group_name, forms in synonym_groups.items():
         grammatical_form = SYNONYM_FORM_MAP[group_name]
         for synonym in forms:
+            existing_owner = (
+                session.query(DerivativeForm)
+                .filter(
+                    DerivativeForm.derivative_form_text == synonym,
+                    DerivativeForm.language_code == language_code,
+                    DerivativeForm.grammatical_form.in_(tuple(SYNONYM_GRAMMATICAL_FORMS)),
+                    DerivativeForm.lemma_id != lemma.id,
+                )
+                .first()
+            )
+            if existing_owner is not None:
+                logger.warning(
+                    "Skipping synonym '%s' (%s) for lemma %s: already attached to lemma %s as '%s'",
+                    synonym,
+                    grammatical_form,
+                    lemma.id,
+                    existing_owner.lemma_id,
+                    existing_owner.grammatical_form,
+                )
+                continue
             try:
                 word_token = add_word_token(session, synonym, language_code)
                 add_derivative_form(
