@@ -11,7 +11,10 @@
     <div class="col">
         <div class="d-flex justify-content-between align-items-center">
             <h1 class="h4 mb-0"><i class="bi bi-journal-bookmark"></i> {{ STRINGS.dictionary.title }}</h1>
-            <span class="text-muted">{{ STRINGS.dictionary.entries_count }}: {{ total }}</span>
+            <span class="text-muted">
+                <a href="{{ url_for('peleda.lexemes', lang=lang) }}" class="me-3">Extended (lexemes) &rarr;</a>
+                {{ STRINGS.dictionary.entries_count }}: {{ total }}
+            </span>
         </div>
     </div>
 </div>
