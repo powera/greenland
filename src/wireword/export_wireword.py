@@ -40,13 +40,14 @@ from wireword.readings import (
 from wireword.text_rendering import format_subtype_display_name
 from wireword.helpers import (
     convert_to_wireword_grammatical_form_key,
+    extract_conjugation_slot,
+    extract_conjugation_tense,
     format_verb_entry,
     generate_simple_grammatical_form_label,
     normalize_pos_type,
-    extract_conjugation_slot,
-    extract_conjugation_tense,
 )
 from wireword.generate_manifest import generate_manifest
+from words.cognates import detect_cognate
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -780,6 +781,23 @@ class WirewordExporter:
                     wireword["base_english"] = source_word
                 else:
                     wireword["base_source"] = entry["source_word"]
+
+                noun_source_form: Optional[str]
+                if self.source_language == "en":
+                    noun_source_form = wireword.get("base_english")
+                else:
+                    noun_source_form = wireword.get("base_source")
+                if noun_source_form:
+                    noun_cognate_result = detect_cognate(
+                        noun_source_form,
+                        entry["target_language"],
+                        self.source_language,
+                        self.language,
+                    )
+                    wireword["cognate"] = noun_cognate_result.is_cognate
+                    if self.debug:
+                        wireword["cognate_score"] = noun_cognate_result.score
+                        wireword["cognate_reason_codes"] = list(noun_cognate_result.reasons)
                 wireword.update(
                     {
                         "corpus": assigned_corpus,
@@ -1513,6 +1531,23 @@ class WirewordExporter:
                     wireword["base_english"] = verb_source
                 else:
                     wireword["base_source"] = base_source
+
+                verb_source_form: Optional[str]
+                if self.source_language == "en":
+                    verb_source_form = wireword.get("base_english")
+                else:
+                    verb_source_form = wireword.get("base_source")
+                if verb_source_form:
+                    verb_cognate_result = detect_cognate(
+                        verb_source_form,
+                        base_target,
+                        self.source_language,
+                        self.language,
+                    )
+                    wireword["cognate"] = verb_cognate_result.is_cognate
+                    if self.debug:
+                        wireword["cognate_score"] = verb_cognate_result.score
+                        wireword["cognate_reason_codes"] = list(verb_cognate_result.reasons)
                 wireword.update(
                     {
                         "corpus": "VERBS",
