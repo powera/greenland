@@ -442,6 +442,20 @@ class GandrasAgent:
             )
 
         if existing:
+            # If the existing record was rejected and this manifest is the same
+            # audio file (same MD5 — filenames in S3 are the audio MD5), skip.
+            # Don't resurrect bad audio that's already been reviewed and rejected.
+            # TODO: rewrite the manifest JSON in S3 on rejection so other clients
+            # / databases that run gandras also see the rejection without
+            # depending on this DB's review state.
+            if existing.status == "needs_replacement" and existing.manifest_md5 == manifest.md5:
+                logger.info(
+                    f"Skipping re-import of rejected audio for "
+                    f"{manifest.guid or f'sentence_{manifest.sentence_id}'} "
+                    f"(status=needs_replacement, same MD5)"
+                )
+                return existing
+
             # Update existing record
             existing.filename = local_filename
             existing.expected_text = manifest.expected_text
@@ -452,6 +466,9 @@ class GandrasAgent:
             # Reset to pending_review since we're re-downloading
             existing.status = "pending_review"
             existing.reviewed_at = None
+            existing.reviewed_by = None
+            existing.quality_issues = None
+            existing.notes = None
             logger.debug(
                 f"Updated existing review record for "
                 f"{manifest.guid or f'sentence_{manifest.sentence_id}'}"
