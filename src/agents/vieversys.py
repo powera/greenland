@@ -343,6 +343,7 @@ class VieversysAgent:
                         language_code=language_code,
                         voice_name=gpt_voice.path_name,
                     )
+                    .filter(AudioQualityReview.status != "needs_replacement")
                     .first()
                 )
                 if existing:
@@ -591,6 +592,7 @@ class VieversysAgent:
                         language_code=language_code,
                         voice_name=gpt_voice.path_name,
                     )
+                    .filter(AudioQualityReview.status != "needs_replacement")
                     .first()
                 )
                 if existing:
@@ -820,6 +822,7 @@ class VieversysAgent:
                         language_code=language_code,
                         voice_name=voice_name,
                     )
+                    .filter(AudioQualityReview.status != "needs_replacement")
                     .first()
                 )
                 if existing:
@@ -1191,6 +1194,7 @@ class VieversysAgent:
                         AudioQualityReview.sentence_id.isnot(None),
                         AudioQualityReview.language_code == language_code,
                         AudioQualityReview.voice_name.in_(voice_names),
+                        AudioQualityReview.status != "needs_replacement",
                     )
                     .group_by(AudioQualityReview.sentence_id)
                     .having(
