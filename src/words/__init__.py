@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 
-"""Shared word-level generation helpers used by benchmarks and app flows."""
+"""Shared word-level generation helpers used by benchmarks and app flows.
+
+Note: ``words.cognates`` provides heuristic shared-form/shared-origin detection
+for likely cognates. It is not a full historical etymology engine.
+"""
 
 from words.synonyms import (
     SYNONYM_FORM_MAP,
@@ -26,6 +30,7 @@ from words.ipa_pronunciation import (
     generate_ipa_pronunciation,
     query_ipa_pronunciation,
 )
+from words.cognates import CognateResult, detect_cognate, detect_cognate_for_lemmas
 
 __all__ = [
     "SYNONYM_FORM_MAP",
@@ -49,4 +54,7 @@ __all__ = [
     "build_ipa_pronunciation_prompt",
     "generate_ipa_pronunciation",
     "query_ipa_pronunciation",
+    "CognateResult",
+    "detect_cognate",
+    "detect_cognate_for_lemmas",
 ]
