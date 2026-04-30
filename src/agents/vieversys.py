@@ -523,6 +523,10 @@ class VieversysAgent:
             existing.s3_prod_url = s3_prod_url
             existing.accepted_at = accepted_at
             existing.accepted_by = accepted_by
+            existing.quality_issues = None
+            existing.notes = None
+            existing.reviewed_at = None
+            existing.reviewed_by = None
             logger.debug(f"Updated existing review record for {lemma.guid}")
         else:
             # Create new record
@@ -751,6 +755,10 @@ class VieversysAgent:
             existing.s3_prod_url = None  # Clear prod URL when regenerating
             existing.accepted_at = None
             existing.accepted_by = None
+            existing.quality_issues = None
+            existing.notes = None
+            existing.reviewed_at = None
+            existing.reviewed_by = None
             logger.debug(f"Updated existing review record for sentence {sentence.id}")
         else:
             # Create new record
