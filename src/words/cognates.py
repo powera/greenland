@@ -18,6 +18,8 @@ import unicodedata
 from dataclasses import dataclass
 from typing import Mapping, Protocol, Sequence
 
+from langtools.romanization import romanize_text
+
 
 @dataclass(frozen=True)
 class CognateResult:
@@ -52,104 +54,6 @@ class CognateConfig:
     threshold: float = 0.62
 
 
-_KANA_ROMAJI_MAP: Mapping[str, str] = {
-    "あ": "a",
-    "い": "i",
-    "う": "u",
-    "え": "e",
-    "お": "o",
-    "か": "ka",
-    "き": "ki",
-    "く": "ku",
-    "け": "ke",
-    "こ": "ko",
-    "さ": "sa",
-    "し": "shi",
-    "す": "su",
-    "せ": "se",
-    "そ": "so",
-    "た": "ta",
-    "ち": "chi",
-    "つ": "tsu",
-    "て": "te",
-    "と": "to",
-    "な": "na",
-    "に": "ni",
-    "ぬ": "nu",
-    "ね": "ne",
-    "の": "no",
-    "は": "ha",
-    "ひ": "hi",
-    "ふ": "fu",
-    "へ": "he",
-    "ほ": "ho",
-    "ま": "ma",
-    "み": "mi",
-    "む": "mu",
-    "め": "me",
-    "も": "mo",
-    "や": "ya",
-    "ゆ": "yu",
-    "よ": "yo",
-    "ら": "ra",
-    "り": "ri",
-    "る": "ru",
-    "れ": "re",
-    "ろ": "ro",
-    "わ": "wa",
-    "を": "o",
-    "ん": "n",
-}
-
-_BASIC_ZH_ROMANIZATION_MAP: Mapping[str, str] = {
-    "中": "zhong",
-    "国": "guo",
-    "學": "xue",
-    "学": "xue",
-    "語": "yu",
-    "语": "yu",
-    "人": "ren",
-    "水": "shui",
-    "火": "huo",
-    "木": "mu",
-}
-
-_BASIC_UK_ROMANIZATION_MAP: Mapping[str, str] = {
-    "а": "a",
-    "б": "b",
-    "в": "v",
-    "г": "h",
-    "ґ": "g",
-    "д": "d",
-    "е": "e",
-    "є": "ye",
-    "ж": "zh",
-    "з": "z",
-    "и": "y",
-    "і": "i",
-    "ї": "yi",
-    "й": "i",
-    "к": "k",
-    "л": "l",
-    "м": "m",
-    "н": "n",
-    "о": "o",
-    "п": "p",
-    "р": "r",
-    "с": "s",
-    "т": "t",
-    "у": "u",
-    "ф": "f",
-    "х": "kh",
-    "ц": "ts",
-    "ч": "ch",
-    "ш": "sh",
-    "щ": "shch",
-    "ь": "",
-    "ю": "yu",
-    "я": "ya",
-}
-
 DEFAULT_COGNATE_CONFIG = CognateConfig(
     language_suffix_rules={
         "lt": ("as", "is", "us", "a", "ė", "ija"),
@@ -173,7 +77,7 @@ DEFAULT_COGNATE_CONFIG = CognateConfig(
         "it": (("ch", "k"), ("gh", "g"), ("gl", "l")),
         "pt": (("ç", "c"), ("nh", "n"), ("lh", "l")),
         "ro": (("ț", "t"), ("ș", "s"), ("â", "a"), ("ă", "a")),
-        "uk": (("ї", "i"), ("й", "i"), ("є", "e"), ("ґ", "g")),
+        "uk": (),
         "zh": (),
         "ja": (),
     },
@@ -274,40 +178,12 @@ def detect_cognate_for_lemmas(
 
 
 def _normalize_base(raw_text: str, language_code: str) -> str:
-    romanized_text = _romanize_if_needed(raw_text, language_code)
+    romanized_text = romanize_text(raw_text, language_code)
     normalized_text = unicodedata.normalize("NFKD", romanized_text).casefold()
     text_without_marks = "".join(
         character for character in normalized_text if not unicodedata.combining(character)
     )
     return re.sub(r"[\W_]+", "", text_without_marks, flags=re.UNICODE)
-
-
-def _romanize_if_needed(raw_text: str, language_code: str) -> str:
-    if language_code == "ja":
-        return "".join(
-            _KANA_ROMAJI_MAP.get(character, character)
-            for character in _katakana_to_hiragana(raw_text)
-        )
-    if language_code == "zh":
-        return "".join(
-            _BASIC_ZH_ROMANIZATION_MAP.get(character, character) for character in raw_text
-        )
-    if language_code == "uk":
-        return "".join(
-            _BASIC_UK_ROMANIZATION_MAP.get(character, character) for character in raw_text
-        )
-    return raw_text
-
-
-def _katakana_to_hiragana(raw_text: str) -> str:
-    output_chars: list[str] = []
-    for character in raw_text:
-        codepoint = ord(character)
-        if 0x30A1 <= codepoint <= 0x30F6:
-            output_chars.append(chr(codepoint - 0x60))
-        else:
-            output_chars.append(character)
-    return "".join(output_chars)
 
 
 def _strip_suffix(word: str, suffixes: Sequence[str]) -> str:

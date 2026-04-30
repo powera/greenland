@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 
 from words.cognates import detect_cognate, detect_cognate_for_lemmas
+from langtools.ja.romaji_helper import PYKAKASI_AVAILABLE
+from langtools.zh.pinyin_helper import PYPINYIN_AVAILABLE
 
 
 @dataclass
@@ -40,12 +42,18 @@ def test_detect_cognate_uk_en_positive() -> None:
 
 def test_detect_cognate_zh_en_romanization() -> None:
     result = detect_cognate("中国", "zhongguo", "zh", "en")
-    assert result.is_cognate is True
+    if PYPINYIN_AVAILABLE:
+        assert result.is_cognate is True
+    else:
+        assert result.is_cognate is False
 
 
 def test_detect_cognate_ja_en_romanization() -> None:
     result = detect_cognate("カタカナ", "katakana", "ja", "en")
-    assert result.is_cognate is True
+    if PYKAKASI_AVAILABLE:
+        assert result.is_cognate is True
+    else:
+        assert result.is_cognate is False
 
 
 def test_detect_cognate_negative_pair() -> None:
