@@ -47,6 +47,21 @@ SYNONYM_GRAMMATICAL_FORMS: frozenset[str] = frozenset(
 )
 
 
+# Sense prominence values for Lemma.sense_prominence.
+# Used to split shared-token frequency across competing lemmas (homographs).
+SENSE_PROMINENCE_VERY_COMMON: str = "very_common"
+SENSE_PROMINENCE_COMMON: str = "common"
+SENSE_PROMINENCE_UNCOMMON: str = "uncommon"
+SENSE_PROMINENCE_VALUES: frozenset[str] = frozenset(
+    {SENSE_PROMINENCE_VERY_COMMON, SENSE_PROMINENCE_COMMON, SENSE_PROMINENCE_UNCOMMON}
+)
+SENSE_PROMINENCE_WEIGHTS: dict[str, int] = {
+    SENSE_PROMINENCE_VERY_COMMON: 20,
+    SENSE_PROMINENCE_COMMON: 5,
+    SENSE_PROMINENCE_UNCOMMON: 1,
+}
+
+
 class WordToken(Base):
     """Model for storing word tokens - the specific letters/spelling of a word in a specific language."""
 
@@ -111,6 +126,17 @@ class Lemma(Base):
     # Disambiguation for polysemes (e.g., "mouse (animal)" vs "mouse (computer)")
     disambiguation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
+    # Sense prominence: how prominent this sense is when its surface form is shared
+    # with other lemmas (homographs). Drives weighted split of token frequency in
+    # wordfreq.lexeme_frequency. One of SENSE_PROMINENCE_VALUES; default "common".
+    # For lemmas with no homograph competition, the value has no effect on the rollup.
+    sense_prominence: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+        server_default=SENSE_PROMINENCE_COMMON,
+        default=SENSE_PROMINENCE_COMMON,
+    )
+
     # Metadata
     confidence: Mapped[float] = mapped_column(Float, default=0.0)  # 0-1 score from LLM
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -139,6 +165,7 @@ class Lemma(Base):
     embeddings = relationship(
         "LemmaEmbedding", back_populates="lemma", cascade="all, delete-orphan"
     )
+    tiers = relationship("LemmaTier", back_populates="lemma", cascade="all, delete-orphan")
 
 
 class LemmaTranslation(Base):
@@ -576,6 +603,63 @@ class WordFrequency(Base):
     # Relationships
     word_token = relationship("WordToken", back_populates="frequencies")
     corpus = relationship("Corpus", back_populates="word_frequencies")
+
+
+class TierDefinition(Base):
+    """Definition of a single tier within a tier source (e.g. Cambridge YLE, CEFR).
+
+    Tier sources (e.g. ``cambridge_yle``, ``cefr``) define their own set of named
+    tiers; the ordinal column orders them within a source so consumers can sort
+    or threshold without baking the order into code.
+    """
+
+    __tablename__ = "tier_definitions"
+    __table_args__ = (
+        UniqueConstraint("source", "tier_name", name="uq_tier_definition_source_name"),
+        UniqueConstraint("source", "ordinal", name="uq_tier_definition_source_ordinal"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    source: Mapped[str] = mapped_column(
+        String, nullable=False, index=True
+    )  # e.g., "cambridge_yle", "cefr"
+    tier_name: Mapped[str] = mapped_column(
+        String, nullable=False
+    )  # e.g., "starters", "movers", "flyers", "A1", "B2"
+    ordinal: Mapped[int] = mapped_column(Integer, nullable=False)  # 1 = easiest within source
+    display_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )
+
+
+class LemmaTier(Base):
+    """Tier (e.g. Cambridge YLE level, CEFR level) assigned to a Lemma by a source.
+
+    A lemma may have at most one tier per source. The tier_name must be a known
+    tier_name in TierDefinition for the same source; this is enforced by the
+    importer rather than by a DB-level FK so that bulk imports can fall back
+    to bootstrap defaults if a source's TierDefinition rows are missing.
+    """
+
+    __tablename__ = "lemma_tiers"
+    __table_args__ = (UniqueConstraint("lemma_id", "source", name="uq_lemma_tier_lemma_source"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    lemma_id: Mapped[int] = mapped_column(ForeignKey("lemmas.id"), nullable=False, index=True)
+    source: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    tier_name: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    themes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )
+
+    # Relationships
+    lemma = relationship("Lemma", back_populates="tiers")
 
 
 class AudioQualityReview(Base):
