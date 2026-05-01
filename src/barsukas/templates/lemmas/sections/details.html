@@ -181,6 +181,44 @@
                     </div>
 
                     <div class="col-lg-6">
+                        <h6 class="mb-2">Lexeme Rollup (new system)</h6>
+                        {% if lexeme_frequency_by_corpus %}
+                            <div class="table-responsive mb-3">
+                                <table class="table table-sm table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Corpus</th>
+                                            <th>Total Lexeme Frequency</th>
+                                            <th>Contributing Forms</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for corpus_name, rollup in lexeme_frequency_by_corpus.items() %}
+                                        <tr>
+                                            <td><code>{{ corpus_name }}</code></td>
+                                            <td>
+                                                {% if rollup %}
+                                                    {{ "%.8f"|format(rollup.total_frequency) }}
+                                                {% else %}
+                                                    <span class="text-muted">No lexeme row</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if rollup %}
+                                                    {{ rollup.breakdown|length }}
+                                                {% else %}
+                                                    <span class="text-muted">—</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-3">No enabled lexeme-based corpora configured for this lemma yet.</p>
+                        {% endif %}
+
                         <h6 class="mb-2">Word Frequency Modules</h6>
                         {% if frequency_rows %}
                             <div class="table-responsive">
