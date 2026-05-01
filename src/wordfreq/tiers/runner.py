@@ -1,7 +1,18 @@
 """Shared import driver for tier sources.
 
-Loads entries from a TierImporter, resolves each one against the database,
-upserts LemmaTier rows for matched entries, and queues the rest for review.
+For each TierEntry from an importer:
+
+1. Get-or-create a WordToken for ``(entry.word, entry.language_code)``.
+2. Upsert an ExternalLexemeAnnotation row keyed by
+   ``(word_token_id, source, pos_hint, sense_hint)``.
+3. Resolve to candidate Lemma ids via the importer.
+4. For each candidate, upsert an ExternalLexemeAnnotationLemma row and a
+   LemmaTier row.
+
+The annotation row exists regardless of how many lemmas matched, so the
+annotation table is itself the registry of "words this source knows about,
+including ones with no lemma yet." Reconcile after lemma additions to attach
+new candidates.
 """
 
 from __future__ import annotations
@@ -13,9 +24,14 @@ from typing import Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
-from storage.models.imports import PendingImport
-from storage.models.schema import LemmaTier, TierDefinition
-from wordfreq.tiers.base import ResolveStatus, TierEntry, TierImporter
+from storage.models.schema import (
+    ExternalLexemeAnnotation,
+    ExternalLexemeAnnotationLemma,
+    LemmaTier,
+    TierDefinition,
+    WordToken,
+)
+from wordfreq.tiers.base import TierEntry, TierImporter
 from wordfreq.tiers.bootstrap import bootstrap_tier_definitions
 
 logger = logging.getLogger(__name__)
@@ -27,12 +43,12 @@ class ImportReport:
 
     source: str
     total: int = 0
-    matched: int = 0
-    ambiguous: int = 0
-    unmatched: int = 0
-    upserts_inserted: int = 0
-    upserts_updated: int = 0
-    queued_for_review: int = 0
+    annotations_inserted: int = 0
+    annotations_updated: int = 0
+    lemma_links_inserted: int = 0
+    lemma_tiers_inserted: int = 0
+    lemma_tiers_updated: int = 0
+    unattached: int = 0  # annotations with zero matched lemmas
     unknown_tier_names: List[str] = field(default_factory=list)
     examples: Dict[str, List[str]] = field(default_factory=dict)
 
@@ -49,6 +65,85 @@ def _known_tier_names(session: Session, source: str) -> set[str]:
     }
 
 
+def _get_or_create_word_token(session: Session, token_text: str, language_code: str) -> WordToken:
+    token = (
+        session.query(WordToken)
+        .filter(WordToken.token == token_text, WordToken.language_code == language_code)
+        .first()
+    )
+    if token is not None:
+        return token
+    token = WordToken(token=token_text, language_code=language_code)
+    session.add(token)
+    session.flush()
+    return token
+
+
+def _upsert_annotation(
+    session: Session,
+    *,
+    word_token_id: int,
+    source: str,
+    tier_name: str,
+    pos_hint: Optional[str],
+    sense_hint: Optional[str],
+    themes: tuple[str, ...],
+) -> tuple[ExternalLexemeAnnotation, bool]:
+    """Insert or update an annotation. Returns (row, inserted_bool)."""
+    themes_json = json.dumps(list(themes)) if themes else None
+    pos_filter = (
+        ExternalLexemeAnnotation.pos_hint.is_(None)
+        if pos_hint is None
+        else ExternalLexemeAnnotation.pos_hint == pos_hint
+    )
+    sense_filter = (
+        ExternalLexemeAnnotation.sense_hint.is_(None)
+        if sense_hint is None
+        else ExternalLexemeAnnotation.sense_hint == sense_hint
+    )
+    existing = (
+        session.query(ExternalLexemeAnnotation)
+        .filter(
+            ExternalLexemeAnnotation.word_token_id == word_token_id,
+            ExternalLexemeAnnotation.source == source,
+            pos_filter,
+            sense_filter,
+        )
+        .first()
+    )
+    if existing is None:
+        row = ExternalLexemeAnnotation(
+            word_token_id=word_token_id,
+            source=source,
+            tier_name=tier_name,
+            pos_hint=pos_hint,
+            sense_hint=sense_hint,
+            themes=themes_json,
+        )
+        session.add(row)
+        session.flush()
+        return row, True
+    existing.tier_name = tier_name
+    existing.themes = themes_json
+    return existing, False
+
+
+def _ensure_lemma_link(session: Session, annotation_id: int, lemma_id: int) -> bool:
+    """Insert an annotation->lemma link if missing. Returns True if inserted."""
+    existing = (
+        session.query(ExternalLexemeAnnotationLemma)
+        .filter(
+            ExternalLexemeAnnotationLemma.annotation_id == annotation_id,
+            ExternalLexemeAnnotationLemma.lemma_id == lemma_id,
+        )
+        .first()
+    )
+    if existing is not None:
+        return False
+    session.add(ExternalLexemeAnnotationLemma(annotation_id=annotation_id, lemma_id=lemma_id))
+    return True
+
+
 def _upsert_lemma_tier(
     session: Session,
     *,
@@ -57,7 +152,7 @@ def _upsert_lemma_tier(
     tier_name: str,
     themes: tuple[str, ...],
 ) -> bool:
-    """Insert or update a LemmaTier row. Returns True if a new row was inserted."""
+    """Insert or update a LemmaTier. Returns True if a new row was inserted."""
     themes_json = json.dumps(list(themes)) if themes else None
     existing = (
         session.query(LemmaTier)
@@ -79,33 +174,49 @@ def _upsert_lemma_tier(
     return False
 
 
-def _queue_for_review(session: Session, source: str, entry: TierEntry, reason: str) -> None:
-    """Add a PendingImport row representing an unresolved tier entry.
-
-    Uses the existing pending_imports table so reviewers see tier misses in the
-    same place as other unresolved word imports. The disambiguation_translation
-    field is set to the original word as a placeholder since these rows do not
-    carry a foreign-language translation.
-    """
-    note_payload = {
-        "tier_source": source,
-        "tier_name": entry.tier_name,
-        "pos_hint": entry.pos_hint,
-        "sense_hint": entry.sense_hint,
-        "themes": list(entry.themes),
-        "reason": reason,
-    }
-    session.add(
-        PendingImport(
-            english_word=entry.word,
-            definition=f"[tier:{source}:{entry.tier_name}] needs review: {reason}",
-            disambiguation_translation=entry.word,
-            disambiguation_language=entry.language_code,
-            pos_type=entry.pos_hint,
-            source=f"tier:{source}",
-            notes=json.dumps(note_payload),
-        )
+def _process_entry(
+    session: Session,
+    importer: TierImporter,
+    entry: TierEntry,
+    report: ImportReport,
+) -> None:
+    token = _get_or_create_word_token(session, entry.word, entry.language_code)
+    annotation, inserted = _upsert_annotation(
+        session,
+        word_token_id=token.id,
+        source=importer.source,
+        tier_name=entry.tier_name,
+        pos_hint=entry.pos_hint,
+        sense_hint=entry.sense_hint,
+        themes=entry.themes,
     )
+    if inserted:
+        report.annotations_inserted += 1
+    else:
+        report.annotations_updated += 1
+
+    candidate_ids = importer.resolve(session, entry)
+    if not candidate_ids:
+        report.unattached += 1
+        report.add_example("unattached", entry.word)
+        return
+
+    for lemma_id in candidate_ids:
+        if _ensure_lemma_link(session, annotation.id, lemma_id):
+            report.lemma_links_inserted += 1
+        if _upsert_lemma_tier(
+            session,
+            lemma_id=lemma_id,
+            source=importer.source,
+            tier_name=entry.tier_name,
+            themes=entry.themes,
+        ):
+            report.lemma_tiers_inserted += 1
+        else:
+            report.lemma_tiers_updated += 1
+
+    if len(candidate_ids) > 1:
+        report.add_example("multi_lemma", f"{entry.word} -> {len(candidate_ids)} lemmas")
 
 
 def run_import(
@@ -113,7 +224,6 @@ def run_import(
     importer: TierImporter,
     *,
     bootstrap: bool = True,
-    queue_unresolved: bool = True,
     dry_run: bool = False,
 ) -> ImportReport:
     """Run a tier importer end-to-end against the given session.
@@ -122,7 +232,6 @@ def run_import(
         session: Database session (caller manages connection lifecycle).
         importer: A TierImporter implementation (e.g., CambridgeYleImporter).
         bootstrap: Insert any missing TierDefinition rows for the source first.
-        queue_unresolved: Write PendingImport rows for ambiguous/unmatched entries.
         dry_run: If True, do not commit; the report still reflects intended changes.
     """
     source = importer.source
@@ -137,36 +246,9 @@ def run_import(
         if entry.tier_name not in known_tiers:
             if entry.tier_name not in report.unknown_tier_names:
                 report.unknown_tier_names.append(entry.tier_name)
-            report.unmatched += 1
             report.add_example("unknown_tier", f"{entry.word} -> {entry.tier_name}")
             continue
-
-        result = importer.resolve(session, entry)
-        if result.status is ResolveStatus.MATCHED:
-            inserted = _upsert_lemma_tier(
-                session,
-                lemma_id=result.lemma_ids[0],
-                source=source,
-                tier_name=entry.tier_name,
-                themes=entry.themes,
-            )
-            report.matched += 1
-            if inserted:
-                report.upserts_inserted += 1
-            else:
-                report.upserts_updated += 1
-        elif result.status is ResolveStatus.AMBIGUOUS:
-            report.ambiguous += 1
-            report.add_example("ambiguous", f"{entry.word} ({len(result.lemma_ids)} candidates)")
-            if queue_unresolved:
-                _queue_for_review(session, source, entry, result.reason or "ambiguous lemma match")
-                report.queued_for_review += 1
-        else:
-            report.unmatched += 1
-            report.add_example("unmatched", entry.word)
-            if queue_unresolved:
-                _queue_for_review(session, source, entry, result.reason or "no lemma match")
-                report.queued_for_review += 1
+        _process_entry(session, importer, entry, report)
 
     if dry_run:
         session.rollback()
@@ -174,15 +256,82 @@ def run_import(
         session.commit()
 
     logger.info(
-        "tier import %s: total=%d matched=%d ambiguous=%d unmatched=%d "
-        "(inserted=%d updated=%d queued=%d)",
+        "tier import %s: total=%d annot(ins=%d upd=%d) "
+        "lemma_links=%d lemma_tiers(ins=%d upd=%d) unattached=%d",
         source,
         report.total,
-        report.matched,
-        report.ambiguous,
-        report.unmatched,
-        report.upserts_inserted,
-        report.upserts_updated,
-        report.queued_for_review,
+        report.annotations_inserted,
+        report.annotations_updated,
+        report.lemma_links_inserted,
+        report.lemma_tiers_inserted,
+        report.lemma_tiers_updated,
+        report.unattached,
+    )
+    return report
+
+
+def reconcile_external_annotations(
+    session: Session,
+    importer: TierImporter,
+    *,
+    dry_run: bool = False,
+) -> ImportReport:
+    """Re-resolve every ExternalLexemeAnnotation for the importer's source.
+
+    Useful after lemmas have been added: walks existing annotation rows,
+    re-runs ``importer.resolve`` against each, and inserts any missing
+    ExternalLexemeAnnotationLemma + LemmaTier rows. Does not modify the
+    annotation rows themselves and does not delete stale links.
+    """
+    source = importer.source
+    annotations = (
+        session.query(ExternalLexemeAnnotation)
+        .filter(ExternalLexemeAnnotation.source == source)
+        .all()
+    )
+    report = ImportReport(source=source, total=len(annotations))
+    for annotation in annotations:
+        token = annotation.word_token
+        themes_tuple: tuple[str, ...] = (
+            tuple(json.loads(annotation.themes)) if annotation.themes else ()
+        )
+        entry = TierEntry(
+            word=token.token,
+            language_code=token.language_code,
+            pos_hint=annotation.pos_hint,
+            tier_name=annotation.tier_name,
+            sense_hint=annotation.sense_hint,
+            themes=themes_tuple,
+        )
+        candidate_ids = importer.resolve(session, entry)
+        if not candidate_ids:
+            report.unattached += 1
+            continue
+        for lemma_id in candidate_ids:
+            if _ensure_lemma_link(session, annotation.id, lemma_id):
+                report.lemma_links_inserted += 1
+            if _upsert_lemma_tier(
+                session,
+                lemma_id=lemma_id,
+                source=source,
+                tier_name=annotation.tier_name,
+                themes=themes_tuple,
+            ):
+                report.lemma_tiers_inserted += 1
+            else:
+                report.lemma_tiers_updated += 1
+
+    if dry_run:
+        session.rollback()
+    else:
+        session.commit()
+
+    logger.info(
+        "reconcile %s: scanned=%d new_links=%d new_tiers=%d unattached=%d",
+        source,
+        report.total,
+        report.lemma_links_inserted,
+        report.lemma_tiers_inserted,
+        report.unattached,
     )
     return report
