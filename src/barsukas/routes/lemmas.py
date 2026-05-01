@@ -461,10 +461,10 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         .order_by(DerivativeForm.language_code, Corpus.name, DerivativeForm.derivative_form_text)
         .all()
     )
-    enabled_corpora = {
-        corpus_name for (corpus_name,) in g.db.query(Corpus.name).filter(Corpus.enabled == True)
-    }
+    from wordfreq.frequency.corpus import get_enabled_corpus_configs
+
     target_corpora = ["19th_books", "20th_books", "cooking", "wiki_vital"]
+    enabled_corpora = {cfg.name for cfg in get_enabled_corpus_configs()}
     lexeme_frequency_by_corpus = {}
     english_lexeme = get_lexeme(g.db, lemma_id, "en")
     if english_lexeme:

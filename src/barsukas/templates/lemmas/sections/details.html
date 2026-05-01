@@ -188,7 +188,7 @@
                                     <thead>
                                         <tr>
                                             <th>Corpus</th>
-                                            <th>Total Lexeme Frequency</th>
+                                            <th>Total Lexeme Frequency (per million)</th>
                                             <th>Contributing Forms</th>
                                         </tr>
                                     </thead>
@@ -198,14 +198,14 @@
                                             <td><code>{{ corpus_name }}</code></td>
                                             <td>
                                                 {% if rollup %}
-                                                    {{ "%.8f"|format(rollup.total_frequency) }}
+                                                    {{ "%.2f"|format(rollup.total_frequency) }}
                                                 {% else %}
                                                     <span class="text-muted">No lexeme row</span>
                                                 {% endif %}
                                             </td>
                                             <td>
                                                 {% if rollup %}
-                                                    {{ rollup.breakdown|length }}
+                                                    {{ rollup.form_breakdown|length }}
                                                 {% else %}
                                                     <span class="text-muted">—</span>
                                                 {% endif %}

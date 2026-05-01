@@ -1,17 +1,20 @@
-"""Lexeme-level frequency rollup over per-WordToken WordFrequency rows.
+"""Lexeme-level frequency rollup over external lexeme annotations.
 
-Token frequency lives on WordToken (one count per surface string per language).
-A Lexeme is one Lemma's surface-form set in one language; multiple lexemes can
-share a surface form (homographs like "bank" the river edge vs. the financial
-institution). When that happens we split the token's frequency across the
-competing lexemes weighted by ``Lemma.sense_prominence`` (very_common=20,
-common=5, uncommon=1). Single-sense words (the common case) get the full
-token frequency regardless of their prominence label, since the weight only
-matters relative to competitors.
+Token frequency lives on ExternalLexemeAnnotation (one row per surface form per
+source per language). A Lexeme is one Lemma's surface-form set in one language;
+multiple lexemes can share a surface form (homographs like "bank" the river
+edge vs. the financial institution). When that happens we split the token's
+frequency across the competing lexemes weighted by ``Lemma.sense_prominence``
+(very_common=20, common=5, uncommon=1, rare=0.15). Single-sense words (the
+common case) get the full token frequency regardless of their prominence label,
+since the weight only matters relative to competitors.
 
 We sum per-form per-corpus frequencies up to the lexeme. Rank rollup is
 intentionally not provided here — ranks are not additive; if you need a rank
 for a lexeme, derive it from the rolled-up frequency in a downstream pass.
+
+The ``corpus_name`` argument is the wordfreq corpus identifier (e.g.
+``"19th_books"``); internally it maps to annotation source ``wordfreq_<name>``.
 """
 
 from __future__ import annotations
@@ -25,14 +28,14 @@ from storage.lexeme import Lexeme, get_lexeme
 from storage.models.schema import (
     SENSE_PROMINENCE_COMMON,
     SENSE_PROMINENCE_WEIGHTS,
-    Corpus,
     DerivativeForm,
+    ExternalLexemeAnnotation,
     Lemma,
-    WordFrequency,
 )
+from wordfreq.frequency.corpus import get_enabled_corpus_configs
 
 
-def _weight_for(prominence: Optional[str]) -> int:
+def _weight_for(prominence: Optional[str]) -> float:
     if prominence is None:
         return SENSE_PROMINENCE_WEIGHTS[SENSE_PROMINENCE_COMMON]
     return SENSE_PROMINENCE_WEIGHTS.get(
@@ -83,51 +86,53 @@ class LexemeFrequency:
 
     lemma_id: int
     language_code: str
-    corpus_id: int
     corpus_name: str
+    source: str
     total_frequency: float
     form_breakdown: Tuple[FormFrequency, ...] = field(default_factory=tuple)
+
+
+def _source_for_corpus(corpus_name: str) -> str:
+    return f"wordfreq_{corpus_name}"
 
 
 def get_lexeme_frequency(
     session: Session,
     lexeme: Lexeme,
     corpus_name: str,
-) -> Optional[LexemeFrequency]:
+) -> LexemeFrequency:
     """Roll up token-level frequencies into a single lexeme frequency for a corpus.
 
-    Returns None if the named corpus does not exist. Returns a zero-frequency
-    LexemeFrequency (with empty breakdown) if the lexeme has no forms with
-    matching WordFrequency rows.
+    Returns a zero-frequency LexemeFrequency (with empty breakdown) if the
+    lexeme has no forms with matching ExternalLexemeAnnotation rows for the
+    corpus.
     """
-    corpus = session.query(Corpus).filter(Corpus.name == corpus_name).first()
-    if corpus is None:
-        return None
+    source = _source_for_corpus(corpus_name)
 
     breakdown: List[FormFrequency] = []
     total = 0.0
     for form in lexeme.forms:
         if form.word_token_id is None:
             continue
-        wf = (
-            session.query(WordFrequency)
+        annotation = (
+            session.query(ExternalLexemeAnnotation)
             .filter(
-                WordFrequency.word_token_id == form.word_token_id,
-                WordFrequency.corpus_id == corpus.id,
+                ExternalLexemeAnnotation.word_token_id == form.word_token_id,
+                ExternalLexemeAnnotation.source == source,
             )
             .first()
         )
-        if wf is None or wf.frequency is None:
+        if annotation is None or annotation.frequency is None:
             continue
         share = get_token_share(session, form.word_token_id, lexeme.lemma.id)
-        contribution = wf.frequency * share
+        contribution = annotation.frequency * share
         total += contribution
         breakdown.append(
             FormFrequency(
                 derivative_form_id=form.id,
                 derivative_form_text=form.derivative_form_text,
                 word_token_id=form.word_token_id,
-                raw_frequency=wf.frequency,
+                raw_frequency=annotation.frequency,
                 share=share,
                 contribution=contribution,
             )
@@ -136,8 +141,8 @@ def get_lexeme_frequency(
     return LexemeFrequency(
         lemma_id=lexeme.lemma.id,
         language_code=lexeme.language_code,
-        corpus_id=corpus.id,
-        corpus_name=corpus.name,
+        corpus_name=corpus_name,
+        source=source,
         total_frequency=total,
         form_breakdown=tuple(breakdown),
     )
@@ -147,12 +152,10 @@ def get_lexeme_frequencies_all_corpora(
     session: Session,
     lexeme: Lexeme,
 ) -> Dict[str, LexemeFrequency]:
-    """Roll up across every Corpus row in the database. Empty rollups are included."""
+    """Roll up across every enabled wordfreq corpus. Empty rollups are included."""
     out: Dict[str, LexemeFrequency] = {}
-    for corpus in session.query(Corpus).all():
-        rollup = get_lexeme_frequency(session, lexeme, corpus.name)
-        if rollup is not None:
-            out[corpus.name] = rollup
+    for cfg in get_enabled_corpus_configs():
+        out[cfg.name] = get_lexeme_frequency(session, lexeme, cfg.name)
     return out
 
 
@@ -162,7 +165,11 @@ def get_lemma_frequency(
     language_code: str,
     corpus_name: str,
 ) -> Optional[LexemeFrequency]:
-    """Convenience: build the Lexeme for ``(lemma_id, language_code)`` and roll up."""
+    """Convenience: build the Lexeme for ``(lemma_id, language_code)`` and roll up.
+
+    Returns None only if the lemma has no Lexeme (no derivative forms in the
+    requested language).
+    """
     lexeme = get_lexeme(session, lemma_id, language_code)
     if lexeme is None:
         return None

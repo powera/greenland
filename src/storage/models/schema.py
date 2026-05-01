@@ -52,13 +52,20 @@ SYNONYM_GRAMMATICAL_FORMS: frozenset[str] = frozenset(
 SENSE_PROMINENCE_VERY_COMMON: str = "very_common"
 SENSE_PROMINENCE_COMMON: str = "common"
 SENSE_PROMINENCE_UNCOMMON: str = "uncommon"
+SENSE_PROMINENCE_RARE: str = "rare"
 SENSE_PROMINENCE_VALUES: frozenset[str] = frozenset(
-    {SENSE_PROMINENCE_VERY_COMMON, SENSE_PROMINENCE_COMMON, SENSE_PROMINENCE_UNCOMMON}
+    {
+        SENSE_PROMINENCE_VERY_COMMON,
+        SENSE_PROMINENCE_COMMON,
+        SENSE_PROMINENCE_UNCOMMON,
+        SENSE_PROMINENCE_RARE,
+    }
 )
-SENSE_PROMINENCE_WEIGHTS: dict[str, int] = {
-    SENSE_PROMINENCE_VERY_COMMON: 20,
-    SENSE_PROMINENCE_COMMON: 5,
-    SENSE_PROMINENCE_UNCOMMON: 1,
+SENSE_PROMINENCE_WEIGHTS: dict[str, float] = {
+    SENSE_PROMINENCE_VERY_COMMON: 20.0,
+    SENSE_PROMINENCE_COMMON: 5.0,
+    SENSE_PROMINENCE_UNCOMMON: 1.0,
+    SENSE_PROMINENCE_RARE: 0.15,
 }
 
 
@@ -697,6 +704,8 @@ class ExternalLexemeAnnotation(Base):
     tier_name: Mapped[str] = mapped_column(String, nullable=False, index=True)
     pos_hint: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     sense_hint: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    ordinal_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
+    frequency: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     themes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
