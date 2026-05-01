@@ -10,7 +10,6 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
 
 import constants
-import wordfreq.frequency.analysis
 import wordfreq.frequency.importer
 from storage.backend.config import DataSourceConfig
 from storage.connection_pool import get_session
@@ -497,15 +496,14 @@ def load_corpus(corpus_name: str, config: Optional["DataSourceConfig"] = None) -
 
     logger.info(f"Loading corpus '{corpus_name}' from {full_file_path}")
 
-    # Call the import function with the configuration parameters
-    return wordfreq.frequency.importer.import_frequency_data(
+    # Import into external_lexeme_annotations (new system).
+    return wordfreq.frequency.importer.import_frequency_as_annotations(
         file_path=full_file_path,
         corpus_name=corpus_config.name,
         language_code=corpus_config.language_code,
         file_type=corpus_config.file_type,
         max_words=corpus_config.max_words,
         value_type=corpus_config.value_type,
-        corpus_description=corpus_config.description,
         config=config,
     )
 
@@ -547,14 +545,7 @@ def load_all_corpora() -> Dict[str, tuple[int, int]]:
             logger.error(f"Failed to load corpus {config.name}: {e}")
             results[config.name] = (0, 0)
 
-    # Calculate combined mean ranks (from original script)
-    logger.info("Calculating combined ranks...")
-    try:
-        analysis_config = DataSourceConfig()
-        wordfreq.frequency.analysis.calculate_combined_ranks(config=analysis_config)
-        logger.info("Harmonic mean ranks calculation completed!")
-    except Exception as e:
-        logger.error(f"Failed to calculate combined ranks: {e}")
+    logger.info("Skipping combined rank calculation: corpus import now targets annotations.")
 
     logger.info("Word frequency data population completed!")
     return results
