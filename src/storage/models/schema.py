@@ -662,6 +662,85 @@ class LemmaTier(Base):
     lemma = relationship("Lemma", back_populates="tiers")
 
 
+class ExternalLexemeAnnotation(Base):
+    """An assertion by an external source (Cambridge YLE, CEFR, ...) that a
+    surface form (WordToken) belongs to a tier, optionally with a POS or sense
+    hint from the source.
+
+    Decoupled from Lemma: the same row exists whether or not any lemma in the
+    DB matches the surface form. The optional 0/1/N relation to Lemma lives in
+    the join table ExternalLexemeAnnotationLemma. Reconcile after lemma adds
+    to attach new candidates.
+
+    The unique key includes pos_hint and sense_hint because a source may emit
+    distinct rows for the same word at different POS (e.g. ``bank`` n vs v).
+    SQLite treats NULLs as distinct in unique indexes, which is intentional
+    here: a row with no pos_hint and a row with pos_hint="n" are distinct.
+    """
+
+    __tablename__ = "external_lexeme_annotations"
+    __table_args__ = (
+        UniqueConstraint(
+            "word_token_id",
+            "source",
+            "pos_hint",
+            "sense_hint",
+            name="uq_external_lexeme_annotation",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    word_token_id: Mapped[int] = mapped_column(
+        ForeignKey("word_tokens.id"), nullable=False, index=True
+    )
+    source: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    tier_name: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    pos_hint: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    sense_hint: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    themes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )
+
+    # Relationships
+    word_token = relationship("WordToken")
+    lemma_links = relationship(
+        "ExternalLexemeAnnotationLemma",
+        back_populates="annotation",
+        cascade="all, delete-orphan",
+    )
+
+
+class ExternalLexemeAnnotationLemma(Base):
+    """Join table linking an ExternalLexemeAnnotation to zero, one, or many Lemmas.
+
+    ON DELETE CASCADE on both FKs: deleting an annotation removes its links;
+    deleting a lemma removes its links. Neither action affects the other parent.
+    """
+
+    __tablename__ = "external_lexeme_annotation_lemmas"
+    __table_args__ = (
+        UniqueConstraint("annotation_id", "lemma_id", name="uq_external_lexeme_annotation_lemma"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    annotation_id: Mapped[int] = mapped_column(
+        ForeignKey("external_lexeme_annotations.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    lemma_id: Mapped[int] = mapped_column(
+        ForeignKey("lemmas.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+
+    # Relationships
+    annotation = relationship("ExternalLexemeAnnotation", back_populates="lemma_links")
+    lemma = relationship("Lemma")
+
+
 class AudioQualityReview(Base):
     """Model for tracking audio file quality reviews.
 
