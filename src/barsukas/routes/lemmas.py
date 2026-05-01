@@ -297,6 +297,16 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
     """View a single lemma with all details."""
     from barsukas.helpers.db_optimization import get_lemma_view_data
     from storage.crud.guid_tombstone import get_tombstones_by_lemma_id
+    from storage.lexeme import get_lexeme
+    from storage.models.schema import (
+        Corpus,
+        ExternalLexemeAnnotation,
+        ExternalLexemeAnnotationLemma,
+        LemmaTier,
+        TierDefinition,
+        WordFrequency,
+    )
+    from wordfreq.lexeme_frequency import get_lexeme_frequencies_all_corpora
 
     # Get all lemma data in optimized bulk queries (replaces 10+ separate queries)
     data = get_lemma_view_data(g.db, lemma_id)
@@ -412,6 +422,57 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
 
     queued_tasks = get_tasks_for_target(g.db, "lemma", lemma_id, limit=8)
 
+    lemma_tiers = (
+        g.db.query(LemmaTier)
+        .filter(LemmaTier.lemma_id == lemma_id)
+        .order_by(LemmaTier.source, LemmaTier.tier_name)
+        .all()
+    )
+    tier_definitions = (
+        g.db.query(TierDefinition)
+        .filter(TierDefinition.source.in_([tier.source for tier in lemma_tiers]))
+        .all()
+        if lemma_tiers
+        else []
+    )
+    tier_display_by_source_name = {
+        (row.source, row.tier_name): (row.display_name or row.tier_name) for row in tier_definitions
+    }
+
+    external_annotations = (
+        g.db.query(ExternalLexemeAnnotation)
+        .join(ExternalLexemeAnnotationLemma)
+        .filter(ExternalLexemeAnnotationLemma.lemma_id == lemma_id)
+        .order_by(ExternalLexemeAnnotation.source, ExternalLexemeAnnotation.tier_name)
+        .all()
+    )
+
+    frequency_rows = (
+        g.db.query(
+            DerivativeForm.derivative_form_text,
+            DerivativeForm.language_code,
+            Corpus.name,
+            WordFrequency.rank,
+            WordFrequency.frequency,
+        )
+        .join(WordFrequency, DerivativeForm.word_token_id == WordFrequency.word_token_id)
+        .join(Corpus, Corpus.id == WordFrequency.corpus_id)
+        .filter(DerivativeForm.lemma_id == lemma_id, DerivativeForm.word_token_id.isnot(None))
+        .order_by(DerivativeForm.language_code, Corpus.name, DerivativeForm.derivative_form_text)
+        .all()
+    )
+    enabled_corpora = {
+        corpus_name for (corpus_name,) in g.db.query(Corpus.name).filter(Corpus.enabled == True)
+    }
+    target_corpora = ["19th_books", "20th_books", "cooking", "wiki_vital"]
+    lexeme_frequency_by_corpus = {}
+    english_lexeme = get_lexeme(g.db, lemma_id, "en")
+    if english_lexeme:
+        all_rollups = get_lexeme_frequencies_all_corpora(g.db, english_lexeme)
+        for corpus_name in target_corpora:
+            if corpus_name in enabled_corpora:
+                lexeme_frequency_by_corpus[corpus_name] = all_rollups.get(corpus_name)
+
     return render_template(
         "lemmas/view.html",
         lemma=lemma,
@@ -445,6 +506,11 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         google_voices=google_voices,
         related_lemmas=related_lemmas,
         queued_tasks=queued_tasks,
+        lemma_tiers=lemma_tiers,
+        tier_display_by_source_name=tier_display_by_source_name,
+        external_annotations=external_annotations,
+        frequency_rows=frequency_rows,
+        lexeme_frequency_by_corpus=lexeme_frequency_by_corpus,
         tier_3_languages=set(TIER_3_LANGUAGES),
     )
 

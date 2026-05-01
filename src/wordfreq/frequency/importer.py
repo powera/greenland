@@ -15,7 +15,7 @@ import wordfreq.frequency.corpus
 from storage import database
 from storage.backend.config import DataSourceConfig
 from storage.connection_pool import get_session
-from storage.models.schema import Corpus, WordFrequency, WordToken
+from storage.models.schema import Corpus, ExternalLexemeAnnotation, WordFrequency, WordToken
 from wordfreq.translation.client import LinguisticClient
 
 # Configure logging
@@ -363,11 +363,99 @@ def import_frequency_data(
             f"Successfully imported {imported_count}/{total_count} words for corpus '{corpus_name}'"
         )
         return (imported_count, total_count)
-
     except Exception as e:
         logger.error(f"Error importing frequency data: {e}")
         session.rollback()
         raise
+
+
+def import_frequency_as_annotations(
+    file_path: str,
+    corpus_name: str,
+    language_code: str = "en",
+    file_type: str = "json",
+    max_words: int = 5000,
+    value_type: str = "auto",
+    config: Optional["DataSourceConfig"] = None,
+) -> Tuple[int, int]:
+    """Import corpus rows into external_lexeme_annotations instead of word_frequencies.
+
+    Creates/updates rows under source ``wordfreq_<corpus_name>`` with:
+    - tier_name: rank bucket (very_common/common/rare)
+    - notes: JSON payload with original rank/frequency and corpus metadata
+    """
+    if config is None:
+        config = DataSourceConfig()
+    imported_count, total_count = import_frequency_data(
+        file_path=file_path,
+        corpus_name=corpus_name,
+        language_code=language_code,
+        file_type=file_type,
+        max_words=max_words,
+        value_type=value_type,
+        config=config,
+    )
+
+    # Re-read canonical rows from DB, then mirror into ExternalLexemeAnnotation.
+    session = get_session(config)
+    source_name = f"wordfreq_{corpus_name}"
+    try:
+        corpus = session.query(Corpus).filter(Corpus.name == corpus_name).first()
+        if corpus is None:
+            return (0, total_count)
+
+        rows = (
+            session.query(WordFrequency, WordToken)
+            .join(WordToken, WordToken.id == WordFrequency.word_token_id)
+            .filter(WordFrequency.corpus_id == corpus.id, WordToken.language_code == language_code)
+            .order_by(WordFrequency.rank.asc().nullslast(), WordToken.token.asc())
+            .limit(max_words)
+            .all()
+        )
+
+        for wf_row, token_row in rows:
+            rank_value = wf_row.rank if wf_row.rank is not None else 10**9
+            if rank_value <= 1000:
+                tier_name = "very_common"
+            elif rank_value <= 4000:
+                tier_name = "common"
+            else:
+                tier_name = "rare"
+
+            existing_annotation = (
+                session.query(ExternalLexemeAnnotation)
+                .filter(
+                    ExternalLexemeAnnotation.word_token_id == token_row.id,
+                    ExternalLexemeAnnotation.source == source_name,
+                    ExternalLexemeAnnotation.pos_hint.is_(None),
+                    ExternalLexemeAnnotation.sense_hint.is_(None),
+                )
+                .first()
+            )
+            notes_payload = json.dumps(
+                {
+                    "corpus": corpus_name,
+                    "rank": wf_row.rank,
+                    "frequency": wf_row.frequency,
+                }
+            )
+            if existing_annotation is None:
+                session.add(
+                    ExternalLexemeAnnotation(
+                        word_token_id=token_row.id,
+                        source=source_name,
+                        tier_name=tier_name,
+                        notes=notes_payload,
+                    )
+                )
+            else:
+                existing_annotation.tier_name = tier_name
+                existing_annotation.notes = notes_payload
+
+        session.commit()
+        return (len(rows), total_count)
+    finally:
+        session.close()
 
 
 # NOTE: The import_all_corpus_data function has been moved to corpus.py as load_all_corpora()
