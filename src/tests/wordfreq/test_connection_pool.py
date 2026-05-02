@@ -12,6 +12,7 @@ from unittest.mock import MagicMock, patch
 # Add the src directory to the path so we can import the module
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
+from storage.backend.config import BackendType, DataSourceConfig
 from storage.connection_pool import ConnectionPool, close_thread_sessions, get_session
 
 
@@ -190,18 +191,23 @@ class TestConnectionPool(unittest.TestCase):
 
     def test_convenience_functions(self):
         """Test the convenience functions get_session and close_thread_sessions."""
+        config = DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=self.db_path)
+
         # Get a session using the convenience function
-        session1 = get_session(self.db_path)
+        session1 = get_session(config)
 
         # Verify we can get the same session again
-        session2 = get_session(self.db_path)
+        session2 = get_session(config)
         self.assertIs(
             session1, session2, "Should return the same session for the same thread and db_path"
         )
 
         # Create a different session for a different db
         different_db_path = os.path.join(self.temp_dir.name, "different.db")
-        different_session = get_session(different_db_path)
+        different_config = DataSourceConfig(
+            backend_type=BackendType.SQLITE, sqlite_path=different_db_path
+        )
+        different_session = get_session(different_config)
         self.assertIsNot(
             session1, different_session, "Should return different sessions for different db_paths"
         )
@@ -218,7 +224,7 @@ class TestConnectionPool(unittest.TestCase):
         different_session.close.assert_called_once()
 
         # Verify we get a new session after closing
-        new_session = get_session(self.db_path)
+        new_session = get_session(config)
         self.assertIsNot(session1, new_session, "Should return a new session after closing")
 
 

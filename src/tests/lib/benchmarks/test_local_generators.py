@@ -31,7 +31,7 @@ class TestBenchmarkGenerators(unittest.TestCase):
 
         # Create a patch for the database insert_benchmark function
         self.patch_insert_benchmark = patch(
-            "datastore.benchmarks.insert_benchmark", return_value=(True, "Success")
+            "benchmarks.datastore.benchmarks.insert_benchmark", return_value=(True, "Success")
         )
         self.mock_insert_benchmark = self.patch_insert_benchmark.start()
 
@@ -228,7 +228,7 @@ class TestBenchmarkGenerators(unittest.TestCase):
         """Test the save_question method."""
         # Create a mock for insert_question
         with patch(
-            "datastore.benchmarks.insert_question", return_value=(True, "Success")
+            "benchmarks.datastore.benchmarks.insert_question", return_value=(True, "Success")
         ) as mock_insert_question:
             # Create a basic generator
             generator = BenchmarkGenerator(self.test_metadata, self.mock_session)
