@@ -17,12 +17,10 @@ from sqlalchemy import or_
 from ipa import has_ipa_characters
 from storage.database import create_database_session
 from storage.models.schema import (
-    Corpus,
     DerivativeForm,
     Lemma,
     Sentence,
     SentenceTranslation,
-    WordFrequency,
     WordToken,
 )
 
@@ -144,58 +142,6 @@ class IntegrityChecker:
         except Exception as e:
             logger.error(f"Error checking derivative form word tokens: {e}")
             return {"error": str(e), "total_checked": 0, "issue_count": 0, "issues": []}
-        finally:
-            session.close()
-
-    def check_orphaned_word_frequencies(self) -> Dict[str, Any]:
-        """Check for word frequencies with invalid word_token_id or corpus_id."""
-        logger.info("Checking for orphaned word frequencies...")
-
-        session = self.get_session()
-        try:
-            valid_token_ids = set(token_id for token_id, in session.query(WordToken.id).all())
-            valid_corpus_ids = set(corpus_id for corpus_id, in session.query(Corpus.id).all())
-
-            logger.info(
-                f"Found {len(valid_token_ids)} valid token IDs and {len(valid_corpus_ids)} valid corpus IDs"
-            )
-
-            frequencies = session.query(WordFrequency).all()
-            orphaned = []
-
-            for freq in frequencies:
-                issues = []
-                if freq.word_token_id not in valid_token_ids:
-                    issues.append(f"invalid_word_token_id: {freq.word_token_id}")
-                if freq.corpus_id not in valid_corpus_ids:
-                    issues.append(f"invalid_corpus_id: {freq.corpus_id}")
-
-                if issues:
-                    orphaned.append(
-                        {
-                            "id": freq.id,
-                            "word_token_id": freq.word_token_id,
-                            "corpus_id": freq.corpus_id,
-                            "issues": issues,
-                        }
-                    )
-
-            logger.info(f"Found {len(orphaned)} orphaned word frequencies")
-
-            return {
-                "total_checked": len(frequencies),
-                "orphaned_count": len(orphaned),
-                "orphaned_frequencies": orphaned,
-            }
-
-        except Exception as e:
-            logger.error(f"Error checking orphaned word frequencies: {e}")
-            return {
-                "error": str(e),
-                "total_checked": 0,
-                "orphaned_count": 0,
-                "orphaned_frequencies": [],
-            }
         finally:
             session.close()
 
@@ -1034,7 +980,6 @@ class IntegrityChecker:
             "checks": {
                 "orphaned_derivative_forms": self.check_orphaned_derivative_forms(),
                 "derivative_form_word_tokens": self.check_derivative_form_word_tokens(),
-                "orphaned_word_frequencies": self.check_orphaned_word_frequencies(),
                 "missing_required_fields": self.check_missing_required_fields(),
                 "lemmas_without_derivatives": self.check_lemmas_without_derivatives(),
                 "duplicate_guids": self.check_duplicate_guids(),
@@ -1085,7 +1030,6 @@ class IntegrityChecker:
         logger.info(
             f"  Derivative forms (invalid/mismatched word_token): {checks['derivative_form_word_tokens']['issue_count']}"
         )
-        logger.info(f"  Word frequencies: {checks['orphaned_word_frequencies']['orphaned_count']}")
         logger.info("")
 
         missing_fields = checks["missing_required_fields"]
@@ -1146,7 +1090,6 @@ class IntegrityChecker:
         total_issues = (
             checks["orphaned_derivative_forms"]["orphaned_count"]
             + checks["derivative_form_word_tokens"]["issue_count"]
-            + checks["orphaned_word_frequencies"]["orphaned_count"]
             + missing_fields["total_issues"]
             + checks["lemmas_without_derivatives"]["without_forms_count"]
             + checks["duplicate_guids"]["duplicate_count"]
@@ -1210,12 +1153,10 @@ def main() -> None:
         results = {
             "derivative_forms": checker.check_orphaned_derivative_forms(),
             "derivative_form_word_tokens": checker.check_derivative_form_word_tokens(),
-            "word_frequencies": checker.check_orphaned_word_frequencies(),
         }
         total = (
             results["derivative_forms"]["orphaned_count"]
             + results["derivative_form_word_tokens"]["issue_count"]
-            + results["word_frequencies"]["orphaned_count"]
         )
         print(f"\nTotal orphaned records: {total}")
 

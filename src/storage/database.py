@@ -33,12 +33,13 @@ from storage.models.schema import (
     Sentence,
     SentenceTranslation,
     SentenceWord,
-    WordFrequency,
     WordToken,
 )
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 from storage.crud.derivative_form import (
@@ -107,7 +108,6 @@ from storage.crud.sentence_word import (
     get_sentence_words,
     update_sentence_word,
 )
-from storage.crud.word_frequency import add_word_frequency
 
 # Import CRUD operations
 from storage.crud.word_token import (
@@ -202,7 +202,6 @@ __all__ = [
     "SentenceTranslation",
     "SentenceWord",
     "Corpus",
-    "WordFrequency",
     "QueryLog",
     "GrammarFact",
     "GuidTombstone",
@@ -256,8 +255,6 @@ __all__ = [
     "add_alternative_form",
     "get_alternative_forms_for_lemma",
     "add_complete_word_entry",
-    # Word Frequency CRUD
-    "add_word_frequency",
     # Sentence CRUD
     "add_sentence",
     "get_sentence_by_id",

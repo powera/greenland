@@ -92,9 +92,6 @@ class WordToken(Base):
     derivative_forms = relationship(
         "DerivativeForm", back_populates="word_token", cascade="all, delete-orphan"
     )
-    frequencies = relationship(
-        "WordFrequency", back_populates="word_token", cascade="all, delete-orphan"
-    )
 
 
 class Lemma(Base):
@@ -115,9 +112,11 @@ class Lemma(Base):
     difficulty_level: Mapped[Optional[int]] = mapped_column(
         Integer, nullable=True
     )  # For which Trakaido "level"
-    frequency_rank: Mapped[Optional[int]] = mapped_column(
-        Integer, nullable=True
-    )  # Combined frequency rank
+    # Combined frequency rank: weighted harmonic mean across enabled wordfreq
+    # corpora and YLE/CEFR tier signals. Batch-computed by
+    # ``wordfreq.frequency.combined_rank``; refresh via ``pradzia --calc-ranks``
+    # after bulk lemma/form/tier changes.
+    frequency_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array of tags
 
     # Language-specific translations of the lemma concept
@@ -587,29 +586,6 @@ class Corpus(Base):
     updated_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP, server_default=func.now(), onupdate=func.now(), nullable=True
     )
-
-    # Relationships
-    word_frequencies = relationship(
-        "WordFrequency", back_populates="corpus", cascade="all, delete-orphan"
-    )
-
-
-class WordFrequency(Base):
-    """Model for storing word frequency in different corpora - tied to WordToken."""
-
-    __tablename__ = "word_frequencies"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    word_token_id: Mapped[int] = mapped_column(ForeignKey("word_tokens.id"), nullable=False)
-    corpus_id: Mapped[int] = mapped_column(ForeignKey("corpus.id"), nullable=False)
-    rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    frequency: Mapped[Optional[float]] = mapped_column(
-        Float, nullable=True
-    )  # Optional raw frequency
-
-    # Relationships
-    word_token = relationship("WordToken", back_populates="frequencies")
-    corpus = relationship("Corpus", back_populates="word_frequencies")
 
 
 class TierDefinition(Base):

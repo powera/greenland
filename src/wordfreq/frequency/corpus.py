@@ -322,17 +322,14 @@ def get_corpus_size(
         should_close = False
 
     try:
-        corpus = (
-            session.query(storage.models.schema.Corpus)
-            .filter(storage.models.schema.Corpus.name == corpus_name)
-            .first()
-        )
-        if not corpus:
-            return 0
-
+        # Corpus size is the number of ExternalLexemeAnnotation rows under the
+        # ``wordfreq_<corpus_name>`` source.
         count: int = (
-            session.query(storage.models.schema.WordFrequency)
-            .filter(storage.models.schema.WordFrequency.corpus_id == corpus.id)
+            session.query(storage.models.schema.ExternalLexemeAnnotation)
+            .filter(
+                storage.models.schema.ExternalLexemeAnnotation.source
+                == f"wordfreq_{corpus_name}"
+            )
             .count()
         )
         return count

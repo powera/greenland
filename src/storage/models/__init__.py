@@ -27,7 +27,6 @@ from storage.models.schema import (
     SentencePatternWord,
     SentenceTranslation,
     SentenceWord,
-    WordFrequency,
     WordToken,
 )
 from storage.models.translations import Translation, TranslationSet
@@ -62,6 +61,5 @@ __all__ = [
     "TranslationSet",
     "VerbSubtype",
     "WordExclusion",
-    "WordFrequency",
     "WordToken",
 ]

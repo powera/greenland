@@ -16,7 +16,7 @@ from flask.typing import ResponseReturnValue
 
 import constants
 from barsukas.routes.agents_launcher import running_tasks
-from storage.models.schema import Corpus, Lemma, WordFrequency, WordToken
+from storage.models.schema import Corpus, ExternalLexemeAnnotation, Lemma, WordToken
 
 bp = Blueprint("pradzia", __name__, url_prefix="/pradzia")
 
@@ -26,7 +26,7 @@ def get_database_stats() -> Dict[str, Any]:
     try:
         lemma_count = g.db.query(Lemma).count()
         token_count = g.db.query(WordToken).count()
-        freq_count = g.db.query(WordFrequency).count()
+        freq_count = g.db.query(ExternalLexemeAnnotation).count()
         corpus_count = g.db.query(Corpus).count()
         enabled_corpus_count = g.db.query(Corpus).filter(Corpus.enabled == True).count()
 

@@ -30,7 +30,12 @@ from util.logging_config import configure_logging, get_logger
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.imports import PendingImport, WordExclusion
-from storage.models.schema import Corpus, DerivativeForm, Lemma, WordFrequency, WordToken
+from storage.models.schema import (
+    DerivativeForm,
+    ExternalLexemeAnnotation,
+    Lemma,
+    WordToken,
+)
 from wordfreq.translation.client import LinguisticClient
 
 # Configure logging
@@ -138,20 +143,25 @@ class DramblysAgent:
                 if not is_valid_word(word):
                     continue
 
-                # Get frequency data
-                frequencies = (
-                    session.query(WordFrequency)
-                    .filter(WordFrequency.word_token_id == token.id)
+                annotations = (
+                    session.query(ExternalLexemeAnnotation)
+                    .filter(
+                        ExternalLexemeAnnotation.word_token_id == token.id,
+                        ExternalLexemeAnnotation.source.like("wordfreq_%"),
+                    )
                     .all()
                 )
 
                 corpus_info = []
-                for freq in frequencies:
-                    corpus = session.query(Corpus).filter(Corpus.id == freq.corpus_id).first()
-                    if corpus:
-                        corpus_info.append(
-                            {"corpus": corpus.name, "rank": freq.rank, "frequency": freq.frequency}
-                        )
+                for annotation in annotations:
+                    corpus_name = annotation.source.removeprefix("wordfreq_")
+                    corpus_info.append(
+                        {
+                            "corpus": corpus_name,
+                            "rank": annotation.ordinal_rank,
+                            "frequency": annotation.frequency,
+                        }
+                    )
 
                 missing_words.append(
                     {

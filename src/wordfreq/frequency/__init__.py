@@ -1,11 +1,6 @@
 """Word frequency analysis and corpus management."""
 
-from wordfreq.frequency.analysis import (
-    analyze_corpus_correlations,
-    calculate_combined_ranks,
-    export_frequency_data,
-    export_ranked_word_list,
-)
+from wordfreq.frequency.combined_rank import calculate_lemma_combined_ranks
 from wordfreq.frequency.corpus import (
     CorpusConfig,
     get_all_corpus_configs,
@@ -14,19 +9,13 @@ from wordfreq.frequency.corpus import (
     load_all_corpora,
     load_corpus,
 )
-from wordfreq.frequency.importer import import_frequency_data, process_stopwords
 
 __all__ = [
-    "calculate_combined_ranks",
-    "export_ranked_word_list",
-    "export_frequency_data",
-    "analyze_corpus_correlations",
+    "calculate_lemma_combined_ranks",
     "CorpusConfig",
     "get_corpus_config",
     "get_enabled_corpus_configs",
     "get_all_corpus_configs",
     "load_corpus",
     "load_all_corpora",
-    "import_frequency_data",
-    "process_stopwords",
 ]

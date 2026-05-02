@@ -260,7 +260,6 @@ def find_duplicates_integrity() -> ResponseReturnValue:
         "orphaned": lambda: {
             "derivative_forms": checker.check_orphaned_derivative_forms(),
             "derivative_form_word_tokens": checker.check_derivative_form_word_tokens(),
-            "word_frequencies": checker.check_orphaned_word_frequencies(),
         },
         "missing-fields": checker.check_missing_required_fields,
         "no-derivatives": checker.check_lemmas_without_derivatives,
