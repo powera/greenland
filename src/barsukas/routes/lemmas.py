@@ -2,7 +2,9 @@
 
 """Routes for lemma management."""
 
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from sqlalchemy import func
 
 from barsukas.config import Config
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
@@ -426,16 +428,6 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         .order_by(LemmaTier.source, LemmaTier.tier_name)
         .all()
     )
-    tier_definitions = (
-        g.db.query(TierDefinition)
-        .filter(TierDefinition.source.in_([tier.source for tier in lemma_tiers]))
-        .all()
-        if lemma_tiers
-        else []
-    )
-    tier_display_by_source_name = {
-        (row.source, row.tier_name): (row.display_name or row.tier_name) for row in tier_definitions
-    }
 
     external_annotations = (
         g.db.query(ExternalLexemeAnnotation)
@@ -445,17 +437,54 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         .all()
     )
 
+    tier_sources: set[str] = {tier.source for tier in lemma_tiers} | {
+        annotation.source for annotation in external_annotations
+    }
+    tier_definitions = (
+        g.db.query(TierDefinition).filter(TierDefinition.source.in_(tier_sources)).all()
+        if tier_sources
+        else []
+    )
+    tier_display_by_source_name: Dict[Tuple[str, str], str] = {
+        (row.source, row.tier_name): (row.display_name or row.tier_name) for row in tier_definitions
+    }
+    tier_ordinal_by_source_name: Dict[Tuple[str, str], int] = {
+        (row.source, row.tier_name): row.ordinal for row in tier_definitions
+    }
+    tier_size_by_source: Dict[str, int] = {}
+    for row in tier_definitions:
+        tier_size_by_source[row.source] = tier_size_by_source.get(row.source, 0) + 1
+
     from wordfreq.frequency.corpus import get_enabled_corpus_configs
 
     target_corpora = ["19th_books", "20th_books", "cooking", "wiki_vital"]
     enabled_corpora = {cfg.name for cfg in get_enabled_corpus_configs()}
     lexeme_frequency_by_corpus = {}
+    lexeme_rank_by_corpus: Dict[str, Optional[int]] = {}
     english_lexeme = get_lexeme(g.db, lemma_id, "en")
     if english_lexeme:
         all_rollups = get_lexeme_frequencies_all_corpora(g.db, english_lexeme)
+        form_token_ids = [
+            form.word_token_id for form in english_lexeme.forms if form.word_token_id is not None
+        ]
         for corpus_name in target_corpora:
-            if corpus_name in enabled_corpora:
-                lexeme_frequency_by_corpus[corpus_name] = all_rollups.get(corpus_name)
+            if corpus_name not in enabled_corpora:
+                continue
+            lexeme_frequency_by_corpus[corpus_name] = all_rollups.get(corpus_name)
+            best_rank: Optional[int] = None
+            if form_token_ids:
+                source_name = f"wordfreq_{corpus_name}"
+                rank_row = (
+                    g.db.query(func.min(ExternalLexemeAnnotation.ordinal_rank))
+                    .filter(
+                        ExternalLexemeAnnotation.word_token_id.in_(form_token_ids),
+                        ExternalLexemeAnnotation.source == source_name,
+                        ExternalLexemeAnnotation.ordinal_rank.isnot(None),
+                    )
+                    .scalar()
+                )
+                best_rank = int(rank_row) if rank_row is not None else None
+            lexeme_rank_by_corpus[corpus_name] = best_rank
 
     return render_template(
         "lemmas/view.html",
@@ -492,8 +521,11 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         queued_tasks=queued_tasks,
         lemma_tiers=lemma_tiers,
         tier_display_by_source_name=tier_display_by_source_name,
+        tier_ordinal_by_source_name=tier_ordinal_by_source_name,
+        tier_size_by_source=tier_size_by_source,
         external_annotations=external_annotations,
         lexeme_frequency_by_corpus=lexeme_frequency_by_corpus,
+        lexeme_rank_by_corpus=lexeme_rank_by_corpus,
         tier_3_languages=set(TIER_3_LANGUAGES),
     )
 
