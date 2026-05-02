@@ -87,6 +87,15 @@ BOOTSTRAP_TIER_DEFINITIONS: Dict[str, Tuple[_TierSpec, ...]] = {
         _TierSpec("C1", 5, "C1", "CEFR C1 (Effective Operational Proficiency)"),
         _TierSpec("C2", 6, "C2", "CEFR C2 (Mastery)"),
     ),
+    "basic_english": (
+        _TierSpec("basic", 1, "Basic", "Ogden's Basic English (core 850)"),
+        _TierSpec(
+            "extended",
+            2,
+            "Extended",
+            "Basic English extended set (compound, international, addendum, endings)",
+        ),
+    ),
     **{source: WORDFREQ_TIER_SPECS for source in WORDFREQ_SOURCES},
 }
 

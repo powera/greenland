@@ -32,6 +32,11 @@ from agents.common.common_args import (
     get_data_source_config,
 )
 from wordfreq.frequency import combined_rank, corpus
+from wordfreq.tiers.basic_english import BasicEnglishImporter
+from wordfreq.tiers.cambridge_yle import CambridgeYleImporter
+from wordfreq.tiers.cefr import CefrImporter
+from wordfreq.tiers.base import TierImporter
+from wordfreq.tiers.runner import run_import as run_tier_import
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.database import (
@@ -343,6 +348,41 @@ class PradziaAgent:
         logger.info(f"Corpus loading complete")
         return result
 
+    def import_tiers(self, dry_run: bool = False) -> Dict[str, Any]:
+        """Run every English tier importer (YLE, CEFR, Basic English).
+
+        Each importer reads its default data file under ``data/`` and writes
+        ``ExternalLexemeAnnotation`` + ``LemmaTier`` rows. ``run_import``
+        bootstraps any missing TierDefinition rows for its source.
+        """
+        logger.info(f"Importing tier annotations (dry_run={dry_run})...")
+        importers: List[TierImporter] = [
+            CambridgeYleImporter(),
+            CefrImporter(),
+            BasicEnglishImporter(),
+        ]
+        per_source: Dict[str, Dict[str, Any]] = {}
+        for importer in importers:
+            session = self.get_session()
+            try:
+                report = run_tier_import(session, importer, dry_run=dry_run)
+                per_source[importer.source] = {
+                    "total": report.total,
+                    "annotations_inserted": report.annotations_inserted,
+                    "annotations_updated": report.annotations_updated,
+                    "lemma_links_inserted": report.lemma_links_inserted,
+                    "lemma_tiers_inserted": report.lemma_tiers_inserted,
+                    "lemma_tiers_updated": report.lemma_tiers_updated,
+                    "unattached": report.unattached,
+                    "unknown_tier_names": report.unknown_tier_names,
+                }
+            except Exception as e:
+                logger.error(f"Tier import failed for {importer.source}: {e}")
+                per_source[importer.source] = {"success": False, "error": str(e)}
+            finally:
+                session.close()
+        return {"dry_run": dry_run, "success": True, "sources": per_source}
+
     def calculate_ranks(self, dry_run: bool = False) -> Dict[str, Any]:
         """
         Calculate combined ranks for all words across corpora.
@@ -563,8 +603,12 @@ class PradziaAgent:
         logger.info("Step 3: Loading enabled corpora...")
         results["corpus_load"] = self.load_corpora(dry_run=dry_run)
 
-        # Step 4: Calculate ranks
-        logger.info("Step 4: Calculating combined ranks...")
+        # Step 4: Import tier annotations (YLE / CEFR / Basic English)
+        logger.info("Step 4: Importing tier annotations...")
+        results["tier_import"] = self.import_tiers(dry_run=dry_run)
+
+        # Step 5: Calculate ranks
+        logger.info("Step 5: Calculating combined ranks...")
         results["rank_calculation"] = self.calculate_ranks(dry_run=dry_run)
 
         end_time = datetime.now()
@@ -685,9 +729,16 @@ def get_argument_parser() -> argparse.ArgumentParser:
         metavar="CORPUS",
         help="Load specified corpora (or all enabled if none specified)",
     )
+    mode_group.add_argument(
+        "--import-tiers",
+        action="store_true",
+        help="Import tier annotations (Cambridge YLE, CEFR, Basic English)",
+    )
     mode_group.add_argument("--calc-ranks", action="store_true", help="Calculate combined ranks")
     mode_group.add_argument(
-        "--init-full", action="store_true", help="Full initialization (sync + load + calc ranks)"
+        "--init-full",
+        action="store_true",
+        help="Full initialization (sync + load + import tiers + calc ranks)",
     )
     mode_group.add_argument(
         "--bootstrap",
@@ -745,6 +796,26 @@ def main() -> None:
 
         if not args.dry_run:
             print(f"\nLoaded {result['successful_corpora']}/{result['total_corpora']} corpora")
+
+    elif args.import_tiers:
+        result = agent.import_tiers(dry_run=args.dry_run)
+
+        if args.output:
+            import json
+
+            with open(args.output, "w", encoding="utf-8") as f:
+                json.dump(result, f, indent=2, ensure_ascii=False)
+
+        if not args.dry_run and result.get("success"):
+            for source, info in result.get("sources", {}).items():
+                if "error" in info:
+                    print(f"\n{source}: FAILED ({info['error']})")
+                    continue
+                print(
+                    f"\n{source}: {info['total']} entries, "
+                    f"{info['lemma_tiers_inserted']}+{info['lemma_tiers_updated']} tier rows, "
+                    f"{info['unattached']} unattached"
+                )
 
     elif args.calc_ranks:
         result = agent.calculate_ranks(dry_run=args.dry_run)
