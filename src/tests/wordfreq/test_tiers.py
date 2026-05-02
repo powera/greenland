@@ -53,7 +53,8 @@ def test_bootstrap_inserts_yle_and_cefr() -> None:
     session = _make_session()
     try:
         inserted = bootstrap_tier_definitions(session)
-        assert inserted == 3 + 6
+        expected = sum(len(specs) for specs in BOOTSTRAP_TIER_DEFINITIONS.values())
+        assert inserted == expected
         yle = session.query(TierDefinition).filter(TierDefinition.source == "cambridge_yle").all()
         assert sorted((t.tier_name, t.ordinal) for t in yle) == [
             ("flyers", 3),
