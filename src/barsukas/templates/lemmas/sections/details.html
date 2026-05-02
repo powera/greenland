@@ -143,7 +143,14 @@
                                         {% for tier in lemma_tiers %}
                                         <tr>
                                             <td><code>{{ tier.source }}</code></td>
-                                            <td>{{ tier_display_by_source_name.get((tier.source, tier.tier_name), tier.tier_name) }}</td>
+                                            <td>
+                                                {{ tier_display_by_source_name.get((tier.source, tier.tier_name), tier.tier_name) }}
+                                                {% set ordinal = tier_ordinal_by_source_name.get((tier.source, tier.tier_name)) %}
+                                                {% set tier_size = tier_size_by_source.get(tier.source) %}
+                                                {% if ordinal and tier_size %}
+                                                    <span class="text-muted">({{ ordinal }} of {{ tier_size }})</span>
+                                                {% endif %}
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -168,7 +175,14 @@
                                         {% for annotation in external_annotations %}
                                         <tr>
                                             <td><code>{{ annotation.source }}</code></td>
-                                            <td>{{ annotation.tier_name }}</td>
+                                            <td>
+                                                {{ annotation.tier_name }}
+                                                {% set ordinal = tier_ordinal_by_source_name.get((annotation.source, annotation.tier_name)) %}
+                                                {% set tier_size = tier_size_by_source.get(annotation.source) %}
+                                                {% if ordinal and tier_size %}
+                                                    <span class="text-muted">({{ ordinal }} of {{ tier_size }})</span>
+                                                {% endif %}
+                                            </td>
                                             <td>{{ annotation.pos_hint or "—" }}</td>
                                         </tr>
                                         {% endfor %}
@@ -189,6 +203,7 @@
                                         <tr>
                                             <th>Corpus</th>
                                             <th>Total Lexeme Frequency (per million)</th>
+                                            <th>Best Rank</th>
                                             <th>Contributing Forms</th>
                                         </tr>
                                     </thead>
@@ -201,6 +216,14 @@
                                                     {{ "%.2f"|format(rollup.total_frequency) }}
                                                 {% else %}
                                                     <span class="text-muted">No lexeme row</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% set best_rank = lexeme_rank_by_corpus.get(corpus_name) %}
+                                                {% if best_rank is not none %}
+                                                    {{ best_rank }}
+                                                {% else %}
+                                                    <span class="text-muted">—</span>
                                                 {% endif %}
                                             </td>
                                             <td>
