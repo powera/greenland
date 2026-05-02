@@ -216,42 +216,7 @@
                                 </table>
                             </div>
                         {% else %}
-                            <p class="text-muted mb-3">No enabled lexeme-based corpora configured for this lemma yet.</p>
-                        {% endif %}
-
-                        <h6 class="mb-2">Word Frequency Modules</h6>
-                        {% if frequency_rows %}
-                            <div class="table-responsive">
-                                <table class="table table-sm table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Form</th>
-                                            <th>Lang</th>
-                                            <th>Module</th>
-                                            <th>Rank</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for row in frequency_rows %}
-                                        <tr>
-                                            <td>{{ row.derivative_form_text }}</td>
-                                            <td><code>{{ row.language_code }}</code></td>
-                                            <td><code>{{ row.name }}</code></td>
-                                            <td>
-                                                {% if row.rank is not none %}
-                                                    {{ row.rank }}
-                                                {% else %}
-                                                    <span class="text-muted">—</span>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <p class="text-muted small mb-0">Supports current YLE-connected data and future corpora like <code>19th_books</code> and <code>cooking_wordfreq</code>.</p>
-                        {% else %}
-                            <p class="text-muted mb-0">No frequency-module rows linked to this lemma’s tokenized derivative forms yet.</p>
+                            <p class="text-muted mb-0">No enabled lexeme-based corpora configured for this lemma yet.</p>
                         {% endif %}
                     </div>
                 </div>

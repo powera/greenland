@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
-from storage.models.schema import Corpus, DerivativeForm, Lemma, WordFrequency, WordToken
+from storage.models.schema import DerivativeForm, Lemma, WordToken
 
 
 def get_processing_stats(session: Session) -> Dict[str, Any]:
@@ -15,7 +15,6 @@ def get_processing_stats(session: Session) -> Dict[str, Any]:
         session.query(func.count(WordToken.id)).join(DerivativeForm).scalar()
     )
 
-    # Count totals
     total_lemmas = session.query(func.count(Lemma.id)).scalar()
     total_derivative_forms = session.query(func.count(DerivativeForm.id)).scalar()
 
@@ -31,33 +30,28 @@ def get_processing_stats(session: Session) -> Dict[str, Any]:
 
 
 def list_problematic_words(session: Session, limit: int = 10) -> List[Dict[str, Any]]:
+    """Get words that need review (unverified derivative forms).
+
+    Ordered by ``Lemma.frequency_rank`` (combined across corpora and tier
+    sources). Returns data in format expected by reviewer.py.
     """
-    Get words that need review (unverified derivative forms).
-    Returns data in format expected by reviewer.py.
-    """
-    # Query derivative forms that are unverified
     query = (
-        session.query(WordToken, DerivativeForm, Lemma, WordFrequency)
-        .join(DerivativeForm)
-        .join(Lemma)
-        .outerjoin(WordFrequency)
-        .outerjoin(Corpus, WordFrequency.corpus_id == Corpus.id)
+        session.query(WordToken, DerivativeForm, Lemma)
+        .join(DerivativeForm, DerivativeForm.word_token_id == WordToken.id)
+        .join(Lemma, DerivativeForm.lemma_id == Lemma.id)
         .filter(DerivativeForm.verified == False)
-        .filter((Corpus.name == "wiki_vital") | (Corpus.name == None))
-        .order_by(WordFrequency.rank.nullslast())
+        .order_by(Lemma.frequency_rank.nullslast())
         .limit(limit)
     )
 
-    results: List[Dict[str, Any]] = []
-    word_groups = {}
+    word_groups: Dict[str, Dict[str, Any]] = {}
 
-    # Group by word token
-    for word_token, derivative_form, lemma, word_frequency in query:
+    for word_token, derivative_form, lemma in query:
         word_text = word_token.token
         if word_text not in word_groups:
             word_groups[word_text] = {
                 "word": word_text,
-                "rank": word_frequency.rank if word_frequency else None,
+                "rank": lemma.frequency_rank,
                 "definitions": [],
             }
 

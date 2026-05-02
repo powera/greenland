@@ -299,12 +299,10 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
     from storage.crud.guid_tombstone import get_tombstones_by_lemma_id
     from storage.lexeme import get_lexeme
     from storage.models.schema import (
-        Corpus,
         ExternalLexemeAnnotation,
         ExternalLexemeAnnotationLemma,
         LemmaTier,
         TierDefinition,
-        WordFrequency,
     )
     from wordfreq.lexeme_frequency import get_lexeme_frequencies_all_corpora
 
@@ -447,20 +445,6 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         .all()
     )
 
-    frequency_rows = (
-        g.db.query(
-            DerivativeForm.derivative_form_text,
-            DerivativeForm.language_code,
-            Corpus.name,
-            WordFrequency.rank,
-            WordFrequency.frequency,
-        )
-        .join(WordFrequency, DerivativeForm.word_token_id == WordFrequency.word_token_id)
-        .join(Corpus, Corpus.id == WordFrequency.corpus_id)
-        .filter(DerivativeForm.lemma_id == lemma_id, DerivativeForm.word_token_id.isnot(None))
-        .order_by(DerivativeForm.language_code, Corpus.name, DerivativeForm.derivative_form_text)
-        .all()
-    )
     from wordfreq.frequency.corpus import get_enabled_corpus_configs
 
     target_corpora = ["19th_books", "20th_books", "cooking", "wiki_vital"]
@@ -509,7 +493,6 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         lemma_tiers=lemma_tiers,
         tier_display_by_source_name=tier_display_by_source_name,
         external_annotations=external_annotations,
-        frequency_rows=frequency_rows,
         lexeme_frequency_by_corpus=lexeme_frequency_by_corpus,
         tier_3_languages=set(TIER_3_LANGUAGES),
     )

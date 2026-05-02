@@ -31,7 +31,7 @@ from agents.common.common_args import (
     add_output_args,
     get_data_source_config,
 )
-from wordfreq.frequency import analysis, corpus
+from wordfreq.frequency import combined_rank, corpus
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.database import (
@@ -357,33 +357,38 @@ class PradziaAgent:
 
         result: Dict[str, Any]
         if dry_run:
-            # For dry run, just report what would happen
             session = self.get_session()
             try:
-                from storage.models.schema import Corpus, WordFrequency, WordToken
+                from storage.models.schema import (
+                    ExternalLexemeAnnotation,
+                    Lemma,
+                    LemmaTier,
+                )
 
-                word_count = session.query(WordToken).count()
-                freq_count = session.query(WordFrequency).count()
-                corpus_count = session.query(Corpus).filter(Corpus.enabled == True).count()
+                lemma_count = session.query(Lemma).count()
+                annotation_count = session.query(ExternalLexemeAnnotation).count()
+                tier_count = session.query(LemmaTier).count()
 
                 result = {
                     "dry_run": True,
-                    "word_tokens": word_count,
-                    "frequency_records": freq_count,
-                    "enabled_corpora": corpus_count,
+                    "lemmas": lemma_count,
+                    "external_lexeme_annotations": annotation_count,
+                    "lemma_tiers": tier_count,
                     "would_calculate": True,
                 }
             finally:
                 session.close()
         else:
-            # Actually calculate ranks
             try:
-                logger.info("Calculating combined ranks using harmonic mean...")
-                analysis.calculate_combined_ranks(config=self.config)
-
+                logger.info("Calculating lemma combined ranks (lexeme + tier sources)...")
+                rank_result = combined_rank.calculate_lemma_combined_ranks(self.config)
                 result = {
                     "dry_run": False,
-                    "success": True,
+                    "success": rank_result.get("success", False),
+                    "lemmas_updated": rank_result.get("lemmas_updated", 0),
+                    "lemmas_scored": rank_result.get("lemmas_scored", 0),
+                    "lemmas_skipped": rank_result.get("lemmas_skipped", 0),
+                    "sources_used": rank_result.get("sources_used", []),
                     "message": "Combined ranks calculated successfully",
                 }
                 logger.info("Combined ranks calculation completed!")
