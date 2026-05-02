@@ -155,6 +155,27 @@ def test_cefr_only_lemma_gets_cefr_synthetic_rank() -> None:
         session.close()
 
 
+def test_basic_english_only_lemma_gets_synthetic_rank() -> None:
+    """A lemma whose only signal is Basic English 'basic' gets synthetic rank 400."""
+    session = _make_session()
+    try:
+        with patch.object(combined_rank, "get_enabled_corpus_configs", return_value=[]):
+            lemma = _add_lemma(session, "animal", "N50")
+            _add_form(session, lemma, "animal", word_token=None)
+            session.add(LemmaTier(lemma_id=lemma.id, source="basic_english", tier_name="basic"))
+            session.commit()
+
+            result = _patched_run(session)
+
+        assert result["success"] is True
+        session.expire_all()
+        scored = session.query(Lemma).filter_by(guid="N50").one()
+        assert scored.frequency_rank == combined_rank.BASIC_ENGLISH_TIER_RANKS["basic"]
+        assert "basic_english" in result["sources_used"]
+    finally:
+        session.close()
+
+
 def test_yle_plus_wordfreq_harmonic_mean() -> None:
     """A lemma with YLE starters (rank 200, w=1.0) + one wordfreq corpus rank 1
     (w=1.0) gets harmonic mean = 2 / (1/200 + 1/1) = 2 / 1.005 ≈ 1.99 -> 2."""

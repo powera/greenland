@@ -13,6 +13,8 @@ English lemma:
   * Cambridge YLE — fixed synthetic ranks per tier (``starters``/``movers``/
     ``flyers``), weight 1.0.
   * CEFR — fixed synthetic ranks per tier (``A1``..``C2``), weight 1.0.
+  * Basic English — fixed synthetic ranks per tier (``basic``/``extended``),
+    weight 1.0.
 
 Per-lemma combined rank is the weighted harmonic mean of the sources that
 actually contributed:
@@ -57,6 +59,12 @@ CEFR_TIER_RANKS: Dict[str, int] = {
     "C2": 25000,
 }
 CEFR_TIER_WEIGHT: float = 1.0
+
+BASIC_ENGLISH_TIER_RANKS: Dict[str, int] = {
+    "basic": 400,
+    "extended": 1200,
+}
+BASIC_ENGLISH_TIER_WEIGHT: float = 1.0
 
 # Lemmas are written back in batches of this size to bound the per-commit
 # transaction footprint on a large corpus.
@@ -211,6 +219,13 @@ def calculate_lemma_combined_ranks(
                 contributors.append((CEFR_TIER_WEIGHT, cefr_rank))
                 sources_used.add("cefr")
 
+            be_rank = _tier_rank_for_lemma(
+                tier_rows, lemma_id, "basic_english", BASIC_ENGLISH_TIER_RANKS
+            )
+            if be_rank is not None:
+                contributors.append((BASIC_ENGLISH_TIER_WEIGHT, be_rank))
+                sources_used.add("basic_english")
+
             combined = _harmonic_mean(contributors)
             if combined is None:
                 skipped += 1
@@ -258,6 +273,8 @@ def calculate_lemma_combined_ranks(
 
 
 __all__ = [
+    "BASIC_ENGLISH_TIER_RANKS",
+    "BASIC_ENGLISH_TIER_WEIGHT",
     "CEFR_TIER_RANKS",
     "CEFR_TIER_WEIGHT",
     "YLE_TIER_RANKS",
