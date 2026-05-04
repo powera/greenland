@@ -264,6 +264,44 @@ class JSONLStorage(BaseStorage):
                         if "derivative_forms" in data:
                             lemma.derivative_forms[lang_code] = data["derivative_forms"]
 
+                        # New release format: top-level "forms" array (inflections)
+                        # and "synonyms" array. Inflections are merged into the
+                        # dict-shaped derivative_forms[lang]; synonyms get their
+                        # own list because the same grammatical_form (e.g.
+                        # "synonym") can repeat per lemma.
+                        if "forms" in data and isinstance(data["forms"], list):
+                            inflections = lemma.derivative_forms.setdefault(lang_code, {})
+                            for entry in data["forms"]:
+                                gform = entry.get("grammatical_form", "")
+                                if not gform:
+                                    continue
+                                form_record: Dict[str, Any] = {
+                                    "form": entry.get("text", ""),
+                                    "is_base_form": entry.get("is_base_form", False),
+                                }
+                                if entry.get("ipa"):
+                                    form_record["ipa"] = entry["ipa"]
+                                if entry.get("phonetic"):
+                                    form_record["phonetic"] = entry["phonetic"]
+                                inflections[gform] = form_record
+
+                        if "synonyms" in data and isinstance(data["synonyms"], list):
+                            syn_list = lemma.synonyms.setdefault(lang_code, [])
+                            for entry in data["synonyms"]:
+                                gform = entry.get("grammatical_form", "")
+                                text = entry.get("text", "")
+                                if not gform or not text:
+                                    continue
+                                syn_record: Dict[str, Any] = {
+                                    "grammatical_form": gform,
+                                    "form": text,
+                                }
+                                if entry.get("ipa"):
+                                    syn_record["ipa"] = entry["ipa"]
+                                if entry.get("phonetic"):
+                                    syn_record["phonetic"] = entry["phonetic"]
+                                syn_list.append(syn_record)
+
                         if "audio_hashes" in data:
                             lemma.audio_hashes[lang_code] = data["audio_hashes"]
 
