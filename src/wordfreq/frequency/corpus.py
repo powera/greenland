@@ -327,8 +327,7 @@ def get_corpus_size(
         count: int = (
             session.query(storage.models.schema.ExternalLexemeAnnotation)
             .filter(
-                storage.models.schema.ExternalLexemeAnnotation.source
-                == f"wordfreq_{corpus_name}"
+                storage.models.schema.ExternalLexemeAnnotation.source == f"wordfreq_{corpus_name}"
             )
             .count()
         )
@@ -452,8 +451,8 @@ def load_corpus(corpus_name: str, config: Optional["DataSourceConfig"] = None) -
     """
     Load a corpus by name using its configuration.
 
-    This function replaces the need to call import_frequency_data directly
-    by looking up the corpus configuration and using those parameters.
+    Looks up the corpus configuration and imports the data file into
+    ``external_lexeme_annotations`` via ``import_frequency_as_annotations``.
 
     Args:
         corpus_name: Name of the corpus to load
