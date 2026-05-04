@@ -167,13 +167,18 @@ def _query_by_letter(lang: str, letter: str) -> Query:  # type: ignore[type-arg]
 
 
 def _query_by_level(lang: str, level: int) -> Query:  # type: ignore[type-arg]
-    """Query filtered to a single difficulty level."""
+    """Query filtered to a single difficulty level.
+
+    Within a level, sort by combined frequency rank (most common first), with
+    unranked lemmas pushed to the end and broken alphabetically.
+    """
     q = _base_query_for_lang(lang).filter(Lemma.difficulty_level == level)
+    rank_sort = (Lemma.frequency_rank.is_(None), Lemma.frequency_rank)
     if lang == "en":
-        return q.order_by(func.lower(Lemma.lemma_text), Lemma.id)
+        return q.order_by(*rank_sort, func.lower(Lemma.lemma_text), Lemma.id)
     if lang in _SORT_KEY_LANGUAGES:
-        return q.order_by(LemmaTranslation.sort_key, Lemma.id)
-    return q.order_by(func.lower(LemmaTranslation.translation), Lemma.id)
+        return q.order_by(*rank_sort, LemmaTranslation.sort_key, Lemma.id)
+    return q.order_by(*rank_sort, func.lower(LemmaTranslation.translation), Lemma.id)
 
 
 def _query_by_category(
@@ -425,6 +430,7 @@ def dictionary() -> ResponseReturnValue:
                 "disambiguation": lm.disambiguation,
                 "pos_type": lm.pos_type,
                 "difficulty_level": lm.difficulty_level,
+                "frequency_rank": lm.frequency_rank,
                 "translations": trans,
             }
         )
