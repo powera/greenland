@@ -44,25 +44,25 @@ logger = logging.getLogger(__name__)
 
 # Synthetic rank assignments for tier sources. Lower = more common.
 YLE_TIER_RANKS: Dict[str, int] = {
-    "starters": 200,
-    "movers": 800,
-    "flyers": 2000,
+    "starters": 325,
+    "movers": 750,
+    "flyers": 1200,
 }
 YLE_TIER_WEIGHT: float = 1.0
 
 CEFR_TIER_RANKS: Dict[str, int] = {
-    "A1": 500,
-    "A2": 1500,
-    "B1": 3000,
-    "B2": 6000,
+    "A1": 800,
+    "A2": 2100,
+    "B1": 4200,
+    "B2": 6900,
     "C1": 12000,
-    "C2": 25000,
+    "C2": 20000,
 }
 CEFR_TIER_WEIGHT: float = 1.0
 
 BASIC_ENGLISH_TIER_RANKS: Dict[str, int] = {
-    "basic": 400,
-    "extended": 1200,
+    "basic": 600,
+    "extended": 1600,
 }
 BASIC_ENGLISH_TIER_WEIGHT: float = 1.0
 
