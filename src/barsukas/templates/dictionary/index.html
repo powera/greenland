@@ -97,6 +97,9 @@
                     <th class="dict-trans-col">{{ language_names[code] }}</th>
                 {% endfor %}
                 <th class="dict-pos-col">{{ LSTR.label_part_of_speech }}</th>
+                {% if sort == 'level' %}
+                    <th class="dict-freq-col">Freq Rank</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -126,11 +129,14 @@
                         </td>
                     {% endfor %}
                     <td class="dict-pos">{{ STRINGS.parts_of_speech.get(entry.pos_type, (entry.pos_type or '')|replace('_', ' ')|title) }}</td>
+                    {% if sort == 'level' %}
+                        <td class="dict-freq">{{ entry.frequency_rank if entry.frequency_rank else '—' }}</td>
+                    {% endif %}
                 </tr>
             {% endfor %}
             {% if not entries %}
                 <tr>
-                    <td colspan="{{ display_langs|length + 2 }}" class="text-center text-muted py-4">
+                    <td colspan="{{ display_langs|length + 2 + (1 if sort == 'level' else 0) }}" class="text-center text-muted py-4">
                         {% if sort == 'alpha' %}
                             {{ STRINGS.dictionary.no_entries_for_letter }}
                         {% elif sort == 'level' %}
