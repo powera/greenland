@@ -14,6 +14,25 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
+_DEFAULT_BASE_GRAMMATICAL_FORMS: Dict[str, str] = {
+    "verb": "infinitive",
+    "noun": "singular",
+    "adjective": "positive",
+    "adverb": "positive",
+}
+
+
+def _default_base_grammatical_form(pos_type: Optional[str]) -> str:
+    """Return a sensible grammatical-form label for a synthetic base form.
+
+    Mirrors ``workqueue.handlers.papuga._get_default_base_grammatical_form``;
+    duplicated here to avoid the JSONL backend depending on workqueue.
+    """
+    if not pos_type:
+        return "lemma"
+    return _DEFAULT_BASE_GRAMMATICAL_FORMS.get(pos_type, "lemma")
+
+
 class JSONLSession(BaseSession):
     """JSONL session implementation.
 
@@ -232,19 +251,46 @@ class JSONLSession(BaseSession):
             # Add derivative forms (per-language inflections / base forms).
             # The combined-rank pass uses these to identify English lemmas, so
             # they must be present in the in-memory SQLite for golden mode.
+            langs_with_explicit_base: set[str] = set()
             for lang_code, lang_forms in jsonl_lemma.derivative_forms.items():
                 for form_name, form_data in lang_forms.items():
+                    is_base = bool(form_data.get("is_base_form", False))
+                    if is_base:
+                        langs_with_explicit_base.add(lang_code)
                     derivative_forms.append(
                         {
                             "lemma_id": jsonl_lemma.id,
                             "language_code": lang_code,
                             "grammatical_form": form_name,
                             "derivative_form_text": form_data.get("form", ""),
-                            "is_base_form": form_data.get("is_base_form", False),
+                            "is_base_form": is_base,
                             "ipa_pronunciation": form_data.get("ipa"),
                             "phonetic_pronunciation": form_data.get("phonetic"),
                         }
                     )
+
+            # Synthesize a base DerivativeForm row from lemma.base_forms for
+            # any language that does not already have one in derivative_forms.
+            # Without this, English lemmas like "bread" (whose base form lives
+            # only in base_forms) would not be detected by the combined-rank
+            # pass, which filters DerivativeForm by language_code == "en".
+            for lang_code, base_data in jsonl_lemma.base_forms.items():
+                if lang_code in langs_with_explicit_base:
+                    continue
+                form_text = base_data.get("form", "")
+                if not form_text:
+                    continue
+                derivative_forms.append(
+                    {
+                        "lemma_id": jsonl_lemma.id,
+                        "language_code": lang_code,
+                        "grammatical_form": _default_base_grammatical_form(jsonl_lemma.pos_type),
+                        "derivative_form_text": form_text,
+                        "is_base_form": True,
+                        "ipa_pronunciation": base_data.get("ipa"),
+                        "phonetic_pronunciation": base_data.get("phonetic"),
+                    }
+                )
 
             # Add grammar facts
             for fact_data in jsonl_lemma.grammar_facts:
