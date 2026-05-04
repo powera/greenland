@@ -26,6 +26,39 @@ from storage.backend.config import DataSourceConfig
 logger = logging.getLogger(__name__)
 
 
+def _load_wordfreq_in_background() -> None:
+    """Populate the JSONL backend's in-memory DB with wordfreq data.
+
+    Sleeps briefly so Flask can finish binding to its port before we start
+    contending for the in-memory SQLite engine, then runs the loader. Any
+    exception is logged but never propagated — the server stays up either
+    way; golden mode just lacks frequency data until restart.
+    """
+    import time as _time
+
+    try:
+        _time.sleep(2.0)
+        from storage.backend import create_session as _create_session
+        from storage.backend.config import DataSourceConfig
+        from storage.backend.factory import _jsonl_storage_cache
+        from wordfreq.golden_loader import load_wordfreq_into_storage
+
+        # Trigger storage cache population if it hasn't happened yet so we can
+        # find the JSONLStorage instance to pass to the loader.
+        _create_session(DataSourceConfig()).close()
+
+        if not _jsonl_storage_cache:
+            logger.warning("Golden loader: no JSONL storage instance found; skipping")
+            return
+
+        # The cache is keyed by data_dir; in golden mode there is exactly one.
+        storage = next(iter(_jsonl_storage_cache.values()))
+        logger.info("Golden loader: starting wordfreq load in background thread")
+        load_wordfreq_into_storage(storage)
+    except Exception:
+        logger.exception("Golden loader: background wordfreq load failed")
+
+
 def run_flask_server(
     host: str,
     port: int,
@@ -221,6 +254,15 @@ def main() -> None:
 
     signal.signal(signal.SIGTERM, handle_shutdown)
     signal.signal(signal.SIGINT, handle_shutdown)
+
+    # In golden/hosted mode (JSONL backend), populate the in-memory wordfreq
+    # tables in a background thread so Flask can start serving immediately.
+    if persona and persona.use_jsonl:
+        threading.Thread(
+            target=_load_wordfreq_in_background,
+            name="GoldenWordfreqLoader",
+            daemon=True,
+        ).start()
 
     # Start the worker thread if enabled
     worker_thread = None

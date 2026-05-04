@@ -79,13 +79,7 @@ def _add_form(
 
 def _patched_run(session: Session) -> dict:
     """Run calculate_lemma_combined_ranks against an in-memory session."""
-
-    class _DummyConfig:
-        pass
-
-    with patch.object(combined_rank, "create_session", return_value=session):
-        with patch.object(session, "close"):
-            return combined_rank.calculate_lemma_combined_ranks(_DummyConfig())  # type: ignore[arg-type]
+    return combined_rank.calculate_lemma_combined_ranks(session)
 
 
 # `get_enabled_corpus_configs` is bound at import time inside combined_rank, so

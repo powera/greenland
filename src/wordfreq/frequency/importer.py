@@ -8,8 +8,8 @@ import os
 import re
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
-from storage.backend.config import DataSourceConfig
-from storage.connection_pool import get_session
+from sqlalchemy.orm import Session
+
 from storage.models.schema import (
     ExternalLexemeAnnotation,
     ExternalLexemeAnnotationLemma,
@@ -120,7 +120,7 @@ def _parse_frequency_file(
 
 
 def _link_wordfreq_annotations_to_lemmas(
-    session: Any,
+    session: Session,
     source_name: str,
     language_code: str,
     tokens: List[WordToken],
@@ -186,15 +186,20 @@ def _link_wordfreq_annotations_to_lemmas(
 
 
 def import_frequency_as_annotations(
+    session: Session,
+    *,
     file_path: str,
     corpus_name: str,
     language_code: str = "en",
     file_type: str = "json",
     max_words: int = 5000,
     value_type: str = "auto",
-    config: Optional["DataSourceConfig"] = None,
 ) -> Tuple[int, int]:
     """Import corpus frequency data directly into external_lexeme_annotations.
+
+    The caller owns the session lifecycle (open and close); this function
+    commits its own writes mid-stream so partial progress is durable on a
+    long load. Rolls back and re-raises on failure.
 
     Writes one row per surface form under source ``wordfreq_<corpus_name>`` with:
     - tier_name: rank bucket (very_common/common/rare)
@@ -202,9 +207,6 @@ def import_frequency_as_annotations(
     - frequency: raw frequency, when present in source data
     - notes: JSON payload with corpus name (for provenance)
     """
-    if config is None:
-        config = DataSourceConfig()
-
     logger.info(
         f"Importing {corpus_name} from {file_path} into external_lexeme_annotations "
         f"(language={language_code})"
@@ -252,7 +254,6 @@ def import_frequency_as_annotations(
     source_name = f"wordfreq_{corpus_name}"
     notes_payload = json.dumps({"corpus": corpus_name})
 
-    session = get_session(config)
     try:
         bootstrap_tier_definitions(session, sources=[source_name])
 
@@ -350,8 +351,6 @@ def import_frequency_as_annotations(
         logger.error(f"Error importing annotations for {corpus_name}: {e}")
         session.rollback()
         raise
-    finally:
-        session.close()
 
 
 # NOTE: The import_all_corpus_data function has been moved to corpus.py as load_all_corpora()
