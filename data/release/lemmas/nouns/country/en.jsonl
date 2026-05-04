@@ -1,0 +1,23 @@
+{"guid": "N45_001", "forms": [{"grammatical_form": "singular", "text": "Lithuania", "is_base_form": true, "ipa": "/lɪθˈuːniə/", "phonetic": "LITH-u-nia"}]}
+{"guid": "N45_002", "forms": [{"grammatical_form": "singular", "text": "Latvia", "is_base_form": true, "ipa": "/ˌlætˈviːə/", "phonetic": "LAT-vee-uh"}]}
+{"guid": "N45_003", "forms": [{"grammatical_form": "singular", "text": "Estonia", "is_base_form": true, "ipa": "/ˌɛs.təˈni.i.ə/", "phonetic": "ehs-tə-NEE-ee-ə"}]}
+{"guid": "N45_004", "forms": [{"grammatical_form": "singular", "text": "Poland", "is_base_form": true, "ipa": "/ˌpɒl.ənd/", "phonetic": "POL-ə-nd"}]}
+{"guid": "N45_005", "forms": [{"grammatical_form": "singular", "text": "Germany", "is_base_form": true, "ipa": "/ˈdɔɪ.ʒə.mi/", "phonetic": "DOY-juh-mee"}]}
+{"guid": "N45_006", "forms": [{"grammatical_form": "singular", "text": "France", "is_base_form": true, "ipa": "/frɑːns/", "phonetic": "FRANS"}]}
+{"guid": "N45_007", "forms": [{"grammatical_form": "singular", "text": "Spain", "is_base_form": true, "ipa": "/ˈspeɪn/", "phonetic": "SPAY-n"}]}
+{"guid": "N45_008", "forms": [{"grammatical_form": "singular", "text": "Italy", "is_base_form": true, "ipa": "/ɪˈtaɪli/", "phonetic": "IH-ty-luh"}]}
+{"guid": "N45_009", "forms": [{"grammatical_form": "singular", "text": "Russia", "is_base_form": true, "ipa": "/ˈrʊʃə/", "phonetic": "ROO-shə"}]}
+{"guid": "N45_010", "forms": [{"grammatical_form": "singular", "text": "England", "is_base_form": true, "ipa": "/ˈɛŋlənd/", "phonetic": "EN-glənd"}]}
+{"guid": "N45_011", "forms": [{"grammatical_form": "singular", "text": "United States", "is_base_form": true, "ipa": "/ˌjuːnɪtɛd ˈsɛts/", "phonetic": "YOO-nit-id SET-s"}]}
+{"guid": "N45_012", "forms": [{"grammatical_form": "singular", "text": "Canada", "is_base_form": true, "ipa": "/kəˈnædə/", "phonetic": "kuh-NAD-uh"}]}
+{"guid": "N45_013", "forms": [{"grammatical_form": "singular", "text": "Japan", "is_base_form": true, "ipa": "dʒəˈpæn", "phonetic": "JAY-puhn"}]}
+{"guid": "N45_014", "forms": [{"grammatical_form": "singular", "text": "China", "is_base_form": true, "ipa": "/ˈtʃaɪnə/", "phonetic": "CHY-nuh"}]}
+{"guid": "N45_015", "forms": [{"grammatical_form": "singular", "text": "India", "is_base_form": true, "ipa": "/ˈɪndiə/", "phonetic": "IN-dee-uh"}]}
+{"guid": "N45_016", "forms": [{"grammatical_form": "singular", "text": "Brazil", "is_base_form": true, "ipa": "ˌbræzɪl", "phonetic": "BRAH-zil"}]}
+{"guid": "N45_017", "forms": [{"grammatical_form": "singular", "text": "Australia", "is_base_form": true, "ipa": "/ɔːˈstreɪliə/", "phonetic": "AW-streigh-lee-uh"}]}
+{"guid": "N45_018", "forms": [{"grammatical_form": "singular", "text": "Sweden", "is_base_form": true, "ipa": "/swuːdɛn/", "phonetic": "SWEED-en"}]}
+{"guid": "N45_019", "forms": [{"grammatical_form": "singular", "text": "Norway", "is_base_form": true, "ipa": "/nˈoʊˌweɪ/", "phonetic": "NOH-way"}]}
+{"guid": "N45_020", "forms": [{"grammatical_form": "singular", "text": "Finland", "is_base_form": true, "ipa": "/ˈfɪnlænd/", "phonetic": "FIN-land"}]}
+{"guid": "N45_022", "forms": [{"grammatical_form": "singular", "text": "Thailand", "is_base_form": true}]}
+{"guid": "N45_023", "forms": [{"grammatical_form": "singular", "text": "Vietnam", "is_base_form": true}]}
+{"guid": "N45_025", "forms": [{"grammatical_form": "singular", "text": "Egypt", "is_base_form": true}]}

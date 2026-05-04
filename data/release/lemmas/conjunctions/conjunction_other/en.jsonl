@@ -1,0 +1,13 @@
+{"guid": "C99_001", "forms": [{"grammatical_form": "lemma", "text": "and", "is_base_form": true, "ipa": "[ˌænd] or [ən]", "phonetic": "AND-uh or uh-nd"}]}
+{"guid": "C99_002", "forms": [{"grammatical_form": "lemma", "text": "or", "is_base_form": true, "ipa": "/ɔr/", "phonetic": "OR"}]}
+{"guid": "C99_003", "forms": [{"grammatical_form": "lemma", "text": "but", "is_base_form": true, "ipa": "/bʌt/", "phonetic": "BUT"}]}
+{"guid": "C99_013", "forms": [{"grammatical_form": "lemma", "text": "because", "is_base_form": true, "ipa": "/bɪˈkɒz/", "phonetic": "BEE-koss"}]}
+{"guid": "C99_014", "forms": [{"grammatical_form": "lemma", "text": "if", "is_base_form": true, "ipa": "/ɪf/", "phonetic": "IF"}]}
+{"guid": "C99_015", "forms": [{"grammatical_form": "lemma", "text": "so", "is_base_form": true, "ipa": "/soʊ/", "phonetic": "SOH"}]}
+{"guid": "C99_017", "forms": [{"grammatical_form": "lemma", "text": "that", "is_base_form": true, "ipa": "/ðət/", "phonetic": "DAT"}]}
+{"guid": "C99_024", "forms": [{"grammatical_form": "lemma", "text": "than", "is_base_form": true, "ipa": "/ðən/", "phonetic": "DEN"}]}
+{"guid": "C99_037", "forms": [{"grammatical_form": "lemma", "text": "until", "is_base_form": true, "ipa": "/ʌnˈtɪl/", "phonetic": "UN-tihl"}]}
+{"guid": "C99_038", "forms": [{"grammatical_form": "lemma", "text": "though", "is_base_form": true, "ipa": "/ðɔʊ/", "phonetic": "THOH"}]}
+{"guid": "C99_039", "forms": [{"grammatical_form": "lemma", "text": "while", "is_base_form": true}]}
+{"guid": "C99_040", "forms": [{"grammatical_form": "lemma", "text": "although", "is_base_form": true}]}
+{"guid": "C99_041", "forms": [{"grammatical_form": "lemma", "text": "whether", "is_base_form": true}]}

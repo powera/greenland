@@ -1,0 +1,14 @@
+{"guid": "N04_001", "forms": [{"grammatical_form": "singular", "text": "cold", "is_base_form": true}]}
+{"guid": "N04_002", "forms": [{"grammatical_form": "singular", "text": "fever", "is_base_form": true, "ipa": "/ˈfivə(r)/", "phonetic": "FIV-ər"}]}
+{"guid": "N04_003", "forms": [{"grammatical_form": "singular", "text": "headache", "is_base_form": true, "ipa": "/ˈhɛd.eɪk/", "phonetic": "HED-ayk"}]}
+{"guid": "N04_004", "forms": [{"grammatical_form": "singular", "text": "cough", "is_base_form": true, "ipa": "/kɑːf/", "phonetic": "KAAF"}]}
+{"guid": "N04_005", "forms": [{"grammatical_form": "singular", "text": "flu", "is_base_form": true, "ipa": "/ˈflu/", "phonetic": "FLOO"}]}
+{"guid": "N04_006", "forms": [{"grammatical_form": "singular", "text": "allergy", "is_base_form": true, "ipa": "əlˈdʒɪ", "phonetic": "AL-jee"}]}
+{"guid": "N04_007", "forms": [{"grammatical_form": "singular", "text": "infection", "is_base_form": true, "ipa": "/ɪnˈfɛkʃən/", "phonetic": "IN-fek-shun"}]}
+{"guid": "N04_009", "forms": [{"grammatical_form": "singular", "text": "injury", "is_base_form": true, "ipa": "ˈɪndʒəri", "phonetic": "IN-jur-ee"}]}
+{"guid": "N04_010", "forms": [{"grammatical_form": "singular", "text": "disease", "is_base_form": true, "ipa": "/dɪˈziːz/", "phonetic": "DIZ-eez"}]}
+{"guid": "N04_011", "forms": [{"grammatical_form": "singular", "text": "cancer", "is_base_form": true}]}
+{"guid": "N04_012", "forms": [{"grammatical_form": "singular", "text": "diabetes", "is_base_form": true}]}
+{"guid": "N04_013", "forms": [{"grammatical_form": "singular", "text": "asthma", "is_base_form": true}]}
+{"guid": "N04_014", "forms": [{"grammatical_form": "singular", "text": "wound", "is_base_form": true}]}
+{"guid": "N04_015", "forms": [{"grammatical_form": "singular", "text": "sunburn", "is_base_form": true}]}

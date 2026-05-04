@@ -1,0 +1,69 @@
+{"guid": "N02_001", "forms": [{"grammatical_form": "singular", "text": "dog", "is_base_form": true, "ipa": "/dɒɡ/", "phonetic": "DOG"}]}
+{"guid": "N02_002", "forms": [{"grammatical_form": "singular", "text": "cat", "is_base_form": true, "ipa": "/kæt/", "phonetic": "CAT"}]}
+{"guid": "N02_003", "forms": [{"grammatical_form": "singular", "text": "bird", "is_base_form": true, "ipa": "/bɜːrd/", "phonetic": "BIRD"}]}
+{"guid": "N02_004", "forms": [{"grammatical_form": "singular", "text": "horse", "is_base_form": true, "ipa": "/hɔːrs/", "phonetic": "HAWR-s"}]}
+{"guid": "N02_005", "forms": [{"grammatical_form": "singular", "text": "cattle", "is_base_form": true, "ipa": "/ˈkæt.əl/", "phonetic": "KAT-tul"}]}
+{"guid": "N02_006", "forms": [{"grammatical_form": "singular", "text": "pig", "is_base_form": true, "ipa": "/pɪɡ/", "phonetic": "PIG"}]}
+{"guid": "N02_007", "forms": [{"grammatical_form": "singular", "text": "chicken", "is_base_form": true, "ipa": "/ˈtʃɪk.ɪn/", "phonetic": "CHIK-uhn"}]}
+{"guid": "N02_008", "forms": [{"grammatical_form": "singular", "text": "mouse", "is_base_form": true, "ipa": "/maʊs/", "phonetic": "MAWs"}]}
+{"guid": "N02_009", "forms": [{"grammatical_form": "singular", "text": "bear", "is_base_form": true, "ipa": "/bɛr/", "phonetic": "BER"}]}
+{"guid": "N02_010", "forms": [{"grammatical_form": "singular", "text": "wolf", "is_base_form": true, "ipa": "/wʊlf/", "phonetic": "WUHF"}]}
+{"guid": "N02_011", "forms": [{"grammatical_form": "singular", "text": "rabbit", "is_base_form": true, "ipa": "ˈræbɪt", "phonetic": "RAB-bit"}]}
+{"guid": "N02_012", "forms": [{"grammatical_form": "singular", "text": "whale", "is_base_form": true, "ipa": "/weɪl/", "phonetic": "WEY-uhl"}]}
+{"guid": "N02_013", "forms": [{"grammatical_form": "singular", "text": "tiger", "is_base_form": true, "ipa": "/ˈtaɪgər/", "phonetic": "TIGH-ger"}]}
+{"guid": "N02_014", "forms": [{"grammatical_form": "singular", "text": "snake", "is_base_form": true, "ipa": "/sneɪk/", "phonetic": "SNAYK"}]}
+{"guid": "N02_015", "forms": [{"grammatical_form": "singular", "text": "elephant", "is_base_form": true, "ipa": "/ˈɛl.ɪf.ənt/", "phonetic": "E-LIH-funt"}]}
+{"guid": "N02_016", "forms": [{"grammatical_form": "singular", "text": "shark", "is_base_form": true, "ipa": "/ʃɑːrk/", "phonetic": "SHAHK"}]}
+{"guid": "N02_017", "forms": [{"grammatical_form": "singular", "text": "owl", "is_base_form": true, "ipa": "/oʊl/", "phonetic": "OH-l"}]}
+{"guid": "N02_018", "forms": [{"grammatical_form": "singular", "text": "spider", "is_base_form": true, "ipa": "/ˈspaɪdər/", "phonetic": "SPY-dər"}]}
+{"guid": "N02_019", "forms": [{"grammatical_form": "singular", "text": "squirrel", "is_base_form": true, "ipa": "/ˈskwɪr.əl/", "phonetic": "SKWIR-uh-l"}]}
+{"guid": "N02_020", "forms": [{"grammatical_form": "singular", "text": "goat", "is_base_form": true}]}
+{"guid": "N02_021", "forms": [{"grammatical_form": "singular", "text": "goose", "is_base_form": true, "ipa": "gus", "phonetic": "GOO-ze"}]}
+{"guid": "N02_022", "forms": [{"grammatical_form": "singular", "text": "duck", "is_base_form": true, "ipa": "/dʌk/", "phonetic": "DUH-k"}]}
+{"guid": "N02_023", "forms": [{"grammatical_form": "singular", "text": "frog", "is_base_form": true, "ipa": "/frɔːɡ/", "phonetic": "FRAW-gh"}]}
+{"guid": "N02_024", "forms": [{"grammatical_form": "singular", "text": "butterfly", "is_base_form": true, "ipa": "/ˈbʌtəflaɪ/", "phonetic": "BOO-tuh-fly"}]}
+{"guid": "N02_025", "forms": [{"grammatical_form": "singular", "text": "turtle", "is_base_form": true, "ipa": "/ˈtɜrtəl/", "phonetic": "TUR-tuhl"}]}
+{"guid": "N02_026", "forms": [{"grammatical_form": "singular", "text": "crow", "is_base_form": true, "ipa": "/kraʊ/", "phonetic": "KROH"}]}
+{"guid": "N02_027", "forms": [{"grammatical_form": "singular", "text": "eagle", "is_base_form": true, "ipa": "/ˈiː.ɡəl/", "phonetic": "EE-geh-ul"}]}
+{"guid": "N02_028", "forms": [{"grammatical_form": "singular", "text": "sheep", "is_base_form": true, "ipa": "ʃiːp", "phonetic": "SHEEP"}]}
+{"guid": "N02_029", "forms": [{"grammatical_form": "singular", "text": "dragon", "is_base_form": true, "ipa": "/ˈdræɡ.ə.n/", "phonetic": "DRAG-uhn"}]}
+{"guid": "N02_030", "forms": [{"grammatical_form": "singular", "text": "animal", "is_base_form": true, "ipa": "/ˈænɪml/", "phonetic": "AN-ih-muhl"}]}
+{"guid": "N02_031", "forms": [{"grammatical_form": "singular", "text": "creature", "is_base_form": true, "ipa": "/ˈkriːtʃɚ/", "phonetic": "KREE-chuh"}]}
+{"guid": "N02_032", "forms": [{"grammatical_form": "singular", "text": "beast", "is_base_form": true, "ipa": "/biːst/", "phonetic": "BEAST"}]}
+{"guid": "N02_033", "forms": [{"grammatical_form": "singular", "text": "monster", "is_base_form": true, "ipa": "/ˈmɒnstər/", "phonetic": "MON-s-tuh-er"}]}
+{"guid": "N02_034", "forms": [{"grammatical_form": "singular", "text": "fish", "is_base_form": true}]}
+{"guid": "N02_035", "forms": [{"grammatical_form": "singular", "text": "lion", "is_base_form": true}]}
+{"guid": "N02_036", "forms": [{"grammatical_form": "singular", "text": "monkey", "is_base_form": true}]}
+{"guid": "N02_037", "forms": [{"grammatical_form": "singular", "text": "deer", "is_base_form": true}]}
+{"guid": "N02_038", "forms": [{"grammatical_form": "singular", "text": "fox", "is_base_form": true}]}
+{"guid": "N02_039", "forms": [{"grammatical_form": "singular", "text": "bee", "is_base_form": true}]}
+{"guid": "N02_040", "forms": [{"grammatical_form": "singular", "text": "ant", "is_base_form": true}]}
+{"guid": "N02_041", "forms": [{"grammatical_form": "singular", "text": "dolphin", "is_base_form": true}]}
+{"guid": "N02_042", "forms": [{"grammatical_form": "singular", "text": "penguin", "is_base_form": true}]}
+{"guid": "N02_043", "forms": [{"grammatical_form": "singular", "text": "giraffe", "is_base_form": true}]}
+{"guid": "N02_044", "forms": [{"grammatical_form": "singular", "text": "zebra", "is_base_form": true}]}
+{"guid": "N02_045", "forms": [{"grammatical_form": "singular", "text": "crocodile", "is_base_form": true}]}
+{"guid": "N02_046", "forms": [{"grammatical_form": "singular", "text": "donkey", "is_base_form": true}]}
+{"guid": "N02_047", "forms": [{"grammatical_form": "singular", "text": "rat", "is_base_form": true}]}
+{"guid": "N02_048", "forms": [{"grammatical_form": "singular", "text": "parrot", "is_base_form": true}]}
+{"guid": "N02_049", "forms": [{"grammatical_form": "singular", "text": "pigeon", "is_base_form": true}]}
+{"guid": "N02_050", "forms": [{"grammatical_form": "singular", "text": "bat", "is_base_form": true}]}
+{"guid": "N02_051", "forms": [{"grammatical_form": "singular", "text": "camel", "is_base_form": true}]}
+{"guid": "N02_052", "forms": [{"grammatical_form": "singular", "text": "gorilla", "is_base_form": true}]}
+{"guid": "N02_053", "forms": [{"grammatical_form": "singular", "text": "hippopotamus", "is_base_form": true}]}
+{"guid": "N02_054", "forms": [{"grammatical_form": "singular", "text": "rhinoceros", "is_base_form": true}]}
+{"guid": "N02_055", "forms": [{"grammatical_form": "singular", "text": "leopard", "is_base_form": true}]}
+{"guid": "N02_056", "forms": [{"grammatical_form": "singular", "text": "kangaroo", "is_base_form": true}]}
+{"guid": "N02_057", "forms": [{"grammatical_form": "singular", "text": "octopus", "is_base_form": true}]}
+{"guid": "N02_058", "forms": [{"grammatical_form": "singular", "text": "mosquito", "is_base_form": true}]}
+{"guid": "N02_059", "forms": [{"grammatical_form": "singular", "text": "snail", "is_base_form": true}]}
+{"guid": "N02_060", "forms": [{"grammatical_form": "singular", "text": "worm", "is_base_form": true}]}
+{"guid": "N02_061", "forms": [{"grammatical_form": "singular", "text": "rooster", "is_base_form": true}]}
+{"guid": "N02_062", "forms": [{"grammatical_form": "singular", "text": "swan", "is_base_form": true}]}
+{"guid": "N02_063", "forms": [{"grammatical_form": "singular", "text": "peacock", "is_base_form": true}]}
+{"guid": "N02_064", "forms": [{"grammatical_form": "singular", "text": "flamingo", "is_base_form": true}]}
+{"guid": "N02_065", "forms": [{"grammatical_form": "singular", "text": "panda", "is_base_form": true}]}
+{"guid": "N02_066", "forms": [{"grammatical_form": "singular", "text": "crab", "is_base_form": true}]}
+{"guid": "N02_067", "forms": [{"grammatical_form": "singular", "text": "lobster", "is_base_form": true}]}
+{"guid": "N02_069", "forms": [{"grammatical_form": "singular", "text": "fowl", "is_base_form": true}]}
+{"guid": "N02_070", "forms": [{"grammatical_form": "singular", "text": "insect", "is_base_form": true}]}

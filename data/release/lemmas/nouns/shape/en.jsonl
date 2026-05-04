@@ -1,0 +1,18 @@
+{"guid": "N37_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "circle", "is_base_form": true, "ipa": "/ˈsɜːrkəl/", "phonetic": "SER-kuhl"}, {"grammatical_form": "noun/en_plural", "text": "circles", "is_base_form": false}]}
+{"guid": "N37_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "square", "is_base_form": true, "ipa": "skwɛər", "phonetic": "SKWEE-ər"}, {"grammatical_form": "noun/en_plural", "text": "squares", "is_base_form": false}]}
+{"guid": "N37_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "triangle", "is_base_form": true, "ipa": "/ˈtrɪ.æŋ.ɡəl/", "phonetic": "TRIH-angel"}, {"grammatical_form": "noun/en_plural", "text": "triangles", "is_base_form": false}]}
+{"guid": "N37_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "rectangle", "is_base_form": true, "ipa": "/ɹˈɛk.t̬əŋ.kəl/", "phonetic": "REK-tuh-nguhl"}, {"grammatical_form": "noun/en_plural", "text": "rectangles", "is_base_form": false}]}
+{"guid": "N37_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "oval", "is_base_form": true, "ipa": "/ˈoʊvəl/", "phonetic": "OH-vuh"}, {"grammatical_form": "noun/en_plural", "text": "ovals", "is_base_form": false}]}
+{"guid": "N37_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "cube", "is_base_form": true, "ipa": "kjuːb", "phonetic": "KOO-b"}, {"grammatical_form": "noun/en_plural", "text": "cubes", "is_base_form": false}]}
+{"guid": "N37_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "sphere", "is_base_form": true, "ipa": "/sˈfɪər/", "phonetic": "SFEER"}, {"grammatical_form": "noun/en_plural", "text": "spheres", "is_base_form": false}]}
+{"guid": "N37_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "cylinder", "is_base_form": true, "ipa": "/ˈsɪlɪndər/", "phonetic": "SIL-ih-n-dər"}, {"grammatical_form": "noun/en_plural", "text": "cylinders", "is_base_form": false}]}
+{"guid": "N37_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "cone", "is_base_form": true, "ipa": "/koʊn/", "phonetic": "KOHN"}, {"grammatical_form": "noun/en_plural", "text": "cones", "is_base_form": false}]}
+{"guid": "N37_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "pyramid", "is_base_form": true, "ipa": "/paɪˈrɪmɪd/", "phonetic": "PY-ri-mid"}, {"grammatical_form": "noun/en_plural", "text": "pyramids", "is_base_form": false}]}
+{"guid": "N37_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "hexagon", "is_base_form": true, "ipa": "/ˈhɛks.əɡən/", "phonetic": "HEX-suh-guh-n"}, {"grammatical_form": "noun/en_plural", "text": "hexagons", "is_base_form": false}]}
+{"guid": "N37_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "pentagon", "is_base_form": true, "ipa": "ˌpɛnˈtɒɡɒn", "phonetic": "PENT-uh-gone"}, {"grammatical_form": "noun/en_plural", "text": "pentagons", "is_base_form": false}]}
+{"guid": "N37_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "octagon", "is_base_form": true, "ipa": "/ˈɑːktəɡɒn/", "phonetic": "AHK-tuh-ghahn"}, {"grammatical_form": "noun/en_plural", "text": "octagons", "is_base_form": false}]}
+{"guid": "N37_014", "forms": [{"grammatical_form": "singular", "text": "shape", "is_base_form": true}]}
+{"guid": "N37_015", "forms": [{"grammatical_form": "singular", "text": "angle", "is_base_form": true}]}
+{"guid": "N37_016", "forms": [{"grammatical_form": "singular", "text": "curve", "is_base_form": true}]}
+{"guid": "N37_017", "forms": [{"grammatical_form": "singular", "text": "edge", "is_base_form": true}]}
+{"guid": "N37_018", "forms": [{"grammatical_form": "singular", "text": "star", "is_base_form": true}]}
