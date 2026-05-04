@@ -315,9 +315,10 @@ class PradziaAgent:
             errors: List[str] = []
 
             for corpus_config in configs_to_load:
+                session = self.get_session()
                 try:
                     logger.info(f"Loading corpus: {corpus_config.name}")
-                    imported, total = corpus.load_corpus(corpus_config.name, config=self.config)
+                    imported, total = corpus.load_corpus(session, corpus_config.name)
                     results[corpus_config.name] = {
                         "imported": imported,
                         "total": total,
@@ -336,6 +337,8 @@ class PradziaAgent:
                         "success": False,
                         "error": str(e),
                     }
+                finally:
+                    session.close()
 
             result = {
                 "dry_run": False,
@@ -419,9 +422,10 @@ class PradziaAgent:
             finally:
                 session.close()
         else:
+            session = self.get_session()
             try:
                 logger.info("Calculating lemma combined ranks (lexeme + tier sources)...")
-                rank_result = combined_rank.calculate_lemma_combined_ranks(self.config)
+                rank_result = combined_rank.calculate_lemma_combined_ranks(session)
                 result = {
                     "dry_run": False,
                     "success": rank_result.get("success", False),
@@ -436,6 +440,8 @@ class PradziaAgent:
                 error_msg = f"Failed to calculate combined ranks: {e}"
                 logger.error(error_msg)
                 result = {"dry_run": False, "success": False, "error": str(e)}
+            finally:
+                session.close()
 
         return result
 

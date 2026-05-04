@@ -34,8 +34,6 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
-from storage.backend import create_session
-from storage.backend.config import DataSourceConfig
 from storage.models.schema import Corpus, Lemma, LemmaTier
 from wordfreq.frequency.corpus import get_enabled_corpus_configs
 
@@ -161,14 +159,17 @@ def _harmonic_mean(weighted_ranks: List[Tuple[float, int]]) -> Optional[int]:
 
 
 def calculate_lemma_combined_ranks(
-    config: DataSourceConfig,
+    session: Session,
     *,
     dry_run: bool = False,
 ) -> Dict[str, Any]:
     """Compute ``Lemma.frequency_rank`` from lexeme rollups + tier signals.
 
+    The caller owns the session lifecycle. Mid-stream commits are issued
+    while writing back ranks in batches.
+
     Args:
-        config: DataSourceConfig describing the database to read/write.
+        session: SQLAlchemy session bound to the target database.
         dry_run: If True, compute the ranks but do not write them back.
 
     Returns:
@@ -176,100 +177,94 @@ def calculate_lemma_combined_ranks(
         the ordered list of source names that contributed at least one rank.
     """
     logger.info(f"Calculating lemma combined ranks (dry_run={dry_run})...")
-    session = create_session(config)
-    try:
-        lemma_ids = _english_lemma_ids(session)
-        logger.info(f"Found {len(lemma_ids)} English lemmas to score")
+    lemma_ids = _english_lemma_ids(session)
+    logger.info(f"Found {len(lemma_ids)} English lemmas to score")
 
-        corpus_weights = _corpus_weights(session)
-        logger.info(f"Active corpora ({len(corpus_weights)}): " f"{sorted(corpus_weights.keys())}")
+    corpus_weights = _corpus_weights(session)
+    logger.info(f"Active corpora ({len(corpus_weights)}): " f"{sorted(corpus_weights.keys())}")
 
-        per_corpus_ranks: Dict[str, Dict[int, int]] = {}
-        for corpus_name in corpus_weights:
-            logger.info(f"Ranking lemmas within corpus '{corpus_name}'...")
-            per_corpus_ranks[corpus_name] = _build_corpus_rank_table(
-                session, corpus_name, lemma_ids
-            )
+    per_corpus_ranks: Dict[str, Dict[int, int]] = {}
+    for corpus_name in corpus_weights:
+        logger.info(f"Ranking lemmas within corpus '{corpus_name}'...")
+        per_corpus_ranks[corpus_name] = _build_corpus_rank_table(session, corpus_name, lemma_ids)
 
-        tier_rows_q = session.query(LemmaTier.lemma_id, LemmaTier.source, LemmaTier.tier_name).all()
-        tier_rows: Dict[Tuple[int, str], str] = {
-            (row.lemma_id, row.source): row.tier_name for row in tier_rows_q
-        }
+    tier_rows_q = session.query(LemmaTier.lemma_id, LemmaTier.source, LemmaTier.tier_name).all()
+    tier_rows: Dict[Tuple[int, str], str] = {
+        (row.lemma_id, row.source): row.tier_name for row in tier_rows_q
+    }
 
-        sources_used: set[str] = set()
-        new_ranks: Dict[int, int] = {}
-        skipped = 0
+    sources_used: set[str] = set()
+    new_ranks: Dict[int, int] = {}
+    skipped = 0
 
-        for lemma_id in lemma_ids:
-            contributors: List[Tuple[float, int]] = []
+    for lemma_id in lemma_ids:
+        contributors: List[Tuple[float, int]] = []
 
-            for corpus_name, weight in corpus_weights.items():
-                rank = per_corpus_ranks[corpus_name].get(lemma_id)
-                if rank is not None:
-                    contributors.append((weight, rank))
-                    sources_used.add(f"wordfreq_{corpus_name}")
+        for corpus_name, weight in corpus_weights.items():
+            rank = per_corpus_ranks[corpus_name].get(lemma_id)
+            if rank is not None:
+                contributors.append((weight, rank))
+                sources_used.add(f"wordfreq_{corpus_name}")
 
-            yle_rank = _tier_rank_for_lemma(tier_rows, lemma_id, "cambridge_yle", YLE_TIER_RANKS)
-            if yle_rank is not None:
-                contributors.append((YLE_TIER_WEIGHT, yle_rank))
-                sources_used.add("cambridge_yle")
+        yle_rank = _tier_rank_for_lemma(tier_rows, lemma_id, "cambridge_yle", YLE_TIER_RANKS)
+        if yle_rank is not None:
+            contributors.append((YLE_TIER_WEIGHT, yle_rank))
+            sources_used.add("cambridge_yle")
 
-            cefr_rank = _tier_rank_for_lemma(tier_rows, lemma_id, "cefr", CEFR_TIER_RANKS)
-            if cefr_rank is not None:
-                contributors.append((CEFR_TIER_WEIGHT, cefr_rank))
-                sources_used.add("cefr")
+        cefr_rank = _tier_rank_for_lemma(tier_rows, lemma_id, "cefr", CEFR_TIER_RANKS)
+        if cefr_rank is not None:
+            contributors.append((CEFR_TIER_WEIGHT, cefr_rank))
+            sources_used.add("cefr")
 
-            be_rank = _tier_rank_for_lemma(
-                tier_rows, lemma_id, "basic_english", BASIC_ENGLISH_TIER_RANKS
-            )
-            if be_rank is not None:
-                contributors.append((BASIC_ENGLISH_TIER_WEIGHT, be_rank))
-                sources_used.add("basic_english")
-
-            combined = _harmonic_mean(contributors)
-            if combined is None:
-                skipped += 1
-                continue
-            new_ranks[lemma_id] = combined
-
-        logger.info(
-            f"Computed ranks for {len(new_ranks)} lemmas; "
-            f"{skipped} skipped (no contributing sources)"
+        be_rank = _tier_rank_for_lemma(
+            tier_rows, lemma_id, "basic_english", BASIC_ENGLISH_TIER_RANKS
         )
+        if be_rank is not None:
+            contributors.append((BASIC_ENGLISH_TIER_WEIGHT, be_rank))
+            sources_used.add("basic_english")
 
-        if dry_run:
-            return {
-                "dry_run": True,
-                "success": True,
-                "lemmas_scored": len(new_ranks),
-                "lemmas_skipped": skipped,
-                "sources_used": sorted(sources_used),
-            }
+        combined = _harmonic_mean(contributors)
+        if combined is None:
+            skipped += 1
+            continue
+        new_ranks[lemma_id] = combined
 
-        updated = 0
-        ids = list(new_ranks.keys())
-        for offset in range(0, len(ids), _BATCH_SIZE):
-            batch_ids = ids[offset : offset + _BATCH_SIZE]
-            lemmas = session.query(Lemma).filter(Lemma.id.in_(batch_ids)).all()
-            for lemma in lemmas:
-                target = new_ranks[lemma.id]
-                if lemma.frequency_rank != target:
-                    lemma.frequency_rank = target
-                    updated += 1
-            session.commit()
-            logger.info(f"Wrote {min(offset + _BATCH_SIZE, len(ids))}/{len(ids)} lemma ranks")
+    logger.info(
+        f"Computed ranks for {len(new_ranks)} lemmas; "
+        f"{skipped} skipped (no contributing sources)"
+    )
 
-        logger.info(f"Lemma combined-rank update complete: {updated} rows changed")
+    if dry_run:
         return {
-            "dry_run": False,
+            "dry_run": True,
             "success": True,
             "lemmas_scored": len(new_ranks),
-            "lemmas_updated": updated,
             "lemmas_skipped": skipped,
             "sources_used": sorted(sources_used),
         }
-    finally:
-        session.close()
+
+    updated = 0
+    ids = list(new_ranks.keys())
+    for offset in range(0, len(ids), _BATCH_SIZE):
+        batch_ids = ids[offset : offset + _BATCH_SIZE]
+        lemmas = session.query(Lemma).filter(Lemma.id.in_(batch_ids)).all()
+        for lemma in lemmas:
+            target = new_ranks[lemma.id]
+            if lemma.frequency_rank != target:
+                lemma.frequency_rank = target
+                updated += 1
+        session.commit()
+        logger.info(f"Wrote {min(offset + _BATCH_SIZE, len(ids))}/{len(ids)} lemma ranks")
+
+    logger.info(f"Lemma combined-rank update complete: {updated} rows changed")
+    return {
+        "dry_run": False,
+        "success": True,
+        "lemmas_scored": len(new_ranks),
+        "lemmas_updated": updated,
+        "lemmas_skipped": skipped,
+        "sources_used": sorted(sources_used),
+    }
 
 
 __all__ = [

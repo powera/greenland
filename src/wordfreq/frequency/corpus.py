@@ -447,16 +447,17 @@ def initialize_corpus_configs(
     return sync_corpus_configs_to_db(session, db_path)
 
 
-def load_corpus(corpus_name: str, config: Optional["DataSourceConfig"] = None) -> tuple[int, int]:
+def load_corpus(session: Session, corpus_name: str) -> tuple[int, int]:
     """
     Load a corpus by name using its configuration.
 
     Looks up the corpus configuration and imports the data file into
     ``external_lexeme_annotations`` via ``import_frequency_as_annotations``.
+    The caller owns the session lifecycle.
 
     Args:
-        corpus_name: Name of the corpus to load
-        config: DataSourceConfig with backend settings (uses default if None)
+        session: SQLAlchemy session bound to the target database.
+        corpus_name: Name of the corpus to load.
 
     Returns:
         Tuple of (words imported, total words)
@@ -464,66 +465,49 @@ def load_corpus(corpus_name: str, config: Optional["DataSourceConfig"] = None) -
     Raises:
         ValueError: If corpus_name is not found in configuration
     """
-    from storage.backend.config import DataSourceConfig
-
-    # Find the corpus configuration
     corpus_config = get_corpus_config(corpus_name)
     if corpus_config is None:
         raise ValueError(f"Corpus '{corpus_name}' not found in configuration")
 
-    # Build the full file path
     data_dir = constants.WORDFREQ_DATA_DIR
     full_file_path = os.path.join(data_dir, corpus_config.file_path)
 
-    # Check if file exists
     if not os.path.exists(full_file_path):
         raise FileNotFoundError(f"Data file not found: {full_file_path}")
 
     logger.info(f"Loading corpus '{corpus_name}' from {full_file_path}")
 
-    # Import into external_lexeme_annotations (new system).
     return wordfreq.frequency.importer.import_frequency_as_annotations(
+        session,
         file_path=full_file_path,
         corpus_name=corpus_config.name,
         language_code=corpus_config.language_code,
         file_type=corpus_config.file_type,
         max_words=corpus_config.max_words,
         value_type=corpus_config.value_type,
-        config=config,
     )
 
 
-def load_all_corpora() -> Dict[str, tuple[int, int]]:
+def load_all_corpora(session: Session) -> Dict[str, tuple[int, int]]:
     """
     Load all enabled corpora using their configurations.
 
-    This function replaces the functionality from create_wordfreq_simple.py
-    by loading all enabled corpora in the configuration.
+    The caller owns the session lifecycle and is responsible for ensuring
+    tables and ``Corpus`` rows exist before calling this.
+
+    Args:
+        session: SQLAlchemy session bound to the target database.
 
     Returns:
         Dictionary mapping corpus names to (words imported, total words) tuples
     """
-    logger.info("Initializing database and clients...")
-
-    # Create database session
-    session = storage.database.create_database_session()
-
-    # Ensure all database tables exist
-    logger.info("Initializing database tables...")
-    storage.database.ensure_tables_exist(session)
-
-    # Initialize corpora entries
-    logger.info("Initializing corpora...")
-    storage.database.initialize_corpora(session)
-
-    # Load all enabled corpora
-    results = {}
+    results: Dict[str, tuple[int, int]] = {}
     enabled_configs = get_enabled_corpus_configs()
 
     for config in enabled_configs:
         try:
             logger.info(f"Loading corpus: {config.name}")
-            result = load_corpus(config.name)
+            result = load_corpus(session, config.name)
             results[config.name] = result
             logger.info(f"Successfully loaded {config.name}: {result[0]}/{result[1]} words")
         except Exception as e:
@@ -531,6 +515,5 @@ def load_all_corpora() -> Dict[str, tuple[int, int]]:
             results[config.name] = (0, 0)
 
     logger.info("Skipping combined rank calculation: corpus import now targets annotations.")
-
     logger.info("Word frequency data population completed!")
     return results
