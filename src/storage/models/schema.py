@@ -46,6 +46,14 @@ SYNONYM_GRAMMATICAL_FORMS: frozenset[str] = frozenset(
     }
 )
 
+# Non-inflection grammatical forms that can legitimately repeat per
+# (lemma, language) — same shape semantics as synonyms (list, not dict).
+# True inflectional grammatical_form values (e.g. "singular",
+# "verb/en_3s_present") are expected to be unique per (lemma, language).
+NON_INFLECTION_GRAMMATICAL_FORMS: frozenset[str] = SYNONYM_GRAMMATICAL_FORMS | frozenset(
+    {"abbreviation", "expanded_form"}
+)
+
 
 # Sense prominence values for Lemma.sense_prominence.
 # Used to split shared-token frequency across competing lemmas (homographs).

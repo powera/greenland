@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Set, Type
 from storage.backend.base import BaseSession, BaseStorage
 from storage.backend.jsonl import models
 from storage.backend.jsonl.session import JSONLSession
+from storage.models.schema import NON_INFLECTION_GRAMMATICAL_FORMS
 
 
 class JSONLStorage(BaseStorage):
@@ -265,18 +266,46 @@ class JSONLStorage(BaseStorage):
                             lemma.derivative_forms[lang_code] = data["derivative_forms"]
 
                         # New release format: top-level "forms" array (inflections)
-                        # and "synonyms" array. Inflections are merged into the
-                        # dict-shaped derivative_forms[lang]; synonyms get their
-                        # own list because the same grammatical_form (e.g.
-                        # "synonym") can repeat per lemma.
+                        # and "synonyms" array. True inflections are merged into
+                        # the dict-shaped derivative_forms[lang], which assumes
+                        # one entry per grammatical_form. Non-inflection multi-
+                        # valued forms (synonyms, abbreviation, expanded_form)
+                        # get routed into the list-shaped synonyms[lang] because
+                        # the same grammatical_form can repeat per lemma.
                         if "forms" in data and isinstance(data["forms"], list):
                             inflections = lemma.derivative_forms.setdefault(lang_code, {})
+                            syn_list_for_forms: Optional[List[Dict[str, Any]]] = None
                             for entry in data["forms"]:
                                 gform = entry.get("grammatical_form", "")
                                 if not gform:
                                     continue
+                                text = entry.get("text", "")
+                                if gform in NON_INFLECTION_GRAMMATICAL_FORMS:
+                                    if not text:
+                                        continue
+                                    if syn_list_for_forms is None:
+                                        syn_list_for_forms = lemma.synonyms.setdefault(
+                                            lang_code, []
+                                        )
+                                    syn_record: Dict[str, Any] = {
+                                        "grammatical_form": gform,
+                                        "form": text,
+                                    }
+                                    if entry.get("ipa"):
+                                        syn_record["ipa"] = entry["ipa"]
+                                    if entry.get("phonetic"):
+                                        syn_record["phonetic"] = entry["phonetic"]
+                                    syn_list_for_forms.append(syn_record)
+                                    continue
+                                if gform in inflections:
+                                    print(
+                                        f"Warning: {lang_file} guid {guid} has duplicate "
+                                        f"inflection grammatical_form '{gform}'; "
+                                        f"keeping first, dropping '{text}'"
+                                    )
+                                    continue
                                 form_record: Dict[str, Any] = {
-                                    "form": entry.get("text", ""),
+                                    "form": text,
                                     "is_base_form": entry.get("is_base_form", False),
                                 }
                                 if entry.get("ipa"):
@@ -292,7 +321,7 @@ class JSONLStorage(BaseStorage):
                                 text = entry.get("text", "")
                                 if not gform or not text:
                                     continue
-                                syn_record: Dict[str, Any] = {
+                                syn_record = {
                                     "grammatical_form": gform,
                                     "form": text,
                                 }
