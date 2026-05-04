@@ -1,0 +1,17 @@
+{"guid": "T99_001", "forms": [{"grammatical_form": "lemma", "text": "this", "is_base_form": true, "ipa": "/ðɪs/", "phonetic": "DHIS"}]}
+{"guid": "T99_002", "forms": [{"grammatical_form": "lemma", "text": "these", "is_base_form": true, "ipa": "/ðiːz/", "phonetic": "THEE-z"}]}
+{"guid": "T99_003", "forms": [{"grammatical_form": "lemma", "text": "those", "is_base_form": true, "ipa": "/ðoʊz/", "phonetic": "THOH-z"}]}
+{"guid": "T99_004", "forms": [{"grammatical_form": "lemma", "text": "some", "is_base_form": true, "ipa": "/sʌm/", "phonetic": "SOUM"}]}
+{"guid": "T99_005", "forms": [{"grammatical_form": "lemma", "text": "any", "is_base_form": true, "ipa": "/ˈeni/", "phonetic": "AY-ni"}]}
+{"guid": "T99_006", "forms": [{"grammatical_form": "lemma", "text": "another", "is_base_form": true, "ipa": "/ˌenəˈðɚ/", "phonetic": "EN-uh-DHUR"}]}
+{"guid": "T99_007", "forms": [{"grammatical_form": "lemma", "text": "other", "is_base_form": true, "ipa": "/ˈʌðər/", "phonetic": "OOD-der"}]}
+{"guid": "T99_008", "forms": [{"grammatical_form": "lemma", "text": "few", "is_base_form": true, "ipa": "fjuː", "phonetic": "FYOO"}]}
+{"guid": "T99_009", "forms": [{"grammatical_form": "lemma", "text": "such", "is_base_form": true, "ipa": "/sʌtʃ/", "phonetic": "SOOCH"}]}
+{"guid": "T99_010", "forms": [{"grammatical_form": "lemma", "text": "both", "is_base_form": true, "ipa": "/boʊθ/", "phonetic": "BOH-th"}]}
+{"guid": "T99_011", "forms": [{"grammatical_form": "lemma", "text": "same", "is_base_form": true}]}
+{"guid": "T99_012", "forms": [{"grammatical_form": "lemma", "text": "each", "is_base_form": true, "ipa": "/iːtʃ/", "phonetic": "EECH"}]}
+{"guid": "T99_013", "forms": [{"grammatical_form": "lemma", "text": "many", "is_base_form": true, "ipa": "/ˈmeni/", "phonetic": "MEH-nee"}]}
+{"guid": "T99_014", "forms": [{"grammatical_form": "lemma", "text": "several", "is_base_form": true, "ipa": "ˈsɛv.ɚl", "phonetic": "SEH-vuhl"}]}
+{"guid": "T99_015", "forms": [{"grammatical_form": "lemma", "text": "neither", "is_base_form": true}]}
+{"guid": "T99_016", "forms": [{"grammatical_form": "lemma", "text": "either", "is_base_form": true, "ipa": "/ˈiːðər/", "phonetic": "EED-ther"}]}
+{"guid": "T99_017", "forms": [{"grammatical_form": "lemma", "text": "every", "is_base_form": true, "ipa": "/ˈɛvri/", "phonetic": "EV-ruh-ee"}]}

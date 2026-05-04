@@ -1,0 +1,16 @@
+{"guid": "N43_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "blender", "is_base_form": true, "ipa": "/ˈblɛndɚ/", "phonetic": "BLEND-er"}, {"grammatical_form": "noun/en_plural", "text": "blenders", "is_base_form": false}]}
+{"guid": "N43_002", "forms": [{"grammatical_form": "singular", "text": "oven", "is_base_form": true}]}
+{"guid": "N43_003", "forms": [{"grammatical_form": "singular", "text": "refrigerator", "is_base_form": true, "ipa": "/rɪˌfrɪdʒəˈreɪtər/", "phonetic": "RI-fridge-EY-ter"}]}
+{"guid": "N43_004", "forms": [{"grammatical_form": "singular", "text": "microwave", "is_base_form": true, "ipa": "/ˌmaɪˈkrəʊ.weɪ/", "phonetic": "MY-krow-WEY"}]}
+{"guid": "N43_005", "forms": [{"grammatical_form": "singular", "text": "washing machine", "is_base_form": true, "ipa": "/ˈwɒʃɪŋ ˈmeɪʃɪn/", "phonetic": "WA-shing MAY-shin"}]}
+{"guid": "N43_006", "forms": [{"grammatical_form": "singular", "text": "dryer", "is_base_form": true, "ipa": "/ˈdraɪər/", "phonetic": "DY-ər"}]}
+{"guid": "N43_007", "forms": [{"grammatical_form": "singular", "text": "dishwasher", "is_base_form": true, "ipa": "/ˈdɪʃwɔːʃər/", "phonetic": "DISH-wosh-er"}]}
+{"guid": "N43_008", "forms": [{"grammatical_form": "singular", "text": "toaster", "is_base_form": true, "ipa": "/ˈtoʊstər/", "phonetic": "TOH-stuh"}]}
+{"guid": "N43_009", "forms": [{"grammatical_form": "singular", "text": "coffee maker", "is_base_form": true, "ipa": "kəˈfiː ˈmeɪkə(r)", "phonetic": "KOH-fee MAK-uh(r)"}]}
+{"guid": "N43_011", "forms": [{"grammatical_form": "singular", "text": "air conditioner", "is_base_form": true, "ipa": "/ˌer ˈkʌndɪʃənər/", "phonetic": "AIR-kun-DIH-shə-nər"}]}
+{"guid": "N43_012", "forms": [{"grammatical_form": "singular", "text": "stove", "is_base_form": true}]}
+{"guid": "N43_013", "forms": [{"grammatical_form": "singular", "text": "iron", "is_base_form": true}]}
+{"guid": "N43_014", "forms": [{"grammatical_form": "singular", "text": "freezer", "is_base_form": true}]}
+{"guid": "N43_015", "forms": [{"grammatical_form": "singular", "text": "kettle", "is_base_form": true}]}
+{"guid": "N43_017", "forms": [{"grammatical_form": "singular", "text": "heater", "is_base_form": true}]}
+{"guid": "N43_018", "forms": [{"grammatical_form": "singular", "text": "fan", "is_base_form": true}]}

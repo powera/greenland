@@ -1,0 +1,39 @@
+{"guid": "N46_001", "forms": [{"grammatical_form": "singular", "text": "Warsaw", "is_base_form": true, "ipa": "/ˈwɔːrzɔ/", "phonetic": "WOHR-zaw"}]}
+{"guid": "N46_002", "forms": [{"grammatical_form": "singular", "text": "Berlin", "is_base_form": true, "ipa": "/bɜːrlɪn/", "phonetic": "BURL-in"}]}
+{"guid": "N46_003", "forms": [{"grammatical_form": "singular", "text": "Paris", "is_base_form": true, "ipa": "/pəˈriː/", "phonetic": "PARE-ree"}]}
+{"guid": "N46_004", "forms": [{"grammatical_form": "singular", "text": "London", "is_base_form": true}]}
+{"guid": "N46_005", "forms": [{"grammatical_form": "singular", "text": "Rome", "is_base_form": true, "ipa": "/roʊm/", "phonetic": "ROH-m"}]}
+{"guid": "N46_006", "forms": [{"grammatical_form": "singular", "text": "Madrid", "is_base_form": true, "ipa": "/mædˈrɪd/", "phonetic": "MAD-rid"}]}
+{"guid": "N46_007", "forms": [{"grammatical_form": "singular", "text": "Moscow", "is_base_form": true, "ipa": "ˈmɒskəʊ", "phonetic": "MOH-skoh"}]}
+{"guid": "N46_008", "forms": [{"grammatical_form": "singular", "text": "New York", "is_base_form": true, "ipa": "/nuː ˈjɔːrk/", "phonetic": "NOO-yohrk"}]}
+{"guid": "N46_009", "forms": [{"grammatical_form": "singular", "text": "Chicago", "is_base_form": true, "ipa": "/tʃɪˈkɑːɡoʊ/", "phonetic": "CHEE-kah-go"}]}
+{"guid": "N46_010", "forms": [{"grammatical_form": "singular", "text": "Los Angeles", "is_base_form": true, "ipa": "/ˈloʊs æŋˈdʒɛləs/", "phonetic": "LOH-s ANG-jeh-luhs"}]}
+{"guid": "N46_011", "forms": [{"grammatical_form": "singular", "text": "Tokyo", "is_base_form": true, "ipa": "/toʊˈki.oʊ/", "phonetic": "TOH-kee-oh"}]}
+{"guid": "N46_012", "forms": [{"grammatical_form": "singular", "text": "Beijing", "is_base_form": true, "ipa": "/pɛi.dʒiŋ/", "phonetic": "PEE-jing"}]}
+{"guid": "N46_013", "forms": [{"grammatical_form": "singular", "text": "Stockholm", "is_base_form": true, "ipa": "/ˈstɒk.həlm/", "phonetic": "STOCK-huhm"}]}
+{"guid": "N46_014", "forms": [{"grammatical_form": "singular", "text": "Oslo", "is_base_form": true, "ipa": "/ˈoʊsloʊ/ and /ˈɑːzloʊ/", "phonetic": "OZ-sloh or OW-sloh"}]}
+{"guid": "N46_015", "forms": [{"grammatical_form": "singular", "text": "Helsinki", "is_base_form": true, "ipa": "[ˈhɛlˌsɪŋki, ˈhɛlˈsɪŋki]", "phonetic": "HEL-sing-ki (HEL-sing-ky)"}]}
+{"guid": "N46_016", "forms": [{"grammatical_form": "singular", "text": "Seoul", "is_base_form": true}]}
+{"guid": "N46_017", "forms": [{"grammatical_form": "singular", "text": "Cairo", "is_base_form": true}]}
+{"guid": "N46_018", "forms": [{"grammatical_form": "singular", "text": "Sydney", "is_base_form": true}]}
+{"guid": "N46_019", "forms": [{"grammatical_form": "singular", "text": "Bangkok", "is_base_form": true}]}
+{"guid": "N46_023", "forms": [{"grammatical_form": "singular", "text": "Toronto", "is_base_form": true}]}
+{"guid": "N46_024", "forms": [{"grammatical_form": "singular", "text": "Amsterdam", "is_base_form": true}]}
+{"guid": "N46_025", "forms": [{"grammatical_form": "singular", "text": "Vienna", "is_base_form": true}]}
+{"guid": "N46_026", "forms": [{"grammatical_form": "singular", "text": "Prague", "is_base_form": true}]}
+{"guid": "N46_027", "forms": [{"grammatical_form": "singular", "text": "Athens", "is_base_form": true}]}
+{"guid": "N46_028", "forms": [{"grammatical_form": "singular", "text": "Istanbul", "is_base_form": true}]}
+{"guid": "N46_029", "forms": [{"grammatical_form": "singular", "text": "Lisbon", "is_base_form": true}]}
+{"guid": "N46_030", "forms": [{"grammatical_form": "singular", "text": "Dublin", "is_base_form": true}]}
+{"guid": "N46_031", "forms": [{"grammatical_form": "singular", "text": "Copenhagen", "is_base_form": true}]}
+{"guid": "N46_032", "forms": [{"grammatical_form": "singular", "text": "Brussels", "is_base_form": true}]}
+{"guid": "N46_033", "forms": [{"grammatical_form": "singular", "text": "Barcelona", "is_base_form": true}]}
+{"guid": "N46_034", "forms": [{"grammatical_form": "singular", "text": "Shanghai", "is_base_form": true}]}
+{"guid": "N46_035", "forms": [{"grammatical_form": "singular", "text": "Mumbai", "is_base_form": true}]}
+{"guid": "N46_036", "forms": [{"grammatical_form": "singular", "text": "Singapore", "is_base_form": true}]}
+{"guid": "N46_038", "forms": [{"grammatical_form": "singular", "text": "Taipei", "is_base_form": true}]}
+{"guid": "N46_039", "forms": [{"grammatical_form": "singular", "text": "Jakarta", "is_base_form": true}]}
+{"guid": "N46_040", "forms": [{"grammatical_form": "singular", "text": "Lagos", "is_base_form": true}]}
+{"guid": "N46_041", "forms": [{"grammatical_form": "singular", "text": "Nairobi", "is_base_form": true}]}
+{"guid": "N46_043", "forms": [{"grammatical_form": "singular", "text": "Dubai", "is_base_form": true}]}
+{"guid": "N46_044", "forms": [{"grammatical_form": "singular", "text": "Melbourne", "is_base_form": true}]}

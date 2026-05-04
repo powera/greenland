@@ -1,0 +1,20 @@
+{"guid": "N42_001", "forms": [{"grammatical_form": "singular", "text": "water", "is_base_form": true, "ipa": "/ˈwɔːtər/", "phonetic": "WOH-tur"}]}
+{"guid": "N42_002", "forms": [{"grammatical_form": "singular", "text": "coffee", "is_base_form": true, "ipa": "/ˈkɑf.i/", "phonetic": "KOF-ee"}]}
+{"guid": "N42_003", "forms": [{"grammatical_form": "singular", "text": "tea", "is_base_form": true, "ipa": "/tiː/", "phonetic": "TEE"}]}
+{"guid": "N42_004", "forms": [{"grammatical_form": "singular", "text": "beer", "is_base_form": true, "ipa": "/biːr/", "phonetic": "beer"}]}
+{"guid": "N42_005", "forms": [{"grammatical_form": "abbreviation", "text": "vino", "is_base_form": false}, {"grammatical_form": "expanded_form", "text": "table wine", "is_base_form": false}, {"grammatical_form": "expanded_form", "text": "fortified wine", "is_base_form": false}, {"grammatical_form": "singular", "text": "wine", "is_base_form": true, "ipa": "/waɪn/", "phonetic": "WINE"}]}
+{"guid": "N42_006", "forms": [{"grammatical_form": "singular", "text": "milk", "is_base_form": true, "ipa": "/mɪlk/", "phonetic": "MIHLK"}]}
+{"guid": "N42_007", "forms": [{"grammatical_form": "singular", "text": "soda", "is_base_form": true, "ipa": "/ˈsoʊdə/", "phonetic": "SOH-də"}]}
+{"guid": "N42_008", "forms": [{"grammatical_form": "singular", "text": "juice", "is_base_form": true}]}
+{"guid": "N42_009", "forms": [{"grammatical_form": "singular", "text": "lemonade", "is_base_form": true}]}
+{"guid": "N42_011", "forms": [{"grammatical_form": "singular", "text": "smoothie", "is_base_form": true}]}
+{"guid": "N42_012", "forms": [{"grammatical_form": "singular", "text": "cocktail", "is_base_form": true}]}
+{"guid": "N42_013", "forms": [{"grammatical_form": "singular", "text": "liquor", "is_base_form": true}]}
+{"guid": "N42_014", "forms": [{"grammatical_form": "singular", "text": "whiskey", "is_base_form": true}]}
+{"guid": "N42_015", "forms": [{"grammatical_form": "singular", "text": "vodka", "is_base_form": true}]}
+{"guid": "N42_016", "forms": [{"grammatical_form": "singular", "text": "rum", "is_base_form": true}]}
+{"guid": "N42_017", "forms": [{"grammatical_form": "singular", "text": "champagne", "is_base_form": true}]}
+{"guid": "N42_018", "forms": [{"grammatical_form": "singular", "text": "sake", "is_base_form": true}]}
+{"guid": "N42_019", "forms": [{"grammatical_form": "singular", "text": "cider", "is_base_form": true}]}
+{"guid": "N42_020", "forms": [{"grammatical_form": "singular", "text": "beverage", "is_base_form": true}]}
+{"guid": "N42_021", "forms": [{"grammatical_form": "singular", "text": "port", "is_base_form": true}]}
