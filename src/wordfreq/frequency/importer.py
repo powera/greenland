@@ -35,8 +35,7 @@ def _parse_frequency_file(
 ) -> Dict[str, Dict[str, Optional[Union[int, float]]]]:
     """Parse a corpus frequency file into ``{lowercase_word: {"rank", "frequency"}}``.
 
-    Mirrors the parsing/normalization logic of ``import_frequency_data`` without
-    touching the database.
+    Pure parsing/normalization — no database access.
     """
     raw_words_data: Dict[str, Any] = {}
     detected_type: str = "unknown"
@@ -202,8 +201,6 @@ def import_frequency_as_annotations(
     - ordinal_rank: integer rank within the corpus (1 = most frequent)
     - frequency: raw frequency, when present in source data
     - notes: JSON payload with corpus name (for provenance)
-
-    Does not touch the legacy ``word_frequencies`` table.
     """
     if config is None:
         config = DataSourceConfig()
