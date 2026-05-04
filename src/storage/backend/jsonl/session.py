@@ -269,6 +269,27 @@ class JSONLSession(BaseSession):
                         }
                     )
 
+            # Synonyms: stored separately in lemma.synonyms (list per lang) so
+            # that repeated grammatical_form values (e.g. multiple "synonym"
+            # entries) are preserved. Emit one DerivativeForm row per entry.
+            for lang_code, syn_list in jsonl_lemma.synonyms.items():
+                for syn in syn_list:
+                    text = syn.get("form", "")
+                    gform = syn.get("grammatical_form", "")
+                    if not text or not gform:
+                        continue
+                    derivative_forms.append(
+                        {
+                            "lemma_id": jsonl_lemma.id,
+                            "language_code": lang_code,
+                            "grammatical_form": gform,
+                            "derivative_form_text": text,
+                            "is_base_form": False,
+                            "ipa_pronunciation": syn.get("ipa"),
+                            "phonetic_pronunciation": syn.get("phonetic"),
+                        }
+                    )
+
             # Synthesize a base DerivativeForm row from lemma.base_forms for
             # any language that does not already have one in derivative_forms.
             # Without this, English lemmas like "bread" (whose base form lives

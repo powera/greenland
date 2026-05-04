@@ -82,6 +82,7 @@ from barsukas.routes import (
     sync_relation_release,
     sync_release,
     sync_sentence_release,
+    sync_synonym_release,
     translations,
     wireword,
 )
@@ -233,6 +234,7 @@ def create_app(
     app.register_blueprint(sync_relation_release.bp)
     app.register_blueprint(sync_sentence_release.bp)
     app.register_blueprint(sync_derivative_release.bp)
+    app.register_blueprint(sync_synonym_release.bp)
 
     # --- Benchmarks integration ---
     # Barsukas always uses PostgreSQL to access the benchmarks schema.

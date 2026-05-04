@@ -151,6 +151,12 @@ class Lemma:
     derivative_forms: Dict[str, Dict[str, Any]] = field(
         default_factory=dict
     )  # lang_code -> {form_name -> form_data}
+    # synonyms: Stored as a list because the same grammatical_form (e.g. "synonym")
+    # can repeat. Each entry is a dict with grammatical_form, form, optional
+    # ipa/phonetic. Loaded from the top-level "synonyms" array in {lang}.jsonl.
+    synonyms: Dict[str, List[Dict[str, Any]]] = field(
+        default_factory=dict
+    )  # lang_code -> [{grammatical_form, form, ipa?, phonetic?}, ...]
     # base_forms: Used when no derivative_form has is_base_form=true for that language
     # Contains {form: str, ipa: str, phonetic: str} per language
     base_forms: Dict[str, Dict[str, Any]] = field(
@@ -194,6 +200,7 @@ class Lemma:
         data.setdefault("definitions", {})
         data.setdefault("difficulty_overrides", {})
         data.setdefault("derivative_forms", {})
+        data.setdefault("synonyms", {})
         data.setdefault("base_forms", {})
         data.setdefault("grammar_facts", [])
         data.setdefault("audio_hashes", {})
