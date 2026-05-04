@@ -180,6 +180,7 @@ class JSONLSession(BaseSession):
         from storage.models.lemma_relation import (
             LemmaRelationMember as SQLLemmaRelationMember,
         )
+        from storage.models.schema import DerivativeForm as SQLDerivativeForm
         from storage.models.schema import Lemma as SQLLemma
         from storage.models.schema import LemmaTranslation
         from storage.models.schema import Sentence as SQLSentence
@@ -189,6 +190,7 @@ class JSONLSession(BaseSession):
         # Use bulk operations for better performance
         lemmas = []
         translations = []
+        derivative_forms: list[dict] = []
         grammar_facts = []
         relation_groups = []
         relation_members = []
@@ -226,6 +228,23 @@ class JSONLSession(BaseSession):
                 if disambig:
                     trans_entry["disambiguation"] = disambig
                 translations.append(trans_entry)
+
+            # Add derivative forms (per-language inflections / base forms).
+            # The combined-rank pass uses these to identify English lemmas, so
+            # they must be present in the in-memory SQLite for golden mode.
+            for lang_code, lang_forms in jsonl_lemma.derivative_forms.items():
+                for form_name, form_data in lang_forms.items():
+                    derivative_forms.append(
+                        {
+                            "lemma_id": jsonl_lemma.id,
+                            "language_code": lang_code,
+                            "grammatical_form": form_name,
+                            "derivative_form_text": form_data.get("form", ""),
+                            "is_base_form": form_data.get("is_base_form", False),
+                            "ipa_pronunciation": form_data.get("ipa"),
+                            "phonetic_pronunciation": form_data.get("phonetic"),
+                        }
+                    )
 
             # Add grammar facts
             for fact_data in jsonl_lemma.grammar_facts:
@@ -307,6 +326,8 @@ class JSONLSession(BaseSession):
             self._sqlite_session.bulk_insert_mappings(SQLLemma, lemmas)
         if translations:
             self._sqlite_session.bulk_insert_mappings(LemmaTranslation, translations)
+        if derivative_forms:
+            self._sqlite_session.bulk_insert_mappings(SQLDerivativeForm, derivative_forms)
         if grammar_facts:
             self._sqlite_session.bulk_insert_mappings(SQLGrammarFact, grammar_facts)
         if relation_groups:
