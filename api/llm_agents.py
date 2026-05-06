@@ -12,7 +12,7 @@ genuinely requires a per-call key, do not add it here.
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 from api._http import get_json, post_json
 from api._mirror import mirrored_route
@@ -34,17 +34,20 @@ def check_translations(guid: str, *, model: Optional[str] = None) -> Any:
 
 
 @mirrored_route("/api/llm/voras/add-missing-translations", "POST")
-def add_missing_translations(guid: str, *, model: Optional[str] = None) -> Any:
-    """Generate missing translations for a lemma across all configured languages.
+def add_missing_translations(
+    guid: str,
+    *,
+    model: Optional[str] = None,
+    languages: Optional[List[str]] = None,
+) -> Any:
+    """Generate missing translations for a lemma.
 
-    The Barsukas route currently has no per-call language filter; it fills in
-    every translation language Voras is configured for. If you need
-    "translate into these specific languages only", that capability has to
-    be added on the Barsukas side first.
+    When ``languages`` is omitted/None, Voras fills all configured generation
+    languages. When provided, Voras fills only the requested language codes.
     """
     return post_json(
         "/api/llm/voras/add-missing-translations",
-        {"guid": guid, "model": model},
+        {"guid": guid, "model": model, "languages": languages},
     )
 
 
