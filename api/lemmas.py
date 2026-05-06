@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, TypedDict, cast
 
-from api._decorator import mirrored_route
+from api._mirror import mirrored_route
 from api._http import get_json
 from api.constants import API_V1_PREFIX
 
@@ -102,7 +102,7 @@ class SentenceEntry(TypedDict, total=False):
     word_info: List[SentenceWordInfo]
 
 
-@mirrored_route(f"{API_V1_PREFIX}/search", "GET")
+@mirrored_route("/api/v1/search", "GET")
 def search(
     query: str,
     *,
@@ -127,13 +127,13 @@ def search(
     )
 
 
-@mirrored_route(f"{API_V1_PREFIX}/lemma/<guid>", "GET")
+@mirrored_route("/api/v1/lemma/<guid>", "GET")
 def get_lemma(guid: str) -> Any:
     """Basic lemma details."""
     return get_json(f"{API_V1_PREFIX}/lemma/{guid}")
 
 
-@mirrored_route(f"{API_V1_PREFIX}/lemma/<guid>/translations", "GET")
+@mirrored_route("/api/v1/lemma/<guid>/translations", "GET")
 def get_translations(guid: str, *, language: Optional[str] = None) -> Any:
     """Translations of a lemma keyed by language code."""
     return get_json(
@@ -142,7 +142,7 @@ def get_translations(guid: str, *, language: Optional[str] = None) -> Any:
     )
 
 
-@mirrored_route(f"{API_V1_PREFIX}/lemma/<guid>/forms", "GET")
+@mirrored_route("/api/v1/lemma/<guid>/forms", "GET")
 def get_forms(guid: str, *, language: Optional[str] = None) -> Any:
     """Derivative/declined forms of a lemma."""
     return get_json(
@@ -151,7 +151,7 @@ def get_forms(guid: str, *, language: Optional[str] = None) -> Any:
     )
 
 
-@mirrored_route(f"{API_V1_PREFIX}/lemma/<guid>/grammar", "GET")
+@mirrored_route("/api/v1/lemma/<guid>/grammar", "GET")
 def get_grammar(guid: str, *, language: Optional[str] = None) -> Any:
     """Grammar facts about a lemma."""
     return get_json(
@@ -160,7 +160,7 @@ def get_grammar(guid: str, *, language: Optional[str] = None) -> Any:
     )
 
 
-@mirrored_route(f"{API_V1_PREFIX}/lemma/<guid>/pronunciations", "GET")
+@mirrored_route("/api/v1/lemma/<guid>/pronunciations", "GET")
 def get_pronunciations(guid: str, *, language: Optional[str] = None) -> Any:
     """Base-form IPA/phonetic pronunciations by language."""
     return get_json(
@@ -169,7 +169,7 @@ def get_pronunciations(guid: str, *, language: Optional[str] = None) -> Any:
     )
 
 
-@mirrored_route(f"{API_V1_PREFIX}/lemma/<guid>/audio", "GET")
+@mirrored_route("/api/v1/lemma/<guid>/audio", "GET")
 def get_audio(guid: str, *, language: Optional[str] = None) -> Any:
     """Audio availability for a lemma by language."""
     return get_json(
@@ -178,7 +178,7 @@ def get_audio(guid: str, *, language: Optional[str] = None) -> Any:
     )
 
 
-@mirrored_route(f"{API_V1_PREFIX}/lemma/<guid>/sentences", "GET")
+@mirrored_route("/api/v1/lemma/<guid>/sentences", "GET")
 def get_sentences(guid: str, *, language: Optional[str] = None) -> Any:
     """Example sentences using a lemma."""
     return get_json(

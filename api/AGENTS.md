@@ -15,7 +15,7 @@ models in `src/storage/`.
   live in underscore-prefixed modules and are intentionally not re-exported.
 - `api/constants.py` — shared constants: `BASE_URL` (override with the
   `BARSUKAS_API_URL` env var), API path prefix, default timeout, user-agent.
-- `api/_decorator.py` — the `mirrored_route` decorator (see "Mirroring contract"
+- `api/_mirror.py` — the `mirrored_route` decorator (see "Mirroring contract"
   below).
 - `api/_http.py` — minimal `requests.get`-based JSON transport and
   `BarsukasAPIError`.
@@ -45,7 +45,7 @@ mirrored route path and HTTP method:
 
 - Facade side (`api/`):
   ```python
-  from api._decorator import mirrored_route
+  from api._mirror import mirrored_route
 
   @mirrored_route("/api/v1/lemma/<guid>/translations", "GET")
   def get_translations(guid: str, *, language: Optional[str] = None) -> ...:
@@ -67,15 +67,22 @@ imports from the other. They set the same attribute names
 (`_mirrored_route`, `_mirrored_method`) so a precommit check can pair them
 up by value.
 
-### What the precommit check does (intended behaviour)
+### Precommit check
 
-1. Walk `api/*.py`, collect every function with `_mirrored_route` set.
-2. Walk `src/barsukas/routes/*.py`, collect every view function with
-   `_mirrored_route` set.
-3. Verify that each `(route, method)` on the facade side has exactly one
-   match on the Barsukas side, and vice versa.
-4. Verify that the route path on each side is one of the registered Flask
-   rules (catches typos in the decorator argument).
+`scripts/check_api_mirror_routes.py` AST-walks the files on both sides,
+collects every `(route_path, method)` literal passed to `@mirrored_route`
+(facade side) and `@mirrored_facade` (Barsukas side), and fails if either
+set has an entry the other doesn't.
+
+The decorator arguments must be **string literals** — f-strings or other
+expressions are rejected so the checker can read them statically without
+importing either tree.
+
+Run it directly:
+
+```
+python scripts/check_api_mirror_routes.py
+```
 
 ### Editing rules
 

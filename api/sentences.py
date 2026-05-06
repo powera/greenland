@@ -12,12 +12,12 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from api._decorator import mirrored_route
+from api._mirror import mirrored_route
 from api._http import get_json
 from api.constants import API_V1_PREFIX
 
 
-@mirrored_route(f"{API_V1_PREFIX}/metadata/sentences", "GET")
+@mirrored_route("/api/v1/metadata/sentences", "GET")
 def get_sentence_metadata(
     *,
     language: Optional[str] = None,

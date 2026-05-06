@@ -11,14 +11,14 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from api._decorator import mirrored_route
+from api._mirror import mirrored_route
 from api._http import get_json
 from api.constants import API_V1_PREFIX
 
 _PENDING_IMPORTS_PREFIX = "/pending-imports"
 
 
-@mirrored_route(f"{API_V1_PREFIX}/metadata/words", "GET")
+@mirrored_route("/api/v1/metadata/words", "GET")
 def get_word_metadata(
     *,
     language: Optional[str] = None,
@@ -31,19 +31,19 @@ def get_word_metadata(
     )
 
 
-@mirrored_route(f"{API_V1_PREFIX}/models", "GET")
+@mirrored_route("/api/v1/models", "GET")
 def list_models(*, q: Optional[str] = None) -> Any:
     """List LLM models registered in the benchmarks database."""
     return get_json(f"{API_V1_PREFIX}/models", {"q": q})
 
 
-@mirrored_route(f"{_PENDING_IMPORTS_PREFIX}/api/duplicates", "GET")
+@mirrored_route("/pending-imports/api/duplicates", "GET")
 def find_pending_import_duplicates() -> Any:
     """Find pending imports that duplicate existing lemmas (direct/form match)."""
     return get_json(f"{_PENDING_IMPORTS_PREFIX}/api/duplicates")
 
 
-@mirrored_route(f"{_PENDING_IMPORTS_PREFIX}/api/list", "GET")
+@mirrored_route("/pending-imports/api/list", "GET")
 def list_pending_imports(
     *,
     search: Optional[str] = None,
