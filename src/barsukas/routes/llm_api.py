@@ -23,7 +23,7 @@ the matching facade in the same commit. See ``api/AGENTS.md``.
 """
 
 import logging
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from barsukas.config import Config
 from barsukas.routes._mirror import mirrored_facade
@@ -292,6 +292,8 @@ def api_add_missing_translations() -> ResponseReturnValue:
 
     Request body (JSON):
         guid: Required. GUID of the lemma (e.g., 'N03_003')
+        languages: Optional list of language codes (e.g., ["hr", "bs"]).
+            When omitted/null, uses all configured Voras generation languages.
         model: Optional. LLM model to use
         openai_api_key: Optional. OpenAI API key
         anthropic_api_key: Optional. Anthropic API key
@@ -308,17 +310,49 @@ def api_add_missing_translations() -> ResponseReturnValue:
     if not guid:
         return _build_error_response("guid is required")
 
+    languages_raw = data.get("languages")
+    languages: Optional[List[str]]
+    if languages_raw is None:
+        languages = None
+    else:
+        if not isinstance(languages_raw, list) or not all(
+            isinstance(language_code, str) for language_code in languages_raw
+        ):
+            return _build_error_response("languages must be a list of language code strings")
+        languages = languages_raw
+
     lemma, error = _get_lemma_or_error(guid)
     if error:
         return error
     assert lemma is not None  # Type narrowing for mypy
 
     try:
+        from storage.translation_helpers import get_tier_1_and_tier_2_languages
+
+        allowed_languages = set(get_tier_1_and_tier_2_languages())
+        if languages is not None:
+            unknown_languages = sorted(
+                language_code
+                for language_code in languages
+                if language_code not in allowed_languages
+            )
+            if unknown_languages:
+                return _build_error_response(
+                    "Unknown language codes: "
+                    + ", ".join(unknown_languages)
+                    + ". Allowed codes: "
+                    + ", ".join(sorted(allowed_languages))
+                )
+
         config = _get_config_from_request(data)
         agent = VorasAgent(config=config)
 
         # Use the agent's fix_missing_translations method with the specific lemma
-        result = agent.fix_missing_translations(lemmas=[lemma], dry_run=False)
+        result = agent.fix_missing_translations(
+            language_code=languages,
+            lemmas=[lemma],
+            dry_run=False,
+        )
 
         g.db.commit()
 
