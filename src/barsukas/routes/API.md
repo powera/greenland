@@ -14,6 +14,9 @@ Base prefix: `/api`.
 - `GET /api/v1/search?q=<query>[&pos_type=...][&difficulty=...][&limit=...][&offset=...]`
   - Search lemmas by text/definition/translations.
 
+- `GET /api/v1/lemmas/by-difficulty?difficulty=<level>[&pos_type=...][&limit=...][&offset=...]`
+  - List lemmas for one difficulty level without supplying a text query.
+
 - `GET /api/v1/lemma/<guid>`
   - Basic lemma details.
 - `POST /api/v1/lemma/<guid>` or `PATCH /api/v1/lemma/<guid>`

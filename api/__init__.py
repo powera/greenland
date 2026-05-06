@@ -24,6 +24,7 @@ from api.lemmas import (
     get_pronunciations,
     get_sentences,
     get_translations,
+    list_by_difficulty,
     search,
 )
 from api.llm_agents import (
@@ -54,6 +55,7 @@ __all__ = [
     "get_sentences",
     "get_translations",
     "get_word_metadata",
+    "list_by_difficulty",
     "list_models",
     "list_pending_imports",
     "search",
