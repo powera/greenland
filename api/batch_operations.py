@@ -23,11 +23,12 @@ def get_word_metadata(
     *,
     language: Optional[str] = None,
     max_difficulty: Optional[int] = None,
+    difficulty: Optional[int] = None,
 ) -> Any:
     """Per-language lemma counts and metadata coverage."""
     return get_json(
         f"{API_V1_PREFIX}/metadata/words",
-        {"language": language, "max_difficulty": max_difficulty},
+        {"language": language, "max_difficulty": max_difficulty, "difficulty": difficulty},
     )
 
 

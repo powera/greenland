@@ -96,3 +96,35 @@ def post_json(
         raise BarsukasAPIError(response.status_code, message)
 
     return response.json()
+
+
+def patch_json(
+    path: str,
+    body: Optional[Mapping[str, Any]] = None,
+    *,
+    base_url: Optional[str] = None,
+    timeout: float = DEFAULT_TIMEOUT_SECONDS,
+) -> Any:
+    """PATCH ``path`` with ``body`` as JSON and return parsed JSON."""
+    if not path.startswith("/"):
+        raise ValueError(f"path must start with '/': {path!r}")
+
+    cleaned_body = {key: value for key, value in body.items() if value is not None} if body else {}
+
+    url = (base_url.rstrip("/") if base_url else BASE_URL) + path
+    response = requests.patch(
+        url,
+        json=cleaned_body,
+        timeout=timeout,
+        headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
+    )
+
+    if not response.ok:
+        try:
+            payload = response.json()
+            message = payload.get("error") or response.text
+        except ValueError:
+            message = response.text
+        raise BarsukasAPIError(response.status_code, message)
+
+    return response.json()

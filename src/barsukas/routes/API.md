@@ -16,6 +16,9 @@ Base prefix: `/api`.
 
 - `GET /api/v1/lemma/<guid>`
   - Basic lemma details.
+- `POST /api/v1/lemma/<guid>` or `PATCH /api/v1/lemma/<guid>`
+  - Update mutable lemma fields.
+  - Body: `{"difficulty_level": <int|null>}`.
 
 - `GET /api/v1/lemma/<guid>/translations[?language=<code>]`
   - Translations keyed by language code.
@@ -45,7 +48,7 @@ Base prefix: `/api`.
 
 ## Metadata endpoints (for aggregate counting)
 
-- `GET /api/v1/metadata/words[?language=<code>][&max_difficulty=<int>]`
+- `GET /api/v1/metadata/words[?language=<code>][&max_difficulty=<int>][&difficulty=<int>]`
 
 Returns per-language aggregate counts with this shape:
 
@@ -64,6 +67,8 @@ Returns per-language aggregate counts with this shape:
 - `max_difficulty`: if supplied, restricts to words whose effective difficulty
   (`COALESCE(lemma_difficulty_overrides.difficulty_level, lemma.difficulty_level)` for the
   requested language) is between 1 and `max_difficulty` inclusive (excludes -1 / NULL)
+- `difficulty`: if supplied, restricts to words whose effective difficulty exactly equals
+  that value
 
 - `GET /api/v1/metadata/sentences[?language=<code>][&max_difficulty=<int>]`
 
