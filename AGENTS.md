@@ -54,7 +54,7 @@ correctness.  For barsukas changes, ask the developer to test the change in
 their local browser.
 
 After cloning, enable pre-commit hooks to automatically check black formatting:
-  git config core.hooksPath hooks
+  git config core.hooksPath .githooks
 
 When writing HTML templates, try to avoid inline CSS/JS; use separate files.
 Also, always use ordinary form submits for POST data - do not do an AJAX-based
