@@ -35,7 +35,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy.orm import Session
 
 from storage.models.schema import Corpus, Lemma, LemmaTier
-from wordfreq.frequency.corpus import get_enabled_corpus_configs
+from wordfreq.frequency.corpus import CorpusConfig, get_enabled_corpus_configs
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +47,10 @@ YLE_TIER_RANKS: Dict[str, int] = {
     "flyers": 1200,
 }
 YLE_TIER_WEIGHT: float = 1.0
+# Rank assigned when a lemma is absent from YLE entirely. Set just past the
+# last YLE tier (flyers=1200) so non-YLE words get a mild penalty without
+# being treated as if they were rarer than C2-level vocabulary.
+YLE_UNKNOWN_RANK: int = 2000
 
 CEFR_TIER_RANKS: Dict[str, int] = {
     "A1": 800,
@@ -57,16 +61,29 @@ CEFR_TIER_RANKS: Dict[str, int] = {
     "C2": 20000,
 }
 CEFR_TIER_WEIGHT: float = 1.0
+# Rank assigned when a lemma is absent from CEFR entirely. Just past C2
+# (20000) so words outside the CEFR vocabulary get pushed below it.
+CEFR_UNKNOWN_RANK: int = 25000
 
 BASIC_ENGLISH_TIER_RANKS: Dict[str, int] = {
     "basic": 600,
     "extended": 1600,
 }
 BASIC_ENGLISH_TIER_WEIGHT: float = 1.0
+# Rank assigned when a lemma is absent from Basic English entirely. Just
+# past extended (1600); Basic English is a small curated list, so absence
+# is a weak signal but worth contributing.
+BASIC_ENGLISH_UNKNOWN_RANK: int = 2500
 
 # Lemmas are written back in batches of this size to bound the per-commit
 # transaction footprint on a large corpus.
 _BATCH_SIZE: int = 1000
+
+# Floor used when a wordfreq corpus has no entry for a lemma. Each corpus
+# can override this via ``CorpusConfig.max_unknown_rank``; when neither is
+# set, we fall back to this value (chosen to be larger than the largest
+# corpus we currently load).
+_DEFAULT_UNKNOWN_RANK: int = 20000
 
 
 def _english_lemma_ids(session: Session) -> List[int]:
@@ -129,6 +146,21 @@ def _corpus_weights(session: Session) -> Dict[str, float]:
     return weights
 
 
+def _enabled_corpus_configs_by_name() -> Dict[str, CorpusConfig]:
+    return {cfg.name: cfg for cfg in get_enabled_corpus_configs()}
+
+
+def _unknown_rank_for_corpus(cfg: CorpusConfig, corpus_size: int) -> int:
+    """Effective rank to assign when a lemma is absent from this corpus.
+
+    Mirrors ``CorpusConfig.get_effective_unknown_rank`` but uses our local
+    ``_DEFAULT_UNKNOWN_RANK`` floor. Lower of (configured cap, max(corpus
+    size, default)) so a corpus's "missing" rank is never more flattering
+    than the worst rank actually present in the corpus.
+    """
+    return cfg.get_effective_unknown_rank(corpus_size, _DEFAULT_UNKNOWN_RANK)
+
+
 def _tier_rank_for_lemma(
     tier_rows: Dict[Tuple[int, str], str],
     lemma_id: int,
@@ -188,6 +220,21 @@ def calculate_lemma_combined_ranks(
         logger.info(f"Ranking lemmas within corpus '{corpus_name}'...")
         per_corpus_ranks[corpus_name] = _build_corpus_rank_table(session, corpus_name, lemma_ids)
 
+    # Per-corpus "unknown" rank: applied when a lemma has no rollup in a given
+    # corpus. Without this floor, a word that appears only in a small corpus
+    # (e.g. "baking" in cooking) gets a deceptively high combined rank because
+    # the larger corpora silently drop out of the harmonic mean.
+    cfgs_by_name = _enabled_corpus_configs_by_name()
+    unknown_rank_by_corpus: Dict[str, int] = {}
+    for corpus_name in corpus_weights:
+        cfg = cfgs_by_name.get(corpus_name)
+        if cfg is None:
+            unknown_rank_by_corpus[corpus_name] = _DEFAULT_UNKNOWN_RANK
+        else:
+            unknown_rank_by_corpus[corpus_name] = _unknown_rank_for_corpus(
+                cfg, len(per_corpus_ranks[corpus_name])
+            )
+
     tier_rows_q = session.query(LemmaTier.lemma_id, LemmaTier.source, LemmaTier.tier_name).all()
     tier_rows: Dict[Tuple[int, str], str] = {
         (row.lemma_id, row.source): row.tier_name for row in tier_rows_q
@@ -200,21 +247,45 @@ def calculate_lemma_combined_ranks(
     for lemma_id in lemma_ids:
         contributors: List[Tuple[float, int]] = []
 
+        # Track whether this lemma had a positive signal in *any* wordfreq
+        # corpus. Only then do we apply the unknown-rank floor for the other
+        # wordfreq corpora — otherwise a lemma with zero wordfreq presence
+        # would be ranked purely from "missing everywhere" floors, which is
+        # misleading. Tier-only lemmas continue to fall through to the
+        # tier-source contributors below.
+        has_wordfreq_hit = any(
+            per_corpus_ranks[name].get(lemma_id) is not None for name in corpus_weights
+        )
+
         for corpus_name, weight in corpus_weights.items():
             rank = per_corpus_ranks[corpus_name].get(lemma_id)
             if rank is not None:
                 contributors.append((weight, rank))
                 sources_used.add(f"wordfreq_{corpus_name}")
+            elif has_wordfreq_hit:
+                contributors.append((weight, unknown_rank_by_corpus[corpus_name]))
+                sources_used.add(f"wordfreq_{corpus_name}_unknown")
 
+        # For each tier source, contribute either the lemma's tier rank or the
+        # tier's "unknown" floor if the lemma is absent. Unlike wordfreq
+        # corpora, we apply the floor unconditionally — these are curated
+        # English vocabulary lists, so "absent" is a real signal that the
+        # word is at least somewhat outside the everyday/learner core.
         yle_rank = _tier_rank_for_lemma(tier_rows, lemma_id, "cambridge_yle", YLE_TIER_RANKS)
         if yle_rank is not None:
             contributors.append((YLE_TIER_WEIGHT, yle_rank))
             sources_used.add("cambridge_yle")
+        else:
+            contributors.append((YLE_TIER_WEIGHT, YLE_UNKNOWN_RANK))
+            sources_used.add("cambridge_yle_unknown")
 
         cefr_rank = _tier_rank_for_lemma(tier_rows, lemma_id, "cefr", CEFR_TIER_RANKS)
         if cefr_rank is not None:
             contributors.append((CEFR_TIER_WEIGHT, cefr_rank))
             sources_used.add("cefr")
+        else:
+            contributors.append((CEFR_TIER_WEIGHT, CEFR_UNKNOWN_RANK))
+            sources_used.add("cefr_unknown")
 
         be_rank = _tier_rank_for_lemma(
             tier_rows, lemma_id, "basic_english", BASIC_ENGLISH_TIER_RANKS
@@ -222,6 +293,9 @@ def calculate_lemma_combined_ranks(
         if be_rank is not None:
             contributors.append((BASIC_ENGLISH_TIER_WEIGHT, be_rank))
             sources_used.add("basic_english")
+        else:
+            contributors.append((BASIC_ENGLISH_TIER_WEIGHT, BASIC_ENGLISH_UNKNOWN_RANK))
+            sources_used.add("basic_english_unknown")
 
         combined = _harmonic_mean(contributors)
         if combined is None:
@@ -270,9 +344,12 @@ def calculate_lemma_combined_ranks(
 __all__ = [
     "BASIC_ENGLISH_TIER_RANKS",
     "BASIC_ENGLISH_TIER_WEIGHT",
+    "BASIC_ENGLISH_UNKNOWN_RANK",
     "CEFR_TIER_RANKS",
     "CEFR_TIER_WEIGHT",
+    "CEFR_UNKNOWN_RANK",
     "YLE_TIER_RANKS",
     "YLE_TIER_WEIGHT",
+    "YLE_UNKNOWN_RANK",
     "calculate_lemma_combined_ranks",
 ]

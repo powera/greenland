@@ -64,6 +64,62 @@ def _make_session_for_storage(storage: "JSONLStorage") -> Session:
     return factory()
 
 
+def _link_derivative_forms_to_word_tokens(session: Session) -> int:
+    """Set ``DerivativeForm.word_token_id`` for forms whose surface text matches
+    a ``WordToken``.
+
+    The JSONL backend populates DerivativeForms from release files but never
+    sets ``word_token_id`` (no WordToken loader exists). After the wordfreq
+    importer creates WordToken rows for each annotated surface form, we wire
+    every English DerivativeForm whose ``derivative_form_text`` matches a
+    WordToken token to that WordToken. Without this link,
+    ``get_lexeme_frequency`` skips every form (it filters on
+    ``word_token_id is not None``) and rolls up zero for all wordfreq
+    corpora — meaning lemma combined ranks in golden mode collapse to
+    YLE/CEFR/Basic-English signals only.
+
+    Matching is case-insensitive on the lowercased token text, since the
+    wordfreq importer normalizes everything to lowercase.
+
+    Returns the number of DerivativeForm rows updated.
+    """
+    from storage.models.schema import DerivativeForm, WordToken
+
+    tokens = session.query(WordToken).filter(WordToken.language_code == "en").all()
+    token_id_by_text: dict[str, int] = {}
+    for token in tokens:
+        # Wordfreq imports tokens already lowercased; defend against any
+        # accidentally-cased rows by normalizing here too.
+        token_id_by_text.setdefault(token.token.lower(), token.id)
+
+    if not token_id_by_text:
+        return 0
+
+    forms = (
+        session.query(DerivativeForm)
+        .filter(
+            DerivativeForm.language_code == "en",
+            DerivativeForm.word_token_id.is_(None),
+        )
+        .all()
+    )
+
+    updated = 0
+    for form in forms:
+        text = (form.derivative_form_text or "").lower()
+        if not text:
+            continue
+        token_id = token_id_by_text.get(text)
+        if token_id is None:
+            continue
+        form.word_token_id = token_id
+        updated += 1
+
+    if updated:
+        session.commit()
+    return updated
+
+
 def _ensure_corpus_rows(session: Session) -> None:
     """Insert ``Corpus`` rows from CORPUS_CONFIGS if missing.
 
@@ -106,6 +162,7 @@ def load_wordfreq_into_storage(storage: "JSONLStorage") -> dict[str, Any]:
     summary: dict[str, Any] = {
         "corpora": {},
         "tiers": {},
+        "derivative_form_links": 0,
         "combined_rank": None,
         "elapsed_seconds": 0.0,
     }
@@ -116,6 +173,21 @@ def load_wordfreq_into_storage(storage: "JSONLStorage") -> dict[str, Any]:
 
         logger.info("Golden loader: importing wordfreq corpora")
         summary["corpora"] = corpus.load_all_corpora(session)
+
+        # Wire DerivativeForms (loaded from JSONL with no word_token_id) to the
+        # WordTokens just created by the wordfreq importer. Without this, the
+        # lexeme-frequency rollup finds no matching annotations and combined
+        # ranks fall back to tier sources only.
+        logger.info("Golden loader: linking DerivativeForms to WordTokens")
+        try:
+            summary["derivative_form_links"] = _link_derivative_forms_to_word_tokens(session)
+            logger.info(
+                f"Golden loader: linked {summary['derivative_form_links']} "
+                f"DerivativeForms to WordTokens"
+            )
+        except Exception as e:
+            logger.exception("Golden loader: derivative-form linking failed")
+            summary["derivative_form_links"] = {"error": str(e)}
 
         logger.info("Golden loader: importing tier sources")
         for importer in (CambridgeYleImporter(), CefrImporter(), BasicEnglishImporter()):
