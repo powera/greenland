@@ -102,6 +102,20 @@ class SentenceEntry(TypedDict, total=False):
     word_info: List[SentenceWordInfo]
 
 
+class WordfreqCorpusEntry(TypedDict):
+    total_frequency: Optional[float]
+    best_rank: Optional[int]
+
+
+class WordfreqLanguageEntry(TypedDict):
+    corpora: Dict[str, WordfreqCorpusEntry]
+
+
+class WordfreqResponse(TypedDict):
+    data: Dict[str, Dict[str, WordfreqCorpusEntry]]
+    metadata: Dict[str, Optional[int]]
+
+
 @mirrored_route("/api/v1/search", "GET")
 def search(
     query: str,
@@ -194,6 +208,12 @@ def get_audio(guid: str, *, language: Optional[str] = None) -> Any:
         f"{API_V1_PREFIX}/lemma/{guid}/audio",
         {"language": language},
     )
+
+
+@mirrored_route("/api/v1/lemma/<guid>/wordfreq", "GET")
+def get_wordfreq(guid: str) -> WordfreqResponse:
+    """Wordfreq corpus rollups and best ranks for a lemma by language."""
+    return cast(WordfreqResponse, get_json(f"{API_V1_PREFIX}/lemma/{guid}/wordfreq"))
 
 
 @mirrored_route("/api/v1/lemma/<guid>/sentences", "GET")
