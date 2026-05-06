@@ -137,6 +137,9 @@ def query_translations(
         response = client.generate_chat(
             prompt=prompt, model=model, json_schema=schema, context=context
         )
+        setattr(
+            client, "_last_query_cost_usd", float(response.usage.cost) if response.usage else 0.0
+        )
 
         # Log successful query
         session = get_session_func()
@@ -160,5 +163,6 @@ def query_translations(
             return {}, False
 
     except Exception as e:
+        setattr(client, "_last_query_cost_usd", 0.0)
         logger.error(f"Error generating translations for '{english_word}': {type(e).__name__}: {e}")
         return {}, False

@@ -375,6 +375,7 @@ def api_add_missing_translations() -> ResponseReturnValue:
                 "total_fixed": result.get("total_fixed", 0),
                 "total_failed": result.get("total_failed", 0),
                 "by_language": result.get("by_language", {}),
+                "llm_cost_usd": result.get("llm_cost_usd", 0.0),
             }
         )
 

@@ -12,10 +12,42 @@ genuinely requires a per-call key, do not add it here.
 
 from __future__ import annotations
 
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional, TypedDict, cast
 
 from api._http import get_json, post_json
 from api._mirror import mirrored_route
+
+
+class SuccessResponse(TypedDict):
+    """Standard success envelope returned by LLM API routes."""
+
+    success: bool
+
+
+class AddMissingTranslationsLanguageStats(TypedDict):
+    """Per-language statistics for generated translations."""
+
+    language_name: str
+    total_missing: int
+    fixed: int
+    failed: int
+
+
+class AddMissingTranslationsData(TypedDict):
+    """Payload returned by ``/api/llm/voras/add-missing-translations``."""
+
+    guids: List[str]
+    missing_guids: List[str]
+    total_fixed: int
+    total_failed: int
+    by_language: Dict[str, AddMissingTranslationsLanguageStats]
+    llm_cost_usd: float
+
+
+class AddMissingTranslationsResponse(SuccessResponse):
+    """Response envelope for add-missing-translations."""
+
+    data: AddMissingTranslationsData
 
 
 @mirrored_route("/api/llm/info", "GET")
@@ -40,15 +72,22 @@ def add_missing_translations(
     guids: Optional[List[str]] = None,
     model: Optional[str] = None,
     languages: Optional[List[str]] = None,
-) -> Any:
-    """Generate missing translations for a lemma.
+) -> AddMissingTranslationsResponse:
+    """Generate missing translations for one or more lemmas.
 
     When ``languages`` is omitted/None, Voras fills all configured generation
     languages. When provided, Voras fills only the requested language codes.
+
+    Returns:
+        A typed response envelope with aggregate counts, per-language stats,
+        and ``llm_cost_usd`` for the request.
     """
-    return post_json(
-        "/api/llm/voras/add-missing-translations",
-        {"guid": guid, "guids": guids, "model": model, "languages": languages},
+    return cast(
+        AddMissingTranslationsResponse,
+        post_json(
+            "/api/llm/voras/add-missing-translations",
+            {"guid": guid, "guids": guids, "model": model, "languages": languages},
+        ),
     )
 
 
