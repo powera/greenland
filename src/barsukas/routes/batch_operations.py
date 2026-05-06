@@ -3,6 +3,7 @@
 
 """Routes for viewing batch operations."""
 
+from barsukas.routes.mirror_metadata import mirrored_by_api
 from flask import Blueprint, render_template, request
 from flask.typing import ResponseReturnValue
 
@@ -18,6 +19,7 @@ bp = Blueprint("batch_operations", __name__, url_prefix="/batch-operations")
 
 
 @bp.route("/")
+@mirrored_by_api("/batch-operations/", "GET")
 def list_batches() -> ResponseReturnValue:
     """List batch operations with filtering."""
     status_filter = request.args.get("status", "").strip()

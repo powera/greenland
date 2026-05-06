@@ -6,6 +6,7 @@
 from typing import Any, Union
 
 from barsukas.config import Config
+from barsukas.routes.mirror_metadata import mirrored_by_api
 from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 from sqlalchemy import case, func, or_
@@ -42,6 +43,7 @@ bp = Blueprint("sentences", __name__, url_prefix="/sentences")
 
 
 @bp.route("/")
+@mirrored_by_api("/sentences/", "GET")
 def list_sentences() -> ResponseReturnValue:
     """List all sentences with pagination and filtering."""
     page = request.args.get("page", 1, type=int)

@@ -21,6 +21,7 @@ import logging
 from typing import Any, Dict, Optional, Tuple, Union
 
 from barsukas.config import Config
+from barsukas.routes.mirror_metadata import mirrored_by_api
 from flask import Blueprint, g, jsonify, request
 from flask.typing import ResponseReturnValue
 
@@ -190,6 +191,7 @@ def api_info() -> ResponseReturnValue:
 
 
 @bp.route("/voras/check-translations", methods=["POST"])
+@mirrored_by_api("/api/llm/voras/check-translations", "POST")
 def api_check_translations() -> ResponseReturnValue:
     """Check translations for a lemma using LLM validation.
 
@@ -278,6 +280,7 @@ def api_check_translations() -> ResponseReturnValue:
 
 
 @bp.route("/voras/add-missing-translations", methods=["POST"])
+@mirrored_by_api("/api/llm/voras/add-missing-translations", "POST")
 def api_add_missing_translations() -> ResponseReturnValue:
     """Generate missing translations for a lemma.
 
@@ -330,6 +333,7 @@ def api_add_missing_translations() -> ResponseReturnValue:
 
 
 @bp.route("/papuga/generate-pronunciations", methods=["POST"])
+@mirrored_by_api("/api/llm/papuga/generate-pronunciations", "POST")
 def api_generate_pronunciations() -> ResponseReturnValue:
     """Generate pronunciations for a lemma's forms.
 

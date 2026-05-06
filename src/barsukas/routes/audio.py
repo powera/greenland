@@ -41,6 +41,7 @@ from audioshoe.espeak import EspeakVoice
 from audioshoe.qwen.types import QwenVoice
 from audioshoe.piper import PiperVoice
 from barsukas.helpers.audio_helpers import link_audio_to_lemma, validate_audio_translation
+from barsukas.routes.mirror_metadata import mirrored_by_api
 from clients.audio import Voice
 from clients.audio.gpt_voices import GptVoice
 from clients.audio.azure_tts import AzureVoice
@@ -227,6 +228,7 @@ def import_manifest() -> ResponseReturnValue:
 
 
 @bp.route("/list")
+@mirrored_by_api("/audio/list", "GET")
 def list_files() -> ResponseReturnValue:
     """List audio files with filters and search."""
     # Get filter parameters

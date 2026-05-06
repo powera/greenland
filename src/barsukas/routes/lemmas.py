@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from sqlalchemy import func
 
 from barsukas.config import Config
+from barsukas.routes.mirror_metadata import mirrored_by_api
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
@@ -193,6 +194,7 @@ def add_lemma() -> ResponseReturnValue:
 
 
 @bp.route("/")
+@mirrored_by_api("/lemmas/", "GET")
 def list_lemmas() -> ResponseReturnValue:
     """List all lemmas with pagination and filtering."""
     page = request.args.get("page", 1, type=int)
