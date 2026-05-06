@@ -19,6 +19,7 @@ from sqlalchemy import and_, case, func, or_
 
 from storage.crud.grammar_fact import get_grammar_facts
 from storage.crud.lemma import get_lemma_by_guid
+from storage.lexeme import get_lexeme
 from storage.models import (
     DerivativeForm,
     GrammarFact,
@@ -28,7 +29,11 @@ from storage.models import (
     SentenceTranslation,
     SentenceWord,
 )
-from storage.models.schema import AudioQualityReview, LemmaDifficultyOverride
+from storage.models.schema import (
+    AudioQualityReview,
+    ExternalLexemeAnnotation,
+    LemmaDifficultyOverride,
+)
 from storage.queries.lemma import build_lemma_search_query
 from storage.translation_helpers import (
     LANGUAGE_HIERARCHY,
@@ -345,6 +350,12 @@ def api_info() -> ResponseReturnValue:
                     "description": "Filter to specific language code (e.g., 'en', 'lt', 'fr')",
                 }
             ],
+        },
+        {
+            "path": "/api/v1/lemma/<guid>/wordfreq",
+            "method": "GET",
+            "description": "Get per-language wordfreq corpus rollups and best ranks for a lemma",
+            "parameters": [],
         },
         {
             "path": "/api/v1/lemma/<guid>/sentences",
@@ -1038,6 +1049,62 @@ def get_lemma_audio(guid: str) -> ResponseReturnValue:
         metadata["is_populated"] = language_filter in audio_data
 
     return _build_success_response(audio_data, metadata)
+
+
+@bp.route("/v1/lemma/<guid>/wordfreq")
+@mirrored_facade("/api/v1/lemma/<guid>/wordfreq", "GET")
+def get_lemma_wordfreq(guid: str) -> ResponseReturnValue:
+    """Get wordfreq rollups and best ranks across enabled corpora for lemma lexemes."""
+    lemma = get_lemma_by_guid(g.db, guid)
+    if not lemma:
+        return _build_error_response(f"Lemma with GUID '{guid}' not found", 404)
+
+    from wordfreq.frequency.corpus import get_enabled_corpus_configs
+    from wordfreq.lexeme_frequency import get_lexeme_frequencies_all_corpora
+
+    enabled_corpora = {cfg.name for cfg in get_enabled_corpus_configs()}
+    language_wordfreq: Dict[str, Dict[str, Dict[str, Optional[Union[float, int]]]]] = {}
+
+    for translation in lemma.translations:
+        language_code = translation.language_code
+        lexeme = get_lexeme(g.db, lemma.id, language_code)
+        if not lexeme:
+            continue
+
+        all_rollups = get_lexeme_frequencies_all_corpora(g.db, lexeme)
+        form_token_ids = [
+            form.word_token_id for form in lexeme.forms if form.word_token_id is not None
+        ]
+        corpus_data: Dict[str, Dict[str, Optional[Union[float, int]]]] = {}
+        for corpus_name in sorted(enabled_corpora):
+            rollup = all_rollups.get(corpus_name)
+            total_frequency: Optional[float] = None
+            if rollup is not None:
+                total_frequency = float(rollup.total_frequency)
+
+            best_rank: Optional[int] = None
+            if form_token_ids:
+                source_name = f"wordfreq_{corpus_name}"
+                rank_row = (
+                    g.db.query(func.min(ExternalLexemeAnnotation.ordinal_rank))
+                    .filter(
+                        ExternalLexemeAnnotation.word_token_id.in_(form_token_ids),
+                        ExternalLexemeAnnotation.source == source_name,
+                        ExternalLexemeAnnotation.ordinal_rank.isnot(None),
+                    )
+                    .scalar()
+                )
+                best_rank = int(rank_row) if rank_row is not None else None
+
+            corpus_data[corpus_name] = {
+                "total_frequency": total_frequency,
+                "best_rank": best_rank,
+            }
+
+        language_wordfreq[language_code] = corpus_data
+
+    metadata = {"frequency_rank": lemma.frequency_rank}
+    return _build_success_response(language_wordfreq, metadata)
 
 
 @bp.route("/v1/lemma/<guid>/sentences")
