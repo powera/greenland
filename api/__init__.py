@@ -26,15 +26,29 @@ from api.lemmas import (
     get_translations,
     search,
 )
+from api.llm_agents import (
+    add_missing_translations,
+    check_definition,
+    check_disambiguation,
+    check_translations,
+    generate_pronunciations,
+    get_llm_info,
+)
 from api.sentences import get_sentence_metadata
 
 __all__ = [
     "BarsukasAPIError",
+    "add_missing_translations",
+    "check_definition",
+    "check_disambiguation",
+    "check_translations",
     "find_pending_import_duplicates",
+    "generate_pronunciations",
     "get_audio",
     "get_forms",
     "get_grammar",
     "get_lemma",
+    "get_llm_info",
     "get_pronunciations",
     "get_sentence_metadata",
     "get_sentences",

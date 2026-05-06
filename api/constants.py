@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from typing import Final
 
-DEFAULT_BASE_URL: Final[str] = "http://localhost:5000"
+DEFAULT_BASE_URL: Final[str] = "http://100.118.20.30:5555"
 
 BASE_URL: Final[str] = os.environ.get("BARSUKAS_API_URL", DEFAULT_BASE_URL).rstrip("/")
 

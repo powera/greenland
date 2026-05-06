@@ -26,6 +26,11 @@ models in `src/storage/`.
   standalone endpoints in those domains.
 - `api/batch_operations.py` — bulk/aggregate endpoints (word metadata,
   model registry, pending-imports list / duplicate detection).
+- `api/llm_agents.py` — LLM-driven agent triggers (translation generation
+  /validation, pronunciation generation, definition / disambiguation
+  review). Mirrors ``src/barsukas/routes/llm_api.py``. The Barsukas routes
+  accept optional API keys in the JSON body; these facades intentionally
+  do not expose those parameters and rely on Barsukas' system keys.
 
 ## Independence from `src/`
 
@@ -97,8 +102,15 @@ python scripts/check_api_mirror_routes.py
 
 ## Scope
 
-For the initial cut, `api/` mirrors only the endpoints documented in
-`src/barsukas/routes/API.md`. Internal AJAX helpers used by the Barsukas
-HTML UI (e.g. `/api/check_lemma_exists`, `/api/auto_populate_lemma`) are
-intentionally **not** mirrored — they are UI implementation details, not
-part of the stable external surface.
+`api/` mirrors:
+
+- the read-only JSON endpoints documented in `src/barsukas/routes/API.md`
+  (search, lemma sub-resources, metadata aggregates, model registry,
+  pending-imports list / duplicate detection); and
+- the LLM-agent trigger endpoints under `/api/llm/` (defined in
+  `src/barsukas/routes/llm_api.py`).
+
+Internal AJAX helpers used by the Barsukas HTML UI (e.g.
+`/api/check_lemma_exists`, `/api/auto_populate_lemma`, the form-driven
+`/agents/*` routes) are intentionally **not** mirrored — they are UI
+implementation details, not part of the stable external surface.

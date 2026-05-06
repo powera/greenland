@@ -22,12 +22,14 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 BARSUKAS_FILES = [
     "src/barsukas/routes/api.py",
     "src/barsukas/routes/pending_imports.py",
+    "src/barsukas/routes/llm_api.py",
 ]
 
 API_FILES = [
     "api/lemmas.py",
     "api/sentences.py",
     "api/batch_operations.py",
+    "api/llm_agents.py",
 ]
 
 API_DECORATOR_NAME = "mirrored_route"
