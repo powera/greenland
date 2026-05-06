@@ -481,6 +481,7 @@ class VorasAgent:
             "total_translations_added": 0,
             "total_failed": 0,
             "batch_requests_queued": 0,
+            "llm_cost_usd": 0.0,
             "by_language": {
                 lang_code: {
                     "language_name": get_language_name(lang_code),
@@ -649,6 +650,7 @@ class VorasAgent:
         results: Dict[str, Any] = {
             "total_fixed": 0,
             "total_failed": 0,
+            "llm_cost_usd": 0.0,
             "by_language": {
                 lang_code: {
                     "language_name": get_language_name(lang_code),
@@ -783,6 +785,8 @@ class VorasAgent:
                             pos_subtype=lemma.pos_subtype,
                             languages=missing_lang_codes,
                         )
+                        query_cost_usd = float(getattr(client.client, "_last_query_cost_usd", 0.0))
+                        results["llm_cost_usd"] += query_cost_usd
 
                         if not success or not llm_translations:
                             logger.warning(f"Failed to get translations for '{lemma.lemma_text}'")
