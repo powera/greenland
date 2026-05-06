@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# MIRROR NOTICE: If you edit this route module, update the matching wrapper in top-level api/ in the same commit.
 
 """Routes for translation management."""
 
