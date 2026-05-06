@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 
 from api._http import HttpResult, send_request
+from api._mirror import mirrored_route
 
 
 @dataclass(frozen=True)
@@ -16,6 +17,7 @@ class BatchOperationsResponse:
     result: HttpResult
 
 
+@mirrored_route("/batch-operations/", "GET")
 def list_batches(request_data: ListBatchesRequest) -> BatchOperationsResponse:
     """Delegate to Barsukas `GET /batch-operations/` route."""
     return BatchOperationsResponse(

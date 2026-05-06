@@ -22,6 +22,7 @@ def send_request(
     *,
     params: Optional[Mapping[str, str | int]] = None,
     form_data: Optional[Mapping[str, str | int]] = None,
+    json_data: object | None = None,
     base_url: str = DEFAULT_BARSUKAS_BASE_URL,
     timeout_seconds: int = REQUEST_TIMEOUT_SECONDS,
 ) -> HttpResult:
@@ -35,6 +36,7 @@ def send_request(
         url=target_url,
         params=params,
         data=form_data,
+        json=json_data,
         timeout=timeout_seconds,
     )
     try:

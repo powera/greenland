@@ -20,6 +20,7 @@ Each module in this directory mirrors a domain route module in
 - `api/translations.py` <-> `src/barsukas/routes/translations.py`
 - `api/audio.py` <-> `src/barsukas/routes/audio.py`
 - `api/batch_operations.py` <-> `src/barsukas/routes/batch_operations.py`
+- `api/llm_agents.py` <-> `src/barsukas/routes/llm_api.py`
 
 When changing behavior in a mirrored Barsukas route file, make the
 corresponding change in this `api/` module in the same commit.
@@ -31,3 +32,5 @@ corresponding change in this `api/` module in the same commit.
   the relevant BARSUKAS HTTP route.
 - Do not duplicate business logic from Barsukas route handlers.
 - Keep shared endpoint/location values in `api/constants.py`.
+
+Use `@mirrored_route(...)` on each public facade function so mirrored coverage is explicit.

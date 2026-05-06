@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 
 from api._http import HttpResult, send_request
+from api._mirror import mirrored_route
 
 
 @dataclass(frozen=True)
@@ -19,6 +20,7 @@ class TranslationResponse:
     result: HttpResult
 
 
+@mirrored_route("/translations/<lemma_id>/<lang_code>", "POST")
 def update_translation(request_data: UpdateTranslationRequest) -> TranslationResponse:
     """Delegate to Barsukas `POST /translations/<lemma_id>/<lang_code>` route."""
     return TranslationResponse(

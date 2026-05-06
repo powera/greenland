@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 
 from api._http import HttpResult, send_request
+from api._mirror import mirrored_route
 
 
 @dataclass(frozen=True)
@@ -19,6 +20,7 @@ class LemmasResponse:
     result: HttpResult
 
 
+@mirrored_route("/lemmas/", "GET")
 def list_lemmas(request_data: ListLemmasRequest) -> LemmasResponse:
     """Delegate to Barsukas `GET /lemmas/` list route."""
     return LemmasResponse(
