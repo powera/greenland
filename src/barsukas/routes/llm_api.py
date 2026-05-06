@@ -15,12 +15,18 @@ Example request:
         "model": "gpt-5.4-mini",
         "openai_api_key": "sk-..."
     }
+
+MIRRORED: routes annotated with ``@mirrored_facade`` have a typed Python
+wrapper in the root-level ``api/`` package (``api/llm_agents.py``). Edits
+to a mirrored route's path, request body, or response shape MUST be made in
+the matching facade in the same commit. See ``api/AGENTS.md``.
 """
 
 import logging
 from typing import Any, Dict, Optional, Tuple, Union
 
 from barsukas.config import Config
+from barsukas.routes._mirror import mirrored_facade
 from flask import Blueprint, g, jsonify, request
 from flask.typing import ResponseReturnValue
 
@@ -125,6 +131,7 @@ def _get_lemma_or_error(
 
 
 @bp.route("/info", methods=["GET"])
+@mirrored_facade("/api/llm/info", "GET")
 def api_info() -> ResponseReturnValue:
     """Get information about available LLM API endpoints."""
     endpoints = [
@@ -190,6 +197,7 @@ def api_info() -> ResponseReturnValue:
 
 
 @bp.route("/voras/check-translations", methods=["POST"])
+@mirrored_facade("/api/llm/voras/check-translations", "POST")
 def api_check_translations() -> ResponseReturnValue:
     """Check translations for a lemma using LLM validation.
 
@@ -278,6 +286,7 @@ def api_check_translations() -> ResponseReturnValue:
 
 
 @bp.route("/voras/add-missing-translations", methods=["POST"])
+@mirrored_facade("/api/llm/voras/add-missing-translations", "POST")
 def api_add_missing_translations() -> ResponseReturnValue:
     """Generate missing translations for a lemma.
 
@@ -330,6 +339,7 @@ def api_add_missing_translations() -> ResponseReturnValue:
 
 
 @bp.route("/papuga/generate-pronunciations", methods=["POST"])
+@mirrored_facade("/api/llm/papuga/generate-pronunciations", "POST")
 def api_generate_pronunciations() -> ResponseReturnValue:
     """Generate pronunciations for a lemma's forms.
 
@@ -393,6 +403,7 @@ def api_generate_pronunciations() -> ResponseReturnValue:
 
 
 @bp.route("/lokys/check-definition", methods=["POST"])
+@mirrored_facade("/api/llm/lokys/check-definition", "POST")
 def api_check_definition() -> ResponseReturnValue:
     """Check/improve the definition of a lemma.
 
@@ -444,6 +455,7 @@ def api_check_definition() -> ResponseReturnValue:
 
 
 @bp.route("/lokys/check-disambiguation", methods=["POST"])
+@mirrored_facade("/api/llm/lokys/check-disambiguation", "POST")
 def api_check_disambiguation() -> ResponseReturnValue:
     """Check if a lemma needs disambiguation.
 

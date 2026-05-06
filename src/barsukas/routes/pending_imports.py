@@ -1,11 +1,18 @@
 #!/usr/bin/python3
 
-"""Routes for viewing pending imports."""
+"""Routes for viewing pending imports.
+
+MIRRORED: routes annotated with ``@mirrored_facade`` have a typed Python
+wrapper in the root-level ``api/`` package (``api/batch_operations.py``).
+Edits to a mirrored route's path, query params, or response shape MUST be
+made in the matching facade in the same commit. See ``api/AGENTS.md``.
+"""
 
 import logging
 from typing import Any, cast
 
 from barsukas.config import Config
+from barsukas.routes._mirror import mirrored_facade
 from agents.dramblys.staging import approve_pending_import, reject_pending_import
 from workqueue.task_queue import TaskType, enqueue_task
 from flask import (
@@ -273,6 +280,7 @@ def stage(pending_import_id: int) -> ResponseReturnValue:
 
 
 @bp.route("/api/duplicates")
+@mirrored_facade("/pending-imports/api/duplicates", "GET")
 def api_duplicates() -> ResponseReturnValue:
     """JSON API: find pending imports that are duplicates of existing lemmas.
 
@@ -306,24 +314,24 @@ def api_duplicates() -> ResponseReturnValue:
         pos = item.pos_type
 
         # 1. Direct lemma match
-        direct_query = g.db.query(Lemma).filter(
-            Lemma.lemma_text.ilike(word_lower)
-        )
+        direct_query = g.db.query(Lemma).filter(Lemma.lemma_text.ilike(word_lower))
         if pos:
             direct_query = direct_query.filter(Lemma.pos_type == pos)
         direct_match = direct_query.first()
         if direct_match:
-            results.append({
-                "id": item.id,
-                "english_word": item.english_word,
-                "pos_type": item.pos_type,
-                "source": item.source,
-                "added_at": item.added_at.isoformat() if item.added_at else None,
-                "match_type": "direct",
-                "matched_lemma_guid": direct_match.guid,
-                "matched_lemma_text": direct_match.lemma_text,
-                "matched_pos_type": direct_match.pos_type,
-            })
+            results.append(
+                {
+                    "id": item.id,
+                    "english_word": item.english_word,
+                    "pos_type": item.pos_type,
+                    "source": item.source,
+                    "added_at": item.added_at.isoformat() if item.added_at else None,
+                    "match_type": "direct",
+                    "matched_lemma_guid": direct_match.guid,
+                    "matched_lemma_text": direct_match.lemma_text,
+                    "matched_pos_type": direct_match.pos_type,
+                }
+            )
             continue
 
         # 2. Derivative form match (e.g. "telling" → lemma "tell")
@@ -340,22 +348,27 @@ def api_duplicates() -> ResponseReturnValue:
         form_match = form_query.first()
         if form_match:
             _form, matched_lemma = form_match
-            results.append({
-                "id": item.id,
-                "english_word": item.english_word,
-                "pos_type": item.pos_type,
-                "source": item.source,
-                "added_at": item.added_at.isoformat() if item.added_at else None,
-                "match_type": "form",
-                "matched_lemma_guid": matched_lemma.guid,
-                "matched_lemma_text": matched_lemma.lemma_text,
-                "matched_pos_type": matched_lemma.pos_type,
-            })
+            results.append(
+                {
+                    "id": item.id,
+                    "english_word": item.english_word,
+                    "pos_type": item.pos_type,
+                    "source": item.source,
+                    "added_at": item.added_at.isoformat() if item.added_at else None,
+                    "match_type": "form",
+                    "matched_lemma_guid": matched_lemma.guid,
+                    "matched_lemma_text": matched_lemma.lemma_text,
+                    "matched_pos_type": matched_lemma.pos_type,
+                }
+            )
 
-    return jsonify({"data": results, "metadata": {"total": len(results), "checked": len(pending_list)}})
+    return jsonify(
+        {"data": results, "metadata": {"total": len(results), "checked": len(pending_list)}}
+    )
 
 
 @bp.route("/api/list")
+@mirrored_facade("/pending-imports/api/list", "GET")
 def api_list() -> ResponseReturnValue:
     """JSON API: list pending imports with optional filtering.
 

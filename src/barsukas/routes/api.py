@@ -1,10 +1,18 @@
 #!/usr/bin/python3
 
-"""API routes for AJAX requests and REST API endpoints."""
+"""API routes for AJAX requests and REST API endpoints.
+
+MIRRORED: routes annotated with ``@mirrored_facade`` have a typed Python
+wrapper in the root-level ``api/`` package (``api/lemmas.py``,
+``api/sentences.py``, ``api/batch_operations.py``, ...). Edits to a mirrored
+route's path, query params, or response shape MUST be made in the matching
+facade in the same commit. See ``api/AGENTS.md`` for the mirroring contract.
+"""
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from barsukas.config import Config
+from barsukas.routes._mirror import mirrored_facade
 from flask import Blueprint, Response, g, jsonify, request
 from flask.typing import ResponseReturnValue
 from sqlalchemy import and_, case, func, or_
@@ -363,6 +371,7 @@ def api_info() -> ResponseReturnValue:
 
 
 @bp.route("/v1/search")
+@mirrored_facade("/api/v1/search", "GET")
 def search_lemmas() -> ResponseReturnValue:
     """
     Search for lemmas by keyword across multiple fields.
@@ -536,6 +545,7 @@ def _build_success_response(
 
 
 @bp.route("/v1/lemma/<guid>")
+@mirrored_facade("/api/v1/lemma/<guid>", "GET")
 def get_lemma_info(guid: str) -> ResponseReturnValue:
     """
     Get basic information about a lemma by GUID.
@@ -575,6 +585,7 @@ def get_lemma_info(guid: str) -> ResponseReturnValue:
 
 
 @bp.route("/v1/lemma/<guid>/translations")
+@mirrored_facade("/api/v1/lemma/<guid>/translations", "GET")
 def get_lemma_translations(guid: str) -> ResponseReturnValue:
     """
     Get translations of a lemma in various languages.
@@ -627,6 +638,7 @@ def get_lemma_translations(guid: str) -> ResponseReturnValue:
 
 
 @bp.route("/v1/lemma/<guid>/forms")
+@mirrored_facade("/api/v1/lemma/<guid>/forms", "GET")
 def get_lemma_forms(guid: str) -> ResponseReturnValue:
     """
     Get derivative/declined forms of a lemma (conjugations, declensions, etc.).
@@ -698,6 +710,7 @@ def get_lemma_forms(guid: str) -> ResponseReturnValue:
 
 
 @bp.route("/v1/lemma/<guid>/grammar")
+@mirrored_facade("/api/v1/lemma/<guid>/grammar", "GET")
 def get_lemma_grammar(guid: str) -> ResponseReturnValue:
     """
     Get grammar facts about a lemma (e.g., gender, plurale tantum, declension class).
@@ -761,6 +774,7 @@ def get_lemma_grammar(guid: str) -> ResponseReturnValue:
 
 
 @bp.route("/v1/lemma/<guid>/pronunciations")
+@mirrored_facade("/api/v1/lemma/<guid>/pronunciations", "GET")
 def get_lemma_pronunciations(guid: str) -> ResponseReturnValue:
     """
     Get pronunciations for the base forms of a lemma.
@@ -831,6 +845,7 @@ def get_lemma_pronunciations(guid: str) -> ResponseReturnValue:
 
 
 @bp.route("/v1/lemma/<guid>/audio")
+@mirrored_facade("/api/v1/lemma/<guid>/audio", "GET")
 def get_lemma_audio(guid: str) -> ResponseReturnValue:
     """
     Get audio availability for a lemma by language.
@@ -975,6 +990,7 @@ def get_lemma_audio(guid: str) -> ResponseReturnValue:
 
 
 @bp.route("/v1/lemma/<guid>/sentences")
+@mirrored_facade("/api/v1/lemma/<guid>/sentences", "GET")
 def get_lemma_sentences(guid: str) -> ResponseReturnValue:
     """
     Get example sentences that use this lemma.
@@ -1092,6 +1108,7 @@ def _has_translation_expression(language_code: str) -> Any:
 
 
 @bp.route("/v1/metadata/words")
+@mirrored_facade("/api/v1/metadata/words", "GET")
 def get_word_metadata() -> ResponseReturnValue:
     """Get per-language metadata counts for lemma coverage, audio, and derivative forms.
 
@@ -1266,6 +1283,7 @@ def get_word_metadata() -> ResponseReturnValue:
 
 
 @bp.route("/v1/metadata/sentences")
+@mirrored_facade("/api/v1/metadata/sentences", "GET")
 def get_sentence_metadata() -> ResponseReturnValue:
     """Get per-language metadata counts for sentence coverage and sentence-level audio.
 
@@ -1412,6 +1430,7 @@ def get_sentence_metadata() -> ResponseReturnValue:
 
 
 @bp.route("/v1/models")
+@mirrored_facade("/api/v1/models", "GET")
 def list_models() -> ResponseReturnValue:
     """Search LLM models registered in the benchmarks database.
 
