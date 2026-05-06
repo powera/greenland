@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, TypedDict, cast
 
 from api._mirror import mirrored_route
-from api._http import get_json
+from api._http import get_json, patch_json, post_json
 from api.constants import API_V1_PREFIX
 
 
@@ -131,6 +131,24 @@ def search(
 def get_lemma(guid: str) -> Any:
     """Basic lemma details."""
     return get_json(f"{API_V1_PREFIX}/lemma/{guid}")
+
+
+@mirrored_route("/api/v1/lemma/<guid>", "POST")
+def set_lemma_difficulty(guid: str, difficulty_level: Optional[int]) -> Any:
+    """Set or clear Barsukas difficulty level for a lemma."""
+    return post_json(
+        f"{API_V1_PREFIX}/lemma/{guid}",
+        {"difficulty_level": difficulty_level},
+    )
+
+
+@mirrored_route("/api/v1/lemma/<guid>", "PATCH")
+def patch_lemma_difficulty(guid: str, difficulty_level: Optional[int]) -> Any:
+    """PATCH Barsukas difficulty level for a lemma."""
+    return patch_json(
+        f"{API_V1_PREFIX}/lemma/{guid}",
+        {"difficulty_level": difficulty_level},
+    )
 
 
 @mirrored_route("/api/v1/lemma/<guid>/translations", "GET")

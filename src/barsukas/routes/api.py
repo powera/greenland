@@ -584,6 +584,57 @@ def get_lemma_info(guid: str) -> ResponseReturnValue:
     return _build_success_response(data)
 
 
+@bp.route("/v1/lemma/<guid>", methods=["POST", "PATCH"])
+@mirrored_facade("/api/v1/lemma/<guid>", "POST")
+@mirrored_facade("/api/v1/lemma/<guid>", "PATCH")
+def update_lemma_info(guid: str) -> ResponseReturnValue:
+    """Update mutable lemma fields.
+
+    Supports:
+      - ``difficulty_level``: integer in configured range, ``-1`` to exclude,
+        or ``null`` to unset.
+    """
+    lemma = get_lemma_by_guid(g.db, guid)
+    if not lemma:
+        return _build_error_response(f"Lemma with GUID '{guid}' not found", 404)
+
+    payload = request.get_json(silent=True) or {}
+    if "difficulty_level" not in payload:
+        return _build_error_response("JSON body must include 'difficulty_level'", 400)
+
+    difficulty_value = payload["difficulty_level"]
+    if difficulty_value is None:
+        new_difficulty_level: Optional[int] = None
+    else:
+        try:
+            new_difficulty_level = int(difficulty_value)
+        except (TypeError, ValueError):
+            return _build_error_response("difficulty_level must be an integer or null", 400)
+
+        if new_difficulty_level != Config.EXCLUDE_DIFFICULTY_LEVEL and (
+            new_difficulty_level < Config.MIN_DIFFICULTY_LEVEL
+            or new_difficulty_level > Config.MAX_DIFFICULTY_LEVEL
+        ):
+            return _build_error_response(
+                f"difficulty_level must be between {Config.MIN_DIFFICULTY_LEVEL} and "
+                f"{Config.MAX_DIFFICULTY_LEVEL}, or {Config.EXCLUDE_DIFFICULTY_LEVEL}",
+                400,
+            )
+
+    old_difficulty_level = lemma.difficulty_level
+    lemma.difficulty_level = new_difficulty_level
+    g.db.commit()
+
+    return _build_success_response(
+        {
+            "guid": lemma.guid,
+            "difficulty_level": _serialize_value(lemma.difficulty_level),
+            "previous_difficulty_level": _serialize_value(old_difficulty_level),
+            "updated": old_difficulty_level != lemma.difficulty_level,
+        }
+    )
+
+
 @bp.route("/v1/lemma/<guid>/translations")
 @mirrored_facade("/api/v1/lemma/<guid>/translations", "GET")
 def get_lemma_translations(guid: str) -> ResponseReturnValue:
@@ -1117,15 +1168,24 @@ def get_word_metadata() -> ResponseReturnValue:
       max_difficulty=<int>  Only count words whose effective difficulty (COALESCE of
                             per-language override and base lemma difficulty) is between
                             1 and max_difficulty inclusive (excludes -1 / unset).
+      difficulty=<int>      Only count words whose effective difficulty exactly equals this
+                            value.
     """
     requested_language = request.args.get("language", "").strip().lower()
     max_difficulty_param = request.args.get("max_difficulty", "").strip()
+    difficulty_param = request.args.get("difficulty", "").strip()
     max_difficulty: Optional[int] = None
+    exact_difficulty: Optional[int] = None
     if max_difficulty_param:
         try:
             max_difficulty = int(max_difficulty_param)
         except ValueError:
             return _build_error_response("max_difficulty must be an integer", 400)
+    if difficulty_param:
+        try:
+            exact_difficulty = int(difficulty_param)
+        except ValueError:
+            return _build_error_response("difficulty must be an integer", 400)
 
     translation_languages = {
         row[0]
@@ -1198,6 +1258,19 @@ def get_word_metadata() -> ResponseReturnValue:
                 effective_difficulty >= 1,
                 effective_difficulty <= max_difficulty,
             )
+        elif exact_difficulty is not None:
+            effective_difficulty = case(
+                (
+                    LemmaDifficultyOverride.difficulty_level.isnot(None),
+                    LemmaDifficultyOverride.difficulty_level,
+                ),
+                else_=Lemma.difficulty_level,
+            )
+            base_query = base_query.outerjoin(
+                LemmaDifficultyOverride,
+                (LemmaDifficultyOverride.lemma_id == Lemma.id)
+                & (LemmaDifficultyOverride.language_code == current_language),
+            ).filter(effective_difficulty == exact_difficulty)
 
         base_subquery = base_query.subquery()
 
@@ -1278,6 +1351,8 @@ def get_word_metadata() -> ResponseReturnValue:
         metadata["requested_language"] = requested_language
     if max_difficulty is not None:
         metadata["max_difficulty"] = max_difficulty
+    if exact_difficulty is not None:
+        metadata["difficulty"] = exact_difficulty
 
     return _build_success_response(summary_data, metadata)
 
