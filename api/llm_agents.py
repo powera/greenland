@@ -35,8 +35,9 @@ def check_translations(guid: str, *, model: Optional[str] = None) -> Any:
 
 @mirrored_route("/api/llm/voras/add-missing-translations", "POST")
 def add_missing_translations(
-    guid: str,
+    guid: Optional[str] = None,
     *,
+    guids: Optional[List[str]] = None,
     model: Optional[str] = None,
     languages: Optional[List[str]] = None,
 ) -> Any:
@@ -47,7 +48,7 @@ def add_missing_translations(
     """
     return post_json(
         "/api/llm/voras/add-missing-translations",
-        {"guid": guid, "model": model, "languages": languages},
+        {"guid": guid, "guids": guids, "model": model, "languages": languages},
     )
 
 

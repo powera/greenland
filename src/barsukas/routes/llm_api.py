@@ -153,7 +153,8 @@ def api_info() -> ResponseReturnValue:
             "description": "Generate missing translations for a lemma",
             "parameters": {
                 "guid": "Required. GUID of the lemma (e.g., 'N03_003')",
-                "model": "Optional. LLM model to use",
+                "guids": "Optional. List of GUIDs for batch mode",
+                "model": "Optional. LLM model to use (any model string exposed by /api/v1/models is accepted)",
                 "openai_api_key": "Optional. OpenAI API key",
                 "anthropic_api_key": "Optional. Anthropic API key",
                 "google_api_key": "Optional. Google API key",
@@ -190,7 +191,7 @@ def api_info() -> ResponseReturnValue:
         {
             "version": "1.0",
             "description": "API for triggering LLM-based agent operations",
-            "note": "API keys can be passed in request body to avoid file-based configuration",
+            "note": "API keys can be passed in request body to avoid file-based configuration. Model names are passed through to agents; discover configured models via /api/v1/models.",
             "endpoints": endpoints,
         }
     )
@@ -222,7 +223,7 @@ def api_check_translations() -> ResponseReturnValue:
     lemma, error = _get_lemma_or_error(guid)
     if error:
         return error
-    assert lemma is not None  # Type narrowing for mypy
+    assert lemma is not None
 
     try:
         config = _get_config_from_request(data)
@@ -307,8 +308,17 @@ def api_add_missing_translations() -> ResponseReturnValue:
         return _build_error_response("Request body must be JSON")
 
     guid = data.get("guid")
-    if not guid:
-        return _build_error_response("guid is required")
+    guids_raw = data.get("guids")
+    guids: List[str] = []
+    if guid:
+        guids.append(guid)
+    if guids_raw is not None:
+        if not isinstance(guids_raw, list) or not all(isinstance(item, str) for item in guids_raw):
+            return _build_error_response("guids must be a list of GUID strings")
+        guids.extend(guids_raw)
+    guids = list(dict.fromkeys(guids))
+    if not guids:
+        return _build_error_response("guid or guids is required")
 
     languages_raw = data.get("languages")
     languages: Optional[List[str]]
@@ -320,11 +330,6 @@ def api_add_missing_translations() -> ResponseReturnValue:
         ):
             return _build_error_response("languages must be a list of language code strings")
         languages = languages_raw
-
-    lemma, error = _get_lemma_or_error(guid)
-    if error:
-        return error
-    assert lemma is not None  # Type narrowing for mypy
 
     try:
         from storage.translation_helpers import LANGUAGE_FIELDS
@@ -346,20 +351,27 @@ def api_add_missing_translations() -> ResponseReturnValue:
 
         config = _get_config_from_request(data)
         agent = VorasAgent(config=config)
+        lemmas: List[Lemma] = []
+        missing_guids: List[str] = []
+        for guid_value in guids:
+            lemma = g.db.query(Lemma).filter(Lemma.guid == guid_value).first()
+            if lemma is None:
+                missing_guids.append(guid_value)
+            else:
+                lemmas.append(lemma)
+        if not lemmas:
+            return _build_error_response("No requested GUIDs were found", 404)
 
-        # Use the agent's fix_missing_translations method with the specific lemma
         result = agent.fix_missing_translations(
-            language_code=languages,
-            lemmas=[lemma],
-            dry_run=False,
+            language_code=languages, lemmas=lemmas, dry_run=False
         )
 
         g.db.commit()
 
         return _build_success_response(
             {
-                "guid": guid,
-                "lemma_text": lemma.lemma_text,
+                "guids": [lemma.guid for lemma in lemmas],
+                "missing_guids": missing_guids,
                 "total_fixed": result.get("total_fixed", 0),
                 "total_failed": result.get("total_failed", 0),
                 "by_language": result.get("by_language", {}),
@@ -368,7 +380,7 @@ def api_add_missing_translations() -> ResponseReturnValue:
 
     except Exception as e:
         g.db.rollback()
-        logger.exception("Error adding translations for lemma %s", guid)
+        logger.exception("Error adding translations for GUIDs %s", guids)
         return _build_error_response(str(e), 500)
 
 
