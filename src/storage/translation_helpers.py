@@ -90,12 +90,17 @@ TIER_4_LANGUAGES = [
     "et",
     "fi",
     "ga",
-    "hr",
     "hu",
     "lv",
     "mt",
     "sk",
     "sl",
+    "bs",
+    "sr",
+    "hr",
+    "mk",
+    "sq",
+    "me",
 ]
 
 # Languages included in data/release read/write operations.
@@ -178,12 +183,17 @@ LANGUAGE_HIERARCHY = [
     "et",  # Estonian (experimental)
     "fi",  # Finnish (experimental)
     "ga",  # Irish (experimental)
-    "hr",  # Croatian (experimental)
     "hu",  # Hungarian (experimental)
     "lv",  # Latvian (experimental)
     "mt",  # Maltese (experimental)
     "sk",  # Slovak (experimental)
     "sl",  # Slovenian (experimental)
+    "bs",  # Bosnian (experimental)
+    "sr",  # Serbian (experimental, Cyrillic)
+    "hr",  # Croatian (experimental, Latin)
+    "mk",  # Macedonian (experimental)
+    "sq",  # Albanian (experimental)
+    "me",  # Montenegrin (experimental)
 ]
 
 # Language mappings
@@ -244,12 +254,17 @@ LANGUAGE_FIELDS = {
     "et": ("et", "Estonian", True),
     "fi": ("fi", "Finnish", True),
     "ga": ("ga", "Irish", True),
-    "hr": ("hr", "Croatian", True),
     "hu": ("hu", "Hungarian", True),
     "lv": ("lv", "Latvian", True),
     "mt": ("mt", "Maltese", True),
     "sk": ("sk", "Slovak", True),
     "sl": ("sl", "Slovenian", True),
+    "bs": ("bs", "Bosnian", True),
+    "sr": ("sr", "Serbian (Cyrillic)", True),
+    "hr": ("hr", "Croatian (Latin)", True),
+    "mk": ("mk", "Macedonian", True),
+    "sq": ("sq", "Albanian", True),
+    "me": ("me", "Montenegrin", True),
 }
 
 # Language display names (for use in prompts, UIs, etc.)
@@ -316,6 +331,11 @@ LLM_FIELD_TO_LANG_CODE = {
     "maltese_translation": "mt",
     "slovak_translation": "sk",
     "slovenian_translation": "sl",
+    "bosnian_translation": "bs",
+    "serbian_translation": "sr",  # Serbian (Cyrillic)
+    "macedonian_translation": "mk",
+    "albanian_translation": "sq",
+    "montenegrin_translation": "me",
 }
 
 # Reverse mapping: language codes to LLM field names
