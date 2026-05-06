@@ -307,4 +307,39 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "description": "Bulgarian translation in lemma form (Cyrillic script)",
         "instructions": "- Bulgarian: Provide standard Bulgarian in Cyrillic script in base form (infinitive/da-construction for verbs, singular indefinite for nouns)\n  - Do not include transliteration, just the Cyrillic characters",
     },
+    "croatian": {
+        "field": "croatian_translation",
+        "code": "hr",
+        "description": "Croatian translation in lemma form (Latin script)",
+        "instructions": "- Croatian: Provide standard Croatian in Latin script in base form (infinitive for verbs, singular nominative for nouns)",
+    },
+    "serbian": {
+        "field": "serbian_translation",
+        "code": "sr",
+        "description": "Serbian translation in lemma form (Cyrillic script)",
+        "instructions": "- Serbian: Provide standard Serbian in Cyrillic script in base form (infinitive for verbs, singular nominative for nouns)\n  - Do not include transliteration, just the Cyrillic characters",
+    },
+    "bosnian": {
+        "field": "bosnian_translation",
+        "code": "bs",
+        "description": "Bosnian translation in lemma form (Latin script)",
+        "instructions": "- Bosnian: Provide standard Bosnian in Latin script in base form (infinitive for verbs, singular nominative for nouns)",
+    },
+    "slovenian": {
+        "field": "slovenian_translation",
+        "code": "sl",
+        "description": "Slovenian translation in lemma form",
+        "instructions": "- Slovenian: Provide standard Slovenian in base form (infinitive for verbs, singular nominative for nouns)",
+    },
+    "albanian": {
+        "field": "albanian_translation",
+        "code": "sq",
+        "description": "Albanian translation in lemma form",
+        "instructions": "- Albanian: Provide standard Albanian (Tosk-based standard) in base form (lemma for verbs, singular indefinite for nouns)",
+    },
+}
+
+# Index by language code for fast lookup. Built from DEFAULT_TRANSLATION_LANGUAGES.
+DEFAULT_TRANSLATION_LANGUAGES_BY_CODE = {
+    config["code"]: config for config in DEFAULT_TRANSLATION_LANGUAGES.values()
 }

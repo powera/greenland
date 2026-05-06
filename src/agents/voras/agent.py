@@ -43,7 +43,6 @@ from storage.models.schema import Lemma, LemmaTranslation
 from storage.translation_helpers import (
     LANG_CODE_TO_LLM_FIELD,
     LANGUAGE_FIELDS,
-    LANGUAGE_NAMES,
     convert_llm_response_to_lang_codes,
     get_language_name,
     get_reference_translation,
@@ -772,12 +771,8 @@ class VorasAgent:
                         and reference_lang_code
                         and reference_translation
                     ):
-                        # Build list of language names (lowercase) for only the missing languages
-                        missing_lang_names = [
-                            LANGUAGE_NAMES[lang_code].lower()
-                            for lang_code, _ in missing_languages
-                            if lang_code in LANGUAGE_NAMES
-                        ]
+                        # Pass language codes for only the missing languages
+                        missing_lang_codes = [lang_code for lang_code, _ in missing_languages]
 
                         # Query LLM for translations - ONE CALL for only missing languages
                         llm_translations, success = client.query_translations(
@@ -786,7 +781,7 @@ class VorasAgent:
                             definition=lemma.definition_text,
                             pos_type=lemma.pos_type,
                             pos_subtype=lemma.pos_subtype,
-                            languages=missing_lang_names,
+                            languages=missing_lang_codes,
                         )
 
                         if not success or not llm_translations:

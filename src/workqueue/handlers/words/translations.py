@@ -12,7 +12,6 @@ from storage.crud.operation_log import log_operation
 from storage.models.schema import Lemma
 from storage.translation_helpers import (
     LANGUAGE_FIELDS,
-    LANGUAGE_NAMES,
     get_reference_translation,
     get_translation,
     lang_code_to_llm_field,
@@ -60,8 +59,6 @@ def do_generate_missing_translations(
         reference_lang_code = "en"
         reference_translation = lemma.lemma_text
 
-    missing_language_names = [LANGUAGE_NAMES.get(code, code).lower() for code in missing_languages]
-
     config = _build_config()
     agent = VorasAgent(config=config)
     client = LinguisticClient(
@@ -78,7 +75,7 @@ def do_generate_missing_translations(
         definition=lemma.definition_text,
         pos_type=lemma.pos_type,
         pos_subtype=lemma.pos_subtype,
-        languages=missing_language_names,
+        languages=missing_languages,
     )
 
     if not success or not translations:
@@ -139,9 +136,6 @@ def do_regenerate_translations(session: Any, lemma_id: int, **_: Any) -> str:
         reference_lang_code = "en"
         reference_translation = lemma.lemma_text
 
-    missing_language_names = [
-        LANGUAGE_NAMES.get(code, code).lower() for code in languages_to_regenerate
-    ]
     translations, success = client.query_translations(
         english_word=lemma.lemma_text,
         reference_translation=(
@@ -151,7 +145,7 @@ def do_regenerate_translations(session: Any, lemma_id: int, **_: Any) -> str:
         definition=lemma.definition_text,
         pos_type=lemma.pos_type,
         pos_subtype=lemma.pos_subtype,
-        languages=missing_language_names,
+        languages=languages_to_regenerate,
     )
 
     if not success or not translations:

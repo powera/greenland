@@ -327,9 +327,9 @@ def api_add_missing_translations() -> ResponseReturnValue:
     assert lemma is not None  # Type narrowing for mypy
 
     try:
-        from storage.translation_helpers import get_tier_1_and_tier_2_languages
+        from storage.translation_helpers import LANGUAGE_FIELDS
 
-        allowed_languages = set(get_tier_1_and_tier_2_languages())
+        allowed_languages = set(LANGUAGE_FIELDS.keys())
         if languages is not None:
             unknown_languages = sorted(
                 language_code

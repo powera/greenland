@@ -125,7 +125,6 @@ def _handle_single_lemma_populate(
     """
     from agents.voras import cli_display
     from storage.translation_helpers import (
-        LANGUAGE_NAMES,
         convert_llm_response_to_lang_codes,
         get_reference_translation,
     )
@@ -174,19 +173,14 @@ def _handle_single_lemma_populate(
                     reference_lang_code = "en"
                     reference_translation = lemma.lemma_text
 
-                # Build list of missing language names for query_translations
-                missing_lang_names = [
-                    LANGUAGE_NAMES[lc].lower() for lc in missing_langs if lc in LANGUAGE_NAMES
-                ]
-
-                # Query translations
+                # Query translations using language codes
                 llm_response, success = client.query_translations(
                     english_word=lemma.lemma_text,
                     reference_translation=(reference_lang_code, reference_translation),
                     definition=lemma.definition_text,
                     pos_type=lemma.pos_type,
                     pos_subtype=lemma.pos_subtype,
-                    languages=missing_lang_names,
+                    languages=list(missing_langs),
                 )
 
                 if success and llm_response:
