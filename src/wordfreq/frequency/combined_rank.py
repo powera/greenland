@@ -47,10 +47,12 @@ YLE_TIER_RANKS: Dict[str, int] = {
     "flyers": 1200,
 }
 YLE_TIER_WEIGHT: float = 1.0
-# Rank assigned when a lemma is absent from YLE entirely. Set just past the
-# last YLE tier (flyers=1200) so non-YLE words get a mild penalty without
-# being treated as if they were rarer than C2-level vocabulary.
-YLE_UNKNOWN_RANK: int = 2000
+# Rank assigned when a lemma is absent from YLE entirely. Set higher than
+# the last YLE tier (flyers=1200) would suggest because the combined score
+# is a harmonic mean, which is dominated by the smallest contributor — a
+# floor near the tier range would single-handedly pin truly-rare words to
+# a deceptively common combined rank.
+YLE_UNKNOWN_RANK: int = 7500
 
 CEFR_TIER_RANKS: Dict[str, int] = {
     "A1": 800,
@@ -70,10 +72,12 @@ BASIC_ENGLISH_TIER_RANKS: Dict[str, int] = {
     "extended": 1600,
 }
 BASIC_ENGLISH_TIER_WEIGHT: float = 1.0
-# Rank assigned when a lemma is absent from Basic English entirely. Just
-# past extended (1600); Basic English is a small curated list, so absence
-# is a weak signal but worth contributing.
-BASIC_ENGLISH_UNKNOWN_RANK: int = 2500
+# Rank assigned when a lemma is absent from Basic English entirely. Set
+# higher than extended (1600) would suggest because the combined score is
+# a harmonic mean, which is dominated by the smallest contributor — a
+# floor near the tier range would single-handedly pin truly-rare words to
+# a deceptively common combined rank.
+BASIC_ENGLISH_UNKNOWN_RANK: int = 7500
 
 # Lemmas are written back in batches of this size to bound the per-commit
 # transaction footprint on a large corpus.
