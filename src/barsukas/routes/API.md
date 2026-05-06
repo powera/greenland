@@ -14,8 +14,12 @@ Base prefix: `/api`.
 - `GET /api/v1/search?q=<query>[&pos_type=...][&difficulty=...][&limit=...][&offset=...]`
   - Search lemmas by text/definition/translations.
 
-- `GET /api/v1/lemmas/by-difficulty?difficulty=<level>[&pos_type=...][&limit=...][&offset=...]`
+- `GET /api/v1/lemmas/by-difficulty?difficulty=<level>[&pos_type=...][&missing_translation=<code>][&limit=...][&offset=...]`
   - List lemmas for one difficulty level without supplying a text query.
+  - `missing_translation`: optional language code; when supplied, only returns lemmas where that translation is missing/empty.
+
+- `GET /api/v1/lemmas/translations?guids=<guid1,guid2,...>[&language=<code>]`
+  - Fetch translations for multiple GUIDs in one call.
 
 - `GET /api/v1/lemma/<guid>`
   - Basic lemma details.

@@ -228,6 +228,12 @@ def api_info() -> ResponseReturnValue:
                     "description": "Filter by difficulty level (1-30, '-1' for excluded, 'null' for not set)",
                 },
                 {
+                    "name": "missing_translation",
+                    "type": "query",
+                    "required": False,
+                    "description": "Only return lemmas missing this target language translation",
+                },
+                {
                     "name": "limit",
                     "type": "query",
                     "required": False,
@@ -269,6 +275,25 @@ def api_info() -> ResponseReturnValue:
                     "type": "query",
                     "required": False,
                     "description": "Number of results to skip for pagination (default: 0)",
+                },
+            ],
+        },
+        {
+            "path": "/api/v1/lemmas/translations",
+            "method": "GET",
+            "description": "Fetch translations for multiple lemma GUIDs in one request",
+            "parameters": [
+                {
+                    "name": "guids",
+                    "type": "query",
+                    "required": True,
+                    "description": "Comma-separated GUID list",
+                },
+                {
+                    "name": "language",
+                    "type": "query",
+                    "required": False,
+                    "description": "Optional language filter",
                 },
             ],
         },
@@ -560,6 +585,7 @@ def list_lemmas_by_difficulty() -> ResponseReturnValue:
         return _build_error_response("Query parameter 'difficulty' is required", 400)
 
     pos_type = request.args.get("pos_type", "").strip()
+    missing_translation = request.args.get("missing_translation", "").strip().lower()
     try:
         limit = min(int(request.args.get("limit", "200")), 1000)
     except ValueError:
@@ -576,6 +602,19 @@ def list_lemmas_by_difficulty() -> ResponseReturnValue:
         pos_type=pos_type or None,
         difficulty=difficulty,
     )
+    if missing_translation:
+        query = query.outerjoin(
+            LemmaTranslation,
+            and_(
+                LemmaTranslation.lemma_id == Lemma.id,
+                LemmaTranslation.language_code == missing_translation,
+            ),
+        ).filter(
+            or_(
+                LemmaTranslation.id.is_(None),
+                func.trim(LemmaTranslation.translation) == "",
+            )
+        )
     total_count = query.count()
     results = query.order_by(Lemma.id.asc()).limit(limit).offset(offset).all()
 
@@ -605,8 +644,56 @@ def list_lemmas_by_difficulty() -> ResponseReturnValue:
         metadata["next_offset"] = offset + limit
     if pos_type:
         metadata["pos_type_filter"] = pos_type
+    if missing_translation:
+        metadata["missing_translation"] = missing_translation
 
     return _build_success_response(lemmas_data, metadata)
+
+
+@bp.route("/v1/lemmas/translations")
+@mirrored_facade("/api/v1/lemmas/translations", "GET")
+def get_lemmas_translations_bulk() -> ResponseReturnValue:
+    """Return translations for multiple GUIDs in one request."""
+    guids_raw = request.args.get("guids", "").strip()
+    if not guids_raw:
+        return _build_error_response("Query parameter 'guids' is required", 400)
+
+    guids = [guid.strip() for guid in guids_raw.split(",") if guid.strip()]
+    if not guids:
+        return _build_error_response("No valid GUIDs provided in 'guids'", 400)
+
+    language_filter = request.args.get("language", "").strip().lower()
+    lemmas = g.db.query(Lemma).filter(Lemma.guid.in_(guids)).all()
+    lemma_by_guid = {lemma.guid: lemma for lemma in lemmas}
+
+    data: Dict[str, Dict[str, str]] = {}
+    missing_guids: List[str] = []
+    for guid in guids:
+        lemma = lemma_by_guid.get(guid)
+        if lemma is None:
+            missing_guids.append(guid)
+            continue
+        all_translations_raw = get_all_translations(g.db, lemma)
+        all_translations = {
+            key: value
+            for key, value in all_translations_raw.items()
+            if value is not None and value.strip()
+        }
+        if language_filter:
+            value = all_translations.get(language_filter)
+            data[guid] = {language_filter: value} if value else {}
+        else:
+            data[guid] = all_translations
+
+    return _build_success_response(
+        data,
+        {
+            "requested_guids": guids,
+            "found_count": len(data),
+            "missing_guids": missing_guids,
+            "requested_language": language_filter or None,
+        },
+    )
 
 
 def _serialize_value(value: Any, field_name: str = "") -> Any:

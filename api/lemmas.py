@@ -30,6 +30,16 @@ class SearchResponse(TypedDict):
     metadata: Dict[str, Any]
 
 
+class TranslationMapResponse(TypedDict):
+    data: Dict[str, str]
+    metadata: Dict[str, Any]
+
+
+class BulkTranslationMapResponse(TypedDict):
+    data: Dict[str, Dict[str, str]]
+    metadata: Dict[str, Any]
+
+
 class LemmaInfo(TypedDict, total=False):
     guid: str
     lemma_text: str
@@ -146,6 +156,7 @@ def list_by_difficulty(
     difficulty: str,
     *,
     pos_type: Optional[str] = None,
+    missing_translation: Optional[str] = None,
     limit: Optional[int] = None,
     offset: Optional[int] = None,
 ) -> SearchResponse:
@@ -157,6 +168,7 @@ def list_by_difficulty(
             {
                 "difficulty": difficulty,
                 "pos_type": pos_type,
+                "missing_translation": missing_translation,
                 "limit": limit,
                 "offset": offset,
             },
@@ -191,9 +203,26 @@ def patch_lemma_difficulty(guid: str, difficulty_level: Optional[int]) -> Any:
 @mirrored_route("/api/v1/lemma/<guid>/translations", "GET")
 def get_translations(guid: str, *, language: Optional[str] = None) -> Any:
     """Translations of a lemma keyed by language code."""
-    return get_json(
-        f"{API_V1_PREFIX}/lemma/{guid}/translations",
-        {"language": language},
+    return cast(
+        TranslationMapResponse,
+        get_json(
+            f"{API_V1_PREFIX}/lemma/{guid}/translations",
+            {"language": language},
+        ),
+    )
+
+
+@mirrored_route("/api/v1/lemmas/translations", "GET")
+def get_translations_bulk(
+    guids: List[str], *, language: Optional[str] = None
+) -> BulkTranslationMapResponse:
+    """Translations for multiple lemmas keyed by GUID, then language code."""
+    return cast(
+        BulkTranslationMapResponse,
+        get_json(
+            f"{API_V1_PREFIX}/lemmas/translations",
+            {"guids": ",".join(guids), "language": language},
+        ),
     )
 
 
