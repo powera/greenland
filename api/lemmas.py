@@ -141,6 +141,29 @@ def search(
     )
 
 
+@mirrored_route("/api/v1/lemmas/by-difficulty", "GET")
+def list_by_difficulty(
+    difficulty: str,
+    *,
+    pos_type: Optional[str] = None,
+    limit: Optional[int] = None,
+    offset: Optional[int] = None,
+) -> SearchResponse:
+    """List lemmas by difficulty without requiring a search query."""
+    return cast(
+        SearchResponse,
+        get_json(
+            f"{API_V1_PREFIX}/lemmas/by-difficulty",
+            {
+                "difficulty": difficulty,
+                "pos_type": pos_type,
+                "limit": limit,
+                "offset": offset,
+            },
+        ),
+    )
+
+
 @mirrored_route("/api/v1/lemma/<guid>", "GET")
 def get_lemma(guid: str) -> Any:
     """Basic lemma details."""

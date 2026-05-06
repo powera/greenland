@@ -242,6 +242,37 @@ def api_info() -> ResponseReturnValue:
             ],
         },
         {
+            "path": "/api/v1/lemmas/by-difficulty",
+            "method": "GET",
+            "description": "List lemmas by difficulty level without requiring a text query",
+            "parameters": [
+                {
+                    "name": "difficulty",
+                    "type": "query",
+                    "required": True,
+                    "description": "Difficulty level (1-30, '-1' for excluded, 'null' for not set)",
+                },
+                {
+                    "name": "pos_type",
+                    "type": "query",
+                    "required": False,
+                    "description": "Optional part-of-speech filter",
+                },
+                {
+                    "name": "limit",
+                    "type": "query",
+                    "required": False,
+                    "description": "Max results to return (default: 200, max: 1000)",
+                },
+                {
+                    "name": "offset",
+                    "type": "query",
+                    "required": False,
+                    "description": "Number of results to skip for pagination (default: 0)",
+                },
+            ],
+        },
+        {
             "path": "/api/v1/models",
             "method": "GET",
             "description": "List LLM models registered in the benchmarks database (requires postgres)",
@@ -516,6 +547,64 @@ def search_lemmas() -> ResponseReturnValue:
     metadata["has_more"] = (offset + limit) < total_count
     if metadata["has_more"]:
         metadata["next_offset"] = offset + limit
+
+    return _build_success_response(lemmas_data, metadata)
+
+
+@bp.route("/v1/lemmas/by-difficulty")
+@mirrored_facade("/api/v1/lemmas/by-difficulty", "GET")
+def list_lemmas_by_difficulty() -> ResponseReturnValue:
+    """List lemmas at one difficulty level without requiring query text."""
+    difficulty = request.args.get("difficulty", "").strip()
+    if not difficulty:
+        return _build_error_response("Query parameter 'difficulty' is required", 400)
+
+    pos_type = request.args.get("pos_type", "").strip()
+    try:
+        limit = min(int(request.args.get("limit", "200")), 1000)
+    except ValueError:
+        limit = 200
+
+    try:
+        offset = max(int(request.args.get("offset", "0")), 0)
+    except ValueError:
+        offset = 0
+
+    query = build_lemma_search_query(
+        session=g.db,
+        search=None,
+        pos_type=pos_type or None,
+        difficulty=difficulty,
+    )
+    total_count = query.count()
+    results = query.order_by(Lemma.id.asc()).limit(limit).offset(offset).all()
+
+    lemmas_data = [
+        {
+            "guid": lemma.guid,
+            "lemma_text": lemma.lemma_text,
+            "definition": lemma.definition_text,
+            "pos_type": lemma.pos_type,
+            "pos_subtype": _serialize_value(lemma.pos_subtype),
+            "difficulty_level": _serialize_value(lemma.difficulty_level),
+            "disambiguation": _serialize_value(lemma.disambiguation),
+            "verified": lemma.verified,
+        }
+        for lemma in results
+    ]
+
+    metadata = {
+        "difficulty_filter": difficulty,
+        "total_results": total_count,
+        "limit": limit,
+        "offset": offset,
+        "returned": len(lemmas_data),
+        "has_more": (offset + limit) < total_count,
+    }
+    if metadata["has_more"]:
+        metadata["next_offset"] = offset + limit
+    if pos_type:
+        metadata["pos_type_filter"] = pos_type
 
     return _build_success_response(lemmas_data, metadata)
 
