@@ -10,7 +10,10 @@ import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from storage import database as linguistic_db
 from storage.translation_helpers import MAX_LLM_LANGUAGES_PER_OPERATION, LANGUAGE_NAMES
-from wordfreq.translation.constants import DEFAULT_TRANSLATION_LANGUAGES
+from wordfreq.translation.constants import (
+    DEFAULT_TRANSLATION_LANGUAGES,
+    DEFAULT_TRANSLATION_LANGUAGES_BY_CODE,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -41,8 +44,8 @@ def query_translations(
         pos_type: Part of speech (noun, verb, etc.)
         get_session_func: Function to get database session
         pos_subtype: Optional part of speech subtype
-        languages: List of language names to translate to (e.g., ['french', 'spanish', 'german']).
-                  If None, uses default set: ['chinese', 'korean', 'french', 'spanish', 'german', 'portuguese', 'swahili', 'vietnamese']
+        languages: List of ISO language codes to translate to (e.g., ['fr', 'es', 'de']).
+                  If None, uses default set: ['zh', 'ko', 'fr', 'es', 'de', 'pt', 'sw', 'vi']
 
     Returns:
         Tuple of (translations dict, success flag)
@@ -59,16 +62,7 @@ def query_translations(
 
     # Use default languages if not specified
     if languages is None:
-        languages = [
-            "chinese",
-            "korean",
-            "french",
-            "spanish",
-            "german",
-            "portuguese",
-            "swahili",
-            "vietnamese",
-        ]
+        languages = ["zh", "ko", "fr", "es", "de", "pt", "sw", "vi"]
 
     if len(languages) > MAX_LLM_LANGUAGES_PER_OPERATION:
         logger.warning(
@@ -83,18 +77,18 @@ def query_translations(
     languages_list_lines = []
     language_instructions_lines = []
 
-    for lang in languages:
-        if lang in DEFAULT_TRANSLATION_LANGUAGES:
-            lang_config = DEFAULT_TRANSLATION_LANGUAGES[lang]
-            schema_properties[lang_config["field"]] = SchemaProperty(
-                "string", lang_config["description"]
-            )
-            # Add to languages list (e.g., "- French")
-            languages_list_lines.append(f"- {lang.capitalize()}")
-            # Add language instructions
-            language_instructions_lines.append(lang_config["instructions"])
-        else:
-            logger.warning(f"Unknown language '{lang}' requested, skipping")
+    for lang_code in languages:
+        lang_config = DEFAULT_TRANSLATION_LANGUAGES_BY_CODE.get(lang_code)
+        if lang_config is None:
+            logger.warning(f"Unknown language code '{lang_code}' requested, skipping")
+            continue
+        schema_properties[lang_config["field"]] = SchemaProperty(
+            "string", lang_config["description"]
+        )
+        # Use the canonical language name (without script qualifier) for the prompt bullet list
+        display_name = LANGUAGE_NAMES.get(lang_code, lang_code)
+        languages_list_lines.append(f"- {display_name}")
+        language_instructions_lines.append(lang_config["instructions"])
 
     if not schema_properties:
         logger.error("No valid languages specified")
