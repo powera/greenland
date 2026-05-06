@@ -2,9 +2,12 @@
 
 """API routes for AJAX requests and REST API endpoints."""
 
+# MIRROR NOTICE: If you edit mirrored JSON endpoints here, update matching top-level api/ wrappers in the same commit.
+
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from barsukas.config import Config
+from barsukas.routes.mirror_metadata import mirrored_by_api
 from flask import Blueprint, Response, g, jsonify, request
 from flask.typing import ResponseReturnValue
 from sqlalchemy import and_, case, func, or_
@@ -363,6 +366,7 @@ def api_info() -> ResponseReturnValue:
 
 
 @bp.route("/v1/search")
+@mirrored_by_api("/api/v1/search", "GET")
 def search_lemmas() -> ResponseReturnValue:
     """
     Search for lemmas by keyword across multiple fields.
@@ -536,6 +540,7 @@ def _build_success_response(
 
 
 @bp.route("/v1/lemma/<guid>")
+@mirrored_by_api("/api/v1/lemma/<guid>", "GET")
 def get_lemma_info(guid: str) -> ResponseReturnValue:
     """
     Get basic information about a lemma by GUID.
@@ -575,6 +580,7 @@ def get_lemma_info(guid: str) -> ResponseReturnValue:
 
 
 @bp.route("/v1/lemma/<guid>/translations")
+@mirrored_by_api("/api/v1/lemma/<guid>/translations", "GET")
 def get_lemma_translations(guid: str) -> ResponseReturnValue:
     """
     Get translations of a lemma in various languages.
@@ -831,6 +837,7 @@ def get_lemma_pronunciations(guid: str) -> ResponseReturnValue:
 
 
 @bp.route("/v1/lemma/<guid>/audio")
+@mirrored_by_api("/api/v1/lemma/<guid>/audio", "GET")
 def get_lemma_audio(guid: str) -> ResponseReturnValue:
     """
     Get audio availability for a lemma by language.
@@ -975,6 +982,7 @@ def get_lemma_audio(guid: str) -> ResponseReturnValue:
 
 
 @bp.route("/v1/lemma/<guid>/sentences")
+@mirrored_by_api("/api/v1/lemma/<guid>/sentences", "GET")
 def get_lemma_sentences(guid: str) -> ResponseReturnValue:
     """
     Get example sentences that use this lemma.

@@ -14,6 +14,7 @@ BARSUKAS_FILES = [
     "src/barsukas/routes/audio.py",
     "src/barsukas/routes/batch_operations.py",
     "src/barsukas/routes/llm_api.py",
+    "src/barsukas/routes/api.py",
 ]
 
 API_FILES = [

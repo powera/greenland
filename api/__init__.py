@@ -1,8 +1,14 @@
 """Public typed facade for Barsukas domain HTTP wrappers."""
 
-from api.audio import AudioResponse, ListAudioFilesRequest, list_audio_files
+from api.audio import AudioResponse, GetLemmaAudioRequest, get_lemma_audio
 from api.batch_operations import BatchOperationsResponse, ListBatchesRequest, list_batches
-from api.lemmas import LemmasResponse, ListLemmasRequest, list_lemmas
+from api.lemmas import (
+    GetLemmaRequest,
+    LemmasResponse,
+    SearchLemmasRequest,
+    get_lemma,
+    search_lemmas,
+)
 from api.llm_agents import (
     AgentTriggerRequest,
     AgentTriggerResponse,
@@ -11,29 +17,35 @@ from api.llm_agents import (
     check_translations,
     generate_pronunciations,
 )
-from api.sentences import ListSentencesRequest, SentencesResponse, list_sentences
-from api.translations import TranslationResponse, UpdateTranslationRequest, update_translation
+from api.sentences import GetLemmaSentencesRequest, SentencesResponse, get_lemma_sentences
+from api.translations import (
+    GetLemmaTranslationsRequest,
+    TranslationResponse,
+    get_lemma_translations,
+)
 
 __all__ = [
-    "generate_pronunciations",
-    "check_translations",
-    "add_missing_translations",
-    "PronunciationTriggerRequest",
-    "AgentTriggerResponse",
     "AgentTriggerRequest",
+    "AgentTriggerResponse",
     "AudioResponse",
     "BatchOperationsResponse",
+    "GetLemmaAudioRequest",
+    "GetLemmaRequest",
+    "GetLemmaSentencesRequest",
+    "GetLemmaTranslationsRequest",
     "LemmasResponse",
-    "ListAudioFilesRequest",
     "ListBatchesRequest",
-    "ListLemmasRequest",
-    "ListSentencesRequest",
+    "PronunciationTriggerRequest",
+    "SearchLemmasRequest",
     "SentencesResponse",
     "TranslationResponse",
-    "UpdateTranslationRequest",
-    "list_audio_files",
+    "add_missing_translations",
+    "check_translations",
+    "generate_pronunciations",
+    "get_lemma",
+    "get_lemma_audio",
+    "get_lemma_sentences",
+    "get_lemma_translations",
     "list_batches",
-    "list_lemmas",
-    "list_sentences",
-    "update_translation",
+    "search_lemmas",
 ]

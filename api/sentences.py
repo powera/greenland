@@ -1,4 +1,4 @@
-"""Typed wrappers for Barsukas sentence routes."""
+"""Typed wrappers for Barsukas JSON sentence API endpoints."""
 
 from dataclasses import dataclass
 
@@ -7,14 +7,9 @@ from api._mirror import mirrored_route
 
 
 @dataclass(frozen=True)
-class ListSentencesRequest:
-    page: int = 1
-    search: str = ""
-    pattern_type: str = ""
-    minimum_level: str = ""
-    has_translation: str = ""
-    exclude_rejected: str = "no"
-    exclude_verified: str = "no"
+class GetLemmaSentencesRequest:
+    guid: str
+    language: str = ""
 
 
 @dataclass(frozen=True)
@@ -22,21 +17,12 @@ class SentencesResponse:
     result: HttpResult
 
 
-@mirrored_route("/sentences/", "GET")
-def list_sentences(request_data: ListSentencesRequest) -> SentencesResponse:
-    """Delegate to Barsukas `GET /sentences/` list route."""
+@mirrored_route("/api/v1/lemma/<guid>/sentences", "GET")
+def get_lemma_sentences(request_data: GetLemmaSentencesRequest) -> SentencesResponse:
     return SentencesResponse(
         result=send_request(
             "GET",
-            "/sentences/",
-            params={
-                "page": request_data.page,
-                "search": request_data.search,
-                "pattern_type": request_data.pattern_type,
-                "minimum_level": request_data.minimum_level,
-                "has_translation": request_data.has_translation,
-                "exclude_rejected": request_data.exclude_rejected,
-                "exclude_verified": request_data.exclude_verified,
-            },
+            f"/api/v1/lemma/{request_data.guid}/sentences",
+            params={"language": request_data.language},
         )
     )

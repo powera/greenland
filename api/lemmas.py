@@ -1,4 +1,4 @@
-"""Typed wrappers for Barsukas lemma routes."""
+"""Typed wrappers for Barsukas JSON lemma API endpoints."""
 
 from dataclasses import dataclass
 
@@ -7,12 +7,17 @@ from api._mirror import mirrored_route
 
 
 @dataclass(frozen=True)
-class ListLemmasRequest:
-    page: int = 1
-    search: str = ""
+class SearchLemmasRequest:
+    query: str
     pos_type: str = ""
-    pos_subtype: str = ""
     difficulty: str = ""
+    limit: int = 20
+    offset: int = 0
+
+
+@dataclass(frozen=True)
+class GetLemmaRequest:
+    guid: str
 
 
 @dataclass(frozen=True)
@@ -20,19 +25,23 @@ class LemmasResponse:
     result: HttpResult
 
 
-@mirrored_route("/lemmas/", "GET")
-def list_lemmas(request_data: ListLemmasRequest) -> LemmasResponse:
-    """Delegate to Barsukas `GET /lemmas/` list route."""
+@mirrored_route("/api/v1/search", "GET")
+def search_lemmas(request_data: SearchLemmasRequest) -> LemmasResponse:
     return LemmasResponse(
         result=send_request(
             "GET",
-            "/lemmas/",
+            "/api/v1/search",
             params={
-                "page": request_data.page,
-                "search": request_data.search,
+                "q": request_data.query,
                 "pos_type": request_data.pos_type,
-                "pos_subtype": request_data.pos_subtype,
                 "difficulty": request_data.difficulty,
+                "limit": request_data.limit,
+                "offset": request_data.offset,
             },
         )
     )
+
+
+@mirrored_route("/api/v1/lemma/<guid>", "GET")
+def get_lemma(request_data: GetLemmaRequest) -> LemmasResponse:
+    return LemmasResponse(result=send_request("GET", f"/api/v1/lemma/{request_data.guid}"))

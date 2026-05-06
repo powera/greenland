@@ -15,10 +15,10 @@ BARSUKAS HTTP route operations.
 Each module in this directory mirrors a domain route module in
 `src/barsukas/routes/`:
 
-- `api/lemmas.py` <-> `src/barsukas/routes/lemmas.py`
-- `api/sentences.py` <-> `src/barsukas/routes/sentences.py`
-- `api/translations.py` <-> `src/barsukas/routes/translations.py`
-- `api/audio.py` <-> `src/barsukas/routes/audio.py`
+- `api/lemmas.py` <-> `src/barsukas/routes/api.py (v1 search/lemma endpoints)`
+- `api/sentences.py` <-> `src/barsukas/routes/api.py (v1 lemma sentences endpoint)`
+- `api/translations.py` <-> `src/barsukas/routes/api.py (v1 lemma translations endpoint)`
+- `api/audio.py` <-> `src/barsukas/routes/api.py (v1 lemma audio endpoint)`
 - `api/batch_operations.py` <-> `src/barsukas/routes/batch_operations.py`
 - `api/llm_agents.py` <-> `src/barsukas/routes/llm_api.py`
 

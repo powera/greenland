@@ -1,4 +1,4 @@
-"""Typed wrappers for Barsukas translation routes."""
+"""Typed wrappers for Barsukas JSON translation API endpoints."""
 
 from dataclasses import dataclass
 
@@ -7,12 +7,9 @@ from api._mirror import mirrored_route
 
 
 @dataclass(frozen=True)
-class UpdateTranslationRequest:
-    lemma_id: int
-    lang_code: str
-    translation: str
-    disambiguation: str = ""
-    return_to: str = ""
+class GetLemmaTranslationsRequest:
+    guid: str
+    language: str = ""
 
 
 @dataclass(frozen=True)
@@ -20,17 +17,12 @@ class TranslationResponse:
     result: HttpResult
 
 
-@mirrored_route("/translations/<lemma_id>/<lang_code>", "POST")
-def update_translation(request_data: UpdateTranslationRequest) -> TranslationResponse:
-    """Delegate to Barsukas `POST /translations/<lemma_id>/<lang_code>` route."""
+@mirrored_route("/api/v1/lemma/<guid>/translations", "GET")
+def get_lemma_translations(request_data: GetLemmaTranslationsRequest) -> TranslationResponse:
     return TranslationResponse(
         result=send_request(
-            "POST",
-            f"/translations/{request_data.lemma_id}/{request_data.lang_code}",
-            form_data={
-                "translation": request_data.translation,
-                "disambiguation": request_data.disambiguation,
-                "return_to": request_data.return_to,
-            },
+            "GET",
+            f"/api/v1/lemma/{request_data.guid}/translations",
+            params={"language": request_data.language},
         )
     )

@@ -1,4 +1,4 @@
-"""Typed wrappers for Barsukas audio routes."""
+"""Typed wrappers for Barsukas JSON audio API endpoints."""
 
 from dataclasses import dataclass
 
@@ -7,11 +7,9 @@ from api._mirror import mirrored_route
 
 
 @dataclass(frozen=True)
-class ListAudioFilesRequest:
-    page: int = 1
-    status: str = ""
-    language_code: str = ""
-    voice_name: str = ""
+class GetLemmaAudioRequest:
+    guid: str
+    language: str = ""
 
 
 @dataclass(frozen=True)
@@ -19,18 +17,12 @@ class AudioResponse:
     result: HttpResult
 
 
-@mirrored_route("/audio/list", "GET")
-def list_audio_files(request_data: ListAudioFilesRequest) -> AudioResponse:
-    """Delegate to Barsukas `GET /audio/list` route."""
+@mirrored_route("/api/v1/lemma/<guid>/audio", "GET")
+def get_lemma_audio(request_data: GetLemmaAudioRequest) -> AudioResponse:
     return AudioResponse(
         result=send_request(
             "GET",
-            "/audio/list",
-            params={
-                "page": request_data.page,
-                "status": request_data.status,
-                "language_code": request_data.language_code,
-                "voice_name": request_data.voice_name,
-            },
+            f"/api/v1/lemma/{request_data.guid}/audio",
+            params={"language": request_data.language},
         )
     )

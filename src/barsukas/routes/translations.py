@@ -1,12 +1,9 @@
 #!/usr/bin/python3
-# MIRROR NOTICE: If you edit this route module, update the matching wrapper in top-level api/ in the same commit.
-
 """Routes for translation management."""
 
 from typing import Union
 
 from barsukas.config import Config
-from barsukas.routes.mirror_metadata import mirrored_by_api
 from flask import Blueprint, flash, g, jsonify, redirect, request, url_for
 from werkzeug.wrappers import Response
 
@@ -23,7 +20,6 @@ bp = Blueprint("translations", __name__, url_prefix="/translations")
 
 
 @bp.route("/<int:lemma_id>/<lang_code>", methods=["POST"])
-@mirrored_by_api("/translations/<lemma_id>/<lang_code>", "POST")
 def update_translation(lemma_id: int, lang_code: str) -> Response:
     """Update a translation for a lemma."""
     from flask import current_app
