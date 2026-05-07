@@ -31,10 +31,12 @@ logger = logging.getLogger(__name__)
 bp = Blueprint("sync_release", __name__, url_prefix="/sync/lemmas")
 
 # Default path to data/release/lemmas
-# __file__ is src/barsukas/routes/sync_release.py
-# .parent = routes/, .parent.parent = barsukas/, .parent.parent.parent = src/
-# .parent.parent.parent.parent = repo root
-DEFAULT_RELEASE_DIR = Path(__file__).parent.parent.parent.parent / "data" / "release" / "lemmas"
+# __file__ is src/barsukas/routes/sync/sync_release.py
+# .parent = sync/, .parent.parent = routes/, .parent.parent.parent = barsukas/,
+# .parent.parent.parent.parent = src/, .parent.parent.parent.parent.parent = repo root
+DEFAULT_RELEASE_DIR = (
+    Path(__file__).parent.parent.parent.parent.parent / "data" / "release" / "lemmas"
+)
 
 
 def _get_release_dir() -> Path:

@@ -70,22 +70,22 @@ from barsukas.routes import (
     peleda,
     pending_imports,
     pradzia,
-    rapid_review,
     rhymes,
-    rapid_review_hub,
-    sentence_rapid_review,
     sentence_stats,
     sentences,
     settings,
     strings_export,
+    translations,
+    wireword,
+)
+from barsukas.routes.review import rapid_review, rapid_review_hub, sentence_rapid_review
+from barsukas.routes.sync import (
     sync_derivative_release,
     sync_hub,
     sync_relation_release,
     sync_release,
     sync_sentence_release,
     sync_synonym_release,
-    translations,
-    wireword,
 )
 from storage.backend import create_session, get_backend_type
 from storage.backend.config import BackendType, DataSourceConfig
