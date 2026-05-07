@@ -19,18 +19,8 @@ from typing import Iterable, Set, Tuple
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-BARSUKAS_FILES = [
-    "src/barsukas/routes/api.py",
-    "src/barsukas/routes/pending_imports.py",
-    "src/barsukas/routes/llm_api.py",
-]
-
-API_FILES = [
-    "api/lemmas.py",
-    "api/sentences.py",
-    "api/batch_operations.py",
-    "api/llm_agents.py",
-]
+BARSUKAS_DIR = "src/barsukas/routes"
+API_DIR = "api"
 
 API_DECORATOR_NAME = "mirrored_route"
 BARSUKAS_DECORATOR_NAME = "mirrored_facade"
@@ -38,10 +28,16 @@ BARSUKAS_DECORATOR_NAME = "mirrored_facade"
 RoutePair = Tuple[str, str]
 
 
-def _extract_pairs(file_paths: Iterable[str], decorator_name: str) -> Set[RoutePair]:
+def _iter_python_files(rel_dir: str) -> Iterable[Path]:
+    """Yield every .py file under ``rel_dir`` (recursive), sorted for stable output."""
+    base = REPO_ROOT / rel_dir
+    return sorted(base.rglob("*.py"))
+
+
+def _extract_pairs(file_paths: Iterable[Path], decorator_name: str) -> Set[RoutePair]:
     pairs: Set[RoutePair] = set()
-    for rel_path in file_paths:
-        full_path = REPO_ROOT / rel_path
+    for full_path in file_paths:
+        rel_path = full_path.relative_to(REPO_ROOT).as_posix()
         source = full_path.read_text(encoding="utf-8")
         tree = ast.parse(source, filename=rel_path)
         for node in ast.walk(tree):
@@ -69,8 +65,8 @@ def _extract_pairs(file_paths: Iterable[str], decorator_name: str) -> Set[RouteP
 
 
 def main() -> int:
-    api_pairs = _extract_pairs(API_FILES, API_DECORATOR_NAME)
-    barsukas_pairs = _extract_pairs(BARSUKAS_FILES, BARSUKAS_DECORATOR_NAME)
+    api_pairs = _extract_pairs(_iter_python_files(API_DIR), API_DECORATOR_NAME)
+    barsukas_pairs = _extract_pairs(_iter_python_files(BARSUKAS_DIR), BARSUKAS_DECORATOR_NAME)
 
     missing_in_api = barsukas_pairs - api_pairs
     missing_in_barsukas = api_pairs - barsukas_pairs
