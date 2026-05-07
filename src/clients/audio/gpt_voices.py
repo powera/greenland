@@ -283,6 +283,26 @@ class GptVoice(Enum):
             return None
 
     @classmethod
+    def from_path_name(cls, path_name: str, language_code: str) -> Optional["GptVoice"]:
+        """
+        Get a GptVoice from its path name (e.g., 'amina') and language code.
+
+        Path names are not globally unique across languages, so the language
+        code is required to disambiguate.
+
+        Args:
+            path_name: Path-safe voice name as returned by ``GptVoice.path_name``
+            language_code: Language code the voice belongs to
+
+        Returns:
+            Matching GptVoice enum value or None if not found
+        """
+        for voice in cls:
+            if voice.language_code == language_code and voice.path_name == path_name:
+                return voice
+        return None
+
+    @classmethod
     def from_openai_voice(cls, openai_voice: Voice, language_code: str) -> Optional["GptVoice"]:
         """
         Get a GptVoice from an OpenAI voice and language.

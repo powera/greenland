@@ -39,6 +39,7 @@ from agents.voras.agent import VorasAgent
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import Lemma
 
+from clients.audio.gpt_voices import GptVoice
 from clients.keys import load_key
 
 bp = Blueprint("llm_api", __name__, url_prefix="/api/llm")
@@ -182,7 +183,7 @@ def api_info() -> ResponseReturnValue:
             "parameters": {
                 "guids": "Required. List of lemma GUIDs",
                 "language": "Required. Language code (e.g., 'bs')",
-                "voice": "Optional. Voice name for the selected backend/agent",
+                "voice": "Optional. Voice name for the selected backend/agent. For vieversys/OpenAI, the path_name from /api/v1/audio/voices (e.g. 'amina'); omit to generate all default voices for the language.",
                 "include_forms": "Optional bool. Reserved for form-level generation (currently base lemma only)",
                 "force": "Optional bool. Reserved for overwrite behavior (currently skipped if manifest already exists)",
             },
@@ -476,6 +477,10 @@ def api_generate_audio(agent: str) -> ResponseReturnValue:
     voice_name = data.get("voice")
     include_forms = bool(data.get("include_forms", False))
     force = bool(data.get("force", False))
+    # API callers default to uploading to S3 staging — local-only generation
+    # is the exception (one-off debug runs explicitly pass upload_s3=False).
+    upload_s3 = bool(data.get("upload_s3", True))
+    auto_approve = bool(data.get("auto_approve", False))
     if not isinstance(guids, list) or not all(isinstance(guid_value, str) for guid_value in guids):
         return _build_error_response("guids is required and must be a list of strings")
     if not isinstance(language_code, str) or not language_code:
@@ -491,16 +496,30 @@ def api_generate_audio(agent: str) -> ResponseReturnValue:
     try:
         config = _get_config_from_request(data)
         if agent == "vieversys":
-            vieversys_agent = VieversysAgent(config=config)
+            vieversys_agent = VieversysAgent(
+                config=config, upload_s3=upload_s3, auto_approve=auto_approve
+            )
+            selected_gpt_voices: Optional[List[GptVoice]] = None
+            if isinstance(voice_name, str) and voice_name:
+                # OpenAI-backed voices are addressed by their path_name (e.g.
+                # "amina"); cloud backends (polly/azure/google) use the raw
+                # backend voice id. We try the OpenAI registry first and fall
+                # back to passing the string through as a cloud voice id.
+                resolved = GptVoice.from_path_name(voice_name, language_code)
+                if resolved is not None:
+                    selected_gpt_voices = [resolved]
             result = vieversys_agent.generate_batch(
                 language_code=language_code,
                 lemmas=lemmas,
+                voices=selected_gpt_voices,
                 cloud_voice_names=(
-                    [voice_name] if isinstance(voice_name, str) and voice_name else None
+                    [voice_name]
+                    if isinstance(voice_name, str) and voice_name and selected_gpt_voices is None
+                    else None
                 ),
             )
         elif agent == "strazdas":
-            strazdas_agent = StrazdasAgent(config=config)
+            strazdas_agent = StrazdasAgent(config=config, upload_s3=upload_s3)
             result = strazdas_agent.generate_batch(language_code=language_code, lemmas=lemmas)
         else:
             return _build_error_response(
