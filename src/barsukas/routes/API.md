@@ -30,6 +30,10 @@ Base prefix: `/api`.
 - `GET /api/v1/lemma/<guid>/translations[?language=<code>]`
   - Translations keyed by language code.
 
+- `GET /api/v1/lemma/<guid>/wordfreq`
+  - Word frequency rollups nested by `language_code -> corpus_name -> {total_frequency, best_rank}`.
+  - `total_frequency` is the corpus rollup value for the lemma lexeme; `best_rank` is the best (lowest) available form rank in that corpus.
+
 - `GET /api/v1/lemma/<guid>/forms[?language=<code>]`
   - Derivative forms for a lemma.
 
