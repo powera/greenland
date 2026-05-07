@@ -173,6 +173,30 @@ class GptVoice(Enum):
     GPT_SV_M1 = ("sv", "m", 1, Voice.ASH)
     GPT_SV_M2 = ("sv", "m", 2, Voice.ECHO)
 
+    # Bosnian voices
+    GPT_BS_F1 = ("bs", "f", 1, Voice.NOVA)
+    GPT_BS_F2 = ("bs", "f", 2, Voice.ALLOY)
+    GPT_BS_M1 = ("bs", "m", 1, Voice.ASH)
+    GPT_BS_M2 = ("bs", "m", 2, Voice.ECHO)
+
+    # Albanian voices
+    GPT_SQ_F1 = ("sq", "f", 1, Voice.NOVA)
+    GPT_SQ_F2 = ("sq", "f", 2, Voice.ALLOY)
+    GPT_SQ_M1 = ("sq", "m", 1, Voice.ASH)
+    GPT_SQ_M2 = ("sq", "m", 2, Voice.ECHO)
+
+    # Croatian voices
+    GPT_HR_F1 = ("hr", "f", 1, Voice.NOVA)
+    GPT_HR_F2 = ("hr", "f", 2, Voice.ALLOY)
+    GPT_HR_M1 = ("hr", "m", 1, Voice.ASH)
+    GPT_HR_M2 = ("hr", "m", 2, Voice.ECHO)
+
+    # Slovenian voices
+    GPT_SL_F1 = ("sl", "f", 1, Voice.NOVA)
+    GPT_SL_F2 = ("sl", "f", 2, Voice.ALLOY)
+    GPT_SL_M1 = ("sl", "m", 1, Voice.ASH)
+    GPT_SL_M2 = ("sl", "m", 2, Voice.ECHO)
+
     @property
     def language_code(self) -> str:
         """Get the language code for this voice."""
@@ -287,12 +311,16 @@ DEFAULT_GPT_VOICES: Dict[str, List[GptVoice]] = {
     "nl": [GptVoice.GPT_NL_F1, GptVoice.GPT_NL_M1],
     "de": [GptVoice.GPT_DE_F1, GptVoice.GPT_DE_M1],
     "sv": [GptVoice.GPT_SV_F1, GptVoice.GPT_SV_M1],
+    "bs": [GptVoice.GPT_BS_F1, GptVoice.GPT_BS_M1],
+    "sq": [GptVoice.GPT_SQ_F1, GptVoice.GPT_SQ_M1],
+    "hr": [GptVoice.GPT_HR_F1, GptVoice.GPT_HR_M1],
+    "sl": [GptVoice.GPT_SL_F1, GptVoice.GPT_SL_M1],
 }
 
 # All voices per language (all 4 variants)
 ALL_GPT_VOICES: Dict[str, List[GptVoice]] = {
     lang: GptVoice.get_voices_for_language(lang)
-    for lang in ["lt", "zh", "es", "fr", "it", "pt", "nl", "de", "sv"]
+    for lang in ["lt", "zh", "es", "fr", "it", "pt", "nl", "de", "sv", "bs", "sq", "hr", "sl"]
 }
 
 # Supported languages
@@ -367,6 +395,34 @@ CHARACTER_NAMES: Dict[str, Dict[str, str]] = {
         "m1": "Erik",  # Male, primary (Ash)
         "m2": "Oskar",  # Male, secondary (Echo)
     },
+    # Bosnian
+    "bs": {
+        "f1": "Amina",  # Female, primary (Nova)
+        "f2": "Lejla",  # Female, secondary (Alloy)
+        "m1": "Emir",  # Male, primary (Ash)
+        "m2": "Tarik",  # Male, secondary (Echo)
+    },
+    # Albanian
+    "sq": {
+        "f1": "Elira",  # Female, primary (Nova)
+        "f2": "Drita",  # Female, secondary (Alloy)
+        "m1": "Arben",  # Male, primary (Ash)
+        "m2": "Bekim",  # Male, secondary (Echo)
+    },
+    # Croatian
+    "hr": {
+        "f1": "Ana",  # Female, primary (Nova)
+        "f2": "Petra",  # Female, secondary (Alloy)
+        "m1": "Ivan",  # Male, primary (Ash)
+        "m2": "Marko",  # Male, secondary (Echo)
+    },
+    # Slovenian
+    "sl": {
+        "f1": "Maja",  # Female, primary (Nova)
+        "f2": "Nina",  # Female, secondary (Alloy)
+        "m1": "Luka",  # Male, primary (Ash)
+        "m2": "Matej",  # Male, secondary (Echo)
+    },
 }
 
 # Language display names for character descriptions
@@ -380,6 +436,10 @@ LANGUAGE_DISPLAY_NAMES: Dict[str, str] = {
     "nl": "Dutch",
     "de": "German",
     "sv": "Swedish",
+    "bs": "Bosnian",
+    "sq": "Albanian",
+    "hr": "Croatian",
+    "sl": "Slovenian",
 }
 
 

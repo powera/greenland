@@ -160,7 +160,13 @@ def generate_audio(
     include_forms: bool = False,
     force: bool = False,
 ) -> GenerateAudioResponse:
-    """Generate audio for a list of GUIDs with a selected audio agent."""
+    """Generate audio for a list of GUIDs with a selected audio agent.
+
+    Known audio agents (see src/agents/README.md):
+      - "vieversys" — OpenAI TTS (gpt-4o-mini-tts). Use this for cloud-quality
+        audio. Also supports polly/azure/google via server-side config.
+      - "strazdas" — eSpeak-NG (offline, robotic).
+    """
     return cast(
         GenerateAudioResponse,
         post_json(

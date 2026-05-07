@@ -273,15 +273,8 @@ def backend_info() -> ResponseReturnValue:
     return jsonify(info)
 
 
-@bp.route("/restart", methods=["POST"])
-def restart() -> ResponseReturnValue:
-    """Initiate a graceful restart of the Barsukas process.
-
-    This endpoint:
-    1. Returns immediately to the client
-    2. Waits for all in-flight requests to complete
-    3. Restarts the process with the same arguments
-    """
+def initiate_restart() -> ResponseReturnValue:
+    """Shared logic for graceful restart, used by /settings/restart and /api/v1/admin/restart."""
     global _shutdown_requested
 
     if not current_app.config.get("ALLOW_RESTART", True):
@@ -292,19 +285,14 @@ def restart() -> ResponseReturnValue:
 
     _shutdown_requested = True
 
-    # Start restart in background thread
     def do_restart() -> None:
-        # Wait a moment for this response to be sent
         time.sleep(0.5)
 
-        # Wait for all other requests to complete
-        max_wait = 300  # 5 minutes max wait
+        max_wait = 300
         start_time = time.time()
 
         while time.time() - start_time < max_wait:
             with _active_requests_lock:
-                # Only this request (the restart request) should remain
-                # (Status checks are not tracked, so they don't count)
                 if _active_requests <= 1:
                     break
             time.sleep(0.1)
@@ -314,12 +302,10 @@ def restart() -> ResponseReturnValue:
         print("All requests completed, shutting down...")
         print("=" * 50 + "\n")
 
-        # Flush output
         sys.stdout.flush()
         sys.stderr.flush()
 
         # Exit with code 42 to signal the launch script to restart
-        # This is cleaner than fork/exec and lets the OS fully clean up
         os._exit(42)
 
     restart_thread = threading.Thread(target=do_restart, daemon=True)
@@ -331,6 +317,16 @@ def restart() -> ResponseReturnValue:
             "message": "Restart initiated. Waiting for active requests to complete...",
         }
     )
+
+
+@bp.route("/restart", methods=["POST"])
+def restart() -> ResponseReturnValue:
+    """Initiate a graceful restart of the Barsukas process.
+
+    Returns immediately, waits for in-flight requests, then exits with code 42
+    so the launch script restarts the process.
+    """
+    return initiate_restart()
 
 
 @bp.route("/restart/status", methods=["GET"])
