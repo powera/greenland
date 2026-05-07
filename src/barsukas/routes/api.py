@@ -15,9 +15,17 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from barsukas.config import Config
 from barsukas.routes._mirror import mirrored_facade
+from clients.audio.azure_tts import AzureVoice
+from clients.audio.google_tts import GoogleTtsVoice
+from clients.audio.gpt_voices import GptVoice
+from clients.audio.polly_tts import PollyVoice
 from flask import Blueprint, Response, g, jsonify, request
 from flask.typing import ResponseReturnValue
 from sqlalchemy import and_, case, func, or_
+from audioshoe.coqui.types import CoquiVoice
+from audioshoe.espeak.types import EspeakVoice
+from audioshoe.piper.types import PiperVoice
+from audioshoe.qwen.types import QwenVoice
 
 from storage.crud.grammar_fact import get_grammar_facts
 from storage.crud.lemma import get_lemma_by_guid
@@ -408,6 +416,19 @@ def api_info() -> ResponseReturnValue:
                     "type": "query",
                     "required": False,
                     "description": "Filter to specific language code (e.g., 'en', 'lt', 'fr')",
+                }
+            ],
+        },
+        {
+            "path": "/api/v1/audio/voices",
+            "method": "GET",
+            "description": "List available TTS voices by backend and language",
+            "parameters": [
+                {
+                    "name": "language",
+                    "type": "query",
+                    "required": False,
+                    "description": "Filter to specific language code (e.g., 'bs')",
                 }
             ],
         },
@@ -1546,6 +1567,96 @@ def get_lemma_audio(guid: str) -> ResponseReturnValue:
         metadata["is_populated"] = language_filter in audio_data
 
     return _build_success_response(audio_data, metadata)
+
+
+@bp.route("/v1/audio/voices")
+@mirrored_facade("/api/v1/audio/voices", "GET")
+def list_audio_voices() -> ResponseReturnValue:
+    """List available voices across supported TTS backends."""
+    language_filter = request.args.get("language", type=str)
+    voice_entries: List[Dict[str, Any]] = []
+
+    def append_voice(
+        voice_name: str, display_voice: str, backend: str, language_code: str, gender: Optional[str]
+    ) -> None:
+        if language_filter and language_code != language_filter:
+            return
+        voice_entries.append(
+            {
+                "voice_name": voice_name,
+                "display_voice": display_voice,
+                "backend": backend,
+                "language_code": language_code,
+                "gender": gender,
+                "sample_url": None,
+            }
+        )
+
+    for language_code in LANGUAGE_HIERARCHY:
+        for openai_voice in GptVoice.get_default_voices_for_language(language_code):
+            append_voice(openai_voice.path_name, openai_voice.ui_name, "openai", language_code, None)
+        for espeak_voice in EspeakVoice.get_voices_for_language(language_code):
+            append_voice(
+                espeak_voice.name,
+                str(getattr(espeak_voice, "ui_name", espeak_voice.name)),
+                "espeak",
+                language_code,
+                getattr(espeak_voice, "gender", None),
+            )
+        for qwen_voice in QwenVoice.get_voices_for_language(language_code):
+            append_voice(
+                qwen_voice.name,
+                str(getattr(qwen_voice, "ui_name", qwen_voice.name)),
+                "qwen",
+                language_code,
+                getattr(qwen_voice, "gender", None),
+            )
+        for piper_voice in PiperVoice.get_voices_for_language(language_code):
+            append_voice(
+                piper_voice.name,
+                str(getattr(piper_voice, "ui_name", piper_voice.name)),
+                "piper",
+                language_code,
+                getattr(piper_voice, "gender", None),
+            )
+        for coqui_voice in CoquiVoice.get_voices_for_language(language_code):
+            append_voice(
+                coqui_voice.name,
+                str(getattr(coqui_voice, "ui_name", coqui_voice.name)),
+                "coqui",
+                language_code,
+                getattr(coqui_voice, "gender", None),
+            )
+        for polly_voice in PollyVoice.get_voices_for_language(language_code):
+            voice_key = str(getattr(polly_voice, "id", polly_voice.name))
+            append_voice(
+                voice_key,
+                str(getattr(polly_voice, "name", voice_key)),
+                "polly",
+                language_code,
+                getattr(polly_voice, "gender", None),
+            )
+        for azure_voice in AzureVoice.get_voices_for_language(language_code):
+            voice_key = str(getattr(azure_voice, "short_name", getattr(azure_voice, "name", "")))
+            append_voice(
+                voice_key,
+                str(getattr(azure_voice, "display_name", getattr(azure_voice, "name", voice_key))),
+                "azure",
+                language_code,
+                getattr(azure_voice, "gender", None),
+            )
+        for google_voice in GoogleTtsVoice.get_voices_for_language(language_code):
+            append_voice(
+                google_voice.name,
+                str(getattr(google_voice, "display_name", google_voice.name)),
+                "google",
+                language_code,
+                getattr(google_voice, "gender", None),
+            )
+
+    return _build_success_response(
+        voice_entries, {"language": language_filter, "total": len(voice_entries)}
+    )
 
 
 @bp.route("/v1/lemma/<guid>/wordfreq")

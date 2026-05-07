@@ -10,6 +10,32 @@ response shape there must be reflected here in the same commit.
 
 from __future__ import annotations
 
+from typing import Any, Dict, List, Optional, TypedDict, cast
+
+from api._http import get_json
+from api._mirror import mirrored_route
+from api.constants import API_V1_PREFIX
 from api.lemmas import get_audio
 
-__all__ = ["get_audio"]
+
+class VoiceEntry(TypedDict):
+    voice_name: str
+    display_voice: str
+    backend: str
+    language_code: str
+    gender: Optional[str]
+    sample_url: Optional[str]
+
+
+class VoicesResponse(TypedDict):
+    data: List[VoiceEntry]
+    metadata: Dict[str, Any]
+
+
+@mirrored_route("/api/v1/audio/voices", "GET")
+def list_voices(*, language: Optional[str] = None) -> VoicesResponse:
+    """List available voices for one language or all languages."""
+    return cast(VoicesResponse, get_json(f"{API_V1_PREFIX}/audio/voices", {"language": language}))
+
+
+__all__ = ["get_audio", "list_voices"]
