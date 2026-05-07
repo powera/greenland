@@ -11,6 +11,16 @@ from __future__ import annotations
 
 from api._http import BarsukasAPIError
 from api.audio import get_audio
+from api.agent_tasks import (
+    check_definition,
+    check_disambiguation,
+    check_pronunciations,
+    check_translations,
+    queue_add_missing_translations,
+    queue_generate_forms,
+    queue_generate_pronunciations,
+    queue_generate_synonyms,
+)
 from api.batch_operations import (
     find_pending_import_duplicates,
     get_word_metadata,
@@ -30,9 +40,6 @@ from api.lemmas import (
 )
 from api.llm_agents import (
     add_missing_translations,
-    check_definition,
-    check_disambiguation,
-    check_translations,
     generate_pronunciations,
     get_llm_info,
 )
@@ -43,6 +50,7 @@ __all__ = [
     "add_missing_translations",
     "check_definition",
     "check_disambiguation",
+    "check_pronunciations",
     "check_translations",
     "find_pending_import_duplicates",
     "generate_pronunciations",
@@ -60,5 +68,9 @@ __all__ = [
     "list_by_difficulty",
     "list_models",
     "list_pending_imports",
+    "queue_add_missing_translations",
+    "queue_generate_forms",
+    "queue_generate_pronunciations",
+    "queue_generate_synonyms",
     "search",
 ]

@@ -9,6 +9,8 @@ route's path, query params, or response shape MUST be made in the matching
 facade in the same commit. See ``api/AGENTS.md`` for the mirroring contract.
 """
 
+from datetime import datetime, timedelta
+import json
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from barsukas.config import Config
@@ -33,6 +35,7 @@ from storage.models.schema import (
     AudioQualityReview,
     ExternalLexemeAnnotation,
     LemmaDifficultyOverride,
+    BarsukasTask,
 )
 from storage.queries.lemma import build_lemma_search_query
 from storage.translation_helpers import (
@@ -40,6 +43,7 @@ from storage.translation_helpers import (
     get_all_translations,
     get_translation_pronunciations,
 )
+from workqueue.task_queue import TaskStatus, TaskType, enqueue_task
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -729,6 +733,323 @@ def _build_success_response(
     if metadata:
         response["metadata"] = metadata
     return jsonify(response)
+
+
+def _require_model() -> Tuple[Optional[str], Optional[ResponseReturnValue]]:
+    payload = request.get_json(silent=True) or {}
+    model = payload.get("model")
+    if not isinstance(model, str) or not model.strip():
+        return None, _build_error_response("model is required and must be a non-empty string")
+    return model.strip(), None
+
+
+@bp.route("/v1/agents/lemma/<guid>/add-missing-translations", methods=["POST"])
+@mirrored_facade("/api/v1/agents/lemma/<guid>/add-missing-translations", "POST")
+def queue_add_missing_translations(guid: str) -> ResponseReturnValue:
+    model, error = _require_model()
+    if error is not None:
+        return error
+    return _queue_task_for_guid_with_optional_batch(
+        guid,
+        TaskType.ADD_MISSING_TRANSLATIONS,
+        {"model": model},
+        dedup_key=f"{TaskType.ADD_MISSING_TRANSLATIONS}:{{lemma_id}}",
+        batch_dedup_prefix=str(TaskType.ADD_MISSING_TRANSLATIONS),
+    )
+
+
+def _queue_task_for_guid(
+    guid: str, task_type: str, payload: Dict[str, Any], dedup_key: str
+) -> ResponseReturnValue:
+    lemma = get_lemma_by_guid(g.db, guid)
+    if lemma is None:
+        return _build_error_response(f"Lemma with GUID '{guid}' not found", 404)
+    result = enqueue_task(
+        g.db,
+        task_type=task_type,
+        target_type="lemma",
+        target_id=lemma.id,
+        payload={"lemma_id": lemma.id, **payload},
+        dedup_key=dedup_key.format(lemma_id=lemma.id),
+    )
+    return _build_success_response({"queued": result.created}, {"guid": guid, **payload})
+
+
+def _queue_task_for_guid_with_optional_batch(
+    guid: str,
+    task_type: str,
+    payload: Dict[str, Any],
+    *,
+    dedup_key: str,
+    batch_dedup_prefix: str,
+) -> ResponseReturnValue:
+    request_payload = request.get_json(silent=True) or {}
+    use_batch = bool(request_payload.get("batch", False))
+    batch_window_minutes = int(request_payload.get("batch_window_minutes", 10))
+    if batch_window_minutes < 1 or batch_window_minutes > 10:
+        return _build_error_response("batch_window_minutes must be between 1 and 10")
+    if not use_batch:
+        return _queue_task_for_guid(guid, task_type, payload, dedup_key)
+
+    lemma = get_lemma_by_guid(g.db, guid)
+    if lemma is None:
+        return _build_error_response(f"Lemma with GUID '{guid}' not found", 404)
+
+    window_index = int(datetime.utcnow().timestamp() // (batch_window_minutes * 60))
+    model_name = str(payload.get("model", ""))
+    lang_code = str(payload.get("lang_code", ""))
+    batch_dedup_key = (
+        f"{batch_dedup_prefix}:{window_index}:{batch_window_minutes}:{model_name}:{lang_code}"
+    )
+    existing = (
+        g.db.query(BarsukasTask)
+        .filter(
+            BarsukasTask.dedup_key == batch_dedup_key,
+            BarsukasTask.status.in_(TaskStatus.ACTIVE),
+            BarsukasTask.created_at >= datetime.utcnow() - timedelta(minutes=batch_window_minutes),
+        )
+        .order_by(BarsukasTask.created_at.desc())
+        .first()
+    )
+    if existing:
+        existing_payload = json.loads(existing.payload or "{}")
+        lemma_ids = set(existing_payload.get("lemma_ids", []))
+        lemma_ids.add(lemma.id)
+        existing_payload["lemma_ids"] = sorted(lemma_ids)
+        existing.payload = json.dumps(existing_payload)
+        g.db.flush()
+        return _build_success_response(
+            {"queued": False, "batched": True},
+            {
+                "guid": guid,
+                **payload,
+                "batch": True,
+                "batch_window_minutes": batch_window_minutes,
+                "batch_task_id": existing.id,
+            },
+        )
+
+    result = enqueue_task(
+        g.db,
+        task_type=task_type,
+        target_type="batch",
+        target_id=None,
+        payload={**payload, "lemma_ids": [lemma.id], "batch": True},
+        dedup_key=batch_dedup_key,
+    )
+    return _build_success_response(
+        {"queued": result.created, "batched": True},
+        {
+            "guid": guid,
+            **payload,
+            "batch": True,
+            "batch_window_minutes": batch_window_minutes,
+            "batch_task_id": result.task.id,
+        },
+    )
+
+
+@bp.route("/v1/agents/lemma/<guid>/generate-pronunciations", methods=["POST"])
+@mirrored_facade("/api/v1/agents/lemma/<guid>/generate-pronunciations", "POST")
+def queue_generate_pronunciations(guid: str) -> ResponseReturnValue:
+    model, error = _require_model()
+    if error is not None:
+        return error
+    payload = request.get_json(silent=True) or {}
+    lang_code = payload.get("lang_code", "en")
+    assert model is not None
+    return _queue_task_for_guid_with_optional_batch(
+        guid,
+        TaskType.GENERATE_PRONUNCIATIONS,
+        {"lang_code": lang_code, "model": model},
+        dedup_key=f"{TaskType.GENERATE_PRONUNCIATIONS}:{{lemma_id}}:{lang_code}",
+        batch_dedup_prefix=str(TaskType.GENERATE_PRONUNCIATIONS),
+    )
+
+
+@bp.route("/v1/agents/lemma/<guid>/generate-forms", methods=["POST"])
+@mirrored_facade("/api/v1/agents/lemma/<guid>/generate-forms", "POST")
+def queue_generate_forms(guid: str) -> ResponseReturnValue:
+    model, error = _require_model()
+    if error is not None:
+        return error
+    payload = request.get_json(silent=True) or {}
+    lang_code = payload.get("lang_code", "lt")
+    assert model is not None
+    return _queue_task_for_guid_with_optional_batch(
+        guid,
+        TaskType.GENERATE_FORMS,
+        {"lang_code": lang_code, "model": model},
+        dedup_key=f"{TaskType.GENERATE_FORMS}:{{lemma_id}}:{lang_code}",
+        batch_dedup_prefix=str(TaskType.GENERATE_FORMS),
+    )
+
+
+@bp.route("/v1/agents/lemma/<guid>/generate-synonyms", methods=["POST"])
+@mirrored_facade("/api/v1/agents/lemma/<guid>/generate-synonyms", "POST")
+def queue_generate_synonyms(guid: str) -> ResponseReturnValue:
+    model, error = _require_model()
+    if error is not None:
+        return error
+    payload = request.get_json(silent=True) or {}
+    lang_code = payload.get("lang_code", "en")
+    assert model is not None
+    return _queue_task_for_guid_with_optional_batch(
+        guid,
+        TaskType.GENERATE_SYNONYMS,
+        {"lang_code": lang_code, "model": model},
+        dedup_key=f"{TaskType.GENERATE_SYNONYMS}:{{lemma_id}}:{lang_code}",
+        batch_dedup_prefix=str(TaskType.GENERATE_SYNONYMS),
+    )
+
+
+@bp.route("/v1/agents/lemma/<guid>/check-definition", methods=["POST"])
+@mirrored_facade("/api/v1/agents/lemma/<guid>/check-definition", "POST")
+def check_definition_by_guid(guid: str) -> ResponseReturnValue:
+    model, error = _require_model()
+    if error is not None:
+        return error
+    from agents.lokys import LokysAgent
+    from storage.backend.config import BackendType, DataSourceConfig
+
+    lemma = get_lemma_by_guid(g.db, guid)
+    if lemma is None:
+        return _build_error_response(f"Lemma with GUID '{guid}' not found", 404)
+    agent = LokysAgent(
+        config=DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+            model=model,
+            debug=Config.DEBUG,
+        )
+    )
+    result = agent.check_single_definition(lemma, session=g.db)
+    status = (
+        "ok"
+        if bool(result.get("is_valid")) and float(result.get("confidence", 0)) >= 0.7
+        else "issues_found"
+    )
+    return _build_success_response(
+        {
+            "status": status,
+            "issues": result.get("issues", []),
+            "confidence_summary": {"confidence": result.get("confidence", 0)},
+        },
+        {"guid": guid, "model": model},
+    )
+
+
+@bp.route("/v1/agents/lemma/<guid>/check-disambiguation", methods=["POST"])
+@mirrored_facade("/api/v1/agents/lemma/<guid>/check-disambiguation", "POST")
+def check_disambiguation_by_guid(guid: str) -> ResponseReturnValue:
+    model, error = _require_model()
+    if error is not None:
+        return error
+    from agents.lokys import LokysAgent
+    from storage.backend.config import BackendType, DataSourceConfig
+
+    lemma = get_lemma_by_guid(g.db, guid)
+    if lemma is None:
+        return _build_error_response(f"Lemma with GUID '{guid}' not found", 404)
+    agent = LokysAgent(
+        config=DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+            model=model,
+            debug=Config.DEBUG,
+        )
+    )
+    result = agent.check_single_disambiguation(lemma, session=g.db)
+    issues = [] if not result.get("needs_disambiguation") else [result]
+    return _build_success_response(
+        {
+            "status": "ok" if not issues else "issues_found",
+            "issues": issues,
+            "confidence_summary": {"duplicate_count": result.get("duplicate_count", 0)},
+        },
+        {"guid": guid, "model": model},
+    )
+
+
+@bp.route("/v1/agents/lemma/<guid>/check-translations", methods=["POST"])
+@mirrored_facade("/api/v1/agents/lemma/<guid>/check-translations", "POST")
+def check_translations_by_guid(guid: str) -> ResponseReturnValue:
+    model, error = _require_model()
+    if error is not None:
+        return error
+    from agents.voras.agent import VorasAgent
+    from storage.backend.config import BackendType, DataSourceConfig
+    from storage.translation_helpers import LANGUAGE_FIELDS
+    from wordfreq.tools.llm_validators import validate_all_translations_for_word
+
+    lemma = get_lemma_by_guid(g.db, guid)
+    if lemma is None:
+        return _build_error_response(f"Lemma with GUID '{guid}' not found", 404)
+    agent = VorasAgent(
+        config=DataSourceConfig(
+            backend_type=BackendType.SQLITE,
+            sqlite_path=Config.DB_PATH,
+            model=model,
+            debug=Config.DEBUG,
+        )
+    )
+    translations = {
+        lc: t for lc in LANGUAGE_FIELDS.keys() if (t := agent.get_translation(g.db, lemma, lc))
+    }
+    validation_results = validate_all_translations_for_word(
+        lemma.lemma_text, translations, lemma.pos_type, model
+    )
+    issues = [
+        value
+        for value in validation_results.values()
+        if (not value["is_correct"] or not value["is_lemma_form"]) and value["confidence"] >= 0.7
+    ]
+    return _build_success_response(
+        {
+            "status": "ok" if not issues else "issues_found",
+            "issues": issues,
+            "confidence_summary": {"translations_checked": len(translations)},
+        },
+        {"guid": guid, "model": model},
+    )
+
+
+@bp.route("/v1/agents/lemma/<guid>/check-pronunciations", methods=["POST"])
+@mirrored_facade("/api/v1/agents/lemma/<guid>/check-pronunciations", "POST")
+def check_pronunciations_by_guid(guid: str) -> ResponseReturnValue:
+    model, error = _require_model()
+    if error is not None:
+        return error
+    from wordfreq.tools.llm_validators import validate_pronunciation
+
+    lemma = get_lemma_by_guid(g.db, guid)
+    if lemma is None:
+        return _build_error_response(f"Lemma with GUID '{guid}' not found", 404)
+    forms = g.db.query(DerivativeForm).filter(DerivativeForm.lemma_id == lemma.id).all()
+    issues: List[Dict[str, Any]] = []
+    confidences: List[float] = []
+    assert model is not None
+    for form in forms:
+        result = validate_pronunciation(
+            form.derivative_form_text,
+            form.ipa_pronunciation,
+            form.phonetic_pronunciation,
+            lemma.pos_type,
+            definition=lemma.definition_text,
+            model=model,
+        )
+        confidences.append(float(result.get("confidence", 0)))
+        if result.get("needs_update") and float(result.get("confidence", 0)) >= 0.7:
+            issues.append(result)
+    avg_conf = sum(confidences) / len(confidences) if confidences else 0.0
+    return _build_success_response(
+        {
+            "status": "ok" if not issues else "issues_found",
+            "issues": issues,
+            "confidence_summary": {"forms_checked": len(forms), "average_confidence": avg_conf},
+        },
+        {"guid": guid, "model": model},
+    )
 
 
 @bp.route("/v1/lemma/<guid>")
@@ -1495,6 +1816,7 @@ def get_word_metadata() -> ResponseReturnValue:
             )
             base_query = base_query.outerjoin(
                 LemmaDifficultyOverride,
+                BarsukasTask,
                 (LemmaDifficultyOverride.lemma_id == Lemma.id)
                 & (LemmaDifficultyOverride.language_code == current_language),
             ).filter(
@@ -1511,6 +1833,7 @@ def get_word_metadata() -> ResponseReturnValue:
             )
             base_query = base_query.outerjoin(
                 LemmaDifficultyOverride,
+                BarsukasTask,
                 (LemmaDifficultyOverride.lemma_id == Lemma.id)
                 & (LemmaDifficultyOverride.language_code == current_language),
             ).filter(effective_difficulty == exact_difficulty)

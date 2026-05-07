@@ -37,11 +37,25 @@ def do_generate_synonyms(
 @workqueue_payload_handler()
 def handle_words_synonyms(
     session: Any,
-    lemma_id: int,
-    lang_code: str,
+    lemma_id: Optional[int] = None,
+    lemma_ids: Optional[list[int]] = None,
+    lang_code: str = "en",
     form_type: Optional[str] = None,
 ) -> str:
     """Workqueue wrapper for synonym generation."""
+    if lemma_ids:
+        results = [
+            do_generate_synonyms(
+                session=session,
+                lemma_id=queued_lemma_id,
+                lang_code=lang_code,
+                form_type=form_type,
+            )
+            for queued_lemma_id in lemma_ids
+        ]
+        return f"Batch completed for {len(lemma_ids)} lemmas: " + "; ".join(results)
+    if lemma_id is None:
+        raise ValueError("lemma_id or lemma_ids is required")
     return do_generate_synonyms(
         session=session,
         lemma_id=lemma_id,

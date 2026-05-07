@@ -57,6 +57,27 @@ Base prefix: `/api`.
   - Returns array of `{codename, displayname, model_path, model_type, lmstudio_model_name, launch_date, license_name}`.
   - Returns HTTP 503 if benchmarks database is not configured.
 
+## Agent task + LLM check endpoints (GUID-based)
+
+All LLM-invoking endpoints below require JSON body with `"model": "<model-name>"`.
+
+- `POST /api/v1/agents/lemma/<guid>/add-missing-translations`
+- `POST /api/v1/agents/lemma/<guid>/generate-pronunciations` (optional `lang_code`)
+- `POST /api/v1/agents/lemma/<guid>/generate-forms` (optional `lang_code`)
+- `POST /api/v1/agents/lemma/<guid>/generate-synonyms` (optional `lang_code`)
+
+- `POST /api/v1/agents/lemma/<guid>/check-definition`
+- `POST /api/v1/agents/lemma/<guid>/check-disambiguation`
+- `POST /api/v1/agents/lemma/<guid>/check-translations`
+- `POST /api/v1/agents/lemma/<guid>/check-pronunciations`
+
+Check endpoints return:
+
+- `data.status`: `"ok"` or `"issues_found"`
+- `data.issues`: list of issues/suggestions
+- `data.confidence_summary`: aggregate confidence/check metadata
+- `metadata.guid`, `metadata.model`
+
 ## Metadata endpoints (for aggregate counting)
 
 - `GET /api/v1/metadata/words[?language=<code>][&max_difficulty=<int>][&difficulty=<int>]`
