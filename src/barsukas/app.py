@@ -50,6 +50,7 @@ from langtools.zh.pinyin_helper import (
     is_chinese,
 )
 from barsukas.routes import (
+    admin,
     agents,
     agents_launcher,
     api,
@@ -220,6 +221,7 @@ def create_app(
     app.register_blueprint(api.bp)
     app.register_blueprint(llm_api.bp)
     app.register_blueprint(api_client.bp)
+    app.register_blueprint(admin.bp)
     app.register_blueprint(audio.bp)
     app.register_blueprint(rapid_review.bp)
     app.register_blueprint(rapid_review_hub.bp)

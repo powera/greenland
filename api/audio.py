@@ -34,7 +34,13 @@ class VoicesResponse(TypedDict):
 
 @mirrored_route("/api/v1/audio/voices", "GET")
 def list_voices(*, language: Optional[str] = None) -> VoicesResponse:
-    """List available voices for one language or all languages."""
+    """List available voices for one language or all languages.
+
+    The ``backend`` field on each entry identifies the TTS engine
+    ("openai", "polly", "azure", "google", "espeak"). OpenAI-backed voices
+    are served by the ``vieversys`` agent (gpt-4o-mini-tts); see
+    :func:`api.llm_agents.generate_audio`.
+    """
     return cast(VoicesResponse, get_json(f"{API_V1_PREFIX}/audio/voices", {"language": language}))
 
 

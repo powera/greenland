@@ -10,6 +10,7 @@ the ``BARSUKAS_API_URL`` environment variable; see :mod:`api.constants`.
 from __future__ import annotations
 
 from api._http import BarsukasAPIError
+from api.admin import restart as admin_restart
 from api.audio import get_audio, list_voices
 from api.agent_tasks import (
     check_definition,
@@ -48,6 +49,7 @@ from api.sentences import get_sentence_metadata
 
 __all__ = [
     "BarsukasAPIError",
+    "admin_restart",
     "add_missing_translations",
     "check_definition",
     "check_disambiguation",
