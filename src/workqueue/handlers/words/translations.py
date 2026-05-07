@@ -179,9 +179,24 @@ def do_regenerate_translations(session: Any, lemma_id: int, **_: Any) -> str:
 
 @workqueue_payload_handler()
 def handle_words_translations(
-    session: Any, lemma_id: int, languages: Optional[List[str]] = None
+    session: Any,
+    lemma_id: Optional[int] = None,
+    lemma_ids: Optional[List[int]] = None,
+    languages: Optional[List[str]] = None,
 ) -> str:
     """Workqueue wrapper for missing translation generation."""
+    if lemma_ids:
+        results = [
+            do_generate_missing_translations(
+                session=session,
+                lemma_id=queued_lemma_id,
+                languages=languages,
+            )
+            for queued_lemma_id in lemma_ids
+        ]
+        return f"Batch completed for {len(lemma_ids)} lemmas: " + "; ".join(results)
+    if lemma_id is None:
+        raise ValueError("lemma_id or lemma_ids is required")
     return do_generate_missing_translations(session=session, lemma_id=lemma_id, languages=languages)
 
 
