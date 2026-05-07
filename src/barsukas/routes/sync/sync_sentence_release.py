@@ -40,11 +40,11 @@ logger = logging.getLogger(__name__)
 bp = Blueprint("sync_sentence_release", __name__, url_prefix="/sync/sentences")
 
 # Default path to data/release/sentences
-# __file__ is src/barsukas/routes/sync_sentence_release.py
-# .parent = routes/, .parent.parent = barsukas/, .parent.parent.parent = src/
-# .parent.parent.parent.parent = repo root
+# __file__ is src/barsukas/routes/sync/sync_sentence_release.py
+# .parent = sync/, .parent.parent = routes/, .parent.parent.parent = barsukas/,
+# .parent.parent.parent.parent = src/, .parent.parent.parent.parent.parent = repo root
 DEFAULT_SENTENCE_RELEASE_DIR = (
-    Path(__file__).parent.parent.parent.parent / "data" / "release" / "sentences"
+    Path(__file__).parent.parent.parent.parent.parent / "data" / "release" / "sentences"
 )
 
 

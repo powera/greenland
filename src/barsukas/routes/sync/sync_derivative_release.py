@@ -1,19 +1,16 @@
 #!/usr/bin/python3
 
-"""Routes for syncing synonyms between per-language release files and the DB.
+"""Routes for syncing derivative forms between per-language release files and SQLite database.
 
-Synonyms live alongside inflected forms in the same per-language JSONL file
-under a separate top-level array key, so both can be edited independently::
+Derivative forms are stored in per-language JSONL files alongside the base.jsonl:
+    data/release/lemmas/{pos_type}/{pos_subtype}/{lang_code}.jsonl
 
-    {"guid": "N02_001",
-     "forms":    [{"grammatical_form": "noun/es_singular", "text": "perro", ...}],
-     "synonyms": [{"grammatical_form": "synonym",          "text": "can"},
-                  {"grammatical_form": "synonym_regional", "text": "chucho"}]}
-
-In the SQL DB, synonyms are stored in the same ``DerivativeForm`` table as
-other forms, distinguished by ``grammatical_form`` membership in
-``SYNONYM_GRAMMATICAL_FORMS``. We may revisit that grouping later, but for
-now treating them as DerivativeForm rows keeps load/lookup paths uniform.
+Each line in a language file contains derivative forms for one lemma:
+    {"guid": "N02_001", "forms": [
+        {"grammatical_form": "noun/es_singular", "text": "perro", "is_base_form": true,
+         "ipa": "/ˈpe.ro/", "phonetic": null},
+        {"grammatical_form": "noun/es_plural", "text": "perros", "is_base_form": false}
+    ]}
 """
 
 import logging
@@ -23,7 +20,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
-from barsukas.routes.sync_release_helpers import (
+from barsukas.routes.sync.sync_release_helpers import (
     find_release_file_for_lemma_lang,
     load_release_array_for_lang,
     write_release_line_partial,
@@ -40,12 +37,16 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-bp = Blueprint("sync_synonym_release", __name__, url_prefix="/sync/synonyms")
+bp = Blueprint("sync_derivative_release", __name__, url_prefix="/sync/derivatives")
 
-DEFAULT_RELEASE_DIR = Path(__file__).parent.parent.parent.parent / "data" / "release" / "lemmas"
+# Default path to data/release/lemmas (derivative files live alongside base.jsonl)
+DEFAULT_RELEASE_DIR = (
+    Path(__file__).parent.parent.parent.parent.parent / "data" / "release" / "lemmas"
+)
 
 
 def _get_release_dir() -> Path:
+    """Get the path to the data/release/lemmas directory."""
     return DEFAULT_RELEASE_DIR
 
 
@@ -55,10 +56,11 @@ def _get_release_dir() -> Path:
 
 
 def _db_form_to_dict(form: DerivativeForm) -> Dict[str, Any]:
-    """Convert a DB synonym DerivativeForm to the release file dict format."""
+    """Convert a DB DerivativeForm to the release file dict format."""
     d: Dict[str, Any] = {
         "grammatical_form": form.grammatical_form,
         "text": form.derivative_form_text,
+        "is_base_form": form.is_base_form,
     }
     if form.ipa_pronunciation:
         d["ipa"] = form.ipa_pronunciation
@@ -67,20 +69,36 @@ def _db_form_to_dict(form: DerivativeForm) -> Dict[str, Any]:
     return d
 
 
+def _forms_match(release_form: Dict[str, Any], db_form: DerivativeForm) -> bool:
+    """Check if a release form dict matches a DB DerivativeForm on key fields."""
+    return bool(
+        release_form.get("grammatical_form") == db_form.grammatical_form
+        and release_form.get("text") == db_form.derivative_form_text
+    )
+
+
 def _form_key(grammatical_form: str, text: str) -> str:
+    """Create a comparison key for a derivative form."""
     return f"{grammatical_form}|{text}"
 
 
 # =============================================================================
-# Loading
+# Loading release data
 # =============================================================================
 
 
-def _load_release_synonyms_for_lang(
+def _load_release_derivatives_for_lang(
     release_dir: Path, lang_code: str
 ) -> Dict[str, List[Dict[str, Any]]]:
-    """Load synonym entries for a language from release JSONL files."""
-    return load_release_array_for_lang(release_dir, lang_code, "synonyms")
+    """Load non-synonym derivative forms for a language from release JSONL files.
+
+    Reads only the top-level ``forms`` array; synonyms live under a separate
+    ``synonyms`` key and are handled by ``sync_synonym_release``.
+
+    Returns:
+        Dictionary mapping GUID to list of derivative form dicts.
+    """
+    return load_release_array_for_lang(release_dir, lang_code, "forms")
 
 
 def _get_languages_with_release_files(release_dir: Path) -> Set[str]:
@@ -88,183 +106,88 @@ def _get_languages_with_release_files(release_dir: Path) -> Set[str]:
     languages: Set[str] = set()
     if not release_dir.exists():
         return languages
+
     for jsonl_file in release_dir.rglob("*.jsonl"):
         stem = jsonl_file.stem
+        # Skip base.jsonl and non-language files
         if stem == "base":
             continue
+        # Language codes are 2-3 chars
         if len(stem) in (2, 3) and stem.isalpha():
             languages.add(stem)
+
     return languages
 
 
-def _load_db_synonyms_for_lang(db_session: Any, lang_code: str) -> Dict[str, List[DerivativeForm]]:
-    """Load synonym DerivativeForm rows for a language, keyed by lemma GUID."""
+def _find_release_file_for_lemma_lang(
+    release_dir: Path, guid: str, lang_code: str
+) -> Optional[Path]:
+    """Find the {lang}.jsonl file that contains (or should contain) ``guid``."""
+    return find_release_file_for_lemma_lang(release_dir, guid, lang_code)
+
+
+# =============================================================================
+# DB loading helpers
+# =============================================================================
+
+
+def _load_db_derivatives_for_lang(
+    db_session: Any, lang_code: str
+) -> Dict[str, List[DerivativeForm]]:
+    """Load all derivative forms for a language from the DB, keyed by lemma GUID.
+
+    Returns:
+        Dictionary mapping GUID to list of DerivativeForm objects.
+    """
     forms_by_guid: Dict[str, List[DerivativeForm]] = {}
+
+    # Join DerivativeForm with Lemma to get GUIDs. Synonym-class rows are
+    # managed by the parallel /sync/synonyms route, so exclude them here.
     rows = (
         db_session.query(DerivativeForm, Lemma.guid)
         .join(Lemma, DerivativeForm.lemma_id == Lemma.id)
         .filter(
             DerivativeForm.language_code == lang_code,
             Lemma.guid.isnot(None),
-            DerivativeForm.grammatical_form.in_(tuple(SYNONYM_GRAMMATICAL_FORMS)),
+            DerivativeForm.grammatical_form.notin_(tuple(SYNONYM_GRAMMATICAL_FORMS)),
         )
         .all()
     )
+
     for form, guid in rows:
-        forms_by_guid.setdefault(guid, []).append(form)
+        if guid not in forms_by_guid:
+            forms_by_guid[guid] = []
+        forms_by_guid[guid].append(form)
+
     return forms_by_guid
 
 
 # =============================================================================
-# Diff helpers
-# =============================================================================
-
-
-def _has_form_differences(
-    release_forms: List[Dict[str, Any]], db_forms: List[DerivativeForm]
-) -> bool:
-    release_keys = {
-        _form_key(f.get("grammatical_form", ""), f.get("text", "")) for f in release_forms
-    }
-    db_keys = {_form_key(f.grammatical_form, f.derivative_form_text) for f in db_forms}
-
-    if release_keys != db_keys:
-        return True
-
-    release_by_key = {
-        _form_key(f.get("grammatical_form", ""), f.get("text", "")): f for f in release_forms
-    }
-    db_by_key = {_form_key(f.grammatical_form, f.derivative_form_text): f for f in db_forms}
-
-    for key in release_keys:
-        rf = release_by_key[key]
-        df = db_by_key[key]
-        if (rf.get("ipa") or "") != (df.ipa_pronunciation or ""):
-            return True
-        if (rf.get("phonetic") or "") != (df.phonetic_pronunciation or ""):
-            return True
-    return False
-
-
-def _compute_form_diffs(
-    release_forms: List[Dict[str, Any]], db_forms: List[DerivativeForm]
-) -> List[Dict[str, Any]]:
-    diffs: List[Dict[str, Any]] = []
-
-    release_by_key = {
-        _form_key(f.get("grammatical_form", ""), f.get("text", "")): f for f in release_forms
-    }
-    db_by_key = {_form_key(f.grammatical_form, f.derivative_form_text): f for f in db_forms}
-
-    release_keys = set(release_by_key.keys())
-    db_keys = set(db_by_key.keys())
-
-    for key in sorted(release_keys - db_keys):
-        rf = release_by_key[key]
-        diffs.append(
-            {
-                "type": "release_only",
-                "grammatical_form": rf.get("grammatical_form", ""),
-                "release_text": rf.get("text", ""),
-                "db_text": "",
-                "release_ipa": rf.get("ipa", ""),
-                "db_ipa": "",
-                "release_phonetic": rf.get("phonetic", ""),
-                "db_phonetic": "",
-            }
-        )
-
-    for key in sorted(db_keys - release_keys):
-        df = db_by_key[key]
-        diffs.append(
-            {
-                "type": "db_only",
-                "grammatical_form": df.grammatical_form,
-                "release_text": "",
-                "db_text": df.derivative_form_text,
-                "release_ipa": "",
-                "db_ipa": df.ipa_pronunciation or "",
-                "release_phonetic": "",
-                "db_phonetic": df.phonetic_pronunciation or "",
-            }
-        )
-
-    for key in sorted(release_keys & db_keys):
-        rf = release_by_key[key]
-        df = db_by_key[key]
-        r_ipa = rf.get("ipa") or ""
-        d_ipa = df.ipa_pronunciation or ""
-        r_phonetic = rf.get("phonetic") or ""
-        d_phonetic = df.phonetic_pronunciation or ""
-        if r_ipa != d_ipa or r_phonetic != d_phonetic:
-            diffs.append(
-                {
-                    "type": "field_diff",
-                    "grammatical_form": rf.get("grammatical_form", ""),
-                    "release_text": rf.get("text", ""),
-                    "db_text": df.derivative_form_text,
-                    "release_ipa": r_ipa,
-                    "db_ipa": d_ipa,
-                    "release_phonetic": r_phonetic,
-                    "db_phonetic": d_phonetic,
-                }
-            )
-    return diffs
-
-
-def _get_lemma_info_by_guids(db_session: Any, guids: Set[str]) -> Dict[str, Dict[str, Any]]:
-    info: Dict[str, Dict[str, Any]] = {}
-    if not guids:
-        return info
-    batch_size = 500
-    guid_list = list(guids)
-    for i in range(0, len(guid_list), batch_size):
-        batch = guid_list[i : i + batch_size]
-        lemmas = db_session.query(Lemma).filter(Lemma.guid.in_(batch)).all()
-        for lemma in lemmas:
-            info[lemma.guid] = {
-                "lemma_id": lemma.id,
-                "lemma_text": lemma.lemma_text,
-                "pos_type": lemma.pos_type,
-                "pos_subtype": lemma.pos_subtype or "",
-            }
-    return info
-
-
-def _build_guid_to_lemma_id(db_session: Any) -> Dict[str, int]:
-    return {
-        guid: lid
-        for lid, guid in db_session.query(Lemma.id, Lemma.guid).filter(Lemma.guid.isnot(None)).all()
-    }
-
-
-# =============================================================================
-# Index
+# Index (Hub)
 # =============================================================================
 
 
 @bp.route("/")
 def index() -> ResponseReturnValue:
-    """Per-language synonym sync hub."""
+    """Display derivative form sync hub with per-language counts."""
     release_dir = _get_release_dir()
 
     if not release_dir.exists():
         return render_template(
-            "sync_synonym_release/index.html",
+            "sync_derivative_release/index.html",
             release_dir=str(release_dir),
             error="Release directory not found",
             lang_counts=None,
         )
 
+    # Find languages that have release files
     release_languages = _get_languages_with_release_files(release_dir)
 
+    # Find languages that have DB derivative forms
     db_lang_rows = (
         g.db.query(DerivativeForm.language_code)
         .join(Lemma, DerivativeForm.lemma_id == Lemma.id)
-        .filter(
-            Lemma.guid.isnot(None),
-            DerivativeForm.grammatical_form.in_(tuple(SYNONYM_GRAMMATICAL_FORMS)),
-        )
+        .filter(Lemma.guid.isnot(None))
         .distinct()
         .all()
     )
@@ -275,10 +198,11 @@ def index() -> ResponseReturnValue:
         key=lambda lc: (LANGUAGE_HIERARCHY.index(lc) if lc in LANGUAGE_HIERARCHY else 999),
     )
 
+    # For each language, compute summary counts
     lang_counts: List[Dict[str, Any]] = []
     for lang_code in all_languages:
-        release_forms = _load_release_synonyms_for_lang(release_dir, lang_code)
-        db_forms = _load_db_synonyms_for_lang(g.db, lang_code)
+        release_forms = _load_release_derivatives_for_lang(release_dir, lang_code)
+        db_forms = _load_db_derivatives_for_lang(g.db, lang_code)
 
         release_guids = set(release_forms.keys())
         db_guids = set(db_forms.keys())
@@ -286,6 +210,7 @@ def index() -> ResponseReturnValue:
         additions = len(release_guids - db_guids)
         removals = len(db_guids - release_guids)
 
+        # Count changes among common GUIDs
         common_guids = release_guids & db_guids
         changes = 0
         for guid in common_guids:
@@ -308,34 +233,153 @@ def index() -> ResponseReturnValue:
         )
 
     return render_template(
-        "sync_synonym_release/index.html",
+        "sync_derivative_release/index.html",
         release_dir=str(release_dir),
         lang_counts=lang_counts,
     )
 
 
+def _has_form_differences(
+    release_forms: List[Dict[str, Any]], db_forms: List[DerivativeForm]
+) -> bool:
+    """Check if there are any differences between release and DB forms for a GUID."""
+    release_keys = {
+        _form_key(f.get("grammatical_form", ""), f.get("text", "")) for f in release_forms
+    }
+    db_keys = {_form_key(f.grammatical_form, f.derivative_form_text) for f in db_forms}
+
+    if release_keys != db_keys:
+        return True
+
+    # Keys match; check pronunciation/is_base_form differences
+    release_by_key = {
+        _form_key(f.get("grammatical_form", ""), f.get("text", "")): f for f in release_forms
+    }
+    db_by_key = {_form_key(f.grammatical_form, f.derivative_form_text): f for f in db_forms}
+
+    for key in release_keys:
+        rf = release_by_key[key]
+        df = db_by_key[key]
+
+        if rf.get("is_base_form", False) != df.is_base_form:
+            return True
+        if (rf.get("ipa") or "") != (df.ipa_pronunciation or ""):
+            return True
+        if (rf.get("phonetic") or "") != (df.phonetic_pronunciation or ""):
+            return True
+
+    return False
+
+
 # =============================================================================
-# Language detail
+# Language detail view (per-language additions, removals, changes)
 # =============================================================================
+
+
+def _compute_form_diffs(
+    release_forms: List[Dict[str, Any]], db_forms: List[DerivativeForm]
+) -> List[Dict[str, Any]]:
+    """Compute detailed per-form differences between release and DB.
+
+    Returns a list of diff dicts, each describing one form difference.
+    """
+    diffs: List[Dict[str, Any]] = []
+
+    release_by_key = {
+        _form_key(f.get("grammatical_form", ""), f.get("text", "")): f for f in release_forms
+    }
+    db_by_key = {_form_key(f.grammatical_form, f.derivative_form_text): f for f in db_forms}
+
+    release_keys = set(release_by_key.keys())
+    db_keys = set(db_by_key.keys())
+
+    # Forms only in release
+    for key in sorted(release_keys - db_keys):
+        rf = release_by_key[key]
+        diffs.append(
+            {
+                "type": "release_only",
+                "grammatical_form": rf.get("grammatical_form", ""),
+                "release_text": rf.get("text", ""),
+                "db_text": "",
+                "release_ipa": rf.get("ipa", ""),
+                "db_ipa": "",
+                "release_phonetic": rf.get("phonetic", ""),
+                "db_phonetic": "",
+                "release_is_base": rf.get("is_base_form", False),
+                "db_is_base": False,
+            }
+        )
+
+    # Forms only in DB
+    for key in sorted(db_keys - release_keys):
+        df = db_by_key[key]
+        diffs.append(
+            {
+                "type": "db_only",
+                "grammatical_form": df.grammatical_form,
+                "release_text": "",
+                "db_text": df.derivative_form_text,
+                "release_ipa": "",
+                "db_ipa": df.ipa_pronunciation or "",
+                "release_phonetic": "",
+                "db_phonetic": df.phonetic_pronunciation or "",
+                "release_is_base": False,
+                "db_is_base": df.is_base_form,
+            }
+        )
+
+    # Forms in both - check for field differences
+    for key in sorted(release_keys & db_keys):
+        rf = release_by_key[key]
+        df = db_by_key[key]
+
+        r_ipa = rf.get("ipa") or ""
+        d_ipa = df.ipa_pronunciation or ""
+        r_phonetic = rf.get("phonetic") or ""
+        d_phonetic = df.phonetic_pronunciation or ""
+        r_base = rf.get("is_base_form", False)
+        d_base = df.is_base_form
+
+        if r_ipa != d_ipa or r_phonetic != d_phonetic or r_base != d_base:
+            diffs.append(
+                {
+                    "type": "field_diff",
+                    "grammatical_form": rf.get("grammatical_form", ""),
+                    "release_text": rf.get("text", ""),
+                    "db_text": df.derivative_form_text,
+                    "release_ipa": r_ipa,
+                    "db_ipa": d_ipa,
+                    "release_phonetic": r_phonetic,
+                    "db_phonetic": d_phonetic,
+                    "release_is_base": r_base,
+                    "db_is_base": d_base,
+                }
+            )
+
+    return diffs
 
 
 @bp.route("/<lang_code>")
 def language_detail(lang_code: str) -> ResponseReturnValue:
+    """Show detailed sync status for a single language."""
     release_dir = _get_release_dir()
 
     if not release_dir.exists():
         flash(f"Release directory not found: {release_dir}", "error")
-        return redirect(url_for("sync_synonym_release.index"))
+        return redirect(url_for("sync_derivative_release.index"))
 
-    release_forms = _load_release_synonyms_for_lang(release_dir, lang_code)
-    db_forms = _load_db_synonyms_for_lang(g.db, lang_code)
+    release_forms = _load_release_derivatives_for_lang(release_dir, lang_code)
+    db_forms = _load_db_derivatives_for_lang(g.db, lang_code)
 
     release_guids = set(release_forms.keys())
     db_guids = set(db_forms.keys())
 
+    # Build GUID -> lemma info lookup for display
     all_guids = release_guids | db_guids
     guid_info = _get_lemma_info_by_guids(g.db, all_guids)
 
+    # Additions: in release but not in DB
     additions: List[Dict[str, Any]] = []
     for guid in sorted(release_guids - db_guids):
         info = guid_info.get(guid, {})
@@ -350,6 +394,7 @@ def language_detail(lang_code: str) -> ResponseReturnValue:
             }
         )
 
+    # Removals: in DB but not in release
     removals: List[Dict[str, Any]] = []
     for guid in sorted(db_guids - release_guids):
         info = guid_info.get(guid, {})
@@ -365,6 +410,7 @@ def language_detail(lang_code: str) -> ResponseReturnValue:
             }
         )
 
+    # Changes: in both but different
     changes: List[Dict[str, Any]] = []
     for guid in sorted(release_guids & db_guids):
         form_diffs = _compute_form_diffs(release_forms[guid], db_forms[guid])
@@ -383,7 +429,7 @@ def language_detail(lang_code: str) -> ResponseReturnValue:
             )
 
     return render_template(
-        "sync_synonym_release/language_detail.html",
+        "sync_derivative_release/language_detail.html",
         lang_code=lang_code,
         lang_name=LANGUAGE_NAMES.get(lang_code, lang_code),
         additions=additions,
@@ -394,25 +440,50 @@ def language_detail(lang_code: str) -> ResponseReturnValue:
     )
 
 
+def _get_lemma_info_by_guids(db_session: Any, guids: Set[str]) -> Dict[str, Dict[str, Any]]:
+    """Look up basic lemma info for a set of GUIDs."""
+    info: Dict[str, Dict[str, Any]] = {}
+    if not guids:
+        return info
+
+    batch_size = 500
+    guid_list = list(guids)
+    for i in range(0, len(guid_list), batch_size):
+        batch = guid_list[i : i + batch_size]
+        lemmas = db_session.query(Lemma).filter(Lemma.guid.in_(batch)).all()
+        for lemma in lemmas:
+            info[lemma.guid] = {
+                "lemma_id": lemma.id,
+                "lemma_text": lemma.lemma_text,
+                "pos_type": lemma.pos_type,
+                "pos_subtype": lemma.pos_subtype or "",
+            }
+
+    return info
+
+
 # =============================================================================
-# Apply additions
+# Apply additions (import release -> DB)
 # =============================================================================
 
 
 @bp.route("/<lang_code>/additions/apply", methods=["POST"])
 def apply_additions(lang_code: str) -> ResponseReturnValue:
+    """Import selected derivative forms from release files into DB."""
     app: "BarsukasFlask" = current_app  # type: ignore[assignment]
     if app.config.get("READONLY", False):
         flash("Database is in read-only mode", "error")
-        return redirect(url_for("sync_synonym_release.language_detail", lang_code=lang_code))
+        return redirect(url_for("sync_derivative_release.language_detail", lang_code=lang_code))
 
     selected_guids = request.form.getlist("selected_guids")
     if not selected_guids:
         flash("No lemmas selected for import", "warning")
-        return redirect(url_for("sync_synonym_release.language_detail", lang_code=lang_code))
+        return redirect(url_for("sync_derivative_release.language_detail", lang_code=lang_code))
 
     release_dir = _get_release_dir()
-    release_forms = _load_release_synonyms_for_lang(release_dir, lang_code)
+    release_forms = _load_release_derivatives_for_lang(release_dir, lang_code)
+
+    # Build GUID -> lemma_id lookup
     guid_to_lemma_id = _build_guid_to_lemma_id(g.db)
 
     imported_count = 0
@@ -421,27 +492,24 @@ def apply_additions(lang_code: str) -> ResponseReturnValue:
     for guid in selected_guids:
         forms = release_forms.get(guid)
         if not forms:
+            logger.warning(f"No release forms found for GUID {guid} lang={lang_code}")
             error_count += 1
             continue
+
         lemma_id = guid_to_lemma_id.get(guid)
         if not lemma_id:
+            logger.warning(f"Lemma not found in DB for GUID {guid}")
             error_count += 1
             continue
+
         try:
             for form_data in forms:
-                gform = form_data.get("grammatical_form", "")
-                if gform not in SYNONYM_GRAMMATICAL_FORMS:
-                    logger.warning(
-                        f"Skipping non-synonym grammatical_form {gform!r} in synonyms array "
-                        f"for {guid} lang={lang_code}"
-                    )
-                    continue
                 df = DerivativeForm(
                     lemma_id=lemma_id,
                     language_code=lang_code,
-                    grammatical_form=gform,
+                    grammatical_form=form_data.get("grammatical_form", ""),
                     derivative_form_text=form_data.get("text", ""),
-                    is_base_form=False,
+                    is_base_form=form_data.get("is_base_form", False),
                     ipa_pronunciation=form_data.get("ipa") or None,
                     phonetic_pronunciation=form_data.get("phonetic") or None,
                     verified=False,
@@ -451,7 +519,7 @@ def apply_additions(lang_code: str) -> ResponseReturnValue:
             log_operation(
                 session=g.db,
                 source="sync-release",
-                operation_type="synonym_import",
+                operation_type="derivative_import",
                 lemma_id=lemma_id,
                 details={
                     "guid": guid,
@@ -460,14 +528,15 @@ def apply_additions(lang_code: str) -> ResponseReturnValue:
                 },
             )
             imported_count += 1
+
         except Exception as e:
-            logger.error(f"Error importing synonyms for {guid} lang={lang_code}: {e}")
+            logger.error(f"Error importing derivative forms for {guid} lang={lang_code}: {e}")
             error_count += 1
 
     if imported_count > 0:
         try:
             g.db.commit()
-            flash(f"Imported synonyms for {imported_count} lemma(s)", "success")
+            flash(f"Imported derivative forms for {imported_count} lemma(s)", "success")
         except Exception as e:
             g.db.rollback()
             flash(f"Error committing changes: {e}", "error")
@@ -476,20 +545,21 @@ def apply_additions(lang_code: str) -> ResponseReturnValue:
     if error_count > 0:
         flash(f"Errors: {error_count}", "warning")
 
-    return redirect(url_for("sync_synonym_release.language_detail", lang_code=lang_code))
+    return redirect(url_for("sync_derivative_release.language_detail", lang_code=lang_code))
 
 
 # =============================================================================
-# Apply removals
+# Apply removals (export DB -> release or delete from DB)
 # =============================================================================
 
 
 @bp.route("/<lang_code>/removals/apply", methods=["POST"])
 def apply_removals(lang_code: str) -> ResponseReturnValue:
+    """Handle derivative forms in DB but not in release: export to release or delete."""
     app: "BarsukasFlask" = current_app  # type: ignore[assignment]
     if app.config.get("READONLY", False):
         flash("Database is in read-only mode", "error")
-        return redirect(url_for("sync_synonym_release.language_detail", lang_code=lang_code))
+        return redirect(url_for("sync_derivative_release.language_detail", lang_code=lang_code))
 
     actions: Dict[str, str] = {}
     for key, value in request.form.items():
@@ -499,10 +569,10 @@ def apply_removals(lang_code: str) -> ResponseReturnValue:
 
     if not actions:
         flash("No actions selected", "warning")
-        return redirect(url_for("sync_synonym_release.language_detail", lang_code=lang_code))
+        return redirect(url_for("sync_derivative_release.language_detail", lang_code=lang_code))
 
     release_dir = _get_release_dir()
-    db_forms = _load_db_synonyms_for_lang(g.db, lang_code)
+    db_forms = _load_db_derivatives_for_lang(g.db, lang_code)
 
     exported_count = 0
     deleted_count = 0
@@ -520,18 +590,22 @@ def apply_removals(lang_code: str) -> ResponseReturnValue:
             continue
 
         if action == "export":
+            # Export DB forms to release file
             try:
-                file_path = find_release_file_for_lemma_lang(release_dir, guid, lang_code)
+                file_path = _find_release_file_for_lemma_lang(release_dir, guid, lang_code)
                 if not file_path:
+                    logger.warning(f"Could not resolve release file for {guid} lang={lang_code}")
                     error_count += 1
                     continue
+
                 form_dicts = [_db_form_to_dict(f) for f in forms]
-                write_release_line_partial(file_path, guid, "synonyms", form_dicts)
+                _append_or_update_release_line(file_path, guid, form_dicts)
                 exported_count += 1
+
                 log_operation(
                     session=g.db,
                     source="sync-release",
-                    operation_type="synonym_export",
+                    operation_type="derivative_export",
                     lemma_id=forms[0].lemma_id,
                     details={
                         "guid": guid,
@@ -539,8 +613,9 @@ def apply_removals(lang_code: str) -> ResponseReturnValue:
                         "form_count": len(forms),
                     },
                 )
+
             except Exception as e:
-                logger.error(f"Error exporting synonyms for {guid} lang={lang_code}: {e}")
+                logger.error(f"Error exporting derivatives for {guid} lang={lang_code}: {e}")
                 error_count += 1
 
         elif action == "delete":
@@ -548,10 +623,11 @@ def apply_removals(lang_code: str) -> ResponseReturnValue:
                 lemma_id = forms[0].lemma_id
                 for form in forms:
                     g.db.delete(form)
+
                 log_operation(
                     session=g.db,
                     source="sync-release",
-                    operation_type="synonym_delete",
+                    operation_type="derivative_delete",
                     lemma_id=lemma_id,
                     details={
                         "guid": guid,
@@ -560,8 +636,9 @@ def apply_removals(lang_code: str) -> ResponseReturnValue:
                     },
                 )
                 deleted_count += 1
+
             except Exception as e:
-                logger.error(f"Error deleting synonyms for {guid} lang={lang_code}: {e}")
+                logger.error(f"Error deleting derivatives for {guid} lang={lang_code}: {e}")
                 error_count += 1
 
     if deleted_count > 0 or exported_count > 0:
@@ -573,29 +650,34 @@ def apply_removals(lang_code: str) -> ResponseReturnValue:
             logger.error(f"Commit error: {e}")
 
     if exported_count > 0:
-        flash(f"Exported synonyms for {exported_count} lemma(s) to release files", "success")
+        flash(
+            f"Exported derivative forms for {exported_count} lemma(s) to release files", "success"
+        )
     if deleted_count > 0:
-        flash(f"Deleted synonyms for {deleted_count} lemma(s) from database", "success")
+        flash(f"Deleted derivative forms for {deleted_count} lemma(s) from database", "success")
     if skipped_count > 0:
         flash(f"Skipped {skipped_count} lemma(s)", "info")
     if error_count > 0:
         flash(f"Errors: {error_count}", "warning")
 
-    return redirect(url_for("sync_synonym_release.language_detail", lang_code=lang_code))
+    return redirect(url_for("sync_derivative_release.language_detail", lang_code=lang_code))
 
 
 # =============================================================================
-# Apply changes
+# Apply changes (bidirectional sync of form differences)
 # =============================================================================
 
 
 @bp.route("/<lang_code>/changes/apply", methods=["POST"])
 def apply_changes(lang_code: str) -> ResponseReturnValue:
+    """Apply selected form changes (use_release or use_db) for a language."""
     app: "BarsukasFlask" = current_app  # type: ignore[assignment]
     if app.config.get("READONLY", False):
         flash("Database is in read-only mode", "error")
-        return redirect(url_for("sync_synonym_release.language_detail", lang_code=lang_code))
+        return redirect(url_for("sync_derivative_release.language_detail", lang_code=lang_code))
 
+    # Parse form actions: action_{guid} = use_release | use_db | skip
+    # Each GUID gets a whole-lemma action (replace all forms for this GUID+lang)
     actions: Dict[str, str] = {}
     for key, value in request.form.items():
         if key.startswith("action_"):
@@ -604,11 +686,11 @@ def apply_changes(lang_code: str) -> ResponseReturnValue:
 
     if not actions:
         flash("No changes selected", "warning")
-        return redirect(url_for("sync_synonym_release.language_detail", lang_code=lang_code))
+        return redirect(url_for("sync_derivative_release.language_detail", lang_code=lang_code))
 
     release_dir = _get_release_dir()
-    release_forms = _load_release_synonyms_for_lang(release_dir, lang_code)
-    db_forms = _load_db_synonyms_for_lang(g.db, lang_code)
+    release_forms = _load_release_derivatives_for_lang(release_dir, lang_code)
+    db_forms = _load_db_derivatives_for_lang(g.db, lang_code)
     guid_to_lemma_id = _build_guid_to_lemma_id(g.db)
 
     updated_db_count = 0
@@ -623,27 +705,28 @@ def apply_changes(lang_code: str) -> ResponseReturnValue:
 
         lemma_id = guid_to_lemma_id.get(guid)
         if not lemma_id:
+            logger.warning(f"Lemma not found for GUID: {guid}")
             error_count += 1
             continue
 
         try:
             if action == "use_release":
+                # Replace DB forms with release forms
                 r_forms = release_forms.get(guid, [])
                 d_forms = db_forms.get(guid, [])
 
+                # Delete existing DB forms for this lemma+lang
                 for df in d_forms:
                     g.db.delete(df)
 
+                # Add release forms
                 for form_data in r_forms:
-                    gform = form_data.get("grammatical_form", "")
-                    if gform not in SYNONYM_GRAMMATICAL_FORMS:
-                        continue
                     df = DerivativeForm(
                         lemma_id=lemma_id,
                         language_code=lang_code,
-                        grammatical_form=gform,
+                        grammatical_form=form_data.get("grammatical_form", ""),
                         derivative_form_text=form_data.get("text", ""),
-                        is_base_form=False,
+                        is_base_form=form_data.get("is_base_form", False),
                         ipa_pronunciation=form_data.get("ipa") or None,
                         phonetic_pronunciation=form_data.get("phonetic") or None,
                         verified=False,
@@ -653,7 +736,7 @@ def apply_changes(lang_code: str) -> ResponseReturnValue:
                 log_operation(
                     session=g.db,
                     source="sync-release",
-                    operation_type="synonym_sync_use_release",
+                    operation_type="derivative_sync_use_release",
                     lemma_id=lemma_id,
                     details={
                         "guid": guid,
@@ -665,15 +748,18 @@ def apply_changes(lang_code: str) -> ResponseReturnValue:
                 updated_db_count += 1
 
             elif action == "use_db":
+                # Update release file with DB forms
                 d_forms = db_forms.get(guid, [])
                 form_dicts = [_db_form_to_dict(f) for f in d_forms]
-                file_path = find_release_file_for_lemma_lang(release_dir, guid, lang_code)
+
+                file_path = _find_release_file_for_lemma_lang(release_dir, guid, lang_code)
                 if file_path:
-                    write_release_line_partial(file_path, guid, "synonyms", form_dicts)
+                    _append_or_update_release_line(file_path, guid, form_dicts)
+
                     log_operation(
                         session=g.db,
                         source="sync-release",
-                        operation_type="synonym_sync_use_db",
+                        operation_type="derivative_sync_use_db",
                         lemma_id=lemma_id,
                         details={
                             "guid": guid,
@@ -683,29 +769,38 @@ def apply_changes(lang_code: str) -> ResponseReturnValue:
                     )
                     updated_release_count += 1
                 else:
+                    logger.warning(f"Could not find release file for GUID: {guid}")
                     error_count += 1
 
         except Exception as e:
-            logger.error(f"Error syncing synonyms for {guid} lang={lang_code}: {e}")
+            logger.error(f"Error syncing derivatives for {guid} lang={lang_code}: {e}")
             error_count += 1
 
     if updated_db_count > 0:
         try:
             g.db.commit()
-            flash(f"Updated DB synonyms for {updated_db_count} lemma(s)", "success")
+            flash(
+                f"Updated DB derivative forms for {updated_db_count} lemma(s)",
+                "success",
+            )
         except Exception as e:
             g.db.rollback()
             flash(f"Error committing DB changes: {e}", "error")
             logger.error(f"Commit error: {e}")
 
     if updated_release_count > 0:
-        flash(f"Updated release files for {updated_release_count} lemma(s)", "success")
+        flash(
+            f"Updated release files for {updated_release_count} lemma(s)",
+            "success",
+        )
+
     if skipped_count > 0:
         flash(f"Skipped {skipped_count} lemma(s)", "info")
+
     if error_count > 0:
         flash(f"Errors: {error_count}", "warning")
 
-    return redirect(url_for("sync_synonym_release.language_detail", lang_code=lang_code))
+    return redirect(url_for("sync_derivative_release.language_detail", lang_code=lang_code))
 
 
 # =============================================================================
@@ -715,41 +810,53 @@ def apply_changes(lang_code: str) -> ResponseReturnValue:
 
 @bp.route("/<lang_code>/export_all", methods=["POST"])
 def export_all(lang_code: str) -> ResponseReturnValue:
-    """Export every DB synonym for a language to release files."""
+    """Export all DB derivative forms for a language to release files.
+
+    Writes every GUID that has derivative forms in the DB for this language
+    into the appropriate {lang_code}.jsonl files, creating or updating as needed.
+    """
     release_dir = _get_release_dir()
 
     if not release_dir.exists():
         flash(f"Release directory not found: {release_dir}", "error")
-        return redirect(url_for("sync_synonym_release.language_detail", lang_code=lang_code))
+        return redirect(url_for("sync_derivative_release.language_detail", lang_code=lang_code))
 
-    db_forms = _load_db_synonyms_for_lang(g.db, lang_code)
+    db_forms = _load_db_derivatives_for_lang(g.db, lang_code)
 
     if not db_forms:
-        flash(f"No {LANGUAGE_NAMES.get(lang_code, lang_code)} synonyms in database", "warning")
-        return redirect(url_for("sync_synonym_release.language_detail", lang_code=lang_code))
+        flash(
+            f"No {LANGUAGE_NAMES.get(lang_code, lang_code)} derivative forms in database", "warning"
+        )
+        return redirect(url_for("sync_derivative_release.language_detail", lang_code=lang_code))
 
     exported_count = 0
     error_count = 0
 
     for guid, forms in sorted(db_forms.items()):
         try:
-            file_path = find_release_file_for_lemma_lang(release_dir, guid, lang_code)
+            file_path = _find_release_file_for_lemma_lang(release_dir, guid, lang_code)
             if not file_path:
+                logger.warning(f"Could not resolve release file for {guid} lang={lang_code}")
                 error_count += 1
                 continue
+
             form_dicts = [_db_form_to_dict(f) for f in forms]
-            write_release_line_partial(file_path, guid, "synonyms", form_dicts)
+            _append_or_update_release_line(file_path, guid, form_dicts)
             exported_count += 1
+
         except Exception as e:
-            logger.error(f"Error exporting synonyms for {guid} lang={lang_code}: {e}")
+            logger.error(f"Error exporting derivatives for {guid} lang={lang_code}: {e}")
             error_count += 1
 
     if exported_count > 0:
         log_operation(
             session=g.db,
             source="sync-release",
-            operation_type="synonym_export_all",
-            details={"language_code": lang_code, "guid_count": exported_count},
+            operation_type="derivative_export_all",
+            details={
+                "language_code": lang_code,
+                "guid_count": exported_count,
+            },
         )
         try:
             g.db.commit()
@@ -758,11 +865,32 @@ def export_all(lang_code: str) -> ResponseReturnValue:
             logger.error(f"Commit error logging export_all: {e}")
 
         flash(
-            f"Exported {lang_code} synonyms for {exported_count} lemma(s) to release files",
+            f"Exported {lang_code} derivative forms for {exported_count} lemma(s) to release files",
             "success",
         )
 
     if error_count > 0:
         flash(f"Errors: {error_count}", "warning")
 
-    return redirect(url_for("sync_synonym_release.language_detail", lang_code=lang_code))
+    return redirect(url_for("sync_derivative_release.language_detail", lang_code=lang_code))
+
+
+# =============================================================================
+# Release file write helpers
+# =============================================================================
+
+
+def _append_or_update_release_line(file_path: Path, guid: str, forms: List[Dict[str, Any]]) -> None:
+    """Write or update a GUID's ``forms`` array in a release JSONL file.
+
+    Preserves the ``synonyms`` array (if present) on the same line.
+    """
+    write_release_line_partial(file_path, guid, "forms", forms)
+
+
+def _build_guid_to_lemma_id(db_session: Any) -> Dict[str, int]:
+    """Build a GUID -> lemma_id mapping for all lemmas with GUIDs."""
+    return {
+        guid: lid
+        for lid, guid in db_session.query(Lemma.id, Lemma.guid).filter(Lemma.guid.isnot(None)).all()
+    }
