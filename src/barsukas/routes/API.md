@@ -45,6 +45,9 @@ Base prefix: `/api`.
 
 - `GET /api/v1/lemma/<guid>/audio[?language=<code>]`
   - Audio availability by language with `has_lemma_audio`, `form_audio_count`, and `audio_files` (includes `manifest_md5` and URL pointers).
+- `GET /api/v1/audio/voices[?language=<code>]`
+  - Lists voice options by backend for discovery before generation.
+  - Response entries include: `voice_name`, `display_voice`, `backend`, `language_code`, `gender`, `sample_url`.
 
 - `GET /api/v1/lemma/<guid>/sentences[?language=<code>]`
   - Example sentences using the lemma.
@@ -70,6 +73,9 @@ All LLM-invoking endpoints below require JSON body with `"model": "<model-name>"
 - `POST /api/v1/agents/lemma/<guid>/check-disambiguation`
 - `POST /api/v1/agents/lemma/<guid>/check-translations`
 - `POST /api/v1/agents/lemma/<guid>/check-pronunciations`
+- `POST /api/llm/<agent>/generate-audio`
+  - Bulk lemma audio generation (currently supports `agent=vieversys` and `agent=strazdas`).
+  - Body: `{"guids": [...], "language": "bs", "voice": "...", "include_forms": false, "force": false}`.
 
 Check endpoints return:
 

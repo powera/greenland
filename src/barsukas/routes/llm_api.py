@@ -33,6 +33,8 @@ from flask.typing import ResponseReturnValue
 import constants
 from agents.lokys import LokysAgent
 from agents.papuga import PapugaAgent
+from agents.strazdas import StrazdasAgent
+from agents.vieversys import VieversysAgent
 from agents.voras.agent import VorasAgent
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import Lemma
@@ -171,6 +173,18 @@ def api_info() -> ResponseReturnValue:
                 "openai_api_key": "Optional. OpenAI API key",
                 "anthropic_api_key": "Optional. Anthropic API key",
                 "google_api_key": "Optional. Google API key",
+            },
+        },
+        {
+            "path": "/api/llm/<agent>/generate-audio",
+            "method": "POST",
+            "description": "Generate lemma audio in bulk using the selected audio agent (vieversys/strazdas)",
+            "parameters": {
+                "guids": "Required. List of lemma GUIDs",
+                "language": "Required. Language code (e.g., 'bs')",
+                "voice": "Optional. Voice name for the selected backend/agent",
+                "include_forms": "Optional bool. Reserved for form-level generation (currently base lemma only)",
+                "force": "Optional bool. Reserved for overwrite behavior (currently skipped if manifest already exists)",
             },
         },
         {
@@ -446,6 +460,87 @@ def api_generate_pronunciations() -> ResponseReturnValue:
     except Exception as e:
         g.db.rollback()
         logger.exception("Error generating pronunciations for lemma %s", guid)
+        return _build_error_response(str(e), 500)
+
+
+@bp.route("/<agent>/generate-audio", methods=["POST"])
+@mirrored_facade("/api/llm/<agent>/generate-audio", "POST")
+def api_generate_audio(agent: str) -> ResponseReturnValue:
+    """Generate lemma audio for a batch of GUIDs via a selected audio agent."""
+    data = request.get_json()
+    if not data:
+        return _build_error_response("Request body must be JSON")
+
+    guids = data.get("guids")
+    language_code = data.get("language")
+    voice_name = data.get("voice")
+    include_forms = bool(data.get("include_forms", False))
+    force = bool(data.get("force", False))
+    if not isinstance(guids, list) or not all(isinstance(guid_value, str) for guid_value in guids):
+        return _build_error_response("guids is required and must be a list of strings")
+    if not isinstance(language_code, str) or not language_code:
+        return _build_error_response("language is required")
+
+    lemmas = g.db.query(Lemma).filter(Lemma.guid.in_(guids)).all()
+    found_guid_set = {lemma.guid for lemma in lemmas}
+    missing_guids = [guid_value for guid_value in guids if guid_value not in found_guid_set]
+
+    if not lemmas:
+        return _build_error_response("No requested GUIDs were found", 404)
+
+    try:
+        config = _get_config_from_request(data)
+        if agent == "vieversys":
+            vieversys_agent = VieversysAgent(config=config)
+            result = vieversys_agent.generate_batch(
+                language_code=language_code,
+                lemmas=lemmas,
+                cloud_voice_names=(
+                    [voice_name] if isinstance(voice_name, str) and voice_name else None
+                ),
+            )
+        elif agent == "strazdas":
+            strazdas_agent = StrazdasAgent(config=config)
+            result = strazdas_agent.generate_batch(language_code=language_code, lemmas=lemmas)
+        else:
+            return _build_error_response(
+                "Unsupported audio agent. Use 'vieversys' or 'strazdas'", 400
+            )
+
+        by_guid: Dict[str, Dict[str, Any]] = {}
+        for lemma_result in result.get("lemmas", []):
+            guid_value = lemma_result.get("guid")
+            if not isinstance(guid_value, str):
+                continue
+            if lemma_result.get("success"):
+                by_guid[guid_value] = {"status": "generated"}
+            else:
+                by_guid[guid_value] = {"status": "failed", "error": lemma_result.get("error")}
+
+        generated = int(result.get("success_count", 0))
+        failed = int(result.get("error_count", 0))
+        total = len(guids)
+        skipped_existing = max(total - generated - failed, 0)
+
+        return _build_success_response(
+            {
+                "guids": guids,
+                "missing_guids": missing_guids,
+                "language": language_code,
+                "voice": voice_name,
+                "agent": agent,
+                "include_forms": include_forms,
+                "force": force,
+                "total": total,
+                "generated": generated,
+                "skipped_existing": skipped_existing,
+                "failed": failed,
+                "by_guid": by_guid,
+                "tts_cost_usd": 0.0,
+            }
+        )
+    except Exception as e:
+        logger.exception("Error generating audio with agent=%s", agent)
         return _build_error_response(str(e), 500)
 
 

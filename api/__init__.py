@@ -10,7 +10,7 @@ the ``BARSUKAS_API_URL`` environment variable; see :mod:`api.constants`.
 from __future__ import annotations
 
 from api._http import BarsukasAPIError
-from api.audio import get_audio
+from api.audio import get_audio, list_voices
 from api.agent_tasks import (
     check_definition,
     check_disambiguation,
@@ -40,6 +40,7 @@ from api.lemmas import (
 )
 from api.llm_agents import (
     add_missing_translations,
+    generate_audio,
     generate_pronunciations,
     get_llm_info,
 )
@@ -54,7 +55,9 @@ __all__ = [
     "check_translations",
     "find_pending_import_duplicates",
     "generate_pronunciations",
+    "generate_audio",
     "get_audio",
+    "list_voices",
     "get_forms",
     "get_grammar",
     "get_lemma",

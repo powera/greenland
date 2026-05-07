@@ -50,6 +50,33 @@ class AddMissingTranslationsResponse(SuccessResponse):
     data: AddMissingTranslationsData
 
 
+class GenerateAudioResult(TypedDict, total=False):
+    status: str
+    audio_url: str
+    manifest_md5: str
+    error: str
+
+
+class GenerateAudioData(TypedDict):
+    guids: List[str]
+    missing_guids: List[str]
+    language: str
+    voice: Optional[str]
+    agent: str
+    include_forms: bool
+    force: bool
+    total: int
+    generated: int
+    skipped_existing: int
+    failed: int
+    by_guid: Dict[str, GenerateAudioResult]
+    tts_cost_usd: float
+
+
+class GenerateAudioResponse(SuccessResponse):
+    data: GenerateAudioData
+
+
 @mirrored_route("/api/llm/info", "GET")
 def get_llm_info() -> Any:
     """List the LLM agent endpoints exposed by Barsukas."""
@@ -120,4 +147,30 @@ def check_disambiguation(guid: str, *, model: Optional[str] = None) -> Any:
     return post_json(
         "/api/llm/lokys/check-disambiguation",
         {"guid": guid, "model": model},
+    )
+
+
+@mirrored_route("/api/llm/<agent>/generate-audio", "POST")
+def generate_audio(
+    agent: str,
+    *,
+    guids: List[str],
+    language: str,
+    voice: Optional[str] = None,
+    include_forms: bool = False,
+    force: bool = False,
+) -> GenerateAudioResponse:
+    """Generate audio for a list of GUIDs with a selected audio agent."""
+    return cast(
+        GenerateAudioResponse,
+        post_json(
+            f"/api/llm/{agent}/generate-audio",
+            {
+                "guids": guids,
+                "language": language,
+                "voice": voice,
+                "include_forms": include_forms,
+                "force": force,
+            },
+        ),
     )
