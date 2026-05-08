@@ -86,6 +86,14 @@ Check endpoints return:
 
 ## Metadata endpoints (for aggregate counting)
 
+- `GET /api/v1/metadata/pos-subtypes[?pos_type=<type>]`
+  - List distinct POS subtypes present in lemmas.
+  - `pos_type`: optional exact POS filter (e.g. `noun`, `verb`).
+
+- `GET /api/v1/metadata/levels/by-pos?pos_type=<type>&pos_subtype=<subtype>`
+  - Return difficulty-level distribution for lemmas in one POS bucket.
+  - Response `data` is a map of difficulty level string to count (uses `"null"` for unset levels).
+
 - `GET /api/v1/metadata/words[?language=<code>][&max_difficulty=<int>][&difficulty=<int>]`
 
 Returns per-language aggregate counts with this shape:

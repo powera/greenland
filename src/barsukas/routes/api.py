@@ -336,6 +336,38 @@ def api_info() -> ResponseReturnValue:
             ],
         },
         {
+            "path": "/api/v1/metadata/pos-subtypes",
+            "method": "GET",
+            "description": "List available POS subtypes, optionally filtered by POS type",
+            "parameters": [
+                {
+                    "name": "pos_type",
+                    "type": "query",
+                    "required": False,
+                    "description": "Optional part-of-speech filter (e.g., noun, verb)",
+                }
+            ],
+        },
+        {
+            "path": "/api/v1/metadata/levels/by-pos",
+            "method": "GET",
+            "description": "Get word difficulty-level distribution for a POS type + subtype",
+            "parameters": [
+                {
+                    "name": "pos_type",
+                    "type": "query",
+                    "required": True,
+                    "description": "Part-of-speech type (e.g., noun, verb)",
+                },
+                {
+                    "name": "pos_subtype",
+                    "type": "query",
+                    "required": True,
+                    "description": "Part-of-speech subtype (e.g., physical_object)",
+                },
+            ],
+        },
+        {
             "path": "/api/v1/metadata/sentences",
             "method": "GET",
             "description": "Get per-language sentence counts and metadata coverage (audio, verification, pattern types)",
@@ -1594,7 +1626,9 @@ def list_audio_voices() -> ResponseReturnValue:
 
     for language_code in LANGUAGE_HIERARCHY:
         for openai_voice in GptVoice.get_default_voices_for_language(language_code):
-            append_voice(openai_voice.path_name, openai_voice.ui_name, "openai", language_code, None)
+            append_voice(
+                openai_voice.path_name, openai_voice.ui_name, "openai", language_code, None
+            )
         for espeak_voice in EspeakVoice.get_voices_for_language(language_code):
             append_voice(
                 espeak_voice.name,
@@ -2032,6 +2066,61 @@ def get_word_metadata() -> ResponseReturnValue:
         metadata["difficulty"] = exact_difficulty
 
     return _build_success_response(summary_data, metadata)
+
+
+@bp.route("/v1/metadata/pos-subtypes")
+@mirrored_facade("/api/v1/metadata/pos-subtypes", "GET")
+def list_pos_subtypes() -> ResponseReturnValue:
+    """List distinct POS subtypes, optionally filtered by POS type."""
+    pos_type = request.args.get("pos_type", "").strip()
+    subtype_query = g.db.query(Lemma.pos_subtype).filter(
+        Lemma.pos_subtype.isnot(None),
+        Lemma.pos_subtype != "",
+    )
+    if pos_type:
+        subtype_query = subtype_query.filter(Lemma.pos_type == pos_type)
+
+    subtypes = sorted({row[0] for row in subtype_query.distinct().all()})
+    metadata: Dict[str, Any] = {
+        "count": len(subtypes),
+    }
+    if pos_type:
+        metadata["pos_type"] = pos_type
+    return _build_success_response(subtypes, metadata)
+
+
+@bp.route("/v1/metadata/levels/by-pos")
+@mirrored_facade("/api/v1/metadata/levels/by-pos", "GET")
+def get_level_distribution_by_pos() -> ResponseReturnValue:
+    """Return difficulty distribution for lemmas in one POS type/subtype bucket."""
+    pos_type = request.args.get("pos_type", "").strip()
+    pos_subtype = request.args.get("pos_subtype", "").strip()
+    if not pos_type:
+        return _build_error_response("pos_type is required", 400)
+    if not pos_subtype:
+        return _build_error_response("pos_subtype is required", 400)
+
+    rows = (
+        g.db.query(Lemma.difficulty_level, func.count().label("count"))
+        .filter(Lemma.pos_type == pos_type, Lemma.pos_subtype == pos_subtype)
+        .group_by(Lemma.difficulty_level)
+        .order_by(Lemma.difficulty_level)
+        .all()
+    )
+    distribution = {
+        "null" if row.difficulty_level is None else str(row.difficulty_level): row.count
+        for row in rows
+    }
+    total_words = sum(row.count for row in rows)
+
+    return _build_success_response(
+        distribution,
+        {
+            "pos_type": pos_type,
+            "pos_subtype": pos_subtype,
+            "total_words": total_words,
+        },
+    )
 
 
 @bp.route("/v1/metadata/sentences")

@@ -24,9 +24,11 @@ from api.agent_tasks import (
 )
 from api.batch_operations import (
     find_pending_import_duplicates,
+    get_level_distribution_by_pos,
     get_word_metadata,
     list_models,
     list_pending_imports,
+    list_pos_subtypes,
 )
 from api.lemmas import (
     get_forms,
@@ -69,10 +71,12 @@ __all__ = [
     "get_sentences",
     "get_translations",
     "get_translations_bulk",
+    "get_level_distribution_by_pos",
     "get_word_metadata",
     "list_by_difficulty",
     "list_models",
     "list_pending_imports",
+    "list_pos_subtypes",
     "queue_add_missing_translations",
     "queue_generate_forms",
     "queue_generate_pronunciations",
