@@ -19,7 +19,7 @@ from clients.audio.azure_tts import AzureVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.gpt_voices import GptVoice
 from clients.audio.polly_tts import PollyVoice
-from flask import Response, g, jsonify, request
+from flask import Response, current_app, g, jsonify, request
 from flask.typing import ResponseReturnValue
 from sqlalchemy import and_, case, func, or_
 from audioshoe.coqui.types import CoquiVoice
@@ -27,6 +27,7 @@ from audioshoe.espeak.types import EspeakVoice
 from audioshoe.piper.types import PiperVoice
 from audioshoe.qwen.types import QwenVoice
 
+from storage.backend.config import DataSourceConfig
 from storage.crud.grammar_fact import get_grammar_facts
 from storage.crud.lemma import get_lemma_by_guid
 from storage.lexeme import get_lexeme
@@ -53,6 +54,22 @@ from storage.translation_helpers import (
 )
 from workqueue.task_queue import TaskStatus, TaskType, enqueue_task
 from barsukas.routes.api import bp
+
+
+def _get_data_source_config(model_name: str, debug: bool) -> DataSourceConfig:
+    """Build DataSourceConfig from app backend config with route-level LLM settings."""
+    base_config = current_app.backend_config  # type: ignore[attr-defined]
+    return DataSourceConfig(
+        backend_type=base_config.backend_type,
+        sqlite_path=base_config.sqlite_path,
+        jsonl_data_dir=base_config.jsonl_data_dir,
+        postgres_url=base_config.postgres_url,
+        barsukas_url=base_config.barsukas_url,
+        cache_only=base_config.cache_only,
+        use_word2vec=base_config.use_word2vec,
+        model=model_name,
+        debug=debug,
+    )
 
 
 @bp.route("/check_lemma_exists")
@@ -119,7 +136,8 @@ def auto_populate_lemma() -> ResponseReturnValue:
         # Use LLM to generate definition, POS type, and POS subtype
         from wordfreq.translation.client import LinguisticClient
 
-        client = LinguisticClient(model="gpt-5.4-mini", db_path=Config.DB_PATH, debug=Config.DEBUG)
+        data_source_config = _get_data_source_config(model_name="gpt-5.4-mini", debug=Config.DEBUG)
+        client = LinguisticClient(config=data_source_config)
 
         # Build prompt for LLM
         if translation and lang_code:

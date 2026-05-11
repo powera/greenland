@@ -19,6 +19,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from util.logging_config import get_logger
+from storage.backend.config import DataSourceConfig
 from storage.models.imports import PendingImport, WordExclusion
 from wordfreq.translation.client import LinguisticClient
 
@@ -115,7 +116,7 @@ def _find_duplicate_lemma(
 def approve_pending_import(
     session: Any,
     pending_import_id: int,
-    db_path: str,
+    data_source_config: DataSourceConfig,
     model: str = "gpt-5.4-mini",
     debug: bool = False,
 ) -> Dict[str, Any]:
@@ -129,7 +130,7 @@ def approve_pending_import(
     Args:
         session: Database session
         pending_import_id: ID of the PendingImport record
-        db_path: Database path for LinguisticClient
+        data_source_config: Data source configuration for LinguisticClient
         model: LLM model to use for processing
         debug: Debug flag
 
@@ -155,7 +156,21 @@ def approve_pending_import(
 
         # Use LinguisticClient to get full definitions from the LLM, including
         # pos_subtype (needed for GUID) and translations.
-        client = LinguisticClient(model=model, db_path=db_path, debug=debug)
+        client_config = DataSourceConfig(
+            backend_type=data_source_config.backend_type,
+            sqlite_path=data_source_config.sqlite_path,
+            jsonl_data_dir=data_source_config.jsonl_data_dir,
+            postgres_url=data_source_config.postgres_url,
+            barsukas_url=data_source_config.barsukas_url,
+            cache_only=data_source_config.cache_only,
+            use_word2vec=data_source_config.use_word2vec,
+            model=model,
+            debug=debug,
+            openai_api_key=data_source_config.openai_api_key,
+            anthropic_api_key=data_source_config.anthropic_api_key,
+            google_api_key=data_source_config.google_api_key,
+        )
+        client = LinguisticClient(config=client_config)
 
         example_sentence: Optional[str] = pending.example_sentence
 
