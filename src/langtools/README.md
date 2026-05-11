@@ -25,7 +25,8 @@ Langtools is being aligned to a language-plugin architecture with these rules:
    - registry-based LLM form querying.
 
 This README is intentionally high-level; see `STRUCTURE.md` for concrete
-module contracts and `LANGUAGE_STATUS.md` for per-language status.
+module contracts, `LANGUAGE_MODULE_FORMAT.md` for per-language file standards,
+and `LANGUAGE_STATUS.md` for per-language status.
 
 ## Important scope note
 
