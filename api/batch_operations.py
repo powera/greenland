@@ -2,7 +2,7 @@
 
 Covers per-language word-metadata aggregates, the LLM model registry, and the
 pending-imports listing/duplicate-detection endpoints, plus POS metadata helpers. Mirrors
-``src/barsukas/routes/api.py`` and ``src/barsukas/routes/pending_imports.py``.
+``src/barsukas/routes/api/v1.py`` and ``src/barsukas/routes/pending_imports.py``.
 Any change to a route signature or response shape there must be reflected
 here in the same commit.
 """

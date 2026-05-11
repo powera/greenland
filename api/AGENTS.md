@@ -1,7 +1,7 @@
 # `api/` — Python wrapper around the Barsukas HTTP API
 
 This package provides a thin, typed Python facade over the JSON endpoints
-exposed by the Barsukas web app (`src/barsukas/routes/api.py` and
+exposed by the Barsukas web app (`src/barsukas/routes/api/v1.py`, `src/barsukas/routes/api/html.py`, and
 `src/barsukas/routes/pending_imports.py`).
 
 It is the recommended way for scripts, agents, and external tools to consume
