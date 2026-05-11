@@ -1,6 +1,6 @@
 # Barsukas API quick reference
 
-This file documents the main JSON endpoints under `src/barsukas/routes/api.py` that are useful for automation/agents.
+This file documents the main JSON endpoints under `src/barsukas/routes/api/v1.py` that are useful for automation/agents.
 
 Base prefix: `/api`.
 

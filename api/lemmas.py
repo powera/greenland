@@ -1,6 +1,6 @@
 """HTTP facade for lemma-related Barsukas endpoints.
 
-Mirrors ``src/barsukas/routes/api.py``. Any change to a route signature or
+Mirrors ``src/barsukas/routes/api/v1.py``. Any change to a route signature or
 response shape there must be reflected here in the same commit.
 """
 
