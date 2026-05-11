@@ -78,3 +78,9 @@ When refactoring existing code toward this architecture:
 4. Keep shared logic generic; keep language exceptions local to the language
    folder.
 5. Update `LANGUAGE_STATUS.md` whenever core-language capability status changes.
+
+
+## 7) File-format standardization
+
+For the concrete per-language filename/entrypoint contract required by
+conditional imports, see `LANGUAGE_MODULE_FORMAT.md`.
