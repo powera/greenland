@@ -44,4 +44,15 @@ if [ -n "$STAGED_RELEASE" ]; then
     fi
 fi
 
+# --- Langtools contract checks (es/fr/lt) ---
+STAGED_LANGTOOLS=$(git diff --cached --name-only --diff-filter=ACM | grep '^src/langtools/')
+
+if [ -n "$STAGED_LANGTOOLS" ]; then
+    echo "Checking langtools required functions (es/fr/lt)..."
+    python3 scripts/check_langtools_required_functions.py
+    if [ $? -ne 0 ]; then
+        FAILED=1
+    fi
+fi
+
 exit $FAILED
