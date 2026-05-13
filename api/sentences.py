@@ -30,35 +30,30 @@ def get_sentence_metadata(
     )
 
 
-@mirrored_route("/api/v1/sentences/decompose-batch", "POST")
-def decompose_sentence_batch(
+@mirrored_route("/api/v1/sentences/add", "POST")
+def add_sentences(
     sentences: List[str],
     source: str,
     *,
-    model: Optional[str] = None,
     language: Optional[str] = None,
 ) -> Any:
-    """Add up to 15 sentences to the database and decompose each into translations and lemmas.
+    """Add up to 15 sentences to the database, deduplicating by text.
 
-    Each sentence is stored with the supplied *source* identifier and translated
-    into English, French, Chinese, Lithuanian, and Spanish via an LLM call.
-    Per-word lemma associations are stored for each language.
-
-    Sentences that already exist (matched by text and language) are returned
-    with their existing translations without re-running decomposition.
+    Makes no LLM calls. Sentences already present are returned with status
+    ``already_exists`` so the caller still gets their IDs. Use the returned
+    IDs with :func:`api.llm_agents.decompose_sentences` to queue translation
+    and lemma decomposition.
 
     Args:
         sentences: List of sentence strings (max 15).
         source: Source identifier stored as ``source_filename`` on each Sentence row.
-        model: LLM model to use (default: gpt-5.4-mini).
         language: Source language code of the input sentences (default: "en").
 
     Returns:
-        API response dict with ``data`` (list of per-sentence results) and ``metadata``.
+        API response dict with ``data`` (list of per-sentence results with
+        sentence_id, guid, status) and ``metadata``.
     """
     body: dict[str, Any] = {"sentences": sentences, "source": source}
-    if model is not None:
-        body["model"] = model
     if language is not None:
         body["language"] = language
-    return post_json(f"{API_V1_PREFIX}/sentences/decompose-batch", body)
+    return post_json(f"{API_V1_PREFIX}/sentences/add", body)
