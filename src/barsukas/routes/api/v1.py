@@ -27,8 +27,11 @@ from audioshoe.espeak.types import EspeakVoice
 from audioshoe.piper.types import PiperVoice
 from audioshoe.qwen.types import QwenVoice
 
+from sentences.translation import translate_sentence
 from storage.crud.grammar_fact import get_grammar_facts
 from storage.crud.lemma import get_lemma_by_guid
+from storage.crud.sentence import add_sentence, find_sentence_by_text
+from storage.crud.sentence_translation import add_sentence_translation
 from storage.lexeme import get_lexeme
 from storage.models import (
     DerivativeForm,
@@ -227,6 +230,37 @@ def api_info() -> ResponseReturnValue:
                     "required": False,
                     "description": "Filter to a specific language code (e.g., 'en', 'zh', 'lt')",
                 }
+            ],
+        },
+        {
+            "path": "/api/v1/sentences/decompose-batch",
+            "method": "POST",
+            "description": "Add up to 15 sentences to the database and decompose each into translations and lemmas for en/fr/zh/lt/es",
+            "parameters": [
+                {
+                    "name": "sentences",
+                    "type": "body",
+                    "required": True,
+                    "description": "List of sentence strings (max 15)",
+                },
+                {
+                    "name": "source",
+                    "type": "body",
+                    "required": True,
+                    "description": "Source identifier stored on the created Sentence rows",
+                },
+                {
+                    "name": "model",
+                    "type": "body",
+                    "required": False,
+                    "description": "LLM model to use (default: gpt-5.4-mini)",
+                },
+                {
+                    "name": "language",
+                    "type": "body",
+                    "required": False,
+                    "description": "Source language code of the input sentences (default: en)",
+                },
             ],
         },
         {
@@ -2117,6 +2151,156 @@ def get_sentence_metadata() -> ResponseReturnValue:
         metadata["max_difficulty"] = max_difficulty_sentences
 
     return _build_success_response(summary_data, metadata)
+
+
+_DECOMPOSE_BATCH_LANGUAGES: List[str] = ["fr", "zh", "lt", "es"]
+_DECOMPOSE_BATCH_MAX_SENTENCES = 15
+_DECOMPOSE_BATCH_DEFAULT_MODEL = "gpt-5.4-mini"
+
+
+@bp.route("/v1/sentences/decompose-batch", methods=["POST"])
+@mirrored_facade("/api/v1/sentences/decompose-batch", "POST")
+def decompose_sentence_batch() -> ResponseReturnValue:
+    """Add sentences to the database and decompose each into translations and lemmas.
+
+    Accepts up to 15 sentences, creates each in the database with the caller-supplied
+    source identifier, then runs LLM decomposition to produce translations in
+    English, French, Chinese, Lithuanian, and Spanish, along with per-word lemma
+    associations for each language.
+
+    If a sentence with identical text already exists (matched by source language),
+    it is returned as-is without re-running decomposition.
+
+    Request body (JSON):
+        sentences (list[str], required): Up to 15 sentence strings.
+        source (str, required): Source identifier stored as source_filename on the Sentence.
+        model (str, optional): LLM model to use (default: gpt-5.4-mini).
+        language (str, optional): Source language code of the input sentences (default: "en").
+
+    Returns:
+        data: list of per-sentence results, each containing:
+            - sentence_text: original input text
+            - sentence_id: database ID
+            - guid: sentence GUID (e.g. S_00123)
+            - status: "created", "already_exists", or "error"
+            - translations: dict mapping language code to translated text
+            - error: error message string (only present when status is "error")
+        metadata:
+            - total, created, already_exists, errors counts
+            - source, language, model used
+
+    Example:
+        POST /api/v1/sentences/decompose-batch
+        {
+            "sentences": ["The cat sits on the mat.", "She reads every day."],
+            "source": "my_lesson_set",
+            "model": "gpt-5.4-mini"
+        }
+    """
+    import logging as _logging
+
+    _log = _logging.getLogger(__name__)
+
+    payload = request.get_json(silent=True) or {}
+
+    sentences_raw = payload.get("sentences")
+    if not isinstance(sentences_raw, list) or not sentences_raw:
+        return _build_error_response("sentences must be a non-empty list")
+    if len(sentences_raw) > _DECOMPOSE_BATCH_MAX_SENTENCES:
+        return _build_error_response(
+            f"sentences may contain at most {_DECOMPOSE_BATCH_MAX_SENTENCES} items"
+        )
+    sentences: List[str] = []
+    for item in sentences_raw:
+        if not isinstance(item, str) or not item.strip():
+            return _build_error_response("each sentence must be a non-empty string")
+        sentences.append(item.strip())
+
+    source = payload.get("source", "")
+    if not isinstance(source, str) or not source.strip():
+        return _build_error_response("source is required and must be a non-empty string")
+    source = source.strip()
+
+    model_raw = payload.get("model", _DECOMPOSE_BATCH_DEFAULT_MODEL)
+    if not isinstance(model_raw, str) or not model_raw.strip():
+        return _build_error_response("model must be a non-empty string")
+    model = model_raw.strip()
+
+    language = payload.get("language", "en")
+    if not isinstance(language, str) or not language.strip():
+        return _build_error_response("language must be a non-empty string")
+    language = language.strip().lower()
+
+    results: List[Dict[str, Any]] = []
+    stats = {"total": len(sentences), "created": 0, "already_exists": 0, "errors": 0}
+
+    for sentence_text in sentences:
+        existing = find_sentence_by_text(g.db, sentence_text, language_code=language)
+        if existing is not None:
+            existing_translations = {
+                t.language_code: t.translation_text for t in existing.translations
+            }
+            results.append(
+                {
+                    "sentence_text": sentence_text,
+                    "sentence_id": existing.id,
+                    "guid": existing.guid,
+                    "status": "already_exists",
+                    "translations": existing_translations,
+                }
+            )
+            stats["already_exists"] += 1
+            continue
+
+        sentence_row = add_sentence(g.db, source_filename=source)
+        add_sentence_translation(
+            g.db,
+            sentence=sentence_row,
+            language_code=language,
+            translation_text=sentence_text,
+            verified=False,
+        )
+
+        try:
+            decomposition = translate_sentence(
+                sentence_id=sentence_row.id,
+                target_languages=_DECOMPOSE_BATCH_LANGUAGES,
+                session=g.db,
+                model=model,
+            )
+            translations = {
+                lang: text for lang, text in decomposition.items() if not lang.startswith("words_")
+            }
+            # Ensure the source language text is included
+            translations[language] = sentence_text
+            results.append(
+                {
+                    "sentence_text": sentence_text,
+                    "sentence_id": sentence_row.id,
+                    "guid": sentence_row.guid,
+                    "status": "created",
+                    "translations": translations,
+                }
+            )
+            stats["created"] += 1
+        except Exception as exc:
+            _log.error("decompose-batch: LLM decomposition failed for %r: %s", sentence_text, exc)
+            results.append(
+                {
+                    "sentence_text": sentence_text,
+                    "sentence_id": sentence_row.id,
+                    "guid": sentence_row.guid,
+                    "status": "error",
+                    "translations": {language: sentence_text},
+                    "error": str(exc),
+                }
+            )
+            stats["errors"] += 1
+
+    return _build_success_response(
+        results,
+        {**stats, "source": source, "language": language, "model": model},
+    )
 
 
 @bp.route("/v1/models")
