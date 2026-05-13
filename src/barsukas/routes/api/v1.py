@@ -29,6 +29,8 @@ from audioshoe.qwen.types import QwenVoice
 
 from storage.crud.grammar_fact import get_grammar_facts
 from storage.crud.lemma import get_lemma_by_guid
+from storage.crud.sentence import add_sentence, find_sentence_by_text
+from storage.crud.sentence_translation import add_sentence_translation
 from storage.lexeme import get_lexeme
 from storage.models import (
     DerivativeForm,
@@ -227,6 +229,31 @@ def api_info() -> ResponseReturnValue:
                     "required": False,
                     "description": "Filter to a specific language code (e.g., 'en', 'zh', 'lt')",
                 }
+            ],
+        },
+        {
+            "path": "/api/v1/sentences/add",
+            "method": "POST",
+            "description": "Add up to 15 sentences to the database, deduplicating by text. Returns IDs for use with /api/llm/sentences/decompose.",
+            "parameters": [
+                {
+                    "name": "sentences",
+                    "type": "body",
+                    "required": True,
+                    "description": "List of sentence strings (max 15)",
+                },
+                {
+                    "name": "source",
+                    "type": "body",
+                    "required": True,
+                    "description": "Source identifier stored as source_filename on each created Sentence row",
+                },
+                {
+                    "name": "language",
+                    "type": "body",
+                    "required": False,
+                    "description": "Source language code of the input sentences (default: en)",
+                },
             ],
         },
         {
@@ -2117,6 +2144,110 @@ def get_sentence_metadata() -> ResponseReturnValue:
         metadata["max_difficulty"] = max_difficulty_sentences
 
     return _build_success_response(summary_data, metadata)
+
+
+_ADD_SENTENCES_MAX = 15
+
+
+@bp.route("/v1/sentences/add", methods=["POST"])
+@mirrored_facade("/api/v1/sentences/add", "POST")
+def add_sentences() -> ResponseReturnValue:
+    """Add up to 15 sentences to the database, deduplicating by text.
+
+    Sentences already present (matched by text in the source language) are
+    returned with status ``already_exists`` so the caller can still obtain
+    their IDs. New sentences receive the caller-supplied source identifier
+    as ``source_filename``.
+
+    This endpoint makes no LLM calls. Use ``POST /api/llm/sentences/decompose``
+    afterward to queue translation + decomposition for the returned IDs.
+
+    Request body (JSON):
+        sentences (list[str], required): Up to 15 sentence strings.
+        source (str, required): Source identifier stored as source_filename.
+        language (str, optional): Source language code (default: "en").
+
+    Returns:
+        data: list of per-sentence results, each with:
+            - sentence_text: the input text
+            - sentence_id: database ID
+            - guid: sentence GUID (e.g. S_00123)
+            - status: "created" or "already_exists"
+        metadata: total, created, already_exists counts plus source and language.
+
+    Example:
+        POST /api/v1/sentences/add
+        {"sentences": ["The cat sits on the mat."], "source": "lesson_a1"}
+    """
+    payload = request.get_json(silent=True) or {}
+
+    sentences_raw = payload.get("sentences")
+    if not isinstance(sentences_raw, list) or not sentences_raw:
+        return _build_error_response("sentences must be a non-empty list")
+    if len(sentences_raw) > _ADD_SENTENCES_MAX:
+        return _build_error_response(f"sentences may contain at most {_ADD_SENTENCES_MAX} items")
+    sentences: List[str] = []
+    for item in sentences_raw:
+        if not isinstance(item, str) or not item.strip():
+            return _build_error_response("each sentence must be a non-empty string")
+        sentences.append(item.strip())
+
+    source = payload.get("source", "")
+    if not isinstance(source, str) or not source.strip():
+        return _build_error_response("source is required and must be a non-empty string")
+    source = source.strip()
+
+    language = payload.get("language", "en")
+    if not isinstance(language, str) or not language.strip():
+        return _build_error_response("language must be a non-empty string")
+    language = language.strip().lower()
+
+    results: List[Dict[str, Any]] = []
+    created_count = 0
+    already_exists_count = 0
+
+    for sentence_text in sentences:
+        existing = find_sentence_by_text(g.db, sentence_text, language_code=language)
+        if existing is not None:
+            results.append(
+                {
+                    "sentence_text": sentence_text,
+                    "sentence_id": existing.id,
+                    "guid": existing.guid,
+                    "status": "already_exists",
+                }
+            )
+            already_exists_count += 1
+            continue
+
+        sentence_row = add_sentence(g.db, source_filename=source)
+        add_sentence_translation(
+            g.db,
+            sentence=sentence_row,
+            language_code=language,
+            translation_text=sentence_text,
+            verified=False,
+        )
+        results.append(
+            {
+                "sentence_text": sentence_text,
+                "sentence_id": sentence_row.id,
+                "guid": sentence_row.guid,
+                "status": "created",
+            }
+        )
+        created_count += 1
+
+    return _build_success_response(
+        results,
+        {
+            "total": len(sentences),
+            "created": created_count,
+            "already_exists": already_exists_count,
+            "source": source,
+            "language": language,
+        },
+    )
 
 
 @bp.route("/v1/models")

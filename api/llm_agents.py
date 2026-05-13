@@ -236,3 +236,48 @@ def generate_audio(
             **kwargs,
         ),
     )
+
+
+@mirrored_route("/api/llm/sentences/decompose", "POST")
+def decompose_sentences(
+    sentence_ids: List[int],
+    *,
+    model: Optional[str] = None,
+    batch: bool = False,
+    batch_window_minutes: int = 10,
+) -> Any:
+    """Queue sentence decomposition (translation + lemma linking) for a list of sentence IDs.
+
+    Sentences must already exist in the database — create them first with
+    :func:`api.sentences.add_sentences` and use the returned IDs here.
+
+    The queued task translates each sentence into French, Chinese, Lithuanian,
+    and Spanish and builds per-word lemma associations. English word breakdown
+    is also produced when no English words exist yet.
+
+    With ``batch=False`` (default) each sentence gets its own task queued
+    immediately.
+
+    With ``batch=True`` the IDs are added to a shared time-windowed task.
+    Multiple callers within the same window contribute their IDs to the same
+    task, which is processed once the worker picks it up. The response is
+    immediate; there is no synchronous LLM call.
+
+    Args:
+        sentence_ids: List of sentence database IDs (max 15).
+        model: LLM model to use (default: system default).
+        batch: Whether to accumulate IDs in a time-windowed batch task.
+        batch_window_minutes: Window size in minutes 1-10 (default: 10).
+
+    Returns:
+        API response dict. Non-batch: ``data.queued_count`` and ``data.task_ids``.
+        Batch: ``data.batched``, ``data.batch_task_id``, ``data.sentence_ids_added``.
+    """
+    body: Dict[str, Any] = {
+        "sentence_ids": sentence_ids,
+        "batch": batch,
+        "batch_window_minutes": batch_window_minutes,
+    }
+    if model is not None:
+        body["model"] = model
+    return post_json("/api/llm/sentences/decompose", body)

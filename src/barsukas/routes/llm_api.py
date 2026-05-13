@@ -22,7 +22,9 @@ to a mirrored route's path, request body, or response shape MUST be made in
 the matching facade in the same commit. See ``api/AGENTS.md``.
 """
 
+import json
 import logging
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from barsukas.config import Config
@@ -37,7 +39,8 @@ from agents.strazdas import StrazdasAgent
 from agents.vieversys import VieversysAgent
 from agents.voras.agent import VorasAgent
 from storage.backend.config import BackendType, DataSourceConfig
-from storage.models.schema import Lemma
+from storage.models.schema import BarsukasTask, Lemma
+from workqueue.task_queue import TaskStatus, TaskType, enqueue_task
 
 from clients.audio.gpt_voices import GptVoice
 from clients.keys import load_key
@@ -198,6 +201,17 @@ def api_info() -> ResponseReturnValue:
                 "openai_api_key": "Optional. OpenAI API key",
                 "anthropic_api_key": "Optional. Anthropic API key",
                 "google_api_key": "Optional. Google API key",
+            },
+        },
+        {
+            "path": "/api/llm/sentences/decompose",
+            "method": "POST",
+            "description": "Queue sentence decomposition (translation + lemma linking) for a list of sentence IDs. Use batch=true to accumulate IDs across callers before processing.",
+            "parameters": {
+                "sentence_ids": "Required. List of sentence database IDs (from /api/v1/sentences/add).",
+                "model": "Optional. LLM model to use.",
+                "batch": "Optional bool (default false). When true, accumulate IDs in a time-windowed task instead of queuing immediately.",
+                "batch_window_minutes": "Optional int 1-10 (default 10). Window size when batch=true.",
             },
         },
     ]
@@ -666,3 +680,143 @@ def api_check_disambiguation() -> ResponseReturnValue:
     except Exception as e:
         logger.exception("Error checking disambiguation for lemma %s", guid)
         return _build_error_response(str(e), 500)
+
+
+_DECOMPOSE_SENTENCES_MAX = 15
+_DECOMPOSE_LANGUAGES: List[str] = ["fr", "zh", "lt", "es"]
+
+
+@bp.route("/sentences/decompose", methods=["POST"])
+@mirrored_facade("/api/llm/sentences/decompose", "POST")
+def decompose_sentences() -> ResponseReturnValue:
+    """Queue sentence decomposition (translation + lemma linking) for a list of sentences.
+
+    Each sentence must already exist in the database (create them first via
+    ``POST /api/v1/sentences/add``). The queued task calls ``translate_sentence``
+    which produces translations and per-word lemma associations for English,
+    French, Chinese, Lithuanian, and Spanish.
+
+    With ``batch=false`` (default) each sentence ID is queued as an individual
+    task and processed as soon as the worker is free.
+
+    With ``batch=true`` the IDs are accumulated into a single time-windowed task
+    shared by all callers within ``batch_window_minutes`` minutes. The response
+    is immediate; the task runs after the window closes (or when the worker picks
+    it up).
+
+    Request body (JSON):
+        sentence_ids (list[int], required): Up to 15 sentence IDs from /api/v1/sentences/add.
+        model (str, optional): LLM model to use (default: system default).
+        batch (bool, optional): Whether to accumulate into a shared batch task (default: false).
+        batch_window_minutes (int, optional): Batch window size in minutes 1-10 (default: 10).
+
+    Returns (non-batch):
+        data.queued_count: number of tasks enqueued
+        data.task_ids: list of BarsukasTask IDs created
+
+    Returns (batch):
+        data.batched: true
+        data.batch_task_id: ID of the shared batch task
+        data.sentence_ids_added: number of IDs merged into the batch
+    """
+    data = request.get_json(silent=True) or {}
+
+    sentence_ids_raw = data.get("sentence_ids")
+    if not isinstance(sentence_ids_raw, list) or not sentence_ids_raw:
+        return _build_error_response("sentence_ids must be a non-empty list")
+    if len(sentence_ids_raw) > _DECOMPOSE_SENTENCES_MAX:
+        return _build_error_response(
+            f"sentence_ids may contain at most {_DECOMPOSE_SENTENCES_MAX} items"
+        )
+    sentence_ids: List[int] = []
+    for item in sentence_ids_raw:
+        if not isinstance(item, int):
+            return _build_error_response("each sentence_id must be an integer")
+        sentence_ids.append(item)
+
+    model_raw = data.get("model", constants.DEFAULT_MODEL)
+    if not isinstance(model_raw, str) or not model_raw.strip():
+        return _build_error_response("model must be a non-empty string")
+    model = model_raw.strip()
+
+    use_batch = bool(data.get("batch", False))
+    batch_window_minutes_raw = data.get("batch_window_minutes", 10)
+    try:
+        batch_window_minutes = int(batch_window_minutes_raw)
+    except (TypeError, ValueError):
+        return _build_error_response("batch_window_minutes must be an integer")
+    if batch_window_minutes < 1 or batch_window_minutes > 10:
+        return _build_error_response("batch_window_minutes must be between 1 and 10")
+
+    if not use_batch:
+        task_ids: List[int] = []
+        for sid in sentence_ids:
+            result = enqueue_task(
+                g.db,
+                task_type=TaskType.SENTENCES_TRANSLATE,
+                target_type="sentence",
+                target_id=sid,
+                payload={
+                    "sentence_id": sid,
+                    "selected_languages": _DECOMPOSE_LANGUAGES,
+                    "model": model,
+                },
+                dedup_key=f"{TaskType.SENTENCES_TRANSLATE}:{sid}",
+            )
+            task_ids.append(result.task.id)
+        return _build_success_response(
+            {"queued_count": len(task_ids), "task_ids": task_ids},
+            f"Queued {len(task_ids)} sentence decomposition task(s)",
+        )
+
+    window_index = int(datetime.utcnow().timestamp() // (batch_window_minutes * 60))
+    batch_dedup_key = (
+        f"{TaskType.SENTENCES_TRANSLATE}:batch:{window_index}:{batch_window_minutes}:{model}"
+    )
+    existing = (
+        g.db.query(BarsukasTask)
+        .filter(
+            BarsukasTask.dedup_key == batch_dedup_key,
+            BarsukasTask.status.in_(TaskStatus.ACTIVE),
+            BarsukasTask.created_at >= datetime.utcnow() - timedelta(minutes=batch_window_minutes),
+        )
+        .order_by(BarsukasTask.created_at.desc())
+        .first()
+    )
+    if existing:
+        existing_payload = json.loads(existing.payload or "{}")
+        accumulated = set(existing_payload.get("sentence_ids", []))
+        accumulated.update(sentence_ids)
+        existing_payload["sentence_ids"] = sorted(accumulated)
+        existing.payload = json.dumps(existing_payload)
+        g.db.flush()
+        return _build_success_response(
+            {
+                "batched": True,
+                "batch_task_id": existing.id,
+                "sentence_ids_added": len(sentence_ids),
+            },
+            f"Added {len(sentence_ids)} sentence ID(s) to batch task {existing.id}",
+        )
+
+    result = enqueue_task(
+        g.db,
+        task_type=TaskType.SENTENCES_TRANSLATE,
+        target_type="batch",
+        target_id=None,
+        payload={
+            "sentence_ids": sentence_ids,
+            "selected_languages": _DECOMPOSE_LANGUAGES,
+            "model": model,
+            "batch": True,
+        },
+        dedup_key=batch_dedup_key,
+    )
+    return _build_success_response(
+        {
+            "batched": True,
+            "batch_task_id": result.task.id,
+            "sentence_ids_added": len(sentence_ids),
+        },
+        f"Created batch task {result.task.id} with {len(sentence_ids)} sentence ID(s)",
+    )
