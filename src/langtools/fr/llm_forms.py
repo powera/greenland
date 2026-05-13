@@ -21,14 +21,14 @@ NOUN_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("fr", "noun")].form_
 VERB_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("fr", "verb")].form_mapping
 
 
-def query_french_noun_forms(
+def get_noun_forms(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
     """Query LLM for French noun forms."""
     return query_forms(FORM_SPECS[("fr", "noun")], client, lemma_id, get_session_func)
 
 
-def query_french_verb_conjugations(
+def get_verb_forms(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
     """Generate French verb forms mechanically when possible, else use LLM."""
@@ -59,3 +59,17 @@ def query_french_verb_conjugations(
             logger.info("Falling back to LLM for French verb '%s'", french_verb)
 
     return query_forms(FORM_SPECS[("fr", "verb")], client, lemma_id, get_session_func)
+
+
+def query_french_noun_forms(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Backward-compatible alias for noun form generation."""
+    return get_noun_forms(client, lemma_id, get_session_func)
+
+
+def query_french_verb_conjugations(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Backward-compatible alias for verb form generation."""
+    return get_verb_forms(client, lemma_id, get_session_func)

@@ -50,7 +50,7 @@ def _parse_principal_parts(translation_text: str) -> Tuple[str, str, str] | None
     return None
 
 
-def query_lithuanian_noun_declensions(
+def get_noun_forms(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
     """Generate Lithuanian noun declensions mechanically when safe, else use LLM."""
@@ -105,7 +105,7 @@ def query_lithuanian_noun_declensions(
     return query_forms(FORM_SPECS[("lt", "noun")], client, lemma_id, get_session_func)
 
 
-def query_lithuanian_verb_conjugations(
+def get_verb_forms(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
     """Generate Lithuanian verb forms mechanically when possible, else use LLM."""
@@ -177,15 +177,43 @@ def query_lithuanian_verb_conjugations(
     return query_forms(FORM_SPECS[("lt", "verb")], client, lemma_id, get_session_func)
 
 
-def query_lithuanian_adjective_declensions(
+def get_adjective_forms(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
     """Query LLM for Lithuanian adjective forms."""
     return query_forms(FORM_SPECS[("lt", "adjective")], client, lemma_id, get_session_func)
 
 
-def query_lithuanian_adverb_forms(
+def get_adverb_forms(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
     """Query LLM for Lithuanian adverb forms."""
     return query_forms(FORM_SPECS[("lt", "adverb")], client, lemma_id, get_session_func)
+
+
+def query_lithuanian_noun_declensions(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Backward-compatible alias for noun form generation."""
+    return get_noun_forms(client, lemma_id, get_session_func)
+
+
+def query_lithuanian_verb_conjugations(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Backward-compatible alias for verb form generation."""
+    return get_verb_forms(client, lemma_id, get_session_func)
+
+
+def query_lithuanian_adjective_declensions(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Backward-compatible alias for adjective form generation."""
+    return get_adjective_forms(client, lemma_id, get_session_func)
+
+
+def query_lithuanian_adverb_forms(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Backward-compatible alias for adverb form generation."""
+    return get_adverb_forms(client, lemma_id, get_session_func)
