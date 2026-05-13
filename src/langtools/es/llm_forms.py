@@ -39,14 +39,14 @@ def _project_spanish_forms_to_registry(forms: Dict[str, str]) -> Dict[str, str]:
     return projected_forms
 
 
-def query_spanish_noun_forms(
+def get_noun_forms(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
     """Query LLM for Spanish noun forms."""
     return query_forms(FORM_SPECS[("es", "noun")], client, lemma_id, get_session_func)
 
 
-def query_spanish_verb_conjugations(
+def get_verb_forms(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
     """Generate Spanish verb forms mechanically when possible, else use LLM."""
@@ -78,3 +78,17 @@ def query_spanish_verb_conjugations(
             logger.info("Falling back to LLM for Spanish verb '%s'", spanish_verb)
 
     return query_forms(FORM_SPECS[("es", "verb")], client, lemma_id, get_session_func)
+
+
+def query_spanish_noun_forms(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Backward-compatible alias for noun form generation."""
+    return get_noun_forms(client, lemma_id, get_session_func)
+
+
+def query_spanish_verb_conjugations(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Backward-compatible alias for verb form generation."""
+    return get_verb_forms(client, lemma_id, get_session_func)

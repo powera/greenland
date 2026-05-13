@@ -14,26 +14,26 @@ ROOT = Path(__file__).resolve().parent.parent
 REQUIRED_FUNCTIONS: dict[str, dict[str, tuple[str, ...]]] = {
     "es": {
         "llm_forms.py": (
-            "query_spanish_noun_forms",
-            "query_spanish_verb_conjugations",
+            "get_noun_forms",
+            "get_verb_forms",
         ),
         "directions.py": ("get_general_direction_note",),
         "utils.py": ("strip_subject_pronoun",),
     },
     "fr": {
         "llm_forms.py": (
-            "query_french_noun_forms",
-            "query_french_verb_conjugations",
+            "get_noun_forms",
+            "get_verb_forms",
         ),
         "directions.py": ("get_general_direction_note",),
         "utils.py": ("strip_subject_pronoun",),
     },
     "lt": {
         "llm_forms.py": (
-            "query_lithuanian_noun_declensions",
-            "query_lithuanian_verb_conjugations",
-            "query_lithuanian_adjective_declensions",
-            "query_lithuanian_adverb_forms",
+            "get_noun_forms",
+            "get_verb_forms",
+            "get_adjective_forms",
+            "get_adverb_forms",
         ),
         "directions.py": ("get_general_direction_note",),
         "utils.py": ("strip_subject_pronoun",),
@@ -66,9 +66,7 @@ def main() -> int:
             for function_name in required_names:
                 if function_name not in available:
                     rel_path = file_path.relative_to(ROOT)
-                    errors.append(
-                        f"Missing function '{function_name}' in {rel_path}"
-                    )
+                    errors.append(f"Missing function '{function_name}' in {rel_path}")
 
     if errors:
         print("Langtools required-function check failed:")
