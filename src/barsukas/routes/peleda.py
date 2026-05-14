@@ -34,19 +34,33 @@ bp = Blueprint("peleda", __name__, url_prefix="/dictionary")
 DICT_ITEMS_PER_PAGE = 200
 
 # Languages available as a source (browsing) language.
-# Order determines display in the dropdown.
+# Order determines display in the dropdown: English first, then tier 1, 2, 3.
 DICTIONARY_SOURCE_LANGUAGES: List[str] = [
     "en",
+    # Tier 1
     "lt",
     "zh",
     "fr",
     "es",
+    # Tier 2
     "de",
     "it",
+    "nl",
     "pt",
+    "sv",
+    # Tier 3
+    "vi",
     "ja",
     "ko",
-    "vi",
+    "ro",
+    "pl",
+    "th",
+    "ta",
+    "kn",
+    "uk",
+    "bn",
+    "sw",
+    "hi",
 ]
 
 # The pool of translation languages to display alongside headwords.
