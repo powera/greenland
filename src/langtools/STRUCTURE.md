@@ -82,6 +82,11 @@ When refactoring existing code toward this architecture:
 4. Keep shared logic generic; keep language exceptions local to the language
    folder.
 5. Update `LANGUAGE_STATUS.md` whenever core-language capability status changes.
+6. Cross-language script-family data (alphabets, position-code remap tables
+   shared by multiple languages of the same script) lives under
+   `src/langtools/family/<script>/`. Single-language data still lives under
+   `src/langtools/<lang>/`. See `family/cyrillic/`, `family/brahmic/`, and
+   `family/thai/` for the current examples.
 
 
 ## 7) File-format standardization
