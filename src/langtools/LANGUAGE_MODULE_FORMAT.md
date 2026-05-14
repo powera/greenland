@@ -35,6 +35,10 @@ modules are expected to satisfy.
 
 def generate_latin_sort_key(lang_code: str, text: str) -> Optional[str]: ...
 
+# src/langtools/letters.py
+
+def get_letters(lang_code: str, *, uppercase: bool = True) -> Optional[List[str]]: ...
+
 # src/langtools/directions.py
 
 def get_language_direction_note(language_code: str) -> str: ...
@@ -174,6 +178,25 @@ def tokenize(text: str) -> List[str]: ...
 ```
 
 - Language-local tokenization behavior when shared tokenization is insufficient.
+
+### `letters.py` (optional)
+
+Expected exports:
+
+```python
+LETTERS_UPPER: List[str]  # alphabet in canonical dictionary order
+```
+
+- Used by ``langtools.letters.get_letters`` to power dictionary-view letter
+  bars and similar UX (e.g. `/dictionary` in barsukas).
+- For scripts without case distinction (CJK, Hangul, Thai, Devanagari, Tamil,
+  Bengali, Kannada), ``LETTERS_UPPER`` simply holds the script's ordering set;
+  the dispatcher does not lowercase it.
+- Entries are *explicit* — not derived from `collation.py` — because dictionary
+  bars need the user-visible letters (e.g. Spanish Ñ between N and O; Polish
+  excludes Q V X; Chinese uses pinyin initials minus rare ones).
+- Currently provided for tier 1–3 languages plus Turkish; absent languages
+  default to plain A–Z at the call site.
 
 ### Script-specific helpers (optional)
 

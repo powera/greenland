@@ -48,13 +48,15 @@ The practical shared API should stay focused around a small set of key
 capabilities. Current target categories:
 
 1. **Collation key** (`collation` dispatcher + per-language collation behavior)
-2. **Grammatical words** (language-aware grammatical-word classification)
-3. **Verb conjugation** (deterministic or assisted)
-4. **General grammatical forms** (noun/adjective/etc form generation)
-5. **Prompt direction notes** (`directions`)
-6. **Tokenization helpers** (`tokenizer` where language-specific behavior matters)
-7. **Script/romanization helpers** (CJK-focused converters/readings)
-8. **LLM form-query integration** (registry-based form slots + query adapters)
+2. **Alphabet letters** (`letters` dispatcher + per-language `letters.py` exposing
+   `LETTERS_UPPER: List[str]`; used by dictionary-view letter bars)
+3. **Grammatical words** (language-aware grammatical-word classification)
+4. **Verb conjugation** (deterministic or assisted)
+5. **General grammatical forms** (noun/adjective/etc form generation)
+6. **Prompt direction notes** (`directions`)
+7. **Tokenization helpers** (`tokenizer` where language-specific behavior matters)
+8. **Script/romanization helpers** (CJK-focused converters/readings)
+9. **LLM form-query integration** (registry-based form slots + query adapters)
 
 The exact function names can evolve, but architecture should keep this surface
 small and explicit.

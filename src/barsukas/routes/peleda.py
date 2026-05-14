@@ -23,7 +23,8 @@ from barsukas.routes.categories import (
     VERB_GROUPS,
 )
 from langtools.collation import LATIN_SORT_KEY_LANGUAGES
-from langtools.ja.gojuon import KANA_TO_ROW, ROW_INITIALS, ROW_MEMBERS
+from langtools.ja.gojuon import KANA_TO_ROW, ROW_MEMBERS
+from langtools.letters import get_letters
 from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
 from storage.translation_helpers import LANGUAGE_NAMES
 
@@ -53,23 +54,6 @@ DICTIONARY_SOURCE_LANGUAGES: List[str] = [
 # itself (or French if the source language is not in this list).
 DICTIONARY_DISPLAY_POOL = ["en", "zh", "lt", "fr"]
 
-# Language-specific alphabets.
-# CJK languages use sort_key for filtering: pinyin initials for zh,
-# hiragana gojūon groups for ja, jamo consonants for ko.
-LANGUAGE_ALPHABETS: Dict[str, List[str]] = {
-    "lt": list("AĄBCČDEĘĖFGHIĮYJKLMNOPRSŠTUŲŪVZŽ"),
-    "zh": list("ABCDEFGHJKLMNOPQRSTWXYZ"),  # pinyin initials (no I/U/V alone)
-    "ja": ROW_INITIALS,  # 10 gojūon row initials
-    "ko": list("ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ"),  # 19 choseong (SK order)
-    "de": list("ABCDEFGHIJKLMNOPQRSTUVWXYZ") + ["Ä", "Ö", "Ü"],
-    "es": list("ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"),
-    "fr": list("ABCDEFGHIJKLMNOPQRSTUVWXYZ") + ["É", "È"],
-    "it": list("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
-    "pt": list("ABCDEFGHIJKLMNOPQRSTUVWXYZ") + ["Ã", "Ç", "Õ"],
-    "sv": list("ABCDEFGHIJKLMNOPQRSTUVWXYZ") + ["Å", "Ä", "Ö"],
-    "vi": list("AĂÂBCDĐEÊGHIKLMNOÔƠPQRSTUƯVXY"),
-}
-
 # CJK languages whose alphabet bar filters on sort_key rather than translation.
 _CJK_SORT_KEY_LANGUAGES = frozenset({"zh", "ja", "ko"})
 
@@ -95,7 +79,10 @@ def _get_display_langs(source_lang: str) -> List[str]:
 
 def _get_alphabet(source_lang: str) -> List[str]:
     """Return the alphabet to use for the letter bar."""
-    return LANGUAGE_ALPHABETS.get(source_lang, list("ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+    letters = get_letters(source_lang, uppercase=True)
+    if letters is not None:
+        return letters
+    return list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 
 def _localized_language_names(ui_lang: str) -> Dict[str, str]:
