@@ -160,6 +160,30 @@ class DataSourceConfig:
         # Debug configuration
         self.debug = debug
 
+    def with_model(self, model: str, debug: Optional[bool] = None) -> "DataSourceConfig":
+        """Return a copy of this config with the LLM model (and optionally debug) overridden.
+
+        Storage backend, cache, and feature flags are preserved from ``self``; only the
+        LLM-specific fields change. Intended for API routes that take ``self`` from the
+        Barsukas app and override the model based on a per-request parameter.
+        """
+        # TODO: add optional API-key kwargs (openai_api_key/anthropic_api_key/google_api_key)
+        # once a caller passes per-request keys.
+        return DataSourceConfig(
+            backend_type=self.backend_type,
+            sqlite_path=self.sqlite_path,
+            jsonl_data_dir=self.jsonl_data_dir,
+            postgres_url=self.postgres_url,
+            barsukas_url=self.barsukas_url,
+            cache_only=self.cache_only,
+            use_word2vec=self.use_word2vec,
+            model=model,
+            debug=self.debug if debug is None else debug,
+            openai_api_key=self.openai_api_key,
+            anthropic_api_key=self.anthropic_api_key,
+            google_api_key=self.google_api_key,
+        )
+
     @classmethod
     def from_env(cls) -> "DataSourceConfig":
         """Create configuration from environment variables.

@@ -38,22 +38,6 @@ bp = Blueprint("pending_imports", __name__, url_prefix="/pending-imports")
 logger = logging.getLogger(__name__)
 
 
-def _get_data_source_config(model_name: str, debug: bool) -> DataSourceConfig:
-    """Build DataSourceConfig from the app-level backend config with route overrides."""
-    base_config = cast(DataSourceConfig, current_app.backend_config)  # type: ignore[attr-defined]
-    return DataSourceConfig(
-        backend_type=base_config.backend_type,
-        sqlite_path=base_config.sqlite_path,
-        jsonl_data_dir=base_config.jsonl_data_dir,
-        postgres_url=base_config.postgres_url,
-        barsukas_url=base_config.barsukas_url,
-        cache_only=base_config.cache_only,
-        use_word2vec=base_config.use_word2vec,
-        model=model_name,
-        debug=debug,
-    )
-
-
 def _build_filtered_query() -> Query[Any]:
     """Build a filtered query for pending imports based on request args."""
     search = request.args.get("search", "").strip()
@@ -169,7 +153,8 @@ def approve(pending_import_id: int) -> ResponseReturnValue:
     try:
         model_name = str(current_app.config.get("DEFAULT_LLM_MODEL", "gpt-5.4-mini"))
         debug = bool(current_app.config.get("DEBUG", False))
-        data_source_config = _get_data_source_config(model_name=model_name, debug=debug)
+        base_config = cast(DataSourceConfig, current_app.backend_config)  # type: ignore[attr-defined]
+        data_source_config = base_config.with_model(model_name, debug=debug)
         result = approve_pending_import(
             session=g.db,
             pending_import_id=pending_import_id,
@@ -250,7 +235,8 @@ def stage(pending_import_id: int) -> ResponseReturnValue:
 
     model_name = str(current_app.config.get("DEFAULT_LLM_MODEL", "gpt-5.4-mini"))
     debug = bool(current_app.config.get("DEBUG", False))
-    data_source_config = _get_data_source_config(model_name=model_name, debug=debug)
+    base_config = cast(DataSourceConfig, current_app.backend_config)  # type: ignore[attr-defined]
+    data_source_config = base_config.with_model(model_name, debug=debug)
 
     try:
         from wordfreq.translation.client import LinguisticClient

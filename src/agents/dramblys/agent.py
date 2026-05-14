@@ -899,7 +899,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
             return staging.approve_pending_import(
                 session,
                 pending_import_id,
-                self.db_path or constants.WORDFREQ_DB_PATH,
+                self.config.with_model(model, debug=self.debug),
                 model,
                 self.debug,
             )

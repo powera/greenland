@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-"""API routes for AJAX requests and REST API endpoints.
+"""REST API v1 routes for external and automation consumption.
 
 MIRRORED: routes annotated with ``@mirrored_facade`` have a typed Python
 wrapper in the root-level ``api/`` package (``api/lemmas.py``,
@@ -19,7 +19,7 @@ from clients.audio.azure_tts import AzureVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.gpt_voices import GptVoice
 from clients.audio.polly_tts import PollyVoice
-from flask import Blueprint, Response, current_app, g, jsonify, request
+from flask import Response, g, jsonify, request
 from flask.typing import ResponseReturnValue
 from sqlalchemy import and_, case, func, or_
 from audioshoe.coqui.types import CoquiVoice
@@ -27,9 +27,10 @@ from audioshoe.espeak.types import EspeakVoice
 from audioshoe.piper.types import PiperVoice
 from audioshoe.qwen.types import QwenVoice
 
-from storage.backend.config import DataSourceConfig
 from storage.crud.grammar_fact import get_grammar_facts
 from storage.crud.lemma import get_lemma_by_guid
+from storage.crud.sentence import add_sentence, find_sentence_by_text
+from storage.crud.sentence_translation import add_sentence_translation
 from storage.lexeme import get_lexeme
 from storage.models import (
     DerivativeForm,
@@ -53,175 +54,7 @@ from storage.translation_helpers import (
     get_translation_pronunciations,
 )
 from workqueue.task_queue import TaskStatus, TaskType, enqueue_task
-
-bp = Blueprint("api", __name__, url_prefix="/api")
-
-
-def _get_data_source_config(model_name: str, debug: bool) -> DataSourceConfig:
-    """Build DataSourceConfig from app backend config with route-level LLM settings."""
-    base_config = current_app.backend_config  # type: ignore[attr-defined]
-    return DataSourceConfig(
-        backend_type=base_config.backend_type,
-        sqlite_path=base_config.sqlite_path,
-        jsonl_data_dir=base_config.jsonl_data_dir,
-        postgres_url=base_config.postgres_url,
-        barsukas_url=base_config.barsukas_url,
-        cache_only=base_config.cache_only,
-        use_word2vec=base_config.use_word2vec,
-        model=model_name,
-        debug=debug,
-    )
-
-
-@bp.route("/check_lemma_exists")
-def check_lemma_exists() -> ResponseReturnValue:
-    """Check if a lemma exists or find similar lemmas."""
-    search = request.args.get("search", "").strip()
-    pos_type = request.args.get("pos_type", "").strip()
-
-    if not search:
-        return jsonify({"exact_match": None, "similar_matches": []})
-
-    # Check for exact match
-    exact_query = g.db.query(Lemma).filter(func.lower(Lemma.lemma_text) == search.lower())
-    if pos_type:
-        exact_query = exact_query.filter(Lemma.pos_type == pos_type)
-
-    exact_match = exact_query.first()
-
-    # Find similar matches (case-insensitive LIKE search)
-    similar_query = g.db.query(Lemma).filter(Lemma.lemma_text.ilike(f"%{search}%"))
-
-    # If exact match found, exclude it from similar matches
-    if exact_match:
-        similar_query = similar_query.filter(Lemma.id != exact_match.id)
-
-    similar_matches = similar_query.limit(5).all()
-
-    return jsonify(
-        {
-            "exact_match": (
-                {
-                    "id": exact_match.id,
-                    "lemma_text": exact_match.lemma_text,
-                    "pos_type": exact_match.pos_type,
-                    "definition_text": exact_match.definition_text,
-                }
-                if exact_match
-                else None
-            ),
-            "similar_matches": [
-                {
-                    "id": lemma.id,
-                    "lemma_text": lemma.lemma_text,
-                    "pos_type": lemma.pos_type,
-                    "definition_text": lemma.definition_text,
-                }
-                for lemma in similar_matches
-            ],
-        }
-    )
-
-
-@bp.route("/auto_populate_lemma")
-def auto_populate_lemma() -> ResponseReturnValue:
-    """Auto-populate lemma fields using LLM based on word and optional translation."""
-    word = request.args.get("word", "").strip()
-    translation = request.args.get("translation", "").strip()
-    lang_code = request.args.get("lang_code", "").strip()
-
-    if not word:
-        return jsonify({"success": False, "error": "Word is required"})
-
-    try:
-        # Use LLM to generate definition, POS type, and POS subtype
-        from wordfreq.translation.client import LinguisticClient
-
-        data_source_config = _get_data_source_config(model_name="gpt-5.4-mini", debug=Config.DEBUG)
-        client = LinguisticClient(config=data_source_config)
-
-        # Build prompt for LLM
-        if translation and lang_code:
-            context = f'English word: "{word}"\n{lang_code.upper()} translation: "{translation}"'
-        else:
-            context = f'English word: "{word}"'
-
-        prompt = f"""Analyze this word and provide its linguistic properties:
-
-{context}
-
-Provide:
-1. A clear, concise definition (1-2 sentences)
-2. Part of speech (pos_type): Choose from: noun, verb, adjective, adverb, pronoun, preposition, conjunction, interjection, determiner, numeral
-3. Part of speech subtype (pos_subtype): Choose the most appropriate:
-   - For nouns: animal, body_part, building_structure, clothing_accessory, concept_idea, emotion_feeling, food, beverage, furniture, vehicle, plant, plant_part, human, material_substance, nationality, natural_feature, personal_name, place_name, small_movable_object, temporal_name, time_period, tool_machine, unit_of_measurement
-   - For verbs: physical_action, creation_action, destruction_action, mental_state, emotional_state, perception, communication, possession, existence, development, change, directional_movement, manner_movement
-   - For adjectives: size, color, shape, texture, personal_quality, condition, quality, aesthetic, importance, origin, purpose, material, indefinite_quantity, duration, frequency, sequence
-   - For adverbs: style, attitude, specific_time, relative_time, duration, direction, location, distance, intensity, completeness, approximation, definite_frequency, indefinite_frequency
-   - For numerals: cardinal, ordinal
-   - For other POS: use appropriate subtype or "other"
-
-The definition should be suitable for language learners."""
-
-        # Define schema for structured output
-        from clients.types import Schema, SchemaProperty
-
-        schema = Schema(
-            name="LemmaProperties",
-            description="Linguistic properties of a word",
-            properties={
-                "definition": SchemaProperty(
-                    type="string",
-                    description="Clear, concise definition of the word (1-2 sentences)",
-                ),
-                "pos_type": SchemaProperty(type="string", description="Part of speech type"),
-                "pos_subtype": SchemaProperty(type="string", description="Part of speech subtype"),
-            },
-        )
-
-        response = client.client.generate_chat(
-            prompt=prompt, model="gpt-5.4-mini", json_schema=schema, timeout=30
-        )
-
-        if not response.structured_data:
-            return jsonify(
-                {"success": False, "error": "Failed to get structured response from LLM"}
-            )
-
-        result = response.structured_data
-
-        # Get the maximum difficulty level for this pos_subtype
-        max_level = None
-        if result.get("pos_subtype"):
-            max_level_query = (
-                g.db.query(func.max(Lemma.difficulty_level))
-                .filter(
-                    Lemma.pos_subtype == result["pos_subtype"],
-                    Lemma.difficulty_level.isnot(None),
-                    Lemma.difficulty_level != -1,  # Exclude "excluded" words
-                )
-                .scalar()
-            )
-            if max_level_query:
-                max_level = int(max_level_query)
-
-        return jsonify(
-            {
-                "success": True,
-                "definition": result.get("definition", ""),
-                "pos_type": result.get("pos_type", ""),
-                "pos_subtype": result.get("pos_subtype", ""),
-                "suggested_difficulty_level": max_level,
-            }
-        )
-
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
-
-
-# ============================================================================
-# REST API v1 - Read-only endpoints for external consumption
-# ============================================================================
+from barsukas.routes.api import bp
 
 
 @bp.route("/v1")
@@ -396,6 +229,31 @@ def api_info() -> ResponseReturnValue:
                     "required": False,
                     "description": "Filter to a specific language code (e.g., 'en', 'zh', 'lt')",
                 }
+            ],
+        },
+        {
+            "path": "/api/v1/sentences/add",
+            "method": "POST",
+            "description": "Add up to 15 sentences to the database, deduplicating by text. Returns IDs for use with /api/llm/sentences/decompose.",
+            "parameters": [
+                {
+                    "name": "sentences",
+                    "type": "body",
+                    "required": True,
+                    "description": "List of sentence strings (max 15)",
+                },
+                {
+                    "name": "source",
+                    "type": "body",
+                    "required": True,
+                    "description": "Source identifier stored as source_filename on each created Sentence row",
+                },
+                {
+                    "name": "language",
+                    "type": "body",
+                    "required": False,
+                    "description": "Source language code of the input sentences (default: en)",
+                },
             ],
         },
         {
@@ -2286,6 +2144,110 @@ def get_sentence_metadata() -> ResponseReturnValue:
         metadata["max_difficulty"] = max_difficulty_sentences
 
     return _build_success_response(summary_data, metadata)
+
+
+_ADD_SENTENCES_MAX = 15
+
+
+@bp.route("/v1/sentences/add", methods=["POST"])
+@mirrored_facade("/api/v1/sentences/add", "POST")
+def add_sentences() -> ResponseReturnValue:
+    """Add up to 15 sentences to the database, deduplicating by text.
+
+    Sentences already present (matched by text in the source language) are
+    returned with status ``already_exists`` so the caller can still obtain
+    their IDs. New sentences receive the caller-supplied source identifier
+    as ``source_filename``.
+
+    This endpoint makes no LLM calls. Use ``POST /api/llm/sentences/decompose``
+    afterward to queue translation + decomposition for the returned IDs.
+
+    Request body (JSON):
+        sentences (list[str], required): Up to 15 sentence strings.
+        source (str, required): Source identifier stored as source_filename.
+        language (str, optional): Source language code (default: "en").
+
+    Returns:
+        data: list of per-sentence results, each with:
+            - sentence_text: the input text
+            - sentence_id: database ID
+            - guid: sentence GUID (e.g. S_00123)
+            - status: "created" or "already_exists"
+        metadata: total, created, already_exists counts plus source and language.
+
+    Example:
+        POST /api/v1/sentences/add
+        {"sentences": ["The cat sits on the mat."], "source": "lesson_a1"}
+    """
+    payload = request.get_json(silent=True) or {}
+
+    sentences_raw = payload.get("sentences")
+    if not isinstance(sentences_raw, list) or not sentences_raw:
+        return _build_error_response("sentences must be a non-empty list")
+    if len(sentences_raw) > _ADD_SENTENCES_MAX:
+        return _build_error_response(f"sentences may contain at most {_ADD_SENTENCES_MAX} items")
+    sentences: List[str] = []
+    for item in sentences_raw:
+        if not isinstance(item, str) or not item.strip():
+            return _build_error_response("each sentence must be a non-empty string")
+        sentences.append(item.strip())
+
+    source = payload.get("source", "")
+    if not isinstance(source, str) or not source.strip():
+        return _build_error_response("source is required and must be a non-empty string")
+    source = source.strip()
+
+    language = payload.get("language", "en")
+    if not isinstance(language, str) or not language.strip():
+        return _build_error_response("language must be a non-empty string")
+    language = language.strip().lower()
+
+    results: List[Dict[str, Any]] = []
+    created_count = 0
+    already_exists_count = 0
+
+    for sentence_text in sentences:
+        existing = find_sentence_by_text(g.db, sentence_text, language_code=language)
+        if existing is not None:
+            results.append(
+                {
+                    "sentence_text": sentence_text,
+                    "sentence_id": existing.id,
+                    "guid": existing.guid,
+                    "status": "already_exists",
+                }
+            )
+            already_exists_count += 1
+            continue
+
+        sentence_row = add_sentence(g.db, source_filename=source)
+        add_sentence_translation(
+            g.db,
+            sentence=sentence_row,
+            language_code=language,
+            translation_text=sentence_text,
+            verified=False,
+        )
+        results.append(
+            {
+                "sentence_text": sentence_text,
+                "sentence_id": sentence_row.id,
+                "guid": sentence_row.guid,
+                "status": "created",
+            }
+        )
+        created_count += 1
+
+    return _build_success_response(
+        results,
+        {
+            "total": len(sentences),
+            "created": created_count,
+            "already_exists": already_exists_count,
+            "source": source,
+            "language": language,
+        },
+    )
 
 
 @bp.route("/v1/models")
