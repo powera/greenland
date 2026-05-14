@@ -11,7 +11,7 @@ facade in the same commit. See ``api/AGENTS.md`` for the mirroring contract.
 
 from datetime import datetime, timedelta
 import json
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 from barsukas.config import Config
 from barsukas.routes._mirror import mirrored_facade
@@ -19,7 +19,7 @@ from clients.audio.azure_tts import AzureVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.gpt_voices import GptVoice
 from clients.audio.polly_tts import PollyVoice
-from flask import Response, g, jsonify, request
+from flask import Response, current_app, g, jsonify, request
 from flask.typing import ResponseReturnValue
 from sqlalchemy import and_, case, func, or_
 from audioshoe.coqui.types import CoquiVoice
@@ -27,6 +27,7 @@ from audioshoe.espeak.types import EspeakVoice
 from audioshoe.piper.types import PiperVoice
 from audioshoe.qwen.types import QwenVoice
 
+from storage.backend.config import DataSourceConfig
 from storage.crud.grammar_fact import get_grammar_facts
 from storage.crud.lemma import get_lemma_by_guid
 from storage.lexeme import get_lexeme
@@ -119,7 +120,8 @@ def auto_populate_lemma() -> ResponseReturnValue:
         # Use LLM to generate definition, POS type, and POS subtype
         from wordfreq.translation.client import LinguisticClient
 
-        client = LinguisticClient(model="gpt-5.4-mini", db_path=Config.DB_PATH, debug=Config.DEBUG)
+        base_config = cast(DataSourceConfig, current_app.backend_config)  # type: ignore[attr-defined]
+        client = LinguisticClient(config=base_config.with_model("gpt-5.4-mini", debug=Config.DEBUG))
 
         # Build prompt for LLM
         if translation and lang_code:

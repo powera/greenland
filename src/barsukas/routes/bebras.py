@@ -14,11 +14,12 @@ import subprocess
 import threading
 import uuid
 from pathlib import Path
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Dict, Iterator, List, Optional, cast
 
 from flask import (
     Blueprint,
     Response,
+    current_app,
     flash,
     g,
     redirect,
@@ -32,6 +33,7 @@ import constants
 from agents.bebras.integrity import IntegrityChecker
 from barsukas.config import Config
 from barsukas.helpers.flash_helpers import flash_and_log
+from storage.backend.config import BackendType
 from storage.models.schema import Lemma, Sentence
 
 logger = logging.getLogger(__name__)
@@ -40,6 +42,15 @@ bp = Blueprint("bebras", __name__, url_prefix="/bebras")
 
 # Track running tasks
 running_tasks: Dict[str, Dict[str, Any]] = {}
+
+
+def _checker_db_path() -> Optional[str]:
+    """Get checker db path from app backend configuration."""
+    backend_config = current_app.backend_config  # type: ignore[attr-defined]
+    if backend_config.backend_type == BackendType.SQLITE:
+        return cast(Optional[str], backend_config.sqlite_path)
+    return None
+
 
 # Supported languages for verification
 VERIFICATION_LANGUAGES = [
@@ -233,8 +244,7 @@ def find_duplicates() -> ResponseReturnValue:
     This is an example of the decoupled approach: the web route imports and
     calls the checker in-process instead of shelling out to the CLI.
     """
-    db_path = None if Config.is_postgres_mode() else Config.DB_PATH
-    checker = IntegrityChecker(db_path=db_path)
+    checker = IntegrityChecker(db_path=_checker_db_path())
     results = checker.check_duplicate_words()
 
     return render_template(
@@ -253,8 +263,7 @@ def find_duplicates_integrity() -> ResponseReturnValue:
     check_type = request.form.get("check_type", "duplicate-words")
     fix_issues = request.form.get("fix_issues") == "true"
 
-    db_path = None if Config.is_postgres_mode() else Config.DB_PATH
-    checker = IntegrityChecker(db_path=db_path)
+    checker = IntegrityChecker(db_path=_checker_db_path())
 
     check_map: Dict[str, Any] = {
         "orphaned": lambda: {
