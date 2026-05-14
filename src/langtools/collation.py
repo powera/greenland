@@ -33,7 +33,7 @@ Strategies used (chosen per language):
    Thai): Same single-character ASCII position-code scheme as Cyrillic,
    applied after stripping combining marks (matras, vowel signs, virama,
    tone marks) so they don't perturb word-initial ordering.  Data lives in
-   ``langtools/family/brahmic/collation.py`` and ``langtools/family/thai/collation.py``.
+   ``langtools/family/brahmic/collation.py`` and ``langtools/th/collation.py``.
 
 All sort keys produced by this module are plain ASCII (codepoints 0-127),
 so any SQLite collation engine sorts them correctly without knowing the
@@ -50,7 +50,7 @@ from typing import Dict, List, Optional
 
 from langtools.family.brahmic import collation as _brahmic_collation
 from langtools.family.cyrillic import collation as _cyrillic_collation
-from langtools.family.thai import collation as _thai_collation
+from langtools.th import collation as _thai_collation
 
 # ---------------------------------------------------------------------------
 # Per-language remapping tables  (strategy 1: position remapping)

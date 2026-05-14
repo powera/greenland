@@ -85,8 +85,9 @@ When refactoring existing code toward this architecture:
 6. Cross-language script-family data (alphabets, position-code remap tables
    shared by multiple languages of the same script) lives under
    `src/langtools/family/<script>/`. Single-language data still lives under
-   `src/langtools/<lang>/`. See `family/cyrillic/`, `family/brahmic/`, and
-   `family/thai/` for the current examples.
+   `src/langtools/<lang>/`. See `family/cyrillic/` and `family/brahmic/` for
+   the current examples; single-language script data such as Thai collation
+   lives in its language folder (`th/collation.py`).
 
 
 ## 7) File-format standardization

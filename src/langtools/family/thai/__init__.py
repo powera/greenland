@@ -1,1 +1,0 @@
-"""Thai-script collation data."""
