@@ -32,8 +32,12 @@ modules are expected to satisfy.
 
 ```python
 # src/langtools/collation.py
+# Covers Latin, Cyrillic, Brahmic, and Thai. CJK is handled by script-specific
+# helpers in langtools/<lang>/ and is not dispatched here. All returned keys
+# are plain ASCII so SQLite's default binary collation orders them correctly.
 
-def generate_latin_sort_key(lang_code: str, text: str) -> Optional[str]: ...
+def generate_sort_key(lang_code: str, text: str) -> Optional[str]: ...
+def generate_latin_sort_key(lang_code: str, text: str) -> Optional[str]: ...  # legacy alias
 
 # src/langtools/letters.py
 

@@ -47,7 +47,9 @@ Use a **capability-based** model:
 The practical shared API should stay focused around a small set of key
 capabilities. Current target categories:
 
-1. **Collation key** (`collation` dispatcher + per-language collation behavior)
+1. **Collation key** (`collation` dispatcher; covers Latin, Cyrillic, Brahmic,
+   and Thai; CJK uses script-specific helpers in `langtools/<lang>/`; all
+   produced keys are plain ASCII)
 2. **Alphabet letters** (`letters` dispatcher + per-language `letters.py` exposing
    `LETTERS_UPPER: List[str]`; used by dictionary-view letter bars)
 3. **Grammatical words** (language-aware grammatical-word classification)

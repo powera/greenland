@@ -22,7 +22,7 @@ from barsukas.routes.categories import (
     SUBTYPE_DESCRIPTIONS,
     VERB_GROUPS,
 )
-from langtools.collation import LATIN_SORT_KEY_LANGUAGES
+from langtools.collation import SORT_KEY_LANGUAGES
 from langtools.ja.gojuon import KANA_TO_ROW, ROW_MEMBERS
 from langtools.letters import get_letters
 from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
@@ -57,8 +57,9 @@ DICTIONARY_DISPLAY_POOL = ["en", "zh", "lt", "fr"]
 # CJK languages whose alphabet bar filters on sort_key rather than translation.
 _CJK_SORT_KEY_LANGUAGES = frozenset({"zh", "ja", "ko"})
 
-# All languages that use sort_key for ORDER BY (CJK + accented Latin).
-_SORT_KEY_LANGUAGES = _CJK_SORT_KEY_LANGUAGES | LATIN_SORT_KEY_LANGUAGES
+# All languages that use sort_key for ORDER BY (CJK + Latin + Cyrillic +
+# Brahmic/Thai).
+_SORT_KEY_LANGUAGES = _CJK_SORT_KEY_LANGUAGES | SORT_KEY_LANGUAGES
 
 # Groups for building the category dropdown, keyed by POS type.
 _POS_SUBTYPE_GROUPS: Dict[str, Dict[str, List[str]]] = {
@@ -148,7 +149,7 @@ def _query_by_letter(lang: str, letter: str) -> Query:  # type: ignore[type-arg]
     q = _base_query_for_lang(lang).filter(
         func.substr(LemmaTranslation.translation, 1, 1).in_(letter_variants)
     )
-    if lang in LATIN_SORT_KEY_LANGUAGES:
+    if lang in SORT_KEY_LANGUAGES:
         return q.order_by(LemmaTranslation.sort_key, Lemma.id)
     return q.order_by(func.lower(LemmaTranslation.translation), Lemma.id)
 

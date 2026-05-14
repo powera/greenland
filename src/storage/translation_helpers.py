@@ -26,10 +26,11 @@ MAX_LLM_LANGUAGES_PER_OPERATION = 16
 # languages use character remapping (see langtools.collation).
 _CJK_SORT_KEY_LANGUAGES = frozenset({"zh", "ja", "ko"})
 
-# Import Latin collation languages so we have the full set.
-from langtools.collation import LATIN_SORT_KEY_LANGUAGES  # noqa: E402
+# Import collation languages (Latin + Cyrillic + Brahmic/Thai) so we have
+# the full set.  CJK is handled separately via script-specific helpers.
+from langtools.collation import SORT_KEY_LANGUAGES as _COLLATION_SORT_KEY_LANGUAGES  # noqa: E402
 
-_SORT_KEY_LANGUAGES = _CJK_SORT_KEY_LANGUAGES | LATIN_SORT_KEY_LANGUAGES
+_SORT_KEY_LANGUAGES = _CJK_SORT_KEY_LANGUAGES | _COLLATION_SORT_KEY_LANGUAGES
 
 # Language hierarchy: ordered from most reliable/primary to experimental
 # Tier 1: Primary supported languages
@@ -581,10 +582,10 @@ def compute_sort_key(lang_code: str, translation: str) -> Optional[str]:
             from langtools.ko.hangul_helper import decompose_hangul
 
             return decompose_hangul(translation)
-        elif lang_code in LATIN_SORT_KEY_LANGUAGES:
-            from langtools.collation import generate_latin_sort_key
+        elif lang_code in _COLLATION_SORT_KEY_LANGUAGES:
+            from langtools.collation import generate_sort_key
 
-            return generate_latin_sort_key(lang_code, translation)
+            return generate_sort_key(lang_code, translation)
     except Exception as e:
         logger.warning(f"Failed to compute sort_key for {lang_code} '{translation}': {e}")
     return None
