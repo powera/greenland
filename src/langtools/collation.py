@@ -1,25 +1,45 @@
 #!/usr/bin/env python3
 """
-Latin-alphabet collation sort-key generation.
+Collation sort-key generation for non-CJK languages.
 
 For languages whose alphabets place accented or special characters in positions
 that differ from Unicode code-point order, we generate a *sort key* string
 that can be compared with SQLite's default binary collation and produce the
 linguistically correct ordering.
 
-Two strategies are used depending on the language:
+Strategies used (chosen per language):
 
-1. **Position remapping** (Lithuanian, Spanish, Swedish, Vietnamese, and others):
-   Characters that are *distinct letters* in the alphabet are remapped to
-   ``<base>{`` (first variant after *base*), ``<base>|`` (second variant),
-   or ``<base>}`` (third).  Characters ``{`` ``|`` ``}`` all sort after ``z``
-   in ASCII/Unicode, so ``a{ < b`` and ``a{ < a|`` hold under binary
-   comparison.
+1. **Latin position remapping** (Lithuanian, Spanish, Swedish, Vietnamese,
+   Turkish, and others): Characters that are *distinct letters* in the
+   alphabet are remapped to ``<base>{`` (first variant after *base*),
+   ``<base>|`` (second variant), or ``<base>}`` (third).  Characters
+   ``{`` ``|`` ``}`` all sort after ``z`` in ASCII/Unicode, so
+   ``a{ < b`` and ``a{ < a|`` hold under binary comparison.
 
-2. **Diacritic stripping** (French, German, Irish, Italian, Portuguese):
-   Accented characters are *not* separate letters — they sort as their base
-   letter.  We strip diacritics via Unicode NFD decomposition so that
-   ``é`` → ``e``, ``ü`` → ``u``, ``ç`` → ``c``, etc.
+2. **Latin diacritic stripping** (French, German, Irish, Italian, Dutch,
+   Portuguese): Accented characters are *not* separate letters — they sort
+   as their base letter.  We strip diacritics via Unicode NFD decomposition
+   so that ``é`` → ``e``, ``ü`` → ``u``, ``ç`` → ``c``, etc.
+
+3. **Cyrillic position remapping** (Ukrainian): Each alphabet letter is
+   remapped to a single-character ASCII position code (from the case-invariant
+   alphabet defined in ``langtools.family._position_codes``) so binary
+   collation reproduces canonical alphabet order even though Cyrillic
+   codepoints are not contiguous (Ґ sits at U+0490; Є/І/Ї live in the
+   supplementary block at U+0400-U+040F).  Data lives in
+   ``langtools/family/cyrillic/collation.py``.
+
+4. **Brahmic/Thai position remapping** (Hindi, Bengali, Tamil, Kannada,
+   Thai): Same single-character ASCII position-code scheme as Cyrillic,
+   applied after stripping combining marks (matras, vowel signs, virama,
+   tone marks) so they don't perturb word-initial ordering.  Data lives in
+   ``langtools/family/brahmic/collation.py`` and ``langtools/th/collation.py``.
+
+All sort keys produced by this module are plain ASCII (codepoints 0-127),
+so any SQLite collation engine sorts them correctly without knowing the
+language's script.  Position-code keys are also case-invariant: uppercasing
+or lowercasing a key preserves its ordering relative to other keys.  Sort
+keys are *not* intended to be human-readable.
 
 CJK languages (zh, ja, ko) have their own sort-key helpers in their
 respective ``langtools`` packages and are **not** handled here.
@@ -27,6 +47,10 @@ respective ``langtools`` packages and are **not** handled here.
 
 import unicodedata
 from typing import Dict, List, Optional
+
+from langtools.family.brahmic import collation as _brahmic_collation
+from langtools.family.cyrillic import collation as _cyrillic_collation
+from langtools.th import collation as _thai_collation
 
 # ---------------------------------------------------------------------------
 # Per-language remapping tables  (strategy 1: position remapping)
@@ -295,6 +319,23 @@ _AZ_MAP: Dict[str, str] = {
     "ü": "u{",
 }
 
+# ---------------------------------------------------------------------------
+# Cyrillic / Brahmic / Thai position remapping (strategies 3 + 4)
+# ---------------------------------------------------------------------------
+# Alphabet tables and per-family generators live in ``langtools/family/``.
+# The single-character position-code alphabet is defined in
+# ``langtools.family._position_codes`` and is case-invariant by construction.
+
+_CYRILLIC_REMAP_LANGUAGES: Dict[str, Dict[str, str]] = _cyrillic_collation.REMAP_LANGUAGES
+
+# Combined Brahmic + Thai remap table preserved under its historical name so
+# the existing dispatcher branches below need no rewiring.
+_BRAHMIC_THAI_REMAP_LANGUAGES: Dict[str, Dict[str, str]] = {
+    **_brahmic_collation.REMAP_LANGUAGES,
+    **_thai_collation.REMAP_LANGUAGES,
+}
+
+
 # Master table for position-remapped languages.
 _REMAP_LANGUAGES: Dict[str, Dict[str, str]] = {
     "lt": _LT_MAP,
@@ -339,8 +380,17 @@ _STRIP_LANGUAGES: List[str] = ["de", "fr", "ga", "it", "nl", "pt"]
 # Public constants
 # ---------------------------------------------------------------------------
 
-# All languages handled by this module.
+# Latin-script languages handled by this module.
 LATIN_SORT_KEY_LANGUAGES = frozenset(list(_REMAP_LANGUAGES.keys()) + _STRIP_LANGUAGES)
+
+# Non-Latin-script languages handled by this module (Cyrillic + Brahmic + Thai).
+NON_LATIN_SORT_KEY_LANGUAGES = frozenset(
+    list(_CYRILLIC_REMAP_LANGUAGES.keys()) + list(_BRAHMIC_THAI_REMAP_LANGUAGES.keys())
+)
+
+# All languages with collation handled here (excludes CJK which lives in
+# language-local helpers under langtools/<lang>/).
+SORT_KEY_LANGUAGES = LATIN_SORT_KEY_LANGUAGES | NON_LATIN_SORT_KEY_LANGUAGES
 
 
 def _strip_diacritics(text: str) -> str:
@@ -428,17 +478,41 @@ def _turkish_lower(text: str) -> str:
     return "".join(result)
 
 
+def _generate_cyrillic_sort_key(lang_code: str, text: str) -> str:
+    """Delegate to the Cyrillic family generator."""
+    return _cyrillic_collation.generate_sort_key(lang_code, text)
+
+
+def _generate_brahmic_thai_sort_key(lang_code: str, text: str) -> str:
+    """Delegate to the Brahmic or Thai family generator based on *lang_code*."""
+    if lang_code in _thai_collation.REMAP_LANGUAGES:
+        return _thai_collation.generate_sort_key(lang_code, text)
+    return _brahmic_collation.generate_sort_key(lang_code, text)
+
+
 def generate_latin_sort_key(lang_code: str, text: str) -> Optional[str]:
     """Return a binary-sortable key for *text* in the given language.
 
-    For position-remapped languages, characters in the remapping table are
-    replaced; everything else is lowercased.  For diacritic-stripping
+    Despite the historical name, this function now also handles the
+    non-Latin-script languages tracked in ``NON_LATIN_SORT_KEY_LANGUAGES``
+    (Cyrillic + Brahmic + Thai).  Prefer ``generate_sort_key`` in new code.
+
+    For Latin position-remapped languages, characters in the remapping table
+    are replaced; everything else is lowercased.  For diacritic-stripping
     languages, all diacritics are removed and the result is lowercased.
+    For Cyrillic and Brahmic/Thai see ``_generate_cyrillic_sort_key`` and
+    ``_generate_brahmic_thai_sort_key``.
 
     Returns ``None`` for unsupported languages or empty input.
     """
-    if lang_code not in LATIN_SORT_KEY_LANGUAGES or not text or not text.strip():
+    if lang_code not in SORT_KEY_LANGUAGES or not text or not text.strip():
         return None
+
+    if lang_code in _CYRILLIC_REMAP_LANGUAGES:
+        return _generate_cyrillic_sort_key(lang_code, text)
+
+    if lang_code in _BRAHMIC_THAI_REMAP_LANGUAGES:
+        return _generate_brahmic_thai_sort_key(lang_code, text)
 
     if lang_code in _REMAP_LANGUAGES:
         char_map = _REMAP_LANGUAGES[lang_code]
@@ -461,5 +535,16 @@ def generate_latin_sort_key(lang_code: str, text: str) -> Optional[str]:
             parts.append(char_map.get(lower, lower))
         return "".join(parts)
 
-    # Diacritic-stripping languages (de, fr, it, pt).
+    # Diacritic-stripping languages (de, fr, ga, it, nl, pt).
     return _strip_diacritics(text).lower()
+
+
+def generate_sort_key(lang_code: str, text: str) -> Optional[str]:
+    """Return a binary-sortable key for *text* in *lang_code*.
+
+    Preferred entrypoint for new code.  Covers all languages in
+    ``SORT_KEY_LANGUAGES`` (Latin + Cyrillic + Brahmic + Thai); CJK
+    languages are handled by their script-specific helpers in
+    ``langtools/<lang>/`` and are not dispatched here.
+    """
+    return generate_latin_sort_key(lang_code, text)

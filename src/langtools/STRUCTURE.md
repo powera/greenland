@@ -47,14 +47,18 @@ Use a **capability-based** model:
 The practical shared API should stay focused around a small set of key
 capabilities. Current target categories:
 
-1. **Collation key** (`collation` dispatcher + per-language collation behavior)
-2. **Grammatical words** (language-aware grammatical-word classification)
-3. **Verb conjugation** (deterministic or assisted)
-4. **General grammatical forms** (noun/adjective/etc form generation)
-5. **Prompt direction notes** (`directions`)
-6. **Tokenization helpers** (`tokenizer` where language-specific behavior matters)
-7. **Script/romanization helpers** (CJK-focused converters/readings)
-8. **LLM form-query integration** (registry-based form slots + query adapters)
+1. **Collation key** (`collation` dispatcher; covers Latin, Cyrillic, Brahmic,
+   and Thai; CJK uses script-specific helpers in `langtools/<lang>/`; all
+   produced keys are plain ASCII)
+2. **Alphabet letters** (`letters` dispatcher + per-language `letters.py` exposing
+   `LETTERS_UPPER: List[str]`; used by dictionary-view letter bars)
+3. **Grammatical words** (language-aware grammatical-word classification)
+4. **Verb conjugation** (deterministic or assisted)
+5. **General grammatical forms** (noun/adjective/etc form generation)
+6. **Prompt direction notes** (`directions`)
+7. **Tokenization helpers** (`tokenizer` where language-specific behavior matters)
+8. **Script/romanization helpers** (CJK-focused converters/readings)
+9. **LLM form-query integration** (registry-based form slots + query adapters)
 
 The exact function names can evolve, but architecture should keep this surface
 small and explicit.
@@ -78,6 +82,12 @@ When refactoring existing code toward this architecture:
 4. Keep shared logic generic; keep language exceptions local to the language
    folder.
 5. Update `LANGUAGE_STATUS.md` whenever core-language capability status changes.
+6. Cross-language script-family data (alphabets, position-code remap tables
+   shared by multiple languages of the same script) lives under
+   `src/langtools/family/<script>/`. Single-language data still lives under
+   `src/langtools/<lang>/`. See `family/cyrillic/` and `family/brahmic/` for
+   the current examples; single-language script data such as Thai collation
+   lives in its language folder (`th/collation.py`).
 
 
 ## 7) File-format standardization
