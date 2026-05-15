@@ -10,7 +10,6 @@ Translate this sentence naturally into: {target_language_names}.
 
 {english_instruction}
 
-Use the provided word translations where appropriate, but prioritize natural translations.
-If the target language expresses the concept differently, use natural phrasing and map words to their actual meanings, not the English lemmas.
-Only include real GUIDs for words that genuinely correspond to referenced lemma meanings.
-When no real GUID is available, create synthetic ids in sequence as SYN001, SYN002, SYN003, ... and keep each id consistent for the same concept across all target languages within this sentence.
+Per-call requirements:
+- Use the provided word translations where appropriate, but prioritize natural translations. If the target language expresses the concept differently, use natural phrasing and map words to their actual meanings, not the English lemmas.
+- Only include real GUIDs for words that genuinely correspond to referenced lemma meanings. When no real GUID is available, fall back to synthetic SYN### ids per the context rules.
