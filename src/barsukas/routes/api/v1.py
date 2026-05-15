@@ -1,3 +1,5 @@
-"""Backward-compatible entrypoint for v1 API registration."""
+"""API v1 route registration."""
 
-from barsukas.routes.api.api_routes import *  # noqa: F401,F403
+from barsukas.routes.api import lemma_routes  # noqa: F401
+from barsukas.routes.api import meta_routes  # noqa: F401
+from barsukas.routes.api import sentence_routes  # noqa: F401
