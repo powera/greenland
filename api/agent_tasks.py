@@ -136,3 +136,11 @@ def check_pronunciations(guid: str, *, model: str) -> CheckResponse:
         CheckResponse,
         post_json(f"/api/v1/agents/lemma/{guid}/check-pronunciations", {"model": model}),
     )
+
+
+@mirrored_route("/api/v1/tasks/<task_id>", "GET")
+def get_task(task_id: int) -> Dict[str, Any]:
+    """Get queued/running/completed task status and result fields."""
+    from api._http import get_json
+
+    return cast(Dict[str, Any], get_json(f"/api/v1/tasks/{task_id}"))

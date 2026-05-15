@@ -57,3 +57,9 @@ def add_sentences(
     if language is not None:
         body["language"] = language
     return post_json(f"{API_V1_PREFIX}/sentences/add", body)
+
+
+@mirrored_route("/api/v1/sentences/<id>", "GET")
+def get_sentence(sentence_id: int) -> Any:
+    """Fetch a sentence with translations and sentence_words details."""
+    return get_json(f"{API_V1_PREFIX}/sentences/{sentence_id}")
