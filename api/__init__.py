@@ -21,6 +21,7 @@ from api.agent_tasks import (
     queue_generate_forms,
     queue_generate_pronunciations,
     queue_generate_synonyms,
+    get_task,
 )
 from api.batch_operations import (
     find_pending_import_duplicates,
@@ -47,7 +48,7 @@ from api.llm_agents import (
     generate_pronunciations,
     get_llm_info,
 )
-from api.sentences import get_sentence_metadata
+from api.sentences import get_sentence, get_sentence_metadata
 
 __all__ = [
     "BarsukasAPIError",
@@ -67,6 +68,7 @@ __all__ = [
     "get_lemma",
     "get_llm_info",
     "get_pronunciations",
+    "get_sentence",
     "get_sentence_metadata",
     "get_sentences",
     "get_translations",
@@ -81,5 +83,6 @@ __all__ = [
     "queue_generate_forms",
     "queue_generate_pronunciations",
     "queue_generate_synonyms",
+    "get_task",
     "search",
 ]

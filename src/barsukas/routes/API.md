@@ -52,6 +52,13 @@ Base prefix: `/api`.
 - `GET /api/v1/lemma/<guid>/sentences[?language=<code>]`
   - Example sentences using the lemma.
 
+
+- `GET /api/v1/tasks/<task_id>`
+  - Task status/result snapshot for queued background work.
+
+- `GET /api/v1/sentences/<id>`
+  - Full sentence payload including translations and `sentence_words` rows.
+
 ## Model registry
 
 - `GET /api/v1/models[?q=<search>]`
