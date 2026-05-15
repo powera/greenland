@@ -56,6 +56,7 @@ from barsukas.routes import (
     api,
     api_client,
     audio,
+    barsukas_tasks,
     batch_operations,
     bebras,
     categories,
@@ -215,6 +216,7 @@ def create_app(
     app.register_blueprint(operation_logs.bp)
     app.register_blueprint(pending_imports.bp)
     app.register_blueprint(batch_operations.bp)
+    app.register_blueprint(barsukas_tasks.bp)
     app.register_blueprint(bebras.bp)
     app.register_blueprint(wireword.bp)
     app.register_blueprint(exports.bp)

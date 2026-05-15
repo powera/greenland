@@ -771,7 +771,8 @@ def decompose_sentences() -> ResponseReturnValue:
 
     window_index = int(datetime.utcnow().timestamp() // (batch_window_minutes * 60))
     batch_dedup_key = (
-        f"{TaskType.SENTENCES_TRANSLATE}:batch:{window_index}:{batch_window_minutes}:{model}"
+        f"{TaskType.SENTENCES_TRANSLATE_BATCH_SUBMIT}:batch:"
+        f"{window_index}:{batch_window_minutes}:{model}"
     )
     existing = (
         g.db.query(BarsukasTask)
@@ -801,14 +802,13 @@ def decompose_sentences() -> ResponseReturnValue:
 
     result = enqueue_task(
         g.db,
-        task_type=TaskType.SENTENCES_TRANSLATE,
+        task_type=TaskType.SENTENCES_TRANSLATE_BATCH_SUBMIT,
         target_type="batch",
         target_id=None,
         payload={
             "sentence_ids": sentence_ids,
             "selected_languages": _DECOMPOSE_LANGUAGES,
             "model": model,
-            "batch": True,
         },
         dedup_key=batch_dedup_key,
     )

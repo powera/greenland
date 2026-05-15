@@ -24,7 +24,7 @@ from clients.batch_queue import BatchQueue, get_batch_manager
 from util.telemetry import CostConfig
 from storage.backend import create_session as create_backend_session
 from storage.translation_helpers import LANGUAGE_FIELDS, set_translation
-from sentences.translation import store_translation_results
+from sentences.batch_completion import apply_sentence_translation_results
 
 logger = logging.getLogger(__name__)
 
@@ -199,35 +199,7 @@ def _group_completed_by_agent(requests: Iterable[BatchQueue]) -> Dict[str, list[
 def _apply_sentence_translations(
     requests: Iterable[BatchQueue], session: Any, batch_id: str
 ) -> Dict[str, int]:
-    sentences_updated = 0
-    failed = 0
-
-    for req in requests:
-        sentence_id = req.entity_id
-        if not sentence_id:
-            continue
-
-        try:
-            if not req.response_body:
-                continue
-            response = json.loads(req.response_body)
-            content = response["body"]["choices"][0]["message"]["content"]
-            translations = json.loads(content)
-
-            store_translation_results(sentence_id, translations, session)
-            sentences_updated += 1
-
-        except Exception as exc:
-            failed += 1
-            logger.error(
-                "Failed to apply sentence translations for sentence %s (batch %s): %s",
-                sentence_id,
-                batch_id,
-                exc,
-            )
-            session.rollback()
-
-    return {"updated": sentences_updated, "failed": failed}
+    return apply_sentence_translation_results(requests, session, batch_id)
 
 
 def _apply_voras_translations(
@@ -398,7 +370,7 @@ def main() -> int:
         session = create_backend_session(config)
         try:
             for agent_name, requests in grouped.items():
-                if agent_name == "zvirblis":
+                if agent_name in ("zvirblis", "barsukas_decompose"):
                     result = _apply_sentence_translations(requests, session, args.batch_id)
                     logger.info(
                         "Sentence translations applied: %s updated, %s failed",

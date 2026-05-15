@@ -47,16 +47,19 @@ def build_translation_prompt(
     session: Session,
     include_english: bool = True,
     *,
+    source_language: str = "en",
     candidate_lemmas: Optional[List[Lemma]] = None,
 ) -> Tuple[str, str]:
     """
     Build LLM prompt for translating a sentence.
 
     Args:
-        sentence: Sentence object with English translation
+        sentence: Sentence object with a translation in ``source_language``
         target_languages: List of language codes to translate to
         session: Database session for lemma lookups
         include_english: Whether to request English translation with word-by-word POS info
+        source_language: Language code of the existing SentenceTranslation to use
+            as the prompt's template sentence (default: "en").
         candidate_lemmas: Optional ranked list of Lemmas the LLM should prefer.
 
     Returns:
@@ -67,6 +70,7 @@ def build_translation_prompt(
         _normalize_target_languages(target_languages),
         session,
         include_english=include_english,
+        source_language=source_language,
         candidate_lemmas=candidate_lemmas,
     )
 
@@ -91,7 +95,12 @@ def build_response_schema(
 
 
 def translate_sentence(
-    sentence_id: int, target_languages: List[str], session: Session, model: str = "gpt-5.4-mini"
+    sentence_id: int,
+    target_languages: List[str],
+    session: Session,
+    model: str = "gpt-5.4-mini",
+    *,
+    source_language: str = "en",
 ) -> Dict[str, Any]:
     """
     Translate a single sentence to target languages using LLM.
@@ -101,6 +110,8 @@ def translate_sentence(
         target_languages: List of language codes (e.g., ["lt", "zh", "fr"])
         session: Database session
         model: LLM model to use
+        source_language: Language code of the existing SentenceTranslation to use
+            as the prompt's template sentence (default: "en").
 
     Returns:
         Dict with translation results
@@ -110,18 +121,27 @@ def translate_sentence(
     if not sentence:
         raise ValueError(f"Sentence {sentence_id} not found")
 
-    # Check if English word breakdown already exists
-    # If not, include English in the translation request
+    # Check if English word breakdown already exists.
+    # If not, include English in the translation request so we always end up with
+    # an English sentence + word breakdown, regardless of the source language.
     english_words = (
         session.query(SentenceWord).filter_by(sentence_id=sentence_id, language_code="en").all()
     )
     include_english = len(english_words) == 0
 
     normalized_target_languages = _normalize_target_languages(target_languages)
+    # Don't ask the LLM to "translate" the source language back to itself.
+    normalized_target_languages = [
+        lang for lang in normalized_target_languages if lang != source_language
+    ]
 
     # Build context, prompt and schema
     context, prompt = build_translation_prompt(
-        sentence, normalized_target_languages, session, include_english
+        sentence,
+        normalized_target_languages,
+        session,
+        include_english,
+        source_language=source_language,
     )
     schema = build_response_schema(normalized_target_languages, include_english)
 
@@ -156,7 +176,7 @@ def store_translation_results(
     """
     logger.info(f"=== Storing translations for sentence {sentence_id} ===")
 
-    # Update English translation if provided
+    # Update or create English translation if provided
     if "en" in translations:
         logger.info(f"Updating English: {translations['en']}")
         en_trans = (
@@ -166,6 +186,15 @@ def store_translation_results(
         )
         if en_trans:
             en_trans.translation_text = translations["en"]
+        else:
+            session.add(
+                SentenceTranslation(
+                    sentence_id=sentence_id,
+                    language_code="en",
+                    translation_text=translations["en"],
+                    verified=False,
+                )
+            )
 
     # Store translations for each language
     for key, value in translations.items():

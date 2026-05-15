@@ -44,6 +44,7 @@ class TaskType:
     WORDS_EMBEDDINGS = "words.embeddings"
     WORDS_GRAMMAR_FACTS = "words.grammar_facts"
     SENTENCES_TRANSLATE = "sentences.translate"
+    SENTENCES_TRANSLATE_BATCH_SUBMIT = "sentences.translate.batch_submit"
     AUDIO_GENERATE_LEMMA = "audio.generate.lemma"
     AUDIO_GENERATE_SENTENCE = "audio.generate.sentence"
     WIREWORD_EXPORT_DIRECTORY = "wireword.export.directory"

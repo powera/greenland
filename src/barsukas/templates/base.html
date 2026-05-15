@@ -102,6 +102,9 @@
                             <li><a class="dropdown-item" href="{{ url_for('batch_operations.list_batches') }}">
                                 <i class="bi bi-collection"></i> {{ STRINGS.navigation.get('batch_jobs', 'Batch Jobs') }}
                             </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('barsukas_tasks.list_tasks') }}">
+                                <i class="bi bi-list-task"></i> {{ STRINGS.navigation.get('worker_tasks', 'Worker Tasks') }}
+                            </a></li>
                         </ul>
                     </li>
                     {% if not config.get('READONLY', False) %}

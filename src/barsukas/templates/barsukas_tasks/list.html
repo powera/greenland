@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Worker Tasks{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="bi bi-list-task"></i> Worker Tasks</h2>
+        <p class="text-muted">Barsukas in-process workqueue tasks (<code>barsukas_tasks</code> table). Distinct from OpenAI batch jobs.</p>
+    </div>
+</div>
+
+<!-- Status summary -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="d-flex gap-2 flex-wrap">
+            {% for status in statuses %}
+                {% set count = status_counts.get(status, 0) %}
+                <a href="{{ url_for('barsukas_tasks.list_tasks', status=status) }}" class="text-decoration-none">
+                    {% if status == 'completed' %}
+                        <span class="badge bg-success">{{ status }}: {{ count }}</span>
+                    {% elif status == 'failed' %}
+                        <span class="badge bg-danger">{{ status }}: {{ count }}</span>
+                    {% elif status == 'running' %}
+                        <span class="badge bg-warning text-dark">{{ status }}: {{ count }}</span>
+                    {% elif status == 'pending' %}
+                        <span class="badge bg-primary">{{ status }}: {{ count }}</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ status }}: {{ count }}</span>
+                    {% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-funnel"></i> Filters</div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">All</option>
+                            {% for status in statuses %}
+                                <option value="{{ status }}" {% if status == status_filter %}selected{% endif %}>{{ status }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="task_type" class="form-label">Task type</label>
+                        <select class="form-select" id="task_type" name="task_type">
+                            <option value="">All</option>
+                            {% for tt in task_types %}
+                                <option value="{{ tt }}" {% if tt == task_type_filter %}selected{% endif %}>{{ tt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="target_type" class="form-label">Target type</label>
+                        <select class="form-select" id="target_type" name="target_type">
+                            <option value="">All</option>
+                            {% for tgt in target_types %}
+                                <option value="{{ tgt }}" {% if tgt == target_type_filter %}selected{% endif %}>{{ tgt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="limit" class="form-label">Limit</label>
+                        <input type="number" min="1" max="500" class="form-control" id="limit" name="limit" value="{{ limit }}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <a href="{{ url_for('barsukas_tasks.list_tasks') }}" class="btn btn-secondary">
+                            <i class="bi bi-x"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="bi bi-list"></i> Tasks
+                    <span class="badge bg-secondary">{{ tasks | length }} shown</span>
+                </span>
+            </div>
+            <div class="card-body">
+                {% if tasks %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Type</th>
+                                    <th>Target</th>
+                                    <th>Status</th>
+                                    <th>Payload summary</th>
+                                    <th>Created</th>
+                                    <th>Finished</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in tasks %}
+                                    {% set payload = parse_payload(task.payload) %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ url_for('barsukas_tasks.view_task', task_id=task.id) }}">{{ task.id }}</a>
+                                        </td>
+                                        <td><code>{{ task.task_type }}</code></td>
+                                        <td>
+                                            {% if task.target_type %}
+                                                <small>{{ task.target_type }}{% if task.target_id is not none %} #{{ task.target_id }}{% endif %}</small>
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if task.status == 'completed' %}
+                                                <span class="badge bg-success">{{ task.status }}</span>
+                                            {% elif task.status == 'failed' %}
+                                                <span class="badge bg-danger">{{ task.status }}</span>
+                                            {% elif task.status == 'running' %}
+                                                <span class="badge bg-warning text-dark">{{ task.status }}</span>
+                                            {% elif task.status == 'pending' %}
+                                                <span class="badge bg-primary">{{ task.status }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ task.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if payload is mapping %}
+                                                {% if 'sentence_ids' in payload %}
+                                                    <small>{{ payload['sentence_ids'] | length }} sentence_id(s)</small>
+                                                {% elif 'sentence_id' in payload %}
+                                                    <small>sentence_id={{ payload['sentence_id'] }}</small>
+                                                {% elif 'guid' in payload %}
+                                                    <small>guid={{ payload['guid'] }}</small>
+                                                {% elif 'guids' in payload %}
+                                                    <small>{{ payload['guids'] | length }} guid(s)</small>
+                                                {% else %}
+                                                    <small class="text-muted">{{ payload.keys() | list | join(', ') }}</small>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td><small>{% if task.created_at %}{{ task.created_at.strftime('%Y-%m-%d %H:%M:%S') }}{% endif %}</small></td>
+                                        <td><small>{% if task.finished_at %}{{ task.finished_at.strftime('%Y-%m-%d %H:%M:%S') }}{% endif %}</small></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No tasks match the current filters.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
