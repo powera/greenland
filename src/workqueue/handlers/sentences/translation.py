@@ -24,7 +24,14 @@ def do_translate_sentence(
     model: str = constants.DEFAULT_MODEL,
     **_: Any,
 ) -> str:
-    """Translate a sentence into selected target languages."""
+    """Translate a sentence into selected target languages.
+
+    The sentence must already have at least one SentenceTranslation row; that
+    row's language is used as the source language for the LLM prompt. English
+    is preferred when present; otherwise the first available translation is
+    used. If no English row exists, English is added to the target languages so
+    the task always produces one.
+    """
     normalized_languages = normalize_llm_language_codes(
         selected_languages,
         operation_name="Workqueue sentence translation",
@@ -35,23 +42,36 @@ def do_translate_sentence(
     if not sentence:
         raise ValueError(f"Sentence {sentence_id} not found")
 
-    en_translation = (
-        session.query(SentenceTranslation)
-        .filter_by(sentence_id=sentence_id, language_code="en")
-        .first()
+    existing_translations = (
+        session.query(SentenceTranslation).filter_by(sentence_id=sentence_id).all()
     )
-    if not en_translation:
+    if not existing_translations:
         raise ValueError(
-            "Sentence must have an English translation before translating to other languages"
+            f"Sentence {sentence_id} has no translations; cannot determine source language"
         )
 
-    do_translation(sentence_id, normalized_languages, session, model=model)
+    existing_languages = {t.language_code for t in existing_translations}
+    source_language = "en" if "en" in existing_languages else next(iter(existing_languages))
+
+    if "en" not in existing_languages and "en" not in normalized_languages:
+        normalized_languages = ["en", *normalized_languages]
+
+    do_translation(
+        sentence_id,
+        normalized_languages,
+        session,
+        model=model,
+        source_language=source_language,
+    )
 
     language_names = [
         get_supported_languages().get(language_code, language_code)
         for language_code in normalized_languages
     ]
-    return f"Successfully translated sentence to: {', '.join(language_names)}"
+    return (
+        f"Successfully translated sentence (source={source_language}) to: "
+        f"{', '.join(language_names)}"
+    )
 
 
 @workqueue_payload_handler()
@@ -61,6 +81,7 @@ def handle_sentences_translate(
     sentence_ids: Optional[List[int]] = None,
     selected_languages: Optional[List[str]] = None,
     model: str = constants.DEFAULT_MODEL,
+    batch: bool = False,
 ) -> str:
     """Workqueue wrapper for sentence translation.
 

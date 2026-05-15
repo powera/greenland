@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Worker Task #{{ task.id }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="bi bi-list-task"></i> Worker Task #{{ task.id }}</h2>
+        <p>
+            <a href="{{ url_for('barsukas_tasks.list_tasks') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to list
+            </a>
+        </p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-info-circle"></i> Overview</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Task type</dt>
+                    <dd class="col-sm-8"><code>{{ task.task_type }}</code></dd>
+
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">
+                        {% if task.status == 'completed' %}
+                            <span class="badge bg-success">{{ task.status }}</span>
+                        {% elif task.status == 'failed' %}
+                            <span class="badge bg-danger">{{ task.status }}</span>
+                        {% elif task.status == 'running' %}
+                            <span class="badge bg-warning text-dark">{{ task.status }}</span>
+                        {% elif task.status == 'pending' %}
+                            <span class="badge bg-primary">{{ task.status }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ task.status }}</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Target</dt>
+                    <dd class="col-sm-8">
+                        {% if task.target_type %}
+                            {{ task.target_type }}{% if task.target_id is not none %} #{{ task.target_id }}{% endif %}
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Dedup key</dt>
+                    <dd class="col-sm-8">
+                        {% if task.dedup_key %}<code>{{ task.dedup_key }}</code>{% else %}<span class="text-muted">—</span>{% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-clock"></i> Timestamps</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Created</dt>
+                    <dd class="col-sm-8">{% if task.created_at %}{{ task.created_at.strftime('%Y-%m-%d %H:%M:%S') }}{% else %}<span class="text-muted">—</span>{% endif %}</dd>
+
+                    <dt class="col-sm-4">Updated</dt>
+                    <dd class="col-sm-8">{% if task.updated_at %}{{ task.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}{% else %}<span class="text-muted">—</span>{% endif %}</dd>
+
+                    <dt class="col-sm-4">Started</dt>
+                    <dd class="col-sm-8">{% if task.started_at %}{{ task.started_at.strftime('%Y-%m-%d %H:%M:%S') }}{% else %}<span class="text-muted">—</span>{% endif %}</dd>
+
+                    <dt class="col-sm-4">Finished</dt>
+                    <dd class="col-sm-8">{% if task.finished_at %}{{ task.finished_at.strftime('%Y-%m-%d %H:%M:%S') }}{% else %}<span class="text-muted">—</span>{% endif %}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if sentence_ids %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-chat-left-text"></i> Sentences ({{ sentence_ids | length }})</div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-1">
+                    {% for sid in sentence_ids %}
+                        <span class="badge bg-light text-dark border">{{ sid }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-braces"></i> Payload</div>
+            <div class="card-body">
+                {% if payload_pretty %}
+                    <pre class="mb-0"><code>{{ payload_pretty }}</code></pre>
+                {% else %}
+                    <p class="text-muted mb-0">No payload.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if task.result_message %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-check2-circle"></i> Result message</div>
+            <div class="card-body"><pre class="mb-0">{{ task.result_message }}</pre></div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if task.error_detail %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card border-danger">
+            <div class="card-header text-bg-danger"><i class="bi bi-exclamation-triangle"></i> Error detail</div>
+            <div class="card-body"><pre class="mb-0">{{ task.error_detail }}</pre></div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

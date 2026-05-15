@@ -15,12 +15,13 @@ import sys
 import threading
 import types
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from barsukas.config import Config
 from barsukas.app import create_app
 from barsukas.personas import get_persona, list_personas, PersonaConfig
 from workqueue.worker import run_worker, STOP_EVENT
+from barsukas.batch_poller import start_poller_thread as start_batch_poller_thread
 from storage.backend.config import DataSourceConfig
 
 logger = logging.getLogger(__name__)
@@ -266,6 +267,7 @@ def main() -> None:
 
     # Start the worker thread if enabled
     worker_thread = None
+    batch_poller_thread = None
     if not args.no_worker:
         logger.info("Starting task worker thread...")
         worker_thread = threading.Thread(
@@ -276,6 +278,19 @@ def main() -> None:
         )
         worker_thread.start()
         logger.info("Task worker thread started")
+
+        # Periodic poller for OpenAI Batch jobs submitted by Barsukas
+        # (sentence decomposition). Checks every 5 minutes and applies any
+        # completed batches to the main DB.
+        from storage.backend import create_session as _create_main_session
+        from storage.backend.config import DataSourceConfig as _DataSourceConfig
+
+        def _main_session_factory() -> Any:
+            return _create_main_session(_DataSourceConfig())
+
+        logger.info("Starting batch poller thread (5-minute interval)...")
+        batch_poller_thread = start_batch_poller_thread(_main_session_factory, STOP_EVENT)
+        logger.info("Batch poller thread started")
 
     # Run Flask server in the main thread
     # This blocks until the server is stopped (Ctrl+C or signal)
@@ -293,6 +308,13 @@ def main() -> None:
             worker_thread.join(timeout=5.0)
             if worker_thread.is_alive():
                 logger.warning("Worker thread did not stop cleanly")
+
+        # Wait for batch poller thread to finish if it exists
+        if batch_poller_thread and batch_poller_thread.is_alive():
+            logger.info("Waiting for batch poller thread to finish...")
+            batch_poller_thread.join(timeout=5.0)
+            if batch_poller_thread.is_alive():
+                logger.warning("Batch poller thread did not stop cleanly")
 
         logger.info("Barsukas shutdown complete")
 

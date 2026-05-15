@@ -497,16 +497,15 @@ def translate_sentence(sentence_id: int) -> Response:
         flash("No valid target languages after normalization", "warning")
         return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))
 
-    # Check if sentence has English translation
-    en_translation = (
-        g.db.query(SentenceTranslation)
-        .filter_by(sentence_id=sentence_id, language_code="en")
-        .first()
+    # The sentence must have at least one translation row; the worker picks a
+    # source language from whatever exists (preferring English) and produces
+    # English on the fly when missing.
+    has_any_translation = (
+        g.db.query(SentenceTranslation).filter_by(sentence_id=sentence_id).first() is not None
     )
-
-    if not en_translation:
+    if not has_any_translation:
         flash(
-            "Sentence must have an English translation before translating to other languages",
+            "Sentence has no translations yet; cannot determine source language.",
             "error",
         )
         return redirect(url_for("sentences.view_sentence", sentence_id=sentence_id))

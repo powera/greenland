@@ -8,7 +8,10 @@ from __future__ import annotations
 
 from workqueue.handlers.audio import handle_audio_generate_lemma, handle_audio_generate_sentence
 from workqueue.handlers.sarka import handle_generate_conversation, handle_generate_definition
-from workqueue.handlers.sentences import handle_sentences_translate
+from workqueue.handlers.sentences import (
+    handle_sentences_translate,
+    handle_sentences_translate_batch_submit,
+)
 from workqueue.handlers.wireword import handle_wireword_export_directory
 from workqueue.handlers.words import (
     handle_words_embeddings,
@@ -30,6 +33,7 @@ TASK_HANDLERS = {
     "words.embeddings": handle_words_embeddings,
     "words.grammar_facts": handle_words_grammar_facts,
     "sentences.translate": handle_sentences_translate,
+    "sentences.translate.batch_submit": handle_sentences_translate_batch_submit,
     "audio.generate.lemma": handle_audio_generate_lemma,
     "audio.generate.sentence": handle_audio_generate_sentence,
     "conversations.generate": handle_generate_conversation,
