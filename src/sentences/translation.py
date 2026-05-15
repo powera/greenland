@@ -8,7 +8,6 @@ This module provides reusable translation functionality that can be used by:
 - Future translation agents
 """
 
-import json
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -18,15 +17,12 @@ from clients.unified_client import UnifiedLLMClient
 from sentences.decomposition import (
     build_decomposition_schema,
     build_prompt_for_translate_and_decompose,
-    query_sentence_decomposition,
 )
 from storage.models.schema import (
     Lemma,
-    LemmaTranslation,
     Sentence,
     SentenceTranslation,
     SentenceWord,
-    SentencePatternWord,
 )
 from storage.translation_helpers import normalize_llm_language_codes
 
@@ -102,65 +98,118 @@ def translate_sentence(
     *,
     source_language: str = "en",
 ) -> Dict[str, Any]:
-    """
-    Translate a single sentence to target languages using LLM.
+    """Translate a stored sentence into target languages using the 3-phase pipeline.
+
+    Phase 1 produces per-language translations, Phase 2 ranks DB candidate lemmas
+    for the English version, and Phase 3 decomposes EACH target language plus
+    English (when missing) into word-level entries. Per-language Phase 3 calls
+    cost more LLM tokens than the old single-call shape, but produce
+    higher-quality ``SentenceWord`` rows for morphologically rich languages.
 
     Args:
-        sentence_id: ID of sentence to translate
-        target_languages: List of language codes (e.g., ["lt", "zh", "fr"])
-        session: Database session
-        model: LLM model to use
+        sentence_id: ID of sentence to translate.
+        target_languages: List of language codes (e.g., ["lt", "zh", "fr"]).
+        session: Database session.
+        model: LLM model to use.
         source_language: Language code of the existing SentenceTranslation to use
-            as the prompt's template sentence (default: "en").
+            as the prompt's source sentence (default: "en").
 
     Returns:
-        Dict with translation results
+        Dict of language_code -> translation_text for the languages that were
+        produced this call (includes English when it was missing). Per-language
+        word breakdowns are persisted to ``SentenceWord`` as a side effect.
     """
-    # Get sentence and existing translations
+    from sentences.translate_and_decompose import translate_and_decompose
+
     sentence = session.query(Sentence).get(sentence_id)
     if not sentence:
         raise ValueError(f"Sentence {sentence_id} not found")
 
-    # Check if English word breakdown already exists.
-    # If not, include English in the translation request so we always end up with
-    # an English sentence + word breakdown, regardless of the source language.
+    source_translation = (
+        session.query(SentenceTranslation)
+        .filter_by(sentence_id=sentence_id, language_code=source_language)
+        .first()
+    )
+    if not source_translation:
+        raise ValueError(
+            f"Sentence {sentence_id} has no translation in source language '{source_language}'"
+        )
+
     english_words = (
         session.query(SentenceWord).filter_by(sentence_id=sentence_id, language_code="en").all()
     )
     include_english = len(english_words) == 0
 
-    normalized_target_languages = _normalize_target_languages(target_languages)
-    # Don't ask the LLM to "translate" the source language back to itself.
-    normalized_target_languages = [
-        lang for lang in normalized_target_languages if lang != source_language
-    ]
+    normalized_targets_all = _normalize_target_languages(target_languages)
+    # Phase 1 must not retranslate the source language back to itself.
+    phase1_targets = [lang for lang in normalized_targets_all if lang != source_language]
 
-    # Build context, prompt and schema
-    context, prompt = build_translation_prompt(
-        sentence,
-        normalized_target_languages,
-        session,
-        include_english,
-        source_language=source_language,
-    )
-    schema = build_response_schema(normalized_target_languages, include_english)
+    # Phase 3 should decompose every language the caller asked for, including
+    # the source language: callers requesting "decompose lt" for an LT-source
+    # sentence still want LT SentenceWord rows produced from the existing
+    # source translation. translate_and_decompose handles a decompose_languages
+    # entry that has no Phase 1 translation by falling back to the source text.
+    decompose_languages: List[str] = list(normalized_targets_all)
+    if include_english and "en" not in decompose_languages and source_language != "en":
+        decompose_languages.append("en")
 
     client = UnifiedLLMClient()
-    result = query_sentence_decomposition(
-        prompt=prompt,
+    pipeline_result = translate_and_decompose(
+        sentence_text=source_translation.translation_text,
+        source_language=source_language,
+        session=session,
         client=client,
+        target_languages=phase1_targets,
+        decompose_languages=decompose_languages,
         model=model,
-        json_schema=schema,
-        context=context,
     )
-    if not result.get("success"):
-        raise ValueError(result.get("error", "No response data found in LLM result"))
-    translations = {k: v for k, v in result.items() if k != "success"}
 
-    # Store translations in database
+    if not pipeline_result.phase1_ok:
+        raise ValueError(pipeline_result.phase1_error or "Phase 1 translation failed")
+
+    translations: Dict[str, Any] = dict(pipeline_result.translations)
+
+    # Adapt Phase 3 output to the legacy "translations" dict shape consumed by
+    # store_translation_results: keys "lang" / "words_lang".
+    for language_code, decomposition in pipeline_result.decompositions.items():
+        if not decomposition.success:
+            logger.warning(
+                "Phase 3 decomposition failed for sentence %d, language %s: %s",
+                sentence_id,
+                language_code,
+                decomposition.error,
+            )
+            continue
+        if language_code not in translations and decomposition.translation:
+            translations[language_code] = decomposition.translation
+        translations[f"words_{language_code}"] = [
+            _adapt_decomposed_word(word_entry) for word_entry in decomposition.words
+        ]
+
     store_translation_results(sentence_id, translations, session)
-
     return translations
+
+
+def _adapt_decomposed_word(word_entry: Dict[str, Any]) -> Dict[str, Any]:
+    """Map a Phase 3 ``words[]`` entry to the legacy ``words_<lang>`` shape.
+
+    Phase 3 uses ``surface_form`` / ``english_gloss`` / ``lemma_guid``; the
+    legacy storage path expects ``word`` / ``english`` / ``guid``.
+    """
+    grammatical_form_raw = word_entry.get("grammatical_form")
+    grammatical_form: Optional[str]
+    if grammatical_form_raw is None:
+        grammatical_form = None
+    else:
+        stripped = str(grammatical_form_raw).strip()
+        grammatical_form = stripped or None
+    return {
+        "word": str(word_entry.get("surface_form") or "").strip(),
+        "english": str(word_entry.get("english_gloss") or "").strip(),
+        "guid": str(word_entry.get("lemma_guid") or "").strip(),
+        "role": str(word_entry.get("role") or "").strip(),
+        "grammatical_form": grammatical_form,
+    }
 
 
 def store_translation_results(

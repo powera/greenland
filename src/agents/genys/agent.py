@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
-"""Genys agent core logic for document parsing and pending import staging."""
+"""Genys agent: document parser + PendingImport staging.
+
+The translate/decompose pipeline itself lives in
+``sentences.translate_and_decompose``. This module is responsible only for:
+
+- Splitting an input document into sentences.
+- Choosing which target languages to translate into.
+- Calling the shared pipeline once per sentence.
+- Storing sentences and SentenceWord rows when requested.
+- Staging missing English glosses to ``PendingImport`` for later review,
+  deduplicating against existing lemmas, derivative forms, and prior pending
+  imports.
+"""
 
 import logging
 import re
@@ -10,20 +22,14 @@ from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 from sqlalchemy import func, literal, or_
 
 from clients.unified_client import UnifiedLLMClient
-from langtools.dialect_overrides import get_dialect_display_name, get_llm_prompt_note
 from langtools.grammatical_words import is_function_word
 from langtools.tokenizer import tokenize
 from sentences.analysis import SUBSTRING_MATCH_LANGUAGES
-from sentences.candidate_lookup import (
-    DEFAULT_PIVOT_LANGUAGES,
-    CandidateLemma,
-    find_candidate_lemmas_from_translations,
-)
-from sentences.decomposition import (
-    build_sentence_decomposition_context,
-    build_sentence_decomposition_prompt,
-    build_single_language_decomposition_schema,
-    query_sentence_decomposition,
+from sentences.candidate_lookup import DEFAULT_PIVOT_LANGUAGES
+from sentences.translate_and_decompose import (
+    SYNTHETIC_GUID_PREFIX,
+    TranslateAndDecomposeResult,
+    translate_and_decompose,
 )
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import DataSourceConfig
@@ -32,8 +38,7 @@ from storage.crud.sentence_translation import add_sentence_translation
 from storage.crud.sentence_word import add_sentence_word
 from storage.models.imports import PendingImport
 from storage.models.schema import DerivativeForm, Lemma
-from storage.translation_helpers import LANGUAGE_NAMES, normalize_llm_language_codes
-from util.prompt_loader import get_context, get_prompt
+from storage.translation_helpers import normalize_llm_language_codes
 
 logger = logging.getLogger(__name__)
 
@@ -49,12 +54,11 @@ SKIPPED_ROLES: Set[str] = {"article", "preposition", "conjunction", "determiner"
 # The doc language is excluded at runtime.
 _PHASE1_LANGUAGES: List[str] = ["en", "fr", "zh", "lt"]
 
-# Synthetic GUID prefix — do not resolve these to DB lemmas
-_SYNTHETIC_GUID_PREFIX = "SYN"
+_PUNCTUATION_STRIP = ".,!?;:\"'()[]{}—-"
 
 
 class GenysAgent:
-    """Agent that decomposes documents and stages missing words for review."""
+    """Decompose documents and stage missing words for review."""
 
     def __init__(self, config: DataSourceConfig):
         self.config = config
@@ -65,11 +69,9 @@ class GenysAgent:
             logger.setLevel(logging.DEBUG)
 
     def get_session(self) -> Any:
-        """Get database session from backend config."""
         return create_backend_session(self.config)
 
     def get_llm_client(self) -> UnifiedLLMClient:
-        """Get lazily initialized LLM client."""
         if self._llm_client is None:
             self._llm_client = UnifiedLLMClient.from_config(self.config)
             if self.config.model:
@@ -89,119 +91,45 @@ class GenysAgent:
         else:
             split_pattern = r"(?<=[.!?…])\s+"
 
-        parts = [
+        return [
             segment.strip() for segment in re.split(split_pattern, compact_text) if segment.strip()
         ]
-        return parts
 
     @staticmethod
     def choose_target_languages(document_language: str) -> List[str]:
-        """Choose up to 3 target languages for Phase 1 translation.
-
-        Always uses [en, fr, zh, lt] minus the document language.
-        """
-        normalized_document_language = document_language.strip().lower()
-        selected_languages = [
-            lang for lang in _PHASE1_LANGUAGES if lang != normalized_document_language
-        ]
+        """Pick up to 3 target languages: [en, fr, zh, lt] minus the doc language."""
+        normalized = document_language.strip().lower()
+        selected = [lang for lang in _PHASE1_LANGUAGES if lang != normalized]
         return normalize_llm_language_codes(
-            selected_languages[:3],
+            selected[:3],
             operation_name="Genys Phase 1 translation",
         )
 
     # ------------------------------------------------------------------ #
-    # Phase 1: sentence-level translation (no word breakdown)             #
+    # DB dedup helpers                                                    #
     # ------------------------------------------------------------------ #
 
-    def _build_phase1_schema(self, target_languages: Sequence[str]) -> Dict[str, Any]:
-        """JSON schema for Phase 1: sentence translations only, no words_ fields."""
-        properties: Dict[str, Any] = {}
-        for lang in target_languages:
-            lang_name = LANGUAGE_NAMES.get(lang, lang)
-            properties[lang] = {"type": "string", "description": f"{lang_name} translation"}
-        return {
-            "type": "object",
-            "properties": properties,
-            "required": list(target_languages),
-            "additionalProperties": False,
-        }
-
-    def _phase1_translate(
-        self,
-        sentence_text: str,
-        document_language: str,
-        target_languages: Sequence[str],
-    ) -> Dict[str, str]:
-        """Phase 1: ask the LLM for sentence-level translations only.
-
-        Returns a dict mapping language_code -> translated sentence string.
-        On failure returns an empty dict.
-        """
-        source_language_name = get_dialect_display_name(document_language)
-        target_language_lines: List[str] = []
-        for lang in target_languages:
-            display_name = get_dialect_display_name(lang)
-            note = get_llm_prompt_note(lang)
-            line = f"- {display_name} ({lang})"
-            if note:
-                line += f": {note}"
-            target_language_lines.append(line)
-        prompt = get_prompt("sentence_decomposition", "translate_only").format(
-            sentence=sentence_text,
-            source_language=source_language_name,
-            target_languages_with_notes="\n".join(target_language_lines),
-        )
-        context = get_context("sentence_decomposition", "translate_only")
-        schema = self._build_phase1_schema(target_languages)
-
-        result = query_sentence_decomposition(
-            prompt=prompt,
-            client=self.get_llm_client(),
-            model=self.config.model or "gpt-5.4-mini",
-            json_schema=schema,
-            context=context,
-        )
-        if not result.get("success"):
-            logger.warning("Phase 1 translation failed: %s", result.get("error", "unknown"))
-            return {}
-
-        translations: Dict[str, str] = {}
-        for lang in target_languages:
-            value = result.get(lang)
-            if isinstance(value, str) and value.strip():
-                translations[lang] = value.strip()
-        return translations
-
-    # ------------------------------------------------------------------ #
-    # Phase 2: DB candidate lemma lookup (no LLM)                        #
-    # ------------------------------------------------------------------ #
-
+    @staticmethod
     def _lemma_ids_for_english_gloss(
-        self,
-        session: Any,
-        english_gloss: str,
-        cache: Dict[str, Set[int]],
+        session: Any, english_gloss: str, cache: Dict[str, Set[int]]
     ) -> Set[int]:
-        normalized_gloss = english_gloss.strip().lower()
-        if normalized_gloss in cache:
-            return cache[normalized_gloss]
+        normalized = english_gloss.strip().lower()
+        if normalized in cache:
+            return cache[normalized]
+        rows = session.query(Lemma.id).filter(func.lower(Lemma.lemma_text) == normalized).all()
+        ids = {row[0] for row in rows}
+        cache[normalized] = ids
+        return ids
 
-        lemma_rows = (
-            session.query(Lemma.id).filter(func.lower(Lemma.lemma_text) == normalized_gloss).all()
-        )
-        lemma_ids: Set[int] = {row[0] for row in lemma_rows}
-        cache[normalized_gloss] = lemma_ids
-        return lemma_ids
-
+    @staticmethod
     def _lemma_ids_for_derivative(
-        self,
         session: Any,
         language_code: str,
         surface_form: str,
         cache: Dict[Tuple[str, str], Set[int]],
     ) -> Set[int]:
-        normalized_surface = surface_form.strip().lower()
-        cache_key = (language_code, normalized_surface)
+        normalized = surface_form.strip().lower()
+        cache_key = (language_code, normalized)
         if cache_key in cache:
             return cache[cache_key]
 
@@ -223,187 +151,123 @@ class GenysAgent:
                 session.query(DerivativeForm.lemma_id)
                 .filter(
                     DerivativeForm.language_code == language_code,
-                    func.lower(DerivativeForm.derivative_form_text) == normalized_surface,
+                    func.lower(DerivativeForm.derivative_form_text) == normalized,
                 )
                 .all()
             )
-
-        lemma_ids: Set[int] = {row[0] for row in rows}
-        cache[cache_key] = lemma_ids
-        return lemma_ids
-
-    def _phase2_candidate_lemmas(
-        self,
-        session: Any,
-        english_text: str,
-        translations: Dict[str, str],
-        pivot_languages: Sequence[str],
-        target_languages: Sequence[str],
-    ) -> Dict[str, List[CandidateLemma]]:
-        """Phase 2: look up candidate lemmas grouped by English surface word.
-
-        Delegates to sentences.candidate_lookup.find_candidate_lemmas_from_translations.
-        Returns the grouped {english_word: [CandidateLemma, ...]} form that
-        the decomposition prompt builder now accepts.
-        """
-        pivot_translations = {
-            lang: text for lang, text in translations.items() if lang in pivot_languages
-        }
-        grouped = find_candidate_lemmas_from_translations(
-            session,
-            english_text=english_text,
-            pivot_translations=pivot_translations,
-            pivot_languages=pivot_languages,
-            target_languages=target_languages,
-        )
-        total = sum(len(v) for v in grouped.values())
-        logger.debug(
-            "Phase 2: found %d candidates across %d English words",
-            total,
-            len(grouped),
-        )
-        return grouped
-
-    # ------------------------------------------------------------------ #
-    # Phase 3: per-word decomposition with candidate lemmas (LLM)        #
-    # ------------------------------------------------------------------ #
-
-    def _phase3_decompose(
-        self,
-        sentence_text: str,
-        document_language: str,
-        translations: Dict[str, str],
-        candidate_lemmas_by_english_word: Dict[str, List[CandidateLemma]],
-    ) -> Dict[str, Any]:
-        """Phase 3: decompose the English translation into per-word breakdown.
-
-        Uses the other language translations only as helper context for
-        candidate lemma selection (already done in Phase 2). The decomposition
-        is always for English, since that is the language of the lemma database.
-        """
-        # If the document is English, use the original sentence directly.
-        # Otherwise use the Phase 1 English translation.
-        if document_language == "en":
-            english_text = sentence_text
-        else:
-            english_text = translations.get("en", "")
-        if not english_text:
-            logger.warning("Phase 3: no English translation available, cannot decompose")
-            return {"success": False, "error": "No English translation from Phase 1"}
-
-        # All other translations serve as helpers for disambiguation
-        helper_translations = [
-            {"language_code": lang, "translation": translation_text}
-            for lang, translation_text in translations.items()
-            if lang != "en"
-        ]
-        # Include the original document-language sentence as a helper too
-        if document_language != "en":
-            helper_translations.insert(
-                0, {"language_code": document_language, "translation": sentence_text}
-            )
-
-        # Adapt CandidateLemma dataclass -> dict shape expected by the prompt builder.
-        candidates_as_dicts: Dict[str, List[Dict[str, Any]]] = {
-            english_word: [
-                {
-                    "guid": candidate.guid,
-                    "lemma": candidate.lemma_text,
-                    "disambiguation": candidate.disambiguation,
-                    "pos": candidate.pos,
-                    "definition": candidate.definition,
-                    "translations": candidate.translations,
-                }
-                for candidate in candidates
-            ]
-            for english_word, candidates in candidate_lemmas_by_english_word.items()
-        }
-
-        prompt = build_sentence_decomposition_prompt(
-            source_sentence=english_text,
-            source_language="en",
-            target_language="en",
-            target_translation=english_text,
-            helper_translations=helper_translations,
-            candidate_lemmas_by_english_word=candidates_as_dicts,
-        )
-        context = build_sentence_decomposition_context()
-        schema = build_single_language_decomposition_schema()
-
-        result = query_sentence_decomposition(
-            prompt=prompt,
-            client=self.get_llm_client(),
-            model=self.config.model or "gpt-5.4-mini",
-            json_schema=schema,
-            context=context,
-        )
-        return result
-
-    @staticmethod
-    def _extract_words_from_phase3(result: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Extract the flat word list from the single-language decomposition schema result."""
-        languages = result.get("languages")
-        if not isinstance(languages, list) or not languages:
-            return []
-        first_lang = languages[0]
-        if not isinstance(first_lang, dict):
-            return []
-        words = first_lang.get("words")
-        if not isinstance(words, list):
-            return []
-        return [w for w in words if isinstance(w, dict)]
+        ids = {row[0] for row in rows}
+        cache[cache_key] = ids
+        return ids
 
     @staticmethod
     def _check_decomposition_completeness(
         english_text: str, words: List[Dict[str, Any]], sentence_label: str
     ) -> None:
-        """Warn if any token in *english_text* is absent from the decomposition surface forms."""
+        """Warn if any token in ``english_text`` is missing from decomposition surface forms."""
         surface_forms: Set[str] = set()
-        for w in words:
-            sf = str(w.get("surface_form") or "").strip().lower()
-            # Also cover multi-word surface forms by adding each sub-token
-            for part in re.split(r"\s+", sf):
-                part = part.strip(".,!?;:\"'()[]{}—-")
-                if part:
-                    surface_forms.add(part)
+        for word_entry in words:
+            raw_surface = str(word_entry.get("surface_form") or "").strip().lower()
+            for part in re.split(r"\s+", raw_surface):
+                stripped = part.strip(_PUNCTUATION_STRIP)
+                if stripped:
+                    surface_forms.add(stripped)
 
-        tokens = tokenize(english_text, "en")
-        missing = []
-        for token in tokens:
-            normalized = token.strip(".,!?;:\"'()[]{}—-").lower()
+        missing: List[str] = []
+        for token in tokenize(english_text, "en"):
+            normalized = token.strip(_PUNCTUATION_STRIP).lower()
             if normalized and normalized not in surface_forms:
                 missing.append(token)
 
         if missing:
             logger.warning(
-                "Phase 3 completeness check FAILED at %s: %d token(s) missing from decomposition: %s",
+                "Decomposition completeness check FAILED at %s: %d token(s) missing: %s",
                 sentence_label,
                 len(missing),
                 ", ".join(missing),
             )
 
+    @staticmethod
+    def _is_real_guid(lemma_guid: str) -> bool:
+        if not lemma_guid:
+            return False
+        lowered = lemma_guid.lower()
+        if lowered in {"", "none", "null"}:
+            return False
+        synthetic = (
+            lemma_guid.startswith(SYNTHETIC_GUID_PREFIX)
+            and lemma_guid[len(SYNTHETIC_GUID_PREFIX) :].isdigit()
+        )
+        return not synthetic
+
+    @staticmethod
+    def _load_pending_glosses(session: Any) -> Set[str]:
+        rows = session.query(PendingImport.english_word).all()
+        return {str(row[0]).strip().lower() for row in rows if row[0]}
+
     # ------------------------------------------------------------------ #
-    # Shared helpers                                                      #
+    # Per-sentence persistence                                            #
     # ------------------------------------------------------------------ #
 
     @staticmethod
-    def _normalize_word_role(raw_role: Any) -> str:
-        return str(raw_role or "").strip().lower()
+    def _store_sentence(
+        session: Any,
+        *,
+        source_name: str,
+        document_language: str,
+        sentence_text: str,
+        translations: Dict[str, str],
+        english_words: List[Dict[str, Any]],
+    ) -> None:
+        sentence_row = add_sentence(
+            session,
+            source_filename=source_name,
+            notes=f"Imported by genys from {source_name}",
+        )
+        add_sentence_translation(
+            session,
+            sentence=sentence_row,
+            language_code=document_language,
+            translation_text=sentence_text,
+            verified=False,
+        )
+        for lang, translation_text in translations.items():
+            add_sentence_translation(
+                session,
+                sentence=sentence_row,
+                language_code=lang,
+                translation_text=translation_text,
+                verified=False,
+            )
 
-    @staticmethod
-    def _normalize_surface_form(raw_word: Any) -> str:
-        return str(raw_word or "").strip()
+        for position, word_entry in enumerate(english_words):
+            role = str(word_entry.get("role") or "").strip().lower() or "unknown"
+            surface = str(word_entry.get("surface_form") or "").strip()
+            english_gloss = str(word_entry.get("english_gloss") or "").strip()
+            grammatical_form_raw = word_entry.get("grammatical_form")
+            grammatical_form = (
+                str(grammatical_form_raw).strip() if grammatical_form_raw is not None else None
+            )
 
-    @staticmethod
-    def _normalize_english_gloss(raw_gloss: Any) -> str:
-        return str(raw_gloss or "").strip()
+            word_lemma: Optional[Lemma] = None
+            lemma_guid = str(word_entry.get("lemma_guid") or "").strip()
+            if GenysAgent._is_real_guid(lemma_guid):
+                word_lemma = session.query(Lemma).filter(Lemma.guid == lemma_guid).first()
 
-    def _load_pending_glosses(self, session: Any) -> Set[str]:
-        pending_rows = session.query(PendingImport.english_word).all()
-        return {str(row[0]).strip().lower() for row in pending_rows if row[0]}
+            add_sentence_word(
+                session,
+                sentence=sentence_row,
+                position=position,
+                word_role=role,
+                language_code="en",
+                lemma=word_lemma,
+                english_text=english_gloss or None,
+                target_language_text=surface or None,
+                grammatical_form=grammatical_form,
+                declined_form=surface or None,
+            )
 
     # ------------------------------------------------------------------ #
-    # Main processing loop                                                #
+    # Main loop                                                           #
     # ------------------------------------------------------------------ #
 
     def process_document(
@@ -416,15 +280,7 @@ class GenysAgent:
         limit: Optional[int] = None,
         pivot_languages: Optional[Sequence[str]] = None,
     ) -> Dict[str, Any]:
-        """Process a document and stage missing words to PendingImport.
-
-        Three phases per sentence:
-          1. LLM: sentence-level translation into target + pivot languages.
-          2. DB: query for candidate lemmas grouped by English surface word,
-             ranked by how many pivot translations confirm each sense.
-          3. LLM: per-word decomposition with grouped candidates as context.
-        """
-        logger.debug("Phase: initialization - loading input document")
+        """Process a document and stage missing English words to ``PendingImport``."""
         document_path = Path(input_path)
         source_name = document_path.name
         document_text = document_path.read_text(encoding="utf-8")
@@ -439,12 +295,9 @@ class GenysAgent:
             )
             if lang != document_language.strip().lower() and lang not in target_languages
         ]
-        # Phase 1 translates into the union of targets + pivots.
-        phase1_languages = list(target_languages) + effective_pivots
 
         logger.debug(
-            "Phase: initialization complete - document=%s language=%s "
-            "total_sentences=%d selected_sentences=%d target_languages=%s pivot_languages=%s",
+            "Genys init - document=%s language=%s total=%d selected=%d targets=%s pivots=%s",
             source_name,
             document_language,
             len(all_sentences),
@@ -470,158 +323,92 @@ class GenysAgent:
         }
 
         if not selected_sentences:
-            logger.debug("Phase: complete - no sentences selected for processing")
             return stats
 
-        logger.debug("Phase: database session - opening session and loading pending imports")
         session = self.get_session()
+        client = self.get_llm_client()
+        model = self.config.model or "gpt-5.4-mini"
+
         processed_glosses: Set[str] = set()
         gloss_cache: Dict[str, Set[int]] = {}
         derivative_cache: Dict[Tuple[str, str], Set[int]] = {}
 
         try:
             existing_pending_glosses = self._load_pending_glosses(session)
-            logger.debug(
-                "Phase: sentence processing - loaded existing pending imports: %d entries",
-                len(existing_pending_glosses),
-            )
 
             for sentence_index, sentence_text in enumerate(selected_sentences):
                 sentence_label = f"sentence {sentence_index + 1}/{len(selected_sentences)}"
+                logger.debug("Genys start - %s - %r", sentence_label, sentence_text)
 
-                # ── Phase 1: translate ──────────────────────────────────
-                logger.debug("Phase 1 start - %s - sentence=%r", sentence_label, sentence_text)
-                translations = self._phase1_translate(
-                    sentence_text, document_language, phase1_languages
-                )
-                if not translations:
-                    logger.warning("Phase 1 failed for %s, skipping", sentence_label)
-                    stats["errors"] += 1
-                    continue
-                logger.debug("Phase 1 complete - %s", sentence_label)
-
-                # ── Phase 2: candidate lemmas ───────────────────────────
-                logger.debug("Phase 2 start - %s", sentence_label)
-                english_for_lookup = (
-                    sentence_text if document_language == "en" else translations.get("en", "")
-                )
-                if english_for_lookup:
-                    candidate_lemmas = self._phase2_candidate_lemmas(
-                        session,
-                        english_for_lookup,
-                        translations,
-                        effective_pivots,
-                        target_languages,
-                    )
-                else:
-                    candidate_lemmas = {}
-                logger.debug(
-                    "Phase 2 complete - %s - %d English words with candidates",
-                    sentence_label,
-                    len(candidate_lemmas),
+                pipeline_result: TranslateAndDecomposeResult = translate_and_decompose(
+                    sentence_text=sentence_text,
+                    source_language=document_language,
+                    session=session,
+                    client=client,
+                    target_languages=target_languages,
+                    pivot_languages=effective_pivots,
+                    decompose_languages=["en"],
+                    model=model,
                 )
 
-                # ── Phase 3: per-word decomposition ────────────────────
-                logger.debug("Phase 3 start - %s", sentence_label)
-                decomposition_result = self._phase3_decompose(
-                    sentence_text,
-                    document_language,
-                    translations,
-                    candidate_lemmas,
-                )
-                if not decomposition_result.get("success"):
+                if not pipeline_result.phase1_ok:
                     logger.warning(
-                        "Phase 3 decomposition failed at %s: %s",
+                        "Phase 1 failed at %s: %s",
                         sentence_label,
-                        decomposition_result.get("error", "unknown error"),
+                        pipeline_result.phase1_error,
                     )
                     stats["errors"] += 1
                     continue
-                logger.debug("Phase 3 complete - %s", sentence_label)
 
-                words = self._extract_words_from_phase3(decomposition_result)
+                english_decomposition = pipeline_result.decompositions.get("en")
+                if english_decomposition is None or not english_decomposition.success:
+                    err = (
+                        english_decomposition.error
+                        if english_decomposition is not None
+                        else "no English decomposition"
+                    )
+                    logger.warning("Phase 3 failed at %s: %s", sentence_label, err)
+                    stats["errors"] += 1
+                    continue
 
-                # ── Sanity-check decomposition completeness ─────────────
+                words = english_decomposition.words
                 english_text_for_check = (
-                    sentence_text if document_language == "en" else translations.get("en", "")
+                    sentence_text
+                    if document_language == "en"
+                    else pipeline_result.translations.get("en", "")
                 )
                 if english_text_for_check:
                     self._check_decomposition_completeness(
                         english_text_for_check, words, sentence_label
                     )
 
-                # ── Store sentence (optional) ───────────────────────────
                 sentence_has_db_changes = False
                 sentence_new_pending_glosses: Set[str] = set()
 
                 if store_sentences and not dry_run:
-                    sentence_row = add_sentence(
+                    self._store_sentence(
                         session,
-                        source_filename=source_name,
-                        notes=f"Imported by genys from {source_name}",
+                        source_name=source_name,
+                        document_language=document_language,
+                        sentence_text=sentence_text,
+                        translations=pipeline_result.translations,
+                        english_words=words,
                     )
-                    add_sentence_translation(
-                        session,
-                        sentence=sentence_row,
-                        language_code=document_language,
-                        translation_text=sentence_text,
-                        verified=False,
-                    )
-                    for lang, translation_text in translations.items():
-                        add_sentence_translation(
-                            session,
-                            sentence=sentence_row,
-                            language_code=lang,
-                            translation_text=translation_text,
-                            verified=False,
-                        )
-
-                    for word_position, word_entry in enumerate(words):
-                        word_role = self._normalize_word_role(word_entry.get("role")) or "unknown"
-                        surface = self._normalize_surface_form(word_entry.get("surface_form"))
-                        english_gloss = self._normalize_english_gloss(
-                            word_entry.get("english_gloss")
-                        )
-                        grammatical_form_raw = word_entry.get("grammatical_form")
-                        grammatical_form = (
-                            str(grammatical_form_raw).strip()
-                            if grammatical_form_raw is not None
-                            else None
-                        )
-
-                        # Resolve lemma from guid if present and not synthetic
-                        word_lemma: Optional[Lemma] = None
-                        lemma_guid = str(word_entry.get("lemma_guid") or "").strip()
-                        if (
-                            lemma_guid
-                            and not lemma_guid.startswith(_SYNTHETIC_GUID_PREFIX)
-                            and lemma_guid.lower() not in {"", "none", "null"}
-                        ):
-                            word_lemma = (
-                                session.query(Lemma).filter(Lemma.guid == lemma_guid).first()
-                            )
-
-                        add_sentence_word(
-                            session,
-                            sentence=sentence_row,
-                            position=word_position,
-                            word_role=word_role,
-                            language_code="en",
-                            lemma=word_lemma,
-                            english_text=english_gloss or None,
-                            target_language_text=surface or None,
-                            grammatical_form=grammatical_form,
-                            declined_form=surface or None,
-                        )
                     sentence_has_db_changes = True
 
-                # ── Stage pending imports ───────────────────────────────
+                # ── Stage pending imports ─────────────────────────────────
+                english_sentence_for_context = (
+                    sentence_text
+                    if document_language == "en"
+                    else pipeline_result.translations.get("en", "")
+                )
+
                 for word_entry in words:
                     stats["total_words_extracted"] += 1
-                    surface_form = self._normalize_surface_form(word_entry.get("surface_form"))
-                    english_gloss = self._normalize_english_gloss(word_entry.get("english_gloss"))
-                    role = self._normalize_word_role(word_entry.get("role"))
-                    lemma_guid = self._normalize_surface_form(word_entry.get("lemma_guid"))
+                    surface_form = str(word_entry.get("surface_form") or "").strip()
+                    english_gloss = str(word_entry.get("english_gloss") or "").strip()
+                    role = str(word_entry.get("role") or "").strip().lower()
+                    lemma_guid = str(word_entry.get("lemma_guid") or "").strip()
 
                     if not surface_form or not english_gloss:
                         continue
@@ -634,49 +421,22 @@ class GenysAgent:
                         stats["function_words_skipped"] += 1
                         continue
 
-                    # Words with real (non-synthetic) guids are already in the DB
-                    is_synthetic = (
-                        lemma_guid.startswith(_SYNTHETIC_GUID_PREFIX)
-                        and lemma_guid[len(_SYNTHETIC_GUID_PREFIX) :].isdigit()
-                    )
-                    has_real_guid = (
-                        bool(lemma_guid)
-                        and lemma_guid.lower() not in {"", "none", "null"}
-                        and not is_synthetic
-                    )
-                    if has_real_guid:
+                    if self._is_real_guid(lemma_guid):
                         stats["already_in_database"] += 1
-                        logger.debug(
-                            "Phase 3 - %s - word already in database (guid=%s): %s",
-                            sentence_label,
-                            lemma_guid,
-                            english_gloss,
-                        )
                         continue
 
                     concept_key = f"gloss:{english_gloss.lower()}"
                     if concept_key in processed_glosses:
-                        logger.debug(
-                            "Phase 3 - %s - skipping concept already processed: %s",
-                            sentence_label,
-                            concept_key,
-                        )
                         continue
                     processed_glosses.add(concept_key)
 
                     normalized_gloss = english_gloss.strip().lower()
                     if normalized_gloss in existing_pending_glosses:
                         stats["existing_pending"] += 1
-                        logger.debug(
-                            "Phase 3 - %s - concept already in pending imports: %s",
-                            sentence_label,
-                            normalized_gloss,
-                        )
                         continue
 
                     mapped_pos_type = ROLE_POS_MAP.get(role)
 
-                    # Check for duplicate: direct lemma match or derivative form match
                     direct_lemma_ids = self._lemma_ids_for_english_gloss(
                         session, normalized_gloss, gloss_cache
                     )
@@ -690,11 +450,6 @@ class GenysAgent:
                         }
                     if direct_lemma_ids:
                         stats["already_in_database"] += 1
-                        logger.debug(
-                            "Phase 3 - %s - word already in database as lemma: %s",
-                            sentence_label,
-                            normalized_gloss,
-                        )
                         continue
 
                     form_lemma_ids = self._lemma_ids_for_derivative(
@@ -710,16 +465,8 @@ class GenysAgent:
                         }
                     if form_lemma_ids:
                         stats["already_in_database"] += 1
-                        logger.debug(
-                            "Phase 3 - %s - word already in database as derivative form: %s",
-                            sentence_label,
-                            normalized_gloss,
-                        )
                         continue
-                    # Use the English sentence text as context for LLM disambiguation
-                    english_sentence = (
-                        sentence_text if document_language == "en" else translations.get("en", "")
-                    )
+
                     pending_import = PendingImport(
                         english_word=english_gloss,
                         definition=english_gloss,
@@ -730,40 +477,27 @@ class GenysAgent:
                         source=f"genys/{source_name}",
                         frequency_rank=None,
                         notes=f"From document: {source_name}",
-                        example_sentence=english_sentence or None,
+                        example_sentence=english_sentence_for_context or None,
                     )
 
                     stats["staged_for_review"] += 1
-                    logger.debug(
-                        "Phase 3 - %s - staged pending import - gloss=%s pos=%s surface=%r",
-                        sentence_label,
-                        english_gloss,
-                        mapped_pos_type,
-                        surface_form,
-                    )
                     if not dry_run:
                         session.add(pending_import)
                         sentence_has_db_changes = True
                         sentence_new_pending_glosses.add(normalized_gloss)
 
                 if not dry_run and sentence_has_db_changes:
-                    logger.debug("Phase: %s - committing transaction", sentence_label)
                     session.commit()
                     existing_pending_glosses.update(sentence_new_pending_glosses)
-                elif dry_run:
-                    logger.debug("Phase: %s - dry run, skipping commit", sentence_label)
 
                 if throttle_seconds > 0 and sentence_index < len(selected_sentences) - 1:
-                    logger.debug("Phase: %s - throttling %.2fs", sentence_label, throttle_seconds)
                     time.sleep(throttle_seconds)
 
         except Exception:
-            logger.exception("Phase: error - rolling back transaction")
+            logger.exception("Genys aborted - rolling back transaction")
             session.rollback()
             raise
         finally:
-            logger.debug("Phase: cleanup - closing database session")
             session.close()
 
-        logger.debug("Phase: complete - processing finished")
         return stats
