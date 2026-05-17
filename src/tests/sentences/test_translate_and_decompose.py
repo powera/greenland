@@ -81,36 +81,30 @@ def test_pipeline_translates_and_decomposes_english_by_default() -> None:
         "uk": "Я читаю книгу",
         "kn": "ನಾನು ಪುಸ್ತಕ ಓದುತ್ತೇನೆ",
     }
-    phase3_en_payload = {
-        "languages": [
+    phase3_payload = {
+        "en": "I read a book",
+        "words_en": [
             {
-                "language_code": "en",
-                "translation": "I read a book",
-                "word_count": 4,
-                "words": [
-                    {
-                        "position": 0,
-                        "role": "pronoun",
-                        "english_gloss": "I",
-                        "surface_form": "I",
-                        "grammatical_form": "subject",
-                        "lemma_guid": "SYN1",
-                        "lemma": "I",
-                    },
-                    {
-                        "position": 1,
-                        "role": "verb",
-                        "english_gloss": "read",
-                        "surface_form": "read",
-                        "grammatical_form": "present",
-                        "lemma_guid": "SYN2",
-                        "lemma": "read",
-                    },
-                ],
-            }
-        ]
+                "position": 0,
+                "role": "pronoun",
+                "english_gloss": "I",
+                "surface_form": "I",
+                "grammatical_form": "subject",
+                "lemma_guid": "SYN1",
+                "lemma": "I",
+            },
+            {
+                "position": 1,
+                "role": "verb",
+                "english_gloss": "read",
+                "surface_form": "read",
+                "grammatical_form": "present",
+                "lemma_guid": "SYN2",
+                "lemma": "read",
+            },
+        ],
     }
-    client = _ScriptedLLMClient([phase1_payload, phase3_en_payload])
+    client = _ScriptedLLMClient([phase1_payload, phase3_payload])
 
     result = translate_and_decompose(
         sentence_text="Leo un libro",
@@ -143,14 +137,8 @@ def test_pipeline_drops_source_language_from_targets() -> None:
         "kn": "ನಾನು ಓದುತ್ತೇನೆ",
     }
     phase3_en_payload = {
-        "languages": [
-            {
-                "language_code": "en",
-                "translation": "I read",
-                "word_count": 0,
-                "words": [],
-            }
-        ]
+        "en": "I read",
+        "words_en": [],
     }
     client = _ScriptedLLMClient([phase1_payload, phase3_en_payload])
 
@@ -170,8 +158,8 @@ def test_pipeline_drops_source_language_from_targets() -> None:
     assert "fr" in phase1_schema["properties"]
 
 
-def test_pipeline_runs_phase3_per_requested_language() -> None:
-    """Multiple ``decompose_languages`` mean multiple Phase 3 calls."""
+def test_pipeline_runs_phase3_in_one_combined_call() -> None:
+    """Multiple ``decompose_languages`` share a single combined Phase 3 call."""
     phase1_payload = {
         "fr": "Je lis",
         "lt": "Aš skaitau",
@@ -179,27 +167,13 @@ def test_pipeline_runs_phase3_per_requested_language() -> None:
         "uk": "Я читаю",
         "kn": "ನಾನು ಓದುತ್ತೇನೆ",
     }
-    fr_decomposition = {
-        "languages": [
-            {
-                "language_code": "fr",
-                "translation": "Je lis",
-                "word_count": 2,
-                "words": [],
-            }
-        ]
+    phase3_payload = {
+        "fr": "Je lis",
+        "words_fr": [],
+        "lt": "Aš skaitau",
+        "words_lt": [],
     }
-    lt_decomposition = {
-        "languages": [
-            {
-                "language_code": "lt",
-                "translation": "Aš skaitau",
-                "word_count": 2,
-                "words": [],
-            }
-        ]
-    }
-    client = _ScriptedLLMClient([phase1_payload, fr_decomposition, lt_decomposition])
+    client = _ScriptedLLMClient([phase1_payload, phase3_payload])
 
     result = translate_and_decompose(
         sentence_text="I read",
@@ -213,7 +187,7 @@ def test_pipeline_runs_phase3_per_requested_language() -> None:
     assert result.phase1_ok
     assert set(result.decompositions.keys()) == {"fr", "lt"}
     assert all(d.success for d in result.decompositions.values())
-    assert len(client.calls) == 3  # 1 translate + 2 decompose
+    assert len(client.calls) == 2  # 1 translate + 1 combined decompose
 
 
 def test_pipeline_reports_phase1_failure() -> None:
@@ -234,8 +208,8 @@ def test_pipeline_reports_phase1_failure() -> None:
     assert result.decompositions == {}
 
 
-def test_pipeline_records_phase3_failure_without_aborting() -> None:
-    """Phase 3 failure for one language is recorded but doesn't stop other languages."""
+def test_pipeline_records_phase3_failure_for_every_language() -> None:
+    """A combined Phase 3 LLM failure marks each requested language as failed."""
     phase1_payload = {
         "fr": "Je lis",
         "lt": "Aš skaitau",
@@ -243,22 +217,8 @@ def test_pipeline_records_phase3_failure_without_aborting() -> None:
         "uk": "Я читаю",
         "kn": "ನಾನು ಓದುತ್ತೇನೆ",
     }
-    good_decomposition = {
-        "languages": [
-            {
-                "language_code": "fr",
-                "translation": "Je lis",
-                "word_count": 2,
-                "words": [],
-            }
-        ]
-    }
 
-    client = _ScriptedLLMClient([phase1_payload, good_decomposition])
-    # Third call (lt) will raise because no more scripted responses exist; we
-    # need to inject a failing response instead. Re-do with a richer stub.
-
-    class _MixedClient:
+    class _FailingPhase3Client:
         def __init__(self) -> None:
             self.call_count = 0
 
@@ -266,23 +226,23 @@ def test_pipeline_records_phase3_failure_without_aborting() -> None:
             self.call_count += 1
             if self.call_count == 1:
                 return _FakeResponse(phase1_payload)
-            if self.call_count == 2:
-                return _FakeResponse(good_decomposition)
-            raise RuntimeError("LT decomposition exploded")
+            raise RuntimeError("decomposition exploded")
 
-    client2 = _MixedClient()
+    client = _FailingPhase3Client()
     result = translate_and_decompose(
         sentence_text="I read",
         source_language="en",
         session=_make_session_with_no_candidates(),
-        client=client2,
+        client=client,
         target_languages=["fr", "lt"],
         decompose_languages=["fr", "lt"],
     )
     assert result.phase1_ok
-    assert result.decompositions["fr"].success
+    assert set(result.decompositions.keys()) == {"fr", "lt"}
+    assert not result.decompositions["fr"].success
     assert not result.decompositions["lt"].success
-    assert "LT decomposition exploded" in (result.decompositions["lt"].error or "")
+    assert "decomposition exploded" in (result.decompositions["fr"].error or "")
+    assert "decomposition exploded" in (result.decompositions["lt"].error or "")
 
 
 def test_decomposed_language_dataclass_defaults() -> None:

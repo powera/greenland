@@ -15,16 +15,10 @@ Phases
    every requested target + pivot language. No word breakdown.
 2. **Phase 2 (DB)** — for each English surface word, look up candidate lemmas
    ranked by pivot-language agreement. Pure database work, no LLM.
-3. **Phase 3 (LLM, per target language)** — word-by-word decomposition of one
-   translation, with the candidate lemmas surfaced as disambiguation hints.
-
-Why per-language Phase 3?
--------------------------
-Asking the LLM to decompose every language in one call (the previous shape of
-``sentences.translation.translate_sentence``) muddies the grammar slots: the
-model averages across languages and produces lower-quality per-word entries
-for morphologically rich languages. One call per language is more LLM-expensive
-but yields cleaner SentenceWord rows.
+3. **Phase 3 (LLM, combined)** — one call decomposes every requested target
+   translation into per-word entries, with the candidate lemmas surfaced as
+   disambiguation hints. (A per-language helper, :func:`decompose_language`,
+   remains defined but unused for callers that may want to fan out later.)
 """
 
 import logging
@@ -37,12 +31,16 @@ from sqlalchemy.orm import Session
 
 from clients.unified_client import UnifiedLLMClient
 from langtools.dialect_overrides import get_dialect_display_name, get_llm_prompt_note
+from langtools.directions import get_language_direction_note
 from sentences.candidate_lookup import (
     DEFAULT_PIVOT_LANGUAGES,
     CandidateLemma,
     find_candidate_lemmas_from_translations,
 )
 from sentences.decomposition import (
+    build_multi_language_decomposition_context,
+    build_multi_language_decomposition_prompt,
+    build_multi_language_decomposition_schema,
     build_sentence_decomposition_context,
     build_sentence_decomposition_prompt,
     build_single_language_decomposition_schema,
@@ -213,10 +211,16 @@ def translate_sentence_text(
     target_language_lines: List[str] = []
     for lang in normalized_targets:
         display_name = get_dialect_display_name(lang)
-        note = get_llm_prompt_note(lang)
+        notes: List[str] = []
+        direction_note = get_language_direction_note(lang)
+        if direction_note:
+            notes.append(direction_note.lstrip("- ").strip())
+        dialect_note = get_llm_prompt_note(lang)
+        if dialect_note:
+            notes.append(dialect_note)
         line = f"- {display_name} ({lang})"
-        if note:
-            line += f": {note}"
+        if notes:
+            line += ": " + "; ".join(notes)
         target_language_lines.append(line)
 
     prompt = get_prompt("sentence_decomposition", "translate_only").format(
@@ -407,6 +411,108 @@ def decompose_language(
     )
 
 
+def decompose_languages_combined(
+    *,
+    source_sentence: str,
+    source_language: str,
+    target_translations: Dict[str, str],
+    helper_translations: List[Dict[str, str]],
+    candidate_lemmas_by_english_word: Dict[str, List[CandidateLemma]],
+    client: UnifiedLLMClient,
+    model: str = DEFAULT_MODEL,
+) -> Dict[str, DecomposedLanguage]:
+    """Phase 3 (combined): decompose every provided translation in a single LLM call.
+
+    ``target_translations`` maps language_code -> already-known translation; the
+    LLM is instructed not to retranslate. Returns one ``DecomposedLanguage`` per
+    requested language. On LLM failure every language is returned with
+    ``success=False`` and the same error string.
+    """
+    if not target_translations:
+        return {}
+
+    target_languages = list(target_translations.keys())
+
+    prompt = build_multi_language_decomposition_prompt(
+        source_sentence=source_sentence,
+        source_language=source_language,
+        target_translations=target_translations,
+        helper_translations=helper_translations,
+        candidate_lemmas_by_english_word=_candidates_for_prompt(candidate_lemmas_by_english_word),
+    )
+    context = build_multi_language_decomposition_context()
+    schema = build_multi_language_decomposition_schema(target_languages=target_languages)
+
+    result = query_sentence_decomposition(
+        prompt=prompt,
+        client=client,
+        model=model,
+        json_schema=schema,
+        context=context,
+    )
+    if not result.get("success"):
+        error = str(result.get("error", "unknown error"))
+        return {
+            lang: DecomposedLanguage(
+                language_code=lang,
+                translation=text,
+                success=False,
+                error=error,
+            )
+            for lang, text in target_translations.items()
+        }
+
+    decompositions: Dict[str, DecomposedLanguage] = {}
+    for lang, target_translation in target_translations.items():
+        raw_words = result.get(f"words_{lang}")
+        words: List[Dict[str, Any]] = []
+        if isinstance(raw_words, list):
+            words = [w for w in raw_words if isinstance(w, dict)]
+
+        translation_tokens, missing_tokens = _find_missing_surface_forms(
+            target_language=lang,
+            target_translation=target_translation,
+            words=words,
+        )
+
+        if missing_tokens:
+            usage = result.get("_usage") if isinstance(result, dict) else None
+            tokens_out: Any = usage.get("tokens_out") if isinstance(usage, dict) else None
+            tokens_in: Any = usage.get("tokens_in") if isinstance(usage, dict) else None
+            logger.warning(
+                "Sentence decomposition missing surface forms for language=%s "
+                "(translation=%r): missing=%s | translation_tokens=%d, "
+                "returned_words=%d, model=%s, tokens_in=%s, tokens_out=%s",
+                lang,
+                target_translation,
+                missing_tokens,
+                len(translation_tokens),
+                len(words),
+                model,
+                tokens_in,
+                tokens_out,
+            )
+            if words:
+                last_surface = words[-1].get("surface_form")
+                last_position = words[-1].get("position")
+                logger.warning(
+                    "  Last returned word for %s: position=%s, surface_form=%r "
+                    "(if this is mid-sentence the LLM likely truncated)",
+                    lang,
+                    last_position,
+                    last_surface,
+                )
+
+        decompositions[lang] = DecomposedLanguage(
+            language_code=lang,
+            translation=target_translation,
+            words=words,
+            success=True,
+            missing_surface_forms=missing_tokens,
+        )
+    return decompositions
+
+
 # --------------------------------------------------------------------------- #
 # Orchestration                                                                #
 # --------------------------------------------------------------------------- #
@@ -509,21 +615,16 @@ def translate_and_decompose(
     else:
         languages_to_decompose = [lang.strip().lower() for lang in decompose_languages if lang]
 
-    # Build helper translations once. The decomposition for language X uses
-    # every OTHER known translation as helper context, plus the original source.
     all_known: Dict[str, str] = dict(translations)
     if normalized_source not in all_known:
         all_known[normalized_source] = sentence_text
 
-    for target_language in languages_to_decompose:
-        # For "en" Phase 3, the anchor sentence is the English text itself.
-        if target_language == "en":
-            anchor_text = english_for_lookup
-            anchor_language = "en"
-        else:
-            anchor_text = english_for_lookup or sentence_text
-            anchor_language = "en" if english_for_lookup else normalized_source
+    # Anchor sentence is the English text when available, else the source.
+    anchor_text = english_for_lookup or sentence_text
+    anchor_language = "en" if english_for_lookup else normalized_source
 
+    target_translations: Dict[str, str] = {}
+    for target_language in languages_to_decompose:
         target_translation = all_known.get(target_language)
         if not target_translation:
             result.decompositions[target_language] = DecomposedLanguage(
@@ -541,22 +642,24 @@ def translate_and_decompose(
                 error="No anchor English text available for decomposition",
             )
             continue
+        target_translations[target_language] = target_translation
 
+    if target_translations:
         helper_translations = [
             {"language_code": lang, "translation": text}
             for lang, text in all_known.items()
-            if lang != target_language and lang != anchor_language
+            if lang not in target_translations and lang != anchor_language
         ]
 
-        result.decompositions[target_language] = decompose_language(
+        combined = decompose_languages_combined(
             source_sentence=anchor_text,
             source_language=anchor_language,
-            target_language=target_language,
-            target_translation=target_translation,
+            target_translations=target_translations,
             helper_translations=helper_translations,
             candidate_lemmas_by_english_word=result.candidate_lemmas,
             client=client,
             model=model,
         )
+        result.decompositions.update(combined)
 
     return result

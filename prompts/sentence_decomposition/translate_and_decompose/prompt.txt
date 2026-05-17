@@ -6,7 +6,9 @@ Word translations for reference:
 Candidate lemmas (prefer these GUIDs when a word in the sentence matches one of these meanings):
 {candidate_lemmas}
 
-Translate this sentence naturally into: {target_language_names}.
+Translate this sentence naturally into each of these languages:
+
+{target_languages_with_notes}
 
 {english_instruction}
 
