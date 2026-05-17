@@ -25,13 +25,14 @@ from clients.batch_queue import (
     create_batch_database_session,
 )
 from clients.openai.batch_client import OpenAIBatchClient
+from sentences.translate_and_decompose import lookup_candidate_lemmas
 from sentences.translation import build_response_schema, build_translation_prompt
-from storage.models.schema import Sentence, SentenceTranslation, SentenceWord
+from storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord
 from workqueue.tools import workqueue_payload_handler
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_LANGUAGES: List[str] = ["fr", "zh", "lt", "es"]
+_DEFAULT_LANGUAGES: List[str] = ["fr", "zh", "lt", "es", "bn", "uk", "kn"]
 _AGENT_NAME = "barsukas_decompose"
 _OPERATION_TYPE = "decompose_sentence"
 _BATCH_ENDPOINT = "/v1/chat/completions"
@@ -83,12 +84,13 @@ def handle_sentences_translate_batch_submit(
                 skipped.append(sentence_id)
                 continue
 
-            existing_languages = {
-                row.language_code
+            existing_translations: Dict[str, str] = {
+                row.language_code: row.translation_text
                 for row in session.query(SentenceTranslation)
                 .filter_by(sentence_id=sentence_id)
                 .all()
             }
+            existing_languages = set(existing_translations.keys())
             if not existing_languages:
                 logger.warning("Sentence %s has no translations; cannot build prompt", sentence_id)
                 skipped.append(sentence_id)
@@ -105,6 +107,17 @@ def handle_sentences_translate_batch_submit(
 
             request_targets = [lang for lang in target_languages if lang != source_language]
 
+            candidates = lookup_candidate_lemmas(
+                session=session,
+                translations=existing_translations,
+                source_languages=list(existing_translations.keys()),
+            )
+            candidate_lemma_models: List[Lemma] = []
+            for candidate in candidates:
+                lemma_model = session.query(Lemma).filter_by(guid=candidate.guid).first()
+                if lemma_model is not None:
+                    candidate_lemma_models.append(lemma_model)
+
             try:
                 context, prompt = build_translation_prompt(
                     sentence,
@@ -112,6 +125,7 @@ def handle_sentences_translate_batch_submit(
                     session,
                     include_english=include_english,
                     source_language=source_language,
+                    candidate_lemmas=candidate_lemma_models,
                 )
             except ValueError as exc:
                 logger.warning(

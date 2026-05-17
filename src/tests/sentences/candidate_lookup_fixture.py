@@ -303,11 +303,11 @@ def add_test_sentence(
 ) -> Sentence:
     """Create a Sentence with SentenceTranslation rows for each provided language.
 
-    The English translation (``translations_by_language["en"]``) is required —
-    candidate_lookup operates on it.
+    Multi-language candidate lookup accepts sentences without an English
+    translation; tests for that path call this fixture without an ``en`` entry.
     """
-    if "en" not in translations_by_language:
-        raise ValueError("translations_by_language must include an 'en' entry")
+    if not translations_by_language:
+        raise ValueError("translations_by_language must be non-empty")
 
     sentence = add_sentence(session, source_filename="candidate_lookup_fixture")
     for lang, text in translations_by_language.items():

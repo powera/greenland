@@ -1,15 +1,15 @@
-"""Per-English-word candidate lemma lookup for sentence decomposition.
+"""Multi-language candidate lemma lookup for sentence decomposition.
 
-Given a sentence with an English translation and pivot-language translations
-(stored as SentenceTranslation rows), produce a grouped mapping from each
-English content word to a ranked list of candidate lemmas. The ranking uses
-pivot-language evidence: a candidate lemma scores higher when more pivot
-translations of the sentence contain a translation or derivative form of
-that lemma.
+Given a sentence with translations in several languages, produce a flat ranked
+list of candidate lemmas for the sentence as a whole. Candidates are sourced
+from every language for which the sentence has a translation: any lemma whose
+``lemma_text`` or ``DerivativeForm`` matches a token in some language's
+translation becomes a candidate. The ranking score for each candidate is the
+number of those languages whose translation contains a matching form.
 
-This is the machinery that turns an ambiguous English word like "can" into
-a list [can (modal), can (container)] with the right sense on top, given
-pivot translations that only render one of the senses.
+The score is an internal sort key only; it is not surfaced to the LLM. The
+Phase-3 prompt receives an ungrouped list of CandidateLemma rows in score
+order. Stage-3 decomposition selects/validates per word.
 """
 
 import logging
@@ -21,18 +21,18 @@ from sqlalchemy.orm import Session
 
 from langtools.tokenizer import tokenize
 from sentences.analysis import SUBSTRING_MATCH_LANGUAGES
-from storage.models.schema import DerivativeForm, Lemma, SentenceTranslation
+from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation, SentenceTranslation
 from storage.translation_helpers import LANGUAGE_FIELDS, get_translation
 
 logger = logging.getLogger(__name__)
 
-# Default pivot languages for disambiguation. Typologically diverse so at
-# least one usually distinguishes any given English sense ambiguity.
-DEFAULT_PIVOT_LANGUAGES: List[str] = ["bn", "uk", "kn"]
+# Languages searched for candidate lemmas (their tokens are matched against
+# Lemma.lemma_text / DerivativeForm). These are the languages a sentence is
+# expected to be translated into during the pipeline.
+DEFAULT_SOURCE_LANGUAGES: List[str] = ["en", "fr", "lt", "zh", "es", "bn", "uk", "kn"]
 
-# Default cap on candidates per English word. Set high enough to let the LLM
-# see legitimate alternatives but low enough to keep the prompt tight.
-DEFAULT_MAX_CANDIDATES_PER_WORD = 5
+# Cap on the flat candidate list passed to the LLM.
+DEFAULT_MAX_CANDIDATES = 30
 
 # Characters stripped from token boundaries before matching.
 _PUNCTUATION_STRIP = ".,!?;:\"'()[]{}—-…"
@@ -52,7 +52,7 @@ def _forms_match(token: str, lemma_form: str, language_code: str) -> bool:
 
 @dataclass
 class CandidateLemma:
-    """One candidate lemma for an English surface word in a sentence."""
+    """One candidate lemma for a sentence."""
 
     guid: str
     lemma_text: str
@@ -60,12 +60,11 @@ class CandidateLemma:
     pos: str
     definition: str
     translations: Dict[str, str] = field(default_factory=dict)
-    # Number of pivot languages whose sentence translation contains a
-    # translation/derivative form of this lemma. Higher = more evidence for
-    # this sense.
-    pivot_match_score: int = 0
-    # Which pivot languages confirmed this lemma (useful for debugging).
-    confirmed_pivots: List[str] = field(default_factory=list)
+    # Number of source languages whose sentence translation contains a known
+    # form of this lemma. Used only as a sort key, not surfaced to the LLM.
+    match_score: int = 0
+    # Languages whose translation matched (debug/tests).
+    matched_languages: List[str] = field(default_factory=list)
 
 
 def _normalize_token(token: str) -> str:
@@ -73,31 +72,8 @@ def _normalize_token(token: str) -> str:
     return token.strip(_PUNCTUATION_STRIP).strip().lower()
 
 
-def _unique_tokens(text: str, language_code: str) -> List[str]:
-    """Tokenize and return unique tokens (lowercased, de-punctuated).
-
-    No grammatical/function-word filtering — that would drop legitimate
-    ambiguity drivers like English "can" (modal vs. container). Tokens that
-    turn out to have no lemma candidates in the DB are dropped later.
-    Order preserved, duplicates removed.
-    """
-    seen: Set[str] = set()
-    out: List[str] = []
-    for raw in tokenize(text, language_code):
-        token = _normalize_token(raw)
-        if not token or token in seen:
-            continue
-        seen.add(token)
-        out.append(token)
-    return out
-
-
 def _all_tokens(text: str, language_code: str) -> List[str]:
-    """Tokenize and return all tokens (lowercased, de-punctuated) without filtering.
-
-    Used for scanning pivot translations, where we want to match on any form
-    that appears regardless of whether English considers it grammatical.
-    """
+    """Tokenize and return all tokens (lowercased, de-punctuated)."""
     out: List[str] = []
     for raw in tokenize(text, language_code):
         token = _normalize_token(raw)
@@ -106,52 +82,103 @@ def _all_tokens(text: str, language_code: str) -> List[str]:
     return out
 
 
-def _find_english_candidate_lemmas(session: Session, english_token: str) -> List[Lemma]:
-    """Find all Lemma rows plausibly matching an English surface word.
+def _find_candidate_lemmas_in_language(
+    session: Session, language_code: str, token: str
+) -> List[Lemma]:
+    """Find all Lemma rows plausibly matching a surface token in one language.
 
-    Covers exact + case-insensitive lemma_text and derivative forms keyed in
-    the English DerivativeForm table (so "playing" resolves to the "play"
-    lemma). Returns deduped lemmas.
+    For English (``en``): match by ``Lemma.lemma_text`` (case-insensitive) and
+    by English-coded ``DerivativeForm`` rows.
+
+    For other languages: match against the language-specific translation
+    column on ``Lemma`` (via ``LANGUAGE_FIELDS``) and against ``DerivativeForm``
+    rows for that language.
     """
-    # Exact / case-insensitive lemma_text match.
-    direct = session.query(Lemma).filter(func.lower(Lemma.lemma_text) == english_token).all()
-
-    # English derivative forms (e.g., "playing" -> "play" lemma).
-    form_rows = (
-        session.query(DerivativeForm.lemma_id)
-        .filter(
-            DerivativeForm.language_code == "en",
-            func.lower(DerivativeForm.derivative_form_text) == english_token,
-        )
-        .all()
-    )
-    form_lemma_ids = {row[0] for row in form_rows}
-
     seen_ids: Set[int] = set()
     out: List[Lemma] = []
-    for lemma in direct:
-        if lemma.id not in seen_ids:
-            seen_ids.add(lemma.id)
-            out.append(lemma)
-    if form_lemma_ids - seen_ids:
-        extra = session.query(Lemma).filter(Lemma.id.in_(form_lemma_ids - seen_ids)).all()
+
+    # Base-translation match. English lives on Lemma.lemma_text; every other
+    # supported language lives on LemmaTranslation.
+    field_info = LANGUAGE_FIELDS.get(language_code)
+    if field_info is not None:
+        _field_name, _display, use_translation_table = field_info
+        if use_translation_table:
+            if language_code in SUBSTRING_MATCH_LANGUAGES:
+                # CJK: ask SQL for "field contains token"; the opposite
+                # direction ("token contains field") is recovered at scoring
+                # time and via derivative-form / other-language matches.
+                trans_rows = (
+                    session.query(LemmaTranslation.lemma_id)
+                    .filter(
+                        LemmaTranslation.language_code == language_code,
+                        LemmaTranslation.translation.like(f"%{token}%"),
+                    )
+                    .all()
+                )
+            else:
+                trans_rows = (
+                    session.query(LemmaTranslation.lemma_id)
+                    .filter(
+                        LemmaTranslation.language_code == language_code,
+                        func.lower(LemmaTranslation.translation) == token,
+                    )
+                    .all()
+                )
+            trans_lemma_ids = {row[0] for row in trans_rows}
+            if trans_lemma_ids:
+                direct = session.query(Lemma).filter(Lemma.id.in_(trans_lemma_ids)).all()
+                for lemma in direct:
+                    if lemma.id not in seen_ids:
+                        seen_ids.add(lemma.id)
+                        out.append(lemma)
+        else:
+            # English: column on Lemma.
+            direct = (
+                session.query(Lemma).filter(func.lower(Lemma.lemma_text) == token).all()
+            )
+            for lemma in direct:
+                if lemma.id not in seen_ids:
+                    seen_ids.add(lemma.id)
+                    out.append(lemma)
+
+    # DerivativeForm match for this language.
+    if language_code in SUBSTRING_MATCH_LANGUAGES:
+        form_rows = (
+            session.query(DerivativeForm.lemma_id, DerivativeForm.derivative_form_text)
+            .filter(DerivativeForm.language_code == language_code)
+            .all()
+        )
+        form_lemma_ids = {
+            row[0]
+            for row in form_rows
+            if row[1] and _forms_match(token, row[1], language_code)
+        }
+    else:
+        form_rows = (
+            session.query(DerivativeForm.lemma_id, DerivativeForm.derivative_form_text)
+            .filter(
+                DerivativeForm.language_code == language_code,
+                func.lower(DerivativeForm.derivative_form_text) == token,
+            )
+            .all()
+        )
+        form_lemma_ids = {row[0] for row in form_rows}
+
+    new_ids = form_lemma_ids - seen_ids
+    if new_ids:
+        extra = session.query(Lemma).filter(Lemma.id.in_(new_ids)).all()
         for lemma in extra:
             if lemma.id not in seen_ids:
                 seen_ids.add(lemma.id)
                 out.append(lemma)
+
     return out
 
 
 def _collect_lemma_forms_in_language(
     session: Session, lemma_id: int, language_code: str
 ) -> List[str]:
-    """Return all known surface strings of a lemma in a language.
-
-    Combines the base translation (from get_translation) with all
-    DerivativeForm.derivative_form_text rows keyed to this lemma + language.
-    Empty / None entries are dropped. Results lowercased and deduped while
-    preserving insertion order.
-    """
+    """Return all known surface strings of a lemma in a language (base + derivatives)."""
     forms: List[str] = []
     seen: Set[str] = set()
 
@@ -164,17 +191,14 @@ def _collect_lemma_forms_in_language(
         seen.add(lowered)
         forms.append(lowered)
 
-    # Base translation
     try:
         lemma = session.get(Lemma, lemma_id)
         if lemma is not None:
             base = get_translation(session, lemma, language_code)
             _push(base)
     except (ValueError, KeyError):
-        # Unsupported language code — treat as no base translation.
         pass
 
-    # Derivative forms in this language
     rows = (
         session.query(DerivativeForm.derivative_form_text)
         .filter(
@@ -189,37 +213,23 @@ def _collect_lemma_forms_in_language(
     return forms
 
 
-def _score_pivot_confirmations(
+def _language_confirms_lemma(
     session: Session,
     lemma_id: int,
-    pivot_tokens_by_language: Dict[str, List[str]],
-) -> Tuple[int, List[str]]:
-    """For one lemma, count how many pivot languages confirm it.
-
-    A language confirms the lemma when at least one of its known forms
-    (translation + derivative forms in that language) matches a token in
-    that language's pivot-sentence tokenization. Returns (score, langs).
-    """
-    score = 0
-    confirmed: List[str] = []
-    for lang, tokens in pivot_tokens_by_language.items():
-        if not tokens:
-            continue
-        lemma_forms = _collect_lemma_forms_in_language(session, lemma_id, lang)
-        if not lemma_forms:
-            continue
-        matched = False
-        for lemma_form in lemma_forms:
-            for token in tokens:
-                if _forms_match(token, lemma_form, lang):
-                    matched = True
-                    break
-            if matched:
-                break
-        if matched:
-            score += 1
-            confirmed.append(lang)
-    return score, confirmed
+    language_code: str,
+    tokens: Sequence[str],
+) -> bool:
+    """True if any known form of the lemma in this language matches some token."""
+    if not tokens:
+        return False
+    lemma_forms = _collect_lemma_forms_in_language(session, lemma_id, language_code)
+    if not lemma_forms:
+        return False
+    for lemma_form in lemma_forms:
+        for token in tokens:
+            if _forms_match(token, lemma_form, language_code):
+                return True
+    return False
 
 
 def _build_candidate(
@@ -227,7 +237,7 @@ def _build_candidate(
     lemma: Lemma,
     translation_languages: Sequence[str],
     score: int,
-    confirmed: List[str],
+    matched_languages: List[str],
 ) -> Optional[CandidateLemma]:
     """Build a CandidateLemma from a Lemma row. Returns None if no GUID."""
     if not lemma.guid:
@@ -249,160 +259,139 @@ def _build_candidate(
         pos=lemma.pos_type,
         definition=lemma.definition_text or "",
         translations=translations,
-        pivot_match_score=score,
-        confirmed_pivots=confirmed,
+        match_score=score,
+        matched_languages=matched_languages,
     )
 
 
 def _run_candidate_lookup(
     session: Session,
-    english_text: str,
-    pivot_translations: Dict[str, str],
-    target_languages: Sequence[str],
-    pivot_languages: Sequence[str],
-    max_candidates_per_word: int,
-) -> Dict[str, List[CandidateLemma]]:
-    """Core candidate-lookup algorithm. Takes plain strings, not sentence IDs."""
-    translation_langs: List[str] = []
-    for lang in list(target_languages) + list(pivot_languages):
-        if lang not in translation_langs:
-            translation_langs.append(lang)
-
-    english_tokens = _unique_tokens(english_text, "en")
-    if not english_tokens:
-        return {}
-
-    pivot_tokens_by_language: Dict[str, List[str]] = {
-        lang: _all_tokens(text, lang) for lang, text in pivot_translations.items() if text
-    }
-
-    result: Dict[str, List[CandidateLemma]] = {}
-    for english_token in english_tokens:
-        lemmas = _find_english_candidate_lemmas(session, english_token)
-        if not lemmas:
+    translations_by_language: Dict[str, str],
+    source_languages: Sequence[str],
+    max_candidates: int,
+) -> List[CandidateLemma]:
+    """Core multi-language candidate lookup. Returns a flat ranked list."""
+    # Tokenize each language's translation once.
+    tokens_by_language: Dict[str, List[str]] = {}
+    unique_tokens_by_language: Dict[str, List[str]] = {}
+    for lang in source_languages:
+        text = translations_by_language.get(lang)
+        if not text:
             continue
-        built: List[CandidateLemma] = []
-        for lemma in lemmas:
-            score, confirmed = _score_pivot_confirmations(
-                session, lemma.id, pivot_tokens_by_language
-            )
-            candidate = _build_candidate(session, lemma, translation_langs, score, confirmed)
-            if candidate is not None:
-                built.append(candidate)
-        if not built:
+        all_toks = _all_tokens(text, lang)
+        if not all_toks:
             continue
+        tokens_by_language[lang] = all_toks
+        seen: Set[str] = set()
+        uniq: List[str] = []
+        for token in all_toks:
+            if token not in seen:
+                seen.add(token)
+                uniq.append(token)
+        unique_tokens_by_language[lang] = uniq
 
-        built.sort(key=lambda c: (-c.pivot_match_score, c.lemma_text.lower(), c.guid))
-        if any(c.pivot_match_score > 0 for c in built):
-            filtered = [c for c in built if c.pivot_match_score > 0]
-        else:
-            filtered = built
-        result[english_token] = filtered[:max_candidates_per_word]
-    return result
+    if not unique_tokens_by_language:
+        return []
+
+    # 1. Source candidate lemmas from every language's tokens.
+    candidates_by_id: Dict[int, Lemma] = {}
+    for lang, tokens in unique_tokens_by_language.items():
+        for token in tokens:
+            for lemma in _find_candidate_lemmas_in_language(session, lang, token):
+                if lemma.id not in candidates_by_id:
+                    candidates_by_id[lemma.id] = lemma
+
+    if not candidates_by_id:
+        return []
+
+    # 2. Score each candidate by # of source languages whose translation
+    #    contains a known form of the lemma.
+    built: List[CandidateLemma] = []
+    for lemma in candidates_by_id.values():
+        score = 0
+        matched: List[str] = []
+        for lang in source_languages:
+            tokens = tokens_by_language.get(lang)
+            if not tokens:
+                continue
+            if _language_confirms_lemma(session, lemma.id, lang, tokens):
+                score += 1
+                matched.append(lang)
+        candidate = _build_candidate(
+            session, lemma, list(source_languages), score, matched
+        )
+        if candidate is not None:
+            built.append(candidate)
+
+    # 3. Sort: score desc, then lemma_text/guid for determinism.
+    built.sort(key=lambda c: (-c.match_score, c.lemma_text.lower(), c.guid))
+    return built[:max_candidates]
 
 
-def find_candidate_lemmas_by_english_word(
+def find_candidate_lemmas_for_sentence(
     session: Session,
     sentence_id: int,
     *,
-    pivot_languages: Optional[Sequence[str]] = None,
-    target_languages: Optional[Sequence[str]] = None,
-    max_candidates_per_word: int = DEFAULT_MAX_CANDIDATES_PER_WORD,
-) -> Dict[str, List[CandidateLemma]]:
-    """Return candidate lemmas grouped by English surface word.
+    source_languages: Optional[Sequence[str]] = None,
+    max_candidates: int = DEFAULT_MAX_CANDIDATES,
+) -> List[CandidateLemma]:
+    """Flat ranked list of candidate lemmas for a sentence.
 
-    The sentence must have an English SentenceTranslation. Pivot-language
-    translations (if stored) drive the ranking: for each English content
-    word, candidate lemmas are scored by how many pivot languages render
-    the sentence using a known translation or derivative form of that lemma.
-
-    Unlike the existing sentences.analysis.find_candidate_lemmas_for_sentence
-    (which reads SentenceWord rows — i.e. post-decomposition), this function
-    works pre-decomposition from raw translation strings.
+    Reads every available ``SentenceTranslation`` row in ``source_languages``
+    (defaults to :data:`DEFAULT_SOURCE_LANGUAGES`), pulls candidate lemmas
+    that match any token in any of those translations, and ranks them by the
+    number of those languages that confirm each candidate via a matching
+    surface form or derivative form.
 
     Args:
         session: Database session.
-        sentence_id: Sentence to analyze. Must have an English translation.
-        pivot_languages: Languages used purely for disambiguation. Defaults
-            to DEFAULT_PIVOT_LANGUAGES. Missing translations are silently
-            skipped.
-        target_languages: Final target languages. Their translations are
-            included in CandidateLemma.translations for prompt rendering,
-            but are NOT used for scoring (to avoid confusing the two roles).
-        max_candidates_per_word: Cap applied after ranking. When the top
-            score is > 0, score-0 candidates are dropped before capping.
+        sentence_id: Sentence to analyze.
+        source_languages: Languages whose translations are searched and used
+            for scoring. Defaults to :data:`DEFAULT_SOURCE_LANGUAGES`.
+        max_candidates: Cap on the returned list.
 
     Returns:
-        {english_surface_word: [CandidateLemma, ...]} — keys are the
-        lowercased English tokens from the sentence, ordered by first
-        appearance. Each value list is sorted by pivot_match_score desc
-        (ties broken by lemma_text for determinism) and capped. Words with
-        no candidates are omitted.
+        Flat list of :class:`CandidateLemma`, sorted by descending match score.
+        Empty when the sentence has no translations in any source language.
     """
-    effective_pivots = list(pivot_languages or DEFAULT_PIVOT_LANGUAGES)
-    effective_targets = list(target_languages or [])
-
-    english_trans = (
+    effective_sources = list(source_languages or DEFAULT_SOURCE_LANGUAGES)
+    rows = (
         session.query(SentenceTranslation)
-        .filter_by(sentence_id=sentence_id, language_code="en")
-        .first()
-    )
-    if english_trans is None:
-        logger.debug("Sentence %s has no English translation; returning empty", sentence_id)
-        return {}
-
-    pivot_translations: Dict[str, str] = {}
-    if effective_pivots:
-        pivot_rows = (
-            session.query(SentenceTranslation)
-            .filter(
-                SentenceTranslation.sentence_id == sentence_id,
-                SentenceTranslation.language_code.in_(effective_pivots),
-            )
-            .all()
+        .filter(
+            SentenceTranslation.sentence_id == sentence_id,
+            SentenceTranslation.language_code.in_(effective_sources),
         )
-        pivot_translations = {row.language_code: row.translation_text for row in pivot_rows}
-
+        .all()
+    )
+    translations_by_language = {row.language_code: row.translation_text for row in rows}
     return _run_candidate_lookup(
         session,
-        english_text=english_trans.translation_text,
-        pivot_translations=pivot_translations,
-        target_languages=effective_targets,
-        pivot_languages=effective_pivots,
-        max_candidates_per_word=max_candidates_per_word,
+        translations_by_language=translations_by_language,
+        source_languages=effective_sources,
+        max_candidates=max_candidates,
     )
 
 
 def find_candidate_lemmas_from_translations(
     session: Session,
     *,
-    english_text: str,
-    pivot_translations: Dict[str, str],
-    pivot_languages: Optional[Sequence[str]] = None,
-    target_languages: Optional[Sequence[str]] = None,
-    max_candidates_per_word: int = DEFAULT_MAX_CANDIDATES_PER_WORD,
-) -> Dict[str, List[CandidateLemma]]:
-    """In-memory variant of find_candidate_lemmas_by_english_word.
+    translations: Dict[str, str],
+    source_languages: Optional[Sequence[str]] = None,
+    max_candidates: int = DEFAULT_MAX_CANDIDATES,
+) -> List[CandidateLemma]:
+    """In-memory variant of :func:`find_candidate_lemmas_for_sentence`.
 
-    Accepts the English sentence and pivot translations as plain strings
-    instead of reading them from SentenceTranslation rows. Use this when the
-    sentence has not yet been persisted (e.g., Genys runs decomposition
-    before deciding whether to store the sentence).
-
-    ``pivot_translations`` should be ``{lang_code: translation_text}``.
-    Entries whose keys are not in ``pivot_languages`` (after defaulting) are
+    ``translations`` is ``{language_code: translation_text}``. Entries whose
+    language codes are not in ``source_languages`` (after defaulting) are
     ignored.
     """
-    effective_pivots = list(pivot_languages or DEFAULT_PIVOT_LANGUAGES)
-    effective_targets = list(target_languages or [])
-    filtered_pivots = {
-        lang: text for lang, text in pivot_translations.items() if lang in effective_pivots
+    effective_sources = list(source_languages or DEFAULT_SOURCE_LANGUAGES)
+    filtered = {
+        lang: text for lang, text in translations.items() if lang in effective_sources and text
     }
     return _run_candidate_lookup(
         session,
-        english_text=english_text,
-        pivot_translations=filtered_pivots,
-        target_languages=effective_targets,
-        pivot_languages=effective_pivots,
-        max_candidates_per_word=max_candidates_per_word,
+        translations_by_language=filtered,
+        source_languages=effective_sources,
+        max_candidates=max_candidates,
     )

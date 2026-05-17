@@ -25,7 +25,7 @@ from clients.unified_client import UnifiedLLMClient
 from langtools.grammatical_words import is_function_word
 from langtools.tokenizer import tokenize
 from sentences.analysis import SUBSTRING_MATCH_LANGUAGES
-from sentences.candidate_lookup import DEFAULT_PIVOT_LANGUAGES
+from sentences.candidate_lookup import DEFAULT_SOURCE_LANGUAGES
 from sentences.translate_and_decompose import (
     SYNTHETIC_GUID_PREFIX,
     TranslateAndDecomposeResult,
@@ -291,7 +291,7 @@ class GenysAgent:
         effective_pivots: List[str] = [
             lang
             for lang in (
-                pivot_languages if pivot_languages is not None else DEFAULT_PIVOT_LANGUAGES
+                pivot_languages if pivot_languages is not None else DEFAULT_SOURCE_LANGUAGES
             )
             if lang != document_language.strip().lower() and lang not in target_languages
         ]

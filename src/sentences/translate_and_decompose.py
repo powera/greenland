@@ -13,8 +13,9 @@ Phases
 ------
 1. **Phase 1 (LLM)** — sentence-level translation of the source sentence into
    every requested target + pivot language. No word breakdown.
-2. **Phase 2 (DB)** — for each English surface word, look up candidate lemmas
-   ranked by pivot-language agreement. Pure database work, no LLM.
+2. **Phase 2 (DB)** — produce a flat ranked list of candidate lemmas for the
+   sentence by matching tokens in every available translation, scored by the
+   number of languages that confirm each lemma. Pure database work, no LLM.
 3. **Phase 3 (LLM, combined)** — one call decomposes every requested target
    translation into per-word entries, with the candidate lemmas surfaced as
    disambiguation hints. (A per-language helper, :func:`decompose_language`,
@@ -33,7 +34,7 @@ from clients.unified_client import UnifiedLLMClient
 from langtools.dialect_overrides import get_dialect_display_name, get_llm_prompt_note
 from langtools.directions import get_language_direction_note
 from sentences.candidate_lookup import (
-    DEFAULT_PIVOT_LANGUAGES,
+    DEFAULT_SOURCE_LANGUAGES,
     CandidateLemma,
     find_candidate_lemmas_from_translations,
 )
@@ -158,7 +159,7 @@ class TranslateAndDecomposeResult:
     source_sentence: str
     source_language: str
     translations: Dict[str, str] = field(default_factory=dict)
-    candidate_lemmas: Dict[str, List[CandidateLemma]] = field(default_factory=dict)
+    candidate_lemmas: List[CandidateLemma] = field(default_factory=list)
     decompositions: Dict[str, DecomposedLanguage] = field(default_factory=dict)
     phase1_error: Optional[str] = None
 
@@ -188,25 +189,27 @@ def _phase1_schema(target_languages: Sequence[str]) -> Dict[str, Any]:
     }
 
 
-def translate_sentence_text(
+def build_phase1_prompt(
     *,
     sentence_text: str,
     source_language: str,
     target_languages: Sequence[str],
-    client: UnifiedLLMClient,
-    model: str = DEFAULT_MODEL,
-) -> Dict[str, str]:
-    """Phase 1: ask the LLM for sentence-level translations only.
+) -> Optional[Tuple[str, str, str, Dict[str, Any], List[str]]]:
+    """Build the Phase-1 sentence-translation prompt.
 
-    Returns a dict mapping language_code -> translated sentence string. Languages
-    the LLM omits or returns empty are dropped silently. On LLM failure returns
-    an empty dict and logs a warning.
+    Returns ``(context, prompt, full_prompt, schema, normalized_targets)`` so both
+    the synchronous path and the batch submit handler can reuse it without
+    duplicating the prompt-assembly logic. Returns ``None`` when there are no
+    usable targets after normalization.
+
+    ``full_prompt`` is the concatenation ``f"{context}\\n\\n{prompt}"`` used by
+    OpenAI Batch (which takes a single ``messages[0].content`` string).
     """
     normalized_targets = normalize_llm_language_codes(
         list(target_languages), operation_name="Phase 1 translation"
     )
     if not normalized_targets:
-        return {}
+        return None
 
     target_language_lines: List[str] = []
     for lang in normalized_targets:
@@ -230,6 +233,32 @@ def translate_sentence_text(
     )
     context = get_context("sentence_decomposition", "translate_only")
     schema = _phase1_schema(normalized_targets)
+    full_prompt = f"{context}\n\n{prompt}"
+    return context, prompt, full_prompt, schema, normalized_targets
+
+
+def translate_sentence_text(
+    *,
+    sentence_text: str,
+    source_language: str,
+    target_languages: Sequence[str],
+    client: UnifiedLLMClient,
+    model: str = DEFAULT_MODEL,
+) -> Dict[str, str]:
+    """Phase 1: ask the LLM for sentence-level translations only.
+
+    Returns a dict mapping language_code -> translated sentence string. Languages
+    the LLM omits or returns empty are dropped silently. On LLM failure returns
+    an empty dict and logs a warning.
+    """
+    built = build_phase1_prompt(
+        sentence_text=sentence_text,
+        source_language=source_language,
+        target_languages=target_languages,
+    )
+    if built is None:
+        return {}
+    context, prompt, _full_prompt, schema, normalized_targets = built
 
     result = query_sentence_decomposition(
         prompt=prompt,
@@ -258,26 +287,22 @@ def translate_sentence_text(
 def lookup_candidate_lemmas(
     *,
     session: Session,
-    english_text: str,
     translations: Dict[str, str],
-    pivot_languages: Sequence[str],
-    target_languages: Sequence[str],
-) -> Dict[str, List[CandidateLemma]]:
-    """Phase 2: rank candidate lemmas for each English content word.
+    source_languages: Sequence[str],
+) -> List[CandidateLemma]:
+    """Phase 2: produce a flat ranked candidate-lemma list for the sentence.
 
-    Pivot translations disambiguate ambiguous English words. Pure DB; no LLM.
-    Returns ``{english_word: [CandidateLemma, ...]}``. Empty dict if no English
-    text is available.
+    Candidates are sourced from tokens in every available translation in
+    ``source_languages`` and ranked by the number of those languages that
+    confirm the lemma. Pure DB; no LLM. Empty list when no usable translation
+    is provided.
     """
-    if not english_text.strip():
-        return {}
-    pivot_subset = {lang: text for lang, text in translations.items() if lang in pivot_languages}
+    if not translations:
+        return []
     return find_candidate_lemmas_from_translations(
         session,
-        english_text=english_text,
-        pivot_translations=pivot_subset,
-        pivot_languages=list(pivot_languages),
-        target_languages=list(target_languages),
+        translations=translations,
+        source_languages=list(source_languages),
     )
 
 
@@ -287,23 +312,20 @@ def lookup_candidate_lemmas(
 
 
 def _candidates_for_prompt(
-    candidates_by_english_word: Dict[str, List[CandidateLemma]],
-) -> Dict[str, List[Dict[str, Any]]]:
+    candidates: List[CandidateLemma],
+) -> List[Dict[str, Any]]:
     """Adapt CandidateLemma dataclasses to the dict shape expected by the prompt builder."""
-    return {
-        english_word: [
-            {
-                "guid": candidate.guid,
-                "lemma": candidate.lemma_text,
-                "disambiguation": candidate.disambiguation,
-                "pos": candidate.pos,
-                "definition": candidate.definition,
-                "translations": candidate.translations,
-            }
-            for candidate in candidates
-        ]
-        for english_word, candidates in candidates_by_english_word.items()
-    }
+    return [
+        {
+            "guid": candidate.guid,
+            "lemma": candidate.lemma_text,
+            "disambiguation": candidate.disambiguation,
+            "pos": candidate.pos,
+            "definition": candidate.definition,
+            "translations": candidate.translations,
+        }
+        for candidate in candidates
+    ]
 
 
 def decompose_language(
@@ -313,7 +335,7 @@ def decompose_language(
     target_language: str,
     target_translation: str,
     helper_translations: List[Dict[str, str]],
-    candidate_lemmas_by_english_word: Dict[str, List[CandidateLemma]],
+    candidate_lemmas: List[CandidateLemma],
     client: UnifiedLLMClient,
     model: str = DEFAULT_MODEL,
 ) -> DecomposedLanguage:
@@ -330,7 +352,7 @@ def decompose_language(
         target_language=target_language,
         target_translation=target_translation,
         helper_translations=helper_translations,
-        candidate_lemmas_by_english_word=_candidates_for_prompt(candidate_lemmas_by_english_word),
+        candidate_lemmas=_candidates_for_prompt(candidate_lemmas),
     )
     context = build_sentence_decomposition_context()
     schema = build_single_language_decomposition_schema()
@@ -417,7 +439,7 @@ def decompose_languages_combined(
     source_language: str,
     target_translations: Dict[str, str],
     helper_translations: List[Dict[str, str]],
-    candidate_lemmas_by_english_word: Dict[str, List[CandidateLemma]],
+    candidate_lemmas: List[CandidateLemma],
     client: UnifiedLLMClient,
     model: str = DEFAULT_MODEL,
 ) -> Dict[str, DecomposedLanguage]:
@@ -438,7 +460,7 @@ def decompose_languages_combined(
         source_language=source_language,
         target_translations=target_translations,
         helper_translations=helper_translations,
-        candidate_lemmas_by_english_word=_candidates_for_prompt(candidate_lemmas_by_english_word),
+        candidate_lemmas=_candidates_for_prompt(candidate_lemmas),
     )
     context = build_multi_language_decomposition_context()
     schema = build_multi_language_decomposition_schema(target_languages=target_languages)
@@ -538,10 +560,11 @@ def translate_and_decompose(
         client: Unified LLM client (already configured/warmed).
         target_languages: Languages to translate into in Phase 1. The source
             language is dropped automatically.
-        pivot_languages: Pivot languages for Phase 2 disambiguation. Defaults
-            to ``DEFAULT_PIVOT_LANGUAGES``. Languages already in
-            ``target_languages`` or equal to ``source_language`` are dropped.
-            Phase 1 also translates into these so Phase 2 has data to work with.
+        pivot_languages: Extra languages added to the Phase 2 candidate-lookup
+            pool alongside the targets. Defaults to ``DEFAULT_SOURCE_LANGUAGES``.
+            Languages already in ``target_languages`` or equal to
+            ``source_language`` are dropped. Phase 1 also translates into these
+            so Phase 2 has data to work with.
         decompose_languages: Languages to run Phase 3 on. Defaults to English
             only — that matches GENYS, which only needs the English breakdown
             to stage pending imports. The HTTP path passes the full target list.
@@ -568,7 +591,8 @@ def translate_and_decompose(
         targets.append(normalized)
 
     pivots_effective: List[str] = []
-    for lang in pivot_languages if pivot_languages is not None else DEFAULT_PIVOT_LANGUAGES:
+    pivot_input = pivot_languages if pivot_languages is not None else DEFAULT_SOURCE_LANGUAGES
+    for lang in pivot_input:
         normalized = lang.strip().lower()
         if not normalized or normalized == normalized_source or normalized in seen:
             continue
@@ -600,14 +624,17 @@ def translate_and_decompose(
     result.translations = translations
 
     # ── Phase 2 ────────────────────────────────────────────────────────────
-    english_for_lookup = sentence_text if normalized_source == "en" else translations.get("en", "")
+    # Source language pool: every translation we have plus the source itself.
+    lookup_translations: Dict[str, str] = dict(translations)
+    if normalized_source not in lookup_translations:
+        lookup_translations[normalized_source] = sentence_text
+    source_language_pool: List[str] = list(lookup_translations.keys())
     result.candidate_lemmas = lookup_candidate_lemmas(
         session=session,
-        english_text=english_for_lookup,
-        translations=translations,
-        pivot_languages=pivots_effective,
-        target_languages=targets,
+        translations=lookup_translations,
+        source_languages=source_language_pool,
     )
+    english_for_lookup = sentence_text if normalized_source == "en" else translations.get("en", "")
 
     # ── Phase 3 ────────────────────────────────────────────────────────────
     if decompose_languages is None:
@@ -656,7 +683,7 @@ def translate_and_decompose(
             source_language=anchor_language,
             target_translations=target_translations,
             helper_translations=helper_translations,
-            candidate_lemmas_by_english_word=result.candidate_lemmas,
+            candidate_lemmas=result.candidate_lemmas,
             client=client,
             model=model,
         )

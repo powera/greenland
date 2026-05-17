@@ -253,20 +253,13 @@ def build_sentence_decomposition_prompt(
     target_translation: str,
     helper_translations: Optional[List[Dict[str, str]]] = None,
     candidate_lemmas: Optional[List[Dict[str, Any]]] = None,
-    candidate_lemmas_by_english_word: Optional[Dict[str, List[Dict[str, Any]]]] = None,
 ) -> str:
     """Build prompt for decomposing one already-provided translation.
 
-    Candidate lemmas can be supplied in two shapes:
-      * ``candidate_lemmas`` — flat list, rendered as a single bullet list.
-      * ``candidate_lemmas_by_english_word`` — grouped by English surface
-        word, rendered as "English word "<token>":" headings with nested
-        candidates. When supplied this takes precedence; it makes ambiguity
-        explicit (e.g., two senses of "can" listed under the same heading).
-
-    Items (in either shape) must be dict-like with keys ``guid``, ``lemma``,
-    ``disambiguation``, ``pos``, ``definition``, and ``translations``
-    (a mapping of language_code -> surface form).
+    ``candidate_lemmas`` is a flat ranked list rendered as a single bullet
+    list. Items must be dict-like with keys ``guid``, ``lemma``,
+    ``disambiguation``, ``pos``, ``definition``, and ``translations`` (a
+    mapping of language_code -> surface form).
     """
     helper_translations = (helper_translations or [])[:3]
     candidate_lemmas = candidate_lemmas or []
@@ -280,19 +273,7 @@ def build_sentence_decomposition_prompt(
     ]
     allowed_languages = [source_language, target_language, *helper_languages]
 
-    if candidate_lemmas_by_english_word:
-        blocks: List[str] = []
-        for english_word, items in candidate_lemmas_by_english_word.items():
-            if not items:
-                continue
-            if len(items) == 1:
-                blocks.append(_format_candidate_line(items[0], allowed_languages))
-            else:
-                lines = [f'English word "{english_word}":']
-                lines.extend(_format_candidate_line(item, allowed_languages) for item in items)
-                blocks.append("\n".join(lines))
-        candidate_lines = "\n".join(blocks) if blocks else "- (none provided)"
-    elif candidate_lemmas:
+    if candidate_lemmas:
         candidate_lines = "\n".join(
             _format_candidate_line(item, allowed_languages) for item in candidate_lemmas
         )
@@ -318,16 +299,18 @@ def build_multi_language_decomposition_prompt(
     source_language: str,
     target_translations: Dict[str, str],
     helper_translations: Optional[List[Dict[str, str]]] = None,
-    candidate_lemmas_by_english_word: Optional[Dict[str, List[Dict[str, Any]]]] = None,
+    candidate_lemmas: Optional[List[Dict[str, Any]]] = None,
 ) -> str:
     """Build prompt for decomposing several already-provided translations in one call.
 
     ``target_translations`` maps language_code -> already-known translation text;
     every entry is decomposed in the response. The LLM is instructed not to
-    retranslate. Candidate-lemma rendering matches
-    :func:`build_sentence_decomposition_prompt`.
+    retranslate. ``candidate_lemmas`` is a flat ranked list rendered as a
+    single bullet list (same item shape as
+    :func:`build_sentence_decomposition_prompt`).
     """
     helper_translations = (helper_translations or [])[:3]
+    candidate_lemmas = candidate_lemmas or []
 
     target_lines = "\n".join(
         f'- {lang} ({LANGUAGE_NAMES.get(lang, lang)}): "{text}"'
@@ -343,18 +326,10 @@ def build_multi_language_decomposition_prompt(
     ]
     allowed_languages = [source_language, *target_translations.keys(), *helper_languages]
 
-    if candidate_lemmas_by_english_word:
-        blocks: List[str] = []
-        for english_word, items in candidate_lemmas_by_english_word.items():
-            if not items:
-                continue
-            if len(items) == 1:
-                blocks.append(_format_candidate_line(items[0], allowed_languages))
-            else:
-                lines = [f'English word "{english_word}":']
-                lines.extend(_format_candidate_line(item, allowed_languages) for item in items)
-                blocks.append("\n".join(lines))
-        candidate_lines = "\n".join(blocks) if blocks else "- (none provided)"
+    if candidate_lemmas:
+        candidate_lines = "\n".join(
+            _format_candidate_line(item, allowed_languages) for item in candidate_lemmas
+        )
     else:
         candidate_lines = "- (none provided)"
 

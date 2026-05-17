@@ -14,7 +14,7 @@ from storage.translation_helpers import (
 from sentences.translation import translate_sentence as do_translation
 from workqueue.tools import workqueue_payload_handler
 
-_DECOMPOSE_LANGUAGES: List[str] = ["fr", "zh", "lt", "es"]
+_DECOMPOSE_LANGUAGES: List[str] = ["fr", "zh", "lt", "es", "bn", "uk", "kn"]
 
 
 def do_translate_sentence(

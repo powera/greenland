@@ -2,7 +2,7 @@
 
 """Routes for viewing batch operations."""
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
 from clients.batch_queue import (
@@ -11,7 +11,7 @@ from clients.batch_queue import (
     BatchRequestStatus,
     create_batch_database_session,
 )
-from clients.openai.batch_client import OpenAIBatchClient
+from clients.openai.batch_client import BatchStatus, OpenAIBatchClient
 
 bp = Blueprint("batch_operations", __name__, url_prefix="/batch-operations")
 
@@ -127,5 +127,36 @@ def view_batch(batch_id: str) -> ResponseReturnValue:
             summary=summary,
             requests=requests,
         )
+    finally:
+        batch_session.close()
+
+
+@bp.route("/<batch_id>/check-status", methods=["POST"])
+def check_batch_status(batch_id: str) -> ResponseReturnValue:
+    """Refresh batch status from OpenAI and retrieve results if completed.
+
+    Always redirects back to the detail page. Status and any retrieval outcome
+    are surfaced via flashed messages.
+    """
+    batch_session = create_batch_database_session()
+    try:
+        manager = BatchQueueManager(batch_session, OpenAIBatchClient())
+        try:
+            info = manager.check_batch_status(batch_id)
+        except Exception as exc:
+            flash(f"Failed to check batch status: {exc}", "danger")
+            return redirect(url_for("batch_operations.view_batch", batch_id=batch_id))
+
+        status = info.get("status")
+        flash(f"OpenAI status: {status}", "info")
+
+        if status == BatchStatus.COMPLETED.value:
+            try:
+                manager.retrieve_batch_results(batch_id)
+                flash("Results retrieved from OpenAI.", "success")
+            except Exception as exc:
+                flash(f"Failed to retrieve results: {exc}", "warning")
+
+        return redirect(url_for("batch_operations.view_batch", batch_id=batch_id))
     finally:
         batch_session.close()

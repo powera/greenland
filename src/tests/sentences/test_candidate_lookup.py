@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
-"""Tests for sentences.candidate_lookup.find_candidate_lemmas_by_english_word.
+"""Tests for sentences.candidate_lookup.
 
 Uses the shared fixture in candidate_lookup_fixture.py to seed an in-memory
 SQLite DB with ~50 real release lemmas plus hand-authored ambiguous entries.
+The lookup is multi-language: candidates are sourced from every translation
+in the configured source languages and ranked by the count of those
+languages that confirm each candidate.
 """
 
 import unittest
-from typing import ClassVar, Dict
+from typing import ClassVar, Dict, List
 
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
 from sentences.candidate_lookup import (
     CandidateLemma,
-    DEFAULT_PIVOT_LANGUAGES,
-    find_candidate_lemmas_by_english_word,
+    DEFAULT_SOURCE_LANGUAGES,
+    find_candidate_lemmas_for_sentence,
     find_candidate_lemmas_from_translations,
 )
 from tests.sentences.candidate_lookup_fixture import (
@@ -22,6 +25,17 @@ from tests.sentences.candidate_lookup_fixture import (
     build_test_engine,
     seed_test_database,
 )
+
+
+def _guids(candidates: List[CandidateLemma]) -> List[str]:
+    return [c.guid for c in candidates]
+
+
+def _find_guid(candidates: List[CandidateLemma], guid: str) -> CandidateLemma:
+    for candidate in candidates:
+        if candidate.guid == guid:
+            return candidate
+    raise AssertionError(f"GUID {guid} not found among {_guids(candidates)}")
 
 
 class CandidateLookupTestCase(unittest.TestCase):
@@ -54,45 +68,31 @@ class TestFixtureIntegrity(CandidateLookupTestCase):
 
 
 class TestUnambiguousWord(CandidateLookupTestCase):
-    def test_single_candidate_returned_for_unambiguous_noun(self) -> None:
+    def test_dog_candidate_returned(self) -> None:
         sentence = add_test_sentence(
             self.session,
             {"en": "The dog runs", "bn": "কুকুর দৌড়ায়", "uk": "Собака біжить", "kn": "ನಾಯಿ ಓಡುತ್ತದೆ"},
         )
-        result = find_candidate_lemmas_by_english_word(
-            self.session, sentence.id, target_languages=["fr", "es"]
-        )
-        self.assertIn("dog", result)
-        dog_candidates = result["dog"]
-        self.assertEqual(len(dog_candidates), 1)
-        self.assertEqual(dog_candidates[0].lemma_text, "dog")
-        self.assertEqual(dog_candidates[0].pos, "noun")
+        candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
+        dog = _find_guid(candidates, _release_dog_guid(self.session))
+        self.assertEqual(dog.lemma_text, "dog")
+        self.assertEqual(dog.pos, "noun")
+        self.assertGreaterEqual(dog.match_score, 1)
 
-    def test_target_language_translations_populated(self) -> None:
+    def test_translations_populated_for_source_languages(self) -> None:
         sentence = add_test_sentence(
             self.session,
             {"en": "The dog runs", "bn": "কুকুর দৌড়ায়"},
         )
-        result = find_candidate_lemmas_by_english_word(
-            self.session, sentence.id, target_languages=["fr", "es", "lt"]
-        )
-        dog_candidate = result["dog"][0]
-        # Release base entries include fr/es/lt.
-        self.assertIn("fr", dog_candidate.translations)
-        self.assertIn("es", dog_candidate.translations)
-        self.assertIn("lt", dog_candidate.translations)
+        candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
+        dog = _find_guid(candidates, _release_dog_guid(self.session))
+        # Release base entries include fr/es/lt/zh.
+        for lang in ("fr", "es", "lt"):
+            self.assertIn(lang, dog.translations)
 
 
 class TestAmbiguityResolution(CandidateLookupTestCase):
-    def _find_guid(self, candidates: list[CandidateLemma], guid: str) -> CandidateLemma:
-        for candidate in candidates:
-            if candidate.guid == guid:
-                return candidate
-        raise AssertionError(f"GUID {guid} not found among {[c.guid for c in candidates]}")
-
-    def test_modal_can_wins_when_pivots_confirm_modal(self) -> None:
-        # Pivot translations render "can" in its modal sense — container
-        # translations (ক্যান / банка / ಕ್ಯಾನ್) are deliberately absent.
+    def test_modal_can_outranks_container_when_pivots_confirm_modal(self) -> None:
         sentence = add_test_sentence(
             self.session,
             {
@@ -102,19 +102,18 @@ class TestAmbiguityResolution(CandidateLookupTestCase):
                 "kn": "ನಾನು ಇಂದು ಸಾಧ್ಯ ಆಡಲು",
             },
         )
-        result = find_candidate_lemmas_by_english_word(
-            self.session, sentence.id, target_languages=["fr", "es", "lt", "zh"]
-        )
-        self.assertIn("can", result)
-        can_candidates = result["can"]
-        # Modal must rank first.
-        self.assertEqual(can_candidates[0].guid, "TEST_CAN_MODAL")
-        # Modal scored by pivot evidence; container scored 0 so it was dropped.
-        self.assertGreater(can_candidates[0].pivot_match_score, 0)
-        guids = [c.guid for c in can_candidates]
-        self.assertNotIn("TEST_CAN_CONTAINER", guids)
+        candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
+        # Both senses come from the English token "can"; modal must score higher.
+        modal = _find_guid(candidates, "TEST_CAN_MODAL")
+        # Container may or may not be present depending on cap, but if it is,
+        # its score must be strictly less than modal's.
+        modal_idx = _guids(candidates).index("TEST_CAN_MODAL")
+        if "TEST_CAN_CONTAINER" in _guids(candidates):
+            container_idx = _guids(candidates).index("TEST_CAN_CONTAINER")
+            self.assertLess(modal_idx, container_idx)
+        self.assertGreaterEqual(modal.match_score, 1)
 
-    def test_container_can_wins_when_pivots_confirm_container(self) -> None:
+    def test_container_can_outranks_modal_when_pivots_confirm_container(self) -> None:
         sentence = add_test_sentence(
             self.session,
             {
@@ -124,86 +123,60 @@ class TestAmbiguityResolution(CandidateLookupTestCase):
                 "kn": "ನಾನು ಒಂದು ಕ್ಯಾನ್ ನೋಡುತ್ತೇನೆ",
             },
         )
-        result = find_candidate_lemmas_by_english_word(
-            self.session, sentence.id, target_languages=["fr", "es"]
-        )
-        self.assertIn("can", result)
-        can_candidates = result["can"]
-        self.assertEqual(can_candidates[0].guid, "TEST_CAN_CONTAINER")
-        self.assertGreater(can_candidates[0].pivot_match_score, 0)
+        candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
+        container = _find_guid(candidates, "TEST_CAN_CONTAINER")
+        container_idx = _guids(candidates).index("TEST_CAN_CONTAINER")
+        if "TEST_CAN_MODAL" in _guids(candidates):
+            modal_idx = _guids(candidates).index("TEST_CAN_MODAL")
+            self.assertLess(container_idx, modal_idx)
+        self.assertGreaterEqual(container.match_score, 1)
 
 
-class TestNoPivotEvidence(CandidateLookupTestCase):
-    def test_ambiguous_word_with_no_pivots_returns_all_candidates_zero_score(self) -> None:
-        # English-only sentence — no pivot translations stored at all.
+class TestNoExtraEvidence(CandidateLookupTestCase):
+    def test_english_only_sentence_returns_both_senses_with_score_one(self) -> None:
         sentence = add_test_sentence(self.session, {"en": "I can play today"})
-        result = find_candidate_lemmas_by_english_word(
-            self.session, sentence.id, target_languages=["fr", "es"]
-        )
-        self.assertIn("can", result)
-        guids = {c.guid for c in result["can"]}
-        # Both senses must remain when nothing can score them.
+        candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
+        guids = set(_guids(candidates))
+        # Both senses surface because both have lemma_text="can".
         self.assertIn("TEST_CAN_MODAL", guids)
         self.assertIn("TEST_CAN_CONTAINER", guids)
-        for candidate in result["can"]:
-            self.assertEqual(candidate.pivot_match_score, 0)
+        for guid in ("TEST_CAN_MODAL", "TEST_CAN_CONTAINER"):
+            candidate = _find_guid(candidates, guid)
+            # English alone confirms the lemma_text match.
+            self.assertEqual(candidate.match_score, 1)
+            self.assertEqual(candidate.matched_languages, ["en"])
 
-    def test_missing_pivot_translations_silently_ignored(self) -> None:
-        # Only one pivot language stored — the other two are missing but
-        # shouldn't cause errors.
+
+class TestMultiLanguageSourcing(CandidateLookupTestCase):
+    def test_non_english_translation_can_source_a_candidate(self) -> None:
+        # Sentence with no English translation at all: candidates should still
+        # be sourced from the other languages' tokens.
         sentence = add_test_sentence(
             self.session,
-            {"en": "I can play today", "uk": "Я можу грати сьогодні"},
+            {"fr": "Le chien court", "es": "El perro corre"},
         )
-        result = find_candidate_lemmas_by_english_word(self.session, sentence.id)
-        self.assertIn("can", result)
-        modal = next(c for c in result["can"] if c.guid == "TEST_CAN_MODAL")
-        self.assertGreaterEqual(modal.pivot_match_score, 1)
-        self.assertIn("uk", modal.confirmed_pivots)
+        candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
+        # "dog" lemma's fr translation is "chien"; should be found.
+        guids = set(_guids(candidates))
+        self.assertTrue(
+            any(c.lemma_text == "dog" for c in candidates),
+            f"Expected the 'dog' lemma to be sourced from fr/es; got {guids}",
+        )
 
 
 class TestFilterBehavior(CandidateLookupTestCase):
-    def test_tokens_without_lemmas_not_keys(self) -> None:
+    def test_function_words_with_no_lemmas_dropped(self) -> None:
         sentence = add_test_sentence(self.session, {"en": "I see the dog"})
-        result = find_candidate_lemmas_by_english_word(self.session, sentence.id)
-        # "i" and "the" have no Lemma rows, so they don't appear as keys —
-        # not because we filter them as grammatical, but because the DB has
-        # nothing to resolve them to.
-        self.assertNotIn("i", result)
-        self.assertNotIn("the", result)
-        self.assertIn("dog", result)
-
-    def test_modal_can_surfaces_as_key_despite_being_grammatical(self) -> None:
-        # "can" is registered as a grammatical/function word in English, but
-        # candidate_lookup must still surface it as a key because both senses
-        # live in the lemma DB and need disambiguation.
-        sentence = add_test_sentence(self.session, {"en": "I can swim"})
-        result = find_candidate_lemmas_by_english_word(self.session, sentence.id)
-        self.assertIn("can", result)
-
-    def test_sentence_without_english_returns_empty(self) -> None:
-        sentence = add_test_sentence(self.session, {"en": "placeholder", "uk": "Я бачу"})
-        # Remove the English translation row and confirm empty result.
-        from storage.models.schema import SentenceTranslation
-
-        en_row = (
-            self.session.query(SentenceTranslation)
-            .filter_by(sentence_id=sentence.id, language_code="en")
-            .first()
-        )
-        assert en_row is not None
-        self.session.delete(en_row)
-        self.session.flush()
-
-        result = find_candidate_lemmas_by_english_word(self.session, sentence.id)
-        self.assertEqual(result, {})
+        candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
+        lemma_texts = {c.lemma_text for c in candidates}
+        # "i" / "the" have no Lemma rows so they cannot contribute candidates.
+        self.assertNotIn("i", lemma_texts)
+        self.assertNotIn("the", lemma_texts)
+        self.assertIn("dog", lemma_texts)
 
 
 class TestDerivativeFormPath(CandidateLookupTestCase):
     def test_inflected_english_surface_resolves_via_derivative_form(self) -> None:
-        # "play" base lemma exists in release data (V01_006). Add an English
-        # derivative form "playing" so the surface-level token resolves back
-        # to the lemma.
         from storage.models.schema import DerivativeForm, Lemma
 
         play_lemma = (
@@ -223,52 +196,42 @@ class TestDerivativeFormPath(CandidateLookupTestCase):
         self.session.flush()
 
         sentence = add_test_sentence(self.session, {"en": "They are playing now"})
-        result = find_candidate_lemmas_by_english_word(self.session, sentence.id)
-        self.assertIn("playing", result)
-        guids = {c.guid for c in result["playing"]}
-        self.assertIn(play_lemma.guid, guids)
+        candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
+        self.assertIn(play_lemma.guid, _guids(candidates))
 
 
-class TestCapAndTargetLanguages(CandidateLookupTestCase):
-    def test_max_candidates_per_word_respected(self) -> None:
+class TestCapAndScoring(CandidateLookupTestCase):
+    def test_max_candidates_respected(self) -> None:
         sentence = add_test_sentence(self.session, {"en": "I can play today"})
-        # With pivots absent, both "can" senses survive — cap at 1 should drop one.
-        result = find_candidate_lemmas_by_english_word(
-            self.session, sentence.id, max_candidates_per_word=1
+        candidates = find_candidate_lemmas_for_sentence(
+            self.session, sentence.id, max_candidates=1
         )
-        self.assertIn("can", result)
-        self.assertEqual(len(result["can"]), 1)
+        self.assertEqual(len(candidates), 1)
 
-    def test_target_languages_do_not_affect_scoring(self) -> None:
-        # Same input with/without target_languages should produce the same
-        # ranking. Target languages only change which translations are
-        # attached to the CandidateLemma output.
+    def test_score_equals_number_of_confirming_languages(self) -> None:
         sentence = add_test_sentence(
             self.session,
             {
-                "en": "I can play today",
-                "bn": "আমি আজ পারা",
-                "uk": "Я можу грати сьогодні",
-                "kn": "ನಾನು ಇಂದು ಸಾಧ್ಯ ಆಡಲು",
+                "en": "The dog runs",
+                "fr": "Le chien court",
+                "es": "El perro corre",
             },
         )
-        no_targets = find_candidate_lemmas_by_english_word(self.session, sentence.id)
-        with_targets = find_candidate_lemmas_by_english_word(
-            self.session, sentence.id, target_languages=["fr", "es", "lt", "zh"]
-        )
+        candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
+        dog = _find_guid(candidates, _release_dog_guid(self.session))
+        # en + fr + es all confirm. Sometimes more (lt/zh) via Lemma columns,
+        # but at minimum these three.
+        self.assertGreaterEqual(dog.match_score, 3)
+        for lang in ("en", "fr", "es"):
+            self.assertIn(lang, dog.matched_languages)
+
+
+class TestDefaultSources(CandidateLookupTestCase):
+    def test_default_source_languages_constant(self) -> None:
         self.assertEqual(
-            [c.guid for c in no_targets["can"]],
-            [c.guid for c in with_targets["can"]],
+            DEFAULT_SOURCE_LANGUAGES,
+            ["en", "fr", "lt", "zh", "es", "bn", "uk", "kn"],
         )
-        # With targets, fr/es/lt/zh translations are populated.
-        target_entry = with_targets["can"][0]
-        for lang in ("fr", "es", "lt", "zh"):
-            self.assertIn(lang, target_entry.translations)
-
-
-class TestDefaultPivots(CandidateLookupTestCase):
-    def test_default_pivot_languages_constant(self) -> None:
-        self.assertEqual(DEFAULT_PIVOT_LANGUAGES, ["bn", "uk", "kn"])
 
 
 class TestInMemoryVariant(CandidateLookupTestCase):
@@ -281,23 +244,25 @@ class TestInMemoryVariant(CandidateLookupTestCase):
         }
         sentence = add_test_sentence(self.session, translations)
 
-        from_db = find_candidate_lemmas_by_english_word(
-            self.session, sentence.id, target_languages=["fr", "es"]
-        )
+        from_db = find_candidate_lemmas_for_sentence(self.session, sentence.id)
         in_memory = find_candidate_lemmas_from_translations(
             self.session,
-            english_text=translations["en"],
-            pivot_translations={
-                "bn": translations["bn"],
-                "uk": translations["uk"],
-                "kn": translations["kn"],
-            },
-            target_languages=["fr", "es"],
+            translations=translations,
         )
-        self.assertEqual(
-            {k: [c.guid for c in v] for k, v in from_db.items()},
-            {k: [c.guid for c in v] for k, v in in_memory.items()},
-        )
+        self.assertEqual(_guids(from_db), _guids(in_memory))
+
+
+def _release_dog_guid(session: Session) -> str:
+    """Look up the release-data GUID for the 'dog' noun lemma."""
+    from storage.models.schema import Lemma
+
+    lemma = (
+        session.query(Lemma)
+        .filter(Lemma.lemma_text == "dog", Lemma.pos_type == "noun")
+        .first()
+    )
+    assert lemma is not None and lemma.guid, "release fixture must include 'dog' noun"
+    return lemma.guid
 
 
 if __name__ == "__main__":

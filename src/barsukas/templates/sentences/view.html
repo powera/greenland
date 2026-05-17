@@ -189,6 +189,9 @@
                                 <td>
                                     {% if word.lemma %}
                                         <a href="{{ url_for('lemmas.view_lemma', lemma_id=word.lemma_id) }}">{{ word.lemma_display_text }}</a>
+                                        {% if word.lemma.disambiguation %}
+                                            <span class="text-muted">({{ word.lemma.disambiguation }})</span>
+                                        {% endif %}
                                         {% if word.lemma.guid %}
                                             <small class="text-muted">({{ word.lemma.guid }})</small>
                                         {% endif %}
@@ -502,6 +505,9 @@
                                             <a href="{{ url_for('lemmas.view_lemma', lemma_id=word.lemma_id) }}">
                                                 {{ word.lemma_display_text }}
                                             </a>
+                                            {% if word.lemma.disambiguation %}
+                                                <span class="text-muted">({{ word.lemma.disambiguation }})</span>
+                                            {% endif %}
                                             {% if word.lemma.difficulty_level is not none %}
                                                 <span class="badge bg-info" style="font-size: 0.7rem;">L{{ word.lemma.difficulty_level }}</span>
                                             {% endif %}
