@@ -1,6 +1,6 @@
-Create a sentence decomposition JSON for ONE language only.
+Create a sentence decomposition JSON for the target language.
 Source sentence ({source_language}): "{source_sentence}"
-Target language: {target_language}
+Target language: {target_language_name} ({target_language})
 Target translation: "{target_translation}"
 
 Additional translations for disambiguation (1-3 helper languages):
@@ -17,8 +17,5 @@ Per-call requirements:
 - Each words[] item must include: position, role, english_gloss, surface_form, grammatical_form, lemma_guid, lemma.
 - Use lemma_guid=NONE for function words without a selected candidate lemma.
 - COMPLETENESS: every word in the target translation must appear in words[].
-  Do not stop early. If the translation has N whitespace-separated words
-  (excluding punctuation), words[] must cover all N. A single multi-word
-  surface_form (e.g., "in the evening") may cover multiple input tokens, but
-  no trailing clause may be omitted. Set word_count to the number of entries
-  you return and double-check it before responding.
+  Do not stop early. A single multi-word surface_form (e.g., "in the evening")
+  may cover multiple input tokens, but no trailing clause may be omitted.

@@ -30,7 +30,7 @@ def test_build_sentence_decomposition_prompt_includes_core_sections() -> None:
         ],
     )
 
-    assert "Target language: es" in prompt
+    assert "Target language: Spanish (es)" in prompt
     assert 'Target translation: "Leo un libro"' in prompt
     assert "Candidate lemmas" in prompt
     assert "lemma_guid=NONE" in prompt

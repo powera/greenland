@@ -28,8 +28,10 @@ but yields cleaner SentenceWord rows.
 """
 
 import logging
+import re
+import unicodedata
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from sqlalchemy.orm import Session
 
@@ -66,6 +68,89 @@ class DecomposedLanguage:
     words: List[Dict[str, Any]] = field(default_factory=list)
     success: bool = True
     error: Optional[str] = None
+    missing_surface_forms: List[str] = field(default_factory=list)
+
+
+# Languages that don't separate words with whitespace; per-word coverage cannot
+# be reliably verified by tokenizing the translation string.
+_NO_WHITESPACE_TOKENIZATION_LANGUAGES = frozenset({"zh", "ja", "th", "lo", "km", "my"})
+
+
+def _tokenize_translation(text: str) -> List[str]:
+    """Whitespace+punctuation tokenization used for coverage checks.
+
+    Returns a list of normalized lowercase tokens. Punctuation-only tokens and
+    empty strings are dropped. Used purely for diagnostic comparison against
+    the LLM's per-word breakdown — it does not have to match the LLM's exact
+    tokenization (e.g., the LLM may merge "in the evening" into one entry), so
+    callers compare *multiset coverage* and treat absent surface forms as a
+    signal, not a hard failure.
+    """
+    if not text:
+        return []
+    normalized = unicodedata.normalize("NFC", text)
+    raw_tokens = re.split(r"\s+", normalized.strip())
+    tokens: List[str] = []
+    for token in raw_tokens:
+        stripped = token.strip(
+            "".join(ch for ch in token if unicodedata.category(ch).startswith("P"))
+        )
+        if stripped:
+            tokens.append(stripped.lower())
+    return tokens
+
+
+def _normalize_surface_form(text: str) -> str:
+    if not text:
+        return ""
+    return unicodedata.normalize("NFC", text).strip().lower()
+
+
+def _find_missing_surface_forms(
+    *,
+    target_language: str,
+    target_translation: str,
+    words: List[Dict[str, Any]],
+) -> Tuple[List[str], List[str]]:
+    """Return (translation_tokens, missing_tokens).
+
+    A translation token is "covered" when it equals one of the whitespace-
+    split sub-tokens of some returned ``surface_form`` (after NFC + lowercase
+    normalization and stripping leading/trailing punctuation). This lets
+    multi-word surface forms like "in the evening" cover the input tokens
+    "in", "the", "evening" without one-letter surface forms (e.g., Spanish
+    "a", French "à") spuriously matching every token that contains that
+    letter.
+
+    Returns empty lists for languages in
+    :data:`_NO_WHITESPACE_TOKENIZATION_LANGUAGES` since whitespace tokenization
+    isn't meaningful there.
+    """
+    if target_language.lower() in _NO_WHITESPACE_TOKENIZATION_LANGUAGES:
+        return [], []
+
+    translation_tokens = _tokenize_translation(target_translation)
+    if not translation_tokens:
+        return [], []
+
+    surface_forms = [_normalize_surface_form(str(w.get("surface_form", ""))) for w in words]
+    surface_forms = [s for s in surface_forms if s]
+
+    surface_token_set: set[str] = set()
+    for surface in surface_forms:
+        for piece in re.split(r"\s+", surface):
+            piece = piece.strip(
+                "".join(ch for ch in piece if unicodedata.category(ch).startswith("P"))
+            )
+            if piece:
+                surface_token_set.add(piece)
+
+    missing: List[str] = []
+    for token in translation_tokens:
+        if token in surface_token_set:
+            continue
+        missing.append(token)
+    return translation_tokens, missing
 
 
 @dataclass
@@ -263,18 +348,62 @@ def decompose_language(
 
     languages = result.get("languages")
     words: List[Dict[str, Any]] = []
+    reported_word_count: Optional[int] = None
     if isinstance(languages, list) and languages:
         first = languages[0]
         if isinstance(first, dict):
             raw_words = first.get("words")
             if isinstance(raw_words, list):
                 words = [w for w in raw_words if isinstance(w, dict)]
+            raw_count = first.get("word_count")
+            if isinstance(raw_count, int):
+                reported_word_count = raw_count
+
+    translation_tokens, missing_tokens = _find_missing_surface_forms(
+        target_language=target_language,
+        target_translation=target_translation,
+        words=words,
+    )
+
+    if missing_tokens:
+        usage = result.get("_usage") if isinstance(result, dict) else None
+        tokens_out: Any = usage.get("tokens_out") if isinstance(usage, dict) else None
+        tokens_in: Any = usage.get("tokens_in") if isinstance(usage, dict) else None
+        # tokens_out near the model's output cap is a strong hint that the
+        # response was truncated mid-array, which manifests as the trailing
+        # surface tokens being absent from the breakdown.
+        logger.warning(
+            "Sentence decomposition missing surface forms for language=%s "
+            "(translation=%r): missing=%s | translation_tokens=%d, "
+            "returned_words=%d, llm_reported_word_count=%s, model=%s, "
+            "tokens_in=%s, tokens_out=%s",
+            target_language,
+            target_translation,
+            missing_tokens,
+            len(translation_tokens),
+            len(words),
+            reported_word_count,
+            model,
+            tokens_in,
+            tokens_out,
+        )
+        if words:
+            last_surface = words[-1].get("surface_form")
+            last_position = words[-1].get("position")
+            logger.warning(
+                "  Last returned word for %s: position=%s, surface_form=%r "
+                "(if this is mid-sentence the LLM likely truncated)",
+                target_language,
+                last_position,
+                last_surface,
+            )
 
     return DecomposedLanguage(
         language_code=target_language,
         translation=target_translation,
         words=words,
         success=True,
+        missing_surface_forms=missing_tokens,
     )
 
 

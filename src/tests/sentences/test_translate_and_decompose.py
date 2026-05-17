@@ -21,6 +21,7 @@ class _FakeResponse:
     def __init__(self, payload: Dict[str, Any]) -> None:
         self.structured_data = payload
         self.response_text = json.dumps(payload)
+        self.usage = None
 
 
 class _ScriptedLLMClient:

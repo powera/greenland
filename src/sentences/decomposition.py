@@ -252,7 +252,7 @@ def build_sentence_decomposition_prompt(
     ``disambiguation``, ``pos``, ``definition``, and ``translations``
     (a mapping of language_code -> surface form).
     """
-    helper_translations = helper_translations or []
+    helper_translations = (helper_translations or [])[:3]
     candidate_lemmas = candidate_lemmas or []
 
     helper_lines = "\n".join(
@@ -262,16 +262,19 @@ def build_sentence_decomposition_prompt(
     helper_languages = [
         entry["language_code"] for entry in helper_translations if entry.get("language_code")
     ]
-    allowed_languages = [source_language, target_language, *helper_languages[:3]]
+    allowed_languages = [source_language, target_language, *helper_languages]
 
     if candidate_lemmas_by_english_word:
         blocks: List[str] = []
         for english_word, items in candidate_lemmas_by_english_word.items():
             if not items:
                 continue
-            lines = [f'English word "{english_word}":']
-            lines.extend(_format_candidate_line(item, allowed_languages) for item in items)
-            blocks.append("\n".join(lines))
+            if len(items) == 1:
+                blocks.append(_format_candidate_line(items[0], allowed_languages))
+            else:
+                lines = [f'English word "{english_word}":']
+                lines.extend(_format_candidate_line(item, allowed_languages) for item in items)
+                blocks.append("\n".join(lines))
         candidate_lines = "\n".join(blocks) if blocks else "- (none provided)"
     elif candidate_lemmas:
         candidate_lines = "\n".join(
@@ -286,6 +289,7 @@ def build_sentence_decomposition_prompt(
         source_sentence=source_sentence,
         source_language=source_language,
         target_language=target_language,
+        target_language_name=LANGUAGE_NAMES.get(target_language, target_language),
         target_translation=target_translation,
         helper_translations=helper_lines if helper_lines else "- (none provided)",
         candidate_lemmas=candidate_lines,
@@ -357,7 +361,6 @@ def build_single_language_decomposition_schema() -> Dict[str, Any]:
                     "properties": {
                         "language_code": {"type": "string"},
                         "translation": {"type": "string"},
-                        "word_count": {"type": "integer"},
                         "words": {
                             "type": "array",
                             "items": {
@@ -383,7 +386,7 @@ def build_single_language_decomposition_schema() -> Dict[str, Any]:
                             },
                         },
                     },
-                    "required": ["language_code", "translation", "word_count", "words"],
+                    "required": ["language_code", "translation", "words"],
                 },
             }
         },
@@ -426,4 +429,10 @@ def query_sentence_decomposition(
 
     merged: Dict[str, Any] = {"success": True}
     merged.update(result)
+    if response.usage is not None:
+        merged["_usage"] = {
+            "tokens_in": getattr(response.usage, "tokens_in", None),
+            "tokens_out": getattr(response.usage, "tokens_out", None),
+            "total_tokens": getattr(response.usage, "total_tokens", None),
+        }
     return merged
