@@ -133,9 +133,7 @@ def _find_candidate_lemmas_in_language(
                         out.append(lemma)
         else:
             # English: column on Lemma.
-            direct = (
-                session.query(Lemma).filter(func.lower(Lemma.lemma_text) == token).all()
-            )
+            direct = session.query(Lemma).filter(func.lower(Lemma.lemma_text) == token).all()
             for lemma in direct:
                 if lemma.id not in seen_ids:
                     seen_ids.add(lemma.id)
@@ -149,9 +147,7 @@ def _find_candidate_lemmas_in_language(
             .all()
         )
         form_lemma_ids = {
-            row[0]
-            for row in form_rows
-            if row[1] and _forms_match(token, row[1], language_code)
+            row[0] for row in form_rows if row[1] and _forms_match(token, row[1], language_code)
         }
     else:
         form_rows = (
@@ -311,15 +307,13 @@ def _run_candidate_lookup(
         score = 0
         matched: List[str] = []
         for lang in source_languages:
-            tokens = tokens_by_language.get(lang)
-            if not tokens:
+            lang_tokens = tokens_by_language.get(lang)
+            if not lang_tokens:
                 continue
-            if _language_confirms_lemma(session, lemma.id, lang, tokens):
+            if _language_confirms_lemma(session, lemma.id, lang, lang_tokens):
                 score += 1
                 matched.append(lang)
-        candidate = _build_candidate(
-            session, lemma, list(source_languages), score, matched
-        )
+        candidate = _build_candidate(session, lemma, list(source_languages), score, matched)
         if candidate is not None:
             built.append(candidate)
 

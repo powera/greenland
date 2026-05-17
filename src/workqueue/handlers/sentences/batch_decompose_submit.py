@@ -22,7 +22,9 @@ from clients.batch_queue import (
     BatchRequestMetadata,
     create_batch_database_session,
 )
+from clients.lib import schema_from_dict, to_openai_schema
 from clients.openai.batch_client import OpenAIBatchClient
+from clients.openai.client import is_gpt5_nano_or_mini_model, reasoning_effort_for_model
 from sentences.candidate_lookup import DEFAULT_SOURCE_LANGUAGES, CandidateLemma
 from sentences.decomposition import (
     build_multi_language_decomposition_context,
@@ -151,12 +153,14 @@ def handle_sentences_batch_decompose_submit(
                     "json_schema": {
                         "name": "SentenceDecomposition",
                         "strict": True,
-                        "schema": schema,
+                        "schema": to_openai_schema(schema_from_dict(schema)),
                     },
                 },
             }
-            if model.startswith("gpt-5.4-mini") or model.startswith("gpt-5-nano"):
-                request_body["reasoning_effort"] = "minimal"
+            if is_gpt5_nano_or_mini_model(model):
+                effort = reasoning_effort_for_model(model, "minimal")
+                if effort is not None:
+                    request_body["reasoning_effort"] = effort
 
             custom_id = f"barsukas_decompose_{sentence_id}"
             metadata = BatchRequestMetadata(

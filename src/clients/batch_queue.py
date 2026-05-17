@@ -25,7 +25,9 @@ import constants
 from clients.openai.batch_client import BatchStatus, OpenAIBatchClient
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Batch tracking database path
@@ -340,10 +342,22 @@ class BatchQueueManager:
         if status != BatchStatus.COMPLETED.value:
             raise ValueError(f"Batch {batch_id} is not completed (status: {status})")
 
-        # Download results
-        output_file_id = batch_info["output_file_id"]
-        results = self.batch_client.download_batch_results(output_file_id)
-        logger.info(f"Downloaded {len(results)} results from batch {batch_id}")
+        # Download success and error files. OpenAI returns one or both:
+        #   - output_file_id: per-request successes (and errors surfaced as response.body.error)
+        #   - error_file_id:  per-request validation errors (top-level "error" field)
+        # When every request errors at validation, output_file_id is null and the
+        # only payload lives in error_file_id — reading output_file_id blindly 404s.
+        results: List[Dict[str, Any]] = []
+        output_file_id = batch_info.get("output_file_id")
+        if output_file_id:
+            results.extend(self.batch_client.download_batch_results(output_file_id))
+        error_file_id = batch_info.get("error_file_id")
+        if error_file_id:
+            results.extend(self.batch_client.download_batch_results(error_file_id))
+        logger.info(
+            f"Downloaded {len(results)} results from batch {batch_id} "
+            f"(output={output_file_id}, error={error_file_id})"
+        )
 
         # Update request records with results
         completed_at = datetime.datetime.now()
@@ -358,13 +372,27 @@ class BatchQueueManager:
                 logger.warning(f"No request record found for custom_id: {custom_id}")
                 continue
 
-            # Check if request succeeded or failed
-            if result.get("error"):
+            # A row is failed if it has a top-level "error" (validation error from
+            # error_file_id) OR a non-2xx status_code in response (per-request error
+            # surfaced in output_file_id, with the error in response.body.error).
+            top_error = result.get("error")
+            response = result.get("response") or {}
+            status_code = response.get("status_code")
+            body_error = (
+                (response.get("body") or {}).get("error")
+                if isinstance(response.get("body"), dict)
+                else None
+            )
+
+            if top_error:
                 req.status = BatchRequestStatus.FAILED.value
-                req.error_message = json.dumps(result["error"])
+                req.error_message = json.dumps(top_error)
+            elif status_code is not None and not (200 <= status_code < 300):
+                req.status = BatchRequestStatus.FAILED.value
+                req.error_message = json.dumps(body_error if body_error else response)
             else:
                 req.status = BatchRequestStatus.COMPLETED.value
-                req.response_body = json.dumps(result.get("response", {}))
+                req.response_body = json.dumps(response)
 
             req.completed_at = completed_at
             processed_count += 1

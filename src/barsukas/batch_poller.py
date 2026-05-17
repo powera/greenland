@@ -32,16 +32,15 @@ from clients.batch_queue import (
 )
 from clients.openai.batch_client import BatchStatus, OpenAIBatchClient
 from sentences.batch_completion import (
-    apply_phase1_translation_results,
-    apply_sentence_translation_results,
+    DECOMPOSE_AGENT_NAME,
+    TRANSLATE_AGENT_NAME,
+    apply_results_for_agent,
 )
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_POLL_INTERVAL_SECONDS = 300
-_DECOMPOSE_AGENT_NAME = "barsukas_decompose"
-_TRANSLATE_AGENT_NAME = "barsukas_translate"
-_AGENT_NAMES = (_DECOMPOSE_AGENT_NAME, _TRANSLATE_AGENT_NAME)
+_AGENT_NAMES = (DECOMPOSE_AGENT_NAME, TRANSLATE_AGENT_NAME)
 _IN_FLIGHT_STATUSES = (
     BatchRequestStatus.SUBMITTED.value,
     BatchRequestStatus.PROCESSING.value,
@@ -98,10 +97,7 @@ def poll_once(main_session_factory: Callable[[], Session]) -> None:
 
             main_session = main_session_factory()
             try:
-                if agent_name == _TRANSLATE_AGENT_NAME:
-                    result = apply_phase1_translation_results(completed, main_session, batch_id)
-                else:
-                    result = apply_sentence_translation_results(completed, main_session, batch_id)
+                result = apply_results_for_agent(agent_name, completed, main_session, batch_id)
                 main_session.commit()
                 logger.info(
                     "Applied batch %s (%s): %s sentences updated, %s failed",

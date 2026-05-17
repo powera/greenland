@@ -33,7 +33,7 @@ API_BASE = "https://api.openai.com/v1"
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-def _is_gpt5_nano_or_mini_model(model: str) -> bool:
+def is_gpt5_nano_or_mini_model(model: str) -> bool:
     """Return whether the model is a GPT-5 nano/mini variant."""
     return model.startswith("gpt-5") and (model.endswith("-nano") or model.endswith("-mini"))
 
@@ -45,7 +45,7 @@ _GPT54_VALID_EFFORTS = frozenset(["none", "low", "medium", "high"])
 _DEFAULT_VALID_EFFORTS = frozenset(["minimal", "low", "medium", "high"])
 
 
-def _reasoning_effort_for_model(model: str, requested_effort: str) -> Optional[str]:
+def reasoning_effort_for_model(model: str, requested_effort: str) -> Optional[str]:
     """Return the appropriate reasoning effort string for a model, or None to omit reasoning.
 
     gpt-5.4-series supports "none" (disables reasoning), "low", "medium", "high".
@@ -185,7 +185,7 @@ class OpenAIClient:
 
         # gpt-5 models don't support custom temperature (only default value of 1)
         is_gpt5_model = model.startswith("gpt-5")
-        is_gpt5_nano_or_mini = _is_gpt5_nano_or_mini_model(model)
+        is_gpt5_nano_or_mini = is_gpt5_nano_or_mini_model(model)
 
         token_limit = 512 if brief else 4096
         request_kwargs: Dict[str, Any] = {
@@ -210,7 +210,7 @@ class OpenAIClient:
 
         # Set reasoning and text parameters for GPT-5 nano and mini variants
         if is_gpt5_nano_or_mini:
-            effort = _reasoning_effort_for_model(
+            effort = reasoning_effort_for_model(
                 model, "none" if model.startswith("gpt-5.4") else "minimal"
             )
             request_kwargs["reasoning"] = {"effort": effort}

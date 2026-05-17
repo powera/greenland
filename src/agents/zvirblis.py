@@ -25,7 +25,9 @@ from clients.batch_queue import (
     BatchRequestMetadata,
     create_batch_database_session,
 )
+from clients.lib import schema_from_dict, to_openai_schema
 from clients.openai.batch_client import OpenAIBatchClient
+from clients.openai.client import is_gpt5_nano_or_mini_model, reasoning_effort_for_model
 from clients.translategemma_client import TranslateGemmaClient
 from agents.common.common_args import (
     add_backend_args,
@@ -477,7 +479,7 @@ class ZvirblisAgent:
                     "json_schema": {
                         "name": "SentenceTranslations",
                         "strict": True,
-                        "schema": inner_schema,
+                        "schema": to_openai_schema(schema_from_dict(inner_schema)),
                     },
                 }
 
@@ -487,12 +489,11 @@ class ZvirblisAgent:
                     "response_format": response_format,
                 }
 
-                # Minimize reasoning tokens for gpt-5.4-mini/nano (translation doesn't need deep reasoning)
-                if self.config.model and (
-                    self.config.model.startswith("gpt-5.4-mini")
-                    or self.config.model.startswith("gpt-5-nano")
-                ):
-                    request_body["reasoning_effort"] = "minimal"
+                # Minimize reasoning tokens for gpt-5 nano/mini variants (translation doesn't need deep reasoning)
+                if self.config.model and is_gpt5_nano_or_mini_model(self.config.model):
+                    effort = reasoning_effort_for_model(self.config.model, "minimal")
+                    if effort is not None:
+                        request_body["reasoning_effort"] = effort
 
                 metadata = BatchRequestMetadata(
                     custom_id=custom_id,

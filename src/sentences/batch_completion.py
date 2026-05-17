@@ -26,9 +26,44 @@ import logging
 from typing import Any, Dict, Iterable
 
 from clients.batch_queue import BatchQueue
-from sentences.translation import store_translation_results
+from sentences.translation import _adapt_decomposed_word, store_translation_results
 
 logger = logging.getLogger(__name__)
+
+# Agent names used by the sentence batch pipeline. Kept here so route handlers
+# and the background poller dispatch the same way without importing each other.
+TRANSLATE_AGENT_NAME = "barsukas_translate"
+DECOMPOSE_AGENT_NAME = "barsukas_decompose"
+
+
+def _adapt_phase3_words(translations: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert Phase-3 ``words_<lang>`` entries to the legacy storage shape.
+
+    The Phase-3 batch schema emits each word with ``surface_form`` /
+    ``english_gloss`` / ``lemma_guid``; ``store_translation_results`` expects
+    ``word`` / ``english`` / ``guid``. Non-``words_*`` keys pass through
+    unchanged.
+    """
+    adapted: Dict[str, Any] = {}
+    for key, value in translations.items():
+        if str(key).startswith("words_") and isinstance(value, list):
+            adapted[key] = [_adapt_decomposed_word(entry) for entry in value]
+        else:
+            adapted[key] = value
+    return adapted
+
+
+def apply_results_for_agent(
+    agent_name: str, requests: Iterable[BatchQueue], session: Any, batch_id: str
+) -> Dict[str, int]:
+    """Dispatch to the right apply_* function based on the agent name.
+
+    The Phase-1 (translate-only) and combined/Phase-3 batches have different
+    response schemas; the agent name on each BatchQueue row tells us which.
+    """
+    if agent_name == TRANSLATE_AGENT_NAME:
+        return apply_phase1_translation_results(requests, session, batch_id)
+    return apply_sentence_translation_results(requests, session, batch_id)
 
 
 def apply_sentence_translation_results(
@@ -61,7 +96,8 @@ def apply_sentence_translation_results(
             content = response["body"]["choices"][0]["message"]["content"]
             translations = json.loads(content)
 
-            store_translation_results(sentence_id, translations, session)
+            adapted = _adapt_phase3_words(translations)
+            store_translation_results(sentence_id, adapted, session)
             sentences_updated += 1
 
         except Exception as exc:

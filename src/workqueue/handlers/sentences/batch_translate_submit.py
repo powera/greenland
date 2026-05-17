@@ -23,7 +23,9 @@ from clients.batch_queue import (
     BatchRequestMetadata,
     create_batch_database_session,
 )
+from clients.lib import schema_from_dict, to_openai_schema
 from clients.openai.batch_client import OpenAIBatchClient
+from clients.openai.client import is_gpt5_nano_or_mini_model, reasoning_effort_for_model
 from sentences.candidate_lookup import DEFAULT_SOURCE_LANGUAGES
 from sentences.translate_and_decompose import build_phase1_prompt
 from storage.models.schema import Sentence, SentenceTranslation
@@ -99,6 +101,15 @@ def handle_sentences_batch_translate_submit(
                 for lang in requested_targets
                 if lang != source_language and lang not in existing_languages
             ]
+            # Always include English when missing: Phase 3 lemma-decomposition
+            # uses the English translation as its scoring anchor, so a Phase-1
+            # batch that skips English produces a sentence Phase 3 can't decompose.
+            if (
+                source_language != "en"
+                and "en" not in existing_languages
+                and "en" not in phase1_targets
+            ):
+                phase1_targets.insert(0, "en")
             if not phase1_targets:
                 logger.info(
                     "Sentence %s already has every requested target translation; skipping",
@@ -128,12 +139,14 @@ def handle_sentences_batch_translate_submit(
                     "json_schema": {
                         "name": "SentencePhase1Translation",
                         "strict": True,
-                        "schema": schema,
+                        "schema": to_openai_schema(schema_from_dict(schema)),
                     },
                 },
             }
-            if model.startswith("gpt-5.4-mini") or model.startswith("gpt-5-nano"):
-                request_body["reasoning_effort"] = "minimal"
+            if is_gpt5_nano_or_mini_model(model):
+                effort = reasoning_effort_for_model(model, "minimal")
+                if effort is not None:
+                    request_body["reasoning_effort"] = effort
 
             custom_id = f"barsukas_translate_{sentence_id}"
             metadata = BatchRequestMetadata(

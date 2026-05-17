@@ -2,7 +2,7 @@
 
 """Routes for viewing batch operations."""
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
 from clients.batch_queue import (
@@ -12,6 +12,7 @@ from clients.batch_queue import (
     create_batch_database_session,
 )
 from clients.openai.batch_client import BatchStatus, OpenAIBatchClient
+from sentences.batch_completion import apply_results_for_agent
 
 bp = Blueprint("batch_operations", __name__, url_prefix="/batch-operations")
 
@@ -156,6 +157,32 @@ def check_batch_status(batch_id: str) -> ResponseReturnValue:
                 flash("Results retrieved from OpenAI.", "success")
             except Exception as exc:
                 flash(f"Failed to retrieve results: {exc}", "warning")
+                return redirect(url_for("batch_operations.view_batch", batch_id=batch_id))
+
+            # Apply results per-agent to the main DB. Without this step rows are
+            # marked COMPLETED in the batch DB but their translations never land
+            # in the linguistic DB, and the background poller skips them since
+            # it only picks up SUBMITTED/PROCESSING rows.
+            completed_rows = (
+                batch_session.query(BatchQueue)
+                .filter(BatchQueue.batch_id == batch_id)
+                .filter(BatchQueue.status == BatchRequestStatus.COMPLETED.value)
+                .all()
+            )
+            by_agent: dict[str, list[BatchQueue]] = {}
+            for row in completed_rows:
+                by_agent.setdefault(row.agent_name, []).append(row)
+            for agent_name, rows in by_agent.items():
+                try:
+                    result = apply_results_for_agent(agent_name, rows, g.db, batch_id)
+                    g.db.commit()
+                    flash(
+                        f"Applied {agent_name}: {result['updated']} updated, {result['failed']} failed.",
+                        "success",
+                    )
+                except Exception as exc:
+                    g.db.rollback()
+                    flash(f"Failed to apply {agent_name} results: {exc}", "warning")
 
         return redirect(url_for("batch_operations.view_batch", batch_id=batch_id))
     finally:
