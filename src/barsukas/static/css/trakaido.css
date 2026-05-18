@@ -352,3 +352,122 @@
     color: var(--tk-text-muted);
     text-align: center;
 }
+
+/* Lemma view */
+.trakaido-lemma-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 720px) {
+    .trakaido-lemma-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.trakaido-lemma-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.trakaido-lemma-text {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--tk-text);
+}
+
+.trakaido-lemma-disambig {
+    color: var(--tk-text-muted);
+    font-style: italic;
+}
+
+.trakaido-lemma-definition {
+    color: var(--tk-text);
+    line-height: 1.4;
+}
+
+.trakaido-empty-inline {
+    color: var(--tk-text-muted);
+    font-style: italic;
+}
+
+.trakaido-forms-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.trakaido-forms-table th,
+.trakaido-forms-table td {
+    text-align: left;
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid var(--tk-border);
+}
+
+.trakaido-forms-table th {
+    color: var(--tk-text-muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.trakaido-forms-table code {
+    background: var(--tk-bg);
+    padding: 0.05rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.85rem;
+}
+
+/* Lemma search results */
+.trakaido-result-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.trakaido-result {
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--tk-border);
+}
+
+.trakaido-result:last-child {
+    border-bottom: none;
+}
+
+.trakaido-result a {
+    color: var(--tk-primary-dark);
+    text-decoration: none;
+    font-size: 1.05rem;
+}
+
+.trakaido-result a:hover {
+    text-decoration: underline;
+}
+
+.trakaido-result-disambig {
+    color: var(--tk-text-muted);
+    margin-left: 0.35rem;
+    font-size: 0.9rem;
+}
+
+.trakaido-result-pos {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0.05rem 0.45rem;
+    background: var(--tk-bg);
+    border: 1px solid var(--tk-border);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: var(--tk-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.trakaido-result-def {
+    color: var(--tk-text-muted);
+    font-size: 0.9rem;
+    margin-top: 0.2rem;
+}
