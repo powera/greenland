@@ -825,20 +825,25 @@ def decompose_sentences() -> ResponseReturnValue:
 def _accumulate_or_enqueue_batch(
     *,
     task_type: str,
-    dedup_key: str,
+    coalesce_key: str,
     batch_window_minutes: int,
     payload_template: Dict[str, Any],
     sentence_ids: List[int],
+    languages_field: Optional[str] = None,
 ) -> ResponseReturnValue:
-    """Shared time-windowed dedup logic for batch-phase enqueues.
+    """Coalesce batch-phase enqueues within a time window.
 
-    Mirrors the original ``decompose_sentences`` accumulate path so both new
-    endpoints behave identically.
+    The ``coalesce_key`` is a bucket identifier (window + model), not a
+    correctness key — different callers within the window merge into the same
+    workqueue task. ``sentence_ids`` are unioned across callers, and if
+    ``languages_field`` is given, that payload list is unioned too so the
+    handler sees the combined language set requested by all callers. Per-sentence
+    idempotency (skipping languages already produced) is the handler's job.
     """
     existing = (
         g.db.query(BarsukasTask)
         .filter(
-            BarsukasTask.dedup_key == dedup_key,
+            BarsukasTask.dedup_key == coalesce_key,
             BarsukasTask.status.in_(TaskStatus.ACTIVE),
             BarsukasTask.created_at >= datetime.utcnow() - timedelta(minutes=batch_window_minutes),
         )
@@ -847,9 +852,13 @@ def _accumulate_or_enqueue_batch(
     )
     if existing:
         existing_payload = json.loads(existing.payload or "{}")
-        accumulated = set(existing_payload.get("sentence_ids", []))
-        accumulated.update(sentence_ids)
-        existing_payload["sentence_ids"] = sorted(accumulated)
+        accumulated_ids = set(existing_payload.get("sentence_ids", []))
+        accumulated_ids.update(sentence_ids)
+        existing_payload["sentence_ids"] = sorted(accumulated_ids)
+        if languages_field:
+            accumulated_langs = set(existing_payload.get(languages_field, []))
+            accumulated_langs.update(payload_template.get(languages_field, []))
+            existing_payload[languages_field] = sorted(accumulated_langs)
         existing.payload = json.dumps(existing_payload)
         g.db.flush()
         return _build_success_response(
@@ -869,7 +878,7 @@ def _accumulate_or_enqueue_batch(
         target_type="batch",
         target_id=None,
         payload=payload,
-        dedup_key=dedup_key,
+        dedup_key=coalesce_key,
     )
     return _build_success_response(
         {
@@ -947,20 +956,21 @@ def batch_translate_sentences() -> ResponseReturnValue:
         return _build_error_response("batch_window_minutes must be between 1 and 10")
 
     window_index = int(datetime.utcnow().timestamp() // (batch_window_minutes * 60))
-    dedup_key = (
+    coalesce_key = (
         f"{TaskType.SENTENCES_BATCH_TRANSLATE_SUBMIT}:batch:"
         f"{window_index}:{batch_window_minutes}:{model}"
     )
 
     return _accumulate_or_enqueue_batch(
         task_type=TaskType.SENTENCES_BATCH_TRANSLATE_SUBMIT,
-        dedup_key=dedup_key,
+        coalesce_key=coalesce_key,
         batch_window_minutes=batch_window_minutes,
         payload_template={
             "target_languages": target_languages,
             "model": model,
         },
         sentence_ids=sentence_ids,
+        languages_field="target_languages",
     )
 
 
@@ -1071,18 +1081,19 @@ def batch_decompose_sentences() -> ResponseReturnValue:
         return response
 
     window_index = int(datetime.utcnow().timestamp() // (batch_window_minutes * 60))
-    dedup_key = (
+    coalesce_key = (
         f"{TaskType.SENTENCES_BATCH_DECOMPOSE_SUBMIT}:batch:"
         f"{window_index}:{batch_window_minutes}:{model}"
     )
 
     return _accumulate_or_enqueue_batch(
         task_type=TaskType.SENTENCES_BATCH_DECOMPOSE_SUBMIT,
-        dedup_key=dedup_key,
+        coalesce_key=coalesce_key,
         batch_window_minutes=batch_window_minutes,
         payload_template={
             "decompose_languages": decompose_languages,
             "model": model,
         },
         sentence_ids=sentence_ids,
+        languages_field="decompose_languages",
     )

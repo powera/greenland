@@ -14,6 +14,7 @@ so the existing batch poller's completion path applies them to the main DB.
 from __future__ import annotations
 
 import logging
+import uuid
 from typing import Any, Dict, List, Optional
 
 import constants
@@ -162,7 +163,7 @@ def handle_sentences_batch_decompose_submit(
                 if effort is not None:
                     request_body["reasoning_effort"] = effort
 
-            custom_id = f"barsukas_decompose_{sentence_id}"
+            custom_id = f"barsukas_decompose_{sentence_id}_{uuid.uuid4().hex[:8]}"
             metadata = BatchRequestMetadata(
                 custom_id=custom_id,
                 agent_name=_AGENT_NAME,
