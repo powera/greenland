@@ -623,8 +623,71 @@ def translate_and_decompose(
         return result
     result.translations = translations
 
+    decompose_with_existing_translations(
+        sentence_text=sentence_text,
+        source_language=normalized_source,
+        translations=translations,
+        session=session,
+        client=client,
+        decompose_languages=decompose_languages,
+        model=model,
+        result=result,
+    )
+    return result
+
+
+# Minimum number of languages (counting the source) that must have a sentence
+# translation before Phase 3 will run. Phase 2 candidate-lemma ranking is much
+# weaker with fewer languages, and Phase 3 with few candidates yields mostly
+# synthetic GUIDs that can't be paired to real lemmas.
+PHASE3_MIN_LANGUAGES: int = 3
+
+
+def decompose_with_existing_translations(
+    *,
+    sentence_text: str,
+    source_language: str,
+    translations: Dict[str, str],
+    session: Session,
+    client: UnifiedLLMClient,
+    decompose_languages: Optional[Sequence[str]] = None,
+    model: str = DEFAULT_MODEL,
+    result: Optional[TranslateAndDecomposeResult] = None,
+) -> TranslateAndDecomposeResult:
+    """Run Phase 2 (candidate lookup) + Phase 3 (decomposition) against a set of
+    already-known sentence translations.
+
+    Intended for the synchronous path that persists Phase-1 translations to the
+    database before invoking Phase 3, and for any caller that has obtained
+    translations through some other route (e.g. the OpenAI Batch flow).
+
+    ``translations`` is ``{language_code: text}`` and must NOT include the
+    source language (the source sentence is added internally from
+    ``sentence_text``).
+
+    Enforces two preconditions before running Phase 3:
+      1. At least :data:`PHASE3_MIN_LANGUAGES` languages must be available
+         (counting the source). With fewer than that, candidate-lemma scoring
+         is too weak to disambiguate per-word entries.
+      2. At least one candidate lemma must be returned by Phase 2. If the DB
+         has no lemmas matching any token, Phase 3 would only produce synthetic
+         GUIDs that can't be paired to real lemmas.
+
+    If a precondition fails, every requested ``decompose_languages`` entry is
+    populated with ``DecomposedLanguage(success=False, error=...)`` and Phase 3
+    is skipped. The returned result still has ``phase1_ok`` true (Phase 1 ran)
+    and the candidate lemmas (possibly empty) for diagnostics.
+    """
+    normalized_source = source_language.strip().lower()
+
+    if result is None:
+        result = TranslateAndDecomposeResult(
+            source_sentence=sentence_text,
+            source_language=normalized_source,
+        )
+        result.translations = dict(translations)
+
     # ── Phase 2 ────────────────────────────────────────────────────────────
-    # Source language pool: every translation we have plus the source itself.
     lookup_translations: Dict[str, str] = dict(translations)
     if normalized_source not in lookup_translations:
         lookup_translations[normalized_source] = sentence_text
@@ -641,6 +704,36 @@ def translate_and_decompose(
         languages_to_decompose: List[str] = ["en"]
     else:
         languages_to_decompose = [lang.strip().lower() for lang in decompose_languages if lang]
+
+    available_language_count = len(lookup_translations)
+    precondition_error: Optional[str] = None
+    if available_language_count < PHASE3_MIN_LANGUAGES:
+        precondition_error = (
+            f"Phase 3 requires at least {PHASE3_MIN_LANGUAGES} languages; "
+            f"only {available_language_count} available "
+            f"({sorted(lookup_translations.keys())})"
+        )
+    elif not result.candidate_lemmas:
+        precondition_error = (
+            "Phase 3 requires at least one candidate lemma from Phase 2; "
+            "none of the sentence tokens matched any known lemma"
+        )
+
+    if precondition_error is not None:
+        logger.warning("Skipping Phase 3: %s", precondition_error)
+        for skipped_language in languages_to_decompose:
+            skipped_translation = (
+                sentence_text
+                if skipped_language == normalized_source
+                else translations.get(skipped_language, "")
+            )
+            result.decompositions[skipped_language] = DecomposedLanguage(
+                language_code=skipped_language,
+                translation=skipped_translation,
+                success=False,
+                error=precondition_error,
+            )
+        return result
 
     all_known: Dict[str, str] = dict(translations)
     if normalized_source not in all_known:

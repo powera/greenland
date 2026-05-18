@@ -20,7 +20,6 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from langtools.tokenizer import tokenize
-from sentences.analysis import SUBSTRING_MATCH_LANGUAGES
 from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation, SentenceTranslation
 from storage.translation_helpers import LANGUAGE_FIELDS, get_translation
 
@@ -39,15 +38,19 @@ _PUNCTUATION_STRIP = ".,!?;:\"'()[]{}—-…"
 
 
 def _forms_match(token: str, lemma_form: str, language_code: str) -> bool:
-    """Case-insensitive exact match; substring containment for CJK scripts."""
-    token_lower = token.lower()
-    lemma_lower = lemma_form.lower()
-    if token_lower == lemma_lower:
-        return True
-    if language_code in SUBSTRING_MATCH_LANGUAGES:
-        if token in lemma_form or lemma_form in token:
-            return True
-    return False
+    """Case-insensitive exact match in every language.
+
+    We previously allowed substring containment for CJK (``SUBSTRING_MATCH_LANGUAGES``)
+    as a fallback for jieba mis-segmentation, but single-character function
+    words like ``的`` then matched hundreds of unrelated lemmas whose
+    translations happened to contain that character, drowning out real
+    candidates. Exact match across the board trades that for occasional
+    false negatives on compound CJK tokens, which is the correct tradeoff
+    here. The ``language_code`` parameter is retained for callers but no
+    longer affects matching.
+    """
+    del language_code  # no longer used; retained in signature for callers
+    return token.lower() == lemma_form.lower()
 
 
 @dataclass
@@ -103,27 +106,21 @@ def _find_candidate_lemmas_in_language(
     if field_info is not None:
         _field_name, _display, use_translation_table = field_info
         if use_translation_table:
-            if language_code in SUBSTRING_MATCH_LANGUAGES:
-                # CJK: ask SQL for "field contains token"; the opposite
-                # direction ("token contains field") is recovered at scoring
-                # time and via derivative-form / other-language matches.
-                trans_rows = (
-                    session.query(LemmaTranslation.lemma_id)
-                    .filter(
-                        LemmaTranslation.language_code == language_code,
-                        LemmaTranslation.translation.like(f"%{token}%"),
-                    )
-                    .all()
+            # Exact match in every language. CJK previously used substring
+            # LIKE here, but single-character function-word tokens (e.g. zh
+            # ``的``, ``了``, ``是``) matched hundreds of unrelated lemmas
+            # whose translations happened to contain that character, drowning
+            # out real candidates. The cost is occasional false negatives
+            # when jieba returns a compound like ``好朋友`` and the DB only
+            # has ``朋友`` — acceptable to keep the candidate list clean.
+            trans_rows = (
+                session.query(LemmaTranslation.lemma_id)
+                .filter(
+                    LemmaTranslation.language_code == language_code,
+                    func.lower(LemmaTranslation.translation) == token,
                 )
-            else:
-                trans_rows = (
-                    session.query(LemmaTranslation.lemma_id)
-                    .filter(
-                        LemmaTranslation.language_code == language_code,
-                        func.lower(LemmaTranslation.translation) == token,
-                    )
-                    .all()
-                )
+                .all()
+            )
             trans_lemma_ids = {row[0] for row in trans_rows}
             if trans_lemma_ids:
                 direct = session.query(Lemma).filter(Lemma.id.in_(trans_lemma_ids)).all()
@@ -139,26 +136,17 @@ def _find_candidate_lemmas_in_language(
                     seen_ids.add(lemma.id)
                     out.append(lemma)
 
-    # DerivativeForm match for this language.
-    if language_code in SUBSTRING_MATCH_LANGUAGES:
-        form_rows = (
-            session.query(DerivativeForm.lemma_id, DerivativeForm.derivative_form_text)
-            .filter(DerivativeForm.language_code == language_code)
-            .all()
+    # DerivativeForm match for this language. Exact match across the board
+    # (see _forms_match for why CJK no longer substring-matches).
+    form_rows = (
+        session.query(DerivativeForm.lemma_id, DerivativeForm.derivative_form_text)
+        .filter(
+            DerivativeForm.language_code == language_code,
+            func.lower(DerivativeForm.derivative_form_text) == token,
         )
-        form_lemma_ids = {
-            row[0] for row in form_rows if row[1] and _forms_match(token, row[1], language_code)
-        }
-    else:
-        form_rows = (
-            session.query(DerivativeForm.lemma_id, DerivativeForm.derivative_form_text)
-            .filter(
-                DerivativeForm.language_code == language_code,
-                func.lower(DerivativeForm.derivative_form_text) == token,
-            )
-            .all()
-        )
-        form_lemma_ids = {row[0] for row in form_rows}
+        .all()
+    )
+    form_lemma_ids = {row[0] for row in form_rows}
 
     new_ids = form_lemma_ids - seen_ids
     if new_ids:
