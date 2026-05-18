@@ -683,7 +683,7 @@ def api_check_disambiguation() -> ResponseReturnValue:
 
 
 _DECOMPOSE_SENTENCES_MAX = 15
-_DECOMPOSE_LANGUAGES: List[str] = ["fr", "zh", "lt", "es"]
+_DECOMPOSE_LANGUAGES: List[str] = ["fr", "zh", "lt", "es", "bn", "uk", "kn"]
 
 
 @bp.route("/sentences/decompose", methods=["POST"])
@@ -819,4 +819,281 @@ def decompose_sentences() -> ResponseReturnValue:
             "sentence_ids_added": len(sentence_ids),
         },
         f"Created batch task {result.task.id} with {len(sentence_ids)} sentence ID(s)",
+    )
+
+
+def _accumulate_or_enqueue_batch(
+    *,
+    task_type: str,
+    coalesce_key: str,
+    batch_window_minutes: int,
+    payload_template: Dict[str, Any],
+    sentence_ids: List[int],
+    languages_field: Optional[str] = None,
+) -> ResponseReturnValue:
+    """Coalesce batch-phase enqueues within a time window.
+
+    The ``coalesce_key`` is a bucket identifier (window + model), not a
+    correctness key — different callers within the window merge into the same
+    workqueue task. ``sentence_ids`` are unioned across callers, and if
+    ``languages_field`` is given, that payload list is unioned too so the
+    handler sees the combined language set requested by all callers. Per-sentence
+    idempotency (skipping languages already produced) is the handler's job.
+    """
+    existing = (
+        g.db.query(BarsukasTask)
+        .filter(
+            BarsukasTask.dedup_key == coalesce_key,
+            BarsukasTask.status.in_(TaskStatus.ACTIVE),
+            BarsukasTask.created_at >= datetime.utcnow() - timedelta(minutes=batch_window_minutes),
+        )
+        .order_by(BarsukasTask.created_at.desc())
+        .first()
+    )
+    if existing:
+        existing_payload = json.loads(existing.payload or "{}")
+        accumulated_ids = set(existing_payload.get("sentence_ids", []))
+        accumulated_ids.update(sentence_ids)
+        existing_payload["sentence_ids"] = sorted(accumulated_ids)
+        if languages_field:
+            accumulated_langs = set(existing_payload.get(languages_field, []))
+            accumulated_langs.update(payload_template.get(languages_field, []))
+            existing_payload[languages_field] = sorted(accumulated_langs)
+        existing.payload = json.dumps(existing_payload)
+        g.db.flush()
+        return _build_success_response(
+            {
+                "batched": True,
+                "batch_task_id": existing.id,
+                "sentence_ids_added": len(sentence_ids),
+            },
+            f"Added {len(sentence_ids)} sentence ID(s) to batch task {existing.id}",
+        )
+
+    payload = dict(payload_template)
+    payload["sentence_ids"] = sentence_ids
+    result = enqueue_task(
+        g.db,
+        task_type=task_type,
+        target_type="batch",
+        target_id=None,
+        payload=payload,
+        dedup_key=coalesce_key,
+    )
+    return _build_success_response(
+        {
+            "batched": True,
+            "batch_task_id": result.task.id,
+            "sentence_ids_added": len(sentence_ids),
+        },
+        f"Created batch task {result.task.id} with {len(sentence_ids)} sentence ID(s)",
+    )
+
+
+_BATCH_TRANSLATE_DEFAULT_TARGETS: List[str] = ["fr", "lt", "zh", "es", "bn", "uk", "kn"]
+
+
+@bp.route("/sentences/batch_translate", methods=["POST"])
+@mirrored_facade("/api/llm/sentences/batch_translate", "POST")
+def batch_translate_sentences() -> ResponseReturnValue:
+    """Queue Phase-1 sentence-level translations as an OpenAI Batch job.
+
+    Phase 1 produces only ``SentenceTranslation`` rows (no per-word breakdown).
+    The default target set covers every language used by the Phase-2 candidate-
+    lemma lookup (``DEFAULT_SOURCE_LANGUAGES``) so a follow-up
+    ``/sentences/batch_decompose`` call has rich data to score against.
+
+    Request body (JSON):
+        sentence_ids (list[int], required): Up to 15 sentence IDs.
+        target_languages (list[str], optional): Languages to translate into.
+            Defaults to ``["fr","lt","zh","es","bn","uk","kn"]``.
+        model (str, optional): LLM model (default: system default).
+        batch_window_minutes (int, optional): Batch window 1-10 (default: 10).
+
+    Returns:
+        data.batched: true
+        data.batch_task_id: ID of the shared workqueue task
+        data.sentence_ids_added: how many IDs joined the task
+    """
+    data = request.get_json(silent=True) or {}
+
+    sentence_ids_raw = data.get("sentence_ids")
+    if not isinstance(sentence_ids_raw, list) or not sentence_ids_raw:
+        return _build_error_response("sentence_ids must be a non-empty list")
+    if len(sentence_ids_raw) > _DECOMPOSE_SENTENCES_MAX:
+        return _build_error_response(
+            f"sentence_ids may contain at most {_DECOMPOSE_SENTENCES_MAX} items"
+        )
+    sentence_ids: List[int] = []
+    for item in sentence_ids_raw:
+        if not isinstance(item, int):
+            return _build_error_response("each sentence_id must be an integer")
+        sentence_ids.append(item)
+
+    targets_raw = data.get("target_languages")
+    if targets_raw is None:
+        target_languages = list(_BATCH_TRANSLATE_DEFAULT_TARGETS)
+    else:
+        if not isinstance(targets_raw, list) or not targets_raw:
+            return _build_error_response("target_languages must be a non-empty list when provided")
+        target_languages = []
+        for item in targets_raw:
+            if not isinstance(item, str) or not item.strip():
+                return _build_error_response("each target_language must be a non-empty string")
+            target_languages.append(item.strip())
+
+    model_raw = data.get("model", constants.DEFAULT_MODEL)
+    if not isinstance(model_raw, str) or not model_raw.strip():
+        return _build_error_response("model must be a non-empty string")
+    model = model_raw.strip()
+
+    batch_window_minutes_raw = data.get("batch_window_minutes", 10)
+    try:
+        batch_window_minutes = int(batch_window_minutes_raw)
+    except (TypeError, ValueError):
+        return _build_error_response("batch_window_minutes must be an integer")
+    if batch_window_minutes < 1 or batch_window_minutes > 10:
+        return _build_error_response("batch_window_minutes must be between 1 and 10")
+
+    window_index = int(datetime.utcnow().timestamp() // (batch_window_minutes * 60))
+    coalesce_key = (
+        f"{TaskType.SENTENCES_BATCH_TRANSLATE_SUBMIT}:batch:"
+        f"{window_index}:{batch_window_minutes}:{model}"
+    )
+
+    return _accumulate_or_enqueue_batch(
+        task_type=TaskType.SENTENCES_BATCH_TRANSLATE_SUBMIT,
+        coalesce_key=coalesce_key,
+        batch_window_minutes=batch_window_minutes,
+        payload_template={
+            "target_languages": target_languages,
+            "model": model,
+        },
+        sentence_ids=sentence_ids,
+        languages_field="target_languages",
+    )
+
+
+_BATCH_DECOMPOSE_DEFAULT_TARGETS: List[str] = ["en", "fr", "zh", "lt", "es"]
+_BATCH_DECOMPOSE_REQUIRED_LOOKUP: List[str] = [
+    "en",
+    "fr",
+    "lt",
+    "zh",
+    "es",
+    "bn",
+    "uk",
+    "kn",
+]
+
+
+@bp.route("/sentences/batch_decompose", methods=["POST"])
+@mirrored_facade("/api/llm/sentences/batch_decompose", "POST")
+def batch_decompose_sentences() -> ResponseReturnValue:
+    """Queue Phase-3 per-word decomposition as an OpenAI Batch job.
+
+    Requires that every sentence already has ``SentenceTranslation`` rows for
+    each of the ``decompose_languages`` plus the candidate-lookup pool
+    (``en, fr, lt, zh, es, bn, uk, kn``). If any are missing, returns ``400``
+    with ``data.missing`` describing what's needed — call
+    ``/sentences/batch_translate`` first.
+
+    Request body (JSON):
+        sentence_ids (list[int], required): Up to 15 sentence IDs.
+        decompose_languages (list[str], optional): Languages to produce per-word
+            breakdowns for. Defaults to ``["en","fr","zh","lt","es"]``.
+        model (str, optional): LLM model (default: system default).
+        batch_window_minutes (int, optional): Batch window 1-10 (default: 10).
+
+    Returns:
+        data.batched: true
+        data.batch_task_id: ID of the shared workqueue task
+        data.sentence_ids_added: how many IDs joined the task
+    """
+    from storage.models.schema import Sentence, SentenceTranslation
+
+    data = request.get_json(silent=True) or {}
+
+    sentence_ids_raw = data.get("sentence_ids")
+    if not isinstance(sentence_ids_raw, list) or not sentence_ids_raw:
+        return _build_error_response("sentence_ids must be a non-empty list")
+    if len(sentence_ids_raw) > _DECOMPOSE_SENTENCES_MAX:
+        return _build_error_response(
+            f"sentence_ids may contain at most {_DECOMPOSE_SENTENCES_MAX} items"
+        )
+    sentence_ids = []
+    for item in sentence_ids_raw:
+        if not isinstance(item, int):
+            return _build_error_response("each sentence_id must be an integer")
+        sentence_ids.append(item)
+
+    decompose_raw = data.get("decompose_languages")
+    if decompose_raw is None:
+        decompose_languages = list(_BATCH_DECOMPOSE_DEFAULT_TARGETS)
+    else:
+        if not isinstance(decompose_raw, list) or not decompose_raw:
+            return _build_error_response(
+                "decompose_languages must be a non-empty list when provided"
+            )
+        decompose_languages = []
+        for item in decompose_raw:
+            if not isinstance(item, str) or not item.strip():
+                return _build_error_response("each decompose_language must be a non-empty string")
+            decompose_languages.append(item.strip())
+
+    model_raw = data.get("model", constants.DEFAULT_MODEL)
+    if not isinstance(model_raw, str) or not model_raw.strip():
+        return _build_error_response("model must be a non-empty string")
+    model = model_raw.strip()
+
+    batch_window_minutes_raw = data.get("batch_window_minutes", 10)
+    try:
+        batch_window_minutes = int(batch_window_minutes_raw)
+    except (TypeError, ValueError):
+        return _build_error_response("batch_window_minutes must be an integer")
+    if batch_window_minutes < 1 or batch_window_minutes > 10:
+        return _build_error_response("batch_window_minutes must be between 1 and 10")
+
+    required_languages = sorted(set(decompose_languages) | set(_BATCH_DECOMPOSE_REQUIRED_LOOKUP))
+    missing: List[Dict[str, Any]] = []
+    for sid in sentence_ids:
+        sentence = g.db.get(Sentence, sid)
+        if sentence is None:
+            missing.append({"sentence_id": sid, "error": "not_found"})
+            continue
+        existing = {
+            row.language_code
+            for row in g.db.query(SentenceTranslation).filter_by(sentence_id=sid).all()
+        }
+        absent = [lang for lang in required_languages if lang not in existing]
+        if absent:
+            missing.append({"sentence_id": sid, "missing_languages": absent})
+
+    if missing:
+        response = jsonify(
+            {
+                "success": False,
+                "error": "missing translations; run /api/llm/sentences/batch_translate first",
+                "data": {"missing": missing, "required_languages": required_languages},
+            }
+        )
+        response.status_code = 400
+        return response
+
+    window_index = int(datetime.utcnow().timestamp() // (batch_window_minutes * 60))
+    coalesce_key = (
+        f"{TaskType.SENTENCES_BATCH_DECOMPOSE_SUBMIT}:batch:"
+        f"{window_index}:{batch_window_minutes}:{model}"
+    )
+
+    return _accumulate_or_enqueue_batch(
+        task_type=TaskType.SENTENCES_BATCH_DECOMPOSE_SUBMIT,
+        coalesce_key=coalesce_key,
+        batch_window_minutes=batch_window_minutes,
+        payload_template={
+            "decompose_languages": decompose_languages,
+            "model": model,
+        },
+        sentence_ids=sentence_ids,
+        languages_field="decompose_languages",
     )

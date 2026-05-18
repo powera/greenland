@@ -7,6 +7,8 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 from clients.unified_client import UnifiedLLMClient
+from langtools.dialect_overrides import get_dialect_display_name, get_llm_prompt_note
+from langtools.directions import get_language_direction_note
 from langtools.grammatical_words import is_function_word, is_grammatical_word
 from storage.models.schema import (
     Lemma,
@@ -27,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 _TRANSLATE_DECOMPOSE_PROMPT_PATH = "translate_and_decompose"
 _SINGLE_LANGUAGE_PROMPT_PATH = "single_language"
+_MULTI_LANGUAGE_PROMPT_PATH = "multi_language"
 
 _NO_LEMMA_MARKERS = {"", "none", "null"}
 _NO_LEMMA_TEXT_MARKERS = {"", "no lemma", "none", "null"}
@@ -191,7 +194,20 @@ def build_prompt_for_translate_and_decompose(
         "Do NOT include English in your response."
     )
 
-    language_names = [LANGUAGE_NAMES[lang] for lang in target_languages if lang in LANGUAGE_NAMES]
+    target_language_lines: List[str] = []
+    for lang in target_languages:
+        display_name = get_dialect_display_name(lang)
+        notes: List[str] = []
+        direction_note = get_language_direction_note(lang)
+        if direction_note:
+            notes.append(direction_note.lstrip("- ").strip())
+        dialect_note = get_llm_prompt_note(lang)
+        if dialect_note:
+            notes.append(dialect_note)
+        line = f"- {display_name} ({lang})"
+        if notes:
+            line += ": " + "; ".join(notes)
+        target_language_lines.append(line)
 
     prompt = util.prompt_loader.get_prompt(
         "sentence_decomposition",
@@ -200,7 +216,7 @@ def build_prompt_for_translate_and_decompose(
         template_sentence=source_translation.translation_text,
         word_translations="\n".join(word_translation_lines) or "- (none provided)",
         candidate_lemmas="\n".join(candidate_lines) or "- (none provided)",
-        target_language_names=", ".join(language_names),
+        target_languages_with_notes="\n".join(target_language_lines),
         english_instruction=english_instruction,
     )
     context = util.prompt_loader.get_context(
@@ -237,22 +253,15 @@ def build_sentence_decomposition_prompt(
     target_translation: str,
     helper_translations: Optional[List[Dict[str, str]]] = None,
     candidate_lemmas: Optional[List[Dict[str, Any]]] = None,
-    candidate_lemmas_by_english_word: Optional[Dict[str, List[Dict[str, Any]]]] = None,
 ) -> str:
     """Build prompt for decomposing one already-provided translation.
 
-    Candidate lemmas can be supplied in two shapes:
-      * ``candidate_lemmas`` — flat list, rendered as a single bullet list.
-      * ``candidate_lemmas_by_english_word`` — grouped by English surface
-        word, rendered as "English word "<token>":" headings with nested
-        candidates. When supplied this takes precedence; it makes ambiguity
-        explicit (e.g., two senses of "can" listed under the same heading).
-
-    Items (in either shape) must be dict-like with keys ``guid``, ``lemma``,
-    ``disambiguation``, ``pos``, ``definition``, and ``translations``
-    (a mapping of language_code -> surface form).
+    ``candidate_lemmas`` is a flat ranked list rendered as a single bullet
+    list. Items must be dict-like with keys ``guid``, ``lemma``,
+    ``disambiguation``, ``pos``, ``definition``, and ``translations`` (a
+    mapping of language_code -> surface form).
     """
-    helper_translations = helper_translations or []
+    helper_translations = (helper_translations or [])[:3]
     candidate_lemmas = candidate_lemmas or []
 
     helper_lines = "\n".join(
@@ -262,18 +271,9 @@ def build_sentence_decomposition_prompt(
     helper_languages = [
         entry["language_code"] for entry in helper_translations if entry.get("language_code")
     ]
-    allowed_languages = [source_language, target_language, *helper_languages[:3]]
+    allowed_languages = [source_language, target_language, *helper_languages]
 
-    if candidate_lemmas_by_english_word:
-        blocks: List[str] = []
-        for english_word, items in candidate_lemmas_by_english_word.items():
-            if not items:
-                continue
-            lines = [f'English word "{english_word}":']
-            lines.extend(_format_candidate_line(item, allowed_languages) for item in items)
-            blocks.append("\n".join(lines))
-        candidate_lines = "\n".join(blocks) if blocks else "- (none provided)"
-    elif candidate_lemmas:
+    if candidate_lemmas:
         candidate_lines = "\n".join(
             _format_candidate_line(item, allowed_languages) for item in candidate_lemmas
         )
@@ -286,10 +286,121 @@ def build_sentence_decomposition_prompt(
         source_sentence=source_sentence,
         source_language=source_language,
         target_language=target_language,
+        target_language_name=LANGUAGE_NAMES.get(target_language, target_language),
         target_translation=target_translation,
         helper_translations=helper_lines if helper_lines else "- (none provided)",
         candidate_lemmas=candidate_lines,
     )
+
+
+def build_multi_language_decomposition_prompt(
+    *,
+    source_sentence: str,
+    source_language: str,
+    target_translations: Dict[str, str],
+    helper_translations: Optional[List[Dict[str, str]]] = None,
+    candidate_lemmas: Optional[List[Dict[str, Any]]] = None,
+) -> str:
+    """Build prompt for decomposing several already-provided translations in one call.
+
+    ``target_translations`` maps language_code -> already-known translation text;
+    every entry is decomposed in the response. The LLM is instructed not to
+    retranslate. ``candidate_lemmas`` is a flat ranked list rendered as a
+    single bullet list (same item shape as
+    :func:`build_sentence_decomposition_prompt`).
+    """
+    helper_translations = (helper_translations or [])[:3]
+    candidate_lemmas = candidate_lemmas or []
+
+    target_lines = "\n".join(
+        f'- {lang} ({LANGUAGE_NAMES.get(lang, lang)}): "{text}"'
+        for lang, text in target_translations.items()
+    )
+
+    helper_lines = "\n".join(
+        f"- {entry['language_code']}: {entry['translation']}" for entry in helper_translations
+    )
+
+    helper_languages = [
+        entry["language_code"] for entry in helper_translations if entry.get("language_code")
+    ]
+    allowed_languages = [source_language, *target_translations.keys(), *helper_languages]
+
+    if candidate_lemmas:
+        candidate_lines = "\n".join(
+            _format_candidate_line(item, allowed_languages) for item in candidate_lemmas
+        )
+    else:
+        candidate_lines = "- (none provided)"
+
+    return util.prompt_loader.get_prompt(
+        "sentence_decomposition", _MULTI_LANGUAGE_PROMPT_PATH
+    ).format(
+        source_sentence=source_sentence,
+        source_language=source_language,
+        target_translations=target_lines if target_lines else "- (none provided)",
+        helper_translations=helper_lines if helper_lines else "- (none provided)",
+        candidate_lemmas=candidate_lines,
+    )
+
+
+def build_multi_language_decomposition_context() -> str:
+    """Return context for multi-language sentence decomposition."""
+    return util.prompt_loader.get_context("sentence_decomposition", _MULTI_LANGUAGE_PROMPT_PATH)
+
+
+def build_multi_language_decomposition_schema(*, target_languages: List[str]) -> Dict[str, Any]:
+    """Schema for combined Phase 3 decomposition of several already-translated languages.
+
+    For each ``lang`` in ``target_languages`` the response object must include a
+    string field ``lang`` (echo of the provided translation) and an array field
+    ``words_lang`` whose entries match the single-language Phase 3 word shape
+    (``position``, ``role``, ``english_gloss``, ``surface_form``,
+    ``grammatical_form``, ``lemma_guid``, ``lemma``).
+    """
+    target_languages = _normalize_target_languages(target_languages)
+    word_schema: Dict[str, Any] = {
+        "type": "object",
+        "properties": {
+            "position": {"type": "integer"},
+            "role": {"type": "string"},
+            "english_gloss": {"type": "string"},
+            "surface_form": {"type": "string"},
+            "grammatical_form": {"type": "string"},
+            "lemma_guid": {"type": "string"},
+            "lemma": {"type": "string"},
+        },
+        "required": [
+            "position",
+            "role",
+            "english_gloss",
+            "surface_form",
+            "grammatical_form",
+            "lemma_guid",
+            "lemma",
+        ],
+    }
+
+    schema_properties: Dict[str, Any] = {}
+    required_fields: List[str] = []
+    for lang in target_languages:
+        lang_name = LANGUAGE_NAMES.get(lang, lang)
+        schema_properties[lang] = {
+            "type": "string",
+            "description": f"{lang_name} translation (echo of provided text)",
+        }
+        schema_properties[f"words_{lang}"] = {
+            "type": "array",
+            "description": f"{lang_name} word breakdown",
+            "items": word_schema,
+        }
+        required_fields.extend([lang, f"words_{lang}"])
+
+    return {
+        "type": "object",
+        "properties": schema_properties,
+        "required": required_fields,
+    }
 
 
 def build_decomposition_schema(
@@ -357,7 +468,6 @@ def build_single_language_decomposition_schema() -> Dict[str, Any]:
                     "properties": {
                         "language_code": {"type": "string"},
                         "translation": {"type": "string"},
-                        "word_count": {"type": "integer"},
                         "words": {
                             "type": "array",
                             "items": {
@@ -383,7 +493,7 @@ def build_single_language_decomposition_schema() -> Dict[str, Any]:
                             },
                         },
                     },
-                    "required": ["language_code", "translation", "word_count", "words"],
+                    "required": ["language_code", "translation", "words"],
                 },
             }
         },
@@ -426,4 +536,10 @@ def query_sentence_decomposition(
 
     merged: Dict[str, Any] = {"success": True}
     merged.update(result)
+    if response.usage is not None:
+        merged["_usage"] = {
+            "tokens_in": getattr(response.usage, "tokens_in", None),
+            "tokens_out": getattr(response.usage, "tokens_out", None),
+            "total_tokens": getattr(response.usage, "total_tokens", None),
+        }
     return merged

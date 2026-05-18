@@ -281,3 +281,72 @@ def decompose_sentences(
     if model is not None:
         body["model"] = model
     return post_json("/api/llm/sentences/decompose", body)
+
+
+@mirrored_route("/api/llm/sentences/batch_translate", "POST")
+def batch_translate_sentences(
+    sentence_ids: List[int],
+    *,
+    target_languages: Optional[List[str]] = None,
+    model: Optional[str] = None,
+    batch_window_minutes: int = 10,
+) -> Any:
+    """Queue Phase-1 sentence translations as a shared OpenAI Batch job.
+
+    Produces sentence-level translations only — no per-word breakdown. Call
+    :func:`batch_decompose_sentences` afterwards (once the batch poller has
+    applied results) to produce ``SentenceWord`` rows.
+
+    Args:
+        sentence_ids: Sentence IDs (max 15).
+        target_languages: Languages to translate into. Defaults to the full
+            candidate-lookup pool minus English.
+        model: LLM model id (default: system default).
+        batch_window_minutes: Shared-batch window 1-10 (default: 10).
+
+    Returns:
+        API response dict with ``data.batch_task_id`` / ``data.sentence_ids_added``.
+    """
+    body: Dict[str, Any] = {
+        "sentence_ids": sentence_ids,
+        "batch_window_minutes": batch_window_minutes,
+    }
+    if target_languages is not None:
+        body["target_languages"] = target_languages
+    if model is not None:
+        body["model"] = model
+    return post_json("/api/llm/sentences/batch_translate", body)
+
+
+@mirrored_route("/api/llm/sentences/batch_decompose", "POST")
+def batch_decompose_sentences(
+    sentence_ids: List[int],
+    *,
+    decompose_languages: Optional[List[str]] = None,
+    model: Optional[str] = None,
+    batch_window_minutes: int = 10,
+) -> Any:
+    """Queue Phase-3 per-word decomposition as a shared OpenAI Batch job.
+
+    Every sentence must already have ``SentenceTranslation`` rows for the
+    requested ``decompose_languages`` and for the full candidate-lookup pool
+    (en/fr/lt/zh/es/bn/uk/kn). Missing translations cause an HTTP 400 with
+    ``data.missing`` describing what's absent; in that case run
+    :func:`batch_translate_sentences` first.
+
+    Args:
+        sentence_ids: Sentence IDs (max 15).
+        decompose_languages: Languages whose words to break down. Defaults to
+            ``["en","fr","zh","lt","es"]``.
+        model: LLM model id (default: system default).
+        batch_window_minutes: Shared-batch window 1-10 (default: 10).
+    """
+    body: Dict[str, Any] = {
+        "sentence_ids": sentence_ids,
+        "batch_window_minutes": batch_window_minutes,
+    }
+    if decompose_languages is not None:
+        body["decompose_languages"] = decompose_languages
+    if model is not None:
+        body["model"] = model
+    return post_json("/api/llm/sentences/batch_decompose", body)

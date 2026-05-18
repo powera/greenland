@@ -13,6 +13,12 @@
         </nav>
         <h2><i class="bi bi-collection"></i> Batch Details</h2>
         <p class="text-muted"><code>{{ batch_id }}</code></p>
+        <form method="post" action="{{ url_for('batch_operations.check_batch_status', batch_id=batch_id) }}" class="mb-3">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-arrow-clockwise"></i> Check Status
+            </button>
+            <small class="text-muted ms-2">Refresh from OpenAI and retrieve results if completed.</small>
+        </form>
     </div>
 </div>
 

@@ -31,28 +31,33 @@ from clients.batch_queue import (
     create_batch_database_session,
 )
 from clients.openai.batch_client import BatchStatus, OpenAIBatchClient
-from sentences.batch_completion import apply_sentence_translation_results
+from sentences.batch_completion import (
+    DECOMPOSE_AGENT_NAME,
+    TRANSLATE_AGENT_NAME,
+    apply_results_for_agent,
+)
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_POLL_INTERVAL_SECONDS = 300
-_AGENT_NAME = "barsukas_decompose"
+_AGENT_NAMES = (DECOMPOSE_AGENT_NAME, TRANSLATE_AGENT_NAME)
 _IN_FLIGHT_STATUSES = (
     BatchRequestStatus.SUBMITTED.value,
     BatchRequestStatus.PROCESSING.value,
 )
 
 
-def _collect_active_batch_ids(batch_session: Session) -> list[str]:
+def _collect_active_batch_ids(batch_session: Session) -> list[tuple[str, str]]:
+    """Return ``(batch_id, agent_name)`` for every in-flight Barsukas batch."""
     rows = (
-        batch_session.query(BatchQueue.batch_id)
-        .filter(BatchQueue.agent_name == _AGENT_NAME)
+        batch_session.query(BatchQueue.batch_id, BatchQueue.agent_name)
+        .filter(BatchQueue.agent_name.in_(_AGENT_NAMES))
         .filter(BatchQueue.batch_id.isnot(None))
         .filter(BatchQueue.status.in_(_IN_FLIGHT_STATUSES))
         .distinct()
         .all()
     )
-    return [row[0] for row in rows if row[0]]
+    return [(row[0], row[1]) for row in rows if row[0]]
 
 
 def poll_once(main_session_factory: Callable[[], Session]) -> None:
@@ -60,13 +65,13 @@ def poll_once(main_session_factory: Callable[[], Session]) -> None:
     batch_session = create_batch_database_session()
     try:
         manager = BatchQueueManager(batch_session, OpenAIBatchClient())
-        batch_ids = _collect_active_batch_ids(batch_session)
-        if not batch_ids:
-            logger.debug("No in-flight barsukas_decompose batches")
+        active = _collect_active_batch_ids(batch_session)
+        if not active:
+            logger.debug("No in-flight Barsukas batches")
             return
 
-        logger.info("Checking %s in-flight batch(es): %s", len(batch_ids), batch_ids)
-        for batch_id in batch_ids:
+        logger.info("Checking %s in-flight batch(es): %s", len(active), active)
+        for batch_id, agent_name in active:
             try:
                 info = manager.check_batch_status(batch_id)
             except Exception:
@@ -74,7 +79,7 @@ def poll_once(main_session_factory: Callable[[], Session]) -> None:
                 continue
 
             status = info.get("status")
-            logger.info("Batch %s status: %s", batch_id, status)
+            logger.info("Batch %s (%s) status: %s", batch_id, agent_name, status)
 
             if status != BatchStatus.COMPLETED.value:
                 continue
@@ -85,18 +90,19 @@ def poll_once(main_session_factory: Callable[[], Session]) -> None:
                 logger.exception("Failed to retrieve results for batch %s", batch_id)
                 continue
 
-            completed = manager.get_completed_requests(agent_name=_AGENT_NAME, batch_id=batch_id)
+            completed = manager.get_completed_requests(agent_name=agent_name, batch_id=batch_id)
             if not completed:
                 logger.warning("Batch %s reported completed but no requests found", batch_id)
                 continue
 
             main_session = main_session_factory()
             try:
-                result = apply_sentence_translation_results(completed, main_session, batch_id)
+                result = apply_results_for_agent(agent_name, completed, main_session, batch_id)
                 main_session.commit()
                 logger.info(
-                    "Applied batch %s: %s sentences updated, %s failed",
+                    "Applied batch %s (%s): %s sentences updated, %s failed",
                     batch_id,
+                    agent_name,
                     result["updated"],
                     result["failed"],
                 )

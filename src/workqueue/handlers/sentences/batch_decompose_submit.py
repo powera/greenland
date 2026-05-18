@@ -1,16 +1,14 @@
-"""Workqueue handler that submits sentence-decomposition prompts to OpenAI Batch.
+"""Workqueue handler that submits Phase-3 sentence decomposition to OpenAI Batch.
 
-Created by the ``/api/llm/sentences/decompose`` endpoint when ``batch=True``.
+Created by the ``/api/llm/sentences/batch_decompose`` endpoint. Requires that
+the sentences already have translations in every language needed for the
+candidate-lemma lookup pool — the API route enforces this; this handler
+re-validates defensively.
 
-The handler builds one ``/v1/chat/completions`` request per sentence and queues
-them into the shared ``clients.batch_queue.BatchQueue`` (SQLite) tagged with
-``agent_name="barsukas_decompose"`` and ``operation_type="decompose_sentence"``.
-Once all are queued it calls ``BatchQueueManager.submit_batch`` to push them to
-the OpenAI Batch API.
-
-The Barsukas background batch-poller (see ``barsukas.batch_poller``) periodically
-checks pending batches and, on completion, applies results via
-``sentences.batch_completion.apply_sentence_translation_results``.
+Builds one ``/v1/chat/completions`` request per sentence whose response is a
+combined multi-language word-level decomposition (the Phase 3 output of the
+synchronous pipeline). Requests are tagged ``agent_name="barsukas_decompose"``
+so the existing batch poller's completion path applies them to the main DB.
 """
 
 from __future__ import annotations
@@ -28,49 +26,54 @@ from clients.batch_queue import (
 from clients.lib import schema_from_dict, to_openai_schema
 from clients.openai.batch_client import OpenAIBatchClient
 from clients.openai.client import is_gpt5_nano_or_mini_model, reasoning_effort_for_model
+from sentences.candidate_lookup import DEFAULT_SOURCE_LANGUAGES, CandidateLemma
+from sentences.decomposition import (
+    build_multi_language_decomposition_context,
+    build_multi_language_decomposition_prompt,
+    build_multi_language_decomposition_schema,
+)
 from sentences.translate_and_decompose import lookup_candidate_lemmas
-from sentences.translation import build_response_schema, build_translation_prompt
-from storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord
+from storage.models.schema import Sentence, SentenceTranslation
 from workqueue.tools import workqueue_payload_handler
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_LANGUAGES: List[str] = ["fr", "zh", "lt", "es", "bn", "uk", "kn"]
 _AGENT_NAME = "barsukas_decompose"
 _OPERATION_TYPE = "decompose_sentence"
 _BATCH_ENDPOINT = "/v1/chat/completions"
 
+_DEFAULT_DECOMPOSE_LANGUAGES: List[str] = ["en", "fr", "zh", "lt", "es"]
 
-def _pick_source_language(existing_languages: set[str]) -> str:
-    """Pick the source language for the prompt.
 
-    Prefer English when an English translation already exists; otherwise pick
-    any existing translation. Raises ``ValueError`` if there are none.
-    """
-    if not existing_languages:
-        raise ValueError("Sentence has no translations; cannot determine source language")
-    if "en" in existing_languages:
-        return "en"
-    return next(iter(existing_languages))
+def _candidates_for_prompt(candidates: List[CandidateLemma]) -> List[Dict[str, Any]]:
+    return [
+        {
+            "guid": c.guid,
+            "lemma": c.lemma_text,
+            "disambiguation": c.disambiguation,
+            "pos": c.pos,
+            "definition": c.definition,
+            "translations": c.translations,
+        }
+        for c in candidates
+    ]
 
 
 @workqueue_payload_handler()
-def handle_sentences_translate_batch_submit(
+def handle_sentences_batch_decompose_submit(
     session: Any,
     sentence_ids: Optional[List[int]] = None,
-    selected_languages: Optional[List[str]] = None,
+    decompose_languages: Optional[List[str]] = None,
     model: str = constants.DEFAULT_MODEL,
     **_: Any,
 ) -> str:
-    """Submit a batch of sentence decomposition requests to OpenAI Batch.
-
-    Accepts extra kwargs (``batch``, etc.) and ignores them so it is tolerant
-    of payload changes made by the route.
-    """
+    """Submit a batch of Phase-3 sentence-decomposition requests to OpenAI Batch."""
     if not sentence_ids:
         raise ValueError("sentence_ids must be a non-empty list")
 
-    target_languages = selected_languages or _DEFAULT_LANGUAGES
+    decompose_targets: List[str] = (
+        list(decompose_languages) if decompose_languages else list(_DEFAULT_DECOMPOSE_LANGUAGES)
+    )
 
     batch_session = create_batch_database_session()
     batch_client = OpenAIBatchClient()
@@ -87,57 +90,60 @@ def handle_sentences_translate_batch_submit(
                 skipped.append(sentence_id)
                 continue
 
-            existing_translations: Dict[str, str] = {
+            translations: Dict[str, str] = {
                 row.language_code: row.translation_text
                 for row in session.query(SentenceTranslation)
                 .filter_by(sentence_id=sentence_id)
                 .all()
             }
-            existing_languages = set(existing_translations.keys())
-            if not existing_languages:
-                logger.warning("Sentence %s has no translations; cannot build prompt", sentence_id)
+            if not translations:
+                logger.warning(
+                    "Sentence %s has no translations; cannot decompose (Phase 1 missing)",
+                    sentence_id,
+                )
                 skipped.append(sentence_id)
                 continue
 
-            source_language = _pick_source_language(existing_languages)
+            missing_decompose = [lang for lang in decompose_targets if lang not in translations]
+            if missing_decompose:
+                logger.warning(
+                    "Sentence %s missing translations for decompose targets %s; skipping",
+                    sentence_id,
+                    missing_decompose,
+                )
+                skipped.append(sentence_id)
+                continue
 
-            english_words = (
-                session.query(SentenceWord)
-                .filter_by(sentence_id=sentence_id, language_code="en")
-                .all()
-            )
-            include_english = len(english_words) == 0
+            anchor_language = "en" if "en" in translations else next(iter(translations.keys()))
+            anchor_text = translations[anchor_language]
 
-            request_targets = [lang for lang in target_languages if lang != source_language]
+            target_translations: Dict[str, str] = {
+                lang: translations[lang] for lang in decompose_targets
+            }
+
+            helper_translations = [
+                {"language_code": lang, "translation": text}
+                for lang, text in translations.items()
+                if lang not in target_translations and lang != anchor_language
+            ]
 
             candidates = lookup_candidate_lemmas(
                 session=session,
-                translations=existing_translations,
-                source_languages=list(existing_translations.keys()),
+                translations=translations,
+                source_languages=list(translations.keys()),
             )
-            candidate_lemma_models: List[Lemma] = []
-            for candidate in candidates:
-                lemma_model = session.query(Lemma).filter_by(guid=candidate.guid).first()
-                if lemma_model is not None:
-                    candidate_lemma_models.append(lemma_model)
 
-            try:
-                context, prompt = build_translation_prompt(
-                    sentence,
-                    request_targets,
-                    session,
-                    include_english=include_english,
-                    source_language=source_language,
-                    candidate_lemmas=candidate_lemma_models,
-                )
-            except ValueError as exc:
-                logger.warning(
-                    "Skipping sentence %s (could not build prompt): %s", sentence_id, exc
-                )
-                skipped.append(sentence_id)
-                continue
-
-            schema = build_response_schema(request_targets, include_english)
+            prompt = build_multi_language_decomposition_prompt(
+                source_sentence=anchor_text,
+                source_language=anchor_language,
+                target_translations=target_translations,
+                helper_translations=helper_translations,
+                candidate_lemmas=_candidates_for_prompt(candidates),
+            )
+            context = build_multi_language_decomposition_context()
+            schema = build_multi_language_decomposition_schema(
+                target_languages=list(target_translations.keys())
+            )
             full_prompt = f"{context}\n\n{prompt}"
 
             request_body: Dict[str, Any] = {
@@ -180,8 +186,8 @@ def handle_sentences_translate_batch_submit(
 
         if not queued:
             return (
-                f"No requests queued (skipped={len(skipped)}). "
-                f"Sentence IDs requiring source translations may be missing them."
+                f"No Phase-3 requests queued (skipped={len(skipped)}). "
+                f"Sentence IDs may be missing required translations."
             )
 
         pending = manager.get_pending_requests(
@@ -192,12 +198,12 @@ def handle_sentences_translate_batch_submit(
             batch_metadata={"agent": _AGENT_NAME, "operation": _OPERATION_TYPE},
         )
         logger.info(
-            "Submitted OpenAI batch %s with %s request(s) (file=%s)",
+            "Submitted OpenAI Phase-3 batch %s with %s request(s) (file=%s)",
             batch_id,
             len(pending),
             file_id,
         )
-        msg = f"Submitted batch {batch_id} with {len(pending)} request(s)"
+        msg = f"Submitted Phase-3 batch {batch_id} with {len(pending)} request(s)"
         if skipped:
             msg += f"; skipped {len(skipped)} sentence(s): {skipped}"
         return msg

@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional, Sequence
 from sqlalchemy.orm import Session
 
 from clients.unified_client import UnifiedLLMClient
-from sentences.candidate_lookup import find_candidate_lemmas_by_english_word
+from sentences.candidate_lookup import find_candidate_lemmas_for_sentence
 from storage.database import Sentence
 from storage.models.schema import Lemma, SentencePatternWord, SentenceWord
 from storage.translation_helpers import (
@@ -96,25 +96,26 @@ def ensure_translations(
             is not None
         )
         if not has_pattern_lemmas:
-            grouped = find_candidate_lemmas_by_english_word(
+            source_pool: List[str] = list(
+                dict.fromkeys([*pivot_languages, *needed_languages, "en"])
+            )
+            ranked = find_candidate_lemmas_for_sentence(
                 session,
                 sentence.id,
-                pivot_languages=pivot_languages,
-                target_languages=needed_languages,
+                source_languages=source_pool,
             )
             seen_lemma_ids: set[int] = set()
             flattened: List[Lemma] = []
-            for english_word, candidates in grouped.items():
-                for candidate in candidates:
-                    lemma = session.query(Lemma).filter_by(guid=candidate.guid).first()
-                    if lemma is None or lemma.id in seen_lemma_ids:
-                        continue
-                    seen_lemma_ids.add(lemma.id)
-                    flattened.append(lemma)
+            for candidate in ranked:
+                lemma = session.query(Lemma).filter_by(guid=candidate.guid).first()
+                if lemma is None or lemma.id in seen_lemma_ids:
+                    continue
+                seen_lemma_ids.add(lemma.id)
+                flattened.append(lemma)
             if flattened:
                 candidate_lemmas = flattened
                 logger.info(
-                    "Pattern-less sentence %s: supplying %d candidate lemmas from pivot lookup",
+                    "Pattern-less sentence %s: supplying %d candidate lemmas from multi-language lookup",
                     sentence.id,
                     len(flattened),
                 )

@@ -45,6 +45,8 @@ class TaskType:
     WORDS_GRAMMAR_FACTS = "words.grammar_facts"
     SENTENCES_TRANSLATE = "sentences.translate"
     SENTENCES_TRANSLATE_BATCH_SUBMIT = "sentences.translate.batch_submit"
+    SENTENCES_BATCH_TRANSLATE_SUBMIT = "sentences.batch.translate.submit"
+    SENTENCES_BATCH_DECOMPOSE_SUBMIT = "sentences.batch.decompose.submit"
     AUDIO_GENERATE_LEMMA = "audio.generate.lemma"
     AUDIO_GENERATE_SENTENCE = "audio.generate.sentence"
     WIREWORD_EXPORT_DIRECTORY = "wireword.export.directory"
