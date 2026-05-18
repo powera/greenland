@@ -460,13 +460,74 @@
 </div>
 
 
+<!-- Lemmas Used (cross-lingual aggregate) -->
+{% if lemmas_used %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-diagram-3"></i> {{ STRINGS.sentences.lemmas_used }}
+                <small class="text-muted">({{ n_decomposed_languages }} {{ STRINGS.sentences.language_count|lower }})</small>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-2">{{ STRINGS.sentences.lemmas_used_help }}</p>
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>{{ STRINGS.sentences.lemma }}</th>
+                            <th>{{ STRINGS.sentences.language_count }}</th>
+                            <th>{{ STRINGS.sentences.surface_forms }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in lemmas_used %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('lemmas.view_lemma', lemma_id=entry.lemma_id) }}">
+                                        {{ entry.lemma_display_text }}
+                                    </a>
+                                    {% if entry.lemma.disambiguation %}
+                                        <span class="text-muted">({{ entry.lemma.disambiguation }})</span>
+                                    {% endif %}
+                                    {% if entry.lemma.guid %}
+                                        <small class="text-muted">({{ entry.lemma.guid }})</small>
+                                    {% endif %}
+                                    {% if entry.lemma.difficulty_level is not none %}
+                                        <span class="badge bg-info" style="font-size: 0.7rem;">L{{ entry.lemma.difficulty_level }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ entry.language_count }} / {{ n_decomposed_languages }}</span>
+                                    {% if entry.flag_missing %}
+                                        <i class="bi bi-exclamation-triangle-fill text-warning ms-1"
+                                           tabindex="0"
+                                           role="button"
+                                           title="{{ STRINGS.sentences.missing_in }}: {{ entry.missing_languages|join(', ') }}"
+                                           aria-label="{{ STRINGS.sentences.missing_in }}: {{ entry.missing_languages|join(', ') }}"></i>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% for lang_code, surface in entry.surfaces|dictsort %}
+                                        <span class="me-2"><code class="text-muted">{{ lang_code }}:</code> <strong>{{ surface }}</strong></span>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Words Used in Sentence -->
 {% if words_by_language %}
 <div class="row mb-4">
     <div class="col">
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-book"></i> {{ STRINGS.sentences.vocabulary_words }}
+                <i class="bi bi-book"></i> {{ STRINGS.sentences.per_language_breakdown }}
             </div>
             <div class="card-body">
                 {% for lang_code in words_by_language.keys()|sort %}
@@ -492,7 +553,19 @@
                                     <td>{{ word.position }}</td>
                                     <td><code>{{ word.role }}</code></td>
                                     <td>{{ word.english_text or '-' }}</td>
-                                    <td><strong>{{ word.target_text or '-' }}</strong></td>
+                                    <td>
+                                        {% if word.target_text %}
+                                            {% if lang_code == 'zh' %}
+                                                <strong class="chinese-with-pinyin">{{ word.target_text|pinyin_ruby|safe }}</strong>
+                                            {% elif lang_code == 'ja' %}
+                                                <strong class="japanese-with-romaji">{{ word.target_text|romaji_ruby|safe }}</strong>
+                                            {% else %}
+                                                <strong>{{ word.target_text }}</strong>
+                                            {% endif %}
+                                        {% else %}
+                                            <strong>-</strong>
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         {% if word.grammatical_form %}
                                             <span class="badge bg-light text-dark">{{ word.grammatical_form }}</span>

@@ -245,6 +245,48 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
             }
         )
 
+    # Aggregate lemma usage across languages: which lemma_guids appear in which
+    # decomposed languages, with their surface form. Used to surface cross-lingual
+    # alignment and flag potential decomposition gaps (a lemma missing from just
+    # one or two languages is often a translation/decomposition error).
+    decomposed_langs: set[str] = set(words_by_language.keys())
+    n_decomposed = len(decomposed_langs)
+    # Threshold: flag when missing <=1 lang (or <=2 when N>8)
+    miss_threshold = 2 if n_decomposed > 8 else 1
+
+    lemma_usage: dict[int, dict[str, Any]] = {}
+    for sw in sentence_words:
+        if not sw.lemma_id:
+            continue
+        lemma = lemmas_by_id.get(sw.lemma_id)
+        if not lemma:
+            continue
+        entry = lemma_usage.setdefault(
+            sw.lemma_id,
+            {
+                "lemma": lemma,
+                "lemma_id": sw.lemma_id,
+                "lemma_display_text": lemma_display_by_id.get(lemma.id, lemma.lemma_text),
+                "surfaces": {},  # lang_code -> surface form
+            },
+        )
+        # Keep first surface form seen per language (sentence_words is ordered by lang, position)
+        if sw.language_code not in entry["surfaces"]:
+            entry["surfaces"][sw.language_code] = sw.target_language_text
+
+    lemmas_used: list[dict[str, Any]] = []
+    for entry in lemma_usage.values():
+        present = set(entry["surfaces"].keys())
+        missing = sorted(decomposed_langs - present)
+        count = len(present)
+        entry["language_count"] = count
+        entry["missing_languages"] = missing
+        entry["flag_missing"] = (
+            0 < len(missing) <= miss_threshold and count >= n_decomposed - miss_threshold
+        )
+        lemmas_used.append(entry)
+    lemmas_used.sort(key=lambda e: (-e["language_count"], e["lemma_display_text"] or ""))
+
     # Enrich pattern words with lemma details
     pattern_words_data = []
     for pw in pattern_words:
@@ -367,6 +409,8 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         translations=translations,
         language_names=language_names,
         words_by_language=words_by_language,
+        lemmas_used=lemmas_used,
+        n_decomposed_languages=n_decomposed,
         pattern_words=pattern_words_data,
         audio_by_language=audio_by_language,
         conversations_data=conversations_data,
