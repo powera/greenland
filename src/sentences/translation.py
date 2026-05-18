@@ -119,7 +119,12 @@ def translate_sentence(
         produced this call (includes English when it was missing). Per-language
         word breakdowns are persisted to ``SentenceWord`` as a side effect.
     """
-    from sentences.translate_and_decompose import translate_and_decompose
+    from sentences.candidate_lookup import DEFAULT_SOURCE_LANGUAGES
+    from sentences.translate_and_decompose import (
+        TranslateAndDecomposeResult,
+        decompose_with_existing_translations,
+        translate_sentence_text,
+    )
 
     sentence = session.query(Sentence).get(sentence_id)
     if not sentence:
@@ -144,28 +149,63 @@ def translate_sentence(
     # Phase 1 must not retranslate the source language back to itself.
     phase1_targets = [lang for lang in normalized_targets_all if lang != source_language]
 
+    # Add candidate-lookup pivots to Phase 1 so Phase 2 has enough languages to
+    # rank lemmas against (PHASE3_MIN_LANGUAGES precondition in
+    # translate_and_decompose).
+    phase1_languages: List[str] = list(phase1_targets)
+    seen_phase1: set[str] = {source_language, *phase1_languages}
+    for pivot in DEFAULT_SOURCE_LANGUAGES:
+        if pivot not in seen_phase1:
+            phase1_languages.append(pivot)
+            seen_phase1.add(pivot)
+
     # Phase 3 should decompose every language the caller asked for, including
     # the source language: callers requesting "decompose lt" for an LT-source
     # sentence still want LT SentenceWord rows produced from the existing
-    # source translation. translate_and_decompose handles a decompose_languages
-    # entry that has no Phase 1 translation by falling back to the source text.
+    # source translation. decompose_with_existing_translations handles a
+    # decompose_languages entry that has no Phase 1 translation by falling back
+    # to the source text.
     decompose_languages: List[str] = list(normalized_targets_all)
     if include_english and "en" not in decompose_languages and source_language != "en":
         decompose_languages.append("en")
 
     client = UnifiedLLMClient()
-    pipeline_result = translate_and_decompose(
-        sentence_text=source_translation.translation_text,
+    source_text = source_translation.translation_text
+
+    # ── Phase 1: translate, then PERSIST before Phase 3 ────────────────────
+    phase1_translations = translate_sentence_text(
+        sentence_text=source_text,
         source_language=source_language,
-        session=session,
+        target_languages=phase1_languages,
         client=client,
-        target_languages=phase1_targets,
-        decompose_languages=decompose_languages,
         model=model,
     )
+    if not phase1_translations:
+        raise ValueError("Phase 1 translation produced no results")
 
-    if not pipeline_result.phase1_ok:
-        raise ValueError(pipeline_result.phase1_error or "Phase 1 translation failed")
+    # Persist Phase 1 translations (SentenceTranslation rows only) and commit
+    # before Phase 3. This way the explicit batch decompose path's precondition
+    # is satisfied on retry, and a Phase-3 failure doesn't lose the Phase-1
+    # work.
+    _persist_phase1_translations(sentence_id, phase1_translations, session)
+
+    # ── Phase 2 + Phase 3 ─────────────────────────────────────────────────
+    pipeline_result = TranslateAndDecomposeResult(
+        source_sentence=source_text,
+        source_language=source_language,
+    )
+    pipeline_result.translations = dict(phase1_translations)
+
+    decompose_with_existing_translations(
+        sentence_text=source_text,
+        source_language=source_language,
+        translations=phase1_translations,
+        session=session,
+        client=client,
+        decompose_languages=decompose_languages,
+        model=model,
+        result=pipeline_result,
+    )
 
     translations: Dict[str, Any] = dict(pipeline_result.translations)
 
@@ -188,6 +228,44 @@ def translate_sentence(
 
     store_translation_results(sentence_id, translations, session)
     return translations
+
+
+def _persist_phase1_translations(
+    sentence_id: int,
+    translations: Dict[str, str],
+    session: Session,
+) -> None:
+    """Insert/update SentenceTranslation rows for Phase-1 outputs and commit.
+
+    Used by the synchronous decompose path so Phase-1 work survives a Phase-3
+    failure and so the DB state matches what the explicit two-phase OpenAI
+    Batch flow produces.
+    """
+    for lang_code, translation_text in translations.items():
+        if not isinstance(translation_text, str) or not translation_text.strip():
+            continue
+        existing = (
+            session.query(SentenceTranslation)
+            .filter_by(sentence_id=sentence_id, language_code=lang_code)
+            .first()
+        )
+        if existing:
+            existing.translation_text = translation_text
+        else:
+            session.add(
+                SentenceTranslation(
+                    sentence_id=sentence_id,
+                    language_code=lang_code,
+                    translation_text=translation_text,
+                    verified=False,
+                )
+            )
+    session.commit()
+    logger.info(
+        "Persisted Phase-1 translations for sentence %d: %s",
+        sentence_id,
+        sorted(translations.keys()),
+    )
 
 
 def _adapt_decomposed_word(word_entry: Dict[str, Any]) -> Dict[str, Any]:
