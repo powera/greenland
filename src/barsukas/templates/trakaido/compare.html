@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Sentence Comparison · Trakaido{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/trakaido.css') }}">
+{% endblock %}
+
+{% macro word_chip(w) -%}
+<span class="tk-chip{% if w.pair_index is not none %} tk-pair-{{ w.pair_index % 12 }}{% endif %}"
+      data-pair-key="{{ w.pair_key or '' }}">{{ w.text or '—' }}</span>
+{%- endmacro %}
+
+{% block content %}
+<div class="trakaido-page">
+    <div class="trakaido-header">
+        <h1>Sentence Comparison</h1>
+        {% if sentence %}
+        <div class="trakaido-meta">
+            Sentence #{{ sentence.id }}
+            {% if sentence.source_filename %} · <span class="trakaido-source">{{ sentence.source_filename }}</span>{% endif %}
+            {% if sentence.minimum_level is not none %} · level {{ sentence.minimum_level }}{% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <form class="trakaido-controls" method="get" action="{{ url_for('trakaido.compare_random') }}">
+        <label class="trakaido-control">
+            <span>Interface language</span>
+            <select name="interface_lang">
+                {% for code, name in supported_languages.items() %}
+                <option value="{{ code }}" {% if code == interface_lang %}selected{% endif %}>{{ name }} ({{ code }})</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="trakaido-control">
+            <span>Foreign language</span>
+            <select name="foreign_lang">
+                {% for code, name in supported_languages.items() %}
+                <option value="{{ code }}" {% if code == foreign_lang %}selected{% endif %}>{{ name }} ({{ code }})</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button class="trakaido-button" type="submit">New random sentence</button>
+    </form>
+
+    {% if no_results %}
+    <div class="trakaido-empty">
+        No sentences are available with decompositions in both
+        <strong>{{ interface_lang }}</strong> and <strong>{{ foreign_lang }}</strong>.
+    </div>
+    {% elif sentence %}
+
+    {% if show_gloss_block %}
+    <section class="trakaido-card">
+        <div class="trakaido-section-header">
+            <h2 class="trakaido-section-title">Word-by-word gloss</h2>
+            {% if foreign_audio_url %}
+            <button type="button" class="trakaido-audio-button" data-audio-url="{{ foreign_audio_url }}"
+                    {% if foreign_audio_voice %}title="Play audio ({{ foreign_audio_voice }})"{% else %}title="Play audio"{% endif %}>
+                <span class="trakaido-audio-icon">▶</span>
+                <span>Play {{ foreign_lang|upper }}</span>
+            </button>
+            {% endif %}
+        </div>
+        <div class="trakaido-gloss-row">
+            <span class="trakaido-lang-tag">{{ foreign_lang }}</span>
+            <div class="trakaido-gloss-words">
+                {% for w in foreign_words %}
+                <div class="trakaido-glossed-word">
+                    <div class="trakaido-glossed-native">{{ w.text or '—' }}</div>
+                    <div class="trakaido-glossed-gloss">{{ w.gloss or '—' }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="trakaido-card">
+        <div class="trakaido-section-header">
+            <h2 class="trakaido-section-title">Side-by-side comparison</h2>
+            {% if foreign_audio_url and not show_gloss_block %}
+            <button type="button" class="trakaido-audio-button" data-audio-url="{{ foreign_audio_url }}"
+                    {% if foreign_audio_voice %}title="Play audio ({{ foreign_audio_voice }})"{% else %}title="Play audio"{% endif %}>
+                <span class="trakaido-audio-icon">▶</span>
+                <span>Play {{ foreign_lang|upper }}</span>
+            </button>
+            {% endif %}
+        </div>
+        <div class="trakaido-compare" id="tk-compare">
+            <div class="trakaido-compare-row" data-row="interface">
+                <span class="trakaido-lang-tag">{{ interface_lang }}</span>
+                <div class="trakaido-compare-words">
+                    {% for w in interface_words %}{{ word_chip(w) }}{% endfor %}
+                </div>
+            </div>
+            {% if show_lines %}
+            <svg class="trakaido-lines" id="tk-lines" aria-hidden="true"></svg>
+            {% endif %}
+            <div class="trakaido-compare-row" data-row="foreign">
+                <span class="trakaido-lang-tag">{{ foreign_lang }}</span>
+                <div class="trakaido-compare-words">
+                    {% for w in foreign_words %}
+                    <div class="tk-chip-stack">
+                        {{ word_chip(w) }}
+                        <span class="tk-chip-gram">{{ w.gram_label or ' ' }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/trakaido_compare.js') }}"></script>
+{% endblock %}

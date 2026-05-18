@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Trakaido{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/trakaido.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="trakaido-page">
+    <div class="trakaido-hero">
+        <h1>Trakaido</h1>
+        <p class="trakaido-subtitle">Language-learning activities, served from Barsukas.</p>
+    </div>
+
+    <div class="trakaido-activity-grid">
+        <a class="trakaido-activity-card" href="{{ url_for('trakaido.compare_random') }}">
+            <div class="trakaido-activity-icon">↔</div>
+            <h2>Sentence Comparison</h2>
+            <p>Word-by-word interlinear view of a random sentence in two languages.</p>
+        </a>
+    </div>
+</div>
+{% endblock %}
