@@ -274,6 +274,18 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         if sw.language_code not in entry["surfaces"]:
             entry["surfaces"][sw.language_code] = sw.target_language_text
 
+    # Function-word POS types: extra occurrences in just a few languages
+    # (e.g. an extra "from" in 1/9 languages) are usually noise, not signal.
+    function_word_pos_types = {
+        "preposition",
+        "conjunction",
+        "article",
+        "determiner",
+        "interjection",
+        "particle",
+    }
+    most_threshold = n_decomposed - miss_threshold
+
     lemmas_used: list[dict[str, Any]] = []
     for entry in lemma_usage.values():
         present = set(entry["surfaces"].keys())
@@ -281,9 +293,9 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         count = len(present)
         entry["language_count"] = count
         entry["missing_languages"] = missing
-        entry["flag_missing"] = (
-            0 < len(missing) <= miss_threshold and count >= n_decomposed - miss_threshold
-        )
+        entry["flag_missing"] = 0 < len(missing) <= miss_threshold and count >= most_threshold
+        if entry["lemma"].pos_type in function_word_pos_types and count < most_threshold:
+            continue
         lemmas_used.append(entry)
     lemmas_used.sort(key=lambda e: (-e["language_count"], e["lemma_display_text"] or ""))
 
