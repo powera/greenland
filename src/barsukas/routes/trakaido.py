@@ -20,6 +20,9 @@ from sqlalchemy import func
 
 from storage.models.schema import (
     AudioQualityReview,
+    DerivativeForm,
+    Lemma,
+    LemmaTranslation,
     Sentence,
     SentenceWord,
 )
@@ -348,4 +351,177 @@ def compare(sentence_id: int) -> ResponseReturnValue:
         foreign_audio_url=foreign_audio_url,
         foreign_audio_voice=foreign_audio.voice_name if foreign_audio else None,
         no_results=False,
+    )
+
+
+def _lemma_translation_for_language(
+    lemma: Lemma, lang: str
+) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    """Return (text, definition, disambiguation) for the lemma in `lang`.
+
+    English data lives on the Lemma itself; other languages come from
+    LemmaTranslation rows.
+    """
+    if lang == "en":
+        return lemma.lemma_text, lemma.definition_text, None
+    row = (
+        g.db.query(LemmaTranslation)
+        .filter(LemmaTranslation.lemma_id == lemma.id)
+        .filter(LemmaTranslation.language_code == lang)
+        .first()
+    )
+    if row is None:
+        return None, None, None
+    return row.translation, row.definition_text, row.disambiguation
+
+
+def _pick_lemma_audio(lemma_id: int, language_code: str) -> Optional[AudioQualityReview]:
+    """Return the best available lemma audio review for this language, or None."""
+    reviews = (
+        g.db.query(AudioQualityReview)
+        .filter(AudioQualityReview.lemma_id == lemma_id)
+        .filter(AudioQualityReview.language_code == language_code)
+        .filter(AudioQualityReview.sentence_id.is_(None))
+        .all()
+    )
+    if not reviews:
+        return None
+    reviews.sort(key=lambda r: (_AUDIO_STATUS_PRIORITY.get(r.status, 99), r.id))
+    return cast(AudioQualityReview, reviews[0])
+
+
+_LEMMA_SEARCH_LIMIT = 50
+
+
+def _form_order_key(lang: str, pos_type: Optional[str], grammatical_form: str) -> Tuple[int, str]:
+    """Return a sort key giving canonical order for grammatical forms in (lang, pos).
+
+    Falls back to alphabetical for unknown (lang, pos) or unknown forms.
+    """
+    if pos_type is None:
+        return (10_000, grammatical_form)
+    try:
+        from langtools.form_registry import FORM_SPECS
+    except ImportError:
+        return (10_000, grammatical_form)
+    spec = FORM_SPECS.get((lang, pos_type))
+    if spec is None:
+        return (10_000, grammatical_form)
+    enum_to_index = {
+        spec.form_mapping[field_name].value: idx
+        for idx, field_name in enumerate(spec.form_fields)
+        if field_name in spec.form_mapping
+    }
+    idx = enum_to_index.get(grammatical_form)
+    if idx is None:
+        return (10_000, grammatical_form)
+    return (idx, grammatical_form)
+
+
+@bp.route("/lemma/")
+def lemma_search() -> ResponseReturnValue:
+    """Search page for picking a lemma to open in the Trakaido lemma view."""
+    interface_lang, foreign_lang = _parse_language_params()
+    search = (request.args.get("search") or "").strip()
+
+    results: List[Dict[str, Any]] = []
+    if search:
+        like = f"%{search}%"
+        en_matches = (
+            g.db.query(Lemma)
+            .filter(Lemma.lemma_text.ilike(like))
+            .order_by(Lemma.lemma_text)
+            .limit(_LEMMA_SEARCH_LIMIT)
+            .all()
+        )
+        translation_matches = (
+            g.db.query(Lemma)
+            .join(LemmaTranslation, LemmaTranslation.lemma_id == Lemma.id)
+            .filter(LemmaTranslation.translation.ilike(like))
+            .filter(LemmaTranslation.language_code.in_([interface_lang, foreign_lang]))
+            .order_by(Lemma.lemma_text)
+            .limit(_LEMMA_SEARCH_LIMIT)
+            .all()
+        )
+        seen: set[int] = set()
+        for lemma in list(en_matches) + list(translation_matches):
+            if lemma.id in seen:
+                continue
+            seen.add(lemma.id)
+            results.append(
+                {
+                    "id": lemma.id,
+                    "lemma_text": lemma.lemma_text,
+                    "definition_text": lemma.definition_text,
+                    "pos_type": lemma.pos_type,
+                    "disambiguation": lemma.disambiguation,
+                }
+            )
+            if len(results) >= _LEMMA_SEARCH_LIMIT:
+                break
+
+    return render_template(
+        "trakaido/lemma_search.html",
+        search=search,
+        results=results,
+        interface_lang=interface_lang,
+        foreign_lang=foreign_lang,
+        supported_languages=get_supported_languages(),
+    )
+
+
+@bp.route("/lemma/<int:lemma_id>")
+def lemma_view(lemma_id: int) -> ResponseReturnValue:
+    """Trakaido lemma view: details + foreign forms + foreign audio."""
+    interface_lang, foreign_lang = _parse_language_params()
+
+    lemma = g.db.query(Lemma).filter(Lemma.id == lemma_id).first()
+    if lemma is None:
+        abort(404)
+
+    iface_text, iface_definition, iface_disambiguation = _lemma_translation_for_language(
+        lemma, interface_lang
+    )
+    foreign_text, foreign_definition, foreign_disambiguation = _lemma_translation_for_language(
+        lemma, foreign_lang
+    )
+
+    foreign_forms = list(
+        g.db.query(DerivativeForm)
+        .filter(DerivativeForm.lemma_id == lemma_id)
+        .filter(DerivativeForm.language_code == foreign_lang)
+        .all()
+    )
+    foreign_forms.sort(
+        key=lambda f: (
+            not f.is_base_form,
+            _form_order_key(foreign_lang, lemma.pos_type, f.grammatical_form or ""),
+        )
+    )
+
+    foreign_audio = _pick_lemma_audio(lemma_id, foreign_lang)
+    foreign_audio_url: Optional[str] = None
+    if foreign_audio is not None:
+        foreign_audio_url = url_for(
+            "audio.serve_audio_file",
+            language=foreign_audio.language_code,
+            voice=foreign_audio.voice_name,
+            filename=foreign_audio.filename,
+        )
+
+    return render_template(
+        "trakaido/lemma.html",
+        lemma=lemma,
+        interface_lang=interface_lang,
+        foreign_lang=foreign_lang,
+        supported_languages=get_supported_languages(),
+        interface_text=iface_text,
+        interface_definition=iface_definition,
+        interface_disambiguation=iface_disambiguation,
+        foreign_text=foreign_text,
+        foreign_definition=foreign_definition,
+        foreign_disambiguation=foreign_disambiguation,
+        foreign_forms=foreign_forms,
+        foreign_audio_url=foreign_audio_url,
+        foreign_audio_voice=foreign_audio.voice_name if foreign_audio else None,
     )

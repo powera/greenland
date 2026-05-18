@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lemma.lemma_text }} · Trakaido{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/trakaido.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="trakaido-page">
+    <div class="trakaido-header">
+        <h1>{{ foreign_text or lemma.lemma_text }}</h1>
+        <div class="trakaido-meta">
+            Lemma #{{ lemma.id }}
+            {% if lemma.pos_type %} · {{ lemma.pos_type }}{% if lemma.pos_subtype %} ({{ lemma.pos_subtype }}){% endif %}{% endif %}
+            {% if lemma.disambiguation %} · <em>{{ lemma.disambiguation }}</em>{% endif %}
+        </div>
+    </div>
+
+    <form class="trakaido-controls" method="get" action="{{ url_for('trakaido.lemma_view', lemma_id=lemma.id) }}">
+        <label class="trakaido-control">
+            <span>Interface language</span>
+            <select name="interface_lang">
+                {% for code, name in supported_languages.items() %}
+                <option value="{{ code }}" {% if code == interface_lang %}selected{% endif %}>{{ name }} ({{ code }})</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="trakaido-control">
+            <span>Foreign language</span>
+            <select name="foreign_lang">
+                {% for code, name in supported_languages.items() %}
+                <option value="{{ code }}" {% if code == foreign_lang %}selected{% endif %}>{{ name }} ({{ code }})</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button class="trakaido-button" type="submit">Update</button>
+    </form>
+
+    <section class="trakaido-card">
+        <div class="trakaido-section-header">
+            <h2 class="trakaido-section-title">Lemma</h2>
+            {% if foreign_audio_url %}
+            <button type="button" class="trakaido-audio-button" data-audio-url="{{ foreign_audio_url }}"
+                    {% if foreign_audio_voice %}title="Play audio ({{ foreign_audio_voice }})"{% else %}title="Play audio"{% endif %}>
+                <span class="trakaido-audio-icon">▶</span>
+                <span>Play {{ foreign_lang|upper }}</span>
+            </button>
+            {% endif %}
+        </div>
+
+        <div class="trakaido-lemma-grid">
+            <div class="trakaido-lemma-cell">
+                <div class="trakaido-lang-tag">{{ foreign_lang }}</div>
+                {% if foreign_text %}
+                    <div class="trakaido-lemma-text">{{ foreign_text }}</div>
+                    {% if foreign_disambiguation %}
+                        <div class="trakaido-lemma-disambig">({{ foreign_disambiguation }})</div>
+                    {% endif %}
+                    {% if foreign_definition %}
+                        <div class="trakaido-lemma-definition">{{ foreign_definition }}</div>
+                    {% endif %}
+                {% else %}
+                    <div class="trakaido-empty-inline">No translation in {{ foreign_lang }}.</div>
+                {% endif %}
+            </div>
+
+            <div class="trakaido-lemma-cell">
+                <div class="trakaido-lang-tag">{{ interface_lang }}</div>
+                {% if interface_text %}
+                    <div class="trakaido-lemma-text">{{ interface_text }}</div>
+                    {% if interface_disambiguation %}
+                        <div class="trakaido-lemma-disambig">({{ interface_disambiguation }})</div>
+                    {% endif %}
+                    {% if interface_definition %}
+                        <div class="trakaido-lemma-definition">{{ interface_definition }}</div>
+                    {% endif %}
+                {% else %}
+                    <div class="trakaido-empty-inline">No translation in {{ interface_lang }}.</div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    {% if foreign_forms %}
+    <section class="trakaido-card">
+        <div class="trakaido-section-header">
+            <h2 class="trakaido-section-title">Forms in {{ supported_languages.get(foreign_lang, foreign_lang) }}</h2>
+        </div>
+        <table class="trakaido-forms-table">
+            <thead>
+                <tr>
+                    <th>Form</th>
+                    <th>Grammatical form</th>
+                    <th>IPA</th>
+                    <th>Base</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in foreign_forms %}
+                {% set _gf = form.grammatical_form or '' %}
+                {% set _features = _gf.split('/', 1)[1] if '/' in _gf else _gf %}
+                {% set _prefix = foreign_lang ~ '_' %}
+                {% if _features.startswith(_prefix) %}{% set _features = _features[_prefix|length:] %}{% endif %}
+                <tr>
+                    <td><strong>{{ form.derivative_form_text }}</strong></td>
+                    <td>{{ _features.replace('_', ' ') }}</td>
+                    <td>{{ form.ipa_pronunciation or '—' }}</td>
+                    <td>{% if form.is_base_form %}✓{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/trakaido_audio.js') }}"></script>
+{% endblock %}

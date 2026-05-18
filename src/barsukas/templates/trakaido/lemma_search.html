@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Find a Lemma · Trakaido{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/trakaido.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="trakaido-page">
+    <div class="trakaido-header">
+        <h1>Find a Lemma</h1>
+        <div class="trakaido-meta">Search by English text or by translation in the chosen languages.</div>
+    </div>
+
+    <form class="trakaido-controls" method="get" action="{{ url_for('trakaido.lemma_search') }}">
+        <label class="trakaido-control">
+            <span>Search</span>
+            <input type="text" name="search" value="{{ search }}" autofocus>
+        </label>
+        <label class="trakaido-control">
+            <span>Interface language</span>
+            <select name="interface_lang">
+                {% for code, name in supported_languages.items() %}
+                <option value="{{ code }}" {% if code == interface_lang %}selected{% endif %}>{{ name }} ({{ code }})</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="trakaido-control">
+            <span>Foreign language</span>
+            <select name="foreign_lang">
+                {% for code, name in supported_languages.items() %}
+                <option value="{{ code }}" {% if code == foreign_lang %}selected{% endif %}>{{ name }} ({{ code }})</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button class="trakaido-button" type="submit">Search</button>
+    </form>
+
+    {% if search and not results %}
+    <div class="trakaido-empty">No lemmas match <strong>{{ search }}</strong>.</div>
+    {% elif results %}
+    <section class="trakaido-card">
+        <div class="trakaido-section-header">
+            <h2 class="trakaido-section-title">Results</h2>
+        </div>
+        <ul class="trakaido-result-list">
+            {% for r in results %}
+            <li class="trakaido-result">
+                <a href="{{ url_for('trakaido.lemma_view', lemma_id=r.id, interface_lang=interface_lang, foreign_lang=foreign_lang) }}">
+                    <strong>{{ r.lemma_text }}</strong>
+                    {% if r.disambiguation %}<em class="trakaido-result-disambig">({{ r.disambiguation }})</em>{% endif %}
+                    {% if r.pos_type %}<span class="trakaido-result-pos">{{ r.pos_type }}</span>{% endif %}
+                </a>
+                {% if r.definition_text %}
+                <div class="trakaido-result-def">{{ r.definition_text }}</div>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

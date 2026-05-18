@@ -116,6 +116,9 @@
                             <li><a class="dropdown-item" href="{{ url_for('trakaido.compare_random') }}">
                                 <i class="bi bi-arrow-left-right"></i> Sentence Comparison
                             </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('trakaido.lemma_search') }}">
+                                <i class="bi bi-book"></i> Lemma View
+                            </a></li>
                         </ul>
                     </li>
                     {% if not config.get('READONLY', False) %}
