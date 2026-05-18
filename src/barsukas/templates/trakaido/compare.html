@@ -67,10 +67,20 @@
             <span class="trakaido-lang-tag">{{ foreign_lang }}</span>
             <div class="trakaido-gloss-words">
                 {% for w in foreign_words %}
+                {% if w.lemma_id %}
+                <a class="trakaido-glossed-word trakaido-glossed-link"
+                   href="{{ url_for('lemmas.view_lemma', lemma_id=w.lemma_id) }}"
+                   target="_blank" rel="noopener"
+                   title="View lemma">
+                    <div class="trakaido-glossed-native">{{ w.text or '—' }}</div>
+                    <div class="trakaido-glossed-gloss">{{ w.gloss or '—' }}</div>
+                </a>
+                {% else %}
                 <div class="trakaido-glossed-word">
                     <div class="trakaido-glossed-native">{{ w.text or '—' }}</div>
                     <div class="trakaido-glossed-gloss">{{ w.gloss or '—' }}</div>
                 </div>
+                {% endif %}
                 {% endfor %}
             </div>
         </div>

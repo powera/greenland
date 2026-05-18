@@ -231,6 +231,23 @@
     margin-top: 0.15rem;
 }
 
+.trakaido-glossed-link {
+    text-decoration: none;
+    color: inherit;
+    border-radius: 6px;
+    padding: 0.15rem 0.3rem;
+    margin: -0.15rem -0.3rem;
+    transition: background-color 0.12s ease;
+}
+
+.trakaido-glossed-link:hover {
+    background-color: rgba(0, 149, 255, 0.08);
+}
+
+.trakaido-glossed-link:hover .trakaido-glossed-native {
+    color: var(--tk-primary);
+}
+
 /* Side-by-side comparison with connecting lines */
 .trakaido-compare {
     position: relative;
