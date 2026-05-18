@@ -107,6 +107,17 @@
                             </a></li>
                         </ul>
                     </li>
+                    <!-- Trakaido dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-translate"></i> Trakaido
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><a class="dropdown-item" href="{{ url_for('trakaido.compare_random') }}">
+                                <i class="bi bi-arrow-left-right"></i> Sentence Comparison
+                            </a></li>
+                        </ul>
+                    </li>
                     {% if not config.get('READONLY', False) %}
                     <!-- Sync dropdown (hidden in read-only/golden mode where DB is the release files) -->
                     <li class="nav-item dropdown">
