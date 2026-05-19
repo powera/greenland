@@ -12,6 +12,24 @@
 
 <div class="row">
     <div class="col-md-8 offset-md-2">
+        <div class="card mb-4 border-primary">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-stars"></i> Default Export (Lithuanian)
+            </div>
+            <div class="card-body">
+                <p class="mb-3">
+                    Runs the canonical Lithuanian export across every supported source language
+                    (English plus non-English sources). Applies level overrides, includes
+                    unreviewed audio, and uploads to S3.
+                </p>
+                <form method="post" action="{{ url_for('wireword.default_export') }}">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-cloud-upload"></i> Run Default Export
+                    </button>
+                </form>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-header">
                 <i class="bi bi-gear"></i> Export Configuration
