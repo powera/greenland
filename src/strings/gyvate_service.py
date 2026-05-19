@@ -213,7 +213,14 @@ class GyvateStringsExportService:
             barsukas_generator.TEMPLATES_ROOT = templates_root
             barsukas_generator.STRINGS_ROOT = strings_root
             barsukas_generator.NAMESPACE_ALIAS = {}
-            return barsukas_generator.compute_plan()
+            (
+                template_plans,
+                standard_catalog_state,
+                _cstr_catalog_state,
+                standard_stats,
+                _cstr_stats,
+            ) = barsukas_generator.compute_plan()
+            return (template_plans, standard_catalog_state, standard_stats)
         finally:
             barsukas_generator.TEMPLATES_ROOT = original_templates_root
             barsukas_generator.STRINGS_ROOT = original_strings_root
@@ -271,6 +278,15 @@ class GyvateStringsExportService:
                             sorted_localized_catalog, localized_handle, ensure_ascii=False, indent=2
                         )
                         localized_handle.write("\n")
+                    self._write_xcstrings_catalog(
+                        namespace_dir=namespace_dir,
+                        english_catalog={
+                            str(key_name): str(value_text)
+                            for key_name, value_text in english_catalog.items()
+                        },
+                        localized_catalog=sorted_localized_catalog,
+                        language_code=language_code,
+                    )
 
             status = "updated" if write_mode else "would-update"
             statuses.append(
@@ -299,3 +315,28 @@ class GyvateStringsExportService:
         if not barsukas_src.exists():
             return 0
         return sum(1 for _ in barsukas_src.rglob("*.py"))
+
+    def _write_xcstrings_catalog(
+        self,
+        *,
+        namespace_dir: Path,
+        english_catalog: dict[str, str],
+        localized_catalog: dict[str, str],
+        language_code: str,
+    ) -> None:
+        xcstrings_data: dict[str, Any] = {"sourceLanguage": "en", "version": "1.0", "strings": {}}
+        for key_name, english_text in english_catalog.items():
+            translated_text = localized_catalog.get(key_name, english_text)
+            xcstrings_data["strings"][key_name] = {
+                "localizations": {
+                    "en": {"stringUnit": {"state": "translated", "value": english_text}},
+                    language_code: {
+                        "stringUnit": {"state": "translated", "value": translated_text}
+                    },
+                }
+            }
+
+        xcstrings_path = namespace_dir / f"{language_code}.xcstrings"
+        with xcstrings_path.open("w", encoding="utf-8") as xcstrings_handle:
+            json.dump(xcstrings_data, xcstrings_handle, ensure_ascii=False, indent=2)
+            xcstrings_handle.write("\n")
