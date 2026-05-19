@@ -135,6 +135,10 @@ class JSONLStorage(BaseStorage):
                         if "translation_disambiguations" in data:
                             lemma.translation_disambiguations = data["translation_disambiguations"]
 
+                        # Load emoji list from base.jsonl
+                        if "emoji" in data and data["emoji"]:
+                            lemma.emoji = list(data["emoji"])
+
                         # Populate lemma_text and definition_text from concept fields
                         # or from translations dict for backward compatibility
                         if "en" in lemma.translations:
@@ -720,6 +724,10 @@ class JSONLStorage(BaseStorage):
         # Translation disambiguations per language (e.g., {"lt": "medžiaga"})
         if lemma.translation_disambiguations:
             data["translation_disambiguations"] = lemma.translation_disambiguations
+
+        # Emoji representations of the concept (e.g. ["🐕"] for dog)
+        if lemma.emoji:
+            data["emoji"] = list(lemma.emoji)
 
         if lemma.notes:
             data["notes"] = lemma.notes

@@ -133,6 +133,13 @@ class Lemma:
     # Disambiguation
     disambiguation: Optional[str] = None
 
+    # Emoji representation(s) of the concept. Each entry is a dict
+    #   {"type": "unicode", "value": "🐕"}  — a real Unicode emoji
+    #   {"type": "image",   "value": "badger.svg"} — a custom static image
+    #     (path relative to data/release/emoji/)
+    # Lives in base.jsonl alongside translations; not a per-language field.
+    emoji: List[Dict[str, str]] = field(default_factory=list)
+
     # Metadata
     confidence: float = 0.0
     notes: Optional[str] = None  # From base.jsonl
@@ -206,6 +213,7 @@ class Lemma:
         data.setdefault("audio_hashes", {})
         data.setdefault("translation_pronunciations", {})
         data.setdefault("translation_disambiguations", {})
+        data.setdefault("emoji", [])
 
         # Set defaults for runtime fields that won't be in JSONL
         data.setdefault("verified", False)

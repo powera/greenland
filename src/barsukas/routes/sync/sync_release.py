@@ -152,6 +152,69 @@ def _get_release_disambiguation(release_data: Dict[str, Any]) -> Optional[str]:
     return disambiguation
 
 
+def _normalize_emoji_entry(item: Any) -> Optional[Dict[str, str]]:
+    """Coerce one emoji-list item into a {type, value} dict, or None if invalid.
+
+    Accepts either the canonical dict form or a bare Unicode string (legacy).
+    """
+    if isinstance(item, dict):
+        entry_type = str(item.get("type", "")).strip()
+        value = str(item.get("value", "")).strip()
+        if entry_type in ("unicode", "image") and value:
+            return {"type": entry_type, "value": value}
+        return None
+    if isinstance(item, str) and item.strip():
+        return {"type": "unicode", "value": item.strip()}
+    return None
+
+
+def _normalize_emoji_list(raw: Any) -> List[Dict[str, str]]:
+    """Normalize any emoji-list shape into a list of {type, value} dicts."""
+    if not isinstance(raw, list):
+        return []
+    out: List[Dict[str, str]] = []
+    for item in raw:
+        entry = _normalize_emoji_entry(item)
+        if entry is not None:
+            out.append(entry)
+    return out
+
+
+def _decode_db_emoji(raw: Optional[str]) -> List[Dict[str, str]]:
+    """Decode the JSON-encoded emoji list stored on Lemma.emoji.
+
+    Returns [] for null/empty/unparseable values so equality comparisons with
+    a missing release-side list ("emoji" key absent) treat both as "no emoji".
+    """
+    if not raw:
+        return []
+    try:
+        value = json.loads(raw)
+    except (json.JSONDecodeError, TypeError):
+        return []
+    return _normalize_emoji_list(value)
+
+
+def _get_release_emoji(release_data: Dict[str, Any]) -> List[Dict[str, str]]:
+    """Extract the emoji list from release base.jsonl data (missing -> [])."""
+    return _normalize_emoji_list(release_data.get("emoji"))
+
+
+def _format_emoji_for_display(entries: List[Dict[str, str]]) -> str:
+    """Render an emoji list as a short human-readable string for diff rows.
+
+    Unicode entries render as the glyph; image entries render as
+    "[img:filename]" so reviewers can tell them apart on the sync page.
+    """
+    parts: List[str] = []
+    for entry in entries:
+        if entry.get("type") == "image":
+            parts.append(f"[img:{entry.get('value', '')}]")
+        else:
+            parts.append(entry.get("value", ""))
+    return " ".join(parts)
+
+
 def _get_release_lemma_text(release_data: Dict[str, Any]) -> str:
     """Extract lemma_text from release data."""
     translations = release_data.get("translations", {})
@@ -200,11 +263,15 @@ def index() -> ResponseReturnValue:
     removals = db_guids - release_guids
     common_guids = release_guids & db_guids
 
-    # Count difficulty differences (among common GUIDs with matching lemma_text)
+    # Count difficulty differences (among common GUIDs with matching lemma_text).
+    # Base-info changes (lemma_text, disambiguation, concept_definition, notes,
+    # emoji) are counted together via _find_lemma_text_changes — any base-field
+    # diff bumps the same "changes" counter shown on the hub.
     difficulty_diffs = 0
-    lemma_text_changes = 0
+    lemma_text_changes = len(_find_lemma_text_changes(release_lemmas, g.db))
 
-    # Query common GUIDs in batches
+    # Query common GUIDs in batches for difficulty-only diffs (skip rows that
+    # already have a base-info change so we don't double-count).
     batch_size = 500
     common_list = list(common_guids)
     for i in range(0, len(common_list), batch_size):
@@ -217,13 +284,9 @@ def index() -> ResponseReturnValue:
                 continue
 
             release_text = _get_release_lemma_text(release_data)
-            release_disambig = _get_release_disambiguation(release_data)
-
             if db_lemma.lemma_text != release_text:
-                lemma_text_changes += 1
-            elif db_lemma.disambiguation != release_disambig:
-                lemma_text_changes += 1
-            elif release_data.get("difficulty_level") != db_lemma.difficulty_level:
+                continue
+            if release_data.get("difficulty_level") != db_lemma.difficulty_level:
                 difficulty_diffs += 1
 
     # Count translation differences (only for matching lemmas)
@@ -1133,7 +1196,13 @@ def export_removals_to_release() -> ResponseReturnValue:
 def _find_lemma_text_changes(
     release_lemmas: Dict[str, Dict[str, Any]], db_session: Any
 ) -> List[Dict[str, Any]]:
-    """Find lemmas where lemma_text differs between release and SQLite."""
+    """Find lemmas where any base-concept field differs between release and SQLite.
+
+    Covers fields that live directly on the Lemma row (and the base.jsonl
+    record): lemma_text (translations.en), disambiguation (parsed from
+    concept_label), concept_definition (DB definition_text), notes, and
+    emoji (JSON-encoded list on the DB side, native list in JSONL).
+    """
     changes: List[Dict[str, Any]] = []
     release_guids = set(release_lemmas.keys())
 
@@ -1154,11 +1223,27 @@ def _find_lemma_text_changes(
 
             release_lemma_text = _get_release_lemma_text(release_data)
             release_disambig = _get_release_disambiguation(release_data)
+            release_definition = release_data.get("concept_definition", "") or ""
+            release_notes = release_data.get("notes")
+            release_emoji = _get_release_emoji(release_data)
+
+            db_definition = db_lemma.definition_text or ""
+            db_notes = db_lemma.notes
+            db_emoji = _decode_db_emoji(db_lemma.emoji)
 
             text_differs = db_lemma.lemma_text != release_lemma_text
             disambig_differs = db_lemma.disambiguation != release_disambig
+            definition_differs = db_definition != release_definition
+            notes_differs = (db_notes or None) != (release_notes or None)
+            emoji_differs = db_emoji != release_emoji
 
-            if not text_differs and not disambig_differs:
+            if not (
+                text_differs
+                or disambig_differs
+                or definition_differs
+                or notes_differs
+                or emoji_differs
+            ):
                 continue
 
             changes.append(
@@ -1169,10 +1254,17 @@ def _find_lemma_text_changes(
                     "release_lemma_text": release_lemma_text,
                     "db_disambiguation": db_lemma.disambiguation,
                     "release_disambiguation": release_disambig,
-                    "db_definition": (
-                        db_lemma.definition_text[:60] if db_lemma.definition_text else ""
-                    ),
-                    "release_definition": (release_data.get("concept_definition", "") or "")[:60],
+                    "db_definition": db_definition,
+                    "release_definition": release_definition,
+                    "db_notes": db_notes or "",
+                    "release_notes": release_notes or "",
+                    "db_emoji": _format_emoji_for_display(db_emoji),
+                    "release_emoji": _format_emoji_for_display(release_emoji),
+                    "text_differs": text_differs,
+                    "disambig_differs": disambig_differs,
+                    "definition_differs": definition_differs,
+                    "notes_differs": notes_differs,
+                    "emoji_differs": emoji_differs,
                     "pos_type": db_lemma.pos_type,
                     "pos_subtype": db_lemma.pos_subtype,
                 }
@@ -1260,12 +1352,16 @@ def apply_changes() -> ResponseReturnValue:
             if action == "use_release":
                 old_text = lemma.lemma_text
                 new_text = _get_release_lemma_text(release_data)
-                new_definition = release_data.get("concept_definition", "")
+                new_definition = release_data.get("concept_definition", "") or ""
+                new_notes = release_data.get("notes") or None
+                new_emoji_list = _get_release_emoji(release_data)
+                new_emoji_json = json.dumps(new_emoji_list) if new_emoji_list else None
 
                 lemma.lemma_text = new_text
                 lemma.disambiguation = _get_release_disambiguation(release_data)
-                if new_definition:
-                    lemma.definition_text = new_definition
+                lemma.definition_text = new_definition
+                lemma.notes = new_notes
+                lemma.emoji = new_emoji_json
 
                 log_translation_change(
                     session=g.db,
@@ -1278,15 +1374,19 @@ def apply_changes() -> ResponseReturnValue:
                 )
 
                 updated_db_count += 1
-                logger.info(f"Updated lemma_text for ({lemma.guid}): '{old_text}' -> '{new_text}'")
+                logger.info(f"Updated base info for ({lemma.guid}): '{old_text}' -> '{new_text}'")
 
             elif action == "use_db":
                 db_text = lemma.lemma_text
                 update_fields: Dict[str, Any] = {}
                 # Update English translation in release (stored as translations.en)
                 update_fields["translations.en"] = db_text
-                if lemma.definition_text:
-                    update_fields["concept_definition"] = lemma.definition_text
+                update_fields["concept_definition"] = lemma.definition_text or ""
+                if lemma.notes:
+                    update_fields["notes"] = lemma.notes
+                db_emoji_list = _decode_db_emoji(lemma.emoji)
+                if db_emoji_list:
+                    update_fields["emoji"] = db_emoji_list
 
                 file_path = _find_release_file_for_lemma(release_dir, lemma.guid)
                 if file_path:
