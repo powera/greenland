@@ -16,6 +16,8 @@
             <p class="text-muted">
                 {{ STRINGS.sync.same_guid_diff_lemma_text|safe }}
                 {{ STRINGS.sync.changes_either_direction }}
+                Covers base-concept fields on the lemma: lemma text, disambiguation,
+                definition, notes, and emoji.
             </p>
         </div>
     </div>
@@ -71,17 +73,33 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <strong class="text-danger">{{ item.db_lemma_text }}</strong>
+                                    <strong class="text-danger{% if not item.text_differs and not item.disambig_differs %} text-muted{% endif %}">{{ item.db_lemma_text }}</strong>
                                     {% if item.db_disambiguation %}<span class="text-muted">({{ item.db_disambiguation }})</span>{% endif %}
                                     {% if item.db_definition %}
-                                    <br><small class="text-muted">{{ item.db_definition }}{% if item.db_definition|length >= 60 %}...{% endif %}</small>
+                                    <br><small class="{% if item.definition_differs %}text-danger{% else %}text-muted{% endif %}">{{ item.db_definition[:80] }}{% if item.db_definition|length > 80 %}...{% endif %}</small>
+                                    {% endif %}
+                                    {% if item.db_notes %}
+                                    <br><small class="{% if item.notes_differs %}text-danger{% else %}text-muted{% endif %}"><em>notes:</em> {{ item.db_notes[:80] }}{% if item.db_notes|length > 80 %}...{% endif %}</small>
+                                    {% endif %}
+                                    {% if item.db_emoji %}
+                                    <br><span class="{% if item.emoji_differs %}text-danger{% else %}text-muted{% endif %}">{{ item.db_emoji }}</span>
+                                    {% elif item.emoji_differs %}
+                                    <br><small class="text-danger">(no emoji)</small>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <strong class="text-success">{{ item.release_lemma_text }}</strong>
+                                    <strong class="text-success{% if not item.text_differs and not item.disambig_differs %} text-muted{% endif %}">{{ item.release_lemma_text }}</strong>
                                     {% if item.release_disambiguation %}<span class="text-muted">({{ item.release_disambiguation }})</span>{% endif %}
                                     {% if item.release_definition %}
-                                    <br><small class="text-muted">{{ item.release_definition }}{% if item.release_definition|length >= 60 %}...{% endif %}</small>
+                                    <br><small class="{% if item.definition_differs %}text-success{% else %}text-muted{% endif %}">{{ item.release_definition[:80] }}{% if item.release_definition|length > 80 %}...{% endif %}</small>
+                                    {% endif %}
+                                    {% if item.release_notes %}
+                                    <br><small class="{% if item.notes_differs %}text-success{% else %}text-muted{% endif %}"><em>notes:</em> {{ item.release_notes[:80] }}{% if item.release_notes|length > 80 %}...{% endif %}</small>
+                                    {% endif %}
+                                    {% if item.release_emoji %}
+                                    <br><span class="{% if item.emoji_differs %}text-success{% else %}text-muted{% endif %}">{{ item.release_emoji }}</span>
+                                    {% elif item.emoji_differs %}
+                                    <br><small class="text-success">(no emoji)</small>
                                     {% endif %}
                                 </td>
                                 <td>

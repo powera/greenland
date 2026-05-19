@@ -126,6 +126,10 @@ class Lemma(Base):
     # after bulk lemma/form/tier changes.
     frequency_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array of tags
+    # Emoji representation(s) of this concept, e.g. ["🐕", "🐶"] for "dog".
+    # Treated as a semi-language attached directly to the lemma rather than a
+    # row in lemma_translations; stored as a JSON-encoded array of strings.
+    emoji: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Language-specific translations of the lemma concept
     chinese_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., 吃
