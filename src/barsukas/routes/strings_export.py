@@ -16,7 +16,7 @@ from agents.gyvate import GyvateAgent
 from storage.backend.config import DataSourceConfig
 
 bp = Blueprint("gyvate", __name__, url_prefix="/gyvate")
-DEFAULT_SCOPES = ["templates"]
+DEFAULT_SCOPES: list[str] = []
 DEFAULT_TARGET_LANGUAGES = ["lt"]
 DEFAULT_TEMPLATE_PATH = "src/barsukas/templates"
 DEFAULT_STRINGS_PATH = "strings/barsukas"
@@ -60,6 +60,38 @@ def _parse_uploaded_catalog_json(raw_bytes: bytes, source_name: str) -> dict[str
     return {str(key_name): str(value_text) for key_name, value_text in loaded.items()}
 
 
+def _parse_uploaded_xcstrings(raw_bytes: bytes, source_name: str) -> dict[str, str]:
+    loaded = json.loads(raw_bytes.decode("utf-8"))
+    if not isinstance(loaded, dict):
+        raise ValueError(f"{source_name} must contain a JSON object")
+    strings_payload = loaded.get("strings")
+    if not isinstance(strings_payload, dict):
+        raise ValueError(f'{source_name} must contain a "strings" object')
+
+    source_language = str(loaded.get("sourceLanguage") or "en")
+    extracted_catalog: dict[str, str] = {}
+    for translation_key, translation_entry in strings_payload.items():
+        if not isinstance(translation_entry, dict):
+            continue
+        localization_map = translation_entry.get("localizations")
+        if not isinstance(localization_map, dict):
+            continue
+        source_entry = localization_map.get(source_language) or localization_map.get("en")
+        if not isinstance(source_entry, dict):
+            continue
+        string_unit = source_entry.get("stringUnit")
+        if not isinstance(string_unit, dict):
+            continue
+        value_text = string_unit.get("value")
+        if not isinstance(value_text, str):
+            continue
+        extracted_catalog[str(translation_key)] = value_text
+
+    if not extracted_catalog:
+        raise ValueError(f"{source_name} did not contain extractable source-language strings")
+    return extracted_catalog
+
+
 def _load_uploaded_english_catalogs() -> dict[str, dict[str, str]]:
     uploaded_catalogs: dict[str, dict[str, str]] = {}
 
@@ -69,10 +101,15 @@ def _load_uploaded_english_catalogs() -> dict[str, dict[str, str]]:
     for uploaded_file in uploaded_files:
         assert uploaded_file.filename is not None
         namespace = _normalize_namespace_from_path(uploaded_file.filename)
-        uploaded_catalogs[namespace] = _parse_uploaded_catalog_json(
-            uploaded_file.read(),
-            uploaded_file.filename,
-        )
+        source_bytes = uploaded_file.read()
+        if uploaded_file.filename.endswith(".xcstrings"):
+            uploaded_catalogs[namespace] = _parse_uploaded_xcstrings(
+                source_bytes, uploaded_file.filename
+            )
+        else:
+            uploaded_catalogs[namespace] = _parse_uploaded_catalog_json(
+                source_bytes, uploaded_file.filename
+            )
 
     zip_bundle = request.files.get("english_strings_bundle")
     if not zip_bundle or not zip_bundle.filename:
@@ -81,14 +118,22 @@ def _load_uploaded_english_catalogs() -> dict[str, dict[str, str]]:
     zip_data = zip_bundle.read()
     with zipfile.ZipFile(BytesIO(zip_data)) as zip_handle:
         for entry_name in zip_handle.namelist():
-            if entry_name.endswith("/") or not entry_name.endswith("en.json"):
+            if entry_name.endswith("/"):
                 continue
-            namespace = _normalize_namespace_from_path(entry_name)
+            if not (entry_name.endswith("en.json") or entry_name.endswith(".xcstrings")):
+                continue
+            namespace = _normalize_namespace_from_path(entry_name.replace(".xcstrings", "/en.json"))
             with zip_handle.open(entry_name) as zip_entry:
-                uploaded_catalogs[namespace] = _parse_uploaded_catalog_json(
-                    zip_entry.read(),
-                    entry_name,
-                )
+                source_bytes = zip_entry.read()
+                if entry_name.endswith(".xcstrings"):
+                    uploaded_catalogs[namespace] = _parse_uploaded_xcstrings(
+                        source_bytes, entry_name
+                    )
+                else:
+                    uploaded_catalogs[namespace] = _parse_uploaded_catalog_json(
+                        source_bytes,
+                        entry_name,
+                    )
     return uploaded_catalogs
 
 
@@ -109,10 +154,6 @@ def export_page() -> ResponseReturnValue:
 def export_strings() -> ResponseReturnValue:
     """Run STRINGS extraction/generation via the GYVATE service layer."""
     selected_scopes = request.form.getlist("scopes")
-    if not selected_scopes:
-        flash("Select at least one scope (templates/modules).", "error")
-        return redirect(url_for("gyvate.export_page"))
-
     project_root = request.form.get("project_root", _default_project_root()).strip()
     template_path = request.form.get("template_path", DEFAULT_TEMPLATE_PATH).strip()
     strings_path = request.form.get("strings_path", DEFAULT_STRINGS_PATH).strip()
