@@ -47,7 +47,7 @@ SUPPORTED_LANGUAGES = {
 }
 
 # Explicitly supported non-English source languages for WireWord export variants.
-SUPPORTED_NON_ENGLISH_SOURCE_LANGUAGES = ("uk", "bn", "kn", "pl", "ro")
+SUPPORTED_NON_ENGLISH_SOURCE_LANGUAGES = ("uk", "bn", "kn", "pl", "ro", "es", "fr", "zh")
 
 # Configure logging
 logging.basicConfig(
@@ -108,6 +108,9 @@ class UngurysAgent:
         else:
             self.language = language
             self.language_suffix = language
+
+        if self.source_language == self.language:
+            raise ValueError(f"Source language cannot equal target language ({self.language}).")
 
         # Append source language suffix for non-English source languages
         if self.source_language != "en":

@@ -88,6 +88,9 @@ def export_all_languages(
 
             # Export for each supported language
             for lang_code, lang_name in SUPPORTED_LANGUAGES.items():
+                if source_language == lang_code:
+                    # Skip same source/target combos (e.g. es from es).
+                    continue
                 result_label = (
                     f"{lang_name} from {source_display}"
                     if source_language != "en"
@@ -192,6 +195,82 @@ SUPPORTED_SOURCE_LANGUAGES = {
 }
 
 
+LITHUANIAN_DEFAULT_TARGET = "lt"
+LITHUANIAN_DEFAULT_SOURCE_LANGUAGES: tuple[str, ...] = (
+    "en",
+    *SUPPORTED_NON_ENGLISH_SOURCE_LANGUAGES,
+)
+
+
+@bp.route("/default-export", methods=["POST"])
+def default_export() -> ResponseReturnValue:
+    """Run the canonical Lithuanian export across all supported source languages.
+
+    Generates Lithuanian wordlists from English plus every supported non-English
+    source language, applies level overrides, includes unreviewed audio, and
+    uploads to S3 if credentials are available.
+    """
+    if LITHUANIAN_DEFAULT_TARGET not in SUPPORTED_LANGUAGES:
+        flash("Lithuanian is not configured as a supported target language.", "error")
+        return redirect(url_for("wireword.export_page"))
+
+    upload_to_cdn_requested = True
+    cdn_upload = _cdn_credentials_available()
+    if upload_to_cdn_requested and not cdn_upload:
+        flash(
+            "DigitalOcean Spaces credentials not found; exporting locally without CDN upload.",
+            "warning",
+        )
+
+    config = _get_config()
+    variant_results: dict[str, dict[str, Any]] = {}
+    variant_errors: list[str] = []
+
+    for source_language in LITHUANIAN_DEFAULT_SOURCE_LANGUAGES:
+        if source_language == LITHUANIAN_DEFAULT_TARGET:
+            continue
+        source_label = SUPPORTED_SOURCE_LANGUAGES.get(source_language, source_language)
+        try:
+            agent = UngurysAgent(
+                config=config,
+                language=LITHUANIAN_DEFAULT_TARGET,
+                include_unreviewed_audio=True,
+                source_language=source_language,
+            )
+            agent.apply_level_overrides()
+            success, results = agent.export_wireword_directory(cdn_upload=cdn_upload)
+            variant_results[source_label] = {
+                "success": success,
+                "results": results,
+                "output_dir": agent.get_language_output_dir(),
+            }
+            if not success:
+                variant_errors.append(source_label)
+        except Exception as e:
+            variant_errors.append(f"{source_label}: {str(e)}")
+            variant_results[source_label] = {"success": False, "error": str(e)}
+
+    if variant_errors:
+        flash(
+            f"Default export completed with errors for: {', '.join(variant_errors)}",
+            "warning",
+        )
+    else:
+        flash(
+            "Default Lithuanian export completed for all source languages.",
+            "success",
+        )
+
+    successes = sum(1 for r in variant_results.values() if r.get("success", False))
+    flash(f"Exported {successes}/{len(variant_results)} source-language variants", "info")
+
+    return render_template(
+        "wireword/results_all.html",
+        all_results=variant_results,
+        errors=variant_errors,
+    )
+
+
 @bp.route("/")
 def export_page() -> ResponseReturnValue:
     """Display the WireWord export page."""
@@ -290,6 +369,10 @@ def export_wireword() -> ResponseReturnValue:
             variant_results: dict[str, dict[str, Any]] = {}
             variant_errors: list[str] = []
             for selected_source_language in selected_source_languages:
+                target_lang_code = language if language != "zh-Hant" else "zh"
+                if selected_source_language == target_lang_code:
+                    # Skip same source/target combos.
+                    continue
                 source_label = SUPPORTED_SOURCE_LANGUAGES.get(
                     selected_source_language, selected_source_language
                 )
