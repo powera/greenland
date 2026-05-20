@@ -976,23 +976,9 @@ class WirewordExporter:
         if lemma.pos_type != "noun":
             return derivative_phrases
 
-        # Generate "where is X?" phrase for location-related nouns (Lithuanian only for now)
-        # Uses nominative case (dictionary form)
-        # Note: This is Lithuanian-specific and disabled for other languages
-        if self.language == "lt":
-            where_is_subtypes = {
-                "building_structure",  # where is the bank, hospital, school
-                "location",  # where is the park, city
-                "place_name",  # where is Paris, etc.
-            }
-
-            if lemma.pos_subtype in where_is_subtypes:
-                where_is_level = max(entry_level, 19)
-                derivative_phrases["where_is"] = {
-                    "level": where_is_level,
-                    "target": f"Kur yra {base_target}?",
-                    "english": f"Where is the {base_english}?",
-                }
+        # "where_is" derivative phrase generation is intentionally disabled.
+        # It creates synthetic sentence-like content in word exports, which is
+        # no longer desired in Wireword noun entries.
 
         # Generate "this is my X" phrase for possessable items
         # Uses nominative case (dictionary form) - "Tai mano X"
@@ -1310,11 +1296,18 @@ class WirewordExporter:
 
             # Build English translation lookup for derivative forms
             english_forms_by_lemma: Dict[int, Dict[str, str]] = {}
+            source_forms_by_lemma: Dict[int, Dict[str, str]] = {}
             for form in all_derivative_forms:
                 if form.language_code == "en":
                     if form.lemma_id not in english_forms_by_lemma:
                         english_forms_by_lemma[form.lemma_id] = {}
                     english_forms_by_lemma[form.lemma_id][
+                        form.grammatical_form
+                    ] = form.derivative_form_text
+                if form.language_code == self.source_language:
+                    if form.lemma_id not in source_forms_by_lemma:
+                        source_forms_by_lemma[form.lemma_id] = {}
+                    source_forms_by_lemma[form.lemma_id][
                         form.grammatical_form
                     ] = form.derivative_form_text
 
@@ -1468,24 +1461,41 @@ class WirewordExporter:
                                         # Future tense minimum level is 12
                                         form_level = max(form_level, 12)
 
-                            # Try to look up English translation from pre-fetched data
-                            english_label = self._get_english_translation_from_prefetched(
-                                english_forms_by_lemma, lemma.id, form.grammatical_form
-                            )
-
-                            # If not found in database, use simple generated fallback label.
-                            if not english_label:
-                                missing_english_forms.append(
-                                    (lemma.id, lemma.lemma_text, form.grammatical_form)
+                            source_label: str
+                            if self.source_language == "en":
+                                # Try to look up English translation from pre-fetched data
+                                source_label = (
+                                    self._get_english_translation_from_prefetched(
+                                        english_forms_by_lemma,
+                                        lemma.id,
+                                        form.grammatical_form,
+                                    )
+                                    or ""
                                 )
-                                english_label = generate_simple_grammatical_form_label(
-                                    form.grammatical_form, base_source or ""
+                                # If not found in database, use simple generated fallback label.
+                                if not source_label:
+                                    missing_english_forms.append(
+                                        (lemma.id, lemma.lemma_text, form.grammatical_form)
+                                    )
+                                    source_label = generate_simple_grammatical_form_label(
+                                        form.grammatical_form, base_source or ""
+                                    )
+                            else:
+                                source_label = (
+                                    source_forms_by_lemma.get(lemma.id, {}).get(
+                                        form.grammatical_form
+                                    )
+                                    or ""
                                 )
+                                if not source_label:
+                                    source_label = generate_simple_grammatical_form_label(
+                                        form.grammatical_form, base_source or ""
+                                    )
 
                             gram_form = {
                                 "level": form_level,
                                 "target": form.derivative_form_text,
-                                "english": english_label,
+                                "source": source_label,
                             }
                             gram_form.update(
                                 build_target_reading_fields(
@@ -1512,7 +1522,7 @@ class WirewordExporter:
                             if slot and tense:
                                 tense_table = conjugation_mode_tables.setdefault(tense, {})
                                 tense_table[slot] = {
-                                    "source": english_label.strip(),
+                                    "source": source_label.strip(),
                                     "target": form.derivative_form_text.strip(),
                                 }
 
