@@ -5,6 +5,8 @@ Text rendering and formatting utilities for wireword exports.
 Provides reusable functions for formatting display names and text output.
 """
 
+from typing import Any
+
 
 def format_subtype_display_name(subtype: str) -> str:
     """
@@ -97,3 +99,21 @@ def format_subtype_display_name(subtype: str) -> str:
 
     # Default: title case each word
     return formatted.title()
+
+
+def resolve_group_label(subtype: str, interface_language: str, session: Any | None = None) -> str:
+    """
+    Resolve localized group labels for Wireword exports.
+
+    Args:
+        subtype: Raw subtype value from database (e.g. "food", "tool_machine")
+        interface_language: Interface language code used by Wireword.
+            For current exports this should be the source language.
+        session: Optional database/session handle for future translation lookup support.
+
+    Returns:
+        Localized group label string. Currently falls back to English for all languages.
+    """
+    _ = interface_language
+    _ = session
+    return format_subtype_display_name(subtype)

@@ -37,7 +37,7 @@ from wireword.readings import (
     build_target_reading_fields,
     build_target_reading_list_fields,
 )
-from wireword.text_rendering import format_subtype_display_name
+from wireword.text_rendering import resolve_group_label
 from wireword.helpers import (
     convert_to_wireword_grammatical_form_key,
     extract_conjugation_slot,
@@ -801,7 +801,9 @@ class WirewordExporter:
                 wireword.update(
                     {
                         "corpus": assigned_corpus,
-                        "group": format_subtype_display_name(entry["subtype"]),
+                        "group": resolve_group_label(
+                            entry["subtype"], self.source_language, session
+                        ),
                         "level": entry["trakaido_level"],
                         "word_type": normalize_pos_type(entry["pos_type"]),
                     }
@@ -1561,7 +1563,9 @@ class WirewordExporter:
                 wireword.update(
                     {
                         "corpus": "VERBS",
-                        "group": format_subtype_display_name(lemma.pos_subtype or "action"),
+                        "group": resolve_group_label(
+                            lemma.pos_subtype or "action", self.source_language, session
+                        ),
                         "level": effective_lemma_level,
                         "word_type": "verb",
                     }
