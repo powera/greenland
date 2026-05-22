@@ -617,6 +617,16 @@ class UngurysAgent:
                 category_count = len(data.get("categories", []))
 
             logger.info(f"Successfully exported {category_count} categories to {output_path}")
+
+            # Also copy language-specific variants if present.
+            for lang in ("es", "fr", "zh"):
+                lang_source = os.path.join(project_root, "data", f"categorychoice-{lang}.json")
+                if not os.path.exists(lang_source):
+                    continue
+                lang_output = os.path.join(output_dir, f"categorychoice-{lang}.json")
+                shutil.copy2(lang_source, lang_output)
+                logger.info(f"  Exported {lang_output}")
+
             return True, output_path
 
         except Exception as e:

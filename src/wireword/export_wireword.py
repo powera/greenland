@@ -650,9 +650,6 @@ class WirewordExporter:
                         elif is_synonym:
                             target_synonyms.append(form.derivative_form_text)
                         elif form.grammatical_form == "plural_nominative":
-                            # Skip derivative forms for Lithuanian nouns (they're handled by special cases like "where is X")
-                            if self.language == "lt" and lemma.pos_type == "noun":
-                                continue
                             # Add plural nominative form with appropriate level (minimum level 4)
                             form_level = max(entry["trakaido_level"], 4)
                             gram_form = {
@@ -676,9 +673,6 @@ class WirewordExporter:
 
                             grammatical_forms[form.grammatical_form] = gram_form
                         elif form.grammatical_form in ["singular_accusative", "plural_accusative"]:
-                            # Skip derivative forms for Lithuanian nouns (they're handled by special cases like "where is X")
-                            if self.language == "lt" and lemma.pos_type == "noun":
-                                continue
                             # Add accusative forms with appropriate level (minimum level 9)
                             form_level = max(entry["trakaido_level"], 9)
                             english_suffix = (
@@ -707,9 +701,6 @@ class WirewordExporter:
 
                             grammatical_forms[form.grammatical_form] = gram_form
                         else:
-                            # Skip derivative forms for Lithuanian nouns (they're handled by special cases like "where is X")
-                            if self.language == "lt" and lemma.pos_type == "noun":
-                                continue
                             # Generic handler for other grammatical forms (French verbs, Korean forms, etc.)
                             # Skip alternative_form and synonym as they're handled separately above
                             if form.grammatical_form not in [
@@ -724,22 +715,21 @@ class WirewordExporter:
                             ]:
                                 form_level = max(entry["trakaido_level"], 4)
 
-                                # Try to look up English translation from pre-fetched data
-                                english_label = self._get_english_translation_from_prefetched(
-                                    english_forms_by_lemma, lemma.id, form.grammatical_form
-                                )
-
-                                # If not found in database, use simple fallback
-                                if not english_label:
-                                    english_label = generate_simple_grammatical_form_label(
-                                        form.grammatical_form, entry["source_word"]
-                                    )
-
                                 gram_form = {
                                     "level": form_level,
                                     "target": form.derivative_form_text,
-                                    "english": english_label,
                                 }
+                                # Noun declensions are identified by their form key and the
+                                # lemma's base info, so no English label is exported for them.
+                                if lemma.pos_type != "noun":
+                                    english_label = self._get_english_translation_from_prefetched(
+                                        english_forms_by_lemma, lemma.id, form.grammatical_form
+                                    )
+                                    if not english_label:
+                                        english_label = generate_simple_grammatical_form_label(
+                                            form.grammatical_form, entry["source_word"]
+                                        )
+                                    gram_form["english"] = english_label
                                 gram_form.update(
                                     build_target_reading_fields(
                                         self.language,
@@ -755,12 +745,6 @@ class WirewordExporter:
                                     gram_form["audio"] = form_audio
 
                                 grammatical_forms[form.grammatical_form] = gram_form
-
-                # Generate derivative noun phrases (e.g., "where is X") for appropriate nouns
-                derivative_phrases = self._generate_derivative_noun_phrases(
-                    lemma, entry["source_word"], entry["target_language"], entry["trakaido_level"]
-                )
-                grammatical_forms.update(derivative_phrases)
 
                 # Get corpus assignment for this entry
                 corpus_key = (entry["trakaido_level"], entry["subtype"])

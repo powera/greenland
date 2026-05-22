@@ -1,0 +1,266 @@
+{
+  "categories": [
+    {
+      "id": "family-relation",
+      "label": "Familiar",
+      "groups": [
+        "Family Relation"
+      ],
+      "avoidDecoys": [
+        "human",
+        "occupation"
+      ]
+    },
+    {
+      "id": "occupation",
+      "label": "Profesión",
+      "groups": [
+        "Occupation"
+      ],
+      "avoidDecoys": [
+        "human",
+        "family-relation"
+      ]
+    },
+    {
+      "id": "animal",
+      "label": "Animales",
+      "groups": [
+        "Animals"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "body-part",
+      "label": "Parte del cuerpo",
+      "groups": [
+        "Body Part"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "disease-condition",
+      "label": "Enfermedad",
+      "groups": [
+        "Disease/Condition"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "plant",
+      "label": "Plantas",
+      "groups": [
+        "Plants"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "food",
+      "label": "Comida",
+      "groups": [
+        "Food"
+      ],
+      "avoidDecoys": [
+        "beverage"
+      ]
+    },
+    {
+      "id": "beverage",
+      "label": "Bebida",
+      "groups": [
+        "Beverage"
+      ],
+      "avoidDecoys": [
+        "food"
+      ]
+    },
+    {
+      "id": "building-structure",
+      "label": "Edificio",
+      "groups": [
+        "Building/Structure"
+      ],
+      "avoidDecoys": [
+        "furniture"
+      ]
+    },
+    {
+      "id": "furniture",
+      "label": "Mueble",
+      "groups": [
+        "Furniture"
+      ],
+      "avoidDecoys": [
+        "building-structure"
+      ]
+    },
+    {
+      "id": "clothing-accessory",
+      "label": "Ropa/Accesorio",
+      "groups": [
+        "Clothing/Accessory"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "natural-feature",
+      "label": "Elemento natural",
+      "groups": [
+        "Natural Feature"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "tool",
+      "label": "Herramienta",
+      "groups": [
+        "Tool"
+      ],
+      "avoidDecoys": [
+        "vehicle",
+        "weapon",
+        "electronic-device",
+        "appliance"
+      ]
+    },
+    {
+      "id": "electronic-device",
+      "label": "Dispositivo electrónico",
+      "groups": [
+        "Electronic Device"
+      ],
+      "avoidDecoys": [
+        "tool",
+        "appliance"
+      ]
+    },
+    {
+      "id": "appliance",
+      "label": "Electrodoméstico",
+      "groups": [
+        "Appliance"
+      ],
+      "avoidDecoys": [
+        "tool",
+        "electronic-device"
+      ]
+    },
+    {
+      "id": "weapon",
+      "label": "Arma",
+      "groups": [
+        "Weapon"
+      ],
+      "avoidDecoys": [
+        "tool"
+      ]
+    },
+    {
+      "id": "vehicle",
+      "label": "Vehículo",
+      "groups": [
+        "Vehicle"
+      ],
+      "avoidDecoys": [
+        "tool"
+      ]
+    },
+    {
+      "id": "emotion-feeling",
+      "label": "Emoción/Sentimiento",
+      "groups": [
+        "Emotion/Feeling"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "shape",
+      "label": "Forma",
+      "groups": [
+        "Shape"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "color",
+      "label": "Color",
+      "groups": [
+        "Color"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "time-period",
+      "label": "Periodo de tiempo",
+      "groups": [
+        "Time Period"
+      ],
+      "avoidDecoys": [
+        "temporal-name"
+      ]
+    },
+    {
+      "id": "temporal-name",
+      "label": "Nombre temporal",
+      "groups": [
+        "Temporal Name"
+      ],
+      "avoidDecoys": [
+        "time-period"
+      ]
+    },
+    {
+      "id": "country",
+      "label": "País",
+      "groups": [
+        "Country"
+      ],
+      "avoidDecoys": [
+        "city",
+        "nationality"
+      ]
+    },
+    {
+      "id": "city",
+      "label": "Ciudad",
+      "groups": [
+        "City"
+      ],
+      "avoidDecoys": [
+        "country",
+        "nationality"
+      ]
+    },
+    {
+      "id": "nationality",
+      "label": "Nacionalidad",
+      "groups": [
+        "Nationality"
+      ],
+      "avoidDecoys": [
+        "country",
+        "city"
+      ]
+    },
+    {
+      "id": "definite-quantity",
+      "label": "Cardinal",
+      "groups": [
+        "Definite Quantity"
+      ],
+      "avoidDecoys": [
+        "sequence"
+      ]
+    },
+    {
+      "id": "sequence",
+      "label": "Secuencia",
+      "groups": [
+        "Sequence"
+      ],
+      "avoidDecoys": [
+        "definite-quantity"
+      ]
+    }
+  ]
+}

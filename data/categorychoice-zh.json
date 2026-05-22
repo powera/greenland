@@ -1,0 +1,266 @@
+{
+  "categories": [
+    {
+      "id": "family-relation",
+      "label": "家庭关系",
+      "groups": [
+        "Family Relation"
+      ],
+      "avoidDecoys": [
+        "human",
+        "occupation"
+      ]
+    },
+    {
+      "id": "occupation",
+      "label": "职业",
+      "groups": [
+        "Occupation"
+      ],
+      "avoidDecoys": [
+        "human",
+        "family-relation"
+      ]
+    },
+    {
+      "id": "animal",
+      "label": "动物",
+      "groups": [
+        "Animals"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "body-part",
+      "label": "身体部位",
+      "groups": [
+        "Body Part"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "disease-condition",
+      "label": "疾病",
+      "groups": [
+        "Disease/Condition"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "plant",
+      "label": "植物",
+      "groups": [
+        "Plants"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "food",
+      "label": "食物",
+      "groups": [
+        "Food"
+      ],
+      "avoidDecoys": [
+        "beverage"
+      ]
+    },
+    {
+      "id": "beverage",
+      "label": "饮料",
+      "groups": [
+        "Beverage"
+      ],
+      "avoidDecoys": [
+        "food"
+      ]
+    },
+    {
+      "id": "building-structure",
+      "label": "建筑",
+      "groups": [
+        "Building/Structure"
+      ],
+      "avoidDecoys": [
+        "furniture"
+      ]
+    },
+    {
+      "id": "furniture",
+      "label": "家具",
+      "groups": [
+        "Furniture"
+      ],
+      "avoidDecoys": [
+        "building-structure"
+      ]
+    },
+    {
+      "id": "clothing-accessory",
+      "label": "服装/配饰",
+      "groups": [
+        "Clothing/Accessory"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "natural-feature",
+      "label": "自然地貌",
+      "groups": [
+        "Natural Feature"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "tool",
+      "label": "工具",
+      "groups": [
+        "Tool"
+      ],
+      "avoidDecoys": [
+        "vehicle",
+        "weapon",
+        "electronic-device",
+        "appliance"
+      ]
+    },
+    {
+      "id": "electronic-device",
+      "label": "电子设备",
+      "groups": [
+        "Electronic Device"
+      ],
+      "avoidDecoys": [
+        "tool",
+        "appliance"
+      ]
+    },
+    {
+      "id": "appliance",
+      "label": "家用电器",
+      "groups": [
+        "Appliance"
+      ],
+      "avoidDecoys": [
+        "tool",
+        "electronic-device"
+      ]
+    },
+    {
+      "id": "weapon",
+      "label": "武器",
+      "groups": [
+        "Weapon"
+      ],
+      "avoidDecoys": [
+        "tool"
+      ]
+    },
+    {
+      "id": "vehicle",
+      "label": "交通工具",
+      "groups": [
+        "Vehicle"
+      ],
+      "avoidDecoys": [
+        "tool"
+      ]
+    },
+    {
+      "id": "emotion-feeling",
+      "label": "情感",
+      "groups": [
+        "Emotion/Feeling"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "shape",
+      "label": "形状",
+      "groups": [
+        "Shape"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "color",
+      "label": "颜色",
+      "groups": [
+        "Color"
+      ],
+      "avoidDecoys": []
+    },
+    {
+      "id": "time-period",
+      "label": "时间段",
+      "groups": [
+        "Time Period"
+      ],
+      "avoidDecoys": [
+        "temporal-name"
+      ]
+    },
+    {
+      "id": "temporal-name",
+      "label": "时间名称",
+      "groups": [
+        "Temporal Name"
+      ],
+      "avoidDecoys": [
+        "time-period"
+      ]
+    },
+    {
+      "id": "country",
+      "label": "国家",
+      "groups": [
+        "Country"
+      ],
+      "avoidDecoys": [
+        "city",
+        "nationality"
+      ]
+    },
+    {
+      "id": "city",
+      "label": "城市",
+      "groups": [
+        "City"
+      ],
+      "avoidDecoys": [
+        "country",
+        "nationality"
+      ]
+    },
+    {
+      "id": "nationality",
+      "label": "国籍",
+      "groups": [
+        "Nationality"
+      ],
+      "avoidDecoys": [
+        "country",
+        "city"
+      ]
+    },
+    {
+      "id": "definite-quantity",
+      "label": "基数",
+      "groups": [
+        "Definite Quantity"
+      ],
+      "avoidDecoys": [
+        "sequence"
+      ]
+    },
+    {
+      "id": "sequence",
+      "label": "顺序",
+      "groups": [
+        "Sequence"
+      ],
+      "avoidDecoys": [
+        "definite-quantity"
+      ]
+    }
+  ]
+}
