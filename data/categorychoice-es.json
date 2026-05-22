@@ -4,7 +4,7 @@
       "id": "family-relation",
       "label": "Familiar",
       "groups": [
-        "Family Relation"
+        "Familiar"
       ],
       "avoidDecoys": [
         "human",
@@ -15,7 +15,7 @@
       "id": "occupation",
       "label": "Profesión",
       "groups": [
-        "Occupation"
+        "Profesión"
       ],
       "avoidDecoys": [
         "human",
@@ -26,7 +26,7 @@
       "id": "animal",
       "label": "Animales",
       "groups": [
-        "Animals"
+        "Animales"
       ],
       "avoidDecoys": []
     },
@@ -34,7 +34,7 @@
       "id": "body-part",
       "label": "Parte del cuerpo",
       "groups": [
-        "Body Part"
+        "Parte del cuerpo"
       ],
       "avoidDecoys": []
     },
@@ -42,7 +42,7 @@
       "id": "disease-condition",
       "label": "Enfermedad",
       "groups": [
-        "Disease/Condition"
+        "Enfermedad"
       ],
       "avoidDecoys": []
     },
@@ -50,7 +50,7 @@
       "id": "plant",
       "label": "Plantas",
       "groups": [
-        "Plants"
+        "Plantas"
       ],
       "avoidDecoys": []
     },
@@ -58,7 +58,7 @@
       "id": "food",
       "label": "Comida",
       "groups": [
-        "Food"
+        "Comida"
       ],
       "avoidDecoys": [
         "beverage"
@@ -68,7 +68,7 @@
       "id": "beverage",
       "label": "Bebida",
       "groups": [
-        "Beverage"
+        "Bebida"
       ],
       "avoidDecoys": [
         "food"
@@ -78,7 +78,7 @@
       "id": "building-structure",
       "label": "Edificio",
       "groups": [
-        "Building/Structure"
+        "Edificio"
       ],
       "avoidDecoys": [
         "furniture"
@@ -88,7 +88,7 @@
       "id": "furniture",
       "label": "Mueble",
       "groups": [
-        "Furniture"
+        "Mueble"
       ],
       "avoidDecoys": [
         "building-structure"
@@ -98,7 +98,7 @@
       "id": "clothing-accessory",
       "label": "Ropa/Accesorio",
       "groups": [
-        "Clothing/Accessory"
+        "Ropa/Accesorio"
       ],
       "avoidDecoys": []
     },
@@ -106,7 +106,7 @@
       "id": "natural-feature",
       "label": "Elemento natural",
       "groups": [
-        "Natural Feature"
+        "Elemento natural"
       ],
       "avoidDecoys": []
     },
@@ -114,7 +114,7 @@
       "id": "tool",
       "label": "Herramienta",
       "groups": [
-        "Tool"
+        "Herramienta"
       ],
       "avoidDecoys": [
         "vehicle",
@@ -127,7 +127,7 @@
       "id": "electronic-device",
       "label": "Dispositivo electrónico",
       "groups": [
-        "Electronic Device"
+        "Dispositivo electrónico"
       ],
       "avoidDecoys": [
         "tool",
@@ -138,7 +138,7 @@
       "id": "appliance",
       "label": "Electrodoméstico",
       "groups": [
-        "Appliance"
+        "Electrodoméstico"
       ],
       "avoidDecoys": [
         "tool",
@@ -149,7 +149,7 @@
       "id": "weapon",
       "label": "Arma",
       "groups": [
-        "Weapon"
+        "Arma"
       ],
       "avoidDecoys": [
         "tool"
@@ -159,7 +159,7 @@
       "id": "vehicle",
       "label": "Vehículo",
       "groups": [
-        "Vehicle"
+        "Vehículo"
       ],
       "avoidDecoys": [
         "tool"
@@ -169,7 +169,7 @@
       "id": "emotion-feeling",
       "label": "Emoción/Sentimiento",
       "groups": [
-        "Emotion/Feeling"
+        "Emoción/Sentimiento"
       ],
       "avoidDecoys": []
     },
@@ -177,7 +177,7 @@
       "id": "shape",
       "label": "Forma",
       "groups": [
-        "Shape"
+        "Forma"
       ],
       "avoidDecoys": []
     },
@@ -193,7 +193,7 @@
       "id": "time-period",
       "label": "Periodo de tiempo",
       "groups": [
-        "Time Period"
+        "Periodo de tiempo"
       ],
       "avoidDecoys": [
         "temporal-name"
@@ -203,7 +203,7 @@
       "id": "temporal-name",
       "label": "Nombre temporal",
       "groups": [
-        "Temporal Name"
+        "Nombre temporal"
       ],
       "avoidDecoys": [
         "time-period"
@@ -213,7 +213,7 @@
       "id": "country",
       "label": "País",
       "groups": [
-        "Country"
+        "País"
       ],
       "avoidDecoys": [
         "city",
@@ -224,7 +224,7 @@
       "id": "city",
       "label": "Ciudad",
       "groups": [
-        "City"
+        "Ciudad"
       ],
       "avoidDecoys": [
         "country",
@@ -235,7 +235,7 @@
       "id": "nationality",
       "label": "Nacionalidad",
       "groups": [
-        "Nationality"
+        "Nacionalidad"
       ],
       "avoidDecoys": [
         "country",
@@ -246,7 +246,7 @@
       "id": "definite-quantity",
       "label": "Cardinal",
       "groups": [
-        "Definite Quantity"
+        "Cardinal"
       ],
       "avoidDecoys": [
         "sequence"
@@ -256,7 +256,7 @@
       "id": "sequence",
       "label": "Secuencia",
       "groups": [
-        "Sequence"
+        "Secuencia"
       ],
       "avoidDecoys": [
         "definite-quantity"

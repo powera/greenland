@@ -4,7 +4,7 @@
       "id": "family-relation",
       "label": "家庭关系",
       "groups": [
-        "Family Relation"
+        "家庭关系"
       ],
       "avoidDecoys": [
         "human",
@@ -15,7 +15,7 @@
       "id": "occupation",
       "label": "职业",
       "groups": [
-        "Occupation"
+        "职业"
       ],
       "avoidDecoys": [
         "human",
@@ -26,7 +26,7 @@
       "id": "animal",
       "label": "动物",
       "groups": [
-        "Animals"
+        "动物"
       ],
       "avoidDecoys": []
     },
@@ -34,7 +34,7 @@
       "id": "body-part",
       "label": "身体部位",
       "groups": [
-        "Body Part"
+        "身体部位"
       ],
       "avoidDecoys": []
     },
@@ -42,7 +42,7 @@
       "id": "disease-condition",
       "label": "疾病",
       "groups": [
-        "Disease/Condition"
+        "疾病"
       ],
       "avoidDecoys": []
     },
@@ -50,7 +50,7 @@
       "id": "plant",
       "label": "植物",
       "groups": [
-        "Plants"
+        "植物"
       ],
       "avoidDecoys": []
     },
@@ -58,7 +58,7 @@
       "id": "food",
       "label": "食物",
       "groups": [
-        "Food"
+        "食物"
       ],
       "avoidDecoys": [
         "beverage"
@@ -68,7 +68,7 @@
       "id": "beverage",
       "label": "饮料",
       "groups": [
-        "Beverage"
+        "饮料"
       ],
       "avoidDecoys": [
         "food"
@@ -78,7 +78,7 @@
       "id": "building-structure",
       "label": "建筑",
       "groups": [
-        "Building/Structure"
+        "建筑"
       ],
       "avoidDecoys": [
         "furniture"
@@ -88,7 +88,7 @@
       "id": "furniture",
       "label": "家具",
       "groups": [
-        "Furniture"
+        "家具"
       ],
       "avoidDecoys": [
         "building-structure"
@@ -98,7 +98,7 @@
       "id": "clothing-accessory",
       "label": "服装/配饰",
       "groups": [
-        "Clothing/Accessory"
+        "服装/配饰"
       ],
       "avoidDecoys": []
     },
@@ -106,7 +106,7 @@
       "id": "natural-feature",
       "label": "自然地貌",
       "groups": [
-        "Natural Feature"
+        "自然地貌"
       ],
       "avoidDecoys": []
     },
@@ -114,7 +114,7 @@
       "id": "tool",
       "label": "工具",
       "groups": [
-        "Tool"
+        "工具"
       ],
       "avoidDecoys": [
         "vehicle",
@@ -127,7 +127,7 @@
       "id": "electronic-device",
       "label": "电子设备",
       "groups": [
-        "Electronic Device"
+        "电子设备"
       ],
       "avoidDecoys": [
         "tool",
@@ -138,7 +138,7 @@
       "id": "appliance",
       "label": "家用电器",
       "groups": [
-        "Appliance"
+        "家用电器"
       ],
       "avoidDecoys": [
         "tool",
@@ -149,7 +149,7 @@
       "id": "weapon",
       "label": "武器",
       "groups": [
-        "Weapon"
+        "武器"
       ],
       "avoidDecoys": [
         "tool"
@@ -159,7 +159,7 @@
       "id": "vehicle",
       "label": "交通工具",
       "groups": [
-        "Vehicle"
+        "交通工具"
       ],
       "avoidDecoys": [
         "tool"
@@ -169,7 +169,7 @@
       "id": "emotion-feeling",
       "label": "情感",
       "groups": [
-        "Emotion/Feeling"
+        "情感"
       ],
       "avoidDecoys": []
     },
@@ -177,7 +177,7 @@
       "id": "shape",
       "label": "形状",
       "groups": [
-        "Shape"
+        "形状"
       ],
       "avoidDecoys": []
     },
@@ -185,7 +185,7 @@
       "id": "color",
       "label": "颜色",
       "groups": [
-        "Color"
+        "颜色"
       ],
       "avoidDecoys": []
     },
@@ -193,7 +193,7 @@
       "id": "time-period",
       "label": "时间段",
       "groups": [
-        "Time Period"
+        "时间段"
       ],
       "avoidDecoys": [
         "temporal-name"
@@ -203,7 +203,7 @@
       "id": "temporal-name",
       "label": "时间名称",
       "groups": [
-        "Temporal Name"
+        "时间名称"
       ],
       "avoidDecoys": [
         "time-period"
@@ -213,7 +213,7 @@
       "id": "country",
       "label": "国家",
       "groups": [
-        "Country"
+        "国家"
       ],
       "avoidDecoys": [
         "city",
@@ -224,7 +224,7 @@
       "id": "city",
       "label": "城市",
       "groups": [
-        "City"
+        "城市"
       ],
       "avoidDecoys": [
         "country",
@@ -235,7 +235,7 @@
       "id": "nationality",
       "label": "国籍",
       "groups": [
-        "Nationality"
+        "国籍"
       ],
       "avoidDecoys": [
         "country",
@@ -246,7 +246,7 @@
       "id": "definite-quantity",
       "label": "基数",
       "groups": [
-        "Definite Quantity"
+        "基数"
       ],
       "avoidDecoys": [
         "sequence"
@@ -256,7 +256,7 @@
       "id": "sequence",
       "label": "顺序",
       "groups": [
-        "Sequence"
+        "顺序"
       ],
       "avoidDecoys": [
         "definite-quantity"
