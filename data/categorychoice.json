@@ -153,7 +153,7 @@
     {
       "id": "definite-quantity",
       "label": "Numbers",
-      "groups": ["Definite Quantity"],
+      "groups": ["Cardinal"],
       "avoidDecoys": ["sequence"]
     },
     {

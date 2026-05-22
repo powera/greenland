@@ -31,6 +31,10 @@ from storage.translation_helpers import (
 )
 from storage.backend.factory import create_session
 from wireword.export_manager import TrakaidoExporter
+from wireword.generate_categorychoice import (
+    build_reverse_subtype_map,
+    generate_for_language,
+)
 from wordfreq.tools.country_word_priorities import (
     get_supported_languages as get_country_override_languages,
 )
@@ -618,11 +622,15 @@ class UngurysAgent:
 
             logger.info(f"Successfully exported {category_count} categories to {output_path}")
 
-            # Also copy language-specific variants if present.
+            # Regenerate localized variants from the English source via
+            # SUBTYPE_DISPLAY so groups[] stays in sync with wireword exports.
+            reverse_map = build_reverse_subtype_map()
             for lang in ("es", "fr", "zh"):
+                lang_data = generate_for_language(data, reverse_map, lang)
                 lang_source = os.path.join(project_root, "data", f"categorychoice-{lang}.json")
-                if not os.path.exists(lang_source):
-                    continue
+                with open(lang_source, "w", encoding="utf-8") as f:
+                    json.dump(lang_data, f, ensure_ascii=False, indent=2)
+                    f.write("\n")
                 lang_output = os.path.join(output_dir, f"categorychoice-{lang}.json")
                 shutil.copy2(lang_source, lang_output)
                 logger.info(f"  Exported {lang_output}")
