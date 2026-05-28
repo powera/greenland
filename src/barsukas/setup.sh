@@ -7,6 +7,7 @@ set -e
 
 # Default venv location
 VENV_PATH=""
+EXTRAS=""
 
 # Parse command-line arguments
 while [[ $# -gt 0 ]]; do
@@ -15,19 +16,29 @@ while [[ $# -gt 0 ]]; do
             VENV_PATH="$2"
             shift 2
             ;;
+        --extras)
+            EXTRAS="$2"
+            shift 2
+            ;;
+        --with-audio)
+            EXTRAS="${EXTRAS:+$EXTRAS,}audio"
+            shift
+            ;;
         -h|--help)
-            echo "Usage: $0 --venv PATH"
+            echo "Usage: $0 --venv PATH [--extras EXTRA[,EXTRA...]] [--with-audio]"
             echo ""
             echo "Creates a Python virtual environment and installs dependencies for Barsukas."
             echo ""
             echo "Options:"
-            echo "  --venv PATH    Path where the venv should be created (required)"
-            echo "  -h, --help     Show this help message"
+            echo "  --venv PATH       Path where the venv should be created (required)"
+            echo "  --extras EXTRAS   Optional pyproject extras to install, e.g. audio or audio,dev"
+            echo "  --with-audio      Shortcut for --extras audio"
+            echo "  -h, --help        Show this help message"
             exit 0
             ;;
         *)
             echo "Error: Unknown option '$1'"
-            echo "Usage: $0 --venv PATH"
+            echo "Usage: $0 --venv PATH [--extras EXTRA[,EXTRA...]] [--with-audio]"
             exit 1
             ;;
     esac
@@ -35,7 +46,7 @@ done
 
 if [[ -z "$VENV_PATH" ]]; then
     echo "Error: --venv PATH is required"
-    echo "Usage: $0 --venv PATH"
+    echo "Usage: $0 --venv PATH [--extras EXTRA[,EXTRA...]] [--with-audio]"
     exit 1
 fi
 
@@ -50,6 +61,9 @@ echo "Setting up Barsukas environment"
 echo "=========================================="
 echo "Venv path: $VENV_PATH"
 echo "Repo root: $REPO_ROOT"
+if [[ -n "$EXTRAS" ]]; then
+    echo "Optional extras: $EXTRAS"
+fi
 echo ""
 
 # Create venv if it doesn't exist
@@ -70,8 +84,13 @@ pip install --upgrade pip
 
 # Install requirements
 echo ""
-echo "Installing dependencies from requirements.txt files..."
-pip install -r "$REPO_ROOT/requirements.txt" -r "$SCRIPT_DIR/requirements.txt"
+echo "Installing dependencies from combined requirements.txt..."
+pip install -r "$REPO_ROOT/requirements.txt"
+
+if [[ -n "$EXTRAS" ]]; then
+    echo "Installing optional extras: $EXTRAS"
+    pip install -e "$REPO_ROOT[$EXTRAS]"
+fi
 
 echo ""
 echo "=========================================="
