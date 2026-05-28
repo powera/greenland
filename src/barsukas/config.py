@@ -14,8 +14,8 @@ class Config:
     SECRET_KEY = os.environ.get("BARSUKAS_SECRET_KEY", "dev-secret-key-change-in-production")
 
     # Server settings
-    HOST = "127.0.0.1"  # Localhost only for security
-    PORT = int(os.environ.get("BARSUKAS_PORT", 5555))
+    HOST = os.environ.get("BARSUKAS_HOST", "127.0.0.1")  # Localhost only by default
+    PORT = int(os.environ.get("BARSUKAS_PORT", os.environ.get("PORT", 5555)))
     DEBUG = os.environ.get("BARSUKAS_DEBUG", "False").lower() == "true"
 
     # Database settings
