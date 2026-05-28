@@ -364,12 +364,16 @@ def create_app(
 
     @app.before_request
     def before_request() -> None:
-        """Set up database session and start request timing for metrics."""
-        g.db = app.db_session_factory()
+        """Set up request context and start timing for metrics."""
         g.ui_lang = resolve_ui_language(request)
         endpoint_name = request.endpoint or "common"
         g.strings_default_module = endpoint_name.split(".", 1)[0]
         RequestMetricsMiddleware.before_request()
+
+        if endpoint_name == "healthz":
+            return
+
+        g.db = app.db_session_factory()
 
     @app.teardown_appcontext
     def shutdown_session(exception: Optional[BaseException]) -> None:
@@ -404,6 +408,11 @@ def create_app(
         if not next_url.startswith("/"):
             next_url = url_for("index")
         return redirect(next_url)
+
+    @app.get("/healthz")
+    def healthz() -> Response:
+        """Return a lightweight health check for process supervisors."""
+        return Response("ok\n", mimetype="text/plain; charset=utf-8")
 
     @app.route("/metrics")
     def metrics() -> Response:

@@ -95,3 +95,13 @@ class TestHomeRoute:
     def test_home_returns_200(self, client: FlaskClient) -> None:
         response = client.get("/")
         assert response.status_code == 200
+
+
+class TestHealthRoute:
+    """Smoke test for the health check endpoint."""
+
+    def test_healthz_returns_ok(self, client: FlaskClient) -> None:
+        response = client.get("/healthz")
+        assert response.status_code == 200
+        assert response.text == "ok\n"
+        assert response.mimetype == "text/plain"
