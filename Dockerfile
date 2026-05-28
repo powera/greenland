@@ -9,10 +9,9 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-COPY requirements.txt /tmp/greenland-requirements.txt
-COPY src/barsukas/requirements.txt /tmp/barsukas-requirements.txt
+COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r /tmp/greenland-requirements.txt -r /tmp/barsukas-requirements.txt
+    && pip install --no-cache-dir -r /tmp/requirements.txt
 
 COPY . .
 
