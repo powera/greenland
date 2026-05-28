@@ -200,6 +200,21 @@ def patch_lemma_difficulty(guid: str, difficulty_level: Optional[int]) -> Any:
     )
 
 
+@mirrored_route("/api/v1/lemma/<main_guid>/merge-synonym/<synonym_guid>", "POST")
+def merge_synonym(
+    main_guid: str,
+    synonym_guid: str,
+    *,
+    changed_by: Optional[str] = None,
+    notes: Optional[str] = None,
+) -> Any:
+    """Merge ``synonym_guid`` into ``main_guid`` as per-language synonyms."""
+    return post_json(
+        f"{API_V1_PREFIX}/lemma/{main_guid}/merge-synonym/{synonym_guid}",
+        {"changed_by": changed_by, "notes": notes},
+    )
+
+
 @mirrored_route("/api/v1/lemma/<guid>/translations", "GET")
 def get_translations(guid: str, *, language: Optional[str] = None) -> Any:
     """Translations of a lemma keyed by language code."""
