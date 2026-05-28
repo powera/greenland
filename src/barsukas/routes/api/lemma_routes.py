@@ -22,12 +22,14 @@ from clients.audio.polly_tts import PollyVoice
 from flask import Response, g, jsonify, request
 from flask.typing import ResponseReturnValue
 from sqlalchemy import and_, case, func, or_
+from sqlalchemy.exc import IntegrityError
 from audioshoe.coqui.types import CoquiVoice
 from audioshoe.espeak.types import EspeakVoice
 from audioshoe.piper.types import PiperVoice
 from audioshoe.qwen.types import QwenVoice
 
 from storage.crud.grammar_fact import get_grammar_facts
+from storage.crud.guid_tombstone import create_tombstone, get_tombstone_by_guid
 from storage.crud.lemma import get_lemma_by_guid
 from storage.crud.sentence import add_sentence, find_sentence_by_text
 from storage.crud.sentence_translation import add_sentence_translation
@@ -38,14 +40,17 @@ from storage.models import (
     Lemma,
     LemmaTranslation,
     Sentence,
+    SentencePatternWord,
     SentenceTranslation,
     SentenceWord,
 )
 from storage.models.schema import (
     AudioQualityReview,
     ExternalLexemeAnnotation,
+    ExternalLexemeAnnotationLemma,
     LemmaDifficultyOverride,
     BarsukasTask,
+    SYNONYM_GRAMMATICAL_FORMS,
 )
 from storage.queries.lemma import build_lemma_search_query
 from storage.translation_helpers import (
@@ -757,6 +762,221 @@ def update_lemma_info(guid: str) -> ResponseReturnValue:
             "updated": old_difficulty_level != lemma.difficulty_level,
         }
     )
+
+
+@bp.route("/v1/lemma/<main_guid>/merge-synonym/<synonym_guid>", methods=["POST"])
+@mirrored_facade("/api/v1/lemma/<main_guid>/merge-synonym/<synonym_guid>", "POST")
+def merge_lemma_synonym(main_guid: str, synonym_guid: str) -> ResponseReturnValue:
+    """Merge one lemma into another as per-language synonym forms.
+
+    The merge is intentionally conservative: the two lemmas must have the same
+    part of speech, and at least three non-empty translations must match exactly
+    after whitespace normalization and case folding. On success the synonym
+    lemma's base text/translations are added as ``synonym`` derivative forms on
+    the main lemma, the synonym GUID is tombstoned, sentence/audio references are
+    repointed to the main lemma, and the synonym lemma row is deleted.
+    """
+    if main_guid == synonym_guid:
+        return _build_error_response("main_guid and synonym_guid must be different", 400)
+
+    main_lemma = get_lemma_by_guid(g.db, main_guid)
+    if main_lemma is None:
+        return _build_error_response(f"Lemma with GUID '{main_guid}' not found", 404)
+
+    synonym_lemma = get_lemma_by_guid(g.db, synonym_guid)
+    if synonym_lemma is None:
+        return _build_error_response(f"Lemma with GUID '{synonym_guid}' not found", 404)
+
+    if get_tombstone_by_guid(g.db, synonym_guid) is not None:
+        return _build_error_response(f"GUID '{synonym_guid}' is already tombstoned", 409)
+
+    if main_lemma.pos_type != synonym_lemma.pos_type:
+        return _build_error_response(
+            "Cannot merge lemmas with different part-of-speech values: "
+            f"{main_lemma.pos_type!r} != {synonym_lemma.pos_type!r}",
+            400,
+        )
+
+    main_translations = _non_empty_translations(main_lemma)
+    synonym_translations = _non_empty_translations(synonym_lemma)
+    matched_languages = _matching_translation_languages(main_translations, synonym_translations)
+    if len(matched_languages) < 3:
+        return _build_error_response(
+            "At least 3 matching translations are required to merge synonyms; "
+            f"found {len(matched_languages)}",
+            400,
+        )
+
+    payload = request.get_json(silent=True) or {}
+    changed_by_value = payload.get("changed_by", "barsukas_api")
+    notes_value = payload.get("notes")
+    changed_by = changed_by_value if isinstance(changed_by_value, str) else "barsukas_api"
+    notes = notes_value if isinstance(notes_value, str) else None
+
+    added_synonyms: List[Dict[str, Optional[str]]] = []
+    existing_synonyms: List[Dict[str, str]] = []
+    for language_code, synonym_text in synonym_translations.items():
+        if _main_has_synonym(main_lemma.id, language_code, synonym_text):
+            existing_synonyms.append({"language_code": language_code, "text": synonym_text})
+            continue
+        ipa_pronunciation, phonetic_pronunciation = get_translation_pronunciations(
+            g.db, synonym_lemma, language_code
+        )
+        synonym_form = DerivativeForm(
+            lemma_id=main_lemma.id,
+            language_code=language_code,
+            derivative_form_text=synonym_text,
+            grammatical_form="synonym",
+            is_base_form=False,
+            ipa_pronunciation=ipa_pronunciation,
+            phonetic_pronunciation=phonetic_pronunciation,
+            verified=False,
+            notes=f"Merged from {synonym_guid}",
+        )
+        g.db.add(synonym_form)
+        added_synonyms.append(
+            {
+                "language_code": language_code,
+                "text": synonym_text,
+                "ipa_pronunciation": ipa_pronunciation,
+                "phonetic_pronunciation": phonetic_pronunciation,
+            }
+        )
+
+    sentence_word_updates = _repoint_lemma_references(SentenceWord, synonym_lemma.id, main_lemma.id)
+    pattern_word_updates = _repoint_lemma_references(
+        SentencePatternWord, synonym_lemma.id, main_lemma.id
+    )
+    audio_review_updates = _repoint_lemma_references(
+        AudioQualityReview, synonym_lemma.id, main_lemma.id
+    )
+    annotation_link_updates = _repoint_external_annotation_links(synonym_lemma.id, main_lemma.id)
+
+    create_tombstone(
+        g.db,
+        guid=synonym_guid,
+        original_lemma_text=synonym_lemma.lemma_text,
+        original_pos_type=synonym_lemma.pos_type,
+        original_pos_subtype=synonym_lemma.pos_subtype,
+        replacement_guid=main_guid,
+        lemma_id=synonym_lemma.id,
+        reason="synonym_merge",
+        notes=notes,
+        changed_by=changed_by,
+    )
+    g.db.delete(synonym_lemma)
+
+    try:
+        g.db.commit()
+    except IntegrityError as exc:
+        g.db.rollback()
+        return _build_error_response(f"Merge would violate a database constraint: {exc.orig}", 409)
+
+    return _build_success_response(
+        {
+            "main_guid": main_guid,
+            "removed_guid": synonym_guid,
+            "tombstoned_guid": synonym_guid,
+            "replacement_guid": main_guid,
+            "added_synonyms": added_synonyms,
+            "existing_synonyms": existing_synonyms,
+            "matched_translations": [
+                {
+                    "language_code": language_code,
+                    "translation": main_translations[language_code],
+                }
+                for language_code in matched_languages
+            ],
+            "repointed_references": {
+                "sentence_words": sentence_word_updates,
+                "sentence_pattern_words": pattern_word_updates,
+                "audio_reviews": audio_review_updates,
+                "external_annotation_links": annotation_link_updates,
+            },
+        }
+    )
+
+
+def _normalized_translation(value: str) -> str:
+    """Normalize translation text for conservative exact-match comparisons."""
+    return " ".join(value.split()).casefold()
+
+
+def _non_empty_translations(lemma: Lemma) -> Dict[str, str]:
+    """Return non-empty translations for a lemma keyed by language code."""
+    translations = get_all_translations(g.db, lemma)
+    return {
+        language_code: translation.strip()
+        for language_code, translation in translations.items()
+        if translation is not None and translation.strip()
+    }
+
+
+def _matching_translation_languages(
+    main_translations: Dict[str, str], synonym_translations: Dict[str, str]
+) -> List[str]:
+    """Return languages whose translations match after normalization."""
+    matched_languages: List[str] = []
+    for language_code, main_translation in main_translations.items():
+        if language_code == "en":
+            continue
+        synonym_translation = synonym_translations.get(language_code)
+        if synonym_translation is None:
+            continue
+        if _normalized_translation(main_translation) == _normalized_translation(
+            synonym_translation
+        ):
+            matched_languages.append(language_code)
+    return matched_languages
+
+
+def _main_has_synonym(lemma_id: int, language_code: str, synonym_text: str) -> bool:
+    """Return whether the main lemma already has this synonym text."""
+    existing_count = int(
+        g.db.query(DerivativeForm)
+        .filter(
+            DerivativeForm.lemma_id == lemma_id,
+            DerivativeForm.language_code == language_code,
+            DerivativeForm.derivative_form_text == synonym_text,
+            DerivativeForm.grammatical_form.in_(SYNONYM_GRAMMATICAL_FORMS),
+        )
+        .count()
+    )
+    return existing_count > 0
+
+
+def _repoint_lemma_references(model_class: Any, old_lemma_id: int, new_lemma_id: int) -> int:
+    """Update simple ``lemma_id`` references from one lemma to another."""
+    return int(
+        g.db.query(model_class)
+        .filter(model_class.lemma_id == old_lemma_id)
+        .update({model_class.lemma_id: new_lemma_id}, synchronize_session=False)
+    )
+
+
+def _repoint_external_annotation_links(old_lemma_id: int, new_lemma_id: int) -> int:
+    """Move external annotation links without creating duplicate pairs."""
+    links = (
+        g.db.query(ExternalLexemeAnnotationLemma)
+        .filter(ExternalLexemeAnnotationLemma.lemma_id == old_lemma_id)
+        .all()
+    )
+    updated_count = 0
+    for link in links:
+        duplicate = (
+            g.db.query(ExternalLexemeAnnotationLemma)
+            .filter(
+                ExternalLexemeAnnotationLemma.annotation_id == link.annotation_id,
+                ExternalLexemeAnnotationLemma.lemma_id == new_lemma_id,
+            )
+            .first()
+        )
+        if duplicate is not None:
+            g.db.delete(link)
+            continue
+        link.lemma_id = new_lemma_id
+        updated_count += 1
+    return updated_count
 
 
 @bp.route("/v1/lemma/<guid>/translations")

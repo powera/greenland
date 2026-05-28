@@ -27,6 +27,11 @@ Base prefix: `/api`.
   - Update mutable lemma fields.
   - Body: `{"difficulty_level": <int|null>}`.
 
+- `POST /api/v1/lemma/<main_guid>/merge-synonym/<synonym_guid>`
+  - Merge the synonym lemma into the main lemma. Requires the same `pos_type` and at least 3 matching non-empty translations after normalization.
+  - Adds the synonym lemma text/translations as per-language `synonym` derivative forms on the main lemma, tombstones `synonym_guid`, repoints sentence/audio references, and deletes the synonym lemma row.
+  - Optional body: `{"changed_by": "...", "notes": "..."}`.
+
 - `GET /api/v1/lemma/<guid>/translations[?language=<code>]`
   - Translations keyed by language code.
 
