@@ -576,9 +576,11 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> None:
     """Export sentences from SQLite to data/release/sentences format.
 
-    Sentences are grouped by their **primary lemma** — the noun with the lowest
-    GUID among the sentence's pattern words.  Falls back to any lemma with the
-    lowest GUID, then to ``misc/``.
+    Sentences are grouped first by their **collection** (sentence_collection field,
+    defaulting to "general"), then by primary lemma pos_type/pos_subtype — the noun
+    with the lowest GUID among pattern words, falling back to misc/misc.
+
+    Structure: {release_dir}/{collection}/{pos_dir}/{pos_subtype}/base.jsonl
 
     Conversation sentences are excluded.
 
@@ -639,25 +641,26 @@ def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> Non
         sentences = [s for s in sentences if s.id not in conversation_ids]
         print(f"Found {len(sentences)} non-conversation sentences to export")
 
-        # Group sentences by primary lemma category
-        sentences_by_category: Dict[Tuple[str, str], List[Dict[str, Any]]] = defaultdict(list)
+        # Group sentences by (collection, pos_type, pos_subtype)
+        sentences_by_category: Dict[Tuple[str, str, str], List[Dict[str, Any]]] = defaultdict(list)
 
         for sentence in sentences:
             record = _sentence_to_release_record(sentence)
-            category = _resolve_primary_lemma_category(sentence)
-            sentences_by_category[category].append(record)
+            collection = sentence.sentence_collection or "general"
+            pos_type, pos_subtype = _resolve_primary_lemma_category(sentence)
+            sentences_by_category[(collection, pos_type, pos_subtype)].append(record)
 
         print(f"Organized into {len(sentences_by_category)} categories")
 
-        for (pos_type, pos_subtype), records in sentences_by_category.items():
+        for (collection, pos_type, pos_subtype), records in sentences_by_category.items():
             dir_name = type_to_dir.get(pos_type, pos_type)
-            category_dir = Path(release_dir) / dir_name / pos_subtype
+            category_dir = Path(release_dir) / collection / dir_name / pos_subtype
             category_dir.mkdir(parents=True, exist_ok=True)
 
             # Sort by GUID within each file
             records.sort(key=lambda r: r["guid"])
 
-            print(f"Exporting {len(records)} sentences to {dir_name}/{pos_subtype}...")
+            print(f"Exporting {len(records)} sentences to {collection}/{dir_name}/{pos_subtype}...")
             _write_jsonl_atomic(category_dir / "base.jsonl", records)
 
         print("Sentence export complete!")
@@ -720,6 +723,8 @@ def _sentence_to_release_record(sentence: Any) -> Dict[str, Any]:
     record: Dict[str, Any] = {
         "guid": sentence.guid,
     }
+    if sentence.sentence_collection:
+        record["collection"] = sentence.sentence_collection
     if sentence.pattern_type:
         record["pattern_type"] = sentence.pattern_type
     if sentence.tense:

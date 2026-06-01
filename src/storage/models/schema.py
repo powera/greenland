@@ -405,6 +405,9 @@ class Sentence(Base):
     # NULL means difficulty hasn't been calculated yet
     minimum_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
 
+    # Collection — which sentence set this belongs to (e.g., "beginner", "gutenberg")
+    sentence_collection: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)
+
     # Source tracking
     source_filename: Mapped[Optional[str]] = mapped_column(
         String, nullable=True
