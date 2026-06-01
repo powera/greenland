@@ -338,6 +338,7 @@ def apply_additions() -> ResponseReturnValue:
 
             sentence = Sentence(
                 guid=guid,
+                sentence_collection=release_data.get("collection") or None,
                 pattern_type=release_data.get("pattern_type"),
                 tense=release_data.get("tense"),
                 minimum_level=release_data.get("minimum_level"),
@@ -1458,7 +1459,7 @@ def _normalize_release_sentence_for_compare(release_data: Dict[str, Any]) -> Dic
     """Normalize release JSONL sentence data for comparison with DB export records."""
     normalized: Dict[str, Any] = {"guid": release_data.get("guid")}
 
-    for field_name in ("pattern_type", "tense", "minimum_level", "notes"):
+    for field_name in ("collection", "pattern_type", "tense", "minimum_level", "notes"):
         if field_name in release_data:
             normalized[field_name] = release_data[field_name]
 
@@ -1649,25 +1650,26 @@ def apply_export() -> ResponseReturnValue:
         return redirect(url_for("sync_sentence_release.export"))
 
     # Group new sentences by category, merging with existing release data
-    # {(pos_type, pos_subtype): {guid: record}}
-    category_records: Dict[Tuple[str, str], Dict[str, Dict[str, Any]]] = defaultdict(dict)
+    # {(collection, pos_type, pos_subtype): {guid: record}}
+    category_records: Dict[Tuple[str, str, str], Dict[str, Dict[str, Any]]] = defaultdict(dict)
 
     # Pre-load existing release records grouped by category
     for base_file in release_dir.rglob("base.jsonl"):
-        # Determine category from path: release_dir/pos_dir/subtype/base.jsonl
+        # Determine category from path: release_dir/collection/pos_dir/subtype/base.jsonl
         rel_path = base_file.relative_to(release_dir)
-        parts = rel_path.parts  # e.g. ("verbs", "motion", "base.jsonl")
-        if len(parts) < 3:
+        parts = rel_path.parts  # e.g. ("beginner", "verbs", "motion", "base.jsonl")
+        if len(parts) < 4:
             continue
-        pos_dir = parts[0]
-        subtype = parts[1]
+        collection_dir = parts[0]
+        pos_dir = parts[1]
+        subtype = parts[2]
         # Reverse-map directory name to pos_type
         pos_type = pos_dir
         for pt, dn in _TYPE_TO_DIR.items():
             if dn == pos_dir:
                 pos_type = pt
                 break
-        category_key = (pos_type, subtype)
+        category_key: Tuple[str, str, str] = (collection_dir, pos_type, subtype)
         try:
             with open(base_file, "r", encoding="utf-8") as f:
                 for line in f:
@@ -1688,23 +1690,25 @@ def apply_export() -> ResponseReturnValue:
     exported_count = 0
     for sentence in db_sentences:
         record = _sentence_to_release_record(sentence)
-        category = _resolve_primary_lemma_category(sentence)
-        category_records[category][sentence.guid] = record
+        collection = sentence.sentence_collection or "general"
+        pos_type, pos_subtype = _resolve_primary_lemma_category(sentence)
+        category_records[(collection, pos_type, pos_subtype)][sentence.guid] = record
         exported_count += 1
 
     # Write out all affected categories
-    for (pos_type, pos_subtype), guid_to_record in category_records.items():
+    for (collection, pos_type, pos_subtype), guid_to_record in category_records.items():
         # Only write categories that contain newly exported sentences
         has_new = any(
             s.guid in guid_to_record
             for s in db_sentences
             if _resolve_primary_lemma_category(s) == (pos_type, pos_subtype)
+            and (s.sentence_collection or "general") == collection
         )
         if not has_new:
             continue
 
         dir_name = _TYPE_TO_DIR.get(pos_type, pos_type)
-        category_dir = release_dir / dir_name / pos_subtype
+        category_dir = release_dir / collection / dir_name / pos_subtype
         category_dir.mkdir(parents=True, exist_ok=True)
 
         records = sorted(guid_to_record.values(), key=lambda r: r["guid"])
@@ -1770,9 +1774,10 @@ def apply_export_sync_back() -> ResponseReturnValue:
 
         # If no existing file is found (unexpected for sync-back), append via export category.
         if not release_file:
-            category = _resolve_primary_lemma_category(sentence)
-            dir_name = _TYPE_TO_DIR.get(category[0], category[0])
-            category_dir = release_dir / dir_name / category[1]
+            collection = sentence.sentence_collection or "general"
+            pos_type, pos_subtype = _resolve_primary_lemma_category(sentence)
+            dir_name = _TYPE_TO_DIR.get(pos_type, pos_type)
+            category_dir = release_dir / collection / dir_name / pos_subtype
             category_dir.mkdir(parents=True, exist_ok=True)
             release_file = category_dir / "base.jsonl"
 
