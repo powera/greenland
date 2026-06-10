@@ -30,6 +30,9 @@ As of the queue-first transition, agent CLIs are moving toward **work discovery 
 | **strazdas** | thrush | Audio generation (eSpeak-NG) |
 | **vieversys** | lark | Audio generation (OpenAI TTS) |
 | **seskas** | ferret | Multi-model verb-conjugation consensus generator |
+| **erelis** | eagle | False lemma match detection in sentences |
+| **gandras** | stork | Audio manifest downloader (S3 staging) |
+| **genys** | woodpecker | Document parser and pending import stager |
 
 ## Common Arguments
 
@@ -214,6 +217,29 @@ seskas.py --language lt --verbs-file data/verbs/lt.txt
 seskas.py --language es --verbs-file /tmp/es_verbs.txt --output src/langtools/es/generated_conjugations.py
 seskas.py --language pl --verbs-file /tmp/pl_verbs.txt --model-paths qwen3-4b-lms phi-4-lms gemma-3-12b-lms
 seskas.py --language lt --verbs-file /tmp/lt_verbs.txt --on-existing merge
+```
+
+### erelis (False Lemma Matches)
+
+```bash
+erelis.py --language zh               # Detect false lemma matches in Chinese
+erelis.py --language zh --limit 100   # Limit number of sentences checked
+erelis.py --language zh --guid V03_007
+```
+
+### gandras (Audio Manifest Downloader)
+
+```bash
+gandras.py --mode list                # Show available S3 manifests
+gandras.py --mode report --language lt
+gandras.py --mode download --language lt --voice ruta --output-dir audio/
+```
+
+### genys (Document Import)
+
+```bash
+genys.py --input document.txt --language en
+genys.py --input document.txt --language zh --store-sentences
 ```
 
 ## Creating New Agents

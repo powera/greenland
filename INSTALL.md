@@ -18,12 +18,21 @@ pip install -e ".[dev]"
 pip install -e ".[ml]"
 ```
 
+## Submodules (Optional)
+
+`audio/`, `data/greenland_input/`, and `data/trakaido_wordlists/` are git
+submodules. Initialize them only if you need their contents:
+
+```bash
+git submodule update --init <path>
+```
+
 ## Pre-commit Hooks
 
 Enable black formatting checks on commit:
 
 ```bash
-git config core.hooksPath hooks
+git config core.hooksPath .githooks
 ```
 
 ## Database Initialization
