@@ -9,9 +9,8 @@ src/
 │   ├── translation/       # LLM-based translation and form generation
 │   ├── frequency/         # Word frequency analysis
 │   ├── dictionary/        # Word list management and export
-│   ├── prompts/           # LLM prompt templates
+│   ├── tiers/             # Difficulty tier importers (CEFR, Cambridge YLE)
 │   ├── tools/             # CLI utilities
-│   ├── trakaido/          # Trakaido app integration
 │   └── data/              # Python data modules (family_relations)
 │
 ├── agents/                # Autonomous data quality agents
@@ -21,10 +20,14 @@ src/
 ├── util/                  # General utilities
 ├── wireword/              # WireWord format export
 ├── langtools/             # Language processing tools
-├── audioshoe/             # Audio generation (eSpeak, Piper, Coqui)
-├── scripts/               # Standalone scripts
+├── ipa/                   # IPA pronunciation utilities
+├── audioshoe/             # Audio generation (eSpeak, Piper, Coqui, Qwen)
+├── scripts/               # Standalone maintenance scripts
 ├── sentences/             # Sentence processing
-├── workqueue/             # Work queue infrastructure
+├── strings/               # Barsukas UI string localization tooling
+├── words/                 # Word-level LLM helpers
+├── verbalator/            # Text analysis tooling
+├── workqueue/             # Background task queue
 ├── tests/                 # Tests
 └── constants.py           # Centralized path configuration
 ```
@@ -58,6 +61,8 @@ usage and arguments.
 | elnias | Deer | WireWord bootstrap export |
 | erelis | Eagle | False lemma match detection in sentences |
 | gandras | Stork | Audio manifest downloader |
+| genys | Woodpecker | Document parser and pending import stager |
+| seskas | Ferret | Multi-model verb-conjugation consensus |
 
 ---
 
