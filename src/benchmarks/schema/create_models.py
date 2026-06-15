@@ -482,6 +482,17 @@ def create_local_models(postgres_url=None):
     )
     _insert_lmstudio_model(
         s,
+        codename="gemma-4-12b-lms",
+        displayname="Gemma 4 12B (LMStudio)",
+        launch_date="2026-06-03",
+        filesize_mb=7560,
+        license_name="Gemma License",
+        lmstudio_model="google/gemma-4-12b",
+        lmstudio_model_name="google/gemma-4-12b",
+        max_benchmark_tier=2,
+    )
+    _insert_lmstudio_model(
+        s,
         codename="gemma-4-e4b-it-lms",
         displayname="Gemma 4 E4B IT (LMStudio)",
         launch_date="2025-04-09",
