@@ -391,9 +391,13 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 
     from storage import translation_helpers
     from storage.database import create_database_session
+    from storage.models.guid_tombstone import GuidTombstone
     from storage.models.schema import Lemma
 
     session = create_database_session(sqlite_path)
+    from storage.utils.session import ensure_tables_exist
+
+    ensure_tables_exist(session)
 
     try:
         # Get all lemmas with GUIDs (curated words only)
@@ -569,8 +573,45 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
         print(f"\nExport complete!")
         print(f"Languages exported: {', '.join(sorted(all_languages))}")
 
+        tombstone_records: List[Dict[str, Any]] = []
+        for tombstone in session.query(GuidTombstone).order_by(GuidTombstone.guid).all():
+            tombstone_record: Dict[str, Any] = {
+                "guid": tombstone.guid,
+                "original_lemma_text": tombstone.original_lemma_text,
+                "original_pos_type": tombstone.original_pos_type,
+                "reason": tombstone.reason,
+            }
+            if tombstone.original_pos_subtype:
+                tombstone_record["original_pos_subtype"] = tombstone.original_pos_subtype
+            if tombstone.replacement_guid:
+                tombstone_record["replacement_guid"] = tombstone.replacement_guid
+            if tombstone.lemma_id:
+                tombstone_record["lemma_id"] = tombstone.lemma_id
+            if tombstone.notes:
+                tombstone_record["notes"] = tombstone.notes
+            if tombstone.changed_by:
+                tombstone_record["changed_by"] = tombstone.changed_by
+            _add_tombstoned_at(tombstone_record, tombstone.tombstoned_at)
+            tombstone_records.append(tombstone_record)
+
+        _write_jsonl_atomic(
+            Path(release_dir).parent / "tombstones" / "guid_tombstones.jsonl",
+            tombstone_records,
+        )
+        print(f"Tombstones exported: {len(tombstone_records)}")
+
     finally:
         session.close()
+
+
+def _add_tombstoned_at(record: Dict[str, Any], tombstoned_at: Any) -> None:
+    """Add tombstoned_at to a release tombstone record if it is available."""
+    if tombstoned_at is None:
+        return
+    if hasattr(tombstoned_at, "isoformat"):
+        record["tombstoned_at"] = tombstoned_at.isoformat()
+    else:
+        record["tombstoned_at"] = str(tombstoned_at)
 
 
 def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> None:

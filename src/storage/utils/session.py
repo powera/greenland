@@ -8,6 +8,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 import constants
+import storage.models  # noqa: F401  # Ensure all model tables are registered.
 from storage.models.schema import Base
 
 logger = logging.getLogger(__name__)
