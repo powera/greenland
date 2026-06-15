@@ -9,17 +9,28 @@ imported into or exported from the SQLite database.
 data/release/lemmas/
 ├── nouns/
 │   ├── food/
-│   │   └── base.jsonl
+│   │   ├── base.jsonl
+│   │   ├── secondary.jsonl
+│   │   ├── audio.jsonl
+│   │   └── {lang}.jsonl
 │   ├── animals/
 │   │   └── base.jsonl
 │   └── ...
 ├── verbs/
 │   └── ...
 └── ...
+data/release/sentences/
+├── beginner/
+│   └── nouns/
+│       └── food/
+│           └── base.jsonl
+└── ...
 ```
 
 Each `base.jsonl` file contains concept definitions with translations and
-optional difficulty overrides.
+optional difficulty overrides. Sentence `base.jsonl` files contain sentence
+translations, word breakdowns, pattern words, and approved audio references.
+Lemma `audio.jsonl` files contain approved audio references grouped by GUID.
 
 ## Tools for Loading/Updating Data
 
@@ -65,6 +76,12 @@ Use **migrate.py** to export the database back to release format:
 # Export to data/release/lemmas (default)
 PYTHONPATH=src python src/storage/migrate.py sqlite-to-release
 
+# Export to data/release/sentences (default)
+PYTHONPATH=src python src/storage/migrate.py sqlite-to-sentence-release
+
+# Export only lemma audio files
+PYTHONPATH=src python src/storage/migrate.py sqlite-to-lemma-audio-release
+
 # Export to a custom directory
 PYTHONPATH=src python src/storage/migrate.py sqlite-to-release \
   --release-dir /path/to/output
@@ -83,7 +100,7 @@ PYTHONPATH=src python src/storage/migrate.py sqlite-to-release \
 
 ## File Format
 
-Each `base.jsonl` record contains:
+Lemma `base.jsonl` records contain:
 
 ```json
 {
@@ -102,6 +119,38 @@ Each `base.jsonl` record contains:
   }
 }
 ```
+
+Translations are sparse maps. Missing language keys mean no translation is
+available for that language. Use a per-language difficulty override of `-1`
+when a concept is intentionally not applicable to a language.
+
+Lemma `audio.jsonl` records contain approved audio rows grouped by GUID:
+
+```json
+{
+  "guid": "LM00001234",
+  "audio": [
+    {
+      "language_code": "lt",
+      "voice_name": "alloy",
+      "filename": "LM00001234.mp3",
+      "status": "approved",
+      "expected_text": "obuolys",
+      "manifest_md5": "abc123",
+      "s3_prod_url": "https://...",
+      "s3_staging_url": "https://...",
+      "staging_agent": "vieversys",
+      "grammatical_form": null
+    }
+  ]
+}
+```
+
+Sentence `base.jsonl` records live under
+`sentences/{collection}/{pos_type_dir}/{pos_subtype}/base.jsonl` and contain
+the sentence GUID, sparse translations, optional `pattern_words`, optional
+per-language `words`, and approved sentence `audio` rows. Conversation and
+rejected sentences are not exported.
 
 ## Important Guidelines
 

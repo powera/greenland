@@ -27,6 +27,8 @@ from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
 from storage.config.grammar_facts import RELEASE_GRAMMAR_FACT_TYPES
 
+APPROVED_AUDIO_RELEASE_STATUSES = {"approved", "approved_with_issues"}
+
 
 def export_sqlalchemy_to_jsonl(source_config: DataSourceConfig, jsonl_dir: str) -> None:
     """Export all data from a SQLAlchemy backend (SQLite or PostgreSQL) to JSONL format.
@@ -623,7 +625,7 @@ def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> Non
 
     Structure: {release_dir}/{collection}/{pos_dir}/{pos_subtype}/base.jsonl
 
-    Conversation sentences are excluded.
+    Conversation and rejected sentences are excluded.
 
     Args:
         sqlite_path: Path to SQLite database
@@ -668,6 +670,7 @@ def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> Non
         sentences = (
             session.query(Sentence)
             .filter(Sentence.guid.isnot(None))
+            .filter(Sentence.rejected.is_(False))
             .options(
                 selectinload(Sentence.translations),
                 selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
@@ -680,7 +683,7 @@ def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> Non
 
         # Filter out conversation sentences
         sentences = [s for s in sentences if s.id not in conversation_ids]
-        print(f"Found {len(sentences)} non-conversation sentences to export")
+        print(f"Found {len(sentences)} non-conversation, non-rejected sentences to export")
 
         # Group sentences by (collection, pos_type, pos_subtype)
         sentences_by_category: Dict[Tuple[str, str, str], List[Dict[str, Any]]] = defaultdict(list)
@@ -705,6 +708,90 @@ def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> Non
             _write_jsonl_atomic(category_dir / "base.jsonl", records)
 
         print("Sentence export complete!")
+
+    finally:
+        session.close()
+
+
+def export_sqlite_to_lemma_audio_release(sqlite_path: str, release_dir: str) -> None:
+    """Export approved lemma audio from SQLite to data/release/lemmas format.
+
+    Audio records are grouped beside lemma release records:
+    {release_dir}/{pos_dir}/{pos_subtype}/audio.jsonl
+
+    Only approved lemma audio is exported. Sentence audio is emitted by
+    export_sqlite_to_sentence_release.
+    """
+    print(f"Exporting lemma audio from SQLite ({sqlite_path}) to release format ({release_dir})...")
+
+    from storage.database import create_database_session
+    from storage.models.schema import AudioQualityReview, Lemma
+
+    session = create_database_session(sqlite_path)
+
+    type_to_dir: Dict[str, str] = {
+        "noun": "nouns",
+        "verb": "verbs",
+        "adjective": "adjectives",
+        "adverb": "adverbs",
+        "pronoun": "pronouns",
+        "preposition": "prepositions",
+        "conjunction": "conjunctions",
+        "interjection": "interjections",
+        "numeral": "numerals",
+        "particle": "particles",
+    }
+
+    try:
+        rows = (
+            session.query(AudioQualityReview, Lemma)
+            .join(Lemma, AudioQualityReview.guid == Lemma.guid)
+            .filter(AudioQualityReview.guid.isnot(None))
+            .filter(AudioQualityReview.sentence_id.is_(None))
+            .filter(AudioQualityReview.status.in_(APPROVED_AUDIO_RELEASE_STATUSES))
+            .order_by(
+                Lemma.pos_type,
+                Lemma.pos_subtype,
+                AudioQualityReview.guid,
+                AudioQualityReview.language_code,
+                AudioQualityReview.voice_name,
+            )
+            .all()
+        )
+
+        records_by_category: Dict[Tuple[str, str], Dict[str, List[Dict[str, Any]]]] = defaultdict(
+            lambda: defaultdict(list)
+        )
+        for audio_review, lemma in rows:
+            pos_type = lemma.pos_type.lower() if lemma.pos_type else "misc"
+            pos_subtype = lemma.pos_subtype.lower() if lemma.pos_subtype else "other"
+            records_by_category[(pos_type, pos_subtype)][audio_review.guid].append(
+                {
+                    "language_code": audio_review.language_code,
+                    "voice_name": audio_review.voice_name,
+                    "filename": audio_review.filename,
+                    "status": audio_review.status,
+                    "expected_text": audio_review.expected_text,
+                    "manifest_md5": audio_review.manifest_md5,
+                    "s3_prod_url": audio_review.s3_prod_url,
+                    "s3_staging_url": audio_review.s3_staging_url,
+                    "staging_agent": audio_review.staging_agent,
+                    "grammatical_form": audio_review.grammatical_form,
+                }
+            )
+
+        for (pos_type, pos_subtype), audio_by_guid in records_by_category.items():
+            dir_name = type_to_dir.get(pos_type, pos_type)
+            category_dir = Path(release_dir) / dir_name / pos_subtype
+            category_dir.mkdir(parents=True, exist_ok=True)
+            records = [
+                {"guid": guid, "audio": audio}
+                for guid, audio in sorted(audio_by_guid.items(), key=lambda item: item[0])
+            ]
+            print(f"Exporting {len(records)} lemma audio records to {dir_name}/{pos_subtype}...")
+            _write_jsonl_atomic(category_dir / "audio.jsonl", records)
+
+        print(f"Lemma audio export complete! Exported {len(rows)} approved audio rows.")
 
     finally:
         session.close()
@@ -807,6 +894,8 @@ def _sentence_to_release_record(sentence: Any) -> Dict[str, Any]:
         sentence.audio_reviews,
         key=lambda current_audio: (current_audio.language_code, current_audio.voice_name),
     ):
+        if audio_review.status not in APPROVED_AUDIO_RELEASE_STATUSES:
+            continue
         audio.append(
             {
                 "language_code": audio_review.language_code,
@@ -857,6 +946,7 @@ def main() -> None:
             "jsonl-to-sqlite",
             "sqlite-to-release",
             "sqlite-to-sentence-release",
+            "sqlite-to-lemma-audio-release",
         ],
         help="Migration direction",
     )
@@ -898,8 +988,11 @@ def main() -> None:
         export_postgres_to_jsonl(postgres_url, args.jsonl_dir)
     elif args.direction == "sqlite-to-release":
         export_sqlite_to_release(args.sqlite_path, args.release_dir)
+        export_sqlite_to_lemma_audio_release(args.sqlite_path, args.release_dir)
     elif args.direction == "sqlite-to-sentence-release":
         export_sqlite_to_sentence_release(args.sqlite_path, args.sentence_release_dir)
+    elif args.direction == "sqlite-to-lemma-audio-release":
+        export_sqlite_to_lemma_audio_release(args.sqlite_path, args.release_dir)
     else:
         print("JSONL to SQLite migration not yet implemented")
         sys.exit(1)
