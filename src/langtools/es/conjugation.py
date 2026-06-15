@@ -489,6 +489,15 @@ _CER_ZCO_VERBS = {
 # ---------------------------------------------------------------------------
 
 
+def _is_uir_verb(inf: str) -> bool:
+    """True for -uir verbs with a consonantal y (construir, huir, incluir).
+
+    Excludes -guir/-quir, where the u is a silent digraph marker (seguir,
+    distinguir) and no y is inserted.
+    """
+    return inf.endswith("uir") and not inf.endswith(("guir", "quir"))
+
+
 def get_verb_class(infinitive: str) -> Optional[str]:
     """Return 'ar', 'er', or 'ir' based on verb ending, or None."""
     inf = infinitive.lower().strip()
@@ -623,6 +632,7 @@ def _conjugate_present(
     # Handle -cer/-cir zco pattern
     is_ucir = inf.endswith("ucir")
     is_zco = inf in _CER_ZCO_VERBS
+    is_uir = _is_uir_verb(inf)
 
     for i, person in enumerate(PERSONS):
         key = f"{person}_present"
@@ -637,6 +647,13 @@ def _conjugate_present(
             if sc_type and i in _BOOT_INDICES:
                 from_v, to_v = STEM_CHANGE_MAP[sc_type]
                 s = _apply_stem_change(stem, from_v, to_v)
+            # -uir verbs insert y in the boot (construyo, but construimos)
+            if is_uir and i in _BOOT_INDICES:
+                s = stem + "y"
+            # -guir verbs drop the silent u before -o (yo sigo / distingo);
+            # the u stays before -e endings (sigues, sigue, siguen).
+            if inf.endswith("guir") and endings[i].startswith("o") and s.endswith("u"):
+                s = s[:-1]
             forms[key] = s + endings[i]
 
 
@@ -666,6 +683,16 @@ def _conjugate_preterite(
         return
 
     endings = REGULAR_ENDINGS[verb_class]["preterite"]
+
+    # -uir verbs: unstressed i → y between vowels in 3s/3p (construyó,
+    # construyeron); other persons keep the regular endings.
+    if _is_uir_verb(inf):
+        for i, person in enumerate(PERSONS):
+            if i in (2, 5):
+                forms[f"{person}_preterite"] = stem + "y" + endings[i][1:]
+            else:
+                forms[f"{person}_preterite"] = stem + endings[i]
+        return
 
     # Stem-changing -ir verbs: e→i or o→u in 3s and 3p preterite
     ir_pret_change: Optional[Tuple[str, str]] = None
@@ -739,6 +766,13 @@ def _conjugate_subjunctive_present(
         subj_endings = REGULAR_ENDINGS[verb_class]["subjunctive_present"]
         for i, person in enumerate(PERSONS):
             forms[f"{person}_subjunctive_present"] = subj_stem + subj_endings[i]
+        return
+
+    if _is_uir_verb(inf):
+        # The y carries through every person: construya, construyamos, ...
+        subj_stem = stem + "y"
+        for i, person in enumerate(PERSONS):
+            forms[f"{person}_subjunctive_present"] = subj_stem + endings[i]
         return
 
     # Spelling adjustments for regular subjunctive

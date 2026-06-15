@@ -7,7 +7,14 @@ common irregular verbs and automatic handling of compound verbs
 
 Regular patterns handled:
   - First group (-er): parler, with orthographic adjustments for
-    -ger (manger), -cer (commencer), and -yer (payer/nettoyer)
+    -ger (manger), -cer (commencer), -yer (payer/nettoyer), and the
+    common stem changes:
+      * e -> è before silent endings / throughout the future
+        (lever -> lève / lèverai, acheter -> achète / achèterai)
+      * é -> è before silent present endings only
+        (préférer -> préfère, future préférerai keeps the é)
+      * consonant doubling for appeler / jeter type verbs
+        (appelle / appellerai, jette / jetterai)
   - Second group (-ir with -iss-): finir, choisir, etc.
   - Third group (-re regular): vendre, attendre, etc.
 
@@ -44,8 +51,47 @@ _IMPERFECT = ["ais", "ais", "ait", "ions", "iez", "aient"]
 _FUTURE = ["ai", "as", "a", "ons", "ez", "ont"]
 
 # Indices in _PERSONS where the present-tense ending is "silent"
-# (relevant for -yer stem change: y -> i before silent endings)
+# (relevant for stem changes: y -> i / e -> è / consonant doubling before
+# these endings)
 _SILENT_PRESENT_INDICES = {0, 1, 2, 5}  # je, tu, il/elle, ils/elles
+
+# Vowels (including accented forms and y) used when detecting -er stem changes.
+_VOWELS = "aàâäeéèêëiîïoôöuùûüy"
+
+# -eler / -eter verbs that take è (gèle) rather than doubling their
+# consonant (appelle).  Everything else in -eler/-eter doubles.
+_ER_E_GRAVE_EXCEPTIONS = {
+    # -eter
+    "acheter",
+    "racheter",
+    "fureter",
+    "haleter",
+    "crocheter",
+    "corseter",
+    # -eler
+    "geler",
+    "congeler",
+    "dégeler",
+    "surgeler",
+    "regeler",
+    "peler",
+    "celer",
+    "déceler",
+    "receler",
+    "ciseler",
+    "démanteler",
+    "écarteler",
+    "marteler",
+    "modeler",
+    "remodeler",
+    "harceler",
+}
+
+
+def _is_consonant(ch: str) -> bool:
+    """Return True for an alphabetic character that is not a vowel (or y)."""
+    return ch.isalpha() and ch.lower() not in _VOWELS
+
 
 # ---------------------------------------------------------------------------
 # Helpers to assemble form dictionaries
@@ -84,26 +130,51 @@ def _imperfect_from_stem(stem: str) -> List[str]:
 
 
 def _conjugate_er(infinitive: str) -> Dict[str, str]:
-    """First-group (-er) conjugation with -ger / -cer / -yer adjustments."""
+    """First-group (-er) conjugation with orthographic and stem changes.
+
+    Handles -ger / -cer softening, -yer (y -> i), and the e/é/doubling
+    stem changes documented in the module docstring.
+    """
     stem = infinitive[:-2]
 
     is_ger = stem.endswith("g")
     is_cer = stem.endswith("c")
     is_yer = stem.endswith("y")
 
-    # -- present --
-    present: List[str] = []
-    for i, ending in enumerate(_PRESENT_ER):
-        s = stem
-        if is_yer and i in _SILENT_PRESENT_INDICES:
-            s = stem[:-1] + "i"
-        elif is_ger and ending.startswith("o"):
-            s = stem + "e"  # mangeons
-        elif is_cer and ending.startswith("o"):
-            s = stem[:-1] + "ç"  # commençons
-        present.append(s + ending)
+    # Detect a stem-changing vowel: 'e' or 'é' sitting at stem[-2], i.e.
+    # followed by exactly one consonant before the -er ending.  A stem ending
+    # in two consonants (rester) keeps its stable /ɛ/ and never changes.
+    change: Optional[str] = None  # "grave" (e->è) | "acute" (é->è) | "double"
+    if len(stem) >= 2 and stem[-2] in ("e", "é") and _is_consonant(stem[-1]):
+        if stem[-2] == "é":
+            change = "acute"
+        elif stem.endswith(("el", "et")):
+            change = "grave" if infinitive in _ER_E_GRAVE_EXCEPTIONS else "double"
+        else:
+            change = "grave"
 
-    # -- imperfect --
+    # Stems used by the various changes (only meaningful when ``change`` set).
+    grave_stem = stem[:-2] + "è" + stem[-1]  # lev -> lèv ; préfér -> préfèr
+    double_stem = stem + stem[-1:]  # appel -> appell ; jet -> jett
+
+    def _present_stem(index: int, ending: str) -> str:
+        silent = index in _SILENT_PRESENT_INDICES
+        if is_yer and silent:
+            return stem[:-1] + "i"
+        if change in ("grave", "acute") and silent:
+            return grave_stem
+        if change == "double" and silent:
+            return double_stem
+        if is_ger and ending.startswith("o"):
+            return stem + "e"  # mangeons / protégeons
+        if is_cer and ending.startswith("o"):
+            return stem[:-1] + "ç"  # commençons / dépeçons
+        return stem
+
+    # -- present --
+    present = [_present_stem(i, ending) + ending for i, ending in enumerate(_PRESENT_ER)]
+
+    # -- imperfect (nous-present stem; only -ger/-cer softening applies) --
     imperfect: List[str] = []
     for ending in _IMPERFECT:
         s = stem
@@ -111,16 +182,23 @@ def _conjugate_er(infinitive: str) -> Dict[str, str]:
             s = stem + "e"  # mangeais
         elif is_cer and ending.startswith("a"):
             s = stem[:-1] + "ç"  # commençais
-        # -yer: y stays before pronounced imperfect endings
+        # -yer/-e_er/-é_er keep their base stem before pronounced endings
         imperfect.append(s + ending)
 
-    # -- future (stem = full infinitive; -yer: y -> i) --
-    future_stem = infinitive
-    if is_yer:
+    # -- future stem --
+    if change == "grave":
+        future_stem = grave_stem + "er"  # lèver / achèter
+    elif change == "double":
+        future_stem = double_stem + "er"  # appeller / jetter
+    elif is_yer:
         future_stem = infinitive[:-3] + "ier"  # payer -> paier
+    else:
+        # "acute" (préférer) keeps its é in the future; plain -er/-ger/-cer
+        # build the future on the full infinitive.
+        future_stem = infinitive
     future = _future_from_stem(future_stem)
 
-    # -- past participle --
+    # -- past participle (always built from the base stem) --
     pp_m = stem + "é"
     pp_f = stem + "ée"
 

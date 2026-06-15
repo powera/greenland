@@ -91,6 +91,30 @@ class TestRegularIr(unittest.TestCase):
         self.assertEqual(self.forms["3s_future"], "partirá")
 
 
+class TestArSpellingChangePreterite(unittest.TestCase):
+    """-car/-gar/-çar verbs keep their hard sound in the 1s preterite."""
+
+    def test_ficar(self) -> None:
+        forms = conjugate("ficar")
+        assert forms is not None
+        self.assertEqual(forms["1s_past"], "fiquei")
+        self.assertEqual(forms["3s_past"], "ficou")
+        self.assertEqual(forms["1s_present"], "fico")
+
+    def test_chegar(self) -> None:
+        forms = conjugate("chegar")
+        assert forms is not None
+        self.assertEqual(forms["1s_past"], "cheguei")
+        self.assertEqual(forms["3p_past"], "chegaram")
+
+    def test_comecar(self) -> None:
+        forms = conjugate("começar")
+        assert forms is not None
+        self.assertEqual(forms["1s_past"], "comecei")
+        self.assertEqual(forms["1s_present"], "começo")
+        self.assertEqual(forms["3s_past"], "começou")
+
+
 class TestHardcodedIrregularVerbs(unittest.TestCase):
     """Common irregular verbs should be hard-coded for deterministic output."""
 

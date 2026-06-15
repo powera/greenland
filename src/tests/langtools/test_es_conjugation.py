@@ -504,6 +504,56 @@ class TestConjugateSafe(unittest.TestCase):
         self.assertTrue(len(warnings) > 0)
 
 
+class TestUirVerbs(unittest.TestCase):
+    """-uir verbs insert a consonantal y (construir, huir)."""
+
+    def test_construir_present(self) -> None:
+        forms = conjugate("construir")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "construyo")
+        self.assertEqual(forms["2s_present"], "construyes")
+        self.assertEqual(forms["3s_present"], "construye")
+        self.assertEqual(forms["1p_present"], "construimos")
+        self.assertEqual(forms["2p_present"], "construís")
+        self.assertEqual(forms["3p_present"], "construyen")
+
+    def test_construir_preterite(self) -> None:
+        forms = conjugate("construir")
+        assert forms is not None
+        self.assertEqual(forms["1s_preterite"], "construí")
+        self.assertEqual(forms["3s_preterite"], "construyó")
+        self.assertEqual(forms["3p_preterite"], "construyeron")
+
+    def test_construir_subjunctive_and_nonfinite(self) -> None:
+        forms = conjugate("construir")
+        assert forms is not None
+        self.assertEqual(forms["1s_subjunctive_present"], "construya")
+        self.assertEqual(forms["1p_subjunctive_present"], "construyamos")
+        self.assertEqual(forms["gerund"], "construyendo")
+        self.assertEqual(forms["past_participle"], "construido")
+
+    def test_huir(self) -> None:
+        forms = conjugate("huir")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "huyo")
+        self.assertEqual(forms["3p_present"], "huyen")
+        self.assertEqual(forms["3s_preterite"], "huyó")
+
+    def test_guir_verbs_get_no_y(self) -> None:
+        """-guir verbs are NOT -uir y-verbs; the u is a silent digraph."""
+        forms = conjugate("seguir")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "sigo")
+        self.assertEqual(forms["2s_present"], "sigues")
+        self.assertEqual(forms["3p_present"], "siguen")
+
+    def test_distinguir_drops_u_before_o(self) -> None:
+        forms = conjugate("distinguir")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "distingo")
+        self.assertEqual(forms["2s_present"], "distingues")
+
+
 class TestUcirVerbs(unittest.TestCase):
     def test_conducir_present(self) -> None:
         forms = conjugate("conducir")

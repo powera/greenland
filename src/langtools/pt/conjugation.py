@@ -108,6 +108,23 @@ _FUTURE_ENDINGS: Tuple[str, str, str, str, str, str] = ("ei", "ás", "á", "emos
 _PERSONS: Tuple[str, str, str, str, str, str] = ("1s", "2s", "3s", "1p", "2p", "3p")
 
 
+def _adjust_ar_preterite_1s_stem(stem: str) -> str:
+    """Spelling change for the 1s preterite of -ar verbs (ending -ei).
+
+    The hard c/g/ç sound must be preserved before the front vowel ``e``:
+      - c -> qu  (ficar -> fiquei)
+      - g -> gu  (chegar -> cheguei)
+      - ç -> c   (começar -> comecei)
+    """
+    if stem.endswith("c"):
+        return stem[:-1] + "qu"
+    if stem.endswith("g"):
+        return stem + "u"
+    if stem.endswith("ç"):
+        return stem[:-1] + "c"
+    return stem
+
+
 def conjugate(infinitive: str) -> Optional[Dict[str, str]]:
     """Conjugate a regular Portuguese infinitive across present/past/future."""
     infinitive_value = infinitive.strip().lower()
@@ -130,8 +147,12 @@ def conjugate(infinitive: str) -> Optional[Dict[str, str]]:
     stem = infinitive_value[:-2]
     forms: Dict[str, str] = {}
     for index, person in enumerate(_PERSONS):
+        preterite_stem = stem
+        # 1s preterite of -ar verbs ends in -ei and needs a spelling change.
+        if index == 0 and verb_class == "ar":
+            preterite_stem = _adjust_ar_preterite_1s_stem(stem)
         forms[f"{person}_present"] = stem + _PRESENT_ENDINGS[verb_class][index]
-        forms[f"{person}_past"] = stem + _PRETERITE_ENDINGS[verb_class][index]
+        forms[f"{person}_past"] = preterite_stem + _PRETERITE_ENDINGS[verb_class][index]
         forms[f"{person}_future"] = infinitive_value + _FUTURE_ENDINGS[index]
 
     return forms

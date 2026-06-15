@@ -142,6 +142,123 @@ class TestYerVerbs(_ConjugationTestBase):
         self.assertEqual(forms["pc_f"], "payée")
 
 
+class TestEGraveStemChange(_ConjugationTestBase):
+    """Test e -> è stem change (lever, mener, acheter)."""
+
+    def test_lever_present(self) -> None:
+        forms = self._forms("lever")
+        self.assertEqual(forms["1s_present"], "lève")
+        self.assertEqual(forms["2s_present"], "lèves")
+        self.assertEqual(forms["3s_present"], "lève")
+        self.assertEqual(forms["1p_present"], "levons")
+        self.assertEqual(forms["2p_present"], "levez")
+        self.assertEqual(forms["3p_present"], "lèvent")
+
+    def test_lever_future_uses_grave(self) -> None:
+        forms = self._forms("lever")
+        self.assertEqual(forms["1s_future"], "lèverai")
+        self.assertEqual(forms["3p_future"], "lèveront")
+
+    def test_lever_imperfect_keeps_e(self) -> None:
+        forms = self._forms("lever")
+        self.assertEqual(forms["1s_impf"], "levais")
+        self.assertEqual(forms["1p_impf"], "levions")
+
+    def test_mener(self) -> None:
+        forms = self._forms("mener")
+        self.assertEqual(forms["1s_present"], "mène")
+        self.assertEqual(forms["1p_present"], "menons")
+        self.assertEqual(forms["1s_future"], "mènerai")
+
+    def test_acheter_is_grave_not_doubled(self) -> None:
+        forms = self._forms("acheter")
+        self.assertEqual(forms["1s_present"], "achète")
+        self.assertEqual(forms["1p_present"], "achetons")
+        self.assertEqual(forms["3p_present"], "achètent")
+        self.assertEqual(forms["1s_future"], "achèterai")
+        self.assertEqual(forms["pc_m"], "acheté")
+
+    def test_geler_is_grave_not_doubled(self) -> None:
+        forms = self._forms("geler")
+        self.assertEqual(forms["3s_present"], "gèle")
+        self.assertEqual(forms["1p_present"], "gelons")
+        self.assertEqual(forms["1s_future"], "gèlerai")
+
+
+class TestEAcuteStemChange(_ConjugationTestBase):
+    """Test é -> è stem change (préférer, espérer): present only."""
+
+    def test_preferer_present(self) -> None:
+        forms = self._forms("préférer")
+        self.assertEqual(forms["1s_present"], "préfère")
+        self.assertEqual(forms["2s_present"], "préfères")
+        self.assertEqual(forms["3s_present"], "préfère")
+        self.assertEqual(forms["1p_present"], "préférons")
+        self.assertEqual(forms["2p_present"], "préférez")
+        self.assertEqual(forms["3p_present"], "préfèrent")
+
+    def test_preferer_future_keeps_acute(self) -> None:
+        forms = self._forms("préférer")
+        self.assertEqual(forms["1s_future"], "préférerai")
+        self.assertEqual(forms["3p_future"], "préféreront")
+
+    def test_esperer(self) -> None:
+        forms = self._forms("espérer")
+        self.assertEqual(forms["1s_present"], "espère")
+        self.assertEqual(forms["1p_present"], "espérons")
+        self.assertEqual(forms["1s_future"], "espérerai")
+        self.assertEqual(forms["pc_m"], "espéré")
+
+    def test_repeter(self) -> None:
+        forms = self._forms("répéter")
+        self.assertEqual(forms["3s_present"], "répète")
+        self.assertEqual(forms["1s_future"], "répéterai")
+
+
+class TestConsonantDoublingStemChange(_ConjugationTestBase):
+    """Test consonant doubling (appeler, jeter)."""
+
+    def test_appeler_present(self) -> None:
+        forms = self._forms("appeler")
+        self.assertEqual(forms["1s_present"], "appelle")
+        self.assertEqual(forms["2s_present"], "appelles")
+        self.assertEqual(forms["3s_present"], "appelle")
+        self.assertEqual(forms["1p_present"], "appelons")
+        self.assertEqual(forms["2p_present"], "appelez")
+        self.assertEqual(forms["3p_present"], "appellent")
+
+    def test_appeler_future_doubles(self) -> None:
+        forms = self._forms("appeler")
+        self.assertEqual(forms["1s_future"], "appellerai")
+        self.assertEqual(forms["3p_future"], "appelleront")
+
+    def test_appeler_imperfect_single(self) -> None:
+        forms = self._forms("appeler")
+        self.assertEqual(forms["1s_impf"], "appelais")
+        self.assertEqual(forms["pc_m"], "appelé")
+
+    def test_jeter(self) -> None:
+        forms = self._forms("jeter")
+        self.assertEqual(forms["1s_present"], "jette")
+        self.assertEqual(forms["1p_present"], "jetons")
+        self.assertEqual(forms["3p_present"], "jettent")
+        self.assertEqual(forms["1s_future"], "jetterai")
+        self.assertEqual(forms["pc_m"], "jeté")
+
+
+class TestProtegerCombined(_ConjugationTestBase):
+    """protéger combines é -> è and -ger softening."""
+
+    def test_proteger(self) -> None:
+        forms = self._forms("protéger")
+        self.assertEqual(forms["1s_present"], "protège")
+        self.assertEqual(forms["1p_present"], "protégeons")
+        self.assertEqual(forms["2p_present"], "protégez")
+        self.assertEqual(forms["3p_present"], "protègent")
+        self.assertEqual(forms["1s_impf"], "protégeais")
+        self.assertEqual(forms["1s_future"], "protégerai")
+
+
 class TestRegularIrVerbs(_ConjugationTestBase):
     """Test second-group (-ir with -iss-) regular conjugation."""
 

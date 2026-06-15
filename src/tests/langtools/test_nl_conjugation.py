@@ -121,6 +121,55 @@ class TestRegularWithDeSuffix(unittest.TestCase):
         self.assertEqual(result["1p_past"], "speelden")
 
 
+class TestDoubledConsonantStems(unittest.TestCase):
+    """Verbs with a doubled consonant degeminate the stem (pakken → pak)."""
+
+    def test_pakken(self) -> None:
+        stem, raw = _normalize_stem("pakken")
+        self.assertEqual(stem, "pak")
+        self.assertEqual(raw, "pakk")
+        result = conjugate("pakken")
+        assert result is not None
+        self.assertEqual(result["1s_present"], "pak")
+        self.assertEqual(result["2s_present"], "pakt")
+        self.assertEqual(result["1s_past"], "pakte")  # 't kofschip → -te
+
+    def test_stoppen(self) -> None:
+        result = conjugate("stoppen")
+        assert result is not None
+        self.assertEqual(result["1s_present"], "stop")
+        self.assertEqual(result["3s_present"], "stopt")
+        self.assertEqual(result["1s_past"], "stopte")
+
+    def test_stellen_takes_de(self) -> None:
+        """stellen: degeminate to 'stel', ends in l → -de past."""
+        result = conjugate("stellen")
+        assert result is not None
+        self.assertEqual(result["1s_present"], "stel")
+        self.assertEqual(result["1s_past"], "stelde")
+
+
+class TestStemEndingInT(unittest.TestCase):
+    """A stem ending in -t does not double the t in the present."""
+
+    def test_zetten(self) -> None:
+        """zetten: degeminate to 'zet'; 2s/3s stay 'zet'."""
+        result = conjugate("zetten")
+        assert result is not None
+        self.assertEqual(result["1s_present"], "zet")
+        self.assertEqual(result["2s_present"], "zet")
+        self.assertEqual(result["3s_present"], "zet")
+        self.assertEqual(result["1s_past"], "zette")
+
+    def test_praten(self) -> None:
+        """praten: vowel-doubled to 'praat'; no extra t."""
+        result = conjugate("praten")
+        assert result is not None
+        self.assertEqual(result["1s_present"], "praat")
+        self.assertEqual(result["3s_present"], "praat")
+        self.assertEqual(result["1s_past"], "praatte")
+
+
 class TestIrregularVerbsReturnNone(unittest.TestCase):
     """Irregular/strong verbs must return None to trigger LLM fallback."""
 
