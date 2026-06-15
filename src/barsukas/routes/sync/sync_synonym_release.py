@@ -12,8 +12,8 @@ under a separate top-level array key, so both can be edited independently::
 
 In the SQL DB, synonyms are stored in the same ``DerivativeForm`` table as
 other forms, distinguished by ``grammatical_form`` membership in
-``SYNONYM_GRAMMATICAL_FORMS``. We may revisit that grouping later, but for
-now treating them as DerivativeForm rows keeps load/lookup paths uniform.
+``NON_INFLECTION_GRAMMATICAL_FORMS``. We may revisit that grouping later, but
+for now treating them as DerivativeForm rows keeps load/lookup paths uniform.
 """
 
 import logging
@@ -29,7 +29,7 @@ from barsukas.routes.sync.sync_release_helpers import (
     write_release_line_partial,
 )
 from storage.crud.operation_log import log_operation
-from storage.models.schema import SYNONYM_GRAMMATICAL_FORMS, DerivativeForm, Lemma
+from storage.models.schema import NON_INFLECTION_GRAMMATICAL_FORMS, DerivativeForm, Lemma
 from storage.translation_helpers import (
     LANGUAGE_HIERARCHY,
     LANGUAGE_NAMES,
@@ -108,7 +108,7 @@ def _load_db_synonyms_for_lang(db_session: Any, lang_code: str) -> Dict[str, Lis
         .filter(
             DerivativeForm.language_code == lang_code,
             Lemma.guid.isnot(None),
-            DerivativeForm.grammatical_form.in_(tuple(SYNONYM_GRAMMATICAL_FORMS)),
+            DerivativeForm.grammatical_form.in_(tuple(NON_INFLECTION_GRAMMATICAL_FORMS)),
         )
         .all()
     )
@@ -265,7 +265,7 @@ def index() -> ResponseReturnValue:
         .join(Lemma, DerivativeForm.lemma_id == Lemma.id)
         .filter(
             Lemma.guid.isnot(None),
-            DerivativeForm.grammatical_form.in_(tuple(SYNONYM_GRAMMATICAL_FORMS)),
+            DerivativeForm.grammatical_form.in_(tuple(NON_INFLECTION_GRAMMATICAL_FORMS)),
         )
         .distinct()
         .all()
@@ -432,7 +432,7 @@ def apply_additions(lang_code: str) -> ResponseReturnValue:
         try:
             for form_data in forms:
                 gform = form_data.get("grammatical_form", "")
-                if gform not in SYNONYM_GRAMMATICAL_FORMS:
+                if gform not in NON_INFLECTION_GRAMMATICAL_FORMS:
                     logger.warning(
                         f"Skipping non-synonym grammatical_form {gform!r} in synonyms array "
                         f"for {guid} lang={lang_code}"
@@ -638,7 +638,7 @@ def apply_changes(lang_code: str) -> ResponseReturnValue:
 
                 for form_data in r_forms:
                     gform = form_data.get("grammatical_form", "")
-                    if gform not in SYNONYM_GRAMMATICAL_FORMS:
+                    if gform not in NON_INFLECTION_GRAMMATICAL_FORMS:
                         continue
                     df = DerivativeForm(
                         lemma_id=lemma_id,

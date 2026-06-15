@@ -26,7 +26,7 @@ from barsukas.routes.sync.sync_release_helpers import (
     write_release_line_partial,
 )
 from storage.crud.operation_log import log_operation
-from storage.models.schema import SYNONYM_GRAMMATICAL_FORMS, DerivativeForm, Lemma
+from storage.models.schema import NON_INFLECTION_GRAMMATICAL_FORMS, DerivativeForm, Lemma
 from storage.translation_helpers import (
     LANGUAGE_HIERARCHY,
     LANGUAGE_NAMES,
@@ -90,7 +90,7 @@ def _form_key(grammatical_form: str, text: str) -> str:
 def _load_release_derivatives_for_lang(
     release_dir: Path, lang_code: str
 ) -> Dict[str, List[Dict[str, Any]]]:
-    """Load non-synonym derivative forms for a language from release JSONL files.
+    """Load inflectional derivative forms for a language from release JSONL files.
 
     Reads only the top-level ``forms`` array; synonyms live under a separate
     ``synonyms`` key and are handled by ``sync_synonym_release``.
@@ -149,7 +149,7 @@ def _load_db_derivatives_for_lang(
         .filter(
             DerivativeForm.language_code == lang_code,
             Lemma.guid.isnot(None),
-            DerivativeForm.grammatical_form.notin_(tuple(SYNONYM_GRAMMATICAL_FORMS)),
+            DerivativeForm.grammatical_form.notin_(tuple(NON_INFLECTION_GRAMMATICAL_FORMS)),
         )
         .all()
     )
