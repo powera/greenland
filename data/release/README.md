@@ -31,6 +31,8 @@ Each `base.jsonl` file contains concept definitions with translations and
 optional difficulty overrides. Sentence `base.jsonl` files contain sentence
 translations, word breakdowns, pattern words, and approved audio references.
 Lemma `audio.jsonl` files contain approved audio references grouped by GUID.
+Per-language lemma files (`{lang}.jsonl`) contain inflection data, grammar
+facts, and synonym-class lexical variants for that language.
 
 ## Tools for Loading/Updating Data
 
@@ -151,6 +153,25 @@ Sentence `base.jsonl` records live under
 the sentence GUID, sparse translations, optional `pattern_words`, optional
 per-language `words`, and approved sentence `audio` rows. Conversation and
 rejected sentences are not exported.
+
+Per-language lemma records may contain `synonyms`, a list of lexical variants
+kept out of the main lemma record:
+
+```json
+{
+  "guid": "N01_001",
+  "synonyms": [
+    {"grammatical_form": "synonym", "text": "bicycle"},
+    {"grammatical_form": "synonym_near", "text": "cycle"},
+    {"grammatical_form": "abbreviation", "text": "bike"}
+  ]
+}
+```
+
+The `grammatical_form` value is the relation label. Use specific labels such
+as `synonym_near`, `synonym_regional`, `synonym_register`,
+`synonym_related`, `synonym_synecdoche`, `abbreviation`, or `expanded_form`
+when the words are not exact drop-in equivalents.
 
 ## Important Guidelines
 
