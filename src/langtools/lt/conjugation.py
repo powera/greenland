@@ -294,7 +294,7 @@ def _conjugate_habitual_past(infinitive: str) -> Optional[Dict[str, str]]:
     }
 
 
-def conjugate_verb(infinitive: str, present_3: str, past_3: str) -> Optional[Dict[str, str]]:
+def conjugate(infinitive: str, present_3: str, past_3: str) -> Optional[Dict[str, str]]:
     """Generate all Lithuanian verb forms from three principal parts.
 
     Given the infinitive, 3rd person present, and 3rd person past,
@@ -352,3 +352,9 @@ def conjugate_verb(infinitive: str, present_3: str, past_3: str) -> Optional[Dic
     if habitual_past_forms is not None:
         all_forms.update(habitual_past_forms)
     return all_forms
+
+
+# Backward-compatible alias. ``conjugate`` is the standard cross-language
+# entrypoint name; Lithuanian additionally requires the 3rd-person present and
+# past principal parts as arguments.
+conjugate_verb = conjugate

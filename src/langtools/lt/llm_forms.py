@@ -10,7 +10,7 @@ from typing import Callable, Dict, Tuple
 from clients.unified_client import UnifiedLLMClient
 from langtools.form_registry import FORM_SPECS
 from langtools.llm_forms_base import query_forms
-from langtools.lt.conjugation import conjugate_verb
+from langtools.lt.conjugation import conjugate
 from langtools.lt.declension import decline_noun
 from langtools.lt.principal_parts import get_principal_parts
 from sqlalchemy.orm import Session
@@ -150,7 +150,7 @@ def get_verb_forms(
                 principal_parts = _parse_principal_parts(lithuanian_verb)
 
             if principal_parts:
-                conjugation_forms = conjugate_verb(
+                conjugation_forms = conjugate(
                     infinitive=principal_parts[0],
                     present_3=principal_parts[1],
                     past_3=principal_parts[2],

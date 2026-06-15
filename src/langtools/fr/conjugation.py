@@ -542,7 +542,21 @@ del _verb, _entry, _prefix, _base
 # ---------------------------------------------------------------------------
 
 
-def conjugate(infinitive: str) -> Tuple[VerbConjugation, bool]:
+def conjugate(infinitive: str) -> Optional[Dict[str, str]]:
+    """Conjugate a French verb, returning a ``{form_key: form}`` dict or ``None``.
+
+    This is the standard cross-language mechanical-conjugation entrypoint
+    (matching ``langtools.<lang>.conjugation.conjugate`` in the other
+    languages).  Use :func:`conjugate_detailed` when the confidence/notes
+    metadata is needed.
+    """
+    conjugation, success = conjugate_detailed(infinitive)
+    if not success or not conjugation.forms:
+        return None
+    return conjugation.forms
+
+
+def conjugate_detailed(infinitive: str) -> Tuple[VerbConjugation, bool]:
     """Conjugate a French verb using rule-based logic.
 
     Returns ``(VerbConjugation, True)`` on success, or

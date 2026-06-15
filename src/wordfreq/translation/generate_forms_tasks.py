@@ -89,6 +89,11 @@ _TASK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Any]] = {
         "threshold": 25,
         "client_method": "query_french_verb_conjugations",
     },
+    ("fr", "adjective"): {
+        "fetcher": "translation",
+        "threshold": 4,
+        "client_method": "query_french_adjective_forms",
+    },
     # German — translation fetcher, gender on nouns
     ("de", "noun"): {
         "fetcher": "translation",
@@ -140,6 +145,11 @@ _TASK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Any]] = {
         "fetcher": "translation",
         "threshold": 10,
         "client_method": "query_spanish_verb_conjugations",
+    },
+    ("es", "adjective"): {
+        "fetcher": "translation",
+        "threshold": 4,
+        "client_method": "query_spanish_adjective_forms",
     },
     # Italian — translation fetcher, gender on nouns
     ("it", "noun"): {"fetcher": "translation", "threshold": 2, "gender": True},

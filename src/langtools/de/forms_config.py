@@ -27,6 +27,16 @@ VERB_CONFIG: Dict[str, Any] = {
     "schema_name": "GermanVerbConjugations",
 }
 
+# German adjective declension is highly context-dependent (strong/weak/mixed ×
+# case × gender). For the learning app we capture a simplified gender/number
+# agreement set, generated via the LLM. The enum members already exist below.
+ADJECTIVE_CONFIG: Dict[str, Any] = {
+    "type": "explicit",
+    "forms": ["singular_m", "singular_f", "plural_m", "plural_f"],
+    "query_type": "german_adjective_forms",
+    "schema_name": "GermanAdjectiveForms",
+}
+
 GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
     "ADJ_DE_PLURAL_F": "adjective/de_plural_f",
     "ADJ_DE_PLURAL_M": "adjective/de_plural_m",

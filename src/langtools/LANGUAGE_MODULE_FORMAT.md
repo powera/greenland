@@ -130,14 +130,29 @@ Contract expectations:
 
 ### `conjugation.py` (optional)
 
-Expected callable pattern:
+Expected callable pattern (standard cross-language entrypoint):
 
 ```python
-# def mechanically_conjugate_<lang>_verb(lemma: str, ...) -> Optional[Dict[str, str]]: ...
+def conjugate(lemma: str, **kwargs: str) -> Optional[Dict[str, str]]: ...
 ```
 
+- Returns a ``{form_key: form}`` dict for the lemma, or ``None`` when the verb
+  cannot be conjugated mechanically (unrecognised ending, irregular not in
+  table, etc.).
 - Deterministic verb conjugation logic for languages that support it.
-- May be called directly by dispatcher or from `llm_forms.py` fast paths.
+- Called from `llm_forms.py` mechanical fast paths (with LLM fallback).
+- Language notes:
+  - Most languages take just the lemma (`es`, `pt`, `de`, `nl`, `sv`, `it`;
+    `it` also accepts optional `present_1s`/`past_1s`/`future_1s` principal
+    parts).
+  - `lt` additionally **requires** the 3rd-person present and past principal
+    parts: `conjugate(infinitive, present_3, past_3)` (legacy alias:
+    `conjugate_verb`).
+  - `fr` also exposes `conjugate_detailed(lemma) -> Tuple[VerbConjugation, bool]`
+    when confidence/notes metadata is needed.
+  - `en` derives the table from the infinitive; the richer
+    `expand_verb_forms(base_forms)` is preferred when canonical past /
+    past-participle base forms are already stored.
 
 ### `grammatical_words.py` (optional)
 

@@ -9,6 +9,7 @@ from typing import Callable, Dict, Tuple
 from clients.unified_client import UnifiedLLMClient
 from langtools.form_registry import FORM_SPECS
 from langtools.fr.conjugation import conjugate
+from langtools.fr.inflection import build_adjective_forms
 from langtools.llm_forms_base import query_forms
 from sqlalchemy.orm import Session
 from storage import database as linguistic_db
@@ -17,6 +18,7 @@ from storage.translation_helpers import get_translation
 
 logger = logging.getLogger(__name__)
 
+ADJECTIVE_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("fr", "adjective")].form_mapping
 NOUN_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("fr", "noun")].form_mapping
 VERB_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("fr", "verb")].form_mapping
 
@@ -38,8 +40,8 @@ def get_verb_forms(
     if lemma and lemma.pos_type.lower() == "verb":
         french_verb = get_translation(session, lemma, "fr")
         if french_verb:
-            conjugation, mechanical_success = conjugate(french_verb)
-            if mechanical_success and conjugation.forms:
+            conjugation_forms = conjugate(french_verb)
+            if conjugation_forms:
                 linguistic_db.log_query(
                     session,
                     word=french_verb,
@@ -47,18 +49,49 @@ def get_verb_forms(
                     prompt="[mechanical langtools.fr.conjugation]",
                     response=json.dumps(
                         {
-                            "forms": conjugation.forms,
-                            "confidence": conjugation.confidence,
-                            "notes": conjugation.notes,
+                            "forms": conjugation_forms,
+                            "notes": "mechanical regular conjugation",
                             "mechanical": True,
                         }
                     ),
                     model=client.default_model,
                 )
-                return conjugation.forms, True
+                return conjugation_forms, True
             logger.info("Falling back to LLM for French verb '%s'", french_verb)
 
     return query_forms(FORM_SPECS[("fr", "verb")], client, lemma_id, get_session_func)
+
+
+def get_adjective_forms(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Generate French adjective forms mechanically when possible, else use LLM."""
+    session = get_session_func()
+    lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+
+    if lemma and lemma.pos_type.lower() == "adjective":
+        french_adjective = get_translation(session, lemma, "fr")
+        if french_adjective:
+            adjective_forms = build_adjective_forms(french_adjective)
+            if adjective_forms:
+                linguistic_db.log_query(
+                    session,
+                    word=french_adjective,
+                    query_type="french_adjective_forms",
+                    prompt="[mechanical langtools.fr.inflection]",
+                    response=json.dumps(
+                        {
+                            "forms": adjective_forms,
+                            "notes": "mechanical adjective agreement generation",
+                            "mechanical": True,
+                        }
+                    ),
+                    model=client.default_model,
+                )
+                return adjective_forms, True
+            logger.info("Falling back to LLM for French adjective '%s'", french_adjective)
+
+    return query_forms(FORM_SPECS[("fr", "adjective")], client, lemma_id, get_session_func)
 
 
 def query_french_noun_forms(
@@ -73,3 +106,10 @@ def query_french_verb_conjugations(
 ) -> Tuple[Dict[str, str], bool]:
     """Backward-compatible alias for verb form generation."""
     return get_verb_forms(client, lemma_id, get_session_func)
+
+
+def query_french_adjective_forms(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Backward-compatible alias for adjective form generation."""
+    return get_adjective_forms(client, lemma_id, get_session_func)
