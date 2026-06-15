@@ -215,7 +215,10 @@ def _find_sentence_additions(
     """
     conversation_ids = _get_conversation_sentence_ids(db_session)
     all_db_rows = (
-        db_session.query(Sentence.id, Sentence.guid).filter(Sentence.guid.isnot(None)).all()
+        db_session.query(Sentence.id, Sentence.guid)
+        .filter(Sentence.guid.isnot(None))
+        .filter(Sentence.rejected.is_(False))
+        .all()
     )
     db_guids = set(guid for sid, guid in all_db_rows if guid and sid not in conversation_ids)
 
@@ -1437,7 +1440,12 @@ def _find_exportable_sentences(
 
     for i in range(0, len(guid_list), batch_size):
         batch = guid_list[i : i + batch_size]
-        db_sentences = db_session.query(Sentence).filter(Sentence.guid.in_(batch)).all()
+        db_sentences = (
+            db_session.query(Sentence)
+            .filter(Sentence.guid.in_(batch))
+            .filter(Sentence.rejected.is_(False))
+            .all()
+        )
 
         for db_sentence in db_sentences:
             english_text = _get_db_sentence_english(db_session, db_sentence)
@@ -1541,7 +1549,12 @@ def _find_sync_back_candidates(
 ) -> List[Dict[str, Any]]:
     """Find sentences that exist in both DB and release, but differ from DB canonical record."""
     conversation_ids = _get_conversation_sentence_ids(db_session)
-    db_rows = db_session.query(Sentence.id, Sentence.guid).filter(Sentence.guid.isnot(None)).all()
+    db_rows = (
+        db_session.query(Sentence.id, Sentence.guid)
+        .filter(Sentence.guid.isnot(None))
+        .filter(Sentence.rejected.is_(False))
+        .all()
+    )
     db_guid_to_id = {guid: sentence_id for sentence_id, guid in db_rows if guid}
     common_guids = sorted(set(release_sentences.keys()) & set(db_guid_to_id.keys()))
     if not common_guids:
@@ -1554,6 +1567,7 @@ def _find_sync_back_candidates(
         db_sentences = (
             db_session.query(Sentence)
             .filter(Sentence.guid.in_(batch))
+            .filter(Sentence.rejected.is_(False))
             .options(
                 selectinload(Sentence.translations),
                 selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
@@ -1633,6 +1647,7 @@ def apply_export() -> ResponseReturnValue:
     db_sentences = (
         g.db.query(Sentence)
         .filter(Sentence.guid.in_(selected_guids))
+        .filter(Sentence.rejected.is_(False))
         .options(
             selectinload(Sentence.translations),
             selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
@@ -1747,6 +1762,7 @@ def apply_export_sync_back() -> ResponseReturnValue:
     db_sentences = (
         g.db.query(Sentence)
         .filter(Sentence.guid.in_(selected_guids))
+        .filter(Sentence.rejected.is_(False))
         .options(
             selectinload(Sentence.translations),
             selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
