@@ -30,6 +30,13 @@ VERB_CONFIG: Dict[str, Any] = {
     "schema_name": "FrenchVerbConjugations",
 }
 
+ADJECTIVE_CONFIG: Dict[str, Any] = {
+    "type": "explicit",
+    "forms": ["singular_m", "singular_f", "plural_m", "plural_f"],
+    "query_type": "french_adjective_forms",
+    "schema_name": "FrenchAdjectiveForms",
+}
+
 GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
     "ADJ_FR_PLURAL_F": "adjective/fr_plural_f",
     "ADJ_FR_PLURAL_M": "adjective/fr_plural_m",

@@ -39,6 +39,20 @@ Legend:
 5. Dispatcher standardization at top-level `src/langtools/*.py` should continue
    to converge toward language-first dynamic import entrypoints.
 
+## Adjective coverage + conjugation API (2026-06-15)
+
+- **Adjective forms** are now configured for all core languages. `es`, `fr`,
+  `de`, `nl` use the `singular_m/f` × `plural_m/f` agreement axis; `sv` uses the
+  Swedish `common`/`neuter`/`plural` axis (no grammatical gender). `es` and `fr`
+  additionally have mechanical adjective helpers (`inflection.py`) with LLM
+  fallback; `de`/`sv`/`nl` adjectives are LLM-only. (`en`, `it`, `pt`, `lt`
+  already had adjective configs.)
+- **Mechanical conjugation API standardized** on
+  `conjugate(lemma, ...) -> Optional[Dict[str, str]]` across the core languages.
+  `fr.conjugate` now returns the forms dict (use `conjugate_detailed` for
+  confidence/notes); `lt.conjugate` is the canonical name (`conjugate_verb`
+  retained as alias); `en` adds a `conjugate` wrapper over `expand_verb_forms`.
+
 ## FIGS+LT directory-shape verification (2026-05-13)
 
 Checked against `LANGUAGE_MODULE_FORMAT.md` and `STRUCTURE.md`:

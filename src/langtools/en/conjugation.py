@@ -329,3 +329,19 @@ def expand_verb_forms(
         result["2p_imp"] = infinitive
 
     return result
+
+
+def conjugate(lemma: str) -> Optional[Dict[str, str]]:
+    """Conjugate an English verb from its infinitive.
+
+    Standard cross-language mechanical-conjugation entrypoint (matching
+    ``langtools.<lang>.conjugation.conjugate`` in the other languages).  English
+    derives the regular/irregular person-tense table from the infinitive alone;
+    use :func:`expand_verb_forms` directly when canonical past / past-participle
+    base forms are already known.
+    """
+    cleaned = lemma.strip()
+    if not cleaned:
+        return None
+    forms = expand_verb_forms({"infinitive": cleaned})
+    return forms or None

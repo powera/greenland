@@ -19,6 +19,13 @@ VERB_CONFIG: Dict[str, Any] = {
     "schema_name": "SpanishVerbConjugations",
 }
 
+ADJECTIVE_CONFIG: Dict[str, Any] = {
+    "type": "explicit",
+    "forms": ["singular_m", "singular_f", "plural_m", "plural_f"],
+    "query_type": "spanish_adjective_forms",
+    "schema_name": "SpanishAdjectiveForms",
+}
+
 GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
     "ADJ_ES_PLURAL_F": "adjective/es_plural_f",
     "ADJ_ES_PLURAL_M": "adjective/es_plural_m",

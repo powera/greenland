@@ -23,6 +23,16 @@ VERB_CONFIG: Dict[str, Any] = {
     "schema_name": "DutchVerbConjugations",
 }
 
+# Dutch adjectives inflect mainly base vs. -e form; the gender/number set here
+# mirrors the cross-language agreement axis and is generated via the LLM. The
+# enum members already exist below.
+ADJECTIVE_CONFIG: Dict[str, Any] = {
+    "type": "explicit",
+    "forms": ["singular_m", "singular_f", "plural_m", "plural_f"],
+    "query_type": "dutch_adjective_forms",
+    "schema_name": "DutchAdjectiveForms",
+}
+
 GRAMMATICAL_FORM_OVERRIDES: Dict[str, str] = {
     "ADJ_NL_PLURAL_F": "adjective/nl_plural_f",
     "ADJ_NL_PLURAL_M": "adjective/nl_plural_m",

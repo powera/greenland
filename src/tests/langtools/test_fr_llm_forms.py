@@ -36,12 +36,7 @@ class TestFrenchVerbLlmForms(unittest.TestCase):
             patch("langtools.fr.llm_forms.get_translation", return_value="parler"),
             patch(
                 "langtools.fr.llm_forms.conjugate",
-                return_value=(
-                    SimpleNamespace(
-                        forms={"1s_present": "parle"}, confidence=1.0, notes="regular -er"
-                    ),
-                    True,
-                ),
+                return_value={"1s_present": "parle"},
             ),
             patch("langtools.fr.llm_forms.query_forms") as mock_query_forms,
             patch("langtools.fr.llm_forms.linguistic_db.log_query") as mock_log_query,
@@ -62,7 +57,7 @@ class TestFrenchVerbLlmForms(unittest.TestCase):
             patch("langtools.fr.llm_forms.get_translation", return_value="xyz"),
             patch(
                 "langtools.fr.llm_forms.conjugate",
-                return_value=(SimpleNamespace(forms={}, confidence=0.0, notes=""), False),
+                return_value=None,
             ),
             patch(
                 "langtools.fr.llm_forms.query_forms", return_value=({"1s_present": "xyz"}, True)

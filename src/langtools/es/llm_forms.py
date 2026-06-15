@@ -8,6 +8,7 @@ from typing import Callable, Dict, Tuple
 
 from clients.unified_client import UnifiedLLMClient
 from langtools.es.conjugation import conjugate
+from langtools.es.inflection import build_adjective_forms
 from langtools.form_registry import FORM_SPECS
 from langtools.llm_forms_base import query_forms
 from sqlalchemy.orm import Session
@@ -17,6 +18,7 @@ from storage.translation_helpers import get_translation
 
 logger = logging.getLogger(__name__)
 
+ADJECTIVE_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("es", "adjective")].form_mapping
 NOUN_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("es", "noun")].form_mapping
 VERB_FORM_MAPPING: Dict[str, GrammaticalForm] = FORM_SPECS[("es", "verb")].form_mapping
 
@@ -80,11 +82,50 @@ def get_verb_forms(
     return query_forms(FORM_SPECS[("es", "verb")], client, lemma_id, get_session_func)
 
 
+def get_adjective_forms(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Generate Spanish adjective forms mechanically when possible, else use LLM."""
+    session = get_session_func()
+    lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+
+    if lemma and lemma.pos_type.lower() == "adjective":
+        spanish_adjective = get_translation(session, lemma, "es")
+        if spanish_adjective:
+            adjective_forms = build_adjective_forms(spanish_adjective)
+            if adjective_forms:
+                linguistic_db.log_query(
+                    session,
+                    word=spanish_adjective,
+                    query_type="spanish_adjective_forms",
+                    prompt="[mechanical langtools.es.inflection]",
+                    response=json.dumps(
+                        {
+                            "forms": adjective_forms,
+                            "notes": "mechanical adjective agreement generation",
+                            "mechanical": True,
+                        }
+                    ),
+                    model=client.default_model,
+                )
+                return adjective_forms, True
+            logger.info("Falling back to LLM for Spanish adjective '%s'", spanish_adjective)
+
+    return query_forms(FORM_SPECS[("es", "adjective")], client, lemma_id, get_session_func)
+
+
 def query_spanish_noun_forms(
     client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
 ) -> Tuple[Dict[str, str], bool]:
     """Backward-compatible alias for noun form generation."""
     return get_noun_forms(client, lemma_id, get_session_func)
+
+
+def query_spanish_adjective_forms(
+    client: UnifiedLLMClient, lemma_id: int, get_session_func: Callable[[], Session]
+) -> Tuple[Dict[str, str], bool]:
+    """Backward-compatible alias for adjective form generation."""
+    return get_adjective_forms(client, lemma_id, get_session_func)
 
 
 def query_spanish_verb_conjugations(

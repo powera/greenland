@@ -26,6 +26,7 @@ from langtools.en.types import (
 )
 from langtools.en.conjugation import (
     IRREGULAR_CONJUGATIONS,
+    conjugate,
     expand_verb_forms,
 )
 from langtools.en.utils import (
@@ -59,6 +60,7 @@ __all__ = [
     "get_english_noun_forms",
     "get_english_verb_forms",
     # Conjugation expansion
+    "conjugate",
     "expand_verb_forms",
     "IRREGULAR_CONJUGATIONS",
     # Utilities

@@ -36,6 +36,7 @@ from langtools.fr.utils import (
 )
 from langtools.fr.conjugation import (
     conjugate,
+    conjugate_detailed,
     is_known_irregular,
     list_irregular_verbs,
 )
@@ -58,6 +59,7 @@ __all__ = [
     "VerbConjugation",
     # Rule-based conjugation
     "conjugate",
+    "conjugate_detailed",
     "is_known_irregular",
     "list_irregular_verbs",
     # Convenience functions
