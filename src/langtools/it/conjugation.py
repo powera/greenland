@@ -120,6 +120,23 @@ def _infer_verb_class(infinitive: str) -> str:
     return ""
 
 
+def _adjust_are_stem(stem: str, ending: str, *, is_car_gar: bool, is_ci_gi: bool) -> str:
+    """Apply -care/-gare/-ciare/-giare orthography before a front-vowel ending.
+
+    -care/-gare insert an ``h`` to keep the hard c/g sound (cerco -> cerchi),
+    while -ciare/-giare drop the stem-final ``i`` that only softened the c/g
+    (mangio -> mangi, not "mangii").  Adjustments only apply before endings
+    starting with ``e`` or ``i``.
+    """
+    if ending[:1] not in ("e", "i"):
+        return stem
+    if is_car_gar:
+        return stem + "h"
+    if is_ci_gi and stem.endswith("i"):
+        return stem[:-1]
+    return stem
+
+
 def _derive_past_stem(verb_class: str, past_1s: str, infinitive: str) -> str:
     expected_ending = _IMPERFECT_ENDINGS[verb_class][0]
     if past_1s.endswith(expected_ending):
@@ -157,6 +174,12 @@ def conjugate(
         return None
 
     default_stem = infinitive_value[: -len(verb_class)]
+
+    # Orthographic adjustments only apply to -are verbs whose stem ends in a
+    # hard c/g (-care/-gare) or a softening i (-ciare/-giare).
+    is_car_gar = verb_class == "are" and infinitive_value.endswith(("care", "gare"))
+    is_ci_gi = verb_class == "are" and infinitive_value.endswith(("ciare", "giare"))
+
     present_stem = (
         present_1s.strip().lower()[: -len(_PRESENT_ENDINGS[verb_class][0])]
         if present_1s and present_1s.strip().lower().endswith(_PRESENT_ENDINGS[verb_class][0])
@@ -167,15 +190,22 @@ def conjugate(
         if past_1s
         else default_stem
     )
-    future_stem = (
-        _derive_future_stem(verb_class, future_1s.strip().lower(), infinitive_value)
-        if future_1s
-        else default_stem + ("er" if verb_class in {"are", "ere"} else "ir")
-    )
+    if future_1s:
+        future_stem = _derive_future_stem(verb_class, future_1s.strip().lower(), infinitive_value)
+    elif is_car_gar:
+        future_stem = default_stem + "her"  # cerc -> cercher(ò)
+    elif is_ci_gi:
+        future_stem = default_stem[:-1] + "er"  # mangi -> manger(ò)
+    else:
+        future_stem = default_stem + ("er" if verb_class in {"are", "ere"} else "ir")
 
     forms: Dict[str, str] = {}
     for index, person in enumerate(_PERSONS):
-        forms[f"{person}_present"] = present_stem + _PRESENT_ENDINGS[verb_class][index]
+        present_ending = _PRESENT_ENDINGS[verb_class][index]
+        forms[f"{person}_present"] = (
+            _adjust_are_stem(present_stem, present_ending, is_car_gar=is_car_gar, is_ci_gi=is_ci_gi)
+            + present_ending
+        )
         forms[f"{person}_past"] = past_stem + _IMPERFECT_ENDINGS[verb_class][index]
         forms[f"{person}_future"] = future_stem + _FUTURE_ENDINGS[index]
 

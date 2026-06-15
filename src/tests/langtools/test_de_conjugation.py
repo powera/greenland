@@ -91,6 +91,37 @@ class TestRegularLernen(unittest.TestCase):
         self.assertEqual(result["3s_present"], "lernt")
 
 
+class TestSibilantStems(unittest.TestCase):
+    """Stems ending in a sibilant take -t (not -st) in 2s present."""
+
+    def test_tanzen(self) -> None:
+        result = conjugate("tanzen")
+        assert result is not None
+        self.assertEqual(result["1s_present"], "tanze")
+        self.assertEqual(result["2s_present"], "tanzt")
+        self.assertEqual(result["3s_present"], "tanzt")
+        self.assertEqual(result["2p_present"], "tanzt")
+
+    def test_reisen(self) -> None:
+        result = conjugate("reisen")
+        assert result is not None
+        self.assertEqual(result["2s_present"], "reist")
+        self.assertEqual(result["3s_present"], "reist")
+
+    def test_gruessen(self) -> None:
+        """grüßen: stem ends in ß → du grüßt."""
+        result = conjugate("grüßen")
+        assert result is not None
+        self.assertEqual(result["2s_present"], "grüßt")
+
+    def test_past_unaffected(self) -> None:
+        """The sibilant rule only touches 2s present, not the past tense."""
+        result = conjugate("tanzen")
+        assert result is not None
+        self.assertEqual(result["1s_past"], "tanzte")
+        self.assertEqual(result["2s_past"], "tanztest")
+
+
 class TestIrregularVerbsReturnNone(unittest.TestCase):
     """Irregular/strong/modal verbs must return None to trigger LLM fallback."""
 

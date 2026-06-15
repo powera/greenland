@@ -109,6 +109,10 @@ def conjugate(infinitive: str) -> Optional[Dict[str, str]]:
     # Insert linking -e- for stems ending in -t, -d, -chn, -ffn, -tm, -dm
     needs_e = stem.endswith(("t", "d")) or stem.endswith(("chn", "ffn", "tm", "dm"))
 
+    # Stems ending in a sibilant (s, ß, z, x, tz) absorb the s of the 2s -st
+    # ending: du tanzt (not "tanzst"), du reist (not "reisst").
+    sibilant_stem = stem.endswith(("s", "ß", "z", "x"))
+
     forms: Dict[str, str] = {}
     for index, person in enumerate(_PERSONS):
         pres_ending = _PRESENT_ENDINGS[index]
@@ -118,6 +122,8 @@ def conjugate(infinitive: str) -> Optional[Dict[str, str]]:
         # past: before ALL endings (they all start with t-)
         if needs_e and pres_ending in ("st", "t"):
             pres_ending = "e" + pres_ending
+        elif sibilant_stem and pres_ending == "st":
+            pres_ending = "t"  # 2s: sibilant + -st -> -t
         if needs_e:
             past_ending = "e" + past_ending
         forms[f"{person}_present"] = stem + pres_ending

@@ -90,6 +90,65 @@ class TestRegularIre(unittest.TestCase):
         self.assertEqual(self.forms["3s_future"], "partirà")
 
 
+class TestCareGareOrthography(unittest.TestCase):
+    """-care/-gare verbs insert h to keep the hard c/g sound."""
+
+    def test_cercare_present(self) -> None:
+        forms = conjugate("cercare")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "cerco")
+        self.assertEqual(forms["2s_present"], "cerchi")
+        self.assertEqual(forms["3s_present"], "cerca")
+        self.assertEqual(forms["1p_present"], "cerchiamo")
+        self.assertEqual(forms["2p_present"], "cercate")
+        self.assertEqual(forms["3p_present"], "cercano")
+
+    def test_cercare_future(self) -> None:
+        forms = conjugate("cercare")
+        assert forms is not None
+        self.assertEqual(forms["1s_future"], "cercherò")
+        self.assertEqual(forms["3p_future"], "cercheranno")
+
+    def test_pagare_present(self) -> None:
+        forms = conjugate("pagare")
+        assert forms is not None
+        self.assertEqual(forms["2s_present"], "paghi")
+        self.assertEqual(forms["1p_present"], "paghiamo")
+        self.assertEqual(forms["1s_future"], "pagherò")
+
+    def test_pagare_imperfect_unchanged(self) -> None:
+        forms = conjugate("pagare")
+        assert forms is not None
+        self.assertEqual(forms["1s_past"], "pagavo")
+
+
+class TestCiareGiareOrthography(unittest.TestCase):
+    """-ciare/-giare verbs drop the softening i before front vowels."""
+
+    def test_mangiare_present(self) -> None:
+        forms = conjugate("mangiare")
+        assert forms is not None
+        self.assertEqual(forms["1s_present"], "mangio")
+        self.assertEqual(forms["2s_present"], "mangi")
+        self.assertEqual(forms["3s_present"], "mangia")
+        self.assertEqual(forms["1p_present"], "mangiamo")
+        self.assertEqual(forms["2p_present"], "mangiate")
+        self.assertEqual(forms["3p_present"], "mangiano")
+
+    def test_mangiare_future(self) -> None:
+        forms = conjugate("mangiare")
+        assert forms is not None
+        self.assertEqual(forms["1s_future"], "mangerò")
+        self.assertEqual(forms["3s_future"], "mangerà")
+
+    def test_cominciare_present(self) -> None:
+        forms = conjugate("cominciare")
+        assert forms is not None
+        self.assertEqual(forms["2s_present"], "cominci")
+        self.assertEqual(forms["1p_present"], "cominciamo")
+        self.assertEqual(forms["1s_future"], "comincerò")
+
+
 class TestIrregularVerbsHandling(unittest.TestCase):
     """Common irregulars are hard-coded; other irregulars still fall back."""
 
