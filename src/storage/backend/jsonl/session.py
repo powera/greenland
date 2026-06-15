@@ -92,6 +92,7 @@ class JSONLSession(BaseSession):
         from sqlalchemy.orm import sessionmaker
         from sqlalchemy.pool import StaticPool
 
+        import storage.models  # noqa: F401  # Ensure all model tables are registered.
         from storage.models.schema import Base
 
         logger = logging.getLogger(__name__)
@@ -114,6 +115,7 @@ class JSONLSession(BaseSession):
 
         # Log statistics about what was loaded
         from storage.models.grammar_fact import GrammarFact as SQLGrammarFact
+        from storage.models.guid_tombstone import GuidTombstone as SQLGuidTombstone
         from storage.models.lemma_relation import (
             LemmaRelationGroup as SQLLemmaRelationGroup,
         )
@@ -160,6 +162,7 @@ class JSONLSession(BaseSession):
             Dictionary mapping JSONL models to SQLAlchemy models
         """
         from storage.models.grammar_fact import GrammarFact as SQLGrammarFact
+        from storage.models.guid_tombstone import GuidTombstone as SQLGuidTombstone
         from storage.models.lemma_relation import (
             LemmaRelationGroup as SQLLemmaRelationGroup,
         )
@@ -182,6 +185,7 @@ class JSONLSession(BaseSession):
             models.LemmaDifficultyOverride: SQLLemmaDifficultyOverride,
             models.DerivativeForm: SQLDerivativeForm,
             models.GrammarFact: SQLGrammarFact,
+            models.GuidTombstone: SQLGuidTombstone,
             models.LemmaRelationGroup: SQLLemmaRelationGroup,
             models.LemmaRelationMember: SQLLemmaRelationMember,
             models.Sentence: SQLSentence,
@@ -193,6 +197,7 @@ class JSONLSession(BaseSession):
         """Populate the temporary SQLite database with data from JSONL storage."""
         assert self._sqlite_session is not None  # For type checking
         from storage.models.grammar_fact import GrammarFact as SQLGrammarFact
+        from storage.models.guid_tombstone import GuidTombstone as SQLGuidTombstone
         from storage.models.lemma_relation import (
             LemmaRelationGroup as SQLLemmaRelationGroup,
         )
@@ -216,6 +221,7 @@ class JSONLSession(BaseSession):
         sentences = []
         sentence_translations = []
         sentence_words = []
+        tombstones = []
 
         # Prepare lemmas and translations
         for jsonl_lemma in self._storage.lemmas.values():
@@ -388,6 +394,23 @@ class JSONLSession(BaseSession):
                     )
                     member_id_counter += 1
 
+        for jsonl_tombstone in self._storage.tombstones:
+            tombstones.append(
+                {
+                    "id": jsonl_tombstone.id,
+                    "guid": jsonl_tombstone.guid,
+                    "original_lemma_text": jsonl_tombstone.original_lemma_text,
+                    "original_pos_type": jsonl_tombstone.original_pos_type,
+                    "original_pos_subtype": jsonl_tombstone.original_pos_subtype,
+                    "replacement_guid": jsonl_tombstone.replacement_guid,
+                    "lemma_id": jsonl_tombstone.lemma_id,
+                    "reason": jsonl_tombstone.reason,
+                    "notes": jsonl_tombstone.notes,
+                    "changed_by": jsonl_tombstone.changed_by,
+                    "tombstoned_at": jsonl_tombstone.tombstoned_at,
+                }
+            )
+
         # Bulk insert
         if lemmas:
             self._sqlite_session.bulk_insert_mappings(SQLLemma, lemmas)
@@ -407,6 +430,8 @@ class JSONLSession(BaseSession):
             self._sqlite_session.bulk_insert_mappings(SentenceTranslation, sentence_translations)
         if sentence_words:
             self._sqlite_session.bulk_insert_mappings(SentenceWord, sentence_words)
+        if tombstones:
+            self._sqlite_session.bulk_insert_mappings(SQLGuidTombstone, tombstones)
 
         self._sqlite_session.commit()
 
