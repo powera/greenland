@@ -202,6 +202,12 @@ LANGUAGE_HIERARCHY = [
 ]
 
 # Language mappings
+# This is the storage-side source of truth for supported languages (code,
+# display name, table routing). The translation LLM path additionally needs
+# prompt data (description, instructions) kept in DEFAULT_TRANSLATION_LANGUAGES
+# in wordfreq/translation/constants.py. When adding/removing a language here,
+# make the matching change there (and in LLM_FIELD_TO_LANG_CODE below), or the
+# active query_translations path will skip it as "unknown".
 # Format: 'code': (field_name_or_code, display_name, use_lemma_translation_table)
 # If use_lemma_translation_table is True, field_name_or_code is the language_code for LemmaTranslation table
 # If False, field_name_or_code is the column name in Lemma table (only used for English)

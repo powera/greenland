@@ -29,7 +29,12 @@ VALID_POS_TYPES = {
 # Define major parts of speech as a set for efficient lookup
 MAJOR_POS_TYPES = {"noun", "verb", "adjective", "adverb"}
 
-# Default languages and their configurations
+# Default languages and their configurations.
+# This carries prompt-specific data (description, instructions) needed by the
+# translation LLM path; the storage-side source of truth is LANGUAGE_FIELDS in
+# storage/translation_helpers.py. When adding/removing a language here, make the
+# matching change in LANGUAGE_FIELDS (and LLM_FIELD_TO_LANG_CODE) there, or the
+# active query_translations path will skip it as "unknown".
 DEFAULT_TRANSLATION_LANGUAGES = {
     "lithuanian": {
         "field": "lithuanian_translation",
@@ -72,6 +77,18 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "code": "ja",
         "description": "Japanese translation in lemma form",
         "instructions": "- Japanese: Provide standard Japanese in base form (dictionary form, singular for nouns)",
+    },
+    "latin": {
+        "field": "latin_translation",
+        "code": "la",
+        "description": "Latin translation in lemma form",
+        "instructions": "- Latin: Provide Classical Latin in base form (present active infinitive for verbs, nominative singular for nouns)\n  - Use Classical (not Ecclesiastical or Medieval) orthography and vocabulary\n  - For modern concepts with no Classical word, use the established Neo-Latin term",
+    },
+    "sanskrit": {
+        "field": "sanskrit_translation",
+        "code": "sa",
+        "description": "Sanskrit translation in lemma form (Devanagari script)",
+        "instructions": "- Sanskrit: Provide Sanskrit in Devanagari script in base form (root/stem form for verbs, nominative singular for nouns)\n  - Do not include IAST transliteration, just the Devanagari characters\n  - For modern concepts, use the established Sanskrit coinage where one exists",
     },
     "italian": {
         "field": "italian_translation",
