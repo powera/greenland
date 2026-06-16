@@ -39,6 +39,7 @@ def build_single_target_translation_prompt(
     prompt_lines = [
         f'Translate the single word "{source_word}" from {_language_name(source_language)} to {_language_name(target_language)}.',
         "Return only one translation in lemma/base form.",
+        "For historical or classical target languages, prefer a conventional native word; if none exists, return the best attested loanword or concise descriptive lemma.",
     ]
 
     if candidate_translations:
@@ -78,6 +79,7 @@ def build_multi_target_translation_prompt(
     prompt = (
         f'Translate the single word "{source_word}" from {_language_name(source_language)} into each requested target language.\n'
         "Return lemma/base-form translations only.\n"
+        "For historical or classical target languages, prefer conventional native words; if none exists, return the best attested loanword or concise descriptive lemma.\n"
         "Target languages:\n"
         f"{target_lines}"
     )

@@ -57,6 +57,10 @@ class BaseConcept:
     # Editorial notes about the concept (singleton for now)
     notes: Optional[str] = None
 
+    # Concept-level explanation for why historical/classical languages may not
+    # have a conventional native lexical item for this lemma.
+    lexical_gap_reason: Optional[str] = None
+
     # Runtime field (not exported to JSONL - Git handles versioning)
     added_at: Optional[datetime.datetime] = None
 
@@ -143,6 +147,7 @@ class Lemma:
     # Metadata
     confidence: float = 0.0
     notes: Optional[str] = None  # From base.jsonl
+    lexical_gap_reason: Optional[str] = None  # From base.jsonl
 
     # Runtime/internal fields (not exported to JSONL)
     verified: bool = False  # Moved to verifications.jsonl
