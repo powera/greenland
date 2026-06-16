@@ -8,11 +8,19 @@ Edits to a mirrored route's path, query params, or response shape MUST be
 made in the matching facade in the same commit. See ``api/AGENTS.md``.
 """
 
+import json
 import logging
-from typing import Any, cast
+from typing import Any, Dict, List, cast
 
 from barsukas.config import Config
 from barsukas.routes._mirror import mirrored_facade
+from agents.dramblys.synonym_screening import (
+    ACCEPTED_STATUS,
+    ACTIVE_STATUS,
+    has_active_strong_synonym_candidate,
+    ignore_synonym_candidates,
+    run_synonym_screening,
+)
 from agents.dramblys.staging import approve_pending_import, reject_pending_import
 from workqueue.task_queue import TaskType, enqueue_task
 from flask import (
@@ -32,10 +40,69 @@ from flask.typing import ResponseReturnValue
 from sqlalchemy.orm import Query
 
 from storage.backend.config import DataSourceConfig
-from storage.models.imports import PendingImport
+from storage.crud.derivative_form import add_derivative_form
+from storage.crud.word_token import add_word_token
+from storage.models.imports import PendingImport, PendingImportSynonymCandidate
+from storage.models.schema import DerivativeForm, Lemma
 
 bp = Blueprint("pending_imports", __name__, url_prefix="/pending-imports")
 logger = logging.getLogger(__name__)
+
+
+def _json_list(value: str) -> List[str]:
+    try:
+        parsed = json.loads(value)
+    except json.JSONDecodeError:
+        return []
+    if not isinstance(parsed, list):
+        return []
+    return [item for item in parsed if isinstance(item, str)]
+
+
+def _serialize_synonym_candidate(candidate: PendingImportSynonymCandidate) -> Dict[str, Any]:
+    lemma_data = None
+    if candidate.lemma is not None:
+        lemma_data = {
+            "id": candidate.lemma.id,
+            "guid": candidate.lemma.guid,
+            "lemma_text": candidate.lemma.lemma_text,
+            "definition_text": candidate.lemma.definition_text,
+            "pos_type": candidate.lemma.pos_type,
+            "pos_subtype": candidate.lemma.pos_subtype,
+        }
+    return {
+        "id": candidate.id,
+        "candidate_text": candidate.candidate_text,
+        "lemma": lemma_data,
+        "same_pos": candidate.same_pos,
+        "llm_synonym_category": candidate.llm_synonym_category,
+        "llm_synonym_score": candidate.llm_synonym_score,
+        "matched_translation_count": candidate.matched_translation_count,
+        "matched_translation_languages": _json_list(candidate.matched_translation_languages),
+        "explanation": candidate.explanation,
+        "is_strong": candidate.is_strong,
+        "status": candidate.status,
+    }
+
+
+def _active_synonym_candidates_for_pending(
+    pending_import_id: int,
+) -> List[PendingImportSynonymCandidate]:
+    return cast(
+        List[PendingImportSynonymCandidate],
+        g.db.query(PendingImportSynonymCandidate)
+        .filter(
+            PendingImportSynonymCandidate.pending_import_id == pending_import_id,
+            PendingImportSynonymCandidate.status == ACTIVE_STATUS,
+        )
+        .order_by(
+            PendingImportSynonymCandidate.is_strong.desc(),
+            PendingImportSynonymCandidate.matched_translation_count.desc(),
+            PendingImportSynonymCandidate.llm_synonym_score.desc().nullslast(),
+            PendingImportSynonymCandidate.id,
+        )
+        .all(),
+    )
 
 
 def _build_filtered_query() -> Query[Any]:
@@ -80,6 +147,29 @@ def list_pending_imports() -> ResponseReturnValue:
     # Paginate
     total = query.count()
     imports = query.limit(Config.ITEMS_PER_PAGE).offset((page - 1) * Config.ITEMS_PER_PAGE).all()
+    import_ids = [pending_import.id for pending_import in imports]
+    strong_candidate_counts: Dict[int, int] = {
+        pending_import_id: 0 for pending_import_id in import_ids
+    }
+    candidate_counts: Dict[int, int] = {pending_import_id: 0 for pending_import_id in import_ids}
+    if import_ids:
+        rows = (
+            g.db.query(
+                PendingImportSynonymCandidate.pending_import_id,
+                PendingImportSynonymCandidate.is_strong,
+            )
+            .filter(
+                PendingImportSynonymCandidate.pending_import_id.in_(import_ids),
+                PendingImportSynonymCandidate.status == ACTIVE_STATUS,
+            )
+            .all()
+        )
+        for pending_import_id, is_strong in rows:
+            candidate_counts[pending_import_id] = candidate_counts.get(pending_import_id, 0) + 1
+            if is_strong:
+                strong_candidate_counts[pending_import_id] = (
+                    strong_candidate_counts.get(pending_import_id, 0) + 1
+                )
 
     # Get unique values for filter dropdowns
     pos_types = (
@@ -140,6 +230,8 @@ def list_pending_imports() -> ResponseReturnValue:
         pos_subtypes=pos_subtypes,
         sources=sources,
         languages=languages,
+        candidate_counts=candidate_counts,
+        strong_candidate_counts=strong_candidate_counts,
     )
 
 
@@ -189,6 +281,96 @@ def approve(pending_import_id: int) -> ResponseReturnValue:
     return redirect(url_for("pending_imports.list_pending_imports"))
 
 
+@bp.route("/<int:pending_import_id>/create-anyway", methods=["POST"])
+def create_anyway(pending_import_id: int) -> ResponseReturnValue:
+    """Ignore active synonym candidates so normal approval can continue."""
+    if current_app.config.get("READONLY", False):
+        flash("Cannot modify data in read-only mode", "error")
+        return redirect(request.referrer or url_for("pending_imports.list_pending_imports"))
+
+    pending = g.db.query(PendingImport).filter(PendingImport.id == pending_import_id).first()
+    if not pending:
+        abort(404)
+
+    ignored_count = ignore_synonym_candidates(g.db, pending_import_id)
+    g.db.commit()
+    flash(f"Ignored {ignored_count} synonym candidate(s). Normal approval is now enabled.", "info")
+    return redirect(url_for("pending_imports.detail", pending_import_id=pending_import_id))
+
+
+@bp.route(
+    "/<int:pending_import_id>/use-synonym/<int:candidate_id>",
+    methods=["POST"],
+)
+def use_synonym(pending_import_id: int, candidate_id: int) -> ResponseReturnValue:
+    """Attach the pending English word as a synonym form on an existing lemma."""
+    if current_app.config.get("READONLY", False):
+        flash("Cannot modify data in read-only mode", "error")
+        return redirect(request.referrer or url_for("pending_imports.list_pending_imports"))
+
+    pending = g.db.query(PendingImport).filter(PendingImport.id == pending_import_id).first()
+    if not pending:
+        abort(404)
+
+    candidate = (
+        g.db.query(PendingImportSynonymCandidate)
+        .filter(
+            PendingImportSynonymCandidate.id == candidate_id,
+            PendingImportSynonymCandidate.pending_import_id == pending_import_id,
+        )
+        .first()
+    )
+    if not candidate:
+        abort(404)
+    if candidate.lemma_id is None:
+        flash("Cannot use this candidate because it is not linked to an existing lemma.", "error")
+        return redirect(url_for("pending_imports.detail", pending_import_id=pending_import_id))
+
+    lemma = g.db.query(Lemma).filter(Lemma.id == candidate.lemma_id).first()
+    if lemma is None:
+        flash("Cannot use this candidate because the linked lemma no longer exists.", "error")
+        return redirect(url_for("pending_imports.detail", pending_import_id=pending_import_id))
+
+    try:
+        pending_word = pending.english_word
+        word_token = add_word_token(g.db, pending.english_word, "en")
+        existing_form = (
+            g.db.query(DerivativeForm)
+            .filter(
+                DerivativeForm.lemma_id == lemma.id,
+                DerivativeForm.language_code == "en",
+                DerivativeForm.derivative_form_text == pending.english_word,
+                DerivativeForm.grammatical_form == "synonym",
+            )
+            .first()
+        )
+        if existing_form is None:
+            add_derivative_form(
+                g.db,
+                lemma,
+                pending.english_word,
+                "en",
+                "synonym",
+                word_token=word_token,
+                is_base_form=False,
+                verified=False,
+                notes=f"Accepted from pending import #{pending.id}",
+            )
+        candidate.status = ACCEPTED_STATUS
+        g.db.delete(pending)
+        g.db.commit()
+        flash(
+            f"Added '{pending_word}' as an English synonym for {lemma.lemma_text}.",
+            "success",
+        )
+    except Exception as exc:
+        g.db.rollback()
+        flash(f"Error accepting synonym candidate: {exc}", "error")
+        return redirect(url_for("pending_imports.detail", pending_import_id=pending_import_id))
+
+    return redirect(url_for("pending_imports.list_pending_imports"))
+
+
 @bp.route("/<int:pending_import_id>/reject", methods=["POST"])
 def reject(pending_import_id: int) -> ResponseReturnValue:
     """Reject a pending import entry and remove it from pending list."""
@@ -220,7 +402,17 @@ def detail(pending_import_id: int) -> ResponseReturnValue:
     pending = g.db.query(PendingImport).filter(PendingImport.id == pending_import_id).first()
     if not pending:
         abort(404)
-    return render_template("pending_imports/detail.html", item=pending)
+    synonym_candidates = [
+        _serialize_synonym_candidate(candidate)
+        for candidate in _active_synonym_candidates_for_pending(pending_import_id)
+    ]
+    has_strong_synonym_candidate = any(candidate["is_strong"] for candidate in synonym_candidates)
+    return render_template(
+        "pending_imports/detail.html",
+        item=pending,
+        synonym_candidates=synonym_candidates,
+        has_strong_synonym_candidate=has_strong_synonym_candidate,
+    )
 
 
 @bp.route("/<int:pending_import_id>/stage", methods=["POST"])
@@ -273,9 +465,26 @@ def stage(pending_import_id: int) -> ResponseReturnValue:
         pending.pos_subtype = first.get("pos_subtype") or pending.pos_subtype
         if first.get("definition"):
             pending.definition = first["definition"]
+        synonym_candidates = run_synonym_screening(
+            g.db,
+            pending,
+            client.client,
+            model=model_name,
+        )
         g.db.commit()
 
-        return jsonify({"success": True, "definitions": definitions_list})
+        return jsonify(
+            {
+                "success": True,
+                "definitions": definitions_list,
+                "synonym_candidates": [
+                    _serialize_synonym_candidate(candidate) for candidate in synonym_candidates
+                ],
+                "has_strong_synonym_candidate": has_active_strong_synonym_candidate(
+                    g.db, pending_import_id
+                ),
+            }
+        )
 
     except Exception as exc:
         g.db.rollback()
@@ -399,6 +608,8 @@ def api_list() -> ResponseReturnValue:
             "source": item.source,
             "frequency_rank": item.frequency_rank,
             "notes": item.notes,
+            "synonym_candidate_count": len(_active_synonym_candidates_for_pending(item.id)),
+            "has_strong_synonym_candidate": has_active_strong_synonym_candidate(g.db, item.id),
             "added_at": item.added_at.isoformat() if item.added_at else None,
         }
         for item in imports

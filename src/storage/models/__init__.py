@@ -33,7 +33,7 @@ from storage.models.translations import Translation, TranslationSet
 
 # Import after schema to ensure PendingImport is registered with the same Base
 # before SentencePatternWord's relationship to it is resolved
-from storage.models.imports import PendingImport, WordExclusion
+from storage.models.imports import PendingImport, PendingImportSynonymCandidate, WordExclusion
 
 __all__ = [
     "AdjectiveSubtype",
@@ -52,6 +52,7 @@ __all__ = [
     "NounSubtype",
     "OperationLog",
     "PendingImport",
+    "PendingImportSynonymCandidate",
     "QueryLog",
     "Sentence",
     "SentencePatternWord",

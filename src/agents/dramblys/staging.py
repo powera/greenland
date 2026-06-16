@@ -19,8 +19,9 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from util.logging_config import get_logger
+from agents.dramblys.synonym_screening import has_active_strong_synonym_candidate
 from storage.backend.config import DataSourceConfig
-from storage.models.imports import PendingImport, WordExclusion
+from storage.models.imports import PendingImport, PendingImportSynonymCandidate, WordExclusion
 from wordfreq.translation.client import LinguisticClient
 
 logger = get_logger(__name__)
@@ -63,6 +64,23 @@ def list_pending_imports(
 
         results = []
         for pending in pending_imports:
+            synonym_candidate_count = int(
+                session.query(PendingImportSynonymCandidate)
+                .filter(
+                    PendingImportSynonymCandidate.pending_import_id == pending.id,
+                    PendingImportSynonymCandidate.status == "active",
+                )
+                .count()
+            )
+            strong_synonym_candidate_count = int(
+                session.query(PendingImportSynonymCandidate)
+                .filter(
+                    PendingImportSynonymCandidate.pending_import_id == pending.id,
+                    PendingImportSynonymCandidate.status == "active",
+                    PendingImportSynonymCandidate.is_strong.is_(True),
+                )
+                .count()
+            )
             results.append(
                 {
                     "id": pending.id,
@@ -75,6 +93,8 @@ def list_pending_imports(
                     "source": pending.source,
                     "frequency_rank": pending.frequency_rank,
                     "notes": pending.notes,
+                    "synonym_candidate_count": synonym_candidate_count,
+                    "strong_synonym_candidate_count": strong_synonym_candidate_count,
                     "added_at": pending.added_at.isoformat() if pending.added_at else None,
                 }
             )
@@ -146,6 +166,20 @@ def approve_pending_import(
         if not pending:
             logger.error(f"Pending import ID {pending_import_id} not found")
             return {"error": f"Pending import ID {pending_import_id} not found", "success": False}
+
+        if has_active_strong_synonym_candidate(session, pending_import_id):
+            logger.info(
+                "Pending import ID %s has active strong synonym candidates; refusing normal approval",
+                pending_import_id,
+            )
+            return {
+                "success": False,
+                "word": pending.english_word,
+                "error": (
+                    "Strong synonym candidates exist. Use 'Use As Synonym' or "
+                    "'Create Anyway' from the pending import detail page."
+                ),
+            }
 
         word = pending.english_word
         pending_definition = pending.definition
