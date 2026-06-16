@@ -9,6 +9,47 @@ from storage.translation_helpers import TIER_1_LANGUAGES, TIER_2_LANGUAGES
 
 VERB_FORM_OVERRIDE_PREFIX = "verb_form_"
 TIER_1_2_LANGUAGES: Tuple[str, ...] = tuple(TIER_1_LANGUAGES + TIER_2_LANGUAGES)
+IRREGULAR_PLURAL_LANGUAGES: Tuple[str, ...] = (
+    "en",
+    "es",
+    "fr",
+    "de",
+    "it",
+    "pt",
+    "nl",
+    "sv",
+)
+NUMBER_TYPE_LANGUAGES: Tuple[str, ...] = (
+    "en",
+    "es",
+    "fr",
+    "de",
+    "it",
+    "lt",
+    "pt",
+    "nl",
+    "sv",
+)
+PARTICIPLE_OVERRIDE_LANGUAGES: Tuple[str, ...] = (
+    "en",
+    "fr",
+    "de",
+    "it",
+    "es",
+    "pt",
+    "nl",
+    "sv",
+)
+COMPARISON_OVERRIDE_LANGUAGES: Tuple[str, ...] = (
+    "en",
+    "fr",
+    "de",
+    "it",
+    "es",
+    "pt",
+    "nl",
+    "sv",
+)
 
 
 @dataclass(frozen=True)
@@ -75,7 +116,7 @@ GRAMMAR_FACT_DEFINITIONS: Dict[str, GrammarFactDefinition] = {
     ),
     "auxiliary_verb": GrammarFactDefinition(
         fact_type="auxiliary_verb",
-        languages=("fr", "de", "it"),
+        languages=("fr", "de", "it", "nl"),
         required_pos=("verb",),
         display_label="Auxiliary Verb",
         description="Identify auxiliary verb used in compound tenses",
@@ -155,10 +196,64 @@ GRAMMAR_FACT_DEFINITIONS: Dict[str, GrammarFactDefinition] = {
     ),
     "plural": GrammarFactDefinition(
         fact_type="plural",
-        languages=("it",),
+        languages=IRREGULAR_PLURAL_LANGUAGES,
         required_pos=("noun",),
         display_label="Plural",
-        description="Italian irregular noun plural override",
+        description="Irregular or non-derivable noun plural override",
+        release_sync=True,
+    ),
+    "number_type": GrammarFactDefinition(
+        fact_type="number_type",
+        languages=NUMBER_TYPE_LANGUAGES,
+        required_pos=("noun",),
+        display_label="Number Type",
+        description=(
+            "Exceptional noun number behavior: uncountable, plurale_tantum, "
+            "singulare_tantum, or both"
+        ),
+        release_sync=True,
+    ),
+    "past": GrammarFactDefinition(
+        fact_type="past",
+        languages=("en",),
+        required_pos=("verb",),
+        display_label="Past",
+        description="English irregular simple past principal part",
+        release_sync=True,
+    ),
+    "past_participle": GrammarFactDefinition(
+        fact_type="past_participle",
+        languages=PARTICIPLE_OVERRIDE_LANGUAGES,
+        required_pos=("verb",),
+        display_label="Past Participle",
+        description=(
+            "Irregular or non-derivable past participle principal part; for Swedish, "
+            "stores the generator-required perfect-form principal part"
+        ),
+        release_sync=True,
+    ),
+    "feminine_form": GrammarFactDefinition(
+        fact_type="feminine_form",
+        languages=("fr",),
+        required_pos=("adjective",),
+        display_label="Feminine Form",
+        description="French irregular or non-derivable feminine adjective form",
+        release_sync=True,
+    ),
+    "comparative": GrammarFactDefinition(
+        fact_type="comparative",
+        languages=COMPARISON_OVERRIDE_LANGUAGES,
+        required_pos=("adjective", "adverb"),
+        display_label="Comparative",
+        description="Irregular comparative form",
+        release_sync=True,
+    ),
+    "superlative": GrammarFactDefinition(
+        fact_type="superlative",
+        languages=COMPARISON_OVERRIDE_LANGUAGES,
+        required_pos=("adjective", "adverb"),
+        display_label="Superlative",
+        description="Irregular superlative form",
         release_sync=True,
     ),
 }

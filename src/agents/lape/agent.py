@@ -90,6 +90,11 @@ class LapeAgent:
             "auxiliaries": ["avere", "essere"],
             "description": "avere (most verbs) or essere (motion/reflexive verbs)",
         },
+        "nl": {
+            "name": "Dutch",
+            "auxiliaries": ["hebben", "zijn"],
+            "description": "hebben (most verbs) or zijn (motion/state change verbs)",
+        },
     }
 
     # Language-specific reflexivity systems

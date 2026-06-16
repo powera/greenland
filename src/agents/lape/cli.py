@@ -77,9 +77,10 @@ Supported fact types:
   Verb facts:
     - verb_transitivity: Transitive/intransitive/ditransitive/ambitransitive (languages: en - base concept)
     - verb_reflexivity: Inherently/optionally/non-reflexive (languages: fr, es, de, lt, it)
-    - auxiliary_verb: Compound tense auxiliary (languages: fr, de, it)
+    - auxiliary_verb: Compound tense auxiliary (languages: fr, de, it, nl)
 
-  Note: number_type (plurale_tantum/singulare_tantum) is auto-detected during form generation by Vilkas.
+  Note: release-synced non-generated facts include irregular plural, number_type,
+  English past, past_participle, French feminine_form, comparative, and superlative.
 
 Task presets:
   - all: All fact types

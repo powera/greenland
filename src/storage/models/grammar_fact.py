@@ -31,8 +31,8 @@ class GrammarFact(Base):
     Examples:
         - number_type: plurale_tantum (scissors, pants)
         - number_type: singulare_tantum (information, furniture)
-        - gender: masculine/feminine/neuter (for gendered languages)
-        - declension: declension class (1, 2, 3, etc. for Lithuanian/Latin)
+        - grammatical_gender: masculine/feminine/neuter (for gendered languages)
+        - declension_class: declension class (1, 2, 3, etc. for Lithuanian/Latin)
         - defective_verb: missing certain conjugations
         - indeclinable: doesn't decline/conjugate
 
@@ -60,14 +60,15 @@ class GrammarFact(Base):
     language_code: Mapped[str] = mapped_column(String, nullable=False, index=True)
 
     # Type of grammatical fact
-    # Common values: "number_type", "gender", "declension", "defective_verb", "indeclinable"
+    # Common values: "number_type", "grammatical_gender", "declension_class",
+    # "defective_verb", "indeclinable"
     fact_type: Mapped[str] = mapped_column(String, nullable=False, index=True)
 
     # Specific value for this fact type
     # Examples:
     #   fact_type="number_type" -> fact_value="plurale_tantum" or "singulare_tantum"
-    #   fact_type="gender" -> fact_value="masculine", "feminine", "neuter"
-    #   fact_type="declension" -> fact_value="1", "2", "3", "4", "5"
+    #   fact_type="grammatical_gender" -> fact_value="masculine", "feminine", "neuter"
+    #   fact_type="declension_class" -> fact_value="1", "2", "3", "4", "5"
     #   fact_type="defective_verb" -> fact_value="no_imperative" or similar
     fact_value: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 

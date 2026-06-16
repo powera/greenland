@@ -12,6 +12,7 @@ from langtools.form_registry import FORM_SPECS
 from langtools.llm_forms_base import query_forms
 from sqlalchemy.orm import Session
 from storage import database as linguistic_db
+from storage.crud.grammar_fact import get_grammar_fact_value
 from storage.models.enums import GrammaticalForm
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,14 @@ def query_english_verb_forms(
     lemma = session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
 
     if lemma and lemma.pos_type.lower() == "verb":
-        conjugation_forms = expand_verb_forms({"infinitive": lemma.lemma_text})
+        base_forms = {"infinitive": lemma.lemma_text}
+        past = get_grammar_fact_value(session, lemma.id, "en", "past")
+        past_participle = get_grammar_fact_value(session, lemma.id, "en", "past_participle")
+        if past:
+            base_forms["past"] = past
+        if past_participle:
+            base_forms["past_participle"] = past_participle
+        conjugation_forms = expand_verb_forms(base_forms)
         projected_forms: Dict[str, str] = {}
         for form_name in VERB_FORM_MAPPING:
             if form_name in conjugation_forms:
@@ -45,7 +53,7 @@ def query_english_verb_forms(
                 response=json.dumps(
                     {
                         "forms": projected_forms,
-                        "notes": "mechanical expansion from infinitive",
+                        "notes": "mechanical expansion from infinitive and grammar facts",
                         "mechanical": True,
                     }
                 ),

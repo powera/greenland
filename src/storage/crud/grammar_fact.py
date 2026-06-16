@@ -28,7 +28,8 @@ def add_grammar_fact(
         session: Database session
         lemma_id: ID of the lemma
         language_code: Language code (e.g., "en", "lt", "fr")
-        fact_type: Type of fact (e.g., "number_type", "gender", "declension")
+        fact_type: Type of fact (e.g., "number_type", "grammatical_gender",
+            "declension_class")
         fact_value: Value for the fact (e.g., "plurale_tantum", "masculine", "1")
         notes: Optional notes
         verified: Whether this fact has been verified
@@ -43,11 +44,11 @@ def add_grammar_fact(
 
         # Mark a French noun as masculine
         add_grammar_fact(session, lemma_id=456, language_code="fr",
-                        fact_type="gender", fact_value="masculine")
+                        fact_type="grammatical_gender", fact_value="masculine")
 
         # Mark a Lithuanian noun's declension class
         add_grammar_fact(session, lemma_id=789, language_code="lt",
-                        fact_type="declension", fact_value="1")
+                        fact_type="declension_class", fact_value="1")
     """
     try:
         grammar_fact = GrammarFact(
@@ -100,7 +101,7 @@ def get_grammar_facts(
         facts = get_grammar_facts(session, lemma_id=123, language_code="en")
 
         # Get gender facts across all languages
-        facts = get_grammar_facts(session, lemma_id=123, fact_type="gender")
+        facts = get_grammar_facts(session, lemma_id=123, fact_type="grammatical_gender")
     """
     query = session.query(GrammarFact).filter(GrammarFact.lemma_id == lemma_id)
 
@@ -139,7 +140,7 @@ def get_grammar_fact_value(
         # Get the gender of a French noun
         gender = get_grammar_fact_value(session, lemma_id=456,
                                        language_code="fr",
-                                       fact_type="gender")
+                                       fact_type="grammatical_gender")
     """
     fact = (
         session.query(GrammarFact)
@@ -309,7 +310,7 @@ def get_grammatical_gender(session: Session, lemma_id: int, language_code: str) 
         elif gender == "feminine":
             print("Use: la/une")  # feminine articles in French
     """
-    return get_grammar_fact_value(session, lemma_id, language_code, "gender")
+    return get_grammar_fact_value(session, lemma_id, language_code, "grammatical_gender")
 
 
 def get_declension_class(session: Session, lemma_id: int, language_code: str) -> Optional[str]:
@@ -329,7 +330,7 @@ def get_declension_class(session: Session, lemma_id: int, language_code: str) ->
         if declension:
             print(f"This noun follows declension pattern {declension}")
     """
-    return get_grammar_fact_value(session, lemma_id, language_code, "declension")
+    return get_grammar_fact_value(session, lemma_id, language_code, "declension_class")
 
 
 def get_verb_form_overrides(session: Session, lemma_id: int, language_code: str) -> Dict[str, str]:
