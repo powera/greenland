@@ -62,6 +62,8 @@ TIER_3_LANGUAGES = [
 
 # Tier 4: Additional experimental languages with minimal coverage
 TIER_4_LANGUAGES = [
+    "la",
+    "sa",
     "ms",
     "my",
     "km",
@@ -149,6 +151,8 @@ LANGUAGE_HIERARCHY = [
     "ro",  # Romanian (experimental)
     "pl",  # Polish (experimental)
     "th",  # Thai (experimental)
+    "la",  # Latin (experimental/classical)
+    "sa",  # Sanskrit (experimental/classical)
     "ms",  # Malay (experimental)
     "my",  # Burmese (experimental)
     "km",  # Khmer (experimental)
@@ -217,6 +221,8 @@ LANGUAGE_FIELDS = {
     "vi": ("vi", "Vietnamese", True),
     "ja": ("ja", "Japanese", True),
     "ko": ("ko", "Korean", True),
+    "la": ("la", "Latin", True),
+    "sa": ("sa", "Sanskrit", True),
     "sw": ("sw", "Swahili", True),
     "ro": ("ro", "Romanian", True),
     "pl": ("pl", "Polish", True),
@@ -283,6 +289,8 @@ LLM_FIELD_TO_LANG_CODE = {
     "spanish_translation": "es",
     "german_translation": "de",
     "japanese_translation": "ja",
+    "latin_translation": "la",
+    "sanskrit_translation": "sa",
     "italian_translation": "it",
     "dutch_translation": "nl",
     "portuguese_translation": "pt",

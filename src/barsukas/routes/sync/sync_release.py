@@ -1068,6 +1068,9 @@ def _build_release_entry_from_db(lemma: Lemma) -> Dict[str, Any]:
     if translation_disambiguations:
         entry["translation_disambiguations"] = translation_disambiguations
 
+    if lemma.lexical_gap_reason:
+        entry["lexical_gap_reason"] = lemma.lexical_gap_reason
+
     return entry
 
 
@@ -1203,8 +1206,9 @@ def _find_lemma_text_changes(
 
     Covers fields that live directly on the Lemma row (and the base.jsonl
     record): lemma_text (translations.en), disambiguation (parsed from
-    concept_label), concept_definition (DB definition_text), notes, and
-    emoji (JSON-encoded list on the DB side, native list in JSONL).
+    concept_label), concept_definition (DB definition_text), notes,
+    lexical_gap_reason, and emoji (JSON-encoded list on the DB side, native
+    list in JSONL).
     """
     changes: List[Dict[str, Any]] = []
     release_guids = set(release_lemmas.keys())
@@ -1228,16 +1232,21 @@ def _find_lemma_text_changes(
             release_disambig = _get_release_disambiguation(release_data)
             release_definition = release_data.get("concept_definition", "") or ""
             release_notes = release_data.get("notes")
+            release_lexical_gap_reason = release_data.get("lexical_gap_reason")
             release_emoji = _get_release_emoji(release_data)
 
             db_definition = db_lemma.definition_text or ""
             db_notes = db_lemma.notes
+            db_lexical_gap_reason = db_lemma.lexical_gap_reason
             db_emoji = _decode_db_emoji(db_lemma.emoji)
 
             text_differs = db_lemma.lemma_text != release_lemma_text
             disambig_differs = db_lemma.disambiguation != release_disambig
             definition_differs = db_definition != release_definition
             notes_differs = (db_notes or None) != (release_notes or None)
+            lexical_gap_reason_differs = (db_lexical_gap_reason or None) != (
+                release_lexical_gap_reason or None
+            )
             emoji_differs = db_emoji != release_emoji
 
             if not (
@@ -1245,6 +1254,7 @@ def _find_lemma_text_changes(
                 or disambig_differs
                 or definition_differs
                 or notes_differs
+                or lexical_gap_reason_differs
                 or emoji_differs
             ):
                 continue
@@ -1261,12 +1271,15 @@ def _find_lemma_text_changes(
                     "release_definition": release_definition,
                     "db_notes": db_notes or "",
                     "release_notes": release_notes or "",
+                    "db_lexical_gap_reason": db_lexical_gap_reason or "",
+                    "release_lexical_gap_reason": release_lexical_gap_reason or "",
                     "db_emoji": _format_emoji_for_display(db_emoji),
                     "release_emoji": _format_emoji_for_display(release_emoji),
                     "text_differs": text_differs,
                     "disambig_differs": disambig_differs,
                     "definition_differs": definition_differs,
                     "notes_differs": notes_differs,
+                    "lexical_gap_reason_differs": lexical_gap_reason_differs,
                     "emoji_differs": emoji_differs,
                     "pos_type": db_lemma.pos_type,
                     "pos_subtype": db_lemma.pos_subtype,
@@ -1357,6 +1370,7 @@ def apply_changes() -> ResponseReturnValue:
                 new_text = _get_release_lemma_text(release_data)
                 new_definition = release_data.get("concept_definition", "") or ""
                 new_notes = release_data.get("notes") or None
+                new_lexical_gap_reason = release_data.get("lexical_gap_reason") or None
                 new_emoji_list = _get_release_emoji(release_data)
                 new_emoji_json = json.dumps(new_emoji_list) if new_emoji_list else None
 
@@ -1364,6 +1378,7 @@ def apply_changes() -> ResponseReturnValue:
                 lemma.disambiguation = _get_release_disambiguation(release_data)
                 lemma.definition_text = new_definition
                 lemma.notes = new_notes
+                lemma.lexical_gap_reason = new_lexical_gap_reason
                 lemma.emoji = new_emoji_json
 
                 log_translation_change(
@@ -1387,6 +1402,8 @@ def apply_changes() -> ResponseReturnValue:
                 update_fields["concept_definition"] = lemma.definition_text or ""
                 if lemma.notes:
                     update_fields["notes"] = lemma.notes
+                if lemma.lexical_gap_reason:
+                    update_fields["lexical_gap_reason"] = lemma.lexical_gap_reason
                 db_emoji_list = _decode_db_emoji(lemma.emoji)
                 if db_emoji_list:
                     update_fields["emoji"] = db_emoji_list

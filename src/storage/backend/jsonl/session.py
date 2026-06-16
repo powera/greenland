@@ -236,6 +236,7 @@ class JSONLSession(BaseSession):
                 "difficulty_level": jsonl_lemma.difficulty_level,
                 "frequency_rank": jsonl_lemma.frequency_rank,
                 "tags": jsonl_lemma.tags,
+                "lexical_gap_reason": jsonl_lemma.lexical_gap_reason,
                 "added_at": jsonl_lemma.added_at,
                 "updated_at": jsonl_lemma.updated_at,
             }

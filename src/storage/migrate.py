@@ -247,6 +247,7 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any = None) -> Any:
         confidence=lemma.confidence,
         verified=lemma.verified,
         notes=lemma.notes,
+        lexical_gap_reason=lemma.lexical_gap_reason,
         added_at=lemma.added_at,
         updated_at=lemma.updated_at,
         # Language-specific data (translations now go in base.jsonl)
@@ -503,6 +504,9 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 
                 if difficulty_overrides_dict:
                     base_data["difficulty_overrides"] = difficulty_overrides_dict
+
+                if lemma.lexical_gap_reason:
+                    base_data["lexical_gap_reason"] = lemma.lexical_gap_reason
 
                 base_records.append(base_data)
 

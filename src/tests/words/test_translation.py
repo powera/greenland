@@ -3,7 +3,7 @@
 from words.translation import build_single_target_translation_prompt
 
 
-def test_single_target_prompt_contains_expected_phrases_and_schema():
+def test_single_target_prompt_contains_expected_phrases_and_schema() -> None:
     context, prompt, schema = build_single_target_translation_prompt(
         source_word="cat",
         source_language="en",
@@ -14,6 +14,7 @@ def test_single_target_prompt_contains_expected_phrases_and_schema():
     assert "multilingual translation expert" in context
     assert 'Translate the single word "cat"' in prompt
     assert "Return only one translation in lemma/base form." in prompt
+    assert "historical or classical target languages" in prompt
     assert "choose exactly one candidate" in prompt
     assert "Candidate translations:" in prompt
     assert "- chat" in prompt
@@ -25,3 +26,15 @@ def test_single_target_prompt_contains_expected_phrases_and_schema():
     translation_field = schema["properties"]["translation"]
     assert translation_field["type"] == "string"
     assert "Single-word translation" in translation_field["description"]
+
+
+def test_single_target_prompt_uses_latin_language_name() -> None:
+    _, prompt, schema = build_single_target_translation_prompt(
+        source_word="tomato",
+        source_language="en",
+        target_language="la",
+    )
+
+    assert "to Latin" in prompt
+    assert "historical or classical target languages" in prompt
+    assert "Latin" in schema["properties"]["translation"]["description"]

@@ -149,6 +149,7 @@ class JSONLStorage(BaseStorage):
 
                         lemma.difficulty_level = data.get("difficulty_level")
                         lemma.notes = data.get("notes")
+                        lemma.lexical_gap_reason = data.get("lexical_gap_reason")
                         lemma.added_at = data.get("added_at")
                         if isinstance(lemma.added_at, str):
                             from datetime import datetime
@@ -731,6 +732,9 @@ class JSONLStorage(BaseStorage):
 
         if lemma.notes:
             data["notes"] = lemma.notes
+
+        if lemma.lexical_gap_reason:
+            data["lexical_gap_reason"] = lemma.lexical_gap_reason
 
         # Note: added_at is not exported (Git handles versioning)
 
