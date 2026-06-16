@@ -1108,14 +1108,16 @@ def get_lemma_forms(guid: str) -> ResponseReturnValue:
 @mirrored_facade("/api/v1/lemma/<guid>/grammar", "GET")
 def get_lemma_grammar(guid: str) -> ResponseReturnValue:
     """
-    Get grammar facts about a lemma (e.g., gender, plurale tantum, declension class).
+    Get grammar facts about a lemma (e.g., grammatical gender, plurale tantum,
+    declension class).
 
     Query parameters:
         - language: Optional. Filter to a specific language code (e.g., 'zh', 'fr', 'lt')
 
     Returns a list of grammar facts, each containing:
         - language_code: Language this fact applies to
-        - fact_type: Type of grammatical fact (e.g., "gender", "number_type", "declension")
+        - fact_type: Type of grammatical fact (e.g., "grammatical_gender",
+          "number_type", "declension_class")
         - fact_value: The value of this fact (e.g., "masculine", "plurale_tantum", "1")
         - notes: Any additional notes (if present)
         - verified: Whether this fact has been verified

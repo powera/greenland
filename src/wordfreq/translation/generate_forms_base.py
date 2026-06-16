@@ -588,7 +588,7 @@ def process_lemma_forms(
                     session,
                     lemma_id=lemma_id,
                     language_code=form_config.language_code,
-                    fact_type="gender",
+                    fact_type="grammatical_gender",
                     fact_value=gender,
                     notes=f"Extracted from {form_config.pos_type} forms",
                     verified=False,

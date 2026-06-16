@@ -31,7 +31,7 @@ def generate_auxiliary_verb(
         agent: The LapeAgent instance
         lemma: The Lemma object
         target_translation: The translation in the target language
-        language_code: Target language code (fr, de, it)
+        language_code: Target language code (fr, de, it, nl)
         session: Database session (optional)
 
     Returns:
