@@ -6,10 +6,10 @@ a Lemma (the conceptual sense) with its language-specific surface forms
 the DerivativeForm table.
 
 This module composes existing CRUD calls in storage/crud/derivative_form.py;
-it does not introduce a new SQLAlchemy model. The partial unique index
-``ix_derivative_forms_synonym_unique_per_lang`` on ``derivative_forms``
-guarantees that a synonym-class surface form in a given language attaches to
-at most one Lemma, which is what makes ``get_lexeme_for_synonym`` well-defined.
+it does not introduce a new SQLAlchemy model. A synonym-class surface form in
+a given language may legitimately attach to more than one Lemma (and recur
+across synonym sub-types), so ``get_lexeme_for_synonym`` returns the first
+matching owner rather than assuming global uniqueness.
 """
 
 from dataclasses import dataclass, field
@@ -80,11 +80,11 @@ def get_lexeme(session: Session, lemma_id: int, language_code: str) -> Optional[
 def get_lexeme_for_synonym(
     session: Session, form_text: str, language_code: str
 ) -> Optional[Lexeme]:
-    """Return the unique Lexeme that owns ``form_text`` as a synonym-class form.
+    """Return the first Lexeme that owns ``form_text`` as a synonym-class form.
 
-    Relies on the partial unique index over synonym grammatical forms so that
-    at most one Lemma can claim a given synonym surface string in a language.
-    Returns None if no synonym row matches.
+    A synonym surface string may attach to more than one Lemma in a language
+    (the data does not enforce global synonym uniqueness), so this returns the
+    first matching owner by row order. Returns None if no synonym row matches.
     """
     row = (
         session.query(DerivativeForm)

@@ -1,10 +1,8 @@
-"""Tests for the Lexeme facade and the synonym-uniqueness partial index."""
+"""Tests for the Lexeme facade over DerivativeForm."""
 
 from __future__ import annotations
 
-import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from storage.lexeme import (
@@ -55,35 +53,47 @@ def _add_form(
     return form
 
 
-def test_synonym_uniqueness_constraint_blocks_duplicate_across_lemmas() -> None:
+def test_synonym_can_attach_to_multiple_lemmas() -> None:
+    """The same synonym surface string may own to more than one lemma."""
     session = _make_session()
     try:
         hat = _add_lemma(session, "hat", "N01_001")
         cap = _add_lemma(session, "cap", "N01_002")
 
         _add_form(session, hat, "beanie", "synonym")
+        _add_form(session, cap, "beanie", "synonym")
         session.commit()
 
-        with pytest.raises(IntegrityError):
-            _add_form(session, cap, "beanie", "synonym")
-        session.rollback()
+        rows = (
+            session.query(DerivativeForm)
+            .filter(
+                DerivativeForm.derivative_form_text == "beanie",
+                DerivativeForm.grammatical_form == "synonym",
+            )
+            .all()
+        )
+        assert len(rows) == 2
     finally:
         session.close()
 
 
-def test_synonym_uniqueness_blocks_across_different_synonym_subtypes() -> None:
-    """A row with grammatical_form=synonym collides with one of synonym_near, etc."""
+def test_synonym_can_recur_across_synonym_subtypes() -> None:
+    """A synonym string may repeat across synonym sub-types for one lemma."""
     session = _make_session()
     try:
-        hat = _add_lemma(session, "hat", "N01_001")
-        cap = _add_lemma(session, "cap", "N01_002")
+        big = _add_lemma(session, "big", "A01_001")
 
-        _add_form(session, hat, "beanie", "synonym")
+        _add_form(session, big, "ample", "synonym")
+        _add_form(session, big, "ample", "synonym_near")
+        _add_form(session, big, "ample", "synonym_regional")
         session.commit()
 
-        with pytest.raises(IntegrityError):
-            _add_form(session, cap, "beanie", "synonym_near")
-        session.rollback()
+        rows = (
+            session.query(DerivativeForm)
+            .filter(DerivativeForm.derivative_form_text == "ample")
+            .all()
+        )
+        assert len(rows) == 3
     finally:
         session.close()
 
