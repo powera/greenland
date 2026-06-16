@@ -307,6 +307,12 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "description": "Bulgarian translation in lemma form (Cyrillic script)",
         "instructions": "- Bulgarian: Provide standard Bulgarian in Cyrillic script in base form (infinitive/da-construction for verbs, singular indefinite for nouns)\n  - Do not include transliteration, just the Cyrillic characters",
     },
+    "greek": {
+        "field": "greek_translation",
+        "code": "el",
+        "description": "Greek translation in lemma form (Greek script)",
+        "instructions": "- Greek: Provide standard Modern Greek in Greek script in base form (infinitive-equivalent dictionary form for verbs, singular nominative for nouns)\n  - Do not include transliteration, just the Greek characters",
+    },
     "croatian": {
         "field": "croatian_translation",
         "code": "hr",
