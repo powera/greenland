@@ -11,7 +11,10 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
-from storage.config.grammar_facts import RELEASE_GRAMMAR_FACT_TYPES
+from storage.config.grammar_facts import (
+    get_release_grammar_fact_languages,
+    is_release_grammar_fact_type,
+)
 from storage.crud.operation_log import log_operation, log_translation_change
 from storage.models.grammar_fact import GrammarFact
 from storage.models.schema import Lemma, LemmaTranslation
@@ -82,7 +85,7 @@ def _load_release_grammar_facts(
 ) -> Dict[str, List[Dict[str, str]]]:
     """Load grammar facts from per-language JSONL files in data/release/lemmas.
 
-    Only loads fact types listed in RELEASE_GRAMMAR_FACT_TYPES for each language.
+    Only loads fact types allowed by the shared grammar fact registry.
 
     Returns:
         Dictionary mapping GUID to list of {fact_type, fact_value, language_code}.
@@ -92,7 +95,7 @@ def _load_release_grammar_facts(
     if not release_dir.exists():
         return grammar_facts
 
-    for lang_code, allowed_types in RELEASE_GRAMMAR_FACT_TYPES.items():
+    for lang_code in get_release_grammar_fact_languages():
         lang_filename = f"{lang_code}.jsonl"
         for lang_file in release_dir.rglob(lang_filename):
             try:
@@ -115,7 +118,7 @@ def _load_release_grammar_facts(
                         for fact in facts_list:
                             fact_type = fact.get("fact_type", "")
                             fact_value = fact.get("fact_value", "")
-                            if fact_type in allowed_types and fact_value:
+                            if is_release_grammar_fact_type(lang_code, fact_type) and fact_value:
                                 if guid not in grammar_facts:
                                     grammar_facts[guid] = []
                                 grammar_facts[guid].append(

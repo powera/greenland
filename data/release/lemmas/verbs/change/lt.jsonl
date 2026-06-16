@@ -1,21 +1,21 @@
-{"guid": "V08_001", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "tampa"}, {"fact_type": "3p_past", "fact_value": "tapo"}]}
-{"guid": "V08_002", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "virsta"}, {"fact_type": "3p_past", "fact_value": "virto"}]}
-{"guid": "V08_003", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "auga"}, {"fact_type": "3p_past", "fact_value": "augo"}]}
-{"guid": "V08_004", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "keičia"}, {"fact_type": "3p_past", "fact_value": "keitė"}]}
-{"guid": "V08_005", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "pradeda"}, {"fact_type": "3p_past", "fact_value": "pradėjo"}]}
-{"guid": "V08_006", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "pradeda"}, {"fact_type": "3p_past", "fact_value": "pradėjo"}]}
-{"guid": "V08_007", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "baigia"}, {"fact_type": "3p_past", "fact_value": "baigė"}]}
-{"guid": "V08_008", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "užbaigia"}, {"fact_type": "3p_past", "fact_value": "užbaigė"}]}
-{"guid": "V08_009", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "didina"}, {"fact_type": "3p_past", "fact_value": "didino"}]}
-{"guid": "V08_010", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "mažina"}, {"fact_type": "3p_past", "fact_value": "mažino"}]}
-{"guid": "V08_011", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "pakeičia"}, {"fact_type": "3p_past", "fact_value": "pakeitė"}]}
-{"guid": "V08_012", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "transformuoja"}, {"fact_type": "3p_past", "fact_value": "transformavo"}]}
-{"guid": "V08_013", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "koreguoja"}, {"fact_type": "3p_past", "fact_value": "koregavo"}]}
-{"guid": "V08_014", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "susitraukia"}, {"fact_type": "3p_past", "fact_value": "susitraukė"}]}
-{"guid": "V08_015", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "plečia"}, {"fact_type": "3p_past", "fact_value": "plėtė"}]}
-{"guid": "V08_016", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "sujungia"}, {"fact_type": "3p_past", "fact_value": "sujungė"}]}
-{"guid": "V08_017", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "uždega"}, {"fact_type": "3p_past", "fact_value": "uždegė"}]}
-{"guid": "V08_018", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "apriboja"}, {"fact_type": "3p_past", "fact_value": "apribojo"}]}
-{"guid": "V08_019", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "sukelia"}, {"fact_type": "3p_past", "fact_value": "sukėlė"}]}
-{"guid": "V08_020", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "leidžia"}, {"fact_type": "3p_past", "fact_value": "leido"}]}
-{"guid": "V08_021", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "išlaiko"}, {"fact_type": "3p_past", "fact_value": "išlaikė"}]}
+{"guid": "V08_001", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "tapti"}, {"fact_type": "3s_present", "fact_value": "tampa"}, {"fact_type": "3s_past", "fact_value": "tapo"}]}
+{"guid": "V08_002", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "virsti"}, {"fact_type": "3s_present", "fact_value": "virsta"}, {"fact_type": "3s_past", "fact_value": "virto"}]}
+{"guid": "V08_003", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "augti"}, {"fact_type": "3s_present", "fact_value": "auga"}, {"fact_type": "3s_past", "fact_value": "augo"}]}
+{"guid": "V08_004", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "keisti"}, {"fact_type": "3s_present", "fact_value": "keičia"}, {"fact_type": "3s_past", "fact_value": "keitė"}]}
+{"guid": "V08_005", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "pradėti"}, {"fact_type": "3s_present", "fact_value": "pradeda"}, {"fact_type": "3s_past", "fact_value": "pradėjo"}]}
+{"guid": "V08_006", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "pradėti"}, {"fact_type": "3s_present", "fact_value": "pradeda"}, {"fact_type": "3s_past", "fact_value": "pradėjo"}]}
+{"guid": "V08_007", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "baigti"}, {"fact_type": "3s_present", "fact_value": "baigia"}, {"fact_type": "3s_past", "fact_value": "baigė"}]}
+{"guid": "V08_008", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "užbaigti"}, {"fact_type": "3s_present", "fact_value": "užbaigia"}, {"fact_type": "3s_past", "fact_value": "užbaigė"}]}
+{"guid": "V08_009", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "didinti"}, {"fact_type": "3s_present", "fact_value": "didina"}, {"fact_type": "3s_past", "fact_value": "didino"}]}
+{"guid": "V08_010", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "mažinti"}, {"fact_type": "3s_present", "fact_value": "mažina"}, {"fact_type": "3s_past", "fact_value": "mažino"}]}
+{"guid": "V08_011", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "pakeisti"}, {"fact_type": "3s_present", "fact_value": "pakeičia"}, {"fact_type": "3s_past", "fact_value": "pakeitė"}]}
+{"guid": "V08_012", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "transformuoti"}, {"fact_type": "3s_present", "fact_value": "transformuoja"}, {"fact_type": "3s_past", "fact_value": "transformavo"}]}
+{"guid": "V08_013", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "koreguoti"}, {"fact_type": "3s_present", "fact_value": "koreguoja"}, {"fact_type": "3s_past", "fact_value": "koregavo"}]}
+{"guid": "V08_014", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "susitraukti"}, {"fact_type": "3s_present", "fact_value": "susitraukia"}, {"fact_type": "3s_past", "fact_value": "susitraukė"}]}
+{"guid": "V08_015", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "plėsti"}, {"fact_type": "3s_present", "fact_value": "plečia"}, {"fact_type": "3s_past", "fact_value": "plėtė"}]}
+{"guid": "V08_016", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "sujungti"}, {"fact_type": "3s_present", "fact_value": "sujungia"}, {"fact_type": "3s_past", "fact_value": "sujungė"}]}
+{"guid": "V08_017", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "uždegti"}, {"fact_type": "3s_present", "fact_value": "uždega"}, {"fact_type": "3s_past", "fact_value": "uždegė"}]}
+{"guid": "V08_018", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "apriboti"}, {"fact_type": "3s_present", "fact_value": "apriboja"}, {"fact_type": "3s_past", "fact_value": "apribojo"}]}
+{"guid": "V08_019", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "sukelti"}, {"fact_type": "3s_present", "fact_value": "sukelia"}, {"fact_type": "3s_past", "fact_value": "sukėlė"}]}
+{"guid": "V08_020", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "leisti"}, {"fact_type": "3s_present", "fact_value": "leidžia"}, {"fact_type": "3s_past", "fact_value": "leido"}]}
+{"guid": "V08_021", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "išlaikyti"}, {"fact_type": "3s_present", "fact_value": "išlaiko"}, {"fact_type": "3s_past", "fact_value": "išlaikė"}]}

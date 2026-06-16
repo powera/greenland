@@ -16,6 +16,7 @@ from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from sqlalchemy.orm import Session
 from storage.backend.config import DataSourceConfig
+from storage.config.grammar_fact_registry import legacy_supported_fact_types
 from storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
 from storage.crud.operation_log import log_operation
 from storage.models.schema import Lemma
@@ -50,11 +51,6 @@ GENDER_SYSTEMS = {
         "genders": ["masculine", "feminine"],
         "description": "2-way system (masculine/feminine)",
     },
-    "ru": {
-        "name": "Russian",
-        "genders": ["masculine", "feminine", "neuter"],
-        "description": "3-way system (masculine/feminine/neuter)",
-    },
     "it": {
         "name": "Italian",
         "genders": ["masculine", "feminine"],
@@ -62,34 +58,9 @@ GENDER_SYSTEMS = {
     },
 }
 
-# Supported fact types and their configuration
-SUPPORTED_FACT_TYPES = {
-    "measure_words": {
-        "languages": ["zh"],
-        "required_pos": ["noun"],
-        "description": "Generate Chinese measure words/classifiers for nouns",
-    },
-    "grammatical_gender": {
-        "languages": list(GENDER_SYSTEMS.keys()),
-        "required_pos": ["noun"],
-        "description": "Determine grammatical gender (masculine, feminine, neuter)",
-    },
-    "verb_transitivity": {
-        "languages": ["en"],
-        "required_pos": ["verb"],
-        "description": "Classify verbs as transitive, intransitive, ditransitive, or ambitransitive",
-    },
-    "countability": {
-        "languages": ["en"],
-        "required_pos": ["noun"],
-        "description": "Classify nouns as countable, uncountable, or both",
-    },
-    "animacy": {
-        "languages": ["en"],
-        "required_pos": ["noun"],
-        "description": "Classify nouns as animate or inanimate",
-    },
-}
+# Supported fact types and their configuration. Keep this historical name for
+# Barsukas imports, but source it from the shared registry.
+SUPPORTED_FACT_TYPES = legacy_supported_fact_types()
 
 
 def _get_llm_client(config: DataSourceConfig) -> UnifiedLLMClient:
@@ -346,22 +317,18 @@ def generate_grammar_fact_for_lemma(
             "language_code": language_code,
         }
 
-    # Generate fact based on type
-    # translation is guaranteed to be non-None here due to validation check above
+    # Generate through the Lape dispatcher so workqueue and CLI stay aligned.
     assert translation is not None
-    if fact_type == "measure_words":
-        fact_value, notes, confidence = generate_measure_words(lemma, translation, config)
-    elif fact_type == "grammatical_gender":
-        fact_value, notes, confidence = generate_grammatical_gender(
-            lemma, translation, language_code, config
-        )
-    else:
-        return {
-            "error": f"Handler not yet implemented for fact type: {fact_type}",
-            "lemma_id": lemma.id,
-            "fact_type": fact_type,
-            "language_code": language_code,
-        }
+    from agents.lape.agent import LapeAgent
+
+    agent = LapeAgent(config=config)
+    fact_value, notes, confidence = agent.generate_fact(
+        fact_type=fact_type,
+        lemma=lemma,
+        language_code=language_code,
+        translation=translation,
+        session=session,
+    )
 
     if not fact_value or confidence < min_confidence:
         return {

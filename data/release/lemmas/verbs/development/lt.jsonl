@@ -1,16 +1,16 @@
-{"guid": "V07_001", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "treniruoja"}, {"fact_type": "3p_past", "fact_value": "treniravo"}]}
-{"guid": "V07_002", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "vysto"}, {"fact_type": "3p_past", "fact_value": "vystė"}]}
-{"guid": "V07_003", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "tobulina"}, {"fact_type": "3p_past", "fact_value": "tobulino"}]}
-{"guid": "V07_004", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "praktikuoja"}, {"fact_type": "3p_past", "fact_value": "praktikavo"}]}
-{"guid": "V07_005", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "progresuoja"}, {"fact_type": "3p_past", "fact_value": "progresavo"}]}
-{"guid": "V07_006", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "subręsta"}, {"fact_type": "3p_past", "fact_value": "subrendo"}]}
-{"guid": "V07_007", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "evoliucionuoja"}, {"fact_type": "3p_past", "fact_value": "evoliucionavo"}]}
-{"guid": "V07_008", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "paruošia"}, {"fact_type": "3p_past", "fact_value": "paruošė"}]}
-{"guid": "V07_009", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "šviečia"}, {"fact_type": "3p_past", "fact_value": "švietė"}]}
-{"guid": "V07_010", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "stiprina"}, {"fact_type": "3p_past", "fact_value": "stiprino"}]}
-{"guid": "V07_011", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "puoselėja"}, {"fact_type": "3p_past", "fact_value": "puoselėjo"}]}
-{"guid": "V07_012", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "ugdo"}, {"fact_type": "3p_past", "fact_value": "ugdė"}]}
-{"guid": "V07_013", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "ženga"}, {"fact_type": "3p_past", "fact_value": "žengo"}]}
-{"guid": "V07_014", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "tobulina"}, {"fact_type": "3p_past", "fact_value": "tobulino"}]}
-{"guid": "V07_015", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "klesti"}, {"fact_type": "3p_past", "fact_value": "klestėjo"}]}
-{"guid": "V07_016", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "augina"}, {"fact_type": "3p_past", "fact_value": "augino"}]}
+{"guid": "V07_001", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "treniruoti"}, {"fact_type": "3s_present", "fact_value": "treniruoja"}, {"fact_type": "3s_past", "fact_value": "treniravo"}]}
+{"guid": "V07_002", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "vystyti"}, {"fact_type": "3s_present", "fact_value": "vysto"}, {"fact_type": "3s_past", "fact_value": "vystė"}]}
+{"guid": "V07_003", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "tobulinti"}, {"fact_type": "3s_present", "fact_value": "tobulina"}, {"fact_type": "3s_past", "fact_value": "tobulino"}]}
+{"guid": "V07_004", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "praktikuoti"}, {"fact_type": "3s_present", "fact_value": "praktikuoja"}, {"fact_type": "3s_past", "fact_value": "praktikavo"}]}
+{"guid": "V07_005", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "progresuoti"}, {"fact_type": "3s_present", "fact_value": "progresuoja"}, {"fact_type": "3s_past", "fact_value": "progresavo"}]}
+{"guid": "V07_006", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "subręsti"}, {"fact_type": "3s_present", "fact_value": "subręsta"}, {"fact_type": "3s_past", "fact_value": "subrendo"}]}
+{"guid": "V07_007", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "evoliucionuoti"}, {"fact_type": "3s_present", "fact_value": "evoliucionuoja"}, {"fact_type": "3s_past", "fact_value": "evoliucionavo"}]}
+{"guid": "V07_008", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "paruošti"}, {"fact_type": "3s_present", "fact_value": "paruošia"}, {"fact_type": "3s_past", "fact_value": "paruošė"}]}
+{"guid": "V07_009", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "šviesti"}, {"fact_type": "3s_present", "fact_value": "šviečia"}, {"fact_type": "3s_past", "fact_value": "švietė"}]}
+{"guid": "V07_010", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "stiprinti"}, {"fact_type": "3s_present", "fact_value": "stiprina"}, {"fact_type": "3s_past", "fact_value": "stiprino"}]}
+{"guid": "V07_011", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "puoselėti"}, {"fact_type": "3s_present", "fact_value": "puoselėja"}, {"fact_type": "3s_past", "fact_value": "puoselėjo"}]}
+{"guid": "V07_012", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "ugdyti"}, {"fact_type": "3s_present", "fact_value": "ugdo"}, {"fact_type": "3s_past", "fact_value": "ugdė"}]}
+{"guid": "V07_013", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "žengti pirmyn"}, {"fact_type": "3s_present", "fact_value": "ženga"}, {"fact_type": "3s_past", "fact_value": "žengo"}]}
+{"guid": "V07_014", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "tobulinti"}, {"fact_type": "3s_present", "fact_value": "tobulina"}, {"fact_type": "3s_past", "fact_value": "tobulino"}]}
+{"guid": "V07_015", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "klestėti"}, {"fact_type": "3s_present", "fact_value": "klesti"}, {"fact_type": "3s_past", "fact_value": "klestėjo"}]}
+{"guid": "V07_016", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "auginti"}, {"fact_type": "3s_present", "fact_value": "augina"}, {"fact_type": "3s_past", "fact_value": "augino"}]}

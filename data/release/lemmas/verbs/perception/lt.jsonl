@@ -1,13 +1,13 @@
-{"guid": "V10_001", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "mato"}, {"fact_type": "3p_past", "fact_value": "matė"}]}
-{"guid": "V10_002", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "girdi"}, {"fact_type": "3p_past", "fact_value": "girdėjo"}]}
-{"guid": "V10_003", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "jaučia"}, {"fact_type": "3p_past", "fact_value": "jautė"}]}
-{"guid": "V10_004", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "uodžia"}, {"fact_type": "3p_past", "fact_value": "uodė"}]}
-{"guid": "V10_005", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "ragauja"}, {"fact_type": "3p_past", "fact_value": "ragavo"}]}
-{"guid": "V10_006", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "žiūri"}, {"fact_type": "3p_past", "fact_value": "žiūrėjo"}]}
-{"guid": "V10_007", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "stebi"}, {"fact_type": "3p_past", "fact_value": "stebėjo"}]}
-{"guid": "V10_008", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "pastebi"}, {"fact_type": "3p_past", "fact_value": "pastebėjo"}]}
-{"guid": "V10_009", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "apžiūri"}, {"fact_type": "3p_past", "fact_value": "apžiūrėjo"}]}
-{"guid": "V10_010", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "stebi"}, {"fact_type": "3p_past", "fact_value": "stebėjo"}]}
-{"guid": "V10_011", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "aptinka"}, {"fact_type": "3p_past", "fact_value": "aptiko"}]}
-{"guid": "V10_012", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "pajunta"}, {"fact_type": "3p_past", "fact_value": "pajuto"}]}
-{"guid": "V10_013", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "atranda"}, {"fact_type": "3p_past", "fact_value": "atrado"}]}
+{"guid": "V10_001", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "matyti"}, {"fact_type": "3s_present", "fact_value": "mato"}, {"fact_type": "3s_past", "fact_value": "matė"}]}
+{"guid": "V10_002", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "girdėti"}, {"fact_type": "3s_present", "fact_value": "girdi"}, {"fact_type": "3s_past", "fact_value": "girdėjo"}]}
+{"guid": "V10_003", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "jausti"}, {"fact_type": "3s_present", "fact_value": "jaučia"}, {"fact_type": "3s_past", "fact_value": "jautė"}]}
+{"guid": "V10_004", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "uosti"}, {"fact_type": "3s_present", "fact_value": "uodžia"}, {"fact_type": "3s_past", "fact_value": "uodė"}]}
+{"guid": "V10_005", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "ragauti"}, {"fact_type": "3s_present", "fact_value": "ragauja"}, {"fact_type": "3s_past", "fact_value": "ragavo"}]}
+{"guid": "V10_006", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "žiūrėti"}, {"fact_type": "3s_present", "fact_value": "žiūri"}, {"fact_type": "3s_past", "fact_value": "žiūrėjo"}]}
+{"guid": "V10_007", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "stebėti"}, {"fact_type": "3s_present", "fact_value": "stebi"}, {"fact_type": "3s_past", "fact_value": "stebėjo"}]}
+{"guid": "V10_008", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "pastebėti"}, {"fact_type": "3s_present", "fact_value": "pastebi"}, {"fact_type": "3s_past", "fact_value": "pastebėjo"}]}
+{"guid": "V10_009", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "apžiūrėti"}, {"fact_type": "3s_present", "fact_value": "apžiūri"}, {"fact_type": "3s_past", "fact_value": "apžiūrėjo"}]}
+{"guid": "V10_010", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "stebėti"}, {"fact_type": "3s_present", "fact_value": "stebi"}, {"fact_type": "3s_past", "fact_value": "stebėjo"}]}
+{"guid": "V10_011", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "aptikti"}, {"fact_type": "3s_present", "fact_value": "aptinka"}, {"fact_type": "3s_past", "fact_value": "aptiko"}]}
+{"guid": "V10_012", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "pajusti"}, {"fact_type": "3s_present", "fact_value": "pajunta"}, {"fact_type": "3s_past", "fact_value": "pajuto"}]}
+{"guid": "V10_013", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "atrasti"}, {"fact_type": "3s_present", "fact_value": "atranda"}, {"fact_type": "3s_past", "fact_value": "atrado"}]}

@@ -4,8 +4,8 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-card-list"></i> Grammar Facts</span>
-                {% if lemma.pos_type == 'noun' %}
                 <div>
+                    {% if generatable_grammar_fact_defs %}
                     <button type="button" class="btn btn-sm btn-success"
                             {% if config.get('ALLOW_OUTBOUND_CALLS', True) %}
                             data-bs-toggle="modal" data-bs-target="#generateGrammarFactModal"
@@ -14,8 +14,12 @@
                             {% endif %}>
                         <i class="bi bi-plus-circle"></i> Generate Grammar Fact
                     </button>
+                    {% endif %}
+                    <button type="button" class="btn btn-sm btn-outline-primary"
+                            data-bs-toggle="modal" data-bs-target="#addGrammarFactModal">
+                        <i class="bi bi-pencil-square"></i> Add Manual Fact
+                    </button>
                 </div>
-                {% endif %}
             </div>
             <div class="card-body">
                 {% if grammar_facts %}
@@ -56,8 +60,8 @@
                 {% else %}
                 <p class="text-muted mb-0">
                     <i class="bi bi-info-circle"></i> No grammar facts recorded for this lemma yet.
-                    {% if lemma.pos_type == 'noun' %}
-                    Use the <strong>Lape agent</strong> to generate language-specific grammar facts like Chinese measure words.
+                    {% if generatable_grammar_fact_defs %}
+                    Use the <strong>Lape agent</strong> to generate supported grammar facts.
                     {% endif %}
                 </p>
                 {% endif %}
@@ -66,8 +70,7 @@
     </div>
 </div>
 
-<!-- Generate Grammar Fact Modal (for nouns) -->
-{% if lemma.pos_type == 'noun' %}
+{% if generatable_grammar_fact_defs %}
 <div class="modal fade" id="generateGrammarFactModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -84,21 +87,17 @@
                     <div class="mb-3">
                         <label for="fact_type" class="form-label">Fact Type</label>
                         <select class="form-select" id="fact_type" name="fact_type" required>
-                            <option value="measure_words">Measure Words (Chinese classifiers)</option>
-                            <option value="grammatical_gender">Grammatical Gender</option>
-                            <!-- Future options:
-                            <option value="number_type">Number Type (Plurale tantum, Singulare tantum)</option>
-                            <option value="declension_class">Declension Class (Lithuanian, Latin, etc.)</option>
-                            -->
+                            {% for fact_def in generatable_grammar_fact_defs %}
+                            <option value="{{ fact_def.fact_type }}">{{ fact_def.display_label }}</option>
+                            {% endfor %}
                         </select>
                         <small class="form-text text-muted">
                             Select the type of grammar fact to generate
                         </small>
                     </div>
                     <div class="mb-3">
-                        <label for="language_code" class="form-label">Language</label>
+                        <label for="grammar_fact_language_code" class="form-label">Language</label>
                         <select class="form-select" id="grammar_fact_language_code" name="language_code" required>
-                            <!-- Options populated by JavaScript based on fact type -->
                         </select>
                         <small class="form-text text-muted">
                             Language for the grammar fact
@@ -123,57 +122,89 @@
 </div>
 
 <script>
-// Grammar fact type configuration
-const GRAMMAR_FACT_TYPES = {
-    'measure_words': {
-        languages: ['zh'],
-        languageNames: {'zh': 'Chinese'},
-        description: 'The Lape agent uses AI to determine the appropriate Chinese classifier/measure word (量词) for this noun. The measure word is required when using numbers with nouns in Chinese.'
-    },
-    'grammatical_gender': {
-        languages: ['fr', 'lt', 'es', 'de', 'pt', 'ru', 'it'],
-        languageNames: {
-            'fr': 'French',
-            'lt': 'Lithuanian',
-            'es': 'Spanish',
-            'de': 'German',
-            'pt': 'Portuguese',
-            'ru': 'Russian',
-            'it': 'Italian'
-        },
-        description: 'The Lape agent uses AI to determine the grammatical gender (masculine, feminine, neuter) for this noun in the selected language.'
+(function() {
+    const grammarFactTypes = {{ generatable_grammar_fact_defs|tojson }};
+    const grammarFactLanguageNames = {{ language_names|tojson }};
+
+    function updateGrammarFactLanguages() {
+        const factTypeSelect = document.getElementById('fact_type');
+        const languageSelect = document.getElementById('grammar_fact_language_code');
+        const descriptionText = document.getElementById('grammar_fact_description_text');
+
+        if (!factTypeSelect || !languageSelect || !descriptionText) return;
+
+        const factConfig = grammarFactTypes.find((entry) => entry.fact_type === factTypeSelect.value);
+        if (!factConfig) return;
+
+        languageSelect.innerHTML = '';
+        factConfig.languages.forEach((langCode, index) => {
+            const option = document.createElement('option');
+            option.value = langCode;
+            option.textContent = `${grammarFactLanguageNames[langCode] || langCode} (${langCode})`;
+            if (index === 0) option.selected = true;
+            languageSelect.appendChild(option);
+        });
+
+        descriptionText.textContent = factConfig.description;
     }
-};
 
-function updateGrammarFactLanguages() {
-    const factType = document.getElementById('fact_type').value;
-    const languageSelect = document.getElementById('grammar_fact_language_code');
-    const descriptionText = document.getElementById('grammar_fact_description_text');
-    const config = GRAMMAR_FACT_TYPES[factType];
-
-    if (!config) return;
-
-    // Clear and populate language options
-    languageSelect.innerHTML = '';
-    config.languages.forEach((langCode, index) => {
-        const option = document.createElement('option');
-        option.value = langCode;
-        option.textContent = `${config.languageNames[langCode]} (${langCode})`;
-        if (index === 0) option.selected = true;
-        languageSelect.appendChild(option);
+    document.addEventListener('DOMContentLoaded', function() {
+        const factTypeSelect = document.getElementById('fact_type');
+        if (factTypeSelect) {
+            updateGrammarFactLanguages();
+            factTypeSelect.addEventListener('change', updateGrammarFactLanguages);
+        }
     });
-
-    // Update description
-    descriptionText.textContent = config.description;
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    const factTypeSelect = document.getElementById('fact_type');
-    if (factTypeSelect) {
-        updateGrammarFactLanguages();
-        factTypeSelect.addEventListener('change', updateGrammarFactLanguages);
-    }
-});
+})();
 </script>
 {% endif %}
+
+<div class="modal fade" id="addGrammarFactModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Manual Grammar Fact</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{{ url_for('agents.add_grammar_fact_manual', lemma_id=lemma.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="manual_language_code" class="form-label">Language</label>
+                        <select class="form-select" id="manual_language_code" name="language_code" required>
+                            {% for lang_code, lang_name in language_names.items() %}
+                            <option value="{{ lang_code }}">{{ lang_name }} ({{ lang_code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="manual_fact_type" class="form-label">Fact Type</label>
+                        <input class="form-control" id="manual_fact_type" name="fact_type"
+                               {% if lemma.pos_type == 'verb' %}
+                               placeholder="verb_form_3s_past"
+                               {% else %}
+                               placeholder="plural"
+                               {% endif %}
+                               required>
+                        <small class="form-text text-muted">
+                            For irregular verb overrides, use verb_form_ followed by the generated form key.
+                        </small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="manual_fact_value" class="form-label">Value</label>
+                        <input class="form-control" id="manual_fact_value" name="fact_value" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="manual_notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="manual_notes" name="notes" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Save Fact
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -22,6 +22,7 @@ from agents.lape.tasks import (
 )
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
+from storage.config.grammar_fact_registry import legacy_supported_fact_types
 from storage.crud.grammar_fact import (
     add_grammar_fact,
     get_grammar_fact_value,
@@ -64,11 +65,6 @@ class LapeAgent:
             "name": "Portuguese",
             "genders": ["masculine", "feminine"],
             "description": "2-way system (masculine/feminine)",
-        },
-        "ru": {
-            "name": "Russian",
-            "genders": ["masculine", "feminine", "neuter"],
-            "description": "3-way system (masculine/feminine/neuter)",
         },
         "it": {
             "name": "Italian",
@@ -125,49 +121,8 @@ class LapeAgent:
         },
     }
 
-    # Supported fact types and their required parameters
-    SUPPORTED_FACT_TYPES = {
-        "measure_words": {
-            "languages": ["zh"],  # Chinese only for now
-            "required_pos": ["noun"],
-            "description": "Generate Chinese measure words/classifiers for nouns",
-        },
-        "grammatical_gender": {
-            "languages": list(GENDER_SYSTEMS.keys()),
-            "required_pos": ["noun"],
-            "description": "Determine grammatical gender (masculine, feminine, neuter)",
-        },
-        "verb_transitivity": {
-            "languages": ["en"],  # English-based, applies to base concept
-            "required_pos": ["verb"],
-            "description": "Classify verbs as transitive, intransitive, ditransitive, or ambitransitive",
-        },
-        "verb_reflexivity": {
-            "languages": ["fr", "es", "de", "lt", "it"],
-            "required_pos": ["verb"],
-            "description": "Identify inherently reflexive, optionally reflexive, or non-reflexive verbs",
-        },
-        "countability": {
-            "languages": ["en"],  # English-based, applies to base concept
-            "required_pos": ["noun"],
-            "description": "Classify nouns as countable, uncountable, or both",
-        },
-        "declension_class": {
-            "languages": ["lt"],  # Lithuanian for now
-            "required_pos": ["noun"],
-            "description": "Determine declension class (1-5 for Lithuanian nouns)",
-        },
-        "auxiliary_verb": {
-            "languages": ["fr", "de", "it"],
-            "required_pos": ["verb"],
-            "description": "Identify auxiliary verb used in compound tenses (avoir/être, haben/sein, etc.)",
-        },
-        "animacy": {
-            "languages": ["en"],  # English-based, applies to base concept
-            "required_pos": ["noun"],
-            "description": "Classify nouns as animate or inanimate (affects case in some languages)",
-        },
-    }
+    # Supported fact types and their required parameters.
+    SUPPORTED_FACT_TYPES = legacy_supported_fact_types()
 
     # Grouped task presets mapping to multiple fact types
     TASK_PRESETS = {
