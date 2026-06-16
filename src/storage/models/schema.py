@@ -11,7 +11,6 @@ from sqlalchemy import (
     CheckConstraint,
     Float,
     ForeignKey,
-    Index,
     Integer,
     String,
     Text,
@@ -19,7 +18,6 @@ from sqlalchemy import (
     event,
     func,
     literal_column,
-    text,
 )
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -320,17 +318,6 @@ class DerivativeForm(Base):
             "grammatical_form",
             "derivative_form_text",
             name="uq_derivative_form",
-        ),
-        Index(
-            "ix_derivative_forms_synonym_unique_per_lang",
-            "language_code",
-            "derivative_form_text",
-            unique=True,
-            sqlite_where=text(
-                "grammatical_form IN ("
-                + ", ".join(f"'{form}'" for form in sorted(SYNONYM_GRAMMATICAL_FORMS))
-                + ")"
-            ),
         ),
     )
 

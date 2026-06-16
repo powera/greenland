@@ -167,6 +167,95 @@ def export_postgres_to_jsonl(postgres_url: str, jsonl_dir: str) -> None:
     export_sqlalchemy_to_jsonl(source_config, jsonl_dir)
 
 
+def _sqlite_file_has_data(sqlite_path: str) -> bool:
+    """Return True if a SQLite file exists and holds at least one lemma."""
+    if not os.path.exists(sqlite_path) or os.path.getsize(sqlite_path) == 0:
+        return False
+
+    import sqlite3
+
+    conn = sqlite3.connect(sqlite_path)
+    try:
+        cursor = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='lemmas'")
+        if cursor.fetchone() is None:
+            return False
+        cursor = conn.execute("SELECT 1 FROM lemmas LIMIT 1")
+        return cursor.fetchone() is not None
+    finally:
+        conn.close()
+
+
+def import_jsonl_to_sqlite(release_dir: str, sqlite_path: str, force: bool = False) -> None:
+    """Build a read-write SQLite database from a JSONL release directory.
+
+    Reuses the JSONL backend's loader, which populates an in-memory SQLite
+    database with full parity (lemmas, translations, derivative forms,
+    synonyms, synthesized base forms, grammar facts, relation groups/members,
+    sentences, sentence translations/words, tombstones). The populated
+    in-memory database is then copied to the target file via SQLite's native
+    backup API, so the on-disk result matches the in-memory load exactly.
+
+    Args:
+        release_dir: Path to the JSONL data directory (the parent of
+            ``lemmas/``, ``sentences/``, etc. — e.g. ``data/release``).
+        sqlite_path: Destination SQLite file path.
+        force: If True, overwrite an existing non-empty SQLite file. Otherwise
+            this raises when the target already holds data.
+    """
+    import sqlite3
+
+    from storage.backend.jsonl.storage import JSONLStorage
+
+    if _sqlite_file_has_data(sqlite_path) and not force:
+        raise ValueError(
+            f"Target SQLite database '{sqlite_path}' already contains data. "
+            "Pass --force to overwrite it."
+        )
+
+    print(f"Loading JSONL release from '{release_dir}'...")
+    storage = JSONLStorage(release_dir)
+    storage.ensure_initialized()
+
+    # Force the JSONL backend to populate its cached in-memory SQLite engine.
+    # Any query is enough to trigger _get_or_create_cached_engine.
+    from storage.backend.jsonl import models as jsonl_models
+
+    warm_session = storage.create_session()
+    try:
+        warm_session.query(jsonl_models.Lemma).limit(1).all()
+    finally:
+        warm_session.close()
+
+    source_engine = storage._cached_sqlite_engine
+    if source_engine is None:
+        raise RuntimeError("JSONL backend did not populate its in-memory SQLite engine")
+
+    # Replace any existing database so the backup writes a clean file. Remove
+    # the WAL/SHM sidecars too: a stale -shm/-wal left from a prior database
+    # paired with a freshly written main file makes SQLite raise disk I/O
+    # errors when it next tries to open the WAL.
+    for suffix in ("", "-wal", "-shm", "-journal"):
+        sidecar = sqlite_path + suffix
+        if os.path.exists(sidecar):
+            os.remove(sidecar)
+    parent_dir = os.path.dirname(os.path.abspath(sqlite_path))
+    os.makedirs(parent_dir, exist_ok=True)
+
+    print(f"Writing SQLite database to '{sqlite_path}'...")
+    raw_source = source_engine.raw_connection()
+    try:
+        source_conn = raw_source.driver_connection
+        dest_conn = sqlite3.connect(sqlite_path)
+        try:
+            source_conn.backup(dest_conn)
+        finally:
+            dest_conn.close()
+    finally:
+        raw_source.close()
+
+    print(f"Done. SQLite database written to '{sqlite_path}'.")
+
+
 def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any = None) -> Any:
     """Convert SQLAlchemy Lemma to JSONL dataclass.
 
@@ -1000,6 +1089,19 @@ def main() -> None:
         help="Path to release directory (default: data/release/lemmas)",
     )
     parser.add_argument(
+        "--jsonl-release-dir",
+        default="data/release",
+        help=(
+            "Path to the JSONL release data directory for jsonl-to-sqlite "
+            "(parent of lemmas/, sentences/, etc.; default: data/release)"
+        ),
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite an existing non-empty target database (jsonl-to-sqlite)",
+    )
+    parser.add_argument(
         "--sentence-release-dir",
         default="data/release/sentences",
         help="Path to sentence release directory (default: data/release/sentences)",
@@ -1022,8 +1124,10 @@ def main() -> None:
         export_sqlite_to_sentence_release(args.sqlite_path, args.sentence_release_dir)
     elif args.direction == "sqlite-to-lemma-audio-release":
         export_sqlite_to_lemma_audio_release(args.sqlite_path, args.release_dir)
+    elif args.direction == "jsonl-to-sqlite":
+        import_jsonl_to_sqlite(args.jsonl_release_dir, args.sqlite_path, force=args.force)
     else:
-        print("JSONL to SQLite migration not yet implemented")
+        print(f"Unknown migration direction: {args.direction}")
         sys.exit(1)
 
 
