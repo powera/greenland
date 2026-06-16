@@ -210,6 +210,13 @@ def main() -> None:
                     print(f"   POS: {pending['pos_type']}/{pending['pos_subtype']}")
                 if pending["frequency_rank"]:
                     print(f"   Frequency rank: {pending['frequency_rank']}")
+                synonym_count = pending.get("synonym_candidate_count", 0)
+                strong_synonym_count = pending.get("strong_synonym_candidate_count", 0)
+                if synonym_count:
+                    print(
+                        f"   Synonym candidates: {synonym_count} "
+                        f"({strong_synonym_count} strong)"
+                    )
                 print(f"   Source: {pending['source']}")
                 print()
 

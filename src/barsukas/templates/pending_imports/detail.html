@@ -84,6 +84,105 @@
     </div>
 </div>
 
+<!-- Synonym candidates -->
+{% if synonym_candidates %}
+<div class="row mb-4">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-intersect"></i> Candidate Existing Lemmas
+            </div>
+            <div class="card-body">
+                {% if has_strong_synonym_candidate %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Strong synonym candidates exist. Choose one as the existing lemma or explicitly create a new lemma anyway.
+                    </div>
+                {% endif %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered align-middle">
+                        <thead>
+                            <tr>
+                                <th>Candidate</th>
+                                <th>LLM</th>
+                                <th>Translation Matches</th>
+                                <th>Explanation</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for candidate in synonym_candidates %}
+                            <tr class="{% if candidate.is_strong %}table-warning{% endif %}">
+                                <td>
+                                    <strong>{{ candidate.candidate_text }}</strong>
+                                    {% if candidate.lemma %}
+                                        <br>
+                                        <a href="{{ url_for('lemmas.view_lemma', lemma_id=candidate.lemma.id) }}">
+                                            {{ candidate.lemma.lemma_text }}
+                                        </a>
+                                        {% if candidate.lemma.guid %}
+                                            <code class="small">{{ candidate.lemma.guid }}</code>
+                                        {% endif %}
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ candidate.lemma.pos_type }}{% if candidate.lemma.pos_subtype %}/{{ candidate.lemma.pos_subtype }}{% endif %}
+                                        </small>
+                                        <br>
+                                        <small>{{ candidate.lemma.definition_text | truncate(80) }}</small>
+                                    {% else %}
+                                        <br><span class="badge bg-secondary">No DB match</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge {% if candidate.is_strong %}bg-warning text-dark{% else %}bg-info{% endif %}">
+                                        {{ candidate.llm_synonym_category }}
+                                    </span>
+                                    {% if candidate.llm_synonym_score is not none %}
+                                        <br><small>{{ "%.2f"|format(candidate.llm_synonym_score) }}</small>
+                                    {% endif %}
+                                    {% if not candidate.same_pos %}
+                                        <br><small class="text-muted">different POS</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ candidate.matched_translation_count }}</strong>
+                                    {% if candidate.matched_translation_languages %}
+                                        <br>
+                                        {% for lang in candidate.matched_translation_languages %}
+                                            <span class="badge bg-light text-dark border">{{ lang }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </td>
+                                <td><small>{{ candidate.explanation or '—' }}</small></td>
+                                <td>
+                                    {% if candidate.lemma %}
+                                        <form method="post" action="{{ url_for('pending_imports.use_synonym', pending_import_id=item.id, candidate_id=candidate.id) }}">
+                                            <button type="submit" class="btn btn-warning btn-sm">
+                                                <i class="bi bi-check2-circle"></i> Use As Synonym
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span class="text-muted">No linked lemma</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if has_strong_synonym_candidate %}
+                    <form method="post" action="{{ url_for('pending_imports.create_anyway', pending_import_id=item.id) }}">
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-plus-circle"></i> Create New Lemma Anyway
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Stage / LLM enrichment -->
 <div class="row mb-4">
     <div class="col-md-8">
@@ -129,7 +228,7 @@
             <div class="card-body d-flex gap-2">
                 <form method="post" action="{{ url_for('pending_imports.approve', pending_import_id=item.id) }}">
                     <button type="submit" class="btn btn-success" id="approveBtn"
-                        {% if not item.pos_subtype %}disabled title="Stage the word first to determine its category"{% endif %}>
+                        {% if not item.pos_subtype or has_strong_synonym_candidate %}disabled title="{% if has_strong_synonym_candidate %}Resolve synonym candidates first{% else %}Stage the word first to determine its category{% endif %}"{% endif %}>
                         <i class="bi bi-check-lg"></i> Approve &amp; Import
                     </button>
                 </form>
@@ -139,9 +238,14 @@
                     </button>
                 </form>
             </div>
-            {% if not item.pos_subtype %}
+            {% if not item.pos_subtype or has_strong_synonym_candidate %}
             <div class="card-footer text-muted small">
-                <i class="bi bi-info-circle"></i> Approve is disabled until the word has been staged and a category (pos_subtype) is determined.
+                <i class="bi bi-info-circle"></i>
+                {% if has_strong_synonym_candidate %}
+                    Approve is disabled until synonym candidates are resolved.
+                {% else %}
+                    Approve is disabled until the word has been staged and a category (pos_subtype) is determined.
+                {% endif %}
             </div>
             {% endif %}
         </div>
@@ -200,8 +304,14 @@
                     }
                     if (first.pos_subtype) {
                         fieldPosSubtype.innerHTML = '<span class="badge bg-success">' + escapeHtml(first.pos_subtype) + '</span>';
-                        approveBtn.disabled = false;
-                        approveBtn.title = '';
+                        if (data.synonym_candidates && data.synonym_candidates.length) {
+                            window.location.reload();
+                        } else if (!data.has_strong_synonym_candidate) {
+                            approveBtn.disabled = false;
+                            approveBtn.title = '';
+                        } else {
+                            window.location.reload();
+                        }
                     }
                 }
             } else {

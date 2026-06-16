@@ -97,6 +97,7 @@
                                     <th>Definition</th>
                                     <th>Disambiguation</th>
                                     <th>POS</th>
+                                    <th>Synonyms</th>
                                     <th>Source</th>
                                     <th>Added</th>
                                     <th>Actions</th>
@@ -123,6 +124,17 @@
                                                 {% if item.pos_subtype %}
                                                     <br><small class="text-muted">{{ item.pos_subtype }}</small>
                                                 {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% set candidate_count = candidate_counts.get(item.id, 0) %}
+                                            {% set strong_count = strong_candidate_counts.get(item.id, 0) %}
+                                            {% if strong_count %}
+                                                <span class="badge bg-warning text-dark">{{ strong_count }} strong</span>
+                                            {% elif candidate_count %}
+                                                <span class="badge bg-info">{{ candidate_count }} candidate{{ '' if candidate_count == 1 else 's' }}</span>
                                             {% else %}
                                                 <span class="text-muted">-</span>
                                             {% endif %}

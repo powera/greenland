@@ -5,8 +5,8 @@
 import datetime
 from typing import Optional
 
-from sqlalchemy import TIMESTAMP, Integer, String, Text, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import TIMESTAMP, Boolean, Float, ForeignKey, Integer, String, Text, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .schema import Base
 
@@ -43,6 +43,47 @@ class PendingImport(Base):
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+
+    synonym_candidates = relationship(
+        "PendingImportSynonymCandidate",
+        back_populates="pending_import",
+        cascade="all, delete-orphan",
+    )
+
+
+class PendingImportSynonymCandidate(Base):
+    """Potential existing lemma match for a pending import."""
+
+    __tablename__ = "pending_import_synonym_candidates"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    pending_import_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("pending_imports.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    lemma_id: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        ForeignKey("lemmas.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    candidate_text: Mapped[str] = mapped_column(String, nullable=False)
+    same_pos: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    llm_synonym_category: Mapped[str] = mapped_column(String, nullable=False)
+    llm_synonym_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    matched_translation_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    matched_translation_languages: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    candidate_translations: Mapped[str] = mapped_column(Text, nullable=False, default="{}")
+    explanation: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    is_strong: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, index=True)
+    status: Mapped[str] = mapped_column(String, nullable=False, default="active", index=True)
+
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+
+    pending_import = relationship("PendingImport", back_populates="synonym_candidates")
+    lemma = relationship("Lemma")
 
 
 class WordExclusion(Base):
