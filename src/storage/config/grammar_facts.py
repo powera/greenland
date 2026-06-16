@@ -1,10 +1,15 @@
-"""Configuration for grammar facts in the release file pipeline."""
+"""Compatibility exports for grammar fact release configuration."""
 
-from typing import Dict, Set
+from storage.config.grammar_fact_registry import (
+    RELEASE_GRAMMAR_FACT_PREFIXES,
+    RELEASE_GRAMMAR_FACT_TYPES,
+    get_release_grammar_fact_languages,
+    is_release_grammar_fact_type,
+)
 
-# Grammar fact types included in release files, keyed by language code.
-# Only these fact types are imported/exported via the release pipeline.
-RELEASE_GRAMMAR_FACT_TYPES: Dict[str, Set[str]] = {
-    "lt": {"3p_present", "3p_past"},
-    "it": {"1s_present", "1s_past", "1s_future", "plural"},
-}
+__all__ = [
+    "RELEASE_GRAMMAR_FACT_PREFIXES",
+    "RELEASE_GRAMMAR_FACT_TYPES",
+    "get_release_grammar_fact_languages",
+    "is_release_grammar_fact_type",
+]

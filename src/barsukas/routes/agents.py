@@ -702,6 +702,66 @@ def generate_grammar_fact(lemma_id: int) -> ResponseReturnValue:
     return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 
 
+@bp.route("/add-grammar-fact/<int:lemma_id>", methods=["POST"])
+def add_grammar_fact_manual(lemma_id: int) -> ResponseReturnValue:
+    """Add or update a grammar fact manually from the lemma page."""
+    from storage.config.grammar_fact_registry import is_release_grammar_fact_type
+    from storage.crud.grammar_fact import add_grammar_fact
+    from storage.models.grammar_fact import GrammarFact
+
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
+
+    language_code = (request.form.get("language_code") or "").strip()
+    fact_type = (request.form.get("fact_type") or "").strip()
+    fact_value = (request.form.get("fact_value") or "").strip()
+    notes = (request.form.get("notes") or "").strip() or None
+
+    if not language_code or not fact_type or not fact_value:
+        flash("Language, fact type, and value are required", "warning")
+        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+
+    if fact_type.startswith("verb_form_") and lemma.pos_type != "verb":
+        flash("verb_form_* overrides can only be added to verbs", "warning")
+        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+
+    existing = (
+        g.db.query(GrammarFact)
+        .filter(
+            GrammarFact.lemma_id == lemma_id,
+            GrammarFact.language_code == language_code,
+            GrammarFact.fact_type == fact_type,
+        )
+        .first()
+    )
+    if existing:
+        existing.fact_value = fact_value
+        existing.notes = notes
+        g.db.commit()
+        flash(f"Updated grammar fact {language_code}:{fact_type}", "success")
+    else:
+        result = add_grammar_fact(
+            g.db,
+            lemma_id=lemma_id,
+            language_code=language_code,
+            fact_type=fact_type,
+            fact_value=fact_value,
+            notes=notes,
+            verified=False,
+        )
+        if result:
+            flash(f"Added grammar fact {language_code}:{fact_type}", "success")
+        else:
+            flash("Could not add grammar fact", "error")
+
+    if is_release_grammar_fact_type(language_code, fact_type):
+        flash("This grammar fact is eligible for release sync.", "info")
+
+    return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+
+
 @bp.route("/view-sentences/<int:lemma_id>")
 def view_sentences(lemma_id: int) -> ResponseReturnValue:
     """View all sentences that use a specific lemma."""

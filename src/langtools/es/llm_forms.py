@@ -11,7 +11,12 @@ from langtools.es.conjugation import conjugate
 from langtools.es.inflection import build_adjective_forms
 from langtools.form_registry import FORM_SPECS
 from langtools.llm_forms_base import query_forms
+from langtools.verb_overrides import (
+    apply_verb_form_overrides,
+    get_complete_verb_form_overrides,
+)
 from sqlalchemy.orm import Session
+from storage.crud.grammar_fact import get_verb_form_overrides
 from storage import database as linguistic_db
 from storage.models.enums import GrammaticalForm
 from storage.translation_helpers import get_translation
@@ -61,7 +66,11 @@ def get_verb_forms(
             conjugation_forms = conjugate(spanish_verb)
             if conjugation_forms:
                 projected_forms = _project_spanish_forms_to_registry(conjugation_forms)
-                if projected_forms:
+                merged_forms = apply_verb_form_overrides(
+                    projected_forms,
+                    get_verb_form_overrides(session, lemma.id, "es"),
+                )
+                if merged_forms:
                     linguistic_db.log_query(
                         session,
                         word=spanish_verb,
@@ -69,14 +78,31 @@ def get_verb_forms(
                         prompt="[mechanical langtools.es.conjugation]",
                         response=json.dumps(
                             {
-                                "forms": projected_forms,
+                                "forms": merged_forms,
                                 "notes": "mechanical; past mapped from preterite",
                                 "mechanical": True,
                             }
                         ),
                         model=client.default_model,
                     )
-                    return projected_forms, True
+                    return merged_forms, True
+            override_forms = get_complete_verb_form_overrides(session, lemma.id, "es")
+            if override_forms:
+                linguistic_db.log_query(
+                    session,
+                    word=spanish_verb,
+                    query_type="spanish_verb_conjugations",
+                    prompt="[grammar fact verb_form_* overrides]",
+                    response=json.dumps(
+                        {
+                            "forms": override_forms,
+                            "notes": "exact forms from grammar facts",
+                            "mechanical": True,
+                        }
+                    ),
+                    model=client.default_model,
+                )
+                return override_forms, True
             logger.info("Falling back to LLM for Spanish verb '%s'", spanish_verb)
 
     return query_forms(FORM_SPECS[("es", "verb")], client, lemma_id, get_session_func)

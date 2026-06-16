@@ -307,6 +307,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         TierDefinition,
     )
     from wordfreq.lexeme_frequency import get_lexeme_frequencies_all_corpora
+    from storage.config.grammar_fact_registry import get_generatable_fact_definitions
 
     # Get all lemma data in optimized bulk queries (replaces 10+ separate queries)
     data = get_lemma_view_data(g.db, lemma_id)
@@ -421,6 +422,16 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         ]
 
     queued_tasks = get_tasks_for_target(g.db, "lemma", lemma_id, limit=8)
+    generatable_grammar_fact_defs = [
+        {
+            "fact_type": definition.fact_type,
+            "languages": list(definition.languages),
+            "display_label": definition.display_label,
+            "description": definition.description,
+        }
+        for definition in get_generatable_fact_definitions().values()
+        if lemma.pos_type in definition.required_pos
+    ]
 
     lemma_tiers = (
         g.db.query(LemmaTier)
@@ -508,6 +519,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         sentence_count=sentence_count,
         needs_disambiguation_check=needs_disambiguation_check,
         grammar_facts=grammar_facts,
+        generatable_grammar_fact_defs=generatable_grammar_fact_defs,
         tombstones=tombstones,
         openai_voices=openai_voices,
         espeak_voices=espeak_voices,

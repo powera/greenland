@@ -69,7 +69,7 @@ Supported fact types:
 
   Noun facts:
     - measure_words: Chinese measure words/classifiers (languages: zh)
-    - grammatical_gender: Noun gender (languages: fr, lt, es, de, pt, ru, it)
+    - grammatical_gender: Noun gender (languages: fr, lt, es, de, pt, it)
     - countability: Countable/uncountable/both (languages: en - base concept)
     - declension_class: Declension class 1-5 (languages: lt)
     - animacy: Animate/inanimate (languages: en - base concept)

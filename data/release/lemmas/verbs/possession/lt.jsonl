@@ -1,17 +1,17 @@
-{"guid": "V06_001", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "yra"}, {"fact_type": "3p_past", "fact_value": "buvo"}]}
-{"guid": "V06_002", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "turi"}, {"fact_type": "3p_past", "fact_value": "turėjo"}]}
-{"guid": "V06_003", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "uždirba"}, {"fact_type": "3p_past", "fact_value": "uždirbo"}]}
-{"guid": "V06_004", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "perka"}, {"fact_type": "3p_past", "fact_value": "pirko"}]}
-{"guid": "V06_005", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "duoda"}, {"fact_type": "3p_past", "fact_value": "davė"}]}
-{"guid": "V06_006", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "paima"}, {"fact_type": "3p_past", "fact_value": "paėmė"}]}
-{"guid": "V06_007", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "parduoda"}, {"fact_type": "3p_past", "fact_value": "pardavė"}]}
-{"guid": "V06_008", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "skolinasi"}, {"fact_type": "3p_past", "fact_value": "skolinosi"}]}
-{"guid": "V06_009", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "skolina"}, {"fact_type": "3p_past", "fact_value": "skolino"}]}
-{"guid": "V06_010", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "turi"}, {"fact_type": "3p_past", "fact_value": "turėjo"}]}
-{"guid": "V06_011", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "dalinasi"}, {"fact_type": "3p_past", "fact_value": "dalinosi"}]}
-{"guid": "V06_012", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "vagia"}, {"fact_type": "3p_past", "fact_value": "vogė"}]}
-{"guid": "V06_013", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "moka"}, {"fact_type": "3p_past", "fact_value": "mokėjo"}]}
-{"guid": "V06_014", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "gauna"}, {"fact_type": "3p_past", "fact_value": "gavo"}]}
-{"guid": "V06_015", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "aukoja"}, {"fact_type": "3p_past", "fact_value": "aukojo"}]}
-{"guid": "V06_016", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "samdo"}, {"fact_type": "3p_past", "fact_value": "samdė"}]}
-{"guid": "V06_017", "grammar_facts": [{"fact_type": "3p_present", "fact_value": "paduoda"}, {"fact_type": "3p_past", "fact_value": "padavė"}]}
+{"guid": "V06_001", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "būti"}, {"fact_type": "3s_present", "fact_value": "yra"}, {"fact_type": "3s_past", "fact_value": "buvo"}]}
+{"guid": "V06_002", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "turėti"}, {"fact_type": "3s_present", "fact_value": "turi"}, {"fact_type": "3s_past", "fact_value": "turėjo"}]}
+{"guid": "V06_003", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "uždirbti"}, {"fact_type": "3s_present", "fact_value": "uždirba"}, {"fact_type": "3s_past", "fact_value": "uždirbo"}]}
+{"guid": "V06_004", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "pirkti"}, {"fact_type": "3s_present", "fact_value": "perka"}, {"fact_type": "3s_past", "fact_value": "pirko"}]}
+{"guid": "V06_005", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "duoti"}, {"fact_type": "3s_present", "fact_value": "duoda"}, {"fact_type": "3s_past", "fact_value": "davė"}]}
+{"guid": "V06_006", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "paimti"}, {"fact_type": "3s_present", "fact_value": "paima"}, {"fact_type": "3s_past", "fact_value": "paėmė"}]}
+{"guid": "V06_007", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "parduoti"}, {"fact_type": "3s_present", "fact_value": "parduoda"}, {"fact_type": "3s_past", "fact_value": "pardavė"}]}
+{"guid": "V06_008", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "skolintis"}, {"fact_type": "3s_present", "fact_value": "skolinasi"}, {"fact_type": "3s_past", "fact_value": "skolinosi"}]}
+{"guid": "V06_009", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "skolinti"}, {"fact_type": "3s_present", "fact_value": "skolina"}, {"fact_type": "3s_past", "fact_value": "skolino"}]}
+{"guid": "V06_010", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "turėti"}, {"fact_type": "3s_present", "fact_value": "turi"}, {"fact_type": "3s_past", "fact_value": "turėjo"}]}
+{"guid": "V06_011", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "dalintis"}, {"fact_type": "3s_present", "fact_value": "dalinasi"}, {"fact_type": "3s_past", "fact_value": "dalinosi"}]}
+{"guid": "V06_012", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "vogti"}, {"fact_type": "3s_present", "fact_value": "vagia"}, {"fact_type": "3s_past", "fact_value": "vogė"}]}
+{"guid": "V06_013", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "mokėti"}, {"fact_type": "3s_present", "fact_value": "moka"}, {"fact_type": "3s_past", "fact_value": "mokėjo"}]}
+{"guid": "V06_014", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "gauti"}, {"fact_type": "3s_present", "fact_value": "gauna"}, {"fact_type": "3s_past", "fact_value": "gavo"}]}
+{"guid": "V06_015", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "aukoti"}, {"fact_type": "3s_present", "fact_value": "aukoja"}, {"fact_type": "3s_past", "fact_value": "aukojo"}]}
+{"guid": "V06_016", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "samdyti"}, {"fact_type": "3s_present", "fact_value": "samdo"}, {"fact_type": "3s_past", "fact_value": "samdė"}]}
+{"guid": "V06_017", "grammar_facts": [{"fact_type": "infinitive", "fact_value": "paduoti"}, {"fact_type": "3s_present", "fact_value": "paduoda"}, {"fact_type": "3s_past", "fact_value": "padavė"}]}

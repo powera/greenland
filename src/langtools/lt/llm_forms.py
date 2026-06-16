@@ -13,8 +13,12 @@ from langtools.llm_forms_base import query_forms
 from langtools.lt.conjugation import conjugate
 from langtools.lt.declension import decline_noun
 from langtools.lt.principal_parts import get_principal_parts
+from langtools.verb_overrides import (
+    apply_verb_form_overrides,
+    get_complete_verb_form_overrides,
+)
 from sqlalchemy.orm import Session
-from storage.crud.grammar_fact import get_grammatical_gender
+from storage.crud.grammar_fact import get_grammatical_gender, get_verb_form_overrides
 from storage import database as linguistic_db
 from storage.models.enums import GrammaticalForm
 from storage.translation_helpers import get_translation
@@ -118,33 +122,24 @@ def get_verb_forms(
             # Try principal parts from grammar facts DB
             guid = getattr(lemma, "guid", None)
             release_parts = get_principal_parts(session, guid) if guid else None
+            principal_parts: Tuple[str, str, str] | None
             if release_parts:
-                # Extract clean infinitive from translation string.
-                # Legacy formats like "dirbti, dirba, dirbo" or
-                # "dirbti (dirba, dirbo)" need parsing; a plain single-word
-                # translation like "dirbti" is used directly.
-                # If the translation is complex (multi-synonym, annotated)
-                # and can't be parsed, treat as a mechanical-conjugation
-                # miss and fall through to LLM.
-                parsed = _parse_principal_parts(lithuanian_verb)
-                clean_verb = lithuanian_verb.strip()
-                if parsed:
-                    infinitive = parsed[0]
-                elif " " not in clean_verb and "," not in clean_verb:
-                    # Single-word translation is a clean infinitive
-                    infinitive = clean_verb
+                if len(release_parts) == 2:
+                    parsed = _parse_principal_parts(lithuanian_verb)
+                    if parsed:
+                        principal_parts = (parsed[0], release_parts[0], release_parts[1])
+                    else:
+                        clean_verb = lithuanian_verb.strip()
+                        if " " not in clean_verb and "," not in clean_verb:
+                            principal_parts = (clean_verb, release_parts[0], release_parts[1])
+                        else:
+                            principal_parts = None
                 else:
-                    # Can't extract a clean infinitive — skip mechanical
-                    infinitive = None
-
-                if infinitive is not None:
-                    principal_parts: Tuple[str, str, str] | None = (
-                        infinitive,
-                        release_parts[0],
-                        release_parts[1],
-                    )
-                else:
-                    principal_parts = None
+                    parsed = _parse_principal_parts(release_parts[0])
+                    if parsed:
+                        principal_parts = (parsed[0], release_parts[1], release_parts[2])
+                    else:
+                        principal_parts = release_parts
             else:
                 # Fall back to parsing principal parts from the translation string
                 principal_parts = _parse_principal_parts(lithuanian_verb)
@@ -156,6 +151,12 @@ def get_verb_forms(
                     past_3=principal_parts[2],
                 )
                 if conjugation_forms:
+                    conjugation_forms = apply_verb_form_overrides(
+                        conjugation_forms,
+                        get_verb_form_overrides(session, lemma.id, "lt"),
+                    )
+                    if conjugation_forms is None:
+                        conjugation_forms = {}
                     source = "grammar_facts DB" if release_parts else "translation principal parts"
                     linguistic_db.log_query(
                         session,
@@ -172,6 +173,23 @@ def get_verb_forms(
                         model=client.default_model,
                     )
                     return conjugation_forms, True
+            override_forms = get_complete_verb_form_overrides(session, lemma.id, "lt")
+            if override_forms:
+                linguistic_db.log_query(
+                    session,
+                    word=lithuanian_verb,
+                    query_type="lithuanian_verb_forms",
+                    prompt="[grammar fact verb_form_* overrides]",
+                    response=json.dumps(
+                        {
+                            "forms": override_forms,
+                            "notes": "exact forms from grammar facts",
+                            "mechanical": True,
+                        }
+                    ),
+                    model=client.default_model,
+                )
+                return override_forms, True
             logger.info("Falling back to LLM for Lithuanian verb '%s'", lithuanian_verb)
 
     return query_forms(FORM_SPECS[("lt", "verb")], client, lemma_id, get_session_func)

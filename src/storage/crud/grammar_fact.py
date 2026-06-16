@@ -6,6 +6,7 @@ from typing import Dict, List, Optional
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from storage.config.grammar_fact_registry import VERB_FORM_OVERRIDE_PREFIX
 from storage.models.grammar_fact import GrammarFact
 
 logger = logging.getLogger(__name__)
@@ -329,6 +330,30 @@ def get_declension_class(session: Session, lemma_id: int, language_code: str) ->
             print(f"This noun follows declension pattern {declension}")
     """
     return get_grammar_fact_value(session, lemma_id, language_code, "declension")
+
+
+def get_verb_form_overrides(session: Session, lemma_id: int, language_code: str) -> Dict[str, str]:
+    """Return exact verb form overrides keyed by form name.
+
+    Overrides are stored as grammar facts with fact types like
+    ``verb_form_1s_present`` or ``verb_form_past_participle``.
+    """
+    query = session.query(GrammarFact).filter(
+        GrammarFact.lemma_id == lemma_id,
+        GrammarFact.language_code == language_code,
+        GrammarFact.fact_type.like(f"{VERB_FORM_OVERRIDE_PREFIX}%"),
+    )
+    if not hasattr(query, "all"):
+        return {}
+    facts = query.all()
+    overrides: Dict[str, str] = {}
+    for fact in facts:
+        if not fact.fact_value:
+            continue
+        form_key = fact.fact_type[len(VERB_FORM_OVERRIDE_PREFIX) :]
+        if form_key:
+            overrides[form_key] = fact.fact_value
+    return overrides
 
 
 def update_alternate_forms_facts_after_deletion(
