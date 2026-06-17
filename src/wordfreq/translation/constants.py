@@ -288,6 +288,12 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "description": "Hindi translation in lemma form (Devanagari script)",
         "instructions": "- Hindi: Provide standard Hindi in Devanagari script in base form (infinitive for verbs, singular for nouns)\n  - Use Modern Standard Hindi as spoken in India\n  - Do not include transliteration, just the Devanagari characters",
     },
+    "punjabi": {
+        "field": "punjabi_translation",
+        "code": "pa",
+        "description": "Punjabi translation in lemma form (Gurmukhi script)",
+        "instructions": "- Punjabi: Provide standard Punjabi in Gurmukhi script in base form (infinitive for verbs, singular for nouns)\n  - Use Eastern (Indian) Punjabi as spoken in Indian Punjab\n  - Use the Gurmukhi script, not Shahmukhi/Perso-Arabic\n  - Do not include transliteration, just the Gurmukhi characters",
+    },
     "bengali": {
         "field": "bengali_translation",
         "code": "bn",

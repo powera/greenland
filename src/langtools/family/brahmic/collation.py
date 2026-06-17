@@ -1,4 +1,4 @@
-"""Collation data for Brahmic-script languages (Devanagari, Bengali, Tamil, Kannada).
+"""Collation data for Brahmic-script languages (Devanagari, Bengali, Tamil, Kannada, Gurmukhi).
 
 Independent letters are in canonical varnamala order within each script's
 primary Unicode block, but we still remap to single-character ASCII so every
@@ -31,10 +31,17 @@ KN_LETTERS_LOWER: List[str] = list(
     "ಅಆಇಈಉಊಋಎಏಐಒಓಔ" "ಕಖಗಘಙ" "ಚಛಜಝಞ" "ಟಠಡಢಣ" "ತಥದಧನ" "ಪಫಬಭಮ" "ಯರಲವಶಷಸಹಳ"
 )
 
+# Punjabi (Gurmukhi): the three vowel-bearers (Ura, Aira, Iri) followed by the
+# 35 consonants of the painti in standard Gurmukhi alphabet order.  Independent
+# vowels are formed from the bearers plus matras, which are stripped as
+# combining marks before lookup, so word-initial vowels collate via their bearer.
+PA_LETTERS_LOWER: List[str] = list("ੳਅੲ" "ਸਹ" "ਕਖਗਘਙ" "ਚਛਜਝਞ" "ਟਠਡਢਣ" "ਤਥਦਧਨ" "ਪਫਬਭਮ" "ਯਰਲਵੜ")
+
 HI_REMAP: Dict[str, str] = build_position_codes(HI_LETTERS_LOWER)
 BN_REMAP: Dict[str, str] = build_position_codes(BN_LETTERS_LOWER)
 TA_REMAP: Dict[str, str] = build_position_codes(TA_LETTERS_LOWER)
 KN_REMAP: Dict[str, str] = build_position_codes(KN_LETTERS_LOWER)
+PA_REMAP: Dict[str, str] = build_position_codes(PA_LETTERS_LOWER)
 
 # Master table for Brahmic position-remapped languages.
 REMAP_LANGUAGES: Dict[str, Dict[str, str]] = {
@@ -42,6 +49,7 @@ REMAP_LANGUAGES: Dict[str, Dict[str, str]] = {
     "bn": BN_REMAP,
     "ta": TA_REMAP,
     "kn": KN_REMAP,
+    "pa": PA_REMAP,
 }
 
 
