@@ -21,6 +21,8 @@ class SearchResult(TypedDict, total=False):
     pos_subtype: Optional[str]
     difficulty_level: Optional[int]
     disambiguation: Optional[str]
+    lexical_gap_reason: Optional[str]
+    translation_absence: Dict[str, Any]
     translations: Dict[str, str]
     verified: bool
 
@@ -40,6 +42,16 @@ class BulkTranslationMapResponse(TypedDict):
     metadata: Dict[str, Any]
 
 
+class TranslationAbsence(TypedDict, total=False):
+    language_code: str
+    is_populated: bool
+    reason: str
+    reason_codes: List[str]
+    effective_difficulty_level: Optional[int]
+    difficulty_override: Dict[str, Any]
+    lexical_gap_reason: str
+
+
 class LemmaInfo(TypedDict, total=False):
     guid: str
     lemma_text: str
@@ -50,6 +62,7 @@ class LemmaInfo(TypedDict, total=False):
     verified: bool
     tags: Optional[Any]
     disambiguation: Optional[str]
+    lexical_gap_reason: Optional[str]
 
 
 class DerivativeFormEntry(TypedDict, total=False):

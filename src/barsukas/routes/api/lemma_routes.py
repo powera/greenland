@@ -243,8 +243,9 @@ def list_lemmas_by_difficulty() -> ResponseReturnValue:
     total_count = query.count()
     results = query.order_by(Lemma.id.asc()).limit(limit).offset(offset).all()
 
-    lemmas_data = [
-        {
+    lemmas_data: List[Dict[str, Any]] = []
+    for lemma in results:
+        lemma_data: Dict[str, Any] = {
             "guid": lemma.guid,
             "lemma_text": lemma.lemma_text,
             "definition": lemma.definition_text,
@@ -252,10 +253,14 @@ def list_lemmas_by_difficulty() -> ResponseReturnValue:
             "pos_subtype": _serialize_value(lemma.pos_subtype),
             "difficulty_level": _serialize_value(lemma.difficulty_level),
             "disambiguation": _serialize_value(lemma.disambiguation),
+            "lexical_gap_reason": _serialize_value(lemma.lexical_gap_reason),
             "verified": lemma.verified,
         }
-        for lemma in results
-    ]
+        if missing_translation:
+            lemma_data["translation_absence"] = {
+                missing_translation: _build_translation_absence_metadata(lemma, missing_translation)
+            }
+        lemmas_data.append(lemma_data)
 
     metadata = {
         "difficulty_filter": difficulty,
@@ -292,6 +297,7 @@ def get_lemmas_translations_bulk() -> ResponseReturnValue:
     lemma_by_guid = {lemma.guid: lemma for lemma in lemmas}
 
     data: Dict[str, Dict[str, str]] = {}
+    translation_absence: Dict[str, Dict[str, Dict[str, Any]]] = {}
     missing_guids: List[str] = []
     for guid in guids:
         lemma = lemma_by_guid.get(guid)
@@ -307,18 +313,23 @@ def get_lemmas_translations_bulk() -> ResponseReturnValue:
         if language_filter:
             value = all_translations.get(language_filter)
             data[guid] = {language_filter: value} if value else {}
+            if not value:
+                translation_absence[guid] = {
+                    language_filter: _build_translation_absence_metadata(lemma, language_filter)
+                }
         else:
             data[guid] = all_translations
 
-    return _build_success_response(
-        data,
-        {
-            "requested_guids": guids,
-            "found_count": len(data),
-            "missing_guids": missing_guids,
-            "requested_language": language_filter or None,
-        },
-    )
+    metadata: Dict[str, Any] = {
+        "requested_guids": guids,
+        "found_count": len(data),
+        "missing_guids": missing_guids,
+        "requested_language": language_filter or None,
+    }
+    if translation_absence:
+        metadata["translation_absence"] = translation_absence
+
+    return _build_success_response(data, metadata)
 
 
 def _serialize_value(value: Any, field_name: str = "") -> Any:
@@ -708,6 +719,7 @@ def get_lemma_info(guid: str) -> ResponseReturnValue:
         "verified": lemma.verified,
         "tags": _serialize_value(lemma.tags),
         "disambiguation": _serialize_value(lemma.disambiguation),
+        "lexical_gap_reason": _serialize_value(lemma.lexical_gap_reason),
     }
 
     return _build_success_response(data)
@@ -930,6 +942,47 @@ def _matching_translation_languages(
     return matched_languages
 
 
+def _build_translation_absence_metadata(lemma: Lemma, language_code: str) -> Dict[str, Any]:
+    """Describe why a lemma has no populated translation for a language."""
+    override = (
+        g.db.query(LemmaDifficultyOverride)
+        .filter(
+            LemmaDifficultyOverride.lemma_id == lemma.id,
+            LemmaDifficultyOverride.language_code == language_code,
+        )
+        .first()
+    )
+    effective_difficulty = (
+        override.difficulty_level if override is not None else lemma.difficulty_level
+    )
+
+    reason_codes: List[str] = []
+    if effective_difficulty == Config.EXCLUDE_DIFFICULTY_LEVEL:
+        reason_codes.append("excluded")
+    if lemma.lexical_gap_reason:
+        reason_codes.append("lexical_gap")
+    if not reason_codes:
+        reason_codes.append("not_populated")
+
+    data: Dict[str, Any] = {
+        "language_code": language_code,
+        "is_populated": False,
+        "reason": reason_codes[0],
+        "reason_codes": reason_codes,
+        "effective_difficulty_level": _serialize_value(effective_difficulty),
+    }
+
+    if override is not None:
+        data["difficulty_override"] = {
+            "difficulty_level": override.difficulty_level,
+            "notes": _serialize_value(override.notes),
+        }
+    if lemma.lexical_gap_reason:
+        data["lexical_gap_reason"] = lemma.lexical_gap_reason
+
+    return data
+
+
 def _main_has_synonym(lemma_id: int, language_code: str, synonym_text: str) -> bool:
     """Return whether the main lemma already has this synonym text."""
     existing_count = int(
@@ -1028,6 +1081,10 @@ def get_lemma_translations(guid: str) -> ResponseReturnValue:
     if language_filter:
         metadata["requested_language"] = language_filter
         metadata["is_populated"] = language_filter in all_translations
+        if language_filter not in all_translations:
+            metadata["translation_absence"] = {
+                language_filter: _build_translation_absence_metadata(lemma, language_filter)
+            }
 
     return _build_success_response(translations, metadata)
 
