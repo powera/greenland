@@ -61,6 +61,14 @@ from storage.translation_helpers import (
 from workqueue.task_queue import TaskStatus, TaskType, enqueue_task
 from barsukas.routes.api import bp
 
+TRANSLATION_STATUS_VALUES = {
+    "conventional",
+    "late_construction",
+    "modern_loan",
+    "descriptive",
+    "uncertain",
+}
+
 
 @bp.route("/v1/search")
 @mirrored_facade("/api/v1/search", "GET")
@@ -298,6 +306,7 @@ def get_lemmas_translations_bulk() -> ResponseReturnValue:
 
     data: Dict[str, Dict[str, str]] = {}
     translation_absence: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    translation_metadata: Dict[str, Dict[str, Dict[str, Any]]] = {}
     missing_guids: List[str] = []
     for guid in guids:
         lemma = lemma_by_guid.get(guid)
@@ -317,8 +326,14 @@ def get_lemmas_translations_bulk() -> ResponseReturnValue:
                 translation_absence[guid] = {
                     language_filter: _build_translation_absence_metadata(lemma, language_filter)
                 }
+            row_metadata = _get_translation_status_metadata(lemma, [language_filter])
+            if row_metadata:
+                translation_metadata[guid] = row_metadata
         else:
             data[guid] = all_translations
+            row_metadata = _get_translation_status_metadata(lemma, list(all_translations.keys()))
+            if row_metadata:
+                translation_metadata[guid] = row_metadata
 
     metadata: Dict[str, Any] = {
         "requested_guids": guids,
@@ -328,6 +343,8 @@ def get_lemmas_translations_bulk() -> ResponseReturnValue:
     }
     if translation_absence:
         metadata["translation_absence"] = translation_absence
+    if translation_metadata:
+        metadata["translation_metadata"] = translation_metadata
 
     return _build_success_response(data, metadata)
 
@@ -983,6 +1000,32 @@ def _build_translation_absence_metadata(lemma: Lemma, language_code: str) -> Dic
     return data
 
 
+def _serialize_translation_status(translation: LemmaTranslation) -> Optional[Dict[str, Any]]:
+    """Return status metadata for a translation row if any status field is set."""
+    if not translation.translation_status and not translation.translation_status_note:
+        return None
+    return {
+        "translation_status": _serialize_value(translation.translation_status),
+        "translation_status_note": _serialize_value(translation.translation_status_note),
+    }
+
+
+def _get_translation_status_metadata(
+    lemma: Lemma, language_codes: Optional[List[str]] = None
+) -> Dict[str, Dict[str, Any]]:
+    """Return per-language translation status metadata for populated rows."""
+    query = g.db.query(LemmaTranslation).filter(LemmaTranslation.lemma_id == lemma.id)
+    if language_codes is not None:
+        query = query.filter(LemmaTranslation.language_code.in_(language_codes))
+
+    metadata: Dict[str, Dict[str, Any]] = {}
+    for translation in query.all():
+        serialized = _serialize_translation_status(translation)
+        if serialized is not None:
+            metadata[translation.language_code] = serialized
+    return metadata
+
+
 def _main_has_synonym(lemma_id: int, language_code: str, synonym_text: str) -> bool:
     """Return whether the main lemma already has this synonym text."""
     existing_count = int(
@@ -1085,8 +1128,73 @@ def get_lemma_translations(guid: str) -> ResponseReturnValue:
             metadata["translation_absence"] = {
                 language_filter: _build_translation_absence_metadata(lemma, language_filter)
             }
+        else:
+            translation_metadata = _get_translation_status_metadata(lemma, [language_filter])
+            if translation_metadata:
+                metadata["translation_metadata"] = translation_metadata
+    else:
+        translation_metadata = _get_translation_status_metadata(
+            lemma, list(all_translations.keys())
+        )
+        if translation_metadata:
+            metadata["translation_metadata"] = translation_metadata
 
     return _build_success_response(translations, metadata)
+
+
+@bp.route("/v1/lemma/<guid>/translations/<language>/metadata", methods=["PATCH"])
+@mirrored_facade("/api/v1/lemma/<guid>/translations/<language>/metadata", "PATCH")
+def patch_lemma_translation_metadata(guid: str, language: str) -> ResponseReturnValue:
+    """Set metadata for one populated lemma translation row."""
+    lemma = get_lemma_by_guid(g.db, guid)
+    if not lemma:
+        return _build_error_response(f"Lemma with GUID '{guid}' not found", 404)
+
+    language_code = language.strip().lower()
+    translation = (
+        g.db.query(LemmaTranslation)
+        .filter(
+            LemmaTranslation.lemma_id == lemma.id,
+            LemmaTranslation.language_code == language_code,
+        )
+        .first()
+    )
+    if translation is None:
+        return _build_error_response(
+            f"Translation for language '{language_code}' not found on lemma '{guid}'",
+            404,
+        )
+
+    payload = request.get_json(silent=True) or {}
+    status_value = payload.get("translation_status")
+    note_value = payload.get("translation_status_note")
+
+    if status_value is not None:
+        if not isinstance(status_value, str):
+            return _build_error_response("translation_status must be a string or null")
+        status_value = status_value.strip()
+        if status_value and status_value not in TRANSLATION_STATUS_VALUES:
+            return _build_error_response(
+                "translation_status must be one of: " + ", ".join(sorted(TRANSLATION_STATUS_VALUES))
+            )
+        translation.translation_status = status_value or None
+
+    if "translation_status_note" in payload:
+        if note_value is not None and not isinstance(note_value, str):
+            return _build_error_response("translation_status_note must be a string or null")
+        translation.translation_status_note = note_value.strip() if note_value else None
+
+    g.db.commit()
+
+    return _build_success_response(
+        {
+            "guid": guid,
+            "language_code": language_code,
+            "translation": translation.translation,
+            "translation_status": _serialize_value(translation.translation_status),
+            "translation_status_note": _serialize_value(translation.translation_status_note),
+        }
+    )
 
 
 @bp.route("/v1/lemma/<guid>/forms")

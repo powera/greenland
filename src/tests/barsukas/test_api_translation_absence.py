@@ -126,3 +126,42 @@ def test_by_difficulty_missing_translation_includes_absence_reason(client, db_en
     absence = listed["translation_absence"]["la"]
     assert absence["reason"] == "excluded"
     assert absence["difficulty_override"]["notes"] == "No ordinary Classical Latin learner cue."
+
+
+def test_translation_metadata_marks_late_construction(client) -> None:
+    response = client.patch(
+        "/api/v1/lemma/V01_001/translations/fr/metadata",
+        json={
+            "translation_status": "late_construction",
+            "translation_status_note": "Modern learner cue, not classical usage.",
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["data"]["translation_status"] == "late_construction"
+    assert payload["data"]["translation_status_note"] == "Modern learner cue, not classical usage."
+
+    single_response = client.get("/api/v1/lemma/V01_001/translations?language=fr")
+    bulk_response = client.get("/api/v1/lemmas/translations?guids=V01_001&language=fr")
+
+    assert single_response.status_code == 200
+    assert bulk_response.status_code == 200
+    assert single_response.get_json()["metadata"]["translation_metadata"]["fr"] == {
+        "translation_status": "late_construction",
+        "translation_status_note": "Modern learner cue, not classical usage.",
+    }
+    assert bulk_response.get_json()["metadata"]["translation_metadata"]["V01_001"]["fr"] == {
+        "translation_status": "late_construction",
+        "translation_status_note": "Modern learner cue, not classical usage.",
+    }
+
+
+def test_translation_metadata_rejects_unknown_status(client) -> None:
+    response = client.patch(
+        "/api/v1/lemma/V01_001/translations/fr/metadata",
+        json={"translation_status": "ancient-ish"},
+    )
+
+    assert response.status_code == 400
+    assert "translation_status must be one of" in response.get_json()["error"]

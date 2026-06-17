@@ -11,7 +11,7 @@ directly accessing translation fields.
 
 import json
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
@@ -682,6 +682,8 @@ def set_translation(
     lang_code: str,
     translation: str,
     definition: Optional[str] = None,
+    translation_status: Optional[str] = None,
+    translation_status_note: Optional[str] = None,
 ) -> Tuple[Optional[str], str]:
     """
     Set translation for a lemma in the specified language.
@@ -692,6 +694,8 @@ def set_translation(
         lang_code: Language code (e.g., 'es', 'fr', 'zh')
         translation: Translation string to set
         definition: Optional definition text in this language
+        translation_status: Optional status marker for the translation
+        translation_status_note: Optional human-readable note for the status
 
     Returns:
         Tuple of (old_translation, new_translation)
@@ -723,6 +727,10 @@ def set_translation(
             translation_obj.translation = translation
             if definition is not None:
                 translation_obj.definition_text = definition
+            if translation_status is not None:
+                translation_obj.translation_status = translation_status
+            if translation_status_note is not None:
+                translation_obj.translation_status_note = translation_status_note
             if lang_code in _SORT_KEY_LANGUAGES:
                 translation_obj.sort_key = sort_key
         else:
@@ -731,6 +739,8 @@ def set_translation(
                 language_code=field_name,
                 translation=translation,
                 definition_text=definition,
+                translation_status=translation_status,
+                translation_status_note=translation_status_note,
                 sort_key=sort_key,
                 verified=False,
             )
@@ -1046,7 +1056,26 @@ def lang_code_to_llm_field(lang_code: str) -> Optional[str]:
     return LANG_CODE_TO_LLM_FIELD.get(lang_code)
 
 
-def convert_llm_response_to_lang_codes(llm_response: Dict[str, str]) -> Dict[str, str]:
+TRANSLATION_STATUS_VALUES = {
+    "conventional",
+    "late_construction",
+    "modern_loan",
+    "descriptive",
+    "uncertain",
+}
+
+
+def _extract_llm_translation_text(value: Any) -> str:
+    """Extract translation text from either legacy string or object response values."""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict):
+        translation = value.get("translation")
+        return translation if isinstance(translation, str) else ""
+    return ""
+
+
+def convert_llm_response_to_lang_codes(llm_response: Dict[str, Any]) -> Dict[str, str]:
     """
     Convert LLM response with field names to language code format.
 
@@ -1059,10 +1088,35 @@ def convert_llm_response_to_lang_codes(llm_response: Dict[str, str]) -> Dict[str
         (e.g., {'zh': '吃', 'fr': 'manger'})
     """
     return {
-        LLM_FIELD_TO_LANG_CODE[field_name]: translation
-        for field_name, translation in llm_response.items()
+        LLM_FIELD_TO_LANG_CODE[field_name]: _extract_llm_translation_text(value)
+        for field_name, value in llm_response.items()
         if field_name in LLM_FIELD_TO_LANG_CODE
     }
+
+
+def convert_llm_response_to_translation_metadata(
+    llm_response: Dict[str, Any],
+) -> Dict[str, Dict[str, Optional[str]]]:
+    """Convert LLM response object metadata to language-code keyed metadata."""
+    metadata: Dict[str, Dict[str, Optional[str]]] = {}
+    for field_name, value in llm_response.items():
+        lang_code = LLM_FIELD_TO_LANG_CODE.get(field_name)
+        if lang_code is None or not isinstance(value, dict):
+            continue
+        status_value = value.get("translation_status")
+        note_value = value.get("translation_status_note")
+        if status_value is not None and not isinstance(status_value, str):
+            status_value = None
+        if note_value is not None and not isinstance(note_value, str):
+            note_value = None
+        if status_value and status_value not in TRANSLATION_STATUS_VALUES:
+            status_value = "uncertain"
+        if status_value or note_value:
+            metadata[lang_code] = {
+                "translation_status": status_value,
+                "translation_status_note": note_value,
+            }
+    return metadata
 
 
 def bulk_get_translations(

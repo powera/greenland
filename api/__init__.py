@@ -41,6 +41,7 @@ from api.lemmas import (
     get_translations_bulk,
     list_by_difficulty,
     merge_synonym,
+    patch_translation_metadata,
     search,
 )
 from api.llm_agents import (
@@ -79,6 +80,7 @@ __all__ = [
     "list_by_difficulty",
     "list_models",
     "merge_synonym",
+    "patch_translation_metadata",
     "list_pending_imports",
     "list_pos_subtypes",
     "queue_add_missing_translations",

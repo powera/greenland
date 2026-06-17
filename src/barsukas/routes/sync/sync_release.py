@@ -635,17 +635,21 @@ def apply_additions() -> ResponseReturnValue:
             # Add translations
             translations = release_data.get("translations", {})
             translation_disambiguations = release_data.get("translation_disambiguations", {})
+            translation_metadata = release_data.get("translation_metadata", {})
             for lang_code, translation_text in translations.items():
                 if lang_code == "en":  # English is stored as lemma_text
                     continue
                 if not translation_text:
                     continue
+                lang_metadata = translation_metadata.get(lang_code, {})
 
                 trans = LemmaTranslation(
                     lemma_id=lemma.id,
                     language_code=lang_code,
                     translation=translation_text,
                     disambiguation=translation_disambiguations.get(lang_code),
+                    translation_status=lang_metadata.get("translation_status"),
+                    translation_status_note=lang_metadata.get("translation_status_note"),
                     sort_key=compute_sort_key(lang_code, translation_text),
                     verified=False,
                 )
@@ -1038,6 +1042,7 @@ def _build_release_entry_from_db(lemma: Lemma) -> Dict[str, Any]:
     # Build translations dict with en first (from lemma_text), then RELEASE_LANGUAGES order
     translations: Dict[str, str] = {"en": lemma.lemma_text}
     translation_disambiguations: Dict[str, str] = {}
+    translation_metadata: Dict[str, Dict[str, str]] = {}
 
     lang_to_trans: Dict[str, LemmaTranslation] = {t.language_code: t for t in lemma.translations}
 
@@ -1049,6 +1054,13 @@ def _build_release_entry_from_db(lemma: Lemma) -> Dict[str, Any]:
             translations[lang_code] = trans_obj.translation
             if trans_obj.disambiguation:
                 translation_disambiguations[lang_code] = trans_obj.disambiguation
+            metadata: Dict[str, str] = {}
+            if trans_obj.translation_status:
+                metadata["translation_status"] = trans_obj.translation_status
+            if trans_obj.translation_status_note:
+                metadata["translation_status_note"] = trans_obj.translation_status_note
+            if metadata:
+                translation_metadata[lang_code] = metadata
 
     # Build concept_label: "word (disambiguation)" if disambiguation exists
     concept_label = lemma.lemma_text
@@ -1067,6 +1079,8 @@ def _build_release_entry_from_db(lemma: Lemma) -> Dict[str, Any]:
 
     if translation_disambiguations:
         entry["translation_disambiguations"] = translation_disambiguations
+    if translation_metadata:
+        entry["translation_metadata"] = translation_metadata
 
     if lemma.lexical_gap_reason:
         entry["lexical_gap_reason"] = lemma.lexical_gap_reason
@@ -1695,6 +1709,7 @@ def apply_translations() -> ResponseReturnValue:
 
             release_translations = release_data.get("translations", {})
             release_disambiguations = release_data.get("translation_disambiguations", {})
+            release_metadata = release_data.get("translation_metadata", {})
 
             for lang_code, action in lang_actions.items():
                 if action == "skip":
@@ -1705,6 +1720,7 @@ def apply_translations() -> ResponseReturnValue:
                     # Copy from release to DB
                     release_val = release_translations.get(lang_code, "")
                     release_disambig = release_disambiguations.get(lang_code)
+                    release_lang_metadata = release_metadata.get(lang_code, {})
                     if release_val:
                         trans_obj = (
                             g.db.query(LemmaTranslation)
@@ -1719,6 +1735,12 @@ def apply_translations() -> ResponseReturnValue:
                             old_val = trans_obj.translation
                             trans_obj.translation = release_val
                             trans_obj.disambiguation = release_disambig
+                            trans_obj.translation_status = release_lang_metadata.get(
+                                "translation_status"
+                            )
+                            trans_obj.translation_status_note = release_lang_metadata.get(
+                                "translation_status_note"
+                            )
                             trans_obj.sort_key = compute_sort_key(lang_code, release_val)
                         else:
                             trans_obj = LemmaTranslation(
@@ -1726,6 +1748,10 @@ def apply_translations() -> ResponseReturnValue:
                                 language_code=lang_code,
                                 translation=release_val,
                                 disambiguation=release_disambig,
+                                translation_status=release_lang_metadata.get("translation_status"),
+                                translation_status_note=release_lang_metadata.get(
+                                    "translation_status_note"
+                                ),
                                 sort_key=compute_sort_key(lang_code, release_val),
                                 verified=False,
                             )
