@@ -64,6 +64,9 @@ TIER_3_LANGUAGES = [
 TIER_4_LANGUAGES = [
     "la",
     "sa",
+    "grc",
+    "ar-classical",
+    "non",
     "ms",
     "my",
     "km",
@@ -104,6 +107,14 @@ TIER_4_LANGUAGES = [
     "mk",
     "sq",
     "me",
+]
+
+ANCIENT_LANGUAGE_GROUP = [
+    "la",
+    "sa",
+    "grc",
+    "ar-classical",
+    "non",
 ]
 
 # Languages included in data/release read/write operations.
@@ -153,6 +164,9 @@ LANGUAGE_HIERARCHY = [
     "th",  # Thai (experimental)
     "la",  # Latin (experimental/classical)
     "sa",  # Sanskrit (experimental/classical)
+    "grc",  # Ancient Greek (experimental/classical)
+    "ar-classical",  # Classical Arabic, pre-1200 (experimental/classical)
+    "non",  # Old Norse (experimental/classical)
     "ms",  # Malay (experimental)
     "my",  # Burmese (experimental)
     "km",  # Khmer (experimental)
@@ -229,6 +243,9 @@ LANGUAGE_FIELDS = {
     "ko": ("ko", "Korean", True),
     "la": ("la", "Latin", True),
     "sa": ("sa", "Sanskrit", True),
+    "grc": ("grc", "Ancient Greek", True),
+    "ar-classical": ("ar-classical", "Classical Arabic (pre-1200)", True),
+    "non": ("non", "Old Norse", True),
     "sw": ("sw", "Swahili", True),
     "ro": ("ro", "Romanian", True),
     "pl": ("pl", "Polish", True),
@@ -297,6 +314,9 @@ LLM_FIELD_TO_LANG_CODE = {
     "japanese_translation": "ja",
     "latin_translation": "la",
     "sanskrit_translation": "sa",
+    "ancient_greek_translation": "grc",
+    "classical_arabic_translation": "ar-classical",
+    "old_norse_translation": "non",
     "italian_translation": "it",
     "dutch_translation": "nl",
     "portuguese_translation": "pt",

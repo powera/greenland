@@ -62,6 +62,11 @@ Base prefix: `/api`.
     historical/native vocabulary, such as Neo-Latin terms or modern Sanskrit
     coinages.
 
+Ancient/classical dictionary targets are grouped as `la` Latin, `sa` Sanskrit,
+`grc` Ancient Greek, `ar-classical` Classical Arabic (pre-1200), and `non` Old
+Norse. Expect more `late_construction`, `modern_loan`, `descriptive`, and
+`lexical_gap` cases for this group than for modern living-language targets.
+
 - `GET /api/v1/lemma/<guid>/wordfreq`
   - Word frequency rollups nested by `language_code -> corpus_name -> {total_frequency, best_rank}`.
   - `total_frequency` is the corpus rollup value for the lemma lexeme; `best_rank` is the best (lowest) available form rank in that corpus.
