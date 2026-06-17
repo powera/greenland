@@ -90,6 +90,24 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "description": "Sanskrit translation in lemma form (Devanagari script)",
         "instructions": "- Sanskrit: Provide Sanskrit in Devanagari script in base form (root/stem form for verbs, nominative singular for nouns)\n  - Do not include IAST transliteration, just the Devanagari characters\n  - For modern concepts, use the established Sanskrit coinage where one exists",
     },
+    "ancient greek": {
+        "field": "ancient_greek_translation",
+        "code": "grc",
+        "description": "Ancient Greek translation in lemma form (Greek script)",
+        "instructions": "- Ancient Greek: Provide Ancient Greek in Greek script, targeting classical/pre-modern usage rather than Modern Greek\n  - Prefer Classical Attic/Ionic vocabulary and dictionary headwords where available; common Koine is acceptable when it is the historically established form\n  - Use dictionary lemma forms (first-person singular present active indicative for verbs when that is the standard headword, nominative singular for nouns)\n  - Do not include transliteration, just the Greek script\n  - For later or modern concepts, use an established learned construction only when useful and mark it as late_construction, modern_loan, descriptive, or uncertain",
+    },
+    "classical arabic": {
+        "field": "classical_arabic_translation",
+        "code": "ar-classical",
+        "description": "Classical Arabic (pre-1200) translation in lemma form (Arabic script)",
+        "instructions": "- Classical Arabic: Provide Classical Arabic in Arabic script, targeting pre-1200 usage, not Modern Standard Arabic or a modern national variety\n  - Use historically attested Classical/Qur'anic/early literary vocabulary where available\n  - Use dictionary lemma forms (third-person masculine singular perfect for verbs where appropriate, singular for nouns)\n  - Do not include transliteration, just the Arabic script\n  - For post-1200 or modern concepts, do not silently use Modern Standard Arabic; use an established learned construction only when useful and mark it as late_construction, modern_loan, descriptive, or uncertain",
+    },
+    "old norse": {
+        "field": "old_norse_translation",
+        "code": "non",
+        "description": "Old Norse translation in normalized lemma form",
+        "instructions": "- Old Norse: Provide normalized Old Norse / Old Icelandic dictionary forms, not Modern Icelandic, Norwegian, Danish, or Swedish\n  - Use conventional normalized spelling with diacritics where appropriate\n  - Use lemma forms (infinitive for verbs, nominative singular for nouns)\n  - For later or modern concepts, use an established scholarly construction only when useful and mark it as late_construction, modern_loan, descriptive, or uncertain",
+    },
     "italian": {
         "field": "italian_translation",
         "code": "it",
