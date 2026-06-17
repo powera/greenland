@@ -2,6 +2,7 @@
 
 from storage.translation_helpers import (
     ANCIENT_LANGUAGE_GROUP,
+    EXTRA_RELEASE_LANGUAGE_GROUPS,
     LANG_CODE_TO_LLM_FIELD,
     LANGUAGE_FIELDS,
     LANGUAGE_HIERARCHY,
@@ -17,9 +18,10 @@ from wordfreq.translation.constants import DEFAULT_TRANSLATION_LANGUAGES_BY_CODE
 def test_ancient_languages_are_tier4_languages() -> None:
     """Ancient languages are available as tier-4 row-based translation languages."""
     assert ANCIENT_LANGUAGE_GROUP == ["la", "sa", "grc", "ar-classical", "non"]
+    assert EXTRA_RELEASE_LANGUAGE_GROUPS["ancient"] == ANCIENT_LANGUAGE_GROUP
     for language_code in ANCIENT_LANGUAGE_GROUP:
         assert language_code in TIER_4_LANGUAGES
-        assert language_code in SECONDARY_RELEASE_LANGUAGES
+        assert language_code not in SECONDARY_RELEASE_LANGUAGES
 
 
 def test_ancient_language_metadata() -> None:
