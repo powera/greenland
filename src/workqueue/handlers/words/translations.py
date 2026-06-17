@@ -12,6 +12,7 @@ from storage.crud.operation_log import log_operation
 from storage.models.schema import Lemma
 from storage.translation_helpers import (
     LANGUAGE_FIELDS,
+    convert_llm_response_to_translation_metadata,
     get_reference_translation,
     get_translation,
     lang_code_to_llm_field,
@@ -81,13 +82,29 @@ def do_generate_missing_translations(
     if not success or not translations:
         raise RuntimeError("LLM could not generate translations")
 
+    translation_metadata_by_lang_code = convert_llm_response_to_translation_metadata(translations)
     added_count = 0
     for language_code in missing_languages:
         llm_field = lang_code_to_llm_field(language_code)
         if llm_field:
-            translation_text = translations.get(llm_field, "").strip()
+            response_value = translations.get(llm_field, "")
+            if isinstance(response_value, dict):
+                raw_translation = response_value.get("translation", "")
+                translation_text = (
+                    raw_translation.strip() if isinstance(raw_translation, str) else ""
+                )
+            else:
+                translation_text = response_value.strip() if isinstance(response_value, str) else ""
             if translation_text:
-                agent.set_translation(session, lemma, language_code, translation_text)
+                translation_metadata = translation_metadata_by_lang_code.get(language_code, {})
+                agent.set_translation(
+                    session,
+                    lemma,
+                    language_code,
+                    translation_text,
+                    translation_status=translation_metadata.get("translation_status"),
+                    translation_status_note=translation_metadata.get("translation_status_note"),
+                )
                 added_count += 1
 
     log_operation(

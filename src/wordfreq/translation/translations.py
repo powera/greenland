@@ -28,7 +28,7 @@ def query_translations(
     pos_subtype: Optional[str] = None,
     languages: Optional[List[str]] = None,
     model: Optional[str] = None,
-) -> Tuple[Dict[str, str], bool]:
+) -> Tuple[Dict[str, Any], bool]:
     """
     Query LLM to generate translations for a word with known English, reference translation, and definition.
 
@@ -83,7 +83,26 @@ def query_translations(
             logger.warning(f"Unknown language code '{lang_code}' requested, skipping")
             continue
         schema_properties[lang_config["field"]] = SchemaProperty(
-            "string", lang_config["description"]
+            "object",
+            lang_config["description"],
+            properties={
+                "translation": SchemaProperty("string", lang_config["description"]),
+                "translation_status": SchemaProperty(
+                    "string",
+                    "How historically/native the translation is: conventional, late_construction, modern_loan, descriptive, or uncertain.",
+                    enum=[
+                        "conventional",
+                        "late_construction",
+                        "modern_loan",
+                        "descriptive",
+                        "uncertain",
+                    ],
+                ),
+                "translation_status_note": SchemaProperty(
+                    "string",
+                    "Brief note when status is not conventional; otherwise an empty string.",
+                ),
+            },
         )
         # Use the canonical language name (without script qualifier) for the prompt bullet list
         display_name = LANGUAGE_NAMES.get(lang_code, lang_code)

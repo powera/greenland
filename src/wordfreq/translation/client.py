@@ -219,7 +219,7 @@ class LinguisticClient:
         pos_type: str,
         pos_subtype: Optional[str] = None,
         languages: Optional[List[str]] = None,
-    ) -> Tuple[Dict[str, str], bool]:
+    ) -> Tuple[Dict[str, Any], bool]:
         """
         Query LLM to generate translations for a word.
 

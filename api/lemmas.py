@@ -52,6 +52,11 @@ class TranslationAbsence(TypedDict, total=False):
     lexical_gap_reason: str
 
 
+class TranslationMetadata(TypedDict, total=False):
+    translation_status: Optional[str]
+    translation_status_note: Optional[str]
+
+
 class LemmaInfo(TypedDict, total=False):
     guid: str
     lemma_text: str
@@ -237,6 +242,24 @@ def get_translations(guid: str, *, language: Optional[str] = None) -> Any:
             f"{API_V1_PREFIX}/lemma/{guid}/translations",
             {"language": language},
         ),
+    )
+
+
+@mirrored_route("/api/v1/lemma/<guid>/translations/<language>/metadata", "PATCH")
+def patch_translation_metadata(
+    guid: str,
+    language: str,
+    *,
+    translation_status: Optional[str] = None,
+    translation_status_note: Optional[str] = None,
+) -> Any:
+    """Set metadata for one populated lemma translation."""
+    return patch_json(
+        f"{API_V1_PREFIX}/lemma/{guid}/translations/{language}/metadata",
+        {
+            "translation_status": translation_status,
+            "translation_status_note": translation_status_note,
+        },
     )
 
 

@@ -9,8 +9,15 @@ CRITICAL REQUIREMENTS:
 4. For adjectives: positive/base form
 5. For adverbs: base form
 6. Ensure translations match the specific meaning indicated by the English and Lithuanian
+7. For each translation, classify its historical/native fit:
+   - conventional: ordinary native or historically established vocabulary for the target language
+   - late_construction: a useful learner cue, but a Neo-Latin, post-classical, modern Sanskrit coinage, or otherwise late learned construction
+   - modern_loan: a modern loanword or transliteration rather than native/classical vocabulary
+   - descriptive: a descriptive phrase/compound used because there is no simple ordinary term
+   - uncertain: use only when the fit is genuinely unclear
+8. For historical/classical target languages such as Latin and Sanskrit, do not hide modernity: mark post-classical foods, institutions, clothing, technologies, and modern loans clearly.
 
 Languages to translate to:
 {language_instructions}
 
-Ensure accuracy and cultural appropriateness for all languages. Use the most common translation that matches the intended meaning.
+Ensure accuracy and cultural appropriateness for all languages. Use the most common translation that matches the intended meaning. Return an empty status note for conventional translations; otherwise briefly explain the marker.

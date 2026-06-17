@@ -224,6 +224,12 @@ class LemmaTranslation(Base):
     # E.g., Lithuanian "oda" can mean both "skin" and "leather", so we store a
     # Lithuanian disambiguator like "žmogaus" or "medžiaga" to display alongside.
     disambiguation: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    # Marks translations that are useful learner cues but not ordinary historical
+    # vocabulary, e.g. Neo-Latin, modern loans, or descriptive Sanskrit coinages.
+    # Suggested values: conventional, late_construction, modern_loan, descriptive,
+    # uncertain.
+    translation_status: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    translation_status_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Metadata
     verified: Mapped[bool] = mapped_column(Boolean, default=False)

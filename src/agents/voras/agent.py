@@ -44,6 +44,7 @@ from storage.translation_helpers import (
     LANG_CODE_TO_LLM_FIELD,
     LANGUAGE_FIELDS,
     convert_llm_response_to_lang_codes,
+    convert_llm_response_to_translation_metadata,
     get_language_name,
     get_reference_translation,
     get_tier_1_and_tier_2_languages,
@@ -125,6 +126,8 @@ class VorasAgent:
         lang_code: str,
         translation: str,
         source: Optional[str] = None,
+        translation_status: Optional[str] = None,
+        translation_status_note: Optional[str] = None,
     ) -> None:
         """
         Set translation for a lemma in the specified language.
@@ -134,7 +137,12 @@ class VorasAgent:
         """
         # Use helper function which returns (old_translation, new_translation)
         old_translation, new_translation = set_translation_helper(
-            session, lemma, lang_code, translation
+            session,
+            lemma,
+            lang_code,
+            translation,
+            translation_status=translation_status,
+            translation_status_note=translation_status_note,
         )
 
         # Log the translation change
@@ -799,12 +807,20 @@ class VorasAgent:
                         translations_by_lang_code = convert_llm_response_to_lang_codes(
                             llm_translations
                         )
+                        translation_metadata_by_lang_code = (
+                            convert_llm_response_to_translation_metadata(llm_translations)
+                        )
                         translation_source = f"voras-agent/{self.config.model}"
+                    else:
+                        translation_metadata_by_lang_code = {}
 
                     # Apply translations to lemma (translations_by_lang_code now always uses lang_code keys)
                     if translations_by_lang_code:
                         for lang_code, language_name in missing_languages:
                             translation = translations_by_lang_code.get(lang_code, "").strip()
+                            translation_metadata = translation_metadata_by_lang_code.get(
+                                lang_code, {}
+                            )
 
                             if translation:
                                 # Update the translation using helper method
@@ -814,6 +830,12 @@ class VorasAgent:
                                     lang_code,
                                     translation,
                                     source=translation_source,
+                                    translation_status=translation_metadata.get(
+                                        "translation_status"
+                                    ),
+                                    translation_status_note=translation_metadata.get(
+                                        "translation_status_note"
+                                    ),
                                 )
                                 logger.debug(
                                     f"  Added {language_name} translation: '{translation}'"

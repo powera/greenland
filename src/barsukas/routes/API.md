@@ -24,6 +24,8 @@ Base prefix: `/api`.
   - Fetch translations for multiple GUIDs in one call.
   - With `language=<code>`, omitted translations are described in
     `metadata.translation_absence[guid][code]`.
+  - Marked translations are described in
+    `metadata.translation_metadata[guid][code]`.
 
 - `GET /api/v1/lemma/<guid>`
   - Basic lemma details.
@@ -48,6 +50,17 @@ Base prefix: `/api`.
       the lemma difficulty
     - `difficulty_override`: present when a language-specific override exists
     - `lexical_gap_reason`: present when the lemma has one
+  - Populated translations with status markers appear in
+    `metadata.translation_metadata[code]`.
+
+- `PATCH /api/v1/lemma/<guid>/translations/<language>/metadata`
+  - Mark one populated translation with optional metadata.
+  - Body: `{"translation_status": <string|null>, "translation_status_note": <string|null>}`.
+  - `translation_status` may be one of `conventional`, `late_construction`,
+    `modern_loan`, `descriptive`, or `uncertain`.
+  - Use `late_construction` for useful learner cues that are not ordinary
+    historical/native vocabulary, such as Neo-Latin terms or modern Sanskrit
+    coinages.
 
 - `GET /api/v1/lemma/<guid>/wordfreq`
   - Word frequency rollups nested by `language_code -> corpus_name -> {total_frequency, best_rank}`.
