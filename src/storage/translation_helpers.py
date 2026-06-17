@@ -58,6 +58,7 @@ TIER_3_LANGUAGES = [
     "bn",
     "sw",
     "hi",
+    "pa",
 ]
 
 # Tier 4: Additional experimental languages with minimal coverage
@@ -198,6 +199,7 @@ LANGUAGE_HIERARCHY = [
     "xh",  # Xhosa (experimental)
     "sn",  # Shona (experimental)
     "hi",  # Hindi (experimental)
+    "pa",  # Punjabi (experimental, Gurmukhi)
     "ps",  # Pashto (experimental)
     "fa",  # Persian (experimental)
     "ka",  # Georgian (experimental)
@@ -280,6 +282,7 @@ LANGUAGE_FIELDS = {
     "xh": ("xh", "Xhosa", True),
     "sn": ("sn", "Shona", True),
     "hi": ("hi", "Hindi", True),
+    "pa": ("pa", "Punjabi", True),
     "ps": ("ps", "Pashto", True),
     "fa": ("fa", "Persian", True),
     "ka": ("ka", "Georgian", True),
@@ -356,6 +359,7 @@ LLM_FIELD_TO_LANG_CODE = {
     "xhosa_translation": "xh",
     "shona_translation": "sn",
     "hindi_translation": "hi",
+    "punjabi_translation": "pa",
     "pashto_translation": "ps",
     "persian_translation": "fa",
     "georgian_translation": "ka",

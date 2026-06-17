@@ -219,7 +219,6 @@ _PATTERN_B_LANGS: List[Tuple[str, str]] = [
     ("mr", "Marathi"),
     ("ms", "Malay"),
     ("or", "Odia"),
-    ("pa", "Punjabi"),
     ("ps", "Pashto"),
     ("tl", "Filipino"),
     ("tr", "Turkish"),
