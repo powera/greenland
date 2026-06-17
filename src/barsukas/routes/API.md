@@ -17,12 +17,18 @@ Base prefix: `/api`.
 - `GET /api/v1/lemmas/by-difficulty?difficulty=<level>[&pos_type=...][&missing_translation=<code>][&limit=...][&offset=...]`
   - List lemmas for one difficulty level without supplying a text query.
   - `missing_translation`: optional language code; when supplied, only returns lemmas where that translation is missing/empty.
+    Each returned lemma then includes `translation_absence[code]`.
+  - Lemma summaries include `lexical_gap_reason` when populated.
 
 - `GET /api/v1/lemmas/translations?guids=<guid1,guid2,...>[&language=<code>]`
   - Fetch translations for multiple GUIDs in one call.
+  - With `language=<code>`, omitted translations are described in
+    `metadata.translation_absence[guid][code]`.
 
 - `GET /api/v1/lemma/<guid>`
   - Basic lemma details.
+  - Includes `lexical_gap_reason` for concepts that may not have conventional
+    native lexical items in historical/classical languages.
 - `POST /api/v1/lemma/<guid>` or `PATCH /api/v1/lemma/<guid>`
   - Update mutable lemma fields.
   - Body: `{"difficulty_level": <int|null>}`.
@@ -34,6 +40,14 @@ Base prefix: `/api`.
 
 - `GET /api/v1/lemma/<guid>/translations[?language=<code>]`
   - Translations keyed by language code.
+  - With `language=<code>`, a missing translation returns an empty `data` map
+    and `metadata.translation_absence[code]` with:
+    - `reason`: primary reason, one of `not_populated`, `excluded`, or `lexical_gap`
+    - `reason_codes`: all applicable reasons
+    - `effective_difficulty_level`: per-language override if present, otherwise
+      the lemma difficulty
+    - `difficulty_override`: present when a language-specific override exists
+    - `lexical_gap_reason`: present when the lemma has one
 
 - `GET /api/v1/lemma/<guid>/wordfreq`
   - Word frequency rollups nested by `language_code -> corpus_name -> {total_frequency, best_rank}`.
