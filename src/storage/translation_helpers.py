@@ -117,6 +117,10 @@ ANCIENT_LANGUAGE_GROUP = [
     "non",
 ]
 
+EXTRA_RELEASE_LANGUAGE_GROUPS = {
+    "ancient": ANCIENT_LANGUAGE_GROUP,
+}
+
 # Languages included in data/release read/write operations.
 # Only these languages will be exported to and synced from release files.
 # Edit this list to add or remove languages from release builds.
@@ -139,10 +143,14 @@ RELEASE_LANGUAGES = [
 ]
 
 # Languages included in data/release secondary.jsonl files.
-# These are Tier 3 and Tier 4 languages NOT already in RELEASE_LANGUAGES.
-# They are stored separately from base.jsonl to keep the primary release lean.
+# These are Tier 3 and Tier 4 languages NOT already in RELEASE_LANGUAGES or a
+# named extra release group. Named groups use <group>.jsonl (for example
+# ancient.jsonl) to keep each release file below roughly 20 languages.
 SECONDARY_RELEASE_LANGUAGES = [
-    lang for lang in (TIER_3_LANGUAGES + TIER_4_LANGUAGES) if lang not in RELEASE_LANGUAGES
+    lang
+    for lang in (TIER_3_LANGUAGES + TIER_4_LANGUAGES)
+    if lang not in RELEASE_LANGUAGES
+    and all(lang not in group for group in EXTRA_RELEASE_LANGUAGE_GROUPS.values())
 ]
 
 LANGUAGE_HIERARCHY = [
@@ -607,19 +615,19 @@ def compute_sort_key(lang_code: str, translation: str) -> Optional[str]:
         if lang_code == "zh":
             from langtools.zh.pinyin_helper import generate_pinyin
 
-            return generate_pinyin(translation)
+            return str(generate_pinyin(translation))
         elif lang_code == "ja":
             from langtools.ja.romaji_helper import generate_hiragana
 
-            return generate_hiragana(translation)
+            return str(generate_hiragana(translation))
         elif lang_code == "ko":
             from langtools.ko.hangul_helper import decompose_hangul
 
-            return decompose_hangul(translation)
+            return str(decompose_hangul(translation))
         elif lang_code in _COLLATION_SORT_KEY_LANGUAGES:
             from langtools.collation import generate_sort_key
 
-            return generate_sort_key(lang_code, translation)
+            return str(generate_sort_key(lang_code, translation))
     except Exception as e:
         logger.warning(f"Failed to compute sort_key for {lang_code} '{translation}': {e}")
     return None

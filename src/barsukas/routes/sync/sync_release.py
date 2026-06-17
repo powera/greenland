@@ -19,6 +19,7 @@ from storage.crud.operation_log import log_operation, log_translation_change
 from storage.models.grammar_fact import GrammarFact
 from storage.models.schema import Lemma, LemmaTranslation
 from storage.translation_helpers import (
+    EXTRA_RELEASE_LANGUAGE_GROUPS,
     LANGUAGE_NAMES,
     RELEASE_LANGUAGES,
     SECONDARY_RELEASE_LANGUAGES,
@@ -1110,7 +1111,7 @@ def _get_release_file_path_for_lemma(release_dir: Path, lemma: Lemma) -> Optiona
     pos_dir = pos_dir_map.get(lemma.pos_type)
     if not pos_dir:
         return None
-    return release_dir / pos_dir / lemma.pos_subtype / "base.jsonl"
+    return release_dir / pos_dir / str(lemma.pos_subtype) / "base.jsonl"
 
 
 def _append_lemma_to_release_file(file_path: Path, entry: Dict[str, Any]) -> None:
@@ -2339,10 +2340,10 @@ def _apply_release_translation_updates(
 def _load_secondary_translations(
     release_dir: Path,
 ) -> Dict[str, Dict[str, str]]:
-    """Load all secondary translations from data/release secondary.jsonl files.
+    """Load extra translations from data/release secondary/group JSONL files.
 
     Returns:
-        Dictionary mapping GUID to {lang_code: translation} for secondary languages.
+        Dictionary mapping GUID to {lang_code: translation} for extra languages.
     """
     secondary: Dict[str, Dict[str, str]] = {}
 
@@ -2350,46 +2351,65 @@ def _load_secondary_translations(
         logger.warning(f"Release directory not found: {release_dir}")
         return secondary
 
-    for sec_file in release_dir.rglob("secondary.jsonl"):
-        try:
-            with open(sec_file, "r", encoding="utf-8") as f:
-                for line_num, line in enumerate(f, 1):
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        data = json.loads(line)
-                        guid = data.get("guid")
-                        translations = data.get("translations", {})
-                        if guid and translations:
-                            if guid not in secondary:
-                                secondary[guid] = {}
-                            secondary[guid].update(translations)
-                    except json.JSONDecodeError as e:
-                        logger.error(f"JSON parse error in {sec_file}:{line_num}: {e}")
-        except Exception as e:
-            logger.error(f"Error reading {sec_file}: {e}")
+    extra_filenames = ["secondary.jsonl"] + [
+        f"{group_name}.jsonl" for group_name in EXTRA_RELEASE_LANGUAGE_GROUPS
+    ]
+    for extra_filename in extra_filenames:
+        for sec_file in release_dir.rglob(extra_filename):
+            _load_extra_translation_file(sec_file, secondary)
 
     return secondary
 
 
+def _load_extra_translation_file(
+    file_path: Path, translations_by_guid: Dict[str, Dict[str, str]]
+) -> None:
+    """Merge one grouped extra-translation file into translations_by_guid."""
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            for line_num, line in enumerate(f, 1):
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    data = json.loads(line)
+                    guid = data.get("guid")
+                    translations = data.get("translations", {})
+                    if guid and translations:
+                        if guid not in translations_by_guid:
+                            translations_by_guid[guid] = {}
+                        translations_by_guid[guid].update(translations)
+                except json.JSONDecodeError as e:
+                    logger.error(f"JSON parse error in {file_path}:{line_num}: {e}")
+    except Exception as e:
+        logger.error(f"Error reading {file_path}: {e}")
+
+
+def _extra_translation_filenames() -> List[str]:
+    """Return all grouped extra translation filenames."""
+    return ["secondary.jsonl"] + [
+        f"{group_name}.jsonl" for group_name in EXTRA_RELEASE_LANGUAGE_GROUPS
+    ]
+
+
 def _find_secondary_file_for_lemma(release_dir: Path, guid: str) -> Optional[Path]:
-    """Find the secondary.jsonl file containing a specific GUID."""
-    for sec_file in release_dir.rglob("secondary.jsonl"):
-        try:
-            with open(sec_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        data = json.loads(line)
-                        if data.get("guid") == guid:
-                            return sec_file
-                    except json.JSONDecodeError:
-                        continue
-        except Exception:
-            continue
+    """Find the extra translation file containing a specific GUID."""
+    for extra_filename in _extra_translation_filenames():
+        for sec_file in release_dir.rglob(extra_filename):
+            try:
+                with open(sec_file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            data = json.loads(line)
+                            if data.get("guid") == guid:
+                                return sec_file
+                        except json.JSONDecodeError:
+                            continue
+            except Exception:
+                continue
     return None
 
 

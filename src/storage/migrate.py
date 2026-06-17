@@ -499,6 +499,7 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
             session.query(Lemma)
             .filter(Lemma.guid.isnot(None))
             .options(
+                selectinload(Lemma.translations),
                 selectinload(Lemma.derivative_forms),
                 selectinload(Lemma.grammar_facts),
             )
@@ -548,9 +549,14 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 
             release_lang_set = set(translation_helpers.RELEASE_LANGUAGES)
             secondary_lang_set = set(translation_helpers.SECONDARY_RELEASE_LANGUAGES)
+            extra_group_lang_sets = {
+                group_name: set(group_languages)
+                for group_name, group_languages in translation_helpers.EXTRA_RELEASE_LANGUAGE_GROUPS.items()
+            }
 
             # Collect secondary translation records alongside base records
             secondary_records: List[Dict[str, Any]] = []
+            extra_group_records: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
 
             for lemma in category_lemmas:
                 # Get all translations
@@ -558,15 +564,45 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 
                 # Build translations dict (only non-empty values, filtered to RELEASE_LANGUAGES)
                 translations_dict: Dict[str, str] = {}
+                translation_metadata_dict: Dict[str, Dict[str, str]] = {}
                 secondary_translations_dict: Dict[str, str] = {}
+                secondary_translation_metadata_dict: Dict[str, Dict[str, str]] = {}
+                extra_group_translations: Dict[str, Dict[str, str]] = defaultdict(dict)
+                extra_group_metadata: Dict[str, Dict[str, Dict[str, str]]] = defaultdict(dict)
+                metadata_by_lang: Dict[str, Dict[str, str]] = {}
+                for trans_obj in lemma.translations:
+                    metadata: Dict[str, str] = {}
+                    if trans_obj.translation_status:
+                        metadata["translation_status"] = trans_obj.translation_status
+                    if trans_obj.translation_status_note:
+                        metadata["translation_status_note"] = trans_obj.translation_status_note
+                    if metadata:
+                        metadata_by_lang[trans_obj.language_code] = metadata
+
                 for lang_code, translation in all_translations.items():
                     if translation and translation.strip():
                         if lang_code in release_lang_set:
                             all_languages.add(lang_code)
                             translations_dict[lang_code] = translation
+                            if lang_code in metadata_by_lang:
+                                translation_metadata_dict[lang_code] = metadata_by_lang[lang_code]
                         elif lang_code in secondary_lang_set:
                             all_languages.add(lang_code)
                             secondary_translations_dict[lang_code] = translation
+                            if lang_code in metadata_by_lang:
+                                secondary_translation_metadata_dict[lang_code] = metadata_by_lang[
+                                    lang_code
+                                ]
+                        else:
+                            for group_name, group_lang_set in extra_group_lang_sets.items():
+                                if lang_code in group_lang_set:
+                                    all_languages.add(lang_code)
+                                    extra_group_translations[group_name][lang_code] = translation
+                                    if lang_code in metadata_by_lang:
+                                        extra_group_metadata[group_name][lang_code] = (
+                                            metadata_by_lang[lang_code]
+                                        )
+                                    break
 
                 # Get difficulty overrides (filtered to RELEASE_LANGUAGES)
                 difficulty_overrides_dict: Dict[str, int] = {}
@@ -587,6 +623,8 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 
                 if translations_dict:
                     base_data["translations"] = translations_dict
+                if translation_metadata_dict:
+                    base_data["translation_metadata"] = translation_metadata_dict
 
                 if lemma.difficulty_level is not None:
                     base_data["difficulty_level"] = lemma.difficulty_level
@@ -601,12 +639,24 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 
                 # Secondary translations record (guid + translations only)
                 if secondary_translations_dict:
-                    secondary_records.append(
-                        {
+                    secondary_data: Dict[str, Any] = {
+                        "guid": lemma.guid,
+                        "translations": secondary_translations_dict,
+                    }
+                    if secondary_translation_metadata_dict:
+                        secondary_data["translation_metadata"] = secondary_translation_metadata_dict
+                    secondary_records.append(secondary_data)
+
+                for group_name, group_translations in extra_group_translations.items():
+                    if group_translations:
+                        group_data: Dict[str, Any] = {
                             "guid": lemma.guid,
-                            "translations": secondary_translations_dict,
+                            "translations": group_translations,
                         }
-                    )
+                        group_metadata = extra_group_metadata.get(group_name, {})
+                        if group_metadata:
+                            group_data["translation_metadata"] = group_metadata
+                        extra_group_records[group_name].append(group_data)
 
             # Write base.jsonl (now includes translations)
             base_file = category_dir / "base.jsonl"
@@ -615,6 +665,10 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
             # Write secondary.jsonl (secondary language translations)
             secondary_file = category_dir / "secondary.jsonl"
             _write_jsonl_atomic(secondary_file, secondary_records)
+
+            for group_name, group_records in extra_group_records.items():
+                group_file = category_dir / f"{group_name}.jsonl"
+                _write_jsonl_atomic(group_file, group_records)
 
             # Collect per-language data (derivative_forms, grammar_facts)
             # keyed by language code -> list of per-lemma records
