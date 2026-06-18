@@ -8,6 +8,8 @@
   "no_entries_for_letter": "No entries for this letter.",
   "no_entries_for_level": "No entries for this level.",
   "no_entries_for_category": "No entries for this category.",
+  "phrasebook": "Phrasebook",
+  "no_phrases": "No phrases in this section.",
   "label_sort_order_alphabetical": "Alphabetical",
   "label_part_of_speech": "Part of Speech"
 }

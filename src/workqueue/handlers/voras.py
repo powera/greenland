@@ -16,7 +16,7 @@ from storage.backend.config import DataSourceConfig
 from storage.models.schema import Lemma
 from storage.translation_helpers import (
     LANGUAGE_NAMES,
-    get_tier_1_and_tier_2_languages,
+    get_default_generation_languages,
     normalize_llm_language_codes,
     convert_llm_response_to_lang_codes,
     get_reference_translation,
@@ -57,9 +57,9 @@ def generate_missing_translations_for_lemma(
         source = f"voras-agent/{config.model}"
 
     target_languages = normalize_llm_language_codes(
-        get_tier_1_and_tier_2_languages(),
+        get_default_generation_languages(),
         operation_name="Voras workqueue missing translations",
-        all_expansion=get_tier_1_and_tier_2_languages(),
+        all_expansion=get_default_generation_languages(),
     )
 
     # Find missing languages for this lemma

@@ -36,9 +36,19 @@
                 <option value="alpha" {% if sort == 'alpha' %}selected{% endif %}>{{ LSTR.label_sort_order_alphabetical }}</option>
                 <option value="level" {% if sort == 'level' %}selected{% endif %}>{{ LSTR.level }}</option>
                 <option value="category" {% if sort == 'category' %}selected{% endif %}>{{ LSTR.category }}</option>
+                <option value="phrasebook" {% if sort == 'phrasebook' %}selected{% endif %}>{{ STRINGS.dictionary.phrasebook }}</option>
             </select>
         </div>
-        {% if sort == 'category' %}
+        {% if sort == 'phrasebook' %}
+        <div class="col-auto">
+            <label for="phrase_subtype" class="form-label mb-0 small text-muted">{{ STRINGS.dictionary.phrasebook }}</label>
+            <select class="form-select form-select-sm" id="phrase_subtype" name="phrase_subtype" onchange="this.form.submit()">
+                {% for subtype in phrase_subtype_options %}
+                    <option value="{{ subtype }}" {% if subtype == selected_phrase_subtype %}selected{% endif %}>{{ subtype|replace('_', ' ')|title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% elif sort == 'category' %}
         <div class="col-auto">
             <label for="category" class="form-label mb-0 small text-muted">{{ LSTR.category }}</label>
             <select class="form-select form-select-sm dict-category-select" id="category" name="category" onchange="this.form.submit()">
@@ -143,6 +153,8 @@
                             {{ STRINGS.dictionary.no_entries_for_level }}
                         {% elif sort == 'category' %}
                             {{ STRINGS.dictionary.no_entries_for_category }}
+                        {% elif sort == 'phrasebook' %}
+                            {{ STRINGS.dictionary.no_phrases }}
                         {% else %}
                             {{ STRINGS.dictionary.no_entries }}
                         {% endif %}
@@ -155,7 +167,9 @@
 
 <!-- Pagination -->
 {% if total_pages > 1 %}
-    {% if sort == 'category' %}
+    {% if sort == 'phrasebook' %}
+        {% set page_params = {'lang': lang, 'sort': 'phrasebook', 'phrase_subtype': selected_phrase_subtype} %}
+    {% elif sort == 'category' %}
         {% set page_params = {'lang': lang, 'sort': 'category', 'category': selected_category} %}
     {% elif sort == 'level' %}
         {% set page_params = {'lang': lang, 'sort': 'level', 'level': selected_level} %}

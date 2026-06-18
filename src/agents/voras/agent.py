@@ -46,8 +46,8 @@ from storage.translation_helpers import (
     convert_llm_response_to_lang_codes,
     convert_llm_response_to_translation_metadata,
     get_language_name,
+    get_default_generation_languages,
     get_reference_translation,
-    get_tier_1_and_tier_2_languages,
     normalize_llm_language_codes,
 )
 from storage.translation_helpers import get_translation
@@ -642,7 +642,7 @@ class VorasAgent:
 
         # Handle language_code as string, list, or None
         if language_code is None:
-            languages_to_fix = get_tier_1_and_tier_2_languages()
+            languages_to_fix = get_default_generation_languages()
         elif isinstance(language_code, str):
             languages_to_fix = [language_code]
         else:
@@ -651,7 +651,7 @@ class VorasAgent:
         languages_to_fix = normalize_llm_language_codes(
             languages_to_fix,
             operation_name="Voras translation generation",
-            all_expansion=get_tier_1_and_tier_2_languages(),
+            all_expansion=get_default_generation_languages(),
         )
 
         # Initialize results structure

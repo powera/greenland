@@ -34,8 +34,8 @@
                     </thead>
                     <tbody>
                         {% for lang_code, lang_name in language_names.items() %}
-                            {% set is_tier3 = lang_code in tier_3_languages %}
-                            <tr{% if is_tier3 %} class="tier-3-translation d-none"{% endif %}>
+                            {% set is_hidden = lang_code in hidden_languages %}
+                            <tr{% if is_hidden %} class="secondary-translation d-none"{% endif %}>
                                 <td><strong>{{ lang_name }}</strong> <small class="text-muted">({{ lang_code }})</small></td>
                                 <td>
                                     {% if translations[lang_code] %}
@@ -143,9 +143,12 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleTier3Btn">
-                    <i class="bi bi-chevron-down"></i> {{ STRINGS.sentences.show_all_languages_more }} ({{ tier_3_languages|length }})
+                {% set hidden_count = language_names.keys()|select('in', hidden_languages)|list|length %}
+                {% if hidden_count %}
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleSecondaryLangsBtn">
+                    <i class="bi bi-chevron-down"></i> {{ STRINGS.sentences.show_all_languages_more }} ({{ hidden_count }})
                 </button>
+                {% endif %}
             </div>
         </div>
     </div>

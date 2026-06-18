@@ -101,16 +101,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Toggle tier 3 (experimental) language rows in translations table
+// Toggle secondary (non-default) language rows in translations table
 document.addEventListener('DOMContentLoaded', function() {
-    var toggleBtn = document.getElementById('toggleTier3Btn');
+    var toggleBtn = document.getElementById('toggleSecondaryLangsBtn');
     if (!toggleBtn) return;
 
-    var tier3Count = document.querySelectorAll('.tier-3-translation').length;
-    toggleBtn.innerHTML = '<i class="bi bi-chevron-down"></i> Show all languages (' + tier3Count + ' more)';
+    var hiddenCount = document.querySelectorAll('.secondary-translation').length;
+    toggleBtn.innerHTML = '<i class="bi bi-chevron-down"></i> Show all languages (' + hiddenCount + ' more)';
 
     toggleBtn.addEventListener('click', function() {
-        var rows = document.querySelectorAll('.tier-3-translation');
+        var rows = document.querySelectorAll('.secondary-translation');
         var isHidden = rows.length > 0 && rows[0].classList.contains('d-none');
         rows.forEach(function(row) {
             row.classList.toggle('d-none');
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isHidden) {
             toggleBtn.innerHTML = '<i class="bi bi-chevron-up"></i> Show fewer languages';
         } else {
-            toggleBtn.innerHTML = '<i class="bi bi-chevron-down"></i> Show all languages (' + tier3Count + ' more)';
+            toggleBtn.innerHTML = '<i class="bi bi-chevron-down"></i> Show all languages (' + hiddenCount + ' more)';
         }
     });
 });
