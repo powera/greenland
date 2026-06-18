@@ -194,6 +194,27 @@ def list_by_difficulty(
     )
 
 
+class AddLemmaInput(TypedDict, total=False):
+    lemma_text: str
+    definition_text: str
+    pos_type: str
+    pos_subtype: str
+    difficulty_level: Optional[int]
+    translations: Dict[str, str]
+
+
+@mirrored_route("/api/v1/lemmas/add", "POST")
+def add_lemmas(lemmas: List[AddLemmaInput]) -> Any:
+    """Create one or more lemmas, returning their generated GUIDs.
+
+    Each entry requires ``lemma_text``, ``definition_text``, ``pos_type`` and
+    ``pos_subtype``; ``difficulty_level`` and ``translations`` are optional.
+    An entry whose ``(lemma_text, pos_type)`` already exists is returned with
+    ``status`` ``"already_exists"`` and is not modified.
+    """
+    return post_json(f"{API_V1_PREFIX}/lemmas/add", {"lemmas": lemmas})
+
+
 @mirrored_route("/api/v1/lemma/<guid>", "GET")
 def get_lemma(guid: str) -> Any:
     """Basic lemma details."""
