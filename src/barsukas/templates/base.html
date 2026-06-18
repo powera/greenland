@@ -55,6 +55,9 @@
                             <li><a class="dropdown-item" href="{{ url_for('peleda.dictionary') }}">
                                 <i class="bi bi-journal-bookmark"></i> {{ STRINGS.navigation.get('dictionary', 'Dictionary') }}
                             </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('peleda.dictionary', sort='phrasebook') }}">
+                                <i class="bi bi-chat-quote"></i> {{ STRINGS.navigation.get('phrasebook', 'Phrasebook') }}
+                            </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('rhymes.index') }}">
                                 <i class="bi bi-music-note-list"></i> {{ STRINGS.navigation.get('rhyming_dictionary', 'Rhyming Dictionary') }}
                             </a></li>

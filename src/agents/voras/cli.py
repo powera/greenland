@@ -35,7 +35,7 @@ from storage.models.schema import BarsukasTask
 # Import language mappings from translation_helpers (single source of truth)
 from storage.translation_helpers import (
     LANGUAGE_FIELDS,
-    get_tier_1_and_tier_2_languages,
+    get_default_generation_languages,
     normalize_llm_language_codes,
 )
 
@@ -535,9 +535,9 @@ def main() -> None:
             session = agent.get_session()
             try:
                 languages_to_fix = normalize_llm_language_codes(
-                    args.languages if args.languages else get_tier_1_and_tier_2_languages(),
+                    args.languages if args.languages else get_default_generation_languages(),
                     operation_name="Voras populate enqueue",
-                    all_expansion=get_tier_1_and_tier_2_languages(),
+                    all_expansion=get_default_generation_languages(),
                 )
                 results = enqueue_voras_populate_work(
                     agent=agent,

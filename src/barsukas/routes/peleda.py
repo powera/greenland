@@ -319,6 +319,30 @@ def _build_category_options(available: set[Tuple[str, str]]) -> List[Dict[str, A
     return result
 
 
+def _available_phrase_subtypes() -> List[str]:
+    """Return phrase subtypes (e.g. greetings, traveler) that have entries."""
+    rows = (
+        g.db.query(Lemma.pos_subtype)
+        .filter(
+            Lemma.guid.isnot(None),
+            Lemma.pos_type == "phrase",
+            Lemma.pos_subtype.isnot(None),
+        )
+        .distinct()
+        .all()
+    )
+    return sorted(r[0] for r in rows)
+
+
+def _query_by_phrase_subtype(lang: str, pos_subtype: str) -> Query:  # type: ignore[type-arg]
+    """Query phrases of a single subtype, ordered by GUID (curated order)."""
+    return (  # type: ignore[no-any-return]
+        _base_query_for_lang(lang)
+        .filter(Lemma.pos_type == "phrase", Lemma.pos_subtype == pos_subtype)
+        .order_by(Lemma.guid, Lemma.id)
+    )
+
+
 # ---------------------------------------------------------------------------
 # Main view
 # ---------------------------------------------------------------------------
@@ -336,7 +360,7 @@ def dictionary() -> ResponseReturnValue:
     valid_codes = set(DICTIONARY_SOURCE_LANGUAGES)
     if lang not in valid_codes:
         lang = "en"
-    if sort not in ("alpha", "level", "category"):
+    if sort not in ("alpha", "level", "category", "phrasebook"):
         sort = "alpha"
     display_langs = _get_display_langs(lang)
     alphabet = _get_alphabet(lang)
@@ -350,8 +374,22 @@ def dictionary() -> ResponseReturnValue:
     available_letters: set[str] = set()
     category_options: List[Dict[str, Any]] = []
     selected_category: Optional[str] = None
+    phrase_subtype_options: List[str] = []
+    selected_phrase_subtype: Optional[str] = None
 
-    if sort == "category":
+    if sort == "phrasebook":
+        phrase_subtype_options = _available_phrase_subtypes()
+        selected_phrase_subtype = request.args.get("phrase_subtype", "").strip()
+        if selected_phrase_subtype not in phrase_subtype_options:
+            selected_phrase_subtype = phrase_subtype_options[0] if phrase_subtype_options else ""
+
+        if selected_phrase_subtype:
+            base_query = _query_by_phrase_subtype(lang, selected_phrase_subtype)
+        else:
+            # No phrases exist yet: show nothing.
+            base_query = _base_query_for_lang(lang).filter(Lemma.id < 0)
+
+    elif sort == "category":
         available = _available_categories()
         category_options = _build_category_options(available)
         selected_category = request.args.get("category", "").strip()
@@ -453,6 +491,8 @@ def dictionary() -> ResponseReturnValue:
         level_list=level_list,
         selected_category=selected_category,
         category_options=category_options,
+        phrase_subtype_options=phrase_subtype_options,
+        selected_phrase_subtype=selected_phrase_subtype,
         page=page,
         total=total,
         total_pages=total_pages,

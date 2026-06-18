@@ -32,7 +32,7 @@ from storage.crud.operation_log import log_translation_change
 from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
 from storage.queries.lemma import build_lemma_search_query
 from storage.translation_helpers import (
-    TIER_3_LANGUAGES,
+    DEFAULT_GENERATION_LANGUAGES,
     get_all_translations,
     get_supported_languages,
 )
@@ -538,7 +538,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         external_annotations=external_annotations,
         lexeme_frequency_by_corpus=lexeme_frequency_by_corpus,
         lexeme_rank_by_corpus=lexeme_rank_by_corpus,
-        tier_3_languages=set(TIER_3_LANGUAGES),
+        hidden_languages=set(language_names) - set(DEFAULT_GENERATION_LANGUAGES),
     )
 
 
