@@ -96,12 +96,21 @@ def _english_lemma_ids(session: Session) -> List[int]:
     We only assign ``frequency_rank`` to lemmas that have an English lexeme,
     since the wordfreq corpora are English. Tier sources (YLE/CEFR) likewise
     annotate English. A lemma without an English lexeme stays unranked.
+
+    Fixed-phrase lemmas (see ``NON_LEXEME_POS_TYPES``) are excluded explicitly:
+    they are not single words and have no meaningful corpus frequency. (They also
+    never receive derivative forms, so this is belt-and-suspenders.)
     """
-    from storage.models.schema import DerivativeForm
+    from storage.models.schema import DerivativeForm, Lemma
+    from storage.translation_helpers import NON_LEXEME_POS_TYPES
 
     rows = (
         session.query(DerivativeForm.lemma_id)
-        .filter(DerivativeForm.language_code == "en")
+        .join(Lemma, DerivativeForm.lemma_id == Lemma.id)
+        .filter(
+            DerivativeForm.language_code == "en",
+            Lemma.pos_type.notin_(NON_LEXEME_POS_TYPES),
+        )
         .distinct()
         .all()
     )

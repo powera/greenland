@@ -139,4 +139,11 @@ SUBTYPE_GUID_PREFIXES = {
         "cardinal": "Z01",
         "ordinal": "Z02",
     },
+    # Fixed traveler phrases (e.g. "Where is the toilet?"). Stored as lemmas but
+    # are not single lexemes; excluded from sentence assembly and rhyming via
+    # translation_helpers.NON_LEXEME_POS_TYPES.
+    "phrase": {
+        "greetings": "F01",
+        "traveler": "F02",
+    },
 }

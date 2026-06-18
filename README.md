@@ -9,6 +9,16 @@ and language-model evaluation tools.
 ## Main Components
 
 - **WordFreq data layer**: stores lemmas, translations, forms, sentences, and metadata.
+
+> **Note on the `Lemma` table:** the current `Lemma` schema is expected to be
+> replaced with a redesigned version in the future. As a result, some content
+> that isn't really a single-word concept is currently tacked onto it somewhat
+> awkwardly — most notably **fixed phrases** (the traveler's dictionary), which
+> are stored as lemmas with `pos_type="phrase"` to reuse the existing
+> translation/difficulty/export/sync pipeline. These are deliberately excluded
+> from word-only code paths (sentence assembly, rhyming, embeddings) via
+> `storage.translation_helpers.NON_LEXEME_POS_TYPES`. When the schema is
+> reworked, phrases are a candidate to split into their own first-class model.
 - **Barsukas web editor**: Flask UI for browsing, editing, and reviewing linguistic content.
 - **Automation agents**: task-focused scripts for data QA, generation, and maintenance.
 - **Benchmarks**: framework for generating and scoring model responses on language tasks.

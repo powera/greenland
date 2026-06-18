@@ -13,6 +13,10 @@ Base prefix: `/api`.
 
 - `GET /api/v1/search?q=<query>[&pos_type=...][&difficulty=...][&limit=...][&offset=...]`
   - Search lemmas by text/definition/translations.
+  - `pos_type` may be any value in `VALID_POS_TYPES`, including `phrase` for fixed
+    traveler phrases (subtypes `greetings`, `traveler`). Phrase lemmas store the
+    full English phrase in their lemma/concept label and behave like any other
+    lemma here; they are only excluded from sentence assembly and rhyming.
 
 - `GET /api/v1/lemmas/by-difficulty?difficulty=<level>[&pos_type=...][&missing_translation=<code>][&limit=...][&offset=...]`
   - List lemmas for one difficulty level without supplying a text query.

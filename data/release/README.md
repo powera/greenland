@@ -18,6 +18,11 @@ data/release/lemmas/
 │   └── ...
 ├── verbs/
 │   └── ...
+├── phrases/
+│   ├── greetings/
+│   │   └── base.jsonl
+│   └── traveler/
+│       └── base.jsonl
 └── ...
 data/release/sentences/
 ├── beginner/
@@ -180,3 +185,9 @@ when the words are not exact drop-in equivalents.
 - **Difficulty**: New words should have difficulty level `-1` unless specified.
 - **Lemma form**: Words should be in lemma form with disambiguation if needed.
 - **Chinese**: Use mainland Chinese with simplified characters.
+- **Phrases**: Fixed traveler phrases (e.g. "Where is the toilet?") are stored as
+  lemmas with `pos_type` `phrase` under `lemmas/phrases/<subtype>/` (GUID prefixes
+  `F01` greetings, `F02` traveler). The English phrase goes in `concept_label` and
+  a one-line usage note in `concept_definition`. Phrases are intentionally excluded
+  from sentence assembly and the rhyming dictionary
+  (`storage.translation_helpers.NON_LEXEME_POS_TYPES`).
