@@ -530,6 +530,7 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
             "interjection": "interjections",
             "numeral": "numerals",
             "particle": "particles",
+            "phrase": "phrases",
         }
 
         # Track languages encountered

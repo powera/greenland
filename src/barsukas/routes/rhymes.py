@@ -25,7 +25,7 @@ from langtools.rhyme_keys import (
     rhyme_key_penultimate_sound,
 )
 from storage.models.schema import DerivativeForm, Lemma
-from storage.translation_helpers import get_supported_languages
+from storage.translation_helpers import NON_LEXEME_POS_TYPES, get_supported_languages
 
 bp = Blueprint("rhymes", __name__, url_prefix="/rhymes")
 
@@ -67,9 +67,12 @@ def _rhyme_family_rows(language_code: str) -> List[Tuple[str, int, str]]:
             func.count(func.distinct(DerivativeForm.lemma_id)).label("word_count"),
             func.min(DerivativeForm.derivative_form_text).label("example_word"),
         )
+        .join(Lemma, DerivativeForm.lemma_id == Lemma.id)
         .filter(
             DerivativeForm.language_code == language_code,
             DerivativeForm.rhyme_key.isnot(None),
+            # Exclude fixed phrases from rhyme families.
+            Lemma.pos_type.notin_(NON_LEXEME_POS_TYPES),
         )
         .group_by(DerivativeForm.rhyme_key)
         .having(func.count(func.distinct(DerivativeForm.lemma_id)) >= 2)
@@ -141,6 +144,8 @@ def _family_words(
             DerivativeForm.language_code == language_code,
             DerivativeForm.rhyme_key == rhyme_key_value,
             Lemma.guid.isnot(None),
+            # Exclude fixed phrases from rhyme families.
+            Lemma.pos_type.notin_(NON_LEXEME_POS_TYPES),
         )
         .order_by(func.lower(Lemma.lemma_text), DerivativeForm.derivative_form_text)
         .all()

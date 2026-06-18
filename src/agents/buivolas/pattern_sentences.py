@@ -19,6 +19,7 @@ from storage.models.schema import (
     SentenceWord,
     SentencePatternWord,
 )
+from storage.translation_helpers import NON_LEXEME_POS_TYPES
 
 logger = logging.getLogger(__name__)
 
@@ -115,6 +116,8 @@ class PatternSentenceGenerator:
         query = session.query(Lemma).filter(
             Lemma.guid.isnot(None),
             Lemma.pos_type == slot["pos_type"],
+            # Never use fixed phrases as sentence building blocks.
+            Lemma.pos_type.notin_(NON_LEXEME_POS_TYPES),
         )
 
         if slot.get("pos_subtype") is not None:

@@ -167,6 +167,7 @@ def load_trakaido_json(json_path: str) -> List[Dict[str, Any]]:
             "numeral",
             "auxiliary",
             "modal",
+            "phrase",
         }
         if pos_type not in valid_pos_types:
             raise ValueError(

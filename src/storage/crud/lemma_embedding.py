@@ -157,8 +157,14 @@ def get_lemmas_for_embedding_refresh(
     language_code: str,
     limit: Optional[int] = None,
 ) -> List[Lemma]:
-    """Fetch lemmas eligible for embedding generation."""
-    query = session.query(Lemma)
+    """Fetch lemmas eligible for embedding generation.
+
+    Fixed phrases (see ``NON_LEXEME_POS_TYPES``) are excluded: they are not single
+    concepts and should not appear as semantic-similarity candidates.
+    """
+    from storage.translation_helpers import NON_LEXEME_POS_TYPES
+
+    query = session.query(Lemma).filter(Lemma.pos_type.notin_(NON_LEXEME_POS_TYPES))
     if language_code != "en":
         query = query.join(
             LemmaTranslation,

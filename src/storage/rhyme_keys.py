@@ -15,8 +15,15 @@ def is_derivative_form_rhyme_indexable(derivative_form: "DerivativeForm") -> boo
 
     We intentionally skip rhyme indexing for multi-word periphrastic tense forms.
     Minimum enforced policy: English future-tense forms (``*_future``) that
-    contain whitespace are excluded from rhyme-key storage.
+    contain whitespace are excluded from rhyme-key storage. Fixed-phrase lemmas
+    (see ``NON_LEXEME_POS_TYPES``) are never rhyme-indexed.
     """
+    from storage.translation_helpers import NON_LEXEME_POS_TYPES
+
+    parent_lemma = derivative_form.lemma
+    if parent_lemma is not None and parent_lemma.pos_type in NON_LEXEME_POS_TYPES:
+        return False
+
     form_text = derivative_form.derivative_form_text or ""
     normalized_form = form_text.strip()
     if not normalized_form:
