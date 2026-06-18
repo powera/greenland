@@ -49,6 +49,7 @@ from storage.translation_helpers import (
     get_default_generation_languages,
     get_reference_translation,
     normalize_llm_language_codes,
+    split_llm_language_batches,
 )
 from storage.translation_helpers import get_translation
 from storage.translation_helpers import get_translation as get_translation_helper
@@ -784,20 +785,32 @@ class VorasAgent:
                         # Pass language codes for only the missing languages
                         missing_lang_codes = [lang_code for lang_code, _ in missing_languages]
 
-                        # Query LLM for translations - ONE CALL for only missing languages
-                        llm_translations, success = client.query_translations(
-                            english_word=lemma.lemma_text,
-                            reference_translation=(reference_lang_code, reference_translation),
-                            definition=lemma.definition_text,
-                            pos_type=lemma.pos_type,
-                            pos_subtype=lemma.pos_subtype,
-                            languages=missing_lang_codes,
-                        )
-                        query_cost_usd = float(getattr(client.client, "_last_query_cost_usd", 0.0))
-                        results["llm_cost_usd"] += query_cost_usd
+                        llm_translations: Dict[str, Any] = {}
+                        query_failed = False
+                        for language_batch in split_llm_language_batches(missing_lang_codes):
+                            batch_translations, success = client.query_translations(
+                                english_word=lemma.lemma_text,
+                                reference_translation=(reference_lang_code, reference_translation),
+                                definition=lemma.definition_text,
+                                pos_type=lemma.pos_type,
+                                pos_subtype=lemma.pos_subtype,
+                                languages=language_batch,
+                            )
+                            query_cost_usd = float(
+                                getattr(client.client, "_last_query_cost_usd", 0.0)
+                            )
+                            results["llm_cost_usd"] += query_cost_usd
+                            if not success or not batch_translations:
+                                logger.warning(
+                                    "Failed to get translations for '%s' in %s",
+                                    lemma.lemma_text,
+                                    ", ".join(language_batch),
+                                )
+                                query_failed = True
+                                break
+                            llm_translations.update(batch_translations)
 
-                        if not success or not llm_translations:
-                            logger.warning(f"Failed to get translations for '{lemma.lemma_text}'")
+                        if query_failed or not llm_translations:
                             for lang_code, _ in missing_languages:
                                 results["by_language"][lang_code]["failed"] += 1
                                 results["total_failed"] += 1

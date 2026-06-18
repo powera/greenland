@@ -22,6 +22,7 @@ from storage.translation_helpers import (
     get_reference_translation,
     get_translation,
     set_translation,
+    split_llm_language_batches,
 )
 from storage.crud.operation_log import log_translation_change
 from wordfreq.translation.client import LinguisticClient
@@ -34,6 +35,7 @@ def generate_missing_translations_for_lemma(
     lemma: Lemma,
     config: Optional[DataSourceConfig] = None,
     source: Optional[str] = None,
+    payload_languages: Optional[List[str]] = None,
 ) -> Tuple[int, List[str]]:
     """
     Generate missing translations for a single lemma.
@@ -56,10 +58,14 @@ def generate_missing_translations_for_lemma(
     if source is None:
         source = f"voras-agent/{config.model}"
 
+    requested_languages = (
+        payload_languages if payload_languages is not None else get_default_generation_languages()
+    )
     target_languages = normalize_llm_language_codes(
-        get_default_generation_languages(),
+        requested_languages,
         operation_name="Voras workqueue missing translations",
         all_expansion=get_default_generation_languages(),
+        max_languages=len(get_default_generation_languages()),
     )
 
     # Find missing languages for this lemma
@@ -87,19 +93,21 @@ def generate_missing_translations_for_lemma(
         reference_lang_code = "en"
         reference_translation = lemma.lemma_text
 
-    # Query LLM for translations (pass language codes directly)
+    # Query LLM for translations (pass language codes directly), split to keep prompts focused.
     client = LinguisticClient(model=config.model, db_path=config.sqlite_path, debug=config.debug)
-    llm_response, success = client.query_translations(
-        english_word=lemma.lemma_text,
-        reference_translation=(reference_lang_code, reference_translation),
-        definition=lemma.definition_text,
-        pos_type=lemma.pos_type,
-        pos_subtype=lemma.pos_subtype,
-        languages=missing_languages,
-    )
-
-    if not success or not llm_response:
-        return 0, ["LLM could not generate translations"]
+    llm_response: Dict[str, object] = {}
+    for language_batch in split_llm_language_batches(missing_languages):
+        batch_response, success = client.query_translations(
+            english_word=lemma.lemma_text,
+            reference_translation=(reference_lang_code, reference_translation),
+            definition=lemma.definition_text,
+            pos_type=lemma.pos_type,
+            pos_subtype=lemma.pos_subtype,
+            languages=language_batch,
+        )
+        if not success or not batch_response:
+            return 0, ["LLM could not generate translations for " + ", ".join(language_batch)]
+        llm_response.update(batch_response)
 
     # Convert LLM response to lang_code format and save
     translations_by_lang_code = convert_llm_response_to_lang_codes(llm_response)
@@ -142,7 +150,15 @@ def handle_add_missing_translations(session: Session, payload: Dict) -> str:
     lemma_id = payload["lemma_id"]
     lemma = get_lemma_or_raise(session, lemma_id)
 
-    added_count, errors = generate_missing_translations_for_lemma(session, lemma)
+    languages = payload.get("languages")
+    if languages is not None and (
+        not isinstance(languages, list) or not all(isinstance(item, str) for item in languages)
+    ):
+        raise ValueError("languages must be a list of language code strings")
+
+    added_count, errors = generate_missing_translations_for_lemma(
+        session, lemma, payload_languages=languages
+    )
 
     if errors and added_count == 0:
         raise RuntimeError("; ".join(errors))

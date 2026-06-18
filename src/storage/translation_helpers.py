@@ -19,7 +19,7 @@ from storage.models.schema import AudioQualityReview, Lemma, LemmaTranslation
 
 logger = logging.getLogger(__name__)
 
-MAX_LLM_LANGUAGES_PER_OPERATION = 16
+MAX_LLM_LANGUAGES_PER_OPERATION = 10
 
 # Languages that need a computed sort_key for dictionary ordering.
 # CJK languages use transliteration (pinyin, hiragana, jamo); accented Latin
@@ -1093,6 +1093,30 @@ def normalize_llm_language_codes(
         deduped = deduped[:max_languages]
 
     return deduped
+
+
+def split_llm_language_batches(
+    languages: List[str], max_languages: int = MAX_LLM_LANGUAGES_PER_OPERATION
+) -> List[List[str]]:
+    """Split normalized language codes into LLM-sized batches.
+
+    Keeps hierarchy/order from the caller, caps every batch at ``max_languages``,
+    and avoids singleton tail batches by moving one language from the previous
+    batch when possible. This preserves similar-language grouping for ordered
+    language lists while avoiding inefficient one-language prompts.
+    """
+    if max_languages < 2:
+        raise ValueError("max_languages must be at least 2 to avoid singleton batches")
+    if not languages:
+        return []
+
+    batches = [
+        languages[index : index + max_languages]
+        for index in range(0, len(languages), max_languages)
+    ]
+    if len(batches) > 1 and len(batches[-1]) == 1 and len(batches[-2]) > 2:
+        batches[-1].insert(0, batches[-2].pop())
+    return batches
 
 
 def get_languages_in_hierarchy() -> list:

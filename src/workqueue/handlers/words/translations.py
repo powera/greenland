@@ -16,6 +16,8 @@ from storage.translation_helpers import (
     get_reference_translation,
     get_translation,
     lang_code_to_llm_field,
+    normalize_llm_language_codes,
+    split_llm_language_batches,
 )
 from wordfreq.translation.client import LinguisticClient
 from workqueue.tools import workqueue_payload_handler
@@ -42,7 +44,11 @@ def do_generate_missing_translations(
     if not lemma:
         raise ValueError(f"Lemma {lemma_id} not found")
 
-    requested_languages = languages or list(LANGUAGE_FIELDS.keys())
+    requested_languages = normalize_llm_language_codes(
+        languages or list(LANGUAGE_FIELDS.keys()),
+        operation_name="Workqueue word translation",
+        max_languages=len(LANGUAGE_FIELDS),
+    )
     missing_languages: List[str] = []
     for language_code in requested_languages:
         translation = get_translation(session, lemma, language_code)
@@ -66,20 +72,24 @@ def do_generate_missing_translations(
         db_path=config.sqlite_path or "",
         debug=Config.DEBUG,
     )
-    translations, success = client.query_translations(
-        english_word=lemma.lemma_text,
-        reference_translation=(
-            reference_lang_code or "en",
-            reference_translation or lemma.lemma_text,
-        ),
-        definition=lemma.definition_text,
-        pos_type=lemma.pos_type,
-        pos_subtype=lemma.pos_subtype,
-        languages=missing_languages,
-    )
-
-    if not success or not translations:
-        raise RuntimeError("LLM could not generate translations")
+    translations: Dict[str, Any] = {}
+    for language_batch in split_llm_language_batches(missing_languages):
+        batch_translations, success = client.query_translations(
+            english_word=lemma.lemma_text,
+            reference_translation=(
+                reference_lang_code or "en",
+                reference_translation or lemma.lemma_text,
+            ),
+            definition=lemma.definition_text,
+            pos_type=lemma.pos_type,
+            pos_subtype=lemma.pos_subtype,
+            languages=language_batch,
+        )
+        if not success or not batch_translations:
+            raise RuntimeError(
+                "LLM could not generate translations for " + ", ".join(language_batch)
+            )
+        translations.update(batch_translations)
 
     translation_metadata_by_lang_code = convert_llm_response_to_translation_metadata(translations)
     added_count = 0
@@ -152,20 +162,24 @@ def do_regenerate_translations(session: Any, lemma_id: int, **_: Any) -> str:
         reference_lang_code = "en"
         reference_translation = lemma.lemma_text
 
-    translations, success = client.query_translations(
-        english_word=lemma.lemma_text,
-        reference_translation=(
-            reference_lang_code or "en",
-            reference_translation or lemma.lemma_text,
-        ),
-        definition=lemma.definition_text,
-        pos_type=lemma.pos_type,
-        pos_subtype=lemma.pos_subtype,
-        languages=languages_to_regenerate,
-    )
-
-    if not success or not translations:
-        raise RuntimeError("LLM could not regenerate translations")
+    translations: Dict[str, Any] = {}
+    for language_batch in split_llm_language_batches(languages_to_regenerate):
+        batch_translations, success = client.query_translations(
+            english_word=lemma.lemma_text,
+            reference_translation=(
+                reference_lang_code or "en",
+                reference_translation or lemma.lemma_text,
+            ),
+            definition=lemma.definition_text,
+            pos_type=lemma.pos_type,
+            pos_subtype=lemma.pos_subtype,
+            languages=language_batch,
+        )
+        if not success or not batch_translations:
+            raise RuntimeError(
+                "LLM could not regenerate translations for " + ", ".join(language_batch)
+            )
+        translations.update(batch_translations)
 
     regenerated_count = 0
     for language_code in languages_to_regenerate:

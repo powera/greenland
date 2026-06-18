@@ -395,17 +395,46 @@ def _require_model() -> Tuple[Optional[str], Optional[ResponseReturnValue]]:
     return model.strip(), None
 
 
+def _require_languages(
+    payload: Dict[str, Any],
+) -> Tuple[Optional[List[str]], Optional[ResponseReturnValue]]:
+    raw_value = payload.get("languages")
+    if raw_value is None:
+        raw_value = payload.get("language")
+    if raw_value is None:
+        return None, _build_error_response("language or languages is required")
+    if isinstance(raw_value, str):
+        language_code = raw_value.strip()
+        if not language_code:
+            return None, _build_error_response("language must be a non-empty string")
+        return [language_code], None
+    if not isinstance(raw_value, list) or not raw_value:
+        return None, _build_error_response("languages must be a non-empty list of strings")
+    languages: List[str] = []
+    for item in raw_value:
+        if not isinstance(item, str) or not item.strip():
+            return None, _build_error_response("languages must contain non-empty strings")
+        languages.append(item.strip())
+    return languages, None
+
+
 @bp.route("/v1/agents/lemma/<guid>/add-missing-translations", methods=["POST"])
 @mirrored_facade("/api/v1/agents/lemma/<guid>/add-missing-translations", "POST")
 def queue_add_missing_translations(guid: str) -> ResponseReturnValue:
+    payload = request.get_json(silent=True) or {}
     model, error = _require_model()
     if error is not None:
         return error
+    languages, language_error = _require_languages(payload)
+    if language_error is not None:
+        return language_error
+    assert model is not None
+    assert languages is not None
     return _queue_task_for_guid_with_optional_batch(
         guid,
         TaskType.ADD_MISSING_TRANSLATIONS,
-        {"model": model},
-        dedup_key=f"{TaskType.ADD_MISSING_TRANSLATIONS}:{{lemma_id}}",
+        {"model": model, "languages": languages},
+        dedup_key=f"{TaskType.ADD_MISSING_TRANSLATIONS}:{{lemma_id}}:{':'.join(sorted(languages))}",
         batch_dedup_prefix=str(TaskType.ADD_MISSING_TRANSLATIONS),
     )
 
@@ -450,9 +479,11 @@ def _queue_task_for_guid_with_optional_batch(
     window_index = int(datetime.utcnow().timestamp() // (batch_window_minutes * 60))
     model_name = str(payload.get("model", ""))
     lang_code = str(payload.get("lang_code", ""))
-    batch_dedup_key = (
-        f"{batch_dedup_prefix}:{window_index}:{batch_window_minutes}:{model_name}:{lang_code}"
-    )
+    languages = payload.get("languages")
+    languages_key = ""
+    if isinstance(languages, list):
+        languages_key = ":".join(sorted(str(language_code) for language_code in languages))
+    batch_dedup_key = f"{batch_dedup_prefix}:{window_index}:{batch_window_minutes}:{model_name}:{lang_code}:{languages_key}"
     existing = (
         g.db.query(BarsukasTask)
         .filter(

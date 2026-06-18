@@ -118,7 +118,7 @@ Norse. Expect more `late_construction`, `modern_loan`, `descriptive`, and
 
 All LLM-invoking endpoints below require JSON body with `"model": "<model-name>"`.
 
-- `POST /api/v1/agents/lemma/<guid>/add-missing-translations`
+- `POST /api/v1/agents/lemma/<guid>/add-missing-translations` (requires `language` or `languages`)
 - `POST /api/v1/agents/lemma/<guid>/generate-pronunciations` (optional `lang_code`)
 - `POST /api/v1/agents/lemma/<guid>/generate-forms` (optional `lang_code`)
 - `POST /api/v1/agents/lemma/<guid>/generate-synonyms` (optional `lang_code`)
