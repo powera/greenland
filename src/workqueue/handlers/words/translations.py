@@ -21,11 +21,11 @@ from wordfreq.translation.client import LinguisticClient
 from workqueue.tools import workqueue_payload_handler
 
 
-def _build_config() -> DataSourceConfig:
+def _build_config(model: Optional[str] = None) -> DataSourceConfig:
     return DataSourceConfig(
         backend_type=BackendType.SQLITE,
         sqlite_path=Config.DB_PATH,
-        model=constants.DEFAULT_MODEL,
+        model=model or constants.DEFAULT_MODEL,
         debug=Config.DEBUG,
     )
 
@@ -34,6 +34,7 @@ def do_generate_missing_translations(
     session: Any,
     lemma_id: int,
     languages: Optional[List[str]] = None,
+    model: Optional[str] = None,
     **_: Any,
 ) -> str:
     """Generate missing translations for a lemma, optionally constrained to languages."""
@@ -44,8 +45,6 @@ def do_generate_missing_translations(
     requested_languages = languages or list(LANGUAGE_FIELDS.keys())
     missing_languages: List[str] = []
     for language_code in requested_languages:
-        if language_code == "lt":
-            continue
         translation = get_translation(session, lemma, language_code)
         if not translation or not translation.strip():
             missing_languages.append(language_code)
@@ -60,7 +59,7 @@ def do_generate_missing_translations(
         reference_lang_code = "en"
         reference_translation = lemma.lemma_text
 
-    config = _build_config()
+    config = _build_config(model)
     agent = VorasAgent(config=config)
     client = LinguisticClient(
         model=config.model or "",
@@ -200,6 +199,8 @@ def handle_words_translations(
     lemma_id: Optional[int] = None,
     lemma_ids: Optional[List[int]] = None,
     languages: Optional[List[str]] = None,
+    model: Optional[str] = None,
+    **_: Any,
 ) -> str:
     """Workqueue wrapper for missing translation generation."""
     if lemma_ids:
@@ -208,13 +209,16 @@ def handle_words_translations(
                 session=session,
                 lemma_id=queued_lemma_id,
                 languages=languages,
+                model=model,
             )
             for queued_lemma_id in lemma_ids
         ]
         return f"Batch completed for {len(lemma_ids)} lemmas: " + "; ".join(results)
     if lemma_id is None:
         raise ValueError("lemma_id or lemma_ids is required")
-    return do_generate_missing_translations(session=session, lemma_id=lemma_id, languages=languages)
+    return do_generate_missing_translations(
+        session=session, lemma_id=lemma_id, languages=languages, model=model
+    )
 
 
 @workqueue_payload_handler()

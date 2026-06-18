@@ -32,6 +32,7 @@ from api.batch_operations import (
     list_pos_subtypes,
 )
 from api.lemmas import (
+    add_lemmas,
     get_forms,
     get_grammar,
     get_lemma,
@@ -55,6 +56,7 @@ from api.sentences import get_sentence, get_sentence_metadata
 __all__ = [
     "BarsukasAPIError",
     "admin_restart",
+    "add_lemmas",
     "add_missing_translations",
     "check_definition",
     "check_disambiguation",
