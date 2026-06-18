@@ -106,13 +106,13 @@ def add_missing_translations(
     *,
     guids: Optional[List[str]] = None,
     model: Optional[str] = None,
+    language: Optional[str] = None,
     languages: Optional[List[str]] = None,
     timeout: Optional[float] = None,
 ) -> AddMissingTranslationsResponse:
     """Generate missing translations for one or more lemmas.
 
-    When ``languages`` is omitted/None, Voras fills all configured generation
-    languages. When provided, Voras fills only the requested language codes.
+    Pass either ``language`` for one target language or ``languages`` for several target language codes.
 
     ``timeout`` overrides the default HTTP read timeout; pass a longer value
     for bulk requests.
@@ -126,7 +126,13 @@ def add_missing_translations(
         AddMissingTranslationsResponse,
         post_json(
             "/api/llm/voras/add-missing-translations",
-            {"guid": guid, "guids": guids, "model": model, "languages": languages},
+            {
+                "guid": guid,
+                "guids": guids,
+                "model": model,
+                "language": language,
+                "languages": languages,
+            },
             **kwargs,
         ),
     )
@@ -299,8 +305,7 @@ def batch_translate_sentences(
 
     Args:
         sentence_ids: Sentence IDs (max 15).
-        target_languages: Languages to translate into. Defaults to the full
-            candidate-lookup pool minus English.
+        target_languages: Required languages to translate into.
         model: LLM model id (default: system default).
         batch_window_minutes: Shared-batch window 1-10 (default: 10).
 

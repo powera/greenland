@@ -99,6 +99,36 @@ def _build_success_response(
     return jsonify(response)
 
 
+def _get_required_language_list(
+    data: Dict[str, Any], *, plural_field: str = "languages", singular_field: str = "language"
+) -> Union[List[str], ResponseReturnValue]:
+    """Read a required language selection from JSON payload aliases."""
+    raw_value = data.get(plural_field)
+    if raw_value is None:
+        raw_value = data.get(singular_field)
+    if raw_value is None and plural_field != "target_languages":
+        raw_value = data.get("target_languages")
+    if raw_value is None:
+        return _build_error_response(f"{singular_field} or {plural_field} is required")
+    if isinstance(raw_value, str):
+        languages = [raw_value.strip()]
+    elif isinstance(raw_value, list):
+        languages = []
+        for item in raw_value:
+            if not isinstance(item, str) or not item.strip():
+                return _build_error_response(
+                    f"{plural_field} must contain non-empty language code strings"
+                )
+            languages.append(item.strip())
+    else:
+        return _build_error_response(
+            f"{singular_field} must be a string or {plural_field} must be a list of strings"
+        )
+    if not languages:
+        return _build_error_response(f"{singular_field} or {plural_field} is required")
+    return languages
+
+
 def _get_config_from_request(data: Dict[str, Any]) -> DataSourceConfig:
     """Build a DataSourceConfig from request data, including optional API keys.
 
@@ -322,8 +352,7 @@ def api_add_missing_translations() -> ResponseReturnValue:
 
     Request body (JSON):
         guid: Required. GUID of the lemma (e.g., 'N03_003')
-        languages: Optional list of language codes (e.g., ["hr", "bs"]).
-            When omitted/null, uses all configured Voras generation languages.
+        language/languages: Required language code or list of language codes (e.g., ["hr", "bs"]).
         model: Optional. LLM model to use
         openai_api_key: Optional. OpenAI API key
         anthropic_api_key: Optional. Anthropic API key
@@ -349,16 +378,10 @@ def api_add_missing_translations() -> ResponseReturnValue:
     if not guids:
         return _build_error_response("guid or guids is required")
 
-    languages_raw = data.get("languages")
-    languages: Optional[List[str]]
-    if languages_raw is None:
-        languages = None
-    else:
-        if not isinstance(languages_raw, list) or not all(
-            isinstance(language_code, str) for language_code in languages_raw
-        ):
-            return _build_error_response("languages must be a list of language code strings")
-        languages = languages_raw
+    languages_result = _get_required_language_list(data)
+    if not isinstance(languages_result, list):
+        return languages_result
+    languages = languages_result
 
     try:
         from storage.translation_helpers import LANGUAGE_FIELDS
@@ -930,17 +953,12 @@ def batch_translate_sentences() -> ResponseReturnValue:
             return _build_error_response("each sentence_id must be an integer")
         sentence_ids.append(item)
 
-    targets_raw = data.get("target_languages")
-    if targets_raw is None:
-        target_languages = list(_BATCH_TRANSLATE_DEFAULT_TARGETS)
-    else:
-        if not isinstance(targets_raw, list) or not targets_raw:
-            return _build_error_response("target_languages must be a non-empty list when provided")
-        target_languages = []
-        for item in targets_raw:
-            if not isinstance(item, str) or not item.strip():
-                return _build_error_response("each target_language must be a non-empty string")
-            target_languages.append(item.strip())
+    target_languages_result = _get_required_language_list(
+        data, plural_field="target_languages", singular_field="language"
+    )
+    if not isinstance(target_languages_result, list):
+        return target_languages_result
+    target_languages = target_languages_result
 
     model_raw = data.get("model", constants.DEFAULT_MODEL)
     if not isinstance(model_raw, str) or not model_raw.strip():
@@ -955,22 +973,42 @@ def batch_translate_sentences() -> ResponseReturnValue:
     if batch_window_minutes < 1 or batch_window_minutes > 10:
         return _build_error_response("batch_window_minutes must be between 1 and 10")
 
-    window_index = int(datetime.utcnow().timestamp() // (batch_window_minutes * 60))
-    coalesce_key = (
-        f"{TaskType.SENTENCES_BATCH_TRANSLATE_SUBMIT}:batch:"
-        f"{window_index}:{batch_window_minutes}:{model}"
-    )
+    from storage.translation_helpers import split_llm_language_batches
 
-    return _accumulate_or_enqueue_batch(
-        task_type=TaskType.SENTENCES_BATCH_TRANSLATE_SUBMIT,
-        coalesce_key=coalesce_key,
-        batch_window_minutes=batch_window_minutes,
-        payload_template={
-            "target_languages": target_languages,
-            "model": model,
+    window_index = int(datetime.utcnow().timestamp() // (batch_window_minutes * 60))
+    language_batches = split_llm_language_batches(target_languages)
+    responses: List[ResponseReturnValue] = []
+    for language_batch in language_batches:
+        languages_key = ":".join(language_batch)
+        coalesce_key = (
+            f"{TaskType.SENTENCES_BATCH_TRANSLATE_SUBMIT}:batch:"
+            f"{window_index}:{batch_window_minutes}:{model}:{languages_key}"
+        )
+        responses.append(
+            _accumulate_or_enqueue_batch(
+                task_type=TaskType.SENTENCES_BATCH_TRANSLATE_SUBMIT,
+                coalesce_key=coalesce_key,
+                batch_window_minutes=batch_window_minutes,
+                payload_template={
+                    "target_languages": language_batch,
+                    "model": model,
+                },
+                sentence_ids=sentence_ids,
+                languages_field=None,
+            )
+        )
+
+    if len(responses) == 1:
+        return responses[0]
+
+    return _build_success_response(
+        {
+            "batched": True,
+            "batch_count": len(responses),
+            "sentence_ids_added": len(sentence_ids),
+            "language_batches": language_batches,
         },
-        sentence_ids=sentence_ids,
-        languages_field="target_languages",
+        f"Created/updated {len(responses)} batch task(s)",
     )
 
 

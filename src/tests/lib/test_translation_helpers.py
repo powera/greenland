@@ -10,6 +10,7 @@ from storage.translation_helpers import (
     convert_llm_response_to_translation_metadata,
     get_tier_1_and_tier_2_languages,
     normalize_llm_language_codes,
+    split_llm_language_batches,
 )
 
 
@@ -33,7 +34,13 @@ class TestTranslationHelpers(unittest.TestCase):
         )
         self.assertEqual(len(normalized), MAX_LLM_LANGUAGES_PER_OPERATION)
         self.assertEqual(normalized[0], "l0")
-        self.assertEqual(normalized[-1], "l15")
+        self.assertEqual(normalized[-1], "l9")
+
+    def test_split_llm_language_batches_avoids_singleton_tail(self):
+        batches = split_llm_language_batches([f"l{i}" for i in range(11)])
+        self.assertEqual([len(batch) for batch in batches], [9, 2])
+        self.assertEqual(batches[0][0], "l0")
+        self.assertEqual(batches[-1], ["l9", "l10"])
 
     def test_converts_structured_translation_response_metadata(self):
         response = {
