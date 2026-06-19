@@ -1,5 +1,5 @@
-{"guid": "A05_015", "forms": [{"grammatical_form": "positive", "text": "good", "is_base_form": true, "ipa": "/ɡʊd/", "phonetic": "GOOD"}]}
-{"guid": "A05_016", "forms": [{"grammatical_form": "positive", "text": "bad", "is_base_form": true}]}
+{"guid": "A05_015", "forms": [{"grammatical_form": "positive", "text": "good", "is_base_form": true, "ipa": "/ɡʊd/", "phonetic": "GOOD"}, {"grammatical_form": "adjective/en_positive", "text": "good", "is_base_form": true}, {"grammatical_form": "adjective/en_comparative", "text": "better", "is_base_form": false}, {"grammatical_form": "adjective/en_superlative", "text": "best", "is_base_form": false}]}
+{"guid": "A05_016", "forms": [{"grammatical_form": "positive", "text": "bad", "is_base_form": true}, {"grammatical_form": "adjective/en_positive", "text": "bad", "is_base_form": true}, {"grammatical_form": "adjective/en_comparative", "text": "worse", "is_base_form": false}, {"grammatical_form": "adjective/en_superlative", "text": "worst", "is_base_form": false}]}
 {"guid": "A05_025", "forms": [{"grammatical_form": "positive", "text": "strong", "is_base_form": true, "ipa": "/strɔːŋ/", "phonetic": "STROW-NG"}]}
 {"guid": "A05_026", "forms": [{"grammatical_form": "positive", "text": "easy", "is_base_form": true, "ipa": "/ˈiːzi/", "phonetic": "EE-zi"}]}
 {"guid": "A05_027", "forms": [{"grammatical_form": "positive", "text": "difficult", "is_base_form": true, "ipa": "/ˈdɪfɪkt/", "phonetic": "DIF-ik-t"}]}

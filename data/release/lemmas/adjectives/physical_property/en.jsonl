@@ -60,7 +60,6 @@
 {"guid": "A18_061", "forms": [{"grammatical_form": "positive", "text": "warm", "is_base_form": true}]}
 {"guid": "A18_062", "forms": [{"grammatical_form": "positive", "text": "thin", "is_base_form": true, "ipa": "θɪn", "phonetic": "THIN"}]}
 {"guid": "A18_063", "forms": [{"grammatical_form": "positive", "text": "soft", "is_base_form": true, "ipa": "/sɑft/", "phonetic": "SOFT"}]}
-{"guid": "A18_064", "forms": [{"grammatical_form": "positive", "text": "worse", "is_base_form": true, "ipa": "/wɜːrs/", "phonetic": "WOHR-z"}]}
 {"guid": "A18_065", "forms": [{"grammatical_form": "positive", "text": "bent", "is_base_form": true, "ipa": "bɛnt", "phonetic": "BENT"}]}
 {"guid": "A18_066", "forms": [{"grammatical_form": "positive", "text": "present", "is_base_form": true, "ipa": "/prɛˈzɛnt/", "phonetic": "PREZ-ent"}]}
 {"guid": "A18_067", "forms": [{"grammatical_form": "positive", "text": "slow", "is_base_form": true, "ipa": "/sloʊ/", "phonetic": "SLOH"}]}

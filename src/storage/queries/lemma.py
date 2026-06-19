@@ -1,6 +1,6 @@
 """General-purpose lemma query functions."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Sequence
 
 from sqlalchemy import case, func, or_
 from sqlalchemy.orm import Query, Session
@@ -88,6 +88,7 @@ def build_lemma_search_query(
     pos_subtype: Optional[str] = None,
     difficulty: Optional[str] = None,
     display_language_code: str = "en",
+    exclude_pos_types: Optional[Sequence[str]] = None,
 ) -> Query[Lemma]:
     """
     Build a filtered and ordered lemma query for search/listing.
@@ -98,6 +99,9 @@ def build_lemma_search_query(
         pos_type: Filter by part of speech type
         pos_subtype: Filter by part of speech subtype
         difficulty: Filter by difficulty level (supports "-1", "null", or numeric string)
+        exclude_pos_types: POS types to omit from results (e.g. ``phrase`` for the
+            Words list). Ignored when ``pos_type`` explicitly selects an excluded
+            type, so an explicit filter can still surface those lemmas.
 
     Returns:
         SQLAlchemy query object with filters and ordering applied
@@ -147,6 +151,13 @@ def build_lemma_search_query(
     # Apply POS subtype filter
     if pos_subtype:
         query = query.filter(Lemma.pos_subtype == pos_subtype)
+
+    # Exclude POS types (e.g. phrases from the Words list). Skip the exclusion
+    # for any type the caller explicitly selected via pos_type.
+    if exclude_pos_types:
+        effective_excludes = [pt for pt in exclude_pos_types if pt != pos_type]
+        if effective_excludes:
+            query = query.filter(Lemma.pos_type.notin_(effective_excludes))
 
     # Apply difficulty filter
     if difficulty:
