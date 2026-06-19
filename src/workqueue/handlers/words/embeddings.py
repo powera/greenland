@@ -68,8 +68,13 @@ def handle_words_embeddings(
     model_name: str = DEFAULT_EMBEDDING_MODEL,
     text_source: str = DEFAULT_TEXT_SOURCE,
     limit: Optional[int] = None,
+    **_: Any,
 ) -> str:
-    """Workqueue wrapper for embedding refresh/rebuild."""
+    """Workqueue wrapper for embedding refresh/rebuild.
+
+    Accepts and ignores extra payload kwargs (``model``, etc.) added by the
+    route so it is tolerant of payload changes.
+    """
     if lemma_id is not None:
         return do_refresh_embedding(
             session=session,

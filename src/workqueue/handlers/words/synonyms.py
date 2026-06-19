@@ -41,8 +41,13 @@ def handle_words_synonyms(
     lemma_ids: Optional[list[int]] = None,
     lang_code: str = "en",
     form_type: Optional[str] = None,
+    **_: Any,
 ) -> str:
-    """Workqueue wrapper for synonym generation."""
+    """Workqueue wrapper for synonym generation.
+
+    Accepts and ignores extra payload kwargs (``model``, etc.) added by the
+    route so it is tolerant of payload changes.
+    """
     if lemma_ids:
         results = [
             do_generate_synonyms(

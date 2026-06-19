@@ -55,8 +55,13 @@ def handle_wireword_export_directory(
     source_language: str = "en",
     include_unreviewed_audio: bool = False,
     apply_level_overrides: bool = False,
+    **_: Any,
 ) -> str:
-    """Workqueue wrapper for directory-format WireWord exports."""
+    """Workqueue wrapper for directory-format WireWord exports.
+
+    Accepts and ignores extra payload kwargs added by the route so it is
+    tolerant of payload changes.
+    """
     return do_wireword_export_directory(
         session=session,
         language=language,

@@ -222,6 +222,10 @@ def handle_words_translations(
 
 
 @workqueue_payload_handler()
-def handle_words_translations_regenerate(session: Any, lemma_id: int) -> str:
-    """Workqueue wrapper for translation regeneration."""
+def handle_words_translations_regenerate(session: Any, lemma_id: int, **_: Any) -> str:
+    """Workqueue wrapper for translation regeneration.
+
+    Accepts and ignores extra payload kwargs (``model``, etc.) added by the
+    route so it is tolerant of payload changes.
+    """
     return do_regenerate_translations(session=session, lemma_id=lemma_id)

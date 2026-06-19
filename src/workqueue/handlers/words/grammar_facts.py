@@ -38,8 +38,13 @@ def handle_words_grammar_facts(
     fact_type: str,
     lang_code: str = "en",
     language_code: str | None = None,
+    **_: Any,
 ) -> str:
-    """Workqueue wrapper for grammar fact generation."""
+    """Workqueue wrapper for grammar fact generation.
+
+    Accepts and ignores extra payload kwargs (``model``, etc.) added by the
+    route so it is tolerant of payload changes.
+    """
     return do_generate_grammar_fact(
         session=session,
         lemma_id=lemma_id,
