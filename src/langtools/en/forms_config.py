@@ -21,6 +21,8 @@ VERB_CONFIG: Dict[str, Any] = {
         *(f"{person}_{tense}" for tense in ["present", "past", "future"] for person in _PERSONS),
         "2s_imp",
         "2p_imp",
+        "present_participle",
+        "past_participle",
     ],
     "query_type": "english_verb_conjugations",
     "schema_name": "EnglishVerbConjugations",

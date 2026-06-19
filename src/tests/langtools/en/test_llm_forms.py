@@ -41,8 +41,34 @@ class TestEnglishMechanicalLlmForms(unittest.TestCase):
         self.assertTrue(ok)
         self.assertEqual(forms["3s_present"], "walks")
         self.assertEqual(forms["1s_past"], "walked")
+        # Participles must survive the VERB_FORM_MAPPING projection.
+        self.assertEqual(forms["present_participle"], "walking")
+        self.assertEqual(forms["past_participle"], "walked")
         mock_query_forms.assert_not_called()
         mock_log_query.assert_called_once()
+
+    def test_includes_participles_for_irregular_verb(self) -> None:
+        lemma = SimpleNamespace(id=1, pos_type="verb", lemma_text="go")
+        client = cast(Any, SimpleNamespace(default_model="fake-model"))
+
+        def get_fact(
+            _session: object, _lemma_id: int, _language_code: str, fact_type: str
+        ) -> str | None:
+            return {"past": "went", "past_participle": "gone"}.get(fact_type)
+
+        with (
+            patch("langtools.en.llm_forms.get_grammar_fact_value", side_effect=get_fact),
+            patch("langtools.en.llm_forms.query_forms") as mock_query_forms,
+            patch("langtools.en.llm_forms.linguistic_db.log_query"),
+        ):
+            get_session = cast(Callable[[], Any], lambda: _FakeSession(lemma))
+            forms, ok = query_english_verb_forms(client, 1, get_session)
+
+        self.assertTrue(ok)
+        self.assertEqual(forms["1s_past"], "went")
+        self.assertEqual(forms["present_participle"], "going")
+        self.assertEqual(forms["past_participle"], "gone")
+        mock_query_forms.assert_not_called()
 
     def test_uses_grammar_fact_principal_parts(self) -> None:
         lemma = SimpleNamespace(id=1, pos_type="verb", lemma_text="teach")
