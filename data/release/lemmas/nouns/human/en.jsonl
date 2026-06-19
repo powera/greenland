@@ -3,7 +3,7 @@
 {"guid": "N01_057", "forms": [{"grammatical_form": "singular", "text": "boy", "is_base_form": true, "ipa": "/bɔɪ/", "phonetic": "BOY"}]}
 {"guid": "N01_058", "forms": [{"grammatical_form": "singular", "text": "girl", "is_base_form": true, "ipa": "/ɡɝl/", "phonetic": "GURL"}]}
 {"guid": "N01_059", "forms": [{"grammatical_form": "singular", "text": "friend", "is_base_form": true, "ipa": "fɹɛnd", "phonetic": "FRĒND"}]}
-{"guid": "N01_060", "forms": [{"grammatical_form": "singular", "text": "person", "is_base_form": true, "ipa": "/ˈpɝːsən/", "phonetic": "PUR-suhn"}]}
+{"guid": "N01_060", "forms": [{"grammatical_form": "singular", "text": "person", "is_base_form": true, "ipa": "/ˈpɝːsən/", "phonetic": "PUR-suhn"}, {"grammatical_form": "noun/en_singular", "text": "person", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "people", "is_base_form": false}]}
 {"guid": "N01_065", "forms": [{"grammatical_form": "singular", "text": "human", "is_base_form": true, "ipa": "/ˈhjuːmən/", "phonetic": "HOO-mən"}]}
 {"guid": "N01_066", "forms": [{"grammatical_form": "singular", "text": "enemy", "is_base_form": true, "ipa": "/ˈɛnəmi/", "phonetic": "EN-uh-mee"}]}
 {"guid": "N01_069", "forms": [{"grammatical_form": "singular", "text": "folk", "is_base_form": true, "ipa": "/fəʊk/", "phonetic": "FOH-k"}]}
