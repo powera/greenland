@@ -82,6 +82,7 @@ def handle_sentences_translate(
     selected_languages: Optional[List[str]] = None,
     model: str = constants.DEFAULT_MODEL,
     batch: bool = False,
+    **_: Any,
 ) -> str:
     """Workqueue wrapper for sentence translation.
 

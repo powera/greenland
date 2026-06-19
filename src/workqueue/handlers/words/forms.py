@@ -32,8 +32,13 @@ def handle_words_forms(
     lemma_ids: Optional[list[int]] = None,
     lang_code: str = "lt",
     language_code: str | None = None,
+    **_: Any,
 ) -> str:
-    """Workqueue wrapper for form generation."""
+    """Workqueue wrapper for form generation.
+
+    Accepts and ignores extra payload kwargs (``model``, ``batch``, etc.) added
+    by the route so it is tolerant of payload changes.
+    """
     if lemma_ids:
         results = [
             do_generate_forms(

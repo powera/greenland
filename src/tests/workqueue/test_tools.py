@@ -12,11 +12,14 @@ from sqlalchemy.orm import Session
 
 from storage.backend.config import BackendType
 from storage.models.schema import Base, Lemma
+from typing import Any
+
 from workqueue.tools import (
     build_default_config,
     commit_or_raise,
     extract_payload_param,
     get_lemma_or_raise,
+    workqueue_payload_handler,
 )
 
 
@@ -168,6 +171,51 @@ class TestBuildDefaultConfig(unittest.TestCase):
         self.assertEqual(config.sqlite_path, "/tmp/test.db")
         self.assertEqual(config.model, "gpt-4")
         self.assertTrue(config.debug)
+
+
+class TestWorkqueuePayloadHandler(unittest.TestCase):
+    """Test the @workqueue_payload_handler decorator's payload-splat contract.
+
+    The decorator calls ``func(session=session, **payload)``, so every payload
+    key becomes a kwarg. Routes add keys like ``model`` to payloads, so handlers
+    must declare ``**_`` to tolerate keys they do not consume. A handler missing
+    ``**_`` raises ``TypeError: ... unexpected keyword argument`` -- the exact
+    failure this contract guards against.
+    """
+
+    def setUp(self) -> None:
+        self.engine = create_engine("sqlite:///:memory:")
+        self.session = Session(self.engine)
+
+    def tearDown(self) -> None:
+        self.session.close()
+        self.engine.dispose()
+
+    def test_forwards_known_payload_keys(self) -> None:
+        @workqueue_payload_handler()
+        def handler(session: Session, lemma_id: int, lang_code: str = "lt") -> str:
+            return f"{lemma_id}:{lang_code}"
+
+        result = handler(self.session, {"lemma_id": 7, "lang_code": "fr"})
+        self.assertEqual(result, "7:fr")
+
+    def test_handler_with_kwargs_tolerates_extra_keys(self) -> None:
+        @workqueue_payload_handler()
+        def handler(session: Session, lemma_id: int, **_: Any) -> str:
+            return f"ok:{lemma_id}"
+
+        # 'model' is not a declared param but must be ignored, not crash.
+        result = handler(self.session, {"lemma_id": 7, "model": "gpt-5.4-mini"})
+        self.assertEqual(result, "ok:7")
+
+    def test_handler_without_kwargs_rejects_extra_keys(self) -> None:
+        @workqueue_payload_handler()
+        def handler(session: Session, lemma_id: int) -> str:
+            return f"ok:{lemma_id}"
+
+        with self.assertRaises(TypeError) as ctx:
+            handler(self.session, {"lemma_id": 7, "model": "gpt-5.4-mini"})
+        self.assertIn("unexpected keyword argument", str(ctx.exception))
 
 
 if __name__ == "__main__":

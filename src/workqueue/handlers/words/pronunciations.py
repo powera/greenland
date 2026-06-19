@@ -39,8 +39,13 @@ def handle_words_pronunciations(
     lemma_ids: Optional[list[int]] = None,
     lang_code: str = "en",
     all_forms_pronunciation: bool = False,
+    **_: Any,
 ) -> str:
-    """Workqueue wrapper for pronunciation generation."""
+    """Workqueue wrapper for pronunciation generation.
+
+    Accepts and ignores extra payload kwargs (``model``, etc.) added by the
+    route so it is tolerant of payload changes.
+    """
     if lemma_ids:
         results = [
             do_generate_pronunciations(
