@@ -76,6 +76,45 @@ def link_wikidata_concept(
         return None
 
 
+def cache_wikidata_title(session: Session, qid: str, title: str) -> Optional[ConceptWikidataIndex]:
+    """Cache a Q-id and its remote Wikipedia title in the reverse index.
+
+    Used for Q-ids that are known but have no concept yet (``concept_id`` stays
+    NULL), e.g. ranked "wanted" red links resolved from titles. Existing rows
+    keep their ``concept_id``/``rejected`` state; only the ``title`` is filled
+    in (refreshed if a different title is supplied).
+
+    Args:
+        session: Database session.
+        qid: A Wikidata Q-id (any case; normalized).
+        title: The remote Wikipedia article title to cache.
+
+    Returns:
+        The cached/updated row, or None if the Q-id was invalid / the write
+        failed.
+    """
+    from storage.wikidata import normalize_qid
+
+    normalized_qid = normalize_qid(qid)
+    if normalized_qid is None:
+        return None
+    clean_title = title.strip()
+    if not clean_title:
+        return None
+    row = get_wikidata_index(session, normalized_qid)
+    if row is None:
+        row = ConceptWikidataIndex(qid=normalized_qid)
+        session.add(row)
+    row.title = clean_title
+    try:
+        session.commit()
+        return row
+    except IntegrityError as error:
+        session.rollback()
+        logger.warning("Failed to cache Wikidata title for %s: %s", normalized_qid, error)
+        return None
+
+
 def get_concept_by_slug(session: Session, slug: str) -> Optional[Concept]:
     """Look up a concept by slug, normalizing space/underscore equivalence.
 

@@ -176,6 +176,11 @@ class ConceptWikidataIndex(Base):
     concept_id: Mapped[Optional[int]] = mapped_column(
         Integer, ForeignKey("concepts.id"), nullable=True, index=True
     )
+    # Remote Wikipedia article title for this Q-id. Cached when a Q-id is known
+    # but no concept exists yet (concept_id NULL), e.g. ranked "wanted" red links
+    # resolved by storage.wikidata.resolve_titles_to_qids. Just the title string,
+    # not the full Wikidata entity payload.
+    title: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     rejected: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
