@@ -27,7 +27,6 @@ import logging
 import sys
 import urllib.error
 import urllib.request
-from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Dict, List, Optional, cast
 
@@ -56,42 +55,36 @@ FETCH_TIMEOUT_SECONDS: int = 20
 DEFAULT_USER_AGENT: str = "Greenland-Vovere/1.0 (concept entry generator)"
 
 
-class _TextExtractor(HTMLParser):
-    """Minimal HTML-to-text extractor that skips script/style content."""
-
-    _SKIP_TAGS = {"script", "style", "noscript", "head"}
-
-    def __init__(self) -> None:
-        super().__init__()
-        self._chunks: List[str] = []
-        self._skip_depth = 0
-
-    def handle_starttag(self, tag: str, attrs: List[Any]) -> None:
-        if tag in self._SKIP_TAGS:
-            self._skip_depth += 1
-
-    def handle_endtag(self, tag: str) -> None:
-        if tag in self._SKIP_TAGS and self._skip_depth > 0:
-            self._skip_depth -= 1
-
-    def handle_data(self, data: str) -> None:
-        if self._skip_depth == 0:
-            text = data.strip()
-            if text:
-                self._chunks.append(text)
-
-    def get_text(self) -> str:
-        return " ".join(self._chunks)
-
-
 def html_to_text(html: str) -> str:
-    """Strip HTML to readable text, dropping script/style content."""
-    parser = _TextExtractor()
-    try:
-        parser.feed(html)
-    except Exception as error:  # malformed HTML should not crash generation
-        logger.warning(f"HTML parse error, using partial text: {error}")
-    return parser.get_text()
+    """Strip HTML to readable text, dropping navigation and other page chrome."""
+    from bs4 import BeautifulSoup
+
+    soup = BeautifulSoup(html, "html.parser")
+    for selector in (
+        "script",
+        "style",
+        "noscript",
+        "head",
+        "nav",
+        "header",
+        "footer",
+        "aside",
+        "form",
+        "button",
+        "menu",
+        "[role='navigation']",
+        "[aria-hidden='true']",
+        ".mw-editsection",
+        ".navbox",
+        ".metadata",
+        ".reference",
+        ".reflist",
+        ".sidebar",
+        ".toc",
+    ):
+        for element in soup.select(selector):
+            element.decompose()
+    return cast(str, soup.get_text(" ", strip=True))
 
 
 class VovereAgent:

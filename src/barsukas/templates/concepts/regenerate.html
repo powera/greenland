@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Regenerate {{ concept.title }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/concepts.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('concepts.list_concepts_view') }}">Concepts</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('concepts.detail', slug=concept.slug) }}">{{ concept.title }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Regenerate</li>
+            </ol>
+        </nav>
+        <h1><i class="bi bi-arrow-clockwise"></i> Regenerate: {{ concept.title }}</h1>
+        <p class="text-muted">
+            Review and edit the references before making a new LLM call.
+        </p>
+    </div>
+</div>
+
+<div class="alert alert-warning">
+    Regeneration sends the references and current summary to the configured LLM and may incur API cost.
+    Confirm only after the references below are correct.
+</div>
+
+<form method="post" action="{{ url_for('concepts.regenerate', slug=concept.slug) }}">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="mb-3">
+                <label for="sources" class="form-label">References (one URL per line)</label>
+                <textarea class="form-control" id="sources" name="sources" rows="10">{{ sources_text }}</textarea>
+                <div class="form-text">Up to {{ max_sources }} references. These replace the stored references when regeneration succeeds.</div>
+            </div>
+
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="confirm_regenerate" name="confirm_regenerate" value="1">
+                <label class="form-check-label" for="confirm_regenerate">
+                    I reviewed the references and understand this will make an LLM generation call.
+                </label>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="mb-3">
+                <label for="model" class="form-label">Generation model</label>
+                <input type="text" class="form-control" id="model" name="model" value="{{ default_model }}">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100" {{ 'disabled' if not sources_text }}>
+                <i class="bi bi-arrow-clockwise"></i> Confirm and regenerate
+            </button>
+            <a class="btn btn-link w-100 mt-2" href="{{ url_for('concepts.detail', slug=concept.slug) }}">
+                Cancel
+            </a>
+        </div>
+    </div>
+</form>
+{% endblock %}

@@ -78,12 +78,11 @@
         {% if not readonly %}
         <div class="card">
             <div class="card-body">
-                <form method="post" action="{{ url_for('concepts.regenerate', slug=concept.slug) }}" class="mb-2">
-                    <button type="submit" class="btn btn-outline-secondary w-100"
-                            {{ 'disabled' if not sources }}>
-                        <i class="bi bi-arrow-clockwise"></i> Regenerate from sources
-                    </button>
-                </form>
+                <a class="btn btn-outline-secondary w-100 mb-2 {{ 'disabled' if not sources }}"
+                   href="{{ url_for('concepts.regenerate', slug=concept.slug) }}"
+                   {% if not sources %}aria-disabled="true" tabindex="-1"{% endif %}>
+                    <i class="bi bi-arrow-clockwise"></i> Regenerate from references
+                </a>
                 <form method="post" action="{{ url_for('concepts.delete', slug=concept.slug) }}"
                       onsubmit="return confirm('Delete this concept?');">
                     <button type="submit" class="btn btn-outline-danger w-100">

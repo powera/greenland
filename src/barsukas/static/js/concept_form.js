@@ -5,6 +5,7 @@
     const summaryInput = document.getElementById('summary');
     const sourcesInput = document.getElementById('sources');
     const preview = document.getElementById('wikidata-preview');
+    const includeRegionalWikisInput = document.getElementById('include_regional_wikis');
     if (!form || !qidInput || !titleInput || !summaryInput || !sourcesInput || !preview) {
         return;
     }
@@ -64,6 +65,13 @@
         }
     });
 
+    if (includeRegionalWikisInput) {
+        includeRegionalWikisInput.addEventListener('change', function () {
+            lastRequestedQid = '';
+            qidInput.dispatchEvent(new Event('input'));
+        });
+    }
+
     qidInput.addEventListener('input', function () {
         const qid = qidInput.value.trim().toUpperCase();
         window.clearTimeout(debounceHandle);
@@ -86,7 +94,8 @@
             lastRequestedQid = qid;
             setPreview('Looking up ' + qid + '…', 'form-text text-muted');
 
-            fetch(previewUrl + '?qid=' + encodeURIComponent(qid), {
+            const regionalParam = includeRegionalWikisInput && includeRegionalWikisInput.checked ? '&include_regional_wikis=1' : '';
+            fetch(previewUrl + '?qid=' + encodeURIComponent(qid) + regionalParam, {
                 headers: {Accept: 'application/json'},
             })
                 .then(function (response) {

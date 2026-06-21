@@ -15,7 +15,7 @@
         <h1><i class="bi bi-plus-lg"></i> Create Page</h1>
         <p class="text-muted">
             Provide either a Wikidata Q-id or a title, then add any optional description and sources.
-            If a Q-id is provided, Wikipedia and EB1911 sources are added automatically when available.
+            If a Q-id is provided, the title/description are resolved from Wikidata and Wikipedia/EB1911 text sources are added automatically when available.
         </p>
         {% endif %}
     </div>
@@ -38,7 +38,7 @@
                 <input type="text" class="form-control" id="wikidata_qid" name="wikidata_qid"
                        placeholder="e.g. Q42"
                        data-preview-url="{{ url_for('concepts.wikidata_preview') }}">
-                <div id="wikidata-preview" class="form-text">Optional. If supplied, the title, summary, and default sources are previewed and filled from Wikidata/Wikipedia. Pressing Return in this field previews data but does not create the page.</div>
+                <div id="wikidata-preview" class="form-text">Optional. If supplied, the title and summary are previewed from Wikidata, while source URLs are filled only from text sources such as Wikipedia and EB1911. Pressing Return in this field previews data but does not create the page.</div>
             </div>
             {% endif %}
 
@@ -69,10 +69,16 @@
                 <label for="sources" class="form-label">Sources (one URL per line)</label>
                 <textarea class="form-control" id="sources" name="sources" rows="6"
                           placeholder="https://example.com/topic">{{ sources_text if concept else '' }}</textarea>
-                <div class="form-text">Up to {{ max_sources }}. Q-id creation adds Wikipedia and EB1911 defaults when available.</div>
+                <div class="form-text">Up to {{ max_sources }}. Q-id creation adds Wikipedia and EB1911 text sources when available; Wikidata itself is not added as a generation source.</div>
             </div>
 
             {% if not concept %}
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="include_regional_wikis" name="include_regional_wikis" value="1">
+                <label class="form-check-label" for="include_regional_wikis">Include de/fr Wikipedia sources</label>
+                <div class="form-text">Optional supplementary sources with regional-bias notes. English Wikipedia remains the default Wikipedia source.</div>
+            </div>
+
             <div class="mb-3">
                 <label for="model" class="form-label">Generation model</label>
                 <input type="text" class="form-control" id="model" name="model"
