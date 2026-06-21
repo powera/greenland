@@ -193,6 +193,35 @@ class VovereAgent:
         messages.append({"role": "user", "content": instruction})
         return messages
 
+    def build_request_body(
+        self, title: str, summary: str, sources: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """Build the ``/v1/chat/completions`` request body for one concept.
+
+        This is the batch-API counterpart of :meth:`generate_body`: it fetches
+        sources and assembles the exact same system context + user messages, but
+        returns the request payload instead of calling the LLM. Submitting this
+        body to the Batch API yields the same body text at ~50% of the cost.
+
+        Args:
+            title: The concept title (display form, e.g. "Art Deco").
+            summary: One-sentence description steering the entry.
+            sources: Source dicts with at least a ``url`` key.
+
+        Returns:
+            A ``{"model", "messages"}`` dict suitable for ``queue_request``.
+
+        Raises:
+            ValueError: If no model is configured on the agent.
+        """
+        if not self.model:
+            raise ValueError("VovereAgent requires a model (set config.model or pass model=)")
+
+        system_context = get_context(PROMPT_CATEGORY, PROMPT_TYPE)
+        messages: List[ChatMessage] = [{"role": "system", "content": system_context}]
+        messages.extend(self.build_messages(title, summary, sources))
+        return {"model": self.model, "messages": messages}
+
     def generate_body(self, title: str, summary: str, sources: List[Dict[str, Any]]) -> str:
         """Generate a Markdown concept body from a title, summary, and sources.
 

@@ -26,7 +26,11 @@ from storage.crud.concept import (
     link_wikidata_concept,
 )
 from storage.models.concept import Concept
-from storage.wikidata import fetch_wikidata_concept_seed, normalize_qid
+from storage.wikidata import (
+    WikidataConceptSeed,
+    fetch_wikidata_concept_seed,
+    normalize_qid,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +109,73 @@ def create_concept_from_qid(
             detail="Wikidata seed could not be resolved",
         )
 
+    body = ""
+    body_model: Optional[str] = None
+    body_detail = ""
+    if body_generator is not None:
+        try:
+            body = body_generator(seed.title, seed.summary, list(seed.sources))
+            body_model = source_model
+        except Exception as exc:  # generation failure must not lose the entry
+            logger.exception("Concept body generation failed for %s", normalized_qid)
+            body = ""
+            body_detail = f"saved without body: {exc}"
+    else:
+        body_detail = "no body generator supplied"
+
+    return create_concept_from_seed(
+        session,
+        seed,
+        body=body,
+        source_model=body_model,
+        body_detail=body_detail,
+    )
+
+
+def create_concept_from_seed(
+    session: Session,
+    seed: WikidataConceptSeed,
+    *,
+    body: str,
+    source_model: Optional[str] = None,
+    body_detail: str = "",
+) -> ConceptCreationResult:
+    """Create a concept from an already-fetched seed and a pre-generated body.
+
+    This is the second half of :func:`create_concept_from_qid`, split out so the
+    batch flow can do the expensive work once: callers fetch the Wikidata seed
+    and the (LLM-generated) body up front, then call this to persist. It performs
+    the same idempotency checks and Q-id linking, but does no Wikidata fetch and
+    no body generation of its own.
+
+    Args:
+        session: Database session.
+        seed: Pre-fetched Wikidata concept seed (carries the Q-id).
+        body: The concept body to store (may be empty).
+        source_model: Model name to record when ``body`` is non-empty.
+        body_detail: Optional note about body generation (e.g. a failure reason),
+            surfaced as ``detail`` on the result.
+
+    Returns:
+        A :class:`ConceptCreationResult` describing the outcome.
+    """
+    normalized_qid = normalize_qid(seed.qid)
+    if normalized_qid is None:
+        return ConceptCreationResult(
+            qid=seed.qid, title=seed.title, concept=None, status="failed", detail="invalid Q-id"
+        )
+
+    existing_index = get_wikidata_index(session, normalized_qid)
+    if existing_index is not None and existing_index.concept is not None:
+        concept = existing_index.concept
+        return ConceptCreationResult(
+            qid=normalized_qid,
+            title=concept.title,
+            concept=concept,
+            status="exists",
+            detail=f"already linked to {concept.slug!r}",
+        )
+
     if get_concept_by_slug(session, seed.title) is not None:
         return ConceptCreationResult(
             qid=normalized_qid,
@@ -114,27 +185,13 @@ def create_concept_from_qid(
             detail=f"a concept titled {seed.title!r} already exists",
         )
 
-    body = ""
-    body_model: Optional[str] = None
-    return_detail = ""
-    if body_generator is not None:
-        try:
-            body = body_generator(seed.title, seed.summary, list(seed.sources))
-            body_model = source_model
-        except Exception as exc:  # generation failure must not lose the entry
-            logger.exception("Concept body generation failed for %s", normalized_qid)
-            body = ""
-            return_detail = f"saved without body: {exc}"
-    else:
-        return_detail = "no body generator supplied"
-
     created = create_concept(
         session,
         title=seed.title,
         summary=seed.summary,
         body=body,
         sources=list(seed.sources),
-        source_model=body_model,
+        source_model=source_model if body else None,
     )
     if created is None:
         return ConceptCreationResult(
@@ -151,5 +208,5 @@ def create_concept_from_qid(
         title=created.title,
         concept=created,
         status="created",
-        detail=return_detail,
+        detail=body_detail,
     )
