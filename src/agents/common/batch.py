@@ -289,6 +289,118 @@ def _apply_voras_translations(
     return results
 
 
+def _extract_chat_completion_text(response_body: Optional[str]) -> Optional[str]:
+    """Pull the assistant message text from a stored chat-completions response.
+
+    Args:
+        response_body: JSON string of the batch result's ``response`` object.
+
+    Returns:
+        The message content, or None if it could not be located.
+    """
+    if not response_body:
+        return None
+    try:
+        response = json.loads(response_body)
+    except json.JSONDecodeError:
+        return None
+
+    body = response.get("body") if isinstance(response.get("body"), dict) else response
+    choices = body.get("choices") if isinstance(body, dict) else None
+    if not choices:
+        return None
+    message = choices[0].get("message") if isinstance(choices[0], dict) else None
+    content = message.get("content") if isinstance(message, dict) else None
+    return content.strip() if isinstance(content, str) else None
+
+
+def _apply_voverukas_concepts(
+    requests: Iterable[BatchQueue], session: Any, batch_id: str
+) -> Dict[str, int]:
+    """Create concepts from voverukas batch results (seed + generated body).
+
+    Each request stashed the full Wikidata seed and model in its metadata at
+    submit time, so concept creation needs no further outbound calls: the body
+    is the LLM output, the seed is the stored input.
+
+    Args:
+        requests: Completed BatchQueue records for the ``voverukas`` agent.
+        session: Database session.
+        batch_id: The batch ID (for logging only).
+
+    Returns:
+        ``{"processed", "created", "skipped", "failed"}`` counts.
+    """
+    from storage.concept_service import create_concept_from_seed
+    from storage.wikidata import WikidataConceptSeed
+
+    results = {"processed": 0, "created": 0, "skipped": 0, "failed": 0}
+
+    for req in requests:
+        results["processed"] += 1
+        try:
+            metadata = json.loads(req.additional_metadata) if req.additional_metadata else {}
+            seed_data = metadata.get("seed")
+            if not seed_data:
+                logger.warning("No stashed seed for request %s; skipping", req.custom_id)
+                results["failed"] += 1
+                continue
+
+            body = _extract_chat_completion_text(req.response_body)
+            if not body:
+                logger.warning("No generated body for request %s; skipping", req.custom_id)
+                results["failed"] += 1
+                continue
+
+            seed = WikidataConceptSeed(
+                qid=seed_data["qid"],
+                title=seed_data["title"],
+                summary=seed_data.get("summary", ""),
+                sources=list(seed_data.get("sources", [])),
+            )
+            result = create_concept_from_seed(
+                session,
+                seed,
+                body=body,
+                source_model=metadata.get("source_model"),
+            )
+            if result.status == "created":
+                session.commit()
+                results["created"] += 1
+            else:
+                # "exists" / "unresolved" / "failed" — nothing persisted.
+                results["skipped" if result.status == "exists" else "failed"] += 1
+            logger.info(
+                "%s [%s] %s%s",
+                result.status.upper(),
+                seed.qid,
+                seed.title,
+                f" - {result.detail}" if result.detail else "",
+            )
+        except Exception as exc:
+            session.rollback()
+            results["failed"] += 1
+            logger.error(
+                "Failed to create concept for request %s (batch %s): %s",
+                req.custom_id,
+                batch_id,
+                exc,
+            )
+
+    return results
+
+
+def _report_voverukas_results(results: Dict[str, int]) -> None:
+    logger.info("\n" + "=" * 80)
+    logger.info("BATCH RESULTS SUMMARY (VOVERUKAS)")
+    logger.info("=" * 80)
+    logger.info("Total requests processed: %s", results["processed"])
+    logger.info("Concepts created: %s", results["created"])
+    logger.info("Skipped (already exist): %s", results["skipped"])
+    logger.info("Failed: %s", results["failed"])
+    logger.info("=" * 80)
+
+
 def _report_voras_results(results: Dict[str, int]) -> None:
     logger.info("\n" + "=" * 80)
     logger.info("BATCH RESULTS SUMMARY (VORAS)")
@@ -380,6 +492,9 @@ def main() -> int:
                 elif agent_name == "voras":
                     result = _apply_voras_translations(requests, session, args.batch_id)
                     _report_voras_results(result)
+                elif agent_name == "voverukas":
+                    result = _apply_voverukas_concepts(requests, session, args.batch_id)
+                    _report_voverukas_results(result)
                 else:
                     logger.warning(
                         "No completion handler for agent '%s' (batch %s)",

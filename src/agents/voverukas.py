@@ -14,19 +14,26 @@ list is the worklist for which missing topics to create next: a red link cited
 by many high-importance concepts ranks above one cited by a single obscure
 concept.
 
-This agent is READ-ONLY. It computes the ranking on the fly each run; nothing is
-persisted.
+Ranking itself is READ-ONLY (computed on the fly each run, nothing persisted).
+The optional ``--resolve-qids``/``--create``/``--batch`` steps do write (cached
+Q-ids and, for create/batch, new concepts).
+
+``--batch`` submits one OpenAI Batch job for all ranked topics at ~50% cost: it
+fetches every concept's inputs (Wikidata seed + source text) up front, queues a
+single batch, and the resulting bodies are turned into concepts later via
+``agents/common/batch.py complete``.
 
 Usage:
     PYTHONPATH=src python src/agents/voverukas.py --limit 30
     PYTHONPATH=src python src/agents/voverukas.py --limit 50 --iterations 6 --debug
+    PYTHONPATH=src python src/agents/voverukas.py --limit 10 --batch --model gpt-5.4-mini
 """
 
 import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
@@ -39,18 +46,29 @@ from agents.common.common_args import (
     add_llm_args,
     get_data_source_config,
 )
+import json
+
+from clients.batch_queue import BatchRequestMetadata, get_batch_manager
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import DataSourceConfig
 from storage.concept_service import create_concept_from_qid
 from storage.crud.concept import cache_wikidata_title
 from storage.models.concept import Concept, concept_slug_to_title
-from storage.wikidata import resolve_titles_to_qids
+from storage.wikidata import (
+    fetch_wikidata_concept_seed,
+    resolve_titles_to_qids,
+)
 from wordfreq.voverukas import (
     DEFAULT_DAMPING,
     DEFAULT_ITERATIONS,
     build_link_graph,
     compute_ranks,
 )
+
+# Agent name recorded on queued batch requests; the completion handler in
+# agents/common/batch.py dispatches on this name.
+BATCH_AGENT_NAME = "voverukas"
+BATCH_OPERATION = "generate_concept"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -205,6 +223,140 @@ class VoverukasAgent:
         finally:
             session.close()
 
+    def resolve_qids(self, wanted: List[Dict[str, object]]) -> Dict[str, Optional[str]]:
+        """Batch-resolve ranked titles to Q-ids and annotate each item in place.
+
+        Args:
+            wanted: Ranked wanted items from :meth:`rank_wanted`.
+
+        Returns:
+            The title -> Q-id (or None) map used to annotate ``wanted``.
+        """
+        titles = [str(item["title"]) for item in wanted]
+        qid_map = resolve_titles_to_qids(titles)
+        for item in wanted:
+            item["qid"] = qid_map.get(str(item["title"])) or ""
+        return qid_map
+
+    def submit_batch(
+        self,
+        wanted: List[Dict[str, object]],
+        qid_map: Optional[Dict[str, Optional[str]]] = None,
+    ) -> Dict[str, object]:
+        """Queue concept-body generation for ranked topics as one Batch API job.
+
+        Does the expensive work once, up front: resolves all titles to Q-ids,
+        fetches every Wikidata seed and its source text, and builds one
+        ``/v1/chat/completions`` request per resolvable topic. Each seed is
+        stored alongside its request so the completion step (``agents/common/
+        batch.py complete``) can create the concept from the *same* inputs
+        without re-fetching. All requests are then submitted as a single batch.
+
+        Args:
+            wanted: Ranked wanted items from :meth:`rank_wanted`.
+            qid_map: Optional pre-resolved title -> Q-id map (from
+                :meth:`resolve_qids`); resolved here if omitted.
+
+        Returns:
+            ``{"batch_id", "queued", "skipped"}`` describing what was submitted.
+        """
+        from agents.vovere import VovereAgent
+
+        vovere = VovereAgent(self.config)
+        if not vovere.model:
+            raise ValueError("A model is required to submit a batch (set --model).")
+
+        if qid_map is None:
+            qid_map = self.resolve_qids(wanted)
+
+        batch_manager = get_batch_manager(debug=self.debug)
+        session = create_backend_session(self.config)
+        queued = 0
+        skipped = 0
+        try:
+            for item in wanted:
+                title = str(item["title"])
+                qid = qid_map.get(title)
+                if not qid:
+                    logger.info("SKIP (unresolved) %s", title)
+                    skipped += 1
+                    continue
+
+                # Cache the qid<->title mapping regardless of batch success.
+                cache_wikidata_title(session, qid, title)
+
+                seed = fetch_wikidata_concept_seed(qid)
+                if seed is None:
+                    logger.info("SKIP (no seed) [%s] %s", qid, title)
+                    skipped += 1
+                    continue
+
+                request_body = vovere.build_request_body(
+                    seed.title, seed.summary, list(seed.sources)
+                )
+
+                custom_id = f"{BATCH_AGENT_NAME}_{seed.qid}"
+                metadata = BatchRequestMetadata(
+                    custom_id=custom_id,
+                    agent_name=BATCH_AGENT_NAME,
+                    operation_type=BATCH_OPERATION,
+                    entity_type="concept",
+                )
+                try:
+                    record = batch_manager.queue_request(
+                        custom_id=custom_id,
+                        request_body=request_body,
+                        metadata=metadata,
+                        endpoint="/v1/chat/completions",
+                    )
+                except ValueError as exc:
+                    logger.info("SKIP (already queued) [%s] %s: %s", qid, title, exc)
+                    skipped += 1
+                    continue
+
+                # Stash the full seed + model so the completion step can build
+                # the concept from the same inputs without a second fetch.
+                record.additional_metadata = json.dumps(
+                    {
+                        **metadata.to_dict(),
+                        "qid": seed.qid,
+                        "seed": {
+                            "qid": seed.qid,
+                            "title": seed.title,
+                            "summary": seed.summary,
+                            "sources": list(seed.sources),
+                        },
+                        "source_model": vovere.model,
+                    },
+                    ensure_ascii=False,
+                )
+                batch_manager.db.commit()
+                logger.info("QUEUED [%s] %s", qid, title)
+                queued += 1
+
+            if queued == 0:
+                logger.info("Nothing to submit (queued 0 requests).")
+                return {"batch_id": None, "queued": 0, "skipped": skipped}
+
+            pending = batch_manager.get_pending_requests(
+                agent_name=BATCH_AGENT_NAME, operation_type=BATCH_OPERATION
+            )
+            batch_id, _file_id = batch_manager.submit_batch(
+                pending,
+                batch_metadata={"agent": BATCH_AGENT_NAME, "operation": BATCH_OPERATION},
+            )
+            logger.info("Submitted batch %s with %d requests", batch_id, len(pending))
+            logger.info(
+                "Complete it later with: "
+                "PYTHONPATH=src python src/agents/common/batch.py complete "
+                "--batch-id %s --agent %s",
+                batch_id,
+                BATCH_AGENT_NAME,
+            )
+            return {"batch_id": batch_id, "queued": queued, "skipped": skipped}
+        finally:
+            session.close()
+
 
 def main() -> int:
     """Main entry point."""
@@ -244,11 +396,24 @@ def main() -> int:
         action="store_true",
         help="With --create, save concepts without generating an LLM body.",
     )
+    parser.add_argument(
+        "--batch",
+        action="store_true",
+        help=(
+            "Fetch all inputs now and queue one OpenAI Batch job to generate every "
+            "concept body (~50%% cheaper). Concepts are created later via "
+            "'agents/common/batch.py complete'. Mutually exclusive with --create."
+        ),
+    )
     add_common_args(parser)
     add_backend_args(parser)
     add_llm_args(parser)
 
     args = parser.parse_args()
+
+    if args.batch and args.create:
+        parser.error("--batch and --create are mutually exclusive (batch creates later).")
+
     config = get_data_source_config(args)
 
     agent = VoverukasAgent(config)
@@ -260,6 +425,27 @@ def main() -> int:
 
     if not wanted:
         logger.info("No wanted (red-link) topics found.")
+        return 0
+
+    if args.batch:
+        # Resolve and show the exact topics + Q-ids before asking to submit.
+        qid_map = agent.resolve_qids(wanted)
+        _print_wanted_table(wanted)
+        resolvable = sum(1 for item in wanted if item.get("qid"))
+        if not args.yes:
+            confirm = input(
+                f"\nFetch inputs for {resolvable} resolved topics and submit one batch? [y/N]: "
+            )
+            if confirm.strip().lower() != "y":
+                logger.info("Aborted.")
+                return 0
+        result = agent.submit_batch(wanted, qid_map=qid_map)
+        if not result["batch_id"]:
+            return 0
+        print(
+            f"\nSubmitted batch {result['batch_id']}: "
+            f"{result['queued']} queued, {result['skipped']} skipped."
+        )
         return 0
 
     if args.resolve_qids or args.create:
@@ -275,6 +461,12 @@ def main() -> int:
             generate_body=not args.no_body,
         )
 
+    _print_wanted_table(wanted)
+    return 0
+
+
+def _print_wanted_table(wanted: List[Dict[str, object]]) -> None:
+    """Print the ranked wanted-topics table (score, inbound, Q-id, status)."""
     show_qid = "qid" in wanted[0]
     show_status = "status" in wanted[0]
     header = f"{'#':>4}  {'score':>10}  {'inbound':>7}"
@@ -293,8 +485,6 @@ def main() -> int:
             row += f"  {str(item.get('status') or '—'):>10}"
         row += f"  {item['title']}"
         print(row)
-
-    return 0
 
 
 if __name__ == "__main__":
