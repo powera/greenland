@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 QID_RE = re.compile(r"^Q[1-9][0-9]*$", re.IGNORECASE)
 WIKIDATA_ENTITY_URL = "https://www.wikidata.org/wiki/Special:EntityData/{qid}.json"
 WIKIPEDIA_SUMMARY_URL = "https://en.wikipedia.org/api/rest_v1/page/summary/{title}"
-WIKIPEDIA_EXTRACT_URL = "https://en.wikipedia.org/w/api.php"
+WIKIPEDIA_EXTRACT_URL = "https://{language_code}.wikipedia.org/w/api.php"
 WIKISOURCE_SEARCH_URL = "https://en.wikisource.org/w/api.php"
 DEFAULT_TIMEOUT_SECONDS = 10
 MAX_SOURCE_TEXT_CHARS = 12000
@@ -24,6 +24,7 @@ WIKIPEDIA_LEAD_THRESHOLD_CHARS = 10_000
 EB1911_MAX_PARAGRAPHS = 10
 EB1911_MAX_WORDS = 1200
 EB1911_WIKIDATA_QID = "Q867541"
+REGIONAL_WIKIPEDIA_LANGUAGE_CODES = ("de", "fr")
 
 
 def _word_count(text: str) -> int:
@@ -147,7 +148,7 @@ def _extract_english_value(values: Dict[str, Dict[str, str]]) -> str:
 
 
 def _fetch_wikipedia_extract(
-    page_title: str, *, lead_only: bool = False
+    page_title: str, *, language_code: str = "en", lead_only: bool = False
 ) -> Optional[Dict[str, str]]:
     """Fetch a Wikipedia plain-text extract for a page."""
     # TODO: Switch source hydration to a local Wikipedia dump so concept creation
@@ -164,7 +165,7 @@ def _fetch_wikipedia_extract(
     }
     if lead_only:
         params["exintro"] = "1"
-    payload = _get_json(WIKIPEDIA_EXTRACT_URL, params=params)
+    payload = _get_json(WIKIPEDIA_EXTRACT_URL.format(language_code=language_code), params=params)
     pages = (payload or {}).get("query", {}).get("pages", [])
     if not pages:
         return None
@@ -176,25 +177,33 @@ def _fetch_wikipedia_extract(
     return {"title": title, "extract": extract}
 
 
-def _fetch_wikipedia_source(page_title: str) -> Optional[Dict[str, Any]]:
+def _fetch_wikipedia_source(
+    page_title: str, *, language_code: str = "en", regional_note: bool = False
+) -> Optional[Dict[str, Any]]:
     """Return a Wikipedia source dict with full short articles or lead-only long articles."""
-    page_extract = _fetch_wikipedia_extract(page_title)
+    page_extract = _fetch_wikipedia_extract(page_title, language_code=language_code)
     if page_extract is None:
         return None
     extract = page_extract["extract"]
     title = page_extract["title"]
     note = "Plain-text Wikipedia article extract for concept generation."
     if len(extract) > WIKIPEDIA_LEAD_THRESHOLD_CHARS:
-        lead_extract = _fetch_wikipedia_extract(title, lead_only=True)
+        lead_extract = _fetch_wikipedia_extract(title, language_code=language_code, lead_only=True)
         if lead_extract is not None:
             extract = lead_extract["extract"]
             title = lead_extract["title"]
         note = (
             "Plain-text Wikipedia lead section for concept generation; full article exceeded 10 KB."
         )
+    if regional_note:
+        note = (
+            f"{note} Regional Wikipedia source ({language_code}); use as a supplementary "
+            "perspective because coverage and framing may reflect local editorial bias."
+        )
+    source_label = "Wikipedia" if language_code == "en" else f"Wikipedia ({language_code})"
     return {
-        "url": f"https://en.wikipedia.org/wiki/{title.replace(' ', '_')}",
-        "title": f"Wikipedia: {title}",
+        "url": f"https://{language_code}.wikipedia.org/wiki/{title.replace(' ', '_')}",
+        "title": f"{source_label}: {title}",
         "note": note,
         "text": extract[:MAX_SOURCE_TEXT_CHARS],
     }
@@ -312,7 +321,9 @@ def _fetch_eb1911_source(
     }
 
 
-def fetch_wikidata_concept_seed(raw_qid: str) -> Optional[WikidataConceptSeed]:
+def fetch_wikidata_concept_seed(
+    raw_qid: str, *, include_regional_wikis: bool = False
+) -> Optional[WikidataConceptSeed]:
     """Resolve a Wikidata Q-id into a concept title, summary, and default sources."""
     qid = normalize_qid(raw_qid)
     if qid is None:
@@ -338,17 +349,21 @@ def fetch_wikidata_concept_seed(raw_qid: str) -> Optional[WikidataConceptSeed]:
         extract = str((summary_payload or {}).get("extract", "")).strip()
         summary = extract.split(".")[0].strip() + "." if extract and not description else summary
 
-    sources: List[Dict[str, Any]] = [
-        {
-            "url": f"https://www.wikidata.org/wiki/{qid}",
-            "title": f"Wikidata: {qid}",
-            "note": "Wikidata entity used to seed the concept title and summary.",
-        }
-    ]
+    sources: List[Dict[str, Any]] = []
     if enwiki_title:
         wikipedia_source = _fetch_wikipedia_source(enwiki_title)
         if wikipedia_source is not None:
             sources.append(wikipedia_source)
+    if include_regional_wikis:
+        for language_code in REGIONAL_WIKIPEDIA_LANGUAGE_CODES:
+            regional_title = str(sitelinks.get(f"{language_code}wiki", {}).get("title", "")).strip()
+            if not regional_title:
+                continue
+            regional_source = _fetch_wikipedia_source(
+                regional_title, language_code=language_code, regional_note=True
+            )
+            if regional_source is not None:
+                sources.append(regional_source)
     eb1911_source = _fetch_eb1911_source(title, label, entity)
     if eb1911_source is not None:
         sources.append(eb1911_source)

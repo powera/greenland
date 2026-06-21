@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-from agents.vovere import VovereAgent
+import pytest
+from agents.vovere import VovereAgent, html_to_text
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from storage.crud.concept import create_concept, get_wikidata_index, link_wikidata_concept
@@ -43,7 +44,9 @@ def test_link_wikidata_concept_creates_reverse_index() -> None:
 def test_wikipedia_source_uses_lead_for_long_articles(monkeypatch) -> None:  # type: ignore[no-untyped-def]
     calls: list[bool] = []
 
-    def fake_fetch(page_title: str, *, lead_only: bool = False) -> Optional[Dict[str, str]]:
+    def fake_fetch(
+        page_title: str, *, language_code: str = "en", lead_only: bool = False
+    ) -> Optional[Dict[str, str]]:
         calls.append(lead_only)
         if lead_only:
             return {"title": page_title, "extract": "Lead section only"}
@@ -174,10 +177,75 @@ def test_fetch_wikidata_seed_builds_sources_from_mocked_apis(monkeypatch) -> Non
     assert seed.title == "Douglas Adams"
     assert seed.summary == "English writer and humorist"
     assert [source["title"] for source in seed.sources] == [
-        "Wikidata: Q42",
         "Wikipedia: Douglas Adams",
         "EB1911: Douglas Adams",
     ]
+    assert all(not source["title"].startswith("Wikidata:") for source in seed.sources)
+
+
+def test_fetch_wikidata_seed_can_include_regional_wikipedia_sources(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    def fake_get_json(
+        url: str, *, params: Optional[Dict[str, str]] = None
+    ) -> Optional[Dict[str, Any]]:
+        if "Special:EntityData" in url:
+            return {
+                "entities": {
+                    "Q1204": {
+                        "labels": {"en": {"value": "Illinois"}},
+                        "descriptions": {"en": {"value": "state of the United States"}},
+                        "sitelinks": {
+                            "enwiki": {"title": "Illinois"},
+                            "dewiki": {"title": "Illinois"},
+                            "frwiki": {"title": "Illinois"},
+                        },
+                    }
+                }
+            }
+        if "rest_v1/page/summary" in url:
+            return {"extract": "Illinois is a state. More text."}
+        if "en.wikipedia.org/w/api.php" in url:
+            return {"query": {"pages": [{"title": "Illinois", "extract": "English text"}]}}
+        if "de.wikipedia.org/w/api.php" in url:
+            return {"query": {"pages": [{"title": "Illinois", "extract": "German text"}]}}
+        if "fr.wikipedia.org/w/api.php" in url:
+            return {"query": {"pages": [{"title": "Illinois", "extract": "French text"}]}}
+        if params and params.get("list") == "search":
+            return {"query": {"search": []}}
+        return {"query": {"pages": []}}
+
+    monkeypatch.setattr("storage.wikidata._get_json", fake_get_json)
+
+    seed = fetch_wikidata_concept_seed("Q1204", include_regional_wikis=True)
+
+    assert seed is not None
+    assert [source["title"] for source in seed.sources] == [
+        "Wikipedia: Illinois",
+        "Wikipedia (de): Illinois",
+        "Wikipedia (fr): Illinois",
+    ]
+    assert "regional" in seed.sources[1]["note"].lower()
+    assert all(not source["title"].startswith("Wikidata:") for source in seed.sources)
+
+
+def test_vovere_html_to_text_removes_navigation_chrome() -> None:
+    pytest.importorskip("bs4")
+    html = """
+    <html>
+      <body>
+        <nav>Main menu should disappear</nav>
+        <header>Header should disappear</header>
+        <main><p>Useful article text remains.</p></main>
+        <footer>Footer should disappear</footer>
+      </body>
+    </html>
+    """
+
+    text = html_to_text(html)
+
+    assert "Useful article text remains." in text
+    assert "Main menu should disappear" not in text
+    assert "Header should disappear" not in text
+    assert "Footer should disappear" not in text
 
 
 def test_vovere_uses_provided_source_text(monkeypatch) -> None:  # type: ignore[no-untyped-def]

@@ -76,6 +76,27 @@ def _outbound_allowed() -> bool:
     return bool(current_app.config.get("ALLOW_OUTBOUND_CALLS", True))
 
 
+def _source_key(source: Dict[str, Any]) -> str:
+    """Return a stable de-duplication key for a source dict."""
+    return str(source.get("url", "")).strip().rstrip("/").casefold()
+
+
+def _merge_sources(*source_lists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Merge source lists by URL, preserving first occurrence order."""
+    merged_sources: List[Dict[str, Any]] = []
+    seen_sources: set[str] = set()
+    for source_list in source_lists:
+        for source in source_list:
+            source_key = _source_key(source)
+            if not source_key or source_key in seen_sources:
+                continue
+            merged_sources.append(source)
+            seen_sources.add(source_key)
+            if len(merged_sources) >= MAX_CONCEPT_SOURCES:
+                return merged_sources
+    return merged_sources
+
+
 def _parse_sources_form(raw: str) -> List[Dict[str, Any]]:
     """Parse the sources textarea (one URL per line) into source dicts.
 
@@ -90,7 +111,22 @@ def _parse_sources_form(raw: str) -> List[Dict[str, Any]]:
         url = line.strip()
         if url:
             sources.append({"url": url})
-    return sources[:MAX_CONCEPT_SOURCES]
+    return _merge_sources(sources)
+
+
+def _concept_sources(concept: Any) -> List[Dict[str, Any]]:
+    """Return parsed concept sources."""
+    if not concept.sources:
+        return []
+    parsed_sources = json.loads(concept.sources)
+    if isinstance(parsed_sources, list):
+        return [source for source in parsed_sources if isinstance(source, dict)]
+    return []
+
+
+def _source_urls_text(sources: List[Dict[str, Any]]) -> str:
+    """Render source URLs for the textarea editor."""
+    return "\n".join(str(source.get("url", "")) for source in sources)
 
 
 def _generate_body(title: str, summary: str, sources: List[Dict[str, Any]], model: str) -> str:
@@ -142,7 +178,8 @@ def wikidata_preview() -> ResponseReturnValue:
     qid = normalize_qid(request.args.get("qid", ""))
     if qid is None:
         return jsonify({"found": False, "error": "invalid_qid"}), 400
-    seed = fetch_wikidata_concept_seed(qid)
+    include_regional_wikis = request.args.get("include_regional_wikis") == "1"
+    seed = fetch_wikidata_concept_seed(qid, include_regional_wikis=include_regional_wikis)
     if seed is None:
         return jsonify({"found": False, "qid": qid})
     return jsonify(
@@ -182,13 +219,16 @@ def create() -> ResponseReturnValue:
                 "error",
             )
             return redirect(url_for("concepts.detail", slug=existing_index.concept.slug))
-        seed = fetch_wikidata_concept_seed(wikidata_qid)
+        include_regional_wikis = request.form.get("include_regional_wikis") == "1"
+        seed = fetch_wikidata_concept_seed(
+            wikidata_qid, include_regional_wikis=include_regional_wikis
+        )
         if seed is None:
             flash(f"Could not resolve Wikidata ID {wikidata_qid}.", "error")
             return redirect(url_for("concepts.new_concept"))
         title = title or seed.title
         summary = summary or seed.summary
-        sources = (sources + seed.sources)[:MAX_CONCEPT_SOURCES]
+        sources = _merge_sources(sources, seed.sources)
 
     if not title:
         flash("A title or Wikidata Q-id is required.", "error")
@@ -239,7 +279,7 @@ def detail(slug: str) -> ResponseReturnValue:
 
     existing = get_existing_link_targets(_concept_session(), concept.body or "")
     rendered_body = render_concept_body(concept.body or "", existing)
-    sources = json.loads(concept.sources) if concept.sources else []
+    sources = _concept_sources(concept)
     backlinks = get_backlinks(_concept_session(), concept.slug)
     wikidata_links = (
         _concept_session()
@@ -271,11 +311,11 @@ def edit(slug: str) -> ResponseReturnValue:
         flash(f"No concept found for {slug!r}.", "error")
         return redirect(url_for("concepts.list_concepts_view"))
 
-    sources = json.loads(concept.sources) if concept.sources else []
+    sources = _concept_sources(concept)
     return render_template(
         "concepts/form.html",
         concept=concept,
-        sources_text="\n".join(str(s.get("url", "")) for s in sources),
+        sources_text=_source_urls_text(sources),
         default_model=constants.DEFAULT_MODEL,
         max_sources=MAX_CONCEPT_SOURCES,
         outbound_allowed=_outbound_allowed(),
@@ -322,9 +362,9 @@ def update(slug: str) -> ResponseReturnValue:
     return redirect(url_for("concepts.detail", slug=updated.slug))
 
 
-@bp.route("/<path:slug>/regenerate", methods=["POST"])
+@bp.route("/<path:slug>/regenerate", methods=["GET", "POST"])
 def regenerate(slug: str) -> ResponseReturnValue:
-    """Regenerate the body from the stored sources and one-sentence summary."""
+    """Review sources, then regenerate the body after explicit confirmation."""
     if _is_readonly():
         flash("Cannot regenerate in read-only mode", "error")
         return redirect(url_for("concepts.detail", slug=slug))
@@ -337,8 +377,29 @@ def regenerate(slug: str) -> ResponseReturnValue:
         flash(f"No concept found for {slug!r}.", "error")
         return redirect(url_for("concepts.list_concepts_view"))
 
+    sources = _concept_sources(concept)
+    sources_text = _source_urls_text(sources)
+    if request.method == "GET":
+        return render_template(
+            "concepts/regenerate.html",
+            concept=concept,
+            sources_text=sources_text,
+            default_model=constants.DEFAULT_MODEL,
+            max_sources=MAX_CONCEPT_SOURCES,
+        )
+
+    if request.form.get("confirm_regenerate") != "1":
+        flash("Please confirm the LLM cost before regenerating.", "error")
+        return render_template(
+            "concepts/regenerate.html",
+            concept=concept,
+            sources_text=request.form.get("sources", sources_text),
+            default_model=request.form.get("model", "").strip() or constants.DEFAULT_MODEL,
+            max_sources=MAX_CONCEPT_SOURCES,
+        )
+
     model = request.form.get("model", "").strip() or constants.DEFAULT_MODEL
-    sources = json.loads(concept.sources) if concept.sources else []
+    sources = _parse_sources_form(request.form.get("sources", ""))
     try:
         body = _generate_body(concept.title, concept.summary or "", sources, model)
     except Exception as exc:
@@ -346,7 +407,7 @@ def regenerate(slug: str) -> ResponseReturnValue:
         flash(f"Regeneration failed: {exc}", "error")
         return redirect(url_for("concepts.detail", slug=slug))
 
-    update_concept(_concept_session(), concept, body=body, source_model=model)
+    update_concept(_concept_session(), concept, body=body, sources=sources, source_model=model)
     flash("Regenerated concept body.", "success")
     return redirect(url_for("concepts.detail", slug=concept.slug))
 
