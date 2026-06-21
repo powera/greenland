@@ -40,11 +40,11 @@ from clients.lib import ChatMessage
 from clients.unified_client import UnifiedLLMClient
 from storage.backend.config import DataSourceConfig
 from storage.models.concept import MAX_CONCEPT_SOURCES, concept_slug_to_title
-from util.prompt_loader import get_prompt
+from util.prompt_loader import get_context, get_prompt
 
 logger = logging.getLogger(__name__)
 
-# Category/type used to load prompts/concepts/entry/prompt.txt via prompt_loader.
+# Category/type used to load prompts/concepts/entry/{context,prompt}.txt.
 PROMPT_CATEGORY: str = "concepts"
 PROMPT_TYPE: str = "entry"
 
@@ -206,8 +206,13 @@ class VovereAgent:
         if not self.model:
             raise ValueError("VovereAgent requires a model (set config.model or pass model=)")
 
+        # The system context frames the task and tells the model to wait for all
+        # source messages; sources and the write instruction are user messages.
+        system_context = get_context(PROMPT_CATEGORY, PROMPT_TYPE)
         messages = self.build_messages(title, summary, sources)
-        response = self.client.generate_chat("", model=self.model, messages=messages)
+        response = self.client.generate_chat(
+            "", model=self.model, context=system_context, messages=messages
+        )
         return response.response_text.strip()
 
 
