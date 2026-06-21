@@ -218,6 +218,46 @@ def test_eb1911_source_uses_direct_existing_page_before_search(monkeypatch) -> N
     assert calls == ["query", "query"]
 
 
+def test_eb1911_source_uses_wikisource_parse_when_extract_is_empty(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    def fake_get_json(
+        url: str, *, params: Optional[Dict[str, str]] = None
+    ) -> Optional[Dict[str, Any]]:
+        assert params is not None
+        if params.get("prop") == "extracts":
+            return {
+                "query": {
+                    "pages": [
+                        {
+                            "title": "1911 Encyclopædia Britannica/Atlantic Ocean",
+                            "extract": "",
+                        }
+                    ]
+                }
+            }
+        if params.get("action") == "parse":
+            assert params.get("page") == "1911 Encyclopædia Britannica/Atlantic Ocean"
+            return {
+                "parse": {
+                    "text": (
+                        '<div class="mw-parser-output"><p><b>ATLANTIC OCEAN</b>, '
+                        "a belt of water between Europe, Africa, and the Americas.</p></div>"
+                    )
+                }
+            }
+        raise AssertionError(f"Unexpected params: {params}")
+
+    monkeypatch.setattr("storage.wikidata._get_json", fake_get_json)
+
+    source = _fetch_eb1911_source("Atlantic Ocean")
+
+    assert source is not None
+    assert (
+        source["url"]
+        == "https://en.wikisource.org/wiki/1911_Encyclopædia_Britannica/Atlantic_Ocean"
+    )
+    assert "ATLANTIC OCEAN" in source["text"]
+
+
 def test_eb1911_source_prefers_wikidata_p805_wikisource_page(monkeypatch) -> None:  # type: ignore[no-untyped-def]
     entity = {
         "claims": {
