@@ -7,7 +7,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from storage.crud.concept import create_concept, get_wikidata_index, link_wikidata_concept
 from storage.models.concept import Base
-from storage.wikidata import _fetch_wikipedia_source, fetch_wikidata_concept_seed, normalize_qid
+from storage.wikidata import (
+    _eb1911_search_titles,
+    _fetch_wikipedia_source,
+    _limit_eb1911_extract,
+    fetch_wikidata_concept_seed,
+    normalize_qid,
+)
 
 
 def test_normalize_qid_accepts_canonical_ids() -> None:
@@ -49,6 +55,19 @@ def test_wikipedia_source_uses_lead_for_long_articles(monkeypatch) -> None:  # t
     assert source["text"] == "Lead section only"
     assert "lead section" in source["note"]
     assert calls == [False, True]
+
+
+def test_eb1911_search_titles_include_last_first_variant() -> None:
+    assert _eb1911_search_titles("Abraham Lincoln") == ["Abraham Lincoln", "Lincoln, Abraham"]
+
+
+def test_eb1911_extract_uses_intro_for_long_pages() -> None:
+    paragraphs = [f"Paragraph {index} text." for index in range(12)]
+
+    extract, intro_only = _limit_eb1911_extract("\n\n".join(paragraphs))
+
+    assert intro_only is True
+    assert extract == "\n\n".join(paragraphs[:10])
 
 
 def test_fetch_wikidata_seed_builds_sources_from_mocked_apis(monkeypatch) -> None:  # type: ignore[no-untyped-def]

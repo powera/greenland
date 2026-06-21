@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence
 
 import requests
 
@@ -21,6 +21,61 @@ WIKISOURCE_SEARCH_URL = "https://en.wikisource.org/w/api.php"
 DEFAULT_TIMEOUT_SECONDS = 10
 MAX_SOURCE_TEXT_CHARS = 12000
 WIKIPEDIA_LEAD_THRESHOLD_CHARS = 10_000
+EB1911_MAX_PARAGRAPHS = 10
+EB1911_MAX_WORDS = 1200
+
+
+def _word_count(text: str) -> int:
+    """Return a simple whitespace-delimited word count."""
+    return len(text.split())
+
+
+def _limit_eb1911_extract(extract: str) -> tuple[str, bool]:
+    """Return an EB1911 extract limited to an intro-sized excerpt when needed."""
+    paragraphs = [
+        paragraph.strip() for paragraph in re.split(r"\n\s*\n", extract) if paragraph.strip()
+    ]
+    if len(paragraphs) <= EB1911_MAX_PARAGRAPHS and _word_count(extract) <= EB1911_MAX_WORDS:
+        return extract, False
+
+    selected_paragraphs: List[str] = []
+    selected_words = 0
+    for paragraph in paragraphs:
+        paragraph_words = _word_count(paragraph)
+        if selected_paragraphs and (
+            len(selected_paragraphs) >= EB1911_MAX_PARAGRAPHS
+            or selected_words + paragraph_words > EB1911_MAX_WORDS
+        ):
+            break
+        selected_paragraphs.append(paragraph)
+        selected_words += paragraph_words
+        if len(selected_paragraphs) >= EB1911_MAX_PARAGRAPHS or selected_words >= EB1911_MAX_WORDS:
+            break
+
+    if not selected_paragraphs:
+        return " ".join(extract.split()[:EB1911_MAX_WORDS]), True
+    return "\n\n".join(selected_paragraphs), True
+
+
+def _eb1911_search_titles(title: str, label: str = "") -> List[str]:
+    """Return likely EB1911 page-title candidates for a Wikidata concept."""
+    candidates: List[str] = []
+    for raw_title in (title, label):
+        clean_title = raw_title.strip()
+        if not clean_title:
+            continue
+        candidates.append(clean_title)
+        parts = clean_title.split()
+        if len(parts) == 2:
+            candidates.append(f"{parts[1]}, {parts[0]}")
+    deduped: List[str] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        normalized = candidate.casefold()
+        if normalized not in seen:
+            deduped.append(candidate)
+            seen.add(normalized)
+    return deduped
 
 
 @dataclass(frozen=True)
@@ -120,22 +175,44 @@ def _fetch_wikipedia_source(page_title: str) -> Optional[Dict[str, Any]]:
     }
 
 
-def _fetch_eb1911_source(title: str) -> Optional[Dict[str, Any]]:
+def _search_eb1911_page_title(candidates: Sequence[str]) -> Optional[str]:
+    """Return the first Wikisource EB1911 page title matching any candidate."""
+    for candidate in candidates:
+        search_title = f"1911 Encyclopædia Britannica/{candidate}"
+        params = {
+            "action": "query",
+            "list": "search",
+            "srsearch": f'intitle:"{search_title}"',
+            "srlimit": "1",
+            "format": "json",
+        }
+        search_payload = _get_json(WIKISOURCE_SEARCH_URL, params=params)
+        results = (search_payload or {}).get("query", {}).get("search", [])
+        if results:
+            page_title = str(results[0].get("title", "")).strip()
+            if page_title:
+                return page_title
+
+        params = {
+            "action": "query",
+            "list": "search",
+            "srsearch": f'"1911 Encyclopædia Britannica/{candidate}"',
+            "srlimit": "1",
+            "format": "json",
+        }
+        search_payload = _get_json(WIKISOURCE_SEARCH_URL, params=params)
+        results = (search_payload or {}).get("query", {}).get("search", [])
+        if results:
+            page_title = str(results[0].get("title", "")).strip()
+            if page_title:
+                return page_title
+    return None
+
+
+def _fetch_eb1911_source(title: str, label: str = "") -> Optional[Dict[str, Any]]:
     """Try to find an EB1911 Wikisource page for the topic and return its extract."""
-    search_title = f"1911 Encyclopædia Britannica/{title}"
-    params = {
-        "action": "query",
-        "list": "search",
-        "srsearch": f'intitle:"{search_title}"',
-        "srlimit": "1",
-        "format": "json",
-    }
-    search_payload = _get_json(WIKISOURCE_SEARCH_URL, params=params)
-    results = (search_payload or {}).get("query", {}).get("search", [])
-    if not results:
-        return None
-    page_title = str(results[0].get("title", "")).strip()
-    if not page_title:
+    page_title = _search_eb1911_page_title(_eb1911_search_titles(title, label))
+    if page_title is None:
         return None
     params = {
         "action": "query",
@@ -153,10 +230,14 @@ def _fetch_eb1911_source(title: str) -> Optional[Dict[str, Any]]:
     extract = str(pages[0].get("extract", "")).strip()
     if not extract:
         return None
+    extract, intro_only = _limit_eb1911_extract(extract)
+    note = "1911 Encyclopædia Britannica text from Wikisource."
+    if intro_only:
+        note = "1911 Encyclopædia Britannica intro excerpt from Wikisource; full page exceeded the concept-generation size limit."
     return {
         "url": f"https://en.wikisource.org/wiki/{page_title.replace(' ', '_')}",
         "title": f"EB1911: {title}",
-        "note": "1911 Encyclopædia Britannica text from Wikisource, truncated for concept generation.",
+        "note": note,
         "text": extract[:MAX_SOURCE_TEXT_CHARS],
     }
 
@@ -199,7 +280,7 @@ def fetch_wikidata_concept_seed(raw_qid: str) -> Optional[WikidataConceptSeed]:
         wikipedia_source = _fetch_wikipedia_source(enwiki_title)
         if wikipedia_source is not None:
             sources.append(wikipedia_source)
-    eb1911_source = _fetch_eb1911_source(title)
+    eb1911_source = _fetch_eb1911_source(title, label)
     if eb1911_source is not None:
         sources.append(eb1911_source)
 

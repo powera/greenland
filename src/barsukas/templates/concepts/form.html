@@ -28,7 +28,7 @@
 </div>
 {% endif %}
 
-<form method="post"
+<form id="concept-form" method="post"
       action="{{ url_for('concepts.update', slug=concept.slug) if concept else url_for('concepts.create') }}">
     <div class="row">
         <div class="col-lg-8">
@@ -38,7 +38,7 @@
                 <input type="text" class="form-control" id="wikidata_qid" name="wikidata_qid"
                        placeholder="e.g. Q42"
                        data-preview-url="{{ url_for('concepts.wikidata_preview') }}">
-                <div id="wikidata-preview" class="form-text">Optional. If supplied, the title, summary, and default sources are filled from Wikidata/Wikipedia.</div>
+                <div id="wikidata-preview" class="form-text">Optional. If supplied, the title, summary, and default sources are previewed and filled from Wikidata/Wikipedia. Pressing Return in this field previews data but does not create the page.</div>
             </div>
             {% endif %}
 

@@ -145,7 +145,15 @@ def wikidata_preview() -> ResponseReturnValue:
     seed = fetch_wikidata_concept_seed(qid)
     if seed is None:
         return jsonify({"found": False, "qid": qid})
-    return jsonify({"found": True, "qid": seed.qid, "title": seed.title, "summary": seed.summary})
+    return jsonify(
+        {
+            "found": True,
+            "qid": seed.qid,
+            "title": seed.title,
+            "summary": seed.summary,
+            "sources": seed.sources,
+        }
+    )
 
 
 @bp.route("/create", methods=["POST"])
