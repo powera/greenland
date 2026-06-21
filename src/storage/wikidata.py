@@ -64,7 +64,18 @@ class _WikiLinkHTMLTextParser(HTMLParser):
             self.skip_depth += 1
             return
         if tag in {"script", "style", "table"} or classes.intersection(
-            {"navbox", "vertical-navbox", "metadata", "ambox", "infobox", "sidebar"}
+            {
+                "ambox",
+                "infobox",
+                "metadata",
+                "mw-references-wrap",
+                "navbox",
+                "reference",
+                "references",
+                "reflist",
+                "sidebar",
+                "vertical-navbox",
+            }
         ):
             self.skip_depth += 1
             return
@@ -107,11 +118,26 @@ class _WikiLinkHTMLTextParser(HTMLParser):
         return text.strip()
 
 
+def _strip_wikipedia_trailing_reference_sections(text: str) -> str:
+    """Remove trailing Wikipedia maintenance/reference sections from parsed article text."""
+    section_heading_re = re.compile(
+        r"^(references|notes|citations|sources|further reading|external links|bibliography)$",
+        re.IGNORECASE,
+    )
+    kept_lines: List[str] = []
+    for line in text.splitlines():
+        clean_line = line.strip().strip("=").strip()
+        if section_heading_re.match(clean_line):
+            break
+        kept_lines.append(line)
+    return "\n".join(kept_lines).strip()
+
+
 def _html_to_text_with_wikilinks(html: str) -> str:
     """Convert parsed Wikimedia HTML to text while preserving internal link targets."""
     parser = _WikiLinkHTMLTextParser()
     parser.feed(html)
-    return parser.get_text()
+    return _strip_wikipedia_trailing_reference_sections(parser.get_text())
 
 
 def _fetch_wikipedia_parsed_text(
@@ -146,13 +172,38 @@ def _word_count(text: str) -> int:
     return len(text.split())
 
 
-def _limit_eb1911_extract(extract: str) -> tuple[str, bool]:
-    """Return an EB1911 extract limited to an intro-sized excerpt when needed."""
+def _looks_like_eb1911_sections_index(paragraph: str) -> bool:
+    """Return whether a paragraph is an EB1911 table-of-sections index."""
+    clean_paragraph = " ".join(paragraph.split())
+    if not clean_paragraph.lower().startswith("sections"):
+        return False
+    section_markers = re.findall(r"\b[IVXLCDM]+\.—", clean_paragraph)
+    return len(section_markers) >= 3
+
+
+def _strip_eb1911_sections_index(extract: str) -> str:
+    """Remove EB1911 front-matter section indexes from Wikisource extracts."""
     paragraphs = [
         paragraph.strip() for paragraph in re.split(r"\n\s*\n", extract) if paragraph.strip()
     ]
-    if len(paragraphs) <= EB1911_MAX_PARAGRAPHS and _word_count(extract) <= EB1911_MAX_WORDS:
-        return extract, False
+    while paragraphs and _looks_like_eb1911_sections_index(paragraphs[0]):
+        paragraphs.pop(0)
+    return "\n\n".join(paragraphs)
+
+
+def _limit_eb1911_extract(extract: str) -> tuple[str, bool]:
+    """Return an EB1911 extract limited to an intro-sized excerpt when needed."""
+    cleaned_extract = _strip_eb1911_sections_index(extract)
+    paragraphs = [
+        paragraph.strip()
+        for paragraph in re.split(r"\n\s*\n", cleaned_extract)
+        if paragraph.strip()
+    ]
+    if (
+        len(paragraphs) <= EB1911_MAX_PARAGRAPHS
+        and _word_count(cleaned_extract) <= EB1911_MAX_WORDS
+    ):
+        return cleaned_extract, cleaned_extract != extract
 
     selected_paragraphs: List[str] = []
     selected_words = 0
@@ -169,7 +220,7 @@ def _limit_eb1911_extract(extract: str) -> tuple[str, bool]:
             break
 
     if not selected_paragraphs:
-        return " ".join(extract.split()[:EB1911_MAX_WORDS]), True
+        return " ".join(cleaned_extract.split()[:EB1911_MAX_WORDS]), True
     return "\n\n".join(selected_paragraphs), True
 
 
