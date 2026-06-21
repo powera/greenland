@@ -18,6 +18,7 @@ from flask import (
     current_app,
     flash,
     g,
+    jsonify,
     redirect,
     render_template,
     request,
@@ -135,6 +136,18 @@ def new_concept() -> ResponseReturnValue:
     )
 
 
+@bp.route("/wikidata-preview")
+def wikidata_preview() -> ResponseReturnValue:
+    """Return a small JSON preview for a complete Wikidata Q-id."""
+    qid = normalize_qid(request.args.get("qid", ""))
+    if qid is None:
+        return jsonify({"found": False, "error": "invalid_qid"}), 400
+    seed = fetch_wikidata_concept_seed(qid)
+    if seed is None:
+        return jsonify({"found": False, "qid": qid})
+    return jsonify({"found": True, "qid": seed.qid, "title": seed.title, "summary": seed.summary})
+
+
 @bp.route("/create", methods=["POST"])
 def create() -> ResponseReturnValue:
     """Create a concept, generating its body from the supplied sources."""
@@ -148,7 +161,12 @@ def create() -> ResponseReturnValue:
     sources = _parse_sources_form(request.form.get("sources", ""))
     model = request.form.get("model", "").strip() or constants.DEFAULT_MODEL
 
-    if wikidata_qid is not None:
+    if wikidata_qid is None:
+        flash(
+            "Creating a concept without a Wikidata Q-id; please add one later if a good match exists.",
+            "warning",
+        )
+    else:
         existing_index = get_wikidata_index(_concept_session(), wikidata_qid)
         if existing_index is not None and existing_index.concept is not None:
             flash(
