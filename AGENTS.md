@@ -17,7 +17,11 @@ src/barsukas is the main web UX used by humans to interact with the database.
 
 src/agents contains scripts to do bulk operations against the database,
 generally making LLM calls.  Each agent is named with a Lithuanian animal
-name.
+name.  The concept agents (vovere = generator, voverukas = red-link ranker,
+voveraite = create concepts from explicit Q-ids) live in src/agents/vovere/ .
+
+Do not run commands that make live Wikidata/Wikipedia API calls (e.g. resolving
+Q-ids, fetching concept seeds) without first confirming with the developer.
 
 src/storage contains the SQLAlchemy schema for the main database;
 the default location is data/wordfreq/linguistics.sqlite .

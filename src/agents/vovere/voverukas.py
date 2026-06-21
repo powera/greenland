@@ -24,9 +24,9 @@ single batch, and the resulting bodies are turned into concepts later via
 ``agents/common/batch.py complete``.
 
 Usage:
-    PYTHONPATH=src python src/agents/voverukas.py --limit 30
-    PYTHONPATH=src python src/agents/voverukas.py --limit 50 --iterations 6 --debug
-    PYTHONPATH=src python src/agents/voverukas.py --limit 10 --batch --model gpt-5.4-mini
+    PYTHONPATH=src python src/agents/vovere/voverukas.py --limit 30
+    PYTHONPATH=src python src/agents/vovere/voverukas.py --limit 50 --iterations 6 --debug
+    PYTHONPATH=src python src/agents/vovere/voverukas.py --limit 10 --batch --model gpt-5.4-mini
 """
 
 import argparse
@@ -35,8 +35,8 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-# Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
+# Add src directory to path (this file lives at src/agents/vovere/)
+GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
@@ -151,7 +151,7 @@ class VoverukasAgent:
 
         Imported lazily so ranking-only runs do not require the LLM client.
         """
-        from agents.vovere import VovereAgent
+        from agents.vovere.vovere import VovereAgent
 
         agent = VovereAgent(self.config)
 
@@ -260,7 +260,7 @@ class VoverukasAgent:
         Returns:
             ``{"batch_id", "queued", "skipped"}`` describing what was submitted.
         """
-        from agents.vovere import VovereAgent
+        from agents.vovere.vovere import VovereAgent
 
         vovere = VovereAgent(self.config)
         if not vovere.model:
