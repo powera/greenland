@@ -8,6 +8,7 @@ import os
 import re
 import time
 from dataclasses import dataclass, field
+from functools import lru_cache
 from typing import Any, Dict, List, Optional, Sequence
 from urllib.parse import quote, unquote
 
@@ -566,6 +567,16 @@ def _fetch_eb1911_source(
     }
 
 
+def _clone_wikidata_concept_seed(seed: WikidataConceptSeed) -> WikidataConceptSeed:
+    """Return a copy of cached seed data with fresh mutable source dictionaries."""
+    return WikidataConceptSeed(
+        qid=seed.qid,
+        title=seed.title,
+        summary=seed.summary,
+        sources=[dict(source) for source in seed.sources],
+    )
+
+
 def fetch_wikidata_concept_seed(
     raw_qid: str, *, include_regional_wikis: bool = False
 ) -> Optional[WikidataConceptSeed]:
@@ -574,6 +585,17 @@ def fetch_wikidata_concept_seed(
     if qid is None:
         return None
 
+    seed = _fetch_wikidata_concept_seed_cached(qid, include_regional_wikis)
+    if seed is None:
+        return None
+    return _clone_wikidata_concept_seed(seed)
+
+
+@lru_cache(maxsize=256)
+def _fetch_wikidata_concept_seed_cached(
+    qid: str, include_regional_wikis: bool
+) -> Optional[WikidataConceptSeed]:
+    """Resolve a normalized Q-id, caching repeated lookups in this process."""
     entity = _fetch_wikidata_entity(qid)
     if entity is None:
         return None
