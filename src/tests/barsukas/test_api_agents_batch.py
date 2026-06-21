@@ -22,7 +22,12 @@ def test_add_missing_translations_batch_aggregates_three_requests(client, app) -
         session.add(lemma3)
         session.commit()
 
-    payload = {"model": "gpt-5.4-mini", "language": "fr", "batch": True, "batch_window_minutes": 10}
+    payload = {
+        "model": "gpt-5.4-mini",
+        "languages": ["fr"],
+        "batch": True,
+        "batch_window_minutes": 10,
+    }
     response1 = client.post("/api/v1/agents/lemma/V01_001/add-missing-translations", json=payload)
     response2 = client.post("/api/v1/agents/lemma/N01_001/add-missing-translations", json=payload)
     response3 = client.post("/api/v1/agents/lemma/V01_003/add-missing-translations", json=payload)

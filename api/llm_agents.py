@@ -112,7 +112,9 @@ def add_missing_translations(
 ) -> AddMissingTranslationsResponse:
     """Generate missing translations for one or more lemmas.
 
-    Pass either ``language`` for one target language or ``languages`` for several target language codes.
+    Pass ``language`` for one target language, or ``languages`` for several
+    target language codes. ``language`` is a convenience that is sent to the
+    server as a one-element ``languages`` list.
 
     ``timeout`` overrides the default HTTP read timeout; pass a longer value
     for bulk requests.
@@ -121,6 +123,10 @@ def add_missing_translations(
         A typed response envelope with aggregate counts, per-language stats,
         and ``llm_cost_usd`` for the request.
     """
+    if language is not None:
+        if languages is not None:
+            raise ValueError("Pass either 'language' or 'languages', not both")
+        languages = [language]
     kwargs: Dict[str, Any] = {} if timeout is None else {"timeout": timeout}
     return cast(
         AddMissingTranslationsResponse,
@@ -130,7 +136,6 @@ def add_missing_translations(
                 "guid": guid,
                 "guids": guids,
                 "model": model,
-                "language": language,
                 "languages": languages,
             },
             **kwargs,

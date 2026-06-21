@@ -146,14 +146,18 @@ class WordfreqResponse(TypedDict):
 
 @mirrored_route("/api/v1/search", "GET")
 def search(
-    query: str,
+    query: Optional[str] = None,
     *,
     pos_type: Optional[str] = None,
     difficulty: Optional[str] = None,
     limit: Optional[int] = None,
     offset: Optional[int] = None,
 ) -> SearchResponse:
-    """Search lemmas by text/definition/translations."""
+    """Search lemmas by text/definition/translations.
+
+    ``query`` is optional: omit it (or pass an empty string) to match all
+    lemmas, subject to the ``pos_type``/``difficulty`` filters and pagination.
+    """
     return cast(
         SearchResponse,
         get_json(

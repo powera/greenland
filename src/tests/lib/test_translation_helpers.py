@@ -36,11 +36,11 @@ class TestTranslationHelpers(unittest.TestCase):
         self.assertEqual(normalized[0], "l0")
         self.assertEqual(normalized[-1], "l9")
 
-    def test_split_llm_language_batches_avoids_singleton_tail(self):
+    def test_split_llm_language_batches_chunks_in_order(self):
         batches = split_llm_language_batches([f"l{i}" for i in range(11)])
-        self.assertEqual([len(batch) for batch in batches], [9, 2])
+        self.assertEqual([len(batch) for batch in batches], [MAX_LLM_LANGUAGES_PER_OPERATION, 1])
         self.assertEqual(batches[0][0], "l0")
-        self.assertEqual(batches[-1], ["l9", "l10"])
+        self.assertEqual(batches[-1], ["l10"])
 
     def test_converts_structured_translation_response_metadata(self):
         response = {

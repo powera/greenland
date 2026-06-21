@@ -13,6 +13,7 @@ Base prefix: `/api`.
 
 - `GET /api/v1/search?q=<query>[&pos_type=...][&difficulty=...][&limit=...][&offset=...]`
   - Search lemmas by text/definition/translations.
+  - `q` is optional; an empty/omitted `q` matches all lemmas (subject to the other filters and pagination).
   - `pos_type` may be any value in `VALID_POS_TYPES`, including `phrase` for fixed
     traveler phrases (subtypes `greetings`, `traveler`). Phrase lemmas store the
     full English phrase in their lemma/concept label and behave like any other
@@ -118,7 +119,7 @@ Norse. Expect more `late_construction`, `modern_loan`, `descriptive`, and
 
 All LLM-invoking endpoints below require JSON body with `"model": "<model-name>"`.
 
-- `POST /api/v1/agents/lemma/<guid>/add-missing-translations` (requires `language` or `languages`)
+- `POST /api/v1/agents/lemma/<guid>/add-missing-translations` (requires `languages`: a list of language codes; use a one-element list for a single language)
 - `POST /api/v1/agents/lemma/<guid>/generate-pronunciations` (optional `lang_code`)
 - `POST /api/v1/agents/lemma/<guid>/generate-forms` (optional `lang_code`)
 - `POST /api/v1/agents/lemma/<guid>/generate-synonyms` (optional `lang_code`)
