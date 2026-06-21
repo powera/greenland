@@ -31,10 +31,17 @@ from storage.crud.concept import (
     create_concept,
     delete_concept,
     get_concept_by_slug,
+    get_wikidata_index,
+    link_wikidata_concept,
     update_concept,
 )
-from storage.models.concept import MAX_CONCEPT_SOURCES, normalize_concept_slug
+from storage.models.concept import (
+    MAX_CONCEPT_SOURCES,
+    ConceptWikidataIndex,
+    normalize_concept_slug,
+)
 from storage.queries.concept import count_concepts, get_backlinks, list_concepts
+from storage.wikidata import fetch_wikidata_concept_seed, normalize_qid
 
 if TYPE_CHECKING:
     from barsukas.app import BarsukasFlask
@@ -135,13 +142,30 @@ def create() -> ResponseReturnValue:
         flash("Cannot create concepts in read-only mode", "error")
         return redirect(url_for("concepts.list_concepts_view"))
 
+    wikidata_qid = normalize_qid(request.form.get("wikidata_qid", ""))
     title = request.form.get("title", "").strip()
     summary = request.form.get("summary", "").strip()
     sources = _parse_sources_form(request.form.get("sources", ""))
     model = request.form.get("model", "").strip() or constants.DEFAULT_MODEL
 
+    if wikidata_qid is not None:
+        existing_index = get_wikidata_index(_concept_session(), wikidata_qid)
+        if existing_index is not None and existing_index.concept is not None:
+            flash(
+                f"Wikidata ID {wikidata_qid} is already linked to {existing_index.concept.title!r}.",
+                "error",
+            )
+            return redirect(url_for("concepts.detail", slug=existing_index.concept.slug))
+        seed = fetch_wikidata_concept_seed(wikidata_qid)
+        if seed is None:
+            flash(f"Could not resolve Wikidata ID {wikidata_qid}.", "error")
+            return redirect(url_for("concepts.new_concept"))
+        title = title or seed.title
+        summary = summary or seed.summary
+        sources = (sources + seed.sources)[:MAX_CONCEPT_SOURCES]
+
     if not title:
-        flash("A title is required.", "error")
+        flash("A title or Wikidata Q-id is required.", "error")
         return redirect(url_for("concepts.new_concept"))
 
     if get_concept_by_slug(_concept_session(), title) is not None:
@@ -172,6 +196,9 @@ def create() -> ResponseReturnValue:
         flash("Failed to create the concept.", "error")
         return redirect(url_for("concepts.new_concept"))
 
+    if wikidata_qid is not None:
+        link_wikidata_concept(_concept_session(), wikidata_qid, concept)
+
     flash(f"Created concept {concept.title!r}.", "success")
     return redirect(url_for("concepts.detail", slug=concept.slug))
 
@@ -188,6 +215,12 @@ def detail(slug: str) -> ResponseReturnValue:
     rendered_body = render_concept_body(concept.body or "", existing)
     sources = json.loads(concept.sources) if concept.sources else []
     backlinks = get_backlinks(_concept_session(), concept.slug)
+    wikidata_links = (
+        _concept_session()
+        .query(ConceptWikidataIndex)
+        .filter(ConceptWikidataIndex.concept_id == concept.id)
+        .all()
+    )
 
     return render_template(
         "concepts/detail.html",
@@ -196,6 +229,7 @@ def detail(slug: str) -> ResponseReturnValue:
         sources=sources,
         backlinks=backlinks,
         readonly=_is_readonly(),
+        wikidata_links=wikidata_links,
     )
 
 

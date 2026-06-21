@@ -29,7 +29,7 @@ import urllib.error
 import urllib.request
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
@@ -148,7 +148,12 @@ class VovereAgent:
             url = str(source.get("url", "")).strip()
             if not url:
                 continue
-            text = self.fetch_source_text(url)
+            provided_text = str(source.get("text", "")).strip()
+            text = (
+                provided_text[:PER_SOURCE_CHAR_LIMIT]
+                if provided_text
+                else self.fetch_source_text(url)
+            )
             if not text:
                 continue
             text = text[:budget]
@@ -213,7 +218,7 @@ class VovereAgent:
         response = self.client.generate_chat(
             "", model=self.model, context=system_context, messages=messages
         )
-        return response.response_text.strip()
+        return cast(str, response.response_text.strip())
 
 
 def main() -> int:
