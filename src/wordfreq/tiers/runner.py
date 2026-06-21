@@ -65,17 +65,83 @@ def _known_tier_names(session: Session, source: str) -> set[str]:
     }
 
 
-def _get_or_create_word_token(session: Session, token_text: str, language_code: str) -> WordToken:
-    token = (
-        session.query(WordToken)
-        .filter(WordToken.token == token_text, WordToken.language_code == language_code)
-        .first()
+@dataclass
+class _ImportCaches:
+    """In-memory lookup tables seeded once per import run.
+
+    The per-entry helpers issue one SELECT each to decide insert-vs-update.
+    For a large source (CEFR is ~10k entries) against the golden-mode in-memory
+    DB those SELECTs dominate the runtime, and every one of them misses because
+    the tables start empty. Seeding these maps from the current rows once lets
+    the helpers answer "does this already exist?" without a query, while
+    staying correct against an already-populated DB.
+    """
+
+    # (token_text, language_code) -> word_token_id
+    word_token_ids: Dict[tuple[str, str], int] = field(default_factory=dict)
+    # (word_token_id, source, pos_hint, sense_hint) -> ExternalLexemeAnnotation
+    annotations: Dict[tuple[int, str, Optional[str], Optional[str]], ExternalLexemeAnnotation] = (
+        field(default_factory=dict)
     )
-    if token is not None:
-        return token
+    # set of (annotation_id, lemma_id) links that already exist
+    lemma_links: set[tuple[int, int]] = field(default_factory=set)
+    # (lemma_id, source) -> LemmaTier
+    lemma_tiers: Dict[tuple[int, str], LemmaTier] = field(default_factory=dict)
+
+
+def _build_import_caches(session: Session, source: str) -> _ImportCaches:
+    """Preload existing rows relevant to ``source`` into in-memory maps."""
+    caches = _ImportCaches()
+
+    for token in session.query(WordToken).all():
+        caches.word_token_ids[(token.token, token.language_code)] = token.id
+
+    annotations = (
+        session.query(ExternalLexemeAnnotation)
+        .filter(ExternalLexemeAnnotation.source == source)
+        .all()
+    )
+    annotation_ids: set[int] = set()
+    for annotation in annotations:
+        caches.annotations[
+            (
+                annotation.word_token_id,
+                annotation.source,
+                annotation.pos_hint,
+                annotation.sense_hint,
+            )
+        ] = annotation
+        annotation_ids.add(annotation.id)
+
+    if annotation_ids:
+        for link in (
+            session.query(ExternalLexemeAnnotationLemma)
+            .filter(ExternalLexemeAnnotationLemma.annotation_id.in_(annotation_ids))
+            .all()
+        ):
+            caches.lemma_links.add((link.annotation_id, link.lemma_id))
+
+    for tier in session.query(LemmaTier).filter(LemmaTier.source == source).all():
+        caches.lemma_tiers[(tier.lemma_id, tier.source)] = tier
+
+    return caches
+
+
+def _get_or_create_word_token(
+    session: Session,
+    token_text: str,
+    language_code: str,
+    caches: _ImportCaches,
+) -> WordToken:
+    cached_id = caches.word_token_ids.get((token_text, language_code))
+    if cached_id is not None:
+        token = session.get(WordToken, cached_id)
+        if token is not None:
+            return token
     token = WordToken(token=token_text, language_code=language_code)
     session.add(token)
     session.flush()
+    caches.word_token_ids[(token_text, language_code)] = token.id
     return token
 
 
@@ -88,29 +154,12 @@ def _upsert_annotation(
     pos_hint: Optional[str],
     sense_hint: Optional[str],
     themes: tuple[str, ...],
+    caches: _ImportCaches,
 ) -> tuple[ExternalLexemeAnnotation, bool]:
     """Insert or update an annotation. Returns (row, inserted_bool)."""
     themes_json = json.dumps(list(themes)) if themes else None
-    pos_filter = (
-        ExternalLexemeAnnotation.pos_hint.is_(None)
-        if pos_hint is None
-        else ExternalLexemeAnnotation.pos_hint == pos_hint
-    )
-    sense_filter = (
-        ExternalLexemeAnnotation.sense_hint.is_(None)
-        if sense_hint is None
-        else ExternalLexemeAnnotation.sense_hint == sense_hint
-    )
-    existing = (
-        session.query(ExternalLexemeAnnotation)
-        .filter(
-            ExternalLexemeAnnotation.word_token_id == word_token_id,
-            ExternalLexemeAnnotation.source == source,
-            pos_filter,
-            sense_filter,
-        )
-        .first()
-    )
+    key = (word_token_id, source, pos_hint, sense_hint)
+    existing = caches.annotations.get(key)
     if existing is None:
         row = ExternalLexemeAnnotation(
             word_token_id=word_token_id,
@@ -122,25 +171,24 @@ def _upsert_annotation(
         )
         session.add(row)
         session.flush()
+        caches.annotations[key] = row
         return row, True
     existing.tier_name = tier_name
     existing.themes = themes_json
     return existing, False
 
 
-def _ensure_lemma_link(session: Session, annotation_id: int, lemma_id: int) -> bool:
+def _ensure_lemma_link(
+    session: Session,
+    annotation_id: int,
+    lemma_id: int,
+    caches: _ImportCaches,
+) -> bool:
     """Insert an annotation->lemma link if missing. Returns True if inserted."""
-    existing = (
-        session.query(ExternalLexemeAnnotationLemma)
-        .filter(
-            ExternalLexemeAnnotationLemma.annotation_id == annotation_id,
-            ExternalLexemeAnnotationLemma.lemma_id == lemma_id,
-        )
-        .first()
-    )
-    if existing is not None:
+    if (annotation_id, lemma_id) in caches.lemma_links:
         return False
     session.add(ExternalLexemeAnnotationLemma(annotation_id=annotation_id, lemma_id=lemma_id))
+    caches.lemma_links.add((annotation_id, lemma_id))
     return True
 
 
@@ -151,23 +199,20 @@ def _upsert_lemma_tier(
     source: str,
     tier_name: str,
     themes: tuple[str, ...],
+    caches: _ImportCaches,
 ) -> bool:
     """Insert or update a LemmaTier. Returns True if a new row was inserted."""
     themes_json = json.dumps(list(themes)) if themes else None
-    existing = (
-        session.query(LemmaTier)
-        .filter(LemmaTier.lemma_id == lemma_id, LemmaTier.source == source)
-        .first()
-    )
+    existing = caches.lemma_tiers.get((lemma_id, source))
     if existing is None:
-        session.add(
-            LemmaTier(
-                lemma_id=lemma_id,
-                source=source,
-                tier_name=tier_name,
-                themes=themes_json,
-            )
+        row = LemmaTier(
+            lemma_id=lemma_id,
+            source=source,
+            tier_name=tier_name,
+            themes=themes_json,
         )
+        session.add(row)
+        caches.lemma_tiers[(lemma_id, source)] = row
         return True
     existing.tier_name = tier_name
     existing.themes = themes_json
@@ -179,8 +224,9 @@ def _process_entry(
     importer: TierImporter,
     entry: TierEntry,
     report: ImportReport,
+    caches: _ImportCaches,
 ) -> None:
-    token = _get_or_create_word_token(session, entry.word, entry.language_code)
+    token = _get_or_create_word_token(session, entry.word, entry.language_code, caches)
     annotation, inserted = _upsert_annotation(
         session,
         word_token_id=token.id,
@@ -189,6 +235,7 @@ def _process_entry(
         pos_hint=entry.pos_hint,
         sense_hint=entry.sense_hint,
         themes=entry.themes,
+        caches=caches,
     )
     if inserted:
         report.annotations_inserted += 1
@@ -202,7 +249,7 @@ def _process_entry(
         return
 
     for lemma_id in candidate_ids:
-        if _ensure_lemma_link(session, annotation.id, lemma_id):
+        if _ensure_lemma_link(session, annotation.id, lemma_id, caches):
             report.lemma_links_inserted += 1
         if _upsert_lemma_tier(
             session,
@@ -210,6 +257,7 @@ def _process_entry(
             source=importer.source,
             tier_name=entry.tier_name,
             themes=entry.themes,
+            caches=caches,
         ):
             report.lemma_tiers_inserted += 1
         else:
@@ -239,6 +287,7 @@ def run_import(
         bootstrap_tier_definitions(session, sources=[source])
 
     known_tiers = _known_tier_names(session, source)
+    caches = _build_import_caches(session, source)
     entries = importer.load_entries()
     report = ImportReport(source=source, total=len(entries))
 
@@ -248,7 +297,7 @@ def run_import(
                 report.unknown_tier_names.append(entry.tier_name)
             report.add_example("unknown_tier", f"{entry.word} -> {entry.tier_name}")
             continue
-        _process_entry(session, importer, entry, report)
+        _process_entry(session, importer, entry, report, caches)
 
     if dry_run:
         session.rollback()
@@ -290,6 +339,7 @@ def reconcile_external_annotations(
         .all()
     )
     report = ImportReport(source=source, total=len(annotations))
+    caches = _build_import_caches(session, source)
     for annotation in annotations:
         token = annotation.word_token
         themes_tuple: tuple[str, ...] = (
@@ -308,7 +358,7 @@ def reconcile_external_annotations(
             report.unattached += 1
             continue
         for lemma_id in candidate_ids:
-            if _ensure_lemma_link(session, annotation.id, lemma_id):
+            if _ensure_lemma_link(session, annotation.id, lemma_id, caches):
                 report.lemma_links_inserted += 1
             if _upsert_lemma_tier(
                 session,
@@ -316,6 +366,7 @@ def reconcile_external_annotations(
                 source=source,
                 tier_name=annotation.tier_name,
                 themes=themes_tuple,
+                caches=caches,
             ):
                 report.lemma_tiers_inserted += 1
             else:
