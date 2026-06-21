@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit ' + concept.title if concept else 'Create Page' }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/concepts.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        {% if concept %}
+        <h1><i class="bi bi-pencil"></i> Edit: {{ concept.title }}</h1>
+        {% else %}
+        <h1><i class="bi bi-plus-lg"></i> Create Page</h1>
+        <p class="text-muted">
+            Provide a title, a one-sentence description, and 2&ndash;{{ max_sources }} source URLs
+            (web-page length). The entry body will be generated from those sources.
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+{% if not concept and not outbound_allowed %}
+<div class="alert alert-warning">
+    Outbound calls are disabled on this server, so the body cannot be generated now.
+    The page will be saved with its title, summary, and sources only.
+</div>
+{% endif %}
+
+<form method="post"
+      action="{{ url_for('concepts.update', slug=concept.slug) if concept else url_for('concepts.create') }}">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <input type="text" class="form-control" id="title" name="title" required
+                       value="{{ concept.title if concept else '' }}"
+                       placeholder="e.g. Battle of Gettysburg">
+                <div class="form-text">Natural capitalization. Spaces and underscores are equivalent.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="summary" class="form-label">One-sentence description</label>
+                <textarea class="form-control" id="summary" name="summary" rows="2"
+                          placeholder="A short description of the topic.">{{ concept.summary if concept else '' }}</textarea>
+            </div>
+
+            {% if concept %}
+            <div class="mb-3">
+                <label for="body" class="form-label">Body (Markdown, supports [[wiki links]])</label>
+                <textarea class="form-control concept-body-editor" id="body" name="body" rows="18">{{ concept.body or '' }}</textarea>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="mb-3">
+                <label for="sources" class="form-label">Sources (one URL per line)</label>
+                <textarea class="form-control" id="sources" name="sources" rows="6"
+                          placeholder="https://example.com/topic">{{ sources_text if concept else '' }}</textarea>
+                <div class="form-text">Up to {{ max_sources }}. Used as input for body generation.</div>
+            </div>
+
+            {% if not concept %}
+            <div class="mb-3">
+                <label for="model" class="form-label">Generation model</label>
+                <input type="text" class="form-control" id="model" name="model"
+                       value="{{ default_model }}">
+            </div>
+            {% endif %}
+
+            {% if concept %}
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="verified" name="verified" value="1"
+                       {{ 'checked' if concept.verified }}>
+                <label class="form-check-label" for="verified">Verified</label>
+            </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary w-100">
+                {% if concept %}<i class="bi bi-save"></i> Save changes
+                {% else %}<i class="bi bi-stars"></i> Create &amp; generate{% endif %}
+            </button>
+            <a class="btn btn-link w-100 mt-2"
+               href="{{ url_for('concepts.detail', slug=concept.slug) if concept else url_for('concepts.list_concepts_view') }}">
+                Cancel
+            </a>
+        </div>
+    </div>
+</form>
+{% endblock %}

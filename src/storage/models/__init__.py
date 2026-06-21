@@ -1,5 +1,11 @@
 """Models package for wordfreq."""
 
+from storage.models.concept import (
+    Concept,
+    MAX_CONCEPT_SOURCES,
+    concept_slug_to_title,
+    normalize_concept_slug,
+)
 from storage.models.enums import (
     AdjectiveSubtype,
     AdverbSubtype,
@@ -39,6 +45,7 @@ __all__ = [
     "AdjectiveSubtype",
     "AdverbSubtype",
     "Base",
+    "Concept",
     "Corpus",
     "DerivativeForm",
     "GrammarFact",
@@ -49,11 +56,14 @@ __all__ = [
     "LemmaRelationGroup",
     "LemmaRelationMember",
     "LemmaTranslation",
+    "MAX_CONCEPT_SOURCES",
     "NounSubtype",
     "OperationLog",
     "PendingImport",
     "PendingImportSynonymCandidate",
     "QueryLog",
+    "concept_slug_to_title",
+    "normalize_concept_slug",
     "Sentence",
     "SentencePatternWord",
     "SentenceTranslation",
