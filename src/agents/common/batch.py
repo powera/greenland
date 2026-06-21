@@ -314,17 +314,18 @@ def _extract_chat_completion_text(response_body: Optional[str]) -> Optional[str]
     return content.strip() if isinstance(content, str) else None
 
 
-def _apply_voverukas_concepts(
+def _apply_concept_seed_bodies(
     requests: Iterable[BatchQueue], session: Any, batch_id: str
 ) -> Dict[str, int]:
-    """Create concepts from voverukas batch results (seed + generated body).
+    """Create concepts from stashed (seed + generated body) batch results.
 
-    Each request stashed the full Wikidata seed and model in its metadata at
-    submit time, so concept creation needs no further outbound calls: the body
-    is the LLM output, the seed is the stored input.
+    Shared by every agent that queues concept-body generation (``voverukas``,
+    ``voveraite``). Each request stashed the full Wikidata seed and model in its
+    metadata at submit time, so concept creation needs no further outbound
+    calls: the body is the LLM output, the seed is the stored input.
 
     Args:
-        requests: Completed BatchQueue records for the ``voverukas`` agent.
+        requests: Completed BatchQueue records for a concept-body agent.
         session: Database session.
         batch_id: The batch ID (for logging only).
 
@@ -390,9 +391,9 @@ def _apply_voverukas_concepts(
     return results
 
 
-def _report_voverukas_results(results: Dict[str, int]) -> None:
+def _report_concept_seed_results(results: Dict[str, int], agent_name: str) -> None:
     logger.info("\n" + "=" * 80)
-    logger.info("BATCH RESULTS SUMMARY (VOVERUKAS)")
+    logger.info("BATCH RESULTS SUMMARY (%s)", agent_name.upper())
     logger.info("=" * 80)
     logger.info("Total requests processed: %s", results["processed"])
     logger.info("Concepts created: %s", results["created"])
@@ -492,9 +493,9 @@ def main() -> int:
                 elif agent_name == "voras":
                     result = _apply_voras_translations(requests, session, args.batch_id)
                     _report_voras_results(result)
-                elif agent_name == "voverukas":
-                    result = _apply_voverukas_concepts(requests, session, args.batch_id)
-                    _report_voverukas_results(result)
+                elif agent_name in ("voverukas", "voveraite"):
+                    result = _apply_concept_seed_bodies(requests, session, args.batch_id)
+                    _report_concept_seed_results(result, agent_name)
                 else:
                     logger.warning(
                         "No completion handler for agent '%s' (batch %s)",

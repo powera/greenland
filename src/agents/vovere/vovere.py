@@ -15,7 +15,7 @@ This module exposes :class:`VovereAgent` for use by Barsukas (the
 generation.
 
 Usage:
-    PYTHONPATH=src python src/agents/vovere.py \\
+    PYTHONPATH=src python src/agents/vovere/vovere.py \\
         --title "Art Deco" \\
         --summary "A decorative arts style of the 1920s-30s." \\
         --source https://example.com/art-deco \\
@@ -31,8 +31,8 @@ from urllib.parse import urlparse
 from pathlib import Path
 from typing import Any, Dict, List, Optional, cast
 
-# Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
+# Add src directory to path (this file lives at src/agents/vovere/)
+GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
