@@ -19,6 +19,7 @@ from storage.wikidata import (
     _strip_eb1911_sections_index,
     fetch_wikidata_concept_seed,
     normalize_qid,
+    resolve_titles_to_qids,
 )
 
 
@@ -500,3 +501,45 @@ def test_vovere_uses_provided_source_text(monkeypatch) -> None:  # type: ignore[
     assert len(messages) == 1
     assert "provided text" in messages[0]["content"]
     assert "fetched text" not in messages[0]["content"]
+
+
+def test_resolve_titles_to_qids_batches_and_maps_redirects(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    captured: Dict[str, Any] = {}
+
+    def fake_get_json(url: str, *, params: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+        captured["params"] = params or {}
+        # "Lake Huron" resolves directly; "Mackinac" is a redirect to
+        # "Straits of Mackinac"; "Nowhere" is missing.
+        return {
+            "query": {
+                "redirects": [{"from": "Mackinac", "to": "Straits of Mackinac"}],
+                "pages": [
+                    {"title": "Lake Huron", "pageprops": {"wikibase_item": "Q1383"}},
+                    {
+                        "title": "Straits of Mackinac",
+                        "pageprops": {"wikibase_item": "Q1073685"},
+                    },
+                    {"title": "Nowhere", "missing": True},
+                ],
+            }
+        }
+
+    monkeypatch.setattr("storage.wikidata._get_json", fake_get_json)
+
+    result = resolve_titles_to_qids(["Lake_Huron", "Mackinac", "Nowhere"])
+
+    # All requested titles resolved in a single batched request.
+    assert "|" in str(captured["params"].get("titles", ""))
+    assert result["Lake_Huron"] == "Q1383"
+    assert result["Mackinac"] == "Q1073685"  # mapped back through the redirect
+    assert result["Nowhere"] is None
+
+
+def test_resolve_titles_to_qids_handles_failed_request(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    # A None payload simulates a rate-limited request after retries are exhausted.
+    monkeypatch.setattr("storage.wikidata._get_json", lambda url, *, params=None: None)
+
+    result = resolve_titles_to_qids(["Lake Huron", "Michigan"])
+
+    # Titles are left unresolved (None) rather than crashing.
+    assert result == {"Lake Huron": None, "Michigan": None}

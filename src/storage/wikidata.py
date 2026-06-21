@@ -24,7 +24,11 @@ WIKIPEDIA_SUMMARY_URL = "https://en.wikipedia.org/api/rest_v1/page/summary/{titl
 WIKIPEDIA_EXTRACT_URL = "https://{language_code}.wikipedia.org/w/api.php"
 WIKISOURCE_SEARCH_URL = "https://en.wikisource.org/w/api.php"
 DEFAULT_TIMEOUT_SECONDS = 10
-MAX_HTTP_ATTEMPTS = 3
+# 429 (rate limit) and 503-with-maxlag are transient Wikimedia conditions worth
+# waiting out, so allow several attempts with a longer backoff cap than a normal
+# request would use.
+MAX_HTTP_ATTEMPTS = 5
+MAX_RETRY_DELAY_SECONDS = 30.0
 DEFAULT_USER_AGENT = os.environ.get(
     "GREENLAND_HTTP_USER_AGENT",
     "Greenland-Barsukas/1.0 (concept seeding; set GREENLAND_HTTP_USER_AGENT with contact)",
@@ -311,8 +315,17 @@ def resolve_titles_to_qids(
         payload = _get_json(
             WIKIPEDIA_EXTRACT_URL.format(language_code=language_code), params=params
         )
-        query = payload or {}
-        query = query.get("query", {}) if isinstance(query, dict) else {}
+        if payload is None:
+            # A None payload means the request failed (e.g. rate-limited after
+            # retries), not that the titles have no Q-id. Surface it so callers
+            # don't silently treat a transient failure as "unresolved".
+            logger.warning(
+                "Title->Q-id batch request failed for %d titles (left unresolved): %s",
+                len(batch),
+                ", ".join(batch[:5]) + ("..." if len(batch) > 5 else ""),
+            )
+            continue
+        query = payload.get("query", {}) if isinstance(payload, dict) else {}
 
         # Build a lookup from any title the API mentions (normalized + redirected
         # forms both map back to a requested title) to the resolved page title.
@@ -354,12 +367,18 @@ def resolve_title_to_qid(title: str, *, language_code: str = "en") -> Optional[s
 
 
 def _retry_delay_seconds(response: requests.Response, attempt_index: int) -> float:
-    """Return a short retry delay for rate-limited Wikimedia responses."""
+    """Return a retry delay for rate-limited / lagged Wikimedia responses.
+
+    Honors the server's ``Retry-After`` header when present (this is what a
+    ``maxlag`` 429 sends), otherwise falls back to exponential backoff. Both are
+    capped at :data:`MAX_RETRY_DELAY_SECONDS` so a single stuck call cannot block
+    a batch indefinitely.
+    """
     retry_after = response.headers.get("Retry-After", "").strip()
     if retry_after.isdigit():
-        return min(float(retry_after), 5.0)
+        return min(float(retry_after), MAX_RETRY_DELAY_SECONDS)
     fallback_delay: float = 0.5 * float(2**attempt_index)
-    return min(fallback_delay, 5.0)
+    return min(fallback_delay, MAX_RETRY_DELAY_SECONDS)
 
 
 def _get_json(url: str, *, params: Optional[Dict[str, str]] = None) -> Optional[Dict[str, Any]]:
