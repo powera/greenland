@@ -15,6 +15,7 @@ from storage.wikidata import (
     _fetch_wikipedia_source,
     _html_to_text_with_wikilinks,
     _limit_eb1911_extract,
+    _strip_eb1911_sections_index,
     fetch_wikidata_concept_seed,
     normalize_qid,
 )
@@ -56,6 +57,25 @@ def test_wikipedia_html_to_text_preserves_wikilink_targets() -> None:
     assert "[[Lake Michigan|the lake]]" in text
     assert "[[Illinois]]" in text
     assert "[[Help:Contents" not in text
+
+
+def test_wikipedia_html_to_text_removes_trailing_references() -> None:
+    html = """
+    <div class="mw-parser-output">
+      <p>Useful article lead with <a href="/wiki/Chicago">Chicago</a>.</p>
+      <h2>References</h2>
+      <ol class="references"><li>Reference text should disappear.</li></ol>
+      <h2>External links</h2>
+      <p>External link text should disappear.</p>
+    </div>
+    """
+
+    text = _html_to_text_with_wikilinks(html)
+
+    assert "Useful article lead with [[Chicago]]." in text
+    assert "References" not in text
+    assert "Reference text should disappear" not in text
+    assert "External link text should disappear" not in text
 
 
 def test_wikipedia_source_uses_parsed_html_with_wikilinks(monkeypatch) -> None:  # type: ignore[no-untyped-def]
@@ -112,6 +132,29 @@ def test_eb1911_extract_uses_intro_for_long_pages() -> None:
 
     assert intro_only is True
     assert extract == "\n\n".join(paragraphs[:10])
+
+
+def test_eb1911_sections_index_is_removed_before_limiting() -> None:
+    extract = """Sections
+I.—Physical Geography
+II.—Geology
+III.—Climate
+IV.—Fauna and Flora
+V.—Population and Social Conditions
+
+UNITED STATES, a federal republic of North America.
+
+Second paragraph.
+"""
+
+    assert _strip_eb1911_sections_index(extract).startswith("UNITED STATES")
+    limited_extract, intro_only = _limit_eb1911_extract(extract)
+
+    assert (
+        limited_extract
+        == "UNITED STATES, a federal republic of North America.\n\nSecond paragraph."
+    )
+    assert intro_only is True
 
 
 def test_eb1911_page_qids_use_p1343_p805_claims() -> None:
