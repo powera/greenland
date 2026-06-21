@@ -13,6 +13,7 @@ from storage.wikidata import (
     _extract_eb1911_page_qids,
     _fetch_eb1911_source,
     _fetch_wikipedia_source,
+    _html_to_text_with_wikilinks,
     _limit_eb1911_extract,
     fetch_wikidata_concept_seed,
     normalize_qid,
@@ -39,6 +40,44 @@ def test_link_wikidata_concept_creates_reverse_index() -> None:
         assert row.concept_id == concept.id
         assert row.rejected is False
         assert get_wikidata_index(session, "Q42") == row
+
+
+def test_wikipedia_html_to_text_preserves_wikilink_targets() -> None:
+    html = """
+    <div class="mw-parser-output">
+      <p><b>Chicago</b> is on <a href="/wiki/Lake_Michigan">the lake</a> and in
+      <a href="/wiki/Illinois">Illinois</a>.</p>
+      <p><a href="/wiki/Help:Contents">Help</a> links are not article signals.</p>
+    </div>
+    """
+
+    text = _html_to_text_with_wikilinks(html)
+
+    assert "[[Lake Michigan|the lake]]" in text
+    assert "[[Illinois]]" in text
+    assert "[[Help:Contents" not in text
+
+
+def test_wikipedia_source_uses_parsed_html_with_wikilinks(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    def fake_get_json(
+        url: str, *, params: Optional[Dict[str, str]] = None
+    ) -> Optional[Dict[str, Any]]:
+        assert params is not None
+        assert params.get("action") == "parse"
+        return {
+            "parse": {
+                "title": "Chicago",
+                "text": '<div class="mw-parser-output"><p>City in <a href="/wiki/Illinois">Illinois</a>.</p></div>',
+            }
+        }
+
+    monkeypatch.setattr("storage.wikidata._get_json", fake_get_json)
+
+    source = _fetch_wikipedia_source("Chicago")
+
+    assert source is not None
+    assert "[[Illinois]]" in source["text"]
+    assert "wiki-link markers" in source["note"]
 
 
 def test_wikipedia_source_uses_lead_for_long_articles(monkeypatch) -> None:  # type: ignore[no-untyped-def]
@@ -104,6 +143,36 @@ def test_eb1911_page_qids_use_p1343_p805_claims() -> None:
     }
 
     assert _extract_eb1911_page_qids(entity) == ["Q64437865"]
+
+
+def test_eb1911_source_uses_direct_existing_page_before_search(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    calls: list[str] = []
+
+    def fake_get_json(
+        url: str, *, params: Optional[Dict[str, str]] = None
+    ) -> Optional[Dict[str, Any]]:
+        assert params is not None
+        calls.append(params.get("action", ""))
+        assert params.get("titles") == "1911 Encyclopædia Britannica/Chicago"
+        return {
+            "query": {
+                "pages": [
+                    {
+                        "title": "1911 Encyclopædia Britannica/Chicago",
+                        "extract": "Chicago EB1911 text",
+                    }
+                ]
+            }
+        }
+
+    monkeypatch.setattr("storage.wikidata._get_json", fake_get_json)
+
+    source = _fetch_eb1911_source("Chicago")
+
+    assert source is not None
+    assert source["url"] == "https://en.wikisource.org/wiki/1911_Encyclopædia_Britannica/Chicago"
+    assert source["text"] == "Chicago EB1911 text"
+    assert calls == ["query", "query"]
 
 
 def test_eb1911_source_prefers_wikidata_p805_wikisource_page(monkeypatch) -> None:  # type: ignore[no-untyped-def]

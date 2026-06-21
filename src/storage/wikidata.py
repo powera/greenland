@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import logging
+from html.parser import HTMLParser
 import os
 import re
 import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 import requests
 
@@ -33,6 +34,111 @@ EB1911_MAX_PARAGRAPHS = 10
 EB1911_MAX_WORDS = 1200
 EB1911_WIKIDATA_QID = "Q867541"
 REGIONAL_WIKIPEDIA_LANGUAGE_CODES = ("de", "fr")
+
+
+def _wikilink_markup(label: str, target: str) -> str:
+    """Return a compact wiki-link marker for parsed article text."""
+    clean_label = " ".join(label.split())
+    clean_target = unquote(target).replace("_", " ").strip()
+    if not clean_label or not clean_target:
+        return clean_label
+    if clean_label == clean_target:
+        return f"[[{clean_target}]]"
+    return f"[[{clean_target}|{clean_label}]]"
+
+
+class _WikiLinkHTMLTextParser(HTMLParser):
+    """Small HTML-to-text parser that emits wiki-link markers for article links."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.parts: List[str] = []
+        self.skip_depth = 0
+        self.current_href = ""
+        self.current_label_parts: List[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, Optional[str]]]) -> None:
+        attr_map = {name: value or "" for name, value in attrs}
+        classes = set(attr_map.get("class", "").split())
+        if self.skip_depth:
+            self.skip_depth += 1
+            return
+        if tag in {"script", "style", "table"} or classes.intersection(
+            {"navbox", "vertical-navbox", "metadata", "ambox", "infobox", "sidebar"}
+        ):
+            self.skip_depth += 1
+            return
+        if tag == "a":
+            self.current_href = attr_map.get("href", "")
+            self.current_label_parts = []
+        elif tag in {"p", "div", "li", "br", "h1", "h2", "h3", "h4"}:
+            self.parts.append("\n")
+
+    def handle_endtag(self, tag: str) -> None:
+        if self.skip_depth:
+            self.skip_depth -= 1
+            return
+        if tag == "a" and self.current_href:
+            label = "".join(self.current_label_parts)
+            if self.current_href.startswith("/wiki/") and ":" not in self.current_href.removeprefix(
+                "/wiki/"
+            ):
+                self.parts.append(_wikilink_markup(label, self.current_href.removeprefix("/wiki/")))
+            else:
+                self.parts.append(label)
+            self.current_href = ""
+            self.current_label_parts = []
+        elif tag in {"p", "div", "li", "h1", "h2", "h3", "h4"}:
+            self.parts.append("\n")
+
+    def handle_data(self, data: str) -> None:
+        if self.skip_depth:
+            return
+        if self.current_href:
+            self.current_label_parts.append(data)
+        else:
+            self.parts.append(data)
+
+    def get_text(self) -> str:
+        text = "".join(self.parts)
+        text = re.sub(r"[ \t\r\f\v]+", " ", text)
+        text = re.sub(r" *\n *", "\n", text)
+        text = re.sub(r"\n{3,}", "\n\n", text)
+        return text.strip()
+
+
+def _html_to_text_with_wikilinks(html: str) -> str:
+    """Convert parsed Wikimedia HTML to text while preserving internal link targets."""
+    parser = _WikiLinkHTMLTextParser()
+    parser.feed(html)
+    return parser.get_text()
+
+
+def _fetch_wikipedia_parsed_text(
+    page_title: str, *, language_code: str = "en", lead_only: bool = False
+) -> Optional[Dict[str, str]]:
+    """Fetch parsed Wikipedia text with wiki-link markers preserved."""
+    params = {
+        "action": "parse",
+        "page": page_title,
+        "prop": "text",
+        "redirects": "1",
+        "disableeditsection": "1",
+        "format": "json",
+        "formatversion": "2",
+    }
+    if lead_only:
+        params["section"] = "0"
+    payload = _get_json(WIKIPEDIA_EXTRACT_URL.format(language_code=language_code), params=params)
+    parsed_page = (payload or {}).get("parse", {})
+    html = str(parsed_page.get("text", "")).strip()
+    title = str(parsed_page.get("title", page_title)).strip() or page_title
+    if not html:
+        return None
+    text = _html_to_text_with_wikilinks(html)
+    if not text:
+        return None
+    return {"title": title, "extract": text}
 
 
 def _word_count(text: str) -> int:
@@ -188,9 +294,15 @@ def _extract_english_value(values: Dict[str, Dict[str, str]]) -> str:
 def _fetch_wikipedia_extract(
     page_title: str, *, language_code: str = "en", lead_only: bool = False
 ) -> Optional[Dict[str, str]]:
-    """Fetch a Wikipedia plain-text extract for a page."""
+    """Fetch Wikipedia article text, preserving wiki-link markers when possible."""
     # TODO: Switch source hydration to a local Wikipedia dump so concept creation
     # does not depend on live API availability and repeated network calls.
+    parsed_text = _fetch_wikipedia_parsed_text(
+        page_title, language_code=language_code, lead_only=lead_only
+    )
+    if parsed_text is not None:
+        return parsed_text
+
     params = {
         "action": "query",
         "prop": "extracts",
@@ -224,14 +336,18 @@ def _fetch_wikipedia_source(
         return None
     extract = page_extract["extract"]
     title = page_extract["title"]
-    note = "Plain-text Wikipedia article extract for concept generation."
+    note = (
+        "Wikipedia article extract for concept generation; internal links are preserved "
+        "as wiki-link markers when available."
+    )
     if len(extract) > WIKIPEDIA_LEAD_THRESHOLD_CHARS:
         lead_extract = _fetch_wikipedia_extract(title, language_code=language_code, lead_only=True)
         if lead_extract is not None:
             extract = lead_extract["extract"]
             title = lead_extract["title"]
         note = (
-            "Plain-text Wikipedia lead section for concept generation; full article exceeded 10 KB."
+            "Wikipedia lead section for concept generation; full article exceeded 10 KB. "
+            "Internal links are preserved as wiki-link markers when available."
         )
     if regional_note:
         note = (
@@ -278,6 +394,39 @@ def _extract_wikisource_title(entity: Dict[str, Any]) -> str:
     if not isinstance(sitelinks, dict):
         return ""
     return str(sitelinks.get("enwikisource", {}).get("title", "")).strip()
+
+
+def _fetch_eb1911_page_extract(page_title: str) -> Optional[str]:
+    """Fetch a Wikisource plain-text extract for an EB1911 page title."""
+    params = {
+        "action": "query",
+        "prop": "extracts",
+        "explaintext": "1",
+        "redirects": "1",
+        "titles": page_title,
+        "format": "json",
+        "formatversion": "2",
+    }
+    payload = _get_json(WIKISOURCE_SEARCH_URL, params=params)
+    pages = (payload or {}).get("query", {}).get("pages", [])
+    if not pages:
+        return None
+    page = pages[0]
+    if page.get("missing"):
+        return None
+    extract = str(page.get("extract", "")).strip()
+    if not extract:
+        return None
+    return extract
+
+
+def _find_existing_eb1911_page_title(candidates: Sequence[str]) -> Optional[str]:
+    """Return the first direct EB1911 page title that has extractable text."""
+    for candidate in candidates:
+        page_title = f"1911 Encyclopædia Britannica/{candidate}"
+        if _fetch_eb1911_page_extract(page_title) is not None:
+            return page_title
+    return None
 
 
 def _search_eb1911_page_title(candidates: Sequence[str]) -> Optional[str]:
@@ -327,25 +476,18 @@ def _fetch_eb1911_source(
             page_title = _extract_wikisource_title(page_entity)
             if page_title:
                 break
-    if page_title is None or not page_title:
-        page_title = _search_eb1911_page_title(_eb1911_search_titles(title, label))
-    if page_title is None:
-        return None
-    params = {
-        "action": "query",
-        "prop": "extracts",
-        "explaintext": "1",
-        "redirects": "1",
-        "titles": page_title,
-        "format": "json",
-        "formatversion": "2",
-    }
-    payload = _get_json(WIKISOURCE_SEARCH_URL, params=params)
-    pages = (payload or {}).get("query", {}).get("pages", [])
-    if not pages:
-        return None
-    extract = str(pages[0].get("extract", "")).strip()
-    if not extract:
+    extract = None
+    if page_title:
+        extract = _fetch_eb1911_page_extract(page_title)
+    if extract is None:
+        candidates = _eb1911_search_titles(title, label)
+        page_title = _find_existing_eb1911_page_title(candidates)
+        if page_title is None:
+            page_title = _search_eb1911_page_title(candidates)
+        if page_title is None:
+            return None
+        extract = _fetch_eb1911_page_extract(page_title)
+    if extract is None or page_title is None:
         return None
     extract, intro_only = _limit_eb1911_extract(extract)
     note = "1911 Encyclopædia Britannica text from Wikisource."
