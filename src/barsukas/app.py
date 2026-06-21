@@ -100,6 +100,7 @@ class BarsukasFlask(Flask):
     backend_config: DataSourceConfig
     db_session_factory: Callable[[], Session]
     bench_db_session_factory: Optional[Callable[[], Session]]
+    concepts_db_session_factory: Optional[Callable[[], Session]]
 
 
 def create_app(
@@ -189,6 +190,30 @@ def create_app(
         return cast(Session, create_session(backend_config))
 
     app.db_session_factory = session_factory
+    app.concepts_db_session_factory = None
+
+    if os.environ.get("BARSUKAS_CONCEPTS_BACKEND") == "postgres":
+        try:
+            concepts_postgres_url = DataSourceConfig.build_postgres_url()
+        except Exception as concepts_exc:
+            print(f"Error building PostgreSQL URL for concepts: {concepts_exc}", file=sys.stderr)
+            sys.exit(1)
+
+        concepts_backend_config = DataSourceConfig(
+            backend_type=BackendType.POSTGRES,
+            postgres_url=concepts_postgres_url,
+            use_word2vec=use_word2vec,
+        )
+
+        def concepts_session_factory() -> Session:
+            return cast(Session, create_session(concepts_backend_config))
+
+        app.concepts_db_session_factory = concepts_session_factory
+        app.config["CONCEPTS_BACKEND"] = "postgres"
+        app.config["CONCEPTS_WRITABLE"] = True
+    else:
+        app.config["CONCEPTS_BACKEND"] = backend_config.backend_type.value
+        app.config["CONCEPTS_WRITABLE"] = False
     try:
         from sqlalchemy.engine import Engine
 
@@ -381,10 +406,20 @@ def create_app(
             return
 
         g.db = app.db_session_factory()
+        if endpoint_name.startswith("concepts.") and app.concepts_db_session_factory is not None:
+            g.concepts_db = app.concepts_db_session_factory()
 
     @app.teardown_appcontext
     def shutdown_session(exception: Optional[BaseException]) -> None:
         """Clean up database session after request."""
+        concepts_db = g.pop("concepts_db", None)
+        if concepts_db is not None:
+            if exception:
+                concepts_db.rollback()
+            else:
+                concepts_db.commit()
+            concepts_db.close()
+
         db = g.pop("db", None)
         if db is not None:
             if exception:

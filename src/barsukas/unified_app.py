@@ -83,6 +83,7 @@ def run_flask_server(
         app.config["ENABLE_WORKER"] = persona.enable_worker
         app.config["ALLOW_RESTART"] = persona.allow_restart
         app.config["ALLOW_EXPORTS"] = persona.allow_exports
+        app.config["CONCEPTS_WRITABLE"] = persona.use_postgres_concepts
     else:
         # Defaults when no persona specified
         app.config["ALLOW_OUTBOUND_CALLS"] = True
@@ -90,6 +91,7 @@ def run_flask_server(
         app.config["ENABLE_WORKER"] = True
         app.config["ALLOW_RESTART"] = True
         app.config["ALLOW_EXPORTS"] = True
+        app.config["CONCEPTS_WRITABLE"] = False
 
     logger.info(f"Starting Barsukas Flask server on http://{host}:{port}")
     logger.info(f"Database: {app.config['DB_PATH']}")
@@ -139,8 +141,8 @@ def main() -> None:
     parser.add_argument(
         "--persona",
         type=str,
-        choices=["prod", "golden", "hosted", "local"],
-        help="Launch persona (prod, golden, hosted, local) - overrides other backend settings",
+        choices=["prod", "golden", "hosted", "scholar", "local"],
+        help="Launch persona (prod, golden, hosted, scholar, local) - overrides other backend settings",
     )
     parser.add_argument(
         "--list-personas",
@@ -174,6 +176,8 @@ def main() -> None:
             args.no_worker = True
         if persona.use_postgres:
             args.postgres = True
+        if persona.use_postgres_concepts:
+            os.environ["BARSUKAS_CONCEPTS_BACKEND"] = "postgres"
 
     # Safety rule: read-only mode never starts the background worker.
     if args.readonly and not args.no_worker:
@@ -237,6 +241,8 @@ def main() -> None:
         logger.info(f"Task worker will poll every {args.poll_interval}s")
     else:
         logger.info("Task worker DISABLED")
+    if persona and persona.use_postgres_concepts:
+        logger.info("Concepts database: PostgreSQL (writable)")
     if persona and not persona.allow_api_keys:
         logger.info("API keys: DISABLED (no local keys)")
     if persona and not persona.allow_outbound_calls:
