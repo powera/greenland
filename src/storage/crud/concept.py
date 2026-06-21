@@ -6,13 +6,14 @@ variants of a title resolve to the same row (Wikipedia-style equivalence).
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from storage.models.concept import (
     Concept,
+    ConceptWikidataIndex,
     MAX_CONCEPT_SOURCES,
     normalize_concept_slug,
 )
@@ -34,6 +35,47 @@ def _normalize_sources(sources: Optional[List[Dict[str, Any]]]) -> Optional[str]
     return json.dumps(sources[:MAX_CONCEPT_SOURCES], ensure_ascii=False)
 
 
+def get_wikidata_index(session: Session, qid: str) -> Optional[ConceptWikidataIndex]:
+    """Return the Wikidata reverse-index row for a Q-id, if any."""
+    from storage.wikidata import normalize_qid
+
+    normalized_qid = normalize_qid(qid)
+    if normalized_qid is None:
+        return None
+    return cast(
+        Optional[ConceptWikidataIndex],
+        session.query(ConceptWikidataIndex)
+        .filter(ConceptWikidataIndex.qid == normalized_qid)
+        .first(),
+    )
+
+
+def link_wikidata_concept(
+    session: Session, qid: str, concept: Concept, *, notes: Optional[str] = None
+) -> Optional[ConceptWikidataIndex]:
+    """Create or update the reverse index linking a Wikidata Q-id to a concept."""
+    from storage.wikidata import normalize_qid
+
+    normalized_qid = normalize_qid(qid)
+    if normalized_qid is None:
+        return None
+    row = get_wikidata_index(session, normalized_qid)
+    if row is None:
+        row = ConceptWikidataIndex(qid=normalized_qid)
+        session.add(row)
+    row.concept = concept
+    row.rejected = False
+    if notes is not None:
+        row.notes = notes
+    try:
+        session.commit()
+        return row
+    except IntegrityError as error:
+        session.rollback()
+        logger.warning("Failed to link Wikidata Q-id %s: %s", normalized_qid, error)
+        return None
+
+
 def get_concept_by_slug(session: Session, slug: str) -> Optional[Concept]:
     """Look up a concept by slug, normalizing space/underscore equivalence.
 
@@ -45,12 +87,14 @@ def get_concept_by_slug(session: Session, slug: str) -> Optional[Concept]:
         The matching Concept, or None if not found.
     """
     normalized = normalize_concept_slug(slug)
-    return session.query(Concept).filter(Concept.slug == normalized).first()
+    return cast(
+        Optional[Concept], session.query(Concept).filter(Concept.slug == normalized).first()
+    )
 
 
 def get_concept_by_id(session: Session, concept_id: int) -> Optional[Concept]:
     """Return a concept by its internal id, or None."""
-    return session.query(Concept).filter(Concept.id == concept_id).first()
+    return cast(Optional[Concept], session.query(Concept).filter(Concept.id == concept_id).first())
 
 
 def create_concept(

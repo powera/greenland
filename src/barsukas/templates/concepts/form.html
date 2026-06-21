@@ -14,8 +14,8 @@
         {% else %}
         <h1><i class="bi bi-plus-lg"></i> Create Page</h1>
         <p class="text-muted">
-            Provide a title, a one-sentence description, and 2&ndash;{{ max_sources }} source URLs
-            (web-page length). The entry body will be generated from those sources.
+            Provide either a Wikidata Q-id or a title, then add any optional description and sources.
+            If a Q-id is provided, Wikipedia and EB1911 sources are added automatically when available.
         </p>
         {% endif %}
     </div>
@@ -32,12 +32,21 @@
       action="{{ url_for('concepts.update', slug=concept.slug) if concept else url_for('concepts.create') }}">
     <div class="row">
         <div class="col-lg-8">
+            {% if not concept %}
+            <div class="mb-3">
+                <label for="wikidata_qid" class="form-label">Wikidata Q-id</label>
+                <input type="text" class="form-control" id="wikidata_qid" name="wikidata_qid"
+                       placeholder="e.g. Q42">
+                <div class="form-text">Optional. If supplied, the title, summary, and default sources are filled from Wikidata/Wikipedia.</div>
+            </div>
+            {% endif %}
+
             <div class="mb-3">
                 <label for="title" class="form-label">Title</label>
-                <input type="text" class="form-control" id="title" name="title" required
+                <input type="text" class="form-control" id="title" name="title"
                        value="{{ concept.title if concept else '' }}"
                        placeholder="e.g. Battle of Gettysburg">
-                <div class="form-text">Natural capitalization. Spaces and underscores are equivalent.</div>
+                <div class="form-text">Required unless a Wikidata Q-id is provided. Spaces and underscores are equivalent.</div>
             </div>
 
             <div class="mb-3">
@@ -59,7 +68,7 @@
                 <label for="sources" class="form-label">Sources (one URL per line)</label>
                 <textarea class="form-control" id="sources" name="sources" rows="6"
                           placeholder="https://example.com/topic">{{ sources_text if concept else '' }}</textarea>
-                <div class="form-text">Up to {{ max_sources }}. Used as input for body generation.</div>
+                <div class="form-text">Up to {{ max_sources }}. Q-id creation adds Wikipedia and EB1911 defaults when available.</div>
             </div>
 
             {% if not concept %}

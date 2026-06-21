@@ -24,9 +24,10 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    ForeignKey,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from storage.models.schema import Base
 
@@ -164,3 +165,28 @@ class Concept(Base):
 
     def __repr__(self) -> str:
         return f"<Concept(id={self.id}, slug={self.slug!r}, verified={self.verified})>"
+
+
+class ConceptWikidataIndex(Base):
+    """Reverse index from Wikidata Q-id to an accepted or rejected concept."""
+
+    __tablename__ = "concept_wikidata_index"
+
+    qid: Mapped[str] = mapped_column(String, primary_key=True)
+    concept_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("concepts.id"), nullable=True, index=True
+    )
+    rejected: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )
+
+    concept: Mapped[Optional[Concept]] = relationship("Concept")
+
+    def __repr__(self) -> str:
+        return (
+            f"<ConceptWikidataIndex(qid={self.qid!r}, concept_id={self.concept_id!r}, "
+            f"rejected={self.rejected})>"
+        )

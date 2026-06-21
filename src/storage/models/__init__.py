@@ -2,6 +2,7 @@
 
 from storage.models.concept import (
     Concept,
+    ConceptWikidataIndex,
     MAX_CONCEPT_SOURCES,
     concept_slug_to_title,
     normalize_concept_slug,
@@ -46,6 +47,7 @@ __all__ = [
     "AdverbSubtype",
     "Base",
     "Concept",
+    "ConceptWikidataIndex",
     "Corpus",
     "DerivativeForm",
     "GrammarFact",
