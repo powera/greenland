@@ -11,6 +11,7 @@ may contain ``[[wiki links]]`` to other concepts.
 import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, cast
+from urllib.parse import urlparse
 
 import constants
 from flask import (
@@ -43,6 +44,8 @@ from storage.models.concept import (
 )
 from storage.queries.concept import count_concepts, get_backlinks, list_concepts
 from storage.wikidata import fetch_wikidata_concept_seed, normalize_qid
+
+BLOCKED_SOURCE_HOSTS: frozenset[str] = frozenset({"wikidata.org", "www.wikidata.org"})
 
 if TYPE_CHECKING:
     from barsukas.app import BarsukasFlask
@@ -97,6 +100,13 @@ def _merge_sources(*source_lists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return merged_sources
 
 
+def _is_allowed_generation_source_url(url: str) -> bool:
+    """Return False for source URLs that produce unusable generation text."""
+    parsed_url = urlparse(url)
+    host = parsed_url.netloc.casefold()
+    return host not in BLOCKED_SOURCE_HOSTS
+
+
 def _parse_sources_form(raw: str) -> List[Dict[str, Any]]:
     """Parse the sources textarea (one URL per line) into source dicts.
 
@@ -109,7 +119,7 @@ def _parse_sources_form(raw: str) -> List[Dict[str, Any]]:
     sources: List[Dict[str, Any]] = []
     for line in raw.splitlines():
         url = line.strip()
-        if url:
+        if url and _is_allowed_generation_source_url(url):
             sources.append({"url": url})
     return _merge_sources(sources)
 

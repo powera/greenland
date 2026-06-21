@@ -6,6 +6,7 @@
     const sourcesInput = document.getElementById('sources');
     const preview = document.getElementById('wikidata-preview');
     const includeRegionalWikisInput = document.getElementById('include_regional_wikis');
+    const generatedSources = document.getElementById('wikidata-generated-sources');
     if (!form || !qidInput || !titleInput || !summaryInput || !sourcesInput || !preview) {
         return;
     }
@@ -20,31 +21,37 @@
         preview.className = className;
     }
 
-    function sourceUrls(sources) {
+    function sourceLabels(sources) {
         if (!Array.isArray(sources)) {
             return [];
         }
         return sources.map(function (source) {
-            return source.url || '';
-        }).filter(function (url) {
-            return url.length > 0;
+            return source.title || source.url || '';
+        }).filter(function (label) {
+            return label.length > 0;
         });
     }
 
-    function mergeSourceUrls(existingText, sources) {
-        const existingUrls = existingText.split('\n').map(function (line) {
-            return line.trim();
-        }).filter(function (line) {
-            return line.length > 0;
+    function renderGeneratedSources(sources) {
+        if (!generatedSources) {
+            return;
+        }
+        const labels = sourceLabels(sources);
+        generatedSources.textContent = '';
+        if (labels.length === 0) {
+            return;
+        }
+        const heading = document.createElement('div');
+        heading.textContent = 'Q-id generated sources that will be included automatically:';
+        generatedSources.appendChild(heading);
+        const list = document.createElement('ul');
+        list.className = 'mb-0';
+        labels.forEach(function (label) {
+            const item = document.createElement('li');
+            item.textContent = label;
+            list.appendChild(item);
         });
-        const seenUrls = new Set(existingUrls);
-        sourceUrls(sources).forEach(function (url) {
-            if (!seenUrls.has(url)) {
-                existingUrls.push(url);
-                seenUrls.add(url);
-            }
-        });
-        return existingUrls.join('\n');
+        generatedSources.appendChild(list);
     }
 
     function hydrateFields(data) {
@@ -54,7 +61,7 @@
         if (!summaryInput.value.trim()) {
             summaryInput.value = data.summary || '';
         }
-        sourcesInput.value = mergeSourceUrls(sourcesInput.value, data.sources || []);
+        renderGeneratedSources(data.sources || []);
     }
 
     qidInput.addEventListener('keydown', function (event) {
@@ -79,11 +86,13 @@
         if (!qid) {
             lastRequestedQid = '';
             setPreview('', 'form-text');
+            renderGeneratedSources([]);
             return;
         }
 
         if (!qidPattern.test(qid)) {
             setPreview('Enter a complete Wikidata Q-id such as Q42.', 'form-text text-muted');
+            renderGeneratedSources([]);
             return;
         }
 
@@ -116,11 +125,13 @@
                         );
                     } else {
                         setPreview('No Wikidata match found for ' + qid + '.', 'form-text text-warning');
+                        renderGeneratedSources([]);
                     }
                 })
                 .catch(function () {
                     if (qidInput.value.trim().toUpperCase() === qid) {
                         setPreview('Could not preview ' + qid + '; creation can still try resolving it after you click Create & generate.', 'form-text text-warning');
+                        renderGeneratedSources([]);
                     }
                 });
         }, 600);

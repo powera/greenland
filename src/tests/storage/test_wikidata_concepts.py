@@ -227,6 +227,54 @@ def test_fetch_wikidata_seed_can_include_regional_wikipedia_sources(monkeypatch)
     assert all(not source["title"].startswith("Wikidata:") for source in seed.sources)
 
 
+def test_get_json_retries_429_with_wikimedia_headers(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    calls: list[dict[str, Any]] = []
+
+    class FakeResponse:
+        def __init__(self, status_code: int) -> None:
+            self.status_code = status_code
+            self.headers: dict[str, str] = {"Retry-After": "0"}
+
+        def raise_for_status(self) -> None:
+            if self.status_code >= 400:
+                raise RuntimeError("unexpected status")
+
+        def json(self) -> dict[str, str]:
+            return {"ok": "yes"}
+
+    def fake_get(url: str, **kwargs: Any) -> FakeResponse:
+        calls.append(kwargs)
+        return FakeResponse(429 if len(calls) == 1 else 200)
+
+    monkeypatch.setattr("storage.wikidata.requests.get", fake_get)
+    monkeypatch.setattr("storage.wikidata.time.sleep", lambda delay: None)
+
+    from storage.wikidata import _get_json
+
+    assert _get_json("https://en.wikisource.org/w/api.php", params={"action": "query"}) == {
+        "ok": "yes"
+    }
+    assert len(calls) == 2
+    assert calls[0]["headers"]["Api-User-Agent"]
+    assert calls[0]["params"]["maxlag"] == "5"
+
+
+def test_vovere_skips_wikidata_generation_sources() -> None:
+    agent = VovereAgent.__new__(VovereAgent)
+
+    messages = agent._build_source_messages(
+        [
+            {
+                "url": "https://www.wikidata.org/wiki/Q12439",
+                "title": "Wikidata: Detroit",
+                "text": "Jump to content From Wikidata junk",
+            }
+        ]
+    )
+
+    assert messages == []
+
+
 def test_vovere_html_to_text_removes_navigation_chrome() -> None:
     pytest.importorskip("bs4")
     html = """

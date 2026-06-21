@@ -27,6 +27,7 @@ import logging
 import sys
 import urllib.error
 import urllib.request
+from urllib.parse import urlparse
 from pathlib import Path
 from typing import Any, Dict, List, Optional, cast
 
@@ -53,6 +54,14 @@ PER_SOURCE_CHAR_LIMIT: int = 12000
 TOTAL_SOURCE_CHAR_LIMIT: int = 40000
 FETCH_TIMEOUT_SECONDS: int = 20
 DEFAULT_USER_AGENT: str = "Greenland-Vovere/1.0 (concept entry generator)"
+BLOCKED_SOURCE_HOSTS: frozenset[str] = frozenset({"wikidata.org", "www.wikidata.org"})
+
+
+def is_allowed_generation_source_url(url: str) -> bool:
+    """Return False for source URLs that are unsuitable as generation text."""
+    parsed_url = urlparse(url)
+    host = parsed_url.netloc.casefold()
+    return host not in BLOCKED_SOURCE_HOSTS
 
 
 def html_to_text(html: str) -> str:
@@ -139,7 +148,7 @@ class VovereAgent:
         budget = TOTAL_SOURCE_CHAR_LIMIT
         for index, source in enumerate(sources[:MAX_CONCEPT_SOURCES], start=1):
             url = str(source.get("url", "")).strip()
-            if not url:
+            if not url or not is_allowed_generation_source_url(url):
                 continue
             provided_text = str(source.get("text", "")).strip()
             text = (
