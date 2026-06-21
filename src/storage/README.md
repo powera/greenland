@@ -7,7 +7,9 @@ operations, query helpers, and a pluggable backend abstraction.
 ## Layout
 
 - `models/` — SQLAlchemy ORM schema (`Lemma`, `WordToken`, `DerivativeForm`,
-  `Sentence`, grammar facts, enums) plus GUID prefix definitions
+  `Sentence`, grammar facts, enums) plus GUID prefix definitions. Also
+  `Concept` — encyclopedia-style entries (e.g. "World War II") kept outside the
+  lemma/GUID/data-release machinery; see `models/concept.py`.
 - `crud/` — create/read/update/delete functions for lemmas, tokens, sentences,
   translations, grammar facts, and embeddings
 - `queries/` — read-only query helpers (lemma lookup, POS filtering, statistics)

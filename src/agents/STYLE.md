@@ -288,6 +288,7 @@ if __name__ == '__main__':
 |-------|-----------|---------|
 | **Žvirblis** | Sparrow | Example sentence generator with automatic difficulty calculation |
 | **Povas** | Peacock | HTML report generator (POS subtype pages with comprehensive data) |
+| **Vovere** | Squirrel | Concept entry generator (fetches source pages, writes encyclopedia bodies) |
 
 ### Export & Integration
 

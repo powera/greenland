@@ -6,7 +6,7 @@ import logging
 import os
 import time
 from functools import wraps
-from typing import Any, Callable, Dict, Optional, Tuple, TypeVar
+from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar
 
 import requests
 
@@ -148,16 +148,19 @@ class OpenAIClient:
         brief: bool = False,
         json_schema: Optional[Any] = None,
         context: Optional[str] = None,
+        messages: Optional[List[clients.lib.ChatMessage]] = None,
     ) -> Response:
         """
         Generate chat response using OpenAI Responses API.
 
         Args:
-            prompt: The main prompt/question
+            prompt: The main prompt/question (ignored if ``messages`` is given)
             model: Model to use for generation
             brief: Whether to limit response length
             json_schema: Schema for structured response (if provided, returns JSON)
             context: Optional context to include before the prompt
+            messages: Optional provider-neutral message list. The Responses API
+                accepts consecutive same-role messages, so these are passed as-is.
 
         Returns:
             Response containing response_text, structured_data, and usage
@@ -190,7 +193,9 @@ class OpenAIClient:
         token_limit = 512 if brief else 4096
         request_kwargs: Dict[str, Any] = {
             "model": model,
-            "input": prompt,
+            # The Responses API accepts either a string or a list of role/content
+            # message items; consecutive same-role messages are permitted.
+            "input": messages if messages else prompt,
         }
 
         # Add instructions (system message) if context provided

@@ -1,0 +1,20 @@
+Write a concise encyclopedia entry about: {title}
+
+One-sentence summary for orientation: {summary}
+
+The preceding messages contain the source material for this entry (each message
+is one source). If there are no source messages, rely only on well-established
+general knowledge.
+
+Requirements:
+- Length: roughly a single web page (about 150-350 words / a few short
+  paragraphs), not book length.
+- Write in English, in clear encyclopedic prose, using Markdown.
+- Base the content on the supplied source messages; do not invent facts that are
+  not supported by them or by well-established general knowledge.
+- When you mention another notable topic that deserves its own entry (a person,
+  event, place, movement, work), wrap it as a wiki link in double brackets, e.g.
+  [[Abraham Lincoln]] or [[Battle of Gettysburg]]. Use natural capitalization
+  inside the brackets. Do not wiki-link the entry's own title.
+- Do not add a top-level title heading; start with the prose.
+- Output only the entry body, nothing else.

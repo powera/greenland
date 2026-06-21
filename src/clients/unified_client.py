@@ -3,9 +3,10 @@
 
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 import benchmarks.datastore.common  # Assuming datastore.common is available
+import clients.lib
 from clients import gemini_client, lmstudio_client, ollama_client
 from clients.anthropic import client as anthropic_client
 from clients.openai import client as openai_client
@@ -319,17 +320,22 @@ class UnifiedLLMClient:
         json_schema: Optional[Union[Dict[str, Any], Schema]] = None,
         context: Optional[str] = None,
         timeout: Optional[float] = None,
+        messages: Optional[List[clients.lib.ChatMessage]] = None,
     ) -> Response:
         """
         Generate chat completion using appropriate backend.
 
         Args:
-            prompt: The main prompt/question
+            prompt: The main prompt/question (ignored if ``messages`` is given)
             model: Model name (determines backend). If not provided, uses default_model from config.
             brief: Whether to limit response length
             json_schema: Schema for structured response (if provided, returns JSON) - either a dict (old) or a types.Schema
             context: Optional context to include before the prompt
             timeout: Optional timeout override in seconds
+            messages: Optional provider-neutral conversation (list of
+                ``{"role", "content"}``). Supported only by the remote cloud
+                backends (OpenAI, Anthropic, Gemini); passing it for a local
+                backend raises NotImplementedError.
 
         Returns:
             Response containing response_text, structured_data, and usage
@@ -388,6 +394,20 @@ class UnifiedLLMClient:
                 "json_schema": json_schema,
                 "context": context,
             }
+            if messages is not None:
+                # Multi-message conversations are only implemented for the remote
+                # cloud backends, which know how to map/normalize roles.
+                cloud_clients = (
+                    openai_client.OpenAIClient,
+                    anthropic_client.AnthropicClient,
+                    gemini_client.GeminiClient,
+                )
+                if not isinstance(client, cloud_clients):
+                    raise NotImplementedError(
+                        f"messages= is not supported for backend {backend_name!r}; "
+                        "use a remote OpenAI/Anthropic/Gemini model."
+                    )
+                generate_kwargs["messages"] = messages
             if isinstance(client, lmstudio_client.LMStudioClient):
                 generate_kwargs["expected_response_model"] = expected_response_model
 
@@ -475,6 +495,7 @@ def generate_chat(
     json_schema: Optional[Union[Dict[str, Any], Schema]] = None,
     context: Optional[str] = None,
     timeout: Optional[float] = None,
+    messages: Optional[List[clients.lib.ChatMessage]] = None,
 ) -> Response:
     """
     Generate a chat response using appropriate backend based on model name.
@@ -484,4 +505,6 @@ def generate_chat(
         For text responses, structured_data will be empty dict
         For JSON responses, response_text will be empty string
     """
-    return _get_client().generate_chat(prompt, model, brief, json_schema, context, timeout)
+    return _get_client().generate_chat(
+        prompt, model, brief, json_schema, context, timeout, messages
+    )

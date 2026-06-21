@@ -6,7 +6,7 @@ import logging
 import os
 import time
 from functools import wraps
-from typing import Any, Callable, Dict, Optional, TypeVar
+from typing import Any, Callable, Dict, List, Optional, TypeVar
 
 import requests
 
@@ -17,7 +17,9 @@ from clients.types import Response, Schema
 from util.telemetry import LLMUsage
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Model identifiers
@@ -116,16 +118,20 @@ class AnthropicClient:
         brief: bool = False,
         json_schema: Optional[Any] = None,
         context: Optional[str] = None,
+        messages: Optional[List[clients.lib.ChatMessage]] = None,
     ) -> Response:
         """
         Generate chat completion using Anthropic API.
 
         Args:
-            prompt: The main prompt/question
+            prompt: The main prompt/question (ignored if ``messages`` is given)
             model: Model to use for generation
             brief: Whether to limit response length
             json_schema: Schema for structured response (if provided, returns JSON)
             context: Optional context.
+            messages: Optional provider-neutral message list. Consecutive same-role
+                messages are normalized with assistant acks (Anthropic requires
+                strictly alternating roles).
 
         Returns:
             Response containing response_text, structured_data, and usage
@@ -217,8 +223,12 @@ class AnthropicClient:
         if system_content:
             request_kwargs["system"] = system_content
 
-        # Add the user message
-        request_kwargs["messages"] = [{"role": "user", "content": prompt}]
+        # Add the user message(s). When a multi-message conversation is provided,
+        # normalize it so roles strictly alternate (Anthropic requirement).
+        if messages:
+            request_kwargs["messages"] = clients.lib.normalize_alternating_messages(messages)
+        else:
+            request_kwargs["messages"] = [{"role": "user", "content": prompt}]
 
         completion_data, duration_ms = self._create_message(**request_kwargs)
 

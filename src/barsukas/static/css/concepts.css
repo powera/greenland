@@ -1,0 +1,30 @@
+/* Styling for concept entries and their wiki links. */
+
+.concept-body {
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+.concept-body p {
+    margin-bottom: 1rem;
+}
+
+.concept-body h3,
+.concept-body h4,
+.concept-body h5,
+.concept-body h6 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Wiki links to topics that do not yet have a concept page: shown as plain,
+   slightly muted text (no "red link" / create affordance). */
+.wikilink-missing {
+    color: inherit;
+    border-bottom: 1px dotted #adb5bd;
+}
+
+.concept-body-editor {
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.95rem;
+}

@@ -11,9 +11,45 @@ converted to the appropriate format for different LLM clients:
 """
 
 import copy
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from clients.types import Schema, SchemaProperty
+
+# A single chat message in the provider-neutral "dialect": a role of "user" or
+# "assistant" and string content. Clients translate these into their own request
+# shapes (OpenAI Responses input items, Anthropic messages, Gemini contents).
+ChatMessage = Dict[str, str]
+
+# Filler used when a synthetic assistant turn must be inserted to keep roles
+# alternating for providers that require it (Anthropic, Gemini).
+ALTERNATION_ACK: str = "Understood."
+
+
+def normalize_alternating_messages(
+    messages: List[ChatMessage], ack: str = ALTERNATION_ACK
+) -> List[ChatMessage]:
+    """Insert synthetic assistant turns so message roles strictly alternate.
+
+    Some providers (Anthropic, Gemini) reject two consecutive messages with the
+    same role. Callers may pass several consecutive ``user`` messages (e.g. one
+    per source); this inserts a short assistant acknowledgement between any two
+    same-role messages so the resulting list alternates user/assistant.
+
+    Args:
+        messages: Provider-neutral messages, each ``{"role", "content"}``.
+        ack: Content used for inserted assistant acknowledgements.
+
+    Returns:
+        A new list with assistant acks inserted where needed. The input is not
+        mutated. An empty input yields an empty list.
+    """
+    normalized: List[ChatMessage] = []
+    for message in messages:
+        if normalized and normalized[-1]["role"] == message["role"]:
+            filler_role = "assistant" if message["role"] == "user" else "user"
+            normalized.append({"role": filler_role, "content": ack})
+        normalized.append({"role": message["role"], "content": message["content"]})
+    return normalized
 
 
 def _ensure_additional_properties(schema_dict: Dict[str, Any]) -> None:

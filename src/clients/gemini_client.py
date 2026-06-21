@@ -6,7 +6,7 @@ import logging
 import os
 import time
 from functools import wraps
-from typing import Any, Callable, Dict, Optional, TypeVar
+from typing import Any, Callable, Dict, List, Optional, TypeVar
 
 import requests
 
@@ -17,7 +17,9 @@ from clients.types import Response
 from util.telemetry import LLMUsage
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Model identifiers
@@ -101,16 +103,20 @@ class GeminiClient:
         brief: bool = False,
         json_schema: Optional[Any] = None,
         context: Optional[str] = None,
+        messages: Optional[List[clients.lib.ChatMessage]] = None,
     ) -> Response:
         """
         Generate chat completion using Gemini API.
 
         Args:
-            prompt: The main prompt/question
+            prompt: The main prompt/question (ignored if ``messages`` is given)
             model: Model to use for generation
             brief: Whether to limit response length
             json_schema: Schema for structured response (if provided, returns JSON)
             context: Optional context to include before the prompt
+            messages: Optional provider-neutral message list. Consecutive same-role
+                messages are normalized with acks (Gemini requires alternating
+                roles) and mapped to Gemini ``contents`` (assistant -> model).
 
         Returns:
             Response containing response_text, structured_data, and usage
@@ -132,8 +138,19 @@ class GeminiClient:
             logger.debug("JSON schema: %s", json_schema)
 
         generation_config: Dict[str, Any] = {"maxOutputTokens": 256 if brief else 1536}
+        if messages:
+            normalized = clients.lib.normalize_alternating_messages(messages)
+            contents = [
+                {
+                    "role": "model" if message["role"] == "assistant" else "user",
+                    "parts": [{"text": message["content"]}],
+                }
+                for message in normalized
+            ]
+        else:
+            contents = [{"role": "user", "parts": [{"text": prompt}]}]
         request_kwargs: Dict[str, Any] = {
-            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+            "contents": contents,
             "generationConfig": generation_config,
         }
         if context:

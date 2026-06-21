@@ -49,6 +49,9 @@
                             <li><a class="dropdown-item" href="{{ url_for('categories.list_categories') }}">
                                 <i class="bi bi-grid-3x3-gap"></i> {{ STRINGS.navigation.get('word_categories', 'Word Categories') }}
                             </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('concepts.list_concepts_view') }}">
+                                <i class="bi bi-journal-richtext"></i> {{ STRINGS.navigation.get('concepts', 'Concepts') }}
+                            </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('pending_imports.list_pending_imports') }}">
                                 <i class="bi bi-inbox"></i> {{ STRINGS.navigation.get('pending_imports', 'Pending Imports') }}
                             </a></li>
