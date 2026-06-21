@@ -36,11 +36,17 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
+from clients.lib import ChatMessage
 from clients.unified_client import UnifiedLLMClient
 from storage.backend.config import DataSourceConfig
 from storage.models.concept import MAX_CONCEPT_SOURCES, concept_slug_to_title
+from util.prompt_loader import get_prompt
 
 logger = logging.getLogger(__name__)
+
+# Category/type used to load prompts/concepts/entry/prompt.txt via prompt_loader.
+PROMPT_CATEGORY: str = "concepts"
+PROMPT_TYPE: str = "entry"
 
 # Per-source character cap (web-page length, not book length) and total budget
 # of source text handed to the LLM.
@@ -123,9 +129,20 @@ class VovereAgent:
         html = raw.decode(charset, errors="replace")
         return html_to_text(html)[:PER_SOURCE_CHAR_LIMIT]
 
-    def _build_source_block(self, sources: List[Dict[str, Any]]) -> str:
-        """Fetch sources and assemble a labeled block for the LLM context."""
-        parts: List[str] = []
+    def _build_source_messages(self, sources: List[Dict[str, Any]]) -> List[ChatMessage]:
+        """Fetch sources and return one user message per usable source.
+
+        Each source becomes its own ``user`` message; the client's dialect layer
+        inserts assistant acks where a provider requires alternating roles.
+
+        Args:
+            sources: Source dicts with at least a ``url`` key.
+
+        Returns:
+            A list of ``{"role": "user", "content": ...}`` messages (possibly
+            empty if no source could be fetched).
+        """
+        messages: List[ChatMessage] = []
         budget = TOTAL_SOURCE_CHAR_LIMIT
         for index, source in enumerate(sources[:MAX_CONCEPT_SOURCES], start=1):
             url = str(source.get("url", "")).strip()
@@ -137,13 +154,15 @@ class VovereAgent:
             text = text[:budget]
             budget -= len(text)
             label = source.get("title") or url
-            parts.append(f"[Source {index}: {label}]\n{text}")
+            messages.append({"role": "user", "content": f"Source {index}: {label}\n\n{text}"})
             if budget <= 0:
                 break
-        return "\n\n".join(parts)
+        return messages
 
-    def generate_body(self, title: str, summary: str, sources: List[Dict[str, Any]]) -> str:
-        """Generate a Markdown concept body from a title, summary, and sources.
+    def build_messages(
+        self, title: str, summary: str, sources: List[Dict[str, Any]]
+    ) -> List[ChatMessage]:
+        """Build the full message list: each source, then the instruction.
 
         Args:
             title: The concept title (display form, e.g. "Art Deco").
@@ -151,7 +170,35 @@ class VovereAgent:
             sources: Source dicts with at least a ``url`` key.
 
         Returns:
-            The generated Markdown body. May contain ``[[wiki links]]``.
+            Consecutive ``user`` messages (sources followed by the instruction
+            loaded from ``prompts/concepts/entry/prompt.txt``).
+        """
+        display_title = concept_slug_to_title(title)
+        messages = self._build_source_messages(sources)
+        if not messages:
+            logger.warning(
+                "No source text available for %r; generating from summary only.",
+                display_title,
+            )
+        instruction = get_prompt(PROMPT_CATEGORY, PROMPT_TYPE).format(
+            title=display_title, summary=summary
+        )
+        messages.append({"role": "user", "content": instruction})
+        return messages
+
+    def generate_body(self, title: str, summary: str, sources: List[Dict[str, Any]]) -> str:
+        """Generate a Markdown concept body from a title, summary, and sources.
+
+        Sends each source as its own user message followed by the instruction;
+        the body may contain ``[[wiki links]]``.
+
+        Args:
+            title: The concept title (display form, e.g. "Art Deco").
+            summary: One-sentence description steering the entry.
+            sources: Source dicts with at least a ``url`` key.
+
+        Returns:
+            The generated Markdown body.
 
         Raises:
             ValueError: If no model is configured on the agent.
@@ -159,34 +206,8 @@ class VovereAgent:
         if not self.model:
             raise ValueError("VovereAgent requires a model (set config.model or pass model=)")
 
-        display_title = concept_slug_to_title(title)
-        source_block = self._build_source_block(sources)
-
-        prompt = (
-            f"Write a concise encyclopedia entry about: {display_title}\n\n"
-            f"One-sentence summary for orientation: {summary}\n\n"
-            "Requirements:\n"
-            "- Length: roughly a single web page (a few short paragraphs), not "
-            "book length.\n"
-            "- Write in English, in clear encyclopedic prose, using Markdown.\n"
-            "- Base the content on the provided sources; do not invent facts not "
-            "supported by them or by well-established general knowledge.\n"
-            "- When you mention another notable topic that deserves its own entry "
-            "(a person, event, place, movement), wrap it as a wiki link using "
-            "double brackets, e.g. [[Abraham Lincoln]] or [[Battle of "
-            "Gettysburg]]. Use natural capitalization inside the brackets.\n"
-            "- Do not add a top-level title heading; start with the prose.\n"
-            "- Output only the entry body, nothing else."
-        )
-
-        context = source_block if source_block else None
-        if not source_block:
-            logger.warning(
-                "No source text available for %r; generating from summary only.",
-                display_title,
-            )
-
-        response = self.client.generate_chat(prompt, model=self.model, context=context)
+        messages = self.build_messages(title, summary, sources)
+        response = self.client.generate_chat("", model=self.model, messages=messages)
         return response.response_text.strip()
 
 
