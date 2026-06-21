@@ -6,7 +6,7 @@ serialization to/from JSONL format.
 
 import datetime
 import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from typing import Any, Dict, List, Optional
 
 
@@ -366,7 +366,14 @@ class Sentence:
         # Set defaults for runtime fields that won't be in JSONL
         data.setdefault("verified", False)
 
-        return cls(**data)
+        # Ignore keys that aren't dataclass fields (e.g. "audio", which is an
+        # external audio manifest stored alongside the sentence but consumed
+        # via AudioQualityReview rather than the Sentence model). Without this,
+        # cls(**data) raises TypeError and aborts loading the entire file.
+        known_fields = {f.name for f in fields(cls)}
+        filtered = {k: v for k, v in data.items() if k in known_fields}
+
+        return cls(**filtered)
 
 
 @dataclass

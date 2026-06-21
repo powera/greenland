@@ -372,12 +372,17 @@ class JSONLStorage(BaseStorage):
         for sentences_file in sentences_dir.rglob("*.jsonl"):
             try:
                 with open(sentences_file, "r", encoding="utf-8") as f:
-                    for line in f:
+                    for line_num, line in enumerate(f, start=1):
                         line = line.strip()
                         if not line:
                             continue
-                        data = json.loads(line)
-                        sentence = models.Sentence.from_dict(data)
+                        try:
+                            data = json.loads(line)
+                            sentence = models.Sentence.from_dict(data)
+                        except Exception as line_err:
+                            # Skip the bad line but keep loading the rest of the file.
+                            print(f"Error loading {sentences_file}:{line_num}: {line_err}")
+                            continue
 
                         # Assign ID if not present
                         if sentence.id is None:

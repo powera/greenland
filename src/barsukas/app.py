@@ -190,9 +190,14 @@ def create_app(
 
     app.db_session_factory = session_factory
     try:
+        from sqlalchemy.engine import Engine
+
         probe_session = app.db_session_factory()
         engine = probe_session.get_bind()
-        if engine is not None:
+        # The JSONL backend's session returns a JSONLStorage object (not a real
+        # SQLAlchemy Engine) from get_bind(); skip instrumentation there rather
+        # than logging a misleading "No such event" warning.
+        if isinstance(engine, Engine):
             instrument_sqlalchemy_engine(engine)
     except Exception as setup_error:
         logging.getLogger(__name__).warning(
