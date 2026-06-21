@@ -467,7 +467,21 @@ def _fetch_eb1911_page_extract(page_title: str) -> Optional[str]:
         return None
     extract = str(page.get("extract", "")).strip()
     if not extract:
-        return None
+        parse_params = {
+            "action": "parse",
+            "page": page_title,
+            "prop": "text",
+            "redirects": "1",
+            "format": "json",
+            "formatversion": "2",
+        }
+        parse_payload = _get_json(WIKISOURCE_SEARCH_URL, params=parse_params)
+        html = str((parse_payload or {}).get("parse", {}).get("text", "")).strip()
+        if not html:
+            return None
+        extract = _html_to_text_with_wikilinks(html)
+        if not extract:
+            return None
     return extract
 
 
