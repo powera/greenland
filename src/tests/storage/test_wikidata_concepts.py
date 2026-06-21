@@ -12,6 +12,7 @@ from storage.wikidata import (
     _eb1911_search_titles,
     _extract_eb1911_page_qids,
     _fetch_eb1911_source,
+    _fetch_wikidata_concept_seed_cached,
     _fetch_wikipedia_source,
     _html_to_text_with_wikilinks,
     _limit_eb1911_extract,
@@ -333,6 +334,46 @@ def test_fetch_wikidata_seed_builds_sources_from_mocked_apis(monkeypatch) -> Non
         "EB1911: Douglas Adams",
     ]
     assert all(not source["title"].startswith("Wikidata:") for source in seed.sources)
+
+
+def test_fetch_wikidata_seed_caches_repeated_qid_lookups(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    _fetch_wikidata_concept_seed_cached.cache_clear()
+    calls: list[str] = []
+
+    def fake_get_json(
+        url: str, *, params: Optional[Dict[str, str]] = None
+    ) -> Optional[Dict[str, Any]]:
+        calls.append(url)
+        if "Special:EntityData" in url:
+            return {
+                "entities": {
+                    "Q555": {
+                        "labels": {"en": {"value": "Cached concept"}},
+                        "descriptions": {"en": {"value": "cached description"}},
+                        "sitelinks": {"enwiki": {"title": "Cached concept"}},
+                    }
+                }
+            }
+        if "rest_v1/page/summary" in url:
+            return {"extract": "Cached concept summary."}
+        if "en.wikipedia.org/w/api.php" in url:
+            return {"query": {"pages": [{"title": "Cached concept", "extract": "Article text"}]}}
+        if params and params.get("list") == "search":
+            return {"query": {"search": []}}
+        return {"query": {"pages": []}}
+
+    monkeypatch.setattr("storage.wikidata._get_json", fake_get_json)
+
+    first_seed = fetch_wikidata_concept_seed("q555")
+    assert first_seed is not None
+    first_seed.sources.append({"title": "mutated"})
+    second_seed = fetch_wikidata_concept_seed("Q555")
+
+    assert second_seed is not None
+    assert second_seed.title == "Cached concept"
+    assert [source["title"] for source in second_seed.sources] == ["Wikipedia: Cached concept"]
+    assert sum("Special:EntityData" in url for url in calls) == 1
+    _fetch_wikidata_concept_seed_cached.cache_clear()
 
 
 def test_fetch_wikidata_seed_can_include_regional_wikipedia_sources(monkeypatch) -> None:  # type: ignore[no-untyped-def]
