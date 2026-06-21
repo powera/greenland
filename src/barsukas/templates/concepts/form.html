@@ -38,7 +38,8 @@
                 <input type="text" class="form-control" id="wikidata_qid" name="wikidata_qid"
                        placeholder="e.g. Q42"
                        data-preview-url="{{ url_for('concepts.wikidata_preview') }}">
-                <div id="wikidata-preview" class="form-text">Optional. If supplied, the title and summary are previewed from Wikidata, while source URLs are filled only from text sources such as Wikipedia and EB1911. Pressing Return in this field previews data but does not create the page.</div>
+                <div id="wikidata-preview" class="form-text">Optional. If supplied, the title and summary are previewed from Wikidata, and generated text sources are listed below without adding them to the editable source URL field. Pressing Return in this field previews data but does not create the page.</div>
+                <div id="wikidata-generated-sources" class="form-text mt-2"></div>
             </div>
             {% endif %}
 
@@ -69,7 +70,7 @@
                 <label for="sources" class="form-label">Sources (one URL per line)</label>
                 <textarea class="form-control" id="sources" name="sources" rows="6"
                           placeholder="https://example.com/topic">{{ sources_text if concept else '' }}</textarea>
-                <div class="form-text">Up to {{ max_sources }}. Q-id creation adds Wikipedia and EB1911 text sources when available; Wikidata itself is not added as a generation source.</div>
+                <div class="form-text">Up to {{ max_sources }} additional URLs. Q-id creation adds generated Wikipedia and EB1911 text sources automatically, but does not copy those URLs here. Wikidata itself is not added as a generation source. TODO: add checkboxes to disable individual Q-id generated sources.</div>
             </div>
 
             {% if not concept %}

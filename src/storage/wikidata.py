@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
+import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence
+from urllib.parse import quote
 
 import requests
 
@@ -19,6 +22,11 @@ WIKIPEDIA_SUMMARY_URL = "https://en.wikipedia.org/api/rest_v1/page/summary/{titl
 WIKIPEDIA_EXTRACT_URL = "https://{language_code}.wikipedia.org/w/api.php"
 WIKISOURCE_SEARCH_URL = "https://en.wikisource.org/w/api.php"
 DEFAULT_TIMEOUT_SECONDS = 10
+MAX_HTTP_ATTEMPTS = 3
+DEFAULT_USER_AGENT = os.environ.get(
+    "GREENLAND_HTTP_USER_AGENT",
+    "Greenland-Barsukas/1.0 (concept seeding; set GREENLAND_HTTP_USER_AGENT with contact)",
+)
 MAX_SOURCE_TEXT_CHARS = 12000
 WIKIPEDIA_LEAD_THRESHOLD_CHARS = 10_000
 EB1911_MAX_PARAGRAPHS = 10
@@ -98,22 +106,52 @@ def normalize_qid(raw_qid: str) -> Optional[str]:
     return None
 
 
+def _retry_delay_seconds(response: requests.Response, attempt_index: int) -> float:
+    """Return a short retry delay for rate-limited Wikimedia responses."""
+    retry_after = response.headers.get("Retry-After", "").strip()
+    if retry_after.isdigit():
+        return min(float(retry_after), 5.0)
+    fallback_delay: float = 0.5 * float(2**attempt_index)
+    return min(fallback_delay, 5.0)
+
+
 def _get_json(url: str, *, params: Optional[Dict[str, str]] = None) -> Optional[Dict[str, Any]]:
-    """Fetch JSON with a short timeout, returning None on HTTP/network errors."""
-    try:
-        response = requests.get(
-            url,
-            params=params,
-            timeout=DEFAULT_TIMEOUT_SECONDS,
-            headers={"User-Agent": "Greenland-Barsukas/1.0 (Wikidata concept seeding)"},
-        )
-        response.raise_for_status()
-        payload = response.json()
-    except (requests.RequestException, ValueError) as error:
-        logger.warning("Failed to fetch JSON from %s: %s", url, error)
+    """Fetch JSON with Wikimedia-friendly headers and limited 429 retries."""
+    request_params = dict(params or {})
+    if "/w/api.php" in url:
+        request_params.setdefault("maxlag", "5")
+        request_params.setdefault("format", "json")
+
+    last_error: Optional[Exception] = None
+    for attempt_index in range(MAX_HTTP_ATTEMPTS):
+        try:
+            response = requests.get(
+                url,
+                params=request_params or None,
+                timeout=DEFAULT_TIMEOUT_SECONDS,
+                headers={
+                    "User-Agent": DEFAULT_USER_AGENT,
+                    "Api-User-Agent": DEFAULT_USER_AGENT,
+                },
+            )
+            if response.status_code in {429, 503} and attempt_index < MAX_HTTP_ATTEMPTS - 1:
+                time.sleep(_retry_delay_seconds(response, attempt_index))
+                continue
+            response.raise_for_status()
+            payload = response.json()
+        except (requests.RequestException, ValueError) as error:
+            last_error = error
+            if attempt_index < MAX_HTTP_ATTEMPTS - 1 and isinstance(error, requests.HTTPError):
+                error_response = error.response
+                if error_response is not None and error_response.status_code in {429, 503}:
+                    time.sleep(_retry_delay_seconds(error_response, attempt_index))
+                    continue
+            break
+        if isinstance(payload, dict):
+            return payload
         return None
-    if isinstance(payload, dict):
-        return payload
+
+    logger.warning("Failed to fetch JSON from %s: %s", url, last_error)
     return None
 
 
@@ -344,7 +382,7 @@ def fetch_wikidata_concept_seed(
     summary = description
     if enwiki_title:
         summary_payload = _get_json(
-            WIKIPEDIA_SUMMARY_URL.format(title=enwiki_title.replace(" ", "%20"))
+            WIKIPEDIA_SUMMARY_URL.format(title=quote(enwiki_title, safe=""))
         )
         extract = str((summary_payload or {}).get("extract", "")).strip()
         summary = extract.split(".")[0].strip() + "." if extract and not description else summary
