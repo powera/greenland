@@ -100,32 +100,30 @@ def _build_success_response(
 
 
 def _get_required_language_list(
-    data: Dict[str, Any], *, plural_field: str = "languages", singular_field: str = "language"
+    data: Dict[str, Any], *, plural_field: str = "languages"
 ) -> Union[List[str], ResponseReturnValue]:
-    """Read a required language selection from JSON payload aliases."""
+    """Read a required list of language codes from the JSON payload.
+
+    The server API accepts only the plural list field (``plural_field``); there
+    is no singular alias. Single-language callers pass a one-element list. The
+    typed Python facade in ``api/llm_agents.py`` may still offer a singular
+    ``language`` convenience, but it collapses it to a one-element list before
+    sending the request.
+    """
     raw_value = data.get(plural_field)
     if raw_value is None:
-        raw_value = data.get(singular_field)
-    if raw_value is None and plural_field != "target_languages":
-        raw_value = data.get("target_languages")
-    if raw_value is None:
-        return _build_error_response(f"{singular_field} or {plural_field} is required")
-    if isinstance(raw_value, str):
-        languages = [raw_value.strip()]
-    elif isinstance(raw_value, list):
-        languages = []
-        for item in raw_value:
-            if not isinstance(item, str) or not item.strip():
-                return _build_error_response(
-                    f"{plural_field} must contain non-empty language code strings"
-                )
-            languages.append(item.strip())
-    else:
-        return _build_error_response(
-            f"{singular_field} must be a string or {plural_field} must be a list of strings"
-        )
+        return _build_error_response(f"{plural_field} is required")
+    if not isinstance(raw_value, list):
+        return _build_error_response(f"{plural_field} must be a list of language code strings")
+    languages = []
+    for item in raw_value:
+        if not isinstance(item, str) or not item.strip():
+            return _build_error_response(
+                f"{plural_field} must contain non-empty language code strings"
+            )
+        languages.append(item.strip())
     if not languages:
-        return _build_error_response(f"{singular_field} or {plural_field} is required")
+        return _build_error_response(f"{plural_field} is required")
     return languages
 
 
@@ -352,7 +350,8 @@ def api_add_missing_translations() -> ResponseReturnValue:
 
     Request body (JSON):
         guid: Required. GUID of the lemma (e.g., 'N03_003')
-        language/languages: Required language code or list of language codes (e.g., ["hr", "bs"]).
+        languages: Required. List of language codes (e.g., ["hr", "bs"]). For a
+            single language, pass a one-element list (e.g., ["fr"]).
         model: Optional. LLM model to use
         openai_api_key: Optional. OpenAI API key
         anthropic_api_key: Optional. Anthropic API key
@@ -953,9 +952,7 @@ def batch_translate_sentences() -> ResponseReturnValue:
             return _build_error_response("each sentence_id must be an integer")
         sentence_ids.append(item)
 
-    target_languages_result = _get_required_language_list(
-        data, plural_field="target_languages", singular_field="language"
-    )
+    target_languages_result = _get_required_language_list(data, plural_field="target_languages")
     if not isinstance(target_languages_result, list):
         return target_languages_result
     target_languages = target_languages_result

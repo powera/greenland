@@ -1095,28 +1095,25 @@ def normalize_llm_language_codes(
     return deduped
 
 
-def split_llm_language_batches(
-    languages: List[str], max_languages: int = MAX_LLM_LANGUAGES_PER_OPERATION
-) -> List[List[str]]:
+def split_llm_language_batches(languages: List[str]) -> List[List[str]]:
     """Split normalized language codes into LLM-sized batches.
 
-    Keeps hierarchy/order from the caller, caps every batch at ``max_languages``,
-    and avoids singleton tail batches by moving one language from the previous
-    batch when possible. This preserves similar-language grouping for ordered
-    language lists while avoiding inefficient one-language prompts.
+    Preserves the caller's order and caps every batch at
+    ``MAX_LLM_LANGUAGES_PER_OPERATION``.
+
+    IDEA (not implemented): instead of a plain chunk-by-N split, we could group
+    languages by tier/family before batching (e.g. keep TIER_1_LANGUAGES,
+    TIER_2_LANGUAGES, ANCIENT_LANGUAGE_GROUP, and the additional-Asian languages
+    each within their own request). Same-family languages share orthography and
+    cognates, so co-locating them in one prompt may give the model more useful
+    context. This isn't strictly necessary, so we keep the simple split for now.
     """
-    if max_languages < 2:
-        raise ValueError("max_languages must be at least 2 to avoid singleton batches")
     if not languages:
         return []
-
-    batches = [
-        languages[index : index + max_languages]
-        for index in range(0, len(languages), max_languages)
+    return [
+        languages[index : index + MAX_LLM_LANGUAGES_PER_OPERATION]
+        for index in range(0, len(languages), MAX_LLM_LANGUAGES_PER_OPERATION)
     ]
-    if len(batches) > 1 and len(batches[-1]) == 1 and len(batches[-2]) > 2:
-        batches[-1].insert(0, batches[-2].pop())
-    return batches
 
 
 def get_languages_in_hierarchy() -> list:

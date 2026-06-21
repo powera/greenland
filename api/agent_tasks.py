@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, TypedDict, cast
+from typing import Any, Dict, List, Optional, TypedDict, cast
 
 from api._http import post_json
 from api._mirror import mirrored_route
@@ -22,15 +22,30 @@ def queue_add_missing_translations(
     guid: str,
     *,
     model: str,
+    language: Optional[str] = None,
+    languages: Optional[List[str]] = None,
     batch: bool = False,
     batch_window_minutes: int = 10,
 ) -> CheckResponse:
+    """Queue missing-translation generation for a lemma.
+
+    Pass ``language`` for one target language, or ``languages`` for several
+    target language codes. ``language`` is a convenience that is sent to the
+    server as a one-element ``languages`` list.
+    """
+    if language is not None:
+        if languages is not None:
+            raise ValueError("Pass either 'language' or 'languages', not both")
+        languages = [language]
+    if not languages:
+        raise ValueError("'language' or 'languages' is required")
     return cast(
         CheckResponse,
         post_json(
             f"/api/v1/agents/lemma/{guid}/add-missing-translations",
             {
                 "model": model,
+                "languages": languages,
                 "batch": batch,
                 "batch_window_minutes": batch_window_minutes,
             },

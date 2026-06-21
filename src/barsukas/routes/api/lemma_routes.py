@@ -80,7 +80,7 @@ def search_lemmas() -> ResponseReturnValue:
     Search for lemmas by keyword across multiple fields.
 
     Query parameters:
-        - q: Required. Search query to find in lemma text, definition, disambiguation, and translations
+        - q: Optional. Search query to find in lemma text, definition, disambiguation, and translations. An empty/omitted query matches all lemmas (subject to the other filters).
         - pos_type: Optional. Filter by part of speech (e.g., 'noun', 'verb')
         - difficulty: Optional. Filter by difficulty level (1-30, '-1' for excluded, 'null' for not set)
         - limit: Optional. Maximum number of results to return (default: 20, max: 100)
@@ -121,9 +121,9 @@ def search_lemmas() -> ResponseReturnValue:
     except ValueError:
         offset = 0
 
-    # Validate required parameter
-    if not search_query:
-        return _build_error_response("Query parameter 'q' is required", 400)
+    # An empty 'q' is a valid query meaning "match all lemmas" (subject to the
+    # other filters and pagination); build_lemma_search_query skips the text
+    # filter when search is falsy and orders by difficulty/alphabetically.
 
     # Build the search query using existing function
     query = build_lemma_search_query(
@@ -172,7 +172,7 @@ def search_lemmas() -> ResponseReturnValue:
                         break
 
         # Truncate definition if very long (keep first 200 chars)
-        definition = lemma.definition_text
+        definition = lemma.definition_text or ""
         if len(definition) > 200:
             definition = definition[:197] + "..."
 
@@ -398,16 +398,15 @@ def _require_model() -> Tuple[Optional[str], Optional[ResponseReturnValue]]:
 def _require_languages(
     payload: Dict[str, Any],
 ) -> Tuple[Optional[List[str]], Optional[ResponseReturnValue]]:
+    """Read a required list of language codes from the JSON payload.
+
+    The server API accepts only the plural ``languages`` list; single-language
+    callers pass a one-element list. The typed Python facade in ``api/`` may
+    expose a singular ``language`` convenience that it collapses to a list.
+    """
     raw_value = payload.get("languages")
     if raw_value is None:
-        raw_value = payload.get("language")
-    if raw_value is None:
-        return None, _build_error_response("language or languages is required")
-    if isinstance(raw_value, str):
-        language_code = raw_value.strip()
-        if not language_code:
-            return None, _build_error_response("language must be a non-empty string")
-        return [language_code], None
+        return None, _build_error_response("languages is required")
     if not isinstance(raw_value, list) or not raw_value:
         return None, _build_error_response("languages must be a non-empty list of strings")
     languages: List[str] = []
