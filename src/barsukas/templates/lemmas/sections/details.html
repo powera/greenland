@@ -138,7 +138,7 @@
                 </div>
                 <div class="row">
                     <div class="col-lg-6 mb-3 mb-lg-0">
-                        <h6 class="mb-2">Lemma Tier Assignments</h6>
+                        <h6 class="mb-2">Tier Signals</h6>
                         {% if lemma_tiers %}
                             <div class="table-responsive">
                                 <table class="table table-sm table-striped">
@@ -146,6 +146,7 @@
                                         <tr>
                                             <th>Source</th>
                                             <th>Tier</th>
+                                            <th>Rank used</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -160,60 +161,36 @@
                                                     <span class="text-muted">({{ ordinal }} of {{ tier_size }})</span>
                                                 {% endif %}
                                             </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        {% else %}
-                            <p class="text-muted mb-0">No lemma-tier assignment found yet.</p>
-                        {% endif %}
-
-                        <h6 class="mt-3 mb-2">External Lexeme Annotations (joined)</h6>
-                        {% if external_annotations %}
-                            <div class="table-responsive">
-                                <table class="table table-sm table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Source</th>
-                                            <th>Tier</th>
-                                            <th>POS hint</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for annotation in external_annotations %}
-                                        <tr>
-                                            <td><code>{{ annotation.source }}</code></td>
                                             <td>
-                                                {{ annotation.tier_name }}
-                                                {% set ordinal = tier_ordinal_by_source_name.get((annotation.source, annotation.tier_name)) %}
-                                                {% set tier_size = tier_size_by_source.get(annotation.source) %}
-                                                {% if ordinal and tier_size %}
-                                                    <span class="text-muted">({{ ordinal }} of {{ tier_size }})</span>
+                                                {% set tier_rank = tier_rank_by_source_name.get((tier.source, tier.tier_name)) %}
+                                                {% if tier_rank is not none %}
+                                                    {{ tier_rank }}
+                                                {% else %}
+                                                    <span class="text-muted">—</span>
                                                 {% endif %}
                                             </td>
-                                            <td>{{ annotation.pos_hint or "—" }}</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
+                            <p class="text-muted small mb-0">Rank used = synthetic rank this tier contributes to the combined frequency rank (lower = more common).</p>
                         {% else %}
-                            <p class="text-muted mb-0">No linked external-annotation rows for this lemma.</p>
+                            <p class="text-muted mb-0">No lemma-tier assignment found yet.</p>
                         {% endif %}
                     </div>
 
                     <div class="col-lg-6">
-                        <h6 class="mb-2">Lexeme Rollup (new system)</h6>
+                        <h6 class="mb-2">Corpus Frequency</h6>
                         {% if lexeme_frequency_by_corpus %}
                             <div class="table-responsive mb-3">
                                 <table class="table table-sm table-striped">
                                     <thead>
                                         <tr>
                                             <th>Corpus</th>
-                                            <th>Total Lexeme Frequency (per million)</th>
-                                            <th>Best Rank</th>
-                                            <th>Contributing Forms</th>
+                                            <th>Freq (per M)</th>
+                                            <th>Best rank</th>
+                                            <th>Forms</th>
                                         </tr>
                                     </thead>
                                     <tbody>

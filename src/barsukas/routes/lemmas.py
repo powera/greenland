@@ -41,6 +41,23 @@ from storage.translation_helpers import (
 bp = Blueprint("lemmas", __name__, url_prefix="/lemmas")
 
 
+# Synthetic ranks each tier source contributes to the combined frequency rank,
+# keyed by source name -> {tier_name: rank}. Imported from the combined-rank
+# module so the lemma view shows the exact value used in the harmonic mean.
+def _tier_ranks_by_source() -> Dict[str, Dict[str, int]]:
+    from wordfreq.frequency.combined_rank import (
+        BASIC_ENGLISH_TIER_RANKS,
+        CEFR_TIER_RANKS,
+        YLE_TIER_RANKS,
+    )
+
+    return {
+        "cambridge_yle": YLE_TIER_RANKS,
+        "cefr": CEFR_TIER_RANKS,
+        "basic_english": BASIC_ENGLISH_TIER_RANKS,
+    }
+
+
 @bp.route("/add", methods=["GET", "POST"])
 def add_lemma() -> ResponseReturnValue:
     """Add a new lemma."""
@@ -306,7 +323,6 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
     from storage.lexeme import get_lexeme
     from storage.models.schema import (
         ExternalLexemeAnnotation,
-        ExternalLexemeAnnotationLemma,
         LemmaTier,
         TierDefinition,
     )
@@ -444,17 +460,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         .all()
     )
 
-    external_annotations = (
-        g.db.query(ExternalLexemeAnnotation)
-        .join(ExternalLexemeAnnotationLemma)
-        .filter(ExternalLexemeAnnotationLemma.lemma_id == lemma_id)
-        .order_by(ExternalLexemeAnnotation.source, ExternalLexemeAnnotation.tier_name)
-        .all()
-    )
-
-    tier_sources: set[str] = {tier.source for tier in lemma_tiers} | {
-        annotation.source for annotation in external_annotations
-    }
+    tier_sources: set[str] = {tier.source for tier in lemma_tiers}
     tier_definitions = (
         g.db.query(TierDefinition).filter(TierDefinition.source.in_(tier_sources)).all()
         if tier_sources
@@ -469,6 +475,16 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
     tier_size_by_source: Dict[str, int] = {}
     for row in tier_definitions:
         tier_size_by_source[row.source] = tier_size_by_source.get(row.source, 0) + 1
+
+    # The synthetic rank each tier assignment contributes to the combined
+    # frequency rank (lower = more common), surfaced so the view explains the
+    # number rather than just the tier label.
+    ranks_by_source = _tier_ranks_by_source()
+    tier_rank_by_source_name: Dict[Tuple[str, str], Optional[int]] = {
+        (tier.source, tier.tier_name): ranks_by_source[tier.source].get(tier.tier_name)
+        for tier in lemma_tiers
+        if tier.source in ranks_by_source
+    }
 
     from wordfreq.frequency.corpus import get_enabled_corpus_configs
 
@@ -539,7 +555,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         tier_display_by_source_name=tier_display_by_source_name,
         tier_ordinal_by_source_name=tier_ordinal_by_source_name,
         tier_size_by_source=tier_size_by_source,
-        external_annotations=external_annotations,
+        tier_rank_by_source_name=tier_rank_by_source_name,
         lexeme_frequency_by_corpus=lexeme_frequency_by_corpus,
         lexeme_rank_by_corpus=lexeme_rank_by_corpus,
         hidden_languages=set(language_names) - set(DEFAULT_GENERATION_LANGUAGES),
