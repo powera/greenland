@@ -22,6 +22,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
+from sqlalchemy import insert
 from sqlalchemy.orm import Session
 
 from storage.models.schema import (
@@ -127,55 +128,120 @@ def _build_import_caches(session: Session, source: str) -> _ImportCaches:
     return caches
 
 
-def _get_or_create_word_token(
+def _bulk_create_word_tokens(
     session: Session,
-    token_text: str,
-    language_code: str,
+    entries: List[TierEntry],
     caches: _ImportCaches,
-) -> WordToken:
-    cached_id = caches.word_token_ids.get((token_text, language_code))
-    if cached_id is not None:
-        token = session.get(WordToken, cached_id)
-        if token is not None:
-            return token
-    token = WordToken(token=token_text, language_code=language_code)
-    session.add(token)
+) -> None:
+    """Insert every WordToken an import needs in one bulk statement.
+
+    All token texts are known up front, so rather than get-or-create (with a
+    per-entry flush) inside the loop, we compute the set of tokens not already
+    in the cache and insert them with a single ``bulk_insert_mappings``, then
+    re-read their ids back into the cache. After this, ``_word_token_id`` is a
+    pure dictionary lookup with no further flushes.
+    """
+    needed: set[tuple[str, str]] = {(entry.word, entry.language_code) for entry in entries}
+    missing = sorted(needed - caches.word_token_ids.keys())
+    if not missing:
+        return
+
+    session.execute(
+        insert(WordToken),
+        [{"token": token_text, "language_code": lang} for token_text, lang in missing],
+    )
     session.flush()
-    caches.word_token_ids[(token_text, language_code)] = token.id
-    return token
+
+    # Re-read the ids assigned to the rows we just inserted. Filtering by the
+    # languages present keeps this to the tokens this source cares about.
+    languages = {lang for _, lang in missing}
+    for token in session.query(WordToken).filter(WordToken.language_code.in_(languages)).all():
+        caches.word_token_ids[(token.token, token.language_code)] = token.id
 
 
-def _upsert_annotation(
+def _word_token_id(token_text: str, language_code: str, caches: _ImportCaches) -> int:
+    """Return the id for a token that ``_bulk_create_word_tokens`` already made."""
+    token_id = caches.word_token_ids.get((token_text, language_code))
+    assert token_id is not None, f"word token {(token_text, language_code)!r} not pre-created"
+    return token_id
+
+
+def _bulk_upsert_annotations(
     session: Session,
-    *,
-    word_token_id: int,
-    source: str,
-    tier_name: str,
-    pos_hint: Optional[str],
-    sense_hint: Optional[str],
-    themes: tuple[str, ...],
+    importer: TierImporter,
+    entries: List[TierEntry],
+    report: ImportReport,
     caches: _ImportCaches,
-) -> tuple[ExternalLexemeAnnotation, bool]:
-    """Insert or update an annotation. Returns (row, inserted_bool)."""
-    themes_json = json.dumps(list(themes)) if themes else None
-    key = (word_token_id, source, pos_hint, sense_hint)
-    existing = caches.annotations.get(key)
-    if existing is None:
-        row = ExternalLexemeAnnotation(
-            word_token_id=word_token_id,
-            source=source,
-            tier_name=tier_name,
-            pos_hint=pos_hint,
-            sense_hint=sense_hint,
-            themes=themes_json,
-        )
-        session.add(row)
+) -> None:
+    """Upsert every annotation an import needs without per-entry flushing.
+
+    Splits entries into rows already present (updated in place) and new rows,
+    inserts the new rows in one bulk statement, then re-reads them back into
+    ``caches.annotations`` so the per-entry pass can look up annotation ids
+    without flushing once per row. ``report`` is updated with the same
+    inserted/updated counts the previous per-entry path produced.
+    """
+    source = importer.source
+    # Pending new-annotation rows, keyed so a repeated key updates the pending
+    # row instead of inserting a duplicate. dict preserves insertion order.
+    new_rows: dict[tuple[int, str, Optional[str], Optional[str]], dict[str, object]] = {}
+    for entry in entries:
+        word_token_id = _word_token_id(entry.word, entry.language_code, caches)
+        key = (word_token_id, source, entry.pos_hint, entry.sense_hint)
+        themes_json = json.dumps(list(entry.themes)) if entry.themes else None
+        existing = caches.annotations.get(key)
+        if existing is not None:
+            existing.tier_name = entry.tier_name
+            existing.themes = themes_json
+            report.annotations_updated += 1
+            continue
+        # Two entries in the same file can share a key (same token/pos/sense).
+        # As in the original per-entry upsert, the first occurrence inserts and
+        # later ones count as updates (overwriting the still-pending fields).
+        pending = new_rows.get(key)
+        if pending is not None:
+            pending["tier_name"] = entry.tier_name
+            pending["themes"] = themes_json
+            report.annotations_updated += 1
+            continue
+        report.annotations_inserted += 1
+        new_rows[key] = {
+            "word_token_id": word_token_id,
+            "source": source,
+            "tier_name": entry.tier_name,
+            "pos_hint": entry.pos_hint,
+            "sense_hint": entry.sense_hint,
+            "themes": themes_json,
+        }
+
+    if new_rows:
+        session.execute(insert(ExternalLexemeAnnotation), list(new_rows.values()))
         session.flush()
-        caches.annotations[key] = row
-        return row, True
-    existing.tier_name = tier_name
-    existing.themes = themes_json
-    return existing, False
+        # Re-read the rows we just inserted so the cache holds their ids.
+        for annotation in (
+            session.query(ExternalLexemeAnnotation)
+            .filter(ExternalLexemeAnnotation.source == source)
+            .all()
+        ):
+            caches.annotations[
+                (
+                    annotation.word_token_id,
+                    annotation.source,
+                    annotation.pos_hint,
+                    annotation.sense_hint,
+                )
+            ] = annotation
+
+
+def _annotation_for(
+    importer: TierImporter, entry: TierEntry, caches: _ImportCaches
+) -> ExternalLexemeAnnotation:
+    """Return the annotation ``_bulk_upsert_annotations`` created for an entry."""
+    word_token_id = _word_token_id(entry.word, entry.language_code, caches)
+    key = (word_token_id, importer.source, entry.pos_hint, entry.sense_hint)
+    annotation = caches.annotations.get(key)
+    assert annotation is not None, f"annotation for {entry.word!r} not pre-created"
+    return annotation
 
 
 def _ensure_lemma_link(
@@ -226,21 +292,9 @@ def _process_entry(
     report: ImportReport,
     caches: _ImportCaches,
 ) -> None:
-    token = _get_or_create_word_token(session, entry.word, entry.language_code, caches)
-    annotation, inserted = _upsert_annotation(
-        session,
-        word_token_id=token.id,
-        source=importer.source,
-        tier_name=entry.tier_name,
-        pos_hint=entry.pos_hint,
-        sense_hint=entry.sense_hint,
-        themes=entry.themes,
-        caches=caches,
-    )
-    if inserted:
-        report.annotations_inserted += 1
-    else:
-        report.annotations_updated += 1
+    # The annotation row (and its counts) was already created by
+    # _bulk_upsert_annotations; here we only attach lemmas.
+    annotation = _annotation_for(importer, entry, caches)
 
     candidate_ids = importer.resolve(session, entry)
     if not candidate_ids:
@@ -291,12 +345,23 @@ def run_import(
     entries = importer.load_entries()
     report = ImportReport(source=source, total=len(entries))
 
+    # Split out entries with an unknown tier so they neither create word tokens
+    # nor get processed (matching the original per-entry skip).
+    processable: List[TierEntry] = []
     for entry in entries:
         if entry.tier_name not in known_tiers:
             if entry.tier_name not in report.unknown_tier_names:
                 report.unknown_tier_names.append(entry.tier_name)
             report.add_example("unknown_tier", f"{entry.word} -> {entry.tier_name}")
             continue
+        processable.append(entry)
+
+    # Create all needed WordTokens and annotations in bulk up front, so the
+    # per-entry path below never flushes just to mint a token or annotation id.
+    _bulk_create_word_tokens(session, processable, caches)
+    _bulk_upsert_annotations(session, importer, processable, report, caches)
+
+    for entry in processable:
         _process_entry(session, importer, entry, report, caches)
 
     if dry_run:
