@@ -10,7 +10,7 @@ may contain ``[[wiki links]]`` to other concepts.
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, cast
 
 import constants
 from flask import (
@@ -38,6 +38,7 @@ from storage.queries.concept import count_concepts, get_backlinks, list_concepts
 
 if TYPE_CHECKING:
     from barsukas.app import BarsukasFlask
+    from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +52,15 @@ def _get_config() -> DataSourceConfig:
 
 
 def _is_readonly() -> bool:
-    """Return True if the server is in read-only mode."""
+    """Return True if concept editing should be disabled."""
+    if bool(current_app.config.get("CONCEPTS_WRITABLE", False)):
+        return False
     return bool(current_app.config.get("READONLY", False))
+
+
+def _concept_session() -> "Session":
+    """Return the session that owns concept reads and writes."""
+    return cast("Session", getattr(g, "concepts_db", g.db))
 
 
 def _outbound_allowed() -> bool:
@@ -94,11 +102,11 @@ def list_concepts_view() -> ResponseReturnValue:
     """List concepts with optional search and verified filter."""
     search = request.args.get("q", "").strip()
     verified_only = request.args.get("verified") == "1"
-    concepts = list_concepts(g.db, search=search, verified_only=verified_only)
+    concepts = list_concepts(_concept_session(), search=search, verified_only=verified_only)
     return render_template(
         "concepts/list.html",
         concepts=concepts,
-        total=count_concepts(g.db),
+        total=count_concepts(_concept_session()),
         search=search,
         verified_only=verified_only,
         readonly=_is_readonly(),
@@ -136,7 +144,7 @@ def create() -> ResponseReturnValue:
         flash("A title is required.", "error")
         return redirect(url_for("concepts.new_concept"))
 
-    if get_concept_by_slug(g.db, title) is not None:
+    if get_concept_by_slug(_concept_session(), title) is not None:
         flash(f"A concept titled {title!r} already exists.", "error")
         return redirect(url_for("concepts.new_concept"))
 
@@ -153,7 +161,7 @@ def create() -> ResponseReturnValue:
         flash("Outbound calls are disabled; saved without a generated body.", "warning")
 
     concept = create_concept(
-        g.db,
+        _concept_session(),
         title=title,
         summary=summary,
         body=body,
@@ -171,15 +179,15 @@ def create() -> ResponseReturnValue:
 @bp.route("/<path:slug>")
 def detail(slug: str) -> ResponseReturnValue:
     """Show a single concept with its rendered body and backlinks."""
-    concept = get_concept_by_slug(g.db, slug)
+    concept = get_concept_by_slug(_concept_session(), slug)
     if concept is None:
         flash(f"No concept found for {slug!r}.", "error")
         return redirect(url_for("concepts.list_concepts_view"))
 
-    existing = get_existing_link_targets(g.db, concept.body or "")
+    existing = get_existing_link_targets(_concept_session(), concept.body or "")
     rendered_body = render_concept_body(concept.body or "", existing)
     sources = json.loads(concept.sources) if concept.sources else []
-    backlinks = get_backlinks(g.db, concept.slug)
+    backlinks = get_backlinks(_concept_session(), concept.slug)
 
     return render_template(
         "concepts/detail.html",
@@ -198,7 +206,7 @@ def edit(slug: str) -> ResponseReturnValue:
         flash("Cannot edit concepts in read-only mode", "error")
         return redirect(url_for("concepts.detail", slug=slug))
 
-    concept = get_concept_by_slug(g.db, slug)
+    concept = get_concept_by_slug(_concept_session(), slug)
     if concept is None:
         flash(f"No concept found for {slug!r}.", "error")
         return redirect(url_for("concepts.list_concepts_view"))
@@ -221,7 +229,7 @@ def update(slug: str) -> ResponseReturnValue:
         flash("Cannot edit concepts in read-only mode", "error")
         return redirect(url_for("concepts.detail", slug=slug))
 
-    concept = get_concept_by_slug(g.db, slug)
+    concept = get_concept_by_slug(_concept_session(), slug)
     if concept is None:
         flash(f"No concept found for {slug!r}.", "error")
         return redirect(url_for("concepts.list_concepts_view"))
@@ -233,12 +241,12 @@ def update(slug: str) -> ResponseReturnValue:
 
     # Guard against renaming onto another existing concept's slug.
     new_slug = normalize_concept_slug(title)
-    if new_slug != concept.slug and get_concept_by_slug(g.db, new_slug) is not None:
+    if new_slug != concept.slug and get_concept_by_slug(_concept_session(), new_slug) is not None:
         flash(f"A concept titled {title!r} already exists.", "error")
         return redirect(url_for("concepts.edit", slug=slug))
 
     updated = update_concept(
-        g.db,
+        _concept_session(),
         concept,
         title=title,
         summary=request.form.get("summary", "").strip(),
@@ -264,7 +272,7 @@ def regenerate(slug: str) -> ResponseReturnValue:
         flash("Outbound calls are disabled; cannot regenerate.", "error")
         return redirect(url_for("concepts.detail", slug=slug))
 
-    concept = get_concept_by_slug(g.db, slug)
+    concept = get_concept_by_slug(_concept_session(), slug)
     if concept is None:
         flash(f"No concept found for {slug!r}.", "error")
         return redirect(url_for("concepts.list_concepts_view"))
@@ -278,7 +286,7 @@ def regenerate(slug: str) -> ResponseReturnValue:
         flash(f"Regeneration failed: {exc}", "error")
         return redirect(url_for("concepts.detail", slug=slug))
 
-    update_concept(g.db, concept, body=body, source_model=model)
+    update_concept(_concept_session(), concept, body=body, source_model=model)
     flash("Regenerated concept body.", "success")
     return redirect(url_for("concepts.detail", slug=concept.slug))
 
@@ -290,12 +298,12 @@ def delete(slug: str) -> ResponseReturnValue:
         flash("Cannot delete in read-only mode", "error")
         return redirect(url_for("concepts.detail", slug=slug))
 
-    concept = get_concept_by_slug(g.db, slug)
+    concept = get_concept_by_slug(_concept_session(), slug)
     if concept is None:
         flash(f"No concept found for {slug!r}.", "error")
         return redirect(url_for("concepts.list_concepts_view"))
 
     title = concept.title
-    delete_concept(g.db, concept)
+    delete_concept(_concept_session(), concept)
     flash(f"Deleted concept {title!r}.", "success")
     return redirect(url_for("concepts.list_concepts_view"))

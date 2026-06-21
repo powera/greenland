@@ -22,6 +22,7 @@ class PersonaName(Enum):
     GOLDEN = "golden"
     HOSTED = "hosted"
     LOCAL = "local"
+    SCHOLAR = "scholar"
 
 
 @dataclass
@@ -35,6 +36,7 @@ class PersonaConfig:
     use_postgres: bool = False
     use_jsonl: bool = False
     jsonl_data_dir: Optional[str] = None  # Relative to repo root
+    use_postgres_concepts: bool = False
 
     # Access control
     readonly: bool = False
@@ -82,6 +84,19 @@ PERSONAS: dict[PersonaName, PersonaConfig] = {
         enable_worker=False,
         allow_restart=False,
         allow_exports=False,
+    ),
+    PersonaName.SCHOLAR: PersonaConfig(
+        name=PersonaName.SCHOLAR,
+        description=(
+            "Scholar mode: Golden JSONL data with API keys and writable PostgreSQL concepts"
+        ),
+        use_jsonl=True,
+        jsonl_data_dir="data/release",
+        use_postgres_concepts=True,
+        readonly=True,
+        allow_api_keys=True,
+        allow_outbound_calls=True,
+        enable_worker=False,
     ),
     PersonaName.LOCAL: PersonaConfig(
         name=PersonaName.LOCAL,

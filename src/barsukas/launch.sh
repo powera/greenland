@@ -54,6 +54,7 @@ while [[ $# -gt 0 ]]; do
             echo "  prod   - Production mode: PostgreSQL backend, no local API keys, LLM calls only"
             echo "  golden - Golden mode: Read-only JSONL from data/release"
             echo "  hosted - Hosted mode: Like golden but hardened (no restart, no exports)"
+            echo "  scholar - Scholar mode: Golden JSONL with API keys and PostgreSQL concepts"
             echo "  local  - Local development: SQLite database with full access (default)"
             exit 0
             ;;
@@ -81,6 +82,10 @@ if [[ -n "$PERSONA" ]]; then
             STORAGE_FORMAT="jsonl"
             PERSONA_ARGS="--persona hosted --readonly --no-worker"
             ;;
+        scholar)
+            STORAGE_FORMAT="jsonl"
+            PERSONA_ARGS="--persona scholar --readonly --no-worker"
+            ;;
         local)
             STORAGE_FORMAT="sqlite"
             PERSONA_ARGS="--persona local"
@@ -96,7 +101,7 @@ fi
 # Validate storage format (only if not using postgres and no persona set)
 if [[ -z "$PERSONA" && -z "$USE_POSTGRES" && "$STORAGE_FORMAT" != "jsonl" && "$STORAGE_FORMAT" != "sqlite" ]]; then
     echo "Error: Invalid storage format '$STORAGE_FORMAT'"
-    echo "Usage: $0 [--persona prod|golden|local] [-f|--format jsonl|sqlite] [--postgres] [-a|--all-interfaces] [-p|--port PORT] [--db-path PATH] [--venv PATH]"
+    echo "Usage: $0 [--persona prod|golden|hosted|scholar|local] [-f|--format jsonl|sqlite] [--postgres] [-a|--all-interfaces] [-p|--port PORT] [--db-path PATH] [--venv PATH]"
     exit 1
 fi
 
