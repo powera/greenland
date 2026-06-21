@@ -23,6 +23,7 @@ MAX_SOURCE_TEXT_CHARS = 12000
 WIKIPEDIA_LEAD_THRESHOLD_CHARS = 10_000
 EB1911_MAX_PARAGRAPHS = 10
 EB1911_MAX_WORDS = 1200
+EB1911_WIKIDATA_QID = "Q867541"
 
 
 def _word_count(text: str) -> int:
@@ -115,6 +116,30 @@ def _get_json(url: str, *, params: Optional[Dict[str, str]] = None) -> Optional[
     return None
 
 
+def _extract_entity_qid(snak: Dict[str, Any]) -> Optional[str]:
+    """Extract a Wikidata entity Q-id from a claim snak."""
+    data_value = snak.get("datavalue", {})
+    value = data_value.get("value", {})
+    if not isinstance(value, dict):
+        return None
+    raw_id = value.get("id")
+    if isinstance(raw_id, str):
+        return normalize_qid(raw_id)
+    numeric_id = value.get("numeric-id")
+    if isinstance(numeric_id, int):
+        return normalize_qid(f"Q{numeric_id}")
+    return None
+
+
+def _fetch_wikidata_entity(qid: str) -> Optional[Dict[str, Any]]:
+    """Fetch a single Wikidata entity JSON object."""
+    payload = _get_json(WIKIDATA_ENTITY_URL.format(qid=qid))
+    entity = (payload or {}).get("entities", {}).get(qid)
+    if isinstance(entity, dict):
+        return entity
+    return None
+
+
 def _extract_english_value(values: Dict[str, Dict[str, str]]) -> str:
     """Extract an English Wikidata label/description value."""
     english = values.get("en", {})
@@ -175,6 +200,39 @@ def _fetch_wikipedia_source(page_title: str) -> Optional[Dict[str, Any]]:
     }
 
 
+def _extract_eb1911_page_qids(entity: Dict[str, Any]) -> List[str]:
+    """Extract EB1911 article item Q-ids from Wikidata P1343/P805 claims."""
+    page_qids: List[str] = []
+    seen_qids: set[str] = set()
+    for claim in entity.get("claims", {}).get("P1343", []):
+        if not isinstance(claim, dict):
+            continue
+        mainsnak = claim.get("mainsnak", {})
+        if not isinstance(mainsnak, dict):
+            continue
+        if _extract_entity_qid(mainsnak) != EB1911_WIKIDATA_QID:
+            continue
+        qualifiers = claim.get("qualifiers", {})
+        if not isinstance(qualifiers, dict):
+            continue
+        for qualifier in qualifiers.get("P805", []):
+            if not isinstance(qualifier, dict):
+                continue
+            page_qid = _extract_entity_qid(qualifier)
+            if page_qid is not None and page_qid not in seen_qids:
+                page_qids.append(page_qid)
+                seen_qids.add(page_qid)
+    return page_qids
+
+
+def _extract_wikisource_title(entity: Dict[str, Any]) -> str:
+    """Extract an English Wikisource title from a Wikidata entity."""
+    sitelinks = entity.get("sitelinks", {})
+    if not isinstance(sitelinks, dict):
+        return ""
+    return str(sitelinks.get("enwikisource", {}).get("title", "")).strip()
+
+
 def _search_eb1911_page_title(candidates: Sequence[str]) -> Optional[str]:
     """Return the first Wikisource EB1911 page title matching any candidate."""
     for candidate in candidates:
@@ -209,9 +267,21 @@ def _search_eb1911_page_title(candidates: Sequence[str]) -> Optional[str]:
     return None
 
 
-def _fetch_eb1911_source(title: str, label: str = "") -> Optional[Dict[str, Any]]:
+def _fetch_eb1911_source(
+    title: str, label: str = "", entity: Optional[Dict[str, Any]] = None
+) -> Optional[Dict[str, Any]]:
     """Try to find an EB1911 Wikisource page for the topic and return its extract."""
-    page_title = _search_eb1911_page_title(_eb1911_search_titles(title, label))
+    page_title = None
+    if entity is not None:
+        for page_qid in _extract_eb1911_page_qids(entity):
+            page_entity = _fetch_wikidata_entity(page_qid)
+            if page_entity is None:
+                continue
+            page_title = _extract_wikisource_title(page_entity)
+            if page_title:
+                break
+    if page_title is None or not page_title:
+        page_title = _search_eb1911_page_title(_eb1911_search_titles(title, label))
     if page_title is None:
         return None
     params = {
@@ -248,9 +318,8 @@ def fetch_wikidata_concept_seed(raw_qid: str) -> Optional[WikidataConceptSeed]:
     if qid is None:
         return None
 
-    payload = _get_json(WIKIDATA_ENTITY_URL.format(qid=qid))
-    entity = (payload or {}).get("entities", {}).get(qid)
-    if not isinstance(entity, dict):
+    entity = _fetch_wikidata_entity(qid)
+    if entity is None:
         return None
 
     label = _extract_english_value(entity.get("labels", {}))
@@ -280,7 +349,7 @@ def fetch_wikidata_concept_seed(raw_qid: str) -> Optional[WikidataConceptSeed]:
         wikipedia_source = _fetch_wikipedia_source(enwiki_title)
         if wikipedia_source is not None:
             sources.append(wikipedia_source)
-    eb1911_source = _fetch_eb1911_source(title, label)
+    eb1911_source = _fetch_eb1911_source(title, label, entity)
     if eb1911_source is not None:
         sources.append(eb1911_source)
 

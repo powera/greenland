@@ -9,6 +9,8 @@ from storage.crud.concept import create_concept, get_wikidata_index, link_wikida
 from storage.models.concept import Base
 from storage.wikidata import (
     _eb1911_search_titles,
+    _extract_eb1911_page_qids,
+    _fetch_eb1911_source,
     _fetch_wikipedia_source,
     _limit_eb1911_extract,
     fetch_wikidata_concept_seed,
@@ -68,6 +70,77 @@ def test_eb1911_extract_uses_intro_for_long_pages() -> None:
 
     assert intro_only is True
     assert extract == "\n\n".join(paragraphs[:10])
+
+
+def test_eb1911_page_qids_use_p1343_p805_claims() -> None:
+    entity = {
+        "claims": {
+            "P1343": [
+                {
+                    "mainsnak": {
+                        "datavalue": {"value": {"id": "Q867541"}},
+                    },
+                    "qualifiers": {
+                        "P805": [
+                            {"datavalue": {"value": {"id": "Q64437865"}}},
+                        ]
+                    },
+                },
+                {
+                    "mainsnak": {
+                        "datavalue": {"value": {"id": "Q123"}},
+                    },
+                    "qualifiers": {
+                        "P805": [
+                            {"datavalue": {"value": {"id": "Q999"}}},
+                        ]
+                    },
+                },
+            ]
+        }
+    }
+
+    assert _extract_eb1911_page_qids(entity) == ["Q64437865"]
+
+
+def test_eb1911_source_prefers_wikidata_p805_wikisource_page(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    entity = {
+        "claims": {
+            "P1343": [
+                {
+                    "mainsnak": {"datavalue": {"value": {"id": "Q867541"}}},
+                    "qualifiers": {"P805": [{"datavalue": {"value": {"id": "Q64437865"}}}]},
+                }
+            ]
+        }
+    }
+
+    def fake_fetch_entity(qid: str) -> Optional[Dict[str, Any]]:
+        assert qid == "Q64437865"
+        return {
+            "sitelinks": {
+                "enwikisource": {"title": "1911 Encyclopædia Britannica/Lincoln, Abraham"}
+            }
+        }
+
+    def fake_get_json(
+        url: str, *, params: Optional[Dict[str, str]] = None
+    ) -> Optional[Dict[str, Any]]:
+        assert params is not None
+        assert params.get("titles") == "1911 Encyclopædia Britannica/Lincoln, Abraham"
+        return {"query": {"pages": [{"extract": "Lincoln EB1911 text"}]}}
+
+    monkeypatch.setattr("storage.wikidata._fetch_wikidata_entity", fake_fetch_entity)
+    monkeypatch.setattr("storage.wikidata._get_json", fake_get_json)
+
+    source = _fetch_eb1911_source("Abraham Lincoln", entity=entity)
+
+    assert source is not None
+    assert (
+        source["url"]
+        == "https://en.wikisource.org/wiki/1911_Encyclopædia_Britannica/Lincoln,_Abraham"
+    )
+    assert source["text"] == "Lincoln EB1911 text"
 
 
 def test_fetch_wikidata_seed_builds_sources_from_mocked_apis(monkeypatch) -> None:  # type: ignore[no-untyped-def]
