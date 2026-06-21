@@ -264,6 +264,95 @@ def normalize_qid(raw_qid: str) -> Optional[str]:
     return None
 
 
+# Wikipedia's query API accepts up to 50 titles per request for non-bot clients.
+MAX_TITLES_PER_QUERY = 50
+
+
+def resolve_titles_to_qids(
+    titles: Sequence[str], *, language_code: str = "en"
+) -> Dict[str, Optional[str]]:
+    """Resolve many Wikipedia article titles to Q-ids in batched API requests.
+
+    Uses the Wikipedia ``pageprops`` API (``wikibase_item``), which follows
+    redirects and accepts up to 50 titles per request, so a whole ranked
+    worklist resolves in one or two calls rather than one call per title. This
+    is the Text -> Q-id step that bridges plain topic titles (e.g.
+    ``"Lake Huron"``) into the Q-id-based concept-seeding flow
+    (:func:`fetch_wikidata_concept_seed`).
+
+    Args:
+        titles: Wikipedia article titles (spaces or underscores both work).
+        language_code: Wikipedia language edition to resolve against.
+
+    Returns:
+        A mapping from each input title (as given) to its canonical Q-id, or
+        None when the title has no article / no linked Wikidata item.
+    """
+    # Map the API's normalized/redirected title back to the caller's input.
+    clean_to_input: Dict[str, str] = {}
+    for title in titles:
+        clean_title = " ".join(title.replace("_", " ").split())
+        if clean_title:
+            clean_to_input.setdefault(clean_title, title)
+
+    results: Dict[str, Optional[str]] = {title: None for title in titles}
+    clean_titles = list(clean_to_input.keys())
+    for start in range(0, len(clean_titles), MAX_TITLES_PER_QUERY):
+        batch = clean_titles[start : start + MAX_TITLES_PER_QUERY]
+        params = {
+            "action": "query",
+            "prop": "pageprops",
+            "ppprop": "wikibase_item",
+            "redirects": "1",
+            "titles": "|".join(batch),
+            "format": "json",
+            "formatversion": "2",
+        }
+        payload = _get_json(
+            WIKIPEDIA_EXTRACT_URL.format(language_code=language_code), params=params
+        )
+        query = payload or {}
+        query = query.get("query", {}) if isinstance(query, dict) else {}
+
+        # Build a lookup from any title the API mentions (normalized + redirected
+        # forms both map back to a requested title) to the resolved page title.
+        alias_to_requested: Dict[str, str] = {clean: clean for clean in batch}
+        for entry in query.get("normalized", []):
+            if entry.get("from") in alias_to_requested or entry.get("from") in batch:
+                alias_to_requested[entry.get("to", "")] = alias_to_requested.get(
+                    entry.get("from", ""), entry.get("from", "")
+                )
+        for entry in query.get("redirects", []):
+            source = entry.get("from", "")
+            target = entry.get("to", "")
+            if source in alias_to_requested:
+                alias_to_requested[target] = alias_to_requested[source]
+
+        for page in query.get("pages", []):
+            if page.get("missing"):
+                continue
+            raw_qid = str(page.get("pageprops", {}).get("wikibase_item", "")).strip()
+            if not raw_qid:
+                continue
+            qid = normalize_qid(raw_qid)
+            requested_clean = alias_to_requested.get(str(page.get("title", "")))
+            if requested_clean is None:
+                continue
+            input_title = clean_to_input.get(requested_clean)
+            if input_title is not None:
+                results[input_title] = qid
+    return results
+
+
+def resolve_title_to_qid(title: str, *, language_code: str = "en") -> Optional[str]:
+    """Resolve a single Wikipedia article title to its Wikidata Q-id.
+
+    Thin wrapper over :func:`resolve_titles_to_qids` for one-off lookups; prefer
+    the batched form when resolving more than one title.
+    """
+    return resolve_titles_to_qids([title], language_code=language_code).get(title)
+
+
 def _retry_delay_seconds(response: requests.Response, attempt_index: int) -> float:
     """Return a short retry delay for rate-limited Wikimedia responses."""
     retry_after = response.headers.get("Retry-After", "").strip()

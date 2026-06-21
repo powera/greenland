@@ -10,7 +10,7 @@ may contain ``[[wiki links]]`` to other concepts.
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, cast
 from urllib.parse import urlparse
 
 import constants
@@ -29,12 +29,11 @@ from flask.typing import ResponseReturnValue
 
 from barsukas.helpers.wikilinks import get_existing_link_targets, render_concept_body
 from storage.backend.config import DataSourceConfig
+from storage.concept_service import create_concept_from_qid
 from storage.crud.concept import (
     create_concept,
     delete_concept,
     get_concept_by_slug,
-    get_wikidata_index,
-    link_wikidata_concept,
     update_concept,
 )
 from storage.models.concept import (
@@ -144,11 +143,20 @@ def _generate_body(title: str, summary: str, sources: List[Dict[str, Any]], mode
 
     Imported lazily so the route module stays importable without LLM clients.
     """
+    return _body_generator_for_model(model)(title, summary, sources)
+
+
+def _body_generator_for_model(model: str) -> Callable[[str, str, List[Dict[str, Any]]], str]:
+    """Return a (title, summary, sources) -> body callable backed by Vovere."""
     from agents.vovere import VovereAgent
 
     config = _get_config().with_model(model)
     agent = VovereAgent(config)
-    return agent.generate_body(title, summary, sources)
+
+    def generate(title: str, summary: str, sources: List[Dict[str, Any]]) -> str:
+        return agent.generate_body(title, summary, sources)
+
+    return generate
 
 
 @bp.route("/")
@@ -215,35 +223,49 @@ def create() -> ResponseReturnValue:
     summary = request.form.get("summary", "").strip()
     sources = _parse_sources_form(request.form.get("sources", ""))
     model = request.form.get("model", "").strip() or constants.DEFAULT_MODEL
+    include_regional_wikis = request.form.get("include_regional_wikis") == "1"
 
-    if wikidata_qid is None:
-        flash(
-            "Creating a concept without a Wikidata Q-id; please add one later if a good match exists.",
-            "warning",
+    # Q-id-seeded creation goes through the shared concept-creation service so
+    # Barsukas and bulk agents (voverukas) use one implementation.
+    if wikidata_qid is not None:
+        body_generator = None
+        if _outbound_allowed():
+            body_generator = _body_generator_for_model(model)
+        else:
+            flash("Outbound calls are disabled; saved without a generated body.", "warning")
+
+        result = create_concept_from_qid(
+            _concept_session(),
+            wikidata_qid,
+            body_generator=body_generator,
+            source_model=model if body_generator else None,
+            include_regional_wikis=include_regional_wikis,
         )
-    else:
-        existing_index = get_wikidata_index(_concept_session(), wikidata_qid)
-        if existing_index is not None and existing_index.concept is not None:
+        if result.status == "exists" and result.concept is not None:
             flash(
-                f"Wikidata ID {wikidata_qid} is already linked to {existing_index.concept.title!r}.",
+                f"Wikidata ID {wikidata_qid} is already linked to {result.concept.title!r}.",
                 "error",
             )
-            return redirect(url_for("concepts.detail", slug=existing_index.concept.slug))
-        include_regional_wikis = request.form.get("include_regional_wikis") == "1"
-        seed = fetch_wikidata_concept_seed(
-            wikidata_qid, include_regional_wikis=include_regional_wikis
-        )
-        if seed is None:
+            return redirect(url_for("concepts.detail", slug=result.concept.slug))
+        if result.status == "unresolved":
             flash(f"Could not resolve Wikidata ID {wikidata_qid}.", "error")
             return redirect(url_for("concepts.new_concept"))
-        title = title or seed.title
-        summary = summary or seed.summary
-        sources = _merge_sources(sources, seed.sources)
+        if result.concept is None:
+            flash("Failed to create the concept.", "error")
+            return redirect(url_for("concepts.new_concept"))
+        if result.detail.startswith("saved without body"):
+            flash(f"Saved the page, but body generation failed: {result.detail}", "warning")
+        flash(f"Created concept {result.concept.title!r}.", "success")
+        return redirect(url_for("concepts.detail", slug=result.concept.slug))
 
+    # Manual (no Q-id) creation: keep the inline path.
+    flash(
+        "Creating a concept without a Wikidata Q-id; please add one later if a good match exists.",
+        "warning",
+    )
     if not title:
         flash("A title or Wikidata Q-id is required.", "error")
         return redirect(url_for("concepts.new_concept"))
-
     if get_concept_by_slug(_concept_session(), title) is not None:
         flash(f"A concept titled {title!r} already exists.", "error")
         return redirect(url_for("concepts.new_concept"))
@@ -271,9 +293,6 @@ def create() -> ResponseReturnValue:
     if concept is None:
         flash("Failed to create the concept.", "error")
         return redirect(url_for("concepts.new_concept"))
-
-    if wikidata_qid is not None:
-        link_wikidata_concept(_concept_session(), wikidata_qid, concept)
 
     flash(f"Created concept {concept.title!r}.", "success")
     return redirect(url_for("concepts.detail", slug=concept.slug))
