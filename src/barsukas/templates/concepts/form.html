@@ -36,8 +36,9 @@
             <div class="mb-3">
                 <label for="wikidata_qid" class="form-label">Wikidata Q-id</label>
                 <input type="text" class="form-control" id="wikidata_qid" name="wikidata_qid"
-                       placeholder="e.g. Q42">
-                <div class="form-text">Optional. If supplied, the title, summary, and default sources are filled from Wikidata/Wikipedia.</div>
+                       placeholder="e.g. Q42"
+                       data-preview-url="{{ url_for('concepts.wikidata_preview') }}">
+                <div id="wikidata-preview" class="form-text">Optional. If supplied, the title, summary, and default sources are filled from Wikidata/Wikipedia.</div>
             </div>
             {% endif %}
 
@@ -98,4 +99,11 @@
         </div>
     </div>
 </form>
+{% endblock %}
+
+
+{% block extra_scripts %}
+{% if not concept %}
+<script src="{{ url_for('static', filename='js/concept_form.js') }}"></script>
+{% endif %}
 {% endblock %}

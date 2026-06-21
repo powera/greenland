@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from storage.crud.concept import create_concept, get_wikidata_index, link_wikidata_concept
 from storage.models.concept import Base
-from storage.wikidata import fetch_wikidata_concept_seed, normalize_qid
+from storage.wikidata import _fetch_wikipedia_source, fetch_wikidata_concept_seed, normalize_qid
 
 
 def test_normalize_qid_accepts_canonical_ids() -> None:
@@ -30,6 +30,25 @@ def test_link_wikidata_concept_creates_reverse_index() -> None:
         assert row.concept_id == concept.id
         assert row.rejected is False
         assert get_wikidata_index(session, "Q42") == row
+
+
+def test_wikipedia_source_uses_lead_for_long_articles(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    calls: list[bool] = []
+
+    def fake_fetch(page_title: str, *, lead_only: bool = False) -> Optional[Dict[str, str]]:
+        calls.append(lead_only)
+        if lead_only:
+            return {"title": page_title, "extract": "Lead section only"}
+        return {"title": page_title, "extract": "Full article. " + ("x" * 10_001)}
+
+    monkeypatch.setattr("storage.wikidata._fetch_wikipedia_extract", fake_fetch)
+
+    source = _fetch_wikipedia_source("Long Article")
+
+    assert source is not None
+    assert source["text"] == "Lead section only"
+    assert "lead section" in source["note"]
+    assert calls == [False, True]
 
 
 def test_fetch_wikidata_seed_builds_sources_from_mocked_apis(monkeypatch) -> None:  # type: ignore[no-untyped-def]

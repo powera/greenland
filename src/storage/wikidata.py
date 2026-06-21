@@ -20,6 +20,7 @@ WIKIPEDIA_EXTRACT_URL = "https://en.wikipedia.org/w/api.php"
 WIKISOURCE_SEARCH_URL = "https://en.wikisource.org/w/api.php"
 DEFAULT_TIMEOUT_SECONDS = 10
 MAX_SOURCE_TEXT_CHARS = 12000
+WIKIPEDIA_LEAD_THRESHOLD_CHARS = 10_000
 
 
 @dataclass(frozen=True)
@@ -65,8 +66,12 @@ def _extract_english_value(values: Dict[str, Dict[str, str]]) -> str:
     return str(english.get("value", "")).strip()
 
 
-def _fetch_wikipedia_source(page_title: str) -> Optional[Dict[str, Any]]:
-    """Return a Wikipedia source dict with a truncated plain-text extract."""
+def _fetch_wikipedia_extract(
+    page_title: str, *, lead_only: bool = False
+) -> Optional[Dict[str, str]]:
+    """Fetch a Wikipedia plain-text extract for a page."""
+    # TODO: Switch source hydration to a local Wikipedia dump so concept creation
+    # does not depend on live API availability and repeated network calls.
     params = {
         "action": "query",
         "prop": "extracts",
@@ -77,6 +82,8 @@ def _fetch_wikipedia_source(page_title: str) -> Optional[Dict[str, Any]]:
         "format": "json",
         "formatversion": "2",
     }
+    if lead_only:
+        params["exintro"] = "1"
     payload = _get_json(WIKIPEDIA_EXTRACT_URL, params=params)
     pages = (payload or {}).get("query", {}).get("pages", [])
     if not pages:
@@ -86,10 +93,29 @@ def _fetch_wikipedia_source(page_title: str) -> Optional[Dict[str, Any]]:
     title = str(page.get("title", page_title)).strip() or page_title
     if not extract:
         return None
+    return {"title": title, "extract": extract}
+
+
+def _fetch_wikipedia_source(page_title: str) -> Optional[Dict[str, Any]]:
+    """Return a Wikipedia source dict with full short articles or lead-only long articles."""
+    page_extract = _fetch_wikipedia_extract(page_title)
+    if page_extract is None:
+        return None
+    extract = page_extract["extract"]
+    title = page_extract["title"]
+    note = "Plain-text Wikipedia article extract for concept generation."
+    if len(extract) > WIKIPEDIA_LEAD_THRESHOLD_CHARS:
+        lead_extract = _fetch_wikipedia_extract(title, lead_only=True)
+        if lead_extract is not None:
+            extract = lead_extract["extract"]
+            title = lead_extract["title"]
+        note = (
+            "Plain-text Wikipedia lead section for concept generation; full article exceeded 10 KB."
+        )
     return {
         "url": f"https://en.wikipedia.org/wiki/{title.replace(' ', '_')}",
         "title": f"Wikipedia: {title}",
-        "note": "Plain-text Wikipedia article extract, truncated for concept generation.",
+        "note": note,
         "text": extract[:MAX_SOURCE_TEXT_CHARS],
     }
 
