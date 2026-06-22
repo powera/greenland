@@ -159,19 +159,40 @@ def _body_generator_for_model(model: str) -> Callable[[str, str, List[Dict[str, 
     return generate
 
 
+CONCEPTS_PER_PAGE = 50
+
+
 @bp.route("/")
 def list_concepts_view() -> ResponseReturnValue:
-    """List concepts with optional search and verified filter."""
+    """List concepts with optional search, verified filter, and pagination."""
     search = request.args.get("q", "").strip()
     verified_only = request.args.get("verified") == "1"
-    concepts = list_concepts(_concept_session(), search=search, verified_only=verified_only)
+
+    total = count_concepts(_concept_session(), search=search, verified_only=verified_only)
+    total_pages = max(1, (total + CONCEPTS_PER_PAGE - 1) // CONCEPTS_PER_PAGE)
+
+    try:
+        page = int(request.args.get("page", "1"))
+    except ValueError:
+        page = 1
+    page = max(1, min(page, total_pages))
+
+    concepts = list_concepts(
+        _concept_session(),
+        search=search,
+        verified_only=verified_only,
+        limit=CONCEPTS_PER_PAGE,
+        offset=(page - 1) * CONCEPTS_PER_PAGE,
+    )
     return render_template(
         "concepts/list.html",
         concepts=concepts,
-        total=count_concepts(_concept_session()),
+        total=total,
         search=search,
         verified_only=verified_only,
         readonly=_is_readonly(),
+        page=page,
+        total_pages=total_pages,
     )
 
 
