@@ -113,12 +113,27 @@ class VovereAgent:
     def fetch_source_text(self, url: str) -> str:
         """Fetch a URL and return its extracted text, capped to web-page length.
 
+        Wikipedia article URLs are routed through the dedicated parse-API
+        codepath (:func:`storage.wikidata.fetch_wikipedia_source_from_url`),
+        which extracts the article body and preserves internal links as
+        ``[[wiki link]]`` markers. Generic ``urllib`` + BeautifulSoup scraping
+        of a rendered Wikipedia page only yields page chrome ("Jump to
+        content"), so the URL alone is not enough.
+
         Args:
             url: The source URL to fetch.
 
         Returns:
             Extracted plain text (possibly empty if the fetch failed).
         """
+        from storage.wikidata import fetch_wikipedia_source_from_url
+
+        wikipedia_source = fetch_wikipedia_source_from_url(url)
+        if wikipedia_source is not None:
+            wikipedia_text = str(wikipedia_source.get("text", "")).strip()
+            if wikipedia_text:
+                return wikipedia_text[:PER_SOURCE_CHAR_LIMIT]
+
         request = urllib.request.Request(url, headers={"User-Agent": DEFAULT_USER_AGENT})
         try:
             with urllib.request.urlopen(request, timeout=FETCH_TIMEOUT_SECONDS) as response:
