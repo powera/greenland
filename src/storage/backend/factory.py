@@ -21,11 +21,14 @@ _engine_initialized: set[str] = set()  # Track which engines have had tables ens
 _jsonl_storage_cache: dict[str, Any] = {}  # data_dir -> JSONLStorage
 
 
-def _create_engine(db_path: str) -> "Engine":
+def _create_engine(db_path: str, readonly: bool = False) -> "Engine":
     """Create a SQLAlchemy engine with appropriate settings.
 
     Args:
         db_path: Path to the database file (for SQLite) or connection string
+        readonly: For PostgreSQL, open every connection in a read-only
+            transaction so the server rejects any write or DDL. Ignored for
+            SQLite (there is no per-connection read-only mode used here).
 
     Returns:
         Configured SQLAlchemy engine
@@ -56,6 +59,11 @@ def _create_engine(db_path: str) -> "Engine":
             def _set_pg_search_path(dbapi_conn: Any, connection_record: Any) -> None:
                 cursor = dbapi_conn.cursor()
                 cursor.execute(f"SET search_path TO {pg_schema}")
+                if readonly:
+                    # Enforce read-only at the server: any INSERT/UPDATE/DELETE
+                    # or DDL on this connection fails. This is our DB-layer
+                    # guard since there is no dedicated read-only role.
+                    cursor.execute("SET default_transaction_read_only = on")
                 cursor.close()
 
     else:
@@ -205,7 +213,7 @@ def _get_session_factory() -> "sessionmaker":
     return _global_session_factory
 
 
-def _get_cached_engine(db_path: str) -> "Engine":
+def _get_cached_engine(db_path: str, readonly: bool = False) -> "Engine":
     """Get or create a cached engine for the given connection string.
 
     This avoids creating new database connections on every request, which is
@@ -213,30 +221,42 @@ def _get_cached_engine(db_path: str) -> "Engine":
 
     Args:
         db_path: Database connection string or file path
+        readonly: If True, build a read-only engine (PostgreSQL connections open
+            in a read-only transaction) and skip table-ensuring, which is itself
+            DDL and would fail on a read-only connection. The same db_path can
+            therefore have both a writable and a read-only engine cached.
 
     Returns:
         Cached SQLAlchemy engine
     """
     global _engine_cache, _engine_initialized
 
-    if db_path not in _engine_cache:
-        _engine_cache[db_path] = _create_engine(db_path)
+    # Key by (db_path, readonly) so a read-only engine never aliases a writable
+    # one for the same database.
+    cache_key = f"{db_path}\x00readonly" if readonly else db_path
 
-    engine = _engine_cache[db_path]
+    if cache_key not in _engine_cache:
+        _engine_cache[cache_key] = _create_engine(db_path, readonly=readonly)
 
-    # Only ensure tables exist once per engine
-    if db_path not in _engine_initialized:
+    engine = _engine_cache[cache_key]
+
+    # Only ensure tables exist once per engine. Read-only engines must never run
+    # the table-ensuring DDL; the schema is owned by the writable callers.
+    if not readonly and cache_key not in _engine_initialized:
         _ensure_tables_exist(engine)
-        _engine_initialized.add(db_path)
+        _engine_initialized.add(cache_key)
 
     return engine
 
 
-def create_session(config: Optional[DataSourceConfig] = None) -> "Session":
+def create_session(config: Optional[DataSourceConfig] = None, readonly: bool = False) -> "Session":
     """Create a new database session.
 
     Args:
         config: Optional data source configuration. If not provided, uses global config.
+        readonly: If True (only honored when an explicit config is given), use a
+            read-only engine. For PostgreSQL this opens the connection in a
+            read-only transaction so writes/DDL are rejected at the server.
 
     Returns:
         A new SQLAlchemy Session instance (or JSONLSession for JSONL backend)
@@ -266,7 +286,7 @@ def create_session(config: Optional[DataSourceConfig] = None) -> "Session":
             db_path = config.sqlite_path
 
         # Use cached engine to avoid connection overhead on every request
-        engine = _get_cached_engine(db_path)
+        engine = _get_cached_engine(db_path, readonly=readonly)
         factory = sessionmaker(bind=engine)
         return factory()
     else:

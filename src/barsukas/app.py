@@ -205,12 +205,18 @@ def create_app(
             use_word2vec=use_word2vec,
         )
 
+        # golden/hosted connect read-only: writes/DDL are rejected at the server,
+        # not merely gated by CONCEPTS_WRITABLE route checks.
+        concepts_readonly = os.environ.get("BARSUKAS_CONCEPTS_READONLY") == "true"
+
         def concepts_session_factory() -> Session:
-            return cast(Session, create_session(concepts_backend_config))
+            return cast(
+                Session, create_session(concepts_backend_config, readonly=concepts_readonly)
+            )
 
         app.concepts_db_session_factory = concepts_session_factory
         app.config["CONCEPTS_BACKEND"] = "postgres"
-        app.config["CONCEPTS_WRITABLE"] = True
+        app.config["CONCEPTS_WRITABLE"] = not concepts_readonly
     else:
         app.config["CONCEPTS_BACKEND"] = backend_config.backend_type.value
         app.config["CONCEPTS_WRITABLE"] = False

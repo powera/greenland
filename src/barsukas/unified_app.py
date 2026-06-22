@@ -178,6 +178,8 @@ def main() -> None:
             args.postgres = True
         if persona.use_postgres_concepts:
             os.environ["BARSUKAS_CONCEPTS_BACKEND"] = "postgres"
+            if persona.postgres_concepts_readonly:
+                os.environ["BARSUKAS_CONCEPTS_READONLY"] = "true"
 
     # Safety rule: read-only mode never starts the background worker.
     if args.readonly and not args.no_worker:
@@ -242,7 +244,10 @@ def main() -> None:
     else:
         logger.info("Task worker DISABLED")
     if persona and persona.use_postgres_concepts:
-        logger.info("Concepts database: PostgreSQL (writable)")
+        if persona.postgres_concepts_readonly:
+            logger.info("Concepts database: PostgreSQL (read-only)")
+        else:
+            logger.info("Concepts database: PostgreSQL (writable)")
     if persona and not persona.allow_api_keys:
         logger.info("API keys: DISABLED (no local keys)")
     if persona and not persona.allow_outbound_calls:

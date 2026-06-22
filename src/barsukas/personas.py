@@ -37,6 +37,10 @@ class PersonaConfig:
     use_jsonl: bool = False
     jsonl_data_dir: Optional[str] = None  # Relative to repo root
     use_postgres_concepts: bool = False
+    # When use_postgres_concepts is set, connect to PostgreSQL for concepts in a
+    # read-only transaction (the server rejects writes/DDL). Used by golden/hosted
+    # to browse concepts without granting write access.
+    postgres_concepts_readonly: bool = False
 
     # Access control
     readonly: bool = False
@@ -65,9 +69,11 @@ PERSONAS: dict[PersonaName, PersonaConfig] = {
     ),
     PersonaName.GOLDEN: PersonaConfig(
         name=PersonaName.GOLDEN,
-        description="Golden mode: Read-only JSONL from data/release",
+        description="Golden mode: Read-only JSONL from data/release with read-only PostgreSQL concepts",
         use_jsonl=True,
         jsonl_data_dir="data/release",
+        use_postgres_concepts=True,
+        postgres_concepts_readonly=True,
         readonly=True,
         allow_api_keys=True,
         allow_outbound_calls=True,
@@ -78,6 +84,8 @@ PERSONAS: dict[PersonaName, PersonaConfig] = {
         description="Hosted mode: Read-only JSONL like golden, hardened for shared deployment",
         use_jsonl=True,
         jsonl_data_dir="data/release",
+        use_postgres_concepts=True,
+        postgres_concepts_readonly=True,
         readonly=True,
         allow_api_keys=False,
         allow_outbound_calls=False,
