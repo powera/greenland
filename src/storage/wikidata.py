@@ -9,8 +9,8 @@ import re
 import time
 from dataclasses import dataclass, field
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, Sequence
-from urllib.parse import quote, unquote
+from typing import Any, Dict, List, Optional, Sequence, Tuple
+from urllib.parse import quote, unquote, urlparse
 
 import requests
 
@@ -521,6 +521,49 @@ def _fetch_wikipedia_source(
         "note": note,
         "text": extract[:MAX_SOURCE_TEXT_CHARS],
     }
+
+
+def parse_wikipedia_article_url(url: str) -> Optional[Tuple[str, str]]:
+    """Return ``(language_code, page_title)`` for a Wikipedia article URL, else None.
+
+    Recognizes ``https://<lang>.wikipedia.org/wiki/<Title>`` URLs (and the
+    ``m.wikipedia.org`` mobile variant). Non-article paths (``/w/``, special
+    namespaces such as ``Special:`` or ``File:``) return None so callers fall
+    back to generic fetching.
+    """
+    parsed_url = urlparse(url)
+    host = parsed_url.netloc.casefold()
+    if not host.endswith("wikipedia.org"):
+        return None
+    language_code = host.split(".", 1)[0]
+    if language_code.endswith(".m") or host.startswith("m."):
+        language_code = language_code.removesuffix(".m") or "en"
+    if not language_code or language_code in ("www", "m"):
+        return None
+    prefix = "/wiki/"
+    if not parsed_url.path.startswith(prefix):
+        return None
+    page_title = unquote(parsed_url.path[len(prefix) :]).replace("_", " ").strip()
+    if not page_title:
+        return None
+    # Skip non-article namespaces (Special:, File:, Category:, Help:, etc.).
+    if ":" in page_title and page_title.split(":", 1)[0].lower() not in ("", "list of"):
+        return None
+    return language_code, page_title
+
+
+def fetch_wikipedia_source_from_url(url: str) -> Optional[Dict[str, Any]]:
+    """Fetch a Wikipedia article URL via the parse API, preserving wiki links.
+
+    Returns a source dict (``url``, ``title``, ``note``, ``text``) when ``url``
+    is a recognizable Wikipedia article URL and the article could be fetched;
+    otherwise None so callers can fall back to a generic HTML fetch.
+    """
+    parsed = parse_wikipedia_article_url(url)
+    if parsed is None:
+        return None
+    language_code, page_title = parsed
+    return _fetch_wikipedia_source(page_title, language_code=language_code)
 
 
 def _extract_eb1911_page_qids(entity: Dict[str, Any]) -> List[str]:

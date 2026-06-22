@@ -18,6 +18,7 @@ from storage.wikidata import (
     _limit_eb1911_extract,
     _strip_eb1911_sections_index,
     fetch_wikidata_concept_seed,
+    parse_wikipedia_article_url,
     normalize_qid,
     resolve_titles_to_qids,
 )
@@ -501,6 +502,50 @@ def test_vovere_uses_provided_source_text(monkeypatch) -> None:  # type: ignore[
     assert len(messages) == 1
     assert "provided text" in messages[0]["content"]
     assert "fetched text" not in messages[0]["content"]
+
+
+def test_parse_wikipedia_article_url_recognizes_articles() -> None:
+    assert parse_wikipedia_article_url("https://en.wikipedia.org/wiki/Oprah_Winfrey") == (
+        "en",
+        "Oprah Winfrey",
+    )
+    assert parse_wikipedia_article_url("https://en.wikipedia.org/wiki/Oprah_Winfrey#Career") == (
+        "en",
+        "Oprah Winfrey",
+    )
+    assert parse_wikipedia_article_url("https://de.wikipedia.org/wiki/Kunst") == ("de", "Kunst")
+    assert parse_wikipedia_article_url("https://en.m.wikipedia.org/wiki/Cat") == ("en", "Cat")
+    assert parse_wikipedia_article_url("https://en.wikipedia.org/wiki/List_of_cats") == (
+        "en",
+        "List of cats",
+    )
+
+
+def test_parse_wikipedia_article_url_rejects_non_articles() -> None:
+    assert parse_wikipedia_article_url("https://en.wikipedia.org/wiki/Special:Random") is None
+    assert parse_wikipedia_article_url("https://en.wikipedia.org/wiki/File:Foo.jpg") is None
+    assert parse_wikipedia_article_url("https://en.wikipedia.org/w/index.php?title=Cat") is None
+    assert parse_wikipedia_article_url("https://www.example.com/art-deco") is None
+    assert parse_wikipedia_article_url("https://www.wikidata.org/wiki/Q12345") is None
+
+
+def test_vovere_fetch_source_text_routes_wikipedia_through_parse_api(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    agent = VovereAgent.__new__(VovereAgent)
+
+    def fake_wikipedia_source(url: str) -> Optional[Dict[str, Any]]:
+        assert url == "https://en.wikipedia.org/wiki/Oprah_Winfrey"
+        return {"text": "Oprah Winfrey is a media executive. See [[Chicago]]."}
+
+    def fail_urlopen(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError("generic fetch must not run for Wikipedia URLs")
+
+    monkeypatch.setattr("storage.wikidata.fetch_wikipedia_source_from_url", fake_wikipedia_source)
+    monkeypatch.setattr("urllib.request.urlopen", fail_urlopen)
+
+    text = agent.fetch_source_text("https://en.wikipedia.org/wiki/Oprah_Winfrey")
+
+    assert "Oprah Winfrey is a media executive." in text
+    assert "[[Chicago]]" in text
 
 
 def test_resolve_titles_to_qids_batches_and_maps_redirects(monkeypatch) -> None:  # type: ignore[no-untyped-def]
