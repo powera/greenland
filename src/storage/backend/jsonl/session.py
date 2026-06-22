@@ -204,16 +204,19 @@ class JSONLSession(BaseSession):
         from storage.models.lemma_relation import (
             LemmaRelationMember as SQLLemmaRelationMember,
         )
+        from storage.models.concept import ConceptLemmaLink as SQLConceptLemmaLink
         from storage.models.schema import DerivativeForm as SQLDerivativeForm
         from storage.models.schema import Lemma as SQLLemma
         from storage.models.schema import LemmaTranslation
         from storage.models.schema import Sentence as SQLSentence
         from storage.models.schema import SentenceTranslation, SentenceWord
         from storage.translation_helpers import compute_sort_key
+        from storage.wikidata import normalize_qid
 
         # Use bulk operations for better performance
         lemmas = []
         translations = []
+        concept_lemma_links: list[dict] = []
         derivative_forms: list[dict] = []
         grammar_facts = []
         relation_groups = []
@@ -241,6 +244,21 @@ class JSONLSession(BaseSession):
                 "updated_at": jsonl_lemma.updated_at,
             }
             lemmas.append(lemma_dict)
+
+            # Reconstruct the lemma<->concept pairing from the JSONL qid field.
+            # In JSONL/golden/scholar mode there is no curated concept_lemma_links
+            # table on disk; the qid on the lemma row is the source of truth, so
+            # populate the (ephemeral) link table from it. This makes the pairing
+            # readable via the same CRUD the writable backends use.
+            normalized_qid = normalize_qid(jsonl_lemma.qid) if jsonl_lemma.qid else None
+            if normalized_qid is not None and jsonl_lemma.id is not None:
+                concept_lemma_links.append(
+                    {
+                        "lemma_id": jsonl_lemma.id,
+                        "qid": normalized_qid,
+                        "verified": True,
+                    }
+                )
 
             # Add translations
             for lang_code, translation in jsonl_lemma.translations.items():
@@ -417,6 +435,8 @@ class JSONLSession(BaseSession):
             self._sqlite_session.bulk_insert_mappings(SQLLemma, lemmas)
         if translations:
             self._sqlite_session.bulk_insert_mappings(LemmaTranslation, translations)
+        if concept_lemma_links:
+            self._sqlite_session.bulk_insert_mappings(SQLConceptLemmaLink, concept_lemma_links)
         if derivative_forms:
             self._sqlite_session.bulk_insert_mappings(SQLDerivativeForm, derivative_forms)
         if grammar_facts:

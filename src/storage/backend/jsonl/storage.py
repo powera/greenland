@@ -150,6 +150,7 @@ class JSONLStorage(BaseStorage):
                         lemma.difficulty_level = data.get("difficulty_level")
                         lemma.notes = data.get("notes")
                         lemma.lexical_gap_reason = data.get("lexical_gap_reason")
+                        lemma.qid = data.get("qid")
                         lemma.added_at = data.get("added_at")
                         if isinstance(lemma.added_at, str):
                             from datetime import datetime

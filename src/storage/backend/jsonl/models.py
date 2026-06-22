@@ -149,6 +149,11 @@ class Lemma:
     notes: Optional[str] = None  # From base.jsonl
     lexical_gap_reason: Optional[str] = None  # From base.jsonl
 
+    # Wikidata Q-id of the paired concept (e.g. "Q89" for apple). From
+    # base.jsonl; used to populate concept_lemma_links when loading data/release
+    # so the lemma<->concept pairing is visible in JSONL/golden/scholar mode.
+    qid: Optional[str] = None
+
     # Runtime/internal fields (not exported to JSONL)
     verified: bool = False  # Moved to verifications.jsonl
     added_at: Optional[datetime.datetime] = None  # Git handles versioning

@@ -25,6 +25,7 @@ from sqlalchemy import (
     String,
     Text,
     ForeignKey,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -165,6 +166,68 @@ class Concept(Base):
 
     def __repr__(self) -> str:
         return f"<Concept(id={self.id}, slug={self.slug!r}, verified={self.verified})>"
+
+
+class ConceptLemmaLink(Base):
+    """A one-to-one pairing between a lemma and the concept that names it.
+
+    Many concepts (e.g. "Frank Lloyd Wright") are *not* lexical items and never
+    get a lemma; this table exists only for the overlap where a concept's topic
+    is also a dictionary headword (e.g. "Apple", "Banana").
+
+    Storage model (deliberate, see this module's docstring): concepts live
+    outside the lemma machinery, and in hosted deployments they live in a
+    *separate, read-only* database from lemmas. So this table lives with the
+    lemmas (writable in all modes) and does **not** hard-FK the concepts table.
+    The durable payload is the concept's Wikidata Q-id (e.g. "Q89" for Apple) --
+    that is the only piece of concept data the data/release export needs. The
+    ``concept_slug`` is stored for display/round-tripping only.
+
+    The pairing is strict one-to-one: a lemma links to at most one concept and a
+    given concept (by Q-id) links to at most one lemma (unique constraints on
+    ``lemma_id`` and ``qid``). A lemma represents a single sense ("bank (river)"
+    vs "bank (finance)"), so an ambiguous match should be left unlinked rather
+    than guessed. Links are curated for now; an auto-match pass may seed
+    candidates later, but acceptance stays explicit.
+    """
+
+    __tablename__ = "concept_lemma_links"
+    __table_args__ = (
+        UniqueConstraint("lemma_id", name="uq_concept_lemma_lemma"),
+        UniqueConstraint("qid", name="uq_concept_lemma_qid"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    lemma_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("lemmas.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    # Wikidata Q-id of the paired concept (e.g. "Q89"). This is the value emitted
+    # into data/release. Stored here rather than joined from the concepts DB so
+    # the export works even when concepts live in a separate/read-only backend.
+    qid: Mapped[str] = mapped_column(String, nullable=False, index=True)
+
+    # Canonical concept slug for display and round-tripping back to the concept
+    # page (concepts.detail). Not a foreign key.
+    concept_slug: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
+    # Whether a human has confirmed this pairing (vs. an auto-suggested candidate).
+    verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<ConceptLemmaLink(lemma_id={self.lemma_id}, qid={self.qid!r}, "
+            f"verified={self.verified})>"
+        )
 
 
 class ConceptWikidataIndex(Base):

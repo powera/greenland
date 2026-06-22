@@ -67,6 +67,16 @@
                                 {% endif %}
                             </dd>
 
+                            {% if concept_link %}
+                            <dt class="col-sm-5">Paired concept:</dt>
+                            <dd class="col-sm-7">
+                                {% if concept_link.concept_slug %}
+                                    <a href="{{ url_for('concepts.detail', slug=concept_link.concept_slug) }}">{{ concept_link.concept_slug }}</a>
+                                {% endif %}
+                                <code>{{ concept_link.qid }}</code>
+                            </dd>
+                            {% endif %}
+
                             <dt class="col-sm-5">Base Difficulty:</dt>
                             <dd class="col-sm-7">
                                 {% if lemma.difficulty_level is not none %}

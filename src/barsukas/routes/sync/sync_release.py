@@ -15,6 +15,14 @@ from storage.config.grammar_facts import (
     get_release_grammar_fact_languages,
     is_release_grammar_fact_type,
 )
+from sqlalchemy.orm import object_session
+
+from storage.crud.concept import (
+    get_qid_for_lemma,
+    link_lemma_to_concept,
+    unlink_lemma_from_concept,
+)
+from storage.wikidata import normalize_qid
 from storage.crud.operation_log import log_operation, log_translation_change
 from storage.models.grammar_fact import GrammarFact
 from storage.models.schema import Lemma, LemmaTranslation
@@ -1086,6 +1094,15 @@ def _build_release_entry_from_db(lemma: Lemma) -> Dict[str, Any]:
     if lemma.lexical_gap_reason:
         entry["lexical_gap_reason"] = lemma.lexical_gap_reason
 
+    # If this lemma is paired with a concept that has a Wikidata Q-id, emit the
+    # Q-id (e.g. "Apple" -> Q89). The concept itself is never exported; this is
+    # the only piece of concept data that flows into data/release.
+    session = object_session(lemma)
+    if session is not None:
+        qid = get_qid_for_lemma(session, lemma.id)
+        if qid:
+            entry["qid"] = qid
+
     return entry
 
 
@@ -1250,11 +1267,13 @@ def _find_lemma_text_changes(
             release_notes = release_data.get("notes")
             release_lexical_gap_reason = release_data.get("lexical_gap_reason")
             release_emoji = _get_release_emoji(release_data)
+            release_qid = normalize_qid(release_data.get("qid") or "") or None
 
             db_definition = db_lemma.definition_text or ""
             db_notes = db_lemma.notes
             db_lexical_gap_reason = db_lemma.lexical_gap_reason
             db_emoji = _decode_db_emoji(db_lemma.emoji)
+            db_qid = get_qid_for_lemma(db_session, db_lemma.id)
 
             text_differs = db_lemma.lemma_text != release_lemma_text
             disambig_differs = db_lemma.disambiguation != release_disambig
@@ -1264,6 +1283,7 @@ def _find_lemma_text_changes(
                 release_lexical_gap_reason or None
             )
             emoji_differs = db_emoji != release_emoji
+            qid_differs = db_qid != release_qid
 
             if not (
                 text_differs
@@ -1272,6 +1292,7 @@ def _find_lemma_text_changes(
                 or notes_differs
                 or lexical_gap_reason_differs
                 or emoji_differs
+                or qid_differs
             ):
                 continue
 
@@ -1291,12 +1312,15 @@ def _find_lemma_text_changes(
                     "release_lexical_gap_reason": release_lexical_gap_reason or "",
                     "db_emoji": _format_emoji_for_display(db_emoji),
                     "release_emoji": _format_emoji_for_display(release_emoji),
+                    "db_qid": db_qid or "",
+                    "release_qid": release_qid or "",
                     "text_differs": text_differs,
                     "disambig_differs": disambig_differs,
                     "definition_differs": definition_differs,
                     "notes_differs": notes_differs,
                     "lexical_gap_reason_differs": lexical_gap_reason_differs,
                     "emoji_differs": emoji_differs,
+                    "qid_differs": qid_differs,
                     "pos_type": db_lemma.pos_type,
                     "pos_subtype": db_lemma.pos_subtype,
                 }
@@ -1397,6 +1421,15 @@ def apply_changes() -> ResponseReturnValue:
                 lemma.lexical_gap_reason = new_lexical_gap_reason
                 lemma.emoji = new_emoji_json
 
+                # Concept pairing: the release file carries only the Q-id. Pair
+                # (or repair) when present, unlink when absent. The pairing lives
+                # in concept_lemma_links and is committed by link/unlink itself.
+                new_qid = normalize_qid(release_data.get("qid") or "") or None
+                if new_qid:
+                    link_lemma_to_concept(g.db, lemma.id, new_qid, verified=True)
+                else:
+                    unlink_lemma_from_concept(g.db, lemma_id=lemma.id)
+
                 log_translation_change(
                     session=g.db,
                     source="sync-release",
@@ -1423,6 +1456,10 @@ def apply_changes() -> ResponseReturnValue:
                 db_emoji_list = _decode_db_emoji(lemma.emoji)
                 if db_emoji_list:
                     update_fields["emoji"] = db_emoji_list
+                # Concept pairing: write the DB's Q-id, or remove the field when
+                # the lemma is unpaired so a stale qid doesn't linger in release.
+                db_qid = get_qid_for_lemma(g.db, lemma.id)
+                update_fields["qid"] = db_qid if db_qid else _REMOVE_FIELD
 
                 file_path = _find_release_file_for_lemma(release_dir, lemma.guid)
                 if file_path:
@@ -2495,13 +2532,19 @@ def _apply_secondary_translation_updates(
             raise
 
 
+# Sentinel value: setting a field to this in an update dict removes the field
+# from the release record (used to clear e.g. "qid" when a lemma is unpaired).
+_REMOVE_FIELD = object()
+
+
 def _apply_release_field_updates(
     updates: Dict[Path, Dict[str, Dict[str, Any]]],
 ) -> None:
     """Apply field updates to release JSONL files.
 
     Supports top-level fields (e.g. difficulty_level) and dotted paths
-    for nested fields (e.g. translations.en).
+    for nested fields (e.g. translations.en). A value of ``_REMOVE_FIELD``
+    deletes the field instead of setting it.
 
     Args:
         updates: {filepath: {guid: {field_or_dotted_path: new_value}}}
@@ -2529,9 +2572,15 @@ def _apply_release_field_updates(
                                 if "." in field_path:
                                     parts = field_path.split(".", 1)
                                     parent_key, child_key = parts[0], parts[1]
-                                    if parent_key not in data:
-                                        data[parent_key] = {}
-                                    data[parent_key][child_key] = new_val
+                                    if new_val is _REMOVE_FIELD:
+                                        if parent_key in data:
+                                            data[parent_key].pop(child_key, None)
+                                    else:
+                                        if parent_key not in data:
+                                            data[parent_key] = {}
+                                        data[parent_key][child_key] = new_val
+                                elif new_val is _REMOVE_FIELD:
+                                    data.pop(field_path, None)
                                 else:
                                     data[field_path] = new_val
                             updated_lines.append(json.dumps(data, ensure_ascii=False) + "\n")

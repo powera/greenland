@@ -34,8 +34,12 @@ from storage.crud.concept import (
     create_concept,
     delete_concept,
     get_concept_by_slug,
+    get_link_for_qid,
+    link_lemma_to_concept,
+    unlink_lemma_from_concept,
     update_concept,
 )
+from storage.models.schema import Lemma
 from storage.models.concept import (
     MAX_CONCEPT_SOURCES,
     ConceptWikidataIndex,
@@ -338,6 +342,29 @@ def detail(slug: str) -> ResponseReturnValue:
         .all()
     )
 
+    # Lemma pairing. The concept's Q-id is what the link is keyed on; if the
+    # concept has no Q-id it cannot be paired with a lemma (the release export
+    # only carries the Q-id). The link itself lives in the lemma/main DB (g.db).
+    concept_qid = wikidata_links[0].qid if wikidata_links else None
+    paired_link = get_link_for_qid(g.db, concept_qid) if concept_qid else None
+    paired_lemma = (
+        g.db.query(Lemma).filter(Lemma.id == paired_link.lemma_id).first()
+        if paired_link is not None
+        else None
+    )
+
+    # Candidate lemmas for a lemma-search query (one-off, ordinary form submit).
+    lemma_query = request.args.get("lemma_q", "").strip()
+    lemma_candidates: List[Lemma] = []
+    if concept_qid and paired_link is None and lemma_query:
+        lemma_candidates = (
+            g.db.query(Lemma)
+            .filter(Lemma.lemma_text.ilike(f"%{lemma_query}%"))
+            .order_by(Lemma.lemma_text, Lemma.id)
+            .limit(25)
+            .all()
+        )
+
     return render_template(
         "concepts/detail.html",
         concept=concept,
@@ -346,6 +373,11 @@ def detail(slug: str) -> ResponseReturnValue:
         backlinks=backlinks,
         readonly=_is_readonly(),
         wikidata_links=wikidata_links,
+        concept_qid=concept_qid,
+        paired_link=paired_link,
+        paired_lemma=paired_lemma,
+        lemma_query=lemma_query,
+        lemma_candidates=lemma_candidates,
     )
 
 
@@ -410,6 +442,75 @@ def update(slug: str) -> ResponseReturnValue:
 
     flash("Concept updated.", "success")
     return redirect(url_for("concepts.detail", slug=updated.slug))
+
+
+@bp.route("/<path:slug>/link-lemma", methods=["POST"])
+def link_lemma(slug: str) -> ResponseReturnValue:
+    """Pair this concept with a lemma (by lemma id), keyed on the concept Q-id."""
+    if _is_readonly():
+        flash("Cannot link lemmas in read-only mode", "error")
+        return redirect(url_for("concepts.detail", slug=slug))
+
+    concept = get_concept_by_slug(_concept_session(), slug)
+    if concept is None:
+        flash(f"No concept found for {slug!r}.", "error")
+        return redirect(url_for("concepts.list_concepts_view"))
+
+    # The pairing is keyed on the concept's Q-id, since that is what the release
+    # export carries. A concept with no Q-id cannot be paired.
+    qid_row = (
+        _concept_session()
+        .query(ConceptWikidataIndex)
+        .filter(ConceptWikidataIndex.concept_id == concept.id)
+        .first()
+    )
+    if qid_row is None:
+        flash("This concept has no Wikidata Q-id, so it cannot be paired with a lemma.", "error")
+        return redirect(url_for("concepts.detail", slug=slug))
+
+    try:
+        lemma_id = int(request.form.get("lemma_id", ""))
+    except ValueError:
+        flash("Invalid lemma selection.", "error")
+        return redirect(url_for("concepts.detail", slug=slug))
+
+    lemma = g.db.query(Lemma).filter(Lemma.id == lemma_id).first()
+    if lemma is None:
+        flash("That lemma no longer exists.", "error")
+        return redirect(url_for("concepts.detail", slug=slug))
+
+    link = link_lemma_to_concept(
+        g.db, lemma_id, qid_row.qid, concept_slug=concept.slug, verified=True
+    )
+    if link is None:
+        flash(
+            "Could not pair: the lemma or this concept is already linked to something else.",
+            "error",
+        )
+        return redirect(url_for("concepts.detail", slug=slug))
+
+    flash(f"Paired with lemma {lemma.lemma_text!r}.", "success")
+    return redirect(url_for("concepts.detail", slug=slug))
+
+
+@bp.route("/<path:slug>/unlink-lemma", methods=["POST"])
+def unlink_lemma(slug: str) -> ResponseReturnValue:
+    """Remove the lemma pairing for this concept."""
+    if _is_readonly():
+        flash("Cannot unlink in read-only mode", "error")
+        return redirect(url_for("concepts.detail", slug=slug))
+
+    try:
+        lemma_id = int(request.form.get("lemma_id", ""))
+    except ValueError:
+        flash("Invalid lemma selection.", "error")
+        return redirect(url_for("concepts.detail", slug=slug))
+
+    if unlink_lemma_from_concept(g.db, lemma_id=lemma_id):
+        flash("Removed the lemma pairing.", "success")
+    else:
+        flash("No pairing to remove.", "warning")
+    return redirect(url_for("concepts.detail", slug=slug))
 
 
 @bp.route("/<path:slug>/regenerate", methods=["GET", "POST"])
