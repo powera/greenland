@@ -50,7 +50,7 @@ import json
 
 from clients.batch_queue import BatchRequestMetadata, get_batch_manager
 from storage.backend import create_session as create_backend_session
-from storage.backend.config import DataSourceConfig
+from storage.backend.config import BackendType, DataSourceConfig
 from storage.concept_service import create_concept_from_qid
 from storage.crud.concept import cache_wikidata_title
 from storage.models.concept import Concept, concept_slug_to_title
@@ -347,12 +347,18 @@ class VoverukasAgent:
                 batch_metadata={"agent": BATCH_AGENT_NAME, "operation": BATCH_OPERATION},
             )
             logger.info("Submitted batch %s with %d requests", batch_id, len(pending))
+            backend_flag = ""
+            if self.config.backend_type == BackendType.POSTGRES:
+                backend_flag = " --postgres"
+            elif self.config.backend_type == BackendType.JSONL:
+                backend_flag = " --backend jsonl"
             logger.info(
                 "Complete it later with: "
                 "PYTHONPATH=src python src/agents/common/batch.py complete "
-                "--batch-id %s --agent %s",
+                "--batch-id %s --agent %s%s",
                 batch_id,
                 BATCH_AGENT_NAME,
+                backend_flag,
             )
             return {"batch_id": batch_id, "queued": queued, "skipped": skipped}
         finally:
