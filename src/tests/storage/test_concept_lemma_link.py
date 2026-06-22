@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 # Import the full model registry so the lemmas table (FK target) is created too.
 import storage.models  # noqa: F401
 from storage.crud.concept import (
+    get_lemma_for_qid,
     get_link_for_lemma,
     get_link_for_qid,
     get_qid_for_lemma,
@@ -50,6 +51,21 @@ def test_link_normalizes_qid_and_reads_back(session: Session) -> None:
     assert link.concept_slug == "Apple"
     assert get_qid_for_lemma(session, lemma.id) == "Q89"
     assert get_link_for_qid(session, "Q89").lemma_id == lemma.id
+
+
+def test_get_lemma_for_qid_round_trips(session: Session) -> None:
+    lemma = _make_lemma(session, "apple")
+    # Unpaired and invalid Q-ids both read back as None.
+    assert get_lemma_for_qid(session, "Q89") is None
+    assert get_lemma_for_qid(session, "not-a-qid") is None
+
+    link_lemma_to_concept(session, lemma.id, "Q89")
+
+    # Reverse lookup returns the lemma, accepting any casing for the Q-id.
+    found = get_lemma_for_qid(session, "q89")
+    assert found is not None
+    assert found.id == lemma.id
+    assert found.lemma_text == "apple"
 
 
 def test_invalid_qid_is_rejected(session: Session) -> None:

@@ -6,7 +6,7 @@ variants of a title resolve to the same row (Wikipedia-style equivalence).
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -18,6 +18,9 @@ from storage.models.concept import (
     MAX_CONCEPT_SOURCES,
     normalize_concept_slug,
 )
+
+if TYPE_CHECKING:
+    from storage.models.schema import Lemma
 
 logger = logging.getLogger(__name__)
 
@@ -413,3 +416,25 @@ def get_qid_for_lemma(session: Session, lemma_id: int) -> Optional[str]:
     """
     link = get_link_for_lemma(session, lemma_id)
     return link.qid if link is not None else None
+
+
+def get_lemma_for_qid(session: Session, qid: str) -> Optional["Lemma"]:
+    """Return the lemma paired with a concept Q-id, if any.
+
+    The inverse of :func:`get_qid_for_lemma`: given a concept's Q-id (e.g.
+    "Q89"), return the dictionary headword it names (e.g. the "apple" lemma).
+    The Q-id is normalized, so any casing/whitespace is accepted. Returns None
+    if the Q-id is invalid or unpaired.
+
+    Note: ``session`` must be the lemma/main DB session (where both
+    ``concept_lemma_links`` and ``lemmas`` live), not the concepts DB session.
+    """
+    from storage.models.schema import Lemma
+
+    link = get_link_for_qid(session, qid)
+    if link is None:
+        return None
+    return cast(
+        Optional["Lemma"],
+        session.query(Lemma).filter(Lemma.id == link.lemma_id).first(),
+    )

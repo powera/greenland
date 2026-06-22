@@ -91,6 +91,11 @@
                                     {% elif item.emoji_differs %}
                                     <br><small class="text-danger">(no emoji)</small>
                                     {% endif %}
+                                    {% if item.db_qid %}
+                                    <br><small class="{% if item.qid_differs %}text-danger{% else %}text-muted{% endif %}"><em>qid:</em> {{ item.db_qid }}</small>
+                                    {% elif item.qid_differs %}
+                                    <br><small class="text-danger"><em>qid:</em> (none)</small>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     <strong class="text-success{% if not item.text_differs and not item.disambig_differs %} text-muted{% endif %}">{{ item.release_lemma_text }}</strong>
@@ -110,6 +115,11 @@
                                     <br><span class="{% if item.emoji_differs %}text-success{% else %}text-muted{% endif %}">{{ item.release_emoji }}</span>
                                     {% elif item.emoji_differs %}
                                     <br><small class="text-success">(no emoji)</small>
+                                    {% endif %}
+                                    {% if item.release_qid %}
+                                    <br><small class="{% if item.qid_differs %}text-success{% else %}text-muted{% endif %}"><em>qid:</em> {{ item.release_qid }}</small>
+                                    {% elif item.qid_differs %}
+                                    <br><small class="text-success"><em>qid:</em> (none)</small>
                                     {% endif %}
                                 </td>
                                 <td>
