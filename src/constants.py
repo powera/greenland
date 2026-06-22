@@ -42,6 +42,14 @@ WIKI_CORPUS_PREFIX = "enwiki-20220501"
 # Note: wiki_index.schema is currently in benchmarks/schema but should probably move
 WIKI_INDEX_SCHEMA_PATH = os.path.join(SRC_DIR, "benchmarks", "schema", "wiki_index.schema")
 
+# Default minimum seconds between outbound HTTP requests to a single host, used
+# to stay under Wikimedia's per-minute request quota. Per-host overrides live in
+# clients/http_rate_limits.py; this is the fallback for hosts not listed there.
+# Override at runtime with GREENLAND_HTTP_MIN_INTERVAL_SECONDS (0 disables).
+DEFAULT_HTTP_MIN_INTERVAL_SECONDS = float(
+    os.environ.get("GREENLAND_HTTP_MIN_INTERVAL_SECONDS", "6.0")
+)
+
 # PostgreSQL configuration
 # Template URL with placeholder for password - the actual password is loaded from keys/postgres.key
 POSTGRES_URL_TEMPLATE = "postgresql://postgres:[YOUR-PASSWORD]@db.srouvwdghrmwkxnzyzqz.supabase.co:5432/postgres?sslmode=require"
