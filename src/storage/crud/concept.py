@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from storage.models.concept import (
     Concept,
+    ConceptLemmaLink,
     ConceptWikidataIndex,
     MAX_CONCEPT_SOURCES,
     normalize_concept_slug,
@@ -270,3 +271,145 @@ def delete_concept(session: Session, concept: Concept) -> bool:
     session.commit()
     logger.info(f"Deleted concept: {concept.slug}")
     return True
+
+
+# --- Lemma <-> Concept pairing -------------------------------------------------
+#
+# A lemma links to at most one concept (by Q-id) and vice versa. The link lives
+# with the lemmas (see ConceptLemmaLink) and stores the concept's Q-id directly,
+# which is the only piece of concept data the data/release export consumes.
+# Links are curated, not auto-created.
+
+
+def get_link_for_lemma(session: Session, lemma_id: int) -> Optional[ConceptLemmaLink]:
+    """Return the lemma<->concept link for a lemma, if one exists.
+
+    Note: ``session`` must be the lemma/main DB session (where the
+    ``concept_lemma_links`` table lives), not the concepts DB session.
+    """
+    return cast(
+        Optional[ConceptLemmaLink],
+        session.query(ConceptLemmaLink).filter(ConceptLemmaLink.lemma_id == lemma_id).first(),
+    )
+
+
+def get_link_for_qid(session: Session, qid: str) -> Optional[ConceptLemmaLink]:
+    """Return the lemma<->concept link for a concept Q-id, if one exists."""
+    from storage.wikidata import normalize_qid
+
+    normalized_qid = normalize_qid(qid)
+    if normalized_qid is None:
+        return None
+    return cast(
+        Optional[ConceptLemmaLink],
+        session.query(ConceptLemmaLink).filter(ConceptLemmaLink.qid == normalized_qid).first(),
+    )
+
+
+def link_lemma_to_concept(
+    session: Session,
+    lemma_id: int,
+    qid: str,
+    *,
+    concept_slug: Optional[str] = None,
+    verified: bool = False,
+    notes: Optional[str] = None,
+) -> Optional[ConceptLemmaLink]:
+    """Pair a lemma with a concept Q-id (one-to-one on both sides).
+
+    Idempotent for the same (lemma_id, qid) pair: re-linking updates
+    ``concept_slug``/``verified``/``notes`` rather than failing. Returns None if
+    either side is already linked to a *different* partner, the Q-id is invalid,
+    or on any constraint failure (the caller should treat None as "left
+    unlinked").
+
+    Args:
+        session: The lemma/main DB session (owns ``concept_lemma_links``).
+        lemma_id: The lemma to link.
+        qid: The Wikidata Q-id of the concept (any case; normalized).
+        concept_slug: The concept's slug, stored for display.
+        verified: Whether a human has confirmed the pairing.
+        notes: Optional notes about the pairing.
+
+    Returns:
+        The created/updated link, or None if the pairing was rejected.
+    """
+    from storage.wikidata import normalize_qid
+
+    normalized_qid = normalize_qid(qid)
+    if normalized_qid is None:
+        logger.warning("Refusing to link lemma %s to invalid Q-id %r", lemma_id, qid)
+        return None
+
+    existing_for_lemma = get_link_for_lemma(session, lemma_id)
+    existing_for_qid = get_link_for_qid(session, normalized_qid)
+
+    if existing_for_lemma is not None and existing_for_lemma.qid == normalized_qid:
+        # Same pair already linked: update metadata only.
+        if concept_slug is not None:
+            existing_for_lemma.concept_slug = concept_slug
+        existing_for_lemma.verified = verified
+        if notes is not None:
+            existing_for_lemma.notes = notes
+        try:
+            session.commit()
+            return existing_for_lemma
+        except IntegrityError as error:
+            session.rollback()
+            logger.warning("Failed to update lemma-concept link: %s", error)
+            return None
+
+    if existing_for_lemma is not None:
+        logger.warning(
+            "Lemma %s already linked to %s; refusing to relink to %s",
+            lemma_id,
+            existing_for_lemma.qid,
+            normalized_qid,
+        )
+        return None
+    if existing_for_qid is not None:
+        logger.warning(
+            "Concept %s already linked to lemma %s; refusing to relink to %s",
+            normalized_qid,
+            existing_for_qid.lemma_id,
+            lemma_id,
+        )
+        return None
+
+    link = ConceptLemmaLink(
+        lemma_id=lemma_id,
+        qid=normalized_qid,
+        concept_slug=concept_slug,
+        verified=verified,
+        notes=notes,
+    )
+    try:
+        session.add(link)
+        session.commit()
+        logger.info("Linked lemma %s <-> concept %s", lemma_id, normalized_qid)
+        return link
+    except IntegrityError as error:
+        session.rollback()
+        logger.warning("Failed to link lemma %s to %s: %s", lemma_id, normalized_qid, error)
+        return None
+
+
+def unlink_lemma_from_concept(session: Session, *, lemma_id: int) -> bool:
+    """Remove the lemma<->concept link for a lemma. Returns True if removed."""
+    link = get_link_for_lemma(session, lemma_id)
+    if link is None:
+        return False
+    session.delete(link)
+    session.commit()
+    logger.info("Unlinked lemma %s from concept %s", lemma_id, link.qid)
+    return True
+
+
+def get_qid_for_lemma(session: Session, lemma_id: int) -> Optional[str]:
+    """Return the Wikidata Q-id paired with a lemma, if any.
+
+    This is the single piece of concept data that flows into ``data/release``
+    (e.g. "Apple" -> "Q89"). Returns None if the lemma is unlinked.
+    """
+    link = get_link_for_lemma(session, lemma_id)
+    return link.qid if link is not None else None

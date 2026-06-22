@@ -2,6 +2,7 @@
 
 from storage.models.concept import (
     Concept,
+    ConceptLemmaLink,
     ConceptWikidataIndex,
     MAX_CONCEPT_SOURCES,
     concept_slug_to_title,
@@ -47,6 +48,7 @@ __all__ = [
     "AdverbSubtype",
     "Base",
     "Concept",
+    "ConceptLemmaLink",
     "ConceptWikidataIndex",
     "Corpus",
     "DerivativeForm",

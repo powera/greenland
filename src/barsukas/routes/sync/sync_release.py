@@ -15,6 +15,9 @@ from storage.config.grammar_facts import (
     get_release_grammar_fact_languages,
     is_release_grammar_fact_type,
 )
+from sqlalchemy.orm import object_session
+
+from storage.crud.concept import get_qid_for_lemma
 from storage.crud.operation_log import log_operation, log_translation_change
 from storage.models.grammar_fact import GrammarFact
 from storage.models.schema import Lemma, LemmaTranslation
@@ -1085,6 +1088,15 @@ def _build_release_entry_from_db(lemma: Lemma) -> Dict[str, Any]:
 
     if lemma.lexical_gap_reason:
         entry["lexical_gap_reason"] = lemma.lexical_gap_reason
+
+    # If this lemma is paired with a concept that has a Wikidata Q-id, emit the
+    # Q-id (e.g. "Apple" -> Q89). The concept itself is never exported; this is
+    # the only piece of concept data that flows into data/release.
+    session = object_session(lemma)
+    if session is not None:
+        qid = get_qid_for_lemma(session, lemma.id)
+        if qid:
+            entry["qid"] = qid
 
     return entry
 

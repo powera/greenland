@@ -62,6 +62,69 @@
         </div>
         {% endif %}
 
+        <div class="card mb-3">
+            <div class="card-header"><i class="bi bi-link"></i> Paired lemma</div>
+            <div class="card-body">
+                {% if not concept_qid %}
+                <p class="text-muted mb-0">
+                    This concept has no Wikidata Q-id, so it cannot be paired with a lemma.
+                </p>
+                {% elif paired_lemma %}
+                <p class="mb-2">
+                    Paired with
+                    <strong>{{ paired_lemma.lemma_text }}</strong>
+                    {% if paired_lemma.disambiguation %}<span class="text-muted">({{ paired_lemma.disambiguation }})</span>{% endif %}
+                    {% if paired_lemma.guid %}<span class="badge bg-light text-dark">{{ paired_lemma.guid }}</span>{% endif %}
+                </p>
+                <p class="text-muted small mb-2">
+                    {{ paired_lemma.definition_text }}
+                </p>
+                {% if not readonly %}
+                <form method="post" action="{{ url_for('concepts.unlink_lemma', slug=concept.slug) }}"
+                      onsubmit="return confirm('Remove this lemma pairing?');">
+                    <input type="hidden" name="lemma_id" value="{{ paired_lemma.id }}">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-x"></i> Remove pairing
+                    </button>
+                </form>
+                {% endif %}
+                {% elif readonly %}
+                <p class="text-muted mb-0">Not paired with a lemma.</p>
+                {% else %}
+                <form method="get" action="{{ url_for('concepts.detail', slug=concept.slug) }}" class="mb-2">
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="lemma_q" class="form-control"
+                               placeholder="Search lemmas…" value="{{ lemma_query }}">
+                        <button type="submit" class="btn btn-outline-secondary">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+                {% if lemma_query and not lemma_candidates %}
+                <p class="text-muted small mb-0">No lemmas match {{ lemma_query }}.</p>
+                {% elif lemma_candidates %}
+                <ul class="list-group list-group-flush">
+                    {% for lemma in lemma_candidates %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span>
+                            {{ lemma.lemma_text }}
+                            {% if lemma.disambiguation %}<span class="text-muted small">({{ lemma.disambiguation }})</span>{% endif %}
+                            <span class="text-muted small">· {{ lemma.pos_type }}</span>
+                        </span>
+                        <form method="post" action="{{ url_for('concepts.link_lemma', slug=concept.slug) }}">
+                            <input type="hidden" name="lemma_id" value="{{ lemma.id }}">
+                            <button type="submit" class="btn btn-outline-primary btn-sm">Pair</button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted small mb-0">Search for a lemma to pair with this concept.</p>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
         {% if backlinks %}
         <div class="card mb-3">
             <div class="card-header"><i class="bi bi-arrow-return-left"></i> Linked from</div>
