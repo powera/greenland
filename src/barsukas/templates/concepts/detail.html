@@ -72,7 +72,7 @@
                 {% elif paired_lemma %}
                 <p class="mb-2">
                     Paired with
-                    <strong>{{ paired_lemma.lemma_text }}</strong>
+                    <strong><a href="{{ url_for('lemmas.view_lemma', lemma_id=paired_lemma.id) }}">{{ paired_lemma.lemma_text }}</a></strong>
                     {% if paired_lemma.disambiguation %}<span class="text-muted">({{ paired_lemma.disambiguation }})</span>{% endif %}
                     {% if paired_lemma.guid %}<span class="badge bg-light text-dark">{{ paired_lemma.guid }}</span>{% endif %}
                 </p>

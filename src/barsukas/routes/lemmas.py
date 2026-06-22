@@ -373,6 +373,13 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
     # Get tombstone entries for this lemma
     tombstones = get_tombstones_by_lemma_id(g.db, lemma_id)
 
+    # Paired concept (one-to-one, by Q-id). The link lives in the lemma/main DB,
+    # so it is available here even when concepts are hosted in a separate,
+    # read-only database. Only surfaced when the lemma is actually paired.
+    from storage.crud.concept import get_link_for_lemma
+
+    concept_link = get_link_for_lemma(g.db, lemma_id)
+
     # Prepare voice options for audio generation
     openai_voices = [
         "ash",
@@ -550,6 +557,7 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         azure_voices=azure_voices,
         google_voices=google_voices,
         related_lemmas=related_lemmas,
+        concept_link=concept_link,
         queued_tasks=queued_tasks,
         lemma_tiers=lemma_tiers,
         tier_display_by_source_name=tier_display_by_source_name,
