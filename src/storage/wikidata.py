@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import threading
 from html.parser import HTMLParser
 import os
 import re
@@ -14,6 +15,7 @@ from urllib.parse import quote, unquote, urlparse
 
 import requests
 
+from clients.http_rate_limits import min_interval_for_url
 from storage.models.concept import MAX_CONCEPT_SOURCES
 
 logger = logging.getLogger(__name__)
@@ -33,6 +35,15 @@ DEFAULT_USER_AGENT = os.environ.get(
     "GREENLAND_HTTP_USER_AGENT",
     "Greenland-Barsukas/1.0 (concept seeding; set GREENLAND_HTTP_USER_AGENT with contact)",
 )
+# Wikimedia enforces a per-clock-minute request quota, not just a per-second
+# rate: bursting a handful of requests trips a ~60s cooldown (observed as a
+# Retry-After that bounces every call to the top of the next minute). Each
+# concept seed makes several requests (entity + summary + article + de + fr +
+# EB1911), so we pace GETs to a minimum interval *per host* to stay under that
+# quota. Per-host intervals live in clients/http_rate_limits.py.
+_throttle_lock = threading.Lock()
+_last_request_time_by_host: Dict[str, float] = {}
+
 MAX_SOURCE_TEXT_CHARS = 12000
 WIKIPEDIA_LEAD_THRESHOLD_CHARS = 10_000
 EB1911_MAX_PARAGRAPHS = 10
@@ -381,6 +392,27 @@ def _retry_delay_seconds(response: requests.Response, attempt_index: int) -> flo
     return min(fallback_delay, MAX_RETRY_DELAY_SECONDS)
 
 
+def _throttle(url: str) -> None:
+    """Block until this host's minimum request interval has elapsed.
+
+    Paces GETs per host so a multi-request seed fetch (entity + summary +
+    article + de + fr + EB1911) does not burst past Wikimedia's per-minute
+    quota. The per-host interval comes from
+    :func:`clients.http_rate_limits.min_interval_for_url`. Thread-safe so
+    concurrent callers serialize through the same per-host gate.
+    """
+    interval = min_interval_for_url(url)
+    if interval <= 0:
+        return
+    host = urlparse(url).hostname or ""
+    with _throttle_lock:
+        elapsed = time.monotonic() - _last_request_time_by_host.get(host, 0.0)
+        wait = interval - elapsed
+        if wait > 0:
+            time.sleep(wait)
+        _last_request_time_by_host[host] = time.monotonic()
+
+
 def _get_json(url: str, *, params: Optional[Dict[str, str]] = None) -> Optional[Dict[str, Any]]:
     """Fetch JSON with Wikimedia-friendly headers and limited 429 retries."""
     request_params = dict(params or {})
@@ -391,6 +423,7 @@ def _get_json(url: str, *, params: Optional[Dict[str, str]] = None) -> Optional[
     last_error: Optional[Exception] = None
     for attempt_index in range(MAX_HTTP_ATTEMPTS):
         try:
+            _throttle(url)
             response = requests.get(
                 url,
                 params=request_params or None,

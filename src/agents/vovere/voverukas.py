@@ -209,6 +209,7 @@ class VoverukasAgent:
                     qid,
                     body_generator=body_generator,
                     source_model=self.config.model if body_generator else None,
+                    include_regional_wikis=True,
                 )
                 item["status"] = result.status
                 item["detail"] = result.detail
@@ -285,7 +286,7 @@ class VoverukasAgent:
                 # Cache the qid<->title mapping regardless of batch success.
                 cache_wikidata_title(session, qid, title)
 
-                seed = fetch_wikidata_concept_seed(qid)
+                seed = fetch_wikidata_concept_seed(qid, include_regional_wikis=True)
                 if seed is None:
                     logger.info("SKIP (no seed) [%s] %s", qid, title)
                     skipped += 1

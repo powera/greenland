@@ -454,6 +454,49 @@ def test_get_json_retries_429_with_wikimedia_headers(monkeypatch) -> None:  # ty
     assert calls[0]["params"]["maxlag"] == "5"
 
 
+def test_throttle_waits_for_min_interval_per_host(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    import storage.wikidata as wikidata
+
+    sleeps: list[float] = []
+    clock = {"now": 1000.0}
+
+    monkeypatch.setattr(wikidata, "min_interval_for_url", lambda url: 6.0)
+    monkeypatch.setattr(wikidata, "_last_request_time_by_host", {})
+    monkeypatch.setattr(wikidata.time, "monotonic", lambda: clock["now"])
+
+    def fake_sleep(delay: float) -> None:
+        sleeps.append(delay)
+        clock["now"] += delay
+
+    monkeypatch.setattr(wikidata.time, "sleep", fake_sleep)
+
+    # First call to a host after a long idle: no wait.
+    wikidata._throttle("https://en.wikipedia.org/w/api.php")
+    assert sleeps == []
+
+    # A different host is tracked independently: still no wait.
+    wikidata._throttle("https://de.wikipedia.org/w/api.php")
+    assert sleeps == []
+
+    # Immediate second call to the *same* host must wait out the interval.
+    wikidata._throttle("https://en.wikipedia.org/w/api.php")
+    assert sleeps == [6.0]
+
+
+def test_throttle_disabled_when_interval_is_zero(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    import storage.wikidata as wikidata
+
+    monkeypatch.setattr(wikidata, "min_interval_for_url", lambda url: 0.0)
+    monkeypatch.setattr(
+        wikidata.time,
+        "sleep",
+        lambda delay: pytest.fail("throttle should not sleep when disabled"),
+    )
+
+    wikidata._throttle("https://en.wikipedia.org/w/api.php")
+    wikidata._throttle("https://en.wikipedia.org/w/api.php")
+
+
 def test_vovere_skips_wikidata_generation_sources() -> None:
     agent = VovereAgent.__new__(VovereAgent)
 

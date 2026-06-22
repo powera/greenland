@@ -113,6 +113,7 @@ class VoveraiteAgent:
                     raw_qid,
                     body_generator=body_generator,
                     source_model=self.config.model if body_generator else None,
+                    include_regional_wikis=True,
                 )
                 results.append(
                     {
@@ -166,7 +167,7 @@ class VoveraiteAgent:
                     skipped += 1
                     continue
 
-                seed = fetch_wikidata_concept_seed(qid)
+                seed = fetch_wikidata_concept_seed(qid, include_regional_wikis=True)
                 if seed is None:
                     logger.info("SKIP (no seed) [%s]", qid)
                     skipped += 1
