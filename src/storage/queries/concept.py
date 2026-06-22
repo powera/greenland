@@ -6,7 +6,7 @@ scanning concept bodies for ``[[...]]`` references, so they need no link table.
 
 from typing import List, Set
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Query, Session
 
 from storage.models.concept import (
     Concept,
@@ -15,25 +15,12 @@ from storage.models.concept import (
 )
 
 
-def list_concepts(
+def _filtered_concepts_query(
     session: Session,
-    search: str = "",
-    verified_only: bool = False,
-    limit: int = 0,
-) -> List[Concept]:
-    """List concepts, optionally filtered by a search term and verification.
-
-    Args:
-        session: Database session.
-        search: Case-insensitive substring matched against slug and summary.
-            Spaces are treated like underscores so "civil war" matches
-            "Civil_War".
-        verified_only: If True, return only verified concepts.
-        limit: Maximum rows to return; 0 means no limit.
-
-    Returns:
-        Concepts ordered alphabetically by slug.
-    """
+    search: str,
+    verified_only: bool,
+) -> "Query[Concept]":
+    """Return a Concept query with the search/verified filters applied."""
     query = session.query(Concept)
 
     if search.strip():
@@ -46,17 +33,48 @@ def list_concepts(
     if verified_only:
         query = query.filter(Concept.verified.is_(True))
 
+    return query
+
+
+def list_concepts(
+    session: Session,
+    search: str = "",
+    verified_only: bool = False,
+    limit: int = 0,
+    offset: int = 0,
+) -> List[Concept]:
+    """List concepts, optionally filtered by a search term and verification.
+
+    Args:
+        session: Database session.
+        search: Case-insensitive substring matched against slug and summary.
+            Spaces are treated like underscores so "civil war" matches
+            "Civil_War".
+        verified_only: If True, return only verified concepts.
+        limit: Maximum rows to return; 0 means no limit.
+        offset: Number of rows to skip (for pagination); ignored when 0.
+
+    Returns:
+        Concepts ordered alphabetically by slug.
+    """
+    query = _filtered_concepts_query(session, search, verified_only)
     query = query.order_by(Concept.slug.asc())
 
+    if offset > 0:
+        query = query.offset(offset)
     if limit > 0:
         query = query.limit(limit)
 
     return query.all()
 
 
-def count_concepts(session: Session) -> int:
-    """Return the total number of concepts."""
-    return session.query(Concept).count()
+def count_concepts(
+    session: Session,
+    search: str = "",
+    verified_only: bool = False,
+) -> int:
+    """Return the number of concepts matching the search/verified filters."""
+    return _filtered_concepts_query(session, search, verified_only).count()
 
 
 def get_backlinks(session: Session, slug: str) -> List[Concept]:

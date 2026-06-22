@@ -83,7 +83,9 @@ def run_flask_server(
         app.config["ENABLE_WORKER"] = persona.enable_worker
         app.config["ALLOW_RESTART"] = persona.allow_restart
         app.config["ALLOW_EXPORTS"] = persona.allow_exports
-        app.config["CONCEPTS_WRITABLE"] = persona.use_postgres_concepts
+        app.config["CONCEPTS_WRITABLE"] = (
+            persona.use_postgres_concepts and not persona.postgres_concepts_readonly
+        )
     else:
         # Defaults when no persona specified
         app.config["ALLOW_OUTBOUND_CALLS"] = True
