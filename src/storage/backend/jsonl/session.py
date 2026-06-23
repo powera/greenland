@@ -351,6 +351,11 @@ class JSONLSession(BaseSession):
                     }
                 )
 
+        # Map lemma GUIDs to their ephemeral SQLite ids. Sentence words and
+        # relation members reference lemmas by GUID in JSONL, but the in-memory
+        # SQLite rows are keyed by integer id.
+        guid_to_lemma_id = {lem.guid: lem.id for lem in self._storage.lemmas.values() if lem.guid}
+
         # Prepare sentences and their translations/words
         for jsonl_sentence in self._storage.sentences.values():
             sentence_dict = {
@@ -376,21 +381,32 @@ class JSONLSession(BaseSession):
                     }
                 )
 
-            # Add words
+            # Add words. JSONL references lemmas by GUID (lemma_guid); resolve
+            # it to the ephemeral integer id, falling back to an explicit
+            # lemma_id if present. The surface/gloss text fields must be copied
+            # too, otherwise consumers (e.g. the Trakaido sentence comparison
+            # view) render every word as a placeholder dash.
             for word_data in jsonl_sentence.words:
+                lemma_guid = word_data.get("lemma_guid")
+                lemma_id = word_data.get("lemma_id")
+                if lemma_id is None and lemma_guid:
+                    lemma_id = guid_to_lemma_id.get(lemma_guid)
                 sentence_words.append(
                     {
                         "sentence_id": jsonl_sentence.id,
-                        "lemma_id": word_data.get("lemma_id"),
+                        "lemma_id": lemma_id,
                         "language_code": word_data.get("language_code", ""),
                         "position": word_data.get("position", 0),
                         "word_role": word_data.get("word_role"),
+                        "english_text": word_data.get("english_text"),
+                        "target_language_text": word_data.get("target_language_text"),
                         "grammatical_form": word_data.get("grammatical_form"),
+                        "grammatical_case": word_data.get("grammatical_case"),
+                        "declined_form": word_data.get("declined_form"),
                     }
                 )
 
         # Prepare relation groups and members (resolve GUIDs to lemma IDs)
-        guid_to_lemma_id = {lem.guid: lem.id for lem in self._storage.lemmas.values() if lem.guid}
         member_id_counter = 1
         for group in self._storage.relation_groups:
             relation_groups.append(
@@ -576,16 +592,25 @@ class JSONLSession(BaseSession):
 
     def _extract_sentence_words(self) -> List[models.SentenceWord]:
         """Extract SentenceWord objects from nested Sentence data."""
+        guid_to_lemma_id = {lem.guid: lem.id for lem in self._storage.lemmas.values() if lem.guid}
         words = []
         for sentence in self._storage.sentences.values():
             for word_data in sentence.words:
+                lemma_guid = word_data.get("lemma_guid")
+                lemma_id = word_data.get("lemma_id")
+                if lemma_id is None and lemma_guid:
+                    lemma_id = guid_to_lemma_id.get(lemma_guid)
                 word = models.SentenceWord(
                     sentence_id=sentence.id,
-                    lemma_id=word_data.get("lemma_id"),
+                    lemma_id=lemma_id,
                     language_code=word_data.get("language_code", ""),
                     position=word_data.get("position", 0),
                     word_role=word_data.get("word_role", ""),
+                    english_text=word_data.get("english_text"),
+                    target_language_text=word_data.get("target_language_text"),
                     grammatical_form=word_data.get("grammatical_form"),
+                    grammatical_case=word_data.get("grammatical_case"),
+                    declined_form=word_data.get("declined_form"),
                     sentence=sentence,
                 )
                 words.append(word)
