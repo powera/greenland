@@ -67,6 +67,7 @@ def export_sqlalchemy_to_jsonl(source_config: DataSourceConfig, jsonl_dir: str) 
     from storage.models.schema import AudioQualityReview as SQLiteAudioQualityReview
     from storage.models.schema import Lemma as SQLiteLemma
     from storage.models.schema import Sentence as SQLiteSentence
+    from storage.models.schema import SentenceWord as SQLiteSentenceWord
 
     try:
         # Export Lemmas with eager loading to avoid N+1 queries
@@ -95,7 +96,7 @@ def export_sqlalchemy_to_jsonl(source_config: DataSourceConfig, jsonl_dir: str) 
             source_session.query(SQLiteSentence)
             .options(
                 selectinload(SQLiteSentence.translations),
-                selectinload(SQLiteSentence.words),
+                selectinload(SQLiteSentence.words).selectinload(SQLiteSentenceWord.lemma),
             )
             .all()
         )
@@ -365,12 +366,14 @@ def convert_sqlalchemy_sentence_to_jsonl(sentence: Any) -> Any:
     for trans in sentence.translations:
         translations[trans.language_code] = trans.translation_text
 
-    # Get words
+    # Get words. Reference lemmas by GUID (the stable, on-disk identifier used
+    # throughout data/release); integer lemma_ids are ephemeral and would not
+    # survive a JSONL -> SQLite reload.
     words = []
     for word in sentence.words:
         words.append(
             {
-                "lemma_id": word.lemma_id,
+                "lemma_guid": word.lemma.guid if word.lemma else None,
                 "language_code": word.language_code,
                 "position": word.position,
                 "word_role": word.word_role,
