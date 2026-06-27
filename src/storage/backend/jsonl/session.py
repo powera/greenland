@@ -207,6 +207,7 @@ class JSONLSession(BaseSession):
         from storage.models.concept import ConceptLemmaLink as SQLConceptLemmaLink
         from storage.models.schema import DerivativeForm as SQLDerivativeForm
         from storage.models.schema import Lemma as SQLLemma
+        from storage.models.schema import LemmaDifficultyOverride as SQLLemmaDifficultyOverride
         from storage.models.schema import LemmaTranslation
         from storage.models.schema import Sentence as SQLSentence
         from storage.models.schema import SentenceTranslation, SentenceWord
@@ -216,6 +217,7 @@ class JSONLSession(BaseSession):
         # Use bulk operations for better performance
         lemmas = []
         translations = []
+        difficulty_overrides: list[dict] = []
         concept_lemma_links: list[dict] = []
         derivative_forms: list[dict] = []
         grammar_facts = []
@@ -240,6 +242,10 @@ class JSONLSession(BaseSession):
                 "frequency_rank": jsonl_lemma.frequency_rank,
                 "tags": jsonl_lemma.tags,
                 "lexical_gap_reason": jsonl_lemma.lexical_gap_reason,
+                "disambiguation": jsonl_lemma.disambiguation,
+                "confidence": jsonl_lemma.confidence,
+                "notes": jsonl_lemma.notes,
+                "verified": jsonl_lemma.verified,
                 "added_at": jsonl_lemma.added_at,
                 "updated_at": jsonl_lemma.updated_at,
             }
@@ -272,6 +278,16 @@ class JSONLSession(BaseSession):
                 if disambig:
                     trans_entry["disambiguation"] = disambig
                 translations.append(trans_entry)
+
+            # Per-language difficulty overrides (stored in base.jsonl).
+            for lang_code, level in jsonl_lemma.difficulty_overrides.items():
+                difficulty_overrides.append(
+                    {
+                        "lemma_id": jsonl_lemma.id,
+                        "language_code": lang_code,
+                        "difficulty_level": level,
+                    }
+                )
 
             # Add derivative forms (per-language inflections / base forms).
             # The combined-rank pass uses these to identify English lemmas, so
@@ -451,6 +467,10 @@ class JSONLSession(BaseSession):
             self._sqlite_session.bulk_insert_mappings(SQLLemma, lemmas)
         if translations:
             self._sqlite_session.bulk_insert_mappings(LemmaTranslation, translations)
+        if difficulty_overrides:
+            self._sqlite_session.bulk_insert_mappings(
+                SQLLemmaDifficultyOverride, difficulty_overrides
+            )
         if concept_lemma_links:
             self._sqlite_session.bulk_insert_mappings(SQLConceptLemmaLink, concept_lemma_links)
         if derivative_forms:
