@@ -7,8 +7,9 @@ for Japanese text. Degrades gracefully if pykakasi is not available.
 """
 
 import logging
-import re
 from typing import Any, Optional
+
+from langtools.ja.script_analysis import contains_japanese
 
 logger = logging.getLogger(__name__)
 
@@ -35,13 +36,9 @@ def is_japanese(text: str) -> bool:
     Returns:
         True if text contains Japanese characters, False otherwise
     """
-    if not text:
-        return False
-    # Check for Hiragana, Katakana, or CJK (kanji) ranges
-    # Hiragana: U+3040-U+309F
-    # Katakana: U+30A0-U+30FF
-    # CJK Unified Ideographs: U+4E00-U+9FFF (shared with Chinese)
-    return bool(re.search(r"[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9fff]", text))
+    # Delegate to the canonical script-range definitions in script_analysis so
+    # the CJK/kana ranges live in exactly one place.
+    return contains_japanese(text)
 
 
 def generate_romaji(japanese_text: str) -> Optional[str]:
