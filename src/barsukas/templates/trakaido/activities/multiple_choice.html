@@ -1,0 +1,94 @@
+{% extends "trakaido/activities/base_activity.html" %}
+
+{% block title %}Multiple Choice{% endblock %}
+{% block activity_title %}Multiple Choice{% endblock %}
+{% block activity_subtitle %}Pick the correct translation from four options.{% endblock %}
+
+{% block activity_extra_controls %}
+<div class="trakaido-control">
+    <label for="study-mode-select">Study mode</label>
+    <select id="study-mode-select" name="study_mode" onchange="this.form.submit()">
+        {% for mode in study_modes %}
+        <option value="{{ mode }}" {% if mode == study_mode %}selected{% endif %}>
+            {% if mode == "target-to-source" %}Target → Interface{% else %}Interface → Target{% endif %}
+        </option>
+        {% endfor %}
+    </select>
+</div>
+{% endblock %}
+
+{% block activity_scripts %}
+<script>
+(function () {
+  var questions = {{ questions_json|safe }};
+
+  function render(q, idx) {
+    var area = document.getElementById("tk-activity-area");
+
+    var html =
+      '<div class="tk-mc-prompt">' +
+        '<div class="tk-mc-word">' + escapeHtml(q.prompt) + '</div>';
+    if (q.prompt_sub) {
+      html += '<div class="tk-mc-sub">' + escapeHtml(q.prompt_sub) + '</div>';
+    }
+    html += '</div>' +
+      '<div class="tk-options" id="tk-options">';
+
+    for (var i = 0; i < q.options.length; i++) {
+      html +=
+        '<button class="tk-option-btn" data-idx="' + i + '">' +
+          escapeHtml(q.options[i].text) +
+        '</button>';
+    }
+    html += '</div>' +
+      '<div class="tk-feedback" id="tk-feedback"></div>';
+
+    area.innerHTML = html;
+
+    var buttons = area.querySelectorAll(".tk-option-btn");
+    for (var j = 0; j < buttons.length; j++) {
+      buttons[j].addEventListener("click", function (e) {
+        handleClick(e, q);
+      });
+    }
+  }
+
+  function handleClick(e, q) {
+    var btn = e.currentTarget;
+    var selectedIdx = parseInt(btn.getAttribute("data-idx"), 10);
+    var selected = q.options[selectedIdx];
+    var isCorrect = selected.correct;
+    TrakaidoQuiz.recordAnswer(isCorrect);
+
+    var allBtns = document.querySelectorAll("#tk-options .tk-option-btn");
+    for (var k = 0; k < allBtns.length; k++) {
+      allBtns[k].disabled = true;
+      var opt = q.options[parseInt(allBtns[k].getAttribute("data-idx"), 10)];
+      if (opt.correct) {
+        allBtns[k].classList.add("tk-correct");
+      } else if (k === selectedIdx && !isCorrect) {
+        allBtns[k].classList.add("tk-incorrect");
+      } else {
+        allBtns[k].classList.add("tk-unselected");
+      }
+    }
+
+    var fb = document.getElementById("tk-feedback");
+    if (fb) {
+      fb.textContent = isCorrect
+        ? "Correct!"
+        : "Incorrect — the answer is " + q.correct_answer;
+      fb.className = "tk-feedback " + (isCorrect ? "tk-fb-correct" : "tk-fb-incorrect");
+    }
+  }
+
+  function escapeHtml(s) {
+    var d = document.createElement("div");
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+
+  TrakaidoQuiz.init({ questions: questions, renderer: render });
+})();
+</script>
+{% endblock %}

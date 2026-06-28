@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/trakaido.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="trakaido-page">
+    <div class="trakaido-header">
+        <h1>{% block activity_title %}Activity{% endblock %}</h1>
+        <p class="trakaido-meta">{% block activity_subtitle %}{% endblock %}</p>
+    </div>
+
+    <!-- Controls bar: level + language selectors -->
+    <form class="trakaido-controls" method="get">
+        <div class="trakaido-control">
+            <label for="level-select">Level</label>
+            <select id="level-select" name="level" onchange="this.form.submit()">
+                {% for lvl in available_levels %}
+                <option value="{{ lvl }}" {% if lvl == level %}selected{% endif %}>
+                    Level {{ lvl }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="trakaido-control">
+            <label for="foreign-lang-select">Target language</label>
+            <select id="foreign-lang-select" name="foreign_lang" onchange="this.form.submit()">
+                {% for code, name in supported_languages.items() %}
+                <option value="{{ code }}" {% if code == foreign_lang %}selected{% endif %}>
+                    {{ name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% block activity_extra_controls %}{% endblock %}
+        <input type="hidden" name="interface_lang" value="{{ interface_lang }}">
+    </form>
+
+    <!-- Progress bar -->
+    <div id="tk-progress" class="tk-progress-wrapper">
+        <div id="tk-progress-text" class="tk-progress-text">Loading…</div>
+        <div class="tk-progress-track">
+            <div id="tk-progress-bar" class="tk-progress-fill" style="width:0%"></div>
+        </div>
+    </div>
+
+    <!-- Activity area (rendered by JS) -->
+    <div id="tk-activity-area" class="trakaido-card tk-activity-area">
+        {% block activity_initial %}{% endblock %}
+    </div>
+
+    <!-- Navigation -->
+    <div id="tk-nav-buttons" class="tk-nav-buttons">
+        <button id="tk-next-btn" class="trakaido-button" disabled onclick="TrakaidoQuiz.next()">
+            Next &#8594;
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/trakaido_activities.js') }}"></script>
+{% block activity_scripts %}{% endblock %}
+{% endblock %}

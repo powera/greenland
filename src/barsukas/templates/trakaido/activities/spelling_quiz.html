@@ -1,0 +1,95 @@
+{% extends "trakaido/activities/base_activity.html" %}
+
+{% block title %}Spelling Quiz{% endblock %}
+{% block activity_title %}Spelling Quiz{% endblock %}
+{% block activity_subtitle %}Pick the correct letter or digraph to complete the word.{% endblock %}
+
+{% block activity_scripts %}
+<script>
+(function () {
+  var questions = {{ questions_json|safe }};
+
+  function render(q, idx) {
+    var area = document.getElementById("tk-activity-area");
+    var before = q.word.substring(0, q.blank_start);
+    var after = q.word.substring(q.blank_end);
+
+    var html =
+      '<div class="tk-sq-prompt">' +
+        '<div class="tk-sq-english">' + escapeHtml(q.english) + '</div>' +
+        '<div class="tk-sq-definition">' + escapeHtml(q.definition) + '</div>' +
+      '</div>' +
+      '<div class="tk-sq-word">' +
+        '<span>' + escapeHtml(before) + '</span>' +
+        '<span class="tk-sq-blank" id="tk-sq-blank">_</span>' +
+        '<span>' + escapeHtml(after) + '</span>' +
+      '</div>' +
+      '<div class="tk-options" id="tk-options">';
+
+    for (var i = 0; i < q.options.length; i++) {
+      html +=
+        '<button class="tk-option-btn" data-option="' + escapeAttr(q.options[i]) + '">' +
+        escapeHtml(q.options[i]) +
+        '</button>';
+    }
+    html += '</div>' +
+      '<div class="tk-feedback" id="tk-feedback"></div>';
+
+    area.innerHTML = html;
+
+    var buttons = area.querySelectorAll(".tk-option-btn");
+    for (var j = 0; j < buttons.length; j++) {
+      buttons[j].addEventListener("click", handleClick);
+    }
+  }
+
+  function handleClick(e) {
+    var btn = e.currentTarget;
+    var selected = btn.getAttribute("data-option");
+    var currentQ = questions[TrakaidoQuiz.getCurrentIndex()];
+    if (!currentQ) return;
+
+    var isCorrect = selected.toLowerCase() === currentQ.correct_answer.toLowerCase();
+    TrakaidoQuiz.recordAnswer(isCorrect);
+
+    // Reveal
+    var blank = document.getElementById("tk-sq-blank");
+    if (blank) {
+      blank.textContent = currentQ.correct_answer;
+      blank.classList.add("tk-sq-revealed");
+    }
+
+    var allBtns = document.querySelectorAll("#tk-options .tk-option-btn");
+    for (var k = 0; k < allBtns.length; k++) {
+      allBtns[k].disabled = true;
+      var opt = allBtns[k].getAttribute("data-option");
+      if (opt.toLowerCase() === currentQ.correct_answer.toLowerCase()) {
+        allBtns[k].classList.add("tk-correct");
+      } else if (opt === selected && !isCorrect) {
+        allBtns[k].classList.add("tk-incorrect");
+      } else {
+        allBtns[k].classList.add("tk-unselected");
+      }
+    }
+
+    var fb = document.getElementById("tk-feedback");
+    if (fb) {
+      fb.textContent = isCorrect ? "Correct!" : "Incorrect — the answer is " + currentQ.correct_answer;
+      fb.className = "tk-feedback " + (isCorrect ? "tk-fb-correct" : "tk-fb-incorrect");
+    }
+  }
+
+  function escapeHtml(s) {
+    var d = document.createElement("div");
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+
+  function escapeAttr(s) {
+    return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  TrakaidoQuiz.init({ questions: questions, renderer: render });
+})();
+</script>
+{% endblock %}

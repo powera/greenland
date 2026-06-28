@@ -125,6 +125,22 @@
                             <li><a class="dropdown-item" href="{{ url_for('trakaido.lemma_search') }}">
                                 <i class="bi bi-book"></i> Lemma View
                             </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.spelling_quiz') }}">
+                                <i class="bi bi-pencil"></i> Spelling Quiz
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.category_choice') }}">
+                                <i class="bi bi-grid-3x3-gap"></i> Category Choice
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.sentence_completion') }}">
+                                <i class="bi bi-input-cursor-text"></i> Sentence Completion
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.multiple_choice') }}">
+                                <i class="bi bi-ui-radios"></i> Multiple Choice
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.listening') }}">
+                                <i class="bi bi-headphones"></i> Listening
+                            </a></li>
                         </ul>
                     </li>
                     {% if not config.get('READONLY', False) %}

@@ -1,0 +1,130 @@
+{% extends "trakaido/activities/base_activity.html" %}
+
+{% block title %}Listening{% endblock %}
+{% block activity_title %}Listening{% endblock %}
+{% block activity_subtitle %}Listen to the audio and pick the correct answer.{% endblock %}
+
+{% block activity_extra_controls %}
+<div class="trakaido-control">
+    <label for="study-mode-select">Study mode</label>
+    <select id="study-mode-select" name="study_mode" onchange="this.form.submit()">
+        {% for mode in study_modes %}
+        <option value="{{ mode }}" {% if mode == study_mode %}selected{% endif %}>
+            {% if mode == "target-to-source" %}Listen → Interface{% else %}Listen → Target{% endif %}
+        </option>
+        {% endfor %}
+    </select>
+</div>
+{% endblock %}
+
+{% block activity_scripts %}
+<script>
+(function () {
+  var questions = {{ questions_json|safe }};
+  var audio = new Audio();
+  var currentBtn = null;
+
+  audio.addEventListener("ended", function () {
+    if (currentBtn) currentBtn.classList.remove("is-playing");
+    currentBtn = null;
+  });
+
+  function playAudio(url, btn) {
+    if (currentBtn) currentBtn.classList.remove("is-playing");
+    audio.src = url;
+    audio.play().then(function () {
+      if (btn) {
+        btn.classList.add("is-playing");
+        currentBtn = btn;
+      }
+    }).catch(function () {});
+  }
+
+  function render(q, idx) {
+    var area = document.getElementById("tk-activity-area");
+
+    var html =
+      '<div class="tk-listen-prompt">' +
+        '<button class="tk-listen-play" id="tk-listen-play">' +
+          '<span class="tk-listen-icon">&#9654;</span>' +
+          '<span>Play Audio</span>' +
+        '</button>' +
+      '</div>' +
+      '<div class="tk-options" id="tk-options">';
+
+    for (var i = 0; i < q.options.length; i++) {
+      html +=
+        '<button class="tk-option-btn" data-idx="' + i + '">' +
+          escapeHtml(q.options[i].text) +
+        '</button>';
+    }
+    html += '</div>' +
+      '<div class="tk-feedback" id="tk-feedback"></div>';
+
+    area.innerHTML = html;
+
+    var playBtn = document.getElementById("tk-listen-play");
+    playBtn.addEventListener("click", function () {
+      playAudio(q.audio_url, playBtn);
+    });
+
+    // Auto-play on render
+    setTimeout(function () {
+      playAudio(q.audio_url, playBtn);
+    }, 200);
+
+    var buttons = area.querySelectorAll(".tk-option-btn");
+    for (var j = 0; j < buttons.length; j++) {
+      buttons[j].addEventListener("click", function (e) {
+        handleClick(e, q);
+      });
+    }
+  }
+
+  function handleClick(e, q) {
+    var btn = e.currentTarget;
+    var selectedIdx = parseInt(btn.getAttribute("data-idx"), 10);
+    var selected = q.options[selectedIdx];
+    var isCorrect = selected.correct;
+    TrakaidoQuiz.recordAnswer(isCorrect);
+
+    var allBtns = document.querySelectorAll("#tk-options .tk-option-btn");
+    for (var k = 0; k < allBtns.length; k++) {
+      allBtns[k].disabled = true;
+      var opt = q.options[parseInt(allBtns[k].getAttribute("data-idx"), 10)];
+      if (opt.correct) {
+        allBtns[k].classList.add("tk-correct");
+      } else if (k === selectedIdx && !isCorrect) {
+        allBtns[k].classList.add("tk-incorrect");
+      } else {
+        allBtns[k].classList.add("tk-unselected");
+      }
+    }
+
+    var fb = document.getElementById("tk-feedback");
+    if (fb) {
+      var msg = isCorrect ? "Correct!" : "Incorrect — the answer is " + q.correct_answer;
+      fb.textContent = msg;
+      fb.className = "tk-feedback " + (isCorrect ? "tk-fb-correct" : "tk-fb-incorrect");
+    }
+
+    // Show the target word after answering
+    var prompt = document.querySelector(".tk-listen-prompt");
+    if (prompt) {
+      var reveal = document.createElement("div");
+      reveal.className = "tk-listen-reveal";
+      reveal.textContent = q.target_word;
+      prompt.appendChild(reveal);
+    }
+  }
+
+  function escapeHtml(s) {
+    var d = document.createElement("div");
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+
+  TrakaidoQuiz.init({ questions: questions, renderer: render });
+})();
+</script>
+{% endblock %}
