@@ -15,14 +15,29 @@
 
     <div class="trakaido-activity-grid">
         <a class="trakaido-activity-card" href="{{ url_for('trakaido.compare_random') }}">
-            <div class="trakaido-activity-icon">↔</div>
+            <div class="trakaido-activity-icon">&#8596;</div>
             <h2>Sentence Comparison</h2>
             <p>Word-by-word interlinear view of a random sentence in two languages.</p>
         </a>
         <a class="trakaido-activity-card" href="{{ url_for('trakaido.lemma_search') }}">
-            <div class="trakaido-activity-icon">📖</div>
+            <div class="trakaido-activity-icon">&#128214;</div>
             <h2>Lemma View</h2>
             <p>Look up a lemma to see its translation, forms, and audio in two languages.</p>
+        </a>
+        <a class="trakaido-activity-card" href="{{ url_for('trakaido_activities.spelling_quiz') }}">
+            <div class="trakaido-activity-icon">&#9998;</div>
+            <h2>Spelling Quiz</h2>
+            <p>Pick the correct letter or digraph to complete a word from confusable options.</p>
+        </a>
+        <a class="trakaido-activity-card" href="{{ url_for('trakaido_activities.category_choice') }}">
+            <div class="trakaido-activity-icon">&#9783;</div>
+            <h2>Category Choice</h2>
+            <p>Given a semantic category, pick the word that belongs.</p>
+        </a>
+        <a class="trakaido-activity-card" href="{{ url_for('trakaido_activities.sentence_completion') }}">
+            <div class="trakaido-activity-icon">&#9999;</div>
+            <h2>Sentence Completion</h2>
+            <p>Choose the missing word to complete a sentence.</p>
         </a>
     </div>
 </div>

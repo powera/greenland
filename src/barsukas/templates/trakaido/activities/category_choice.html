@@ -1,0 +1,85 @@
+{% extends "trakaido/activities/base_activity.html" %}
+
+{% block title %}Category Choice{% endblock %}
+{% block activity_title %}Category Choice{% endblock %}
+{% block activity_subtitle %}Pick the word that belongs to the shown category.{% endblock %}
+
+{% block activity_scripts %}
+<script>
+(function () {
+  var questions = {{ questions_json|safe }};
+
+  function render(q, idx) {
+    var area = document.getElementById("tk-activity-area");
+
+    var html =
+      '<div class="tk-cc-prompt">' +
+        '<div class="tk-cc-category">' + escapeHtml(q.category) + '</div>' +
+        '<div class="tk-cc-hint">Which word belongs to this category?</div>' +
+      '</div>' +
+      '<div class="tk-options" id="tk-options">';
+
+    for (var i = 0; i < q.options.length; i++) {
+      var o = q.options[i];
+      html +=
+        '<button class="tk-option-btn" data-idx="' + i + '">' +
+          '<span class="tk-opt-foreign">' + escapeHtml(o.foreign) + '</span>' +
+        '</button>';
+    }
+    html += '</div>' +
+      '<div class="tk-feedback" id="tk-feedback"></div>';
+
+    area.innerHTML = html;
+
+    var buttons = area.querySelectorAll(".tk-option-btn");
+    for (var j = 0; j < buttons.length; j++) {
+      buttons[j].addEventListener("click", function (e) {
+        handleClick(e, q);
+      });
+    }
+  }
+
+  function handleClick(e, q) {
+    var btn = e.currentTarget;
+    var selectedIdx = parseInt(btn.getAttribute("data-idx"), 10);
+    var selected = q.options[selectedIdx];
+    var isCorrect = selected.correct;
+    TrakaidoQuiz.recordAnswer(isCorrect);
+
+    var allBtns = document.querySelectorAll("#tk-options .tk-option-btn");
+    for (var k = 0; k < allBtns.length; k++) {
+      allBtns[k].disabled = true;
+      var opt = q.options[parseInt(allBtns[k].getAttribute("data-idx"), 10)];
+      if (opt.correct) {
+        allBtns[k].classList.add("tk-correct");
+      } else if (k === selectedIdx && !isCorrect) {
+        allBtns[k].classList.add("tk-incorrect");
+      } else {
+        allBtns[k].classList.add("tk-unselected");
+      }
+      // Show English after answering
+      var eng = document.createElement("span");
+      eng.className = "tk-opt-english";
+      eng.textContent = "(" + opt.english + ")";
+      allBtns[k].appendChild(eng);
+    }
+
+    var fb = document.getElementById("tk-feedback");
+    if (fb) {
+      fb.textContent = isCorrect
+        ? "Correct!"
+        : "Incorrect — the answer is " + q.correct_foreign + " (" + q.correct_english + ")";
+      fb.className = "tk-feedback " + (isCorrect ? "tk-fb-correct" : "tk-fb-incorrect");
+    }
+  }
+
+  function escapeHtml(s) {
+    var d = document.createElement("div");
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+
+  TrakaidoQuiz.init({ questions: questions, renderer: render });
+})();
+</script>
+{% endblock %}

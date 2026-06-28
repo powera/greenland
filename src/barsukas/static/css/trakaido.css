@@ -471,3 +471,222 @@
     font-size: 0.9rem;
     margin-top: 0.2rem;
 }
+
+/* =========================================================
+   Activity quiz styles
+   ========================================================= */
+
+/* Progress bar */
+.tk-progress-wrapper {
+    margin-bottom: 1rem;
+}
+
+.tk-progress-text {
+    font-size: 0.85rem;
+    color: var(--tk-text-muted);
+    margin-bottom: 0.35rem;
+}
+
+.tk-progress-track {
+    height: 6px;
+    background: var(--tk-border);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.tk-progress-fill {
+    height: 100%;
+    background: var(--tk-primary);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+/* Activity area */
+.tk-activity-area {
+    min-height: 220px;
+}
+
+/* Option buttons */
+.tk-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.65rem;
+    margin-top: 1.25rem;
+}
+
+.tk-option-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85rem 1rem;
+    background: var(--tk-card-bg);
+    border: 2px solid var(--tk-border);
+    border-radius: 8px;
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--tk-text);
+    cursor: pointer;
+    transition: border-color 0.12s ease, background-color 0.12s ease, transform 0.08s ease;
+}
+
+.tk-option-btn:hover:not(:disabled) {
+    border-color: var(--tk-primary);
+    background: rgba(0, 149, 255, 0.04);
+    transform: translateY(-1px);
+}
+
+.tk-option-btn:disabled {
+    cursor: default;
+}
+
+.tk-option-btn.tk-correct {
+    border-color: #16a34a;
+    background: rgba(22, 163, 74, 0.08);
+    color: #15803d;
+}
+
+.tk-option-btn.tk-incorrect {
+    border-color: #dc2626;
+    background: rgba(220, 38, 38, 0.08);
+    color: #b91c1c;
+}
+
+.tk-option-btn.tk-unselected {
+    opacity: 0.45;
+}
+
+.tk-opt-foreign {
+    font-weight: 600;
+}
+
+.tk-opt-english {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.82rem;
+    color: var(--tk-text-muted);
+    font-weight: 400;
+}
+
+/* Feedback line */
+.tk-feedback {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    min-height: 1.4em;
+}
+
+.tk-fb-correct {
+    color: #16a34a;
+}
+
+.tk-fb-incorrect {
+    color: #dc2626;
+}
+
+/* Navigation buttons */
+.tk-nav-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.75rem;
+}
+
+/* Spelling Quiz specifics */
+.tk-sq-prompt {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.tk-sq-english {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--tk-text);
+}
+
+.tk-sq-definition {
+    font-size: 0.9rem;
+    color: var(--tk-text-muted);
+    margin-top: 0.15rem;
+}
+
+.tk-sq-word {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin: 1rem 0;
+    color: var(--tk-text);
+}
+
+.tk-sq-blank {
+    display: inline-block;
+    min-width: 1.2em;
+    border-bottom: 3px solid var(--tk-primary);
+    margin: 0 0.08em;
+    text-align: center;
+    color: transparent;
+}
+
+.tk-sq-blank.tk-sq-revealed {
+    color: var(--tk-primary);
+    border-bottom-color: transparent;
+}
+
+/* Category Choice specifics */
+.tk-cc-prompt {
+    text-align: center;
+    margin-bottom: 0.75rem;
+}
+
+.tk-cc-category {
+    display: inline-block;
+    padding: 0.4rem 1.1rem;
+    background: var(--tk-primary);
+    color: white;
+    border-radius: 999px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.tk-cc-hint {
+    color: var(--tk-text-muted);
+    font-size: 0.9rem;
+    margin-top: 0.6rem;
+}
+
+/* Sentence Completion specifics */
+.tk-sc-prompt {
+    margin-bottom: 0.75rem;
+}
+
+.tk-sc-interface {
+    font-size: 1.05rem;
+    color: var(--tk-text-muted);
+    line-height: 1.4;
+    margin-bottom: 0.6rem;
+}
+
+.tk-sc-foreign {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--tk-text);
+    line-height: 1.35;
+}
+
+.tk-sc-label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+@media (max-width: 540px) {
+    .tk-options {
+        grid-template-columns: 1fr 1fr;
+    }
+    .tk-sq-word {
+        font-size: 1.6rem;
+    }
+}

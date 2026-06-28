@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Trakaido Activities{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/trakaido.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="trakaido-page">
+    <div class="trakaido-hero">
+        <h1>Trakaido Activities</h1>
+        <p class="trakaido-subtitle">Interactive language-learning activities drawn from the Barsukas database.</p>
+    </div>
+
+    <div class="trakaido-activity-grid">
+        <a class="trakaido-activity-card" href="{{ url_for('trakaido_activities.spelling_quiz') }}">
+            <div class="trakaido-activity-icon">&#9998;</div>
+            <h2>Spelling Quiz</h2>
+            <p>A word is shown with a missing letter or digraph. Pick the correct spelling from confusable options.</p>
+        </a>
+        <a class="trakaido-activity-card" href="{{ url_for('trakaido_activities.category_choice') }}">
+            <div class="trakaido-activity-icon">&#9783;</div>
+            <h2>Category Choice</h2>
+            <p>Given a semantic category (animals, food, etc.), pick the word that belongs.</p>
+        </a>
+        <a class="trakaido-activity-card" href="{{ url_for('trakaido_activities.sentence_completion') }}">
+            <div class="trakaido-activity-icon">&#9999;</div>
+            <h2>Sentence Completion</h2>
+            <p>A sentence is shown with one word blanked out. Choose the missing word from four options.</p>
+        </a>
+    </div>
+</div>
+{% endblock %}
