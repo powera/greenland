@@ -33,6 +33,7 @@
                 {% endfor %}
             </select>
         </div>
+        {% block activity_extra_controls %}{% endblock %}
         <input type="hidden" name="interface_lang" value="{{ interface_lang }}">
     </form>
 

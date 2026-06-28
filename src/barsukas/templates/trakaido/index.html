@@ -39,6 +39,16 @@
             <h2>Sentence Completion</h2>
             <p>Choose the missing word to complete a sentence.</p>
         </a>
+        <a class="trakaido-activity-card" href="{{ url_for('trakaido_activities.multiple_choice') }}">
+            <div class="trakaido-activity-icon">&#10004;</div>
+            <h2>Multiple Choice</h2>
+            <p>Translate a word by picking the correct option from four choices.</p>
+        </a>
+        <a class="trakaido-activity-card" href="{{ url_for('trakaido_activities.listening') }}">
+            <div class="trakaido-activity-icon">&#127911;</div>
+            <h2>Listening</h2>
+            <p>Listen to a word and identify it from four options.</p>
+        </a>
     </div>
 </div>
 {% endblock %}

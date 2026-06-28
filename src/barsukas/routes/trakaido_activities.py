@@ -10,13 +10,14 @@ selects which difficulty band to draw words from.
 
 import json
 import random
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
-from flask import Blueprint, g, render_template, request
+from flask import Blueprint, g, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 from sqlalchemy import func
 
 from storage.models.schema import (
+    AudioQualityReview,
     Lemma,
     LemmaTranslation,
     Sentence,
@@ -438,6 +439,167 @@ def _build_sentence_completion_questions(
 
 
 # ---------------------------------------------------------------------------
+# Multiple Choice
+# ---------------------------------------------------------------------------
+
+_STUDY_MODES = ["target-to-source", "source-to-target"]
+
+
+def _build_multiple_choice_questions(
+    words: List[Dict[str, Any]], study_mode: str
+) -> List[Dict[str, Any]]:
+    """Generate multiple-choice translation questions.
+
+    study_mode:
+      - "target-to-source": show foreign word, pick the English meaning
+      - "source-to-target": show English word, pick the foreign translation
+    """
+    if len(words) < 4:
+        return []
+
+    questions: List[Dict[str, Any]] = []
+    random.shuffle(words)
+
+    for word_data in words:
+        if len(questions) >= _QUESTIONS_PER_ROUND:
+            break
+
+        decoys = [
+            w
+            for w in words
+            if w["id"] != word_data["id"]
+            and w["foreign"].lower() != word_data["foreign"].lower()
+            and w["english"].lower() != word_data["english"].lower()
+        ]
+        if len(decoys) < 3:
+            continue
+
+        random.shuffle(decoys)
+        option_words = [word_data] + decoys[:3]
+        random.shuffle(option_words)
+
+        if study_mode == "source-to-target":
+            prompt_text = word_data["english"]
+            prompt_sub = word_data["definition"] or ""
+            options = [
+                {"text": o["foreign"], "correct": o["id"] == word_data["id"]} for o in option_words
+            ]
+            correct_display = word_data["foreign"]
+        else:
+            prompt_text = word_data["foreign"]
+            prompt_sub = ""
+            options = [
+                {"text": o["english"], "correct": o["id"] == word_data["id"]} for o in option_words
+            ]
+            correct_display = word_data["english"]
+
+        questions.append(
+            {
+                "prompt": prompt_text,
+                "prompt_sub": prompt_sub,
+                "correct_answer": correct_display,
+                "options": options,
+            }
+        )
+
+    return questions
+
+
+# ---------------------------------------------------------------------------
+# Listening
+# ---------------------------------------------------------------------------
+
+_AUDIO_STATUS_PRIORITY: Dict[str, int] = {
+    "approved": 0,
+    "approved_with_issues": 1,
+    "pending_review": 2,
+    "needs_replacement": 3,
+}
+
+
+def _pick_lemma_audio(lemma_id: int, language_code: str) -> Optional[AudioQualityReview]:
+    """Return the best available lemma audio review, or None."""
+    reviews = (
+        g.db.query(AudioQualityReview)
+        .filter(AudioQualityReview.lemma_id == lemma_id)
+        .filter(AudioQualityReview.language_code == language_code)
+        .filter(AudioQualityReview.sentence_id.is_(None))
+        .all()
+    )
+    if not reviews:
+        return None
+    reviews.sort(key=lambda r: (_AUDIO_STATUS_PRIORITY.get(r.status, 99), r.id))
+    return cast(AudioQualityReview, reviews[0])
+
+
+def _build_listening_questions(
+    words: List[Dict[str, Any]], foreign_lang: str, study_mode: str
+) -> List[Dict[str, Any]]:
+    """Generate listening quiz questions — only words with audio."""
+    if len(words) < 4:
+        return []
+
+    words_with_audio: List[Dict[str, Any]] = []
+    for word_data in words:
+        audio = _pick_lemma_audio(word_data["id"], foreign_lang)
+        if audio is not None:
+            word_data_copy = dict(word_data)
+            word_data_copy["audio_url"] = url_for(
+                "audio.serve_audio_file",
+                language=audio.language_code,
+                voice=audio.voice_name,
+                filename=audio.filename,
+            )
+            words_with_audio.append(word_data_copy)
+
+    if len(words_with_audio) < 4:
+        return []
+
+    questions: List[Dict[str, Any]] = []
+    random.shuffle(words_with_audio)
+
+    for word_data in words_with_audio:
+        if len(questions) >= _QUESTIONS_PER_ROUND:
+            break
+
+        decoys = [
+            w
+            for w in words_with_audio
+            if w["id"] != word_data["id"]
+            and w["foreign"].lower() != word_data["foreign"].lower()
+            and w["english"].lower() != word_data["english"].lower()
+        ]
+        if len(decoys) < 3:
+            continue
+
+        random.shuffle(decoys)
+        option_words = [word_data] + decoys[:3]
+        random.shuffle(option_words)
+
+        if study_mode == "target-to-target":
+            options = [
+                {"text": o["foreign"], "correct": o["id"] == word_data["id"]} for o in option_words
+            ]
+            correct_display = word_data["foreign"]
+        else:
+            options = [
+                {"text": o["english"], "correct": o["id"] == word_data["id"]} for o in option_words
+            ]
+            correct_display = word_data["english"]
+
+        questions.append(
+            {
+                "audio_url": word_data["audio_url"],
+                "correct_answer": correct_display,
+                "foreign_word": word_data["foreign"],
+                "options": options,
+            }
+        )
+
+    return questions
+
+
+# ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
 
@@ -498,5 +660,50 @@ def sentence_completion() -> ResponseReturnValue:
         "trakaido/activities/sentence_completion.html",
         questions_json=json.dumps(questions, ensure_ascii=False),
         question_count=len(questions),
+        **_common_template_vars(level, interface_lang, foreign_lang),
+    )
+
+
+@bp.route("/multiple-choice")
+def multiple_choice() -> ResponseReturnValue:
+    """Multiple choice translation activity."""
+    level, interface_lang, foreign_lang = _parse_activity_params()
+    study_mode = request.args.get("study_mode", "target-to-source")
+    if study_mode not in _STUDY_MODES:
+        study_mode = "target-to-source"
+
+    words = _fetch_words_at_level(level, foreign_lang, limit=40)
+    questions = _build_multiple_choice_questions(words, study_mode)
+
+    return render_template(
+        "trakaido/activities/multiple_choice.html",
+        questions_json=json.dumps(questions, ensure_ascii=False),
+        question_count=len(questions),
+        study_mode=study_mode,
+        study_modes=_STUDY_MODES,
+        **_common_template_vars(level, interface_lang, foreign_lang),
+    )
+
+
+_LISTENING_STUDY_MODES = ["target-to-source", "target-to-target"]
+
+
+@bp.route("/listening")
+def listening() -> ResponseReturnValue:
+    """Listening comprehension activity."""
+    level, interface_lang, foreign_lang = _parse_activity_params()
+    study_mode = request.args.get("study_mode", "target-to-source")
+    if study_mode not in _LISTENING_STUDY_MODES:
+        study_mode = "target-to-source"
+
+    words = _fetch_words_at_level(level, foreign_lang, limit=60)
+    questions = _build_listening_questions(words, foreign_lang, study_mode)
+
+    return render_template(
+        "trakaido/activities/listening.html",
+        questions_json=json.dumps(questions, ensure_ascii=False),
+        question_count=len(questions),
+        study_mode=study_mode,
+        study_modes=_LISTENING_STUDY_MODES,
         **_common_template_vars(level, interface_lang, foreign_lang),
     )
