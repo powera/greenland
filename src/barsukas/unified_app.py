@@ -200,6 +200,7 @@ def main() -> None:
         os.environ["USE_WORD2VEC"] = "true"
 
     # Determine backend type
+    db_display: Optional[str] = None
     if args.postgres or os.environ.get("USE_POSTGRES_BACKEND") == "true":
         # PostgreSQL mode - build URL from template + key
         try:
@@ -209,9 +210,10 @@ def main() -> None:
             logger.info("PostgreSQL mode: connecting to Supabase")
             db_display = "PostgreSQL (Supabase)"
         except Exception as e:
-            logger.error(f"Failed to build PostgreSQL URL: {e}")
-            sys.exit(1)
-    elif persona and persona.use_jsonl:
+            logger.warning(f"PostgreSQL credentials not available ({e}), falling back to SQLite")
+            args.postgres = False
+
+    if db_display is None and persona and persona.use_jsonl:
         # JSONL mode from persona (e.g., GOLDEN)
         repo_root = Path(__file__).parent.parent.parent
         jsonl_dir = repo_root / (persona.jsonl_data_dir or "data/release")
@@ -221,11 +223,11 @@ def main() -> None:
         os.environ["STORAGE_BACKEND"] = "jsonl"
         os.environ["JSONL_DATA_DIR"] = str(jsonl_dir)
         db_display = f"JSONL ({jsonl_dir})"
-    elif os.environ.get("STORAGE_BACKEND") == "jsonl":
+    elif db_display is None and os.environ.get("STORAGE_BACKEND") == "jsonl":
         # JSONL mode from environment
         jsonl_dir_env = os.environ.get("JSONL_DATA_DIR", "data/release")
         db_display = f"JSONL ({jsonl_dir_env})"
-    else:
+    elif db_display is None:
         # SQLite mode - validate database exists
         if not Path(Config.DB_PATH).exists():
             logger.error(f"Database not found at {Config.DB_PATH}")
