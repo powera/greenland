@@ -10,7 +10,7 @@
     <select id="study-mode-select" name="study_mode" onchange="this.form.submit()">
         {% for mode in study_modes %}
         <option value="{{ mode }}" {% if mode == study_mode %}selected{% endif %}>
-            {% if mode == "target-to-source" %}Listen → English{% else %}Listen → Foreign{% endif %}
+            {% if mode == "target-to-source" %}Listen → Interface{% else %}Listen → Target{% endif %}
         </option>
         {% endfor %}
     </select>
@@ -108,12 +108,12 @@
       fb.className = "tk-feedback " + (isCorrect ? "tk-fb-correct" : "tk-fb-incorrect");
     }
 
-    // Show the foreign word after answering
+    // Show the target word after answering
     var prompt = document.querySelector(".tk-listen-prompt");
     if (prompt) {
       var reveal = document.createElement("div");
       reveal.className = "tk-listen-reveal";
-      reveal.textContent = q.foreign_word;
+      reveal.textContent = q.target_word;
       prompt.appendChild(reveal);
     }
   }

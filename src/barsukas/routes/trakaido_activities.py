@@ -591,7 +591,7 @@ def _build_listening_questions(
             {
                 "audio_url": word_data["audio_url"],
                 "correct_answer": correct_display,
-                "foreign_word": word_data["foreign"],
+                "target_word": word_data["foreign"],
                 "options": options,
             }
         )

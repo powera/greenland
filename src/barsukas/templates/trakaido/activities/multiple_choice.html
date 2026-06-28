@@ -10,7 +10,7 @@
     <select id="study-mode-select" name="study_mode" onchange="this.form.submit()">
         {% for mode in study_modes %}
         <option value="{{ mode }}" {% if mode == study_mode %}selected{% endif %}>
-            {% if mode == "target-to-source" %}Foreign → English{% else %}English → Foreign{% endif %}
+            {% if mode == "target-to-source" %}Target → Interface{% else %}Interface → Target{% endif %}
         </option>
         {% endfor %}
     </select>
