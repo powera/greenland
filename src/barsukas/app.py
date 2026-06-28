@@ -137,8 +137,11 @@ def create_app(
             try:
                 postgres_url = DataSourceConfig.build_postgres_url()
             except Exception as e:
-                print(f"Error building PostgreSQL URL: {e}", file=sys.stderr)
-                sys.exit(1)
+                print(
+                    f"Warning: PostgreSQL credentials not available ({e}), "
+                    f"falling back to SQLite",
+                    file=sys.stderr,
+                )
 
     if postgres_url:
         # PostgreSQL backend
@@ -197,27 +200,36 @@ def create_app(
         try:
             concepts_postgres_url = DataSourceConfig.build_postgres_url()
         except Exception as concepts_exc:
-            print(f"Error building PostgreSQL URL for concepts: {concepts_exc}", file=sys.stderr)
-            sys.exit(1)
+            print(
+                f"Warning: Concepts PostgreSQL credentials not available ({concepts_exc}), "
+                f"concepts DB disabled",
+                file=sys.stderr,
+            )
+            concepts_postgres_url = None
 
-        concepts_backend_config = DataSourceConfig(
-            backend_type=BackendType.POSTGRES,
-            postgres_url=concepts_postgres_url,
-            use_word2vec=use_word2vec,
-        )
-
-        # golden/hosted connect read-only: writes/DDL are rejected at the server,
-        # not merely gated by CONCEPTS_WRITABLE route checks.
-        concepts_readonly = os.environ.get("BARSUKAS_CONCEPTS_READONLY") == "true"
-
-        def concepts_session_factory() -> Session:
-            return cast(
-                Session, create_session(concepts_backend_config, readonly=concepts_readonly)
+        if concepts_postgres_url:
+            concepts_backend_config = DataSourceConfig(
+                backend_type=BackendType.POSTGRES,
+                postgres_url=concepts_postgres_url,
+                use_word2vec=use_word2vec,
             )
 
-        app.concepts_db_session_factory = concepts_session_factory
-        app.config["CONCEPTS_BACKEND"] = "postgres"
-        app.config["CONCEPTS_WRITABLE"] = not concepts_readonly
+            # golden/hosted connect read-only: writes/DDL are rejected at the server,
+            # not merely gated by CONCEPTS_WRITABLE route checks.
+            concepts_readonly = os.environ.get("BARSUKAS_CONCEPTS_READONLY") == "true"
+
+            def concepts_session_factory() -> Session:
+                return cast(
+                    Session,
+                    create_session(concepts_backend_config, readonly=concepts_readonly),
+                )
+
+            app.concepts_db_session_factory = concepts_session_factory
+            app.config["CONCEPTS_BACKEND"] = "postgres"
+            app.config["CONCEPTS_WRITABLE"] = not concepts_readonly
+        else:
+            app.config["CONCEPTS_BACKEND"] = backend_config.backend_type.value
+            app.config["CONCEPTS_WRITABLE"] = False
     else:
         app.config["CONCEPTS_BACKEND"] = backend_config.backend_type.value
         app.config["CONCEPTS_WRITABLE"] = False
