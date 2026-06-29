@@ -5,9 +5,11 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PEER_DIR="$ROOT_DIR/peer-repo"
 
 required_files=(
+  "newslettr-status.md"
+  "atacama-status.md"
   "trakaido-status.md"
   "greenland-status.md"
-  "atacama-status.md"
+  "trakaido-prodconfig-status.md"
 )
 
 required_sections=(
