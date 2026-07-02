@@ -1,0 +1,94 @@
+{% extends "trakaido/activities/base_activity.html" %}
+
+{% block title %}Flashcards{% endblock %}
+{% block activity_title %}Flashcards{% endblock %}
+{% block activity_subtitle %}Flip the card, then grade yourself honestly.{% endblock %}
+
+{% block activity_extra_controls %}
+<div class="trakaido-control">
+    <label for="study-mode-select">Study mode</label>
+    <select id="study-mode-select" name="study_mode" onchange="this.form.submit()">
+        {% for mode in study_modes %}
+        <option value="{{ mode }}" {% if mode == study_mode %}selected{% endif %}>
+            {% if mode == "target-to-source" %}Target → Interface{% else %}Interface → Target{% endif %}
+        </option>
+        {% endfor %}
+    </select>
+</div>
+{% endblock %}
+
+{% block activity_scripts %}
+<script>
+(function () {
+  var questions = {{ questions_json|safe }};
+
+  function render(q, idx) {
+    var area = document.getElementById("tk-activity-area");
+
+    var html =
+      '<div class="tk-flashcard" id="tk-flashcard" tabindex="0">' +
+        '<div class="tk-fc-front">' +
+          '<div class="tk-fc-word">' + escapeHtml(q.front) + '</div>';
+    if (q.front_sub) {
+      html += '<div class="tk-fc-sub">' + escapeHtml(q.front_sub) + '</div>';
+    }
+    html += '</div>' +
+        '<div class="tk-fc-back" id="tk-fc-back" hidden>' +
+          '<div class="tk-fc-word">' + escapeHtml(q.back) + '</div>';
+    if (q.back_sub) {
+      html += '<div class="tk-fc-sub">' + escapeHtml(q.back_sub) + '</div>';
+    }
+    html += '</div>' +
+        '<div class="tk-fc-hint" id="tk-fc-hint">Click to reveal</div>' +
+      '</div>' +
+      '<div class="tk-fc-actions" id="tk-fc-actions" hidden>' +
+        '<button class="tk-option-btn tk-fc-missed" id="tk-fc-missed">&#10007; Missed it</button>' +
+        '<button class="tk-option-btn tk-fc-got" id="tk-fc-got">&#10003; Got it</button>' +
+      '</div>';
+
+    area.innerHTML = html;
+
+    var card = document.getElementById("tk-flashcard");
+    card.addEventListener("click", reveal);
+    card.addEventListener("keydown", function (e) {
+      if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        reveal();
+      }
+    });
+    document.getElementById("tk-fc-got").addEventListener("click", function () {
+      grade(true);
+    });
+    document.getElementById("tk-fc-missed").addEventListener("click", function () {
+      grade(false);
+    });
+  }
+
+  function reveal() {
+    var back = document.getElementById("tk-fc-back");
+    if (!back || !back.hidden) return;
+    back.hidden = false;
+    document.getElementById("tk-fc-hint").hidden = true;
+    document.getElementById("tk-fc-actions").hidden = false;
+  }
+
+  function grade(gotIt) {
+    TrakaidoQuiz.recordAnswer(gotIt);
+    TrakaidoQuiz.next();
+  }
+
+  function escapeHtml(s) {
+    var d = document.createElement("div");
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+
+  // Flashcards advance as soon as they are graded, so the shared Next
+  // button is redundant here.
+  var nav = document.getElementById("tk-nav-buttons");
+  if (nav) nav.style.display = "none";
+
+  TrakaidoQuiz.init({ questions: questions, renderer: render });
+})();
+</script>
+{% endblock %}

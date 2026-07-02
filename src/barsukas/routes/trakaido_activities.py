@@ -2,10 +2,13 @@
 
 """Trakaido interactive activities served by Barsukas.
 
-Ports the "weird" Trakaido activities (spelling quiz, category choice,
-sentence completion) into server-rendered pages using the Greenland UI
-patterns.  No user state is persisted; a level dropdown on each page
-selects which difficulty band to draw words from.
+Ports the Trakaido web activities (spelling quiz, category choice,
+sentence completion, multiple choice, listening, flashcards, typing,
+verb forms) into server-rendered pages using the Greenland UI patterns.
+No user state is persisted server-side; a level dropdown on each page
+selects the difficulty ceiling to draw words from.  Words below the
+selected level are still quizzed, but with exponentially decreasing
+frequency the further below the level they sit.
 """
 
 import json
@@ -16,6 +19,7 @@ from flask import Blueprint, g, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 from sqlalchemy import func
 
+from storage.models.grammar_fact import GrammarFact
 from storage.models.schema import (
     AudioQualityReview,
     Lemma,
@@ -30,7 +34,13 @@ bp = Blueprint("trakaido_activities", __name__, url_prefix="/trakaido/activities
 DEFAULT_INTERFACE_LANG = "en"
 DEFAULT_FOREIGN_LANG = "lt"
 _QUESTIONS_PER_ROUND = 10
-_LEVEL_EXPAND_RANGE = 2
+
+# Level weighting: the selected level is the ceiling.  Each level below the
+# selected one is _LEVEL_DECAY times as likely to be drawn as the level above
+# it, with a floor so long-learned words still show up occasionally.
+_LEVEL_DECAY = 0.5
+_LEVEL_WEIGHT_FLOOR = 0.05
+_POOL_FETCH_CAP = 400
 
 CONFUSION_SETS: Dict[str, List[Dict[str, Any]]] = {
     "lt": [
@@ -121,8 +131,48 @@ def _available_levels() -> List[int]:
     return [row[0] for row in rows]
 
 
+def _level_weight(selected_level: int, item_level: int) -> float:
+    """Relative draw weight for an item at *item_level* when quizzing *selected_level*."""
+    return max(_LEVEL_WEIGHT_FLOOR, _LEVEL_DECAY ** (selected_level - item_level))
+
+
+def _weighted_sample_by_level(
+    items: List[Dict[str, Any]], selected_level: int, count: int
+) -> List[Dict[str, Any]]:
+    """Sample up to *count* items, favoring the selected level.
+
+    Each item must carry a ``level`` key.  The selected level gets the
+    highest draw weight; each level below it is exponentially less likely.
+    Items are drawn without replacement, so if the preferred levels run
+    out the remaining slots fall through to whatever is left.
+    """
+    by_level: Dict[int, List[Dict[str, Any]]] = {}
+    for item in items:
+        by_level.setdefault(int(item["level"]), []).append(item)
+    for bucket in by_level.values():
+        random.shuffle(bucket)
+
+    picked: List[Dict[str, Any]] = []
+    while len(picked) < count and by_level:
+        levels = list(by_level.keys())
+        weights = [_level_weight(selected_level, lvl) for lvl in levels]
+        chosen_level = random.choices(levels, weights=weights, k=1)[0]
+        bucket = by_level[chosen_level]
+        picked.append(bucket.pop())
+        if not bucket:
+            del by_level[chosen_level]
+
+    random.shuffle(picked)
+    return picked
+
+
 def _fetch_words_at_level(level: int, foreign_lang: str, limit: int = 40) -> List[Dict[str, Any]]:
-    """Fetch lemmas near the given difficulty level with foreign translations."""
+    """Fetch lemmas at or below the given difficulty level with foreign translations.
+
+    The selected level is a ceiling: words above it never appear, and words
+    below it are included with exponentially decreasing frequency the further
+    below the level they sit (see _weighted_sample_by_level).
+    """
     rows = (
         g.db.query(Lemma, LemmaTranslation.translation)
         .join(LemmaTranslation, LemmaTranslation.lemma_id == Lemma.id)
@@ -130,17 +180,9 @@ def _fetch_words_at_level(level: int, foreign_lang: str, limit: int = 40) -> Lis
         .filter(LemmaTranslation.translation.isnot(None))
         .filter(LemmaTranslation.translation != "")
         .filter(Lemma.difficulty_level.isnot(None))
-        .filter(
-            Lemma.difficulty_level.between(
-                max(1, level - _LEVEL_EXPAND_RANGE),
-                level + _LEVEL_EXPAND_RANGE,
-            )
-        )
-        .order_by(
-            func.abs(Lemma.difficulty_level - level),
-            func.random(),
-        )
-        .limit(limit)
+        .filter(Lemma.difficulty_level.between(1, level))
+        .order_by(func.random())
+        .limit(_POOL_FETCH_CAP)
         .all()
     )
 
@@ -157,7 +199,7 @@ def _fetch_words_at_level(level: int, foreign_lang: str, limit: int = 40) -> Lis
                 "level": lemma.difficulty_level,
             }
         )
-    return words
+    return _weighted_sample_by_level(words, level, limit)
 
 
 # ---------------------------------------------------------------------------
@@ -334,24 +376,28 @@ def _build_sentence_completion_questions(
     """Generate sentence-completion questions."""
     content_roles = {"verb", "noun", "subject", "object", "adjective", "adverb"}
 
+    # A sentence's level is the hardest word it contains; only sentences whose
+    # hardest word is at or below the selected level qualify, and easier
+    # sentences are drawn less often via the shared level weighting.
     sentence_rows = (
-        g.db.query(Sentence)
+        g.db.query(Sentence, func.max(Lemma.difficulty_level).label("sentence_level"))
         .join(SentenceWord, SentenceWord.sentence_id == Sentence.id)
         .join(Lemma, Lemma.id == SentenceWord.lemma_id)
         .filter(Sentence.rejected == False)  # noqa: E712
         .filter(SentenceWord.language_code == foreign_lang)
         .filter(Lemma.difficulty_level.isnot(None))
-        .filter(
-            Lemma.difficulty_level.between(
-                max(1, level - _LEVEL_EXPAND_RANGE),
-                level + _LEVEL_EXPAND_RANGE,
-            )
-        )
-        .distinct()
+        .filter(Lemma.difficulty_level >= 1)
+        .group_by(Sentence.id)
+        .having(func.max(Lemma.difficulty_level) <= level)
         .order_by(func.random())
-        .limit(30)
+        .limit(120)
         .all()
     )
+    sentence_items: List[Dict[str, Any]] = [
+        {"sentence": sentence, "level": sentence_level}
+        for sentence, sentence_level in sentence_rows
+    ]
+    sampled_sentences = _weighted_sample_by_level(sentence_items, level, 30)
 
     decoy_words_rows = (
         g.db.query(LemmaTranslation.translation)
@@ -360,12 +406,7 @@ def _build_sentence_completion_questions(
         .filter(LemmaTranslation.translation.isnot(None))
         .filter(LemmaTranslation.translation != "")
         .filter(Lemma.difficulty_level.isnot(None))
-        .filter(
-            Lemma.difficulty_level.between(
-                max(1, level - _LEVEL_EXPAND_RANGE),
-                level + _LEVEL_EXPAND_RANGE,
-            )
-        )
+        .filter(Lemma.difficulty_level.between(1, level))
         .order_by(func.random())
         .limit(60)
         .all()
@@ -374,7 +415,8 @@ def _build_sentence_completion_questions(
 
     questions: List[Dict[str, Any]] = []
 
-    for sentence in sentence_rows:
+    for sentence_item in sampled_sentences:
+        sentence = sentence_item["sentence"]
         if len(questions) >= _QUESTIONS_PER_ROUND:
             break
 
@@ -499,6 +541,171 @@ def _build_multiple_choice_questions(
                 "prompt_sub": prompt_sub,
                 "correct_answer": correct_display,
                 "options": options,
+            }
+        )
+
+    return questions
+
+
+# ---------------------------------------------------------------------------
+# Flashcards
+# ---------------------------------------------------------------------------
+
+
+def _build_flashcard_questions(
+    words: List[Dict[str, Any]], study_mode: str
+) -> List[Dict[str, Any]]:
+    """Generate self-graded flashcards from a word list.
+
+    study_mode:
+      - "target-to-source": show foreign word, reveal the English meaning
+      - "source-to-target": show English word, reveal the foreign translation
+    """
+    cards: List[Dict[str, Any]] = []
+    for word_data in words:
+        if study_mode == "target-to-source":
+            front = word_data["foreign"]
+            front_sub = ""
+            back = word_data["english"]
+            back_sub = word_data["definition"] or ""
+        else:
+            front = word_data["english"]
+            front_sub = word_data["definition"] or ""
+            back = word_data["foreign"]
+            back_sub = ""
+
+        cards.append(
+            {
+                "front": front,
+                "front_sub": front_sub,
+                "back": back,
+                "back_sub": back_sub,
+            }
+        )
+        if len(cards) >= _QUESTIONS_PER_ROUND:
+            break
+    return cards
+
+
+# ---------------------------------------------------------------------------
+# Typing
+# ---------------------------------------------------------------------------
+
+
+def _build_typing_questions(words: List[Dict[str, Any]], study_mode: str) -> List[Dict[str, Any]]:
+    """Generate typing questions: show a word, type its translation.
+
+    study_mode:
+      - "source-to-target": show English word, type the foreign translation
+      - "target-to-source": show foreign word, type the English meaning
+    """
+    questions: List[Dict[str, Any]] = []
+    for word_data in words:
+        if study_mode == "target-to-source":
+            prompt = word_data["foreign"]
+            prompt_sub = ""
+            answer = word_data["english"]
+        else:
+            prompt = word_data["english"]
+            prompt_sub = word_data["definition"] or ""
+            answer = word_data["foreign"]
+
+        questions.append(
+            {
+                "prompt": prompt,
+                "prompt_sub": prompt_sub,
+                "answer": answer,
+            }
+        )
+        if len(questions) >= _QUESTIONS_PER_ROUND:
+            break
+    return questions
+
+
+# ---------------------------------------------------------------------------
+# Verb Forms
+# ---------------------------------------------------------------------------
+
+_VERB_FORM_LABELS: Dict[str, str] = {
+    "3s_present": "he / she / it — present tense",
+    "3s_past": "he / she / it — past tense",
+}
+
+
+def _fetch_verbs_with_forms(level: int, foreign_lang: str) -> List[Dict[str, Any]]:
+    """Fetch verb lemmas at or below *level* that have conjugation grammar facts."""
+    fact_types = list(_VERB_FORM_LABELS.keys()) + ["infinitive"]
+    rows = (
+        g.db.query(GrammarFact, Lemma)
+        .join(Lemma, Lemma.id == GrammarFact.lemma_id)
+        .filter(GrammarFact.language_code == foreign_lang)
+        .filter(GrammarFact.fact_type.in_(fact_types))
+        .filter(GrammarFact.fact_value.isnot(None))
+        .filter(GrammarFact.fact_value != "")
+        .filter(Lemma.difficulty_level.isnot(None))
+        .filter(Lemma.difficulty_level.between(1, level))
+        .all()
+    )
+
+    by_lemma: Dict[int, Dict[str, Any]] = {}
+    for fact, lemma in rows:
+        entry = by_lemma.setdefault(
+            lemma.id,
+            {
+                "id": lemma.id,
+                "english": lemma.lemma_text,
+                "definition": lemma.definition_text,
+                "level": lemma.difficulty_level,
+                "facts": {},
+            },
+        )
+        entry["facts"][fact.fact_type] = fact.fact_value
+
+    return [
+        verb
+        for verb in by_lemma.values()
+        if any(ftype in verb["facts"] for ftype in _VERB_FORM_LABELS)
+    ]
+
+
+def _build_verb_form_questions(verbs: List[Dict[str, Any]], level: int) -> List[Dict[str, Any]]:
+    """Generate conjugation questions: pick the correct verb form."""
+    if len(verbs) < 4:
+        return []
+
+    sampled = _weighted_sample_by_level(verbs, level, _QUESTIONS_PER_ROUND)
+    questions: List[Dict[str, Any]] = []
+
+    for verb in sampled:
+        available_forms = [ftype for ftype in _VERB_FORM_LABELS if ftype in verb["facts"]]
+        if not available_forms:
+            continue
+        form_type = random.choice(available_forms)
+        correct_text: str = verb["facts"][form_type]
+
+        decoys = [
+            v["facts"][form_type]
+            for v in verbs
+            if v["id"] != verb["id"]
+            and form_type in v["facts"]
+            and v["facts"][form_type].lower() != correct_text.lower()
+        ]
+        decoys = list(dict.fromkeys(decoys))
+        if len(decoys) < 3:
+            continue
+
+        random.shuffle(decoys)
+        option_list = [correct_text] + decoys[:3]
+        random.shuffle(option_list)
+
+        questions.append(
+            {
+                "english": verb["english"],
+                "definition": verb["definition"] or "",
+                "infinitive": verb["facts"].get("infinitive", ""),
+                "form_label": _VERB_FORM_LABELS[form_type],
+                "correct_answer": correct_text,
+                "options": [{"text": o, "correct": o == correct_text} for o in option_list],
             }
         )
 
@@ -681,6 +888,63 @@ def multiple_choice() -> ResponseReturnValue:
         question_count=len(questions),
         study_mode=study_mode,
         study_modes=_STUDY_MODES,
+        **_common_template_vars(level, interface_lang, foreign_lang),
+    )
+
+
+@bp.route("/flashcards")
+def flashcards() -> ResponseReturnValue:
+    """Self-graded flashcard activity."""
+    level, interface_lang, foreign_lang = _parse_activity_params()
+    study_mode = request.args.get("study_mode", "source-to-target")
+    if study_mode not in _STUDY_MODES:
+        study_mode = "source-to-target"
+
+    words = _fetch_words_at_level(level, foreign_lang, limit=_QUESTIONS_PER_ROUND)
+    questions = _build_flashcard_questions(words, study_mode)
+
+    return render_template(
+        "trakaido/activities/flashcards.html",
+        questions_json=json.dumps(questions, ensure_ascii=False),
+        question_count=len(questions),
+        study_mode=study_mode,
+        study_modes=_STUDY_MODES,
+        **_common_template_vars(level, interface_lang, foreign_lang),
+    )
+
+
+@bp.route("/typing")
+def typing() -> ResponseReturnValue:
+    """Typing activity: type the translation of the shown word."""
+    level, interface_lang, foreign_lang = _parse_activity_params()
+    study_mode = request.args.get("study_mode", "source-to-target")
+    if study_mode not in _STUDY_MODES:
+        study_mode = "source-to-target"
+
+    words = _fetch_words_at_level(level, foreign_lang, limit=_QUESTIONS_PER_ROUND)
+    questions = _build_typing_questions(words, study_mode)
+
+    return render_template(
+        "trakaido/activities/typing.html",
+        questions_json=json.dumps(questions, ensure_ascii=False),
+        question_count=len(questions),
+        study_mode=study_mode,
+        study_modes=_STUDY_MODES,
+        **_common_template_vars(level, interface_lang, foreign_lang),
+    )
+
+
+@bp.route("/verb-forms")
+def verb_forms() -> ResponseReturnValue:
+    """Verb conjugation activity: pick the correct form of a verb."""
+    level, interface_lang, foreign_lang = _parse_activity_params()
+    verbs = _fetch_verbs_with_forms(level, foreign_lang)
+    questions = _build_verb_form_questions(verbs, level)
+
+    return render_template(
+        "trakaido/activities/verb_forms.html",
+        questions_json=json.dumps(questions, ensure_ascii=False),
+        question_count=len(questions),
         **_common_template_vars(level, interface_lang, foreign_lang),
     )
 

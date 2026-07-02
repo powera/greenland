@@ -476,29 +476,128 @@
    Activity quiz styles
    ========================================================= */
 
-/* Progress bar */
+/* Progress header: batch dots + session line */
 .tk-progress-wrapper {
     margin-bottom: 1rem;
 }
 
-.tk-progress-text {
-    font-size: 0.85rem;
-    color: var(--tk-text-muted);
+.tk-progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
     margin-bottom: 0.35rem;
 }
 
-.tk-progress-track {
-    height: 6px;
-    background: var(--tk-border);
-    border-radius: 3px;
-    overflow: hidden;
+.tk-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
 }
 
-.tk-progress-fill {
-    height: 100%;
-    background: var(--tk-primary);
-    border-radius: 3px;
-    transition: width 0.3s ease;
+.tk-dot {
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 50%;
+    background: var(--tk-border);
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tk-dot-current {
+    background: var(--tk-card-bg);
+    box-shadow: inset 0 0 0 2px var(--tk-primary);
+}
+
+.tk-dot-correct {
+    background: #16a34a;
+}
+
+.tk-dot-wrong {
+    background: #dc2626;
+}
+
+.tk-batch-score {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--tk-text);
+    white-space: nowrap;
+}
+
+.tk-session-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-height: 1.4em;
+}
+
+.tk-session-line {
+    font-size: 0.85rem;
+    color: var(--tk-text-muted);
+}
+
+.tk-session-reset {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.8rem;
+    color: var(--tk-text-muted);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.tk-session-reset:hover {
+    color: var(--tk-text);
+}
+
+/* Reset link in the activity header is hidden until there is a session. */
+.tk-session-row .tk-session-reset {
+    visibility: hidden;
+}
+
+/* Session summary strip on the activities index */
+.tk-session-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: var(--tk-card-bg);
+    border: 1px solid var(--tk-border);
+    border-radius: var(--tk-radius);
+    padding: 0.65rem 1rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--tk-shadow);
+}
+
+/* Between-round card */
+.tk-round-card {
+    text-align: center;
+    padding: 1.5rem 1rem;
+}
+
+.tk-round-headline {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--tk-text);
+}
+
+.tk-round-session {
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    color: var(--tk-text-muted);
+}
+
+.tk-round-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    margin-top: 1.25rem;
+}
+
+.tk-round-link {
+    font-size: 0.9rem;
+    color: var(--tk-primary-dark);
 }
 
 /* Activity area */
@@ -745,6 +844,129 @@
     margin-top: 0.25rem;
 }
 
+/* Flashcards specifics */
+.tk-flashcard {
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.5rem 1rem;
+    border: 2px dashed var(--tk-border);
+    border-radius: var(--tk-radius);
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.12s ease;
+}
+
+.tk-flashcard:hover {
+    border-color: var(--tk-primary);
+}
+
+.tk-fc-word {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--tk-text);
+}
+
+.tk-fc-back .tk-fc-word {
+    color: var(--tk-primary-dark);
+}
+
+.tk-fc-sub {
+    font-size: 0.9rem;
+    color: var(--tk-text-muted);
+    margin-top: 0.25rem;
+}
+
+.tk-fc-hint {
+    font-size: 0.85rem;
+    color: var(--tk-text-muted);
+    font-style: italic;
+}
+
+.tk-fc-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+    margin-top: 1rem;
+}
+
+.tk-fc-got:hover:not(:disabled) {
+    border-color: #16a34a;
+    background: rgba(22, 163, 74, 0.08);
+}
+
+.tk-fc-missed:hover:not(:disabled) {
+    border-color: #dc2626;
+    background: rgba(220, 38, 38, 0.08);
+}
+
+/* Typing specifics */
+.tk-typing-row {
+    display: flex;
+    gap: 0.65rem;
+    justify-content: center;
+    margin-top: 1.25rem;
+}
+
+.tk-typing-input {
+    flex: 1;
+    max-width: 380px;
+    padding: 0.65rem 0.8rem;
+    border: 2px solid var(--tk-border);
+    border-radius: 8px;
+    font-size: 1.1rem;
+    color: var(--tk-text);
+}
+
+.tk-typing-input:focus {
+    outline: none;
+    border-color: var(--tk-primary);
+}
+
+.tk-typing-input.tk-typing-correct {
+    border-color: #16a34a;
+    background: rgba(22, 163, 74, 0.08);
+}
+
+.tk-typing-input.tk-typing-incorrect {
+    border-color: #dc2626;
+    background: rgba(220, 38, 38, 0.08);
+}
+
+.tk-typing-giveup-row {
+    text-align: center;
+    margin-top: 0.6rem;
+}
+
+.tk-typing-giveup {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.85rem;
+    color: var(--tk-text-muted);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.tk-typing-giveup:hover:not(:disabled) {
+    color: var(--tk-text);
+}
+
+/* Verb Forms specifics */
+.tk-vf-label {
+    display: inline-block;
+    padding: 0.3rem 0.9rem;
+    background: var(--tk-primary);
+    color: white;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+}
+
 @media (max-width: 540px) {
     .tk-options {
         grid-template-columns: 1fr 1fr;
@@ -754,5 +976,12 @@
     }
     .tk-mc-word {
         font-size: 1.4rem;
+    }
+    .tk-typing-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .tk-typing-input {
+        max-width: none;
     }
 }
