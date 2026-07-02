@@ -37,11 +37,17 @@
         <input type="hidden" name="interface_lang" value="{{ interface_lang }}">
     </form>
 
-    <!-- Progress bar -->
-    <div id="tk-progress" class="tk-progress-wrapper">
-        <div id="tk-progress-text" class="tk-progress-text">Loading…</div>
-        <div class="tk-progress-track">
-            <div id="tk-progress-bar" class="tk-progress-fill" style="width:0%"></div>
+    <!-- Progress: batch dots + shared session stats -->
+    <div id="tk-progress" class="tk-progress-wrapper"
+         data-lang="{{ foreign_lang }}"
+         data-index-url="{{ url_for('trakaido_activities.activities_index') }}">
+        <div class="tk-progress-row">
+            <div id="tk-dots" class="tk-dots"></div>
+            <div id="tk-batch-score" class="tk-batch-score"></div>
+        </div>
+        <div class="tk-session-row">
+            <span id="tk-session-line" class="tk-session-line"></span>
+            <button type="button" id="tk-session-reset" class="tk-session-reset">Reset session</button>
         </div>
     </div>
 

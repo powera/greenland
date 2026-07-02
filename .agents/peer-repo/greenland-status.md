@@ -55,6 +55,16 @@ All agents follow standardized command-line interfaces via `src/agents/common_ar
 - Manage word relationships
 - Quality control and validation
 
+Barsukas also hosts the **Trakaido activities** (`/trakaido/activities/`):
+server-rendered, multi-language versions of the Trakaido web study modes
+(spelling quiz, category choice, sentence completion, multiple choice,
+listening, flashcards, typing, verb forms). These are stateless and take only
+a level parameter — the selected level acts as a ceiling, with lower-level
+words quizzed less often. Per-user stat tracking stays in the Trakaido apps
+(which are migrating to Lithuanian-only); a lightweight sessionStorage-based
+practice session (accuracy, streaks) is shared across the Greenland
+activities client-side.
+
 ### Language Support
 
 The system maintains comprehensive language code mappings in `src/storage/translation_helpers.py`, which serves as the single source of truth for:

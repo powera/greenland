@@ -1,0 +1,107 @@
+{% extends "trakaido/activities/base_activity.html" %}
+
+{% block title %}Typing{% endblock %}
+{% block activity_title %}Typing{% endblock %}
+{% block activity_subtitle %}Type the translation of the word shown.{% endblock %}
+
+{% block activity_extra_controls %}
+<div class="trakaido-control">
+    <label for="study-mode-select">Study mode</label>
+    <select id="study-mode-select" name="study_mode" onchange="this.form.submit()">
+        {% for mode in study_modes %}
+        <option value="{{ mode }}" {% if mode == study_mode %}selected{% endif %}>
+            {% if mode == "target-to-source" %}Target → Interface{% else %}Interface → Target{% endif %}
+        </option>
+        {% endfor %}
+    </select>
+</div>
+{% endblock %}
+
+{% block activity_scripts %}
+<script>
+(function () {
+  var questions = {{ questions_json|safe }};
+
+  function normalize(s) {
+    return s.normalize("NFC").toLowerCase().trim().replace(/\s+/g, " ");
+  }
+
+  function render(q, idx) {
+    var area = document.getElementById("tk-activity-area");
+
+    var html =
+      '<div class="tk-mc-prompt">' +
+        '<div class="tk-mc-word">' + escapeHtml(q.prompt) + '</div>';
+    if (q.prompt_sub) {
+      html += '<div class="tk-mc-sub">' + escapeHtml(q.prompt_sub) + '</div>';
+    }
+    html += '</div>' +
+      '<div class="tk-typing-row">' +
+        '<input type="text" id="tk-typing-input" class="tk-typing-input"' +
+        ' autocomplete="off" autocapitalize="off" spellcheck="false"' +
+        ' placeholder="Type the translation…">' +
+        '<button class="trakaido-button" id="tk-typing-check">Check</button>' +
+      '</div>' +
+      '<div class="tk-typing-giveup-row">' +
+        '<button class="tk-typing-giveup" id="tk-typing-giveup">Show answer</button>' +
+      '</div>' +
+      '<div class="tk-feedback" id="tk-feedback"></div>';
+
+    area.innerHTML = html;
+
+    var input = document.getElementById("tk-typing-input");
+    input.focus();
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        check(q);
+      }
+    });
+    document.getElementById("tk-typing-check").addEventListener("click", function () {
+      check(q);
+    });
+    document.getElementById("tk-typing-giveup").addEventListener("click", function () {
+      finish(q, false, true);
+    });
+  }
+
+  function check(q) {
+    var input = document.getElementById("tk-typing-input");
+    if (!input || input.disabled) return;
+    if (normalize(input.value) === "") return;
+    finish(q, normalize(input.value) === normalize(q.answer), false);
+  }
+
+  function finish(q, isCorrect, gaveUp) {
+    var input = document.getElementById("tk-typing-input");
+    if (!input || input.disabled) return;
+    input.disabled = true;
+    input.classList.add(isCorrect ? "tk-typing-correct" : "tk-typing-incorrect");
+    document.getElementById("tk-typing-check").disabled = true;
+    document.getElementById("tk-typing-giveup").disabled = true;
+
+    TrakaidoQuiz.recordAnswer(isCorrect);
+
+    var fb = document.getElementById("tk-feedback");
+    if (fb) {
+      if (isCorrect) {
+        fb.textContent = "Correct!";
+      } else if (gaveUp) {
+        fb.textContent = "The answer is " + q.answer;
+      } else {
+        fb.textContent = "Incorrect — the answer is " + q.answer;
+      }
+      fb.className = "tk-feedback " + (isCorrect ? "tk-fb-correct" : "tk-fb-incorrect");
+    }
+  }
+
+  function escapeHtml(s) {
+    var d = document.createElement("div");
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+
+  TrakaidoQuiz.init({ questions: questions, renderer: render });
+})();
+</script>
+{% endblock %}

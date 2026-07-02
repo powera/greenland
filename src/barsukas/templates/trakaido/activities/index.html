@@ -13,6 +13,8 @@
         <p class="trakaido-subtitle">Interactive language-learning activities drawn from the Barsukas database.</p>
     </div>
 
+    <div id="tk-session-summary" class="tk-session-summary" hidden></div>
+
     <div class="trakaido-activity-grid">
         <a class="trakaido-activity-card" href="{{ url_for('trakaido_activities.spelling_quiz') }}">
             <div class="trakaido-activity-icon">&#9998;</div>
@@ -39,6 +41,25 @@
             <h2>Listening</h2>
             <p>Listen to a word and identify it from four options.</p>
         </a>
+        <a class="trakaido-activity-card" href="{{ url_for('trakaido_activities.flashcards') }}">
+            <div class="trakaido-activity-icon">&#9635;</div>
+            <h2>Flashcards</h2>
+            <p>Flip the card to reveal the translation, then grade yourself.</p>
+        </a>
+        <a class="trakaido-activity-card" href="{{ url_for('trakaido_activities.typing') }}">
+            <div class="trakaido-activity-icon">&#9000;</div>
+            <h2>Typing</h2>
+            <p>Type the translation of the word shown — spelling counts.</p>
+        </a>
+        <a class="trakaido-activity-card" href="{{ url_for('trakaido_activities.verb_forms') }}">
+            <div class="trakaido-activity-icon">&#10227;</div>
+            <h2>Verb Forms</h2>
+            <p>Pick the correct conjugated form of a verb for the requested tense.</p>
+        </a>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/trakaido_activities.js') }}"></script>
 {% endblock %}
