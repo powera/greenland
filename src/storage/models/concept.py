@@ -206,6 +206,10 @@ class SubConcept(Base):
     main-encyclopedia listings, rankings, and generation, while keeping a
     durable record (slug + category + Q-id via the shared Wikidata index).
 
+    The divide is prominence, not topic type: a small town like Hafik files
+    here while Ankara stays a main concept, and promote/demote (see
+    storage.concept_service) move a topic across when the judgement changes.
+
     Sub-concepts share the slug conventions of :class:`Concept` (same
     normalization, no namespace prefix) but slugs are only unique *within*
     this table: a slug may exist in both tables, in which case slug-based
