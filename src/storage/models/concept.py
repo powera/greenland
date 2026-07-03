@@ -20,6 +20,7 @@ from typing import List, NamedTuple, Optional
 from sqlalchemy import (
     TIMESTAMP,
     Boolean,
+    CheckConstraint,
     Float,
     Integer,
     String,
@@ -36,7 +37,37 @@ from storage.models.schema import Base
 # treated as guidance rather than a hard floor so thin entries are not blocked.
 MAX_CONCEPT_SOURCES: int = 10
 
+# Closed vocabulary for SubConcept.category. Extend by editing this tuple; these
+# values are deliberately NOT part of Concept.concept_type. Species categories
+# divide at roughly the phylum/class level (bird_species = class Aves); a future
+# mammal_species etc. would be a sibling entry, not a widening of bird_species.
+SUB_CONCEPT_CATEGORIES: tuple = (
+    "bird_species",
+    "chess_concept",
+    "sports_team_season",
+)
+
 _WHITESPACE_RE = re.compile(r"\s+")
+
+# A wiki-link target that is a Wikidata Q-id rather than a title, e.g.
+# ``[[Q103632]]`` or ``[[Q103632|the Sicilian]]``. Q-id targets are how links
+# stay specific when a slug is ambiguous between the main and sub tables.
+_QID_TARGET_RE = re.compile(r"^Q[1-9][0-9]*$", re.IGNORECASE)
+
+
+def wiki_target_qid(target: str) -> Optional[str]:
+    """Return the canonical Q-id when a wiki-link target is a Wikidata Q-id.
+
+    Args:
+        target: A wiki-link target (raw or slug-normalized).
+
+    Returns:
+        The uppercase Q-id (e.g. "Q42") if the target has Q-id form, else None.
+    """
+    candidate = target.strip()
+    if _QID_TARGET_RE.match(candidate):
+        return candidate.upper()
+    return None
 
 
 def normalize_concept_slug(text: str) -> str:
@@ -168,6 +199,59 @@ class Concept(Base):
         return f"<Concept(id={self.id}, slug={self.slug!r}, verified={self.verified})>"
 
 
+class SubConcept(Base):
+    """A sub-encyclopedia entry: a tracked topic that is deliberately NOT a
+    main concept (e.g. a single chess opening, one team's season, one bird
+    species). Exists primarily so these topics can be filtered out of
+    main-encyclopedia listings, rankings, and generation, while keeping a
+    durable record (slug + category + Q-id via the shared Wikidata index).
+
+    Sub-concepts share the slug conventions of :class:`Concept` (same
+    normalization, no namespace prefix) but slugs are only unique *within*
+    this table: a slug may exist in both tables, in which case slug-based
+    wiki links resolve to the main concept and ``[[Q...]]`` links are used to
+    target the sub-concept specifically.
+
+    Deliberately absent for now: body/sources/generation metadata. Each can be
+    added later as a nullable column if the sub-encyclopedia grows entries.
+    """
+
+    __tablename__ = "sub_concepts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    # Canonical underscore-joined slug, same normalization as Concept.slug.
+    # Always assign via normalize_concept_slug().
+    slug: Mapped[str] = mapped_column(String, unique=True, nullable=False, index=True)
+
+    # Required category from SUB_CONCEPT_CATEGORIES (hardcoded vocabulary,
+    # separate from Concept.concept_type). Indexed for per-family listings.
+    category: Mapped[str] = mapped_column(String, nullable=False, index=True)
+
+    # One-sentence description, typically the Wikidata seed summary.
+    summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Review metadata (mirrors conventions on Concept).
+    verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )
+
+    @property
+    def title(self) -> str:
+        """Human-readable display title derived from the slug."""
+        return concept_slug_to_title(self.slug)
+
+    def __repr__(self) -> str:
+        return (
+            f"<SubConcept(id={self.id}, slug={self.slug!r}, "
+            f"category={self.category!r}, verified={self.verified})>"
+        )
+
+
 class ConceptLemmaLink(Base):
     """A one-to-one pairing between a lemma and the concept that names it.
 
@@ -231,13 +315,31 @@ class ConceptLemmaLink(Base):
 
 
 class ConceptWikidataIndex(Base):
-    """Reverse index from Wikidata Q-id to an accepted or rejected concept."""
+    """Reverse index from Wikidata Q-id to its concept, sub-concept, or rejection.
+
+    This table is the shared Q-id spine across the main encyclopedia and the
+    sub-encyclopedia: a Q-id points at *either* a :class:`Concept` or a
+    :class:`SubConcept` (never both -- see the CHECK constraint), is marked
+    ``rejected``, or is merely cached (``title`` only, both pointers NULL).
+    """
 
     __tablename__ = "concept_wikidata_index"
+    __table_args__ = (
+        CheckConstraint(
+            "concept_id IS NULL OR sub_concept_id IS NULL",
+            name="ck_wikidata_index_one_target",
+        ),
+    )
 
     qid: Mapped[str] = mapped_column(String, primary_key=True)
     concept_id: Mapped[Optional[int]] = mapped_column(
         Integer, ForeignKey("concepts.id"), nullable=True, index=True
+    )
+    # Sub-encyclopedia target: mutually exclusive with concept_id. NULL on
+    # pre-migration SQLite databases lacking the CHECK constraint is guarded by
+    # the CRUD layer as well.
+    sub_concept_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("sub_concepts.id"), nullable=True, index=True
     )
     # Remote Wikipedia article title for this Q-id. Cached when a Q-id is known
     # but no concept exists yet (concept_id NULL), e.g. ranked "wanted" red links
@@ -252,9 +354,10 @@ class ConceptWikidataIndex(Base):
     )
 
     concept: Mapped[Optional[Concept]] = relationship("Concept")
+    sub_concept: Mapped[Optional[SubConcept]] = relationship("SubConcept")
 
     def __repr__(self) -> str:
         return (
             f"<ConceptWikidataIndex(qid={self.qid!r}, concept_id={self.concept_id!r}, "
-            f"rejected={self.rejected})>"
+            f"sub_concept_id={self.sub_concept_id!r}, rejected={self.rejected})>"
         )

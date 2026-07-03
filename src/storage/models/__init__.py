@@ -5,8 +5,11 @@ from storage.models.concept import (
     ConceptLemmaLink,
     ConceptWikidataIndex,
     MAX_CONCEPT_SOURCES,
+    SUB_CONCEPT_CATEGORIES,
+    SubConcept,
     concept_slug_to_title,
     normalize_concept_slug,
+    wiki_target_qid,
 )
 from storage.models.enums import (
     AdjectiveSubtype,
@@ -62,6 +65,9 @@ __all__ = [
     "LemmaTranslation",
     "MAX_CONCEPT_SOURCES",
     "NounSubtype",
+    "SUB_CONCEPT_CATEGORIES",
+    "SubConcept",
+    "wiki_target_qid",
     "OperationLog",
     "PendingImport",
     "PendingImportSynonymCandidate",

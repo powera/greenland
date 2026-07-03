@@ -1,19 +1,24 @@
 """Render concept bodies: resolve ``[[wiki links]]`` and minimal Markdown to HTML.
 
-Wiki-link targets are resolved against existing :class:`~storage.models.concept.Concept`
-slugs (space/underscore equivalent). Existing targets become links to the concept
-page; missing targets render as plain (unlinked) text -- there are deliberately no
-"red links" to a create page.
+Wiki-link targets are resolved against both encyclopedia tables
+(:class:`~storage.models.concept.Concept` and
+:class:`~storage.models.concept.SubConcept`) via
+:func:`storage.queries.concept.resolve_wiki_link_targets`: slug targets resolve
+main-concept-first, and ``[[Q...]]`` targets resolve through the shared Wikidata
+index. Resolved targets become links to the matching detail page; missing
+targets render as plain (unlinked) text -- there are deliberately no "red links"
+to a create page.
 """
 
 import re
-from typing import Dict, Set
+from typing import Dict
 
 from flask import url_for
 from markupsafe import Markup, escape
 from sqlalchemy.orm import Session
 
-from storage.models.concept import Concept, parse_wiki_links
+from storage.models.concept import parse_wiki_links, wiki_target_qid
+from storage.queries.concept import ResolvedWikiTarget, resolve_wiki_link_targets
 
 # Inline emphasis on already-escaped text (markers are literal there).
 _BOLD_RE = re.compile(r"\*\*(.+?)\*\*")
@@ -21,21 +26,18 @@ _ITALIC_RE = re.compile(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)")
 _HEADING_RE = re.compile(r"^(#{1,6})\s+(.*)$")
 
 
-def get_existing_link_targets(session: Session, body: str) -> Set[str]:
-    """Return the set of wiki-link target slugs in ``body`` that exist as concepts.
+def get_resolved_link_targets(session: Session, body: str) -> Dict[str, ResolvedWikiTarget]:
+    """Resolve the wiki-link targets in ``body`` against both concept tables.
 
     Args:
-        session: Database session.
+        session: Database session (concepts backend).
         body: A concept body containing ``[[...]]`` links.
 
     Returns:
-        Canonical slugs that are both linked-to and present in the database.
+        Mapping of target slug (including Q-id targets like "Q42") to where it
+        resolves; unresolvable targets are absent.
     """
-    targets = {link.target_slug for link in parse_wiki_links(body or "") if link.target_slug}
-    if not targets:
-        return set()
-    rows = session.query(Concept.slug).filter(Concept.slug.in_(targets)).all()
-    return {row[0] for row in rows}
+    return resolve_wiki_link_targets(session, body or "")
 
 
 def _render_inline(text: str) -> str:
@@ -64,12 +66,13 @@ def _render_blocks(escaped: str) -> str:
     return "\n".join(html_blocks)
 
 
-def render_concept_body(body: str, existing_slugs: Set[str]) -> Markup:
+def render_concept_body(body: str, resolved: Dict[str, ResolvedWikiTarget]) -> Markup:
     """Render a concept body to safe HTML with resolved wiki links.
 
     Args:
         body: The raw concept body (Markdown + ``[[wiki links]]``).
-        existing_slugs: Slugs known to exist (links to these become anchors).
+        resolved: Target resolution from :func:`get_resolved_link_targets`
+            (links to these become anchors; the rest render as plain text).
 
     Returns:
         A :class:`~markupsafe.Markup` HTML fragment safe to embed in a template.
@@ -84,13 +87,24 @@ def render_concept_body(body: str, existing_slugs: Set[str]) -> Markup:
     for index, link in enumerate(parse_wiki_links(body)):
         token = f"\x00WL{index}\x00"
         text = text.replace(link.raw, token, 1)
-        if link.target_slug in existing_slugs:
-            href = url_for("concepts.detail", slug=link.target_slug)
-            placeholders[token] = Markup('<a href="{}">{}</a>').format(href, link.display)
-        else:
+        target = resolved.get(link.target_slug)
+        if target is None:
             placeholders[token] = Markup('<span class="wikilink-missing">{}</span>').format(
                 link.display
             )
+            continue
+        # Unpiped [[Q...]] links display the resolved page title, not the Q-id.
+        display = link.display
+        if "|" not in link.raw and wiki_target_qid(link.target_slug):
+            display = target.title
+        if target.kind == "sub_concept":
+            href = url_for("concepts.sub_detail", slug=target.slug)
+            placeholders[token] = Markup('<a class="wikilink-sub" href="{}">{}</a>').format(
+                href, display
+            )
+        else:
+            href = url_for("concepts.detail", slug=target.slug)
+            placeholders[token] = Markup('<a href="{}">{}</a>').format(href, display)
 
     html = _render_blocks(str(escape(text)))
     for token, anchor in placeholders.items():

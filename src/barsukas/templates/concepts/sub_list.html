@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Sub-Encyclopedia{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/concepts.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('concepts.list_concepts_view') }}">Concepts</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Sub-Encyclopedia</li>
+            </ol>
+        </nav>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="bi bi-journals"></i> Sub-Encyclopedia</h1>
+                <p class="text-muted">{{ total }} tracked sub-concept{{ '' if total == 1 else 's' }} (kept out of the main encyclopedia)</p>
+            </div>
+            {% if not readonly %}
+            <a class="btn btn-primary" href="{{ url_for('concepts.sub_new') }}">
+                <i class="bi bi-plus-lg"></i> File Sub-Concept
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col">
+        <form method="get" action="{{ url_for('concepts.sub_list') }}" class="row g-2 align-items-center">
+            <div class="col-auto flex-grow-1">
+                <input type="text" class="form-control" name="q" value="{{ search }}"
+                       placeholder="Search by title or summary...">
+            </div>
+            <div class="col-auto">
+                <select class="form-select" name="category">
+                    <option value="">All categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {{ 'selected' if cat == category }}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if sub_concepts %}
+<div class="list-group">
+    {% for sub in sub_concepts %}
+    <a class="list-group-item list-group-item-action" href="{{ url_for('concepts.sub_detail', slug=sub.slug) }}">
+        <div class="d-flex w-100 justify-content-between align-items-start">
+            <div>
+                <h5 class="mb-1">{{ sub.title }}</h5>
+                {% if sub.summary %}<p class="mb-1 text-muted">{{ sub.summary }}</p>{% endif %}
+            </div>
+            <div class="text-end">
+                <span class="badge bg-secondary">{{ sub.category }}</span>
+                {% if sub.verified %}<span class="badge bg-success"><i class="bi bi-check"></i> verified</span>{% endif %}
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+
+{% if total_pages > 1 %}
+<nav aria-label="Sub-concept pages" class="mt-4">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {{ 'disabled' if page <= 1 }}">
+            <a class="page-link"
+               href="{{ url_for('concepts.sub_list', q=search, category=(category or None), page=page - 1) }}">
+                Previous
+            </a>
+        </li>
+        <li class="page-item disabled">
+            <span class="page-link">Page {{ page }} of {{ total_pages }}</span>
+        </li>
+        <li class="page-item {{ 'disabled' if page >= total_pages }}">
+            <a class="page-link"
+               href="{{ url_for('concepts.sub_list', q=search, category=(category or None), page=page + 1) }}">
+                Next
+            </a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+{% else %}
+<div class="alert alert-info">No sub-concepts yet.{% if not readonly %} Use <strong>File Sub-Concept</strong> to add one.{% endif %}</div>
+{% endif %}
+{% endblock %}

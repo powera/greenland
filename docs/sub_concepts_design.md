@@ -76,8 +76,8 @@ class SubConcept(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
     # Canonical underscore-joined slug, same normalization and semantics as
-    # Concept.slug. Unique within this table; cross-table uniqueness against
-    # concepts.slug is enforced at the application layer (see Slug Semantics).
+    # Concept.slug. Unique within this table only; a slug may shadow a main
+    # concept, in which case slug links resolve there (see Slug Semantics).
     slug: Mapped[str] = mapped_column(String, unique=True, nullable=False, index=True)
 
     # Required category from SUB_CONCEPT_CATEGORIES (hardcoded vocabulary,
@@ -154,13 +154,18 @@ select:
 
 # Closed vocabulary for SubConcept.category. Extend by editing this tuple;
 # these values are deliberately NOT part of Concept.concept_type.
-SUB_CONCEPT_CATEGORIES: tuple[str, ...] = (
-    "chess_opening",
-    "sports_team_season",
-    "city",
+SUB_CONCEPT_CATEGORIES: tuple = (
     "bird_species",
+    "chess_concept",
+    "sports_team_season",
 )
 ```
+
+Naming notes: `chess_concept` is broader than just openings (endgames, motifs,
+and other chess topics all file there). Species categories divide at roughly
+the phylum/class level -- `bird_species` covers class Aves, and a future
+`mammal_species` etc. would be a sibling entry rather than a widening of the
+bird category. A `city` category is deferred until it is actually needed.
 
 CRUD validates `category` against this tuple (a plain tuple of strings rather
 than an `enum.Enum` keeps it consistent with the free-form-string style of the
@@ -185,16 +190,25 @@ classification rule (Future Work).
 
 ### Slug and wiki-link semantics
 
-Sub-concepts share the **slug namespace by convention**: the same
+Sub-concepts share the **slug conventions**: the same
 `normalize_concept_slug` normalization, and no MediaWiki-style `Sub:` prefix.
-Since uniqueness across two tables cannot be a single DB constraint,
-creation paths for *both* tables check the other table for the slug and
-refuse on collision (application-level, in `storage/crud/concept.py`).
+Slugs are unique only *within* each table -- the same slug may exist in both
+tables. Ambiguity is handled by two rules:
 
-Wiki-link resolution order: `concepts` first, then `sub_concepts`.
+1. **Deterministic slug resolution**: a slug target resolves to the main
+   concept first, then to a sub-concept with the same slug
+   (`storage.queries.concept.resolve_wiki_link_targets`).
+2. **Q-id wiki links for specificity**: ``[[Q103632]]`` (or piped
+   ``[[Q103632|the Sicilian]]``) resolves through the shared Wikidata index
+   to whichever table the Q-id points at, so a link can always target the
+   sub-concept even when a main concept shadows its slug. Unpiped Q-id links
+   display the resolved page title rather than the raw Q-id.
+
 `[[Sicilian_Defense]]` inside a main concept body renders as a link to the
-sub-concept's detail page rather than as a red link. A slug that exists in
-*either* table is "existing" -- it can never appear as a wanted page.
+sub-concept's detail page (styled with a `wikilink-sub` class) rather than as
+a red link. A slug that exists in *either* table is "existing" -- it can never
+appear as a wanted page. Q-id-form targets are never wanted pages either: they
+name a specific entity, not a creatable slug.
 
 ## Integration Points
 
@@ -233,16 +247,19 @@ continue to rank normally; they leave the list when someone files them.
 ### 3. Creation / service layer (`storage/crud/concept.py`, `storage/concept_service.py`)
 
 - New CRUD: `create_sub_concept(session, title, category, summary=None, ...)`
-  (validates category against `SUB_CONCEPT_CATEGORIES`, checks both tables
-  for slug collisions), `get_sub_concept_by_slug`, `update_sub_concept`,
-  `delete_sub_concept`.
+  (validates category against `SUB_CONCEPT_CATEGORIES`; the slug may shadow a
+  main concept but must be unique among sub-concepts),
+  `get_sub_concept_by_slug`, `update_sub_concept`, `delete_sub_concept`
+  (detaches index rows so the Q-id reverts to untriaged).
 - New index helper `link_wikidata_sub_concept(session, qid, sub_concept)`
   mirroring `link_wikidata_concept`, clearing `rejected` and enforcing the
-  one-target rule.
+  one-target rule (each refuses when the Q-id already points at the other
+  table).
 - New service `file_sub_concept_from_qid(session, qid, category)`: resolve
   the Q-id (cached seed), create the `SubConcept` row from title + summary,
   link the index. Idempotent: skips Q-ids whose index row already points at
-  either table; reports a conflict when the slug exists as a main concept.
+  either table; when the slug also exists as a main concept the row is filed
+  anyway with a warning detail (slug links resolve to the main concept).
 - `create_concept_from_qid` / `create_concept_from_seed`: the existing
   "already linked" check extends to `sub_concept_id`, returning status
   `"exists"` with detail "filed as sub-concept" so bulk main-concept runs
@@ -259,7 +276,7 @@ Voveraite is the natural intake for hand-collected Q-id lists ("all cities in
 Turkey", "chess openings", "MLB team seasons"). Add:
 
 ```
---sub --category chess_opening    # file these Q-ids as sub-concepts
+--sub --category chess_concept    # file these Q-ids as sub-concepts
 ```
 
 Behavior: resolve each Q-id, then call `file_sub_concept_from_qid` -- creating
@@ -280,15 +297,17 @@ Wikidata/Wikipedia calls and need developer confirmation before running.
   select populated from `SUB_CONCEPT_CATEGORIES`), plus a simple detail/edit
   page (category select, summary, notes, verified -- ordinary form submits,
   per house style).
-- **Wanted/triage views**: wherever ranked wanted topics are surfaced, add a
-  "file as sub-concept" action (form POST with a category select) backed by
-  `file_sub_concept_from_qid` -- the one-click way to move a red link into
-  the sub-encyclopedia.
+- **File Sub-Concept form** (`/concepts/sub/new`): takes a Wikidata Q-id
+  (preferred; title/summary come from the seed via
+  `file_sub_concept_from_qid`) or a manual title, plus the category select --
+  the quick way to move a red link into the sub-encyclopedia.
 - **Wiki-link rendering** (`barsukas/helpers/wikilinks.py`):
-  `get_existing_link_targets` consults both tables (via
-  `get_all_known_slugs`); links to sub-concepts route to the sub detail page,
-  optionally styled distinctly from main-concept links.
-- **Promote / demote** buttons on the respective detail pages.
+  `get_resolved_link_targets` resolves against both tables and Q-id targets
+  (via `storage.queries.concept.resolve_wiki_link_targets`); links to
+  sub-concepts route to the sub detail page with a `wikilink-sub` class.
+- **Promote / demote** buttons on the respective detail pages (demote asks
+  for a category and warns that the body/sources are discarded). The sub
+  detail page flags when a main concept shadows the slug.
 
 Barsukas changes need no tests per repo convention, but should be verified in
 the developer's local browser.
@@ -311,17 +330,20 @@ curation activity, not a migration.
 
 ## Rollout Steps
 
-1. **Schema**: `SubConcept` model, `SUB_CONCEPT_CATEGORIES`,
-   `sub_concept_id` on the index, migration script, unit tests for CRUD
-   validation (category vocabulary, cross-table slug collision, one-target
-   index rule).
-2. **Service threading**: `file_sub_concept_from_qid`, `promote_sub_concept`
-   and mirror, `get_all_known_slugs`, extended "already linked" checks in
+Steps 1-4 are implemented (initial commit); step 5 remains future work.
+
+1. **Schema** (done): `SubConcept` model, `SUB_CONCEPT_CATEGORIES`,
+   `sub_concept_id` on the index, migration script, unit tests
+   (`src/tests/storage/test_sub_concepts.py`).
+2. **Service threading** (done): `file_sub_concept_from_qid`,
+   `promote_sub_concept` / `demote_concept_to_sub`, `get_all_known_slugs`,
+   `resolve_wiki_link_targets`, extended "already linked" checks in
    `create_concept_from_qid`.
-3. **Agents**: Voverukas wanted-list filtering (sub slugs + rejected +
-   sub-linked Q-ids) with `--show-filtered`; Voveraite `--sub --category`.
-4. **Barsukas**: sub-encyclopedia list/detail, "file as sub-concept" triage
-   action, wiki-link rendering across both tables, promote/demote.
+3. **Agents** (done): Voverukas wanted-list filtering (sub slugs + rejected +
+   sub-linked Q-ids + Q-id-form targets) with `--show-filtered`; Voveraite
+   `--sub --category`.
+4. **Barsukas** (done): sub-encyclopedia list/detail/form, wiki-link
+   rendering across both tables and Q-id targets, promote/demote.
 5. **Future** (separate designs): Wikidata auto-classification, `parent_slug`
    grouping, sub-concept body generation (likely shorter/templated bodies).
 
@@ -332,10 +354,10 @@ a rule table could classify topics at seed-fetch time:
 
 | Category             | Signal (illustrative)                                    |
 |----------------------|----------------------------------------------------------|
-| `chess_opening`      | P31 (instance of) = chess opening                        |
+| `chess_concept`      | P31 (instance of) = chess opening / chess term           |
 | `sports_team_season` | P31 = season of a sports club                            |
-| `city`               | P31 = city (+ P17 country qualifier)                     |
 | `bird_species`       | P31 = taxon with P105 (taxon rank) = species, class Aves |
+| `city` (future)      | P31 = city (+ P17 country qualifier)                     |
 
 A curated mapping of P31 class Q-ids to a `SUB_CONCEPT_CATEGORIES` entry --
 hardcoded next to the category tuple -- would let `fetch_wikidata_concept_seed`

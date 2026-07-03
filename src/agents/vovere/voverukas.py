@@ -33,7 +33,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 # Add src directory to path (this file lives at src/agents/vovere/)
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
@@ -53,7 +53,14 @@ from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.concept_service import create_concept_from_qid
 from storage.crud.concept import cache_wikidata_title
-from storage.models.concept import Concept, concept_slug_to_title
+from storage.models.concept import (
+    Concept,
+    ConceptWikidataIndex,
+    SubConcept,
+    concept_slug_to_title,
+    normalize_concept_slug,
+    wiki_target_qid,
+)
 from storage.wikidata import (
     fetch_wikidata_concept_seed,
     resolve_titles_to_qids,
@@ -97,8 +104,14 @@ class VoverukasAgent:
         limit: int = 50,
         iterations: int = DEFAULT_ITERATIONS,
         damping: float = DEFAULT_DAMPING,
-    ) -> List[Dict[str, object]]:
+    ) -> Tuple[List[Dict[str, object]], List[Dict[str, object]]]:
         """Rank red-link targets by importance over the concept link-graph.
+
+        Sub-encyclopedia topics never rank as wanted: slugs present in
+        ``sub_concepts`` count as existing, and red links whose cached Q-id is
+        rejected or filed as a sub-concept are diverted to the suppressed list.
+        Q-id-form targets (``[[Q...]]``) name a specific entity rather than a
+        creatable slug and are skipped outright.
 
         Args:
             limit: Maximum number of wanted slugs to return.
@@ -106,8 +119,11 @@ class VoverukasAgent:
             damping: Fraction of a node's rank dispersed across its out-links.
 
         Returns:
-            A list of ``{"slug", "title", "score", "inbound"}`` dicts for the
-            top wanted (missing) topics, ordered by descending score.
+            A ``(wanted, suppressed)`` pair. ``wanted`` is a list of
+            ``{"slug", "title", "score", "inbound"}`` dicts for the top wanted
+            (missing) topics, ordered by descending score. ``suppressed``
+            holds the same shape plus a ``"reason"`` field for ranked topics
+            that were filtered out (rejected / filed as sub-concept).
         """
         session = create_backend_session(self.config)
         try:
@@ -117,7 +133,24 @@ class VoverukasAgent:
                 existing_slugs.add(slug)
                 bodies_by_slug[slug] = body or ""
 
-            logger.info("Loaded %d concepts", len(existing_slugs))
+            sub_slugs = {row[0] for row in session.query(SubConcept.slug).all()}
+
+            # Red links whose cached Q-id has been triaged away from the main
+            # encyclopedia, matched through the cached remote title.
+            suppressed_reasons: Dict[str, str] = {}
+            for index_row in (
+                session.query(ConceptWikidataIndex)
+                .filter(ConceptWikidataIndex.title.isnot(None))
+                .filter(
+                    ConceptWikidataIndex.rejected.is_(True)
+                    | ConceptWikidataIndex.sub_concept_id.isnot(None)
+                )
+                .all()
+            ):
+                triage_reason = "rejected" if index_row.rejected else "sub-concept"
+                suppressed_reasons[normalize_concept_slug(index_row.title or "")] = triage_reason
+
+            logger.info("Loaded %d concepts, %d sub-concepts", len(existing_slugs), len(sub_slugs))
 
             link_graph, inbound_counts = build_link_graph(bodies_by_slug)
             ranks = compute_ranks(
@@ -127,22 +160,29 @@ class VoverukasAgent:
                 damping=damping,
             )
 
-            # Keep only targets that are linked-to but have no concept yet.
+            # Keep only targets that are linked-to but have no page yet.
             wanted: List[Dict[str, object]] = []
+            suppressed: List[Dict[str, object]] = []
             for slug, score in ranks.top(n=len(ranks.scores)):
-                if slug in existing_slugs:
+                if slug in existing_slugs or slug in sub_slugs:
                     continue
-                wanted.append(
-                    {
-                        "slug": slug,
-                        "title": concept_slug_to_title(slug),
-                        "score": round(score, 4),
-                        "inbound": inbound_counts.get(slug, 0),
-                    }
-                )
+                if wiki_target_qid(slug):
+                    continue
+                item: Dict[str, object] = {
+                    "slug": slug,
+                    "title": concept_slug_to_title(slug),
+                    "score": round(score, 4),
+                    "inbound": inbound_counts.get(slug, 0),
+                }
+                suppression = suppressed_reasons.get(slug)
+                if suppression is not None:
+                    item["reason"] = suppression
+                    suppressed.append(item)
+                    continue
+                wanted.append(item)
                 if len(wanted) >= limit:
                     break
-            return wanted
+            return wanted, suppressed
         finally:
             session.close()
 
@@ -389,6 +429,14 @@ def main() -> int:
         help=f"Rank dispersed across out-links per pass (default: {DEFAULT_DAMPING})",
     )
     parser.add_argument(
+        "--show-filtered",
+        action="store_true",
+        help=(
+            "Also print ranked topics suppressed from the wanted list because "
+            "their Q-id is rejected or filed as a sub-concept."
+        ),
+    )
+    parser.add_argument(
         "--resolve-qids",
         action="store_true",
         help="Batch-resolve ranked titles to Wikidata Q-ids and cache them (read-only).",
@@ -424,14 +472,23 @@ def main() -> int:
     config = get_data_source_config(args)
 
     agent = VoverukasAgent(config)
-    wanted = agent.rank_wanted(
+    wanted, suppressed = agent.rank_wanted(
         limit=args.limit,
         iterations=args.iterations,
         damping=args.damping,
     )
 
+    if suppressed and not args.show_filtered:
+        logger.info(
+            "%d ranked topics suppressed (rejected / sub-concept); "
+            "use --show-filtered to list them.",
+            len(suppressed),
+        )
+
     if not wanted:
         logger.info("No wanted (red-link) topics found.")
+        if args.show_filtered and suppressed:
+            _print_suppressed_table(suppressed)
         return 0
 
     if args.batch:
@@ -469,7 +526,20 @@ def main() -> int:
         )
 
     _print_wanted_table(wanted)
+    if args.show_filtered and suppressed:
+        _print_suppressed_table(suppressed)
     return 0
+
+
+def _print_suppressed_table(suppressed: List[Dict[str, object]]) -> None:
+    """Print ranked topics filtered out of the wanted list, with the reason."""
+    print(f"\nSuppressed topics ({len(suppressed)}):\n")
+    print(f"{'#':>4}  {'score':>10}  {'inbound':>7}  {'reason':>12}  topic")
+    for index, item in enumerate(suppressed, 1):
+        print(
+            f"{index:>4}  {item['score']:>10}  {item['inbound']:>7}"
+            f"  {str(item['reason']):>12}  {item['title']}"
+        )
 
 
 def _print_wanted_table(wanted: List[Dict[str, object]]) -> None:

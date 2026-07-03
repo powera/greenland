@@ -27,25 +27,42 @@ from flask import (
 )
 from flask.typing import ResponseReturnValue
 
-from barsukas.helpers.wikilinks import get_existing_link_targets, render_concept_body
+from barsukas.helpers.wikilinks import get_resolved_link_targets, render_concept_body
 from storage.backend.config import DataSourceConfig
-from storage.concept_service import create_concept_from_qid
+from storage.concept_service import (
+    create_concept_from_qid,
+    demote_concept_to_sub,
+    file_sub_concept_from_qid,
+    promote_sub_concept,
+)
 from storage.crud.concept import (
     create_concept,
+    create_sub_concept,
     delete_concept,
+    delete_sub_concept,
     get_concept_by_slug,
     get_link_for_qid,
+    get_qids_for_sub_concept,
+    get_sub_concept_by_slug,
     link_lemma_to_concept,
     unlink_lemma_from_concept,
     update_concept,
+    update_sub_concept,
 )
 from storage.models.schema import Lemma
 from storage.models.concept import (
     MAX_CONCEPT_SOURCES,
+    SUB_CONCEPT_CATEGORIES,
     ConceptWikidataIndex,
     normalize_concept_slug,
 )
-from storage.queries.concept import count_concepts, get_backlinks, list_concepts
+from storage.queries.concept import (
+    count_concepts,
+    count_sub_concepts,
+    get_backlinks,
+    list_concepts,
+    list_sub_concepts,
+)
 from storage.wikidata import fetch_wikidata_concept_seed, normalize_qid
 
 BLOCKED_SOURCE_HOSTS: frozenset[str] = frozenset({"wikidata.org", "www.wikidata.org"})
@@ -331,8 +348,8 @@ def detail(slug: str) -> ResponseReturnValue:
         flash(f"No concept found for {slug!r}.", "error")
         return redirect(url_for("concepts.list_concepts_view"))
 
-    existing = get_existing_link_targets(_concept_session(), concept.body or "")
-    rendered_body = render_concept_body(concept.body or "", existing)
+    resolved_targets = get_resolved_link_targets(_concept_session(), concept.body or "")
+    rendered_body = render_concept_body(concept.body or "", resolved_targets)
     sources = _concept_sources(concept)
     backlinks = get_backlinks(_concept_session(), concept.slug)
     wikidata_links = (
@@ -378,6 +395,7 @@ def detail(slug: str) -> ResponseReturnValue:
         paired_lemma=paired_lemma,
         lemma_query=lemma_query,
         lemma_candidates=lemma_candidates,
+        sub_categories=SUB_CONCEPT_CATEGORIES,
     )
 
 
@@ -579,3 +597,266 @@ def delete(slug: str) -> ResponseReturnValue:
     delete_concept(_concept_session(), concept)
     flash(f"Deleted concept {title!r}.", "success")
     return redirect(url_for("concepts.list_concepts_view"))
+
+
+@bp.route("/<path:slug>/demote", methods=["POST"])
+def demote(slug: str) -> ResponseReturnValue:
+    """Demote a main concept to a sub-concept (discards body and sources)."""
+    if _is_readonly():
+        flash("Cannot demote in read-only mode", "error")
+        return redirect(url_for("concepts.detail", slug=slug))
+
+    concept = get_concept_by_slug(_concept_session(), slug)
+    if concept is None:
+        flash(f"No concept found for {slug!r}.", "error")
+        return redirect(url_for("concepts.list_concepts_view"))
+
+    category = request.form.get("category", "")
+    if category not in SUB_CONCEPT_CATEGORIES:
+        flash("Pick a sub-concept category to demote into.", "error")
+        return redirect(url_for("concepts.detail", slug=slug))
+
+    sub_concept = demote_concept_to_sub(_concept_session(), concept, category)
+    if sub_concept is None:
+        flash("Could not demote: a sub-concept with this slug already exists.", "error")
+        return redirect(url_for("concepts.detail", slug=slug))
+
+    flash(f"Demoted {sub_concept.title!r} to the sub-encyclopedia.", "success")
+    return redirect(url_for("concepts.sub_detail", slug=sub_concept.slug))
+
+
+# --- Sub-encyclopedia ------------------------------------------------------------
+#
+# Sub-concepts (see storage.models.concept.SubConcept) are lightweight tracked
+# topics kept out of the main encyclopedia. These routes are static-prefixed
+# with /sub, which Werkzeug matches ahead of the /<path:slug> concept detail.
+
+SUB_CONCEPTS_PER_PAGE = 100
+
+
+@bp.route("/sub")
+def sub_list() -> ResponseReturnValue:
+    """List sub-concepts with optional search, category filter, and pagination."""
+    search = request.args.get("q", "").strip()
+    category = request.args.get("category", "").strip()
+    if category not in SUB_CONCEPT_CATEGORIES:
+        category = ""
+
+    total = count_sub_concepts(_concept_session(), search=search, category=category or None)
+    total_pages = max(1, (total + SUB_CONCEPTS_PER_PAGE - 1) // SUB_CONCEPTS_PER_PAGE)
+
+    try:
+        page = int(request.args.get("page", "1"))
+    except ValueError:
+        page = 1
+    page = max(1, min(page, total_pages))
+
+    sub_concepts = list_sub_concepts(
+        _concept_session(),
+        search=search,
+        category=category or None,
+        limit=SUB_CONCEPTS_PER_PAGE,
+        offset=(page - 1) * SUB_CONCEPTS_PER_PAGE,
+    )
+    return render_template(
+        "concepts/sub_list.html",
+        sub_concepts=sub_concepts,
+        total=total,
+        search=search,
+        category=category,
+        categories=SUB_CONCEPT_CATEGORIES,
+        readonly=_is_readonly(),
+        page=page,
+        total_pages=total_pages,
+    )
+
+
+@bp.route("/sub/new")
+def sub_new() -> ResponseReturnValue:
+    """Render the file-a-sub-concept form."""
+    if _is_readonly():
+        flash("Cannot create sub-concepts in read-only mode", "error")
+        return redirect(url_for("concepts.sub_list"))
+    return render_template(
+        "concepts/sub_form.html",
+        sub_concept=None,
+        categories=SUB_CONCEPT_CATEGORIES,
+    )
+
+
+@bp.route("/sub/create", methods=["POST"])
+def sub_create() -> ResponseReturnValue:
+    """File a sub-concept from a Wikidata Q-id, or create one manually."""
+    if _is_readonly():
+        flash("Cannot create sub-concepts in read-only mode", "error")
+        return redirect(url_for("concepts.sub_list"))
+
+    category = request.form.get("category", "")
+    if category not in SUB_CONCEPT_CATEGORIES:
+        flash("A sub-concept category is required.", "error")
+        return redirect(url_for("concepts.sub_new"))
+
+    wikidata_qid = normalize_qid(request.form.get("wikidata_qid", ""))
+    title = request.form.get("title", "").strip()
+    summary = request.form.get("summary", "").strip()
+    notes = request.form.get("notes", "").strip() or None
+
+    # Q-id filing goes through the shared service so Barsukas and Voveraite use
+    # one implementation (seed fetch, idempotency, index link -- no LLM).
+    if wikidata_qid is not None:
+        result = file_sub_concept_from_qid(_concept_session(), wikidata_qid, category, notes=notes)
+        if result.status == "filed" and result.sub_concept is not None:
+            if result.detail:
+                flash(result.detail.capitalize() + ".", "warning")
+            flash(f"Filed sub-concept {result.sub_concept.title!r}.", "success")
+            return redirect(url_for("concepts.sub_detail", slug=result.sub_concept.slug))
+        if result.status == "exists":
+            flash(f"Wikidata ID {wikidata_qid}: {result.detail}.", "error")
+            if result.sub_concept is not None:
+                return redirect(url_for("concepts.sub_detail", slug=result.sub_concept.slug))
+            return redirect(url_for("concepts.sub_new"))
+        flash(f"Could not file {wikidata_qid}: {result.detail or result.status}.", "error")
+        return redirect(url_for("concepts.sub_new"))
+
+    if not title:
+        flash("A title or Wikidata Q-id is required.", "error")
+        return redirect(url_for("concepts.sub_new"))
+    sub_concept = create_sub_concept(
+        _concept_session(),
+        title=title,
+        category=category,
+        summary=summary or None,
+        notes=notes,
+    )
+    if sub_concept is None:
+        flash(f"A sub-concept titled {title!r} already exists.", "error")
+        return redirect(url_for("concepts.sub_new"))
+
+    flash(f"Created sub-concept {sub_concept.title!r}.", "success")
+    return redirect(url_for("concepts.sub_detail", slug=sub_concept.slug))
+
+
+@bp.route("/sub/<path:slug>")
+def sub_detail(slug: str) -> ResponseReturnValue:
+    """Show a single sub-concept with its Q-ids and backlinks."""
+    sub_concept = get_sub_concept_by_slug(_concept_session(), slug)
+    if sub_concept is None:
+        flash(f"No sub-concept found for {slug!r}.", "error")
+        return redirect(url_for("concepts.sub_list"))
+
+    qids = get_qids_for_sub_concept(_concept_session(), sub_concept.id)
+    backlinks = get_backlinks(_concept_session(), sub_concept.slug, qids=qids)
+    shadowing_concept = get_concept_by_slug(_concept_session(), sub_concept.slug)
+
+    return render_template(
+        "concepts/sub_detail.html",
+        sub_concept=sub_concept,
+        qids=qids,
+        backlinks=backlinks,
+        shadowing_concept=shadowing_concept,
+        readonly=_is_readonly(),
+    )
+
+
+@bp.route("/sub/<path:slug>/edit")
+def sub_edit(slug: str) -> ResponseReturnValue:
+    """Render the edit form for an existing sub-concept."""
+    if _is_readonly():
+        flash("Cannot edit sub-concepts in read-only mode", "error")
+        return redirect(url_for("concepts.sub_detail", slug=slug))
+
+    sub_concept = get_sub_concept_by_slug(_concept_session(), slug)
+    if sub_concept is None:
+        flash(f"No sub-concept found for {slug!r}.", "error")
+        return redirect(url_for("concepts.sub_list"))
+
+    return render_template(
+        "concepts/sub_form.html",
+        sub_concept=sub_concept,
+        categories=SUB_CONCEPT_CATEGORIES,
+    )
+
+
+@bp.route("/sub/<path:slug>/update", methods=["POST"])
+def sub_update(slug: str) -> ResponseReturnValue:
+    """Apply edits to a sub-concept (title, category, summary, verified, notes)."""
+    if _is_readonly():
+        flash("Cannot edit sub-concepts in read-only mode", "error")
+        return redirect(url_for("concepts.sub_detail", slug=slug))
+
+    sub_concept = get_sub_concept_by_slug(_concept_session(), slug)
+    if sub_concept is None:
+        flash(f"No sub-concept found for {slug!r}.", "error")
+        return redirect(url_for("concepts.sub_list"))
+
+    title = request.form.get("title", "").strip()
+    if not title:
+        flash("A title is required.", "error")
+        return redirect(url_for("concepts.sub_edit", slug=slug))
+    category = request.form.get("category", "")
+    if category not in SUB_CONCEPT_CATEGORIES:
+        flash("A sub-concept category is required.", "error")
+        return redirect(url_for("concepts.sub_edit", slug=slug))
+
+    new_slug = normalize_concept_slug(title)
+    if (
+        new_slug != sub_concept.slug
+        and get_sub_concept_by_slug(_concept_session(), new_slug) is not None
+    ):
+        flash(f"A sub-concept titled {title!r} already exists.", "error")
+        return redirect(url_for("concepts.sub_edit", slug=slug))
+
+    updated = update_sub_concept(
+        _concept_session(),
+        sub_concept,
+        title=title,
+        category=category,
+        summary=request.form.get("summary", "").strip(),
+        verified=request.form.get("verified") == "1",
+        notes=request.form.get("notes", "").strip(),
+    )
+    if updated is None:
+        flash("Failed to update the sub-concept.", "error")
+        return redirect(url_for("concepts.sub_edit", slug=slug))
+
+    flash("Sub-concept updated.", "success")
+    return redirect(url_for("concepts.sub_detail", slug=updated.slug))
+
+
+@bp.route("/sub/<path:slug>/delete", methods=["POST"])
+def sub_delete(slug: str) -> ResponseReturnValue:
+    """Delete a sub-concept (its Q-ids revert to untriaged)."""
+    if _is_readonly():
+        flash("Cannot delete in read-only mode", "error")
+        return redirect(url_for("concepts.sub_detail", slug=slug))
+
+    sub_concept = get_sub_concept_by_slug(_concept_session(), slug)
+    if sub_concept is None:
+        flash(f"No sub-concept found for {slug!r}.", "error")
+        return redirect(url_for("concepts.sub_list"))
+
+    title = sub_concept.title
+    delete_sub_concept(_concept_session(), sub_concept)
+    flash(f"Deleted sub-concept {title!r}.", "success")
+    return redirect(url_for("concepts.sub_list"))
+
+
+@bp.route("/sub/<path:slug>/promote", methods=["POST"])
+def sub_promote(slug: str) -> ResponseReturnValue:
+    """Promote a sub-concept to a main concept (no body yet; generate later)."""
+    if _is_readonly():
+        flash("Cannot promote in read-only mode", "error")
+        return redirect(url_for("concepts.sub_detail", slug=slug))
+
+    sub_concept = get_sub_concept_by_slug(_concept_session(), slug)
+    if sub_concept is None:
+        flash(f"No sub-concept found for {slug!r}.", "error")
+        return redirect(url_for("concepts.sub_list"))
+
+    concept = promote_sub_concept(_concept_session(), sub_concept)
+    if concept is None:
+        flash("Could not promote: a main concept with this slug already exists.", "error")
+        return redirect(url_for("concepts.sub_detail", slug=slug))
+
+    flash(f"Promoted {concept.title!r} to a main concept.", "success")
+    return redirect(url_for("concepts.detail", slug=concept.slug))
