@@ -15,15 +15,19 @@ Modes:
               Concepts are created later via ``agents/common/batch.py complete``.
     --create  Create each concept inline now (one LLM call per Q-id), or with
               --no-body save sources without generating a body.
+    --sub     File each Q-id into the sub-encyclopedia (requires --category).
+              Creates lightweight SubConcept rows from the Wikidata seed; no
+              LLM calls are involved.
     (default) Resolve + report each Q-id's seed without writing anything.
 
-Concept creation is idempotent: a Q-id already linked to a concept (or whose
-seeded title already exists) is skipped.
+Concept creation is idempotent: a Q-id already linked to a concept or a
+sub-concept (or whose seeded title already exists) is skipped.
 
 Usage:
     PYTHONPATH=src python src/agents/vovere/voveraite.py Q8768 Q8743 Q8704
     PYTHONPATH=src python src/agents/vovere/voveraite.py Q8768 Q8743 --create --model gpt-5.4-mini
     PYTHONPATH=src python src/agents/vovere/voveraite.py Q8768 Q8743 --batch --model gpt-5.4-mini
+    PYTHONPATH=src python src/agents/vovere/voveraite.py Q103632 --sub --category chess_concept
 """
 
 import argparse
@@ -47,8 +51,9 @@ from agents.common.common_args import (
 from clients.batch_queue import BatchRequestMetadata, get_batch_manager
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
-from storage.concept_service import create_concept_from_qid
+from storage.concept_service import create_concept_from_qid, file_sub_concept_from_qid
 from storage.crud.concept import cache_wikidata_title
+from storage.models.concept import SUB_CONCEPT_CATEGORIES
 from storage.wikidata import fetch_wikidata_concept_seed, normalize_qid
 
 # Agent name recorded on queued batch requests; the completion handler in
@@ -248,6 +253,40 @@ class VoveraiteAgent:
         finally:
             session.close()
 
+    def file_sub(self, qids: List[str], category: str) -> List[Dict[str, object]]:
+        """File each Q-id into the sub-encyclopedia via the shared service.
+
+        Args:
+            qids: Wikidata Q-ids (any case; normalized by the service).
+            category: One of SUB_CONCEPT_CATEGORIES, applied to every Q-id.
+
+        Returns:
+            One result dict per Q-id with ``qid``/``title``/``status``/``detail``.
+        """
+        results: List[Dict[str, object]] = []
+        session = create_backend_session(self.config)
+        try:
+            for raw_qid in qids:
+                result = file_sub_concept_from_qid(session, raw_qid, category)
+                results.append(
+                    {
+                        "qid": result.qid,
+                        "title": result.title,
+                        "status": result.status,
+                        "detail": result.detail,
+                    }
+                )
+                logger.info(
+                    "%s [%s] %s%s",
+                    result.status.upper(),
+                    result.qid,
+                    result.title,
+                    f" - {result.detail}" if result.detail else "",
+                )
+            return results
+        finally:
+            session.close()
+
     def resolve(self, qids: List[str]) -> List[Dict[str, object]]:
         """Fetch and report each Q-id's Wikidata seed without writing anything.
 
@@ -314,6 +353,19 @@ def main() -> int:
             "'agents/common/batch.py complete'. Mutually exclusive with --create."
         ),
     )
+    parser.add_argument(
+        "--sub",
+        action="store_true",
+        help=(
+            "File each Q-id into the sub-encyclopedia instead of creating "
+            "concepts (no LLM). Requires --category."
+        ),
+    )
+    parser.add_argument(
+        "--category",
+        choices=SUB_CONCEPT_CATEGORIES,
+        help="Sub-concept category applied to every Q-id (with --sub).",
+    )
     add_common_args(parser)
     add_backend_args(parser)
     add_llm_args(parser)
@@ -323,6 +375,12 @@ def main() -> int:
         parser.error("--batch and --create are mutually exclusive.")
     if args.no_body and not args.create:
         parser.error("--no-body only applies with --create.")
+    if args.sub and (args.batch or args.create):
+        parser.error("--sub is mutually exclusive with --create/--batch.")
+    if args.sub and not args.category:
+        parser.error("--sub requires --category.")
+    if args.category and not args.sub:
+        parser.error("--category only applies with --sub.")
 
     config = get_data_source_config(args)
     agent = VoveraiteAgent(config)
@@ -334,12 +392,23 @@ def main() -> int:
     resolved = agent.resolve(args.qids)
     _print_resolution(resolved)
 
-    if not (args.batch or args.create):
+    if not (args.batch or args.create or args.sub):
         return 0
 
     resolvable = [str(item["qid"]) for item in resolved if item["resolved"]]
     if not resolvable:
         logger.info("No Q-ids resolved; nothing to do.")
+        return 0
+
+    if args.sub:
+        if not args.yes:
+            confirm = input(
+                f"\nFile {len(resolvable)} sub-concept(s) as {args.category!r}? [y/N]: "
+            )
+            if confirm.strip().lower() != "y":
+                logger.info("Aborted.")
+                return 0
+        agent.file_sub(resolvable, args.category)
         return 0
 
     action = "Submit one batch to generate" if args.batch else "Create"

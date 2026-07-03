@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit ' + sub_concept.title if sub_concept else 'File Sub-Concept' }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/concepts.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('concepts.list_concepts_view') }}">Concepts</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('concepts.sub_list') }}">Sub-Encyclopedia</a></li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {{ 'Edit ' + sub_concept.title if sub_concept else 'File Sub-Concept' }}
+                </li>
+            </ol>
+        </nav>
+        <h1>{{ 'Edit Sub-Concept' if sub_concept else 'File Sub-Concept' }}</h1>
+        {% if not sub_concept %}
+        <p class="text-muted">
+            File a topic into the sub-encyclopedia: give a Wikidata Q-id (preferred;
+            title and summary come from the seed) or a manual title. No body is
+            generated.
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post"
+              action="{{ url_for('concepts.sub_update', slug=sub_concept.slug) if sub_concept else url_for('concepts.sub_create') }}">
+            {% if not sub_concept %}
+            <div class="mb-3">
+                <label class="form-label" for="wikidata_qid">Wikidata Q-id</label>
+                <input type="text" class="form-control" id="wikidata_qid" name="wikidata_qid"
+                       placeholder="e.g. Q103632">
+                <div class="form-text">If set, the title and summary are taken from Wikidata.</div>
+            </div>
+            {% endif %}
+            <div class="mb-3">
+                <label class="form-label" for="title">Title{% if not sub_concept %} (if no Q-id){% endif %}</label>
+                <input type="text" class="form-control" id="title" name="title"
+                       value="{{ sub_concept.title if sub_concept else '' }}"
+                       {% if sub_concept %}required{% endif %}>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="category">Category</label>
+                <select class="form-select" id="category" name="category" required>
+                    {% if not sub_concept %}<option value="">Choose a category...</option>{% endif %}
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {{ 'selected' if sub_concept and cat == sub_concept.category }}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="summary">Summary</label>
+                <textarea class="form-control" id="summary" name="summary" rows="2"
+                          placeholder="One-sentence description">{{ sub_concept.summary or '' if sub_concept else '' }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="notes">Notes</label>
+                <textarea class="form-control" id="notes" name="notes" rows="2"
+                          placeholder="e.g. intake batch context">{{ sub_concept.notes or '' if sub_concept else '' }}</textarea>
+            </div>
+            {% if sub_concept %}
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" name="verified" value="1"
+                       id="verified" {{ 'checked' if sub_concept.verified }}>
+                <label class="form-check-label" for="verified">Verified</label>
+            </div>
+            {% endif %}
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> {{ 'Save' if sub_concept else 'File Sub-Concept' }}
+                </button>
+                <a class="btn btn-outline-secondary"
+                   href="{{ url_for('concepts.sub_detail', slug=sub_concept.slug) if sub_concept else url_for('concepts.sub_list') }}">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

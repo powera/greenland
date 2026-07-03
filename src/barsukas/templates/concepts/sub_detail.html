@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}{{ sub_concept.title }} (sub-concept){% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/concepts.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('concepts.list_concepts_view') }}">Concepts</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('concepts.sub_list') }}">Sub-Encyclopedia</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ sub_concept.title }}</li>
+            </ol>
+        </nav>
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h1>{{ sub_concept.title }}</h1>
+                {% if sub_concept.summary %}<p class="lead text-muted">{{ sub_concept.summary }}</p>{% endif %}
+                <p>
+                    <span class="badge bg-secondary">{{ sub_concept.category }}</span>
+                    {% if sub_concept.verified %}<span class="badge bg-success"><i class="bi bi-check"></i> verified</span>
+                    {% else %}<span class="badge bg-warning text-dark">unverified</span>{% endif %}
+                    {% for qid in qids %}
+                    <a class="badge bg-info text-dark text-decoration-none" href="https://www.wikidata.org/wiki/{{ qid }}" target="_blank" rel="noopener noreferrer">{{ qid }}</a>
+                    {% endfor %}
+                </p>
+            </div>
+            {% if not readonly %}
+            <div class="btn-group">
+                <a class="btn btn-outline-primary" href="{{ url_for('concepts.sub_edit', slug=sub_concept.slug) }}">
+                    <i class="bi bi-pencil"></i> Edit
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        {% if shadowing_concept %}
+        <div class="alert alert-warning">
+            A main concept with this slug also exists:
+            <a href="{{ url_for('concepts.detail', slug=shadowing_concept.slug) }}">{{ shadowing_concept.title }}</a>.
+            Slug-based <code>[[wiki links]]</code> resolve there; use a
+            <code>[[Q-id]]</code> link to target this sub-concept specifically.
+        </div>
+        {% endif %}
+        <p class="text-muted">
+            Sub-concepts are tracked topics without generated bodies. They exist so
+            narrow or list-like topics stay out of the main encyclopedia, its
+            rankings, and its generation queues.
+        </p>
+        {% if sub_concept.notes %}
+        <div class="card mb-3">
+            <div class="card-header"><i class="bi bi-sticky"></i> Notes</div>
+            <div class="card-body"><p class="mb-0">{{ sub_concept.notes }}</p></div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-lg-4">
+        {% if backlinks %}
+        <div class="card mb-3">
+            <div class="card-header"><i class="bi bi-arrow-return-left"></i> Linked from</div>
+            <ul class="list-group list-group-flush">
+                {% for backlink in backlinks %}
+                <li class="list-group-item">
+                    <a href="{{ url_for('concepts.detail', slug=backlink.slug) }}">{{ backlink.title }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if not readonly %}
+        <div class="card">
+            <div class="card-body">
+                <form method="post" action="{{ url_for('concepts.sub_promote', slug=sub_concept.slug) }}"
+                      onsubmit="return confirm('Promote to a main concept? It will join the main encyclopedia (without a body).');"
+                      class="mb-2">
+                    <button type="submit" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-arrow-up-circle"></i> Promote to main concept
+                    </button>
+                </form>
+                <form method="post" action="{{ url_for('concepts.sub_delete', slug=sub_concept.slug) }}"
+                      onsubmit="return confirm('Delete this sub-concept? Its Q-id becomes untriaged again.');">
+                    <button type="submit" class="btn btn-outline-danger w-100">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

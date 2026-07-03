@@ -16,6 +16,8 @@ from storage.models.concept import (
     ConceptLemmaLink,
     ConceptWikidataIndex,
     MAX_CONCEPT_SOURCES,
+    SUB_CONCEPT_CATEGORIES,
+    SubConcept,
     normalize_concept_slug,
 )
 
@@ -57,13 +59,26 @@ def get_wikidata_index(session: Session, qid: str) -> Optional[ConceptWikidataIn
 def link_wikidata_concept(
     session: Session, qid: str, concept: Concept, *, notes: Optional[str] = None
 ) -> Optional[ConceptWikidataIndex]:
-    """Create or update the reverse index linking a Wikidata Q-id to a concept."""
+    """Create or update the reverse index linking a Wikidata Q-id to a concept.
+
+    Refuses (returns None) when the Q-id already points at a sub-concept: the
+    index targets are mutually exclusive, and repointing is an explicit
+    promote/demote action, never a side effect of linking.
+    """
     from storage.wikidata import normalize_qid
 
     normalized_qid = normalize_qid(qid)
     if normalized_qid is None:
         return None
     row = get_wikidata_index(session, normalized_qid)
+    if row is not None and row.sub_concept_id is not None:
+        logger.warning(
+            "Refusing to link Q-id %s to concept %r: already filed as sub-concept %s",
+            normalized_qid,
+            concept.slug,
+            row.sub_concept_id,
+        )
+        return None
     if row is None:
         row = ConceptWikidataIndex(qid=normalized_qid)
         session.add(row)
@@ -274,6 +289,182 @@ def delete_concept(session: Session, concept: Concept) -> bool:
     session.commit()
     logger.info(f"Deleted concept: {concept.slug}")
     return True
+
+
+# --- Sub-concepts ----------------------------------------------------------------
+#
+# Sub-encyclopedia entries: lightweight rows sharing the concepts' slug
+# conventions and the Wikidata reverse index, but kept out of every
+# main-encyclopedia code path. See storage.models.concept.SubConcept.
+
+
+def get_sub_concept_by_slug(session: Session, slug: str) -> Optional[SubConcept]:
+    """Look up a sub-concept by slug, normalizing space/underscore equivalence."""
+    normalized = normalize_concept_slug(slug)
+    return cast(
+        Optional[SubConcept],
+        session.query(SubConcept).filter(SubConcept.slug == normalized).first(),
+    )
+
+
+def get_sub_concept_by_id(session: Session, sub_concept_id: int) -> Optional[SubConcept]:
+    """Return a sub-concept by its internal id, or None."""
+    return cast(
+        Optional[SubConcept],
+        session.query(SubConcept).filter(SubConcept.id == sub_concept_id).first(),
+    )
+
+
+def create_sub_concept(
+    session: Session,
+    title: str,
+    category: str,
+    summary: Optional[str] = None,
+    verified: bool = False,
+    notes: Optional[str] = None,
+) -> Optional[SubConcept]:
+    """Create a new sub-concept.
+
+    The slug may coexist with a main concept of the same slug (slug-based wiki
+    links then resolve to the main concept; ``[[Q...]]`` links stay specific),
+    but must be unique among sub-concepts.
+
+    Args:
+        session: Database session.
+        title: Human-entered title; normalized to the canonical slug.
+        category: One of SUB_CONCEPT_CATEGORIES.
+        summary: One-sentence description.
+        verified: Whether a human has reviewed it.
+        notes: Optional notes (e.g. intake batch context).
+
+    Returns:
+        The created SubConcept, or None if the category is invalid, the slug is
+        empty, or a sub-concept with the slug already exists.
+    """
+    if category not in SUB_CONCEPT_CATEGORIES:
+        logger.warning("Refusing to create sub-concept with unknown category %r", category)
+        return None
+    slug = normalize_concept_slug(title)
+    if not slug:
+        logger.warning("Refusing to create sub-concept with empty title")
+        return None
+
+    sub_concept = SubConcept(
+        slug=slug,
+        category=category,
+        summary=summary,
+        verified=verified,
+        notes=notes,
+    )
+    try:
+        session.add(sub_concept)
+        session.commit()
+        logger.info(f"Created sub-concept: {slug} [{category}]")
+        return sub_concept
+    except IntegrityError as error:
+        session.rollback()
+        logger.warning(f"Sub-concept already exists or constraint violated for {slug!r}: {error}")
+        return None
+
+
+def update_sub_concept(
+    session: Session,
+    sub_concept: SubConcept,
+    *,
+    title: Optional[str] = None,
+    category: Optional[str] = None,
+    summary: Optional[str] = None,
+    verified: Optional[bool] = None,
+    notes: Optional[str] = None,
+) -> Optional[SubConcept]:
+    """Update fields on an existing sub-concept.
+
+    Only non-None arguments are applied. Returns None (and rolls back) if the
+    new slug collides with another sub-concept or the category is invalid.
+    """
+    if category is not None:
+        if category not in SUB_CONCEPT_CATEGORIES:
+            logger.warning("Refusing to set unknown sub-concept category %r", category)
+            return None
+        sub_concept.category = category
+    if title is not None:
+        sub_concept.slug = normalize_concept_slug(title)
+    if summary is not None:
+        sub_concept.summary = summary
+    if verified is not None:
+        sub_concept.verified = verified
+    if notes is not None:
+        sub_concept.notes = notes
+
+    try:
+        session.commit()
+        logger.info(f"Updated sub-concept: {sub_concept.slug}")
+        return sub_concept
+    except IntegrityError as error:
+        session.rollback()
+        logger.warning(f"Update collided with existing sub-concept {sub_concept.slug!r}: {error}")
+        return None
+
+
+def delete_sub_concept(session: Session, sub_concept: SubConcept) -> bool:
+    """Delete a sub-concept, detaching any Wikidata index rows first."""
+    session.query(ConceptWikidataIndex).filter(
+        ConceptWikidataIndex.sub_concept_id == sub_concept.id
+    ).update({ConceptWikidataIndex.sub_concept_id: None})
+    session.delete(sub_concept)
+    session.commit()
+    logger.info(f"Deleted sub-concept: {sub_concept.slug}")
+    return True
+
+
+def link_wikidata_sub_concept(
+    session: Session, qid: str, sub_concept: SubConcept, *, notes: Optional[str] = None
+) -> Optional[ConceptWikidataIndex]:
+    """Create or update the reverse index linking a Wikidata Q-id to a sub-concept.
+
+    Mirror of :func:`link_wikidata_concept`. Refuses (returns None) when the
+    Q-id already points at a main concept: repointing is an explicit
+    promote/demote action, never a side effect of linking.
+    """
+    from storage.wikidata import normalize_qid
+
+    normalized_qid = normalize_qid(qid)
+    if normalized_qid is None:
+        return None
+    row = get_wikidata_index(session, normalized_qid)
+    if row is not None and row.concept_id is not None:
+        logger.warning(
+            "Refusing to link Q-id %s to sub-concept %r: already linked to concept %s",
+            normalized_qid,
+            sub_concept.slug,
+            row.concept_id,
+        )
+        return None
+    if row is None:
+        row = ConceptWikidataIndex(qid=normalized_qid)
+        session.add(row)
+    row.sub_concept = sub_concept
+    row.rejected = False
+    if notes is not None:
+        row.notes = notes
+    try:
+        session.commit()
+        return row
+    except IntegrityError as error:
+        session.rollback()
+        logger.warning("Failed to link Wikidata Q-id %s to sub-concept: %s", normalized_qid, error)
+        return None
+
+
+def get_qids_for_sub_concept(session: Session, sub_concept_id: int) -> List[str]:
+    """Return the Wikidata Q-ids linked to a sub-concept (usually 0 or 1)."""
+    rows = (
+        session.query(ConceptWikidataIndex.qid)
+        .filter(ConceptWikidataIndex.sub_concept_id == sub_concept_id)
+        .order_by(ConceptWikidataIndex.qid)
+        .all()
+    )
+    return [row[0] for row in rows]
 
 
 # --- Lemma <-> Concept pairing -------------------------------------------------

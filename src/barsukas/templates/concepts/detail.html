@@ -146,6 +146,21 @@
                    {% if not sources %}aria-disabled="true" tabindex="-1"{% endif %}>
                     <i class="bi bi-arrow-clockwise"></i> Regenerate from references
                 </a>
+                <form method="post" action="{{ url_for('concepts.demote', slug=concept.slug) }}"
+                      onsubmit="return confirm('Demote to a sub-concept? The body and sources are DISCARDED.');"
+                      class="mb-2">
+                    <div class="input-group">
+                        <select class="form-select" name="category" required>
+                            <option value="">Sub-concept category...</option>
+                            {% for cat in sub_categories %}
+                            <option value="{{ cat }}">{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-down-circle"></i> Demote
+                        </button>
+                    </div>
+                </form>
                 <form method="post" action="{{ url_for('concepts.delete', slug=concept.slug) }}"
                       onsubmit="return confirm('Delete this concept?');">
                     <button type="submit" class="btn btn-outline-danger w-100">
