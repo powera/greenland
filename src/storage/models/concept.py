@@ -47,6 +47,22 @@ SUB_CONCEPT_CATEGORIES: tuple = (
     "sports_team_season",
 )
 
+# Strictly excluded categories: filing a Q-id under one of these actively
+# records that we deliberately IGNORE the topic (stronger than the tracked
+# categories above, more structured than the per-Q-id ``rejected`` flag).
+# Excluded sub-concepts are never generated and cannot be promoted to main
+# concepts without first moving them to a tracked category.
+EXCLUDED_SUB_CONCEPT_CATEGORIES: tuple = ("micronation",)
+
+# Every valid SubConcept.category value (tracked + strictly excluded).
+ALL_SUB_CONCEPT_CATEGORIES: tuple = SUB_CONCEPT_CATEGORIES + EXCLUDED_SUB_CONCEPT_CATEGORIES
+
+
+def is_excluded_sub_concept_category(category: str) -> bool:
+    """Return True when a sub-concept category marks its topics as ignored."""
+    return category in EXCLUDED_SUB_CONCEPT_CATEGORIES
+
+
 _WHITESPACE_RE = re.compile(r"\s+")
 
 # A wiki-link target that is a Wikidata Q-id rather than a title, e.g.
@@ -210,6 +226,11 @@ class SubConcept(Base):
     here while Ankara stays a main concept, and promote/demote (see
     storage.concept_service) move a topic across when the judgement changes.
 
+    A category from EXCLUDED_SUB_CONCEPT_CATEGORIES (e.g. "micronation")
+    means the topic is strictly ignored, not merely deferred: the row exists
+    to record that decision for the Q-id, and promotion is blocked until the
+    category is changed to a tracked one.
+
     Sub-concepts share the slug conventions of :class:`Concept` (same
     normalization, no namespace prefix) but slugs are only unique *within*
     this table: a slug may exist in both tables, in which case slug-based
@@ -248,6 +269,11 @@ class SubConcept(Base):
     def title(self) -> str:
         """Human-readable display title derived from the slug."""
         return concept_slug_to_title(self.slug)
+
+    @property
+    def is_excluded(self) -> bool:
+        """True when this sub-concept's category strictly excludes the topic."""
+        return is_excluded_sub_concept_category(self.category)
 
     def __repr__(self) -> str:
         return (

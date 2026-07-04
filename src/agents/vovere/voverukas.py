@@ -123,7 +123,8 @@ class VoverukasAgent:
             ``{"slug", "title", "score", "inbound"}`` dicts for the top wanted
             (missing) topics, ordered by descending score. ``suppressed``
             holds the same shape plus a ``"reason"`` field for ranked topics
-            that were filtered out (rejected / filed as sub-concept).
+            that were filtered out (rejected / filed as sub-concept /
+            strictly excluded).
         """
         session = create_backend_session(self.config)
         try:
@@ -147,7 +148,12 @@ class VoverukasAgent:
                 )
                 .all()
             ):
-                triage_reason = "rejected" if index_row.rejected else "sub-concept"
+                if index_row.rejected:
+                    triage_reason = "rejected"
+                elif index_row.sub_concept is not None and index_row.sub_concept.is_excluded:
+                    triage_reason = "excluded"
+                else:
+                    triage_reason = "sub-concept"
                 suppressed_reasons[normalize_concept_slug(index_row.title or "")] = triage_reason
 
             logger.info("Loaded %d concepts, %d sub-concepts", len(existing_slugs), len(sub_slugs))

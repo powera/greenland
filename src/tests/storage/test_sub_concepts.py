@@ -29,7 +29,14 @@ from storage.crud.concept import (
     link_wikidata_sub_concept,
     update_sub_concept,
 )
-from storage.models.concept import Base, SUB_CONCEPT_CATEGORIES, wiki_target_qid
+from storage.models.concept import (
+    ALL_SUB_CONCEPT_CATEGORIES,
+    Base,
+    EXCLUDED_SUB_CONCEPT_CATEGORIES,
+    SUB_CONCEPT_CATEGORIES,
+    is_excluded_sub_concept_category,
+    wiki_target_qid,
+)
 from storage.queries.concept import (
     count_sub_concepts,
     get_all_known_slugs,
@@ -286,3 +293,58 @@ def test_backlinks_match_slug_and_qid_links(session: Session) -> None:
 
 def test_sub_concept_categories_initial_vocabulary() -> None:
     assert SUB_CONCEPT_CATEGORIES == ("bird_species", "chess_concept", "sports_team_season")
+    assert EXCLUDED_SUB_CONCEPT_CATEGORIES == ("micronation",)
+    assert set(ALL_SUB_CONCEPT_CATEGORIES) == set(SUB_CONCEPT_CATEGORIES) | set(
+        EXCLUDED_SUB_CONCEPT_CATEGORIES
+    )
+    assert is_excluded_sub_concept_category("micronation") is True
+    assert is_excluded_sub_concept_category("bird_species") is False
+
+
+def test_excluded_category_creates_and_marks_sub_concept(session: Session) -> None:
+    sub = create_sub_concept(session, "Sealand", "micronation")
+    assert sub is not None
+    assert sub.is_excluded is True
+
+    tracked = create_sub_concept(session, "Anhinga", "bird_species")
+    assert tracked is not None
+    assert tracked.is_excluded is False
+
+
+def test_excluded_sub_concept_cannot_be_promoted(session: Session) -> None:
+    sub = create_sub_concept(session, "Sealand", "micronation")
+    assert sub is not None
+    assert link_wikidata_sub_concept(session, "Q35754", sub) is not None
+
+    assert promote_sub_concept(session, sub) is None
+    # Row and index link are untouched.
+    assert get_sub_concept_by_slug(session, "Sealand") is not None
+    row = get_wikidata_index(session, "Q35754")
+    assert row is not None and row.sub_concept_id == sub.id
+
+    # Moving to a tracked category unblocks promotion.
+    assert update_sub_concept(session, sub, category="chess_concept") is not None
+    assert promote_sub_concept(session, sub) is not None
+
+
+def test_create_concept_from_qid_reports_excluded_qids(session: Session) -> None:
+    sub = create_sub_concept(session, "Sealand", "micronation")
+    assert sub is not None
+    assert link_wikidata_sub_concept(session, "Q35754", sub) is not None
+
+    result = create_concept_from_qid(session, "Q35754")
+    assert result.status == "exists"
+    assert "strictly excluded" in result.detail
+    assert result.concept is None
+
+
+def test_file_sub_concept_from_qid_accepts_excluded_category(monkeypatch, session: Session) -> None:  # type: ignore[no-untyped-def]
+    monkeypatch.setattr(
+        "storage.concept_service.fetch_wikidata_concept_seed",
+        lambda qid, include_regional_wikis=False: _seed(qid, "Principality of Sealand"),
+    )
+
+    result = file_sub_concept_from_qid(session, "Q35754", "micronation")
+    assert result.status == "filed"
+    assert result.sub_concept is not None
+    assert result.sub_concept.is_excluded is True

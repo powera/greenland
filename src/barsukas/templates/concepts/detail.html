@@ -152,9 +152,16 @@
                     <div class="input-group">
                         <select class="form-select" name="category" required>
                             <option value="">Sub-concept category...</option>
-                            {% for cat in sub_categories %}
-                            <option value="{{ cat }}">{{ cat }}</option>
-                            {% endfor %}
+                            <optgroup label="Tracked">
+                                {% for cat in sub_categories %}
+                                <option value="{{ cat }}">{{ cat }}</option>
+                                {% endfor %}
+                            </optgroup>
+                            <optgroup label="Strictly excluded">
+                                {% for cat in excluded_sub_categories %}
+                                <option value="{{ cat }}">{{ cat }}</option>
+                                {% endfor %}
+                            </optgroup>
                         </select>
                         <button type="submit" class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-down-circle"></i> Demote

@@ -101,12 +101,13 @@ def create_concept_from_qid(
         )
     if existing_index is not None and existing_index.sub_concept is not None:
         sub = existing_index.sub_concept
+        filing = "strictly excluded" if sub.is_excluded else "filed as sub-concept"
         return ConceptCreationResult(
             qid=normalized_qid,
             title=sub.title,
             concept=None,
             status="exists",
-            detail=f"filed as sub-concept {sub.slug!r} [{sub.category}]",
+            detail=f"{filing} {sub.slug!r} [{sub.category}]",
         )
 
     seed = fetch_wikidata_concept_seed(
@@ -189,12 +190,13 @@ def create_concept_from_seed(
         )
     if existing_index is not None and existing_index.sub_concept is not None:
         sub = existing_index.sub_concept
+        filing = "strictly excluded" if sub.is_excluded else "filed as sub-concept"
         return ConceptCreationResult(
             qid=normalized_qid,
             title=sub.title,
             concept=None,
             status="exists",
-            detail=f"filed as sub-concept {sub.slug!r} [{sub.category}]",
+            detail=f"{filing} {sub.slug!r} [{sub.category}]",
         )
 
     if get_concept_by_slug(session, seed.title) is not None:
@@ -268,7 +270,9 @@ def file_sub_concept_from_qid(
     Args:
         session: Database session (concepts backend).
         qid: A Wikidata Q-id (any case; normalized).
-        category: One of SUB_CONCEPT_CATEGORIES.
+        category: One of ALL_SUB_CONCEPT_CATEGORIES. A strictly excluded
+            category (e.g. "micronation") actively records that the Q-id is
+            ignored rather than deferred.
         notes: Optional notes (e.g. intake batch context).
 
     Returns:
@@ -356,10 +360,22 @@ def promote_sub_concept(session: Session, sub_concept: SubConcept) -> Optional[C
     sub-concept to the new concept, and deletes the sub-concept row so the
     slug and Q-id never exist on both sides.
 
+    Strictly excluded sub-concepts (e.g. category "micronation") cannot be
+    promoted: the exclusion is the point of the row. Move the sub-concept to
+    a tracked category first if the judgement has genuinely changed.
+
     Returns:
-        The new Concept, or None if a main concept with the slug already
-        exists (the sub-concept is left untouched).
+        The new Concept, or None if the sub-concept is strictly excluded or a
+        main concept with the slug already exists (the sub-concept is left
+        untouched).
     """
+    if sub_concept.is_excluded:
+        logger.warning(
+            "Refusing to promote strictly excluded sub-concept %r [%s]",
+            sub_concept.slug,
+            sub_concept.category,
+        )
+        return None
     concept = create_concept(
         session,
         title=sub_concept.slug,
