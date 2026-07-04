@@ -39,11 +39,13 @@
             <div class="col-auto">
                 <select class="form-select" name="category">
                     <option value="">All categories</option>
-                    <optgroup label="Tracked">
-                        {% for cat in categories %}
+                    {% for group_label, group_categories in category_groups %}
+                    <optgroup label="{{ group_label }}">
+                        {% for cat in group_categories %}
                         <option value="{{ cat }}" {{ 'selected' if cat == category }}>{{ cat }}</option>
                         {% endfor %}
                     </optgroup>
+                    {% endfor %}
                     <optgroup label="Strictly excluded">
                         {% for cat in excluded_categories %}
                         <option value="{{ cat }}" {{ 'selected' if cat == category }}>{{ cat }}</option>

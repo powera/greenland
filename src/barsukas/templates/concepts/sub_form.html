@@ -51,11 +51,13 @@
                 <label class="form-label" for="category">Category</label>
                 <select class="form-select" id="category" name="category" required>
                     {% if not sub_concept %}<option value="">Choose a category...</option>{% endif %}
-                    <optgroup label="Tracked">
-                        {% for cat in categories %}
+                    {% for group_label, group_categories in category_groups %}
+                    <optgroup label="{{ group_label }}">
+                        {% for cat in group_categories %}
                         <option value="{{ cat }}" {{ 'selected' if sub_concept and cat == sub_concept.category }}>{{ cat }}</option>
                         {% endfor %}
                     </optgroup>
+                    {% endfor %}
                     <optgroup label="Strictly excluded (topic is actively ignored)">
                         {% for cat in excluded_categories %}
                         <option value="{{ cat }}" {{ 'selected' if sub_concept and cat == sub_concept.category }}>{{ cat }}</option>

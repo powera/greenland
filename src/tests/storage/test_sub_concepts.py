@@ -31,6 +31,7 @@ from storage.crud.concept import (
 )
 from storage.models.concept import (
     ALL_SUB_CONCEPT_CATEGORIES,
+    SUB_CONCEPT_CATEGORY_GROUPS,
     Base,
     EXCLUDED_SUB_CONCEPT_CATEGORIES,
     SUB_CONCEPT_CATEGORIES,
@@ -292,11 +293,22 @@ def test_backlinks_match_slug_and_qid_links(session: Session) -> None:
 
 
 def test_sub_concept_categories_initial_vocabulary() -> None:
-    assert SUB_CONCEPT_CATEGORIES == ("bird_species", "chess_concept", "sports_team_season")
+    assert "bird_species" in SUB_CONCEPT_CATEGORIES
+    assert "geography_river" in SUB_CONCEPT_CATEGORIES
+    assert "geography_city" in SUB_CONCEPT_CATEGORIES
+    assert "geography_mountain" in SUB_CONCEPT_CATEGORIES
+    assert "media_tv_episode" in SUB_CONCEPT_CATEGORIES
+    assert "sports_team_season" in SUB_CONCEPT_CATEGORIES
     assert EXCLUDED_SUB_CONCEPT_CATEGORIES == ("micronation",)
     assert set(ALL_SUB_CONCEPT_CATEGORIES) == set(SUB_CONCEPT_CATEGORIES) | set(
         EXCLUDED_SUB_CONCEPT_CATEGORIES
     )
+    grouped_categories = {
+        category
+        for _group_label, categories in SUB_CONCEPT_CATEGORY_GROUPS
+        for category in categories
+    }
+    assert grouped_categories == set(SUB_CONCEPT_CATEGORIES)
     assert is_excluded_sub_concept_category("micronation") is True
     assert is_excluded_sub_concept_category("bird_species") is False
 
