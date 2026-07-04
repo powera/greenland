@@ -39,9 +39,16 @@
             <div class="col-auto">
                 <select class="form-select" name="category">
                     <option value="">All categories</option>
-                    {% for cat in categories %}
-                    <option value="{{ cat }}" {{ 'selected' if cat == category }}>{{ cat }}</option>
-                    {% endfor %}
+                    <optgroup label="Tracked">
+                        {% for cat in categories %}
+                        <option value="{{ cat }}" {{ 'selected' if cat == category }}>{{ cat }}</option>
+                        {% endfor %}
+                    </optgroup>
+                    <optgroup label="Strictly excluded">
+                        {% for cat in excluded_categories %}
+                        <option value="{{ cat }}" {{ 'selected' if cat == category }}>{{ cat }}</option>
+                        {% endfor %}
+                    </optgroup>
                 </select>
             </div>
             <div class="col-auto">
@@ -63,7 +70,11 @@
                 {% if sub.summary %}<p class="mb-1 text-muted">{{ sub.summary }}</p>{% endif %}
             </div>
             <div class="text-end">
+                {% if sub.is_excluded %}
+                <span class="badge bg-danger">{{ sub.category }} · excluded</span>
+                {% else %}
                 <span class="badge bg-secondary">{{ sub.category }}</span>
+                {% endif %}
                 {% if sub.verified %}<span class="badge bg-success"><i class="bi bi-check"></i> verified</span>{% endif %}
             </div>
         </div>

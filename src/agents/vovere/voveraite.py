@@ -53,7 +53,7 @@ from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.concept_service import create_concept_from_qid, file_sub_concept_from_qid
 from storage.crud.concept import cache_wikidata_title
-from storage.models.concept import SUB_CONCEPT_CATEGORIES
+from storage.models.concept import ALL_SUB_CONCEPT_CATEGORIES
 from storage.wikidata import fetch_wikidata_concept_seed, normalize_qid
 
 # Agent name recorded on queued batch requests; the completion handler in
@@ -363,8 +363,12 @@ def main() -> int:
     )
     parser.add_argument(
         "--category",
-        choices=SUB_CONCEPT_CATEGORIES,
-        help="Sub-concept category applied to every Q-id (with --sub).",
+        choices=ALL_SUB_CONCEPT_CATEGORIES,
+        help=(
+            "Sub-concept category applied to every Q-id (with --sub). Strictly "
+            "excluded categories (e.g. micronation) record that the Q-ids are "
+            "deliberately ignored."
+        ),
     )
     add_common_args(parser)
     add_backend_args(parser)

@@ -167,6 +167,12 @@ SUB_CONCEPT_CATEGORIES: tuple = (
     "chess_concept",
     "sports_team_season",
 )
+
+# Strictly excluded categories: filing a Q-id under one of these actively
+# records that we deliberately IGNORE the topic.
+EXCLUDED_SUB_CONCEPT_CATEGORIES: tuple = ("micronation",)
+
+ALL_SUB_CONCEPT_CATEGORIES: tuple = SUB_CONCEPT_CATEGORIES + EXCLUDED_SUB_CONCEPT_CATEGORIES
 ```
 
 Naming notes: `chess_concept` is broader than just openings (endgames, motifs,
@@ -184,11 +190,38 @@ prominence judgement. The prominent members of a family stay main concepts
 openings and seasons) while the long tail files here -- and `promote` /
 `demote` move individual topics across the divide when a judgement changes.
 
-CRUD validates `category` against this tuple (a plain tuple of strings rather
-than an `enum.Enum` keeps it consistent with the free-form-string style of the
-concept module while still being closed in practice). Adding a new family of
-sub-topics is a one-line code change plus, optionally, a Wikidata
-classification rule (Future Work).
+CRUD validates `category` against `ALL_SUB_CONCEPT_CATEGORIES` (plain tuples
+of strings rather than an `enum.Enum` keep this consistent with the
+free-form-string style of the concept module while still being closed in
+practice). Adding a new family of sub-topics is a one-line code change plus,
+optionally, a Wikidata classification rule (Future Work).
+
+#### Strictly excluded categories
+
+The vocabulary is partitioned into **tracked** and **strictly excluded**
+categories. A tracked category ("bird_species") means "real topic, deferred
+from the main encyclopedia, maybe an entry someday". A strictly excluded
+category ("micronation") means "we actively record that we ignore this topic
+and its Q-id" -- the row exists precisely to note that decision, so the topic
+never resurfaces for triage.
+
+How exclusion differs from the per-Q-id `rejected` flag on the index:
+`rejected` is an ad-hoc, uncategorized veto with no slug, no summary, and no
+browsable page; an excluded sub-concept is a structured, categorized,
+searchable record of the same decision, filed in bulk by family. New
+family-wide exclusions should get a category; one-off vetoes can stay
+`rejected`.
+
+Behavioral consequences of an excluded category
+(`SubConcept.is_excluded` / `is_excluded_sub_concept_category`):
+
+- `promote_sub_concept` refuses (the Barsukas promote button is replaced by
+  an explanatory note); the category must first be changed to a tracked one.
+- `create_concept_from_qid` reports the Q-id as `exists` with detail
+  "strictly excluded ..." rather than "filed as sub-concept ...".
+- Voverukas suppression shows reason `excluded` instead of `sub-concept`.
+- Everything else (never generated, never wanted, filterable, Q-id linked)
+  is inherited from being a sub-concept at all.
 
 ### Alternatives considered
 
@@ -256,7 +289,9 @@ name a specific entity, not a creatable slug.
     `sub_concept_id` -- this also closes the existing gap where rejected
     Q-ids still rank.
 - A `--show-filtered` flag prints the suppressed items as a separate section
-  of the report instead of hiding them, for triage review.
+  of the report instead of hiding them, for triage review. The reason column
+  distinguishes `rejected` (index flag), `sub-concept` (tracked category),
+  and `excluded` (strictly excluded category).
 
 Unresolved red links (no row anywhere) are by definition untriaged and
 continue to rank normally; they leave the list when someone files them.
@@ -264,8 +299,8 @@ continue to rank normally; they leave the list when someone files them.
 ### 3. Creation / service layer (`storage/crud/concept.py`, `storage/concept_service.py`)
 
 - New CRUD: `create_sub_concept(session, title, category, summary=None, ...)`
-  (validates category against `SUB_CONCEPT_CATEGORIES`; the slug may shadow a
-  main concept but must be unique among sub-concepts),
+  (validates category against `ALL_SUB_CONCEPT_CATEGORIES`; the slug may
+  shadow a main concept but must be unique among sub-concepts),
   `get_sub_concept_by_slug`, `update_sub_concept`, `delete_sub_concept`
   (detaches index rows so the Q-id reverts to untriaged).
 - New index helper `link_wikidata_sub_concept(session, qid, sub_concept)`
@@ -279,13 +314,16 @@ continue to rank normally; they leave the list when someone files them.
   anyway with a warning detail (slug links resolve to the main concept).
 - `create_concept_from_qid` / `create_concept_from_seed`: the existing
   "already linked" check extends to `sub_concept_id`, returning status
-  `"exists"` with detail "filed as sub-concept" so bulk main-concept runs
-  skip sub-filed Q-ids loudly rather than silently.
+  `"exists"` with detail "filed as sub-concept" (or "strictly excluded" for
+  excluded categories) so bulk main-concept runs skip sub-filed Q-ids loudly
+  rather than silently.
 - **Promotion/demotion**: promoting a sub-concept to a main concept =
   `create_concept(...)` + repoint the index row's target + delete the
   `sub_concepts` row, in one service function (`promote_sub_concept`), so
   the slug and Q-id never exist on both sides. Demotion is the mirror image.
-  Both are curation actions exposed only in Barsukas.
+  Both are curation actions exposed only in Barsukas. Promotion refuses
+  strictly excluded sub-concepts; the category must be moved to a tracked one
+  first.
 
 ### 4. Bulk intake (`agents/vovere/voveraite.py`)
 
@@ -294,14 +332,15 @@ Sivas Province", "chess openings", "MLB team seasons"). Add:
 
 ```
 --sub --category chess_concept    # file these Q-ids as sub-concepts
+--sub --category micronation      # record that these Q-ids are ignored
 ```
 
 Behavior: resolve each Q-id, then call `file_sub_concept_from_qid` -- creating
 the row and index link. No LLM calls are involved; `--sub` is mutually
 exclusive with `--create`/`--batch`/`--no-body` (there is nothing to
 generate). `--category` is required with `--sub` and validated against
-`SUB_CONCEPT_CATEGORIES` at argparse time so a typo fails before any network
-call.
+`ALL_SUB_CONCEPT_CATEGORIES` at argparse time so a typo fails before any
+network call.
 
 Per project policy, Voveraite runs that resolve Q-ids make live
 Wikidata/Wikipedia calls and need developer confirmation before running.
@@ -311,9 +350,10 @@ Wikidata/Wikipedia calls and need developer confirmation before running.
 - **Main list page**: unchanged (no filtering needed).
 - **New sub-encyclopedia section** under the concepts blueprint
   (`/concepts/sub`): list with search + category filter (ordinary GET form,
-  select populated from `SUB_CONCEPT_CATEGORIES`), plus a simple detail/edit
-  page (category select, summary, notes, verified -- ordinary form submits,
-  per house style).
+  select grouped into Tracked / Strictly excluded optgroups), plus a simple
+  detail/edit page (category select, summary, notes, verified -- ordinary
+  form submits, per house style). Excluded entries carry a red badge and an
+  explanatory banner.
 - **File Sub-Concept form** (`/concepts/sub/new`): takes a Wikidata Q-id
   (preferred; title/summary come from the seed via
   `file_sub_concept_from_qid`) or a manual title, plus the category select --

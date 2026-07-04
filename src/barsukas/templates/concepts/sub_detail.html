@@ -21,7 +21,11 @@
                 <h1>{{ sub_concept.title }}</h1>
                 {% if sub_concept.summary %}<p class="lead text-muted">{{ sub_concept.summary }}</p>{% endif %}
                 <p>
+                    {% if sub_concept.is_excluded %}
+                    <span class="badge bg-danger">{{ sub_concept.category }} · strictly excluded</span>
+                    {% else %}
                     <span class="badge bg-secondary">{{ sub_concept.category }}</span>
+                    {% endif %}
                     {% if sub_concept.verified %}<span class="badge bg-success"><i class="bi bi-check"></i> verified</span>
                     {% else %}<span class="badge bg-warning text-dark">unverified</span>{% endif %}
                     {% for qid in qids %}
@@ -50,11 +54,20 @@
             <code>[[Q-id]]</code> link to target this sub-concept specifically.
         </div>
         {% endif %}
+        {% if sub_concept.is_excluded %}
+        <div class="alert alert-danger">
+            <strong>Strictly excluded.</strong> This entry records that we
+            deliberately ignore this topic (and its Q-id): it will never be
+            generated, and it cannot be promoted to a main concept unless its
+            category is first changed to a tracked one.
+        </div>
+        {% else %}
         <p class="text-muted">
             Sub-concepts are tracked topics without generated bodies. They exist so
             narrow or list-like topics stay out of the main encyclopedia, its
             rankings, and its generation queues.
         </p>
+        {% endif %}
         {% if sub_concept.notes %}
         <div class="card mb-3">
             <div class="card-header"><i class="bi bi-sticky"></i> Notes</div>
@@ -79,6 +92,12 @@
         {% if not readonly %}
         <div class="card">
             <div class="card-body">
+                {% if sub_concept.is_excluded %}
+                <p class="text-muted small mb-2">
+                    Strictly excluded entries cannot be promoted; change the
+                    category to a tracked one first.
+                </p>
+                {% else %}
                 <form method="post" action="{{ url_for('concepts.sub_promote', slug=sub_concept.slug) }}"
                       onsubmit="return confirm('Promote to a main concept? It will join the main encyclopedia (without a body).');"
                       class="mb-2">
@@ -86,6 +105,7 @@
                         <i class="bi bi-arrow-up-circle"></i> Promote to main concept
                     </button>
                 </form>
+                {% endif %}
                 <form method="post" action="{{ url_for('concepts.sub_delete', slug=sub_concept.slug) }}"
                       onsubmit="return confirm('Delete this sub-concept? Its Q-id becomes untriaged again.');">
                     <button type="submit" class="btn btn-outline-danger w-100">

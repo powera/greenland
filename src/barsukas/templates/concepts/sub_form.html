@@ -51,10 +51,22 @@
                 <label class="form-label" for="category">Category</label>
                 <select class="form-select" id="category" name="category" required>
                     {% if not sub_concept %}<option value="">Choose a category...</option>{% endif %}
-                    {% for cat in categories %}
-                    <option value="{{ cat }}" {{ 'selected' if sub_concept and cat == sub_concept.category }}>{{ cat }}</option>
-                    {% endfor %}
+                    <optgroup label="Tracked">
+                        {% for cat in categories %}
+                        <option value="{{ cat }}" {{ 'selected' if sub_concept and cat == sub_concept.category }}>{{ cat }}</option>
+                        {% endfor %}
+                    </optgroup>
+                    <optgroup label="Strictly excluded (topic is actively ignored)">
+                        {% for cat in excluded_categories %}
+                        <option value="{{ cat }}" {{ 'selected' if sub_concept and cat == sub_concept.category }}>{{ cat }}</option>
+                        {% endfor %}
+                    </optgroup>
                 </select>
+                <div class="form-text">
+                    Filing under a strictly excluded category records that we
+                    deliberately ignore the topic; it can never be promoted to a
+                    main concept.
+                </div>
             </div>
             <div class="mb-3">
                 <label class="form-label" for="summary">Summary</label>

@@ -12,11 +12,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from storage.models.concept import (
+    ALL_SUB_CONCEPT_CATEGORIES,
     Concept,
     ConceptLemmaLink,
     ConceptWikidataIndex,
     MAX_CONCEPT_SOURCES,
-    SUB_CONCEPT_CATEGORIES,
     SubConcept,
     normalize_concept_slug,
 )
@@ -332,7 +332,8 @@ def create_sub_concept(
     Args:
         session: Database session.
         title: Human-entered title; normalized to the canonical slug.
-        category: One of SUB_CONCEPT_CATEGORIES.
+        category: One of ALL_SUB_CONCEPT_CATEGORIES (tracked, or strictly
+            excluded like "micronation" to record that the topic is ignored).
         summary: One-sentence description.
         verified: Whether a human has reviewed it.
         notes: Optional notes (e.g. intake batch context).
@@ -341,7 +342,7 @@ def create_sub_concept(
         The created SubConcept, or None if the category is invalid, the slug is
         empty, or a sub-concept with the slug already exists.
     """
-    if category not in SUB_CONCEPT_CATEGORIES:
+    if category not in ALL_SUB_CONCEPT_CATEGORIES:
         logger.warning("Refusing to create sub-concept with unknown category %r", category)
         return None
     slug = normalize_concept_slug(title)
@@ -383,7 +384,7 @@ def update_sub_concept(
     new slug collides with another sub-concept or the category is invalid.
     """
     if category is not None:
-        if category not in SUB_CONCEPT_CATEGORIES:
+        if category not in ALL_SUB_CONCEPT_CATEGORIES:
             logger.warning("Refusing to set unknown sub-concept category %r", category)
             return None
         sub_concept.category = category

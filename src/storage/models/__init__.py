@@ -1,13 +1,16 @@
 """Models package for wordfreq."""
 
 from storage.models.concept import (
+    ALL_SUB_CONCEPT_CATEGORIES,
     Concept,
     ConceptLemmaLink,
     ConceptWikidataIndex,
+    EXCLUDED_SUB_CONCEPT_CATEGORIES,
     MAX_CONCEPT_SOURCES,
     SUB_CONCEPT_CATEGORIES,
     SubConcept,
     concept_slug_to_title,
+    is_excluded_sub_concept_category,
     normalize_concept_slug,
     wiki_target_qid,
 )
@@ -47,9 +50,12 @@ from storage.models.translations import Translation, TranslationSet
 from storage.models.imports import PendingImport, PendingImportSynonymCandidate, WordExclusion
 
 __all__ = [
+    "ALL_SUB_CONCEPT_CATEGORIES",
     "AdjectiveSubtype",
     "AdverbSubtype",
     "Base",
+    "EXCLUDED_SUB_CONCEPT_CATEGORIES",
+    "is_excluded_sub_concept_category",
     "Concept",
     "ConceptLemmaLink",
     "ConceptWikidataIndex",

@@ -51,6 +51,8 @@ from storage.crud.concept import (
 )
 from storage.models.schema import Lemma
 from storage.models.concept import (
+    ALL_SUB_CONCEPT_CATEGORIES,
+    EXCLUDED_SUB_CONCEPT_CATEGORIES,
     MAX_CONCEPT_SOURCES,
     SUB_CONCEPT_CATEGORIES,
     ConceptWikidataIndex,
@@ -396,6 +398,7 @@ def detail(slug: str) -> ResponseReturnValue:
         lemma_query=lemma_query,
         lemma_candidates=lemma_candidates,
         sub_categories=SUB_CONCEPT_CATEGORIES,
+        excluded_sub_categories=EXCLUDED_SUB_CONCEPT_CATEGORIES,
     )
 
 
@@ -612,7 +615,7 @@ def demote(slug: str) -> ResponseReturnValue:
         return redirect(url_for("concepts.list_concepts_view"))
 
     category = request.form.get("category", "")
-    if category not in SUB_CONCEPT_CATEGORIES:
+    if category not in ALL_SUB_CONCEPT_CATEGORIES:
         flash("Pick a sub-concept category to demote into.", "error")
         return redirect(url_for("concepts.detail", slug=slug))
 
@@ -639,7 +642,7 @@ def sub_list() -> ResponseReturnValue:
     """List sub-concepts with optional search, category filter, and pagination."""
     search = request.args.get("q", "").strip()
     category = request.args.get("category", "").strip()
-    if category not in SUB_CONCEPT_CATEGORIES:
+    if category not in ALL_SUB_CONCEPT_CATEGORIES:
         category = ""
 
     total = count_sub_concepts(_concept_session(), search=search, category=category or None)
@@ -665,6 +668,7 @@ def sub_list() -> ResponseReturnValue:
         search=search,
         category=category,
         categories=SUB_CONCEPT_CATEGORIES,
+        excluded_categories=EXCLUDED_SUB_CONCEPT_CATEGORIES,
         readonly=_is_readonly(),
         page=page,
         total_pages=total_pages,
@@ -681,6 +685,7 @@ def sub_new() -> ResponseReturnValue:
         "concepts/sub_form.html",
         sub_concept=None,
         categories=SUB_CONCEPT_CATEGORIES,
+        excluded_categories=EXCLUDED_SUB_CONCEPT_CATEGORIES,
     )
 
 
@@ -692,7 +697,7 @@ def sub_create() -> ResponseReturnValue:
         return redirect(url_for("concepts.sub_list"))
 
     category = request.form.get("category", "")
-    if category not in SUB_CONCEPT_CATEGORIES:
+    if category not in ALL_SUB_CONCEPT_CATEGORIES:
         flash("A sub-concept category is required.", "error")
         return redirect(url_for("concepts.sub_new"))
 
@@ -774,6 +779,7 @@ def sub_edit(slug: str) -> ResponseReturnValue:
         "concepts/sub_form.html",
         sub_concept=sub_concept,
         categories=SUB_CONCEPT_CATEGORIES,
+        excluded_categories=EXCLUDED_SUB_CONCEPT_CATEGORIES,
     )
 
 
@@ -794,7 +800,7 @@ def sub_update(slug: str) -> ResponseReturnValue:
         flash("A title is required.", "error")
         return redirect(url_for("concepts.sub_edit", slug=slug))
     category = request.form.get("category", "")
-    if category not in SUB_CONCEPT_CATEGORIES:
+    if category not in ALL_SUB_CONCEPT_CATEGORIES:
         flash("A sub-concept category is required.", "error")
         return redirect(url_for("concepts.sub_edit", slug=slug))
 
@@ -852,6 +858,14 @@ def sub_promote(slug: str) -> ResponseReturnValue:
     if sub_concept is None:
         flash(f"No sub-concept found for {slug!r}.", "error")
         return redirect(url_for("concepts.sub_list"))
+
+    if sub_concept.is_excluded:
+        flash(
+            "This sub-concept is strictly excluded; change its category to a "
+            "tracked one before promoting.",
+            "error",
+        )
+        return redirect(url_for("concepts.sub_detail", slug=slug))
 
     concept = promote_sub_concept(_concept_session(), sub_concept)
     if concept is None:
