@@ -55,6 +55,7 @@ from storage.models.concept import (
     EXCLUDED_SUB_CONCEPT_CATEGORIES,
     MAX_CONCEPT_SOURCES,
     SUB_CONCEPT_CATEGORIES,
+    SUB_CONCEPT_CATEGORY_GROUPS,
     ConceptWikidataIndex,
     normalize_concept_slug,
 )
@@ -398,6 +399,7 @@ def detail(slug: str) -> ResponseReturnValue:
         lemma_query=lemma_query,
         lemma_candidates=lemma_candidates,
         sub_categories=SUB_CONCEPT_CATEGORIES,
+        sub_category_groups=SUB_CONCEPT_CATEGORY_GROUPS,
         excluded_sub_categories=EXCLUDED_SUB_CONCEPT_CATEGORIES,
     )
 
@@ -668,6 +670,7 @@ def sub_list() -> ResponseReturnValue:
         search=search,
         category=category,
         categories=SUB_CONCEPT_CATEGORIES,
+        category_groups=SUB_CONCEPT_CATEGORY_GROUPS,
         excluded_categories=EXCLUDED_SUB_CONCEPT_CATEGORIES,
         readonly=_is_readonly(),
         page=page,
@@ -685,6 +688,7 @@ def sub_new() -> ResponseReturnValue:
         "concepts/sub_form.html",
         sub_concept=None,
         categories=SUB_CONCEPT_CATEGORIES,
+        category_groups=SUB_CONCEPT_CATEGORY_GROUPS,
         excluded_categories=EXCLUDED_SUB_CONCEPT_CATEGORIES,
     )
 
@@ -779,6 +783,7 @@ def sub_edit(slug: str) -> ResponseReturnValue:
         "concepts/sub_form.html",
         sub_concept=sub_concept,
         categories=SUB_CONCEPT_CATEGORIES,
+        category_groups=SUB_CONCEPT_CATEGORY_GROUPS,
         excluded_categories=EXCLUDED_SUB_CONCEPT_CATEGORIES,
     )
 

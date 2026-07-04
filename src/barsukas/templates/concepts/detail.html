@@ -152,11 +152,13 @@
                     <div class="input-group">
                         <select class="form-select" name="category" required>
                             <option value="">Sub-concept category...</option>
-                            <optgroup label="Tracked">
-                                {% for cat in sub_categories %}
+                            {% for group_label, group_categories in sub_category_groups %}
+                            <optgroup label="{{ group_label }}">
+                                {% for cat in group_categories %}
                                 <option value="{{ cat }}">{{ cat }}</option>
                                 {% endfor %}
                             </optgroup>
+                            {% endfor %}
                             <optgroup label="Strictly excluded">
                                 {% for cat in excluded_sub_categories %}
                                 <option value="{{ cat }}">{{ cat }}</option>

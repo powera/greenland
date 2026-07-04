@@ -37,14 +37,79 @@ from storage.models.schema import Base
 # treated as guidance rather than a hard floor so thin entries are not blocked.
 MAX_CONCEPT_SOURCES: int = 10
 
-# Closed vocabulary for SubConcept.category. Extend by editing this tuple; these
-# values are deliberately NOT part of Concept.concept_type. Species categories
-# divide at roughly the phylum/class level (bird_species = class Aves); a future
-# mammal_species etc. would be a sibling entry, not a widening of bird_species.
-SUB_CONCEPT_CATEGORIES: tuple = (
-    "bird_species",
-    "chess_concept",
-    "sports_team_season",
+# Closed vocabulary for SubConcept.category. Extend this explicit two-layer
+# structure instead of deriving UI groups from string prefixes. Values are
+# deliberately NOT part of Concept.concept_type, and categories are about what
+# the Q-id is, not cross-cutting Wikipedia-style intersections (for example:
+# use geography_river, not german_river). A Q-id still belongs to exactly one
+# concrete category.
+SUB_CONCEPT_CATEGORY_GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    (
+        "Animals / biology",
+        (
+            "bird_species",
+            "fish_species",
+            "insect_species",
+            "mammal_species",
+            "plant_species",
+        ),
+    ),
+    (
+        "Arts, media, and entertainment",
+        (
+            "media_album",
+            "media_book",
+            "media_comic",
+            "media_film",
+            "media_game",
+            "media_song",
+            "media_tv_episode",
+            "media_tv_season",
+        ),
+    ),
+    (
+        "Competitive and structured domains",
+        (
+            "chess_concept",
+            "sports_athlete",
+            "sports_competition",
+            "sports_team",
+            "sports_team_season",
+        ),
+    ),
+    (
+        "Geography and infrastructure",
+        (
+            "geography_administrative_division",
+            "geography_airport",
+            "geography_building",
+            "geography_city",
+            "geography_island",
+            "geography_lake",
+            "geography_mountain",
+            "geography_mountain_range",
+            "geography_protected_area",
+            "geography_railway_station",
+            "geography_river",
+            "geography_road",
+            "geography_town",
+            "geography_village",
+        ),
+    ),
+    (
+        "Organizations and events",
+        (
+            "event_recurring",
+            "event_sports_match",
+            "organization_company",
+            "organization_educational_institution",
+            "organization_military_unit",
+        ),
+    ),
+)
+
+SUB_CONCEPT_CATEGORIES: tuple[str, ...] = tuple(
+    category for _group_label, categories in SUB_CONCEPT_CATEGORY_GROUPS for category in categories
 )
 
 # Strictly excluded categories: filing a Q-id under one of these actively
