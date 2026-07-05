@@ -1,0 +1,18 @@
+Write a conversation titled: {title}
+
+Scenario brief: {summary}
+{difficulty_instruction}
+Requirements:
+- An original dialogue between two (occasionally three) named speakers,
+  roughly 10-20 turns, that plays out the scenario naturally from greeting to
+  a clean ending.
+- Format each turn as a Markdown line starting with the speaker's name in
+  bold, e.g. **Anna:** followed by the spoken sentence(s). One turn per line,
+  with a blank line between turns.
+- Write in English. Keep the language natural but learner-friendly: everyday
+  vocabulary, complete sentences, no heavy slang or idioms that would defeat
+  a learner.
+- You may add at most one short italic stage direction line if the scene
+  needs it, e.g. *At the counter of a small cafe.*
+- No top-level title heading, no [[wiki links]], no footnotes.
+- Output only the conversation, nothing else.

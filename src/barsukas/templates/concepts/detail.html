@@ -47,6 +47,27 @@
         </div>
     </div>
     <div class="col-lg-4">
+        {% if text_work or attributed_works %}
+        <div class="card mb-3">
+            <div class="card-header"><i class="bi bi-book"></i> Texts</div>
+            <ul class="list-group list-group-flush">
+                {% if text_work %}
+                <li class="list-group-item">
+                    Read the {{ text_work.text_type.replace('_', ' ') }}:
+                    <a href="{{ url_for('texts.detail', slug=text_work.slug) }}">{{ text_work.title }}</a>
+                </li>
+                {% endif %}
+                {% for attributed in attributed_works %}
+                <li class="list-group-item">
+                    Attributed:
+                    <a href="{{ url_for('texts.detail', slug=attributed.slug) }}">{{ attributed.title }}</a>
+                    <span class="badge bg-secondary">{{ attributed.text_type }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
         {% if sources %}
         <div class="card mb-3">
             <div class="card-header"><i class="bi bi-link-45deg"></i> Sources</div>

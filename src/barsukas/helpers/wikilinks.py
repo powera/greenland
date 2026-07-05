@@ -110,3 +110,22 @@ def render_concept_body(body: str, resolved: Dict[str, ResolvedWikiTarget]) -> M
     for token, anchor in placeholders.items():
         html = html.replace(token, str(anchor))
     return Markup(html)
+
+
+def render_text_body(body: str) -> Markup:
+    """Render a story-library text body to safe HTML (no wiki links).
+
+    Text-work versions (see :mod:`storage.models.text_work`) are plain
+    Markdown by design -- stories, not encyclopedia entries -- so this is the
+    escape + minimal-Markdown half of :func:`render_concept_body` with no
+    link resolution at all.
+
+    Args:
+        body: The raw version body (Markdown, no ``[[wiki links]]``).
+
+    Returns:
+        A :class:`~markupsafe.Markup` HTML fragment safe to embed in a template.
+    """
+    if not body:
+        return Markup("")
+    return Markup(_render_blocks(str(escape(body))))

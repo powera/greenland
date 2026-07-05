@@ -77,6 +77,7 @@ from barsukas.routes import (
     sentences,
     settings,
     strings_export,
+    texts,
     trakaido,
     trakaido_activities,
     translations,
@@ -261,6 +262,7 @@ def create_app(
     app.register_blueprint(categories.bp)
     app.register_blueprint(completeness.bp)
     app.register_blueprint(concepts.bp)
+    app.register_blueprint(texts.bp)
     app.register_blueprint(translations.bp)
     app.register_blueprint(overrides.bp)
     app.register_blueprint(agents.bp)

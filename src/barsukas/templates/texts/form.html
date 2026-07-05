@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit ' + work.title if work else 'Add Work' }}{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('texts.list_texts_view') }}">Texts</a></li>
+                {% if work %}
+                <li class="breadcrumb-item"><a href="{{ url_for('texts.detail', slug=work.slug) }}">{{ work.title }}</a></li>
+                {% endif %}
+                <li class="breadcrumb-item active" aria-current="page">{{ 'Edit' if work else 'Add Work' }}</li>
+            </ol>
+        </nav>
+        <h1>{{ 'Edit Work' if work else 'Add Work' }}</h1>
+        {% if not work %}
+        <p class="text-muted">
+            Add a work to the story library: give a Wikidata Q-id (preferred; title
+            and summary come from the seed) or a manual title (conversations have no
+            Q-id). The text itself is added afterwards -- generated for authored
+            types, pasted with a license for canonical types.
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post"
+              action="{{ url_for('texts.update', slug=work.slug) if work else url_for('texts.create') }}">
+            {% if not work %}
+            <div class="mb-3">
+                <label class="form-label" for="wikidata_qid">Wikidata Q-id</label>
+                <input type="text" class="form-control" id="wikidata_qid" name="wikidata_qid"
+                       placeholder="e.g. Q727946">
+                <div class="form-text">If set, the title and summary are taken from Wikidata.</div>
+            </div>
+            {% else %}
+            <div class="mb-3">
+                <label class="form-label" for="wikidata_qid">Wikidata Q-id (the work itself)</label>
+                <input type="text" class="form-control" id="wikidata_qid" name="wikidata_qid"
+                       value="{{ work.qid or '' }}" placeholder="e.g. Q727946">
+            </div>
+            {% endif %}
+            <div class="mb-3">
+                <label class="form-label" for="title">Title{% if not work %} (if no Q-id){% endif %}</label>
+                <input type="text" class="form-control" id="title" name="title"
+                       value="{{ work.title if work else '' }}"
+                       {% if work %}required{% endif %}>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="text_type">Type</label>
+                <select class="form-select" id="text_type" name="text_type" required>
+                    {% if not work %}<option value="">Choose a type...</option>{% endif %}
+                    {% for group_label, group_types in type_groups %}
+                    <optgroup label="{{ group_label }}">
+                        {% for t in group_types %}
+                        {% if t in selectable_types %}
+                        <option value="{{ t }}" {{ 'selected' if work and t == work.text_type }}>{{ t }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </optgroup>
+                    {% endfor %}
+                </select>
+                <div class="form-text">
+                    Authored types get their text generated (our own telling);
+                    canonical types get the authoritative text pasted in with a license.
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="attribution">Attribution</label>
+                <input type="text" class="form-control" id="attribution" name="attribution"
+                       value="{{ work.attribution or '' if work else '' }}"
+                       placeholder='e.g. "Robert Frost" or "trad. Norwegian"'>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="attribution_qid">Attribution Q-id</label>
+                <input type="text" class="form-control" id="attribution_qid" name="attribution_qid"
+                       value="{{ work.attribution_qid or '' if work else '' }}"
+                       placeholder="e.g. Q168728 (the person/source attributed)">
+                <div class="form-text">Many works may share one attribution Q-id (poet, singer, speaker).</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="summary">Summary</label>
+                <textarea class="form-control" id="summary" name="summary" rows="2"
+                          placeholder="One-sentence description (for conversations: the scenario brief)">{{ work.summary or '' if work else '' }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="notes">Notes</label>
+                <textarea class="form-control" id="notes" name="notes" rows="2"
+                          placeholder="e.g. curation context">{{ work.notes or '' if work else '' }}</textarea>
+            </div>
+            {% if work %}
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" name="verified" value="1"
+                       id="verified" {{ 'checked' if work.verified }}>
+                <label class="form-check-label" for="verified">Verified</label>
+            </div>
+            {% endif %}
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> {{ 'Save' if work else 'Add Work' }}
+                </button>
+                <a class="btn btn-outline-secondary"
+                   href="{{ url_for('texts.detail', slug=work.slug) if work else url_for('texts.list_texts_view') }}">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

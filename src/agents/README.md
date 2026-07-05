@@ -33,6 +33,7 @@ As of the queue-first transition, agent CLIs are moving toward **work discovery 
 | **erelis** | eagle | False lemma match detection in sentences |
 | **gandras** | stork | Audio manifest downloader (S3 staging) |
 | **genys** | woodpecker | Document parser and pending import stager |
+| **ozys** | billy goat | Story-library text generator (retellings, learner conversations) |
 
 ## Common Arguments
 

@@ -30,6 +30,19 @@ from storage.models.lemma_relation import (
 )
 from storage.models.operation_log import OperationLog
 from storage.models.query_log import QueryLog
+from storage.models.text_work import (
+    ALL_TEXT_TYPES,
+    AUTHORED_TEXT_TYPES,
+    CANONICAL_TEXT_TYPES,
+    INTAKE_DEFERRED_TEXT_TYPES,
+    SUPPORTED_TEXT_VERSION_LANGS,
+    TEXT_TYPE_GROUPS,
+    TextVersion,
+    TextWork,
+    is_authored_text_type,
+    is_canonical_text_type,
+    is_intake_deferred_text_type,
+)
 from storage.models.schema import (
     Base,
     Corpus,
@@ -52,6 +65,8 @@ from storage.models.imports import PendingImport, PendingImportSynonymCandidate,
 
 __all__ = [
     "ALL_SUB_CONCEPT_CATEGORIES",
+    "ALL_TEXT_TYPES",
+    "AUTHORED_TEXT_TYPES",
     "AdjectiveSubtype",
     "AdverbSubtype",
     "Base",
@@ -60,8 +75,10 @@ __all__ = [
     "Concept",
     "ConceptLemmaLink",
     "ConceptWikidataIndex",
+    "CANONICAL_TEXT_TYPES",
     "Corpus",
     "DerivativeForm",
+    "INTAKE_DEFERRED_TEXT_TYPES",
     "GrammarFact",
     "GuidTombstone",
     "Lemma",
@@ -74,7 +91,14 @@ __all__ = [
     "NounSubtype",
     "SUB_CONCEPT_CATEGORIES",
     "SUB_CONCEPT_CATEGORY_GROUPS",
+    "SUPPORTED_TEXT_VERSION_LANGS",
     "SubConcept",
+    "TEXT_TYPE_GROUPS",
+    "TextVersion",
+    "TextWork",
+    "is_authored_text_type",
+    "is_canonical_text_type",
+    "is_intake_deferred_text_type",
     "wiki_target_qid",
     "OperationLog",
     "PendingImport",
