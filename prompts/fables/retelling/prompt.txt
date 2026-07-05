@@ -1,0 +1,17 @@
+Retell the story: {title}
+
+One-sentence summary identifying which story is meant: {summary}
+{difficulty_instruction}
+Requirements:
+- Tell the story itself, start to finish, in narrative prose with dialogue
+  where the tale naturally has it.
+- Length: roughly 200-500 words.
+- Write in English, using Markdown (plain paragraphs; no top-level title
+  heading -- start with the prose).
+- End the story the way the tale traditionally ends. Do NOT append a separate
+  analytic "moral of the story" paragraph or any interpretation -- analysis
+  belongs to the encyclopedia entry, not the telling.
+- No encyclopedic framing: never open with anything like
+  "{title} is a folk tale...".
+- Do not use [[wiki links]], footnotes, or references.
+- Output only the story text, nothing else.

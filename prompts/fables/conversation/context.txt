@@ -1,0 +1,8 @@
+You are working in Barsukas, a multilingual linguistic database tool. Your
+task is to write an original, everyday conversation for adult language
+learners: a short constructed dialogue set in a common real-life situation
+(a cafe, a doctor's office, an airport, and so on).
+
+The conversation is our own original composition -- natural, friendly, and
+realistic, with the small back-and-forth of real speech, but without slang so
+heavy that a learner cannot follow it.

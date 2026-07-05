@@ -59,6 +59,7 @@ from storage.models.concept import (
     ConceptWikidataIndex,
     normalize_concept_slug,
 )
+from storage.crud.text_work import get_text_work_by_qid
 from storage.queries.concept import (
     count_concepts,
     count_sub_concepts,
@@ -66,6 +67,7 @@ from storage.queries.concept import (
     list_concepts,
     list_sub_concepts,
 )
+from storage.queries.text_work import list_text_works_attributed_to
 from storage.wikidata import fetch_wikidata_concept_seed, normalize_qid
 
 BLOCKED_SOURCE_HOSTS: frozenset[str] = frozenset({"wikidata.org", "www.wikidata.org"})
@@ -366,6 +368,14 @@ def detail(slug: str) -> ResponseReturnValue:
     # concept has no Q-id it cannot be paired with a lemma (the release export
     # only carries the Q-id). The link itself lives in the lemma/main DB (g.db).
     concept_qid = wikidata_links[0].qid if wikidata_links else None
+
+    # Story-library cross-links: a text work about this topic (by the work's
+    # own Q-id), and works attributed to it (person pages: poems, speeches).
+    text_work = get_text_work_by_qid(_concept_session(), concept_qid) if concept_qid else None
+    attributed_works = (
+        list_text_works_attributed_to(_concept_session(), concept_qid) if concept_qid else []
+    )
+
     paired_link = get_link_for_qid(g.db, concept_qid) if concept_qid else None
     paired_lemma = (
         g.db.query(Lemma).filter(Lemma.id == paired_link.lemma_id).first()
@@ -394,6 +404,8 @@ def detail(slug: str) -> ResponseReturnValue:
         readonly=_is_readonly(),
         wikidata_links=wikidata_links,
         concept_qid=concept_qid,
+        text_work=text_work,
+        attributed_works=attributed_works,
         paired_link=paired_link,
         paired_lemma=paired_lemma,
         lemma_query=lemma_query,
@@ -757,12 +769,20 @@ def sub_detail(slug: str) -> ResponseReturnValue:
     backlinks = get_backlinks(_concept_session(), sub_concept.slug, qids=qids)
     shadowing_concept = get_concept_by_slug(_concept_session(), sub_concept.slug)
 
+    # Story-library cross-links (e.g. a media_song sub-concept whose lyrics
+    # live in the library), keyed on the sub-concept's Q-id.
+    sub_qid = qids[0] if qids else None
+    text_work = get_text_work_by_qid(_concept_session(), sub_qid) if sub_qid else None
+    attributed_works = list_text_works_attributed_to(_concept_session(), sub_qid) if sub_qid else []
+
     return render_template(
         "concepts/sub_detail.html",
         sub_concept=sub_concept,
         qids=qids,
         backlinks=backlinks,
         shadowing_concept=shadowing_concept,
+        text_work=text_work,
+        attributed_works=attributed_works,
         readonly=_is_readonly(),
     )
 

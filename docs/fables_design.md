@@ -452,6 +452,9 @@ backfill -- populating the library is curation, not migration.
 
 ## Rollout Steps
 
+The code for steps 1-4 is implemented (initial commit); generating the
+starter set of tellings (LLM cost, developer-run) and step 5 remain.
+
 1. **Schema**: models + vocabulary (including the reserved `quote` type and
    `attribution_qid`), CRUD with the three invariants, migration, unit tests
    (`src/tests/storage/test_text_works.py`).
