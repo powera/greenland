@@ -31,7 +31,8 @@ is this split:
   "regenerated"; and storing it raises licensing questions that authored
   texts do not (see Licensing).
 
-Design is deliberately implementation-free for now; this doc is the artifact.
+The system is now implemented; see Implementation Status at the end for the
+file map, implementation notes, and what remains.
 
 ## Problem
 
@@ -382,10 +383,10 @@ Canonical texts are someone's fixed words:
   phase lands) and `lang` via `translation_helpers` (accepting only "en" for
   now).
 - Queries: `list_text_works(search, text_type, limit, offset)` +
-  `count_text_works` with the concepts search semantics (slug + summary,
-  space/underscore equivalence); `get_text_work_for_qid` for the
-  concept-page cross-link box; `list_text_works_attributed_to(qid)` for the
-  person-page listing.
+  `count_text_works` with the concepts search semantics (slug + summary +
+  attribution, space/underscore equivalence); `get_text_work_by_qid` (CRUD)
+  for the concept-page cross-link box; `list_text_works_attributed_to(qid)`
+  for the person-page listing.
 - Service: `create_text_work_from_qid(session, qid, text_type)` mirroring
   `create_concept_from_qid` -- resolve the seed (title, summary), create the
   work, no version yet. Idempotent on `qid`. Per project policy, flows that
@@ -452,8 +453,9 @@ backfill -- populating the library is curation, not migration.
 
 ## Rollout Steps
 
-The code for steps 1-4 is implemented (initial commit); generating the
-starter set of tellings (LLM cost, developer-run) and step 5 remain.
+The code for steps 1-4 is implemented; see Implementation Status below.
+Generating the starter set of tellings (LLM cost, developer-run) and step 5
+remain.
 
 1. **Schema**: models + vocabulary (including the reserved `quote` type and
    `attribution_qid`), CRUD with the three invariants, migration, unit tests
@@ -528,3 +530,83 @@ so their later arrival is additive:
    some one-word titles could be. `ConceptLemmaLink` already links lemma to
    Q-id independently of this system, so no action -- noted only to record
    that no `TextWorkLemmaLink` is planned.
+
+## Implementation Status
+
+Rollout steps 1-4 are implemented (July 2026, this branch). Step 5 items
+(quote intake, other languages, Trakaido export, audio) remain future
+designs, and the starter set of tellings has not been generated yet.
+
+### File map
+
+| Piece | Where |
+|-------|-------|
+| Schema + vocabulary | `src/storage/models/text_work.py` (`TextWork`, `TextVersion`, `AUTHORED_TEXT_TYPES` / `CANONICAL_TEXT_TYPES` / `TEXT_TYPE_GROUPS`, `SUPPORTED_TEXT_VERSION_LANGS`); re-exported from `storage/models/__init__.py` |
+| CRUD + invariants | `src/storage/crud/text_work.py` |
+| Queries | `src/storage/queries/text_work.py` |
+| Service | `src/storage/text_work_service.py` (`create_text_work_from_qid` -> `TextWorkCreationResult`) |
+| Migration | `src/storage/migrations/add_text_works.py` |
+| Agent | `src/agents/ozys/` (`OzysAgent` + CLI) |
+| Prompts | `prompts/fables/retelling/` and `prompts/fables/conversation/` (`context.txt` + `prompt.txt`) |
+| Barsukas | `src/barsukas/routes/texts.py` (blueprint `texts`, `/texts`) + `templates/texts/{list,form,detail,version_form}.html`; Texts cross-link boxes in `concepts/detail.html` and `concepts/sub_detail.html`; `render_text_body` in `barsukas/helpers/wikilinks.py`; nav entry in `base.html` |
+| Tests | `src/tests/storage/test_text_works.py` (12 tests) |
+
+### Implementation notes (where the code refines the draft above)
+
+- **Quote deferral is a first-class mechanism**: `INTAKE_DEFERRED_TEXT_TYPES
+  = ("quote",)` plus `is_intake_deferred_text_type()`. CRUD, the service, and
+  the Barsukas type select all consult it, so enabling quote intake later is
+  a one-line vocabulary change plus the dedicated curation surface.
+- **Nullable-field updates**: `update_text_work` / `update_text_version` use
+  an `_UNSET` sentinel so `qid`, `attribution_qid`, and `difficulty_level`
+  can be explicitly cleared (None) as distinct from "not supplied".
+- **Cascade**: `TextWork.versions` uses ORM `cascade="all, delete-orphan"`,
+  so deleting a work deletes its versions even on SQLite sessions without FK
+  enforcement (the FK also declares `ondelete="CASCADE"` for Postgres).
+- **Naming**: the by-Q-id lookup landed as `get_text_work_by_qid` (CRUD),
+  not the draft's `get_text_work_for_qid`.
+- **Service idempotency** covers both spines: an existing work with the Q-id
+  *and* an existing work with the seeded title both report `exists`.
+- **Ožys**: prompt templates take `{title}`, `{summary}`, and
+  `{difficulty_instruction}` (empty when untargeted); generation is a single
+  user message (no source fetching -- the tale as a tradition is in-model
+  knowledge). Canonical types raise `ValueError`; verified versions are
+  refused by both the CLI and the Barsukas route, and regeneration
+  overwrites only unverified slots. The CLI already accepts `--difficulty`,
+  so difficulty-targeted tellings need only prompt-quality work, not
+  plumbing. `--dry-run` prints without storing.
+- **Licenses**: the Barsukas license select is a closed list
+  (`CANONICAL_LICENSE_CHOICES`: public-domain, CC0, CC-BY, CC-BY-SA,
+  developer-authored); the schema itself accepts any string, so widening is
+  a UI-only change.
+- **Migration**: idempotent create-if-missing for both tables. Note that
+  `storage.backend.create_session` runs `Base.metadata.create_all`, so on a
+  fresh local SQLite the tables appear on first use and the migration is a
+  formality; it matters for production PostgreSQL
+  (`PYTHONPATH=src python src/storage/migrations/add_text_works.py --postgres`).
+
+### Verification
+
+- The 12 unit tests cover the vocabulary partition, work CRUD guards (type
+  validation, quote deferral, slug/Q-id uniqueness and normalization, type
+  change pinned by a canonical version), all three version invariants,
+  delete cascade, the query layer, and service idempotency (seed fetch
+  monkeypatched -- no live Wikidata calls).
+- The full storage and barsukas suites pass unchanged.
+- The `/texts` flows were driven end-to-end with the Flask test client:
+  creating both work kinds, license enforcement, single-canonical
+  rejection, generate-refused-for-canonical, version editing and slot
+  moves, list filters/search, work deletion, and the concept-page Texts
+  box. A local-browser pass over `/texts` is still owed per the Barsukas
+  convention.
+
+### Seeding content (developer-run; LLM cost)
+
+```
+PYTHONPATH=src python src/agents/ozys/ozys.py \
+    --slug The_Three_Billy_Goats_Gruff --model gpt-5.4-mini [--dry-run]
+```
+
+Works are created first in Barsukas (`/texts/new`, Q-id preferred) or via
+`create_text_work_from_qid`; Ožys then fills the English reference telling
+per work.
