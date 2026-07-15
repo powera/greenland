@@ -10,12 +10,12 @@ from typing import Any, Dict, List, cast
 
 logger = logging.getLogger(__name__)
 
-from barsukas.config import Config
 from flask import Blueprint, g, jsonify, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
 import constants
 from barsukas.routes.agents_launcher import running_tasks
+from barsukas.helpers.agent_args import agent_db_args
 from storage.models.schema import Corpus, ExternalLexemeAnnotation, Lemma, WordToken
 
 bp = Blueprint("pradzia", __name__, url_prefix="/pradzia")
@@ -83,10 +83,7 @@ def run_pradzia_command(args: list[str], timeout: int = 600) -> Dict[str, Any]:
     """Execute a PRADZIA command and return the result."""
     # Build full command with appropriate backend configuration
     full_args = ["python3", "-m", "agents.pradzia"]
-    if Config.is_postgres_mode():
-        full_args.append("--postgres")
-    else:
-        full_args.extend(["--db-path", Config.DB_PATH])
+    full_args.extend(agent_db_args())
     full_args.extend(args)
 
     try:
@@ -126,10 +123,7 @@ def start_pradzia_task(args: list[str], operation_name: str) -> str:
     """
     # Build full command with appropriate backend configuration
     full_args = ["python3", "-m", "agents.pradzia"]
-    if Config.is_postgres_mode():
-        full_args.append("--postgres")
-    else:
-        full_args.extend(["--db-path", Config.DB_PATH])
+    full_args.extend(agent_db_args())
     full_args.extend(args)
 
     # Generate unique task ID

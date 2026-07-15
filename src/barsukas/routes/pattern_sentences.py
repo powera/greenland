@@ -10,6 +10,7 @@ from typing import Any, cast
 logger = logging.getLogger(__name__)
 
 from barsukas.config import Config
+from barsukas.helpers.agent_args import agent_db_args
 from flask import Blueprint, flash, g, jsonify, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
@@ -165,10 +166,7 @@ def generate_candidates() -> ResponseReturnValue:
     args = ["python3", str(script_path)]
 
     # Add database configuration
-    if Config.is_postgres_mode():
-        args.append("--postgres")
-    else:
-        args.extend(["--db-path", Config.DB_PATH])
+    args.extend(agent_db_args())
 
     # Add dry-run if requested
     if dry_run:
@@ -250,10 +248,7 @@ def submit_batch() -> ResponseReturnValue:
     args = ["python3", str(script_path)]
 
     # Add database configuration (before subcommand)
-    if Config.is_postgres_mode():
-        args.append("--postgres")
-    else:
-        args.extend(["--db-path", Config.DB_PATH])
+    args.extend(agent_db_args())
 
     # Add subcommand
     args.extend(["submit-batch", "--languages"])
@@ -317,10 +312,7 @@ def batch_status() -> ResponseReturnValue:
         return jsonify({"success": False, "error": f"Buivolas agent not found"}), 404
 
     args = ["python3", str(script_path)]
-    if Config.is_postgres_mode():
-        args.append("--postgres")
-    else:
-        args.extend(["--db-path", Config.DB_PATH])
+    args.extend(agent_db_args())
     args.append("list-batches")
 
     try:
@@ -356,10 +348,7 @@ def check_batch(batch_id: str) -> ResponseReturnValue:
 
     # First check the status
     args = ["python3", str(script_path)]
-    if Config.is_postgres_mode():
-        args.append("--postgres")
-    else:
-        args.extend(["--db-path", Config.DB_PATH])
+    args.extend(agent_db_args())
     args.extend(["check-batch", "--batch-id", batch_id])
 
     try:
@@ -384,10 +373,7 @@ def check_batch(batch_id: str) -> ResponseReturnValue:
         # If completed, automatically retrieve results
         if is_completed:
             retrieve_args = ["python3", str(script_path)]
-            if Config.is_postgres_mode():
-                retrieve_args.append("--postgres")
-            else:
-                retrieve_args.extend(["--db-path", Config.DB_PATH])
+            retrieve_args.extend(agent_db_args())
             retrieve_args.extend(["retrieve-batch", "--batch-id", batch_id])
             logger.info("Launching agent subprocess: %s", " ".join(retrieve_args))
             retrieve_process = subprocess.Popen(
@@ -420,10 +406,7 @@ def retrieve_batch(batch_id: str) -> ResponseReturnValue:
         return jsonify({"success": False, "error": f"Buivolas agent not found"}), 404
 
     args = ["python3", str(script_path)]
-    if Config.is_postgres_mode():
-        args.append("--postgres")
-    else:
-        args.extend(["--db-path", Config.DB_PATH])
+    args.extend(agent_db_args())
     args.extend(["retrieve-batch", "--batch-id", batch_id])
 
     try:

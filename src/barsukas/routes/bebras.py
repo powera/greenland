@@ -31,8 +31,8 @@ from flask.typing import ResponseReturnValue
 
 import constants
 from agents.bebras.integrity import IntegrityChecker
-from barsukas.config import Config
 from barsukas.helpers.flash_helpers import flash_and_log
+from barsukas.helpers.agent_args import agent_db_args
 from storage.backend.config import BackendType
 from storage.models.schema import Lemma, Sentence
 
@@ -229,10 +229,7 @@ def check_integrity() -> ResponseReturnValue:
         args.extend(["--output", output_file])
 
     # Add database path
-    if Config.is_postgres_mode():
-        args.append("--postgres")
-    else:
-        args.extend(["--db-path", Config.DB_PATH])
+    args.extend(agent_db_args())
 
     return _execute_async(args, f"Integrity Check: {check_type}")
 
@@ -551,10 +548,7 @@ def generate_cli_command() -> ResponseReturnValue:
 
 def _add_db_args(args: List[str]) -> None:
     """Add database configuration arguments."""
-    if Config.is_postgres_mode():
-        args.append("--postgres")
-    else:
-        args.extend(["--db-path", Config.DB_PATH])
+    args.extend(agent_db_args())
 
 
 def _execute_async(args: List[str], task_name: str) -> ResponseReturnValue:
