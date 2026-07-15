@@ -9,10 +9,12 @@ This module provides metrics instrumentation for:
 - Resource usage (CPU, memory)
 """
 
+import os
 import time
 from contextlib import contextmanager
 from functools import wraps
-from typing import Any, Callable, Generator, TypeVar
+from pathlib import Path
+from typing import Any, Callable, Dict, Generator, Optional, TypeVar
 
 try:
     from prometheus_client import Counter, Gauge, Histogram, generate_latest
@@ -81,6 +83,14 @@ if HAS_PROMETHEUS:
         "barsukas_db_queries_total",
         "Total number of database queries",
         ["operation"],
+        registry=REGISTRY,
+    )
+
+    # Build/version metadata
+    BUILD_INFO = Gauge(
+        "barsukas_build_info",
+        "Deployed build metadata (value is always 1); labels carry the git revision",
+        ["revision", "branch", "version"],
         registry=REGISTRY,
     )
 
@@ -168,6 +178,7 @@ else:
     LLM_CALL_COUNT = _NOOP  # type: ignore[assignment]
     LLM_CALL_LATENCY = _NOOP  # type: ignore[assignment]
     LLM_TOKENS_TOTAL = _NOOP  # type: ignore[assignment]
+    BUILD_INFO = _NOOP  # type: ignore[assignment]
     SERVER_MODE_INFO = _NOOP  # type: ignore[assignment]
     SERVER_READ_ONLY = _NOOP  # type: ignore[assignment]
     SERVER_DEBUG = _NOOP  # type: ignore[assignment]
@@ -250,6 +261,130 @@ def set_server_mode_metrics(
     ).set(1.0)
     SERVER_READ_ONLY.set(1.0 if readonly else 0.0)
     SERVER_DEBUG.set(1.0 if debug else 0.0)
+
+
+# Repo root is three levels up from this file: <root>/src/barsukas/metrics.py
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+_UNKNOWN = "unknown"
+
+# Cache the resolved build info; reading git metadata touches disk and must not
+# run on every /metrics scrape.
+_build_info_cache: Optional[Dict[str, str]] = None
+
+
+def _resolve_git_dir(repo_root: Path) -> Optional[Path]:
+    """Return the ``.git`` directory for a checkout.
+
+    Handles the normal case (``.git`` is a directory) and the worktree/submodule
+    case (``.git`` is a file containing ``gitdir: <path>``). Returns ``None`` if
+    no git metadata is found.
+    """
+    git_path = repo_root / ".git"
+    if git_path.is_dir():
+        return git_path
+    if git_path.is_file():
+        try:
+            content = git_path.read_text(encoding="utf-8").strip()
+        except OSError:
+            return None
+        if content.startswith("gitdir:"):
+            target = Path(content[len("gitdir:") :].strip())
+            if not target.is_absolute():
+                target = (repo_root / target).resolve()
+            return target if target.is_dir() else None
+    return None
+
+
+def _resolve_ref(git_dir: Path, ref_name: str) -> str:
+    """Resolve a ref (e.g. ``refs/heads/main``) to a commit SHA.
+
+    Checks the loose ref file first, then falls back to ``packed-refs`` (which is
+    where refs live after a ``git gc``). Returns ``""`` if unresolved.
+    """
+    loose = git_dir / ref_name
+    try:
+        return loose.read_text(encoding="utf-8").strip()
+    except OSError:
+        pass
+    packed = git_dir / "packed-refs"
+    try:
+        for line in packed.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith(("#", "^")):
+                continue
+            sha, _, packed_ref = line.partition(" ")
+            if packed_ref == ref_name:
+                return sha
+    except OSError:
+        pass
+    return ""
+
+
+def read_build_info(repo_path: Optional[str] = None) -> Dict[str, str]:
+    """Read the deployed git build info (revision, branch, version).
+
+    Reads ``.git`` metadata directly with the standard library -- no ``git``
+    subprocess and no third-party dependency. Values may be overridden via the
+    environment (``BARSUKAS_BUILD_REVISION`` / ``BARSUKAS_BUILD_BRANCH`` /
+    ``BARSUKAS_BUILD_VERSION``), which lets a deploy step inject them when a
+    ``.git`` directory is not available. Anything that cannot be resolved falls
+    back to ``"unknown"`` rather than raising.
+
+    Args:
+        repo_path: Path to the git checkout. Defaults to the Barsukas repo root.
+
+    Returns:
+        A dict with ``revision``, ``branch`` and ``version`` keys.
+    """
+    info: Dict[str, str] = {
+        "revision": os.environ.get("BARSUKAS_BUILD_REVISION", ""),
+        "branch": os.environ.get("BARSUKAS_BUILD_BRANCH", ""),
+        "version": os.environ.get("BARSUKAS_BUILD_VERSION", ""),
+    }
+
+    if not (info["revision"] and info["branch"]):
+        repo_root = Path(repo_path) if repo_path else _REPO_ROOT
+        git_dir = _resolve_git_dir(repo_root)
+        if git_dir is not None:
+            try:
+                head = (git_dir / "HEAD").read_text(encoding="utf-8").strip()
+            except OSError:
+                head = ""
+            if head.startswith("ref: "):
+                ref_name = head[len("ref: ") :].strip()
+                if not info["branch"]:
+                    info["branch"] = ref_name.replace("refs/heads/", "", 1)
+                if not info["revision"]:
+                    info["revision"] = _resolve_ref(git_dir, ref_name)
+            elif head:
+                # Detached HEAD: the file contains the SHA directly.
+                if not info["revision"]:
+                    info["revision"] = head
+                if not info["branch"]:
+                    info["branch"] = "detached"
+
+    # Default the human-facing version to the short revision when not supplied.
+    if not info["version"] and info["revision"]:
+        info["version"] = info["revision"][:12]
+
+    return {key: (value or _UNKNOWN) for key, value in info.items()}
+
+
+def set_build_info_metrics(repo_path: Optional[str] = None) -> None:
+    """Populate the ``barsukas_build_info`` gauge once (idempotent).
+
+    The build info is static for the life of the process, so it is resolved a
+    single time and cached; repeated calls are cheap no-ops.
+    """
+    global _build_info_cache
+    if _build_info_cache is None:
+        _build_info_cache = read_build_info(repo_path)
+    BUILD_INFO.labels(
+        revision=_build_info_cache["revision"],
+        branch=_build_info_cache["branch"],
+        version=_build_info_cache["version"],
+    ).set(1.0)
 
 
 def _extract_sql_operation(statement: str) -> str:

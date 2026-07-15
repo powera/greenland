@@ -35,6 +35,7 @@ from barsukas.metrics import (
     get_metrics_output,
     instrument_sqlalchemy_engine,
     record_llm_call,
+    set_build_info_metrics,
     set_server_mode_metrics,
 )
 from sqlalchemy.orm import Session
@@ -180,6 +181,9 @@ def create_app(
         readonly=bool(app.config.get("READONLY", False)),
         debug=bool(app.config.get("DEBUG", False)),
     )
+
+    # Record deployed git revision/branch/version (resolved once, then cached).
+    set_build_info_metrics()
 
     # Register LLM metrics callback so unified_client reports metrics
     try:
