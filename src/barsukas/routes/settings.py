@@ -65,6 +65,10 @@ def index() -> ResponseReturnValue:
         env_backend=env_backend,
         env_sqlite_path=env_sqlite_path,
         env_jsonl_dir=env_jsonl_dir,
+        persona=current_app.config.get("PERSONA"),
+        concepts_backend=current_app.config.get("CONCEPTS_BACKEND"),
+        concepts_writable=current_app.config.get("CONCEPTS_WRITABLE", False),
+        degraded_notices=current_app.config.get("DEGRADED_NOTICES", []),
     )
 
 
@@ -225,10 +229,18 @@ def switch_backend() -> ResponseReturnValue:
     if target_backend == current_backend:
         return jsonify({"message": "Already using that backend"}), 200
 
-    # Provide instructions for switching
+    # Provide instructions for switching. The backend is chosen by the persona,
+    # so point at the persona that uses the requested backend for its main DB.
+    persona_for_backend = {
+        "sqlite": "local",
+        "jsonl": "golden",
+        "postgres": "prod",
+    }
     instructions = {
-        "message": f"To switch to {target_backend} backend, restart Barsukas with:",
-        "command": f"STORAGE_BACKEND={target_backend} python src/barsukas/app.py",
+        "message": f"To switch to the {target_backend} backend, restart Barsukas with:",
+        "command": (
+            f"src/barsukas/launch.sh --persona {persona_for_backend.get(target_backend, 'local')}"
+        ),
     }
 
     if target_backend == "jsonl":

@@ -1,34 +1,47 @@
 #!/bin/bash
 
-# Launch script for Barsukas web interface
-# Sets up Python path to allow imports from wordfreq module
+# Launch script for the Barsukas web interface.
+#
+# This script deliberately makes no configuration decisions: it activates a venv,
+# sets PYTHONPATH, and runs unified_app.py with an auto-restart loop. Which
+# databases to use is decided entirely by the persona (see src/barsukas/personas.py).
+#
+# For a custom database, run unified_app.py directly:
+#   PYTHONPATH=src python src/barsukas/unified_app.py --db-url postgresql://...
 
-# Default storage format
-STORAGE_FORMAT="sqlite"
 # Default to all interfaces
 HOST_ARGS="--host 0.0.0.0"
 # Default port
 PORT="5555"
-# Optional database path
-DB_PATH=""
-# PostgreSQL mode
-USE_POSTGRES=""
 # Python venv path (optional)
 VENV_PATH=""
-# Persona (optional - overrides other settings)
+# Persona (optional; Python defaults to 'local')
 PERSONA=""
+
+usage() {
+    cat <<'EOF'
+Usage: launch.sh [--persona NAME] [-p|--port PORT] [-a|--all-interfaces] [--venv PATH]
+
+  --persona NAME   Launch persona (default: local). --list-personas to see them.
+  -p, --port       Port to listen on (default: 5555)
+  -a               Bind all interfaces (default)
+  --venv PATH      Activate this virtualenv first
+  --list-personas  List available personas and exit
+
+Any other arguments are passed through to unified_app.py.
+EOF
+}
+
+# Tell the developer where a removed flag went, rather than silently ignoring it.
+removed_flag() {
+    echo "Error: $1 was removed from launch.sh."
+    echo "       $2"
+    exit 1
+}
 
 # Parse command-line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
-        -f|--format)
-            STORAGE_FORMAT="$2"
-            shift 2
-            ;;
-        --format=*)
-            STORAGE_FORMAT="${1#*=}"
-            shift
-            ;;
         -a|--all-interfaces)
             HOST_ARGS="--host 0.0.0.0"
             shift
@@ -39,18 +52,6 @@ while [[ $# -gt 0 ]]; do
             ;;
         --port=*)
             PORT="${1#*=}"
-            shift
-            ;;
-        --db-path)
-            DB_PATH="$2"
-            shift 2
-            ;;
-        --db-path=*)
-            DB_PATH="${1#*=}"
-            shift
-            ;;
-        --postgres)
-            USE_POSTGRES="true"
             shift
             ;;
         --venv)
@@ -69,13 +70,17 @@ while [[ $# -gt 0 ]]; do
             PERSONA="${1#*=}"
             shift
             ;;
-        --list-personas)
-            echo "Available personas:"
-            echo "  prod   - Production mode: PostgreSQL backend, no local API keys, LLM calls only"
-            echo "  golden - Golden mode: Read-only JSONL from data/release"
-            echo "  hosted - Hosted mode: Like golden but hardened (no restart, no exports)"
-            echo "  scholar - Scholar mode: Golden JSONL with API keys and PostgreSQL concepts"
-            echo "  local  - Local development: SQLite database with full access (default)"
+        -f|--format|--format=*)
+            removed_flag "--format" "The persona picks the storage backend: --persona local|local-sqlite|golden|scholar|prod"
+            ;;
+        --postgres)
+            removed_flag "--postgres" "Use --persona prod, or run unified_app.py directly with --db-url postgresql://..."
+            ;;
+        --db-path|--db-path=*)
+            removed_flag "--db-path" "Set BARSUKAS_DB_PATH, or run unified_app.py directly with --db-url"
+            ;;
+        -h|--help)
+            usage
             exit 0
             ;;
         *)
@@ -84,46 +89,6 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
-
-# Handle persona configuration (overrides manual settings)
-PERSONA_ARGS=""
-if [[ -n "$PERSONA" ]]; then
-    case "$PERSONA" in
-        prod)
-            USE_POSTGRES="true"
-            STORAGE_FORMAT="postgres"
-            PERSONA_ARGS="--persona prod"
-            ;;
-        golden)
-            STORAGE_FORMAT="jsonl"
-            PERSONA_ARGS="--persona golden --readonly --no-worker"
-            ;;
-        hosted)
-            STORAGE_FORMAT="jsonl"
-            PERSONA_ARGS="--persona hosted --readonly --no-worker"
-            ;;
-        scholar)
-            STORAGE_FORMAT="jsonl"
-            PERSONA_ARGS="--persona scholar --readonly --no-worker"
-            ;;
-        local)
-            STORAGE_FORMAT="sqlite"
-            PERSONA_ARGS="--persona local"
-            ;;
-        *)
-            echo "Error: Unknown persona '$PERSONA'"
-            echo "Use --list-personas to see available options"
-            exit 1
-            ;;
-    esac
-fi
-
-# Validate storage format (only if not using postgres and no persona set)
-if [[ -z "$PERSONA" && -z "$USE_POSTGRES" && "$STORAGE_FORMAT" != "jsonl" && "$STORAGE_FORMAT" != "sqlite" ]]; then
-    echo "Error: Invalid storage format '$STORAGE_FORMAT'"
-    echo "Usage: $0 [--persona prod|golden|hosted|scholar|local] [-f|--format jsonl|sqlite] [--postgres] [-a|--all-interfaces] [-p|--port PORT] [--db-path PATH] [--venv PATH]"
-    exit 1
-fi
 
 # Activate venv if specified
 if [[ -n "$VENV_PATH" ]]; then
@@ -144,27 +109,9 @@ REPO_ROOT="$( cd "$SCRIPT_DIR/../.." && pwd )"
 # Set PYTHONPATH to include src/ directory
 export PYTHONPATH="$REPO_ROOT/src:$PYTHONPATH"
 
-# Configure storage backend based on format or persona
-if [[ -n "$USE_POSTGRES" ]]; then
-    export STORAGE_BACKEND="postgres"
-    export USE_POSTGRES_BACKEND="true"
-else
-    export STORAGE_BACKEND="$STORAGE_FORMAT"
-    if [[ "$STORAGE_FORMAT" == "jsonl" ]]; then
-        export JSONL_DATA_DIR="$REPO_ROOT/data/release"
-    elif [[ "$STORAGE_FORMAT" == "sqlite" && -n "$DB_PATH" ]]; then
-        # Make path absolute if it's relative
-        if [[ "$DB_PATH" = /* ]]; then
-            export BARSUKAS_DB_PATH="$DB_PATH"
-        else
-            export BARSUKAS_DB_PATH="$REPO_ROOT/$DB_PATH"
-        fi
-    fi
-fi
-
-# Export persona for Python to use
+PERSONA_ARGS=""
 if [[ -n "$PERSONA" ]]; then
-    export BARSUKAS_PERSONA="$PERSONA"
+    PERSONA_ARGS="--persona $PERSONA"
 fi
 
 # Change to barsukas directory
@@ -173,27 +120,14 @@ cd "$SCRIPT_DIR"
 echo "=========================================="
 echo "Starting Barsukas Web Interface (Unified Mode)"
 echo "=========================================="
-if [[ -n "$PERSONA" ]]; then
-    echo "Persona: $PERSONA"
-fi
 if [[ -n "$VENV_PATH" ]]; then
     echo "Python venv: $VENV_PATH"
 fi
-echo "Storage backend: $STORAGE_BACKEND"
 echo "PYTHONPATH: $PYTHONPATH"
 echo "Working directory: $(pwd)"
-if [[ -n "$USE_POSTGRES" ]]; then
-    echo "PostgreSQL mode: enabled (using constants + keys/postgres.key)"
-elif [[ "$STORAGE_FORMAT" == "jsonl" ]]; then
-    echo "JSONL data directory: $JSONL_DATA_DIR"
-elif [[ "$STORAGE_FORMAT" == "sqlite" && -n "$BARSUKAS_DB_PATH" ]]; then
-    echo "SQLite database: $BARSUKAS_DB_PATH"
-fi
 echo ""
 echo "NOTE: Using unified launcher (Flask + Worker in same process)"
-if [[ -z "$USE_POSTGRES" ]]; then
-    echo "      This avoids SQLite concurrency issues."
-fi
+echo "      Persona and database selection are reported below by the app."
 echo ""
 
 cleanup() {

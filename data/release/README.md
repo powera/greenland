@@ -45,7 +45,7 @@ facts, and synonym-class lexical variants for that language.
 
 Use the **Barsukas web UI** to compare and sync data between data/release and SQLite:
 
-1. Start Barsukas: `PYTHONPATH=src python -m barsukas.app`
+1. Start Barsukas: `src/barsukas/launch.sh` (the default `local` persona uses SQLite)
 2. Navigate to: `/sync` (or use the Sync menu in the navbar)
 3. The hub shows counts for each sync type:
    - **Additions**: GUIDs in release but not in SQLite (import new lemmas)

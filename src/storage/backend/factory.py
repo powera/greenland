@@ -1,5 +1,6 @@
 """Factory for creating SQLAlchemy database sessions."""
 
+import threading
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from storage.backend.config import BackendType, DataSourceConfig
@@ -15,6 +16,12 @@ _global_session_factory: Optional["sessionmaker"] = None
 # Cache engines by connection string to avoid creating new connections per request
 _engine_cache: dict[str, "Engine"] = {}
 _engine_initialized: set[str] = set()  # Track which engines have had tables ensured
+
+# Guards engine creation and the create_all() that follows it. Barsukas runs
+# Flask, the task worker, and the batch poller as threads in one process, so
+# without this two threads can both see an uncached engine, both run
+# create_all(), and the loser raises "table ... already exists".
+_engine_lock = threading.Lock()
 
 # Cache JSONL storage instances to avoid re-loading data from disk on every request.
 # Since JSONL mode is read-only, the storage can be safely shared across sessions.
@@ -175,23 +182,29 @@ def _get_engine() -> "Engine":
     """
     global _global_engine, _global_config
 
-    if _global_engine is None:
-        if _global_config is None:
-            _global_config = DataSourceConfig.from_env()
+    # See _engine_lock: creation and the create_all() that follows must be
+    # atomic, or concurrent threads race to create the same tables.
+    with _engine_lock:
+        if _global_engine is None:
+            if _global_config is None:
+                _global_config = DataSourceConfig.from_env()
 
-        # Choose the correct path based on backend type
-        if _global_config.backend_type == BackendType.POSTGRES:
-            assert (
-                _global_config.postgres_url is not None
-            ), "postgres_url must be set for POSTGRES backend"
-            _global_engine = _create_engine(_global_config.postgres_url)
-        else:
-            assert (
-                _global_config.sqlite_path is not None
-            ), "sqlite_path must be set for SQLITE backend"
-            _global_engine = _create_engine(_global_config.sqlite_path)
+            # Choose the correct path based on backend type
+            if _global_config.backend_type == BackendType.POSTGRES:
+                assert (
+                    _global_config.postgres_url is not None
+                ), "postgres_url must be set for POSTGRES backend"
+                engine = _create_engine(_global_config.postgres_url)
+            else:
+                assert (
+                    _global_config.sqlite_path is not None
+                ), "sqlite_path must be set for SQLITE backend"
+                engine = _create_engine(_global_config.sqlite_path)
 
-        _ensure_tables_exist(_global_engine)
+            _ensure_tables_exist(engine)
+            # Publish only after the schema is ready, so another thread cannot
+            # observe a half-initialized engine.
+            _global_engine = engine
 
     return _global_engine
 
@@ -235,16 +248,19 @@ def _get_cached_engine(db_path: str, readonly: bool = False) -> "Engine":
     # one for the same database.
     cache_key = f"{db_path}\x00readonly" if readonly else db_path
 
-    if cache_key not in _engine_cache:
-        _engine_cache[cache_key] = _create_engine(db_path, readonly=readonly)
+    # Held across _ensure_tables_exist(): the check and the DDL must be atomic
+    # together, or concurrent threads race to create the same tables.
+    with _engine_lock:
+        if cache_key not in _engine_cache:
+            _engine_cache[cache_key] = _create_engine(db_path, readonly=readonly)
 
-    engine = _engine_cache[cache_key]
+        engine = _engine_cache[cache_key]
 
-    # Only ensure tables exist once per engine. Read-only engines must never run
-    # the table-ensuring DDL; the schema is owned by the writable callers.
-    if not readonly and cache_key not in _engine_initialized:
-        _ensure_tables_exist(engine)
-        _engine_initialized.add(cache_key)
+        # Only ensure tables exist once per engine. Read-only engines must never run
+        # the table-ensuring DDL; the schema is owned by the writable callers.
+        if not readonly and cache_key not in _engine_initialized:
+            _ensure_tables_exist(engine)
+            _engine_initialized.add(cache_key)
 
     return engine
 

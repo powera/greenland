@@ -14,12 +14,19 @@ import signal
 import sys
 import threading
 import types
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Optional
 
 from barsukas.config import Config
 from barsukas.app import create_app
-from barsukas.personas import get_persona, list_personas, PersonaConfig
+from barsukas.personas import (
+    apply_persona_env,
+    list_personas,
+    PersonaConfig,
+    PersonaName,
+    resolve_persona,
+)
 from workqueue.worker import run_worker, STOP_EVENT
 from barsukas.batch_poller import start_poller_thread as start_batch_poller_thread
 from storage.backend.config import DataSourceConfig
@@ -65,35 +72,23 @@ def run_flask_server(
     port: int,
     debug: bool,
     readonly: bool,
-    persona: Optional[PersonaConfig] = None,
+    persona: PersonaConfig,
+    db_url: Optional[str] = None,
+    use_word2vec: bool = False,
 ) -> None:
-    """Run the Flask server in the current thread."""
-    app = create_app()
+    """Run the Flask server in the current thread.
+
+    All persona-derived configuration is applied inside create_app(), which is
+    the only code that knows whether the databases it asked for are actually
+    reachable.
+    """
+    app = create_app(db_url=db_url, use_word2vec=use_word2vec, persona=persona)
 
     if debug:
         app.config["DEBUG"] = True
 
     if readonly:
         app.config["READONLY"] = True
-
-    # Apply persona-specific settings for UI visibility
-    if persona:
-        app.config["ALLOW_OUTBOUND_CALLS"] = persona.allow_outbound_calls
-        app.config["ALLOW_API_KEYS"] = persona.allow_api_keys
-        app.config["ENABLE_WORKER"] = persona.enable_worker
-        app.config["ALLOW_RESTART"] = persona.allow_restart
-        app.config["ALLOW_EXPORTS"] = persona.allow_exports
-        app.config["CONCEPTS_WRITABLE"] = (
-            persona.use_postgres_concepts and not persona.postgres_concepts_readonly
-        )
-    else:
-        # Defaults when no persona specified
-        app.config["ALLOW_OUTBOUND_CALLS"] = True
-        app.config["ALLOW_API_KEYS"] = True
-        app.config["ENABLE_WORKER"] = True
-        app.config["ALLOW_RESTART"] = True
-        app.config["ALLOW_EXPORTS"] = True
-        app.config["CONCEPTS_WRITABLE"] = False
 
     logger.info(f"Starting Barsukas Flask server on http://{host}:{port}")
     logger.info(f"Database: {app.config['DB_PATH']}")
@@ -129,9 +124,14 @@ def main() -> None:
         "--no-worker", action="store_true", help="Don't start the background worker (Flask only)"
     )
     parser.add_argument(
-        "--postgres",
-        action="store_true",
-        help="Use PostgreSQL backend (builds URL from constants + keys/postgres.key)",
+        "--db-url",
+        type=str,
+        default=None,
+        help=(
+            "Main database URL (postgresql://user:pass@host:5432/db). Overrides the "
+            "persona's main database. Does not affect the concepts database, which "
+            "is always the global PostgreSQL."
+        ),
     )
     parser.add_argument(
         "--use-word2vec",
@@ -143,8 +143,8 @@ def main() -> None:
     parser.add_argument(
         "--persona",
         type=str,
-        choices=["prod", "golden", "hosted", "scholar", "local"],
-        help="Launch persona (prod, golden, hosted, scholar, local) - overrides other backend settings",
+        choices=[p.value for p in PersonaName],
+        help="Launch persona (default: local; or set BARSUKAS_PERSONA)",
     )
     parser.add_argument(
         "--list-personas",
@@ -157,31 +157,22 @@ def main() -> None:
     if args.list_personas:
         print("Available personas:")
         for name, description in list_personas():
-            print(f"  {name:8} - {description}")
+            print(f"  {name:12} - {description}")
         sys.exit(0)
 
-    # Get persona config if specified (or from environment)
-    persona: Optional[PersonaConfig] = None
-    persona_name = args.persona or os.environ.get("BARSUKAS_PERSONA")
-    if persona_name:
-        try:
-            persona = get_persona(persona_name)
-        except ValueError as e:
-            print(f"Error: {e}")
-            sys.exit(1)
+    # Resolve the persona. A launch with nothing selected is the LOCAL persona --
+    # there is no unpersona'd path, so every setting has one definition.
+    try:
+        persona = resolve_persona(args.persona)
+    except ValueError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
 
     # Apply persona overrides
-    if persona:
-        if persona.readonly:
-            args.readonly = True
-        if not persona.enable_worker:
-            args.no_worker = True
-        if persona.use_postgres:
-            args.postgres = True
-        if persona.use_postgres_concepts:
-            os.environ["BARSUKAS_CONCEPTS_BACKEND"] = "postgres"
-            if persona.postgres_concepts_readonly:
-                os.environ["BARSUKAS_CONCEPTS_READONLY"] = "true"
+    if persona.readonly:
+        args.readonly = True
+    if not persona.enable_worker:
+        args.no_worker = True
 
     # Safety rule: read-only mode never starts the background worker.
     if args.readonly and not args.no_worker:
@@ -206,47 +197,52 @@ def main() -> None:
     if args.use_word2vec:
         os.environ["USE_WORD2VEC"] = "true"
 
-    # Determine backend type
-    db_display: Optional[str] = None
-    if args.postgres or os.environ.get("USE_POSTGRES_BACKEND") == "true":
-        # PostgreSQL mode - build URL from template + key
+    # Resolve the main database and export the compatibility env vars. This is
+    # the only place the persona is translated into the environment; create_app()
+    # and run_worker() take the object itself.
+    repo_root = Path(__file__).parent.parent.parent
+
+    main_postgres_url: Optional[str] = args.db_url
+    if main_postgres_url:
+        logger.info("Main database overridden by --db-url")
+    elif persona.use_postgres:
         try:
-            postgres_url = DataSourceConfig.build_postgres_url()
-            os.environ["POSTGRES_URL"] = postgres_url
-            os.environ["STORAGE_BACKEND"] = "postgres"
+            main_postgres_url = DataSourceConfig.build_postgres_url()
             logger.info("PostgreSQL mode: connecting to Supabase")
-            db_display = "PostgreSQL (Supabase)"
         except Exception as e:
             logger.warning(f"PostgreSQL credentials not available ({e}), falling back to SQLite")
-            args.postgres = False
+            # Fall back to a SQLite main DB by pretending the persona asked for it.
+            persona = replace(persona, use_postgres=False)
 
-    if db_display is None and persona and persona.use_jsonl:
-        # JSONL mode from persona (e.g., GOLDEN)
-        repo_root = Path(__file__).parent.parent.parent
+    if persona.use_jsonl:
         jsonl_dir = repo_root / (persona.jsonl_data_dir or "data/release")
         if not jsonl_dir.exists():
             logger.error(f"JSONL data directory not found at {jsonl_dir}")
             sys.exit(1)
-        os.environ["STORAGE_BACKEND"] = "jsonl"
-        os.environ["JSONL_DATA_DIR"] = str(jsonl_dir)
         db_display = f"JSONL ({jsonl_dir})"
-    elif db_display is None and os.environ.get("STORAGE_BACKEND") == "jsonl":
-        # JSONL mode from environment
-        jsonl_dir_env = os.environ.get("JSONL_DATA_DIR", "data/release")
-        db_display = f"JSONL ({jsonl_dir_env})"
-    elif db_display is None:
+    elif main_postgres_url:
+        db_display = "PostgreSQL (Supabase)"
+    else:
         # SQLite mode - validate database exists
         if not Path(Config.DB_PATH).exists():
             logger.error(f"Database not found at {Config.DB_PATH}")
             sys.exit(1)
         db_display = Config.DB_PATH
 
+    apply_persona_env(persona, repo_root, postgres_url=main_postgres_url)
+
     logger.info("=" * 80)
     logger.info("BARSUKAS UNIFIED LAUNCHER")
     logger.info("=" * 80)
-    if persona:
-        logger.info(f"Persona: {persona.name.value.upper()} - {persona.description}")
-    logger.info(f"Database: {db_display}")
+    logger.info(f"Persona: {persona.name.value.upper()} - {persona.description}")
+    # Name both databases: which concepts you are looking at is exactly the
+    # question this banner needs to answer.
+    logger.info(f"Main database:     {db_display}")
+    if persona.use_postgres_concepts:
+        access = "read-only" if persona.postgres_concepts_readonly else "writable"
+        logger.info(f"Concepts database: PostgreSQL ({access})")
+    else:
+        logger.info(f"Concepts database: same as main ({db_display})")
     logger.info(f"Flask server will run on http://{args.host}:{args.port}")
     if args.readonly:
         logger.info("Mode: READ-ONLY")
@@ -254,14 +250,9 @@ def main() -> None:
         logger.info(f"Task worker will poll every {args.poll_interval}s")
     else:
         logger.info("Task worker DISABLED")
-    if persona and persona.use_postgres_concepts:
-        if persona.postgres_concepts_readonly:
-            logger.info("Concepts database: PostgreSQL (read-only)")
-        else:
-            logger.info("Concepts database: PostgreSQL (writable)")
-    if persona and not persona.allow_api_keys:
+    if not persona.allow_api_keys:
         logger.info("API keys: DISABLED (no local keys)")
-    if persona and not persona.allow_outbound_calls:
+    if not persona.allow_outbound_calls:
         logger.info("Outbound calls: LLM only (no external APIs)")
     logger.info("Word2Vec/pgvector: %s", "ENABLED" if args.use_word2vec else "DISABLED")
     logger.info("=" * 80)
@@ -280,7 +271,7 @@ def main() -> None:
 
     # In golden/hosted mode (JSONL backend), populate the in-memory wordfreq
     # tables in a background thread so Flask can start serving immediately.
-    if persona and persona.use_jsonl:
+    if persona.use_jsonl:
         threading.Thread(
             target=_load_wordfreq_in_background,
             name="GoldenWordfreqLoader",
@@ -294,7 +285,7 @@ def main() -> None:
         logger.info("Starting task worker thread...")
         worker_thread = threading.Thread(
             target=run_worker,
-            args=(args.poll_interval,),
+            args=(args.poll_interval, persona),
             name="BarsukasWorker",
             daemon=True,  # Worker will shut down when main thread exits
         )
@@ -308,6 +299,8 @@ def main() -> None:
         from storage.backend.config import DataSourceConfig as _DataSourceConfig
 
         def _main_session_factory() -> Any:
+            # Bare DataSourceConfig() reads STORAGE_BACKEND from the environment,
+            # which apply_persona_env() set above.
             return _create_main_session(_DataSourceConfig())
 
         logger.info("Starting batch poller thread (5-minute interval)...")
@@ -317,7 +310,15 @@ def main() -> None:
     # Run Flask server in the main thread
     # This blocks until the server is stopped (Ctrl+C or signal)
     try:
-        run_flask_server(args.host, args.port, args.debug, args.readonly, persona)
+        run_flask_server(
+            args.host,
+            args.port,
+            args.debug,
+            args.readonly,
+            persona,
+            db_url=args.db_url,
+            use_word2vec=args.use_word2vec,
+        )
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt received, shutting down...")
     finally:
