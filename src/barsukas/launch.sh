@@ -25,6 +25,10 @@ while [[ $# -gt 0 ]]; do
             STORAGE_FORMAT="$2"
             shift 2
             ;;
+        --format=*)
+            STORAGE_FORMAT="${1#*=}"
+            shift
+            ;;
         -a|--all-interfaces)
             HOST_ARGS="--host 0.0.0.0"
             shift
@@ -33,9 +37,17 @@ while [[ $# -gt 0 ]]; do
             PORT="$2"
             shift 2
             ;;
+        --port=*)
+            PORT="${1#*=}"
+            shift
+            ;;
         --db-path)
             DB_PATH="$2"
             shift 2
+            ;;
+        --db-path=*)
+            DB_PATH="${1#*=}"
+            shift
             ;;
         --postgres)
             USE_POSTGRES="true"
@@ -45,9 +57,17 @@ while [[ $# -gt 0 ]]; do
             VENV_PATH="$2"
             shift 2
             ;;
+        --venv=*)
+            VENV_PATH="${1#*=}"
+            shift
+            ;;
         --persona)
             PERSONA="$2"
             shift 2
+            ;;
+        --persona=*)
+            PERSONA="${1#*=}"
+            shift
             ;;
         --list-personas)
             echo "Available personas:"

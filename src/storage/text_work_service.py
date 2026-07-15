@@ -92,8 +92,22 @@ def create_text_work_from_qid(
             detail=f"text type {text_type!r} has no intake yet",
         )
 
+    logger.debug(
+        "create_text_work_from_qid: qid=%s (raw=%r) text_type=%s attribution_qid=%s",
+        normalized_qid,
+        qid,
+        text_type,
+        attribution_qid,
+    )
+
     existing = get_text_work_by_qid(session, normalized_qid)
     if existing is not None:
+        logger.debug(
+            "create_text_work_from_qid: %s already exists as slug=%r id=%s; no Wikidata fetch",
+            normalized_qid,
+            existing.slug,
+            existing.id,
+        )
         return TextWorkCreationResult(
             qid=normalized_qid,
             title=existing.title,
@@ -102,8 +116,12 @@ def create_text_work_from_qid(
             detail=f"already in the library as {existing.slug!r} [{existing.text_type}]",
         )
 
+    logger.debug(
+        "create_text_work_from_qid: fetching Wikidata/Wikipedia seed for %s", normalized_qid
+    )
     seed = fetch_wikidata_concept_seed(normalized_qid)
     if seed is None:
+        logger.debug("create_text_work_from_qid: %s did not resolve to a seed", normalized_qid)
         return TextWorkCreationResult(
             qid=normalized_qid,
             title="",
@@ -111,8 +129,20 @@ def create_text_work_from_qid(
             status="unresolved",
             detail="Wikidata seed could not be resolved",
         )
+    logger.debug(
+        "create_text_work_from_qid: %s resolved to title=%r summary=%r (%d source(s): %s)",
+        normalized_qid,
+        seed.title,
+        seed.summary,
+        len(seed.sources),
+        ", ".join(str(s.get("url", "?")) for s in seed.sources) or "none",
+    )
 
     if get_text_work_by_slug(session, seed.title) is not None:
+        logger.debug(
+            "create_text_work_from_qid: seeded title %r collides with an existing work",
+            seed.title,
+        )
         return TextWorkCreationResult(
             qid=normalized_qid,
             title=seed.title,
@@ -132,6 +162,9 @@ def create_text_work_from_qid(
         notes=notes,
     )
     if created is None:
+        logger.debug(
+            "create_text_work_from_qid: create_text_work returned None for title=%r", seed.title
+        )
         return TextWorkCreationResult(
             qid=normalized_qid,
             title=seed.title,
@@ -140,6 +173,16 @@ def create_text_work_from_qid(
             detail="create_text_work returned None",
         )
 
+    logger.debug(
+        "create_text_work_from_qid: created work id=%s slug=%r title=%r type=%s qid=%s "
+        "summary=%r (no versions yet)",
+        created.id,
+        created.slug,
+        created.title,
+        created.text_type,
+        created.qid,
+        created.summary,
+    )
     return TextWorkCreationResult(
         qid=normalized_qid,
         title=created.title,

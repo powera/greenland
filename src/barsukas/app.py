@@ -428,7 +428,10 @@ def create_app(
             return
 
         g.db = app.db_session_factory()
-        if endpoint_name.startswith("concepts.") and app.concepts_db_session_factory is not None:
+        if (
+            endpoint_name.startswith(("concepts.", "texts."))
+            and app.concepts_db_session_factory is not None
+        ):
             g.concepts_db = app.concepts_db_session_factory()
 
     @app.teardown_appcontext
@@ -566,6 +569,13 @@ def main() -> None:
         help="Enable pgvector embedding read/write operations (opt-in)",
     )
     args = parser.parse_args()
+
+    # create_app() calls logging.basicConfig() off Config.DEBUG, which is read
+    # from the environment at import time -- so --debug has to land here, before
+    # create_app(), or the root logger stays at INFO and debug logs never emit.
+    if args.debug:
+        os.environ["BARSUKAS_DEBUG"] = "true"
+        Config.DEBUG = True
 
     app = create_app(db_url=args.db_url, use_word2vec=args.use_word2vec)
 

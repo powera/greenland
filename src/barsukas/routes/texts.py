@@ -89,9 +89,21 @@ def _texts_session() -> "Session":
     """Return the session that owns text-work reads and writes.
 
     Text works live in the concepts database/backend (same posture as
-    concepts: outside the lemma machinery).
+    concepts: outside the lemma machinery). When a separate concepts backend
+    is configured, falling back to g.db would read and write the lemma
+    backend instead -- which under the JSONL personas silently discards
+    writes -- so that case is an error rather than a fallback.
     """
-    return cast("Session", getattr(g, "concepts_db", g.db))
+    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
+    concepts_db = getattr(g, "concepts_db", None)
+    if concepts_db is not None:
+        return cast("Session", concepts_db)
+    if app.concepts_db_session_factory is not None:
+        raise RuntimeError(
+            "Text-work request has no concepts_db session even though a concepts "
+            "backend is configured; before_request must open one for this endpoint."
+        )
+    return cast("Session", g.db)
 
 
 def _outbound_allowed() -> bool:
@@ -211,6 +223,16 @@ def create() -> ResponseReturnValue:
     summary = request.form.get("summary", "").strip()
     notes = request.form.get("notes", "").strip() or None
 
+    logger.debug(
+        "texts.create: spine=%s text_type=%s qid=%s title=%r backend=%s writable=%s",
+        "qid" if wikidata_qid is not None else "manual",
+        text_type,
+        wikidata_qid,
+        title,
+        current_app.config.get("CONCEPTS_BACKEND"),
+        current_app.config.get("CONCEPTS_WRITABLE"),
+    )
+
     # Q-id-seeded creation goes through the shared service (seed fetch,
     # idempotency), mirroring the concepts create flow.
     if wikidata_qid is not None:
@@ -222,6 +244,12 @@ def create() -> ResponseReturnValue:
             attribution=attribution,
             notes=notes,
         )
+        logger.debug(
+            "texts.create: qid spine -> status=%s title=%r detail=%r",
+            result.status,
+            result.title,
+            result.detail,
+        )
         if result.status == "exists":
             flash(f"Wikidata ID {wikidata_qid}: {result.detail}.", "error")
             if result.work is not None:
@@ -230,7 +258,11 @@ def create() -> ResponseReturnValue:
         if result.work is None:
             flash(f"Could not create the work: {result.detail or result.status}.", "error")
             return redirect(url_for("texts.new_work"))
-        flash(f"Added {result.work.title!r} to the library.", "success")
+        flash(
+            f"Added {result.work.title!r} ({result.work.text_type}) from {wikidata_qid}. "
+            f"No telling yet -- generate one below.",
+            "success",
+        )
         return redirect(url_for("texts.detail", slug=result.work.slug))
 
     # Manual creation (the only route for conversations, which have no Q-id).
@@ -254,7 +286,16 @@ def create() -> ResponseReturnValue:
         flash("Failed to create the work.", "error")
         return redirect(url_for("texts.new_work"))
 
-    flash(f"Added {work.title!r} to the library.", "success")
+    logger.debug(
+        "texts.create: manual spine -> created id=%s slug=%r type=%s (no versions yet)",
+        work.id,
+        work.slug,
+        work.text_type,
+    )
+    flash(
+        f"Added {work.title!r} ({work.text_type}). No telling yet -- generate one below.",
+        "success",
+    )
     return redirect(url_for("texts.detail", slug=work.slug))
 
 
@@ -403,6 +444,14 @@ def generate(slug: str) -> ResponseReturnValue:
     # Imported lazily so the route module stays importable without LLM clients.
     from agents.ozys import OzysAgent
 
+    logger.debug(
+        "texts.generate: slug=%r type=%s model=%s difficulty=%s slot=%s",
+        work.slug,
+        work.text_type,
+        model,
+        difficulty_level,
+        "regenerate" if existing is not None else "new",
+    )
     try:
         agent = OzysAgent(_get_config(), model=model)
         body = agent.generate_for_work(work, difficulty_level=difficulty_level)
@@ -410,6 +459,7 @@ def generate(slug: str) -> ResponseReturnValue:
         logger.exception("Text generation failed for %r", work.slug)
         flash(f"Generation failed: {exc}", "error")
         return redirect(url_for("texts.detail", slug=slug))
+    logger.debug("texts.generate: %r produced %d chars from %s", work.slug, len(body or ""), model)
 
     if existing is not None:
         version = update_text_version(
