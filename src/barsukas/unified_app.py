@@ -188,7 +188,14 @@ def main() -> None:
         logger.info("Read-only mode enabled: disabling task worker")
         args.no_worker = True
 
-    # Set up logging
+    # Set up logging. create_app() re-runs basicConfig(force=True) off
+    # Config.DEBUG, which reads BARSUKAS_DEBUG from the environment -- so the
+    # env var has to be set here or that call resets the level back to INFO
+    # and --debug logs never emit.
+    if args.debug:
+        os.environ["BARSUKAS_DEBUG"] = "true"
+        Config.DEBUG = True
+
     log_level = logging.DEBUG if args.debug else logging.INFO
     logging.basicConfig(
         level=log_level,
