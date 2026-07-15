@@ -106,11 +106,22 @@ def _ensure_tables_exist(engine: "Engine") -> None:
     import storage.models  # noqa: F401
     from storage.models.schema import Base
 
+    from sqlalchemy.exc import OperationalError
+
     if engine.dialect.name == "postgresql":
         with engine.begin() as conn:
             conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
 
-    Base.metadata.create_all(engine)
+    try:
+        Base.metadata.create_all(engine)
+    except OperationalError as create_error:
+        # create_all(checkfirst=True) inspects the schema first, but a second
+        # connection with a stale WAL view (e.g. the metrics-instrumentation
+        # probe session opening concurrently on first run) can still race and
+        # lose to another creator, raising "table ... already exists". That is
+        # benign: the table now exists, which is all we wanted.
+        if "already exists" not in str(create_error).lower():
+            raise
 
     # Add missing columns to existing tables
     from storage.utils.session import ensure_tables_exist
