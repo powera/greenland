@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 import constants
+from barsukas.personas import PersonaName
 from constants import DEFAULT_MODEL
 
 if TYPE_CHECKING:
@@ -181,9 +182,18 @@ def add_backend_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser
         The same parser with backend arguments added
     """
     parser.add_argument(
+        "--persona",
+        choices=[p.value for p in PersonaName],
+        help=(
+            "Use the main database of this Barsukas persona (e.g. local, prod). "
+            "Takes precedence over --backend/--postgres. Agents only use the "
+            "persona's main database; its concepts and UI settings do not apply."
+        ),
+    )
+    parser.add_argument(
         "--backend",
         choices=["sqlite", "jsonl", "postgres"],
-        help="Storage backend type (default: sqlite, or use STORAGE_BACKEND env var)",
+        help="Storage backend type (default: sqlite)",
     )
     parser.add_argument(
         "--data-dir",
@@ -456,8 +466,30 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None) -> "D
     jsonl_data_dir = None
     postgres_url = None
 
+    # A persona names the main database directly, so it wins over the
+    # lower-level flags. Only the persona's main database applies: agents do not
+    # use its concepts, worker, or UI settings.
+    if hasattr(args, "persona") and getattr(args, "persona", None):
+        from barsukas.personas import get_persona
+
+        persona = get_persona(args.persona)
+        if persona.use_postgres:
+            backend_type = BackendType.POSTGRES
+            postgres_url = DataSourceConfig.build_postgres_url()
+        elif persona.use_jsonl:
+            backend_type = BackendType.JSONL
+            jsonl_data_dir = str(
+                Path(__file__).parent.parent.parent.parent / (persona.jsonl_data_dir or "")
+            )
+        else:
+            backend_type = BackendType.SQLITE
+            sqlite_path = (
+                args.db_path
+                if hasattr(args, "db_path") and args.db_path
+                else constants.WORDFREQ_DB_PATH
+            )
     # Check for --postgres flag first (shorthand)
-    if hasattr(args, "postgres") and args.postgres:
+    elif hasattr(args, "postgres") and args.postgres:
         backend_type = BackendType.POSTGRES
         postgres_url = DataSourceConfig.build_postgres_url()
     elif hasattr(args, "backend") and args.backend:

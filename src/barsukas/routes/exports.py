@@ -11,7 +11,7 @@ from typing import Union, Tuple
 
 logger = logging.getLogger(__name__)
 
-from barsukas.config import Config
+from barsukas.helpers.agent_args import agent_db_args
 from flask import (
     Blueprint,
     current_app,
@@ -68,10 +68,7 @@ def povas_generate() -> Union[Response, Tuple[Response, int]]:
         args.append("--dry-run")
 
     # Add database configuration
-    if Config.is_postgres_mode():
-        args.append("--postgres")
-    else:
-        args.extend(["--db-path", Config.DB_PATH])
+    args.extend(agent_db_args())
 
     try:
         # Execute
@@ -132,10 +129,7 @@ def elnias_generate() -> Union[Response, Tuple[Response, int]]:
         args.append("--include-unverified")
 
     # Add database configuration
-    if Config.is_postgres_mode():
-        args.append("--postgres")
-    else:
-        args.extend(["--db-path", Config.DB_PATH])
+    args.extend(agent_db_args())
 
     try:
         # Execute

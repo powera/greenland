@@ -4,7 +4,6 @@
 
 import os
 from pathlib import Path
-from typing import Optional
 
 
 class Config:
@@ -47,31 +46,3 @@ class Config:
         "S3_CDN_BASE_URL", "https://trakaido-audio.sfo3.cdn.digitaloceanspaces.com"
     )
     S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME", "trakaido-audio")
-
-    @classmethod
-    def is_postgres_mode(cls) -> bool:
-        """Check if running in PostgreSQL mode."""
-        return os.environ.get("STORAGE_BACKEND") == "postgres"
-
-    @classmethod
-    def get_postgres_url(cls) -> Optional[str]:
-        """Get PostgreSQL URL if configured.
-
-        Returns:
-            PostgreSQL connection URL or None if not in postgres mode
-        """
-        if not cls.is_postgres_mode():
-            return None
-
-        # Check for explicit URL first
-        url = os.environ.get("POSTGRES_URL")
-        if url:
-            return url
-
-        # Build from template + key
-        from storage.backend.config import DataSourceConfig
-
-        try:
-            return DataSourceConfig.build_postgres_url()
-        except Exception:
-            return None

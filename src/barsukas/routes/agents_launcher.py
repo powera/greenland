@@ -13,7 +13,6 @@ from typing import Any, Dict, IO, Iterator, List, Optional
 
 logger = logging.getLogger(__name__)
 
-from barsukas.config import Config
 from flask import (
     Blueprint,
     Response,
@@ -28,6 +27,7 @@ from flask import (
 from flask.typing import ResponseReturnValue
 
 import constants
+from barsukas.helpers.agent_args import agent_db_args
 from barsukas.helpers.flash_helpers import flash_and_log
 from barsukas.utils.argparse_introspection import (
     get_agent_cli_module_path,
@@ -460,11 +460,7 @@ def execute_agent(agent_name: str) -> ResponseReturnValue:
     # Check if any backend-related args were already added from the form
     has_backend_arg = any(arg in ["--postgres", "--backend", "--db-path"] for arg in args)
     if not has_backend_arg:
-        if Config.is_postgres_mode():
-            # Pass PostgreSQL configuration to agent
-            args.append("--postgres")
-        else:
-            args.extend(["--db-path", Config.DB_PATH])
+        args.extend(agent_db_args())
 
     # Add --yes flag for background execution (skip confirmation prompts)
     args.append("--yes")
