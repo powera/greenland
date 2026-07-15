@@ -5,9 +5,12 @@ Barsukas - Word Frequency Database Web Editor
 
 A lightweight Flask web interface for manual edits to lemmas, translations,
 and difficulty levels in the linguistics database.
+
+This module is the application factory. To run Barsukas, use
+src/barsukas/launch.sh (or src/barsukas/unified_app.py directly), which starts
+the Flask server and the task worker in one process.
 """
 
-import argparse
 import json
 import logging
 import os
@@ -16,6 +19,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Optional, cast
 
 from barsukas.config import Config
+from barsukas.personas import PersonaConfig
 from barsukas.helpers.strings import (
     SUPPORTED_UI_LANGS,
     create_cstr_accessor,
@@ -95,6 +99,8 @@ from barsukas.routes.sync import (
 from storage.backend import create_session, get_backend_type
 from storage.backend.config import BackendType, DataSourceConfig
 
+logger = logging.getLogger(__name__)
+
 
 class BarsukasFlask(Flask):
     """Custom Flask subclass with typed custom attributes."""
@@ -105,16 +111,48 @@ class BarsukasFlask(Flask):
     concepts_db_session_factory: Optional[Callable[[], Session]]
 
 
+def _warn_degraded(what: str, reason: str, consequence: str, fix: str) -> str:
+    """Log a hard-to-miss banner about running in a degraded configuration.
+
+    Silently serving a different database than the persona asked for is the
+    failure this exists to prevent, so the banner names what was wanted, why it
+    is unavailable, and what the process is doing instead.
+
+    Returns:
+        A one-line summary, for display on the settings page.
+    """
+    summary = f"{what} unavailable: {reason}"
+    logger.warning("=" * 78)
+    logger.warning("WARNING: %s", what)
+    logger.warning("  Reason:      %s", reason)
+    logger.warning("  Consequence: %s", consequence)
+    logger.warning("  Fix:         %s", fix)
+    logger.warning("=" * 78)
+    return summary
+
+
 def create_app(
     config_class: type[Config] = Config,
     db_url: Optional[str] = None,
     use_word2vec: bool = False,
+    persona: Optional[PersonaConfig] = None,
 ) -> BarsukasFlask:
     """Create and configure the Flask application.
 
+    Barsukas uses two databases and they are configured independently:
+
+    - main: lemmas/words. SQLite, JSONL, or PostgreSQL per the persona, or an
+      explicit ``db_url`` override.
+    - concepts: always the hardcoded global PostgreSQL, or the main database
+      when the persona does not ask for PostgreSQL concepts.
+
     Args:
         config_class: Configuration class to use
-        db_url: Optional database URL (for PostgreSQL: postgresql://user:pass@host:5432/db)
+        db_url: Optional main-database URL (postgresql://user:pass@host:5432/db).
+            Overrides the persona's main backend. Never affects concepts.
+        use_word2vec: Enable pgvector embedding operations
+        persona: The resolved persona. When omitted, backend selection falls back
+            to reading the environment, which is what the test fixtures rely on.
     """
     logging.basicConfig(
         level=logging.DEBUG if config_class.DEBUG else logging.INFO,
@@ -127,25 +165,36 @@ def create_app(
     if use_word2vec:
         os.environ["USE_WORD2VEC"] = "true"
 
-    # Set up storage backend
-    postgres_url = db_url if db_url and db_url.startswith("postgresql://") else None
+    # Degraded-mode notices, surfaced on the settings page as well as the log.
+    degraded: list[str] = []
 
-    # Check for env-based postgres configuration
-    if not postgres_url and os.environ.get("STORAGE_BACKEND") == "postgres":
+    # --- main database -------------------------------------------------------
+    # An explicit db_url wins over the persona; a persona's postgres main DB
+    # builds the URL from the key file.
+    postgres_url = db_url if db_url and db_url.startswith("postgresql://") else None
+    if postgres_url and persona:
+        logger.info("--db-url overrides persona '%s' main database", persona.name.value)
+
+    wants_postgres_main = bool(postgres_url) or (
+        persona.use_postgres if persona else os.environ.get("STORAGE_BACKEND") == "postgres"
+    )
+
+    if wants_postgres_main and not postgres_url:
         postgres_url = os.environ.get("POSTGRES_URL")
         if not postgres_url:
-            # Build from template + key
             try:
                 postgres_url = DataSourceConfig.build_postgres_url()
             except Exception as e:
-                print(
-                    f"Warning: PostgreSQL credentials not available ({e}), "
-                    f"falling back to SQLite",
-                    file=sys.stderr,
+                degraded.append(
+                    _warn_degraded(
+                        what="PostgreSQL main database",
+                        reason=str(e),
+                        consequence="Falling back to the local SQLite database.",
+                        fix="Add credentials at keys/postgres.key",
+                    )
                 )
 
     if postgres_url:
-        # PostgreSQL backend
         print("Using storage backend: postgres")
         backend_config = DataSourceConfig(
             backend_type=BackendType.POSTGRES,
@@ -197,14 +246,36 @@ def create_app(
     app.db_session_factory = session_factory
     app.concepts_db_session_factory = None
 
-    if os.environ.get("BARSUKAS_CONCEPTS_BACKEND") == "postgres":
+    # --- concepts database ---------------------------------------------------
+    # Concepts live in the hardcoded global PostgreSQL; there is no custom URL
+    # for them. Personas that don't ask for PostgreSQL concepts (local-sqlite,
+    # prod) read concepts out of the main database instead.
+    #
+    # This block is the sole authority on CONCEPTS_WRITABLE: it is the only code
+    # that knows whether the connection was actually established. Deriving it
+    # from persona flags elsewhere would advertise writable concepts while
+    # serving the fallback backend.
+    wants_postgres_concepts = (
+        persona.use_postgres_concepts
+        if persona
+        else os.environ.get("BARSUKAS_CONCEPTS_BACKEND") == "postgres"
+    )
+
+    if wants_postgres_concepts:
         try:
-            concepts_postgres_url = DataSourceConfig.build_postgres_url()
+            concepts_postgres_url: Optional[str] = DataSourceConfig.build_postgres_url()
         except Exception as concepts_exc:
-            print(
-                f"Warning: Concepts PostgreSQL credentials not available ({concepts_exc}), "
-                f"concepts DB disabled",
-                file=sys.stderr,
+            persona_label = f" '{persona.name.value}'" if persona else ""
+            degraded.append(
+                _warn_degraded(
+                    what="PostgreSQL concepts database",
+                    reason=str(concepts_exc),
+                    consequence=(
+                        f"Persona{persona_label} expects PostgreSQL concepts. Concepts are "
+                        f"DISABLED for this session and cannot be edited."
+                    ),
+                    fix="Add credentials at keys/postgres.key, or use --persona local-sqlite",
+                )
             )
             concepts_postgres_url = None
 
@@ -217,7 +288,11 @@ def create_app(
 
             # golden/hosted connect read-only: writes/DDL are rejected at the server,
             # not merely gated by CONCEPTS_WRITABLE route checks.
-            concepts_readonly = os.environ.get("BARSUKAS_CONCEPTS_READONLY") == "true"
+            concepts_readonly = (
+                persona.postgres_concepts_readonly
+                if persona
+                else os.environ.get("BARSUKAS_CONCEPTS_READONLY") == "true"
+            )
 
             def concepts_session_factory() -> Session:
                 return cast(
@@ -234,6 +309,20 @@ def create_app(
     else:
         app.config["CONCEPTS_BACKEND"] = backend_config.backend_type.value
         app.config["CONCEPTS_WRITABLE"] = False
+
+    app.config["DEGRADED_NOTICES"] = degraded
+
+    # --- persona-derived UI/access settings ----------------------------------
+    # Owned here so one function holds every persona-derived config value.
+    if persona:
+        app.config["PERSONA"] = persona.name.value
+        app.config["ALLOW_OUTBOUND_CALLS"] = persona.allow_outbound_calls
+        app.config["ALLOW_API_KEYS"] = persona.allow_api_keys
+        app.config["ENABLE_WORKER"] = persona.enable_worker
+        app.config["ALLOW_RESTART"] = persona.allow_restart
+        app.config["ALLOW_EXPORTS"] = persona.allow_exports
+        if persona.readonly:
+            app.config["READONLY"] = True
     try:
         from sqlalchemy.engine import Engine
 
@@ -541,59 +630,3 @@ def create_app(
         }
 
     return app
-
-
-def main() -> None:
-    """Run the Flask development server."""
-    parser = argparse.ArgumentParser(description="Barsukas Web Interface")
-    parser.add_argument(
-        "--host", type=str, default=Config.HOST, help=f"Host to bind to (default: {Config.HOST})"
-    )
-    parser.add_argument(
-        "--port", type=int, default=Config.PORT, help=f"Port to run on (default: {Config.PORT})"
-    )
-    parser.add_argument("--debug", action="store_true", help="Enable debug mode")
-    parser.add_argument(
-        "--readonly", action="store_true", help="Run in read-only mode (no edits allowed)"
-    )
-    parser.add_argument(
-        "--db-url",
-        type=str,
-        help="PostgreSQL connection URL (e.g., postgresql://user:pass@host:5432/dbname)",
-    )
-    parser.add_argument(
-        "--use-word2vec",
-        "--use_word2vec",
-        dest="use_word2vec",
-        action="store_true",
-        help="Enable pgvector embedding read/write operations (opt-in)",
-    )
-    args = parser.parse_args()
-
-    # create_app() calls logging.basicConfig() off Config.DEBUG, which is read
-    # from the environment at import time -- so --debug has to land here, before
-    # create_app(), or the root logger stays at INFO and debug logs never emit.
-    if args.debug:
-        os.environ["BARSUKAS_DEBUG"] = "true"
-        Config.DEBUG = True
-
-    app = create_app(db_url=args.db_url, use_word2vec=args.use_word2vec)
-
-    if args.debug:
-        app.config["DEBUG"] = True
-
-    if args.readonly:
-        app.config["READONLY"] = True
-
-    print(f"Starting Barsukas on http://{args.host}:{args.port}")
-    print(f"Database: {app.config['DB_PATH']}")
-    print(f"Word2Vec/pgvector: {'ENABLED' if args.use_word2vec else 'DISABLED'}")
-    if args.readonly:
-        print("Running in READ-ONLY mode - no edits allowed")
-    print(f"Press Ctrl+C to stop")
-
-    app.run(host=args.host, port=args.port, debug=app.config["DEBUG"])
-
-
-if __name__ == "__main__":
-    main()
