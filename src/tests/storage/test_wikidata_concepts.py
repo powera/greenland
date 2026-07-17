@@ -305,7 +305,7 @@ def test_fetch_wikidata_seed_builds_sources_from_mocked_apis(monkeypatch) -> Non
     def fake_get_json(
         url: str, *, params: Optional[Dict[str, str]] = None
     ) -> Optional[Dict[str, Any]]:
-        if "Special:EntityData" in url:
+        if "www.wikidata.org/w/api.php" in url:
             return {
                 "entities": {
                     "Q42": {
@@ -346,7 +346,7 @@ def test_fetch_wikidata_seed_caches_repeated_qid_lookups(monkeypatch) -> None:  
         url: str, *, params: Optional[Dict[str, str]] = None
     ) -> Optional[Dict[str, Any]]:
         calls.append(url)
-        if "Special:EntityData" in url:
+        if "www.wikidata.org/w/api.php" in url:
             return {
                 "entities": {
                     "Q555": {
@@ -374,7 +374,7 @@ def test_fetch_wikidata_seed_caches_repeated_qid_lookups(monkeypatch) -> None:  
     assert second_seed is not None
     assert second_seed.title == "Cached concept"
     assert [source["title"] for source in second_seed.sources] == ["Wikipedia: Cached concept"]
-    assert sum("Special:EntityData" in url for url in calls) == 1
+    assert sum("www.wikidata.org/w/api.php" in url for url in calls) == 1
     _fetch_wikidata_concept_seed_cached.cache_clear()
 
 
@@ -382,7 +382,7 @@ def test_fetch_wikidata_seed_can_include_regional_wikipedia_sources(monkeypatch)
     def fake_get_json(
         url: str, *, params: Optional[Dict[str, str]] = None
     ) -> Optional[Dict[str, Any]]:
-        if "Special:EntityData" in url:
+        if "www.wikidata.org/w/api.php" in url:
             return {
                 "entities": {
                     "Q1204": {
@@ -451,7 +451,74 @@ def test_get_json_retries_429_with_wikimedia_headers(monkeypatch) -> None:  # ty
     }
     assert len(calls) == 2
     assert calls[0]["headers"]["Api-User-Agent"]
+    assert calls[0]["headers"]["Accept-Encoding"] == "gzip, deflate"
     assert calls[0]["params"]["maxlag"] == "5"
+
+
+def test_fetch_wikidata_entities_batches_action_api(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    import storage.wikidata as wikidata
+
+    calls: list[dict[str, str]] = []
+
+    def fake_get_json(
+        url: str, *, params: Optional[Dict[str, str]] = None
+    ) -> Optional[Dict[str, Any]]:
+        assert url == wikidata.WIKIDATA_ACTION_API_URL
+        assert params is not None
+        calls.append(params)
+        return {
+            "entities": {
+                qid: {"labels": {"en": {"value": qid}}} for qid in params["ids"].split("|")
+            }
+        }
+
+    monkeypatch.setattr(wikidata, "_get_json", fake_get_json)
+
+    entities = wikidata._fetch_wikidata_entities([f"Q{index}" for index in range(1, 53)])
+
+    assert len(calls) == 2
+    assert calls[0]["action"] == "wbgetentities"
+    assert calls[0]["ids"].startswith("Q1|Q2")
+    assert len(calls[0]["ids"].split("|")) == 50
+    assert set(entities) == {f"Q{index}" for index in range(1, 53)}
+
+
+def test_post_json_uses_sparql_post_headers_and_retries(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    import storage.wikidata as wikidata
+
+    calls: list[dict[str, Any]] = []
+
+    class FakeResponse:
+        def __init__(self, status_code: int) -> None:
+            self.status_code = status_code
+            self.headers: dict[str, str] = {"Retry-After": "0"}
+
+        def raise_for_status(self) -> None:
+            if self.status_code >= 400:
+                raise RuntimeError("unexpected status")
+
+        def json(self) -> dict[str, Any]:
+            return {"results": {"bindings": []}}
+
+    def fake_post(url: str, **kwargs: Any) -> FakeResponse:
+        calls.append({"url": url, **kwargs})
+        return FakeResponse(503 if len(calls) == 1 else 200)
+
+    monkeypatch.setattr(wikidata.requests, "post", fake_post)
+    monkeypatch.setattr(wikidata.time, "sleep", lambda delay: None)
+    monkeypatch.setattr(wikidata, "min_interval_for_url", lambda url: 0.0)
+
+    payload = wikidata._post_json(
+        "https://query.wikidata.org/sparql",
+        data={"query": "SELECT * WHERE {}"},
+        accept="application/sparql-results+json",
+    )
+
+    assert payload == {"results": {"bindings": []}}
+    assert len(calls) == 2
+    assert calls[0]["data"] == {"query": "SELECT * WHERE {}"}
+    assert calls[0]["headers"]["Accept"] == "application/sparql-results+json"
+    assert calls[0]["headers"]["User-Agent"]
 
 
 def test_throttle_waits_for_min_interval_per_host(monkeypatch) -> None:  # type: ignore[no-untyped-def]
