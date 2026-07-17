@@ -21,11 +21,12 @@ from storage.models.concept import MAX_CONCEPT_SOURCES
 logger = logging.getLogger(__name__)
 
 QID_RE = re.compile(r"^Q[1-9][0-9]*$", re.IGNORECASE)
-WIKIDATA_ENTITY_URL = "https://www.wikidata.org/wiki/Special:EntityData/{qid}.json"
+WIKIDATA_ACTION_API_URL = "https://www.wikidata.org/w/api.php"
 WIKIPEDIA_SUMMARY_URL = "https://en.wikipedia.org/api/rest_v1/page/summary/{title}"
 WIKIPEDIA_EXTRACT_URL = "https://{language_code}.wikipedia.org/w/api.php"
 WIKISOURCE_SEARCH_URL = "https://en.wikisource.org/w/api.php"
 DEFAULT_TIMEOUT_SECONDS = 10
+WIKIDATA_ENTITY_BATCH_SIZE = 50
 # 429 (rate limit) and 503-with-maxlag are transient Wikimedia conditions worth
 # waiting out, so allow several attempts with a longer backoff cap than a normal
 # request would use.
@@ -33,8 +34,22 @@ MAX_HTTP_ATTEMPTS = 5
 MAX_RETRY_DELAY_SECONDS = 30.0
 DEFAULT_USER_AGENT = os.environ.get(
     "GREENLAND_HTTP_USER_AGENT",
-    "Greenland-Barsukas/1.0 (concept seeding; set GREENLAND_HTTP_USER_AGENT with contact)",
+    "Greenland/1.0 (https://github.com/jmikedupont2/greenland; contact: set GREENLAND_HTTP_USER_AGENT)",
 )
+
+
+def _wikimedia_headers(*, accept: Optional[str] = None) -> Dict[str, str]:
+    """Return Wikimedia-friendly request headers with project identity."""
+    headers = {
+        "User-Agent": DEFAULT_USER_AGENT,
+        "Api-User-Agent": DEFAULT_USER_AGENT,
+        "Accept-Encoding": "gzip, deflate",
+    }
+    if accept is not None:
+        headers["Accept"] = accept
+    return headers
+
+
 # Wikimedia enforces a per-clock-minute request quota, not just a per-second
 # rate: bursting a handful of requests trips a ~60s cooldown (observed as a
 # Retry-After that bounces every call to the top of the next minute). Each
@@ -428,10 +443,7 @@ def _get_json(url: str, *, params: Optional[Dict[str, str]] = None) -> Optional[
                 url,
                 params=request_params or None,
                 timeout=DEFAULT_TIMEOUT_SECONDS,
-                headers={
-                    "User-Agent": DEFAULT_USER_AGENT,
-                    "Api-User-Agent": DEFAULT_USER_AGENT,
-                },
+                headers=_wikimedia_headers(),
             )
             if response.status_code in {429, 503} and attempt_index < MAX_HTTP_ATTEMPTS - 1:
                 time.sleep(_retry_delay_seconds(response, attempt_index))
@@ -454,6 +466,52 @@ def _get_json(url: str, *, params: Optional[Dict[str, str]] = None) -> Optional[
     return None
 
 
+def _post_json(
+    url: str,
+    *,
+    data: Optional[Dict[str, str]] = None,
+    timeout: tuple[float, float] = (10.0, 90.0),
+    accept: Optional[str] = None,
+) -> Optional[Dict[str, Any]]:
+    """POST for JSON with Wikimedia identity headers and transient retries."""
+    last_error: Optional[Exception] = None
+    for attempt_index in range(MAX_HTTP_ATTEMPTS):
+        try:
+            _throttle(url)
+            response = requests.post(
+                url,
+                data=dict(data or {}),
+                timeout=timeout,
+                headers=_wikimedia_headers(accept=accept),
+            )
+            if (
+                response.status_code in {429, 502, 503, 504}
+                and attempt_index < MAX_HTTP_ATTEMPTS - 1
+            ):
+                time.sleep(_retry_delay_seconds(response, attempt_index))
+                continue
+            response.raise_for_status()
+            payload = response.json()
+        except (requests.RequestException, ValueError) as error:
+            last_error = error
+            break
+        if isinstance(payload, dict):
+            return payload
+        return None
+
+    logger.warning("Failed to POST JSON from %s: %s", url, last_error)
+    return None
+
+
+def query_wikidata_sparql(sparql: str) -> Optional[Dict[str, Any]]:
+    """Run a WDQS SPARQL query as a POST with Wikimedia-friendly retries."""
+    return _post_json(
+        "https://query.wikidata.org/sparql",
+        data={"query": sparql},
+        accept="application/sparql-results+json",
+    )
+
+
 def _extract_entity_qid(snak: Dict[str, Any]) -> Optional[str]:
     """Extract a Wikidata entity Q-id from a claim snak."""
     data_value = snak.get("datavalue", {})
@@ -469,13 +527,43 @@ def _extract_entity_qid(snak: Dict[str, Any]) -> Optional[str]:
     return None
 
 
+def _fetch_wikidata_entities(qids: Sequence[str]) -> Dict[str, Dict[str, Any]]:
+    """Fetch Wikidata entities via the cheaper batched Action API."""
+    normalized_qids: List[str] = []
+    seen_qids: set[str] = set()
+    for raw_qid in qids:
+        normalized_qid = normalize_qid(raw_qid)
+        if normalized_qid is not None and normalized_qid not in seen_qids:
+            normalized_qids.append(normalized_qid)
+            seen_qids.add(normalized_qid)
+
+    entities_by_qid: Dict[str, Dict[str, Any]] = {}
+    for start in range(0, len(normalized_qids), WIKIDATA_ENTITY_BATCH_SIZE):
+        batch_qids = normalized_qids[start : start + WIKIDATA_ENTITY_BATCH_SIZE]
+        payload = _get_json(
+            WIKIDATA_ACTION_API_URL,
+            params={
+                "action": "wbgetentities",
+                "ids": "|".join(batch_qids),
+                "props": "labels|descriptions|aliases|claims|sitelinks",
+                "languages": "en",
+                "languagefallback": "1",
+                "formatversion": "2",
+            },
+        )
+        for entity_qid, entity in (payload or {}).get("entities", {}).items():
+            normalized_entity_qid = normalize_qid(str(entity_qid))
+            if normalized_entity_qid is not None and isinstance(entity, dict):
+                entities_by_qid[normalized_entity_qid] = entity
+    return entities_by_qid
+
+
 def _fetch_wikidata_entity(qid: str) -> Optional[Dict[str, Any]]:
-    """Fetch a single Wikidata entity JSON object."""
-    payload = _get_json(WIKIDATA_ENTITY_URL.format(qid=qid))
-    entity = (payload or {}).get("entities", {}).get(qid)
-    if isinstance(entity, dict):
-        return entity
-    return None
+    """Fetch a single Wikidata entity JSON object via the Action API."""
+    normalized_qid = normalize_qid(qid)
+    if normalized_qid is None:
+        return None
+    return _fetch_wikidata_entities([normalized_qid]).get(normalized_qid)
 
 
 def _extract_english_value(values: Dict[str, Dict[str, str]]) -> str:

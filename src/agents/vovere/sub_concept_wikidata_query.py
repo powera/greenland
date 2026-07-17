@@ -19,8 +19,6 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import requests
-
 # Add src directory to path (this file lives at src/agents/vovere/)
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
@@ -31,11 +29,10 @@ from storage.backend import create_session as create_backend_session
 from storage.backend.config import DataSourceConfig
 from storage.concept_service import file_sub_concept_from_qid
 from storage.models.concept import ALL_SUB_CONCEPT_CATEGORIES
-from storage.wikidata import normalize_qid
+from storage.wikidata import normalize_qid, query_wikidata_sparql
 
 logger = logging.getLogger(__name__)
 
-WIKIDATA_QUERY_ENDPOINT = "https://query.wikidata.org/sparql"
 
 PRESET_CLASS_QIDS: Dict[str, str] = {
     "geography_administrative_division": "Q56061",
@@ -74,14 +71,9 @@ class SubConceptWikidataQueryAgent:
 
     def query_qids(self, sparql: str) -> List[str]:
         """Run a SPARQL query and return Q-ids from a ``?item`` binding."""
-        response = requests.get(
-            WIKIDATA_QUERY_ENDPOINT,
-            params={"query": sparql, "format": "json"},
-            headers={"User-Agent": "greenland-sub-concept-query/0.1"},
-            timeout=60,
-        )
-        response.raise_for_status()
-        data = response.json()
+        data = query_wikidata_sparql(sparql)
+        if data is None:
+            raise RuntimeError("Wikidata SPARQL query failed after retries")
         qids: List[str] = []
         for binding in data.get("results", {}).get("bindings", []):
             item_uri = binding.get("item", {}).get("value", "")

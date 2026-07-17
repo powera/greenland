@@ -17,6 +17,7 @@ import constants
 # to constants.DEFAULT_HTTP_MIN_INTERVAL_SECONDS.
 HOST_MIN_INTERVAL_SECONDS: Dict[str, float] = {
     "www.wikidata.org": 6.0,
+    "query.wikidata.org": 6.0,
     "en.wikipedia.org": 6.0,
     "de.wikipedia.org": 6.0,
     "fr.wikipedia.org": 6.0,
