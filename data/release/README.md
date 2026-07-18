@@ -94,6 +94,23 @@ PYTHONPATH=src python src/storage/migrate.py sqlite-to-release \
   --release-dir /path/to/output
 ```
 
+### Sync lemma audio back from data/release into SQLite
+
+`sqlite-to-lemma-audio-release` only writes files. To pull the approved lemma
+audio in `data/release/lemmas/*/audio.jsonl` **back into** an existing SQLite
+database, use **lemma-audio-release-to-sqlite**. It upserts audio rows matched on
+`(guid, language_code, voice_name, grammatical_form)`, links each row to its
+lemma by GUID, and leaves local review metadata (`reviewed_by`, `notes`,
+`quality_issues`, acceptance columns) untouched:
+
+```bash
+# Add/update audio rows from release files
+PYTHONPATH=src python src/storage/migrate.py lemma-audio-release-to-sqlite
+
+# Also delete exportable audio rows that are no longer in the release files
+PYTHONPATH=src python src/storage/migrate.py lemma-audio-release-to-sqlite --prune
+```
+
 ## Sync Capabilities Summary
 
 | Change Type               | Barsukas `/sync`   |
@@ -136,6 +153,7 @@ Lemma `audio.jsonl` records contain approved audio rows grouped by GUID:
 ```json
 {
   "guid": "LM00001234",
+  "english": "apple",
   "audio": [
     {
       "language_code": "lt",
@@ -152,6 +170,12 @@ Lemma `audio.jsonl` records contain approved audio rows grouped by GUID:
   ]
 }
 ```
+
+The `english` field is the English word the audio relates to (the lemma's
+`concept_label`), included so the file is self-describing without a lookup into
+`base.jsonl`. It is informational on import. In the long run lemma audio will
+move into the per-language `{lang}.jsonl` files; for now it stays in
+`audio.jsonl`.
 
 Sentence `base.jsonl` records live under
 `sentences/{collection}/{pos_type_dir}/{pos_subtype}/base.jsonl` and contain
