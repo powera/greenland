@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Add Phrase{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('phrases.list_phrases') }}">Phrases</a></li>
+        <li class="breadcrumb-item active">Add</li>
+    </ol>
+</nav>
+
+<form method="POST" action="{{ url_for('phrases.add_phrase_route') }}">
+    <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-plus-circle"></i> New Phrase</div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="phrase_subtype" class="form-label">Subtype</label>
+                <select class="form-select" id="phrase_subtype" name="phrase_subtype" required>
+                    {% for st in subtypes %}
+                        <option value="{{ st }}">{{ st|replace('_', ' ')|title }}</option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">The GUID is auto-assigned from the subtype prefix (e.g. F01 for greetings).</div>
+            </div>
+            <div class="mb-3">
+                <label for="label" class="form-label">Label (English concept)</label>
+                <input type="text" class="form-control" id="label" name="label" required
+                       placeholder="e.g. See you later">
+            </div>
+            <div class="mb-3">
+                <label for="english" class="form-label">English translation</label>
+                <input type="text" class="form-control" id="english" name="english"
+                       placeholder="Defaults to the label if left blank">
+            </div>
+            <div class="mb-3">
+                <label for="definition" class="form-label">Definition</label>
+                <textarea class="form-control" id="definition" name="definition" rows="2"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="difficulty_level" class="form-label">Difficulty level (-1 to exclude)</label>
+                <input type="number" class="form-control" id="difficulty_level" name="difficulty_level" value="1">
+            </div>
+        </div>
+    </div>
+    <div class="mb-4">
+        <button type="submit" class="btn btn-primary"
+                {% if config.get('READONLY', False) %}disabled title="Not available in hosted mode"{% endif %}>
+            <i class="bi bi-save"></i> Create
+        </button>
+        <a href="{{ url_for('phrases.list_phrases') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}

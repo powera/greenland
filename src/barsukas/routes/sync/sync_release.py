@@ -1123,7 +1123,6 @@ def _get_release_file_path_for_lemma(release_dir: Path, lemma: Lemma) -> Optiona
         "determiner": "determiners",
         "article": "articles",
         "numeral": "numerals",
-        "phrase": "phrases",
         "misc": "misc",
     }
     pos_dir = pos_dir_map.get(lemma.pos_type)

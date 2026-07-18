@@ -61,7 +61,6 @@ from storage.database import (
     update_lemma_translation,
 )
 from storage.models.schema import DerivativeForm, Lemma, WordToken
-from storage.translation_helpers import NON_LEXEME_POS_TYPES
 
 english_alternative_map = {
     "bicycle": ["bike"],
@@ -168,7 +167,6 @@ def load_trakaido_json(json_path: str) -> List[Dict[str, Any]]:
             "numeral",
             "auxiliary",
             "modal",
-            "phrase",
         }
         if pos_type not in valid_pos_types:
             raise ValueError(
@@ -359,18 +357,16 @@ def find_or_create_lemma(
             lemma.guid = existing_guid
             session.commit()
 
-        # Add English derivative form. Non-lexeme lemmas (fixed phrases) are not
-        # inflected and reject derivative forms; skip the form for them.
-        if pos_type not in NON_LEXEME_POS_TYPES:
-            add_derivative_form(
-                session=session,
-                lemma=lemma,
-                derivative_form_text=clean_english,
-                language_code="en",
-                grammatical_form="singular" if pos_type == "noun" else "base_form",
-                word_token=word_token,  # Will be None if no word token exists
-                is_base_form=True,
-            )
+        # Add English derivative form.
+        add_derivative_form(
+            session=session,
+            lemma=lemma,
+            derivative_form_text=clean_english,
+            language_code="en",
+            grammatical_form="singular" if pos_type == "noun" else "base_form",
+            word_token=word_token,  # Will be None if no word token exists
+            is_base_form=True,
+        )
 
         if word_token:
             print(f"Created lemma with word token for: {english_word}")

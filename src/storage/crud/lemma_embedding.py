@@ -113,8 +113,7 @@ def nearest_lemma_embeddings(
         )
         params["min_similarity"] = min_similarity
 
-    sql = text(
-        f"""
+    sql = text(f"""
         SELECT
             e.lemma_id,
             l.lemma_text,
@@ -129,8 +128,7 @@ def nearest_lemma_embeddings(
         WHERE {" AND ".join(where_fragments)}
         ORDER BY e.embedding <=> CAST(:query_vector AS vector)
         LIMIT :limit
-        """
-    )
+        """)
 
     rows = session.execute(sql, params).all()
     matches: list[LemmaEmbeddingMatch] = []
@@ -157,14 +155,8 @@ def get_lemmas_for_embedding_refresh(
     language_code: str,
     limit: Optional[int] = None,
 ) -> List[Lemma]:
-    """Fetch lemmas eligible for embedding generation.
-
-    Fixed phrases (see ``NON_LEXEME_POS_TYPES``) are excluded: they are not single
-    concepts and should not appear as semantic-similarity candidates.
-    """
-    from storage.translation_helpers import NON_LEXEME_POS_TYPES
-
-    query = session.query(Lemma).filter(Lemma.pos_type.notin_(NON_LEXEME_POS_TYPES))
+    """Fetch lemmas eligible for embedding generation."""
+    query = session.query(Lemma)
     if language_code != "en":
         query = query.join(
             LemmaTranslation,

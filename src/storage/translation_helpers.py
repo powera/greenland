@@ -122,27 +122,6 @@ EXTRA_RELEASE_LANGUAGE_GROUPS = {
     "ancient": ANCIENT_LANGUAGE_GROUP,
 }
 
-# POS types whose lemmas are fixed multi-word phrases (e.g. the traveler's
-# dictionary), not single lexemes. They are stored as ordinary Lemma rows so they
-# reuse the translation/difficulty/export pipeline, but must be excluded from any
-# code path that combines lemmas as building blocks (sentence assembly) or treats
-# them as pronounceable words (rhyming). Use is_lexeme_pos/is_lexeme_lemma below.
-NON_LEXEME_POS_TYPES = frozenset({"phrase"})
-
-
-def is_lexeme_pos(pos_type: Optional[str]) -> bool:
-    """Return True if this pos_type is an ordinary word/concept lemma.
-
-    Returns False for fixed-phrase POS types (see NON_LEXEME_POS_TYPES), which
-    should not be combined with other lemmas or rhymed.
-    """
-    return pos_type is not None and pos_type not in NON_LEXEME_POS_TYPES
-
-
-def is_lexeme_lemma(lemma: Lemma) -> bool:
-    """Return True if this lemma is an ordinary word/concept (not a fixed phrase)."""
-    return is_lexeme_pos(lemma.pos_type)
-
 
 # Languages included in data/release read/write operations.
 # Only these languages will be exported to and synced from release files.
