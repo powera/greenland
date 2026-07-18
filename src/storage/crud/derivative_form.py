@@ -79,21 +79,7 @@ def add_derivative_form(
     verified: bool = False,
     notes: Optional[str] = None,
 ) -> DerivativeForm:
-    """Add a derivative form for a lemma in a specific language.
-
-    Fixed-phrase lemmas (see ``NON_LEXEME_POS_TYPES``) are not inflected and never
-    receive derivative forms; this keeps them out of conjugation/declension,
-    frequency ranking, and rhyming, all of which key off derivative forms.
-    """
-    from storage.translation_helpers import NON_LEXEME_POS_TYPES
-
-    if lemma.pos_type in NON_LEXEME_POS_TYPES:
-        raise ValueError(
-            f"Cannot add a derivative form to a non-lexeme lemma "
-            f"(pos_type={lemma.pos_type!r}, guid={lemma.guid!r}); fixed phrases are "
-            f"not inflected."
-        )
-
+    """Add a derivative form for a lemma in a specific language."""
     try:
         # Check if this derivative form already exists
         existing = (
@@ -335,16 +321,6 @@ def add_noun_derivative_form(
     Returns:
         DerivativeForm object or None if creation failed
     """
-    from storage.translation_helpers import NON_LEXEME_POS_TYPES
-
-    if lemma.pos_type in NON_LEXEME_POS_TYPES:
-        logger.warning(
-            "Skipping noun derivative form for non-lexeme lemma (pos_type=%s, guid=%s)",
-            lemma.pos_type,
-            lemma.guid,
-        )
-        return None
-
     try:
         # Get or create word token
         word_token = add_word_token(session, form_text, language_code)

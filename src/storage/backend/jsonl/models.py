@@ -427,6 +427,84 @@ class SentenceWord:
 
 
 @dataclass
+class Phrase:
+    """JSONL model for phrases (fixed traveler/greeting expressions)."""
+
+    id: Optional[int] = None
+    guid: Optional[str] = None  # Used as primary identifier in JSONL
+
+    phrase_subtype: str = ""  # e.g. "greetings", "traveler"
+    concept_label: str = ""  # English concept label, e.g. "See you later"
+    concept_definition: Optional[str] = None
+    difficulty_level: Optional[int] = None
+
+    # Runtime/internal fields (not exported to JSONL)
+    verified: bool = False
+    notes: Optional[str] = None
+    added_at: Optional[datetime.datetime] = None
+    updated_at: Optional[datetime.datetime] = None
+
+    # Nested relationships (lang_code -> text / lang_code -> {status, note})
+    translations: Dict[str, str] = field(default_factory=dict)
+    translation_metadata: Dict[str, Dict[str, str]] = field(default_factory=dict)
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary for JSONL serialization."""
+        data = asdict(self)
+        data.pop("id", None)
+        data.pop("verified", None)
+        data.pop("notes", None)
+        data.pop("added_at", None)
+        data.pop("updated_at", None)
+        return data
+
+    @classmethod
+    def from_dict(cls, data: dict, default_subtype: str = "") -> "Phrase":
+        """Create from a base.jsonl record.
+
+        Args:
+            data: The parsed JSON object.
+            default_subtype: phrase_subtype to use when the record omits it
+                (typically the parent directory name).
+        """
+        if "added_at" in data and data["added_at"]:
+            data["added_at"] = datetime.datetime.fromisoformat(data["added_at"])
+        if "updated_at" in data and data["updated_at"]:
+            data["updated_at"] = datetime.datetime.fromisoformat(data["updated_at"])
+
+        data.setdefault("phrase_subtype", default_subtype)
+        data.setdefault("translations", {})
+        data.setdefault("translation_metadata", {})
+        data.setdefault("verified", False)
+
+        known_fields = {f.name for f in fields(cls)}
+        filtered = {k: v for k, v in data.items() if k in known_fields}
+        return cls(**filtered)
+
+
+@dataclass
+class PhraseTranslation:
+    """JSONL model for phrase translations.
+
+    Note: In the JSONL backend these are stored nested in Phrase.translations;
+    this dataclass exists to mirror the SQLAlchemy model for materialization.
+    """
+
+    id: Optional[int] = None
+    phrase_id: Optional[int] = None
+    language_code: str = ""
+    translation: str = ""
+    translation_status: Optional[str] = None
+    translation_status_note: Optional[str] = None
+    verified: bool = False
+    added_at: Optional[datetime.datetime] = None
+    updated_at: Optional[datetime.datetime] = None
+
+    # Reference to parent phrase
+    phrase: Optional[Phrase] = None
+
+
+@dataclass
 class LemmaRelationGroup:
     """JSONL model for lemma relation groups.
 

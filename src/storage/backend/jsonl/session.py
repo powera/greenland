@@ -175,6 +175,8 @@ class JSONLSession(BaseSession):
             LemmaDifficultyOverride as SQLLemmaDifficultyOverride,
         )
         from storage.models.schema import LemmaTranslation as SQLLemmaTranslation
+        from storage.models.schema import Phrase as SQLPhrase
+        from storage.models.schema import PhraseTranslation as SQLPhraseTranslation
         from storage.models.schema import Sentence as SQLSentence
         from storage.models.schema import SentenceTranslation as SQLSentenceTranslation
         from storage.models.schema import SentenceWord as SQLSentenceWord
@@ -191,6 +193,8 @@ class JSONLSession(BaseSession):
             models.Sentence: SQLSentence,
             models.SentenceTranslation: SQLSentenceTranslation,
             models.SentenceWord: SQLSentenceWord,
+            models.Phrase: SQLPhrase,
+            models.PhraseTranslation: SQLPhraseTranslation,
         }
 
     def _populate_sqlite(self) -> None:
@@ -209,6 +213,8 @@ class JSONLSession(BaseSession):
         from storage.models.schema import Lemma as SQLLemma
         from storage.models.schema import LemmaDifficultyOverride as SQLLemmaDifficultyOverride
         from storage.models.schema import LemmaTranslation
+        from storage.models.schema import Phrase as SQLPhrase
+        from storage.models.schema import PhraseTranslation as SQLPhraseTranslation
         from storage.models.schema import Sentence as SQLSentence
         from storage.models.schema import SentenceTranslation, SentenceWord
         from storage.translation_helpers import compute_sort_key
@@ -226,6 +232,8 @@ class JSONLSession(BaseSession):
         sentences = []
         sentence_translations = []
         sentence_words = []
+        phrases: list[dict] = []
+        phrase_translations: list[dict] = []
         tombstones = []
 
         # Prepare lemmas and translations
@@ -422,6 +430,38 @@ class JSONLSession(BaseSession):
                     }
                 )
 
+        # Prepare phrases and their translations. Translations are stored nested
+        # in the JSONL Phrase model (lang_code -> text, plus optional metadata).
+        phrase_translation_id_counter = 1
+        for jsonl_phrase in self._storage.phrases.values():
+            phrases.append(
+                {
+                    "id": jsonl_phrase.id,
+                    "guid": jsonl_phrase.guid,
+                    "phrase_subtype": jsonl_phrase.phrase_subtype,
+                    "label": jsonl_phrase.concept_label,
+                    "definition": jsonl_phrase.concept_definition,
+                    "difficulty_level": jsonl_phrase.difficulty_level,
+                    "verified": jsonl_phrase.verified,
+                    "notes": jsonl_phrase.notes,
+                    "added_at": jsonl_phrase.added_at,
+                    "updated_at": jsonl_phrase.updated_at,
+                }
+            )
+            for lang_code, translation_text in jsonl_phrase.translations.items():
+                meta = jsonl_phrase.translation_metadata.get(lang_code, {})
+                phrase_translations.append(
+                    {
+                        "id": phrase_translation_id_counter,
+                        "phrase_id": jsonl_phrase.id,
+                        "language_code": lang_code,
+                        "translation": translation_text,
+                        "translation_status": meta.get("translation_status"),
+                        "translation_status_note": meta.get("translation_status_note"),
+                    }
+                )
+                phrase_translation_id_counter += 1
+
         # Prepare relation groups and members (resolve GUIDs to lemma IDs)
         member_id_counter = 1
         for group in self._storage.relation_groups:
@@ -487,6 +527,10 @@ class JSONLSession(BaseSession):
             self._sqlite_session.bulk_insert_mappings(SentenceTranslation, sentence_translations)
         if sentence_words:
             self._sqlite_session.bulk_insert_mappings(SentenceWord, sentence_words)
+        if phrases:
+            self._sqlite_session.bulk_insert_mappings(SQLPhrase, phrases)
+        if phrase_translations:
+            self._sqlite_session.bulk_insert_mappings(SQLPhraseTranslation, phrase_translations)
         if tombstones:
             self._sqlite_session.bulk_insert_mappings(SQLGuidTombstone, tombstones)
 

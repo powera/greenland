@@ -33,6 +33,8 @@ class JSONLStorage(BaseStorage):
         self.lemmas_by_id: Dict[int, models.Lemma] = {}  # id -> Lemma
         self.sentences: Dict[str, models.Sentence] = {}  # guid -> Sentence
         self.sentences_by_id: Dict[int, models.Sentence] = {}  # id -> Sentence
+        self.phrases: Dict[str, models.Phrase] = {}  # guid -> Phrase
+        self.phrases_by_id: Dict[int, models.Phrase] = {}  # id -> Phrase
         self.audio_reviews: List[models.AudioQualityReview] = []
         self.operation_logs: List[models.OperationLog] = []
         self.tombstones: List[models.GuidTombstone] = []
@@ -45,6 +47,7 @@ class JSONLStorage(BaseStorage):
         # ID counters for new objects
         self._next_lemma_id = 1
         self._next_sentence_id = 1
+        self._next_phrase_id = 1
         self._next_audio_review_id = 1
         self._next_operation_log_id = 1
         self._next_tombstone_id = 1
@@ -73,6 +76,7 @@ class JSONLStorage(BaseStorage):
         directories = [
             self.data_dir / "lemmas",
             self.data_dir / "sentences",
+            self.data_dir / "phrases",
             self.data_dir / "audio_reviews",
             self.data_dir / "operation_logs",
             self.data_dir / "tombstones",
@@ -86,6 +90,7 @@ class JSONLStorage(BaseStorage):
         """Load all JSONL files into memory."""
         self._load_lemmas()
         self._load_sentences()
+        self._load_phrases()
         self._load_relations()
         self._load_audio_reviews()
         self._load_operation_logs()
@@ -399,6 +404,71 @@ class JSONLStorage(BaseStorage):
 
             except Exception as e:
                 print(f"Error loading {sentences_file}: {e}")
+
+    def _load_phrases(self) -> None:
+        """Load all phrase files from disk.
+
+        Phrases live in their own tree, organized by subtype:
+        - phrases/{phrase_subtype}/base.jsonl (e.g. phrases/greetings/base.jsonl)
+        - phrases/{phrase_subtype}/secondary.jsonl (secondary-language translations)
+
+        Each base line carries: guid, phrase_subtype, concept_label,
+        concept_definition, translations, translation_metadata, difficulty_level.
+        The phrase_subtype is taken from the record, falling back to the parent
+        directory name.
+        """
+        phrases_dir = self.data_dir / "phrases"
+        if not phrases_dir.exists():
+            return
+
+        # First pass: base.jsonl files (concept + primary translations).
+        for base_file in phrases_dir.rglob("base.jsonl"):
+            subtype_from_dir = base_file.parent.name
+            try:
+                with open(base_file, "r", encoding="utf-8") as f:
+                    for line_num, line in enumerate(f, start=1):
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            data = json.loads(line)
+                            phrase = models.Phrase.from_dict(data, default_subtype=subtype_from_dir)
+                        except Exception as line_err:
+                            print(f"Error loading {base_file}:{line_num}: {line_err}")
+                            continue
+
+                        if phrase.id is None:
+                            phrase.id = self._next_phrase_id
+                            self._next_phrase_id += 1
+                        else:
+                            self._next_phrase_id = max(self._next_phrase_id, phrase.id + 1)
+
+                        if phrase.guid:
+                            self.phrases[phrase.guid] = phrase
+                        self.phrases_by_id[phrase.id] = phrase
+            except Exception as e:
+                print(f"Error loading {base_file}: {e}")
+
+        # Second pass: secondary.jsonl files merge extra-language translations
+        # into already-loaded phrases (keyed by guid).
+        for secondary_file in phrases_dir.rglob("secondary.jsonl"):
+            try:
+                with open(secondary_file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        data = json.loads(line)
+                        guid = data.get("guid")
+                        if not guid or guid not in self.phrases:
+                            continue
+                        phrase = self.phrases[guid]
+                        for lang_code, text in (data.get("translations") or {}).items():
+                            phrase.translations.setdefault(lang_code, text)
+                        for lang_code, meta in (data.get("translation_metadata") or {}).items():
+                            phrase.translation_metadata.setdefault(lang_code, meta)
+            except Exception as e:
+                print(f"Error loading {secondary_file}: {e}")
 
     def _load_relations(self) -> None:
         """Load all lemma relation group files from disk.

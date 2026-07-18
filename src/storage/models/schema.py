@@ -574,6 +574,81 @@ class SentencePatternWord(Base):
     pending_import = relationship("PendingImport")
 
 
+class Phrase(Base):
+    """Model for storing fixed traveler/greeting phrases (e.g. "See you later").
+
+    Phrases are curated, fixed multi-word expressions that are *not* single
+    lexemes. They used to live in the ``lemmas`` table with ``pos_type="phrase"``,
+    which meant every lemma query had to filter them out. They now have their own
+    table, mirroring the ``Sentence`` model: language-agnostic metadata here, the
+    actual text per language in :class:`PhraseTranslation`.
+    """
+
+    __tablename__ = "phrases"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    guid: Mapped[Optional[str]] = mapped_column(
+        String, unique=True, nullable=True, index=True
+    )  # e.g., "F01_003"
+
+    # Phrase subtype (e.g. "greetings", "traveler"); drives the GUID prefix.
+    phrase_subtype: Mapped[str] = mapped_column(String, nullable=False, index=True)
+
+    # English concept label and definition (formerly Lemma.lemma_text /
+    # Lemma.definition_text).
+    label: Mapped[str] = mapped_column(String, nullable=False, index=True)  # e.g., "See you later"
+    definition: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # For which Trakaido "level"
+    difficulty_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+    # Metadata
+    verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )
+
+    # Relationships
+    translations = relationship(
+        "PhraseTranslation", back_populates="phrase", cascade="all, delete-orphan"
+    )
+
+
+class PhraseTranslation(Base):
+    """Model for storing translations of phrases in various languages.
+
+    Mirrors :class:`SentenceTranslation`; stores all language versions including
+    the original/source (English) language.
+    """
+
+    __tablename__ = "phrase_translations"
+    __table_args__ = (UniqueConstraint("phrase_id", "language_code", name="uq_phrase_translation"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    phrase_id: Mapped[int] = mapped_column(ForeignKey("phrases.id"), nullable=False)
+    language_code: Mapped[str] = mapped_column(
+        String, nullable=False, index=True
+    )  # e.g., "en", "lt", "zh"
+    translation: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # Marks translations that are learner cues rather than natural phrasings
+    # (e.g. lemma-form renderings). Mirrors LemmaTranslation.translation_status.
+    translation_status: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    translation_status_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Metadata
+    verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )
+
+    # Relationships
+    phrase = relationship("Phrase", back_populates="translations")
+
+
 class Corpus(Base):
     """Model for storing corpus information."""
 

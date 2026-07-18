@@ -76,6 +76,7 @@ from barsukas.routes import (
     pattern_sentences,
     peleda,
     pending_imports,
+    phrases,
     pradzia,
     rhymes,
     sentence_stats,
@@ -380,6 +381,7 @@ def create_app(
     app.register_blueprint(trakaido_activities.bp)
     app.register_blueprint(pattern_sentences.bp)
     app.register_blueprint(peleda.bp)
+    app.register_blueprint(phrases.bp)
     app.register_blueprint(rhymes.bp)
     app.register_blueprint(pradzia.bp)
     app.register_blueprint(sync_hub.bp)

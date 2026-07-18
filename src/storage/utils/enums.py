@@ -26,7 +26,6 @@ VALID_POS_TYPES = {
     "numeral",
     "auxiliary",
     "modal",
-    "phrase",
 }
 
 

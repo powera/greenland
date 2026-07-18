@@ -116,8 +116,13 @@
             {% for entry in entries %}
                 <tr class="dict-entry">
                     <td class="dict-headword">
+                        {% if entry.is_phrase %}
+                        <a href="{{ url_for('phrases.view_phrase', phrase_id=entry.id) }}"
+                           class="dict-headword-link">{{ entry.headword }}</a>
+                        {% else %}
                         <a href="{{ url_for('lemmas.view_lemma', lemma_id=entry.id) }}"
                            class="dict-headword-link">{{ entry.headword }}</a>
+                        {% endif %}
                         {%- if lang == 'zh' and entry.headword|pinyin %} <span class="dict-reading">({{ entry.headword|pinyin }})</span>
                         {%- elif lang == 'ja' and entry.headword|romaji %} <span class="dict-reading">({{ entry.headword|romaji }})</span>
                         {%- endif %}

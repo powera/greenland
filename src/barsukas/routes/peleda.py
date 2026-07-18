@@ -25,7 +25,13 @@ from barsukas.routes.categories import (
 from langtools.collation import SORT_KEY_LANGUAGES
 from langtools.ja.gojuon import KANA_TO_ROW, ROW_MEMBERS
 from langtools.letters import get_letters
-from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
+from storage.models.schema import (
+    DerivativeForm,
+    Lemma,
+    LemmaTranslation,
+    Phrase,
+    PhraseTranslation,
+)
 from storage.translation_helpers import LANGUAGE_NAMES
 
 bp = Blueprint("peleda", __name__, url_prefix="/dictionary")
@@ -321,26 +327,25 @@ def _build_category_options(available: set[Tuple[str, str]]) -> List[Dict[str, A
 
 def _available_phrase_subtypes() -> List[str]:
     """Return phrase subtypes (e.g. greetings, traveler) that have entries."""
-    rows = (
-        g.db.query(Lemma.pos_subtype)
-        .filter(
-            Lemma.guid.isnot(None),
-            Lemma.pos_type == "phrase",
-            Lemma.pos_subtype.isnot(None),
-        )
-        .distinct()
-        .all()
-    )
+    rows = g.db.query(Phrase.phrase_subtype).filter(Phrase.guid.isnot(None)).distinct().all()
     return sorted(r[0] for r in rows)
 
 
-def _query_by_phrase_subtype(lang: str, pos_subtype: str) -> Query:  # type: ignore[type-arg]
-    """Query phrases of a single subtype, ordered by GUID (curated order)."""
-    return (  # type: ignore[no-any-return]
-        _base_query_for_lang(lang)
-        .filter(Lemma.pos_type == "phrase", Lemma.pos_subtype == pos_subtype)
-        .order_by(Lemma.guid, Lemma.id)
+def _query_by_phrase_subtype(lang: str, phrase_subtype: str) -> Query:  # type: ignore[type-arg]
+    """Query phrases of a single subtype, ordered by GUID (curated order).
+
+    For non-English source languages, the phrase must have a translation in that
+    language to appear (mirroring the lemma dictionary behaviour).
+    """
+    query = g.db.query(Phrase).filter(
+        Phrase.guid.isnot(None), Phrase.phrase_subtype == phrase_subtype
     )
+    if lang != "en":
+        query = query.join(
+            PhraseTranslation,
+            (PhraseTranslation.phrase_id == Phrase.id) & (PhraseTranslation.language_code == lang),
+        )
+    return query.order_by(Phrase.guid, Phrase.id)  # type: ignore[no-any-return]
 
 
 # ---------------------------------------------------------------------------
@@ -377,7 +382,9 @@ def dictionary() -> ResponseReturnValue:
     phrase_subtype_options: List[str] = []
     selected_phrase_subtype: Optional[str] = None
 
-    if sort == "phrasebook":
+    is_phrasebook = sort == "phrasebook"
+
+    if is_phrasebook:
         phrase_subtype_options = _available_phrase_subtypes()
         selected_phrase_subtype = request.args.get("phrase_subtype", "").strip()
         if selected_phrase_subtype not in phrase_subtype_options:
@@ -387,7 +394,7 @@ def dictionary() -> ResponseReturnValue:
             base_query = _query_by_phrase_subtype(lang, selected_phrase_subtype)
         else:
             # No phrases exist yet: show nothing.
-            base_query = _base_query_for_lang(lang).filter(Lemma.id < 0)
+            base_query = g.db.query(Phrase).filter(Phrase.id < 0)
 
     elif sort == "category":
         available = _available_categories()
@@ -431,47 +438,62 @@ def dictionary() -> ResponseReturnValue:
     total_pages = max(1, (total + DICT_ITEMS_PER_PAGE - 1) // DICT_ITEMS_PER_PAGE)
     page = max(1, min(page, total_pages))
 
-    lemmas = base_query.limit(DICT_ITEMS_PER_PAGE).offset((page - 1) * DICT_ITEMS_PER_PAGE).all()
+    rows_page = base_query.limit(DICT_ITEMS_PER_PAGE).offset((page - 1) * DICT_ITEMS_PER_PAGE).all()
 
     # --- Bulk-fetch translations ---
 
-    lemma_ids = [lm.id for lm in lemmas]
+    row_ids = [r.id for r in rows_page]
     needed_langs = set(display_langs)
     if lang != "en":
         needed_langs.add(lang)
 
-    translations_map: Dict[int, Dict[str, Optional[str]]] = {lm.id: {} for lm in lemmas}
-    if lemma_ids and needed_langs:
-        rows = (
-            g.db.query(LemmaTranslation)
-            .filter(
-                LemmaTranslation.lemma_id.in_(lemma_ids),
-                LemmaTranslation.language_code.in_(list(needed_langs)),
+    translations_map: Dict[int, Dict[str, Optional[str]]] = {r.id: {} for r in rows_page}
+    if row_ids and needed_langs:
+        if is_phrasebook:
+            phrase_trans = (
+                g.db.query(PhraseTranslation)
+                .filter(
+                    PhraseTranslation.phrase_id.in_(row_ids),
+                    PhraseTranslation.language_code.in_(list(needed_langs)),
+                )
+                .all()
             )
-            .all()
-        )
-        for row in rows:
-            translations_map.setdefault(row.lemma_id, {})[row.language_code] = row.translation
+            for row in phrase_trans:
+                translations_map.setdefault(row.phrase_id, {})[row.language_code] = row.translation
+        else:
+            lemma_trans = (
+                g.db.query(LemmaTranslation)
+                .filter(
+                    LemmaTranslation.lemma_id.in_(row_ids),
+                    LemmaTranslation.language_code.in_(list(needed_langs)),
+                )
+                .all()
+            )
+            for row in lemma_trans:
+                translations_map.setdefault(row.lemma_id, {})[row.language_code] = row.translation
 
     # --- Build entry dicts for template ---
 
     entries: List[Dict[str, Any]] = []
-    for lm in lemmas:
+    for item in rows_page:
+        # Phrases use ``label`` as their English headword; lemmas use ``lemma_text``.
+        english_text = item.label if is_phrasebook else item.lemma_text
         headword = (
-            lm.lemma_text if lang == "en" else (translations_map.get(lm.id, {}).get(lang) or "")
+            english_text if lang == "en" else (translations_map.get(item.id, {}).get(lang) or "")
         )
-        trans = translations_map.get(lm.id, {})
-        trans["en"] = lm.lemma_text
+        trans = translations_map.get(item.id, {})
+        trans["en"] = english_text
 
         entries.append(
             {
-                "id": lm.id,
+                "id": item.id,
                 "headword": headword,
-                "disambiguation": lm.disambiguation,
-                "pos_type": lm.pos_type,
-                "difficulty_level": lm.difficulty_level,
-                "frequency_rank": lm.frequency_rank,
+                "disambiguation": None if is_phrasebook else item.disambiguation,
+                "pos_type": "phrase" if is_phrasebook else item.pos_type,
+                "difficulty_level": item.difficulty_level,
+                "frequency_rank": None if is_phrasebook else item.frequency_rank,
                 "translations": trans,
+                "is_phrase": is_phrasebook,
             }
         )
 

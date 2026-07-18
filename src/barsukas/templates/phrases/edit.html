@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Phrase {{ phrase.guid }}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('phrases.list_phrases') }}">Phrases</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('phrases.view_phrase', phrase_id=phrase.id) }}">{{ phrase.guid }}</a></li>
+        <li class="breadcrumb-item active">Edit</li>
+    </ol>
+</nav>
+
+<form method="POST" action="{{ url_for('phrases.edit_phrase', phrase_id=phrase.id) }}">
+    <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-pencil"></i> Phrase Metadata</div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="label" class="form-label">Label (English concept)</label>
+                <input type="text" class="form-control" id="label" name="label" value="{{ phrase.label }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="definition" class="form-label">Definition</label>
+                <textarea class="form-control" id="definition" name="definition" rows="2">{{ phrase.definition or '' }}</textarea>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="phrase_subtype" class="form-label">Subtype</label>
+                    <select class="form-select" id="phrase_subtype" name="phrase_subtype">
+                        {% for st in subtypes %}
+                            <option value="{{ st }}" {% if st == phrase.phrase_subtype %}selected{% endif %}>{{ st|replace('_', ' ')|title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="guid" class="form-label">GUID</label>
+                    <input type="text" class="form-control" id="guid" name="guid" value="{{ phrase.guid or '' }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="difficulty_level" class="form-label">Difficulty level (-1 to exclude)</label>
+                    <input type="number" class="form-control" id="difficulty_level" name="difficulty_level"
+                           value="{{ phrase.difficulty_level if phrase.difficulty_level is not none else '' }}">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes</label>
+                <input type="text" class="form-control" id="notes" name="notes" value="{{ phrase.notes or '' }}">
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="verified" name="verified" {% if phrase.verified %}checked{% endif %}>
+                <label class="form-check-label" for="verified">Verified</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-translate"></i> Translations</div>
+        <div class="card-body">
+            <p class="text-muted small">Leave a field blank to remove that translation.</p>
+            {% for lang_code, lang_name in language_names.items() %}
+                <div class="row mb-2 align-items-center">
+                    <label class="col-sm-3 col-form-label" for="translation_{{ lang_code }}">
+                        {{ lang_name }} <small class="text-muted">({{ lang_code }})</small>
+                    </label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control form-control-sm" id="translation_{{ lang_code }}"
+                               name="translation_{{ lang_code }}"
+                               value="{{ translations[lang_code].translation if translations.get(lang_code) else '' }}">
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <button type="submit" class="btn btn-primary"
+                {% if config.get('READONLY', False) %}disabled title="Not available in hosted mode"{% endif %}>
+            <i class="bi bi-save"></i> Save
+        </button>
+        <a href="{{ url_for('phrases.view_phrase', phrase_id=phrase.id) }}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}

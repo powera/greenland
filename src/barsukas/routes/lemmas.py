@@ -33,7 +33,6 @@ from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
 from storage.queries.lemma import build_lemma_search_query
 from storage.translation_helpers import (
     DEFAULT_GENERATION_LANGUAGES,
-    NON_LEXEME_POS_TYPES,
     get_all_translations,
     get_supported_languages,
 )
@@ -231,9 +230,6 @@ def list_lemmas() -> ResponseReturnValue:
         pos_subtype=pos_subtype or None,
         difficulty=difficulty or None,
         display_language_code=display_language_code,
-        # Phrases live in the phrasebook, not the Words list; an explicit
-        # pos_type=phrase filter still surfaces them.
-        exclude_pos_types=sorted(NON_LEXEME_POS_TYPES),
     )
 
     # Paginate

@@ -533,7 +533,6 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
             "interjection": "interjections",
             "numeral": "numerals",
             "particle": "particles",
-            "phrase": "phrases",
         }
 
         # Track languages encountered
@@ -889,6 +888,131 @@ def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> Non
         session.close()
 
 
+def export_sqlite_to_phrase_release(sqlite_path: str, release_dir: str) -> None:
+    """Export phrases from SQLite to data/release/phrases format.
+
+    Phrases (fixed traveler/greeting expressions) live in their own ``phrases``
+    table (no longer in ``lemmas``), so they get their own release tree:
+
+    Structure: {release_dir}/{phrase_subtype}/base.jsonl
+
+    Each base record carries: guid, phrase_subtype, concept_label,
+    concept_definition, translations (RELEASE_LANGUAGES), translation_metadata,
+    and difficulty_level. Secondary-language translations, when present, go to a
+    sibling secondary.jsonl.
+
+    Args:
+        sqlite_path: Path to SQLite database
+        release_dir: Directory to write release files (e.g., data/release/phrases)
+    """
+    print(f"Exporting phrases from SQLite ({sqlite_path}) to release format ({release_dir})...")
+
+    from sqlalchemy.orm import selectinload
+
+    from storage import translation_helpers
+    from storage.database import create_database_session
+    from storage.models.schema import Phrase
+
+    session = create_database_session(sqlite_path)
+    from storage.utils.session import ensure_tables_exist
+
+    ensure_tables_exist(session)
+
+    try:
+        phrases = (
+            session.query(Phrase)
+            .filter(Phrase.guid.isnot(None))
+            .options(selectinload(Phrase.translations))
+            .order_by(Phrase.guid)
+            .all()
+        )
+        print(f"Found {len(phrases)} phrases to export")
+
+        base_by_subtype: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+        secondary_by_subtype: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+
+        for phrase in phrases:
+            # Index this phrase's translations by language for stable,
+            # RELEASE_LANGUAGES-ordered output (matching the lemma export).
+            trans_by_lang: Dict[str, Any] = {
+                t.language_code: t
+                for t in phrase.translations
+                if t.translation and t.translation.strip()
+            }
+
+            def _metadata_for(trans_obj: Any) -> Dict[str, str]:
+                meta: Dict[str, str] = {}
+                if trans_obj.translation_status:
+                    meta["translation_status"] = trans_obj.translation_status
+                if trans_obj.translation_status_note:
+                    meta["translation_status_note"] = trans_obj.translation_status_note
+                return meta
+
+            translations_dict: Dict[str, str] = {}
+            translation_metadata_dict: Dict[str, Dict[str, str]] = {}
+            secondary_translations_dict: Dict[str, str] = {}
+            secondary_metadata_dict: Dict[str, Dict[str, str]] = {}
+
+            for lang_code in translation_helpers.RELEASE_LANGUAGES:
+                trans_obj = trans_by_lang.get(lang_code)
+                if trans_obj is None:
+                    continue
+                translations_dict[lang_code] = trans_obj.translation
+                metadata = _metadata_for(trans_obj)
+                if metadata:
+                    translation_metadata_dict[lang_code] = metadata
+
+            for lang_code in translation_helpers.SECONDARY_RELEASE_LANGUAGES:
+                trans_obj = trans_by_lang.get(lang_code)
+                if trans_obj is None:
+                    continue
+                secondary_translations_dict[lang_code] = trans_obj.translation
+                metadata = _metadata_for(trans_obj)
+                if metadata:
+                    secondary_metadata_dict[lang_code] = metadata
+
+            base_data: Dict[str, Any] = {
+                "guid": phrase.guid,
+                "phrase_subtype": phrase.phrase_subtype,
+                "concept_label": phrase.label,
+                "concept_definition": phrase.definition,
+            }
+            if translations_dict:
+                base_data["translations"] = translations_dict
+            if translation_metadata_dict:
+                base_data["translation_metadata"] = translation_metadata_dict
+            if phrase.difficulty_level is not None:
+                base_data["difficulty_level"] = phrase.difficulty_level
+
+            base_by_subtype[phrase.phrase_subtype].append(base_data)
+
+            if secondary_translations_dict:
+                secondary_data: Dict[str, Any] = {
+                    "guid": phrase.guid,
+                    "translations": secondary_translations_dict,
+                }
+                if secondary_metadata_dict:
+                    secondary_data["translation_metadata"] = secondary_metadata_dict
+                secondary_by_subtype[phrase.phrase_subtype].append(secondary_data)
+
+        for phrase_subtype, records in base_by_subtype.items():
+            category_dir = Path(release_dir) / phrase_subtype
+            category_dir.mkdir(parents=True, exist_ok=True)
+            records.sort(key=lambda r: r["guid"])
+            print(f"Exporting {len(records)} phrases to {phrase_subtype}...")
+            _write_jsonl_atomic(category_dir / "base.jsonl", records)
+
+            secondary_records = secondary_by_subtype.get(phrase_subtype)
+            if secondary_records:
+                secondary_records.sort(key=lambda r: r["guid"])
+                _write_jsonl_atomic(category_dir / "secondary.jsonl", secondary_records)
+
+        print("Phrase export complete!")
+
+    finally:
+        session.close()
+
+
 def export_sqlite_to_lemma_audio_release(sqlite_path: str, release_dir: str) -> None:
     """Export approved lemma audio from SQLite to data/release/lemmas format.
 
@@ -1122,6 +1246,7 @@ def main() -> None:
             "jsonl-to-sqlite",
             "sqlite-to-release",
             "sqlite-to-sentence-release",
+            "sqlite-to-phrase-release",
             "sqlite-to-lemma-audio-release",
         ],
         help="Migration direction",
@@ -1164,6 +1289,11 @@ def main() -> None:
         default="data/release/sentences",
         help="Path to sentence release directory (default: data/release/sentences)",
     )
+    parser.add_argument(
+        "--phrase-release-dir",
+        default="data/release/phrases",
+        help="Path to phrase release directory (default: data/release/phrases)",
+    )
 
     args = parser.parse_args()
 
@@ -1180,6 +1310,8 @@ def main() -> None:
         export_sqlite_to_lemma_audio_release(args.sqlite_path, args.release_dir)
     elif args.direction == "sqlite-to-sentence-release":
         export_sqlite_to_sentence_release(args.sqlite_path, args.sentence_release_dir)
+    elif args.direction == "sqlite-to-phrase-release":
+        export_sqlite_to_phrase_release(args.sqlite_path, args.phrase_release_dir)
     elif args.direction == "sqlite-to-lemma-audio-release":
         export_sqlite_to_lemma_audio_release(args.sqlite_path, args.release_dir)
     elif args.direction == "jsonl-to-sqlite":
