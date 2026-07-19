@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Sync Phrase Text Changes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('sync_phrase_release.index') }}">Phrases</a></li>
+            <li class="breadcrumb-item active">Text Changes</li>
+        </ol>
+    </nav>
+    <h2><i class="bi bi-pencil text-info"></i> English Label Changes</h2>
+    <p class="text-muted">Same GUID, but the English concept label differs between database and release.</p>
+
+    {% if not changes %}
+    <div class="alert alert-success"><i class="bi bi-check-circle"></i> No English label changes found.</div>
+    <a href="{{ url_for('sync_phrase_release.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    {% else %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-check"></i> Changes: {{ changes|length }}</span>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll('skip')">Skip All</button>
+                <button type="button" class="btn btn-sm btn-outline-warning" onclick="selectAll('use_db')">Use All DB</button>
+                <button type="button" class="btn btn-sm btn-outline-info" onclick="selectAll('use_release')">Use All Release</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('sync_phrase_release.apply_changes') }}">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr><th>GUID</th><th>Subtype</th><th>SQLite Text</th><th>Release Text</th><th>Action</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for item in changes %}
+                            <tr>
+                                <td><code>{{ item.guid }}</code></td>
+                                <td><span class="badge bg-secondary">{{ item.phrase_subtype }}</span></td>
+                                <td><span class="text-danger">{{ item.db_english }}</span></td>
+                                <td><span class="text-success">{{ item.release_english }}</span></td>
+                                <td>
+                                    <select class="form-select form-select-sm action-select" name="action_{{ item.phrase_id }}" style="min-width: 140px;">
+                                        <option value="skip">Skip</option>
+                                        <option value="use_db">Use DB</option>
+                                        <option value="use_release">Use Release</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <a href="{{ url_for('sync_phrase_release.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+                    <button type="submit" class="btn btn-info"><i class="bi bi-check-lg"></i> Apply Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function selectAll(action) {
+    document.querySelectorAll('.action-select').forEach(function(sel) {
+        for (var i = 0; i < sel.options.length; i++) { if (sel.options[i].value === action) { sel.selectedIndex = i; break; } }
+    });
+}
+</script>
+{% endblock %}

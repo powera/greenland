@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Sync - Export Phrases{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('sync_phrase_release.index') }}">Phrases</a></li>
+            <li class="breadcrumb-item active">Export</li>
+        </ol>
+    </nav>
+    <h2><i class="bi bi-download text-primary"></i> Export DB Phrases to Release</h2>
+    <p class="text-muted">Database phrases with no matching release entry, plus phrases whose release record differs from the database.</p>
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Want to delete database-only phrases instead?
+        Use <a href="{{ url_for('sync_phrase_release.removals') }}" class="alert-link">Removals</a>.
+    </div>
+
+    {% if not exportable and not sync_back_candidates %}
+    <div class="alert alert-success"><i class="bi bi-check-circle"></i> No phrase export or sync-back work found.</div>
+    <a href="{{ url_for('sync_phrase_release.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    {% endif %}
+
+    {% macro phrase_table(items, action_url, checkbox_class, select_id, submit_label, submit_icon) %}
+    <form method="post" action="{{ action_url }}">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 40px;"><input type="checkbox" id="{{ select_id }}" onchange="toggleAll('{{ checkbox_class }}', '{{ select_id }}', this.checked)"></th>
+                        <th>GUID</th>
+                        <th>Subtype</th>
+                        <th>English</th>
+                        <th class="text-center">Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td><input type="checkbox" class="{{ checkbox_class }}" name="selected_guids" value="{{ item.guid }}"></td>
+                        <td><code>{{ item.guid }}</code></td>
+                        <td><span class="badge bg-secondary">{{ item.phrase_subtype }}</span></td>
+                        <td>{{ item.english_text }}</td>
+                        <td class="text-center">
+                            {% if item.difficulty_level is none %}<span class="badge bg-warning text-dark">None</span>
+                            {% else %}<span class="badge bg-primary">{{ item.difficulty_level }}</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <a href="{{ url_for('sync_phrase_release.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+            <button type="submit" class="btn btn-primary"><i class="bi {{ submit_icon }}"></i> {{ submit_label }}</button>
+        </div>
+    </form>
+    {% endmacro %}
+
+    {% if exportable %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-check"></i> Exportable Phrases: {{ exportable|length }}</span>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll('export-checkbox', 'export-select-all', false)">Deselect All</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleAll('export-checkbox', 'export-select-all', true)">Select All</button>
+            </div>
+        </div>
+        <div class="card-body">
+            {{ phrase_table(exportable, url_for('sync_phrase_release.apply_export'), 'export-checkbox', 'export-select-all', 'Export Selected', 'bi-download') }}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if sync_back_candidates %}
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-arrow-up-circle"></i> Sync Back to Release: {{ sync_back_candidates|length }}</span>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll('sync-back-checkbox', 'sync-back-select-all', false)">Deselect All</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleAll('sync-back-checkbox', 'sync-back-select-all', true)">Select All</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">These phrases exist in both SQLite and release, but the release record differs. Overwrite the release record with the canonical SQLite data.</p>
+            {{ phrase_table(sync_back_candidates, url_for('sync_phrase_release.apply_export_sync_back'), 'sync-back-checkbox', 'sync-back-select-all', 'Sync Back Selected', 'bi-arrow-up-circle') }}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleAll(checkboxClass, selectAllId, checked) {
+    document.querySelectorAll('.' + checkboxClass).forEach(function(cb) { cb.checked = checked; });
+    var sa = document.getElementById(selectAllId);
+    if (sa) sa.checked = checked;
+}
+</script>
+{% endblock %}

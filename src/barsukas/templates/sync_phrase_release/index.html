@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Sync Phrases{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_hub.index') }}">Sync</a></li>
+                    <li class="breadcrumb-item active">Phrases</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-arrow-left-right"></i> Sync Phrase Release Data</h2>
+            <p class="text-muted">
+                Compare the phrase files (<code>data/release/phrases</code>) with the working database.
+            </p>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-header"><i class="bi bi-info-circle"></i> Summary</div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Release files:</strong> <code>{{ release_dir }}</code></p>
+                    <p class="mb-1"><strong>Phrases in release files:</strong> {{ counts.release_total }}</p>
+                    <p class="mb-0"><strong>Phrases in database:</strong> {{ counts.db_total }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        {% macro card(title, icon, color, count, desc, endpoint, action) %}
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100 {% if count > 0 %}border-{{ color }}{% endif %}">
+                <div class="card-header"><i class="bi {{ icon }} text-{{ color }}"></i> {{ title }}</div>
+                <div class="card-body">
+                    <h3 class="card-title {% if count > 0 %}text-{{ color }}{% else %}text-muted{% endif %}">{{ count }}</h3>
+                    <p class="card-text text-muted">{{ desc }}</p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for(endpoint) }}" class="btn btn-sm {% if count > 0 %}btn-{{ color }}{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-arrow-right"></i> {{ action }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endmacro %}
+
+        {{ card('Additions', 'bi-plus-circle', 'success', counts.additions, 'New phrases in release not yet in database', 'sync_phrase_release.additions', 'View / Import') }}
+        {{ card('Removals', 'bi-dash-circle', 'danger', counts.removals, 'Phrases in database not in release', 'sync_phrase_release.removals', 'View / Delete') }}
+        {{ card('Level', 'bi-speedometer2', 'warning', counts.level, 'Same phrase, different difficulty level', 'sync_phrase_release.level', 'View / Sync') }}
+        {{ card('Text Changes', 'bi-pencil', 'info', counts.changes, 'Same GUID, English label differs', 'sync_phrase_release.changes', 'View / Sync') }}
+        {{ card('Translations', 'bi-translate', 'secondary', counts.translations, 'Different translations for matching phrases', 'sync_phrase_release.translations', 'View / Sync') }}
+        {{ card('Export', 'bi-download', 'primary', counts.export, 'DB phrases not yet in release files', 'sync_phrase_release.export', 'View / Export') }}
+    </div>
+</div>
+{% endblock %}
