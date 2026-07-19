@@ -107,11 +107,15 @@ CATEGORY_LABELS: Dict[str, str] = {
 
 
 def _parse_activity_params() -> Tuple[int, str, str]:
-    """Read level and language params from the query string.
+    """Read level and language params for an activity request.
 
     Level and target (foreign) language fall back to the Trakaido-wide cookies
     when their query params are absent, so the last-chosen values carry across
     activities and browser sessions.  An explicit query param always wins.
+
+    The interface (source) language is not a Trakaido setting: it follows the
+    site-wide Barsukas UI language, resolved in ``app.before_request`` from the
+    ``barsukas_ui_lang`` cookie and exposed as ``g.ui_lang``.
     """
     supported = set(get_supported_languages().keys())
 
@@ -123,7 +127,9 @@ def _parse_activity_params() -> Tuple[int, str, str]:
     except (TypeError, ValueError):
         level = 1
 
-    interface_lang = (request.args.get("interface_lang") or DEFAULT_INTERFACE_LANG).strip().lower()
+    interface_lang = (
+        (getattr(g, "ui_lang", DEFAULT_INTERFACE_LANG) or DEFAULT_INTERFACE_LANG).strip().lower()
+    )
     foreign_lang = (
         (
             request.args.get("foreign_lang")
