@@ -15,7 +15,7 @@ import json
 import random
 from typing import Any, Dict, List, Optional, Tuple, cast
 
-from flask import Blueprint, g, render_template, request, url_for
+from flask import Blueprint, Response, g, make_response, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 from sqlalchemy import func
 
@@ -34,6 +34,15 @@ bp = Blueprint("trakaido_activities", __name__, url_prefix="/trakaido/activities
 DEFAULT_INTERFACE_LANG = "en"
 DEFAULT_FOREIGN_LANG = "lt"
 _QUESTIONS_PER_ROUND = 10
+
+# Trakaido-wide preferences persisted in cookies.  We deliberately keep this to
+# just the two selectors (difficulty level + target language) shared by every
+# activity — no activity/score tracking is stored server-side.  These are read
+# as a fallback when the corresponding query param is absent, so landing on any
+# activity from the index (which carries no params) restores the last choices.
+_LEVEL_COOKIE = "trakaido_level"
+_FOREIGN_LANG_COOKIE = "trakaido_foreign_lang"
+_PREF_COOKIE_MAX_AGE = 60 * 60 * 24 * 365  # one year
 
 # Level weighting: the selected level is the ceiling.  Each level below the
 # selected one is _LEVEL_DECAY times as likely to be drawn as the level above
@@ -98,17 +107,32 @@ CATEGORY_LABELS: Dict[str, str] = {
 
 
 def _parse_activity_params() -> Tuple[int, str, str]:
-    """Read level and language params from the query string."""
+    """Read level and language params from the query string.
+
+    Level and target (foreign) language fall back to the Trakaido-wide cookies
+    when their query params are absent, so the last-chosen values carry across
+    activities and browser sessions.  An explicit query param always wins.
+    """
     supported = set(get_supported_languages().keys())
 
-    level_raw = request.args.get("level", "1")
+    level_raw = request.args.get("level")
+    if level_raw is None:
+        level_raw = request.cookies.get(_LEVEL_COOKIE)
     try:
-        level = max(1, int(level_raw))
-    except ValueError:
+        level = max(1, int(level_raw)) if level_raw is not None else 1
+    except (TypeError, ValueError):
         level = 1
 
     interface_lang = (request.args.get("interface_lang") or DEFAULT_INTERFACE_LANG).strip().lower()
-    foreign_lang = (request.args.get("foreign_lang") or DEFAULT_FOREIGN_LANG).strip().lower()
+    foreign_lang = (
+        (
+            request.args.get("foreign_lang")
+            or request.cookies.get(_FOREIGN_LANG_COOKIE)
+            or DEFAULT_FOREIGN_LANG
+        )
+        .strip()
+        .lower()
+    )
 
     if interface_lang not in supported:
         interface_lang = DEFAULT_INTERFACE_LANG
@@ -821,6 +845,36 @@ def _common_template_vars(level: int, interface_lang: str, foreign_lang: str) ->
     }
 
 
+def _render_activity(
+    template_name: str,
+    level: int,
+    interface_lang: str,
+    foreign_lang: str,
+    **extra: Any,
+) -> Response:
+    """Render an activity page, persisting the level and target language cookies.
+
+    Every activity shares the same two Trakaido-wide preferences, so we write
+    them back on each render.  This keeps the selectors sticky whether the user
+    changes them via the controls form or just navigates between activities.
+    """
+    context = {**_common_template_vars(level, interface_lang, foreign_lang), **extra}
+    response = make_response(render_template(template_name, **context))
+    response.set_cookie(
+        _LEVEL_COOKIE,
+        str(level),
+        max_age=_PREF_COOKIE_MAX_AGE,
+        samesite="Lax",
+    )
+    response.set_cookie(
+        _FOREIGN_LANG_COOKIE,
+        foreign_lang,
+        max_age=_PREF_COOKIE_MAX_AGE,
+        samesite="Lax",
+    )
+    return response
+
+
 @bp.route("/")
 def activities_index() -> ResponseReturnValue:
     """Landing page listing the available Trakaido activities."""
@@ -834,11 +888,13 @@ def spelling_quiz() -> ResponseReturnValue:
     words = _fetch_words_at_level(level, foreign_lang, limit=40)
     questions = _build_spelling_questions(words, foreign_lang)
 
-    return render_template(
+    return _render_activity(
         "trakaido/activities/spelling_quiz.html",
+        level,
+        interface_lang,
+        foreign_lang,
         questions_json=json.dumps(questions, ensure_ascii=False),
         question_count=len(questions),
-        **_common_template_vars(level, interface_lang, foreign_lang),
     )
 
 
@@ -849,11 +905,13 @@ def category_choice() -> ResponseReturnValue:
     words = _fetch_words_at_level(level, foreign_lang, limit=80)
     questions = _build_category_questions(words)
 
-    return render_template(
+    return _render_activity(
         "trakaido/activities/category_choice.html",
+        level,
+        interface_lang,
+        foreign_lang,
         questions_json=json.dumps(questions, ensure_ascii=False),
         question_count=len(questions),
-        **_common_template_vars(level, interface_lang, foreign_lang),
     )
 
 
@@ -863,11 +921,13 @@ def sentence_completion() -> ResponseReturnValue:
     level, interface_lang, foreign_lang = _parse_activity_params()
     questions = _build_sentence_completion_questions(level, interface_lang, foreign_lang)
 
-    return render_template(
+    return _render_activity(
         "trakaido/activities/sentence_completion.html",
+        level,
+        interface_lang,
+        foreign_lang,
         questions_json=json.dumps(questions, ensure_ascii=False),
         question_count=len(questions),
-        **_common_template_vars(level, interface_lang, foreign_lang),
     )
 
 
@@ -882,13 +942,15 @@ def multiple_choice() -> ResponseReturnValue:
     words = _fetch_words_at_level(level, foreign_lang, limit=40)
     questions = _build_multiple_choice_questions(words, study_mode)
 
-    return render_template(
+    return _render_activity(
         "trakaido/activities/multiple_choice.html",
+        level,
+        interface_lang,
+        foreign_lang,
         questions_json=json.dumps(questions, ensure_ascii=False),
         question_count=len(questions),
         study_mode=study_mode,
         study_modes=_STUDY_MODES,
-        **_common_template_vars(level, interface_lang, foreign_lang),
     )
 
 
@@ -903,13 +965,15 @@ def flashcards() -> ResponseReturnValue:
     words = _fetch_words_at_level(level, foreign_lang, limit=_QUESTIONS_PER_ROUND)
     questions = _build_flashcard_questions(words, study_mode)
 
-    return render_template(
+    return _render_activity(
         "trakaido/activities/flashcards.html",
+        level,
+        interface_lang,
+        foreign_lang,
         questions_json=json.dumps(questions, ensure_ascii=False),
         question_count=len(questions),
         study_mode=study_mode,
         study_modes=_STUDY_MODES,
-        **_common_template_vars(level, interface_lang, foreign_lang),
     )
 
 
@@ -924,13 +988,15 @@ def typing() -> ResponseReturnValue:
     words = _fetch_words_at_level(level, foreign_lang, limit=_QUESTIONS_PER_ROUND)
     questions = _build_typing_questions(words, study_mode)
 
-    return render_template(
+    return _render_activity(
         "trakaido/activities/typing.html",
+        level,
+        interface_lang,
+        foreign_lang,
         questions_json=json.dumps(questions, ensure_ascii=False),
         question_count=len(questions),
         study_mode=study_mode,
         study_modes=_STUDY_MODES,
-        **_common_template_vars(level, interface_lang, foreign_lang),
     )
 
 
@@ -941,11 +1007,13 @@ def verb_forms() -> ResponseReturnValue:
     verbs = _fetch_verbs_with_forms(level, foreign_lang)
     questions = _build_verb_form_questions(verbs, level)
 
-    return render_template(
+    return _render_activity(
         "trakaido/activities/verb_forms.html",
+        level,
+        interface_lang,
+        foreign_lang,
         questions_json=json.dumps(questions, ensure_ascii=False),
         question_count=len(questions),
-        **_common_template_vars(level, interface_lang, foreign_lang),
     )
 
 
@@ -963,11 +1031,13 @@ def listening() -> ResponseReturnValue:
     words = _fetch_words_at_level(level, foreign_lang, limit=60)
     questions = _build_listening_questions(words, foreign_lang, study_mode)
 
-    return render_template(
+    return _render_activity(
         "trakaido/activities/listening.html",
+        level,
+        interface_lang,
+        foreign_lang,
         questions_json=json.dumps(questions, ensure_ascii=False),
         question_count=len(questions),
         study_mode=study_mode,
         study_modes=_LISTENING_STUDY_MODES,
-        **_common_template_vars(level, interface_lang, foreign_lang),
     )
