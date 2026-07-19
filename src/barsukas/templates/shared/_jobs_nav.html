@@ -1,0 +1,24 @@
+{# Shared header + tab navigation for the Jobs pages.
+   Parameters:
+   - active_jobs_tab: 'worker' or 'batch'
+#}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="bi bi-list-task"></i> Jobs</h2>
+        <p class="text-muted mb-2">Background work: in-process worker tasks and OpenAI batch jobs.</p>
+        <ul class="nav nav-pills">
+            <li class="nav-item">
+                <a class="nav-link {% if active_jobs_tab == 'worker' %}active{% endif %}"
+                   href="{{ url_for('barsukas_tasks.list_tasks') }}">
+                    <i class="bi bi-list-task"></i> Worker Tasks
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_jobs_tab == 'batch' %}active{% endif %}"
+                   href="{{ url_for('batch_operations.list_batches') }}">
+                    <i class="bi bi-collection"></i> Batch Jobs
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

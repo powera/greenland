@@ -5,6 +5,13 @@
 {% block content %}
 <div class="row mb-4">
     <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('exports.exports_page') }}">Exports</a></li>
+                <li class="breadcrumb-item active">GYVATE STRINGS Export</li>
+            </ol>
+        </nav>
         <h2><i class="bi bi-translate"></i> GYVATE STRINGS Export</h2>
         <p class="text-muted">General-purpose translation catalog generation. Optional template/module scans can be enabled for Barsukas workflows.</p>
     </div>
