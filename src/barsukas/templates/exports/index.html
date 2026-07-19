@@ -100,6 +100,36 @@
             </div>
         </div>
     </div>
+
+    <!-- GYVATE - UI STRINGS Export -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-info text-dark">
+                <h5 class="mb-0">
+                    <i class="bi bi-translate"></i> UI STRINGS Export
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">GYVATE Agent</h6>
+                <p class="card-text">
+                    Translate and export UI string catalogs for application localization.
+                    Generates per-language STRINGS files from the English source catalogs.
+                </p>
+                <ul class="mb-3">
+                    <li>UI string catalog translation</li>
+                    <li>Multiple target languages</li>
+                    <li>Supports uploaded catalogs (JSON/xcstrings)</li>
+                    <li>Downloadable ZIP output</li>
+                </ul>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge bg-warning text-dark">Uses LLM</span>
+                    <a href="{{ url_for('gyvate.export_page') }}" class="btn btn-info">
+                        <i class="bi bi-arrow-right-circle"></i> Export STRINGS
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="row mt-4">

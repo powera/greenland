@@ -25,6 +25,9 @@ ROUTE_SMOKE_CASES: tuple[RouteSmokeCase, ...] = (
     RouteSmokeCase(name="sentences", path="/sentences/", expected_text="I eat"),
     RouteSmokeCase(name="dictionary", path="/dictionary/?letter=E", expected_text="eat"),
     RouteSmokeCase(name="sync", path="/sync/", expected_text="sync"),
+    RouteSmokeCase(name="exports", path="/exports/", expected_text="GYVATE"),
+    RouteSmokeCase(name="worker-tasks", path="/barsukas-tasks/", expected_text="Worker Tasks"),
+    RouteSmokeCase(name="batch-jobs", path="/batch-operations/", expected_text="Batch Jobs"),
 )
 
 

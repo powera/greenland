@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Find a Lemma · Trakaido{% endblock %}
+{% block title %}Learner Word View · Trakaido{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/trakaido.css') }}">
@@ -9,8 +9,8 @@
 {% block content %}
 <div class="trakaido-page">
     <div class="trakaido-header">
-        <h1>Find a Lemma</h1>
-        <div class="trakaido-meta">Search by English text or by translation in the chosen languages.</div>
+        <h1>Learner Word View</h1>
+        <div class="trakaido-meta">Two-language word view. Search by English text or by translation in the chosen languages.</div>
     </div>
 
     <form class="trakaido-controls" method="get" action="{{ url_for('trakaido.lemma_search') }}">

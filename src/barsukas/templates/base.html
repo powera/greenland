@@ -73,11 +73,6 @@
                             <li><a class="dropdown-item" href="{{ url_for('ipa_reference') }}">
                                 <i class="bi bi-soundwave"></i> {{ STRINGS.navigation.get('ipa_reference', 'IPA Reference') }}
                             </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header">{{ STRINGS.navigation.get('workflow', 'Workflow') }}</h6></li>
-                            <li><a class="dropdown-item" href="{{ url_for('pending_imports.list_pending_imports') }}">
-                                <i class="bi bi-inbox"></i> {{ STRINGS.navigation.get('pending_imports', 'Pending Imports') }}
-                            </a></li>
                         </ul>
                     </li>
                     <!-- Tools dropdown -->
@@ -98,6 +93,9 @@
                                 <i class="bi bi-speedometer2"></i> {{ STRINGS.navigation.get('rapid_review', 'Rapid Review') }}
                             </a></li>
                             {% endif %}
+                            <li><a class="dropdown-item" href="{{ url_for('pending_imports.list_pending_imports') }}">
+                                <i class="bi bi-inbox"></i> {{ STRINGS.navigation.get('pending_imports', 'Pending Imports') }}
+                            </a></li>
                             {% if not config.get('READONLY', False) or config.get('ALLOW_OUTBOUND_CALLS', True) %}
                             <li><hr class="dropdown-divider"></li>
                             <li><h6 class="dropdown-header">{{ STRINGS.navigation.get('generation', 'Generation') }}</h6></li>
@@ -115,23 +113,15 @@
                                 <i class="bi bi-cloud-arrow-up"></i> {{ STRINGS.navigation.get('api_client', 'API Client') }}
                             </a></li>
                             {% endif %}
-                            {% if config.get('ALLOW_EXPORTS', True) %}
                             <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header">{{ STRINGS.navigation.get('exports', 'Exports') }}</h6></li>
+                            <li><h6 class="dropdown-header">{{ STRINGS.navigation.get('data_and_jobs', 'Data & Jobs') }}</h6></li>
+                            {% if config.get('ALLOW_EXPORTS', True) %}
                             <li><a class="dropdown-item" href="{{ url_for('exports.exports_page') }}">
                                 <i class="bi bi-download"></i> {{ STRINGS.navigation.get('exports', 'Exports') }}
                             </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('gyvate.export_page') }}">
-                                <i class="bi bi-translate"></i> GYVATE STRINGS Export
-                            </a></li>
                             {% endif %}
-                            <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header">{{ STRINGS.navigation.get('jobs', 'Jobs') }}</h6></li>
-                            <li><a class="dropdown-item" href="{{ url_for('batch_operations.list_batches') }}">
-                                <i class="bi bi-collection"></i> {{ STRINGS.navigation.get('batch_jobs', 'Batch Jobs') }}
-                            </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('barsukas_tasks.list_tasks') }}">
-                                <i class="bi bi-list-task"></i> {{ STRINGS.navigation.get('worker_tasks', 'Worker Tasks') }}
+                                <i class="bi bi-list-task"></i> {{ STRINGS.navigation.get('jobs', 'Jobs') }}
                             </a></li>
                         </ul>
                     </li>
@@ -145,20 +135,33 @@
                                 <i class="bi bi-arrow-left-right"></i> Sentence Comparison
                             </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('trakaido.lemma_search') }}">
-                                <i class="bi bi-book"></i> Lemma View
+                                <i class="bi bi-book"></i> Learner Word View
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.spelling_quiz') }}">
-                                <i class="bi bi-pencil"></i> Spelling Quiz
+                            <li><h6 class="dropdown-header">Activities</h6></li>
+                            <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.activities_index') }}">
+                                <i class="bi bi-controller"></i> All Activities
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.flashcards') }}">
+                                <i class="bi bi-card-text"></i> Flashcards
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.multiple_choice') }}">
+                                <i class="bi bi-ui-radios"></i> Multiple Choice
                             </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.category_choice') }}">
                                 <i class="bi bi-grid-3x3-gap"></i> Category Choice
                             </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.spelling_quiz') }}">
+                                <i class="bi bi-pencil"></i> Spelling Quiz
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.typing') }}">
+                                <i class="bi bi-keyboard"></i> Typing
+                            </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.sentence_completion') }}">
                                 <i class="bi bi-input-cursor-text"></i> Sentence Completion
                             </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.multiple_choice') }}">
-                                <i class="bi bi-ui-radios"></i> Multiple Choice
+                            <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.verb_forms') }}">
+                                <i class="bi bi-arrow-repeat"></i> Verb Forms
                             </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('trakaido_activities.listening') }}">
                                 <i class="bi bi-headphones"></i> Listening
