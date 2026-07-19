@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}Quality Hub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h1><i class="bi bi-patch-check"></i> Quality Hub</h1>
+    </div>
+    <p class="lead text-muted mb-4">
+        One place for the "find and fix weak data" loop: review content quickly,
+        run integrity checks, and see where coverage is thin.
+    </p>
+
+    <!-- Queue stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary h-100">
+                <div class="card-body text-center py-2">
+                    <div class="fw-bold fs-4">{{ sentence_stats.ready }}</div>
+                    <small class="text-muted">Sentences awaiting review</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning h-100">
+                <div class="card-body text-center py-2">
+                    <div class="fw-bold fs-4">{{ audio_stats.pending }}</div>
+                    <small class="text-muted">Audio files pending review</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger h-100">
+                <div class="card-body text-center py-2">
+                    <div class="fw-bold fs-4">{{ audio_stats.needs_replacement }}</div>
+                    <small class="text-muted">Audio needing replacement</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center py-2">
+                    <div class="fw-bold fs-4">{{ total_lemmas }}</div>
+                    <small class="text-muted">Words in database</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if not config.get('READONLY', False) %}
+    <!-- Section 1: Rapid Review -->
+    <h4 class="mt-4 mb-3"><i class="bi bi-lightning-charge"></i> Rapid Review</h4>
+    <p class="text-muted">
+        Keyboard-driven review queues. "Verify" here sets the item's
+        <em>verified</em> flag (sentence-level review by a human); it is separate
+        from per-translation verification done by the LLM verification tools below.
+    </p>
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="bi bi-chat-left-quote"></i> Sentence Review</h6>
+                </div>
+                <div class="card-body">
+                    <p class="card-text small">
+                        Verify or reject sentences with translations in Spanish, French,
+                        Chinese, and Lithuanian.
+                        <br>
+                        <kbd>G</kbd> verify &middot; <kbd>R</kbd> reject &middot;
+                        <kbd>S</kbd> skip &middot; <kbd>U</kbd> undo
+                    </p>
+                    <p class="small text-muted mb-0">
+                        {{ sentence_stats.ready }} ready &middot;
+                        {{ sentence_stats.verified }} verified &middot;
+                        {{ sentence_stats.rejected }} rejected
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('sentence_rapid_review.index') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-play-fill"></i> Start Sentence Review
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0"><i class="bi bi-music-note-beamed"></i> Lemma Audio Review</h6>
+                </div>
+                <div class="card-body">
+                    <p class="card-text small">
+                        Listen to generated word audio and mark quality.
+                        <br>
+                        <kbd>G</kbd> good &middot; <kbd>A</kbd> acceptable &middot;
+                        <kbd>R</kbd> replace &middot; <kbd>T</kbd> bad translation &middot;
+                        <kbd>P</kbd> replay
+                    </p>
+                    <p class="small text-muted mb-0">{{ audio_stats.pending_lemma }} pending</p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    {% for lang in lemma_audio_languages %}
+                    <a href="{{ url_for('rapid_review.index', language=lang, type='lemma', status='pending_review') }}"
+                       class="btn btn-success btn-sm mb-1">
+                        <i class="bi bi-play-fill"></i> {{ lang }}
+                    </a>
+                    {% else %}
+                    <span class="text-muted small">No audio pending review</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-soundwave"></i> Sentence Audio Review</h6>
+                </div>
+                <div class="card-body">
+                    <p class="card-text small">
+                        Listen to generated sentence audio and mark quality.
+                        Same shortcuts as lemma audio review.
+                    </p>
+                    <p class="small text-muted mb-0">{{ audio_stats.pending_sentence }} pending</p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    {% for lang in sentence_audio_languages %}
+                    <a href="{{ url_for('rapid_review.index', language=lang, type='sentence', status='pending_review') }}"
+                       class="btn btn-info btn-sm mb-1">
+                        <i class="bi bi-play-fill"></i> {{ lang }}
+                    </a>
+                    {% else %}
+                    <span class="text-muted small">No audio pending review</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Data Quality Checks -->
+    <h4 class="mt-4 mb-3"><i class="bi bi-shield-check"></i> Data Quality Checks</h4>
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-shield-check"></i> Integrity Check</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">
+                        Scan the database for structural problems. Runs directly in the
+                        web app and shows results immediately.
+                    </p>
+                    <form method="post" action="{{ url_for('quality.run_check') }}">
+                        <div class="row">
+                            {% for check_id, check_name, check_desc in integrity_checks %}
+                            <div class="col-md-6 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio"
+                                           name="check_type" value="{{ check_id }}"
+                                           id="qcheck_{{ check_id }}" {% if loop.first %}checked{% endif %}>
+                                    <label class="form-check-label" for="qcheck_{{ check_id }}">
+                                        <strong>{{ check_name }}</strong>
+                                        {% if check_id in fixable_checks %}
+                                        <span class="badge text-bg-light">fixable</span>
+                                        {% endif %}
+                                        <br><small class="text-muted">{{ check_desc }}</small>
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="qfix_issues"
+                                   name="fix_issues" value="true">
+                            <label class="form-check-label" for="qfix_issues">
+                                <strong>Fix issues</strong>
+                                <small class="text-muted">(only checks marked "fixable" support auto-repair)</small>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-shield-check me-1"></i>Run Check
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-robot"></i> LLM Verification</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">
+                        Ask an LLM to judge existing word and sentence translations
+                        (correct / incorrect), or run full streaming integrity scans.
+                        These run as agent jobs on the Data Quality page.
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('bebras.index') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-arrow-right"></i> Open Data Quality Tools
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Section 3: Data Completeness -->
+    <h4 class="mt-4 mb-3"><i class="bi bi-clipboard-data"></i> Data Completeness</h4>
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h6><i class="bi bi-globe"></i> Per-Language Summary</h6>
+                    <p class="text-muted small mb-0">
+                        Translation, IPA, and audio coverage aggregated by language and tier.
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('completeness.index') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-arrow-right"></i> Open Summary
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h6><i class="bi bi-list-columns"></i> Per-Word Detail</h6>
+                    <p class="text-muted small mb-0">
+                        Row-by-row coverage for each lemma: translations, IPA, audio,
+                        relations, and example sentences.
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('completeness.stats', scope='lemmas') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-arrow-right"></i> Open Word Detail
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h6><i class="bi bi-chat-left-text"></i> Per-Sentence Detail</h6>
+                    <p class="text-muted small mb-0">
+                        Row-by-row coverage for each sentence: translations and audio.
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('completeness.stats', scope='sentences') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-arrow-right"></i> Open Sentence Detail
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

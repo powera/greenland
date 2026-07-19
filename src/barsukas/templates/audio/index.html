@@ -1,14 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Audio Quality Review{% endblock %}
+{% block title %}Audio Hub{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h1><i class="bi bi-music-note-beamed"></i> Audio Quality Review</h1>
-    <p class="text-muted">Manage and review audio file quality for multiple languages and voices</p>
+    <h1><i class="bi bi-music-note-beamed"></i> Audio Hub</h1>
+    <p class="text-muted">
+        Home base for all audio work: generate new TTS files, review their quality,
+        and browse everything in the audio database.
+    </p>
 
+    <!-- Summary Statistics -->
     <div class="row mt-4">
-        <!-- Summary Statistics -->
         <div class="col-md-3">
             <div class="card">
                 <div class="card-body">
@@ -43,30 +46,117 @@
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card">
+    <!-- Generate / Review / Browse -->
+    <div class="row mt-4 g-4">
+        <!-- Generate -->
+        <div class="col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-mic-fill"></i> Generate</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">Quick Actions</h5>
-                    <div class="d-flex gap-2 flex-wrap">
+                    <p class="card-text small text-muted">
+                        Create new TTS audio for words and sentences. Batch generation
+                        runs in the browser request; single-item generation from lemma
+                        and sentence pages is queued for the job worker.
+                    </p>
+                    <div class="d-grid gap-2">
                         <a href="{{ url_for('audio.generate') }}" class="btn btn-primary">
                             <i class="bi bi-mic-fill"></i> Generate Audio
                         </a>
-                        <a href="{{ url_for('audio.import_manifest') }}" class="btn btn-primary">
+                        <a href="{{ url_for('audio.import_manifest') }}" class="btn btn-outline-primary">
                             <i class="bi bi-upload"></i> Import Manifest
                         </a>
-                        <a href="{{ url_for('rapid_review.index', status='pending_review', language='lt') }}" class="btn btn-success">
-                            <i class="bi bi-lightning-charge"></i> Rapid Review Mode (Lithuanian)
+                        <a href="{{ url_for('barsukas_tasks.list_tasks') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-list-task"></i> Generation Jobs
                         </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Review -->
+        <div class="col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-lightning-charge"></i> Review</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text small text-muted">
+                        Keyboard-driven rapid review of pending audio. Approving a file
+                        pushes it from staging to production.
+                    </p>
+                    {% if language_counts %}
+                    <table class="table table-sm align-middle mb-2">
+                        <thead>
+                            <tr>
+                                <th>Language</th>
+                                <th class="text-end">Words</th>
+                                <th class="text-end">Sentences</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lang_code in language_counts.keys()|sort %}
+                            {% set p_lemma = language_pending_lemma.get(lang_code, 0) %}
+                            {% set p_sentence = language_pending_sentence.get(lang_code, 0) %}
+                            {% if p_lemma or p_sentence %}
+                            <tr>
+                                <td><code>{{ lang_code }}</code></td>
+                                <td class="text-end">
+                                    {% if p_lemma %}
+                                    <a href="{{ url_for('rapid_review.index', language=lang_code, type='lemma', status='pending_review') }}"
+                                       class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-play-fill"></i> {{ p_lemma }}
+                                    </a>
+                                    {% else %}-{% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if p_sentence %}
+                                    <a href="{{ url_for('rapid_review.index', language=lang_code, type='sentence', status='pending_review') }}"
+                                       class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-play-fill"></i> {{ p_sentence }}
+                                    </a>
+                                    {% else %}-{% endif %}
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                    {% if pending_review == 0 %}
+                    <p class="small text-muted mb-2">Nothing pending review.</p>
+                    {% endif %}
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('audio.list_files', status='needs_replacement') }}" class="btn btn-outline-danger">
+                            <i class="bi bi-exclamation-triangle"></i> Needs Replacement ({{ needs_replacement }})
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Browse -->
+        <div class="col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> Browse</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text small text-muted">
+                        Search and filter all audio files by language, voice, status, or
+                        quality issue. Individual reviews and bulk production acceptance
+                        live here too.
+                    </p>
+                    <div class="d-grid gap-2">
                         <a href="{{ url_for('audio.list_files') }}" class="btn btn-secondary">
-                            <i class="bi bi-list-ul"></i> View All Files
+                            <i class="bi bi-list-ul"></i> All Files
                         </a>
-                        <a href="{{ url_for('audio.list_files', status='pending_review') }}" class="btn btn-warning">
+                        <a href="{{ url_for('audio.list_files', status='pending_review') }}" class="btn btn-outline-warning">
                             <i class="bi bi-clock"></i> Pending Review ({{ pending_review }})
                         </a>
-                        <a href="{{ url_for('audio.list_files', status='needs_replacement') }}" class="btn btn-danger">
-                            <i class="bi bi-exclamation-triangle"></i> Needs Replacement ({{ needs_replacement }})
+                        <a href="{{ url_for('audio.list_files', status='approved') }}" class="btn btn-outline-success">
+                            <i class="bi bi-check-circle"></i> Approved ({{ approved }})
                         </a>
                     </div>
                 </div>

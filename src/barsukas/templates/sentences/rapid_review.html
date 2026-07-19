@@ -21,10 +21,17 @@
 
     <!-- Filter Bar -->
     <div class="filter-bar">
-        <select id="status-filter" class="form-select" style="width: auto;">
+        {% set status_labels = {
+            'ready': 'Ready (not yet reviewed)',
+            'verified': 'Verified',
+            'rejected': 'Rejected',
+            'all': 'All sentences'
+        } %}
+        <select id="status-filter" class="form-select" style="width: auto;"
+                title="Verify (G) sets the sentence's verified flag and recalculates its level; Reject (R) sets its rejected flag">
             {% for status in statuses %}
             <option value="{{ status }}" {% if status == status_filter %}selected{% endif %}>
-                {{ status.replace('_', ' ').title() }}
+                {{ status_labels.get(status, status.replace('_', ' ').title()) }}
             </option>
             {% endfor %}
         </select>

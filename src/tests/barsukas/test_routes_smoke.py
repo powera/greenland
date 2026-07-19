@@ -28,7 +28,28 @@ ROUTE_SMOKE_CASES: tuple[RouteSmokeCase, ...] = (
     RouteSmokeCase(name="exports", path="/exports/", expected_text="GYVATE"),
     RouteSmokeCase(name="worker-tasks", path="/barsukas-tasks/", expected_text="Worker Tasks"),
     RouteSmokeCase(name="batch-jobs", path="/batch-operations/", expected_text="Batch Jobs"),
+    RouteSmokeCase(name="quality-hub", path="/quality/", expected_text="Quality Hub"),
+    RouteSmokeCase(name="audio-hub", path="/audio/", expected_text="Audio Hub"),
+    RouteSmokeCase(name="completeness", path="/completeness/", expected_text="Completeness"),
 )
+
+
+class TestQualityHubChecks:
+    """Smoke checks for the Quality Hub's in-process integrity runner."""
+
+    def test_run_check_duplicate_words(self, client: FlaskClient) -> None:
+        response = client.post("/quality/run-check", data={"check_type": "duplicate-words"})
+        assert response.status_code == 200
+        assert b"duplicate-words" in response.data
+
+    def test_run_check_unknown_type_redirects(self, client: FlaskClient) -> None:
+        response = client.post("/quality/run-check", data={"check_type": "nonsense"})
+        assert response.status_code == 302
+
+    def test_rapid_review_hub_redirects_to_quality(self, client: FlaskClient) -> None:
+        response = client.get("/rapid-review/")
+        assert response.status_code == 302
+        assert "/quality/" in response.headers["Location"]
 
 
 class TestRouteSmoke:

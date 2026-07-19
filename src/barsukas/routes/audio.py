@@ -61,7 +61,7 @@ logger = logging.getLogger(__name__)
 
 @bp.route("/")
 def index() -> ResponseReturnValue:
-    """Audio quality review dashboard."""
+    """Audio Hub: generation, review queues, and browsing in one place."""
     from barsukas.helpers.db_optimization import get_audio_dashboard_stats
 
     # Get all stats in optimized queries (replaces 6 separate queries with 2)
@@ -75,6 +75,8 @@ def index() -> ResponseReturnValue:
         needs_replacement=stats["needs_replacement"],
         language_counts=stats["language_counts"],
         voice_counts=stats["voice_counts"],
+        language_pending_lemma=stats["language_pending_lemma"],
+        language_pending_sentence=stats["language_pending_sentence"],
     )
 
 

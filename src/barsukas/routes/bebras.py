@@ -14,13 +14,11 @@ import subprocess
 import threading
 import uuid
 from pathlib import Path
-from typing import Any, Dict, Iterator, List, Optional, cast
+from typing import Any, Dict, Iterator, List
 
 from flask import (
     Blueprint,
     Response,
-    current_app,
-    flash,
     g,
     redirect,
     render_template,
@@ -30,10 +28,13 @@ from flask import (
 from flask.typing import ResponseReturnValue
 
 import constants
-from agents.bebras.integrity import IntegrityChecker
 from barsukas.helpers.flash_helpers import flash_and_log
 from barsukas.helpers.agent_args import agent_db_args
-from storage.backend.config import BackendType
+from barsukas.helpers.integrity_runner import (
+    INTEGRITY_CHECKS as RUNNABLE_INTEGRITY_CHECKS,
+    checker_db_path,
+    run_integrity_check,
+)
 from storage.models.schema import Lemma, Sentence
 
 logger = logging.getLogger(__name__)
@@ -42,14 +43,6 @@ bp = Blueprint("bebras", __name__, url_prefix="/bebras")
 
 # Track running tasks
 running_tasks: Dict[str, Dict[str, Any]] = {}
-
-
-def _checker_db_path() -> Optional[str]:
-    """Get checker db path from app backend configuration."""
-    backend_config = current_app.backend_config  # type: ignore[attr-defined]
-    if backend_config.backend_type == BackendType.SQLITE:
-        return cast(Optional[str], backend_config.sqlite_path)
-    return None
 
 
 # Supported languages for verification
@@ -65,56 +58,10 @@ VERIFICATION_LANGUAGES = [
     ("ru", "Russian"),
 ]
 
-# Integrity check types
+# Integrity check types offered by the subprocess runner ("all" is CLI-only)
 INTEGRITY_CHECKS = [
-    ("all", "All Checks", "Run every check below in one pass"),
-    (
-        "orphaned",
-        "Orphaned Records",
-        "Derivative forms or word frequencies pointing to deleted lemmas/tokens",
-    ),
-    (
-        "missing-fields",
-        "Missing Fields",
-        "Lemmas missing a definition, part of speech, or difficulty level",
-    ),
-    (
-        "no-derivatives",
-        "No Derivatives",
-        "Lemmas that have no inflected forms (e.g. no plural, no conjugations)",
-    ),
-    ("duplicates", "Duplicate GUIDs", "Two or more lemmas sharing the same GUID identifier"),
-    (
-        "duplicate-words",
-        "Duplicate Words",
-        "Lemmas with the same text and part of speech that may need merging",
-    ),
-    (
-        "invalid-levels",
-        "Invalid Levels",
-        "Difficulty levels outside the valid 1\u201320 range",
-    ),
-    (
-        "missing-punctuation",
-        "Missing Punctuation",
-        "Sentence translations not ending with a period, question mark, or exclamation mark",
-    ),
-    (
-        "sentence-levels",
-        "Sentence Levels",
-        "Sentences whose minimum_level doesn't match their linked word difficulties",
-    ),
-    (
-        "audio-mismatches",
-        "Audio Mismatches",
-        "Audio files whose expected text no longer matches the current translation",
-    ),
-    (
-        "pronunciation-fields",
-        "Pronunciation Fields",
-        "IPA fields that look like leaked prompts/instructions instead of pronunciations",
-    ),
-]
+    ("all", "All Checks", "Run every check below in one pass")
+] + RUNNABLE_INTEGRITY_CHECKS
 
 
 @bp.route("/")
@@ -228,65 +175,22 @@ def check_integrity() -> ResponseReturnValue:
     if output_file:
         args.extend(["--output", output_file])
 
-    # Add database path
-    args.extend(agent_db_args())
+    # The integrity CLI only understands --db-path (no --persona/--backend),
+    # so point it directly at the app's SQLite database.
+    db_path = checker_db_path()
+    if db_path:
+        args.extend(["--db-path", db_path])
 
     return _execute_async(args, f"Integrity Check: {check_type}")
 
 
 @bp.route("/find-duplicates", methods=["POST"])
 def find_duplicates() -> ResponseReturnValue:
-    """Find duplicate words by calling IntegrityChecker directly (no subprocess).
-
-    This is an example of the decoupled approach: the web route imports and
-    calls the checker in-process instead of shelling out to the CLI.
-    """
-    checker = IntegrityChecker(db_path=_checker_db_path())
-    results = checker.check_duplicate_words()
+    """Find duplicate words in-process (no subprocess)."""
+    results = run_integrity_check("duplicate-words")
 
     return render_template(
         "bebras/duplicates.html",
-        results=results,
-    )
-
-
-@bp.route("/find-duplicates-integrity", methods=["POST"])
-def find_duplicates_integrity() -> ResponseReturnValue:
-    """Run a single named integrity check in-process and return results.
-
-    Demonstrates the decoupled pattern: call IntegrityChecker directly
-    instead of launching a subprocess.
-    """
-    check_type = request.form.get("check_type", "duplicate-words")
-    fix_issues = request.form.get("fix_issues") == "true"
-
-    checker = IntegrityChecker(db_path=_checker_db_path())
-
-    check_map: Dict[str, Any] = {
-        "orphaned": lambda: {
-            "derivative_forms": checker.check_orphaned_derivative_forms(),
-            "derivative_form_word_tokens": checker.check_derivative_form_word_tokens(),
-        },
-        "missing-fields": checker.check_missing_required_fields,
-        "no-derivatives": checker.check_lemmas_without_derivatives,
-        "duplicates": checker.check_duplicate_guids,
-        "duplicate-words": checker.check_duplicate_words,
-        "invalid-levels": checker.check_invalid_difficulty_levels,
-        "missing-punctuation": lambda: checker.check_sentences_missing_punctuation(fix=fix_issues),
-        "sentence-levels": lambda: checker.check_sentence_levels(fix=fix_issues),
-        "audio-mismatches": lambda: checker.check_audio_translation_mismatches(fix=fix_issues),
-        "pronunciation-fields": lambda: checker.check_pronunciation_fields(fix=fix_issues),
-    }
-
-    runner = check_map.get(check_type)
-    if runner is None:
-        flash_and_log(f"Unknown check type: {check_type}", "error")
-        return redirect(url_for("bebras.index"))
-
-    results = runner()
-    return render_template(
-        "bebras/integrity_results.html",
-        check_type=check_type,
         results=results,
     )
 
@@ -398,34 +302,6 @@ def verify_sentences() -> ResponseReturnValue:
     args.append("--yes")
 
     return _execute_async(args, task_name)
-
-
-@bp.route("/submit-batch", methods=["POST"])
-def submit_batch() -> ResponseReturnValue:
-    """Submit a batch verification job to OpenAI Batch API."""
-    verify_type = request.form.get("verify_type", "words")
-    languages = request.form.getlist("languages")
-    limit = request.form.get("limit", "100").strip()
-
-    if not languages:
-        languages = ["lt", "zh", "fr", "es"]
-
-    # Build command for batch submission
-    script_path = Path(constants.AGENTS_DIR) / "bebras.py"
-    args = ["python3", str(script_path)]
-    args.append("--verify")
-    args.append(verify_type)
-    args.append("submit-batch")
-    args.extend(["--languages"] + languages)
-
-    if limit:
-        args.extend(["--limit", limit])
-
-    # Add database configuration
-    _add_db_args(args)
-    args.append("--yes")
-
-    return _execute_async(args, f"Batch Submit: {verify_type}")
 
 
 @bp.route("/output/<task_id>")
