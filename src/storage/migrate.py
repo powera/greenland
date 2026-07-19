@@ -12,7 +12,7 @@ import sys
 import tempfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from sqlalchemy.orm import selectinload
 
@@ -888,6 +888,81 @@ def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> Non
         session.close()
 
 
+def phrase_to_release_records(phrase: Any) -> Tuple[Dict[str, Any], Optional[Dict[str, Any]]]:
+    """Build the (base, secondary) release JSONL records for a phrase.
+
+    The base record carries RELEASE_LANGUAGES translations (+ metadata), the
+    concept label/definition, subtype, and difficulty. Secondary-language
+    translations, when present, go to a separate record (written to
+    ``secondary.jsonl``); ``None`` when the phrase has none. Translation keys
+    are emitted in RELEASE_LANGUAGES / SECONDARY_RELEASE_LANGUAGES order so the
+    output is stable and matches the lemma export.
+
+    Shared by the CLI export (``export_sqlite_to_phrase_release``) and the
+    Barsukas phrase sync so both write byte-identical files.
+    """
+    from storage import translation_helpers
+
+    trans_by_lang: Dict[str, Any] = {
+        t.language_code: t for t in phrase.translations if t.translation and t.translation.strip()
+    }
+
+    def _metadata_for(trans_obj: Any) -> Dict[str, str]:
+        meta: Dict[str, str] = {}
+        if trans_obj.translation_status:
+            meta["translation_status"] = trans_obj.translation_status
+        if trans_obj.translation_status_note:
+            meta["translation_status_note"] = trans_obj.translation_status_note
+        return meta
+
+    translations_dict: Dict[str, str] = {}
+    translation_metadata_dict: Dict[str, Dict[str, str]] = {}
+    secondary_translations_dict: Dict[str, str] = {}
+    secondary_metadata_dict: Dict[str, Dict[str, str]] = {}
+
+    for lang_code in translation_helpers.RELEASE_LANGUAGES:
+        trans_obj = trans_by_lang.get(lang_code)
+        if trans_obj is None:
+            continue
+        translations_dict[lang_code] = trans_obj.translation
+        metadata = _metadata_for(trans_obj)
+        if metadata:
+            translation_metadata_dict[lang_code] = metadata
+
+    for lang_code in translation_helpers.SECONDARY_RELEASE_LANGUAGES:
+        trans_obj = trans_by_lang.get(lang_code)
+        if trans_obj is None:
+            continue
+        secondary_translations_dict[lang_code] = trans_obj.translation
+        metadata = _metadata_for(trans_obj)
+        if metadata:
+            secondary_metadata_dict[lang_code] = metadata
+
+    base_data: Dict[str, Any] = {
+        "guid": phrase.guid,
+        "phrase_subtype": phrase.phrase_subtype,
+        "concept_label": phrase.label,
+        "concept_definition": phrase.definition,
+    }
+    if translations_dict:
+        base_data["translations"] = translations_dict
+    if translation_metadata_dict:
+        base_data["translation_metadata"] = translation_metadata_dict
+    if phrase.difficulty_level is not None:
+        base_data["difficulty_level"] = phrase.difficulty_level
+
+    secondary_data: Optional[Dict[str, Any]] = None
+    if secondary_translations_dict:
+        secondary_data = {
+            "guid": phrase.guid,
+            "translations": secondary_translations_dict,
+        }
+        if secondary_metadata_dict:
+            secondary_data["translation_metadata"] = secondary_metadata_dict
+
+    return base_data, secondary_data
+
+
 def export_sqlite_to_phrase_release(sqlite_path: str, release_dir: str) -> None:
     """Export phrases from SQLite to data/release/phrases format.
 
@@ -909,7 +984,6 @@ def export_sqlite_to_phrase_release(sqlite_path: str, release_dir: str) -> None:
 
     from sqlalchemy.orm import selectinload
 
-    from storage import translation_helpers
     from storage.database import create_database_session
     from storage.models.schema import Phrase
 
@@ -932,67 +1006,9 @@ def export_sqlite_to_phrase_release(sqlite_path: str, release_dir: str) -> None:
         secondary_by_subtype: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
 
         for phrase in phrases:
-            # Index this phrase's translations by language for stable,
-            # RELEASE_LANGUAGES-ordered output (matching the lemma export).
-            trans_by_lang: Dict[str, Any] = {
-                t.language_code: t
-                for t in phrase.translations
-                if t.translation and t.translation.strip()
-            }
-
-            def _metadata_for(trans_obj: Any) -> Dict[str, str]:
-                meta: Dict[str, str] = {}
-                if trans_obj.translation_status:
-                    meta["translation_status"] = trans_obj.translation_status
-                if trans_obj.translation_status_note:
-                    meta["translation_status_note"] = trans_obj.translation_status_note
-                return meta
-
-            translations_dict: Dict[str, str] = {}
-            translation_metadata_dict: Dict[str, Dict[str, str]] = {}
-            secondary_translations_dict: Dict[str, str] = {}
-            secondary_metadata_dict: Dict[str, Dict[str, str]] = {}
-
-            for lang_code in translation_helpers.RELEASE_LANGUAGES:
-                trans_obj = trans_by_lang.get(lang_code)
-                if trans_obj is None:
-                    continue
-                translations_dict[lang_code] = trans_obj.translation
-                metadata = _metadata_for(trans_obj)
-                if metadata:
-                    translation_metadata_dict[lang_code] = metadata
-
-            for lang_code in translation_helpers.SECONDARY_RELEASE_LANGUAGES:
-                trans_obj = trans_by_lang.get(lang_code)
-                if trans_obj is None:
-                    continue
-                secondary_translations_dict[lang_code] = trans_obj.translation
-                metadata = _metadata_for(trans_obj)
-                if metadata:
-                    secondary_metadata_dict[lang_code] = metadata
-
-            base_data: Dict[str, Any] = {
-                "guid": phrase.guid,
-                "phrase_subtype": phrase.phrase_subtype,
-                "concept_label": phrase.label,
-                "concept_definition": phrase.definition,
-            }
-            if translations_dict:
-                base_data["translations"] = translations_dict
-            if translation_metadata_dict:
-                base_data["translation_metadata"] = translation_metadata_dict
-            if phrase.difficulty_level is not None:
-                base_data["difficulty_level"] = phrase.difficulty_level
-
+            base_data, secondary_data = phrase_to_release_records(phrase)
             base_by_subtype[phrase.phrase_subtype].append(base_data)
-
-            if secondary_translations_dict:
-                secondary_data: Dict[str, Any] = {
-                    "guid": phrase.guid,
-                    "translations": secondary_translations_dict,
-                }
-                if secondary_metadata_dict:
-                    secondary_data["translation_metadata"] = secondary_metadata_dict
+            if secondary_data is not None:
                 secondary_by_subtype[phrase.phrase_subtype].append(secondary_data)
 
         for phrase_subtype, records in base_by_subtype.items():

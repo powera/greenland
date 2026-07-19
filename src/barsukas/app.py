@@ -93,6 +93,7 @@ from barsukas.routes.review import rapid_review, rapid_review_hub, sentence_rapi
 from barsukas.routes.sync import (
     sync_derivative_release,
     sync_hub,
+    sync_phrase_release,
     sync_relation_release,
     sync_release,
     sync_sentence_release,
@@ -388,6 +389,7 @@ def create_app(
     app.register_blueprint(sync_release.bp)
     app.register_blueprint(sync_relation_release.bp)
     app.register_blueprint(sync_sentence_release.bp)
+    app.register_blueprint(sync_phrase_release.bp)
     app.register_blueprint(sync_derivative_release.bp)
     app.register_blueprint(sync_synonym_release.bp)
 

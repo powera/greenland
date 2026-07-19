@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Sync - New Phrases{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('sync_phrase_release.index') }}">Phrases</a></li>
+            <li class="breadcrumb-item active">Additions</li>
+        </ol>
+    </nav>
+    <h2><i class="bi bi-plus-circle text-success"></i> New Phrases in Release</h2>
+    <p class="text-muted">Phrases present in <code>data/release/phrases</code> but not yet in the database.</p>
+
+    {% if not additions %}
+    <div class="alert alert-success"><i class="bi bi-check-circle"></i> No new phrases to import.</div>
+    <a href="{{ url_for('sync_phrase_release.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    {% else %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-check"></i> New Phrases: {{ additions|length }}</span>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">Deselect All</button>
+                <button type="button" class="btn btn-sm btn-outline-success" onclick="toggleAll(true)">Select All</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('sync_phrase_release.apply_additions') }}">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 40px;"><input type="checkbox" id="select-all-checkbox" onchange="toggleAll(this.checked)"></th>
+                                <th>GUID</th>
+                                <th>Subtype</th>
+                                <th>English</th>
+                                <th class="text-center">Level</th>
+                                <th>Translations</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in additions %}
+                            <tr>
+                                <td><input type="checkbox" class="item-checkbox" name="selected_guids" value="{{ item.guid }}"></td>
+                                <td><code>{{ item.guid }}</code></td>
+                                <td><span class="badge bg-secondary">{{ item.phrase_subtype }}</span></td>
+                                <td><strong>{{ item.english_text }}</strong></td>
+                                <td class="text-center">
+                                    {% if item.difficulty_level is none %}<span class="badge bg-warning text-dark">None</span>
+                                    {% else %}<span class="badge bg-primary">{{ item.difficulty_level }}</span>{% endif %}
+                                </td>
+                                <td><small>
+                                    {% for lang, trans in item.translations.items() %}{% if lang != 'en' and trans %}<span class="badge bg-light text-dark">{{ lang }}</span> {% endif %}{% endfor %}
+                                </small></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <a href="{{ url_for('sync_phrase_release.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+                    <button type="submit" class="btn btn-success"><i class="bi bi-plus-lg"></i> Import Selected</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleAll(checked) {
+    document.querySelectorAll('.item-checkbox').forEach(function(cb) { cb.checked = checked; });
+    document.getElementById('select-all-checkbox').checked = checked;
+}
+</script>
+{% endblock %}
