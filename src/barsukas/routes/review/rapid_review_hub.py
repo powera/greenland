@@ -3,10 +3,11 @@
 """
 Rapid Review Hub Routes
 
-Provides a central hub for accessing all rapid review activities.
+The rapid review hub has been folded into the Quality Hub; this blueprint
+only keeps the old URL working.
 """
 
-from flask import Blueprint, render_template
+from flask import Blueprint, redirect, url_for
 from flask.typing import ResponseReturnValue
 
 bp = Blueprint("rapid_review_hub", __name__, url_prefix="/rapid-review")
@@ -14,5 +15,5 @@ bp = Blueprint("rapid_review_hub", __name__, url_prefix="/rapid-review")
 
 @bp.route("/")
 def index() -> ResponseReturnValue:
-    """Display the rapid review hub with links to all review activities."""
-    return render_template("rapid_review_hub/index.html")
+    """Redirect to the Quality Hub, which now hosts the rapid review entry points."""
+    return redirect(url_for("quality.index"))

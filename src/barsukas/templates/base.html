@@ -82,17 +82,9 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark">
                             <li><h6 class="dropdown-header">{{ STRINGS.navigation.get('quality_review', 'Quality & Review') }}</h6></li>
-                            <li><a class="dropdown-item" href="{{ url_for('completeness.index') }}">
-                                <i class="bi bi-clipboard-data"></i> {{ STRINGS.navigation.get('data_completeness', 'Data Completeness') }}
+                            <li><a class="dropdown-item" href="{{ url_for('quality.index') }}">
+                                <i class="bi bi-patch-check"></i> {{ STRINGS.navigation.get('quality_hub', 'Quality Hub') }}
                             </a></li>
-                            {% if not config.get('READONLY', False) %}
-                            <li><a class="dropdown-item" href="{{ url_for('bebras.index') }}">
-                                <i class="bi bi-shield-check"></i> {{ STRINGS.navigation.get('data_quality', 'Data Quality') }}
-                            </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('rapid_review_hub.index') }}">
-                                <i class="bi bi-speedometer2"></i> {{ STRINGS.navigation.get('rapid_review', 'Rapid Review') }}
-                            </a></li>
-                            {% endif %}
                             <li><a class="dropdown-item" href="{{ url_for('pending_imports.list_pending_imports') }}">
                                 <i class="bi bi-inbox"></i> {{ STRINGS.navigation.get('pending_imports', 'Pending Imports') }}
                             </a></li>
@@ -107,7 +99,7 @@
                             {% endif %}
                             {% if config.get('ALLOW_OUTBOUND_CALLS', True) %}
                             <li><a class="dropdown-item" href="{{ url_for('audio.index') }}">
-                                <i class="bi bi-music-note-beamed"></i> {{ STRINGS.navigation.get('audio', 'Audio') }}
+                                <i class="bi bi-music-note-beamed"></i> {{ STRINGS.navigation.get('audio_hub', 'Audio Hub') }}
                             </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('api_client.api_client_ui') }}">
                                 <i class="bi bi-cloud-arrow-up"></i> {{ STRINGS.navigation.get('api_client', 'API Client') }}

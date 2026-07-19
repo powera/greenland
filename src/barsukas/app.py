@@ -78,6 +78,7 @@ from barsukas.routes import (
     pending_imports,
     phrases,
     pradzia,
+    quality,
     rhymes,
     sentence_stats,
     sentences,
@@ -356,6 +357,7 @@ def create_app(
     app.register_blueprint(conversations.bp)
     app.register_blueprint(categories.bp)
     app.register_blueprint(completeness.bp)
+    app.register_blueprint(quality.bp)
     app.register_blueprint(concepts.bp)
     app.register_blueprint(texts.bp)
     app.register_blueprint(translations.bp)

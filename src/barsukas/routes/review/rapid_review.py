@@ -56,7 +56,7 @@ def index() -> ResponseReturnValue:
     language_filter = request.args.get("language", "")
     if not language_filter:
         flash("Please select a language to begin rapid review", "warning")
-        return redirect(url_for("audio.list_files"))
+        return redirect(url_for("audio.index"))
 
     voice_filter = request.args.get("voice", "")
     status_filter = request.args.get("status", "pending_review")

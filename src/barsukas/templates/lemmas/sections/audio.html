@@ -4,14 +4,21 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-music-note-beamed"></i> {{ STRINGS.sentences.audio_files }}</span>
-                <button type="button" class="btn btn-sm btn-success"
-                        {% if config.get('ALLOW_OUTBOUND_CALLS', True) %}
-                        data-bs-toggle="modal" data-bs-target="#generateAudioModal"
-                        {% else %}
-                        disabled title="Not available in hosted mode"
-                        {% endif %}>
-                    <i class="bi bi-mic-fill"></i> {{ STRINGS.sentences.generate_audio }}
-                </button>
+                <span>
+                    {% if lemma.guid %}
+                    <a href="{{ url_for('audio.list_files', search=lemma.guid) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-box-arrow-up-right"></i> {{ STRINGS.navigation.get('audio_hub', 'Audio Hub') }}
+                    </a>
+                    {% endif %}
+                    <button type="button" class="btn btn-sm btn-success"
+                            {% if config.get('ALLOW_OUTBOUND_CALLS', True) %}
+                            data-bs-toggle="modal" data-bs-target="#generateAudioModal"
+                            {% else %}
+                            disabled title="Not available in hosted mode"
+                            {% endif %}>
+                        <i class="bi bi-mic-fill"></i> {{ STRINGS.sentences.generate_audio }}
+                    </button>
+                </span>
             </div>
             <div class="card-body">
                 {% if audio_files %}

@@ -10,7 +10,7 @@ PostgreSQL over a network connection.
 
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import case, func
+from sqlalchemy import and_, case, func
 from sqlalchemy.orm import Session
 
 from storage.models.grammar_fact import GrammarFact
@@ -62,7 +62,7 @@ def get_audio_dashboard_stats(session: Session) -> Dict[str, Any]:
 
     Returns:
         Dictionary with keys: total_files, pending_review, approved, needs_replacement,
-        language_counts, voice_counts
+        language_counts, voice_counts, language_pending_lemma, language_pending_sentence
     """
     # Combine status counts into single query with conditional aggregation
     stats = session.query(
@@ -76,26 +76,55 @@ def get_audio_dashboard_stats(session: Session) -> Dict[str, Any]:
         ),
     ).first()
 
-    # Get grouped counts in one query (language + voice)
+    # Get grouped counts in one query (language + voice), including per-group
+    # pending-review splits for lemma vs sentence audio.
     grouped_counts = (
         session.query(
             AudioQualityReview.language_code,
             AudioQualityReview.display_voice,
             func.count(AudioQualityReview.id).label("count"),
+            func.count(
+                case(
+                    (
+                        and_(
+                            AudioQualityReview.status == "pending_review",
+                            AudioQualityReview.sentence_id.is_(None),
+                        ),
+                        1,
+                    )
+                )
+            ).label("pending_lemma"),
+            func.count(
+                case(
+                    (
+                        and_(
+                            AudioQualityReview.status == "pending_review",
+                            AudioQualityReview.sentence_id.isnot(None),
+                        ),
+                        1,
+                    )
+                )
+            ).label("pending_sentence"),
         )
         .group_by(AudioQualityReview.language_code, AudioQualityReview.display_voice)
         .all()
     )
 
-    # Process grouped counts into language_counts and voice_counts
+    # Process grouped counts into per-language and per-voice aggregates
     language_counts: Dict[str, int] = {}
     voice_counts: Dict[str, int] = {}
+    language_pending_lemma: Dict[str, int] = {}
+    language_pending_sentence: Dict[str, int] = {}
 
     for row in grouped_counts:
         # Aggregate language counts
         if row.language_code not in language_counts:
             language_counts[row.language_code] = 0
+            language_pending_lemma[row.language_code] = 0
+            language_pending_sentence[row.language_code] = 0
         language_counts[row.language_code] += row.count
+        language_pending_lemma[row.language_code] += row.pending_lemma
+        language_pending_sentence[row.language_code] += row.pending_sentence
 
         # Voice counts (already grouped by language/voice)
         if row.display_voice:
@@ -108,6 +137,8 @@ def get_audio_dashboard_stats(session: Session) -> Dict[str, Any]:
         "needs_replacement": stats.needs_replacement if stats else 0,
         "language_counts": language_counts,
         "voice_counts": voice_counts,
+        "language_pending_lemma": language_pending_lemma,
+        "language_pending_sentence": language_pending_sentence,
     }
 
 
