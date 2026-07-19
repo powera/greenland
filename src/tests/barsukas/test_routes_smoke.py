@@ -77,9 +77,23 @@ class TestLemmaRoutes:
         html = response.data.decode()
         assert "eat" in html
 
+    @pytest.mark.parametrize("subpage", ["forms", "audio", "related", "levels"])
+    def test_view_lemma_subpages_return_200(self, client: FlaskClient, subpage: str) -> None:
+        response = client.get(f"/lemmas/1/{subpage}")
+        assert response.status_code == 200
+        html = response.data.decode()
+        assert "eat" in html
+
     def test_view_nonexistent_lemma_redirects(self, client: FlaskClient) -> None:
         response = client.get("/lemmas/9999")
         # Should redirect to the lemma list
+        assert response.status_code == 302
+
+    @pytest.mark.parametrize("subpage", ["forms", "audio", "related", "levels"])
+    def test_view_nonexistent_lemma_subpages_redirect(
+        self, client: FlaskClient, subpage: str
+    ) -> None:
+        response = client.get(f"/lemmas/9999/{subpage}")
         assert response.status_code == 302
 
     def test_view_second_lemma(self, client: FlaskClient) -> None:

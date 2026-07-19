@@ -1,0 +1,64 @@
+{# Shared breadcrumb + sub-navigation for lemma pages.
+   Parameters:
+   - lemma: the Lemma object
+   - active_tab: one of 'overview', 'forms', 'audio', 'related', 'levels'
+   - nav_counts: dict with per-tab counts ('forms', 'audio', 'related', 'levels')
+#}
+<div class="row mb-2">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('lemmas.list_lemmas') }}">Lemmas</a></li>
+                {% if active_tab == 'overview' %}
+                <li class="breadcrumb-item active">{{ lemma.lemma_text }}</li>
+                {% else %}
+                <li class="breadcrumb-item"><a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}">{{ lemma.lemma_text }}</a></li>
+                <li class="breadcrumb-item active">
+                    {% if active_tab == 'forms' %}Forms &amp; Grammar
+                    {% elif active_tab == 'audio' %}Audio
+                    {% elif active_tab == 'related' %}Related Words
+                    {% elif active_tab == 'levels' %}Frequency &amp; Levels
+                    {% endif %}
+                </li>
+                {% endif %}
+            </ol>
+        </nav>
+        <ul class="nav nav-pills mb-3">
+            <li class="nav-item">
+                <a class="nav-link {% if active_tab == 'overview' %}active{% endif %}"
+                   href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}">
+                    <i class="bi bi-book"></i> Overview
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_tab == 'forms' %}active{% endif %}"
+                   href="{{ url_for('lemmas.view_lemma_forms', lemma_id=lemma.id) }}">
+                    <i class="bi bi-file-text"></i> Forms &amp; Grammar
+                    {% if nav_counts.forms %}<span class="badge text-bg-light ms-1">{{ nav_counts.forms }}</span>{% endif %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_tab == 'audio' %}active{% endif %}"
+                   href="{{ url_for('lemmas.view_lemma_audio', lemma_id=lemma.id) }}">
+                    <i class="bi bi-music-note-beamed"></i> Audio
+                    {% if nav_counts.audio %}<span class="badge text-bg-light ms-1">{{ nav_counts.audio }}</span>{% endif %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_tab == 'related' %}active{% endif %}"
+                   href="{{ url_for('lemmas.view_lemma_related', lemma_id=lemma.id) }}">
+                    <i class="bi bi-shuffle"></i> Related Words
+                    {% if nav_counts.related %}<span class="badge text-bg-light ms-1">{{ nav_counts.related }}</span>{% endif %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_tab == 'levels' %}active{% endif %}"
+                   href="{{ url_for('lemmas.view_lemma_levels', lemma_id=lemma.id) }}">
+                    <i class="bi bi-bar-chart"></i> Frequency &amp; Levels
+                    {% if nav_counts.levels %}<span class="badge text-bg-light ms-1">{{ nav_counts.levels }}</span>{% endif %}
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

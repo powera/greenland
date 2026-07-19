@@ -3,36 +3,14 @@
 {% block title %}{{ lemma.lemma_text }}{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('lemmas.list_lemmas') }}">Lemmas</a></li>
-                <li class="breadcrumb-item active">{{ lemma.lemma_text }}</li>
-            </ol>
-        </nav>
-    </div>
-</div>
+{% include 'lemmas/_lemma_nav.html' %}
 
 {% include 'lemmas/sections/details.html' %}
 
-{% include 'lemmas/sections/relations.html' %}
-
-{% include 'lemmas/sections/tasks.html' %}
-
-{% include 'lemmas/sections/forms.html' %}
-
-{% include 'lemmas/sections/synonyms.html' %}
-
 {% include 'lemmas/sections/translations.html' %}
 
-{% include 'lemmas/sections/grammar_facts.html' %}
+{% include 'lemmas/sections/coverage.html' %}
 
-{% include 'lemmas/sections/audio.html' %}
-
-{% include 'lemmas/sections/sentences.html' %}
-
-{% include 'lemmas/sections/overrides.html' %}
+{% include 'lemmas/sections/tasks.html' %}
 
 {% endblock %}

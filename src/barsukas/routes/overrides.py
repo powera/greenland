@@ -28,7 +28,7 @@ def add_override(lemma_id: int) -> Response:
 
     if current_app.config.get("READONLY", False):
         flash_and_log("Cannot add override: running in read-only mode", "error")
-        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+        return redirect(url_for("lemmas.view_lemma_levels", lemma_id=lemma_id))
 
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
@@ -43,7 +43,7 @@ def add_override(lemma_id: int) -> Response:
     # Validate language code
     if lang_code not in get_supported_languages():
         flash_and_log("Invalid language code", "error")
-        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+        return redirect(url_for("lemmas.view_lemma_levels", lemma_id=lemma_id))
 
     # Validate difficulty level
     try:
@@ -56,10 +56,10 @@ def add_override(lemma_id: int) -> Response:
                 f"Difficulty level must be -1 or between {Config.MIN_DIFFICULTY_LEVEL} and {Config.MAX_DIFFICULTY_LEVEL}",
                 "error",
             )
-            return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+            return redirect(url_for("lemmas.view_lemma_levels", lemma_id=lemma_id))
     except ValueError:
         flash_and_log("Invalid difficulty level", "error")
-        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+        return redirect(url_for("lemmas.view_lemma_levels", lemma_id=lemma_id))
 
     # Check if override already exists
     old_override = get_difficulty_override(g.db, lemma_id, lang_code)
@@ -92,7 +92,7 @@ def add_override(lemma_id: int) -> Response:
     lang_name = get_supported_languages()[lang_code]
     flash(f"{action} difficulty override for {lang_name}: Level {difficulty_level}", "success")
 
-    return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+    return redirect(url_for("lemmas.view_lemma_levels", lemma_id=lemma_id))
 
 
 @bp.route("/<int:lemma_id>/<lang_code>/delete", methods=["POST"])
@@ -102,7 +102,7 @@ def delete_override(lemma_id: int, lang_code: str) -> Response:
 
     if current_app.config.get("READONLY", False):
         flash_and_log("Cannot delete override: running in read-only mode", "error")
-        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+        return redirect(url_for("lemmas.view_lemma_levels", lemma_id=lemma_id))
 
     lemma = g.db.query(Lemma).get(lemma_id)
     if not lemma:
@@ -113,7 +113,7 @@ def delete_override(lemma_id: int, lang_code: str) -> Response:
     old_override = get_difficulty_override(g.db, lemma_id, lang_code)
     if not old_override:
         flash_and_log("Override not found", "error")
-        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+        return redirect(url_for("lemmas.view_lemma_levels", lemma_id=lemma_id))
 
     old_level = old_override.difficulty_level
 
@@ -139,4 +139,4 @@ def delete_override(lemma_id: int, lang_code: str) -> Response:
     else:
         flash_and_log("Failed to delete override", "error")
 
-    return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+    return redirect(url_for("lemmas.view_lemma_levels", lemma_id=lemma_id))

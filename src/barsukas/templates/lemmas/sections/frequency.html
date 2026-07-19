@@ -1,0 +1,114 @@
+<!-- Frequency and Tier Signals -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-bar-chart"></i> Frequency and Tier Signals
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Combined Frequency Rank:</strong>
+                    {% if lemma.frequency_rank %}
+                        {{ lemma.frequency_rank }}
+                        <span class="text-muted">(weighted harmonic mean of corpus + tier signals; lower = more common)</span>
+                    {% else %}
+                        <span class="text-muted">— (run <code>pradzia --calc-ranks</code> to populate)</span>
+                    {% endif %}
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 mb-3 mb-lg-0">
+                        <h6 class="mb-2">Tier Signals</h6>
+                        {% if lemma_tiers %}
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Source</th>
+                                            <th>Tier</th>
+                                            <th>Rank used</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for tier in lemma_tiers %}
+                                        <tr>
+                                            <td><code>{{ tier.source }}</code></td>
+                                            <td>
+                                                {{ tier_display_by_source_name.get((tier.source, tier.tier_name), tier.tier_name) }}
+                                                {% set ordinal = tier_ordinal_by_source_name.get((tier.source, tier.tier_name)) %}
+                                                {% set tier_size = tier_size_by_source.get(tier.source) %}
+                                                {% if ordinal and tier_size %}
+                                                    <span class="text-muted">({{ ordinal }} of {{ tier_size }})</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% set tier_rank = tier_rank_by_source_name.get((tier.source, tier.tier_name)) %}
+                                                {% if tier_rank is not none %}
+                                                    {{ tier_rank }}
+                                                {% else %}
+                                                    <span class="text-muted">—</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="text-muted small mb-0">Rank used = synthetic rank this tier contributes to the combined frequency rank (lower = more common).</p>
+                        {% else %}
+                            <p class="text-muted mb-0">No lemma-tier assignment found yet.</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-lg-6">
+                        <h6 class="mb-2">Corpus Frequency</h6>
+                        {% if lexeme_frequency_by_corpus %}
+                            <div class="table-responsive mb-3">
+                                <table class="table table-sm table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Corpus</th>
+                                            <th>Freq (per M)</th>
+                                            <th>Best rank</th>
+                                            <th>Forms</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for corpus_name, rollup in lexeme_frequency_by_corpus.items() %}
+                                        <tr>
+                                            <td><code>{{ corpus_name }}</code></td>
+                                            <td>
+                                                {% if rollup %}
+                                                    {{ "%.2f"|format(rollup.total_frequency) }}
+                                                {% else %}
+                                                    <span class="text-muted">No lexeme row</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% set best_rank = lexeme_rank_by_corpus.get(corpus_name) %}
+                                                {% if best_rank is not none %}
+                                                    {{ best_rank }}
+                                                {% else %}
+                                                    <span class="text-muted">—</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if rollup %}
+                                                    {{ rollup.form_breakdown|length }}
+                                                {% else %}
+                                                    <span class="text-muted">—</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No enabled lexeme-based corpora configured for this lemma yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

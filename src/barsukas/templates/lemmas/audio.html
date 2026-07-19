@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lemma.lemma_text }} - Audio{% endblock %}
+
+{% block content %}
+{% include 'lemmas/_lemma_nav.html' %}
+
+{% include 'lemmas/sections/audio.html' %}
+
+{% endblock %}
