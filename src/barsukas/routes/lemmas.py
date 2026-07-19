@@ -33,7 +33,6 @@ from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
 from storage.queries.lemma import build_lemma_search_query
 from storage.translation_helpers import (
     DEFAULT_GENERATION_LANGUAGES,
-    get_all_translations,
     get_supported_languages,
 )
 
@@ -311,47 +310,24 @@ def list_lemmas() -> ResponseReturnValue:
     )
 
 
-@bp.route("/<int:lemma_id>")
-def view_lemma(lemma_id: int) -> ResponseReturnValue:
-    """View a single lemma with all details."""
+def _get_lemma_page_context(lemma_id: int) -> Optional[Dict[str, Any]]:
+    """Build the template context shared by all lemma subpages.
+
+    Returns None when the lemma does not exist. The context includes the
+    grouped derivative-form data plus the per-tab counts used by the lemma
+    sub-navigation, so every subpage can render the same nav.
+    """
     from barsukas.helpers.db_optimization import get_lemma_view_data
-    from storage.crud.guid_tombstone import get_tombstones_by_lemma_id
-    from storage.lexeme import get_lexeme
-    from storage.models.schema import (
-        ExternalLexemeAnnotation,
-        LemmaTier,
-        TierDefinition,
-    )
-    from wordfreq.lexeme_frequency import get_lexeme_frequencies_all_corpora
-    from storage.config.grammar_fact_registry import get_generatable_fact_definitions
 
-    # Get all lemma data in optimized bulk queries (replaces 10+ separate queries)
     data = get_lemma_view_data(g.db, lemma_id)
-
     lemma = data["lemma"]
     if not lemma:
-        flash("Lemma not found", "error")
-        return redirect(url_for("lemmas.list_lemmas"))
+        return None
 
-    # Extract pre-fetched data
     translations = data["translations"]
-    definitions = data["definitions"]
-    translation_disambiguations = data["translation_disambiguations"]
-    translation_pronunciations = data["translation_pronunciations"]
     language_names = get_supported_languages()
-    overrides = data["overrides"]
-    effective_levels = data["effective_levels"]
     derivative_forms = data["derivative_forms"]
-    grammar_facts = data["grammar_facts"]
-    audio_files = data["audio_files"]
-    sentence_count = data["sentence_count"]
-    needs_disambiguation_check = data["needs_disambiguation_check"]
-    related_lemmas = data["related_lemmas"]
 
-    # Get difficulty level distribution for same POS type/subtype
-    difficulty_stats = get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
-
-    # Group forms by language and type
     (
         forms_by_language,
         synonyms_by_language,
@@ -359,92 +335,101 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         all_synonym_languages,
     ) = group_derivative_forms(derivative_forms)
     pronunciation_forms_by_language = group_populated_pronunciations(derivative_forms)
-    pronunciation_languages = get_pronunciation_languages(derivative_forms, translations)
     lemma_pronunciation_rows = build_lemma_pronunciation_rows(
         derivative_forms,
         translations,
-        translation_pronunciations,
+        data["translation_pronunciations"],
     )
 
-    # Get tombstone entries for this lemma
-    tombstones = get_tombstones_by_lemma_id(g.db, lemma_id)
+    forms_total = sum(len(forms) for forms in forms_by_language.values())
+    related_total = (
+        sum(len(forms) for forms in synonyms_by_language.values())
+        + sum(len(forms) for forms in alternative_forms_by_language.values())
+        + len(data["related_lemmas"])
+    )
+
+    return {
+        "lemma": lemma,
+        "translations": translations,
+        "definitions": data["definitions"],
+        "translation_disambiguations": data["translation_disambiguations"],
+        "language_names": language_names,
+        "overrides": data["overrides"],
+        "effective_levels": data["effective_levels"],
+        "derivative_forms": derivative_forms,
+        "forms_by_language": forms_by_language,
+        "synonyms_by_language": synonyms_by_language,
+        "alternative_forms_by_language": alternative_forms_by_language,
+        "all_synonym_languages": all_synonym_languages,
+        "pronunciation_forms_by_language": pronunciation_forms_by_language,
+        "lemma_pronunciation_rows": lemma_pronunciation_rows,
+        "grammar_facts": data["grammar_facts"],
+        "audio_files": data["audio_files"],
+        "sentence_count": data["sentence_count"],
+        "needs_disambiguation_check": data["needs_disambiguation_check"],
+        "related_lemmas": data["related_lemmas"],
+        "hidden_languages": set(language_names) - set(DEFAULT_GENERATION_LANGUAGES),
+        # Per-tab counts for the lemma sub-navigation
+        "nav_counts": {
+            "forms": forms_total + len(data["grammar_facts"]),
+            "audio": len(data["audio_files"]),
+            "related": related_total,
+            "levels": len(data["overrides"]),
+        },
+    }
+
+
+@bp.route("/<int:lemma_id>")
+def view_lemma(lemma_id: int) -> ResponseReturnValue:
+    """Lemma overview: details, translations, and per-language coverage summary."""
+    from barsukas.helpers.lemma_display import build_language_coverage_rows
+    from storage.crud.concept import get_link_for_lemma
+
+    context = _get_lemma_page_context(lemma_id)
+    if context is None:
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
 
     # Paired concept (one-to-one, by Q-id). The link lives in the lemma/main DB,
     # so it is available here even when concepts are hosted in a separate,
     # read-only database. Only surfaced when the lemma is actually paired.
-    from storage.crud.concept import get_link_for_lemma
-
     concept_link = get_link_for_lemma(g.db, lemma_id)
 
-    # Prepare voice options for audio generation
-    openai_voices = [
-        "ash",
-        "alloy",
-        "nova",
-        "ballad",
-        "coral",
-        "echo",
-        "fable",
-        "onyx",
-        "sage",
-        "shimmer",
-    ]
-
-    # eSpeak-NG voices by language
-    espeak_voices = {}
-    for lang_code in language_names.keys():
-        espeak_voice_list = EspeakVoice.get_voices_for_language(lang_code)
-        espeak_voices[lang_code] = [{"name": v.name, "gender": v.gender} for v in espeak_voice_list]
-
-    # Piper voices by language
-    piper_voices = {}
-    for lang_code in language_names.keys():
-        piper_voice_list = PiperVoice.get_voices_for_language(lang_code)
-        piper_voices[lang_code] = [
-            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in piper_voice_list
-        ]
-
-    # Coqui voices by language
-    coqui_voices = {}
-    for lang_code in language_names.keys():
-        coqui_voice_list = CoquiVoice.get_voices_for_language(lang_code)
-        coqui_voices[lang_code] = [
-            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in coqui_voice_list
-        ]
-
-    # Qwen3 voices by language
-    qwen3_voices = {}
-    for lang_code in language_names.keys():
-        qwen3_voice_list = QwenVoice.get_voices_for_language(lang_code)
-        qwen3_voices[lang_code] = [
-            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in qwen3_voice_list
-        ]
-
-    # Amazon Polly voices by language
-    polly_voices = {}
-    for lang_code in language_names.keys():
-        polly_voice_list = PollyVoice.get_voices_for_language(lang_code)
-        polly_voices[lang_code] = [
-            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in polly_voice_list
-        ]
-
-    # Azure TTS voices by language
-    azure_voices = {}
-    for lang_code in language_names.keys():
-        azure_voice_list = AzureVoice.get_voices_for_language(lang_code)
-        azure_voices[lang_code] = [
-            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in azure_voice_list
-        ]
-
-    # Google Cloud TTS voices by language
-    google_voices = {}
-    for lang_code in language_names.keys():
-        google_voice_list = GoogleTtsVoice.get_voices_for_language(lang_code)
-        google_voices[lang_code] = [
-            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender} for v in google_voice_list
-        ]
+    coverage_rows = build_language_coverage_rows(
+        language_names=context["language_names"],
+        translations=context["translations"],
+        forms_by_language=context["forms_by_language"],
+        pronunciation_forms_by_language=context["pronunciation_forms_by_language"],
+        lemma_pronunciation_rows=context["lemma_pronunciation_rows"],
+        audio_files=context["audio_files"],
+        default_languages=DEFAULT_GENERATION_LANGUAGES,
+    )
 
     queued_tasks = get_tasks_for_target(g.db, "lemma", lemma_id, limit=8)
+
+    return render_template(
+        "lemmas/view.html",
+        active_tab="overview",
+        concept_link=concept_link,
+        coverage_rows=coverage_rows,
+        queued_tasks=queued_tasks,
+        **context,
+    )
+
+
+@bp.route("/<int:lemma_id>/forms")
+def view_lemma_forms(lemma_id: int) -> ResponseReturnValue:
+    """Grammatical forms, pronunciations, and grammar facts for a lemma."""
+    from storage.config.grammar_fact_registry import get_generatable_fact_definitions
+
+    context = _get_lemma_page_context(lemma_id)
+    if context is None:
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
+
+    pronunciation_languages = get_pronunciation_languages(
+        context["derivative_forms"], context["translations"]
+    )
     generatable_grammar_fact_defs = [
         {
             "fact_type": definition.fact_type,
@@ -453,8 +438,70 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
             "description": definition.description,
         }
         for definition in get_generatable_fact_definitions().values()
-        if lemma.pos_type in definition.required_pos
+        if context["lemma"].pos_type in definition.required_pos
     ]
+
+    return render_template(
+        "lemmas/forms.html",
+        active_tab="forms",
+        pronunciation_languages=pronunciation_languages,
+        generatable_grammar_fact_defs=generatable_grammar_fact_defs,
+        **context,
+    )
+
+
+@bp.route("/<int:lemma_id>/audio")
+def view_lemma_audio(lemma_id: int) -> ResponseReturnValue:
+    """Audio files and audio generation for a lemma."""
+    context = _get_lemma_page_context(lemma_id)
+    if context is None:
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
+
+    return render_template(
+        "lemmas/audio.html",
+        active_tab="audio",
+        **_build_voice_options(context["language_names"]),
+        **context,
+    )
+
+
+@bp.route("/<int:lemma_id>/related")
+def view_lemma_related(lemma_id: int) -> ResponseReturnValue:
+    """Synonyms, alternative forms, related lemmas, and example sentences."""
+    context = _get_lemma_page_context(lemma_id)
+    if context is None:
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
+
+    return render_template(
+        "lemmas/related.html",
+        active_tab="related",
+        **context,
+    )
+
+
+@bp.route("/<int:lemma_id>/levels")
+def view_lemma_levels(lemma_id: int) -> ResponseReturnValue:
+    """Frequency/tier signals and per-language difficulty overrides for a lemma."""
+    from storage.lexeme import get_lexeme
+    from storage.models.schema import (
+        ExternalLexemeAnnotation,
+        LemmaTier,
+        TierDefinition,
+    )
+    from wordfreq.frequency.corpus import get_enabled_corpus_configs
+    from wordfreq.lexeme_frequency import get_lexeme_frequencies_all_corpora
+
+    context = _get_lemma_page_context(lemma_id)
+    if context is None:
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
+
+    lemma = context["lemma"]
+
+    # Get difficulty level distribution for same POS type/subtype
+    difficulty_stats = get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
 
     lemma_tiers = (
         g.db.query(LemmaTier)
@@ -489,8 +536,6 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         if tier.source in ranks_by_source
     }
 
-    from wordfreq.frequency.corpus import get_enabled_corpus_configs
-
     target_corpora = ["19th_books", "20th_books", "cooking", "wiki_vital"]
     enabled_corpora = {cfg.name for cfg in get_enabled_corpus_configs()}
     lexeme_frequency_by_corpus = {}
@@ -521,40 +566,9 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
             lexeme_rank_by_corpus[corpus_name] = best_rank
 
     return render_template(
-        "lemmas/view.html",
-        lemma=lemma,
-        translations=translations,
-        definitions=definitions,
-        translation_disambiguations=translation_disambiguations,
-        language_names=language_names,
-        overrides=overrides,
-        effective_levels=effective_levels,
+        "lemmas/levels.html",
+        active_tab="levels",
         difficulty_stats=difficulty_stats,
-        forms_by_language=forms_by_language,
-        derivative_forms=derivative_forms,
-        pronunciation_forms_by_language=pronunciation_forms_by_language,
-        pronunciation_languages=pronunciation_languages,
-        lemma_pronunciation_rows=lemma_pronunciation_rows,
-        audio_files=audio_files,
-        synonyms_by_language=synonyms_by_language,
-        alternative_forms_by_language=alternative_forms_by_language,
-        all_synonym_languages=all_synonym_languages,
-        sentence_count=sentence_count,
-        needs_disambiguation_check=needs_disambiguation_check,
-        grammar_facts=grammar_facts,
-        generatable_grammar_fact_defs=generatable_grammar_fact_defs,
-        tombstones=tombstones,
-        openai_voices=openai_voices,
-        espeak_voices=espeak_voices,
-        piper_voices=piper_voices,
-        coqui_voices=coqui_voices,
-        qwen3_voices=qwen3_voices,
-        polly_voices=polly_voices,
-        azure_voices=azure_voices,
-        google_voices=google_voices,
-        related_lemmas=related_lemmas,
-        concept_link=concept_link,
-        queued_tasks=queued_tasks,
         lemma_tiers=lemma_tiers,
         tier_display_by_source_name=tier_display_by_source_name,
         tier_ordinal_by_source_name=tier_ordinal_by_source_name,
@@ -562,8 +576,72 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         tier_rank_by_source_name=tier_rank_by_source_name,
         lexeme_frequency_by_corpus=lexeme_frequency_by_corpus,
         lexeme_rank_by_corpus=lexeme_rank_by_corpus,
-        hidden_languages=set(language_names) - set(DEFAULT_GENERATION_LANGUAGES),
+        **context,
     )
+
+
+def _build_voice_options(language_names: Dict[str, str]) -> Dict[str, Any]:
+    """Build the per-engine voice option lists used by the audio generation modal."""
+    openai_voices = [
+        "ash",
+        "alloy",
+        "nova",
+        "ballad",
+        "coral",
+        "echo",
+        "fable",
+        "onyx",
+        "sage",
+        "shimmer",
+    ]
+
+    espeak_voices: Dict[str, List[Dict[str, Any]]] = {}
+    piper_voices: Dict[str, List[Dict[str, Any]]] = {}
+    coqui_voices: Dict[str, List[Dict[str, Any]]] = {}
+    qwen3_voices: Dict[str, List[Dict[str, Any]]] = {}
+    polly_voices: Dict[str, List[Dict[str, Any]]] = {}
+    azure_voices: Dict[str, List[Dict[str, Any]]] = {}
+    google_voices: Dict[str, List[Dict[str, Any]]] = {}
+    for lang_code in language_names.keys():
+        espeak_voices[lang_code] = [
+            {"name": v.name, "gender": v.gender}
+            for v in EspeakVoice.get_voices_for_language(lang_code)
+        ]
+        piper_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender}
+            for v in PiperVoice.get_voices_for_language(lang_code)
+        ]
+        coqui_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender}
+            for v in CoquiVoice.get_voices_for_language(lang_code)
+        ]
+        qwen3_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender}
+            for v in QwenVoice.get_voices_for_language(lang_code)
+        ]
+        polly_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender}
+            for v in PollyVoice.get_voices_for_language(lang_code)
+        ]
+        azure_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender}
+            for v in AzureVoice.get_voices_for_language(lang_code)
+        ]
+        google_voices[lang_code] = [
+            {"name": v.name, "ui_name": v.ui_name, "gender": v.gender}
+            for v in GoogleTtsVoice.get_voices_for_language(lang_code)
+        ]
+
+    return {
+        "openai_voices": openai_voices,
+        "espeak_voices": espeak_voices,
+        "piper_voices": piper_voices,
+        "coqui_voices": coqui_voices,
+        "qwen3_voices": qwen3_voices,
+        "polly_voices": polly_voices,
+        "azure_voices": azure_voices,
+        "google_voices": google_voices,
+    }
 
 
 @bp.route("/<int:lemma_id>/edit", methods=["GET", "POST"])
@@ -759,7 +837,7 @@ def delete_synonym(lemma_id: int, form_id: int) -> ResponseReturnValue:
 
     if current_app.config.get("READONLY", False):
         flash("Cannot delete: running in read-only mode", "error")
-        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+        return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
 
     # Verify the form belongs to this lemma
     form = (
@@ -770,7 +848,7 @@ def delete_synonym(lemma_id: int, form_id: int) -> ResponseReturnValue:
 
     if not form:
         flash("Synonym or alternative form not found", "error")
-        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+        return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
 
     # Store form details for flash message and grammar fact update
     form_text = form.derivative_form_text
@@ -802,7 +880,7 @@ def delete_synonym(lemma_id: int, form_id: int) -> ResponseReturnValue:
     else:
         flash(f'Failed to delete {form_type}: "{form_text}"', "error")
 
-    return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+    return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
 
 
 @bp.route("/<int:lemma_id>/delete-all-synonyms", methods=["POST"])
@@ -814,7 +892,7 @@ def delete_all_synonyms(lemma_id: int) -> ResponseReturnValue:
 
     if current_app.config.get("READONLY", False):
         flash("Cannot delete: running in read-only mode", "error")
-        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+        return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
 
     # Get optional filters from request
     lang_code = request.form.get("lang_code")  # Optional: filter by language
@@ -860,7 +938,7 @@ def delete_all_synonyms(lemma_id: int) -> ResponseReturnValue:
 
     if not forms_to_delete:
         flash("No matching forms found to delete", "warning")
-        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+        return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
 
     # Collect affected languages for grammar fact updates
     affected_languages = set(form.language_code for form in forms_to_delete)
@@ -903,4 +981,4 @@ def delete_all_synonyms(lemma_id: int) -> ResponseReturnValue:
     else:
         flash("Failed to delete forms", "error")
 
-    return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+    return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))

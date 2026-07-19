@@ -37,6 +37,7 @@
                             <i class="bi bi-eye"></i> {{ STRINGS.navigation.get('view', 'View') }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><h6 class="dropdown-header">{{ STRINGS.navigation.get('content', 'Content') }}</h6></li>
                             <li><a class="dropdown-item" href="{{ url_for('lemmas.list_lemmas') }}">
                                 <i class="bi bi-list"></i> {{ STRINGS.navigation.get('words', 'Words') }}
                             </a></li>
@@ -58,9 +59,8 @@
                             <li><a class="dropdown-item" href="{{ url_for('texts.list_texts_view') }}">
                                 <i class="bi bi-book"></i> {{ STRINGS.navigation.get('texts', 'Texts') }}
                             </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('pending_imports.list_pending_imports') }}">
-                                <i class="bi bi-inbox"></i> {{ STRINGS.navigation.get('pending_imports', 'Pending Imports') }}
-                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">{{ STRINGS.navigation.get('reference', 'Reference') }}</h6></li>
                             <li><a class="dropdown-item" href="{{ url_for('peleda.dictionary') }}">
                                 <i class="bi bi-journal-bookmark"></i> {{ STRINGS.navigation.get('dictionary', 'Dictionary') }}
                             </a></li>
@@ -73,6 +73,11 @@
                             <li><a class="dropdown-item" href="{{ url_for('ipa_reference') }}">
                                 <i class="bi bi-soundwave"></i> {{ STRINGS.navigation.get('ipa_reference', 'IPA Reference') }}
                             </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">{{ STRINGS.navigation.get('workflow', 'Workflow') }}</h6></li>
+                            <li><a class="dropdown-item" href="{{ url_for('pending_imports.list_pending_imports') }}">
+                                <i class="bi bi-inbox"></i> {{ STRINGS.navigation.get('pending_imports', 'Pending Imports') }}
+                            </a></li>
                         </ul>
                     </li>
                     <!-- Tools dropdown -->
@@ -81,13 +86,11 @@
                             <i class="bi bi-tools"></i> {{ STRINGS.navigation.get('tools', 'Tools') }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><h6 class="dropdown-header">{{ STRINGS.navigation.get('quality_review', 'Quality & Review') }}</h6></li>
                             <li><a class="dropdown-item" href="{{ url_for('completeness.index') }}">
                                 <i class="bi bi-clipboard-data"></i> {{ STRINGS.navigation.get('data_completeness', 'Data Completeness') }}
                             </a></li>
                             {% if not config.get('READONLY', False) %}
-                            <li><a class="dropdown-item" href="{{ url_for('agents_launcher.list_agents') }}">
-                                <i class="bi bi-robot"></i> {{ STRINGS.navigation.get('ai_agents', 'AI Agents') }}
-                            </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('bebras.index') }}">
                                 <i class="bi bi-shield-check"></i> {{ STRINGS.navigation.get('data_quality', 'Data Quality') }}
                             </a></li>
@@ -95,15 +98,26 @@
                                 <i class="bi bi-speedometer2"></i> {{ STRINGS.navigation.get('rapid_review', 'Rapid Review') }}
                             </a></li>
                             {% endif %}
-                            {% if config.get('ALLOW_OUTBOUND_CALLS', True) %}
-                            <li><a class="dropdown-item" href="{{ url_for('api_client.api_client_ui') }}">
-                                <i class="bi bi-cloud-arrow-up"></i> {{ STRINGS.navigation.get('api_client', 'API Client') }}
+                            {% if not config.get('READONLY', False) or config.get('ALLOW_OUTBOUND_CALLS', True) %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">{{ STRINGS.navigation.get('generation', 'Generation') }}</h6></li>
+                            {% endif %}
+                            {% if not config.get('READONLY', False) %}
+                            <li><a class="dropdown-item" href="{{ url_for('agents_launcher.list_agents') }}">
+                                <i class="bi bi-robot"></i> {{ STRINGS.navigation.get('ai_agents', 'AI Agents') }}
                             </a></li>
+                            {% endif %}
+                            {% if config.get('ALLOW_OUTBOUND_CALLS', True) %}
                             <li><a class="dropdown-item" href="{{ url_for('audio.index') }}">
                                 <i class="bi bi-music-note-beamed"></i> {{ STRINGS.navigation.get('audio', 'Audio') }}
                             </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('api_client.api_client_ui') }}">
+                                <i class="bi bi-cloud-arrow-up"></i> {{ STRINGS.navigation.get('api_client', 'API Client') }}
+                            </a></li>
                             {% endif %}
                             {% if config.get('ALLOW_EXPORTS', True) %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">{{ STRINGS.navigation.get('exports', 'Exports') }}</h6></li>
                             <li><a class="dropdown-item" href="{{ url_for('exports.exports_page') }}">
                                 <i class="bi bi-download"></i> {{ STRINGS.navigation.get('exports', 'Exports') }}
                             </a></li>
@@ -111,6 +125,8 @@
                                 <i class="bi bi-translate"></i> GYVATE STRINGS Export
                             </a></li>
                             {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">{{ STRINGS.navigation.get('jobs', 'Jobs') }}</h6></li>
                             <li><a class="dropdown-item" href="{{ url_for('batch_operations.list_batches') }}">
                                 <i class="bi bi-collection"></i> {{ STRINGS.navigation.get('batch_jobs', 'Batch Jobs') }}
                             </a></li>

@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence, Set, Tuple
 
 from storage.queries.lemma import get_difficulty_stats
 
-
 LemmaPronunciationRow = Dict[str, Optional[str]]
 
 
@@ -164,9 +163,68 @@ def build_lemma_pronunciation_rows(
     return pronunciation_rows
 
 
+def build_language_coverage_rows(
+    language_names: Mapping[str, str],
+    translations: Mapping[str, Optional[str]],
+    forms_by_language: Mapping[str, Sequence[Any]],
+    pronunciation_forms_by_language: Mapping[str, Sequence[Any]],
+    lemma_pronunciation_rows: Mapping[str, LemmaPronunciationRow],
+    audio_files: Sequence[Any],
+    default_languages: Sequence[str],
+) -> List[Dict[str, Any]]:
+    """Build the per-language coverage summary shown on the lemma overview page.
+
+    Default (high-priority) languages are always listed so absences are visible;
+    secondary languages appear only when they actually have forms, pronunciation,
+    or audio data.
+    """
+    audio_total_by_language: Dict[str, int] = {}
+    audio_approved_by_language: Dict[str, int] = {}
+    for audio in audio_files:
+        language_code = audio.language_code
+        audio_total_by_language[language_code] = audio_total_by_language.get(language_code, 0) + 1
+        if audio.status in ("approved", "approved_with_issues"):
+            audio_approved_by_language[language_code] = (
+                audio_approved_by_language.get(language_code, 0) + 1
+            )
+
+    ordered_languages: List[str] = [
+        lang_code for lang_code in default_languages if lang_code in language_names
+    ]
+    extra_languages = sorted(
+        (
+            set(forms_by_language)
+            | set(pronunciation_forms_by_language)
+            | set(lemma_pronunciation_rows)
+            | set(audio_total_by_language)
+        )
+        - set(ordered_languages)
+    )
+    ordered_languages.extend(
+        lang_code for lang_code in extra_languages if lang_code in language_names
+    )
+
+    coverage_rows: List[Dict[str, Any]] = []
+    for lang_code in ordered_languages:
+        coverage_rows.append(
+            {
+                "lang_code": lang_code,
+                "lang_name": language_names[lang_code],
+                "has_translation": bool((translations.get(lang_code) or "").strip()),
+                "forms_count": len(forms_by_language.get(lang_code, [])),
+                "pronunciation_count": len(pronunciation_forms_by_language.get(lang_code, [])),
+                "has_lemma_pronunciation": lang_code in lemma_pronunciation_rows,
+                "audio_total": audio_total_by_language.get(lang_code, 0),
+                "audio_approved": audio_approved_by_language.get(lang_code, 0),
+            }
+        )
+    return coverage_rows
+
+
 # Re-export for backwards compatibility and convenience
 # Routes can import from here for UI-related helpers
 __all__ = [
+    "build_language_coverage_rows",
     "build_lemma_pronunciation_rows",
     "get_difficulty_stats",
     "get_pronunciation_languages",

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lemma.lemma_text }} - Forms & Grammar{% endblock %}
+
+{% block content %}
+{% include 'lemmas/_lemma_nav.html' %}
+
+{% include 'lemmas/sections/forms.html' %}
+
+{% include 'lemmas/sections/grammar_facts.html' %}
+
+{% endblock %}

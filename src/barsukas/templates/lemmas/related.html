@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lemma.lemma_text }} - Related Words{% endblock %}
+
+{% block content %}
+{% include 'lemmas/_lemma_nav.html' %}
+
+{% include 'lemmas/sections/synonyms.html' %}
+
+{% include 'lemmas/sections/relations.html' %}
+
+{% include 'lemmas/sections/sentences.html' %}
+
+{% endblock %}

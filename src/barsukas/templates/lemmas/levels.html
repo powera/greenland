@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lemma.lemma_text }} - Frequency & Levels{% endblock %}
+
+{% block content %}
+{% include 'lemmas/_lemma_nav.html' %}
+
+<!-- Base Difficulty -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-speedometer"></i> Base Difficulty
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <strong>Base difficulty:</strong>
+                    {% if lemma.difficulty_level is not none %}
+                        {% if lemma.difficulty_level == -1 %}
+                            <span class="badge bg-warning difficulty-badge">Excluded</span>
+                        {% else %}
+                            <span class="badge bg-info difficulty-badge">Level {{ lemma.difficulty_level }}</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="text-muted">Not set</span>
+                    {% endif %}
+                    <a href="{{ url_for('lemmas.edit_lemma', lemma_id=lemma.id) }}" class="small ms-2">edit</a>
+                </p>
+                {% if difficulty_stats %}
+                <p class="mb-0 small text-muted">
+                    Level distribution for {{ lemma.pos_type }}{% if lemma.pos_subtype %} ({{ lemma.pos_subtype }}){% endif %}:
+                    {% for level in range(-1, config.MAX_DIFFICULTY_LEVEL + 1) %}
+                        {% if level in difficulty_stats %}
+                            {% if level == -1 %}
+                                <span class="badge bg-warning text-dark" title="{{ difficulty_stats[level] }} words">-1: {{ difficulty_stats[level] }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary" title="{{ difficulty_stats[level] }} words">{{ level }}: {{ difficulty_stats[level] }}</span>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'lemmas/sections/overrides.html' %}
+
+{% include 'lemmas/sections/frequency.html' %}
+
+{% endblock %}
