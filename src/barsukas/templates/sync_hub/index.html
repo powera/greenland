@@ -162,6 +162,31 @@
                 </div>
             </div>
         </div>
+
+        <!-- Lemma Audio -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white">
+                    <i class="bi bi-music-note-list"></i> Lemma Audio
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Sync approved lemma audio references (S3 URLs, status, md5) in the
+                        per-category <code>audio.jsonl</code> files.
+                    </p>
+                    <ul class="small">
+                        <li>Metadata only, not mp3 bytes</li>
+                        <li>Import / export whole directories</li>
+                        <li>Difference summary preview</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('sync_lemma_audio_release.index') }}" class="btn btn-danger w-100">
+                        <i class="bi bi-arrow-right"></i> Open Lemma Audio Sync
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row mt-4">

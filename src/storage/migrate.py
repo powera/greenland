@@ -11,6 +11,7 @@ import os
 import sys
 import tempfile
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -1029,6 +1030,119 @@ def export_sqlite_to_phrase_release(sqlite_path: str, release_dir: str) -> None:
         session.close()
 
 
+@dataclass
+class LemmaAudioExportStats:
+    """Summary of a lemma-audio export (SQLite/DB -> release files)."""
+
+    audio_rows: int = 0
+    guids: int = 0
+    categories: int = 0
+
+
+@dataclass
+class LemmaAudioImportStats:
+    """Summary of a lemma-audio import (release files -> SQLite/DB)."""
+
+    added: int = 0
+    updated: int = 0
+    pruned: int = 0
+
+
+# Directory names for each part of speech, shared by lemma-audio export/import.
+_LEMMA_AUDIO_TYPE_TO_DIR: Dict[str, str] = {
+    "noun": "nouns",
+    "verb": "verbs",
+    "adjective": "adjectives",
+    "adverb": "adverbs",
+    "pronoun": "pronouns",
+    "preposition": "prepositions",
+    "conjunction": "conjunctions",
+    "interjection": "interjections",
+    "numeral": "numerals",
+    "particle": "particles",
+}
+
+
+def export_lemma_audio_release_from_session(
+    session: Any, release_dir: str
+) -> LemmaAudioExportStats:
+    """Export approved lemma audio from an open session to release files.
+
+    Session-based core of :func:`export_sqlite_to_lemma_audio_release`; works with
+    any SQLAlchemy backend (SQLite or PostgreSQL) so the Barsukas sync route can
+    reuse it against the live request session. Does not close ``session``.
+    """
+    from storage.models.schema import AudioQualityReview, Lemma
+
+    type_to_dir = _LEMMA_AUDIO_TYPE_TO_DIR
+
+    rows = (
+        session.query(AudioQualityReview, Lemma)
+        .join(Lemma, AudioQualityReview.guid == Lemma.guid)
+        .filter(AudioQualityReview.guid.isnot(None))
+        .filter(AudioQualityReview.sentence_id.is_(None))
+        .filter(AudioQualityReview.status.in_(APPROVED_AUDIO_RELEASE_STATUSES))
+        .order_by(
+            Lemma.pos_type,
+            Lemma.pos_subtype,
+            AudioQualityReview.guid,
+            AudioQualityReview.language_code,
+            AudioQualityReview.voice_name,
+        )
+        .all()
+    )
+
+    records_by_category: Dict[Tuple[str, str], Dict[str, List[Dict[str, Any]]]] = defaultdict(
+        lambda: defaultdict(list)
+    )
+    # The English word each GUID's audio relates to, so audio.jsonl records
+    # are self-describing without a cross-reference into base.jsonl.
+    english_by_category_guid: Dict[Tuple[str, str], Dict[str, str]] = defaultdict(dict)
+    for audio_review, lemma in rows:
+        pos_type = lemma.pos_type.lower() if lemma.pos_type else "misc"
+        pos_subtype = lemma.pos_subtype.lower() if lemma.pos_subtype else "other"
+        records_by_category[(pos_type, pos_subtype)][audio_review.guid].append(
+            {
+                "language_code": audio_review.language_code,
+                "voice_name": audio_review.voice_name,
+                "filename": audio_review.filename,
+                "status": audio_review.status,
+                "expected_text": audio_review.expected_text,
+                "manifest_md5": audio_review.manifest_md5,
+                "s3_prod_url": audio_review.s3_prod_url,
+                "s3_staging_url": audio_review.s3_staging_url,
+                "staging_agent": audio_review.staging_agent,
+                "grammatical_form": audio_review.grammatical_form,
+            }
+        )
+        english_by_category_guid[(pos_type, pos_subtype)][audio_review.guid] = lemma.lemma_text
+
+    guid_count = 0
+    for (pos_type, pos_subtype), audio_by_guid in records_by_category.items():
+        dir_name = type_to_dir.get(pos_type, pos_type)
+        category_dir = Path(release_dir) / dir_name / pos_subtype
+        category_dir.mkdir(parents=True, exist_ok=True)
+        english_by_guid = english_by_category_guid[(pos_type, pos_subtype)]
+        records = []
+        for guid, audio in sorted(audio_by_guid.items(), key=lambda item: item[0]):
+            record: Dict[str, Any] = {"guid": guid}
+            english = english_by_guid.get(guid)
+            if english:
+                record["english"] = english
+            record["audio"] = audio
+            records.append(record)
+        guid_count += len(records)
+        print(f"Exporting {len(records)} lemma audio records to {dir_name}/{pos_subtype}...")
+        _write_jsonl_atomic(category_dir / "audio.jsonl", records)
+
+    print(f"Lemma audio export complete! Exported {len(rows)} approved audio rows.")
+    return LemmaAudioExportStats(
+        audio_rows=len(rows),
+        guids=guid_count,
+        categories=len(records_by_category),
+    )
+
+
 def export_sqlite_to_lemma_audio_release(sqlite_path: str, release_dir: str) -> None:
     """Export approved lemma audio from SQLite to data/release/lemmas format.
 
@@ -1036,90 +1150,209 @@ def export_sqlite_to_lemma_audio_release(sqlite_path: str, release_dir: str) -> 
     {release_dir}/{pos_dir}/{pos_subtype}/audio.jsonl
 
     Only approved lemma audio is exported. Sentence audio is emitted by
-    export_sqlite_to_sentence_release.
+    export_sqlite_to_sentence_release. Opens (and closes) its own session from
+    ``sqlite_path``; :func:`export_lemma_audio_release_from_session` is the
+    session-based core.
     """
     print(f"Exporting lemma audio from SQLite ({sqlite_path}) to release format ({release_dir})...")
 
     from storage.database import create_database_session
-    from storage.models.schema import AudioQualityReview, Lemma
 
     session = create_database_session(sqlite_path)
+    try:
+        export_lemma_audio_release_from_session(session, release_dir)
+    finally:
+        session.close()
 
-    type_to_dir: Dict[str, str] = {
-        "noun": "nouns",
-        "verb": "verbs",
-        "adjective": "adjectives",
-        "adverb": "adverbs",
-        "pronoun": "pronouns",
-        "preposition": "prepositions",
-        "conjunction": "conjunctions",
-        "interjection": "interjections",
-        "numeral": "numerals",
-        "particle": "particles",
+
+def import_lemma_audio_release_into_session(
+    session: Any, release_dir: str, prune: bool = False
+) -> LemmaAudioImportStats:
+    """Sync approved lemma audio from release files into an open session.
+
+    Session-based core of :func:`import_lemma_audio_release_to_sqlite`; works with
+    any SQLAlchemy backend so the Barsukas sync route can reuse it against the
+    live request session. Commits on ``session`` but does not close it.
+    """
+    from storage.models.schema import AudioQualityReview, Lemma
+
+    added = 0
+    updated = 0
+    pruned = 0
+
+    # Map GUIDs to lemma ids so imported audio rows can be linked.
+    lemma_id_by_guid: Dict[str, int] = {
+        guid: lemma_id
+        for guid, lemma_id in session.query(Lemma.guid, Lemma.id)
+        .filter(Lemma.guid.isnot(None))
+        .all()
     }
 
-    try:
-        rows = (
-            session.query(AudioQualityReview, Lemma)
-            .join(Lemma, AudioQualityReview.guid == Lemma.guid)
+    release_keys: Set[Tuple[str, str, str, Any]] = set()
+
+    for audio_file in sorted(Path(release_dir).rglob("audio.jsonl")):
+        with open(audio_file, "r", encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                data = json.loads(line)
+                guid = data.get("guid")
+                if not guid:
+                    continue
+                for entry in data.get("audio", []):
+                    language_code = entry.get("language_code")
+                    voice_name = entry.get("voice_name")
+                    if not language_code or not voice_name:
+                        print(f"Warning: {audio_file} guid {guid} has audio without a voice")
+                        continue
+                    grammatical_form = entry.get("grammatical_form")
+                    release_keys.add((guid, language_code, voice_name, grammatical_form))
+
+                    existing = (
+                        session.query(AudioQualityReview)
+                        .filter(
+                            AudioQualityReview.guid == guid,
+                            AudioQualityReview.language_code == language_code,
+                            AudioQualityReview.voice_name == voice_name,
+                            (
+                                AudioQualityReview.grammatical_form.is_(grammatical_form)
+                                if grammatical_form is None
+                                else AudioQualityReview.grammatical_form == grammatical_form
+                            ),
+                        )
+                        .one_or_none()
+                    )
+
+                    if existing is None:
+                        session.add(
+                            AudioQualityReview(
+                                guid=guid,
+                                language_code=language_code,
+                                voice_name=voice_name,
+                                grammatical_form=grammatical_form,
+                                filename=entry.get("filename", ""),
+                                expected_text=entry.get("expected_text", ""),
+                                manifest_md5=entry.get("manifest_md5", ""),
+                                status=entry.get("status", "approved"),
+                                s3_prod_url=entry.get("s3_prod_url"),
+                                s3_staging_url=entry.get("s3_staging_url"),
+                                staging_agent=entry.get("staging_agent"),
+                                lemma_id=lemma_id_by_guid.get(guid),
+                            )
+                        )
+                        added += 1
+                    else:
+                        existing.filename = entry.get("filename", existing.filename)
+                        existing.expected_text = entry.get("expected_text", existing.expected_text)
+                        existing.manifest_md5 = entry.get("manifest_md5", existing.manifest_md5)
+                        existing.status = entry.get("status", existing.status)
+                        existing.s3_prod_url = entry.get("s3_prod_url", existing.s3_prod_url)
+                        existing.s3_staging_url = entry.get(
+                            "s3_staging_url", existing.s3_staging_url
+                        )
+                        existing.staging_agent = entry.get("staging_agent", existing.staging_agent)
+                        if existing.lemma_id is None:
+                            existing.lemma_id = lemma_id_by_guid.get(guid)
+                        updated += 1
+
+    if prune:
+        exportable = (
+            session.query(AudioQualityReview)
             .filter(AudioQualityReview.guid.isnot(None))
             .filter(AudioQualityReview.sentence_id.is_(None))
             .filter(AudioQualityReview.status.in_(APPROVED_AUDIO_RELEASE_STATUSES))
-            .order_by(
-                Lemma.pos_type,
-                Lemma.pos_subtype,
-                AudioQualityReview.guid,
-                AudioQualityReview.language_code,
-                AudioQualityReview.voice_name,
-            )
             .all()
         )
-
-        records_by_category: Dict[Tuple[str, str], Dict[str, List[Dict[str, Any]]]] = defaultdict(
-            lambda: defaultdict(list)
-        )
-        # The English word each GUID's audio relates to, so audio.jsonl records
-        # are self-describing without a cross-reference into base.jsonl.
-        english_by_category_guid: Dict[Tuple[str, str], Dict[str, str]] = defaultdict(dict)
-        for audio_review, lemma in rows:
-            pos_type = lemma.pos_type.lower() if lemma.pos_type else "misc"
-            pos_subtype = lemma.pos_subtype.lower() if lemma.pos_subtype else "other"
-            records_by_category[(pos_type, pos_subtype)][audio_review.guid].append(
-                {
-                    "language_code": audio_review.language_code,
-                    "voice_name": audio_review.voice_name,
-                    "filename": audio_review.filename,
-                    "status": audio_review.status,
-                    "expected_text": audio_review.expected_text,
-                    "manifest_md5": audio_review.manifest_md5,
-                    "s3_prod_url": audio_review.s3_prod_url,
-                    "s3_staging_url": audio_review.s3_staging_url,
-                    "staging_agent": audio_review.staging_agent,
-                    "grammatical_form": audio_review.grammatical_form,
-                }
+        for review in exportable:
+            key = (
+                review.guid,
+                review.language_code,
+                review.voice_name,
+                review.grammatical_form,
             )
-            english_by_category_guid[(pos_type, pos_subtype)][audio_review.guid] = lemma.lemma_text
+            if key not in release_keys:
+                session.delete(review)
+                pruned += 1
 
-        for (pos_type, pos_subtype), audio_by_guid in records_by_category.items():
-            dir_name = type_to_dir.get(pos_type, pos_type)
-            category_dir = Path(release_dir) / dir_name / pos_subtype
-            category_dir.mkdir(parents=True, exist_ok=True)
-            english_by_guid = english_by_category_guid[(pos_type, pos_subtype)]
-            records = []
-            for guid, audio in sorted(audio_by_guid.items(), key=lambda item: item[0]):
-                record: Dict[str, Any] = {"guid": guid}
-                english = english_by_guid.get(guid)
-                if english:
-                    record["english"] = english
-                record["audio"] = audio
-                records.append(record)
-            print(f"Exporting {len(records)} lemma audio records to {dir_name}/{pos_subtype}...")
-            _write_jsonl_atomic(category_dir / "audio.jsonl", records)
+    session.commit()
+    summary = f"Lemma audio sync complete! Added {added}, updated {updated}"
+    if prune:
+        summary += f", pruned {pruned}"
+    print(summary + ".")
+    return LemmaAudioImportStats(added=added, updated=updated, pruned=pruned)
 
-        print(f"Lemma audio export complete! Exported {len(rows)} approved audio rows.")
 
-    finally:
-        session.close()
+@dataclass
+class LemmaAudioReleaseDiff:
+    """Read-only comparison of lemma-audio release files vs. the database.
+
+    Keys are the lemma-audio unique tuple ``(guid, language_code, voice_name,
+    grammatical_form)``. ``db_keys`` counts only exportable rows (GUID-bearing,
+    non-sentence, in an approved status), matching what an export would write.
+    """
+
+    release_keys: int = 0
+    db_keys: int = 0
+    only_in_release: int = 0
+    only_in_db: int = 0
+    in_both: int = 0
+
+
+def _read_release_lemma_audio_keys(release_dir: str) -> Set[Tuple[str, str, str, Any]]:
+    """Collect the lemma-audio unique keys present in release ``audio.jsonl`` files."""
+    keys: Set[Tuple[str, str, str, Any]] = set()
+    for audio_file in sorted(Path(release_dir).rglob("audio.jsonl")):
+        with open(audio_file, "r", encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                data = json.loads(line)
+                guid = data.get("guid")
+                if not guid:
+                    continue
+                for entry in data.get("audio", []):
+                    language_code = entry.get("language_code")
+                    voice_name = entry.get("voice_name")
+                    if not language_code or not voice_name:
+                        continue
+                    keys.add((guid, language_code, voice_name, entry.get("grammatical_form")))
+    return keys
+
+
+def summarize_lemma_audio_release_diff(session: Any, release_dir: str) -> LemmaAudioReleaseDiff:
+    """Compare exportable lemma audio in ``session`` against the release files.
+
+    Read-only: mutates nothing, used to preview a sync in the Barsukas UI.
+    """
+    from storage.models.schema import AudioQualityReview
+
+    release_keys = _read_release_lemma_audio_keys(release_dir)
+
+    db_keys: Set[Tuple[str, str, str, Any]] = set()
+    exportable = (
+        session.query(
+            AudioQualityReview.guid,
+            AudioQualityReview.language_code,
+            AudioQualityReview.voice_name,
+            AudioQualityReview.grammatical_form,
+        )
+        .filter(AudioQualityReview.guid.isnot(None))
+        .filter(AudioQualityReview.sentence_id.is_(None))
+        .filter(AudioQualityReview.status.in_(APPROVED_AUDIO_RELEASE_STATUSES))
+        .all()
+    )
+    for guid, language_code, voice_name, grammatical_form in exportable:
+        db_keys.add((guid, language_code, voice_name, grammatical_form))
+
+    return LemmaAudioReleaseDiff(
+        release_keys=len(release_keys),
+        db_keys=len(db_keys),
+        only_in_release=len(release_keys - db_keys),
+        only_in_db=len(db_keys - release_keys),
+        in_both=len(release_keys & db_keys),
+    )
 
 
 def import_lemma_audio_release_to_sqlite(
@@ -1135,6 +1368,8 @@ def import_lemma_audio_release_to_sqlite(
     Only the release-bearing columns are written on update; locally-held review
     metadata (``reviewed_by``, ``quality_issues``, ``notes``, acceptance columns)
     on an existing row is left untouched. ``lemma_id`` is resolved from the GUID.
+    Opens (and closes) its own session from ``sqlite_path``;
+    :func:`import_lemma_audio_release_into_session` is the session-based core.
 
     Args:
         sqlite_path: Path to the SQLite database to sync into.
@@ -1148,122 +1383,12 @@ def import_lemma_audio_release_to_sqlite(
     print(f"Syncing lemma audio from release ({release_dir}) into SQLite ({sqlite_path})...")
 
     from storage.database import create_database_session
-    from storage.models.schema import AudioQualityReview, Lemma
     from storage.utils.session import ensure_tables_exist
 
     session = create_database_session(sqlite_path)
     ensure_tables_exist(session)
-
-    added = 0
-    updated = 0
-    pruned = 0
-
     try:
-        # Map GUIDs to lemma ids so imported audio rows can be linked.
-        lemma_id_by_guid: Dict[str, int] = {
-            guid: lemma_id
-            for guid, lemma_id in session.query(Lemma.guid, Lemma.id)
-            .filter(Lemma.guid.isnot(None))
-            .all()
-        }
-
-        release_keys: Set[Tuple[str, str, str, Any]] = set()
-
-        for audio_file in sorted(Path(release_dir).rglob("audio.jsonl")):
-            with open(audio_file, "r", encoding="utf-8") as handle:
-                for line in handle:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    data = json.loads(line)
-                    guid = data.get("guid")
-                    if not guid:
-                        continue
-                    for entry in data.get("audio", []):
-                        language_code = entry.get("language_code")
-                        voice_name = entry.get("voice_name")
-                        if not language_code or not voice_name:
-                            print(f"Warning: {audio_file} guid {guid} has audio without a voice")
-                            continue
-                        grammatical_form = entry.get("grammatical_form")
-                        release_keys.add((guid, language_code, voice_name, grammatical_form))
-
-                        existing = (
-                            session.query(AudioQualityReview)
-                            .filter(
-                                AudioQualityReview.guid == guid,
-                                AudioQualityReview.language_code == language_code,
-                                AudioQualityReview.voice_name == voice_name,
-                                (
-                                    AudioQualityReview.grammatical_form.is_(grammatical_form)
-                                    if grammatical_form is None
-                                    else AudioQualityReview.grammatical_form == grammatical_form
-                                ),
-                            )
-                            .one_or_none()
-                        )
-
-                        if existing is None:
-                            session.add(
-                                AudioQualityReview(
-                                    guid=guid,
-                                    language_code=language_code,
-                                    voice_name=voice_name,
-                                    grammatical_form=grammatical_form,
-                                    filename=entry.get("filename", ""),
-                                    expected_text=entry.get("expected_text", ""),
-                                    manifest_md5=entry.get("manifest_md5", ""),
-                                    status=entry.get("status", "approved"),
-                                    s3_prod_url=entry.get("s3_prod_url"),
-                                    s3_staging_url=entry.get("s3_staging_url"),
-                                    staging_agent=entry.get("staging_agent"),
-                                    lemma_id=lemma_id_by_guid.get(guid),
-                                )
-                            )
-                            added += 1
-                        else:
-                            existing.filename = entry.get("filename", existing.filename)
-                            existing.expected_text = entry.get(
-                                "expected_text", existing.expected_text
-                            )
-                            existing.manifest_md5 = entry.get("manifest_md5", existing.manifest_md5)
-                            existing.status = entry.get("status", existing.status)
-                            existing.s3_prod_url = entry.get("s3_prod_url", existing.s3_prod_url)
-                            existing.s3_staging_url = entry.get(
-                                "s3_staging_url", existing.s3_staging_url
-                            )
-                            existing.staging_agent = entry.get(
-                                "staging_agent", existing.staging_agent
-                            )
-                            if existing.lemma_id is None:
-                                existing.lemma_id = lemma_id_by_guid.get(guid)
-                            updated += 1
-
-        if prune:
-            exportable = (
-                session.query(AudioQualityReview)
-                .filter(AudioQualityReview.guid.isnot(None))
-                .filter(AudioQualityReview.sentence_id.is_(None))
-                .filter(AudioQualityReview.status.in_(APPROVED_AUDIO_RELEASE_STATUSES))
-                .all()
-            )
-            for review in exportable:
-                key = (
-                    review.guid,
-                    review.language_code,
-                    review.voice_name,
-                    review.grammatical_form,
-                )
-                if key not in release_keys:
-                    session.delete(review)
-                    pruned += 1
-
-        session.commit()
-        summary = f"Lemma audio sync complete! Added {added}, updated {updated}"
-        if prune:
-            summary += f", pruned {pruned}"
-        print(summary + ".")
-
+        import_lemma_audio_release_into_session(session, release_dir, prune=prune)
     finally:
         session.close()
 
