@@ -44,11 +44,15 @@
                                 <td class="text-end">{{ diff.release_keys }}</td>
                             </tr>
                             <tr>
-                                <th scope="row">In both</th>
-                                <td class="text-end">{{ diff.in_both }}</td>
+                                <th scope="row">Identical on both sides</th>
+                                <td class="text-end">{{ diff.identical }}</td>
+                            </tr>
+                            <tr class="{{ 'table-warning' if diff.changed else '' }}">
+                                <th scope="row">Changed (same key, different fields)</th>
+                                <td class="text-end">{{ diff.changed }}</td>
                             </tr>
                             <tr class="{{ 'table-warning' if diff.only_in_release else '' }}">
-                                <th scope="row">Only in release (import adds/updates these)</th>
+                                <th scope="row">Only in release (import adds these)</th>
                                 <td class="text-end">{{ diff.only_in_release }}</td>
                             </tr>
                             <tr class="{{ 'table-warning' if diff.only_in_db else '' }}">
@@ -59,7 +63,9 @@
                     </table>
                     <p class="small text-muted mt-2 mb-0">
                         Keyed on <code>(guid, language, voice, grammatical_form)</code>. "Exportable"
-                        means GUID-bearing, non-sentence audio in an approved status.
+                        means GUID-bearing, non-sentence audio in an approved status. "Changed" rows
+                        share a key but differ in a release-bearing field &mdash; an import would
+                        overwrite the database copy, an export the file copy.
                     </p>
                 </div>
             </div>
@@ -84,7 +90,7 @@
                             </label>
                         </div>
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-box-arrow-in-down"></i> Import from Release
+                            <i class="bi bi-box-arrow-in-down"></i> Import Everything
                         </button>
                     </form>
                 </div>
@@ -101,12 +107,161 @@
                     </p>
                     <form method="POST" action="{{ url_for('sync_lemma_audio_release.export_release') }}">
                         <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-box-arrow-up"></i> Export to Release
+                            <i class="bi bi-box-arrow-up"></i> Export Everything
                         </button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-list-check"></i> Differences by Category
+                </div>
+                <div class="card-body">
+                    {% if not diff.differing_categories %}
+                        <p class="mb-0 text-muted">
+                            No differences &mdash; the release files and the database agree on all
+                            {{ diff.identical }} audio row(s).
+                        </p>
+                    {% else %}
+                        <p class="small text-muted">
+                            Select whole categories to sync just those, or expand a category and
+                            pick individual rows to import. Export always writes whole categories,
+                            since an <code>audio.jsonl</code> file is rewritten as a unit.
+                        </p>
+                        <form method="POST" id="scoped-sync-form">
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 2.5rem;"></th>
+                                            <th>Category</th>
+                                            <th class="text-end">Changed</th>
+                                            <th class="text-end">Only in release</th>
+                                            <th class="text-end">Only in DB</th>
+                                            <th class="text-end">Identical</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for category in diff.differing_categories %}
+                                        <tr>
+                                            <td>
+                                                <input class="form-check-input" type="checkbox"
+                                                       name="category" value="{{ category.slug }}"
+                                                       id="cat-{{ loop.index }}"
+                                                       aria-label="Select {{ category.slug }}">
+                                            </td>
+                                            <th scope="row">
+                                                <label for="cat-{{ loop.index }}" class="mb-0">
+                                                    <code>{{ category.slug }}</code>
+                                                </label>
+                                            </th>
+                                            <td class="text-end">{{ category.changed }}</td>
+                                            <td class="text-end">{{ category.only_in_release }}</td>
+                                            <td class="text-end">{{ category.only_in_db }}</td>
+                                            <td class="text-end text-muted">{{ category.identical }}</td>
+                                            <td class="text-end">
+                                                <a class="btn btn-sm btn-outline-secondary"
+                                                   href="{{ url_for('sync_lemma_audio_release.index', category=category.slug) }}">
+                                                    Show only this
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td colspan="6">
+                                                <details>
+                                                    <summary class="small text-muted">
+                                                        {{ category.differing }} differing row(s)
+                                                    </summary>
+                                                    <table class="table table-sm mt-2 mb-0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 2.5rem;"></th>
+                                                                <th>GUID</th>
+                                                                <th>English</th>
+                                                                <th>Lang</th>
+                                                                <th>Voice</th>
+                                                                <th>State</th>
+                                                                <th>Fields differing</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for entry in category.differing_entries %}
+                                                            <tr>
+                                                                <td>
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                           name="key" value="{{ entry.key_token }}"
+                                                                           aria-label="Select {{ entry.guid }} {{ entry.language_code }} {{ entry.voice_name }}">
+                                                                </td>
+                                                                <td><code>{{ entry.guid }}</code></td>
+                                                                <td>{{ entry.english or '' }}</td>
+                                                                <td>{{ entry.language_code }}</td>
+                                                                <td>{{ entry.voice_name }}</td>
+                                                                <td>
+                                                                    {% if entry.state == 'changed' %}
+                                                                        <span class="badge bg-warning text-dark">changed</span>
+                                                                    {% elif entry.state == 'only_in_release' %}
+                                                                        <span class="badge bg-primary">only in release</span>
+                                                                    {% else %}
+                                                                        <span class="badge bg-success">only in DB</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td class="small">
+                                                                    {% for name, values in entry.changed_fields.items() %}
+                                                                        <div>
+                                                                            <code>{{ name }}</code>:
+                                                                            <span class="text-primary">{{ values[0] }}</span>
+                                                                            &rarr;
+                                                                            <span class="text-success">{{ values[1] }}</span>
+                                                                        </div>
+                                                                    {% endfor %}
+                                                                </td>
+                                                            </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </details>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" name="prune" id="scoped-prune">
+                                <label class="form-check-label" for="scoped-prune">
+                                    Prune rows no longer in the release files
+                                    <span class="text-muted">(limited to the selected categories)</span>
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary"
+                                    formaction="{{ url_for('sync_lemma_audio_release.import_release') }}">
+                                <i class="bi bi-box-arrow-in-down"></i> Import Selected
+                            </button>
+                            <button type="submit" class="btn btn-success"
+                                    formaction="{{ url_for('sync_lemma_audio_release.export_release') }}">
+                                <i class="bi bi-box-arrow-up"></i> Export Selected Categories
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if scope_slug %}
+    <p class="text-muted">
+        Showing only <code>{{ scope_slug }}</code>.
+        <a href="{{ url_for('sync_lemma_audio_release.index') }}">Show all categories</a>
+    </p>
+    {% endif %}
 </div>
 {% endblock %}
