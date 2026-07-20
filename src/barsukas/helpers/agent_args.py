@@ -24,8 +24,9 @@ def agent_db_args() -> List[str]:
         return ["--persona", str(persona)]
 
     # No persona (test fixtures, or a directly-constructed app): fall back to the
-    # concrete path this app is actually using.
+    # concrete path this app is actually using. --persona custom unlocks the
+    # manual --postgres flag; a bare --db-path implies SQLite and needs no gate.
     backend_config = current_app.backend_config  # type: ignore[attr-defined]
     if backend_config.postgres_url:
-        return ["--postgres"]
+        return ["--persona", "custom", "--postgres"]
     return ["--db-path", str(backend_config.sqlite_path)]

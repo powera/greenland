@@ -181,12 +181,18 @@ def introspect_agent_parser(agent_module_path: str) -> Dict[str, Any]:
             if action.dest in AUTO_ADDED_ARGS:
                 continue
 
-            # Skip deprecated arguments (marked in help text by common_args);
-            # the launcher passes --persona instead
-            if (action.help or "").lstrip().upper().startswith("[DEPRECATED]"):
+            # Skip advanced manual-backend arguments (marked in help text by
+            # common_args); they require --persona custom, and the launcher
+            # passes a real persona instead
+            if (action.help or "").lstrip().upper().startswith("[ADVANCED]"):
                 continue
 
             arg_info = ArgumentInfo(action)
+
+            # "custom" only unlocks the manual backend flags hidden above, so
+            # it is meaningless in the form
+            if arg_info.dest == "persona" and arg_info.choices:
+                arg_info.choices = [c for c in arg_info.choices if c != "custom"]
             arguments.append(arg_info)
 
             # Collect mode hints
