@@ -1,3 +1,3 @@
-{"guid": "N18_001", "forms": [{"grammatical_form": "singular", "text": "pi", "is_base_form": true, "ipa": "/paɪ/", "phonetic": "PI"}]}
-{"guid": "N18_002", "forms": [{"grammatical_form": "singular", "text": "spade", "is_base_form": true}]}
-{"guid": "N18_003", "forms": [{"grammatical_form": "singular", "text": "suit", "is_base_form": true}]}
+{"guid": "N18_001", "forms": [{"grammatical_form": "singular", "text": "pi", "is_base_form": true, "ipa": "/paɪ/", "phonetic": "PI"}, {"grammatical_form": "noun/en_singular", "text": "pi", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "pis", "is_base_form": false}]}
+{"guid": "N18_002", "forms": [{"grammatical_form": "singular", "text": "spade", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "spade", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "spades", "is_base_form": false}]}
+{"guid": "N18_003", "forms": [{"grammatical_form": "singular", "text": "suit", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "suit", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "suits", "is_base_form": false}]}

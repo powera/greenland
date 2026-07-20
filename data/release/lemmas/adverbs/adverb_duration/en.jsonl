@@ -1,6 +1,6 @@
-{"guid": "D05_001", "forms": [{"grammatical_form": "positive", "text": "long", "is_base_form": true, "ipa": "/lɔːŋ/", "phonetic": "LONG"}]}
-{"guid": "D05_002", "forms": [{"grammatical_form": "positive", "text": "briefly", "is_base_form": true, "ipa": "/ˈbrif.li/", "phonetic": "BRIEF-lee"}]}
-{"guid": "D05_003", "forms": [{"grammatical_form": "positive", "text": "forever", "is_base_form": true, "ipa": "/ˈfɔːrəvɚ/", "phonetic": "FOH-ruh-VER"}]}
-{"guid": "D05_004", "forms": [{"grammatical_form": "positive", "text": "temporarily", "is_base_form": true}]}
-{"guid": "D05_005", "forms": [{"grammatical_form": "positive", "text": "permanently", "is_base_form": true}]}
-{"guid": "D05_006", "forms": [{"grammatical_form": "positive", "text": "momentarily", "is_base_form": true}]}
+{"guid": "D05_001", "forms": [{"grammatical_form": "positive", "text": "long", "is_base_form": true, "ipa": "/lɔːŋ/", "phonetic": "LONG"}, {"grammatical_form": "adverb/en_positive", "text": "long", "is_base_form": true}, {"grammatical_form": "adverb/en_comparative", "text": "longer", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "longest", "is_base_form": false}]}
+{"guid": "D05_002", "forms": [{"grammatical_form": "positive", "text": "briefly", "is_base_form": true, "ipa": "/ˈbrif.li/", "phonetic": "BRIEF-lee"}, {"grammatical_form": "adverb/en_positive", "text": "briefly", "is_base_form": true}, {"grammatical_form": "adverb/en_comparative", "text": "more briefly", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "most briefly", "is_base_form": false}]}
+{"guid": "D05_003", "forms": [{"grammatical_form": "positive", "text": "forever", "is_base_form": true, "ipa": "/ˈfɔːrəvɚ/", "phonetic": "FOH-ruh-VER"}, {"grammatical_form": "adverb/en_positive", "text": "forever", "is_base_form": true}]}
+{"guid": "D05_004", "forms": [{"grammatical_form": "positive", "text": "temporarily", "is_base_form": true}, {"grammatical_form": "adverb/en_positive", "text": "temporarily", "is_base_form": true}]}
+{"guid": "D05_005", "forms": [{"grammatical_form": "positive", "text": "permanently", "is_base_form": true}, {"grammatical_form": "adverb/en_positive", "text": "permanently", "is_base_form": true}]}
+{"guid": "D05_006", "forms": [{"grammatical_form": "positive", "text": "momentarily", "is_base_form": true}, {"grammatical_form": "adverb/en_positive", "text": "momentarily", "is_base_form": true}]}

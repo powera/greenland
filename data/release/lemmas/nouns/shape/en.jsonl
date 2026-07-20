@@ -11,8 +11,8 @@
 {"guid": "N37_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "hexagon", "is_base_form": true, "ipa": "/ˈhɛks.əɡən/", "phonetic": "HEX-suh-guh-n"}, {"grammatical_form": "noun/en_plural", "text": "hexagons", "is_base_form": false}]}
 {"guid": "N37_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "pentagon", "is_base_form": true, "ipa": "ˌpɛnˈtɒɡɒn", "phonetic": "PENT-uh-gone"}, {"grammatical_form": "noun/en_plural", "text": "pentagons", "is_base_form": false}]}
 {"guid": "N37_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "octagon", "is_base_form": true, "ipa": "/ˈɑːktəɡɒn/", "phonetic": "AHK-tuh-ghahn"}, {"grammatical_form": "noun/en_plural", "text": "octagons", "is_base_form": false}]}
-{"guid": "N37_014", "forms": [{"grammatical_form": "singular", "text": "shape", "is_base_form": true}]}
-{"guid": "N37_015", "forms": [{"grammatical_form": "singular", "text": "angle", "is_base_form": true}]}
-{"guid": "N37_016", "forms": [{"grammatical_form": "singular", "text": "curve", "is_base_form": true}]}
-{"guid": "N37_017", "forms": [{"grammatical_form": "singular", "text": "edge", "is_base_form": true}]}
-{"guid": "N37_018", "forms": [{"grammatical_form": "singular", "text": "star", "is_base_form": true}]}
+{"guid": "N37_014", "forms": [{"grammatical_form": "singular", "text": "shape", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "shape", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "shapes", "is_base_form": false}]}
+{"guid": "N37_015", "forms": [{"grammatical_form": "singular", "text": "angle", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "angle", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "angles", "is_base_form": false}]}
+{"guid": "N37_016", "forms": [{"grammatical_form": "singular", "text": "curve", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "curve", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "curves", "is_base_form": false}]}
+{"guid": "N37_017", "forms": [{"grammatical_form": "singular", "text": "edge", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "edge", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "edges", "is_base_form": false}]}
+{"guid": "N37_018", "forms": [{"grammatical_form": "singular", "text": "star", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "star", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stars", "is_base_form": false}]}

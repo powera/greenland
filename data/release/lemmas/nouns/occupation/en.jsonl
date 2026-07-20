@@ -22,34 +22,34 @@
 {"guid": "N36_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "dentist", "is_base_form": true, "ipa": "/ˈdɛntɪst/", "phonetic": "DEN-tist"}, {"grammatical_form": "noun/en_plural", "text": "dentists", "is_base_form": false}]}
 {"guid": "N36_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "veterinarian", "is_base_form": true, "ipa": "/vɛtəˈnɛriən/", "phonetic": "VET-uh-NAIR-yuhn"}, {"grammatical_form": "noun/en_plural", "text": "veterinarians", "is_base_form": false}]}
 {"guid": "N36_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "baker", "is_base_form": true, "ipa": "/ˈbeɪkər/", "phonetic": "BAY-ker"}, {"grammatical_form": "noun/en_plural", "text": "bakers", "is_base_form": false}]}
-{"guid": "N36_042", "forms": [{"grammatical_form": "singular", "text": "soldier", "is_base_form": true}]}
-{"guid": "N36_043", "forms": [{"grammatical_form": "singular", "text": "waiter", "is_base_form": true}]}
-{"guid": "N36_044", "forms": [{"grammatical_form": "singular", "text": "pharmacist", "is_base_form": true}]}
-{"guid": "N36_045", "forms": [{"grammatical_form": "singular", "text": "architect", "is_base_form": true}]}
-{"guid": "N36_046", "forms": [{"grammatical_form": "singular", "text": "scientist", "is_base_form": true}]}
-{"guid": "N36_047", "forms": [{"grammatical_form": "singular", "text": "actor", "is_base_form": true}]}
-{"guid": "N36_048", "forms": [{"grammatical_form": "singular", "text": "judge", "is_base_form": true}]}
-{"guid": "N36_049", "forms": [{"grammatical_form": "singular", "text": "hairdresser", "is_base_form": true}]}
-{"guid": "N36_050", "forms": [{"grammatical_form": "singular", "text": "fisherman", "is_base_form": true}]}
-{"guid": "N36_051", "forms": [{"grammatical_form": "singular", "text": "worker", "is_base_form": true}]}
-{"guid": "N36_052", "forms": [{"grammatical_form": "singular", "text": "librarian", "is_base_form": true}]}
-{"guid": "N36_053", "forms": [{"grammatical_form": "singular", "text": "surgeon", "is_base_form": true}]}
-{"guid": "N36_054", "forms": [{"grammatical_form": "singular", "text": "programmer", "is_base_form": true}]}
-{"guid": "N36_055", "forms": [{"grammatical_form": "singular", "text": "sailor", "is_base_form": true}]}
-{"guid": "N36_056", "forms": [{"grammatical_form": "singular", "text": "tailor", "is_base_form": true}]}
-{"guid": "N36_057", "forms": [{"grammatical_form": "singular", "text": "painter", "is_base_form": true}]}
-{"guid": "N36_058", "forms": [{"grammatical_form": "singular", "text": "butcher", "is_base_form": true}]}
-{"guid": "N36_059", "forms": [{"grammatical_form": "singular", "text": "gardener", "is_base_form": true}]}
-{"guid": "N36_060", "forms": [{"grammatical_form": "singular", "text": "translator", "is_base_form": true}]}
-{"guid": "N36_061", "forms": [{"grammatical_form": "singular", "text": "receptionist", "is_base_form": true}]}
-{"guid": "N36_062", "forms": [{"grammatical_form": "singular", "text": "coach", "is_base_form": true}]}
-{"guid": "N36_063", "forms": [{"grammatical_form": "singular", "text": "professor", "is_base_form": true}]}
-{"guid": "N36_064", "forms": [{"grammatical_form": "singular", "text": "psychologist", "is_base_form": true}]}
-{"guid": "N36_065", "forms": [{"grammatical_form": "singular", "text": "therapist", "is_base_form": true}]}
-{"guid": "N36_066", "forms": [{"grammatical_form": "singular", "text": "cashier", "is_base_form": true}]}
-{"guid": "N36_067", "forms": [{"grammatical_form": "singular", "text": "janitor", "is_base_form": true}]}
-{"guid": "N36_069", "forms": [{"grammatical_form": "singular", "text": "detective", "is_base_form": true}]}
-{"guid": "N36_070", "forms": [{"grammatical_form": "singular", "text": "paramedic", "is_base_form": true}]}
-{"guid": "N36_072", "forms": [{"grammatical_form": "singular", "text": "economist", "is_base_form": true}]}
-{"guid": "N36_073", "forms": [{"grammatical_form": "singular", "text": "diplomat", "is_base_form": true}]}
-{"guid": "N36_074", "forms": [{"grammatical_form": "singular", "text": "miner", "is_base_form": true}]}
+{"guid": "N36_042", "forms": [{"grammatical_form": "singular", "text": "soldier", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "soldier", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "soldiers", "is_base_form": false}]}
+{"guid": "N36_043", "forms": [{"grammatical_form": "singular", "text": "waiter", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "waiter", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "waiters", "is_base_form": false}]}
+{"guid": "N36_044", "forms": [{"grammatical_form": "singular", "text": "pharmacist", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "pharmacist", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "pharmacists", "is_base_form": false}]}
+{"guid": "N36_045", "forms": [{"grammatical_form": "singular", "text": "architect", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "architect", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "architects", "is_base_form": false}]}
+{"guid": "N36_046", "forms": [{"grammatical_form": "singular", "text": "scientist", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "scientist", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "scientists", "is_base_form": false}]}
+{"guid": "N36_047", "forms": [{"grammatical_form": "singular", "text": "actor", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "actor", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "actors", "is_base_form": false}]}
+{"guid": "N36_048", "forms": [{"grammatical_form": "singular", "text": "judge", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "judge", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "judges", "is_base_form": false}]}
+{"guid": "N36_049", "forms": [{"grammatical_form": "singular", "text": "hairdresser", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "hairdresser", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "hairdressers", "is_base_form": false}]}
+{"guid": "N36_050", "forms": [{"grammatical_form": "singular", "text": "fisherman", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "fisherman", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "fishermans", "is_base_form": false}]}
+{"guid": "N36_051", "forms": [{"grammatical_form": "singular", "text": "worker", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "worker", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "workers", "is_base_form": false}]}
+{"guid": "N36_052", "forms": [{"grammatical_form": "singular", "text": "librarian", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "librarian", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "librarians", "is_base_form": false}]}
+{"guid": "N36_053", "forms": [{"grammatical_form": "singular", "text": "surgeon", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "surgeon", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "surgeons", "is_base_form": false}]}
+{"guid": "N36_054", "forms": [{"grammatical_form": "singular", "text": "programmer", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "programmer", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "programmers", "is_base_form": false}]}
+{"guid": "N36_055", "forms": [{"grammatical_form": "singular", "text": "sailor", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "sailor", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "sailors", "is_base_form": false}]}
+{"guid": "N36_056", "forms": [{"grammatical_form": "singular", "text": "tailor", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "tailor", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "tailors", "is_base_form": false}]}
+{"guid": "N36_057", "forms": [{"grammatical_form": "singular", "text": "painter", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "painter", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "painters", "is_base_form": false}]}
+{"guid": "N36_058", "forms": [{"grammatical_form": "singular", "text": "butcher", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "butcher", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "butchers", "is_base_form": false}]}
+{"guid": "N36_059", "forms": [{"grammatical_form": "singular", "text": "gardener", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "gardener", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "gardeners", "is_base_form": false}]}
+{"guid": "N36_060", "forms": [{"grammatical_form": "singular", "text": "translator", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "translator", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "translators", "is_base_form": false}]}
+{"guid": "N36_061", "forms": [{"grammatical_form": "singular", "text": "receptionist", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "receptionist", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "receptionists", "is_base_form": false}]}
+{"guid": "N36_062", "forms": [{"grammatical_form": "singular", "text": "coach", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "coach", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "coaches", "is_base_form": false}]}
+{"guid": "N36_063", "forms": [{"grammatical_form": "singular", "text": "professor", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "professor", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "professors", "is_base_form": false}]}
+{"guid": "N36_064", "forms": [{"grammatical_form": "singular", "text": "psychologist", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "psychologist", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "psychologists", "is_base_form": false}]}
+{"guid": "N36_065", "forms": [{"grammatical_form": "singular", "text": "therapist", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "therapist", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "therapists", "is_base_form": false}]}
+{"guid": "N36_066", "forms": [{"grammatical_form": "singular", "text": "cashier", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "cashier", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "cashiers", "is_base_form": false}]}
+{"guid": "N36_067", "forms": [{"grammatical_form": "singular", "text": "janitor", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "janitor", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "janitors", "is_base_form": false}]}
+{"guid": "N36_069", "forms": [{"grammatical_form": "singular", "text": "detective", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "detective", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "detectives", "is_base_form": false}]}
+{"guid": "N36_070", "forms": [{"grammatical_form": "singular", "text": "paramedic", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "paramedic", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "paramedics", "is_base_form": false}]}
+{"guid": "N36_072", "forms": [{"grammatical_form": "singular", "text": "economist", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "economist", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "economists", "is_base_form": false}]}
+{"guid": "N36_073", "forms": [{"grammatical_form": "singular", "text": "diplomat", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "diplomat", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "diplomats", "is_base_form": false}]}
+{"guid": "N36_074", "forms": [{"grammatical_form": "singular", "text": "miner", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "miner", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "miners", "is_base_form": false}]}
