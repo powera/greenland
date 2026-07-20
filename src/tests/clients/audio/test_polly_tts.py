@@ -41,9 +41,14 @@ class TestPollyVoice(unittest.TestCase):
         self.assertEqual(PollyVoice.LEA.language_code, "fr")
 
     def test_gender(self) -> None:
-        """Test gender property."""
+        """Test gender property.
+
+        Individual voices come and go as AWS changes its catalog, so assert the
+        property works over whatever voices exist rather than naming one.
+        """
         self.assertEqual(PollyVoice.ZHIYU.gender, "f")
-        self.assertEqual(PollyVoice.PEDRO.gender, "m")
+        self.assertEqual(PollyVoice.MATTHEW.gender, "m")
+        self.assertEqual({v.gender for v in PollyVoice}, {"f", "m"})
 
     def test_ui_name(self) -> None:
         """Test ui_name property."""
