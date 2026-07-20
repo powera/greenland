@@ -172,8 +172,41 @@ def add_guid_arg(
     return parser
 
 
+# Help-text marker for arguments that are deprecated in favor of --persona.
+# The Barsukas agents launcher hides any argument whose help starts with this.
+DEPRECATED_ARG_MARKER = "[DEPRECATED]"
+
+
+class _DeprecatedBackendFlagAction(argparse.Action):
+    """Store an argument's value while warning that the flag is deprecated.
+
+    argparse only invokes actions for flags actually present on the command
+    line, so defaults set via ``parser.set_defaults(...)`` do not warn.
+    """
+
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        values: Any,
+        option_string: Optional[str] = None,
+    ) -> None:
+        print(
+            f"Warning: {option_string} is deprecated; use --persona instead.",
+            file=sys.stderr,
+        )
+        if self.nargs == 0:
+            setattr(namespace, self.dest, True)
+        else:
+            setattr(namespace, self.dest, values)
+
+
 def add_backend_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     """Add storage backend arguments.
+
+    --persona is the preferred way to select the main database. The older
+    --backend/--data-dir/--postgres flags are deprecated and kept only for
+    backward compatibility until they are fully redundant to --persona.
 
     Args:
         parser: The argument parser to add arguments to
@@ -193,16 +226,23 @@ def add_backend_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser
     parser.add_argument(
         "--backend",
         choices=["sqlite", "jsonl", "postgres"],
-        help="Storage backend type (default: sqlite)",
+        action=_DeprecatedBackendFlagAction,
+        help=f"{DEPRECATED_ARG_MARKER} Use --persona instead. Storage backend type (default: sqlite)",
     )
     parser.add_argument(
         "--data-dir",
-        help="Data directory for JSONL backend (e.g., data/release/lemmas). Only used with --backend jsonl",
+        action=_DeprecatedBackendFlagAction,
+        help=(
+            f"{DEPRECATED_ARG_MARKER} Use --persona instead. Data directory for "
+            "JSONL backend (e.g., data/release/lemmas). Only used with --backend jsonl"
+        ),
     )
     parser.add_argument(
         "--postgres",
-        action="store_true",
-        help="Use PostgreSQL backend instead of SQLite",
+        nargs=0,
+        default=False,
+        action=_DeprecatedBackendFlagAction,
+        help=f"{DEPRECATED_ARG_MARKER} Use --persona prod instead. Use PostgreSQL backend instead of SQLite",
     )
 
     return parser
