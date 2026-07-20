@@ -4,7 +4,11 @@
 
 import unittest
 
-from langtools.en.conjugation import IRREGULAR_CONJUGATIONS, expand_verb_forms
+from langtools.en.conjugation import (
+    IRREGULAR_BASE_FORMS,
+    IRREGULAR_CONJUGATIONS,
+    expand_verb_forms,
+)
 
 # Expected keys matching VERB_FORM_MAPPING in langtools.en.llm_forms.
 # Defined here to avoid importing llm_forms (which pulls in storage/sqlalchemy).
@@ -302,6 +306,66 @@ class TestAutoGenerationFromInfinitive(unittest.TestCase):
         self.assertEqual(result["present_participle"], "trying")
 
 
+class TestFinalConsonantDoubling(unittest.TestCase):
+    """Final consonants double only when the last syllable is stressed."""
+
+    def test_monosyllables_double(self) -> None:
+        """Stressed monosyllables double: plan -> planned/planning."""
+        for infinitive, past, participle in [
+            ("plan", "planned", "planning"),
+            ("stop", "stopped", "stopping"),
+            ("nod", "nodded", "nodding"),
+            ("rub", "rubbed", "rubbing"),
+        ]:
+            result = expand_verb_forms({"infinitive": infinitive})
+            self.assertEqual(result["1s_past"], past)
+            self.assertEqual(result["present_participle"], participle)
+
+    def test_stressed_final_syllable_doubles(self) -> None:
+        """Polysyllables stressed on the last syllable still double."""
+        for infinitive, past, participle in [
+            ("prefer", "preferred", "preferring"),
+            ("occur", "occurred", "occurring"),
+            ("regret", "regretted", "regretting"),
+        ]:
+            result = expand_verb_forms({"infinitive": infinitive})
+            self.assertEqual(result["1s_past"], past)
+            self.assertEqual(result["present_participle"], participle)
+
+    def test_unstressed_final_syllable_does_not_double(self) -> None:
+        """Polysyllables with an unstressed last syllable must not double."""
+        for infinitive, past, participle in [
+            ("remember", "remembered", "remembering"),
+            ("answer", "answered", "answering"),
+            ("open", "opened", "opening"),
+            ("visit", "visited", "visiting"),
+            ("develop", "developed", "developing"),
+            ("listen", "listened", "listening"),
+        ]:
+            result = expand_verb_forms({"infinitive": infinitive})
+            self.assertEqual(result["1s_past"], past)
+            self.assertEqual(result["present_participle"], participle)
+
+
+class TestCommonIrregularsAreTabulated(unittest.TestCase):
+    """Common irregular verbs must not fall through to the regular rules."""
+
+    def test_irregular_past_forms(self) -> None:
+        for infinitive, past in [
+            ("tell", "told"),
+            ("teach", "taught"),
+            ("grow", "grew"),
+            ("throw", "threw"),
+            ("swim", "swam"),
+            ("win", "won"),
+            ("wear", "wore"),
+            ("wake", "woke"),
+            ("understand", "understood"),
+        ]:
+            result = expand_verb_forms({"infinitive": infinitive})
+            self.assertEqual(result["1s_past"], past)
+
+
 class TestExpandVerbFormsAlignment(unittest.TestCase):
     """Verify that expanded keys match VERB_FORM_MAPPING keys."""
 
@@ -384,8 +448,8 @@ class TestIrregularConjugationsData(unittest.TestCase):
         self.assertEqual(steal_forms["past_participle"], "stolen")
 
     def test_irregular_list_expanded_size(self) -> None:
-        # 1 fully explicit (be) + 104 irregular base-form entries.
-        self.assertEqual(len(IRREGULAR_CONJUGATIONS), 105)
+        # 1 fully explicit ("be") plus one expanded entry per base-form entry.
+        self.assertEqual(len(IRREGULAR_CONJUGATIONS), len(IRREGULAR_BASE_FORMS) + 1)
 
 
 if __name__ == "__main__":

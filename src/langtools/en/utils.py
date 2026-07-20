@@ -1,6 +1,85 @@
 """English-specific utility functions."""
 
-from typing import List
+from typing import List, Set
+
+# Verbs whose final syllable is stressed and therefore double the final
+# consonant despite having more than one syllable (e.g. "prefer" -> "preferred").
+# Multi-syllable verbs not listed here are assumed to have an unstressed final
+# syllable and do not double.
+_STRESSED_FINAL_SYLLABLE_VERBS: Set[str] = {
+    "admit",
+    "allot",
+    "begin",
+    "commit",
+    "compel",
+    "control",
+    "defer",
+    "emit",
+    "equip",
+    "excel",
+    "forget",
+    "infer",
+    "occur",
+    "omit",
+    "patrol",
+    "permit",
+    "prefer",
+    "propel",
+    "rebel",
+    "refer",
+    "regret",
+    "submit",
+    "transfer",
+    "transmit",
+    "upset",
+}
+
+_VOWELS = "aeiou"
+
+
+def _count_syllable_groups(word: str) -> int:
+    """Approximate syllable count by counting runs of vowels.
+
+    Good enough to separate monosyllables ("plan") from polysyllables
+    ("remember"); exact stress placement is handled by the explicit
+    :data:`_STRESSED_FINAL_SYLLABLE_VERBS` set.
+    """
+    groups = 0
+    in_vowel_run = False
+    for char in word:
+        if char in _VOWELS:
+            if not in_vowel_run:
+                groups += 1
+                in_vowel_run = True
+        else:
+            in_vowel_run = False
+    return groups
+
+
+def should_double_final_consonant(verb: str) -> bool:
+    """Whether *verb* doubles its final consonant before ``-ed`` / ``-ing``.
+
+    English doubles only when the word ends consonant-vowel-consonant *and*
+    the final syllable carries the stress. Monosyllables are always stressed
+    ("plan" -> "planned"); polysyllables double only when listed in
+    :data:`_STRESSED_FINAL_SYLLABLE_VERBS` ("prefer" -> "preferred", but
+    "remember" -> "remembered", not "rememberred").
+    """
+    if len(verb) < 2:
+        return False
+
+    # Final consonant-vowel-consonant pattern, excluding w/x/y which never double.
+    if not (
+        verb[-1] in "bdgklmnprstz"
+        and verb[-2] in _VOWELS
+        and (len(verb) < 3 or verb[-3] not in _VOWELS)
+    ):
+        return False
+
+    if _count_syllable_groups(verb) <= 1:
+        return True
+
+    return verb.lower() in _STRESSED_FINAL_SYLLABLE_VERBS
 
 
 def strip_subject_pronoun(text: str) -> str:
@@ -133,14 +212,9 @@ def generate_past_tense(verb: str) -> str:
     if verb.endswith("y") and len(verb) > 1 and verb[-2] not in "aeiou":
         return verb[:-1] + "ied"
 
-    # Single consonant after single short vowel: double the consonant
-    # This is a simplified heuristic
-    if (
-        len(verb) >= 2
-        and verb[-1] in "bdgklmnprstz"
-        and verb[-2] in "aeiou"
-        and (len(verb) < 3 or verb[-3] not in "aeiou")
-    ):
+    # Single consonant after single short vowel in a stressed final syllable:
+    # double the consonant
+    if should_double_final_consonant(verb):
         return verb + verb[-1] + "ed"
 
     # Regular: add -ed
@@ -168,13 +242,9 @@ def generate_present_participle(verb: str) -> str:
     if verb.endswith("e") and len(verb) > 1 and verb[-2] not in "eyo":
         return verb[:-1] + "ing"
 
-    # Single consonant after single short vowel: double the consonant
-    if (
-        len(verb) >= 2
-        and verb[-1] in "bdgklmnprstz"
-        and verb[-2] in "aeiou"
-        and (len(verb) < 3 or verb[-3] not in "aeiou")
-    ):
+    # Single consonant after single short vowel in a stressed final syllable:
+    # double the consonant
+    if should_double_final_consonant(verb):
         return verb + verb[-1] + "ing"
 
     # Regular: add -ing
