@@ -226,27 +226,6 @@ def add_backend_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser
     return parser
 
 
-def add_benchmarks_backend_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
-    """Add benchmark-datastore backend arguments.
-
-    Args:
-        parser: The argument parser to add arguments to
-
-    Returns:
-        The same parser with benchmark backend arguments added
-    """
-    parser.add_argument(
-        "--benchmarks-use-postgres",
-        action="store_true",
-        help=(
-            "Use PostgreSQL for benchmark metadata lookups (model registry). "
-            "If --postgres is set, this is also treated as enabled."
-        ),
-    )
-
-    return parser
-
-
 def add_language_args(
     parser: argparse.ArgumentParser, multiple: bool = False
 ) -> argparse.ArgumentParser:
@@ -444,28 +423,6 @@ def count_items_for_confirmation(
         session.close()
 
 
-def get_standard_db_path(args_db_path: Optional[str] = None) -> str:
-    """Get standardized database path with fallback logic.
-
-    Args:
-        args_db_path: Database path from command-line args (or None)
-
-    Returns:
-        Resolved database path
-    """
-    if args_db_path:
-        return args_db_path
-
-    # Try environment variable
-    import os
-
-    if "GREENLAND_DB" in os.environ:
-        return os.environ["GREENLAND_DB"]
-
-    # Default fallback
-    return str(Path(__file__).parent.parent.parent / "data" / "greenland.db")
-
-
 def get_data_source_config(args: Any, default_model: Optional[str] = None) -> "DataSourceConfig":
     """Create DataSourceConfig from parsed arguments.
 
@@ -570,7 +527,7 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None) -> "D
     debug = args.debug if hasattr(args, "debug") else False
     use_word2vec = args.use_word2vec if hasattr(args, "use_word2vec") else False
 
-    return DataSourceConfig(
+    config = DataSourceConfig(
         backend_type=backend_type,
         sqlite_path=sqlite_path,
         jsonl_data_dir=jsonl_data_dir,
@@ -582,26 +539,23 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None) -> "D
         debug=debug,
     )
 
+    # Declare this as the process's main database. Consumers that cannot take
+    # the config directly (no-arg create_session(), the S3 staging prefix)
+    # read the declared backend instead of the environment.
+    from storage.backend.factory import configure_backend
+
+    configure_backend(config)
+
+    return config
+
 
 def configure_benchmarks_session_backend(args: Any) -> None:
-    """Configure benchmark datastore session factory from CLI args.
+    """Configure the benchmark datastore backend from the persona.
 
-    This currently monkey-patches benchmarks.datastore.common.create_dev_session
-    so model/codename lookups (used by UnifiedLLMClient) can target the
-    benchmarks PostgreSQL schema when requested.
+    The benchmark datastore (model registry, used by UnifiedLLMClient lookups)
+    is PostgreSQL for every persona except the fully offline local-sqlite one.
     """
     import benchmarks.datastore.common as datastore_common
-    from benchmarks.config import BenchmarkConfig
 
-    use_postgres = bool(getattr(args, "benchmarks_use_postgres", False)) or bool(
-        getattr(args, "postgres", False)
-    )
-    if not use_postgres:
-        return
-
-    postgres_url = BenchmarkConfig.build_postgres_url()
-
-    def _postgres_dev_session() -> Any:
-        return datastore_common.create_postgres_session(postgres_url)
-
-    datastore_common.create_dev_session = _postgres_dev_session
+    if getattr(args, "persona", None) == PersonaName.LOCAL_SQLITE.value:
+        datastore_common.use_sqlite_backend()

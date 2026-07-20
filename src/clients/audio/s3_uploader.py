@@ -27,7 +27,9 @@ except ImportError:
 import constants
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Default configuration
@@ -36,12 +38,20 @@ DEFAULT_BUCKET = "trakaido-audio"
 
 
 def get_staging_prefix() -> str:
-    """Get the staging directory prefix based on current backend.
+    """Get the staging directory prefix based on the process's main database.
+
+    Reads the backend declared via storage.backend.configure_backend() —
+    create_app(), the worker, and agents' get_data_source_config() all declare
+    it. A process that never configured a backend gets the SQLite prefix.
 
     Returns:
         "staging-postgres" if using PostgreSQL backend, "staging" otherwise
     """
-    if os.environ.get("STORAGE_BACKEND") == "postgres":
+    from storage.backend.config import BackendType
+    from storage.backend.factory import get_configured_backend_config
+
+    config = get_configured_backend_config()
+    if config is not None and config.backend_type == BackendType.POSTGRES:
         return "staging-postgres"
     return "staging"
 

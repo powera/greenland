@@ -5,9 +5,7 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app/src \
     PORT=5555 \
     BARSUKAS_HOST=0.0.0.0 \
-    BARSUKAS_PERSONA=hosted \
-    STORAGE_BACKEND=jsonl \
-    JSONL_DATA_DIR=/app/data/release
+    BARSUKAS_PERSONA=hosted
 
 WORKDIR /app
 

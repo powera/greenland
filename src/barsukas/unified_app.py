@@ -21,7 +21,6 @@ from typing import Any, Optional
 from barsukas.config import Config
 from barsukas.app import create_app
 from barsukas.personas import (
-    apply_persona_env,
     list_personas,
     PersonaConfig,
     PersonaName,
@@ -197,9 +196,8 @@ def main() -> None:
     if args.use_word2vec:
         os.environ["USE_WORD2VEC"] = "true"
 
-    # Resolve the main database and export the compatibility env vars. This is
-    # the only place the persona is translated into the environment; create_app()
-    # and run_worker() take the object itself.
+    # Resolve the main database. create_app() and run_worker() take the persona
+    # object itself; nothing is exported to the environment.
     repo_root = Path(__file__).parent.parent.parent
 
     main_postgres_url: Optional[str] = args.db_url
@@ -228,8 +226,6 @@ def main() -> None:
             logger.error(f"Database not found at {Config.DB_PATH}")
             sys.exit(1)
         db_display = Config.DB_PATH
-
-    apply_persona_env(persona, repo_root, postgres_url=main_postgres_url)
 
     logger.info("=" * 80)
     logger.info("BARSUKAS UNIFIED LAUNCHER")
@@ -296,12 +292,27 @@ def main() -> None:
         # (sentence decomposition). Checks every 5 minutes and applies any
         # completed batches to the main DB.
         from storage.backend import create_session as _create_main_session
+        from storage.backend.config import BackendType as _BackendType
         from storage.backend.config import DataSourceConfig as _DataSourceConfig
 
+        # Build the poller's config from the resolved persona directly; the
+        # environment is not consulted.
+        if main_postgres_url:
+            _poller_config = _DataSourceConfig(
+                backend_type=_BackendType.POSTGRES, postgres_url=main_postgres_url
+            )
+        elif persona.use_jsonl:
+            _poller_config = _DataSourceConfig(
+                backend_type=_BackendType.JSONL,
+                jsonl_data_dir=str(repo_root / (persona.jsonl_data_dir or "data/release")),
+            )
+        else:
+            _poller_config = _DataSourceConfig(
+                backend_type=_BackendType.SQLITE, sqlite_path=Config.DB_PATH
+            )
+
         def _main_session_factory() -> Any:
-            # Bare DataSourceConfig() reads STORAGE_BACKEND from the environment,
-            # which apply_persona_env() set above.
-            return _create_main_session(_DataSourceConfig())
+            return _create_main_session(_poller_config)
 
         logger.info("Starting batch poller thread (5-minute interval)...")
         batch_poller_thread = start_batch_poller_thread(_main_session_factory, STOP_EVENT)

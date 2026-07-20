@@ -4,7 +4,6 @@ This module provides configuration management for the benchmark subsystem,
 which is separate from the main linguistics/wordfreq database.
 """
 
-import os
 from pathlib import Path
 from typing import Optional
 
@@ -13,7 +12,6 @@ from benchmarks.benchmark_constants import (
     BENCHMARKS_POSTGRES_SCHEMA,
     DEFAULT_BENCHMARK_MODEL,
 )
-
 
 # Benchmark codes that are considered production-ready for init-all / missing.
 # Other registered benchmarks still exist in the registry and can be run
@@ -99,40 +97,6 @@ class BenchmarkConfig:
         self.postgres_url = postgres_url
         self.model = model or DEFAULT_BENCHMARK_MODEL
         self.debug = debug
-
-    @classmethod
-    def from_env(cls) -> "BenchmarkConfig":
-        """Create configuration from environment variables.
-
-        Environment variables:
-            BENCH_STORAGE_BACKEND: "sqlite" or "postgres" (default: "postgres")
-            BENCHMARKS_DB_PATH: Path to benchmarks database (optional, sqlite only)
-            BENCH_POSTGRES_URL: Full PostgreSQL URL (optional; built from key file if absent)
-            BENCHMARK_MODEL: Default LLM model to use (optional)
-            DEBUG: "true" or "false" (default: "false")
-
-        Returns:
-            BenchmarkConfig instance
-        """
-        backend = os.environ.get("BENCH_STORAGE_BACKEND", "postgres").lower()
-        db_path = os.environ.get("BENCHMARKS_DB_PATH")
-        model = os.environ.get("BENCHMARK_MODEL")
-        debug = os.environ.get("DEBUG", "false").lower() == "true"
-
-        postgres_url: Optional[str] = None
-        if backend == "postgres":
-            postgres_url = os.environ.get("BENCH_POSTGRES_URL")
-            if postgres_url:
-                postgres_url = cls.normalize_postgres_url(postgres_url)
-            else:
-                postgres_url = cls.build_postgres_url()
-
-        return cls(
-            db_path=db_path,
-            postgres_url=postgres_url,
-            model=model,
-            debug=debug,
-        )
 
     @classmethod
     def build_postgres_url(cls) -> str:

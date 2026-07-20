@@ -108,16 +108,10 @@ class DataSourceConfig:
             model: LLM model to use (e.g., "gpt-5.4-mini", "claude-sonnet-4")
             debug: Enable debug logging
         """
-        # Determine backend type from env var or default
+        # Default backend is SQLite. Backend selection is explicit (via
+        # --persona and DataSourceConfig); the environment is not consulted.
         if backend_type is None:
-            backend_str = os.environ.get("STORAGE_BACKEND", "sqlite").lower()
-            try:
-                backend_type = BackendType(backend_str)
-            except ValueError:
-                raise ValueError(
-                    f"Invalid STORAGE_BACKEND: {backend_str}. "
-                    f"Must be one of: {[b.value for b in BackendType]}"
-                )
+            backend_type = BackendType.SQLITE
 
         self.backend_type = backend_type
 
@@ -182,55 +176,6 @@ class DataSourceConfig:
             openai_api_key=self.openai_api_key,
             anthropic_api_key=self.anthropic_api_key,
             google_api_key=self.google_api_key,
-        )
-
-    @classmethod
-    def from_env(cls) -> "DataSourceConfig":
-        """Create configuration from environment variables.
-
-        Environment variables:
-            STORAGE_BACKEND: "sqlite", "jsonl", or "postgres" (default: "sqlite")
-            SQLITE_DB_PATH: Path to SQLite database (optional)
-            JSONL_DATA_DIR: Path to JSONL data directory (optional)
-            POSTGRES_URL: PostgreSQL connection URL (optional, built from template if not set)
-            BARSUKAS_CACHE_URL: URL of BARSUKAS cache server (optional)
-            CACHE_ONLY: "true" or "false" (default: "false")
-            USE_WORD2VEC: "true" or "false" (default: "false")
-            LLM_MODEL: Default LLM model to use (optional)
-            DEBUG: "true" or "false" (default: "false")
-
-        Returns:
-            DataSourceConfig instance
-        """
-        backend_str = os.environ.get("STORAGE_BACKEND", "sqlite").lower()
-        backend_type = BackendType(backend_str)
-
-        sqlite_path = os.environ.get("SQLITE_DB_PATH")
-        jsonl_data_dir = os.environ.get("JSONL_DATA_DIR")
-        barsukas_url = os.environ.get("BARSUKAS_CACHE_URL")
-        cache_only = os.environ.get("CACHE_ONLY", "false").lower() == "true"
-        use_word2vec = os.environ.get("USE_WORD2VEC", "false").lower() == "true"
-        model = os.environ.get("LLM_MODEL")
-        debug = os.environ.get("DEBUG", "false").lower() == "true"
-
-        # Handle PostgreSQL URL
-        postgres_url = None
-        if backend_type == BackendType.POSTGRES:
-            postgres_url = os.environ.get("POSTGRES_URL")
-            if not postgres_url:
-                # Build from template + key file
-                postgres_url = cls.build_postgres_url()
-
-        return cls(
-            backend_type=backend_type,
-            sqlite_path=sqlite_path,
-            jsonl_data_dir=jsonl_data_dir,
-            postgres_url=postgres_url,
-            barsukas_url=barsukas_url,
-            cache_only=cache_only,
-            use_word2vec=use_word2vec,
-            model=model,
-            debug=debug,
         )
 
     @classmethod
