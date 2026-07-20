@@ -57,6 +57,46 @@ run black and mypy on modified Python files to ensure code quality and type
 correctness.  For barsukas changes, ask the developer to test the change in
 their local browser.
 
+Testing
+-------
+There are three test targets, run via ./run_tests.sh :
+
+  ./run_tests.sh smoke    ~16 tests, ~1s   - run on every commit
+  ./run_tests.sh base     ~1690 tests, ~16s - run often, not every commit
+  ./run_tests.sh all      everything, including known-failing suites
+
+Extra arguments pass through to pytest:
+  ./run_tests.sh base -k combined_rank -x
+
+The older run_tests.py is broken (it dies on src/benchmarks/server, which is not
+an importable package) and cannot filter by marker.  Use run_tests.sh .
+
+smoke asserts only that the tree imports and the barsukas app starts.  It is
+deliberately shallow: the recurring failure in this repo is a module being moved
+while something that named it as a string was not updated, and imports catch
+that immediately.  Mark new smoke tests with @pytest.mark.smoke and keep the
+total under ~20 - it is worthless if it stops being fast.  Tests needing a
+database, an LLM client, or fixtures belong in base instead.
+
+base is everything except src/tests/lib/benchmarks .  Those 16 failures are all
+one cause: stale "datastore.*" mock.patch targets that should be
+"benchmarks.datastore.*" .  Fixing the paths will let those tests run for the
+first time in a while, so expect further staleness underneath.
+
+Two things to know when writing tests:
+
+* Tests must never use real credentials.  create_app() gates its benchmarks
+  PostgreSQL setup on TESTING for this reason; do not un-gate it.
+* Import benchmarks.lib.utils before importing any module under
+  benchmarks.lib.runners or benchmarks.lib.generators .  The utils package init
+  eagerly imports every runner and then the registry, and the registry imports
+  those runners back for their registration side effects, so entering from a
+  runner leaves it half-initialized.  This is a convention, not a fix.
+
+When a test fails after a refactor, check whether the production behavior
+changed intentionally before editing the test - and prefer asserting against a
+constant or a derived value over a hardcoded literal that will go stale again.
+
 After cloning, enable pre-commit hooks to automatically check black formatting:
   git config core.hooksPath .githooks
 

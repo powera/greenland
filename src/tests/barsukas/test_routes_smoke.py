@@ -127,6 +127,7 @@ class TestLemmaRoutes:
         assert "house" in html
 
 
+@pytest.mark.smoke
 class TestHomeRoute:
     """Smoke test for the home page."""
 
@@ -135,6 +136,7 @@ class TestHomeRoute:
         assert response.status_code == 200
 
 
+@pytest.mark.smoke
 class TestHealthRoute:
     """Smoke test for the health check endpoint."""
 

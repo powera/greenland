@@ -13,6 +13,8 @@ import importlib
 import unittest
 from typing import Any, Dict, Optional
 
+import pytest
+
 
 def is_missing_dependency_error(error: Exception) -> bool:
     """Check if an error is due to a missing external dependency."""
@@ -122,6 +124,7 @@ ALL_LANGUAGES = [
 KEYWORD_CONFLICT_LANGUAGES = ["or"]  # "or" is Odia but conflicts with Python's "or" keyword
 
 
+@pytest.mark.smoke
 class TestLanguageModuleImports(unittest.TestCase):
     """Test that all language modules can be imported."""
 

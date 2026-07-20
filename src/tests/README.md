@@ -3,18 +3,33 @@
 ## Running Tests
 
 ```bash
-# All tests
-python run_tests.py
+# Fast import/startup checks (~16 tests, ~1s) - run on every commit
+./run_tests.sh smoke
 
-# Specific directory
-python run_tests.py src/tests/clients
+# The tests known to pass (~1690 tests, ~16s) - run often
+./run_tests.sh base
+
+# Everything, including known-failing suites
+./run_tests.sh all
+
+# Extra args pass through to pytest
+./run_tests.sh base -k combined_rank -x
 
 # Specific file (via pytest directly)
 PYTHONPATH=src pytest src/tests/clients/test_batch_queue.py
 ```
 
-The test runner (`run_tests.py`) auto-discovers `test_*.py` files under `src/`
-using unittest discovery, with `src/` on the Python path.
+`base` excludes `src/tests/lib/benchmarks`, whose 16 failures all come from
+stale `datastore.*` mock.patch targets that should be `benchmarks.datastore.*`.
+
+New smoke tests are marked `@pytest.mark.smoke`. Keep the smoke suite under
+~20 tests and free of databases, LLM clients, and fixtures, so it stays fast
+enough to run every time.
+
+The legacy runner (`run_tests.py`) is **currently broken**: it walks every
+directory under `src/` containing a `test_*.py`, and dies on the first one that
+is not an importable package (`ImportError: Start directory is not importable:
+src/benchmarks/server`). It also cannot filter by marker. Use `run_tests.sh`.
 
 ## Test Organization
 
