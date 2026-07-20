@@ -256,6 +256,18 @@ GRAMMAR_FACT_DEFINITIONS: Dict[str, GrammarFactDefinition] = {
         description="Irregular superlative form",
         release_sync=True,
     ),
+    "gradability": GrammarFactDefinition(
+        fact_type="gradability",
+        languages=("en",),
+        required_pos=("adjective", "adverb"),
+        display_label="Gradability",
+        description=(
+            "Whether an adjective/adverb compares synthetically (-er/-est), "
+            "periphrastically (more/most), or not at all: synthetic, "
+            "periphrastic, or non_gradable"
+        ),
+        release_sync=True,
+    ),
 }
 
 
