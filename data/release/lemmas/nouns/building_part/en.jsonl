@@ -3,8 +3,8 @@
 {"guid": "N47_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "wall", "is_base_form": true, "ipa": " /wɔːl/", "phonetic": "WOHL"}, {"grammatical_form": "noun/en_plural", "text": "walls", "is_base_form": false}]}
 {"guid": "N47_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "floor", "is_base_form": true, "ipa": "/floʊr/", "phonetic": "FLOH-r"}, {"grammatical_form": "noun/en_plural", "text": "floors", "is_base_form": false}]}
 {"guid": "N47_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "ceiling", "is_base_form": true, "ipa": "ˈsiːlɪŋ", "phonetic": "SEE-ling"}, {"grammatical_form": "noun/en_plural", "text": "ceilings", "is_base_form": false}]}
-{"guid": "N47_006", "forms": [{"grammatical_form": "singular", "text": "roof", "is_base_form": true, "ipa": "/rʊf/", "phonetic": "ROO-f"}]}
-{"guid": "N47_007", "forms": [{"grammatical_form": "singular", "text": "stairs", "is_base_form": true, "ipa": "/steərs/", "phonetic": "STAIRS"}]}
+{"guid": "N47_006", "forms": [{"grammatical_form": "singular", "text": "roof", "is_base_form": true, "ipa": "/rʊf/", "phonetic": "ROO-f"}, {"grammatical_form": "noun/en_singular", "text": "roof", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "roofs", "is_base_form": false}]}
+{"guid": "N47_007", "forms": [{"grammatical_form": "singular", "text": "stairs", "is_base_form": true, "ipa": "/steərs/", "phonetic": "STAIRS"}, {"grammatical_form": "noun/en_singular", "text": "stairs", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stairs", "is_base_form": false}]}
 {"guid": "N47_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "gate", "is_base_form": true, "ipa": "/ɡeɪt/", "phonetic": "GAYT"}, {"grammatical_form": "noun/en_plural", "text": "gates", "is_base_form": false}]}
 {"guid": "N47_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "hallway", "is_base_form": true, "ipa": "/ˈhɔːleɪ/", "phonetic": "HOW-ley"}, {"grammatical_form": "noun/en_plural", "text": "hallways", "is_base_form": false}]}
 {"guid": "N47_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "corridor", "is_base_form": true, "ipa": "/kəˈrɪdəʊɹ/", "phonetic": "kə-RID-ə-r"}, {"grammatical_form": "noun/en_plural", "text": "corridors", "is_base_form": false}]}
@@ -14,12 +14,12 @@
 {"guid": "N47_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "balcony", "is_base_form": true, "ipa": "/ˈbæl.kə.ʃni/", "phonetic": "BAL-kuh-shee"}, {"grammatical_form": "noun/en_plural", "text": "balconies", "is_base_form": false}]}
 {"guid": "N47_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "pillar", "is_base_form": true, "ipa": "/ˈpɪlər/", "phonetic": "PIL-lər"}, {"grammatical_form": "noun/en_plural", "text": "pillars", "is_base_form": false}]}
 {"guid": "N47_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "fence", "is_base_form": true, "ipa": "/fɛnts/", "phonetic": "FENTS"}, {"grammatical_form": "noun/en_plural", "text": "fences", "is_base_form": false}]}
-{"guid": "N47_017", "forms": [{"grammatical_form": "singular", "text": "step", "is_base_form": true}]}
-{"guid": "N47_018", "forms": [{"grammatical_form": "singular", "text": "railing", "is_base_form": true}]}
-{"guid": "N47_019", "forms": [{"grammatical_form": "singular", "text": "beam", "is_base_form": true}]}
-{"guid": "N47_020", "forms": [{"grammatical_form": "singular", "text": "threshold", "is_base_form": true}]}
-{"guid": "N47_021", "forms": [{"grammatical_form": "singular", "text": "corner", "is_base_form": true}]}
-{"guid": "N47_022", "forms": [{"grammatical_form": "singular", "text": "clock", "is_base_form": true}]}
-{"guid": "N47_023", "forms": [{"grammatical_form": "singular", "text": "drain", "is_base_form": true}]}
-{"guid": "N47_024", "forms": [{"grammatical_form": "singular", "text": "pen", "is_base_form": true}]}
-{"guid": "N47_025", "forms": [{"grammatical_form": "singular", "text": "flight", "is_base_form": true}]}
+{"guid": "N47_017", "forms": [{"grammatical_form": "singular", "text": "step", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "step", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "steps", "is_base_form": false}]}
+{"guid": "N47_018", "forms": [{"grammatical_form": "singular", "text": "railing", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "railing", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "railings", "is_base_form": false}]}
+{"guid": "N47_019", "forms": [{"grammatical_form": "singular", "text": "beam", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "beam", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "beams", "is_base_form": false}]}
+{"guid": "N47_020", "forms": [{"grammatical_form": "singular", "text": "threshold", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "threshold", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "thresholds", "is_base_form": false}]}
+{"guid": "N47_021", "forms": [{"grammatical_form": "singular", "text": "corner", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "corner", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "corners", "is_base_form": false}]}
+{"guid": "N47_022", "forms": [{"grammatical_form": "singular", "text": "clock", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "clock", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "clocks", "is_base_form": false}]}
+{"guid": "N47_023", "forms": [{"grammatical_form": "singular", "text": "drain", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "drain", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "drains", "is_base_form": false}]}
+{"guid": "N47_024", "forms": [{"grammatical_form": "singular", "text": "pen", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "pen", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "pens", "is_base_form": false}]}
+{"guid": "N47_025", "forms": [{"grammatical_form": "singular", "text": "flight", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "flight", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "flights", "is_base_form": false}]}
