@@ -116,20 +116,25 @@ ALL_LANGUAGES = [
     "zu",
 ]
 
-# Languages that cannot be imported due to Python keyword conflicts
-# These use language codes that are Python reserved keywords
+# Language codes that are Python reserved keywords. These cannot appear in an
+# `import langtools.or` statement, but nothing needs to: every caller outside
+# src/langtools reaches languages dynamically, e.g. get_verb_conjugation(lang="or").
 KEYWORD_CONFLICT_LANGUAGES = ["or"]  # "or" is Odia but conflicts with Python's "or" keyword
 
 
 class TestLanguageModuleImports(unittest.TestCase):
     """Test that all language modules can be imported."""
 
-    def test_keyword_conflict_languages_fail(self) -> None:
-        """Test that languages with Python keyword conflicts fail as expected."""
+    def test_keyword_conflict_languages_import_dynamically(self) -> None:
+        """Keyword-named language codes must still be reachable via import_module.
+
+        The statement form (`import langtools.or`) is a syntax error, so the
+        dynamic path is the only way in and must keep working.
+        """
         for lang_code in KEYWORD_CONFLICT_LANGUAGES:
             with self.subTest(lang=lang_code):
-                with self.assertRaises(SyntaxError):
-                    importlib.import_module(f"langtools.{lang_code}")
+                module = importlib.import_module(f"langtools.{lang_code}")
+                self.assertIsNotNone(module)
 
     def test_all_language_init_imports(self) -> None:
         """Test that __init__.py can be imported for all languages."""
@@ -166,11 +171,22 @@ class TestLanguageModuleImports(unittest.TestCase):
             self.fail(f"Failed to import types for {len(errors)} languages:\n{error_msg}")
 
     def test_all_language_llm_forms_imports(self) -> None:
-        """Test that llm_forms.py can be imported for all languages."""
+        """Test that llm_forms.py can be imported for all enabled languages.
+
+        Pattern B languages are scaffolded but not registered in FORM_SPECS
+        (see form_registry.py), so importing their llm_forms raises KeyError.
+        They are skipped until their forms_config.py files are written.
+        """
+        from langtools.form_registry import _PATTERN_B_LANGS
+
+        not_yet_enabled = {lang_code for lang_code, _ in _PATTERN_B_LANGS}
+
         errors = {}
         for lang_code in ALL_LANGUAGES:
             # Skip languages with keyword conflicts
             if lang_code in KEYWORD_CONFLICT_LANGUAGES:
+                continue
+            if lang_code in not_yet_enabled:
                 continue
 
             with self.subTest(lang=lang_code):

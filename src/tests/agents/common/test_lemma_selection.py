@@ -153,16 +153,30 @@ class TestLemmaQueryBuilder(unittest.TestCase):
         self.assertTrue(self.mock_query.order_by.called)
         self.assertEqual(result, self.mock_query)
 
-    @patch("agents.lemma_selection.LANG_CODE_TO_LLM_FIELD", {"fr": "french_translation"})
+    @patch("storage.translation_helpers.LANG_CODE_TO_LLM_FIELD", {"fr": "french_translation"})
     def test_has_translation_in_valid_language(self):
         """Test has_translation_in with valid language code."""
+        from sqlalchemy import select
+
+        from storage.models.schema import LemmaTranslation
+
+        # has_translation_in() feeds session.query(LemmaTranslation.lemma_id)
+        # straight into Lemma.id.in_(), which rejects a bare Mock. Return a real
+        # selectable for that call while the builder's own query stays mocked.
+        def query_side_effect(*args):
+            if args and args[0] is LemmaTranslation.lemma_id:
+                return select(LemmaTranslation.lemma_id)
+            return self.mock_query
+
+        self.session.query.side_effect = query_side_effect
+
         builder = LemmaQueryBuilder(self.session)
         builder.has_translation_in("fr")
 
         # Should add filter
         self.assertTrue(self.mock_query.filter.called)
 
-    @patch("agents.lemma_selection.LANG_CODE_TO_LLM_FIELD", {"fr": "french_translation"})
+    @patch("storage.translation_helpers.LANG_CODE_TO_LLM_FIELD", {"fr": "french_translation"})
     def test_has_translation_in_invalid_language(self):
         """Test has_translation_in with invalid language code raises error."""
         builder = LemmaQueryBuilder(self.session)
@@ -320,7 +334,7 @@ class TestCountForConfirmation(unittest.TestCase):
 class TestGetLemmasForProcessing(unittest.TestCase):
     """Test the high-level get_lemmas_for_processing function."""
 
-    @patch("agents.lemma_selection.find_lemma_by_guid")
+    @patch("agents.common.lemma_selection.find_lemma_by_guid")
     def test_single_lemma_by_guid(self, mock_find):
         """Test getting a single lemma by GUID."""
         session = Mock()
@@ -378,7 +392,7 @@ class TestGetLemmasForProcessing(unittest.TestCase):
         self.assertTrue(mock_query.filter.called)
         self.assertEqual(len(result), 1)
 
-    @patch("agents.lemma_selection.LANG_CODE_TO_LLM_FIELD", {"fr": "french_translation"})
+    @patch("storage.translation_helpers.LANG_CODE_TO_LLM_FIELD", {"fr": "french_translation"})
     def test_batch_mode_with_language_filter(self):
         """Test batch mode with language filter."""
         session = Mock()
@@ -386,7 +400,17 @@ class TestGetLemmasForProcessing(unittest.TestCase):
         lemmas = [MockLemma(id=1)]
         lemmas[0].french_translation = "bonjour"
 
-        session.query.return_value = mock_query
+        from sqlalchemy import select
+
+        from storage.models.schema import LemmaTranslation
+
+        # The language filter builds a real IN subquery, which rejects a Mock.
+        def query_side_effect(*args):
+            if args and args[0] is LemmaTranslation.lemma_id:
+                return select(LemmaTranslation.lemma_id)
+            return mock_query
+
+        session.query.side_effect = query_side_effect
         mock_query.filter.return_value = mock_query
         mock_query.order_by.return_value = mock_query
         mock_query.all.return_value = lemmas

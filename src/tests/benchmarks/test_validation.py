@@ -7,6 +7,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from benchmarks.validation import ResponseValidator, ValidationResult
+from clients.types import Response
 
 
 class MockOllamaClient:
@@ -149,7 +150,11 @@ class MockOllamaClient:
         response = responses.get(
             model_base, {"explanation": "Unknown model", "valid": False, "confidence": 0}
         )
-        return json.dumps(response), {"total_msec": 100}
+        return Response(
+            response_text=json.dumps(response),
+            structured_data=response,
+            usage=None,
+        )
 
     def _get_default_responses(self, explanation):
         """Generate default negative responses for unknown cases."""
@@ -160,7 +165,7 @@ class MockOllamaClient:
         }
 
 
-@patch("lib.validation.ollama_client", MockOllamaClient())
+@patch("benchmarks.validation.ollama_client", MockOllamaClient())
 class TestResponseValidator(unittest.TestCase):
     def setUp(self):
         self.validator = ResponseValidator()
@@ -171,7 +176,8 @@ class TestResponseValidator(unittest.TestCase):
             "A large gray mammal with a trunk", "definition", expected="elephant"
         )
         self.assertTrue(result.valid)
-        self.assertAlmostEqual(result.confidence, 90.0, places=2)
+        # Mean of the two default validators: qwen2.5 (90) and gemma2 (85).
+        self.assertAlmostEqual(result.confidence, 87.5, places=2)
         self.assertTrue(all(r["valid"] for r in result.validator_results))
 
     def test_validate_incorrect_definition(self):
