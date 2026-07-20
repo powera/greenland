@@ -48,14 +48,26 @@ class TestTaskType(unittest.TestCase):
     """Test TaskType constants."""
 
     def test_type_values(self) -> None:
-        self.assertEqual(TaskType.ADD_MISSING_TRANSLATIONS, "add_missing_translations")
-        self.assertEqual(TaskType.GENERATE_PRONUNCIATIONS, "generate_pronunciations")
-        self.assertEqual(TaskType.GENERATE_FORMS, "generate_forms")
-        self.assertEqual(TaskType.GENERATE_SYNONYMS, "generate_synonyms")
-        self.assertEqual(TaskType.TRANSLATE_SENTENCE, "translate_sentence")
-        self.assertEqual(TaskType.GENERATE_AUDIO, "generate_audio")
-        self.assertEqual(TaskType.GENERATE_SENTENCE_AUDIO, "generate_sentence_audio")
-        self.assertEqual(TaskType.GENERATE_GRAMMAR_FACT, "generate_grammar_fact")
+        """Task types use namespaced ids, e.g. "words.translations"."""
+        self.assertEqual(TaskType.WORDS_TRANSLATIONS, "words.translations")
+        self.assertEqual(TaskType.WORDS_PRONUNCIATIONS, "words.pronunciations")
+        self.assertEqual(TaskType.WORDS_FORMS, "words.forms")
+        self.assertEqual(TaskType.WORDS_SYNONYMS, "words.synonyms")
+        self.assertEqual(TaskType.WORDS_GRAMMAR_FACTS, "words.grammar_facts")
+        self.assertEqual(TaskType.SENTENCES_TRANSLATE, "sentences.translate")
+        self.assertEqual(TaskType.AUDIO_GENERATE_LEMMA, "audio.generate.lemma")
+        self.assertEqual(TaskType.AUDIO_GENERATE_SENTENCE, "audio.generate.sentence")
+
+    def test_legacy_aliases_point_at_namespaced_values(self) -> None:
+        """The pre-migration names are retained as aliases, not distinct values."""
+        self.assertEqual(TaskType.ADD_MISSING_TRANSLATIONS, TaskType.WORDS_TRANSLATIONS)
+        self.assertEqual(TaskType.GENERATE_PRONUNCIATIONS, TaskType.WORDS_PRONUNCIATIONS)
+        self.assertEqual(TaskType.GENERATE_FORMS, TaskType.WORDS_FORMS)
+        self.assertEqual(TaskType.GENERATE_SYNONYMS, TaskType.WORDS_SYNONYMS)
+        self.assertEqual(TaskType.GENERATE_GRAMMAR_FACT, TaskType.WORDS_GRAMMAR_FACTS)
+        self.assertEqual(TaskType.TRANSLATE_SENTENCE, TaskType.SENTENCES_TRANSLATE)
+        self.assertEqual(TaskType.GENERATE_AUDIO, TaskType.AUDIO_GENERATE_LEMMA)
+        self.assertEqual(TaskType.GENERATE_SENTENCE_AUDIO, TaskType.AUDIO_GENERATE_SENTENCE)
 
 
 class TaskQueueDBTestCase(unittest.TestCase):

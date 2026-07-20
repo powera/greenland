@@ -6,6 +6,9 @@ import types
 if "pydantic" not in sys.modules:
     sys.modules["pydantic"] = types.SimpleNamespace(BaseModel=object)
 
+# Must precede any generator import; see test_sentence_decomposition_scoring.py.
+import benchmarks.lib.utils  # noqa: F401  (import order matters)
+
 from benchmarks.lib.generators.verb_forms_generator import VerbFormsGenerator
 from words.verb_forms import build_verb_forms_prompt
 
