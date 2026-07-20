@@ -24,6 +24,7 @@ NOUN_CONFIG: Dict[str, Any] = {
 }
 
 VERB_CONFIG: Dict[str, Any] = {
+    # TODO: add "infinitive" (citation form) to this verb config; see en/forms_config.py
     "type": "explicit",
     "forms": VERB_FORMS,
     "query_type": "french_verb_conjugations",

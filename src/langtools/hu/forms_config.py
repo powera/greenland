@@ -36,6 +36,7 @@ NOUN_CONFIG: Dict[str, Any] = {
 }
 
 VERB_CONFIG: Dict[str, Any] = {
+    # TODO: add "infinitive" (citation form) to this verb config; see en/forms_config.py
     "type": "person_tense",
     "persons": ["1s", "2s", "3s", "1p", "2p", "3p"],
     "tenses": ["present", "past", "future"],

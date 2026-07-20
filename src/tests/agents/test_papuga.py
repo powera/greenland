@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from agents.papuga.agent import PapugaAgent
 from agents.papuga.cli import _parse_language_codes, enqueue_papuga_work
+from langtools.form_registry import FORM_SPECS
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import Base, DerivativeForm, Lemma, LemmaTranslation
 from workqueue.handlers.papuga import generate_pronunciations_for_lemma
@@ -468,7 +469,10 @@ def test_generate_pronunciations_for_lemma_creates_english_base_form_when_missin
         assert generated_count == 1
         assert errors == []
         assert generated_form.derivative_form_text == "quickly"
-        assert generated_form.grammatical_form == "positive"
+        assert (
+            generated_form.grammatical_form
+            == FORM_SPECS[("en", "adverb")].form_mapping["positive"].value
+        )
         assert generated_form.is_base_form is True
         assert generated_form.ipa_pronunciation == "/ˈkwɪkli/"
         assert generated_form.phonetic_pronunciation == "KWIK-lee"
