@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Lemma Audio Sync{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('sync_hub.index') }}">{{ STRINGS.sync.hub_title }}</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Lemma Audio</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-music-note-list"></i> Lemma Audio Sync</h2>
+            <p class="text-muted">
+                Sync approved lemma audio metadata between the release files
+                (<code>audio.jsonl</code> under <code>{{ release_dir }}</code>) and the working
+                database. Only the audio <em>references</em> (S3 URLs, status, md5) are synced &mdash;
+                the mp3 bytes live on S3/CDN or under <code>BARSUKAS_AUDIO_DIR</code>, not in the
+                release. Sentence audio is synced separately on the
+                <a href="{{ url_for('sync_sentence_release.index') }}">Sentence Sync</a> page.
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-bar-chart"></i> Difference Summary
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm mb-0">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Exportable audio rows in database</th>
+                                <td class="text-end">{{ diff.db_keys }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Audio rows in release files</th>
+                                <td class="text-end">{{ diff.release_keys }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">In both</th>
+                                <td class="text-end">{{ diff.in_both }}</td>
+                            </tr>
+                            <tr class="{{ 'table-warning' if diff.only_in_release else '' }}">
+                                <th scope="row">Only in release (import adds/updates these)</th>
+                                <td class="text-end">{{ diff.only_in_release }}</td>
+                            </tr>
+                            <tr class="{{ 'table-warning' if diff.only_in_db else '' }}">
+                                <th scope="row">Only in database (export writes these out)</th>
+                                <td class="text-end">{{ diff.only_in_db }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="small text-muted mt-2 mb-0">
+                        Keyed on <code>(guid, language, voice, grammatical_form)</code>. "Exportable"
+                        means GUID-bearing, non-sentence audio in an approved status.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-box-arrow-in-down"></i> Import: Release &rarr; Database
+                </div>
+                <div class="card-body">
+                    <p class="card-text small">
+                        Read every <code>audio.jsonl</code> and upsert the audio rows into the
+                        database. Local review metadata (notes, quality issues, acceptance) on
+                        existing rows is preserved.
+                    </p>
+                    <form method="POST" action="{{ url_for('sync_lemma_audio_release.import_release') }}">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="prune" id="prune">
+                            <label class="form-check-label" for="prune">
+                                Prune exportable rows no longer in the release files
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-box-arrow-in-down"></i> Import from Release
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-box-arrow-up"></i> Export: Database &rarr; Release
+                </div>
+                <div class="card-body">
+                    <p class="card-text small">
+                        Write approved lemma audio from the database out to the per-category
+                        <code>audio.jsonl</code> files, replacing their contents.
+                    </p>
+                    <form method="POST" action="{{ url_for('sync_lemma_audio_release.export_release') }}">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-box-arrow-up"></i> Export to Release
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
