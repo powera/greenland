@@ -94,7 +94,7 @@ class ArgumentInfo:
             return "llm_config"
 
         # Backend Configuration
-        if dest in ["backend", "data_dir"]:
+        if dest in ["persona", "backend", "data_dir", "postgres"]:
             return "backend_config"
 
         # Processing Options
@@ -179,6 +179,11 @@ def introspect_agent_parser(agent_module_path: str) -> Dict[str, Any]:
 
             # Skip arguments that BARSUKAS adds automatically
             if action.dest in AUTO_ADDED_ARGS:
+                continue
+
+            # Skip deprecated arguments (marked in help text by common_args);
+            # the launcher passes --persona instead
+            if (action.help or "").lstrip().upper().startswith("[DEPRECATED]"):
                 continue
 
             arg_info = ArgumentInfo(action)

@@ -203,6 +203,71 @@ class TestAddBackendArgs(unittest.TestCase):
         args = parser.parse_args(["--data-dir", "/path/to/data"])
         self.assertEqual(args.data_dir, "/path/to/data")
 
+    def test_adds_persona_arg(self):
+        """Test that --persona argument is added with valid choices."""
+        parser = argparse.ArgumentParser()
+        add_backend_args(parser)
+        args = parser.parse_args(["--persona", "local"])
+        self.assertEqual(args.persona, "local")
+
+        with self.assertRaises(SystemExit):
+            parser.parse_args(["--persona", "invalid"])
+
+    def test_adds_postgres_flag(self):
+        """Test that --postgres flag is added and defaults to False."""
+        parser = argparse.ArgumentParser()
+        add_backend_args(parser)
+
+        args = parser.parse_args([])
+        self.assertFalse(args.postgres)
+
+        args = parser.parse_args(["--postgres"])
+        self.assertTrue(args.postgres)
+
+    def test_deprecated_flags_warn_when_passed(self):
+        """Test that deprecated backend flags print a warning to stderr."""
+        parser = argparse.ArgumentParser()
+        add_backend_args(parser)
+
+        for argv in (["--backend", "sqlite"], ["--data-dir", "/data"], ["--postgres"]):
+            with patch("sys.stderr", new=StringIO()) as stderr:
+                parser.parse_args(argv)
+            self.assertIn("deprecated", stderr.getvalue())
+            self.assertIn("--persona", stderr.getvalue())
+
+    def test_persona_does_not_warn(self):
+        """Test that --persona itself produces no deprecation warning."""
+        parser = argparse.ArgumentParser()
+        add_backend_args(parser)
+        with patch("sys.stderr", new=StringIO()) as stderr:
+            parser.parse_args(["--persona", "local"])
+        self.assertEqual(stderr.getvalue(), "")
+
+    def test_set_defaults_does_not_warn(self):
+        """Test that set_defaults (as in check_duplicates.py) does not warn."""
+        parser = argparse.ArgumentParser()
+        add_backend_args(parser)
+        parser.set_defaults(backend="jsonl", data_dir="/release")
+        with patch("sys.stderr", new=StringIO()) as stderr:
+            args = parser.parse_args([])
+        self.assertEqual(stderr.getvalue(), "")
+        self.assertEqual(args.backend, "jsonl")
+        self.assertEqual(args.data_dir, "/release")
+
+    def test_deprecated_flags_marked_in_help(self):
+        """Test that deprecated flags carry the marker the launcher hides on."""
+        parser = argparse.ArgumentParser()
+        add_backend_args(parser)
+        deprecated = {"backend", "data_dir", "postgres"}
+        for action in parser._actions:
+            if action.dest in deprecated:
+                self.assertTrue(
+                    (action.help or "").startswith("[DEPRECATED]"),
+                    f"--{action.dest} should be marked deprecated",
+                )
+            elif action.dest == "persona":
+                self.assertNotIn("[DEPRECATED]", action.help or "")
+
 
 class TestAddLanguageArgs(unittest.TestCase):
     """Test add_language_args function."""

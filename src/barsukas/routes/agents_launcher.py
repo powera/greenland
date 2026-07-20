@@ -41,7 +41,7 @@ bp = Blueprint("agents_launcher", __name__, url_prefix="/agents-launcher")
 
 # Global dictionary to track running agent processes
 # Format: {task_id: {"process": Popen, "output": [], "complete": bool, "returncode": int}}
-running_tasks = {}
+running_tasks: Dict[str, Dict[str, Any]] = {}
 
 
 def _resolve_agent_script_path(agent_script: str) -> Path:
@@ -456,9 +456,12 @@ def execute_agent(agent_name: str) -> ResponseReturnValue:
         if dry_run:
             args.append("--dry-run")
 
-    # Add database configuration only if user hasn't specified backend via form
-    # Check if any backend-related args were already added from the form
-    has_backend_arg = any(arg in ["--postgres", "--backend", "--db-path"] for arg in args)
+    # Add database configuration only if user hasn't specified backend via form.
+    # --persona must be in this list: argparse takes the last occurrence, so
+    # appending the app's persona would silently override a user-chosen one.
+    has_backend_arg = any(
+        arg in ["--persona", "--postgres", "--backend", "--data-dir", "--db-path"] for arg in args
+    )
     if not has_backend_arg:
         args.extend(agent_db_args())
 
