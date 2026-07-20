@@ -2,6 +2,7 @@
 """Unified client for routing requests to appropriate LLM backends."""
 
 import logging
+import os
 import time
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -477,14 +478,40 @@ def _get_client() -> UnifiedLLMClient:
     return _client
 
 
+class LiveLLMCallInTestError(RuntimeError):
+    """Raised when test code reaches a real LLM backend."""
+
+
+def _assert_not_under_test(func_name: str) -> None:
+    """
+    Refuse to make a live LLM call from inside a test.
+
+    Tests must stub the client rather than hitting a real backend: live calls are
+    slow, nondeterministic, cost money, and require real credentials. A test that
+    genuinely needs to record real responses can opt out by setting
+    GREENLAND_ALLOW_LIVE_LLM=1 .
+    """
+    if "PYTEST_CURRENT_TEST" not in os.environ:
+        return
+    if os.environ.get("GREENLAND_ALLOW_LIVE_LLM") == "1":
+        return
+    raise LiveLLMCallInTestError(
+        f"unified_client.{func_name} was called from a test without being stubbed. "
+        f"Patch 'clients.unified_client.{func_name}', or set GREENLAND_ALLOW_LIVE_LLM=1 "
+        f"if this test is deliberately recording live responses."
+    )
+
+
 # Expose key functions at module level for API compatibility
 def warm_model(model: str, timeout: Optional[float] = None) -> bool:
     """Warm up a model for faster first inference."""
+    _assert_not_under_test("warm_model")
     return _get_client().warm_model(model, timeout)
 
 
 def unload_model(model: str) -> bool:
     """Unload a model from memory."""
+    _assert_not_under_test("unload_model")
     return _get_client().unload_model(model)
 
 
@@ -505,6 +532,7 @@ def generate_chat(
         For text responses, structured_data will be empty dict
         For JSON responses, response_text will be empty string
     """
+    _assert_not_under_test("generate_chat")
     return _get_client().generate_chat(
         prompt, model, brief, json_schema, context, timeout, messages
     )

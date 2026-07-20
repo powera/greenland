@@ -62,14 +62,11 @@ Testing
 There are three test targets, run via ./run_tests.sh :
 
   ./run_tests.sh smoke    ~16 tests, ~1s   - run on every commit
-  ./run_tests.sh base     ~1690 tests, ~16s - run often, not every commit
-  ./run_tests.sh all      everything, including known-failing suites
+  ./run_tests.sh base     ~1700 tests, ~16s - run often, not every commit
+  ./run_tests.sh all      everything, including the audio suite
 
 Extra arguments pass through to pytest:
   ./run_tests.sh base -k combined_rank -x
-
-The older run_tests.py is broken (it dies on src/benchmarks/server, which is not
-an importable package) and cannot filter by marker.  Use run_tests.sh .
 
 smoke asserts only that the tree imports and the barsukas app starts.  It is
 deliberately shallow: the recurring failure in this repo is a module being moved
@@ -78,15 +75,17 @@ that immediately.  Mark new smoke tests with @pytest.mark.smoke and keep the
 total under ~20 - it is worthless if it stops being fast.  Tests needing a
 database, an LLM client, or fixtures belong in base instead.
 
-base is everything except src/tests/lib/benchmarks .  Those 16 failures are all
-one cause: stale "datastore.*" mock.patch targets that should be
-"benchmarks.datastore.*" .  Fixing the paths will let those tests run for the
-first time in a while, so expect further staleness underneath.
+base is everything except src/tests/clients/audio ; all adds that back.
 
 Two things to know when writing tests:
 
 * Tests must never use real credentials.  create_app() gates its benchmarks
   PostgreSQL setup on TESTING for this reason; do not un-gate it.
+  Relatedly, unified_client.generate_chat / warm_model / unload_model raise
+  LiveLLMCallInTestError when called under pytest without being stubbed, so a
+  test that forgets to patch the LLM fails loudly instead of quietly spending
+  money.  Patch "clients.unified_client.generate_chat"; only set
+  GREENLAND_ALLOW_LIVE_LLM=1 for a deliberate recording run.
 * Import benchmarks.lib.utils before importing any module under
   benchmarks.lib.runners or benchmarks.lib.generators .  The utils package init
   eagerly imports every runner and then the registry, and the registry imports

@@ -42,7 +42,7 @@ PYTHONPATH=src python src/barsukas/app.py
 PYTHONPATH=src python -i src/interactive.py
 
 # Run tests
-python run_tests.py
+./run_tests.sh base
 ```
 
 ## Repository Layout
@@ -60,7 +60,7 @@ greenland/
 ├── prod/                # Production deployment configuration
 ├── .githooks/           # Git hooks (pre-commit config)
 ├── pyproject.toml       # Python/tooling configuration
-└── run_tests.py         # Test runner entry point
+└── run_tests.sh         # Test runner entry point (smoke|base|all)
 ```
 
 ## Documentation

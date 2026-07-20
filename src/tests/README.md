@@ -6,10 +6,10 @@
 # Fast import/startup checks (~16 tests, ~1s) - run on every commit
 ./run_tests.sh smoke
 
-# The tests known to pass (~1690 tests, ~16s) - run often
+# The tests known to pass (~1700 tests, ~16s) - run often
 ./run_tests.sh base
 
-# Everything, including known-failing suites
+# Everything, including the audio suite
 ./run_tests.sh all
 
 # Extra args pass through to pytest
@@ -19,17 +19,18 @@
 PYTHONPATH=src pytest src/tests/clients/test_batch_queue.py
 ```
 
-`base` excludes `src/tests/lib/benchmarks`, whose 16 failures all come from
-stale `datastore.*` mock.patch targets that should be `benchmarks.datastore.*`.
+`base` excludes `src/tests/clients/audio`, which needs the audio submodule
+synced to its recorded commit; `all` adds it back.
+
+Tests must never reach a real LLM. `unified_client.generate_chat`,
+`warm_model`, and `unload_model` raise `LiveLLMCallInTestError` when called
+under pytest, so an unstubbed call fails loudly rather than quietly costing
+money. Patch `clients.unified_client.generate_chat` in your test; set
+`GREENLAND_ALLOW_LIVE_LLM=1` only for a deliberate recording run.
 
 New smoke tests are marked `@pytest.mark.smoke`. Keep the smoke suite under
 ~20 tests and free of databases, LLM clients, and fixtures, so it stays fast
 enough to run every time.
-
-The legacy runner (`run_tests.py`) is **currently broken**: it walks every
-directory under `src/` containing a `test_*.py`, and dies on the first one that
-is not an importable package (`ImportError: Start directory is not importable:
-src/benchmarks/server`). It also cannot filter by marker. Use `run_tests.sh`.
 
 ## Test Organization
 
