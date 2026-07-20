@@ -600,7 +600,9 @@ def get_all_definitions(session: Session, lemma: Lemma) -> Dict[str, Optional[st
 def compute_sort_key(lang_code: str, translation: str) -> Optional[str]:
     """Compute a sort key for dictionary ordering.
 
-    - Chinese (zh): pinyin with tone marks, e.g. "chī" for 吃
+    - Chinese (zh): pinyin with tone digits, e.g. "chi1" for 吃.  Digits rather
+      than tone marks, so that a byte-ordered comparison sorts alphabetically
+      by syllable first and only then by tone.
     - Japanese (ja): hiragana reading, e.g. "たべる" for 食べる
     - Korean (ko): decomposed jamo
     - Accented Latin languages (lt, es, de, sv, pt, fr, vi): character
@@ -618,21 +620,21 @@ def compute_sort_key(lang_code: str, translation: str) -> Optional[str]:
 
     try:
         if lang_code == "zh":
-            from langtools.zh.pinyin_helper import generate_pinyin
+            from langtools.zh.pinyin_helper import generate_pinyin_sort_key
 
-            return str(generate_pinyin(translation))
+            return generate_pinyin_sort_key(translation)
         elif lang_code == "ja":
             from langtools.ja.romaji_helper import generate_hiragana
 
-            return str(generate_hiragana(translation))
+            return generate_hiragana(translation)
         elif lang_code == "ko":
             from langtools.ko.hangul_helper import decompose_hangul
 
-            return str(decompose_hangul(translation))
+            return decompose_hangul(translation)
         elif lang_code in _COLLATION_SORT_KEY_LANGUAGES:
             from langtools.collation import generate_sort_key
 
-            return str(generate_sort_key(lang_code, translation))
+            return generate_sort_key(lang_code, translation)
     except Exception as e:
         logger.warning(f"Failed to compute sort_key for {lang_code} '{translation}': {e}")
     return None
