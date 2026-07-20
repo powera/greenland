@@ -18,6 +18,7 @@ NOUN_CONFIG: Dict[str, Any] = {
 VERB_CONFIG: Dict[str, Any] = {
     "type": "explicit",
     "forms": [
+        "infinitive",
         *(f"{person}_{tense}" for tense in ["present", "past", "future"] for person in _PERSONS),
         "2s_imp",
         "2p_imp",

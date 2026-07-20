@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from workqueue.tools import build_default_config, get_lemma_or_raise
 import constants
+from langtools.form_registry import FORM_SPECS
 from storage.backend.config import DataSourceConfig
 from storage.crud.derivative_form import (
     add_derivative_form,
@@ -38,15 +39,32 @@ from wordfreq.tools.llm_validators import generate_pronunciation
 logger = logging.getLogger(__name__)
 
 
-def _get_default_base_grammatical_form(pos_type: str) -> str:
-    """Return a sensible grammatical-form label for a synthetic base form."""
-    default_forms = {
-        "verb": "infinitive",
-        "noun": "singular",
-        "adjective": "positive",
-        "adverb": "positive",
-    }
-    return default_forms.get(pos_type, "lemma")
+# Base-form field name per POS, as it appears in a LanguageFormSpec.form_mapping.
+_BASE_FORM_FIELDS: Dict[str, str] = {
+    "verb": "infinitive",
+    "noun": "singular",
+    "adjective": "positive",
+    "adverb": "positive",
+}
+
+
+def _get_default_base_grammatical_form(pos_type: str, lang_code: str) -> str:
+    """Return the canonical grammatical-form label for a synthetic base form.
+
+    Resolves through :data:`FORM_SPECS` so the synthetic row papuga creates
+    carries the same label the forms agent would later generate (e.g.
+    ``noun/en_singular``) rather than a bare ``singular``, which produced a
+    duplicate row for every lemma.  Falls back to ``"lemma"`` when the
+    language has no spec for *pos_type*.
+    """
+    field = _BASE_FORM_FIELDS.get(pos_type)
+    if field is None:
+        return "lemma"
+    spec = FORM_SPECS.get((lang_code, pos_type))
+    if spec is None:
+        return "lemma"
+    form = spec.form_mapping.get(field)
+    return form.value if form is not None else "lemma"
 
 
 def get_example_sentence_for_lemma(session: Session, lemma_id: int) -> Optional[str]:
@@ -270,7 +288,7 @@ def generate_pronunciations_for_lemma(
                     lemma=lemma,
                     derivative_form_text=translation_text,
                     language_code=lang_code,
-                    grammatical_form=_get_default_base_grammatical_form(lemma.pos_type),
+                    grammatical_form=_get_default_base_grammatical_form(lemma.pos_type, lang_code),
                     is_base_form=True,
                     ipa_pronunciation=ipa_value,
                     phonetic_pronunciation=phonetic_value,
@@ -282,7 +300,7 @@ def generate_pronunciations_for_lemma(
                 lemma_id=lemma.id,
                 derivative_form_text=translation_text,
                 language_code=lang_code,
-                grammatical_form=_get_default_base_grammatical_form(lemma.pos_type),
+                grammatical_form=_get_default_base_grammatical_form(lemma.pos_type, lang_code),
                 is_base_form=True,
             ),
             pos_type=lemma.pos_type,
@@ -297,7 +315,7 @@ def generate_pronunciations_for_lemma(
                 lemma=lemma,
                 derivative_form_text=translation_text,
                 language_code=lang_code,
-                grammatical_form=_get_default_base_grammatical_form(lemma.pos_type),
+                grammatical_form=_get_default_base_grammatical_form(lemma.pos_type, lang_code),
                 is_base_form=True,
                 ipa_pronunciation=generated_ipa,
                 phonetic_pronunciation=generated_phonetic,
