@@ -171,5 +171,8 @@ module = [
 ignore_errors = true
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["src/tests"]
 python_files = ["test_*.py"]
+markers = [
+    "smoke: fast checks that the tree imports and the app starts (run every commit)",
+]
