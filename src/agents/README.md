@@ -51,9 +51,16 @@ All agents use standardized arguments from `agents/common/common_args.py`:
 --guid GUID         Process single item by GUID
 --level N           Filter by difficulty level (single or range like "1-9")
 --language LANG     Filter by language code
---backend TYPE      Storage backend: sqlite, jsonl, postgres
---postgres          Shorthand for --backend postgres
+--persona NAME      Barsukas persona whose main database to use
+                    (prod, golden, hosted, local, local-sqlite, scholar)
+--backend TYPE      [requires --persona custom] Storage backend: sqlite, jsonl, postgres
+--data-dir DIR      [requires --persona custom] Data directory for the jsonl backend
+--postgres          [requires --persona custom] Shorthand for --backend postgres
 ```
+
+Select the database with `--persona`; the default (no persona) is the local
+SQLite database. `--persona custom` unlocks the manual backend flags for
+development setups that need to spell out the backend directly.
 
 ## Agent Details
 

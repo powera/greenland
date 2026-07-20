@@ -210,6 +210,9 @@ class TestAddBackendArgs(unittest.TestCase):
         args = parser.parse_args(["--persona", "local"])
         self.assertEqual(args.persona, "local")
 
+        args = parser.parse_args(["--persona", "custom"])
+        self.assertEqual(args.persona, "custom")
+
         with self.assertRaises(SystemExit):
             parser.parse_args(["--persona", "invalid"])
 
@@ -224,49 +227,19 @@ class TestAddBackendArgs(unittest.TestCase):
         args = parser.parse_args(["--postgres"])
         self.assertTrue(args.postgres)
 
-    def test_deprecated_flags_warn_when_passed(self):
-        """Test that deprecated backend flags print a warning to stderr."""
+    def test_manual_flags_marked_advanced_in_help(self):
+        """Test that manual flags carry the marker the launcher hides on."""
         parser = argparse.ArgumentParser()
         add_backend_args(parser)
-
-        for argv in (["--backend", "sqlite"], ["--data-dir", "/data"], ["--postgres"]):
-            with patch("sys.stderr", new=StringIO()) as stderr:
-                parser.parse_args(argv)
-            self.assertIn("deprecated", stderr.getvalue())
-            self.assertIn("--persona", stderr.getvalue())
-
-    def test_persona_does_not_warn(self):
-        """Test that --persona itself produces no deprecation warning."""
-        parser = argparse.ArgumentParser()
-        add_backend_args(parser)
-        with patch("sys.stderr", new=StringIO()) as stderr:
-            parser.parse_args(["--persona", "local"])
-        self.assertEqual(stderr.getvalue(), "")
-
-    def test_set_defaults_does_not_warn(self):
-        """Test that set_defaults (as in check_duplicates.py) does not warn."""
-        parser = argparse.ArgumentParser()
-        add_backend_args(parser)
-        parser.set_defaults(backend="jsonl", data_dir="/release")
-        with patch("sys.stderr", new=StringIO()) as stderr:
-            args = parser.parse_args([])
-        self.assertEqual(stderr.getvalue(), "")
-        self.assertEqual(args.backend, "jsonl")
-        self.assertEqual(args.data_dir, "/release")
-
-    def test_deprecated_flags_marked_in_help(self):
-        """Test that deprecated flags carry the marker the launcher hides on."""
-        parser = argparse.ArgumentParser()
-        add_backend_args(parser)
-        deprecated = {"backend", "data_dir", "postgres"}
+        manual = {"backend", "data_dir", "postgres"}
         for action in parser._actions:
-            if action.dest in deprecated:
+            if action.dest in manual:
                 self.assertTrue(
-                    (action.help or "").startswith("[DEPRECATED]"),
-                    f"--{action.dest} should be marked deprecated",
+                    (action.help or "").startswith("[ADVANCED]"),
+                    f"--{action.dest} should be marked advanced",
                 )
             elif action.dest == "persona":
-                self.assertNotIn("[DEPRECATED]", action.help or "")
+                self.assertNotIn("[ADVANCED]", action.help or "")
 
 
 class TestAddLanguageArgs(unittest.TestCase):
@@ -548,8 +521,9 @@ class TestGetDataSourceConfig(unittest.TestCase):
 
     @patch("agents.common.common_args.constants.WORDFREQ_DB_PATH", "/default/db.sqlite")
     def test_explicit_sqlite_backend(self):
-        """Test explicit SQLite backend selection."""
+        """Test explicit SQLite backend selection via --persona custom."""
         args = argparse.Namespace(
+            persona="custom",
             backend="sqlite",
             db_path="/custom/db.sqlite",
         )
@@ -559,8 +533,9 @@ class TestGetDataSourceConfig(unittest.TestCase):
         self.assertEqual(config.sqlite_path, "/custom/db.sqlite")
 
     def test_jsonl_backend(self):
-        """Test JSONL backend configuration."""
+        """Test JSONL backend configuration via --persona custom."""
         args = argparse.Namespace(
+            persona="custom",
             backend="jsonl",
             data_dir="/path/to/jsonl/data",
         )
@@ -569,18 +544,76 @@ class TestGetDataSourceConfig(unittest.TestCase):
         self.assertEqual(config.backend_type, BackendType.JSONL)
         self.assertEqual(config.jsonl_data_dir, "/path/to/jsonl/data")
 
-    @patch("sys.exit")
+    @patch("sys.exit", side_effect=SystemExit)
     @patch("builtins.print")
     def test_jsonl_backend_without_data_dir_fails(self, mock_print, mock_exit):
         """Test that JSONL backend without data_dir fails."""
         args = argparse.Namespace(
+            persona="custom",
             backend="jsonl",
         )
-        get_data_source_config(args)
+        with self.assertRaises(SystemExit):
+            get_data_source_config(args)
 
         mock_print.assert_called_once()
         self.assertIn("--data-dir is required", mock_print.call_args[0][0])
         mock_exit.assert_called_once_with(1)
+
+    @patch("sys.exit", side_effect=SystemExit)
+    @patch("builtins.print")
+    def test_manual_flags_without_custom_persona_fail(self, mock_print, mock_exit):
+        """Test that manual backend flags are rejected without --persona custom."""
+        for kwargs in (
+            {"backend": "sqlite"},
+            {"data_dir": "/data"},
+            {"postgres": True},
+            {"persona": "local", "backend": "jsonl", "data_dir": "/data"},
+        ):
+            mock_print.reset_mock()
+            mock_exit.reset_mock()
+            with self.assertRaises(SystemExit):
+                get_data_source_config(argparse.Namespace(**kwargs))
+            self.assertIn("--persona custom", mock_print.call_args[0][0])
+            mock_exit.assert_called_once_with(1)
+
+    @patch("agents.common.common_args.constants.WORDFREQ_DB_PATH", "/default/db.sqlite")
+    def test_custom_persona_without_flags_uses_default_sqlite(self):
+        """Test that --persona custom alone falls back to the default SQLite DB."""
+        args = argparse.Namespace(persona="custom")
+        config = get_data_source_config(args)
+
+        self.assertEqual(config.backend_type, BackendType.SQLITE)
+        self.assertEqual(config.sqlite_path, "/default/db.sqlite")
+
+    @patch(
+        "storage.backend.config.DataSourceConfig.build_postgres_url",
+        return_value="postgresql://test/db",
+    )
+    def test_custom_persona_postgres(self, mock_build_url):
+        """Test --persona custom --postgres selects the PostgreSQL backend."""
+        args = argparse.Namespace(persona="custom", postgres=True)
+        config = get_data_source_config(args)
+
+        self.assertEqual(config.backend_type, BackendType.POSTGRES)
+        self.assertEqual(config.postgres_url, "postgresql://test/db")
+
+    @patch("agents.common.common_args.constants.WORDFREQ_DB_PATH", "/default/db.sqlite")
+    def test_persona_local_uses_sqlite(self):
+        """Test that --persona local resolves to the SQLite main database."""
+        args = argparse.Namespace(persona="local")
+        config = get_data_source_config(args)
+
+        self.assertEqual(config.backend_type, BackendType.SQLITE)
+        self.assertEqual(config.sqlite_path, "/default/db.sqlite")
+
+    def test_persona_golden_uses_release_jsonl(self):
+        """Test that --persona golden resolves to the data/release JSONL dir."""
+        args = argparse.Namespace(persona="golden")
+        config = get_data_source_config(args)
+
+        self.assertEqual(config.backend_type, BackendType.JSONL)
+        assert config.jsonl_data_dir is not None
+        self.assertTrue(config.jsonl_data_dir.endswith("data/release"))
 
     def test_cache_configuration(self):
         """Test cache URL and cache_only configuration."""

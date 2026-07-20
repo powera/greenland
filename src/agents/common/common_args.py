@@ -172,41 +172,22 @@ def add_guid_arg(
     return parser
 
 
-# Help-text marker for arguments that are deprecated in favor of --persona.
-# The Barsukas agents launcher hides any argument whose help starts with this.
-DEPRECATED_ARG_MARKER = "[DEPRECATED]"
+# --persona value that unlocks the manual backend flags below. Not a real
+# Barsukas persona: it means "the command line spells out the backend itself".
+CUSTOM_PERSONA = "custom"
 
-
-class _DeprecatedBackendFlagAction(argparse.Action):
-    """Store an argument's value while warning that the flag is deprecated.
-
-    argparse only invokes actions for flags actually present on the command
-    line, so defaults set via ``parser.set_defaults(...)`` do not warn.
-    """
-
-    def __call__(
-        self,
-        parser: argparse.ArgumentParser,
-        namespace: argparse.Namespace,
-        values: Any,
-        option_string: Optional[str] = None,
-    ) -> None:
-        print(
-            f"Warning: {option_string} is deprecated; use --persona instead.",
-            file=sys.stderr,
-        )
-        if self.nargs == 0:
-            setattr(namespace, self.dest, True)
-        else:
-            setattr(namespace, self.dest, values)
+# Help-text marker for the manual backend flags. The Barsukas agents launcher
+# hides any argument whose help starts with this; the launcher always passes
+# a real persona instead.
+ADVANCED_ARG_MARKER = "[ADVANCED]"
 
 
 def add_backend_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     """Add storage backend arguments.
 
-    --persona is the preferred way to select the main database. The older
-    --backend/--data-dir/--postgres flags are deprecated and kept only for
-    backward compatibility until they are fully redundant to --persona.
+    --persona is the way to select the main database. The manual flags
+    (--backend/--data-dir/--postgres) are only honored together with
+    --persona custom; get_data_source_config() rejects them otherwise.
 
     Args:
         parser: The argument parser to add arguments to
@@ -216,33 +197,30 @@ def add_backend_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser
     """
     parser.add_argument(
         "--persona",
-        choices=[p.value for p in PersonaName],
+        choices=[p.value for p in PersonaName] + [CUSTOM_PERSONA],
         help=(
             "Use the main database of this Barsukas persona (e.g. local, prod). "
-            "Takes precedence over --backend/--postgres. Agents only use the "
-            "persona's main database; its concepts and UI settings do not apply."
+            "Agents only use the persona's main database; its concepts and UI "
+            "settings do not apply. 'custom' selects the backend from the manual "
+            "--backend/--data-dir/--postgres flags instead."
         ),
     )
     parser.add_argument(
         "--backend",
         choices=["sqlite", "jsonl", "postgres"],
-        action=_DeprecatedBackendFlagAction,
-        help=f"{DEPRECATED_ARG_MARKER} Use --persona instead. Storage backend type (default: sqlite)",
+        help=f"{ADVANCED_ARG_MARKER} Requires --persona custom. Storage backend type (default: sqlite)",
     )
     parser.add_argument(
         "--data-dir",
-        action=_DeprecatedBackendFlagAction,
         help=(
-            f"{DEPRECATED_ARG_MARKER} Use --persona instead. Data directory for "
-            "JSONL backend (e.g., data/release/lemmas). Only used with --backend jsonl"
+            f"{ADVANCED_ARG_MARKER} Requires --persona custom. Data directory for "
+            "JSONL backend (e.g., data/release). Only used with --backend jsonl"
         ),
     )
     parser.add_argument(
         "--postgres",
-        nargs=0,
-        default=False,
-        action=_DeprecatedBackendFlagAction,
-        help=f"{DEPRECATED_ARG_MARKER} Use --persona prod instead. Use PostgreSQL backend instead of SQLite",
+        action="store_true",
+        help=f"{ADVANCED_ARG_MARKER} Requires --persona custom. Use PostgreSQL backend instead of SQLite",
     )
 
     return parser
@@ -506,13 +484,54 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None) -> "D
     jsonl_data_dir = None
     postgres_url = None
 
-    # A persona names the main database directly, so it wins over the
-    # lower-level flags. Only the persona's main database applies: agents do not
-    # use its concepts, worker, or UI settings.
-    if hasattr(args, "persona") and getattr(args, "persona", None):
+    persona_name = getattr(args, "persona", None)
+
+    # The manual backend flags are only honored with --persona custom, so that
+    # --persona stays the single way to select a database.
+    manual_flags = []
+    if getattr(args, "postgres", False):
+        manual_flags.append("--postgres")
+    if getattr(args, "backend", None):
+        manual_flags.append("--backend")
+    if getattr(args, "data_dir", None):
+        manual_flags.append("--data-dir")
+    if manual_flags and persona_name != CUSTOM_PERSONA:
+        print(f"Error: {', '.join(manual_flags)} requires --persona custom")
+        sys.exit(1)
+
+    if persona_name == CUSTOM_PERSONA:
+        # Manual backend selection: --postgres wins, then --backend, then
+        # --db-path (implies SQLite), then the default SQLite database.
+        if getattr(args, "postgres", False):
+            backend_type = BackendType.POSTGRES
+            postgres_url = DataSourceConfig.build_postgres_url()
+        elif getattr(args, "backend", None):
+            if args.backend == "sqlite":
+                backend_type = BackendType.SQLITE
+                sqlite_path = (
+                    args.db_path
+                    if hasattr(args, "db_path") and args.db_path
+                    else constants.WORDFREQ_DB_PATH
+                )
+            elif args.backend == "jsonl":
+                if not getattr(args, "data_dir", None):
+                    print("Error: --data-dir is required when using --backend jsonl")
+                    sys.exit(1)
+                backend_type = BackendType.JSONL
+                jsonl_data_dir = getattr(args, "data_dir", None)
+            elif args.backend == "postgres":
+                backend_type = BackendType.POSTGRES
+                postgres_url = DataSourceConfig.build_postgres_url()
+        elif hasattr(args, "db_path") and args.db_path:
+            backend_type = BackendType.SQLITE
+            sqlite_path = args.db_path
+    elif persona_name:
+        # A persona names the main database directly. Only the persona's main
+        # database applies: agents do not use its concepts, worker, or UI
+        # settings.
         from barsukas.personas import get_persona
 
-        persona = get_persona(args.persona)
+        persona = get_persona(persona_name)
         if persona.use_postgres:
             backend_type = BackendType.POSTGRES
             postgres_url = DataSourceConfig.build_postgres_url()
@@ -528,27 +547,6 @@ def get_data_source_config(args: Any, default_model: Optional[str] = None) -> "D
                 if hasattr(args, "db_path") and args.db_path
                 else constants.WORDFREQ_DB_PATH
             )
-    # Check for --postgres flag first (shorthand)
-    elif hasattr(args, "postgres") and args.postgres:
-        backend_type = BackendType.POSTGRES
-        postgres_url = DataSourceConfig.build_postgres_url()
-    elif hasattr(args, "backend") and args.backend:
-        if args.backend == "sqlite":
-            backend_type = BackendType.SQLITE
-            sqlite_path = (
-                args.db_path
-                if hasattr(args, "db_path") and args.db_path
-                else constants.WORDFREQ_DB_PATH
-            )
-        elif args.backend == "jsonl":
-            if not hasattr(args, "data_dir") or not getattr(args, "data_dir", None):
-                print("Error: --data-dir is required when using --backend jsonl")
-                sys.exit(1)
-            backend_type = BackendType.JSONL
-            jsonl_data_dir = getattr(args, "data_dir", None)
-        elif args.backend == "postgres":
-            backend_type = BackendType.POSTGRES
-            postgres_url = DataSourceConfig.build_postgres_url()
     elif hasattr(args, "db_path") and args.db_path:
         # Backward compatibility: db_path implies SQLite backend
         backend_type = BackendType.SQLITE

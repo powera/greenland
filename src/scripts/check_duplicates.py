@@ -10,9 +10,10 @@ collisions into four buckets:
 3. Meaning collisions (same surface form, same POS, different concepts)
 4. Duplicates (same surface form, same POS, same concept listed multiple times)
 
-By default this reads from the release JSONL data under ``data/release/lemmas``
-via the JSONL backend, which internally populates a temporary SQLite database
-for queries. The backend can still be overridden with the usual storage flags.
+By default this reads the release JSONL data via the golden persona
+(``--persona golden``), which internally populates a temporary SQLite database
+for queries. Another persona can be selected with --persona, or a manual
+backend with --persona custom plus the usual storage flags.
 """
 
 import argparse
@@ -26,11 +27,10 @@ if str(Path(__file__).parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
+from storage.backend.config import DataSourceConfig
 from storage.backend.factory import create_session
 from storage.models.schema import Lemma, LemmaTranslation
 from storage.translation_helpers import LANGUAGE_FIELDS
-
-DEFAULT_RELEASE_DIR = Path(__file__).resolve().parents[2] / "data" / "release"
 
 
 @dataclass(frozen=True)
@@ -95,7 +95,9 @@ def get_argument_parser() -> argparse.ArgumentParser:
     )
     add_common_args(parser)
     add_backend_args(parser)
-    parser.set_defaults(backend="jsonl", data_dir=str(DEFAULT_RELEASE_DIR))
+    # The golden persona reads the release JSONL (data/release), which is what
+    # this report is about by default.
+    parser.set_defaults(persona="golden")
     return parser
 
 
@@ -110,9 +112,8 @@ def validate_language(language_code: str) -> str:
     return normalized_code
 
 
-def load_entries(language_code: str, args: argparse.Namespace) -> list[LemmaEntry]:
+def load_entries(language_code: str, config: DataSourceConfig) -> list[LemmaEntry]:
     """Load lemma entries for the requested language."""
-    config = get_data_source_config(args)
     session = create_session(config)
     try:
         rows = cast(
@@ -338,18 +339,18 @@ def print_summary(
     same_word_different_pos: Sequence[tuple[str, list[LemmaEntry]]],
     meaning_collisions: Sequence[tuple[str, str, list[LemmaEntry]]],
     duplicates: Sequence[tuple[str, str, tuple[str, str, str], list[LemmaEntry]]],
-    args: argparse.Namespace,
+    config: DataSourceConfig,
 ) -> None:
     """Print a top-level summary before the detailed sections."""
     language_name = LANGUAGE_FIELDS[language_code][1]
-    backend_name = args.backend or "sqlite"
+    backend_name = config.backend_type.value
     print(
         f"Duplicate report for {language_name} ({language_code}) " f"using backend={backend_name}"
     )
-    if getattr(args, "data_dir", None):
-        print(f"Data dir: {args.data_dir}")
-    if getattr(args, "db_path", None):
-        print(f"DB path: {args.db_path}")
+    if config.jsonl_data_dir:
+        print(f"Data dir: {config.jsonl_data_dir}")
+    if config.sqlite_path:
+        print(f"DB path: {config.sqlite_path}")
     print(f"Entries scanned: {len(entries)}")
     print(f"Related word form groups: {len(related_word_forms)}")
     print(f"Same word, different POS collision groups: {len(same_word_different_pos)}")
@@ -368,7 +369,8 @@ def main() -> int:
     except ValueError as exc:
         parser.error(str(exc))
 
-    entries = load_entries(language_code, args)
+    config = get_data_source_config(args)
+    entries = load_entries(language_code, config)
     grouped_entries = group_by_word(entries)
     related_word_forms = classify_related_word_forms(grouped_entries)
     same_word_different_pos = classify_same_word_different_pos(grouped_entries)
@@ -382,7 +384,7 @@ def main() -> int:
         same_word_different_pos=same_word_different_pos,
         meaning_collisions=meaning_collisions,
         duplicates=duplicates,
-        args=args,
+        config=config,
     )
     print_related_word_forms(related_word_forms)
     print_same_word_different_pos(same_word_different_pos)
