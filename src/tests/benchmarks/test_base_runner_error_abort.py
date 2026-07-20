@@ -11,6 +11,16 @@ from benchmarks.lib.utils.base_runner import BenchmarkRunner
 from benchmarks.lib.utils.data_models import BenchmarkMetadata, BenchmarkResult
 
 
+class _DummySession:
+    """Stand-in for the datastore session; _run_inner() closes it on the way out."""
+
+    def __init__(self):
+        self.closed = False
+
+    def close(self):
+        self.closed = True
+
+
 class _DummyRunner(BenchmarkRunner):
     def prepare_prompt(self, question_data):
         return "prompt", None, None
@@ -19,7 +29,7 @@ class _DummyRunner(BenchmarkRunner):
 def test_run_aborts_after_three_errors(monkeypatch):
     monkeypatch.setattr(
         "benchmarks.lib.utils.base_runner.datastore_benchmarks.create_dev_session",
-        lambda: object(),
+        lambda: _DummySession(),
     )
     monkeypatch.setattr(
         "benchmarks.lib.utils.base_runner.datastore_common.get_model_by_codename",
@@ -64,7 +74,7 @@ def test_run_aborts_after_three_errors(monkeypatch):
 def test_run_keeps_lmstudio_model_loaded_after_success(monkeypatch):
     monkeypatch.setattr(
         "benchmarks.lib.utils.base_runner.datastore_benchmarks.create_dev_session",
-        lambda: object(),
+        lambda: _DummySession(),
     )
     monkeypatch.setattr(
         "benchmarks.lib.utils.base_runner.datastore_common.get_model_by_codename",

@@ -216,14 +216,19 @@ class TestConjugateConditional:
     """Test conditional (tariamoji nuosaka) derivation from infinitive."""
 
     def test_consonant_stem(self) -> None:
-        """dirbti → dirb + conditional endings."""
+        """dirbti → dirb + conditional endings.
+
+        The plural endings are deliberately asymmetric: 1pl drops the -mė-
+        (dirbtume, not dirbtumėme) because me+me is too repetitive, while 2pl
+        keeps it (dirbtumėte) since mė+te is not. Do not "fix" this to match.
+        """
         forms = _conjugate_conditional("dirbti")
         assert forms is not None
         assert forms["1s_conditional"] == "dirbčiau"
         assert forms["2s_conditional"] == "dirbtum"
         assert forms["3s_conditional"] == "dirbtų"
         assert forms["1p_conditional"] == "dirbtume"
-        assert forms["2p_conditional"] == "dirbtute"
+        assert forms["2p_conditional"] == "dirbtumėte"
         assert forms["3p_conditional"] == "dirbtų"
 
     def test_vowel_stem(self) -> None:

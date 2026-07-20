@@ -251,7 +251,9 @@ class PromptGenerationSizeTestCase(unittest.TestCase):
         )
 
         self.assertEqual(payload["model"], "gpt-5.4-mini")
-        self.assertEqual(payload["reasoning"], {"effort": "minimal"})
+        # gpt-5.4 does not accept "minimal"; "none" is its way to disable
+        # reasoning entirely. Other families still request "minimal".
+        self.assertEqual(payload["reasoning"], {"effort": "none"})
         self.assertEqual(payload["text"]["verbosity"], "low")
         self.assertIn("format", payload["text"])
         self.assertNotIn("temperature", payload)

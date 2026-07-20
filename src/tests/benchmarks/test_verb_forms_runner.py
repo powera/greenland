@@ -8,6 +8,9 @@ import types
 if "pydantic" not in sys.modules:
     sys.modules["pydantic"] = types.SimpleNamespace(BaseModel=object)
 
+# Must precede any runner import; see test_sentence_decomposition_scoring.py.
+import benchmarks.lib.utils  # noqa: F401  (import order matters)
+
 from benchmarks.lib.runners.verb_forms_runner import CORRECTNESS_THRESHOLD, VerbFormsRunner
 
 

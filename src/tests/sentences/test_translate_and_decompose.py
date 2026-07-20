@@ -71,7 +71,32 @@ def _make_session_with_no_candidates() -> Any:
     return session
 
 
-def test_pipeline_translates_and_decomposes_english_by_default() -> None:
+@pytest.fixture()
+def phase2_returns_a_candidate(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make Phase 2 yield one candidate lemma.
+
+    Phase 3 refuses to run without at least one candidate, and this module
+    deliberately stubs out the DB (Phase 2 is covered in test_candidate_lookup).
+    Patching the lookup keeps these orchestration tests focused on Phase 1/3.
+    """
+    from sentences.candidate_lookup import CandidateLemma
+
+    candidate = CandidateLemma(
+        guid="V01_001",
+        lemma_text="read",
+        disambiguation="",
+        pos="verb",
+        definition="to look at and comprehend written words",
+    )
+    monkeypatch.setattr(
+        "sentences.translate_and_decompose.find_candidate_lemmas_from_translations",
+        lambda *args, **kwargs: [candidate],
+    )
+
+
+def test_pipeline_translates_and_decomposes_english_by_default(
+    phase2_returns_a_candidate: None,
+) -> None:
     """With ``decompose_languages=None`` the pipeline runs Phase 3 only for English."""
     phase1_payload = {
         "en": "I read a book",
@@ -158,7 +183,7 @@ def test_pipeline_drops_source_language_from_targets() -> None:
     assert "fr" in phase1_schema["properties"]
 
 
-def test_pipeline_runs_phase3_in_one_combined_call() -> None:
+def test_pipeline_runs_phase3_in_one_combined_call(phase2_returns_a_candidate: None) -> None:
     """Multiple ``decompose_languages`` share a single combined Phase 3 call."""
     phase1_payload = {
         "fr": "Je lis",
@@ -208,7 +233,9 @@ def test_pipeline_reports_phase1_failure() -> None:
     assert result.decompositions == {}
 
 
-def test_pipeline_records_phase3_failure_for_every_language() -> None:
+def test_pipeline_records_phase3_failure_for_every_language(
+    phase2_returns_a_candidate: None,
+) -> None:
     """A combined Phase 3 LLM failure marks each requested language as failed."""
     phase1_payload = {
         "fr": "Je lis",

@@ -250,6 +250,10 @@ def _conjugate_conditional(infinitive: str) -> Optional[Dict[str, str]]:
       1p: stem + tume
       2p: stem + tumėte
       3p: stem + tų  (same as 3s)
+
+    The plural endings are asymmetric on purpose. 1pl drops the -mė- (dirbtume,
+    not dirbtumėme) because me+me is too repetitive; 2pl keeps it (dirbtumėte)
+    because mė+te is not. buti follows the same pattern: būtume / būtumėte.
     """
     stem = _get_infinitive_stem(infinitive)
     if stem is None:

@@ -22,9 +22,14 @@ def mock_boto3() -> Any:
     with patch("clients.wireword.cdn_uploader.boto3") as mock_b3:
         mock_client = MagicMock()
         mock_b3.client.return_value = mock_client
-        # head_object raises 404 by default (file doesn't exist)
+        # head_object raises 404 by default (file doesn't exist). This must be
+        # the same ClientError the uploader catches -- an ad-hoc exception class
+        # is not a subclass of botocore's, so it would propagate instead.
+        from clients.wireword.cdn_uploader import ClientError
+
         error_response: Dict[str, Any] = {"Error": {"Code": "404"}}
-        exc = type("ClientError", (Exception,), {"response": error_response})()
+        exc = ClientError.__new__(ClientError)
+        exc.response = error_response  # type: ignore[attr-defined]
         mock_client.head_object.side_effect = exc
         yield mock_client
 
