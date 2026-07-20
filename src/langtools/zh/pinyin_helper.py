@@ -97,6 +97,48 @@ def generate_pinyin(chinese_text: str) -> Optional[str]:
         return None
 
 
+def generate_pinyin_sort_key(chinese_text: str) -> Optional[str]:
+    """
+    Generate a pinyin sort key for Chinese dictionary ordering.
+
+    Unlike :func:`generate_pinyin`, tones are written as trailing digits rather
+    than diacritics (e.g. "dian3" instead of "diǎn").  Tone-marked vowels live
+    far above ASCII in Unicode, so a byte-ordered comparison of tone-marked
+    pinyin sorts by tone before it sorts by spelling.  Trailing digits keep the
+    letters adjacent, so a plain BINARY collation yields standard dictionary
+    order: alphabetical by syllable first, then tone 1-4 within a homophone.
+
+    Neutral tone is written as 5 so that every syllable ends in a digit, and it
+    sorts after the four marked tones as dictionaries expect.  ü is rendered
+    "v" (pypinyin's convention), which sorts just after "u".
+
+    Args:
+        chinese_text: Chinese text to convert (simplified or traditional)
+
+    Returns:
+        Lowercase pinyin with tone digits (e.g., "ni3 hao3"), or None if:
+        - pypinyin is not available
+        - text is empty
+        - text doesn't contain Chinese characters
+    """
+    if not PYPINYIN_AVAILABLE or not chinese_text:
+        return None
+
+    if not is_chinese(chinese_text):
+        return None
+
+    try:
+        # Convert to simplified Chinese first for better pinyin accuracy
+        # pypinyin handles simplified characters more reliably for polyphonic chars
+        text_for_pinyin = to_simplified(chinese_text)
+
+        pinyin_list = lazy_pinyin(text_for_pinyin, style=Style.TONE3, neutral_tone_with_five=True)
+        return " ".join(pinyin_list).lower()
+    except Exception as e:
+        logger.warning(f"Failed to generate pinyin sort key for '{chinese_text}': {e}")
+        return None
+
+
 def generate_pinyin_ruby_html(chinese_text: str) -> str:
     """
     Generate HTML with ruby annotations for Chinese text with Pinyin.

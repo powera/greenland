@@ -6,6 +6,10 @@ Iterates over every language that ``compute_sort_key`` supports (CJK plus
 Latin, Cyrillic, Brahmic, and Thai), finds rows where ``sort_key`` is NULL,
 computes the value, and writes it back.  Safe to re-run — rows that
 already have a sort_key are skipped via the NULL filter.
+
+Pass ``--recompute`` to also rewrite rows that already have a sort_key.  This
+is needed when the key format itself changes, as it did for Chinese when tone
+marks ("diǎn") were replaced by tone digits ("dian3").
 """
 
 import sys
@@ -30,25 +34,32 @@ def _all_supported_languages() -> List[str]:
     return _CJK_LANGUAGES + sorted(SORT_KEY_LANGUAGES)
 
 
-def backfill(db_path: str, dry_run: bool = False, languages: Optional[List[str]] = None) -> None:
+def backfill(
+    db_path: str,
+    dry_run: bool = False,
+    languages: Optional[List[str]] = None,
+    recompute: bool = False,
+) -> None:
     session = create_database_session(db_path)
     target_languages = languages if languages else _all_supported_languages()
 
     try:
         for lang in target_languages:
-            rows = (
-                session.query(LemmaTranslation)
-                .filter(
-                    LemmaTranslation.language_code == lang,
-                    LemmaTranslation.sort_key.is_(None),
-                )
-                .all()
+            query = session.query(LemmaTranslation).filter(
+                LemmaTranslation.language_code == lang,
             )
+            if not recompute:
+                query = query.filter(LemmaTranslation.sort_key.is_(None))
+            rows = query.all()
             updated = 0
             skipped = 0
+            unchanged = 0
             for row in rows:
                 key = compute_sort_key(lang, row.translation)
                 if key:
+                    if key == row.sort_key:
+                        unchanged += 1
+                        continue
                     if not dry_run:
                         row.sort_key = key
                     updated += 1
@@ -59,7 +70,10 @@ def backfill(db_path: str, dry_run: bool = False, languages: Optional[List[str]]
                 session.commit()
 
             if updated or skipped:
-                print(f"{lang}: {updated} updated, {skipped} skipped (no key computed)")
+                print(
+                    f"{lang}: {updated} updated, {unchanged} unchanged, "
+                    f"{skipped} skipped (no key computed)"
+                )
 
         if dry_run:
             print("\n** DRY RUN — no changes written **")
@@ -87,12 +101,18 @@ def main() -> int:
         default=None,
         help="Restrict backfill to these language codes (default: all supported)",
     )
+    parser.add_argument(
+        "--recompute",
+        action="store_true",
+        help="Also rewrite rows that already have a sort_key (for format changes)",
+    )
     args = parser.parse_args()
 
     print(f"Database: {args.db_path}")
     print(f"Dry run: {args.dry_run}")
+    print(f"Recompute existing: {args.recompute}")
     print(f"Languages: {args.languages or 'all supported'}\n")
-    backfill(args.db_path, args.dry_run, args.languages)
+    backfill(args.db_path, args.dry_run, args.languages, args.recompute)
     return 0
 
 
