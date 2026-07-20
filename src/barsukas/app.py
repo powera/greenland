@@ -396,13 +396,17 @@ def create_app(
     # --- Benchmarks integration ---
     # Barsukas always uses PostgreSQL to access the benchmarks schema.
     # The benchmarks section is only enabled when the postgres URL can be built.
+    # Under TESTING the benchmarks section stays disabled: building the URL reads
+    # the real Postgres key off disk and the request hooks open live connections,
+    # neither of which belongs in a test run.
     bench_postgres_url: Optional[str] = None
-    try:
-        from benchmarks.config import BenchmarkConfig
+    if not app.config.get("TESTING"):
+        try:
+            from benchmarks.config import BenchmarkConfig
 
-        bench_postgres_url = BenchmarkConfig.build_postgres_url()
-    except Exception as bench_exc:
-        print(f"Benchmarks DB not available, section disabled: {bench_exc}", file=sys.stderr)
+            bench_postgres_url = BenchmarkConfig.build_postgres_url()
+        except Exception as bench_exc:
+            print(f"Benchmarks DB not available, section disabled: {bench_exc}", file=sys.stderr)
 
     if bench_postgres_url:
         from benchmarks.datastore.common import create_postgres_session

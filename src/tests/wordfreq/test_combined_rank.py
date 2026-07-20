@@ -116,12 +116,15 @@ def test_combined_rank_uses_only_wordfreq_when_only_corpus_signal() -> None:
             result = _patched_run(session)
 
         assert result["success"] is True
-        # salt is more frequent -> rank 1, saffron rank 2
+        # Both lemmas are absent from every tier source, so each also picks up
+        # the YLE/CEFR/Basic English unknown floors. That compresses the
+        # absolute values, but salt (corpus rank 1) still beats saffron (rank 2).
         session.expire_all()
         salt = session.query(Lemma).filter_by(guid="N01").one()
         saffron = session.query(Lemma).filter_by(guid="N02").one()
-        assert salt.frequency_rank == 1
-        assert saffron.frequency_rank == 2
+        assert salt.frequency_rank == 4
+        assert saffron.frequency_rank == 8
+        assert salt.frequency_rank < saffron.frequency_rank
         assert "wordfreq_cooking" in result["sources_used"]
     finally:
         session.close()
@@ -142,15 +145,16 @@ def test_cefr_only_lemma_gets_cefr_synthetic_rank() -> None:
         assert result["success"] is True
         session.expire_all()
         scored = session.query(Lemma).filter_by(guid="V01").one()
-        # Single source (CEFR C1), harmonic mean = 12000
-        assert scored.frequency_rank == combined_rank.CEFR_TIER_RANKS["C1"]
+        # CEFR C1 (12000) plus the YLE (7500) and Basic English (7500) unknown
+        # floors: 3 / (1/7500 + 1/12000 + 1/7500) = 8571.
+        assert scored.frequency_rank == 8571
         assert "cefr" in result["sources_used"]
     finally:
         session.close()
 
 
 def test_basic_english_only_lemma_gets_synthetic_rank() -> None:
-    """A lemma whose only signal is Basic English 'basic' gets synthetic rank 400."""
+    """A lemma whose only positive signal is Basic English 'basic'."""
     session = _make_session()
     try:
         with patch.object(combined_rank, "get_enabled_corpus_configs", return_value=[]):
@@ -164,15 +168,17 @@ def test_basic_english_only_lemma_gets_synthetic_rank() -> None:
         assert result["success"] is True
         session.expire_all()
         scored = session.query(Lemma).filter_by(guid="N50").one()
-        assert scored.frequency_rank == combined_rank.BASIC_ENGLISH_TIER_RANKS["basic"]
+        # Basic English 'basic' (600) plus the YLE (7500) and CEFR (25000)
+        # unknown floors: 3 / (1/7500 + 1/25000 + 1/600) = 1630.
+        assert scored.frequency_rank == 1630
         assert "basic_english" in result["sources_used"]
     finally:
         session.close()
 
 
 def test_yle_plus_wordfreq_harmonic_mean() -> None:
-    """A lemma with YLE starters (rank 200, w=1.0) + one wordfreq corpus rank 1
-    (w=1.0) gets harmonic mean = 2 / (1/200 + 1/1) = 2 / 1.005 ≈ 1.99 -> 2."""
+    """A lemma with YLE starters + one wordfreq corpus rank 1, plus the CEFR and
+    Basic English unknown floors it is absent from."""
     session = _make_session()
     try:
         with patch.object(
@@ -199,16 +205,22 @@ def test_yle_plus_wordfreq_harmonic_mean() -> None:
         assert result["success"] is True
         session.expire_all()
         scored = session.query(Lemma).filter_by(guid="N01").one()
-        # 2.0 / (1.0/1 + 1.0/200) = 2.0 / 1.005 ≈ 1.99 -> int(round(...)) = 2
-        assert scored.frequency_rank == 2
+        # wordfreq rank 1, YLE starters (325), CEFR unknown (25000), Basic
+        # English unknown (7500): 4 / (1/1 + 1/325 + 1/25000 + 1/7500) = 4.
+        assert scored.frequency_rank == 4
         assert "cambridge_yle" in result["sources_used"]
         assert "wordfreq_cooking" in result["sources_used"]
     finally:
         session.close()
 
 
-def test_lemma_with_no_signal_is_skipped() -> None:
-    """Lemmas with no wordfreq rollup and no tier rows keep their existing rank (or NULL)."""
+def test_lemma_with_no_signal_gets_all_unknown_floors() -> None:
+    """A lemma with no wordfreq rollup and no tier rows still gets a rank.
+
+    The tier floors are applied unconditionally, so "absent everywhere" is
+    itself a signal: the lemma lands at the harmonic mean of the three
+    unknown ranks rather than being skipped.
+    """
     session = _make_session()
     try:
         with patch.object(combined_rank, "get_enabled_corpus_configs", return_value=[]):
@@ -219,10 +231,11 @@ def test_lemma_with_no_signal_is_skipped() -> None:
             result = _patched_run(session)
 
         assert result["success"] is True
-        assert result["lemmas_skipped"] >= 1
+        assert result["lemmas_skipped"] == 0
         session.expire_all()
         ghost = session.query(Lemma).filter_by(guid="N99").one()
-        assert ghost.frequency_rank is None
+        # 3 / (1/7500 + 1/25000 + 1/7500) = 9783
+        assert ghost.frequency_rank == 9783
     finally:
         session.close()
 
@@ -254,10 +267,12 @@ def test_corpus_weight_zero_excludes_corpus() -> None:
 
             result = _patched_run(session)
 
-        # No sources contributed
+        # The zero-weight corpus contributes nothing, so despite having a
+        # corpus hit the lemma is ranked purely from the tier unknown floors.
         assert "wordfreq_cooking" not in result["sources_used"]
         session.expire_all()
         scored = session.query(Lemma).filter_by(guid="N01").one()
-        assert scored.frequency_rank is None
+        # 3 / (1/7500 + 1/25000 + 1/7500) = 9783, same as a lemma with no signal.
+        assert scored.frequency_rank == 9783
     finally:
         session.close()
