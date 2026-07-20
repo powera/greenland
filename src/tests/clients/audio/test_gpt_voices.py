@@ -250,8 +250,16 @@ class TestSupportedLanguages(unittest.TestCase):
     """Test supported languages configuration."""
 
     def test_supported_languages(self) -> None:
-        """Test that supported languages are correctly defined."""
-        self.assertEqual(set(SUPPORTED_LANGUAGES), {"lt", "zh", "es", "fr", "it", "pt", "nl", "de", "sv"})
+        """Test that supported languages are correctly defined.
+
+        The list is derived from DEFAULT_GPT_VOICES and grows as languages are
+        added, so assert that derivation plus the core set, rather than pinning
+        an exact set that goes stale on every addition.
+        """
+        self.assertEqual(set(SUPPORTED_LANGUAGES), set(DEFAULT_GPT_VOICES))
+        self.assertTrue(
+            {"lt", "zh", "es", "fr", "it", "pt", "nl", "de", "sv"}.issubset(SUPPORTED_LANGUAGES)
+        )
 
     def test_default_voices_for_all_languages(self) -> None:
         """Test that default voices are defined for all supported languages."""

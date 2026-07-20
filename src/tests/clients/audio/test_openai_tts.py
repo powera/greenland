@@ -16,7 +16,7 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
-from clients.audio.openai_tts import OpenAITTSClient
+from clients.audio.openai_tts import DEFAULT_MODEL, OpenAITTSClient
 from clients.audio.types import AudioFormat, AudioGenerationResult, Voice
 
 
@@ -29,7 +29,7 @@ class TestOpenAITTSClient(unittest.TestCase):
         self.mock_api_key = "sk-test-key-123"
 
     @patch("clients.audio.openai_tts.requests.post")
-    @patch.object(OpenAITTSClient, "_load_key")
+    @patch("clients.audio.openai_tts.load_key")
     def test_generate_audio_success(self, mock_load_key: MagicMock, mock_post: MagicMock) -> None:
         """Test successful audio generation."""
         mock_load_key.return_value = self.mock_api_key
@@ -56,13 +56,16 @@ class TestOpenAITTSClient(unittest.TestCase):
         call_args = mock_post.call_args
         self.assertIn("json", call_args.kwargs)
         payload = call_args.kwargs["json"]
-        self.assertEqual(payload["model"], "gpt-4o-mini-tts")
+        # Assert against the constant, not a literal: the model is still
+        # gpt-4o-mini-tts but is pinned to a dated snapshot that changes.
+        self.assertEqual(payload["model"], DEFAULT_MODEL)
+        self.assertTrue(DEFAULT_MODEL.startswith("gpt-4o-mini-tts"))
         self.assertEqual(payload["input"], "labas")
         self.assertEqual(payload["voice"], "ash")
         self.assertIn("instructions", payload)
 
     @patch("clients.audio.openai_tts.requests.post")
-    @patch.object(OpenAITTSClient, "_load_key")
+    @patch("clients.audio.openai_tts.load_key")
     def test_generate_audio_api_error(self, mock_load_key: MagicMock, mock_post: MagicMock) -> None:
         """Test handling of API errors."""
         mock_load_key.return_value = self.mock_api_key
@@ -84,7 +87,7 @@ class TestOpenAITTSClient(unittest.TestCase):
         self.assertIn("429", result.error)
 
     @patch("clients.audio.openai_tts.requests.post")
-    @patch.object(OpenAITTSClient, "_load_key")
+    @patch("clients.audio.openai_tts.load_key")
     def test_generate_audio_with_speed(
         self, mock_load_key: MagicMock, mock_post: MagicMock
     ) -> None:
@@ -107,7 +110,7 @@ class TestOpenAITTSClient(unittest.TestCase):
         self.assertEqual(payload["speed"], 0.75)
 
     @patch("clients.audio.openai_tts.requests.post")
-    @patch.object(OpenAITTSClient, "_load_key")
+    @patch("clients.audio.openai_tts.load_key")
     def test_language_specific_instructions(
         self, mock_load_key: MagicMock, mock_post: MagicMock
     ) -> None:
@@ -135,7 +138,7 @@ class TestOpenAITTSClient(unittest.TestCase):
         self.assertIn("Chinese", payload["instructions"])
 
     @patch("clients.audio.openai_tts.requests.post")
-    @patch.object(OpenAITTSClient, "_load_key")
+    @patch("clients.audio.openai_tts.load_key")
     def test_audio_format_parameter(self, mock_load_key: MagicMock, mock_post: MagicMock) -> None:
         """Test different audio format options."""
         mock_load_key.return_value = self.mock_api_key
