@@ -8,9 +8,8 @@
 # Any extra arguments are passed through to pytest, so this works:
 #   ./run_tests.sh base -k combined_rank -x
 #
-# base excludes two directories:
+# base excludes one directory:
 #   clients/audio   - needs the audio submodule synced to its recorded commit
-#   lib/benchmarks  - 16 known failures from stale datastore.* patch targets
 set -euo pipefail
 
 cd "$(dirname "$0")"
@@ -24,9 +23,7 @@ case "$TARGET" in
     exec python -m pytest src/tests -m smoke "$@"
     ;;
   base)
-    exec python -m pytest src/tests \
-      --ignore=src/tests/lib/benchmarks \
-      "$@"
+    exec python -m pytest src/tests "$@"
     ;;
   all)
     exec python -m pytest src/tests "$@"

@@ -67,14 +67,27 @@ Access at `http://127.0.0.1:5555`.
 ## Running Tests
 
 ```bash
-# All tests
-python run_tests.py
+# Fast import/startup checks; run on every commit
+./run_tests.sh smoke
 
+# The tests known to pass; run often, not every commit
+./run_tests.sh base
+
+# Everything, including known-failing suites
+./run_tests.sh all
+```
+
+Extra arguments are passed through to pytest, so you can narrow a run:
+
+```bash
 # Specific directory
-python run_tests.py src/wordfreq
+./run_tests.sh base src/tests/wordfreq
 
 # Specific file
-python run_tests.py src/wordfreq/test_storage.py
+./run_tests.sh base src/tests/wordfreq/test_storage.py
+
+# By keyword, stopping at the first failure
+./run_tests.sh base -k combined_rank -x
 ```
 
 ## Running Agents

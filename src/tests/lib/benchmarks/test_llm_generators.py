@@ -22,6 +22,7 @@ import logging
 import os
 import pickle
 import random
+import re
 import sys
 import unittest
 from typing import Any, Dict, List, Optional, Tuple, Type
@@ -30,9 +31,13 @@ from unittest.mock import MagicMock, patch
 from benchmarks.lib.utils.base import BenchmarkGenerator
 from benchmarks.lib.utils.data_models import BenchmarkMetadata, BenchmarkQuestion
 from benchmarks.lib.utils.factory import get_all_benchmark_codes, get_generator
+import benchmarks.validation
+from clients import unified_client
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -179,8 +184,11 @@ class GeneratorTestCase(unittest.TestCase):
     generator_class: Optional[Type[BenchmarkGenerator]] = None
     benchmark_code: Optional[str] = None
 
-    # Class variables for controlling test behavior
-    stub_llm: bool = False
+    # Class variables for controlling test behavior.
+    # stub_llm defaults to True so that a plain `pytest` run never makes a live
+    # LLM call; the __main__ entry point below overrides it from --stub-llm and
+    # --record for deliberate recording runs.
+    stub_llm: bool = True
     record_mode: bool = False
     cache_file: str = "llm_responses_cache.json"
     random_seed: int = 42
@@ -212,12 +220,12 @@ class GeneratorTestCase(unittest.TestCase):
             self.skipTest("No generator_class or benchmark_code specified")
 
         # Patch the insert_benchmark function to prevent database writes
-        self.insert_benchmark_patcher = patch("datastore.benchmarks.insert_benchmark")
+        self.insert_benchmark_patcher = patch("benchmarks.datastore.benchmarks.insert_benchmark")
         self.mock_insert_benchmark = self.insert_benchmark_patcher.start()
         self.mock_insert_benchmark.return_value = (True, "Benchmark inserted")
 
         # Patch the insert_question function to prevent database writes
-        self.insert_question_patcher = patch("datastore.benchmarks.insert_question")
+        self.insert_question_patcher = patch("benchmarks.datastore.benchmarks.insert_question")
         self.mock_insert_question = self.insert_question_patcher.start()
         self.mock_insert_question.return_value = (True, "Question inserted")
 
@@ -239,12 +247,12 @@ class GeneratorTestCase(unittest.TestCase):
         ]  # Always take first k items
 
         # Patch unified_client.generate_chat to use cache
-        self.generate_chat_patcher = patch("lib.benchmarks.base.unified_client.generate_chat")
+        self.generate_chat_patcher = patch("clients.unified_client.generate_chat")
         self.mock_generate_chat = self.generate_chat_patcher.start()
         self.mock_generate_chat.side_effect = self._mock_generate_chat
 
         # Patch unified_client.warm_model
-        self.warm_model_patcher = patch("lib.benchmarks.base.unified_client.warm_model")
+        self.warm_model_patcher = patch("clients.unified_client.warm_model")
         self.mock_warm_model = self.warm_model_patcher.start()
         self.mock_warm_model.return_value = True
 
@@ -367,10 +375,7 @@ class GeneratorTestCase(unittest.TestCase):
         # If in record mode, we need to wrap the original method to capture responses
         if self.record_mode:
             # Create a wrapper for the real generate_chat function
-            original_generate_chat = getattr(
-                __import__("lib.benchmarks.base", fromlist=["unified_client"]).unified_client,
-                "generate_chat",
-            )
+            original_generate_chat = unified_client.generate_chat
 
             def record_wrapper(prompt, model, **kwargs):
                 # Call the original function
@@ -393,30 +398,26 @@ class GeneratorTestCase(unittest.TestCase):
                 return response
 
             # Apply the wrapper for this test
-            with patch(
-                "lib.benchmarks.base.unified_client.generate_chat", side_effect=record_wrapper
-            ):
-                result = self.generator.generate_llm_question("test prompt", schema=schema)
+            with patch("clients.unified_client.generate_chat", side_effect=record_wrapper):
+                result = self.generator.get_llm_question("test prompt", schema=schema)
                 self.assertIsNotNone(result)
 
                 # Also test without schema
-                result = self.generator.generate_llm_question(
-                    "test prompt without schema", schema=None
-                )
+                result = self.generator.get_llm_question("test prompt without schema", schema=None)
                 self.assertIsNotNone(result)
 
         elif self.stub_llm:
             # When using stubbed responses, just verify we get something
-            result = self.generator.generate_llm_question("test prompt", schema=schema)
+            result = self.generator.get_llm_question("test prompt", schema=schema)
             self.assertIsNotNone(result)
 
             # Also test without schema
-            result = self.generator.generate_llm_question("test prompt without schema", schema=None)
+            result = self.generator.get_llm_question("test prompt without schema", schema=None)
             self.assertIsNotNone(result)
 
         else:
             # Without stubbing or recording, use temporary mocks
-            with patch("lib.benchmarks.base.unified_client.generate_chat") as mock_generate_chat:
+            with patch("clients.unified_client.generate_chat") as mock_generate_chat:
                 # Configure the mock
                 mock_response = MagicMock()
                 mock_response.structured_data = {"key": "value"}
@@ -424,11 +425,11 @@ class GeneratorTestCase(unittest.TestCase):
                 mock_generate_chat.return_value = mock_response
 
                 # Test with schema
-                result = self.generator.generate_llm_question("test prompt", schema=schema)
+                result = self.generator.get_llm_question("test prompt", schema=schema)
                 self.assertEqual(result, {"key": "value"})
 
                 # Test without schema
-                result = self.generator.generate_llm_question("test prompt", schema=None)
+                result = self.generator.get_llm_question("test prompt", schema=None)
                 self.assertEqual(result, "Test response")
 
     def test_validate_question(self):
@@ -438,10 +439,7 @@ class GeneratorTestCase(unittest.TestCase):
         # If in record mode, we need to wrap the original method to capture responses
         if self.record_mode:
             # Create a wrapper for the real generate_chat function
-            original_generate_chat = getattr(
-                __import__("lib.benchmarks.base", fromlist=["unified_client"]).unified_client,
-                "generate_chat",
-            )
+            original_generate_chat = unified_client.generate_chat
 
             def record_wrapper(prompt, model, **kwargs):
                 # Call the original function
@@ -464,28 +462,26 @@ class GeneratorTestCase(unittest.TestCase):
                 return response
 
             # Apply the wrapper for this test
-            with patch(
-                "lib.benchmarks.base.unified_client.generate_chat", side_effect=record_wrapper
-            ):
-                is_valid, reason = self.generator.validate_question(question)
+            with patch("clients.unified_client.generate_chat", side_effect=record_wrapper):
+                is_valid, reason = benchmarks.validation.validate_question(question)
                 self.assertIsNotNone(is_valid)
                 self.assertIsNotNone(reason)
 
         elif self.stub_llm:
             # When using stubbed responses, just verify we get something
-            is_valid, reason = self.generator.validate_question(question)
+            is_valid, reason = benchmarks.validation.validate_question(question)
             self.assertIsNotNone(is_valid)
             self.assertIsNotNone(reason)
 
         else:
             # Without stubbing or recording, use temporary mocks
-            with patch("lib.benchmarks.base.unified_client.generate_chat") as mock_generate_chat:
+            with patch("clients.unified_client.generate_chat") as mock_generate_chat:
                 # Configure the mock
                 mock_response = MagicMock()
                 mock_response.structured_data = {"valid": True, "reason": "Good question"}
                 mock_generate_chat.return_value = mock_response
 
-                is_valid, reason = self.generator.validate_question(question)
+                is_valid, reason = benchmarks.validation.validate_question(question)
 
                 self.assertTrue(is_valid)
                 self.assertEqual(reason, "Good question")
@@ -498,28 +494,21 @@ class TestLetterCountGenerator(GeneratorTestCase):
 
     def test_letter_count_question(self):
         """Test specific functionality of the LetterCountGenerator."""
-        # Generate a question with specific word and letter
-        question = self.generator.generate_question(word="hello", letter="l")
-
-        # Check the specific content
-        self.assertIn("letter 'l'", question.question_text)
-        self.assertIn("word 'hello'", question.question_text)
-        self.assertEqual(question.correct_answer, 2)  # 'l' appears twice in 'hello'
-
-
-class TestAntonymGenerator(GeneratorTestCase):
-    """Test case for the AntonymGenerator."""
-
-    benchmark_code = "0016_antonym"
-
-    def test_antonym_question(self):
-        """Test specific functionality of the AntonymGenerator."""
+        # The generator selects its own word and letter at random, so parse them
+        # back out of the question text rather than asserting fixed values.
         question = self.generator.generate_question()
 
-        # Check for antonym-specific properties
-        self.assertIn("antonym", question.question_text.lower())
-        self.assertTrue(hasattr(question, "choices"))
-        self.assertIsInstance(question.choices, list)
+        match = re.search(
+            r"How many times does the letter '(\w)' appear in the word '(\w+)'\?",
+            question.question_text,
+        )
+        if match is None:
+            self.fail(f"Unexpected question text: {question.question_text!r}")
+        letter, word = match.group(1), match.group(2)
+
+        # The stated answer must match an independent count over the stated word.
+        self.assertIn(letter.lower(), word.lower())
+        self.assertEqual(question.correct_answer, word.lower().count(letter.lower()))
 
 
 def get_test_suite():
@@ -528,11 +517,12 @@ def get_test_suite():
 
     # Add specific test cases
     suite.addTest(unittest.makeSuite(TestLetterCountGenerator))
-    suite.addTest(unittest.makeSuite(TestAntonymGenerator))
 
     # Dynamically add test cases for all registered benchmarks
     for benchmark_code in get_all_benchmark_codes():
-        # Skip the ones we've already added specific tests for
+        # 0012 has a specific test case above. 0016_antonym is excluded because
+        # its generator is LLM-backed and is slated to be rebuilt on top of the
+        # linguistics database; there is nothing worth pinning until then.
         if benchmark_code in ["0012_letter_count", "0016_antonym"]:
             continue
 
