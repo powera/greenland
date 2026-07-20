@@ -37,9 +37,9 @@ def _configure_backend_once(persona: Optional[PersonaConfig] = None) -> None:
     database, so the persona's concepts settings are irrelevant here.
 
     Args:
-        persona: The resolved persona. When omitted, the backend is read from
-            the environment, preserving the standalone `python -m workqueue.worker`
-            entry point.
+        persona: The resolved persona. When omitted (the standalone
+            `python -m workqueue.worker` entry point), the backend is SQLite
+            at Config.DB_PATH.
     """
     global _backend_configured
     if _backend_configured:
@@ -47,30 +47,24 @@ def _configure_backend_once(persona: Optional[PersonaConfig] = None) -> None:
 
     use_word2vec = os.environ.get("USE_WORD2VEC", "false").lower() == "true"
 
-    if persona is not None:
-        wants_postgres = persona.use_postgres
-        wants_jsonl = persona.use_jsonl
-    else:
-        backend_env = os.environ.get("STORAGE_BACKEND")
-        wants_postgres = backend_env == "postgres"
-        wants_jsonl = backend_env == "jsonl"
+    wants_postgres = persona is not None and persona.use_postgres
+    wants_jsonl = persona is not None and persona.use_jsonl
 
     backend_config: Optional[DataSourceConfig] = None
 
     if wants_postgres:
-        postgres_url = os.environ.get("POSTGRES_URL")
-        if not postgres_url:
-            try:
-                postgres_url = DataSourceConfig.build_postgres_url()
-            except Exception as e:
-                # Degrade rather than raise, matching create_app(): a worker that
-                # dies on startup takes the whole unified process down with it.
-                logger.warning(
-                    "PostgreSQL credentials unavailable (%s); worker falling back to SQLite at %s",
-                    e,
-                    Config.DB_PATH,
-                )
-                postgres_url = None
+        postgres_url: Optional[str]
+        try:
+            postgres_url = DataSourceConfig.build_postgres_url()
+        except Exception as e:
+            # Degrade rather than raise, matching create_app(): a worker that
+            # dies on startup takes the whole unified process down with it.
+            logger.warning(
+                "PostgreSQL credentials unavailable (%s); worker falling back to SQLite at %s",
+                e,
+                Config.DB_PATH,
+            )
+            postgres_url = None
 
         if postgres_url:
             backend_config = DataSourceConfig(

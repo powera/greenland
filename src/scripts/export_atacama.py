@@ -16,8 +16,8 @@ from pathlib import Path
 if str(Path(__file__).parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from agents.common.common_args import add_backend_args, get_data_source_config
 from atacama.export_atacama import AtacamaExporter
-from storage.backend.config import DataSourceConfig
 
 
 def main() -> None:
@@ -39,6 +39,7 @@ def main() -> None:
         action="store_true",
         help="Enable debug logging",
     )
+    add_backend_args(parser)
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -47,7 +48,7 @@ def main() -> None:
     )
 
     languages = tuple(lang.strip() for lang in args.languages.split(","))
-    config = DataSourceConfig.from_env()
+    config = get_data_source_config(args)
     exporter = AtacamaExporter(config=config, languages=languages)
     result = exporter.export(args.output)
 

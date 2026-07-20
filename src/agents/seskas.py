@@ -13,7 +13,7 @@ if str(Path(__file__).parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from agents.common.common_args import (
-    add_benchmarks_backend_args,
+    add_backend_args,
     add_common_args,
     configure_benchmarks_session_backend,
     get_data_source_config,
@@ -266,7 +266,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Per-request timeout in seconds for local model calls",
     )
     add_common_args(parser)
-    add_benchmarks_backend_args(parser)
+    add_backend_args(parser)
     return parser
 
 

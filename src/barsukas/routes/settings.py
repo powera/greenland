@@ -27,7 +27,6 @@ from flask import (
 from flask.typing import ResponseReturnValue
 from werkzeug.wrappers import Response
 
-from storage.backend import get_backend_type
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import Lemma
 
@@ -50,21 +49,12 @@ def _get_backend_config() -> DataSourceConfig:
 @bp.route("/")
 def index() -> ResponseReturnValue:
     """Settings page."""
-    backend_type = get_backend_type()
     backend_config = _get_backend_config()
-
-    # Get environment variables
-    env_backend = os.environ.get("STORAGE_BACKEND", "sqlite")
-    env_sqlite_path = os.environ.get("SQLITE_DB_PATH", "")
-    env_jsonl_dir = os.environ.get("JSONL_DATA_DIR", "")
 
     return render_template(
         "settings.html",
-        current_backend=backend_type.value,
+        current_backend=backend_config.backend_type.value,
         backend_config=backend_config,
-        env_backend=env_backend,
-        env_sqlite_path=env_sqlite_path,
-        env_jsonl_dir=env_jsonl_dir,
         persona=current_app.config.get("PERSONA"),
         concepts_backend=current_app.config.get("CONCEPTS_BACKEND"),
         concepts_writable=current_app.config.get("CONCEPTS_WRITABLE", False),
@@ -224,7 +214,7 @@ def switch_backend() -> ResponseReturnValue:
     if target_backend not in ["sqlite", "jsonl"]:
         return jsonify({"error": "Invalid backend type"}), 400
 
-    current_backend = get_backend_type().value
+    current_backend = _get_backend_config().backend_type.value
 
     if target_backend == current_backend:
         return jsonify({"message": "Already using that backend"}), 200
@@ -252,8 +242,8 @@ def switch_backend() -> ResponseReturnValue:
 @bp.route("/backend/info", methods=["GET"])
 def backend_info() -> ResponseReturnValue:
     """Get information about the current backend."""
-    backend_type = get_backend_type()
     backend_config = _get_backend_config()
+    backend_type = backend_config.backend_type
 
     info: dict = {
         "backend_type": backend_type.value,

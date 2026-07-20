@@ -110,7 +110,7 @@
 
             <div class="alert alert-info mt-3">
                 <strong>Note:</strong> Switching backends requires restarting Barsukas with a different
-                <code>STORAGE_BACKEND</code> environment variable.
+                <code>--persona</code>.
             </div>
         </div>
     </div>
@@ -124,7 +124,6 @@
         <div class="card-body">
             <p>Gracefully restart the Barsukas process to:</p>
             <ul>
-                <li>Apply environment variable changes (e.g., switching storage backends)</li>
                 <li>Reload Python code changes</li>
                 <li>Clear memory and start fresh</li>
             </ul>
@@ -156,13 +155,13 @@
             <h2>Switch Backend</h2>
         </div>
         <div class="card-body">
-            <p>To switch backends, set environment variables and restart Barsukas with one of these commands:</p>
+            <p>The backend is selected by the persona. To switch, restart Barsukas with one of these commands:</p>
 
             <div class="mb-3">
-                <h5>Use SQLite Backend:</h5>
+                <h5>Use SQLite Backend (local persona):</h5>
                 <div class="input-group">
                     <input type="text" class="form-control" readonly
-                           value="STORAGE_BACKEND=sqlite python src/barsukas/app.py" id="sqlite-cmd">
+                           value="src/barsukas/launch.sh --persona local" id="sqlite-cmd">
                     <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('sqlite-cmd')">
                         <i class="bi bi-clipboard"></i> Copy
                     </button>
@@ -170,17 +169,14 @@
             </div>
 
             <div class="mb-3">
-                <h5>Use JSONL Backend:</h5>
+                <h5>Use JSONL Backend (golden persona):</h5>
                 <div class="input-group">
                     <input type="text" class="form-control" readonly
-                           value="STORAGE_BACKEND=jsonl python src/barsukas/app.py" id="jsonl-cmd">
+                           value="src/barsukas/launch.sh --persona golden" id="jsonl-cmd">
                     <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('jsonl-cmd')">
                         <i class="bi bi-clipboard"></i> Copy
                     </button>
                 </div>
-                <small class="form-text text-muted">
-                    Optional: Set <code>JSONL_DATA_DIR=path/to/data</code> to customize the data directory
-                </small>
             </div>
         </div>
     </div>

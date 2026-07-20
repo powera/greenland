@@ -100,7 +100,7 @@ from barsukas.routes.sync import (
     sync_sentence_release,
     sync_synonym_release,
 )
-from storage.backend import create_session, get_backend_type
+from storage.backend import configure_backend, create_session
 from storage.backend.config import BackendType, DataSourceConfig
 
 logger = logging.getLogger(__name__)
@@ -155,8 +155,8 @@ def create_app(
         db_url: Optional main-database URL (postgresql://user:pass@host:5432/db).
             Overrides the persona's main backend. Never affects concepts.
         use_word2vec: Enable pgvector embedding operations
-        persona: The resolved persona. When omitted, backend selection falls back
-            to reading the environment, which is what the test fixtures rely on.
+        persona: The resolved persona. When omitted, the main database is
+            SQLite at config DB_PATH, which is what the test fixtures rely on.
     """
     logging.basicConfig(
         level=logging.DEBUG if config_class.DEBUG else logging.INFO,
@@ -174,29 +174,27 @@ def create_app(
 
     # --- main database -------------------------------------------------------
     # An explicit db_url wins over the persona; a persona's postgres main DB
-    # builds the URL from the key file.
+    # builds the URL from the key file. The environment is never consulted:
+    # with no persona and no db_url (test fixtures, directly-constructed apps)
+    # the main database is SQLite at config DB_PATH.
     postgres_url = db_url if db_url and db_url.startswith("postgresql://") else None
     if postgres_url and persona:
         logger.info("--db-url overrides persona '%s' main database", persona.name.value)
 
-    wants_postgres_main = bool(postgres_url) or (
-        persona.use_postgres if persona else os.environ.get("STORAGE_BACKEND") == "postgres"
-    )
+    wants_postgres_main = bool(postgres_url) or bool(persona and persona.use_postgres)
 
     if wants_postgres_main and not postgres_url:
-        postgres_url = os.environ.get("POSTGRES_URL")
-        if not postgres_url:
-            try:
-                postgres_url = DataSourceConfig.build_postgres_url()
-            except Exception as e:
-                degraded.append(
-                    _warn_degraded(
-                        what="PostgreSQL main database",
-                        reason=str(e),
-                        consequence="Falling back to the local SQLite database.",
-                        fix="Add credentials at keys/postgres.key",
-                    )
+        try:
+            postgres_url = DataSourceConfig.build_postgres_url()
+        except Exception as e:
+            degraded.append(
+                _warn_degraded(
+                    what="PostgreSQL main database",
+                    reason=str(e),
+                    consequence="Falling back to the local SQLite database.",
+                    fix="Add credentials at keys/postgres.key",
                 )
+            )
 
     if postgres_url:
         print("Using storage backend: postgres")
@@ -207,24 +205,30 @@ def create_app(
         )
         app.config["DB_PATH"] = "PostgreSQL (Supabase)"  # For display
         app.config["USING_POSTGRES"] = True
+    elif persona and persona.use_jsonl:
+        print("Using storage backend: jsonl")
+        repo_root = Path(__file__).parent.parent.parent
+        jsonl_dir = repo_root / (persona.jsonl_data_dir or "data/release")
+        backend_config = DataSourceConfig(
+            backend_type=BackendType.JSONL,
+            jsonl_data_dir=str(jsonl_dir),
+            use_word2vec=use_word2vec,
+        )
+        app.config["USING_POSTGRES"] = False
     else:
-        backend_type = get_backend_type()
-        print(f"Using storage backend: {backend_type.value}")
-
-        if backend_type == BackendType.SQLITE:
-            db_path = app.config["DB_PATH"]
-            if not Path(db_path).exists():
-                print(f"Error: Database not found at {db_path}", file=sys.stderr)
-                sys.exit(1)
-            backend_config = DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=db_path)
-        else:
-            # JSONL backend
-            backend_config = DataSourceConfig.from_env()
-
+        print("Using storage backend: sqlite")
+        db_path = app.config["DB_PATH"]
+        if not Path(db_path).exists():
+            print(f"Error: Database not found at {db_path}", file=sys.stderr)
+            sys.exit(1)
+        backend_config = DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=db_path)
         app.config["USING_POSTGRES"] = False
 
-    # Store backend config in app
+    # Store backend config in app, and declare it as the process's main
+    # database so no-arg storage.backend helpers and the S3 staging prefix
+    # see the same backend.
     app.backend_config = backend_config
+    configure_backend(backend_config)
     app.config["SERVER_MODE"] = "readwrite"
 
     set_server_mode_metrics(
@@ -262,11 +266,7 @@ def create_app(
     # that knows whether the connection was actually established. Deriving it
     # from persona flags elsewhere would advertise writable concepts while
     # serving the fallback backend.
-    wants_postgres_concepts = (
-        persona.use_postgres_concepts
-        if persona
-        else os.environ.get("BARSUKAS_CONCEPTS_BACKEND") == "postgres"
-    )
+    wants_postgres_concepts = bool(persona and persona.use_postgres_concepts)
 
     if wants_postgres_concepts:
         try:
@@ -295,11 +295,7 @@ def create_app(
 
             # golden/hosted connect read-only: writes/DDL are rejected at the server,
             # not merely gated by CONCEPTS_WRITABLE route checks.
-            concepts_readonly = (
-                persona.postgres_concepts_readonly
-                if persona
-                else os.environ.get("BARSUKAS_CONCEPTS_READONLY") == "true"
-            )
+            concepts_readonly = bool(persona and persona.postgres_concepts_readonly)
 
             def concepts_session_factory() -> Session:
                 return cast(

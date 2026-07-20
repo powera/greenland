@@ -36,6 +36,7 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
+from agents.common.common_args import add_backend_args, get_data_source_config
 from clients.lib import ChatMessage
 from clients.unified_client import UnifiedLLMClient
 from storage.backend.config import DataSourceConfig
@@ -281,6 +282,7 @@ def main() -> int:
     )
     parser.add_argument("--model", required=True, help="LLM model, e.g. gpt-5.4-mini")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    add_backend_args(parser)
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -288,7 +290,7 @@ def main() -> int:
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    config = DataSourceConfig.from_env().with_model(args.model, debug=args.debug)
+    config = get_data_source_config(args)
     agent = VovereAgent(config)
     sources: List[Dict[str, Any]] = [{"url": url} for url in args.sources]
     body = agent.generate_body(args.title, args.summary, sources)

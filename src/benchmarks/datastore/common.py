@@ -99,14 +99,12 @@ def _migrate_postgres_schema(conn) -> None:
     existing_columns = {
         (row[0], row[1])
         for row in conn.execute(
-            text(
-                """
+            text("""
                 SELECT table_name, column_name
                 FROM information_schema.columns
                 WHERE table_schema = :schema
                   AND table_name IN ('benchmark', 'model', 'run_detail', 'question')
-                """
-            ),
+                """),
             {"schema": schema},
         )
     }
@@ -138,17 +136,28 @@ def _migrate_postgres_schema(conn) -> None:
             conn.execute(text(statement))
 
 
+# The benchmark datastore is PostgreSQL for every configuration except the
+# fully offline local-sqlite persona, which opts out via use_sqlite_backend()
+# (called by agents.common.common_args.configure_benchmarks_session_backend).
+_force_sqlite = False
+
+
+def use_sqlite_backend() -> None:
+    """Use the local SQLite benchmarks database instead of PostgreSQL."""
+    global _force_sqlite
+    _force_sqlite = True
+
+
 def create_dev_session():
     """Create a database session.
 
-    Uses PostgreSQL by default (via BenchmarkConfig.from_env()), falling back
-    to the local SQLite file only when BENCH_STORAGE_BACKEND=sqlite is set.
+    Uses PostgreSQL by default; the local SQLite file is used only after
+    use_sqlite_backend() has been called (local-sqlite persona).
     """
     from benchmarks.config import BenchmarkConfig
 
-    config = BenchmarkConfig.from_env()
-    if config.using_postgres and config.postgres_url:
-        return create_postgres_session(config.postgres_url)
+    if not _force_sqlite:
+        return create_postgres_session(BenchmarkConfig.build_postgres_url())
 
     db_path = BENCHMARKS_DB_PATH
     engine = create_engine(

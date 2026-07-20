@@ -163,7 +163,8 @@ def copy_staging_to_prod(staging_url: str) -> Tuple[bool, str]:
     )
 
     # Extract path parts from staging URL: staging/{lang}/{voice}/{md5}.mp3
-    match = re.search(r"/staging/([^/]+)/([^/]+)/([a-f0-9]+)\.mp3$", staging_url)
+    # (accepting both the "staging" and "staging-postgres" prefixes)
+    match = re.search(r"/staging(?:-postgres)?/([^/]+)/([^/]+)/([a-f0-9]+)\.mp3$", staging_url)
     if not match:
         return False, f"Could not parse staging URL: {staging_url}"
 

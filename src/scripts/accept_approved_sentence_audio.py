@@ -26,7 +26,7 @@ from storage.utils.session import create_database_session
 
 
 def extract_staging_path_parts(
-    staging_url: str,
+    staging_url: Optional[str],
 ) -> Optional[Tuple[str, str, str]]:
     """
     Extract language, voice, and md5 from a staging URL.
@@ -36,7 +36,9 @@ def extract_staging_path_parts(
     Returns:
         Tuple of (language, voice, md5) or None if parsing fails
     """
-    match = re.search(r"/staging/([^/]+)/([^/]+)/([a-f0-9]+)\.mp3$", staging_url)
+    if not staging_url:
+        return None
+    match = re.search(r"/staging(?:-postgres)?/([^/]+)/([^/]+)/([a-f0-9]+)\.mp3$", staging_url)
     if match:
         return match.group(1), match.group(2), match.group(3)
     return None

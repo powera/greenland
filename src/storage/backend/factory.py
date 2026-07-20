@@ -168,11 +168,22 @@ def get_data_source_config() -> DataSourceConfig:
     """Get the global data source configuration.
 
     Returns:
-        The data source configuration
+        The data source configuration; a default SQLite configuration if
+        configure_backend() has not been called.
     """
     global _global_config
     if _global_config is None:
-        _global_config = DataSourceConfig.from_env()
+        _global_config = DataSourceConfig(backend_type=BackendType.SQLITE)
+    return _global_config
+
+
+def get_configured_backend_config() -> Optional[DataSourceConfig]:
+    """Get the global config only if configure_backend() was actually called.
+
+    Unlike get_data_source_config(), this never invents a default: callers that
+    need to know whether the process declared its main database (e.g. the S3
+    staging prefix) get None when it has not.
+    """
     return _global_config
 
 
@@ -198,7 +209,7 @@ def _get_engine() -> "Engine":
     with _engine_lock:
         if _global_engine is None:
             if _global_config is None:
-                _global_config = DataSourceConfig.from_env()
+                _global_config = DataSourceConfig(backend_type=BackendType.SQLITE)
 
             # Choose the correct path based on backend type
             if _global_config.backend_type == BackendType.POSTGRES:

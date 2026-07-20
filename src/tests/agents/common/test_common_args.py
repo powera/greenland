@@ -22,7 +22,6 @@ from agents.common.common_args import (
     confirm_operation,
     count_items_for_confirmation,
     get_data_source_config,
-    get_standard_db_path,
     validate_cache_args,
 )
 from storage.backend.config import BackendType
@@ -481,28 +480,6 @@ class TestCountItemsForConfirmation(unittest.TestCase):
         )
 
         mock_session.close.assert_called_once()
-
-
-class TestGetStandardDbPath(unittest.TestCase):
-    """Test get_standard_db_path function."""
-
-    def test_returns_provided_path(self):
-        """Test that provided path is returned."""
-        path = get_standard_db_path("/custom/path/db.sqlite")
-        self.assertEqual(path, "/custom/path/db.sqlite")
-
-    @patch.dict("os.environ", {"GREENLAND_DB": "/env/path/db.sqlite"})
-    def test_returns_env_var_when_no_arg(self):
-        """Test that environment variable is used when no arg provided."""
-        path = get_standard_db_path(None)
-        self.assertEqual(path, "/env/path/db.sqlite")
-
-    @patch.dict("os.environ", {}, clear=True)
-    def test_returns_default_when_no_arg_or_env(self):
-        """Test that default path is returned when no arg or env var."""
-        path = get_standard_db_path(None)
-        # Should return default path
-        self.assertIn("greenland.db", path)
 
 
 class TestGetDataSourceConfig(unittest.TestCase):

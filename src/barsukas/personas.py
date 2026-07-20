@@ -28,7 +28,6 @@ import logging
 import os
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -205,73 +204,14 @@ def resolve_persona(name: Optional[str] = None) -> PersonaConfig:
     Raises:
         ValueError: If a persona name was given but is not recognized
     """
-    persona_name = name or os.environ.get("BARSUKAS_PERSONA")
+    env_name = os.environ.get("BARSUKAS_PERSONA")
+    if name and env_name:
+        logger.warning(
+            "Both --persona %s and BARSUKAS_PERSONA=%s are set; the flag wins",
+            name,
+            env_name,
+        )
+    persona_name = name or env_name
     if persona_name:
         return get_persona(persona_name)
     return get_default_persona()
-
-
-# Environment variables derived from the persona. apply_persona_env() is the
-# only place Barsukas writes these; listing them here keeps the set and the
-# clearing logic in one place.
-_PERSONA_ENV_VARS = (
-    "STORAGE_BACKEND",
-    "JSONL_DATA_DIR",
-    "POSTGRES_URL",
-    "BARSUKAS_CONCEPTS_BACKEND",
-    "BARSUKAS_CONCEPTS_READONLY",
-)
-
-
-def apply_persona_env(
-    persona: PersonaConfig,
-    repo_root: Path,
-    postgres_url: Optional[str] = None,
-) -> None:
-    """Export the environment variables implied by a persona.
-
-    This is a compatibility surface, not Barsukas's internal wiring: Barsukas
-    itself takes the PersonaConfig object. These variables exist for consumers
-    outside Barsukas that hold no persona and read the process environment
-    directly. The notable one is
-    clients.audio.s3_uploader.get_staging_prefix(), which maps STORAGE_BACKEND
-    to an S3 key prefix ("staging-postgres" vs "staging") -- if that value is
-    wrong, audio is silently read and written at the wrong path. Others include
-    storage.backend.factory's lazy DataSourceConfig.from_env() fallback,
-    wordfreq.frequency.corpus, and agents.vovere.
-
-    Any variable not implied by this persona is cleared, so that switching
-    personas within a process cannot leave a stale value behind.
-
-    Args:
-        persona: The resolved persona
-        repo_root: Repository root, used to make jsonl_data_dir absolute
-        postgres_url: Main-database PostgreSQL URL. Required when the persona's
-            main backend is PostgreSQL, and may also be supplied to override a
-            non-PostgreSQL persona (unified_app's --db-url). Passed in rather
-            than built here so this function needs no credentials.
-    """
-    for var in _PERSONA_ENV_VARS:
-        os.environ.pop(var, None)
-
-    if persona.use_postgres and not postgres_url:
-        raise ValueError(
-            f"Persona '{persona.name.value}' uses a PostgreSQL main database "
-            f"but no postgres_url was provided"
-        )
-
-    if postgres_url:
-        # An explicit URL wins over the persona's main backend.
-        os.environ["STORAGE_BACKEND"] = "postgres"
-        os.environ["POSTGRES_URL"] = postgres_url
-    elif persona.use_jsonl:
-        jsonl_dir = repo_root / (persona.jsonl_data_dir or "data/release")
-        os.environ["STORAGE_BACKEND"] = "jsonl"
-        os.environ["JSONL_DATA_DIR"] = str(jsonl_dir)
-    else:
-        os.environ["STORAGE_BACKEND"] = "sqlite"
-
-    if persona.use_postgres_concepts:
-        os.environ["BARSUKAS_CONCEPTS_BACKEND"] = "postgres"
-        if persona.postgres_concepts_readonly:
-            os.environ["BARSUKAS_CONCEPTS_READONLY"] = "true"
