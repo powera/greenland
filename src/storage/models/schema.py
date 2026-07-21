@@ -32,6 +32,9 @@ class Base(DeclarativeBase):
     pass
 
 
+# Alternate spellings are deliberately absent here: "grey" is the same lexeme
+# as "gray", not a different one, and it carries its own paradigm.  Those live
+# in the variant_forms table; see storage.models.variant_form.
 SYNONYM_GRAMMATICAL_FORMS: frozenset[str] = frozenset(
     {
         "synonym",
@@ -40,7 +43,6 @@ SYNONYM_GRAMMATICAL_FORMS: frozenset[str] = frozenset(
         "synonym_register",
         "synonym_synecdoche",
         "synonym_related",
-        "synonym_spelling",
     }
 )
 

@@ -24,6 +24,7 @@ from storage.models.schema import (
     Sentence,
     SentenceWord,
 )
+from storage.models.variant_form import VariantForm
 from storage.translation_helpers import LANGUAGE_FIELDS
 
 
@@ -387,6 +388,21 @@ def get_lemma_view_data(session: Session, lemma_id: int) -> Dict[str, Any]:
                 if sibling:
                     related_lemmas.append((concept_label, sibling))
 
+    # Query 10: Variant forms (alternate spellings). Queried separately from
+    # derivative_forms on purpose -- a variant is the same lexeme as the lemma
+    # and must not appear among its inflections; see storage.models.variant_form.
+    variant_forms = (
+        session.query(VariantForm)
+        .filter(VariantForm.lemma_id == lemma_id)
+        .order_by(
+            VariantForm.language_code,
+            VariantForm.variant_key,
+            VariantForm.is_base_form.desc(),
+            VariantForm.grammatical_form,
+        )
+        .all()
+    )
+
     return {
         "lemma": lemma,
         "translations": translations,
@@ -396,6 +412,7 @@ def get_lemma_view_data(session: Session, lemma_id: int) -> Dict[str, Any]:
         "overrides": overrides,
         "effective_levels": effective_levels,
         "derivative_forms": derivative_forms,
+        "variant_forms": variant_forms,
         "grammar_facts": grammar_facts,
         "audio_files": audio_files,
         "sentence_count": sentence_count,
