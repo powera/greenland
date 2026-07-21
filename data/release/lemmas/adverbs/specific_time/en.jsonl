@@ -1,4 +1,4 @@
-{"guid": "D03_001", "forms": [{"grammatical_form": "positive", "text": "today", "is_base_form": true, "ipa": "/təˈdeɪ/", "phonetic": "TOH-day"}, {"grammatical_form": "adverb/en_positive", "text": "today", "is_base_form": true}]}
-{"guid": "D03_002", "forms": [{"grammatical_form": "positive", "text": "yesterday", "is_base_form": true, "ipa": "/jɛˈstɜːdeɪ/", "phonetic": "YEST-ər-dey"}, {"grammatical_form": "adverb/en_positive", "text": "yesterday", "is_base_form": true}]}
-{"guid": "D03_003", "forms": [{"grammatical_form": "positive", "text": "tomorrow", "is_base_form": true, "ipa": "/təˈmɒr.oʊ/", "phonetic": "tuh-MOR-uh"}, {"grammatical_form": "adverb/en_positive", "text": "tomorrow", "is_base_form": true}]}
-{"guid": "D03_004", "forms": [{"grammatical_form": "positive", "text": "tonight", "is_base_form": true, "ipa": "/təʊˈnaɪt/", "phonetic": "TOH-nite"}, {"grammatical_form": "adverb/en_positive", "text": "tonight", "is_base_form": true}]}
+{"guid": "D03_001", "forms": [{"grammatical_form": "adverb/en_positive", "text": "today", "is_base_form": true, "ipa": "/təˈdeɪ/", "phonetic": "TOH-day"}]}
+{"guid": "D03_002", "forms": [{"grammatical_form": "adverb/en_positive", "text": "yesterday", "is_base_form": true, "ipa": "/jɛˈstɜːdeɪ/", "phonetic": "YEST-ər-dey"}]}
+{"guid": "D03_003", "forms": [{"grammatical_form": "adverb/en_positive", "text": "tomorrow", "is_base_form": true, "ipa": "/təˈmɒr.oʊ/", "phonetic": "tuh-MOR-uh"}]}
+{"guid": "D03_004", "forms": [{"grammatical_form": "adverb/en_positive", "text": "tonight", "is_base_form": true, "ipa": "/təʊˈnaɪt/", "phonetic": "TOH-nite"}]}

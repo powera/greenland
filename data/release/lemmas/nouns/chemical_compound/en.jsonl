@@ -1,10 +1,10 @@
-{"guid": "N15_001", "forms": [{"grammatical_form": "singular", "text": "oxygen", "is_base_form": true, "ipa": "/ˈɑksɪdʒən/", "phonetic": "AKS-ih-juh-nən"}, {"grammatical_form": "noun/en_singular", "text": "oxygen", "is_base_form": true}]}
+{"guid": "N15_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "oxygen", "is_base_form": true, "ipa": "/ˈɑksɪdʒən/", "phonetic": "AKS-ih-juh-nən"}]}
 {"guid": "N15_002", "forms": [{"grammatical_form": "singular", "text": "carbon dioxide", "is_base_form": true, "ipa": "/ˈkɑrbən ˌdaɪ ɑːkˌsaɪd/", "phonetic": "CAR-buhn DYE-ox-aid"}]}
 {"guid": "N15_003", "forms": [{"grammatical_form": "singular", "text": "lithium", "is_base_form": true, "ipa": "/ˈlɪθ.i.əm/", "phonetic": "LITH-ee-əm"}]}
-{"guid": "N15_004", "forms": [{"grammatical_form": "singular", "text": "hydrogen", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "hydrogen", "is_base_form": true}]}
-{"guid": "N15_005", "forms": [{"grammatical_form": "singular", "text": "nitrogen", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "nitrogen", "is_base_form": true}]}
-{"guid": "N15_006", "forms": [{"grammatical_form": "singular", "text": "ammonia", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "ammonia", "is_base_form": true}]}
-{"guid": "N15_007", "forms": [{"grammatical_form": "singular", "text": "methane", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "methane", "is_base_form": true}]}
-{"guid": "N15_008", "forms": [{"grammatical_form": "singular", "text": "chlorine", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "chlorine", "is_base_form": true}]}
+{"guid": "N15_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "hydrogen", "is_base_form": true}]}
+{"guid": "N15_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "nitrogen", "is_base_form": true}]}
+{"guid": "N15_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "ammonia", "is_base_form": true}]}
+{"guid": "N15_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "methane", "is_base_form": true}]}
+{"guid": "N15_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "chlorine", "is_base_form": true}]}
 {"guid": "N15_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "acid", "is_base_form": true, "ipa": "/ˈæs.ɪd/", "phonetic": "AS-id"}, {"grammatical_form": "noun/en_plural", "text": "acids", "is_base_form": false, "ipa": "/ˈæsɪdz/", "phonetic": "AS-ids"}]}
-{"guid": "N15_010", "forms": [{"grammatical_form": "singular", "text": "base", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "base", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "bases", "is_base_form": false}]}
+{"guid": "N15_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "base", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "bases", "is_base_form": false}]}
