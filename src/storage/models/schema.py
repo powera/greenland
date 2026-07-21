@@ -132,15 +132,11 @@ class Lemma(Base):
     # item in historical/classical languages. Example: "post-classical technology".
     lexical_gap_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    # Language-specific translations of the lemma concept
-    chinese_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., 吃
-    french_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., manger
-    korean_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., 먹다
-    swahili_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., kula
-    lithuanian_translation: Mapped[Optional[str]] = mapped_column(
-        String, nullable=True
-    )  # e.g., valgyti
-    vietnamese_translation: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # e.g., ăn
+    # Translations of the lemma concept live in the LemmaTranslation table
+    # (see below); read and write them via storage.translation_helpers. The
+    # per-language columns that used to sit here (chinese_translation,
+    # lithuanian_translation, ...) are gone. The SQLite columns still exist as
+    # dead weight in older database files and are simply not mapped.
 
     # Disambiguation for polysemes (e.g., "mouse (animal)" vs "mouse (computer)")
     disambiguation: Mapped[Optional[str]] = mapped_column(String, nullable=True)

@@ -93,7 +93,9 @@ ENGLISH_AUXILIARY_VERBS: Final[list[str]] = [
     "may",
     "might",
     "must",
+    "ought",
     "can",
+    "cannot",
     "could",
 ]
 

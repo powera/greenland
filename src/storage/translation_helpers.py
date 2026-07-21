@@ -313,6 +313,9 @@ LANGUAGE_FIELDS = {
 # This is derived from LANGUAGE_FIELDS for convenience
 LANGUAGE_NAMES = {code: name for code, (_, name, _) in LANGUAGE_FIELDS.items()}
 
+# Inverse of LANGUAGE_NAMES, keyed by lowercased display name ("chinese" -> "zh").
+LANGUAGE_NAME_TO_CODE = {name.lower(): code for code, name in LANGUAGE_NAMES.items()}
+
 # LLM field name mappings (used for LLM responses)
 # Maps LLM field names (e.g., "chinese_translation") to language codes (e.g., "zh")
 LLM_FIELD_TO_LANG_CODE = {
@@ -993,6 +996,49 @@ def get_language_name(lang_code: str) -> str:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
     return LANGUAGE_FIELDS[lang_code][1]
+
+
+def has_translation_clause(lang_code: str, translation: Optional[str] = None) -> Any:
+    """
+    Build a SQLAlchemy filter clause for lemmas that have a translation.
+
+    Use in a query against Lemma, e.g.::
+
+        session.query(Lemma).filter(has_translation_clause("lt"))
+        session.query(Lemma).filter(~has_translation_clause("lt"))  # missing it
+
+    Args:
+        lang_code: Language code (e.g., 'lt', 'zh')
+        translation: If given, match only this exact translation text
+
+    Returns:
+        An EXISTS clause correlated to Lemma
+    """
+    from sqlalchemy import select
+
+    conditions = [
+        LemmaTranslation.lemma_id == Lemma.id,
+        LemmaTranslation.language_code == lang_code,
+    ]
+    if translation is None:
+        conditions.append(LemmaTranslation.translation != "")
+    else:
+        conditions.append(LemmaTranslation.translation == translation)
+
+    return select(LemmaTranslation.id).where(*conditions).exists()
+
+
+def get_language_code(language_name: str) -> Optional[str]:
+    """
+    Get the language code for a display name. Inverse of get_language_name.
+
+    Args:
+        language_name: Display name, case-insensitive (e.g., 'Spanish', 'chinese')
+
+    Returns:
+        Language code (e.g., 'es', 'zh'), or None if the name is not recognized
+    """
+    return LANGUAGE_NAME_TO_CODE.get(language_name.lower())
 
 
 def get_supported_languages() -> Dict[str, str]:

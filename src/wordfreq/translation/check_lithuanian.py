@@ -10,7 +10,7 @@ import logging
 from typing import Any, Dict
 
 from storage.models.schema import DerivativeForm, Lemma
-from storage.translation_helpers import get_translation
+from storage.translation_helpers import get_translation, has_translation_clause
 
 logger = logging.getLogger(__name__)
 
@@ -24,11 +24,7 @@ def check_missing_lithuanian_base_forms(agent: Any) -> Dict[str, Any]:
 
     session = agent.get_session()
     try:
-        lemmas_with_lt = (
-            session.query(Lemma)
-            .filter(Lemma.lithuanian_translation.isnot(None), Lemma.lithuanian_translation != "")
-            .all()
-        )
+        lemmas_with_lt = session.query(Lemma).filter(has_translation_clause("lt")).all()
 
         logger.info(f"Found {len(lemmas_with_lt)} lemmas with Lithuanian translations")
 
@@ -92,8 +88,7 @@ def check_noun_declension_coverage(agent: Any) -> Dict[str, Any]:
             session.query(Lemma)
             .filter(
                 Lemma.pos_type == "noun",
-                Lemma.lithuanian_translation.isnot(None),
-                Lemma.lithuanian_translation != "",
+                has_translation_clause("lt"),
             )
             .all()
         )

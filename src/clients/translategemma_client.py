@@ -17,11 +17,13 @@ import requests
 from requests.exceptions import RequestException
 
 from clients.types import Response
-from storage.translation_helpers import LANGUAGE_NAMES
+from storage.translation_helpers import LANGUAGE_NAME_TO_CODE, LANGUAGE_NAMES
 from util.telemetry import LLMUsage
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Backend configuration
@@ -282,17 +284,14 @@ class TranslateGemmaClient:
         Returns:
             Tuple of (source_code, target_code) or None if not found
         """
-        # Build reverse lookup: name -> code
-        name_to_code = {name.lower(): code for code, name in LANGUAGE_NAMES.items()}
-
         # Pattern: "from <lang> to <lang>"
         match = re.search(r"from\s+(\w+)\s+to\s+(\w+)", context, re.IGNORECASE)
         if match:
             source_str = match.group(1).lower()
             target_str = match.group(2).lower()
 
-            source_code = name_to_code.get(source_str, source_str)
-            target_code = name_to_code.get(target_str, target_str)
+            source_code = LANGUAGE_NAME_TO_CODE.get(source_str, source_str)
+            target_code = LANGUAGE_NAME_TO_CODE.get(target_str, target_str)
 
             if source_code in LANGUAGE_NAMES and target_code in LANGUAGE_NAMES:
                 return source_code, target_code

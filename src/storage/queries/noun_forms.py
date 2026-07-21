@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from storage.crud.lemma import get_lemma_by_guid
 from storage.models.schema import DerivativeForm
+from storage.translation_helpers import get_translation
 
 logger = logging.getLogger(__name__)
 
@@ -153,7 +154,7 @@ def check_noun_forms_coverage(session: Session, guid: str) -> Dict[str, Any]:
         "guid": guid,
         "found": True,
         "lemma_text": lemma.lemma_text,
-        "lithuanian": lemma.lithuanian_translation,
+        "lithuanian": get_translation(session, lemma, "lt"),
         "forms_count": len(all_forms),
         "expected_count": len(expected_forms),
         "missing_forms": missing,

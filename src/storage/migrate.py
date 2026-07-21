@@ -326,13 +326,8 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any = None) -> Any:
         difficulty_level=lemma.difficulty_level,
         frequency_rank=lemma.frequency_rank,
         tags=lemma.tags,
-        # Legacy translation fields
-        chinese_translation=lemma.chinese_translation,
-        french_translation=lemma.french_translation,
-        korean_translation=lemma.korean_translation,
-        swahili_translation=lemma.swahili_translation,
-        lithuanian_translation=lemma.lithuanian_translation,
-        vietnamese_translation=lemma.vietnamese_translation,
+        # Translations are carried in the `translations` dict below, built from
+        # LemmaTranslation; the JSONL model's per-language fields are left unset.
         # Metadata
         disambiguation=lemma.disambiguation,
         confidence=lemma.confidence,

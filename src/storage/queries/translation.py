@@ -2,10 +2,12 @@
 
 from typing import List, Optional, cast
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from storage.crud.operation_log import log_translation_change
-from storage.models.schema import Lemma
+from storage.models.schema import Lemma, LemmaTranslation
+from storage.translation_helpers import get_language_code, set_translation
 
 
 def get_lemmas_without_translation(
@@ -22,24 +24,21 @@ def get_lemmas_without_translation(
     Returns:
         List of Lemma objects without the specified translation
     """
-    language = language.lower()
-    column_map = {
-        "chinese": Lemma.chinese_translation,
-        "french": Lemma.french_translation,
-        "korean": Lemma.korean_translation,
-        "swahili": Lemma.swahili_translation,
-        "lithuanian": Lemma.lithuanian_translation,
-        "vietnamese": Lemma.vietnamese_translation,
-    }
+    lang_code = get_language_code(language)
+    if lang_code is None:
+        raise ValueError(f"Unsupported language: {language}")
 
-    if language not in column_map:
-        raise ValueError(
-            f"Unsupported language: {language}. Supported languages: {', '.join(column_map.keys())}"
+    has_translation = (
+        select(LemmaTranslation.id)
+        .where(
+            LemmaTranslation.lemma_id == Lemma.id,
+            LemmaTranslation.language_code == lang_code,
+            LemmaTranslation.translation != "",
         )
-
-    return cast(
-        List[Lemma], session.query(Lemma).filter(column_map[language].is_(None)).limit(limit).all()
+        .exists()
     )
+
+    return cast(List[Lemma], session.query(Lemma).filter(~has_translation).limit(limit).all())
 
 
 def update_lemma_translation(
@@ -62,28 +61,13 @@ def update_lemma_translation(
     if not lemma:
         return False
 
-    language = language.lower()
-
-    # Map language names to field names and language codes
-    language_map = {
-        "chinese": ("chinese_translation", "zh"),
-        "french": ("french_translation", "fr"),
-        "korean": ("korean_translation", "ko"),
-        "swahili": ("swahili_translation", "sw"),
-        "lithuanian": ("lithuanian_translation", "lt"),
-        "vietnamese": ("vietnamese_translation", "vi"),
-    }
-
-    if language not in language_map:
+    lang_code = get_language_code(language)
+    if lang_code is None:
         return False
 
-    field_name, lang_code = language_map[language]
-
-    # Get old value for logging
-    old_translation = getattr(lemma, field_name, None)
-
-    # Update the translation
-    setattr(lemma, field_name, translation_text)
+    # Translations live in LemmaTranslation; set_translation returns the
+    # previous value so the change can still be logged.
+    old_translation, _ = set_translation(session, lemma, lang_code, translation_text)
 
     # Log the change
     log_translation_change(

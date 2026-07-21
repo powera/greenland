@@ -45,6 +45,7 @@ from storage.database import (
     initialize_corpora,
 )
 from storage.models.schema import Corpus  # Ensure Corpus model is imported
+from storage.translation_helpers import has_translation_clause
 from agents.pradzia import json_to_database
 
 # Configure logging
@@ -473,9 +474,7 @@ class PradziaAgent:
 
             # Count lemmas with Lithuanian translations
             existing_lithuanian_count = (
-                session.query(Lemma)
-                .filter(Lemma.lithuanian_translation != None, Lemma.lithuanian_translation != "")
-                .count()
+                session.query(Lemma).filter(has_translation_clause("lt")).count()
             )
 
             if existing_lithuanian_count > 0:
