@@ -63,7 +63,6 @@ from langtools.en.utils import (
     generate_comparative,
     generate_regular_plural,
     generate_superlative,
-    should_double_final_consonant,
 )
 
 # Values of the "number_type" grammar fact that suppress the plural slot.
@@ -257,19 +256,11 @@ def _periphrastic(positive: str) -> Dict[str, str]:
 
 
 def _synthetic(positive: str) -> Dict[str, str]:
-    """Build ``-er``/``-est`` forms, doubling the final consonant when due.
+    """Build ``-er``/``-est`` forms via the shared spelling helpers.
 
-    ``generate_comparative`` / ``generate_superlative`` only double after
-    ``b d g p t``, which misses "thin" -> "thinner" and "dim" -> "dimmer";
-    :func:`should_double_final_consonant` applies the full stressed-CVC rule.
+    ``generate_comparative`` / ``generate_superlative`` own the full
+    stressed-CVC doubling rule ("thin" -> "thinner"), so this just delegates.
     """
-    if should_double_final_consonant(positive):
-        stem = positive + positive[-1]
-        return {
-            "positive": positive,
-            "comparative": stem + "er",
-            "superlative": stem + "est",
-        }
     return {
         "positive": positive,
         "comparative": generate_comparative(positive),

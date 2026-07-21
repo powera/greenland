@@ -279,13 +279,11 @@ def generate_comparative(adjective: str) -> str:
     if adjective.endswith("y") and len(adjective) > 1 and adjective[-2] not in "aeiou":
         return adjective[:-1] + "ier"
 
-    # Single consonant after single short vowel: double the consonant
-    if (
-        len(adjective) >= 2
-        and adjective[-1] in "bdgpt"
-        and adjective[-2] in "aeiou"
-        and (len(adjective) < 3 or adjective[-3] not in "aeiou")
-    ):
+    # Single consonant after a stressed short vowel: double the consonant
+    # ("big" -> "bigger", "thin" -> "thinner").  should_double_final_consonant
+    # is the single home of this rule, shared with the past-tense/participle
+    # helpers and inflection.build_adjective_forms.
+    if should_double_final_consonant(adjective):
         return adjective + adjective[-1] + "er"
 
     # Regular short adjective: add -er
@@ -313,13 +311,10 @@ def generate_superlative(adjective: str) -> str:
     if adjective.endswith("y") and len(adjective) > 1 and adjective[-2] not in "aeiou":
         return adjective[:-1] + "iest"
 
-    # Single consonant after single short vowel: double the consonant
-    if (
-        len(adjective) >= 2
-        and adjective[-1] in "bdgpt"
-        and adjective[-2] in "aeiou"
-        and (len(adjective) < 3 or adjective[-3] not in "aeiou")
-    ):
+    # Single consonant after a stressed short vowel: double the consonant
+    # ("big" -> "biggest", "thin" -> "thinnest").  See generate_comparative;
+    # should_double_final_consonant is the single home of this rule.
+    if should_double_final_consonant(adjective):
         return adjective + adjective[-1] + "est"
 
     # Regular short adjective: add -est
