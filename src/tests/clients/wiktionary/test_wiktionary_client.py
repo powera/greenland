@@ -1253,6 +1253,16 @@ class TestEnglishUtils(unittest.TestCase):
         self.assertEqual(generate_comparative("tall"), "taller")
         self.assertEqual(generate_comparative("fast"), "faster")
 
+    def test_generate_comparative_doubles_final_consonant(self) -> None:
+        """A stressed short-vowel CVC ending doubles ("thin" -> "thinner")."""
+        self.assertEqual(generate_comparative("thin"), "thinner")
+        self.assertEqual(generate_comparative("big"), "bigger")
+        self.assertEqual(generate_superlative("thin"), "thinnest")
+        self.assertEqual(generate_superlative("dim"), "dimmest")
+        # Multi-syllable and non-CVC endings must not double.
+        self.assertEqual(generate_comparative("common"), "commoner")
+        self.assertEqual(generate_comparative("dead"), "deader")
+
     def test_generate_comparative_r(self) -> None:
         """Test comparative with -r for -e ending."""
         self.assertEqual(generate_comparative("large"), "larger")
