@@ -11,9 +11,13 @@ converted to the appropriate format for different LLM clients:
 """
 
 import copy
+import json
+import logging
 from typing import Any, Dict, List
 
 from clients.types import Schema, SchemaProperty
+
+logger = logging.getLogger(__name__)
 
 # A single chat message in the provider-neutral "dialect": a role of "user" or
 # "assistant" and string content. Clients translate these into their own request
@@ -23,6 +27,69 @@ ChatMessage = Dict[str, str]
 # Filler used when a synthetic assistant turn must be inserted to keep roles
 # alternating for providers that require it (Anthropic, Gemini).
 ALTERNATION_ACK: str = "Understood."
+
+# Maximum size of a serialized JSON schema, in tokens. A schema is sent with
+# every request that uses it, so a large one is a recurring cost on every call.
+# The usual cause is embedding a full enum: listing every GrammaticalForm value
+# (1238 of them, ~7100 tokens) to ask about a single English word cost more than
+# the instructions and the query combined. If a schema trips this, narrow the
+# enum to the values that are actually possible, or describe the format in the
+# prompt and drop the enum.
+MAX_SCHEMA_TOKENS = 2048
+
+
+class SchemaTooLargeError(ValueError):
+    """Raised when a serialized schema exceeds MAX_SCHEMA_TOKENS."""
+
+
+def count_schema_tokens(schema_dict: Dict[str, Any]) -> int:
+    """Count tokens in a serialized schema, for size enforcement."""
+    import tiktoken
+
+    encoder = tiktoken.get_encoding("cl100k_base")
+    return len(encoder.encode(json.dumps(schema_dict)))
+
+
+def _check_schema_size(schema_dict: Dict[str, Any], schema_name: str, provider: str) -> None:
+    """Raise if the serialized schema is too large to send on every request.
+
+    Args:
+        schema_dict: The provider-format schema about to be returned
+        schema_name: Schema.name, for the error message
+        provider: Provider name, for the error message
+
+    Raises:
+        SchemaTooLargeError: If the schema exceeds MAX_SCHEMA_TOKENS
+    """
+    token_count = count_schema_tokens(schema_dict)
+    if token_count > MAX_SCHEMA_TOKENS:
+        largest = _largest_enums(schema_dict)
+        detail = ""
+        if largest:
+            detail = " Largest enums: " + ", ".join(
+                f"{path} ({count} values)" for path, count in largest
+            )
+        raise SchemaTooLargeError(
+            f"{provider} schema {schema_name!r} is {token_count} tokens, over the "
+            f"{MAX_SCHEMA_TOKENS} limit. A schema is sent on every request that uses "
+            f"it, so this is a per-call cost.{detail}"
+        )
+
+
+def _largest_enums(schema_dict: Any, path: str = "", found: Any = None) -> List[Any]:
+    """Find the largest enum lists in a schema, to point at the likely cause."""
+    if found is None:
+        found = []
+    if isinstance(schema_dict, dict):
+        for key, value in schema_dict.items():
+            if key == "enum" and isinstance(value, list):
+                found.append((path or "<root>", len(value)))
+            elif isinstance(value, (dict, list)):
+                _largest_enums(value, f"{path}.{key}" if path else key, found)
+    elif isinstance(schema_dict, list):
+        for index, item in enumerate(schema_dict):
+            _largest_enums(item, f"{path}[{index}]", found)
+    return sorted(found, key=lambda pair: pair[1], reverse=True)[:3]
 
 
 def normalize_alternating_messages(
@@ -203,6 +270,7 @@ def to_openai_schema(schema: Schema) -> Dict[str, Any]:
     _recursive_clean_for_openai(result)
     # Ensure all nested objects have additionalProperties set (required by OpenAI)
     _ensure_additional_properties(result)
+    _check_schema_size(result, schema.name, "OpenAI")
     return result
 
 
@@ -294,6 +362,7 @@ def to_anthropic_schema(schema: Schema) -> Dict[str, Any]:
 
         result["properties"][name] = property_schema
 
+    _check_schema_size(result, schema.name, "Anthropic")
     return result
 
 
@@ -395,6 +464,7 @@ def to_gemini_schema(schema: Schema) -> Dict[str, Any]:
     # Add propertyOrdering required by Gemini
     result["propertyOrdering"] = list(schema.properties.keys())
 
+    _check_schema_size(result, schema.name, "Gemini")
     return result
 
 
@@ -487,6 +557,7 @@ def to_ollama_schema(schema: Schema) -> Dict[str, Any]:
 
         result["properties"][name] = property_schema
 
+    _check_schema_size(result, schema.name, "Ollama")
     return result
 
 

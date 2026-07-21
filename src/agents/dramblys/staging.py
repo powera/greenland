@@ -24,6 +24,7 @@ from storage.backend.config import DataSourceConfig
 from storage.models.imports import PendingImport, PendingImportSynonymCandidate, WordExclusion
 from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD
 from wordfreq.translation.client import LinguisticClient
+from wordfreq.translation.definitions import select_senses_to_add
 
 logger = get_logger(__name__)
 
@@ -500,8 +501,22 @@ def stage_missing_words_for_import(
                     time.sleep(throttle)
                 continue
 
-            # For each definition/sense, create a pending import entry
-            definitions = word_data.get("definitions", [])
+            # Create a pending import per sense worth adding. The LLM returns
+            # every sense it can think of, including marginal ones, so keep the
+            # prominent handful rather than all of them.
+            all_definitions = word_data.get("definitions", [])
+            definitions = select_senses_to_add(all_definitions)
+            if len(definitions) < len(all_definitions):
+                kept_ids = {id(d) for d in definitions}
+                dropped = [
+                    f"{d.get('definition', '')[:40]} ({d.get('sense_prominence', 'unrated')})"
+                    for d in all_definitions
+                    if id(d) not in kept_ids
+                ]
+                logger.info(
+                    f"'{word}': keeping {len(definitions)} of {len(all_definitions)} senses; "
+                    f"skipped {'; '.join(dropped)}"
+                )
             for definition_data in definitions:
                 definition_text = definition_data.get("definition", "")
                 # The schema uses "pos" not "pos_type"

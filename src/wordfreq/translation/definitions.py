@@ -9,6 +9,12 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from storage import database as linguistic_db
+from storage.models.schema import (
+    SENSE_PROMINENCE_COMMON,
+    SENSE_PROMINENCE_RARE,
+    SENSE_PROMINENCE_UNCOMMON,
+    SENSE_PROMINENCE_VERY_COMMON,
+)
 from wordfreq.translation.constants import VALID_POS_TYPES
 
 logger = logging.getLogger(__name__)
@@ -19,16 +25,70 @@ logger = logging.getLogger(__name__)
 # silently yielding no translation.
 DEFINITIONS_PROMPT_LANGUAGES: Tuple[str, ...] = ("lt", "es", "fr", "zh")
 
-# How common a sense is, most to least. A word's senses are rated
-# independently, so "arrive" can have two "most_common" senses; this is a
-# judgement about the sense, not a ranking within the response.
-SENSE_FREQUENCIES: Tuple[str, ...] = (
-    "most_common",
-    "somewhat_common",
-    "uncommon",
-    "rare",
-    "very_rare",
+# How common a sense is, most to least. These are the values of
+# Lemma.sense_prominence, so an answer can be stored directly on the lemma and
+# feeds the frequency rollup in wordfreq.lexeme_frequency via
+# SENSE_PROMINENCE_WEIGHTS. Senses are rated independently: a word may have two
+# "very_common" senses, or none.
+SENSE_PROMINENCE_ORDER: Tuple[str, ...] = (
+    SENSE_PROMINENCE_VERY_COMMON,
+    SENSE_PROMINENCE_COMMON,
+    SENSE_PROMINENCE_UNCOMMON,
+    SENSE_PROMINENCE_RARE,
 )
+
+
+def select_senses_to_add(
+    definitions_list: List[Dict[str, Any]],
+    max_senses: int = 4,
+    min_senses: int = 2,
+) -> List[Dict[str, Any]]:
+    """
+    Pick which of a word's senses are worth adding as lemmas.
+
+    ``query_definitions`` returns every sense it can think of, including
+    marginal ones -- "arrive" comes back with "reach a destination" and also
+    "make a formal or public appearance". Adding all of them buries the common
+    meaning; adding only the first loses real vocabulary.
+
+    Senses are ordered by prominence and taken while they stay common enough:
+    always the first ``min_senses``, then further senses only while they are
+    ``common`` or better, up to ``max_senses``. So a word with four solid
+    senses contributes four, and a word with one everyday sense plus three
+    obscure ones contributes two.
+
+    Args:
+        definitions_list: Senses as returned by query_definitions
+        max_senses: Never return more than this many
+        min_senses: Return at least this many (if that many exist)
+
+    Returns:
+        The selected senses, most prominent first
+    """
+    if not definitions_list:
+        return []
+
+    rank = {value: index for index, value in enumerate(SENSE_PROMINENCE_ORDER)}
+    default_rank = rank[SENSE_PROMINENCE_COMMON]
+
+    ordered = sorted(
+        definitions_list,
+        key=lambda sense: rank.get(sense.get("sense_prominence", ""), default_rank),
+    )
+
+    # Senses at or above this prominence are worth adding beyond min_senses.
+    keep_threshold = rank[SENSE_PROMINENCE_COMMON]
+
+    selected: List[Dict[str, Any]] = []
+    for sense in ordered[:max_senses]:
+        prominence_rank = rank.get(sense.get("sense_prominence", ""), default_rank)
+        if len(selected) < min_senses or prominence_rank <= keep_threshold:
+            selected.append(sense)
+        else:
+            # Ordered by prominence, so nothing after this qualifies either.
+            break
+
+    return selected
 
 
 def query_definitions(
@@ -131,11 +191,11 @@ def query_definitions(
                         "chinese_translation": SchemaProperty(
                             "string", "The Chinese translation of this form"
                         ),
-                        "sense_frequency": SchemaProperty(
+                        "sense_prominence": SchemaProperty(
                             "string",
                             "How common this sense is for this word in general "
                             "modern English, independent of the other senses",
-                            enum=list(SENSE_FREQUENCIES),
+                            enum=list(SENSE_PROMINENCE_ORDER),
                         ),
                         "confidence": SchemaProperty("number", "Confidence score from 0-1"),
                     },

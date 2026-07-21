@@ -10,8 +10,11 @@ from typing import Any, Dict
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from clients.lib import (
+    MAX_SCHEMA_TOKENS,
     Schema,
     SchemaProperty,
+    SchemaTooLargeError,
+    count_schema_tokens,
     schema_from_dict,
     to_anthropic_schema,
     to_gemini_schema,
@@ -483,6 +486,77 @@ class SchemaConversionTestCase(unittest.TestCase):
         self.assertNotIn(
             "minimum", openai_schema["properties"]["pronunciation"]["properties"]["confidence"]
         )
+
+
+class SchemaSizeLimitTestCase(unittest.TestCase):
+    """Tests for the MAX_SCHEMA_TOKENS guard.
+
+    A schema is sent on every request that uses it, so an oversized one -- in
+    practice, an embedded full enum -- is a recurring per-call cost.
+    """
+
+    def _schema_with_enum(self, values: int) -> Schema:
+        return Schema(
+            name="BigEnumSchema",
+            description="Schema carrying a large enum",
+            properties={
+                "form": SchemaProperty(
+                    "string",
+                    "A grammatical form",
+                    enum=[f"language/form_variant_number_{i:04d}" for i in range(values)],
+                ),
+            },
+        )
+
+    def test_ordinary_schema_passes(self) -> None:
+        """A normal schema converts without raising."""
+        schema = Schema(
+            name="Small",
+            description="A small schema",
+            properties={
+                "word": SchemaProperty("string", "The word"),
+                "pos": SchemaProperty("string", "Part of speech", enum=["noun", "verb"]),
+            },
+        )
+        for converter in (
+            to_openai_schema,
+            to_anthropic_schema,
+            to_gemini_schema,
+            to_ollama_schema,
+        ):
+            with self.subTest(converter=converter.__name__):
+                self.assertLessEqual(count_schema_tokens(converter(schema)), MAX_SCHEMA_TOKENS)
+
+    def test_oversized_enum_raises_for_every_provider(self) -> None:
+        """Each provider's converter rejects a schema over the limit."""
+        schema = self._schema_with_enum(1238)
+        for converter in (
+            to_openai_schema,
+            to_anthropic_schema,
+            to_gemini_schema,
+            to_ollama_schema,
+        ):
+            with self.subTest(converter=converter.__name__):
+                with self.assertRaises(SchemaTooLargeError):
+                    converter(schema)
+
+    def test_error_names_the_offending_enum(self) -> None:
+        """The message points at the largest enum so the cause is obvious."""
+        with self.assertRaises(SchemaTooLargeError) as caught:
+            to_openai_schema(self._schema_with_enum(1238))
+
+        message = str(caught.exception)
+        self.assertIn("BigEnumSchema", message)
+        self.assertIn(str(MAX_SCHEMA_TOKENS), message)
+        self.assertIn("1238 values", message)
+
+    def test_limit_boundary(self) -> None:
+        """A schema just under the limit passes; well over it does not."""
+        small = self._schema_with_enum(50)
+        self.assertLessEqual(count_schema_tokens(to_openai_schema(small)), MAX_SCHEMA_TOKENS)
+
+        with self.assertRaises(SchemaTooLargeError):
+            to_openai_schema(self._schema_with_enum(500))
 
 
 if __name__ == "__main__":
