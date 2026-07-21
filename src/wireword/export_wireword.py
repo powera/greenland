@@ -24,7 +24,13 @@ from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
 from storage.crud.difficulty_override import bulk_get_effective_difficulty_levels
 from storage.models.grammar_fact import GrammarFact
-from storage.models.schema import AudioQualityReview, DerivativeForm, Lemma, WordToken
+from storage.models.schema import (
+    SYNONYM_GRAMMATICAL_FORMS,
+    AudioQualityReview,
+    DerivativeForm,
+    Lemma,
+    WordToken,
+)
 from storage.translation_helpers import (
     LANGUAGE_FIELDS,
     LANGUAGE_NAMES,
@@ -628,15 +634,7 @@ class WirewordExporter:
                         "alternate_spelling",
                         "alternative_form",
                     ]
-                    is_synonym = form.grammatical_form in [
-                        "synonym",
-                        "synonym_near",
-                        "synonym_regional",
-                        "synonym_register",
-                        "synonym_related",
-                        "synonym_spelling",
-                        "synonym_synecdoche",
-                    ]
+                    is_synonym = form.grammatical_form in SYNONYM_GRAMMATICAL_FORMS
 
                     # Handle different types of derivative forms
                     if form.language_code == "en":
@@ -703,16 +701,10 @@ class WirewordExporter:
                         else:
                             # Generic handler for other grammatical forms (French verbs, Korean forms, etc.)
                             # Skip alternative_form and synonym as they're handled separately above
-                            if form.grammatical_form not in [
-                                "alternative_form",
-                                "synonym",
-                                "synonym_near",
-                                "synonym_regional",
-                                "synonym_register",
-                                "synonym_related",
-                                "synonym_spelling",
-                                "synonym_synecdoche",
-                            ]:
+                            if (
+                                form.grammatical_form != "alternative_form"
+                                and form.grammatical_form not in SYNONYM_GRAMMATICAL_FORMS
+                            ):
                                 form_level = max(entry["trakaido_level"], 4)
 
                                 gram_form = {
@@ -1393,26 +1385,10 @@ class WirewordExporter:
 
                     # Handle different types of derivative forms
                     if form.language_code == "en":
-                        if form.grammatical_form in [
-                            "synonym",
-                            "synonym_near",
-                            "synonym_regional",
-                            "synonym_register",
-                            "synonym_related",
-                            "synonym_spelling",
-                            "synonym_synecdoche",
-                        ]:
+                        if form.grammatical_form in SYNONYM_GRAMMATICAL_FORMS:
                             english_synonyms.append(form.derivative_form_text)
                     elif form.language_code == self.language:
-                        if form.grammatical_form in [
-                            "synonym",
-                            "synonym_near",
-                            "synonym_regional",
-                            "synonym_register",
-                            "synonym_related",
-                            "synonym_spelling",
-                            "synonym_synecdoche",
-                        ]:
+                        if form.grammatical_form in SYNONYM_GRAMMATICAL_FORMS:
                             target_synonyms.append(form.derivative_form_text)
                         elif form.grammatical_form != "infinitive":
                             # This is a conjugated form

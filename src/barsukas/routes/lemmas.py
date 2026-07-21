@@ -23,13 +23,20 @@ from barsukas.helpers.lemma_display import (
     get_difficulty_stats,
     group_derivative_forms,
     group_populated_pronunciations,
+    group_variant_forms,
 )
 from workqueue.task_queue import get_tasks_for_target
 from storage.crud.derivative_form import delete_derivative_form
 from storage.crud.difficulty_override import get_all_overrides_for_lemma
 from storage.crud.lemma import handle_lemma_type_subtype_change
 from storage.crud.operation_log import log_translation_change
-from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
+from storage.models.schema import (
+    SYNONYM_GRAMMATICAL_FORMS,
+    DerivativeForm,
+    Lemma,
+    LemmaTranslation,
+)
+from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
 from storage.queries.lemma import build_lemma_search_query
 from storage.translation_helpers import (
     DEFAULT_GENERATION_LANGUAGES,
@@ -334,6 +341,7 @@ def _get_lemma_page_context(lemma_id: int) -> Optional[Dict[str, Any]]:
         alternative_forms_by_language,
         all_synonym_languages,
     ) = group_derivative_forms(derivative_forms)
+    variants_by_language, all_variant_languages = group_variant_forms(data["variant_forms"])
     pronunciation_forms_by_language = group_populated_pronunciations(derivative_forms)
     lemma_pronunciation_rows = build_lemma_pronunciation_rows(
         derivative_forms,
@@ -342,9 +350,13 @@ def _get_lemma_page_context(lemma_id: int) -> Optional[Dict[str, Any]]:
     )
 
     forms_total = sum(len(forms) for forms in forms_by_language.values())
+    # Variants count once per paradigm rather than once per row: "grey" is one
+    # entry in the UI even though it is three rows.
+    variants_total = sum(len(variants) for variants in variants_by_language.values())
     related_total = (
         sum(len(forms) for forms in synonyms_by_language.values())
         + sum(len(forms) for forms in alternative_forms_by_language.values())
+        + variants_total
         + len(data["related_lemmas"])
     )
 
@@ -361,6 +373,8 @@ def _get_lemma_page_context(lemma_id: int) -> Optional[Dict[str, Any]]:
         "synonyms_by_language": synonyms_by_language,
         "alternative_forms_by_language": alternative_forms_by_language,
         "all_synonym_languages": all_synonym_languages,
+        "variants_by_language": variants_by_language,
+        "all_variant_languages": all_variant_languages,
         "pronunciation_forms_by_language": pronunciation_forms_by_language,
         "lemma_pronunciation_rows": lemma_pronunciation_rows,
         "grammar_facts": data["grammar_facts"],
@@ -913,19 +927,7 @@ def delete_all_synonyms(lemma_id: int) -> ResponseReturnValue:
 
     # Apply form category filter
     if form_category == "synonyms":
-        query = query.filter(
-            DerivativeForm.grammatical_form.in_(
-                [
-                    "synonym",
-                    "synonym_near",
-                    "synonym_regional",
-                    "synonym_register",
-                    "synonym_related",
-                    "synonym_spelling",
-                    "synonym_synecdoche",
-                ]
-            )
-        )
+        query = query.filter(DerivativeForm.grammatical_form.in_(tuple(SYNONYM_GRAMMATICAL_FORMS)))
     elif form_category == "alternatives":
         query = query.filter(
             DerivativeForm.grammatical_form.in_(
@@ -980,5 +982,147 @@ def delete_all_synonyms(lemma_id: int) -> ResponseReturnValue:
         flash(msg, "success")
     else:
         flash("Failed to delete forms", "error")
+
+    return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
+
+
+@bp.route("/<int:lemma_id>/add-variant", methods=["POST"])
+def add_variant(lemma_id: int) -> ResponseReturnValue:
+    """Add a spelling variant, expanding it into a paradigm where possible."""
+    from flask import current_app
+
+    from words.synonyms import store_spelling_variants
+
+    if current_app.config.get("READONLY", False):
+        flash("Cannot add variant: running in read-only mode", "error")
+        return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
+
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
+
+    variant_text = request.form.get("variant_text", "").strip()
+    lang_code = request.form.get("lang_code", "").strip()
+    variant_kind = request.form.get("variant_kind", "").strip() or VARIANT_KIND_SPELLING
+
+    if not variant_text:
+        flash("Variant spelling is required", "error")
+        return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
+    if not lang_code:
+        flash("Language is required", "error")
+        return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
+
+    stored = store_spelling_variants(
+        session=g.db,
+        lemma=lemma,
+        language_code=lang_code,
+        alternate_spellings=[variant_text],
+        variant_kind=variant_kind,
+    )
+
+    if not stored:
+        flash(f'Failed to add variant "{variant_text}"', "error")
+        return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
+
+    log_translation_change(
+        session=g.db,
+        source=Config.OPERATION_LOG_SOURCE,
+        operation_type="variant_form_add",
+        lemma_id=lemma_id,
+        field_name=f"{lang_code}_{variant_kind}",
+        old_value=None,
+        new_value=variant_text,
+    )
+    g.db.commit()
+
+    flash(f'Added variant "{variant_text}"', "success")
+    return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
+
+
+@bp.route("/<int:lemma_id>/delete-variant-form/<int:form_id>", methods=["POST"])
+def delete_variant_form(lemma_id: int, form_id: int) -> ResponseReturnValue:
+    """Delete a single form of a variant paradigm."""
+    from flask import current_app
+
+    if current_app.config.get("READONLY", False):
+        flash("Cannot delete: running in read-only mode", "error")
+        return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
+
+    form = (
+        g.db.query(VariantForm)
+        .filter(VariantForm.id == form_id, VariantForm.lemma_id == lemma_id)
+        .first()
+    )
+    if not form:
+        flash("Variant form not found", "error")
+        return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
+
+    form_text = form.variant_form_text
+    language_code = form.language_code
+    grammatical_form = form.grammatical_form
+
+    g.db.delete(form)
+    log_translation_change(
+        session=g.db,
+        source=Config.OPERATION_LOG_SOURCE,
+        operation_type="variant_form_delete",
+        lemma_id=lemma_id,
+        field_name=f"{language_code}_{grammatical_form}",
+        old_value=form_text,
+        new_value=None,
+    )
+    g.db.commit()
+
+    flash(f'Deleted variant form: "{form_text}"', "success")
+    return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
+
+
+@bp.route("/<int:lemma_id>/delete-variant", methods=["POST"])
+def delete_variant_paradigm(lemma_id: int) -> ResponseReturnValue:
+    """Delete an entire variant paradigm (all forms of one spelling)."""
+    from flask import current_app
+
+    from storage.crud.variant_form import delete_variant
+
+    if current_app.config.get("READONLY", False):
+        flash("Cannot delete: running in read-only mode", "error")
+        return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
+
+    lemma = g.db.query(Lemma).get(lemma_id)
+    if not lemma:
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
+
+    variant_key = request.form.get("variant_key", "").strip()
+    lang_code = request.form.get("lang_code", "").strip()
+    variant_kind = request.form.get("variant_kind", "").strip() or VARIANT_KIND_SPELLING
+
+    if not variant_key or not lang_code:
+        flash("Variant key and language are required", "error")
+        return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
+
+    deleted_count = delete_variant(
+        session=g.db,
+        lemma=lemma,
+        variant_key=variant_key,
+        language_code=lang_code,
+        variant_kind=variant_kind,
+    )
+
+    if deleted_count:
+        log_translation_change(
+            session=g.db,
+            source=Config.OPERATION_LOG_SOURCE,
+            operation_type="variant_delete",
+            lemma_id=lemma_id,
+            field_name=f"{lang_code}_{variant_kind}",
+            old_value=variant_key,
+            new_value=None,
+        )
+        g.db.commit()
+        flash(f'Deleted variant "{variant_key}" ({deleted_count} form(s))', "success")
+    else:
+        flash(f'Variant "{variant_key}" not found', "error")
 
     return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))

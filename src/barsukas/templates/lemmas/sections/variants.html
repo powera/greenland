@@ -1,0 +1,159 @@
+<!-- Spelling Variants -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-pencil-square"></i> Spelling Variants</span>
+                <button type="button" class="btn btn-sm btn-success"
+                        data-bs-toggle="modal" data-bs-target="#addVariantModal">
+                    <i class="bi bi-plus-circle"></i> Add Variant
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-3">
+                    <strong><i class="bi bi-info-circle"></i> What is a spelling variant?</strong>
+                    <p class="mb-0 mt-2 small">
+                        The <em>same word</em> written differently &mdash; "gray" &harr; "grey",
+                        "doughnut" &harr; "donut". Each variant carries its own full set of forms
+                        ("grey" &rarr; "greyer", "greyest"), which is why it is listed separately
+                        from both synonyms (different words) and inflections (different forms of
+                        this spelling).
+                    </p>
+                </div>
+
+                {% if variants_by_language %}
+                    {% for lang_code in all_variant_languages %}
+                        <h5 class="mt-3">{{ language_names.get(lang_code, lang_code) }}</h5>
+                        {% for variant in variants_by_language[lang_code] %}
+                            <div class="card mb-2">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div>
+                                            <strong>{{ variant.base_text }}</strong>
+                                            <span class="badge bg-secondary ms-1">{{ variant.kind }}</span>
+                                            <span class="text-muted small ms-1">
+                                                {{ variant.forms | length }} form{{ '' if variant.forms | length == 1 else 's' }}
+                                            </span>
+                                        </div>
+                                        <form method="post"
+                                              action="{{ url_for('lemmas.delete_variant_paradigm', lemma_id=lemma.id) }}"
+                                              onsubmit="return confirm('Delete the &quot;{{ variant.key }}&quot; variant and all of its forms?');">
+                                            <input type="hidden" name="lang_code" value="{{ lang_code }}">
+                                            <input type="hidden" name="variant_key" value="{{ variant.key }}">
+                                            <input type="hidden" name="variant_kind" value="{{ variant.kind }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    title="Remove this variant and all its forms">
+                                                <i class="bi bi-trash"></i> Remove Variant
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <table class="table table-sm mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Grammatical Form</th>
+                                                <th>Text</th>
+                                                <th>Base</th>
+                                                <th>Verified</th>
+                                                <th class="text-end">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for form in variant.forms %}
+                                                <tr>
+                                                    <td><code>{{ form.grammatical_form }}</code></td>
+                                                    <td>{{ form.variant_form_text }}</td>
+                                                    <td>
+                                                        {% if form.is_base_form %}
+                                                            <i class="bi bi-check-circle-fill text-success"
+                                                               title="Base form of this variant"></i>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if form.verified %}
+                                                            <i class="bi bi-check-circle-fill text-success"
+                                                               title="Verified"></i>
+                                                        {% else %}
+                                                            <span class="text-muted small">unverified</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <form method="post"
+                                                              action="{{ url_for('lemmas.delete_variant_form', lemma_id=lemma.id, form_id=form.id) }}"
+                                                              onsubmit="return confirm('Delete &quot;{{ form.variant_form_text }}&quot;?');">
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                                    title="Remove this form">
+                                                                <i class="bi bi-x-circle"></i>
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-info-circle"></i> No spelling variants recorded for this lemma.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Variant Modal -->
+<div class="modal fade" id="addVariantModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Spelling Variant</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{{ url_for('lemmas.add_variant', lemma_id=lemma.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="variant_text" class="form-label">Variant spelling</label>
+                        <input type="text" class="form-control" id="variant_text" name="variant_text"
+                               placeholder="e.g. grey" required>
+                        <div class="form-text">
+                            The variant's base form. Its remaining forms are generated
+                            mechanically where the spelling rules are confident.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="variant_lang_code" class="form-label">Language</label>
+                        <select class="form-select" id="variant_lang_code" name="lang_code" required>
+                            {% for lang_code in language_names %}
+                                <option value="{{ lang_code }}" {% if lang_code == 'en' %}selected{% endif %}>
+                                    {{ language_names[lang_code] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="variant_kind" class="form-label">Kind</label>
+                        <select class="form-select" id="variant_kind" name="variant_kind" required>
+                            <option value="spelling" selected>spelling (gray / grey)</option>
+                            <option value="script">script (simplified / traditional)</option>
+                        </select>
+                    </div>
+                    <div class="alert alert-warning mb-0 small">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Only use this for the <strong>same word</strong> spelled differently.
+                        A different word with a similar meaning is a synonym, and a regional
+                        word choice is a translation.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Add Variant
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

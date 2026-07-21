@@ -2,6 +2,7 @@
 
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Set, Tuple
 
+from storage.models.schema import SYNONYM_GRAMMATICAL_FORMS
 from storage.queries.lemma import get_difficulty_stats
 
 LemmaPronunciationRow = Dict[str, Optional[str]]
@@ -38,15 +39,7 @@ def group_derivative_forms(derivative_forms: Any) -> Tuple[Dict, Dict, Dict, Lis
             "alternate_spelling",
             "alternative_form",
         ]
-        is_synonym = form.grammatical_form in [
-            "synonym",
-            "synonym_near",
-            "synonym_regional",
-            "synonym_register",
-            "synonym_related",
-            "synonym_spelling",
-            "synonym_synecdoche",
-        ]
+        is_synonym = form.grammatical_form in SYNONYM_GRAMMATICAL_FORMS
 
         if is_synonym:
             if lang_code not in synonyms_by_language:
@@ -73,6 +66,48 @@ def group_derivative_forms(derivative_forms: Any) -> Tuple[Dict, Dict, Dict, Lis
         alternative_forms_by_language,
         all_synonym_languages,
     )
+
+
+def group_variant_forms(variant_forms: Any) -> Tuple[Dict[str, List[Dict[str, Any]]], List[str]]:
+    """Group variant forms into per-language paradigms for UI display.
+
+    Variants are grouped by language and then by ``variant_key``, because a
+    lemma can carry several ("donut" and "doughnut"), and each is a paradigm in
+    its own right rather than a single extra spelling.
+
+    Args:
+        variant_forms: List of VariantForm objects
+
+    Returns:
+        Tuple of (variants_by_language, all_variant_languages), where each
+        variant is a dict with ``key``, ``kind``, ``base_text`` and ``forms``.
+    """
+    grouped: Dict[str, Dict[Tuple[str, str], List[Any]]] = {}
+
+    for form in variant_forms:
+        language_variants = grouped.setdefault(form.language_code, {})
+        language_variants.setdefault((form.variant_kind, form.variant_key), []).append(form)
+
+    variants_by_language: Dict[str, List[Dict[str, Any]]] = {}
+    for lang_code, language_variants in grouped.items():
+        entries: List[Dict[str, Any]] = []
+        for (variant_kind, variant_key), forms in sorted(language_variants.items()):
+            base_form = next((f for f in forms if f.is_base_form), None)
+            entries.append(
+                {
+                    "key": variant_key,
+                    "kind": variant_kind,
+                    # Fall back to the variant key, which is conventionally the
+                    # variant's own base form, when no row is flagged as base.
+                    "base_text": (
+                        base_form.variant_form_text if base_form is not None else variant_key
+                    ),
+                    "forms": forms,
+                }
+            )
+        variants_by_language[lang_code] = entries
+
+    return variants_by_language, sorted(variants_by_language)
 
 
 def group_populated_pronunciations(derivative_forms: Any) -> Dict[str, List[Any]]:
@@ -230,4 +265,5 @@ __all__ = [
     "get_pronunciation_languages",
     "group_derivative_forms",
     "group_populated_pronunciations",
+    "group_variant_forms",
 ]

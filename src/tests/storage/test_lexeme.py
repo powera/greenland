@@ -18,6 +18,7 @@ from storage.models.schema import (
     DerivativeForm,
     Lemma,
 )
+from words.synonyms import SYNONYM_FORM_MAP
 
 
 def _make_session() -> Session:
@@ -207,6 +208,16 @@ def test_synonym_grammatical_forms_constant_is_complete() -> None:
         "synonym_register",
         "synonym_synecdoche",
         "synonym_related",
-        "synonym_spelling",
     }
     assert set(SYNONYM_GRAMMATICAL_FORMS) == expected
+
+
+def test_alternate_spellings_are_not_a_synonym_form() -> None:
+    """Spelling variants belong in variant_forms, not derivative_forms.
+
+    "grey" is the same lexeme as "gray", so it is neither a synonym nor an
+    inflection; see storage.models.variant_form.
+    """
+    assert "synonym_spelling" not in SYNONYM_GRAMMATICAL_FORMS
+    assert "alternate_spellings" not in SYNONYM_FORM_MAP
+    assert "synonym_spelling" not in SYNONYM_FORM_MAP.values()

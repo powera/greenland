@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
@@ -21,10 +21,12 @@ from clients.unified_client import UnifiedLLMClient
 from langtools.directions import get_language_direction_note
 from storage.backend.config import DataSourceConfig
 from storage.crud.derivative_form import add_derivative_form
-from storage.crud.grammar_fact import add_grammar_fact
+from storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
 from storage.crud.operation_log import log_operation
+from storage.crud.variant_form import add_variant_form
 from storage.crud.word_token import add_word_token
 from storage.models.schema import SYNONYM_GRAMMATICAL_FORMS, DerivativeForm, Lemma
+from storage.models.variant_form import VARIANT_KIND_SPELLING
 from storage.translation_helpers import get_supported_languages, get_translation
 from wordfreq.tools.text_utils import is_numeral
 
@@ -36,6 +38,10 @@ logger = logging.getLogger(__name__)
 # Maps LLM JSON keys to the ``grammatical_form`` value stored on
 # ``DerivativeForm`` rows. The ordering here is also the canonical
 # preference order when deduplicating across categories.
+#
+# ``alternate_spellings`` is deliberately not in this map. A spelling variant
+# is the same lexeme as the lemma and carries its own paradigm, so it is
+# stored in ``variant_forms`` by ``store_spelling_variants`` instead.
 SYNONYM_FORM_MAP: Dict[str, str] = {
     "synonyms": "synonym",
     "near_synonyms": "synonym_near",
@@ -43,7 +49,6 @@ SYNONYM_FORM_MAP: Dict[str, str] = {
     "register_variants": "synonym_register",
     "synecdoche_variants": "synonym_synecdoche",
     "related_learner_equivalents": "synonym_related",
-    "alternate_spellings": "synonym_spelling",
 }
 
 assert set(SYNONYM_FORM_MAP.values()) == set(
@@ -325,6 +330,159 @@ def store_synonym_forms(
     return stored_counts
 
 
+# The paradigm slot that holds a variant's own base form, per POS. Keys are the
+# form keys produced by the langtools.en builders. English only: variants in
+# other languages are stored as a bare base form (see store_spelling_variants).
+_EN_BASE_FORM_KEY: Dict[str, str] = {
+    "noun": "singular",
+    "adjective": "positive",
+    "adverb": "positive",
+    "verb": "infinitive",
+}
+
+
+def _variant_form_mapping(language_code: str, pos_type: str) -> Dict[str, str]:
+    """Map builder form keys to ``grammatical_form`` values, or ``{}``."""
+    # Lazy-imported for the same reason as LinguisticClient below: the
+    # langtools package imports back into words.
+    from langtools.form_registry import FORM_SPECS
+
+    try:
+        spec = FORM_SPECS[(language_code, pos_type.lower())]
+    except KeyError:
+        return {}
+    return {
+        form_key: getattr(grammatical_form, "value", str(grammatical_form))
+        for form_key, grammatical_form in spec.form_mapping.items()
+    }
+
+
+def _variant_base_grammatical_form(language_code: str, pos_type: str) -> Optional[str]:
+    """The ``grammatical_form`` naming a variant's base form, or ``None``."""
+    normalized_pos = pos_type.lower()
+    base_form_key = _EN_BASE_FORM_KEY.get(normalized_pos)
+    if base_form_key is None:
+        return None
+    return _variant_form_mapping(language_code, normalized_pos).get(base_form_key)
+
+
+def store_spelling_variants(
+    session: Session,
+    lemma: Lemma,
+    language_code: str,
+    alternate_spellings: List[str],
+    variant_kind: str = VARIANT_KIND_SPELLING,
+) -> int:
+    """Persist alternate spellings as ``variant_forms`` rows.
+
+    A spelling variant is the same lexeme as the lemma, so it does not belong
+    in ``derivative_forms`` alongside synonyms; see
+    ``storage.models.variant_form``. Callers only ever supply the variant's
+    base form ("grey"), which is expanded into a full paradigm by the
+    mechanical rules where they are confident. When they are not -- irregular
+    words, unusual spellings -- only the base form is stored, and the remaining
+    slots are left for a human to fill in via Barsukas.
+
+    Only English is expanded mechanically; other languages store the base form
+    alone, since the paradigm builders here are English-specific.
+
+    Used both by the synonym generator (for the LLM's ``alternate_spellings``)
+    and by the Barsukas "Add Variant" form.
+
+    Args:
+        session: Database session
+        lemma: The lemma these are variants of
+        language_code: Language of the variants (e.g. "en")
+        alternate_spellings: Base forms of the variants (e.g. ``["grey"]``)
+        variant_kind: Kind of variant; defaults to "spelling"
+
+    Returns:
+        Number of variant paradigms stored (not rows).
+    """
+    if not alternate_spellings:
+        return 0
+
+    stored_variants = 0
+    for spelling in alternate_spellings:
+        variant_key = spelling.strip()
+        if not variant_key:
+            continue
+
+        paradigm: Dict[str, str] = {}
+        if language_code == "en":
+            # Lazy-imported to avoid a circular import via langtools -> words.
+            from langtools.en.variants import build_variant_paradigm
+
+            paradigm = (
+                build_variant_paradigm(
+                    lemma_text=lemma.lemma_text,
+                    variant_text=variant_key,
+                    pos_type=lemma.pos_type,
+                    countability=get_grammar_fact_value(session, lemma.id, "en", "countability"),
+                    number_type=get_grammar_fact_value(session, lemma.id, "en", "number_type"),
+                    irregular_plural=get_grammar_fact_value(session, lemma.id, "en", "plural"),
+                    gradability=get_grammar_fact_value(session, lemma.id, "en", "gradability"),
+                    comparative=get_grammar_fact_value(session, lemma.id, "en", "comparative"),
+                    superlative=get_grammar_fact_value(session, lemma.id, "en", "superlative"),
+                    past=get_grammar_fact_value(session, lemma.id, "en", "past"),
+                    past_participle=get_grammar_fact_value(
+                        session, lemma.id, "en", "past_participle"
+                    ),
+                )
+                or {}
+            )
+
+        form_mapping = _variant_form_mapping(language_code, lemma.pos_type)
+        base_grammatical_form = _variant_base_grammatical_form(language_code, lemma.pos_type)
+
+        # Fall back to the bare base form when the rules declined to expand, so
+        # duplicate detection still recognizes the spelling.
+        rows: List[Tuple[str, str, bool]] = []
+        if paradigm and form_mapping:
+            for form_key, form_text in paradigm.items():
+                grammatical_form = form_mapping.get(form_key)
+                if grammatical_form is None:
+                    continue
+                rows.append(
+                    (
+                        str(grammatical_form),
+                        form_text,
+                        str(grammatical_form) == base_grammatical_form,
+                    )
+                )
+        elif base_grammatical_form:
+            rows.append((base_grammatical_form, variant_key, True))
+
+        if not rows:
+            logger.warning(
+                "Skipping spelling variant '%s' for lemma %s: no grammatical form for %s/%s",
+                variant_key,
+                lemma.id,
+                language_code,
+                lemma.pos_type,
+            )
+            continue
+
+        try:
+            for grammatical_form, form_text, is_base_form in rows:
+                add_variant_form(
+                    session=session,
+                    lemma=lemma,
+                    variant_form_text=form_text,
+                    language_code=language_code,
+                    variant_key=variant_key,
+                    grammatical_form=grammatical_form,
+                    variant_kind=variant_kind,
+                    is_base_form=is_base_form,
+                    verified=False,
+                )
+            stored_variants += 1
+        except Exception as error:
+            logger.warning("Failed to store spelling variant '%s': %s", variant_key, error)
+
+    return stored_variants
+
+
 def record_synonym_processing_metadata(
     session: Session,
     lemma_id: int,
@@ -357,6 +515,7 @@ def record_synonym_processing_metadata(
             "stored_synonyms": stored_counts["synonyms"],
             "stored_abbreviations": stored_counts["abbreviations"],
             "stored_expanded_forms": stored_counts["expanded_forms"],
+            "stored_spelling_variants": stored_counts.get("spelling_variants", 0),
         },
     )
 
@@ -426,6 +585,9 @@ def generate_synonyms_for_lemma(
 
     abbreviations = normalize_generated_forms(result.get("abbreviations", []), word)
     expanded_forms = normalize_generated_forms(result.get("expanded_forms", []), word)
+    # Alternate spellings are stored in variant_forms rather than as synonyms,
+    # so they are normalized separately from SYNONYM_FORM_MAP's categories.
+    alternate_spellings = normalize_generated_forms(result.get("alternate_spellings", []), word)
 
     if dry_run:
         return {
@@ -437,7 +599,7 @@ def generate_synonyms_for_lemma(
             "abbreviations": abbreviations,
             "expanded_forms": expanded_forms,
             "synecdoche_variants": synonym_groups.get("synecdoche_variants", []),
-            "alternate_spellings": synonym_groups.get("alternate_spellings", []),
+            "alternate_spellings": alternate_spellings,
             "total_count": len(synonyms) + len(abbreviations) + len(expanded_forms),
         }
 
@@ -449,14 +611,22 @@ def generate_synonyms_for_lemma(
         abbreviations=abbreviations,
         expanded_forms=expanded_forms,
     )
+    stored_counts["spelling_variants"] = store_spelling_variants(
+        session=session,
+        lemma=lemma,
+        language_code=language_code,
+        alternate_spellings=alternate_spellings,
+    )
 
     record_synonym_processing_metadata(session, lemma.id, language_code, stored_counts)
 
     logger.info(
-        "Stored %d synonym variants, %d abbreviations, and %d expanded forms",
+        "Stored %d synonym variants, %d abbreviations, %d expanded forms, "
+        "and %d spelling variants",
         stored_counts["synonyms"],
         stored_counts["abbreviations"],
         stored_counts["expanded_forms"],
+        stored_counts["spelling_variants"],
     )
 
     return {
@@ -468,11 +638,12 @@ def generate_synonyms_for_lemma(
         "abbreviations": abbreviations,
         "expanded_forms": expanded_forms,
         "synecdoche_variants": synonym_groups.get("synecdoche_variants", []),
-        "alternate_spellings": synonym_groups.get("alternate_spellings", []),
+        "alternate_spellings": alternate_spellings,
         "stored_synonyms": stored_counts["synonyms"],
         "stored_abbreviations": stored_counts["abbreviations"],
         "stored_expanded": stored_counts["expanded_forms"],
         "stored_expanded_forms": stored_counts["expanded_forms"],
+        "stored_spelling_variants": stored_counts["spelling_variants"],
     }
 
 
@@ -484,6 +655,7 @@ __all__ = [
     "normalize_generated_forms",
     "query_synonyms_from_llm",
     "store_synonym_forms",
+    "store_spelling_variants",
     "record_synonym_processing_metadata",
     "generate_synonyms_for_lemma",
 ]
