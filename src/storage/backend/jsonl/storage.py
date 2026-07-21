@@ -11,6 +11,7 @@ from storage.backend.base import BaseSession, BaseStorage
 from storage.backend.jsonl import models
 from storage.backend.jsonl.session import JSONLSession
 from storage.models.schema import NON_INFLECTION_GRAMMATICAL_FORMS
+from storage.models.variant_form import VARIANT_KIND_SPELLING
 
 
 class JSONLStorage(BaseStorage):
@@ -342,6 +343,43 @@ class JSONLStorage(BaseStorage):
                                     syn_record["phonetic"] = entry["phonetic"]
                                 syn_list.append(syn_record)
 
+                        # Alternate spellings ("grey" for "gray"). Handled
+                        # separately from "forms" so variants are never routed
+                        # into the synonyms bucket: a variant is the same
+                        # lexeme, not a different one.
+                        if "variants" in data and isinstance(data["variants"], list):
+                            variant_list = lemma.variants.setdefault(lang_code, [])
+                            for variant_entry in data["variants"]:
+                                variant_key = variant_entry.get("key", "")
+                                raw_forms = variant_entry.get("forms", [])
+                                if not variant_key or not isinstance(raw_forms, list):
+                                    continue
+                                variant_forms: List[Dict[str, Any]] = []
+                                for form_entry in raw_forms:
+                                    vgform = form_entry.get("grammatical_form", "")
+                                    vtext = form_entry.get("text", "")
+                                    if not vgform or not vtext:
+                                        continue
+                                    variant_record: Dict[str, Any] = {
+                                        "grammatical_form": vgform,
+                                        "text": vtext,
+                                        "is_base_form": form_entry.get("is_base_form", False),
+                                    }
+                                    if form_entry.get("ipa"):
+                                        variant_record["ipa"] = form_entry["ipa"]
+                                    if form_entry.get("phonetic"):
+                                        variant_record["phonetic"] = form_entry["phonetic"]
+                                    variant_forms.append(variant_record)
+                                if not variant_forms:
+                                    continue
+                                variant_list.append(
+                                    {
+                                        "kind": variant_entry.get("kind", VARIANT_KIND_SPELLING),
+                                        "key": variant_key,
+                                        "forms": variant_forms,
+                                    }
+                                )
+
                         if "audio_hashes" in data:
                             lemma.audio_hashes[lang_code] = data["audio_hashes"]
 
@@ -663,6 +701,7 @@ class JSONLStorage(BaseStorage):
         languages_to_save.update(lemma.audio_hashes.keys())
         languages_to_save.update(lemma.definitions.keys())
         languages_to_save.update(lemma.translation_disambiguations.keys())
+        languages_to_save.update(lemma.variants.keys())
 
         # Extract grammar_facts languages
         for fact in lemma.grammar_facts:
@@ -895,6 +934,11 @@ class JSONLStorage(BaseStorage):
                 data["base_form"] = lemma.base_forms[lang_code]
                 has_data = True
 
+        # Alternate spellings for this language, each with its own paradigm
+        if lemma.variants.get(lang_code):
+            data["variants"] = lemma.variants[lang_code]
+            has_data = True
+
         # Audio hashes for this language
         if lang_code in lemma.audio_hashes:
             data["audio_hashes"] = lemma.audio_hashes[lang_code]
@@ -1109,6 +1153,7 @@ class JSONLStorage(BaseStorage):
         languages_to_update.update(lemma.base_forms.keys())
         languages_to_update.update(lemma.audio_hashes.keys())
         languages_to_update.update(lemma.definitions.keys())
+        languages_to_update.update(lemma.variants.keys())
 
         # Remove from in-memory storage
         if lemma.guid and lemma.guid in self.lemmas:

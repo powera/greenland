@@ -118,21 +118,38 @@ def _find_duplicate_lemma(
 ) -> Optional[Any]:
     """Check if a lemma already exists for this word/POS/subtype combination.
 
+    Matches both the lemma text itself and any alternate spelling recorded for
+    it, so approving a pending "grey" resolves to the existing "gray" lemma
+    instead of creating a duplicate concept under the other spelling.
+
     Returns the first matching Lemma, or None if no duplicate found.
     """
     from sqlalchemy import func
 
     from storage.models.schema import Lemma
+    from storage.models.variant_form import VariantForm
 
-    query = session.query(Lemma).filter(func.lower(Lemma.lemma_text) == word.strip().lower())
+    normalized = word.strip().lower()
 
-    if pos_type:
-        query = query.filter(Lemma.pos_type == pos_type)
+    def _apply_pos_filters(query: Any) -> Any:
+        if pos_type:
+            query = query.filter(Lemma.pos_type == pos_type)
+        if pos_subtype:
+            query = query.filter(Lemma.pos_subtype == pos_subtype)
+        return query
 
-    if pos_subtype:
-        query = query.filter(Lemma.pos_subtype == pos_subtype)
+    direct_match = _apply_pos_filters(
+        session.query(Lemma).filter(func.lower(Lemma.lemma_text) == normalized)
+    ).first()
+    if direct_match is not None:
+        return direct_match
 
-    return query.first()
+    variant_match = _apply_pos_filters(
+        session.query(Lemma)
+        .join(VariantForm, VariantForm.lemma_id == Lemma.id)
+        .filter(func.lower(VariantForm.variant_form_text) == normalized)
+    ).first()
+    return variant_match
 
 
 def approve_pending_import(

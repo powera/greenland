@@ -80,6 +80,7 @@ def export_sqlalchemy_to_jsonl(source_config: DataSourceConfig, jsonl_dir: str) 
                 selectinload(SQLiteLemma.translations),
                 selectinload(SQLiteLemma.difficulty_overrides),
                 selectinload(SQLiteLemma.derivative_forms),
+                selectinload(SQLiteLemma.variant_forms),
                 selectinload(SQLiteLemma.grammar_facts),
             )
             .all()
@@ -297,6 +298,40 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any = None) -> Any:
             "phonetic": form.phonetic_pronunciation,
         }
 
+    # Get variant forms (alternate spellings), grouped per language and then
+    # per variant so each variant keeps its own paradigm.
+    variants_by_key: Dict[str, Dict[Tuple[str, str], List[Dict[str, Any]]]] = defaultdict(
+        lambda: defaultdict(list)
+    )
+    for variant_form in lemma.variant_forms:
+        variant_record: Dict[str, Any] = {
+            "grammatical_form": variant_form.grammatical_form,
+            "text": variant_form.variant_form_text,
+            "is_base_form": variant_form.is_base_form,
+        }
+        if variant_form.ipa_pronunciation:
+            variant_record["ipa"] = variant_form.ipa_pronunciation
+        if variant_form.phonetic_pronunciation:
+            variant_record["phonetic"] = variant_form.phonetic_pronunciation
+        variants_by_key[variant_form.language_code][
+            (variant_form.variant_kind, variant_form.variant_key)
+        ].append(variant_record)
+
+    variants: Dict[str, List[Dict[str, Any]]] = {
+        lang_code: [
+            {
+                "kind": variant_kind,
+                "key": variant_key,
+                "forms": sorted(
+                    variant_forms,
+                    key=lambda current_form: current_form["grammatical_form"],
+                ),
+            }
+            for (variant_kind, variant_key), variant_forms in sorted(variant_group.items())
+        ]
+        for lang_code, variant_group in variants_by_key.items()
+    }
+
     # Get grammar facts
     grammar_facts = []
     for fact in lemma.grammar_facts:
@@ -341,6 +376,7 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any = None) -> Any:
         translation_disambiguations=translation_disambiguations,
         difficulty_overrides=difficulty_overrides,
         derivative_forms=derivative_forms,
+        variants=variants,
         base_forms={},  # Populated when no derivative has is_base_form=true
         grammar_facts=grammar_facts,
         audio_hashes={},
@@ -500,6 +536,7 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
             .options(
                 selectinload(Lemma.translations),
                 selectinload(Lemma.derivative_forms),
+                selectinload(Lemma.variant_forms),
                 selectinload(Lemma.grammar_facts),
             )
             .order_by(Lemma.id)
@@ -701,6 +738,26 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                         "phonetic": form.phonetic_pronunciation,
                     }
 
+                # Group variant forms (alternate spellings) by language, then by
+                # the variant they belong to, so each variant keeps its own
+                # paradigm: {"en": {("spelling", "grey"): [grey, greyer, ...]}}
+                variants_by_lang: Dict[str, Dict[Tuple[str, str], List[Dict[str, Any]]]] = (
+                    defaultdict(lambda: defaultdict(list))
+                )
+                for variant_form in lemma.variant_forms:
+                    variant_record: Dict[str, Any] = {
+                        "grammatical_form": variant_form.grammatical_form,
+                        "text": variant_form.variant_form_text,
+                        "is_base_form": variant_form.is_base_form,
+                    }
+                    if variant_form.ipa_pronunciation:
+                        variant_record["ipa"] = variant_form.ipa_pronunciation
+                    if variant_form.phonetic_pronunciation:
+                        variant_record["phonetic"] = variant_form.phonetic_pronunciation
+                    variants_by_lang[variant_form.language_code][
+                        (variant_form.variant_kind, variant_form.variant_key)
+                    ].append(variant_record)
+
                 # Group grammar facts by language (only whitelisted types)
                 facts_by_lang: Dict[str, List[Dict[str, Any]]] = {}
                 for fact in lemma.grammar_facts:
@@ -720,6 +777,7 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                 langs_with_data = (
                     set(forms_by_lang.keys())
                     | set(synonyms_by_lang.keys())
+                    | set(variants_by_lang.keys())
                     | set(facts_by_lang.keys())
                 ) & release_lang_set
                 for lang in langs_with_data:
@@ -734,6 +792,20 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                                 current_synonym["text"],
                             ),
                         )
+                    if lang in variants_by_lang:
+                        record["variants"] = [
+                            {
+                                "kind": variant_kind,
+                                "key": variant_key,
+                                "forms": sorted(
+                                    variant_forms,
+                                    key=lambda current_form: current_form["grammatical_form"],
+                                ),
+                            }
+                            for (variant_kind, variant_key), variant_forms in sorted(
+                                variants_by_lang[lang].items()
+                            )
+                        ]
                     if lang in facts_by_lang:
                         record["grammar_facts"] = facts_by_lang[lang]
                     lang_records[lang].append(record)

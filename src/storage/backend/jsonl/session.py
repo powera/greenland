@@ -217,6 +217,8 @@ class JSONLSession(BaseSession):
         from storage.models.schema import PhraseTranslation as SQLPhraseTranslation
         from storage.models.schema import Sentence as SQLSentence
         from storage.models.schema import SentenceTranslation, SentenceWord
+        from storage.models.variant_form import VARIANT_KIND_SPELLING
+        from storage.models.variant_form import VariantForm as SQLVariantForm
         from storage.translation_helpers import compute_sort_key
         from storage.wikidata import normalize_qid
 
@@ -226,6 +228,7 @@ class JSONLSession(BaseSession):
         difficulty_overrides: list[dict] = []
         concept_lemma_links: list[dict] = []
         derivative_forms: list[dict] = []
+        variant_forms: list[dict] = []
         grammar_facts = []
         relation_groups = []
         relation_members = []
@@ -338,6 +341,35 @@ class JSONLSession(BaseSession):
                             "phonetic_pronunciation": syn.get("phonetic"),
                         }
                     )
+
+            # Variant forms (alternate spellings): each variant keeps its own
+            # paradigm, so emit one VariantForm row per (variant, form). These
+            # go to a separate table, never to derivative_forms -- an unfiltered
+            # read of a lemma's forms must not return "grey".
+            for lang_code, variant_list in jsonl_lemma.variants.items():
+                for variant in variant_list:
+                    variant_key = variant.get("key", "")
+                    if not variant_key:
+                        continue
+                    variant_kind = variant.get("kind", VARIANT_KIND_SPELLING)
+                    for variant_form_entry in variant.get("forms", []):
+                        variant_text = variant_form_entry.get("text", "")
+                        variant_gform = variant_form_entry.get("grammatical_form", "")
+                        if not variant_text or not variant_gform:
+                            continue
+                        variant_forms.append(
+                            {
+                                "lemma_id": jsonl_lemma.id,
+                                "language_code": lang_code,
+                                "variant_kind": variant_kind,
+                                "variant_key": variant_key,
+                                "grammatical_form": variant_gform,
+                                "variant_form_text": variant_text,
+                                "is_base_form": bool(variant_form_entry.get("is_base_form", False)),
+                                "ipa_pronunciation": variant_form_entry.get("ipa"),
+                                "phonetic_pronunciation": variant_form_entry.get("phonetic"),
+                            }
+                        )
 
             # Synthesize a base DerivativeForm row from lemma.base_forms for
             # any language that does not already have one in derivative_forms.
@@ -515,6 +547,8 @@ class JSONLSession(BaseSession):
             self._sqlite_session.bulk_insert_mappings(SQLConceptLemmaLink, concept_lemma_links)
         if derivative_forms:
             self._sqlite_session.bulk_insert_mappings(SQLDerivativeForm, derivative_forms)
+        if variant_forms:
+            self._sqlite_session.bulk_insert_mappings(SQLVariantForm, variant_forms)
         if grammar_facts:
             self._sqlite_session.bulk_insert_mappings(SQLGrammarFact, grammar_facts)
         if relation_groups:

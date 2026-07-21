@@ -165,6 +165,13 @@ class Lemma(Base):
     derivative_forms = relationship(
         "DerivativeForm", back_populates="lemma", cascade="all, delete-orphan"
     )
+    # Alternate spellings and other orthographic variants of this same lexeme
+    # ("grey" for "gray").  Deliberately separate from derivative_forms so an
+    # unfiltered read of a lemma's forms does not return variant spellings;
+    # see storage.models.variant_form.
+    variant_forms = relationship(
+        "VariantForm", back_populates="lemma", cascade="all, delete-orphan"
+    )
     grammar_facts = relationship(
         "GrammarFact", back_populates="lemma", cascade="all, delete-orphan"
     )

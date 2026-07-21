@@ -61,6 +61,14 @@ from storage.crud.derivative_form import (
     has_specific_noun_forms,
     update_derivative_form,
 )
+from storage.crud.variant_form import (
+    add_variant_form,
+    delete_variant,
+    find_lemmas_by_variant_text,
+    get_all_variant_texts,
+    get_variant_forms_for_lemma,
+    get_variant_paradigms_for_lemma,
+)
 from storage.crud.grammar_fact import (
     add_grammar_fact,
     delete_grammar_fact,
@@ -255,6 +263,13 @@ __all__ = [
     "add_alternative_form",
     "get_alternative_forms_for_lemma",
     "add_complete_word_entry",
+    # Variant form CRUD (alternate spellings)
+    "add_variant_form",
+    "delete_variant",
+    "find_lemmas_by_variant_text",
+    "get_all_variant_texts",
+    "get_variant_forms_for_lemma",
+    "get_variant_paradigms_for_lemma",
     # Sentence CRUD
     "add_sentence",
     "get_sentence_by_id",
