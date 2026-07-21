@@ -93,6 +93,7 @@ def clean_form(text: str) -> List[str]:
 
     return cleaned_forms
 
+
 def strip_subject_pronoun(text: str) -> str:
     """Strip a Ukrainian subject pronoun from the beginning of a verb phrase."""
     normalized = normalize_ukrainian_text(text.strip().lower())
@@ -102,11 +103,10 @@ def strip_subject_pronoun(text: str) -> str:
     combined_pronouns = ["він/вона ", "вона/він ", "він / вона ", "вона / він "]
     for pronoun in combined_pronouns:
         if normalized.startswith(pronoun):
-            return normalized[len(pronoun):].strip()
+            return normalized[len(pronoun) :].strip()
 
     pronouns = ["я ", "ти ", "він ", "вона ", "воно ", "ми ", "ви ", "вони "]
     for pronoun in pronouns:
         if normalized.startswith(pronoun):
-            return normalized[len(pronoun):].strip()
+            return normalized[len(pronoun) :].strip()
     return normalized
-

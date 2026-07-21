@@ -80,6 +80,7 @@ def is_bengali_script(text: str) -> bool:
             return True
     return False
 
+
 def strip_subject_pronoun(text: str) -> str:
     """Strip a Bengali subject pronoun from the beginning of a verb phrase."""
     normalized = normalize_bengali_text(text.strip().lower())
@@ -89,11 +90,10 @@ def strip_subject_pronoun(text: str) -> str:
     combined_pronouns = ["সে/তিনি ", "তিনি/সে ", "সে / তিনি ", "তিনি / সে "]
     for pronoun in combined_pronouns:
         if normalized.startswith(pronoun):
-            return normalized[len(pronoun):].strip()
+            return normalized[len(pronoun) :].strip()
 
     pronouns = ["আমি ", "তুমি ", "আপনি ", "সে ", "তিনি ", "আমরা ", "তোমরা ", "আপনারা ", "তারা "]
     for pronoun in pronouns:
         if normalized.startswith(pronoun):
-            return normalized[len(pronoun):].strip()
+            return normalized[len(pronoun) :].strip()
     return normalized
-

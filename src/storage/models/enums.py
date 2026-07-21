@@ -221,7 +221,6 @@ class GrammaticalForm(enum.Enum):
     ADJECTIVE_COMPARATIVE = "adjective/comparative"
     ADJECTIVE_SUPERLATIVE = "adjective/superlative"
 
-
     # Adverb forms
     ADVERB_POSITIVE = "adverb/positive"
     ADVERB_COMPARATIVE = "adverb/comparative"
@@ -229,7 +228,6 @@ class GrammaticalForm(enum.Enum):
 
     # Language-specific adverb base forms (invariant adverbs)
     ADVERB_KO_BASE = "adverb/ko_base"
-
 
     # Pronoun forms - Korean (simplified)
     # Word itself indicates person/number/formality; tag indicates function
@@ -249,27 +247,22 @@ class GrammaticalForm(enum.Enum):
     DETERMINER = "determiner/base"
     ARTICLE = "article/base"
 
-
     # Korean numerals (native Korean vs Sino-Korean systems)
     NUMERAL_KO_NATIVE = "numeral/ko_native"  # 하나, 둘, 셋 (native Korean, for counting)
     NUMERAL_KO_SINO = "numeral/ko_sino"  # 일, 이, 삼 (Sino-Korean, for dates/numbers)
     NUMERAL_KO_ORDINAL = "numeral/ko_ordinal"  # 첫째, 둘째, 셋째
 
-
     # Kannada noun forms (singular/plural only)
     NOUN_KN_SINGULAR = "noun/kn_singular"
     NOUN_KN_PLURAL = "noun/kn_plural"
-
 
     # Estonian noun forms (singular/plural only - no grammatical gender)
     NOUN_ET_SINGULAR = "noun/et_singular"
     NOUN_ET_PLURAL = "noun/et_plural"
 
-
     # Latvian noun forms (legacy singular/plural - kept for backward compatibility)
     NOUN_LV_SINGULAR = "noun/lv_singular"
     NOUN_LV_PLURAL = "noun/lv_plural"
-
 
     # Malay noun forms (singular/plural - plural via reduplication e.g. buku-buku)
     NOUN_MS_SINGULAR = "noun/ms_singular"
@@ -280,7 +273,6 @@ class GrammaticalForm(enum.Enum):
     VERB_MS_PAST = "verb/ms_past"
     VERB_MS_FUTURE = "verb/ms_future"
 
-
     # Filipino (Tagalog) noun forms (singular/plural - plural via mga prefix)
     NOUN_TL_SINGULAR = "noun/tl_singular"
     NOUN_TL_PLURAL = "noun/tl_plural"
@@ -289,7 +281,6 @@ class GrammaticalForm(enum.Enum):
     VERB_TL_PRESENT = "verb/tl_present"
     VERB_TL_PAST = "verb/tl_past"
     VERB_TL_FUTURE = "verb/tl_future"
-
 
     # Bengali noun forms (singular/plural)
     NOUN_BN_SINGULAR = "noun/bn_singular"
@@ -358,12 +349,10 @@ class GrammaticalForm(enum.Enum):
     NOUN_UK_SINGULAR = "noun/uk_singular"
     NOUN_UK_PLURAL = "noun/uk_plural"
 
-
     # Ukrainian verb forms (legacy tense-only - kept for backward compatibility)
     VERB_UK_PRESENT = "verb/uk_present"
     VERB_UK_PAST = "verb/uk_past"
     VERB_UK_FUTURE = "verb/uk_future"
-
 
     # Generic forms
     BASE_FORM = "base_form"

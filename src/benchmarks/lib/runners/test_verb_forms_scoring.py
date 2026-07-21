@@ -245,7 +245,6 @@ class TestVerbFormsScoring(unittest.TestCase):
         score = self.runner.score_response(question_data, response)
         self.assertEqual(score, 100)
 
-
     def test_spanish_pronoun_stripping_scores_100(self):
         question_data = {
             "correct_answer": {
@@ -257,9 +256,30 @@ class TestVerbFormsScoring(unittest.TestCase):
                     "participle": "hablado",
                 },
                 "forms": {
-                    "present": {"1s": "hablo", "2s": "hablas", "3s": "habla", "1p": "hablamos", "2p": "habláis", "3p": "hablan"},
-                    "past": {"1s": "hablé", "2s": "hablaste", "3s": "habló", "1p": "hablamos", "2p": "hablasteis", "3p": "hablaron"},
-                    "future": {"1s": "hablaré", "2s": "hablarás", "3s": "hablará", "1p": "hablaremos", "2p": "hablaréis", "3p": "hablarán"},
+                    "present": {
+                        "1s": "hablo",
+                        "2s": "hablas",
+                        "3s": "habla",
+                        "1p": "hablamos",
+                        "2p": "habláis",
+                        "3p": "hablan",
+                    },
+                    "past": {
+                        "1s": "hablé",
+                        "2s": "hablaste",
+                        "3s": "habló",
+                        "1p": "hablamos",
+                        "2p": "hablasteis",
+                        "3p": "hablaron",
+                    },
+                    "future": {
+                        "1s": "hablaré",
+                        "2s": "hablarás",
+                        "3s": "hablará",
+                        "1p": "hablaremos",
+                        "2p": "hablaréis",
+                        "3p": "hablarán",
+                    },
                 },
             }
         }
@@ -269,9 +289,30 @@ class TestVerbFormsScoring(unittest.TestCase):
             "lemma": "hablar",
             "extra_forms": {"gerund": "hablando", "participle": "hablado"},
             "forms": {
-                "present": {"1s": "yo hablo", "2s": "tú hablas", "3s": "ella habla", "1p": "nosotros hablamos", "2p": "vosotros habláis", "3p": "ellos hablan"},
-                "past": {"1s": "yo hablé", "2s": "tú hablaste", "3s": "ella habló", "1p": "nosotros hablamos", "2p": "vosotros hablasteis", "3p": "ellos hablaron"},
-                "future": {"1s": "yo hablaré", "2s": "tú hablarás", "3s": "ella hablará", "1p": "nosotros hablaremos", "2p": "vosotros hablaréis", "3p": "ellos hablarán"},
+                "present": {
+                    "1s": "yo hablo",
+                    "2s": "tú hablas",
+                    "3s": "ella habla",
+                    "1p": "nosotros hablamos",
+                    "2p": "vosotros habláis",
+                    "3p": "ellos hablan",
+                },
+                "past": {
+                    "1s": "yo hablé",
+                    "2s": "tú hablaste",
+                    "3s": "ella habló",
+                    "1p": "nosotros hablamos",
+                    "2p": "vosotros hablasteis",
+                    "3p": "ellos hablaron",
+                },
+                "future": {
+                    "1s": "yo hablaré",
+                    "2s": "tú hablarás",
+                    "3s": "ella hablará",
+                    "1p": "nosotros hablaremos",
+                    "2p": "vosotros hablaréis",
+                    "3p": "ellos hablarán",
+                },
             },
         }
 

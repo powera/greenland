@@ -66,7 +66,9 @@ class BenchmarkRunWorker:
         self._interactive_local_ttl_seconds = 120.0
 
         self._state_lock = threading.Lock()
-        self._thread = threading.Thread(target=self._run_forever, daemon=True, name="benchmark-run-worker")
+        self._thread = threading.Thread(
+            target=self._run_forever, daemon=True, name="benchmark-run-worker"
+        )
         self._thread.start()
 
     def enqueue(self, benchmark_name: str, model_name: str) -> int:
@@ -86,7 +88,9 @@ class BenchmarkRunWorker:
             self._tasks[task_id] = task
             self._cleanup_expired_outputs_locked()
 
-        request = BenchmarkRunRequest(benchmark_name=benchmark_name, model_name=model_name, task_id=task_id)
+        request = BenchmarkRunRequest(
+            benchmark_name=benchmark_name, model_name=model_name, task_id=task_id
+        )
         self._queue.put(request)
         return self._queue.qsize()
 
@@ -131,13 +135,15 @@ class BenchmarkRunWorker:
                 and task.enqueued_at >= now_utc - self._history_window
             ]
         return {
-            "active": None
-            if current is None
-            else {
-                "task_id": current.task_id,
-                "benchmark_name": current.benchmark_name,
-                "model_name": current.model_name,
-            },
+            "active": (
+                None
+                if current is None
+                else {
+                    "task_id": current.task_id,
+                    "benchmark_name": current.benchmark_name,
+                    "model_name": current.model_name,
+                }
+            ),
             "queued": len(queued_tasks),
             "queued_tasks": queued_tasks,
             "recent_tasks": recent_tasks,
@@ -231,8 +237,12 @@ class BenchmarkRunWorker:
 
         logger.info("Running benchmark via worker: %s", " ".join(cmd))
         task = self._tasks.get(request.task_id)
-        stdout_path = task.stdout_path if task else self._output_dir / f"task-{request.task_id}.stdout.log"
-        stderr_path = task.stderr_path if task else self._output_dir / f"task-{request.task_id}.stderr.log"
+        stdout_path = (
+            task.stdout_path if task else self._output_dir / f"task-{request.task_id}.stdout.log"
+        )
+        stderr_path = (
+            task.stderr_path if task else self._output_dir / f"task-{request.task_id}.stderr.log"
+        )
 
         with (
             stdout_path.open("w", encoding="utf-8") as stdout_file,

@@ -99,12 +99,14 @@ def _migrate_postgres_schema(conn) -> None:
     existing_columns = {
         (row[0], row[1])
         for row in conn.execute(
-            text("""
+            text(
+                """
                 SELECT table_name, column_name
                 FROM information_schema.columns
                 WHERE table_schema = :schema
                   AND table_name IN ('benchmark', 'model', 'run_detail', 'question')
-                """),
+                """
+            ),
             {"schema": schema},
         )
     }

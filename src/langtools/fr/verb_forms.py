@@ -18,4 +18,3 @@ def get_verb_forms_config() -> dict:
             "single generic past tense."
         ),
     }
-

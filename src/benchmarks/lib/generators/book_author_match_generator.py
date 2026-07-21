@@ -38,7 +38,12 @@ class BookAuthorMatchGenerator(BenchmarkGenerator):
         schema = {
             "type": "object",
             "properties": {
-                "decoys": {"type": "array", "items": {"type": "string"}, "minItems": 3, "maxItems": 3}
+                "decoys": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "minItems": 3,
+                    "maxItems": 3,
+                }
             },
             "required": ["decoys"],
         }
