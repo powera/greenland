@@ -59,11 +59,12 @@ their local browser.
 
 Testing
 -------
-There are three test targets, run via ./run_tests.sh :
+There are four test targets, run via ./run_tests.sh :
 
-  ./run_tests.sh smoke    ~16 tests, ~1s   - run on every commit
-  ./run_tests.sh base     ~1700 tests, ~16s - run often, not every commit
-  ./run_tests.sh all      everything, including the audio suite
+  ./run_tests.sh smoke     ~16 tests, ~1s    - run on every commit
+  ./run_tests.sh portable  ~1676 tests       - base minus optional-native-dep tests
+  ./run_tests.sh base      ~1700 tests, ~16s - run often, not every commit
+  ./run_tests.sh all       everything, including the audio suite
 
 Extra arguments pass through to pytest:
   ./run_tests.sh base -k combined_rank -x
@@ -76,6 +77,27 @@ total under ~20 - it is worthless if it stops being fast.  Tests needing a
 database, an LLM client, or fixtures belong in base instead.
 
 base is everything except src/tests/clients/audio ; all adds that back.
+
+portable is base with the tests that require optional native dependencies
+removed, so the suite runs cleanly where those wheels do not build or install.
+It is a superset of smoke and a subset of base.  Three dependencies drive the
+exclusions, all listed in PORTABLE_EXCLUDES in run_tests.sh :
+
+* jieba (Chinese segmentation) is imported at module load by
+  benchmarks.lib.generators.pinyin_letter_count_generator, and
+  benchmarks.lib.utils pulls that generators package in eagerly, so the whole
+  benchmarks tree fails to *collect* without it - portable drops
+  src/tests/benchmarks and src/tests/lib/benchmarks wholesale.
+* pypinyin + pykakasi (Chinese pinyin / Japanese readings) are needed by
+  src/tests/wireword/test_readings.py, which asserts real reading output;
+  portable drops that file.
+
+The exclusions are pytest path --ignore flags, not -m "not ..." marker
+deselection: jieba breaks collection before any marker could deselect a test.
+Tests that gate themselves on a missing dep (skipif / skipUnless / an
+*_AVAILABLE flag, e.g. test_zh_pinyin_sort.py, test_dialect_overrides.py,
+test_cognates.py) already skip cleanly and are not excluded.  When the exclusion
+set changes, update both run_tests.sh and this section.
 
 Two things to know when writing tests:
 
