@@ -113,7 +113,8 @@ def nearest_lemma_embeddings(
         )
         params["min_similarity"] = min_similarity
 
-    sql = text(f"""
+    sql = text(
+        f"""
         SELECT
             e.lemma_id,
             l.lemma_text,
@@ -128,7 +129,8 @@ def nearest_lemma_embeddings(
         WHERE {" AND ".join(where_fragments)}
         ORDER BY e.embedding <=> CAST(:query_vector AS vector)
         LIMIT :limit
-        """)
+        """
+    )
 
     rows = session.execute(sql, params).all()
     matches: list[LemmaEmbeddingMatch] = []

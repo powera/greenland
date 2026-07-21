@@ -23,7 +23,9 @@ from typing import Dict
 from sqlalchemy.orm import Session
 from storage.database import Lemma, LemmaTranslation, create_database_session
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Mapping of old column names to language codes

@@ -203,9 +203,7 @@ class TestDerivativeFormPath(CandidateLookupTestCase):
 class TestCapAndScoring(CandidateLookupTestCase):
     def test_max_candidates_respected(self) -> None:
         sentence = add_test_sentence(self.session, {"en": "I can play today"})
-        candidates = find_candidate_lemmas_for_sentence(
-            self.session, sentence.id, max_candidates=1
-        )
+        candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id, max_candidates=1)
         self.assertEqual(len(candidates), 1)
 
     def test_score_equals_number_of_confirming_languages(self) -> None:
@@ -256,11 +254,7 @@ def _release_dog_guid(session: Session) -> str:
     """Look up the release-data GUID for the 'dog' noun lemma."""
     from storage.models.schema import Lemma
 
-    lemma = (
-        session.query(Lemma)
-        .filter(Lemma.lemma_text == "dog", Lemma.pos_type == "noun")
-        .first()
-    )
+    lemma = session.query(Lemma).filter(Lemma.lemma_text == "dog", Lemma.pos_type == "noun").first()
     assert lemma is not None and lemma.guid, "release fixture must include 'dog' noun"
     return lemma.guid
 

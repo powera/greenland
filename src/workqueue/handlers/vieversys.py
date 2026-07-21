@@ -138,10 +138,7 @@ def handle_generate_audio(session: Session, payload: Dict) -> str:
                 gpt_voice_list.append(gpt_voice)
 
         if invalid_voice_names:
-            raise RuntimeError(
-                "Invalid OpenAI voice names: "
-                + ", ".join(invalid_voice_names)
-            )
+            raise RuntimeError("Invalid OpenAI voice names: " + ", ".join(invalid_voice_names))
 
         if not gpt_voice_list:
             supported_languages = sorted({voice.language_code for voice in GptVoice})

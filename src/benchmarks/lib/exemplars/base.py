@@ -21,7 +21,9 @@ from clients import unified_client
 from clients.types import Response, Schema
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -434,7 +436,8 @@ class ExemplarReportGenerator:
         # Generate simple HTML report
         report_path = os.path.join(self.output_dir, f"{exemplar_id}.html")
         with open(report_path, "w", encoding="utf-8") as f:
-            f.write(f"""<!DOCTYPE html>
+            f.write(
+                f"""<!DOCTYPE html>
 <html>
 <head>
     <title>Exemplar Report: {exemplar.name}</title>
@@ -458,7 +461,8 @@ class ExemplarReportGenerator:
     {self._generate_model_sections(results)}
 </body>
 </html>
-""")
+"""
+            )
 
         logger.info(f"Generated report at {report_path}")
         return report_path
@@ -483,7 +487,8 @@ class ExemplarReportGenerator:
             model_size = model_sizes.get(model_name, "Unknown")
 
             # Create section for this model
-            sections.append(f"""
+            sections.append(
+                f"""
     <div class="model-response">
         <h2>Model: {model_name} ({model_size} MB)</h2>
         <div class="metadata">
@@ -493,7 +498,8 @@ class ExemplarReportGenerator:
         <h3>Response:</h3>
         <pre>{response}</pre>
     </div>
-""")
+"""
+            )
 
         return "\n".join(sections)
 
@@ -529,7 +535,8 @@ class ExemplarReportGenerator:
         # Generate HTML table of exemplars
         rows = []
         for exemplar in exemplars:
-            rows.append(f"""
+            rows.append(
+                f"""
     <tr>
         <td>{exemplar.name}</td>
         <td>{exemplar.id}</td>
@@ -537,12 +544,14 @@ class ExemplarReportGenerator:
         <td>{exemplar.description or ""}</td>
         <td><a href="{exemplar.id}.html">View Report</a></td>
     </tr>
-""")
+"""
+            )
 
         # Write index report
         index_path = os.path.join(self.output_dir, "index.html")
         with open(index_path, "w") as f:
-            f.write(f"""<!DOCTYPE html>
+            f.write(
+                f"""<!DOCTYPE html>
 <html>
 <head>
     <title>Exemplar Reports</title>
@@ -568,7 +577,8 @@ class ExemplarReportGenerator:
     </table>
 </body>
 </html>
-""")
+"""
+            )
 
         logger.info(f"Generated index report at {index_path}")
         return index_path

@@ -130,6 +130,7 @@ def detect_gender_from_word(word: str) -> Optional["SpanishGender"]:
 
     return None
 
+
 def strip_subject_pronoun(text: str) -> str:
     """Strip a Spanish subject pronoun from the beginning of a verb phrase."""
     normalized = normalize_spanish_text(text.strip().lower())
@@ -139,7 +140,7 @@ def strip_subject_pronoun(text: str) -> str:
     combined_pronouns = ["él/ella ", "ella/él ", "el/ella ", "ella/el ", "él / ella ", "ella / él "]
     for pronoun in combined_pronouns:
         if normalized.startswith(pronoun):
-            return normalized[len(pronoun):].strip()
+            return normalized[len(pronoun) :].strip()
 
     pronouns = [
         "yo ",
@@ -159,6 +160,5 @@ def strip_subject_pronoun(text: str) -> str:
     ]
     for pronoun in pronouns:
         if normalized.startswith(pronoun):
-            return normalized[len(pronoun):].strip()
+            return normalized[len(pronoun) :].strip()
     return normalized
-

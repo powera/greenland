@@ -12,7 +12,21 @@ def strip_subject_pronoun(text: str) -> str:
         if normalized.startswith(pronoun):
             return normalized[len(pronoun) :].strip()
 
-    pronouns = ["ik ", "jij ", "je ", "u ", "hij ", "zij ", "ze ", "het ", "wij ", "we ", "jullie ", "zij ", "ze "]
+    pronouns = [
+        "ik ",
+        "jij ",
+        "je ",
+        "u ",
+        "hij ",
+        "zij ",
+        "ze ",
+        "het ",
+        "wij ",
+        "we ",
+        "jullie ",
+        "zij ",
+        "ze ",
+    ]
     for pronoun in pronouns:
         if normalized.startswith(pronoun):
             return normalized[len(pronoun) :].strip()
