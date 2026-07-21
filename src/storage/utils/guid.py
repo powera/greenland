@@ -31,6 +31,11 @@ def generate_guid(session: Session, pos_type: str, subtype: str) -> str:
 
     prefix = SUBTYPE_GUID_PREFIXES[pos_type][subtype]
 
+    # TODO: this only sees rows the query returns (the DB plus flushed session
+    # state). Lemmas that have been session.add()-ed but not yet flushed are
+    # invisible here, so two same-subtype lemmas added before a flush get the
+    # same GUID. Callers must flush after each add for now; fix by also folding
+    # in the session's pending new Lemma rows (session.new).
     # Find the highest existing GUID number for this subtype
     existing_guids = (
         session.query(Lemma.guid)

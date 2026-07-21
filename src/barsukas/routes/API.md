@@ -46,6 +46,26 @@ Base prefix: `/api`.
   - `lemma_text`/`definition_text`/`pos_type`/`pos_subtype` are required per entry; `difficulty_level` and `translations` are optional. Max 100 entries.
   - GUIDs are assigned automatically from the `pos_type`/`pos_subtype` prefix. An entry whose `(lemma_text, pos_type)` already exists is returned with `status: "already_exists"` and its existing GUID, and is not modified; created entries return `status: "created"`.
 
+- `POST /api/v1/words/add`
+  - Add a single English word to the database from **just the word** — the
+    intelligent counterpart to `/v1/lemmas/add`. **Makes an LLM call and costs
+    money.**
+  - Body: `{"word": "...", "model": "<model-name>", "dry_run": <bool, optional>}`.
+  - Queries the LLM for the word's senses, sizes how many senses to add by the
+    word's corpus frequency (rarer words get fewer senses), caps closed-class
+    words — anything other than noun/verb/adjective/adverb — to a single sense,
+    collapses senses the LLM over-split (same POS and identical translations),
+    and writes one lemma per surviving sense at difficulty `-1` with the
+    lt/es/fr/zh translations the definitions call returned.
+  - A word already accounted for — as a lemma, disambiguated lemma, English
+    derivative form, or alternate spelling (`variant_forms`) — returns
+    `status: "already_exists"` and nothing is written.
+  - Response `data`: `{word, status, frequency_rank, senses: [{guid, pos_type, pos_subtype, definition_text, sense_prominence, translations}], dropped_senses}`.
+    `status` is one of `created`, `already_exists`, `no_definitions`.
+    `metadata` carries `{model, dry_run, created}`.
+  - `dry_run: true` runs the whole pipeline (still making the LLM call) but
+    writes nothing; the response shows what would be created.
+
 - `POST /api/v1/lemma/<main_guid>/merge-synonym/<synonym_guid>`
   - Merge the synonym lemma into the main lemma. Requires the same `pos_type` and at least 3 matching non-empty translations after normalization.
   - Adds the synonym lemma text/translations as per-language `synonym` derivative forms on the main lemma, tombstones `synonym_guid`, repoints sentence/audio references, and deletes the synonym lemma row.

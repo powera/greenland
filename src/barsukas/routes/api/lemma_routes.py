@@ -997,7 +997,88 @@ def add_lemmas() -> ResponseReturnValue:
     )
 
 
+@bp.route("/v1/words/add", methods=["POST"])
+@mirrored_facade("/api/v1/words/add", "POST")
+def add_word_endpoint() -> ResponseReturnValue:
+    """Add a single English word to the database, from just the word.
+
+    Unlike ``/v1/lemmas/add`` (which takes fully specified lemma rows), this
+    endpoint takes a bare word and runs the intelligent pipeline: it queries the
+    LLM for the word's senses, sizes how many senses to add by the word's corpus
+    frequency, caps closed-class words to a single sense, collapses senses the
+    LLM over-split, and writes one lemma per surviving sense. **It makes an LLM
+    call and costs money.**
+
+    JSON body:
+      - ``word``: the English word to add (required).
+      - ``model``: LLM model name (required).
+      - ``dry_run``: if true, run the pipeline (including the LLM call) but write
+        nothing; the response shows what would be created. Optional, default
+        false.
+
+    Synchronous, one word per request. A word already accounted for -- as a
+    lemma, disambiguated lemma, English derivative form or alternate spelling --
+    is returned with ``status: "already_exists"`` and nothing is written.
+    """
+    from storage.backend.config import BackendType, DataSourceConfig
+    from words.add_word import add_word
+
+    model, error = _require_model()
+    if error is not None:
+        return error
+
+    payload = request.get_json(silent=True) or {}
+    word = payload.get("word")
+    if not isinstance(word, str) or not word.strip():
+        return _build_error_response("word is required and must be a non-empty string")
+
+    dry_run_raw = payload.get("dry_run", False)
+    if not isinstance(dry_run_raw, bool):
+        return _build_error_response("dry_run must be a boolean")
+
+    config = DataSourceConfig(
+        backend_type=BackendType.SQLITE,
+        sqlite_path=Config.DB_PATH,
+        model=model,
+        debug=Config.DEBUG,
+    )
+    result = add_word(
+        g.db,
+        word.strip(),
+        config=config,
+        model=model,
+        source=Config.OPERATION_LOG_SOURCE,
+        dry_run=dry_run_raw,
+    )
+
+    if result.status == "error":
+        return _build_error_response(result.error or "failed to add word")
+
+    data = {
+        "word": result.word,
+        "status": result.status,
+        "frequency_rank": _serialize_value(result.frequency_rank),
+        "senses": [
+            {
+                "guid": sense.guid,
+                "pos_type": sense.pos_type,
+                "pos_subtype": sense.pos_subtype,
+                "definition_text": sense.definition_text,
+                "sense_prominence": sense.sense_prominence,
+                "translations": sense.translations,
+            }
+            for sense in result.senses
+        ],
+        "dropped_senses": result.dropped_senses,
+    }
+    return _build_success_response(
+        data,
+        {"model": model, "dry_run": dry_run_raw, "created": len(result.senses)},
+    )
+
+
 @bp.route("/v1/lemma/<main_guid>/merge-synonym/<synonym_guid>", methods=["POST"])
+@mirrored_facade("/api/v1/lemma/<main_guid>/merge-synonym/<synonym_guid>", "POST")
 @mirrored_facade("/api/v1/lemma/<main_guid>/merge-synonym/<synonym_guid>", "POST")
 def merge_lemma_synonym(main_guid: str, synonym_guid: str) -> ResponseReturnValue:
     """Merge one lemma into another as per-language synonym forms.

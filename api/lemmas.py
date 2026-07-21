@@ -219,6 +219,26 @@ def add_lemmas(lemmas: List[AddLemmaInput]) -> Any:
     return post_json(f"{API_V1_PREFIX}/lemmas/add", {"lemmas": lemmas})
 
 
+@mirrored_route("/api/v1/words/add", "POST")
+def add_word(word: str, model: str, dry_run: bool = False) -> Any:
+    """Add a single English word to the database, from just the word.
+
+    Unlike :func:`add_lemmas` (which takes fully specified lemma rows), this runs
+    the intelligent pipeline: it queries the LLM for the word's senses, sizes how
+    many senses to add by corpus frequency, caps closed-class words to one sense,
+    collapses over-split senses, and writes one lemma per surviving sense.
+    **Makes an LLM call and costs money.**
+
+    A word already accounted for -- as a lemma, disambiguated lemma, English
+    derivative form or alternate spelling -- returns ``status`` ``"already_exists"``
+    and nothing is written. Pass ``dry_run=True`` to preview without writing.
+    """
+    return post_json(
+        f"{API_V1_PREFIX}/words/add",
+        {"word": word, "model": model, "dry_run": dry_run},
+    )
+
+
 @mirrored_route("/api/v1/lemma/<guid>", "GET")
 def get_lemma(guid: str) -> Any:
     """Basic lemma details."""
