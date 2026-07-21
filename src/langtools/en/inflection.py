@@ -171,13 +171,9 @@ def build_noun_forms(
     if singular.endswith("ch") and singular in HARD_CH_NOUNS:
         return {"singular": singular, "plural": singular + "s"}
 
-    # "-ff"/"-ffe" never go to "-ves" ("giraffe" -> "giraffes", "cliff" ->
-    # "cliffs"), but generate_regular_plural's -f/-fe rule would say otherwise.
-    if singular.endswith("ffe"):
-        return {"singular": singular, "plural": singular + "s"}
-    if singular.endswith("ff"):
-        return {"singular": singular, "plural": singular + "s"}
-
+    # The "-ff"/"-ffe" -> "-s" rule (giraffe -> giraffes, not girafves) lives in
+    # generate_regular_plural; the AMBIGUOUS_PLURAL_ENDINGS check above already
+    # let these through rather than deferring them to the LLM.
     return {"singular": singular, "plural": generate_regular_plural(singular)}
 
 
