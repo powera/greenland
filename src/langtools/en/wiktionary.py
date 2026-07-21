@@ -108,6 +108,11 @@ class EnglishParser:
             if "plural noun" in template_name:
                 number_type = NounNumberType.PLURALE_TANTUM
                 forms = {"plural": word}
+            elif self._is_uncountable_template(template_text):
+                # "{{en-noun|-}}" marks an uncountable noun ("diabetes",
+                # "information"): it has no plural, so none is generated.
+                # "~" means "countable and uncountable", which does.
+                number_type = NounNumberType.SINGULARE_TANTUM
             else:
                 # Extract plural from template
                 plural, alts = self._extract_plural_from_template(template_text, word)
@@ -119,11 +124,6 @@ class EnglishParser:
         # If no plural found, generate regular plural
         if "plural" not in forms and number_type == NounNumberType.REGULAR:
             forms["plural"] = generate_regular_plural(word)
-
-        # Check for uncountable marker
-        if raw_template and ("-" in raw_template or "~" in raw_template):
-            # May be uncountable, but we still store the regular plural
-            pass
 
         result = NounDeclension(
             word=word,
@@ -140,6 +140,20 @@ class EnglishParser:
             logger.warning(f"No noun forms extracted for '{word}'")
 
         return result, success
+
+    def _is_uncountable_template(self, template_text: str) -> bool:
+        """Whether the noun template marks the word as uncountable.
+
+        Wiktionary writes ``{{en-noun|-}}`` for a noun with no plural.  The
+        marker must be a positional parameter in its own right - a bare "-"
+        anywhere in the template would also match hyphenated plurals such as
+        ``{{en-noun|mother-in-law}}``.  ``~`` ("countable and uncountable")
+        deliberately does not count: those nouns do have a plural.
+        """
+        if re.search(r"\|pl(?:ural)?=\s*-\s*(?:\||\})", template_text):
+            return True
+        params = re.findall(r"\|([^|}]*)", template_text)
+        return any(param.strip() == "-" for param in params)
 
     def _extract_plural_from_template(
         self, template_text: str, word: str

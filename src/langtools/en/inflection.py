@@ -9,8 +9,9 @@ keyed per lemma GUID, and are passed in to the builders here as parameters.
 
 The only word lists kept are the handful of suppletive comparison paradigms
 (``IRREGULAR_COMPARISON``, ``IRREGULAR_ADVERB_COMPARISON``) which are short,
-closed and genuinely spelling-keyed, plus :data:`HARD_CH_NOUNS`, which encodes
-a pronunciation-driven spelling exception rather than a lexical fact.
+closed and genuinely spelling-keyed.  :data:`HARD_CH_NOUNS` encodes a
+pronunciation-driven spelling exception rather than a lexical fact, so it now
+lives in ``langtools.en.utils`` with the other spelling rules.
 
 Every public builder returns ``None`` when it is *not* confident, so the
 caller (``langtools.en.llm_forms``) can fall back to the LLM.  Producing
@@ -34,7 +35,9 @@ Nouns (``build_noun_forms``)
        guess between ``roofs``/``rooves`` or ``cactuses``/``cacti``.  ``-ss``,
        ``-ff``, ``-ffe``, ``-oo``, ``-io`` and ``-eo`` are exempt: their
        plurals really are regular.
-    5. Everything else takes the regular ``-s``/``-es``/``-ies`` rule.
+    5. Everything else takes the regular ``-s``/``-es``/``-ies`` rule, which
+       also covers the hard-``-ch`` ("stomach" -> "stomachs") and
+       ``-ff``/``-ffe`` ("giraffe" -> "giraffes") spelling exceptions.
 
 Adjectives (``build_adjective_forms``)
     1. Explicit ``comparative``/``superlative`` facts win outright; a lemma in
@@ -57,9 +60,10 @@ Adverbs (``build_adverb_forms``)
     ``more``/``most`` and everything else falls through.
 """
 
-from typing import Dict, Optional, Set, Tuple
+from typing import Dict, Optional, Tuple
 
 from langtools.en.utils import (
+    HARD_CH_NOUNS,
     generate_comparative,
     generate_regular_plural,
     generate_superlative,
@@ -77,17 +81,9 @@ GRADABILITY_NON_GRADABLE = "non_gradable"
 # Nouns
 # ---------------------------------------------------------------------------
 
-# Nouns ending in "-ch" pronounced /k/, which take a plain "-s" rather than
-# the sibilant "-es" ("stomach" -> "stomachs", not "stomaches").  This is a
-# pronunciation-driven spelling exception, not a lexical property.
-HARD_CH_NOUNS: Set[str] = {
-    "epoch",
-    "eunuch",
-    "loch",
-    "monarch",
-    "patriarch",
-    "stomach",
-}
+# HARD_CH_NOUNS ("stomach" -> "stomachs") is a spelling exception rather than
+# a lexical fact, so it lives with the spelling rules in langtools.en.utils and
+# is re-exported here for callers that expect it in this module.
 
 # Endings whose plural is not predictable from spelling.  Any lemma with one
 # of these endings and no stored "plural" grammar fact falls through to the
@@ -164,15 +160,10 @@ def build_noun_forms(
     ):
         return None
 
-    # "-ch" is only a sibilant when pronounced /tʃ/: "church" -> "churches" but
-    # "stomach" -> "stomachs".  Spelling cannot tell them apart, so the /k/
-    # cases are listed.
-    if singular.endswith("ch") and singular in HARD_CH_NOUNS:
-        return {"singular": singular, "plural": singular + "s"}
-
-    # The "-ff"/"-ffe" -> "-s" rule (giraffe -> giraffes, not girafves) lives in
-    # generate_regular_plural; the AMBIGUOUS_PLURAL_ENDINGS check above already
-    # let these through rather than deferring them to the LLM.
+    # Hard "-ch" ("stomach" -> "stomachs") and "-ff"/"-ffe" ("giraffe" ->
+    # "giraffes") are handled by generate_regular_plural itself; the
+    # AMBIGUOUS_PLURAL_ENDINGS check above already let these through rather
+    # than deferring them to the LLM.
     return {"singular": singular, "plural": generate_regular_plural(singular)}
 
 
