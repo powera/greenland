@@ -1,6 +1,6 @@
 """General-purpose lemma query functions."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Iterable, List, Optional, Set
 
 from sqlalchemy import case, func, or_
 from sqlalchemy.orm import Query, Session
@@ -203,3 +203,177 @@ def build_lemma_search_query(
             query = query.order_by(level_order, func.lower(Lemma.lemma_text))
 
     return query
+
+
+def _disambiguation_base(lemma_text: str) -> Optional[str]:
+    """Return the bare word behind a disambiguated lemma, if it is one.
+
+    "light (color)" -> "light"; "light" -> None.
+    """
+    paren_idx = lemma_text.find(" (")
+    return lemma_text[:paren_idx] if paren_idx > 0 else None
+
+
+def word_exists_in_english(
+    session: Session, word: str, *, include_exclusions: bool = False
+) -> bool:
+    """
+    Return whether the database already accounts for this English word, in any form.
+
+    This is the canonical "do we already have this lexeme?" check. The answer is
+    deliberately broader than the lemmas table -- a word counts as existing if it
+    appears as any of:
+
+      * a lemma ("gray")
+      * a disambiguated lemma whose base is this word -- a plain "light" is
+        covered by an existing "light (color)"
+      * an English derivative form ("grayer", "walked")
+      * an English variant form -- alternate spellings such as "grey" for
+        "gray", which live in ``variant_forms`` rather than as their own lemma
+
+    Callers that gate *imports* should pass ``include_exclusions=True`` to fold
+    in the word-exclusions list, so a word rejected once is not re-proposed.
+    Callers that measure *coverage* should leave it False: an excluded word is
+    genuinely absent from the dictionary, and counting it as present would
+    overstate coverage.
+
+    For more than a handful of words use ``filter_existing_english_words``,
+    which answers the same question for a whole batch in a few queries.
+
+    Args:
+        session: SQLAlchemy database session
+        word: English word to look for
+        include_exclusions: Also count words on the English exclusions list
+
+    Returns:
+        True if the word is already accounted for
+    """
+    from storage.models.imports import WordExclusion
+    from storage.models.schema import DerivativeForm
+    from storage.models.variant_form import VariantForm
+
+    normalized = word.strip().lower()
+    if not normalized:
+        return False
+
+    lemma_match = (
+        session.query(Lemma.id)
+        .filter(
+            or_(
+                func.lower(Lemma.lemma_text) == normalized,
+                func.lower(Lemma.lemma_text).startswith(normalized + " ("),
+            )
+        )
+        .first()
+    )
+    if lemma_match is not None:
+        return True
+
+    form_match = (
+        session.query(DerivativeForm.id)
+        .filter(
+            DerivativeForm.language_code == "en",
+            func.lower(DerivativeForm.derivative_form_text) == normalized,
+        )
+        .first()
+    )
+    if form_match is not None:
+        return True
+
+    variant_match = (
+        session.query(VariantForm.id)
+        .filter(
+            VariantForm.language_code == "en",
+            func.lower(VariantForm.variant_form_text) == normalized,
+        )
+        .first()
+    )
+    if variant_match is not None:
+        return True
+
+    if include_exclusions:
+        exclusion_match = (
+            session.query(WordExclusion.id)
+            .filter(
+                WordExclusion.language_code == "en",
+                func.lower(WordExclusion.excluded_word) == normalized,
+            )
+            .first()
+        )
+        if exclusion_match is not None:
+            return True
+
+    return False
+
+
+def filter_existing_english_words(
+    session: Session, words: Iterable[str], *, include_exclusions: bool = False
+) -> Set[str]:
+    """
+    Return which of ``words`` the database already accounts for.
+
+    The batch form of ``word_exists_in_english`` -- same definition of
+    "exists", answered for many words in a fixed number of queries rather than
+    one per word. Callers checking thousands of candidates (the frequency check,
+    wordlist coverage) should use this.
+
+    Only the given words are looked up, so cost scales with the batch rather
+    than with the size of the dictionary.
+
+    Args:
+        session: SQLAlchemy database session
+        words: English words to look for
+        include_exclusions: Also count words on the English exclusions list
+
+    Returns:
+        The subset of ``words``, lowercased, that already exist. Words absent
+        from the database do not appear.
+    """
+    from storage.models.imports import WordExclusion
+    from storage.models.schema import DerivativeForm
+    from storage.models.variant_form import VariantForm
+
+    wanted = {word.strip().lower() for word in words}
+    wanted.discard("")
+    if not wanted:
+        return set()
+
+    found: Set[str] = set()
+
+    # SQLite caps the number of variables per statement (999 by default), and
+    # these run over thousands of candidates, so the IN-lists are chunked.
+    chunk_size = 500
+    wanted_list: List[str] = sorted(wanted)
+
+    def _collect(column: Any, extra_filter: Any = None) -> None:
+        for start in range(0, len(wanted_list), chunk_size):
+            chunk = wanted_list[start : start + chunk_size]
+            query = session.query(column).filter(func.lower(column).in_(chunk))
+            if extra_filter is not None:
+                query = query.filter(extra_filter)
+            for (value,) in query.all():
+                found.add(value.strip().lower())
+
+    _collect(Lemma.lemma_text)
+    _collect(DerivativeForm.derivative_form_text, DerivativeForm.language_code == "en")
+    _collect(VariantForm.variant_form_text, VariantForm.language_code == "en")
+    if include_exclusions:
+        _collect(WordExclusion.excluded_word, WordExclusion.language_code == "en")
+
+    # Disambiguated lemmas: a bare "light" is covered by "light (color)". These
+    # cannot be matched by equality, so ask for the prefixed forms directly.
+    missing = wanted - found
+    if missing:
+        missing_list = sorted(missing)
+        for start in range(0, len(missing_list), chunk_size):
+            chunk = missing_list[start : start + chunk_size]
+            clauses = [
+                func.lower(Lemma.lemma_text).startswith(candidate + " (") for candidate in chunk
+            ]
+            rows = session.query(Lemma.lemma_text).filter(or_(*clauses)).all()
+            for (lemma_text,) in rows:
+                base = _disambiguation_base(lemma_text.strip().lower())
+                if base is not None and base in wanted:
+                    found.add(base)
+
+    return found

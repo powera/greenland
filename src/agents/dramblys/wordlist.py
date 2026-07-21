@@ -6,11 +6,10 @@ and checks coverage against the linguistics database.
 """
 
 import re
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, Iterable, List, Set
 
 from langtools.en.grammatical_words import ENGLISH_GRAMMATICAL_WORDS_WITH_CONTRACTIONS
-from storage.models.schema import DerivativeForm, Lemma
-from storage.models.variant_form import VariantForm
+from storage.queries.lemma import filter_existing_english_words
 
 
 def parse_wikitext_file(file_path: str) -> List[str]:
@@ -88,41 +87,23 @@ def get_grammatical_stopwords() -> Set[str]:
     return set(ENGLISH_GRAMMATICAL_WORDS_WITH_CONTRACTIONS)
 
 
-def get_existing_english_words(session: Any) -> Set[str]:
+def get_existing_english_words(session: Any, words: Iterable[str]) -> Set[str]:
     """
-    Get all English words currently in the database (lemmas + derivative forms
-    + alternate spellings).
+    Get which of ``words`` the database already has, in any English form.
+
+    Thin wrapper over the canonical check in storage.queries.lemma, kept because
+    callers here read better with a local name. Exclusions are not folded in:
+    this measures dictionary *coverage*, and a word we deliberately excluded is
+    genuinely not in the dictionary.
 
     Args:
         session: SQLAlchemy database session
+        words: Words to look up
 
     Returns:
-        Set of lowercased English words found in the database
+        The subset of ``words``, lowercased, that already exist
     """
-    existing_words: Set[str] = set()
-
-    # Get all lemma texts, including the base word without disambiguation suffix.
-    # E.g. "light (color)" adds both "light (color)" and "light".
-    lemmas = session.query(Lemma).all()
-    for lemma in lemmas:
-        lemma_lower = lemma.lemma_text.lower()
-        existing_words.add(lemma_lower)
-        paren_idx = lemma_lower.find(" (")
-        if paren_idx > 0:
-            existing_words.add(lemma_lower[:paren_idx])
-
-    # Get all English derivative forms
-    english_forms = session.query(DerivativeForm).filter(DerivativeForm.language_code == "en").all()
-    for form in english_forms:
-        existing_words.add(form.derivative_form_text.lower())
-
-    # Alternate spellings ("grey" for "gray"). Without these a wordlist offering
-    # the other spelling reads as a missing word and gets staged for import.
-    variant_forms = session.query(VariantForm).filter(VariantForm.language_code == "en").all()
-    for variant_form in variant_forms:
-        existing_words.add(variant_form.variant_form_text.lower())
-
-    return existing_words
+    return filter_existing_english_words(session, words)
 
 
 def check_wordlist_coverage(file_path: str, session: Any) -> Dict[str, Any]:
@@ -137,7 +118,7 @@ def check_wordlist_coverage(file_path: str, session: Any) -> Dict[str, Any]:
         Dictionary with coverage statistics and list of missing words
     """
     parsed_words = parse_wikitext_file(file_path)
-    existing_words = get_existing_english_words(session)
+    existing_words = get_existing_english_words(session, parsed_words)
     grammatical_stops = get_grammatical_stopwords()
 
     in_database: List[str] = []

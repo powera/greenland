@@ -83,10 +83,11 @@ def session(db_engine: Engine) -> Generator[Session, None, None]:
 
 def test_existing_words_include_variant_spellings(session: Session) -> None:
     """Variant spellings count as words the database already has."""
-    words = get_existing_english_words(session)
+    words = get_existing_english_words(session, ["gray", "grey", "greyer", "magenta"])
     assert "gray" in words
     assert "grey" in words
     assert "greyer" in words
+    assert "magenta" not in words
 
 
 def test_wordlist_coverage_treats_variant_as_present(session: Session, tmp_path: Path) -> None:
