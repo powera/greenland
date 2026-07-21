@@ -211,21 +211,7 @@ def get_sentences_with_full_sentenceword_data(
                     # Get translations for this lemma
                     lemma_translations: Dict[str, str] = {}
 
-                    # Check legacy columns first
-                    if sw.lemma.chinese_translation:
-                        lemma_translations["zh"] = sw.lemma.chinese_translation
-                    if sw.lemma.french_translation:
-                        lemma_translations["fr"] = sw.lemma.french_translation
-                    if sw.lemma.korean_translation:
-                        lemma_translations["ko"] = sw.lemma.korean_translation
-                    if sw.lemma.swahili_translation:
-                        lemma_translations["sw"] = sw.lemma.swahili_translation
-                    if sw.lemma.lithuanian_translation:
-                        lemma_translations["lt"] = sw.lemma.lithuanian_translation
-                    if sw.lemma.vietnamese_translation:
-                        lemma_translations["vi"] = sw.lemma.vietnamese_translation
-
-                    # Add from lemma_translations table
+                    # From the lemma_translations table
                     for lt in sw.lemma.translations:
                         if lt.language_code not in lemma_translations:
                             lemma_translations[lt.language_code] = lt.translation

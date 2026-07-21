@@ -15,63 +15,76 @@ from wordfreq.translation.constants import VALID_POS_TYPES
 logger = logging.getLogger(__name__)
 
 
+# Base (dictionary) form per part of speech, for English. The definitions
+# prompt analyses one English word per definition, so the form follows from the
+# POS -- there is nothing to ask the LLM about. Language-tagged ("en_") values
+# only; the untagged generic forms (verb/infinitive, noun/singular, ...) are
+# deprecated because they carry no language code.
+#
+# The en_ members are added by _auto_extend_grammatical_form() at import time
+# and are not real class attributes, so they must be looked up by name via
+# GrammaticalForm[...] rather than GrammaticalForm.NAME.
+EN_BASE_FORM_BY_POS: Dict[str, str] = {
+    "verb": GrammaticalForm["VERB_EN_INFINITIVE"].value,
+    "noun": GrammaticalForm["NOUN_EN_SINGULAR"].value,
+    "adjective": GrammaticalForm["ADJ_EN_POSITIVE"].value,
+    "adverb": GrammaticalForm["ADVERB_EN_POSITIVE"].value,
+    "pronoun": GrammaticalForm["PRONOUN_EN_SUBJECTIVE"].value,
+    "numeral": GrammaticalForm["NUMERAL_EN_CARDINAL"].value,
+    "article": GrammaticalForm["ARTICLE_EN_BASE"].value,
+}
+
+# Inflected English forms used by the suffix heuristics below.
+_EN_INFLECTED = {
+    name: GrammaticalForm[name].value
+    for name in (
+        "VERB_EN_PRESENT_PARTICIPLE",
+        "VERB_EN_PAST_PARTICIPLE",
+        "NOUN_EN_PLURAL",
+        "ADJ_EN_COMPARATIVE",
+        "ADJ_EN_SUPERLATIVE",
+        "ADVERB_EN_COMPARATIVE",
+        "ADVERB_EN_SUPERLATIVE",
+    )
+}
+
+
 def determine_default_grammatical_form(word_text: str, pos_type: str, lemma_text: str) -> str:
     """
-    Determine a default grammatical form based on word, POS, and lemma.
+    Determine the English grammatical form for a word given its POS and lemma.
 
-    This is a heuristic fallback when the LLM doesn't provide grammatical_form.
+    ``query_definitions`` analyses English words and ``process_word`` records a
+    single form per definition, so this is derived rather than asked for. When
+    the word is its own lemma the form is the POS's base form; otherwise a few
+    suffix heuristics cover the common inflections.
     """
     pos_lower = pos_type.lower()
 
     if word_text == lemma_text:
-        # Word matches lemma, likely base form
-        if pos_lower == "verb":
-            return GrammaticalForm.VERB_INFINITIVE.value
-        elif pos_lower == "noun":
-            return GrammaticalForm.NOUN_SINGULAR.value
-        elif pos_lower == "adjective":
-            return GrammaticalForm.ADJECTIVE_POSITIVE.value
-        elif pos_lower == "adverb":
-            return GrammaticalForm.ADVERB_POSITIVE.value
-        elif pos_lower == "preposition":
-            return GrammaticalForm.PREPOSITION.value
-        elif pos_lower == "conjunction":
-            return GrammaticalForm.CONJUNCTION.value
-        elif pos_lower == "interjection":
-            return GrammaticalForm.INTERJECTION.value
-        elif pos_lower == "determiner":
-            return GrammaticalForm.DETERMINER.value
-        elif pos_lower == "article":
-            return GrammaticalForm.ARTICLE.value
-        else:
-            return GrammaticalForm.BASE_FORM.value
+        return EN_BASE_FORM_BY_POS.get(pos_lower, GrammaticalForm.OTHER.value)
 
     # Basic heuristics for English inflected forms
     if pos_lower == "verb":
         if word_text.endswith("ing"):
-            return GrammaticalForm.VERB_PRESENT_PARTICIPLE.value  # Default to participle
+            return _EN_INFLECTED["VERB_EN_PRESENT_PARTICIPLE"]
         elif word_text.endswith("ed"):
-            return GrammaticalForm.VERB_PAST_PARTICIPLE.value
-        elif word_text.endswith("s"):
-            return GrammaticalForm.OTHER.value
+            return _EN_INFLECTED["VERB_EN_PAST_PARTICIPLE"]
 
     elif pos_lower == "noun":
         if word_text.endswith("s") and not lemma_text.endswith("s"):
-            return GrammaticalForm.NOUN_PLURAL.value
-        elif word_text.endswith("'s"):
-            return GrammaticalForm.NOUN_POSSESSIVE_SINGULAR.value
+            return _EN_INFLECTED["NOUN_EN_PLURAL"]
 
     elif pos_lower == "adjective":
         if word_text.endswith("er"):
-            return GrammaticalForm.ADJECTIVE_COMPARATIVE.value
+            return _EN_INFLECTED["ADJ_EN_COMPARATIVE"]
         elif word_text.endswith("est"):
-            return GrammaticalForm.ADJECTIVE_SUPERLATIVE.value
+            return _EN_INFLECTED["ADJ_EN_SUPERLATIVE"]
 
     elif pos_lower == "adverb":
         if word_text.endswith("er"):
-            return GrammaticalForm.ADVERB_COMPARATIVE.value
+            return _EN_INFLECTED["ADVERB_EN_COMPARATIVE"]
         elif word_text.endswith("est"):
-            return GrammaticalForm.ADVERB_SUPERLATIVE.value
+            return _EN_INFLECTED["ADVERB_EN_SUPERLATIVE"]
 
     return GrammaticalForm.OTHER.value
 
@@ -186,45 +199,36 @@ def process_word(
             if not is_base_form_flag:
                 is_base_form_flag = is_likely_base_form(word, def_data.get("lemma", word), pos_type)
 
-            # Create Translation objects for each language
-            chinese_trans = None
-            chinese_text = def_data.get("chinese_translation")
-            if chinese_text and isinstance(chinese_text, str):
-                chinese_trans = Translation(text=chinese_text)
+            # Create Translation objects for each language the definitions
+            # prompt returns: lt/es/fr/zh. The prompt previously also asked for
+            # Korean, Swahili and Vietnamese; those dated to an older target
+            # language set and are no longer requested.
+            lithuanian_trans = None
+            lithuanian_text = def_data.get("lithuanian_translation")
+            if lithuanian_text and isinstance(lithuanian_text, str):
+                lithuanian_trans = Translation(text=lithuanian_text)
 
-            korean_trans = None
-            korean_text = def_data.get("korean_translation")
-            if korean_text and isinstance(korean_text, str):
-                korean_trans = Translation(text=korean_text)
+            spanish_trans = None
+            spanish_text = def_data.get("spanish_translation")
+            if spanish_text and isinstance(spanish_text, str):
+                spanish_trans = Translation(text=spanish_text)
 
             french_trans = None
             french_text = def_data.get("french_translation")
             if french_text and isinstance(french_text, str):
                 french_trans = Translation(text=french_text)
 
-            swahili_trans = None
-            swahili_text = def_data.get("swahili_translation")
-            if swahili_text and isinstance(swahili_text, str):
-                swahili_trans = Translation(text=swahili_text)
-
-            vietnamese_trans = None
-            vietnamese_text = def_data.get("vietnamese_translation")
-            if vietnamese_text and isinstance(vietnamese_text, str):
-                vietnamese_trans = Translation(text=vietnamese_text)
-
-            lithuanian_trans = None
-            lithuanian_text = def_data.get("lithuanian_translation")
-            if lithuanian_text and isinstance(lithuanian_text, str):
-                lithuanian_trans = Translation(text=lithuanian_text)
+            chinese_trans = None
+            chinese_text = def_data.get("chinese_translation")
+            if chinese_text and isinstance(chinese_text, str):
+                chinese_trans = Translation(text=chinese_text)
 
             # Create TranslationSet with Translation objects
             translations_set = TranslationSet(
-                chinese=chinese_trans,
-                korean=korean_trans,
-                french=french_trans,
-                swahili=swahili_trans,
-                vietnamese=vietnamese_trans,
                 lithuanian=lithuanian_trans,
+                spanish=spanish_trans,
+                french=french_trans,
+                chinese=chinese_trans,
             )
 
             # Create complete word entry (WordToken + Lemma + DerivativeForm)

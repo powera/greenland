@@ -17,23 +17,24 @@ class TestLinkAudioToLemma:
         result = link_audio_to_lemma(seeded_session, "V01_001", "anything", "en")
         assert result == 1
 
-    def test_falls_back_to_column_translation_match(self, db_session: Session) -> None:
-        """When GUID doesn't match, fall back to column-based text lookup."""
+    def test_falls_back_to_translation_match(self, db_session: Session) -> None:
+        """When GUID doesn't match, fall back to translation text lookup."""
         lemma = Lemma(
             lemma_text="dog",
             definition_text="a pet",
             pos_type="noun",
-            chinese_translation="狗",
             confidence=0.0,
         )
         db_session.add(lemma)
+        db_session.flush()
+        db_session.add(LemmaTranslation(lemma_id=lemma.id, language_code="zh", translation="狗"))
         db_session.flush()
 
         result = link_audio_to_lemma(db_session, "NONEXISTENT", "狗", "zh")
         assert result == lemma.id
 
     def test_falls_back_to_table_translation_match(self, db_session: Session) -> None:
-        """Table-based languages (es, de, pt) use LemmaTranslation table."""
+        """Every language resolves through the LemmaTranslation table."""
         lemma = Lemma(
             lemma_text="cat",
             definition_text="a pet",
@@ -62,16 +63,17 @@ class TestLinkAudioToLemma:
 class TestValidateAudioTranslation:
     """Tests for validate_audio_translation."""
 
-    def test_valid_column_translation(self, db_session: Session) -> None:
+    def test_valid_translation(self, db_session: Session) -> None:
         lemma = Lemma(
             lemma_text="water",
             definition_text="H2O",
             pos_type="noun",
             guid="N99_001",
-            french_translation="eau",
             confidence=0.0,
         )
         db_session.add(lemma)
+        db_session.flush()
+        db_session.add(LemmaTranslation(lemma_id=lemma.id, language_code="fr", translation="eau"))
         db_session.flush()
 
         result = validate_audio_translation(db_session, "N99_001", "eau", "fr")
@@ -86,10 +88,11 @@ class TestValidateAudioTranslation:
             definition_text="H2O",
             pos_type="noun",
             guid="N99_002",
-            french_translation="eau",
             confidence=0.0,
         )
         db_session.add(lemma)
+        db_session.flush()
+        db_session.add(LemmaTranslation(lemma_id=lemma.id, language_code="fr", translation="eau"))
         db_session.flush()
 
         result = validate_audio_translation(db_session, "N99_002", "wrong", "fr")

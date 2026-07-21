@@ -44,8 +44,9 @@ For translations:
   - Include articles (la table) where appropriate, and provide verbs in the infinitive (aller)
 - For Lithuanian:
   - Use the nominative singular form for nouns and adjectives
-- For Vietnamese:
-  - Include all diacritics and tone marks
+- For Spanish:
+  - Include articles (la mesa) where appropriate, and provide verbs in the infinitive (ir)
+  - Use the masculine singular form for adjectives
 
 For phonetic spellings:
 - Provide the pronunciation for the specific definition of the word.
@@ -69,7 +70,13 @@ In summary: for each definition, provide in order:
 7. Whether this is a special case (foreign word, part of name, etc.)
 8. At least one example sentence
 9. Any additional notes about the definition
-10. Translations in all supported languages (Chinese, French, Korean, Swahili, Lithuanian, Vietnamese)
-11. A confidence score (0-1) - the most common definition should have confidence of 1, less-common or domain specific definitions should have confidence around 0.9.
+10. Translations in all supported languages (Lithuanian, Spanish, French, Chinese)
+11. How common this sense is: most_common, somewhat_common, uncommon, rare, or very_rare.
+    Rate each sense on its own, against how often the word carries that meaning in
+    general modern English. This is not a ranking within your answer: a word may have
+    two most_common senses, or none. Include uncommon and rare senses, but label them
+    honestly rather than inflating them.
+12. A confidence score (0-1) - how confident you are that this definition is correct
+    and well-formed. This is about your certainty, not about how common the sense is.
 
 Respond only with a structured JSON object following the schema provided.

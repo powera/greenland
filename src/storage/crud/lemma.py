@@ -3,10 +3,12 @@
 import json
 from typing import Any, Dict, List, Optional
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from storage.crud.operation_log import log_translation_change
 from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
+from storage.translation_helpers import set_translation
 from storage.utils.guid import generate_guid
 
 
@@ -21,6 +23,7 @@ def add_lemma(
     tags: Optional[List[str]] = None,
     chinese_translation: Optional[str] = None,
     french_translation: Optional[str] = None,
+    spanish_translation: Optional[str] = None,
     korean_translation: Optional[str] = None,
     swahili_translation: Optional[str] = None,
     lithuanian_translation: Optional[str] = None,
@@ -66,12 +69,6 @@ def add_lemma(
         difficulty_level=difficulty_level,
         frequency_rank=frequency_rank,
         tags=tags_json,
-        chinese_translation=chinese_translation,
-        french_translation=french_translation,
-        korean_translation=korean_translation,
-        swahili_translation=swahili_translation,
-        lithuanian_translation=lithuanian_translation,
-        vietnamese_translation=vietnamese_translation,
         confidence=confidence,
         verified=verified,
         notes=notes,
@@ -79,18 +76,24 @@ def add_lemma(
     session.add(lemma)
     session.flush()
 
-    # Log translation additions
+    # Translations go to the LemmaTranslation table via set_translation. The
+    # legacy Lemma.<language>_translation columns are gone -- that table is the
+    # only home for translations.
+    # TODO: replace the per-language keyword arguments with a single
+    # translations dict keyed by language code.
     translation_map = {
-        "zh": chinese_translation,
+        "lt": lithuanian_translation,
+        "es": spanish_translation,
         "fr": french_translation,
+        "zh": chinese_translation,
         "ko": korean_translation,
         "sw": swahili_translation,
-        "lt": lithuanian_translation,
         "vi": vietnamese_translation,
     }
 
     for lang_code, translation in translation_map.items():
         if translation:
+            set_translation(session, lemma, lang_code, translation)
             log_translation_change(
                 session=session,
                 source=source or "lemma-crud/add",
@@ -116,6 +119,7 @@ def update_lemma(
     tags: Optional[List[str]] = None,
     chinese_translation: Optional[str] = None,
     french_translation: Optional[str] = None,
+    spanish_translation: Optional[str] = None,
     korean_translation: Optional[str] = None,
     swahili_translation: Optional[str] = None,
     lithuanian_translation: Optional[str] = None,
@@ -137,22 +141,25 @@ def update_lemma(
     if not lemma:
         return False
 
-    # Map of translation parameters to language codes
+    # TODO: replace the per-language keyword arguments on add_lemma/update_lemma
+    # with a single translations dict keyed by language code, so adding a
+    # language does not mean touching every signature.
     translation_updates = {
-        "zh": ("chinese_translation", chinese_translation),
-        "fr": ("french_translation", french_translation),
-        "ko": ("korean_translation", korean_translation),
-        "sw": ("swahili_translation", swahili_translation),
-        "lt": ("lithuanian_translation", lithuanian_translation),
-        "vi": ("vietnamese_translation", vietnamese_translation),
+        "lt": lithuanian_translation,
+        "es": spanish_translation,
+        "fr": french_translation,
+        "zh": chinese_translation,
+        "ko": korean_translation,
+        "sw": swahili_translation,
+        "vi": vietnamese_translation,
     }
 
-    # Track translation changes for logging
-    for lang_code, (field_name, new_value) in translation_updates.items():
+    # Translations live in LemmaTranslation; set_translation returns the
+    # previous value so the change can still be logged.
+    for lang_code, new_value in translation_updates.items():
         if new_value is not None:
-            old_value = getattr(lemma, field_name, None)
+            old_value, _ = set_translation(session, lemma, lang_code, new_value)
             if old_value != new_value:
-                # Log the translation change
                 log_translation_change(
                     session=session,
                     source=source or "lemma-crud/update",
@@ -177,18 +184,7 @@ def update_lemma(
         lemma.frequency_rank = frequency_rank
     if tags is not None:
         lemma.tags = json.dumps(tags)
-    if chinese_translation is not None:
-        lemma.chinese_translation = chinese_translation
-    if french_translation is not None:
-        lemma.french_translation = french_translation
-    if korean_translation is not None:
-        lemma.korean_translation = korean_translation
-    if swahili_translation is not None:
-        lemma.swahili_translation = swahili_translation
-    if lithuanian_translation is not None:
-        lemma.lithuanian_translation = lithuanian_translation
-    if vietnamese_translation is not None:
-        lemma.vietnamese_translation = vietnamese_translation
+    # Translations were written to LemmaTranslation above.
     if confidence is not None:
         lemma.confidence = confidence
     if verified is not None:
@@ -227,6 +223,19 @@ def get_lemmas_without_subtypes(session: Session, limit: int = 100) -> List[Lemm
     return result
 
 
+def _has_translation_clause(language_code: str) -> Any:
+    """Return a filter clause matching lemmas that have a translation in ``language_code``."""
+    return (
+        select(LemmaTranslation.id)
+        .where(
+            LemmaTranslation.lemma_id == Lemma.id,
+            LemmaTranslation.language_code == language_code,
+            LemmaTranslation.translation != "",
+        )
+        .exists()
+    )
+
+
 def get_all_subtypes(session: Session, lang: Optional[str] = None) -> List[str]:
     """Get all pos_subtypes that have lemmas with GUIDs."""
     query = (
@@ -236,7 +245,7 @@ def get_all_subtypes(session: Session, lang: Optional[str] = None) -> List[str]:
     )
 
     if lang == "chinese":
-        query = query.filter(Lemma.chinese_translation != None)
+        query = query.filter(_has_translation_clause("zh"))
 
     subtypes = query.distinct().all()
     return [subtype[0] for subtype in subtypes if subtype[0]]
@@ -248,7 +257,7 @@ def get_lemmas_by_subtype(
     """Get all lemmas for a specific subtype, ordered by GUID."""
     query = session.query(Lemma).filter(Lemma.pos_subtype == pos_subtype).filter(Lemma.guid != None)
     if lang == "chinese":
-        query = query.filter(Lemma.chinese_translation != None)
+        query = query.filter(_has_translation_clause("zh"))
 
     result: list[Lemma] = query.order_by(Lemma.guid).all()
     return result

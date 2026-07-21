@@ -61,6 +61,7 @@ from storage.database import (
     update_lemma_translation,
 )
 from storage.models.schema import DerivativeForm, Lemma, WordToken
+from storage.translation_helpers import has_translation_clause
 
 english_alternative_map = {
     "bicycle": ["bike"],
@@ -313,7 +314,7 @@ def find_or_create_lemma(
     existing_lemma = (
         session.query(Lemma)
         .filter(Lemma.lemma_text == clean_english)
-        .filter(Lemma.lithuanian_translation == lithuanian_word)
+        .filter(has_translation_clause("lt", lithuanian_word))
         .first()
     )
 
@@ -582,9 +583,7 @@ Examples:
         print(f"\nDatabase statistics after migration:")
         lemmas_with_subtypes = session.query(Lemma).filter(Lemma.pos_subtype != None).count()
         lemmas_with_guids = session.query(Lemma).filter(Lemma.guid != None).count()
-        lemmas_with_lithuanian = (
-            session.query(Lemma).filter(Lemma.lithuanian_translation != None).count()
-        )
+        lemmas_with_lithuanian = session.query(Lemma).filter(has_translation_clause("lt")).count()
         lemmas_with_difficulty = session.query(Lemma).filter(Lemma.difficulty_level != None).count()
         english_derivative_forms = (
             session.query(DerivativeForm).filter(DerivativeForm.language_code == "en").count()

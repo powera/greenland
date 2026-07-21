@@ -22,6 +22,7 @@ from util.logging_config import get_logger
 from agents.dramblys.synonym_screening import has_active_strong_synonym_candidate
 from storage.backend.config import DataSourceConfig
 from storage.models.imports import PendingImport, PendingImportSynonymCandidate, WordExclusion
+from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD
 from wordfreq.translation.client import LinguisticClient
 
 logger = get_logger(__name__)
@@ -507,9 +508,13 @@ def stage_missing_words_for_import(
                 pos_type = definition_data.get("pos", None)
                 pos_subtype = definition_data.get("pos_subtype", None)
 
-                # Get translation for disambiguation
-                # The schema uses {language}_translation fields, not a translations dict
-                translation_key = f"{target_language}_translation"
+                # Get translation for disambiguation. The schema keys are LLM
+                # field names ("lithuanian_translation"), not language codes, so
+                # map through LANG_CODE_TO_LLM_FIELD rather than building
+                # f"{target_language}_translation" -- that produced
+                # "lt_translation", which never matched, so the disambiguation
+                # translation was always empty.
+                translation_key = LANG_CODE_TO_LLM_FIELD[target_language]
                 translation = definition_data.get(translation_key, "")
 
                 if not definition_text:

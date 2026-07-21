@@ -122,13 +122,7 @@ def build_lemma_search_query(
             Lemma.lemma_text.ilike(f"%{search}%"),
             Lemma.definition_text.ilike(f"%{search}%"),
             Lemma.disambiguation.ilike(f"%{search}%"),
-            # Search in legacy translation columns
-            Lemma.chinese_translation.ilike(f"%{search}%"),
-            Lemma.french_translation.ilike(f"%{search}%"),
-            Lemma.korean_translation.ilike(f"%{search}%"),
-            Lemma.swahili_translation.ilike(f"%{search}%"),
-            Lemma.lithuanian_translation.ilike(f"%{search}%"),
-            Lemma.vietnamese_translation.ilike(f"%{search}%"),
+            # Translations are matched via the LemmaTranslation subquery below.
         ]
 
         # Also search in LemmaTranslation table
@@ -170,13 +164,15 @@ def build_lemma_search_query(
                 func.lower(Lemma.disambiguation).contains(search_lower),
                 5,
             ),  # Contains in disambiguation
-            # Translation matches
-            (func.lower(Lemma.lithuanian_translation).contains(search_lower), 6),
-            (func.lower(Lemma.chinese_translation).contains(search_lower), 6),
-            (func.lower(Lemma.french_translation).contains(search_lower), 6),
-            (func.lower(Lemma.korean_translation).contains(search_lower), 6),
-            (func.lower(Lemma.swahili_translation).contains(search_lower), 6),
-            (func.lower(Lemma.vietnamese_translation).contains(search_lower), 6),
+            # Translation matches, in any language
+            (
+                Lemma.id.in_(
+                    session.query(LemmaTranslation.lemma_id).filter(
+                        func.lower(LemmaTranslation.translation).contains(search_lower)
+                    )
+                ),
+                6,
+            ),
             else_=7,
         )
         if display_translation_joined:

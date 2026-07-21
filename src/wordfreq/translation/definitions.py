@@ -9,10 +9,26 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from storage import database as linguistic_db
-from storage.models.enums import GrammaticalForm
 from wordfreq.translation.constants import VALID_POS_TYPES
 
 logger = logging.getLogger(__name__)
+
+# Language codes whose "<language>_translation" fields the definitions schema
+# below requests. Callers that pick a translation field by language code should
+# check against this so an unsupported language fails loudly instead of
+# silently yielding no translation.
+DEFINITIONS_PROMPT_LANGUAGES: Tuple[str, ...] = ("lt", "es", "fr", "zh")
+
+# How common a sense is, most to least. A word's senses are rated
+# independently, so "arrive" can have two "most_common" senses; this is a
+# judgement about the sense, not a ranking within the response.
+SENSE_FREQUENCIES: Tuple[str, ...] = (
+    "most_common",
+    "somewhat_common",
+    "uncommon",
+    "rare",
+    "very_rare",
+)
 
 
 def query_definitions(
@@ -37,9 +53,6 @@ def query_definitions(
     if not word or not isinstance(word, str):
         logger.error("Invalid word parameter provided")
         return [], False
-
-    # Get valid grammatical forms for the schema
-    valid_grammatical_forms = [form.value for form in GrammaticalForm]
 
     schema = Schema(
         name="WordDefinitions",
@@ -68,11 +81,14 @@ def query_definitions(
                         "lemma": SchemaProperty(
                             "string", "The base form (lemma) for this definition"
                         ),
-                        "grammatical_form": SchemaProperty(
-                            "string",
-                            "The specific grammatical form (e.g., verb/infinitive, noun/plural)",
-                            enum=valid_grammatical_forms,
-                        ),
+                        # No grammatical_form property: this prompt analyses one
+                        # English word per definition and process_word records a
+                        # single form, so the form follows from pos_type and is
+                        # derived by determine_default_grammatical_form. Listing
+                        # the enum here meant sending all 1238 GrammaticalForm
+                        # values -- every language's full conjugation tables,
+                        # ~28.5k characters, roughly two thirds of the prompt --
+                        # to ask about one English word.
                         "is_base_form": SchemaProperty(
                             "boolean", "Whether this is the base form (infinitive, singular, etc.)"
                         ),
@@ -95,23 +111,31 @@ def query_definitions(
                             },
                         ),
                         "notes": SchemaProperty("string", "Additional notes about this form"),
-                        "chinese_translation": SchemaProperty(
-                            "string", "The Chinese translation of this form"
+                        # Translations are limited to the current target
+                        # languages (lt/es/fr/zh). The prompt previously asked
+                        # for Korean, Swahili and Vietnamese as well; those
+                        # dated to an older target set, were never stored, and
+                        # only inflated the prompt. Callers that build a field
+                        # name as f"{language}_translation" (dramblys
+                        # --target-language, client.get_translation_for_form)
+                        # can only request one of these four.
+                        "lithuanian_translation": SchemaProperty(
+                            "string", "The Lithuanian translation of this form"
                         ),
-                        "korean_translation": SchemaProperty(
-                            "string", "The Korean translation of this form"
+                        "spanish_translation": SchemaProperty(
+                            "string", "The Spanish translation of this form"
                         ),
                         "french_translation": SchemaProperty(
                             "string", "The French translation of this form"
                         ),
-                        "swahili_translation": SchemaProperty(
-                            "string", "The Swahili translation of this form"
+                        "chinese_translation": SchemaProperty(
+                            "string", "The Chinese translation of this form"
                         ),
-                        "vietnamese_translation": SchemaProperty(
-                            "string", "The Vietnamese translation of this form"
-                        ),
-                        "lithuanian_translation": SchemaProperty(
-                            "string", "The Lithuanian translation of this form"
+                        "sense_frequency": SchemaProperty(
+                            "string",
+                            "How common this sense is for this word in general "
+                            "modern English, independent of the other senses",
+                            enum=list(SENSE_FREQUENCIES),
                         ),
                         "confidence": SchemaProperty("number", "Confidence score from 0-1"),
                     },
