@@ -17,10 +17,12 @@ from sqlalchemy.exc import OperationalError
 
 import constants
 from agents.common.common_args import get_data_source_config
+from langtools.wiktionary import WIKTIONARY_TO_TASK_MAPPINGS, get_wiktionary_forms
 from storage import database as linguistic_db
 from storage.backend.config import DataSourceConfig
 from storage.connection_pool import get_session
 from storage.models.enums import GrammaticalForm
+from storage.translation_helpers import get_translation
 from wordfreq.translation.client import LinguisticClient
 
 # Retry settings for transient SQLite errors (e.g., database locked)
@@ -611,6 +613,144 @@ def process_lemma_forms(
     except Exception as e:
         session.rollback()
         logger.error(f"Error processing lemma ID {lemma_id}: {e}", exc_info=True)
+        return False
+
+
+def process_lemma_forms_wiktionary(
+    lemma_id: int,
+    data_config: DataSourceConfig,
+    form_config: FormGenerationConfig,
+) -> bool:
+    """
+    Process and store forms for a single lemma using Wiktionary.
+
+    This is the Wiktionary equivalent of :func:`process_lemma_forms`; it sources
+    forms from the shared :func:`langtools.wiktionary.get_wiktionary_forms`
+    dispatcher instead of an LLM client.
+
+    Args:
+        lemma_id: ID of the lemma to process
+        data_config: DataSourceConfig with database configuration
+        form_config: FormGenerationConfig with language and form settings
+
+    Returns:
+        True if any form was stored, False otherwise
+    """
+    session = get_session(data_config)
+
+    try:
+        lemma = (
+            session.query(linguistic_db.Lemma).filter(linguistic_db.Lemma.id == lemma_id).first()
+        )
+
+        if not lemma:
+            logger.error(f"Lemma ID {lemma_id} not found")
+            return False
+
+        # Determine the word to look up
+        if form_config.language_code == "en":
+            # For English, use the lemma text directly
+            word: str = lemma.lemma_text
+        else:
+            # For other languages, get the translation
+            translated_word = get_translation(session, lemma, form_config.language_code)
+            if not translated_word:
+                logger.warning(
+                    f"No {form_config.language_code} translation for lemma ID {lemma_id}"
+                )
+                return False
+            word = translated_word
+
+        # Check if forms already exist
+        existing_forms = (
+            session.query(linguistic_db.DerivativeForm)
+            .filter(
+                linguistic_db.DerivativeForm.lemma_id == lemma_id,
+                linguistic_db.DerivativeForm.language_code == form_config.language_code,
+            )
+            .all()
+        )
+
+        existing_grammatical_forms = {f.grammatical_form for f in existing_forms}
+        expected_grammatical_forms = {g.value for g in form_config.form_mapping.values()}
+        existing_count = len(existing_grammatical_forms & expected_grammatical_forms)
+
+        if existing_count >= form_config.min_forms_threshold:
+            logger.info(
+                f"Lemma ID {lemma_id} already has {existing_count} "
+                f"{form_config.language_name} forms, skipping"
+            )
+            return True
+
+        # Get forms from Wiktionary
+        wiktionary_forms, success = get_wiktionary_forms(
+            word, form_config.language_code, form_config.pos_type
+        )
+
+        if not success or not wiktionary_forms:
+            logger.warning(f"No Wiktionary forms found for '{word}' (lemma ID {lemma_id})")
+            return False
+
+        # Get the mapping from Wiktionary keys to task keys
+        wiktionary_to_task = WIKTIONARY_TO_TASK_MAPPINGS.get(form_config.language_code, {}).get(
+            form_config.pos_type, {}
+        )
+
+        # Store each form
+        stored = 0
+        skipped = 0
+
+        for wiktionary_key, form_text in wiktionary_forms.items():
+            if not form_text or not form_text.strip():
+                logger.debug(f"Skipping empty form: {wiktionary_key}")
+                continue
+
+            # Map Wiktionary key to task key, then look up in form_mapping
+            task_key = wiktionary_to_task.get(wiktionary_key, wiktionary_key)
+            if task_key not in form_config.form_mapping:
+                logger.debug(f"Form key '{task_key}' not in form mapping, skipping")
+                continue
+
+            grammatical_form_enum = form_config.form_mapping[task_key]
+            grammatical_form_value = grammatical_form_enum.value
+            is_base = task_key == form_config.base_form_identifier
+
+            # Check if this specific form already exists
+            if grammatical_form_value in existing_grammatical_forms:
+                logger.debug(
+                    f"Form '{wiktionary_key}' already exists for lemma ID {lemma_id}, skipping"
+                )
+                skipped += 1
+                continue
+
+            # Get or create word token
+            word_token = linguistic_db.add_word_token(session, form_text, form_config.language_code)
+
+            # Create derivative form
+            session.add(
+                linguistic_db.DerivativeForm(
+                    lemma_id=lemma_id,
+                    derivative_form_text=form_text,
+                    word_token_id=word_token.id,
+                    language_code=form_config.language_code,
+                    grammatical_form=grammatical_form_value,
+                    is_base_form=is_base,
+                    verified=False,
+                    notes="Generated from Wiktionary",
+                )
+            )
+            stored += 1
+
+        session.commit()
+        logger.info(
+            f"Added {stored} Wiktionary forms for lemma ID {lemma_id} "
+            f"('{word}', {form_config.language_code})"
+        )
+        return stored > 0
+
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Error processing lemma ID {lemma_id} with Wiktionary: {e}", exc_info=True)
         return False
 
 

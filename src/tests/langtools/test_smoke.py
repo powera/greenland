@@ -417,5 +417,69 @@ class TestSharedModules(unittest.TestCase):
             self.fail(f"Failed to import langtools.form_patterns: {e}")
 
 
+class TestDispatchers(unittest.TestCase):
+    """Test the cross-language dispatchers (inflection, conjugation, wiktionary).
+
+    These dispatchers resolve per-language modules/classes by *string* name, so
+    a renamed parser class or builder would fail silently at runtime.  These
+    tests pin the registries to the real modules to catch that.
+    """
+
+    def test_wiktionary_parser_registry_resolves(self) -> None:
+        """Every registered Wiktionary parser must expose the standard methods."""
+        from langtools.wiktionary import _PARSER_SPECS, _POS_TO_METHOD
+
+        errors = {}
+        for lang_code, (module_path, class_name) in _PARSER_SPECS.items():
+            with self.subTest(lang=lang_code):
+                module, error = import_module_safely(module_path)
+                if error:
+                    errors[lang_code] = error
+                    continue
+                if module is None:
+                    # Missing optional dependency (bs4, etc.); acceptable.
+                    continue
+                parser_cls = getattr(module, class_name, None)
+                if parser_cls is None:
+                    errors[lang_code] = f"{module_path} has no class {class_name}"
+                    continue
+                missing = [
+                    method_name
+                    for method_name in _POS_TO_METHOD.values()
+                    if not callable(getattr(parser_cls, method_name, None))
+                ]
+                if missing:
+                    errors[lang_code] = f"{class_name} missing methods: {missing}"
+
+        if errors:
+            error_msg = "\n".join(f"  {lang}: {err}" for lang, err in errors.items())
+            self.fail(f"Wiktionary parser registry issues:\n{error_msg}")
+
+    def test_inflection_dispatcher_resolves_english(self) -> None:
+        """The inflection dispatcher must reach English builders and honor facts."""
+        from langtools.inflection import inflect
+
+        # Grammar facts are threaded through and consumed by the builder.
+        self.assertEqual(
+            inflect("giraffe", "en", "noun"),
+            {"singular": "giraffe", "plural": "giraffes"},
+        )
+        self.assertEqual(
+            inflect("rice", "en", "noun", {"countability": "uncountable"}),
+            {"singular": "rice"},
+        )
+        # Unsupported language falls through to None rather than raising.
+        self.assertIsNone(inflect("foo", "xx", "noun"))
+
+    def test_conjugation_dispatcher_resolves_english(self) -> None:
+        """The conjugation dispatcher must reach the English conjugator."""
+        from langtools.conjugation import conjugate
+
+        forms = conjugate("walk", "en")
+        assert forms is not None
+        self.assertEqual(forms["3s_present"], "walks")
+        self.assertIsNone(conjugate("foo", "xx"))
+
+
 if __name__ == "__main__":
     unittest.main()

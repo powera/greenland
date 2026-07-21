@@ -500,7 +500,7 @@ class VilkasAgent:
 
         # Check Wiktionary support if requested
         if use_wiktionary:
-            from wordfreq.translation.wiktionary_forms import is_wiktionary_supported
+            from langtools.wiktionary import is_wiktionary_supported
 
             if not is_wiktionary_supported(language_code, pos_type):
                 logger.error(
@@ -540,10 +540,10 @@ class VilkasAgent:
 
                 # Call the appropriate process function
                 if use_wiktionary:
-                    from wordfreq.translation.generate_forms_tasks import FORM_GENERATION_TASKS
-                    from wordfreq.translation.wiktionary_forms import (
+                    from wordfreq.translation.generate_forms_base import (
                         process_lemma_forms_wiktionary,
                     )
+                    from wordfreq.translation.generate_forms_tasks import FORM_GENERATION_TASKS
 
                     task_config = FORM_GENERATION_TASKS[task_key].config
                     success = process_lemma_forms_wiktionary(
