@@ -36,6 +36,20 @@ _STRESSED_FINAL_SYLLABLE_VERBS: Set[str] = {
 
 _VOWELS = "aeiou"
 
+# Nouns ending in "-ch" pronounced /k/, which take a plain "-s" rather than the
+# sibilant "-es" ("stomach" -> "stomachs", not "stomaches").  The real
+# conditioning factor is pronunciation, not spelling, so this list is a
+# stopgap: once lemmas carry IPA, a "-ch" word whose transcription ends in /k/
+# should take "-s" and this set should go away rather than grow.
+HARD_CH_NOUNS: Set[str] = {
+    "epoch",
+    "eunuch",
+    "loch",
+    "monarch",
+    "patriarch",
+    "stomach",
+}
+
 
 def _count_syllable_groups(word: str) -> int:
     """Approximate syllable count by counting runs of vowels.
@@ -68,12 +82,13 @@ def should_double_final_consonant(verb: str) -> bool:
     if len(verb) < 2:
         return False
 
-    # Final consonant-vowel-consonant pattern, excluding w/x/y which never double.
-    if not (
-        verb[-1] in "bdgklmnprstz"
-        and verb[-2] in _VOWELS
-        and (len(verb) < 3 or verb[-3] not in _VOWELS)
-    ):
+    # Final consonant-vowel-consonant pattern, excluding w/x/y which never
+    # double.  The "u" of "qu" spells /w/ rather than a vowel, so "quit" and
+    # "equip" are CVC and do double ("quitting", "equipped").
+    preceding_is_vowel = (
+        len(verb) >= 3 and verb[-3] in _VOWELS and not (len(verb) >= 4 and verb[-4:-2] == "qu")
+    )
+    if not (verb[-1] in "bdgklmnprstz" and verb[-2] in _VOWELS and not preceding_is_vowel):
         return False
 
     if _count_syllable_groups(verb) <= 1:
@@ -128,6 +143,14 @@ def generate_regular_plural(word: str) -> str:
     """
     Generate regular English plural form.
 
+    This applies **spelling rules only**.  Whether a noun has a plural at all
+    is a lexical property of the lemma - "diabetes" is uncountable, "jeans" is
+    plurale tantum, "series" is unchanged - and no spelling rule can see that,
+    so this function will happily return "diabeteses" if asked.  Callers that
+    have the lemma's grammar facts should go through
+    :func:`langtools.en.inflection.build_noun_forms`, which consults
+    ``countability``/``number_type`` first and only falls back to here.
+
     Args:
         word: Singular noun
 
@@ -139,6 +162,16 @@ def generate_regular_plural(word: str) -> str:
 
     # Words ending in -s, -ss, -sh, -ch, -x, -z add -es
     if word.endswith(("s", "ss", "sh", "ch", "x", "z")):
+        # "-ch" is only a sibilant when pronounced /tʃ/: "church" -> "churches"
+        # but "stomach" -> "stomachs".  Spelling cannot tell them apart, so
+        # the /k/ cases are listed.
+        if word.endswith("ch") and word.lower() in HARD_CH_NOUNS:
+            return word + "s"
+        # A single "-z" on a stressed short vowel doubles: "quiz" -> "quizzes",
+        # "fez" -> "fezzes".  "-ss" and "-zz" are already doubled, and "-s"
+        # does not double at all ("bus" -> "buses", not "busses").
+        if word.endswith("z") and should_double_final_consonant(word):
+            return word + "z" + "es"
         return word + "es"
 
     # Words ending in consonant + y change y to -ies
@@ -149,11 +182,11 @@ def generate_regular_plural(word: str) -> str:
     # doubled f never does: "-ff"/"-ffe" take a plain -s ("cliff" -> "cliffs",
     # "giraffe" -> "giraffes").  This is the single home of that rule; callers
     # such as inflection.build_noun_forms rely on it rather than repeating it.
-    if word.endswith("ffe"):
+    if word.endswith(("ff", "ffe")):
         return word + "s"
     if word.endswith("fe"):
         return word[:-2] + "ves"
-    if word.endswith("f") and not word.endswith("ff"):
+    if word.endswith("f"):
         return word[:-1] + "ves"
 
     # Words ending in -o (some add -es, some just -s)
@@ -181,6 +214,9 @@ def generate_3s_present(verb: str) -> str:
 
     # Verbs ending in -s, -ss, -sh, -ch, -x, -z add -es
     if verb.endswith(("s", "ss", "sh", "ch", "x", "z")):
+        # A single "-z" on a stressed short vowel doubles: "quiz" -> "quizzes".
+        if verb.endswith("z") and should_double_final_consonant(verb):
+            return verb + "z" + "es"
         return verb + "es"
 
     # Verbs ending in consonant + y change y to -ies

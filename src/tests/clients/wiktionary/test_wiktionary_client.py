@@ -1155,12 +1155,14 @@ class TestSpanishNounDeclensionType(unittest.TestCase):
 from langtools.en.types import NounDeclension as EnglishNounDeclension
 from langtools.en.utils import clean_form as en_clean_form
 from langtools.en.utils import (
+    HARD_CH_NOUNS,
     generate_3s_present,
     generate_comparative,
     generate_past_tense,
     generate_present_participle,
     generate_regular_plural,
     generate_superlative,
+    should_double_final_consonant,
 )
 from langtools.en.wiktionary import EnglishParser
 
@@ -1179,7 +1181,20 @@ class TestEnglishUtils(unittest.TestCase):
         self.assertEqual(generate_regular_plural("dish"), "dishes")
         self.assertEqual(generate_regular_plural("watch"), "watches")
         self.assertEqual(generate_regular_plural("box"), "boxes")
-        self.assertEqual(generate_regular_plural("quiz"), "quizes")
+
+    def test_generate_regular_plural_z_doubles(self) -> None:
+        """A single -z on a stressed short vowel doubles before -es."""
+        self.assertEqual(generate_regular_plural("quiz"), "quizzes")
+        self.assertEqual(generate_regular_plural("fez"), "fezzes")
+        self.assertEqual(generate_regular_plural("whiz"), "whizzes")
+        # Already doubled, or a consonant before the -z: no further doubling.
+        self.assertEqual(generate_regular_plural("buzz"), "buzzes")
+        self.assertEqual(generate_regular_plural("waltz"), "waltzes")
+        # Unstressed final syllable.
+        self.assertEqual(generate_regular_plural("topaz"), "topazes")
+        # "-s" never doubles, unlike "-z".
+        self.assertEqual(generate_regular_plural("bus"), "buses")
+        self.assertEqual(generate_regular_plural("gas"), "gases")
 
     def test_generate_regular_plural_y_to_ies(self) -> None:
         """Test plural with consonant + y -> -ies."""
@@ -1201,6 +1216,15 @@ class TestEnglishUtils(unittest.TestCase):
         self.assertEqual(generate_regular_plural("giraffe"), "giraffes")
         self.assertEqual(generate_regular_plural("cliff"), "cliffs")
         self.assertEqual(generate_regular_plural("staff"), "staffs")
+        self.assertEqual(generate_regular_plural("cuff"), "cuffs")
+
+    def test_generate_regular_plural_hard_ch(self) -> None:
+        """-ch pronounced /k/ takes -s, not the sibilant -es."""
+        for singular in sorted(HARD_CH_NOUNS):
+            self.assertEqual(generate_regular_plural(singular), singular + "s")
+        # Soft /tS/ "-ch" still takes "-es".
+        self.assertEqual(generate_regular_plural("church"), "churches")
+        self.assertEqual(generate_regular_plural("watch"), "watches")
 
     def test_generate_3s_present_s(self) -> None:
         """Test 3rd person singular with -s."""
@@ -1217,6 +1241,35 @@ class TestEnglishUtils(unittest.TestCase):
         """Test 3rd person singular with -y -> -ies."""
         self.assertEqual(generate_3s_present("try"), "tries")
         self.assertEqual(generate_3s_present("fly"), "flies")
+
+    def test_generate_3s_present_z_doubles(self) -> None:
+        """A single -z on a stressed short vowel doubles before -es."""
+        self.assertEqual(generate_3s_present("quiz"), "quizzes")
+        self.assertEqual(generate_3s_present("whiz"), "whizzes")
+        self.assertEqual(generate_3s_present("buzz"), "buzzes")
+        self.assertEqual(generate_3s_present("waltz"), "waltzes")
+
+    def test_qu_is_not_a_vowel_for_doubling(self) -> None:
+        """The "u" of "qu" spells /w/, so "qu-V-C" words are CVC and double.
+
+        Without this, "quit"/"quip"/"equip" read as vowel-vowel-consonant and
+        fail the doubling test.
+        """
+        self.assertTrue(should_double_final_consonant("quit"))
+        self.assertTrue(should_double_final_consonant("quip"))
+        self.assertTrue(should_double_final_consonant("equip"))
+        self.assertTrue(should_double_final_consonant("squat"))
+        self.assertEqual(generate_present_participle("quit"), "quitting")
+        self.assertEqual(generate_past_tense("quip"), "quipped")
+        self.assertEqual(generate_past_tense("equip"), "equipped")
+        self.assertEqual(generate_present_participle("squat"), "squatting")
+
+    def test_real_vowel_before_final_consonant_does_not_double(self) -> None:
+        """A genuine two-vowel sequence still blocks doubling."""
+        self.assertFalse(should_double_final_consonant("wait"))
+        self.assertFalse(should_double_final_consonant("read"))
+        self.assertEqual(generate_past_tense("wait"), "waited")
+        self.assertEqual(generate_present_participle("read"), "reading")
 
     def test_generate_past_tense_ed(self) -> None:
         """Test past tense with -ed."""
@@ -1272,6 +1325,31 @@ class TestEnglishUtils(unittest.TestCase):
         """Test comparative with -y -> -ier."""
         self.assertEqual(generate_comparative("happy"), "happier")
         self.assertEqual(generate_comparative("easy"), "easier")
+
+    def test_generate_comparison_doubles_final_consonant(self) -> None:
+        """Stressed CVC monosyllables double before -er/-est.
+
+        The doubling set is not limited to "b d g p t": "thin" -> "thinner"
+        and "dim" -> "dimmer" double an "n" and an "m".
+        """
+        expected = {
+            "thin": "thinner",
+            "dim": "dimmer",
+            "big": "bigger",
+            "sad": "sadder",
+            "fat": "fatter",
+            "wet": "wetter",
+            "red": "redder",
+        }
+        for positive, comparative in expected.items():
+            self.assertEqual(generate_comparative(positive), comparative)
+            self.assertEqual(generate_superlative(positive), comparative[:-2] + "est")
+
+    def test_generate_comparison_does_not_double_unstressed(self) -> None:
+        """Polysyllables with an unstressed final syllable do not double."""
+        self.assertEqual(generate_comparative("common"), "commoner")
+        self.assertEqual(generate_superlative("common"), "commonest")
+        self.assertEqual(generate_comparative("narrow"), "narrower")
 
     def test_generate_superlative_est(self) -> None:
         """Test superlative with -est."""
@@ -1341,6 +1419,39 @@ class TestEnglishParser(unittest.TestCase):
         self.assertTrue(success)
         self.assertEqual(result.forms["singular"], "cat")
         self.assertEqual(result.forms["plural"], "cats")
+
+    def test_get_noun_declensions_uncountable_has_no_plural(self) -> None:
+        """ "{{en-noun|-}}" marks an uncountable noun, which gets no plural."""
+        self.mock_client.fetch_page_wikitext.return_value = "==English==\n===Noun==="
+        self.mock_client.extract_language_section.return_value = "===Noun===\nA disease"
+        self.mock_client.find_templates.return_value = [("en-noun", "{{en-noun|-}}")]
+
+        result, success = self.parser.get_noun_declensions("diabetes")
+
+        self.assertTrue(success)
+        self.assertEqual(result.forms["singular"], "diabetes")
+        self.assertNotIn("plural", result.forms)
+        self.assertEqual(result.number_type, NounNumberType.SINGULARE_TANTUM)
+
+    def test_get_noun_declensions_countable_and_uncountable(self) -> None:
+        """ "~" means countable *and* uncountable, so a plural is still made."""
+        self.mock_client.fetch_page_wikitext.return_value = "==English==\n===Noun==="
+        self.mock_client.extract_language_section.return_value = "===Noun===\nA food"
+        self.mock_client.find_templates.return_value = [("en-noun", "{{en-noun|~}}")]
+
+        result, success = self.parser.get_noun_declensions("cheese")
+
+        self.assertTrue(success)
+        self.assertEqual(result.forms["plural"], "cheeses")
+
+    def test_is_uncountable_template(self) -> None:
+        """Only a standalone "-" parameter marks uncountability."""
+        self.assertTrue(self.parser._is_uncountable_template("{{en-noun|-}}"))
+        self.assertTrue(self.parser._is_uncountable_template("{{en-noun|pl=-}}"))
+        self.assertFalse(self.parser._is_uncountable_template("{{en-noun}}"))
+        self.assertFalse(self.parser._is_uncountable_template("{{en-noun|~}}"))
+        # A hyphen inside a plural form is not the uncountable marker.
+        self.assertFalse(self.parser._is_uncountable_template("{{en-noun|mothers-in-law}}"))
 
     def test_get_verb_conjugations_no_page(self) -> None:
         """Test verb conjugation when page not found."""
