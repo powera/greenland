@@ -179,6 +179,13 @@ class Lemma:
     base_forms: Dict[str, Dict[str, Any]] = field(
         default_factory=dict
     )  # lang_code -> {form, ipa, phonetic}
+    # variants: Alternate spellings of the same lexeme ("grey" for "gray"), each
+    # carrying its own full paradigm. Kept separate from derivative_forms and
+    # synonyms because a variant is neither an inflection nor a different word;
+    # loaded from the top-level "variants" array in {lang}.jsonl.
+    variants: Dict[str, List[Dict[str, Any]]] = field(
+        default_factory=dict
+    )  # lang_code -> [{kind, key, forms: [{grammatical_form, text, ...}]}, ...]
     grammar_facts: List[Dict[str, Any]] = field(default_factory=list)
     audio_hashes: Dict[str, Dict[str, str]] = field(
         default_factory=dict
@@ -219,6 +226,7 @@ class Lemma:
         data.setdefault("derivative_forms", {})
         data.setdefault("synonyms", {})
         data.setdefault("base_forms", {})
+        data.setdefault("variants", {})
         data.setdefault("grammar_facts", [])
         data.setdefault("audio_hashes", {})
         data.setdefault("translation_pronunciations", {})

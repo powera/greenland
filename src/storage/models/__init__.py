@@ -60,6 +60,11 @@ from storage.models.schema import (
     WordToken,
 )
 from storage.models.translations import Translation, TranslationSet
+from storage.models.variant_form import (
+    VARIANT_KIND_SCRIPT,
+    VARIANT_KIND_SPELLING,
+    VariantForm,
+)
 
 # Import after schema to ensure PendingImport is registered with the same Base
 # before SentencePatternWord's relationship to it is resolved
@@ -116,6 +121,9 @@ __all__ = [
     "SentenceWord",
     "Translation",
     "TranslationSet",
+    "VARIANT_KIND_SCRIPT",
+    "VARIANT_KIND_SPELLING",
+    "VariantForm",
     "VerbSubtype",
     "WordExclusion",
     "WordToken",

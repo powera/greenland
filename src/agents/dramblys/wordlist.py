@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Set
 
 from langtools.en.grammatical_words import ENGLISH_GRAMMATICAL_WORDS_WITH_CONTRACTIONS
 from storage.models.schema import DerivativeForm, Lemma
+from storage.models.variant_form import VariantForm
 
 
 def parse_wikitext_file(file_path: str) -> List[str]:
@@ -89,7 +90,8 @@ def get_grammatical_stopwords() -> Set[str]:
 
 def get_existing_english_words(session: Any) -> Set[str]:
     """
-    Get all English words currently in the database (lemmas + derivative forms).
+    Get all English words currently in the database (lemmas + derivative forms
+    + alternate spellings).
 
     Args:
         session: SQLAlchemy database session
@@ -113,6 +115,12 @@ def get_existing_english_words(session: Any) -> Set[str]:
     english_forms = session.query(DerivativeForm).filter(DerivativeForm.language_code == "en").all()
     for form in english_forms:
         existing_words.add(form.derivative_form_text.lower())
+
+    # Alternate spellings ("grey" for "gray"). Without these a wordlist offering
+    # the other spelling reads as a missing word and gets staged for import.
+    variant_forms = session.query(VariantForm).filter(VariantForm.language_code == "en").all()
+    for variant_form in variant_forms:
+        existing_words.add(variant_form.variant_form_text.lower())
 
     return existing_words
 
