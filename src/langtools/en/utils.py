@@ -145,8 +145,12 @@ def generate_regular_plural(word: str) -> str:
     if word.endswith("y") and len(word) > 1 and word[-2] not in "aeiou":
         return word[:-1] + "ies"
 
-    # Words ending in -f or -fe often change to -ves (but not always)
-    # This is a common pattern but has exceptions
+    # Words ending in -f/-fe commonly go to -ves ("leaf" -> "leaves"), but a
+    # doubled f never does: "-ff"/"-ffe" take a plain -s ("cliff" -> "cliffs",
+    # "giraffe" -> "giraffes").  This is the single home of that rule; callers
+    # such as inflection.build_noun_forms rely on it rather than repeating it.
+    if word.endswith("ffe"):
+        return word + "s"
     if word.endswith("fe"):
         return word[:-2] + "ves"
     if word.endswith("f") and not word.endswith("ff"):

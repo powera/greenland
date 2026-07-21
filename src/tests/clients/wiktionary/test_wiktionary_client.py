@@ -1196,6 +1196,12 @@ class TestEnglishUtils(unittest.TestCase):
         self.assertEqual(generate_regular_plural("leaf"), "leaves")
         self.assertEqual(generate_regular_plural("knife"), "knives")
 
+    def test_generate_regular_plural_double_f_to_s(self) -> None:
+        """A doubled f takes plain -s, never -ves ("giraffe" -> "giraffes")."""
+        self.assertEqual(generate_regular_plural("giraffe"), "giraffes")
+        self.assertEqual(generate_regular_plural("cliff"), "cliffs")
+        self.assertEqual(generate_regular_plural("staff"), "staffs")
+
     def test_generate_3s_present_s(self) -> None:
         """Test 3rd person singular with -s."""
         self.assertEqual(generate_3s_present("walk"), "walks")
