@@ -16,7 +16,6 @@ from storage.connection_pool import close_thread_sessions, get_session
 from wordfreq.translation import (
     definitions,
     pos_subtype,
-    pronunciation,
     translations,
     word_processing,
 )
@@ -259,35 +258,6 @@ class LinguisticClient:
             self.client, word_list, self.get_session, refresh, throttle
         )
 
-    # Pronunciation queries
-    def query_pronunciation(self, word: str, sentence: str) -> Tuple[Dict[str, Any], bool]:
-        """Query LLM for IPA and phonetic pronunciation of a word."""
-        return pronunciation.query_pronunciation(self.client, word, sentence, self.get_session)
-
-    def update_pronunciation_for_definition(
-        self, definition_id: int, sentence: Optional[str] = None
-    ) -> bool:
-        """Update the pronunciation information for a specific definition."""
-        return pronunciation.update_pronunciation_for_definition(
-            self.client, definition_id, self.get_session, sentence
-        )
-
-    def update_missing_pronunciations_for_word(
-        self, word_text: str, throttle: float = 1.0
-    ) -> Dict[str, Any]:
-        """Add missing pronunciations for all definitions of a word."""
-        return pronunciation.update_missing_pronunciations_for_word(
-            self.client, word_text, self.get_session, throttle
-        )
-
-    def update_pronunciations_for_batch(
-        self, limit: int = 100, throttle: float = 1.0
-    ) -> Dict[str, Any]:
-        """Add missing pronunciations for a batch of definitions."""
-        return pronunciation.update_pronunciations_for_batch(
-            self.client, self.get_session, limit, throttle
-        )
-
     # POS subtype queries
     def query_pos_subtype(self, word: str, definition_text: str, pos_type: str) -> Tuple[str, bool]:
         """Query LLM for POS subtype for a definition."""
@@ -344,33 +314,6 @@ class LinguisticClient:
     def query_lithuanian_adverb_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:
         """Query LLM for Lithuanian adverb forms."""
         return lithuanian.query_lithuanian_adverb_forms(self.client, lemma_id, self.get_session)
-
-    def get_lithuanian_noun_forms(
-        self, word: Optional[str] = None, lemma_id: Optional[int] = None, source: str = "llm"
-    ) -> Tuple[Dict[str, str], bool]:
-        """
-        Get Lithuanian noun declensions using either LLM or Wiktionary.
-
-        Args:
-            word: The Lithuanian word to decline (required if source='wiki')
-            lemma_id: The lemma ID (required if source='llm')
-            source: Source for noun forms - 'llm' (default) or 'wiki'
-
-        Returns:
-            Tuple of (dictionary mapping case names to forms, success flag)
-        """
-        if source == "wiki":
-            if word is None:
-                raise ValueError("word parameter is required when source='wiki'")
-            from wordfreq.translation.wiki import get_lithuanian_noun_forms
-
-            return get_lithuanian_noun_forms(word)
-        elif source == "llm":
-            if lemma_id is None:
-                raise ValueError("lemma_id parameter is required when source='llm'")
-            return self.query_lithuanian_noun_declensions(lemma_id)
-        else:
-            raise ValueError(f"Invalid source: {source}. Must be 'llm' or 'wiki'")
 
     # French forms
     def query_french_noun_forms(self, lemma_id: int) -> Tuple[Dict[str, str], bool]:

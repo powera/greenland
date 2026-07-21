@@ -33,7 +33,11 @@ from sqlalchemy.orm import Session
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import DerivativeForm, Lemma
-from storage.translation_helpers import get_language_name, get_translation
+from storage.translation_helpers import (
+    get_language_name,
+    get_translation,
+    has_translation_clause,
+)
 from wordfreq.translation.client import LinguisticClient
 from wordfreq.translation.generate_forms_tasks import get_task_key, process_lemma_for_task
 
@@ -80,34 +84,159 @@ class VilkasAgent:
             )
         return self.cache_client
 
-    def check_missing_lithuanian_base_forms(self) -> Dict[str, Any]:
+    def check_missing_base_forms(self, language_code: str = "lt") -> Dict[str, Any]:
         """
-        Check for lemmas with Lithuanian translations but no Lithuanian derivative forms.
+        Check for lemmas translated into *language_code* but with no derivative forms.
+
+        Args:
+            language_code: Language code to check (defaults to Lithuanian).
 
         Returns:
-            Dictionary with check results
+            Dictionary with check results.
         """
-        # Delegate to translation helpers
-        from wordfreq.translation.check_lithuanian import (
-            check_missing_lithuanian_base_forms as _check,
-        )
+        language_name = get_language_name(language_code)
+        logger.info(f"Checking for lemmas missing {language_name} base forms...")
 
-        return _check(self)
+        session = self.get_session()
+        try:
+            query = session.query(Lemma)
+            if language_code != "en":
+                query = query.filter(has_translation_clause(language_code))
+            lemmas_with_translation = query.all()
 
-    def check_noun_declension_coverage(self) -> Dict[str, Any]:
+            logger.info(
+                f"Found {len(lemmas_with_translation)} lemmas with {language_name} translations"
+            )
+
+            missing_forms = []
+            for lemma in lemmas_with_translation:
+                lang_forms = (
+                    session.query(DerivativeForm)
+                    .filter(
+                        DerivativeForm.lemma_id == lemma.id,
+                        DerivativeForm.language_code == language_code,
+                    )
+                    .all()
+                )
+
+                if not lang_forms:
+                    missing_forms.append(
+                        {
+                            "guid": lemma.guid,
+                            "english": lemma.lemma_text,
+                            "translation": get_translation(session, lemma, language_code),
+                            "pos_type": lemma.pos_type,
+                            "pos_subtype": lemma.pos_subtype,
+                            "difficulty_level": lemma.difficulty_level,
+                        }
+                    )
+
+            logger.info(
+                f"Found {len(missing_forms)} lemmas missing {language_name} derivative forms"
+            )
+
+            return {
+                "total_with_translation": len(lemmas_with_translation),
+                "missing_forms": missing_forms,
+                "missing_count": len(missing_forms),
+                "coverage_percentage": (
+                    (len(lemmas_with_translation) - len(missing_forms))
+                    / len(lemmas_with_translation)
+                    * 100
+                    if lemmas_with_translation
+                    else 0
+                ),
+            }
+
+        except Exception as e:
+            logger.error(f"Error checking missing {language_name} base forms: {e}")
+            return {
+                "error": str(e),
+                "total_with_translation": 0,
+                "missing_forms": [],
+                "missing_count": 0,
+                "coverage_percentage": 0,
+            }
+        finally:
+            session.close()
+
+    def check_noun_declension_coverage(self, language_code: str = "lt") -> Dict[str, Any]:
         """
-        Check for Lithuanian nouns that have base forms but missing declensions.
+        Check for nouns that have a base form but are missing declensions.
 
-        For Lithuanian nouns, we expect various declension forms (cases/numbers).
-        This checks which nouns only have the base (nominative singular) form.
+        Nouns with only one derivative form (the base) are treated as needing
+        their remaining case/number forms.
+
+        Args:
+            language_code: Language code to check (defaults to Lithuanian).
 
         Returns:
-            Dictionary with check results
+            Dictionary with check results.
         """
-        # Delegate to translation helpers
-        from wordfreq.translation.check_lithuanian import check_noun_declension_coverage as _check
+        language_name = get_language_name(language_code)
+        logger.info(f"Checking {language_name} noun declension coverage...")
 
-        return _check(self)
+        session = self.get_session()
+        try:
+            query = session.query(Lemma).filter(Lemma.pos_type == "noun")
+            if language_code != "en":
+                query = query.filter(has_translation_clause(language_code))
+            noun_lemmas = query.all()
+
+            logger.info(f"Found {len(noun_lemmas)} noun lemmas with {language_name} translations")
+
+            needs_declensions = []
+            has_declensions = []
+
+            for lemma in noun_lemmas:
+                lang_forms = (
+                    session.query(DerivativeForm)
+                    .filter(
+                        DerivativeForm.lemma_id == lemma.id,
+                        DerivativeForm.language_code == language_code,
+                    )
+                    .all()
+                )
+
+                if len(lang_forms) <= 1:
+                    needs_declensions.append(
+                        {
+                            "guid": lemma.guid,
+                            "english": lemma.lemma_text,
+                            "translation": get_translation(session, lemma, language_code),
+                            "pos_subtype": lemma.pos_subtype,
+                            "difficulty_level": lemma.difficulty_level,
+                            "current_form_count": len(lang_forms),
+                        }
+                    )
+                else:
+                    has_declensions.append({"guid": lemma.guid, "form_count": len(lang_forms)})
+
+            logger.info(f"Nouns with declensions: {len(has_declensions)}")
+            logger.info(f"Nouns needing declensions: {len(needs_declensions)}")
+
+            return {
+                "total_nouns": len(noun_lemmas),
+                "with_declensions": len(has_declensions),
+                "needs_declensions": len(needs_declensions),
+                "nouns_needing_declensions": needs_declensions,
+                "declension_coverage_percentage": (
+                    len(has_declensions) / len(noun_lemmas) * 100 if noun_lemmas else 0
+                ),
+            }
+
+        except Exception as e:
+            logger.error(f"Error checking {language_name} noun declension coverage: {e}")
+            return {
+                "error": str(e),
+                "total_nouns": 0,
+                "with_declensions": 0,
+                "needs_declensions": 0,
+                "nouns_needing_declensions": [],
+                "declension_coverage_percentage": 0,
+            }
+        finally:
+            session.close()
 
     def generate_forms_for_lemma(
         self,
@@ -451,7 +580,7 @@ class VilkasAgent:
             check_results = (
                 self.check_verb_conjugation_coverage(language_code=language_code)
                 if pos_type == "verb"
-                else self.check_noun_declension_coverage()
+                else self.check_noun_declension_coverage(language_code=language_code)
             )
 
             if "error" in check_results:
@@ -603,7 +732,7 @@ class VilkasAgent:
             "timestamp": start_time.isoformat(),
             "database_path": self.db_path,
             "checks": {
-                "missing_base_forms": self.check_missing_lithuanian_base_forms(),
+                "missing_base_forms": self.check_missing_base_forms(),
                 "noun_declensions": self.check_noun_declension_coverage(),
                 "verb_conjugations": self.check_verb_conjugation_coverage(),
             },
