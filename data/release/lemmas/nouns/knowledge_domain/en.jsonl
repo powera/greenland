@@ -1,11 +1,11 @@
-{"guid": "N21_001", "forms": [{"grammatical_form": "singular", "text": "science", "is_base_form": true, "ipa": "/saɪəns/", "phonetic": "SYE-ence"}, {"grammatical_form": "noun/en_singular", "text": "science", "is_base_form": true}]}
-{"guid": "N21_002", "forms": [{"grammatical_form": "singular", "text": "history", "is_base_form": true, "ipa": "/ˈhɪs.tɚ.i/", "phonetic": "HIS-tuh-ree"}, {"grammatical_form": "noun/en_singular", "text": "history", "is_base_form": true}]}
-{"guid": "N21_003", "forms": [{"grammatical_form": "singular", "text": "mathematics", "is_base_form": true, "ipa": "/məˈθɛm.ə.tɪks/", "phonetic": "MA-thuh-muh-tiks"}, {"grammatical_form": "noun/en_singular", "text": "mathematics", "is_base_form": true}]}
-{"guid": "N21_004", "forms": [{"grammatical_form": "singular", "text": "philosophy", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "philosophy", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "philosophies", "is_base_form": false}]}
-{"guid": "N21_005", "forms": [{"grammatical_form": "singular", "text": "geography", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "geography", "is_base_form": true}]}
-{"guid": "N21_006", "forms": [{"grammatical_form": "singular", "text": "biology", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "biology", "is_base_form": true}]}
-{"guid": "N21_007", "forms": [{"grammatical_form": "singular", "text": "physics", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "physics", "is_base_form": true}]}
-{"guid": "N21_008", "forms": [{"grammatical_form": "singular", "text": "chemistry", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "chemistry", "is_base_form": true}]}
-{"guid": "N21_009", "forms": [{"grammatical_form": "singular", "text": "math", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "math", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "maths", "is_base_form": false}]}
-{"guid": "N21_010", "forms": [{"grammatical_form": "singular", "text": "species", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "species", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "species", "is_base_form": false}]}
-{"guid": "N21_011", "forms": [{"grammatical_form": "singular", "text": "field", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "field", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "fields", "is_base_form": false}]}
+{"guid": "N21_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "science", "is_base_form": true, "ipa": "/saɪəns/", "phonetic": "SYE-ence"}]}
+{"guid": "N21_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "history", "is_base_form": true, "ipa": "/ˈhɪs.tɚ.i/", "phonetic": "HIS-tuh-ree"}]}
+{"guid": "N21_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "mathematics", "is_base_form": true, "ipa": "/məˈθɛm.ə.tɪks/", "phonetic": "MA-thuh-muh-tiks"}]}
+{"guid": "N21_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "philosophy", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "philosophies", "is_base_form": false}]}
+{"guid": "N21_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "geography", "is_base_form": true}]}
+{"guid": "N21_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "biology", "is_base_form": true}]}
+{"guid": "N21_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "physics", "is_base_form": true}]}
+{"guid": "N21_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "chemistry", "is_base_form": true}]}
+{"guid": "N21_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "math", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "maths", "is_base_form": false}]}
+{"guid": "N21_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "species", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "species", "is_base_form": false}]}
+{"guid": "N21_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "field", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "fields", "is_base_form": false}]}

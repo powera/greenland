@@ -1,51 +1,51 @@
-{"guid": "N41_001", "forms": [{"grammatical_form": "singular", "text": "reading", "is_base_form": true, "ipa": "/ˈriːdɪŋ/", "phonetic": "REE-ding"}, {"grammatical_form": "noun/en_singular", "text": "reading", "is_base_form": true}]}
-{"guid": "N41_002", "forms": [{"grammatical_form": "singular", "text": "writing", "is_base_form": true, "ipa": "/ˈraɪtɪŋ/", "phonetic": "RYT-ing"}, {"grammatical_form": "noun/en_singular", "text": "writing", "is_base_form": true}]}
-{"guid": "N41_003", "forms": [{"grammatical_form": "singular", "text": "drawing", "is_base_form": true, "ipa": "/ˈdɹɔɪɪŋ/", "phonetic": "DRAW-ing"}, {"grammatical_form": "noun/en_singular", "text": "drawing", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "drawings", "is_base_form": false}]}
-{"guid": "N41_004", "forms": [{"grammatical_form": "singular", "text": "painting", "is_base_form": true, "ipa": "/ˈpeɪntɪŋ/", "phonetic": "PEY-tin"}, {"grammatical_form": "noun/en_singular", "text": "painting", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "paintings", "is_base_form": false}]}
-{"guid": "N41_005", "forms": [{"grammatical_form": "singular", "text": "singing", "is_base_form": true, "ipa": "ˈsɪŋɪŋ", "phonetic": "SIN-ig-ing"}, {"grammatical_form": "noun/en_singular", "text": "singing", "is_base_form": true}]}
-{"guid": "N41_006", "forms": [{"grammatical_form": "singular", "text": "dancing", "is_base_form": true, "ipa": "/ˈdænsɪŋ/", "phonetic": "DANS-ing"}, {"grammatical_form": "noun/en_singular", "text": "dancing", "is_base_form": true}]}
-{"guid": "N41_007", "forms": [{"grammatical_form": "singular", "text": "cooking", "is_base_form": true, "ipa": "ˈkʊk.ɪŋ", "phonetic": "COOK-ing"}, {"grammatical_form": "noun/en_singular", "text": "cooking", "is_base_form": true}]}
-{"guid": "N41_008", "forms": [{"grammatical_form": "singular", "text": "baking", "is_base_form": true, "ipa": "/ˈbeɪkɪŋ/", "phonetic": "BAY-king"}, {"grammatical_form": "noun/en_singular", "text": "baking", "is_base_form": true}]}
-{"guid": "N41_009", "forms": [{"grammatical_form": "singular", "text": "gardening", "is_base_form": true, "ipa": "/ˈɡɑːr.dɪŋ/", "phonetic": "GAR-din-ing"}, {"grammatical_form": "noun/en_singular", "text": "gardening", "is_base_form": true}]}
-{"guid": "N41_010", "forms": [{"grammatical_form": "singular", "text": "fishing", "is_base_form": true, "ipa": "/ˈfɪʃɪŋ/", "phonetic": "FIH-shihng"}, {"grammatical_form": "noun/en_singular", "text": "fishing", "is_base_form": true}]}
-{"guid": "N41_011", "forms": [{"grammatical_form": "singular", "text": "hiking", "is_base_form": true, "ipa": "/ˈhaɪ.kɪŋ/", "phonetic": "HIGH-king"}, {"grammatical_form": "noun/en_singular", "text": "hiking", "is_base_form": true}]}
-{"guid": "N41_012", "forms": [{"grammatical_form": "singular", "text": "camping", "is_base_form": true, "ipa": "kɑːmpɪŋ", "phonetic": "KAMP-ing"}, {"grammatical_form": "noun/en_singular", "text": "camping", "is_base_form": true}]}
-{"guid": "N41_013", "forms": [{"grammatical_form": "singular", "text": "traveling", "is_base_form": true, "ipa": "/ˈtrævəlɪŋ/", "phonetic": "TRAH-vəl-ing"}, {"grammatical_form": "noun/en_singular", "text": "traveling", "is_base_form": true}]}
-{"guid": "N41_014", "forms": [{"grammatical_form": "singular", "text": "photography", "is_base_form": true, "ipa": "/fəˈtɑːɡrəfi/", "phonetic": "fə-TOG-ruh-fee"}, {"grammatical_form": "noun/en_singular", "text": "photography", "is_base_form": true}]}
-{"guid": "N41_015", "forms": [{"grammatical_form": "singular", "text": "sports", "is_base_form": true, "ipa": "/spɔːrts/", "phonetic": "SPOR-ts"}, {"grammatical_form": "noun/en_singular", "text": "sports", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "sports", "is_base_form": false}]}
-{"guid": "N41_016", "forms": [{"grammatical_form": "singular", "text": "music", "is_base_form": true, "ipa": "/mjuːzɪk/", "phonetic": "MEE-zik"}, {"grammatical_form": "noun/en_singular", "text": "music", "is_base_form": true}]}
-{"guid": "N41_017", "forms": [{"grammatical_form": "singular", "text": "movie", "is_base_form": true, "ipa": "/muːvi/", "phonetic": "MOO-vee"}, {"grammatical_form": "noun/en_singular", "text": "movie", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "movies", "is_base_form": false}]}
-{"guid": "N41_018", "forms": [{"grammatical_form": "singular", "text": "game", "is_base_form": true, "ipa": "/ɡeɪm/", "phonetic": "GAYM"}, {"grammatical_form": "noun/en_singular", "text": "game", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "games", "is_base_form": false}]}
-{"guid": "N41_019", "forms": [{"grammatical_form": "singular", "text": "swimming", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "swimming", "is_base_form": true}]}
-{"guid": "N41_020", "forms": [{"grammatical_form": "singular", "text": "shopping", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "shopping", "is_base_form": true}]}
-{"guid": "N41_021", "forms": [{"grammatical_form": "singular", "text": "exercise", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "exercise", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "exercises", "is_base_form": false}]}
-{"guid": "N41_022", "forms": [{"grammatical_form": "singular", "text": "concert", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "concert", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "concerts", "is_base_form": false}]}
-{"guid": "N41_023", "forms": [{"grammatical_form": "singular", "text": "picnic", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "picnic", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "picnics", "is_base_form": false}]}
-{"guid": "N41_024", "forms": [{"grammatical_form": "singular", "text": "tennis", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "tennis", "is_base_form": true}]}
-{"guid": "N41_025", "forms": [{"grammatical_form": "singular", "text": "soccer", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "soccer", "is_base_form": true}]}
-{"guid": "N41_026", "forms": [{"grammatical_form": "singular", "text": "guitar", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "guitar", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "guitars", "is_base_form": false}]}
-{"guid": "N41_027", "forms": [{"grammatical_form": "singular", "text": "basketball", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "basketball", "is_base_form": true}]}
-{"guid": "N41_028", "forms": [{"grammatical_form": "singular", "text": "baseball", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "baseball", "is_base_form": true}]}
-{"guid": "N41_029", "forms": [{"grammatical_form": "singular", "text": "volleyball", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "volleyball", "is_base_form": true}]}
-{"guid": "N41_030", "forms": [{"grammatical_form": "singular", "text": "golf", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "golf", "is_base_form": true}]}
-{"guid": "N41_031", "forms": [{"grammatical_form": "singular", "text": "boxing", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "boxing", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "boxings", "is_base_form": false}]}
-{"guid": "N41_032", "forms": [{"grammatical_form": "singular", "text": "cycling", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "cycling", "is_base_form": true}]}
-{"guid": "N41_033", "forms": [{"grammatical_form": "singular", "text": "skiing", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "skiing", "is_base_form": true}]}
-{"guid": "N41_034", "forms": [{"grammatical_form": "singular", "text": "hockey", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "hockey", "is_base_form": true}]}
-{"guid": "N41_035", "forms": [{"grammatical_form": "singular", "text": "rugby", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "rugby", "is_base_form": true}]}
-{"guid": "N41_036", "forms": [{"grammatical_form": "singular", "text": "cricket", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "cricket", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "crickets", "is_base_form": false}]}
-{"guid": "N41_037", "forms": [{"grammatical_form": "singular", "text": "badminton", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "badminton", "is_base_form": true}]}
-{"guid": "N41_038", "forms": [{"grammatical_form": "singular", "text": "gymnastics", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "gymnastics", "is_base_form": true}]}
-{"guid": "N41_039", "forms": [{"grammatical_form": "singular", "text": "wrestling", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "wrestling", "is_base_form": true}]}
-{"guid": "N41_040", "forms": [{"grammatical_form": "singular", "text": "surfing", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "surfing", "is_base_form": true}]}
-{"guid": "N41_041", "forms": [{"grammatical_form": "singular", "text": "skateboarding", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "skateboarding", "is_base_form": true}]}
-{"guid": "N41_042", "forms": [{"grammatical_form": "singular", "text": "archery", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "archery", "is_base_form": true}]}
-{"guid": "N41_043", "forms": [{"grammatical_form": "singular", "text": "chess", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "chess", "is_base_form": true}]}
-{"guid": "N41_044", "forms": [{"grammatical_form": "singular", "text": "yoga", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "yoga", "is_base_form": true}]}
-{"guid": "N41_046", "forms": [{"grammatical_form": "singular", "text": "running", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "running", "is_base_form": true}]}
-{"guid": "N41_047", "forms": [{"grammatical_form": "singular", "text": "bath", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "bath", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "baths", "is_base_form": false}]}
-{"guid": "N41_048", "forms": [{"grammatical_form": "singular", "text": "kiss", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "kiss", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "kisses", "is_base_form": false}]}
-{"guid": "N41_049", "forms": [{"grammatical_form": "singular", "text": "sneeze", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "sneeze", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "sneezes", "is_base_form": false}]}
-{"guid": "N41_050", "forms": [{"grammatical_form": "singular", "text": "stitch", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "stitch", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stitches", "is_base_form": false}]}
-{"guid": "N41_051", "forms": [{"grammatical_form": "singular", "text": "driving", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "driving", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "drivings", "is_base_form": false}]}
-{"guid": "N41_052", "forms": [{"grammatical_form": "singular", "text": "waiting", "is_base_form": true}, {"grammatical_form": "noun/en_singular", "text": "waiting", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "waitings", "is_base_form": false}]}
+{"guid": "N41_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "reading", "is_base_form": true, "ipa": "/ˈriːdɪŋ/", "phonetic": "REE-ding"}]}
+{"guid": "N41_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "writing", "is_base_form": true, "ipa": "/ˈraɪtɪŋ/", "phonetic": "RYT-ing"}]}
+{"guid": "N41_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "drawing", "is_base_form": true, "ipa": "/ˈdɹɔɪɪŋ/", "phonetic": "DRAW-ing"}, {"grammatical_form": "noun/en_plural", "text": "drawings", "is_base_form": false}]}
+{"guid": "N41_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "painting", "is_base_form": true, "ipa": "/ˈpeɪntɪŋ/", "phonetic": "PEY-tin"}, {"grammatical_form": "noun/en_plural", "text": "paintings", "is_base_form": false}]}
+{"guid": "N41_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "singing", "is_base_form": true, "ipa": "ˈsɪŋɪŋ", "phonetic": "SIN-ig-ing"}]}
+{"guid": "N41_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "dancing", "is_base_form": true, "ipa": "/ˈdænsɪŋ/", "phonetic": "DANS-ing"}]}
+{"guid": "N41_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "cooking", "is_base_form": true, "ipa": "ˈkʊk.ɪŋ", "phonetic": "COOK-ing"}]}
+{"guid": "N41_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "baking", "is_base_form": true, "ipa": "/ˈbeɪkɪŋ/", "phonetic": "BAY-king"}]}
+{"guid": "N41_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "gardening", "is_base_form": true, "ipa": "/ˈɡɑːr.dɪŋ/", "phonetic": "GAR-din-ing"}]}
+{"guid": "N41_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "fishing", "is_base_form": true, "ipa": "/ˈfɪʃɪŋ/", "phonetic": "FIH-shihng"}]}
+{"guid": "N41_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "hiking", "is_base_form": true, "ipa": "/ˈhaɪ.kɪŋ/", "phonetic": "HIGH-king"}]}
+{"guid": "N41_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "camping", "is_base_form": true, "ipa": "kɑːmpɪŋ", "phonetic": "KAMP-ing"}]}
+{"guid": "N41_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "traveling", "is_base_form": true, "ipa": "/ˈtrævəlɪŋ/", "phonetic": "TRAH-vəl-ing"}]}
+{"guid": "N41_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "photography", "is_base_form": true, "ipa": "/fəˈtɑːɡrəfi/", "phonetic": "fə-TOG-ruh-fee"}]}
+{"guid": "N41_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "sports", "is_base_form": true, "ipa": "/spɔːrts/", "phonetic": "SPOR-ts"}, {"grammatical_form": "noun/en_plural", "text": "sports", "is_base_form": false}]}
+{"guid": "N41_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "music", "is_base_form": true, "ipa": "/mjuːzɪk/", "phonetic": "MEE-zik"}]}
+{"guid": "N41_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "movie", "is_base_form": true, "ipa": "/muːvi/", "phonetic": "MOO-vee"}, {"grammatical_form": "noun/en_plural", "text": "movies", "is_base_form": false}]}
+{"guid": "N41_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "game", "is_base_form": true, "ipa": "/ɡeɪm/", "phonetic": "GAYM"}, {"grammatical_form": "noun/en_plural", "text": "games", "is_base_form": false}]}
+{"guid": "N41_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "swimming", "is_base_form": true}]}
+{"guid": "N41_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "shopping", "is_base_form": true}]}
+{"guid": "N41_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "exercise", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "exercises", "is_base_form": false}]}
+{"guid": "N41_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "concert", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "concerts", "is_base_form": false}]}
+{"guid": "N41_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "picnic", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "picnics", "is_base_form": false}]}
+{"guid": "N41_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "tennis", "is_base_form": true}]}
+{"guid": "N41_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "soccer", "is_base_form": true}]}
+{"guid": "N41_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "guitar", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "guitars", "is_base_form": false}]}
+{"guid": "N41_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "basketball", "is_base_form": true}]}
+{"guid": "N41_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "baseball", "is_base_form": true}]}
+{"guid": "N41_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "volleyball", "is_base_form": true}]}
+{"guid": "N41_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "golf", "is_base_form": true}]}
+{"guid": "N41_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "boxing", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "boxings", "is_base_form": false}]}
+{"guid": "N41_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "cycling", "is_base_form": true}]}
+{"guid": "N41_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "skiing", "is_base_form": true}]}
+{"guid": "N41_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "hockey", "is_base_form": true}]}
+{"guid": "N41_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "rugby", "is_base_form": true}]}
+{"guid": "N41_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "cricket", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "crickets", "is_base_form": false}]}
+{"guid": "N41_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "badminton", "is_base_form": true}]}
+{"guid": "N41_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "gymnastics", "is_base_form": true}]}
+{"guid": "N41_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "wrestling", "is_base_form": true}]}
+{"guid": "N41_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "surfing", "is_base_form": true}]}
+{"guid": "N41_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "skateboarding", "is_base_form": true}]}
+{"guid": "N41_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "archery", "is_base_form": true}]}
+{"guid": "N41_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "chess", "is_base_form": true}]}
+{"guid": "N41_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "yoga", "is_base_form": true}]}
+{"guid": "N41_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "running", "is_base_form": true}]}
+{"guid": "N41_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "bath", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "baths", "is_base_form": false}]}
+{"guid": "N41_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "kiss", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "kisses", "is_base_form": false}]}
+{"guid": "N41_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "sneeze", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "sneezes", "is_base_form": false}]}
+{"guid": "N41_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "stitch", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stitches", "is_base_form": false}]}
+{"guid": "N41_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "driving", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "drivings", "is_base_form": false}]}
+{"guid": "N41_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "waiting", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "waitings", "is_base_form": false}]}

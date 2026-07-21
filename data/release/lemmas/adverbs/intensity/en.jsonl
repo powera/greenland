@@ -1,9 +1,9 @@
 {"guid": "D09_001", "forms": [{"grammatical_form": "positive", "text": "more", "is_base_form": true, "ipa": "/mɔːr/", "phonetic": "MOR-er"}]}
 {"guid": "D09_002", "forms": [{"grammatical_form": "positive", "text": "most", "is_base_form": true, "ipa": "/moʊst/", "phonetic": "MOHST"}]}
-{"guid": "D09_003", "forms": [{"grammatical_form": "positive", "text": "only", "is_base_form": true, "ipa": "/ˈoʊn.li/", "phonetic": "OH-nlee"}, {"grammatical_form": "adverb/en_positive", "text": "only", "is_base_form": true}]}
-{"guid": "D09_004", "forms": [{"grammatical_form": "positive", "text": "even", "is_base_form": true, "ipa": "ˈiːvən", "phonetic": "EE-ven"}, {"grammatical_form": "adverb/en_positive", "text": "even", "is_base_form": true}]}
-{"guid": "D09_005", "forms": [{"grammatical_form": "positive", "text": "too", "is_base_form": true, "ipa": "/tuː/", "phonetic": "TOO"}, {"grammatical_form": "adverb/en_positive", "text": "too", "is_base_form": true}]}
-{"guid": "D09_006", "forms": [{"grammatical_form": "positive", "text": "much", "is_base_form": true, "ipa": "/mʌtʃ/", "phonetic": "MUTCH"}, {"grammatical_form": "adverb/en_positive", "text": "much", "is_base_form": true}, {"grammatical_form": "adverb/en_comparative", "text": "more", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "most", "is_base_form": false}]}
-{"guid": "D09_007", "forms": [{"grammatical_form": "positive", "text": "extremely", "is_base_form": true}, {"grammatical_form": "adverb/en_positive", "text": "extremely", "is_base_form": true}]}
-{"guid": "D09_008", "forms": [{"grammatical_form": "positive", "text": "barely", "is_base_form": true}, {"grammatical_form": "adverb/en_positive", "text": "barely", "is_base_form": true}]}
-{"guid": "D09_009", "forms": [{"grammatical_form": "positive", "text": "absolutely", "is_base_form": true}, {"grammatical_form": "adverb/en_positive", "text": "absolutely", "is_base_form": true}]}
+{"guid": "D09_003", "forms": [{"grammatical_form": "adverb/en_positive", "text": "only", "is_base_form": true, "ipa": "/ˈoʊn.li/", "phonetic": "OH-nlee"}]}
+{"guid": "D09_004", "forms": [{"grammatical_form": "adverb/en_positive", "text": "even", "is_base_form": true, "ipa": "ˈiːvən", "phonetic": "EE-ven"}]}
+{"guid": "D09_005", "forms": [{"grammatical_form": "adverb/en_positive", "text": "too", "is_base_form": true, "ipa": "/tuː/", "phonetic": "TOO"}]}
+{"guid": "D09_006", "forms": [{"grammatical_form": "adverb/en_positive", "text": "much", "is_base_form": true, "ipa": "/mʌtʃ/", "phonetic": "MUTCH"}, {"grammatical_form": "adverb/en_comparative", "text": "more", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "most", "is_base_form": false}]}
+{"guid": "D09_007", "forms": [{"grammatical_form": "adverb/en_positive", "text": "extremely", "is_base_form": true}]}
+{"guid": "D09_008", "forms": [{"grammatical_form": "adverb/en_positive", "text": "barely", "is_base_form": true}]}
+{"guid": "D09_009", "forms": [{"grammatical_form": "adverb/en_positive", "text": "absolutely", "is_base_form": true}]}
