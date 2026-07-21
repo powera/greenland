@@ -27,6 +27,34 @@ from agents.common.common_args import (
 )
 
 
+def _resolve_word_arguments(raw_words: list[str]) -> list[str]:
+    """Expand any ``@FILE`` entries in a word list into the file's words.
+
+    A hand-curated batch is usually already in a file, and shells cap how much
+    can go on one command line, so ``--stage-words @batch.txt`` reads them from
+    disk. Plain words and ``@FILE`` entries can be mixed. Within a file, one word
+    per line; blank lines and ``#`` comments are ignored.
+
+    Duplicates are left in -- the caller drops them, case-insensitively, along
+    with words that are already known.
+
+    Raises:
+        OSError: if an ``@FILE`` cannot be read.
+    """
+    words: list[str] = []
+    for raw_word in raw_words:
+        if not raw_word.startswith("@"):
+            words.append(raw_word)
+            continue
+        path = Path(raw_word[1:])
+        with path.open("r", encoding="utf-8") as handle:
+            for line in handle:
+                entry = line.split("#", 1)[0].strip()
+                if entry:
+                    words.append(entry)
+    return words
+
+
 def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection.
 
@@ -82,6 +110,14 @@ def get_argument_parser() -> argparse.ArgumentParser:
         "--stage",
         action="store_true",
         help="Stage mode: Add missing words to pending_imports for review",
+    )
+    parser.add_argument(
+        "--stage-words",
+        nargs="+",
+        metavar="WORD",
+        help="Stage mode: Stage these specific words to pending_imports, instead of "
+        "sourcing candidates from the frequency check. Use @FILE to read words from a "
+        "file (one per line, blank lines and #-comments ignored)",
     )
     parser.add_argument(
         "--target-language",
@@ -248,6 +284,56 @@ def main() -> None:
                 print(f"  Added '{results['word']}' to exclusions")
         else:
             print(f"\nError: {results.get('error', 'Unknown error')}")
+        return
+
+    # Handle --stage-words mode (explicit word list rather than the frequency check)
+    if args.stage_words:
+        try:
+            words = _resolve_word_arguments(args.stage_words)
+        except OSError as exc:
+            print(f"\nError reading word list: {exc}")
+            return
+        if not words:
+            print("\nNo words to stage.")
+            return
+
+        if not confirm_operation(
+            message=f"Model: {args.model}\nTarget language: {args.target_language}\n"
+            f"Words: {', '.join(words)}\n\nWords will be added to pending_imports for review",
+            estimated_calls=len(words) if not args.yes and not args.dry_run else None,
+            skip_confirmation=args.yes,
+            dry_run=args.dry_run,
+        ):
+            print("Aborted.")
+            return
+
+        results = agent.stage_explicit_words(
+            words=words,
+            limit=args.limit,
+            model=args.model,
+            throttle=args.throttle,
+            dry_run=args.dry_run,
+            target_language=args.target_language,
+        )
+
+        if "error" in results:
+            print(f"\nError: {results['error']}")
+        else:
+            skipped_existing = results.get("skipped_existing", [])
+            if skipped_existing:
+                print(
+                    f"\nSkipped {len(skipped_existing)} already known or excluded: "
+                    f"{', '.join(skipped_existing)}"
+                )
+            if args.dry_run:
+                print(f"\nDRY RUN: Would stage {results['would_stage']} of {len(words)} words")
+            else:
+                print(f"\nStaging complete:")
+                print(f"  Processed: {results['processed']}")
+                print(f"  Staged: {results['staged']}")
+                print(f"  Skipped (already pending): {results['skipped_already_pending']}")
+                print(f"  Failed: {results['failed']}")
+                print(f"\nUse --list-pending to review staged words")
         return
 
     # Handle --stage mode

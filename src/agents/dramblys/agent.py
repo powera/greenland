@@ -36,6 +36,7 @@ from storage.models.schema import (
     Lemma,
     WordToken,
 )
+from storage.queries.lemma import filter_existing_english_words
 from wordfreq.translation.client import LinguisticClient
 
 # Configure logging
@@ -86,30 +87,6 @@ class DramblysAgent:
 
         session = self.get_session()
         try:
-            # Get all existing lemma texts (English)
-            existing_lemmas = set()
-            lemmas = session.query(Lemma).all()
-            for lemma in lemmas:
-                existing_lemmas.add(lemma.lemma_text.lower())
-
-            # Also get all English derivative forms
-            english_forms = (
-                session.query(DerivativeForm).filter(DerivativeForm.language_code == "en").all()
-            )
-            for form in english_forms:
-                existing_lemmas.add(form.derivative_form_text.lower())
-
-            # Get excluded words (words we've decided not to import)
-            excluded_words = set()
-            exclusions = (
-                session.query(WordExclusion).filter(WordExclusion.language_code == "en").all()
-            )
-            for exclusion in exclusions:
-                excluded_words.add(exclusion.excluded_word.lower())
-
-            logger.info(f"Found {len(existing_lemmas)} existing English words in database")
-            logger.info(f"Found {len(excluded_words)} excluded words")
-
             # Get high-frequency words from word_tokens
             high_freq_tokens = (
                 session.query(WordToken)
@@ -125,18 +102,25 @@ class DramblysAgent:
 
             logger.info(f"Checking {len(high_freq_tokens)} high-frequency tokens")
 
+            # Ask about just these candidates rather than loading the whole
+            # dictionary. Exclusions count as existing here: this gates imports,
+            # and a word rejected once should not be proposed again.
+            existing_words = filter_existing_english_words(
+                session,
+                [token.token for token in high_freq_tokens],
+                include_exclusions=True,
+            )
+
+            logger.info(f"{len(existing_words)} of the candidates are already known")
+
             # Find missing words
             missing_words = []
             for token in high_freq_tokens:
                 word = token.token
                 word_lower = word.lower()
 
-                # Skip if already in database
-                if word_lower in existing_lemmas:
-                    continue
-
-                # Skip if explicitly excluded
-                if word_lower in excluded_words:
+                # Skip if already in the database, or explicitly excluded
+                if word_lower in existing_words:
                     continue
 
                 # Skip if not a valid word (use imported validation function)
@@ -177,7 +161,10 @@ class DramblysAgent:
                 "total_checked": len(high_freq_tokens),
                 "missing_count": len(missing_words),
                 "missing_words": missing_words,
-                "existing_word_count": len(existing_lemmas),
+                # Reported for context only. Counted directly rather than
+                # derived from the candidate check, which now looks up only the
+                # candidates instead of loading every word in the dictionary.
+                "existing_word_count": session.query(Lemma).count(),
             }
 
         except Exception as e:
@@ -763,6 +750,93 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                 target_language=target_language,
                 debug=self.debug,
             )
+        finally:
+            session.close()
+
+    def stage_explicit_words(
+        self,
+        words: List[str],
+        limit: Optional[int] = None,
+        model: str = "gpt-5.4-mini",
+        throttle: float = 1.0,
+        dry_run: bool = False,
+        target_language: str = "lt",
+    ) -> Dict[str, Any]:
+        """
+        Stage a caller-supplied list of words to the pending_imports table.
+
+        Same staging path as stage_missing_words_for_import, differing only in
+        where the candidate words come from: an explicit list rather than the
+        frequency check. Useful for working a hand-curated batch, where the
+        words were chosen elsewhere and the frequency corpora have nothing to
+        say about them.
+
+        The LLM sees only the word -- query_definitions takes a word and an
+        optional example sentence -- so the frequency fields the staging path
+        prints are supplied empty here. They exist for display, not for the
+        prompt.
+
+        Words the database already accounts for in any English form -- a lemma,
+        a derivative form, an alternate spelling -- and words on the exclusions
+        list are dropped before any LLM call. Staging re-checks pending_imports
+        itself, so a repeat run costs nothing.
+
+        Args:
+            words: English words to stage
+            limit: Maximum number of words to stage
+            model: LLM model to use for definitions
+            throttle: Seconds to wait between API calls
+            dry_run: If True, show what would be staged without making changes
+            target_language: Language code for disambiguation translations
+
+        Returns:
+            Dictionary with staging results, plus "skipped_existing" naming the
+            words dropped as already-known or excluded.
+        """
+        session = self.get_session()
+        try:
+            # Exclusions count as existing: this gates imports, so a word
+            # rejected once should not be proposed again.
+            existing_words = filter_existing_english_words(session, words, include_exclusions=True)
+
+            candidates: List[Dict[str, Any]] = []
+            skipped_existing: List[str] = []
+            seen: Set[str] = set()
+            for word in words:
+                word_lower = word.lower()
+                if word_lower in seen:
+                    continue
+                seen.add(word_lower)
+                if word_lower in existing_words:
+                    skipped_existing.append(word)
+                    continue
+                candidates.append(
+                    {
+                        "word": word,
+                        "overall_rank": None,
+                        "corpus_frequencies": [],
+                    }
+                )
+
+            if skipped_existing:
+                logger.info(
+                    f"Skipping {len(skipped_existing)} word(s) already known or excluded: "
+                    f"{', '.join(skipped_existing)}"
+                )
+
+            results = staging.stage_missing_words_for_import(
+                session=session,
+                missing_words=candidates,
+                db_path=self.db_path or constants.WORDFREQ_DB_PATH,
+                limit=limit,
+                model=model,
+                throttle=throttle,
+                dry_run=dry_run,
+                target_language=target_language,
+                debug=self.debug,
+            )
+            results["skipped_existing"] = skipped_existing
+            return results
         finally:
             session.close()
 
