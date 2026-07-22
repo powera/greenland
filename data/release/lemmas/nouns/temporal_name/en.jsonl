@@ -1,23 +1,23 @@
-{"guid": "N32_001", "forms": [{"grammatical_form": "singular", "text": "Monday", "is_base_form": true, "ipa": "/ˈmʌndeɪ/", "phonetic": "MUND-uh"}]}
-{"guid": "N32_002", "forms": [{"grammatical_form": "singular", "text": "Tuesday", "is_base_form": true, "ipa": "/ˈtjuːzdeɪ/", "phonetic": "TJOO-zday"}]}
-{"guid": "N32_003", "forms": [{"grammatical_form": "singular", "text": "Wednesday", "is_base_form": true, "ipa": "/ˈwɛnzdeɪ/", "phonetic": "WENZ-day"}]}
-{"guid": "N32_004", "forms": [{"grammatical_form": "singular", "text": "Thursday", "is_base_form": true, "ipa": "/ˈθɜːrzdeɪ/", "phonetic": "THOOR-zday"}]}
-{"guid": "N32_005", "forms": [{"grammatical_form": "singular", "text": "Friday", "is_base_form": true}]}
-{"guid": "N32_006", "forms": [{"grammatical_form": "singular", "text": "Saturday", "is_base_form": true, "ipa": "/ˈsætərdi/", "phonetic": "SAT-uh-ruh-dee"}]}
-{"guid": "N32_007", "forms": [{"grammatical_form": "singular", "text": "Sunday", "is_base_form": true, "ipa": "/ˈsʌn.deɪ/", "phonetic": "SOON-day"}]}
-{"guid": "N32_008", "forms": [{"grammatical_form": "singular", "text": "January", "is_base_form": true, "ipa": "/ˈdʒæn.jʊˌɛr.i/", "phonetic": "JAN-yuh-REE-uh"}]}
-{"guid": "N32_009", "forms": [{"grammatical_form": "singular", "text": "February", "is_base_form": true, "ipa": "/ˈfɛbruˌwɛri/", "phonetic": "FYOO-bruh-WAIR-ee"}]}
-{"guid": "N32_010", "forms": [{"grammatical_form": "singular", "text": "March", "is_base_form": true, "ipa": "/mɑːrtʃ/", "phonetic": "MART-ch"}]}
-{"guid": "N32_011", "forms": [{"grammatical_form": "singular", "text": "April", "is_base_form": true, "ipa": "/eɪˈpɹəl/", "phonetic": "AY-puh-ral"}]}
-{"guid": "N32_012", "forms": [{"grammatical_form": "singular", "text": "May", "is_base_form": true, "ipa": "/meɪ/", "phonetic": "MEY"}]}
-{"guid": "N32_013", "forms": [{"grammatical_form": "singular", "text": "June", "is_base_form": true, "ipa": "/dʒuːn/", "phonetic": "JOON"}]}
-{"guid": "N32_014", "forms": [{"grammatical_form": "singular", "text": "July", "is_base_form": true, "ipa": "/dʒuːli/", "phonetic": "JOO-lee"}]}
-{"guid": "N32_015", "forms": [{"grammatical_form": "singular", "text": "August", "is_base_form": true, "ipa": "/ɔːɡəst/", "phonetic": "OH-gust"}]}
-{"guid": "N32_016", "forms": [{"grammatical_form": "singular", "text": "September", "is_base_form": true, "ipa": "/ˈsɛptəmɚ/", "phonetic": "SEPT-uh-mər"}]}
-{"guid": "N32_017", "forms": [{"grammatical_form": "singular", "text": "October", "is_base_form": true, "ipa": "/ɒkˈtəʊbər/", "phonetic": "OCK-toh-bur"}]}
-{"guid": "N32_018", "forms": [{"grammatical_form": "singular", "text": "November", "is_base_form": true, "ipa": "/nəʊvɪmbər/", "phonetic": "NOH-vim-bər"}]}
-{"guid": "N32_019", "forms": [{"grammatical_form": "singular", "text": "December", "is_base_form": true, "ipa": "/dɪˈsɛmbər/", "phonetic": "DI-sɛm-bər"}]}
-{"guid": "N32_020", "forms": [{"grammatical_form": "singular", "text": "Christmas", "is_base_form": true, "ipa": "/krɪsməs/", "phonetic": "KRIS-məs"}]}
-{"guid": "N32_021", "forms": [{"grammatical_form": "singular", "text": "Easter", "is_base_form": true, "ipa": "/ˈiːstər/", "phonetic": "EE-stər"}]}
-{"guid": "N32_022", "forms": [{"grammatical_form": "singular", "text": "New Year", "is_base_form": true, "ipa": "/njuː jɪər/", "phonetic": "NEW-yeer"}]}
-{"guid": "N32_023", "forms": [{"grammatical_form": "singular", "text": "Independence Day", "is_base_form": true, "ipa": "/ɪnˌdɛpɪˈdɛns deɪ/", "phonetic": "IN-dep-uh-dence-day"}]}
+{"guid": "N32_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "Monday", "is_base_form": true, "ipa": "/ˈmʌndeɪ/", "phonetic": "MUND-uh"}]}
+{"guid": "N32_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "Tuesday", "is_base_form": true, "ipa": "/ˈtjuːzdeɪ/", "phonetic": "TJOO-zday"}]}
+{"guid": "N32_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "Wednesday", "is_base_form": true, "ipa": "/ˈwɛnzdeɪ/", "phonetic": "WENZ-day"}]}
+{"guid": "N32_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "Thursday", "is_base_form": true, "ipa": "/ˈθɜːrzdeɪ/", "phonetic": "THOOR-zday"}]}
+{"guid": "N32_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "Friday", "is_base_form": true}]}
+{"guid": "N32_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "Saturday", "is_base_form": true, "ipa": "/ˈsætərdi/", "phonetic": "SAT-uh-ruh-dee"}]}
+{"guid": "N32_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sunday", "is_base_form": true, "ipa": "/ˈsʌn.deɪ/", "phonetic": "SOON-day"}]}
+{"guid": "N32_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "January", "is_base_form": true, "ipa": "/ˈdʒæn.jʊˌɛr.i/", "phonetic": "JAN-yuh-REE-uh"}]}
+{"guid": "N32_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "February", "is_base_form": true, "ipa": "/ˈfɛbruˌwɛri/", "phonetic": "FYOO-bruh-WAIR-ee"}]}
+{"guid": "N32_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "March", "is_base_form": true, "ipa": "/mɑːrtʃ/", "phonetic": "MART-ch"}]}
+{"guid": "N32_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "April", "is_base_form": true, "ipa": "/eɪˈpɹəl/", "phonetic": "AY-puh-ral"}]}
+{"guid": "N32_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "May", "is_base_form": true, "ipa": "/meɪ/", "phonetic": "MEY"}]}
+{"guid": "N32_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "June", "is_base_form": true, "ipa": "/dʒuːn/", "phonetic": "JOON"}]}
+{"guid": "N32_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "July", "is_base_form": true, "ipa": "/dʒuːli/", "phonetic": "JOO-lee"}]}
+{"guid": "N32_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "August", "is_base_form": true, "ipa": "/ɔːɡəst/", "phonetic": "OH-gust"}]}
+{"guid": "N32_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "September", "is_base_form": true, "ipa": "/ˈsɛptəmɚ/", "phonetic": "SEPT-uh-mər"}]}
+{"guid": "N32_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "October", "is_base_form": true, "ipa": "/ɒkˈtəʊbər/", "phonetic": "OCK-toh-bur"}]}
+{"guid": "N32_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "November", "is_base_form": true, "ipa": "/nəʊvɪmbər/", "phonetic": "NOH-vim-bər"}]}
+{"guid": "N32_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "December", "is_base_form": true, "ipa": "/dɪˈsɛmbər/", "phonetic": "DI-sɛm-bər"}]}
+{"guid": "N32_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "Christmas", "is_base_form": true, "ipa": "/krɪsməs/", "phonetic": "KRIS-məs"}]}
+{"guid": "N32_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "Easter", "is_base_form": true, "ipa": "/ˈiːstər/", "phonetic": "EE-stər"}]}
+{"guid": "N32_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "New Year", "is_base_form": true, "ipa": "/njuː jɪər/", "phonetic": "NEW-yeer"}]}
+{"guid": "N32_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "Independence Day", "is_base_form": true, "ipa": "/ɪnˌdɛpɪˈdɛns deɪ/", "phonetic": "IN-dep-uh-dence-day"}]}

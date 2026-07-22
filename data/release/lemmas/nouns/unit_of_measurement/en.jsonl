@@ -7,5 +7,5 @@
 {"guid": "N34_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "liter", "is_base_form": true, "ipa": "/ˈlɪt.ər/", "phonetic": "LIT-ər"}, {"grammatical_form": "noun/en_plural", "text": "liters", "is_base_form": false}]}
 {"guid": "N34_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "milliliter", "is_base_form": true, "ipa": "/ˌmɪ.liˈlɪtər/", "phonetic": "MIL-i-LITER"}, {"grammatical_form": "noun/en_plural", "text": "milliliters", "is_base_form": false}]}
 {"guid": "N34_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "degree", "is_base_form": true, "ipa": "dɪˈɡriː", "phonetic": "DEE-gruh"}, {"grammatical_form": "noun/en_plural", "text": "degrees", "is_base_form": false}]}
-{"guid": "N34_010", "forms": [{"grammatical_form": "singular", "text": "celsius", "is_base_form": true, "ipa": "/ˈsɛlɪəs/", "phonetic": "SEL-ee-əs"}]}
+{"guid": "N34_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "celsius", "is_base_form": true, "ipa": "/ˈsɛlɪəs/", "phonetic": "SEL-ee-əs"}]}
 {"guid": "N34_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "fahrenheit", "is_base_form": true, "ipa": "/ˈfɑːrɪntaɪn/", "phonetic": "FAR-in-tin"}, {"grammatical_form": "noun/en_plural", "text": "fahrenheits", "is_base_form": false}]}

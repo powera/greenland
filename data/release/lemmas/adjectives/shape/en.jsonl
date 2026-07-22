@@ -14,5 +14,5 @@
 {"guid": "A03_014", "forms": [{"grammatical_form": "adjective/en_positive", "text": "straight", "is_base_form": true, "ipa": "/streɪt/", "phonetic": "STRAHT"}, {"grammatical_form": "adjective/en_comparative", "text": "straighter", "is_base_form": false}, {"grammatical_form": "adjective/en_superlative", "text": "straightest", "is_base_form": false}]}
 {"guid": "A03_015", "forms": [{"grammatical_form": "adjective/en_positive", "text": "shaped", "is_base_form": true, "ipa": "/ʃeɪpt/", "phonetic": "SHAYPT"}]}
 {"guid": "A03_016", "forms": [{"grammatical_form": "adjective/en_positive", "text": "curved", "is_base_form": true}]}
-{"guid": "A03_017", "forms": [{"grammatical_form": "positive", "text": "hollow", "is_base_form": true}]}
+{"guid": "A03_017", "forms": [{"grammatical_form": "adjective/en_positive", "text": "hollow", "is_base_form": true}]}
 {"guid": "A03_018", "forms": [{"grammatical_form": "adjective/en_positive", "text": "spiral", "is_base_form": true}]}

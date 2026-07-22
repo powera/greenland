@@ -2,12 +2,12 @@
 {"guid": "N43_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "oven", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "ovens", "is_base_form": false}]}
 {"guid": "N43_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "refrigerator", "is_base_form": true, "ipa": "/rɪˌfrɪdʒəˈreɪtər/", "phonetic": "RI-fridge-EY-ter"}, {"grammatical_form": "noun/en_plural", "text": "refrigerators", "is_base_form": false}]}
 {"guid": "N43_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "microwave", "is_base_form": true, "ipa": "/ˌmaɪˈkrəʊ.weɪ/", "phonetic": "MY-krow-WEY"}, {"grammatical_form": "noun/en_plural", "text": "microwaves", "is_base_form": false}]}
-{"guid": "N43_005", "forms": [{"grammatical_form": "singular", "text": "washing machine", "is_base_form": true, "ipa": "/ˈwɒʃɪŋ ˈmeɪʃɪn/", "phonetic": "WA-shing MAY-shin"}]}
+{"guid": "N43_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "washing machine", "is_base_form": true, "ipa": "/ˈwɒʃɪŋ ˈmeɪʃɪn/", "phonetic": "WA-shing MAY-shin"}]}
 {"guid": "N43_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "dryer", "is_base_form": true, "ipa": "/ˈdraɪər/", "phonetic": "DY-ər"}, {"grammatical_form": "noun/en_plural", "text": "dryers", "is_base_form": false}]}
 {"guid": "N43_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "dishwasher", "is_base_form": true, "ipa": "/ˈdɪʃwɔːʃər/", "phonetic": "DISH-wosh-er"}, {"grammatical_form": "noun/en_plural", "text": "dishwashers", "is_base_form": false}]}
 {"guid": "N43_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "toaster", "is_base_form": true, "ipa": "/ˈtoʊstər/", "phonetic": "TOH-stuh"}, {"grammatical_form": "noun/en_plural", "text": "toasters", "is_base_form": false}]}
-{"guid": "N43_009", "forms": [{"grammatical_form": "singular", "text": "coffee maker", "is_base_form": true, "ipa": "kəˈfiː ˈmeɪkə(r)", "phonetic": "KOH-fee MAK-uh(r)"}]}
-{"guid": "N43_011", "forms": [{"grammatical_form": "singular", "text": "air conditioner", "is_base_form": true, "ipa": "/ˌer ˈkʌndɪʃənər/", "phonetic": "AIR-kun-DIH-shə-nər"}]}
+{"guid": "N43_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "coffee maker", "is_base_form": true, "ipa": "kəˈfiː ˈmeɪkə(r)", "phonetic": "KOH-fee MAK-uh(r)"}]}
+{"guid": "N43_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "air conditioner", "is_base_form": true, "ipa": "/ˌer ˈkʌndɪʃənər/", "phonetic": "AIR-kun-DIH-shə-nər"}]}
 {"guid": "N43_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "stove", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stoves", "is_base_form": false}]}
 {"guid": "N43_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "iron", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "irons", "is_base_form": false}]}
 {"guid": "N43_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "freezer", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "freezers", "is_base_form": false}]}

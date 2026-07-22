@@ -118,7 +118,7 @@
 {"guid": "N17_271", "forms": [{"grammatical_form": "noun/en_singular", "text": "respect", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "respects", "is_base_form": false}]}
 {"guid": "N17_272", "forms": [{"grammatical_form": "noun/en_singular", "text": "reward", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "rewards", "is_base_form": false}]}
 {"guid": "N17_273", "forms": [{"grammatical_form": "noun/en_singular", "text": "rhythm", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "rhythms", "is_base_form": false}]}
-{"guid": "N17_274", "forms": [{"grammatical_form": "singular", "text": "sex", "is_base_form": true}]}
+{"guid": "N17_274", "forms": [{"grammatical_form": "noun/en_singular", "text": "sex", "is_base_form": true}]}
 {"guid": "N17_275", "forms": [{"grammatical_form": "noun/en_singular", "text": "statement", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "statements", "is_base_form": false}]}
 {"guid": "N17_276", "forms": [{"grammatical_form": "noun/en_singular", "text": "structure", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "structures", "is_base_form": false}]}
 {"guid": "N17_277", "forms": [{"grammatical_form": "noun/en_singular", "text": "substance", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "substances", "is_base_form": false}]}

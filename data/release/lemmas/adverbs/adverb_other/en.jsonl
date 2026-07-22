@@ -1,5 +1,5 @@
-{"guid": "D99_001", "forms": [{"grammatical_form": "positive", "text": "least", "is_base_form": true, "ipa": "/liːst/", "phonetic": "LEEHST"}]}
-{"guid": "D99_002", "forms": [{"grammatical_form": "positive", "text": "less", "is_base_form": true, "ipa": "/ləs/", "phonetic": "LEHS"}]}
+{"guid": "D99_001", "forms": [{"grammatical_form": "adverb/en_positive", "text": "least", "is_base_form": true, "ipa": "/liːst/", "phonetic": "LEEHST"}]}
+{"guid": "D99_002", "forms": [{"grammatical_form": "adverb/en_positive", "text": "less", "is_base_form": true, "ipa": "/ləs/", "phonetic": "LEHS"}]}
 {"guid": "D99_003", "forms": [{"grammatical_form": "adverb/en_positive", "text": "twice", "is_base_form": true, "ipa": "/taɪs/", "phonetic": "TWAIS"}]}
 {"guid": "D99_004", "forms": [{"grammatical_form": "adverb/en_positive", "text": "once", "is_base_form": true}]}
 {"guid": "D99_005", "forms": [{"grammatical_form": "adverb/en_positive", "text": "again", "is_base_form": true}]}

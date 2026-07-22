@@ -12,7 +12,7 @@
 {"guid": "N42_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "liquor", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "liquors", "is_base_form": false}]}
 {"guid": "N42_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "whiskey", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "whiskeys", "is_base_form": false}]}
 {"guid": "N42_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "vodka", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "vodkas", "is_base_form": false}]}
-{"guid": "N42_016", "forms": [{"grammatical_form": "singular", "text": "rum", "is_base_form": true}]}
+{"guid": "N42_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "rum", "is_base_form": true}]}
 {"guid": "N42_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "champagne", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "champagnes", "is_base_form": false}]}
 {"guid": "N42_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "sake", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "sakes", "is_base_form": false}]}
 {"guid": "N42_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "cider", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "ciders", "is_base_form": false}]}

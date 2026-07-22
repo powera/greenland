@@ -1,6 +1,6 @@
 {"guid": "N15_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "oxygen", "is_base_form": true, "ipa": "/ˈɑksɪdʒən/", "phonetic": "AKS-ih-juh-nən"}]}
-{"guid": "N15_002", "forms": [{"grammatical_form": "singular", "text": "carbon dioxide", "is_base_form": true, "ipa": "/ˈkɑrbən ˌdaɪ ɑːkˌsaɪd/", "phonetic": "CAR-buhn DYE-ox-aid"}]}
-{"guid": "N15_003", "forms": [{"grammatical_form": "singular", "text": "lithium", "is_base_form": true, "ipa": "/ˈlɪθ.i.əm/", "phonetic": "LITH-ee-əm"}]}
+{"guid": "N15_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "carbon dioxide", "is_base_form": true, "ipa": "/ˈkɑrbən ˌdaɪ ɑːkˌsaɪd/", "phonetic": "CAR-buhn DYE-ox-aid"}]}
+{"guid": "N15_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "lithium", "is_base_form": true, "ipa": "/ˈlɪθ.i.əm/", "phonetic": "LITH-ee-əm"}]}
 {"guid": "N15_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "hydrogen", "is_base_form": true}]}
 {"guid": "N15_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "nitrogen", "is_base_form": true}]}
 {"guid": "N15_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "ammonia", "is_base_form": true}]}
