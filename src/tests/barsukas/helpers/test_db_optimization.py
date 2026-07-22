@@ -34,10 +34,21 @@ class TestGetHomePageStats:
         assert all(v == 0 for v in result.values())
 
     def test_counts_match_seed_data(self, seeded_session: Session) -> None:
+        # Derived from the seed rather than hardcoded: adding a lemma to the
+        # shared fixture should not require editing a literal here.
+        expected_total = seeded_session.query(Lemma).count()
+        expected_verified = seeded_session.query(Lemma).filter(Lemma.verified.is_(True)).count()
+        expected_with_difficulty = (
+            seeded_session.query(Lemma).filter(Lemma.difficulty_level.isnot(None)).count()
+        )
+
         result = get_home_page_stats(seeded_session)
-        assert result["total_lemmas"] == 2
-        assert result["verified_lemmas"] == 1  # only "eat" is verified
-        assert result["with_difficulty"] == 2  # both have difficulty_level
+
+        assert result["total_lemmas"] == expected_total
+        assert result["verified_lemmas"] == expected_verified
+        assert result["with_difficulty"] == expected_with_difficulty
+        # Guard the derivation itself: the seed must exercise both branches.
+        assert 0 < expected_verified < expected_total
 
 
 class TestGetLemmaListFilterOptions:

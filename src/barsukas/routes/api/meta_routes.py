@@ -49,7 +49,7 @@ def api_info() -> ResponseReturnValue:
                     "name": "q",
                     "type": "query",
                     "required": False,
-                    "description": "Search query (searches lemma text, definition, disambiguation, translations). Empty/omitted matches all lemmas.",
+                    "description": "Search query (searches lemma text, definition, disambiguation, translations, and English derivative/variant forms). Empty/omitted matches all lemmas.",
                 },
                 {
                     "name": "pos_type",

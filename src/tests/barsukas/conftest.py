@@ -23,6 +23,7 @@ from storage.models.schema import (
     Sentence,
     SentenceTranslation,
 )
+from storage.models.variant_form import VariantForm
 
 
 @pytest.fixture()
@@ -75,8 +76,34 @@ def _seed_database(session: Session) -> None:
         confidence=0.9,
         verified=False,
     )
-    session.add_all([lemma1, lemma2])
+    # "gray" carries the alternate spelling "grey" in variant_forms rather than
+    # as its own lemma -- the case where search and the import guard used to
+    # disagree about what the database contains.
+    lemma3 = Lemma(
+        id=3,
+        lemma_text="gray",
+        definition_text="of a color between black and white",
+        pos_type="adjective",
+        pos_subtype="color",
+        guid="J01_001",
+        difficulty_level=2,
+        confidence=0.9,
+        verified=False,
+    )
+    session.add_all([lemma1, lemma2, lemma3])
     session.flush()
+
+    session.add(
+        VariantForm(
+            lemma_id=3,
+            language_code="en",
+            variant_kind="spelling",
+            variant_key="grey",
+            grammatical_form="adjective/en_positive",
+            variant_form_text="grey",
+            is_base_form=True,
+        )
+    )
 
     # Add a table-based translation for lemma1
     t1 = LemmaTranslation(lemma_id=1, language_code="fr", translation="manger")

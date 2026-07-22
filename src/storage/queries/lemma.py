@@ -5,7 +5,13 @@ from typing import Any, Dict, Iterable, List, Optional, Set
 from sqlalchemy import case, func, or_
 from sqlalchemy.orm import Query, Session
 
-from storage.models.schema import Lemma, LemmaDifficultyOverride, LemmaTranslation
+from storage.models.schema import (
+    DerivativeForm,
+    Lemma,
+    LemmaDifficultyOverride,
+    LemmaTranslation,
+)
+from storage.models.variant_form import VariantForm
 
 
 def apply_effective_difficulty_filter(
@@ -92,9 +98,16 @@ def build_lemma_search_query(
     """
     Build a filtered and ordered lemma query for search/listing.
 
+    The text search covers the same ground as ``word_exists_in_english``: lemma
+    text, definition, disambiguation, translations in any language, and -- for
+    English -- derivative forms and alternate spellings. Folding the last two in
+    keeps search and the import guard agreeing about what the database holds, so
+    "grey" finds the existing "gray" lemma rather than reporting it missing.
+
     Args:
         session: Database session
-        search: Search term to find in lemma text, definition, disambiguation, and translations
+        search: Search term to find in lemma text, definition, disambiguation,
+            translations, and English derivative/variant forms
         pos_type: Filter by part of speech type
         pos_subtype: Filter by part of speech subtype
         difficulty: Filter by difficulty level (supports "-1", "null", or numeric string)
@@ -131,6 +144,23 @@ def build_lemma_search_query(
         )
 
         search_conditions.append(Lemma.id.in_(translation_subquery))
+
+        # English derivative forms ("grayer", "walked") and alternate spellings
+        # ("grey" for "gray"). Without these, search disagrees with
+        # word_exists_in_english about what the database contains -- the guard
+        # folds both in, so a caller surveying for missing words gets one answer
+        # from search and another from the add endpoint.
+        derivative_subquery = session.query(DerivativeForm.lemma_id).filter(
+            DerivativeForm.language_code == "en",
+            DerivativeForm.derivative_form_text.ilike(f"%{search}%"),
+        )
+        search_conditions.append(Lemma.id.in_(derivative_subquery))
+
+        variant_subquery = session.query(VariantForm.lemma_id).filter(
+            VariantForm.language_code == "en",
+            VariantForm.variant_form_text.ilike(f"%{search}%"),
+        )
+        search_conditions.append(Lemma.id.in_(variant_subquery))
 
         query = query.filter(or_(*search_conditions))
 
@@ -173,7 +203,27 @@ def build_lemma_search_query(
                 ),
                 6,
             ),
-            else_=7,
+            # An alternate spelling is a closer hit than an inflection: "grey"
+            # names the same lexeme, "walked" is a form of it.
+            (
+                Lemma.id.in_(
+                    session.query(VariantForm.lemma_id).filter(
+                        VariantForm.language_code == "en",
+                        func.lower(VariantForm.variant_form_text).contains(search_lower),
+                    )
+                ),
+                7,
+            ),
+            (
+                Lemma.id.in_(
+                    session.query(DerivativeForm.lemma_id).filter(
+                        DerivativeForm.language_code == "en",
+                        func.lower(DerivativeForm.derivative_form_text).contains(search_lower),
+                    )
+                ),
+                8,
+            ),
+            else_=9,
         )
         if display_translation_joined:
             display_text_order = func.lower(

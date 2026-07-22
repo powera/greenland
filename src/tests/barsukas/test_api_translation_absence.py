@@ -98,8 +98,9 @@ def test_lemma_summaries_include_lexical_gap_reason(client, db_engine) -> None:
         detail_response.get_json()["data"]["lexical_gap_reason"]
         == "post-classical domestic architecture sense"
     )
-    listed = list_response.get_json()["data"][0]
-    assert listed["guid"] == "N01_001"
+    # Find the lemma under test rather than indexing: other seed lemmas share
+    # difficulty 2, and the listing is ordered alphabetically within a level.
+    listed = next(item for item in list_response.get_json()["data"] if item["guid"] == "N01_001")
     assert listed["lexical_gap_reason"] == "post-classical domestic architecture sense"
 
 

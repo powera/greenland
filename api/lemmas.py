@@ -32,6 +32,11 @@ class SearchResponse(TypedDict):
     metadata: Dict[str, Any]
 
 
+class WordsExistResponse(TypedDict):
+    data: Dict[str, bool]
+    metadata: Dict[str, Any]
+
+
 class TranslationMapResponse(TypedDict):
     data: Dict[str, str]
     metadata: Dict[str, Any]
@@ -219,8 +224,33 @@ def add_lemmas(lemmas: List[AddLemmaInput]) -> Any:
     return post_json(f"{API_V1_PREFIX}/lemmas/add", {"lemmas": lemmas})
 
 
+@mirrored_route("/api/v1/words/exists", "POST")
+def words_exist(words: List[str], include_exclusions: bool = True) -> WordsExistResponse:
+    """Check which English words the database already accounts for.
+
+    The bulk, exact-accounting counterpart to :func:`search`: it answers the same
+    question :func:`add_word` asks before minting, so a wordlist survey agrees
+    with what the add endpoint will do. A word counts as existing if it appears
+    as a lemma, a disambiguated lemma, an English derivative form, or an
+    alternate spelling. Makes no LLM call and writes nothing.
+
+    ``include_exclusions`` defaults to true, matching how :func:`add_word` gates
+    imports. Pass false to measure dictionary coverage, where a word on the
+    exclusions list is genuinely absent.
+
+    ``data`` maps each word, lowercased, to a boolean. At most 150 words.
+    """
+    return cast(
+        WordsExistResponse,
+        post_json(
+            f"{API_V1_PREFIX}/words/exists",
+            {"words": words, "include_exclusions": include_exclusions},
+        ),
+    )
+
+
 @mirrored_route("/api/v1/words/add", "POST")
-def add_word(word: str, model: str, dry_run: bool = False) -> Any:
+def add_word(word: str, model: str) -> Any:
     """Add a single English word to the database, from just the word.
 
     Unlike :func:`add_lemmas` (which takes fully specified lemma rows), this runs
@@ -231,11 +261,20 @@ def add_word(word: str, model: str, dry_run: bool = False) -> Any:
 
     A word already accounted for -- as a lemma, disambiguated lemma, English
     derivative form or alternate spelling -- returns ``status`` ``"already_exists"``
-    and nothing is written. Pass ``dry_run=True`` to preview without writing.
+    and nothing is written. Use :func:`words_exist` to check first without paying
+    for the LLM call.
+
+    Senses landing on a catch-all ``*_other`` subtype for an open-class word are
+    diverted to the pending-import queue for human review rather than written as
+    lemmas, and come back in ``pending_senses``. A word whose every sense is
+    diverted returns ``status`` ``"pending_review"``.
+
+    There is no preview mode: a preview needs the LLM call, and that call is
+    non-deterministic, so it cannot predict what a committing run writes.
     """
     return post_json(
         f"{API_V1_PREFIX}/words/add",
-        {"word": word, "model": model, "dry_run": dry_run},
+        {"word": word, "model": model},
     )
 
 

@@ -3,8 +3,10 @@
 add_word turns a bare English word into one lemma per sense worth adding. The
 LLM call is stubbed here by replacing the LinguisticClient it constructs, so no
 real definitions call is made -- the tests cover the logic layered on top of the
-LLM: the existence guard, frequency-driven sense sizing, the closed-class
-single-sense cap, translation-duplicate collapse, and subtype normalization.
+LLM: the existence guard, frequency-driven sense sizing (including the fallback
+to inflected surface forms), the closed-class single-sense cap,
+translation-duplicate collapse, subtype normalization, and the diversion of
+catch-all ``*_other`` subtypes to the pending-import queue.
 """
 
 from pathlib import Path
@@ -17,6 +19,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models import Base, Lemma, WordToken
+from storage.models.imports import PendingImport
 from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
 from words import add_word as add_word_module
 from words.add_word import (
@@ -24,6 +27,7 @@ from words.add_word import (
     _apply_pos_sense_cap,
     _drop_translation_duplicates,
     _extend_for_prominence_ties,
+    _inflected_candidates,
     _normalize_subtype,
     _sense_bounds,
     add_word,
@@ -197,6 +201,87 @@ def test_translation_duplicates_collapsed() -> None:
     assert len(collapsed) == 1
 
 
+def test_accent_differences_collapse() -> None:
+    """An accent apart is the same word: "proteger" vs "protéger"."""
+    senses = [
+        _def("to watch over", pos="verb", spanish_translation="proteger"),
+        _def("to prevent harm", pos="verb", spanish_translation="protéger"),
+    ]
+    kept, collapsed = _drop_translation_duplicates(senses)
+    assert len(kept) == 1
+    assert len(collapsed) == 1
+
+
+def test_prefix_differences_collapse() -> None:
+    """The TODO's case: lt marks aspect with a prefix, so these are one sense."""
+    senses = [
+        _def("to watch over", pos="verb", lithuanian_translation="saugoti"),
+        _def("to prevent harm", pos="verb", lithuanian_translation="apsaugoti"),
+    ]
+    kept, collapsed = _drop_translation_duplicates(senses)
+    assert len(kept) == 1
+    assert len(collapsed) == 1
+
+
+def test_genuinely_distinct_senses_survive() -> None:
+    """Regression guard from the TODO: "further" must not be over-merged.
+
+    D08_001 (distance) and D09_010 (intensity) are a real English split. Their
+    translations differ outright in every language, so unanimity keeps them.
+    """
+    senses = [
+        _def(
+            "at a greater distance",
+            pos="adverb",
+            lithuanian_translation="toliau",
+            spanish_translation="más lejos",
+            french_translation="plus loin",
+        ),
+        _def(
+            "to a greater extent",
+            pos="adverb",
+            lithuanian_translation="labiau",
+            spanish_translation="más",
+            french_translation="davantage",
+        ),
+    ]
+    kept, collapsed = _drop_translation_duplicates(senses)
+    assert len(kept) == 2
+    assert collapsed == []
+
+
+def test_unrelated_words_are_not_merged_by_the_prefix_rule() -> None:
+    """The tolerance must not swallow words that merely share an ending."""
+    senses = [
+        _def("a small animal", pos="noun", lithuanian_translation="katinas"),
+        _def("a large animal", pos="noun", lithuanian_translation="arklys"),
+    ]
+    kept, collapsed = _drop_translation_duplicates(senses)
+    assert len(kept) == 2
+    assert collapsed == []
+
+
+def test_partial_translation_agreement_does_not_collapse() -> None:
+    """Every language must agree; one matching language is not enough."""
+    senses = [
+        _def(
+            "sense one",
+            pos="verb",
+            lithuanian_translation="saugoti",
+            spanish_translation="proteger",
+        ),
+        _def(
+            "sense two",
+            pos="verb",
+            lithuanian_translation="apsaugoti",
+            spanish_translation="vigilar",
+        ),
+    ]
+    kept, collapsed = _drop_translation_duplicates(senses)
+    assert len(kept) == 2
+    assert collapsed == []
+
+
 def test_normalize_subtype_closed_class() -> None:
     assert _normalize_subtype("preposition", "preposition") == "preposition_other"
     assert _normalize_subtype("conjunction", "other") == "conjunction_other"
@@ -361,19 +446,6 @@ def test_add_word_closed_class_single_sense(
     assert session.query(Lemma).filter(Lemma.lemma_text == "unless").count() == 1
 
 
-def test_add_word_dry_run_writes_nothing(
-    session: Session, config: DataSourceConfig, patch_client: Any
-) -> None:
-    patch_client([_def("a domesticated carnivore", pos="noun", pos_subtype="animal")])
-    _seed_word_token(session, "dog", rank=300)
-
-    result = add_word(session, "dog", config=config, dry_run=True)
-
-    assert result.status == "created"
-    assert len(result.senses) == 1
-    assert session.query(Lemma).filter(Lemma.lemma_text == "dog").count() == 0
-
-
 def test_add_word_no_definitions(
     session: Session, config: DataSourceConfig, patch_client: Any
 ) -> None:
@@ -383,3 +455,225 @@ def test_add_word_no_definitions(
 
     assert result.status == "no_definitions"
     assert result.senses == []
+
+
+# --- Frequency rank falls back to inflected forms ---------------------------
+
+
+def test_inflected_candidates_are_pos_directed() -> None:
+    """Each POS gets only its own inflections; closed-class gets none.
+
+    This is the guard against the whole point of the POS-directed lookup: a
+    blind generator would offer "exclaimer" for a verb and "guards" for both a
+    noun and a verb.
+    """
+    assert set(_inflected_candidates("exclaim", "verb")) == {
+        "exclaims",
+        "exclaimed",
+        "exclaiming",
+    }
+    assert _inflected_candidates("guard", "noun") == ["guards"]
+    assert set(_inflected_candidates("merry", "adjective")) == {"merrier", "merriest"}
+    assert _inflected_candidates("within", "preposition") == []
+
+
+def test_rank_falls_back_to_an_inflected_form(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """The TODO's case: the corpus holds "exclaimed", not "exclaim"."""
+    patch_client([_def("to cry out suddenly", pos="verb", pos_subtype="communication")])
+    _seed_word_token(session, "exclaimed", rank=1500)
+
+    result = add_word(session, "exclaim", config=config)
+
+    assert result.frequency_rank == 1500
+    assert result.frequency_rank_source == "exclaimed"
+
+
+def test_exact_form_beats_an_inflected_match(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """A rank for the word itself always wins, even if an inflection ranks better."""
+    patch_client([_def("to watch over", pos="verb", pos_subtype="physical_action")])
+    _seed_word_token(session, "guard", rank=900)
+    _seed_word_token(session, "guarded", rank=100)
+
+    result = add_word(session, "guard", config=config)
+
+    assert result.frequency_rank == 900
+    assert result.frequency_rank_source == "guard"
+
+
+def test_wrong_pos_inflection_is_not_consulted(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """A verb must not pick up the adjective comparative "exclaimer".
+
+    Without POS-directed candidates this token would be found, and because a
+    lower rank means *more* frequent, it would silently widen the sense ceiling.
+    """
+    patch_client([_def("to cry out suddenly", pos="verb", pos_subtype="communication")])
+    _seed_word_token(session, "exclaimer", rank=50)
+
+    result = add_word(session, "exclaim", config=config)
+
+    assert result.frequency_rank is None
+    assert result.frequency_rank_source is None
+
+
+def test_inflected_rank_widens_the_sense_ceiling(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """The rank is only worth recovering because it sizes sense selection.
+
+    Four very_common senses with no rank are capped at 2 by the fallback band;
+    the same senses at rank 500 are allowed 4.
+    """
+    definitions = [
+        _def(f"sense {n}", pos="verb", pos_subtype="physical_action", prominence="very_common")
+        for n in range(4)
+    ]
+    patch_client(definitions)
+    _seed_word_token(session, "guarded", rank=500)
+
+    result = add_word(session, "guard", config=config)
+
+    assert result.frequency_rank == 500
+    assert result.frequency_rank_source == "guarded"
+    assert len(result.senses) == 4
+
+
+def test_irregular_inflections_are_not_reached(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """Known limitation: the candidates are rule-based, so "struck" is missed.
+
+    ``generate_past_tense("strike")`` gives "striked". Recovering irregular
+    forms would need the conjugation tables, which is a larger change; the
+    fallback is documented as best-effort and simply finds nothing here.
+    """
+    patch_client([_def("to hit forcefully", pos="verb", pos_subtype="physical_action")])
+    _seed_word_token(session, "struck", rank=500)
+
+    result = add_word(session, "strike", config=config)
+
+    assert result.frequency_rank is None
+    assert result.status == "created"  # still added, just unsized
+
+
+def test_no_definitions_skips_the_frequency_lookup(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """No POS means no rank: the lookup needs one to pick candidates."""
+    patch_client([])
+    _seed_word_token(session, "zzznotaword", rank=10)
+
+    result = add_word(session, "zzznotaword", config=config)
+
+    assert result.status == "no_definitions"
+    assert result.frequency_rank is None
+
+
+# --- *_other subtypes are diverted to the pending queue ---------------------
+
+
+def test_other_subtype_on_open_class_is_queued_not_written(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    patch_client(
+        [
+            _def(
+                "to watch over and protect",
+                pos="verb",
+                pos_subtype="verb_other",
+                lithuanian_translation="saugoti",
+            )
+        ]
+    )
+
+    result = add_word(session, "guard", config=config)
+
+    assert result.status == "pending_review"
+    assert result.senses == []
+    assert session.query(Lemma).filter(Lemma.lemma_text == "guard").count() == 0
+
+    pending = session.query(PendingImport).filter(PendingImport.english_word == "guard").all()
+    assert len(pending) == 1
+    assert pending[0].pos_subtype == "verb_other"
+    assert pending[0].disambiguation_translation == "saugoti"
+
+    assert len(result.pending_senses) == 1
+    assert result.pending_senses[0].guid == ""
+
+
+def test_other_subtype_on_closed_class_is_still_written(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """The only preposition subtype is "preposition_other" -- not a review signal."""
+    patch_client([_def("inside the limits of", pos="preposition", pos_subtype="preposition_other")])
+
+    result = add_word(session, "within", config=config)
+
+    assert result.status == "created"
+    assert len(result.senses) == 1
+    assert session.query(Lemma).filter(Lemma.lemma_text == "within").count() == 1
+    assert session.query(PendingImport).count() == 0
+
+
+def test_mixed_senses_both_write_and_queue(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """A word can create some lemmas and queue others; status stays "created"."""
+    patch_client(
+        [
+            _def(
+                "a person who watches over",
+                pos="noun",
+                pos_subtype="human",
+                lithuanian_translation="sargas",
+            ),
+            _def(
+                "an unplaceable sense",
+                pos="noun",
+                pos_subtype="noun_other",
+                lithuanian_translation="kita",
+            ),
+        ]
+    )
+    _seed_word_token(session, "guard", rank=500)
+
+    result = add_word(session, "guard", config=config)
+
+    assert result.status == "created"
+    assert len(result.senses) == 1
+    assert len(result.pending_senses) == 1
+    assert session.query(Lemma).filter(Lemma.lemma_text == "guard").count() == 1
+    assert session.query(PendingImport).filter(PendingImport.english_word == "guard").count() == 1
+
+
+def test_queued_sense_falls_back_to_definition_for_disambiguation(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """disambiguation_translation is NOT NULL, so it needs a fallback."""
+    patch_client([_def("an unplaceable sense", pos="noun", pos_subtype="noun_other")])
+
+    add_word(session, "guard", config=config)
+
+    pending = session.query(PendingImport).filter(PendingImport.english_word == "guard").one()
+    assert pending.disambiguation_translation == "an unplaceable sense"
+
+
+def test_queueing_the_same_sense_twice_is_not_duplicated(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    """Re-running a word must not stack duplicate rows in the review queue."""
+    definitions = [_def("an unplaceable sense", pos="noun", pos_subtype="noun_other")]
+    patch_client(definitions)
+    add_word(session, "guard", config=config)
+
+    patch_client(definitions)
+    result = add_word(session, "guard", config=config)
+
+    assert session.query(PendingImport).filter(PendingImport.english_word == "guard").count() == 1
+    assert result.pending_senses == []
+    assert any("already in the pending queue" in entry for entry in result.dropped_senses)
