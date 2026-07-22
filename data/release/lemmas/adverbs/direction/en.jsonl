@@ -3,4 +3,4 @@
 {"guid": "D06_003", "forms": [{"grammatical_form": "adverb/en_positive", "text": "east", "is_base_form": true, "ipa": "/iːst/", "phonetic": "EEST"}]}
 {"guid": "D06_004", "forms": [{"grammatical_form": "adverb/en_positive", "text": "west", "is_base_form": true, "ipa": "/wɛst/", "phonetic": "WEST"}]}
 {"guid": "D06_005", "forms": [{"grammatical_form": "adverb/en_positive", "text": "right", "is_base_form": true, "ipa": "/raɪt/", "phonetic": "RYT"}]}
-{"guid": "D06_006", "forms": [{"grammatical_form": "positive", "text": "left", "is_base_form": true}]}
+{"guid": "D06_006", "forms": [{"grammatical_form": "adverb/en_positive", "text": "left", "is_base_form": true}]}

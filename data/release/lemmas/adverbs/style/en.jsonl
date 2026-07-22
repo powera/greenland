@@ -24,7 +24,7 @@
 {"guid": "D01_025", "forms": [{"grammatical_form": "adverb/en_positive", "text": "softly", "is_base_form": true, "ipa": "/ˈsɑftli/", "phonetic": "SOFT-lee"}, {"grammatical_form": "adverb/en_comparative", "text": "more softly", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "most softly", "is_base_form": false}]}
 {"guid": "D01_026", "forms": [{"grammatical_form": "adverb/en_positive", "text": "slightly", "is_base_form": true, "ipa": "/ˈslaɪtli/", "phonetic": "SLY-tli"}]}
 {"guid": "D01_027", "forms": [{"grammatical_form": "adverb/en_positive", "text": "silently", "is_base_form": true, "ipa": "/ˈsaɪləntli/", "phonetic": "SY-lee-nt-lee"}, {"grammatical_form": "adverb/en_comparative", "text": "more silently", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "most silently", "is_base_form": false}]}
-{"guid": "D01_028", "forms": [{"grammatical_form": "positive", "text": "according", "is_base_form": true, "ipa": "/əˈkɔrdɪŋ/", "phonetic": "uh-KORD-ing"}]}
+{"guid": "D01_028", "forms": [{"grammatical_form": "adverb/en_positive", "text": "according", "is_base_form": true, "ipa": "/əˈkɔrdɪŋ/", "phonetic": "uh-KORD-ing"}]}
 {"guid": "D01_029", "forms": [{"grammatical_form": "adverb/en_positive", "text": "apparently", "is_base_form": true, "ipa": "/əˈpɑrəntli/", "phonetic": "uh-PAR-uhnt-li"}]}
 {"guid": "D01_030", "forms": [{"grammatical_form": "adverb/en_positive", "text": "evidently", "is_base_form": true, "ipa": "/ˈɛvɪdəntli/", "phonetic": "E-vi-dent-lee"}]}
 {"guid": "D01_031", "forms": [{"grammatical_form": "adverb/en_positive", "text": "entirely", "is_base_form": true, "ipa": "/ɪnˈtaɪəli/", "phonetic": "IN-tye-er-lee"}]}

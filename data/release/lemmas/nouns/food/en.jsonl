@@ -28,7 +28,7 @@
 {"guid": "N06_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "ketchup", "is_base_form": true, "ipa": "/kəˈtʃɛp/", "phonetic": "KUH-chehp"}, {"grammatical_form": "noun/en_plural", "text": "ketchups", "is_base_form": false}]}
 {"guid": "N06_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "mayonnaise", "is_base_form": true, "ipa": "IPA", "phonetic": "phonetic"}]}
 {"guid": "N06_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "vinegar", "is_base_form": true, "ipa": "/ˈvaɪn.ɡɚ/", "phonetic": "VINE-ger"}, {"grammatical_form": "noun/en_plural", "text": "vinegars", "is_base_form": false}]}
-{"guid": "N06_037", "forms": [{"grammatical_form": "singular", "text": "cooking oil", "is_base_form": true, "ipa": "/ˌkuːkɪŋ ˈɔɪl/", "phonetic": "COO-king OIL"}]}
+{"guid": "N06_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "cooking oil", "is_base_form": true, "ipa": "/ˌkuːkɪŋ ˈɔɪl/", "phonetic": "COO-king OIL"}]}
 {"guid": "N06_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "flour", "is_base_form": true, "ipa": "/flaʊər/", "phonetic": "FLA-wur"}]}
 {"guid": "N06_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "corn", "is_base_form": true, "ipa": "/kɔːrn/", "phonetic": "CURN"}]}
 {"guid": "N06_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "bean", "is_base_form": true, "ipa": "/biːn/", "phonetic": "BEE-n"}, {"grammatical_form": "noun/en_plural", "text": "beans", "is_base_form": false}]}
@@ -66,7 +66,7 @@
 {"guid": "N06_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "sausage", "is_base_form": true, "ipa": "/ˈsɔːsɪdʒ/", "phonetic": "SOO-sidz"}, {"grammatical_form": "noun/en_plural", "text": "sausages", "is_base_form": false}]}
 {"guid": "N06_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "ham", "is_base_form": true, "ipa": "ˈhæm", "phonetic": "HAM"}, {"grammatical_form": "noun/en_plural", "text": "hams", "is_base_form": false}]}
 {"guid": "N06_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "bacon", "is_base_form": true, "ipa": "/ˈbæk.ən/", "phonetic": "BAK-uhn"}]}
-{"guid": "N06_075", "forms": [{"grammatical_form": "singular", "text": "chicken meat", "is_base_form": true, "ipa": "/tʃɪkɪn miːt/", "phonetic": "CHIK-in MEAT"}]}
+{"guid": "N06_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "chicken meat", "is_base_form": true, "ipa": "/tʃɪkɪn miːt/", "phonetic": "CHIK-in MEAT"}]}
 {"guid": "N06_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "beef", "is_base_form": true, "ipa": "/biːf/", "phonetic": "BEEF"}]}
 {"guid": "N06_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "pork", "is_base_form": true, "ipa": "/pɔːrk/", "phonetic": "POHRK"}]}
 {"guid": "N06_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "lamb", "is_base_form": true, "ipa": "/læm/", "phonetic": "LAM"}, {"grammatical_form": "noun/en_plural", "text": "lambs", "is_base_form": false}]}
@@ -80,7 +80,7 @@
 {"guid": "N06_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "breakfast", "is_base_form": true, "ipa": "/ˈbriːkfəst/", "phonetic": "BREEK-fəst"}, {"grammatical_form": "noun/en_plural", "text": "breakfasts", "is_base_form": false}]}
 {"guid": "N06_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "lunch", "is_base_form": true, "ipa": "/lʌntʃ/", "phonetic": "LUNCH"}, {"grammatical_form": "noun/en_plural", "text": "lunches", "is_base_form": false}]}
 {"guid": "N06_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "dinner", "is_base_form": true, "ipa": "/ˈdɪnər/", "phonetic": "DIN-uh-er"}, {"grammatical_form": "noun/en_plural", "text": "dinners", "is_base_form": false}]}
-{"guid": "N06_091", "forms": [{"grammatical_form": "singular", "text": "sour cream", "is_base_form": true, "ipa": "/ˈsaʊər kriːm/", "phonetic": "SOO-uh KREE-m"}]}
+{"guid": "N06_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "sour cream", "is_base_form": true, "ipa": "/ˈsaʊər kriːm/", "phonetic": "SOO-uh KREE-m"}]}
 {"guid": "N06_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "food", "is_base_form": true, "ipa": "/fuːd/", "phonetic": "FOOD"}]}
 {"guid": "N06_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "produce", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "produces", "is_base_form": false}]}
 {"guid": "N06_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "pancake", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "pancakes", "is_base_form": false}]}

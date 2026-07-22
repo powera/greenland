@@ -2,7 +2,7 @@
 {"guid": "N02_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "cat", "is_base_form": true, "ipa": "/kæt/", "phonetic": "CAT"}, {"grammatical_form": "noun/en_plural", "text": "cats", "is_base_form": false}]}
 {"guid": "N02_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "bird", "is_base_form": true, "ipa": "/bɜːrd/", "phonetic": "BIRD"}, {"grammatical_form": "noun/en_plural", "text": "birds", "is_base_form": false}]}
 {"guid": "N02_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "horse", "is_base_form": true, "ipa": "/hɔːrs/", "phonetic": "HAWR-s"}, {"grammatical_form": "noun/en_plural", "text": "horses", "is_base_form": false}]}
-{"guid": "N02_005", "forms": [{"grammatical_form": "singular", "text": "cattle", "is_base_form": true, "ipa": "/ˈkæt.əl/", "phonetic": "KAT-tul"}, {"grammatical_form": "noun/en_singular", "text": "cow", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "cows", "is_base_form": false}]}
+{"guid": "N02_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "cow", "is_base_form": true, "ipa": "/kaʊ/", "phonetic": "KAW"}, {"grammatical_form": "noun/en_plural", "text": "cows", "is_base_form": false}]}
 {"guid": "N02_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "pig", "is_base_form": true, "ipa": "/pɪɡ/", "phonetic": "PIG"}, {"grammatical_form": "noun/en_plural", "text": "pigs", "is_base_form": false}]}
 {"guid": "N02_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "chicken", "is_base_form": true, "ipa": "/ˈtʃɪk.ɪn/", "phonetic": "CHIK-uhn"}, {"grammatical_form": "noun/en_plural", "text": "chickens", "is_base_form": false}]}
 {"guid": "N02_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "mouse", "is_base_form": true, "ipa": "/maʊs/", "phonetic": "MAWs"}, {"grammatical_form": "noun/en_plural", "text": "mice", "is_base_form": false}]}
@@ -50,7 +50,7 @@
 {"guid": "N02_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "bat", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "bats", "is_base_form": false}]}
 {"guid": "N02_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "camel", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "camels", "is_base_form": false}]}
 {"guid": "N02_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "gorilla", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "gorillas", "is_base_form": false}]}
-{"guid": "N02_053", "forms": [{"grammatical_form": "singular", "text": "hippopotamus", "is_base_form": true}]}
+{"guid": "N02_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "hippopotamus", "is_base_form": true}]}
 {"guid": "N02_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "rhinoceros", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "rhinoceroses", "is_base_form": false}]}
 {"guid": "N02_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "leopard", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "leopards", "is_base_form": false}]}
 {"guid": "N02_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "kangaroo", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "kangaroos", "is_base_form": false}]}

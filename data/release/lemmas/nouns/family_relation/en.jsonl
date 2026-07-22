@@ -24,12 +24,12 @@
 {"guid": "N35_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "wife", "is_base_form": true, "ipa": "/waɪf/", "phonetic": "WAH-f"}, {"grammatical_form": "noun/en_plural", "text": "wives", "is_base_form": false}]}
 {"guid": "N35_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "husband", "is_base_form": true, "ipa": "/ˈhʌzbənd/", "phonetic": "HUZ-bənd"}, {"grammatical_form": "noun/en_plural", "text": "husbands", "is_base_form": false}]}
 {"guid": "N35_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "cousin", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "cousins", "is_base_form": false}]}
-{"guid": "N35_089", "forms": [{"grammatical_form": "singular", "text": "father-in-law", "is_base_form": true}]}
-{"guid": "N35_090", "forms": [{"grammatical_form": "singular", "text": "mother-in-law", "is_base_form": true}]}
-{"guid": "N35_091", "forms": [{"grammatical_form": "singular", "text": "son-in-law", "is_base_form": true}]}
-{"guid": "N35_092", "forms": [{"grammatical_form": "singular", "text": "daughter-in-law", "is_base_form": true}]}
-{"guid": "N35_093", "forms": [{"grammatical_form": "singular", "text": "brother-in-law", "is_base_form": true}]}
-{"guid": "N35_094", "forms": [{"grammatical_form": "singular", "text": "sister-in-law", "is_base_form": true}]}
+{"guid": "N35_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "father-in-law", "is_base_form": true}]}
+{"guid": "N35_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "mother-in-law", "is_base_form": true}]}
+{"guid": "N35_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "son-in-law", "is_base_form": true}]}
+{"guid": "N35_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "daughter-in-law", "is_base_form": true}]}
+{"guid": "N35_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "brother-in-law", "is_base_form": true}]}
+{"guid": "N35_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "sister-in-law", "is_base_form": true}]}
 {"guid": "N35_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "stepfather", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stepfathers", "is_base_form": false}]}
 {"guid": "N35_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "stepmother", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stepmothers", "is_base_form": false}]}
 {"guid": "N35_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "stepson", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stepsons", "is_base_form": false}]}

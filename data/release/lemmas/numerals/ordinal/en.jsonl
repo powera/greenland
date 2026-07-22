@@ -1,10 +1,10 @@
-{"guid": "Z02_001", "forms": [{"grammatical_form": "lemma", "text": "first", "is_base_form": true, "ipa": "/fɝst/", "phonetic": "FURST"}]}
-{"guid": "Z02_002", "forms": [{"grammatical_form": "lemma", "text": "second", "is_base_form": true, "ipa": "ˈsɛkənd", "phonetic": "SEE-kənd"}]}
-{"guid": "Z02_003", "forms": [{"grammatical_form": "lemma", "text": "third", "is_base_form": true, "ipa": "/ðɜːrd/", "phonetic": "THURD"}]}
-{"guid": "Z02_004", "forms": [{"grammatical_form": "lemma", "text": "fourth", "is_base_form": true, "ipa": "/fɔːrð/", "phonetic": "FOUR-d"}]}
-{"guid": "Z02_005", "forms": [{"grammatical_form": "lemma", "text": "fifth", "is_base_form": true, "ipa": "/fɪfθ/", "phonetic": "FIF-th"}]}
-{"guid": "Z02_006", "forms": [{"grammatical_form": "lemma", "text": "sixth", "is_base_form": true, "ipa": "/sɪksθ/", "phonetic": "SIXS-TH"}]}
-{"guid": "Z02_007", "forms": [{"grammatical_form": "lemma", "text": "seventh", "is_base_form": true}]}
-{"guid": "Z02_008", "forms": [{"grammatical_form": "lemma", "text": "eighth", "is_base_form": true, "ipa": "/eɪtʃ/", "phonetic": "EYCH"}]}
-{"guid": "Z02_009", "forms": [{"grammatical_form": "lemma", "text": "ninth", "is_base_form": true}]}
-{"guid": "Z02_010", "forms": [{"grammatical_form": "lemma", "text": "tenth", "is_base_form": true}]}
+{"guid": "Z02_001", "forms": [{"grammatical_form": "numeral/en_ordinal", "text": "first", "is_base_form": true, "ipa": "/fɝst/", "phonetic": "FURST"}]}
+{"guid": "Z02_002", "forms": [{"grammatical_form": "numeral/en_ordinal", "text": "second", "is_base_form": true, "ipa": "ˈsɛkənd", "phonetic": "SEE-kənd"}]}
+{"guid": "Z02_003", "forms": [{"grammatical_form": "numeral/en_ordinal", "text": "third", "is_base_form": true, "ipa": "/ðɜːrd/", "phonetic": "THURD"}]}
+{"guid": "Z02_004", "forms": [{"grammatical_form": "numeral/en_ordinal", "text": "fourth", "is_base_form": true, "ipa": "/fɔːrð/", "phonetic": "FOUR-d"}]}
+{"guid": "Z02_005", "forms": [{"grammatical_form": "numeral/en_ordinal", "text": "fifth", "is_base_form": true, "ipa": "/fɪfθ/", "phonetic": "FIF-th"}]}
+{"guid": "Z02_006", "forms": [{"grammatical_form": "numeral/en_ordinal", "text": "sixth", "is_base_form": true, "ipa": "/sɪksθ/", "phonetic": "SIXS-TH"}]}
+{"guid": "Z02_007", "forms": [{"grammatical_form": "numeral/en_ordinal", "text": "seventh", "is_base_form": true}]}
+{"guid": "Z02_008", "forms": [{"grammatical_form": "numeral/en_ordinal", "text": "eighth", "is_base_form": true, "ipa": "/eɪtʃ/", "phonetic": "EYCH"}]}
+{"guid": "Z02_009", "forms": [{"grammatical_form": "numeral/en_ordinal", "text": "ninth", "is_base_form": true}]}
+{"guid": "Z02_010", "forms": [{"grammatical_form": "numeral/en_ordinal", "text": "tenth", "is_base_form": true}]}

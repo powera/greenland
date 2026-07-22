@@ -1,7 +1,7 @@
 {"guid": "D07_001", "forms": [{"grammatical_form": "adverb/en_positive", "text": "now", "is_base_form": true, "ipa": "naʊ", "phonetic": "NAH-ow"}]}
 {"guid": "D07_002", "forms": [{"grammatical_form": "adverb/en_positive", "text": "always", "is_base_form": true, "ipa": "/ˈɔːlweɪz/", "phonetic": "AL-ways"}]}
 {"guid": "D07_003", "forms": [{"grammatical_form": "adverb/en_positive", "text": "never", "is_base_form": true, "ipa": "/ˈnɛvər/", "phonetic": "NEE-vər"}]}
-{"guid": "D07_004", "forms": [{"grammatical_form": "positive", "text": "often", "is_base_form": true, "ipa": "/ˈɒftən/", "phonetic": "OFF-tən"}]}
+{"guid": "D07_004", "forms": [{"grammatical_form": "adverb/en_positive", "text": "often", "is_base_form": true, "ipa": "/ˈɒftən/", "phonetic": "OFF-tən"}]}
 {"guid": "D07_005", "forms": [{"grammatical_form": "adverb/en_positive", "text": "sometimes", "is_base_form": true, "ipa": "/ˈsʌm.taɪmz/", "phonetic": "SOOM-tymes"}]}
 {"guid": "D07_006", "forms": [{"grammatical_form": "adverb/en_positive", "text": "here", "is_base_form": true, "ipa": "/hɪər/", "phonetic": "HEER"}]}
 {"guid": "D07_007", "forms": [{"grammatical_form": "adverb/en_positive", "text": "there", "is_base_form": true, "ipa": "/ðər/", "phonetic": "THUR"}]}
@@ -13,10 +13,10 @@
 {"guid": "D07_013", "forms": [{"grammatical_form": "adverb/en_positive", "text": "away", "is_base_form": true, "ipa": "/əˈweɪ/", "phonetic": "uh-WAY"}]}
 {"guid": "D07_014", "forms": [{"grammatical_form": "adverb/en_positive", "text": "far", "is_base_form": true, "ipa": "fɑː", "phonetic": "FAAR"}, {"grammatical_form": "adverb/en_comparative", "text": "farther", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "farthest", "is_base_form": false}]}
 {"guid": "D07_015", "forms": [{"grammatical_form": "adverb/en_positive", "text": "near", "is_base_form": true, "ipa": "/nɪr/", "phonetic": "NEER"}, {"grammatical_form": "adverb/en_comparative", "text": "nearer", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "nearest", "is_base_form": false}]}
-{"guid": "D07_016", "forms": [{"grammatical_form": "positive", "text": "round", "is_base_form": true, "ipa": "/raʊnd/", "phonetic": "ROWnd"}]}
+{"guid": "D07_016", "forms": [{"grammatical_form": "adverb/en_positive", "text": "round", "is_base_form": true, "ipa": "/raʊnd/", "phonetic": "ROWnd"}]}
 {"guid": "D07_017", "forms": [{"grammatical_form": "adverb/en_positive", "text": "forward", "is_base_form": true, "ipa": "/ˈfɔːrd/", "phonetic": "FOWRD"}]}
 {"guid": "D07_018", "forms": [{"grammatical_form": "adverb/en_positive", "text": "ahead", "is_base_form": true, "ipa": "/əˈhɛd/", "phonetic": "uh-HED"}]}
-{"guid": "D07_019", "forms": [{"grammatical_form": "positive", "text": "distant", "is_base_form": true, "ipa": "/ˈdɪs.tənt/", "phonetic": "DIS-tuhnt"}]}
+{"guid": "D07_019", "forms": [{"grammatical_form": "adverb/en_positive", "text": "distant", "is_base_form": true, "ipa": "/ˈdɪs.tənt/", "phonetic": "DIS-tuhnt"}]}
 {"guid": "D07_020", "forms": [{"grammatical_form": "adverb/en_positive", "text": "directly", "is_base_form": true, "ipa": "/dəˈrɛktli/", "phonetic": "DYUR-ek-tlee"}, {"grammatical_form": "adverb/en_comparative", "text": "more directly", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "most directly", "is_base_form": false}]}
 {"guid": "D07_021", "forms": [{"grammatical_form": "adverb/en_positive", "text": "anywhere", "is_base_form": true, "ipa": "/ˈɛniˌhɛwɚ/", "phonetic": "EH-nigh-HUR-er"}]}
 {"guid": "D07_022", "forms": [{"grammatical_form": "adverb/en_positive", "text": "aside", "is_base_form": true, "ipa": "/əˈsaɪd/", "phonetic": "uh-SYD"}]}
@@ -33,6 +33,6 @@
 {"guid": "D07_033", "forms": [{"grammatical_form": "adverb/en_positive", "text": "overhead", "is_base_form": true, "ipa": "/oʊvɚˈhɛd/", "phonetic": "OH-vuh-HED"}]}
 {"guid": "D07_034", "forms": [{"grammatical_form": "adverb/en_positive", "text": "somewhere", "is_base_form": true, "ipa": "/ˈsʌmweɪər/", "phonetic": "SOO-mweh-er"}]}
 {"guid": "D07_035", "forms": [{"grammatical_form": "adverb/en_positive", "text": "off", "is_base_form": true, "ipa": "/ɒf/", "phonetic": "OFF"}]}
-{"guid": "D07_036", "forms": [{"grammatical_form": "positive", "text": "nearby", "is_base_form": true}]}
+{"guid": "D07_036", "forms": [{"grammatical_form": "adverb/en_positive", "text": "nearby", "is_base_form": true}]}
 {"guid": "D07_037", "forms": [{"grammatical_form": "adverb/en_positive", "text": "online", "is_base_form": true}]}
 {"guid": "D07_038", "forms": [{"grammatical_form": "adverb/en_positive", "text": "upstairs", "is_base_form": true}]}

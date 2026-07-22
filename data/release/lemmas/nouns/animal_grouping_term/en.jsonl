@@ -1,5 +1,5 @@
-{"guid": "N27_001", "forms": [{"grammatical_form": "singular", "text": "(generic counter for animals)", "is_base_form": true, "ipa": "/ˌdʒə.ner.ɪk ˈkaʊn.tər ˈfɔːr ˈæn.ɪ.məlz/", "phonetic": "JEN-er-ik KOWN-ter FOR AN-i-mals"}]}
-{"guid": "N27_002", "forms": [{"grammatical_form": "singular", "text": "head (of cattle)", "is_base_form": true}]}
-{"guid": "N27_003", "forms": [{"grammatical_form": "singular", "text": "(counter for horses)", "is_base_form": true, "ipa": "/ˈkaʊntər/", "phonetic": "COUN-tuh"}]}
+{"guid": "N27_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "(generic counter for animals)", "is_base_form": true, "ipa": "/ˌdʒə.ner.ɪk ˈkaʊn.tər ˈfɔːr ˈæn.ɪ.məlz/", "phonetic": "JEN-er-ik KOWN-ter FOR AN-i-mals"}]}
+{"guid": "N27_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "head (of cattle)", "is_base_form": true}]}
+{"guid": "N27_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "(counter for horses)", "is_base_form": true, "ipa": "/ˈkaʊntər/", "phonetic": "COUN-tuh"}]}
 {"guid": "N27_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "school", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "schools", "is_base_form": false}]}
 {"guid": "N27_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "pride", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "prides", "is_base_form": false}]}
