@@ -119,6 +119,8 @@ class OpenAIClient:
     @measure_completion
     def _create_response(self, **kwargs: Any) -> Dict[str, Any]:
         """Make direct HTTP request to OpenAI responses endpoint."""
+        clients.lib.assert_llm_calls_enabled("openai")
+
         url = f"{API_BASE}/responses"
 
         if self.debug:
