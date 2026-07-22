@@ -14,6 +14,12 @@ two-step pending-import flow (staging queue + human review) for a different
 workflow, but shares the same ``select_senses_to_add`` / ``query_definitions``
 building blocks.
 
+Not every sense is committed. A sense that lands on a catch-all ``*_other``
+subtype for an open-class word is diverted to that same pending-import queue
+instead of becoming a lemma, on the reasoning that "noun_other" out of 55
+available noun subtypes is usually the LLM failing to place the sense rather
+than a sense with genuinely no category.
+
 The "does the database already have this word?" guard is
 ``word_exists_in_english`` -- the canonical check that folds in lemmas,
 disambiguated lemmas, English derivative forms and alternate spellings
@@ -27,9 +33,19 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
+from langtools.en.utils import (
+    generate_3s_present,
+    generate_comparative,
+    generate_past_tense,
+    generate_present_participle,
+    generate_regular_plural,
+    generate_superlative,
+)
+from langtools.collation import strip_diacritics
 from storage.backend.config import DataSourceConfig
 from storage.crud.operation_log import log_translation_change
 from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
+from storage.models.imports import PendingImport
 from storage.models.schema import (
     SENSE_PROMINENCE_COMMON,
     ExternalLexemeAnnotation,
@@ -54,6 +70,14 @@ DIFFICULTY_LEVEL = -1
 # Languages the definitions call already returns per sense, stored as the lemma
 # is created so no second LLM call is needed for them.
 TRANSLATION_LANGUAGES: Tuple[str, ...] = DEFINITIONS_PROMPT_LANGUAGES
+# Language whose translation disambiguates a queued sense for the human
+# reviewer, matching what DRAMBLYS stages.
+REVIEW_DISAMBIGUATION_LANGUAGE = "lt"
+# How much extra leading material two translations may differ by and still count
+# as the same word when collapsing duplicate senses. Sized for the Lithuanian
+# aspect prefix ("saugoti" vs "apsaugoti"); wide enough for a prefix, too narrow
+# to merge unrelated words.
+_STEM_PREFIX_TOLERANCE = 3
 
 # Frequency-driven sense sizing. A word's overall corpus rank sets only the
 # *ceiling* on how many senses to bother with -- it is a signal about the word,
@@ -94,41 +118,109 @@ class AddWordResult:
 
     ``status`` is one of:
       * ``"created"`` -- one or more lemmas were created (see ``senses``)
+      * ``"pending_review"`` -- every surviving sense went to the pending queue
+        instead of the database (see ``pending_senses``); no lemma was created
       * ``"already_exists"`` -- the word is already accounted for; nothing done
       * ``"no_definitions"`` -- the LLM returned no usable senses
       * ``"error"`` -- a sense failed validation/GUID minting; see ``error``
+
+    ``created`` and ``pending_review`` are not exclusive in effect: a word can
+    create some lemmas and queue others, in which case the status is
+    ``"created"`` and both lists are populated.
     """
 
     word: str
     status: str
     frequency_rank: Optional[int] = None
+    # Surface form the rank came from. Differs from ``word`` when the corpus
+    # holds only an inflection ("exclaimed" for "exclaim"); None when no rank
+    # was found at all.
+    frequency_rank_source: Optional[str] = None
     senses: List[SenseResult] = field(default_factory=list)
+    # Senses routed to the pending-import queue for human subtype review rather
+    # than written as lemmas. Their ``guid`` is empty: none was minted.
+    pending_senses: List[SenseResult] = field(default_factory=list)
     dropped_senses: List[str] = field(default_factory=list)
     error: Optional[str] = None
 
 
-def _lookup_frequency(session: Session, word: str) -> Tuple[Optional[int], List[Dict[str, Any]]]:
-    """Return the word's overall corpus rank and its per-corpus rank breakdown.
+def _inflected_candidates(word: str, pos_type: str) -> List[str]:
+    """Return mechanically generated surface forms of ``word`` for this POS.
+
+    Used only to find a corpus rank when the base form itself is absent: the
+    19th/20th-century book corpora hold "exclaimed" but not "exclaim".
+
+    Strictly POS-directed, and that is the whole point. Generating every
+    inflection blind would be actively harmful, because the corpora are large
+    enough that wrong-POS candidates hit real tokens -- "exclaim" yields
+    "exclaimer", "further" yields "furtherer", and the noun plural collides with
+    the 3s present outright ("guards" is both). A spurious match returns a
+    *lower* rank, and ``_SENSE_BANDS`` reads lower as more frequent, so guessing
+    wrong silently buys a word extra senses. Closed-class POS types get no
+    candidates at all: they do not inflect, and anything generated for them
+    would be noise.
+
+    All generators here are rule-based, no LLM -- which also bounds what this
+    can recover: irregular forms are out of reach ("strike" yields "striked",
+    never "struck"), so a word whose corpus evidence is entirely irregular still
+    comes back unranked. That is the pre-existing behavior, not a regression;
+    closing it would mean consulting the conjugation tables.
+    """
+    if pos_type == "verb":
+        return [
+            generate_3s_present(word),
+            generate_past_tense(word),
+            generate_present_participle(word),
+        ]
+    if pos_type == "noun":
+        return [generate_regular_plural(word)]
+    if pos_type in ("adjective", "adverb"):
+        return [generate_comparative(word), generate_superlative(word)]
+    return []
+
+
+def _lookup_frequency(
+    session: Session, word: str, pos_type: str
+) -> Tuple[Optional[int], Optional[str], List[Dict[str, Any]]]:
+    """Return the word's corpus rank, the form it came from, and its breakdown.
 
     ``frequency_rank`` is the combined harmonic-mean rank on the ``WordToken``;
     the per-corpus list mirrors what DRAMBLYS records so the operation log
-    carries the same provenance. Both are ``None``/empty when the word is not in
-    the frequency corpora -- which is not an error here: the word is added
-    anyway, the rank just informs sense sizing.
+    carries the same provenance. All three are ``None``/empty when neither the
+    word nor any of its inflections is in the frequency corpora -- which is not
+    an error here: the word is added anyway, the rank just informs sense sizing.
+
+    The exact form always wins when present. Only when it is absent does the
+    best (numerically lowest) rank among ``_inflected_candidates`` stand in, so
+    a word whose corpus evidence is entirely inflected still gets sized against
+    real usage rather than falling to the tightest band by default.
     """
-    token = (
+    candidates = [word] + [
+        candidate for candidate in _inflected_candidates(word, pos_type) if candidate != word
+    ]
+    tokens = (
         session.query(WordToken)
-        .filter(WordToken.language_code == "en", WordToken.token == word)
-        .first()
+        .filter(WordToken.language_code == "en", WordToken.token.in_(candidates))
+        .all()
     )
-    if token is None:
-        return None, []
+    if not tokens:
+        return None, None, []
+
+    by_token = {token.token: token for token in tokens}
+    chosen = by_token.get(word)
+    if chosen is None:
+        ranked: List[Tuple[int, WordToken]] = [
+            (token.frequency_rank, token) for token in tokens if token.frequency_rank is not None
+        ]
+        if not ranked:
+            return None, None, []
+        chosen = min(ranked, key=lambda pair: pair[0])[1]
 
     corpus_info: List[Dict[str, Any]] = []
     annotations = (
         session.query(ExternalLexemeAnnotation)
         .filter(
-            ExternalLexemeAnnotation.word_token_id == token.id,
+            ExternalLexemeAnnotation.word_token_id == chosen.id,
             ExternalLexemeAnnotation.source.like("wordfreq_%"),
         )
         .all()
@@ -141,7 +233,7 @@ def _lookup_frequency(session: Session, word: str) -> Tuple[Optional[int], List[
                 "frequency": annotation.frequency,
             }
         )
-    return token.frequency_rank, corpus_info
+    return chosen.frequency_rank, chosen.token, corpus_info
 
 
 def _sense_bounds(frequency_rank: Optional[int]) -> Tuple[int, int]:
@@ -192,6 +284,46 @@ def _apply_pos_sense_cap(senses: List[Dict[str, Any]]) -> Tuple[List[Dict[str, A
     return senses[:1], dropped
 
 
+def _normalize_translation(text: Optional[str]) -> str:
+    """Accent-fold and case-fold one translation for duplicate comparison."""
+    return strip_diacritics((text or "").strip()).lower()
+
+
+def _same_stem(first: str, second: str) -> bool:
+    """Whether two normalized translations are one word with a prefix apart.
+
+    Lithuanian marks aspect with a prefix, so the LLM's two "guard" senses came
+    back as ``saugoti`` and ``apsaugoti`` -- the same verb, described twice.
+    Matching a bare suffix relation with a short tolerance catches that without
+    doing real stemming: ``proteger``/``protéger`` is already handled by the
+    accent fold, and unrelated words rarely differ by only a two-letter prefix.
+
+    Order-independent: the longer string is chosen before testing the suffix
+    relation, so the caller need not normalize argument order.
+    """
+    if not first or not second:
+        return False
+    if first == second:
+        return True
+    longer, shorter = (first, second) if len(first) >= len(second) else (second, first)
+    extra = len(longer) - len(shorter)
+    return 0 < extra <= _STEM_PREFIX_TOLERANCE and longer.endswith(shorter)
+
+
+def _translations_match(first: Tuple[str, ...], second: Tuple[str, ...]) -> bool:
+    """Whether two whole translation tuples describe the same sense.
+
+    Every language must agree. A real distinction shows up as different words in
+    several languages at once -- "further"'s distance and intensity senses differ
+    in lt/es/fr together -- so requiring unanimity keeps those apart while still
+    collapsing the accent/prefix noise.
+    """
+    return all(
+        _same_stem(left, right) if (left and right) else left == right
+        for left, right in zip(first, second)
+    )
+
+
 def _drop_translation_duplicates(
     senses: List[Dict[str, Any]],
 ) -> Tuple[List[Dict[str, Any]], List[str]]:
@@ -208,31 +340,46 @@ def _drop_translation_duplicates(
     guessing, not a real distinction. Senses arrive prominence-ordered, so the
     first one wins.
 
+    Comparison is not literal. Exact matching let "guard" through as two
+    ``verb_other`` senses that were the same sense twice, because the two rows
+    read lt ``saugoti``/``apsaugoti``, es ``proteger``/``protéger`` -- an accent
+    and a prefix apart. Each translation is accent-folded, and two are treated
+    as the same when one is a suffix of the other with at most
+    ``_STEM_PREFIX_TOLERANCE`` characters of extra leading material.
+
     Returns:
         (kept senses, human-readable descriptions of the senses collapsed)
     """
     kept: List[Dict[str, Any]] = []
+    kept_keys: List[Tuple[str, Tuple[str, ...], str]] = []
     collapsed: List[str] = []
-    seen: Dict[Tuple[str, ...], str] = {}
 
     for sense in senses:
         by_lang_code = convert_llm_response_to_lang_codes(sense)
         translations = tuple(
-            (by_lang_code.get(lang_code) or "").strip().lower()
+            _normalize_translation(by_lang_code.get(lang_code))
             for lang_code in TRANSLATION_LANGUAGES
         )
         if not any(translations):
             kept.append(sense)
             continue
 
-        key = (sense.get("pos") or "",) + translations
-        first = seen.get(key)
-        if first is not None:
-            definition = (sense.get("definition") or "")[:40]
-            collapsed.append(f"{definition} (same pos+translations as {first!r})")
+        pos_type = sense.get("pos") or ""
+        definition = (sense.get("definition") or "")[:40]
+
+        duplicate_of = next(
+            (
+                seen_definition
+                for seen_pos, seen_translations, seen_definition in kept_keys
+                if seen_pos == pos_type and _translations_match(seen_translations, translations)
+            ),
+            None,
+        )
+        if duplicate_of is not None:
+            collapsed.append(f"{definition} (same pos+translations as {duplicate_of!r})")
             continue
 
-        seen[key] = (sense.get("definition") or "")[:40]
+        kept_keys.append((pos_type, translations, definition))
         kept.append(sense)
 
     return kept, collapsed
@@ -258,6 +405,70 @@ def _normalize_subtype(pos_type: str, pos_subtype: Optional[str]) -> Optional[st
     if pos_subtype == "other" and canonical in subtypes:
         return canonical
     return pos_subtype
+
+
+def _needs_subtype_review(pos_type: str, pos_subtype: str) -> bool:
+    """Whether this sense should go to the pending queue instead of the database.
+
+    ``*_other`` is the catch-all subtype, and on an open-class word it usually
+    means the LLM could not place the sense rather than that the sense genuinely
+    has no category -- noun has 55 subtypes and verb 14, so "noun_other" is a
+    near-miss worth a human look before it becomes a lemma.
+
+    Restricted to the open-class POS types on purpose. Every closed-class type
+    (preposition, conjunction, article, determiner, pronoun, interjection) has
+    ``<pos>_other`` as its *only* subtype, so treating "_other" as suspicious
+    there would divert every preposition in the language to review.
+    """
+    return pos_type in MAJOR_POS_TYPES and pos_subtype.endswith("_other")
+
+
+def _stage_for_review(
+    session: Session,
+    word: str,
+    sense: Dict[str, Any],
+    *,
+    pos_type: str,
+    pos_subtype: str,
+    definition_text: str,
+    frequency_rank: Optional[int],
+    source: str,
+) -> bool:
+    """Write one sense to the pending-import queue. Returns False if already there.
+
+    ``disambiguation_translation`` is NOT NULL on ``PendingImport``, so it falls
+    back to the definition when the LLM returned no Lithuanian -- the same
+    fallback ``stage_missing_words_for_import`` uses.
+    """
+    existing = (
+        session.query(PendingImport.id)
+        .filter(
+            PendingImport.english_word == word,
+            PendingImport.definition == definition_text,
+        )
+        .first()
+    )
+    if existing is not None:
+        return False
+
+    by_lang_code = convert_llm_response_to_lang_codes(sense)
+    disambiguation = (by_lang_code.get(REVIEW_DISAMBIGUATION_LANGUAGE) or "").strip()
+
+    session.add(
+        PendingImport(
+            english_word=word,
+            definition=definition_text,
+            disambiguation_translation=disambiguation or definition_text,
+            disambiguation_language=REVIEW_DISAMBIGUATION_LANGUAGE,
+            pos_type=pos_type,
+            pos_subtype=pos_subtype,
+            source=source,
+            frequency_rank=frequency_rank,
+            notes=f"add_word: {pos_subtype} needs subtype review before import",
+        )
+    )
+    session.commit()
+    return True
 
 
 def _validate_pos(pos_type: str, pos_subtype: Optional[str]) -> Optional[str]:
@@ -321,22 +532,47 @@ def _extend_for_prominence_ties(
     return selected + extras
 
 
-def _pick_senses(
-    client: LinguisticClient, word: str, frequency_rank: Optional[int]
-) -> Tuple[List[Dict[str, Any]], List[str]]:
-    """Ask the LLM for the word's senses and keep the ones worth adding.
+def _query_senses(client: LinguisticClient, word: str) -> List[Dict[str, Any]]:
+    """Ask the LLM for every sense of the word. One LLM call, no filtering.
 
-    One LLM call. Selection is frequency-sized (``_sense_bounds``), extended to
-    include senses tied in prominence at the ceiling (``_extend_for_prominence_ties``),
-    then capped for closed-class parts of speech (``_apply_pos_sense_cap``), then
+    Split from :func:`_select_senses` because selection is frequency-sized and
+    the frequency lookup is POS-directed -- so the POS has to come back from
+    this call before the rank can be looked up. Nothing about the call itself
+    depends on the rank.
+    """
+    definitions_list, success = client.query_definitions(word)
+    if not success or not definitions_list:
+        return []
+    return definitions_list
+
+
+def _leading_pos_type(definitions_list: List[Dict[str, Any]]) -> str:
+    """POS of the most prominent sense, used to direct the frequency lookup.
+
+    ``query_definitions`` returns senses prominence-ordered, and
+    ``_apply_pos_sense_cap`` already treats the first sense's POS as the word's
+    POS -- mixed-POS answers are the LLM guessing. Same assumption here.
+    """
+    if not definitions_list:
+        return ""
+    return (definitions_list[0].get("pos") or "").lower()
+
+
+def _select_senses(
+    definitions_list: List[Dict[str, Any]], frequency_rank: Optional[int]
+) -> Tuple[List[Dict[str, Any]], List[str]]:
+    """Keep the senses worth adding from an already-fetched definitions list.
+
+    Selection is frequency-sized (``_sense_bounds``), extended to include senses
+    tied in prominence at the ceiling (``_extend_for_prominence_ties``), then
+    capped for closed-class parts of speech (``_apply_pos_sense_cap``), then
     collapsed where the LLM over-split into translation-identical senses
     (``_drop_translation_duplicates``).
 
     Returns:
         (selected senses, human-readable descriptions of the senses dropped)
     """
-    definitions_list, success = client.query_definitions(word)
-    if not success or not definitions_list:
+    if not definitions_list:
         return [], []
 
     min_senses, max_senses = _sense_bounds(frequency_rank)
@@ -396,20 +632,29 @@ def add_word(
     config: DataSourceConfig,
     model: Optional[str] = None,
     source: str = "add_word",
-    dry_run: bool = False,
 ) -> AddWordResult:
     """Add a single English word to the database, from just the word.
 
-    Runs the full pipeline: existence guard, frequency lookup, one LLM call for
-    the word's senses, frequency-sized and closed-class-capped sense selection,
-    translation-duplicate collapse, then one lemma per surviving sense with a
-    minted GUID and the translations the definitions call returned.
+    Runs the full pipeline: existence guard, one LLM call for the word's senses,
+    a POS-directed frequency lookup, frequency-sized and closed-class-capped
+    sense selection, translation-duplicate collapse, then one lemma per
+    surviving sense with a minted GUID and the translations the definitions call
+    returned.
+
+    Note the order: the frequency lookup follows the LLM call rather than
+    preceding it, because knowing which inflections to search the corpora for
+    requires knowing the word's POS. A word the LLM cannot define therefore
+    returns with ``frequency_rank`` unset -- there was no POS to look it up
+    with, and nothing left to size.
 
     The word is committed per sense on success (a multi-sense word is a series
     of small writes, not one all-or-nothing transaction), matching how the
-    batch importer behaves. ``dry_run`` runs the whole pipeline -- including the
-    LLM call, which is needed to show what would be written -- but writes
-    nothing and rolls back.
+    batch importer behaves.
+
+    There is deliberately no preview mode. Showing what would be written
+    requires the LLM call, and that call is non-deterministic, so a preview does
+    not predict what a subsequent committing run produces -- it costs money to
+    show a result that will not reproduce.
 
     Args:
         session: Database session.
@@ -417,10 +662,9 @@ def add_word(
         config: Data source configuration for the ``LinguisticClient``.
         model: LLM model override; falls back to ``config.model``.
         source: Operation-log source tag.
-        dry_run: Run the pipeline without writing (still makes the LLM call).
 
     Returns:
-        An :class:`AddWordResult` describing what was (or would be) created.
+        An :class:`AddWordResult` describing what was created.
     """
     normalized = word.strip()
     if not normalized:
@@ -432,19 +676,30 @@ def add_word(
     if word_exists_in_english(session, normalized, include_exclusions=True):
         return AddWordResult(word=normalized, status="already_exists")
 
-    frequency_rank, corpus_info = _lookup_frequency(session, normalized)
-    best_corpus_rank = min((c["rank"] for c in corpus_info if c["rank"] is not None), default=None)
-
     client_config = config.with_model(model) if model else config
     client = LinguisticClient(config=client_config)
     client_model = client_config.model
 
-    senses, dropped = _pick_senses(client, normalized, frequency_rank)
+    # The definitions call comes first because the frequency lookup needs the
+    # word's POS to know which inflections to look for, and only the LLM knows
+    # the POS. Sense *selection* then consumes the rank, so the order is
+    # definitions -> POS -> rank -> selection.
+    definitions_list = _query_senses(client, normalized)
+    if not definitions_list:
+        return AddWordResult(word=normalized, status="no_definitions")
+
+    frequency_rank, rank_source, corpus_info = _lookup_frequency(
+        session, normalized, _leading_pos_type(definitions_list)
+    )
+    best_corpus_rank = min((c["rank"] for c in corpus_info if c["rank"] is not None), default=None)
+
+    senses, dropped = _select_senses(definitions_list, frequency_rank)
     if not senses:
         return AddWordResult(
             word=normalized,
             status="no_definitions",
             frequency_rank=frequency_rank,
+            frequency_rank_source=rank_source,
             dropped_senses=dropped,
         )
 
@@ -452,9 +707,9 @@ def add_word(
         word=normalized,
         status="created",
         frequency_rank=frequency_rank,
+        frequency_rank_source=rank_source,
         dropped_senses=dropped,
     )
-    issued_guids: Dict[str, str] = {}
 
     try:
         for sense in senses:
@@ -474,11 +729,45 @@ def add_word(
                     word=normalized,
                     status="error",
                     frequency_rank=frequency_rank,
+                    frequency_rank_source=rank_source,
                     senses=result.senses,
                     dropped_senses=dropped,
                     error=f"LLM gave {pos_error}",
                 )
             assert pos_subtype is not None  # _validate_pos rejects None
+
+            # A catch-all subtype on an open-class word is usually the LLM
+            # failing to place the sense. Queue it for review rather than
+            # minting a GUID that a human would have to undo.
+            if _needs_subtype_review(pos_type, pos_subtype):
+                staged = _stage_for_review(
+                    session,
+                    normalized,
+                    sense,
+                    pos_type=pos_type,
+                    pos_subtype=pos_subtype,
+                    definition_text=definition_text,
+                    frequency_rank=frequency_rank,
+                    source=source,
+                )
+                if staged:
+                    result.pending_senses.append(
+                        SenseResult(
+                            guid="",
+                            pos_type=pos_type,
+                            pos_subtype=pos_subtype,
+                            definition_text=definition_text,
+                            sense_prominence=prominence,
+                            translations={
+                                code: value
+                                for code, value in convert_llm_response_to_lang_codes(sense).items()
+                                if code in TRANSLATION_LANGUAGES and value
+                            },
+                        )
+                    )
+                else:
+                    dropped.append(f"{definition_text[:40]} (already in the pending queue)")
+                continue
 
             try:
                 guid = generate_guid(session, pos_type, pos_subtype)
@@ -488,15 +777,11 @@ def add_word(
                     word=normalized,
                     status="error",
                     frequency_rank=frequency_rank,
+                    frequency_rank_source=rank_source,
                     senses=result.senses,
                     dropped_senses=dropped,
                     error=f"GUID generation: {exc}",
                 )
-
-            # In dry-run nothing is flushed, so generate_guid returns the same
-            # GUID for same-subtype senses; note the collision rather than
-            # reporting it twice as distinct.
-            issued_guids.setdefault(guid, normalized)
 
             sense_result = SenseResult(
                 guid=guid,
@@ -505,14 +790,6 @@ def add_word(
                 definition_text=definition_text,
                 sense_prominence=prominence,
             )
-
-            if dry_run:
-                preview = convert_llm_response_to_lang_codes(sense)
-                sense_result.translations = {
-                    code: preview[code] for code in TRANSLATION_LANGUAGES if preview.get(code)
-                }
-                result.senses.append(sense_result)
-                continue
 
             new_lemma = Lemma(
                 lemma_text=normalized,
@@ -552,13 +829,13 @@ def add_word(
             # so a failure on a later sense does not discard the earlier ones.
             session.commit()
             result.senses.append(sense_result)
-
-        if dry_run:
-            session.rollback()
     except Exception:
         session.rollback()
         raise
 
     if not result.senses:
-        result.status = "no_definitions"
+        # Distinguish "the LLM gave us nothing usable" from "everything it gave
+        # us is waiting on a human": the second is a queue to work through, not
+        # a dead end.
+        result.status = "pending_review" if result.pending_senses else "no_definitions"
     return result

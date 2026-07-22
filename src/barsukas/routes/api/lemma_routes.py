@@ -997,6 +997,69 @@ def add_lemmas() -> ResponseReturnValue:
     )
 
 
+MAX_EXISTS_WORDS = 150
+
+
+@bp.route("/v1/words/exists", methods=["POST"])
+@mirrored_facade("/api/v1/words/exists", "POST")
+def words_exist_endpoint() -> ResponseReturnValue:
+    """Check which of a list of English words the database already accounts for.
+
+    This is the exact-accounting counterpart to ``/v1/search``: it answers the
+    same question ``/v1/words/add`` asks before minting anything, so a caller
+    surveying a wordlist gets the same verdict the add endpoint will. A word
+    counts as existing if it appears as a lemma, a disambiguated lemma, an
+    English derivative form, or an alternate spelling in ``variant_forms``.
+
+    Makes no LLM call and writes nothing.
+
+    JSON body:
+      - ``words``: list of English words to check (required, max 150).
+      - ``include_exclusions``: also count words on the English exclusions list.
+        Optional, default true -- matching how ``/v1/words/add`` gates imports,
+        so a word rejected once is not re-proposed. Pass false to measure
+        dictionary coverage, where an excluded word is genuinely absent.
+
+    Returns a ``data`` object mapping each word (lowercased) to a boolean.
+    """
+    from storage.queries.lemma import filter_existing_english_words
+
+    payload = request.get_json(silent=True) or {}
+    words = payload.get("words")
+    if not isinstance(words, list) or not words:
+        return _build_error_response("words is required and must be a non-empty list")
+    if not all(isinstance(word, str) for word in words):
+        return _build_error_response("words must be a list of strings")
+    if len(words) > MAX_EXISTS_WORDS:
+        return _build_error_response(
+            f"words may contain at most {MAX_EXISTS_WORDS} entries; got {len(words)}"
+        )
+
+    include_exclusions = payload.get("include_exclusions", True)
+    if not isinstance(include_exclusions, bool):
+        return _build_error_response("include_exclusions must be a boolean")
+
+    existing = filter_existing_english_words(g.db, words, include_exclusions=include_exclusions)
+
+    # Key on the normalized word, since that is what the helper reports back and
+    # what "already exists" is actually keyed on. Duplicates in the request
+    # collapse to one entry.
+    results = {}
+    for word in words:
+        normalized = word.strip().lower()
+        if normalized:
+            results[normalized] = normalized in existing
+
+    return _build_success_response(
+        results,
+        {
+            "checked": len(results),
+            "existing": sum(1 for found in results.values() if found),
+            "include_exclusions": include_exclusions,
+        },
+    )
+
+
 @bp.route("/v1/words/add", methods=["POST"])
 @mirrored_facade("/api/v1/words/add", "POST")
 def add_word_endpoint() -> ResponseReturnValue:
@@ -1012,13 +1075,19 @@ def add_word_endpoint() -> ResponseReturnValue:
     JSON body:
       - ``word``: the English word to add (required).
       - ``model``: LLM model name (required).
-      - ``dry_run``: if true, run the pipeline (including the LLM call) but write
-        nothing; the response shows what would be created. Optional, default
-        false.
 
     Synchronous, one word per request. A word already accounted for -- as a
     lemma, disambiguated lemma, English derivative form or alternate spelling --
     is returned with ``status: "already_exists"`` and nothing is written.
+
+    Senses that land on a catch-all ``*_other`` subtype for an open-class word
+    are diverted to the pending-import queue for human review instead of being
+    written as lemmas; they come back in ``pending_senses`` with an empty GUID.
+    A word whose every sense is diverted returns ``status: "pending_review"``.
+
+    There is no preview mode: a preview needs the LLM call, and that call is
+    non-deterministic, so it cannot predict what a committing run writes. A
+    request still sending ``dry_run`` is rejected rather than silently written.
     """
     from storage.backend.config import BackendType, DataSourceConfig
     from words.add_word import add_word
@@ -1032,9 +1101,14 @@ def add_word_endpoint() -> ResponseReturnValue:
     if not isinstance(word, str) or not word.strip():
         return _build_error_response("word is required and must be a non-empty string")
 
-    dry_run_raw = payload.get("dry_run", False)
-    if not isinstance(dry_run_raw, bool):
-        return _build_error_response("dry_run must be a boolean")
+    # Fail loudly on the removed flag: a caller that still sends dry_run=True is
+    # expecting a preview, and silently committing would be the worst outcome.
+    if "dry_run" in payload:
+        return _build_error_response(
+            "dry_run is no longer supported: the preview required the LLM call and "
+            "was non-deterministic, so it did not predict what a committing run "
+            "writes. Remove the flag to write, or do not call this endpoint."
+        )
 
     config = DataSourceConfig(
         backend_type=BackendType.SQLITE,
@@ -1048,32 +1122,37 @@ def add_word_endpoint() -> ResponseReturnValue:
         config=config,
         model=model,
         source=Config.OPERATION_LOG_SOURCE,
-        dry_run=dry_run_raw,
     )
 
     if result.status == "error":
         return _build_error_response(result.error or "failed to add word")
 
+    def _serialize_sense(sense: Any) -> Dict[str, Any]:
+        return {
+            "guid": sense.guid,
+            "pos_type": sense.pos_type,
+            "pos_subtype": sense.pos_subtype,
+            "definition_text": sense.definition_text,
+            "sense_prominence": sense.sense_prominence,
+            "translations": sense.translations,
+        }
+
     data = {
         "word": result.word,
         "status": result.status,
         "frequency_rank": _serialize_value(result.frequency_rank),
-        "senses": [
-            {
-                "guid": sense.guid,
-                "pos_type": sense.pos_type,
-                "pos_subtype": sense.pos_subtype,
-                "definition_text": sense.definition_text,
-                "sense_prominence": sense.sense_prominence,
-                "translations": sense.translations,
-            }
-            for sense in result.senses
-        ],
+        "frequency_rank_source": _serialize_value(result.frequency_rank_source),
+        "senses": [_serialize_sense(sense) for sense in result.senses],
+        "pending_senses": [_serialize_sense(sense) for sense in result.pending_senses],
         "dropped_senses": result.dropped_senses,
     }
     return _build_success_response(
         data,
-        {"model": model, "dry_run": dry_run_raw, "created": len(result.senses)},
+        {
+            "model": model,
+            "created": len(result.senses),
+            "pending": len(result.pending_senses),
+        },
     )
 
 

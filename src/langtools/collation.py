@@ -393,13 +393,21 @@ NON_LATIN_SORT_KEY_LANGUAGES = frozenset(
 SORT_KEY_LANGUAGES = LATIN_SORT_KEY_LANGUAGES | NON_LATIN_SORT_KEY_LANGUAGES
 
 
-def _strip_diacritics(text: str) -> str:
+def strip_diacritics(text: str) -> str:
     """Remove combining diacritical marks via NFD decomposition.
 
     ``"café"`` → ``"cafe"``, ``"über"`` → ``"uber"``, ``"façade"`` → ``"facade"``.
+
+    Public because comparing translations across languages needs the same fold
+    (``words.add_word`` uses it to tell "proteger" and "protéger" apart from a
+    genuine sense distinction).
     """
     nfd = unicodedata.normalize("NFD", text)
     return "".join(ch for ch in nfd if unicodedata.category(ch) != "Mn")
+
+
+# Retained for in-module callers that predate the rename.
+_strip_diacritics = strip_diacritics
 
 
 # Vietnamese tone marks (combining characters) to strip.  These are the

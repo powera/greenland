@@ -46,11 +46,26 @@ Base prefix: `/api`.
   - `lemma_text`/`definition_text`/`pos_type`/`pos_subtype` are required per entry; `difficulty_level` and `translations` are optional. Max 100 entries.
   - GUIDs are assigned automatically from the `pos_type`/`pos_subtype` prefix. An entry whose `(lemma_text, pos_type)` already exists is returned with `status: "already_exists"` and its existing GUID, and is not modified; created entries return `status: "created"`.
 
+- `POST /api/v1/words/exists`
+  - Check which of a list of English words the database already accounts for —
+    the bulk, exact-accounting counterpart to `/api/v1/search`. Makes no LLM
+    call and writes nothing.
+  - Body: `{"words": ["...", ...], "include_exclusions": <bool, optional, default true>}`. Max 150 entries.
+  - Answers the same question `/api/v1/words/add` asks before minting, so a
+    wordlist survey agrees with what the add endpoint will do. A word counts as
+    existing if it appears as a lemma, a disambiguated lemma, an English
+    derivative form, or an alternate spelling (`variant_forms`).
+  - `include_exclusions` defaults to `true`, matching how `/v1/words/add` gates
+    imports. Pass `false` to measure dictionary coverage, where a word on the
+    exclusions list is genuinely absent.
+  - Response `data`: `{"<word>": true|false}`, keyed by the lowercased word.
+    `metadata` carries `{checked, existing, include_exclusions}`.
+
 - `POST /api/v1/words/add`
   - Add a single English word to the database from **just the word** — the
     intelligent counterpart to `/v1/lemmas/add`. **Makes an LLM call and costs
-    money.**
-  - Body: `{"word": "...", "model": "<model-name>", "dry_run": <bool, optional>}`.
+    money.** Use `/api/v1/words/exists` to check first without paying for it.
+  - Body: `{"word": "...", "model": "<model-name>"}`.
   - Queries the LLM for the word's senses, sizes how many senses to add by the
     word's corpus frequency (rarer words get fewer senses), caps closed-class
     words — anything other than noun/verb/adjective/adverb — to a single sense,
@@ -60,11 +75,22 @@ Base prefix: `/api`.
   - A word already accounted for — as a lemma, disambiguated lemma, English
     derivative form, or alternate spelling (`variant_forms`) — returns
     `status: "already_exists"` and nothing is written.
-  - Response `data`: `{word, status, frequency_rank, senses: [{guid, pos_type, pos_subtype, definition_text, sense_prominence, translations}], dropped_senses}`.
-    `status` is one of `created`, `already_exists`, `no_definitions`.
-    `metadata` carries `{model, dry_run, created}`.
-  - `dry_run: true` runs the whole pipeline (still making the LLM call) but
-    writes nothing; the response shows what would be created.
+  - Senses landing on a catch-all `*_other` subtype for an open-class word
+    (noun/verb/adjective/adverb) are diverted to the pending-import queue for
+    human review instead of being written as lemmas, and are returned in
+    `pending_senses` with an empty `guid`. Closed-class words are unaffected:
+    `<pos>_other` is their only subtype. A word whose every surviving sense is
+    diverted returns `status: "pending_review"`.
+  - The corpus rank falls back to inflected forms when the base form is absent
+    from the corpora (the corpus holds `exclaimed`, not `exclaim`). Candidates
+    are generated only for the POS the LLM returned. `frequency_rank_source`
+    names the surface form the rank came from.
+  - Response `data`: `{word, status, frequency_rank, frequency_rank_source, senses: [{guid, pos_type, pos_subtype, definition_text, sense_prominence, translations}], pending_senses: [...], dropped_senses}`.
+    `status` is one of `created`, `pending_review`, `already_exists`, `no_definitions`.
+    `metadata` carries `{model, created, pending}`.
+  - There is no preview mode. A preview needs the LLM call, and that call is
+    non-deterministic, so it cannot predict what a committing run writes. A
+    request still sending `dry_run` is rejected with a 400 rather than written.
 
 - `POST /api/v1/lemma/<main_guid>/merge-synonym/<synonym_guid>`
   - Merge the synonym lemma into the main lemma. Requires the same `pos_type` and at least 3 matching non-empty translations after normalization.
