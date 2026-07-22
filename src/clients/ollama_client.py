@@ -57,6 +57,8 @@ class OllamaClient:
 
     def _make_request(self, endpoint: str, data: Dict) -> requests.Response:
         """Make HTTP request to Ollama API."""
+        clients.lib.assert_llm_calls_enabled("ollama")
+
         url = f"{self.base_url}/{endpoint}"
 
         if self.debug:

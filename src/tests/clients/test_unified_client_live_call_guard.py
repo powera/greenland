@@ -2,7 +2,7 @@
 
 import pytest
 
-from clients import unified_client
+from clients import lib, unified_client
 
 
 def _fail_if_reached(*args, **kwargs):
@@ -46,6 +46,104 @@ def test_guard_is_inert_outside_pytest(monkeypatch):
     monkeypatch.setattr(unified_client, "_get_client", lambda: _StubClient(sentinel))
 
     assert unified_client.warm_model(model="some-model") is sentinel
+
+
+def _blow_up_on_post(*args, **kwargs):
+    raise AssertionError("kill switch did not fire; an HTTP request was attempted")
+
+
+# Each backend's single outbound-request method. The guard lives here rather
+# than on a wrapper: every backend defines its own generate_chat/warm_model and
+# callers hold client objects directly, so a guard on UnifiedLLMClient (or on
+# the module-level helpers) can be routed around. These are the methods that
+# actually reach the network.
+_REQUEST_BOUNDARIES = [
+    ("clients.openai.client", "OpenAIClient", "_create_response", "openai"),
+    ("clients.anthropic.client", "AnthropicClient", "_create_message", "anthropic"),
+    ("clients.gemini_client", "GeminiClient", "_create_completion", "gemini"),
+    ("clients.lmstudio_client", "LMStudioClient", "_make_request", "lmstudio"),
+    ("clients.ollama_client", "OllamaClient", "_make_request", "ollama"),
+    (
+        "clients.translategemma_client",
+        "TranslateGemmaClient",
+        "_make_request",
+        "translategemma",
+    ),
+]
+
+
+@pytest.mark.parametrize("module_name, class_name, method_name, backend", _REQUEST_BOUNDARIES)
+def test_disable_env_blocks_every_backend(
+    monkeypatch, module_name, class_name, method_name, backend
+):
+    """GREENLAND_DISABLE_LLM=1 blocks the outbound request in every backend.
+
+    requests.post is replaced with a raiser, so reaching the network fails the
+    test rather than silently succeeding.
+    """
+    import importlib
+
+    module = importlib.import_module(module_name)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    monkeypatch.setenv("GREENLAND_DISABLE_LLM", "1")
+    monkeypatch.setattr(module.requests, "post", _blow_up_on_post)
+
+    client = object.__new__(getattr(module, class_name))
+    method = getattr(client, method_name)
+
+    with pytest.raises(lib.LLMCallsDisabledError) as excinfo:
+        if method_name == "_create_completion":
+            method("some-model")
+        elif method_name == "_make_request":
+            method("chat/completions", {"model": "some-model"})
+        else:
+            method()
+
+    assert backend in str(excinfo.value)
+
+
+def test_disable_env_blocks_calls_made_through_a_client_object(monkeypatch):
+    """A caller holding a UnifiedLLMClient cannot route around the kill switch.
+
+    This is the path the form-generation agents take: they construct a client
+    and call its generate_chat method, never the module-level wrapper. Guarding
+    only the wrapper left this path live.
+    """
+    from clients.openai import client as openai_client
+
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    monkeypatch.setenv("GREENLAND_DISABLE_LLM", "1")
+    monkeypatch.setattr(openai_client.requests, "post", _blow_up_on_post)
+
+    client = unified_client.UnifiedLLMClient()
+
+    with pytest.raises(lib.LLMCallsDisabledError):
+        client.generate_chat(prompt="hi", model="gpt-5.4-mini")
+
+
+def test_disable_env_takes_priority_over_recording_opt_out(monkeypatch):
+    """The kill switch still fires when GREENLAND_ALLOW_LIVE_LLM=1 is also set.
+
+    The two variables mean different things: the allow-flag only opts a test out
+    of the pytest guard, and must not re-enable a deliberately disabled backend.
+    """
+    from clients.openai import client as openai_client
+
+    monkeypatch.setenv("GREENLAND_ALLOW_LIVE_LLM", "1")
+    monkeypatch.setenv("GREENLAND_DISABLE_LLM", "1")
+    monkeypatch.setattr(openai_client.requests, "post", _blow_up_on_post)
+
+    client = object.__new__(openai_client.OpenAIClient)
+
+    with pytest.raises(lib.LLMCallsDisabledError):
+        client._create_response()
+
+
+def test_disable_env_is_inert_when_unset(monkeypatch):
+    """With the kill switch unset, assert_llm_calls_enabled does nothing."""
+    monkeypatch.delenv("GREENLAND_DISABLE_LLM", raising=False)
+
+    assert lib.assert_llm_calls_enabled("openai") is None
 
 
 class _StubClient:

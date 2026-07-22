@@ -21,6 +21,7 @@ from langtools.wiktionary import WIKTIONARY_TO_TASK_MAPPINGS, get_wiktionary_for
 from storage import database as linguistic_db
 from storage.backend.config import DataSourceConfig
 from storage.connection_pool import get_session
+from storage.crud.operation_log import log_operation
 from storage.models.enums import GrammaticalForm
 from storage.translation_helpers import get_translation
 from wordfreq.translation.client import LinguisticClient
@@ -526,6 +527,7 @@ def process_lemma_forms(
         # Store each form
         stored = 0
         skipped = 0
+        grammar_facts_added = 0
         for form_name, form_text in forms_dict.items():
             if form_name not in form_config.form_mapping:
                 logger.debug(f"Unknown form name: {form_name}, skipping")
@@ -574,6 +576,7 @@ def process_lemma_forms(
                     verified=False,
                 )
                 if grammar_fact:
+                    grammar_facts_added += 1
                     logger.info(
                         f"Added grammar_fact for lemma ID {lemma_id}: number_type={number_type}"
                     )
@@ -596,11 +599,31 @@ def process_lemma_forms(
                     verified=False,
                 )
                 if grammar_fact:
+                    grammar_facts_added += 1
                     logger.info(f"Added grammar_fact for lemma ID {lemma_id}: gender={gender}")
                 else:
                     logger.debug(
                         f"Grammar fact for gender={gender} already exists for lemma ID {lemma_id}"
                     )
+
+        # Record what this run changed. Logged in the same transaction as the
+        # forms themselves, so the log cannot survive a rolled-back write.
+        if stored or grammar_facts_added:
+            log_operation(
+                session,
+                operation_type="derivative_forms_generated",
+                source=f"vilkas-{form_config.language_code}-{form_config.pos_type}",
+                entity_type="derivative_form",
+                lemma_id=lemma_id,
+                details={
+                    "language_code": form_config.language_code,
+                    "pos_type": form_config.pos_type,
+                    "forms_added": stored,
+                    "forms_skipped": skipped,
+                    "grammar_facts_added": grammar_facts_added,
+                    "client_method": form_config.client_method_name,
+                },
+            )
 
         _commit_with_retry(session, lemma_id)
         logger.info(f"Added {stored} forms for lemma ID {lemma_id}")

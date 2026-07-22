@@ -16,6 +16,7 @@ from typing import Any, Dict, Optional
 import requests
 from requests.exceptions import RequestException
 
+import clients.lib
 from clients.types import Response
 from storage.translation_helpers import LANGUAGE_NAME_TO_CODE, LANGUAGE_NAMES
 from util.telemetry import LLMUsage
@@ -98,6 +99,8 @@ class TranslateGemmaClient:
 
     def _make_request(self, endpoint: str, data: Dict[str, Any]) -> requests.Response:
         """Make HTTP request to LMStudio API."""
+        clients.lib.assert_llm_calls_enabled("translategemma")
+
         url = f"{self.base_url}/{endpoint}"
 
         if self.debug:

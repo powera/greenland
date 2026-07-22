@@ -74,6 +74,8 @@ class GeminiClient:
     @measure_completion
     def _create_completion(self, model: str, **kwargs: Any) -> Dict[str, Any]:
         """Make direct HTTP request to Gemini chat completions endpoint."""
+        clients.lib.assert_llm_calls_enabled("gemini")
+
         url = f"{API_BASE}/{model}:generateContent?key={self.api_key}"
 
         if self.debug:

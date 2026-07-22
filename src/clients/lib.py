@@ -13,6 +13,7 @@ converted to the appropriate format for different LLM clients:
 import copy
 import json
 import logging
+import os
 from typing import Any, Dict, List
 
 from clients.types import Schema, SchemaProperty
@@ -40,6 +41,36 @@ MAX_SCHEMA_TOKENS = 2048
 
 class SchemaTooLargeError(ValueError):
     """Raised when a serialized schema exceeds MAX_SCHEMA_TOKENS."""
+
+
+class LLMCallsDisabledError(RuntimeError):
+    """Raised when GREENLAND_DISABLE_LLM blocks an outbound LLM request."""
+
+
+def assert_llm_calls_enabled(backend: str) -> None:
+    """Refuse to send an outbound LLM request when GREENLAND_DISABLE_LLM=1 .
+
+    This is an operator-facing kill switch: it lets a bulk agent run against the
+    database with a hard guarantee that nothing reaches a paid backend, so code
+    paths that generate data mechanically (e.g. langtools.en rule-based forms)
+    still run while any LLM fallback fails loudly instead of silently spending
+    money.
+
+    Call this at the point of the outbound HTTP request, not in a wrapper.
+    Each backend client defines its own generate_chat/warm_model, and callers
+    hold client objects directly, so a guard on any higher layer can be routed
+    around -- only the request boundary catches every caller.
+
+    Args:
+        backend: Backend name, for the error message (e.g. "openai").
+    """
+    if os.environ.get("GREENLAND_DISABLE_LLM") != "1":
+        return
+    raise LLMCallsDisabledError(
+        f"Outbound {backend} LLM request blocked: GREENLAND_DISABLE_LLM=1 is set. "
+        f"Unset it to allow live LLM calls, or use a code path that does not "
+        f"require an LLM."
+    )
 
 
 def count_schema_tokens(schema_dict: Dict[str, Any]) -> int:

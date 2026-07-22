@@ -76,6 +76,8 @@ class LMStudioClient:
 
     def _make_request(self, endpoint: str, data: Dict) -> requests.Response:
         """Make HTTP request to LMStudio API."""
+        clients.lib.assert_llm_calls_enabled("lmstudio")
+
         url = f"{self.base_url}/{endpoint}"
 
         if endpoint == "chat/completions" and "model" not in data:

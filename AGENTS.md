@@ -44,6 +44,20 @@ rather than relative updir imports (e.g., "from ..common_args import").
 To run scripts, always use PYTHONPATH and never use cd commands:
   PYTHONPATH=src python src/agents/dramblys.py --help
 
+Set GREENLAND_DISABLE_LLM=1 to hard-block every live LLM call:
+
+  GREENLAND_DISABLE_LLM=1 PYTHONPATH=src python src/agents/dramblys.py ...
+
+Every backend then raises clients.lib.LLMCallsDisabledError instead of sending
+its request.  The check sits at each backend's outbound-request method, not on
+a wrapper: backends define their own generate_chat/warm_model and callers hold
+client objects directly, so a guard on any higher layer can be routed around.
+Use it whenever an agent should run only its mechanical/rule-based paths (e.g.
+langtools.en form generation) - the run fails loudly rather than quietly falling
+back to a paid model.  It overrides GREENLAND_ALLOW_LIVE_LLM, which only opts a
+test out of the separate pytest guard and must never re-enable a disabled
+backend.
+
 For agent CLI scripts that should be runnable directly, add this at the top
 (before any local imports), adjusting the number of .parent calls to reach src/:
   import sys

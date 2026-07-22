@@ -89,6 +89,8 @@ class AnthropicClient:
     @measure_completion
     def _create_message(self, **kwargs: Any) -> Dict[str, Any]:
         """Make direct HTTP request to Anthropic messages endpoint."""
+        clients.lib.assert_llm_calls_enabled("anthropic")
+
         url = f"{API_BASE}/messages"
 
         if self.debug:
