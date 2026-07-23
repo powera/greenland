@@ -15,6 +15,7 @@ from agents.lape.tasks import (
     auxiliary_verb,
     countability,
     declension_class,
+    fanciful_collective,
     grammatical_gender,
     measure_words,
     verb_reflexivity,
@@ -134,6 +135,7 @@ class LapeAgent:
         "all": list(SUPPORTED_FACT_TYPES.keys()),
         "gender": ["grammatical_gender"],
         "measure-words": ["measure_words"],
+        "fanciful-collectives": ["fanciful_collective"],
         "nouns": ["grammatical_gender", "countability", "animacy", "declension_class"],
         "verbs": ["verb_transitivity", "verb_reflexivity", "auxiliary_verb"],
     }
@@ -229,6 +231,8 @@ class LapeAgent:
             )
         elif fact_type == "animacy":
             return animacy.generate_animacy(self, lemma, session)
+        elif fact_type == "fanciful_collective":
+            return fanciful_collective.generate_fanciful_collective(self, lemma, session)
         else:
             logger.error(f"Unsupported fact type: {fact_type}")
             return None, None, 0.0

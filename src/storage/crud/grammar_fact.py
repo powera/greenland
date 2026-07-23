@@ -291,6 +291,32 @@ def get_measure_word(session: Session, lemma_id: int, language_code: str = "zh")
     return get_grammar_fact_value(session, lemma_id, language_code, "measure_words")
 
 
+def get_fanciful_collective(
+    session: Session, lemma_id: int, language_code: str = "en"
+) -> Optional[str]:
+    """
+    Get the ornamental ("fanciful") collective noun for an animal.
+
+    These are terms of venery tied to one animal - a murder of crows, a pride of
+    lions. Most animals have none, and None is the normal result: the ordinary
+    collective ("a flock of crows") is always acceptable English.
+
+    Args:
+        session: Database session
+        lemma_id: ID of the lemma
+        language_code: Language code (default: "en")
+
+    Returns:
+        The bare collective term, or None if this animal has no such term
+
+    Example:
+        collective = get_fanciful_collective(session, lemma_id=123)
+        if collective:
+            print(f"a {collective} of crows")  # e.g., "a murder of crows"
+    """
+    return get_grammar_fact_value(session, lemma_id, language_code, "fanciful_collective")
+
+
 def get_grammatical_gender(session: Session, lemma_id: int, language_code: str) -> Optional[str]:
     """
     Get the grammatical gender for a noun in gendered languages.

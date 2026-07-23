@@ -54,6 +54,9 @@ Examples:
   # Generate Lithuanian declension classes
   python lape.py --fact-type declension_class --languages lt --limit 10
 
+  # Generate ornamental English animal collectives (a murder of crows)
+  python lape.py --fact-type fanciful_collective --languages en --limit 10
+
   # Generate for a single lemma by GUID
   python lape.py --fact-type grammatical_gender --languages fr --guid N14_001
 
@@ -73,6 +76,8 @@ Supported fact types:
     - countability: Countable/uncountable/both (languages: en - base concept)
     - declension_class: Declension class 1-5 (languages: lt)
     - animacy: Animate/inanimate (languages: en - base concept)
+    - fanciful_collective: Ornamental animal collective, e.g. a murder of crows
+      (languages: en); most animals have none, and none is a valid answer
 
   Verb facts:
     - verb_transitivity: Transitive/intransitive/ditransitive/ambitransitive (languages: en - base concept)
@@ -86,6 +91,7 @@ Task presets:
   - all: All fact types
   - gender: grammatical_gender only
   - measure-words: measure_words only
+  - fanciful-collectives: fanciful_collective only
   - nouns: grammatical_gender, countability, animacy, declension_class
   - verbs: verb_transitivity, verb_reflexivity, auxiliary_verb
         """,

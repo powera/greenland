@@ -73,6 +73,20 @@ GRAMMAR_FACT_DEFINITIONS: Dict[str, GrammarFactDefinition] = {
         display_label="Measure Words",
         description="Chinese measure words/classifiers for nouns",
         generatable=True,
+        release_sync=True,
+    ),
+    "fanciful_collective": GrammarFactDefinition(
+        fact_type="fanciful_collective",
+        languages=("en",),
+        required_pos=("noun",),
+        display_label="Fanciful Collective",
+        description=(
+            "Ornamental English collective noun tied to one animal (a murder of "
+            "crows, a parliament of owls); decorative rather than load-bearing, "
+            "since the ordinary term (a flock of crows) is always acceptable"
+        ),
+        generatable=True,
+        release_sync=True,
     ),
     "grammatical_gender": GrammarFactDefinition(
         fact_type="grammatical_gender",
