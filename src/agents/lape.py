@@ -18,6 +18,8 @@ Noun facts:
 - countability (English): Classify nouns as countable, uncountable, or both
 - declension_class (Lithuanian): Determine which declension class (1-5) a noun follows
 - animacy (English): Classify nouns as animate or inanimate (affects grammar in some languages)
+- fanciful_collective (English): Ornamental animal collective nouns (a murder of crows);
+  most animals have none, and no term is a valid result
 
 Verb facts:
 - verb_transitivity (English): Classify as transitive, intransitive, ditransitive, or ambitransitive

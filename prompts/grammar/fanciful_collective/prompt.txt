@@ -1,0 +1,19 @@
+Identify the ornamental ("fanciful") English collective noun for the following animal, if one exists:
+
+English word: {english_word}
+Part of speech: {pos_type}
+Definition: {definition}
+
+Provide:
+1. Primary fanciful collective noun, or null if this animal has none
+2. Alternative fanciful collective nouns (if more than one is well attested)
+3. Brief explanation (1-2 sentences) of the term's status and how commonly it is used
+4. Confidence score (0.0-1.0)
+
+IMPORTANT:
+- Return the bare term only ("murder"), not the full phrase ("a murder of crows")
+- Return null unless the term is specific to this animal; most animals have none
+- Do not report generic collectives (flock, herd, swarm, pack, group) - a term
+  used for three or more unrelated animals is generic, not fanciful
+- Do not invent a plausible-sounding term; null is the correct answer when
+  no traditional term is attested
