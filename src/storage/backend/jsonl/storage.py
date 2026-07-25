@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import tempfile
 from collections import defaultdict
 from pathlib import Path
@@ -28,6 +29,21 @@ GROUPED_TRANSLATION_FILE_STEMS: Set[str] = {"secondary", *EXTRA_RELEASE_LANGUAGE
 # rows land in audio tables, so the lemma loader skips it rather than treating
 # "audio" as a language.
 NON_LEMMA_FILE_STEMS: Set[str] = {"audio"}
+
+# Matches a trailing "(...)" qualifier on a concept label, e.g. the "quality"
+# in "fine (quality)". The release stores an English lemma's disambiguation only
+# inside its concept_label parenthetical; there is no separate field for it, so
+# the loader parses it back out into Lemma.disambiguation. Any explicit
+# "disambiguation" field in en.jsonl still overrides this (see load below).
+_CONCEPT_LABEL_DISAMBIG_RE = re.compile(r"^(.+?)\s+\(([^)]+)\)$")
+
+
+def _disambiguation_from_concept_label(concept_label: str) -> Optional[str]:
+    """Return the parenthetical disambiguation in a concept label, or None."""
+    match = _CONCEPT_LABEL_DISAMBIG_RE.match(concept_label.strip())
+    if match:
+        return match.group(2).strip()
+    return None
 
 
 class JSONLStorage(BaseStorage):
@@ -144,6 +160,14 @@ class JSONLStorage(BaseStorage):
                         lemma.pos_subtype = data.get("pos_subtype")
                         lemma.concept_label = data.get("concept_label", "")
                         lemma.concept_definition = data.get("concept_definition", "")
+
+                        # The disambiguation lives only in the concept_label
+                        # parenthetical (e.g. "fine (quality)"); parse it back
+                        # into its own field. An explicit "disambiguation" field
+                        # in en.jsonl overrides this in the second pass below.
+                        lemma.disambiguation = _disambiguation_from_concept_label(
+                            lemma.concept_label
+                        )
 
                         # Load translations from base.jsonl (new format)
                         if "translations" in data:
