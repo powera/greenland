@@ -242,7 +242,9 @@ def create_remote_models(postgres_url=None):
         s,
         codename="gemini-3.5-flash-lite",
         displayname="Gemini 3.5 Flash Lite",
-        launch_date="2026-07-27",
+        # No verified public launch date is available. Do not substitute the
+        # registry update date for model release metadata.
+        launch_date=None,
         filesize_mb=0,
         license_name="Closed Model",
         model_path="gemini-3.5-flash-lite",
