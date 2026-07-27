@@ -130,10 +130,6 @@ class BebrasAgent:
                             "type": "string",
                             "description": "Part of speech (noun, verb, adjective, adverb)",
                         },
-                        "role": {
-                            "type": "string",
-                            "description": "Role in sentence (subject, verb, object, etc.)",
-                        },
                         "disambiguation": {
                             "type": "string",
                             "description": "Context or disambiguation hint",
@@ -147,7 +143,7 @@ class BebrasAgent:
                             "description": "Optional lemma GUID when known (e.g., V12_006)",
                         },
                     },
-                    "required": ["word", "lemma", "pos", "role"],
+                    "required": ["word", "lemma", "pos"],
                 },
             ),
         }
@@ -246,7 +242,7 @@ class BebrasAgent:
                     update_sentence_word(
                         session=session,
                         sentence_word=existing_word,
-                        word_role=word_data.get("role", "unknown"),
+                        part_of_speech=word_data.get("pos", "unknown"),
                         lemma=lemma,
                         english_text=source_word_text,
                         target_language_text=lemma_text,
@@ -257,7 +253,7 @@ class BebrasAgent:
                         session=session,
                         sentence=sentence,
                         position=position,
-                        word_role=word_data.get("role", "unknown"),
+                        part_of_speech=word_data.get("pos", "unknown"),
                         lemma=lemma,
                         english_text=source_word_text,
                         target_language_text=lemma_text,

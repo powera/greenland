@@ -116,7 +116,7 @@ def print_match(match: dict, verbose: bool = False) -> None:
         f"    Lemma: {match['lemma_english']} ({match['lemma_guid']}) "
         f"-> {match['lemma_translation']}"
     )
-    print(f"    Role: {match['word_role']}, Position: {match['position']}")
+    print(f"    Part of speech: {match['part_of_speech']}, Position: {match['position']}")
 
 
 def print_results(result: dict, verbose: bool = False) -> None:

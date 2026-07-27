@@ -169,7 +169,7 @@ class TestFindCandidateLemmasForSentence(unittest.TestCase):
                     sentence_id=self.sentence.id,
                     language_code="en",
                     position=0,
-                    word_role="verb",
+                    part_of_speech="verb",
                     english_text="eat",
                     declined_form="eats",
                 ),
@@ -177,7 +177,7 @@ class TestFindCandidateLemmasForSentence(unittest.TestCase):
                     sentence_id=self.sentence.id,
                     language_code="en",
                     position=1,
-                    word_role="object",
+                    part_of_speech="noun",
                     english_text="apple",
                     declined_form="apple",
                 ),
@@ -186,7 +186,7 @@ class TestFindCandidateLemmasForSentence(unittest.TestCase):
                     sentence_id=self.sentence.id,
                     language_code="fr",
                     position=0,
-                    word_role="verb",
+                    part_of_speech="verb",
                     english_text="eat",
                     declined_form="mange",
                 ),
@@ -194,7 +194,7 @@ class TestFindCandidateLemmasForSentence(unittest.TestCase):
                     sentence_id=self.sentence.id,
                     language_code="fr",
                     position=1,
-                    word_role="object",
+                    part_of_speech="noun",
                     english_text="apple",
                     declined_form="pomme",
                 ),
@@ -203,7 +203,7 @@ class TestFindCandidateLemmasForSentence(unittest.TestCase):
                     sentence_id=self.sentence.id,
                     language_code="zh",
                     position=0,
-                    word_role="verb",
+                    part_of_speech="verb",
                     english_text="eat",
                     declined_form="吃",
                 ),
@@ -211,7 +211,7 @@ class TestFindCandidateLemmasForSentence(unittest.TestCase):
                     sentence_id=self.sentence.id,
                     language_code="zh",
                     position=1,
-                    word_role="object",
+                    part_of_speech="noun",
                     english_text="apple",
                     declined_form="苹果",
                 ),
@@ -259,19 +259,19 @@ class TestFindCandidateLemmasForSentence(unittest.TestCase):
             self.assertEqual(len(candidate["matched_languages"]), 3)
             self.assertEqual(set(candidate["matched_languages"]), {"en", "fr", "zh"})
 
-    def test_returns_english_text_and_word_role(self):
-        """Test that english_text and word_role are correctly returned."""
+    def test_returns_english_text_and_part_of_speech(self):
+        """Test that english_text and part_of_speech are correctly returned."""
         candidates = find_candidate_lemmas_for_sentence(
             self.session, self.sentence.id, min_language_matches=2
         )
 
         eat_candidate = next(c for c in candidates if c["lemma"].lemma_text == "eat")
         self.assertEqual(eat_candidate["english_text"], "eat")
-        self.assertEqual(eat_candidate["word_role"], "verb")
+        self.assertEqual(eat_candidate["part_of_speech"], "verb")
 
         apple_candidate = next(c for c in candidates if c["lemma"].lemma_text == "apple")
         self.assertEqual(apple_candidate["english_text"], "apple")
-        self.assertEqual(apple_candidate["word_role"], "object")
+        self.assertEqual(apple_candidate["part_of_speech"], "noun")
 
     def test_case_insensitive_matching(self):
         """Test that matching is case-insensitive for non-CJK languages."""
@@ -286,7 +286,7 @@ class TestFindCandidateLemmasForSentence(unittest.TestCase):
                     sentence_id=sentence2.id,
                     language_code="en",
                     position=0,
-                    word_role="verb",
+                    part_of_speech="verb",
                     english_text="eat",
                     declined_form="EATS",  # Uppercase
                 ),
@@ -294,7 +294,7 @@ class TestFindCandidateLemmasForSentence(unittest.TestCase):
                     sentence_id=sentence2.id,
                     language_code="fr",
                     position=0,
-                    word_role="verb",
+                    part_of_speech="verb",
                     english_text="eat",
                     declined_form="Mange",  # Mixed case
                 ),
@@ -323,7 +323,7 @@ class TestFindCandidateLemmasForSentence(unittest.TestCase):
                     sentence_id=sentence2.id,
                     language_code="en",
                     position=0,
-                    word_role="verb",
+                    part_of_speech="verb",
                     english_text="eat",
                     declined_form="eats",
                     lemma_id=self.lemma_eat.id,
@@ -332,7 +332,7 @@ class TestFindCandidateLemmasForSentence(unittest.TestCase):
                     sentence_id=sentence2.id,
                     language_code="fr",
                     position=0,
-                    word_role="verb",
+                    part_of_speech="verb",
                     english_text="eat",
                     declined_form="mange",
                     lemma_id=self.lemma_eat.id,
@@ -342,7 +342,7 @@ class TestFindCandidateLemmasForSentence(unittest.TestCase):
                     sentence_id=sentence2.id,
                     language_code="en",
                     position=1,
-                    word_role="object",
+                    part_of_speech="noun",
                     english_text="apple",
                     declined_form="apple",
                 ),
@@ -350,7 +350,7 @@ class TestFindCandidateLemmasForSentence(unittest.TestCase):
                     sentence_id=sentence2.id,
                     language_code="fr",
                     position=1,
-                    word_role="object",
+                    part_of_speech="noun",
                     english_text="apple",
                     declined_form="pomme",
                 ),
@@ -390,7 +390,7 @@ class TestFindCandidateLemmasForSentence(unittest.TestCase):
                     sentence_id=sentence2.id,
                     language_code="en",
                     position=0,
-                    word_role="verb",
+                    part_of_speech="verb",
                     english_text="nonexistent",
                     declined_form="nonexistent_form",
                 ),
@@ -446,13 +446,13 @@ class TestStoreDiscoveredLemmas(unittest.TestCase):
                 "lemma": self.lemma_eat,
                 "english_text": "eat",
                 "matched_languages": ["en", "fr"],
-                "word_role": "verb",
+                "part_of_speech": "verb",
             },
             {
                 "lemma": self.lemma_apple,
                 "english_text": "apple",
                 "matched_languages": ["en", "fr"],
-                "word_role": "object",
+                "part_of_speech": "noun",
             },
         ]
 
@@ -497,13 +497,13 @@ class TestStoreDiscoveredLemmas(unittest.TestCase):
                 "lemma": self.lemma_eat,  # Already exists
                 "english_text": "eat",
                 "matched_languages": ["en", "fr"],
-                "word_role": "verb",
+                "part_of_speech": "verb",
             },
             {
                 "lemma": self.lemma_apple,  # New
                 "english_text": "apple",
                 "matched_languages": ["en", "fr"],
-                "word_role": "object",
+                "part_of_speech": "noun",
             },
         ]
 
@@ -560,7 +560,7 @@ class TestStoreDiscoveredLemmas(unittest.TestCase):
                 "lemma": new_lemma,
                 "english_text": "new",
                 "matched_languages": ["en"],
-                "word_role": "object",
+                "part_of_speech": "noun",
             },
         ]
 
@@ -574,6 +574,8 @@ class TestStoreDiscoveredLemmas(unittest.TestCase):
             .filter(SentencePatternWord.lemma_id == new_lemma.id)
             .first()
         )
+        self.assertIsNotNone(new_pw)
+        assert new_pw is not None
         self.assertEqual(new_pw.position, 3)
 
 
@@ -625,7 +627,7 @@ class TestDiscoverAndStoreLemmas(unittest.TestCase):
                     sentence_id=self.sentence.id,
                     language_code="en",
                     position=0,
-                    word_role="verb",
+                    part_of_speech="verb",
                     english_text="eat",
                     declined_form="eats",
                 ),
@@ -633,7 +635,7 @@ class TestDiscoverAndStoreLemmas(unittest.TestCase):
                     sentence_id=self.sentence.id,
                     language_code="fr",
                     position=0,
-                    word_role="verb",
+                    part_of_speech="verb",
                     english_text="eat",
                     declined_form="mange",
                 ),
@@ -720,7 +722,7 @@ class TestSubstringMatchingChinese(unittest.TestCase):
                 sentence_id=self.sentence.id,
                 language_code="zh",
                 position=0,
-                word_role="verb",
+                part_of_speech="verb",
                 english_text="eat",
                 declined_form="吃",  # Substring of derivative form "吃饭"
             )

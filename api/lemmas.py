@@ -116,8 +116,10 @@ class LanguageAudioEntry(TypedDict):
 
 
 class SentenceWordInfo(TypedDict, total=False):
+    """Sentence token metadata."""
+
     position: int
-    word_role: str
+    part_of_speech: str
     english_text: Optional[str]
     target_language_text: Optional[str]
     grammatical_form: Optional[str]

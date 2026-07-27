@@ -26,7 +26,6 @@ import benchmarks.lib.utils  # noqa: F401  (import order matters; see above)
 
 from benchmarks.lib.runners.sentence_decomposition_runner import SentenceDecompositionRunner
 
-
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures" / "sentence_decomposition"
 
 
@@ -51,7 +50,7 @@ def test_0062_allows_close_morphology_and_gloss_variants_for_partial_credit():
                         "lemma": "No lemma",
                         "lemma_guid": "NONE",
                         "position": 0,
-                        "role": "determiner",
+                        "part_of_speech": "determiner",
                         "surface_form": "Mano",
                     },
                     {
@@ -60,7 +59,7 @@ def test_0062_allows_close_morphology_and_gloss_variants_for_partial_credit():
                         "lemma": "son",
                         "lemma_guid": "N35_036",
                         "position": 1,
-                        "role": "subject",
+                        "part_of_speech": "subject",
                         "surface_form": "sūnus",
                     },
                     {
@@ -69,7 +68,7 @@ def test_0062_allows_close_morphology_and_gloss_variants_for_partial_credit():
                         "lemma": "go",
                         "lemma_guid": "V12_004",
                         "position": 2,
-                        "role": "verb",
+                        "part_of_speech": "verb",
                         "surface_form": "eina",
                     },
                     {
@@ -78,7 +77,7 @@ def test_0062_allows_close_morphology_and_gloss_variants_for_partial_credit():
                         "lemma": "No lemma",
                         "lemma_guid": "NONE",
                         "position": 3,
-                        "role": "preposition",
+                        "part_of_speech": "preposition",
                         "surface_form": "į",
                     },
                     {
@@ -87,7 +86,7 @@ def test_0062_allows_close_morphology_and_gloss_variants_for_partial_credit():
                         "lemma": "school (institution)",
                         "lemma_guid": "N07_002",
                         "position": 4,
-                        "role": "object",
+                        "part_of_speech": "object",
                         "surface_form": "mokyklą",
                     },
                 ],
@@ -108,7 +107,7 @@ def test_0062_allows_close_morphology_and_gloss_variants_for_partial_credit():
                         "lemma": "mano",
                         "lemma_guid": "NONE",
                         "position": 0,
-                        "role": "determiner",
+                        "part_of_speech": "determiner",
                         "surface_form": "Mano",
                     },
                     {
@@ -117,7 +116,7 @@ def test_0062_allows_close_morphology_and_gloss_variants_for_partial_credit():
                         "lemma": "sūnus",
                         "lemma_guid": "N35_036",
                         "position": 1,
-                        "role": "noun",
+                        "part_of_speech": "noun",
                         "surface_form": "sūnus",
                     },
                     {
@@ -126,7 +125,7 @@ def test_0062_allows_close_morphology_and_gloss_variants_for_partial_credit():
                         "lemma": "eiti",
                         "lemma_guid": "V12_004",
                         "position": 2,
-                        "role": "verb",
+                        "part_of_speech": "verb",
                         "surface_form": "eina",
                     },
                     {
@@ -135,7 +134,7 @@ def test_0062_allows_close_morphology_and_gloss_variants_for_partial_credit():
                         "lemma": "į",
                         "lemma_guid": "NONE",
                         "position": 3,
-                        "role": "preposition",
+                        "part_of_speech": "preposition",
                         "surface_form": "į",
                     },
                     {
@@ -144,7 +143,7 @@ def test_0062_allows_close_morphology_and_gloss_variants_for_partial_credit():
                         "lemma": "mokykla",
                         "lemma_guid": "N07_002",
                         "position": 4,
-                        "role": "noun",
+                        "part_of_speech": "noun",
                         "surface_form": "mokyklą",
                     },
                 ],
@@ -221,7 +220,7 @@ def test_0062_split_tokens_do_not_cascade_mismatch_scores():
                         "lemma": "No lemma",
                         "lemma_guid": "NONE",
                         "position": 0,
-                        "role": "pronoun",
+                        "part_of_speech": "pronoun",
                         "surface_form": "她",
                     },
                     {
@@ -230,7 +229,7 @@ def test_0062_split_tokens_do_not_cascade_mismatch_scores():
                         "lemma": "yesterday",
                         "lemma_guid": "D03_002",
                         "position": 1,
-                        "role": "adverb",
+                        "part_of_speech": "adverb",
                         "surface_form": "昨天",
                     },
                     {
@@ -239,7 +238,7 @@ def test_0062_split_tokens_do_not_cascade_mismatch_scores():
                         "lemma": "go",
                         "lemma_guid": "V12_004",
                         "position": 2,
-                        "role": "verb",
+                        "part_of_speech": "verb",
                         "surface_form": "去了",
                     },
                     {
@@ -248,7 +247,7 @@ def test_0062_split_tokens_do_not_cascade_mismatch_scores():
                         "lemma": "hospital",
                         "lemma_guid": "N07_003",
                         "position": 3,
-                        "role": "noun",
+                        "part_of_speech": "noun",
                         "surface_form": "医院",
                     },
                 ],
@@ -269,7 +268,7 @@ def test_0062_split_tokens_do_not_cascade_mismatch_scores():
                         "lemma": "她",
                         "lemma_guid": "NONE",
                         "position": 0,
-                        "role": "pronoun",
+                        "part_of_speech": "pronoun",
                         "surface_form": "她",
                     },
                     {
@@ -278,7 +277,7 @@ def test_0062_split_tokens_do_not_cascade_mismatch_scores():
                         "lemma": "昨天",
                         "lemma_guid": "D03_002",
                         "position": 1,
-                        "role": "adverb",
+                        "part_of_speech": "adverb",
                         "surface_form": "昨天",
                     },
                     {
@@ -287,7 +286,7 @@ def test_0062_split_tokens_do_not_cascade_mismatch_scores():
                         "lemma": "去",
                         "lemma_guid": "V12_004",
                         "position": 2,
-                        "role": "verb",
+                        "part_of_speech": "verb",
                         "surface_form": "去",
                     },
                     {
@@ -296,7 +295,7 @@ def test_0062_split_tokens_do_not_cascade_mismatch_scores():
                         "lemma": "了",
                         "lemma_guid": "NONE",
                         "position": 3,
-                        "role": "particle",
+                        "part_of_speech": "particle",
                         "surface_form": "了",
                     },
                     {
@@ -305,7 +304,7 @@ def test_0062_split_tokens_do_not_cascade_mismatch_scores():
                         "lemma": "医院",
                         "lemma_guid": "N07_003",
                         "position": 4,
-                        "role": "noun",
+                        "part_of_speech": "noun",
                         "surface_form": "医院",
                     },
                 ],

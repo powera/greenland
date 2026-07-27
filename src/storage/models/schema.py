@@ -20,7 +20,7 @@ from sqlalchemy import (
     literal_column,
 )
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, synonym
 
 from storage.models.pgvector import PGVector
 from storage.rhyme_keys import sync_derivative_form_rhyme_key
@@ -495,10 +495,10 @@ class SentenceWord(Base):
     # Position in the sentence (0-indexed, matches order in target language sentence)
     position: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    # Word role in the sentence (semantic, not grammatical)
-    word_role: Mapped[str] = mapped_column(
-        String, nullable=False
-    )  # e.g., "subject", "verb", "object", "pronoun", "adjective"
+    # Keep the existing database column name while exposing an accurate Python
+    # attribute. The synonym preserves compatibility for storage/release code.
+    part_of_speech: Mapped[str] = mapped_column("word_role", String, nullable=False)
+    word_role = synonym("part_of_speech")
 
     # Reference text in both languages (from words_used JSON)
     english_text: Mapped[Optional[str]] = mapped_column(String, nullable=True)

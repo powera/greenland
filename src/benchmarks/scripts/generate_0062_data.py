@@ -167,10 +167,10 @@ def get_sentences_with_full_sentenceword_data(
                 for sw in lang_words:
                     word_entry = {
                         "position": sw.position,
-                        "role": sw.word_role,
+                        "part_of_speech": sw.part_of_speech,
                         "english_gloss": simplify_gloss(sw.english_text or ""),
                         "surface_form": sw.declined_form or sw.target_language_text or "",
-                        "grammatical_form": sw.grammatical_form or f"{sw.word_role}/base",
+                        "grammatical_form": sw.grammatical_form or f"{sw.part_of_speech}/base",
                     }
 
                     # Add lemma info

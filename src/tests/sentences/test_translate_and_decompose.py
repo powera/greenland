@@ -111,7 +111,7 @@ def test_pipeline_translates_and_decomposes_english_by_default(
         "words_en": [
             {
                 "position": 0,
-                "role": "pronoun",
+                "part_of_speech": "pronoun",
                 "english_gloss": "I",
                 "surface_form": "I",
                 "grammatical_form": "subject",
@@ -120,7 +120,7 @@ def test_pipeline_translates_and_decomposes_english_by_default(
             },
             {
                 "position": 1,
-                "role": "verb",
+                "part_of_speech": "verb",
                 "english_gloss": "read",
                 "surface_form": "read",
                 "grammatical_form": "present",

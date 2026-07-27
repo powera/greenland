@@ -41,7 +41,7 @@ class FalseLemmaMatch:
     sentence_english: str
     sentence_translation: str
     language_code: str
-    word_role: str
+    part_of_speech: str
     position: int
 
     def to_dict(self) -> Dict[str, Any]:
@@ -56,7 +56,7 @@ class FalseLemmaMatch:
             "sentence_english": self.sentence_english,
             "sentence_translation": self.sentence_translation,
             "language_code": self.language_code,
-            "word_role": self.word_role,
+            "part_of_speech": self.part_of_speech,
             "position": self.position,
         }
 
@@ -179,7 +179,7 @@ class ErelisAgent:
                     sentence_english=sentence_english,
                     sentence_translation=sentence_target,
                     language_code=target_language,
-                    word_role=sw.word_role,
+                    part_of_speech=sw.part_of_speech,
                     position=sw.position,
                 )
                 matches.append(match)

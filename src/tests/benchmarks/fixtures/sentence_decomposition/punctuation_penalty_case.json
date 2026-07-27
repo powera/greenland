@@ -7,11 +7,11 @@
           "translation": "Mano sūnus eina į mokyklą.",
           "word_count": 5,
           "words": [
-            {"position": 0, "role": "determiner", "english_gloss": "my", "surface_form": "Mano", "grammatical_form": "pronoun/lt_possessive", "lemma_guid": "NONE", "lemma": "No lemma"},
-            {"position": 1, "role": "subject", "english_gloss": "son", "surface_form": "sūnus", "grammatical_form": "noun/lt_nominative_singular", "lemma_guid": "N35_036", "lemma": "son"},
-            {"position": 2, "role": "verb", "english_gloss": "goes", "surface_form": "eina", "grammatical_form": "verb/lt_3s_present", "lemma_guid": "V12_004", "lemma": "go"},
-            {"position": 3, "role": "preposition", "english_gloss": "to", "surface_form": "į", "grammatical_form": "preposition/base", "lemma_guid": "NONE", "lemma": "No lemma"},
-            {"position": 4, "role": "object", "english_gloss": "school", "surface_form": "mokyklą", "grammatical_form": "noun/lt_accusative_singular", "lemma_guid": "N07_002", "lemma": "school (institution)"}
+            {"position": 0, "part_of_speech": "determiner", "english_gloss": "my", "surface_form": "Mano", "grammatical_form": "pronoun/lt_possessive", "lemma_guid": "NONE", "lemma": "No lemma"},
+            {"position": 1, "part_of_speech": "subject", "english_gloss": "son", "surface_form": "sūnus", "grammatical_form": "noun/lt_nominative_singular", "lemma_guid": "N35_036", "lemma": "son"},
+            {"position": 2, "part_of_speech": "verb", "english_gloss": "goes", "surface_form": "eina", "grammatical_form": "verb/lt_3s_present", "lemma_guid": "V12_004", "lemma": "go"},
+            {"position": 3, "part_of_speech": "preposition", "english_gloss": "to", "surface_form": "į", "grammatical_form": "preposition/base", "lemma_guid": "NONE", "lemma": "No lemma"},
+            {"position": 4, "part_of_speech": "object", "english_gloss": "school", "surface_form": "mokyklą", "grammatical_form": "noun/lt_accusative_singular", "lemma_guid": "N07_002", "lemma": "school (institution)"}
           ]
         }
       ]
@@ -24,12 +24,12 @@
         "translation": "Mano sūnus eina į mokyklą.",
         "word_count": 6,
         "words": [
-          {"position": 0, "role": "determiner", "english_gloss": "my", "surface_form": "Mano", "grammatical_form": "pronoun/lt_possessive", "lemma_guid": "NONE", "lemma": "No lemma"},
-          {"position": 1, "role": "subject", "english_gloss": "son", "surface_form": "sūnus", "grammatical_form": "noun/lt_nominative_singular", "lemma_guid": "N35_036", "lemma": "son"},
-          {"position": 2, "role": "verb", "english_gloss": "goes", "surface_form": "eina", "grammatical_form": "verb/lt_3s_present", "lemma_guid": "V12_004", "lemma": "go"},
-          {"position": 3, "role": "preposition", "english_gloss": "to", "surface_form": "į", "grammatical_form": "preposition/base", "lemma_guid": "NONE", "lemma": "No lemma"},
-          {"position": 4, "role": "object", "english_gloss": "school", "surface_form": "mokyklą", "grammatical_form": "noun/lt_accusative_singular", "lemma_guid": "N07_002", "lemma": "school (institution)"},
-          {"position": 5, "role": "punctuation", "english_gloss": ".", "surface_form": ".", "grammatical_form": "punctuation/base", "lemma_guid": "NONE", "lemma": "."}
+          {"position": 0, "part_of_speech": "determiner", "english_gloss": "my", "surface_form": "Mano", "grammatical_form": "pronoun/lt_possessive", "lemma_guid": "NONE", "lemma": "No lemma"},
+          {"position": 1, "part_of_speech": "subject", "english_gloss": "son", "surface_form": "sūnus", "grammatical_form": "noun/lt_nominative_singular", "lemma_guid": "N35_036", "lemma": "son"},
+          {"position": 2, "part_of_speech": "verb", "english_gloss": "goes", "surface_form": "eina", "grammatical_form": "verb/lt_3s_present", "lemma_guid": "V12_004", "lemma": "go"},
+          {"position": 3, "part_of_speech": "preposition", "english_gloss": "to", "surface_form": "į", "grammatical_form": "preposition/base", "lemma_guid": "NONE", "lemma": "No lemma"},
+          {"position": 4, "part_of_speech": "object", "english_gloss": "school", "surface_form": "mokyklą", "grammatical_form": "noun/lt_accusative_singular", "lemma_guid": "N07_002", "lemma": "school (institution)"},
+          {"position": 5, "part_of_speech": "punctuation", "english_gloss": ".", "surface_form": ".", "grammatical_form": "punctuation/base", "lemma_guid": "NONE", "lemma": "."}
         ]
       }
     ]

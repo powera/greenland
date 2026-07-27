@@ -453,7 +453,9 @@ class JSONLSession(BaseSession):
                         "lemma_id": lemma_id,
                         "language_code": word_data.get("language_code", ""),
                         "position": word_data.get("position", 0),
-                        "word_role": word_data.get("word_role"),
+                        # SQLAlchemy bulk mappings use the Python attribute
+                        # name; the JSONL/release key remains word_role.
+                        "part_of_speech": word_data.get("word_role"),
                         "english_text": word_data.get("english_text"),
                         "target_language_text": word_data.get("target_language_text"),
                         "grammatical_form": word_data.get("grammatical_form"),

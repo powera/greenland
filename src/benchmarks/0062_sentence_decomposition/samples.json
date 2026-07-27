@@ -53,7 +53,7 @@
           "words": [
             {
               "position": 0,
-              "role": "pronoun",
+              "part_of_speech": "pronoun",
               "english_gloss": "they",
               "surface_form": "They",
               "grammatical_form": "pronoun/en_subjective",
@@ -62,7 +62,7 @@
             },
             {
               "position": 1,
-              "role": "verb",
+              "part_of_speech": "verb",
               "english_gloss": "are",
               "surface_form": "are",
               "grammatical_form": "verb/en_3p_present",
@@ -71,7 +71,7 @@
             },
             {
               "position": 2,
-              "role": "preposition",
+              "part_of_speech": "preposition",
               "english_gloss": "at",
               "surface_form": "at",
               "grammatical_form": "preposition/base",
@@ -80,7 +80,7 @@
             },
             {
               "position": 3,
-              "role": "article",
+              "part_of_speech": "article",
               "english_gloss": "the",
               "surface_form": "the",
               "grammatical_form": "article/en_singular",
@@ -89,7 +89,7 @@
             },
             {
               "position": 4,
-              "role": "noun",
+              "part_of_speech": "noun",
               "english_gloss": "school",
               "surface_form": "school",
               "grammatical_form": "noun/en_singular",
@@ -105,7 +105,7 @@
           "words": [
             {
               "position": 0,
-              "role": "pronoun",
+              "part_of_speech": "pronoun",
               "english_gloss": "they",
               "surface_form": "Ellos",
               "grammatical_form": "pronoun/es_subjective",
@@ -114,7 +114,7 @@
             },
             {
               "position": 1,
-              "role": "verb",
+              "part_of_speech": "verb",
               "english_gloss": "are",
               "surface_form": "están",
               "grammatical_form": "verb/es_3p_present",
@@ -123,7 +123,7 @@
             },
             {
               "position": 2,
-              "role": "preposition",
+              "part_of_speech": "preposition",
               "english_gloss": "in/at",
               "surface_form": "en",
               "grammatical_form": "preposition/base",
@@ -132,7 +132,7 @@
             },
             {
               "position": 3,
-              "role": "article",
+              "part_of_speech": "article",
               "english_gloss": "the",
               "surface_form": "la",
               "grammatical_form": "article/es_singular_f",
@@ -141,7 +141,7 @@
             },
             {
               "position": 4,
-              "role": "noun",
+              "part_of_speech": "noun",
               "english_gloss": "school",
               "surface_form": "escuela",
               "grammatical_form": "noun/es_singular",
@@ -157,7 +157,7 @@
           "words": [
             {
               "position": 0,
-              "role": "pronoun",
+              "part_of_speech": "pronoun",
               "english_gloss": "they",
               "surface_form": "Ils",
               "grammatical_form": "pronoun/fr_subjective",
@@ -166,7 +166,7 @@
             },
             {
               "position": 1,
-              "role": "verb",
+              "part_of_speech": "verb",
               "english_gloss": "are",
               "surface_form": "sont",
               "grammatical_form": "verb/fr_3p_present",
@@ -175,7 +175,7 @@
             },
             {
               "position": 2,
-              "role": "preposition",
+              "part_of_speech": "preposition",
               "english_gloss": "at",
               "surface_form": "à",
               "grammatical_form": "preposition/base",
@@ -184,7 +184,7 @@
             },
             {
               "position": 3,
-              "role": "article",
+              "part_of_speech": "article",
               "english_gloss": "the (elided)",
               "surface_form": "l'",
               "grammatical_form": "article/fr_singular",
@@ -193,7 +193,7 @@
             },
             {
               "position": 4,
-              "role": "noun",
+              "part_of_speech": "noun",
               "english_gloss": "school",
               "surface_form": "école",
               "grammatical_form": "noun/fr_singular",

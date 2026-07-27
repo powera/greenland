@@ -285,7 +285,7 @@ def _adapt_decomposed_word(word_entry: Dict[str, Any]) -> Dict[str, Any]:
         "word": str(word_entry.get("surface_form") or "").strip(),
         "english": str(word_entry.get("english_gloss") or "").strip(),
         "guid": str(word_entry.get("lemma_guid") or "").strip(),
-        "role": str(word_entry.get("role") or "").strip(),
+        "part_of_speech": str(word_entry.get("part_of_speech") or "").strip(),
         "grammatical_form": grammatical_form,
     }
 
@@ -386,7 +386,7 @@ def store_translation_results(
                 lemma_id=lemma_id,
                 language_code=lang_code,
                 position=position,
-                word_role=word_data.get("role"),
+                part_of_speech=word_data.get("part_of_speech"),
                 english_text=word_data.get("english"),
                 target_language_text=word_data.get("word"),
                 grammatical_form=word_data.get("grammatical_form"),

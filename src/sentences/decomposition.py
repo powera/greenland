@@ -116,9 +116,9 @@ def build_prompt_for_translate_and_decompose(
         .all()
     )
 
-    # Collect lemma_id -> (english_text, role) from pattern words first
+    # Collect lemma_id -> (English text, part of speech) from pattern words first.
     seen_lemma_ids: set[int] = set()
-    lemma_entries: List[tuple[int, str, str]] = []  # (lemma_id, english_text, role)
+    lemma_entries: List[tuple[int, str, str]] = []
     for pattern_word in pattern_words:
         if pattern_word.lemma_id and pattern_word.lemma_id not in seen_lemma_ids:
             seen_lemma_ids.add(pattern_word.lemma_id)
@@ -143,10 +143,10 @@ def build_prompt_for_translate_and_decompose(
     for sw in sentence_words:
         if sw.lemma_id not in seen_lemma_ids:
             seen_lemma_ids.add(sw.lemma_id)
-            lemma_entries.append((sw.lemma_id, sw.english_text or "", sw.word_role or ""))
+            lemma_entries.append((sw.lemma_id, sw.english_text or "", sw.part_of_speech or ""))
 
     word_translation_lines: List[str] = []
-    for lemma_id, english_text, role in lemma_entries:
+    for lemma_id, english_text, part_of_speech in lemma_entries:
         lemma = session.query(Lemma).filter_by(id=lemma_id).first()
         if not lemma:
             continue
@@ -159,10 +159,12 @@ def build_prompt_for_translate_and_decompose(
             if trans:
                 trans_items.append(f"{lang}={trans}")
 
-        role_str = f" [{role}]" if role else ""
+        part_of_speech_str = f" [{part_of_speech}]" if part_of_speech else ""
         guid_str = f" (GUID: {guid})" if guid else ""
         trans_str = ", ".join(trans_items)
-        word_translation_lines.append(f"  {english_text}{role_str}{guid_str}: {trans_str}")
+        word_translation_lines.append(
+            f"  {english_text}{part_of_speech_str}{guid_str}: {trans_str}"
+        )
 
     candidate_lines: List[str] = []
     if candidate_lemmas:
@@ -355,7 +357,7 @@ def build_multi_language_decomposition_schema(*, target_languages: List[str]) ->
     For each ``lang`` in ``target_languages`` the response object must include a
     string field ``lang`` (echo of the provided translation) and an array field
     ``words_lang`` whose entries match the single-language Phase 3 word shape
-    (``position``, ``role``, ``english_gloss``, ``surface_form``,
+    (``position``, ``part_of_speech``, ``english_gloss``, ``surface_form``,
     ``grammatical_form``, ``lemma_guid``, ``lemma``).
     """
     target_languages = _normalize_target_languages(target_languages)
@@ -363,7 +365,10 @@ def build_multi_language_decomposition_schema(*, target_languages: List[str]) ->
         "type": "object",
         "properties": {
             "position": {"type": "integer"},
-            "role": {"type": "string"},
+            "part_of_speech": {
+                "type": "string",
+                "description": "Part of speech, never subject/object syntactic role",
+            },
             "english_gloss": {"type": "string"},
             "surface_form": {"type": "string"},
             "grammatical_form": {"type": "string"},
@@ -372,7 +377,7 @@ def build_multi_language_decomposition_schema(*, target_languages: List[str]) ->
         },
         "required": [
             "position",
-            "role",
+            "part_of_speech",
             "english_gloss",
             "surface_form",
             "grammatical_form",
@@ -414,10 +419,13 @@ def build_decomposition_schema(
             "word": {"type": "string"},
             "english": {"type": "string"},
             "guid": {"type": "string"},
-            "role": {"type": "string"},
+            "part_of_speech": {
+                "type": "string",
+                "description": "Part of speech, never subject/object syntactic role",
+            },
             "grammatical_form": {"type": ["string", "null"]},
         },
-        "required": ["word", "english", "guid", "role", "grammatical_form"],
+        "required": ["word", "english", "guid", "part_of_speech", "grammatical_form"],
         "additionalProperties": False,
     }
 
@@ -474,7 +482,10 @@ def build_single_language_decomposition_schema() -> Dict[str, Any]:
                                 "type": "object",
                                 "properties": {
                                     "position": {"type": "integer"},
-                                    "role": {"type": "string"},
+                                    "part_of_speech": {
+                                        "type": "string",
+                                        "description": "Part of speech, never subject/object syntactic role",
+                                    },
                                     "english_gloss": {"type": "string"},
                                     "surface_form": {"type": "string"},
                                     "grammatical_form": {"type": "string"},
@@ -483,7 +494,7 @@ def build_single_language_decomposition_schema() -> Dict[str, Any]:
                                 },
                                 "required": [
                                     "position",
-                                    "role",
+                                    "part_of_speech",
                                     "english_gloss",
                                     "surface_form",
                                     "grammatical_form",

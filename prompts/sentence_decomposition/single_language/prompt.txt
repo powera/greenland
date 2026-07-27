@@ -14,7 +14,7 @@ Candidate lemmas (must choose correct lemma_guid when a content word maps to one
 Per-call requirements:
 - Return exactly one entry in languages[] and set language_code to '{target_language}'.
 - The languages[] breakdown must analyze tokens from the target translation only.
-- Each words[] item must include: position, role, english_gloss, surface_form, grammatical_form, lemma_guid, lemma.
+- Each words[] item must include: position, part_of_speech, english_gloss, surface_form, grammatical_form, lemma_guid, lemma.
 - Use lemma_guid=NONE for function words without a selected candidate lemma.
 - COMPLETENESS: every word in the target translation must appear in words[].
   Do not stop early. A single multi-word surface_form (e.g., "in the evening")

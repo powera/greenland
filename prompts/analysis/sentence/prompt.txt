@@ -9,7 +9,6 @@ Task:
    - The word as it appears in the sentence (e.g., "eating", "bananas")
    - The base form/lemma (e.g., "eat", "banana")
    - Part of speech (noun, verb, adjective, adverb)
-   - Role in the sentence (subject, verb, object, adjective, adverb)
    - A brief context or disambiguation hint if the word has multiple meanings
      (e.g., for "mouse": "animal" or "computer device")
    - Grammatical form (e.g., "present_participle", "plural", "base_form")

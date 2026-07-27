@@ -404,7 +404,7 @@ def _build_sentence_completion_questions(
     level: int, interface_lang: str, foreign_lang: str
 ) -> List[Dict[str, Any]]:
     """Generate sentence-completion questions."""
-    content_roles = {"verb", "noun", "subject", "object", "adjective", "adverb"}
+    content_parts_of_speech = {"verb", "noun", "adjective", "adverb"}
 
     # A sentence's level is the hardest word it contains; only sentences whose
     # hardest word is at or below the selected level qualify, and easier
@@ -471,7 +471,7 @@ def _build_sentence_completion_questions(
         blankable = [
             w
             for w in foreign_words_query
-            if w.word_role in content_roles
+            if w.part_of_speech in content_parts_of_speech
             and w.target_language_text
             and len(w.target_language_text) > 1
         ]

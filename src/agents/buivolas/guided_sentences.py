@@ -164,7 +164,7 @@ class GuidedSentenceGenerator:
                     type="string",
                     description="The dictionary/base form of the word",
                 ),
-                "role": SchemaProperty(
+                "part_of_speech": SchemaProperty(
                     type="string",
                     description="Part of speech: noun, verb, adjective, adverb, or other",
                 ),
@@ -273,7 +273,7 @@ class GuidedSentenceGenerator:
                     word_lemma = self._find_lemma_for_word(
                         session,
                         word_data.get("lemma", ""),
-                        word_data.get("role", "unknown"),
+                        word_data.get("part_of_speech", "unknown"),
                         source_lemma=source_lemma,
                     )
 
@@ -283,7 +283,7 @@ class GuidedSentenceGenerator:
                             sentence_id=sentence.id,
                             lemma_id=word_lemma.id,
                             position=position,
-                            slot_name=word_data.get("role", "unknown"),
+                            slot_name=word_data.get("part_of_speech", "unknown"),
                             english_text=word_data.get("lemma", ""),
                         )
                         session.add(pattern_word)
@@ -293,7 +293,7 @@ class GuidedSentenceGenerator:
                         pending_import = self._stage_missing_word(
                             session,
                             word_text=word_data.get("lemma", ""),
-                            word_role=word_data.get("role", "unknown"),
+                            part_of_speech=word_data.get("part_of_speech", "unknown"),
                             sentence_id=sentence.id,
                             sentence_text=en_text,
                         )
@@ -302,7 +302,7 @@ class GuidedSentenceGenerator:
                                 sentence_id=sentence.id,
                                 pending_import_id=pending_import.id,
                                 position=position,
-                                slot_name=word_data.get("role", "unknown"),
+                                slot_name=word_data.get("part_of_speech", "unknown"),
                                 english_text=word_data.get("lemma", ""),
                             )
                             session.add(pattern_word)
@@ -341,7 +341,7 @@ class GuidedSentenceGenerator:
         self,
         session: Any,
         word_text: str,
-        word_role: str,
+        part_of_speech: str,
         sentence_id: int,
         sentence_text: str,
     ) -> Optional[PendingImport]:
@@ -350,7 +350,7 @@ class GuidedSentenceGenerator:
         Args:
             session: Database session
             word_text: The lemma/base form of the word
-            word_role: POS role (noun, verb, adjective, adverb)
+            part_of_speech: Part of speech (noun, verb, adjective, adverb)
             sentence_id: ID of the sentence using this word
             sentence_text: The English sentence text for context
 
@@ -360,14 +360,14 @@ class GuidedSentenceGenerator:
         if not word_text:
             return None
 
-        # Map roles to POS types
-        role_to_pos = {
+        # Normalize the LLM part-of-speech value to database POS types.
+        part_of_speech_to_pos = {
             "noun": "noun",
             "verb": "verb",
             "adjective": "adjective",
             "adverb": "adverb",
         }
-        pos_type = role_to_pos.get(word_role)
+        pos_type = part_of_speech_to_pos.get(part_of_speech)
 
         # Check if already in pending_imports with same word and pos_type
         existing = (
@@ -412,14 +412,14 @@ class GuidedSentenceGenerator:
         self,
         session: Any,
         word_text: str,
-        word_role: str,
+        part_of_speech: str,
         source_lemma: Optional[Lemma] = None,
     ) -> Optional[Lemma]:
-        """Find a lemma matching the given word text and role.
+        """Find a lemma matching the given word text and part of speech.
 
         Delegates to wordfreq.tools.sentence_word_linker.find_lemma_by_text().
         """
-        return find_lemma_by_text(session, word_text, word_role, source_lemma=source_lemma)
+        return find_lemma_by_text(session, word_text, part_of_speech, source_lemma=source_lemma)
 
 
 def generate_guided_sentences(

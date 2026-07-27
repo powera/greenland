@@ -163,18 +163,16 @@ def _word_payload(w: SentenceWord, lang: str) -> Dict[str, Any]:
         "text": w.target_language_text,
         "gloss": w.english_text,
         "lemma_id": w.lemma_id,
-        "role": w.word_role,
+        "part_of_speech": w.part_of_speech,
         "form": w.grammatical_form,
         "gram_label": _format_grammatical_label(w.grammatical_form, lang),
     }
 
 
-# Rank for keeping pairs when we cap the colored set; lower number = higher priority.
-_ROLE_PRIORITY: Dict[str, int] = {
+# Rank parts of speech when we cap the colored set; lower number = higher priority.
+_PART_OF_SPEECH_PRIORITY: Dict[str, int] = {
     "verb": 0,
     "noun": 1,
-    "subject": 1,
-    "object": 1,
     "adjective": 2,
     "adverb": 3,
     "numeral": 4,
@@ -189,8 +187,8 @@ _ROLE_PRIORITY: Dict[str, int] = {
 _MAX_COLORED_PAIRS = 4
 
 
-def _role_rank(role: Optional[str]) -> int:
-    return _ROLE_PRIORITY.get(role or "", 9)
+def _part_of_speech_rank(part_of_speech: Optional[str]) -> int:
+    return _PART_OF_SPEECH_PRIORITY.get(part_of_speech or "", 9)
 
 
 def _assign_pair_keys(
@@ -199,7 +197,7 @@ def _assign_pair_keys(
     """Annotate words with 'pair_key' / 'pair_index' for cross-language coloring.
 
     Pairs are matched strictly by shared lemma_id (function words without a
-    lemma never pair up). We then rank candidate pairs by the best role on
+    lemma never pair up). We then rank candidate pairs by the best part of speech on
     either side (content words like verb/noun outrank pronouns/conjunctions)
     and keep at most _MAX_COLORED_PAIRS. Words outside the kept set get
     pair_key=None, pair_index=None and render without color.
@@ -222,10 +220,11 @@ def _assign_pair_keys(
 
     shared_lemmas = set(iface_by_lemma.keys()) & set(foreign_by_lemma.keys())
 
-    candidates: List[Tuple[int, int, int]] = []  # (role_rank, first_position, lemma_id)
+    candidates: List[Tuple[int, int, int]] = []  # (POS rank, first position, lemma ID)
     for lemma_id in shared_lemmas:
         best_rank = min(
-            _role_rank(w["role"]) for w in iface_by_lemma[lemma_id] + foreign_by_lemma[lemma_id]
+            _part_of_speech_rank(w["part_of_speech"])
+            for w in iface_by_lemma[lemma_id] + foreign_by_lemma[lemma_id]
         )
         first_pos = min(w["position"] for w in iface_by_lemma[lemma_id])
         candidates.append((best_rank, first_pos, lemma_id))

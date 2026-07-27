@@ -11,14 +11,15 @@ def add_sentence_word(
     session: Session,
     sentence: Sentence,
     position: int,
-    word_role: str,
-    language_code: str,
+    part_of_speech: Optional[str] = None,
+    language_code: str = "",
     lemma: Optional[Lemma] = None,
     english_text: Optional[str] = None,
     target_language_text: Optional[str] = None,
     grammatical_form: Optional[str] = None,
     grammatical_case: Optional[str] = None,
     declined_form: Optional[str] = None,
+    word_role: Optional[str] = None,
 ) -> SentenceWord:
     """Add a word usage record to a sentence.
 
@@ -26,7 +27,7 @@ def add_sentence_word(
         session: Database session
         sentence: Sentence object
         position: Position in the sentence (0-indexed)
-        word_role: Semantic role (e.g., "subject", "verb", "object", "pronoun")
+        part_of_speech: Part of speech (e.g., "noun", "verb", "pronoun")
         language_code: Language code (e.g., 'lt', 'fr', 'zh')
         lemma: Optional Lemma object this word refers to
         english_text: English form of the word
@@ -34,15 +35,22 @@ def add_sentence_word(
         grammatical_form: Grammatical form (e.g., "1s_past", "gerund")
         grammatical_case: Grammatical case (e.g., "accusative", "nominative")
         declined_form: Actual declined/conjugated form used in sentence
+        word_role: Deprecated alias for ``part_of_speech``
 
     Returns:
         Created SentenceWord object
     """
+    if part_of_speech and word_role and part_of_speech != word_role:
+        raise ValueError("part_of_speech and word_role must match when both are provided")
+    resolved_part_of_speech = part_of_speech or word_role
+    if not resolved_part_of_speech:
+        raise ValueError("part_of_speech is required")
+
     sentence_word = SentenceWord(
         sentence_id=sentence.id,
         lemma_id=lemma.id if lemma else None,
         position=position,
-        word_role=word_role,
+        part_of_speech=resolved_part_of_speech,
         language_code=language_code,
         english_text=english_text,
         target_language_text=target_language_text,
@@ -100,32 +108,37 @@ def get_lemmas_for_sentence(session: Session, sentence_id: int) -> List[Lemma]:
 def update_sentence_word(
     session: Session,
     sentence_word: SentenceWord,
-    word_role: Optional[str] = None,
+    part_of_speech: Optional[str] = None,
     lemma: Optional[Lemma] = None,
     english_text: Optional[str] = None,
     target_language_text: Optional[str] = None,
     grammatical_form: Optional[str] = None,
     grammatical_case: Optional[str] = None,
     declined_form: Optional[str] = None,
+    word_role: Optional[str] = None,
 ) -> SentenceWord:
     """Update a sentence word record.
 
     Args:
         session: Database session
         sentence_word: SentenceWord object to update
-        word_role: New word role (optional)
+        part_of_speech: New part of speech (optional)
         lemma: New lemma association (optional)
         english_text: New English text (optional)
         target_language_text: New target language text (optional)
         grammatical_form: New grammatical form (optional)
         grammatical_case: New grammatical case (optional)
         declined_form: New declined form (optional)
+        word_role: Deprecated alias for ``part_of_speech``
 
     Returns:
         Updated SentenceWord object
     """
-    if word_role is not None:
-        sentence_word.word_role = word_role
+    if part_of_speech and word_role and part_of_speech != word_role:
+        raise ValueError("part_of_speech and word_role must match when both are provided")
+    resolved_part_of_speech = part_of_speech or word_role
+    if resolved_part_of_speech is not None:
+        sentence_word.part_of_speech = resolved_part_of_speech
     if lemma is not None:
         sentence_word.lemma_id = lemma.id
     if english_text is not None:
