@@ -27,6 +27,11 @@ DEFAULT_MODEL = "gemini-2.5-flash"
 DEFAULT_TIMEOUT = 50
 API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
+# Gemini 3.5 Flash Lite supports configurable thinking. Keep its default at the
+# least expensive/lowest-latency level for both benchmarks and Barsukas calls,
+# which share this client through UnifiedLLMClient.
+MINIMAL_THINKING_MODELS = ("gemini-3.5-flash-lite",)
+
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -140,6 +145,8 @@ class GeminiClient:
             logger.debug("JSON schema: %s", json_schema)
 
         generation_config: Dict[str, Any] = {"maxOutputTokens": 256 if brief else 1536}
+        if model.startswith(MINIMAL_THINKING_MODELS):
+            generation_config["thinkingConfig"] = {"thinkingLevel": "minimal"}
         if messages:
             normalized = clients.lib.normalize_alternating_messages(messages)
             contents = [
@@ -178,9 +185,8 @@ class GeminiClient:
         usage = LLMUsage.from_api_response(
             {
                 "prompt_tokens": completion_data["usageMetadata"].get("promptTokenCount", 0),
-                "completion_tokens": completion_data["usageMetadata"].get(
-                    "candidatesTokenCount", 0
-                ),
+                "completion_tokens": completion_data["usageMetadata"].get("candidatesTokenCount", 0)
+                + completion_data["usageMetadata"].get("thoughtsTokenCount", 0),
                 "total_duration": duration_ms,
             },
             model=model,

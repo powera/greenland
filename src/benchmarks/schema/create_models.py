@@ -237,6 +237,19 @@ def create_remote_models(postgres_url=None):
         max_benchmark_tier=2,
     )
 
+    # Google Gemini 3.5 family
+    _model_write(
+        s,
+        codename="gemini-3.5-flash-lite",
+        displayname="Gemini 3.5 Flash Lite",
+        launch_date="2026-07-21",
+        filesize_mb=0,
+        license_name="Closed Model",
+        model_path="gemini-3.5-flash-lite",
+        model_type="remote",
+        max_benchmark_tier=2,
+    )
+
 
 def create_local_models(postgres_url=None):
     """Create local (LMStudio) model definitions."""
