@@ -905,12 +905,18 @@ class JSONLSession(BaseSession):
                     existing_word = i
                     break
 
+            # Write every data-bearing field: a partial dict here silently drops
+            # columns from the sentence on the next save.
             word_data = {
                 "lemma_id": instance.lemma_id,
                 "language_code": instance.language_code,
                 "position": instance.position,
                 "word_role": instance.word_role,
+                "english_text": instance.english_text,
+                "target_language_text": instance.target_language_text,
                 "grammatical_form": instance.grammatical_form,
+                "grammatical_case": instance.grammatical_case,
+                "declined_form": instance.declined_form,
             }
 
             if existing_word is not None:

@@ -79,6 +79,45 @@ def _normalize_target_languages(target_languages: List[str]) -> List[str]:
     return normalize_llm_language_codes(target_languages, operation_name="Sentence decomposition")
 
 
+def build_decomposed_word_schema(*, additional_properties: bool = True) -> Dict[str, Any]:
+    """Return the canonical JSON schema for one decomposed word.
+
+    Every decomposition path - single-language, multi-language, translate+
+    decompose, and verbalator - shares this shape. Add new per-word fields
+    here and only here, so the schemas cannot drift apart.
+
+    Set ``additional_properties=False`` for providers that need the object
+    closed; the field set is otherwise identical across callers.
+    """
+    schema: Dict[str, Any] = {
+        "type": "object",
+        "properties": {
+            "position": {"type": "integer"},
+            "part_of_speech": {
+                "type": "string",
+                "description": "Part of speech, never subject/object syntactic role",
+            },
+            "english_gloss": {"type": "string"},
+            "surface_form": {"type": "string"},
+            "grammatical_form": {"type": ["string", "null"]},
+            "lemma_guid": {"type": "string"},
+            "lemma": {"type": "string"},
+        },
+        "required": [
+            "position",
+            "part_of_speech",
+            "english_gloss",
+            "surface_form",
+            "grammatical_form",
+            "lemma_guid",
+            "lemma",
+        ],
+    }
+    if not additional_properties:
+        schema["additionalProperties"] = False
+    return schema
+
+
 def build_prompt_for_translate_and_decompose(
     sentence: Sentence,
     target_languages: List[str],
@@ -361,30 +400,7 @@ def build_multi_language_decomposition_schema(*, target_languages: List[str]) ->
     ``grammatical_form``, ``lemma_guid``, ``lemma``).
     """
     target_languages = _normalize_target_languages(target_languages)
-    word_schema: Dict[str, Any] = {
-        "type": "object",
-        "properties": {
-            "position": {"type": "integer"},
-            "part_of_speech": {
-                "type": "string",
-                "description": "Part of speech, never subject/object syntactic role",
-            },
-            "english_gloss": {"type": "string"},
-            "surface_form": {"type": "string"},
-            "grammatical_form": {"type": "string"},
-            "lemma_guid": {"type": "string"},
-            "lemma": {"type": "string"},
-        },
-        "required": [
-            "position",
-            "part_of_speech",
-            "english_gloss",
-            "surface_form",
-            "grammatical_form",
-            "lemma_guid",
-            "lemma",
-        ],
-    }
+    word_schema = build_decomposed_word_schema()
 
     schema_properties: Dict[str, Any] = {}
     required_fields: List[str] = []
@@ -411,23 +427,14 @@ def build_multi_language_decomposition_schema(*, target_languages: List[str]) ->
 def build_decomposition_schema(
     *, target_languages: List[str], include_english: bool = True
 ) -> Dict[str, Any]:
-    """Schema for translate+decompose requests (ZVIRBLIS and sentence translator)."""
+    """Schema for translate+decompose requests (ZVIRBLIS and sentence translator).
+
+    Uses the same per-word shape as every other decomposition path; only the
+    outer structure (``words_<lang>`` keys plus an optional English echo)
+    differs.
+    """
     target_languages = _normalize_target_languages(target_languages)
-    word_schema: Dict[str, Any] = {
-        "type": "object",
-        "properties": {
-            "word": {"type": "string"},
-            "english": {"type": "string"},
-            "guid": {"type": "string"},
-            "part_of_speech": {
-                "type": "string",
-                "description": "Part of speech, never subject/object syntactic role",
-            },
-            "grammatical_form": {"type": ["string", "null"]},
-        },
-        "required": ["word", "english", "guid", "part_of_speech", "grammatical_form"],
-        "additionalProperties": False,
-    }
+    word_schema = build_decomposed_word_schema(additional_properties=False)
 
     schema_properties: Dict[str, Any] = {}
     required_fields: List[str] = []
@@ -478,30 +485,7 @@ def build_single_language_decomposition_schema() -> Dict[str, Any]:
                         "translation": {"type": "string"},
                         "words": {
                             "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "position": {"type": "integer"},
-                                    "part_of_speech": {
-                                        "type": "string",
-                                        "description": "Part of speech, never subject/object syntactic role",
-                                    },
-                                    "english_gloss": {"type": "string"},
-                                    "surface_form": {"type": "string"},
-                                    "grammatical_form": {"type": "string"},
-                                    "lemma_guid": {"type": "string"},
-                                    "lemma": {"type": "string"},
-                                },
-                                "required": [
-                                    "position",
-                                    "part_of_speech",
-                                    "english_gloss",
-                                    "surface_form",
-                                    "grammatical_form",
-                                    "lemma_guid",
-                                    "lemma",
-                                ],
-                            },
+                            "items": build_decomposed_word_schema(),
                         },
                     },
                     "required": ["language_code", "translation", "words"],

@@ -209,7 +209,7 @@ def translate_sentence(
 
     translations: Dict[str, Any] = dict(pipeline_result.translations)
 
-    # Adapt Phase 3 output to the legacy "translations" dict shape consumed by
+    # Flatten Phase 3 output into the "translations" dict shape consumed by
     # store_translation_results: keys "lang" / "words_lang".
     for language_code, decomposition in pipeline_result.decompositions.items():
         if not decomposition.success:
@@ -222,9 +222,7 @@ def translate_sentence(
             continue
         if language_code not in translations and decomposition.translation:
             translations[language_code] = decomposition.translation
-        translations[f"words_{language_code}"] = [
-            _adapt_decomposed_word(word_entry) for word_entry in decomposition.words
-        ]
+        translations[f"words_{language_code}"] = list(decomposition.words)
 
     store_translation_results(sentence_id, translations, session)
     return translations
@@ -268,26 +266,15 @@ def _persist_phase1_translations(
     )
 
 
-def _adapt_decomposed_word(word_entry: Dict[str, Any]) -> Dict[str, Any]:
-    """Map a Phase 3 ``words[]`` entry to the legacy ``words_<lang>`` shape.
+def _clean_word_field(value: Any) -> str:
+    """Return a stripped string for a decomposition field, treating None as empty."""
+    return str(value or "").strip()
 
-    Phase 3 uses ``surface_form`` / ``english_gloss`` / ``lemma_guid``; the
-    legacy storage path expects ``word`` / ``english`` / ``guid``.
-    """
-    grammatical_form_raw = word_entry.get("grammatical_form")
-    grammatical_form: Optional[str]
-    if grammatical_form_raw is None:
-        grammatical_form = None
-    else:
-        stripped = str(grammatical_form_raw).strip()
-        grammatical_form = stripped or None
-    return {
-        "word": str(word_entry.get("surface_form") or "").strip(),
-        "english": str(word_entry.get("english_gloss") or "").strip(),
-        "guid": str(word_entry.get("lemma_guid") or "").strip(),
-        "part_of_speech": str(word_entry.get("part_of_speech") or "").strip(),
-        "grammatical_form": grammatical_form,
-    }
+
+def _optional_word_field(value: Any) -> Optional[str]:
+    """Return a stripped string, or None when the field is absent or blank."""
+    cleaned = _clean_word_field(value)
+    return cleaned or None
 
 
 def store_translation_results(
@@ -369,9 +356,10 @@ def store_translation_results(
 
         # Add detailed word records
         for position, word_data in enumerate(words_data):
-            # Find matching lemma by GUID if provided
+            # Find matching lemma by GUID if provided. Synthetic GUIDs are
+            # placeholders emitted for words with no real lemma; never resolve them.
             lemma_id = None
-            guid = word_data.get("guid", "").strip()
+            guid = _clean_word_field(word_data.get("lemma_guid"))
             is_synthetic_guid = guid.startswith("SYN") and guid[3:].isdigit()
 
             if guid and not is_synthetic_guid:
@@ -380,18 +368,20 @@ def store_translation_results(
                 if lemma:
                     lemma_id = lemma.id
 
+            surface_form = _clean_word_field(word_data.get("surface_form"))
+
             # Create SentenceWord with detailed grammatical info
             new_word = SentenceWord(
                 sentence_id=sentence_id,
                 lemma_id=lemma_id,
                 language_code=lang_code,
                 position=position,
-                part_of_speech=word_data.get("part_of_speech"),
-                english_text=word_data.get("english"),
-                target_language_text=word_data.get("word"),
-                grammatical_form=word_data.get("grammatical_form"),
+                part_of_speech=_clean_word_field(word_data.get("part_of_speech")),
+                english_text=_clean_word_field(word_data.get("english_gloss")),
+                target_language_text=surface_form,
+                grammatical_form=_optional_word_field(word_data.get("grammatical_form")),
                 grammatical_case=None,
-                declined_form=word_data.get("word"),
+                declined_form=surface_form,
             )
             session.add(new_word)
 

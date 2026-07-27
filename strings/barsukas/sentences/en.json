@@ -106,6 +106,7 @@
   "missing_in": "missing",
   "per_language_breakdown": "Per-language Breakdown",
   "role": "Role",
+  "part_of_speech": "Part of Speech",
   "english": "English",
   "grammatical_form": "Grammatical Form",
   "token_optional": "Optional"

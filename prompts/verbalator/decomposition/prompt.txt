@@ -7,5 +7,5 @@ Target language for decomposition: {target_language}
 Return schema requirements:
 - Return exactly one entry in languages[] and set language_code to '{target_language}'.
 - The languages[] breakdown must analyze tokens from the text in the target language.
-- Each words[] item must include: position, role, english_gloss, surface_form, grammatical_form, lemma_guid, lemma.
+- Each words[] item must include: position, part_of_speech, english_gloss, surface_form, grammatical_form, lemma_guid, lemma.
 - Use lemma_guid=NONE for function words without a selected candidate lemma.

@@ -1,8 +1,12 @@
 """Tests for shared sentence decomposition helpers."""
 
+from typing import Any, Dict
+
 from sentences.decomposition import (
     all_words_are_lemmas_or_grammatical,
+    build_decomposed_word_schema,
     build_decomposition_schema,
+    build_multi_language_decomposition_schema,
     build_sentence_decomposition_context,
     build_prompt_for_translate_and_decompose,
     build_sentence_decomposition_prompt,
@@ -48,6 +52,44 @@ def test_build_decomposition_schema_has_words_for_target_languages() -> None:
     assert "es" in schema["properties"]
     assert "words_es" in schema["properties"]
     assert "en" not in schema["properties"]
+
+
+def test_all_schema_builders_share_one_word_shape() -> None:
+    """Every decomposition path must describe a word identically.
+
+    The shapes previously drifted (surface_form/english_gloss/lemma_guid vs
+    word/english/guid), which needed adapters to reconcile and silently
+    dropped fields when one was missed. Adding a per-word field should mean
+    editing build_decomposed_word_schema alone; this test fails if a caller
+    starts inlining its own copy again.
+    """
+    from verbalator.actions.decomposition import DecompositionAction
+
+    canonical = build_decomposed_word_schema()
+
+    single = build_single_language_decomposition_schema()
+    single_word = single["properties"]["languages"]["items"]["properties"]["words"]["items"]
+
+    multi = build_multi_language_decomposition_schema(target_languages=["lt"])
+    multi_word = multi["properties"]["words_lt"]["items"]
+
+    legacy = build_decomposition_schema(target_languages=["lt"], include_english=False)
+    legacy_word = legacy["properties"]["words_lt"]["items"]
+
+    verbalator = DecompositionAction().build_schema()
+    verbalator_word = verbalator["properties"]["languages"]["items"]["properties"]["words"]["items"]
+
+    for word_schema in (single_word, multi_word, legacy_word, verbalator_word):
+        assert word_schema["properties"] == canonical["properties"]
+        assert sorted(word_schema["required"]) == sorted(canonical["required"])
+
+
+def test_canonical_word_schema_uses_phase3_field_names() -> None:
+    """The legacy word/english/guid names must not come back."""
+    properties = build_decomposed_word_schema()["properties"]
+
+    assert {"surface_form", "english_gloss", "lemma_guid"} <= set(properties)
+    assert not {"word", "english", "guid"} & set(properties)
 
 
 def test_build_single_language_schema_limits_languages_to_one() -> None:
