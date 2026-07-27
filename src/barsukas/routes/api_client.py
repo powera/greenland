@@ -81,6 +81,7 @@ def api_client_ui() -> ResponseReturnValue:
 
     # Available models
     models = [
+        ("gpt-5.6-luna", "GPT-5.6 Luna (OpenAI)"),
         ("gpt-5.4-mini", "GPT-5.4 Mini (OpenAI)"),
         ("gpt-5-mini", "GPT-5 Mini (OpenAI)"),
         ("gpt-4o-mini", "GPT-4o Mini (OpenAI)"),

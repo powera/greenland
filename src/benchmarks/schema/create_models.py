@@ -189,6 +189,19 @@ def create_remote_models(postgres_url=None):
         max_benchmark_tier=2,
     )
 
+    # OpenAI GPT-5.6 family
+    _model_write(
+        s,
+        codename="gpt-5.6-luna",
+        displayname="GPT-5.6 Luna",
+        launch_date="2026-07-27",
+        filesize_mb=0,
+        license_name="Closed Model",
+        model_path="gpt-5.6-luna",
+        model_type="remote",
+        max_benchmark_tier=2,
+    )
+
     # Anthropic Claude 4.6
     _model_write(
         s,

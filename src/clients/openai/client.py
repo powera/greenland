@@ -34,28 +34,55 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 
 def is_gpt5_nano_or_mini_model(model: str) -> bool:
-    """Return whether the model is a GPT-5 nano/mini variant."""
+    """Return whether the model is a GPT-5 cheap-tier (nano/mini-class) variant.
+
+    gpt-5.6-luna is mini-class on price and performance despite not carrying a
+    "-mini" suffix, so it is matched explicitly.
+    """
+    if model.startswith("gpt-5.6-luna"):
+        return True
     return model.startswith("gpt-5") and (model.endswith("-nano") or model.endswith("-mini"))
 
 
 # Valid reasoning effort values by model family.
-# gpt-5.4-* supports: "none", "low", "medium", "high"
+# gpt-5.4-* and gpt-5.6-luna support: "none", "low", "medium", "high"
 # Other reasoning models (o1, o3, gpt-5.x non-5.4) support: "minimal", "low", "medium", "high"
 _GPT54_VALID_EFFORTS = frozenset(["none", "low", "medium", "high"])
 _DEFAULT_VALID_EFFORTS = frozenset(["minimal", "low", "medium", "high"])
+
+# gpt-5.6-luna additionally accepts "xhigh" and "max" at the API level, but this
+# product deliberately does not use them: they are rejected rather than clamped
+# down to "high" so a caller asking for more reasoning fails loudly instead of
+# silently getting less than it requested.
+_DISALLOWED_EFFORTS = frozenset(["xhigh", "max"])
+
+
+def _uses_gpt54_effort_scale(model: str) -> bool:
+    """Return whether the model uses the gpt-5.4-style effort scale (supports "none")."""
+    return model.startswith("gpt-5.4") or model.startswith("gpt-5.6-luna")
 
 
 def reasoning_effort_for_model(model: str, requested_effort: str) -> Optional[str]:
     """Return the appropriate reasoning effort string for a model, or None to omit reasoning.
 
-    gpt-5.4-series supports "none" (disables reasoning), "low", "medium", "high".
+    gpt-5.4-series and gpt-5.6-luna support "none" (disables reasoning), "low",
+    "medium", "high"; "minimal" is mapped to "low" for them.
     Other models support "minimal", "low", "medium", "high".
-    "minimal" is mapped to "low" for gpt-5.4-series.
-    Returns None if effort is "none" for non-gpt-5.4 models (best-effort disable).
+    Returns None if effort is "none" for models without a "none" level
+    (best-effort disable).
+
+    "xhigh" and "max" are rejected for every model even where the API accepts
+    them; see _DISALLOWED_EFFORTS.
 
     Raises ValueError for invalid effort values.
     """
-    if model.startswith("gpt-5.4"):
+    if requested_effort in _DISALLOWED_EFFORTS:
+        raise ValueError(
+            f"Reasoning effort '{requested_effort}' is not used in this product "
+            f"(requested for model '{model}'). Use at most 'high'."
+        )
+
+    if _uses_gpt54_effort_scale(model):
         valid = _GPT54_VALID_EFFORTS
         effort = "low" if requested_effort == "minimal" else requested_effort
     else:
@@ -218,7 +245,7 @@ class OpenAIClient:
         # Set reasoning and text parameters for GPT-5 nano and mini variants
         if is_gpt5_nano_or_mini:
             effort = reasoning_effort_for_model(
-                model, "none" if model.startswith("gpt-5.4") else "minimal"
+                model, "none" if _uses_gpt54_effort_scale(model) else "minimal"
             )
             request_kwargs["reasoning"] = {"effort": effort}
             # Only set text verbosity if not overridden by JSON schema below
