@@ -6,6 +6,7 @@ import logging
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
+import util.prompt_loader
 from benchmarks.lib.runners.partial_credit_runner import PartialCreditRunner
 from benchmarks.lib.utils.factory import runner
 
@@ -79,30 +80,11 @@ Output requirements:
 - Include all tokens in order (zero-indexed positions)
 - For each token provide: position, part_of_speech, english_gloss, surface_form, grammatical_form, lemma_guid, lemma
 - Use lemma_guid from candidate lemmas when applicable, otherwise use "NONE"
-- Set word_count to match the number of token entries
 - IMPORTANT: Do NOT include punctuation as standalone tokens in words[]"""
 
-        context = """You are a multilingual linguistics expert specializing in morphological analysis.
-Your task is to decompose sentences into tokens and provide detailed grammatical information for each token.
-
-Grammatical form format:
-- Use <part_of_speech>/<language_code>_<morphology> for inflected words.
-- Person/number notation: 1s, 2s, 3s, 1p, 2p, 3p.
-- Include gender only when the surface form differs by gender (e.g., 3s-f, singular_f).
-- Tense/aspect examples: present, past, future, impf, pc, inf.
-- Case languages (lt, de): include case + number (e.g., noun/de_accusative_singular).
-- Non-case languages (en, fr, es, pt, ko, zh): nouns should use number only (e.g., noun/fr_singular).
-- Pronouns: pronoun/<lang>_subjective|objective|possessive|reflexive (or case labels for case languages).
-- Numerals: numeral/<lang>_cardinal|ordinal.
-- For uninflected function words: <part_of_speech>/base (e.g., preposition/base).
-
-Important rules:
-- Maintain token order from the original sentence
-- Use zero-indexed positions
-- Ensure word_count equals the number of word entries
-- Output must contain exactly one language entry
-- Do NOT include punctuation marks as separate words
-- Return only valid JSON matching the provided schema"""
+        # Load the production decomposition rules rather than restating them, so
+        # the benchmark cannot score models against a stale paraphrase.
+        context = util.prompt_loader.get_context("sentence_decomposition", "single_language")
 
         return prompt, schema, context
 

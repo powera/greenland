@@ -540,7 +540,7 @@
                         <thead>
                             <tr>
                                 <th>{{ STRINGS.sentences.position }}</th>
-                                <th>{{ STRINGS.sentences.role }}</th>
+                                <th>{{ STRINGS.sentences.part_of_speech }}</th>
                                 <th>{{ STRINGS.sentences.english }}</th>
                                 <th>{{ lang_name }}</th>
                                 <th>{{ STRINGS.sentences.grammatical_form }}</th>
@@ -551,7 +551,7 @@
                             {% for word in words_by_language[lang_code] %}
                                 <tr>
                                     <td>{{ word.position }}</td>
-                                    <td><code>{{ word.role }}</code></td>
+                                    <td><code>{{ word.part_of_speech }}</code></td>
                                     <td>{{ word.english_text or '-' }}</td>
                                     <td>
                                         {% if word.target_text %}
@@ -584,8 +584,8 @@
                                             {% if word.lemma.difficulty_level is not none %}
                                                 <span class="badge bg-info" style="font-size: 0.7rem;">L{{ word.lemma.difficulty_level }}</span>
                                             {% endif %}
-                                        {% elif word.role in ('pronoun', 'article', 'preposition', 'conjunction', 'determiner', 'particle') %}
-                                            <span class="text-muted">{{ word.role | upper }}</span>
+                                        {% elif word.part_of_speech in ('pronoun', 'article', 'preposition', 'conjunction', 'determiner', 'particle') %}
+                                            <span class="text-muted">{{ word.part_of_speech | upper }}</span>
                                         {% else %}
                                             <span class="text-muted fst-italic">{{ STRINGS.sentences.no_lemma }}</span>
                                         {% endif %}

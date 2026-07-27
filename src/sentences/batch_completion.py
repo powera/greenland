@@ -26,7 +26,7 @@ import logging
 from typing import Any, Dict, Iterable
 
 from clients.batch_queue import BatchQueue
-from sentences.translation import _adapt_decomposed_word, store_translation_results
+from sentences.translation import store_translation_results
 
 logger = logging.getLogger(__name__)
 
@@ -34,23 +34,6 @@ logger = logging.getLogger(__name__)
 # and the background poller dispatch the same way without importing each other.
 TRANSLATE_AGENT_NAME = "barsukas_translate"
 DECOMPOSE_AGENT_NAME = "barsukas_decompose"
-
-
-def _adapt_phase3_words(translations: Dict[str, Any]) -> Dict[str, Any]:
-    """Convert Phase-3 ``words_<lang>`` entries to the legacy storage shape.
-
-    The Phase-3 batch schema emits each word with ``surface_form`` /
-    ``english_gloss`` / ``lemma_guid``; ``store_translation_results`` expects
-    ``word`` / ``english`` / ``guid``. Non-``words_*`` keys pass through
-    unchanged.
-    """
-    adapted: Dict[str, Any] = {}
-    for key, value in translations.items():
-        if str(key).startswith("words_") and isinstance(value, list):
-            adapted[key] = [_adapt_decomposed_word(entry) for entry in value]
-        else:
-            adapted[key] = value
-    return adapted
 
 
 def apply_results_for_agent(
@@ -96,8 +79,7 @@ def apply_sentence_translation_results(
             content = response["body"]["choices"][0]["message"]["content"]
             translations = json.loads(content)
 
-            adapted = _adapt_phase3_words(translations)
-            store_translation_results(sentence_id, adapted, session)
+            store_translation_results(sentence_id, translations, session)
             sentences_updated += 1
 
         except Exception as exc:

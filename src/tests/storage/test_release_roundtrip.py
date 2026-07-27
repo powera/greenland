@@ -248,6 +248,36 @@ class ReleaseRoundTripTest(unittest.TestCase):
                 f"export changed column {column!r}",
             )
 
+    def test_release_record_preserves_all_word_data_columns(self) -> None:
+        """_sentence_to_release_record carries the full decomposition.
+
+        This is the serializer that writes data/release; it shares
+        _sentence_word_to_dict with the JSONL export path so a newly added
+        SentenceWord column reaches both at once.
+        """
+        from storage.migrate import _sentence_to_release_record
+
+        engine = create_engine(f"sqlite:///{self.source_db}")
+        with Session(engine) as db:
+            sentence = db.query(Sentence).one()
+            record = _sentence_to_release_record(sentence)
+
+        self.assertIn("words", record, "release record dropped the decomposition")
+        verb_word = next(w for w in record["words"] if w.get("word_role") == "verb")
+        for column in SENTENCE_WORD_DATA_COLUMNS:
+            self.assertIn(column, verb_word, f"release record dropped column {column!r}")
+            self.assertEqual(
+                verb_word[column],
+                EXPECTED_WORD[column],
+                f"release record changed column {column!r}",
+            )
+        self.assertEqual(verb_word.get("lemma_guid"), LEMMA_GUID)
+        self.assertNotIn(
+            "lemma_id",
+            verb_word,
+            "release records must not carry ephemeral integer lemma_id",
+        )
+
     # ---- SQLite import path (migrate.import_jsonl_to_sqlite) --------------
 
     def test_sqlite_import_preserves_word_fields(self) -> None:

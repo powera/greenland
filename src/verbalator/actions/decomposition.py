@@ -3,6 +3,7 @@
 from typing import Any, Dict, Optional, Tuple
 
 import util.prompt_loader
+from sentences.decomposition import build_decomposed_word_schema
 from verbalator.action_base import ActionBase
 from verbalator.action_registry import register
 
@@ -127,27 +128,7 @@ class DecompositionAction(ActionBase):
                             "word_count": {"type": "integer"},
                             "words": {
                                 "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "position": {"type": "integer"},
-                                        "part_of_speech": {"type": "string"},
-                                        "english_gloss": {"type": "string"},
-                                        "surface_form": {"type": "string"},
-                                        "grammatical_form": {"type": "string"},
-                                        "lemma_guid": {"type": "string"},
-                                        "lemma": {"type": "string"},
-                                    },
-                                    "required": [
-                                        "position",
-                                        "part_of_speech",
-                                        "english_gloss",
-                                        "surface_form",
-                                        "grammatical_form",
-                                        "lemma_guid",
-                                        "lemma",
-                                    ],
-                                },
+                                "items": build_decomposed_word_schema(),
                             },
                         },
                         "required": [
