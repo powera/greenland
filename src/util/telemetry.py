@@ -34,6 +34,7 @@ class ModelTier(Enum):
 
     # Gemini models
     GEMINI_FLASH = auto()  # gemini-2.5-flash models
+    GEMINI_35_FLASH_LITE = auto()  # gemini-3.5-flash-lite models
 
     # Ollama cost is based on compute time
     OLLAMA = auto()  # All Ollama models
@@ -64,6 +65,7 @@ class CostConfig:
 
     GEMINI_COSTS = {
         ModelTier.GEMINI_FLASH: {"input": 0.15, "output": 0.6},
+        ModelTier.GEMINI_35_FLASH_LITE: {"input": 0.30, "output": 2.50},
     }
 
     # Ollama cost per compute second (estimated)
@@ -101,7 +103,9 @@ class CostConfig:
             if "haiku" in model_lower:
                 return ModelTier.CLAUDE_HAIKU
         elif "gemini" in model_lower:
-            if "flash" in model_lower:
+            if "gemini-3.5-flash-lite" in model_lower:
+                return ModelTier.GEMINI_35_FLASH_LITE
+            elif "flash" in model_lower:
                 return ModelTier.GEMINI_FLASH
 
         # Local/Ollama models: fall back to compute-time pricing.
@@ -160,6 +164,13 @@ class CostConfig:
         # Handle Anthropic models
         elif tier in cls.CLAUDE_COSTS:
             costs = cls.CLAUDE_COSTS[tier]
+            return (tokens_in * costs["input"] / 1_000_000) + (
+                tokens_out * costs["output"] / 1_000_000
+            )
+
+        # Handle Google Gemini models
+        elif tier in cls.GEMINI_COSTS:
+            costs = cls.GEMINI_COSTS[tier]
             return (tokens_in * costs["input"] / 1_000_000) + (
                 tokens_out * costs["output"] / 1_000_000
             )

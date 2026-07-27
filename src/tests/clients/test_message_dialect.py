@@ -140,6 +140,34 @@ def test_gemini_maps_roles_and_normalizes(monkeypatch: Any) -> None:
     assert contents[0]["parts"][0]["text"] == "Source 1: x"
 
 
+def test_gemini_35_flash_lite_uses_minimal_thinking(monkeypatch: Any) -> None:
+    from clients.gemini_client import GeminiClient
+
+    client = GeminiClient(api_key="test-key")
+    captured: Dict[str, Any] = {}
+
+    def fake_create_completion(model: str, **kwargs: Any) -> Tuple[Dict[str, Any], float]:
+        captured.update(kwargs)
+        data = {
+            "candidates": [{"content": {"parts": [{"text": "BODY"}]}}],
+            "usageMetadata": {
+                "promptTokenCount": 10,
+                "candidatesTokenCount": 20,
+                "thoughtsTokenCount": 5,
+            },
+        }
+        return data, 1.0
+
+    monkeypatch.setattr(client, "_create_completion", fake_create_completion)
+
+    result = client.generate_chat("hello", model="gemini-3.5-flash-lite")
+
+    assert captured["generationConfig"]["thinkingConfig"] == {"thinkingLevel": "minimal"}
+    assert result.usage is not None
+    assert result.usage.tokens_out == 25
+    assert result.usage.cost == pytest.approx(0.0000655)
+
+
 def test_openai_passes_messages_as_input(monkeypatch: Any) -> None:
     from clients.openai.client import OpenAIClient
 
