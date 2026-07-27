@@ -13,7 +13,7 @@ Candidate lemmas (must choose correct lemma_guid when a content word maps to one
 
 Per-call requirements:
 - For each target language listed above, populate the corresponding ``words_<lang>`` array and echo the translation in the ``<lang>`` field.
-- Each ``words_<lang>`` entry must include: position, role, english_gloss, surface_form, grammatical_form, lemma_guid, lemma.
+- Each ``words_<lang>`` entry must include: position, part_of_speech, english_gloss, surface_form, grammatical_form, lemma_guid, lemma.
 - Use lemma_guid=NONE for function words without a selected candidate lemma.
 - Reuse the SAME lemma_guid across languages when entries refer to the same concept.
 - COMPLETENESS: every word in each target translation must appear in its ``words_<lang>`` array.

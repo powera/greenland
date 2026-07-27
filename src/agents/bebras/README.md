@@ -69,7 +69,7 @@ batch_result = agent.process_sentence_batch(
 
 ## How It Works
 
-1. **Analysis**: LLM extracts content words with POS, role, and disambiguation hints
+1. **Analysis**: LLM extracts content words with part of speech and disambiguation hints
 2. **Matching**: Searches database for matching lemmas, filtered by POS
 3. **Disambiguation**: Uses context and LLM to resolve ambiguous matches
 4. **Translation**: Generates natural translations in target languages

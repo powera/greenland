@@ -47,7 +47,7 @@ def get_sentence(sentence_id: int) -> ResponseReturnValue:
                 {
                     "language_code": word.language_code,
                     "position": word.position,
-                    "role": word.word_role,
+                    "part_of_speech": word.part_of_speech,
                     "lemma_guid": word.lemma.guid if word.lemma is not None else None,
                     "english_text": word.english_text,
                     "target_language_text": word.target_language_text,

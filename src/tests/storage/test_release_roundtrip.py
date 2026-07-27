@@ -171,7 +171,7 @@ def _build_source_db(sqlite_path: str) -> None:
                 lemma_id=None,
                 language_code="en",
                 position=1,
-                word_role="object",
+                word_role="noun",
                 english_text="printer",
                 target_language_text="printer",
                 grammatical_form="noun/en_singular",

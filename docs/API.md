@@ -367,7 +367,7 @@ GET /api/v1/lemma/V01_001/sentences?language=lt
       "word_info": [
         {
           "position": 1,
-          "word_role": "verb",
+          "part_of_speech": "verb",
           "english_text": "live",
           "target_language_text": "gyventi",
           "grammatical_form": "1s_present",
@@ -393,7 +393,8 @@ GET /api/v1/lemma/V01_001/sentences?language=lt
 - `verified`: Whether this sentence has been verified
 - `word_info`: Information about how this lemma is used in the sentence
   - `position`: Word position in the sentence (0-indexed)
-  - `word_role`: Role in the sentence (e.g., "subject", "verb", "object")
+  - `part_of_speech`: Lexical category (e.g., "noun", "verb", "pronoun"); this
+    is not the syntactic role (subject/object).
   - `english_text`: English form of the word
   - `target_language_text`: Base form in target language
   - `grammatical_form`: Grammatical form used (e.g., "1s_present")

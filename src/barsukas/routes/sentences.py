@@ -233,7 +233,7 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         words_by_language[sw.language_code].append(
             {
                 "position": sw.position,
-                "role": sw.word_role,
+                "part_of_speech": sw.part_of_speech,
                 "english_text": sw.english_text,
                 "target_text": sw.target_language_text,
                 "grammatical_form": sw.grammatical_form,

@@ -42,13 +42,19 @@ from storage.translation_helpers import normalize_llm_language_codes
 
 logger = logging.getLogger(__name__)
 
-ROLE_POS_MAP: Dict[str, str] = {
+PART_OF_SPEECH_MAP: Dict[str, str] = {
     "noun": "noun",
     "verb": "verb",
     "adjective": "adjective",
     "adverb": "adverb",
 }
-SKIPPED_ROLES: Set[str] = {"article", "preposition", "conjunction", "determiner", "particle"}
+SKIPPED_PARTS_OF_SPEECH: Set[str] = {
+    "article",
+    "preposition",
+    "conjunction",
+    "determiner",
+    "particle",
+}
 
 # Languages always requested in Phase 1 (sentence-level translation only).
 # The doc language is excluded at runtime.
@@ -240,7 +246,9 @@ class GenysAgent:
             )
 
         for position, word_entry in enumerate(english_words):
-            role = str(word_entry.get("role") or "").strip().lower() or "unknown"
+            part_of_speech = (
+                str(word_entry.get("part_of_speech") or "").strip().lower() or "unknown"
+            )
             surface = str(word_entry.get("surface_form") or "").strip()
             english_gloss = str(word_entry.get("english_gloss") or "").strip()
             grammatical_form_raw = word_entry.get("grammatical_form")
@@ -257,7 +265,7 @@ class GenysAgent:
                 session,
                 sentence=sentence_row,
                 position=position,
-                word_role=role,
+                part_of_speech=part_of_speech,
                 language_code="en",
                 lemma=word_lemma,
                 english_text=english_gloss or None,
@@ -407,13 +415,13 @@ class GenysAgent:
                     stats["total_words_extracted"] += 1
                     surface_form = str(word_entry.get("surface_form") or "").strip()
                     english_gloss = str(word_entry.get("english_gloss") or "").strip()
-                    role = str(word_entry.get("role") or "").strip().lower()
+                    part_of_speech = str(word_entry.get("part_of_speech") or "").strip().lower()
                     lemma_guid = str(word_entry.get("lemma_guid") or "").strip()
 
                     if not surface_form or not english_gloss:
                         continue
 
-                    if role in SKIPPED_ROLES:
+                    if part_of_speech in SKIPPED_PARTS_OF_SPEECH:
                         stats["function_words_skipped"] += 1
                         continue
 
@@ -435,7 +443,7 @@ class GenysAgent:
                         stats["existing_pending"] += 1
                         continue
 
-                    mapped_pos_type = ROLE_POS_MAP.get(role)
+                    mapped_pos_type = PART_OF_SPEECH_MAP.get(part_of_speech)
 
                     direct_lemma_ids = self._lemma_ids_for_english_gloss(
                         session, normalized_gloss, gloss_cache

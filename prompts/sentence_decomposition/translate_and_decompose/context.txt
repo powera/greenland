@@ -10,15 +10,15 @@ For each target language, provide a detailed word-by-word breakdown including:
 - word: the actual inflected form as it appears in the sentence.
 - english: English translation of this specific word/phrase.
 - guid: if a real lemma GUID is known from references or candidate lemmas, use it. Otherwise assign synthetic concept ids in this exact sequence format: SYN001, SYN002, SYN003, ... Reuse the SAME synthetic id for the same concept across all languages in this sentence, and never reuse one synthetic id for different concepts.
-- role: grammatical role (subject, verb, object, adjective, adverb, article, preposition, determiner, pronoun, etc.).
+- part_of_speech: lexical category (noun, verb, adjective, adverb, article, preposition, determiner, pronoun, etc.); never subject/object syntactic role.
 - grammatical_form: see the format spec below.
 
 Supported languages:
 - Case languages (use case + number): lt, de.
 - Non-case languages (use number only): en, fr, es, pt, ko, zh.
 
-Grammatical form format (use <role>/<language_code>_<details>):
-- Part-of-speech prefix should match role (verb, noun, adjective, adverb, pronoun, numeral, etc.).
+Grammatical form format (use <part_of_speech>/<language_code>_<details>):
+- The grammatical-form prefix should match `part_of_speech`.
 - Person/number notation: 1s, 2s, 3s, 1p, 2p, 3p.
 - Gender ONLY when the surface form differs by gender: hyphen for person (3s-m, 3s-f, 3p-m, 3p-f), underscore for case/number (singular_m, plural_f).
 - Tense/aspect examples: present, past, future, impf, pc (passé composé), inf (infinitive).
@@ -31,7 +31,7 @@ Grammatical form format (use <role>/<language_code>_<details>):
   - Lemma form is cardinal, masculine where gender applies. Add _m, _f, _n suffix for gendered forms (lt, de, fr, es, pt).
   - Chinese: zh_cardinal (二), zh_quantity (两, before measure words), zh_ordinal (第二).
   - Korean: ko_native (둘), ko_sino (이), ko_ordinal (둘째).
-- For uninflected function words: <role>/base (e.g., preposition/base, conjunction/base, article/base).
+- For uninflected function words: <part_of_speech>/base (e.g., preposition/base, conjunction/base, article/base).
 
 Important rules:
 - Maintain token order from the original sentence.

@@ -91,7 +91,7 @@ class DecompositionAction(ActionBase):
                     guid = lemma.guid or ""
                     english = lemma.english_word or ""
                     disambiguation = lemma.disambiguation or ""
-                    pos = lemma.word_role or ""
+                    pos = lemma.part_of_speech or ""
 
                     # Get translation in target language
                     trans = get_translation(session, lemma, target_language)
@@ -131,7 +131,7 @@ class DecompositionAction(ActionBase):
                                     "type": "object",
                                     "properties": {
                                         "position": {"type": "integer"},
-                                        "role": {"type": "string"},
+                                        "part_of_speech": {"type": "string"},
                                         "english_gloss": {"type": "string"},
                                         "surface_form": {"type": "string"},
                                         "grammatical_form": {"type": "string"},
@@ -140,7 +140,7 @@ class DecompositionAction(ActionBase):
                                     },
                                     "required": [
                                         "position",
-                                        "role",
+                                        "part_of_speech",
                                         "english_gloss",
                                         "surface_form",
                                         "grammatical_form",

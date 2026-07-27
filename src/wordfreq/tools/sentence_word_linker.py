@@ -38,11 +38,9 @@ logger = logging.getLogger(__name__)
 # Languages where substring matching is appropriate (logographic scripts)
 SUBSTRING_MATCH_LANGUAGES = {"zh", "ja", "ko"}
 
-# Map word roles to POS types
-ROLE_TO_POS: Dict[str, str] = {
-    "subject": "noun",
+# Normalize supported SentenceWord.part_of_speech values to lemma POS values.
+PART_OF_SPEECH_TO_POS: Dict[str, str] = {
     "noun": "noun",
-    "object": "noun",
     "verb": "verb",
     "adjective": "adjective",
     "adverb": "adverb",
@@ -67,11 +65,11 @@ class ResolvedLemma:
 def find_lemma_by_text(
     session: Session,
     word_text: str,
-    word_role: str,
+    part_of_speech: str,
     *,
     source_lemma: Optional[Lemma] = None,
 ) -> Optional[Lemma]:
-    """Find a lemma matching English text and role.
+    """Find a lemma matching English text and part of speech.
 
     This consolidates the duplicated _find_lemma_for_word() from
     guided_sentences.py and llm_sentences.py.
@@ -79,7 +77,8 @@ def find_lemma_by_text(
     Args:
         session: Database session
         word_text: English lemma text to match (e.g., "teacher", "see")
-        word_role: Word role (e.g., "noun", "verb", "subject", "object")
+        part_of_speech: Part of speech (e.g., "noun", "verb"); this parameter keeps
+            the historical database-field name
         source_lemma: Prefer this lemma if text matches (used when generating
             sentences for a specific lemma)
 
@@ -111,7 +110,7 @@ def find_lemma_by_text(
             )
             return source_lemma
 
-    pos_hint = ROLE_TO_POS.get(word_role)
+    pos_hint = PART_OF_SPEECH_TO_POS.get(part_of_speech)
 
     # Try exact match
     query = session.query(Lemma).filter(Lemma.lemma_text == word_text)
@@ -131,7 +130,7 @@ def find_lemma_by_text(
         logger.debug("Found lemma (case-insensitive) for '%s': %s", word_text, lemma.guid)
         return lemma
 
-    logger.debug("No lemma found for '%s' (role: %s)", word_text, word_role)
+    logger.debug("No lemma found for '%s' (part of speech: %s)", word_text, part_of_speech)
     return None
 
 
@@ -141,7 +140,7 @@ def resolve_lemma_for_word(
     guid: Optional[str] = None,
     english_text: Optional[str] = None,
     pos_type: Optional[str] = None,
-    word_role: Optional[str] = None,
+    part_of_speech: Optional[str] = None,
     forms_by_language: Optional[Dict[str, str]] = None,
     sentence_context: Optional[str] = None,
     disambiguation_hint: Optional[str] = None,
@@ -164,7 +163,7 @@ def resolve_lemma_for_word(
         guid: Lemma GUID if known (e.g., from pattern_words or LLM response)
         english_text: English lemma text (e.g., "teacher")
         pos_type: Part of speech (e.g., "noun", "verb")
-        word_role: Semantic role (e.g., "subject", "verb") - used to infer POS
+        part_of_speech: Part of speech from the historically named database field
         forms_by_language: Declined/conjugated forms by language code,
             e.g., {"lt": "mokytoją", "fr": "professeur", "zh": "老师"}
         sentence_context: Full English sentence for LLM disambiguation context
@@ -177,7 +176,7 @@ def resolve_lemma_for_word(
         ResolvedLemma with the best match (or lemma=None if unresolved)
     """
     effective_english = english_text or ""
-    effective_pos = pos_type or ROLE_TO_POS.get(word_role or "", "")
+    effective_pos = pos_type or PART_OF_SPEECH_TO_POS.get(part_of_speech or "", "")
     exact_candidates: List[Lemma] = []
 
     # Strategy 1: GUID lookup
@@ -408,13 +407,13 @@ def resolve_lemmas_for_sentence(
     # Build forms_by_language for each english_text slot from sentence_words
     # Group: english_text -> {lang_code: declined_form}
     slot_forms: Dict[str, Dict[str, str]] = {}
-    slot_roles: Dict[str, str] = {}
+    slot_parts_of_speech: Dict[str, str] = {}
     for sw in sentence_words:
         if sw.english_text:
             slot_key = sw.english_text.lower()
             if slot_key not in slot_forms:
                 slot_forms[slot_key] = {}
-                slot_roles[slot_key] = sw.word_role or ""
+                slot_parts_of_speech[slot_key] = sw.part_of_speech or ""
             if sw.declined_form:
                 slot_forms[slot_key][sw.language_code] = sw.declined_form
 
@@ -433,13 +432,13 @@ def resolve_lemmas_for_sentence(
 
             slot_key = pw.english_text.lower() if pw.english_text else ""
             forms = slot_forms.get(slot_key, {})
-            word_role = slot_roles.get(slot_key, pw.slot_name or "")
+            part_of_speech = slot_parts_of_speech.get(slot_key, pw.slot_name or "")
 
             resolved = resolve_lemma_for_word(
                 session,
                 guid=existing_guid,
                 english_text=pw.english_text,
-                word_role=word_role,
+                part_of_speech=part_of_speech,
                 forms_by_language=forms if forms else None,
                 sentence_context=sentence_context,
                 use_llm_disambiguation=use_llm_disambiguation,
@@ -472,7 +471,7 @@ def resolve_lemmas_for_sentence(
                 session,
                 guid=sw_guid,
                 english_text=sw.english_text,
-                word_role=sw.word_role or "",
+                part_of_speech=sw.part_of_speech or "",
                 forms_by_language=forms if forms else None,
                 sentence_context=sentence_context,
                 use_llm_disambiguation=use_llm_disambiguation,
@@ -480,7 +479,7 @@ def resolve_lemmas_for_sentence(
                 min_derivative_languages=min_derivative_languages,
             )
             resolved.position = position
-            resolved.slot_name = sw.word_role
+            resolved.slot_name = sw.part_of_speech
             results.append(resolved)
             position += 1
 

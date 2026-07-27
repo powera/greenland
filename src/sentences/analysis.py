@@ -42,7 +42,7 @@ def find_candidate_lemmas_for_sentence(
 ) -> List[dict]:
     """Find lemmas that match words in a sentence across multiple languages.
 
-    For each word position/role in the sentence, searches derivative_forms
+    For each word/part-of-speech slot in the sentence, searches derivative_forms
     to find lemmas whose forms match the declined_form in the sentence.
     Returns lemmas that match in at least min_language_matches languages.
 
@@ -60,7 +60,7 @@ def find_candidate_lemmas_for_sentence(
             - lemma: Lemma object
             - english_text: The English word from sentence_words
             - matched_languages: List of language codes that matched
-            - word_role: The role of the word in the sentence
+            - part_of_speech: The word's part of speech
     """
     # Get all sentence words for this sentence
     sentence_words = (
@@ -78,7 +78,7 @@ def find_candidate_lemmas_for_sentence(
             if key not in word_slots:
                 word_slots[key] = {
                     "english_text": sw.english_text,
-                    "word_role": sw.word_role,
+                    "part_of_speech": sw.part_of_speech,
                     "forms_by_lang": {},
                     "has_lemma": False,
                 }
@@ -89,7 +89,7 @@ def find_candidate_lemmas_for_sentence(
                 word_slots[key]["has_lemma"] = True
 
     # Aggregate lemma matches across all slots
-    # lemma_id -> {"langs": set of lang codes, "english_texts": set, "word_roles": set}
+    # lemma_id -> language, English-text, and part-of-speech matches
     global_lemma_matches: dict = {}
 
     for slot_key, slot_data in word_slots.items():
@@ -140,11 +140,13 @@ def find_candidate_lemmas_for_sentence(
                     global_lemma_matches[df.lemma_id] = {
                         "langs": set(),
                         "english_texts": set(),
-                        "word_roles": set(),
+                        "parts_of_speech": set(),
                     }
                 global_lemma_matches[df.lemma_id]["langs"].add(lang_code)
                 global_lemma_matches[df.lemma_id]["english_texts"].add(slot_data["english_text"])
-                global_lemma_matches[df.lemma_id]["word_roles"].add(slot_data["word_role"])
+                global_lemma_matches[df.lemma_id]["parts_of_speech"].add(
+                    slot_data["part_of_speech"]
+                )
 
     # Filter to lemmas that match in at least min_language_matches languages
     qualifying_lemma_ids = [
@@ -170,7 +172,7 @@ def find_candidate_lemmas_for_sentence(
                     "lemma": lemma,
                     "english_text": ", ".join(sorted(match_data["english_texts"])),
                     "matched_languages": sorted(match_data["langs"]),
-                    "word_role": ", ".join(sorted(match_data["word_roles"])),
+                    "part_of_speech": ", ".join(sorted(match_data["parts_of_speech"])),
                 }
             )
 

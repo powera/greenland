@@ -21,7 +21,7 @@ from storage.models.schema import (
     SentenceWord,
 )
 from wordfreq.tools.sentence_word_linker import (
-    ROLE_TO_POS,
+    PART_OF_SPEECH_TO_POS,
     find_lemma_by_text,
     resolve_lemma_for_word,
     resolve_lemmas_for_sentence,
@@ -81,29 +81,15 @@ class TestFindLemmaByText(unittest.TestCase):
         self.assertEqual(result.guid, "V01_001")
 
     def test_pos_filtering(self) -> None:
-        """'set' with role='verb' should return the verb lemma."""
+        """'set' with part of speech 'verb' should return the verb lemma."""
         result = find_lemma_by_text(self.session, "set", "verb")
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result.guid, "V01_002")
 
     def test_pos_filtering_noun(self) -> None:
-        """'set' with role='noun' should return the noun lemma."""
+        """'set' with part of speech 'noun' should return the noun lemma."""
         result = find_lemma_by_text(self.session, "set", "noun")
-        self.assertIsNotNone(result)
-        assert result is not None
-        self.assertEqual(result.guid, "N01_002")
-
-    def test_subject_role_maps_to_noun(self) -> None:
-        """'set' with role='subject' should map to noun POS."""
-        result = find_lemma_by_text(self.session, "set", "subject")
-        self.assertIsNotNone(result)
-        assert result is not None
-        self.assertEqual(result.guid, "N01_002")
-
-    def test_object_role_maps_to_noun(self) -> None:
-        """'set' with role='object' should map to noun POS."""
-        result = find_lemma_by_text(self.session, "set", "object")
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result.guid, "N01_002")
@@ -259,7 +245,7 @@ class TestResolveLemmaForWord(unittest.TestCase):
     def test_guid_not_found_falls_through(self) -> None:
         """Missing GUID should fall through to text matching."""
         result = resolve_lemma_for_word(
-            self.session, guid="NONEXISTENT", english_text="teacher", word_role="noun"
+            self.session, guid="NONEXISTENT", english_text="teacher", part_of_speech="noun"
         )
         # Should still resolve via text
         self.assertIsNotNone(result.lemma)
@@ -278,7 +264,7 @@ class TestResolveLemmaForWord(unittest.TestCase):
 
     def test_exact_text_single_match(self) -> None:
         """Unambiguous text should resolve with high confidence."""
-        result = resolve_lemma_for_word(self.session, english_text="teacher", word_role="noun")
+        result = resolve_lemma_for_word(self.session, english_text="teacher", part_of_speech="noun")
         self.assertEqual(result.method, "exact_text")
         self.assertEqual(result.confidence, 0.9)
         self.assertIsNotNone(result.lemma)
@@ -287,7 +273,7 @@ class TestResolveLemmaForWord(unittest.TestCase):
 
     def test_polysemous_word_both_disambiguated(self) -> None:
         """'bank' with two disambiguated senses: should default to first."""
-        result = resolve_lemma_for_word(self.session, english_text="bank", word_role="noun")
+        result = resolve_lemma_for_word(self.session, english_text="bank", part_of_speech="noun")
         # Both candidates have disambiguation, so falls through to fallback
         self.assertIsNotNone(result.lemma)
         self.assertEqual(len(result.candidates), 2)
@@ -306,7 +292,7 @@ class TestResolveLemmaForWord(unittest.TestCase):
         self.session.add(lemma_bank_plain)
         self.session.commit()
 
-        result = resolve_lemma_for_word(self.session, english_text="bank", word_role="noun")
+        result = resolve_lemma_for_word(self.session, english_text="bank", part_of_speech="noun")
         self.assertIsNotNone(result.lemma)
         assert result.lemma is not None
         self.assertEqual(result.lemma.guid, "N07_003")
@@ -342,7 +328,7 @@ class TestResolveLemmaForWord(unittest.TestCase):
 
     def test_unresolved_returns_none_lemma(self) -> None:
         result = resolve_lemma_for_word(
-            self.session, english_text="xyzzy_nonexistent", word_role="noun"
+            self.session, english_text="xyzzy_nonexistent", part_of_speech="noun"
         )
         self.assertEqual(result.method, "unresolved")
         self.assertIsNone(result.lemma)
@@ -359,7 +345,7 @@ class TestResolveLemmaForWord(unittest.TestCase):
         self.session.add(article_lemma)
         self.session.commit()
 
-        result = resolve_lemma_for_word(self.session, english_text="the", word_role="noun")
+        result = resolve_lemma_for_word(self.session, english_text="the", part_of_speech="noun")
         self.assertEqual(result.method, "grammatical_word")
         self.assertIsNone(result.lemma)
         self.assertEqual(result.confidence, 1.0)
@@ -446,7 +432,7 @@ class TestResolveLemmaForWord(unittest.TestCase):
             self.session,
             guid="N36_014",
             english_text="see",
-            word_role="verb",
+            part_of_speech="verb",
         )
         self.assertEqual(result.method, "guid")
         assert result.lemma is not None
@@ -476,7 +462,7 @@ class TestResolveLemmaForWord(unittest.TestCase):
         result = resolve_lemma_for_word(
             self.session,
             english_text="bank",
-            word_role="noun",
+            part_of_speech="noun",
             forms_by_language={"lt": "bankas", "fr": "banque"},
             min_derivative_languages=2,
         )
@@ -536,7 +522,7 @@ class TestResolveLemmaForWord(unittest.TestCase):
         result = resolve_lemma_for_word(
             self.session,
             english_text="bank",
-            word_role="noun",
+            part_of_speech="noun",
             forms_by_language={"lt": "bankas", "fr": "banque"},
             min_derivative_languages=2,
         )
@@ -722,7 +708,7 @@ class TestResolveLemmasForSentenceFromWords(unittest.TestCase):
                 lemma_id=self.lemma_teacher.id,
                 language_code="en",
                 position=0,
-                word_role="noun",
+                part_of_speech="noun",
                 english_text="teacher",
                 declined_form="teacher",
             )
@@ -733,7 +719,7 @@ class TestResolveLemmasForSentenceFromWords(unittest.TestCase):
                 sentence_id=self.sentence.id,
                 language_code="en",
                 position=1,
-                word_role="verb",
+                part_of_speech="verb",
                 english_text="spoke",
                 declined_form="spoke",
             )
@@ -766,7 +752,7 @@ class TestResolveLemmasForSentenceFromWords(unittest.TestCase):
                 sentence_id=self.sentence.id,
                 language_code="fr",
                 position=0,
-                word_role="noun",
+                part_of_speech="noun",
                 english_text="teacher",
                 declined_form="professeur",
             )
@@ -779,26 +765,20 @@ class TestResolveLemmasForSentenceFromWords(unittest.TestCase):
         self.assertEqual(len(results), 2)
 
 
-class TestRoleToPosMapping(unittest.TestCase):
-    """Test the ROLE_TO_POS constant for completeness."""
-
-    def test_subject_maps_to_noun(self) -> None:
-        self.assertEqual(ROLE_TO_POS["subject"], "noun")
-
-    def test_object_maps_to_noun(self) -> None:
-        self.assertEqual(ROLE_TO_POS["object"], "noun")
+class TestWordRoleToPosMapping(unittest.TestCase):
+    """Test the PART_OF_SPEECH_TO_POS constant for completeness."""
 
     def test_verb_maps_to_verb(self) -> None:
-        self.assertEqual(ROLE_TO_POS["verb"], "verb")
+        self.assertEqual(PART_OF_SPEECH_TO_POS["verb"], "verb")
 
     def test_adjective_maps_to_adjective(self) -> None:
-        self.assertEqual(ROLE_TO_POS["adjective"], "adjective")
+        self.assertEqual(PART_OF_SPEECH_TO_POS["adjective"], "adjective")
 
     def test_adverb_maps_to_adverb(self) -> None:
-        self.assertEqual(ROLE_TO_POS["adverb"], "adverb")
+        self.assertEqual(PART_OF_SPEECH_TO_POS["adverb"], "adverb")
 
     def test_other_has_no_pos_filter(self) -> None:
-        self.assertEqual(ROLE_TO_POS["other"], "")
+        self.assertEqual(PART_OF_SPEECH_TO_POS["other"], "")
 
 
 if __name__ == "__main__":

@@ -494,7 +494,7 @@ IMPORTANT:
                         "english_text": sw.english_text,
                         "target_text": sw.target_language_text,
                         "declined_form": sw.declined_form,
-                        "word_role": sw.word_role,
+                        "part_of_speech": sw.part_of_speech,
                         "lemma_guid": None,
                         "expected_translation": None,
                     }
@@ -1287,7 +1287,7 @@ IMPORTANT:
                             "english_text": sw.english_text,
                             "target_text": sw.target_language_text,
                             "declined_form": sw.declined_form,
-                            "word_role": sw.word_role,
+                            "part_of_speech": sw.part_of_speech,
                             "lemma_guid": None,
                             "expected_translation": None,
                         }

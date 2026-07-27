@@ -111,7 +111,7 @@ def test_all_words_are_lemmas_or_grammatical_handles_spanish_example() -> None:
     words = [
         {
             "position": 0,
-            "role": "pronoun",
+            "part_of_speech": "pronoun",
             "english_gloss": "they",
             "surface_form": "Ellos",
             "grammatical_form": "pronoun/es_subjective",
@@ -120,7 +120,7 @@ def test_all_words_are_lemmas_or_grammatical_handles_spanish_example() -> None:
         },
         {
             "position": 1,
-            "role": "verb",
+            "part_of_speech": "verb",
             "english_gloss": "bought",
             "surface_form": "compraron",
             "grammatical_form": "verb/es_3p_past",
@@ -129,7 +129,7 @@ def test_all_words_are_lemmas_or_grammatical_handles_spanish_example() -> None:
         },
         {
             "position": 2,
-            "role": "noun",
+            "part_of_speech": "noun",
             "english_gloss": "salt",
             "surface_form": "sal",
             "grammatical_form": "noun/es_singular",
@@ -138,7 +138,7 @@ def test_all_words_are_lemmas_or_grammatical_handles_spanish_example() -> None:
         },
         {
             "position": 3,
-            "role": "preposition",
+            "part_of_speech": "preposition",
             "english_gloss": "in",
             "surface_form": "en",
             "grammatical_form": "preposition/es_base",
@@ -147,7 +147,7 @@ def test_all_words_are_lemmas_or_grammatical_handles_spanish_example() -> None:
         },
         {
             "position": 4,
-            "role": "article",
+            "part_of_speech": "article",
             "english_gloss": "the",
             "surface_form": "la",
             "grammatical_form": "article/es_singular_f",
@@ -156,7 +156,7 @@ def test_all_words_are_lemmas_or_grammatical_handles_spanish_example() -> None:
         },
         {
             "position": 5,
-            "role": "noun",
+            "part_of_speech": "noun",
             "english_gloss": "store",
             "surface_form": "tienda",
             "grammatical_form": "noun/es_singular",
@@ -173,7 +173,7 @@ def test_find_unresolved_non_grammatical_words_flags_missing_lemma_content_words
     words = [
         {
             "position": 0,
-            "role": "noun",
+            "part_of_speech": "noun",
             "english_gloss": "store",
             "surface_form": "tienda",
             "grammatical_form": "noun/es_singular",
@@ -182,7 +182,7 @@ def test_find_unresolved_non_grammatical_words_flags_missing_lemma_content_words
         },
         {
             "position": 1,
-            "role": "article",
+            "part_of_speech": "article",
             "english_gloss": "the",
             "surface_form": "la",
             "grammatical_form": "article/es_singular_f",
@@ -202,7 +202,7 @@ def test_negative_case_spanish_fair_without_lemma_fails_check() -> None:
     words = [
         {
             "position": 0,
-            "role": "verb",
+            "part_of_speech": "verb",
             "english_gloss": "saw",
             "surface_form": "Vimos",
             "grammatical_form": "verb/es_past",
@@ -211,7 +211,7 @@ def test_negative_case_spanish_fair_without_lemma_fails_check() -> None:
         },
         {
             "position": 1,
-            "role": "article",
+            "part_of_speech": "article",
             "english_gloss": "a",
             "surface_form": "un",
             "grammatical_form": "article/base",
@@ -220,7 +220,7 @@ def test_negative_case_spanish_fair_without_lemma_fails_check() -> None:
         },
         {
             "position": 2,
-            "role": "object",
+            "part_of_speech": "object",
             "english_gloss": "pig",
             "surface_form": "cerdo",
             "grammatical_form": "noun/es_singular",
@@ -229,7 +229,7 @@ def test_negative_case_spanish_fair_without_lemma_fails_check() -> None:
         },
         {
             "position": 3,
-            "role": "preposition",
+            "part_of_speech": "preposition",
             "english_gloss": "at",
             "surface_form": "en",
             "grammatical_form": "preposition/base",
@@ -238,7 +238,7 @@ def test_negative_case_spanish_fair_without_lemma_fails_check() -> None:
         },
         {
             "position": 4,
-            "role": "article",
+            "part_of_speech": "article",
             "english_gloss": "the",
             "surface_form": "la",
             "grammatical_form": "article/base",
@@ -247,7 +247,7 @@ def test_negative_case_spanish_fair_without_lemma_fails_check() -> None:
         },
         {
             "position": 5,
-            "role": "object_of_preposition",
+            "part_of_speech": "object_of_preposition",
             "english_gloss": "fair",
             "surface_form": "feria",
             "grammatical_form": "noun/es_singular",
@@ -267,7 +267,7 @@ def test_find_unresolved_non_grammatical_words_unknown_language_has_no_grammar_f
     words = [
         {
             "position": 0,
-            "role": "article",
+            "part_of_speech": "article",
             "english_gloss": "the",
             "surface_form": "the",
             "grammatical_form": "article/en_singular",
@@ -286,7 +286,7 @@ def test_find_unresolved_non_grammatical_words_keeps_skip_for_known_grammatical_
     words = [
         {
             "position": 0,
-            "role": "article",
+            "part_of_speech": "article",
             "english_gloss": "the",
             "surface_form": "le",
             "grammatical_form": "noun/fr_singular",

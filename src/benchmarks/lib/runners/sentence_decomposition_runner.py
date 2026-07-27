@@ -26,7 +26,7 @@ class SentenceDecompositionRunner(PartialCreditRunner):
         "position": 0.15,
         "surface_form": 0.45,
         "lemma_guid": 0.20,
-        "role": 0.08,
+        "part_of_speech": 0.08,
         "english_gloss": 0.04,
         "grammatical_form": 0.04,
         "lemma": 0.04,
@@ -77,7 +77,7 @@ Output requirements:
 - Return exactly ONE language entry and set language_code to "{target_lang}"
 - The languages[] breakdown must analyze tokens from "{target_translation}" only
 - Include all tokens in order (zero-indexed positions)
-- For each token provide: position, role, english_gloss, surface_form, grammatical_form, lemma_guid, lemma
+- For each token provide: position, part_of_speech, english_gloss, surface_form, grammatical_form, lemma_guid, lemma
 - Use lemma_guid from candidate lemmas when applicable, otherwise use "NONE"
 - Set word_count to match the number of token entries
 - IMPORTANT: Do NOT include punctuation as standalone tokens in words[]"""
@@ -86,7 +86,7 @@ Output requirements:
 Your task is to decompose sentences into tokens and provide detailed grammatical information for each token.
 
 Grammatical form format:
-- Use <role>/<language_code>_<morphology> for inflected words.
+- Use <part_of_speech>/<language_code>_<morphology> for inflected words.
 - Person/number notation: 1s, 2s, 3s, 1p, 2p, 3p.
 - Include gender only when the surface form differs by gender (e.g., 3s-f, singular_f).
 - Tense/aspect examples: present, past, future, impf, pc, inf.
@@ -94,7 +94,7 @@ Grammatical form format:
 - Non-case languages (en, fr, es, pt, ko, zh): nouns should use number only (e.g., noun/fr_singular).
 - Pronouns: pronoun/<lang>_subjective|objective|possessive|reflexive (or case labels for case languages).
 - Numerals: numeral/<lang>_cardinal|ordinal.
-- For uninflected function words: <role>/base (e.g., preposition/base).
+- For uninflected function words: <part_of_speech>/base (e.g., preposition/base).
 
 Important rules:
 - Maintain token order from the original sentence
@@ -195,10 +195,10 @@ Important rules:
         return bool(re.fullmatch(r"[^\w\s]+", surface_form.strip(), flags=re.UNICODE))
 
     def _is_low_content_token(self, word: Dict[str, Any]) -> bool:
-        role = str(word.get("role", "")).strip().lower()
+        part_of_speech = str(word.get("part_of_speech", "")).strip().lower()
         grammatical_form = str(word.get("grammatical_form", "")).strip().lower()
 
-        low_content_roles = {
+        low_content_parts_of_speech = {
             "particle",
             "determiner",
             "article",
@@ -209,10 +209,10 @@ Important rules:
             "case_marker",
             "clitic",
         }
-        if role in low_content_roles:
+        if part_of_speech in low_content_parts_of_speech:
             return True
 
-        if grammatical_form.endswith("/base") and role not in {
+        if grammatical_form.endswith("/base") and part_of_speech not in {
             "noun",
             "verb",
             "adjective",

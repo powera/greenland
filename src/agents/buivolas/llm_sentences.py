@@ -305,12 +305,12 @@ class LlmSentenceGenerator:
 
                         english_lemma = word_data.get("english_lemma")
                         word_lemma = None
-                        role_value = word_data.get("role")
-                        if english_lemma and isinstance(role_value, str):
+                        part_of_speech_value = word_data.get("part_of_speech")
+                        if english_lemma and isinstance(part_of_speech_value, str):
                             word_lemma = self._find_lemma_for_word(
                                 session,
                                 english_lemma,
-                                role_value,
+                                part_of_speech_value,
                                 source_lemma=source_lemma,
                             )
 
@@ -318,7 +318,7 @@ class LlmSentenceGenerator:
                             session=session,
                             sentence=sentence,
                             position=position,
-                            word_role=word_data.get("role", "unknown"),
+                            part_of_speech=word_data.get("part_of_speech", "unknown"),
                             lemma=word_lemma,
                             english_text=word_data.get("english"),
                             target_language_text=word_data.get("lemma"),
@@ -363,11 +363,11 @@ class LlmSentenceGenerator:
         self,
         session: Any,
         word_text: str,
-        word_role: str,
+        part_of_speech: str,
         source_lemma: Optional[Lemma] = None,
     ) -> Optional[Lemma]:
-        """Find a lemma matching the given word text and role.
+        """Find a lemma matching the given word text and part of speech.
 
         Delegates to wordfreq.tools.sentence_word_linker.find_lemma_by_text().
         """
-        return find_lemma_by_text(session, word_text, word_role, source_lemma=source_lemma)
+        return find_lemma_by_text(session, word_text, part_of_speech, source_lemma=source_lemma)

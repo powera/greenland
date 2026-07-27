@@ -111,7 +111,7 @@
                         {% for lemma_id, word in unique_lemmas.items() %}
                         <a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma_id) }}"
                            class="badge bg-success text-decoration-none"
-                           title="{{ word.word_role }}">
+                           title="{{ word.part_of_speech }}">
                             {{ word.lemma.guid or word.english_text }}
                         </a>
                         {% endfor %}

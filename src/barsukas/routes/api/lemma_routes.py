@@ -2079,7 +2079,7 @@ def get_lemma_sentences(guid: str) -> ResponseReturnValue:
         - pattern_type: Sentence pattern type (if populated)
         - tense: Sentence tense (if populated)
         - verified: Whether this sentence has been verified
-        - word_info: Information about how this lemma is used in the sentence (role, grammatical form, etc.)
+        - word_info: Information about how this lemma is used in the sentence (part of speech, grammatical form, etc.)
 
     Example:
         GET /api/v1/lemma/V01_001/sentences
@@ -2137,7 +2137,7 @@ def get_lemma_sentences(guid: str) -> ResponseReturnValue:
             word_info.append(
                 {
                     "position": sw.position,
-                    "word_role": sw.word_role,
+                    "part_of_speech": sw.part_of_speech,
                     "english_text": _serialize_value(sw.english_text),
                     "target_language_text": _serialize_value(sw.target_language_text),
                     "grammatical_form": _serialize_value(sw.grammatical_form),
