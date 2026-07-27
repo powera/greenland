@@ -17,7 +17,11 @@ from benchmarks.datastore.benchmarks import (
     set_question_exclusion,
 )
 from benchmarks.datastore.common import Model, decode_json
-from benchmarks.server.analysis import analyze_run_details
+from benchmarks.server.analysis import (
+    analyze_run_details,
+    describe_run_warnings,
+    get_score_color,
+)
 from benchmarks.lib.utils.factory import get_all_benchmark_codes, get_benchmark_metadata
 from benchmarks.tiers import (
     BENCHMARK_TIERS,
@@ -289,6 +293,18 @@ def view_benchmark(benchmark_name):
     )
     excluded_question_count = sum(1 for question in question_previews if question["is_excluded"])
 
+    for entry in leaderboard:
+        entry_metrics = entry["metrics"]
+        entry["score_color"] = get_score_color(entry_metrics.effective_score)
+        entry["warnings"] = describe_run_warnings(entry_metrics)
+        entry["avg_cost_micro_usd"] = (
+            entry_metrics.total_cost_usd / entry_metrics.included_question_count * 1_000_000
+            if entry_metrics.included_question_count
+            else 0.0
+        )
+
+    benchmark_tier = get_benchmark_tier(benchmark.codename)
+
     return render_template(
         "benchmarks/view.html",
         benchmark=benchmark,
@@ -296,6 +312,8 @@ def view_benchmark(benchmark_name):
         question_previews=question_previews,
         leaderboard=leaderboard,
         excluded_question_count=excluded_question_count,
+        benchmark_tier=benchmark_tier,
+        benchmark_tier_label=get_tier_label(benchmark_tier),
     )
 
 

@@ -2,186 +2,155 @@
 
 {% block title %}Dashboard{% endblock %}
 
+{% block body_class %}bench-page{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('dashboard.static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% macro metric_summary(summary) -%}
+{%- if summary -%}
+<span class="summary-value"
+      data-summary-score="{{ '%.1f'|format(summary.score) }}"
+      data-summary-latency="{{ '%.0f'|format(summary.latency_msec) }}"
+      data-summary-cost="{{ '%.0f'|format(summary.cost_micro_usd) }}"></span>
+{%- else -%}
+<span class="cell-empty">&ndash;</span>
+{%- endif -%}
+{%- endmacro %}
+
 {% block content %}
-<div class="row mb-4">
-    <div class="col">
-        <h1><i class="bi bi-speedometer2"></i> Benchmark Dashboard</h1>
-        <p class="text-muted">Last updated: {{ current_time }}</p>
+<div class="d-flex align-items-baseline gap-3 mb-2">
+    <h4 class="mb-0"><i class="bi bi-speedometer2"></i> Benchmark Dashboard</h4>
+    <span class="text-muted small">Updated {{ current_time }}</span>
+    <button type="button" class="btn btn-sm btn-outline-secondary py-0" data-bs-toggle="popover"
+            data-bs-html="true" data-bs-placement="bottom" title="Legend"
+            data-bs-content="{% for tier in tier_definitions.values() %}<div><strong>{{ tier.short_label }}</strong> &mdash; {{ tier.label }}</div>{% endfor %}<div><strong>N/A</strong> &mdash; excluded by model capability policy.</div><hr class='my-2'><div class='small'>Cells show the best run per benchmark &times; model. Latency is the <strong>median</strong> over non-excluded questions; suspiciously slow incorrect answers are dropped from that latency summary only. Cost is the mean per question. &#9888; marks a run with latency outliers, question exclusions, or a stored-vs-estimated cost mismatch &mdash; hover the chip for details.</div>">
+        <i class="bi bi-question-circle"></i> Legend
+    </button>
+</div>
+
+<div class="bench-toolbar">
+    <div class="bench-field">
+        <label>Metric</label>
+        <div class="btn-group btn-group-sm" role="group" id="metricSwitch">
+            <button type="button" class="btn btn-outline-primary active" data-metric="score">Score</button>
+            <button type="button" class="btn btn-outline-primary" data-metric="latency">Latency</button>
+            <button type="button" class="btn btn-outline-primary" data-metric="cost">Cost</button>
+        </div>
+    </div>
+    <div class="bench-field">
+        <label for="modelScope">Models</label>
+        <select class="form-select form-select-sm" id="modelScope">
+            <option value="all">All</option>
+            <option value="remote" selected>Remote</option>
+            <option value="local-level1">Local (Level 1)</option>
+            <option value="local-level2plus">Local (Level 2+)</option>
+        </select>
+    </div>
+    <div class="bench-field">
+        <label for="benchmarkTierFilter">Tier</label>
+        <select class="form-select form-select-sm" id="benchmarkTierFilter">
+            <option value="all" selected>All tiers</option>
+            {% for tier in tier_definitions.values() %}
+            <option value="{{ tier.level }}">{{ tier.short_label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="bench-field">
+        <label for="categoryFilter">Category</label>
+        <select class="form-select form-select-sm" id="categoryFilter">
+            <option value="all">All</option>
+            {% for cat in categories %}
+            <option value="{{ cat }}"{% if cat == 'word processing' %} selected{% endif %}>{{ cat | title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="bench-field">
+        <label for="benchmarkSort">Sort</label>
+        <select class="form-select form-select-sm" id="benchmarkSort">
+            <option value="key-asc" selected>Key (0010 &rarr; 9999)</option>
+            <option value="key-desc">Key (9999 &rarr; 0010)</option>
+            <option value="name-asc">Name (A &rarr; Z)</option>
+            <option value="name-desc">Name (Z &rarr; A)</option>
+            <option value="avg-desc">Metric (best &rarr; worst)</option>
+            <option value="avg-asc">Metric (worst &rarr; best)</option>
+        </select>
+    </div>
+    <div class="bench-field">
+        <label for="searchBox">Search</label>
+        <input type="text" class="form-control form-control-sm" id="searchBox" placeholder="Search benchmarks...">
+    </div>
+    <div class="bench-spacer"></div>
+    <div class="bench-field">
+        <span class="text-muted small" id="visibleCount"></span>
     </div>
 </div>
 
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="alert alert-light border">
-            <strong>Tier legend</strong>
-            <div class="mt-2">
-                {% for tier in tier_definitions.values() %}
-                <div class="mb-1">
-                    <span class="badge text-bg-secondary">{{ tier.short_label }}</span>
-                    {{ tier.label }}
-                </div>
+<div class="bench-grid-scroll">
+    <table class="bench-grid" id="resultsTable">
+        <thead>
+            <tr>
+                <th class="col-benchmark">Benchmark</th>
+                <th class="col-summary">All models</th>
+                {% for model in models %}
+                <th class="model-head model-col"
+                    data-model-type="{{ model.model_type }}"
+                    data-model-level="{{ model.max_benchmark_tier }}">
+                    <a href="{{ url_for('models.view_model', model_name=model.codename) }}"
+                       title="{{ model.codename }}{% if model.filesize_mb %} &middot; {{ model.filesize_mb }} MB{% endif %}">
+                        {{ model.displayname }}
+                    </a>
+                    <div class="model-summary">{{ metric_summary(model_summaries[model.codename]) }}</div>
+                </th>
                 {% endfor %}
-                <div>
-                    <span class="badge text-bg-light border">N/A</span>
-                    Excluded by model policy.
-                </div>
-                <div class="mt-2 small text-muted">
-                    Dashboard defaults to <strong>remote</strong> + <strong>word processing</strong>.
-                    Latency is shown as the <strong>median</strong> for non-excluded questions, and suspiciously slow incorrect outliers are ignored in that latency summary.
-                </div>
-            </div>
-        </div>
-    </div>
+            </tr>
+        </thead>
+        <tbody>
+            {% for benchmark in benchmarks %}
+            <tr class="benchmark-row"
+                data-benchmark-name="{{ benchmark.displayname }}"
+                data-benchmark-key="{{ benchmark.codename }}"
+                data-search="{{ benchmark.displayname }} {{ benchmark.codename }} {{ benchmark.description or '' }}"
+                data-category="{{ benchmark.category or '' }}"
+                data-tier="{{ benchmark_tiers[benchmark.codename] }}">
+                <td class="col-benchmark">
+                    <a class="bench-name"
+                       href="{{ url_for('benchmarks.view_benchmark', benchmark_name=benchmark.codename) }}"
+                       title="{{ benchmark.description or benchmark.displayname }}">{{ benchmark.displayname }}</a>
+                    <span class="bench-code">{{ benchmark.codename }}</span>
+                    <span class="bench-tier">{{ tier_definitions[benchmark_tiers[benchmark.codename]].short_label }}</span>
+                </td>
+                <td class="col-summary">{{ metric_summary(benchmark_summaries[benchmark.codename]) }}</td>
+                {% for model in models %}
+                <td class="text-center model-col"
+                    data-model-type="{{ model.model_type }}"
+                    data-model-level="{{ model.max_benchmark_tier }}">
+                    {% if (benchmark.codename, model.codename) in scores %}
+                    {% set cell = scores[(benchmark.codename, model.codename)] %}
+                    <a class="metric-chip"
+                       href="{{ url_for('runs.view_run', run_id=cell.run_id) }}"
+                       data-score="{{ cell.score }}"
+                       data-latency="{{ '%.0f'|format(cell.latency_msec) }}"
+                       data-cost="{{ '%.0f'|format(cell.cost_micro_usd) }}"
+                       title="{{ model.displayname }} &middot; {{ benchmark.displayname }}&#10;Score {{ cell.score }}/100&#10;{{ '%.0f'|format(cell.latency_msec) }}ms median&#10;{{ '%.0f'|format(cell.cost_micro_usd) }}µ$ per question{% if cell.warnings %}&#10;{{ cell.warnings | join(' · ') }}{% endif %}">
+                        <span class="chip-value"></span>
+                        {% if cell.warnings %}<span class="chip-warn">&#9888;</span>{% endif %}
+                    </a>
+                    {% elif not eligibility[(benchmark.codename, model.codename)] %}
+                    <span class="cell-na" title="Excluded by model capability policy">N/A</span>
+                    {% else %}
+                    <span class="cell-empty">&ndash;</span>
+                    {% endif %}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
-<!-- Filter Controls -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <i class="bi bi-funnel"></i> Filters
-                </h5>
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Model Scope</label>
-                        <select class="form-select" id="modelScope">
-                            <option value="all">All</option>
-                            <option value="remote" selected>Remote</option>
-                            <option value="local-level1">Local (Level 1)</option>
-                            <option value="local-level2plus">Local (Level 2+)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Benchmark Tier</label>
-                        <select class="form-select" id="benchmarkTierFilter">
-                            <option value="all" selected>All tiers</option>
-                            {% for tier in tier_definitions.values() %}
-                            <option value="{{ tier.level }}">{{ tier.short_label }} · {{ tier.label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Category</label>
-                        <select class="form-select" id="categoryFilter">
-                            <option value="all">All</option>
-                            {% for cat in categories %}
-                            <option value="{{ cat }}"{% if cat == 'word processing' %} selected{% endif %}>{{ cat | title }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Sort Benchmarks</label>
-                        <select class="form-select" id="benchmarkSort">
-                            <option value="key-asc" selected>Key (0010 → 9999)</option>
-                            <option value="key-desc">Key (9999 → 0010)</option>
-                            <option value="name-asc">Name (A → Z)</option>
-                            <option value="name-desc">Name (Z → A)</option>
-                            <option value="avg-desc">Avg Score (high → low)</option>
-                            <option value="avg-asc">Avg Score (low → high)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Search</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="text" class="form-control" id="searchBox" placeholder="Search benchmarks...">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Results Table -->
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover" id="resultsTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Benchmark</th>
-                                {% for model in models %}
-                                <th class="text-center model-col"
-                                    data-model-type="{{ model.model_type }}"
-                                    data-model-level="{{ model.max_benchmark_tier }}">
-                                    <div class="small">{{ model.displayname }}</div>
-                                    <div class="text-muted small">
-                                        {% if model.filesize_mb %}{{ model.filesize_mb }} MB{% endif %}
-                                    </div>
-                                </th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for benchmark in benchmarks %}
-                            <tr class="benchmark-row"
-                                data-benchmark-name="{{ benchmark.displayname }}"
-                                data-benchmark-key="{{ benchmark.codename }}"
-                                data-category="{{ benchmark.category or '' }}"
-                                data-tier="{{ benchmark_tiers[benchmark.codename] }}">
-                                <td>
-                                    <a href="{{ url_for('benchmarks.view_benchmark', benchmark_name=benchmark.codename) }}"
-                                       class="text-decoration-none">
-                                        <strong>{{ benchmark.displayname }}</strong>
-                                    </a>
-                                    <br><small class="text-muted font-monospace">{{ benchmark.codename }}</small>
-                                    <span class="badge text-bg-light border text-secondary">{{ tier_definitions[benchmark_tiers[benchmark.codename]].short_label }}</span>
-                                    {% if benchmark.description %}
-                                    <br><small class="text-muted">{{ benchmark.description[:80] }}...</small>
-                                    {% endif %}
-                                </td>
-                                {% for model in models %}
-                                <td class="text-center model-col"
-                                    data-model-type="{{ model.model_type }}"
-                                    data-model-level="{{ model.max_benchmark_tier }}">
-                                    {% if (benchmark.codename, model.codename) in scores %}
-                                    {% set score_data = scores[(benchmark.codename, model.codename)] %}
-                                    <a href="{{ url_for('runs.view_run', run_id=score_data.run_id) }}"
-                                       class="text-decoration-none">
-                                        <div class="score-badge mx-auto"
-                                             style="background-color: {{ score_data.color }};"
-                                             title="Score: {{ score_data.value }}/100, Median time: {{ '%.1f'|format(score_data.median_eval_time) }}ms, Avg cost: {{ '%.0f'|format(score_data.avg_cost_usd * 1000000) }}µ${% if score_data.outlier_count %}, Ignored latency outliers: {{ score_data.outlier_count }}{% endif %}{% if score_data.excluded_question_count %}, Excluded questions: {{ score_data.excluded_question_count }}{% endif %}{% if score_data.price_diagnostics.has_mismatch %}, Cost warning{% endif %}">
-                                            {{ score_data.value }}
-                                        </div>
-                                        <div class="small text-muted mt-1">
-                                            {{ '%.1f'|format(score_data.median_eval_time) }}ms median
-                                        </div>
-                                        <div class="small text-muted">
-                                            {{ '%.0f'|format(score_data.avg_cost_usd * 1000000) }}µ$
-                                        </div>
-                                        {% if score_data.outlier_count or score_data.price_diagnostics.has_mismatch or score_data.excluded_question_count %}
-                                        <div class="small text-warning-emphasis">
-                                            {% if score_data.outlier_count %}<span title="Incorrect long-tail latency outliers ignored">{{ score_data.outlier_count }} latency outlier{% if score_data.outlier_count != 1 %}s{% endif %}</span>{% endif %}
-                                            {% if score_data.outlier_count and (score_data.price_diagnostics.has_mismatch or score_data.excluded_question_count) %} · {% endif %}
-                                            {% if score_data.price_diagnostics.has_mismatch %}<span title="{{ score_data.price_diagnostics.message }}">cost warning</span>{% endif %}
-                                            {% if score_data.price_diagnostics.has_mismatch and score_data.excluded_question_count %} · {% endif %}
-                                            {% if score_data.excluded_question_count %}<span title="Question exclusions are removed from aggregate scores">{{ score_data.excluded_question_count }} excluded Q</span>{% endif %}
-                                        </div>
-                                        {% endif %}
-                                    </a>
-                                    {% elif not eligibility[(benchmark.codename, model.codename)] %}
-                                    <span class="badge text-bg-light border"
-                                          title="Excluded by model capability policy">N/A</span>
-                                    {% else %}
-                                    <span class="text-muted">-</span>
-                                    {% endif %}
-                                </td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="noResults" class="alert alert-info mt-4" style="display: none;">
+<div id="noResults" class="alert alert-info mt-3" style="display: none;">
     No results found matching your filters.
 </div>
 
