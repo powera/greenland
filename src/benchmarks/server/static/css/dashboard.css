@@ -1,0 +1,261 @@
+/* Benchmark dashboard grid.
+ *
+ * The grid is the page: a compact toolbar sits above it and everything else
+ * (descriptions, per-run caveats) lives in tooltips or the detail pages.
+ */
+
+.bench-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+}
+
+.bench-toolbar .bench-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.bench-toolbar .bench-field > label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6c757d;
+    margin: 0;
+}
+
+.bench-toolbar .bench-field select,
+.bench-toolbar .bench-field input {
+    min-width: 9.5rem;
+}
+
+.bench-toolbar .bench-spacer {
+    flex: 1 1 auto;
+}
+
+/* The grid is the only scrolling region on this page.
+ *
+ * body/.container-fluid are pinned to the viewport and the grid takes the
+ * remaining height via flex, so there is never a page scrollbar wrapped around
+ * the grid's own scrollbar. Scoped to .bench-page so other pages that share
+ * base.html keep normal document scrolling. */
+body.bench-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* The margin override is against base.html's `.container-fluid mt-4`: that top
+ * margin sits outside the height box and would push the grid past the
+ * viewport. */
+body.bench-page > .container-fluid {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-top: 0.75rem !important;
+    padding-bottom: 0.75rem;
+}
+
+.bench-grid-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+}
+
+/* Toolbar and the empty-state alert keep their natural height; only the grid
+ * flexes. */
+body.bench-page .bench-toolbar,
+body.bench-page #noResults {
+    flex: 0 0 auto;
+}
+
+table.bench-grid {
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.85rem;
+}
+
+table.bench-grid th,
+table.bench-grid td {
+    padding: 0.3rem 0.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #e9ecef;
+    background-color: #fff;
+}
+
+table.bench-grid thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background-color: #f1f3f5;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Left-pinned label and summary columns. --bench-label-w must match the
+ * width applied to .col-benchmark below. */
+:root {
+    --bench-label-w: 260px;
+}
+
+table.bench-grid .col-benchmark {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    width: var(--bench-label-w);
+    min-width: var(--bench-label-w);
+    max-width: var(--bench-label-w);
+    box-shadow: inset -1px 0 0 #e9ecef;
+}
+
+table.bench-grid .col-summary {
+    position: sticky;
+    left: var(--bench-label-w);
+    z-index: 2;
+    min-width: 5.5rem;
+    text-align: center;
+    box-shadow: inset -1px 0 0 #dee2e6;
+}
+
+/* Pinned header cells must outrank both the sticky row and the sticky column. */
+table.bench-grid thead th.col-benchmark,
+table.bench-grid thead th.col-summary {
+    z-index: 4;
+}
+
+table.bench-grid thead th.col-benchmark,
+table.bench-grid thead th.col-summary,
+table.bench-grid tbody td.col-benchmark,
+table.bench-grid tbody td.col-summary {
+    background-color: #f8f9fa;
+}
+
+table.bench-grid tbody tr:hover td {
+    background-color: #eef2f7;
+}
+
+.bench-name {
+    display: block;
+    font-weight: 600;
+    color: #0d6efd;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bench-name:hover {
+    text-decoration: underline;
+}
+
+.bench-code {
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.72rem;
+    color: #6c757d;
+}
+
+.bench-tier {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.3rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    color: #6c757d;
+}
+
+/* Column headers.
+ *
+ * Model names are long relative to the ~3.4rem chip they sit above, so they
+ * wrap to at most two lines and are ellipsized rather than widening the whole
+ * column. The full name stays available via the link's title attribute. */
+.model-head {
+    text-align: center;
+    width: 5.5rem;
+    min-width: 5.5rem;
+    max-width: 5.5rem;
+    vertical-align: bottom;
+}
+
+.model-head a {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    font-size: 0.78rem;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.model-head a:hover {
+    text-decoration: underline;
+}
+
+.model-head .model-summary {
+    font-weight: 400;
+    font-size: 0.7rem;
+    color: #6c757d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Metric chips */
+.metric-chip {
+    position: relative;
+    display: block;
+    margin: 0 auto;
+    min-width: 3.4rem;
+    padding: 0.25rem 0.35rem;
+    border-radius: 0.3rem;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.82rem;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    font-variant-numeric: tabular-nums;
+}
+
+.metric-chip:hover {
+    color: #fff;
+    filter: brightness(1.12);
+}
+
+.metric-chip .chip-warn {
+    position: absolute;
+    top: -3px;
+    right: -1px;
+    font-size: 0.6rem;
+    line-height: 1;
+    color: #ffc107;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.6);
+}
+
+.cell-empty {
+    color: #adb5bd;
+}
+
+.cell-na {
+    font-size: 0.7rem;
+    color: #adb5bd;
+    border: 1px solid #e9ecef;
+    border-radius: 0.25rem;
+    padding: 0.1rem 0.3rem;
+}
+
+.summary-value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: #495057;
+}

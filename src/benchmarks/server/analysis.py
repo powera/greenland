@@ -44,6 +44,41 @@ class RunMetrics:
     price_diagnostics: PriceDiagnostics
 
 
+def get_score_color(score: float) -> str:
+    """Return the background colour used for a 0-100 score badge.
+
+    The same thresholds are mirrored in server/static/js/dashboard.js as
+    SCORE_COLORS; keep the two in sync.
+    """
+    if score >= 90:
+        return "#1b5e20"  # Excellent - dark green
+    elif score >= 75:
+        return "#4caf50"  # Good - green
+    elif score >= 50:
+        return "#ff9800"  # Average - orange
+    elif score >= 25:
+        return "#f44336"  # Below average - red
+    else:
+        return "#b71c1c"  # Poor - dark red
+
+
+def describe_run_warnings(metrics: RunMetrics) -> list[str]:
+    """Return short human-readable caveats about a run's aggregate metrics.
+
+    Used by the dashboard grid, the benchmark leaderboard, and the model page so
+    the same caveats are worded identically everywhere.
+    """
+    warnings: list[str] = []
+    if metrics.outlier_count:
+        plural = "s" if metrics.outlier_count != 1 else ""
+        warnings.append(f"{metrics.outlier_count} latency outlier{plural}")
+    if metrics.price_diagnostics.has_mismatch:
+        warnings.append("cost warning")
+    if metrics.excluded_question_count:
+        warnings.append(f"{metrics.excluded_question_count} excluded Q")
+    return warnings
+
+
 def correctness_threshold(benchmark_name: str) -> int:
     """Return the minimum score treated as correct for a benchmark."""
     return 70 if benchmark_name == "0062_sentence_decomposition" else 100

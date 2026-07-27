@@ -4,14 +4,22 @@
 
 from datetime import datetime
 from itertools import groupby
+from statistics import median
+from typing import Any, Optional
 
 from flask import Blueprint, g, render_template
-from sqlalchemy import case, func
+from sqlalchemy import case
 
 from benchmarks.datastore.benchmarks import Benchmark, Question, Run, RunDetail
 from benchmarks.datastore.common import Model
-from benchmarks.server.analysis import analyze_run_details
+from benchmarks.server.analysis import (
+    analyze_run_details,
+    describe_run_warnings,
+    get_score_color,
+)
 from benchmarks.tiers import BENCHMARK_TIERS, get_benchmark_tier, model_can_run_benchmark
+
+__all__ = ["bp", "get_score_color", "index", "summarize_cells"]
 
 bp = Blueprint(
     "dashboard",
@@ -22,22 +30,24 @@ bp = Blueprint(
 )
 
 
-def get_score_color(score):
-    """Get color for score visualization."""
-    if score >= 90:
-        return "#1b5e20"  # Excellent - dark green
-    elif score >= 75:
-        return "#4caf50"  # Good - green
-    elif score >= 50:
-        return "#ff9800"  # Average - orange
-    elif score >= 25:
-        return "#f44336"  # Below average - red
-    else:
-        return "#b71c1c"  # Poor - dark red
+def summarize_cells(cells: list[dict[str, Any]]) -> Optional[dict[str, float]]:
+    """Aggregate a set of grid cells into mean score, median latency, mean cost.
+
+    Returns None when there is nothing to summarize, so the template can render a
+    placeholder rather than a misleading zero.
+    """
+    if not cells:
+        return None
+    return {
+        "count": len(cells),
+        "score": sum(cell["score"] for cell in cells) / len(cells),
+        "latency_msec": float(median([cell["latency_msec"] for cell in cells])),
+        "cost_micro_usd": sum(cell["cost_micro_usd"] for cell in cells) / len(cells),
+    }
 
 
 @bp.route("/")
-def index():
+def index() -> str:
     """Display the main benchmark dashboard with model-benchmark matrix."""
     # Get models with at least one run, ordered with remote models first.
     models = (
@@ -104,20 +114,25 @@ def index():
                 model_path=model_record.model_path if model_record else None,
                 model_type=model_record.model_type if model_record else None,
             )
+            avg_cost_usd = (
+                metrics.total_cost_usd / metrics.included_question_count
+                if metrics.included_question_count
+                else 0.0
+            )
             candidate = {
                 "run_id": run.run_id,
                 "value": metrics.effective_score,
+                "score": metrics.effective_score,
                 "color": get_score_color(metrics.effective_score),
                 "median_eval_time": metrics.median_time_msec,
-                "avg_cost_usd": (
-                    metrics.total_cost_usd / metrics.included_question_count
-                    if metrics.included_question_count
-                    else 0.0
-                ),
+                "latency_msec": metrics.median_time_msec,
+                "avg_cost_usd": avg_cost_usd,
+                "cost_micro_usd": avg_cost_usd * 1_000_000,
                 "run_ts": run.run_ts,
                 "outlier_count": metrics.outlier_count,
                 "excluded_question_count": metrics.excluded_question_count,
                 "price_diagnostics": metrics.price_diagnostics,
+                "warnings": describe_run_warnings(metrics),
             }
             if best_run_data is None or (
                 candidate["value"],
@@ -143,6 +158,25 @@ def index():
         benchmark.codename: get_benchmark_tier(benchmark.codename) for benchmark in benchmarks
     }
 
+    # Server-rendered summaries cover every model / benchmark; the client
+    # recomputes them for the visible subset whenever filters change.
+    model_summaries = {
+        model.codename: summarize_cells(
+            [cell for (_, model_code), cell in scores.items() if model_code == model.codename]
+        )
+        for model in models
+    }
+    benchmark_summaries = {
+        benchmark.codename: summarize_cells(
+            [
+                cell
+                for (benchmark_code, _), cell in scores.items()
+                if benchmark_code == benchmark.codename
+            ]
+        )
+        for benchmark in benchmarks
+    }
+
     return render_template(
         "dashboard/index.html",
         models=models,
@@ -152,5 +186,7 @@ def index():
         benchmark_tiers=benchmark_tiers,
         tier_definitions=BENCHMARK_TIERS,
         categories=categories,
+        model_summaries=model_summaries,
+        benchmark_summaries=benchmark_summaries,
         current_time=datetime.now().strftime("%B %d, %Y at %H:%M"),
     )

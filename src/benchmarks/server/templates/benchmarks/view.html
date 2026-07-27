@@ -12,6 +12,11 @@
             </ol>
         </nav>
         <h1><i class="bi bi-award"></i> {{ benchmark.displayname }}</h1>
+        <p class="text-muted mb-1">
+            <span class="font-monospace">{{ benchmark.codename }}</span>
+            &middot; <span title="{{ benchmark_tier_label }}">Tier {{ benchmark_tier }}</span>
+            {% if benchmark.category %}&middot; {{ benchmark.category | title }}{% endif %}
+        </p>
         {% if benchmark.description %}
         <p class="lead">{{ benchmark.description }}</p>
         {% endif %}
@@ -88,6 +93,7 @@
                                 <th>Rank</th>
                                 <th>Model</th>
                                 <th class="text-center">Score</th>
+                                <th class="text-end">Avg cost</th>
                                 <th>Run Date</th>
                                 <th>Actions</th>
                             </tr>
@@ -115,26 +121,16 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-center">
-                                    <div class="score-badge mx-auto"
-                                         style="background-color:
-                                         {% if metrics.effective_score >= 90 %}#1b5e20
-                                         {% elif metrics.effective_score >= 75 %}#4caf50
-                                         {% elif metrics.effective_score >= 50 %}#ff9800
-                                         {% elif metrics.effective_score >= 25 %}#f44336
-                                         {% else %}#b71c1c{% endif %};">
+                                    <div class="score-badge mx-auto" style="background-color: {{ entry.score_color }};">
                                         {{ metrics.effective_score }}
                                     </div>
                                     <div class="small text-muted mt-1">{{ '%.1f'|format(metrics.median_time_msec) }}ms median</div>
-                                    {% if metrics.outlier_count or metrics.excluded_question_count or metrics.price_diagnostics.has_mismatch %}
-                                    <div class="small text-warning-emphasis">
-                                        {% if metrics.outlier_count %}{{ metrics.outlier_count }} latency outlier{% if metrics.outlier_count != 1 %}s{% endif %}{% endif %}
-                                        {% if metrics.outlier_count and (metrics.excluded_question_count or metrics.price_diagnostics.has_mismatch) %} · {% endif %}
-                                        {% if metrics.excluded_question_count %}{{ metrics.excluded_question_count }} excluded Q{% endif %}
-                                        {% if metrics.excluded_question_count and metrics.price_diagnostics.has_mismatch %} · {% endif %}
-                                        {% if metrics.price_diagnostics.has_mismatch %}cost warning{% endif %}
-                                    </div>
+                                    {% if entry.warnings %}
+                                    <div class="small text-warning-emphasis"
+                                         title="{{ metrics.price_diagnostics.message }}">{{ entry.warnings | join(' · ') }}</div>
                                     {% endif %}
                                 </td>
+                                <td class="text-end">{{ '%.0f'|format(entry.avg_cost_micro_usd) }}µ$</td>
                                 <td>
                                     <small>{{ run.run_ts.strftime('%Y-%m-%d %H:%M:%S') }}</small>
                                 </td>

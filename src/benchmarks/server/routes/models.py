@@ -2,11 +2,19 @@
 
 """Model routes - list and view model details."""
 
+from itertools import groupby
+from typing import Any
+
 from flask import Blueprint, g, render_template
 from sqlalchemy import func
 
-from benchmarks.datastore.benchmarks import Run
+from benchmarks.datastore.benchmarks import Question, Run, RunDetail
 from benchmarks.datastore.common import Model
+from benchmarks.server.analysis import (
+    analyze_run_details,
+    describe_run_warnings,
+    get_score_color,
+)
 from benchmarks.tiers import get_benchmark_tier, get_model_capability_label
 
 bp = Blueprint("models", __name__, url_prefix="/models", template_folder="../templates")
@@ -74,31 +82,80 @@ def list_models():
 
 
 @bp.route("/<model_name>")
-def view_model(model_name):
+def view_model(model_name: str) -> Any:
     """View detailed information about a specific model."""
-    # Get model
     model = g.bench_db.query(Model).filter(Model.codename == model_name).first()
     if not model:
         return "Model not found", 404
 
-    # Get all runs for this model with benchmark info
-    runs = (
-        g.bench_db.query(Run).filter(Run.model_name == model_name).order_by(Run.run_ts.desc()).all()
+    # Scores here are recomputed from RunDetail with analyze_run_details rather
+    # than read from Run.normed_score, so this page agrees with the dashboard.
+    run_rows = (
+        g.bench_db.query(Run, RunDetail, Question)
+        .outerjoin(RunDetail, RunDetail.run_id == Run.run_id)
+        .outerjoin(Question, RunDetail.question_id == Question.question_id)
+        .filter(Run.model_name == model_name)
+        .order_by(Run.run_id)
+        .all()
     )
 
-    # Calculate best score per benchmark
+    run_entries: list[dict[str, Any]] = []
+    for _run_id, grouped_rows in groupby(run_rows, key=lambda row: row[0].run_id):
+        run = None
+        detail_records: list[dict[str, Any]] = []
+        for current_run, detail, question in grouped_rows:
+            run = current_run
+            if detail is None:
+                continue
+            detail_records.append(
+                {
+                    "question_id": detail.question_id,
+                    "score": detail.score,
+                    "eval_msec": detail.eval_msec,
+                    "cost_usd": detail.cost_usd,
+                    "tokens_used": detail.tokens_used,
+                    "tokens_in": detail.tokens_in,
+                    "tokens_out": detail.tokens_out,
+                    "is_question_excluded": bool(question.is_excluded) if question else False,
+                }
+            )
+
+        if run is None:
+            continue
+
+        metrics = analyze_run_details(
+            run.benchmark_name,
+            detail_records,
+            model_path=model.model_path,
+            model_type=model.model_type,
+        )
+        run_entries.append(
+            {
+                "run": run,
+                "metrics": metrics,
+                "avg_cost_micro_usd": (
+                    metrics.total_cost_usd / metrics.included_question_count * 1_000_000
+                    if metrics.included_question_count
+                    else 0.0
+                ),
+                "score_color": get_score_color(metrics.effective_score),
+                "warnings": describe_run_warnings(metrics),
+            }
+        )
+
+    run_entries.sort(key=lambda entry: entry["run"].run_ts, reverse=True)
+
     best_scores: dict[str, int] = {}
-    for run in runs:
-        if (
-            run.benchmark_name not in best_scores
-            or run.normed_score > best_scores[run.benchmark_name]
-        ):
-            best_scores[run.benchmark_name] = run.normed_score
+    for entry in run_entries:
+        benchmark_name = entry["run"].benchmark_name
+        effective_score = entry["metrics"].effective_score
+        if benchmark_name not in best_scores or effective_score > best_scores[benchmark_name]:
+            best_scores[benchmark_name] = effective_score
 
     return render_template(
         "models/view.html",
         model=model,
-        runs=runs,
+        run_entries=run_entries,
         best_scores=best_scores,
         max_capability_label=get_model_capability_label(model.max_benchmark_tier),
     )
