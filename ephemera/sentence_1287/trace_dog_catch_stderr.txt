@@ -1,0 +1,22 @@
+2026-07-28 13:20:47,654 - unified_client.py:436 - INFO - LLM Query Complete [gpt-5.4-mini] - Model: gpt-5.4-mini, Type: JSON, In: 297, Out: 86, Total: 383, Cost: $0.000610
+Building prefix dict from the default dictionary ...
+2026-07-28 13:20:47,736 - __init__.py:113 - DEBUG - Building prefix dict from the default dictionary ...
+Loading model from cache /var/folders/f2/6mw7k8vd44l4sfgwgddh_j1h0000gn/T/jieba.cache
+2026-07-28 13:20:47,736 - __init__.py:132 - DEBUG - Loading model from cache /var/folders/f2/6mw7k8vd44l4sfgwgddh_j1h0000gn/T/jieba.cache
+Loading model cost 0.221 seconds.
+2026-07-28 13:20:47,958 - __init__.py:164 - DEBUG - Loading model cost 0.221 seconds.
+Prefix dict has been built successfully.
+2026-07-28 13:20:47,958 - __init__.py:166 - DEBUG - Prefix dict has been built successfully.
+2026-07-28 13:20:58,274 - unified_client.py:436 - INFO - LLM Query Complete [gpt-5.4-mini] - Model: gpt-5.4-mini, Type: JSON, In: 2363, Out: 2069, Total: 4432, Cost: $0.011083
+2026-07-28 13:21:03,813 - unified_client.py:436 - INFO - LLM Query Complete [gpt-5.4-mini] - Model: gpt-5.4-mini, Type: JSON, In: 1105, Out: 136, Total: 1241, Cost: $0.001441
+2026-07-28 13:21:05,585 - unified_client.py:436 - INFO - LLM Query Complete [gpt-5.4-mini] - Model: gpt-5.4-mini, Type: JSON, In: 1118, Out: 152, Total: 1270, Cost: $0.001522
+2026-07-28 13:21:07,302 - unified_client.py:436 - INFO - LLM Query Complete [gpt-5.4-mini] - Model: gpt-5.4-mini, Type: JSON, In: 1154, Out: 202, Total: 1356, Cost: $0.001775
+2026-07-28 13:21:08,764 - unified_client.py:436 - INFO - LLM Query Complete [gpt-5.4-mini] - Model: gpt-5.4-mini, Type: JSON, In: 1113, Out: 136, Total: 1249, Cost: $0.001447
+2026-07-28 13:21:10,785 - unified_client.py:436 - INFO - LLM Query Complete [gpt-5.4-mini] - Model: gpt-5.4-mini, Type: JSON, In: 1117, Out: 129, Total: 1246, Cost: $0.001418
+2026-07-28 13:21:10,790 - translation.py:313 - INFO - === Storing translations for sentence 1288 ===
+2026-07-28 13:21:10,790 - translation.py:317 - INFO - Updating English: His dog likes playing catch in the backyard.
+2026-07-28 13:21:10,792 - translation.py:344 - INFO - Storing translation for es: A su perro le gusta jugar a atrapar cosas en el patio trasero.
+2026-07-28 13:21:10,793 - translation.py:344 - INFO - Storing translation for fr: Son chien aime jouer à rapporter dans le jardin.
+2026-07-28 13:21:10,794 - translation.py:344 - INFO - Storing translation for zh: 他的狗喜欢在后院玩接球游戏。
+2026-07-28 13:21:10,794 - translation.py:344 - INFO - Storing translation for lt: Jo šuo mėgsta žaisti gaudynių žaidimą kieme.
+2026-07-28 13:21:10,809 - translation.py:425 - INFO - Stored translation results for sentence 1288

@@ -1,0 +1,215 @@
+
+==============================================================================
+Input
+==============================================================================
+  sentence          : 'His dog likes playing catch in the backyard.'
+  source language   : en
+  target languages  : en, es, fr, zh, lt
+  decompose         : en, fr, es, zh, lt
+  model             : gpt-5.4-mini
+  persist to db     : True
+
+==============================================================================
+Phase 1 - sentence translation (LLM)
+==============================================================================
+  estimated output tokens : 400
+  requested max_tokens    : 640
+
+  en   His dog likes playing catch in the backyard.
+  es   A su perro le gusta jugar a atrapar cosas en el patio trasero.
+  fr   Son chien aime jouer à rapporter dans le jardin.
+  zh   他的狗喜欢在后院玩接球游戏。
+  lt   Jo šuo mėgsta žaisti gaudynių žaidimą kieme.
+
+==============================================================================
+Phase 2 - candidate lemma lookup (database, no LLM)
+==============================================================================
+  10 candidate lemma(s) offered to Phase 3
+
+  guid        lemma               score  matched languages
+  N02_001     dog                     5  en, es, fr, zh, lt
+  V01_006     play                    5  en, es, fr, zh, lt
+  V01_019     catch                   2  en, es
+  V05_001     like                    2  en, zh
+  R99_006     to                      2  es, fr
+  N41_018     game                    1  zh
+  N07_049     garden                  1  fr
+  N07_037     patio                   1  es
+  N17_073     sound                   1  fr
+  N07_066     yard                    1  es
+
+  NOTE: match_score is a sort key, never a threshold. A candidate
+  confirmed by one language can still be adopted by Phase 3 even when
+  other languages disagree -- that is how a zh homograph linked
+  'procedure' to the lemma 'program'.
+
+==============================================================================
+Phase 3 - word decomposition (LLM)
+==============================================================================
+  estimated output tokens : 3340
+  requested max_tokens    : 4609
+
+  --- en ------------------------------------------------------------------------
+    translation : His dog likes playing catch in the backyard.
+    success     : True
+    words       : 8
+    pos  surface           lemma_guid  part_of_speech  gloss
+  *   0  His               NONE        pronoun         his
+  *   1  dog               N02_001     noun            dog
+  *   2  likes             V05_001     verb            likes
+  *   3  playing           V01_006     verb            playing
+  *   4  catch             V01_019     verb            catch
+  *   5  in                NONE        preposition     in
+  *   6  the               NONE        article         the
+  *   7  backyard          NONE        noun            backyard
+    (* = linked to an existing database lemma; verify these)
+
+  --- fr ------------------------------------------------------------------------
+    translation : Son chien aime jouer à rapporter dans le jardin.
+    success     : True
+    words       : 9
+    pos  surface           lemma_guid  part_of_speech  gloss
+  *   0  Son               NONE        pronoun         his
+  *   1  chien             N02_001     noun            dog
+  *   2  aime              V05_001     verb            likes
+  *   3  jouer             V01_006     verb            playing
+  *   4  à                 R99_006     preposition     to
+  *   5  rapporter         NONE        verb            catch
+  *   6  dans              NONE        preposition     in
+  *   7  le                NONE        article         the
+  *   8  jardin            N07_049     noun            garden
+    (* = linked to an existing database lemma; verify these)
+
+  --- es ------------------------------------------------------------------------
+    translation : A su perro le gusta jugar a atrapar cosas en el patio trasero.
+    success     : True
+    words       : 12
+    pos  surface           lemma_guid  part_of_speech  gloss
+  *   0  A                 R99_006     preposition     to
+  *   1  su                NONE        pronoun         his
+  *   2  perro             N02_001     noun            dog
+  *   3  le                NONE        pronoun         to him/her
+  *   4  gusta             V05_001     verb            likes
+  *   5  jugar             V01_006     verb            playing
+  *   6  a                 R99_006     preposition     to
+  *   7  atrapar           V01_019     verb            catch
+  *   8  cosas             NONE        noun            things
+  *   9  en                NONE        preposition     in
+  *  10  el                NONE        article         the
+  *  11  patio trasero     N07_066     noun            yard
+    (* = linked to an existing database lemma; verify these)
+
+  --- zh ------------------------------------------------------------------------
+    translation : 他的狗喜欢在后院玩接球游戏。
+    success     : True
+    words       : 8
+    pos  surface           lemma_guid  part_of_speech  gloss
+  *   0  他的                NONE        pronoun         his
+  *   1  狗                 N02_001     noun            dog
+  *   2  喜欢                V05_001     verb            likes
+  *   3  在                 NONE        preposition     in
+  *   4  后院                N07_066     noun            yard
+  *   5  玩                 V01_006     verb            playing
+  *   6  接                 V01_019     verb            catch
+  *   7  球游戏               N41_018     noun            ball game
+    (* = linked to an existing database lemma; verify these)
+
+  --- lt ------------------------------------------------------------------------
+    translation : Jo šuo mėgsta žaisti gaudynių žaidimą kieme.
+    success     : True
+    words       : 7
+    pos  surface           lemma_guid  part_of_speech  gloss
+  *   0  Jo                NONE        pronoun         his
+  *   1  šuo               N02_001     noun            dog
+  *   2  mėgsta            V05_001     verb            likes
+  *   3  žaisti            V01_006     verb            playing
+  *   4  gaudynių          NONE        noun            catching
+  *   5  žaidimą           N41_018     noun            game
+  *   6  kieme             N07_066     noun            yard
+    (* = linked to an existing database lemma; verify these)
+
+==============================================================================
+Phase 4 - Universal Dependencies (LLM, one call per language)
+==============================================================================
+  en: 8 words, estimated 376, requested 607
+  fr: 9 words, estimated 398, requested 637
+  es: 12 words, estimated 464, requested 726
+  zh: 8 words, estimated 376, requested 607
+  lt: 7 words, estimated 354, requested 577
+
+  en: annotated
+        0  His               det         head=1
+        1  dog               nsubj       head=2
+        2  likes             root        head=-1
+        3  playing           xcomp       head=2
+        4  catch             obj         head=3
+        5  in                case        head=7
+        6  the               det         head=7
+        7  backyard          obl         head=3
+  fr: annotated
+        0  Son               det         head=1
+        1  chien             nsubj       head=2
+        2  aime              root        head=-1
+        3  jouer             xcomp       head=2
+        4  à                 mark        head=5
+        5  rapporter         xcomp       head=3
+        6  dans              case        head=8
+        7  le                det         head=8
+        8  jardin            obl         head=5
+  es: annotated
+        0  A                 case        head=2
+        1  su                det         head=2
+        2  perro             obl         head=4
+        3  le                iobj        head=4
+        4  gusta             root        head=-1
+        5  jugar             xcomp       head=4
+        6  a                 mark        head=7
+        7  atrapar           xcomp       head=5
+        8  cosas             obj         head=7
+        9  en                case        head=11
+       10  el                det         head=11
+       11  patio trasero     obl         head=7
+  zh: annotated
+        0  他的                det         head=1
+        1  狗                 nsubj       head=2
+        2  喜欢                root        head=-1
+        3  在                 case        head=4
+        4  后院                obl         head=5
+        5  玩                 advcl       head=2
+        6  接                 compound    head=7
+        7  球游戏               obj         head=5
+  lt: annotated
+        0  Jo                nmod        head=1
+        1  šuo               nsubj       head=2
+        2  mėgsta            root        head=-1
+        3  žaisti            xcomp       head=2
+        4  gaudynių          nmod        head=5
+        5  žaidimą           obj         head=3
+        6  kieme             obl         head=3
+
+  annotated 5/5 languages
+
+==============================================================================
+Database writes
+==============================================================================
+  created Sentence id=1288 guid=S_01358
+  wrote 5 SentenceTranslation row(s)
+  wrote 44 SentenceWord row(s)
+
+    en: 8 word(s)
+    es: 12 word(s)
+    fr: 9 word(s)
+    lt: 7 word(s)
+    zh: 8 word(s)
+    27 of 44 word(s) linked to an existing lemma
+
+==============================================================================
+Token accounting
+==============================================================================
+  phase                     estimated  requested   actual  ratio
+  Phase 1 translate               400        640       86  4.65x
+  Phase 3 decompose              3340       4609     2069  1.61x
+  Phase 4 dependencies           1968          -      755  2.61x
+
+  ratio = estimated / actual. Well above 1.0 means the estimate is
+  wasteful; below 1.0 means the request would have been truncated.
