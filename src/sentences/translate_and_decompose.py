@@ -37,6 +37,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from sqlalchemy.orm import Session
 
+from clients.lib import limit_from_estimate
 from clients.unified_client import UnifiedLLMClient
 from langtools.dialect_overrides import get_dialect_display_name, get_llm_prompt_note
 from langtools.directions import get_language_direction_note
@@ -61,6 +62,10 @@ from sentences.dependencies import (
     query_sentence_dependencies,
     validate_dependency_tree,
 )
+from sentences.token_estimates import (
+    estimate_decomposition_output_tokens,
+    estimate_dependency_output_tokens,
+)
 from storage.translation_helpers import LANGUAGE_NAMES, normalize_llm_language_codes
 from util.prompt_loader import get_context, get_prompt
 
@@ -68,7 +73,16 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL: str = "gpt-5.4-mini"
 
-# Synthetic GUID prefix — LLM-emitted placeholder for "no DB lemma matched".
+# DEPRECATED. Synthetic GUID prefix — an LLM-emitted placeholder for "no DB
+# lemma matched", e.g. SYN001. No prompt asks for these any more: every
+# decomposition path now says to use NONE, which the same checks already reject.
+#
+# It never carried information. Consumers only ever asked "is this a real GUID?",
+# so a synthetic id and NONE were treated identically, and the instruction to
+# reuse one id for the same concept across languages produced a grouping that was
+# discarded on arrival. Keeping the checks is cheap insurance against a model
+# emitting the old format from memory; a run that trips them is worth
+# investigating rather than trusting.
 SYNTHETIC_GUID_PREFIX: str = "SYN"
 
 
@@ -82,6 +96,13 @@ class DecomposedLanguage:
     success: bool = True
     error: Optional[str] = None
     missing_surface_forms: List[str] = field(default_factory=list)
+    # Phase 4 outcome. ud_annotated is True only when a complete, valid tree was
+    # written. The pair distinguishes "Phase 4 never ran" (False, None) from
+    # "Phase 4 ran and its tree was rejected" (False, "Cycle in head graph: ..."),
+    # which is otherwise invisible -- a rejected sentence and an unannotated one
+    # look identical in the database.
+    ud_annotated: bool = False
+    ud_error: Optional[str] = None
 
 
 # Languages that don't separate words with whitespace; per-word coverage cannot
@@ -164,6 +185,56 @@ def _find_missing_surface_forms(
             continue
         missing.append(token)
     return translation_tokens, missing
+
+
+# How many missing surface forms to tolerate before failing a decomposition.
+# _find_missing_surface_forms is deliberately lenient -- the LLM may merge or
+# split tokens legitimately -- so an isolated miss is usually a tokenization
+# artifact rather than lost data. A truncation is not isolated: it drops
+# everything from some point to the end of the sentence, which
+# _missing_is_trailing_run detects regardless of count.
+MAX_TOLERATED_MISSING_TOKENS: int = 1
+
+
+def _incompleteness_error(
+    translation_tokens: List[str], missing_tokens: List[str]
+) -> Optional[str]:
+    """Return an error message when a decomposition is too incomplete to store.
+
+    Returns None when the gaps are within tolerance and the result should be
+    kept. Storing a truncated breakdown as if it were complete is how a
+    45-word sentence ends up with half its words missing and a dependency tree
+    built over the remainder.
+    """
+    if not missing_tokens:
+        return None
+    if _missing_is_trailing_run(translation_tokens, missing_tokens):
+        return (
+            f"Decomposition truncated: the last {len(missing_tokens)} of "
+            f"{len(translation_tokens)} translation tokens are absent from the word "
+            f"list ({', '.join(missing_tokens)})"
+        )
+    if len(missing_tokens) > MAX_TOLERATED_MISSING_TOKENS:
+        return (
+            f"Decomposition incomplete: {len(missing_tokens)} of "
+            f"{len(translation_tokens)} translation tokens are absent from the word "
+            f"list ({', '.join(missing_tokens)})"
+        )
+    return None
+
+
+def _missing_is_trailing_run(translation_tokens: List[str], missing_tokens: List[str]) -> bool:
+    """True when the missing tokens are exactly the tail of the translation.
+
+    The signature of a response cut off at the output-token limit: the word list
+    stops partway and every token after that point is absent. A scattered miss
+    in the middle of an otherwise complete breakdown is a different problem and
+    is tolerated by the caller.
+    """
+    if not missing_tokens or not translation_tokens:
+        return False
+    tail = translation_tokens[-len(missing_tokens) :]
+    return tail == missing_tokens
 
 
 @dataclass
@@ -371,12 +442,16 @@ def decompose_language(
     context = build_sentence_decomposition_context()
     schema = build_single_language_decomposition_schema()
 
+    estimated_tokens = estimate_decomposition_output_tokens(
+        target_translations={target_language: target_translation}
+    )
     result = query_sentence_decomposition(
         prompt=prompt,
         client=client,
         model=model,
         json_schema=schema,
         context=context,
+        max_tokens=limit_from_estimate(estimated_tokens),
     )
     if not result.get("success"):
         return DecomposedLanguage(
@@ -438,11 +513,13 @@ def decompose_language(
                 last_surface,
             )
 
+    incomplete_error = _incompleteness_error(translation_tokens, missing_tokens)
     return DecomposedLanguage(
         language_code=target_language,
         translation=target_translation,
         words=words,
-        success=True,
+        success=incomplete_error is None,
+        error=incomplete_error,
         missing_surface_forms=missing_tokens,
     )
 
@@ -479,12 +556,17 @@ def decompose_languages_combined(
     context = build_multi_language_decomposition_context()
     schema = build_multi_language_decomposition_schema(target_languages=target_languages)
 
+    # Size the request from the work it asks for: the response carries one word
+    # object per token per language, so a long sentence in several languages
+    # overruns the backend default and comes back truncated.
+    estimated_tokens = estimate_decomposition_output_tokens(target_translations=target_translations)
     result = query_sentence_decomposition(
         prompt=prompt,
         client=client,
         model=model,
         json_schema=schema,
         context=context,
+        max_tokens=limit_from_estimate(estimated_tokens),
     )
     if not result.get("success"):
         error = str(result.get("error", "unknown error"))
@@ -539,11 +621,13 @@ def decompose_languages_combined(
                     last_surface,
                 )
 
+        incomplete_error = _incompleteness_error(translation_tokens, missing_tokens)
         decompositions[lang] = DecomposedLanguage(
             language_code=lang,
             translation=target_translation,
             words=words,
-            success=True,
+            success=incomplete_error is None,
+            error=incomplete_error,
             missing_surface_forms=missing_tokens,
         )
     return decompositions
@@ -577,13 +661,16 @@ def annotate_language_dependencies(
         model=model,
         json_schema=build_dependency_schema(word_count=word_count),
         context=build_dependency_context(),
+        max_tokens=limit_from_estimate(estimate_dependency_output_tokens(word_count=word_count)),
     )
     if not result.get("success"):
+        error = str(result.get("error", "unknown error"))
         logger.warning(
             "Phase 4 dependency call failed for language=%s: %s",
             decomposition.language_code,
-            result.get("error", "unknown error"),
+            error,
         )
+        decomposition.ud_error = error
         return False
 
     raw_words = result.get("words")
@@ -591,14 +678,16 @@ def annotate_language_dependencies(
         [w for w in raw_words if isinstance(w, dict)] if isinstance(raw_words, list) else []
     )
 
-    problems = validate_dependency_tree(annotations)
+    problems = validate_dependency_tree(annotations, expected_word_count=word_count)
     if problems:
+        joined = "; ".join(problems)
         logger.warning(
             "Phase 4 dependency tree rejected for language=%s (translation=%r): %s",
             decomposition.language_code,
             decomposition.translation,
-            "; ".join(problems),
+            joined,
         )
+        decomposition.ud_error = f"Dependency tree rejected: {joined}"
         return False
 
     annotations_by_position = {entry["position"]: entry for entry in annotations}
@@ -615,10 +704,12 @@ def annotate_language_dependencies(
                 decomposition.language_code,
                 position,
             )
+            decomposition.ud_error = f"No annotation returned for position {position}"
             return False
         word["ud_relation"] = annotation["ud_relation"]
         word["ud_head_position"] = annotation["ud_head_position"]
 
+    decomposition.ud_annotated = True
     return True
 
 
@@ -627,14 +718,31 @@ def annotate_dependencies_for_result(
     result: "TranslateAndDecomposeResult",
     client: UnifiedLLMClient,
     model: str = DEFAULT_MODEL,
-) -> None:
-    """Run Phase 4 over every successfully decomposed language in ``result``."""
-    for decomposition in result.decompositions.values():
-        annotate_language_dependencies(
+) -> Dict[str, bool]:
+    """Run Phase 4 over every successfully decomposed language in ``result``.
+
+    Returns language_code -> whether that language was annotated. Callers should
+    look at it: a rejected tree leaves the sentence with no UD data at all, and
+    silently discarding this made that indistinguishable from Phase 4 never
+    having been requested.
+    """
+    annotated: Dict[str, bool] = {}
+    for language_code, decomposition in result.decompositions.items():
+        annotated[language_code] = annotate_language_dependencies(
             decomposition=decomposition,
             client=client,
             model=model,
         )
+
+    failed = [lang for lang, ok in annotated.items() if not ok]
+    if failed:
+        logger.info(
+            "Phase 4 annotated %d/%d languages; no UD data for: %s",
+            len(annotated) - len(failed),
+            len(annotated),
+            ", ".join(sorted(failed)),
+        )
+    return annotated
 
 
 # --------------------------------------------------------------------------- #

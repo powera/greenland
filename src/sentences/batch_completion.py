@@ -36,6 +36,31 @@ TRANSLATE_AGENT_NAME = "barsukas_translate"
 DECOMPOSE_AGENT_NAME = "barsukas_decompose"
 
 
+def _extract_batch_content(response: Dict[str, Any]) -> str:
+    """Pull the message content out of one batch result, refusing truncated ones.
+
+    ``finish_reason`` sits right next to the content and says whether the model
+    finished or ran out of room. Without this check a response cut off at the
+    token limit fails later on ``json.loads`` and is logged as an unspecified
+    parse error -- which, for a batch applied hours after submission, gives no
+    hint that the fix is a larger limit rather than a bad schema.
+
+    Raises:
+        ValueError: If the response was truncated or is missing its content.
+    """
+    choice = response["body"]["choices"][0]
+    finish_reason = choice.get("finish_reason")
+    if finish_reason == "length":
+        raise ValueError(
+            "Response truncated at the output token limit (finish_reason='length'); "
+            "the request needs a larger max_completion_tokens"
+        )
+    content = choice["message"]["content"]
+    if not content:
+        raise ValueError(f"Empty response content (finish_reason={finish_reason!r})")
+    return str(content)
+
+
 def apply_results_for_agent(
     agent_name: str, requests: Iterable[BatchQueue], session: Any, batch_id: str
 ) -> Dict[str, int]:
@@ -76,7 +101,7 @@ def apply_sentence_translation_results(
             if not req.response_body:
                 continue
             response = json.loads(req.response_body)
-            content = response["body"]["choices"][0]["message"]["content"]
+            content = _extract_batch_content(response)
             translations = json.loads(content)
 
             store_translation_results(sentence_id, translations, session)
@@ -118,7 +143,7 @@ def apply_phase1_translation_results(
             if not req.response_body:
                 continue
             response = json.loads(req.response_body)
-            content = response["body"]["choices"][0]["message"]["content"]
+            content = _extract_batch_content(response)
             translations = json.loads(content)
 
             translations_only = {

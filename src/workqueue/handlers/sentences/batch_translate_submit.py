@@ -24,10 +24,11 @@ from clients.batch_queue import (
     BatchRequestMetadata,
     create_batch_database_session,
 )
-from clients.lib import schema_from_dict, to_openai_schema
+from clients.lib import limit_from_estimate, schema_from_dict, to_openai_schema
 from clients.openai.batch_client import OpenAIBatchClient
 from clients.openai.client import is_gpt5_nano_or_mini_model, reasoning_effort_for_model
 from sentences.candidate_lookup import DEFAULT_SOURCE_LANGUAGES
+from sentences.token_estimates import estimate_translation_output_tokens
 from sentences.translate_and_decompose import build_phase1_prompt
 from storage.models.schema import Sentence, SentenceTranslation
 from workqueue.tools import workqueue_payload_handler
@@ -132,9 +133,17 @@ def handle_sentences_batch_translate_submit(
                 continue
             _context, _prompt, full_prompt, schema, _normalized_targets = built
 
+            max_completion_tokens = limit_from_estimate(
+                estimate_translation_output_tokens(
+                    source_text=source_translation,
+                    source_language=source_language,
+                    target_languages=_normalized_targets or phase1_targets,
+                )
+            )
             request_body: Dict[str, Any] = {
                 "model": model,
                 "messages": [{"role": "user", "content": full_prompt}],
+                "max_completion_tokens": max_completion_tokens,
                 "response_format": {
                     "type": "json_schema",
                     "json_schema": {

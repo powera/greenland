@@ -378,13 +378,25 @@ def store_translation_results(
 
         # Add detailed word records
         for position, word_data in enumerate(words_data):
-            # Find matching lemma by GUID if provided. Synthetic GUIDs are
-            # placeholders emitted for words with no real lemma; never resolve them.
+            # Find matching lemma by GUID if provided. "NONE" is what the prompts
+            # ask for when no database lemma matches the word.
             lemma_id = None
             guid = _clean_word_field(word_data.get("lemma_guid"))
+            # DEPRECATED: no prompt asks for SYN### ids any more. Kept because a
+            # model can still emit the old format from memory, in which case the
+            # id must not be looked up -- see SYNTHETIC_GUID_PREFIX in
+            # sentences.translate_and_decompose.
             is_synthetic_guid = guid.startswith("SYN") and guid[3:].isdigit()
+            if is_synthetic_guid:
+                logger.warning(
+                    "Deprecated synthetic lemma_guid %r for sentence %s; prompts ask "
+                    "for NONE. Treating as unmatched.",
+                    guid,
+                    sentence_id,
+                )
+            is_unmatched = guid.lower() in {"none", "null"}
 
-            if guid and not is_synthetic_guid:
+            if guid and not is_synthetic_guid and not is_unmatched:
                 # Look up lemma by GUID
                 lemma = session.query(Lemma).filter_by(guid=guid).first()
                 if lemma:

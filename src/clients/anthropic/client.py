@@ -121,6 +121,7 @@ class AnthropicClient:
         json_schema: Optional[Any] = None,
         context: Optional[str] = None,
         messages: Optional[List[clients.lib.ChatMessage]] = None,
+        max_tokens: Optional[int] = None,
     ) -> Response:
         """
         Generate chat completion using Anthropic API.
@@ -129,6 +130,9 @@ class AnthropicClient:
             prompt: The main prompt/question (ignored if ``messages`` is given)
             model: Model to use for generation
             brief: Whether to limit response length
+            max_tokens: Explicit output-token limit, normally from
+                ``clients.lib.limit_from_estimate()``. When None the backend
+                default applies.
             json_schema: Schema for structured response (if provided, returns JSON)
             context: Optional context.
             messages: Optional provider-neutral message list. Consecutive same-role
@@ -160,7 +164,9 @@ class AnthropicClient:
 
         request_kwargs: Dict[str, Any] = {
             "model": model,
-            "max_tokens": 512 if brief else 3192,
+            "max_tokens": clients.lib.resolve_output_tokens(
+                model, brief=brief, requested=max_tokens, backend_default=3192
+            ),
             "messages": [],
         }
 
@@ -234,6 +240,23 @@ class AnthropicClient:
 
         completion_data, duration_ms = self._create_message(**request_kwargs)
 
+        # Ran out of room rather than finishing: the tool input is cut mid-JSON,
+        # so treat it as a failed call instead of returning a partial answer.
+        # Spending the whole budget is the signal that does not depend on the
+        # provider setting a flag -- a response that ended on its own terms stops
+        # short of the cap.
+        stop_reason = completion_data.get("stop_reason")
+        token_limit = request_kwargs["max_tokens"]
+        output_tokens = (completion_data.get("usage") or {}).get("output_tokens", 0)
+        if stop_reason == "max_tokens" or (
+            isinstance(output_tokens, int) and output_tokens >= token_limit
+        ):
+            raise clients.lib.TruncatedResponseError(
+                f"Anthropic stopped generating at the {token_limit}-token output limit "
+                f"(model={model}, output_tokens={output_tokens}, "
+                f"stop_reason={stop_reason!r}). Raise the limit or split the request."
+            )
+
         # Extract text or tool output from response
         structured_data = {}
         response_text = ""
@@ -299,7 +322,12 @@ class AnthropicClient:
                 logger.debug("No response text or structured data")
             logger.debug("Usage metrics: %s", usage.to_dict())
 
-        return Response(response_text=response_text, structured_data=structured_data, usage=usage)
+        return Response(
+            response_text=response_text,
+            structured_data=structured_data,
+            usage=usage,
+            finish_reason=stop_reason,
+        )
 
 
 # Lazy client instance - only created when first accessed

@@ -501,14 +501,24 @@ def query_sentence_decomposition(
     model: str,
     json_schema: Dict[str, Any],
     context: Optional[str] = None,
+    max_tokens: Optional[int] = None,
 ) -> Dict[str, Any]:
-    """Execute a sentence decomposition/translation query and return structured JSON."""
+    """Execute a sentence decomposition/translation query and return structured JSON.
+
+    ``max_tokens`` should come from ``clients.lib.limit_from_estimate()`` applied
+    to an estimate from ``sentences.token_estimates``; a decomposition's size is
+    predictable from its word count, and the backend default is not large enough
+    for long sentences. A backend that hits its limit raises
+    ``TruncatedResponseError``, which is caught below and reported as a failed
+    call rather than a short one.
+    """
     try:
         response = client.generate_chat(
             prompt=prompt,
             model=model,
             json_schema=json_schema,
             context=context,
+            max_tokens=max_tokens,
         )
     except Exception as error:
         logger.error("Error querying sentence decomposition: %s", error)

@@ -43,6 +43,7 @@ class _ScriptedLLMClient:
         model: str,
         json_schema: Optional[Dict[str, Any]] = None,
         context: Optional[str] = None,
+        max_tokens: Optional[int] = None,
     ) -> _FakeResponse:
         if not self._responses:
             raise AssertionError("Unexpected extra LLM call; no scripted response left")
@@ -53,9 +54,23 @@ class _ScriptedLLMClient:
                 "model": model,
                 "json_schema": json_schema,
                 "context": context,
+                "max_tokens": max_tokens,
             }
         )
         return _FakeResponse(payload)
+
+
+def _decomposed_word(position: int, surface_form: str, part_of_speech: str) -> Dict[str, Any]:
+    """One entry of a Phase-3 word list, in the shape the schema requires."""
+    return {
+        "position": position,
+        "part_of_speech": part_of_speech,
+        "english_gloss": surface_form,
+        "surface_form": surface_form,
+        "grammatical_form": None,
+        "lemma_guid": "SYN1",
+        "lemma": surface_form,
+    }
 
 
 def _make_session_with_no_candidates() -> Any:
@@ -106,6 +121,9 @@ def test_pipeline_translates_and_decomposes_english_by_default(
         "uk": "Я читаю книгу",
         "kn": "ನಾನು ಪುಸ್ತಕ ಓದುತ್ತೇನೆ",
     }
+    # The word list has to cover the translation: a breakdown that stops short
+    # of the last tokens is how a truncated response looks, and is now a failed
+    # decomposition rather than a partial one.
     phase3_payload = {
         "en": "I read a book",
         "words_en": [
@@ -127,6 +145,15 @@ def test_pipeline_translates_and_decomposes_english_by_default(
                 "lemma_guid": "SYN2",
                 "lemma": "read",
             },
+            {
+                "position": 2,
+                "part_of_speech": "noun",
+                "english_gloss": "a book",
+                "surface_form": "a book",
+                "grammatical_form": "singular",
+                "lemma_guid": "SYN3",
+                "lemma": "book",
+            },
         ],
     }
     client = _ScriptedLLMClient([phase1_payload, phase3_payload])
@@ -145,7 +172,7 @@ def test_pipeline_translates_and_decomposes_english_by_default(
     assert result.translations["fr"] == "Je lis un livre"
     assert "en" in result.decompositions
     assert result.decompositions["en"].success
-    assert len(result.decompositions["en"].words) == 2
+    assert len(result.decompositions["en"].words) == 3
     assert result.decompositions["en"].words[1]["surface_form"] == "read"
 
     assert len(client.calls) == 2
@@ -192,11 +219,19 @@ def test_pipeline_runs_phase3_in_one_combined_call(phase2_returns_a_candidate: N
         "uk": "Я читаю",
         "kn": "ನಾನು ಓದುತ್ತೇನೆ",
     }
+    # Cover every token: an empty word list is now a failed decomposition, and
+    # this test is about the call count, not about coverage.
     phase3_payload = {
         "fr": "Je lis",
-        "words_fr": [],
+        "words_fr": [
+            _decomposed_word(0, "Je", "pronoun"),
+            _decomposed_word(1, "lis", "verb"),
+        ],
         "lt": "Aš skaitau",
-        "words_lt": [],
+        "words_lt": [
+            _decomposed_word(0, "Aš", "pronoun"),
+            _decomposed_word(1, "skaitau", "verb"),
+        ],
     }
     client = _ScriptedLLMClient([phase1_payload, phase3_payload])
 
