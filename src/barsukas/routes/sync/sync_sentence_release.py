@@ -237,13 +237,14 @@ def _find_sentence_additions(
         release_data = release_sentences[guid]
         english_text = _get_release_sentence_english(release_data)
         pattern_words = release_data.get("pattern_words", [])
+        sentence_words = release_data.get("words", [])
 
         # Check for missing lemma GUIDs
-        missing_lemma_guids = []
-        for pw in pattern_words:
-            lemma_guid = pw.get("lemma_guid")
+        missing_lemma_guids: Set[str] = set()
+        for release_word in [*pattern_words, *sentence_words]:
+            lemma_guid = release_word.get("lemma_guid")
             if lemma_guid and lemma_guid not in all_lemma_guids:
-                missing_lemma_guids.append(lemma_guid)
+                missing_lemma_guids.add(lemma_guid)
 
         item: Dict[str, Any] = {
             "guid": guid,
@@ -257,7 +258,7 @@ def _find_sentence_additions(
         }
 
         if missing_lemma_guids:
-            item["missing_lemma_guids"] = missing_lemma_guids
+            item["missing_lemma_guids"] = sorted(missing_lemma_guids)
             blocked.append(item)
         else:
             importable.append(item)
@@ -324,13 +325,18 @@ def apply_additions() -> ResponseReturnValue:
             continue
 
         try:
-            # Validate all pattern word lemma GUIDs exist
+            # Validate all referenced lemma GUIDs exist. Skipping an unresolved
+            # decomposition word would silently corrupt the JSONL round trip.
             pattern_words = release_data.get("pattern_words", [])
-            missing_guids = [
-                pw.get("lemma_guid")
-                for pw in pattern_words
-                if pw.get("lemma_guid") and pw["lemma_guid"] not in lemma_guid_to_id
-            ]
+            sentence_words = release_data.get("words", [])
+            missing_guids = sorted(
+                {
+                    release_word["lemma_guid"]
+                    for release_word in [*pattern_words, *sentence_words]
+                    if release_word.get("lemma_guid")
+                    and release_word["lemma_guid"] not in lemma_guid_to_id
+                }
+            )
             if missing_guids:
                 flash(
                     f"Skipped {guid}: missing lemma GUIDs: {', '.join(missing_guids)}",
@@ -379,6 +385,28 @@ def apply_additions() -> ResponseReturnValue:
                 )
                 g.db.add(pattern_word)
 
+            # Add the full per-language decomposition, including Universal
+            # Dependencies fields. The release serializer already writes these
+            # fields; importing them here completes the Barsukas sync round trip.
+            for word_data in sentence_words:
+                lemma_guid = word_data.get("lemma_guid")
+                lemma_id = lemma_guid_to_id.get(lemma_guid) if lemma_guid else None
+                sentence_word = SentenceWord(
+                    sentence_id=sentence.id,
+                    lemma_id=lemma_id,
+                    language_code=word_data.get("language_code", ""),
+                    position=word_data.get("position", 0),
+                    part_of_speech=word_data.get("word_role", ""),
+                    english_text=word_data.get("english_text"),
+                    target_language_text=word_data.get("target_language_text"),
+                    grammatical_form=word_data.get("grammatical_form"),
+                    grammatical_case=word_data.get("grammatical_case"),
+                    declined_form=word_data.get("declined_form"),
+                    ud_relation=word_data.get("ud_relation"),
+                    ud_head_position=word_data.get("ud_head_position"),
+                )
+                g.db.add(sentence_word)
+
             log_operation(
                 session=g.db,
                 source="sync-release",
@@ -388,6 +416,7 @@ def apply_additions() -> ResponseReturnValue:
                     "english_text": _get_release_sentence_english(release_data)[:80],
                     "translation_count": len(translations),
                     "pattern_word_count": len(pattern_words),
+                    "word_count": len(sentence_words),
                 },
             )
 

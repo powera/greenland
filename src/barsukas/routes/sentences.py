@@ -331,7 +331,13 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
     # the flat table. Built here rather than in the template because nesting is
     # data, not presentation.
     dependency_trees_by_language: dict[str, list[dict[str, Any]]] = {}
+    ud_languages: set[str] = set()
     for language_code, language_words in words_by_language.items():
+        if any(
+            word["ud_relation"] is not None or word["ud_head_position"] is not None
+            for word in language_words
+        ):
+            ud_languages.add(language_code)
         tree = _build_dependency_tree(language_words)
         if tree:
             dependency_trees_by_language[language_code] = tree
@@ -513,6 +519,7 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         language_names=language_names,
         words_by_language=words_by_language,
         dependency_trees_by_language=dependency_trees_by_language,
+        ud_languages=ud_languages,
         lemmas_used=lemmas_used,
         n_decomposed_languages=n_decomposed,
         pattern_words=pattern_words_data,
