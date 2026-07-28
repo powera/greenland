@@ -40,6 +40,16 @@ def get_argument_parser() -> argparse.ArgumentParser:
         help="Store source sentences and sentence words in sentence tables",
     )
     parser.add_argument(
+        "--annotate-dependencies",
+        action="store_true",
+        help=(
+            "Run the Phase-4 Universal Dependencies pass over the English "
+            "decomposition, adding a UD relation and head position to each word. "
+            "Costs one extra LLM call per sentence; requires --store-sentences "
+            "for the annotations to be persisted."
+        ),
+    )
+    parser.add_argument(
         "--pivot-languages",
         default="bn,uk,kn",
         help=(
@@ -70,7 +80,9 @@ def main() -> None:
     raw_text = input_path.read_text(encoding="utf-8")
     split_sentences = agent.split_sentences(raw_text, args.language)
     total_sentences = len(split_sentences)
-    estimated_calls = min(total_sentences, args.limit) if args.limit else total_sentences
+    sentences_to_process = min(total_sentences, args.limit) if args.limit else total_sentences
+    # Phase 1 + Phase 3 per sentence, plus Phase 4 when annotating dependencies.
+    estimated_calls = sentences_to_process * (3 if args.annotate_dependencies else 2)
 
     if not confirm_operation(
         message=(
@@ -78,7 +90,8 @@ def main() -> None:
             f"Language: {args.language}\n"
             f"Sentences parsed: {total_sentences}\n"
             f"Target model: {args.model}\n"
-            f"Store sentences: {'yes' if args.store_sentences else 'no'}"
+            f"Store sentences: {'yes' if args.store_sentences else 'no'}\n"
+            f"Annotate dependencies: {'yes' if args.annotate_dependencies else 'no'}"
         ),
         estimated_calls=estimated_calls,
         skip_confirmation=args.yes,
@@ -96,6 +109,7 @@ def main() -> None:
         throttle_seconds=args.throttle,
         limit=args.limit,
         pivot_languages=pivot_languages,
+        annotate_dependencies=args.annotate_dependencies,
     )
 
     print(f"Document: {results['document']} ({results['document_language']})")

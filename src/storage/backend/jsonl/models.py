@@ -426,6 +426,8 @@ class SentenceWord:
     grammatical_form: Optional[str] = None
     grammatical_case: Optional[str] = None
     declined_form: Optional[str] = None
+    ud_relation: Optional[str] = None
+    ud_head_position: Optional[int] = None
     notes: Optional[str] = None
     added_at: Optional[datetime.datetime] = None
 

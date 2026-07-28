@@ -461,6 +461,8 @@ class JSONLSession(BaseSession):
                         "grammatical_form": word_data.get("grammatical_form"),
                         "grammatical_case": word_data.get("grammatical_case"),
                         "declined_form": word_data.get("declined_form"),
+                        "ud_relation": word_data.get("ud_relation"),
+                        "ud_head_position": word_data.get("ud_head_position"),
                     }
                 )
 
@@ -711,6 +713,8 @@ class JSONLSession(BaseSession):
                     grammatical_form=word_data.get("grammatical_form"),
                     grammatical_case=word_data.get("grammatical_case"),
                     declined_form=word_data.get("declined_form"),
+                    ud_relation=word_data.get("ud_relation"),
+                    ud_head_position=word_data.get("ud_head_position"),
                     sentence=sentence,
                 )
                 words.append(word)
@@ -917,6 +921,8 @@ class JSONLSession(BaseSession):
                 "grammatical_form": instance.grammatical_form,
                 "grammatical_case": instance.grammatical_case,
                 "declined_form": instance.declined_form,
+                "ud_relation": instance.ud_relation,
+                "ud_head_position": instance.ud_head_position,
             }
 
             if existing_word is not None:

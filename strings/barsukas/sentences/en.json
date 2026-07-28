@@ -107,6 +107,9 @@
   "per_language_breakdown": "Per-language Breakdown",
   "role": "Role",
   "part_of_speech": "Part of Speech",
+  "ud_relation": "UD Relation",
+  "ud_head": "UD Head",
+  "dependency_tree": "Dependency Tree",
   "english": "English",
   "grammatical_form": "Grammatical Form",
   "token_optional": "Optional"

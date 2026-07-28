@@ -11,6 +11,7 @@ from typing import Any, Dict, List
 
 from sqlalchemy.orm import Session
 
+from langtools.ud_relations import ROOT_HEAD_POSITION
 from sentences.translation import store_translation_results
 from storage.models.schema import Lemma, SentenceWord
 from tests.sentences.candidate_lookup_fixture import (
@@ -135,6 +136,55 @@ def test_store_translation_results_normalizes_blank_fields() -> None:
         assert stored.target_language_text == "knyga"
         assert stored.english_text == "book"
         assert stored.grammatical_form is None
+
+
+def test_store_translation_results_stores_phase4_ud_fields() -> None:
+    """Phase-4 keys reach ud_relation/ud_head_position, and -1 survives as root."""
+    engine = build_test_engine()
+    with Session(engine) as session:
+        seed_test_database(session)
+        sentence = add_test_sentence(session, {"en": "I read a book", "lt": "Skaitau knygą"})
+
+        verb = _phase3_word(position=0, surface_form="Skaitau", english_gloss="I read")
+        verb["ud_relation"] = "root"
+        verb["ud_head_position"] = ROOT_HEAD_POSITION
+
+        obj = _phase3_word(position=1, surface_form="knygą", english_gloss="book")
+        obj["ud_relation"] = "obj"
+        obj["ud_head_position"] = 0
+
+        store_translation_results(
+            sentence.id,
+            {"lt": "Skaitau knygą", "words_lt": [verb, obj]},
+            session,
+        )
+
+        words = _stored_words(session, sentence.id)
+        assert words[0].ud_relation == "root"
+        assert words[0].ud_head_position == ROOT_HEAD_POSITION
+        assert words[1].ud_relation == "obj"
+        assert words[1].ud_head_position == 0
+
+
+def test_store_translation_results_leaves_ud_fields_null_without_phase4() -> None:
+    """Phase 4 is optional; a Phase-3-only payload must not invent UD values."""
+    engine = build_test_engine()
+    with Session(engine) as session:
+        seed_test_database(session)
+        sentence = add_test_sentence(session, {"en": "a book", "lt": "knyga"})
+
+        store_translation_results(
+            sentence.id,
+            {
+                "lt": "knyga",
+                "words_lt": [_phase3_word(position=0, surface_form="knyga", english_gloss="book")],
+            },
+            session,
+        )
+
+        stored = _stored_words(session, sentence.id)[0]
+        assert stored.ud_relation is None
+        assert stored.ud_head_position is None
 
 
 def test_store_translation_results_replaces_prior_words_for_language() -> None:

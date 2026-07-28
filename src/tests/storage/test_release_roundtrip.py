@@ -61,6 +61,8 @@ SENTENCE_WORD_DATA_COLUMNS = [
     "grammatical_form",
     "grammatical_case",
     "declined_form",
+    "ud_relation",
+    "ud_head_position",
 ]
 
 # The one fully-populated word we assert on: every data column set non-null so a
@@ -74,6 +76,8 @@ EXPECTED_WORD: Dict[str, object] = {
     "grammatical_form": "verb/lt_1p_past",
     "grammatical_case": "accusative",
     "declined_form": "pirkome",
+    "ud_relation": "root",
+    "ud_head_position": -1,
 }
 
 LEMMA_GUID = "V06_004"

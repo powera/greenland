@@ -1515,6 +1515,8 @@ def _normalize_release_sentence_for_compare(release_data: Dict[str, Any]) -> Dic
                     "grammatical_form": word_data.get("grammatical_form"),
                     "grammatical_case": word_data.get("grammatical_case"),
                     "declined_form": word_data.get("declined_form"),
+                    "ud_relation": word_data.get("ud_relation"),
+                    "ud_head_position": word_data.get("ud_head_position"),
                 }
             )
         normalized["words"] = normalized_words_data

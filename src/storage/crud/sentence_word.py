@@ -19,6 +19,8 @@ def add_sentence_word(
     grammatical_form: Optional[str] = None,
     grammatical_case: Optional[str] = None,
     declined_form: Optional[str] = None,
+    ud_relation: Optional[str] = None,
+    ud_head_position: Optional[int] = None,
     word_role: Optional[str] = None,
 ) -> SentenceWord:
     """Add a word usage record to a sentence.
@@ -35,6 +37,8 @@ def add_sentence_word(
         grammatical_form: Grammatical form (e.g., "1s_past", "gerund")
         grammatical_case: Grammatical case (e.g., "accusative", "nominative")
         declined_form: Actual declined/conjugated form used in sentence
+        ud_relation: Core Universal Dependencies relation (e.g., "nsubj", "det")
+        ud_head_position: Position of this word's head; -1 marks the root
         word_role: Deprecated alias for ``part_of_speech``
 
     Returns:
@@ -57,6 +61,8 @@ def add_sentence_word(
         grammatical_form=grammatical_form,
         grammatical_case=grammatical_case,
         declined_form=declined_form,
+        ud_relation=ud_relation,
+        ud_head_position=ud_head_position,
     )
     session.add(sentence_word)
     session.flush()
@@ -115,6 +121,8 @@ def update_sentence_word(
     grammatical_form: Optional[str] = None,
     grammatical_case: Optional[str] = None,
     declined_form: Optional[str] = None,
+    ud_relation: Optional[str] = None,
+    ud_head_position: Optional[int] = None,
     word_role: Optional[str] = None,
 ) -> SentenceWord:
     """Update a sentence word record.
@@ -129,6 +137,8 @@ def update_sentence_word(
         grammatical_form: New grammatical form (optional)
         grammatical_case: New grammatical case (optional)
         declined_form: New declined form (optional)
+        ud_relation: New core UD relation (optional)
+        ud_head_position: New head position; -1 marks the root (optional)
         word_role: Deprecated alias for ``part_of_speech``
 
     Returns:
@@ -151,6 +161,10 @@ def update_sentence_word(
         sentence_word.grammatical_case = grammatical_case
     if declined_form is not None:
         sentence_word.declined_form = declined_form
+    if ud_relation is not None:
+        sentence_word.ud_relation = ud_relation
+    if ud_head_position is not None:
+        sentence_word.ud_head_position = ud_head_position
 
     return sentence_word
 

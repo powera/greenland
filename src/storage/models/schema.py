@@ -517,6 +517,14 @@ class SentenceWord(Base):
         String, nullable=True
     )  # Actual form used in sentence (e.g., "banką")
 
+    # Universal Dependencies annotation (Phase 4; NULL on words never annotated)
+    ud_relation: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )  # Core UD relation, e.g. "nsubj", "obj", "det"
+    ud_head_position: Mapped[Optional[int]] = mapped_column(
+        Integer, nullable=True
+    )  # Position of the head word; -1 marks the sentence root
+
     # Metadata
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
 

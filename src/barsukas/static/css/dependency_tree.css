@@ -1,0 +1,124 @@
+/* Universal Dependencies tree for the sentence view.
+ *
+ * Renders the nested <ul>/<li> the route builds as an indented tree with
+ * elbow connectors. Connectors are borders on ::before/::after, so there are
+ * no images and no JavaScript; the markup stays a plain nested list and
+ * remains readable if this stylesheet fails to load.
+ */
+
+.ud-tree-wrapper {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    /* Deep trees on long sentences scroll rather than widening the page. */
+    overflow-x: auto;
+}
+
+/* The caption doubles as the <details> toggle: collapsed by default, so the
+ * table stays the primary view and the tree is opened on demand. */
+.ud-tree-caption {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6c757d;
+    cursor: pointer;
+    user-select: none;
+}
+
+.ud-tree-caption:hover {
+    color: #495057;
+}
+
+/* Only take up vertical space once opened. */
+.ud-tree-wrapper[open] .ud-tree-caption {
+    margin-bottom: 0.5rem;
+}
+
+ul.ud-tree,
+ul.ud-tree ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Nested levels indent and carry the vertical spine of the connector. */
+ul.ud-tree ul {
+    margin-left: 0.75rem;
+    padding-left: 1rem;
+    border-left: 1px solid #ced4da;
+}
+
+.ud-tree-node {
+    position: relative;
+    padding: 0.15rem 0;
+    line-height: 1.6;
+}
+
+/* Horizontal stub joining a child to its parent's vertical spine. */
+ul.ud-tree ul > .ud-tree-node::before {
+    content: "";
+    position: absolute;
+    top: 0.85rem;
+    left: -1rem;
+    width: 0.75rem;
+    border-top: 1px solid #ced4da;
+}
+
+/* Cap the spine at the last child so it does not run past the final row. */
+ul.ud-tree ul > .ud-tree-node:last-child::after {
+    content: "";
+    position: absolute;
+    top: 0.85rem;
+    bottom: 0;
+    left: -1.0625rem;
+    border-left: 1px solid #f8f9fa;
+}
+
+.ud-tree-label {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.ud-tree-relation {
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.8rem;
+    color: #d63384;
+    min-width: 4.5rem;
+}
+
+.ud-tree-surface {
+    font-weight: 600;
+}
+
+.ud-tree-pos {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.ud-tree-position {
+    font-size: 0.7rem;
+    color: #adb5bd;
+    font-family: var(--bs-font-monospace, monospace);
+}
+
+/* Lemma link, matching the table's Lemma column so the two views agree. */
+.ud-tree-lemma {
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.ud-tree-level {
+    font-size: 0.65rem;
+    vertical-align: baseline;
+}
+
+/* A word whose head chain never reaches a root: shown so it is not lost,
+ * flagged so a broken parse is visible rather than looking intentional. */
+.ud-tree-node-orphaned > .ud-tree-label .ud-tree-surface {
+    text-decoration: underline wavy #dc3545;
+}
