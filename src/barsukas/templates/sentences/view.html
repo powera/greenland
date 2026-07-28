@@ -578,8 +578,10 @@
                             <tr>
                                 <th>{{ STRINGS.sentences.position }}</th>
                                 <th>{{ STRINGS.sentences.part_of_speech }}</th>
-                                <th>{{ STRINGS.sentences.ud_relation }}</th>
-                                <th>{{ STRINGS.sentences.ud_head }}</th>
+                                {% if lang_code in ud_languages %}
+                                    <th>{{ STRINGS.sentences.ud_relation }}</th>
+                                    <th>{{ STRINGS.sentences.ud_head }}</th>
+                                {% endif %}
                                 <th>{{ STRINGS.sentences.english }}</th>
                                 <th>{{ lang_name }}</th>
                                 <th>{{ STRINGS.sentences.grammatical_form }}</th>
@@ -591,25 +593,27 @@
                                 <tr>
                                     <td>{{ word.position }}</td>
                                     <td><code>{{ word.part_of_speech }}</code></td>
-                                    <td>
-                                        {% if word.ud_relation %}
-                                            <code>{{ word.ud_relation }}</code>
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if word.ud_head_position is not none %}
-                                            {% if word.ud_head_position < 0 %}
-                                                <em>{{ word.ud_head_text }}</em>
+                                    {% if lang_code in ud_languages %}
+                                        <td>
+                                            {% if word.ud_relation %}
+                                                <code>{{ word.ud_relation }}</code>
                                             {% else %}
-                                                <span class="text-muted">{{ word.ud_head_position }}</span>
-                                                {{ word.ud_head_text or '' }}
+                                                <span class="text-muted">-</span>
                                             {% endif %}
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
+                                        </td>
+                                        <td>
+                                            {% if word.ud_head_position is not none %}
+                                                {% if word.ud_head_position < 0 %}
+                                                    <em>{{ word.ud_head_text }}</em>
+                                                {% else %}
+                                                    <span class="text-muted">{{ word.ud_head_position }}</span>
+                                                    {{ word.ud_head_text or '' }}
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
                                     <td>{{ word.english_text or '-' }}</td>
                                     <td>
                                         {% if word.target_text %}
