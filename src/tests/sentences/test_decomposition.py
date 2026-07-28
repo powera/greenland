@@ -184,8 +184,8 @@ def test_all_words_are_lemmas_or_grammatical_handles_spanish_example() -> None:
             "english_gloss": "in",
             "surface_form": "en",
             "grammatical_form": "preposition/es_base",
-            "lemma_guid": "NONE",
-            "lemma": "No lemma",
+            "lemma_guid": "P01_001",
+            "lemma": "in",
         },
         {
             "position": 4,
@@ -275,8 +275,8 @@ def test_negative_case_spanish_fair_without_lemma_fails_check() -> None:
             "english_gloss": "at",
             "surface_form": "en",
             "grammatical_form": "preposition/base",
-            "lemma_guid": "NONE",
-            "lemma": "No lemma",
+            "lemma_guid": "P01_001",
+            "lemma": "in",
         },
         {
             "position": 4,
@@ -341,3 +341,42 @@ def test_find_unresolved_non_grammatical_words_keeps_skip_for_known_grammatical_
 
     assert unresolved == []
     assert all_words_are_lemmas_or_grammatical(words, "fr")
+
+
+def test_find_unresolved_non_grammatical_words_requires_release_backed_function_lemmas() -> None:
+    words = [
+        {
+            "position": position,
+            "part_of_speech": part_of_speech,
+            "english_gloss": surface_form,
+            "surface_form": surface_form,
+            "grammatical_form": f"{part_of_speech}/base",
+            "lemma_guid": "NONE",
+            "lemma": "No lemma",
+        }
+        for position, (surface_form, part_of_speech) in enumerate(
+            [("if", "conjunction"), ("in", "preposition"), ("who", "pronoun")]
+        )
+    ]
+
+    unresolved = find_unresolved_non_grammatical_words(words, "en")
+
+    assert [word["surface_form"] for word in unresolved] == ["if", "in", "who"]
+    assert not all_words_are_lemmas_or_grammatical(words, "en")
+
+
+def test_find_unresolved_non_grammatical_words_accepts_resolved_function_lemma() -> None:
+    words = [
+        {
+            "position": 0,
+            "part_of_speech": "conjunction",
+            "english_gloss": "if",
+            "surface_form": "if",
+            "grammatical_form": "conjunction/base",
+            "lemma_guid": "C01_001",
+            "lemma": "if",
+        }
+    ]
+
+    assert find_unresolved_non_grammatical_words(words, "en") == []
+    assert all_words_are_lemmas_or_grammatical(words, "en")

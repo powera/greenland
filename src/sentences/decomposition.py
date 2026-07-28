@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from clients.unified_client import UnifiedLLMClient
 from langtools.dialect_overrides import get_dialect_display_name, get_llm_prompt_note
 from langtools.directions import get_language_direction_note
-from langtools.grammatical_words import is_function_word, is_grammatical_word
+from langtools.grammatical_words import is_grammatical_word
 from storage.models.schema import (
     Lemma,
     Sentence,
@@ -38,7 +38,7 @@ _NO_LEMMA_TEXT_MARKERS = {"", "no lemma", "none", "null"}
 def find_unresolved_non_grammatical_words(
     words: List[Dict[str, Any]], language_code: str
 ) -> List[Dict[str, Any]]:
-    """Return decomposition words that have no lemma and are not grammatical/function words."""
+    """Return words missing lemmas, excluding tokens that never have release lemmas."""
 
     unresolved_words: List[Dict[str, Any]] = []
     normalized_language_code = language_code.strip().lower()
@@ -58,9 +58,7 @@ def find_unresolved_non_grammatical_words(
             unresolved_words.append(word_row)
             continue
 
-        is_grammatical = is_grammatical_word(surface_form, normalized_language_code)
-        is_function = is_function_word(surface_form, normalized_language_code)
-        if is_grammatical or is_function:
+        if is_grammatical_word(surface_form, normalized_language_code):
             continue
 
         unresolved_words.append(word_row)
@@ -69,7 +67,7 @@ def find_unresolved_non_grammatical_words(
 
 
 def all_words_are_lemmas_or_grammatical(words: List[Dict[str, Any]], language_code: str) -> bool:
-    """Return True when every word has a lemma or is a grammatical/function word."""
+    """Return True when every word has a lemma or never has a release lemma."""
 
     unresolved_words = find_unresolved_non_grammatical_words(words, language_code)
     return len(unresolved_words) == 0
