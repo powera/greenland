@@ -31,6 +31,7 @@ from audioshoe.qwen.types import QwenVoice
 from storage.crud.grammar_fact import get_grammar_facts
 from storage.crud.guid_tombstone import create_tombstone, get_tombstone_by_guid
 from storage.crud.lemma import get_lemma_by_guid
+from storage.crud.lemma_tags import read_tags
 from storage.crud.operation_log import log_translation_change
 from storage.crud.sentence import add_sentence, find_sentence_by_text
 from storage.crud.sentence_translation import add_sentence_translation
@@ -748,7 +749,7 @@ def get_lemma_info(guid: str) -> ResponseReturnValue:
         - pos_subtype: Part of speech subtype (if populated)
         - difficulty_level: Difficulty level (1-30, or -1 for excluded, or null if not set)
         - verified: Whether the lemma has been human-verified
-        - tags: JSON array of tags (or null if not set)
+        - tags: List of tags (empty list if none); see /api/v1/lemma/<guid>/tags
         - disambiguation: Disambiguation text (or null)
 
     Example:
@@ -767,7 +768,7 @@ def get_lemma_info(guid: str) -> ResponseReturnValue:
         "pos_subtype": _serialize_value(lemma.pos_subtype),
         "difficulty_level": _serialize_value(lemma.difficulty_level),
         "verified": lemma.verified,
-        "tags": _serialize_value(lemma.tags),
+        "tags": read_tags(lemma),
         "disambiguation": _serialize_value(lemma.disambiguation),
         "lexical_gap_reason": _serialize_value(lemma.lexical_gap_reason),
     }

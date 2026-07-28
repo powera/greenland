@@ -29,6 +29,7 @@ from workqueue.task_queue import get_tasks_for_target
 from storage.crud.derivative_form import delete_derivative_form
 from storage.crud.difficulty_override import get_all_overrides_for_lemma
 from storage.crud.lemma import handle_lemma_type_subtype_change
+from storage.crud.lemma_tags import parse_tags_input, serialize_tags_for_column
 from storage.crud.operation_log import log_translation_change
 from storage.models.schema import (
     SYNONYM_GRAMMATICAL_FORMS,
@@ -789,7 +790,18 @@ def edit_lemma(lemma_id: int) -> ResponseReturnValue:
             changes.append(("notes", lemma.notes, new_notes))
             lemma.notes = new_notes
 
-        new_tags = request.form.get("tags", "").strip() or None
+        # The field accepts either a JSON array or a comma-separated list; both
+        # are normalized to the JSON array that Lemma.tags is defined to hold.
+        # Storing the raw input here would write a bare string that read_tags()
+        # then has to treat as one legacy tag.
+        raw_tags = request.form.get("tags", "").strip()
+        try:
+            parsed_tags = parse_tags_input(raw_tags)
+        except ValueError as tag_error:
+            flash(f"Invalid tags: {tag_error}", "error")
+            return render_template("lemmas/edit.html", lemma=lemma)
+
+        new_tags = serialize_tags_for_column(parsed_tags)
         if new_tags != lemma.tags:
             changes.append(("tags", lemma.tags, new_tags))
             lemma.tags = new_tags

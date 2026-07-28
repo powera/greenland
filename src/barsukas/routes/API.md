@@ -246,6 +246,41 @@ Returns per-language aggregate counts with this shape:
   - Returns `{"data": [...], "metadata": {"total": N, "page": P, "total_pages": T}}`.
   - Each item: `id`, `english_word`, `definition`, `disambiguation_translation`, `disambiguation_language`, `pos_type`, `pos_subtype`, `example_sentence`, `source`, `frequency_rank`, `notes`, `added_at`.
 
+## Tags
+
+Tags are free-form labels on a lemma, stored as a JSON array (`["archaic", "legal"]`).
+There is no controlled vocabulary: an unrecognized tag is stored, not rejected.
+Tags are normalized to lowercase and deduplicated, so `Legal` and `legal` cannot
+both accumulate on one lemma.
+
+Corpus ingestion applies tags in bulk with no human in the loop, so these
+endpoints exist to review the result afterwards. Removal is a **hard delete** —
+the tag is gone from the array, not flagged — but every mutation is written to
+the operation log (`operation_type: "lemma_tags"`) with the old and new arrays,
+so the removal stays auditable.
+
+- `GET /api/v1/tags`
+  - List every tag in use with the number of lemmas carrying it.
+  - Returns `{"data": [{"tag": "legal", "lemma_count": 42}], "metadata": {"total": N}}`.
+
+- `GET /api/v1/tags/<tag>`
+  - List the lemmas carrying one tag — the review sweep after a bulk corpus run.
+  - Each item: `guid`, `lemma_text`, `definition`, `pos_type`, `tags`.
+
+- `GET /api/v1/lemma/<guid>/tags`
+  - Return one lemma's tags: `{"data": {"guid": ..., "tags": [...]}}`.
+
+- `POST /api/v1/lemma/<guid>/tags`
+  - Add tags, keeping any already present. Body: `{"tags": ["legal"]}`.
+  - Adding a tag the lemma already carries is a no-op and is not logged.
+  - `metadata.added` lists the tags that were actually new.
+
+- `DELETE /api/v1/lemma/<guid>/tags`
+  - Hard-delete tags. Body: `{"tags": ["legal"]}`.
+  - Removing a tag the lemma does not carry is a no-op and is not logged.
+  - `metadata.removed` lists the tags that were actually removed.
+  - Removing a lemma's last tag sets the column to NULL rather than `[]`.
+
 ## Response conventions
 
 - Success: `{"data": ... , "metadata": ...}` (metadata optional)

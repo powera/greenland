@@ -162,7 +162,6 @@ def create_concept(
     body: Optional[str] = None,
     sources: Optional[List[Dict[str, Any]]] = None,
     concept_type: Optional[str] = None,
-    tags: Optional[List[str]] = None,
     source_model: Optional[str] = None,
     confidence: float = 0.0,
     verified: bool = False,
@@ -177,7 +176,6 @@ def create_concept(
         body: Entry text (Markdown, may contain ``[[wiki links]]``).
         sources: Up to MAX_CONCEPT_SOURCES source dicts used as LLM input.
         concept_type: Coarse classification (e.g. "person", "event").
-        tags: Free-form tags.
         source_model: Name of the LLM that authored the body, if any.
         confidence: LLM confidence (0-1).
         verified: Whether a human has reviewed it.
@@ -197,7 +195,6 @@ def create_concept(
         body=body,
         sources=_normalize_sources(sources),
         concept_type=concept_type,
-        tags=json.dumps(tags, ensure_ascii=False) if tags else None,
         source_model=source_model,
         confidence=confidence,
         verified=verified,
@@ -223,7 +220,6 @@ def update_concept(
     body: Optional[str] = None,
     sources: Optional[List[Dict[str, Any]]] = None,
     concept_type: Optional[str] = None,
-    tags: Optional[List[str]] = None,
     source_model: Optional[str] = None,
     confidence: Optional[float] = None,
     verified: Optional[bool] = None,
@@ -243,7 +239,6 @@ def update_concept(
         body: New entry text.
         sources: New source list (replaces existing).
         concept_type: New classification.
-        tags: New tag list (replaces existing).
         source_model: New authoring-model name.
         confidence: New confidence value.
         verified: New verified flag.
@@ -262,8 +257,6 @@ def update_concept(
         concept.sources = _normalize_sources(sources)
     if concept_type is not None:
         concept.concept_type = concept_type
-    if tags is not None:
-        concept.tags = json.dumps(tags, ensure_ascii=False) if tags else None
     if source_model is not None:
         concept.source_model = source_model
     if confidence is not None:

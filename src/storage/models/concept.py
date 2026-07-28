@@ -257,8 +257,10 @@ class Concept(Base):
     # [{"url": "...", "title": "...", "note": "..."}]. Up to MAX_CONCEPT_SOURCES.
     sources: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    # JSON array of free-form tags (mirrors Lemma.tags).
-    tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # NOTE: the ``concepts.tags`` column still exists in the database but is
+    # deliberately not mapped here -- tags are a lemma-only concern.  The column
+    # is left in place rather than dropped so no peer database loses data; it can
+    # be dropped once every environment is confirmed empty.
 
     # Provenance / review metadata (mirrors conventions on Lemma/GrammarFact).
     source_model: Mapped[Optional[str]] = mapped_column(String, nullable=True)

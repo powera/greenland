@@ -9,6 +9,8 @@ from pathlib import Path
 if str(Path(__file__).parent.parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
+from storage.crud.lemma_tags import normalize_tags
+
 from agents.common.common_args import (
     add_backend_args,
     add_common_args,
@@ -50,6 +52,16 @@ def get_argument_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--tags",
+        default="",
+        help=(
+            "Comma-separated tags applied to every word staged from this document "
+            "(e.g. 'legal' for a statutory corpus). Applied without any per-word "
+            "judgement, so ordinary words in the source are tagged too; review and "
+            "prune afterwards via the /api/v1/tags endpoints."
+        ),
+    )
+    parser.add_argument(
         "--pivot-languages",
         default="bn,uk,kn",
         help=(
@@ -84,6 +96,8 @@ def main() -> None:
     # Phase 1 + Phase 3 per sentence, plus Phase 4 when annotating dependencies.
     estimated_calls = sentences_to_process * (3 if args.annotate_dependencies else 2)
 
+    staged_tags = normalize_tags(args.tags.split(","))
+
     if not confirm_operation(
         message=(
             f"Document: {input_path.name}\n"
@@ -91,7 +105,8 @@ def main() -> None:
             f"Sentences parsed: {total_sentences}\n"
             f"Target model: {args.model}\n"
             f"Store sentences: {'yes' if args.store_sentences else 'no'}\n"
-            f"Annotate dependencies: {'yes' if args.annotate_dependencies else 'no'}"
+            f"Annotate dependencies: {'yes' if args.annotate_dependencies else 'no'}\n"
+            f"Tags applied to staged words: {', '.join(staged_tags) or 'none'}"
         ),
         estimated_calls=estimated_calls,
         skip_confirmation=args.yes,
@@ -102,6 +117,7 @@ def main() -> None:
     pivot_languages = [lang.strip() for lang in args.pivot_languages.split(",") if lang.strip()]
 
     results = agent.process_document(
+        tags=staged_tags,
         input_path=args.input,
         document_language=args.language,
         store_sentences=args.store_sentences,
