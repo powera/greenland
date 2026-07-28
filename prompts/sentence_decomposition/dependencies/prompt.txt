@@ -1,0 +1,17 @@
+Assign Universal Dependencies annotations to the tokens of this sentence.
+
+Language: {language_name} ({language_code})
+Sentence: "{sentence_text}"
+
+Tokens (the numbering is authoritative; heads must refer to these numbers):
+{numbered_tokens}
+
+Per-call requirements:
+- Return exactly one entry per token above, {word_count} in total, with
+  `position` matching the number shown.
+- `ud_relation` must be a core UD relation label from the allowed set.
+- `ud_head_position` must be one of the numbers above, or -1 for the single root.
+- Exactly one token is the root; no token is its own head; the heads form a tree
+  with no cycles.
+- Annotate the tokens exactly as listed. Do not re-tokenize, merge, split, add,
+  or drop entries, even if you would have segmented the sentence differently.

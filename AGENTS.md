@@ -58,6 +58,16 @@ back to a paid model.  It overrides GREENLAND_ALLOW_LIVE_LLM, which only opts a
 test out of the separate pytest guard and must never re-enable a disabled
 backend.
 
+When you do a live LLM test run of a new agent or pipeline phase, persist the
+results to the local database.  The call has already been paid for, and the
+point of the run is to see the data land in the real schema - a script that
+prints its output and exits verifies only that the LLM replied, leaving the
+storage path (column types, coercion helpers, NULL handling, the UI render)
+untested and the spend wasted.  Prefer the ordinary persistence path the real
+callers use (e.g. sentences.translation.store_translation_results) over
+bespoke session writes, so the test run exercises the same code production
+does.  Ask before making the call, not before saving what it returns.
+
 For agent CLI scripts that should be runnable directly, add this at the top
 (before any local imports), adjusting the number of .parent calls to reach src/:
   import sys

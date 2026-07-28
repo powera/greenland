@@ -261,6 +261,14 @@ class GenysAgent:
             if GenysAgent._is_real_guid(lemma_guid):
                 word_lemma = session.query(Lemma).filter(Lemma.guid == lemma_guid).first()
 
+            # Present only when the Phase-4 pass ran and its tree validated;
+            # both stay NULL otherwise.
+            ud_relation_raw = word_entry.get("ud_relation")
+            ud_relation = str(ud_relation_raw).strip() if ud_relation_raw is not None else None
+            ud_head_position = word_entry.get("ud_head_position")
+            if not isinstance(ud_head_position, int) or isinstance(ud_head_position, bool):
+                ud_head_position = None
+
             add_sentence_word(
                 session,
                 sentence=sentence_row,
@@ -272,6 +280,8 @@ class GenysAgent:
                 target_language_text=surface or None,
                 grammatical_form=grammatical_form,
                 declined_form=surface or None,
+                ud_relation=ud_relation or None,
+                ud_head_position=ud_head_position,
             )
 
     # ------------------------------------------------------------------ #
@@ -287,8 +297,15 @@ class GenysAgent:
         throttle_seconds: float = 1.0,
         limit: Optional[int] = None,
         pivot_languages: Optional[Sequence[str]] = None,
+        annotate_dependencies: bool = False,
     ) -> Dict[str, Any]:
-        """Process a document and stage missing English words to ``PendingImport``."""
+        """Process a document and stage missing English words to ``PendingImport``.
+
+        ``annotate_dependencies`` enables the Phase-4 Universal Dependencies
+        pass over the English decomposition: one extra LLM call per sentence,
+        adding a UD relation and head position to each word. Off by default;
+        it only has a persisted effect together with ``store_sentences``.
+        """
         document_path = Path(input_path)
         source_name = document_path.name
         document_text = document_path.read_text(encoding="utf-8")
@@ -318,7 +335,8 @@ class GenysAgent:
             "document": source_name,
             "document_language": document_language,
             "sentences_parsed": len(selected_sentences),
-            "estimated_llm_calls": len(selected_sentences) * 2,
+            # Phase 1 + Phase 3, plus Phase 4 when dependency annotation is on.
+            "estimated_llm_calls": len(selected_sentences) * (3 if annotate_dependencies else 2),
             "total_words_extracted": 0,
             "function_words_skipped": 0,
             "already_in_database": 0,
@@ -357,6 +375,7 @@ class GenysAgent:
                     pivot_languages=effective_pivots,
                     decompose_languages=["en"],
                     model=model,
+                    annotate_dependencies=annotate_dependencies,
                 )
 
                 if not pipeline_result.phase1_ok:

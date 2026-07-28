@@ -165,8 +165,14 @@ def translate_sentence(
     # source translation. decompose_with_existing_translations handles a
     # decompose_languages entry that has no Phase 1 translation by falling back
     # to the source text.
+    #
+    # The same applies to English: it is decomposed whenever it has no
+    # SentenceWord rows yet, including when it IS the source language. Gating
+    # this on source_language != "en" (as an earlier version did) mirrored the
+    # Phase-1 "don't retranslate the source" rule into a phase where it does
+    # not apply, and left every English-source sentence without English words.
     decompose_languages: List[str] = list(normalized_targets_all)
-    if include_english and "en" not in decompose_languages and source_language != "en":
+    if include_english and "en" not in decompose_languages:
         decompose_languages.append("en")
 
     client = UnifiedLLMClient()
@@ -277,6 +283,22 @@ def _optional_word_field(value: Any) -> Optional[str]:
     return cleaned or None
 
 
+def _optional_int_word_field(value: Any) -> Optional[int]:
+    """Return an int for a decomposition field, or None when absent/unparsable.
+
+    Bools are rejected explicitly: ``isinstance(True, int)`` is true in Python,
+    and a stray boolean head would silently store as 0 or 1.
+    """
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    try:
+        return int(str(value).strip())
+    except (TypeError, ValueError):
+        return None
+
+
 def store_translation_results(
     sentence_id: int, translations: Dict[str, Any], session: Session
 ) -> None:
@@ -382,6 +404,8 @@ def store_translation_results(
                 grammatical_form=_optional_word_field(word_data.get("grammatical_form")),
                 grammatical_case=None,
                 declined_form=surface_form,
+                ud_relation=_optional_word_field(word_data.get("ud_relation")),
+                ud_head_position=_optional_int_word_field(word_data.get("ud_head_position")),
             )
             session.add(new_word)
 

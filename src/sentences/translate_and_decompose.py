@@ -20,6 +20,13 @@ Phases
    translation into per-word entries, with the candidate lemmas surfaced as
    disambiguation hints. (A per-language helper, :func:`decompose_language`,
    remains defined but unused for callers that may want to fan out later.)
+4. **Phase 4 (LLM, per language, optional)** — Universal Dependencies pass over
+   the Phase-3 words: one call per decomposed language annotates each word with
+   a core UD ``relation`` and a ``head`` position (-1 = root). It has to be a
+   separate call because heads refer to tokens by number, and the only
+   authoritative numbering is the word list Phase 3 produced. Enabled with
+   ``annotate_dependencies=True``; a language whose returned tree is
+   structurally invalid is rejected whole rather than stored partially.
 """
 
 import logging
@@ -46,6 +53,13 @@ from sentences.decomposition import (
     build_sentence_decomposition_prompt,
     build_single_language_decomposition_schema,
     query_sentence_decomposition,
+)
+from sentences.dependencies import (
+    build_dependency_context,
+    build_dependency_prompt,
+    build_dependency_schema,
+    query_sentence_dependencies,
+    validate_dependency_tree,
 )
 from storage.translation_helpers import LANGUAGE_NAMES, normalize_llm_language_codes
 from util.prompt_loader import get_context, get_prompt
@@ -535,6 +549,94 @@ def decompose_languages_combined(
     return decompositions
 
 
+def annotate_language_dependencies(
+    *,
+    decomposition: DecomposedLanguage,
+    client: UnifiedLLMClient,
+    model: str = DEFAULT_MODEL,
+) -> bool:
+    """Phase 4: add ``ud_relation``/``ud_head_position`` to one language's words.
+
+    Mutates ``decomposition.words`` in place and returns True when the language
+    was annotated. A structurally invalid tree (no root, two roots, a cycle, a
+    missing position) is rejected as a whole and nothing is written: a broken
+    tree is worse than no tree, and a partial graph would be indistinguishable
+    from a complete one downstream.
+    """
+    if not decomposition.success or not decomposition.words:
+        return False
+
+    word_count = len(decomposition.words)
+    result = query_sentence_dependencies(
+        prompt=build_dependency_prompt(
+            language_code=decomposition.language_code,
+            sentence_text=decomposition.translation,
+            words=decomposition.words,
+        ),
+        client=client,
+        model=model,
+        json_schema=build_dependency_schema(word_count=word_count),
+        context=build_dependency_context(),
+    )
+    if not result.get("success"):
+        logger.warning(
+            "Phase 4 dependency call failed for language=%s: %s",
+            decomposition.language_code,
+            result.get("error", "unknown error"),
+        )
+        return False
+
+    raw_words = result.get("words")
+    annotations: List[Dict[str, Any]] = (
+        [w for w in raw_words if isinstance(w, dict)] if isinstance(raw_words, list) else []
+    )
+
+    problems = validate_dependency_tree(annotations)
+    if problems:
+        logger.warning(
+            "Phase 4 dependency tree rejected for language=%s (translation=%r): %s",
+            decomposition.language_code,
+            decomposition.translation,
+            "; ".join(problems),
+        )
+        return False
+
+    annotations_by_position = {entry["position"]: entry for entry in annotations}
+    for index, word in enumerate(decomposition.words):
+        position = word.get("position")
+        if not isinstance(position, int):
+            position = index
+        annotation = annotations_by_position.get(position)
+        if annotation is None:
+            # validate_dependency_tree guarantees full coverage of 0..n-1, so
+            # this only fires when the stored positions are not contiguous.
+            logger.warning(
+                "Phase 4 annotation missing for language=%s position=%s; skipping language",
+                decomposition.language_code,
+                position,
+            )
+            return False
+        word["ud_relation"] = annotation["ud_relation"]
+        word["ud_head_position"] = annotation["ud_head_position"]
+
+    return True
+
+
+def annotate_dependencies_for_result(
+    *,
+    result: "TranslateAndDecomposeResult",
+    client: UnifiedLLMClient,
+    model: str = DEFAULT_MODEL,
+) -> None:
+    """Run Phase 4 over every successfully decomposed language in ``result``."""
+    for decomposition in result.decompositions.values():
+        annotate_language_dependencies(
+            decomposition=decomposition,
+            client=client,
+            model=model,
+        )
+
+
 # --------------------------------------------------------------------------- #
 # Orchestration                                                                #
 # --------------------------------------------------------------------------- #
@@ -550,8 +652,9 @@ def translate_and_decompose(
     pivot_languages: Optional[Sequence[str]] = None,
     decompose_languages: Optional[Sequence[str]] = None,
     model: str = DEFAULT_MODEL,
+    annotate_dependencies: bool = False,
 ) -> TranslateAndDecomposeResult:
-    """Run the full 3-phase pipeline for one sentence.
+    """Run the full pipeline for one sentence.
 
     Args:
         sentence_text: Sentence in ``source_language``.
@@ -573,6 +676,9 @@ def translate_and_decompose(
             backfills SentenceWord rows for the language the sentence was
             originally added in.
         model: LLM model id.
+        annotate_dependencies: Run Phase 4 (Universal Dependencies) over each
+            decomposed language. One extra LLM call per language; off by
+            default so existing callers are unaffected.
 
     Returns:
         A ``TranslateAndDecomposeResult`` capturing every intermediate stage.
@@ -632,6 +738,7 @@ def translate_and_decompose(
         decompose_languages=decompose_languages,
         model=model,
         result=result,
+        annotate_dependencies=annotate_dependencies,
     )
     return result
 
@@ -653,9 +760,10 @@ def decompose_with_existing_translations(
     decompose_languages: Optional[Sequence[str]] = None,
     model: str = DEFAULT_MODEL,
     result: Optional[TranslateAndDecomposeResult] = None,
+    annotate_dependencies: bool = False,
 ) -> TranslateAndDecomposeResult:
-    """Run Phase 2 (candidate lookup) + Phase 3 (decomposition) against a set of
-    already-known sentence translations.
+    """Run Phase 2 (candidate lookup) + Phase 3 (decomposition), and optionally
+    Phase 4 (dependencies), against a set of already-known sentence translations.
 
     Intended for the synchronous path that persists Phase-1 translations to the
     database before invoking Phase 3, and for any caller that has obtained
@@ -672,6 +780,9 @@ def decompose_with_existing_translations(
       2. At least one candidate lemma must be returned by Phase 2. If the DB
          has no lemmas matching any token, Phase 3 would only produce synthetic
          GUIDs that can't be paired to real lemmas.
+
+    ``annotate_dependencies`` adds Phase 4 (one extra LLM call per successfully
+    decomposed language); it is off by default.
 
     If a precondition fails, every requested ``decompose_languages`` entry is
     populated with ``DecomposedLanguage(success=False, error=...)`` and Phase 3
@@ -781,5 +892,9 @@ def decompose_with_existing_translations(
             model=model,
         )
         result.decompositions.update(combined)
+
+    # ── Phase 4 ────────────────────────────────────────────────────────────
+    if annotate_dependencies:
+        annotate_dependencies_for_result(result=result, client=client, model=model)
 
     return result

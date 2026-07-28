@@ -2,7 +2,7 @@
 
 """Routes for sentence management."""
 
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 from barsukas.config import Config
 from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
@@ -18,6 +18,7 @@ from clients.audio.azure_tts import AzureVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.polly_tts import PollyVoice
 from barsukas.helpers.flash_helpers import flash_and_log
+from langtools.ud_relations import ROOT_HEAD_POSITION
 from workqueue.task_queue import TaskType, enqueue_task, get_tasks_for_target
 from storage.models.schema import (
     AudioQualityReview,
@@ -156,6 +157,71 @@ def list_sentences() -> ResponseReturnValue:
     )
 
 
+def _build_dependency_tree(language_words: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Nest one language's words into a UD dependency tree for display.
+
+    Returns a list of root nodes, each ``{"word": ..., "children": [...]}``,
+    with children ordered by sentence position. Returns ``[]`` when the
+    language has no UD annotation, so the template can simply omit the view.
+
+    Deliberately tolerant of malformed graphs: rows can predate validation, a
+    language can be partially annotated, and a head can point at a position
+    that no longer exists. Anything unreachable from a root is surfaced as an
+    additional root rather than silently dropped, and a cycle cannot hang the
+    request because each word is attached at most once.
+    """
+    annotated = [word for word in language_words if word.get("ud_head_position") is not None]
+    if not annotated:
+        return []
+
+    nodes: dict[int, dict[str, Any]] = {
+        word["position"]: {"word": word, "children": []} for word in annotated
+    }
+
+    # Resolve each word to the parent it will actually hang from. A cycle must
+    # be broken *here*, while building: attaching both members of a cycle to
+    # each other would make the nested structure self-referential and the
+    # recursive template macro would never terminate.
+    parent_position: dict[int, Optional[int]] = {}
+    for position in sorted(nodes):
+        head_position = nodes[position]["word"]["ud_head_position"]
+        # Head of -1, a self-loop, or a head naming a word that isn't here:
+        # this word becomes a root of its own subtree.
+        if (
+            head_position == ROOT_HEAD_POSITION
+            or head_position == position
+            or head_position not in nodes
+        ):
+            parent_position[position] = None
+            continue
+
+        # Walk up from the prospective parent. If we arrive back at this word,
+        # attaching would close a loop, so this word becomes a root instead.
+        ancestor: Optional[int] = head_position
+        seen: set[int] = {position}
+        while ancestor is not None and ancestor in parent_position:
+            if ancestor in seen:
+                break
+            seen.add(ancestor)
+            ancestor = parent_position[ancestor]
+        parent_position[position] = None if ancestor == position else head_position
+
+    roots: list[dict[str, Any]] = []
+    for position in sorted(nodes):
+        node = nodes[position]
+        head_position = parent_position[position]
+        if head_position is None:
+            # Flag roots that are only roots because the parse was broken, so a
+            # bad tree looks wrong rather than looking deliberate.
+            if node["word"]["ud_head_position"] != ROOT_HEAD_POSITION:
+                node["orphaned"] = True
+            roots.append(node)
+        else:
+            nodes[head_position]["children"].append(node)
+
+    return roots
+
+
 @bp.route("/<int:sentence_id>")
 def view_sentence(sentence_id: int) -> Union[str, Response]:
     """View a single sentence with all translations."""
@@ -222,6 +288,12 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
                 if translation.translation:
                     lemma_display_by_id[translation.lemma_id] = translation.translation
 
+    # Surface form of each word by (language, position), so a UD head — stored
+    # as a bare integer — can be shown as the word it actually points at.
+    surface_by_language_position: dict[tuple[str, int], str] = {
+        (sw.language_code, sw.position): (sw.target_language_text or "") for sw in sentence_words
+    }
+
     # Group sentence words by language
     words_by_language: dict[str, list[dict[str, Any]]] = {}
     for sw in sentence_words:
@@ -230,6 +302,13 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
 
         lemma = lemmas_by_id.get(sw.lemma_id) if sw.lemma_id else None
 
+        if sw.ud_head_position is None:
+            ud_head_text = None
+        elif sw.ud_head_position == ROOT_HEAD_POSITION:
+            ud_head_text = "root"
+        else:
+            ud_head_text = surface_by_language_position.get((sw.language_code, sw.ud_head_position))
+
         words_by_language[sw.language_code].append(
             {
                 "position": sw.position,
@@ -237,6 +316,9 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
                 "english_text": sw.english_text,
                 "target_text": sw.target_language_text,
                 "grammatical_form": sw.grammatical_form,
+                "ud_relation": sw.ud_relation,
+                "ud_head_position": sw.ud_head_position,
+                "ud_head_text": ud_head_text,
                 "lemma": lemma,
                 "lemma_id": sw.lemma_id,
                 "lemma_display_text": (
@@ -244,6 +326,15 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
                 ),
             }
         )
+
+    # Nested dependency tree per language, for the visual view that accompanies
+    # the flat table. Built here rather than in the template because nesting is
+    # data, not presentation.
+    dependency_trees_by_language: dict[str, list[dict[str, Any]]] = {}
+    for language_code, language_words in words_by_language.items():
+        tree = _build_dependency_tree(language_words)
+        if tree:
+            dependency_trees_by_language[language_code] = tree
 
     # Aggregate lemma usage across languages: which lemma_guids appear in which
     # decomposed languages, with their surface form. Used to surface cross-lingual
@@ -421,6 +512,7 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         translations=translations,
         language_names=language_names,
         words_by_language=words_by_language,
+        dependency_trees_by_language=dependency_trees_by_language,
         lemmas_used=lemmas_used,
         n_decomposed_languages=n_decomposed,
         pattern_words=pattern_words_data,

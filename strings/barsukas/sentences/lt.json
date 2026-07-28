@@ -101,6 +101,9 @@
   "vocabulary_words": "Žodyno žodžiai",
   "role": "Vaidmuo",
   "part_of_speech": "Kalbos dalis",
+  "ud_relation": "UD ryšys",
+  "ud_head": "UD viršūnė",
+  "dependency_tree": "Priklausomybių medis",
   "english": "Anglų",
   "grammatical_form": "Gramatinė forma",
   "token_optional": "Pasirinktina"

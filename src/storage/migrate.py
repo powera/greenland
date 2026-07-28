@@ -405,6 +405,8 @@ def _sentence_word_to_dict(word: Any) -> Dict[str, Any]:
         "grammatical_form": word.grammatical_form,
         "grammatical_case": word.grammatical_case,
         "declined_form": word.declined_form,
+        "ud_relation": word.ud_relation,
+        "ud_head_position": word.ud_head_position,
     }
 
 
