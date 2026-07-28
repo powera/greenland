@@ -10,7 +10,7 @@ For each target language, provide a detailed word-by-word breakdown including:
 - position: 0-indexed token position within the sentence.
 - surface_form: the actual inflected form as it appears in the sentence.
 - english_gloss: English translation of this specific word/phrase.
-- lemma_guid: if a real lemma GUID is known from references or candidate lemmas, use it. Otherwise assign synthetic concept ids in this exact sequence format: SYN001, SYN002, SYN003, ... Reuse the SAME synthetic id for the same concept across all languages in this sentence, and never reuse one synthetic id for different concepts.
+- lemma_guid: if a real lemma GUID is known from references or candidate lemmas, use it. Otherwise use NONE. Reuse the SAME real GUID for the same concept across all languages in this sentence.
 - lemma: the dictionary (base) form of this word.
 - part_of_speech: lexical category (noun, verb, adjective, adverb, article, preposition, determiner, pronoun, etc.); never subject/object syntactic role.
 - grammatical_form: see the format spec below.
@@ -47,5 +47,5 @@ Candidate lemma selection:
 - Prefer the listed GUID when a word in the sentence corresponds to one of
   these meanings. The same GUID should be reused across all target
   languages for the same concept.
-- If no candidate matches the intended meaning, fall back to a synthetic
-  SYN### id as described above rather than forcing a wrong GUID match.
+- If no candidate matches the intended meaning, use NONE rather than forcing
+  a wrong GUID match.

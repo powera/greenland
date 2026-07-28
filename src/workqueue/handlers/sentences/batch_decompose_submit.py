@@ -23,7 +23,7 @@ from clients.batch_queue import (
     BatchRequestMetadata,
     create_batch_database_session,
 )
-from clients.lib import schema_from_dict, to_openai_schema
+from clients.lib import limit_from_estimate, schema_from_dict, to_openai_schema
 from clients.openai.batch_client import OpenAIBatchClient
 from clients.openai.client import is_gpt5_nano_or_mini_model, reasoning_effort_for_model
 from sentences.candidate_lookup import DEFAULT_SOURCE_LANGUAGES, CandidateLemma
@@ -32,6 +32,7 @@ from sentences.decomposition import (
     build_multi_language_decomposition_prompt,
     build_multi_language_decomposition_schema,
 )
+from sentences.token_estimates import estimate_decomposition_output_tokens
 from sentences.translate_and_decompose import lookup_candidate_lemmas
 from storage.models.schema import Sentence, SentenceTranslation
 from workqueue.tools import workqueue_payload_handler
@@ -146,9 +147,16 @@ def handle_sentences_batch_decompose_submit(
             )
             full_prompt = f"{context}\n\n{prompt}"
 
+            # Size the request from the work it asks for. A batch result is
+            # applied hours after submission, so a truncated one wastes the whole
+            # round trip -- worth more care here than on a synchronous call.
+            max_completion_tokens = limit_from_estimate(
+                estimate_decomposition_output_tokens(target_translations=target_translations)
+            )
             request_body: Dict[str, Any] = {
                 "model": model,
                 "messages": [{"role": "user", "content": full_prompt}],
+                "max_completion_tokens": max_completion_tokens,
                 "response_format": {
                     "type": "json_schema",
                     "json_schema": {

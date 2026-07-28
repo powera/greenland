@@ -107,15 +107,42 @@ def test_schema_head_bounds_span_root_through_last_position() -> None:
     assert position_schema["maximum"] == word_count - 1
 
 
-def test_schema_requires_one_entry_per_token() -> None:
-    words_schema = build_dependency_schema(word_count=7)["properties"]["words"]
-    assert words_schema["minItems"] == 7
-    assert words_schema["maxItems"] == 7
+def test_schema_caps_entries_at_the_token_count() -> None:
+    """The upper bound is structural; the lower bound is left to validation.
+
+    Pinning ``minItems`` to the word count too made a short answer a provider
+    schema violation, which surfaces as an opaque API error instead of the
+    "Missing positions: ..." message validate_dependency_tree can produce.
+    """
+    word_count = 7
+    words_schema = build_dependency_schema(word_count=word_count)["properties"]["words"]
+    assert words_schema["minItems"] == 1
+    assert words_schema["maxItems"] == word_count
     assert set(words_schema["items"]["required"]) == {
         "position",
         "ud_relation",
         "ud_head_position",
     }
+
+
+def test_short_dependency_response_is_caught_by_validation() -> None:
+    """What the relaxed minItems delegates to validate_dependency_tree.
+
+    The expected count has to be supplied: a truncated response is internally
+    consistent, so inferring the count from the response itself makes a tree
+    covering the first 3 of 4 words look like a complete 3-word tree.
+    """
+    complete: List[Dict[str, Any]] = [
+        {"position": position, "ud_relation": "dep", "ud_head_position": 0} for position in range(4)
+    ]
+    complete[0]["ud_relation"] = "root"
+    complete[0]["ud_head_position"] = ROOT_HEAD_POSITION
+    assert validate_dependency_tree(complete, expected_word_count=4) == []
+
+    truncated = complete[:-1]
+    assert validate_dependency_tree(truncated) == []
+    problems = validate_dependency_tree(truncated, expected_word_count=4)
+    assert any("Missing positions: 3" in problem for problem in problems)
 
 
 # --------------------------------------------------------------------------- #

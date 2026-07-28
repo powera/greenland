@@ -120,3 +120,9 @@ class Response:
     structured_data: Dict[str, Any]
     usage: Optional[LLMUsage]
     additional_thought: Optional[str] = None
+    # Provider-native reason generation stopped ("max_output_tokens",
+    # "max_tokens", "MAX_TOKENS", "stop", ...), for logs. Backends that hit the
+    # token limit raise TruncatedResponseError rather than returning a partial
+    # response, so a returned Response is normally complete; this is kept for
+    # callers that want to see how a successful call ended.
+    finish_reason: Optional[str] = None

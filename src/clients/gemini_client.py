@@ -111,6 +111,7 @@ class GeminiClient:
         json_schema: Optional[Any] = None,
         context: Optional[str] = None,
         messages: Optional[List[clients.lib.ChatMessage]] = None,
+        max_tokens: Optional[int] = None,
     ) -> Response:
         """
         Generate chat completion using Gemini API.
@@ -119,6 +120,9 @@ class GeminiClient:
             prompt: The main prompt/question (ignored if ``messages`` is given)
             model: Model to use for generation
             brief: Whether to limit response length
+            max_tokens: Explicit output-token limit, normally from
+                ``clients.lib.limit_from_estimate()``. When None the backend
+                default applies.
             json_schema: Schema for structured response (if provided, returns JSON)
             context: Optional context to include before the prompt
             messages: Optional provider-neutral message list. Consecutive same-role
@@ -144,7 +148,10 @@ class GeminiClient:
             logger.debug("Context: %s", context)
             logger.debug("JSON schema: %s", json_schema)
 
-        generation_config: Dict[str, Any] = {"maxOutputTokens": 256 if brief else 1536}
+        output_token_limit = clients.lib.resolve_output_tokens(
+            model, brief=brief, requested=max_tokens, backend_default=1536, brief_default=256
+        )
+        generation_config: Dict[str, Any] = {"maxOutputTokens": output_token_limit}
         if model.startswith(MINIMAL_THINKING_MODELS):
             generation_config["thinkingConfig"] = {"thinkingLevel": "minimal"}
         if messages:
@@ -181,6 +188,26 @@ class GeminiClient:
 
         completion_data, duration_ms = self._create_completion(model=model, **request_kwargs)
 
+        # Check this before touching content: a MAX_TOKENS candidate can carry no
+        # "parts" at all, so extracting text first raises KeyError / IndexError
+        # and hides the real cause. Spending the whole budget is the signal that
+        # does not depend on finishReason being set -- thinking tokens draw from
+        # maxOutputTokens too, so they count toward the total.
+        candidates = completion_data.get("candidates") or [{}]
+        finish_reason = candidates[0].get("finishReason")
+        usage_metadata = completion_data.get("usageMetadata") or {}
+        output_tokens = usage_metadata.get("candidatesTokenCount", 0) + usage_metadata.get(
+            "thoughtsTokenCount", 0
+        )
+        if finish_reason == "MAX_TOKENS" or (
+            isinstance(output_tokens, int) and output_tokens >= output_token_limit
+        ):
+            raise clients.lib.TruncatedResponseError(
+                f"Gemini stopped generating at the {output_token_limit}-token output "
+                f"limit (model={model}, output_tokens={output_tokens}, "
+                f"finish_reason={finish_reason!r}). Raise the limit or split the request."
+            )
+
         response_content = completion_data["candidates"][0]["content"]["parts"][0]["text"]
         usage = LLMUsage.from_api_response(
             {
@@ -216,7 +243,12 @@ class GeminiClient:
                 logger.debug("No response text or structured data")
             logger.debug("Usage metrics: %s", usage.to_dict())
 
-        return Response(response_text=response_text, structured_data=structured_data, usage=usage)
+        return Response(
+            response_text=response_text,
+            structured_data=structured_data,
+            usage=usage,
+            finish_reason=finish_reason,
+        )
 
 
 # Lazy client instance - only created when first accessed

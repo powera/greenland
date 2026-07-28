@@ -25,9 +25,10 @@ from clients.batch_queue import (
     BatchRequestMetadata,
     create_batch_database_session,
 )
-from clients.lib import schema_from_dict, to_openai_schema
+from clients.lib import limit_from_estimate, schema_from_dict, to_openai_schema
 from clients.openai.batch_client import OpenAIBatchClient
 from clients.openai.client import is_gpt5_nano_or_mini_model, reasoning_effort_for_model
+from sentences.token_estimates import estimate_decomposition_output_tokens
 from sentences.translate_and_decompose import lookup_candidate_lemmas
 from sentences.translation import build_response_schema, build_translation_prompt
 from storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord
@@ -140,9 +141,23 @@ def handle_sentences_translate_batch_submit(
             schema = build_response_schema(request_targets, include_english)
             full_prompt = f"{context}\n\n{prompt}"
 
+            # The target translations do not exist yet -- this batch produces
+            # them -- so estimate every requested language from the source text.
+            # Word counts differ across languages, but not by enough to matter
+            # against the headroom limit_from_estimate() adds.
+            source_text = existing_translations[source_language]
+            estimate_languages = list(request_targets)
+            if include_english and "en" not in estimate_languages:
+                estimate_languages.append("en")
+            max_completion_tokens = limit_from_estimate(
+                estimate_decomposition_output_tokens(
+                    target_translations={lang: source_text for lang in estimate_languages}
+                )
+            )
             request_body: Dict[str, Any] = {
                 "model": model,
                 "messages": [{"role": "user", "content": full_prompt}],
+                "max_completion_tokens": max_completion_tokens,
                 "response_format": {
                     "type": "json_schema",
                     "json_schema": {

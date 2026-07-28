@@ -8,10 +8,23 @@ Target translations to decompose (do NOT retranslate; analyze the provided text)
 Additional translations for disambiguation (helper languages, not to be decomposed):
 {helper_translations}
 
-Candidate lemmas (must choose correct lemma_guid when a content word maps to one):
+Candidate lemmas. Each line is "GUID - ENGLISH LEMMA (disambiguation) | POS | Definition | Translations".
+The English lemma and its definition are what the GUID means; the translations are only how that
+same meaning is written elsewhere. Choose a GUID only when the word in the sentence means the same
+thing as that English lemma:
 {candidate_lemmas}
 
 Per-call requirements:
+- LEMMA MATCHING: a candidate must name the same CONCEPT, not merely a related one.
+  "captain" is not "pirate", "procedure" is not "program", "statute" is not "law".
+  A broader lemma that genuinely covers the word is fine ("backyard" -> "yard"); a
+  neighbouring but distinct concept is not. If the exact sense is not in the candidate list, use
+  lemma_guid=NONE. NONE is the correct answer for a near-miss and is always better
+  than a wrong GUID: an unmatched word can be added later, while a wrong link is
+  silently taken as fact.
+- A candidate matching only one language's translation is weak evidence, especially
+  when that language's word is a homograph. Check it against the English lemma and
+  definition before adopting it, and prefer NONE when they disagree.
 - For each target language listed above, populate the corresponding ``words_<lang>`` array and echo the translation in the ``<lang>`` field.
 - Each ``words_<lang>`` entry must include: position, part_of_speech, english_gloss, surface_form, grammatical_form, lemma_guid, lemma.
 - Use lemma_guid=NONE for function words without a selected candidate lemma.

@@ -322,6 +322,7 @@ class UnifiedLLMClient:
         context: Optional[str] = None,
         timeout: Optional[float] = None,
         messages: Optional[List[clients.lib.ChatMessage]] = None,
+        max_tokens: Optional[int] = None,
     ) -> Response:
         """
         Generate chat completion using appropriate backend.
@@ -330,6 +331,10 @@ class UnifiedLLMClient:
             prompt: The main prompt/question (ignored if ``messages`` is given)
             model: Model name (determines backend). If not provided, uses default_model from config.
             brief: Whether to limit response length
+            max_tokens: Explicit output-token limit, normally from
+                ``clients.lib.limit_from_estimate()``. Honored by the cloud
+                backends and ignored by the local ones. When None each backend
+                uses its own default.
             json_schema: Schema for structured response (if provided, returns JSON) - either a dict (old) or a types.Schema
             context: Optional context to include before the prompt
             timeout: Optional timeout override in seconds
@@ -395,20 +400,26 @@ class UnifiedLLMClient:
                 "json_schema": json_schema,
                 "context": context,
             }
+            cloud_clients = (
+                openai_client.OpenAIClient,
+                anthropic_client.AnthropicClient,
+                gemini_client.GeminiClient,
+            )
             if messages is not None:
                 # Multi-message conversations are only implemented for the remote
                 # cloud backends, which know how to map/normalize roles.
-                cloud_clients = (
-                    openai_client.OpenAIClient,
-                    anthropic_client.AnthropicClient,
-                    gemini_client.GeminiClient,
-                )
                 if not isinstance(client, cloud_clients):
                     raise NotImplementedError(
                         f"messages= is not supported for backend {backend_name!r}; "
                         "use a remote OpenAI/Anthropic/Gemini model."
                     )
                 generate_kwargs["messages"] = messages
+            if max_tokens is not None and isinstance(client, cloud_clients):
+                # Only the cloud backends take an explicit limit. Drop it silently
+                # for local backends rather than raising as messages= does: a
+                # token limit is an optimization, not a semantic requirement, and
+                # the local backends are already effectively unlimited.
+                generate_kwargs["max_tokens"] = max_tokens
             if isinstance(client, lmstudio_client.LMStudioClient):
                 generate_kwargs["expected_response_model"] = expected_response_model
 
@@ -523,6 +534,7 @@ def generate_chat(
     context: Optional[str] = None,
     timeout: Optional[float] = None,
     messages: Optional[List[clients.lib.ChatMessage]] = None,
+    max_tokens: Optional[int] = None,
 ) -> Response:
     """
     Generate a chat response using appropriate backend based on model name.
@@ -533,6 +545,15 @@ def generate_chat(
         For JSON responses, response_text will be empty string
     """
     _assert_not_under_test("generate_chat")
+    # Passed by keyword: this signature and the method's have diverged before,
+    # and a positional call silently shifts arguments when either one changes.
     return _get_client().generate_chat(
-        prompt, model, brief, json_schema, context, timeout, messages
+        prompt=prompt,
+        model=model,
+        brief=brief,
+        json_schema=json_schema,
+        context=context,
+        timeout=timeout,
+        messages=messages,
+        max_tokens=max_tokens,
     )

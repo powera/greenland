@@ -82,13 +82,19 @@ class OpenAIBatchClient:
             {
                 "custom_id": "request-1",
                 "method": "POST",
-                "url": "/v1/responses",
+                "url": "/v1/chat/completions",
                 "body": {
                     "model": "gpt-5-nano",
-                    "input": "Translate 'hello' to Spanish",
-                    "max_output_tokens": 512
+                    "messages": [{"role": "user", "content": "Translate 'hello'"}],
+                    "max_completion_tokens": 512
                 }
             }
+
+        Size ``max_completion_tokens`` to the response you expect rather than
+        leaving it at a fixed value -- see ``clients.lib.limit_from_estimate()``.
+        A batch result is applied hours after submission, so a request truncated
+        at the limit wastes the entire round trip, and the truncation is only
+        visible as ``finish_reason == "length"`` on the returned choice.
         """
         # Check if API key is available
         if not self.api_key:

@@ -14,7 +14,7 @@ import copy
 import json
 import logging
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from clients.types import Schema, SchemaProperty
 
@@ -38,6 +38,34 @@ ALTERNATION_ACK: str = "Understood."
 # prompt and drop the enum.
 MAX_SCHEMA_TOKENS = 2048
 
+# Default output-token limit when the caller asks for nothing in particular.
+# Each backend passes its own historical value as ``backend_default`` so that
+# omitting ``max_tokens`` reproduces exactly what that backend did before.
+DEFAULT_BRIEF_TOKENS: int = 512
+
+# Per-model-family ceiling on output tokens. This is not the model's true API
+# maximum; it is the largest single response this project is willing to pay for.
+# Prefix-keyed and deliberately coarse so a new point release does not need an
+# entry -- an unmatched model falls back to DEFAULT_OUTPUT_CEILING.
+MODEL_OUTPUT_CEILINGS: Dict[str, int] = {
+    "gpt-5": 32768,
+    "gpt-4o": 16384,
+    "claude": 16384,
+    "gemini": 8192,
+}
+DEFAULT_OUTPUT_CEILING: int = 4096
+
+# Headroom applied to a caller's estimate of its own response size, by
+# limit_from_estimate(). An estimate is a guess, and the cost of guessing low is
+# a truncated response that fails the whole call; the cost of guessing high is
+# nothing, since output tokens are billed as generated, not as reserved. The
+# additive term covers fixed per-response overhead (envelope punctuation, a
+# trailing object) that does not scale with the estimate, and the floor keeps
+# very small requests from being sized absurdly tight.
+ESTIMATE_SAFETY_FACTOR: float = 1.35
+ESTIMATE_SAFETY_OVERHEAD_TOKENS: int = 100
+MIN_ESTIMATED_LIMIT_TOKENS: int = 512
+
 
 class SchemaTooLargeError(ValueError):
     """Raised when a serialized schema exceeds MAX_SCHEMA_TOKENS."""
@@ -45,6 +73,87 @@ class SchemaTooLargeError(ValueError):
 
 class LLMCallsDisabledError(RuntimeError):
     """Raised when GREENLAND_DISABLE_LLM blocks an outbound LLM request."""
+
+
+class TruncatedResponseError(RuntimeError):
+    """Raised when a backend stopped generating because it hit the token limit.
+
+    Distinct from a malformed response: the model was answering correctly and
+    ran out of room. Callers that can resize and retry should catch this
+    specifically; callers that cannot should let it propagate rather than
+    persisting the partial answer.
+    """
+
+
+def limit_from_estimate(estimated_tokens: int) -> int:
+    """Turn a caller's estimate of its response size into a token limit.
+
+    The single place the estimate-to-limit policy lives, so it can be tuned
+    globally rather than per call site. Callers estimate how large their own
+    response should be (which they know: word counts, item counts) and this
+    adds the safety margin.
+
+    Args:
+        estimated_tokens: The caller's estimate of its response size, in tokens.
+
+    Returns:
+        A token limit at least MIN_ESTIMATED_LIMIT_TOKENS. Still subject to the
+        model ceiling, which resolve_output_tokens() applies.
+    """
+    if estimated_tokens < 0:
+        estimated_tokens = 0
+    padded = int(estimated_tokens * ESTIMATE_SAFETY_FACTOR) + ESTIMATE_SAFETY_OVERHEAD_TOKENS
+    return max(padded, MIN_ESTIMATED_LIMIT_TOKENS)
+
+
+def ceiling_for_model(model: str) -> int:
+    """Largest output-token limit allowed for a model, by name prefix."""
+    for prefix, ceiling in MODEL_OUTPUT_CEILINGS.items():
+        if model.startswith(prefix):
+            return ceiling
+    return DEFAULT_OUTPUT_CEILING
+
+
+def resolve_output_tokens(
+    model: str,
+    *,
+    brief: bool,
+    requested: Optional[int],
+    backend_default: int,
+    brief_default: int = DEFAULT_BRIEF_TOKENS,
+) -> int:
+    """Decide the output-token limit for one request.
+
+    Shared by every backend so the policy is one testable function rather than a
+    hardcoded literal per client.
+
+    Args:
+        model: Model name, used to pick the ceiling.
+        brief: The caller's coarse "keep it short" flag.
+        requested: An explicit limit, normally from limit_from_estimate(). When
+            None, the result is exactly what this backend used before max_tokens
+            existed, so callers that do not pass one are unaffected.
+        backend_default: This backend's historical non-brief default.
+        brief_default: This backend's historical brief default.
+
+    Returns:
+        The token limit to send, clamped to the model ceiling.
+    """
+    if requested is None:
+        return brief_default if brief else backend_default
+
+    ceiling = ceiling_for_model(model)
+    if requested > ceiling:
+        logger.warning(
+            "Requested output limit %d exceeds the %d-token ceiling for model %s; "
+            "clamping. A response that needs more than this should be split by the "
+            "caller rather than truncated.",
+            requested,
+            ceiling,
+            model,
+        )
+        return ceiling
+    return requested
 
 
 def assert_llm_calls_enabled(backend: str) -> None:

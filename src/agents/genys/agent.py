@@ -199,6 +199,14 @@ class GenysAgent:
 
     @staticmethod
     def _is_real_guid(lemma_guid: str) -> bool:
+        """True when the LLM named an actual database lemma.
+
+        The SYN### branch is deprecated and should no longer fire: no prompt
+        asks for synthetic ids any more, and every path now uses NONE for "no
+        lemma matched". It is kept because a model can still emit the old format
+        from memory, and treating SYN001 as a real GUID would look up a lemma
+        that cannot exist. A run that trips it is worth investigating.
+        """
         if not lemma_guid:
             return False
         lowered = lemma_guid.lower()
@@ -208,6 +216,12 @@ class GenysAgent:
             lemma_guid.startswith(SYNTHETIC_GUID_PREFIX)
             and lemma_guid[len(SYNTHETIC_GUID_PREFIX) :].isdigit()
         )
+        if synthetic:
+            logger.warning(
+                "Deprecated synthetic lemma_guid %r from the LLM; prompts ask for "
+                "NONE. Treating as unmatched.",
+                lemma_guid,
+            )
         return not synthetic
 
     @staticmethod

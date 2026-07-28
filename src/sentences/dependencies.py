@@ -82,13 +82,18 @@ def build_dependency_schema(*, word_count: int) -> Dict[str, Any]:
     ``ud_head_position`` is bounded to ``[-1, word_count - 1]`` so a provider
     that enforces the schema rejects out-of-range heads structurally, and
     ``ud_relation`` is a closed enum of the core UD labels.
+
+    Only ``maxItems`` is pinned to the word count. Requiring ``minItems`` too
+    made a short response a provider-side schema violation, which surfaces as an
+    opaque API error; letting it through means ``validate_dependency_tree``
+    handles it instead and names the exact positions that are missing.
     """
     return {
         "type": "object",
         "properties": {
             "words": {
                 "type": "array",
-                "minItems": word_count,
+                "minItems": 1,
                 "maxItems": word_count,
                 "items": {
                     "type": "object",
@@ -120,7 +125,9 @@ def build_dependency_schema(*, word_count: int) -> Dict[str, Any]:
     }
 
 
-def validate_dependency_tree(words: List[Dict[str, Any]]) -> List[str]:
+def validate_dependency_tree(
+    words: List[Dict[str, Any]], *, expected_word_count: Optional[int] = None
+) -> List[str]:
     """Return human-readable structural problems with a dependency parse.
 
     Structural checks only — exactly one root, every position covered exactly
@@ -128,10 +135,18 @@ def validate_dependency_tree(words: List[Dict[str, Any]]) -> List[str]:
     linguistically apt (a ``det`` on a verb, say) is a judgment call the model
     makes better than a rule table would, so it is deliberately not checked.
 
+    ``expected_word_count`` is how many words the sentence actually has. Pass it:
+    without it the expected count is inferred from the response itself, so a
+    response that stops early is internally consistent and validates clean --
+    a truncated tree covering the first 30 of 45 words looks like a complete
+    30-word tree.
+
     An empty list means the parse is usable.
     """
     problems: List[str] = []
-    word_count = len(words)
+    word_count = expected_word_count if expected_word_count is not None else len(words)
+    if not words:
+        return ["No words returned"]
     if word_count == 0:
         return ["No words returned"]
 
@@ -229,14 +244,21 @@ def query_sentence_dependencies(
     model: str,
     json_schema: Dict[str, Any],
     context: Optional[str] = None,
+    max_tokens: Optional[int] = None,
 ) -> Dict[str, Any]:
-    """Execute a Phase-4 dependency query and return structured JSON."""
+    """Execute a Phase-4 dependency query and return structured JSON.
+
+    ``max_tokens`` should come from ``clients.lib.limit_from_estimate()`` applied
+    to ``token_estimates.estimate_dependency_output_tokens()``; the response is
+    one entry per word, so its size is known before the call.
+    """
     try:
         response = client.generate_chat(
             prompt=prompt,
             model=model,
             json_schema=json_schema,
             context=context,
+            max_tokens=max_tokens,
         )
     except Exception as error:
         logger.error("Error querying sentence dependencies: %s", error)

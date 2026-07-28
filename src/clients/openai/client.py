@@ -178,6 +178,7 @@ class OpenAIClient:
         json_schema: Optional[Any] = None,
         context: Optional[str] = None,
         messages: Optional[List[clients.lib.ChatMessage]] = None,
+        max_tokens: Optional[int] = None,
     ) -> Response:
         """
         Generate chat response using OpenAI Responses API.
@@ -185,6 +186,10 @@ class OpenAIClient:
         Args:
             prompt: The main prompt/question (ignored if ``messages`` is given)
             model: Model to use for generation
+            max_tokens: Explicit output-token limit, normally from
+                ``clients.lib.limit_from_estimate()``. When None the backend
+                default applies, which is what every caller got before this
+                parameter existed.
             brief: Whether to limit response length
             json_schema: Schema for structured response (if provided, returns JSON)
             context: Optional context to include before the prompt
@@ -210,16 +215,13 @@ class OpenAIClient:
             logger.debug("Context: %s", context)
             logger.debug("JSON schema: %s", json_schema)
 
-        # Determine which token limit parameter to use based on model
-        # Newer reasoning models (o1, gpt-5, o3) require max_output_tokens
-        reasoning_models = ["o1-", "gpt-5", "o3-"]
-        uses_output_tokens = any(model.startswith(prefix) for prefix in reasoning_models)
-
         # gpt-5 models don't support custom temperature (only default value of 1)
         is_gpt5_model = model.startswith("gpt-5")
         is_gpt5_nano_or_mini = is_gpt5_nano_or_mini_model(model)
 
-        token_limit = 512 if brief else 4096
+        token_limit = clients.lib.resolve_output_tokens(
+            model, brief=brief, requested=max_tokens, backend_default=4096
+        )
         request_kwargs: Dict[str, Any] = {
             "model": model,
             # The Responses API accepts either a string or a list of role/content
@@ -235,12 +237,9 @@ class OpenAIClient:
         if not is_gpt5_model:
             request_kwargs["temperature"] = 0.35
 
-        # Set token limit parameter
-        if uses_output_tokens:
-            request_kwargs["max_output_tokens"] = token_limit
-        else:
-            # For non-reasoning models, we still use max_output_tokens in Responses API
-            request_kwargs["max_output_tokens"] = token_limit
+        # The Responses API takes max_output_tokens for every model, reasoning
+        # or not.
+        request_kwargs["max_output_tokens"] = token_limit
 
         # Set reasoning and text parameters for GPT-5 nano and mini variants
         if is_gpt5_nano_or_mini:
@@ -309,25 +308,59 @@ class OpenAIClient:
 
         # Calculate token usage
         usage_data = response_data.get("usage", {})
+        output_tokens = usage_data.get("output_tokens", 0)
         usage = LLMUsage.from_api_response(
             {
                 "prompt_tokens": usage_data.get("input_tokens", 0),
-                "completion_tokens": usage_data.get("output_tokens", 0),
+                "completion_tokens": output_tokens,
                 "total_duration": duration_ms,
             },
             model=model,
         )
+
+        # Did generation stop because it ran out of room?
+        #
+        # Spending the entire budget is the surest signal, and the only one that
+        # needs no cooperation from the provider: a response that ended on its
+        # own terms stops short of the cap, so landing exactly on it means the
+        # cap did the stopping. The status flags are checked too because they
+        # name the reason, but they can be absent or unset while the token count
+        # cannot lie.
+        response_status = response_data.get("status")
+        incomplete_details = response_data.get("incomplete_details") or {}
+        incomplete_reason = incomplete_details.get("reason")
+        hit_token_limit = isinstance(output_tokens, int) and output_tokens >= token_limit
+        # With reasoning models the envelope can come back "incomplete" carrying
+        # only a reasoning item and no message content at all.
+        status_says_truncated = response_status == "incomplete" and (
+            incomplete_reason == "max_output_tokens" or not response_content
+        )
+        truncated = hit_token_limit or status_says_truncated
+
+        # A truncated response is a failed call, not a short one: the JSON is cut
+        # mid-array and any prefix that happens to parse is missing data the
+        # caller asked for. Raise rather than returning it -- callers merge a
+        # returned dict into a success result and would persist the fragment.
+        if truncated:
+            raise clients.lib.TruncatedResponseError(
+                f"OpenAI stopped generating at the {token_limit}-token output limit "
+                f"(model={model}, output_tokens={output_tokens}, "
+                f"status={response_status!r}, reason={incomplete_reason!r}). "
+                f"Raise the limit or split the request."
+            )
 
         # Parse JSON response if schema was provided
         if json_schema:
             try:
                 structured_data = json.loads(response_content)
                 response_text = ""
-            except json.JSONDecodeError:
-                error_msg = f"Failed to parse JSON response: {response_content}"
-                logger.error(error_msg)
-                structured_data = {"error": error_msg}
-                response_text = ""
+            except json.JSONDecodeError as exc:
+                # Do not return {"error": ...} here: structured_data is merged
+                # into the caller's result dict, so an error payload reads as a
+                # successful response with odd keys.
+                raise ValueError(
+                    f"Failed to parse JSON response from {model}: {response_content!r}"
+                ) from exc
         else:
             response_text = response_content
             structured_data = {}

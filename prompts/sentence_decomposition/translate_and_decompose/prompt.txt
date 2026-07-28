@@ -3,7 +3,10 @@ Template sentence: {template_sentence}
 Word translations for reference:
 {word_translations}
 
-Candidate lemmas (prefer these GUIDs when a word in the sentence matches one of these meanings):
+Candidate lemmas. Each line is "GUID - ENGLISH LEMMA (disambiguation) | POS | Definition | Translations".
+The English lemma and its definition are what the GUID means; the translations are only how that
+same meaning is written elsewhere. Choose a GUID only when the word in the sentence means the same
+thing as that English lemma:
 {candidate_lemmas}
 
 Translate this sentence naturally into each of these languages:
@@ -14,4 +17,14 @@ Translate this sentence naturally into each of these languages:
 
 Per-call requirements:
 - Use the provided word translations where appropriate, but prioritize natural translations. If the target language expresses the concept differently, use natural phrasing and map words to their actual meanings, not the English lemmas.
-- Only include real GUIDs for words that genuinely correspond to referenced lemma meanings. When no real GUID is available, fall back to synthetic SYN### ids per the context rules.
+- Only include real GUIDs for words that genuinely correspond to referenced lemma meanings. When no real GUID is available, use lemma_guid=NONE.
+- LEMMA MATCHING: a candidate must name the same CONCEPT, not merely a related one.
+  "captain" is not "pirate", "procedure" is not "program", "statute" is not "law".
+  A broader lemma that genuinely covers the word is fine ("backyard" -> "yard"); a
+  neighbouring but distinct concept is not. If the exact sense is not in the candidate list, use
+  lemma_guid=NONE. NONE is the correct answer for a near-miss and is always better
+  than a wrong GUID: an unmatched word can be added later, while a wrong link is
+  silently taken as fact.
+- A candidate matching only one language's translation is weak evidence, especially
+  when that language's word is a homograph. Check it against the English lemma and
+  definition before adopting it, and prefer NONE when they disagree.
