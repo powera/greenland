@@ -35,6 +35,7 @@ from storage.backend import create_session as create_backend_session
 from storage.backend.config import DataSourceConfig
 from storage.crud.sentence import add_sentence
 from storage.crud.sentence_translation import add_sentence_translation
+from storage.crud.lemma_tags import serialize_tags_for_column
 from storage.crud.sentence_word import add_sentence_word
 from storage.models.imports import PendingImport
 from storage.models.schema import DerivativeForm, Lemma
@@ -298,6 +299,7 @@ class GenysAgent:
         limit: Optional[int] = None,
         pivot_languages: Optional[Sequence[str]] = None,
         annotate_dependencies: bool = False,
+        tags: Optional[Sequence[str]] = None,
     ) -> Dict[str, Any]:
         """Process a document and stage missing English words to ``PendingImport``.
 
@@ -305,12 +307,24 @@ class GenysAgent:
         pass over the English decomposition: one extra LLM call per sentence,
         adding a UD relation and head position to each word. Off by default;
         it only has a persisted effect together with ``store_sentences``.
+
+        ``tags`` are applied to every word staged from this document, without
+        any per-word judgement -- a word is tagged because of where it came
+        from, not because anything decided it belongs to that domain. For a
+        corpus like ``--tags legal`` that means ordinary words appearing in the
+        source ("chapter", "extent") are tagged too, so the tag is a review
+        queue rather than a conclusion; the /api/v1/tags endpoints exist to
+        sweep it afterwards.
         """
         document_path = Path(input_path)
         source_name = document_path.name
         document_text = document_path.read_text(encoding="utf-8")
         all_sentences = self.split_sentences(document_text, document_language)
         selected_sentences = all_sentences[:limit] if limit is not None else all_sentences
+
+        # Serialized once: every PendingImport staged from this document gets
+        # the same tags, and the column holds the same JSON array Lemma.tags does.
+        staged_tags = serialize_tags_for_column(tags or [])
 
         target_languages = self.choose_target_languages(document_language)
         effective_pivots: List[str] = [
@@ -501,6 +515,7 @@ class GenysAgent:
                         disambiguation_language=document_language,
                         pos_type=mapped_pos_type,
                         pos_subtype=None,
+                        tags=staged_tags,
                         source=f"genys/{source_name}",
                         frequency_rank=None,
                         notes=f"From document: {source_name}",

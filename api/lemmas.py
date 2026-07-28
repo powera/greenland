@@ -70,7 +70,8 @@ class LemmaInfo(TypedDict, total=False):
     pos_subtype: Optional[str]
     difficulty_level: Optional[int]
     verified: bool
-    tags: Optional[Any]
+    # Always a list; empty when the lemma has no tags.
+    tags: List[str]
     disambiguation: Optional[str]
     lexical_gap_reason: Optional[str]
 

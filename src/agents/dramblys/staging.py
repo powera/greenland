@@ -21,6 +21,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 from util.logging_config import get_logger
 from agents.dramblys.synonym_screening import has_active_strong_synonym_candidate
 from storage.backend.config import DataSourceConfig
+from storage.crud.lemma_tags import add_tags, read_pending_import_tags
 from storage.models.imports import PendingImport, PendingImportSynonymCandidate, WordExclusion
 from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD
 from wordfreq.translation.client import LinguisticClient
@@ -204,6 +205,9 @@ def approve_pending_import(
         pending_definition = pending.definition
         pending_pos_type = pending.pos_type
         pending_pos_subtype = pending.pos_subtype
+        # Read before the pending row is deleted below; applied to the lemma
+        # once process_word() has created it.
+        pending_tags = read_pending_import_tags(pending)
 
         logger.info(f"Approving word '{word}' (sense: {pending_definition[:60]}...)")
 
@@ -318,6 +322,12 @@ def approve_pending_import(
                 .first()
             )
             new_lemma_id: Optional[int] = new_lemma.id if new_lemma else None
+
+            # Carry any tags staged on the pending import onto the new lemma, so
+            # a corpus ingested with `genys --tags legal` needs no second pass.
+            if new_lemma is not None and pending_tags:
+                add_tags(session, new_lemma, pending_tags, source="pending-import-approval")
+                session.commit()
 
             logger.info(f"Successfully approved and imported '{word}' (lemma_id={new_lemma_id})")
             return {

@@ -35,6 +35,11 @@ class PendingImport(Base):
     # Example sentence showing this word in context (helps LLM pick the right sense)
     example_sentence: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+    # JSON array of free-form tags to apply to the lemma this import becomes,
+    # e.g. ["legal"] for words staged from a statutory corpus. Mirrors
+    # Lemma.tags; read/write it with storage.crud.lemma_tags.
+    tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
     # Optional metadata
     source: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Where this came from
     frequency_rank: Mapped[Optional[int]] = mapped_column(

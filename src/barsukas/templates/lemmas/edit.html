@@ -141,11 +141,12 @@
 
                     <!-- Tags -->
                     <div class="mb-3">
-                        <label for="tags" class="form-label">Tags (JSON)</label>
+                        <label for="tags" class="form-label">Tags</label>
                         <input type="text" class="form-control" id="tags" name="tags"
                                value="{{ lemma.tags or '' }}"
-                               placeholder="Optional JSON array">
-                        <small class="form-text text-muted">JSON array format, e.g., ["tag1", "tag2"]</small>
+                               placeholder="e.g. legal, archaic">
+                        <small class="form-text text-muted">Comma-separated or a JSON array;
+                            stored as a JSON array and normalized to lowercase.</small>
                     </div>
 
                     <!-- Notes -->
