@@ -58,8 +58,12 @@ SKIPPED_PARTS_OF_SPEECH: Set[str] = {
 }
 
 # Languages always requested in Phase 1 (sentence-level translation only).
-# The doc language is excluded at runtime.
-_PHASE1_LANGUAGES: List[str] = ["en", "fr", "zh", "lt"]
+# The doc language is excluded at runtime, leaving MAX_PHASE1_TARGETS of them.
+_PHASE1_LANGUAGES: List[str] = ["en", "es", "fr", "zh", "lt"]
+
+# One fewer than _PHASE1_LANGUAGES, so dropping the document language leaves
+# every remaining language rather than silently truncating the tail.
+MAX_PHASE1_TARGETS: int = len(_PHASE1_LANGUAGES) - 1
 
 _PUNCTUATION_STRIP = ".,!?;:\"'()[]{}—-"
 
@@ -104,11 +108,11 @@ class GenysAgent:
 
     @staticmethod
     def choose_target_languages(document_language: str) -> List[str]:
-        """Pick up to 3 target languages: [en, fr, zh, lt] minus the doc language."""
+        """Return the Phase-1 target languages minus the document's own language."""
         normalized = document_language.strip().lower()
         selected = [lang for lang in _PHASE1_LANGUAGES if lang != normalized]
         return normalize_llm_language_codes(
-            selected[:3],
+            selected[:MAX_PHASE1_TARGETS],
             operation_name="Genys Phase 1 translation",
         )
 
