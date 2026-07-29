@@ -89,6 +89,11 @@ def api_client_ui() -> ResponseReturnValue:
         ("claude-3-5-haiku-20241022", "Claude 3.5 Haiku (Anthropic)"),
         ("claude-3-7-sonnet-20250219", "Claude 3.7 Sonnet (Anthropic)"),
         ("gemini-2.5-flash", "Gemini 2.5 Flash (Google)"),
+        ("do/anthropic-claude-fable-5", "Claude Fable 5 (DigitalOcean)"),
+        ("do/openai-gpt-5.6-sol", "GPT-5.6 Sol (DigitalOcean)"),
+        ("do/llama-4-maverick", "Llama 4 Maverick (DigitalOcean)"),
+        ("do/deepseek-v4-pro", "DeepSeek V4 Pro (DigitalOcean)"),
+        ("do/deepseek-4-flash", "DeepSeek 4 Flash (DigitalOcean)"),
     ]
 
     return render_template(

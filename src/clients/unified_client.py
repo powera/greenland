@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Un
 
 import benchmarks.datastore.common  # Assuming datastore.common is available
 import clients.lib
-from clients import gemini_client, lmstudio_client, ollama_client
+from clients import digitalocean_client, gemini_client, lmstudio_client, ollama_client
 from clients.anthropic import client as anthropic_client
 from clients.openai import client as openai_client
 from clients.types import Response, Schema
@@ -59,6 +59,7 @@ class UnifiedLLMClient:
         openai_api_key: Optional[str] = None,
         anthropic_api_key: Optional[str] = None,
         google_api_key: Optional[str] = None,
+        digitalocean_api_key: Optional[str] = None,
     ):
         """
         Initialize client with configurable timeout and debug mode.
@@ -69,6 +70,8 @@ class UnifiedLLMClient:
             openai_api_key: Optional API key for OpenAI (avoids file-based key loading)
             anthropic_api_key: Optional API key for Anthropic (avoids file-based key loading)
             google_api_key: Optional API key for Google/Gemini (avoids file-based key loading)
+            digitalocean_api_key: Optional API key for DigitalOcean Gradient inference
+                (avoids file-based key loading)
         """
         self.timeout = timeout
         self.debug = debug
@@ -90,6 +93,9 @@ class UnifiedLLMClient:
         )
         self.gemini = gemini_client.GeminiClient(
             timeout=timeout, debug=False, api_key=google_api_key
+        )
+        self.digitalocean = digitalocean_client.DigitalOceanClient(
+            timeout=timeout, debug=False, api_key=digitalocean_api_key
         )
 
     @classmethod
@@ -131,6 +137,7 @@ class UnifiedLLMClient:
         openai_api_key = getattr(config, "openai_api_key", None)
         anthropic_api_key = getattr(config, "anthropic_api_key", None)
         google_api_key = getattr(config, "google_api_key", None)
+        digitalocean_api_key = getattr(config, "digitalocean_api_key", None)
 
         client = cls(
             timeout=timeout,
@@ -138,6 +145,7 @@ class UnifiedLLMClient:
             openai_api_key=openai_api_key,
             anthropic_api_key=anthropic_api_key,
             google_api_key=google_api_key,
+            digitalocean_api_key=digitalocean_api_key,
         )
         # Store the model from config for use in requests
         # This allows agents to just call client methods without passing model each time
@@ -151,6 +159,7 @@ class UnifiedLLMClient:
             openai_client.OpenAIClient,
             anthropic_client.AnthropicClient,
             gemini_client.GeminiClient,
+            digitalocean_client.DigitalOceanClient,
         ],
         str,
         Optional[str],
@@ -170,6 +179,7 @@ class UnifiedLLMClient:
             openai_client.OpenAIClient,
             anthropic_client.AnthropicClient,
             gemini_client.GeminiClient,
+            digitalocean_client.DigitalOceanClient,
             None,
         ] = None
         client_name: Optional[str] = None
@@ -180,6 +190,8 @@ class UnifiedLLMClient:
         cached = self._model_resolution_cache.get(model)
         if cached is not None:
             cached_client_name, cached_normalized_model, cached_expected_response_model = cached
+            if cached_client_name == "digitalocean":
+                return self.digitalocean, cached_normalized_model, cached_expected_response_model
             if cached_client_name == "openai":
                 return self.openai, cached_normalized_model, cached_expected_response_model
             if cached_client_name == "anthropic":
@@ -194,7 +206,16 @@ class UnifiedLLMClient:
         # Check if this is a commercial API model first (skip database lookup)
         # These models can be routed directly based on their name
         # Exception: gpt-oss models should use database lookup
-        if model.startswith("gpt-") and not model.startswith("gpt-oss"):
+        # DigitalOcean is checked first: DO model ids embed a vendor name
+        # ("anthropic-claude-fable-5", "openai-gpt-5.6-sol"), so only the
+        # explicit "do/" prefix distinguishes them from first-party models. A
+        # slash cannot appear in a first-party model id, so this branch can sit
+        # ahead of the others without shadowing any of them.
+        if model.startswith("do/"):
+            client = self.digitalocean
+            client_name = "DigitalOcean"
+            normalized_model = model[len("do/") :]
+        elif model.startswith("gpt-") and not model.startswith("gpt-oss"):
             client = self.openai
             client_name = "OpenAI"
             normalized_model = model
@@ -269,6 +290,7 @@ class UnifiedLLMClient:
             openai_client.OpenAIClient,
             anthropic_client.AnthropicClient,
             gemini_client.GeminiClient,
+            digitalocean_client.DigitalOceanClient,
         ],
     ) -> str:
         """Get the backend name for a client instance.
@@ -277,9 +299,12 @@ class UnifiedLLMClient:
             client: The LLM client instance.
 
         Returns:
-            Backend name string (e.g., "openai", "anthropic", "gemini", "ollama", "lmstudio").
+            Backend name string (e.g., "openai", "anthropic", "gemini", "digitalocean",
+            "ollama", "lmstudio").
         """
-        if isinstance(client, openai_client.OpenAIClient):
+        if isinstance(client, digitalocean_client.DigitalOceanClient):
+            return "digitalocean"
+        elif isinstance(client, openai_client.OpenAIClient):
             return "openai"
         elif isinstance(client, anthropic_client.AnthropicClient):
             return "anthropic"
@@ -340,8 +365,8 @@ class UnifiedLLMClient:
             timeout: Optional timeout override in seconds
             messages: Optional provider-neutral conversation (list of
                 ``{"role", "content"}``). Supported only by the remote cloud
-                backends (OpenAI, Anthropic, Gemini); passing it for a local
-                backend raises NotImplementedError.
+                backends (OpenAI, Anthropic, Gemini, DigitalOcean); passing it
+                for a local backend raises NotImplementedError.
 
         Returns:
             Response containing response_text, structured_data, and usage
@@ -404,6 +429,7 @@ class UnifiedLLMClient:
                 openai_client.OpenAIClient,
                 anthropic_client.AnthropicClient,
                 gemini_client.GeminiClient,
+                digitalocean_client.DigitalOceanClient,
             )
             if messages is not None:
                 # Multi-message conversations are only implemented for the remote
@@ -411,7 +437,7 @@ class UnifiedLLMClient:
                 if not isinstance(client, cloud_clients):
                     raise NotImplementedError(
                         f"messages= is not supported for backend {backend_name!r}; "
-                        "use a remote OpenAI/Anthropic/Gemini model."
+                        "use a remote OpenAI/Anthropic/Gemini/DigitalOcean model."
                     )
                 generate_kwargs["messages"] = messages
             if max_tokens is not None and isinstance(client, cloud_clients):
