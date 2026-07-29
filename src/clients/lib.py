@@ -47,11 +47,23 @@ DEFAULT_BRIEF_TOKENS: int = 512
 # maximum; it is the largest single response this project is willing to pay for.
 # Prefix-keyed and deliberately coarse so a new point release does not need an
 # entry -- an unmatched model falls back to DEFAULT_OUTPUT_CEILING.
+# Note: matching is against the model name a backend actually sends, i.e. after
+# the router strips the "do/" prefix. DigitalOcean ids embed the vendor
+# ("anthropic-claude-fable-5"), so the bare "claude"/"gpt-5" keys below do not
+# match them and each DO id shape needs its own entry.
 MODEL_OUTPUT_CEILINGS: Dict[str, int] = {
     "gpt-5": 32768,
     "gpt-4o": 16384,
     "claude": 16384,
     "gemini": 8192,
+    # DigitalOcean Gradient model ids.
+    "anthropic-claude": 16384,
+    "openai-gpt-5": 32768,
+    "openai-gpt-4o": 16384,
+    "llama-": 8192,
+    "deepseek-": 8192,
+    "mistral-": 8192,
+    "qwen-": 8192,
 }
 DEFAULT_OUTPUT_CEILING: int = 4096
 

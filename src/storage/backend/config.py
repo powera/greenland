@@ -79,6 +79,7 @@ class DataSourceConfig:
     openai_api_key: Optional[str]
     anthropic_api_key: Optional[str]
     google_api_key: Optional[str]
+    digitalocean_api_key: Optional[str]
 
     def __init__(
         self,
@@ -94,6 +95,7 @@ class DataSourceConfig:
         openai_api_key: Optional[str] = None,
         anthropic_api_key: Optional[str] = None,
         google_api_key: Optional[str] = None,
+        digitalocean_api_key: Optional[str] = None,
     ):
         """Initialize data source configuration.
 
@@ -105,7 +107,8 @@ class DataSourceConfig:
             barsukas_url: URL of BARSUKAS server for cached translations (e.g., http://server:5000)
             cache_only: If True, only use cached translations and fail if not in cache
             use_word2vec: Enable pgvector embedding read/write operations
-            model: LLM model to use (e.g., "gpt-5.4-mini", "claude-sonnet-4")
+            model: LLM model to use (e.g., "gpt-5.4-mini", "claude-sonnet-4",
+                "do/anthropic-claude-fable-5")
             debug: Enable debug logging
         """
         # Default backend is SQLite. Backend selection is explicit (via
@@ -150,6 +153,7 @@ class DataSourceConfig:
         self.openai_api_key = openai_api_key
         self.anthropic_api_key = anthropic_api_key
         self.google_api_key = google_api_key
+        self.digitalocean_api_key = digitalocean_api_key
 
         # Debug configuration
         self.debug = debug
@@ -161,7 +165,8 @@ class DataSourceConfig:
         LLM-specific fields change. Intended for API routes that take ``self`` from the
         Barsukas app and override the model based on a per-request parameter.
         """
-        # TODO: add optional API-key kwargs (openai_api_key/anthropic_api_key/google_api_key)
+        # TODO: add optional API-key kwargs (openai_api_key/anthropic_api_key/
+        # google_api_key/digitalocean_api_key)
         # once a caller passes per-request keys.
         return DataSourceConfig(
             backend_type=self.backend_type,
@@ -176,6 +181,7 @@ class DataSourceConfig:
             openai_api_key=self.openai_api_key,
             anthropic_api_key=self.anthropic_api_key,
             google_api_key=self.google_api_key,
+            digitalocean_api_key=self.digitalocean_api_key,
         )
 
     @classmethod
@@ -255,5 +261,7 @@ class DataSourceConfig:
             parts.append("anthropic_api_key=***")
         if self.google_api_key:
             parts.append("google_api_key=***")
+        if self.digitalocean_api_key:
+            parts.append("digitalocean_api_key=***")
 
         return f"DataSourceConfig({', '.join(parts)})"

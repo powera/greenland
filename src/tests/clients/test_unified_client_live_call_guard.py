@@ -61,6 +61,12 @@ _REQUEST_BOUNDARIES = [
     ("clients.openai.client", "OpenAIClient", "_create_response", "openai"),
     ("clients.anthropic.client", "AnthropicClient", "_create_message", "anthropic"),
     ("clients.gemini_client", "GeminiClient", "_create_completion", "gemini"),
+    (
+        "clients.digitalocean_client",
+        "DigitalOceanClient",
+        "_create_completion",
+        "digitalocean",
+    ),
     ("clients.lmstudio_client", "LMStudioClient", "_make_request", "lmstudio"),
     ("clients.ollama_client", "OllamaClient", "_make_request", "ollama"),
     (
@@ -93,7 +99,9 @@ def test_disable_env_blocks_every_backend(
 
     with pytest.raises(lib.LLMCallsDisabledError) as excinfo:
         if method_name == "_create_completion":
-            method("some-model")
+            # Gemini takes model positionally; DigitalOcean takes it as one of
+            # the request kwargs it forwards to the endpoint.
+            method(model="some-model")
         elif method_name == "_make_request":
             method("chat/completions", {"model": "some-model"})
         else:

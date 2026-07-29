@@ -69,6 +69,129 @@ def test_local_model_resolution_is_cached_and_closes_session(monkeypatch):
     assert created_sessions[0].closed is True
 
 
+def _patch_all_backends(monkeypatch, digitalocean=_DummyBackendClient):
+    """Replace every backend constructor so no client touches a key file or network."""
+    monkeypatch.setattr("clients.unified_client.openai_client.OpenAIClient", _DummyBackendClient)
+    monkeypatch.setattr(
+        "clients.unified_client.anthropic_client.AnthropicClient", _DummyBackendClient
+    )
+    monkeypatch.setattr("clients.unified_client.gemini_client.GeminiClient", _DummyBackendClient)
+    monkeypatch.setattr("clients.unified_client.ollama_client.OllamaClient", _DummyBackendClient)
+    monkeypatch.setattr(
+        "clients.unified_client.lmstudio_client.LMStudioClient", _DummyBackendClient
+    )
+    monkeypatch.setattr(
+        "clients.unified_client.digitalocean_client.DigitalOceanClient", digitalocean
+    )
+
+
+def _explode_on_db(*args, **kwargs):
+    raise AssertionError("do/ routing must not hit the model database")
+
+
+def test_do_prefix_routes_to_digitalocean_and_strips_prefix(monkeypatch):
+    """A do/ model goes to the DigitalOcean backend with the prefix stripped."""
+    _patch_all_backends(monkeypatch)
+    monkeypatch.setattr(
+        "clients.unified_client.benchmarks.datastore.common.create_dev_session", _explode_on_db
+    )
+
+    from clients.unified_client import UnifiedLLMClient
+
+    client = UnifiedLLMClient(debug=False)
+
+    resolved, normalized, expected = client._get_client("do/anthropic-claude-fable-5")
+
+    assert resolved is client.digitalocean
+    assert normalized == "anthropic-claude-fable-5"
+    assert expected is None
+
+
+def test_do_prefix_resolution_is_cached(monkeypatch):
+    """The second lookup comes from the cache fast path, not the branch chain."""
+    _patch_all_backends(monkeypatch)
+    monkeypatch.setattr(
+        "clients.unified_client.benchmarks.datastore.common.create_dev_session", _explode_on_db
+    )
+
+    from clients.unified_client import UnifiedLLMClient
+
+    client = UnifiedLLMClient(debug=False)
+
+    client._get_client("do/openai-gpt-5.6-sol")
+    assert client._model_resolution_cache["do/openai-gpt-5.6-sol"] == (
+        "digitalocean",
+        "openai-gpt-5.6-sol",
+        None,
+    )
+
+    cached_client, cached_model, cached_expected = client._get_client("do/openai-gpt-5.6-sol")
+    assert cached_client is client.digitalocean
+    assert cached_model == "openai-gpt-5.6-sol"
+    assert cached_expected is None
+
+
+def test_do_prefix_wins_over_first_party_prefixes(monkeypatch):
+    """do/ is checked first, so an embedded vendor name does not shadow it."""
+    _patch_all_backends(monkeypatch)
+    monkeypatch.setattr(
+        "clients.unified_client.benchmarks.datastore.common.create_dev_session", _explode_on_db
+    )
+
+    from clients.unified_client import UnifiedLLMClient
+
+    client = UnifiedLLMClient(debug=False)
+
+    for model_name in ("do/openai-gpt-5.6-sol", "do/anthropic-claude-fable-5", "do/gemini-x"):
+        resolved, _normalized, _expected = client._get_client(model_name)
+        assert resolved is client.digitalocean, model_name
+
+    # A bare first-party name still routes first-party.
+    assert client._get_client("gpt-5.4-mini")[0] is client.openai
+
+
+def test_generate_chat_forwards_messages_and_max_tokens_to_digitalocean(monkeypatch):
+    """DigitalOcean is a cloud backend, so messages= and max_tokens= are not dropped."""
+
+    class _CapturingDOClient(_DummyBackendClient):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.captured_kwargs = None
+
+        def generate_chat(self, **kwargs):
+            self.captured_kwargs = kwargs
+            from clients.types import Response
+
+            return Response(
+                response_text="ok", structured_data={}, usage=None, additional_thought=None
+            )
+
+    _patch_all_backends(monkeypatch, digitalocean=_CapturingDOClient)
+    monkeypatch.setattr(
+        "clients.unified_client.benchmarks.datastore.common.create_dev_session", _explode_on_db
+    )
+
+    from clients.unified_client import UnifiedLLMClient
+
+    client = UnifiedLLMClient(debug=False)
+    conversation = [{"role": "user", "content": "hello"}]
+
+    response = client.generate_chat(
+        prompt="ignored",
+        model="do/llama-4-maverick",
+        messages=conversation,
+        max_tokens=1234,
+    )
+
+    assert response.response_text == "ok"
+    assert isinstance(client.digitalocean, _CapturingDOClient)
+    captured = client.digitalocean.captured_kwargs
+    assert captured is not None
+    assert captured["model"] == "llama-4-maverick"
+    assert captured["messages"] == conversation
+    assert captured["max_tokens"] == 1234
+
+
 def test_generate_chat_passes_expected_response_model_to_lmstudio(monkeypatch):
     class _CapturingLMStudioClient(_DummyBackendClient):
         def __init__(self, *args, **kwargs):

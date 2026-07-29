@@ -10,6 +10,7 @@ translation, word form generation, sentence creation, and benchmarking.
 | OpenAI | `clients/openai/` | GPT-4o, GPT-4o-mini, etc. |
 | Anthropic | `clients/anthropic/` | Claude models |
 | Google Gemini | `clients/gemini_client.py` | Gemini models |
+| DigitalOcean | `clients/digitalocean_client.py` | Gradient serverless inference (multi-vendor) |
 | Ollama | `clients/ollama_client.py` | Local models |
 | LM Studio | `clients/lmstudio_client.py` | Local models |
 
@@ -22,7 +23,8 @@ from clients.types import Schema, SchemaProperty
 client = UnifiedLLMClient()
 
 # Simple text query
-response = client.query(prompt="Translate 'hello' to French", model="gpt-4o")
+response = client.generate_chat(prompt="Translate 'hello' to French", model="gpt-4o")
+print(response.response_text)
 
 # Structured output with schema
 schema = Schema(
@@ -33,11 +35,44 @@ schema = Schema(
         "confidence": SchemaProperty("number", "Confidence score 0-1"),
     }
 )
-response = client.query(prompt="...", model="gpt-4o", schema=schema)
+response = client.generate_chat(prompt="...", model="gpt-4o", json_schema=schema)
 data = response.structured_data
 ```
 
-The client routes requests to the correct provider based on model name prefix.
+`generate_chat` is the single entry point every backend implements; there is no
+`query()` method. It returns a `clients.types.Response` with `response_text`
+(text mode), `structured_data` (schema mode), `usage`, and `additional_thought`.
+
+## Model routing
+
+`UnifiedLLMClient` picks a backend from the model name:
+
+| Model name | Backend |
+|------------|---------|
+| `do/...` | DigitalOcean |
+| `gpt-...` (not `gpt-oss`) | OpenAI |
+| `claude-...` | Anthropic |
+| `gemini-...` | Gemini |
+| anything else | database lookup: `lmstudio/...` path → LM Studio, otherwise Ollama |
+
+### The `do/` prefix
+
+DigitalOcean Gradient exposes one OpenAI-compatible endpoint fronting models
+from many vendors, with flat ids that embed the vendor name
+(`anthropic-claude-fable-5`, `openai-gpt-5.6-sol`, `llama-4-maverick`). Those
+collide with the first-party prefixes above, so a DO-routed model is written
+`do/<digitalocean-model-id>`:
+
+```python
+client.generate_chat(prompt="...", model="do/anthropic-claude-fable-5")
+```
+
+The router strips `do/` and sends the remainder verbatim as the `model` field.
+A slash cannot appear in a first-party model id, so this branch is checked
+first with no risk of shadowing; it also matches the existing `lmstudio/` path
+convention in the `model` database table. Note that anything keyed on the model
+name downstream (`MODEL_OUTPUT_CEILINGS` in `lib.py`, `CostConfig` in
+`util/telemetry.py`) sees the *stripped* name and needs its own DO entries.
 
 ## Key Components
 

@@ -36,6 +36,15 @@ class ModelTier(Enum):
     GEMINI_FLASH = auto()  # gemini-2.5-flash models
     GEMINI_35_FLASH_LITE = auto()  # gemini-3.5-flash-lite models
 
+    # DigitalOcean Gradient models (flat, vendor-embedded ids). Routed by the
+    # "do/" prefix; the prefix is stripped before the name reaches here, so the
+    # ids seen are e.g. "anthropic-claude-fable-5", "llama-4-maverick".
+    DO_CLAUDE_FABLE = auto()  # anthropic-claude-fable-5
+    DO_GPT_56_SOL = auto()  # openai-gpt-5.6-sol
+    DO_LLAMA_4_MAVERICK = auto()  # llama-4-maverick
+    DO_DEEPSEEK_V4_PRO = auto()  # deepseek-v4-pro
+    DO_DEEPSEEK_4_FLASH = auto()  # deepseek-4-flash
+
     # Ollama cost is based on compute time
     OLLAMA = auto()  # All Ollama models
 
@@ -68,6 +77,36 @@ class CostConfig:
         ModelTier.GEMINI_35_FLASH_LITE: {"input": 0.30, "output": 2.50},
     }
 
+    # Synthetic placeholder rate for a DigitalOcean model whose real price has
+    # not been looked up. Deliberately not free: a zero would make an unpriced
+    # model look cheap in a cost comparison, which is the failure mode this
+    # table exists to prevent. Every entry below currently carries a real rate;
+    # this remains for the next model added before its price is known.
+    DIGITALOCEAN_PLACEHOLDER_COST = {"input": 1.00, "output": 5.00}
+
+    # DigitalOcean Gradient costs per million tokens. DO resells each vendor's
+    # model at its own rate, so these are separate from the first-party tables
+    # above even where the underlying model is the same.
+    DIGITALOCEAN_COSTS = {
+        ModelTier.DO_CLAUDE_FABLE: {"input": 10.00, "output": 50.00},
+        ModelTier.DO_GPT_56_SOL: {"input": 5.00, "output": 30.00},
+        ModelTier.DO_LLAMA_4_MAVERICK: {"input": 0.25, "output": 0.87},
+        ModelTier.DO_DEEPSEEK_V4_PRO: {"input": 1.39, "output": 2.78},
+        ModelTier.DO_DEEPSEEK_4_FLASH: {"input": 0.11, "output": 0.22},
+    }
+
+    # Model-name substrings that identify a DigitalOcean-hosted model. Used both
+    # to pick a tier and to keep an unpriced DO model from falling through to
+    # Ollama compute-time pricing in estimate_cost().
+    DIGITALOCEAN_MODEL_MARKERS = (
+        "anthropic-claude",
+        "openai-gpt",
+        "llama-",
+        "deepseek-",
+        "mistral-",
+        "qwen-",
+    )
+
     # Ollama cost per compute second (estimated)
     OLLAMA_COST_PER_SEC = 0.000_05  # $0.05 per thousand seconds
 
@@ -76,8 +115,22 @@ class CostConfig:
         """Determine model tier from model name."""
         model_lower = model_name.lower()
 
+        # DigitalOcean-hosted models first: their ids embed a vendor name, so
+        # "anthropic-claude-fable-5" contains "claude" and would otherwise be
+        # priced as a first-party Anthropic model below.
+        if "anthropic-claude-fable" in model_lower:
+            return ModelTier.DO_CLAUDE_FABLE
+        elif "openai-gpt-5.6-sol" in model_lower:
+            return ModelTier.DO_GPT_56_SOL
+        elif "llama-4-maverick" in model_lower:
+            return ModelTier.DO_LLAMA_4_MAVERICK
+        elif "deepseek-v4-pro" in model_lower:
+            return ModelTier.DO_DEEPSEEK_V4_PRO
+        elif "deepseek-4-flash" in model_lower:
+            return ModelTier.DO_DEEPSEEK_4_FLASH
+
         # OpenAI models
-        if "gpt-4o-mini" in model_lower:
+        elif "gpt-4o-mini" in model_lower:
             return ModelTier.GPT4_MINI
         elif "gpt-4.1-nano" in model_lower:
             return ModelTier.GPT_41_NANO
@@ -144,7 +197,8 @@ class CostConfig:
             # Remote API models that weren't recognized should not fall back
             # to Ollama time-based pricing — return 0 and warn instead.
             model_lower = model.lower()
-            if any(prefix in model_lower for prefix in ("gpt-", "claude", "gemini")):
+            remote_markers = ("gpt-", "claude", "gemini") + cls.DIGITALOCEAN_MODEL_MARKERS
+            if any(marker in model_lower for marker in remote_markers):
                 logger.warning(
                     "No token pricing configured for remote model '%s'. "
                     "Add it to CostConfig in telemetry.py.",
@@ -171,6 +225,13 @@ class CostConfig:
         # Handle Google Gemini models
         elif tier in cls.GEMINI_COSTS:
             costs = cls.GEMINI_COSTS[tier]
+            return (tokens_in * costs["input"] / 1_000_000) + (
+                tokens_out * costs["output"] / 1_000_000
+            )
+
+        # Handle DigitalOcean Gradient models
+        elif tier in cls.DIGITALOCEAN_COSTS:
+            costs = cls.DIGITALOCEAN_COSTS[tier]
             return (tokens_in * costs["input"] / 1_000_000) + (
                 tokens_out * costs["output"] / 1_000_000
             )
