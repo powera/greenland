@@ -28,6 +28,15 @@ from storage.models.lemma_relation import (
     LemmaRelationGroup,
     LemmaRelationMember,
 )
+from storage.models.name_entity import (
+    NAME_GENDERS,
+    NAME_KIND_LABELS,
+    NAME_KINDS,
+    Name,
+    NameTranslation,
+    is_valid_name_kind,
+    normalize_name_text,
+)
 from storage.models.operation_log import OperationLog
 from storage.models.query_log import QueryLog
 from storage.models.text_work import (
@@ -95,6 +104,13 @@ __all__ = [
     "LemmaRelationMember",
     "LemmaTranslation",
     "MAX_CONCEPT_SOURCES",
+    "NAME_GENDERS",
+    "NAME_KINDS",
+    "NAME_KIND_LABELS",
+    "Name",
+    "NameTranslation",
+    "is_valid_name_kind",
+    "normalize_name_text",
     "NounSubtype",
     "SUB_CONCEPT_CATEGORIES",
     "SUB_CONCEPT_CATEGORY_GROUPS",

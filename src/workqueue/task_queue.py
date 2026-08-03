@@ -43,6 +43,7 @@ class TaskType:
     WORDS_SYNONYMS = "words.synonyms"
     WORDS_EMBEDDINGS = "words.embeddings"
     WORDS_GRAMMAR_FACTS = "words.grammar_facts"
+    CONVERSATIONS_SCENE_GENERATE = "conversations.scene.generate"
     SENTENCES_TRANSLATE = "sentences.translate"
     SENTENCES_TRANSLATE_BATCH_SUBMIT = "sentences.translate.batch_submit"
     SENTENCES_BATCH_TRANSLATE_SUBMIT = "sentences.batch.translate.submit"

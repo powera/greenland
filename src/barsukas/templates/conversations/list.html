@@ -11,6 +11,14 @@
                 <p class="text-muted">{{ total }} conversation{{ 's' if total != 1 else '' }} found</p>
             </div>
             <div>
+                <a href="{{ url_for('conversations.new_dialog') }}"
+                   class="btn btn-primary me-2 {% if config.get('READONLY', False) %}disabled{% endif %}"
+                   {% if config.get('READONLY', False) %}aria-disabled="true" tabindex="-1"{% endif %}>
+                    <i class="bi bi-plus-circle"></i> New Dialog
+                </a>
+                <a href="{{ url_for('names.list_names_view') }}" class="btn btn-outline-secondary me-2">
+                    <i class="bi bi-person-badge"></i> Names
+                </a>
                 <a href="{{ url_for('conversations.dedupe_sentences') }}"
                    class="btn btn-outline-warning {% if config.get('READONLY', False) %}disabled{% endif %}"
                    {% if config.get('READONLY', False) %}aria-disabled="true" tabindex="-1"{% endif %}>

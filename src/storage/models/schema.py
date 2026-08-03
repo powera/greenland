@@ -476,6 +476,11 @@ class SentenceWord(Base):
 
     The lemma_id may be NULL for function words (pronouns, particles) that aren't
     tracked as separate vocabulary items.
+
+    A word may instead resolve to a proper name (``name_id``, see
+    storage.models.name_entity): "George" is not vocabulary and carries no
+    difficulty, so it is excluded from the minimum_level rollup rather than
+    left unresolved. At most one of lemma_id / name_id is set.
     """
 
     __tablename__ = "sentence_words"
@@ -488,6 +493,11 @@ class SentenceWord(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     sentence_id: Mapped[int] = mapped_column(ForeignKey("sentences.id"), nullable=False)
     lemma_id: Mapped[Optional[int]] = mapped_column(ForeignKey("lemmas.id"), nullable=True)
+    # Proper name this word resolves to, when it is a name rather than
+    # vocabulary. Mutually exclusive with lemma_id; see storage.models.name_entity.
+    name_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("names.id", ondelete="SET NULL"), nullable=True, index=True
+    )
 
     # Language code for this word (e.g., 'lt', 'fr', 'zh')
     language_code: Mapped[str] = mapped_column(String, nullable=False, index=True)
@@ -531,6 +541,7 @@ class SentenceWord(Base):
     # Relationships
     sentence = relationship("Sentence", back_populates="words")
     lemma = relationship("Lemma")
+    name = relationship("Name")
 
 
 class SentencePatternWord(Base):
@@ -992,6 +1003,19 @@ class Conversation(Base):
 
     # Keywords that were used to generate this conversation
     keywords: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array of keywords
+
+    # The scene this dialog acts out, as the author typed it, e.g. "buying
+    # tomatoes at the grocery store". NULL for conversations from the older
+    # keyword-driven path, which had no scene input at all.
+    scene_prompt: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # The level the dialog was *asked* for. Distinct from minimum_level, which
+    # is what the words it actually used add up to; the gap between the two is
+    # what the review page reports.
+    target_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
+
+    # Model that generated the dialog (mirrors Lemma/Concept provenance).
+    source_model: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     # Difficulty level - calculated as the maximum difficulty of all sentences
     minimum_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)

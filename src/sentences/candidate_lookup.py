@@ -159,6 +159,29 @@ def _find_candidate_lemmas_in_language(
     return out
 
 
+def find_lemmas_for_token(session: Session, language_code: str, token: str) -> List[Lemma]:
+    """Return every lemma whose base form or derivative form matches one token.
+
+    The public entry point onto the same matching the candidate ranker uses, for
+    callers that already have a single surface token and want the lemmas behind
+    it -- notably dialog vocabulary coverage, which asks "is this word in the
+    dictionary yet?" of each token in a generated line.
+
+    Args:
+        session: Database session.
+        language_code: Language the token is written in, e.g. "en".
+        token: A single surface token; punctuation and case are normalized here,
+            so callers may pass it raw.
+
+    Returns:
+        Matching lemmas, base-form matches first. Empty when nothing matches.
+    """
+    normalized = _normalize_token(token)
+    if not normalized:
+        return []
+    return _find_candidate_lemmas_in_language(session, language_code, normalized)
+
+
 def _collect_lemma_forms_in_language(
     session: Session, lemma_id: int, language_code: str
 ) -> List[str]:

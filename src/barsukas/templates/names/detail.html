@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}{{ name.name_text }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('names.list_names_view') }}">Names</a></li>
+                <li class="breadcrumb-item active">{{ name.name_text }}</li>
+            </ol>
+        </nav>
+        <h1><i class="bi bi-person-badge"></i> {{ name.display_text }}</h1>
+        <p class="text-muted">
+            {{ name.kind_label }}{% if name.gender %}, {{ name.gender }}{% endif %} &mdash;
+            used in {{ usage_count }} sentence word{{ 's' if usage_count != 1 else '' }}.
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-5">
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-pencil"></i> Details</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('names.update', name_id=name.id) }}">
+                    <div class="mb-3">
+                        <label for="kind" class="form-label">Kind</label>
+                        <select class="form-select" id="kind" name="kind">
+                            {% for value in name_kinds %}
+                                <option value="{{ value }}" {% if name.kind == value %}selected{% endif %}>
+                                    {{ name_kind_labels.get(value, value) }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select class="form-select" id="gender" name="gender">
+                            <option value="">-</option>
+                            {% for value in name_genders %}
+                                <option value="{{ value }}" {% if name.gender == value %}selected{% endif %}>
+                                    {{ value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="disambiguation" class="form-label">Role / disambiguation</label>
+                        <input type="text" class="form-control" id="disambiguation" name="disambiguation"
+                               value="{{ name.disambiguation or '' }}" placeholder="the pharmacist">
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="2">{{ name.notes or '' }}</textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="verified" name="verified"
+                               {% if name.verified %}checked{% endif %}>
+                        <label class="form-check-label" for="verified">Verified</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary
+                            {% if config.get('READONLY', False) %}disabled{% endif %}">
+                        <i class="bi bi-save"></i> Save
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header text-danger"><i class="bi bi-trash"></i> Delete</div>
+            <div class="card-body">
+                <p class="text-muted small">
+                    Words pointing at this name become unresolved again; no sentence text changes.
+                </p>
+                <form method="POST" action="{{ url_for('names.delete', name_id=name.id) }}">
+                    <button type="submit" class="btn btn-outline-danger
+                            {% if config.get('READONLY', False) %}disabled{% endif %}"
+                            onclick="return confirm('Delete this name?')">
+                        <i class="bi bi-trash"></i> Delete {{ name.name_text }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-translate"></i> Renderings</div>
+            <div class="card-body">
+                <p class="text-muted small">
+                    How this name is written in each language. Translation and audio both
+                    read these, so a missing rendering means every sentence using the name
+                    has to invent one.
+                </p>
+
+                {% if name.translations %}
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Language</th>
+                                <th>Rendering</th>
+                                <th>Pronunciation</th>
+                                <th style="width: 6rem;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rendering in name.translations|sort(attribute='language_code') %}
+                            <tr>
+                                <td>{{ language_names.get(rendering.language_code, rendering.language_code) }}</td>
+                                <td><strong>{{ rendering.translation }}</strong></td>
+                                <td class="text-muted">{{ rendering.phonetic_pronunciation or '-' }}</td>
+                                <td>
+                                    <form method="POST"
+                                          action="{{ url_for('names.delete_rendering', name_id=name.id, rendering_id=rendering.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                {% if config.get('READONLY', False) %}disabled{% endif %}>
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> No renderings yet.
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('names.set_rendering', name_id=name.id) }}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="language_code" class="form-label">Language</label>
+                            <select class="form-select" id="language_code" name="language_code">
+                                {% for code, label in language_names.items() %}
+                                    <option value="{{ code }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="translation" class="form-label">Rendering</label>
+                            <input type="text" class="form-control" id="translation" name="translation"
+                                   required placeholder="Džordžas">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="phonetic" class="form-label">Pronunciation</label>
+                            <input type="text" class="form-control" id="phonetic" name="phonetic"
+                                   placeholder="optional">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3
+                            {% if config.get('READONLY', False) %}disabled{% endif %}">
+                        <i class="bi bi-plus-lg"></i> Save rendering
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

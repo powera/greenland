@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Names{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1><i class="bi bi-person-badge"></i> Names</h1>
+        <p class="text-muted">
+            {{ total }} name{{ 's' if total != 1 else '' }}. Proper names used in our
+            texts &mdash; people, shops, streets &mdash; which are neither vocabulary
+            nor encyclopedia topics. They carry no difficulty level, so they never
+            gate a sentence; what they do carry is how they are written in each
+            language.
+        </p>
+    </div>
+</div>
+
+<div class="search-form">
+    <form method="get" action="{{ url_for('names.list_names_view') }}">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="search" class="form-label">Search</label>
+                <input type="text" class="form-control" id="search" name="search"
+                       value="{{ search }}" placeholder="Search names...">
+            </div>
+            <div class="col-md-3">
+                <label for="kind" class="form-label">Kind</label>
+                <select class="form-select" id="kind" name="kind">
+                    <option value="">All</option>
+                    {% for value in name_kinds %}
+                        <option value="{{ value }}" {% if kind == value %}selected{% endif %}>
+                            {{ name_kind_labels.get(value, value) }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Filter
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header"><i class="bi bi-plus-circle"></i> Add a name</div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('names.create') }}">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="name_text" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name_text" name="name_text"
+                           required placeholder="George">
+                </div>
+                <div class="col-md-3">
+                    <label for="new_kind" class="form-label">Kind</label>
+                    <select class="form-select" id="new_kind" name="kind">
+                        {% for value in name_kinds %}
+                            <option value="{{ value }}">{{ name_kind_labels.get(value, value) }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select class="form-select" id="gender" name="gender">
+                        <option value="">-</option>
+                        <option value="masculine">Masculine</option>
+                        <option value="feminine">Feminine</option>
+                        <option value="neutral">Neutral</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100
+                            {% if config.get('READONLY', False) %}disabled{% endif %}">
+                        <i class="bi bi-plus-lg"></i> Add
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if names %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Kind</th>
+                <th>Gender</th>
+                <th>Renderings</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for name in names %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('names.detail', name_id=name.id) }}">
+                        <strong>{{ name.name_text }}</strong>
+                    </a>
+                    {% if name.disambiguation %}
+                        <span class="text-muted small">({{ name.disambiguation }})</span>
+                    {% endif %}
+                </td>
+                <td><span class="badge bg-secondary">{{ name.kind_label }}</span></td>
+                <td>{{ name.gender or '-' }}</td>
+                <td>{{ rendering_counts.get(name.id, 0) }}</td>
+                <td>
+                    {% if name.verified %}
+                        <i class="bi bi-check-circle-fill text-success"></i> Verified
+                    {% else %}
+                        <i class="bi bi-clock text-muted"></i> Unreviewed
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if total_pages > 1 %}
+<nav>
+    <ul class="pagination">
+        {% for p in range(1, total_pages + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link"
+                   href="{{ url_for('names.list_names_view', page=p, search=search, kind=kind) }}">{{ p }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> No names yet. They are registered automatically
+    when a generated dialog casts one.
+</div>
+{% endif %}
+{% endblock %}
