@@ -2,6 +2,10 @@
 
 {% block title %}{{ conversation.title or ('Conversation #' ~ conversation.id) }}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/conversations.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="row mb-4">
     <div class="col">
@@ -54,6 +58,16 @@
                                 <dt class="col-sm-4">Theme:</dt>
                                 <dd class="col-sm-8"><span class="badge bg-secondary">{{ conversation.theme }}</span></dd>
                             {% endif %}
+
+                            {% if conversation.scene_prompt %}
+                                <dt class="col-sm-4">Scene:</dt>
+                                <dd class="col-sm-8">{{ conversation.scene_prompt }}</dd>
+                            {% endif %}
+
+                            {% if conversation.source_model %}
+                                <dt class="col-sm-4">Model:</dt>
+                                <dd class="col-sm-8"><code>{{ conversation.source_model }}</code></dd>
+                            {% endif %}
                         </dl>
                     </div>
                     <div class="col-md-6">
@@ -64,6 +78,11 @@
                                     <span class="badge bg-info difficulty-badge">Level {{ conversation.minimum_level }}</span>
                                 {% else %}
                                     <span class="text-muted">Not set</span>
+                                {% endif %}
+                                {% if conversation.target_level is not none %}
+                                    <span class="text-muted small">
+                                        (asked for level {{ conversation.target_level }})
+                                    </span>
                                 {% endif %}
                             </dd>
 
@@ -173,6 +192,141 @@
     </div>
 </div>
 
+<!-- Vocabulary Coverage -->
+{% if coverage %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-journal-check"></i> Vocabulary Coverage
+                <span class="text-muted small ms-2">
+                    against level {{ coverage.target_level }}, recomputed on each view
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="coverage-summary">
+                    <div class="coverage-stat">
+                        <div class="coverage-stat-value">{{ (coverage.known_ratio * 100)|round|int }}%</div>
+                        <div class="coverage-stat-label">Covered</div>
+                    </div>
+                    <div class="coverage-stat">
+                        <div class="coverage-stat-value">{{ coverage.counts['known'] }}</div>
+                        <div class="coverage-stat-label">Known</div>
+                    </div>
+                    <div class="coverage-stat">
+                        <div class="coverage-stat-value">{{ coverage.counts['above_level'] }}</div>
+                        <div class="coverage-stat-label">Above level</div>
+                    </div>
+                    <div class="coverage-stat">
+                        <div class="coverage-stat-value">{{ coverage.counts['name'] }}</div>
+                        <div class="coverage-stat-label">Names</div>
+                    </div>
+                    <div class="coverage-stat">
+                        <div class="coverage-stat-value">{{ coverage.counts['missing'] }}</div>
+                        <div class="coverage-stat-label">Missing</div>
+                    </div>
+                    <div class="coverage-stat">
+                        <div class="coverage-stat-value">
+                            {{ coverage.computed_minimum_level if coverage.computed_minimum_level is not none else '-' }}
+                        </div>
+                        <div class="coverage-stat-label">Computed level</div>
+                    </div>
+                </div>
+
+                {% if coverage.missing %}
+                    <h6 class="mt-4">Missing from the dictionary</h6>
+                    <p class="text-muted small">
+                        Words this dialog uses that are not lemmas yet. Stage one to send it
+                        to the pending-imports queue with its line as context, or register it
+                        as a name if it is a person, place, or business.
+                    </p>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th style="width: 12rem;">Word</th>
+                                    <th>Used in</th>
+                                    <th style="width: 20rem;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for token in coverage.missing %}
+                                <tr class="coverage-missing-row">
+                                    <td><strong>{{ token.surface }}</strong></td>
+                                    <td class="coverage-example-line">{{ token.example_line }}</td>
+                                    <td>
+                                        {% if token.surface in staged_words %}
+                                            <a class="btn btn-sm btn-outline-success disabled" aria-disabled="true"
+                                               href="{{ url_for('pending_imports.list_pending_imports') }}">
+                                                <i class="bi bi-check2"></i> Staged #{{ staged_words[token.surface] }}
+                                            </a>
+                                        {% else %}
+                                        <form method="POST" class="d-inline"
+                                              action="{{ url_for('conversations.stage_word', conversation_id=conversation.id) }}">
+                                            <input type="hidden" name="word" value="{{ token.surface }}">
+                                            <input type="hidden" name="example_line" value="{{ token.example_line }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary"
+                                                    {% if config.get('READONLY', False) %}disabled{% endif %}>
+                                                <i class="bi bi-box-arrow-in-down"></i> Stage word
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                        <form method="POST" class="d-inline"
+                                              action="{{ url_for('conversations.register_name', conversation_id=conversation.id) }}">
+                                            <input type="hidden" name="name_text" value="{{ token.surface }}">
+                                            <select name="kind" class="form-select form-select-sm d-inline-block w-auto">
+                                                {% for kind in name_kinds %}
+                                                    <option value="{{ kind }}">{{ name_kind_labels.get(kind, kind) }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary"
+                                                    {% if config.get('READONLY', False) %}disabled{% endif %}>
+                                                <i class="bi bi-person-badge"></i> It's a name
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-success mb-0 mt-3">
+                        <i class="bi bi-check-circle"></i> Every word in this dialog is already
+                        a lemma or a registered name.
+                    </div>
+                {% endif %}
+
+                {% if coverage.above_level %}
+                    <h6 class="mt-4">Above the target level</h6>
+                    <p class="text-muted small">
+                        Known vocabulary harder than level {{ coverage.target_level }}. These are what
+                        push the computed level above the one that was asked for.
+                    </p>
+                    <div class="coverage-token-list">
+                        {% for token in coverage.above_level %}
+                            <span class="badge bg-warning text-dark coverage-token">
+                                {{ token.surface }}
+                                <span class="ms-1">L{{ token.difficulty_level }}</span>
+                            </span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% if coverage.names %}
+                    <h6 class="mt-4">Names</h6>
+                    <div class="coverage-token-list">
+                        {% for token in coverage.names %}
+                            <span class="badge bg-info text-dark coverage-token">{{ token.surface }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Translations Summary Table -->
 {% if sentences_data %}
 <div class="row mb-4">
@@ -227,19 +381,4 @@
     </div>
 </div>
 {% endif %}
-
-<style>
-.conversation-dialog .dialog-line {
-    border-left: 3px solid transparent;
-}
-.conversation-dialog .dialog-line.bg-light {
-    border-left-color: var(--bs-primary);
-}
-.conversation-dialog .dialog-line.border {
-    border-left-color: var(--bs-secondary);
-}
-.translation-item {
-    margin-bottom: 0.25rem;
-}
-</style>
 {% endblock %}

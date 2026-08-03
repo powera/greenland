@@ -7,6 +7,7 @@ legacy task names during migration.
 from __future__ import annotations
 
 from workqueue.handlers.audio import handle_audio_generate_lemma, handle_audio_generate_sentence
+from workqueue.handlers.conversations import handle_conversations_scene_generate
 from workqueue.handlers.sarka import handle_generate_conversation, handle_generate_definition
 from workqueue.handlers.sentences import (
     handle_sentences_batch_decompose_submit,
@@ -41,6 +42,7 @@ TASK_HANDLERS = {
     "audio.generate.lemma": handle_audio_generate_lemma,
     "audio.generate.sentence": handle_audio_generate_sentence,
     "conversations.generate": handle_generate_conversation,
+    "conversations.scene.generate": handle_conversations_scene_generate,
     "conversations.definitions": handle_generate_definition,
     "wireword.export.directory": handle_wireword_export_directory,
     # Backward-compatible aliases (legacy snake_case)

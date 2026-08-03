@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}New Dialog{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1><i class="bi bi-chat-dots"></i> New Dialog</h1>
+        <p class="text-muted">
+            Describe a scene and pick a difficulty level. The dialog is written by
+            the worker and stored as a conversation you can review afterwards.
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post" action="{{ url_for('conversations.generate_dialog') }}">
+            <div class="mb-3">
+                <label for="scene" class="form-label">Scene</label>
+                <input type="text" class="form-control" id="scene" name="scene"
+                       value="{{ scene }}" required
+                       placeholder="buying tomatoes at the grocery store">
+                <div class="form-text">
+                    What happens, in plain words. Concrete scenes work better than
+                    topics: &quot;returning a shirt without a receipt&quot; beats &quot;shopping&quot;.
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="target_level" class="form-label">Difficulty level</label>
+                    <select class="form-select" id="target_level" name="target_level">
+                        {% for i in range(1, config.MAX_DIFFICULTY_LEVEL + 1) %}
+                            <option value="{{ i }}" {% if default_level == i %}selected{% endif %}>
+                                Level {{ i }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">Vocabulary at this level steers the writing.</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="num_turns" class="form-label">Turns</label>
+                    <input type="number" class="form-control" id="num_turns" name="num_turns"
+                           value="{{ default_turns }}" min="2" max="40">
+                    <div class="form-text">Approximate number of spoken lines.</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="model" class="form-label">Model</label>
+                    <input type="text" class="form-control" id="model" name="model"
+                           value="{{ default_model }}">
+                </div>
+            </div>
+
+            <div class="mb-3 mt-3">
+                <label for="notes" class="form-label">Extra direction (optional)</label>
+                <textarea class="form-control" id="notes" name="notes" rows="2"
+                          placeholder="The shopper is in a hurry; the tomatoes are out of stock."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary
+                    {% if config.get('READONLY', False) %}disabled{% endif %}">
+                <i class="bi bi-magic"></i> Generate Dialog
+            </button>
+            <a href="{{ url_for('conversations.list_conversations') }}" class="btn btn-outline-secondary">
+                Cancel
+            </a>
+        </form>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">What happens next</div>
+            <div class="card-body">
+                <ol class="mb-0 ps-3">
+                    <li>The worker writes the dialog and stores it as a conversation.</li>
+                    <li>Each line becomes a sentence, and each word is linked to the
+                        lemma or name behind it.</li>
+                    <li>The conversation page reports which words the dictionary is
+                        missing, so you can stage them for import.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

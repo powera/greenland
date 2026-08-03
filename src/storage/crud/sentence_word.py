@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session, joinedload
 
+from storage.models.name_entity import Name
 from storage.models.schema import Lemma, Sentence, SentenceWord
 
 
@@ -14,6 +15,7 @@ def add_sentence_word(
     part_of_speech: Optional[str] = None,
     language_code: str = "",
     lemma: Optional[Lemma] = None,
+    name: Optional[Name] = None,
     english_text: Optional[str] = None,
     target_language_text: Optional[str] = None,
     grammatical_form: Optional[str] = None,
@@ -32,6 +34,8 @@ def add_sentence_word(
         part_of_speech: Part of speech (e.g., "noun", "verb", "pronoun")
         language_code: Language code (e.g., 'lt', 'fr', 'zh')
         lemma: Optional Lemma object this word refers to
+        name: Optional Name object this word refers to, for proper names that
+            are not vocabulary (mutually exclusive with ``lemma``)
         english_text: English form of the word
         target_language_text: Base form in target language
         grammatical_form: Grammatical form (e.g., "1s_past", "gerund")
@@ -43,7 +47,13 @@ def add_sentence_word(
 
     Returns:
         Created SentenceWord object
+
+    Raises:
+        ValueError: If both ``lemma`` and ``name`` are given, or neither
+            ``part_of_speech`` nor ``word_role`` is.
     """
+    if lemma is not None and name is not None:
+        raise ValueError("A sentence word resolves to a lemma or a name, never both")
     if part_of_speech and word_role and part_of_speech != word_role:
         raise ValueError("part_of_speech and word_role must match when both are provided")
     resolved_part_of_speech = part_of_speech or word_role
@@ -53,6 +63,7 @@ def add_sentence_word(
     sentence_word = SentenceWord(
         sentence_id=sentence.id,
         lemma_id=lemma.id if lemma else None,
+        name_id=name.id if name else None,
         position=position,
         part_of_speech=resolved_part_of_speech,
         language_code=language_code,

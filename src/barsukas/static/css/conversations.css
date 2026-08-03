@@ -1,0 +1,62 @@
+/* Styles for the conversation views (dialog display and vocabulary coverage). */
+
+.conversation-dialog .dialog-line {
+    border-left: 3px solid transparent;
+}
+
+.conversation-dialog .dialog-line.bg-light {
+    border-left-color: var(--bs-primary);
+}
+
+.conversation-dialog .dialog-line.border {
+    border-left-color: var(--bs-secondary);
+}
+
+.translation-item {
+    margin-bottom: 0.25rem;
+}
+
+/* Vocabulary coverage panel */
+
+.coverage-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.coverage-stat {
+    min-width: 6rem;
+}
+
+.coverage-stat .coverage-stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.coverage-stat .coverage-stat-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.coverage-token-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.coverage-token {
+    font-size: 0.85rem;
+}
+
+.coverage-missing-row td {
+    vertical-align: middle;
+}
+
+.coverage-example-line {
+    font-style: italic;
+    color: var(--bs-secondary-color, #6c757d);
+}

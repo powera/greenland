@@ -23,7 +23,7 @@ As of the queue-first transition, agent CLIs are moving toward **work discovery 
 | **lape** | fox | Grammar facts (measure words, gender, declension class) |
 | **zvirblis** | sparrow | Example sentence generator |
 | **buivolas** | buffalo | Example sentences (multi-language) |
-| **sarka** | magpie | Dialog/conversation generator |
+| **sarka** | magpie | Dialog/conversation generator (bulk, keyword-driven) |
 | **povas** | peacock | HTML report generator |
 | **ungurys** | eel | WireWord API export |
 | **elnias** | deer | Bootstrap export (minimal format) |
@@ -169,10 +169,22 @@ zvirblis.py --languages en lt zh      # Specify target languages
 
 ### sarka (Dialogs)
 
+Bulk, keyword-driven dialog generation: picks words at a level and writes
+conversations around them, aiming for each word to be used about twice.
+
 ```bash
-sarka.py --level 3 --topic greetings  # Generate dialogs for topic at level
-sarka.py --num-exchanges 5            # Number of dialog exchanges
+sarka.py --generate --level 3                 # 12 dialogs for level 3
+sarka.py --generate --level 3 --by-category   # Keep noun categories coherent
+sarka.py --generate --max-level 5 --num-sentences 10
+sarka.py --show-words --level 3               # What vocabulary is available
+sarka.py --stats                              # Conversation counts by level
 ```
+
+For a *specific* scene ("buying tomatoes at the grocery store") rather than
+level coverage, use the Barsukas-first flow instead: Conversations → New
+Dialog, which enqueues `conversations.scene.generate` and stores word links,
+a derived difficulty level, and a coverage report of the words the dictionary
+is missing. See `docs/dialog_generation.md`.
 
 ### povas (HTML Reports)
 

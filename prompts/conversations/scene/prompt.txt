@@ -1,0 +1,28 @@
+Write a dialog that acts out this scene:
+
+{scene}
+
+Length: about {num_turns} turns.
+
+Difficulty: this dialog is for learners at level {target_level} on our
+vocabulary scale, where level 1 is a first-week beginner and higher levels
+learn progressively rarer words. Write sentences a learner at that level could
+follow: keep the grammar as simple as the scene allows, and reach for a harder
+word only when the scene genuinely needs it.
+
+Vocabulary at this level includes words like:
+{encouraged_words}
+
+That list is a sample to show you the register, not a checklist. Use the words
+the scene calls for; ignore the ones it does not.
+
+Names already in use elsewhere in the app:
+{known_names}
+
+Reuse one of those if it fits the scene, so the same characters recur. Otherwise
+pick a new ordinary name. Either way, list every proper name the dialog uses in
+the `cast` field, with its kind (given_name, family_name, full_name, place,
+organization, brand, animal, other).
+{notes}
+Return the dialog as structured data: a title, a one-word theme, the turns in
+order, and the cast.

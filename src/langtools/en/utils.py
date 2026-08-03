@@ -355,3 +355,87 @@ def generate_superlative(adjective: str) -> str:
 
     # Regular short adjective: add -est
     return adjective + "est"
+
+
+def candidate_base_forms(word: str) -> List[str]:
+    """Guess the base forms an inflected English word could have come from.
+
+    The inverse direction of the ``generate_*`` helpers above, and necessarily
+    a weaker one: English spelling rules are many-to-one, so "saves" could come
+    from "save" or "sav", and only a dictionary lookup can say which. Callers
+    are expected to try each candidate against real lemmas and keep the ones
+    that exist.
+
+    Irregular forms ("came", "children") are out of reach here by construction;
+    those are matched through their stored ``DerivativeForm`` rows instead.
+    This function is the fallback for regular morphology on lemmas whose forms
+    have not been generated yet.
+
+    Args:
+        word: A surface form, e.g. "tomatoes".
+
+    Returns:
+        Candidate base forms, most plausible first, without the input itself
+        and without duplicates. Empty when nothing plausible applies.
+    """
+    lowered = word.strip().lower()
+    if len(lowered) < 3:
+        return []
+
+    candidates: List[str] = []
+
+    def _push(candidate: str) -> None:
+        if len(candidate) >= 2 and candidate != lowered and candidate not in candidates:
+            candidates.append(candidate)
+
+    # Plurals and 3rd-person singulars.
+    if lowered.endswith("ies"):
+        _push(lowered[:-3] + "y")
+    if lowered.endswith("ves"):
+        _push(lowered[:-3] + "f")
+        _push(lowered[:-3] + "fe")
+    if lowered.endswith("es"):
+        _push(lowered[:-2])
+    if lowered.endswith("s") and not lowered.endswith("ss"):
+        _push(lowered[:-1])
+
+    # Past tense / past participle.
+    if lowered.endswith("ied"):
+        _push(lowered[:-3] + "y")
+    if lowered.endswith("ed"):
+        _push(lowered[:-2])
+        _push(lowered[:-1])
+        if _has_doubled_final_consonant(lowered[:-2]):
+            _push(lowered[:-3])
+
+    # Present participle / gerund.
+    if lowered.endswith("ing"):
+        _push(lowered[:-3])
+        _push(lowered[:-3] + "e")
+        if _has_doubled_final_consonant(lowered[:-3]):
+            _push(lowered[:-4])
+
+    # Comparatives and superlatives.
+    if lowered.endswith("iest"):
+        _push(lowered[:-4] + "y")
+    if lowered.endswith("est"):
+        _push(lowered[:-3])
+        _push(lowered[:-2])
+        if _has_doubled_final_consonant(lowered[:-3]):
+            _push(lowered[:-4])
+    if lowered.endswith("ier"):
+        _push(lowered[:-3] + "y")
+    if lowered.endswith("er"):
+        _push(lowered[:-2])
+        _push(lowered[:-1])
+        if _has_doubled_final_consonant(lowered[:-2]):
+            _push(lowered[:-3])
+
+    return candidates
+
+
+def _has_doubled_final_consonant(stem: str) -> bool:
+    """True when a stem ends in a doubled consonant ("stopp", "runn")."""
+    if len(stem) < 3:
+        return False
+    return stem[-1] == stem[-2] and stem[-1] not in "aeiou"

@@ -71,6 +71,7 @@ from barsukas.routes import (
     exports,
     lemmas,
     llm_api,
+    names,
     operation_logs,
     overrides,
     pattern_sentences,
@@ -352,6 +353,7 @@ def create_app(
     app.register_blueprint(sentence_rapid_review.bp)
     app.register_blueprint(sentence_stats.bp)
     app.register_blueprint(conversations.bp)
+    app.register_blueprint(names.bp)
     app.register_blueprint(categories.bp)
     app.register_blueprint(completeness.bp)
     app.register_blueprint(quality.bp)

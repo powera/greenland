@@ -3,27 +3,43 @@
 """Routes for conversation management."""
 
 import json
-from typing import Union
+import logging
+from typing import Any, Dict, List, Optional, Union
 
 from barsukas.config import Config
-from flask import Blueprint, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 from sqlalchemy import case
 from werkzeug.wrappers import Response
 
+import constants
 from barsukas.helpers.flash_helpers import flash_and_log
+from sentences.dialog_coverage import POS_NAME, CoverageReport, analyze_lines
+from sentences.dialog_scene import DEFAULT_NUM_TURNS, SceneRequest
+from storage.crud.name_entity import get_or_create_name
 from storage.crud.sentence import (
     find_duplicate_sentences,
     get_sentence_conversation_count,
     merge_duplicate_sentences,
+)
+from storage.models.imports import PendingImport
+from storage.models.name_entity import (
+    NAME_KIND_LABELS,
+    NAME_KINDS,
+    Name,
+    normalize_name_text,
 )
 from storage.models.schema import (
     Conversation,
     ConversationSentence,
     Sentence,
     SentenceTranslation,
+    SentenceWord,
 )
 from storage.translation_helpers import get_supported_languages
+from workqueue.task_queue import TaskType, enqueue_task
+
+logger = logging.getLogger(__name__)
 
 bp = Blueprint("conversations", __name__, url_prefix="/conversations")
 
@@ -126,6 +142,141 @@ def list_conversations() -> ResponseReturnValue:
     )
 
 
+@bp.route("/new")
+def new_dialog() -> ResponseReturnValue:
+    """Show the form for generating a dialog from a scene."""
+    return render_template(
+        "conversations/new.html",
+        default_model=constants.DEFAULT_MODEL,
+        default_turns=DEFAULT_NUM_TURNS,
+        default_level=request.args.get("target_level", type=int) or 1,
+        scene=request.args.get("scene", ""),
+    )
+
+
+@bp.route("/generate", methods=["POST"])
+def generate_dialog() -> Response:
+    """Queue generation of a dialog for a scene at a target level.
+
+    The dialog is written by the worker rather than in-request: generation is a
+    multi-second LLM call, and the result is a stored conversation the reviewer
+    opens afterwards rather than a page that has to be waited on.
+    """
+    if current_app.config.get("READONLY"):
+        flash("Cannot generate dialogs in read-only mode", "error")
+        return redirect(url_for("conversations.list_conversations"))
+
+    scene = request.form.get("scene", "").strip()
+    target_level = request.form.get("target_level", type=int) or 1
+    num_turns = request.form.get("num_turns", type=int) or DEFAULT_NUM_TURNS
+    model = request.form.get("model", "").strip() or constants.DEFAULT_MODEL
+    notes = request.form.get("notes", "").strip() or None
+
+    scene_request = SceneRequest(
+        scene=scene,
+        target_level=target_level,
+        num_turns=num_turns,
+        model=model,
+        notes=notes,
+    )
+    try:
+        scene_request.validate()
+    except ValueError as exc:
+        flash(str(exc), "error")
+        return redirect(url_for("conversations.new_dialog", scene=scene, target_level=target_level))
+
+    try:
+        result = enqueue_task(
+            g.db,
+            task_type=TaskType.CONVERSATIONS_SCENE_GENERATE,
+            target_type=None,
+            target_id=None,
+            payload={
+                "scene": scene,
+                "target_level": target_level,
+                "num_turns": num_turns,
+                "model": model,
+                "notes": notes,
+            },
+            dedup_key=f"{TaskType.CONVERSATIONS_SCENE_GENERATE}:{target_level}:{scene.lower()}",
+        )
+        g.db.commit()
+    except Exception as exc:
+        g.db.rollback()
+        flash_and_log(f"Error queueing dialog generation: {exc}", "error")
+        return redirect(url_for("conversations.new_dialog", scene=scene))
+
+    if result.created:
+        flash(
+            f"Queued a level {target_level} dialog for {scene!r}. "
+            "It will appear in the conversation list once the worker finishes.",
+            "success",
+        )
+    else:
+        flash("That scene is already queued at this level.", "info")
+
+    return redirect(url_for("barsukas_tasks.list_tasks"))
+
+
+def _conversation_cast_names(conversation: Conversation) -> List[str]:
+    """Names this conversation casts, read from its stored word links.
+
+    The links are the authoritative record -- registering a name relinks the
+    words, so the cast follows without a second place to keep in sync. The
+    keywords column is a fallback for conversations generated before word
+    linking existed (and is only ever display/search data).
+    """
+    rows = (
+        g.db.query(Name.name_text)
+        .join(SentenceWord, SentenceWord.name_id == Name.id)
+        .join(ConversationSentence, ConversationSentence.sentence_id == SentenceWord.sentence_id)
+        .filter(ConversationSentence.conversation_id == conversation.id)
+        .distinct()
+        .all()
+    )
+    if rows:
+        return [row[0] for row in rows]
+
+    if not conversation.keywords:
+        return []
+    try:
+        parsed = json.loads(conversation.keywords)
+    except json.JSONDecodeError:
+        return []
+    return [str(item) for item in parsed if str(item).strip()]
+
+
+def _coverage_for_conversation(
+    conversation: Conversation, sentences_data: List[Dict[str, Any]]
+) -> Optional[CoverageReport]:
+    """Compute vocabulary coverage for a conversation's English lines.
+
+    Recomputed on each view rather than stored, so coverage improves on its own
+    as missing words are added to the dictionary.
+
+    Returns:
+        The report, or None when the conversation has no English text.
+    """
+    lines = [
+        entry["translations"].get("en", "") for entry in sentences_data if entry["translations"]
+    ]
+    lines = [line for line in lines if line.strip()]
+    if not lines:
+        return None
+
+    target_level = conversation.target_level or conversation.minimum_level or 1
+    try:
+        return analyze_lines(
+            g.db,
+            lines,
+            target_level=target_level,
+            cast_names=_conversation_cast_names(conversation),
+        )
+    except Exception as exc:  # pragma: no cover - coverage is advisory
+        logger.warning("Coverage analysis failed for conversation %s: %s", conversation.id, exc)
+        return None
+
+
 @bp.route("/<int:conversation_id>")
 def view_conversation(conversation_id: int) -> Union[str, Response]:
     """View a single conversation with all sentences and translations."""
@@ -186,6 +337,7 @@ def view_conversation(conversation_id: int) -> Union[str, Response]:
         )
 
     language_names = get_supported_languages()
+    coverage = _coverage_for_conversation(conversation, sentences_data)
 
     return render_template(
         "conversations/view.html",
@@ -193,7 +345,141 @@ def view_conversation(conversation_id: int) -> Union[str, Response]:
         keywords=keywords,
         sentences_data=sentences_data,
         language_names=language_names,
+        coverage=coverage,
+        staged_words=_already_staged_words(coverage),
+        name_kinds=NAME_KINDS,
+        name_kind_labels=NAME_KIND_LABELS,
     )
+
+
+def _already_staged_words(coverage: Optional[CoverageReport]) -> Dict[str, int]:
+    """Map missing words that are already in the import queue to their ids.
+
+    A staged word stays in the missing list until it actually becomes a lemma,
+    so the page has to say which ones are already waiting or the reviewer has no
+    way to tell an untouched word from one they staged a minute ago.
+    """
+    if coverage is None or not coverage.missing:
+        return {}
+
+    words = [token.surface for token in coverage.missing]
+    rows = (
+        g.db.query(PendingImport.english_word, PendingImport.id)
+        .filter(PendingImport.english_word.in_(words))
+        .all()
+    )
+    return {row[0]: row[1] for row in rows}
+
+
+@bp.route("/<int:conversation_id>/stage-word", methods=["POST"])
+def stage_word(conversation_id: int) -> Response:
+    """Stage a word the dialog used but the dictionary lacks as a pending import.
+
+    Nothing enters the dictionary here: the word lands in the existing intake
+    queue with the dialog line as its context, and the usual disambiguation and
+    synonym-candidate review decides what becomes a lemma.
+    """
+    if current_app.config.get("READONLY"):
+        flash("Cannot stage words in read-only mode", "error")
+        return redirect(url_for("conversations.view_conversation", conversation_id=conversation_id))
+
+    word = request.form.get("word", "").strip()
+    example_line = request.form.get("example_line", "").strip()
+    if not word:
+        flash("No word given to stage", "error")
+        return redirect(url_for("conversations.view_conversation", conversation_id=conversation_id))
+
+    existing = g.db.query(PendingImport).filter(PendingImport.english_word == word).first()
+    if existing is not None:
+        flash(f"{word!r} is already staged as pending import #{existing.id}.", "info")
+        return redirect(url_for("conversations.view_conversation", conversation_id=conversation_id))
+
+    try:
+        pending = PendingImport(
+            english_word=word,
+            # The dialog line stands in for a definition until intake supplies
+            # one; it is the context a reviewer needs to pick the right sense.
+            definition=example_line or f"Used in conversation {conversation_id}",
+            disambiguation_translation=word,
+            disambiguation_language="en",
+            example_sentence=example_line or None,
+            source=f"dialog_conversation_{conversation_id}",
+            notes=f"Missing vocabulary found in conversation {conversation_id}",
+        )
+        g.db.add(pending)
+        g.db.commit()
+        flash(f"Staged {word!r} for import.", "success")
+    except Exception as exc:
+        g.db.rollback()
+        flash_and_log(f"Error staging {word!r}: {exc}", "error")
+
+    return redirect(url_for("conversations.view_conversation", conversation_id=conversation_id))
+
+
+@bp.route("/<int:conversation_id>/register-name", methods=["POST"])
+def register_name(conversation_id: int) -> Response:
+    """Record a token as a proper name and relink the dialog's words to it.
+
+    Used when the generator failed to report a name it used, so the token shows
+    up as missing vocabulary. Registering it moves the word out of the
+    dictionary's problem list without teaching it as vocabulary.
+    """
+    if current_app.config.get("READONLY"):
+        flash("Cannot register names in read-only mode", "error")
+        return redirect(url_for("conversations.view_conversation", conversation_id=conversation_id))
+
+    conversation = g.db.query(Conversation).get(conversation_id)
+    if not conversation:
+        flash("Conversation not found", "error")
+        return redirect(url_for("conversations.list_conversations"))
+
+    name_text = request.form.get("name_text", "").strip()
+    kind = request.form.get("kind", "given_name").strip()
+    if not name_text:
+        flash("No name given", "error")
+        return redirect(url_for("conversations.view_conversation", conversation_id=conversation_id))
+
+    try:
+        name, created = get_or_create_name(
+            session=g.db,
+            name_text=name_text,
+            kind=kind,
+            notes=f"Registered from conversation {conversation_id}",
+        )
+    except ValueError as exc:
+        flash(str(exc), "error")
+        return redirect(url_for("conversations.view_conversation", conversation_id=conversation_id))
+
+    normalized = normalize_name_text(name_text)
+    sentence_ids = [
+        row.sentence_id
+        for row in g.db.query(ConversationSentence)
+        .filter(ConversationSentence.conversation_id == conversation_id)
+        .all()
+    ]
+    relinked = 0
+    if sentence_ids:
+        words = (
+            g.db.query(SentenceWord)
+            .filter(
+                SentenceWord.sentence_id.in_(sentence_ids),
+                SentenceWord.english_text == normalized,
+            )
+            .all()
+        )
+        for word_row in words:
+            word_row.name_id = name.id
+            word_row.lemma_id = None
+            word_row.part_of_speech = POS_NAME
+            relinked += 1
+
+    g.db.commit()
+    flash(
+        f"{'Registered' if created else 'Reused'} name {normalized!r} "
+        f"and linked {relinked} word occurrence(s).",
+        "success",
+    )
+    return redirect(url_for("conversations.view_conversation", conversation_id=conversation_id))
 
 
 @bp.route("/<int:conversation_id>/verify", methods=["POST"])
