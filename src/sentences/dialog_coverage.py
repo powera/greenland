@@ -339,6 +339,11 @@ def _coverage_key(cleaned_token: str, cast_names: Set[str]) -> str:
     return cleaned_token.lower()
 
 
+def _surface_rank(surface: str) -> tuple[int, str]:
+    """Sort key preferring an uncapitalized spelling of the same word."""
+    return (1 if surface[:1].isupper() else 0, surface)
+
+
 def classify_line_tokens(
     session: Session,
     line: str,
@@ -386,7 +391,12 @@ def classify_line_tokens(
                 cast_names=normalized_cast,
             )
             shared_cache[key] = entry
-        out.append(replace(entry, line_indices=[], example_line=None))
+        # surface comes from *this* occurrence, never the cached one. The cache
+        # key folds case for non-cast words, so "My" and "my" share an entry;
+        # keeping the cached surface would stamp whichever spelling was seen
+        # first onto every later one, and a sentence-initial capital would leak
+        # into mid-sentence positions (and into SentenceWord.english_text).
+        out.append(replace(entry, surface=cleaned, line_indices=[], example_line=None))
 
     return out
 
@@ -436,6 +446,12 @@ def analyze_lines(
                 entry.example_line = line
                 tokens_by_key[key] = entry
                 ordered_keys.append(key)
+            elif entry.surface != token.surface and entry.status != STATUS_NAME:
+                # Same word, different case across lines ("My" at the start of
+                # one line, "my" inside another). The report drives pending
+                # imports, so prefer the lowercase spelling -- staging a word
+                # under its sentence-initial capital would import "My".
+                entry.surface = min(entry.surface, token.surface, key=_surface_rank)
             if line_index not in entry.line_indices:
                 entry.line_indices.append(line_index)
 
