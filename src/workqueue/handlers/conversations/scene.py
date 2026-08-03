@@ -11,8 +11,10 @@ What it stores that the older keyword-driven path did not:
   a lemma, at a name, or at nothing (a word we do not have yet). That makes the
   dialog's difficulty a *computed* property instead of an asserted one.
 * **A derived minimum level.** ``Sentence.minimum_level`` is the max difficulty
-  of the lemmas the line actually used, and the conversation's is the max over
-  its sentences. The level the author asked for is kept separately as
+  of the lemmas the line actually used. The conversation's is the 85th
+  percentile over the distinct lemmas of the whole dialog, floored at the level
+  that was asked for -- a few harder words are expected and should not define
+  the dialog. The level the author asked for is kept separately as
   ``target_level``, so the review page can show the gap.
 * **The cast.** Proper names are registered as ``Name`` rows and linked, so
   "George" is neither mistaken for vocabulary nor left as an unresolved gap.
@@ -30,15 +32,12 @@ from sentences.dialog_coverage import (
     STATUS_MISSING,
     TokenCoverage,
     classify_line_tokens,
+    dialog_difficulty_level,
     part_of_speech_for,
 )
 from sentences.dialog_scene import SceneDraft, SceneRequest, generate_scene
 from storage.backend.config import DataSourceConfig
-from storage.crud.conversation import (
-    add_conversation,
-    add_conversation_sentence,
-    calculate_minimum_level,
-)
+from storage.crud.conversation import add_conversation, add_conversation_sentence
 from storage.crud.name_entity import get_or_create_name, list_names
 from storage.crud.operation_log import log_operation
 from storage.crud.sentence import add_sentence
@@ -123,6 +122,9 @@ def _store_turn(
     )
 
     levels: List[int] = []
+    # Level of each distinct lemma this line used, for the conversation-wide
+    # percentile; a word repeated across turns must only count once.
+    lemma_levels: Dict[int, int] = {}
     missing_words: List[str] = []
     for token_position, token in enumerate(tokens):
         lemma = session.get(Lemma, token.lemma_id) if token.lemma_id is not None else None
@@ -143,11 +145,16 @@ def _store_turn(
         )
         if lemma is not None and lemma.difficulty_level is not None:
             levels.append(lemma.difficulty_level)
+            lemma_levels[lemma.id] = lemma.difficulty_level
         if token.status == STATUS_MISSING:
             missing_words.append(token.surface)
 
-    # Names carry no difficulty, so a line's level is the max over its lemmas
-    # only. A line of pure names and function words has no level at all.
+    # A single line is short enough that a percentile over its words would just
+    # be the max with extra steps, and the per-sentence level is a hard gate: a
+    # learner sees the line only once every word in it is known. So this stays
+    # the max over its lemmas -- the percentile applies to the conversation.
+    # Names carry no difficulty, so a line of pure names and function words has
+    # no level at all.
     sentence.minimum_level = max(levels) if levels else None
 
     add_conversation_sentence(
@@ -164,6 +171,7 @@ def _store_turn(
         "speaker": speaker,
         "text": text,
         "minimum_level": sentence.minimum_level,
+        "lemma_levels": lemma_levels,
         "missing_words": missing_words,
     }
 
@@ -227,7 +235,17 @@ def generate_scene_conversation(
             )
         )
 
-    computed_level = calculate_minimum_level(session, conversation)
+    # One entry per distinct lemma across the whole dialog, so a word used in
+    # every turn does not drag the percentile up by repetition alone.
+    conversation_lemma_levels: Dict[int, int] = {}
+    for turn_summary in stored_turns:
+        conversation_lemma_levels.update(turn_summary["lemma_levels"])
+
+    computed_level = dialog_difficulty_level(
+        list(conversation_lemma_levels.values()),
+        target_level=draft.target_level,
+    )
+    conversation.minimum_level = computed_level
 
     missing_words: List[str] = []
     for turn_summary in stored_turns:

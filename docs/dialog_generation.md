@@ -65,15 +65,32 @@ WireWord export consumes:
 `Conversation.target_level` is what was asked for; `minimum_level` is what the
 dialog turned out to be, computed from the lemmas actually used. The gap
 between them is shown on the review page and is information rather than an
-error: a level-3 scene that needed one level-9 word is a level-9 dialog.
+error.
+
+The rollup is a **percentile, not a maximum** (`dialog_difficulty_level` in
+`sentences/dialog_coverage.py`). Some words being harder than the target — or
+missing from the dictionary entirely — is the expected shape of a natural
+dialog, so one rare word must not define the whole thing. The rules:
+
+* the level is the **85th percentile** of the distinct leveled lemmas used,
+  nearest-rank, so the result is always a level some word really has;
+* it is **floored at `target_level`** — a dialog written for level 5 is level-5
+  material even when its words happen to be easy;
+* the floor lifts only when *every* word used is below the target, in which case
+  the dialog is described by its vocabulary rather than by the request;
+* a word repeated across turns counts once, so repetition alone cannot raise it.
+
+`Sentence.minimum_level` stays the **max** over its own lemmas. A single line is
+too short for a percentile to mean anything there, and that value is a hard gate:
+a learner sees the line only once every word in it is known.
 
 ## Vocabulary coverage
 
 `sentences/dialog_coverage.py` classifies each token into one of five buckets:
 
 * **known** — a lemma at or below the target level;
-* **above level** — a lemma harder than the target level, which is what raises
-  the computed minimum level;
+* **above level** — a lemma harder than the target level; enough of these raise
+  the computed minimum level, a few do not;
 * **name** — a registered `Name`, or one the generator reported in this scene's
   cast;
 * **grammatical** — function words, numerals, and anything that is never a
