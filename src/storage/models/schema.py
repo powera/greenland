@@ -559,16 +559,20 @@ class SentencePatternWord(Base):
     2. Clear distinction between pattern definition vs. translation POS data
     3. Ability to detect when English word breakdown hasn't been generated yet
 
-    Either lemma_id or pending_import_id should be set (not both). When a word
-    used in a sentence doesn't exist in the lemmas table, pending_import_id
-    links to the staged import for later review.
+    Exactly one of lemma_id, pending_import_id, or name_id should be set. When a
+    word used in a sentence doesn't exist in the lemmas table, pending_import_id
+    links to the staged import for later review; when it is a proper name rather
+    than vocabulary, name_id links to the Name row. A name is not a lemma and a
+    learner does not study it, so it carries no difficulty and is excluded from
+    level rollups -- but the pattern still needs to record that the slot was
+    filled by a name and not left as an unresolved gap.
     """
 
     __tablename__ = "sentence_pattern_words"
     __table_args__ = (
         UniqueConstraint("sentence_id", "position", name="uq_sentence_pattern_position"),
         CheckConstraint(
-            "(lemma_id IS NOT NULL) OR (pending_import_id IS NOT NULL)",
+            "(lemma_id IS NOT NULL) OR (pending_import_id IS NOT NULL) " "OR (name_id IS NOT NULL)",
             name="ck_pattern_word_has_reference",
         ),
     )
@@ -579,6 +583,7 @@ class SentencePatternWord(Base):
     pending_import_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("pending_imports.id"), nullable=True
     )
+    name_id: Mapped[Optional[int]] = mapped_column(ForeignKey("names.id"), nullable=True)
 
     # Position in the pattern (0-indexed)
     position: Mapped[int] = mapped_column(Integer, nullable=False)

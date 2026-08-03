@@ -9,12 +9,17 @@ from typing import Any, Dict, List, Optional, Union
 from barsukas.config import Config
 from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
-from sqlalchemy import case
+from sqlalchemy import case, func
 from werkzeug.wrappers import Response
 
 import constants
 from barsukas.helpers.flash_helpers import flash_and_log
-from sentences.dialog_coverage import POS_NAME, CoverageReport, analyze_lines
+from sentences.dialog_coverage import (
+    STATUS_NAME,
+    CoverageReport,
+    analyze_lines,
+    normalize_surface_token,
+)
 from sentences.dialog_scene import DEFAULT_NUM_TURNS, SceneRequest
 from storage.crud.name_entity import get_or_create_name
 from storage.crud.sentence import (
@@ -33,8 +38,8 @@ from storage.models.schema import (
     Conversation,
     ConversationSentence,
     Sentence,
+    SentencePatternWord,
     SentenceTranslation,
-    SentenceWord,
 )
 from storage.translation_helpers import get_supported_languages
 from workqueue.task_queue import TaskType, enqueue_task
@@ -218,6 +223,50 @@ def generate_dialog() -> Response:
     return redirect(url_for("barsukas_tasks.list_tasks"))
 
 
+def _add_name_pattern_rows(sentence_ids: List[int], normalized: str, name: Name) -> int:
+    """Add a name pattern row to each listed sentence whose text uses the name.
+
+    Mechanical classification writes no row for a token it could not resolve, so
+    a name the generator failed to declare has nothing to relink. The sentence's
+    stored English text is the only record that the token was ever there.
+
+    Returns:
+        Number of rows added.
+    """
+    added = 0
+    for sentence_id in sentence_ids:
+        translation = (
+            g.db.query(SentenceTranslation)
+            .filter_by(sentence_id=sentence_id, language_code="en")
+            .first()
+        )
+        if translation is None:
+            continue
+        tokens = {
+            normalize_name_text(normalize_surface_token(token))
+            for token in (translation.translation_text or "").split()
+        }
+        if normalized not in tokens:
+            continue
+
+        next_position = (
+            g.db.query(func.max(SentencePatternWord.position))
+            .filter_by(sentence_id=sentence_id)
+            .scalar()
+        )
+        g.db.add(
+            SentencePatternWord(
+                sentence_id=sentence_id,
+                name_id=name.id,
+                position=0 if next_position is None else next_position + 1,
+                slot_name=STATUS_NAME,
+                english_text=normalized,
+            )
+        )
+        added += 1
+    return added
+
+
 def _conversation_cast_names(conversation: Conversation) -> List[str]:
     """Names this conversation casts, read from its stored word links.
 
@@ -228,8 +277,11 @@ def _conversation_cast_names(conversation: Conversation) -> List[str]:
     """
     rows = (
         g.db.query(Name.name_text)
-        .join(SentenceWord, SentenceWord.name_id == Name.id)
-        .join(ConversationSentence, ConversationSentence.sentence_id == SentenceWord.sentence_id)
+        .join(SentencePatternWord, SentencePatternWord.name_id == Name.id)
+        .join(
+            ConversationSentence,
+            ConversationSentence.sentence_id == SentencePatternWord.sentence_id,
+        )
         .filter(ConversationSentence.conversation_id == conversation.id)
         .distinct()
         .all()
@@ -460,18 +512,25 @@ def register_name(conversation_id: int) -> Response:
     relinked = 0
     if sentence_ids:
         words = (
-            g.db.query(SentenceWord)
+            g.db.query(SentencePatternWord)
             .filter(
-                SentenceWord.sentence_id.in_(sentence_ids),
-                SentenceWord.english_text == normalized,
+                SentencePatternWord.sentence_id.in_(sentence_ids),
+                SentencePatternWord.english_text == normalized,
             )
             .all()
         )
         for word_row in words:
             word_row.name_id = name.id
             word_row.lemma_id = None
-            word_row.part_of_speech = POS_NAME
+            word_row.slot_name = STATUS_NAME
             relinked += 1
+
+        # The case this route exists for: the generator did not report the name,
+        # so the token was classified missing and got no pattern row at all.
+        # There is nothing to relink, so add the rows now -- otherwise
+        # registering the name would appear to succeed and change nothing.
+        if not words:
+            relinked = _add_name_pattern_rows(sentence_ids, normalized, name)
 
     g.db.commit()
     flash(

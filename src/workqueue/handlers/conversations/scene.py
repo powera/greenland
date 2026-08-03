@@ -7,15 +7,28 @@ Sentence / SentenceWord rows -- the same shape the WireWord export consumes.
 
 What it stores that the older keyword-driven path did not:
 
-* **Word links.** Every English token becomes a ``SentenceWord`` row pointing at
-  a lemma, at a name, or at nothing (a word we do not have yet). That makes the
-  dialog's difficulty a *computed* property instead of an asserted one.
+* **Word links.** Every English token that resolves to a lemma or a name becomes
+  a ``SentencePatternWord`` row. That makes the dialog's difficulty a *computed*
+  property instead of an asserted one.
+
+  These are the mechanical, pre-decomposition guesses, which is exactly what
+  ``SentencePatternWord`` is for -- including, per its docstring, detecting that
+  the English word breakdown has not been generated yet. Writing them to
+  ``SentenceWord`` instead would defeat that: the translate/decompose path skips
+  English when English ``SentenceWord`` rows already exist, so a scene dialog
+  would never get its English decomposed, and a mechanical part-of-speech guess
+  would sit in the table that is supposed to hold reviewed output. Grammatical
+  words get no row at all, and missing words are staged through the ordinary
+  pending-import flow on the review page.
 * **A derived minimum level.** ``Sentence.minimum_level`` is the max difficulty
   of the lemmas the line actually used. The conversation's is the 85th
   percentile over the distinct lemmas of the whole dialog, floored at the level
   that was asked for -- a few harder words are expected and should not define
   the dialog. The level the author asked for is kept separately as
   ``target_level``, so the review page can show the gap.
+
+  Both are provisional: they come from mechanical matching, and decomposition
+  recomputes them from the reviewed ``SentenceWord`` rows once it has run.
 * **The cast.** Proper names are registered as ``Name`` rows and linked, so
   "George" is neither mistaken for vocabulary nor left as an unresolved gap.
 """
@@ -33,7 +46,6 @@ from sentences.dialog_coverage import (
     TokenCoverage,
     classify_line_tokens,
     dialog_difficulty_level,
-    part_of_speech_for,
 )
 from sentences.dialog_scene import SceneDraft, SceneRequest, generate_scene
 from storage.backend.config import DataSourceConfig
@@ -42,9 +54,8 @@ from storage.crud.name_entity import get_or_create_name, list_names
 from storage.crud.operation_log import log_operation
 from storage.crud.sentence import add_sentence
 from storage.crud.sentence_translation import add_sentence_translation
-from storage.crud.sentence_word import add_sentence_word
 from storage.models.name_entity import Name, normalize_name_text
-from storage.models.schema import Conversation, Lemma
+from storage.models.schema import Conversation, Lemma, SentencePatternWord
 from workqueue.tools import build_default_config
 
 logger = logging.getLogger(__name__)
@@ -126,35 +137,48 @@ def _store_turn(
     # percentile; a word repeated across turns must only count once.
     lemma_levels: Dict[int, int] = {}
     missing_words: List[str] = []
-    for token_position, token in enumerate(tokens):
+    # Pattern positions are dense and independent of surface token positions:
+    # grammatical words get no row, so reusing the token index would leave gaps
+    # and collide with uq_sentence_pattern_position.
+    pattern_position = 0
+    for token in tokens:
         lemma = session.get(Lemma, token.lemma_id) if token.lemma_id is not None else None
         name = names_by_text.get(normalize_name_text(token.surface))
         if name is None and token.name_id is not None:
             name = session.get(Name, token.name_id)
 
-        add_sentence_word(
-            session,
-            sentence=sentence,
-            position=token_position,
-            part_of_speech=part_of_speech_for(token, lemma.pos_type if lemma else None),
-            language_code=GENERATION_LANG,
-            lemma=lemma,
-            name=name if lemma is None else None,
-            english_text=token.surface,
-            declined_form=token.surface,
-        )
-        if lemma is not None and lemma.difficulty_level is not None:
-            levels.append(lemma.difficulty_level)
-            lemma_levels[lemma.id] = lemma.difficulty_level
         if token.status == STATUS_MISSING:
             missing_words.append(token.surface)
 
-    # A single line is short enough that a percentile over its words would just
-    # be the max with extra steps, and the per-sentence level is a hard gate: a
-    # learner sees the line only once every word in it is known. So this stays
-    # the max over its lemmas -- the percentile applies to the conversation.
-    # Names carry no difficulty, so a line of pure names and function words has
-    # no level at all.
+        # Only words the pattern can actually reference. A grammatical word
+        # carries no pattern meaning, and the check constraint requires one of
+        # lemma / pending import / name anyway. Missing words are staged through
+        # the existing pending-import flow on the review page, not here.
+        if lemma is None and name is None:
+            continue
+
+        session.add(
+            SentencePatternWord(
+                sentence_id=sentence.id,
+                lemma_id=lemma.id if lemma is not None else None,
+                name_id=name.id if lemma is None and name is not None else None,
+                position=pattern_position,
+                slot_name=token.status,
+                english_text=token.surface,
+            )
+        )
+        pattern_position += 1
+
+        if lemma is not None and lemma.difficulty_level is not None:
+            levels.append(lemma.difficulty_level)
+            lemma_levels[lemma.id] = lemma.difficulty_level
+
+    # Provisional, from mechanical matching only -- decomposition recomputes it
+    # from the real SentenceWord rows once those exist. The max (not the
+    # conversation's 85th percentile) because a per-sentence level is a hard
+    # gate: a learner sees the line only once every word in it is known. Names
+    # carry no difficulty, so a line of pure names and function words has no
+    # level at all.
     sentence.minimum_level = max(levels) if levels else None
 
     add_conversation_sentence(

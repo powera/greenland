@@ -25,6 +25,7 @@ from storage.models.schema import (
     ConversationSentence,
     Lemma,
     Sentence,
+    SentencePatternWord,
     SentenceTranslation,
     SentenceWord,
 )
@@ -138,7 +139,7 @@ def test_links_words_to_lemmas_and_names(session: Session, config: DataSourceCon
 
     _generate(session, config)
 
-    words = session.query(SentenceWord).all()
+    words = session.query(SentencePatternWord).all()
     linked_lemmas = {word.english_text for word in words if word.lemma_id is not None}
     linked_names = {word.english_text for word in words if word.name_id is not None}
 
@@ -160,8 +161,65 @@ def test_links_every_occurrence_of_a_name(session: Session, config: DataSourceCo
 
     _generate(session, config, reply=reply)
 
-    words = session.query(SentenceWord).all()
+    words = session.query(SentencePatternWord).all()
     assert sum(1 for word in words if word.name_id is not None) == 2
+
+
+def test_leaves_english_sentence_words_for_decomposition(
+    session: Session, config: DataSourceConfig
+) -> None:
+    """The mechanical pass must not look like a finished English decomposition.
+
+    translate/decompose sets include_english from ``len(english_words) == 0``, so
+    writing the generator's guesses to SentenceWord would make it skip English
+    forever -- leaving the guessed part of speech as the final answer.
+    """
+    _add_lemma(session, "tomato", 3)
+
+    result = _generate(session, config)
+
+    assert session.query(SentenceWord).count() == 0
+    assert session.query(SentencePatternWord).count() > 0
+
+    sentence_ids = [turn["sentence_id"] for turn in result["turns"]]
+    english_words = (
+        session.query(SentenceWord)
+        .filter(SentenceWord.sentence_id.in_(sentence_ids), SentenceWord.language_code == "en")
+        .all()
+    )
+    assert english_words == []
+
+
+def test_grammatical_words_get_no_pattern_row(session: Session, config: DataSourceConfig) -> None:
+    """A function word carries no pattern meaning, and the check constraint
+    would reject a row with no lemma, pending import, or name."""
+    _add_lemma(session, "tomato", 3)
+
+    _generate(session, config)
+
+    english_texts = {word.english_text for word in session.query(SentencePatternWord).all()}
+    assert "are" not in english_texts
+    assert "these" not in english_texts
+
+
+def test_pattern_positions_are_dense_within_a_sentence(
+    session: Session, config: DataSourceConfig
+) -> None:
+    """Skipping grammatical words must not leave gaps that collide with
+    uq_sentence_pattern_position."""
+    _add_lemma(session, "tomato", 3)
+    _add_lemma(session, "fresh", 4, pos_type="adjective")
+
+    result = _generate(session, config)
+
+    for turn in result["turns"]:
+        positions = sorted(
+            word.position
+            for word in session.query(SentencePatternWord)
+            .filter_by(sentence_id=turn["sentence_id"])
+            .all()
+        )
+        assert positions == list(range(len(positions)))
 
 
 def test_registers_the_cast_once(session: Session, config: DataSourceConfig) -> None:

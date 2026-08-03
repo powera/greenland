@@ -206,7 +206,7 @@ def dialog_difficulty_level(
     return max(computed, target_level)
 
 
-def _normalize(token: str) -> str:
+def normalize_surface_token(token: str) -> str:
     """Strip edge punctuation; preserve case (names are case-significant)."""
     return token.strip(_PUNCTUATION_STRIP).strip()
 
@@ -255,7 +255,7 @@ def classify_token(
     Returns:
         The token's coverage entry (line indices are filled in by the caller).
     """
-    cleaned = _normalize(surface)
+    cleaned = normalize_surface_token(surface)
     if not cleaned:
         return TokenCoverage(surface=surface, status=STATUS_GRAMMATICAL)
 
@@ -377,7 +377,7 @@ def classify_line_tokens(
     out: List[TokenCoverage] = []
 
     for raw_token in tokenize(line, language_code):
-        cleaned = _normalize(raw_token)
+        cleaned = normalize_surface_token(raw_token)
         if not cleaned:
             continue
         key = _coverage_key(cleaned, normalized_cast)
