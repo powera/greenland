@@ -10,6 +10,8 @@ import logging
 import re
 from typing import Optional
 
+from langtools.ruby_html import wrap_unannotated_ruby
+
 logger = logging.getLogger(__name__)
 
 # Try to import pypinyin, gracefully handle if not available
@@ -198,10 +200,11 @@ def generate_pinyin_ruby_html(chinese_text: str) -> str:
                         # Display original characters with pinyin from simplified
                         result.append(f"<ruby>{orig_segment}<rt>{pinyin}</rt></ruby>")
                     else:
-                        result.append(orig_segment)
+                        result.append(wrap_unannotated_ruby(orig_segment))
                 else:
-                    # Non-Chinese segment (punctuation, space, etc.)
-                    result.append(orig_segment)
+                    # Non-Chinese segment (Latin word, punctuation, space, etc.)
+                    # Still wrapped so it shares a baseline with annotated neighbours.
+                    result.append(wrap_unannotated_ruby(orig_segment))
         else:
             # Fallback to character-by-character if jieba is not available
             for orig_char, simp_char in zip(chinese_text, simplified_text):
@@ -212,10 +215,10 @@ def generate_pinyin_ruby_html(chinese_text: str) -> str:
                         pinyin = pinyin_list[0]
                         result.append(f"<ruby>{orig_char}<rt>{pinyin}</rt></ruby>")
                     else:
-                        result.append(orig_char)
+                        result.append(wrap_unannotated_ruby(orig_char))
                 else:
-                    # Non-Chinese character (punctuation, space, etc.)
-                    result.append(orig_char)
+                    # Non-Chinese character (Latin letter, punctuation, space, etc.)
+                    result.append(wrap_unannotated_ruby(orig_char))
 
         return "".join(result)
     except Exception as e:
