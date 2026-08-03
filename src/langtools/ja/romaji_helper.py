@@ -10,6 +10,7 @@ import logging
 from typing import Any, Optional
 
 from langtools.ja.script_analysis import contains_japanese
+from langtools.ruby_html import wrap_unannotated_ruby
 
 logger = logging.getLogger(__name__)
 
@@ -136,7 +137,9 @@ def generate_romaji_ruby_html(japanese_text: str) -> str:
             if orig != romaji and romaji:
                 html_parts.append(f"<ruby>{orig}<rt>{romaji}</rt></ruby>")
             else:
-                html_parts.append(orig)
+                # No reading to show (Latin word, digits, punctuation). Wrap it
+                # anyway so it shares a baseline with its annotated neighbours.
+                html_parts.append(wrap_unannotated_ruby(orig))
 
         return "".join(html_parts)
     except Exception as e:

@@ -180,6 +180,15 @@ h1 ruby rt, h2 ruby rt, h3 ruby rt {
     font-size: 0.6em;
 }
 
+/* Segments with no reading (Latin names, digits, punctuation) are still wrapped
+   in <ruby> with an empty <rt> so they share a baseline with annotated
+   neighbours. An empty <rt> generates no line box and would collapse to zero
+   height, dropping the base back onto the normal baseline and reinstating the
+   misalignment - so give it a zero-width space to occupy the annotation row. */
+rt:empty::before {
+    content: "\200B";
+}
+
 /* Optional: Add a subtle separator line between Chinese and pinyin */
 ruby.with-separator {
     position: relative;
