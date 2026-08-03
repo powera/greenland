@@ -17,11 +17,13 @@ dictionary fills in, which is why coverage is reported rather than enforced: a
 dialog is not rejected for using a word we lack.
 
 Difficulty note: a known lemma *above* the target level is not a defect either,
-it is information. It raises the dialog's real minimum level, which the review
-page shows against the level that was asked for.
+it is information. A handful of harder words is the expected shape of a natural
+dialog, so the level is the 85th percentile of the vocabulary used rather than
+its maximum -- see :func:`dialog_difficulty_level`.
 """
 
 import logging
+import math
 from dataclasses import dataclass, field, replace
 from typing import Dict, List, Optional, Sequence, Set
 
@@ -58,6 +60,11 @@ STATUS_LABELS: Dict[str, str] = {
 POS_NAME: str = "name"
 POS_GRAMMATICAL: str = "grammatical"
 POS_UNKNOWN: str = "unknown"
+
+# Share of a dialog's vocabulary that its computed level must cover. The top
+# ~15% is allowed to sit above it: some words being harder (or missing entirely)
+# is the expected shape of a natural dialog, not a generation defect.
+DIFFICULTY_PERCENTILE: float = 0.85
 
 # Characters stripped from token edges before classification. Kept in sync with
 # the sentence tokenizer's expectations rather than re-tokenizing per status.
@@ -97,8 +104,9 @@ class CoverageReport:
 
     target_level: int
     tokens: List[TokenCoverage] = field(default_factory=list)
-    # Highest difficulty among the known lemmas used; None when the dialog uses
-    # no leveled vocabulary at all.
+    # Difficulty of the known lemmas used, at DIFFICULTY_PERCENTILE and floored
+    # at target_level; None when the dialog uses no leveled vocabulary at all.
+    # See dialog_difficulty_level.
     computed_minimum_level: Optional[int] = None
 
     def by_status(self, status: str) -> List[TokenCoverage]:
@@ -149,6 +157,53 @@ class CoverageReport:
             if token.status in (STATUS_KNOWN, STATUS_ABOVE_LEVEL, STATUS_NAME)
         )
         return covered / total
+
+
+def dialog_difficulty_level(
+    levels: Sequence[int],
+    *,
+    target_level: Optional[int] = None,
+    percentile: float = DIFFICULTY_PERCENTILE,
+) -> Optional[int]:
+    """The difficulty level to assign a dialog that used ``levels``.
+
+    Taking the maximum makes one rare word define the whole dialog, which is the
+    wrong reading: a dialog is written *at* a level and is expected to reach past
+    it occasionally. So the level is the 85th percentile of the levels used
+    (nearest-rank, so the result is always a level some word actually has),
+    floored at the level that was asked for.
+
+    The floor is deliberate and one-directional. A dialog written for level 5
+    that happens to use easy words is still level-5 material -- it was written
+    for that learner. But a dialog whose vocabulary is *entirely* below the
+    target is described by its words, not by the request, so the floor lifts and
+    the percentile stands on its own.
+
+    Args:
+        levels: Difficulty levels of the vocabulary used, one entry per distinct
+            word. Order does not matter; duplicates weight that level.
+        target_level: Level the dialog was requested at, used as a floor. None
+            (or an unleveled request) means no floor.
+        percentile: Fraction in [0, 1]; the default is the project's 85th.
+
+    Returns:
+        The computed level, or None when no word carried a level at all.
+    """
+    if not levels:
+        return None
+
+    ordered = sorted(levels)
+    # Nearest-rank: the smallest stored level at or above the percentile cut.
+    rank = math.ceil(percentile * len(ordered))
+    computed = ordered[max(0, min(rank, len(ordered)) - 1)]
+
+    if target_level is None:
+        return computed
+    # Floor at the request -- unless every word used is below it, in which case
+    # the dialog really is easier than it was asked to be.
+    if ordered[-1] < target_level:
+        return computed
+    return max(computed, target_level)
 
 
 def _normalize(token: str) -> str:
@@ -393,7 +448,7 @@ def analyze_lines(
     return CoverageReport(
         target_level=target_level,
         tokens=tokens,
-        computed_minimum_level=max(levels) if levels else None,
+        computed_minimum_level=dialog_difficulty_level(levels, target_level=target_level),
     )
 
 

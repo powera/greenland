@@ -28,6 +28,7 @@ from sentences.dialog_coverage import (
     analyze_lines,
     classify_line_tokens,
     classify_token,
+    dialog_difficulty_level,
 )
 from storage.crud.name_entity import create_name
 from storage.models.schema import Base, DerivativeForm, Lemma
@@ -218,13 +219,58 @@ def test_analyze_lines_dedupes_and_records_where_words_appear(session: Session) 
     ]
 
 
-def test_computed_minimum_level_is_the_hardest_lemma(session: Session) -> None:
-    _add_lemma(session, "tomato", level=3)
+def test_difficulty_level_takes_the_85th_percentile() -> None:
+    """The top ~15% of the vocabulary is allowed to sit above the level."""
+    levels = [1] * 17 + [20, 20, 20]
+
+    # 85% of 20 words is rank 17, the last of the easy ones.
+    assert dialog_difficulty_level(levels, target_level=1) == 1
+    assert dialog_difficulty_level([1] * 16 + [20] * 4, target_level=1) == 20
+
+
+def test_difficulty_level_result_is_always_a_level_some_word_has() -> None:
+    """Nearest-rank, so no interpolated level that no word actually carries."""
+    assert dialog_difficulty_level([2, 4, 8, 9], target_level=2) in {2, 4, 8, 9}
+
+
+def test_difficulty_level_floors_at_the_requested_level() -> None:
+    """Easy words in a level-5 dialog do not make it a level-2 dialog."""
+    assert dialog_difficulty_level([2, 2, 2, 5], target_level=5) == 5
+
+
+def test_difficulty_level_drops_below_target_when_every_word_is_easier() -> None:
+    """A dialog whose vocabulary is entirely below target is described by it."""
+    assert dialog_difficulty_level([1, 2, 2, 3], target_level=8) == 3
+
+
+def test_difficulty_level_without_a_target_has_no_floor() -> None:
+    assert dialog_difficulty_level([1] * 9 + [4], target_level=None) == 1
+
+
+def test_difficulty_level_keeps_the_max_for_a_tiny_vocabulary() -> None:
+    """Nearest-rank cannot discount an outlier until ~7 words are in play.
+
+    A dialog using four leveled words has no 15% tail to trim, so its level is
+    still the hardest of them -- which is the right answer for a dialog that
+    short.
+    """
+    assert dialog_difficulty_level([1, 1, 1, 4], target_level=None) == 4
+
+
+def test_difficulty_level_of_nothing_is_none() -> None:
+    assert dialog_difficulty_level([], target_level=3) is None
+
+
+def test_one_hard_word_does_not_define_the_computed_level(session: Session) -> None:
+    """The 85th percentile, not the max: a lone rare word is expected."""
+    for index in range(9):
+        _add_lemma(session, f"easyword{index}", level=3)
     _add_lemma(session, "aubergine", level=12)
 
-    report = analyze_lines(session, ["A tomato and an aubergine."], target_level=3)
+    line = " ".join(f"easyword{index}" for index in range(9)) + " aubergine."
+    report = analyze_lines(session, [line], target_level=3)
 
-    assert report.computed_minimum_level == 12
+    assert report.computed_minimum_level == 3
 
 
 def test_names_do_not_raise_the_computed_level(session: Session) -> None:

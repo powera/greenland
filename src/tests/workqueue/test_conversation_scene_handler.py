@@ -191,13 +191,60 @@ def test_minimum_level_is_derived_from_the_words_used(
 
     result = _generate(session, config, target_level=3)
 
-    # Asked for level 3, but "fresh" is level 9, so the dialog really is level 9.
+    # Asked for level 3, but the dialog uses only two leveled words, so there is
+    # no 15% tail for the percentile to trim and "fresh" (level 9) stands.
     assert result["target_level"] == 3
     assert result["computed_minimum_level"] == 9
 
     conversation = session.get(Conversation, result["conversation_id"])
     assert conversation is not None
     assert conversation.minimum_level == 9
+
+
+def test_a_single_hard_word_does_not_raise_a_dialogs_level(
+    session: Session, config: DataSourceConfig
+) -> None:
+    """With enough easy vocabulary, one level-9 word falls in the trimmed tail."""
+    reply = {
+        "title": "Buying tomatoes",
+        "turns": [
+            {"speaker": "George", "text": "Are these tomatoes fresh?"},
+            {"speaker": "Clerk", "text": "Bread, milk, cheese, apples, onions, rice, beans too."},
+        ],
+        "cast": [{"name_text": "George", "kind": "given_name"}],
+    }
+    _add_lemma(session, "tomato", 3)
+    _add_lemma(session, "fresh", 9, pos_type="adjective")
+    for word in ("bread", "milk", "cheese", "apple", "onion", "rice", "bean"):
+        _add_lemma(session, word, 3)
+
+    result = _generate(session, config, reply=reply, target_level=3)
+
+    assert result["computed_minimum_level"] == 3
+
+
+def test_computed_level_is_floored_at_the_requested_level(
+    session: Session, config: DataSourceConfig
+) -> None:
+    """A dialog written for level 8 stays level 8 even when its words are easy."""
+    _add_lemma(session, "tomato", 3)
+    _add_lemma(session, "fresh", 8, pos_type="adjective")
+
+    result = _generate(session, config, target_level=8)
+
+    assert result["computed_minimum_level"] == 8
+
+
+def test_computed_level_falls_below_target_when_all_words_are_easier(
+    session: Session, config: DataSourceConfig
+) -> None:
+    """Nothing in the dialog reaches the requested level, so the floor lifts."""
+    _add_lemma(session, "tomato", 2)
+    _add_lemma(session, "fresh", 3, pos_type="adjective")
+
+    result = _generate(session, config, target_level=9)
+
+    assert result["computed_minimum_level"] == 3
 
 
 def test_names_do_not_contribute_to_the_level(session: Session, config: DataSourceConfig) -> None:
