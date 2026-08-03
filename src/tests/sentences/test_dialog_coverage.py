@@ -219,6 +219,35 @@ def test_analyze_lines_dedupes_and_records_where_words_appear(session: Session) 
     ]
 
 
+def test_a_sentence_initial_capital_does_not_leak_across_lines(session: Session) -> None:
+    """The shared cache folds case; it must not stamp "My" onto a later "my"."""
+    _add_lemma(session, "bag", level=2)
+
+    cache: dict = {}
+    first = classify_line_tokens(session, "My bag is here.", target_level=3, cache=cache)
+    second = classify_line_tokens(session, "I have a bag in my bag.", target_level=3, cache=cache)
+
+    assert first[0].surface == "My"
+    assert [token.surface for token in second] == ["I", "have", "a", "bag", "in", "my", "bag"]
+
+
+def test_report_prefers_the_uncapitalized_spelling_of_a_word(session: Session) -> None:
+    """Staging a pending import must not import a sentence-initial capital."""
+    report = analyze_lines(session, ["Cashiers are busy.", "I see the cashiers."], target_level=3)
+
+    # "Cashiers" led the first line and recurs mid-sentence in the second.
+    assert [token.surface for token in report.missing] == ["cashiers", "busy", "see"]
+
+
+def test_a_name_keeps_its_capital_across_lines(session: Session) -> None:
+    """Case-preservation for names is the reason the surface is verbatim."""
+    create_name(session, name_text="George", kind="given_name")
+
+    report = analyze_lines(session, ["George waits.", "We saw George."], target_level=3)
+
+    assert [token.surface for token in report.names] == ["George"]
+
+
 def test_difficulty_level_takes_the_85th_percentile() -> None:
     """The top ~15% of the vocabulary is allowed to sit above the level."""
     levels = [1] * 17 + [20, 20, 20]
