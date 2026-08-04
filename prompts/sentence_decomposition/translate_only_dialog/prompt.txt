@@ -1,0 +1,21 @@
+Translate the following {source_language} sentence into each of these languages:
+
+{target_languages_with_notes}
+
+{conversation_context}
+
+Translate only the sentence given below, not the surrounding dialog. Use the
+dialog only as context:
+
+- When the sentence is an elliptical or fragmentary reply, render it as whatever
+  a speaker of the target language would actually say in that position. Do not
+  translate it word for word: a stranded copula ("They are.", "Son.") is not a
+  valid reply in most languages, and several languages drop the verb entirely.
+- Choose pronouns, honorifics, and politeness level to fit these characters,
+  their ages, and their relationship to each other. Languages that force a
+  choice on every mention (Vietnamese, Japanese, Korean) and languages with a
+  T-V distinction (French, Portuguese, Spanish) must follow the scene rather
+  than defaulting.
+- Keep the register the dialog has already established.
+
+Sentence: {sentence}

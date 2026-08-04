@@ -10,11 +10,17 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from langtools.dialect_overrides import get_dialect_display_name
 from sentences.translate_and_decompose import (
     DecomposedLanguage,
     TranslateAndDecomposeResult,
+    build_phase1_prompt,
+    format_conversation_context,
     translate_and_decompose,
 )
+from storage.crud.conversation import ConversationContext, ConversationLine
+from storage.models.name_entity import Name
+from util.prompt_loader import get_context, get_prompt
 
 
 class _FakeResponse:
@@ -313,3 +319,97 @@ def test_decomposed_language_dataclass_defaults() -> None:
     assert decomposed.success is True
     assert decomposed.error is None
     assert decomposed.words == []
+
+
+# --------------------------------------------------------------------------- #
+# Phase-1 prompt variants: standalone vs. dialog line                          #
+# --------------------------------------------------------------------------- #
+
+
+def _dialog_context() -> ConversationContext:
+    """A minimal dialog context: scene, one character, one turn either side."""
+    return ConversationContext(
+        conversation_id=1,
+        title="At the playground",
+        scene_prompt="two children meeting at a playground",
+        speaker="Maria",
+        position=2,
+        turn_index=None,
+        previous_lines=[ConversationLine("Ben", "They look happy.", 1, None)],
+        next_lines=[ConversationLine("Ben", "Ben is usually shy.", 3, None)],
+        cast=[
+            Name(
+                id=1,
+                name_text="Ben",
+                kind="given_name",
+                gender="masculine",
+                notes="a small boy on the playground",
+            )
+        ],
+    )
+
+
+def test_phase1_prompt_without_context_is_unchanged() -> None:
+    """A standalone sentence keeps the ordinary translate_only prompt."""
+    built = build_phase1_prompt(
+        sentence_text="The sky is blue.",
+        source_language="en",
+        target_languages=["lt", "vi"],
+    )
+    assert built is not None
+    context, prompt, full_prompt, _schema, _targets = built
+
+    assert context == get_context("sentence_decomposition", "translate_only")
+    assert full_prompt == f"{context}\n\n{prompt}"
+    assert "Sentence: The sky is blue." in prompt
+    assert get_dialect_display_name("en") in prompt
+    assert "(lt)" in prompt and "(vi)" in prompt
+    # None of the dialog scaffolding appears for a standalone sentence.
+    assert "one line of a dialog" not in prompt
+    assert "Speaker of this line" not in prompt
+
+
+def test_phase1_prompt_with_context_uses_the_dialog_variant() -> None:
+    """A dialog line gets the scene, the cast, and the neighbouring turns."""
+    block = format_conversation_context(_dialog_context())
+    built = build_phase1_prompt(
+        sentence_text="They are.",
+        source_language="en",
+        target_languages=["vi"],
+        conversation_context=block,
+    )
+    assert built is not None
+    context, prompt, _full_prompt, _schema, _targets = built
+
+    assert context == get_context("sentence_decomposition", "translate_only_dialog")
+    assert context != get_context("sentence_decomposition", "translate_only")
+    # The sentence being translated is still the only thing asked for.
+    assert "Sentence: They are." in prompt
+    # ...but the dialog reached the prompt.
+    assert "two children meeting at a playground" in prompt
+    assert "They look happy." in prompt
+    assert "Ben is usually shy." in prompt
+    assert "Speaker of this line: Maria" in prompt
+    assert "a small boy on the playground" in prompt
+
+
+def test_conversation_context_block_omits_empty_sections() -> None:
+    """No scene, no cast, no neighbours: nothing to say, so say nothing."""
+    empty = ConversationContext(
+        conversation_id=1,
+        title=None,
+        scene_prompt=None,
+        speaker="",
+        position=0,
+        turn_index=None,
+    )
+    assert format_conversation_context(empty) == ""
+
+
+def test_conversation_context_block_survives_a_missing_scene() -> None:
+    """Cast and neighbours are worth sending even with no scene text."""
+    context = _dialog_context()
+    context.scene_prompt = None
+    block = format_conversation_context(context)
+    assert "Scene: At the playground" in block  # falls back to the title
+    assert "They look happy." in block
