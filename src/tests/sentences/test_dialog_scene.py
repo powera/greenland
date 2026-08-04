@@ -291,3 +291,88 @@ def test_generate_scene_raises_on_an_empty_reply(session: Session) -> None:
 
     with pytest.raises(RuntimeError, match="no structured data"):
         generate_scene(session, _request(), config, client=_StubClient({}))
+
+
+# --------------------------------------------------------------------------- #
+# Pre-split turns: the reply carries sentence boundaries, we do not infer them  #
+# --------------------------------------------------------------------------- #
+
+
+def test_parse_scene_response_keeps_the_replys_sentence_split() -> None:
+    """The generator knows its own sentence boundaries; use them."""
+    reply = {
+        "title": "Sharing apples",
+        "turns": [
+            {
+                "speaker": "Ben",
+                "sentences": [
+                    "Thanks.",
+                    "I have two apples in my bag.",
+                    "Would you like one?",
+                ],
+            }
+        ],
+    }
+    draft = parse_scene_response(reply, request=_request())
+
+    assert len(draft.turns) == 1
+    assert draft.turns[0].sentences == [
+        "Thanks.",
+        "I have two apples in my bag.",
+        "Would you like one?",
+    ]
+    # The whole turn is still available as one string.
+    assert draft.turns[0].text == "Thanks. I have two apples in my bag. Would you like one?"
+
+
+def test_parse_scene_response_splits_a_legacy_text_turn() -> None:
+    """An older reply shape still yields one entry per sentence."""
+    reply = {
+        "title": "Sharing apples",
+        "turns": [
+            {"speaker": "Ben", "text": "Thanks. I have two apples in my bag. Would you like one?"}
+        ],
+    }
+    draft = parse_scene_response(reply, request=_request())
+
+    assert draft.turns[0].sentences == [
+        "Thanks.",
+        "I have two apples in my bag.",
+        "Would you like one?",
+    ]
+
+
+def test_parse_scene_response_flattens_a_merged_sentences_entry() -> None:
+    """A model that puts two sentences in one slot must not defeat the split."""
+    reply = {
+        "title": "Sharing apples",
+        "turns": [{"speaker": "Ben", "sentences": ["Thanks. I have two apples.", "Want one?"]}],
+    }
+    draft = parse_scene_response(reply, request=_request())
+
+    assert draft.turns[0].sentences == ["Thanks.", "I have two apples.", "Want one?"]
+
+
+def test_parse_scene_response_drops_a_turn_with_no_sentences() -> None:
+    """An empty list is as unusable as empty text, and must not become a row."""
+    reply = {
+        "title": "Half a dialog",
+        "turns": [
+            {"speaker": "Ben", "sentences": []},
+            {"speaker": "Maria", "sentences": ["Hello."]},
+        ],
+    }
+    draft = parse_scene_response(reply, request=_request())
+
+    assert len(draft.turns) == 1
+    assert draft.turns[0].speaker == "Maria"
+
+
+def test_scene_schema_asks_for_a_sentence_list() -> None:
+    """The schema is what makes the split the model's job rather than ours."""
+    schema = build_scene_schema()
+    turn_item = schema.properties["turns"].items
+    assert turn_item is not None
+    assert turn_item["properties"]["sentences"]["type"] == "array"
+    assert turn_item["properties"]["sentences"]["items"]["type"] == "string"
+    assert "sentences" in turn_item["required"]

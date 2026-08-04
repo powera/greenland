@@ -7,7 +7,9 @@ something simple and get it, or don't. The scene should feel finished: it
 starts somewhere and ends somewhere, rather than trailing off.
 
 Guidelines:
-- Short lines. One or two sentences per turn, often less.
+- Short lines. One or two sentences per turn, often less. Return each turn's
+  sentences as separate entries in its `sentences` list, one entry per
+  sentence.
 - Everyday register: contractions, small reactions ("Oh!", "Sure.", "Got it."),
   the odd incomplete sentence.
 - Concrete details from the scene itself. If it is a grocery store, there are

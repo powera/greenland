@@ -26,3 +26,8 @@ organization, brand, animal, other).
 {notes}
 Return the dialog as structured data: a title, a one-word theme, the turns in
 order, and the cast.
+
+Each turn's `sentences` field is a list, with one entry per sentence. A turn
+that says "Thanks. I have two apples in my bag." has two entries, not one.
+Split on sentence boundaries and never put two sentences in a single entry:
+each one is stored and translated separately.

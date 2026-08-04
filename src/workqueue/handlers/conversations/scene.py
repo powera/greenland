@@ -5,6 +5,14 @@ enqueues a scene ("buying tomatoes at the grocery store") plus a target level,
 and this handler generates the dialog and stores it as ordinary Conversation /
 Sentence / SentenceWord rows -- the same shape the WireWord export consumes.
 
+A turn is stored as *one Sentence per sentence*, not one per turn. The generator
+returns each turn already split (``SceneTurn.sentences``), and the rows of one
+turn share a ``ConversationSentence.turn_index``. Everything downstream --
+translation, decomposition, audio alignment, WireWord export, and
+``minimum_level`` as a gate -- assumes one Sentence is one sentence; a turn
+stored whole made ``minimum_level`` the max over several sentences' vocabulary
+and left translation with no way to render a line on its own.
+
 What it stores that the older keyword-driven path did not:
 
 * **Word links.** Every English token that resolves to a lemma or a name becomes
@@ -93,11 +101,12 @@ def _register_cast(session: Session, draft: SceneDraft) -> Dict[str, Name]:
     return registered
 
 
-def _store_turn(
+def _store_sentence(
     session: Session,
     *,
     conversation: Conversation,
     position: int,
+    turn_index: int,
     speaker: str,
     text: str,
     target_level: int,
@@ -105,7 +114,12 @@ def _store_turn(
     names_by_text: Dict[str, Name],
     token_cache: Dict[str, TokenCoverage],
 ) -> Dict[str, Any]:
-    """Store one dialog turn as a Sentence with word links.
+    """Store one sentence of a dialog turn as a Sentence with word links.
+
+    One row per sentence, not per turn: a turn that says three sentences
+    produces three rows sharing a ``turn_index``. Everything downstream --
+    translation, decomposition, audio alignment, ``minimum_level`` as a gate --
+    assumes one Sentence is one sentence.
 
     Returns:
         Summary dict describing the stored sentence.
@@ -187,11 +201,13 @@ def _store_turn(
         sentence=sentence,
         position=position,
         speaker=speaker,
+        turn_index=turn_index,
     )
 
     return {
         "sentence_id": sentence.id,
         "position": position,
+        "turn_index": turn_index,
         "speaker": speaker,
         "text": text,
         "minimum_level": sentence.minimum_level,
@@ -243,27 +259,33 @@ def generate_scene_conversation(
     conversation.source_model = draft.source_model
 
     token_cache: Dict[str, TokenCoverage] = {}
-    stored_turns: List[Dict[str, Any]] = []
-    for position, turn in enumerate(draft.turns):
-        stored_turns.append(
-            _store_turn(
-                session,
-                conversation=conversation,
-                position=position,
-                speaker=turn.speaker,
-                text=turn.text,
-                target_level=draft.target_level,
-                cast_names=cast_names,
-                names_by_text=names_by_text,
-                token_cache=token_cache,
+    stored_sentences: List[Dict[str, Any]] = []
+    # position is dense across the whole dialog; turn_index groups the sentences
+    # that belong to one spoken turn.
+    position = 0
+    for turn_index, turn in enumerate(draft.turns):
+        for text in turn.sentences:
+            stored_sentences.append(
+                _store_sentence(
+                    session,
+                    conversation=conversation,
+                    position=position,
+                    turn_index=turn_index,
+                    speaker=turn.speaker,
+                    text=text,
+                    target_level=draft.target_level,
+                    cast_names=cast_names,
+                    names_by_text=names_by_text,
+                    token_cache=token_cache,
+                )
             )
-        )
+            position += 1
 
     # One entry per distinct lemma across the whole dialog, so a word used in
     # every turn does not drag the percentile up by repetition alone.
     conversation_lemma_levels: Dict[int, int] = {}
-    for turn_summary in stored_turns:
-        conversation_lemma_levels.update(turn_summary["lemma_levels"])
+    for sentence_summary in stored_sentences:
+        conversation_lemma_levels.update(sentence_summary["lemma_levels"])
 
     computed_level = dialog_difficulty_level(
         list(conversation_lemma_levels.values()),
@@ -272,8 +294,8 @@ def generate_scene_conversation(
     conversation.minimum_level = computed_level
 
     missing_words: List[str] = []
-    for turn_summary in stored_turns:
-        for word in turn_summary["missing_words"]:
+    for sentence_summary in stored_sentences:
+        for word in sentence_summary["missing_words"]:
             if word not in missing_words:
                 missing_words.append(word)
 
@@ -287,7 +309,8 @@ def generate_scene_conversation(
             "title": draft.title,
             "target_level": draft.target_level,
             "computed_minimum_level": computed_level,
-            "num_turns": len(stored_turns),
+            "num_turns": len(draft.turns),
+            "num_sentences": len(stored_sentences),
             "cast": draft.cast_names(),
             "missing_words": missing_words,
             "model": draft.source_model,
@@ -295,10 +318,12 @@ def generate_scene_conversation(
     )
 
     logger.info(
-        "Created conversation %s (%r) with %d turns; target level %s, computed %s, %d missing words",
+        "Created conversation %s (%r) with %d turns in %d sentences; "
+        "target level %s, computed %s, %d missing words",
         conversation.id,
         draft.title,
-        len(stored_turns),
+        len(draft.turns),
+        len(stored_sentences),
         draft.target_level,
         computed_level,
         len(missing_words),
@@ -311,7 +336,10 @@ def generate_scene_conversation(
         "scene": draft.scene,
         "target_level": draft.target_level,
         "computed_minimum_level": computed_level,
-        "turns": stored_turns,
+        "num_turns": len(draft.turns),
+        # One entry per stored Sentence, which is one sentence -- a turn that
+        # said several sentences appears as several entries sharing a turn_index.
+        "sentences": stored_sentences,
         "cast": draft.cast_names(),
         "missing_words": missing_words,
         "model": draft.source_model,
@@ -357,6 +385,7 @@ def handle_conversations_scene_generate(session: Session, payload: Dict[str, Any
     )
     return (
         f"Generated conversation {result['conversation_id']}: '{result['title']}' "
-        f"({len(result['turns'])} turns, target level {result['target_level']}, "
+        f"({result['num_turns']} turns in {len(result['sentences'])} sentences, "
+        f"target level {result['target_level']}, "
         f"computed level {result['computed_minimum_level']}); {missing_note}"
     )

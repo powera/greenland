@@ -1067,8 +1067,21 @@ class ConversationSentence(Base):
     conversation_id: Mapped[int] = mapped_column(ForeignKey("conversations.id"), nullable=False)
     sentence_id: Mapped[int] = mapped_column(ForeignKey("sentences.id"), nullable=False)
 
-    # Position in the conversation (0-indexed)
+    # Position in the conversation (0-indexed), dense across the whole dialog.
+    # One row is one sentence, so a turn that says three sentences occupies
+    # three consecutive positions.
     position: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # Which spoken turn this sentence belongs to (0-indexed). Several rows
+    # share a turn_index when one turn ran to several sentences, so this is
+    # deliberately not unique per conversation.
+    #
+    # Nullable because every row written before the turn split predates the
+    # column; for those, one row *is* one turn and the migration backfills
+    # turn_index = position. Readers must tolerate NULL and fall back to
+    # position rather than grouping by speaker -- a speaker can genuinely hold
+    # two consecutive turns, and grouping would silently merge them.
+    turn_index: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
 
     # Speaker identifier (e.g., "A", "B", or character names like "Maria", "Doctor")
     speaker: Mapped[str] = mapped_column(String, nullable=False)
