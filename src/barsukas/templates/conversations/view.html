@@ -98,7 +98,10 @@
                             </dd>
 
                             <dt class="col-sm-4">Sentences:</dt>
-                            <dd class="col-sm-8">{{ sentences_data|length }}</dd>
+                            <dd class="col-sm-8">
+                                {{ sentences_data|length }}
+                                <span class="text-muted">in {{ turns_data|length }} turn{% if turns_data|length != 1 %}s{% endif %}</span>
+                            </dd>
                         </dl>
                     </div>
                 </div>
@@ -134,49 +137,55 @@
                 <i class="bi bi-chat-left-quote"></i> Conversation
             </div>
             <div class="card-body">
-                {% if sentences_data %}
+                {% if turns_data %}
                     <div class="conversation-dialog">
-                        {% for item in sentences_data %}
-                            <div class="dialog-line mb-3 p-3 rounded {% if item.speaker == 'A' %}bg-light{% else %}bg-white border{% endif %}">
+                        {# One block per spoken turn; each sentence inside it is its own
+                           Sentence row, translated and reviewed separately. #}
+                        {% for turn in turns_data %}
+                            <div class="dialog-line mb-3 p-3 rounded {% if turn.speaker == 'A' %}bg-light{% else %}bg-white border{% endif %}">
                                 <div class="d-flex align-items-start">
                                     <div class="speaker-badge me-3">
-                                        <span class="badge {% if item.speaker == 'A' %}bg-primary{% else %}bg-secondary{% endif %} rounded-pill" style="min-width: 30px;">
-                                            {{ item.speaker }}
+                                        <span class="badge {% if turn.speaker == 'A' %}bg-primary{% else %}bg-secondary{% endif %} rounded-pill" style="min-width: 30px;">
+                                            {{ turn.speaker }}
                                         </span>
                                     </div>
                                     <div class="flex-grow-1">
-                                        <!-- English (primary) -->
-                                        {% if item.translations.get('en') %}
-                                            <div class="dialog-text mb-2">
-                                                <strong>{{ item.translations['en'] }}</strong>
-                                            </div>
-                                        {% endif %}
-
-                                        <!-- Other translations -->
-                                        <div class="translations-list small">
-                                            {% for lang_code, translation in item.translations.items() %}
-                                                {% if lang_code != 'en' %}
-                                                    <div class="translation-item text-muted">
-                                                        <span class="badge bg-light text-dark" style="font-size: 0.7rem;">{{ lang_code }}</span>
-                                                        {% if lang_code == 'zh' %}
-                                                            <span class="chinese-with-pinyin">{{ translation|pinyin_ruby|safe }}</span>
-                                                        {% elif lang_code == 'ja' %}
-                                                            <span class="japanese-with-romaji">{{ translation|romaji_ruby|safe }}</span>
-                                                        {% else %}
-                                                            {{ translation }}
-                                                        {% endif %}
+                                        {% for item in turn.sentences %}
+                                            <div class="dialog-sentence {% if not loop.first %}mt-3 pt-3 border-top{% endif %}">
+                                                <!-- English (primary) -->
+                                                {% if item.translations.get('en') %}
+                                                    <div class="dialog-text mb-2">
+                                                        <strong>{{ item.translations['en'] }}</strong>
                                                     </div>
                                                 {% endif %}
-                                            {% endfor %}
-                                        </div>
 
-                                        <!-- Link to sentence -->
-                                        <div class="mt-2">
-                                            <a href="{{ url_for('sentences.view_sentence', sentence_id=item.sentence_id) }}"
-                                               class="btn btn-sm btn-outline-secondary" title="View sentence details">
-                                                <i class="bi bi-box-arrow-up-right"></i> Sentence #{{ item.sentence_id }}
-                                            </a>
-                                        </div>
+                                                <!-- Other translations -->
+                                                <div class="translations-list small">
+                                                    {% for lang_code, translation in item.translations.items() %}
+                                                        {% if lang_code != 'en' %}
+                                                            <div class="translation-item text-muted">
+                                                                <span class="badge bg-light text-dark" style="font-size: 0.7rem;">{{ lang_code }}</span>
+                                                                {% if lang_code == 'zh' %}
+                                                                    <span class="chinese-with-pinyin">{{ translation|pinyin_ruby|safe }}</span>
+                                                                {% elif lang_code == 'ja' %}
+                                                                    <span class="japanese-with-romaji">{{ translation|romaji_ruby|safe }}</span>
+                                                                {% else %}
+                                                                    {{ translation }}
+                                                                {% endif %}
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+
+                                                <!-- Link to sentence -->
+                                                <div class="mt-2">
+                                                    <a href="{{ url_for('sentences.view_sentence', sentence_id=item.sentence_id) }}"
+                                                       class="btn btn-sm btn-outline-secondary" title="View sentence details">
+                                                        <i class="bi bi-box-arrow-up-right"></i> Sentence #{{ item.sentence_id }}
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
                                     </div>
                                 </div>
                             </div>
@@ -341,6 +350,7 @@
                         <thead>
                             <tr>
                                 <th style="width: 40px;">#</th>
+                                <th style="width: 50px;" title="Which spoken turn this sentence belongs to">Turn</th>
                                 <th style="width: 50px;">Speaker</th>
                                 {% for lang_code, lang_name in language_names.items() %}
                                     <th>{{ lang_name }}</th>
@@ -351,6 +361,13 @@
                             {% for item in sentences_data %}
                                 <tr>
                                     <td>{{ item.position + 1 }}</td>
+                                    <td>
+                                        {% if item.turn_index is not none %}
+                                            {{ item.turn_index + 1 }}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         <span class="badge {% if item.speaker == 'A' %}bg-primary{% else %}bg-secondary{% endif %}">
                                             {{ item.speaker }}

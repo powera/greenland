@@ -181,7 +181,7 @@ def test_leaves_english_sentence_words_for_decomposition(
     assert session.query(SentenceWord).count() == 0
     assert session.query(SentencePatternWord).count() > 0
 
-    sentence_ids = [turn["sentence_id"] for turn in result["turns"]]
+    sentence_ids = [entry["sentence_id"] for entry in result["sentences"]]
     english_words = (
         session.query(SentenceWord)
         .filter(SentenceWord.sentence_id.in_(sentence_ids), SentenceWord.language_code == "en")
@@ -212,11 +212,11 @@ def test_pattern_positions_are_dense_within_a_sentence(
 
     result = _generate(session, config)
 
-    for turn in result["turns"]:
+    for entry in result["sentences"]:
         positions = sorted(
             word.position
             for word in session.query(SentencePatternWord)
-            .filter_by(sentence_id=turn["sentence_id"])
+            .filter_by(sentence_id=entry["sentence_id"])
             .all()
         )
         assert positions == list(range(len(positions)))
@@ -313,7 +313,7 @@ def test_names_do_not_contribute_to_the_level(session: Session, config: DataSour
     # The second line is all name + function words + missing words, so it has
     # no level of its own and cannot raise the conversation's.
     assert result["computed_minimum_level"] == 3
-    second_sentence = session.get(Sentence, result["turns"][1]["sentence_id"])
+    second_sentence = session.get(Sentence, result["sentences"][1]["sentence_id"])
     assert second_sentence is not None
     assert second_sentence.minimum_level is None
 
@@ -353,3 +353,114 @@ def test_handler_returns_a_summary_message(session: Session) -> None:
     assert "Buying tomatoes" in message
     assert "target level 3" in message
     assert "not in the dictionary yet" in message
+
+
+# --------------------------------------------------------------------------- #
+# One Sentence per sentence, grouped by turn_index                             #
+# --------------------------------------------------------------------------- #
+
+
+_SPLIT_REPLY: Dict[str, Any] = {
+    "title": "Sharing apples",
+    "theme": "food",
+    "turns": [
+        {
+            "speaker": "Ben",
+            "sentences": [
+                "Thanks.",
+                "I have two apples in my bag.",
+                "Would you like one?",
+            ],
+        },
+        {"speaker": "Maria", "sentences": ["Yes please."]},
+    ],
+    "cast": [{"name_text": "Ben", "kind": "given_name", "gender": "masculine"}],
+}
+
+
+def test_a_multi_sentence_turn_becomes_several_rows(
+    session: Session, config: DataSourceConfig
+) -> None:
+    """The core of the change: one Sentence row per sentence, not per turn."""
+    result = _generate(session, config, reply=_SPLIT_REPLY)
+
+    links = (
+        session.query(ConversationSentence)
+        .filter_by(conversation_id=result["conversation_id"])
+        .order_by(ConversationSentence.position)
+        .all()
+    )
+
+    assert [link.position for link in links] == [0, 1, 2, 3]
+    assert [link.turn_index for link in links] == [0, 0, 0, 1]
+    assert [link.speaker for link in links] == ["Ben", "Ben", "Ben", "Maria"]
+    assert result["num_turns"] == 2
+    assert len(result["sentences"]) == 4
+
+
+def test_each_sentence_stores_only_its_own_text(session: Session, config: DataSourceConfig) -> None:
+    """A row's translation is its sentence, not the whole turn."""
+    result = _generate(session, config, reply=_SPLIT_REPLY)
+
+    texts = [
+        session.query(SentenceTranslation)
+        .filter_by(sentence_id=entry["sentence_id"], language_code="en")
+        .one()
+        .translation_text
+        for entry in result["sentences"]
+    ]
+    assert texts == [
+        "Thanks.",
+        "I have two apples in my bag.",
+        "Would you like one?",
+        "Yes please.",
+    ]
+
+
+def test_minimum_level_is_per_sentence_within_a_turn(
+    session: Session, config: DataSourceConfig
+) -> None:
+    """The reason for the split: a hard word must not gate its whole turn.
+
+    "apple" is level 1 and "bag" level 6. Stored as one turn, every sentence of
+    it would be gated at 6; stored per sentence, only the sentence that uses
+    "bag" is.
+    """
+    _add_lemma(session, "apple", 1)
+    _add_lemma(session, "bag", 6)
+
+    result = _generate(session, config, reply=_SPLIT_REPLY)
+
+    levels_by_text: Dict[str, Optional[int]] = {}
+    for entry in result["sentences"]:
+        stored = session.get(Sentence, entry["sentence_id"])
+        assert stored is not None
+        levels_by_text[entry["text"]] = stored.minimum_level
+    assert levels_by_text["I have two apples in my bag."] == 6
+    # The other sentences of the same turn use none of that vocabulary.
+    assert levels_by_text["Thanks."] is None
+    assert levels_by_text["Would you like one?"] is None
+
+
+def test_consecutive_turns_by_one_speaker_stay_distinct(
+    session: Session, config: DataSourceConfig
+) -> None:
+    """Turns cannot be recovered by grouping on speaker, which is why they have an index."""
+    reply: Dict[str, Any] = {
+        "title": "A pause",
+        "turns": [
+            {"speaker": "Ben", "sentences": ["Hello?"]},
+            {"speaker": "Ben", "sentences": ["Is anyone there?"]},
+        ],
+        "cast": [],
+    }
+    result = _generate(session, config, reply=reply)
+
+    links = (
+        session.query(ConversationSentence)
+        .filter_by(conversation_id=result["conversation_id"])
+        .order_by(ConversationSentence.position)
+        .all()
+    )
+    assert [link.speaker for link in links] == ["Ben", "Ben"]
+    assert [link.turn_index for link in links] == [0, 1]

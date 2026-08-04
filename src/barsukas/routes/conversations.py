@@ -4,7 +4,7 @@
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from barsukas.config import Config
 from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
@@ -381,6 +381,7 @@ def view_conversation(conversation_id: int) -> Union[str, Response]:
         sentences_data.append(
             {
                 "position": cs.position,
+                "turn_index": cs.turn_index,
                 "speaker": cs.speaker,
                 "sentence_id": cs.sentence_id,
                 "sentence": sentence,
@@ -396,12 +397,45 @@ def view_conversation(conversation_id: int) -> Union[str, Response]:
         conversation=conversation,
         keywords=keywords,
         sentences_data=sentences_data,
+        turns_data=_group_into_turns(sentences_data),
         language_names=language_names,
         coverage=coverage,
         staged_words=_already_staged_words(coverage),
         name_kinds=NAME_KINDS,
         name_kind_labels=NAME_KIND_LABELS,
     )
+
+
+def _group_into_turns(sentences_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Group sentence rows into the turns they were spoken as.
+
+    A turn that ran to several sentences is several rows sharing a
+    ``turn_index``; the reviewer needs to see the turn as a unit while still
+    acting on each sentence. Rows written before the split have no
+    ``turn_index``, and for those one row is one turn, so ``position`` is the
+    right key.
+
+    Grouping by speaker would be wrong: a speaker can hold two consecutive
+    turns, and that would silently merge them.
+    """
+    turns: List[Dict[str, Any]] = []
+    current_key: Optional[Tuple[bool, int]] = None
+    for entry in sentences_data:
+        turn_index = entry.get("turn_index")
+        # Keep NULL and non-NULL keys in separate spaces so a half-migrated
+        # conversation cannot collide a position with a turn_index.
+        key = (turn_index is None, entry["position"] if turn_index is None else turn_index)
+        if current_key != key:
+            turns.append(
+                {
+                    "turn_index": turn_index,
+                    "speaker": entry["speaker"],
+                    "sentences": [],
+                }
+            )
+            current_key = key
+        turns[-1]["sentences"].append(entry)
+    return turns
 
 
 def _already_staged_words(coverage: Optional[CoverageReport]) -> Dict[str, int]:

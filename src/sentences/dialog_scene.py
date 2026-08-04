@@ -47,6 +47,11 @@ PROMPT_TYPE: str = "scene"
 # Default shape of a generated scene.
 DEFAULT_NUM_TURNS: int = 10
 
+# Language dialogs are generated in, used here only to pick sentence-splitting
+# rules. Mirrors GENERATION_LANG in workqueue.handlers.conversations.scene,
+# which owns the storage side of the same decision.
+GENERATION_LANG: str = "en"
+
 # How many level-appropriate words to offer as encouraged vocabulary. Large
 # enough to steer register, small enough that the model does not treat it as a
 # checklist to exhaust.
@@ -85,10 +90,22 @@ class SceneRequest:
 
 @dataclass
 class SceneTurn:
-    """One line of dialog: who says it, and what they say."""
+    """One spoken turn: who says it, and the sentences they say.
+
+    A turn holds a *list* of sentences rather than one string because each
+    sentence becomes its own ``Sentence`` row. The generator returns the split
+    directly -- it already knows where its own sentence boundaries are, which
+    beats inferring them back out of flattened text -- and
+    :func:`parse_scene_response` normalizes whatever comes back.
+    """
 
     speaker: str
-    text: str
+    sentences: List[str]
+
+    @property
+    def text(self) -> str:
+        """The whole turn as one string, for callers that want the line."""
+        return " ".join(self.sentences)
 
 
 @dataclass
@@ -274,12 +291,17 @@ def build_scene_schema() -> Schema:
                             "type": "string",
                             "description": "Who is speaking: a name from the cast, or a role like 'Clerk'",
                         },
-                        "text": {
-                            "type": "string",
-                            "description": "What they say. One or two sentences.",
+                        "sentences": {
+                            "type": "array",
+                            "description": (
+                                "What they say, one array entry per sentence. Split on "
+                                "sentence boundaries; never put two sentences in one entry. "
+                                "A turn is usually one or two sentences."
+                            ),
+                            "items": {"type": "string"},
                         },
                     },
-                    "required": ["speaker", "text"],
+                    "required": ["speaker", "sentences"],
                 },
             ),
             "cast": SchemaProperty(
@@ -346,12 +368,12 @@ def parse_scene_response(
         if not isinstance(raw_turn, dict):
             logger.debug("Skipping non-object turn at index %d: %r", index, raw_turn)
             continue
-        text = str(raw_turn.get("text") or "").strip()
+        sentences = _turn_sentences(raw_turn, index)
         speaker = str(raw_turn.get("speaker") or "").strip()
-        if not text:
-            logger.debug("Skipping turn %d with empty text", index)
+        if not sentences:
+            logger.debug("Skipping turn %d with no usable text", index)
             continue
-        turns.append(SceneTurn(speaker=speaker or _fallback_speaker(index), text=text))
+        turns.append(SceneTurn(speaker=speaker or _fallback_speaker(index), sentences=sentences))
 
     if not turns:
         raise ValueError("The generated scene contained no usable dialog turns")
@@ -384,6 +406,49 @@ def parse_scene_response(
         source_model=source_model,
         encouraged_words=list(encouraged_words),
     )
+
+
+def _turn_sentences(raw_turn: Dict[str, Any], index: int) -> List[str]:
+    """Extract one turn's sentences from either reply shape.
+
+    The current schema asks for ``sentences`` as a list. Two things can still
+    arrive: an older or malformed reply carrying a single ``text`` string, and a
+    ``sentences`` list whose entries each hold more than one sentence. Both are
+    handled by running the sentence splitter over whatever came back, so the
+    splitter acts as a normalizer rather than a second code path -- which also
+    keeps it exercised.
+
+    Args:
+        raw_turn: One entry of the reply's ``turns`` array.
+        index: Position of the turn, for logging.
+
+    Returns:
+        The turn's sentences, in order; empty when the turn said nothing.
+    """
+    # Imported here rather than at module scope: the splitter is the fallback,
+    # and the genys agent pulls in the document-ingestion stack.
+    from agents.genys.agent import GenysAgent
+
+    raw_sentences = raw_turn.get("sentences")
+    if isinstance(raw_sentences, list):
+        candidates = [str(entry) for entry in raw_sentences if str(entry or "").strip()]
+    else:
+        candidates = []
+
+    if not candidates:
+        text = str(raw_turn.get("text") or "").strip()
+        if not text:
+            return []
+        logger.info("Turn %d has no 'sentences' list; splitting its 'text' instead", index)
+        candidates = [text]
+
+    sentences: List[str] = []
+    for candidate in candidates:
+        parts = GenysAgent.split_sentences(candidate, GENERATION_LANG)
+        # split_sentences returns [] only for empty input, which is filtered
+        # above; keep the original as a single sentence if it ever does.
+        sentences.extend(parts or [candidate.strip()])
+    return [sentence for sentence in sentences if sentence]
 
 
 def _fallback_speaker(index: int) -> str:
