@@ -138,10 +138,25 @@ ENGLISH_GRAMMATICAL_CONTRACTIONS: Final[list[str]] = [
     "ain't",
 ]
 
+# Negators. These are particles rather than a category of their own: English
+# spreads negation across several parts of speech ("not" adverbial, "no"
+# determiner, "neither" correlative), so no single POS covers them and none is
+# a teachable lemma. Listing them here keeps them out of lemma lookup, which
+# otherwise matches "not" against the interjection "no".
+ENGLISH_PARTICLES: Final[list[str]] = [
+    "not",
+    "n't",
+    "never",
+    "no",
+    "nor",
+    "neither",
+]
+
 ENGLISH_GRAMMATICAL_WORDS: Final[frozenset[str]] = frozenset(
     [w.lower() for w in ENGLISH_ARTICLES]
     + [w.lower() for w in ENGLISH_AUXILIARY_VERBS]
     + [w.lower() for w in ENGLISH_GRAMMATICAL_CONTRACTIONS]
+    + [w.lower() for w in ENGLISH_PARTICLES]
 )
 
 # ── tier 3: function words (conjunctions, prepositions) ───────────────
@@ -237,6 +252,7 @@ ENGLISH_GRAMMATICAL_WORDS_BY_SUBCATEGORY: Final[GrammaticalWordsBySubcategory] =
         non_personal_pronouns=ENGLISH_NON_PERSONAL_PRONOUNS,
         articles=frozenset(word.lower() for word in ENGLISH_ARTICLES),
         auxiliaries=frozenset(word.lower() for word in ENGLISH_AUXILIARY_VERBS),
+        particles=frozenset(word.lower() for word in ENGLISH_PARTICLES),
         contractions=frozenset(word.lower() for word in ENGLISH_GRAMMATICAL_CONTRACTIONS),
         prepositions=frozenset(word.lower() for word in ENGLISH_PREPOSITIONS),
         conjunctions=frozenset(word.lower() for word in ENGLISH_CONJUNCTIONS),
