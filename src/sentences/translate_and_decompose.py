@@ -33,7 +33,7 @@ import logging
 import re
 import unicodedata
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple
 
 from sqlalchemy.orm import Session
 
@@ -68,6 +68,9 @@ from sentences.token_estimates import (
 )
 from storage.translation_helpers import LANGUAGE_NAMES, normalize_llm_language_codes
 from util.prompt_loader import get_context, get_prompt
+
+if TYPE_CHECKING:
+    from storage.crud.conversation import ConversationContext
 
 logger = logging.getLogger(__name__)
 
@@ -279,6 +282,7 @@ def build_phase1_prompt(
     sentence_text: str,
     source_language: str,
     target_languages: Sequence[str],
+    conversation_context: Optional[str] = None,
 ) -> Optional[Tuple[str, str, str, Dict[str, Any], List[str]]]:
     """Build the Phase-1 sentence-translation prompt.
 
@@ -289,6 +293,14 @@ def build_phase1_prompt(
 
     ``full_prompt`` is the concatenation ``f"{context}\\n\\n{prompt}"`` used by
     OpenAI Batch (which takes a single ``messages[0].content`` string).
+
+    Args:
+        conversation_context: Optional dialog context block. When non-empty, the
+            ``translate_only_dialog`` prompt variant is used instead of
+            ``translate_only``: it adds the surrounding turns, the scene, and the
+            cast, plus the instructions for resolving elliptical replies and
+            choosing pronouns and register. A standalone sentence passes None
+            here and gets the ordinary prompt unchanged.
     """
     normalized_targets = normalize_llm_language_codes(
         list(target_languages), operation_name="Phase 1 translation"
@@ -311,15 +323,72 @@ def build_phase1_prompt(
             line += ": " + "; ".join(notes)
         target_language_lines.append(line)
 
-    prompt = get_prompt("sentence_decomposition", "translate_only").format(
-        sentence=sentence_text,
-        source_language=get_dialect_display_name(source_language),
-        target_languages_with_notes="\n".join(target_language_lines),
-    )
-    context = get_context("sentence_decomposition", "translate_only")
+    prompt_type = "translate_only_dialog" if conversation_context else "translate_only"
+    format_fields: Dict[str, str] = {
+        "sentence": sentence_text,
+        "source_language": get_dialect_display_name(source_language),
+        "target_languages_with_notes": "\n".join(target_language_lines),
+    }
+    if conversation_context:
+        format_fields["conversation_context"] = conversation_context
+
+    prompt = get_prompt("sentence_decomposition", prompt_type).format(**format_fields)
+    context = get_context("sentence_decomposition", prompt_type)
     schema = _phase1_schema(normalized_targets)
     full_prompt = f"{context}\n\n{prompt}"
     return context, prompt, full_prompt, schema, normalized_targets
+
+
+def format_conversation_context(context: "ConversationContext") -> str:
+    """Render a dialog context block for the Phase-1 translation prompt.
+
+    Facts only -- what the scene is, who the characters are, and what is said
+    around this line. The instructions for *using* those facts live in
+    ``prompts/sentence_decomposition/translate_only_dialog/``, since prompt
+    wording belongs in prompt files.
+
+    Returns:
+        The block, or "" when the context carries nothing worth sending (which
+        the caller should treat as "use the ordinary prompt").
+    """
+    sections: List[str] = []
+
+    if context.scene_prompt and context.scene_prompt.strip():
+        sections.append(f"Scene: {context.scene_prompt.strip()}")
+    elif context.title and context.title.strip():
+        sections.append(f"Scene: {context.title.strip()}")
+
+    if context.cast:
+        cast_lines: List[str] = ["Characters:"]
+        for name in context.cast:
+            traits = [name.kind_label]
+            if name.gender:
+                traits.append(name.gender)
+            line = f"- {name.name_text} ({', '.join(traits)})"
+            if name.notes and name.notes.strip():
+                line += f": {name.notes.strip()}"
+            cast_lines.append(line)
+        sections.append("\n".join(cast_lines))
+
+    if context.speaker:
+        sections.append(f"Speaker of this line: {context.speaker}")
+
+    if context.previous_lines:
+        sections.append(
+            "Dialog so far:\n"
+            + "\n".join(f'  {line.speaker}: "{line.text}"' for line in context.previous_lines)
+        )
+    if context.next_lines:
+        sections.append(
+            "Continues:\n"
+            + "\n".join(f'  {line.speaker}: "{line.text}"' for line in context.next_lines)
+        )
+
+    # The scene and cast alone are worth sending even with no neighbouring
+    # lines: they are what a forced pronoun or honorific choice needs.
+    if not sections:
+        return ""
+    return "This sentence is one line of a dialog.\n\n" + "\n\n".join(sections)
 
 
 def translate_sentence_text(
@@ -329,17 +398,24 @@ def translate_sentence_text(
     target_languages: Sequence[str],
     client: UnifiedLLMClient,
     model: str = DEFAULT_MODEL,
+    conversation_context: Optional[str] = None,
 ) -> Dict[str, str]:
     """Phase 1: ask the LLM for sentence-level translations only.
 
     Returns a dict mapping language_code -> translated sentence string. Languages
     the LLM omits or returns empty are dropped silently. On LLM failure returns
     an empty dict and logs a warning.
+
+    Args:
+        conversation_context: Optional dialog context block (see
+            :func:`format_conversation_context`). When present, the
+            conversation-aware prompt variant is used.
     """
     built = build_phase1_prompt(
         sentence_text=sentence_text,
         source_language=source_language,
         target_languages=target_languages,
+        conversation_context=conversation_context,
     )
     if built is None:
         return {}

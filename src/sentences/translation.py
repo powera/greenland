@@ -123,8 +123,10 @@ def translate_sentence(
     from sentences.translate_and_decompose import (
         TranslateAndDecomposeResult,
         decompose_with_existing_translations,
+        format_conversation_context,
         translate_sentence_text,
     )
+    from storage.crud.conversation import get_sentence_conversation_context
 
     sentence = session.query(Sentence).get(sentence_id)
     if not sentence:
@@ -178,6 +180,18 @@ def translate_sentence(
     client = UnifiedLLMClient()
     source_text = source_translation.translation_text
 
+    # A dialog line translated in isolation loses what it is answering, which
+    # is what turns an elliptical reply into a stranded copula in every
+    # language. Standalone sentences get None here and the ordinary prompt.
+    conversation_context_obj = get_sentence_conversation_context(
+        session, sentence_id, language_code=source_language
+    )
+    conversation_context = (
+        format_conversation_context(conversation_context_obj) or None
+        if conversation_context_obj is not None
+        else None
+    )
+
     # ── Phase 1: translate, then PERSIST before Phase 3 ────────────────────
     phase1_translations = translate_sentence_text(
         sentence_text=source_text,
@@ -185,6 +199,7 @@ def translate_sentence(
         target_languages=phase1_languages,
         client=client,
         model=model,
+        conversation_context=conversation_context,
     )
     if not phase1_translations:
         raise ValueError("Phase 1 translation produced no results")

@@ -29,7 +29,8 @@ from clients.openai.batch_client import OpenAIBatchClient
 from clients.openai.client import is_gpt5_nano_or_mini_model, reasoning_effort_for_model
 from sentences.candidate_lookup import DEFAULT_SOURCE_LANGUAGES
 from sentences.token_estimates import estimate_translation_output_tokens
-from sentences.translate_and_decompose import build_phase1_prompt
+from sentences.translate_and_decompose import build_phase1_prompt, format_conversation_context
+from storage.crud.conversation import get_sentence_conversation_context
 from storage.models.schema import Sentence, SentenceTranslation
 from workqueue.tools import workqueue_payload_handler
 
@@ -120,10 +121,22 @@ def handle_sentences_batch_translate_submit(
                 skipped.append(sentence_id)
                 continue
 
+            # Same dialog context the synchronous path passes, so a batched
+            # dialog line is not translated blind to what it answers.
+            context_obj = get_sentence_conversation_context(
+                session, sentence_id, language_code=source_language
+            )
+            conversation_context = (
+                format_conversation_context(context_obj) or None
+                if context_obj is not None
+                else None
+            )
+
             built = build_phase1_prompt(
                 sentence_text=source_translation,
                 source_language=source_language,
                 target_languages=phase1_targets,
+                conversation_context=conversation_context,
             )
             if built is None:
                 logger.warning(
