@@ -20,83 +20,13 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from langtools.en.grammatical_words import ENGLISH_STOPWORD_ANNOTATIONS
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
 from storage.models.schema import DerivativeForm, Lemma
 from storage.translation_helpers import bulk_get_translations
 
 logger = logging.getLogger(__name__)
-
-
-# Common English contractions, emitted into the export's stopword section so the
-# atacama-powera annotator recognizes them instead of leaving them unannotated.
-# Contractions are function words: like the other stopwords they are flagged and
-# not processed further (no GUID, no translations, no Lemma table entry). The
-# "pos" is the category of the leading word ("pronoun" for pronoun-led forms,
-# "verb" for the auxiliary/negation forms). The "lemma" field reuses the stopword
-# schema's display slot to hold the expansion (e.g. "do not"), which the
-# annotator surfaces in the hover tooltip.
-CONTRACTIONS: Dict[str, Dict[str, str]] = {
-    # Negations (auxiliary verb + not)
-    "don't": {"pos": "verb", "lemma": "do not"},
-    "doesn't": {"pos": "verb", "lemma": "does not"},
-    "didn't": {"pos": "verb", "lemma": "did not"},
-    "isn't": {"pos": "verb", "lemma": "is not"},
-    "aren't": {"pos": "verb", "lemma": "are not"},
-    "wasn't": {"pos": "verb", "lemma": "was not"},
-    "weren't": {"pos": "verb", "lemma": "were not"},
-    "haven't": {"pos": "verb", "lemma": "have not"},
-    "hasn't": {"pos": "verb", "lemma": "has not"},
-    "hadn't": {"pos": "verb", "lemma": "had not"},
-    "can't": {"pos": "verb", "lemma": "cannot"},
-    "couldn't": {"pos": "verb", "lemma": "could not"},
-    "won't": {"pos": "verb", "lemma": "will not"},
-    "wouldn't": {"pos": "verb", "lemma": "would not"},
-    "shouldn't": {"pos": "verb", "lemma": "should not"},
-    "mustn't": {"pos": "verb", "lemma": "must not"},
-    "mightn't": {"pos": "verb", "lemma": "might not"},
-    "needn't": {"pos": "verb", "lemma": "need not"},
-    "shan't": {"pos": "verb", "lemma": "shall not"},
-    "ain't": {"pos": "verb", "lemma": "am not"},
-    # Pronoun + "am"
-    "i'm": {"pos": "pronoun", "lemma": "I am"},
-    # Pronoun + "are"
-    "you're": {"pos": "pronoun", "lemma": "you are"},
-    "we're": {"pos": "pronoun", "lemma": "we are"},
-    "they're": {"pos": "pronoun", "lemma": "they are"},
-    # Pronoun + "is"/"has"
-    "he's": {"pos": "pronoun", "lemma": "he is"},
-    "she's": {"pos": "pronoun", "lemma": "she is"},
-    "it's": {"pos": "pronoun", "lemma": "it is"},
-    "that's": {"pos": "pronoun", "lemma": "that is"},
-    "there's": {"pos": "pronoun", "lemma": "there is"},
-    "here's": {"pos": "pronoun", "lemma": "here is"},
-    "what's": {"pos": "pronoun", "lemma": "what is"},
-    "who's": {"pos": "pronoun", "lemma": "who is"},
-    "where's": {"pos": "pronoun", "lemma": "where is"},
-    "how's": {"pos": "pronoun", "lemma": "how is"},
-    "let's": {"pos": "pronoun", "lemma": "let us"},
-    # Pronoun + "have"
-    "i've": {"pos": "pronoun", "lemma": "I have"},
-    "you've": {"pos": "pronoun", "lemma": "you have"},
-    "we've": {"pos": "pronoun", "lemma": "we have"},
-    "they've": {"pos": "pronoun", "lemma": "they have"},
-    # Pronoun + "will"
-    "i'll": {"pos": "pronoun", "lemma": "I will"},
-    "you'll": {"pos": "pronoun", "lemma": "you will"},
-    "he'll": {"pos": "pronoun", "lemma": "he will"},
-    "she'll": {"pos": "pronoun", "lemma": "she will"},
-    "we'll": {"pos": "pronoun", "lemma": "we will"},
-    "they'll": {"pos": "pronoun", "lemma": "they will"},
-    "it'll": {"pos": "pronoun", "lemma": "it will"},
-    # Pronoun + "would"/"had"
-    "i'd": {"pos": "pronoun", "lemma": "I would"},
-    "you'd": {"pos": "pronoun", "lemma": "you would"},
-    "he'd": {"pos": "pronoun", "lemma": "he would"},
-    "she'd": {"pos": "pronoun", "lemma": "she would"},
-    "we'd": {"pos": "pronoun", "lemma": "we would"},
-    "they'd": {"pos": "pronoun", "lemma": "they would"},
-}
 
 
 class AtacamaExporter:
@@ -120,48 +50,26 @@ class AtacamaExporter:
         self.languages = languages
 
     def _load_stopwords(self) -> Dict[str, Dict[str, str]]:
-        """Load function words from data/release/stopwords/en.jsonl.
+        """Return the stopword table from the langtools English registry.
 
-        Also seeds the result with the English contraction table (see
-        CONTRACTIONS) so contractions are token-matched in the atacama output.
-        Curated file entries take precedence over the contraction defaults on
-        any key collision.
+        ENGLISH_STOPWORD_ANNOTATIONS covers all four grammatical tiers plus
+        contractions, keyed by lowercase surface form. Entries are flagged in
+        the export and not processed further: no GUID, no translations, no
+        Lemma table entry. The "lemma" field is a display headword ("I" for
+        "me", "do not" for "don't"), not a link to a lemma.
+
+        This used to read data/release/stopwords/en.jsonl, a hand-maintained
+        file that had drifted to 58 words - missing every conjunction ("as",
+        "and", "but"), determiner, interrogative and particle. Deriving from
+        the registry makes that drift impossible.
 
         Returns:
             Dictionary keyed by lowercase word → {pos, lemma}
         """
-        stopwords_path = os.path.join(
-            constants.PROJECT_ROOT, "data", "release", "stopwords", "en.jsonl"
-        )
-        # Seed with contractions; file entries below may override on collision.
         stopwords: Dict[str, Dict[str, str]] = {
-            word_key: dict(annotation) for word_key, annotation in CONTRACTIONS.items()
+            word: dict(annotation) for word, annotation in ENGLISH_STOPWORD_ANNOTATIONS.items()
         }
-
-        if not os.path.exists(stopwords_path):
-            logger.warning("Stopwords file not found: %s", stopwords_path)
-            return stopwords
-
-        with open(stopwords_path, "r", encoding="utf-8") as f:
-            for line_num, line in enumerate(f, 1):
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    entry = json.loads(line)
-                    word_key = entry["word"].lower()
-                    stopwords[word_key] = {
-                        "pos": entry["pos"],
-                        "lemma": entry["lemma"],
-                    }
-                except (json.JSONDecodeError, KeyError) as e:
-                    logger.warning("Skipping invalid stopwords line %d: %s", line_num, e)
-
-        logger.info(
-            "Loaded %d stopword entries (incl. %d contractions)",
-            len(stopwords),
-            len(CONTRACTIONS),
-        )
+        logger.info("Loaded %d stopword entries from the langtools registry", len(stopwords))
         return stopwords
 
     def _load_derivative_forms_from_jsonl(

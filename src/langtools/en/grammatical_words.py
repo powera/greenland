@@ -19,6 +19,8 @@ from typing import Final
 from langtools.grammatical_word_schema import (
     ALSO_LEMMA_SUBCATEGORIES,
     GRAMMATICAL_ONLY_SUBCATEGORIES,
+    ContractionAnnotation,
+    GrammaticalSubcategory,
     GrammaticalWordsBySubcategory,
     build_subcategory_mapping,
     union_subcategories,
@@ -99,44 +101,77 @@ ENGLISH_AUXILIARY_VERBS: Final[list[str]] = [
     "could",
 ]
 
-ENGLISH_GRAMMATICAL_CONTRACTIONS: Final[list[str]] = [
-    "don't",
-    "doesn't",
-    "didn't",
-    "can't",
-    "couldn't",
-    "won't",
-    "wouldn't",
-    "isn't",
-    "aren't",
-    "wasn't",
-    "weren't",
-    "haven't",
-    "hasn't",
-    "hadn't",
-    "I'm",
-    "I'll",
-    "I've",
-    "I'd",
-    "you're",
-    "you'll",
-    "you've",
-    "he's",
-    "she's",
-    "it's",
-    "we're",
-    "we've",
-    "they're",
-    "what's",
-    "where's",
-    "who's",
-    "that's",
-    "there's",
-    "here's",
-    "let's",
-    "that'll",
-    "ain't",
-]
+# Contractions, with the part of speech of the leading word and the expanded
+# form. The expansion is display data: consumers that annotate English text
+# (e.g. the atacama export) surface it in a tooltip, and it is the reason this
+# is a mapping rather than the flat list it used to be. "pos" is "verb" for the
+# auxiliary/negation forms and "pronoun" for the pronoun-led ones.
+ENGLISH_CONTRACTION_ANNOTATIONS: Final[dict[str, ContractionAnnotation]] = {
+    # Negations (auxiliary verb + not)
+    "don't": ContractionAnnotation(pos="verb", expansion="do not"),
+    "doesn't": ContractionAnnotation(pos="verb", expansion="does not"),
+    "didn't": ContractionAnnotation(pos="verb", expansion="did not"),
+    "isn't": ContractionAnnotation(pos="verb", expansion="is not"),
+    "aren't": ContractionAnnotation(pos="verb", expansion="are not"),
+    "wasn't": ContractionAnnotation(pos="verb", expansion="was not"),
+    "weren't": ContractionAnnotation(pos="verb", expansion="were not"),
+    "haven't": ContractionAnnotation(pos="verb", expansion="have not"),
+    "hasn't": ContractionAnnotation(pos="verb", expansion="has not"),
+    "hadn't": ContractionAnnotation(pos="verb", expansion="had not"),
+    "can't": ContractionAnnotation(pos="verb", expansion="cannot"),
+    "couldn't": ContractionAnnotation(pos="verb", expansion="could not"),
+    "won't": ContractionAnnotation(pos="verb", expansion="will not"),
+    "wouldn't": ContractionAnnotation(pos="verb", expansion="would not"),
+    "shouldn't": ContractionAnnotation(pos="verb", expansion="should not"),
+    "mustn't": ContractionAnnotation(pos="verb", expansion="must not"),
+    "mightn't": ContractionAnnotation(pos="verb", expansion="might not"),
+    "needn't": ContractionAnnotation(pos="verb", expansion="need not"),
+    "shan't": ContractionAnnotation(pos="verb", expansion="shall not"),
+    "ain't": ContractionAnnotation(pos="verb", expansion="am not"),
+    # Pronoun + "am"
+    "i'm": ContractionAnnotation(pos="pronoun", expansion="I am"),
+    # Pronoun + "are"
+    "you're": ContractionAnnotation(pos="pronoun", expansion="you are"),
+    "we're": ContractionAnnotation(pos="pronoun", expansion="we are"),
+    "they're": ContractionAnnotation(pos="pronoun", expansion="they are"),
+    # Pronoun + "is"/"has"
+    "he's": ContractionAnnotation(pos="pronoun", expansion="he is"),
+    "she's": ContractionAnnotation(pos="pronoun", expansion="she is"),
+    "it's": ContractionAnnotation(pos="pronoun", expansion="it is"),
+    "that's": ContractionAnnotation(pos="pronoun", expansion="that is"),
+    "there's": ContractionAnnotation(pos="pronoun", expansion="there is"),
+    "here's": ContractionAnnotation(pos="pronoun", expansion="here is"),
+    "what's": ContractionAnnotation(pos="pronoun", expansion="what is"),
+    "who's": ContractionAnnotation(pos="pronoun", expansion="who is"),
+    "where's": ContractionAnnotation(pos="pronoun", expansion="where is"),
+    "how's": ContractionAnnotation(pos="pronoun", expansion="how is"),
+    "let's": ContractionAnnotation(pos="pronoun", expansion="let us"),
+    # Pronoun + "have"
+    "i've": ContractionAnnotation(pos="pronoun", expansion="I have"),
+    "you've": ContractionAnnotation(pos="pronoun", expansion="you have"),
+    "we've": ContractionAnnotation(pos="pronoun", expansion="we have"),
+    "they've": ContractionAnnotation(pos="pronoun", expansion="they have"),
+    # Pronoun + "will"
+    "i'll": ContractionAnnotation(pos="pronoun", expansion="I will"),
+    "you'll": ContractionAnnotation(pos="pronoun", expansion="you will"),
+    "he'll": ContractionAnnotation(pos="pronoun", expansion="he will"),
+    "she'll": ContractionAnnotation(pos="pronoun", expansion="she will"),
+    "we'll": ContractionAnnotation(pos="pronoun", expansion="we will"),
+    "they'll": ContractionAnnotation(pos="pronoun", expansion="they will"),
+    "it'll": ContractionAnnotation(pos="pronoun", expansion="it will"),
+    "that'll": ContractionAnnotation(pos="pronoun", expansion="that will"),
+    # Pronoun + "would"/"had"
+    "i'd": ContractionAnnotation(pos="pronoun", expansion="I would"),
+    "you'd": ContractionAnnotation(pos="pronoun", expansion="you would"),
+    "he'd": ContractionAnnotation(pos="pronoun", expansion="he would"),
+    "she'd": ContractionAnnotation(pos="pronoun", expansion="she would"),
+    "we'd": ContractionAnnotation(pos="pronoun", expansion="we would"),
+    "they'd": ContractionAnnotation(pos="pronoun", expansion="they would"),
+}
+
+# Surface forms only. Kept as a list for the callers that just need membership
+# (util/stopwords.py, dramblys); keys are already lowercase.
+ENGLISH_GRAMMATICAL_CONTRACTIONS: Final[list[str]] = list(ENGLISH_CONTRACTION_ANNOTATIONS)
 
 # Negators. These are particles rather than a category of their own: English
 # spreads negation across several parts of speech ("not" adverbial, "no"
@@ -288,3 +323,93 @@ ENGLISH_GRAMMATICAL_WORDS_BY_CATEGORY: Final[dict[str, list[str]]] = {
 }
 
 ENGLISH_GRAMMATICAL_WORDS_WITH_CONTRACTIONS: Final[frozenset[str]] = ENGLISH_ALL_TIERS
+
+# ── stopword annotations ───────────────────────────────────────────────
+
+# Part of speech to report for each subcategory. Iteration order resolves words
+# that belong to more than one: "that" is a determiner before an interrogative,
+# and "no"/"nor"/"neither" are particles before determiners/conjunctions.
+# "demonstratives" is absent because its members are all determiners already.
+_SUBCATEGORY_POS: Final[tuple[tuple[GrammaticalSubcategory, str], ...]] = (
+    ("personal_pronouns", "pronoun"),
+    ("articles", "article"),
+    ("auxiliaries", "auxiliary_verb"),
+    ("particles", "particle"),
+    ("prepositions", "preposition"),
+    ("conjunctions", "conjunction"),
+    ("determiners", "determiner"),
+    ("interrogatives", "pronoun"),
+)
+
+# Inflected forms grouped under a single display headword. Only forms whose
+# headword differs from the word itself are listed; everything else maps to
+# itself. Migrated from data/release/stopwords/en.jsonl, which was the export's
+# hand-maintained input before this module became the source of truth.
+_DISPLAY_HEADWORDS: Final[dict[str, str]] = {
+    # personal pronouns, grouped by person
+    "me": "I",
+    "my": "I",
+    "mine": "I",
+    "myself": "I",
+    "us": "we",
+    "our": "we",
+    "ours": "we",
+    "ourselves": "we",
+    "your": "you",
+    "yours": "you",
+    "yourself": "you",
+    "yourselves": "you",
+    "him": "he",
+    "his": "he",
+    "himself": "he",
+    "her": "she",
+    "hers": "she",
+    "herself": "she",
+    "its": "it",
+    "itself": "it",
+    "them": "they",
+    "their": "they",
+    "theirs": "they",
+    "themselves": "they",
+    # articles
+    "an": "a",
+    # auxiliaries, grouped by paradigm
+    "am": "be",
+    "is": "be",
+    "are": "be",
+    "was": "be",
+    "were": "be",
+    "been": "be",
+    "being": "be",
+    "has": "have",
+    "had": "have",
+    "does": "do",
+    "did": "do",
+    "would": "will",
+    "should": "shall",
+    "could": "can",
+    "cannot": "can",
+    "might": "may",
+}
+
+
+def _build_stopword_annotations() -> dict[str, dict[str, str]]:
+    """Build the {word: {pos, lemma}} table for every English grammatical word.
+
+    Covers all four tiers plus contractions, so any word the registry knows is
+    annotatable. "lemma" is a display headword, not a link to the Lemma table:
+    these words have no GUID and never resolve to a lemma entry.
+    """
+    annotations: dict[str, dict[str, str]] = {}
+
+    for subcategory, pos in _SUBCATEGORY_POS:
+        for word in sorted(ENGLISH_GRAMMATICAL_WORDS_BY_SUBCATEGORY.get(subcategory, ())):
+            annotations.setdefault(word, {"pos": pos, "lemma": _DISPLAY_HEADWORDS.get(word, word)})
+
+    for word, annotation in ENGLISH_CONTRACTION_ANNOTATIONS.items():
+        annotations[word] = {"pos": annotation.pos, "lemma": annotation.expansion}
+
+    return annotations
+
+
+ENGLISH_STOPWORD_ANNOTATIONS: Final[dict[str, dict[str, str]]] = _build_stopword_annotations()

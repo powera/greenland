@@ -1,6 +1,22 @@
 """Shared typed schema for language-specific grammatical-word subcategories."""
 
+from dataclasses import dataclass
 from typing import Final, Literal, Mapping, TypeAlias
+
+
+@dataclass(frozen=True)
+class ContractionAnnotation:
+    """Display data for a contraction surface form.
+
+    ``pos`` is the part of speech of the leading word; ``expansion`` is the
+    written-out form ("do not" for "don't"), which annotators surface to the
+    reader. Contractions are grammatical-only: they never resolve to a lemma,
+    so this is the whole of what is known about them.
+    """
+
+    pos: str
+    expansion: str
+
 
 GrammaticalSubcategory: TypeAlias = Literal[
     "personal_pronouns",
