@@ -23,6 +23,12 @@ from storage.models.enums import (
     VerbSubtype,
 )
 from storage.models.grammar_fact import GrammarFact
+from storage.models.idiom import (
+    IDIOM_EQUIVALENCE_KINDS,
+    IDIOM_GUID_PREFIX,
+    Idiom,
+    IdiomEquivalent,
+)
 from storage.models.guid_tombstone import GuidTombstone
 from storage.models.lemma_relation import (
     LemmaRelationGroup,
@@ -97,6 +103,10 @@ __all__ = [
     "INTAKE_DEFERRED_TEXT_TYPES",
     "GrammarFact",
     "GuidTombstone",
+    "IDIOM_EQUIVALENCE_KINDS",
+    "IDIOM_GUID_PREFIX",
+    "Idiom",
+    "IdiomEquivalent",
     "Lemma",
     "LemmaEmbedding",
     "LemmaDifficultyOverride",
