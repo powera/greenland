@@ -75,8 +75,10 @@ For agent CLI scripts that should be runnable directly, add this at the top
   if str(Path(__file__).parent.parent) not in sys.path:
       sys.path.insert(0, str(Path(__file__).parent.parent))
 
-Tests are in src/tests ; any changes to src/clients require tests.  Changes to
-barsukas generally do not require tests.  Before creating a Git commit, always
+Tests are in src/tests. Any changes to src/clients or src/storage/crud require
+tests. Changes elsewhere in src/storage should also have tests unless they are
+documentation-only or cannot change behavior. Changes to barsukas generally do
+not require tests. Before creating a Git commit, always
 run black and mypy on modified Python files to ensure code quality and type
 correctness.  For barsukas changes, ask the developer to test the change in
 their local browser.
