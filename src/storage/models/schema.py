@@ -22,6 +22,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, synonym
 
+from storage.elements.interfaces import ElementRef, LanguageValue
 from storage.models.pgvector import PGVector
 from storage.rhyme_keys import sync_derivative_form_rhyme_key
 
@@ -190,6 +191,47 @@ class Lemma(Base):
         "LemmaEmbedding", back_populates="lemma", cascade="all, delete-orphan"
     )
     tiers = relationship("LemmaTier", back_populates="lemma", cascade="all, delete-orphan")
+
+    @property
+    def element_type(self) -> str:
+        """Return the stable element discriminator used by shared consumers."""
+        return "lemma"
+
+    @property
+    def display_text(self) -> str:
+        """Return the lemma text with its optional sense disambiguation."""
+        if self.disambiguation:
+            return f"{self.lemma_text} ({self.disambiguation})"
+        return self.lemma_text
+
+    @property
+    def word_text(self) -> str:
+        """Return the lexical headword without sense disambiguation."""
+        return self.lemma_text
+
+    @property
+    def level(self) -> Optional[int]:
+        """Expose the stored learner difficulty through LeveledElement."""
+        return self.difficulty_level
+
+    @property
+    def language_values(self) -> list[LanguageValue]:
+        """Project lemma translations into the shared read-only representation."""
+        return [
+            LanguageValue(
+                id=translation.id,
+                language_code=translation.language_code,
+                text=translation.translation,
+                value_kind="headword",
+                verified=translation.verified,
+                status=translation.translation_status,
+                status_note=translation.translation_status_note,
+            )
+            for translation in sorted(
+                self.translations,
+                key=lambda row: (row.language_code, row.id or 0),
+            )
+        ]
 
 
 class LemmaTranslation(Base):
@@ -436,6 +478,51 @@ class Sentence(Base):
     audio_reviews = relationship("AudioQualityReview", back_populates="sentence")
     conversation_sentences = relationship("ConversationSentence", back_populates="sentence")
 
+    @property
+    def element_type(self) -> str:
+        return "sentence"
+
+    @property
+    def display_text(self) -> str:
+        """Prefer the English version, then any version, then the GUID."""
+        translations_by_language = sorted(
+            self.translations,
+            key=lambda row: (row.language_code, row.id or 0),
+        )
+        english = next(
+            (
+                translation.translation_text
+                for translation in translations_by_language
+                if translation.language_code == "en"
+            ),
+            None,
+        )
+        if english is not None:
+            return str(english)
+        if translations_by_language:
+            return str(translations_by_language[0].translation_text)
+        return self.guid or f"Sentence {self.id}"
+
+    @property
+    def level(self) -> Optional[int]:
+        return self.minimum_level
+
+    @property
+    def language_values(self) -> list[LanguageValue]:
+        return [
+            LanguageValue(
+                id=translation.id,
+                language_code=translation.language_code,
+                text=translation.translation_text,
+                value_kind="version",
+                verified=translation.verified,
+            )
+            for translation in sorted(
+                self.translations,
+                key=lambda row: (row.language_code, row.id or 0),
+            )
+        ]
+
 
 class SentenceTranslation(Base):
     """Model for storing translations of sentences in various languages.
@@ -643,6 +730,40 @@ class Phrase(Base):
     translations = relationship(
         "PhraseTranslation", back_populates="phrase", cascade="all, delete-orphan"
     )
+
+    @property
+    def element_type(self) -> str:
+        return "phrase"
+
+    @property
+    def display_text(self) -> str:
+        return self.label
+
+    @property
+    def expression_text(self) -> str:
+        return self.label
+
+    @property
+    def level(self) -> Optional[int]:
+        return self.difficulty_level
+
+    @property
+    def language_values(self) -> list[LanguageValue]:
+        return [
+            LanguageValue(
+                id=translation.id,
+                language_code=translation.language_code,
+                text=translation.translation,
+                value_kind="translation",
+                verified=translation.verified,
+                status=translation.translation_status,
+                status_note=translation.translation_status_note,
+            )
+            for translation in sorted(
+                self.translations,
+                key=lambda row: (row.language_code, row.id or 0),
+            )
+        ]
 
 
 class PhraseTranslation(Base):
@@ -1045,6 +1166,27 @@ class Conversation(Base):
     conversation_sentences = relationship(
         "ConversationSentence", back_populates="conversation", cascade="all, delete-orphan"
     )
+
+    @property
+    def element_type(self) -> str:
+        return "conversation"
+
+    @property
+    def display_text(self) -> str:
+        return self.title or self.scene_prompt or f"Conversation {self.id}"
+
+    @property
+    def level(self) -> Optional[int]:
+        return self.minimum_level
+
+    @property
+    def children(self) -> list[ElementRef]:
+        """Return sentence references in conversation order."""
+        ordered_links = sorted(self.conversation_sentences, key=lambda link: link.position)
+        return [
+            ElementRef(element_type="sentence", element_id=link.sentence_id)
+            for link in ordered_links
+        ]
 
 
 class ConversationSentence(Base):
