@@ -43,6 +43,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from storage.elements.interfaces import LanguageValue
 from storage.models.schema import Base
 
 # Closed vocabulary for Name.kind. Extend this tuple rather than inventing
@@ -149,6 +150,28 @@ class Name(Base):
         if self.disambiguation:
             return f"{self.name_text} ({self.disambiguation})"
         return self.name_text
+
+    @property
+    def element_type(self) -> str:
+        return "name"
+
+    @property
+    def language_values(self) -> list[LanguageValue]:
+        """Project stable name renderings into the shared language view."""
+        return [
+            LanguageValue(
+                id=translation.id,
+                language_code=translation.language_code,
+                text=translation.translation,
+                value_kind="rendering",
+                verified=translation.verified,
+                status_note=translation.notes,
+            )
+            for translation in sorted(
+                self.translations,
+                key=lambda row: (row.language_code, row.id or 0),
+            )
+        ]
 
     def __repr__(self) -> str:
         return f"<Name(id={self.id}, name_text={self.name_text!r}, kind={self.kind!r})>"

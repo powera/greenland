@@ -278,6 +278,14 @@ class Concept(Base):
         """Human-readable display title derived from the slug."""
         return concept_slug_to_title(self.slug)
 
+    @property
+    def element_type(self) -> str:
+        return "concept"
+
+    @property
+    def display_text(self) -> str:
+        return self.title
+
     def __repr__(self) -> str:
         return f"<Concept(id={self.id}, slug={self.slug!r}, verified={self.verified})>"
 
@@ -336,6 +344,14 @@ class SubConcept(Base):
     def title(self) -> str:
         """Human-readable display title derived from the slug."""
         return concept_slug_to_title(self.slug)
+
+    @property
+    def element_type(self) -> str:
+        return "sub_concept"
+
+    @property
+    def display_text(self) -> str:
+        return self.title
 
     @property
     def is_excluded(self) -> bool:
