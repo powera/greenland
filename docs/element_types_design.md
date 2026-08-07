@@ -2,6 +2,10 @@
 
 ## Status and goal
 
+Implementation status: Phase 0 characterization is complete. The shared structural
+interfaces and idiom SQLAlchemy/CRUD layer are now implemented; Barsukas and
+idiom export support remain intentionally deferred.
+
 Greenland models several kinds of linguistic **elements**: lemmas, concepts,
 phrases, sentences, names, and conversations. Idiom will become another kind.
 The types have deliberately different SQLAlchemy models and domain rules, but
@@ -357,8 +361,8 @@ Constraints and indexes:
 - `equivalence_kind` is closed: `idiomatic`, `near_equivalent`, `paraphrase`;
 - source expression lives on the idiom, not as a magic English equivalent;
 - zero equivalents is a valid, visible coverage state;
-- reserve a new immutable GUID family only after auditing downstream prefix
-  validators (the tentative `M01` is not a committed choice).
+- use the dedicated immutable `M01` GUID family, which is routed as `idiom` by
+  the storage GUID resolver.
 
 A separate equivalents table is necessary because the generic language-value
 interface permits multiple values while current phrase/name/sentence tables do
@@ -438,7 +442,6 @@ The parallelization is sufficient for idioms when:
 
 ## Decisions intentionally deferred
 
-- Exact idiom GUID prefix, pending downstream validation audit.
 - Representation of “assessed, no equivalent”: dedicated coverage row versus a
   coverage/status table.
 - Literal-gloss language coverage.
