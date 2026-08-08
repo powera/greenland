@@ -106,7 +106,7 @@ SUBTYPE_GUID_PREFIXES = {
         "attitude": "D02",
         "specific_time": "D03",
         "relative_time": "D04",
-        "adverb_duration": "D05",
+        "duration": "D05",
         "direction": "D06",
         "location": "D07",
         "distance": "D08",
