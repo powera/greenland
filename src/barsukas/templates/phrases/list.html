@@ -30,54 +30,12 @@
     </div>
 </form>
 
-<table class="table table-sm table-hover">
-    <thead>
-        <tr>
-            <th>GUID</th>
-            <th>Subtype</th>
-            <th>Phrase (English)</th>
-            <th>Level</th>
-            <th>Verified</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for phrase in phrases %}
-            <tr>
-                <td><code>{{ phrase.guid }}</code></td>
-                <td><span class="badge bg-secondary">{{ phrase.phrase_subtype }}</span></td>
-                <td><a href="{{ url_for('phrases.view_phrase', phrase_id=phrase.id) }}">{{ phrase.label }}</a></td>
-                <td>
-                    {% if phrase.difficulty_level is not none %}
-                        <span class="badge bg-info">L{{ phrase.difficulty_level }}</span>
-                    {% else %}
-                        <span class="text-muted">—</span>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if phrase.verified %}
-                        <i class="bi bi-check-circle-fill text-success"></i>
-                    {% else %}
-                        <i class="bi bi-x-circle text-muted"></i>
-                    {% endif %}
-                </td>
-            </tr>
-        {% else %}
-            <tr><td colspan="5" class="text-muted fst-italic text-center">No phrases found.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% with text_header='Phrase (English)', empty_text='No phrases found.',
+        extra_header='Subtype', extra_values=subtype_by_id %}
+    {% include "elements/_list_table.html" %}
+{% endwith %}
 
-{% if total_pages > 1 %}
-<nav>
-    <ul class="pagination pagination-sm">
-        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
-            <a class="page-link" href="{{ url_for('phrases.list_phrases', subtype=subtype, page=page-1) }}">Prev</a>
-        </li>
-        <li class="page-item disabled"><span class="page-link">{{ page }} / {{ total_pages }}</span></li>
-        <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
-            <a class="page-link" href="{{ url_for('phrases.list_phrases', subtype=subtype, page=page+1) }}">Next</a>
-        </li>
-    </ul>
-</nav>
-{% endif %}
+{% with endpoint='phrases.list_phrases', args={'subtype': subtype} %}
+    {% include "elements/_pagination.html" %}
+{% endwith %}
 {% endblock %}

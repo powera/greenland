@@ -1,0 +1,61 @@
+{#
+  Shared per-language text table for an element.
+
+  Reads LanguageValue projections rather than a type-specific translations dict,
+  so it renders one row per language for single-value types and several for
+  multi-value ones without a second template.
+
+  Parameters:
+    values_by_language - dict of language code -> list of LanguageValue
+    language_names     - dict of language code -> display name
+    value_header       - column heading for the text column
+    empty_text         - message shown when the element has no values at all
+    show_kind          - whether to show each value's kind badge
+#}
+{% set value_header = value_header | default('Text') %}
+{% set empty_text = empty_text | default('No values recorded.') %}
+{% set show_kind = show_kind | default(false) %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th style="width: 20%;">Language</th>
+                <th>{{ value_header }}</th>
+                {% if show_kind %}<th style="width: 18%;">Kind</th>{% endif %}
+                <th style="width: 18%;">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lang_code, lang_name in language_names.items() %}
+                {% for value in values_by_language.get(lang_code, []) %}
+                    <tr>
+                        {% if loop.first %}
+                            <td rowspan="{{ loop.length }}">
+                                <strong>{{ lang_name }}</strong>
+                                <small class="text-muted">({{ lang_code }})</small>
+                            </td>
+                        {% endif %}
+                        <td>{{ value.text }}</td>
+                        {% if show_kind %}
+                            <td><span class="badge bg-secondary">{{ value.value_kind|replace('_', ' ') }}</span></td>
+                        {% endif %}
+                        <td>
+                            {% if value.status %}
+                                <span class="badge bg-light text-dark" title="{{ value.status_note or '' }}">{{ value.status }}</span>
+                            {% elif value.verified %}
+                                <i class="bi bi-check-circle-fill text-success" title="Verified"></i>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+            {% if not values_by_language %}
+                <tr>
+                    <td colspan="{{ 4 if show_kind else 3 }}" class="text-muted fst-italic text-center">{{ empty_text }}</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>

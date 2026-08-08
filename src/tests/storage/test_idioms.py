@@ -18,6 +18,8 @@ from storage.crud.idiom import (
     delete_idiom_equivalent,
     get_idiom_by_guid,
     get_idiom_by_id,
+    list_idiom_source_languages,
+    list_idioms,
     next_idiom_guid,
     update_idiom,
     update_idiom_equivalent,
@@ -378,3 +380,99 @@ def test_migration_is_idempotent_and_supports_dry_run(tmp_path: Path) -> None:
     assert inspector.has_table("idioms") is True
     assert inspector.has_table("idiom_equivalents") is True
     assert create_idiom_tables(config) is False
+
+
+def test_list_idioms_paginates_and_reports_total(session: Session) -> None:
+    for index in range(5):
+        create_idiom(
+            session,
+            source_language_code="en",
+            expression=f"expression {index}",
+            meaning=f"meaning {index}",
+        )
+
+    first_page, total = list_idioms(session, limit=2, offset=0)
+    second_page, second_total = list_idioms(session, limit=2, offset=2)
+
+    # The total is the full match count, not the size of the returned page.
+    assert total == 5
+    assert second_total == 5
+    assert len(first_page) == 2
+    assert len(second_page) == 2
+    assert {idiom.id for idiom in first_page}.isdisjoint({idiom.id for idiom in second_page})
+
+
+def test_list_idioms_page_size_is_unaffected_by_equivalent_count(session: Session) -> None:
+    """A multi-equivalent idiom must not consume extra slots in a page.
+
+    The equivalents are eager-loaded; loading them via a join would multiply the
+    parent rows and let LIMIT cut a page short.
+    """
+    crowded = create_idiom(
+        session,
+        source_language_code="en",
+        expression="kick the bucket",
+        meaning="to die",
+    )
+    for language_code in ("lt", "es", "fr"):
+        add_idiom_equivalent(
+            session,
+            crowded,
+            language_code=language_code,
+            expression=f"equivalent-{language_code}",
+            equivalence_kind="idiomatic",
+        )
+    create_idiom(
+        session,
+        source_language_code="en",
+        expression="break the ice",
+        meaning="make social interaction easier",
+    )
+
+    page, total = list_idioms(session, limit=2, offset=0)
+
+    assert total == 2
+    assert len(page) == 2
+
+
+def test_list_idioms_filters_by_source_language(session: Session) -> None:
+    create_idiom(
+        session,
+        source_language_code="en",
+        expression="kick the bucket",
+        meaning="to die",
+    )
+    create_idiom(
+        session,
+        source_language_code="lt",
+        expression="kabinti makaronus",
+        meaning="tell someone implausible stories",
+    )
+
+    lithuanian, total = list_idioms(session, source_language_code="lt")
+
+    assert total == 1
+    assert [idiom.expression for idiom in lithuanian] == ["kabinti makaronus"]
+
+
+def test_list_idiom_source_languages_returns_distinct_sorted_codes(session: Session) -> None:
+    create_idiom(
+        session,
+        source_language_code="lt",
+        expression="kabinti makaronus",
+        meaning="tell someone implausible stories",
+    )
+    create_idiom(
+        session,
+        source_language_code="en",
+        expression="kick the bucket",
+        meaning="to die",
+    )
+    create_idiom(
+        session,
+        source_language_code="en",
+        expression="break the ice",
+        meaning="make social interaction easier",
+    )
+
+    assert list_idiom_source_languages(session) == ["en", "lt"]

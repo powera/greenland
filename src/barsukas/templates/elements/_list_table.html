@@ -1,0 +1,84 @@
+{#
+  Shared element list table.
+
+  Renders rows built by barsukas.helpers.elements.build_element_rows, so it works
+  for any element type satisfying the storage.elements protocols.
+
+  Parameters:
+    rows         - sequence of ElementRow
+    text_header  - column heading for the display-text column
+    empty_text   - message shown when there are no rows
+    extra_header - optional heading for one type-specific column
+    extra_values - optional dict of element id -> value for that column
+
+  extra_header/extra_values exist so a type can surface one column of its own
+  (a phrase subtype, say) without forking this table. Anything richer than a
+  single badge belongs in that type's own template.
+#}
+{% set text_header = text_header | default('Text') %}
+{% set empty_text = empty_text | default('No entries found.') %}
+{% set extra_values = extra_values | default({}) %}
+{% set column_count = 5 if extra_header else 4 %}
+<div class="table-responsive">
+    <table class="table table-sm table-hover align-middle">
+        <thead>
+            <tr>
+                <th>GUID</th>
+                {% if extra_header %}<th>{{ extra_header }}</th>{% endif %}
+                <th>{{ text_header }}</th>
+                <th>Level</th>
+                <th>Verified</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr>
+                    <td>
+                        {% if row.guid %}
+                            <code>{{ row.guid }}</code>
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    {% if extra_header %}
+                        <td>
+                            {% set extra_value = extra_values.get(row.element_id) %}
+                            {% if extra_value %}
+                                <span class="badge bg-secondary">{{ extra_value }}</span>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                    {% endif %}
+                    <td>
+                        {% if row.detail_url %}
+                            <a href="{{ row.detail_url }}">{{ row.display_text }}</a>
+                        {% else %}
+                            {{ row.display_text }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if row.level is not none %}
+                            <span class="badge bg-info">L{{ row.level }}</span>
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if row.verified is none %}
+                            <span class="text-muted">—</span>
+                        {% elif row.verified %}
+                            <i class="bi bi-check-circle-fill text-success" title="Verified"></i>
+                        {% else %}
+                            <i class="bi bi-x-circle text-muted" title="Not verified"></i>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="{{ column_count }}" class="text-muted fst-italic text-center">{{ empty_text }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
