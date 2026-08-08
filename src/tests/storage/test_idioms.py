@@ -32,6 +32,7 @@ from storage.elements.interfaces import (
 )
 from storage.guid_router import guid_kind, resolve_guid
 from storage.migrations.add_idioms import create_idiom_tables
+from storage.models.guid_prefixes import IDIOM_GUID_PREFIX
 from storage.models.idiom import Idiom, IdiomEquivalent
 from storage.models.schema import Base
 
@@ -116,6 +117,32 @@ def test_next_guid_increments_and_router_resolves_idiom(session: Session) -> Non
     assert guid_kind("M01_002") == "idiom"
     assert resolve_guid(session, "M01_002") == ("idiom", second)
     assert resolve_guid(session, "M01_999") == ("idiom", None)
+
+
+def test_guid_kind_routes_the_whole_idiom_prefix_family() -> None:
+    """A future second idiom prefix must route without changing the classifier.
+
+    Idioms are deliberately unsubtyped today, so only ``M01`` is allocated. The
+    router matches ``M`` + digits so allocating ``M02`` later does not strand
+    those GUIDs as lemmas.
+    """
+    assert guid_kind(f"{IDIOM_GUID_PREFIX}_001") == "idiom"
+    assert guid_kind("M02_001") == "idiom"
+    assert guid_kind("M99_123") == "idiom"
+
+
+def test_guid_kind_does_not_over_match_the_idiom_family() -> None:
+    """Non-idiom GUIDs that merely start with "M" stay in their own namespace."""
+    # No digits after the family letter, so not an idiom prefix.
+    assert guid_kind("MISC_001") == "lemma"
+    # A bare family letter has no number at all.
+    assert guid_kind("M_001") == "lemma"
+    # No separator at all.
+    assert guid_kind("M01001") == "lemma"
+    # Other namespaces are unaffected by the family match.
+    assert guid_kind("N02_001") == "lemma"
+    assert guid_kind("F01_001") == "phrase"
+    assert guid_kind("S_00001") == "sentence"
 
 
 def test_multiple_equivalents_are_allowed_in_one_language(session: Session) -> None:

@@ -20,7 +20,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from storage.elements.interfaces import LanguageValue
 from storage.models.schema import Base
 
-IDIOM_GUID_PREFIX: str = "M01"
 IDIOM_EQUIVALENCE_KINDS: tuple[str, ...] = (
     "idiomatic",
     "near_equivalent",
