@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from 'elements/_language_text.html' import language_text %}
 
 {% block title %}Idiom {{ idiom.guid or idiom.id }}{% endblock %}
 
@@ -23,7 +24,7 @@
                 <dl class="row">
                     <dt class="col-sm-3">Source expression</dt>
                     <dd class="col-sm-9">
-                        <strong>{{ idiom.expression }}</strong>
+                        <strong>{{ language_text(idiom.expression, idiom.source_language_code) }}</strong>
                         <span class="badge bg-secondary ms-1">
                             {{ language_names.get(idiom.source_language_code, idiom.source_language_code) }}
                         </span>
@@ -85,7 +86,7 @@
                                 {% for equivalent in equivalents %}
                                     <tr>
                                         <td>
-                                            {{ equivalent.expression }}
+                                            {{ language_text(equivalent.expression, lang_code) }}
                                             {% if equivalent.usage_note %}
                                                 <div class="text-muted small">{{ equivalent.usage_note }}</div>
                                             {% endif %}
