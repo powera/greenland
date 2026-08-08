@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from 'elements/_language_text.html' import language_text %}
 
 {% block title %}Sentence Generation Results - {{ lemma.lemma_text }}{% endblock %}
 
@@ -67,13 +68,7 @@
                     {% for translation in sentence.translations|sort(attribute='language_code') %}
                         <div class="mb-2">
                             <strong class="text-uppercase">{{ translation.language_code }}:</strong>
-                            {% if translation.language_code == 'zh' %}
-                                <span class="ms-2 chinese-with-pinyin">{{ translation.translation_text|pinyin_ruby|safe }}</span>
-                            {% elif translation.language_code == 'ja' %}
-                                <span class="ms-2 japanese-with-romaji">{{ translation.translation_text|romaji_ruby|safe }}</span>
-                            {% else %}
-                                <span class="ms-2">{{ translation.translation_text }}</span>
-                            {% endif %}
+                            <span class="ms-2">{{ language_text(translation.translation_text, translation.language_code) }}</span>
                             {% if not translation.verified %}
                                 <small class="text-muted">(unverified)</small>
                             {% endif %}

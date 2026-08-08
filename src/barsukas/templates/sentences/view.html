@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from 'elements/_language_text.html' import language_text %}
 
 {% block title %}{{ STRINGS.sentences.sentence }} #{{ sentence.id }}{% endblock %}
 
@@ -314,13 +315,7 @@
                                 <tr>
                                     <td><strong>{{ lang_name }}</strong> <small class="text-muted">({{ lang_code }})</small></td>
                                     <td>
-                                        {% if lang_code == 'zh' %}
-                                            <span class="chinese-with-pinyin">{{ translations[lang_code]|pinyin_ruby|safe }}</span>
-                                        {% elif lang_code == 'ja' %}
-                                            <span class="japanese-with-romaji">{{ translations[lang_code]|romaji_ruby|safe }}</span>
-                                        {% else %}
-                                            {{ translations[lang_code] }}
-                                        {% endif %}
+                                        {{ language_text(translations[lang_code], lang_code) }}
                                     </td>
                                 </tr>
                             {% endif %}
@@ -617,13 +612,7 @@
                                     <td>{{ word.english_text or '-' }}</td>
                                     <td>
                                         {% if word.target_text %}
-                                            {% if lang_code == 'zh' %}
-                                                <strong class="chinese-with-pinyin">{{ word.target_text|pinyin_ruby|safe }}</strong>
-                                            {% elif lang_code == 'ja' %}
-                                                <strong class="japanese-with-romaji">{{ word.target_text|romaji_ruby|safe }}</strong>
-                                            {% else %}
-                                                <strong>{{ word.target_text }}</strong>
-                                            {% endif %}
+                                            <strong>{{ language_text(word.target_text, lang_code) }}</strong>
                                         {% else %}
                                             <strong>-</strong>
                                         {% endif %}

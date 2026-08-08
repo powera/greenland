@@ -1,4 +1,5 @@
 <!-- Grammar Facts -->
+{% from 'elements/_language_text.html' import language_text %}
 <div class="row mb-4">
     <div class="col">
         <div class="card">
@@ -39,11 +40,7 @@
                             <td><span class="badge bg-secondary">{{ fact.language_code }}</span></td>
                             <td>{{ fact.fact_type|replace('_', ' ')|title }}</td>
                             <td>
-                                {% if fact.language_code == 'zh' %}
-                                <span class="chinese-with-pinyin">{{ fact.fact_value|pinyin_ruby|safe }}</span>
-                                {% else %}
-                                <strong>{{ fact.fact_value }}</strong>
-                                {% endif %}
+                                <strong>{{ language_text(fact.fact_value, fact.language_code) }}</strong>
                             </td>
                             <td><small class="text-muted">{{ fact.notes or '-' }}</small></td>
                             <td>

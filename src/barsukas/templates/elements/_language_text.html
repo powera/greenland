@@ -1,0 +1,25 @@
+{#
+  Shared language-aware text rendering.
+
+  Chinese and Japanese are displayed with ruby annotations (pinyin / romaji);
+  every other language renders as plain text. The dispatch lived inline in the
+  lemma, sentence, phrase, and idiom templates, which meant a language gaining
+  ruby support had to be added in each one separately - and phrases and idioms
+  were in fact still rendering zh/ja unannotated.
+
+  Import rather than include, so the macro can be called per value:
+
+    {% from 'elements/_language_text.html' import language_text %}
+    {{ language_text(value.text, lang_code) }}
+#}
+
+{% macro language_text(text, lang_code) %}
+{%- if not text -%}
+{%- elif lang_code == 'zh' -%}
+<span class="chinese-with-pinyin">{{ text|pinyin_ruby|safe }}</span>
+{%- elif lang_code == 'ja' -%}
+<span class="japanese-with-romaji">{{ text|romaji_ruby|safe }}</span>
+{%- else -%}
+{{ text }}
+{%- endif -%}
+{% endmacro %}

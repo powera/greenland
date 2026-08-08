@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from 'elements/_language_text.html' import language_text %}
 
 {% block title %}{{ conversation.title or ('Conversation #' ~ conversation.id) }}{% endblock %}
 
@@ -165,13 +166,7 @@
                                                         {% if lang_code != 'en' %}
                                                             <div class="translation-item text-muted">
                                                                 <span class="badge bg-light text-dark" style="font-size: 0.7rem;">{{ lang_code }}</span>
-                                                                {% if lang_code == 'zh' %}
-                                                                    <span class="chinese-with-pinyin">{{ translation|pinyin_ruby|safe }}</span>
-                                                                {% elif lang_code == 'ja' %}
-                                                                    <span class="japanese-with-romaji">{{ translation|romaji_ruby|safe }}</span>
-                                                                {% else %}
-                                                                    {{ translation }}
-                                                                {% endif %}
+                                                                {{ language_text(translation, lang_code) }}
                                                             </div>
                                                         {% endif %}
                                                     {% endfor %}
@@ -376,13 +371,7 @@
                                     {% for lang_code, lang_name in language_names.items() %}
                                         <td>
                                             {% if item.translations.get(lang_code) %}
-                                                {% if lang_code == 'zh' %}
-                                                    <span class="chinese-with-pinyin">{{ item.translations[lang_code]|pinyin_ruby|safe }}</span>
-                                                {% elif lang_code == 'ja' %}
-                                                    <span class="japanese-with-romaji">{{ item.translations[lang_code]|romaji_ruby|safe }}</span>
-                                                {% else %}
-                                                    {{ item.translations[lang_code] }}
-                                                {% endif %}
+                                                {{ language_text(item.translations[lang_code], lang_code) }}
                                             {% else %}
                                                 <span class="text-muted">-</span>
                                             {% endif %}

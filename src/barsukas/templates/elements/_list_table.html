@@ -58,10 +58,12 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if row.level is not none %}
-                            <span class="badge bg-info">L{{ row.level }}</span>
-                        {% else %}
+                        {% if row.level is none %}
                             <span class="text-muted">—</span>
+                        {% elif row.level == -1 %}
+                            <span class="badge bg-warning text-dark" title="Level -1: excluded from level-based selection">Excluded</span>
+                        {% else %}
+                            <span class="badge bg-info">L{{ row.level }}</span>
                         {% endif %}
                     </td>
                     <td>

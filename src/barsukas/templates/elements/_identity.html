@@ -18,10 +18,12 @@
 
 <dt class="col-sm-3">Difficulty level</dt>
 <dd class="col-sm-9">
-    {% if element.level is not none %}
-        <span class="badge bg-info">L{{ element.level }}</span>
-    {% else %}
+    {% if element.level is none %}
         <span class="text-muted">Not set</span>
+    {% elif element.level == -1 %}
+        <span class="badge bg-warning text-dark" title="Level -1: excluded from level-based selection">Excluded</span>
+    {% else %}
+        <span class="badge bg-info">L{{ element.level }}</span>
     {% endif %}
 </dd>
 
