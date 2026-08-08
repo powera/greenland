@@ -1107,6 +1107,55 @@ def export_sqlite_to_phrase_release(sqlite_path: str, release_dir: str) -> None:
         session.close()
 
 
+def export_sqlite_to_idiom_release(sqlite_path: str, release_dir: str) -> None:
+    """Export idioms from SQLite to data/release/idioms format.
+
+    Structure: {release_dir}/base.jsonl - a single file, since idioms carry no
+    subtype to partition on. The record shape lives in storage.release.idiom so
+    the CLI and the Barsukas sync write identical files.
+    """
+    print(f"Exporting idioms from SQLite ({sqlite_path}) to release format ({release_dir})...")
+
+    from storage.database import create_database_session
+    from storage.release.idiom import export_idioms_to_release
+    from storage.utils.session import ensure_tables_exist
+
+    session = create_database_session(sqlite_path)
+    ensure_tables_exist(session)
+
+    try:
+        exported = export_idioms_to_release(session, Path(release_dir))
+        print(f"Exported {exported} idioms")
+        print("Idiom export complete!")
+    finally:
+        session.close()
+
+
+def import_idiom_release_to_sqlite(sqlite_path: str, release_dir: str) -> None:
+    """Import data/release/idioms into SQLite.
+
+    Records whose GUID is already present are skipped, so re-running is safe.
+    Reconciling changes to an existing idiom is a sync-UI concern, not an
+    import one.
+    """
+    print(f"Importing idioms from release format ({release_dir}) into SQLite ({sqlite_path})...")
+
+    from storage.database import create_database_session
+    from storage.release.idiom import import_idioms_from_release
+    from storage.utils.session import ensure_tables_exist
+
+    session = create_database_session(sqlite_path)
+    ensure_tables_exist(session)
+
+    try:
+        imported, skipped = import_idioms_from_release(session, Path(release_dir))
+        session.commit()
+        print(f"Imported {imported} idioms ({skipped} already present)")
+        print("Idiom import complete!")
+    finally:
+        session.close()
+
+
 @dataclass
 class LemmaAudioExportStats:
     """Summary of a lemma-audio export (SQLite/DB -> release files)."""
@@ -1991,6 +2040,8 @@ def main() -> None:
             "sqlite-to-release",
             "sqlite-to-sentence-release",
             "sqlite-to-phrase-release",
+            "sqlite-to-idiom-release",
+            "idiom-release-to-sqlite",
             "sqlite-to-lemma-audio-release",
             "lemma-audio-release-to-sqlite",
         ],
@@ -2057,6 +2108,11 @@ def main() -> None:
         default="data/release/phrases",
         help="Path to phrase release directory (default: data/release/phrases)",
     )
+    parser.add_argument(
+        "--idiom-release-dir",
+        default="data/release/idioms",
+        help="Path to idiom release directory (default: data/release/idioms)",
+    )
 
     args = parser.parse_args()
 
@@ -2085,6 +2141,10 @@ def main() -> None:
         export_sqlite_to_sentence_release(args.sqlite_path, args.sentence_release_dir)
     elif args.direction == "sqlite-to-phrase-release":
         export_sqlite_to_phrase_release(args.sqlite_path, args.phrase_release_dir)
+    elif args.direction == "sqlite-to-idiom-release":
+        export_sqlite_to_idiom_release(args.sqlite_path, args.idiom_release_dir)
+    elif args.direction == "idiom-release-to-sqlite":
+        import_idiom_release_to_sqlite(args.sqlite_path, args.idiom_release_dir)
     elif args.direction == "sqlite-to-lemma-audio-release":
         export_sqlite_to_lemma_audio_release(
             args.sqlite_path, args.release_dir, categories=lemma_audio_categories

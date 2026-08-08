@@ -69,6 +69,7 @@ from barsukas.routes import (
     concepts,
     conversations,
     exports,
+    idioms,
     lemmas,
     llm_api,
     names,
@@ -384,6 +385,7 @@ def create_app(
     app.register_blueprint(pattern_sentences.bp)
     app.register_blueprint(peleda.bp)
     app.register_blueprint(phrases.bp)
+    app.register_blueprint(idioms.bp)
     app.register_blueprint(rhymes.bp)
     app.register_blueprint(pradzia.bp)
     app.register_blueprint(sync_hub.bp)

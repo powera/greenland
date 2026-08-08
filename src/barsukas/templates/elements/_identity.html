@@ -1,0 +1,35 @@
+{#
+  Shared identity rows for an element detail page.
+
+  Emits <dt>/<dd> pairs only, so a caller can wrap them in its own <dl> and
+  interleave type-specific rows in whatever order reads best.
+
+  Parameters:
+    element - any storage.elements Element
+#}
+<dt class="col-sm-3">GUID</dt>
+<dd class="col-sm-9">
+    {% if element.guid %}
+        <code>{{ element.guid }}</code>
+    {% else %}
+        <span class="text-muted">Not assigned</span>
+    {% endif %}
+</dd>
+
+<dt class="col-sm-3">Difficulty level</dt>
+<dd class="col-sm-9">
+    {% if element.level is not none %}
+        <span class="badge bg-info">L{{ element.level }}</span>
+    {% else %}
+        <span class="text-muted">Not set</span>
+    {% endif %}
+</dd>
+
+<dt class="col-sm-3">Verified</dt>
+<dd class="col-sm-9">
+    {% if element.verified %}
+        <i class="bi bi-check-circle-fill text-success"></i> Yes
+    {% else %}
+        <i class="bi bi-x-circle text-muted"></i> No
+    {% endif %}
+</dd>

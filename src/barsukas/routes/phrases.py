@@ -23,6 +23,7 @@ from flask import (
 from flask.typing import ResponseReturnValue
 
 from barsukas.config import Config
+from barsukas.helpers.elements import build_element_rows, group_language_values
 from storage.crud.operation_log import log_translation_change
 from storage.crud.phrase import (
     add_phrase,
@@ -64,9 +65,15 @@ def list_phrases() -> ResponseReturnValue:
     page = max(1, min(page, total_pages))
     phrases = query.limit(Config.ITEMS_PER_PAGE).offset((page - 1) * Config.ITEMS_PER_PAGE).all()
 
+    rows = build_element_rows(
+        phrases,
+        {phrase.id: url_for("phrases.view_phrase", phrase_id=phrase.id) for phrase in phrases},
+    )
+
     return render_template(
         "phrases/list.html",
-        phrases=phrases,
+        rows=rows,
+        subtype_by_id={phrase.id: phrase.phrase_subtype for phrase in phrases},
         subtype=subtype,
         subtypes=_available_phrase_subtypes(),
         page=page,
@@ -83,12 +90,10 @@ def view_phrase(phrase_id: int) -> ResponseReturnValue:
         flash("Phrase not found", "error")
         return redirect(url_for("phrases.list_phrases"))
 
-    translations = _phrase_translations(phrase_id)
-
     return render_template(
         "phrases/view.html",
         phrase=phrase,
-        translations=translations,
+        values_by_language=group_language_values(phrase.language_values),
         language_names=get_supported_languages(),
     )
 

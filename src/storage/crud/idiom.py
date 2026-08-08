@@ -1,9 +1,9 @@
 """CRUD operations for idioms and their language equivalents."""
 
-from typing import Optional
+from typing import List, Optional, Tuple
 
 from sqlalchemy import func
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from storage.models.guid_prefixes import IDIOM_GUID_PREFIX
 from storage.models.idiom import (
@@ -103,6 +103,40 @@ def get_idiom_by_guid(session: Session, guid: str) -> Optional[Idiom]:
         .first()
     )
     return result
+
+
+def list_idioms(
+    session: Session,
+    source_language_code: Optional[str] = None,
+    limit: Optional[int] = None,
+    offset: int = 0,
+) -> Tuple[List[Idiom], int]:
+    """Return a page of idioms and the total matching count.
+
+    Ordered by GUID then id so unGUIDed drafts sort last but stay stable. The
+    total is computed before pagination so callers can render page counts.
+    """
+    query = session.query(Idiom)
+    if source_language_code:
+        query = query.filter(Idiom.source_language_code == source_language_code)
+
+    total = query.count()
+
+    # selectinload rather than joinedload: a joined collection multiplies parent
+    # rows, so LIMIT would cut mid-idiom and return fewer than a full page.
+    query = query.options(selectinload(Idiom.equivalents)).order_by(Idiom.guid, Idiom.id)
+    if offset:
+        query = query.offset(offset)
+    if limit is not None:
+        query = query.limit(limit)
+
+    return query.all(), total
+
+
+def list_idiom_source_languages(session: Session) -> List[str]:
+    """Return the distinct source languages that have at least one idiom."""
+    rows = session.query(Idiom.source_language_code).distinct().all()
+    return sorted(row[0] for row in rows if row[0])
 
 
 def add_idiom_equivalent(

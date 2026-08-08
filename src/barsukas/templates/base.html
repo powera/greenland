@@ -47,6 +47,9 @@
                             <li><a class="dropdown-item" href="{{ url_for('phrases.list_phrases') }}">
                                 <i class="bi bi-chat-quote"></i> {{ STRINGS.navigation.get('phrases', 'Phrases') }}
                             </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('idioms.list_idioms_view') }}">
+                                <i class="bi bi-lightbulb"></i> {{ STRINGS.navigation.get('idioms', 'Idioms') }}
+                            </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('conversations.list_conversations') }}">
                                 <i class="bi bi-chat-dots"></i> {{ STRINGS.navigation.get('conversations', 'Conversations') }}
                             </a></li>

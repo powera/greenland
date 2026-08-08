@@ -33,32 +33,15 @@
             </div>
             <div class="card-body">
                 <dl class="row">
-                    <dt class="col-sm-3">GUID</dt>
-                    <dd class="col-sm-9"><code>{{ phrase.guid }}</code></dd>
+                    {% with element=phrase %}
+                        {% include "elements/_identity.html" %}
+                    {% endwith %}
 
                     <dt class="col-sm-3">Subtype</dt>
                     <dd class="col-sm-9"><span class="badge bg-secondary">{{ phrase.phrase_subtype }}</span></dd>
 
                     <dt class="col-sm-3">Definition</dt>
                     <dd class="col-sm-9">{{ phrase.definition or '—' }}</dd>
-
-                    <dt class="col-sm-3">Difficulty level</dt>
-                    <dd class="col-sm-9">
-                        {% if phrase.difficulty_level is not none %}
-                            <span class="badge bg-info">L{{ phrase.difficulty_level }}</span>
-                        {% else %}
-                            <span class="text-muted">Not set</span>
-                        {% endif %}
-                    </dd>
-
-                    <dt class="col-sm-3">Verified</dt>
-                    <dd class="col-sm-9">
-                        {% if phrase.verified %}
-                            <i class="bi bi-check-circle-fill text-success"></i> Yes
-                        {% else %}
-                            <i class="bi bi-x-circle text-muted"></i> No
-                        {% endif %}
-                    </dd>
 
                     {% if phrase.notes %}
                         <dt class="col-sm-3">Notes</dt>
@@ -75,32 +58,9 @@
         <div class="card">
             <div class="card-header"><i class="bi bi-translate"></i> Translations</div>
             <div class="card-body">
-                <table class="table table-hover">
-                    <thead>
-                        <tr><th style="width: 20%;">Language</th><th>Translation</th><th style="width: 20%;">Status</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for lang_code, lang_name in language_names.items() %}
-                            {% if translations.get(lang_code) %}
-                                {% set t = translations[lang_code] %}
-                                <tr>
-                                    <td><strong>{{ lang_name }}</strong> <small class="text-muted">({{ lang_code }})</small></td>
-                                    <td>{{ t.translation }}</td>
-                                    <td>
-                                        {% if t.translation_status %}
-                                            <span class="badge bg-light text-dark" title="{{ t.translation_status_note or '' }}">{{ t.translation_status }}</span>
-                                        {% else %}
-                                            <span class="text-muted">—</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endif %}
-                        {% endfor %}
-                        {% if not translations %}
-                            <tr><td colspan="3" class="text-muted fst-italic text-center">No translations available.</td></tr>
-                        {% endif %}
-                    </tbody>
-                </table>
+                {% with value_header='Translation', empty_text='No translations available.' %}
+                    {% include "elements/_language_values.html" %}
+                {% endwith %}
             </div>
         </div>
     </div>

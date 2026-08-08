@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Idiom {{ idiom.guid or idiom.id }}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('idioms.list_idioms_view') }}">Idioms</a></li>
+        <li class="breadcrumb-item active">{{ idiom.guid or idiom.id }}</li>
+    </ol>
+</nav>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-lightbulb"></i> {{ idiom.expression }}
+            </div>
+            <div class="card-body">
+                {# The source expression and its meaning are kept visually distinct:
+                   an idiom's meaning is not a translation of its words. #}
+                <dl class="row">
+                    <dt class="col-sm-3">Source expression</dt>
+                    <dd class="col-sm-9">
+                        <strong>{{ idiom.expression }}</strong>
+                        <span class="badge bg-secondary ms-1">
+                            {{ language_names.get(idiom.source_language_code, idiom.source_language_code) }}
+                        </span>
+                    </dd>
+
+                    <dt class="col-sm-3">Meaning</dt>
+                    <dd class="col-sm-9">{{ idiom.meaning }}</dd>
+
+                    {% with element=idiom %}
+                        {% include "elements/_identity.html" %}
+                    {% endwith %}
+
+                    {% if idiom.register %}
+                        <dt class="col-sm-3">Register</dt>
+                        <dd class="col-sm-9">{{ idiom.register }}</dd>
+                    {% endif %}
+
+                    {% if idiom.region %}
+                        <dt class="col-sm-3">Region</dt>
+                        <dd class="col-sm-9">{{ idiom.region }}</dd>
+                    {% endif %}
+
+                    {% if idiom.usage_note %}
+                        <dt class="col-sm-3">Usage note</dt>
+                        <dd class="col-sm-9">{{ idiom.usage_note }}</dd>
+                    {% endif %}
+
+                    {% if idiom.notes %}
+                        <dt class="col-sm-3">Notes</dt>
+                        <dd class="col-sm-9">{{ idiom.notes }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-translate"></i> Equivalents</div>
+            <div class="card-body">
+                {% if equivalents_by_language %}
+                    {% for lang_code, equivalents in equivalents_by_language.items() %}
+                        <h6 class="mt-2">
+                            {{ language_names.get(lang_code, lang_code) }}
+                            <small class="text-muted">({{ lang_code }})</small>
+                        </h6>
+                        <table class="table table-sm table-hover align-middle mb-4">
+                            <thead>
+                                <tr>
+                                    <th>Expression</th>
+                                    <th style="width: 18%;">Kind</th>
+                                    <th style="width: 25%;">Literal gloss</th>
+                                    <th style="width: 12%;">Verified</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for equivalent in equivalents %}
+                                    <tr>
+                                        <td>
+                                            {{ equivalent.expression }}
+                                            {% if equivalent.usage_note %}
+                                                <div class="text-muted small">{{ equivalent.usage_note }}</div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">
+                                                {{ equivalent.equivalence_kind|replace('_', ' ') }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if equivalent.literal_gloss %}
+                                                <em>{{ equivalent.literal_gloss }}</em>
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if equivalent.verified %}
+                                                <i class="bi bi-check-circle-fill text-success"></i>
+                                            {% else %}
+                                                <i class="bi bi-x-circle text-muted"></i>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted fst-italic mb-0">No equivalents recorded.</p>
+                {% endif %}
+
+                {% if missing_languages %}
+                    {# Shown persistently rather than hidden: an absent equivalent is a
+                       real coverage state, not a rendering gap. #}
+                    <div class="alert alert-light border mb-0">
+                        <i class="bi bi-info-circle"></i>
+                        No equivalent recorded for:
+                        {% for lang_code in missing_languages %}
+                            <span class="badge bg-light text-dark">
+                                {{ language_names.get(lang_code, lang_code) }}
+                            </span>
+                        {% endfor %}
+                        <div class="small text-muted mt-1">
+                            This does not yet distinguish &ldquo;assessed, no equivalent exists&rdquo;
+                            from &ldquo;not yet assessed&rdquo;.
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

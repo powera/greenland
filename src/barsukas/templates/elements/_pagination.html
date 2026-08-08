@@ -1,0 +1,25 @@
+{#
+  Shared prev/next pagination for element list pages.
+
+  Parameters:
+    page        - current 1-based page number
+    total_pages - total page count
+    endpoint    - blueprint endpoint to link to
+    args        - dict of query args to preserve across pages
+#}
+{% if total_pages > 1 %}
+{% set args = args | default({}) %}
+<nav aria-label="Page navigation">
+    <ul class="pagination pagination-sm">
+        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for(endpoint, page=page - 1, **args) }}">Prev</a>
+        </li>
+        <li class="page-item disabled">
+            <span class="page-link">{{ page }} / {{ total_pages }}</span>
+        </li>
+        <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for(endpoint, page=page + 1, **args) }}">Next</a>
+        </li>
+    </ul>
+</nav>
+{% endif %}

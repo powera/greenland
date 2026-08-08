@@ -7,7 +7,8 @@
 #   2. Initialize database tables and corpus configurations
 #   3. Load word frequency data from enabled corpora
 #   4. Calculate combined frequency ranks
-#   5. Advise user to sync lemmas via Barsukas /sync UI
+#   5. Import idioms from data/release
+#   6. Advise user to sync lemmas via Barsukas /sync UI
 #
 # Environment overrides:
 #   DB_PATH     - Path to SQLite database (default: data/wordfreq/linguistics.sqlite)
@@ -48,6 +49,22 @@ if [[ $? -ne 0 ]]; then
 fi
 
 echo "✓ Database initialization complete"
+echo ""
+
+# Step 2: Load idioms from data/release
+# Idioms are small, hand-curated, and have no sync UI yet, so they are loaded
+# here rather than left to the /sync flow that lemmas use.
+echo "=== Step 2: Importing idioms from data/release ==="
+PYTHONPATH=src python -m storage.migrate idiom-release-to-sqlite \
+  --sqlite-path "$DB_PATH" \
+  --idiom-release-dir data/release/idioms
+
+if [[ $? -ne 0 ]]; then
+  echo "❌ Failed to import idioms"
+  exit 1
+fi
+
+echo "✓ Idiom import complete"
 echo ""
 
 # Done!
