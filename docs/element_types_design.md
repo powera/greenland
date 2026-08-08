@@ -361,8 +361,18 @@ Constraints and indexes:
 - `equivalence_kind` is closed: `idiomatic`, `near_equivalent`, `paraphrase`;
 - source expression lives on the idiom, not as a magic English equivalent;
 - zero equivalents is a valid, visible coverage state;
-- use the dedicated immutable `M01` GUID family, which is routed as `idiom` by
-  the storage GUID resolver.
+- use the dedicated immutable `M01` GUID family, declared in
+  `storage/models/guid_prefixes.py` alongside the lemma and phrase registries
+  and routed as `idiom` by the storage GUID resolver.
+
+Idioms take a single flat prefix because, unlike lemmas and phrases, they have
+no subtype column for a prefix to mirror. The available axes are all unsuitable:
+`register` and `region` are mutable, and a GUID is not; `source_language_code`
+is open-ended and would presume the source language is permanently part of an
+idiom's identity — precisely the question deferred below. The resolver therefore
+matches the whole `M` family rather than the `M01` literal, so allocating `M02`
+later, if a genuine subtype axis emerges, needs no classifier change and leaves
+existing `M01` GUIDs valid.
 
 A separate equivalents table is necessary because the generic language-value
 interface permits multiple values while current phrase/name/sentence tables do
@@ -442,6 +452,13 @@ The parallelization is sufficient for idioms when:
 
 ## Decisions intentionally deferred
 
+- Whether an idiom is anchored to a source language at all. Today's schema says
+  yes: a `source_language_code` expression with equivalents hanging off it. The
+  alternative is a language-neutral meaning with N realizations, none
+  privileged. Idioms translate poorly between languages, so the anchored model
+  may be encoding an accident of authoring order rather than a real asymmetry.
+  Resolve this before idiom export freezes its contract; the flat `M01` prefix
+  is deliberately compatible with either outcome.
 - Representation of “assessed, no equivalent”: dedicated coverage row versus a
   coverage/status table.
 - Literal-gloss language coverage.

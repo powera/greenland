@@ -25,7 +25,6 @@ from storage.models.enums import (
 from storage.models.grammar_fact import GrammarFact
 from storage.models.idiom import (
     IDIOM_EQUIVALENCE_KINDS,
-    IDIOM_GUID_PREFIX,
     Idiom,
     IdiomEquivalent,
 )
@@ -104,7 +103,6 @@ __all__ = [
     "GrammarFact",
     "GuidTombstone",
     "IDIOM_EQUIVALENCE_KINDS",
-    "IDIOM_GUID_PREFIX",
     "Idiom",
     "IdiomEquivalent",
     "Lemma",

@@ -5,9 +5,9 @@ from typing import Optional
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
+from storage.models.guid_prefixes import IDIOM_GUID_PREFIX
 from storage.models.idiom import (
     IDIOM_EQUIVALENCE_KINDS,
-    IDIOM_GUID_PREFIX,
     Idiom,
     IdiomEquivalent,
 )

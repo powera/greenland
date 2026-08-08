@@ -148,3 +148,9 @@ PHRASE_SUBTYPE_GUID_PREFIXES = {
     "greetings": "F01",
     "traveler": "F02",
 }
+
+# GUID prefix for idioms. Idioms (figurative expressions whose meaning is not
+# compositional, e.g. "kick the bucket") live in their own ``idioms`` table, so
+# like phrases they are not part of SUBTYPE_GUID_PREFIXES above. Idioms are not
+# subtyped, so this is a single prefix rather than a mapping.
+IDIOM_GUID_PREFIX = "M01"
