@@ -17,6 +17,7 @@ from audioshoe.qwen.types import QwenVoice
 from clients.audio.azure_tts import AzureVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.polly_tts import PollyVoice
+from barsukas.helpers.elements import group_language_values
 from barsukas.helpers.lemma_display import (
     build_lemma_pronunciation_rows,
     get_pronunciation_languages,
@@ -364,6 +365,10 @@ def _get_lemma_page_context(lemma_id: int) -> Optional[Dict[str, Any]]:
     return {
         "lemma": lemma,
         "translations": translations,
+        # The flat dicts above still drive the edit forms and the slash check,
+        # which ask about absent keys; the grouped values feed the shared
+        # elements/_language_values.html table.
+        "values_by_language": group_language_values(lemma.language_values),
         "definitions": data["definitions"],
         "translation_disambiguations": data["translation_disambiguations"],
         "language_names": language_names,
@@ -428,6 +433,27 @@ def view_lemma(lemma_id: int) -> ResponseReturnValue:
         concept_link=concept_link,
         coverage_rows=coverage_rows,
         queued_tasks=queued_tasks,
+        **context,
+    )
+
+
+@bp.route("/<int:lemma_id>/translations/edit")
+def edit_lemma_translations(lemma_id: int) -> ResponseReturnValue:
+    """Edit every translation for a lemma on one page.
+
+    The overview table previously carried a modal and an AI button per row,
+    which meant its read-only presentation could not be shared with the other
+    element types. Collecting the writes here keeps the overview a pure read
+    view and gives each language a full-width form instead of a modal.
+    """
+    context = _get_lemma_page_context(lemma_id)
+    if context is None:
+        flash("Lemma not found", "error")
+        return redirect(url_for("lemmas.list_lemmas"))
+
+    return render_template(
+        "lemmas/translations_edit.html",
+        active_tab="overview",
         **context,
     )
 

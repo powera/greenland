@@ -44,9 +44,16 @@ def update_translation(lemma_id: int, lang_code: str) -> Response:
     new_disambiguation = request.form.get("disambiguation", "").strip() or None
     return_to = request.form.get("return_to", "").strip()
 
+    # Failures return to whichever page submitted the form, so a rejected edit
+    # does not also lose the user their place.
+    if return_to == "edit_translations":
+        failure_target = url_for("lemmas.edit_lemma_translations", lemma_id=lemma_id)
+    else:
+        failure_target = url_for("lemmas.view_lemma", lemma_id=lemma_id)
+
     if not new_translation:
         flash("Translation cannot be empty", "error")
-        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+        return redirect(failure_target)
 
     # Check for slash warning (will be shown in UI, but we allow it)
     has_slash = "/" in new_translation
@@ -82,11 +89,13 @@ def update_translation(lemma_id: int, lang_code: str) -> Response:
 
     except ValueError as e:
         flash(str(e), "error")
-        return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
+        return redirect(failure_target)
 
     # Redirect based on return_to parameter
     if return_to == "check_translations":
         return redirect(url_for("agents.check_translations", lemma_id=lemma_id))
+    elif return_to == "edit_translations":
+        return redirect(url_for("lemmas.edit_lemma_translations", lemma_id=lemma_id))
     else:
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
 

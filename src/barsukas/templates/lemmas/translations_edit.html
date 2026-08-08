@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}{{ LSTR.translations }} — {{ lemma.lemma_text }}{% endblock %}
+
+{% block content %}
+{% include 'lemmas/_lemma_nav.html' %}
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-pencil"></i> {{ LSTR.translations }} — {{ lemma.lemma_text }}</span>
+                <a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> {{ LSTR.back }}
+                </a>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    <strong>{{ lemma.lemma_text }}</strong>
+                    {% if lemma.definition_text %} &mdash; {{ lemma.definition_text }}{% endif %}
+                </p>
+
+                {# One ordinary POST form per language. Each submits on its own so a
+                   failed edit cannot discard the others' unsaved text. #}
+                {% for lang_code, lang_name in language_names.items() %}
+                    <div class="card mb-3">
+                        <div class="card-header py-2">
+                            <strong>{{ lang_name }}</strong>
+                            <small class="text-muted">({{ lang_code }})</small>
+                            {% if translations[lang_code] and '/' in translations[lang_code] %}
+                                <span class="badge bg-warning text-dark ms-1" title="{{ STRINGS.sentences.contains_slash }}">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            <form method="post"
+                                  action="{{ url_for('translations.update_translation', lemma_id=lemma.id, lang_code=lang_code) }}">
+                                <input type="hidden" name="return_to" value="edit_translations">
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-md-5">
+                                        <label for="translation_{{ lang_code }}" class="form-label">
+                                            {{ LSTR.translation }}
+                                        </label>
+                                        <input type="text" class="form-control" id="translation_{{ lang_code }}"
+                                               name="translation" value="{{ translations[lang_code] or '' }}"
+                                               {% if config.get('READONLY', False) %}disabled{% endif %} required>
+                                    </div>
+                                    {% if lang_code != 'en' %}
+                                        <div class="col-md-4">
+                                            <label for="disambiguation_{{ lang_code }}" class="form-label">
+                                                {{ STRINGS.sentences.disambiguation }}
+                                                <small class="text-muted">({{ LSTR.token_optional }})</small>
+                                            </label>
+                                            <input type="text" class="form-control" id="disambiguation_{{ lang_code }}"
+                                                   name="disambiguation"
+                                                   value="{{ translation_disambiguations[lang_code] or '' }}"
+                                                   placeholder="{{ STRINGS.sentences.disambiguation_example_placeholder }}"
+                                                   {% if config.get('READONLY', False) %}disabled{% endif %}>
+                                        </div>
+                                    {% endif %}
+                                    <div class="col-md-3">
+                                        <button type="submit" class="btn btn-primary"
+                                                {% if config.get('READONLY', False) %}disabled title="Not available in hosted mode"{% endif %}>
+                                            <i class="bi bi-save"></i> {{ STRINGS.sentences.save }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            {% if lang_code != 'en' and translations[lang_code] %}
+                                <form method="post"
+                                      action="{{ url_for('agents.check_translation_disambiguation', lemma_id=lemma.id, lang_code=lang_code) }}"
+                                      class="mt-2">
+                                    <button type="submit" class="btn btn-sm btn-outline-info"
+                                            title="{% if config.get('ALLOW_OUTBOUND_CALLS', True) %}{{ STRINGS.sentences.suggest_disambiguation_using_ai }}{% else %}Not available in hosted mode{% endif %}"
+                                            {% if not config.get('ALLOW_OUTBOUND_CALLS', True) or config.get('READONLY', False) %}disabled{% endif %}>
+                                        <i class="bi bi-robot"></i> {{ STRINGS.sentences.suggest_disambiguation_using_ai }}
+                                    </button>
+                                </form>
+                            {% endif %}
+
+                            {% if definitions[lang_code] %}
+                                <div class="form-text mt-2">
+                                    {{ STRINGS.sentences.definition }}: {{ definitions[lang_code] }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

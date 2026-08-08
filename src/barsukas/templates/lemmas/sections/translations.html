@@ -1,11 +1,14 @@
 <!-- Translations -->
-{% from 'elements/_language_text.html' import language_text %}
 <div class="row mb-4">
     <div class="col">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-translate"></i> {{ LSTR.translations }}</span>
                 <div>
+                    <a href="{{ url_for('lemmas.edit_lemma_translations', lemma_id=lemma.id) }}"
+                       class="btn btn-sm btn-outline-light {% if config.get('READONLY', False) %}disabled{% endif %}">
+                        <i class="bi bi-pencil"></i> {{ LSTR.edit }}
+                    </a>
                     <form method="post" action="{{ url_for('agents.check_translations', lemma_id=lemma.id) }}" style="display: inline;">
                         <button type="submit" class="btn btn-sm btn-light"
                                 title="{% if config.get('ALLOW_OUTBOUND_CALLS', True) %}{{ STRINGS.sentences.check_translations_using_ai }}{% else %}Not available in hosted mode{% endif %}"
@@ -23,121 +26,19 @@
                 </div>
             </div>
             <div class="card-body">
-                <table class="table table-hover translation-table">
-                    <thead>
-                        <tr>
-                            <th>{{ LSTR.language }}</th>
-                            <th>{{ LSTR.translation }}</th>
-                            <th>{{ STRINGS.sentences.disambiguation }}</th>
-                            <th>{{ STRINGS.sentences.definition }}</th>
-                            <th>{{ STRINGS.sentences.actions }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for lang_code, lang_name in language_names.items() %}
-                            {% set is_hidden = lang_code in hidden_languages %}
-                            <tr{% if is_hidden %} class="secondary-translation d-none"{% endif %}>
-                                <td><strong>{{ lang_name }}</strong> <small class="text-muted">({{ lang_code }})</small></td>
-                                <td>
-                                    {% if translations[lang_code] %}
-                                        {{ language_text(translations[lang_code], lang_code) }}
-                                        {% if '/' in translations[lang_code] %}
-                                            <span class="badge bg-warning text-dark" title="{{ STRINGS.sentences.contains_slash }}">
-                                                <i class="bi bi-exclamation-triangle"></i>
-                                            </span>
-                                        {% endif %}
-                                    {% else %}
-                                        <span class="text-muted fst-italic">{{ STRINGS.sentences.not_set }}</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if translation_disambiguations[lang_code] %}
-                                        <span class="badge bg-info text-dark">{{ translation_disambiguations[lang_code] }}</span>
-                                    {% else %}
-                                        <span class="text-muted fst-italic">-</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if definitions[lang_code] %}
-                                        <small class="text-muted">{{ definitions[lang_code][:80] }}{% if definitions[lang_code]|length > 80 %}...{% endif %}</small>
-                                    {% else %}
-                                        <span class="text-muted fst-italic">-</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-outline-primary"
-                                            {% if not config.get('READONLY', False) %}
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#translationModal{{ lang_code }}"
-                                            {% else %}
-                                            disabled title="Not available in hosted mode"
-                                            {% endif %}>
-                                        <i class="bi bi-pencil"></i> {{ LSTR.edit }}
-                                    </button>
-                                    {% if lang_code != 'en' and translations[lang_code] %}
-                                    <form method="post" action="{{ url_for('agents.check_translation_disambiguation', lemma_id=lemma.id, lang_code=lang_code) }}" style="display: inline;">
-                                        <button type="submit" class="btn btn-sm btn-outline-info"
-                                                title="{% if config.get('ALLOW_OUTBOUND_CALLS', True) %}{{ STRINGS.sentences.suggest_disambiguation_using_ai }}{% else %}Not available in hosted mode{% endif %}"
-                                                {% if not config.get('ALLOW_OUTBOUND_CALLS', True) or config.get('READONLY', False) %}disabled{% endif %}>
-                                            <i class="bi bi-robot"></i>
-                                        </button>
-                                    </form>
-                                    {% endif %}
-                                </td>
-                            </tr>
-
-                            <!-- Translation Edit Modal -->
-                            <div class="modal fade" id="translationModal{{ lang_code }}" tabindex="-1">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">{{ STRINGS.sentences.edit_translation_title }} — {{ lang_name }}</h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <form method="post" action="{{ url_for('translations.update_translation', lemma_id=lemma.id, lang_code=lang_code) }}">
-                                            <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label class="form-label">{{ STRINGS.sentences.lemma }}</label>
-                                                    <p class="form-control-plaintext"><strong>{{ lemma.lemma_text }}</strong> - {{ lemma.definition_text[:50] }}...</p>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="translation{{ lang_code }}" class="form-label">
-                                                        {{ LSTR.translation }} ({{ lang_name }})
-                                                    </label>
-                                                    <input type="text" class="form-control" id="translation{{ lang_code }}"
-                                                           name="translation" value="{{ translations[lang_code] or '' }}"
-                                                           onkeyup="checkTranslationSlash(this, 'slashWarning{{ lang_code }}')"
-                                                           required>
-                                                    <div id="slashWarning{{ lang_code }}" class="slash-warning" style="display: {% if translations[lang_code] and '/' in translations[lang_code] %}block{% else %}none{% endif %};">
-                                                        <i class="bi bi-exclamation-triangle"></i>
-                                                        {{ STRINGS.sentences.translation_contains_slash_warning }}
-                                                    </div>
-                                                </div>
-                                                {% if lang_code != 'en' %}
-                                                <div class="mb-3">
-                                                    <label for="disambiguation{{ lang_code }}" class="form-label">
-                                                        {{ STRINGS.sentences.disambiguation }} <small class="text-muted">({{ LSTR.token_optional }})</small>
-                                                    </label>
-                                                    <input type="text" class="form-control" id="disambiguation{{ lang_code }}"
-                                                           name="disambiguation" value="{{ translation_disambiguations[lang_code] or '' }}"
-                                                           placeholder="{{ STRINGS.sentences.disambiguation_example_placeholder }}">
-                                                    <div class="form-text">
-                                                        {{ STRINGS.sentences.disambiguation_help_text }}
-                                                    </div>
-                                                </div>
-                                                {% endif %}
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ STRINGS.sentences.cancel }}</button>
-                                                <button type="submit" class="btn btn-primary">{{ STRINGS.sentences.save }}</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                {# Per-language definition and disambiguation ride on the shared
+                   LanguageValue projection as gloss and qualifier, so this is the
+                   same table phrases, idioms, and sentences render. #}
+                {% with value_header=LSTR.translation,
+                        empty_text=STRINGS.sentences.no_translations_available,
+                        show_gloss=True,
+                        gloss_header=STRINGS.sentences.definition,
+                        show_qualifier=True,
+                        qualifier_header=STRINGS.sentences.disambiguation,
+                        show_missing=True,
+                        missing_text=STRINGS.sentences.not_set %}
+                    {% include "elements/_language_values.html" %}
+                {% endwith %}
                 {% set hidden_count = language_names.keys()|select('in', hidden_languages)|list|length %}
                 {% if hidden_count %}
                 <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleSecondaryLangsBtn">
@@ -148,3 +49,28 @@
         </div>
     </div>
 </div>
+
+{# Slash warnings get their own box rather than a per-row badge: a "/" means an
+   unsplit multi-sense import, which is a data-quality problem for the lemma as
+   a whole rather than a property of one table cell. #}
+{% set slashed = [] %}
+{% for lang_code, lang_name in language_names.items() %}
+    {% if translations[lang_code] and '/' in translations[lang_code] %}
+        {% set _ = slashed.append((lang_code, lang_name)) %}
+    {% endif %}
+{% endfor %}
+{% if slashed %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="alert alert-warning mb-0">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>{{ STRINGS.sentences.contains_slash }}</strong>
+            <ul class="mb-0 mt-1">
+                {% for lang_code, lang_name in slashed %}
+                    <li>{{ lang_name }} <small class="text-muted">({{ lang_code }})</small>: {{ translations[lang_code] }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endif %}

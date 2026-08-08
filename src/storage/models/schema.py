@@ -216,7 +216,13 @@ class Lemma(Base):
 
     @property
     def language_values(self) -> list[LanguageValue]:
-        """Project lemma translations into the shared read-only representation."""
+        """Project lemma translations into the shared read-only representation.
+
+        The per-language definition and sense disambiguation are projected as
+        gloss and qualifier so the shared language-value table can render them
+        as ordinary optional columns, rather than the lemma page needing its
+        own copy of that table to show two extra fields.
+        """
         return [
             LanguageValue(
                 id=translation.id,
@@ -226,6 +232,8 @@ class Lemma(Base):
                 verified=translation.verified,
                 status=translation.translation_status,
                 status_note=translation.translation_status_note,
+                gloss=translation.definition_text,
+                qualifier=translation.disambiguation,
             )
             for translation in sorted(
                 self.translations,

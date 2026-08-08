@@ -22,7 +22,21 @@ class ElementRef:
 
 @dataclass(frozen=True)
 class LanguageValue:
-    """Read-only projection of text associated with a language."""
+    """Read-only projection of text associated with a language.
+
+    ``gloss`` and ``qualifier`` describe the value rather than qualifying its
+    workflow state, which is what ``status``/``status_note`` are for. Both are
+    optional because only some element types have them:
+
+    * ``gloss`` is explanatory prose about the value - a lemma's per-language
+      definition, an idiom equivalent's literal gloss. It explains what the
+      text means; it is never a substitute for the text itself.
+    * ``qualifier`` is a short distinguishing label, rendered as a badge rather
+      than prose - a lemma translation's sense disambiguation.
+
+    Consumers must treat a missing value as "this type has none" rather than
+    "not yet filled in": phrases have neither, and that is not a gap.
+    """
 
     id: int
     language_code: str
@@ -31,6 +45,8 @@ class LanguageValue:
     verified: bool
     status: str | None = None
     status_note: str | None = None
+    gloss: str | None = None
+    qualifier: str | None = None
 
 
 class Element(Protocol):
