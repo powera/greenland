@@ -425,8 +425,8 @@ def handle_lemma_type_subtype_change(
 
     # Step 2: Create tombstone for old GUID if it exists, and generate new GUID
     if old_guid:
-        # Generate new GUID based on the NEW subtype
-        # No need to flush - generate_guid() only queries OTHER lemmas with this prefix
+        # Generate new GUID based on the NEW subtype. generate_guid() accounts
+        # for lemmas pending in this session, so no flush is needed here.
         new_guid = None
         if new_pos_subtype:
             try:
