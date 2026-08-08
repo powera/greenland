@@ -231,6 +231,52 @@ def test_concept_implements_only_the_common_verified_view(session: Session) -> N
     assert not hasattr(concept, "language_values")
 
 
+def test_lemma_projects_definition_and_disambiguation(session: Session) -> None:
+    """Per-language definition and sense disambiguation reach the projection.
+
+    They are gloss and qualifier rather than status/status_note: those describe
+    the value, while the status pair records workflow state.
+    """
+    lemma = add_lemma(
+        session,
+        lemma_text="light",
+        definition_text="visible electromagnetic radiation",
+        pos_type="noun",
+        lithuanian_translation="šviesa",
+        auto_generate_guid=False,
+    )
+    translation = lemma.translations[0]
+    translation.definition_text = "elektromagnetinė spinduliuotė"
+    translation.disambiguation = "radiation"
+    translation.translation_status = "needs_review"
+    session.flush()
+
+    (value,) = _language_values(lemma)
+    assert value.gloss == "elektromagnetinė spinduliuotė"
+    assert value.qualifier == "radiation"
+    assert value.status == "needs_review"
+    assert value.status_note is None
+
+
+def test_language_value_gloss_and_qualifier_default_to_absent(session: Session) -> None:
+    """A type without them projects None rather than an empty string.
+
+    Phrases have neither, and that is a property of the type rather than an
+    unfilled field, so consumers can render the column as "not applicable".
+    """
+    phrase = add_phrase(
+        session,
+        phrase_subtype="greetings",
+        label="good morning",
+    )
+    set_phrase_translation(session, phrase, "lt", "labas rytas")
+    session.flush()
+
+    (value,) = _language_values(phrase)
+    assert value.gloss is None
+    assert value.qualifier is None
+
+
 def test_sub_concept_implements_the_common_verified_view(session: Session) -> None:
     sub_concept = SubConcept(
         slug="Sicilian_Defense",

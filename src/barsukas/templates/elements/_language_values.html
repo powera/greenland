@@ -11,25 +11,56 @@
     value_header       - column heading for the text column
     empty_text         - message shown when the element has no values at all
     show_kind          - whether to show each value's kind badge
+    show_gloss         - whether to show the gloss column (lemma definition,
+                         idiom literal gloss); header from gloss_header
+    gloss_header       - column heading for the gloss column
+    show_qualifier     - whether to show the qualifier badge column (lemma
+                         sense disambiguation); header from qualifier_header
+    qualifier_header   - column heading for the qualifier column
+    show_missing       - render a row for supported languages with no value,
+                         so absent coverage is visible rather than implied by
+                         a shorter table. Opt-in: for types whose coverage is
+                         expected to be partial (phrases) the empty rows are
+                         noise, while for lemmas and idioms they are the point.
+    missing_text       - placeholder shown in a missing language's text cell
+    hidden_languages   - set of language codes whose rows start collapsed.
+                         Rows get .secondary-translation.d-none, which the
+                         toggle button in static/js/script.js keys on.
+    actions_caller     - optional macro taking (lang_code, values) rendering a
+                         trailing actions cell. Kept as a caller rather than
+                         baked in so read-only pages stay read-only.
 #}
 {% from 'elements/_language_text.html' import language_text %}
 {% set value_header = value_header | default('Text') %}
 {% set empty_text = empty_text | default('No values recorded.') %}
 {% set show_kind = show_kind | default(false) %}
+{% set show_gloss = show_gloss | default(false) %}
+{% set gloss_header = gloss_header | default('Gloss') %}
+{% set show_qualifier = show_qualifier | default(false) %}
+{% set qualifier_header = qualifier_header | default('Disambiguation') %}
+{% set show_missing = show_missing | default(false) %}
+{% set missing_text = missing_text | default('Not set') %}
+{% set hidden_languages = hidden_languages | default([]) %}
+{% set column_count = 3 + (1 if show_kind else 0) + (1 if show_gloss else 0) + (1 if show_qualifier else 0) + (1 if actions_caller else 0) %}
 <div class="table-responsive">
     <table class="table table-hover align-middle">
         <thead>
             <tr>
                 <th style="width: 20%;">Language</th>
                 <th>{{ value_header }}</th>
+                {% if show_qualifier %}<th style="width: 18%;">{{ qualifier_header }}</th>{% endif %}
+                {% if show_gloss %}<th style="width: 25%;">{{ gloss_header }}</th>{% endif %}
                 {% if show_kind %}<th style="width: 18%;">Kind</th>{% endif %}
                 <th style="width: 18%;">Status</th>
+                {% if actions_caller %}<th style="width: 15%;">Actions</th>{% endif %}
             </tr>
         </thead>
         <tbody>
             {% for lang_code, lang_name in language_names.items() %}
-                {% for value in values_by_language.get(lang_code, []) %}
-                    <tr>
+                {% set values = values_by_language.get(lang_code, []) %}
+                {% set is_hidden = lang_code in hidden_languages %}
+                {% for value in values %}
+                    <tr{% if is_hidden %} class="secondary-translation d-none"{% endif %}>
                         {% if loop.first %}
                             <td rowspan="{{ loop.length }}">
                                 <strong>{{ lang_name }}</strong>
@@ -37,6 +68,24 @@
                             </td>
                         {% endif %}
                         <td>{{ language_text(value.text, lang_code) }}</td>
+                        {% if show_qualifier %}
+                            <td>
+                                {% if value.qualifier %}
+                                    <span class="badge bg-info text-dark">{{ value.qualifier }}</span>
+                                {% else %}
+                                    <span class="text-muted fst-italic">-</span>
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                        {% if show_gloss %}
+                            <td>
+                                {% if value.gloss %}
+                                    <small class="text-muted">{{ value.gloss }}</small>
+                                {% else %}
+                                    <span class="text-muted fst-italic">-</span>
+                                {% endif %}
+                            </td>
+                        {% endif %}
                         {% if show_kind %}
                             <td><span class="badge bg-secondary">{{ value.value_kind|replace('_', ' ') }}</span></td>
                         {% endif %}
@@ -49,12 +98,29 @@
                                 <span class="text-muted">—</span>
                             {% endif %}
                         </td>
+                        {% if actions_caller %}
+                            <td>{% if loop.first %}{{ actions_caller(lang_code, values) }}{% endif %}</td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
+                {% if show_missing and not values %}
+                    <tr{% if is_hidden %} class="secondary-translation d-none"{% endif %}>
+                        <td>
+                            <strong>{{ lang_name }}</strong>
+                            <small class="text-muted">({{ lang_code }})</small>
+                        </td>
+                        <td><span class="text-muted fst-italic">{{ missing_text }}</span></td>
+                        {% if show_qualifier %}<td><span class="text-muted fst-italic">-</span></td>{% endif %}
+                        {% if show_gloss %}<td><span class="text-muted fst-italic">-</span></td>{% endif %}
+                        {% if show_kind %}<td><span class="text-muted">—</span></td>{% endif %}
+                        <td><span class="text-muted">—</span></td>
+                        {% if actions_caller %}<td>{{ actions_caller(lang_code, []) }}</td>{% endif %}
+                    </tr>
+                {% endif %}
             {% endfor %}
-            {% if not values_by_language %}
+            {% if not values_by_language and not show_missing %}
                 <tr>
-                    <td colspan="{{ 4 if show_kind else 3 }}" class="text-muted fst-italic text-center">{{ empty_text }}</td>
+                    <td colspan="{{ column_count }}" class="text-muted fst-italic text-center">{{ empty_text }}</td>
                 </tr>
             {% endif %}
         </tbody>

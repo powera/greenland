@@ -94,6 +94,37 @@ def test_create_idiom_assigns_guid_and_element_views(session: Session) -> None:
     assert _accept_language_values(idiom) == 0
 
 
+def test_equivalent_literal_gloss_projects_as_a_gloss(session: Session) -> None:
+    """The literal gloss is descriptive, so it is not a status note.
+
+    Register and usage note stay in the status pair because they qualify how
+    the equivalent may be used; the gloss only explains what its words say.
+    """
+    idiom = create_idiom(
+        session,
+        source_language_code="en",
+        expression="bite the bullet",
+        meaning="to endure something unpleasant",
+    )
+    add_idiom_equivalent(
+        session,
+        idiom,
+        language_code="lt",
+        expression="sukąsti dantis",
+        equivalence_kind="idiomatic",
+        literal_gloss="to clench one's teeth",
+        usage_note="Common in speech.",
+        register="informal",
+    )
+
+    (value,) = idiom.language_values
+    assert value.text == "sukąsti dantis"
+    assert value.gloss == "to clench one's teeth"
+    assert value.status == "informal"
+    assert value.status_note == "Common in speech."
+    assert value.qualifier is None
+
+
 def test_idiom_is_not_declared_as_a_word_element() -> None:
     """Document the intended static boundary without runtime protocol tricks."""
     assert "word_text" not in Idiom.__dict__

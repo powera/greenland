@@ -80,7 +80,13 @@ class Idiom(Base):
 
     @property
     def language_values(self) -> tuple[LanguageValue, ...]:
-        """Project equivalents through the shared read-only element interface."""
+        """Project equivalents through the shared read-only element interface.
+
+        The literal gloss is a gloss, not a status note: it explains what the
+        equivalent's words say, which is descriptive rather than a workflow
+        state. Register stays in ``status`` because it does qualify how the
+        equivalent may be used.
+        """
         return tuple(
             LanguageValue(
                 id=equivalent.id,
@@ -90,6 +96,7 @@ class Idiom(Base):
                 verified=equivalent.verified,
                 status=equivalent.register,
                 status_note=equivalent.usage_note,
+                gloss=equivalent.literal_gloss,
             )
             for equivalent in self.equivalents
         )

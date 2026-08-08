@@ -13,6 +13,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
 from storage.crud.idiom import add_idiom_equivalent, create_idiom
+from storage.crud.lemma import add_lemma
 from storage.crud.phrase import add_phrase, set_phrase_translation
 
 
@@ -152,3 +153,76 @@ def test_idiom_list_empty_state_renders(app: Flask, client: FlaskClient, db_engi
 
     assert response.status_code == 200
     assert "No idioms found." in response.get_data(as_text=True)
+
+
+def _seed_lemma(db_engine: Engine) -> int:
+    with Session(db_engine) as session:
+        lemma = add_lemma(
+            session,
+            lemma_text="light",
+            definition_text="visible electromagnetic radiation",
+            pos_type="noun",
+            difficulty_level=2,
+            lithuanian_translation="šviesa",
+        )
+        translation = lemma.translations[0]
+        translation.definition_text = "elektromagnetinė spinduliuotė"
+        translation.disambiguation = "radiation"
+        session.commit()
+        return int(lemma.id)
+
+
+def test_lemma_translations_render_gloss_and_qualifier_columns(
+    app: Flask, client: FlaskClient, db_engine: Engine
+) -> None:
+    """Definition and disambiguation reach the page through LanguageValue.
+
+    They were previously read from separate per-language dicts, which is why
+    the lemma table could not be the shared one.
+    """
+    lemma_id = _seed_lemma(db_engine)
+
+    response = client.get(f"/lemmas/{lemma_id}")
+    body = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert "šviesa" in body
+    assert "elektromagnetinė spinduliuotė" in body
+    assert "radiation" in body
+
+
+def test_lemma_translations_show_languages_with_no_value(
+    app: Flask, client: FlaskClient, db_engine: Engine
+) -> None:
+    """Missing coverage stays visible, as it was before the shared table."""
+    lemma_id = _seed_lemma(db_engine)
+
+    response = client.get(f"/lemmas/{lemma_id}")
+    body = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    # Secondary languages collapse rather than disappear.
+    assert "secondary-translation" in body
+
+
+def test_lemma_translation_edit_page_renders_a_form_per_language(
+    app: Flask, client: FlaskClient, db_engine: Engine
+) -> None:
+    """Writes live on their own page so the overview table can stay shared."""
+    lemma_id = _seed_lemma(db_engine)
+
+    response = client.get(f"/lemmas/{lemma_id}/translations/edit")
+    body = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert f'action="/translations/{lemma_id}/lt"' in body
+    assert 'name="return_to" value="edit_translations"' in body
+    assert "šviesa" in body
+
+
+def test_lemma_translation_edit_page_missing_lemma_redirects(
+    app: Flask, client: FlaskClient, db_engine: Engine
+) -> None:
+    response = client.get("/lemmas/999999/translations/edit")
+
+    assert response.status_code == 302
