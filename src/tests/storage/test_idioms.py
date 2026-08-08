@@ -95,10 +95,12 @@ def test_create_idiom_assigns_guid_and_element_views(session: Session) -> None:
 
 
 def test_equivalent_literal_gloss_projects_as_a_gloss(session: Session) -> None:
-    """The literal gloss is descriptive, so it is not a status note.
+    """Each equivalent field lands in the projection slot that matches its job.
 
-    Register and usage note stay in the status pair because they qualify how
-    the equivalent may be used; the gloss only explains what its words say.
+    The gloss explains what the equivalent's words say. The usage note is
+    editorial prose that earns a persistent line, so it is a note rather than
+    a status_note tooltip. Only register qualifies how the equivalent may be
+    used, so only register stays in the status pair.
     """
     idiom = create_idiom(
         session,
@@ -121,7 +123,8 @@ def test_equivalent_literal_gloss_projects_as_a_gloss(session: Session) -> None:
     assert value.text == "sukąsti dantis"
     assert value.gloss == "to clench one's teeth"
     assert value.status == "informal"
-    assert value.status_note == "Common in speech."
+    assert value.note == "Common in speech."
+    assert value.status_note is None
     assert value.qualifier is None
 
 
@@ -211,7 +214,40 @@ def test_multiple_equivalents_are_allowed_in_one_language(session: Session) -> N
     assert [value.value_kind for value in values] == ["idiomatic", "near_equivalent"]
     assert values[0].text == "kai kiaulės pradės skraidyti"
     assert values[0].status == "informal"
-    assert values[1].status_note == "traditional expression"
+    assert values[1].note == "traditional expression"
+
+
+def test_language_values_sort_independently_of_insertion_order(session: Session) -> None:
+    """The projection sorts, so the page does not depend on write order.
+
+    The idiom route previously sorted the ORM rows itself; consumers now get a
+    stable order from the projection instead.
+    """
+    idiom = create_idiom(
+        session,
+        source_language_code="en",
+        expression="spill the beans",
+        meaning="reveal a secret",
+    )
+    for language_code, kind in (
+        ("lt", "paraphrase"),
+        ("fr", "idiomatic"),
+        ("lt", "idiomatic"),
+    ):
+        add_idiom_equivalent(
+            session,
+            idiom,
+            language_code=language_code,
+            expression=f"{language_code}-{kind}",
+            equivalence_kind=kind,
+        )
+
+    values = idiom.language_values
+    assert [(value.language_code, value.value_kind) for value in values] == [
+        ("fr", "idiomatic"),
+        ("lt", "idiomatic"),
+        ("lt", "paraphrase"),
+    ]
 
 
 def test_duplicate_equivalent_is_rejected(session: Session) -> None:

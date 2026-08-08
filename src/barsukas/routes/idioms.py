@@ -17,37 +17,19 @@ Read-only for now: the add/edit path is deferred until phrases, idioms, and
 sentences get a unified creation flow.
 """
 
-from typing import Dict, List
-
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
 from barsukas.config import Config
-from barsukas.helpers.elements import build_element_rows
+from barsukas.helpers.elements import build_element_rows, group_language_values
 from storage.crud.idiom import (
     get_idiom_by_id,
     list_idiom_source_languages,
     list_idioms,
 )
-from storage.models.idiom import Idiom, IdiomEquivalent
 from storage.translation_helpers import get_supported_languages
 
 bp = Blueprint("idioms", __name__, url_prefix="/idioms")
-
-
-def _equivalents_by_language(idiom: Idiom) -> Dict[str, List[IdiomEquivalent]]:
-    """Group an idiom's equivalents by target language, ordered within a language.
-
-    Kept on the ORM rows rather than the shared LanguageValue projection because
-    the idiom detail page shows per-equivalent fields (literal gloss, region)
-    that the shared projection deliberately does not carry.
-    """
-    grouped: Dict[str, List[IdiomEquivalent]] = {}
-    for equivalent in idiom.equivalents:
-        grouped.setdefault(equivalent.language_code, []).append(equivalent)
-    for equivalents in grouped.values():
-        equivalents.sort(key=lambda row: (row.equivalence_kind, row.id or 0))
-    return grouped
 
 
 @bp.route("/")
@@ -95,21 +77,19 @@ def view_idiom(idiom_id: int) -> ResponseReturnValue:
         return redirect(url_for("idioms.list_idioms_view"))
 
     language_names = get_supported_languages()
-    equivalents_by_language = _equivalents_by_language(idiom)
 
-    # Languages assessed as having no equivalent are indistinguishable from
-    # unassessed ones until a coverage representation exists (see the design
-    # doc's deferred decisions), so present both as "not recorded".
-    missing_languages = [
-        code
-        for code in language_names
-        if code != idiom.source_language_code and code not in equivalents_by_language
-    ]
+    # The source language is not a language an idiom can lack an equivalent in:
+    # its expression is the thing the equivalents are equivalent to. Dropping it
+    # here rather than in the template keeps the shared table's "show a row per
+    # supported language" rule intact.
+    equivalent_language_names = {
+        code: name for code, name in language_names.items() if code != idiom.source_language_code
+    }
 
     return render_template(
         "idioms/view.html",
         idiom=idiom,
-        equivalents_by_language=equivalents_by_language,
-        missing_languages=missing_languages,
+        values_by_language=group_language_values(idiom.language_values),
+        equivalent_language_names=equivalent_language_names,
         language_names=language_names,
     )

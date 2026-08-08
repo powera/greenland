@@ -33,9 +33,13 @@ class LanguageValue:
       text means; it is never a substitute for the text itself.
     * ``qualifier`` is a short distinguishing label, rendered as a badge rather
       than prose - a lemma translation's sense disambiguation.
+    * ``note`` is editorial prose about using the value - an idiom
+      equivalent's usage note. Unlike ``status_note`` it is displayed
+      persistently rather than as a tooltip on a status badge, because it
+      often carries the reason a value reads the way it does.
 
     Consumers must treat a missing value as "this type has none" rather than
-    "not yet filled in": phrases have neither, and that is not a gap.
+    "not yet filled in": phrases have none of them, and that is not a gap.
     """
 
     id: int
@@ -47,6 +51,7 @@ class LanguageValue:
     status_note: str | None = None
     gloss: str | None = None
     qualifier: str | None = None
+    note: str | None = None
 
 
 class Element(Protocol):

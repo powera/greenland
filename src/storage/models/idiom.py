@@ -86,6 +86,12 @@ class Idiom(Base):
         equivalent's words say, which is descriptive rather than a workflow
         state. Register stays in ``status`` because it does qualify how the
         equivalent may be used.
+
+        The usage note is a ``note`` rather than a ``status_note`` so it keeps
+        a persistent line of its own. These notes carry the reason an
+        equivalent reads the way it does - that no idiomatic equivalent is
+        conventional in a language, say - which is content a hover tooltip
+        would hide.
         """
         return tuple(
             LanguageValue(
@@ -95,10 +101,13 @@ class Idiom(Base):
                 value_kind=equivalent.equivalence_kind,
                 verified=equivalent.verified,
                 status=equivalent.register,
-                status_note=equivalent.usage_note,
+                note=equivalent.usage_note,
                 gloss=equivalent.literal_gloss,
             )
-            for equivalent in self.equivalents
+            for equivalent in sorted(
+                self.equivalents,
+                key=lambda row: (row.language_code, row.equivalence_kind, row.id or 0),
+            )
         )
 
 

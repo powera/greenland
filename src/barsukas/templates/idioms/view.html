@@ -67,75 +67,26 @@
         <div class="card">
             <div class="card-header"><i class="bi bi-translate"></i> Equivalents</div>
             <div class="card-body">
-                {% if equivalents_by_language %}
-                    {% for lang_code, equivalents in equivalents_by_language.items() %}
-                        <h6 class="mt-2">
-                            {{ language_names.get(lang_code, lang_code) }}
-                            <small class="text-muted">({{ lang_code }})</small>
-                        </h6>
-                        <table class="table table-sm table-hover align-middle mb-4">
-                            <thead>
-                                <tr>
-                                    <th>Expression</th>
-                                    <th style="width: 18%;">Kind</th>
-                                    <th style="width: 25%;">Literal gloss</th>
-                                    <th style="width: 12%;">Verified</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for equivalent in equivalents %}
-                                    <tr>
-                                        <td>
-                                            {{ language_text(equivalent.expression, lang_code) }}
-                                            {% if equivalent.usage_note %}
-                                                <div class="text-muted small">{{ equivalent.usage_note }}</div>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-secondary">
-                                                {{ equivalent.equivalence_kind|replace('_', ' ') }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            {% if equivalent.literal_gloss %}
-                                                <em>{{ equivalent.literal_gloss }}</em>
-                                            {% else %}
-                                                <span class="text-muted">—</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if equivalent.verified %}
-                                                <i class="bi bi-check-circle-fill text-success"></i>
-                                            {% else %}
-                                                <i class="bi bi-x-circle text-muted"></i>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    {% endfor %}
-                {% else %}
-                    <p class="text-muted fst-italic mb-0">No equivalents recorded.</p>
-                {% endif %}
-
-                {% if missing_languages %}
-                    {# Shown persistently rather than hidden: an absent equivalent is a
-                       real coverage state, not a rendering gap. #}
-                    <div class="alert alert-light border mb-0">
-                        <i class="bi bi-info-circle"></i>
-                        No equivalent recorded for:
-                        {% for lang_code in missing_languages %}
-                            <span class="badge bg-light text-dark">
-                                {{ language_names.get(lang_code, lang_code) }}
-                            </span>
-                        {% endfor %}
-                        <div class="small text-muted mt-1">
-                            This does not yet distinguish &ldquo;assessed, no equivalent exists&rdquo;
-                            from &ldquo;not yet assessed&rdquo;.
-                        </div>
-                    </div>
-                {% endif %}
+                {# One row per supported language, several for languages with more
+                   than one equivalent. show_missing keeps absent coverage on the
+                   page: an idiom with no equivalent in a language is a real
+                   linguistic fact, not a rendering gap. The source language is
+                   excluded by the route, since the expression is what the
+                   equivalents are equivalent to. #}
+                {% with language_names=equivalent_language_names,
+                        value_header='Expression',
+                        show_kind=True,
+                        show_gloss=True,
+                        gloss_header='Literal gloss',
+                        show_missing=True,
+                        missing_text='No equivalent recorded' %}
+                    {% include "elements/_language_values.html" %}
+                {% endwith %}
+                <div class="small text-muted">
+                    A language with no equivalent does not yet distinguish
+                    &ldquo;assessed, no equivalent exists&rdquo; from
+                    &ldquo;not yet assessed&rdquo;.
+                </div>
             </div>
         </div>
     </div>
