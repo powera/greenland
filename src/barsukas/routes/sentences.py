@@ -17,6 +17,7 @@ from audioshoe.qwen.types import QwenVoice
 from clients.audio.azure_tts import AzureVoice
 from clients.audio.google_tts import GoogleTtsVoice
 from clients.audio.polly_tts import PollyVoice
+from barsukas.helpers.elements import group_language_values
 from barsukas.helpers.flash_helpers import flash_and_log
 from langtools.ud_relations import ROOT_HEAD_POSITION
 from workqueue.task_queue import TaskType, enqueue_task, get_tasks_for_target
@@ -516,6 +517,10 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         "sentences/view.html",
         sentence=sentence,
         translations=translations,
+        # The flat translations dict above still drives the "which languages are
+        # missing" checkboxes on the add-translation form; the grouped values
+        # feed the shared elements/_language_values.html table.
+        values_by_language=group_language_values(sentence.language_values),
         language_names=language_names,
         words_by_language=words_by_language,
         dependency_trees_by_language=dependency_trees_by_language,
