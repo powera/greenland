@@ -97,6 +97,7 @@ def _seed_idiom(db_engine: Engine) -> int:
             language_code="lt",
             expression="atiduoti Dievui dūšią",
             equivalence_kind="idiomatic",
+            usage_note="Chiefly literary.",
         )
         session.commit()
         return int(idiom.id)
@@ -138,14 +139,46 @@ def test_idiom_detail_shows_several_equivalents_in_one_language(
 def test_idiom_detail_states_missing_coverage_explicitly(
     app: Flask, client: FlaskClient, db_engine: Engine
 ) -> None:
-    """Absent equivalents are a real coverage state, not a blank space."""
+    """Absent equivalents are a real coverage state, not a blank space.
+
+    Stated as a row per uncovered language in the shared table rather than the
+    separate alert this page used before it shared that table.
+    """
     idiom_id = _seed_idiom(db_engine)
 
     response = client.get(f"/idioms/{idiom_id}")
     body = response.get_data(as_text=True)
 
     assert response.status_code == 200
-    assert "No equivalent recorded for:" in body
+    assert "No equivalent recorded" in body
+    assert "not yet assessed" in body
+
+
+def test_idiom_detail_omits_its_source_language_from_coverage(
+    app: Flask, client: FlaskClient, db_engine: Engine
+) -> None:
+    """An idiom cannot lack an equivalent in the language it is written in."""
+    idiom_id = _seed_idiom(db_engine)
+
+    response = client.get(f"/idioms/{idiom_id}")
+    body = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    # The seeded idiom's source language is English.
+    assert "<strong>English</strong>" not in body
+
+
+def test_idiom_detail_shows_usage_notes_persistently(
+    app: Flask, client: FlaskClient, db_engine: Engine
+) -> None:
+    """Usage notes are content, not a tooltip on a status badge."""
+    idiom_id = _seed_idiom(db_engine)
+
+    response = client.get(f"/idioms/{idiom_id}")
+    body = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert "Chiefly literary." in body
 
 
 def test_idiom_list_empty_state_renders(app: Flask, client: FlaskClient, db_engine: Engine) -> None:

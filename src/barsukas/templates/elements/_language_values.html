@@ -11,6 +11,10 @@
     value_header       - column heading for the text column
     empty_text         - message shown when the element has no values at all
     show_kind          - whether to show each value's kind badge
+
+  A value's note always renders as a line under its text; it needs no flag
+  because a type that has no notes shows nothing.
+
     show_gloss         - whether to show the gloss column (lemma definition,
                          idiom literal gloss); header from gloss_header
     gloss_header       - column heading for the gloss column
@@ -67,7 +71,12 @@
                                 <small class="text-muted">({{ lang_code }})</small>
                             </td>
                         {% endif %}
-                        <td>{{ language_text(value.text, lang_code) }}</td>
+                        <td>
+                            {{ language_text(value.text, lang_code) }}
+                            {% if value.note %}
+                                <div class="text-muted small">{{ value.note }}</div>
+                            {% endif %}
+                        </td>
                         {% if show_qualifier %}
                             <td>
                                 {% if value.qualifier %}
