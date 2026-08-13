@@ -39,6 +39,7 @@ from flask.typing import ResponseReturnValue
 
 from barsukas.config import Config
 from barsukas.helpers.elements import build_element_rows, group_language_values
+from barsukas.helpers.flash_helpers import log_and_flash_error
 from storage.crud.idiom import (
     add_idiom_equivalent,
     create_idiom,
@@ -51,6 +52,7 @@ from storage.crud.idiom import (
 from storage.crud.operation_log import log_translation_change
 from storage.models.idiom import IDIOM_EQUIVALENCE_KINDS
 from storage.translation_helpers import get_supported_languages
+from workqueue.task_queue import enqueue_task
 
 bp = Blueprint("idioms", __name__, url_prefix="/idioms")
 
@@ -58,6 +60,12 @@ bp = Blueprint("idioms", __name__, url_prefix="/idioms")
 # few at once without the page becoming mostly empty inputs; adding more is a
 # save and a revisit.
 _NEW_EQUIVALENT_ROWS = 3
+
+# Canonical capability task names, matching workqueue.registry. These are the
+# same names agents.gegute enqueues, so work queued from this page and from the
+# CLI dedups against each other.
+TASK_POPULATE_EQUIVALENTS = "idioms.equivalents.populate"
+TASK_VALIDATE_EQUIVALENTS = "idioms.equivalents.validate"
 
 
 @bp.route("/")
@@ -257,6 +265,81 @@ def delete_idiom_view(idiom_id: int) -> ResponseReturnValue:
 
     flash(f"Deleted idiom: {expression}", "success")
     return redirect(url_for("idioms.list_idioms_view"))
+
+
+@bp.route("/<int:idiom_id>/populate-equivalents", methods=["POST"])
+def populate_equivalents(idiom_id: int) -> ResponseReturnValue:
+    """Queue equivalent generation for one idiom (gegute's populate mode)."""
+    idiom = get_idiom_by_id(g.db, idiom_id)
+    if not idiom:
+        flash("Idiom not found", "error")
+        return redirect(url_for("idioms.list_idioms_view"))
+
+    try:
+        result = enqueue_task(
+            g.db,
+            task_type=TASK_POPULATE_EQUIVALENTS,
+            target_type="idiom",
+            target_id=idiom_id,
+            payload={
+                "schema_version": 1,
+                "source_component": "barsukas.idioms",
+                "idiom_id": idiom_id,
+                "only_missing": True,
+            },
+            dedup_key=f"{TASK_POPULATE_EQUIVALENTS}:{idiom_id}",
+        )
+        if result.created:
+            flash("Queued equivalent generation. Results will be applied soon.", "info")
+        else:
+            flash("Equivalent generation already in progress for this idiom.", "warning")
+    except Exception as error:
+        log_and_flash_error(error, "queueing equivalent generation")
+
+    return redirect(url_for("idioms.view_idiom", idiom_id=idiom_id))
+
+
+@bp.route("/<int:idiom_id>/validate-equivalents", methods=["POST"])
+def validate_equivalents(idiom_id: int) -> ResponseReturnValue:
+    """Queue an audit of one idiom's equivalents (gegute's validate mode).
+
+    The audit writes nothing; its findings land in the task result, which is
+    why this is offered even in read-only mode's absence of a save button.
+    """
+    idiom = get_idiom_by_id(g.db, idiom_id)
+    if not idiom:
+        flash("Idiom not found", "error")
+        return redirect(url_for("idioms.list_idioms_view"))
+
+    if not idiom.equivalents:
+        flash("Nothing to audit: this idiom has no equivalents yet.", "warning")
+        return redirect(url_for("idioms.view_idiom", idiom_id=idiom_id))
+
+    try:
+        result = enqueue_task(
+            g.db,
+            task_type=TASK_VALIDATE_EQUIVALENTS,
+            target_type="idiom",
+            target_id=idiom_id,
+            payload={
+                "schema_version": 1,
+                "source_component": "barsukas.idioms",
+                "idiom_id": idiom_id,
+            },
+            dedup_key=f"{TASK_VALIDATE_EQUIVALENTS}:{idiom_id}",
+        )
+        if result.created:
+            flash(
+                "Queued equivalent audit. Findings appear in the task result; "
+                "nothing is changed automatically.",
+                "info",
+            )
+        else:
+            flash("An audit is already in progress for this idiom.", "warning")
+    except Exception as error:
+        log_and_flash_error(error, "queueing equivalent audit")
+
+    return redirect(url_for("idioms.view_idiom", idiom_id=idiom_id))
 
 
 def _apply_equivalent_edits(idiom: Any) -> None:

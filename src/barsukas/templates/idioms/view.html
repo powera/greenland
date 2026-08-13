@@ -79,7 +79,25 @@
 <div class="row mb-4">
     <div class="col">
         <div class="card">
-            <div class="card-header"><i class="bi bi-translate"></i> Equivalents</div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-translate"></i> Equivalents</span>
+                <span>
+                    <form method="POST" action="{{ url_for('idioms.populate_equivalents', idiom_id=idiom.id) }}"
+                          class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-primary"
+                                {% if config.get('READONLY', False) %}disabled title="Not available in hosted mode"{% endif %}>
+                            <i class="bi bi-magic"></i> Generate missing
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ url_for('idioms.validate_equivalents', idiom_id=idiom.id) }}"
+                          class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary"
+                                {% if config.get('READONLY', False) %}disabled title="Not available in hosted mode"{% endif %}>
+                            <i class="bi bi-clipboard-check"></i> Audit
+                        </button>
+                    </form>
+                </span>
+            </div>
             <div class="card-body">
                 {# One row per supported language, several for languages with more
                    than one equivalent. show_missing keeps absent coverage on the

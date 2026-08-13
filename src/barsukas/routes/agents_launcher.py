@@ -126,6 +126,15 @@ AGENTS = [
         "use_dynamic_form": True,
     },
     {
+        "name": "GEGUTE",
+        "display_name": "Gegute",
+        "subtitle": "Idiom Generator",
+        "description": "Generates idioms, fills in their cross-language equivalents, and audits stored equivalents for mislabeled equivalence kinds.",
+        "script": "gegute.py",
+        "icon": "bi-lightbulb",
+        "use_dynamic_form": True,
+    },
+    {
         "name": "PAPUGA",
         "display_name": "Papuga",
         "subtitle": "Pronunciation Validator",
