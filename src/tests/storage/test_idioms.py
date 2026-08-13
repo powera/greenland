@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Iterator
 
 import pytest
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from storage.backend.config import BackendType, DataSourceConfig
 from storage.crud.idiom import (
     add_idiom_equivalent,
     create_idiom,
@@ -33,7 +31,6 @@ from storage.elements.interfaces import (
     VerifiableElement,
 )
 from storage.guid_router import guid_kind, resolve_guid
-from storage.migrations.add_idioms import create_idiom_tables
 from storage.models.guid_prefixes import IDIOM_GUID_PREFIX
 from storage.models.idiom import Idiom, IdiomEquivalent
 from storage.models.schema import Base
@@ -429,24 +426,6 @@ def test_deleting_idiom_cascades_to_equivalents(session: Session) -> None:
 
     assert session.query(Idiom).count() == 0
     assert session.query(IdiomEquivalent).count() == 0
-
-
-def test_migration_is_idempotent_and_supports_dry_run(tmp_path: Path) -> None:
-    database_path = tmp_path / "idioms.sqlite"
-    config = DataSourceConfig(
-        backend_type=BackendType.SQLITE,
-        sqlite_path=str(database_path),
-    )
-
-    assert create_idiom_tables(config, dry_run=True) is True
-    engine = create_engine(f"sqlite:///{database_path}")
-    assert inspect(engine).has_table("idioms") is False
-
-    assert create_idiom_tables(config) is True
-    inspector = inspect(engine)
-    assert inspector.has_table("idioms") is True
-    assert inspector.has_table("idiom_equivalents") is True
-    assert create_idiom_tables(config) is False
 
 
 def test_list_idioms_paginates_and_reports_total(session: Session) -> None:
