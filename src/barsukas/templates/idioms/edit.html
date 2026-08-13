@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% set is_new = idiom is none %}
+{% set page_title = 'New Idiom' if is_new else 'Edit Idiom ' ~ (idiom.guid or idiom.id) %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('idioms.list_idioms_view') }}">Idioms</a></li>
+        {% if is_new %}
+            <li class="breadcrumb-item active">New</li>
+        {% else %}
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('idioms.view_idiom', idiom_id=idiom.id) }}">{{ idiom.guid or idiom.id }}</a>
+            </li>
+            <li class="breadcrumb-item active">Edit</li>
+        {% endif %}
+    </ol>
+</nav>
+
+<form method="POST" action="{{ url_for('idioms.new_idiom') if is_new else url_for('idioms.edit_idiom', idiom_id=idiom.id) }}">
+    <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-lightbulb"></i> Idiom</div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="source_language_code" class="form-label">Source language</label>
+                    {% if is_new %}
+                        <select class="form-select" id="source_language_code" name="source_language_code" required>
+                            <option value="">Choose&hellip;</option>
+                            {% for code, name in language_names.items() %}
+                                <option value="{{ code }}" {% if form.get('source_language_code') == code %}selected{% endif %}>
+                                    {{ name }} ({{ code }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        {# Changing the source language would invalidate every stored
+                           equivalent, since they are equivalents *of* this expression
+                           in this language. Delete and recreate instead. #}
+                        <input type="text" class="form-control" id="source_language_code" readonly
+                               value="{{ language_names.get(idiom.source_language_code, idiom.source_language_code) }}">
+                        <div class="form-text">Fixed after creation.</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-8 mb-3">
+                    <label for="expression" class="form-label">Expression</label>
+                    <input type="text" class="form-control" id="expression" name="expression" required
+                           value="{{ form.get('expression', '') if is_new else idiom.expression }}">
+                    <div class="form-text">Citation form, as a dictionary would list it.</div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="meaning" class="form-label">Meaning</label>
+                <textarea class="form-control" id="meaning" name="meaning" rows="2" required>{{ form.get('meaning', '') if is_new else idiom.meaning }}</textarea>
+                <div class="form-text">
+                    What the expression means, as a definition &mdash; not a literal
+                    translation of its words.
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="register" class="form-label">Register</label>
+                    <input type="text" class="form-control" id="register" name="register"
+                           value="{{ form.get('register', '') if is_new else (idiom.register or '') }}"
+                           placeholder="neutral, informal, formal&hellip;">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="region" class="form-label">Region</label>
+                    <input type="text" class="form-control" id="region" name="region"
+                           value="{{ form.get('region', '') if is_new else (idiom.region or '') }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="difficulty_level" class="form-label">Difficulty level (-1 to exclude)</label>
+                    <input type="number" class="form-control" id="difficulty_level" name="difficulty_level"
+                           value="{{ form.get('difficulty_level', '-1') if is_new else (idiom.difficulty_level if idiom.difficulty_level is not none else '') }}">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="usage_note" class="form-label">Usage note</label>
+                <textarea class="form-control" id="usage_note" name="usage_note" rows="2">{{ form.get('usage_note', '') if is_new else (idiom.usage_note or '') }}</textarea>
+                <div class="form-text">Origin of the image, or a constraint on when it can be used.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes</label>
+                <input type="text" class="form-control" id="notes" name="notes"
+                       value="{{ form.get('notes', '') if is_new else (idiom.notes or '') }}">
+            </div>
+
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="verified" name="verified"
+                       {% if not is_new and idiom.verified %}checked{% endif %}>
+                <label class="form-check-label" for="verified">Verified</label>
+            </div>
+        </div>
+    </div>
+
+    {% if is_new %}
+        <div class="alert alert-secondary">
+            Equivalents are added after the idiom is saved, or generated by
+            <code>gegute --populate</code>.
+        </div>
+    {% else %}
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-translate"></i> Equivalents</div>
+            <div class="card-body">
+                {% if idiom.equivalents %}
+                    {% for equivalent in idiom.equivalents|sort(attribute='language_code') %}
+                        {% set prefix = 'equivalent_' ~ equivalent.id %}
+                        <div class="border rounded p-3 mb-3">
+                            <div class="row">
+                                <div class="col-md-3 mb-2">
+                                    <label class="form-label small text-muted">Language</label>
+                                    <input type="text" class="form-control form-control-sm" readonly
+                                           value="{{ language_names.get(equivalent.language_code, equivalent.language_code) }} ({{ equivalent.language_code }})">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label small text-muted" for="{{ prefix }}_expression">Expression</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                           id="{{ prefix }}_expression" name="{{ prefix }}_expression"
+                                           value="{{ equivalent.expression }}">
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <label class="form-label small text-muted" for="{{ prefix }}_kind">Kind</label>
+                                    <select class="form-select form-select-sm" id="{{ prefix }}_kind" name="{{ prefix }}_kind">
+                                        {% for kind in equivalence_kinds %}
+                                            <option value="{{ kind }}" {% if kind == equivalent.equivalence_kind %}selected{% endif %}>
+                                                {{ kind|replace('_', ' ') }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-2">
+                                    <label class="form-label small text-muted" for="{{ prefix }}_gloss">Literal gloss</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                           id="{{ prefix }}_gloss" name="{{ prefix }}_gloss"
+                                           value="{{ equivalent.literal_gloss or '' }}">
+                                </div>
+                                <div class="col-md-5 mb-2">
+                                    <label class="form-label small text-muted" for="{{ prefix }}_note">Usage note</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                           id="{{ prefix }}_note" name="{{ prefix }}_note"
+                                           value="{{ equivalent.usage_note or '' }}">
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <label class="form-label small text-muted" for="{{ prefix }}_register">Register</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                           id="{{ prefix }}_register" name="{{ prefix }}_register"
+                                           value="{{ equivalent.register or '' }}">
+                                </div>
+                            </div>
+                            <div class="d-flex gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                           id="{{ prefix }}_verified" name="{{ prefix }}_verified"
+                                           {% if equivalent.verified %}checked{% endif %}>
+                                    <label class="form-check-label small" for="{{ prefix }}_verified">Verified</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                           id="{{ prefix }}_delete" name="{{ prefix }}_delete">
+                                    <label class="form-check-label small text-danger" for="{{ prefix }}_delete">
+                                        Delete on save
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No equivalents recorded yet.</p>
+                {% endif %}
+
+                <h6 class="mt-4">Add equivalents</h6>
+                <p class="text-muted small">
+                    Leave a row blank to skip it. A language may have several equivalents.
+                </p>
+                {% for index in range(new_equivalent_rows) %}
+                    {% set prefix = 'new_equivalent_' ~ index %}
+                    <div class="row mb-2">
+                        <div class="col-md-2">
+                            <select class="form-select form-select-sm" name="{{ prefix }}_language"
+                                    aria-label="New equivalent language">
+                                <option value="">Language&hellip;</option>
+                                {% for code, name in language_names.items() %}
+                                    {% if code != idiom.source_language_code %}
+                                        <option value="{{ code }}">{{ name }} ({{ code }})</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control form-control-sm" name="{{ prefix }}_expression"
+                                   placeholder="Expression" aria-label="New equivalent expression">
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select form-select-sm" name="{{ prefix }}_kind"
+                                    aria-label="New equivalent kind">
+                                {% for kind in equivalence_kinds %}
+                                    <option value="{{ kind }}">{{ kind|replace('_', ' ') }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control form-control-sm" name="{{ prefix }}_gloss"
+                                   placeholder="Literal gloss" aria-label="New equivalent literal gloss">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control form-control-sm" name="{{ prefix }}_note"
+                                   placeholder="Usage note" aria-label="New equivalent usage note">
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="mb-4">
+        <button type="submit" class="btn btn-primary"
+                {% if config.get('READONLY', False) %}disabled title="Not available in hosted mode"{% endif %}>
+            <i class="bi bi-save"></i> {{ 'Create' if is_new else 'Save' }}
+        </button>
+        <a href="{{ url_for('idioms.list_idioms_view') if is_new else url_for('idioms.view_idiom', idiom_id=idiom.id) }}"
+           class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}
