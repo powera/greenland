@@ -13,7 +13,7 @@ from storage.models.schema import (
     Conversation,
     ConversationSentence,
     Sentence,
-    SentencePatternWord,
+    SentenceWordHint,
     SentenceTranslation,
     SentenceWord,
 )
@@ -89,13 +89,13 @@ def _conversation_cast(session: Session, conversation_id: int) -> List[Name]:
     """Names this conversation casts, in order of first appearance.
 
     Read from the stored word links rather than a cast table, which does not
-    exist: ``SentencePatternWord`` holds the mechanical pre-decomposition
+    exist: ``SentenceWordHint`` holds the mechanical pre-decomposition
     guesses, and ``SentenceWord`` holds the same links for conversations
     generated before d8a4021c moved them.
     """
     ordered: List[Name] = []
     seen: set[int] = set()
-    for word_model in (SentencePatternWord, SentenceWord):
+    for word_model in (SentenceWordHint, SentenceWord):
         rows = (
             session.query(Name, ConversationSentence.position)
             .join(word_model, word_model.name_id == Name.id)

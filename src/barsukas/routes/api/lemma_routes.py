@@ -42,7 +42,7 @@ from storage.models import (
     Lemma,
     LemmaTranslation,
     Sentence,
-    SentencePatternWord,
+    SentenceWordHint,
     SentenceTranslation,
     SentenceWord,
 )
@@ -1238,9 +1238,7 @@ def merge_lemma_synonym(main_guid: str, synonym_guid: str) -> ResponseReturnValu
         )
 
     sentence_word_updates = _repoint_lemma_references(SentenceWord, synonym_lemma.id, main_lemma.id)
-    pattern_word_updates = _repoint_lemma_references(
-        SentencePatternWord, synonym_lemma.id, main_lemma.id
-    )
+    word_hint_updates = _repoint_lemma_references(SentenceWordHint, synonym_lemma.id, main_lemma.id)
     audio_review_updates = _repoint_lemma_references(
         AudioQualityReview, synonym_lemma.id, main_lemma.id
     )
@@ -1283,7 +1281,7 @@ def merge_lemma_synonym(main_guid: str, synonym_guid: str) -> ResponseReturnValu
             ],
             "repointed_references": {
                 "sentence_words": sentence_word_updates,
-                "sentence_pattern_words": pattern_word_updates,
+                "sentence_word_hints": word_hint_updates,
                 "audio_reviews": audio_review_updates,
                 "external_annotation_links": annotation_link_updates,
             },

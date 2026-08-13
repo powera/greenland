@@ -24,7 +24,7 @@ from storage.crud.conversation import (
 from storage.crud.name_entity import create_name
 from storage.crud.sentence import add_sentence
 from storage.crud.sentence_translation import add_sentence_translation
-from storage.models.schema import Base, Conversation, Sentence, SentencePatternWord
+from storage.models.schema import Base, Conversation, Sentence, SentenceWordHint
 
 
 @pytest.fixture()
@@ -181,7 +181,7 @@ def test_cast_is_collected_and_deduplicated(session: Session) -> None:
 
     for position, sentence_id in enumerate(sentence_ids):
         session.add(
-            SentencePatternWord(
+            SentenceWordHint(
                 sentence_id=sentence_id,
                 name_id=ben.id,
                 position=position,

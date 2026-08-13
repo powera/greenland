@@ -25,7 +25,7 @@ from storage.models.schema import (
     ConversationSentence,
     Lemma,
     Sentence,
-    SentencePatternWord,
+    SentenceWordHint,
     SentenceTranslation,
     SentenceWord,
 )
@@ -139,7 +139,7 @@ def test_links_words_to_lemmas_and_names(session: Session, config: DataSourceCon
 
     _generate(session, config)
 
-    words = session.query(SentencePatternWord).all()
+    words = session.query(SentenceWordHint).all()
     linked_lemmas = {word.english_text for word in words if word.lemma_id is not None}
     linked_names = {word.english_text for word in words if word.name_id is not None}
 
@@ -161,7 +161,7 @@ def test_links_every_occurrence_of_a_name(session: Session, config: DataSourceCo
 
     _generate(session, config, reply=reply)
 
-    words = session.query(SentencePatternWord).all()
+    words = session.query(SentenceWordHint).all()
     assert sum(1 for word in words if word.name_id is not None) == 2
 
 
@@ -179,7 +179,7 @@ def test_leaves_english_sentence_words_for_decomposition(
     result = _generate(session, config)
 
     assert session.query(SentenceWord).count() == 0
-    assert session.query(SentencePatternWord).count() > 0
+    assert session.query(SentenceWordHint).count() > 0
 
     sentence_ids = [entry["sentence_id"] for entry in result["sentences"]]
     english_words = (
@@ -197,7 +197,7 @@ def test_grammatical_words_get_no_pattern_row(session: Session, config: DataSour
 
     _generate(session, config)
 
-    english_texts = {word.english_text for word in session.query(SentencePatternWord).all()}
+    english_texts = {word.english_text for word in session.query(SentenceWordHint).all()}
     assert "are" not in english_texts
     assert "these" not in english_texts
 
@@ -206,7 +206,7 @@ def test_pattern_positions_are_dense_within_a_sentence(
     session: Session, config: DataSourceConfig
 ) -> None:
     """Skipping grammatical words must not leave gaps that collide with
-    uq_sentence_pattern_position."""
+    uq_sentence_word_hint_position."""
     _add_lemma(session, "tomato", 3)
     _add_lemma(session, "fresh", 4, pos_type="adjective")
 
@@ -215,7 +215,7 @@ def test_pattern_positions_are_dense_within_a_sentence(
     for entry in result["sentences"]:
         positions = sorted(
             word.position
-            for word in session.query(SentencePatternWord)
+            for word in session.query(SentenceWordHint)
             .filter_by(sentence_id=entry["sentence_id"])
             .all()
         )

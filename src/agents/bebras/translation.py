@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from clients.unified_client import UnifiedLLMClient
 from sentences.candidate_lookup import find_candidate_lemmas_for_sentence
 from storage.database import Sentence
-from storage.models.schema import Lemma, SentencePatternWord, SentenceWord
+from storage.models.schema import Lemma, SentenceWordHint, SentenceWord
 from storage.translation_helpers import (
     get_language_name,
     get_supported_languages,
@@ -55,7 +55,7 @@ def ensure_translations(
         target_languages: List of target language codes
         model: LLM model to use for translation
         verified: Whether translations are verified (unused, kept for API compatibility)
-        pivot_languages: When provided and the sentence has no SentencePatternWord
+        pivot_languages: When provided and the sentence has no SentenceWordHint
             lemma rows, disambiguate candidate lemmas using these pivot-language
             translations (must already be present as SentenceTranslation rows).
 
@@ -87,10 +87,10 @@ def ensure_translations(
     candidate_lemmas: Optional[List[Lemma]] = None
     if pivot_languages:
         has_pattern_lemmas = (
-            session.query(SentencePatternWord.id)
+            session.query(SentenceWordHint.id)
             .filter(
-                SentencePatternWord.sentence_id == sentence.id,
-                SentencePatternWord.lemma_id.isnot(None),
+                SentenceWordHint.sentence_id == sentence.id,
+                SentenceWordHint.lemma_id.isnot(None),
             )
             .first()
             is not None

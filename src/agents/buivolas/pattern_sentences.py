@@ -17,7 +17,7 @@ from storage.models.schema import (
     Sentence,
     SentenceTranslation,
     SentenceWord,
-    SentencePatternWord,
+    SentenceWordHint,
 )
 
 logger = logging.getLogger(__name__)
@@ -350,7 +350,7 @@ class PatternSentenceGenerator:
             for existing_sentence in existing_sentences:
                 existing_lemma_ids = {
                     pw.lemma_id
-                    for pw in session.query(SentencePatternWord)
+                    for pw in session.query(SentenceWordHint)
                     .filter_by(sentence_id=existing_sentence.id)
                     .all()
                 }
@@ -382,32 +382,34 @@ class PatternSentenceGenerator:
             )
             session.add(translation)
 
-            # Store pattern definition in SentencePatternWord (permanent record)
+            # Record the lemmas this sentence was built around as word hints.
+            # The sentence was generated from these, so they are accurate now,
+            # but a later LLM pass may reorder or reword the sentence.
             position = 0
             for slot_name, (lemma, guid) in combination["lemmas"].items():
                 lemma_text = strip_disambiguation(lemma.lemma_text)
 
-                pattern_word = SentencePatternWord(
+                word_hint = SentenceWordHint(
                     sentence_id=sentence.id,
                     lemma_id=lemma.id,
                     position=position,
                     slot_name=slot_name,
                     english_text=lemma_text,
                 )
-                session.add(pattern_word)
+                session.add(word_hint)
                 position += 1
 
-            # Add fixed words to pattern definition
+            # Add fixed words as hints
             fixed_lemmas = self.lookup_fixed_words(session, pattern)
             for lemma, guid in fixed_lemmas:
-                pattern_word = SentencePatternWord(
+                word_hint = SentenceWordHint(
                     sentence_id=sentence.id,
                     lemma_id=lemma.id,
                     position=position,
                     slot_name="fixed",
                     english_text=lemma.lemma_text,
                 )
-                session.add(pattern_word)
+                session.add(word_hint)
                 position += 1
 
             session.commit()

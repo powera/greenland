@@ -28,7 +28,7 @@ from langtools.grammatical_words import is_grammatical_word
 from storage.models.schema import (
     DerivativeForm,
     Lemma,
-    SentencePatternWord,
+    SentenceWordHint,
     SentenceTranslation,
     SentenceWord,
 )
@@ -160,7 +160,7 @@ def resolve_lemma_for_word(
 
     Args:
         session: Database session
-        guid: Lemma GUID if known (e.g., from pattern_words or LLM response)
+        guid: Lemma GUID if known (e.g., from word_hints or LLM response)
         english_text: English lemma text (e.g., "teacher")
         pos_type: Part of speech (e.g., "noun", "verb")
         part_of_speech: Part of speech from the historically named database field
@@ -364,7 +364,7 @@ def resolve_lemmas_for_sentence(
 ) -> List[ResolvedLemma]:
     """Resolve all word-lemma links for a sentence.
 
-    Combines data from SentencePatternWord (GUIDs, english_text),
+    Combines data from SentenceWordHint (GUIDs, english_text),
     SentenceWord (declined forms across languages), and SentenceTranslation
     (sentence context) to resolve each word slot to its best lemma match.
 
@@ -377,14 +377,14 @@ def resolve_lemmas_for_sentence(
             the sentence was generated for)
 
     Returns:
-        List of ResolvedLemma, one per word slot (based on pattern_words
-        or, if no pattern_words exist, from sentence_words grouped by english_text)
+        List of ResolvedLemma, one per word slot (based on word_hints
+        or, if no word_hints exist, from sentence_words grouped by english_text)
     """
-    # Load pattern words (the "template" - has GUIDs and english_text)
-    pattern_words = (
-        session.query(SentencePatternWord)
+    # Load word hints (the expected words - have GUIDs and english_text)
+    word_hints = (
+        session.query(SentenceWordHint)
         .filter_by(sentence_id=sentence_id)
-        .order_by(SentencePatternWord.position)
+        .order_by(SentenceWordHint.position)
         .all()
     )
 
@@ -419,10 +419,10 @@ def resolve_lemmas_for_sentence(
 
     results: List[ResolvedLemma] = []
 
-    if pattern_words:
-        # Use pattern_words as the canonical list of word slots
-        for pw in pattern_words:
-            # Check if already linked via pattern_word.lemma_id
+    if word_hints:
+        # Use word_hints as the canonical list of word slots
+        for pw in word_hints:
+            # Check if already linked via word_hint.lemma_id
             existing_lemma: Optional[Lemma] = None
             existing_guid: Optional[str] = None
             if pw.lemma_id:
@@ -449,7 +449,7 @@ def resolve_lemmas_for_sentence(
             resolved.slot_name = pw.slot_name
             results.append(resolved)
     else:
-        # No pattern words - work from sentence_words grouped by english_text
+        # No word hints - work from sentence_words grouped by english_text
         seen_slots: set[str] = set()
         position = 0
         for sw in sentence_words:

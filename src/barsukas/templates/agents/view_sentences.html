@@ -79,11 +79,11 @@
                 </div>
             </div>
             <div class="card-body">
-                <!-- Sentence Pattern -->
-                {% if sentence.pattern_words %}
+                <!-- Word Hints -->
+                {% if sentence.word_hints %}
                 <details class="mb-3">
                     <summary class="text-muted" style="cursor: pointer;">
-                        <i class="bi bi-diagram-3"></i> Sentence Pattern:
+                        <i class="bi bi-diagram-3"></i> Expected Words:
                     </summary>
                     <div class="mt-2 pt-2 border-top">
                         <table class="table table-sm table-hover mb-0">
@@ -96,7 +96,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for word in sentence.pattern_words|sort(attribute='position') %}
+                                {% for word in sentence.word_hints|sort(attribute='position') %}
                                 <tr>
                                     <td><span class="badge bg-light text-dark">{{ word.position }}</span></td>
                                     <td><code>{{ word.slot_name }}</code></td>

@@ -771,31 +771,31 @@ def view_sentences(lemma_id: int) -> ResponseReturnValue:
         return redirect(url_for("lemmas.list_lemmas"))
 
     try:
-        # Query sentences that use this lemma (from either sentence_words or sentence_pattern_words)
+        # Query sentences that use this lemma (from either sentence_words or sentence_word_hints)
         from sqlalchemy import or_
         from sqlalchemy.orm import joinedload
 
         from storage.models.schema import (
             Sentence,
-            SentencePatternWord,
+            SentenceWordHint,
             SentenceWord,
         )
 
         sentences = (
             g.db.query(Sentence)
             .outerjoin(SentenceWord)
-            .outerjoin(SentencePatternWord)
+            .outerjoin(SentenceWordHint)
             .filter(
                 or_(
                     SentenceWord.lemma_id == lemma_id,
-                    SentencePatternWord.lemma_id == lemma_id,
+                    SentenceWordHint.lemma_id == lemma_id,
                 )
             )
             .filter(Sentence.rejected == False)
             .options(
                 joinedload(Sentence.translations),
                 joinedload(Sentence.words),
-                joinedload(Sentence.pattern_words),
+                joinedload(Sentence.word_hints),
             )
             .order_by(Sentence.id.desc())
             .all()

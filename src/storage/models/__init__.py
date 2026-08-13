@@ -68,7 +68,7 @@ from storage.models.schema import (
     Phrase,
     PhraseTranslation,
     Sentence,
-    SentencePatternWord,
+    SentenceWordHint,
     SentenceTranslation,
     SentenceWord,
     WordToken,
@@ -81,7 +81,7 @@ from storage.models.variant_form import (
 )
 
 # Import after schema to ensure PendingImport is registered with the same Base
-# before SentencePatternWord's relationship to it is resolved
+# before SentenceWordHint's relationship to it is resolved
 from storage.models.imports import PendingImport, PendingImportSynonymCandidate, WordExclusion
 
 __all__ = [
@@ -140,7 +140,7 @@ __all__ = [
     "concept_slug_to_title",
     "normalize_concept_slug",
     "Sentence",
-    "SentencePatternWord",
+    "SentenceWordHint",
     "SentenceTranslation",
     "SentenceWord",
     "Translation",

@@ -652,7 +652,7 @@ class IntegrityChecker:
 
         session = self.get_session()
         try:
-            from storage.models.schema import SentencePatternWord
+            from storage.models.schema import SentenceWordHint
 
             # Get all non-rejected sentences
             sentences = (
@@ -663,11 +663,11 @@ class IntegrityChecker:
             fixed_count = 0
 
             for sentence in sentences:
-                # Get pattern words with their lemmas' difficulty levels
-                pattern_words = (
-                    session.query(SentencePatternWord, Lemma)
-                    .join(Lemma, SentencePatternWord.lemma_id == Lemma.id)
-                    .filter(SentencePatternWord.sentence_id == sentence.id)
+                # Get word hints with their lemmas' difficulty levels
+                word_hints = (
+                    session.query(SentenceWordHint, Lemma)
+                    .join(Lemma, SentenceWordHint.lemma_id == Lemma.id)
+                    .filter(SentenceWordHint.sentence_id == sentence.id)
                     .all()
                 )
 
@@ -675,7 +675,7 @@ class IntegrityChecker:
                 # Treat -1 (excluded words) as 21 for sorting purposes
                 difficulty_levels = [
                     21 if lemma.difficulty_level == -1 else lemma.difficulty_level
-                    for pattern_word, lemma in pattern_words
+                    for word_hint, lemma in word_hints
                     if lemma.difficulty_level is not None
                 ]
 

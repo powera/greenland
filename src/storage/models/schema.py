@@ -480,8 +480,8 @@ class Sentence(Base):
         "SentenceTranslation", back_populates="sentence", cascade="all, delete-orphan"
     )
     words = relationship("SentenceWord", back_populates="sentence", cascade="all, delete-orphan")
-    pattern_words = relationship(
-        "SentencePatternWord", back_populates="sentence", cascade="all, delete-orphan"
+    word_hints = relationship(
+        "SentenceWordHint", back_populates="sentence", cascade="all, delete-orphan"
     )
     audio_reviews = relationship("AudioQualityReview", back_populates="sentence")
     conversation_sentences = relationship("ConversationSentence", back_populates="sentence")
@@ -639,36 +639,38 @@ class SentenceWord(Base):
     name = relationship("Name")
 
 
-class SentencePatternWord(Base):
-    """Model for storing the pattern definition of a sentence.
+class SentenceWordHint(Base):
+    """Model for storing the words a sentence is *expected* to contain.
 
-    This table records which lemmas/GUIDs are intended to be used in each slot
-    of a sentence pattern (e.g., which noun goes in the 'object' slot). This is
-    the "template" or "pattern" information that defines what the sentence is about.
+    These rows are hints, not a record of the final sentence. They are written
+    before or independently of the authoritative word breakdown: the pattern and
+    guided generators in buivolas pick lemmas first and build a sentence around
+    them, and the dialog/scene path records its guesses the same way. A later
+    LLM pass is free to reorder, drop, inflect, or substitute words, so a hint's
+    position and slot_name describe the intent at generation time and may not
+    match the sentence as it finally stands.
 
-    Unlike SentenceWord (which stores actual translation word breakdowns with POS info),
-    this table stores the original pattern definition and never gets overwritten.
-
-    This enables:
-    1. Permanent record of which lemmas were selected for the pattern
-    2. Clear distinction between pattern definition vs. translation POS data
-    3. Ability to detect when English word breakdown hasn't been generated yet
+    SentenceWord is the authoritative per-language breakdown, with POS info and
+    UD relations, and should be preferred wherever the actual sentence content
+    matters. Use these hints for the questions they can still answer reliably:
+    which lemmas a sentence was built to exercise, and whether a breakdown has
+    been generated yet.
 
     Exactly one of lemma_id, pending_import_id, or name_id should be set. When a
     word used in a sentence doesn't exist in the lemmas table, pending_import_id
     links to the staged import for later review; when it is a proper name rather
     than vocabulary, name_id links to the Name row. A name is not a lemma and a
     learner does not study it, so it carries no difficulty and is excluded from
-    level rollups -- but the pattern still needs to record that the slot was
+    level rollups -- but the hint still needs to record that the slot was
     filled by a name and not left as an unresolved gap.
     """
 
-    __tablename__ = "sentence_pattern_words"
+    __tablename__ = "sentence_word_hints"
     __table_args__ = (
-        UniqueConstraint("sentence_id", "position", name="uq_sentence_pattern_position"),
+        UniqueConstraint("sentence_id", "position", name="uq_sentence_word_hint_position"),
         CheckConstraint(
             "(lemma_id IS NOT NULL) OR (pending_import_id IS NOT NULL) " "OR (name_id IS NOT NULL)",
-            name="ck_pattern_word_has_reference",
+            name="ck_word_hint_has_reference",
         ),
     )
 
@@ -693,7 +695,7 @@ class SentencePatternWord(Base):
     added_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
 
     # Relationships
-    sentence = relationship("Sentence", back_populates="pattern_words")
+    sentence = relationship("Sentence", back_populates="word_hints")
     lemma = relationship("Lemma")
     pending_import = relationship("PendingImport")
 

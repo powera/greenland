@@ -16,11 +16,11 @@ and left translation with no way to render a line on its own.
 What it stores that the older keyword-driven path did not:
 
 * **Word links.** Every English token that resolves to a lemma or a name becomes
-  a ``SentencePatternWord`` row. That makes the dialog's difficulty a *computed*
+  a ``SentenceWordHint`` row. That makes the dialog's difficulty a *computed*
   property instead of an asserted one.
 
   These are the mechanical, pre-decomposition guesses, which is exactly what
-  ``SentencePatternWord`` is for -- including, per its docstring, detecting that
+  ``SentenceWordHint`` is for -- including, per its docstring, detecting that
   the English word breakdown has not been generated yet. Writing them to
   ``SentenceWord`` instead would defeat that: the translate/decompose path skips
   English when English ``SentenceWord`` rows already exist, so a scene dialog
@@ -63,7 +63,7 @@ from storage.crud.operation_log import log_operation
 from storage.crud.sentence import add_sentence
 from storage.crud.sentence_translation import add_sentence_translation
 from storage.models.name_entity import Name, normalize_name_text
-from storage.models.schema import Conversation, Lemma, SentencePatternWord
+from storage.models.schema import Conversation, Lemma, SentenceWordHint
 from workqueue.tools import build_default_config
 
 logger = logging.getLogger(__name__)
@@ -153,7 +153,7 @@ def _store_sentence(
     missing_words: List[str] = []
     # Pattern positions are dense and independent of surface token positions:
     # grammatical words get no row, so reusing the token index would leave gaps
-    # and collide with uq_sentence_pattern_position.
+    # and collide with uq_sentence_word_hint_position.
     pattern_position = 0
     for token in tokens:
         lemma = session.get(Lemma, token.lemma_id) if token.lemma_id is not None else None
@@ -172,7 +172,7 @@ def _store_sentence(
             continue
 
         session.add(
-            SentencePatternWord(
+            SentenceWordHint(
                 sentence_id=sentence.id,
                 lemma_id=lemma.id if lemma is not None else None,
                 name_id=name.id if lemma is None and name is not None else None,

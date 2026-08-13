@@ -28,7 +28,7 @@ from storage.models.schema import (
     Lemma,
     LemmaTranslation,
     Sentence,
-    SentencePatternWord,
+    SentenceWordHint,
     SentenceTranslation,
     SentenceWord,
 )
@@ -251,20 +251,20 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         .all()
     )
 
-    # Get pattern words (the original sentence pattern definition)
-    pattern_words = (
-        g.db.query(SentencePatternWord)
-        .filter(SentencePatternWord.sentence_id == sentence_id)
-        .order_by(SentencePatternWord.position)
+    # Get word hints (the words this sentence was generated to use)
+    word_hints = (
+        g.db.query(SentenceWordHint)
+        .filter(SentenceWordHint.sentence_id == sentence_id)
+        .order_by(SentenceWordHint.position)
         .all()
     )
 
-    # Batch load ALL lemmas for sentence words and pattern words in ONE query
+    # Batch load ALL lemmas for sentence words and word hints in ONE query
     all_lemma_ids = set()
     for sw in sentence_words:
         if sw.lemma_id:
             all_lemma_ids.add(sw.lemma_id)
-    for pw in pattern_words:
+    for pw in word_hints:
         if pw.lemma_id:
             all_lemma_ids.add(pw.lemma_id)
 
@@ -397,11 +397,11 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         lemmas_used.append(entry)
     lemmas_used.sort(key=lambda e: (-e["language_count"], e["lemma_display_text"] or ""))
 
-    # Enrich pattern words with lemma details
-    pattern_words_data = []
-    for pw in pattern_words:
+    # Enrich word hints with lemma details
+    word_hints_data = []
+    for pw in word_hints:
         lemma = lemmas_by_id.get(pw.lemma_id) if pw.lemma_id else None
-        pattern_words_data.append(
+        word_hints_data.append(
             {
                 "position": pw.position,
                 "slot_name": pw.slot_name,
@@ -527,7 +527,7 @@ def view_sentence(sentence_id: int) -> Union[str, Response]:
         ud_languages=ud_languages,
         lemmas_used=lemmas_used,
         n_decomposed_languages=n_decomposed,
-        pattern_words=pattern_words_data,
+        word_hints=word_hints_data,
         audio_by_language=audio_by_language,
         conversations_data=conversations_data,
         queued_tasks=queued_tasks,

@@ -38,7 +38,7 @@ from storage.models.schema import (
     Conversation,
     ConversationSentence,
     Sentence,
-    SentencePatternWord,
+    SentenceWordHint,
     SentenceTranslation,
 )
 from storage.translation_helpers import get_supported_languages
@@ -250,12 +250,12 @@ def _add_name_pattern_rows(sentence_ids: List[int], normalized: str, name: Name)
             continue
 
         next_position = (
-            g.db.query(func.max(SentencePatternWord.position))
+            g.db.query(func.max(SentenceWordHint.position))
             .filter_by(sentence_id=sentence_id)
             .scalar()
         )
         g.db.add(
-            SentencePatternWord(
+            SentenceWordHint(
                 sentence_id=sentence_id,
                 name_id=name.id,
                 position=0 if next_position is None else next_position + 1,
@@ -277,10 +277,10 @@ def _conversation_cast_names(conversation: Conversation) -> List[str]:
     """
     rows = (
         g.db.query(Name.name_text)
-        .join(SentencePatternWord, SentencePatternWord.name_id == Name.id)
+        .join(SentenceWordHint, SentenceWordHint.name_id == Name.id)
         .join(
             ConversationSentence,
-            ConversationSentence.sentence_id == SentencePatternWord.sentence_id,
+            ConversationSentence.sentence_id == SentenceWordHint.sentence_id,
         )
         .filter(ConversationSentence.conversation_id == conversation.id)
         .distinct()
@@ -546,10 +546,10 @@ def register_name(conversation_id: int) -> Response:
     relinked = 0
     if sentence_ids:
         words = (
-            g.db.query(SentencePatternWord)
+            g.db.query(SentenceWordHint)
             .filter(
-                SentencePatternWord.sentence_id.in_(sentence_ids),
-                SentencePatternWord.english_text == normalized,
+                SentenceWordHint.sentence_id.in_(sentence_ids),
+                SentenceWordHint.english_text == normalized,
             )
             .all()
         )

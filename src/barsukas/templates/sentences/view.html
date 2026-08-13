@@ -192,15 +192,16 @@
 </div>
 {% endif %}
 
-<!-- Sentence Pattern -->
-{% if pattern_words %}
+<!-- Word Hints -->
+{% if word_hints %}
 <div class="row mb-4">
     <div class="col">
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-diagram-3"></i> {{ STRINGS.sentences.sentence_pattern }}
+                <i class="bi bi-diagram-3"></i> {{ STRINGS.sentences.word_hints }}
             </div>
             <div class="card-body">
+                <p class="text-muted small mb-2">{{ STRINGS.sentences.word_hints_help }}</p>
                 <table class="table table-sm table-hover">
                     <thead>
                         <tr>
@@ -211,7 +212,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for word in pattern_words %}
+                        {% for word in word_hints %}
                             <tr>
                                 <td>{{ word.position }}</td>
                                 <td><code>{{ word.slot_name }}</code></td>

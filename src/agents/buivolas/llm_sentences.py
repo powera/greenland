@@ -15,7 +15,7 @@ from storage.database import (
     add_sentence_word,
     calculate_minimum_level,
 )
-from storage.models.schema import SentencePatternWord
+from storage.models.schema import SentenceWordHint
 from wordfreq.tools.sentence_word_linker import find_lemma_by_text
 from agents.buivolas.pattern_sentences import strip_disambiguation
 
@@ -42,8 +42,8 @@ class LlmSentenceGenerator:
         from sqlalchemy import func
 
         count = (
-            session.query(func.count(SentencePatternWord.id))
-            .filter(SentencePatternWord.lemma_id == lemma.id)
+            session.query(func.count(SentenceWordHint.id))
+            .filter(SentenceWordHint.lemma_id == lemma.id)
             .scalar()
         )
         return bool(count and count > 0)
@@ -247,17 +247,17 @@ class LlmSentenceGenerator:
                     ),
                 )
 
-                # Link the sentence to the source lemma via SentencePatternWord
+                # Link the sentence to the source lemma via SentenceWordHint
                 # This allows zvirblis to find LLM-generated sentences for the lemma
                 lemma_text = strip_disambiguation(source_lemma.lemma_text)
-                pattern_word = SentencePatternWord(
+                word_hint = SentenceWordHint(
                     sentence_id=sentence.id,
                     lemma_id=source_lemma.id,
                     position=0,
                     slot_name="llm_generated",
                     english_text=lemma_text,
                 )
-                session.add(pattern_word)
+                session.add(word_hint)
 
                 translations = sentence_data.get("translations", {})
                 for lang_code, text in translations.items():

@@ -351,7 +351,7 @@ class Sentence:
     # Nested relationships
     translations: Dict[str, str] = field(default_factory=dict)  # lang_code -> text
     words: List[Dict[str, Any]] = field(default_factory=list)  # List of SentenceWord data
-    pattern_words: List[Dict[str, Any]] = field(default_factory=list)  # List of pattern word data
+    word_hints: List[Dict[str, Any]] = field(default_factory=list)  # List of word hint data
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSONL serialization."""
@@ -374,7 +374,7 @@ class Sentence:
 
         data.setdefault("translations", {})
         data.setdefault("words", [])
-        data.setdefault("pattern_words", [])
+        data.setdefault("word_hints", [])
 
         # Set defaults for runtime fields that won't be in JSONL
         data.setdefault("verified", False)
