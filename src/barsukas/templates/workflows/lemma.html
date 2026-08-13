@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Lemma Workflow{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/agents_pipeline.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/workflows.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1><i class="bi bi-diagram-3"></i> Lemma Workflow</h1>
+    <p class="text-muted">
+        One word, stage by stage. Each stage is derived from what is in the database,
+        so it reflects the word's actual state rather than which agents were run.
+        To run an agent over <em>every</em> word that needs it, use
+        <a href="{{ url_for('agents_launcher.list_agents') }}">AI Agents</a> instead.
+    </p>
+
+    <form method="GET" action="{{ url_for('workflows.lemma_workflow') }}" class="row g-2 mb-4">
+        <div class="col-auto flex-grow-1">
+            <input type="text" name="q" class="form-control" placeholder="Search for a word…"
+                   value="{{ query_text }}" autofocus>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i> Find
+            </button>
+        </div>
+    </form>
+
+    {% if matches %}
+    <div class="card mb-4">
+        <div class="card-header">{{ matches|length }} matches</div>
+        <ul class="list-group list-group-flush">
+            {% for match in matches %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>
+                    <strong>{{ match.lemma_text }}</strong>
+                    <span class="badge bg-secondary">{{ match.pos_type }}</span>
+                    {% if match.disambiguation %}
+                    <span class="text-muted">({{ match.disambiguation }})</span>
+                    {% endif %}
+                </span>
+                <a href="{{ url_for('workflows.lemma_workflow', lemma_id=match.id) }}"
+                   class="btn btn-sm btn-outline-primary">Open workflow</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if lemma %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title mb-1">
+                {{ lemma.lemma_text }}
+                <span class="badge bg-secondary">{{ lemma.pos_type }}</span>
+                {% if lemma.guid %}<span class="badge bg-light text-dark">{{ lemma.guid }}</span>{% endif %}
+            </h4>
+            <p class="text-muted mb-0">{{ lemma.definition_text }}</p>
+        </div>
+    </div>
+
+    <div class="pipeline-container">
+        {% for step in steps %}
+        <div class="pipeline-step">
+            <div class="step-number">
+                <div class="step-badge workflow-badge workflow-{{ step.status }}">
+                    {% if step.status == 'complete' %}<i class="bi bi-check-lg"></i>
+                    {% elif step.status == 'blocked' %}<i class="bi bi-slash-circle"></i>
+                    {% else %}{{ loop.index }}{% endif %}
+                </div>
+                {% if not loop.last %}<div class="step-connector"></div>{% endif %}
+            </div>
+            <div class="step-content">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h5 class="card-title mb-1">{{ step.title }}</h5>
+                                <p class="card-text text-muted small mb-2">{{ step.test }}</p>
+
+                                {% if step.blocked_reason %}
+                                <div class="small text-warning-emphasis">
+                                    <i class="bi bi-exclamation-triangle"></i> {{ step.blocked_reason }}
+                                </div>
+                                {% endif %}
+
+                                {% if step.detail %}
+                                <div class="small text-muted">
+                                    {% for key, value in step.detail.items() %}
+                                        {% if value or value == 0 %}
+                                        <span class="me-3"><code>{{ key }}</code>: {{ value }}</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="ms-3 text-end">
+                                {% if step.action_label and not config.get('READONLY', False) %}
+                                <form method="POST"
+                                      action="{{ url_for('workflows.run_lemma_task', lemma_id=lemma.id, task_type=step.action_endpoint) }}">
+                                    <button type="submit" class="btn btn-sm
+                                        {% if step.complete %}btn-outline-secondary{% else %}btn-primary{% endif %}">
+                                        <i class="bi bi-play-fill"></i> {{ step.action_label }}
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% elif not matches %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i>
+        Search for a word above to see where it stands.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

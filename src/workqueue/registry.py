@@ -17,6 +17,8 @@ from workqueue.handlers.sarka import handle_generate_conversation, handle_genera
 from workqueue.handlers.sentences import (
     handle_sentences_batch_decompose_submit,
     handle_sentences_batch_translate_submit,
+    handle_sentences_import,
+    handle_sentences_import_document,
     handle_sentences_translate,
     handle_sentences_translate_batch_submit,
 )
@@ -40,6 +42,8 @@ TASK_HANDLERS = {
     "words.synonyms": handle_words_synonyms,
     "words.embeddings": handle_words_embeddings,
     "words.grammar_facts": handle_words_grammar_facts,
+    "sentences.import": handle_sentences_import,
+    "sentences.import.document": handle_sentences_import_document,
     "sentences.translate": handle_sentences_translate,
     "sentences.translate.batch_submit": handle_sentences_translate_batch_submit,
     "sentences.batch.translate.submit": handle_sentences_batch_translate_submit,

@@ -1,0 +1,43 @@
+/* Per-item workflow views (Lemma Workflow, Sentence Workflow).
+ *
+ * The step/connector layout comes from agents_pipeline.css, which both of
+ * these pages also load. This file only adds what those pages need on top:
+ * colouring a step badge by whether the stage is done, and keeping long
+ * sentence text from stretching the in-flight table.
+ */
+
+.workflow-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Done. */
+.workflow-complete {
+    background-color: var(--bs-success, #198754);
+    color: #fff;
+}
+
+/* Cannot proceed for a stated reason -- not a failure, and not retried. */
+.workflow-blocked {
+    background-color: var(--bs-warning, #ffc107);
+    color: #000;
+}
+
+/* Still to do. */
+.workflow-pending {
+    background-color: var(--bs-primary, #0d6efd);
+    color: #fff;
+}
+
+/* Present in the sequence but not implemented yet; shown so its absence is
+ * visible rather than mysterious. */
+.workflow-deferred {
+    background-color: var(--bs-secondary-bg, #e9ecef);
+    color: var(--bs-secondary-color, #6c757d);
+    border: 1px dashed var(--bs-border-color, #dee2e6);
+}
+
+.workflow-sentence-text {
+    max-width: 40rem;
+}

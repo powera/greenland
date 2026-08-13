@@ -10,7 +10,7 @@ made in the matching facade in the same commit. See ``api/AGENTS.md``.
 
 import json
 import logging
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, Sequence, cast
 
 from barsukas.config import Config
 from barsukas.routes._mirror import mirrored_facade
@@ -43,7 +43,7 @@ from storage.backend.config import DataSourceConfig
 from storage.crud.derivative_form import add_derivative_form
 from storage.crud.word_token import add_word_token
 from storage.models.imports import PendingImport, PendingImportSynonymCandidate
-from storage.models.schema import DerivativeForm, Lemma
+from storage.models.schema import DerivativeForm, Lemma, SentenceWordHint
 
 bp = Blueprint("pending_imports", __name__, url_prefix="/pending-imports")
 logger = logging.getLogger(__name__)
@@ -235,6 +235,47 @@ def list_pending_imports() -> ResponseReturnValue:
     )
 
 
+def _sentences_awaiting_pending_import(session: Any, pending_import_id: int) -> List[int]:
+    """Sentences whose word hints point at this pending import.
+
+    These are the sentences that staged the word and could not link it. Once it
+    becomes a lemma they can be linked, so they are re-queued after approval.
+    """
+    rows = (
+        session.query(SentenceWordHint.sentence_id)
+        .filter(SentenceWordHint.pending_import_id == pending_import_id)
+        .distinct()
+        .all()
+    )
+    return sorted({int(row[0]) for row in rows if row[0] is not None})
+
+
+def _requeue_waiting_sentences(session: Any, sentence_ids: Sequence[int]) -> None:
+    """Re-run the import workflow for sentences unblocked by an approval.
+
+    Best-effort: a queueing failure must not undo an approval that already
+    succeeded, so problems are logged rather than raised.
+    """
+    for sentence_id in sentence_ids:
+        try:
+            enqueue_task(
+                session,
+                task_type=TaskType.SENTENCES_IMPORT,
+                target_type="sentence",
+                target_id=sentence_id,
+                payload={"sentence_id": sentence_id},
+                dedup_key=f"{TaskType.SENTENCES_IMPORT}:{sentence_id}:0",
+            )
+        except Exception as exc:
+            logger.warning("Could not re-queue sentence %s after approval: %s", sentence_id, exc)
+
+    if sentence_ids:
+        flash(
+            f"Re-queued {len(sentence_ids)} sentence(s) that were waiting on this word.",
+            "info",
+        )
+
+
 @bp.route("/<int:pending_import_id>/approve", methods=["POST"])
 def approve(pending_import_id: int) -> ResponseReturnValue:
     """Approve a pending import entry and import it into lemmas."""
@@ -247,6 +288,9 @@ def approve(pending_import_id: int) -> ResponseReturnValue:
         debug = bool(current_app.config.get("DEBUG", False))
         base_config = cast(DataSourceConfig, current_app.backend_config)  # type: ignore[attr-defined]
         data_source_config = base_config.with_model(model_name, debug=debug)
+        # Read before approving: a successful approval deletes the pending row,
+        # which is what the hints point at.
+        waiting_sentence_ids = _sentences_awaiting_pending_import(g.db, pending_import_id)
         result = approve_pending_import(
             session=g.db,
             pending_import_id=pending_import_id,
@@ -256,6 +300,7 @@ def approve(pending_import_id: int) -> ResponseReturnValue:
         )
         if result.get("success"):
             flash(result.get("message", f"Approved pending import #{pending_import_id}"), "success")
+            _requeue_waiting_sentences(g.db, waiting_sentence_ids)
             new_lemma_id = result.get("lemma_id")
             if new_lemma_id:
                 try:

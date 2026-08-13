@@ -26,8 +26,10 @@ from langtools.grammatical_words import is_function_word
 from langtools.tokenizer import tokenize
 from sentences.analysis import SUBSTRING_MATCH_LANGUAGES
 from sentences.candidate_lookup import DEFAULT_SOURCE_LANGUAGES
+from sentences.import_workflow import PART_OF_SPEECH_MAP as _PART_OF_SPEECH_MAP
+from sentences.import_workflow import SKIPPED_PARTS_OF_SPEECH as _SKIPPED_PARTS_OF_SPEECH
+from sentences.persistence import is_real_guid, store_decomposition
 from sentences.translate_and_decompose import (
-    SYNTHETIC_GUID_PREFIX,
     TranslateAndDecomposeResult,
     translate_and_decompose,
 )
@@ -36,26 +38,18 @@ from storage.backend.config import DataSourceConfig
 from storage.crud.sentence import add_sentence
 from storage.crud.sentence_translation import add_sentence_translation
 from storage.crud.lemma_tags import serialize_tags_for_column
-from storage.crud.sentence_word import add_sentence_word
 from storage.models.imports import PendingImport
 from storage.models.schema import DerivativeForm, Lemma
 from storage.translation_helpers import normalize_llm_language_codes
 
 logger = logging.getLogger(__name__)
 
-PART_OF_SPEECH_MAP: Dict[str, str] = {
-    "noun": "noun",
-    "verb": "verb",
-    "adjective": "adjective",
-    "adverb": "adverb",
-}
-SKIPPED_PARTS_OF_SPEECH: Set[str] = {
-    "article",
-    "preposition",
-    "conjunction",
-    "determiner",
-    "particle",
-}
+# Re-exported from sentences.import_workflow, which is where the import
+# workflow's stage predicates read them from too. The two must agree on which
+# words are expected to become lemmas: if they diverge, a word can be neither
+# linkable nor skippable and the workflow's link stage never completes.
+PART_OF_SPEECH_MAP = _PART_OF_SPEECH_MAP
+SKIPPED_PARTS_OF_SPEECH = _SKIPPED_PARTS_OF_SPEECH
 
 # Languages always requested in Phase 1 (sentence-level translation only).
 # The doc language is excluded at runtime, leaving MAX_PHASE1_TARGETS of them.
@@ -201,28 +195,11 @@ class GenysAgent:
     def _is_real_guid(lemma_guid: str) -> bool:
         """True when the LLM named an actual database lemma.
 
-        The SYN### branch is deprecated and should no longer fire: no prompt
-        asks for synthetic ids any more, and every path now uses NONE for "no
-        lemma matched". It is kept because a model can still emit the old format
-        from memory, and treating SYN001 as a real GUID would look up a lemma
-        that cannot exist. A run that trips it is worth investigating.
+        Delegates to ``sentences.persistence.is_real_guid``, which the shared
+        decomposition writer uses, so the staging check and the storage check
+        cannot disagree about what counts as a real GUID.
         """
-        if not lemma_guid:
-            return False
-        lowered = lemma_guid.lower()
-        if lowered in {"", "none", "null"}:
-            return False
-        synthetic = (
-            lemma_guid.startswith(SYNTHETIC_GUID_PREFIX)
-            and lemma_guid[len(SYNTHETIC_GUID_PREFIX) :].isdigit()
-        )
-        if synthetic:
-            logger.warning(
-                "Deprecated synthetic lemma_guid %r from the LLM; prompts ask for "
-                "NONE. Treating as unmatched.",
-                lemma_guid,
-            )
-        return not synthetic
+        return is_real_guid(lemma_guid)
 
     @staticmethod
     def _load_pending_glosses(session: Any) -> Set[str]:
@@ -264,44 +241,12 @@ class GenysAgent:
                 verified=False,
             )
 
-        for position, word_entry in enumerate(english_words):
-            part_of_speech = (
-                str(word_entry.get("part_of_speech") or "").strip().lower() or "unknown"
-            )
-            surface = str(word_entry.get("surface_form") or "").strip()
-            english_gloss = str(word_entry.get("english_gloss") or "").strip()
-            grammatical_form_raw = word_entry.get("grammatical_form")
-            grammatical_form = (
-                str(grammatical_form_raw).strip() if grammatical_form_raw is not None else None
-            )
-
-            word_lemma: Optional[Lemma] = None
-            lemma_guid = str(word_entry.get("lemma_guid") or "").strip()
-            if GenysAgent._is_real_guid(lemma_guid):
-                word_lemma = session.query(Lemma).filter(Lemma.guid == lemma_guid).first()
-
-            # Present only when the Phase-4 pass ran and its tree validated;
-            # both stay NULL otherwise.
-            ud_relation_raw = word_entry.get("ud_relation")
-            ud_relation = str(ud_relation_raw).strip() if ud_relation_raw is not None else None
-            ud_head_position = word_entry.get("ud_head_position")
-            if not isinstance(ud_head_position, int) or isinstance(ud_head_position, bool):
-                ud_head_position = None
-
-            add_sentence_word(
-                session,
-                sentence=sentence_row,
-                position=position,
-                part_of_speech=part_of_speech,
-                language_code="en",
-                lemma=word_lemma,
-                english_text=english_gloss or None,
-                target_language_text=surface or None,
-                grammatical_form=grammatical_form,
-                declined_form=surface or None,
-                ud_relation=ud_relation or None,
-                ud_head_position=ud_head_position,
-            )
+        store_decomposition(
+            session,
+            sentence=sentence_row,
+            language_code="en",
+            words=english_words,
+        )
 
     # ------------------------------------------------------------------ #
     # Main loop                                                           #

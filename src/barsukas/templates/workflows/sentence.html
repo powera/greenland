@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Sentence Workflow{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/agents_pipeline.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/workflows.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1><i class="bi bi-file-text"></i> Sentence Workflow</h1>
+    <p class="text-muted">
+        Import sentences and follow each one through translation, decomposition,
+        lemma linking, and staging of the words that are missing. Every stage is
+        derived from the data, so a sentence created by any path shows its real state.
+    </p>
+
+    {% if not config.get('READONLY', False) %}
+    <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-plus-circle"></i> Start an import</div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('workflows.start_sentence_import') }}">
+                <div class="mb-3">
+                    <label for="text" class="form-label">Text</label>
+                    <textarea class="form-control" id="text" name="text" rows="6"
+                              placeholder="Paste one or more sentences…" required></textarea>
+                    <div class="form-text">
+                        Split into sentences by the worker; each becomes its own import task.
+                        For a file on disk, use <code>genys</code> from the command line.
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="document_language" class="form-label">Language</label>
+                        <select class="form-select" id="document_language" name="document_language">
+                            <option value="en" selected>English</option>
+                            <option value="lt">Lithuanian</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="zh">Chinese</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="source_name" class="form-label">Source label</label>
+                        <input type="text" class="form-control" id="source_name" name="source_name"
+                               placeholder="pasted text">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="limit" class="form-label">Max sentences</label>
+                        <input type="number" class="form-control" id="limit" name="limit" min="1"
+                               placeholder="all">
+                    </div>
+                </div>
+
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="annotate_dependencies"
+                           name="annotate_dependencies">
+                    <label class="form-check-label" for="annotate_dependencies">
+                        Annotate dependencies
+                        <span class="text-muted">— one extra LLM call per sentence.</span>
+                    </label>
+                </div>
+
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="auto_promote" name="auto_promote">
+                    <label class="form-check-label" for="auto_promote">
+                        Auto-promote staged words
+                        <span class="text-danger">— creates permanent lemmas with permanent GUIDs,
+                        without review.</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">
+                    <i class="bi bi-play-fill"></i> Queue import
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <h2 class="h4 mt-4">In flight</h2>
+    {% if in_flight %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Sentence</th>
+                    <th>Waiting at</th>
+                    <th class="text-end">Staged words</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in in_flight %}
+                <tr>
+                    <td>
+                        <div class="text-truncate workflow-sentence-text">{{ row.text or '(no text)' }}</div>
+                        <small class="text-muted">{{ row.guid or row.id }}</small>
+                    </td>
+                    <td><span class="badge bg-secondary">{{ row.stage_title }}</span></td>
+                    <td class="text-end">
+                        {% if row.outstanding %}
+                        <span class="badge bg-warning text-dark">{{ row.outstanding }}</span>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end text-nowrap">
+                        <a href="{{ url_for('workflows.sentence_detail', sentence_id=row.id) }}"
+                           class="btn btn-sm btn-outline-primary">Workflow</a>
+                        <a href="{{ url_for('sentences.view_sentence', sentence_id=row.id) }}"
+                           class="btn btn-sm btn-outline-secondary" title="Sentence view">
+                            <i class="bi bi-box-arrow-up-right"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i> No sentences are waiting on anything.
+    </div>
+    {% endif %}
+
+    <h2 class="h4 mt-5">The stages</h2>
+    <div class="pipeline-container">
+        {% for stage in stage_help %}
+        <div class="pipeline-step">
+            <div class="step-number">
+                <div class="step-badge workflow-badge {% if stage.deferred %}workflow-deferred{% endif %}">
+                    {{ loop.index }}
+                </div>
+                {% if not loop.last %}<div class="step-connector"></div>{% endif %}
+            </div>
+            <div class="step-content">
+                <div class="card">
+                    <div class="card-body py-2">
+                        <h6 class="card-title mb-1">
+                            {{ stage.title }}
+                            {% if stage.deferred %}
+                            <span class="badge bg-light text-dark">deferred</span>
+                            {% endif %}
+                        </h6>
+                        <p class="card-text text-muted small mb-0">{{ stage.test }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

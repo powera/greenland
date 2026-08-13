@@ -11,11 +11,11 @@ consumed elsewhere as a plain name-to-callable mapping. Descriptors are keyed by
 canonical task type; legacy aliases are deliberately absent, since a planner
 should only ever emit canonical names.
 
-Coverage is currently partial by design - the idiom capabilities are described
-because they were built alongside this module. Adding a descriptor for an
-existing capability is a documentation change, and ``undescribed_task_types``
-reports what is still missing so the gap stays visible rather than silently
-becoming permanent.
+Coverage is currently partial by design - the idiom and sentence capabilities
+are described because they were built alongside this module. Adding a descriptor
+for an existing capability is a documentation change, and
+``undescribed_task_types`` reports what is still missing so the gap stays
+visible rather than silently becoming permanent.
 """
 
 from __future__ import annotations
@@ -88,8 +88,112 @@ IDIOM_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
 )
 
 
+# The ``produces`` and ``preconditions`` strings below are written to match each
+# other across capabilities: a planner satisfies a precondition by finding a
+# capability whose ``produces`` names the same thing. "sentence translations in
+# the target languages" appears as both, deliberately. Keep new descriptions in
+# that vocabulary rather than paraphrasing.
+SENTENCE_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
+    CapabilityDescriptor(
+        task_type="sentences.import",
+        summary=(
+            "Run one sentence through the whole import path: translate, decompose, "
+            "link words to lemmas, stage the rest, and finalize."
+        ),
+        target_kind="sentence",
+        required_payload=("sentence_id",),
+        optional_payload=(
+            "target_languages",
+            "decompose_languages",
+            "annotate_dependencies",
+            "auto_promote",
+            "max_iterations",
+            "model",
+            "source",
+            "tags",
+        ),
+        writes=True,
+        produces=(
+            "sentence translations in the target languages",
+            "sentence_word rows with lemma_id set where resolvable",
+            "sentence_word_hint rows linking unresolved words to pending imports",
+            "sentence minimum_level",
+        ),
+        preconditions=("the sentence exists and has at least one translation",),
+    ),
+    CapabilityDescriptor(
+        task_type="sentences.import.document",
+        summary="Split a document into sentences and queue one import task per sentence.",
+        target_kind="language",
+        required_payload=(),
+        optional_payload=(
+            "text",
+            "input_path",
+            "document_language",
+            "source_name",
+            "limit",
+            "target_languages",
+            "decompose_languages",
+            "annotate_dependencies",
+            "auto_promote",
+            "tags",
+            "model",
+        ),
+        writes=True,
+        produces=(
+            "sentence rows with a source-language translation",
+            "one queued sentences.import per sentence",
+        ),
+        preconditions=("document text is available",),
+    ),
+    CapabilityDescriptor(
+        task_type="sentences.translate",
+        summary="Translate one stored sentence into target languages and decompose it.",
+        target_kind="sentence",
+        required_payload=("sentence_id",),
+        optional_payload=("sentence_ids", "selected_languages", "model", "batch"),
+        writes=True,
+        produces=(
+            "sentence translations in the target languages",
+            "sentence_word rows for each translated language",
+        ),
+        preconditions=("the sentence exists and has at least one translation",),
+    ),
+    CapabilityDescriptor(
+        task_type="sentences.translate.batch_submit",
+        summary="Submit stored sentences for translation through the batch API.",
+        target_kind="sentence",
+        required_payload=(),
+        optional_payload=("sentence_ids", "selected_languages", "model"),
+        writes=True,
+        produces=("a submitted batch job, results applied later",),
+        preconditions=("the sentences exist and have at least one translation",),
+    ),
+    CapabilityDescriptor(
+        task_type="sentences.batch.translate.submit",
+        summary="Submit a sentence translation batch job to the LLM provider.",
+        target_kind="sentence",
+        required_payload=(),
+        optional_payload=("sentence_ids", "selected_languages", "model"),
+        writes=True,
+        produces=("a submitted batch job, results applied later",),
+        preconditions=("the sentences exist and have at least one translation",),
+    ),
+    CapabilityDescriptor(
+        task_type="sentences.batch.decompose.submit",
+        summary="Submit a sentence decomposition batch job to the LLM provider.",
+        target_kind="sentence",
+        required_payload=(),
+        optional_payload=("sentence_ids", "selected_languages", "model"),
+        writes=True,
+        produces=("a submitted batch job, results applied later",),
+        preconditions=("sentence translations in the target languages",),
+    ),
+)
+
+
 CAPABILITY_DESCRIPTORS: Dict[str, CapabilityDescriptor] = {
-    descriptor.task_type: descriptor for descriptor in IDIOM_CAPABILITIES
+    descriptor.task_type: descriptor for descriptor in (*IDIOM_CAPABILITIES, *SENTENCE_CAPABILITIES)
 }
 
 
