@@ -91,6 +91,7 @@ from barsukas.routes import (
     trakaido_activities,
     translations,
     wireword,
+    workflows,
 )
 from barsukas.routes.review import rapid_review, rapid_review_hub, sentence_rapid_review
 from barsukas.routes.sync import (
@@ -364,6 +365,7 @@ def create_app(
     app.register_blueprint(overrides.bp)
     app.register_blueprint(agents.bp)
     app.register_blueprint(agents_launcher.bp)
+    app.register_blueprint(workflows.bp)
     app.register_blueprint(operation_logs.bp)
     app.register_blueprint(pending_imports.bp)
     app.register_blueprint(batch_operations.bp)

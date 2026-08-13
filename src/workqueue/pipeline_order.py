@@ -42,6 +42,11 @@ TASK_PIPELINE_ORDER: Dict[str, int] = {
     "audio.generate.lemma": 9,
     "generate_audio": 9,
     # Step 10: BEBRAS - Final Integrity Check (no workqueue task yet)
+    #
+    # sentences.import is deliberately absent. has_earlier_pending_task() only
+    # orders tasks whose target_type is "lemma", so a sentence entry here would
+    # be config that never takes effect. Ordering within a sentence import lives
+    # in sentences.import_workflow.STAGE_ORDER instead.
 }
 
 

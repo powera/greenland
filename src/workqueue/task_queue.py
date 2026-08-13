@@ -44,6 +44,8 @@ class TaskType:
     WORDS_EMBEDDINGS = "words.embeddings"
     WORDS_GRAMMAR_FACTS = "words.grammar_facts"
     CONVERSATIONS_SCENE_GENERATE = "conversations.scene.generate"
+    SENTENCES_IMPORT = "sentences.import"
+    SENTENCES_IMPORT_DOCUMENT = "sentences.import.document"
     SENTENCES_TRANSLATE = "sentences.translate"
     SENTENCES_TRANSLATE_BATCH_SUBMIT = "sentences.translate.batch_submit"
     SENTENCES_BATCH_TRANSLATE_SUBMIT = "sentences.batch.translate.submit"

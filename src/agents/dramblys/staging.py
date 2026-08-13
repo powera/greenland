@@ -153,6 +153,36 @@ def _find_duplicate_lemma(
     return variant_match
 
 
+def _release_sentence_word_hints(
+    session: Any, pending_import_id: int, lemma_id: Optional[int]
+) -> None:
+    """Detach sentence word hints before the pending import row is deleted.
+
+    ``SentenceWordHint.pending_import_id`` is a foreign key with no ON DELETE
+    behavior, so deleting a referenced pending import raises. Sentences staged
+    by the import workflow hold exactly such references.
+
+    A hint that can name the new lemma is repointed at it -- that is what lets
+    the sentence link the word on its next pass. One that cannot is removed,
+    since ``ck_word_hint_has_reference`` forbids a row referencing nothing.
+    """
+    from storage.models.schema import SentenceWordHint
+
+    hints = (
+        session.query(SentenceWordHint)
+        .filter(SentenceWordHint.pending_import_id == pending_import_id)
+        .all()
+    )
+    for hint in hints:
+        hint.pending_import_id = None
+        if lemma_id is not None:
+            hint.lemma_id = lemma_id
+        elif hint.lemma_id is None and hint.name_id is None:
+            session.delete(hint)
+    if hints:
+        session.flush()
+
+
 def approve_pending_import(
     session: Any,
     pending_import_id: int,
@@ -283,6 +313,18 @@ def approve_pending_import(
 
         if not filtered_definitions:
             # Every sense already exists — remove the pending import and report.
+            # Any sentence waiting on this word is repointed at the lemma that
+            # already covers it, so the wait ends rather than dangling.
+            from sqlalchemy import func as _func
+
+            from storage.models.schema import Lemma as _Lemma
+
+            existing_lemma = (
+                session.query(_Lemma).filter(_func.lower(_Lemma.lemma_text) == word.lower()).first()
+            )
+            _release_sentence_word_hints(
+                session, pending_import_id, existing_lemma.id if existing_lemma else None
+            )
             session.delete(pending)
             session.commit()
             msg = f"'{word}' already exists in the database for all senses; removed from pending."
@@ -308,11 +350,9 @@ def approve_pending_import(
             raise
 
         if success:
-            # Delete the pending import entry
-            session.delete(pending)
-            session.commit()
-
-            # Look up the newly created lemma so callers can trigger follow-on tasks
+            # Look up the newly created lemma so callers can trigger follow-on tasks.
+            # Done before the delete so any sentence hint referencing this
+            # pending import can be repointed at the lemma it just became.
             from storage.models.schema import Lemma
 
             new_lemma = (
@@ -322,6 +362,12 @@ def approve_pending_import(
                 .first()
             )
             new_lemma_id: Optional[int] = new_lemma.id if new_lemma else None
+
+            _release_sentence_word_hints(session, pending_import_id, new_lemma_id)
+
+            # Delete the pending import entry
+            session.delete(pending)
+            session.commit()
 
             # Carry any tags staged on the pending import onto the new lemma, so
             # a corpus ingested with `genys --tags legal` needs no second pass.

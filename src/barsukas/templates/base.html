@@ -99,6 +99,12 @@
                             <li><h6 class="dropdown-header">{{ STRINGS.navigation.get('generation', 'Generation') }}</h6></li>
                             {% endif %}
                             {% if not config.get('READONLY', False) %}
+                            <li><a class="dropdown-item" href="{{ url_for('workflows.lemma_workflow') }}">
+                                <i class="bi bi-diagram-3"></i> {{ STRINGS.navigation.get('lemma_workflow', 'Lemma Workflow') }}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('workflows.sentence_workflow') }}">
+                                <i class="bi bi-file-text"></i> {{ STRINGS.navigation.get('sentence_workflow', 'Sentence Workflow') }}
+                            </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('agents_launcher.list_agents') }}">
                                 <i class="bi bi-robot"></i> {{ STRINGS.navigation.get('ai_agents', 'AI Agents') }}
                             </a></li>

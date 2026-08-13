@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Sentence {{ sentence.guid or sentence.id }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/agents_pipeline.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/workflows.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('workflows.sentence_workflow') }}">Sentence Workflow</a>
+            </li>
+            <li class="breadcrumb-item active">{{ sentence.guid or sentence.id }}</li>
+        </ol>
+    </nav>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h4 class="card-title">{{ display_text or '(no text yet)' }}</h4>
+                    <div class="text-muted small">
+                        {{ sentence.guid or '' }}
+                        {% if sentence.minimum_level is not none %}
+                        · level {{ sentence.minimum_level }}
+                        {% endif %}
+                        {% if sentence.verified %}
+                        · <span class="badge bg-success">verified</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <a href="{{ url_for('sentences.view_sentence', sentence_id=sentence.id) }}"
+                   class="btn btn-sm btn-outline-secondary ms-3 flex-shrink-0">
+                    <i class="bi bi-box-arrow-up-right"></i> Sentence view
+                </a>
+            </div>
+        </div>
+        {% if not config.get('READONLY', False) %}
+        <div class="card-footer">
+            <form method="POST" action="{{ url_for('workflows.run_sentence_import', sentence_id=sentence.id) }}"
+                  class="d-flex align-items-center gap-3 flex-wrap">
+                <button type="submit" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-arrow-repeat"></i> Queue next steps
+                </button>
+                <div class="form-check mb-0">
+                    <input class="form-check-input" type="checkbox" id="auto_promote" name="auto_promote">
+                    <label class="form-check-label small" for="auto_promote">
+                        Auto-promote staged words
+                        <span class="text-danger">(creates permanent lemmas)</span>
+                    </label>
+                </div>
+                <div class="w-100 form-text mt-1 mb-0">
+                    Queues the stages below that are not yet done; completed stages are skipped.
+                    Queuing again while one is already waiting or running does nothing.
+                </div>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if pendings %}
+    <div class="card mb-4 border-warning">
+        <div class="card-header bg-warning-subtle">
+            <i class="bi bi-inbox"></i> Waiting on {{ pendings|length }} staged word(s)
+        </div>
+        <ul class="list-group list-group-flush">
+            {% for pending in pendings %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>
+                    <strong>{{ pending.english_word }}</strong>
+                    {% if pending.pos_type %}
+                    <span class="badge bg-secondary">{{ pending.pos_type }}</span>
+                    {% endif %}
+                    <span class="text-muted small">{{ pending.definition }}</span>
+                </span>
+                <a href="{{ url_for('pending_imports.detail', pending_import_id=pending.id) }}"
+                   class="btn btn-sm btn-outline-primary">Review &amp; approve</a>
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="card-footer small text-muted">
+            Approving a word here re-queues this sentence automatically.
+        </div>
+    </div>
+    {% endif %}
+
+    <h2 class="h5">Stages</h2>
+    <div class="pipeline-container">
+        {% for step in steps %}
+        <div class="pipeline-step">
+            <div class="step-number">
+                <div class="step-badge workflow-badge workflow-{{ step.status }}">
+                    {% if step.status == 'complete' %}<i class="bi bi-check-lg"></i>
+                    {% elif step.status == 'blocked' %}<i class="bi bi-slash-circle"></i>
+                    {% elif step.status == 'deferred' %}<i class="bi bi-dash"></i>
+                    {% else %}{{ loop.index }}{% endif %}
+                </div>
+                {% if not loop.last %}<div class="step-connector"></div>{% endif %}
+            </div>
+            <div class="step-content">
+                <div class="card">
+                    <div class="card-body py-2">
+                        <h6 class="card-title mb-1">
+                            {{ step.title }}
+                            {% if step.status == 'deferred' %}
+                            <span class="badge bg-light text-dark">deferred</span>
+                            {% elif step.status == 'blocked' %}
+                            <span class="badge bg-warning text-dark">blocked</span>
+                            {% elif not step.complete %}
+                            <span class="badge bg-primary">needs work</span>
+                            {% endif %}
+                        </h6>
+                        <p class="card-text text-muted small mb-1">{{ step.test }}</p>
+
+                        {% if step.blocked_reason %}
+                        <div class="small text-warning-emphasis">
+                            <i class="bi bi-exclamation-triangle"></i> {{ step.blocked_reason }}
+                        </div>
+                        {% endif %}
+
+                        {% if step.detail %}
+                        <div class="small text-muted">
+                            {% for key, value in step.detail.items() %}
+                                {% if value or value == 0 %}
+                                <span class="me-3"><code>{{ key }}</code>: {{ value }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if translations %}
+    <h2 class="h5 mt-4">Translations</h2>
+    <table class="table table-sm">
+        <tbody>
+            {% for translation in translations %}
+            <tr>
+                <td class="text-muted" style="width: 5rem;">{{ translation.language_code }}</td>
+                <td>{{ translation.translation_text }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+{% endblock %}
