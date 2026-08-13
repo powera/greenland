@@ -24,7 +24,7 @@ be updated to `:05d` for consistency.
 ## Release File Layout
 
 Sentences are grouped by their **primary lemma** - defined as the noun (from
-`sentence_pattern_words`) with the lowest GUID. This places sentence files
+`sentence_word_hints`) with the lowest GUID. This places sentence files
 alongside the lemma files they teach:
 
 ```
@@ -39,19 +39,19 @@ data/release/
     ├── verbs/
     │   └── physical_action/base.jsonl  fallback when no noun in pattern
     └── misc/
-        └── base.jsonl                  no pattern_words or no resolvable lemma
+        └── base.jsonl                  no word_hints or no resolvable lemma
 ```
 
 ### Primary Lemma Resolution
 
-Given a sentence's `SentencePatternWord` records:
+Given a sentence's `SentenceWordHint` records:
 
-1. Collect all pattern words where `lemma_id` is not NULL
+1. Collect all word hints where `lemma_id` is not NULL
 2. Join to `lemmas` to get each lemma's `guid`, `pos_type`, `pos_subtype`
 3. Filter to nouns only (`pos_type = 'noun'`)
 4. Pick the one with the lowest GUID (alphabetic sort, e.g. `N02_005` < `N06_001`)
 5. If no nouns exist, fall back to any lemma with the lowest GUID
-6. If no pattern words resolve to a lemma with a GUID, file goes to `misc/`
+6. If no word hints resolve to a lemma with a GUID, file goes to `misc/`
 
 The resolved `pos_type` and `pos_subtype` determine the directory, using the
 same pluralized directory names as lemmas (`noun` -> `nouns/`, etc.).
@@ -72,7 +72,7 @@ Each line in a sentence `base.jsonl`:
     "zh": "狗吃面包。",
     "fr": "Le chien mange du pain."
   },
-  "pattern_words": [
+  "word_hints": [
     {"position": 0, "slot_name": "subject", "lemma_guid": "N02_001", "english_text": "dog"},
     {"position": 1, "slot_name": "verb", "lemma_guid": "V01_003", "english_text": "eat"},
     {"position": 2, "slot_name": "object", "lemma_guid": "N06_001", "english_text": "bread"}
@@ -89,7 +89,7 @@ Fields:
 | `tense` | `sentences.tense` | e.g. "present", "past"; nullable |
 | `minimum_level` | `sentences.minimum_level` | Analogous to lemma `difficulty_level` |
 | `translations` | `sentence_translations` | All languages including English |
-| `pattern_words` | `sentence_pattern_words` | Lemma GUIDs (not DB ids) for portability |
+| `word_hints` | `sentence_word_hints` | Lemma GUIDs (not DB ids) for portability |
 | `notes` | `sentences.notes` | Included only when non-empty |
 
 ### What is NOT in the release file
@@ -117,14 +117,14 @@ Five sync modes, mirroring the lemma system:
 GUIDs present in release files but not in the `sentences` table.
 
 Import action:
-1. **Pre-check**: resolve all `lemma_guid` values in `pattern_words` via
+1. **Pre-check**: resolve all `lemma_guid` values in `word_hints` via
    `Lemma.guid` lookup. If any lemma GUID is not found in the database, **block
    the import** for that sentence and show a warning indicating which lemma
    GUIDs are missing. The user should import the missing lemmas first (via the
    lemma sync system) before retrying.
 2. Create `Sentence` row with `guid`, `pattern_type`, `tense`, `minimum_level`
 3. Create `SentenceTranslation` rows for each language in `translations`
-4. Create `SentencePatternWord` rows with the resolved `lemma_id` values
+4. Create `SentenceWordHint` rows with the resolved `lemma_id` values
 5. Log via `log_operation(source="sync-release", operation_type="sentence_import")`
 
 ### 2. Removals (DB -> delete)
@@ -133,7 +133,7 @@ GUIDs present in DB (non-NULL `sentences.guid`) but not in any release file.
 Excludes conversation sentences (they're expected to have no release file).
 
 Delete action cascades to `SentenceTranslation`, `SentenceWord`,
-`SentencePatternWord` via SQLAlchemy cascade rules already defined on the model.
+`SentenceWordHint` via SQLAlchemy cascade rules already defined on the model.
 
 ### 3. Level Changes
 
@@ -217,7 +217,7 @@ All sentence creation paths must call this to assign a GUID at creation time:
 Add new migration direction in `migrate.py` (or a standalone script) that:
 
 1. Queries all sentences with non-NULL `guid`, excluding conversation sentences
-2. Eager-loads `translations` and `pattern_words` (with `pattern_words.lemma`)
+2. Eager-loads `translations` and `word_hints` (with `word_hints.lemma`)
 3. Resolves primary lemma for directory placement
 4. Groups by resolved (pos_type, pos_subtype)
 5. Writes `data/release/sentences/{type}/{subtype}/base.jsonl`
@@ -290,7 +290,7 @@ def _get_conversation_sentence_ids(session) -> Set[int]:
    release that references a lemma GUID not yet in the database, the import
    is blocked with a warning. The user must import the missing lemmas first
    (via the lemma sync additions flow) before retrying. The lemma GUIDs
-   referenced by `pattern_words` are expected to exist in `data/release/lemmas/`
+   referenced by `word_hints` are expected to exist in `data/release/lemmas/`
    and should be imported to the database before sentence import.
 
 3. **Auto-assign GUIDs on creation**: All sentence creation paths auto-assign

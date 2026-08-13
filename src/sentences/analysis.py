@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from storage.models.schema import (
     DerivativeForm,
     Lemma,
-    SentencePatternWord,
+    SentenceWordHint,
     SentenceWord,
 )
 
@@ -182,16 +182,17 @@ def find_candidate_lemmas_for_sentence(
 def store_discovered_lemmas(
     session: Session, sentence_id: int, candidates: List[dict], commit: bool = True
 ) -> int:
-    """Store discovered lemmas in sentence_pattern_words table.
+    """Store discovered lemmas in sentence_word_hints table.
 
     Adds entries with slot_name="discovered" for lemmas found via
     find_candidate_lemmas_for_sentence(). Skips lemmas that are already
     associated with the sentence.
 
-    TODO: Rename sentence_pattern_words to sentence_lemmas - position/slot
-    are not always meaningful (e.g., for discovered lemmas or lemmas that
-    appear in different positions across languages like "to like" vs
-    "to be pleasing to").
+    Note that position/slot_name are not always meaningful here: discovered
+    lemmas have no pattern slot, and a lemma can appear at different positions
+    across languages ("to like" vs "to be pleasing to"). This is why the rows
+    are hints rather than an authoritative breakdown -- SentenceWord holds the
+    per-language positional truth.
 
     Args:
         session: Database session
@@ -205,15 +206,15 @@ def store_discovered_lemmas(
     # Get existing lemma associations for this sentence
     existing_lemma_ids = {
         row[0]
-        for row in session.query(SentencePatternWord.lemma_id)
-        .filter(SentencePatternWord.sentence_id == sentence_id)
+        for row in session.query(SentenceWordHint.lemma_id)
+        .filter(SentenceWordHint.sentence_id == sentence_id)
         .all()
     }
 
     # Find the next available position for this sentence
     max_position = (
-        session.query(func.max(SentencePatternWord.position))
-        .filter(SentencePatternWord.sentence_id == sentence_id)
+        session.query(func.max(SentenceWordHint.position))
+        .filter(SentenceWordHint.sentence_id == sentence_id)
         .scalar()
     )
     next_position = (max_position + 1) if max_position is not None else 0
@@ -224,14 +225,14 @@ def store_discovered_lemmas(
         if lemma.id in existing_lemma_ids:
             continue
 
-        pattern_word = SentencePatternWord(
+        word_hint = SentenceWordHint(
             sentence_id=sentence_id,
             lemma_id=lemma.id,
             position=next_position,
             slot_name="discovered",
             english_text=candidate["english_text"],
         )
-        session.add(pattern_word)
+        session.add(word_hint)
         existing_lemma_ids.add(lemma.id)
         next_position += 1
         added += 1

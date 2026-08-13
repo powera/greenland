@@ -4,7 +4,7 @@
 
 This mirrors ``sync_sentence_release`` but for the simpler phrase model:
 phrases have a concept label (English), a definition, a difficulty level, and
-per-language translations — no pattern words, sentence words, audio, or
+per-language translations — no word hints, sentence words, audio, or
 conversation exclusion. The two syncs are deliberately kept as parallel modules
 (as lemma/sentence sync already are) rather than a shared engine.
 

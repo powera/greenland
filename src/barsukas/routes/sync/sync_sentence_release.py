@@ -22,7 +22,7 @@ from storage.models.schema import (
     ConversationSentence,
     Lemma,
     Sentence,
-    SentencePatternWord,
+    SentenceWordHint,
     SentenceTranslation,
     SentenceWord,
 )
@@ -236,12 +236,12 @@ def _find_sentence_additions(
     for guid in sorted(new_guids):
         release_data = release_sentences[guid]
         english_text = _get_release_sentence_english(release_data)
-        pattern_words = release_data.get("pattern_words", [])
+        word_hints = release_data.get("word_hints", [])
         sentence_words = release_data.get("words", [])
 
         # Check for missing lemma GUIDs
         missing_lemma_guids: Set[str] = set()
-        for release_word in [*pattern_words, *sentence_words]:
+        for release_word in [*word_hints, *sentence_words]:
             lemma_guid = release_word.get("lemma_guid")
             if lemma_guid and lemma_guid not in all_lemma_guids:
                 missing_lemma_guids.add(lemma_guid)
@@ -254,7 +254,7 @@ def _find_sentence_additions(
             "tense": release_data.get("tense", ""),
             "minimum_level": release_data.get("minimum_level"),
             "translations": release_data.get("translations", {}),
-            "pattern_words": pattern_words,
+            "word_hints": word_hints,
         }
 
         if missing_lemma_guids:
@@ -327,12 +327,12 @@ def apply_additions() -> ResponseReturnValue:
         try:
             # Validate all referenced lemma GUIDs exist. Skipping an unresolved
             # decomposition word would silently corrupt the JSONL round trip.
-            pattern_words = release_data.get("pattern_words", [])
+            word_hints = release_data.get("word_hints", [])
             sentence_words = release_data.get("words", [])
             missing_guids = sorted(
                 {
                     release_word["lemma_guid"]
-                    for release_word in [*pattern_words, *sentence_words]
+                    for release_word in [*word_hints, *sentence_words]
                     if release_word.get("lemma_guid")
                     and release_word["lemma_guid"] not in lemma_guid_to_id
                 }
@@ -369,21 +369,21 @@ def apply_additions() -> ResponseReturnValue:
                 )
                 g.db.add(trans)
 
-            # Add pattern words
-            for pw in pattern_words:
+            # Add word hints
+            for pw in word_hints:
                 lemma_guid = pw.get("lemma_guid")
                 lemma_id = lemma_guid_to_id.get(lemma_guid) if lemma_guid else None
                 if lemma_id is None:
                     continue
 
-                pattern_word = SentencePatternWord(
+                word_hint = SentenceWordHint(
                     sentence_id=sentence.id,
                     lemma_id=lemma_id,
                     position=pw.get("position", 0),
                     slot_name=pw.get("slot_name", "unknown"),
                     english_text=pw.get("english_text", ""),
                 )
-                g.db.add(pattern_word)
+                g.db.add(word_hint)
 
             # Add the full per-language decomposition, including Universal
             # Dependencies fields. The release serializer already writes these
@@ -415,7 +415,7 @@ def apply_additions() -> ResponseReturnValue:
                     "guid": guid,
                     "english_text": _get_release_sentence_english(release_data)[:80],
                     "translation_count": len(translations),
-                    "pattern_word_count": len(pattern_words),
+                    "word_hint_count": len(word_hints),
                     "word_count": len(sentence_words),
                 },
             )
@@ -1511,20 +1511,20 @@ def _normalize_release_sentence_for_compare(release_data: Dict[str, Any]) -> Dic
     if translations:
         normalized["translations"] = translations
 
-    pattern_words = release_data.get("pattern_words", [])
-    if isinstance(pattern_words, list) and pattern_words:
+    word_hints = release_data.get("word_hints", [])
+    if isinstance(word_hints, list) and word_hints:
         normalized_words: List[Dict[str, Any]] = []
-        sorted_words = sorted(pattern_words, key=lambda p: p.get("position", 0))
-        for pattern_word in sorted_words:
+        sorted_words = sorted(word_hints, key=lambda p: p.get("position", 0))
+        for word_hint in sorted_words:
             normalized_words.append(
                 {
-                    "position": pattern_word.get("position", 0),
-                    "slot_name": pattern_word.get("slot_name"),
-                    "lemma_guid": pattern_word.get("lemma_guid"),
-                    "english_text": pattern_word.get("english_text"),
+                    "position": word_hint.get("position", 0),
+                    "slot_name": word_hint.get("slot_name"),
+                    "lemma_guid": word_hint.get("lemma_guid"),
+                    "english_text": word_hint.get("english_text"),
                 }
             )
-        normalized["pattern_words"] = normalized_words
+        normalized["word_hints"] = normalized_words
 
     words = release_data.get("words", [])
     if isinstance(words, list) and words:
@@ -1601,7 +1601,7 @@ def _find_sync_back_candidates(
             .filter(Sentence.rejected.is_(False))
             .options(
                 selectinload(Sentence.translations),
-                selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
+                selectinload(Sentence.word_hints).selectinload(SentenceWordHint.lemma),
                 selectinload(Sentence.words).selectinload(SentenceWord.lemma),
                 selectinload(Sentence.audio_reviews),
             )
@@ -1681,7 +1681,7 @@ def apply_export() -> ResponseReturnValue:
         .filter(Sentence.rejected.is_(False))
         .options(
             selectinload(Sentence.translations),
-            selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
+            selectinload(Sentence.word_hints).selectinload(SentenceWordHint.lemma),
             selectinload(Sentence.words).selectinload(SentenceWord.lemma),
             selectinload(Sentence.audio_reviews),
         )
@@ -1796,7 +1796,7 @@ def apply_export_sync_back() -> ResponseReturnValue:
         .filter(Sentence.rejected.is_(False))
         .options(
             selectinload(Sentence.translations),
-            selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
+            selectinload(Sentence.word_hints).selectinload(SentenceWordHint.lemma),
             selectinload(Sentence.words).selectinload(SentenceWord.lemma),
             selectinload(Sentence.audio_reviews),
         )

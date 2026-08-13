@@ -874,7 +874,7 @@ def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> Non
 
     Sentences are grouped first by their **collection** (sentence_collection field,
     defaulting to "general"), then by primary lemma pos_type/pos_subtype — the noun
-    with the lowest GUID among pattern words, falling back to misc/misc.
+    with the lowest GUID among word hints, falling back to misc/misc.
 
     Structure: {release_dir}/{collection}/{pos_dir}/{pos_subtype}/base.jsonl
 
@@ -893,7 +893,7 @@ def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> Non
         ConversationSentence,
         Lemma,
         Sentence,
-        SentencePatternWord,
+        SentenceWordHint,
         SentenceWord,
     )
 
@@ -926,7 +926,7 @@ def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> Non
             .filter(Sentence.rejected.is_(False))
             .options(
                 selectinload(Sentence.translations),
-                selectinload(Sentence.pattern_words).selectinload(SentencePatternWord.lemma),
+                selectinload(Sentence.word_hints).selectinload(SentenceWordHint.lemma),
                 selectinload(Sentence.words).selectinload(SentenceWord.lemma),
                 selectinload(Sentence.audio_reviews),
             )
@@ -1907,11 +1907,11 @@ def _resolve_primary_lemma_category(sentence: Any) -> Tuple[str, str]:
     """Resolve the primary lemma category for directory placement.
 
     Returns (pos_type, pos_subtype) based on the noun with the lowest GUID
-    among the sentence's pattern words.  Falls back to any lemma with the
+    among the sentence's word hints.  Falls back to any lemma with the
     lowest GUID, or ("misc", "misc") if nothing resolves.
     """
     lemmas_with_guids = []
-    for pw in sentence.pattern_words:
+    for pw in sentence.word_hints:
         if pw.lemma and pw.lemma.guid:
             lemmas_with_guids.append(pw.lemma)
 
@@ -1942,10 +1942,10 @@ def _sentence_to_release_record(sentence: Any) -> Dict[str, Any]:
         if trans.translation_text and trans.translation_text.strip():
             translations[trans.language_code] = trans.translation_text
 
-    pattern_words: List[Dict[str, Any]] = []
-    for pw in sorted(sentence.pattern_words, key=lambda p: p.position):
+    word_hints: List[Dict[str, Any]] = []
+    for pw in sorted(sentence.word_hints, key=lambda p: p.position):
         lemma_guid = pw.lemma.guid if pw.lemma and pw.lemma.guid else None
-        pattern_words.append(
+        word_hints.append(
             {
                 "position": pw.position,
                 "slot_name": pw.slot_name,
@@ -1967,8 +1967,8 @@ def _sentence_to_release_record(sentence: Any) -> Dict[str, Any]:
         record["minimum_level"] = sentence.minimum_level
     if translations:
         record["translations"] = translations
-    if pattern_words:
-        record["pattern_words"] = pattern_words
+    if word_hints:
+        record["word_hints"] = word_hints
     if sentence.notes:
         record["notes"] = sentence.notes
 

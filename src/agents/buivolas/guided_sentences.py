@@ -18,7 +18,7 @@ from storage.database import (
     add_sentence_translation,
 )
 from storage.models.imports import PendingImport
-from storage.models.schema import SentencePatternWord
+from storage.models.schema import SentenceWordHint
 from wordfreq.tools.sentence_word_linker import find_lemma_by_text
 from wordfreq.tools.vocabulary_budget import build_prompt_vocabulary_section
 
@@ -261,7 +261,7 @@ class GuidedSentenceGenerator:
                         verified=False,
                     )
 
-                # Store words_used as SentencePatternWord entries
+                # Store words_used as SentenceWordHint entries
                 # Only store words where we can find a matching lemma
                 # Words without lemmas are staged to pending_imports
                 words_used = sentence_data.get("words_used", [])
@@ -277,19 +277,19 @@ class GuidedSentenceGenerator:
                         source_lemma=source_lemma,
                     )
 
-                    # Only create SentencePatternWord if we found a lemma
+                    # Only create SentenceWordHint if we found a lemma
                     if word_lemma:
-                        pattern_word = SentencePatternWord(
+                        word_hint = SentenceWordHint(
                             sentence_id=sentence.id,
                             lemma_id=word_lemma.id,
                             position=position,
                             slot_name=word_data.get("part_of_speech", "unknown"),
                             english_text=word_data.get("lemma", ""),
                         )
-                        session.add(pattern_word)
+                        session.add(word_hint)
                         position += 1
                     else:
-                        # Stage missing word to pending_imports and create pattern word
+                        # Stage missing word to pending_imports and create word hint
                         pending_import = self._stage_missing_word(
                             session,
                             word_text=word_data.get("lemma", ""),
@@ -298,14 +298,14 @@ class GuidedSentenceGenerator:
                             sentence_text=en_text,
                         )
                         if pending_import:
-                            pattern_word = SentencePatternWord(
+                            word_hint = SentenceWordHint(
                                 sentence_id=sentence.id,
                                 pending_import_id=pending_import.id,
                                 position=position,
                                 slot_name=word_data.get("part_of_speech", "unknown"),
                                 english_text=word_data.get("lemma", ""),
                             )
-                            session.add(pattern_word)
+                            session.add(word_hint)
                             position += 1
 
                 # Set minimum level to -1 (unverified)

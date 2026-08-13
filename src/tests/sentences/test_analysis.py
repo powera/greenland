@@ -16,7 +16,7 @@ from storage.models.schema import (
     DerivativeForm,
     Lemma,
     Sentence,
-    SentencePatternWord,
+    SentenceWordHint,
     SentenceWord,
 )
 from sentences.analysis import (
@@ -460,29 +460,29 @@ class TestStoreDiscoveredLemmas(unittest.TestCase):
 
         self.assertEqual(added, 2)
 
-        # Verify stored pattern words
-        pattern_words = (
-            self.session.query(SentencePatternWord)
-            .filter(SentencePatternWord.sentence_id == self.sentence.id)
-            .order_by(SentencePatternWord.position)
+        # Verify stored word hints
+        word_hints = (
+            self.session.query(SentenceWordHint)
+            .filter(SentenceWordHint.sentence_id == self.sentence.id)
+            .order_by(SentenceWordHint.position)
             .all()
         )
 
-        self.assertEqual(len(pattern_words), 2)
-        self.assertEqual(pattern_words[0].lemma_id, self.lemma_eat.id)
-        self.assertEqual(pattern_words[0].slot_name, "discovered")
-        self.assertEqual(pattern_words[0].english_text, "eat")
-        self.assertEqual(pattern_words[0].position, 0)
+        self.assertEqual(len(word_hints), 2)
+        self.assertEqual(word_hints[0].lemma_id, self.lemma_eat.id)
+        self.assertEqual(word_hints[0].slot_name, "discovered")
+        self.assertEqual(word_hints[0].english_text, "eat")
+        self.assertEqual(word_hints[0].position, 0)
 
-        self.assertEqual(pattern_words[1].lemma_id, self.lemma_apple.id)
-        self.assertEqual(pattern_words[1].slot_name, "discovered")
-        self.assertEqual(pattern_words[1].english_text, "apple")
-        self.assertEqual(pattern_words[1].position, 1)
+        self.assertEqual(word_hints[1].lemma_id, self.lemma_apple.id)
+        self.assertEqual(word_hints[1].slot_name, "discovered")
+        self.assertEqual(word_hints[1].english_text, "apple")
+        self.assertEqual(word_hints[1].position, 1)
 
     def test_skips_existing_lemmas(self):
         """Test that already-associated lemmas are skipped."""
-        # Pre-add one lemma as a pattern word
-        existing = SentencePatternWord(
+        # Pre-add one lemma as a word hint
+        existing = SentenceWordHint(
             sentence_id=self.sentence.id,
             lemma_id=self.lemma_eat.id,
             position=0,
@@ -511,12 +511,12 @@ class TestStoreDiscoveredLemmas(unittest.TestCase):
 
         self.assertEqual(added, 1)  # Only apple should be added
 
-        pattern_words = (
-            self.session.query(SentencePatternWord)
-            .filter(SentencePatternWord.sentence_id == self.sentence.id)
+        word_hints = (
+            self.session.query(SentenceWordHint)
+            .filter(SentenceWordHint.sentence_id == self.sentence.id)
             .all()
         )
-        self.assertEqual(len(pattern_words), 2)
+        self.assertEqual(len(word_hints), 2)
 
     def test_empty_candidates_does_nothing(self):
         """Test that empty candidates list doesn't add anything."""
@@ -524,18 +524,18 @@ class TestStoreDiscoveredLemmas(unittest.TestCase):
 
         self.assertEqual(added, 0)
 
-        pattern_words = (
-            self.session.query(SentencePatternWord)
-            .filter(SentencePatternWord.sentence_id == self.sentence.id)
+        word_hints = (
+            self.session.query(SentenceWordHint)
+            .filter(SentenceWordHint.sentence_id == self.sentence.id)
             .all()
         )
-        self.assertEqual(len(pattern_words), 0)
+        self.assertEqual(len(word_hints), 0)
 
     def test_continues_position_from_existing(self):
-        """Test that position continues from existing pattern words."""
-        # Pre-add some pattern words
+        """Test that position continues from existing word hints."""
+        # Pre-add some word hints
         for i in range(3):
-            pw = SentencePatternWord(
+            pw = SentenceWordHint(
                 sentence_id=self.sentence.id,
                 lemma_id=self.lemma_eat.id if i == 0 else self.lemma_apple.id,
                 position=i,
@@ -568,10 +568,10 @@ class TestStoreDiscoveredLemmas(unittest.TestCase):
 
         self.assertEqual(added, 1)
 
-        # The new pattern word should have position 3
+        # The new word hint should have position 3
         new_pw = (
-            self.session.query(SentencePatternWord)
-            .filter(SentencePatternWord.lemma_id == new_lemma.id)
+            self.session.query(SentenceWordHint)
+            .filter(SentenceWordHint.lemma_id == new_lemma.id)
             .first()
         )
         self.assertIsNotNone(new_pw)
@@ -659,12 +659,12 @@ class TestDiscoverAndStoreLemmas(unittest.TestCase):
         self.assertEqual(result["candidates"][0]["lemma"].lemma_text, "eat")
 
         # Verify stored
-        pattern_words = (
-            self.session.query(SentencePatternWord)
-            .filter(SentencePatternWord.sentence_id == self.sentence.id)
+        word_hints = (
+            self.session.query(SentenceWordHint)
+            .filter(SentenceWordHint.sentence_id == self.sentence.id)
             .all()
         )
-        self.assertEqual(len(pattern_words), 1)
+        self.assertEqual(len(word_hints), 1)
 
     def test_reports_already_linked(self):
         """Test that already-linked lemmas are found but not re-added."""

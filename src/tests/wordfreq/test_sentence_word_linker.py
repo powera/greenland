@@ -16,7 +16,7 @@ from storage.models.schema import (
     DerivativeForm,
     Lemma,
     Sentence,
-    SentencePatternWord,
+    SentenceWordHint,
     SentenceTranslation,
     SentenceWord,
 )
@@ -534,7 +534,7 @@ class TestResolveLemmaForWord(unittest.TestCase):
 
 
 class TestResolveLemmasForSentence(unittest.TestCase):
-    """Test resolve_lemmas_for_sentence with pattern_words and sentence_words."""
+    """Test resolve_lemmas_for_sentence with word_hints and sentence_words."""
 
     def setUp(self) -> None:
         self.engine = create_engine("sqlite:///:memory:")
@@ -577,24 +577,24 @@ class TestResolveLemmasForSentence(unittest.TestCase):
             )
         )
 
-        # Pattern words (from guided generation) - with GUIDs
+        # Word hints (from guided generation) - with GUIDs
         self.session.add_all(
             [
-                SentencePatternWord(
+                SentenceWordHint(
                     sentence_id=self.sentence.id,
                     lemma_id=self.lemma_see.id,
                     position=0,
                     slot_name="verb",
                     english_text="see",
                 ),
-                SentencePatternWord(
+                SentenceWordHint(
                     sentence_id=self.sentence.id,
                     lemma_id=self.lemma_teacher.id,
                     position=1,
                     slot_name="noun",
                     english_text="teacher",
                 ),
-                SentencePatternWord(
+                SentenceWordHint(
                     sentence_id=self.sentence.id,
                     lemma_id=self.lemma_yesterday.id,
                     position=2,
@@ -608,8 +608,8 @@ class TestResolveLemmasForSentence(unittest.TestCase):
     def tearDown(self) -> None:
         self.session.close()
 
-    def test_resolves_all_pattern_words_via_guid(self) -> None:
-        """All pattern words with lemma_id should resolve via GUID."""
+    def test_resolves_all_word_hints_via_guid(self) -> None:
+        """All word hints with lemma_id should resolve via GUID."""
         results = resolve_lemmas_for_sentence(self.session, self.sentence.id)
 
         self.assertEqual(len(results), 3)
@@ -633,9 +633,9 @@ class TestResolveLemmasForSentence(unittest.TestCase):
         self.assertEqual(results[2].slot_name, "other")
         self.assertEqual(results[2].english_text, "yesterday")
 
-    def test_null_lemma_pattern_word_falls_to_text(self) -> None:
-        """Pattern word with no lemma_id should fall through to text match."""
-        # Add a pattern word without lemma_id (like "work horse" in the examples)
+    def test_null_lemma_word_hint_falls_to_text(self) -> None:
+        """Word hint with no lemma_id should fall through to text match."""
+        # Add a word hint without lemma_id (like "work horse" in the examples)
         # Need a pending_import to satisfy the check constraint
         from storage.models.imports import PendingImport
 
@@ -650,7 +650,7 @@ class TestResolveLemmasForSentence(unittest.TestCase):
         self.session.add(pending)
         self.session.flush()
 
-        pw = SentencePatternWord(
+        pw = SentenceWordHint(
             sentence_id=self.sentence.id,
             pending_import_id=pending.id,
             position=3,
@@ -688,7 +688,7 @@ class TestResolveLemmasForSentenceFromWords(unittest.TestCase):
         self.session.add(self.lemma_teacher)
         self.session.flush()
 
-        # Sentence with only sentence_words (no pattern_words)
+        # Sentence with only sentence_words (no word_hints)
         self.sentence = Sentence(pattern_type="SVO", tense="present")
         self.session.add(self.sentence)
         self.session.flush()
@@ -730,7 +730,7 @@ class TestResolveLemmasForSentenceFromWords(unittest.TestCase):
         self.session.close()
 
     def test_resolves_from_sentence_words(self) -> None:
-        """When no pattern_words exist, sentence_words are used."""
+        """When no word_hints exist, sentence_words are used."""
         results = resolve_lemmas_for_sentence(self.session, self.sentence.id)
 
         self.assertEqual(len(results), 2)

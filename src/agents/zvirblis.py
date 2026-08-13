@@ -44,7 +44,7 @@ from storage.models.schema import (
     Sentence,
     SentenceTranslation,
     SentenceWord,
-    SentencePatternWord,
+    SentenceWordHint,
 )
 from sentences.analysis import discover_and_store_lemmas
 from sentences.translation import build_response_schema, build_translation_prompt
@@ -98,21 +98,21 @@ class ZvirblisAgent:
             if "en" not in required_languages:
                 required_languages.add("en")
 
-            # Find sentences linked via SentenceWord OR SentencePatternWord
+            # Find sentences linked via SentenceWord OR SentenceWordHint
             sentence_word_ids = (
                 session.query(SentenceWord.sentence_id)
                 .filter(SentenceWord.lemma_id == lemma.id)
                 .distinct()
             )
-            pattern_word_ids = (
-                session.query(SentencePatternWord.sentence_id)
-                .filter(SentencePatternWord.lemma_id == lemma.id)
+            word_hint_ids = (
+                session.query(SentenceWordHint.sentence_id)
+                .filter(SentenceWordHint.lemma_id == lemma.id)
                 .distinct()
             )
 
             sentence_query = (
                 session.query(Sentence)
-                .filter((Sentence.id.in_(sentence_word_ids)) | (Sentence.id.in_(pattern_word_ids)))
+                .filter((Sentence.id.in_(sentence_word_ids)) | (Sentence.id.in_(word_hint_ids)))
                 .order_by(Sentence.id)
             )
 
@@ -255,21 +255,21 @@ class ZvirblisAgent:
             if "en" not in required_languages:
                 required_languages.add("en")
 
-            # Find sentences linked via SentenceWord OR SentencePatternWord
+            # Find sentences linked via SentenceWord OR SentenceWordHint
             sentence_word_ids = (
                 session.query(SentenceWord.sentence_id)
                 .filter(SentenceWord.lemma_id == lemma.id)
                 .distinct()
             )
-            pattern_word_ids = (
-                session.query(SentencePatternWord.sentence_id)
-                .filter(SentencePatternWord.lemma_id == lemma.id)
+            word_hint_ids = (
+                session.query(SentenceWordHint.sentence_id)
+                .filter(SentenceWordHint.lemma_id == lemma.id)
                 .distinct()
             )
 
             sentence_query = (
                 session.query(Sentence)
-                .filter((Sentence.id.in_(sentence_word_ids)) | (Sentence.id.in_(pattern_word_ids)))
+                .filter((Sentence.id.in_(sentence_word_ids)) | (Sentence.id.in_(word_hint_ids)))
                 .order_by(Sentence.id)
             )
 
@@ -432,10 +432,10 @@ class ZvirblisAgent:
                 query = query.filter(Sentence.source_filename == f"pattern:{pattern_id}")
 
             if exclude_pending_imports:
-                # Exclude sentences that have any SentencePatternWord with pending_import_id
+                # Exclude sentences that have any SentenceWordHint with pending_import_id
                 sentences_with_pending = (
-                    session.query(SentencePatternWord.sentence_id)
-                    .filter(SentencePatternWord.pending_import_id.isnot(None))
+                    session.query(SentenceWordHint.sentence_id)
+                    .filter(SentenceWordHint.pending_import_id.isnot(None))
                     .distinct()
                     .subquery()
                 )
@@ -579,7 +579,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         default="bn,uk,kn",
         help=(
             "Comma-separated pivot languages used to disambiguate candidate lemmas "
-            "for sentences without SentencePatternWord lemma links (default: bn,uk,kn). "
+            "for sentences without SentenceWordHint lemma links (default: bn,uk,kn). "
             "Pivot translations must already exist as SentenceTranslation rows. "
             "Pass an empty string to disable pivot disambiguation."
         ),

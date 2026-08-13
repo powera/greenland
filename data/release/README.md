@@ -179,7 +179,7 @@ move into the per-language `{lang}.jsonl` files; for now it stays in
 
 Sentence `base.jsonl` records live under
 `sentences/{collection}/{pos_type_dir}/{pos_subtype}/base.jsonl` and contain
-the sentence GUID, sparse translations, optional `pattern_words`, optional
+the sentence GUID, sparse translations, optional `word_hints`, optional
 per-language `words`, and approved sentence `audio` rows. Conversation and
 rejected sentences are not exported.
 

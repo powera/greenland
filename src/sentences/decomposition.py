@@ -13,7 +13,7 @@ from langtools.grammatical_words import is_grammatical_word
 from storage.models.schema import (
     Lemma,
     Sentence,
-    SentencePatternWord,
+    SentenceWordHint,
     SentenceTranslation,
     SentenceWord,
 )
@@ -130,7 +130,7 @@ def build_prompt_for_translate_and_decompose(
     ``candidate_lemmas`` is an optional ranked list of Lemmas the LLM should
     prefer when a word in the sentence corresponds to one of these meanings.
     Typically sourced from pivot-disambiguated candidate lookup for sentences
-    that have no SentencePatternWord.lemma_id rows yet. Rendered as a flat
+    that have no SentenceWordHint.lemma_id rows yet. Rendered as a flat
     block alongside the existing word_translations block; the two are
     independent.
     """
@@ -146,24 +146,24 @@ def build_prompt_for_translate_and_decompose(
             f"Sentence {sentence.id} has no source translation for language '{source_language}'"
         )
 
-    pattern_words = (
-        session.query(SentencePatternWord)
+    word_hints = (
+        session.query(SentenceWordHint)
         .filter_by(sentence_id=sentence.id)
-        .order_by(SentencePatternWord.position)
+        .order_by(SentenceWordHint.position)
         .all()
     )
 
-    # Collect lemma_id -> (English text, part of speech) from pattern words first.
+    # Collect lemma_id -> (English text, part of speech) from word hints first.
     seen_lemma_ids: set[int] = set()
     lemma_entries: List[tuple[int, str, str]] = []
-    for pattern_word in pattern_words:
-        if pattern_word.lemma_id and pattern_word.lemma_id not in seen_lemma_ids:
-            seen_lemma_ids.add(pattern_word.lemma_id)
+    for word_hint in word_hints:
+        if word_hint.lemma_id and word_hint.lemma_id not in seen_lemma_ids:
+            seen_lemma_ids.add(word_hint.lemma_id)
             lemma_entries.append(
                 (
-                    pattern_word.lemma_id,
-                    pattern_word.english_text or "",
-                    pattern_word.slot_name or "",
+                    word_hint.lemma_id,
+                    word_hint.english_text or "",
+                    word_hint.slot_name or "",
                 )
             )
 
