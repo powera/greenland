@@ -1,0 +1,17 @@
+Propose {{count}} idiomatic expressions in {{language_name}}.
+
+{{theme_instruction}}
+
+Do NOT propose any of the following expressions, which are already in the database:
+
+{{existing_expressions}}
+
+For each idiom, return:
+- `expression`: the idiom in {{language_name}}, in citation form
+- `meaning`: a plain-English definition of what it means, not a literal translation
+- `register`: one of neutral, informal, formal, literary, dated
+- `usage_note`: origin or usage constraint, or an empty string if none is needed
+
+Return each idiom as a separate array item.
+
+{{language_note}}

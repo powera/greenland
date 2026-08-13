@@ -1,0 +1,22 @@
+Audit the stored equivalents of the following {{source_language_name}} idiom.
+
+Source idiom: "{{expression}}"
+Language: {{source_language_name}}
+Meaning: {{meaning}}
+Register: {{register}}
+{{usage_note_line}}
+
+Stored equivalents:
+
+{{equivalents_block}}
+
+For each equivalent that has a problem, return:
+- `equivalent_id`: the id shown in brackets for that equivalent
+- `severity`: `error` or `warning`
+- `problem`: one sentence stating what is wrong
+- `suggested_kind`: the correct kind, if `kind` is wrong; otherwise an empty string
+- `suggested_expression`: a corrected expression, if the stored one is wrong; otherwise an empty string
+
+Return an empty array if every stored equivalent is acceptable.
+
+{{language_note}}
