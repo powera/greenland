@@ -1,0 +1,21 @@
+Find the natural equivalents of the following {{source_language_name}} idiom in these target languages: {{target_language_list}}.
+
+Source idiom: "{{expression}}"
+Language: {{source_language_name}}
+Meaning: {{meaning}}
+Register: {{register}}
+{{usage_note_line}}
+
+Remember that the meaning above is authoritative. Express THAT in each target language, using whatever image that language conventionally uses - which may be nothing like the source's.
+
+For each equivalent, return:
+- `language`: the target language code, exactly as given in the list above
+- `expression`: the equivalent in that language
+- `kind`: one of `idiomatic`, `near_equivalent`, `paraphrase`
+- `literal_gloss`: word-for-word English rendering of what the expression says, or an empty string if the words are already plain English-transparent
+- `usage_note`: how it differs (required for `near_equivalent`), or an empty string
+- `register`: one of neutral, informal, formal, literary, dated
+
+Return a separate array item per equivalent. A language may appear more than once if it has genuinely distinct alternatives, and may be omitted entirely if you are not confident.
+
+{{language_note}}

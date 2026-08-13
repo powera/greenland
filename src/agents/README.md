@@ -34,6 +34,7 @@ As of the queue-first transition, agent CLIs are moving toward **work discovery 
 | **gandras** | stork | Audio manifest downloader (S3 staging) |
 | **genys** | woodpecker | Document parser and pending import stager |
 | **ozys** | billy goat | Story-library text generator (retellings, learner conversations) |
+| **gegute** | cuckoo | Idiom generator, equivalent populator, and equivalent auditor |
 
 ## Common Arguments
 
@@ -261,6 +262,34 @@ gandras.py --mode download --language lt --voice ruta --output-dir audio/
 genys.py --input document.txt --language en
 genys.py --input document.txt --language zh --store-sentences
 ```
+
+### gegute (Idioms)
+
+Generates idioms, fills in their cross-language equivalents, and audits the
+equivalents already stored. Execution lives in `workqueue/handlers/idioms/`
+under the canonical task names `idioms.generate`,
+`idioms.equivalents.populate`, and `idioms.equivalents.validate`; the
+generation library itself is `src/idioms/generation.py`.
+
+```bash
+gegute.py --coverage                          # Equivalent coverage report (default)
+gegute.py --coverage --source-language en     # Only English-sourced idioms
+
+gegute.py --generate --source-language lt --count 10
+gegute.py --generate --source-language en --theme "work and money"
+
+gegute.py --populate --guid M01_003           # Fill missing equivalents for one idiom
+gegute.py --populate --language ja ko         # Only these target languages
+gegute.py --populate --all-languages          # Regenerate, not just missing
+
+gegute.py --validate --guid M01_002           # Audit stored equivalents (read-only)
+
+gegute.py --populate --use-workqueue          # Enqueue instead of running inline
+```
+
+`--validate` reports problems rather than applying corrections: the findings
+name an equivalent id for a human to act on, so an unreviewed LLM call cannot
+overwrite curated data.
 
 ## Creating New Agents
 

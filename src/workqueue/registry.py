@@ -8,6 +8,11 @@ from __future__ import annotations
 
 from workqueue.handlers.audio import handle_audio_generate_lemma, handle_audio_generate_sentence
 from workqueue.handlers.conversations import handle_conversations_scene_generate
+from workqueue.handlers.idioms import (
+    handle_idioms_equivalents_populate,
+    handle_idioms_equivalents_validate,
+    handle_idioms_generate,
+)
 from workqueue.handlers.sarka import handle_generate_conversation, handle_generate_definition
 from workqueue.handlers.sentences import (
     handle_sentences_batch_decompose_submit,
@@ -39,6 +44,9 @@ TASK_HANDLERS = {
     "sentences.translate.batch_submit": handle_sentences_translate_batch_submit,
     "sentences.batch.translate.submit": handle_sentences_batch_translate_submit,
     "sentences.batch.decompose.submit": handle_sentences_batch_decompose_submit,
+    "idioms.generate": handle_idioms_generate,
+    "idioms.equivalents.populate": handle_idioms_equivalents_populate,
+    "idioms.equivalents.validate": handle_idioms_equivalents_validate,
     "audio.generate.lemma": handle_audio_generate_lemma,
     "audio.generate.sentence": handle_audio_generate_sentence,
     "conversations.generate": handle_generate_conversation,
