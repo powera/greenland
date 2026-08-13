@@ -13,23 +13,51 @@ per target language, each with its own equivalence kind. That asymmetry is real
 rather than incidental, so it gets its own rendering instead of being forced
 through the shared single-value language table.
 
-Read-only for now: the add/edit path is deferred until phrases, idioms, and
-sentences get a unified creation flow.
+The same asymmetry is why the add/edit path here is a plain per-type form rather
+than a shared one. The ``elements/`` templates generalize the *read* side, where
+every type displays the same few facts. Writing is where the types stop being
+alike: an idiom needs a required equivalence kind per value, allows several
+values per language, and validates through ``crud.idiom``, none of which a
+phrase does. A descriptor-driven shared form would have to encode all of that,
+which is a form framework rather than a configuration - so the view pages keep
+using the shared templates and the edit pages stay siblings.
 """
 
-from flask import Blueprint, flash, g, redirect, render_template, request, url_for
+from typing import Any, Optional
+
+from flask import (
+    Blueprint,
+    current_app,
+    flash,
+    g,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from flask.typing import ResponseReturnValue
 
 from barsukas.config import Config
 from barsukas.helpers.elements import build_element_rows, group_language_values
 from storage.crud.idiom import (
+    add_idiom_equivalent,
+    create_idiom,
+    delete_idiom,
+    delete_idiom_equivalent,
     get_idiom_by_id,
     list_idiom_source_languages,
     list_idioms,
 )
+from storage.crud.operation_log import log_translation_change
+from storage.models.idiom import IDIOM_EQUIVALENCE_KINDS
 from storage.translation_helpers import get_supported_languages
 
 bp = Blueprint("idioms", __name__, url_prefix="/idioms")
+
+# Blank equivalent rows offered at the bottom of the edit form. Enough to add a
+# few at once without the page becoming mostly empty inputs; adding more is a
+# save and a revisit.
+_NEW_EQUIVALENT_ROWS = 3
 
 
 @bp.route("/")
@@ -92,4 +120,253 @@ def view_idiom(idiom_id: int) -> ResponseReturnValue:
         values_by_language=group_language_values(idiom.language_values),
         equivalent_language_names=equivalent_language_names,
         language_names=language_names,
+    )
+
+
+@bp.route("/new", methods=["GET", "POST"])
+def new_idiom() -> ResponseReturnValue:
+    """Create an idiom from its source expression and meaning.
+
+    Equivalents are not collected here. An idiom is identified by its
+    expression and meaning; the equivalents are a separate, longer job best
+    done on the edit page against a saved row - or by gegute.
+    """
+    if request.method == "POST":
+        if current_app.config.get("READONLY", False):
+            flash("Cannot create: running in read-only mode", "error")
+            return redirect(url_for("idioms.list_idioms_view"))
+
+        expression = request.form.get("expression", "").strip()
+        meaning = request.form.get("meaning", "").strip()
+        source_language_code = request.form.get("source_language_code", "").strip()
+
+        # crud.idiom validates these too, but it raises; catching the empty
+        # case here keeps a mistyped form on the form with its values intact.
+        if not expression or not meaning or not source_language_code:
+            flash("Source language, expression, and meaning are all required", "error")
+            return render_template(
+                "idioms/edit.html",
+                idiom=None,
+                form=request.form,
+                language_names=get_supported_languages(),
+                equivalence_kinds=IDIOM_EQUIVALENCE_KINDS,
+                new_equivalent_rows=_NEW_EQUIVALENT_ROWS,
+            )
+
+        idiom = create_idiom(
+            g.db,
+            source_language_code=source_language_code,
+            expression=expression,
+            meaning=meaning,
+            usage_note=request.form.get("usage_note", "").strip() or None,
+            register=request.form.get("register", "").strip() or None,
+            region=request.form.get("region", "").strip() or None,
+            difficulty_level=_parse_int(request.form.get("difficulty_level", "").strip()),
+            notes=request.form.get("notes", "").strip() or None,
+            verified=request.form.get("verified") == "on",
+        )
+        _log("create", None, idiom.guid)
+        g.db.commit()
+
+        flash(f"Created idiom: {idiom.expression}", "success")
+        return redirect(url_for("idioms.view_idiom", idiom_id=idiom.id))
+
+    return render_template(
+        "idioms/edit.html",
+        idiom=None,
+        form={},
+        language_names=get_supported_languages(),
+        equivalence_kinds=IDIOM_EQUIVALENCE_KINDS,
+        new_equivalent_rows=_NEW_EQUIVALENT_ROWS,
+    )
+
+
+@bp.route("/<int:idiom_id>/edit", methods=["GET", "POST"])
+def edit_idiom(idiom_id: int) -> ResponseReturnValue:
+    """Edit an idiom's metadata and its equivalents."""
+    idiom = get_idiom_by_id(g.db, idiom_id)
+    if not idiom:
+        flash("Idiom not found", "error")
+        return redirect(url_for("idioms.list_idioms_view"))
+
+    if request.method == "POST":
+        if current_app.config.get("READONLY", False):
+            flash("Cannot update: running in read-only mode", "error")
+            return redirect(url_for("idioms.view_idiom", idiom_id=idiom_id))
+
+        for field_name in ("expression", "meaning"):
+            new_value = request.form.get(field_name, "").strip()
+            old_value = getattr(idiom, field_name)
+            # Required fields: a blank submission is a mistake rather than a
+            # request to clear, so it is ignored instead of writing an empty
+            # string past the crud layer's validation.
+            if new_value and new_value != old_value:
+                _log(field_name, old_value, new_value)
+                setattr(idiom, field_name, new_value)
+
+        for field_name in ("usage_note", "register", "region", "notes"):
+            new_optional = request.form.get(field_name, "").strip() or None
+            old_optional = getattr(idiom, field_name)
+            if new_optional != old_optional:
+                _log(field_name, old_optional, new_optional)
+                setattr(idiom, field_name, new_optional)
+
+        new_difficulty = _parse_int(request.form.get("difficulty_level", "").strip())
+        if new_difficulty != idiom.difficulty_level:
+            _log("difficulty_level", idiom.difficulty_level, new_difficulty)
+            idiom.difficulty_level = new_difficulty
+
+        new_verified = request.form.get("verified") == "on"
+        if new_verified != idiom.verified:
+            _log("verified", idiom.verified, new_verified)
+            idiom.verified = new_verified
+
+        _apply_equivalent_edits(idiom)
+        _apply_new_equivalents(idiom)
+
+        g.db.commit()
+        flash("Idiom updated", "success")
+        return redirect(url_for("idioms.view_idiom", idiom_id=idiom_id))
+
+    return render_template(
+        "idioms/edit.html",
+        idiom=idiom,
+        form={},
+        language_names=get_supported_languages(),
+        equivalence_kinds=IDIOM_EQUIVALENCE_KINDS,
+        new_equivalent_rows=_NEW_EQUIVALENT_ROWS,
+    )
+
+
+@bp.route("/<int:idiom_id>/delete", methods=["POST"])
+def delete_idiom_view(idiom_id: int) -> ResponseReturnValue:
+    """Delete an idiom and its equivalents via cascade."""
+    if current_app.config.get("READONLY", False):
+        flash("Cannot delete: running in read-only mode", "error")
+        return redirect(url_for("idioms.view_idiom", idiom_id=idiom_id))
+
+    idiom = get_idiom_by_id(g.db, idiom_id)
+    if not idiom:
+        flash("Idiom not found", "error")
+        return redirect(url_for("idioms.list_idioms_view"))
+
+    expression = idiom.expression
+    _log("delete", idiom.guid, None)
+    delete_idiom(g.db, idiom)
+    g.db.commit()
+
+    flash(f"Deleted idiom: {expression}", "success")
+    return redirect(url_for("idioms.list_idioms_view"))
+
+
+def _apply_equivalent_edits(idiom: Any) -> None:
+    """Update or delete existing equivalents from the submitted form.
+
+    Each stored equivalent renders as a row of fields suffixed with its id, so
+    a submission names exactly the rows it means. An unchecked delete box and
+    an unchanged value both leave the row alone.
+    """
+    for equivalent in list(idiom.equivalents):
+        prefix = f"equivalent_{equivalent.id}"
+
+        if request.form.get(f"{prefix}_delete") == "on":
+            _log("equivalent_delete", equivalent.expression, None)
+            delete_idiom_equivalent(g.db, equivalent)
+            continue
+
+        expression = request.form.get(f"{prefix}_expression")
+        # A missing key means the row was not rendered; only a present-and-empty
+        # value is a real edit, and an empty expression is not storable.
+        if expression is not None:
+            expression = expression.strip()
+            if expression and expression != equivalent.expression:
+                _log("equivalent_expression", equivalent.expression, expression)
+                equivalent.expression = expression
+
+        kind = (request.form.get(f"{prefix}_kind") or "").strip()
+        if kind in IDIOM_EQUIVALENCE_KINDS and kind != equivalent.equivalence_kind:
+            _log("equivalent_kind", equivalent.equivalence_kind, kind)
+            equivalent.equivalence_kind = kind
+
+        for field_name, column_name in (
+            ("gloss", "literal_gloss"),
+            ("note", "usage_note"),
+            ("register", "register"),
+        ):
+            raw = request.form.get(f"{prefix}_{field_name}")
+            if raw is None:
+                continue
+            new_value = raw.strip() or None
+            if new_value != getattr(equivalent, column_name):
+                setattr(equivalent, column_name, new_value)
+
+        new_verified = request.form.get(f"{prefix}_verified") == "on"
+        if new_verified != equivalent.verified:
+            _log("equivalent_verified", equivalent.verified, new_verified)
+            equivalent.verified = new_verified
+
+
+def _apply_new_equivalents(idiom: Any) -> None:
+    """Add equivalents from the blank rows at the bottom of the form.
+
+    The form always renders a few empty rows; those left blank are skipped, so
+    the operator adds one or several without a page round-trip per row.
+    """
+    existing = {
+        (row.language_code, (row.expression or "").strip().casefold()) for row in idiom.equivalents
+    }
+
+    for index in range(_NEW_EQUIVALENT_ROWS):
+        prefix = f"new_equivalent_{index}"
+        expression = (request.form.get(f"{prefix}_expression") or "").strip()
+        language_code = (request.form.get(f"{prefix}_language") or "").strip()
+        kind = (request.form.get(f"{prefix}_kind") or "").strip()
+
+        if not expression or not language_code:
+            continue
+        if kind not in IDIOM_EQUIVALENCE_KINDS:
+            flash(f"Skipped {language_code} equivalent: invalid kind {kind!r}", "error")
+            continue
+
+        # The table is unique on (idiom, language, expression); skipping here
+        # turns a would-be IntegrityError into an ordinary no-op.
+        key = (language_code, expression.casefold())
+        if key in existing:
+            flash(f"Skipped duplicate {language_code} equivalent: {expression}", "error")
+            continue
+        existing.add(key)
+
+        add_idiom_equivalent(
+            g.db,
+            idiom,
+            language_code=language_code,
+            expression=expression,
+            equivalence_kind=kind,
+            literal_gloss=(request.form.get(f"{prefix}_gloss") or "").strip() or None,
+            usage_note=(request.form.get(f"{prefix}_note") or "").strip() or None,
+            register=(request.form.get(f"{prefix}_register") or "").strip() or None,
+            verified=request.form.get(f"{prefix}_verified") == "on",
+        )
+        _log("equivalent_create", None, f"{language_code}: {expression}")
+
+
+def _parse_int(value: str) -> Optional[int]:
+    """Parse an integer form value, or None if blank/invalid."""
+    if not value:
+        return None
+    try:
+        return int(value)
+    except ValueError:
+        return None
+
+
+def _log(field_name: str, old_value: Any, new_value: Any) -> None:
+    """Record an idiom field change in the operation log."""
+    log_translation_change(
+        session=g.db,
+        source=Config.OPERATION_LOG_SOURCE,
+        operation_type="idiom_update",
+        field_name=field_name,
+        old_value=str(old_value) if old_value is not None else None,
+        new_value=str(new_value) if new_value is not None else None,
     )

@@ -15,8 +15,22 @@
 <div class="row mb-4">
     <div class="col">
         <div class="card">
-            <div class="card-header">
-                <i class="bi bi-lightbulb"></i> {{ idiom.expression }}
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-lightbulb"></i> {{ idiom.expression }}</span>
+                <span>
+                    <a href="{{ url_for('idioms.edit_idiom', idiom_id=idiom.id) }}"
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <form method="POST" action="{{ url_for('idioms.delete_idiom_view', idiom_id=idiom.id) }}"
+                          class="d-inline"
+                          onsubmit="return confirm('Delete this idiom and all its equivalents?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                {% if config.get('READONLY', False) %}disabled title="Not available in hosted mode"{% endif %}>
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </form>
+                </span>
             </div>
             <div class="card-body">
                 {# The source expression and its meaning are kept visually distinct:
