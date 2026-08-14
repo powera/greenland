@@ -95,6 +95,26 @@ IDIOM_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
 # that vocabulary rather than paraphrasing.
 SENTENCE_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
     CapabilityDescriptor(
+        task_type="sentences.translations.verify",
+        summary="Verify one sentence's translations and persist their verdicts.",
+        target_kind="sentence",
+        required_payload=("sentence_id",),
+        optional_payload=("languages", "model"),
+        writes=True,
+        produces=("sentence translation verification verdicts",),
+        preconditions=("the sentence has an English and target-language translation",),
+    ),
+    CapabilityDescriptor(
+        task_type="sentences.links.verify",
+        summary="Audit one sentence's stored lemma links and report problems.",
+        target_kind="sentence",
+        required_payload=("sentence_id",),
+        optional_payload=("languages", "model"),
+        writes=False,
+        produces=("sentence lemma-link findings in the task result",),
+        preconditions=("the sentence has linked lemma rows",),
+    ),
+    CapabilityDescriptor(
         task_type="sentences.import",
         summary=(
             "Run one sentence through the whole import path: translate, decompose, "
@@ -192,8 +212,23 @@ SENTENCE_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
 )
 
 
+WORD_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
+    CapabilityDescriptor(
+        task_type="words.translations.verify",
+        summary="Verify one lemma's translations and persist their verdicts.",
+        target_kind="lemma",
+        required_payload=("lemma_id",),
+        optional_payload=("languages", "model"),
+        writes=True,
+        produces=("word translation verification verdicts",),
+        preconditions=("the lemma has translations in the requested languages",),
+    ),
+)
+
+
 CAPABILITY_DESCRIPTORS: Dict[str, CapabilityDescriptor] = {
-    descriptor.task_type: descriptor for descriptor in (*IDIOM_CAPABILITIES, *SENTENCE_CAPABILITIES)
+    descriptor.task_type: descriptor
+    for descriptor in (*IDIOM_CAPABILITIES, *SENTENCE_CAPABILITIES, *WORD_CAPABILITIES)
 }
 
 

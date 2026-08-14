@@ -7,12 +7,13 @@ individual integrity checks directly against the app database without
 launching an agent subprocess.
 """
 
-from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from flask import current_app
 
-from agents.bebras.integrity import IntegrityChecker
-from storage.backend.config import BackendType
+from agents.bebras.integrity import IntegrityChecker as LegacyAudioIntegrityChecker
+from storage.backend.config import BackendType, DataSourceConfig
+from storage.integrity import IntegrityChecker
 
 # (check_id, display name, description) for every check runnable in-process.
 INTEGRITY_CHECKS: List[Tuple[str, str, str]] = [
@@ -73,12 +74,15 @@ FIXABLE_CHECKS = {
 }
 
 
+def checker_config() -> DataSourceConfig:
+    """Get the integrity checker data-source configuration from the app."""
+    return current_app.backend_config  # type: ignore[attr-defined,no-any-return]
+
+
 def checker_db_path() -> Optional[str]:
-    """Get the integrity checker db path from the app backend configuration."""
-    backend_config = current_app.backend_config  # type: ignore[attr-defined]
-    if backend_config.backend_type == BackendType.SQLITE:
-        return cast(Optional[str], backend_config.sqlite_path)
-    return None
+    """Return the SQLite path used by the legacy integrity CLI, if applicable."""
+    config = checker_config()
+    return config.sqlite_path if config.backend_type == BackendType.SQLITE else None
 
 
 def run_integrity_check(check_type: str, fix: bool = False) -> Optional[Dict[str, Any]]:
@@ -86,7 +90,9 @@ def run_integrity_check(check_type: str, fix: bool = False) -> Optional[Dict[str
 
     Returns the check's result dict, or None if check_type is unknown.
     """
-    checker = IntegrityChecker(db_path=checker_db_path())
+    config = checker_config()
+    checker = IntegrityChecker(config)
+    legacy_audio_checker = LegacyAudioIntegrityChecker(config=config)
 
     check_map: Dict[str, Callable[[], Dict[str, Any]]] = {
         "orphaned": lambda: {
@@ -100,8 +106,10 @@ def run_integrity_check(check_type: str, fix: bool = False) -> Optional[Dict[str
         "invalid-levels": checker.check_invalid_difficulty_levels,
         "missing-punctuation": lambda: checker.check_sentences_missing_punctuation(fix=fix),
         "sentence-levels": lambda: checker.check_sentence_levels(fix=fix),
-        "audio-mismatches": lambda: checker.check_audio_translation_mismatches(fix=fix),
-        "pronunciation-fields": lambda: checker.check_pronunciation_fields(fix=fix),
+        "audio-mismatches": lambda: legacy_audio_checker.check_audio_translation_mismatches(
+            fix=fix
+        ),
+        "pronunciation-fields": lambda: legacy_audio_checker.check_pronunciation_fields(fix=fix),
     }
 
     runner = check_map.get(check_type)

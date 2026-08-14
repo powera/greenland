@@ -336,8 +336,8 @@
                                 only gives a correct/incorrect verdict so you can spot problems.
                                 Use <strong>Verify Words</strong> for lemma translations or
                                 <strong>Verify Sentences</strong> for sentence translations.
-                                For large runs, enable the <strong>OpenAI Batch API</strong> option
-                                to queue requests at 50% cost.
+                                A specific word or sentence runs immediately. Bulk selections are
+                                queued as one independently retryable job per record.
                             </p>
 
                             <!-- Sub-tabs for words vs sentences -->
@@ -390,7 +390,7 @@
                                         </div>
 
                                         <div class="row mb-3">
-                                            <div class="col-md-6">
+                                            <div class="col-md-12">
                                                 <div class="d-flex flex-column gap-2">
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="checkbox" id="word_unverified_only"
@@ -412,24 +412,6 @@
                                                         <label class="form-check-label" for="word_output_json">
                                                             JSON output
                                                         </label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="card bg-light">
-                                                    <div class="card-body">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" id="word_use_batch"
-                                                                   name="use_batch" value="true">
-                                                            <label class="form-check-label" for="word_use_batch">
-                                                                <i class="bi bi-collection me-1"></i>
-                                                                <strong>Use OpenAI Batch API</strong>
-                                                            </label>
-                                                        </div>
-                                                        <small class="text-muted d-block mt-1">
-                                                            Queue requests for async processing (50% cost savings).
-                                                            Results available in Batch Operations view.
-                                                        </small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -478,7 +460,7 @@
                                         </div>
 
                                         <div class="row mb-3">
-                                            <div class="col-md-6">
+                                            <div class="col-md-12">
                                                 <div class="d-flex flex-column gap-2">
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="checkbox" id="sent_unverified_only"
@@ -510,24 +492,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <div class="card bg-light">
-                                                    <div class="card-body">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" id="sent_use_batch"
-                                                                   name="use_batch" value="true">
-                                                            <label class="form-check-label" for="sent_use_batch">
-                                                                <i class="bi bi-collection me-1"></i>
-                                                                <strong>Use OpenAI Batch API</strong>
-                                                            </label>
-                                                        </div>
-                                                        <small class="text-muted d-block mt-1">
-                                                            Queue requests for async processing (50% cost savings).
-                                                            Results available in Batch Operations view.
-                                                        </small>
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </div>
 
                                         <button type="submit" class="btn btn-primary">
@@ -545,7 +509,7 @@
                                         <i class="bi bi-clipboard"></i>
                                     </button>
                                 </div>
-                                <code id="verify-cli">PYTHONPATH=src python src/agents/bebras.py --verify words --languages lt zh fr es --limit 100</code>
+                                <code id="verify-cli">PYTHONPATH=src python -m verification words --languages lt zh fr es --limit 100</code>
                             </div>
                         </div>
                     </div>

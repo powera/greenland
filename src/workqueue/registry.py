@@ -21,6 +21,8 @@ from workqueue.handlers.sentences import (
     handle_sentences_import_document,
     handle_sentences_translate,
     handle_sentences_translate_batch_submit,
+    handle_sentences_links_verify,
+    handle_sentences_translations_verify,
 )
 from workqueue.handlers.wireword import handle_wireword_export_directory
 from workqueue.handlers.words import (
@@ -31,6 +33,7 @@ from workqueue.handlers.words import (
     handle_words_synonyms,
     handle_words_translations,
     handle_words_translations_regenerate,
+    handle_words_translations_verify,
 )
 from workqueue.task_queue import TaskType
 
@@ -38,6 +41,7 @@ TASK_HANDLERS = {
     # New capability-first task names
     "words.translations": handle_words_translations,
     "words.translations.regenerate": handle_words_translations_regenerate,
+    TaskType.WORDS_TRANSLATIONS_VERIFY: handle_words_translations_verify,
     "words.forms": handle_words_forms,
     "words.pronunciations": handle_words_pronunciations,
     "words.synonyms": handle_words_synonyms,
@@ -46,6 +50,8 @@ TASK_HANDLERS = {
     "sentences.import": handle_sentences_import,
     "sentences.import.document": handle_sentences_import_document,
     "sentences.translate": handle_sentences_translate,
+    TaskType.SENTENCES_TRANSLATIONS_VERIFY: handle_sentences_translations_verify,
+    TaskType.SENTENCES_LINKS_VERIFY: handle_sentences_links_verify,
     "sentences.translate.batch_submit": handle_sentences_translate_batch_submit,
     "sentences.batch.translate.submit": handle_sentences_batch_translate_submit,
     "sentences.batch.decompose.submit": handle_sentences_batch_decompose_submit,

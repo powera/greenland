@@ -38,6 +38,7 @@ class TaskStatus:
 class TaskType:
     WORDS_TRANSLATIONS = "words.translations"
     WORDS_TRANSLATIONS_REGENERATE = "words.translations.regenerate"
+    WORDS_TRANSLATIONS_VERIFY = "words.translations.verify"
     WORDS_PRONUNCIATIONS = "words.pronunciations"
     WORDS_FORMS = "words.forms"
     WORDS_SYNONYMS = "words.synonyms"
@@ -49,6 +50,8 @@ class TaskType:
     SENTENCES_IMPORT = "sentences.import"
     SENTENCES_IMPORT_DOCUMENT = "sentences.import.document"
     SENTENCES_TRANSLATE = "sentences.translate"
+    SENTENCES_TRANSLATIONS_VERIFY = "sentences.translations.verify"
+    SENTENCES_LINKS_VERIFY = "sentences.links.verify"
     SENTENCES_TRANSLATE_BATCH_SUBMIT = "sentences.translate.batch_submit"
     SENTENCES_BATCH_TRANSLATE_SUBMIT = "sentences.batch.translate.submit"
     SENTENCES_BATCH_DECOMPOSE_SUBMIT = "sentences.batch.decompose.submit"
