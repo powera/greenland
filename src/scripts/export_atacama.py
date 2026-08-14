@@ -17,7 +17,7 @@ if str(Path(__file__).parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from agents.common.common_args import add_backend_args, get_data_source_config
-from atacama.export_atacama import AtacamaExporter
+from exports.atacama.export_atacama import AtacamaExporter
 
 
 def main() -> None:

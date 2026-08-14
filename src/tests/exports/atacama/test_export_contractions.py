@@ -17,7 +17,7 @@ pin the registry as the source of truth so that cannot recur.
 
 import unittest
 
-from atacama.export_atacama import AtacamaExporter
+from exports.atacama.export_atacama import AtacamaExporter
 from langtools.en.grammatical_words import (
     ENGLISH_ALL_TIERS,
     ENGLISH_CONTRACTION_ANNOTATIONS,
