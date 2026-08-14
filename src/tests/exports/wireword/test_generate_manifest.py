@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from wireword.generate_manifest import calculate_file_md5, generate_manifest
+from exports.wireword.generate_manifest import calculate_file_md5, generate_manifest
 
 
 def _write_json_file(path: Path, data: str = "[]") -> None:

@@ -12,7 +12,7 @@ from pathlib import Path
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
-from agents.gyvate import GyvateAgent
+from exports.strings import StringsCatalogExporter
 from storage.backend.config import DataSourceConfig
 
 bp = Blueprint("gyvate", __name__, url_prefix="/gyvate")
@@ -168,7 +168,7 @@ def export_strings() -> ResponseReturnValue:
         flash(f"Invalid uploaded STRINGS input: {upload_error}", "error")
         return redirect(url_for("gyvate.export_page"))
 
-    agent = GyvateAgent(config=_get_config())
+    agent = StringsCatalogExporter(config=_get_config())
     result = agent.run_export(
         project_root=project_root,
         template_path=template_path,

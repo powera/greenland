@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 # Add the src directory to the path for imports
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
+GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
@@ -31,7 +31,7 @@ from storage.models.schema import (
     SentenceWord,
 )
 from langtools.zh.converter import to_simplified
-from wireword.readings import build_translation_reading_fields
+from exports.wireword.readings import build_translation_reading_fields
 
 # Configure logging
 logger = logging.getLogger(__name__)

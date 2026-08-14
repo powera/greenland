@@ -25,7 +25,7 @@ As of the queue-first transition, agent CLIs are moving toward **work discovery 
 | **buivolas** | buffalo | Example sentences (multi-language) |
 | **sarka** | magpie | Dialog/conversation generator (bulk, keyword-driven) |
 | **povas** | peacock | HTML report generator |
-| **ungurys** | eel | WireWord API export |
+| **ungurys** | eel | Compatibility wrapper for `exports.wireword` |
 | **elnias** | deer | Bootstrap export (minimal format) |
 | **strazdas** | thrush | Audio generation (eSpeak-NG) |
 | **vieversys** | lark | Audio generation (OpenAI TTS) |
@@ -197,6 +197,10 @@ povas.py --index-only                 # Generate only the index page
 Output: `{OUTPUT_DIR}/pos_subtypes/`
 
 ### ungurys (WireWord Export)
+
+The implementation lives in `src/exports/wireword/`; these legacy commands
+remain available as convenience wrappers. The canonical package command is
+`PYTHONPATH=src python -m exports.wireword`.
 
 ```bash
 ungurys.py                            # Export to directory structure

@@ -32,6 +32,7 @@ from workqueue.handlers.words import (
     handle_words_translations,
     handle_words_translations_regenerate,
 )
+from workqueue.task_queue import TaskType
 
 TASK_HANDLERS = {
     # New capability-first task names
@@ -53,9 +54,9 @@ TASK_HANDLERS = {
     "idioms.equivalents.validate": handle_idioms_equivalents_validate,
     "audio.generate.lemma": handle_audio_generate_lemma,
     "audio.generate.sentence": handle_audio_generate_sentence,
-    "conversations.generate": handle_generate_conversation,
-    "conversations.scene.generate": handle_conversations_scene_generate,
-    "conversations.definitions": handle_generate_definition,
+    TaskType.CONVERSATIONS_GENERATE: handle_generate_conversation,
+    TaskType.CONVERSATIONS_SCENE_GENERATE: handle_conversations_scene_generate,
+    TaskType.CONVERSATIONS_DEFINITIONS: handle_generate_definition,
     "wireword.export.directory": handle_wireword_export_directory,
     # Backward-compatible aliases (legacy snake_case)
     "add_missing_translations": handle_words_translations,

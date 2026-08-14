@@ -17,8 +17,9 @@ src/
 ├── barsukas/              # Flask web interface
 ├── clients/               # Unified LLM client (OpenAI, Anthropic, Gemini, Ollama)
 ├── benchmarks/            # LLM benchmark suite
+├── exports/               # Export services and formats
+│   └── wireword/          # WireWord format export
 ├── util/                  # General utilities
-├── wireword/              # WireWord format export
 ├── langtools/             # Language processing tools
 ├── ipa/                   # IPA pronunciation utilities
 ├── audioshoe/             # Audio generation (eSpeak, Piper, Coqui, Qwen)
@@ -57,7 +58,7 @@ usage and arguments.
 | strazdas | Thrush | eSpeak-NG audio generation |
 | vieversys | Lark | OpenAI TTS audio generation |
 | povas | Peacock | HTML report generator |
-| ungurys | Eel | WireWord export |
+| ungurys | Eel | Compatibility wrapper for `exports.wireword` |
 | elnias | Deer | WireWord bootstrap export |
 | erelis | Eagle | False lemma match detection in sentences |
 | gandras | Stork | Audio manifest downloader |

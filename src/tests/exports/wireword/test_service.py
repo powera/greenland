@@ -2,7 +2,10 @@ import json
 from pathlib import Path
 from typing import Any, cast
 
-from agents.ungurys.agent import MIN_WIREWORD_SENTENCE_EXPORT_COUNT, UngurysAgent
+from exports.wireword.service import (
+    MIN_WIREWORD_SENTENCE_EXPORT_COUNT,
+    WirewordExportService,
+)
 
 
 class _DummySentenceExporter:
@@ -27,20 +30,22 @@ class _DummySentenceExporter:
         return self.sentence_count
 
 
-def _build_agent_with_sentence_exporter(
+def _build_service_with_sentence_exporter(
     sentence_count: int,
-) -> tuple[UngurysAgent, _DummySentenceExporter]:
-    agent = UngurysAgent.__new__(UngurysAgent)
+) -> tuple[WirewordExportService, _DummySentenceExporter]:
+    exporter_service = WirewordExportService.__new__(WirewordExportService)
     exporter = _DummySentenceExporter(sentence_count)
-    setattr(agent, "sentence_exporter", cast(Any, exporter))
-    return agent, exporter
+    setattr(exporter_service, "sentence_exporter", cast(Any, exporter))
+    return exporter_service, exporter
 
 
 def test_export_wireword_sentences_passes_threshold_to_exporter(tmp_path: Path) -> None:
     output_path = tmp_path / "wireword_sentences.json"
-    agent, exporter = _build_agent_with_sentence_exporter(sentence_count=10)
+    exporter_service, exporter = _build_service_with_sentence_exporter(sentence_count=10)
 
-    success, sentence_count = agent.export_wireword_sentences(output_path=str(output_path))
+    success, sentence_count = exporter_service.export_wireword_sentences(
+        output_path=str(output_path)
+    )
 
     assert success is True
     assert sentence_count == 10
@@ -49,11 +54,19 @@ def test_export_wireword_sentences_passes_threshold_to_exporter(tmp_path: Path) 
 
 def test_export_wireword_sentences_returns_exporter_count(tmp_path: Path) -> None:
     output_path = tmp_path / "wireword_sentences.json"
-    agent, _ = _build_agent_with_sentence_exporter(
+    exporter_service, _ = _build_service_with_sentence_exporter(
         sentence_count=MIN_WIREWORD_SENTENCE_EXPORT_COUNT
     )
 
-    success, sentence_count = agent.export_wireword_sentences(output_path=str(output_path))
+    success, sentence_count = exporter_service.export_wireword_sentences(
+        output_path=str(output_path)
+    )
 
     assert success is True
     assert sentence_count == MIN_WIREWORD_SENTENCE_EXPORT_COUNT
+
+
+def test_legacy_ungurys_agent_is_service_alias() -> None:
+    from agents.ungurys import UngurysAgent
+
+    assert UngurysAgent is WirewordExportService

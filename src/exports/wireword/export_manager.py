@@ -5,14 +5,14 @@ Export manager for trakaido data.
 Provides the TrakaidoExporter class for exporting trakaido data
 in various formats (JSON, WireWord).
 
-For WireWord format exports, see wireword/export_wireword.py
+For WireWord format exports, see exports/wireword/export_wireword.py
 """
 
 import json
 import logging
 import os
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 import constants
 from storage.backend.config import BackendType, DataSourceConfig
@@ -112,7 +112,7 @@ class TrakaidoExporter:
         """
         # Use lemma_text directly - it has the correct capitalization
         # Derivative forms are typically lowercase for tokenization/matching
-        return lemma.lemma_text
+        return cast(Optional[str], lemma.lemma_text)
 
     def query_trakaido_data(
         self,
@@ -401,8 +401,8 @@ class TrakaidoExporter:
     def export_to_wireword_format(
         self, output_path: str, **kwargs: Any
     ) -> Tuple[bool, Optional[ExportStats]]:
-        """Delegate to WirewordExporter. See wireword/export_wireword.py for details."""
-        from wireword.export_wireword import WirewordExporter
+        """Delegate to WirewordExporter. See exports/wireword/export_wireword.py for details."""
+        from exports.wireword.export_wireword import WirewordExporter
 
         exporter = WirewordExporter(
             config=self.config,
@@ -417,8 +417,8 @@ class TrakaidoExporter:
     def export_wireword_directory(
         self, output_dir: str, cdn_base: Optional[str] = None
     ) -> Tuple[bool, Dict[str, Any]]:
-        """Delegate to WirewordExporter. See wireword/export_wireword.py for details."""
-        from wireword.export_wireword import WirewordExporter
+        """Delegate to WirewordExporter. See exports/wireword/export_wireword.py for details."""
+        from exports.wireword.export_wireword import WirewordExporter
 
         exporter = WirewordExporter(
             config=self.config,
@@ -433,8 +433,8 @@ class TrakaidoExporter:
     def export_verbs_to_wireword_format(
         self, output_path: str, **kwargs: Any
     ) -> Tuple[bool, Optional[ExportStats]]:
-        """Delegate to WirewordExporter. See wireword/export_wireword.py for details."""
-        from wireword.export_wireword import WirewordExporter
+        """Delegate to WirewordExporter. See exports/wireword/export_wireword.py for details."""
+        from exports.wireword.export_wireword import WirewordExporter
 
         exporter = WirewordExporter(
             config=self.config,

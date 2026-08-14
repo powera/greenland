@@ -18,8 +18,8 @@ labels but keeps the file fully automatable. The ``id`` and ``avoidDecoys``
 fields are preserved verbatim.
 
 Usage:
-    PYTHONPATH=src python src/wireword/generate_categorychoice.py
-    PYTHONPATH=src python src/wireword/generate_categorychoice.py --langs fr es
+    PYTHONPATH=src python src/exports/wireword/generate_categorychoice.py
+    PYTHONPATH=src python src/exports/wireword/generate_categorychoice.py --langs fr es
 """
 
 import argparse
@@ -28,14 +28,15 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List
 
-if str(Path(__file__).parent.parent) not in sys.path:
-    sys.path.insert(0, str(Path(__file__).parent.parent))
+GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
+if GREENLAND_SRC_PATH not in sys.path:
+    sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from storage.models.enum_translations import en as en_translations
 from storage.models.enum_translations import get_subtype_display_name
 
 DEFAULT_LANGS = ("es", "fr", "zh")
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = PROJECT_ROOT / "data"
 EN_SOURCE = DATA_DIR / "categorychoice.json"
 

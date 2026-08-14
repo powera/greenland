@@ -34,7 +34,7 @@ PORTABLE_EXCLUDES=(
   --ignore=src/tests/benchmarks
   --ignore=src/tests/lib/benchmarks
   # pypinyin + pykakasi: reading-field construction for Chinese/Japanese.
-  --ignore=src/tests/wireword/test_readings.py
+  --ignore=src/tests/exports/wireword/test_readings.py
 )
 
 TARGET="${1:-base}"

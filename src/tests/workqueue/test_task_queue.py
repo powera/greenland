@@ -54,6 +54,8 @@ class TestTaskType(unittest.TestCase):
         self.assertEqual(TaskType.WORDS_FORMS, "words.forms")
         self.assertEqual(TaskType.WORDS_SYNONYMS, "words.synonyms")
         self.assertEqual(TaskType.WORDS_GRAMMAR_FACTS, "words.grammar_facts")
+        self.assertEqual(TaskType.CONVERSATIONS_GENERATE, "conversations.generate")
+        self.assertEqual(TaskType.CONVERSATIONS_DEFINITIONS, "conversations.definitions")
         self.assertEqual(TaskType.SENTENCES_TRANSLATE, "sentences.translate")
         self.assertEqual(TaskType.AUDIO_GENERATE_LEMMA, "audio.generate.lemma")
         self.assertEqual(TaskType.AUDIO_GENERATE_SENTENCE, "audio.generate.sentence")
@@ -194,7 +196,7 @@ class TestEnqueueTask(TaskQueueDBTestCase):
         """Tasks can be created without target type/id."""
         result = enqueue_task(
             self.session,
-            task_type="sarka_generate_conversation",
+            task_type=TaskType.CONVERSATIONS_GENERATE,
             target_type=None,
             target_id=None,
             payload={"words": [{"word": "hello"}]},

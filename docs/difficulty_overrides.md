@@ -113,14 +113,16 @@ The `get_lemmas_by_subtype_and_level()` function now:
 - Uses `COALESCE` to prefer override over default
 - Filters out words with level -1 for the target language
 
-### export_manager.py / export_wireword.py
+### exports/wireword/export_manager.py and export_wireword.py
 All export functions now:
 - Use effective difficulty levels when filtering
 - Exclude words marked with level -1
 - Include the effective level in exported data
 
-### ungurys.py (WireWord Export Agent)
-The agent automatically uses effective levels for each language when exporting wordlists.
+### WireWord export service
+`exports.wireword.service.WirewordExportService` automatically uses effective
+levels for each language when exporting wordlists. `ungurys.py` is a
+compatibility CLI wrapper.
 
 ## Design Rationale
 

@@ -5,7 +5,7 @@ Text rendering and formatting utilities for wireword exports.
 Provides reusable functions for formatting display names and text output.
 """
 
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 from storage.models.enum_translations import get_subtype_display_name
 
@@ -22,7 +22,7 @@ def format_subtype_display_name(subtype: Optional[str], source_language: str = "
     Returns:
         Display-friendly subtype name
     """
-    return get_subtype_display_name(subtype, source_language)
+    return cast(str, get_subtype_display_name(subtype, source_language))
 
 
 def resolve_group_label(

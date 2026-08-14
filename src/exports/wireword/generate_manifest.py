@@ -18,13 +18,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 # Add the src directory to the path for imports
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
+GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from langtools.manifest_grammar import get_manifest_conjugation_config
 from storage.translation_helpers import LANGUAGE_NAMES
-from wireword.readings import get_manifest_reading_config
+from exports.wireword.readings import get_manifest_reading_config
 
 # Configure logging
 logger = logging.getLogger(__name__)

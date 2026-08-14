@@ -1,4 +1,4 @@
-from wireword.helpers import extract_conjugation_slot, extract_conjugation_tense
+from exports.wireword.helpers import extract_conjugation_slot, extract_conjugation_tense
 
 
 def test_extract_conjugation_slot() -> None:

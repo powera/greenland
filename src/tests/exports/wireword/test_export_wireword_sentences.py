@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Any, cast
 
-from wireword.export_wireword_sentences import WirewordSentenceExporter
+from exports.wireword.export_wireword_sentences import WirewordSentenceExporter
 
 
 def _build_exporter_with_data(sentence_count: int) -> WirewordSentenceExporter:

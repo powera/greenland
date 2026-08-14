@@ -1,4 +1,4 @@
-from wireword.readings import (
+from exports.wireword.readings import (
     build_target_reading_fields,
     build_target_reading_list_fields,
     build_translation_reading_fields,

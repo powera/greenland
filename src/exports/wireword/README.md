@@ -17,5 +17,5 @@ by the Trakaido language-learning app.
 
 ## Usage
 
-Exports are normally run via the `ungurys` and `elnias` agents (see
-`src/agents/README.md`) or workqueue handlers, rather than invoked directly.
+Exports are normally run through `exports.wireword.cli` or workqueue handlers.
+The `agents.ungurys` entry points remain as thin compatibility wrappers.

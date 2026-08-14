@@ -1,5 +1,5 @@
 from storage.backend.config import BackendType, DataSourceConfig
-from wireword.export_manager import TrakaidoExporter
+from exports.wireword.export_manager import TrakaidoExporter
 
 
 def test_trakaido_exporter_supports_japanese() -> None:

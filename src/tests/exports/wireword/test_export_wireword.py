@@ -1,5 +1,5 @@
 from storage.backend.config import BackendType, DataSourceConfig
-from wireword.export_wireword import WirewordExporter
+from exports.wireword.export_wireword import WirewordExporter
 
 
 def test_format_missing_verb_translation_warning_preview_and_count() -> None:

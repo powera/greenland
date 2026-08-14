@@ -43,6 +43,8 @@ class TaskType:
     WORDS_SYNONYMS = "words.synonyms"
     WORDS_EMBEDDINGS = "words.embeddings"
     WORDS_GRAMMAR_FACTS = "words.grammar_facts"
+    CONVERSATIONS_GENERATE = "conversations.generate"
+    CONVERSATIONS_DEFINITIONS = "conversations.definitions"
     CONVERSATIONS_SCENE_GENERATE = "conversations.scene.generate"
     SENTENCES_IMPORT = "sentences.import"
     SENTENCES_IMPORT_DOCUMENT = "sentences.import.document"

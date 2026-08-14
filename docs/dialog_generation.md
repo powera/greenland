@@ -162,7 +162,7 @@ for production), which creates the name tables and adds
   sentences go through the ordinary translation pipeline afterwards, which does
   not yet consult `NameTranslation` when rendering a name into the target
   language. Until it does, renderings are curated but not consumed.
-* **Conversation export is still disabled** in `agents/ungurys` (it was turned
+* **Conversation export is still disabled** in `exports/wireword` (it was turned
   off when there were no conversations to export). Turning it back on is a
   separate decision about what reaches Trakaido.
 * **Irregular forms depend on stored derivative forms.** "came" resolves to

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from agents.ungurys import UngurysAgent
+from exports.wireword.service import WirewordExportService
 from workqueue.tools import build_default_config, workqueue_payload_handler
 
 
@@ -25,7 +25,7 @@ def do_wireword_export_directory(
         normalized_language = "zh"
         simplified_chinese = False
 
-    agent = UngurysAgent(
+    exporter = WirewordExportService(
         config=config,
         language=normalized_language,
         simplified_chinese=simplified_chinese,
@@ -34,9 +34,9 @@ def do_wireword_export_directory(
     )
 
     if apply_level_overrides:
-        agent.apply_level_overrides()
+        exporter.apply_level_overrides()
 
-    success, results = agent.export_wireword_directory()
+    success, results = exporter.export_wireword_directory()
     if not success:
         raise RuntimeError("WireWord directory export failed")
 

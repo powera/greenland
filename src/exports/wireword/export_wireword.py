@@ -12,10 +12,10 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 # Add the src directory to the path for imports
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
+GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
@@ -38,13 +38,13 @@ from storage.translation_helpers import (
     get_translation,
 )
 from langtools.zh.converter import to_simplified, to_traditional
-from wireword.data_models import ExportStats, create_export_stats
-from wireword.readings import (
+from exports.wireword.data_models import ExportStats, create_export_stats
+from exports.wireword.readings import (
     build_target_reading_fields,
     build_target_reading_list_fields,
 )
-from wireword.text_rendering import resolve_group_label
-from wireword.helpers import (
+from exports.wireword.text_rendering import resolve_group_label
+from exports.wireword.helpers import (
     convert_to_wireword_grammatical_form_key,
     extract_conjugation_slot,
     extract_conjugation_tense,
@@ -52,7 +52,7 @@ from wireword.helpers import (
     generate_simple_grammatical_form_label,
     normalize_pos_type,
 )
-from wireword.generate_manifest import generate_manifest
+from exports.wireword.generate_manifest import generate_manifest
 from words.cognates import detect_cognate
 
 # Configure logging
@@ -176,7 +176,7 @@ class WirewordExporter:
         if self.source_language == "en":
             text: Optional[str] = lemma.lemma_text
             return text
-        return get_translation(session, lemma, self.source_language)
+        return cast(Optional[str], get_translation(session, lemma, self.source_language))
 
     def query_trakaido_data_for_wireword(
         self,

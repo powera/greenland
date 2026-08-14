@@ -1,5 +1,5 @@
-"""GYVATE agent package."""
+"""Compatibility package for application string catalog exports."""
 
-from agents.gyvate.agent import GyvateAgent
+from exports.strings.catalogs import GyvateAgent, GyvateServiceResult, StringsCatalogExporter
 
-__all__ = ["GyvateAgent"]
+__all__ = ["GyvateAgent", "GyvateServiceResult", "StringsCatalogExporter"]

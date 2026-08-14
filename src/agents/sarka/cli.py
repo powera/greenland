@@ -21,7 +21,7 @@ from agents.sarka.agent import (
     WORDS_PER_CONVERSATION,
     WORD_USAGE_TARGET,
 )
-from workqueue.task_queue import TaskStatus, enqueue_task
+from workqueue.task_queue import TaskStatus, TaskType, enqueue_task, get_active_task
 from storage.models.schema import BarsukasTask
 
 logger = logging.getLogger(__name__)
@@ -261,11 +261,16 @@ def enqueue_level_work(
             # Create a unique dedup key based on words and level
             words_str = ",".join(sorted(word_texts))
             words_hash = hashlib.md5(words_str.encode()).hexdigest()[:8]
-            dedup_key = f"sarka_level{level}_{words_hash}_{i}"
+            dedup_key = f"{TaskType.CONVERSATIONS_GENERATE}:{level}:{words_hash}:{i}"
+            legacy_dedup_key = f"sarka_level{level}_{words_hash}_{i}"
+
+            if get_active_task(session, legacy_dedup_key) is not None:
+                logger.debug("Skipped duplicate legacy task %s", i + 1)
+                continue
 
             result = enqueue_task(
                 session,
-                task_type="sarka_generate_conversation",
+                task_type=TaskType.CONVERSATIONS_GENERATE,
                 target_type="conversation",
                 target_id=None,
                 payload={
@@ -352,11 +357,16 @@ def enqueue_definition_work(
 
             words_str = ",".join(sorted(word_texts))
             words_hash = hashlib.md5(words_str.encode()).hexdigest()[:8]
-            dedup_key = f"sarka_def_level{level}_{words_hash}_{i}"
+            dedup_key = f"{TaskType.CONVERSATIONS_DEFINITIONS}:{level}:{words_hash}:{i}"
+            legacy_dedup_key = f"sarka_def_level{level}_{words_hash}_{i}"
+
+            if get_active_task(session, legacy_dedup_key) is not None:
+                logger.debug("Skipped duplicate legacy task %s", i + 1)
+                continue
 
             enqueue_result = enqueue_task(
                 session,
-                task_type="sarka_generate_definition",
+                task_type=TaskType.CONVERSATIONS_DEFINITIONS,
                 target_type="conversation",
                 target_id=None,
                 payload={
@@ -389,19 +399,19 @@ def enqueue_definition_work(
 
 def get_sarka_queue_stats(session: Any) -> Dict[str, int]:
     """Get statistics for sarka tasks in the queue."""
-    task_type = "sarka_generate_conversation"
+    task_types = (TaskType.CONVERSATIONS_GENERATE, "sarka_generate_conversation")
     return {
         "pending": session.query(BarsukasTask)
-        .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.PENDING)
+        .filter(BarsukasTask.task_type.in_(task_types), BarsukasTask.status == TaskStatus.PENDING)
         .count(),
         "running": session.query(BarsukasTask)
-        .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.RUNNING)
+        .filter(BarsukasTask.task_type.in_(task_types), BarsukasTask.status == TaskStatus.RUNNING)
         .count(),
         "completed": session.query(BarsukasTask)
-        .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.COMPLETED)
+        .filter(BarsukasTask.task_type.in_(task_types), BarsukasTask.status == TaskStatus.COMPLETED)
         .count(),
         "failed": session.query(BarsukasTask)
-        .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.FAILED)
+        .filter(BarsukasTask.task_type.in_(task_types), BarsukasTask.status == TaskStatus.FAILED)
         .count(),
     }
 
