@@ -1,5 +1,5 @@
 """
-Countability Task - Classify nouns as countable, uncountable, or both.
+Animacy Task - Classify nouns as animate or inanimate.
 """
 
 import logging
@@ -12,16 +12,16 @@ from clients.types import Schema, SchemaProperty
 from storage.models.schema import Lemma
 
 if TYPE_CHECKING:
-    from agents.lape.agent import LapeAgent
+    from words.grammar_facts import GrammarFactService
 
 logger = logging.getLogger(__name__)
 
 
-def generate_countability(
-    agent: "LapeAgent", lemma: Lemma, session: Optional[Session] = None
+def generate_animacy(
+    agent: "GrammarFactService", lemma: Lemma, session: Optional[Session] = None
 ) -> Tuple[Optional[str], Optional[str], float]:
     """
-    Generate noun countability classification using LLM.
+    Generate noun animacy classification using LLM.
 
     Args:
         agent: The LapeAgent instance
@@ -29,18 +29,18 @@ def generate_countability(
         session: Database session (optional)
 
     Returns:
-        Tuple of (countability, explanation, confidence)
+        Tuple of (animacy, explanation, confidence)
     """
     if lemma.pos_type != "noun":
-        logger.warning(f"Lemma '{lemma.lemma_text}' is not a noun, skipping countability")
+        logger.warning(f"Lemma '{lemma.lemma_text}' is not a noun, skipping animacy")
         return None, None, 0.0
 
     # Load prompts
     try:
-        context = util.prompt_loader.get_context("grammar", "countability")
-        prompt_template = util.prompt_loader.get_prompt("grammar", "countability")
+        context = util.prompt_loader.get_context("grammar", "animacy")
+        prompt_template = util.prompt_loader.get_prompt("grammar", "animacy")
     except Exception as e:
-        logger.error(f"Failed to load countability prompts: {e}")
+        logger.error(f"Failed to load animacy prompts: {e}")
         return None, None, 0.0
 
     # Format prompt
@@ -52,13 +52,13 @@ def generate_countability(
 
     # Define JSON schema for response
     schema = Schema(
-        name="NounCountabilityClassification",
-        description="Classify noun countability",
+        name="NounAnimacyClassification",
+        description="Classify noun animacy",
         properties={
-            "countability": SchemaProperty(
+            "animacy": SchemaProperty(
                 "string",
-                "The countability classification",
-                enum=["countable", "uncountable", "both"],
+                "The animacy classification",
+                enum=["animate", "inanimate"],
             ),
             "explanation": SchemaProperty("string", "Brief explanation if notable"),
             "confidence": SchemaProperty(
@@ -78,17 +78,17 @@ def generate_countability(
             logger.error(f"No structured data received for '{lemma.lemma_text}'")
             return None, None, 0.0
 
-        countability = result.get("countability", None)
+        animacy = result.get("animacy", None)
         explanation = result.get("explanation", "")
         confidence = float(result.get("confidence", 0.5))
 
         logger.info(
-            f"Generated countability for '{lemma.lemma_text}': {countability} "
+            f"Generated animacy for '{lemma.lemma_text}': {animacy} "
             f"(confidence: {confidence:.2f})"
         )
 
-        return countability, explanation, confidence
+        return animacy, explanation, confidence
 
     except Exception as e:
-        logger.error(f"Failed to generate countability for '{lemma.lemma_text}': {e}")
+        logger.error(f"Failed to generate animacy for '{lemma.lemma_text}': {e}")
         return None, None, 0.0

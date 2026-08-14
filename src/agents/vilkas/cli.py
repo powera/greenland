@@ -257,9 +257,9 @@ def main() -> None:
     """Main entry point for the vilkas agent."""
     # Import here to avoid circular imports
     from agents.common.cli_display import display_language_header
-    from agents.common.lemma_selection import get_lemmas_for_agent
+    from words.lemma_selection import get_lemmas_for_agent
     from agents.vilkas import display
-    from agents.vilkas.agent import VilkasAgent
+    from words.inflections import InflectionService
 
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -294,7 +294,7 @@ def main() -> None:
     config = get_data_source_config(args, default_model="gpt-5.4-mini")
 
     # Create agent with unified configuration
-    agent = VilkasAgent(config=config)
+    agent = InflectionService(config=config)
 
     # Require --task
     if not args.task:

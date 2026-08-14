@@ -603,13 +603,13 @@ def check_definition_by_guid(guid: str) -> ResponseReturnValue:
     model, error = _require_model()
     if error is not None:
         return error
-    from agents.lokys import LokysAgent
     from storage.backend.config import BackendType, DataSourceConfig
+    from words.validation import LemmaValidationService
 
     lemma = get_lemma_by_guid(g.db, guid)
     if lemma is None:
         return _build_error_response(f"Lemma with GUID '{guid}' not found", 404)
-    agent = LokysAgent(
+    service = LemmaValidationService(
         config=DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
@@ -617,7 +617,7 @@ def check_definition_by_guid(guid: str) -> ResponseReturnValue:
             debug=Config.DEBUG,
         )
     )
-    result = agent.check_single_definition(lemma, session=g.db)
+    result = service.check_single_definition(lemma, session=g.db)
     status = (
         "ok"
         if bool(result.get("is_valid")) and float(result.get("confidence", 0)) >= 0.7
@@ -639,13 +639,13 @@ def check_disambiguation_by_guid(guid: str) -> ResponseReturnValue:
     model, error = _require_model()
     if error is not None:
         return error
-    from agents.lokys import LokysAgent
     from storage.backend.config import BackendType, DataSourceConfig
+    from words.validation import LemmaValidationService
 
     lemma = get_lemma_by_guid(g.db, guid)
     if lemma is None:
         return _build_error_response(f"Lemma with GUID '{guid}' not found", 404)
-    agent = LokysAgent(
+    service = LemmaValidationService(
         config=DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
@@ -653,7 +653,7 @@ def check_disambiguation_by_guid(guid: str) -> ResponseReturnValue:
             debug=Config.DEBUG,
         )
     )
-    result = agent.check_single_disambiguation(lemma, session=g.db)
+    result = service.check_single_disambiguation(lemma, session=g.db)
     issues = [] if not result.get("needs_disambiguation") else [result]
     return _build_success_response(
         {
@@ -671,15 +671,15 @@ def check_translations_by_guid(guid: str) -> ResponseReturnValue:
     model, error = _require_model()
     if error is not None:
         return error
-    from agents.voras.agent import VorasAgent
     from storage.backend.config import BackendType, DataSourceConfig
     from storage.translation_helpers import LANGUAGE_FIELDS
     from wordfreq.tools.llm_validators import validate_all_translations_for_word
+    from words.translation_workflow import TranslationWorkflow
 
     lemma = get_lemma_by_guid(g.db, guid)
     if lemma is None:
         return _build_error_response(f"Lemma with GUID '{guid}' not found", 404)
-    agent = VorasAgent(
+    workflow = TranslationWorkflow(
         config=DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
@@ -688,7 +688,7 @@ def check_translations_by_guid(guid: str) -> ResponseReturnValue:
         )
     )
     translations = {
-        lc: t for lc in LANGUAGE_FIELDS.keys() if (t := agent.get_translation(g.db, lemma, lc))
+        lc: t for lc in LANGUAGE_FIELDS.keys() if (t := workflow.get_translation(g.db, lemma, lc))
     }
     validation_results = validate_all_translations_for_word(
         lemma.lemma_text, translations, lemma.pos_type, model

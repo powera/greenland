@@ -25,7 +25,7 @@ _DEFAULT_BASE_GRAMMATICAL_FORMS: Dict[str, str] = {
 def _default_base_grammatical_form(pos_type: Optional[str]) -> str:
     """Return a sensible grammatical-form label for a synthetic base form.
 
-    Mirrors ``workqueue.handlers.papuga._get_default_base_grammatical_form``;
+    Mirrors ``words.pronunciation_generation._get_default_base_grammatical_form``;
     duplicated here to avoid the JSONL backend depending on workqueue.
     """
     if not pos_type:

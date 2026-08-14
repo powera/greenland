@@ -1,5 +1,5 @@
 """
-Grammatical Gender Task - Determine grammatical gender for nouns.
+Auxiliary Verb Task - Determine auxiliary verb for compound tenses.
 """
 
 import logging
@@ -12,50 +12,49 @@ from clients.types import Schema, SchemaProperty
 from storage.models.schema import Lemma
 
 if TYPE_CHECKING:
-    from agents.lape.agent import LapeAgent
+    from words.grammar_facts import GrammarFactService
 
 logger = logging.getLogger(__name__)
 
 
-def generate_grammatical_gender(
-    agent: "LapeAgent",
+def generate_auxiliary_verb(
+    agent: "GrammarFactService",
     lemma: Lemma,
     target_translation: Optional[str],
     language_code: str,
     session: Optional[Session] = None,
 ) -> Tuple[Optional[str], Optional[str], float]:
     """
-    Generate grammatical gender for a noun using LLM.
+    Generate auxiliary verb classification for compound tenses using LLM.
 
     Args:
         agent: The LapeAgent instance
         lemma: The Lemma object
         target_translation: The translation in the target language
-        language_code: Target language code (e.g., 'fr', 'lt', 'de')
+        language_code: Target language code (fr, de, it, nl)
         session: Database session (optional)
 
     Returns:
-        Tuple of (gender, explanation, confidence)
+        Tuple of (auxiliary_verb, explanation, confidence)
     """
-    if lemma.pos_type != "noun":
-        logger.warning(f"Lemma '{lemma.lemma_text}' is not a noun, skipping gender generation")
+    if lemma.pos_type != "verb":
+        logger.warning(f"Lemma '{lemma.lemma_text}' is not a verb, skipping auxiliary")
         return None, None, 0.0
 
-    if language_code not in agent.GENDER_SYSTEMS:
-        logger.error(f"Language '{language_code}' does not have a configured gender system")
+    if language_code not in agent.AUXILIARY_SYSTEMS:
+        logger.error(f"Language '{language_code}' does not have auxiliary verb configuration")
         return None, None, 0.0
 
-    gender_config = agent.GENDER_SYSTEMS[language_code]
-    language_name = gender_config["name"]
-    valid_genders = ", ".join(gender_config["genders"])
-    gender_system = gender_config["description"]
+    aux_config = agent.AUXILIARY_SYSTEMS[language_code]
+    language_name = aux_config["name"]
+    valid_auxiliaries = ", ".join(aux_config["auxiliaries"])
 
     # Load prompts
     try:
-        context = util.prompt_loader.get_context("grammar", "gender")
-        prompt_template = util.prompt_loader.get_prompt("grammar", "gender")
+        context = util.prompt_loader.get_context("grammar", "auxiliary")
+        prompt_template = util.prompt_loader.get_prompt("grammar", "auxiliary")
     except Exception as e:
-        logger.error(f"Failed to load grammatical_gender prompts: {e}")
+        logger.error(f"Failed to load auxiliary_verb prompts: {e}")
         return None, None, 0.0
 
     # Format prompt
@@ -66,23 +65,20 @@ def generate_grammatical_gender(
         definition=lemma.definition_text or "N/A",
         language_name=language_name,
         language_code=language_code,
-        gender_system=gender_system,
-        valid_genders=valid_genders,
+        valid_auxiliaries=valid_auxiliaries,
     )
 
     # Define JSON schema for response
     schema = Schema(
-        name="GrammaticalGenderGeneration",
-        description=f"Determine grammatical gender for {language_name} nouns",
+        name="AuxiliaryVerbClassification",
+        description=f"Classify auxiliary verb for {language_name} compound tenses",
         properties={
-            "gender": SchemaProperty(
+            "auxiliary_verb": SchemaProperty(
                 "string",
-                f"The grammatical gender: {valid_genders}",
-                enum=list(gender_config["genders"]),
+                f"The auxiliary verb: {valid_auxiliaries}",
+                enum=list(aux_config["auxiliaries"]),
             ),
-            "explanation": SchemaProperty(
-                "string", "Brief explanation of why this gender is correct"
-            ),
+            "explanation": SchemaProperty("string", "Brief explanation if notable"),
             "confidence": SchemaProperty(
                 "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
             ),
@@ -94,24 +90,23 @@ def generate_grammatical_gender(
         client = agent.get_llm_client()
         response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
 
-        # Extract structured data
         if response.structured_data:
             result = response.structured_data
         else:
             logger.error(f"No structured data received for '{lemma.lemma_text}'")
             return None, None, 0.0
 
-        gender = result.get("gender", None)
+        auxiliary = result.get("auxiliary_verb", None)
         explanation = result.get("explanation", "")
         confidence = float(result.get("confidence", 0.5))
 
         logger.info(
-            f"Generated gender for '{lemma.lemma_text}' ({target_translation}): "
-            f"{gender} (confidence: {confidence:.2f})"
+            f"Generated auxiliary for '{lemma.lemma_text}' ({target_translation}): "
+            f"{auxiliary} (confidence: {confidence:.2f})"
         )
 
-        return gender, explanation, confidence
+        return auxiliary, explanation, confidence
 
     except Exception as e:
-        logger.error(f"Failed to generate gender for '{lemma.lemma_text}': {e}")
+        logger.error(f"Failed to generate auxiliary for '{lemma.lemma_text}': {e}")
         return None, None, 0.0

@@ -40,17 +40,12 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
-# Import from modular structure
-from agents.lape.agent import LapeAgent
 from agents.lape.cli import main
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-
-# Re-export for backward compatibility with Barsukas API
-__all__ = ["LapeAgent", "main"]
 
 if __name__ == "__main__":
     main()

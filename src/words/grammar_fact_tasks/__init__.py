@@ -1,6 +1,6 @@
 """Task modules for individual grammar fact generators."""
 
-from agents.lape.tasks import (
+from words.grammar_fact_tasks import (
     animacy,
     auxiliary_verb,
     countability,

@@ -21,7 +21,7 @@ import sys
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, cast
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -43,7 +43,7 @@ from agents.common.common_args import (
     confirm_operation,
     get_data_source_config,
 )
-from agents.common.lemma_selection import (
+from words.lemma_selection import (
     LemmaQueryBuilder,
     apply_limit_and_sample_rate,
     get_lemmas_for_agent,
@@ -155,7 +155,7 @@ class VieversysAgent:
         Returns:
             Translation text or None if not available
         """
-        return get_translation(session, lemma, language_code)
+        return cast(Optional[str], get_translation(session, lemma, language_code))
 
     def _upload_to_staging_path(
         self,

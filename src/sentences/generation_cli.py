@@ -25,7 +25,7 @@ from agents.common.common_args import (
     add_llm_args,
     get_data_source_config,
 )
-from agents.common.lemma_selection import get_lemmas_for_agent
+from words.lemma_selection import get_lemmas_for_agent
 from sentences.patterns.simple_patterns import SIMPLE_PATTERNS
 from storage.models.schema import Lemma
 from workqueue.task_queue import TaskType, enqueue_task
@@ -135,7 +135,7 @@ def _get_llm_lemmas(service: SentenceGenerationService, args: argparse.Namespace
     session = service.get_session()
     try:
         if args.level:
-            from agents.common.lemma_selection import LemmaQueryBuilder, apply_limit_and_sample_rate
+            from words.lemma_selection import LemmaQueryBuilder, apply_limit_and_sample_rate
 
             query = (
                 LemmaQueryBuilder(session)
@@ -458,7 +458,7 @@ def main() -> int:
                     # Check if the lemma exists but is unsupported POS type
                     session = service.get_session()
                     try:
-                        from agents.common.lemma_selection import get_lemmas_for_agent
+                        from words.lemma_selection import get_lemmas_for_agent
 
                         all_lemmas = get_lemmas_for_agent(session, args)
                         if all_lemmas:

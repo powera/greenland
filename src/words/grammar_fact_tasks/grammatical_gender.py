@@ -1,5 +1,5 @@
 """
-Verb Reflexivity Task - Classify verbs by reflexivity.
+Grammatical Gender Task - Determine grammatical gender for nouns.
 """
 
 import logging
@@ -12,48 +12,50 @@ from clients.types import Schema, SchemaProperty
 from storage.models.schema import Lemma
 
 if TYPE_CHECKING:
-    from agents.lape.agent import LapeAgent
+    from words.grammar_facts import GrammarFactService
 
 logger = logging.getLogger(__name__)
 
 
-def generate_verb_reflexivity(
-    agent: "LapeAgent",
+def generate_grammatical_gender(
+    agent: "GrammarFactService",
     lemma: Lemma,
     target_translation: Optional[str],
     language_code: str,
     session: Optional[Session] = None,
 ) -> Tuple[Optional[str], Optional[str], float]:
     """
-    Generate verb reflexivity classification using LLM.
+    Generate grammatical gender for a noun using LLM.
 
     Args:
         agent: The LapeAgent instance
         lemma: The Lemma object
         target_translation: The translation in the target language
-        language_code: Target language code
+        language_code: Target language code (e.g., 'fr', 'lt', 'de')
         session: Database session (optional)
 
     Returns:
-        Tuple of (reflexivity, explanation, confidence)
+        Tuple of (gender, explanation, confidence)
     """
-    if lemma.pos_type != "verb":
-        logger.warning(f"Lemma '{lemma.lemma_text}' is not a verb, skipping reflexivity")
+    if lemma.pos_type != "noun":
+        logger.warning(f"Lemma '{lemma.lemma_text}' is not a noun, skipping gender generation")
         return None, None, 0.0
 
-    if language_code not in agent.REFLEXIVITY_SYSTEMS:
-        logger.error(f"Language '{language_code}' does not have reflexivity configuration")
+    if language_code not in agent.GENDER_SYSTEMS:
+        logger.error(f"Language '{language_code}' does not have a configured gender system")
         return None, None, 0.0
 
-    reflex_config = agent.REFLEXIVITY_SYSTEMS[language_code]
-    language_name = reflex_config["name"]
+    gender_config = agent.GENDER_SYSTEMS[language_code]
+    language_name = gender_config["name"]
+    valid_genders = ", ".join(gender_config["genders"])
+    gender_system = gender_config["description"]
 
     # Load prompts
     try:
-        context = util.prompt_loader.get_context("grammar", "reflexivity")
-        prompt_template = util.prompt_loader.get_prompt("grammar", "reflexivity")
+        context = util.prompt_loader.get_context("grammar", "gender")
+        prompt_template = util.prompt_loader.get_prompt("grammar", "gender")
     except Exception as e:
-        logger.error(f"Failed to load verb_reflexivity prompts: {e}")
+        logger.error(f"Failed to load grammatical_gender prompts: {e}")
         return None, None, 0.0
 
     # Format prompt
@@ -64,20 +66,22 @@ def generate_verb_reflexivity(
         definition=lemma.definition_text or "N/A",
         language_name=language_name,
         language_code=language_code,
+        gender_system=gender_system,
+        valid_genders=valid_genders,
     )
 
     # Define JSON schema for response
     schema = Schema(
-        name="VerbReflexivityClassification",
-        description=f"Classify verb reflexivity for {language_name}",
+        name="GrammaticalGenderGeneration",
+        description=f"Determine grammatical gender for {language_name} nouns",
         properties={
-            "reflexivity": SchemaProperty(
+            "gender": SchemaProperty(
                 "string",
-                "The reflexivity classification",
-                enum=list(reflex_config["values"]),
+                f"The grammatical gender: {valid_genders}",
+                enum=list(gender_config["genders"]),
             ),
             "explanation": SchemaProperty(
-                "string", "Brief explanation with reflexive form if applicable"
+                "string", "Brief explanation of why this gender is correct"
             ),
             "confidence": SchemaProperty(
                 "number", "Confidence score 0.0-1.0", minimum=0.0, maximum=1.0
@@ -90,23 +94,24 @@ def generate_verb_reflexivity(
         client = agent.get_llm_client()
         response = client.generate_chat(prompt=prompt_text, json_schema=schema, context=context)
 
+        # Extract structured data
         if response.structured_data:
             result = response.structured_data
         else:
             logger.error(f"No structured data received for '{lemma.lemma_text}'")
             return None, None, 0.0
 
-        reflexivity = result.get("reflexivity", None)
+        gender = result.get("gender", None)
         explanation = result.get("explanation", "")
         confidence = float(result.get("confidence", 0.5))
 
         logger.info(
-            f"Generated reflexivity for '{lemma.lemma_text}' ({target_translation}): "
-            f"{reflexivity} (confidence: {confidence:.2f})"
+            f"Generated gender for '{lemma.lemma_text}' ({target_translation}): "
+            f"{gender} (confidence: {confidence:.2f})"
         )
 
-        return reflexivity, explanation, confidence
+        return gender, explanation, confidence
 
     except Exception as e:
-        logger.error(f"Failed to generate reflexivity for '{lemma.lemma_text}': {e}")
+        logger.error(f"Failed to generate gender for '{lemma.lemma_text}': {e}")
         return None, None, 0.0

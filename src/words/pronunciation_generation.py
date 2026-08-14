@@ -1,18 +1,17 @@
-"""Workqueue handler for pronunciation tasks.
+"""Word pronunciation generation workflows.
 
-This module implements the core pronunciation generation logic that is shared
-between the Barsukas task worker and the PapugaAgent CLI.
+This module implements reusable pronunciation generation logic.
 """
 
 from __future__ import annotations
 
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, cast
 
 from sqlalchemy import case
 from sqlalchemy.orm import Session
 
-from workqueue.tools import build_default_config, get_lemma_or_raise
+from words.workflow_support import build_default_config, get_lemma_or_raise
 import constants
 from langtools.form_registry import FORM_SPECS
 from storage.backend.config import DataSourceConfig
@@ -51,8 +50,8 @@ _BASE_FORM_FIELDS: Dict[str, str] = {
 def _get_default_base_grammatical_form(pos_type: str, lang_code: str) -> str:
     """Return the canonical grammatical-form label for a synthetic base form.
 
-    Resolves through :data:`FORM_SPECS` so the synthetic row papuga creates
-    carries the same label the forms agent would later generate (e.g.
+    Resolves through :data:`FORM_SPECS` so the synthetic row this workflow creates
+    carries the same label the forms workflow would later generate (e.g.
     ``noun/en_singular``) rather than a bare ``singular``, which produced a
     duplicate row for every lemma.  Falls back to ``"lemma"`` when the
     language has no spec for *pos_type*.
@@ -64,7 +63,7 @@ def _get_default_base_grammatical_form(pos_type: str, lang_code: str) -> str:
     if spec is None:
         return "lemma"
     form = spec.form_mapping.get(field)
-    return form.value if form is not None else "lemma"
+    return cast(str, form.value) if form is not None else "lemma"
 
 
 def get_example_sentence_for_lemma(session: Session, lemma_id: int) -> Optional[str]:
@@ -145,8 +144,7 @@ def generate_pronunciations_for_lemma(
     """
     Generate pronunciations for all forms of a lemma missing them.
 
-    This is the core pronunciation generation logic shared by both the workqueue
-    handler and the PapugaAgent.
+    This is the core pronunciation generation logic shared by workers and CLIs.
 
     Args:
         session: Database session

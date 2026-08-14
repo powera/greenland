@@ -12,13 +12,13 @@ from clients.types import Schema, SchemaProperty
 from storage.models.schema import Lemma
 
 if TYPE_CHECKING:
-    from agents.lape.agent import LapeAgent
+    from words.grammar_facts import GrammarFactService
 
 logger = logging.getLogger(__name__)
 
 
 def generate_declension_class(
-    agent: "LapeAgent",
+    agent: "GrammarFactService",
     lemma: Lemma,
     target_translation: Optional[str],
     language_code: str,

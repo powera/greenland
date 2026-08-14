@@ -29,7 +29,7 @@ from agents.common.common_args import (
     parse_level_arg,
     validate_cache_args,
 )
-from agents.common.lemma_selection import get_lemmas_for_agent
+from words.lemma_selection import get_lemmas_for_agent
 from workqueue.task_queue import TaskStatus, TaskType, enqueue_task, get_active_task
 from storage.models.schema import BarsukasTask
 
@@ -347,7 +347,7 @@ def main() -> None:
     """Main entry point for the voras agent."""
     # Import here to avoid circular imports
     from agents.voras import cli_display
-    from agents.voras.agent import VorasAgent
+    from words.translation_workflow import TranslationWorkflow
     from storage.models.schema import Lemma
 
     parser = get_argument_parser()
@@ -367,7 +367,7 @@ def main() -> None:
     config = get_data_source_config(args)
 
     # Create agent with unified configuration
-    agent = VorasAgent(config=config)
+    agent = TranslationWorkflow(config=config)
 
     # Determine mode from flags (default to coverage if none specified)
     if args.populate:

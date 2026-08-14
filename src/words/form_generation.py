@@ -1,7 +1,6 @@
-"""Workqueue handler for grammatical forms tasks.
+"""Word-form generation workflows.
 
-This module implements the core form generation logic that is shared
-between the Barsukas task worker and the VilkasAgent CLI.
+This module implements reusable word-form generation logic.
 """
 
 from __future__ import annotations
@@ -11,7 +10,7 @@ from typing import Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
-from workqueue.tools import build_default_config, get_lemma_or_raise
+from words.workflow_support import build_default_config, get_lemma_or_raise
 from storage.backend.config import DataSourceConfig
 from storage.models.schema import Lemma, LemmaTranslation
 from storage.translation_helpers import LANGUAGE_FIELDS, get_translation

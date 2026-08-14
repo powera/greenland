@@ -1,4 +1,4 @@
-"""Canonical pipeline ordering for Barsukas agents.
+"""Canonical pipeline ordering for Barsukas tasks.
 
 This module defines the standard processing order for lemma tasks in the workqueue.
 When multiple tasks for the same lemma are enqueued, they should execute in this order
@@ -14,34 +14,34 @@ from typing import Dict, Optional
 # Mapping from task_type to pipeline step number
 # Lower numbers execute first. Tasks not in this mapping have no ordering constraint.
 TASK_PIPELINE_ORDER: Dict[str, int] = {
-    # Step 1: LOKYS - Validate English Lemma (no workqueue task yet)
-    # Step 2: VORAS - Generate Translations
+    # Step 1: Validate English lemma (no workqueue task yet)
+    # Step 2: Generate translations
     "words.translations": 2,
     "words.translations.regenerate": 2,
     "add_missing_translations": 2,
-    # Step 3: VILKAS - Generate Word Forms
+    # Step 3: Generate word forms
     "words.forms": 3,
     "generate_forms": 3,
-    # Step 4: PAPUGA - Generate Pronunciations
+    # Step 4: Generate pronunciations
     "words.pronunciations": 4,
     "generate_pronunciations": 4,
-    # Step 5: ŠERNAS - Generate Synonyms
+    # Step 5: Generate synonyms
     "words.synonyms": 5,
     "generate_synonyms": 5,
-    # Step 6: WORD2VEC - Refresh semantic embeddings
+    # Step 6: Refresh semantic embeddings
     "words.embeddings": 6,
     "word2vec_refresh_embeddings": 6,
-    # Step 6: LAPE - Generate Grammar Facts
+    # Step 6: Generate grammar facts
     "words.grammar_facts": 6,
     "generate_grammar_fact": 6,
-    # Step 8: BUIVOLAS - Generate Example Sentences (no workqueue task yet)
-    # Step 8: ŽVIRBLIS - Translate Sentences
+    # Step 8: Generate example sentences (no workqueue task yet)
+    # Step 8: Translate sentences
     "sentences.translate": 8,
     "translate_sentence": 8,
-    # Step 9: VIEVERSYS - Generate Audio
+    # Step 9: Generate audio
     "audio.generate.lemma": 9,
     "generate_audio": 9,
-    # Step 10: BEBRAS - Final Integrity Check (no workqueue task yet)
+    # Step 10: Final integrity check (no workqueue task yet)
     #
     # sentences.import is deliberately absent. has_earlier_pending_task() only
     # orders tasks whose target_type is "lemma", so a sentence entry here would

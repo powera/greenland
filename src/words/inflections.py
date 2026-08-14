@@ -1,5 +1,5 @@
 """
-Vilkas - Multi-language Word Forms Checker Agent
+Multi-language Word Form Checking and Generation Workflows
 
 ⚠️  IMPORTANT: This agent has a custom Barsukas API in src/barsukas/routes/agents.py
     If you modify the public interface of this agent, you MUST update:
@@ -10,7 +10,6 @@ This agent runs autonomously to check for the presence of word forms
 across multiple languages in the database. It identifies lemmas that should
 have derivative forms but don't, and reports on data quality issues.
 
-"Vilkas" means "wolf" in Lithuanian - a watchful guardian of the word database.
 
 Supported languages and forms:
 - Lithuanian (lt): noun declensions (7 cases), verb conjugations, adjective forms, adverb forms
@@ -24,10 +23,10 @@ Supported languages and forms:
 import logging
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 import constants
-from agents.common.lemma_selection import find_lemma_by_guid
+from words.lemma_selection import find_lemma_by_guid
 from clients.barsukas_cache import BarsukasCacheClient
 from sqlalchemy.orm import Session
 from storage.backend import create_session as create_backend_session
@@ -45,12 +44,12 @@ from wordfreq.translation.generate_forms_tasks import get_task_key, process_lemm
 logger = logging.getLogger(__name__)
 
 
-class VilkasAgent:
-    """Agent for checking word forms across multiple languages in the database."""
+class InflectionService:
+    """Service for checking word inflections across multiple languages."""
 
     def __init__(self, config: DataSourceConfig):
         """
-        Initialize the Vilkas agent.
+        Initialize the word-form service.
 
         Args:
             config: DataSourceConfig with model, debug, and backend settings (required)
@@ -271,7 +270,7 @@ class VilkasAgent:
                 return False
 
             client = client or LinguisticClient(config=self.config)
-            return process_lemma_for_task(task_key, lemma.id, self.config, client)
+            return cast(bool, process_lemma_for_task(task_key, lemma.id, self.config, client))
         finally:
             session.close()
 
@@ -292,7 +291,7 @@ class VilkasAgent:
         session = self.get_session()
         try:
             # Find verbs with translation in the target language
-            from agents.common.lemma_selection import LemmaQueryBuilder
+            from words.lemma_selection import LemmaQueryBuilder
 
             query_builder = LemmaQueryBuilder(session).filter_custom(
                 lambda q: q.filter(Lemma.pos_type == "verb")
@@ -744,7 +743,7 @@ class VilkasAgent:
 
         # Print summary
         logger.info("=" * 80)
-        logger.info("VILKAS AGENT REPORT - Lithuanian Word Forms Check")
+        logger.info("WORD FORM COVERAGE REPORT")
         logger.info("=" * 80)
         logger.info(f"Timestamp: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         logger.info(f"Duration: {duration:.2f} seconds")

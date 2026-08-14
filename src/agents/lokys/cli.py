@@ -18,12 +18,12 @@ from agents.common.common_args import (
     confirm_operation,
     get_data_source_config,
 )
-from agents.common.lemma_selection import (
+from words.lemma_selection import (
     LemmaQueryBuilder,
     count_for_confirmation,
     get_lemmas_for_agent,
 )
-from agents.lokys.agent import LokysAgent
+from words.validation import LemmaValidationService
 from agents.lokys.display import (
     display_definition_validation_result,
     display_disambiguation_validation_result,
@@ -81,7 +81,7 @@ def main() -> None:
     config = get_data_source_config(args)
 
     # Create agent with config
-    agent = LokysAgent(config=config)
+    agent = LemmaValidationService(config=config)
 
     # Get lemmas to process (either single lemma from --guid or batch)
     session = agent.get_session()

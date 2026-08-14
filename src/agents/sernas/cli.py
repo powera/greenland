@@ -150,7 +150,7 @@ def enqueue_sernas_work(
 def main() -> None:
     """Main entry point for the šernas agent."""
     from agents.common.cli_display import display_language_header
-    from agents.common.lemma_selection import get_lemmas_for_agent
+    from words.lemma_selection import get_lemmas_for_agent
     from agents.sernas.agent import SernasAgent
     from agents.sernas.cli_display import display_batch_results
     from storage.translation_helpers import (

@@ -21,7 +21,7 @@ from storage.backend import create_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.crud.derivative_form import add_derivative_form
 from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
-from workqueue.handlers.papuga import _get_default_base_grammatical_form
+from words.pronunciation_generation import _get_default_base_grammatical_form
 
 BATCH_SIZE = 100
 
@@ -91,7 +91,7 @@ def backfill_base_forms_from_translations(
                 )
                 continue
 
-            grammatical_form = _get_default_base_grammatical_form(lemma.pos_type)
+            grammatical_form = _get_default_base_grammatical_form(lemma.pos_type, lt.language_code)
             print(
                 f"  {'DRY ' if dry_run else ''}CREATE lemma={lemma.lemma_text!r} "
                 f"lang={lt.language_code} form={lt.translation!r} "

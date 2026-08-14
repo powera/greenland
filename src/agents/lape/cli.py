@@ -24,8 +24,8 @@ from agents.common.common_args import (
     add_pos_type_args,
     get_data_source_config,
 )
-from agents.common.lemma_selection import get_lemmas_for_agent
-from agents.lape.agent import LapeAgent
+from words.grammar_facts import GrammarFactService
+from words.lemma_selection import get_lemmas_for_agent
 from workqueue.task_queue import TaskStatus, TaskType, enqueue_task, get_active_task
 from storage.models.schema import BarsukasTask
 
@@ -110,12 +110,12 @@ Task presets:
     task_group = parser.add_mutually_exclusive_group(required=True)
     task_group.add_argument(
         "--fact-type",
-        choices=LapeAgent.SUPPORTED_FACT_TYPES.keys(),
+        choices=GrammarFactService.SUPPORTED_FACT_TYPES.keys(),
         help="Type of grammar fact to generate",
     )
     task_group.add_argument(
         "--task",
-        choices=LapeAgent.TASK_PRESETS.keys(),
+        choices=GrammarFactService.TASK_PRESETS.keys(),
         help="Run a grouped task preset that maps to multiple fact types",
     )
     parser.add_argument("--limit", type=int, help="Maximum number of lemmas to process")
@@ -163,7 +163,7 @@ Task presets:
 
 
 def enqueue_grammar_fact_work(
-    agent: LapeAgent,
+    agent: GrammarFactService,
     session: Session,
     lemmas: List[Lemma],
     fact_types_by_language: Dict[str, List[str]],
@@ -190,7 +190,7 @@ def enqueue_grammar_fact_work(
 
     for language_code, fact_types in fact_types_by_language.items():
         for fact_type in fact_types:
-            fact_config = LapeAgent.SUPPORTED_FACT_TYPES[fact_type]
+            fact_config = GrammarFactService.SUPPORTED_FACT_TYPES[fact_type]
             required_pos = fact_config["required_pos"]
 
             for lemma in lemmas:
@@ -276,7 +276,7 @@ def main() -> None:
     config = get_data_source_config(args)
 
     # Create agent
-    agent = LapeAgent(config=config)
+    agent = GrammarFactService(config=config)
 
     # Check required arguments
     if not args.languages:
@@ -291,7 +291,7 @@ def main() -> None:
     if explicit_fact_type:
         fact_types_to_run = [args.fact_type]
     else:
-        fact_types_to_run = LapeAgent.TASK_PRESETS[args.task]
+        fact_types_to_run = GrammarFactService.TASK_PRESETS[args.task]
 
     # Build fact_types_by_language map
     fact_types_by_language = {}
@@ -299,7 +299,7 @@ def main() -> None:
         applicable_fact_types = [
             fact_type
             for fact_type in fact_types_to_run
-            if language_code in LapeAgent.SUPPORTED_FACT_TYPES[fact_type]["languages"]
+            if language_code in GrammarFactService.SUPPORTED_FACT_TYPES[fact_type]["languages"]
         ]
 
         if explicit_fact_type and not applicable_fact_types:
@@ -349,7 +349,7 @@ def main() -> None:
         try:
             for language_code, applicable_fact_types in fact_types_by_language.items():
                 for fact_type in applicable_fact_types:
-                    fact_config = LapeAgent.SUPPORTED_FACT_TYPES[fact_type]
+                    fact_config = GrammarFactService.SUPPORTED_FACT_TYPES[fact_type]
                     required_pos = fact_config["required_pos"]
 
                     # Filter lemmas by POS type

@@ -1,5 +1,5 @@
 """
-Lokys - English Lemma Validation Agent
+English Lemma Validation Workflows
 
 ⚠️  IMPORTANT: This agent has a custom Barsukas API in src/barsukas/routes/agents.py
     If you modify the public interface of this agent, you MUST update:
@@ -16,15 +16,14 @@ This agent runs autonomously to validate English-language properties:
 4. Lemmas are properly disambiguated when English polysemy requires it
 
 Note: The base concept label/definition can come from base.json inputs and may
-not be English. LOKYS focuses on populating and validating the English lemma
+not be English. This service focuses on populating and validating the English lemma
 text and definition when they are missing or need correction.
 
-"Lokys" means "bear" in Lithuanian - thorough and careful in checking quality.
 """
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from sqlalchemy.orm import Session
 from storage.backend import create_session as create_backend_session
@@ -42,14 +41,14 @@ from wordfreq.tools.llm_validators import (
 logger = logging.getLogger(__name__)
 
 
-class LokysAgent:
-    """Agent for validating English lemma forms and properties."""
+class LemmaValidationService:
+    """Service for validating English lemma forms and properties."""
 
     disambiguation_confidence_threshold = 0.7
 
     def __init__(self, config: DataSourceConfig):
         """
-        Initialize the Lokys agent.
+        Initialize the lemma validation service.
 
         Args:
             config: DataSourceConfig with model, debug, and backend settings (required)
@@ -509,7 +508,7 @@ class LokysAgent:
             pos_type=lemma.pos_type,
             model=self.config.model,
         )
-        return result
+        return cast(Dict[str, Any], result)
 
     def check_single_disambiguation(self, lemma: Lemma, session: Session) -> Dict[str, Any]:
         """
@@ -685,7 +684,7 @@ class LokysAgent:
     ) -> None:
         """Print a summary of the check results."""
         logger.info("=" * 80)
-        logger.info("LOKYS AGENT REPORT - English Lemma Validation")
+        logger.info("LEMMA VALIDATION REPORT")
         logger.info("=" * 80)
         logger.info(f"Timestamp: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         logger.info(f"Model: {results['model']}")

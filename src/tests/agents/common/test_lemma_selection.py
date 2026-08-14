@@ -9,7 +9,7 @@ requiring a full database. Uses mocking to test query building logic.
 import unittest
 from unittest.mock import MagicMock, Mock, call, patch
 
-from agents.common.lemma_selection import (
+from words.lemma_selection import (
     LemmaNotFoundError,
     LemmaQueryBuilder,
     apply_limit_and_sample_rate,
@@ -334,7 +334,7 @@ class TestCountForConfirmation(unittest.TestCase):
 class TestGetLemmasForProcessing(unittest.TestCase):
     """Test the high-level get_lemmas_for_processing function."""
 
-    @patch("agents.common.lemma_selection.find_lemma_by_guid")
+    @patch("words.lemma_selection.find_lemma_by_guid")
     def test_single_lemma_by_guid(self, mock_find):
         """Test getting a single lemma by GUID."""
         session = Mock()

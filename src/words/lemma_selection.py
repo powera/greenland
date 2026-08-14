@@ -1,4 +1,4 @@
-"""Standardized lemma selection and filtering utilities for agents.
+"""Standardized lemma selection and filtering utilities for workflows.
 
 This module provides tested, reusable functions for selecting which lemmas
 to process in agent scripts. It standardizes common patterns like:
@@ -9,7 +9,7 @@ to process in agent scripts. It standardizes common patterns like:
 - Limit and sample-rate application
 
 Usage:
-    from agents.lemma_selection import (
+    from words.lemma_selection import (
         find_lemma_by_guid,
         LemmaQueryBuilder,
         apply_limit_and_sample_rate,

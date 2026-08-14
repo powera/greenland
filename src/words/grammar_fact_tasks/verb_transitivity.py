@@ -12,13 +12,13 @@ from clients.types import Schema, SchemaProperty
 from storage.models.schema import Lemma
 
 if TYPE_CHECKING:
-    from agents.lape.agent import LapeAgent
+    from words.grammar_facts import GrammarFactService
 
 logger = logging.getLogger(__name__)
 
 
 def generate_verb_transitivity(
-    agent: "LapeAgent", lemma: Lemma, session: Optional[Session] = None
+    agent: "GrammarFactService", lemma: Lemma, session: Optional[Session] = None
 ) -> Tuple[Optional[str], Optional[str], float]:
     """
     Generate verb transitivity classification using LLM.

@@ -1,19 +1,12 @@
 """
-Voras Agent - Coverage Reporting
+Word Translation Coverage Reporting
 
 This module handles translation coverage reporting across languages.
 """
 
 import logging
-import sys
 from datetime import datetime
-from pathlib import Path
 from typing import Any, Dict, Optional
-
-# Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
-if GREENLAND_SRC_PATH not in sys.path:
-    sys.path.insert(0, GREENLAND_SRC_PATH)
 
 from storage.models.schema import Lemma
 from storage.translation_helpers import LANGUAGE_FIELDS, get_language_name, get_translation
@@ -324,7 +317,7 @@ def check_difficulty_level_coverage(
 def print_summary(results: Dict[str, Any], start_time: datetime, duration: float) -> None:
     """Print a summary of the check results."""
     logger.info("=" * 80)
-    logger.info("VORAS AGENT REPORT - Multi-lingual Translation Coverage")
+    logger.info("WORD TRANSLATION COVERAGE REPORT")
     logger.info("=" * 80)
     logger.info(f"Timestamp: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
     logger.info(f"Duration: {duration:.2f} seconds")

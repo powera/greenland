@@ -1,7 +1,6 @@
-"""Workqueue handler for grammar fact generation tasks.
+"""Grammar-fact generation workflows.
 
-This module implements the core grammar fact generation logic that is shared
-between the Barsukas task worker and the LapeAgent CLI.
+This module implements reusable grammar-fact generation logic.
 """
 
 from __future__ import annotations
@@ -9,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, Optional, Tuple
 
-from workqueue.tools import build_default_config, get_lemma_or_raise
+from words.workflow_support import build_default_config, get_lemma_or_raise
 import constants
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
@@ -317,12 +316,12 @@ def generate_grammar_fact_for_lemma(
             "language_code": language_code,
         }
 
-    # Generate through the Lape dispatcher so workqueue and CLI stay aligned.
+    # Generate through the shared dispatcher so workqueue and CLI stay aligned.
     assert translation is not None
-    from agents.lape.agent import LapeAgent
+    from words.grammar_facts import GrammarFactService
 
-    agent = LapeAgent(config=config)
-    fact_value, notes, confidence = agent.generate_fact(
+    service = GrammarFactService(config=config)
+    fact_value, notes, confidence = service.generate_fact(
         fact_type=fact_type,
         lemma=lemma,
         language_code=language_code,

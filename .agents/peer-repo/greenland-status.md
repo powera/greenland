@@ -27,12 +27,13 @@ The system centers around a SQLite database (`data/wordfreq/linguistics.sqlite`)
 Greenland uses a collection of **specialized processing agents** (named after Lithuanian animals) that perform bulk operations against the database, typically involving LLM calls for linguistic validation and generation:
 
 **Core Validation & Processing:**
-- **lokys** - English lemma validation (forms and definitions)
+- **lokys** - Thin CLI wrapper for `words.validation`
 - **dramblys** - Missing word detection and processing
-- **vilkas** - Word forms generation (declensions, conjugations)
-- **voras** - Multi-lingual translation management
-- **papuga** - Pronunciation (IPA) validation and generation
-- **sernas** - Synonym and alternative form generation
+- **vilkas** - Thin CLI wrapper for `words.inflections`
+- **voras** - Thin CLI wrapper for `words.translation` / `words.translation_workflow`
+- **papuga** - Thin CLI wrapper for `words.pronunciation`
+- **sernas** - Thin CLI wrapper for `words.synonyms`
+- **lape** - Thin CLI wrapper for `words.grammar_facts`
 
 **Audio Generation:**
 - **strazdas** - eSpeak-NG audio generation (open-source TTS)
@@ -55,6 +56,10 @@ capability-named deduplication keys. New word payloads use `lemma_id`,
 `language_code` for a single language, and `languages` for a set; workers retain
 older animal task names and `lang_code` payloads only for persisted-work
 compatibility.
+
+Reusable lemma enrichment logic lives under `src/words/`. Animal-named modules
+under `src/agents/` contain command-line orchestration and display code only;
+Barsukas and canonical workqueue handlers import the domain modules directly.
 
 Agent CLIs use shared argument helpers from `src/agents/common/common_args.py`.
 Sentence finders enqueue by default and accept `--execute-inline` for deliberate

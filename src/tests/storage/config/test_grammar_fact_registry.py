@@ -1,17 +1,17 @@
-from agents.lape.agent import LapeAgent
+from words.grammar_facts import GrammarFactService
 from storage.config.grammar_fact_registry import (
     VERB_FORM_OVERRIDE_PREFIX,
     get_generatable_fact_definitions,
     is_release_grammar_fact_type,
     legacy_supported_fact_types,
 )
-from workqueue.handlers.lape import SUPPORTED_FACT_TYPES
+from words.grammar_fact_generation import SUPPORTED_FACT_TYPES
 
 
 def test_lape_and_workqueue_share_supported_fact_registry() -> None:
     expected = legacy_supported_fact_types()
 
-    assert LapeAgent.SUPPORTED_FACT_TYPES == expected
+    assert GrammarFactService.SUPPORTED_FACT_TYPES == expected
     assert SUPPORTED_FACT_TYPES == expected
     assert set(expected) == set(get_generatable_fact_definitions())
     assert "ru" not in expected["grammatical_gender"]["languages"]

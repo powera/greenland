@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from workqueue.handlers.lape import generate_grammar_fact_for_lemma
+from words.grammar_fact_generation import generate_grammar_fact_for_lemma
 from workqueue.tools import get_lemma_or_raise, workqueue_payload_handler
 
 

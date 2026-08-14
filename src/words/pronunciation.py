@@ -1,5 +1,5 @@
 """
-Papuga - Pronunciation Validation and Generation Agent
+Pronunciation Validation and Generation Workflows
 
 This agent runs autonomously to validate and generate pronunciations:
 1. Validate existing IPA pronunciations for correctness
@@ -7,7 +7,6 @@ This agent runs autonomously to validate and generate pronunciations:
 3. Generate missing pronunciations for derivative forms
 4. Ensure pronunciations follow proper conventions
 
-"Papuga" means "parrot" in Lithuanian - repeating sounds with perfect accuracy!
 """
 
 import logging
@@ -31,7 +30,7 @@ from storage.models.schema import (
     SentenceWord,
 )
 from storage.translation_helpers import get_translation_pronunciations
-from workqueue.handlers.papuga import generate_pronunciations_for_lemma
+from words.pronunciation_generation import generate_pronunciations_for_lemma
 from wordfreq.tools.llm_validators import (
     batch_generate_pronunciations,
     generate_pronunciation,
@@ -42,12 +41,12 @@ from wordfreq.tools.llm_validators import (
 logger = logging.getLogger(__name__)
 
 
-class PapugaAgent:
-    """Agent for validating and generating pronunciations."""
+class PronunciationService:
+    """Service for validating and generating pronunciations."""
 
     def __init__(self, config: DataSourceConfig):
         """
-        Initialize the Papuga agent.
+        Initialize the pronunciation service.
 
         Args:
             config: DataSourceConfig with model, debug, and backend settings (required)
@@ -870,7 +869,7 @@ class PapugaAgent:
     ) -> None:
         """Print a summary of the check results."""
         logger.info("=" * 80)
-        logger.info("PAPUGA AGENT REPORT - Pronunciation Validation")
+        logger.info("PRONUNCIATION VALIDATION REPORT")
         logger.info("=" * 80)
         logger.info(f"Timestamp: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         logger.info(f"Model: {results['model']}")

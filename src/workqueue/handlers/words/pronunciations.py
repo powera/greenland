@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from workqueue.handlers.papuga import generate_pronunciations_for_lemma
+from words.pronunciation_generation import generate_pronunciations_for_lemma
 from workqueue.tools import get_lemma_or_raise, workqueue_payload_handler
 
 

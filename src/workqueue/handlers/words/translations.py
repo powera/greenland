@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 import constants
-from agents.voras.agent import VorasAgent
 from barsukas.config import Config
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.crud.operation_log import log_operation
@@ -20,6 +19,7 @@ from storage.translation_helpers import (
     split_llm_language_batches,
 )
 from wordfreq.translation.client import LinguisticClient
+from words.translation_workflow import TranslationWorkflow
 from workqueue.tools import workqueue_payload_handler
 
 
@@ -66,7 +66,7 @@ def do_generate_missing_translations(
         reference_translation = lemma.lemma_text
 
     config = _build_config(model)
-    agent = VorasAgent(config=config)
+    workflow = TranslationWorkflow(config=config)
     client = LinguisticClient(
         model=config.model or "",
         db_path=config.sqlite_path or "",
@@ -106,7 +106,7 @@ def do_generate_missing_translations(
                 translation_text = response_value.strip() if isinstance(response_value, str) else ""
             if translation_text:
                 translation_metadata = translation_metadata_by_lang_code.get(language_code, {})
-                agent.set_translation(
+                workflow.set_translation(
                     session,
                     lemma,
                     language_code,
@@ -140,7 +140,7 @@ def do_regenerate_translations(session: Any, lemma_id: int, **_: Any) -> str:
         raise ValueError(f"Lemma {lemma_id} not found")
 
     config = _build_config()
-    agent = VorasAgent(config=config)
+    workflow = TranslationWorkflow(config=config)
     client = LinguisticClient(
         model=config.model or "",
         db_path=config.sqlite_path or "",
@@ -187,7 +187,7 @@ def do_regenerate_translations(session: Any, lemma_id: int, **_: Any) -> str:
         if llm_field:
             translation_text = translations.get(llm_field, "").strip()
             if translation_text:
-                agent.set_translation(session, lemma, language_code, translation_text)
+                workflow.set_translation(session, lemma, language_code, translation_text)
                 regenerated_count += 1
 
     log_operation(

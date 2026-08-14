@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from workqueue.handlers.vilkas import generate_forms_for_lemma
+from words.form_generation import generate_forms_for_lemma
 from workqueue.tools import get_lemma_or_raise, workqueue_payload_handler
 
 

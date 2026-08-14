@@ -22,7 +22,7 @@ from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
 
 import util.prompt_loader
-from agents.common.lemma_selection import LemmaQueryBuilder
+from words.lemma_selection import LemmaQueryBuilder
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from storage.backend import create_session as create_backend_session

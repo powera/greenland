@@ -1,7 +1,7 @@
 """
-LapeAgent - Core agent class for generating grammar facts.
+Grammar-fact generation workflows.
 
-This module contains the main LapeAgent class that coordinates grammar fact generation.
+This module contains the service that coordinates grammar-fact generation.
 The actual generation logic for each fact type is in the tasks/ subdirectory.
 """
 
@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
-from agents.lape.tasks import (
+from words.grammar_fact_tasks import (
     animacy,
     auxiliary_verb,
     countability,
@@ -37,8 +37,8 @@ from clients.unified_client import UnifiedLLMClient
 logger = logging.getLogger(__name__)
 
 
-class LapeAgent:
-    """Agent for generating grammar facts for lemmas."""
+class GrammarFactService:
+    """Service for generating grammar facts for lemmas."""
 
     # Language-specific gender systems configuration
     GENDER_SYSTEMS = {
@@ -142,7 +142,7 @@ class LapeAgent:
 
     def __init__(self, config: DataSourceConfig):
         """
-        Initialize the Lape agent.
+        Initialize the grammar-fact service.
 
         Args:
             config: DataSourceConfig with model, debug, and backend settings (required)

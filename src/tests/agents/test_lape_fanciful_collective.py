@@ -3,7 +3,7 @@
 from types import SimpleNamespace
 from typing import Any, Dict, Optional
 
-from agents.lape.tasks.fanciful_collective import generate_fanciful_collective
+from words.grammar_fact_tasks.fanciful_collective import generate_fanciful_collective
 from storage.models.schema import Lemma
 
 

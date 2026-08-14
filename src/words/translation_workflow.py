@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Voras - Multi-lingual Translation Validator and Populator
+Multi-lingual Translation Validation and Population Workflows
 
 ⚠️  IMPORTANT: This agent has a custom Barsukas API in src/barsukas/routes/agents.py
     If you modify the public interface of this agent, you MUST update:
@@ -13,27 +13,19 @@ This agent runs autonomously to:
 2. Report on translation coverage across all languages
 3. Generate missing translations using LLM
 
-"Voras" means "spider" in Lithuanian - weaving together the web of translations!
 """
 
 import json
 import logging
 import random
-import sys
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
-
-# Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
-if GREENLAND_SRC_PATH not in sys.path:
-    sys.path.insert(0, GREENLAND_SRC_PATH)
+from typing import Any, Dict, List, Optional, Union, cast
 
 import constants
-from agents.common.lemma_selection import LemmaQueryBuilder, apply_limit_and_sample_rate
+from words.lemma_selection import LemmaQueryBuilder, apply_limit_and_sample_rate
 
 # Import submodules
-from agents.voras import coverage
+from words import translation_coverage as coverage
 from clients.barsukas_cache import BarsukasCacheClient
 from clients.batch_queue import BatchRequestMetadata, get_batch_manager
 from storage.backend import create_session as create_backend_session
@@ -64,12 +56,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class VorasAgent:
-    """Agent for validating and populating multi-lingual translations."""
+class TranslationWorkflow:
+    """Service for validating and populating multi-lingual translations."""
 
     def __init__(self, config: DataSourceConfig):
         """
-        Initialize the Voras agent.
+        Initialize the translation workflow.
 
         Args:
             config: DataSourceConfig with model, debug, and backend settings (required)
@@ -118,7 +110,7 @@ class VorasAgent:
 
         Handles both Lemma table columns and LemmaTranslation table.
         """
-        return get_translation_helper(session, lemma, lang_code)
+        return cast(Optional[str], get_translation_helper(session, lemma, lang_code))
 
     def set_translation(
         self,
@@ -897,7 +889,9 @@ class VorasAgent:
         return results
 
     def submit_batch(
-        self, agent_name: str = "voras", metadata: Optional[Dict[str, str]] = None
+        self,
+        agent_name: str = "voras",
+        metadata: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         """Submit pending batch requests to OpenAI."""
         batch_manager = get_batch_manager(debug=self.debug)
