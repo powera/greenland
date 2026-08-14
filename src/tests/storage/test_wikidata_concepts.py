@@ -3,9 +3,10 @@ from __future__ import annotations
 from typing import Any, Dict, Optional
 
 import pytest
-from agents.vovere import VovereAgent, html_to_text
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+
+from concepts.generate.entry import ConceptEntryGenerator, html_to_text
 from storage.crud.concept import create_concept, get_wikidata_index, link_wikidata_concept
 from storage.models.concept import Base
 from storage.wikidata import (
@@ -565,7 +566,7 @@ def test_throttle_disabled_when_interval_is_zero(monkeypatch) -> None:  # type: 
 
 
 def test_vovere_skips_wikidata_generation_sources() -> None:
-    agent = VovereAgent.__new__(VovereAgent)
+    agent = ConceptEntryGenerator.__new__(ConceptEntryGenerator)
 
     messages = agent._build_source_messages(
         [
@@ -602,7 +603,7 @@ def test_vovere_html_to_text_removes_navigation_chrome() -> None:
 
 
 def test_vovere_uses_provided_source_text(monkeypatch) -> None:  # type: ignore[no-untyped-def]
-    agent = VovereAgent.__new__(VovereAgent)
+    agent = ConceptEntryGenerator.__new__(ConceptEntryGenerator)
     monkeypatch.setattr(agent, "fetch_source_text", lambda url: "fetched text")
 
     messages = agent._build_source_messages(
@@ -640,7 +641,7 @@ def test_parse_wikipedia_article_url_rejects_non_articles() -> None:
 
 
 def test_vovere_fetch_source_text_routes_wikipedia_through_parse_api(monkeypatch) -> None:  # type: ignore[no-untyped-def]
-    agent = VovereAgent.__new__(VovereAgent)
+    agent = ConceptEntryGenerator.__new__(ConceptEntryGenerator)
 
     def fake_wikipedia_source(url: str) -> Optional[Dict[str, Any]]:
         assert url == "https://en.wikipedia.org/wiki/Oprah_Winfrey"

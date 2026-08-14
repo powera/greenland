@@ -49,9 +49,11 @@ from agents.common.common_args import (
     get_data_source_config,
 )
 from clients.batch_queue import BatchRequestMetadata, get_batch_manager
+from concepts.generate.entry import ConceptEntryGenerator
+from concepts.pipeline import create_concept_from_qid
+from concepts.sub_concepts import file_sub_concept_from_qid
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
-from storage.concept_service import create_concept_from_qid, file_sub_concept_from_qid
 from storage.crud.concept import cache_wikidata_title
 from storage.models.concept import ALL_SUB_CONCEPT_CATEGORIES
 from storage.wikidata import fetch_wikidata_concept_seed, normalize_qid
@@ -87,12 +89,10 @@ class VoveraiteAgent:
 
         Imported lazily so resolve-only runs do not require the LLM client.
         """
-        from agents.vovere.vovere import VovereAgent
-
-        agent = VovereAgent(self.config)
+        generator = ConceptEntryGenerator(self.config)
 
         def generate(title: str, summary: str, sources: List[Dict[str, Any]]) -> str:
-            return agent.generate_body(title, summary, sources)
+            return generator.generate_body(title, summary, sources)
 
         return generate
 
@@ -154,10 +154,8 @@ class VoveraiteAgent:
         Returns:
             ``{"batch_id", "queued", "skipped"}`` describing what was submitted.
         """
-        from agents.vovere.vovere import VovereAgent
-
-        vovere = VovereAgent(self.config)
-        if not vovere.model:
+        generator = ConceptEntryGenerator(self.config)
+        if not generator.model:
             raise ValueError("A model is required to submit a batch (set --model).")
 
         batch_manager = get_batch_manager(debug=self.debug)
@@ -181,7 +179,7 @@ class VoveraiteAgent:
                 # Cache the qid<->title mapping regardless of batch success.
                 cache_wikidata_title(session, qid, seed.title)
 
-                request_body = vovere.build_request_body(
+                request_body = generator.build_request_body(
                     seed.title, seed.summary, list(seed.sources)
                 )
 
@@ -216,7 +214,7 @@ class VoveraiteAgent:
                             "summary": seed.summary,
                             "sources": list(seed.sources),
                         },
-                        "source_model": vovere.model,
+                        "source_model": generator.model,
                     },
                     ensure_ascii=False,
                 )
