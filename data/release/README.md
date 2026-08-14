@@ -41,6 +41,20 @@ facts, and synonym-class lexical variants for that language.
 
 ## Tools for Loading/Updating Data
 
+### Bootstrap SQLite from this release
+
+Use the administrative bootstrap script when creating a complete SQLite
+database from this directory. It refuses to replace a populated database unless
+`--force` is supplied.
+
+```bash
+PYTHONPATH=src python bootstrap_database.py \
+  --db-path /path/to/linguistics.sqlite
+```
+
+Pass `--release-only` to omit local word-frequency corpora, tier imports, and
+combined-rank calculation.
+
 ### Sync via Barsukas UI
 
 Use the **Barsukas web UI** to compare and sync data between data/release and SQLite:

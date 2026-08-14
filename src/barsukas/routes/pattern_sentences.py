@@ -49,7 +49,7 @@ def index() -> ResponseReturnValue:
 @bp.route("/generate-llm-guided", methods=["POST"])
 def generate_llm_guided() -> ResponseReturnValue:
     """Generate sentences using LLM or Guided mode for a specific lemma."""
-    from agents.buivolas import BuivolasAgent
+    from sentences.generation import SentenceGenerationService
     from barsukas.routes.agents import flash_and_log, log_and_flash_error
     from storage.backend import BackendType
     from storage.backend.config import DataSourceConfig
@@ -78,7 +78,7 @@ def generate_llm_guided() -> ResponseReturnValue:
             model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
-        agent = BuivolasAgent(config=config)
+        agent = SentenceGenerationService(config=config)
 
         # Generate sentences based on mode
         if mode == "guided":

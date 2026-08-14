@@ -21,6 +21,7 @@ from workqueue.handlers.words.translations import (
     handle_words_translations,
     handle_words_translations_regenerate,
 )
+from workqueue.handlers.words.verification import handle_words_translations_verify
 
 __all__ = [
     "do_rebuild_embeddings",
@@ -38,4 +39,5 @@ __all__ = [
     "handle_words_synonyms",
     "handle_words_translations",
     "handle_words_translations_regenerate",
+    "handle_words_translations_verify",
 ]

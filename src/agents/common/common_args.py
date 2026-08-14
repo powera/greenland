@@ -226,34 +226,25 @@ def add_backend_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser
     return parser
 
 
-def add_language_args(
-    parser: argparse.ArgumentParser, multiple: bool = False
-) -> argparse.ArgumentParser:
-    """Add language-related arguments.
+def add_language_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+    """Add the standard multi-language CLI argument.
 
     Args:
         parser: The argument parser to add arguments to
-        multiple: If True, allow multiple languages; if False, allow only one
-
     Returns:
         The same parser with language arguments added
     """
-    if multiple:
-        parser.add_argument(
-            "--language",
-            "--languages",
-            type=str,
-            nargs="+",
-            dest="languages",
-            help="Language code(s) to process (e.g., 'en', 'es', 'fr')",
-        )
-    else:
-        parser.add_argument(
-            "--language",
-            type=str,
-            default=None,
-            help="Language code to process (e.g., 'en', 'es', 'fr')",
-        )
+    # ``argparse`` accepts unique long-option prefixes by default, which would
+    # otherwise make the removed ``--language`` spelling continue to work as an
+    # abbreviation for ``--languages``.
+    parser.allow_abbrev = False
+    parser.add_argument(
+        "--languages",
+        type=str,
+        nargs="+",
+        dest="languages",
+        help="Language code(s) to process (e.g., 'en', 'es', 'fr')",
+    )
 
     return parser
 

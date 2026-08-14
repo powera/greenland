@@ -13,7 +13,6 @@ __all__ = [
     "bebras",
     "voras",
     "povas",
-    "pradzia",
     "papuga",
     "ungurys",
     "zvirblis",

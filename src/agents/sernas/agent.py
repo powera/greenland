@@ -15,9 +15,9 @@ module owns batch orchestration (find-missing, throttled fix loops, CLI glue).
 
 import logging
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
-from agents.common.lemma_selection import LemmaQueryBuilder, find_lemma_by_guid
+from words.lemma_selection import LemmaQueryBuilder, find_lemma_by_guid
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import DataSourceConfig
 from storage.crud.operation_log import has_synonym_scan_record
@@ -166,7 +166,7 @@ class SernasAgent:
             elif "error" in result:
                 session.rollback()
 
-            return result
+            return cast(Dict[str, Any], result)
 
         except Exception as e:
             session.rollback()

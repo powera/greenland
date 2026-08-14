@@ -5,12 +5,12 @@ from unittest.mock import patch
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from agents.papuga.agent import PapugaAgent
-from agents.papuga.cli import _parse_language_codes, enqueue_papuga_work
+from agents.papuga.cli import enqueue_papuga_work, get_argument_parser
 from langtools.form_registry import FORM_SPECS
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import Base, DerivativeForm, Lemma, LemmaTranslation
-from workqueue.handlers.papuga import generate_pronunciations_for_lemma
+from words.pronunciation_generation import generate_pronunciations_for_lemma
+from words.pronunciation import PronunciationService
 
 
 def _build_config() -> DataSourceConfig:
@@ -71,7 +71,7 @@ def test_check_missing_pronunciations_counts_partially_missing_forms() -> None:
         )
         session.commit()
 
-        agent = PapugaAgent(config=_build_config())
+        agent = PronunciationService(config=_build_config())
         with patch.object(agent, "get_session", return_value=session):
             result = agent.check_missing_pronunciations(lemma_id=lemma.id)
 
@@ -146,19 +146,23 @@ def test_enqueue_papuga_work_enqueues_once_per_lemma_language() -> None:
         assert captured_calls[0]["target_type"] == "lemma"
         assert captured_calls[0]["target_id"] == lemma.id
         assert captured_calls[0]["payload"] == {
-            "lang_code": "en",
+            "schema_version": 1,
+            "language_code": "en",
             "lemma_id": lemma.id,
+            "base_forms_only": False,
             "all_forms_pronunciation": False,
+            "source_component": "agents.papuga",
         }
     finally:
         session.close()
         engine.dispose()
 
 
-def test_parse_language_codes_normalizes_and_deduplicates() -> None:
-    """CLI language parsing should normalize case/spacing and remove duplicates."""
-    assert _parse_language_codes(" FR,es, fr ,ES ") == ["es", "fr"]
-    assert _parse_language_codes("") is None
+def test_language_arguments_use_shared_plural_contract() -> None:
+    """Papuga should accept one or more values through --languages only."""
+    parser = get_argument_parser()
+    assert parser.parse_args(["--languages", "fr"]).languages == ["fr"]
+    assert parser.parse_args(["--languages", "de", "it"]).languages == ["de", "it"]
 
 
 def test_enqueue_papuga_work_filters_selected_languages() -> None:
@@ -224,7 +228,7 @@ def test_enqueue_papuga_work_filters_selected_languages() -> None:
         assert len(captured_calls) == 1
         payload = captured_calls[0]["payload"]
         assert isinstance(payload, dict)
-        assert payload["lang_code"] == "es"
+        assert payload["language_code"] == "es"
     finally:
         session.close()
         engine.dispose()
@@ -256,7 +260,7 @@ def test_check_missing_pronunciations_includes_lemma_translation_targets() -> No
         )
         session.commit()
 
-        agent = PapugaAgent(config=_build_config())
+        agent = PronunciationService(config=_build_config())
         with patch.object(agent, "get_session", return_value=session):
             result = agent.check_missing_pronunciations(lemma_id=lemma.id, only_english=False)
 
@@ -295,7 +299,7 @@ def test_generate_pronunciations_for_lemma_updates_lemma_translation() -> None:
         session.commit()
 
         with patch(
-            "workqueue.handlers.papuga.generate_pronunciation_for_form",
+            "words.pronunciation_generation.generate_pronunciation_for_form",
             return_value=(True, "/ˈpero/", "PEH-roh"),
         ):
             generated_count, errors = generate_pronunciations_for_lemma(
@@ -357,7 +361,9 @@ def test_generate_pronunciations_for_lemma_reuses_existing_base_form_pronunciati
         )
         session.commit()
 
-        with patch("workqueue.handlers.papuga.generate_pronunciation_for_form") as mocked_generate:
+        with patch(
+            "words.pronunciation_generation.generate_pronunciation_for_form"
+        ) as mocked_generate:
             generated_count, errors = generate_pronunciations_for_lemma(
                 session=session,
                 lemma=lemma,
@@ -410,7 +416,7 @@ def test_generate_pronunciations_for_lemma_updates_rhyme_key_for_english_forms()
         session.commit()
 
         with patch(
-            "workqueue.handlers.papuga.generate_pronunciation_for_form",
+            "words.pronunciation_generation.generate_pronunciation_for_form",
             return_value=(True, "/kæt/", "KAT"),
         ):
             generated_count, errors = generate_pronunciations_for_lemma(
@@ -450,7 +456,7 @@ def test_generate_pronunciations_for_lemma_creates_english_base_form_when_missin
         session.commit()
 
         with patch(
-            "workqueue.handlers.papuga.generate_pronunciation_for_form",
+            "words.pronunciation_generation.generate_pronunciation_for_form",
             return_value=(True, "/ˈkwɪkli/", "KWIK-lee"),
         ):
             generated_count, errors = generate_pronunciations_for_lemma(
@@ -521,7 +527,7 @@ def test_generate_pronunciations_for_lemma_skips_english_future_by_default() -> 
         session.commit()
 
         with patch(
-            "workqueue.handlers.papuga.generate_pronunciation_for_form",
+            "words.pronunciation_generation.generate_pronunciation_for_form",
             return_value=(True, "/wɔk/", "WAWK"),
         ) as mocked_generate:
             generated_count, errors = generate_pronunciations_for_lemma(
@@ -588,7 +594,7 @@ def test_generate_pronunciations_for_lemma_includes_english_future_with_override
         session.commit()
 
         with patch(
-            "workqueue.handlers.papuga.generate_pronunciation_for_form",
+            "words.pronunciation_generation.generate_pronunciation_for_form",
             return_value=(True, "/wɔk/", "WAWK"),
         ) as mocked_generate:
             generated_count, errors = generate_pronunciations_for_lemma(
@@ -664,6 +670,59 @@ def test_enqueue_papuga_work_respects_optional_form_override() -> None:
         assert override_results["enqueued"] == 1
         assert mocked_enqueue.call_count == 1
         assert mocked_enqueue.call_args.kwargs["payload"]["all_forms_pronunciation"] is True
+    finally:
+        session.close()
+        engine.dispose()
+
+
+def test_generate_pronunciations_base_forms_only_skips_other_forms() -> None:
+    """The worker-side constraint must match Papuga's queue discovery filter."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+
+    session = Session(engine)
+    try:
+        lemma = Lemma(
+            lemma_text="run",
+            definition_text="to move quickly",
+            pos_type="verb",
+            guid="V00_011",
+        )
+        session.add(lemma)
+        session.flush()
+        base_form = DerivativeForm(
+            lemma_id=lemma.id,
+            derivative_form_text="run",
+            language_code="en",
+            grammatical_form="infinitive",
+            is_base_form=True,
+        )
+        other_form = DerivativeForm(
+            lemma_id=lemma.id,
+            derivative_form_text="runs",
+            language_code="en",
+            grammatical_form="third_person_singular_present",
+            is_base_form=False,
+        )
+        session.add_all([base_form, other_form])
+        session.commit()
+
+        with patch(
+            "words.pronunciation_generation.generate_pronunciation_for_form",
+            return_value=(True, "/rʌn/", "RUN"),
+        ) as mocked_generate:
+            generated_count, errors = generate_pronunciations_for_lemma(
+                session,
+                lemma,
+                language_code="en",
+                base_forms_only=True,
+            )
+
+        assert generated_count == 1
+        assert errors == []
+        mocked_generate.assert_called_once()
+        assert base_form.ipa_pronunciation == "/rʌn/"
+        assert other_form.ipa_pronunciation is None
     finally:
         session.close()
         engine.dispose()

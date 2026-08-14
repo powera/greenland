@@ -1,18 +1,23 @@
 # Agents
 
-Autonomous agents for database maintenance and data processing. Named after Lithuanian animals. Designed for scheduled jobs or CI/CD pipelines.
+Animal-named compatibility CLIs for database work discovery and maintenance.
+Long-running sentence and lemma execution is dispatched by capability-named
+workqueue handlers under `src/workqueue/handlers/`.
 
 Run agents with: `PYTHONPATH=src python src/agents/<agent>.py --help`
 
 ## Architecture direction
 
-As of the queue-first transition, agent CLIs are moving toward **work discovery and enqueueing**, while execution is centralized in `src/workqueue/handlers/`. See `WORKQUEUE_REFACTOR_PLAN.md` for the migration plan and target architecture.
+Agent CLIs are moving toward **work discovery and enqueueing** entry points.
+Sentence implementations live in `src/sentences/`; word implementations live
+in `src/words/` or behind `src/workqueue/handlers/words/`. Old animal imports
+remain available for compatibility, but queue tasks and deduplication keys use
+capability names such as `words.forms` and `words.pronunciations`.
 
 ## Quick Reference
 
 | Agent | Lithuanian | Purpose |
 |-------|-----------|---------|
-| **pradzia** | beginning | Database initialization, corpus sync, rank calculation |
 | **bebras** | beaver | Database integrity (orphans, missing fields, duplicates) |
 | **lokys** | bear | English lemma validation (dictionary form, definitions) |
 | **dramblys** | elephant | Missing words detector, JSONL import |
@@ -21,11 +26,11 @@ As of the queue-first transition, agent CLIs are moving toward **work discovery 
 | **papuga** | parrot | Pronunciation validation/generation (IPA, phonetic) |
 | **sernas** | boar | Synonym and alternative form generator |
 | **lape** | fox | Grammar facts (measure words, gender, declension class) |
-| **zvirblis** | sparrow | Example sentence generator |
-| **buivolas** | buffalo | Example sentences (multi-language) |
-| **sarka** | magpie | Dialog/conversation generator (bulk, keyword-driven) |
+| **zvirblis** | sparrow | Finds translations missing from existing sentences |
+| **buivolas** | buffalo | Finds pattern or LLM example-generation work |
+| **sarka** | magpie | Plans bulk, vocabulary-driven conversations |
 | **povas** | peacock | HTML report generator |
-| **ungurys** | eel | WireWord API export |
+| **ungurys** | eel | Compatibility wrapper for `exports.wireword` |
 | **elnias** | deer | Bootstrap export (minimal format) |
 | **strazdas** | thrush | Audio generation (eSpeak-NG) |
 | **vieversys** | lark | Audio generation (OpenAI TTS) |
@@ -51,7 +56,8 @@ All agents use standardized arguments from `agents/common/common_args.py`:
 --sample-rate RATE  Fraction to process (0.0-1.0)
 --guid GUID         Process single item by GUID
 --level N           Filter by difficulty level (single or range like "1-9")
---language LANG     Filter by language code
+--languages LANG [LANG ...]
+                    Filter by one or more language codes
 --persona NAME      Barsukas persona whose main database to use
                     (prod, golden, hosted, local, local-sqlite, scholar)
 --backend TYPE      [requires --persona custom] Storage backend: sqlite, jsonl, postgres
@@ -64,16 +70,6 @@ SQLite database. `--persona custom` unlocks the manual backend flags for
 development setups that need to spell out the backend directly.
 
 ## Agent Details
-
-### pradzia (Database Initialization)
-
-```bash
-pradzia.py --check                    # Check config and database state
-pradzia.py --sync-config              # Sync corpus configs to database
-pradzia.py --load [CORPUS...]         # Load corpora (all enabled if none specified)
-pradzia.py --calc-ranks               # Calculate combined frequency ranks
-pradzia.py --init-full                # Full initialization (sync + load + ranks)
-```
 
 ### bebras (Database Integrity)
 
@@ -109,11 +105,10 @@ dramblys.py --fix --limit 20 --yes    # Process 20 missing words
 ### voras (Translations)
 
 ```bash
-voras.py --mode coverage              # Report translation coverage (default)
-voras.py --mode check-only            # Validate existing translations
-voras.py --mode populate-only         # Add missing translations
-voras.py --mode both                  # Validate and populate
-voras.py --language fr --limit 50     # Process specific language
+voras.py --coverage                    # Report translation coverage (default)
+voras.py --populate --languages fr es --limit 50
+voras.py --populate --guid N07_008 --languages fr
+voras.py --regenerate --use-workqueue --yes
 ```
 
 ### vilkas (Word Forms)
@@ -121,52 +116,72 @@ voras.py --language fr --limit 50     # Process specific language
 Supports: Lithuanian (lt), French (fr), German (de), Spanish (es), Portuguese (pt), English (en)
 
 ```bash
-vilkas.py --check all                 # Run all form checks
-vilkas.py --check noun-declensions    # Check noun declension coverage
-vilkas.py --check verb-conjugations   # Check verb conjugation coverage
-
-vilkas.py --fix --language lt         # Generate Lithuanian forms
-vilkas.py --fix --language fr --pos-type verb  # French verb conjugations
-vilkas.py --fix --source wiki         # Use Wiktionary (Lithuanian nouns only)
+vilkas.py --task all --coverage
+vilkas.py --task lt-noun-declensions --populate --use-workqueue
+vilkas.py --task fr-verb-conjugations --populate --guid V03_007
+vilkas.py --task en-noun-forms --populate --use-wiktionary
 ```
 
 ### papuga (Pronunciations)
 
 ```bash
-papuga.py --check                     # Validate existing pronunciations
-papuga.py --populate                  # Generate missing pronunciations
-papuga.py --both                      # Validate and populate
-papuga.py --all-languages             # Check all languages (default: English)
-papuga.py --base-forms-only           # Only process base forms
+papuga.py --coverage                   # Report missing pronunciations (default)
+papuga.py --populate --use-workqueue
+papuga.py --populate --languages fr es --base-forms-only --use-workqueue
+papuga.py --coverage --all-languages
 ```
 
 ### sernas (Synonyms)
 
 ```bash
-sernas.py --check all                 # Check all languages for missing synonyms
-sernas.py --fix --language en         # Generate English synonyms
-sernas.py --type synonym              # Only synonyms (not alternative forms)
-sernas.py --type alternative_form     # Only alternative forms
+sernas.py --coverage --languages en fr
+sernas.py --populate --languages en --use-workqueue
+sernas.py --populate --type synonym --languages en
+sernas.py --regenerate --languages en --yes
 ```
 
 ### lape (Grammar Facts)
 
 ```bash
-lape.py --task measure-word --language zh    # Chinese measure words
-lape.py --task noun-gender --language de     # German noun gender
-lape.py --task declension-class --language lt  # Lithuanian declension class
-lape.py --task verb-transitivity --language en  # English verb transitivity
-lape.py --task verb-reflexivity --language fr   # French reflexive verbs
+lape.py --fact-type measure_words --languages zh --populate --use-workqueue
+lape.py --fact-type grammatical_gender --languages de --populate
+lape.py --fact-type declension_class --languages lt --coverage
+lape.py --task verbs --languages en fr --populate --use-workqueue
 ```
+
+Lemma task payloads use `lemma_id` as their target identifier. A task acting on
+one language uses `language_code`; a task acting on a language set uses
+`languages`. Workers still accept the former `lang_code` spelling when reading
+persisted legacy tasks, but new producers must not emit it.
 
 ### zvirblis (Sentences)
 
 ```bash
-zvirblis.py --guid N07_008            # Generate sentences for specific word
-zvirblis.py --level 3 --limit 10      # Generate for level 3 nouns
-zvirblis.py --num-sentences 5         # Generate 5 sentences per word
-zvirblis.py --languages en lt zh      # Specify target languages
+zvirblis.py --guid N07_008 --languages lt zh fr
+zvirblis.py --level 3 --translation-limit 5
+zvirblis.py --guid N07_008 --use-translategemma
+zvirblis.py submit-batch --languages lt zh fr --limit 100
 ```
+
+Žvirblis does not create examples. It finds existing sentences linked to the
+selected lemmas and queues `sentences.translate` (rich structured output) or
+`sentences.translate.simple` (text-only TranslateGemma output). Batch discovery
+queues `sentences.translate.batch_submit`. Add `--execute-inline` only for an
+intentional foreground run.
+
+### buivolas (Sentence examples)
+
+```bash
+python -m agents.buivolas --task generate-candidates --all-patterns --limit 100
+python -m agents.buivolas --task generate-sentences --mode pattern --guid N06_001
+python -m agents.buivolas --task generate-sentences --mode llm --level 3 --limit 10
+python -m agents.buivolas --task generate-sentences --mode guided --guid N06_001
+```
+
+Buivolas discovers pattern or lemma targets and queues
+`sentences.patterns.generate` or `sentences.examples.generate`. The generated
+rows are English-first; other languages are added by the sentence translation
+pipeline. Use `--execute-inline` for debugging only.
 
 ### sarka (Dialogs)
 
@@ -180,6 +195,11 @@ sarka.py --generate --max-level 5 --num-sentences 10
 sarka.py --show-words --level 3               # What vocabulary is available
 sarka.py --stats                              # Conversation counts by level
 ```
+
+Generation and definition modes enqueue `conversations.generate` and
+`conversations.definitions.generate` by default. Use `--execute-inline` for a
+deliberate foreground LLM run. `--show-words`, `--view`, and `--stats` remain
+read-only and execute immediately.
 
 For a *specific* scene ("buying tomatoes at the grocery store") rather than
 level coverage, use the Barsukas-first flow instead: Conversations → New
@@ -197,6 +217,10 @@ povas.py --index-only                 # Generate only the index page
 Output: `{OUTPUT_DIR}/pos_subtypes/`
 
 ### ungurys (WireWord Export)
+
+The implementation lives in `src/exports/wireword/`; these legacy commands
+remain available as convenience wrappers. The canonical package command is
+`PYTHONPATH=src python -m exports.wireword`.
 
 ```bash
 ungurys.py                            # Export to directory structure
@@ -227,7 +251,7 @@ strazdas.py --voices Ona Jonas        # Specify voice names
 ### vieversys (OpenAI TTS Audio)
 
 ```bash
-vieversys.py --language en            # Generate English audio
+vieversys.py --languages en           # Generate English audio
 vieversys.py --voice alloy            # Specify OpenAI voice
 ```
 
@@ -279,7 +303,7 @@ gegute.py --generate --source-language lt --count 10
 gegute.py --generate --source-language en --theme "work and money"
 
 gegute.py --populate --guid M01_003           # Fill missing equivalents for one idiom
-gegute.py --populate --language ja ko         # Only these target languages
+gegute.py --populate --languages ja ko        # Only these target languages
 gegute.py --populate --all-languages          # Regenerate, not just missing
 
 gegute.py --validate --guid M01_002           # Audit stored equivalents (read-only)

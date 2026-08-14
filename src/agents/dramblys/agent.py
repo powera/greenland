@@ -22,20 +22,24 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from agents.dramblys import staging, wordlist
+from agents.dramblys import staging
 
-# Import validation and staging operations
 from agents.dramblys.validation import is_valid_word
+from reports.missing_words import (
+    check_high_frequency_missing_words as build_missing_words_report,
+)
+from reports.vocabulary_distribution import (
+    check_difficulty_level_distribution as build_difficulty_distribution_report,
+)
+from reports.vocabulary_distribution import (
+    check_subtype_coverage as build_subtype_coverage_report,
+)
+from reports.wordlist_coverage import check_wordlist_coverage as build_wordlist_coverage_report
 from util.logging_config import configure_logging, get_logger
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
-from storage.models.imports import PendingImport, WordExclusion
-from storage.models.schema import (
-    DerivativeForm,
-    ExternalLexemeAnnotation,
-    Lemma,
-    WordToken,
-)
+from storage.models.imports import PendingImport
+from storage.models.schema import DerivativeForm, Lemma, WordToken
 from storage.queries.lemma import filter_existing_english_words
 from wordfreq.translation.client import LinguisticClient
 
@@ -73,119 +77,22 @@ class DramblysAgent:
     def check_high_frequency_missing_words(
         self, top_n: int = 5000, min_rank: int = 1
     ) -> Dict[str, Any]:
-        """
-        Check for high-frequency words in corpora that are missing from lemmas.
-
-        Args:
-            top_n: Check top N words by frequency
-            min_rank: Minimum frequency rank to consider
-
-        Returns:
-            Dictionary with missing words and their frequency info
-        """
-        logger.info(f"Checking top {top_n} frequency words for missing lemmas...")
-
+        """Delegate to the canonical missing-word report."""
         session = self.get_session()
         try:
-            # Get high-frequency words from word_tokens
-            high_freq_tokens = (
-                session.query(WordToken)
-                .filter(
-                    WordToken.language_code == "en",
-                    WordToken.frequency_rank.isnot(None),
-                    WordToken.frequency_rank >= min_rank,
-                )
-                .order_by(WordToken.frequency_rank)
-                .limit(top_n)
-                .all()
-            )
-
-            logger.info(f"Checking {len(high_freq_tokens)} high-frequency tokens")
-
-            # Ask about just these candidates rather than loading the whole
-            # dictionary. Exclusions count as existing here: this gates imports,
-            # and a word rejected once should not be proposed again.
-            existing_words = filter_existing_english_words(
+            return build_missing_words_report(
                 session,
-                [token.token for token in high_freq_tokens],
-                include_exclusions=True,
+                top_n=top_n,
+                min_rank=min_rank,
             )
-
-            logger.info(f"{len(existing_words)} of the candidates are already known")
-
-            # Find missing words
-            missing_words = []
-            for token in high_freq_tokens:
-                word = token.token
-                word_lower = word.lower()
-
-                # Skip if already in the database, or explicitly excluded
-                if word_lower in existing_words:
-                    continue
-
-                # Skip if not a valid word (use imported validation function)
-                if not is_valid_word(word):
-                    continue
-
-                annotations = (
-                    session.query(ExternalLexemeAnnotation)
-                    .filter(
-                        ExternalLexemeAnnotation.word_token_id == token.id,
-                        ExternalLexemeAnnotation.source.like("wordfreq_%"),
-                    )
-                    .all()
-                )
-
-                corpus_info = []
-                for annotation in annotations:
-                    corpus_name = annotation.source.removeprefix("wordfreq_")
-                    corpus_info.append(
-                        {
-                            "corpus": corpus_name,
-                            "rank": annotation.ordinal_rank,
-                            "frequency": annotation.frequency,
-                        }
-                    )
-
-                missing_words.append(
-                    {
-                        "word": word,
-                        "overall_rank": token.frequency_rank,
-                        "corpus_frequencies": corpus_info,
-                    }
-                )
-
-            logger.info(f"Found {len(missing_words)} high-frequency missing words")
-
-            return {
-                "total_checked": len(high_freq_tokens),
-                "missing_count": len(missing_words),
-                "missing_words": missing_words,
-                # Reported for context only. Counted directly rather than
-                # derived from the candidate check, which now looks up only the
-                # candidates instead of loading every word in the dictionary.
-                "existing_word_count": session.query(Lemma).count(),
-            }
-
-        except Exception as e:
-            logger.error(f"Error checking high-frequency missing words: {e}")
-            return {"error": str(e), "total_checked": 0, "missing_count": 0, "missing_words": []}
         finally:
             session.close()
 
     def check_wordlist_coverage(self, file_path: str) -> Dict[str, Any]:
-        """
-        Check an external word list file against the database for missing words.
-
-        Args:
-            file_path: Path to a wikitext word list file
-
-        Returns:
-            Dictionary with coverage statistics and missing words
-        """
+        """Delegate to the canonical word-list coverage report."""
         session = self.get_session()
         try:
-            return wordlist.check_wordlist_coverage(file_path, session)
+            return build_wordlist_coverage_report(file_path, session)
         finally:
             session.close()
 
@@ -246,70 +153,10 @@ class DramblysAgent:
             session.close()
 
     def check_subtype_coverage(self, min_expected: int = 10) -> Dict[str, Any]:
-        """
-        Check coverage of different POS subtypes and identify underrepresented ones.
-
-        Args:
-            min_expected: Minimum expected count for a subtype to be well-covered
-
-        Returns:
-            Dictionary with subtype coverage info
-        """
-        logger.info("Checking POS subtype coverage...")
-
+        """Delegate to the canonical POS-subtype coverage report."""
         session = self.get_session()
         try:
-            from sqlalchemy import func
-
-            # Get counts by subtype
-            subtype_counts = (
-                session.query(
-                    Lemma.pos_type, Lemma.pos_subtype, func.count(Lemma.id).label("count")
-                )
-                .filter(Lemma.pos_subtype.isnot(None), Lemma.pos_subtype != "")
-                .group_by(Lemma.pos_type, Lemma.pos_subtype)
-                .all()
-            )
-
-            logger.info(f"Found {len(subtype_counts)} subtypes")
-
-            # Categorize by coverage
-            well_covered = []
-            under_covered = []
-
-            for pos_type, pos_subtype, count in subtype_counts:
-                entry = {"pos_type": pos_type, "pos_subtype": pos_subtype, "count": count}
-
-                if count >= min_expected:
-                    well_covered.append(entry)
-                else:
-                    under_covered.append(entry)
-
-            # Sort under-covered by count (ascending)
-            under_covered.sort(key=lambda x: x["count"])
-
-            logger.info(f"Well-covered subtypes: {len(well_covered)}")
-            logger.info(f"Under-covered subtypes: {len(under_covered)}")
-
-            return {
-                "total_subtypes": len(subtype_counts),
-                "well_covered_count": len(well_covered),
-                "under_covered_count": len(under_covered),
-                "well_covered": well_covered,
-                "under_covered": under_covered,
-                "min_expected_threshold": min_expected,
-            }
-
-        except Exception as e:
-            logger.error(f"Error checking subtype coverage: {e}")
-            return {
-                "error": str(e),
-                "total_subtypes": 0,
-                "well_covered_count": 0,
-                "under_covered_count": 0,
-                "well_covered": [],
-                "under_covered": [],
-            }
+            return build_subtype_coverage_report(session, min_expected=min_expected)
         finally:
             session.close()
 
@@ -635,72 +482,10 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         return result
 
     def check_difficulty_level_distribution(self) -> Dict[str, Any]:
-        """
-        Check distribution of words across difficulty levels.
-
-        Returns:
-            Dictionary with level distribution info
-        """
-        logger.info("Checking difficulty level distribution...")
-
+        """Delegate to the canonical difficulty-distribution report."""
         session = self.get_session()
         try:
-            from sqlalchemy import func
-
-            # Get counts by difficulty level
-            level_counts = (
-                session.query(Lemma.difficulty_level, func.count(Lemma.id).label("count"))
-                .filter(
-                    Lemma.difficulty_level.isnot(None),
-                    Lemma.guid.isnot(None),  # Only count trakaido words
-                )
-                .group_by(Lemma.difficulty_level)
-                .order_by(Lemma.difficulty_level)
-                .all()
-            )
-
-            distribution = {}
-            total_words = 0
-            for level, count in level_counts:
-                distribution[level] = count
-                total_words += count
-
-            # Identify gaps and imbalances
-            gaps = []
-            imbalanced = []
-            avg_per_level = total_words / 20 if total_words > 0 else 0
-
-            for level in range(1, 21):
-                count = distribution.get(level, 0)
-
-                if count == 0:
-                    gaps.append(level)
-                elif avg_per_level > 0 and count < avg_per_level * 0.5:
-                    imbalanced.append(
-                        {"level": level, "count": count, "expected_avg": avg_per_level}
-                    )
-
-            logger.info(f"Total trakaido words: {total_words}")
-            logger.info(f"Level gaps: {len(gaps)}")
-            logger.info(f"Imbalanced levels: {len(imbalanced)}")
-
-            return {
-                "total_words": total_words,
-                "distribution": distribution,
-                "average_per_level": avg_per_level,
-                "gaps": gaps,
-                "imbalanced": imbalanced,
-            }
-
-        except Exception as e:
-            logger.error(f"Error checking difficulty level distribution: {e}")
-            return {
-                "error": str(e),
-                "total_words": 0,
-                "distribution": {},
-                "gaps": [],
-                "imbalanced": [],
-            }
+            return build_difficulty_distribution_report(session)
         finally:
             session.close()
 

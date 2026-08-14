@@ -12,6 +12,7 @@ from storage.translation_helpers import (
     normalize_llm_language_codes,
 )
 from sentences.translation import translate_sentence as do_translation
+from sentences.translation_coverage import translate_sentence_simple
 from workqueue.tools import workqueue_payload_handler
 
 _DECOMPOSE_LANGUAGES: List[str] = ["fr", "zh", "lt", "es", "bn", "uk", "kn"]
@@ -112,3 +113,25 @@ def handle_sentences_translate(
         selected_languages=languages,
         model=model,
     )
+
+
+@workqueue_payload_handler()
+def handle_sentences_translate_simple(
+    session: Any,
+    sentence_id: int,
+    selected_languages: Optional[List[str]] = None,
+    **_: Any,
+) -> str:
+    """Add missing text-only translations to one sentence with TranslateGemma."""
+    languages = selected_languages if selected_languages is not None else _DECOMPOSE_LANGUAGES
+    normalized_languages = normalize_llm_language_codes(
+        languages,
+        operation_name="Workqueue simple sentence translation",
+        all_expansion=get_tier_1_and_tier_2_languages(),
+    )
+    added_count = translate_sentence_simple(
+        session,
+        sentence_id=sentence_id,
+        target_languages=normalized_languages,
+    )
+    return f"Added {added_count} text-only translations to sentence {sentence_id}"

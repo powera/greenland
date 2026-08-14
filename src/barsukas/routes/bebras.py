@@ -5,7 +5,7 @@
 Provides a unified interface for BEBRAS functionality:
 1. Sentence-Word Link Processing - Process sentences and link them to vocabulary
 2. Database Integrity Checking - Check database structural integrity
-3. Translation Verification - Verify existing translations (with optional batch support)
+3. Translation Verification - Run one verification inline or queue bulk work
 """
 
 import json
@@ -203,47 +203,29 @@ def verify_words() -> ResponseReturnValue:
     limit = request.form.get("limit", "").strip()
     unverified_only = request.form.get("unverified_only") == "true"
     report_only = request.form.get("report_only") == "true"
-    use_batch = request.form.get("use_batch") == "true"
     output_json = request.form.get("output_json") == "true"
 
     if not languages:
         languages = ["lt", "zh", "fr", "es"]
 
-    # Build command
-    script_path = Path(constants.AGENTS_DIR) / "bebras.py"
-    args = ["python3", str(script_path)]
-    args.append("--verify")
-
-    if use_batch:
-        # Use batch submission command
-        args.append("submit-batch-words")
-        args.extend(["--languages"] + languages)
-        if limit:
-            args.extend(["--limit", limit])
-        if unverified_only:
-            args.append("--unverified-only")
-        task_name = "Batch Word Verification"
-    else:
-        # Use regular verification command
-        args.append("words")
-        args.extend(["--languages"] + languages)
-        if guid:
-            args.extend(["--guid", guid])
-        if limit:
-            args.extend(["--limit", limit])
-        if unverified_only:
-            args.append("--unverified-only")
-        if report_only:
-            args.append("--report-only")
-        if output_json:
-            args.append("--json")
-        task_name = "Word Verification"
+    args = ["python3", "-m", "verification", "words"]
+    args.extend(["--languages"] + languages)
+    if guid:
+        args.extend(["--guid", guid])
+    if limit:
+        args.extend(["--limit", limit])
+    if unverified_only:
+        args.append("--unverified-only")
+    if report_only:
+        args.append("--report-only")
+    if output_json:
+        args.append("--json")
 
     # Add database configuration
     _add_db_args(args)
     args.append("--yes")
 
-    return _execute_async(args, task_name)
+    return _execute_async(args, "Word Verification")
 
 
 @bp.route("/verify-sentences", methods=["POST"])
@@ -255,53 +237,33 @@ def verify_sentences() -> ResponseReturnValue:
     unverified_only = request.form.get("unverified_only") == "true"
     report_only = request.form.get("report_only") == "true"
     check_lemma_links = request.form.get("check_lemma_links") == "true"
-    use_batch = request.form.get("use_batch") == "true"
     output_json = request.form.get("output_json") == "true"
 
     if not languages:
         languages = ["lt", "zh", "fr", "es"]
 
-    # Build command
-    script_path = Path(constants.AGENTS_DIR) / "bebras.py"
-    args = ["python3", str(script_path)]
-    args.append("--verify")
-
-    if use_batch:
-        # Use batch submission command
-        args.append("submit-batch-sentences")
-        args.extend(["--languages"] + languages)
-        if limit:
-            args.extend(["--limit", limit])
-        if unverified_only:
-            args.append("--unverified-only")
-        if check_lemma_links:
-            args.append("--check-lemma-links")
-        task_name = "Batch Sentence Verification"
+    args = ["python3", "-m", "verification", "sentences"]
+    args.extend(["--languages"] + languages)
+    if sentence_id:
+        args.extend(["--sentence-id", sentence_id])
+    if limit:
+        args.extend(["--limit", limit])
+    if unverified_only:
+        args.append("--unverified-only")
+    if report_only:
+        args.append("--report-only")
+    if check_lemma_links:
+        args.append("--check-lemma-links")
     else:
-        # Use regular verification command
-        args.append("sentences")
-        args.extend(["--languages"] + languages)
-        if sentence_id:
-            args.extend(["--sentence-id", sentence_id])
-        if limit:
-            args.extend(["--limit", limit])
-        if unverified_only:
-            args.append("--unverified-only")
-        if report_only:
-            args.append("--report-only")
-        if check_lemma_links:
-            args.append("--check-lemma-links")
-        else:
-            args.append("--no-check-lemma-links")
-        if output_json:
-            args.append("--json")
-        task_name = "Sentence Verification"
+        args.append("--no-check-lemma-links")
+    if output_json:
+        args.append("--json")
 
     # Add database configuration
     _add_db_args(args)
     args.append("--yes")
 
-    return _execute_async(args, task_name)
+    return _execute_async(args, "Sentence Verification")
 
 
 @bp.route("/output/<task_id>")
@@ -378,7 +340,7 @@ def generate_cli_command() -> ResponseReturnValue:
             cmd_parts.append(f"--output {params['output_file']}")
 
     elif mode == "verify_words":
-        cmd_parts.append("--verify words")
+        cmd_parts = ["PYTHONPATH=src python -m verification words"]
         if params.get("languages"):
             cmd_parts.append(f"--languages {' '.join(params['languages'])}")
         if params.get("guid"):
@@ -391,7 +353,7 @@ def generate_cli_command() -> ResponseReturnValue:
             cmd_parts.append("--report-only")
 
     elif mode == "verify_sentences":
-        cmd_parts.append("--verify sentences")
+        cmd_parts = ["PYTHONPATH=src python -m verification sentences"]
         if params.get("languages"):
             cmd_parts.append(f"--languages {' '.join(params['languages'])}")
         if params.get("sentence_id"):
@@ -404,6 +366,8 @@ def generate_cli_command() -> ResponseReturnValue:
             cmd_parts.append("--report-only")
         if params.get("check_lemma_links"):
             cmd_parts.append("--check-lemma-links")
+        else:
+            cmd_parts.append("--no-check-lemma-links")
 
     else:  # sentence mode
         if params.get("sentence"):

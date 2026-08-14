@@ -17,18 +17,18 @@ The agents are organized into a pipeline where each agent typically depends on t
 
 All agents are Lithuanian animal names and live in `src/agents/`.
 
-### Initialization Agents
+The animal names identify discovery CLIs, not queued execution. Lemma enrichment
+work is stored under canonical capabilities such as `words.translations`,
+`words.forms`, `words.pronunciations`, `words.synonyms`, and
+`words.grammar_facts`. Their payloads use `lemma_id`, `language_code` for one
+language, and `languages` for a set.
 
-#### Pradzia (Beginning)
-- **Animal**: Beginning/Start (pradžia)
-- **Purpose**: Database initialization, corpus management, rank calculation
-- **Dependencies**: None (first agent to run)
-- **Outputs**: Initialized database with base lemmas from corpora
-- **Key Functions**:
-  - Create/update database tables
-  - Load word frequency corpora
-  - Calculate combined frequency ranks
-  - Bootstrap from JSON exports
+### Database bootstrap (not an agent)
+
+Run `PYTHONPATH=src python bootstrap_database.py` before agent workflows. It
+loads `data/release` by default, adds local frequency and tier sources, and
+calculates combined ranks. Use `--empty` only when release content is
+intentionally excluded.
 
 ---
 
@@ -37,7 +37,7 @@ All agents are Lithuanian animal names and live in `src/agents/`.
 #### Voras (Spider)
 - **Animal**: Spider
 - **Purpose**: Translation validator and populator - "weaves the web of translations"
-- **Dependencies**: Pradzia (needs base lemmas)
+- **Dependencies**: Bootstrapped database with base lemmas
 - **Outputs**: Translations in multiple languages (Lithuanian, Chinese, French, Korean, Spanish, German, Portuguese, Swahili, Vietnamese)
 - **Key Functions**:
   - Validate existing translations
@@ -81,7 +81,7 @@ All agents are Lithuanian animal names and live in `src/agents/`.
 #### Lokys (Bear)
 - **Animal**: Bear
 - **Purpose**: English lemma validation - "thorough and careful in checking quality"
-- **Dependencies**: Pradzia (needs base lemmas), runs parallel to Voras
+- **Dependencies**: Bootstrapped database with base lemmas; runs parallel to Voras
 - **Outputs**: Validated and corrected English lemma forms and definitions
 - **Key Functions**:
   - Validate lemma forms (e.g., "shoe" not "shoes")
@@ -110,23 +110,39 @@ All agents are Lithuanian animal names and live in `src/agents/`.
 
 ---
 
-### Sentence Generation Agents
+### Sentence and Conversation Work Finders
 
 #### Žvirblis (Sparrow)
 - **Animal**: Sparrow
-- **Purpose**: Sentence generation - "small but prolific, creating many examples"
-- **Dependencies**: Voras (needs translations for target languages)
-- **Outputs**: Example sentences with grammatical analysis in multiple languages
+- **Purpose**: Find existing linked sentences that lack requested translations
+- **Outputs**: Queued `sentences.translate` or `sentences.translate.simple` tasks
 - **Key Functions**:
-  - Generate contextual sentences featuring vocabulary words
-  - Create translations across languages
-  - Analyze grammatical structure
-  - Calculate minimum difficulty level
+  - Select a lemma by GUID or difficulty level
+  - Count already-complete sentences toward a requested limit
+  - Queue rich translation/decomposition or text-only translation
+
+#### Buivolas (Buffalo)
+- **Animal**: Buffalo
+- **Purpose**: Find pattern or LLM example-generation work
+- **Outputs**: Queued `sentences.patterns.generate` or `sentences.examples.generate` tasks
+- **Key Functions**:
+  - Select reusable patterns or compatible lemmas
+  - Choose pattern, basic LLM, or vocabulary-guided generation
+  - Store English-first sentences with lemma hints when the worker executes
+
+#### Šarka (Magpie)
+- **Animal**: Magpie
+- **Purpose**: Plan bulk vocabulary-driven dialogs and definition narratives
+- **Outputs**: Queued `conversations.generate` or `conversations.definitions.generate` tasks
+- **Key Functions**:
+  - Balance word reuse across a difficulty level
+  - Optionally group words by category
+  - Keep generation off the web/CLI request path
 
 #### Bebras (Beaver)
 - **Animal**: Beaver
 - **Purpose**: Sentence-word link management - "industrious builder of connections"
-- **Dependencies**: Žvirblis (needs generated sentences)
+- **Dependencies**: Stored sentence data
 - **Outputs**: Links between sentences and vocabulary words, database integrity
 - **Key Functions**:
   - Link sentences to vocabulary via GUIDs
@@ -202,30 +218,30 @@ All agents are Lithuanian animal names and live in `src/agents/`.
 
 ### Phase 1: Initialization
 ```
-Pradzia (Database Init)
+bootstrap_database.py
   ↓
   Creates base lemmas from word frequency corpora
 ```
 
 ### Phase 2: Core Enrichment (mostly parallel)
 ```
-Pradzia → Voras (Translations)
+Bootstrapped database → Voras (Translations)
   ├→ Vilkas (Word Forms)
   ├→ Lape (Grammar Facts)
   ├→ Šernas (Synonyms)
-  └→ Žvirblis (Sentence Generation)
+  └→ Buivolas (Discover Sentence Example Work)
 ```
 
 ### Phase 3: Validation (parallel with enrichment)
 ```
-Pradzia → Lokys (Lemma Validation)
+Bootstrapped database → Lokys (Lemma Validation)
   ├→ Papuga (Pronunciation Generation)
   └→ Dramblys (Missing Word Detection)
 ```
 
 ### Phase 4: Sentence Linking
 ```
-Žvirblis → Bebras (Link Sentences to Vocabulary)
+Generated/Imported Sentences → Sentence Linking and Verification
 ```
 
 ### Phase 5: Audio Generation
@@ -245,11 +261,11 @@ Complete Data → Ungurys (WireWord Export - needs Voras, Vilkas, Lape, Šernas,
 ## Critical Dependencies
 
 ### Must Run Before Others
-- **Pradzia** must run first to initialize the database and load base lemmas
+- `bootstrap_database.py` must run first to initialize the database and load base lemmas
 - **Voras** must run before most enrichment agents since translations are fundamental
 
 ### Typical Execution Order
-1. `pradzia` - Initialize database
+1. `bootstrap_database.py` - Initialize the database from `data/release`
 2. `voras` - Generate/validate translations
 3. `lokys` - Validate English lemmas (can run in parallel with Voras)
 4. `vilkas`, `lape`, `šernas` - Generate enrichment data (parallel after Voras)

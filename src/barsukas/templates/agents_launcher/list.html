@@ -16,7 +16,7 @@
     <div class="alert alert-warning">
         <i class="bi bi-exclamation-triangle"></i>
         <strong>Database is empty or not initialized.</strong>
-        Run the <em>Database Setup</em> agent (PRADZIA) first to initialize the database.
+        Run <code>PYTHONPATH=src python bootstrap_database.py</code> from the repository root.
     </div>
     {% endif %}
 
@@ -131,7 +131,7 @@
             <div class="alert alert-info mt-4">
                 <i class="bi bi-info-circle"></i>
                 {% if db_empty %}
-                Initialize the database first by running the PRADZIA agent.
+                Initialize the database first with <code>bootstrap_database.py</code>.
                 {% else %}
                 All agents are available. Database is initialized.
                 {% endif %}

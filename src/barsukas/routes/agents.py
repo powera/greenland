@@ -11,14 +11,13 @@ from flask import Blueprint, flash, g, jsonify, redirect, render_template, reque
 from flask.typing import ResponseReturnValue
 
 import constants
-from agents.lokys import LokysAgent
-from agents.papuga import PapugaAgent
-from agents.voras.agent import VorasAgent
 from barsukas.helpers.flash_helpers import flash_and_log, log_and_flash_error
 from workqueue.task_queue import TaskType, enqueue_task
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import DerivativeForm, Lemma
 from storage.translation_helpers import get_supported_languages
+from words.translation_workflow import TranslationWorkflow
+from words.validation import LemmaValidationService
 
 bp = Blueprint("agents", __name__, url_prefix="/agents")
 logger = logging.getLogger(__name__)
@@ -36,21 +35,20 @@ def check_translations(lemma_id: int) -> ResponseReturnValue:
     lang_code = request.form.get("lang_code")
 
     try:
-        # Initialize voras agent
         config = DataSourceConfig(
             backend_type=BackendType.SQLITE,
             sqlite_path=Config.DB_PATH,
             model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
-        agent = VorasAgent(config=config)
+        workflow = TranslationWorkflow(config=config)
 
         # Gather translations for this word
         from storage.translation_helpers import LANGUAGE_FIELDS
 
         translations = {}
         for lc in LANGUAGE_FIELDS.keys():
-            translation = agent.get_translation(g.db, lemma, lc)
+            translation = workflow.get_translation(g.db, lemma, lc)
             if translation and translation.strip():
                 translations[lc] = translation
 
@@ -62,7 +60,7 @@ def check_translations(lemma_id: int) -> ResponseReturnValue:
         from wordfreq.tools.llm_validators import validate_all_translations_for_word
 
         validation_results = validate_all_translations_for_word(
-            lemma.lemma_text, translations, lemma.pos_type, agent.config.model
+            lemma.lemma_text, translations, lemma.pos_type, workflow.config.model
         )
 
         # Format results for display
@@ -119,7 +117,11 @@ def add_missing_translations(lemma_id: int) -> ResponseReturnValue:
             task_type=TaskType.ADD_MISSING_TRANSLATIONS,
             target_type="lemma",
             target_id=lemma_id,
-            payload={"lemma_id": lemma_id},
+            payload={
+                "schema_version": 1,
+                "lemma_id": lemma_id,
+                "source_component": "barsukas",
+            },
             dedup_key=f"{TaskType.ADD_MISSING_TRANSLATIONS}:{lemma_id}",
         )
         if result.created:
@@ -160,15 +162,6 @@ def check_pronunciations(lemma_id: int) -> ResponseReturnValue:
         if not forms_with_pronunciations:
             flash("No pronunciations found to check", "warning")
             return redirect(url_for("lemmas.view_lemma", lemma_id=lemma_id))
-
-        # Initialize PAPUGA agent
-        config = DataSourceConfig(
-            backend_type=BackendType.SQLITE,
-            sqlite_path=Config.DB_PATH,
-            model=constants.DEFAULT_MODEL,
-            debug=Config.DEBUG,
-        )
-        agent = PapugaAgent(config=config)
 
         # Check pronunciations (using dry_run=False to actually validate)
         from storage.models.schema import Sentence, SentenceTranslation, SentenceWord
@@ -245,7 +238,12 @@ def generate_pronunciations(lemma_id: int) -> ResponseReturnValue:
             task_type=TaskType.GENERATE_PRONUNCIATIONS,
             target_type="lemma",
             target_id=lemma_id,
-            payload={"lemma_id": lemma_id, "lang_code": lang_code},
+            payload={
+                "schema_version": 1,
+                "lemma_id": lemma_id,
+                "language_code": lang_code,
+                "source_component": "barsukas",
+            },
             dedup_key=f"{TaskType.GENERATE_PRONUNCIATIONS}:{lemma_id}:{lang_code}",
         )
         if result.created:
@@ -285,7 +283,12 @@ def generate_forms(lemma_id: int) -> ResponseReturnValue:
             task_type=TaskType.GENERATE_FORMS,
             target_type="lemma",
             target_id=lemma_id,
-            payload={"lemma_id": lemma_id, "lang_code": lang_code},
+            payload={
+                "schema_version": 1,
+                "lemma_id": lemma_id,
+                "language_code": lang_code,
+                "source_component": "barsukas",
+            },
             dedup_key=f"{TaskType.GENERATE_FORMS}:{lemma_id}:{lang_code}",
         )
         if result.created:
@@ -318,7 +321,12 @@ def generate_synonyms(lemma_id: int) -> ResponseReturnValue:
             task_type=TaskType.GENERATE_SYNONYMS,
             target_type="lemma",
             target_id=lemma_id,
-            payload={"lemma_id": lemma_id, "lang_code": lang_code},
+            payload={
+                "schema_version": 1,
+                "lemma_id": lemma_id,
+                "language_code": lang_code,
+                "source_component": "barsukas",
+            },
             dedup_key=f"{TaskType.GENERATE_SYNONYMS}:{lemma_id}:{lang_code}",
         )
         if result.created:
@@ -350,10 +358,10 @@ def check_definition(lemma_id: int) -> ResponseReturnValue:
             model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
-        agent = LokysAgent(config=config)
+        service = LemmaValidationService(config=config)
 
         # Use the agent's helper method for cleaner code
-        result = agent.check_single_definition(lemma, session=g.db)
+        result = service.check_single_definition(lemma, session=g.db)
 
         if result["is_valid"] and result["confidence"] >= 0.7:
             flash("Definition looks good!", "success")
@@ -427,10 +435,10 @@ def check_disambiguation(lemma_id: int) -> ResponseReturnValue:
             model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
-        agent = LokysAgent(config=config)
+        service = LemmaValidationService(config=config)
 
         # Use the agent's helper method for cleaner code
-        result = agent.check_single_disambiguation(lemma, session=g.db)
+        result = service.check_single_disambiguation(lemma, session=g.db)
 
         # Handle different cases based on result
         if not result["needs_disambiguation"]:
@@ -556,7 +564,7 @@ def generate_sentences(lemma_id: int) -> ResponseReturnValue:
 
     try:
         # Import Buivolas agent for sentence creation
-        from agents.buivolas import BuivolasAgent
+        from sentences.generation import SentenceGenerationService
         from storage.models.schema import Sentence
 
         # Initialize agent
@@ -566,7 +574,7 @@ def generate_sentences(lemma_id: int) -> ResponseReturnValue:
             model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
-        agent = BuivolasAgent(config=config)
+        agent = SentenceGenerationService(config=config)
 
         # Generate sentences based on mode
         if generation_mode == "guided":
@@ -640,7 +648,7 @@ def generate_sentences(lemma_id: int) -> ResponseReturnValue:
 @bp.route("/generate-grammar-fact/<int:lemma_id>", methods=["POST"])
 def generate_grammar_fact(lemma_id: int) -> ResponseReturnValue:
     """Generate a grammar fact for a lemma using the LAPE agent (queued via task worker)."""
-    from workqueue.handlers.lape import SUPPORTED_FACT_TYPES, validate_grammar_fact_request
+    from words.grammar_fact_generation import SUPPORTED_FACT_TYPES, validate_grammar_fact_request
     from storage.crud.grammar_fact import get_grammar_fact_value
 
     lemma = g.db.query(Lemma).get(lemma_id)
@@ -677,11 +685,13 @@ def generate_grammar_fact(lemma_id: int) -> ResponseReturnValue:
             target_type="lemma",
             target_id=lemma_id,
             payload={
+                "schema_version": 1,
                 "lemma_id": lemma_id,
                 "fact_type": fact_type,
                 "language_code": language_code,
+                "source_component": "barsukas",
             },
-            dedup_key=f"{TaskType.WORDS_GRAMMAR_FACTS}:{lemma_id}:{fact_type}:{language_code}",
+            dedup_key=f"{TaskType.WORDS_GRAMMAR_FACTS}:{lemma_id}:{language_code}:{fact_type}",
         )
 
         if result.created:

@@ -27,12 +27,13 @@ The system centers around a SQLite database (`data/wordfreq/linguistics.sqlite`)
 Greenland uses a collection of **specialized processing agents** (named after Lithuanian animals) that perform bulk operations against the database, typically involving LLM calls for linguistic validation and generation:
 
 **Core Validation & Processing:**
-- **lokys** - English lemma validation (forms and definitions)
+- **lokys** - Thin CLI wrapper for `words.validation`
 - **dramblys** - Missing word detection and processing
-- **vilkas** - Word forms generation (declensions, conjugations)
-- **voras** - Multi-lingual translation management
-- **papuga** - Pronunciation (IPA) validation and generation
-- **sernas** - Synonym and alternative form generation
+- **vilkas** - Thin CLI wrapper for `words.inflections`
+- **voras** - Thin CLI wrapper for `words.translation` / `words.translation_workflow`
+- **papuga** - Thin CLI wrapper for `words.pronunciation`
+- **sernas** - Thin CLI wrapper for `words.synonyms`
+- **lape** - Thin CLI wrapper for `words.grammar_facts`
 
 **Audio Generation:**
 - **strazdas** - eSpeak-NG audio generation (open-source TTS)
@@ -40,10 +41,29 @@ Greenland uses a collection of **specialized processing agents** (named after Li
 
 **Export & Utilities:**
 - **ungurys** - WireWord export generation
-- **bebras** - Sentence-word link management
-- **zvirblis** - Sentence generation
+- **bebras** - Database integrity and compatibility entry points
+- **buivolas** - Discovers pattern/LLM sentence generation work
+- **zvirblis** - Discovers missing sentence translations
+- **sarka** - Plans bulk vocabulary-driven conversations
 
-All agents follow standardized command-line interfaces via `src/agents/common_args.py`, supporting consistent options like `--guid`, `--db-path`, `--model`, `--limit`, `--dry-run`, `--debug`, and `--yes`.
+Sentence and conversation implementations live under `src/sentences/`.
+The animal-named CLIs are queue-first wrappers; workers execute canonical
+function-named tasks such as `sentences.examples.generate`,
+`sentences.translate`, and `conversations.generate`.
+
+Lemma enrichment finders enqueue canonical `words.*` capabilities with
+capability-named deduplication keys. New word payloads use `lemma_id`,
+`language_code` for a single language, and `languages` for a set; workers retain
+older animal task names and `lang_code` payloads only for persisted-work
+compatibility.
+
+Reusable lemma enrichment logic lives under `src/words/`. Animal-named modules
+under `src/agents/` contain command-line orchestration and display code only;
+Barsukas and canonical workqueue handlers import the domain modules directly.
+
+Agent CLIs use shared argument helpers from `src/agents/common/common_args.py`.
+Sentence finders enqueue by default and accept `--execute-inline` for deliberate
+foreground debugging.
 
 ### Web Interface (Barsukas)
 

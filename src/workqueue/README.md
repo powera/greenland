@@ -23,4 +23,18 @@ the database and executed by a worker daemon.
 PYTHONPATH=src python src/workqueue/worker.py --help
 ```
 
-Tasks are normally enqueued from Barsukas via `enqueue_task()`.
+Tasks are enqueued from Barsukas and from animal-named discovery CLIs via
+`enqueue_task()`. Canonical names describe the function being performed, not
+the code that discovered it. Sentence examples include
+`sentences.examples.generate`, `sentences.patterns.generate`,
+`sentences.translate`, `conversations.generate`, and
+`conversations.definitions.generate`.
+
+Legacy agent-prefixed names remain registry aliases only so already-persisted
+tasks can drain. New enqueue sites must use `TaskType` constants and canonical
+names.
+
+Word task payloads identify the target with `lemma_id`. Use `language_code` for
+a single language and `languages` for a set. `lang_code` is accepted only as a
+legacy payload alias. Deduplication keys begin with the canonical capability
+name, never the animal-named discovery CLI.

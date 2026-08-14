@@ -20,6 +20,7 @@ from agents.common.common_args import (
     add_processing_args,
     get_data_source_config,
 )
+from workqueue.task_queue import TaskType, enqueue_task, get_active_task
 
 
 def get_argument_parser() -> argparse.ArgumentParser:
@@ -39,7 +40,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     add_guid_arg(parser, help_text="Process only the lemma with this GUID")
     add_level_args(parser)
     add_pos_type_args(parser)
-    add_language_args(parser, multiple=True)
+    add_language_args(parser)
     add_backend_args(parser)
 
     # Mode selection - mutually exclusive flags
@@ -103,26 +104,29 @@ def enqueue_sernas_work(
     Returns:
         Dictionary with enqueue statistics
     """
-    from workqueue.task_queue import enqueue_task
-
     enqueued_count = 0
     skipped_count = 0
 
     for lemma in lemmas:
         for language_code in languages:
             if not dry_run:
-                dedup_key = f"sernas_{lemma.id}_{language_code}_{form_type or 'all'}"
+                form_key = form_type or "all"
+                dedup_key = f"{TaskType.WORDS_SYNONYMS}:{lemma.id}:{language_code}:{form_key}"
+                legacy_dedup_key = f"sernas_{lemma.id}_{language_code}_{form_key}"
+                if get_active_task(session, legacy_dedup_key) is not None:
+                    skipped_count += 1
+                    continue
                 result = enqueue_task(
                     session,
-                    task_type="words.synonyms",
+                    task_type=TaskType.WORDS_SYNONYMS,
                     target_type="lemma",
                     target_id=lemma.id,
                     payload={
-                        "lang_code": language_code,
+                        "schema_version": 1,
+                        "language_code": language_code,
                         "lemma_id": lemma.id,
                         "form_type": form_type,
-                        "lemma_guid": lemma.guid,
-                        "lemma_text": lemma.lemma_text,
+                        "source_component": "agents.sernas",
                     },
                     dedup_key=dedup_key,
                 )
@@ -146,7 +150,7 @@ def enqueue_sernas_work(
 def main() -> None:
     """Main entry point for the šernas agent."""
     from agents.common.cli_display import display_language_header
-    from agents.common.lemma_selection import get_lemmas_for_agent
+    from words.lemma_selection import get_lemmas_for_agent
     from agents.sernas.agent import SernasAgent
     from agents.sernas.cli_display import display_batch_results
     from storage.translation_helpers import (

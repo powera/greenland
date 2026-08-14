@@ -1,5 +1,9 @@
-"""VEIDRODIS agent package."""
+"""Compatibility package for template string catalog generation."""
 
-from agents.veidrodis.agent import VeidrodisAgent, VeidrodisRunResult
+from exports.strings.template_catalogs import (
+    TemplateStringsExporter,
+    VeidrodisAgent,
+    VeidrodisRunResult,
+)
 
-__all__ = ["VeidrodisAgent", "VeidrodisRunResult"]
+__all__ = ["TemplateStringsExporter", "VeidrodisAgent", "VeidrodisRunResult"]

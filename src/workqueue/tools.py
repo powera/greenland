@@ -130,7 +130,7 @@ def workqueue_payload_handler() -> (
     """Wrap a do_* task function into a standard workqueue `(session, payload)` handler.
 
     The wrapped function keeps direct-call ergonomics for agents during migration
-    (for example, `do_generate_forms(session, lemma_id=1, lang_code='lt')`) while
+    (for example, `do_generate_forms(session, lemma_id=1, language_code='lt')`) while
     the worker can call the generated `handle_*` wrapper with payload dicts.
     """
 

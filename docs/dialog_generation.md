@@ -22,10 +22,10 @@ dialog. Nothing about the pipeline requires a CLI invocation.
 
 ## Why this replaced the keyword-driven path
 
-`agents/sarka` still exists and still works, but it is shaped around a
-different question. It picks ~5 lemmas at a level, plans 12 conversations per
-level so each word gets used about twice, and asks for a dialog around that
-word list. Consequences:
+The legacy `agents/sarka.py` command is now a thin entry point into
+`sentences.conversation_cli`. It answers a different question: it picks about
+five lemmas at a level, plans twelve conversations so each word is used about
+twice, and queues `conversations.generate` for each word list. Consequences:
 
 * **There is no scene.** The LLM invents the situation from the word list, so
   the dialogs are about whatever the vocabulary suggested. There was never a
@@ -39,9 +39,9 @@ word list. Consequences:
 * **Nothing reported what was missing.** A dialog using a word we do not have
   looked exactly like one that did not.
 
-The scene path is the same storage with those four things fixed. Sarka's bulk
-mode remains the right tool for "fill out level 4 across twelve dialogs"; the
-scene path is the right tool for "I want this specific situation covered".
+The scene path is the same storage with those four things fixed. The bulk
+planner remains the right tool for "fill out level 4 across twelve dialogs";
+the scene path is the right tool for "I want this specific situation covered".
 
 There is also `agents/ozys`, which generates *prose* conversations as
 `TextWork`/`TextVersion` rows for the story library (see `fables_design.md`).
@@ -145,6 +145,9 @@ Names are browsable and editable at `/names`.
 | --- | --- |
 | `src/sentences/dialog_scene.py` | request, prompt building, LLM call, reply parsing |
 | `src/sentences/dialog_coverage.py` | token classification and the coverage report |
+| `src/sentences/conversation_planning.py` | bulk vocabulary selection and planning |
+| `src/sentences/conversation_generation.py` | bulk generation and persistence |
+| `src/workqueue/handlers/conversations/generation.py` | bulk task adapters |
 | `src/workqueue/handlers/conversations/scene.py` | generation → stored rows |
 | `src/barsukas/routes/conversations.py` | the new-dialog form, staging, name registration |
 | `src/barsukas/routes/names.py` | the names registry UI |
@@ -162,7 +165,7 @@ for production), which creates the name tables and adds
   sentences go through the ordinary translation pipeline afterwards, which does
   not yet consult `NameTranslation` when rendering a name into the target
   language. Until it does, renderings are curated but not consumed.
-* **Conversation export is still disabled** in `agents/ungurys` (it was turned
+* **Conversation export is still disabled** in `exports/wireword` (it was turned
   off when there were no conversations to export). Turning it back on is a
   separate decision about what reaches Trakaido.
 * **Irregular forms depend on stored derivative forms.** "came" resolves to

@@ -51,7 +51,7 @@ Barsukas routes are organized as Flask blueprints. The main top-level paths are:
 - `/dictionary` — dictionary-facing routes.
 - `/pattern-sentences` — pattern sentence tooling.
 - `/rhymes` — rhyme exploration views.
-- `/pradzia` — start-page style utilities.
+- `/pradzia` — database maintenance utilities (legacy route name).
 - `/rapid-review` — rapid review hub.
 - `/sync` — sync hub.
 - `/sync/lemmas` — lemma release sync.

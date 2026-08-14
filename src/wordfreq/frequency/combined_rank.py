@@ -142,7 +142,7 @@ def _corpus_weights(session: Session) -> Dict[str, float]:
     """Map enabled wordfreq corpus name -> ``Corpus.corpus_weight``.
 
     Falls back to the in-code ``CorpusConfig.corpus_weight`` when no DB row
-    exists yet (fresh DB before pradzia sync). Only returns weights > 0.
+    exists yet (fresh DB before corpus configuration sync). Only returns weights > 0.
     """
     db_rows = {row.name: row.corpus_weight for row in session.query(Corpus).all()}
     weights: Dict[str, float] = {}

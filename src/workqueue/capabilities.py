@@ -88,12 +88,82 @@ IDIOM_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
 )
 
 
+CONVERSATION_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
+    CapabilityDescriptor(
+        task_type="conversations.generate",
+        summary="Generate a vocabulary-driven conversation and store its sentences.",
+        target_kind="conversation",
+        required_payload=("words", "level"),
+        optional_payload=("num_sentences",),
+        writes=True,
+        produces=("a conversation with English sentence rows",),
+        preconditions=("the selected words exist",),
+    ),
+    CapabilityDescriptor(
+        task_type="conversations.definitions.generate",
+        summary="Generate a narrative that compares or defines selected words.",
+        target_kind="conversation",
+        required_payload=("words", "level"),
+        optional_payload=("num_sentences",),
+        writes=True,
+        produces=("a definition conversation with English sentence rows",),
+        preconditions=("the selected words exist",),
+    ),
+)
+
+
 # The ``produces`` and ``preconditions`` strings below are written to match each
 # other across capabilities: a planner satisfies a precondition by finding a
 # capability whose ``produces`` names the same thing. "sentence translations in
 # the target languages" appears as both, deliberately. Keep new descriptions in
 # that vocabulary rather than paraphrasing.
 SENTENCE_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
+    CapabilityDescriptor(
+        task_type="sentences.patterns.generate",
+        summary="Generate English sentence candidates from reusable patterns.",
+        target_kind="sentence",
+        required_payload=(),
+        optional_payload=("pattern_ids", "all_patterns", "max_combinations"),
+        writes=True,
+        produces=("sentence rows with English translations and lemma hints",),
+        preconditions=("the selected patterns have compatible lemmas",),
+    ),
+    CapabilityDescriptor(
+        task_type="sentences.examples.generate",
+        summary="Generate pattern, basic LLM, or vocabulary-guided examples for one lemma.",
+        target_kind="lemma",
+        required_payload=("lemma_id", "mode"),
+        optional_payload=(
+            "num_sentences",
+            "max_combinations",
+            "difficulty_context",
+            "max_vocabulary_level",
+            "model",
+        ),
+        writes=True,
+        produces=("sentence rows with English translations and lemma hints",),
+        preconditions=("the lemma is a noun, verb, or adjective",),
+    ),
+    CapabilityDescriptor(
+        task_type="sentences.translations.verify",
+        summary="Verify one sentence's translations and persist their verdicts.",
+        target_kind="sentence",
+        required_payload=("sentence_id",),
+        optional_payload=("languages", "model"),
+        writes=True,
+        produces=("sentence translation verification verdicts",),
+        preconditions=("the sentence has an English and target-language translation",),
+    ),
+    CapabilityDescriptor(
+        task_type="sentences.links.verify",
+        summary="Audit one sentence's stored lemma links and report problems.",
+        target_kind="sentence",
+        required_payload=("sentence_id",),
+        optional_payload=("languages", "model"),
+        writes=False,
+        produces=("sentence lemma-link findings in the task result",),
+        preconditions=("the sentence has linked lemma rows",),
+    ),
     CapabilityDescriptor(
         task_type="sentences.import",
         summary=(
@@ -160,6 +230,16 @@ SENTENCE_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
         preconditions=("the sentence exists and has at least one translation",),
     ),
     CapabilityDescriptor(
+        task_type="sentences.translate.simple",
+        summary="Add text-only sentence translations with TranslateGemma.",
+        target_kind="sentence",
+        required_payload=("sentence_id",),
+        optional_payload=("selected_languages",),
+        writes=True,
+        produces=("sentence translations in the target languages",),
+        preconditions=("the sentence has an English translation",),
+    ),
+    CapabilityDescriptor(
         task_type="sentences.translate.batch_submit",
         summary="Submit stored sentences for translation through the batch API.",
         target_kind="sentence",
@@ -192,8 +272,88 @@ SENTENCE_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
 )
 
 
+WORD_CAPABILITIES: Tuple[CapabilityDescriptor, ...] = (
+    CapabilityDescriptor(
+        task_type="words.translations",
+        summary="Generate missing translations for one lemma.",
+        target_kind="lemma",
+        required_payload=("lemma_id",),
+        optional_payload=("languages", "model"),
+        writes=True,
+        produces=("lemma translations in the requested languages",),
+        preconditions=("the lemma exists",),
+    ),
+    CapabilityDescriptor(
+        task_type="words.translations.regenerate",
+        summary="Replace non-Lithuanian translations for one lemma.",
+        target_kind="lemma",
+        required_payload=("lemma_id",),
+        optional_payload=("model",),
+        writes=True,
+        produces=("regenerated lemma translations",),
+        preconditions=("the lemma exists",),
+    ),
+    CapabilityDescriptor(
+        task_type="words.translations.verify",
+        summary="Verify one lemma's translations and persist their verdicts.",
+        target_kind="lemma",
+        required_payload=("lemma_id",),
+        optional_payload=("languages", "model"),
+        writes=True,
+        produces=("word translation verification verdicts",),
+        preconditions=("the lemma has translations in the requested languages",),
+    ),
+    CapabilityDescriptor(
+        task_type="words.forms",
+        summary="Generate grammatical forms for one lemma and language.",
+        target_kind="lemma",
+        required_payload=("lemma_id", "language_code"),
+        optional_payload=("model",),
+        writes=True,
+        produces=("derivative forms in the requested language",),
+        preconditions=("the lemma has a translation in the requested language",),
+    ),
+    CapabilityDescriptor(
+        task_type="words.pronunciations",
+        summary="Generate missing pronunciations for one lemma and language.",
+        target_kind="lemma",
+        required_payload=("lemma_id", "language_code"),
+        optional_payload=("base_forms_only", "all_forms_pronunciation", "model"),
+        writes=True,
+        produces=("pronunciations for the requested language",),
+        preconditions=("the lemma has translated or derivative forms",),
+    ),
+    CapabilityDescriptor(
+        task_type="words.synonyms",
+        summary="Generate synonyms and alternative forms for one lemma and language.",
+        target_kind="lemma",
+        required_payload=("lemma_id", "language_code"),
+        optional_payload=("form_type", "model"),
+        writes=True,
+        produces=("synonyms and alternative forms in the requested language",),
+        preconditions=("the lemma has a translation in the requested language",),
+    ),
+    CapabilityDescriptor(
+        task_type="words.grammar_facts",
+        summary="Generate one grammar fact for one lemma and language.",
+        target_kind="lemma",
+        required_payload=("lemma_id", "language_code", "fact_type"),
+        optional_payload=("model",),
+        writes=True,
+        produces=("a grammar fact in the requested language",),
+        preconditions=("the lemma matches the grammar fact's part of speech",),
+    ),
+)
+
+
 CAPABILITY_DESCRIPTORS: Dict[str, CapabilityDescriptor] = {
-    descriptor.task_type: descriptor for descriptor in (*IDIOM_CAPABILITIES, *SENTENCE_CAPABILITIES)
+    descriptor.task_type: descriptor
+    for descriptor in (
+        *CONVERSATION_CAPABILITIES,
+        *IDIOM_CAPABILITIES,
+        *SENTENCE_CAPABILITIES,
+        *WORD_CAPABILITIES,
+    )
 }
 
 

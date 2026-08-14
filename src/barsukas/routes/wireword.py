@@ -21,10 +21,10 @@ from flask import (
 )
 from flask.typing import ResponseReturnValue
 
-from agents.ungurys import (
+from exports.wireword.service import (
     SUPPORTED_LANGUAGES,
     SUPPORTED_NON_ENGLISH_SOURCE_LANGUAGES,
-    UngurysAgent,
+    WirewordExportService,
 )
 from storage.backend.config import DataSourceConfig
 
@@ -100,7 +100,7 @@ def export_all_languages(
                     # Handle Chinese: export both Simplified and Traditional
                     if lang_code == "zh":
                         # Export Simplified Chinese
-                        agent_simplified = UngurysAgent(
+                        simplified_exporter = WirewordExportService(
                             config=config,
                             language=lang_code,
                             simplified_chinese=True,
@@ -108,8 +108,8 @@ def export_all_languages(
                             source_language=source_language,
                         )
                         if apply_level_overrides:
-                            agent_simplified.apply_level_overrides()
-                        success_simp, results_simp = agent_simplified.export_wireword_directory(
+                            simplified_exporter.apply_level_overrides()
+                        success_simp, results_simp = simplified_exporter.export_wireword_directory(
                             cdn_upload=cdn_upload
                         )
                         simplified_label = f"{result_label} (Simplified)"
@@ -121,7 +121,7 @@ def export_all_languages(
                             errors.append(simplified_label)
 
                         # Export Traditional Chinese
-                        agent_traditional = UngurysAgent(
+                        traditional_exporter = WirewordExportService(
                             config=config,
                             language=lang_code,
                             simplified_chinese=False,
@@ -129,8 +129,8 @@ def export_all_languages(
                             source_language=source_language,
                         )
                         if apply_level_overrides:
-                            agent_traditional.apply_level_overrides()
-                        success_trad, results_trad = agent_traditional.export_wireword_directory(
+                            traditional_exporter.apply_level_overrides()
+                        success_trad, results_trad = traditional_exporter.export_wireword_directory(
                             cdn_upload=cdn_upload
                         )
                         traditional_label = f"{result_label} (Traditional)"
@@ -142,15 +142,15 @@ def export_all_languages(
                             errors.append(traditional_label)
                     else:
                         # Export other languages
-                        agent = UngurysAgent(
+                        exporter = WirewordExportService(
                             config=config,
                             language=lang_code,
                             include_unreviewed_audio=include_unreviewed_audio,
                             source_language=source_language,
                         )
                         if apply_level_overrides:
-                            agent.apply_level_overrides()
-                        success, results = agent.export_wireword_directory(cdn_upload=cdn_upload)
+                            exporter.apply_level_overrides()
+                        success, results = exporter.export_wireword_directory(cdn_upload=cdn_upload)
                         all_results[result_label] = {"success": success, "results": results}
                         if not success:
                             errors.append(result_label)
@@ -231,18 +231,18 @@ def default_export() -> ResponseReturnValue:
             continue
         source_label = SUPPORTED_SOURCE_LANGUAGES.get(source_language, source_language)
         try:
-            agent = UngurysAgent(
+            exporter = WirewordExportService(
                 config=config,
                 language=LITHUANIAN_DEFAULT_TARGET,
                 include_unreviewed_audio=True,
                 source_language=source_language,
             )
-            agent.apply_level_overrides()
-            success, results = agent.export_wireword_directory(cdn_upload=cdn_upload)
+            exporter.apply_level_overrides()
+            success, results = exporter.export_wireword_directory(cdn_upload=cdn_upload)
             variant_results[source_label] = {
                 "success": success,
                 "results": results,
-                "output_dir": agent.get_language_output_dir(),
+                "output_dir": exporter.get_language_output_dir(),
             }
             if not success:
                 variant_errors.append(source_label)
@@ -345,8 +345,8 @@ def export_wireword() -> ResponseReturnValue:
         # Create DataSourceConfig
         config = _get_config()
 
-        # Initialize agent
-        agent = UngurysAgent(
+        # Initialize exporter
+        exporter = WirewordExportService(
             config=config,
             language=language if language != "zh-Hant" else "zh",
             simplified_chinese=simplified_chinese,
@@ -357,7 +357,7 @@ def export_wireword() -> ResponseReturnValue:
         # Apply level overrides if requested
         override_results = None
         if apply_level_overrides:
-            override_results = agent.apply_level_overrides()
+            override_results = exporter.apply_level_overrides()
             country_applied = override_results.get("country_overrides", {}).get("applied", False)
             family_applied = override_results.get("family_relation_overrides", {}).get(
                 "applied", False
@@ -376,7 +376,7 @@ def export_wireword() -> ResponseReturnValue:
                 source_label = SUPPORTED_SOURCE_LANGUAGES.get(
                     selected_source_language, selected_source_language
                 )
-                variant_agent = UngurysAgent(
+                variant_exporter = WirewordExportService(
                     config=config,
                     language=language if language != "zh-Hant" else "zh",
                     simplified_chinese=simplified_chinese,
@@ -384,12 +384,12 @@ def export_wireword() -> ResponseReturnValue:
                     source_language=selected_source_language,
                 )
                 if apply_level_overrides:
-                    variant_agent.apply_level_overrides()
-                success, results = variant_agent.export_wireword_directory(cdn_upload=cdn_upload)
+                    variant_exporter.apply_level_overrides()
+                success, results = variant_exporter.export_wireword_directory(cdn_upload=cdn_upload)
                 variant_results[source_label] = {
                     "success": success,
                     "results": results,
-                    "output_dir": variant_agent.get_language_output_dir(),
+                    "output_dir": variant_exporter.get_language_output_dir(),
                 }
                 if not success:
                     variant_errors.append(source_label)
@@ -410,7 +410,7 @@ def export_wireword() -> ResponseReturnValue:
 
         if export_type == "directory":
             # Export to directory structure (includes sentences automatically via UNGURYS)
-            success, results = agent.export_wireword_directory(cdn_upload=cdn_upload)
+            success, results = exporter.export_wireword_directory(cdn_upload=cdn_upload)
             _flash_cdn_upload_status(results)
 
             if success:
@@ -444,7 +444,7 @@ def export_wireword() -> ResponseReturnValue:
                     files_created=files_created,
                     levels_exported=levels_exported,
                     subtypes_exported=subtypes_exported,
-                    output_dir=agent.get_language_output_dir(),
+                    output_dir=exporter.get_language_output_dir(),
                     cdn_upload=results.get("cdn_upload"),
                 )
             else:
@@ -456,7 +456,7 @@ def export_wireword() -> ResponseReturnValue:
             with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as tmp_file:
                 tmp_path = tmp_file.name
 
-            success, stats = agent.export_wireword_single(
+            success, stats = exporter.export_wireword_single(
                 output_path=tmp_path,
                 difficulty_level=difficulty_filter,
                 pos_type=pos_filter,

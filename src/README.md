@@ -4,7 +4,8 @@
 
 ```
 src/
-├── storage/               # Database layer (ORM, models, CRUD)
+├── storage/               # Database layer (ORM, models, CRUD, administration)
+│   └── admin/             # Empty-DB and data/release bootstrap workflows
 ├── wordfreq/              # Linguistic database system (core)
 │   ├── translation/       # LLM-based translation and form generation
 │   ├── frequency/         # Word frequency analysis
@@ -17,8 +18,10 @@ src/
 ├── barsukas/              # Flask web interface
 ├── clients/               # Unified LLM client (OpenAI, Anthropic, Gemini, Ollama)
 ├── benchmarks/            # LLM benchmark suite
+├── exports/               # Export services and formats
+│   └── wireword/          # WireWord format export
+├── reports/               # Read-only database coverage and distribution reports
 ├── util/                  # General utilities
-├── wireword/              # WireWord format export
 ├── langtools/             # Language processing tools
 ├── ipa/                   # IPA pronunciation utilities
 ├── audioshoe/             # Audio generation (eSpeak, Piper, Coqui, Qwen)
@@ -42,7 +45,6 @@ usage and arguments.
 
 | Agent | Animal | Purpose |
 |-------|--------|---------|
-| pradzia | Beginning | Database initialization |
 | lokys | Bear | English lemma validation |
 | dramblys | Elephant | Missing words detector |
 | bebras | Beaver | Database integrity checker |
@@ -50,14 +52,14 @@ usage and arguments.
 | vilkas | Wolf | Word forms checker |
 | sernas | Boar | Synonym/alternative form generator |
 | papuga | Parrot | Pronunciation validation |
-| zvirblis | Sparrow | Example sentence generator |
-| buivolas | Water Buffalo | Pattern-based sentence generator |
+| zvirblis | Sparrow | Finds sentence translation work |
+| buivolas | Water Buffalo | Finds pattern/LLM sentence generation work |
 | lape | Fox | Grammar facts generator |
-| sarka | Magpie | Conversation sentence generator |
+| sarka | Magpie | Plans vocabulary-driven conversation work |
 | strazdas | Thrush | eSpeak-NG audio generation |
 | vieversys | Lark | OpenAI TTS audio generation |
 | povas | Peacock | HTML report generator |
-| ungurys | Eel | WireWord export |
+| ungurys | Eel | Compatibility wrapper for `exports.wireword` |
 | elnias | Deer | WireWord bootstrap export |
 | erelis | Eagle | False lemma match detection in sentences |
 | gandras | Stork | Audio manifest downloader |

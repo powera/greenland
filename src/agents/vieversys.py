@@ -21,7 +21,7 @@ import sys
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, cast
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -36,13 +36,14 @@ from agents.common.common_args import (
     add_backend_args,
     add_common_args,
     add_guid_arg,
+    add_language_args,
     add_level_args,
     add_llm_args,
     add_processing_args,
     confirm_operation,
     get_data_source_config,
 )
-from agents.common.lemma_selection import (
+from words.lemma_selection import (
     LemmaQueryBuilder,
     apply_limit_and_sample_rate,
     get_lemmas_for_agent,
@@ -154,7 +155,7 @@ class VieversysAgent:
         Returns:
             Translation text or None if not available
         """
-        return get_translation(session, lemma, language_code)
+        return cast(Optional[str], get_translation(session, lemma, language_code))
 
     def _upload_to_staging_path(
         self,
@@ -1314,6 +1315,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     add_processing_args(parser)
     add_level_args(parser)
     add_guid_arg(parser, help_text="Process only the lemma with this GUID")
+    add_language_args(parser)
     add_backend_args(parser)
 
     # Mode selection
@@ -1326,11 +1328,6 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Vieversys-specific arguments
     parser.add_argument("--output-dir", help="Output directory for generated audio")
-    parser.add_argument(
-        "--language",
-        choices=sorted(TIER_1_LANGUAGES + TIER_2_LANGUAGES + TIER_3_LANGUAGES),
-        help="Target language code (tier 1-3 languages; required for populate-only and regenerate modes)",
-    )
     parser.add_argument(
         "--tts-engine",
         choices=["openai", "polly", "azure", "google"],
@@ -1404,12 +1401,22 @@ def main() -> None:
     parser = get_argument_parser()
     args = parser.parse_args()
 
+    if args.languages and len(args.languages) != 1:
+        parser.error("Vieversys accepts exactly one value for --languages")
+    language_code = args.languages[0].lower() if args.languages else None
+    supported_languages = set(TIER_1_LANGUAGES + TIER_2_LANGUAGES + TIER_3_LANGUAGES)
+    if language_code is not None and language_code not in supported_languages:
+        parser.error(
+            f"Unsupported language '{language_code}'. Choose from: "
+            + ", ".join(sorted(supported_languages))
+        )
+
     # Create configuration from args (always returns a valid config with defaults)
     config = get_data_source_config(args)
 
     # Validate mode-specific requirements
-    if args.mode in ["populate-only", "regenerate"] and not args.language:
-        print(f"Error: --language is required for --mode {args.mode}")
+    if args.mode in ["populate-only", "regenerate"] and language_code is None:
+        print(f"Error: --languages is required for --mode {args.mode}")
         sys.exit(1)
 
     # Create agent with config
@@ -1433,7 +1440,7 @@ def main() -> None:
             cloud_voice_names = args.voices
         else:
             # Provide defaults for cloud engines
-            lang = args.language or "es"
+            lang = language_code or "es"
             if tts_engine == "polly":
                 defaults = PollyVoice.get_voices_for_language(lang)
                 cloud_voice_names = [v.voice_id for v in defaults] if defaults else []
@@ -1476,8 +1483,8 @@ def main() -> None:
     lemmas = None
     if args.mode in ["populate-only", "regenerate"] and not args.generate_sentences:
         # Require language for lemma processing
-        if not args.language:
-            print("Error: --language is required for lemma processing")
+        if language_code is None:
+            print("Error: --languages is required for lemma processing")
             sys.exit(1)
 
         session = agent.get_session()
@@ -1503,21 +1510,21 @@ def main() -> None:
         print("\nAudio Coverage Report")
         print("=" * 80)
         print("This mode reports on existing audio files in the AudioQualityReview table.")
-        print("Use --language to filter by language.")
+        print("Use --languages to filter by language.")
 
         session = agent.get_session()
         try:
             from sqlalchemy import func
 
             # Get counts by language and voice
-            if args.language:
+            if language_code:
                 lang_query = (
                     session.query(AudioQualityReview.voice_name, func.count(AudioQualityReview.id))
-                    .filter(AudioQualityReview.language_code == args.language)
+                    .filter(AudioQualityReview.language_code == language_code)
                     .group_by(AudioQualityReview.voice_name)
                 )
                 lang_results = lang_query.all()
-                print(f"\nLanguage: {args.language}")
+                print(f"\nLanguage: {language_code}")
                 for voice_name, count in lang_results:
                     print(f"  {voice_name}: {count} audio files")
             else:
@@ -1546,9 +1553,9 @@ def main() -> None:
         try:
             existing_query = session.query(AudioQualityReview)
 
-            if args.language:
+            if language_code:
                 existing_query = existing_query.filter(
-                    AudioQualityReview.language_code == args.language
+                    AudioQualityReview.language_code == language_code
                 )
 
             if args.limit:
@@ -1568,14 +1575,14 @@ def main() -> None:
 
     elif args.mode in ["populate-only", "regenerate"]:
         # Validate language is required
-        if not args.language:
-            print(f"Error: --language is required for --mode {args.mode}")
+        if language_code is None:
+            print(f"Error: --languages is required for --mode {args.mode}")
             sys.exit(1)
 
         # Check if we're generating sentences or lemmas
         if args.generate_sentences:
             # Generate audio for sentences
-            voice_count = len(voices) if voices else len(DEFAULT_GPT_VOICES.get(args.language, []))
+            voice_count = len(voices) if voices else len(DEFAULT_GPT_VOICES.get(language_code, []))
             estimated_calls = args.sentence_limit * voice_count
 
             if args.dry_run:
@@ -1603,7 +1610,7 @@ def main() -> None:
             # Run sentence batch generation
             start_time = datetime.now()
             batch_results = agent.generate_sentences_batch(
-                language_code=args.language,
+                language_code=language_code,
                 guid=args.guid,
                 limit=args.sentence_limit,
                 voices=voices,
@@ -1632,7 +1639,7 @@ def main() -> None:
             lemmas_with_translation = []
             if lemmas:
                 for lemma in lemmas:
-                    if agent.get_translation_text(session, lemma, args.language):
+                    if agent.get_translation_text(session, lemma, language_code):
                         lemmas_with_translation.append(lemma)
             lemma_count = len(lemmas_with_translation)
 
@@ -1643,7 +1650,7 @@ def main() -> None:
                 selected_voice_names = [voice.path_name for voice in voices]
             else:
                 selected_voice_names = [
-                    voice.path_name for voice in DEFAULT_GPT_VOICES.get(args.language, [])
+                    voice.path_name for voice in DEFAULT_GPT_VOICES.get(language_code, [])
                 ]
 
             lemma_guids = [lemma.guid for lemma in lemmas_with_translation]
@@ -1654,7 +1661,7 @@ def main() -> None:
                 existing_rows = (
                     session.query(AudioQualityReview.guid, AudioQualityReview.voice_name)
                     .filter(
-                        AudioQualityReview.language_code == args.language,
+                        AudioQualityReview.language_code == language_code,
                         AudioQualityReview.guid.in_(lemma_guids),
                         AudioQualityReview.voice_name.in_(selected_voice_names),
                     )
@@ -1675,7 +1682,7 @@ def main() -> None:
         elif voices:
             voice_count = len(voices)
         else:
-            voice_count = len(DEFAULT_GPT_VOICES.get(args.language, []))
+            voice_count = len(DEFAULT_GPT_VOICES.get(language_code, []))
         estimated_calls = lemma_count * voice_count
 
         engine_label = tts_engine.title() if tts_engine != "openai" else "OpenAI"
@@ -1725,7 +1732,7 @@ def main() -> None:
         # Run batch generation
         start_time = datetime.now()
         batch_results = agent.generate_batch(
-            language_code=args.language,
+            language_code=language_code,
             lemmas=lemmas,
             voices=voices,
             cloud_voice_names=cloud_voice_names,
@@ -1735,10 +1742,10 @@ def main() -> None:
         # Generate manifests if requested
         if args.generate_manifests:
             logger.info("Generating manifests...")
-            voice_list = voices or DEFAULT_GPT_VOICES.get(args.language, [])
+            voice_list = voices or DEFAULT_GPT_VOICES.get(language_code, [])
             for voice in voice_list:
                 try:
-                    manifest_path = agent.generate_manifest(args.language, voice.path_name)
+                    manifest_path = agent.generate_manifest(language_code, voice.path_name)
                     logger.info(f"Generated manifest: {manifest_path}")
                 except Exception as e:
                     logger.error(f"Error generating manifest for {voice.path_name}: {e}")

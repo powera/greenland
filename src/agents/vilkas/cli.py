@@ -23,6 +23,7 @@ from agents.common.common_args import (
     get_data_source_config,
     validate_cache_args,
 )
+from workqueue.task_queue import TaskType, enqueue_task, get_active_task
 
 # Define supported languages and their forms (matches agent.py SUPPORTED_LANGUAGES)
 SUPPORTED_TASKS = {
@@ -111,7 +112,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     add_guid_arg(parser, help_text="Process only the lemma with this GUID")
     add_level_args(parser)
     add_pos_type_args(parser)
-    add_language_args(parser, multiple=True)
+    add_language_args(parser)
     add_backend_args(parser)
 
     # Build task choices dynamically from module-level SUPPORTED_TASKS
@@ -193,8 +194,6 @@ def enqueue_vilkas_work(
     Returns:
         Dictionary with enqueue statistics
     """
-    from workqueue.task_queue import enqueue_task
-
     enqueued_count = 0
     skipped_count = 0
 
@@ -219,18 +218,21 @@ def enqueue_vilkas_work(
                 continue
 
             if not dry_run:
-                dedup_key = f"vilkas_{lang}_{pos}_{lemma.id}"
+                dedup_key = f"{TaskType.WORDS_FORMS}:{lemma.id}:{lang}"
+                legacy_dedup_key = f"vilkas_{lang}_{pos}_{lemma.id}"
+                if get_active_task(session, legacy_dedup_key) is not None:
+                    skipped_count += 1
+                    continue
                 result = enqueue_task(
                     session,
-                    task_type="words.forms",
+                    task_type=TaskType.WORDS_FORMS,
                     target_type="lemma",
                     target_id=lemma.id,
                     payload={
+                        "schema_version": 1,
                         "language_code": lang,
                         "lemma_id": lemma.id,
-                        "pos_type": pos,
-                        "lemma_guid": lemma.guid,
-                        "lemma_text": lemma.lemma_text,
+                        "source_component": "agents.vilkas",
                     },
                     dedup_key=dedup_key,
                 )
@@ -255,9 +257,9 @@ def main() -> None:
     """Main entry point for the vilkas agent."""
     # Import here to avoid circular imports
     from agents.common.cli_display import display_language_header
-    from agents.common.lemma_selection import get_lemmas_for_agent
+    from words.lemma_selection import get_lemmas_for_agent
     from agents.vilkas import display
-    from agents.vilkas.agent import VilkasAgent
+    from words.inflections import InflectionService
 
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -292,7 +294,7 @@ def main() -> None:
     config = get_data_source_config(args, default_model="gpt-5.4-mini")
 
     # Create agent with unified configuration
-    agent = VilkasAgent(config=config)
+    agent = InflectionService(config=config)
 
     # Require --task
     if not args.task:

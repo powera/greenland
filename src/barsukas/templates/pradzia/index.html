@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}PRADZIA - Database Initialization{% endblock %}
+{% block title %}Database Administration{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ url_for('agents_launcher.list_agents') }}">Agents</a></li>
-            <li class="breadcrumb-item active">Pradzia</li>
+            <li class="breadcrumb-item active">Database Administration</li>
         </ol>
     </nav>
 
     <h1>
-        <i class="bi bi-play-circle"></i> PRADZIA - Database Initialization
+        <i class="bi bi-database-gear"></i> Database Administration
     </h1>
     <p class="lead">
         Initialize and maintain the wordfreq database, including corpus configuration synchronization,
@@ -107,11 +107,10 @@
     {% if not stats.is_initialized %}
     <div class="alert alert-info">
         <h5><i class="bi bi-lightbulb"></i> Getting Started</h5>
-        <p>Your database appears to be empty. Here are your options:</p>
+        <p>Your database appears to be empty.</p>
         <ul class="mb-0">
-            <li><strong>Full Initialization:</strong> Use "Full Init" to set up corpora and load frequency data</li>
-            <li><strong>Bootstrap from JSON:</strong> If you have a trakaido JSON export, use "Bootstrap" to import existing data</li>
-            <li><strong>Sync Release:</strong> Use the <a href="/sync">Sync Release</a> tool to import lemmas from data/release JSONL files</li>
+            <li>Build it from <code>data/release</code> with <code>PYTHONPATH=src python bootstrap_database.py</code>.</li>
+            <li>Use <code>--empty</code> only for a schema-plus-frequency database without release content.</li>
         </ul>
     </div>
     {% endif %}
@@ -243,92 +242,17 @@
             </div>
         </div>
 
-        <!-- Full Initialization -->
-        <div class="col-md-6 mb-4">
-            <div class="card h-100 border-primary">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="bi bi-lightning"></i> Full Initialization
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">
-                        Complete database initialization in one step:
-                    </p>
-                    <ol class="small text-muted">
-                        <li>Ensure database tables exist</li>
-                        <li>Sync corpus configurations</li>
-                        <li>Load all enabled corpora</li>
-                        <li>Calculate combined ranks</li>
-                    </ol>
-                    <p><code>--init-full</code></p>
-                    <form method="POST" action="{{ url_for('pradzia.execute_init_full') }}">
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="initDryRun" name="dry_run">
-                            <label class="form-check-label" for="initDryRun">
-                                Dry run (preview all steps without executing)
-                            </label>
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-play-fill"></i> Run Full Init
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bootstrap from JSON -->
-        <div class="col-md-6 mb-4">
-            <div class="card h-100 border-secondary">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0">
-                        <i class="bi bi-file-earmark-code"></i> Bootstrap from JSON
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">
-                        Bootstrap the database with trakaido data from a JSON export file.
-                        <strong>Only for initial setup</strong> - will abort if Lithuanian translations already exist.
-                    </p>
-                    <p><code>--bootstrap JSON_PATH</code></p>
-                    <form method="POST" action="{{ url_for('pradzia.execute_bootstrap') }}">
-                        <div class="mb-3">
-                            <label for="jsonPath" class="form-label fw-bold">JSON File Path</label>
-                            <input type="text" class="form-control" id="jsonPath" name="json_path"
-                                   placeholder="/path/to/trakaido_export.json" required>
-                            <div class="form-text">Path to the trakaido JSON export file</div>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="bootstrapDryRun" name="dry_run">
-                            <label class="form-check-label" for="bootstrapDryRun">
-                                Dry run (preview without importing)
-                            </label>
-                        </div>
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="noUpdateDifficulty" name="no_update_difficulty">
-                            <label class="form-check-label" for="noUpdateDifficulty">
-                                Do not update difficulty levels on existing lemmas
-                            </label>
-                        </div>
-                        <button type="submit" class="btn btn-secondary">
-                            <i class="bi bi-play-fill"></i> Bootstrap
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <!-- Help Section -->
     <div class="card mt-4">
         <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-question-circle"></i> About PRADZIA</h5>
+            <h5 class="mb-0"><i class="bi bi-question-circle"></i> About database administration</h5>
         </div>
         <div class="card-body">
             <p>
-                PRADZIA ("beginning" in Lithuanian) is the database initialization agent.
-                It manages the setup and maintenance of the wordfreq database.
+                This page runs maintenance operations against an existing database.
+                Database creation is intentionally a repository-level script rather than an agent.
             </p>
             <h6>Typical Workflow:</h6>
             <ol>
@@ -337,9 +261,9 @@
                 <li><strong>Load Corpora</strong> - Import word frequency data from corpus files</li>
                 <li><strong>Calculate Ranks</strong> - Compute combined frequency rankings</li>
             </ol>
-            <p>Or use <strong>Full Initialization</strong> to run all steps at once.</p>
             <h6>Command Line Usage:</h6>
-            <pre class="bg-light p-2 border rounded">PYTHONPATH=src python src/agents/pradzia.py --help</pre>
+            <pre class="bg-light p-2 border rounded">PYTHONPATH=src python bootstrap_database.py --help
+PYTHONPATH=src python -m storage.admin --help</pre>
         </div>
     </div>
 </div>

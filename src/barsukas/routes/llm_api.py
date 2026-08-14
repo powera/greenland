@@ -33,14 +33,14 @@ from flask import Blueprint, g, jsonify, request
 from flask.typing import ResponseReturnValue
 
 import constants
-from agents.lokys import LokysAgent
-from agents.papuga import PapugaAgent
 from agents.strazdas import StrazdasAgent
 from agents.vieversys import VieversysAgent
-from agents.voras.agent import VorasAgent
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import BarsukasTask, Lemma
 from workqueue.task_queue import TaskStatus, TaskType, enqueue_task
+from words.pronunciation import PronunciationService
+from words.translation_workflow import TranslationWorkflow
+from words.validation import LemmaValidationService
 
 from clients.audio.gpt_voices import GptVoice
 from clients.keys import load_key
@@ -284,14 +284,14 @@ def api_check_translations() -> ResponseReturnValue:
 
     try:
         config = _get_config_from_request(data)
-        agent = VorasAgent(config=config)
+        workflow = TranslationWorkflow(config=config)
 
         # Gather translations for this word
         from storage.translation_helpers import LANGUAGE_FIELDS
 
         translations = {}
         for lc in LANGUAGE_FIELDS.keys():
-            translation = agent.get_translation(g.db, lemma, lc)
+            translation = workflow.get_translation(g.db, lemma, lc)
             if translation and translation.strip():
                 translations[lc] = translation
 
@@ -401,7 +401,7 @@ def api_add_missing_translations() -> ResponseReturnValue:
                 )
 
         config = _get_config_from_request(data)
-        agent = VorasAgent(config=config)
+        workflow = TranslationWorkflow(config=config)
         lemmas: List[Lemma] = []
         missing_guids: List[str] = []
         for guid_value in guids:
@@ -413,7 +413,7 @@ def api_add_missing_translations() -> ResponseReturnValue:
         if not lemmas:
             return _build_error_response("No requested GUIDs were found", 404)
 
-        result = agent.fix_missing_translations(
+        result = workflow.fix_missing_translations(
             language_code=languages, lemmas=lemmas, dry_run=False
         )
 
@@ -470,10 +470,10 @@ def api_generate_pronunciations() -> ResponseReturnValue:
 
     try:
         config = _get_config_from_request(data)
-        agent = PapugaAgent(config=config)
+        service = PronunciationService(config=config)
 
         # Generate pronunciations for the lemma using populate_missing_pronunciations
-        result = agent.populate_missing_pronunciations(
+        result = service.populate_missing_pronunciations(
             lemma_id=lemma.id,
             only_english=only_english,
             only_base_forms=False,
@@ -629,10 +629,10 @@ def api_check_definition() -> ResponseReturnValue:
 
     try:
         config = _get_config_from_request(data)
-        agent = LokysAgent(config=config)
+        service = LemmaValidationService(config=config)
 
         # Use the agent's helper method
-        result = agent.check_single_definition(lemma, session=g.db)
+        result = service.check_single_definition(lemma, session=g.db)
 
         return _build_success_response(
             {
@@ -681,10 +681,10 @@ def api_check_disambiguation() -> ResponseReturnValue:
 
     try:
         config = _get_config_from_request(data)
-        agent = LokysAgent(config=config)
+        service = LemmaValidationService(config=config)
 
         # Use the agent's helper method
-        result = agent.check_single_disambiguation(lemma, session=g.db)
+        result = service.check_single_disambiguation(lemma, session=g.db)
 
         return _build_success_response(
             {

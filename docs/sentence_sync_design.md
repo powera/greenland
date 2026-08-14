@@ -209,7 +209,8 @@ def next_sentence_guid(session) -> str:
 
 All sentence creation paths must call this to assign a GUID at creation time:
 - Sync import (additions from release files)
-- Agent sentence generation (buivolas, zvirdlis, etc.)
+- Sentence generation services (`sentences.generation`, including work
+  discovered through the Buivolas compatibility CLI)
 - Any future manual sentence creation in Barsukas
 
 ### Export: `sqlite-to-sentence-release`

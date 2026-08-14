@@ -22,6 +22,7 @@ database.
 Top-level files include `categorychoice*.json` (category metadata for
 Trakaido exports) and `lt_sample_*.txt` (Lithuanian sample texts).
 
-Frequency corpora are loaded into the database by the `pradzia` agent;
+Frequency corpora are loaded during `bootstrap_database.py` or with
+`python -m storage.admin --load`;
 `data/release` is round-tripped via the Barsukas `/sync` UI and
 `storage/migrate.py`.

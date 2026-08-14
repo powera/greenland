@@ -40,9 +40,9 @@ def test_coverage_mode_uses_task_language_instead_of_full_lithuanian_report() ->
         patch("argparse.ArgumentParser.parse_args", return_value=_Args()),
         patch("agents.vilkas.cli.validate_cache_args"),
         patch("agents.vilkas.cli.get_data_source_config", return_value=object()),
-        patch("agents.common.lemma_selection.get_lemmas_for_agent", return_value=[lemma]),
+        patch("words.lemma_selection.get_lemmas_for_agent", return_value=[lemma]),
         patch("agents.vilkas.display.print_fix_results") as mock_print_results,
-        patch("agents.vilkas.agent.VilkasAgent") as mock_agent_class,
+        patch("words.inflections.InflectionService") as mock_agent_class,
     ):
         mock_agent = mock_agent_class.return_value
         mock_agent.get_session.return_value = session_stub

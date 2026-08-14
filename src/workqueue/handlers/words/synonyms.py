@@ -11,13 +11,15 @@ from workqueue.tools import get_lemma_or_raise, workqueue_payload_handler
 def do_generate_synonyms(
     session: Any,
     lemma_id: int,
-    lang_code: str,
+    language_code: str = "en",
+    lang_code: Optional[str] = None,
     form_type: Optional[str] = None,
     **_: Any,
 ) -> str:
     """Generate synonyms/alternative forms for a lemma and language."""
+    effective_language_code = lang_code or language_code
     lemma = get_lemma_or_raise(session, lemma_id)
-    result = generate_synonyms_for_lemma(session, lemma, lang_code)
+    result = generate_synonyms_for_lemma(session, lemma, effective_language_code)
     session.commit()
 
     if not result.get("success"):
@@ -25,7 +27,7 @@ def do_generate_synonyms(
         raise RuntimeError(error_message)
 
     if form_type:
-        return f"Generated {form_type} for {lang_code}"
+        return f"Generated {form_type} for {effective_language_code}"
     total = (
         result.get("stored_synonyms", 0)
         + result.get("stored_abbreviations", 0)
@@ -39,7 +41,8 @@ def handle_words_synonyms(
     session: Any,
     lemma_id: Optional[int] = None,
     lemma_ids: Optional[list[int]] = None,
-    lang_code: str = "en",
+    language_code: str = "en",
+    lang_code: Optional[str] = None,
     form_type: Optional[str] = None,
     **_: Any,
 ) -> str:
@@ -53,6 +56,7 @@ def handle_words_synonyms(
             do_generate_synonyms(
                 session=session,
                 lemma_id=queued_lemma_id,
+                language_code=language_code,
                 lang_code=lang_code,
                 form_type=form_type,
             )
@@ -64,6 +68,7 @@ def handle_words_synonyms(
     return do_generate_synonyms(
         session=session,
         lemma_id=lemma_id,
+        language_code=language_code,
         lang_code=lang_code,
         form_type=form_type,
     )

@@ -20,6 +20,7 @@ import uuid
 from typing import Any, Dict, List, Optional
 
 import constants
+from sqlalchemy import func as sql_func
 from clients.batch_queue import (
     BatchQueueManager,
     BatchRequestMetadata,
@@ -31,7 +32,13 @@ from clients.openai.client import is_gpt5_nano_or_mini_model, reasoning_effort_f
 from sentences.token_estimates import estimate_decomposition_output_tokens
 from sentences.translate_and_decompose import lookup_candidate_lemmas
 from sentences.translation import build_response_schema, build_translation_prompt
-from storage.models.schema import Lemma, Sentence, SentenceTranslation, SentenceWord
+from storage.models.schema import (
+    Lemma,
+    Sentence,
+    SentenceTranslation,
+    SentenceWord,
+    SentenceWordHint,
+)
 from workqueue.tools import workqueue_payload_handler
 
 logger = logging.getLogger(__name__)
@@ -55,12 +62,51 @@ def _pick_source_language(existing_languages: set[str]) -> str:
     return next(iter(existing_languages))
 
 
+def _discover_batch_sentence_ids(
+    session: Any,
+    *,
+    limit: Optional[int],
+    pattern_id: Optional[str],
+    exclude_pending_imports: bool,
+) -> List[int]:
+    """Find English-only sentences eligible for a translation batch."""
+    translation_counts = (
+        session.query(Sentence.id.label("sentence_id"))
+        .join(SentenceTranslation)
+        .group_by(Sentence.id)
+        .having(sql_func.count(SentenceTranslation.id) == 1)
+        .subquery()
+    )
+    query = (
+        session.query(Sentence.id)
+        .join(SentenceTranslation)
+        .filter(SentenceTranslation.language_code == "en")
+        .filter(Sentence.id.in_(session.query(translation_counts.c.sentence_id)))
+        .order_by(Sentence.id)
+    )
+    if pattern_id:
+        query = query.filter(Sentence.source_filename == f"pattern:{pattern_id}")
+    if exclude_pending_imports:
+        pending_sentence_ids = (
+            session.query(SentenceWordHint.sentence_id)
+            .filter(SentenceWordHint.pending_import_id.isnot(None))
+            .distinct()
+        )
+        query = query.filter(~Sentence.id.in_(pending_sentence_ids))
+    if limit is not None:
+        query = query.limit(limit)
+    return [sentence_id for (sentence_id,) in query.all()]
+
+
 @workqueue_payload_handler()
 def handle_sentences_translate_batch_submit(
     session: Any,
     sentence_ids: Optional[List[int]] = None,
     selected_languages: Optional[List[str]] = None,
     model: str = constants.DEFAULT_MODEL,
+    limit: Optional[int] = None,
+    pattern_id: Optional[str] = None,
+    exclude_pending_imports: bool = False,
     **_: Any,
 ) -> str:
     """Submit a batch of sentence decomposition requests to OpenAI Batch.
@@ -68,8 +114,14 @@ def handle_sentences_translate_batch_submit(
     Accepts extra kwargs (``batch``, etc.) and ignores them so it is tolerant
     of payload changes made by the route.
     """
-    if not sentence_ids:
-        raise ValueError("sentence_ids must be a non-empty list")
+    selected_sentence_ids = sentence_ids or _discover_batch_sentence_ids(
+        session,
+        limit=limit,
+        pattern_id=pattern_id,
+        exclude_pending_imports=exclude_pending_imports,
+    )
+    if not selected_sentence_ids:
+        return "No untranslated sentences found for batch submission"
 
     target_languages = selected_languages or _DEFAULT_LANGUAGES
 
@@ -81,7 +133,7 @@ def handle_sentences_translate_batch_submit(
     skipped: List[int] = []
 
     try:
-        for sentence_id in sentence_ids:
+        for sentence_id in selected_sentence_ids:
             sentence = session.get(Sentence, sentence_id)
             if sentence is None:
                 logger.warning("Sentence %s not found; skipping", sentence_id)

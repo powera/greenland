@@ -115,7 +115,7 @@ exclusions, all listed in PORTABLE_EXCLUDES in run_tests.sh :
   benchmarks tree fails to *collect* without it - portable drops
   src/tests/benchmarks and src/tests/lib/benchmarks wholesale.
 * pypinyin + pykakasi (Chinese pinyin / Japanese readings) are needed by
-  src/tests/wireword/test_readings.py, which asserts real reading output;
+  src/tests/exports/wireword/test_readings.py, which asserts real reading output;
   portable drops that file.
 
 The exclusions are pytest path --ignore flags, not -m "not ..." marker

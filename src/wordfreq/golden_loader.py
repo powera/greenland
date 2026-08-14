@@ -125,7 +125,7 @@ def _ensure_corpus_rows(session: Session) -> None:
 
     The combined-rank pass reads ``Corpus.corpus_weight``; without rows it
     falls back to in-code defaults, but populating the table makes the
-    in-memory state match what a real DB looks like after pradzia sync.
+    in-memory state match what a bootstrapped database looks like after corpus sync.
     """
     from storage.models.schema import Corpus
 

@@ -31,7 +31,7 @@ import tempfile
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Dict, List, Optional, Sequence, Union, cast
 
 from sqlalchemy.orm import Session
 
@@ -50,7 +50,7 @@ from agents.common.common_args import (
     confirm_operation,
     get_data_source_config,
 )
-from agents.common.lemma_selection import get_lemmas_for_agent
+from words.lemma_selection import get_lemmas_for_agent
 from audioshoe.espeak import DEFAULT_ESPEAK_VOICES, EspeakVoice
 from audioshoe.espeak import generate_audio as espeak_generate_audio
 from audioshoe.qwen import DEFAULT_QWEN_VOICES, QwenVoice
@@ -165,7 +165,7 @@ class StrazdasAgent:
         Returns:
             Translation text or None if not available
         """
-        return get_translation(session, lemma, language_code)
+        return cast(Optional[str], get_translation(session, lemma, language_code))
 
     def generate_audio_for_lemma(
         self,
