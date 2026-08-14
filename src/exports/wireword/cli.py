@@ -96,8 +96,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
         default="en",
         help="Source language code (default: en). The language the learner already knows. "
         "Use 'all' to export all source-language variants in one run. "
-        "Supported non-English sources: uk (Ukrainian), bn (Bengali), kn (Kannada), "
-        "pl (Polish), ro (Romanian).",
+        "Supported non-English sources: "
+        f"{', '.join(SUPPORTED_NON_ENGLISH_SOURCE_LANGUAGES)}.",
     )
     parser.add_argument(
         "--use-workqueue",
