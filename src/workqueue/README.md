@@ -7,7 +7,9 @@ the database and executed by a worker daemon.
 ## Layout
 
 - `task_queue.py` — task status/type enums and queue operations (enqueue,
-  claim, complete, fail)
+  claim, complete, fail), including `TaskRequest`/`enqueue_tasks` for queueing
+  a batch of work with dedup and dry-run handling
+- `stats.py` — per-status task counts for a set of task types
 - `registry.py` — maps task names (e.g., `words.translations`) to handler
   functions
 - `pipeline_order.py` — dependency ordering so prerequisites run first

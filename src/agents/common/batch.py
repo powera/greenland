@@ -21,6 +21,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 
 from agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
 from clients.batch_queue import BatchQueue, get_batch_manager
+from concepts.generate.batch import complete_concept_body_batch
 from util.telemetry import CostConfig
 from storage.backend import create_session as create_backend_session
 from storage.translation_helpers import LANGUAGE_FIELDS, set_translation
@@ -289,108 +290,6 @@ def _apply_voras_translations(
     return results
 
 
-def _extract_chat_completion_text(response_body: Optional[str]) -> Optional[str]:
-    """Pull the assistant message text from a stored chat-completions response.
-
-    Args:
-        response_body: JSON string of the batch result's ``response`` object.
-
-    Returns:
-        The message content, or None if it could not be located.
-    """
-    if not response_body:
-        return None
-    try:
-        response = json.loads(response_body)
-    except json.JSONDecodeError:
-        return None
-
-    body = response.get("body") if isinstance(response.get("body"), dict) else response
-    choices = body.get("choices") if isinstance(body, dict) else None
-    if not choices:
-        return None
-    message = choices[0].get("message") if isinstance(choices[0], dict) else None
-    content = message.get("content") if isinstance(message, dict) else None
-    return content.strip() if isinstance(content, str) else None
-
-
-def _apply_concept_seed_bodies(
-    requests: Iterable[BatchQueue], session: Any, batch_id: str
-) -> Dict[str, int]:
-    """Create concepts from stashed (seed + generated body) batch results.
-
-    Shared by every agent that queues concept-body generation (``voverukas``,
-    ``voveraite``). Each request stashed the full Wikidata seed and model in its
-    metadata at submit time, so concept creation needs no further outbound
-    calls: the body is the LLM output, the seed is the stored input.
-
-    Args:
-        requests: Completed BatchQueue records for a concept-body agent.
-        session: Database session.
-        batch_id: The batch ID (for logging only).
-
-    Returns:
-        ``{"processed", "created", "skipped", "failed"}`` counts.
-    """
-    from concepts.persist import create_concept_from_seed
-    from storage.wikidata import WikidataConceptSeed
-
-    results = {"processed": 0, "created": 0, "skipped": 0, "failed": 0}
-
-    for req in requests:
-        results["processed"] += 1
-        try:
-            metadata = json.loads(req.additional_metadata) if req.additional_metadata else {}
-            seed_data = metadata.get("seed")
-            if not seed_data:
-                logger.warning("No stashed seed for request %s; skipping", req.custom_id)
-                results["failed"] += 1
-                continue
-
-            body = _extract_chat_completion_text(req.response_body)
-            if not body:
-                logger.warning("No generated body for request %s; skipping", req.custom_id)
-                results["failed"] += 1
-                continue
-
-            seed = WikidataConceptSeed(
-                qid=seed_data["qid"],
-                title=seed_data["title"],
-                summary=seed_data.get("summary", ""),
-                sources=list(seed_data.get("sources", [])),
-            )
-            result = create_concept_from_seed(
-                session,
-                seed,
-                body=body,
-                source_model=metadata.get("source_model"),
-            )
-            if result.status == "created":
-                session.commit()
-                results["created"] += 1
-            else:
-                # "exists" / "unresolved" / "failed" — nothing persisted.
-                results["skipped" if result.status == "exists" else "failed"] += 1
-            logger.info(
-                "%s [%s] %s%s",
-                result.status.upper(),
-                seed.qid,
-                seed.title,
-                f" - {result.detail}" if result.detail else "",
-            )
-        except Exception as exc:
-            session.rollback()
-            results["failed"] += 1
-            logger.error(
-                "Failed to create concept for request %s (batch %s): %s",
-                req.custom_id,
-                batch_id,
-                exc,
-            )
-
-    return results
-
-
 def _report_concept_seed_results(results: Dict[str, int], agent_name: str) -> None:
     logger.info("\n" + "=" * 80)
     logger.info("BATCH RESULTS SUMMARY (%s)", agent_name.upper())
@@ -494,7 +393,7 @@ def main() -> int:
                     result = _apply_voras_translations(requests, session, args.batch_id)
                     _report_voras_results(result)
                 elif agent_name in ("voverukas", "voveraite"):
-                    result = _apply_concept_seed_bodies(requests, session, args.batch_id)
+                    result = complete_concept_body_batch(requests, session, args.batch_id)
                     _report_concept_seed_results(result, agent_name)
                 else:
                     logger.warning(

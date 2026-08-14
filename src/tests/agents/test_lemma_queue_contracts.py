@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from agents.lape.cli import enqueue_grammar_fact_work
 from agents.sernas.cli import enqueue_sernas_work
 from agents.vilkas.cli import enqueue_vilkas_work
-from agents.voras.cli import enqueue_voras_populate_work
+from words.translation_workflow import enqueue_translation_population
 from storage.models.schema import BarsukasTask, Base, Lemma
 from workqueue.task_queue import TaskStatus, TaskType
 
@@ -35,7 +35,7 @@ def _session_with_noun() -> tuple[Engine, Session, Lemma]:
 def test_lemma_finders_enqueue_canonical_keys_and_payloads() -> None:
     engine, session, lemma = _session_with_noun()
     try:
-        enqueue_voras_populate_work(None, session, [lemma], ["fr", "es"])
+        enqueue_translation_population(session, [lemma], ["fr", "es"])
         enqueue_vilkas_work(session, [lemma], "en-noun-forms")
         enqueue_sernas_work(session, [lemma], ["en"])
         enqueue_grammar_fact_work(
@@ -109,7 +109,7 @@ def test_lemma_finders_recognize_active_legacy_dedup_keys() -> None:
         )
         session.commit()
 
-        assert enqueue_voras_populate_work(None, session, [lemma], ["fr"])["enqueued"] == 0
+        assert enqueue_translation_population(session, [lemma], ["fr"])["enqueued"] == 0
         assert enqueue_vilkas_work(session, [lemma], "en-noun-forms")["enqueued"] == 0
         assert enqueue_sernas_work(session, [lemma], ["en"])["enqueued"] == 0
         assert (

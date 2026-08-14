@@ -1,9 +1,11 @@
 """
 Word Translation Coverage Reporting
 
-This module handles translation coverage reporting across languages.
+This module handles translation coverage reporting across languages, including
+the full report that the Voras CLI's default mode prints.
 """
 
+import json
 import logging
 from datetime import datetime
 from typing import Any, Dict, Optional
@@ -364,3 +366,54 @@ def print_summary(results: Dict[str, Any], start_time: datetime, duration: float
                     logger.info(f"      {lang_name}: {percentage:.1f}%")
 
     logger.info("=" * 80)
+
+
+def run_full_check(
+    session: Any,
+    *,
+    database_path: Optional[str] = None,
+    output_file: Optional[str] = None,
+    min_level: Optional[int] = None,
+    max_level: Optional[int] = None,
+) -> Dict[str, Any]:
+    """Run every coverage check, print the summary, and optionally save it.
+
+    Args:
+        session: Database session.
+        database_path: Path recorded in the report (SQLite backends only).
+        output_file: Optional path to write the report to as JSON.
+        min_level: Minimum difficulty level to include (inclusive).
+        max_level: Maximum difficulty level to include (inclusive).
+
+    Returns:
+        The report dictionary, including its own ``duration_seconds``.
+    """
+    logger.info("Starting full multi-lingual translation coverage check...")
+    start_time = datetime.now()
+
+    results: Dict[str, Any] = {
+        "timestamp": start_time.isoformat(),
+        "database_path": database_path,
+        "level_filter": {"min": min_level, "max": max_level},
+        "checks": {
+            "overall_coverage": check_overall_coverage(session, min_level, max_level),
+            "difficulty_level_coverage": check_difficulty_level_coverage(
+                session, min_level, max_level
+            ),
+        },
+    }
+
+    duration = (datetime.now() - start_time).total_seconds()
+    results["duration_seconds"] = duration
+
+    print_summary(results, start_time, duration)
+
+    if output_file:
+        try:
+            with open(output_file, "w", encoding="utf-8") as report_file:
+                json.dump(results, report_file, indent=2, ensure_ascii=False)
+            logger.info(f"Report written to: {output_file}")
+        except OSError as e:
+            logger.error(f"Failed to write output file: {e}")
+
+    return results

@@ -4,38 +4,31 @@ This module contains display functions for VORAS-specific output formats,
 keeping the main CLI clean and focused on logic.
 """
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from storage.translation_helpers import LANGUAGE_FIELDS
 
 
-def display_lemma_translations(lemma: Any, agent: Any, session: Any) -> List[str]:
-    """Display current translations for a lemma and return list of missing languages.
+def display_lemma_translations(lemma: Any, translations: Dict[str, Optional[str]]) -> None:
+    """Display a lemma's current translations, marking the missing ones.
 
     Args:
         lemma: Lemma object to display
-        agent: VorasAgent instance
-        session: Database session
-
-    Returns:
-        List of language codes for missing translations
+        translations: Language code -> translation (or None), as returned by
+            ``TranslationWorkflow.collect_translations``
     """
     print(f"\nProcessing translations for: {lemma.lemma_text} (GUID: {lemma.guid})")
     print(f"POS: {lemma.pos_type}")
     print(f"Definition: {lemma.definition_text or 'N/A'}")
     print("\nCurrent translations:")
 
-    missing_langs = []
     for lang_code in LANGUAGE_FIELDS.keys():
-        translation = agent.get_translation(session, lemma, lang_code)
+        translation = translations.get(lang_code)
         lang_name = LANGUAGE_FIELDS[lang_code][1]
         if translation:
             print(f"  {lang_name} ({lang_code}): {translation}")
         else:
             print(f"  {lang_name} ({lang_code}): [MISSING]")
-            missing_langs.append(lang_code)
-
-    return missing_langs
 
 
 def display_generated_translations(response: Dict[str, str], missing_langs: List[str]) -> None:
