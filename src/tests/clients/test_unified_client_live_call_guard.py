@@ -123,7 +123,11 @@ def test_disable_env_blocks_calls_made_through_a_client_object(monkeypatch):
     monkeypatch.setenv("GREENLAND_DISABLE_LLM", "1")
     monkeypatch.setattr(openai_client.requests, "post", _blow_up_on_post)
 
-    client = unified_client.UnifiedLLMClient()
+    # A fake key, injected rather than read from keys/openai.key: the backend
+    # rejects a missing key before it reaches the guarded request boundary, so
+    # without this the test would assert the kill switch only on machines that
+    # happen to have credentials on disk.
+    client = unified_client.UnifiedLLMClient(openai_api_key="sk-test-not-a-real-key")
 
     with pytest.raises(lib.LLMCallsDisabledError):
         client.generate_chat(prompt="hi", model="gpt-5.4-mini")

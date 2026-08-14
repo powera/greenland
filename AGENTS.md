@@ -106,24 +106,29 @@ base is everything except src/tests/clients/audio ; all adds that back.
 
 portable is base with the tests that require optional native dependencies
 removed, so the suite runs cleanly where those wheels do not build or install.
-It is a superset of smoke and a subset of base.  Three dependencies drive the
-exclusions, all listed in PORTABLE_EXCLUDES in run_tests.sh :
+It is a superset of smoke and a subset of base.  One file is excluded, listed in
+PORTABLE_EXCLUDES in run_tests.sh :
 
-* jieba (Chinese segmentation) is imported at module load by
-  benchmarks.lib.generators.pinyin_letter_count_generator, and
-  benchmarks.lib.utils pulls that generators package in eagerly, so the whole
-  benchmarks tree fails to *collect* without it - portable drops
-  src/tests/benchmarks and src/tests/lib/benchmarks wholesale.
 * pypinyin + pykakasi (Chinese pinyin / Japanese readings) are needed by
   src/tests/exports/wireword/test_readings.py, which asserts real reading output;
   portable drops that file.
 
-The exclusions are pytest path --ignore flags, not -m "not ..." marker
-deselection: jieba breaks collection before any marker could deselect a test.
-Tests that gate themselves on a missing dep (skipif / skipUnless / an
-*_AVAILABLE flag, e.g. test_zh_pinyin_sort.py, test_dialect_overrides.py,
-test_cognates.py) already skip cleanly and are not excluded.  When the exclusion
-set changes, update both run_tests.sh and this section.
+Everything else imports its optional deps behind a try/except and degrades or
+skips at runtime.  Keep it that way: a bare `import jieba` (or pypinyin, opencc,
+pykakasi) at module scope anywhere under src/ breaks *collection*, and no
+exclusion can rescue smoke from that - smoke collects the whole tree to find its
+marked tests, so a collection error fails it too.  This is why the guarded
+import in benchmarks.lib.generators.pinyin_letter_count_generator matters:
+benchmarks.lib.utils pulls the generators package in eagerly, so one hard import
+there takes down the entire benchmarks tree.  src/tests/test_smoke_imports.py
+imports benchmarks.lib.utils to catch a regression.
+
+The exclusion is a pytest path --ignore flag, not -m "not ..." marker
+deselection, so that a collection-time failure would also be covered.  Tests
+that gate themselves on a missing dep (skipif / skipUnless / an *_AVAILABLE
+flag, e.g. test_zh_pinyin_sort.py, test_dialect_overrides.py, test_cognates.py)
+already skip cleanly and are not excluded.  When the exclusion set changes,
+update both run_tests.sh and this section.
 
 Two things to know when writing tests:
 
