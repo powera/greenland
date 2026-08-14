@@ -24,6 +24,7 @@ from storage.translation_helpers import (
 )
 from storage.backend.factory import create_session
 from exports.wireword.export_manager import TrakaidoExporter
+from exports.wireword.generate_manifest import generate_manifest
 from exports.wireword.generate_categorychoice import (
     build_reverse_subtype_map,
     generate_for_language,
@@ -418,6 +419,24 @@ class WirewordExportService:
             # TODO: Re-enable conversation export when we have conversations
             # Conversation export is disabled - we currently have no conversations
             results["conversations_exported"] = 0
+
+            # The word exporter creates an initial manifest, but sentences are
+            # exported afterward. Refresh it now so a new variant includes the
+            # sentence file and an existing variant gets its current checksum.
+            manifest_success, manifest_path = generate_manifest(
+                wireword_dir,
+                self.language,
+                self.simplified_chinese,
+                include_unreviewed_audio=self.include_unreviewed_audio,
+                source_language=self.source_language,
+                cdn_base=cdn_base,
+            )
+            if manifest_success:
+                results["manifest_path"] = manifest_path
+                logger.info("  Refreshed manifest after sentence export")
+            else:
+                logger.error("  Failed to refresh manifest after sentence export")
+                return False, results
 
             # Export category choice data (language-independent, goes to trakaido_wordlists root)
             logger.info("Exporting category choice data...")

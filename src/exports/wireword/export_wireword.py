@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 
 LANGUAGE_EXPORT_MAX_LEVELS: Dict[str, int] = {
     "lt": 30,
-    "es": 20,
+    "es": 30,
     "fr": 20,
     "zh": 20,
 }
