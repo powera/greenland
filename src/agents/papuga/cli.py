@@ -14,6 +14,7 @@ from agents.common.common_args import (
     add_backend_args,
     add_common_args,
     add_guid_arg,
+    add_language_args,
     add_level_args,
     add_llm_args,
     add_output_args,
@@ -29,22 +30,13 @@ from storage.crud.derivative_form import (
     pronunciation_required_filter,
 )
 from storage.models.schema import DerivativeForm
+from workqueue.task_queue import TaskType
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
-
-def _parse_language_codes(raw_languages: Optional[str]) -> Optional[List[str]]:
-    """Parse a comma-separated language-code string into normalized codes."""
-    if not raw_languages:
-        return None
-    normalized_codes = sorted(
-        {language.strip().lower() for language in raw_languages.split(",") if language.strip()}
-    )
-    return normalized_codes if normalized_codes else None
 
 
 def get_argument_parser() -> argparse.ArgumentParser:
@@ -65,18 +57,13 @@ def get_argument_parser() -> argparse.ArgumentParser:
     add_guid_arg(parser, help_text="Validate/generate pronunciation for the lemma with this GUID")
     add_level_args(parser)
     add_pos_type_args(parser)
+    add_language_args(parser)
     add_backend_args(parser)
 
     # Papuga-specific arguments
     parser.add_argument(
         "--all-languages", action="store_true", help="Process all languages (default: English only)"
     )
-    parser.add_argument(
-        "--languages",
-        type=str,
-        help="Comma-separated language codes to process (e.g., 'fr,es')",
-    )
-
     # Mode selection - mutually exclusive flags
     mode_group = parser.add_mutually_exclusive_group()
     mode_group.add_argument(
@@ -161,13 +148,16 @@ def enqueue_papuga_work(
             dedup_key = f"words.pronunciations:{lemma_id}:{language_code}"
             result = enqueue_task(
                 session,
-                task_type="words.pronunciations",
+                task_type=TaskType.WORDS_PRONUNCIATIONS,
                 target_type="lemma",
                 target_id=lemma_id,
                 payload={
-                    "lang_code": language_code,
+                    "schema_version": 1,
+                    "language_code": language_code,
                     "lemma_id": lemma_id,
+                    "base_forms_only": base_forms_only,
                     "all_forms_pronunciation": all_forms_pronunciation,
+                    "source_component": "agents.papuga",
                 },
                 dedup_key=dedup_key,
             )
@@ -209,7 +199,11 @@ def main() -> None:
     else:
         mode = "coverage"  # default
 
-    selected_languages = _parse_language_codes(args.languages)
+    selected_languages = (
+        list(dict.fromkeys(language.strip().lower() for language in args.languages))
+        if args.languages
+        else None
+    )
     only_english = not args.all_languages and selected_languages is None
 
     # Get lemmas to process (either single lemma from --guid or batch)

@@ -50,6 +50,12 @@ The animal-named CLIs are queue-first wrappers; workers execute canonical
 function-named tasks such as `sentences.examples.generate`,
 `sentences.translate`, and `conversations.generate`.
 
+Lemma enrichment finders enqueue canonical `words.*` capabilities with
+capability-named deduplication keys. New word payloads use `lemma_id`,
+`language_code` for a single language, and `languages` for a set; workers retain
+older animal task names and `lang_code` payloads only for persisted-work
+compatibility.
+
 Agent CLIs use shared argument helpers from `src/agents/common/common_args.py`.
 Sentence finders enqueue by default and accept `--execute-inline` for deliberate
 foreground debugging.

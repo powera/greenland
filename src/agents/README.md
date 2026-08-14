@@ -1,17 +1,18 @@
 # Agents
 
 Animal-named compatibility CLIs for database work discovery and maintenance.
-Long-running sentence execution lives in `src/sentences/` and is dispatched by
-capability-named workqueue handlers.
+Long-running sentence and lemma execution is dispatched by capability-named
+workqueue handlers under `src/workqueue/handlers/`.
 
 Run agents with: `PYTHONPATH=src python src/agents/<agent>.py --help`
 
 ## Architecture direction
 
-Sentence agents are **work discovery and enqueueing** entry points. Their
-implementations live in `src/sentences/`; `src/workqueue/handlers/` contains
-thin worker adapters. Old imports remain available for compatibility, but new
-code should import `sentences.*` directly.
+Agent CLIs are moving toward **work discovery and enqueueing** entry points.
+Sentence implementations live in `src/sentences/`; word implementations live
+in `src/words/` or behind `src/workqueue/handlers/words/`. Old animal imports
+remain available for compatibility, but queue tasks and deduplication keys use
+capability names such as `words.forms` and `words.pronunciations`.
 
 ## Quick Reference
 
@@ -56,7 +57,8 @@ All agents use standardized arguments from `agents/common/common_args.py`:
 --sample-rate RATE  Fraction to process (0.0-1.0)
 --guid GUID         Process single item by GUID
 --level N           Filter by difficulty level (single or range like "1-9")
---language LANG     Filter by language code
+--languages LANG [LANG ...]
+                    Filter by one or more language codes
 --persona NAME      Barsukas persona whose main database to use
                     (prod, golden, hosted, local, local-sqlite, scholar)
 --backend TYPE      [requires --persona custom] Storage backend: sqlite, jsonl, postgres
@@ -114,11 +116,10 @@ dramblys.py --fix --limit 20 --yes    # Process 20 missing words
 ### voras (Translations)
 
 ```bash
-voras.py --mode coverage              # Report translation coverage (default)
-voras.py --mode check-only            # Validate existing translations
-voras.py --mode populate-only         # Add missing translations
-voras.py --mode both                  # Validate and populate
-voras.py --language fr --limit 50     # Process specific language
+voras.py --coverage                    # Report translation coverage (default)
+voras.py --populate --languages fr es --limit 50
+voras.py --populate --guid N07_008 --languages fr
+voras.py --regenerate --use-workqueue --yes
 ```
 
 ### vilkas (Word Forms)
@@ -126,48 +127,48 @@ voras.py --language fr --limit 50     # Process specific language
 Supports: Lithuanian (lt), French (fr), German (de), Spanish (es), Portuguese (pt), English (en)
 
 ```bash
-vilkas.py --check all                 # Run all form checks
-vilkas.py --check noun-declensions    # Check noun declension coverage
-vilkas.py --check verb-conjugations   # Check verb conjugation coverage
-
-vilkas.py --fix --language lt         # Generate Lithuanian forms
-vilkas.py --fix --language fr --pos-type verb  # French verb conjugations
-vilkas.py --fix --source wiki         # Use Wiktionary (Lithuanian nouns only)
+vilkas.py --task all --coverage
+vilkas.py --task lt-noun-declensions --populate --use-workqueue
+vilkas.py --task fr-verb-conjugations --populate --guid V03_007
+vilkas.py --task en-noun-forms --populate --use-wiktionary
 ```
 
 ### papuga (Pronunciations)
 
 ```bash
-papuga.py --check                     # Validate existing pronunciations
-papuga.py --populate                  # Generate missing pronunciations
-papuga.py --both                      # Validate and populate
-papuga.py --all-languages             # Check all languages (default: English)
-papuga.py --base-forms-only           # Only process base forms
+papuga.py --coverage                   # Report missing pronunciations (default)
+papuga.py --populate --use-workqueue
+papuga.py --populate --languages fr es --base-forms-only --use-workqueue
+papuga.py --coverage --all-languages
 ```
 
 ### sernas (Synonyms)
 
 ```bash
-sernas.py --check all                 # Check all languages for missing synonyms
-sernas.py --fix --language en         # Generate English synonyms
-sernas.py --type synonym              # Only synonyms (not alternative forms)
-sernas.py --type alternative_form     # Only alternative forms
+sernas.py --coverage --languages en fr
+sernas.py --populate --languages en --use-workqueue
+sernas.py --populate --type synonym --languages en
+sernas.py --regenerate --languages en --yes
 ```
 
 ### lape (Grammar Facts)
 
 ```bash
-lape.py --task measure-word --language zh    # Chinese measure words
-lape.py --task noun-gender --language de     # German noun gender
-lape.py --task declension-class --language lt  # Lithuanian declension class
-lape.py --task verb-transitivity --language en  # English verb transitivity
-lape.py --task verb-reflexivity --language fr   # French reflexive verbs
+lape.py --fact-type measure_words --languages zh --populate --use-workqueue
+lape.py --fact-type grammatical_gender --languages de --populate
+lape.py --fact-type declension_class --languages lt --coverage
+lape.py --task verbs --languages en fr --populate --use-workqueue
 ```
+
+Lemma task payloads use `lemma_id` as their target identifier. A task acting on
+one language uses `language_code`; a task acting on a language set uses
+`languages`. Workers still accept the former `lang_code` spelling when reading
+persisted legacy tasks, but new producers must not emit it.
 
 ### zvirblis (Sentences)
 
 ```bash
-zvirblis.py --guid N07_008 --language lt zh fr
+zvirblis.py --guid N07_008 --languages lt zh fr
 zvirblis.py --level 3 --translation-limit 5
 zvirblis.py --guid N07_008 --use-translategemma
 zvirblis.py submit-batch --languages lt zh fr --limit 100
@@ -261,7 +262,7 @@ strazdas.py --voices Ona Jonas        # Specify voice names
 ### vieversys (OpenAI TTS Audio)
 
 ```bash
-vieversys.py --language en            # Generate English audio
+vieversys.py --languages en           # Generate English audio
 vieversys.py --voice alloy            # Specify OpenAI voice
 ```
 
@@ -313,7 +314,7 @@ gegute.py --generate --source-language lt --count 10
 gegute.py --generate --source-language en --theme "work and money"
 
 gegute.py --populate --guid M01_003           # Fill missing equivalents for one idiom
-gegute.py --populate --language ja ko         # Only these target languages
+gegute.py --populate --languages ja ko        # Only these target languages
 gegute.py --populate --all-languages          # Regenerate, not just missing
 
 gegute.py --validate --guid M01_002           # Audit stored equivalents (read-only)

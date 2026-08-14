@@ -17,6 +17,12 @@ The agents are organized into a pipeline where each agent typically depends on t
 
 All agents are Lithuanian animal names and live in `src/agents/`.
 
+The animal names identify discovery CLIs, not queued execution. Lemma enrichment
+work is stored under canonical capabilities such as `words.translations`,
+`words.forms`, `words.pronunciations`, `words.synonyms`, and
+`words.grammar_facts`. Their payloads use `lemma_id`, `language_code` for one
+language, and `languages` for a set.
+
 ### Initialization Agents
 
 #### Pradzia (Beginning)

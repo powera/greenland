@@ -72,7 +72,7 @@ def _add_common_verification_args(parser: argparse.ArgumentParser) -> None:
     add_llm_args(parser, default_model="gpt-5.4-mini")
     add_backend_args(parser)
     add_processing_args(parser)
-    add_language_args(parser, multiple=True)
+    add_language_args(parser)
     parser.add_argument(
         "--report-only",
         action="store_true",

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
 from workqueue.handlers.lape import generate_grammar_fact_for_lemma
 from workqueue.tools import get_lemma_or_raise, workqueue_payload_handler
@@ -12,12 +12,12 @@ def do_generate_grammar_fact(
     session: Any,
     lemma_id: int,
     fact_type: str,
-    lang_code: str = "en",
-    language_code: str | None = None,
+    language_code: str = "en",
+    lang_code: Optional[str] = None,
     **_: Any,
 ) -> str:
     """Generate one grammar fact for one lemma."""
-    effective_language_code = language_code or lang_code
+    effective_language_code = lang_code or language_code
     lemma = get_lemma_or_raise(session, lemma_id)
     result = generate_grammar_fact_for_lemma(session, lemma, fact_type, effective_language_code)
 
@@ -36,8 +36,8 @@ def handle_words_grammar_facts(
     session: Any,
     lemma_id: int,
     fact_type: str,
-    lang_code: str = "en",
-    language_code: str | None = None,
+    language_code: str = "en",
+    lang_code: Optional[str] = None,
     **_: Any,
 ) -> str:
     """Workqueue wrapper for grammar fact generation.
@@ -49,6 +49,6 @@ def handle_words_grammar_facts(
         session=session,
         lemma_id=lemma_id,
         fact_type=fact_type,
-        lang_code=lang_code,
         language_code=language_code,
+        lang_code=lang_code,
     )

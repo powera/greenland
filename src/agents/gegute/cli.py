@@ -49,7 +49,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     add_llm_args(parser, default_model="gpt-5.4-mini")
     add_processing_args(parser)
     add_guid_arg(parser, help_text="Process only the idiom with this GUID")
-    add_language_args(parser, multiple=True)
+    add_language_args(parser)
     add_backend_args(parser)
 
     mode_group = parser.add_mutually_exclusive_group()
@@ -111,10 +111,10 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
 
 def _resolve_target_languages(args: argparse.Namespace) -> Optional[List[str]]:
-    """Return explicit target languages from --language, or None for defaults.
+    """Return explicit target languages from --languages, or None for defaults.
 
-    ``add_language_args(multiple=True)`` stores under ``languages``, not
-    ``language``; reading the wrong attribute would silently ignore the flag.
+    ``add_language_args`` stores under ``languages``, not
+    a singular attribute; reading the wrong attribute would silently ignore the flag.
     """
     languages = getattr(args, "languages", None)
     if not languages:

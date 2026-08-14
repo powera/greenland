@@ -26,7 +26,7 @@ from agents.common.common_args import (
 )
 from agents.common.lemma_selection import get_lemmas_for_agent
 from agents.lape.agent import LapeAgent
-from workqueue.task_queue import TaskStatus, enqueue_task
+from workqueue.task_queue import TaskStatus, TaskType, enqueue_task, get_active_task
 from storage.models.schema import BarsukasTask
 
 logger = logging.getLogger(__name__)
@@ -101,7 +101,7 @@ Task presets:
     add_common_args(parser)
     add_llm_args(parser, default_model="gpt-5.4-mini")
     add_backend_args(parser)
-    add_language_args(parser, multiple=True)
+    add_language_args(parser)
 
     # Lape-specific arguments
     add_guid_arg(parser, help_text="Process only the lemma with this GUID")
@@ -201,18 +201,30 @@ def enqueue_grammar_fact_work(
 
                 # Enqueue work item using barsukas task queue
                 if not dry_run:
-                    dedup_key = f"lape_{fact_type}_{lemma.id}_{language_code}"
+                    dedup_key = (
+                        f"{TaskType.WORDS_GRAMMAR_FACTS}:{lemma.id}:" f"{language_code}:{fact_type}"
+                    )
+                    legacy_dedup_key = f"lape_{fact_type}_{lemma.id}_{language_code}"
+                    prior_barsukas_dedup_key = (
+                        f"{TaskType.WORDS_GRAMMAR_FACTS}:{lemma.id}:" f"{fact_type}:{language_code}"
+                    )
+                    if (
+                        get_active_task(session, legacy_dedup_key) is not None
+                        or get_active_task(session, prior_barsukas_dedup_key) is not None
+                    ):
+                        skipped_count += 1
+                        continue
                     result = enqueue_task(
                         session,
-                        task_type="words.grammar_facts",
+                        task_type=TaskType.WORDS_GRAMMAR_FACTS,
                         target_type="lemma",
                         target_id=lemma.id,
                         payload={
+                            "schema_version": 1,
                             "fact_type": fact_type,
-                            "lang_code": language_code,
+                            "language_code": language_code,
                             "lemma_id": lemma.id,
-                            "lemma_guid": lemma.guid,
-                            "lemma_text": lemma.lemma_text,
+                            "source_component": "agents.lape",
                         },
                         dedup_key=dedup_key,
                     )
@@ -268,7 +280,7 @@ def main() -> None:
 
     # Check required arguments
     if not args.languages:
-        parser.error("At least one --language/--languages value is required")
+        parser.error("At least one --languages value is required")
 
     # Normalize language list while preserving order
     languages = list(dict.fromkeys(args.languages))

@@ -5,6 +5,11 @@
 > `src/sentences`, their CLIs enqueue canonical tasks by default, and inline
 > execution requires `--execute-inline`. Legacy task/import aliases remain for
 > persisted work and external callers.
+>
+> The lemma finders now emit capability-named deduplication keys and standardized
+> `lemma_id` / `language_code` / `languages` payloads. They recognize active
+> animal-named deduplication keys during migration, and workers retain
+> `lang_code` only as a persisted-task compatibility alias.
 
 ## Why this refactor is needed
 

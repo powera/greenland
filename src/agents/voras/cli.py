@@ -19,6 +19,7 @@ from agents.common.common_args import (
     add_backend_args,
     add_common_args,
     add_guid_arg,
+    add_language_args,
     add_level_args,
     add_llm_args,
     add_output_args,
@@ -29,12 +30,11 @@ from agents.common.common_args import (
     validate_cache_args,
 )
 from agents.common.lemma_selection import get_lemmas_for_agent
-from workqueue.task_queue import TaskStatus, enqueue_task
+from workqueue.task_queue import TaskStatus, TaskType, enqueue_task, get_active_task
 from storage.models.schema import BarsukasTask
 
 # Import language mappings from translation_helpers (single source of truth)
 from storage.translation_helpers import (
-    LANGUAGE_FIELDS,
     get_default_generation_languages,
     normalize_llm_language_codes,
 )
@@ -78,15 +78,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         help="Delete and regenerate all non-Lithuanian translations (destructive)",
     )
 
-    # Language selection (multiple)
-    parser.add_argument(
-        "--language",
-        "--languages",
-        nargs="+",
-        dest="languages",
-        choices=list(LANGUAGE_FIELDS.keys()),
-        help="Specific language(s) to process (lt, zh, ko, fr, es, de, pt, sw, vi). Can specify multiple languages separated by spaces. If not specified, processes Tier-1 and Tier-2 languages.",
-    )
+    add_language_args(parser)
 
     # Additional parameters
     parser.add_argument(
@@ -235,17 +227,22 @@ def enqueue_voras_populate_work(
     for lemma in lemmas:
         # Enqueue work item for each missing translation
         if not dry_run:
-            dedup_key = f"voras_populate_{lemma.id}"
+            language_key = ":".join(sorted(languages_to_fix))
+            dedup_key = f"{TaskType.WORDS_TRANSLATIONS}:{lemma.id}:{language_key}"
+            legacy_dedup_key = f"voras_populate_{lemma.id}"
+            if get_active_task(session, legacy_dedup_key) is not None:
+                skipped_count += 1
+                continue
             result = enqueue_task(
                 session,
-                task_type="words.translations",
+                task_type=TaskType.WORDS_TRANSLATIONS,
                 target_type="lemma",
                 target_id=lemma.id,
                 payload={
-                    "lemma_guid": lemma.guid,
-                    "lemma_text": lemma.lemma_text,
+                    "schema_version": 1,
                     "lemma_id": lemma.id,
                     "languages": languages_to_fix,
+                    "source_component": "agents.voras",
                 },
                 dedup_key=dedup_key,
             )
@@ -289,16 +286,20 @@ def enqueue_voras_regenerate_work(
     for lemma in lemmas:
         # Enqueue work item for regeneration
         if not dry_run:
-            dedup_key = f"voras_regenerate_{lemma.id}"
+            dedup_key = f"{TaskType.WORDS_TRANSLATIONS_REGENERATE}:{lemma.id}"
+            legacy_dedup_key = f"voras_regenerate_{lemma.id}"
+            if get_active_task(session, legacy_dedup_key) is not None:
+                skipped_count += 1
+                continue
             result = enqueue_task(
                 session,
-                task_type="words.translations.regenerate",
+                task_type=TaskType.WORDS_TRANSLATIONS_REGENERATE,
                 target_type="lemma",
                 target_id=lemma.id,
                 payload={
-                    "lemma_guid": lemma.guid,
-                    "lemma_text": lemma.lemma_text,
+                    "schema_version": 1,
                     "lemma_id": lemma.id,
+                    "source_component": "agents.voras",
                 },
                 dedup_key=dedup_key,
             )

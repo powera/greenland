@@ -11,17 +11,17 @@ from workqueue.tools import get_lemma_or_raise, workqueue_payload_handler
 def do_generate_forms(
     session: Any,
     lemma_id: int,
-    lang_code: str = "lt",
-    language_code: str | None = None,
+    language_code: str = "lt",
+    lang_code: Optional[str] = None,
     **_: Any,
 ) -> str:
     """Generate forms for a lemma/language pair."""
-    effective_lang_code = language_code or lang_code
+    effective_language_code = lang_code or language_code
     lemma = get_lemma_or_raise(session, lemma_id)
-    success, error_message = generate_forms_for_lemma(session, lemma, effective_lang_code)
+    success, error_message = generate_forms_for_lemma(session, lemma, effective_language_code)
     session.commit()
     if success:
-        return f"Generated {effective_lang_code} {lemma.pos_type} forms"
+        return f"Generated {effective_language_code} {lemma.pos_type} forms"
     raise RuntimeError(error_message)
 
 
@@ -30,8 +30,8 @@ def handle_words_forms(
     session: Any,
     lemma_id: Optional[int] = None,
     lemma_ids: Optional[list[int]] = None,
-    lang_code: str = "lt",
-    language_code: str | None = None,
+    language_code: str = "lt",
+    lang_code: Optional[str] = None,
     **_: Any,
 ) -> str:
     """Workqueue wrapper for form generation.
@@ -44,8 +44,8 @@ def handle_words_forms(
             do_generate_forms(
                 session=session,
                 lemma_id=queued_lemma_id,
-                lang_code=lang_code,
                 language_code=language_code,
+                lang_code=lang_code,
             )
             for queued_lemma_id in lemma_ids
         ]
@@ -55,6 +55,6 @@ def handle_words_forms(
     return do_generate_forms(
         session=session,
         lemma_id=lemma_id,
-        lang_code=lang_code,
         language_code=language_code,
+        lang_code=lang_code,
     )

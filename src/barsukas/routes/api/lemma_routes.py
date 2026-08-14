@@ -450,7 +450,12 @@ def _queue_task_for_guid(
         task_type=task_type,
         target_type="lemma",
         target_id=lemma.id,
-        payload={"lemma_id": lemma.id, **payload},
+        payload={
+            "schema_version": 1,
+            "lemma_id": lemma.id,
+            **payload,
+            "source_component": "barsukas.api",
+        },
         dedup_key=dedup_key.format(lemma_id=lemma.id),
     )
     return _build_success_response({"queued": result.created}, {"guid": guid, **payload})
@@ -478,12 +483,12 @@ def _queue_task_for_guid_with_optional_batch(
 
     window_index = int(datetime.utcnow().timestamp() // (batch_window_minutes * 60))
     model_name = str(payload.get("model", ""))
-    lang_code = str(payload.get("lang_code", ""))
+    language_code = str(payload.get("language_code", payload.get("lang_code", "")))
     languages = payload.get("languages")
     languages_key = ""
     if isinstance(languages, list):
         languages_key = ":".join(sorted(str(language_code) for language_code in languages))
-    batch_dedup_key = f"{batch_dedup_prefix}:{window_index}:{batch_window_minutes}:{model_name}:{lang_code}:{languages_key}"
+    batch_dedup_key = f"{batch_dedup_prefix}:{window_index}:{batch_window_minutes}:{model_name}:{language_code}:{languages_key}"
     existing = (
         g.db.query(BarsukasTask)
         .filter(
@@ -517,7 +522,13 @@ def _queue_task_for_guid_with_optional_batch(
         task_type=task_type,
         target_type="batch",
         target_id=None,
-        payload={**payload, "lemma_ids": [lemma.id], "batch": True},
+        payload={
+            "schema_version": 1,
+            **payload,
+            "lemma_ids": [lemma.id],
+            "batch": True,
+            "source_component": "barsukas.api",
+        },
         dedup_key=batch_dedup_key,
     )
     return _build_success_response(
@@ -539,13 +550,13 @@ def queue_generate_pronunciations(guid: str) -> ResponseReturnValue:
     if error is not None:
         return error
     payload = request.get_json(silent=True) or {}
-    lang_code = payload.get("lang_code", "en")
+    language_code = payload.get("language_code", payload.get("lang_code", "en"))
     assert model is not None
     return _queue_task_for_guid_with_optional_batch(
         guid,
         TaskType.GENERATE_PRONUNCIATIONS,
-        {"lang_code": lang_code, "model": model},
-        dedup_key=f"{TaskType.GENERATE_PRONUNCIATIONS}:{{lemma_id}}:{lang_code}",
+        {"language_code": language_code, "model": model},
+        dedup_key=f"{TaskType.GENERATE_PRONUNCIATIONS}:{{lemma_id}}:{language_code}",
         batch_dedup_prefix=str(TaskType.GENERATE_PRONUNCIATIONS),
     )
 
@@ -557,13 +568,13 @@ def queue_generate_forms(guid: str) -> ResponseReturnValue:
     if error is not None:
         return error
     payload = request.get_json(silent=True) or {}
-    lang_code = payload.get("lang_code", "lt")
+    language_code = payload.get("language_code", payload.get("lang_code", "lt"))
     assert model is not None
     return _queue_task_for_guid_with_optional_batch(
         guid,
         TaskType.GENERATE_FORMS,
-        {"lang_code": lang_code, "model": model},
-        dedup_key=f"{TaskType.GENERATE_FORMS}:{{lemma_id}}:{lang_code}",
+        {"language_code": language_code, "model": model},
+        dedup_key=f"{TaskType.GENERATE_FORMS}:{{lemma_id}}:{language_code}",
         batch_dedup_prefix=str(TaskType.GENERATE_FORMS),
     )
 
@@ -575,13 +586,13 @@ def queue_generate_synonyms(guid: str) -> ResponseReturnValue:
     if error is not None:
         return error
     payload = request.get_json(silent=True) or {}
-    lang_code = payload.get("lang_code", "en")
+    language_code = payload.get("language_code", payload.get("lang_code", "en"))
     assert model is not None
     return _queue_task_for_guid_with_optional_batch(
         guid,
         TaskType.GENERATE_SYNONYMS,
-        {"lang_code": lang_code, "model": model},
-        dedup_key=f"{TaskType.GENERATE_SYNONYMS}:{{lemma_id}}:{lang_code}",
+        {"language_code": language_code, "model": model},
+        dedup_key=f"{TaskType.GENERATE_SYNONYMS}:{{lemma_id}}:{language_code}",
         batch_dedup_prefix=str(TaskType.GENERATE_SYNONYMS),
     )
 

@@ -141,7 +141,7 @@ def _add_common_verify_args(parser: argparse.ArgumentParser) -> None:
     add_llm_args(parser, default_model="gpt-5.4-mini")
     add_backend_args(parser)
     add_processing_args(parser)
-    add_language_args(parser, multiple=True)
+    add_language_args(parser)
 
     parser.add_argument(
         "--report-only",
@@ -167,7 +167,7 @@ def _add_batch_args(parser: argparse.ArgumentParser) -> None:
     add_common_args(parser)
     add_llm_args(parser, default_model="gpt-5.4-mini")
     add_backend_args(parser)
-    add_language_args(parser, multiple=True)
+    add_language_args(parser)
 
     parser.add_argument(
         "--limit",

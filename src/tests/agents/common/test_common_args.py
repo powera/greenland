@@ -244,26 +244,26 @@ class TestAddBackendArgs(unittest.TestCase):
 class TestAddLanguageArgs(unittest.TestCase):
     """Test add_language_args function."""
 
-    def test_single_language_mode(self):
-        """Test single language argument mode."""
+    def test_single_language_uses_plural_argument_and_list_destination(self):
+        """A one-language selection still uses the plural CLI contract."""
         parser = argparse.ArgumentParser()
-        add_language_args(parser, multiple=False)
-        args = parser.parse_args(["--language", "fr"])
-        self.assertEqual(args.language, "fr")
+        add_language_args(parser)
+        args = parser.parse_args(["--languages", "fr"])
+        self.assertEqual(args.languages, ["fr"])
 
     def test_multiple_languages_mode(self):
         """Test multiple languages argument mode."""
         parser = argparse.ArgumentParser()
-        add_language_args(parser, multiple=True)
+        add_language_args(parser)
         args = parser.parse_args(["--languages", "fr", "es", "de"])
         self.assertEqual(args.languages, ["fr", "es", "de"])
 
-    def test_language_alias(self):
-        """Test that --language alias works in multiple mode."""
+    def test_singular_language_argument_is_not_available(self):
+        """The shared contract intentionally exposes only --languages."""
         parser = argparse.ArgumentParser()
-        add_language_args(parser, multiple=True)
-        args = parser.parse_args(["--language", "en"])
-        self.assertEqual(args.languages, ["en"])
+        add_language_args(parser)
+        with self.assertRaises(SystemExit):
+            parser.parse_args(["--language", "en"])
 
 
 class TestValidateCacheArgs(unittest.TestCase):

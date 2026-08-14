@@ -119,7 +119,11 @@ def add_missing_translations(lemma_id: int) -> ResponseReturnValue:
             task_type=TaskType.ADD_MISSING_TRANSLATIONS,
             target_type="lemma",
             target_id=lemma_id,
-            payload={"lemma_id": lemma_id},
+            payload={
+                "schema_version": 1,
+                "lemma_id": lemma_id,
+                "source_component": "barsukas",
+            },
             dedup_key=f"{TaskType.ADD_MISSING_TRANSLATIONS}:{lemma_id}",
         )
         if result.created:
@@ -245,7 +249,12 @@ def generate_pronunciations(lemma_id: int) -> ResponseReturnValue:
             task_type=TaskType.GENERATE_PRONUNCIATIONS,
             target_type="lemma",
             target_id=lemma_id,
-            payload={"lemma_id": lemma_id, "lang_code": lang_code},
+            payload={
+                "schema_version": 1,
+                "lemma_id": lemma_id,
+                "language_code": lang_code,
+                "source_component": "barsukas",
+            },
             dedup_key=f"{TaskType.GENERATE_PRONUNCIATIONS}:{lemma_id}:{lang_code}",
         )
         if result.created:
@@ -285,7 +294,12 @@ def generate_forms(lemma_id: int) -> ResponseReturnValue:
             task_type=TaskType.GENERATE_FORMS,
             target_type="lemma",
             target_id=lemma_id,
-            payload={"lemma_id": lemma_id, "lang_code": lang_code},
+            payload={
+                "schema_version": 1,
+                "lemma_id": lemma_id,
+                "language_code": lang_code,
+                "source_component": "barsukas",
+            },
             dedup_key=f"{TaskType.GENERATE_FORMS}:{lemma_id}:{lang_code}",
         )
         if result.created:
@@ -318,7 +332,12 @@ def generate_synonyms(lemma_id: int) -> ResponseReturnValue:
             task_type=TaskType.GENERATE_SYNONYMS,
             target_type="lemma",
             target_id=lemma_id,
-            payload={"lemma_id": lemma_id, "lang_code": lang_code},
+            payload={
+                "schema_version": 1,
+                "lemma_id": lemma_id,
+                "language_code": lang_code,
+                "source_component": "barsukas",
+            },
             dedup_key=f"{TaskType.GENERATE_SYNONYMS}:{lemma_id}:{lang_code}",
         )
         if result.created:
@@ -677,11 +696,13 @@ def generate_grammar_fact(lemma_id: int) -> ResponseReturnValue:
             target_type="lemma",
             target_id=lemma_id,
             payload={
+                "schema_version": 1,
                 "lemma_id": lemma_id,
                 "fact_type": fact_type,
                 "language_code": language_code,
+                "source_component": "barsukas",
             },
-            dedup_key=f"{TaskType.WORDS_GRAMMAR_FACTS}:{lemma_id}:{fact_type}:{language_code}",
+            dedup_key=f"{TaskType.WORDS_GRAMMAR_FACTS}:{lemma_id}:{language_code}:{fact_type}",
         )
 
         if result.created:

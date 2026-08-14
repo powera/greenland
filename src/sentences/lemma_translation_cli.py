@@ -546,7 +546,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     add_common_args(parser)
     add_llm_args(parser, default_model="gpt-5.4-mini")
     add_guid_arg(parser, help_text="Translate sentences for this specific lemma GUID")
-    add_language_args(parser, multiple=True)
+    add_language_args(parser)
     add_backend_args(parser)
 
     parser.add_argument(
