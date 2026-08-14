@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-"""Routes for PRADZIA database initialization agent bespoke page."""
+"""Routes for database maintenance and corpus administration."""
 
 import logging
 import subprocess
@@ -70,7 +70,7 @@ def get_database_stats() -> Dict[str, Any]:
 
 @bp.route("/")
 def index() -> ResponseReturnValue:
-    """Display the PRADZIA database initialization interface."""
+    """Display the database-administration interface."""
     stats = get_database_stats()
 
     return render_template(
@@ -79,15 +79,15 @@ def index() -> ResponseReturnValue:
     )
 
 
-def run_pradzia_command(args: list[str], timeout: int = 600) -> Dict[str, Any]:
-    """Execute a PRADZIA command and return the result."""
+def run_database_admin_command(args: list[str], timeout: int = 600) -> Dict[str, Any]:
+    """Execute a database-administration command and return the result."""
     # Build full command with appropriate backend configuration
-    full_args = ["python3", "-m", "agents.pradzia"]
+    full_args = ["python3", "-m", "storage.admin"]
     full_args.extend(agent_db_args())
     full_args.extend(args)
 
     try:
-        logger.info("Launching agent subprocess: %s", " ".join(full_args))
+        logger.info("Launching database-admin subprocess: %s", " ".join(full_args))
         process = subprocess.Popen(
             full_args,
             stdout=subprocess.PIPE,
@@ -115,14 +115,14 @@ def run_pradzia_command(args: list[str], timeout: int = 600) -> Dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
-def start_pradzia_task(args: list[str], operation_name: str) -> str:
-    """Start a PRADZIA command asynchronously and return the task ID.
+def start_database_admin_task(args: list[str], operation_name: str) -> str:
+    """Start a database-administration command and return the task ID.
 
     Uses the shared running_tasks dict from agents_launcher for task tracking
     and SSE streaming.
     """
     # Build full command with appropriate backend configuration
-    full_args = ["python3", "-m", "agents.pradzia"]
+    full_args = ["python3", "-m", "storage.admin"]
     full_args.extend(agent_db_args())
     full_args.extend(args)
 
@@ -130,7 +130,7 @@ def start_pradzia_task(args: list[str], operation_name: str) -> str:
     task_id = str(uuid.uuid4())
 
     # Start the process
-    logger.info("Launching agent subprocess: %s", " ".join(full_args))
+    logger.info("Launching database-admin subprocess: %s", " ".join(full_args))
     process = subprocess.Popen(
         full_args,
         stdout=subprocess.PIPE,
@@ -147,7 +147,7 @@ def start_pradzia_task(args: list[str], operation_name: str) -> str:
         "output": [],
         "complete": False,
         "returncode": None,
-        "agent_name": "PRADZIA",
+        "agent_name": "DATABASE_ADMIN",
         "agent_display_name": operation_name,
         "cmdline": " ".join(full_args),
     }
@@ -177,7 +177,7 @@ def start_pradzia_task(args: list[str], operation_name: str) -> str:
 @bp.route("/check", methods=["POST"])
 def check_configuration() -> ResponseReturnValue:
     """Run configuration check (--check mode)."""
-    result = run_pradzia_command(["--check"], timeout=60)
+    result = run_database_admin_command(["--check"], timeout=60)
     return jsonify(result)
 
 
@@ -190,7 +190,7 @@ def sync_configuration() -> ResponseReturnValue:
     if dry_run:
         args.append("--dry-run")
 
-    result = run_pradzia_command(args, timeout=120)
+    result = run_database_admin_command(args, timeout=120)
     return jsonify(result)
 
 
@@ -207,7 +207,7 @@ def load_corpora() -> ResponseReturnValue:
         args.append("--dry-run")
 
     # Loading corpora can take a while
-    result = run_pradzia_command(args, timeout=1800)  # 30 minutes
+    result = run_database_admin_command(args, timeout=1800)  # 30 minutes
     return jsonify(result)
 
 
@@ -220,41 +220,7 @@ def calculate_ranks() -> ResponseReturnValue:
     if dry_run:
         args.append("--dry-run")
 
-    result = run_pradzia_command(args, timeout=600)  # 10 minutes
-    return jsonify(result)
-
-
-@bp.route("/init-full", methods=["POST"])
-def full_initialization() -> ResponseReturnValue:
-    """Run full database initialization (--init-full mode)."""
-    dry_run = request.form.get("dry_run") == "on"
-
-    args = ["--init-full"]
-    if dry_run:
-        args.append("--dry-run")
-
-    # Full init can take a long time
-    result = run_pradzia_command(args, timeout=3600)  # 60 minutes
-    return jsonify(result)
-
-
-@bp.route("/bootstrap", methods=["POST"])
-def bootstrap_from_json() -> ResponseReturnValue:
-    """Bootstrap database from trakaido JSON export (--bootstrap mode)."""
-    json_path = request.form.get("json_path", "").strip()
-    dry_run = request.form.get("dry_run") == "on"
-    no_update_difficulty = request.form.get("no_update_difficulty") == "on"
-
-    if not json_path:
-        return jsonify({"success": False, "error": "JSON file path is required"}), 400
-
-    args = ["--bootstrap", json_path]
-    if dry_run:
-        args.append("--dry-run")
-    if no_update_difficulty:
-        args.append("--no-update-difficulty")
-
-    result = run_pradzia_command(args, timeout=1800)  # 30 minutes
+    result = run_database_admin_command(args, timeout=600)  # 10 minutes
     return jsonify(result)
 
 
@@ -273,7 +239,7 @@ def get_stats() -> ResponseReturnValue:
 @bp.route("/execute/check", methods=["POST"])
 def execute_check() -> ResponseReturnValue:
     """Execute configuration check and redirect to status page."""
-    task_id = start_pradzia_task(["--check"], "Check Configuration")
+    task_id = start_database_admin_task(["--check"], "Check Configuration")
     return redirect(url_for("agents_launcher.view_output", task_id=task_id))
 
 
@@ -287,7 +253,7 @@ def execute_sync_config() -> ResponseReturnValue:
         args.append("--dry-run")
 
     operation_name = "Sync Configuration" + (" (Dry Run)" if dry_run else "")
-    task_id = start_pradzia_task(args, operation_name)
+    task_id = start_database_admin_task(args, operation_name)
     return redirect(url_for("agents_launcher.view_output", task_id=task_id))
 
 
@@ -304,7 +270,7 @@ def execute_load_corpora() -> ResponseReturnValue:
         args.append("--dry-run")
 
     operation_name = "Load Corpora" + (" (Dry Run)" if dry_run else "")
-    task_id = start_pradzia_task(args, operation_name)
+    task_id = start_database_admin_task(args, operation_name)
     return redirect(url_for("agents_launcher.view_output", task_id=task_id))
 
 
@@ -318,40 +284,5 @@ def execute_calc_ranks() -> ResponseReturnValue:
         args.append("--dry-run")
 
     operation_name = "Calculate Ranks" + (" (Dry Run)" if dry_run else "")
-    task_id = start_pradzia_task(args, operation_name)
-    return redirect(url_for("agents_launcher.view_output", task_id=task_id))
-
-
-@bp.route("/execute/init-full", methods=["POST"])
-def execute_init_full() -> ResponseReturnValue:
-    """Execute full initialization and redirect to status page."""
-    dry_run = request.form.get("dry_run") == "on"
-
-    args = ["--init-full"]
-    if dry_run:
-        args.append("--dry-run")
-
-    operation_name = "Full Initialization" + (" (Dry Run)" if dry_run else "")
-    task_id = start_pradzia_task(args, operation_name)
-    return redirect(url_for("agents_launcher.view_output", task_id=task_id))
-
-
-@bp.route("/execute/bootstrap", methods=["POST"])
-def execute_bootstrap() -> ResponseReturnValue:
-    """Execute bootstrap from JSON and redirect to status page."""
-    json_path = request.form.get("json_path", "").strip()
-    dry_run = request.form.get("dry_run") == "on"
-    no_update_difficulty = request.form.get("no_update_difficulty") == "on"
-
-    if not json_path:
-        return redirect(url_for("pradzia.index"))
-
-    args = ["--bootstrap", json_path]
-    if dry_run:
-        args.append("--dry-run")
-    if no_update_difficulty:
-        args.append("--no-update-difficulty")
-
-    operation_name = "Bootstrap from JSON" + (" (Dry Run)" if dry_run else "")
-    task_id = start_pradzia_task(args, operation_name)
+    task_id = start_database_admin_task(args, operation_name)
     return redirect(url_for("agents_launcher.view_output", task_id=task_id))

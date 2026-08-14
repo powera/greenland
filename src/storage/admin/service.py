@@ -1,36 +1,14 @@
 #!/usr/bin/env python3
-"""
-Pradzia - Database Initialization Agent
+"""Administrative database initialization and maintenance services."""
 
-This agent runs autonomously to initialize and maintain the wordfreq database,
-including corpus configuration synchronization, data loading, and rank calculation.
-
-"Pradzia" means "beginning" in Lithuanian - the starting point for all data!
-"""
-
-import argparse
 import logging
 import os
-import sys
 from datetime import datetime
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
-# Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
-if GREENLAND_SRC_PATH not in sys.path:
-    sys.path.insert(0, GREENLAND_SRC_PATH)
-
-
 import constants
-from agents.common.common_args import (
-    add_backend_args,
-    add_common_args,
-    add_output_args,
-    get_data_source_config,
-)
 from wordfreq.frequency import combined_rank, corpus
 from wordfreq.tiers.basic_english import BasicEnglishImporter
 from wordfreq.tiers.cambridge_yle import CambridgeYleImporter
@@ -39,14 +17,10 @@ from wordfreq.tiers.base import TierImporter
 from wordfreq.tiers.runner import run_import as run_tier_import
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
-from storage.database import (
-    create_database_session,
-    ensure_tables_exist,
-    initialize_corpora,
-)
+from storage.database import ensure_tables_exist, initialize_corpora
 from storage.models.schema import Corpus  # Ensure Corpus model is imported
 from storage.translation_helpers import has_translation_clause
-from agents.pradzia import json_to_database
+import storage.admin.legacy_json_import as legacy_json_import
 
 # Configure logging
 logging.basicConfig(
@@ -55,12 +29,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class PradziaAgent:
-    """Agent for database initialization and corpus management."""
+class DatabaseAdminService:
+    """Initialize and maintain a configured linguistic database."""
 
     def __init__(self, config: DataSourceConfig):
         """
-        Initialize the Pradzia agent.
+        Initialize the administrative service.
 
         Args:
             config: DataSourceConfig with backend settings (required)
@@ -500,7 +474,7 @@ class PradziaAgent:
         # Step 2: Load and validate JSON data
         try:
             logger.info(f"Loading trakaido data from: {json_path}")
-            trakaido_data = json_to_database.load_trakaido_json(json_path)
+            trakaido_data = legacy_json_import.load_trakaido_json(json_path)
 
             result = {
                 "dry_run": dry_run,
@@ -526,7 +500,7 @@ class PradziaAgent:
             session = self.get_session()
             try:
                 logger.info(f"Migrating {len(trakaido_data)} entries to database...")
-                successful, total = json_to_database.migrate_json_data(
+                successful, total = legacy_json_import.migrate_json_data(
                     session=session,
                     trakaido_data=trakaido_data,
                     update_difficulty=update_difficulty,
@@ -667,7 +641,7 @@ class PradziaAgent:
         check = results["check"]
 
         logger.info("=" * 80)
-        logger.info("PRADZIA AGENT REPORT - Configuration Check")
+        logger.info("DATABASE ADMINISTRATION REPORT - Configuration Check")
         logger.info("=" * 80)
         logger.info(f"Timestamp: {results['timestamp']}")
         logger.info("")
@@ -705,176 +679,3 @@ class PradziaAgent:
             logger.info(f"  - {db_corpus['name']} ({enabled}): {db_corpus['description']}")
 
         logger.info("=" * 80)
-
-
-def get_argument_parser() -> argparse.ArgumentParser:
-    """Return the argument parser for introspection.
-
-    This function allows external tools to introspect the available
-    command-line arguments without executing the main function.
-    """
-    parser = argparse.ArgumentParser(description="Pradzia - Database Initialization Agent")
-
-    # Common arguments
-    add_common_args(parser)
-    add_backend_args(parser)
-    add_output_args(parser)
-
-    # Mode selection
-    mode_group = parser.add_mutually_exclusive_group()
-    mode_group.add_argument(
-        "--check", action="store_true", help="Check configuration and database state (no changes)"
-    )
-    mode_group.add_argument(
-        "--sync-config", action="store_true", help="Sync corpus configurations to database"
-    )
-    mode_group.add_argument(
-        "--load",
-        nargs="*",
-        metavar="CORPUS",
-        help="Load specified corpora (or all enabled if none specified)",
-    )
-    mode_group.add_argument(
-        "--import-tiers",
-        action="store_true",
-        help="Import tier annotations (Cambridge YLE, CEFR, Basic English)",
-    )
-    mode_group.add_argument("--calc-ranks", action="store_true", help="Calculate combined ranks")
-    mode_group.add_argument(
-        "--init-full",
-        action="store_true",
-        help="Full initialization (sync + load + import tiers + calc ranks)",
-    )
-    mode_group.add_argument(
-        "--bootstrap",
-        metavar="JSON_PATH",
-        help="Bootstrap database from trakaido JSON export (initial setup only)",
-    )
-
-    # Bootstrap-specific options
-    parser.add_argument(
-        "--no-update-difficulty",
-        action="store_true",
-        help="Do not update difficulty levels on existing lemmas (only with --bootstrap)",
-    )
-
-    return parser
-
-
-def main() -> None:
-    """Main entry point for the pradzia agent."""
-    parser = get_argument_parser()
-    args = parser.parse_args()
-
-    # Create configuration from args (always returns a valid config with defaults)
-    config = get_data_source_config(args)
-
-    agent = PradziaAgent(config=config)
-
-    if args.check:
-        agent.run_check(output_file=args.output)
-
-    elif args.sync_config:
-        result = agent.sync_configurations(dry_run=args.dry_run)
-        if args.output:
-            import json
-
-            with open(args.output, "w", encoding="utf-8") as f:
-                json.dump(result, f, indent=2, ensure_ascii=False)
-
-        if not args.dry_run:
-            print(
-                f"\nSynced: {result['added_count']} added, "
-                f"{result['updated_count']} updated, "
-                f"{result['disabled_count']} disabled"
-            )
-
-    elif args.load is not None:
-        corpus_names = args.load if args.load else None
-        result = agent.load_corpora(corpus_names=corpus_names, dry_run=args.dry_run)
-
-        if args.output:
-            import json
-
-            with open(args.output, "w", encoding="utf-8") as f:
-                json.dump(result, f, indent=2, ensure_ascii=False)
-
-        if not args.dry_run:
-            print(f"\nLoaded {result['successful_corpora']}/{result['total_corpora']} corpora")
-
-    elif args.import_tiers:
-        result = agent.import_tiers(dry_run=args.dry_run)
-
-        if args.output:
-            import json
-
-            with open(args.output, "w", encoding="utf-8") as f:
-                json.dump(result, f, indent=2, ensure_ascii=False)
-
-        if not args.dry_run and result.get("success"):
-            for source, info in result.get("sources", {}).items():
-                if "error" in info:
-                    print(f"\n{source}: FAILED ({info['error']})")
-                    continue
-                print(
-                    f"\n{source}: {info['total']} entries, "
-                    f"{info['lemma_tiers_inserted']}+{info['lemma_tiers_updated']} tier rows, "
-                    f"{info['unattached']} unattached"
-                )
-
-    elif args.calc_ranks:
-        result = agent.calculate_ranks(dry_run=args.dry_run)
-
-        if args.output:
-            import json
-
-            with open(args.output, "w", encoding="utf-8") as f:
-                json.dump(result, f, indent=2, ensure_ascii=False)
-
-        if not args.dry_run and result.get("success"):
-            print("\nCombined ranks calculated successfully")
-
-    elif args.init_full:
-        result = agent.initialize_database(dry_run=args.dry_run)
-
-        if args.output:
-            import json
-
-            with open(args.output, "w", encoding="utf-8") as f:
-                json.dump(result, f, indent=2, ensure_ascii=False)
-
-        print(f"\nInitialization complete in {result['duration_seconds']:.2f} seconds")
-
-    elif args.bootstrap:
-        update_difficulty = not args.no_update_difficulty
-        result = agent.bootstrap_from_json(
-            json_path=args.bootstrap, update_difficulty=update_difficulty, dry_run=args.dry_run
-        )
-
-        if args.output:
-            import json
-
-            with open(args.output, "w", encoding="utf-8") as f:
-                json.dump(result, f, indent=2, ensure_ascii=False)
-
-        if result.get("aborted"):
-            print(f"\n⚠️  Bootstrap aborted: {result['message']}")
-        elif result.get("success"):
-            if not args.dry_run:
-                print(
-                    f"\n✅ Bootstrap complete: {result['successful_migrations']}/{result['total_entries']} entries migrated"
-                )
-                print(f"   Duration: {result['duration_seconds']:.2f} seconds")
-            else:
-                print(f"\n✅ Dry run: Would migrate {result['would_migrate']} entries")
-        else:
-            error_msg = result.get("error", "Unknown error")
-            print(f"\n❌ Bootstrap failed: {error_msg}")
-
-    else:
-        # Default: run check
-        agent.run_check(output_file=args.output)
-
-
-if __name__ == "__main__":
-    main()

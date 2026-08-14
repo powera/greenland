@@ -123,7 +123,7 @@ class Lemma(Base):
     )  # For which Trakaido "level"
     # Combined frequency rank: weighted harmonic mean across enabled wordfreq
     # corpora and YLE/CEFR tier signals. Batch-computed by
-    # ``wordfreq.frequency.combined_rank``; refresh via ``pradzia --calc-ranks``
+    # ``wordfreq.frequency.combined_rank``; refresh via ``storage.admin --calc-ranks``
     # after bulk lemma/form/tier changes.
     frequency_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array of tags

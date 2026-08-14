@@ -23,18 +23,12 @@ work is stored under canonical capabilities such as `words.translations`,
 `words.grammar_facts`. Their payloads use `lemma_id`, `language_code` for one
 language, and `languages` for a set.
 
-### Initialization Agents
+### Database bootstrap (not an agent)
 
-#### Pradzia (Beginning)
-- **Animal**: Beginning/Start (pradžia)
-- **Purpose**: Database initialization, corpus management, rank calculation
-- **Dependencies**: None (first agent to run)
-- **Outputs**: Initialized database with base lemmas from corpora
-- **Key Functions**:
-  - Create/update database tables
-  - Load word frequency corpora
-  - Calculate combined frequency ranks
-  - Bootstrap from JSON exports
+Run `PYTHONPATH=src python bootstrap_database.py` before agent workflows. It
+loads `data/release` by default, adds local frequency and tier sources, and
+calculates combined ranks. Use `--empty` only when release content is
+intentionally excluded.
 
 ---
 
@@ -43,7 +37,7 @@ language, and `languages` for a set.
 #### Voras (Spider)
 - **Animal**: Spider
 - **Purpose**: Translation validator and populator - "weaves the web of translations"
-- **Dependencies**: Pradzia (needs base lemmas)
+- **Dependencies**: Bootstrapped database with base lemmas
 - **Outputs**: Translations in multiple languages (Lithuanian, Chinese, French, Korean, Spanish, German, Portuguese, Swahili, Vietnamese)
 - **Key Functions**:
   - Validate existing translations
@@ -87,7 +81,7 @@ language, and `languages` for a set.
 #### Lokys (Bear)
 - **Animal**: Bear
 - **Purpose**: English lemma validation - "thorough and careful in checking quality"
-- **Dependencies**: Pradzia (needs base lemmas), runs parallel to Voras
+- **Dependencies**: Bootstrapped database with base lemmas; runs parallel to Voras
 - **Outputs**: Validated and corrected English lemma forms and definitions
 - **Key Functions**:
   - Validate lemma forms (e.g., "shoe" not "shoes")
@@ -224,14 +218,14 @@ language, and `languages` for a set.
 
 ### Phase 1: Initialization
 ```
-Pradzia (Database Init)
+bootstrap_database.py
   ↓
   Creates base lemmas from word frequency corpora
 ```
 
 ### Phase 2: Core Enrichment (mostly parallel)
 ```
-Pradzia → Voras (Translations)
+Bootstrapped database → Voras (Translations)
   ├→ Vilkas (Word Forms)
   ├→ Lape (Grammar Facts)
   ├→ Šernas (Synonyms)
@@ -240,7 +234,7 @@ Pradzia → Voras (Translations)
 
 ### Phase 3: Validation (parallel with enrichment)
 ```
-Pradzia → Lokys (Lemma Validation)
+Bootstrapped database → Lokys (Lemma Validation)
   ├→ Papuga (Pronunciation Generation)
   └→ Dramblys (Missing Word Detection)
 ```
@@ -267,11 +261,11 @@ Complete Data → Ungurys (WireWord Export - needs Voras, Vilkas, Lape, Šernas,
 ## Critical Dependencies
 
 ### Must Run Before Others
-- **Pradzia** must run first to initialize the database and load base lemmas
+- `bootstrap_database.py` must run first to initialize the database and load base lemmas
 - **Voras** must run before most enrichment agents since translations are fundamental
 
 ### Typical Execution Order
-1. `pradzia` - Initialize database
+1. `bootstrap_database.py` - Initialize the database from `data/release`
 2. `voras` - Generate/validate translations
 3. `lokys` - Validate English lemmas (can run in parallel with Voras)
 4. `vilkas`, `lape`, `šernas` - Generate enrichment data (parallel after Voras)

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Migration script to populate the wordfreq database with trakaido data from JSON export.
+"""Import the legacy monolithic Trakaido JSON export into the database.
 
 This script:
 1. Reads trakaido data from nouns.json (exported from SQLite database)
@@ -39,29 +38,30 @@ import json
 import os
 import re
 import sys
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 from pathlib import Path
 
 # Add src directory to path
-GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
+GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
-DEFAULT_JSON_PATH = os.path.join(os.path.dirname(__file__), "nouns.json")
-
 import constants
+from storage.backend import create_session as create_backend_session
+from storage.backend.config import DataSourceConfig
 from storage.database import (
     add_alternative_form,
     add_derivative_form,
     add_lemma,
-    create_database_session,
     generate_guid,
     get_word_token_by_text,
     update_lemma_translation,
 )
 from storage.models.schema import DerivativeForm, Lemma, WordToken
 from storage.translation_helpers import has_translation_clause
+
+DEFAULT_JSON_PATH = os.path.join(constants.PROJECT_ROOT, "data", "nouns.json")
 
 english_alternative_map = {
     "bicycle": ["bike"],
@@ -333,7 +333,7 @@ def find_or_create_lemma(
             existing_lemma.notes = notes
             session.commit()
 
-        return existing_lemma
+        return cast(Lemma, existing_lemma)
 
     # Step 2: Check if we have a word token for frequency data
     word_token = get_word_token_by_text(session, clean_english, "en")
@@ -543,6 +543,11 @@ Examples:
         action="store_true",
         help="Do not update difficulty levels on existing lemmas (default: update difficulty levels)",
     )
+    parser.add_argument(
+        "--db-path",
+        default=constants.WORDFREQ_DB_PATH,
+        help=f"Destination SQLite database (default: {constants.WORDFREQ_DB_PATH})",
+    )
 
     args = parser.parse_args()
 
@@ -559,7 +564,8 @@ Examples:
 
     # Create database session
     try:
-        session = create_database_session()
+        config = DataSourceConfig(sqlite_path=args.db_path)
+        session = create_backend_session(config)
         print("✅ Connected to wordfreq database")
     except Exception as e:
         print(f"❌ Failed to connect to database: {e}")

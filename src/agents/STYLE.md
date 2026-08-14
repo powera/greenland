@@ -203,7 +203,7 @@ if __name__ == '__main__':
     sys.exit(main())
 ```
 
-**Examples:** `lokys.py`, `papuga.py`, `pradzia.py`, `ungurys.py`
+**Examples:** `lokys.py`, `papuga.py`, `ungurys.py`
 
 ---
 
@@ -279,7 +279,6 @@ if __name__ == '__main__':
 
 | Agent | Lithuanian | Purpose |
 |-------|-----------|---------|
-| **Pradzia** | Beginning | Database initialization, corpus synchronization, frequency rank calculation |
 | **Bebras** | Beaver | Database integrity checker (orphaned records, missing fields, sentence-word linking) |
 
 ### English Validation

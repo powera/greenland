@@ -4,7 +4,8 @@
 
 ```
 src/
-├── storage/               # Database layer (ORM, models, CRUD)
+├── storage/               # Database layer (ORM, models, CRUD, administration)
+│   └── admin/             # Empty-DB and data/release bootstrap workflows
 ├── wordfreq/              # Linguistic database system (core)
 │   ├── translation/       # LLM-based translation and form generation
 │   ├── frequency/         # Word frequency analysis
@@ -43,7 +44,6 @@ usage and arguments.
 
 | Agent | Animal | Purpose |
 |-------|--------|---------|
-| pradzia | Beginning | Database initialization |
 | lokys | Bear | English lemma validation |
 | dramblys | Elephant | Missing words detector |
 | bebras | Beaver | Database integrity checker |

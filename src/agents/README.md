@@ -18,7 +18,6 @@ capability names such as `words.forms` and `words.pronunciations`.
 
 | Agent | Lithuanian | Purpose |
 |-------|-----------|---------|
-| **pradzia** | beginning | Database initialization, corpus sync, rank calculation |
 | **bebras** | beaver | Database integrity (orphans, missing fields, duplicates) |
 | **lokys** | bear | English lemma validation (dictionary form, definitions) |
 | **dramblys** | elephant | Missing words detector, JSONL import |
@@ -71,16 +70,6 @@ SQLite database. `--persona custom` unlocks the manual backend flags for
 development setups that need to spell out the backend directly.
 
 ## Agent Details
-
-### pradzia (Database Initialization)
-
-```bash
-pradzia.py --check                    # Check config and database state
-pradzia.py --sync-config              # Sync corpus configs to database
-pradzia.py --load [CORPUS...]         # Load corpora (all enabled if none specified)
-pradzia.py --calc-ranks               # Calculate combined frequency ranks
-pradzia.py --init-full                # Full initialization (sync + load + ranks)
-```
 
 ### bebras (Database Integrity)
 

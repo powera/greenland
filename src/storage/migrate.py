@@ -2036,7 +2036,6 @@ def main() -> None:
         choices=[
             "sqlite-to-jsonl",
             "postgres-to-jsonl",
-            "jsonl-to-sqlite",
             "sqlite-to-release",
             "sqlite-to-sentence-release",
             "sqlite-to-phrase-release",
@@ -2066,19 +2065,6 @@ def main() -> None:
         "--release-dir",
         default="data/release/lemmas",
         help="Path to release directory (default: data/release/lemmas)",
-    )
-    parser.add_argument(
-        "--jsonl-release-dir",
-        default="data/release",
-        help=(
-            "Path to the JSONL release data directory for jsonl-to-sqlite "
-            "(parent of lemmas/, sentences/, etc.; default: data/release)"
-        ),
-    )
-    parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Overwrite an existing non-empty target database (jsonl-to-sqlite)",
     )
     parser.add_argument(
         "--prune",
@@ -2156,8 +2142,6 @@ def main() -> None:
             prune=args.prune,
             categories=lemma_audio_categories,
         )
-    elif args.direction == "jsonl-to-sqlite":
-        import_jsonl_to_sqlite(args.jsonl_release_dir, args.sqlite_path, force=args.force)
     else:
         print(f"Unknown migration direction: {args.direction}")
         sys.exit(1)

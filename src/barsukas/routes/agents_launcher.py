@@ -61,17 +61,6 @@ def _resolve_agent_script_path(agent_script: str) -> Path:
 # Define all agents in order from the README
 AGENTS = [
     {
-        "name": "PRADZIA",
-        "display_name": "Pradzia",
-        "subtitle": "Database Initialization",
-        "description": "Initializes and maintains the wordfreq database, including corpus configuration synchronization, data loading, and rank calculation.",
-        "script": "pradzia/agent.py",
-        "icon": "bi-play-circle",
-        "use_dynamic_form": True,
-        "show_if_empty": True,  # Only show if database is empty
-        "redirect_to": "pradzia.index",
-    },
-    {
         "name": "LOKYS",
         "display_name": "Lokys",
         "subtitle": "English Lemma Validation",
@@ -330,20 +319,10 @@ def check_database_empty() -> bool:
 @bp.route("/")
 def list_agents() -> ResponseReturnValue:
     """Display the list of available agents."""
-    # Check if database is empty to determine PRADZIA visibility
+    # Agents require a bootstrapped database.
     db_empty = check_database_empty()
 
-    # Filter agents based on database state
-    visible_agents = []
-    for agent in AGENTS:
-        # Show PRADZIA only if database is empty
-        if agent.get("show_if_empty"):
-            if db_empty:
-                visible_agents.append(agent)
-        else:
-            # Show all other agents only if database is NOT empty
-            if not db_empty:
-                visible_agents.append(agent)
+    visible_agents = [] if db_empty else AGENTS
 
     return render_template(
         "agents_launcher/list.html", agents=visible_agents, pipeline=PIPELINE, db_empty=db_empty
