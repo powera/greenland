@@ -15,7 +15,9 @@ closes the import loop.
 The dedup cascade, in order, each step cheaper than the one after it:
 
 1. words already handled in this run (the caller's ``seen`` set);
-2. words already sitting in ``pending_imports``;
+2. words already sitting in ``pending_imports`` -- the existing row is reused
+   rather than duplicated, but this sentence still gets its own hint pointing
+   at it, since the hint is what makes the sentence re-linkable on approval;
 3. an existing ``Lemma`` with the same text (filtered by POS when known);
 4. an existing ``DerivativeForm`` in English matching the text.
 
@@ -139,6 +141,22 @@ def load_pending_glosses(session: Session) -> Set[str]:
     return {str(row[0]).strip().lower() for row in rows if row[0]}
 
 
+def pending_import_id_for_gloss(session: Session, gloss: str) -> Optional[int]:
+    """The id of an existing pending row for ``gloss``, if one is staged.
+
+    Used when a second sentence needs the word that a first sentence already
+    staged: the pending row is shared, but each sentence needs its own hint
+    pointing at it.
+    """
+    row = (
+        session.query(PendingImport.id)
+        .filter(func.lower(PendingImport.english_word) == gloss.strip().lower())
+        .order_by(PendingImport.id)
+        .first()
+    )
+    return int(row[0]) if row else None
+
+
 def _next_hint_position(session: Session, sentence_id: int) -> int:
     rows = (
         session.query(SentenceWordHint.position)
@@ -163,6 +181,50 @@ def _hints_by_text(session: Session, sentence_id: int) -> Dict[str, SentenceWord
         if text and text not in mapping:
             mapping[text] = hint
     return mapping
+
+
+def _attach_hint(
+    session: Session,
+    sentence_id: int,
+    *,
+    pending_import_id: int,
+    gloss: str,
+    slot_name: Optional[str],
+    existing_hints: Dict[str, SentenceWordHint],
+    next_position: int,
+) -> Tuple[bool, bool]:
+    """Point this sentence's hint for ``gloss`` at ``pending_import_id``.
+
+    The back-link. Without it the sentence has no way to find this word again
+    once it becomes a lemma. A hint may already exist for this slot (written by
+    buivolas or the scene handler); attach to it rather than colliding with its
+    unique (sentence_id, position) key.
+
+    Returns ``(wrote, consumed_position)``. The two differ when an existing
+    hint is upgraded in place: a row was written, but no new position was used.
+    """
+    normalized = gloss.strip().lower()
+    existing_hint = existing_hints.get(normalized)
+    if existing_hint is not None:
+        # An already-resolved hint is left alone: a lemma or name link is a
+        # better answer than a pending row and must not be downgraded.
+        if existing_hint.pending_import_id is None and existing_hint.lemma_id is None:
+            existing_hint.pending_import_id = pending_import_id
+            return True, False
+        return False, False
+
+    new_hint = SentenceWordHint(
+        sentence_id=sentence_id,
+        position=next_position,
+        pending_import_id=pending_import_id,
+        english_text=gloss,
+        # slot_name is NOT NULL; a word whose part of speech the LLM left
+        # blank still needs a row.
+        slot_name=(slot_name or "").strip() or "unknown",
+    )
+    session.add(new_hint)
+    existing_hints[normalized] = new_hint
+    return True, True
 
 
 def stage_unlinked_words(
@@ -198,9 +260,12 @@ def stage_unlinked_words(
         example_sentence: English sentence text, stored as context for the
             approval step's LLM call.
         notes: Free-text note stored on each row.
-        seen: Glosses already handled by this caller, mutated in place. Pass the
-            same set across a document so a word repeated in ten sentences is
-            staged once.
+        seen: Glosses already handled by this caller, mutated in place. Skips
+            the word outright, hint included, so share one set only across
+            calls for the SAME sentence. Sharing it across a document would
+            leave every sentence after the first without a back-link to the
+            word it is waiting on; cross-sentence dedup is ``pending_glosses``'
+            job, which reuses the pending row and still writes the hint.
         pending_glosses: Preloaded set of already-staged glosses, mutated in
             place. Loaded on demand when omitted.
         gloss_cache: Memo for lemma-text lookups, mutated in place.
@@ -240,7 +305,31 @@ def stage_unlinked_words(
         seen_glosses.add(normalized)
 
         if normalized in existing_pending:
+            # Another sentence already staged this word. The pending row is
+            # shared, but the hint is per sentence: without one here, THIS
+            # sentence never reports STAGE complete and is never re-linked when
+            # that pending row is approved, so the workflow spins forever.
             outcome.already_pending += 1
+            if dry_run:
+                continue
+            shared_id = pending_import_id_for_gloss(session, normalized)
+            if shared_id is None:
+                # Staged in this transaction by a caller that primed the set,
+                # or deleted since it was loaded. Nothing to attach to.
+                continue
+            wrote, consumed = _attach_hint(
+                session,
+                sentence_id,
+                pending_import_id=shared_id,
+                gloss=gloss,
+                slot_name=resolved.slot_name,
+                existing_hints=existing_hints,
+                next_position=next_position,
+            )
+            if wrote:
+                outcome.hints_written += 1
+            if consumed:
+                next_position += 1
             continue
 
         pos_type = PART_OF_SPEECH_MAP.get((resolved.slot_name or "").strip().lower())
@@ -283,29 +372,19 @@ def stage_unlinked_words(
         existing_pending.add(normalized)
         outcome.pending_import_ids.append(int(pending.id))
 
-        # The back-link. Without it the sentence has no way to find this word
-        # again once it becomes a lemma. A hint may already exist for this slot
-        # (written by buivolas or the scene handler); attach to it rather than
-        # colliding with its unique (sentence_id, position) key.
-        existing_hint = existing_hints.get(normalized)
-        if existing_hint is not None:
-            if existing_hint.pending_import_id is None and existing_hint.lemma_id is None:
-                existing_hint.pending_import_id = pending.id
-                outcome.hints_written += 1
-        else:
-            new_hint = SentenceWordHint(
-                sentence_id=sentence_id,
-                position=next_position,
-                pending_import_id=pending.id,
-                english_text=gloss,
-                # slot_name is NOT NULL; a word whose part of speech the LLM
-                # left blank still needs a row.
-                slot_name=(resolved.slot_name or "").strip() or "unknown",
-            )
-            session.add(new_hint)
-            existing_hints[normalized] = new_hint
-            next_position += 1
+        wrote, consumed = _attach_hint(
+            session,
+            sentence_id,
+            pending_import_id=int(pending.id),
+            gloss=gloss,
+            slot_name=resolved.slot_name,
+            existing_hints=existing_hints,
+            next_position=next_position,
+        )
+        if wrote:
             outcome.hints_written += 1
+        if consumed:
+            next_position += 1
 
     if not dry_run:
         session.flush()

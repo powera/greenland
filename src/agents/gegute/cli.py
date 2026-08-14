@@ -182,6 +182,9 @@ def _enqueue_generate(session: Session, args: argparse.Namespace) -> int:
             "count": args.count,
             "theme": args.theme,
             "difficulty_level": args.difficulty_level,
+            # Without this the queued run silently uses the worker's default
+            # model rather than the one the operator selected.
+            "model": args.model,
         },
         dedup_key=f"{TASK_GENERATE}:{language}:{args.theme or ''}",
     )
@@ -194,15 +197,21 @@ def _enqueue_for_idioms(
     session: Session,
     idioms: Sequence[Idiom],
     task_type: str,
+    model: str,
     payload_extra: Optional[Dict[str, Any]] = None,
 ) -> int:
-    """Enqueue one task per idiom, reporting how many were newly created."""
+    """Enqueue one task per idiom, reporting how many were newly created.
+
+    ``model`` is carried in each payload so the queued run uses the model the
+    operator selected rather than the worker's default.
+    """
     created = 0
     for idiom in idioms:
         payload: Dict[str, Any] = {
             "schema_version": 1,
             "source_component": "agents.gegute",
             "idiom_id": idiom.id,
+            "model": model,
         }
         if payload_extra:
             payload.update(payload_extra)
@@ -291,6 +300,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     session,
                     idioms,
                     TASK_POPULATE,
+                    args.model,
                     {
                         "target_languages": target_languages,
                         "only_missing": only_missing,
@@ -324,7 +334,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         if args.validate:
             if args.use_workqueue:
-                return _enqueue_for_idioms(session, idioms, TASK_VALIDATE)
+                return _enqueue_for_idioms(session, idioms, TASK_VALIDATE, args.model)
 
             if not confirm_operation(
                 message=f"Will audit equivalents for {len(idioms)} idiom(s)",

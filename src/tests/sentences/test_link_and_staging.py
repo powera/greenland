@@ -20,7 +20,11 @@ import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from sentences.link_writer import LINK_CONFIDENCE_THRESHOLD, link_sentence_words
+from sentences.link_writer import (
+    LINK_CONFIDENCE_THRESHOLD,
+    link_sentence_words,
+    release_sentence_word_hints,
+)
 from sentences.pending_staging import stage_unlinked_words
 from storage.models.imports import PendingImport
 from storage.models.schema import (
@@ -366,6 +370,115 @@ class TestStagingCreatesTheBackLink(WriterTestCase):
         self.assertEqual(outcome.already_pending, 1)
         self.assertEqual(self.session.query(PendingImport).count(), 1)
 
+    def test_a_second_sentence_attaches_to_the_existing_pending_row(self) -> None:
+        """The pending row is shared across sentences; the hint is not.
+
+        Without a hint of its own, the second sentence never reports STAGE
+        complete and is never re-linked when the pending row is approved, so
+        the import workflow spins on it forever.
+        """
+        stage_unlinked_words(
+            self.session,
+            self.sentence.id,
+            unresolved=self.unresolved("aardvark"),
+            source="test",
+        )
+
+        other = Sentence(guid="S_00002")
+        self.session.add(other)
+        self.session.commit()
+
+        outcome = stage_unlinked_words(
+            self.session,
+            other.id,
+            unresolved=self.unresolved("aardvark"),
+            source="test",
+        )
+        self.session.commit()
+
+        self.assertEqual(outcome.staged, 0)
+        self.assertEqual(outcome.already_pending, 1)
+        self.assertEqual(outcome.hints_written, 1)
+
+        pending = self.session.query(PendingImport).one()
+        other_hints = (
+            self.session.query(SentenceWordHint)
+            .filter(SentenceWordHint.sentence_id == other.id)
+            .all()
+        )
+        self.assertEqual(len(other_hints), 1)
+        self.assertEqual(other_hints[0].pending_import_id, pending.id)
+
+    def test_attaching_does_not_downgrade_an_already_linked_hint(self) -> None:
+        """A hint that already names a lemma outranks a pending row."""
+        lemma = self.add_lemma("aardvark", "N01_009")
+        stage_unlinked_words(
+            self.session,
+            self.sentence.id,
+            unresolved=self.unresolved("aardvark"),
+            source="test",
+        )
+
+        other = Sentence(guid="S_00002")
+        self.session.add(other)
+        self.session.commit()
+        self.session.add(
+            SentenceWordHint(
+                sentence_id=other.id,
+                position=0,
+                lemma_id=lemma.id,
+                english_text="aardvark",
+                slot_name="noun",
+            )
+        )
+        self.session.commit()
+
+        outcome = stage_unlinked_words(
+            self.session,
+            other.id,
+            unresolved=self.unresolved("aardvark"),
+            source="test",
+        )
+        self.session.commit()
+
+        self.assertEqual(outcome.hints_written, 0)
+        hint = (
+            self.session.query(SentenceWordHint)
+            .filter(SentenceWordHint.sentence_id == other.id)
+            .one()
+        )
+        self.assertEqual(hint.lemma_id, lemma.id)
+        self.assertIsNone(hint.pending_import_id)
+
+    def test_dry_run_attaches_no_hint_for_an_existing_pending_row(self) -> None:
+        stage_unlinked_words(
+            self.session,
+            self.sentence.id,
+            unresolved=self.unresolved("aardvark"),
+            source="test",
+        )
+
+        other = Sentence(guid="S_00002")
+        self.session.add(other)
+        self.session.commit()
+
+        outcome = stage_unlinked_words(
+            self.session,
+            other.id,
+            unresolved=self.unresolved("aardvark"),
+            source="test",
+            dry_run=True,
+        )
+
+        self.assertEqual(outcome.already_pending, 1)
+        self.assertEqual(outcome.hints_written, 0)
+        self.assertEqual(
+            self.session.query(SentenceWordHint)
+            .filter(SentenceWordHint.sentence_id == other.id)
+            .count(),
+            0,
+        )
+
     def test_the_same_word_twice_in_one_call_is_staged_once(self) -> None:
         outcome = stage_unlinked_words(
             self.session,
@@ -450,6 +563,58 @@ class TestLinkingThenStaging(WriterTestCase):
 
         positions = [hint.position for hint in self.hints()]
         self.assertEqual(len(positions), len(set(positions)))
+
+
+class TestReleasingHintsBeforeDeletingAPending(WriterTestCase):
+    """Every path that deletes a PendingImport must release its hints first.
+
+    The foreign key has no ON DELETE behavior, so a hint left pointing at a
+    deleted row either raises (Postgres) or lingers (SQLite without the
+    pragma). A lingering hint is the worse case: STAGE counts it as staged, so
+    the sentence is never staged again.
+    """
+
+    def stage_one(self, word: str = "aardvark") -> PendingImport:
+        stage_unlinked_words(
+            self.session,
+            self.sentence.id,
+            unresolved=[
+                ResolvedLemma(
+                    position=0,
+                    english_text=word,
+                    lemma=None,
+                    method="unresolved",
+                    confidence=0.0,
+                    slot_name="noun",
+                )
+            ],
+            source="test",
+        )
+        self.session.commit()
+        return self.session.query(PendingImport).one()
+
+    def test_rejection_drops_the_hint(self) -> None:
+        pending = self.stage_one()
+
+        released = release_sentence_word_hints(self.session, pending.id, None)
+        self.session.delete(pending)
+        self.session.commit()
+
+        self.assertEqual(released, 1)
+        self.assertEqual(self.hints(), [])
+
+    def test_synonym_acceptance_repoints_the_hint_at_the_lemma(self) -> None:
+        lemma = self.add_lemma("anteater", "N01_010")
+        pending = self.stage_one()
+
+        released = release_sentence_word_hints(self.session, pending.id, lemma.id)
+        self.session.delete(pending)
+        self.session.commit()
+
+        self.assertEqual(released, 1)
+        hint = self.session.query(SentenceWordHint).one()
+        self.assertEqual(hint.lemma_id, lemma.id)
+        self.assertIsNone(hint.pending_import_id)
 
 
 if __name__ == "__main__":

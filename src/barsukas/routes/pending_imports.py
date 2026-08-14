@@ -39,6 +39,7 @@ from flask import (
 from flask.typing import ResponseReturnValue
 from sqlalchemy.orm import Query
 
+from sentences.link_writer import release_sentence_word_hints
 from storage.backend.config import DataSourceConfig
 from storage.crud.derivative_form import add_derivative_form
 from storage.crud.word_token import add_word_token
@@ -402,6 +403,10 @@ def use_synonym(pending_import_id: int, candidate_id: int) -> ResponseReturnValu
                 notes=f"Accepted from pending import #{pending.id}",
             )
         candidate.status = ACCEPTED_STATUS
+        # The word became a synonym form of this lemma, so any sentence waiting
+        # on the pending row is repointed at it and can link on its next pass.
+        # Must precede the delete: the hint's foreign key has no ON DELETE.
+        release_sentence_word_hints(g.db, pending.id, lemma.id)
         g.db.delete(pending)
         g.db.commit()
         flash(
