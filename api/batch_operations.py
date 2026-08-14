@@ -67,9 +67,14 @@ def list_pending_imports(
     pos_subtype: Optional[str] = None,
     source: Optional[str] = None,
     language: Optional[str] = None,
+    target_kind: Optional[str] = None,
     page: Optional[int] = None,
 ) -> Any:
-    """List pending imports as JSON (same filters as the HTML list view)."""
+    """List pending imports as JSON (same filters as the HTML list view).
+
+    ``target_kind`` filters by what a term becomes on approval: "lemma",
+    "name", or "concept".
+    """
     return get_json(
         f"{_PENDING_IMPORTS_PREFIX}/api/list",
         {
@@ -78,6 +83,7 @@ def list_pending_imports(
             "pos_subtype": pos_subtype,
             "source": source,
             "language": language,
+            "target_kind": target_kind,
             "page": page,
         },
     )

@@ -45,7 +45,6 @@ from langtools.collation import strip_diacritics
 from storage.backend.config import DataSourceConfig
 from storage.crud.operation_log import log_translation_change
 from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
-from storage.models.imports import PendingImport
 from storage.models.schema import (
     SENSE_PROMINENCE_COMMON,
     ExternalLexemeAnnotation,
@@ -53,6 +52,7 @@ from storage.models.schema import (
     WordToken,
 )
 from storage.queries.lemma import word_exists_in_english
+from words.pending_imports.staging import create_pending_import, find_pending_import
 from storage.translation_helpers import convert_llm_response_to_lang_codes, set_translation
 from storage.utils.guid import generate_guid
 from wordfreq.translation.client import LinguisticClient
@@ -440,32 +440,23 @@ def _stage_for_review(
     back to the definition when the LLM returned no Lithuanian -- the same
     fallback ``stage_missing_words_for_import`` uses.
     """
-    existing = (
-        session.query(PendingImport.id)
-        .filter(
-            PendingImport.english_word == word,
-            PendingImport.definition == definition_text,
-        )
-        .first()
-    )
-    if existing is not None:
+    if find_pending_import(session, word, definition=definition_text) is not None:
         return False
 
     by_lang_code = convert_llm_response_to_lang_codes(sense)
     disambiguation = (by_lang_code.get(REVIEW_DISAMBIGUATION_LANGUAGE) or "").strip()
 
-    session.add(
-        PendingImport(
-            english_word=word,
-            definition=definition_text,
-            disambiguation_translation=disambiguation or definition_text,
-            disambiguation_language=REVIEW_DISAMBIGUATION_LANGUAGE,
-            pos_type=pos_type,
-            pos_subtype=pos_subtype,
-            source=source,
-            frequency_rank=frequency_rank,
-            notes=f"add_word: {pos_subtype} needs subtype review before import",
-        )
+    create_pending_import(
+        session,
+        english_word=word,
+        definition=definition_text,
+        disambiguation_translation=disambiguation or definition_text,
+        disambiguation_language=REVIEW_DISAMBIGUATION_LANGUAGE,
+        pos_type=pos_type,
+        pos_subtype=pos_subtype,
+        source=source,
+        frequency_rank=frequency_rank,
+        notes=f"add_word: {pos_subtype} needs subtype review before import",
     )
     session.commit()
     return True

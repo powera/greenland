@@ -20,7 +20,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from agents.dramblys.staging import _find_duplicate_lemma
+from words.pending_imports.approval import _find_duplicate_lemma
 from agents.dramblys.wordlist import check_wordlist_coverage, get_existing_english_words
 from storage.models import Base, DerivativeForm, Lemma
 from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm

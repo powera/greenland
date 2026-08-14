@@ -28,7 +28,7 @@ src/
 ├── scripts/               # Standalone maintenance scripts
 ├── sentences/             # Sentence processing
 ├── strings/               # Barsukas UI string localization tooling
-├── words/                 # Word-level LLM helpers
+├── words/                 # Word-level LLM helpers; pending_imports/ holds the review queue
 ├── verbalator/            # Text analysis tooling
 ├── workqueue/             # Background task queue
 ├── tests/                 # Tests

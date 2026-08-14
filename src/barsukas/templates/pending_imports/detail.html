@@ -40,6 +40,17 @@
                         {% endif %}
                     </dd>
 
+                    <dt class="col-sm-3">Becomes</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge bg-primary">{{ target_kind_labels.get(item.target_kind, item.target_kind) }}</span>
+                        {% if item.target_kind == 'name' and item.name_kind %}
+                            <span class="badge bg-light text-dark border">{{ item.name_kind }}</span>
+                        {% endif %}
+                        {% if item.target_kind == 'concept' and item.concept_type %}
+                            <span class="badge bg-light text-dark border">{{ item.concept_type }}</span>
+                        {% endif %}
+                    </dd>
+
                     <dt class="col-sm-3">POS Type</dt>
                     <dd class="col-sm-9" id="fieldPosType">
                         {% if item.pos_type %}
@@ -76,9 +87,72 @@
                     <dt class="col-sm-3">Notes</dt>
                     <dd class="col-sm-9">{{ item.notes or '—' }}</dd>
 
+                    <dt class="col-sm-3">Waiting Sentences</dt>
+                    <dd class="col-sm-9">
+                        {% if waiting_sentence_ids %}
+                            {% for sentence_id in waiting_sentence_ids %}
+                                <a href="{{ url_for('workflows.sentence_detail', sentence_id=sentence_id) }}"
+                                   class="badge bg-secondary text-decoration-none">#{{ sentence_id }}</a>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </dd>
+
                     <dt class="col-sm-3">Added</dt>
                     <dd class="col-sm-9">{{ item.added_at.strftime('%Y-%m-%d %H:%M') }}</dd>
                 </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Target kind -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-signpost-split"></i> What This Becomes</div>
+            <div class="card-body">
+                <p class="text-muted">
+                    A lemma is vocabulary a learner studies; a name is a proper noun that carries no
+                    difficulty; a concept is an encyclopedia entry. Only the lemma path costs an LLM call.
+                </p>
+                {% if suggestion and suggestion.target_kind != item.target_kind %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-lightbulb"></i>
+                        Suggested: <strong>{{ target_kind_labels.get(suggestion.target_kind, suggestion.target_kind) }}</strong>
+                        {% if suggestion.reason %}({{ suggestion.reason }}){% endif %}
+                    </div>
+                {% endif %}
+                <form method="post" action="{{ url_for('pending_imports.set_kind', pending_import_id=item.id) }}" class="row g-2 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label" for="targetKindSelect">Target</label>
+                        <select class="form-select" id="targetKindSelect" name="target_kind">
+                            {% for kind in target_kinds %}
+                                <option value="{{ kind }}" {% if kind == item.target_kind %}selected{% endif %}>
+                                    {{ target_kind_labels.get(kind, kind) }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="nameKindSelect">Name kind</label>
+                        <select class="form-select" id="nameKindSelect" name="name_kind">
+                            <option value="">—</option>
+                            {% for kind in name_kinds %}
+                                <option value="{{ kind }}" {% if kind == item.name_kind %}selected{% endif %}>{{ kind }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="conceptTypeInput">Concept type</label>
+                        <input type="text" class="form-control" id="conceptTypeInput" name="concept_type"
+                               value="{{ item.concept_type or '' }}" placeholder="event, person, ...">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-outline-primary w-100">Save</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -227,9 +301,14 @@
             <div class="card-header"><i class="bi bi-check2-square"></i> Actions</div>
             <div class="card-body d-flex gap-2">
                 <form method="post" action="{{ url_for('pending_imports.approve', pending_import_id=item.id) }}">
+                    {% set needs_subtype = item.target_kind == 'lemma' and not item.pos_subtype %}
+                    {% set blocked = needs_subtype or (item.target_kind == 'lemma' and has_strong_synonym_candidate) %}
                     <button type="submit" class="btn btn-success" id="approveBtn"
-                        {% if not item.pos_subtype or has_strong_synonym_candidate %}disabled title="{% if has_strong_synonym_candidate %}Resolve synonym candidates first{% else %}Stage the word first to determine its category{% endif %}"{% endif %}>
-                        <i class="bi bi-check-lg"></i> Approve &amp; Import
+                        {% if blocked %}disabled title="{% if needs_subtype %}Stage the word first to determine its category{% else %}Resolve synonym candidates first{% endif %}"{% endif %}>
+                        <i class="bi bi-check-lg"></i>
+                        {% if item.target_kind == 'name' %}Approve as Name
+                        {% elif item.target_kind == 'concept' %}Approve as Concept
+                        {% else %}Approve &amp; Import{% endif %}
                     </button>
                 </form>
                 <form method="post" action="{{ url_for('pending_imports.reject', pending_import_id=item.id) }}">
@@ -238,13 +317,13 @@
                     </button>
                 </form>
             </div>
-            {% if not item.pos_subtype or has_strong_synonym_candidate %}
+            {% if blocked %}
             <div class="card-footer text-muted small">
                 <i class="bi bi-info-circle"></i>
-                {% if has_strong_synonym_candidate %}
-                    Approve is disabled until synonym candidates are resolved.
-                {% else %}
+                {% if needs_subtype %}
                     Approve is disabled until the word has been staged and a category (pos_subtype) is determined.
+                {% else %}
+                    Approve is disabled until synonym candidates are resolved.
                 {% endif %}
             </div>
             {% endif %}
@@ -281,6 +360,12 @@
         .then(function (resp) { return resp.json(); })
         .then(function (data) {
             if (data.success) {
+                if (data.target_kind && data.target_kind !== 'lemma') {
+                    // The term is a name or a concept: no definitions were
+                    // requested, and the page's actions change entirely.
+                    window.location.reload();
+                    return;
+                }
                 stageResultsBody.innerHTML = '';
                 data.definitions.forEach(function (def, idx) {
                     const tr = document.createElement('tr');

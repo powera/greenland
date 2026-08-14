@@ -25,7 +25,10 @@ entry points and work finders.
 - `decomposition.py` and `dependencies.py` contain prompt/schema logic.
 - `candidate_lookup.py` and `analysis.py` resolve tokens against known lemmas.
 - `persistence.py`, `link_writer.py`, `pending_staging.py`, and `promotion.py`
-  store links and stage unresolved vocabulary.
+  store links and stage unresolved vocabulary. A staged word is tied back to
+  the sentence waiting on it by a `SentencePendingImport` row, written and read
+  through `words.pending_imports.sentence_links`; approval and rejection both
+  go through `words.pending_imports.approval`.
 - `import_workflow.py` implements per-sentence import;
   `workqueue/handlers/sentences/import_document.py` performs document splitting
   and queues those imports.

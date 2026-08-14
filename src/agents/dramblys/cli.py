@@ -16,6 +16,8 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
+from storage.models.imports import PENDING_IMPORT_TARGET_KINDS
+
 from agents.common.common_args import (
     add_backend_args,
     add_common_args,
@@ -129,6 +131,11 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--list-pending", action="store_true", help="List pending imports from staging table"
     )
+    parser.add_argument(
+        "--target-kind",
+        choices=list(PENDING_IMPORT_TARGET_KINDS),
+        help="[--list-pending] Only show imports that become this (lemma, name, concept)",
+    )
     parser.add_argument("--approve", type=int, metavar="ID", help="Approve a pending import by ID")
     parser.add_argument("--reject", type=int, metavar="ID", help="Reject a pending import by ID")
     parser.add_argument(
@@ -229,6 +236,7 @@ def main() -> None:
             pos_type=args.pos_type,
             pos_subtype=args.pos_subtype,
             limit=args.limit if hasattr(args, "limit") else None,
+            target_kind=args.target_kind,
         )
 
         if "error" in results:
@@ -240,6 +248,7 @@ def main() -> None:
 
             for i, pending in enumerate(results["pending_imports"], 1):
                 print(f"{i}. ID {pending['id']}: '{pending['english_word']}'")
+                print(f"   Becomes: {pending['target_kind']}")
                 print(f"   Definition: {pending['definition'][:80]}...")
                 print(f"   Translation ({pending['language']}): {pending['translation']}")
                 if pending["pos_type"]:
@@ -253,6 +262,9 @@ def main() -> None:
                         f"   Synonym candidates: {synonym_count} "
                         f"({strong_synonym_count} strong)"
                     )
+                waiting = pending.get("waiting_sentence_count", 0)
+                if waiting:
+                    print(f"   Sentences waiting: {waiting}")
                 print(f"   Source: {pending['source']}")
                 print()
 

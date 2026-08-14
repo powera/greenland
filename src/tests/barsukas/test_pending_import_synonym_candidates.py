@@ -1,10 +1,10 @@
-"""Tests for pending import synonym review routes."""
+"""Tests for pending import review routes: synonym candidates and target kind."""
 
 from flask.testing import FlaskClient
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from agents.dramblys.synonym_screening import has_active_strong_synonym_candidate
+from words.pending_imports.synonym_screening import has_active_strong_synonym_candidate
 from storage.models import DerivativeForm, Lemma, PendingImport, PendingImportSynonymCandidate
 
 
@@ -122,5 +122,87 @@ def test_create_anyway_ignores_candidates(client: FlaskClient, db_engine: Engine
             verify_session.query(PendingImport).filter(PendingImport.id == pending_id).one()
         )
         assert pending_after.synonym_candidates[0].status == "ignored"
+    finally:
+        verify_session.close()
+
+
+def test_list_page_shows_what_each_import_becomes(client: FlaskClient, db_engine: Engine) -> None:
+    factory = sessionmaker(bind=db_engine)
+    session = factory()
+    try:
+        _add_pending_with_candidate(session)
+    finally:
+        session.close()
+
+    response = client.get("/pending-imports/")
+
+    assert response.status_code == 200
+    html = response.get_data(as_text=True)
+    assert "Becomes" in html
+
+
+def test_set_kind_records_a_name_decision(client: FlaskClient, db_engine: Engine) -> None:
+    factory = sessionmaker(bind=db_engine)
+    session = factory()
+    try:
+        pending = PendingImport(
+            english_word="George",
+            definition="George",
+            disambiguation_translation="George",
+            disambiguation_language="en",
+            source="pytest",
+        )
+        session.add(pending)
+        session.commit()
+        pending_id = pending.id
+    finally:
+        session.close()
+
+    response = client.post(
+        f"/pending-imports/{pending_id}/set-kind",
+        data={"target_kind": "name", "name_kind": "given_name"},
+    )
+
+    assert response.status_code == 302
+    verify_session = factory()
+    try:
+        pending_after = (
+            verify_session.query(PendingImport).filter(PendingImport.id == pending_id).one()
+        )
+        assert pending_after.target_kind == "name"
+        assert pending_after.name_kind == "given_name"
+    finally:
+        verify_session.close()
+
+
+def test_set_kind_rejects_an_unknown_kind(client: FlaskClient, db_engine: Engine) -> None:
+    """The vocabulary is closed; approval has no path for anything else."""
+    factory = sessionmaker(bind=db_engine)
+    session = factory()
+    try:
+        pending = PendingImport(
+            english_word="aardvark",
+            definition="an animal",
+            disambiguation_translation="aardvark",
+            disambiguation_language="en",
+            source="pytest",
+        )
+        session.add(pending)
+        session.commit()
+        pending_id = pending.id
+    finally:
+        session.close()
+
+    response = client.post(
+        f"/pending-imports/{pending_id}/set-kind", data={"target_kind": "sandwich"}
+    )
+
+    assert response.status_code == 302
+    verify_session = factory()
+    try:
+        pending_after = (
+            verify_session.query(PendingImport).filter(PendingImport.id == pending_id).one()
+        )
+        assert pending_after.target_kind == "lemma"
     finally:
         verify_session.close()

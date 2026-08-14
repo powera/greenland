@@ -82,7 +82,16 @@ from storage.models.variant_form import (
 
 # Import after schema to ensure PendingImport is registered with the same Base
 # before SentenceWordHint's relationship to it is resolved
-from storage.models.imports import PendingImport, PendingImportSynonymCandidate, WordExclusion
+from storage.models.imports import (
+    PENDING_IMPORT_TARGET_KINDS,
+    TARGET_KIND_CONCEPT,
+    TARGET_KIND_LEMMA,
+    TARGET_KIND_NAME,
+    PendingImport,
+    PendingImportSynonymCandidate,
+    SentencePendingImport,
+    WordExclusion,
+)
 
 __all__ = [
     "ALL_SUB_CONCEPT_CATEGORIES",
@@ -132,8 +141,10 @@ __all__ = [
     "is_intake_deferred_text_type",
     "wiki_target_qid",
     "OperationLog",
+    "PENDING_IMPORT_TARGET_KINDS",
     "PendingImport",
     "PendingImportSynonymCandidate",
+    "SentencePendingImport",
     "Phrase",
     "PhraseTranslation",
     "QueryLog",
@@ -149,6 +160,9 @@ __all__ = [
     "VARIANT_KIND_SPELLING",
     "VariantForm",
     "VerbSubtype",
+    "TARGET_KIND_CONCEPT",
+    "TARGET_KIND_LEMMA",
+    "TARGET_KIND_NAME",
     "WordExclusion",
     "WordToken",
 ]

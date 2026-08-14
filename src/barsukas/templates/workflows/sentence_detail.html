@@ -72,6 +72,9 @@
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span>
                     <strong>{{ pending.english_word }}</strong>
+                    <span class="badge {% if pending.target_kind == 'lemma' %}bg-primary{% else %}bg-dark{% endif %}">
+                        {{ pending.target_kind }}
+                    </span>
                     {% if pending.pos_type %}
                     <span class="badge bg-secondary">{{ pending.pos_type }}</span>
                     {% endif %}

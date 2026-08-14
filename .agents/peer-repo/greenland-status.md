@@ -28,7 +28,7 @@ Greenland uses a collection of **specialized processing agents** (named after Li
 
 **Core Validation & Processing:**
 - **lokys** - Thin CLI wrapper for `words.validation`
-- **dramblys** - Missing word detection and processing
+- **dramblys** - Missing word detection; pending-import review CLI for `words.pending_imports`
 - **vilkas** - Thin CLI wrapper for `words.inflections`
 - **voras** - Thin CLI wrapper for `words.translation` / `words.translation_workflow`
 - **papuga** - Thin CLI wrapper for `words.pronunciation`

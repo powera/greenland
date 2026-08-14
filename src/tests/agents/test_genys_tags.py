@@ -126,7 +126,7 @@ def test_approval_carries_tags_onto_the_lemma() -> None:
     ``approve_pending_import`` deletes the pending row, so the tags have to be
     read before that and applied after the lemma exists.
     """
-    from agents.dramblys import staging
+    from words.pending_imports import approval as staging
 
     engine = build_test_engine()
     with Session(engine) as session:
