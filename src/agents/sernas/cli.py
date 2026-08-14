@@ -2,12 +2,13 @@
 """
 Šernas Agent - Command Line Interface
 
-This module handles all CLI argument parsing and the main entry point.
+This module owns argument parsing, lemma selection, confirmation prompts,
+enqueueing, and rendering. The synonym work itself lives in
+:mod:`words.synonym_workflow` and :mod:`words.synonym_coverage`.
 """
 
 import argparse
-import sys
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional, Sequence
 
 from agents.common.common_args import (
     add_backend_args,
@@ -20,7 +21,7 @@ from agents.common.common_args import (
     add_processing_args,
     get_data_source_config,
 )
-from workqueue.task_queue import TaskType, enqueue_task, get_active_task
+from workqueue.task_queue import EnqueueSummary, TaskRequest, TaskType, enqueue_tasks
 
 
 def get_argument_parser() -> argparse.ArgumentParser:
@@ -87,76 +88,114 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
 def enqueue_sernas_work(
     session: Any,
-    lemmas: List[Any],
-    languages: List[str],
+    lemmas: Sequence[Any],
+    languages: Sequence[str],
     form_type: Optional[str] = None,
     dry_run: bool = False,
-) -> Dict[str, Any]:
+) -> EnqueueSummary:
     """Enqueue synonym generation work items to the queue.
 
     Args:
         session: Database session
-        lemmas: List of lemmas to process
-        languages: List of language codes to process
+        lemmas: Lemmas to process
+        languages: Language codes to process
         form_type: Specific form type or None for all
         dry_run: If True, don't actually enqueue
 
     Returns:
-        Dictionary with enqueue statistics
+        The queue's enqueued/skipped summary.
     """
-    enqueued_count = 0
-    skipped_count = 0
+    form_key = form_type or "all"
+    requests = [
+        TaskRequest(
+            task_type=TaskType.WORDS_SYNONYMS,
+            target_type="lemma",
+            target_id=lemma.id,
+            payload={
+                "schema_version": 1,
+                "language_code": language_code,
+                "lemma_id": lemma.id,
+                "form_type": form_type,
+                "source_component": "agents.sernas",
+            },
+            dedup_key=f"{TaskType.WORDS_SYNONYMS}:{lemma.id}:{language_code}:{form_key}",
+            legacy_dedup_key=f"sernas_{lemma.id}_{language_code}_{form_key}",
+        )
+        for lemma in lemmas
+        for language_code in languages
+    ]
+    return enqueue_tasks(session, requests, dry_run=dry_run)
 
-    for lemma in lemmas:
-        for language_code in languages:
-            if not dry_run:
-                form_key = form_type or "all"
-                dedup_key = f"{TaskType.WORDS_SYNONYMS}:{lemma.id}:{language_code}:{form_key}"
-                legacy_dedup_key = f"sernas_{lemma.id}_{language_code}_{form_key}"
-                if get_active_task(session, legacy_dedup_key) is not None:
-                    skipped_count += 1
-                    continue
-                result = enqueue_task(
-                    session,
-                    task_type=TaskType.WORDS_SYNONYMS,
-                    target_type="lemma",
-                    target_id=lemma.id,
-                    payload={
-                        "schema_version": 1,
-                        "language_code": language_code,
-                        "lemma_id": lemma.id,
-                        "form_type": form_type,
-                        "source_component": "agents.sernas",
-                    },
-                    dedup_key=dedup_key,
-                )
-                if result.created:
-                    enqueued_count += 1
-                else:
-                    skipped_count += 1
-            else:
-                enqueued_count += 1
 
-    if not dry_run:
-        session.commit()
+def _run_coverage(
+    agent: Any,
+    lemmas: List[Any],
+    languages: List[str],
+    form_type: Optional[str],
+    requested_all_languages: bool,
+) -> None:
+    """Report which lemmas still need synonyms, per requested language."""
+    from agents.sernas.cli_display import (
+        display_all_language_coverage,
+        display_language_coverage,
+    )
 
-    return {
-        "enqueued": enqueued_count,
-        "skipped": skipped_count,
-        "dry_run": dry_run,
-    }
+    # A single language gets a detailed report; "all" gets one summary; an
+    # explicit list of languages gets a detailed report each.
+    if requested_all_languages and len(languages) > 1:
+        report = agent.check_missing_synonyms(lemmas=lemmas, form_type=form_type)
+        if report.error:
+            print(f"Error: {report.error}")
+            return
+        display_all_language_coverage(report)
+        return
+
+    for language_code in languages:
+        report = agent.check_missing_synonyms(
+            lemmas=lemmas, language_code=language_code, form_type=form_type
+        )
+        if report.error:
+            print(f"Error: {report.error}")
+            continue
+        display_language_coverage(report, language_code)
+
+
+def _confirm_populate(
+    agent: Any,
+    lemmas: List[Any],
+    language_code: str,
+    form_type: Optional[str],
+    args: argparse.Namespace,
+) -> bool:
+    """Show how much work populating this language implies, and ask."""
+    report = agent.check_missing_synonyms(
+        lemmas=lemmas, language_code=language_code, form_type=form_type
+    )
+    if report.error:
+        print(f"Error checking synonyms: {report.error}")
+        return False
+
+    missing_count = len(report.for_language(language_code))
+
+    print(f"\nReady to generate synonyms/alternatives for {language_code}")
+    print(f"Lemmas needing forms: {missing_count}")
+    print(f"Will process: {min(args.limit, missing_count) if args.limit else missing_count}")
+    print(f"Model: {args.model}")
+    print(f"Throttle: {args.throttle}s between calls")
+
+    return input("\nContinue? [y/N]: ").lower() in ["y", "yes"]
 
 
 def main() -> None:
     """Main entry point for the šernas agent."""
     from agents.common.cli_display import display_language_header
-    from words.lemma_selection import get_lemmas_for_agent
-    from agents.sernas.agent import SernasAgent
-    from agents.sernas.cli_display import display_batch_results
+    from agents.sernas.cli_display import display_batch_results, display_enqueue_summary
     from storage.translation_helpers import (
         get_tier_1_and_tier_2_languages,
         normalize_llm_language_codes,
     )
+    from words.lemma_selection import get_lemmas_for_agent
+    from words.synonym_workflow import SynonymWorkflow, clear_synonym_records
 
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -164,8 +203,8 @@ def main() -> None:
     # Create configuration from args
     config = get_data_source_config(args)
 
-    # Create agent with config
-    agent = SernasAgent(config=config)
+    # Create the workflow with config
+    agent = SynonymWorkflow(config=config)
 
     # Get lemmas to process (either single lemma from --guid or batch)
     session = agent.get_session()
@@ -181,9 +220,8 @@ def main() -> None:
 
     # Get languages to process
     requested_all_languages = bool(args.languages and "all" in args.languages)
-    languages_to_process = args.languages if args.languages else ["en"]
     languages_to_process = normalize_llm_language_codes(
-        languages_to_process,
+        args.languages if args.languages else ["en"],
         operation_name="Sernas synonym generation",
         all_expansion=get_tier_1_and_tier_2_languages(),
     )
@@ -196,206 +234,70 @@ def main() -> None:
     else:
         mode = "coverage"  # default
 
-    # Handle coverage mode (report missing synonyms)
     if mode == "coverage":
-        # Check specific languages or all languages
-        if len(languages_to_process) == 1 or requested_all_languages:
-            # Single language or all languages - use simpler report
-            results = agent.check_missing_synonyms(
-                lemmas=lemmas,
-                language_code=languages_to_process[0] if len(languages_to_process) == 1 else None,
-                form_type=form_type,
-            )
-
-            if "error" in results:
-                print(f"Error: {results['error']}")
-                return
-
-            if len(languages_to_process) == 1:
-                # Single language detailed report
-                language_code = languages_to_process[0]
-                missing = results["missing_by_language"].get(language_code, [])
-
-                print(f"\n{'='*60}")
-                print(f"ŠERNAS AGENT REPORT - {language_code.upper()}")
-                print(f"{'='*60}")
-                print(f"Lemmas missing forms: {len(missing)}")
-                print(f"Checked form types: {', '.join(results['checked_form_types'])}")
-                print("")
-
-                if missing:
-                    print("Sample lemmas needing forms:")
-                    for i, lemma in enumerate(missing[:10], 1):
-                        print(
-                            f"  {i}. {lemma['english']} -> {lemma['translation']} ({lemma['pos_type']})"
-                        )
-                    if len(missing) > 10:
-                        print(f"  ... and {len(missing) - 10} more")
-                print(f"{'='*60}")
-            else:
-                # All languages summary
-                print(f"\n{'='*60}")
-                print("ŠERNAS AGENT REPORT - Synonyms and Alternative Forms Check")
-                print(f"{'='*60}")
-                print(f"Total lemmas missing forms: {results['total_missing']}")
-                print(f"Checked form types: {', '.join(results['checked_form_types'])}")
-                print("")
-
-                for lang_code in results["checked_languages"]:
-                    missing = results["missing_by_language"].get(lang_code, [])
-                    print(f"{lang_code.upper()}: {len(missing)} lemmas missing forms")
-
-                print(f"{'='*60}")
-        else:
-            # Multiple specific languages - show detail for each
-            for language_code in languages_to_process:
-                results = agent.check_missing_synonyms(
-                    lemmas=lemmas, language_code=language_code, form_type=form_type
-                )
-
-                if "error" in results:
-                    print(f"Error: {results['error']}")
-                    continue
-
-                missing = results["missing_by_language"].get(language_code, [])
-
-                print(f"\n{'='*60}")
-                print(f"ŠERNAS AGENT REPORT - {language_code.upper()}")
-                print(f"{'='*60}")
-                print(f"Lemmas missing forms: {len(missing)}")
-                print(f"Checked form types: {', '.join(results['checked_form_types'])}")
-                print("")
-
-                if missing:
-                    print("Sample lemmas needing forms:")
-                    for i, lemma in enumerate(missing[:10], 1):
-                        print(
-                            f"  {i}. {lemma['english']} -> {lemma['translation']} ({lemma['pos_type']})"
-                        )
-                    if len(missing) > 10:
-                        print(f"  ... and {len(missing) - 10} more")
-
-                print(f"{'='*60}")
+        _run_coverage(agent, lemmas, languages_to_process, form_type, requested_all_languages)
         return
 
     # WORKQUEUE MODE: Enqueue work items for barsukas worker
-    if args.use_workqueue and mode in ["populate", "regenerate"]:
+    if args.use_workqueue:
         print("\n" + "=" * 80)
         print("ŠERNAS AGENT - ENQUEUING WORK")
         print("=" * 80)
 
         session = agent.get_session()
         try:
-            results = enqueue_sernas_work(
+            enqueued = enqueue_sernas_work(
                 session=session,
                 lemmas=lemmas,
                 languages=languages_to_process,
                 form_type=form_type,
                 dry_run=args.dry_run,
             )
-
-            print(f"\nEnqueued: {results['enqueued']}")
-            print(f"Skipped: {results['skipped']}")
-            if results["dry_run"]:
-                print("\n⚠️  DRY RUN - No work items were actually enqueued")
-            print("=" * 80)
+            display_enqueue_summary(enqueued)
         finally:
             session.close()
 
         return
 
-    # Handle populate mode
-    if mode == "populate":
-        # Process each language
-        for lang_idx, language_code in enumerate(languages_to_process):
-            display_language_header(language_code, lang_idx + 1, len(languages_to_process))
+    # Populate and regenerate differ only in what they clear first: regenerate
+    # forgets the previous scan so every lemma is generated again.
+    for lang_index, language_code in enumerate(languages_to_process):
+        display_language_header(language_code, lang_index + 1, len(languages_to_process))
 
-            # Confirmation prompt (unless --yes or --dry-run)
-            if not args.yes and not args.dry_run:
-                # Get check results to show how many need fixing
-                check_results = agent.check_missing_synonyms(
-                    lemmas=lemmas, language_code=language_code, form_type=form_type
-                )
-
-                if "error" in check_results:
-                    print(f"Error checking synonyms: {check_results['error']}")
-                    continue
-
-                missing_count = len(check_results["missing_by_language"].get(language_code, []))
-
-                print(f"\nReady to generate synonyms/alternatives for {language_code}")
-                print(f"Lemmas needing forms: {missing_count}")
-                print(
-                    f"Will process: {min(args.limit, missing_count) if args.limit else missing_count}"
-                )
-                print(f"Model: {args.model}")
-                print(f"Throttle: {args.throttle}s between calls")
-
-                response = input("\nContinue? [y/N]: ")
-                if response.lower() not in ["y", "yes"]:
-                    print("Skipping this language.")
-                    continue
-
-            results = agent.fix_missing_synonyms(
-                lemmas=lemmas,
-                language_code=language_code,
-                form_type=form_type,
-                limit=args.limit,
-                model=args.model,
-                throttle=args.throttle,
-                dry_run=args.dry_run,
-            )
-
-            # Print results
-            display_batch_results(results, language_code, dry_run=args.dry_run)
-        return
-
-    # Handle regenerate mode (similar to populate but forces regeneration)
-    if mode == "regenerate":
-        from storage.crud.grammar_fact import delete_grammar_fact
-        from storage.crud.operation_log import delete_synonym_scan_records
-
-        # Process each language
-        for lang_idx, language_code in enumerate(languages_to_process):
-            display_language_header(language_code, lang_idx + 1, len(languages_to_process))
-
-            # Delete existing grammar facts for all lemmas
-            session = agent.get_session()
-            try:
-                for lemma in lemmas:
-                    delete_grammar_fact(session, lemma.id, language_code, "has_abbreviations")
-                    delete_grammar_fact(session, lemma.id, language_code, "has_expanded_forms")
-                    delete_synonym_scan_records(session, lemma.id, language_code)
-                session.commit()
-            finally:
-                session.close()
-
-            # Confirmation prompt (unless --yes or --dry-run)
+        if mode == "regenerate":
+            # Confirm before clearing: the scan records are what makes these
+            # lemmas look "already done", so dropping them and then skipping
+            # the language would leave the data worse than it started.
             if not args.yes and not args.dry_run:
                 print(f"\nReady to regenerate synonyms/alternatives for {language_code}")
                 print(f"Lemmas to process: {len(lemmas)}")
                 print(f"Model: {args.model}")
                 print(f"Throttle: {args.throttle}s between calls")
 
-                response = input("\nContinue? [y/N]: ")
-                if response.lower() not in ["y", "yes"]:
+                if input("\nContinue? [y/N]: ").lower() not in ["y", "yes"]:
                     print("Skipping this language.")
                     continue
 
-            # For regenerate, we want to process all lemmas (not just missing)
-            results = agent.fix_missing_synonyms(
-                lemmas=lemmas,
-                language_code=language_code,
-                form_type=form_type,
-                limit=args.limit,
-                model=args.model,
-                throttle=args.throttle,
-                dry_run=args.dry_run,
-            )
+            if not args.dry_run:
+                session = agent.get_session()
+                try:
+                    clear_synonym_records(session, lemmas, language_code)
+                finally:
+                    session.close()
+        elif not args.yes and not args.dry_run:
+            if not _confirm_populate(agent, lemmas, language_code, form_type, args):
+                print("Skipping this language.")
+                continue
 
-            # Print results
-            display_batch_results(results, language_code, dry_run=args.dry_run)
-        return
+        results = agent.fix_missing_synonyms(
+            lemmas=lemmas,
+            language_code=language_code,
+            form_type=form_type,
+            limit=args.limit,
+            throttle=args.throttle,
+            dry_run=args.dry_run,
+        )
+        display_batch_results(results, language_code, dry_run=args.dry_run)
 
 
 if __name__ == "__main__":

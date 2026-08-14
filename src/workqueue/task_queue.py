@@ -14,7 +14,7 @@ import json
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, TypedDict
 
 from storage.models.schema import BarsukasTask
 
@@ -77,6 +77,88 @@ class TaskType:
 class EnqueueResult:
     task: BarsukasTask
     created: bool
+
+
+@dataclass(frozen=True)
+class TaskRequest:
+    """One task an agent wants queued, before dedup is considered.
+
+    Agents describe *what* to enqueue; :func:`enqueue_tasks` owns the mechanics
+    (dedup lookups, dry-run accounting, the commit).
+
+    Attributes:
+        task_type: A :class:`TaskType` value.
+        target_type: The kind of row the task acts on (e.g. ``"lemma"``).
+        target_id: The row's primary key.
+        payload: JSON-serializable task payload.
+        dedup_key: Canonical dedup key, normally ``f"{task_type}:{...}"``.
+        legacy_dedup_key: Dedup key an older release used for the same work.
+            An active task under that key also suppresses this request, so a
+            queue drained by an older worker is not duplicated.
+    """
+
+    task_type: str
+    target_type: Optional[str]
+    target_id: Optional[int]
+    payload: Optional[Dict] = None
+    dedup_key: Optional[str] = None
+    legacy_dedup_key: Optional[str] = None
+
+
+class EnqueueSummary(TypedDict):
+    """Counts returned by :func:`enqueue_tasks`."""
+
+    enqueued: int
+    skipped: int
+    dry_run: bool
+
+
+def enqueue_tasks(
+    session: "Session",
+    requests: Iterable[TaskRequest],
+    *,
+    dry_run: bool = False,
+) -> EnqueueSummary:
+    """Enqueue a batch of task requests, skipping ones already active.
+
+    Args:
+        session: Database session. Committed once at the end unless dry-running.
+        requests: The tasks to queue.
+        dry_run: If True, count what would be queued and write nothing.
+
+    Returns:
+        An :class:`EnqueueSummary` with ``enqueued``/``skipped`` counts.
+    """
+    enqueued = 0
+    skipped = 0
+
+    for request in requests:
+        if dry_run:
+            enqueued += 1
+            continue
+        if (
+            request.legacy_dedup_key
+            and get_active_task(session, request.legacy_dedup_key) is not None
+        ):
+            skipped += 1
+            continue
+        result = enqueue_task(
+            session,
+            task_type=request.task_type,
+            target_type=request.target_type,
+            target_id=request.target_id,
+            payload=request.payload,
+            dedup_key=request.dedup_key,
+        )
+        if result.created:
+            enqueued += 1
+        else:
+            skipped += 1
+
+    if not dry_run:
+        session.commit()
+
+    return EnqueueSummary(enqueued=enqueued, skipped=skipped, dry_run=dry_run)
 
 
 def _serialize_payload(payload: Optional[Dict]) -> Optional[str]:

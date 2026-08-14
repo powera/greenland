@@ -14,10 +14,27 @@ from concepts.persist import (
 )
 from concepts.seed.wikidata_query import query_wikidata_seed
 from concepts.validate import validate_qid, validate_seed
+from storage.backend.config import DataSourceConfig
 
 logger = logging.getLogger(__name__)
 
 BodyGenerator = Callable[[str, str, List[Dict[str, Any]]], str]
+
+
+def build_body_generator(config: DataSourceConfig) -> BodyGenerator:
+    """Return a ``(title, summary, sources) -> body`` callable backed by an LLM.
+
+    The generator is imported lazily so read-only runs (ranking, resolution)
+    never need to construct an LLM client.
+    """
+    from concepts.generate.entry import ConceptEntryGenerator
+
+    generator = ConceptEntryGenerator(config)
+
+    def generate(title: str, summary: str, sources: List[Dict[str, Any]]) -> str:
+        return generator.generate_body(title, summary, sources)
+
+    return generate
 
 
 def create_concept_from_qid(

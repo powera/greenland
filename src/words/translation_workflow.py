@@ -15,11 +15,11 @@ This agent runs autonomously to:
 
 """
 
-import json
 import logging
 import random
+from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple, Union, cast
 
 import constants
 from words.lemma_selection import LemmaQueryBuilder, apply_limit_and_sample_rate
@@ -49,11 +49,137 @@ from storage.translation_helpers import set_translation as set_translation_helpe
 from wordfreq.tools.llm_validators import validate_all_translations_for_word
 from wordfreq.translation.client import LinguisticClient
 
+if TYPE_CHECKING:  # workqueue handlers import this module, so the import below
+    # is deferred into the enqueue helpers to keep that cycle unbroken.
+    from workqueue.task_queue import EnqueueSummary
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+# Component recorded on queued translation tasks so the worker can tell CLI
+# work apart from work the web UI queued.
+QUEUE_SOURCE_COMPONENT = "agents.voras"
+
+
+@dataclass
+class LemmaTranslations:
+    """Translations produced for one lemma, or the reason there are none."""
+
+    translations: Dict[str, str] = field(default_factory=dict)
+    # Where the translations came from, e.g. "barsukas-proxy" or the agent name
+    # and model; None when nothing was produced.
+    source: Optional[str] = None
+    # Human-readable failure reason for the caller to display; None on success.
+    error: Optional[str] = None
+
+
+def select_curated_lemmas(session: Any, limit: Optional[int] = None) -> List[Lemma]:
+    """Return curated lemmas (those with a GUID) in stable id order.
+
+    This is the selection Voras regenerates over: every curated word, capped by
+    ``limit`` when one is given.
+    """
+    query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
+    if limit:
+        query = query.limit(limit)
+    return cast(List[Lemma], query.all())
+
+
+def count_curated_lemmas(session: Any, limit: Optional[int] = None) -> int:
+    """Count the lemmas :func:`select_curated_lemmas` would return."""
+    query = session.query(Lemma).filter(Lemma.guid.isnot(None))
+    if limit:
+        query = query.limit(limit)
+    return cast(int, query.count())
+
+
+def resolve_generation_languages(languages: Optional[Sequence[str]]) -> List[str]:
+    """Normalize requested language codes, expanding "all" and empty input."""
+    default_languages = get_default_generation_languages()
+    return normalize_llm_language_codes(
+        list(languages) if languages else default_languages,
+        operation_name="Voras translation generation",
+        all_expansion=default_languages,
+    )
+
+
+def enqueue_translation_population(
+    session: Any,
+    lemmas: Sequence[Lemma],
+    languages: Sequence[str],
+    *,
+    dry_run: bool = False,
+) -> "EnqueueSummary":
+    """Queue "generate the missing translations" work for each lemma.
+
+    Args:
+        session: Database session.
+        lemmas: Lemmas to queue work for.
+        languages: Language codes each lemma should be populated in.
+        dry_run: If True, count what would be queued and write nothing.
+
+    Returns:
+        The queue's enqueued/skipped summary.
+    """
+    from workqueue.task_queue import TaskRequest, TaskType, enqueue_tasks
+
+    language_key = ":".join(sorted(languages))
+    requests = [
+        TaskRequest(
+            task_type=TaskType.WORDS_TRANSLATIONS,
+            target_type="lemma",
+            target_id=lemma.id,
+            payload={
+                "schema_version": 1,
+                "lemma_id": lemma.id,
+                "languages": list(languages),
+                "source_component": QUEUE_SOURCE_COMPONENT,
+            },
+            dedup_key=f"{TaskType.WORDS_TRANSLATIONS}:{lemma.id}:{language_key}",
+            legacy_dedup_key=f"voras_populate_{lemma.id}",
+        )
+        for lemma in lemmas
+    ]
+    return enqueue_tasks(session, requests, dry_run=dry_run)
+
+
+def enqueue_translation_regeneration(
+    session: Any,
+    lemmas: Sequence[Lemma],
+    *,
+    dry_run: bool = False,
+) -> "EnqueueSummary":
+    """Queue "delete and regenerate the translations" work for each lemma.
+
+    Args:
+        session: Database session.
+        lemmas: Lemmas to queue work for.
+        dry_run: If True, count what would be queued and write nothing.
+
+    Returns:
+        The queue's enqueued/skipped summary.
+    """
+    from workqueue.task_queue import TaskRequest, TaskType, enqueue_tasks
+
+    requests = [
+        TaskRequest(
+            task_type=TaskType.WORDS_TRANSLATIONS_REGENERATE,
+            target_type="lemma",
+            target_id=lemma.id,
+            payload={
+                "schema_version": 1,
+                "lemma_id": lemma.id,
+                "source_component": QUEUE_SOURCE_COMPONENT,
+            },
+            dedup_key=f"{TaskType.WORDS_TRANSLATIONS_REGENERATE}:{lemma.id}",
+            legacy_dedup_key=f"voras_regenerate_{lemma.id}",
+        )
+        for lemma in lemmas
+    ]
+    return enqueue_tasks(session, requests, dry_run=dry_run)
 
 
 class TranslationWorkflow:
@@ -148,6 +274,125 @@ class TranslationWorkflow:
             old_translation=old_translation,
             new_translation=new_translation,
         )
+
+    def collect_translations(self, session: Any, lemma: Lemma) -> Dict[str, Optional[str]]:
+        """Return this lemma's translation (or None) for every known language."""
+        return {
+            lang_code: self.get_translation(session, lemma, lang_code)
+            for lang_code in LANGUAGE_FIELDS
+        }
+
+    def missing_translation_languages(self, session: Any, lemma: Lemma) -> List[str]:
+        """Return the language codes this lemma has no translation for."""
+        return [
+            lang_code
+            for lang_code, translation in self.collect_translations(session, lemma).items()
+            if not translation
+        ]
+
+    def generate_translations_for_lemma(
+        self,
+        session: Any,
+        lemma: Lemma,
+        missing_languages: Sequence[str],
+    ) -> LemmaTranslations:
+        """Generate one lemma's missing translations, cache first then LLM.
+
+        The Barsukas cache is consulted first: a hit costs nothing and is used
+        as-is. Otherwise the LLM is asked for the missing languages only, using
+        an existing translation (or the English lemma) as the reference.
+
+        Args:
+            session: Database session.
+            lemma: The lemma to translate.
+            missing_languages: Language codes to generate.
+
+        Returns:
+            A :class:`LemmaTranslations`. On failure ``translations`` is empty
+            and ``error`` explains why, so the caller can report it.
+        """
+        cache_client = self.get_cache_client()
+        if cache_client and lemma.guid is not None:
+            try:
+                cached = cache_client.get_translations(lemma.guid)
+                if cached:
+                    logger.info("Using cached translations for '%s'", lemma.lemma_text)
+                    return LemmaTranslations(translations=cached, source="barsukas-proxy")
+            except Exception as cache_error:
+                # In cache-only mode there is no fallback, so the failure is the
+                # outcome; otherwise it is a diagnostic and the LLM answers.
+                if self.config.cache_only:
+                    raise
+                logger.warning("Cache lookup failed for '%s': %s", lemma.lemma_text, cache_error)
+
+        if self.config.cache_only:
+            return LemmaTranslations(
+                error="Cache-only mode: cannot generate translations (not in cache)"
+            )
+
+        client = self.get_linguistic_client()
+        try:
+            existing_lang_code, existing_translation = get_reference_translation(
+                session, lemma, exclude_languages=list(missing_languages)
+            )
+            # With nothing else on file, the English lemma is the reference.
+            reference: Tuple[str, str] = (
+                (existing_lang_code, existing_translation)
+                if existing_lang_code and existing_translation
+                else ("en", lemma.lemma_text)
+            )
+
+            llm_response, success = client.query_translations(
+                english_word=lemma.lemma_text,
+                reference_translation=reference,
+                definition=lemma.definition_text,
+                pos_type=lemma.pos_type,
+                pos_subtype=lemma.pos_subtype,
+                languages=list(missing_languages),
+            )
+        except Exception as e:
+            session.rollback()
+            logger.error("Error generating translations for '%s': %s", lemma.lemma_text, e)
+            return LemmaTranslations(error=f"Error generating translations: {e}")
+
+        if not success or not llm_response:
+            return LemmaTranslations(error="Failed to generate translations")
+
+        return LemmaTranslations(
+            translations=convert_llm_response_to_lang_codes(llm_response),
+            source=f"voras-agent/{self.config.model}",
+        )
+
+    def save_lemma_translations(
+        self,
+        session: Any,
+        lemma: Lemma,
+        translations: Dict[str, str],
+        languages: Sequence[str],
+        source: Optional[str] = None,
+    ) -> int:
+        """Store the non-empty translations for ``languages`` and commit.
+
+        Args:
+            session: Database session.
+            lemma: The lemma being updated.
+            translations: Language code -> translation.
+            languages: The languages to store (others in ``translations`` are
+                ignored).
+            source: Provenance recorded in the operation log.
+
+        Returns:
+            The number of translations stored.
+        """
+        saved = 0
+        for lang_code in languages:
+            translation = translations.get(lang_code)
+            if not translation:
+                continue
+            self.set_translation(session, lemma, lang_code, translation, source=source)
+            saved += 1
+        session.commit()
+        return saved
 
     def validate_translations(
         self,
@@ -950,38 +1195,17 @@ class TranslationWorkflow:
         max_level: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Run all coverage checks and generate a comprehensive report."""
-        logger.info("Starting full multi-lingual translation coverage check...")
-        start_time = datetime.now()
-
-        results: Dict[str, Any] = {
-            "timestamp": start_time.isoformat(),
-            "database_path": self.db_path,
-            "level_filter": {"min": min_level, "max": max_level},
-            "checks": {
-                "overall_coverage": self.check_overall_coverage(min_level, max_level),
-                "difficulty_level_coverage": self.check_difficulty_level_coverage(
-                    min_level, max_level
-                ),
-            },
-        }
-
-        end_time = datetime.now()
-        duration = (end_time - start_time).total_seconds()
-        results["duration_seconds"] = duration
-
-        # Print summary
-        coverage.print_summary(results, start_time, duration)
-
-        # Write to output file if requested
-        if output_file:
-            try:
-                with open(output_file, "w", encoding="utf-8") as f:
-                    json.dump(results, f, indent=2, ensure_ascii=False)
-                logger.info(f"Report written to: {output_file}")
-            except Exception as e:
-                logger.error(f"Failed to write output file: {e}")
-
-        return results
+        session = self.get_session()
+        try:
+            return coverage.run_full_check(
+                session,
+                database_path=self.db_path,
+                output_file=output_file,
+                min_level=min_level,
+                max_level=max_level,
+            )
+        finally:
+            session.close()
 
     def _print_summary(
         self, results: Dict[str, Any], start_time: datetime, duration: float

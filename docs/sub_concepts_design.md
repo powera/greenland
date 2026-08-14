@@ -278,7 +278,7 @@ name a specific entity, not a creatable slug.
   shared by `get_wanted_slugs`, Voverukas, and the wiki-link renderer's
   `get_existing_link_targets`.
 
-### 2. Voverukas ranking (`agents/vovere/voverukas.py`)
+### 2. Voverukas ranking (`concepts/discovery.py`, CLI in `agents/vovere/voverukas.py`)
 
 - **Graph/seed input**: only main concepts seed the rank graph and contribute
   edges (sub-concepts have no bodies). Unchanged code path.
@@ -325,7 +325,7 @@ continue to rank normally; they leave the list when someone files them.
   strictly excluded sub-concepts; the category must be moved to a tracked one
   first.
 
-### 4. Bulk intake (`agents/vovere/voveraite.py`)
+### 4. Bulk intake (`concepts/seed/qids.py`, CLI in `agents/vovere/voveraite.py`)
 
 Voveraite is the natural intake for hand-collected Q-id lists ("small towns in
 Sivas Province", "chess openings", "MLB team seasons"). Add:

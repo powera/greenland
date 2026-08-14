@@ -2,13 +2,16 @@
 """
 Voras Agent - Command Line Interface
 
-This module handles all CLI argument parsing and the main entry point.
+This module handles argument parsing, confirmation prompts, and display. The
+translation work itself lives in :mod:`words.translation_workflow` (selection,
+generation, storage, queueing) and :mod:`words.translation_coverage`
+(reporting); queue mechanics live in :mod:`workqueue`.
 """
 
 import argparse
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, List
 
 # Add src directory to path
 GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent.parent)
@@ -30,14 +33,7 @@ from agents.common.common_args import (
     validate_cache_args,
 )
 from words.lemma_selection import get_lemmas_for_agent
-from workqueue.task_queue import TaskStatus, TaskType, enqueue_task, get_active_task
-from storage.models.schema import BarsukasTask
-
-# Import language mappings from translation_helpers (single source of truth)
-from storage.translation_helpers import (
-    get_default_generation_languages,
-    normalize_llm_language_codes,
-)
+from workqueue.task_queue import TaskType
 
 
 def get_argument_parser() -> argparse.ArgumentParser:
@@ -104,10 +100,10 @@ def get_argument_parser() -> argparse.ArgumentParser:
 def _handle_single_lemma_populate(
     agent: Any, lemma: Any, session: Any, args: argparse.Namespace
 ) -> bool:
-    """Handle populate mode for a single lemma.
+    """Populate one lemma interactively, showing each step.
 
     Args:
-        agent: VorasAgent instance
+        agent: TranslationWorkflow instance
         lemma: Lemma object to process
         session: Database session
         args: Command-line arguments
@@ -116,12 +112,10 @@ def _handle_single_lemma_populate(
         True if successful, False otherwise
     """
     from agents.voras import cli_display
-    from storage.translation_helpers import (
-        convert_llm_response_to_lang_codes,
-        get_reference_translation,
-    )
 
-    missing_langs = cli_display.display_lemma_translations(lemma, agent, session)
+    translations = agent.collect_translations(session, lemma)
+    cli_display.display_lemma_translations(lemma, translations)
+    missing_langs = [lang_code for lang_code, value in translations.items() if not value]
 
     if not missing_langs:
         print("\n✓ No missing translations")
@@ -133,222 +127,161 @@ def _handle_single_lemma_populate(
         return True
 
     print("Generating missing translations...")
+    generated = agent.generate_translations_for_lemma(session, lemma, missing_langs)
 
-    # Try cache first if available
-    response = None
-    cache_client = agent.get_cache_client()
-    if cache_client:
-        try:
-            cached_translations = cache_client.get_translations(lemma.guid)
-            if cached_translations:
-                print("  Using cached translations from BARSUKAS server")
-                response = cached_translations
-        except Exception as cache_error:
-            print(f"  Cache lookup failed: {cache_error}")
-            if agent.config.cache_only:
-                raise
-
-    # If no cache hit, query LLM
-    if not response:
-        if agent.config.cache_only:
-            print("\n✗ Cache-only mode: cannot generate translations (not in cache)")
-            return False
-        else:
-            client = agent.get_linguistic_client()
-            try:
-                reference_lang_code, reference_translation = get_reference_translation(
-                    session, lemma, exclude_languages=missing_langs
-                )
-
-                # If no reference translation, use English
-                if not reference_translation:
-                    reference_lang_code = "en"
-                    reference_translation = lemma.lemma_text
-
-                # Query translations using language codes
-                llm_response, success = client.query_translations(
-                    english_word=lemma.lemma_text,
-                    reference_translation=(reference_lang_code, reference_translation),
-                    definition=lemma.definition_text,
-                    pos_type=lemma.pos_type,
-                    pos_subtype=lemma.pos_subtype,
-                    languages=list(missing_langs),
-                )
-
-                if success and llm_response:
-                    # Convert LLM response to lang_code format
-                    response = convert_llm_response_to_lang_codes(llm_response)
-                else:
-                    response = None
-
-            except Exception as e:
-                print(f"\nError generating translations: {e}")
-                session.rollback()
-                return False
-
-    if response:
-        cli_display.display_generated_translations(response, missing_langs)
-        for lang_code in missing_langs:
-            if lang_code in response and response[lang_code]:
-                agent.set_translation(session, lemma, lang_code, response[lang_code])
-        session.commit()
-        print("\n✓ Translations saved")
-        return True
-    else:
-        print("\nFailed to generate translations")
+    if not generated.translations:
+        print(f"\n✗ {generated.error or 'Failed to generate translations'}")
         return False
 
+    cli_display.display_generated_translations(generated.translations, missing_langs)
+    agent.save_lemma_translations(
+        session, lemma, generated.translations, missing_langs, source=generated.source
+    )
+    print("\n✓ Translations saved")
+    return True
 
-def enqueue_voras_populate_work(
-    agent: Any,
-    session: Any,
-    lemmas: List[Any],
-    languages_to_fix: List[str],
-    dry_run: bool = False,
-) -> Dict[str, Any]:
-    """Enqueue translation population work items to the queue.
 
-    Args:
-        agent: VorasAgent instance
-        session: Database session
-        lemmas: List of lemmas to process
-        languages_to_fix: List of language codes to generate translations for
-        dry_run: If True, don't actually enqueue
+def _print_enqueue_results(session: Any, results: Any, dry_run: bool) -> None:
+    """Print the enqueue summary and, for real runs, current queue depth."""
+    from workqueue.stats import get_task_type_counts, has_queued_work
 
-    Returns:
-        Dictionary with enqueue statistics
-    """
-    enqueued_count = 0
-    skipped_count = 0
+    print("\n" + "=" * 80)
+    print("WORK ENQUEUE SUMMARY")
+    print("=" * 80)
+    print(f"Enqueued: {results['enqueued']}")
+    print(f"Skipped: {results['skipped']}")
+    if dry_run:
+        print("\n⚠️  DRY RUN - No work items were actually enqueued")
+    print("=" * 80)
 
     if dry_run:
-        print("DRY RUN MODE - No work items will be enqueued")
+        return
 
-    for lemma in lemmas:
-        # Enqueue work item for each missing translation
-        if not dry_run:
-            language_key = ":".join(sorted(languages_to_fix))
-            dedup_key = f"{TaskType.WORDS_TRANSLATIONS}:{lemma.id}:{language_key}"
-            legacy_dedup_key = f"voras_populate_{lemma.id}"
-            if get_active_task(session, legacy_dedup_key) is not None:
-                skipped_count += 1
-                continue
-            result = enqueue_task(
+    stats = get_task_type_counts(
+        session, [TaskType.WORDS_TRANSLATIONS, TaskType.WORDS_TRANSLATIONS_REGENERATE]
+    )
+    print("\nCurrent queue status:")
+    for task_type, task_counts in stats.items():
+        if not has_queued_work(task_counts):
+            continue
+        print(f"\n  {task_type}:")
+        print(f"    Pending: {task_counts['pending']}")
+        print(f"    Running: {task_counts['running']}")
+        print(f"    Completed: {task_counts['completed']}")
+        print(f"    Failed: {task_counts['failed']}")
+    print("=" * 80)
+
+
+def _confirm_regeneration(agent: Any, args: argparse.Namespace) -> bool:
+    """Show what regeneration would do and ask whether to proceed."""
+    from words.translation_workflow import count_curated_lemmas
+
+    session = agent.get_session()
+    try:
+        word_count = count_curated_lemmas(session, args.limit)
+    finally:
+        session.close()
+
+    print(f"\nREGENERATION MODE")
+    print(f"This will:")
+    print(f"  1. Delete all non-Lithuanian translations")
+    if args.use_workqueue:
+        print(f"  2. Enqueue {word_count} regeneration tasks for barsukas worker")
+    elif args.batch:
+        print(f"  2. Queue {word_count} batch requests (1 per word) for later submission")
+    else:
+        print(f"  2. Regenerate them fresh using {word_count} LLM API calls (1 per word)")
+    print(f"\nModel: {args.model}")
+    print(f"Words to process: {word_count}")
+
+    response = input("Do you want to proceed? [y/N]: ").strip().lower()
+    return response in ["y", "yes"]
+
+
+def _run_regenerate(agent: Any, args: argparse.Namespace) -> None:
+    """Regenerate every curated lemma's translations, or queue that work."""
+    from agents.voras import cli_display
+    from words.translation_workflow import (
+        enqueue_translation_regeneration,
+        select_curated_lemmas,
+    )
+
+    if not args.yes and not args.dry_run and not _confirm_regeneration(agent, args):
+        print("Aborted.")
+        sys.exit(0)
+
+    # WORKQUEUE MODE: Enqueue work items for barsukas worker to process
+    if args.use_workqueue:
+        print("\n" + "=" * 80)
+        print("VORAS AGENT - ENQUEUING REGENERATE WORK")
+        print("=" * 80)
+
+        session = agent.get_session()
+        try:
+            if args.dry_run:
+                print("DRY RUN MODE - No work items will be enqueued")
+            results = enqueue_translation_regeneration(
                 session,
-                task_type=TaskType.WORDS_TRANSLATIONS,
-                target_type="lemma",
-                target_id=lemma.id,
-                payload={
-                    "schema_version": 1,
-                    "lemma_id": lemma.id,
-                    "languages": languages_to_fix,
-                    "source_component": "agents.voras",
-                },
-                dedup_key=dedup_key,
+                select_curated_lemmas(session, args.limit),
+                dry_run=args.dry_run,
             )
-            if result.created:
-                enqueued_count += 1
-            else:
-                skipped_count += 1
-        else:
-            enqueued_count += 1
+            _print_enqueue_results(session, results, args.dry_run)
+        except Exception as e:
+            print(f"Failed to enqueue work: {e}")
+            sys.exit(1)
+        finally:
+            session.close()
+        return
 
-    if not dry_run:
-        session.commit()
-
-    return {
-        "enqueued": enqueued_count,
-        "skipped": skipped_count,
-        "dry_run": dry_run,
-    }
+    results = agent.regenerate_all_translations(
+        limit=args.limit, dry_run=args.dry_run, batch_mode=args.batch, lemmas=None
+    )
+    cli_display.display_batch_summary(results, batch_mode=args.batch)
 
 
-def enqueue_voras_regenerate_work(
-    agent: Any, session: Any, lemmas: List[Any], dry_run: bool = False
-) -> Dict[str, Any]:
-    """Enqueue translation regeneration work items to the queue.
+def _run_populate(agent: Any, lemmas: List[Any], args: argparse.Namespace) -> None:
+    """Generate the missing translations for the selected lemmas."""
+    from agents.voras import cli_display
+    from words.translation_workflow import (
+        enqueue_translation_population,
+        resolve_generation_languages,
+    )
 
-    Args:
-        agent: VorasAgent instance
-        session: Database session
-        lemmas: List of lemmas to process
-        dry_run: If True, don't actually enqueue
+    # WORKQUEUE MODE: Enqueue work items for barsukas worker to process
+    if args.use_workqueue:
+        print("\n" + "=" * 80)
+        print("VORAS AGENT - ENQUEUING POPULATE WORK")
+        print("=" * 80)
 
-    Returns:
-        Dictionary with enqueue statistics
-    """
-    enqueued_count = 0
-    skipped_count = 0
-
-    if dry_run:
-        print("DRY RUN MODE - No work items will be enqueued")
-
-    for lemma in lemmas:
-        # Enqueue work item for regeneration
-        if not dry_run:
-            dedup_key = f"{TaskType.WORDS_TRANSLATIONS_REGENERATE}:{lemma.id}"
-            legacy_dedup_key = f"voras_regenerate_{lemma.id}"
-            if get_active_task(session, legacy_dedup_key) is not None:
-                skipped_count += 1
-                continue
-            result = enqueue_task(
+        session = agent.get_session()
+        try:
+            if args.dry_run:
+                print("DRY RUN MODE - No work items will be enqueued")
+            results = enqueue_translation_population(
                 session,
-                task_type=TaskType.WORDS_TRANSLATIONS_REGENERATE,
-                target_type="lemma",
-                target_id=lemma.id,
-                payload={
-                    "schema_version": 1,
-                    "lemma_id": lemma.id,
-                    "source_component": "agents.voras",
-                },
-                dedup_key=dedup_key,
+                lemmas,
+                resolve_generation_languages(args.languages),
+                dry_run=args.dry_run,
             )
-            if result.created:
-                enqueued_count += 1
-            else:
-                skipped_count += 1
-        else:
-            enqueued_count += 1
+            _print_enqueue_results(session, results, args.dry_run)
+        except Exception as e:
+            print(f"Failed to enqueue work: {e}")
+            sys.exit(1)
+        finally:
+            session.close()
+        return
 
-    if not dry_run:
-        session.commit()
-
-    return {
-        "enqueued": enqueued_count,
-        "skipped": skipped_count,
-        "dry_run": dry_run,
-    }
-
-
-def get_voras_queue_stats(session: Any) -> Dict[str, Dict[str, int]]:
-    """Get statistics for voras tasks in the queue."""
-    stats = {}
-    for task_type in ["words.translations", "words.translations.regenerate"]:
-        stats[task_type] = {
-            "pending": session.query(BarsukasTask)
-            .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.PENDING)
-            .count(),
-            "running": session.query(BarsukasTask)
-            .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.RUNNING)
-            .count(),
-            "completed": session.query(BarsukasTask)
-            .filter(
-                BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.COMPLETED
-            )
-            .count(),
-            "failed": session.query(BarsukasTask)
-            .filter(BarsukasTask.task_type == task_type, BarsukasTask.status == TaskStatus.FAILED)
-            .count(),
-        }
-    return stats
+    # IMMEDIATE MODE: Process directly (default behavior)
+    results = agent.fix_missing_translations(
+        language_code=args.languages, limit=args.limit, dry_run=args.dry_run, lemmas=lemmas
+    )
+    cli_display.display_population_summary(results)
 
 
 def main() -> None:
     """Main entry point for the voras agent."""
     # Import here to avoid circular imports
-    from agents.voras import cli_display
     from words.translation_workflow import TranslationWorkflow
-    from storage.models.schema import Lemma
 
     parser = get_argument_parser()
     args = parser.parse_args()
@@ -395,101 +328,7 @@ def main() -> None:
 
     # Handle regenerate mode (operates on all curated lemmas, not --guid)
     if mode == "regenerate":
-        # Confirmation for regenerate mode
-        if not args.yes and not args.dry_run:
-            session = agent.get_session()
-            try:
-                query = session.query(Lemma).filter(Lemma.guid.isnot(None))
-                if args.limit:
-                    query = query.limit(args.limit)
-                word_count = query.count()
-
-                print(f"\nREGENERATION MODE")
-                print(f"This will:")
-                print(f"  1. Delete all non-Lithuanian translations")
-                if args.use_workqueue:
-                    print(f"  2. Enqueue {word_count} regeneration tasks for barsukas worker")
-                elif args.batch:
-                    print(
-                        f"  2. Queue {word_count} batch requests (1 per word) for later submission"
-                    )
-                else:
-                    print(
-                        f"  2. Regenerate them fresh using {word_count} LLM API calls (1 per word)"
-                    )
-                print(f"\nModel: {args.model}")
-                print(f"Words to process: {word_count}")
-
-                response = input("Do you want to proceed? [y/N]: ").strip().lower()
-                if response not in ["y", "yes"]:
-                    print("Aborted.")
-                    sys.exit(0)
-            finally:
-                session.close()
-
-        # WORKQUEUE MODE: Enqueue work items for barsukas worker to process
-        if args.use_workqueue:
-            print("\n" + "=" * 80)
-            print("VORAS AGENT - ENQUEUING REGENERATE WORK")
-            print("=" * 80)
-
-            session = agent.get_session()
-            try:
-                # Get lemmas to regenerate
-                query = session.query(Lemma).filter(Lemma.guid.isnot(None)).order_by(Lemma.id)
-                if args.limit:
-                    query = query.limit(args.limit)
-                regenerate_lemmas = query.all()
-
-                results = enqueue_voras_regenerate_work(
-                    agent=agent,
-                    session=session,
-                    lemmas=regenerate_lemmas,
-                    dry_run=args.dry_run,
-                )
-
-                # Print summary
-                print("\n" + "=" * 80)
-                print("WORK ENQUEUE SUMMARY")
-                print("=" * 80)
-                print(f"Enqueued: {results['enqueued']}")
-                print(f"Skipped: {results['skipped']}")
-                if results["dry_run"]:
-                    print("\n⚠️  DRY RUN - No work items were actually enqueued")
-                print("=" * 80)
-
-                # Show queue stats
-                if not args.dry_run:
-                    stats = get_voras_queue_stats(session)
-                    print("\nCurrent queue status:")
-                    for task_type, task_stats in stats.items():
-                        if (
-                            task_stats["pending"]
-                            + task_stats["running"]
-                            + task_stats["completed"]
-                            + task_stats["failed"]
-                            > 0
-                        ):
-                            print(f"\n  {task_type}:")
-                            print(f"    Pending: {task_stats['pending']}")
-                            print(f"    Running: {task_stats['running']}")
-                            print(f"    Completed: {task_stats['completed']}")
-                            print(f"    Failed: {task_stats['failed']}")
-                    print("=" * 80)
-
-            except Exception as e:
-                print(f"Failed to enqueue work: {e}")
-                sys.exit(1)
-            finally:
-                session.close()
-
-            return
-
-        # Execute regeneration (immediate or batch mode)
-        results = agent.regenerate_all_translations(
-            limit=args.limit, dry_run=args.dry_run, batch_mode=args.batch, lemmas=None
-        )
-        cli_display.display_batch_summary(results, batch_mode=args.batch)
+        _run_regenerate(agent, args)
         return
 
     # Get lemmas to process (either single lemma from --guid or batch)
@@ -505,7 +344,7 @@ def main() -> None:
         sys.exit(1)
 
     # Handle single lemma mode (from --guid) - provide detailed interactive experience
-    if len(lemmas) == 1 and mode == "populate":
+    if len(lemmas) == 1:
         lemma = lemmas[0]
         session = agent.get_session()
         try:
@@ -515,7 +354,7 @@ def main() -> None:
         return
 
     # Batch processing mode - get confirmation before running
-    if not args.yes and not args.dry_run and mode == "populate":
+    if not args.yes and not args.dry_run:
         print(f"\nThis will process {len(lemmas)} lemmas using model '{args.model}'")
         print("This may incur costs and take some time to complete.")
         response = input("Do you want to proceed? [y/N]: ").strip().lower()
@@ -523,73 +362,7 @@ def main() -> None:
             print("Aborted.")
             sys.exit(0)
 
-    # Execute populate mode
-    if mode == "populate":
-        # Generate missing translations only
-
-        # WORKQUEUE MODE: Enqueue work items for barsukas worker to process
-        if args.use_workqueue:
-            print("\n" + "=" * 80)
-            print("VORAS AGENT - ENQUEUING POPULATE WORK")
-            print("=" * 80)
-
-            session = agent.get_session()
-            try:
-                languages_to_fix = normalize_llm_language_codes(
-                    args.languages if args.languages else get_default_generation_languages(),
-                    operation_name="Voras populate enqueue",
-                    all_expansion=get_default_generation_languages(),
-                )
-                results = enqueue_voras_populate_work(
-                    agent=agent,
-                    session=session,
-                    lemmas=lemmas,
-                    languages_to_fix=languages_to_fix,
-                    dry_run=args.dry_run,
-                )
-
-                # Print summary
-                print("\n" + "=" * 80)
-                print("WORK ENQUEUE SUMMARY")
-                print("=" * 80)
-                print(f"Enqueued: {results['enqueued']}")
-                print(f"Skipped: {results['skipped']}")
-                if results["dry_run"]:
-                    print("\n⚠️  DRY RUN - No work items were actually enqueued")
-                print("=" * 80)
-
-                # Show queue stats
-                if not args.dry_run:
-                    stats = get_voras_queue_stats(session)
-                    print("\nCurrent queue status:")
-                    for task_type, task_stats in stats.items():
-                        if (
-                            task_stats["pending"]
-                            + task_stats["running"]
-                            + task_stats["completed"]
-                            + task_stats["failed"]
-                            > 0
-                        ):
-                            print(f"\n  {task_type}:")
-                            print(f"    Pending: {task_stats['pending']}")
-                            print(f"    Running: {task_stats['running']}")
-                            print(f"    Completed: {task_stats['completed']}")
-                            print(f"    Failed: {task_stats['failed']}")
-                    print("=" * 80)
-
-            except Exception as e:
-                print(f"Failed to enqueue work: {e}")
-                sys.exit(1)
-            finally:
-                session.close()
-
-            return
-
-        # IMMEDIATE MODE: Process directly (default behavior)
-        results = agent.fix_missing_translations(
-            language_code=args.languages, limit=args.limit, dry_run=args.dry_run, lemmas=lemmas
-        )
-        cli_display.display_population_summary(results)
+    _run_populate(agent, lemmas, args)
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ This package contains all workqueue-related functionality:
 - pipeline_order: Pipeline ordering for dependent tasks
 - registry: Handler registry (TASK_HANDLERS) and custom handlers
 - worker: Background worker daemon
+- stats: Per-status task counts for reporting
 - tools: Common utilities for handler implementations
 - handlers/: Individual handler modules by agent name
 """
@@ -14,7 +15,10 @@ from workqueue.task_queue import (
     TaskStatus,
     TaskType,
     EnqueueResult,
+    EnqueueSummary,
+    TaskRequest,
     enqueue_task,
+    enqueue_tasks,
     claim_next_task,
     mark_task_complete,
     mark_task_failed,
@@ -28,6 +32,7 @@ from workqueue.pipeline_order import (
     has_earlier_step,
 )
 from workqueue.registry import TASK_HANDLERS
+from workqueue.stats import TaskCounts, get_task_type_counts, has_queued_work
 from workqueue.tools import (
     build_default_config,
     get_lemma_or_raise,
@@ -41,7 +46,10 @@ __all__ = [
     "TaskStatus",
     "TaskType",
     "EnqueueResult",
+    "EnqueueSummary",
+    "TaskRequest",
     "enqueue_task",
+    "enqueue_tasks",
     "claim_next_task",
     "mark_task_complete",
     "mark_task_failed",
@@ -54,6 +62,10 @@ __all__ = [
     "has_earlier_step",
     # registry
     "TASK_HANDLERS",
+    # stats
+    "TaskCounts",
+    "get_task_type_counts",
+    "has_queued_work",
     # tools
     "build_default_config",
     "get_lemma_or_raise",
