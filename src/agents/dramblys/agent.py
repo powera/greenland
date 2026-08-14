@@ -22,8 +22,6 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from agents.dramblys import staging
-
 from agents.dramblys.validation import is_valid_word
 from reports.missing_words import (
     check_high_frequency_missing_words as build_missing_words_report,
@@ -36,6 +34,9 @@ from reports.vocabulary_distribution import (
 )
 from reports.wordlist_coverage import check_wordlist_coverage as build_wordlist_coverage_report
 from util.logging_config import configure_logging, get_logger
+from words.pending_imports import approval as pending_approval
+from words.pending_imports import queries as pending_queries
+from words.pending_imports import staging as pending_staging
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.imports import PendingImport
@@ -421,7 +422,8 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                         )
                         translation = target_definition[:50]
 
-                    pending = PendingImport(
+                    pending_staging.create_pending_import(
+                        session,
                         english_word=word,
                         definition=target_definition,
                         disambiguation_translation=translation,
@@ -431,7 +433,6 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                         source=f"dramblys_subtype_{pos_subtype}",
                         notes=f"Found via subtype search for {pos_type}/{pos_subtype}",
                     )
-                    session.add(pending)
                     session.commit()
                     staged += 1
                     logger.info(f"Staged '{word}' to pending imports")
@@ -524,7 +525,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         session = self.get_session()
 
         try:
-            return staging.stage_missing_words_for_import(
+            return pending_staging.stage_missing_words_for_import(
                 session=session,
                 missing_words=missing_words,
                 db_path=self.db_path or constants.WORDFREQ_DB_PATH,
@@ -609,7 +610,7 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
                     f"{', '.join(skipped_existing)}"
                 )
 
-            results = staging.stage_missing_words_for_import(
+            results = pending_staging.stage_missing_words_for_import(
                 session=session,
                 missing_words=candidates,
                 db_path=self.db_path or constants.WORDFREQ_DB_PATH,
@@ -741,21 +742,24 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         pos_type: Optional[str] = None,
         pos_subtype: Optional[str] = None,
         limit: Optional[int] = None,
+        target_kind: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Delegate to staging module."""
+        """Delegate to words.pending_imports."""
         session = self.get_session()
         try:
-            return staging.list_pending_imports(session, pos_type, pos_subtype, limit)
+            return pending_queries.list_pending_imports(
+                session, pos_type, pos_subtype, limit, target_kind=target_kind
+            )
         finally:
             session.close()
 
     def approve_pending_import(
         self, pending_import_id: int, model: str = "gpt-5.4-mini"
     ) -> Dict[str, Any]:
-        """Delegate to staging module."""
+        """Delegate to words.pending_imports."""
         session = self.get_session()
         try:
-            return staging.approve_pending_import(
+            return pending_approval.approve_pending_import(
                 session,
                 pending_import_id,
                 self.config.with_model(model, debug=self.debug),
@@ -771,10 +775,10 @@ Only include words where you're confident they have a {pos_subtype} {pos_type} m
         reason: str = "manual_rejection",
         add_to_exclusions: bool = True,
     ) -> Dict[str, Any]:
-        """Delegate to staging module."""
+        """Delegate to words.pending_imports."""
         session = self.get_session()
         try:
-            return staging.reject_pending_import(
+            return pending_approval.reject_pending_import(
                 session, pending_import_id, reason, add_to_exclusions
             )
         finally:

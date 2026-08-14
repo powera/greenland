@@ -53,9 +53,12 @@ from storage.models.schema import (
     Sentence,
     SentenceTranslation,
     SentenceWord,
-    SentenceWordHint,
 )
-from storage.models.imports import PendingImport
+from storage.models.imports import SentencePendingImport
+from words.pending_imports.sentence_links import (
+    count_links_for_sentence,
+    pending_imports_for_sentence,
+)
 from workqueue.task_queue import TaskType, enqueue_task
 
 bp = Blueprint("workflows", __name__, url_prefix="/workflows")
@@ -382,11 +385,7 @@ def sentence_workflow() -> ResponseReturnValue:
     # the most recent imports. Anything fully complete drops off on its own.
     blocked_ids = [
         int(row[0])
-        for row in g.db.query(SentenceWordHint.sentence_id)
-        .filter(SentenceWordHint.pending_import_id.isnot(None))
-        .distinct()
-        .limit(50)
-        .all()
+        for row in g.db.query(SentencePendingImport.sentence_id).distinct().limit(50).all()
         if row[0] is not None
     ]
     recent_ids = [
@@ -408,15 +407,7 @@ def sentence_workflow() -> ResponseReturnValue:
         if sentence is None:
             continue
 
-        outstanding = (
-            g.db.query(func.count(SentenceWordHint.id))
-            .filter(
-                SentenceWordHint.sentence_id == sentence_id,
-                SentenceWordHint.pending_import_id.isnot(None),
-            )
-            .scalar()
-            or 0
-        )
+        outstanding = count_links_for_sentence(g.db, sentence_id)
         rows.append(
             {
                 "id": sentence_id,
@@ -509,21 +500,7 @@ def sentence_detail(sentence_id: int) -> ResponseReturnValue:
     spec = SentenceImportSpec()
     steps = _sentence_steps(g.db, sentence_id, spec=spec)
 
-    pending_ids = [
-        int(row[0])
-        for row in g.db.query(SentenceWordHint.pending_import_id)
-        .filter(
-            SentenceWordHint.sentence_id == sentence_id,
-            SentenceWordHint.pending_import_id.isnot(None),
-        )
-        .all()
-        if row[0] is not None
-    ]
-    pendings = (
-        g.db.query(PendingImport).filter(PendingImport.id.in_(pending_ids)).all()
-        if pending_ids
-        else []
-    )
+    pendings = pending_imports_for_sentence(g.db, sentence_id)
 
     translations = (
         g.db.query(SentenceTranslation)

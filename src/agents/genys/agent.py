@@ -39,6 +39,7 @@ from storage.crud.sentence import add_sentence
 from storage.crud.sentence_translation import add_sentence_translation
 from storage.crud.lemma_tags import serialize_tags_for_column
 from storage.models.imports import PendingImport
+from words.pending_imports.staging import create_pending_import
 from storage.models.schema import DerivativeForm, Lemma
 from storage.translation_helpers import normalize_llm_language_codes
 
@@ -471,23 +472,23 @@ class GenysAgent:
                         stats["already_in_database"] += 1
                         continue
 
-                    pending_import = PendingImport(
-                        english_word=english_gloss,
-                        definition=english_gloss,
-                        disambiguation_translation=surface_form,
-                        disambiguation_language=document_language,
-                        pos_type=mapped_pos_type,
-                        pos_subtype=None,
-                        tags=staged_tags,
-                        source=f"genys/{source_name}",
-                        frequency_rank=None,
-                        notes=f"From document: {source_name}",
-                        example_sentence=english_sentence_for_context or None,
-                    )
-
                     stats["staged_for_review"] += 1
                     if not dry_run:
-                        session.add(pending_import)
+                        # create_pending_import classifies the term, so a proper
+                        # noun from the document is staged as a name rather than
+                        # queued up to become a junk lemma.
+                        create_pending_import(
+                            session,
+                            english_word=english_gloss,
+                            definition=english_gloss,
+                            disambiguation_translation=surface_form,
+                            disambiguation_language=document_language,
+                            pos_type=mapped_pos_type,
+                            tags=staged_tags,
+                            source=f"genys/{source_name}",
+                            notes=f"From document: {source_name}",
+                            example_sentence=english_sentence_for_context or None,
+                        )
                         sentence_has_db_changes = True
                         sentence_new_pending_glosses.add(normalized_gloss)
 

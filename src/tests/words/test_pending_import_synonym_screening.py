@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from agents.dramblys.synonym_screening import (
+from words.pending_imports.synonym_screening import (
     find_matching_translation_languages,
     run_synonym_screening,
 )

@@ -236,15 +236,22 @@ Returns per-language aggregate counts with this shape:
 
 ## Pending imports
 
+Every pending import carries a `target_kind`: what it becomes when approved.
+One of `lemma` (vocabulary, the default), `name` (proper noun), or `concept`
+(encyclopedia entry). Only the lemma path makes an LLM call on approval.
+
 - `GET /pending-imports/api/duplicates`
   - Find pending imports that are duplicates of existing lemmas (direct match or form-of-lemma match).
-  - Only checks imports where `definition == english_word` (not yet staged).
+  - Only checks imports with `target_kind == "lemma"` where `definition == english_word` (not yet staged).
   - Each result has: pending import fields + `match_type` ("direct"/"form"), `matched_lemma_guid`, `matched_lemma_text`, `matched_pos_type`.
 
-- `GET /pending-imports/api/list[?search=...][&pos_type=...][&pos_subtype=...][&source=...][&language=...][&page=N]`
+- `GET /pending-imports/api/list[?search=...][&pos_type=...][&pos_subtype=...][&source=...][&language=...][&target_kind=...][&page=N]`
   - List pending imports as JSON. Supports the same filters as the HTML list view.
   - Returns `{"data": [...], "metadata": {"total": N, "page": P, "total_pages": T}}`.
-  - Each item: `id`, `english_word`, `definition`, `disambiguation_translation`, `disambiguation_language`, `pos_type`, `pos_subtype`, `example_sentence`, `source`, `frequency_rank`, `notes`, `added_at`.
+  - Each item: `id`, `english_word`, `definition`, `disambiguation_translation`, `disambiguation_language`, `target_kind`, `name_kind`, `concept_type`, `pos_type`, `pos_subtype`, `example_sentence`, `source`, `frequency_rank`, `notes`, `added_at`.
+
+- `POST /pending-imports/<id>/set-kind` (form submit, not JSON)
+  - Fields: `target_kind` (required), `name_kind`, `concept_type`. Redirects to the detail page.
 
 ## Tags
 

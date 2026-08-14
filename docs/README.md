@@ -9,6 +9,8 @@ Design documents and reference documentation.
 - `dialog_generation.md` — scene-driven dialog generation, vocabulary coverage,
   and the names registry
 - `difficulty_overrides.md` — per-language difficulty level overrides
+- `pending_imports.md` — the staged-term review queue: what a term becomes
+  (lemma, name, or concept) and how sentences wait on one
 - `sentence_sync_design.md` — design for syncing sentences between SQLite and
   `data/release`
 - `word2vec_pgvector_plan.md` — plan for word embeddings with PostgreSQL

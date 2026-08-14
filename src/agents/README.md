@@ -100,7 +100,19 @@ dramblys.py --top-n 10000             # Check top N frequency words
 
 # Fix mode (process with LLM)
 dramblys.py --fix --limit 20 --yes    # Process 20 missing words
+
+# Pending import queue (implementation lives in words/pending_imports/)
+dramblys.py --list-pending                    # Everything waiting for review
+dramblys.py --list-pending --target-kind name # Only terms that become names
+dramblys.py --approve 42                      # Create the lemma/name/concept
+dramblys.py --reject 42                       # Drop it and exclude the word
 ```
+
+A pending import becomes one of three things when approved: a **lemma**
+(vocabulary), a **name** (proper noun, no difficulty), or a **concept**
+(encyclopedia entry). Only the lemma path costs an LLM call. The kind is
+guessed when the term is staged and can be changed on the Barsukas detail
+page.
 
 ### voras (Translations)
 

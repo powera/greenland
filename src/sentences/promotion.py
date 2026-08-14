@@ -1,9 +1,10 @@
 """Promote a sentence's staged words into real lemmas.
 
-Staging leaves a sentence pointing at ``PendingImport`` rows through its word
-hints. Promotion turns those into lemmas by delegating to
-``agents.dramblys.staging.approve_pending_import`` -- the same function the
-Approve button in Barsukas calls, unchanged, so the automated path and the
+Staging leaves a sentence pointing at ``PendingImport`` rows through
+``SentencePendingImport`` links. Promotion turns those into lemmas (or names,
+or concepts) by delegating to
+``words.pending_imports.approval.approve_pending_import`` -- the same function
+the Approve button in Barsukas calls, unchanged, so the automated path and the
 human path cannot drift apart.
 
 **Promotion is off by default.** ``approve_pending_import`` makes an LLM call
@@ -15,10 +16,10 @@ expensive thing in this database to un-make. The switch exists and is safe to
 turn on per corpus once ``max_per_run`` has been watched on real input; until
 then the workflow reports what is waiting and stops.
 
-On success ``approve_pending_import`` deletes the ``PendingImport`` row, so the
-hint that referenced it would be left dangling. This module rewrites the hint to
-name the new lemma instead, which is what lets the next linking pass see the
-word as resolved.
+On success ``approve_pending_import`` deletes the ``PendingImport`` row, which
+takes its sentence links with it after applying the outcome to the sentence's
+word rows -- so the word this sentence was waiting on is already linked by the
+time promotion returns.
 """
 
 from __future__ import annotations
@@ -30,8 +31,10 @@ from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy.orm import Session
 
 from storage.backend.config import DataSourceConfig
-from storage.models.imports import PendingImport
-from storage.models.schema import SentenceWordHint
+from storage.models.imports import TARGET_KIND_LEMMA, PendingImport
+from words.pending_imports.sentence_links import (
+    pending_imports_for_sentence as _pending_imports_for_sentence,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +49,8 @@ class PromotionPolicy:
             cannot mint hundreds of lemmas before anyone looks.
         require_pos_type: Skip rows with no part of speech. Those are the ones
             whose approval leans hardest on the LLM, since it must decide both
-            the sense and the subtype that determines the GUID.
+            the sense and the subtype that determines the GUID. Applies only to
+            rows destined to become lemmas.
     """
 
     auto_promote: bool = False
@@ -73,21 +77,12 @@ class PromotionOutcome:
 def pending_imports_for_sentence(session: Session, sentence_id: int) -> List[PendingImport]:
     """The staged words this sentence is still waiting on.
 
-    A hint whose pending row no longer exists is a promotion that already
-    happened, and is simply absent from the result.
+    Thin re-export of :func:`words.pending_imports.sentence_links.
+    pending_imports_for_sentence`, kept here because the promotion loop and its
+    tests both read it. A link whose pending row no longer exists is a
+    promotion that already happened, and is simply absent from the result.
     """
-    rows = (
-        session.query(SentenceWordHint.pending_import_id)
-        .filter(
-            SentenceWordHint.sentence_id == sentence_id,
-            SentenceWordHint.pending_import_id.isnot(None),
-        )
-        .all()
-    )
-    ids = sorted({int(row[0]) for row in rows if row[0] is not None})
-    if not ids:
-        return []
-    return session.query(PendingImport).filter(PendingImport.id.in_(ids)).all()
+    return _pending_imports_for_sentence(session, sentence_id)
 
 
 def promote_sentence_pendings(
@@ -133,7 +128,7 @@ def promote_sentence_pendings(
         )
         return outcome
 
-    from agents.dramblys.staging import approve_pending_import
+    from words.pending_imports.approval import approve_pending_import
 
     for pending in pendings:
         pending_id = int(pending.id)
@@ -142,7 +137,12 @@ def promote_sentence_pendings(
             outcome.deferred.append(pending_id)
             continue
 
-        if policy.require_pos_type and not pending.pos_type:
+        # The pos_type gate exists because approving a *lemma* with no part of
+        # speech leans hardest on the LLM: it must decide the sense and the
+        # subtype the GUID is built from. A name or a concept is created
+        # without an LLM call at all, so the gate does not apply to them.
+        needs_pos_type = (pending.target_kind or TARGET_KIND_LEMMA) == TARGET_KIND_LEMMA
+        if policy.require_pos_type and needs_pos_type and not pending.pos_type:
             logger.debug(
                 "Sentence %s: deferring pending %s (%r) with no pos_type",
                 sentence_id,
@@ -174,7 +174,7 @@ def promote_sentence_pendings(
 
         lemma_id = result.get("lemma_id")
         lemma_id_int = int(lemma_id) if isinstance(lemma_id, int) else None
-        # approve_pending_import repoints the sentence's hints at the new lemma
+        # approve_pending_import applies the outcome to the sentence's word rows
         # before deleting the pending row, so no relinking is needed here.
         session.commit()
 

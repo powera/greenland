@@ -12,8 +12,9 @@ Two tables receive the result, meaning different things:
   language_code, position)``, so a single slot maps to one row per language.
 * ``SentenceWordHint`` records intent at generation time, keyed on
   ``(sentence_id, position)`` -- one row per *slot*, which is the granularity
-  the resolver works at. Its ``pending_import_id`` is how a sentence remembers
-  which staged word it is waiting on.
+  the resolver works at. It records lemmas only; a sentence remembers which
+  staged word it is waiting on through ``SentencePendingImport`` instead (see
+  :mod:`words.pending_imports.sentence_links`).
 
 Slots are identified by lowercased English text, not by position. The resolver
 groups that way, and a sentence containing the same word twice ("the cat saw
@@ -25,8 +26,7 @@ loop depends on:
 
 * an existing non-NULL ``lemma_id`` is never overwritten -- earlier decisions,
   including a human's, always win;
-* a hint row is never deleted, only inserted or upgraded from
-  ``pending_import_id`` to ``lemma_id``.
+* a hint row is never deleted, only inserted or upgraded to name a lemma.
 """
 
 from __future__ import annotations
@@ -38,6 +38,7 @@ from typing import Dict, List, Optional
 from sqlalchemy.orm import Session
 
 from storage.models.schema import Lemma, SentenceWord, SentenceWordHint
+from words.pending_imports.sentence_links import release_legacy_hints
 from wordfreq.tools.sentence_word_linker import ResolvedLemma, resolve_lemmas_for_sentence
 
 logger = logging.getLogger(__name__)
@@ -268,21 +269,14 @@ def link_sentence_words(
 def release_sentence_word_hints(
     session: Session, pending_import_id: int, lemma_id: Optional[int] = None
 ) -> int:
-    """Detach sentence word hints before their pending import row is deleted.
+    """Detach pre-link-table hint rows before their pending import is deleted.
 
-    ``SentenceWordHint.pending_import_id`` is a foreign key with no ON DELETE
-    behavior, so deleting a referenced pending import raises on a backend that
-    enforces foreign keys, and leaves a hint pointing at nothing on one that
-    does not. A dangling hint is worse than the error: ``_evaluate_stage``
-    counts it as staged, so the sentence reports STAGE complete forever and is
-    never re-staged.
-
-    Every path that deletes a ``PendingImport`` must call this first --
-    approval, rejection, and the "Use As Synonym" path alike.
-
-    A hint that can name a lemma is repointed at it, which is what lets the
-    sentence link the word on its next pass. One that cannot is removed, since
-    ``ck_word_hint_has_reference`` forbids a row referencing nothing.
+    Compatibility wrapper over
+    :func:`words.pending_imports.sentence_links.release_legacy_hints`, which is
+    called by ``delete_pending_import`` -- the single place a pending row is
+    now removed. Staging no longer writes hints carrying a
+    ``pending_import_id``, so this only matters for databases staged before the
+    link table existed.
 
     Args:
         session: Database session. Not committed; the caller owns the
@@ -294,17 +288,4 @@ def release_sentence_word_hints(
     Returns:
         The number of hint rows touched.
     """
-    hints = (
-        session.query(SentenceWordHint)
-        .filter(SentenceWordHint.pending_import_id == pending_import_id)
-        .all()
-    )
-    for hint in hints:
-        hint.pending_import_id = None
-        if lemma_id is not None:
-            hint.lemma_id = lemma_id
-        elif hint.lemma_id is None and hint.name_id is None:
-            session.delete(hint)
-    if hints:
-        session.flush()
-    return len(hints)
+    return release_legacy_hints(session, pending_import_id, lemma_id=lemma_id)

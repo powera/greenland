@@ -14,6 +14,10 @@ Word-level LLM helpers (single lemma tasks, not sentence workflows).
 - `synonyms.py` — synonym-family prompt/query helpers with structured JSON output.
 - `verb_forms.py` — language-specific verb-form prompt/query helpers.
 - `ipa_pronunciation.py` — compatibility exports for IPA generation utilities.
+- `pending_imports/` — the staging queue for terms nobody has decided about
+  yet, and the approval paths that turn one into a lemma, a name, or a concept.
+  Used to live in `agents/dramblys/`. See `docs/pending_imports.md` for the
+  three target kinds and the sentence back-link.
 
 ## Dependencies you should use
 

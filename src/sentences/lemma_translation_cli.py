@@ -32,6 +32,7 @@ from agents.common.common_args import (
 )
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import DataSourceConfig
+from storage.models.imports import SentencePendingImport
 from storage.models.schema import (
     Lemma,
     Sentence,
@@ -427,15 +428,20 @@ class LemmaSentenceTranslationService:
                 query = query.filter(Sentence.source_filename == f"pattern:{pattern_id}")
 
             if exclude_pending_imports:
-                # Exclude sentences that have any SentenceWordHint with pending_import_id
+                # Exclude sentences waiting on a staged word. Legacy hint rows
+                # count too, for databases staged before the link table existed.
                 sentences_with_pending = (
+                    session.query(SentencePendingImport.sentence_id).distinct().subquery()
+                )
+                sentences_with_legacy_hints = (
                     session.query(SentenceWordHint.sentence_id)
                     .filter(SentenceWordHint.pending_import_id.isnot(None))
                     .distinct()
                     .subquery()
                 )
                 query = query.filter(
-                    ~Sentence.id.in_(session.query(sentences_with_pending.c.sentence_id))
+                    ~Sentence.id.in_(session.query(sentences_with_pending.c.sentence_id)),
+                    ~Sentence.id.in_(session.query(sentences_with_legacy_hints.c.sentence_id)),
                 )
 
             if limit:

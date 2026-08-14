@@ -14,14 +14,20 @@ from typing import Any, Dict, List, Sequence, cast
 
 from barsukas.config import Config
 from barsukas.routes._mirror import mirrored_facade
-from agents.dramblys.synonym_screening import (
+from words.pending_imports.approval import (
+    approve_pending_import,
+    delete_pending_import,
+    reject_pending_import,
+)
+from words.pending_imports.classification import classify_pending_import, suggest_target_kind
+from words.pending_imports.sentence_links import sentence_ids_waiting_on
+from words.pending_imports.synonym_screening import (
     ACCEPTED_STATUS,
     ACTIVE_STATUS,
     has_active_strong_synonym_candidate,
     ignore_synonym_candidates,
     run_synonym_screening,
 )
-from agents.dramblys.staging import approve_pending_import, reject_pending_import
 from workqueue.task_queue import TaskType, enqueue_task
 from flask import (
     Blueprint,
@@ -39,12 +45,19 @@ from flask import (
 from flask.typing import ResponseReturnValue
 from sqlalchemy.orm import Query
 
-from sentences.link_writer import release_sentence_word_hints
 from storage.backend.config import DataSourceConfig
 from storage.crud.derivative_form import add_derivative_form
 from storage.crud.word_token import add_word_token
-from storage.models.imports import PendingImport, PendingImportSynonymCandidate
-from storage.models.schema import DerivativeForm, Lemma, SentenceWordHint
+from storage.models.imports import (
+    PENDING_IMPORT_TARGET_KIND_LABELS,
+    PENDING_IMPORT_TARGET_KINDS,
+    TARGET_KIND_LEMMA,
+    TARGET_KIND_NAME,
+    PendingImport,
+    PendingImportSynonymCandidate,
+)
+from storage.models.name_entity import NAME_KINDS
+from storage.models.schema import DerivativeForm, Lemma
 
 bp = Blueprint("pending_imports", __name__, url_prefix="/pending-imports")
 logger = logging.getLogger(__name__)
@@ -113,6 +126,7 @@ def _build_filtered_query() -> Query[Any]:
     pos_subtype_filter = request.args.get("pos_subtype", "").strip()
     source_filter = request.args.get("source", "").strip()
     language_filter = request.args.get("language", "").strip()
+    target_kind_filter = request.args.get("target_kind", "").strip()
 
     query = g.db.query(PendingImport)
 
@@ -134,6 +148,9 @@ def _build_filtered_query() -> Query[Any]:
 
     if language_filter:
         query = query.filter(PendingImport.disambiguation_language == language_filter)
+
+    if target_kind_filter:
+        query = query.filter(PendingImport.target_kind == target_kind_filter)
 
     return cast(Query[Any], query.order_by(PendingImport.added_at.desc()))
 
@@ -214,6 +231,7 @@ def list_pending_imports() -> ResponseReturnValue:
     pos_subtype_filter = request.args.get("pos_subtype", "").strip()
     source_filter = request.args.get("source", "").strip()
     language_filter = request.args.get("language", "").strip()
+    target_kind_filter = request.args.get("target_kind", "").strip()
     total_pages = (total + Config.ITEMS_PER_PAGE - 1) // Config.ITEMS_PER_PAGE
 
     return render_template(
@@ -233,22 +251,10 @@ def list_pending_imports() -> ResponseReturnValue:
         languages=languages,
         candidate_counts=candidate_counts,
         strong_candidate_counts=strong_candidate_counts,
+        target_kind_filter=target_kind_filter,
+        target_kinds=PENDING_IMPORT_TARGET_KINDS,
+        target_kind_labels=PENDING_IMPORT_TARGET_KIND_LABELS,
     )
-
-
-def _sentences_awaiting_pending_import(session: Any, pending_import_id: int) -> List[int]:
-    """Sentences whose word hints point at this pending import.
-
-    These are the sentences that staged the word and could not link it. Once it
-    becomes a lemma they can be linked, so they are re-queued after approval.
-    """
-    rows = (
-        session.query(SentenceWordHint.sentence_id)
-        .filter(SentenceWordHint.pending_import_id == pending_import_id)
-        .distinct()
-        .all()
-    )
-    return sorted({int(row[0]) for row in rows if row[0] is not None})
 
 
 def _requeue_waiting_sentences(session: Any, sentence_ids: Sequence[int]) -> None:
@@ -291,7 +297,7 @@ def approve(pending_import_id: int) -> ResponseReturnValue:
         data_source_config = base_config.with_model(model_name, debug=debug)
         # Read before approving: a successful approval deletes the pending row,
         # which is what the hints point at.
-        waiting_sentence_ids = _sentences_awaiting_pending_import(g.db, pending_import_id)
+        waiting_sentence_ids = sentence_ids_waiting_on(g.db, pending_import_id)
         result = approve_pending_import(
             session=g.db,
             pending_import_id=pending_import_id,
@@ -403,11 +409,10 @@ def use_synonym(pending_import_id: int, candidate_id: int) -> ResponseReturnValu
                 notes=f"Accepted from pending import #{pending.id}",
             )
         candidate.status = ACCEPTED_STATUS
-        # The word became a synonym form of this lemma, so any sentence waiting
-        # on the pending row is repointed at it and can link on its next pass.
-        # Must precede the delete: the hint's foreign key has no ON DELETE.
-        release_sentence_word_hints(g.db, pending.id, lemma.id)
-        g.db.delete(pending)
+        # The word became a synonym form of this lemma, so every sentence
+        # waiting on the pending row is pointed at that lemma before the row
+        # (and its links) go away.
+        delete_pending_import(g.db, pending, lemma_id=lemma.id)
         g.db.commit()
         flash(
             f"Added '{pending_word}' as an English synonym for {lemma.lemma_text}.",
@@ -457,11 +462,22 @@ def detail(pending_import_id: int) -> ResponseReturnValue:
         for candidate in _active_synonym_candidates_for_pending(pending_import_id)
     ]
     has_strong_synonym_candidate = any(candidate["is_strong"] for candidate in synonym_candidates)
+    suggestion = suggest_target_kind(
+        g.db,
+        pending.english_word,
+        example_sentence=pending.example_sentence,
+        pos_type=pending.pos_type,
+    )
     return render_template(
         "pending_imports/detail.html",
         item=pending,
         synonym_candidates=synonym_candidates,
         has_strong_synonym_candidate=has_strong_synonym_candidate,
+        target_kinds=PENDING_IMPORT_TARGET_KINDS,
+        target_kind_labels=PENDING_IMPORT_TARGET_KIND_LABELS,
+        name_kinds=NAME_KINDS,
+        suggestion=suggestion,
+        waiting_sentence_ids=sentence_ids_waiting_on(g.db, pending_import_id),
     )
 
 
@@ -491,6 +507,26 @@ def stage(pending_import_id: int) -> ResponseReturnValue:
             g.db.flush()
 
         client = LinguisticClient(config=data_source_config)
+
+        # What the term should become is decided before its definitions are
+        # looked up: asking for the senses of "George" is a wasted call, and
+        # the answer would be nonsense if it came back at all.
+        suggestion = classify_pending_import(g.db, pending, client.client, model=model_name)
+        if suggestion.target_kind != TARGET_KIND_LEMMA:
+            g.db.commit()
+            return jsonify(
+                {
+                    "success": True,
+                    "target_kind": pending.target_kind,
+                    "name_kind": pending.name_kind,
+                    "concept_type": pending.concept_type,
+                    "classification_reason": suggestion.reason,
+                    "definitions": [],
+                    "synonym_candidates": [],
+                    "has_strong_synonym_candidate": False,
+                }
+            )
+
         definitions_list, llm_success = client.query_definitions(
             pending.english_word, example_sentence=pending.example_sentence
         )
@@ -526,6 +562,10 @@ def stage(pending_import_id: int) -> ResponseReturnValue:
         return jsonify(
             {
                 "success": True,
+                "target_kind": pending.target_kind,
+                "name_kind": pending.name_kind,
+                "concept_type": pending.concept_type,
+                "classification_reason": suggestion.reason,
                 "definitions": definitions_list,
                 "synonym_candidates": [
                     _serialize_synonym_candidate(candidate) for candidate in synonym_candidates
@@ -542,6 +582,45 @@ def stage(pending_import_id: int) -> ResponseReturnValue:
         return jsonify({"success": False, "error": str(exc)}), 500
 
 
+@bp.route("/<int:pending_import_id>/set-kind", methods=["POST"])
+def set_kind(pending_import_id: int) -> ResponseReturnValue:
+    """Set what this term becomes on approval: a lemma, a name, or a concept.
+
+    An ordinary form submit, not AJAX: this is a decision a reviewer makes and
+    then acts on, so it belongs in the page's history.
+    """
+    if current_app.config.get("READONLY", False):
+        flash("Cannot modify data in read-only mode", "error")
+        return redirect(request.referrer or url_for("pending_imports.list_pending_imports"))
+
+    pending = g.db.query(PendingImport).filter(PendingImport.id == pending_import_id).first()
+    if not pending:
+        abort(404)
+
+    target_kind = request.form.get("target_kind", "").strip()
+    if target_kind not in PENDING_IMPORT_TARGET_KINDS:
+        flash(f"Unknown target kind {target_kind!r}", "error")
+        return redirect(url_for("pending_imports.detail", pending_import_id=pending_import_id))
+
+    pending.target_kind = target_kind
+
+    name_kind = request.form.get("name_kind", "").strip()
+    if target_kind == TARGET_KIND_NAME and name_kind in NAME_KINDS:
+        pending.name_kind = name_kind
+
+    concept_type = request.form.get("concept_type", "").strip()
+    if concept_type:
+        pending.concept_type = concept_type
+
+    g.db.commit()
+    flash(
+        f"'{pending.english_word}' will be approved as a "
+        f"{PENDING_IMPORT_TARGET_KIND_LABELS.get(target_kind, target_kind)}.",
+        "success",
+    )
+    return redirect(url_for("pending_imports.detail", pending_import_id=pending_import_id))
+
+
 @bp.route("/api/duplicates")
 @mirrored_facade("/pending-imports/api/duplicates", "GET")
 def api_duplicates() -> ResponseReturnValue:
@@ -552,9 +631,10 @@ def api_duplicates() -> ResponseReturnValue:
     - A form match: the pending english_word appears as a DerivativeForm
       (language_code='en') of an existing lemma with the same pos_type.
 
-    Only pending imports where definition == english_word (no real definition
-    yet) are checked, since staged imports with real definitions need human
-    review regardless.
+    Only pending imports destined to become lemmas, and only those where
+    definition == english_word (no real definition yet), are checked: a name or
+    a concept is not a duplicate of a lemma that happens to be spelled like it,
+    and staged imports with real definitions need human review regardless.
 
     Returns {"data": [...]} where each item has pending import fields plus
     "match_type" ("direct" or "form"), "matched_lemma_guid", "matched_lemma_text".
@@ -565,7 +645,10 @@ def api_duplicates() -> ResponseReturnValue:
     # Only check imports that have not yet been staged (definition = english_word)
     pending_list = (
         g.db.query(PendingImport)
-        .filter(PendingImport.definition == PendingImport.english_word)
+        .filter(
+            PendingImport.definition == PendingImport.english_word,
+            PendingImport.target_kind == TARGET_KIND_LEMMA,
+        )
         .order_by(PendingImport.added_at.desc())
         .all()
     )
@@ -652,6 +735,9 @@ def api_list() -> ResponseReturnValue:
             "definition": item.definition,
             "disambiguation_translation": item.disambiguation_translation,
             "disambiguation_language": item.disambiguation_language,
+            "target_kind": item.target_kind,
+            "name_kind": item.name_kind,
+            "concept_type": item.concept_type,
             "pos_type": item.pos_type,
             "pos_subtype": item.pos_subtype,
             "example_sentence": item.example_sentence,

@@ -32,6 +32,7 @@ from clients.openai.client import is_gpt5_nano_or_mini_model, reasoning_effort_f
 from sentences.token_estimates import estimate_decomposition_output_tokens
 from sentences.translate_and_decompose import lookup_candidate_lemmas
 from sentences.translation import build_response_schema, build_translation_prompt
+from storage.models.imports import SentencePendingImport
 from storage.models.schema import (
     Lemma,
     Sentence,
@@ -87,12 +88,18 @@ def _discover_batch_sentence_ids(
     if pattern_id:
         query = query.filter(Sentence.source_filename == f"pattern:{pattern_id}")
     if exclude_pending_imports:
-        pending_sentence_ids = (
+        # Sentences waiting on a staged word. Legacy hint rows count too, so a
+        # database staged before the link table existed is still excluded.
+        pending_sentence_ids = session.query(SentencePendingImport.sentence_id).distinct()
+        legacy_sentence_ids = (
             session.query(SentenceWordHint.sentence_id)
             .filter(SentenceWordHint.pending_import_id.isnot(None))
             .distinct()
         )
-        query = query.filter(~Sentence.id.in_(pending_sentence_ids))
+        query = query.filter(
+            ~Sentence.id.in_(pending_sentence_ids),
+            ~Sentence.id.in_(legacy_sentence_ids),
+        )
     if limit is not None:
         query = query.limit(limit)
     return [sentence_id for (sentence_id,) in query.all()]

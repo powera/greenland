@@ -19,6 +19,8 @@ from storage.database import (
 )
 from storage.models.imports import PendingImport
 from storage.models.schema import SentenceWordHint
+from words.pending_imports.sentence_links import link_sentence_to_pending_import
+from words.pending_imports.staging import create_pending_import
 from wordfreq.tools.sentence_word_linker import find_lemma_by_text
 from wordfreq.tools.vocabulary_budget import build_prompt_vocabulary_section
 
@@ -298,15 +300,16 @@ class GuidedSentenceGenerator:
                             sentence_text=en_text,
                         )
                         if pending_import:
-                            word_hint = SentenceWordHint(
-                                sentence_id=sentence.id,
-                                pending_import_id=pending_import.id,
-                                position=position,
-                                slot_name=word_data.get("part_of_speech", "unknown"),
+                            # The back-link lives in its own table rather than
+                            # on a hint: hints are unique on (sentence_id,
+                            # position) and this loop is not the only writer.
+                            link_sentence_to_pending_import(
+                                session,
+                                sentence.id,
+                                int(pending_import.id),
                                 english_text=word_data.get("lemma", ""),
+                                slot_name=word_data.get("part_of_speech", "unknown"),
                             )
-                            session.add(word_hint)
-                            position += 1
 
                 # Set minimum level to -1 (unverified)
                 sentence.minimum_level = -1
@@ -387,19 +390,19 @@ class GuidedSentenceGenerator:
             )
             return cast(PendingImport, existing)
 
-        # Create pending import entry
-        pending = PendingImport(
+        # Create pending import entry. create_pending_import classifies the
+        # term, so a proper noun is staged as a name rather than as vocabulary.
+        pending = create_pending_import(
+            session,
             english_word=word_text,
             definition=sentence_text,  # Use sentence as context
             disambiguation_translation=word_text,  # Use word itself
             disambiguation_language="en",
             pos_type=pos_type,
-            pos_subtype=None,
             source=f"buivolas_guided_sentence_{sentence_id}",
             notes=f"Missing vocabulary discovered in sentence: {sentence_text}",
+            example_sentence=sentence_text,
         )
-        session.add(pending)
-        session.flush()  # Get the id assigned
         logger.info(
             "Staged missing word '%s' (%s) to pending_imports from sentence %s",
             word_text,

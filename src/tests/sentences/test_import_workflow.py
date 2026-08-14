@@ -23,7 +23,7 @@ from sentences.import_workflow import (
     unlinked_words,
 )
 from sentences.translate_and_decompose import PHASE3_MIN_LANGUAGES
-from storage.models.imports import PendingImport
+from storage.models.imports import PendingImport, SentencePendingImport
 from storage.models.schema import (
     Base,
     Lemma,
@@ -32,6 +32,8 @@ from storage.models.schema import (
     SentenceWord,
     SentenceWordHint,
 )
+from words.pending_imports.approval import delete_pending_import
+from words.pending_imports.sentence_links import link_sentence_to_pending_import
 
 
 class SentenceWorkflowTestCase(unittest.TestCase):
@@ -65,7 +67,32 @@ class SentenceWorkflowTestCase(unittest.TestCase):
         self.session.commit()
 
     def stage_word(self, english_text: str, *, position: int = 0) -> PendingImport:
-        """Stage a word the way pending_staging does: a pending row plus a hint."""
+        """Stage a word the way pending_staging does: a pending row plus a link."""
+        pending = PendingImport(
+            english_word=english_text,
+            definition=english_text,
+            disambiguation_translation=english_text,
+            disambiguation_language="en",
+            pos_type="noun",
+        )
+        self.session.add(pending)
+        self.session.flush()
+        link_sentence_to_pending_import(
+            self.session,
+            self.sentence.id,
+            int(pending.id),
+            english_text=english_text,
+            slot_name="noun",
+        )
+        self.session.commit()
+        return pending
+
+    def stage_word_the_old_way(self, english_text: str, *, position: int = 0) -> PendingImport:
+        """Stage a word as databases did before the link table existed.
+
+        The hint column is no longer written, but rows staged that way are
+        still out there and must keep reporting STAGE and PROMOTE correctly.
+        """
         pending = PendingImport(
             english_word=english_text,
             definition=english_text,
@@ -235,8 +262,16 @@ class TestStageAndPromote(SentenceWorkflowTestCase):
         self.assertFalse(status.complete)
         self.assertEqual(status.detail["unstaged"], ["dog"])
 
-    def test_stage_complete_once_hint_carries_pending_import(self) -> None:
+    def test_stage_complete_once_a_link_carries_the_pending_import(self) -> None:
         self.stage_word("dog")
+        status = evaluate_stage(
+            self.session, self.sentence.id, SentenceImportStage.STAGE, spec=self.spec
+        )
+        self.assertTrue(status.complete)
+
+    def test_stage_complete_for_a_word_staged_before_the_link_table(self) -> None:
+        """Legacy hint rows still count, so old databases do not re-stage."""
+        self.stage_word_the_old_way("dog")
         status = evaluate_stage(
             self.session, self.sentence.id, SentenceImportStage.STAGE, spec=self.spec
         )
@@ -251,13 +286,11 @@ class TestStageAndPromote(SentenceWorkflowTestCase):
         self.assertEqual(status.detail["pending_import_ids"], [pending.id])
 
     def test_promote_complete_once_the_word_becomes_a_lemma(self) -> None:
-        """Approval releases the hint onto the new lemma, then deletes the pending row.
+        """delete_pending_import applies the outcome, then removes the row.
 
-        The release has to happen first: pending_import_id is a plain foreign
-        key, so deleting a referenced row raises instead of orphaning the hint.
+        The sentence's word is linked to the new lemma on the way out, so the
+        sentence needs no further pass to reach a resolved state.
         """
-        from agents.dramblys.staging import _release_sentence_word_hints
-
         pending = self.stage_word("dog")
         lemma = Lemma(
             lemma_text="dog", definition_text="an animal", pos_type="noun", guid="N01_001"
@@ -265,8 +298,7 @@ class TestStageAndPromote(SentenceWorkflowTestCase):
         self.session.add(lemma)
         self.session.commit()
 
-        _release_sentence_word_hints(self.session, pending.id, lemma.id)
-        self.session.delete(pending)
+        delete_pending_import(self.session, pending, lemma_id=lemma.id)
         self.session.commit()
 
         status = evaluate_stage(
@@ -274,8 +306,29 @@ class TestStageAndPromote(SentenceWorkflowTestCase):
         )
         self.assertTrue(status.complete)
 
-        # The sentence now points at the lemma, which is what lets the next
-        # linking pass resolve the word.
+        # The word itself now carries the lemma, and the link is gone with the
+        # pending row that owned it.
+        word = self.session.query(SentenceWord).filter(SentenceWord.english_text == "dog").one()
+        self.assertEqual(word.lemma_id, lemma.id)
+        self.assertEqual(self.session.query(SentencePendingImport).count(), 0)
+
+    def test_promote_complete_for_a_legacy_hint_release(self) -> None:
+        """The same holds for a word staged before the link table existed."""
+        pending = self.stage_word_the_old_way("dog")
+        lemma = Lemma(
+            lemma_text="dog", definition_text="an animal", pos_type="noun", guid="N01_002"
+        )
+        self.session.add(lemma)
+        self.session.commit()
+
+        delete_pending_import(self.session, pending, lemma_id=lemma.id)
+        self.session.commit()
+
+        status = evaluate_stage(
+            self.session, self.sentence.id, SentenceImportStage.PROMOTE, spec=self.spec
+        )
+        self.assertTrue(status.complete)
+
         hint = self.session.query(SentenceWordHint).one()
         self.assertEqual(hint.lemma_id, lemma.id)
         self.assertIsNone(hint.pending_import_id)

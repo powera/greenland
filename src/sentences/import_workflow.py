@@ -40,12 +40,13 @@ from sqlalchemy.orm import Session
 
 from langtools.grammatical_words import is_function_word, is_grammatical_word
 from sentences.translate_and_decompose import DEFAULT_MODEL, PHASE3_MIN_LANGUAGES
-from storage.models.imports import PendingImport
-from storage.models.schema import (
-    Sentence,
-    SentenceTranslation,
-    SentenceWord,
-    SentenceWordHint,
+from storage.crud.concept import get_concept_by_slug
+from storage.models.concept import normalize_concept_slug
+from storage.models.imports import SentencePendingImport
+from storage.models.schema import Sentence, SentenceTranslation, SentenceWord
+from words.pending_imports.sentence_links import (
+    pending_import_ids_for_sentence,
+    staged_texts_for_sentence,
 )
 
 # Parts of speech that map onto a lemma's ``pos_type``. A word whose POS is not
@@ -224,15 +225,30 @@ def linkable_words(
     return [word for word in rows if should_carry_lemma(word, language_code)]
 
 
+def is_known_concept(session: Session, english_text: str) -> bool:
+    """True when this word is already an encyclopedia entry.
+
+    A pending import approved as a concept becomes neither a lemma nor a name,
+    so the sentence word that staged it has nothing to point at. Treating a
+    known concept as settled is what keeps such a sentence from staging the
+    term again on every pass and never reaching a complete LINK.
+    """
+    slug = normalize_concept_slug(english_text)
+    if not slug:
+        return False
+    return get_concept_by_slug(session, slug) is not None
+
+
 def unlinked_words(
     session: Session, sentence_id: int, language_code: str = "en"
 ) -> List[SentenceWord]:
-    """Linkable words that still have neither a lemma nor a name attached."""
-    return [
+    """Linkable words that still have neither a lemma, a name, nor a concept."""
+    candidates = [
         word
         for word in linkable_words(session, sentence_id, language_code)
         if word.lemma_id is None and word.name_id is None
     ]
+    return [word for word in candidates if not is_known_concept(session, word.english_text or "")]
 
 
 # ---------------------------------------------------------------------- #
@@ -359,21 +375,12 @@ def _evaluate_link(session: Session, sentence_id: int, spec: SentenceImportSpec)
 def _evaluate_stage(session: Session, sentence_id: int, spec: SentenceImportSpec) -> StageStatus:
     """Complete when every word LINK could not resolve has been staged.
 
-    A word is "staged" when a hint row for the sentence carries its
-    ``pending_import_id``. Matching is by lowercased English text rather than by
-    position, because hint positions are slot-shaped while sentence-word
-    positions are token-shaped.
+    A word is "staged" when a ``SentencePendingImport`` row ties this sentence
+    to a pending import for it. Matching is by lowercased English text rather
+    than by position, because the link records a slot's gloss while
+    sentence-word positions are token-shaped.
     """
-    staged_texts = {
-        str(row[0]).strip().lower()
-        for row in session.query(SentenceWordHint.english_text)
-        .filter(
-            SentenceWordHint.sentence_id == sentence_id,
-            SentenceWordHint.pending_import_id.isnot(None),
-        )
-        .all()
-        if row[0]
-    }
+    staged_texts = staged_texts_for_sentence(session, sentence_id)
 
     unstaged: List[str] = []
     for language_code in spec.decompose_languages:
@@ -389,35 +396,11 @@ def _evaluate_stage(session: Session, sentence_id: int, spec: SentenceImportSpec
     )
 
 
-def _outstanding_pending_import_ids(session: Session, sentence_id: int) -> List[int]:
-    """Pending imports this sentence is waiting on that still exist.
-
-    ``approve_pending_import`` deletes the row on success, so a hint pointing at
-    a row that is gone is a promotion that already happened.
-    """
-    rows = (
-        session.query(SentenceWordHint.pending_import_id)
-        .filter(
-            SentenceWordHint.sentence_id == sentence_id,
-            SentenceWordHint.pending_import_id.isnot(None),
-        )
-        .all()
-    )
-    candidate_ids = {int(row[0]) for row in rows if row[0] is not None}
-    if not candidate_ids:
-        return []
-
-    alive = {
-        int(row[0])
-        for row in session.query(PendingImport.id)
-        .filter(PendingImport.id.in_(sorted(candidate_ids)))
-        .all()
-    }
-    return sorted(alive)
-
-
 def _evaluate_promote(session: Session, sentence_id: int) -> StageStatus:
-    outstanding = _outstanding_pending_import_ids(session, sentence_id)
+    # ``approve_pending_import`` deletes the row on success, and
+    # ``pending_import_ids_for_sentence`` reports only rows that still exist,
+    # so a link to a row that is gone is a promotion that already happened.
+    outstanding = pending_import_ids_for_sentence(session, sentence_id)
     return StageStatus(
         stage=SentenceImportStage.PROMOTE,
         complete=not outstanding,
@@ -533,11 +516,8 @@ def progress_fingerprint(session: Session, sentence_id: int) -> Tuple[int, int, 
         or 0
     )
     staged = (
-        session.query(func.count(SentenceWordHint.id))
-        .filter(
-            SentenceWordHint.sentence_id == sentence_id,
-            SentenceWordHint.pending_import_id.isnot(None),
-        )
+        session.query(func.count(SentencePendingImport.id))
+        .filter(SentencePendingImport.sentence_id == sentence_id)
         .scalar()
         or 0
     )
