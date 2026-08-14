@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from idioms.generation import generate_idioms_for_language
-from workqueue.tools import workqueue_payload_handler
+from workqueue.tools import build_default_config, workqueue_payload_handler
 
 
 def do_generate_idioms(
@@ -14,12 +14,15 @@ def do_generate_idioms(
     count: int = 10,
     theme: Optional[str] = None,
     difficulty_level: int = -1,
+    model: Optional[str] = None,
     **_: Any,
 ) -> str:
     """Generate and store new idioms for one source language."""
+    config = build_default_config()
     result = generate_idioms_for_language(
         session,
         language_code,
+        config=config.with_model(model) if model else config,
         count=count,
         theme=theme,
         difficulty_level=difficulty_level,
@@ -45,12 +48,14 @@ def handle_idioms_generate(
     count: int = 10,
     theme: Optional[str] = None,
     difficulty_level: int = -1,
+    model: Optional[str] = None,
     **_: Any,
 ) -> str:
     """Workqueue wrapper for idiom generation.
 
-    Accepts and ignores extra payload kwargs (``model``, etc.) added by the
-    route so it is tolerant of payload changes.
+    Accepts and ignores any other extra payload kwargs added by the route so it
+    is tolerant of payload changes. ``model`` is NOT among them: dropping it
+    would run the operator's queued job on the worker's default model.
     """
     return do_generate_idioms(
         session=session,
@@ -58,4 +63,5 @@ def handle_idioms_generate(
         count=count,
         theme=theme,
         difficulty_level=difficulty_level,
+        model=model,
     )

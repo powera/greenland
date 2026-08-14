@@ -263,3 +263,48 @@ def link_sentence_words(
     session.flush()
     logger.info("Linked sentence %s: %s", sentence_id, outcome.summary())
     return outcome
+
+
+def release_sentence_word_hints(
+    session: Session, pending_import_id: int, lemma_id: Optional[int] = None
+) -> int:
+    """Detach sentence word hints before their pending import row is deleted.
+
+    ``SentenceWordHint.pending_import_id`` is a foreign key with no ON DELETE
+    behavior, so deleting a referenced pending import raises on a backend that
+    enforces foreign keys, and leaves a hint pointing at nothing on one that
+    does not. A dangling hint is worse than the error: ``_evaluate_stage``
+    counts it as staged, so the sentence reports STAGE complete forever and is
+    never re-staged.
+
+    Every path that deletes a ``PendingImport`` must call this first --
+    approval, rejection, and the "Use As Synonym" path alike.
+
+    A hint that can name a lemma is repointed at it, which is what lets the
+    sentence link the word on its next pass. One that cannot is removed, since
+    ``ck_word_hint_has_reference`` forbids a row referencing nothing.
+
+    Args:
+        session: Database session. Not committed; the caller owns the
+            transaction.
+        pending_import_id: The pending row about to be deleted.
+        lemma_id: Lemma the pending became, when it became one. Rejection
+            passes None, since the word resolved to no lemma at all.
+
+    Returns:
+        The number of hint rows touched.
+    """
+    hints = (
+        session.query(SentenceWordHint)
+        .filter(SentenceWordHint.pending_import_id == pending_import_id)
+        .all()
+    )
+    for hint in hints:
+        hint.pending_import_id = None
+        if lemma_id is not None:
+            hint.lemma_id = lemma_id
+        elif hint.lemma_id is None and hint.name_id is None:
+            session.delete(hint)
+    if hints:
+        session.flush()
+    return len(hints)

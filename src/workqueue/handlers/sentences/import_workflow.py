@@ -98,26 +98,72 @@ def _run_translate(session: Any, sentence_id: int, spec: SentenceImportSpec, sta
     return f"translate: +{len(produced)} language(s)"
 
 
-def _run_decompose(session: Any, sentence_id: int, spec: SentenceImportSpec, status: Any) -> str:
+def _run_decompose(
+    session: Any,
+    sentence_id: int,
+    spec: SentenceImportSpec,
+    status: Any,
+    client: UnifiedLLMClient,
+) -> str:
     """Decompose languages that have a translation but no word rows.
 
     ``translate_sentence`` decomposes what it translates, so this only fires
-    when a translation arrived by some other route.
+    when a translation arrived by some other route -- an import, or a human
+    curating the text by hand. It therefore runs Phase 2/3 against the stored
+    translations only: going back through ``translate_sentence`` would re-run
+    Phase 1 and overwrite that stored text (including rows a human has marked
+    verified) with a fresh machine translation.
     """
-    from sentences.translation import translate_sentence
+    from sentences.translate_and_decompose import decompose_with_existing_translations
 
     missing: List[str] = list(status.detail.get("missing_languages") or [])
     if not missing:
         return "decompose: nothing missing"
 
-    translate_sentence(
-        sentence_id,
-        missing,
-        session,
+    source_language = _source_language(session, sentence_id)
+    stored: Dict[str, str] = {
+        str(row[0]): str(row[1])
+        for row in session.query(
+            SentenceTranslation.language_code, SentenceTranslation.translation_text
+        )
+        .filter(SentenceTranslation.sentence_id == sentence_id)
+        .all()
+        if row[0] and row[1]
+    }
+    source_text = stored.pop(source_language, "")
+
+    result = decompose_with_existing_translations(
+        sentence_text=source_text,
+        source_language=source_language,
+        translations=stored,
+        session=session,
+        client=client,
+        decompose_languages=missing,
         model=spec.model,
-        source_language=_source_language(session, sentence_id),
     )
-    return f"decompose: {len(missing)} language(s)"
+
+    # Persist word rows only. Passing the translation texts back through
+    # store_translation_results would rewrite them from the decomposition
+    # output, which is exactly what this stage must not do.
+    word_payload: Dict[str, Any] = {}
+    decomposed: List[str] = []
+    for language_code, decomposition in result.decompositions.items():
+        if not decomposition.success:
+            logger.warning(
+                "Sentence %s: decomposition failed for %s: %s",
+                sentence_id,
+                language_code,
+                decomposition.error,
+            )
+            continue
+        word_payload[f"words_{language_code}"] = list(decomposition.words)
+        decomposed.append(language_code)
+
+    if word_payload:
+        from sentences.translation import store_translation_results
+
+        store_translation_results(sentence_id, word_payload, session)
+    return f"decompose: {len(decomposed)} language(s)"
 
 
 def _run_annotate(
@@ -358,7 +404,8 @@ def do_import_sentence(
         if stage is SentenceImportStage.TRANSLATE:
             steps.append(_run_translate(session, sentence_id, spec, status))
         elif stage is SentenceImportStage.DECOMPOSE:
-            steps.append(_run_decompose(session, sentence_id, spec, status))
+            assert client is not None
+            steps.append(_run_decompose(session, sentence_id, spec, status, client))
         elif stage is SentenceImportStage.ANNOTATE:
             assert client is not None
             steps.append(_run_annotate(session, sentence_id, spec, client))

@@ -158,29 +158,12 @@ def _release_sentence_word_hints(
 ) -> None:
     """Detach sentence word hints before the pending import row is deleted.
 
-    ``SentenceWordHint.pending_import_id`` is a foreign key with no ON DELETE
-    behavior, so deleting a referenced pending import raises. Sentences staged
-    by the import workflow hold exactly such references.
-
-    A hint that can name the new lemma is repointed at it -- that is what lets
-    the sentence link the word on its next pass. One that cannot is removed,
-    since ``ck_word_hint_has_reference`` forbids a row referencing nothing.
+    Thin wrapper over :func:`sentences.link_writer.release_sentence_word_hints`,
+    which every pending-import deletion path shares.
     """
-    from storage.models.schema import SentenceWordHint
+    from sentences.link_writer import release_sentence_word_hints
 
-    hints = (
-        session.query(SentenceWordHint)
-        .filter(SentenceWordHint.pending_import_id == pending_import_id)
-        .all()
-    )
-    for hint in hints:
-        hint.pending_import_id = None
-        if lemma_id is not None:
-            hint.lemma_id = lemma_id
-        elif hint.lemma_id is None and hint.name_id is None:
-            session.delete(hint)
-    if hints:
-        session.flush()
+    release_sentence_word_hints(session, pending_import_id, lemma_id)
 
 
 def approve_pending_import(
@@ -440,6 +423,11 @@ def reject_pending_import(
                 )
                 session.add(exclusion)
                 logger.info(f"Added '{word}' to exclusions")
+
+        # A rejected word becomes no lemma, so any sentence waiting on it has
+        # its hint dropped rather than repointed. Must happen before the delete:
+        # the hint's foreign key has no ON DELETE behavior.
+        _release_sentence_word_hints(session, pending_import_id, None)
 
         # Delete the pending import
         session.delete(pending)

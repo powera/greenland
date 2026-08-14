@@ -9,7 +9,7 @@ from idioms.generation import (
     validate_equivalents_for_idiom,
 )
 from workqueue.handlers.idioms.tools import get_idiom_or_raise
-from workqueue.tools import workqueue_payload_handler
+from workqueue.tools import build_default_config, workqueue_payload_handler
 
 
 def do_populate_equivalents(
@@ -17,13 +17,16 @@ def do_populate_equivalents(
     idiom_id: int,
     target_languages: Optional[List[str]] = None,
     only_missing: bool = True,
+    model: Optional[str] = None,
     **_: Any,
 ) -> str:
     """Fill in missing cross-language equivalents for one idiom."""
     idiom = get_idiom_or_raise(session, idiom_id)
+    config = build_default_config()
     result = populate_equivalents_for_idiom(
         session,
         idiom,
+        config=config.with_model(model) if model else config,
         target_languages=target_languages,
         only_missing=only_missing,
     )
@@ -38,14 +41,19 @@ def do_populate_equivalents(
     return f"Stored {result.get('stored', 0)} equivalent(s) for {idiom.expression!r}"
 
 
-def do_validate_equivalents(session: Any, idiom_id: int, **_: Any) -> str:
+def do_validate_equivalents(
+    session: Any, idiom_id: int, model: Optional[str] = None, **_: Any
+) -> str:
     """Audit one idiom's stored equivalents and report findings.
 
     Read-only: findings are returned in the task result for a human to act on.
     Nothing is written, so there is no commit.
     """
     idiom = get_idiom_or_raise(session, idiom_id)
-    result = validate_equivalents_for_idiom(session, idiom)
+    config = build_default_config()
+    result = validate_equivalents_for_idiom(
+        session, idiom, config=config.with_model(model) if model else config
+    )
 
     if not result.get("success"):
         raise RuntimeError(result.get("error", "Unknown idiom validation error"))
@@ -73,12 +81,14 @@ def handle_idioms_equivalents_populate(
     idiom_ids: Optional[List[int]] = None,
     target_languages: Optional[List[str]] = None,
     only_missing: bool = True,
+    model: Optional[str] = None,
     **_: Any,
 ) -> str:
     """Workqueue wrapper for idiom equivalent population.
 
-    Accepts and ignores extra payload kwargs (``model``, etc.) added by the
-    route so it is tolerant of payload changes.
+    Accepts and ignores any other extra payload kwargs added by the route so it
+    is tolerant of payload changes. ``model`` is NOT among them: dropping it
+    would run the operator's queued job on the worker's default model.
     """
     if idiom_ids:
         results = [
@@ -87,6 +97,7 @@ def handle_idioms_equivalents_populate(
                 idiom_id=queued_idiom_id,
                 target_languages=target_languages,
                 only_missing=only_missing,
+                model=model,
             )
             for queued_idiom_id in idiom_ids
         ]
@@ -98,6 +109,7 @@ def handle_idioms_equivalents_populate(
         idiom_id=idiom_id,
         target_languages=target_languages,
         only_missing=only_missing,
+        model=model,
     )
 
 
@@ -106,15 +118,16 @@ def handle_idioms_equivalents_validate(
     session: Any,
     idiom_id: Optional[int] = None,
     idiom_ids: Optional[List[int]] = None,
+    model: Optional[str] = None,
     **_: Any,
 ) -> str:
     """Workqueue wrapper for idiom equivalent auditing."""
     if idiom_ids:
         results = [
-            do_validate_equivalents(session=session, idiom_id=queued_idiom_id)
+            do_validate_equivalents(session=session, idiom_id=queued_idiom_id, model=model)
             for queued_idiom_id in idiom_ids
         ]
         return f"Batch completed for {len(idiom_ids)} idioms: " + "; ".join(results)
     if idiom_id is None:
         raise ValueError("idiom_id or idiom_ids is required")
-    return do_validate_equivalents(session=session, idiom_id=idiom_id)
+    return do_validate_equivalents(session=session, idiom_id=idiom_id, model=model)
