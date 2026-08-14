@@ -556,7 +556,7 @@ def generate_sentences(lemma_id: int) -> ResponseReturnValue:
 
     try:
         # Import Buivolas agent for sentence creation
-        from agents.buivolas import BuivolasAgent
+        from sentences.generation import SentenceGenerationService
         from storage.models.schema import Sentence
 
         # Initialize agent
@@ -566,7 +566,7 @@ def generate_sentences(lemma_id: int) -> ResponseReturnValue:
             model=constants.DEFAULT_MODEL,
             debug=Config.DEBUG,
         )
-        agent = BuivolasAgent(config=config)
+        agent = SentenceGenerationService(config=config)
 
         # Generate sentences based on mode
         if generation_mode == "guided":

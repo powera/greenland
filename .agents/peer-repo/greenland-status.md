@@ -40,10 +40,19 @@ Greenland uses a collection of **specialized processing agents** (named after Li
 
 **Export & Utilities:**
 - **ungurys** - WireWord export generation
-- **bebras** - Sentence-word link management
-- **zvirblis** - Sentence generation
+- **bebras** - Database integrity and compatibility entry points
+- **buivolas** - Discovers pattern/LLM sentence generation work
+- **zvirblis** - Discovers missing sentence translations
+- **sarka** - Plans bulk vocabulary-driven conversations
 
-All agents follow standardized command-line interfaces via `src/agents/common_args.py`, supporting consistent options like `--guid`, `--db-path`, `--model`, `--limit`, `--dry-run`, `--debug`, and `--yes`.
+Sentence and conversation implementations live under `src/sentences/`.
+The animal-named CLIs are queue-first wrappers; workers execute canonical
+function-named tasks such as `sentences.examples.generate`,
+`sentences.translate`, and `conversations.generate`.
+
+Agent CLIs use shared argument helpers from `src/agents/common/common_args.py`.
+Sentence finders enqueue by default and accept `--execute-inline` for deliberate
+foreground debugging.
 
 ### Web Interface (Barsukas)
 

@@ -1,12 +1,17 @@
 # Agents
 
-Autonomous agents for database maintenance and data processing. Named after Lithuanian animals. Designed for scheduled jobs or CI/CD pipelines.
+Animal-named compatibility CLIs for database work discovery and maintenance.
+Long-running sentence execution lives in `src/sentences/` and is dispatched by
+capability-named workqueue handlers.
 
 Run agents with: `PYTHONPATH=src python src/agents/<agent>.py --help`
 
 ## Architecture direction
 
-As of the queue-first transition, agent CLIs are moving toward **work discovery and enqueueing**, while execution is centralized in `src/workqueue/handlers/`. See `WORKQUEUE_REFACTOR_PLAN.md` for the migration plan and target architecture.
+Sentence agents are **work discovery and enqueueing** entry points. Their
+implementations live in `src/sentences/`; `src/workqueue/handlers/` contains
+thin worker adapters. Old imports remain available for compatibility, but new
+code should import `sentences.*` directly.
 
 ## Quick Reference
 
@@ -21,9 +26,9 @@ As of the queue-first transition, agent CLIs are moving toward **work discovery 
 | **papuga** | parrot | Pronunciation validation/generation (IPA, phonetic) |
 | **sernas** | boar | Synonym and alternative form generator |
 | **lape** | fox | Grammar facts (measure words, gender, declension class) |
-| **zvirblis** | sparrow | Example sentence generator |
-| **buivolas** | buffalo | Example sentences (multi-language) |
-| **sarka** | magpie | Dialog/conversation generator (bulk, keyword-driven) |
+| **zvirblis** | sparrow | Finds translations missing from existing sentences |
+| **buivolas** | buffalo | Finds pattern or LLM example-generation work |
+| **sarka** | magpie | Plans bulk, vocabulary-driven conversations |
 | **povas** | peacock | HTML report generator |
 | **ungurys** | eel | Compatibility wrapper for `exports.wireword` |
 | **elnias** | deer | Bootstrap export (minimal format) |
@@ -162,11 +167,31 @@ lape.py --task verb-reflexivity --language fr   # French reflexive verbs
 ### zvirblis (Sentences)
 
 ```bash
-zvirblis.py --guid N07_008            # Generate sentences for specific word
-zvirblis.py --level 3 --limit 10      # Generate for level 3 nouns
-zvirblis.py --num-sentences 5         # Generate 5 sentences per word
-zvirblis.py --languages en lt zh      # Specify target languages
+zvirblis.py --guid N07_008 --language lt zh fr
+zvirblis.py --level 3 --translation-limit 5
+zvirblis.py --guid N07_008 --use-translategemma
+zvirblis.py submit-batch --languages lt zh fr --limit 100
 ```
+
+Žvirblis does not create examples. It finds existing sentences linked to the
+selected lemmas and queues `sentences.translate` (rich structured output) or
+`sentences.translate.simple` (text-only TranslateGemma output). Batch discovery
+queues `sentences.translate.batch_submit`. Add `--execute-inline` only for an
+intentional foreground run.
+
+### buivolas (Sentence examples)
+
+```bash
+python -m agents.buivolas --task generate-candidates --all-patterns --limit 100
+python -m agents.buivolas --task generate-sentences --mode pattern --guid N06_001
+python -m agents.buivolas --task generate-sentences --mode llm --level 3 --limit 10
+python -m agents.buivolas --task generate-sentences --mode guided --guid N06_001
+```
+
+Buivolas discovers pattern or lemma targets and queues
+`sentences.patterns.generate` or `sentences.examples.generate`. The generated
+rows are English-first; other languages are added by the sentence translation
+pipeline. Use `--execute-inline` for debugging only.
 
 ### sarka (Dialogs)
 
@@ -180,6 +205,11 @@ sarka.py --generate --max-level 5 --num-sentences 10
 sarka.py --show-words --level 3               # What vocabulary is available
 sarka.py --stats                              # Conversation counts by level
 ```
+
+Generation and definition modes enqueue `conversations.generate` and
+`conversations.definitions.generate` by default. Use `--execute-inline` for a
+deliberate foreground LLM run. `--show-words`, `--view`, and `--stats` remain
+read-only and execute immediately.
 
 For a *specific* scene ("buying tomatoes at the grocery store") rather than
 level coverage, use the Barsukas-first flow instead: Conversations → New

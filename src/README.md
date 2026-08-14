@@ -51,10 +51,10 @@ usage and arguments.
 | vilkas | Wolf | Word forms checker |
 | sernas | Boar | Synonym/alternative form generator |
 | papuga | Parrot | Pronunciation validation |
-| zvirblis | Sparrow | Example sentence generator |
-| buivolas | Water Buffalo | Pattern-based sentence generator |
+| zvirblis | Sparrow | Finds sentence translation work |
+| buivolas | Water Buffalo | Finds pattern/LLM sentence generation work |
 | lape | Fox | Grammar facts generator |
-| sarka | Magpie | Conversation sentence generator |
+| sarka | Magpie | Plans vocabulary-driven conversation work |
 | strazdas | Thrush | eSpeak-NG audio generation |
 | vieversys | Lark | OpenAI TTS audio generation |
 | povas | Peacock | HTML report generator |

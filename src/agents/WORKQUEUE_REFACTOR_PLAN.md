@@ -1,5 +1,11 @@
 # Agents → Work Discovery Refactor Plan
 
+> Status note (August 2026): the sentence-related Buivolas, Žvirblis, and
+> Šarka entry points now follow the target split. Their implementations live in
+> `src/sentences`, their CLIs enqueue canonical tasks by default, and inline
+> execution requires `--execute-inline`. Legacy task/import aliases remain for
+> persisted work and external callers.
+
 ## Why this refactor is needed
 
 The current codebase mixes two models:

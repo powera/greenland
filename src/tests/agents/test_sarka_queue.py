@@ -6,9 +6,16 @@ from unittest.mock import Mock, patch
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from agents.sarka.cli import enqueue_definition_work, enqueue_level_work, get_sarka_queue_stats
+from sentences.conversation_cli import (
+    enqueue_definition_work,
+    enqueue_level_work,
+    get_conversation_queue_stats,
+)
 from storage.models.schema import Base, BarsukasTask
-from workqueue.handlers.sarka import handle_generate_conversation, handle_generate_definition
+from workqueue.handlers.conversations.generation import (
+    handle_conversations_definitions_generate,
+    handle_conversations_generate,
+)
 from workqueue.registry import TASK_HANDLERS
 from workqueue.task_queue import TaskStatus, TaskType
 
@@ -22,8 +29,8 @@ def test_enqueue_level_work_uses_canonical_task_and_dedup_names() -> None:
     session = Mock()
 
     with (
-        patch("agents.sarka.cli.get_active_task", return_value=None),
-        patch("agents.sarka.cli.enqueue_task") as enqueue_mock,
+        patch("sentences.conversation_cli.get_active_task", return_value=None),
+        patch("sentences.conversation_cli.enqueue_task") as enqueue_mock,
     ):
         enqueue_mock.return_value.created = True
         result = enqueue_level_work(agent, session, level=3, num_conversations=1, num_sentences=8)
@@ -45,8 +52,8 @@ def test_enqueue_definition_work_uses_canonical_task_and_dedup_names() -> None:
     session = Mock()
 
     with (
-        patch("agents.sarka.cli.get_active_task", return_value=None),
-        patch("agents.sarka.cli.enqueue_task") as enqueue_mock,
+        patch("sentences.conversation_cli.get_active_task", return_value=None),
+        patch("sentences.conversation_cli.enqueue_task") as enqueue_mock,
     ):
         enqueue_mock.return_value.created = True
         result = enqueue_definition_work(agent, session, level=2, num_pairs=1)
@@ -60,10 +67,13 @@ def test_enqueue_definition_work_uses_canonical_task_and_dedup_names() -> None:
 
 def test_registry_keeps_legacy_sarka_task_aliases() -> None:
     """Already-persisted Sarka tasks continue to dispatch after the rename."""
-    assert TASK_HANDLERS[TaskType.CONVERSATIONS_GENERATE] is handle_generate_conversation
-    assert TASK_HANDLERS["sarka_generate_conversation"] is handle_generate_conversation
-    assert TASK_HANDLERS[TaskType.CONVERSATIONS_DEFINITIONS] is handle_generate_definition
-    assert TASK_HANDLERS["sarka_generate_definition"] is handle_generate_definition
+    assert TASK_HANDLERS[TaskType.CONVERSATIONS_GENERATE] is handle_conversations_generate
+    assert TASK_HANDLERS["sarka_generate_conversation"] is handle_conversations_generate
+    assert (
+        TASK_HANDLERS[TaskType.CONVERSATIONS_DEFINITIONS]
+        is handle_conversations_definitions_generate
+    )
+    assert TASK_HANDLERS["sarka_generate_definition"] is handle_conversations_definitions_generate
 
 
 def test_queue_stats_include_canonical_and_legacy_conversation_tasks() -> None:
@@ -93,7 +103,7 @@ def test_queue_stats_include_canonical_and_legacy_conversation_tasks() -> None:
         )
         session.flush()
 
-        stats = get_sarka_queue_stats(session)
+        stats = get_conversation_queue_stats(session)
 
         assert stats == {"pending": 2, "running": 0, "completed": 1, "failed": 0}
     finally:

@@ -110,23 +110,39 @@ All agents are Lithuanian animal names and live in `src/agents/`.
 
 ---
 
-### Sentence Generation Agents
+### Sentence and Conversation Work Finders
 
 #### Žvirblis (Sparrow)
 - **Animal**: Sparrow
-- **Purpose**: Sentence generation - "small but prolific, creating many examples"
-- **Dependencies**: Voras (needs translations for target languages)
-- **Outputs**: Example sentences with grammatical analysis in multiple languages
+- **Purpose**: Find existing linked sentences that lack requested translations
+- **Outputs**: Queued `sentences.translate` or `sentences.translate.simple` tasks
 - **Key Functions**:
-  - Generate contextual sentences featuring vocabulary words
-  - Create translations across languages
-  - Analyze grammatical structure
-  - Calculate minimum difficulty level
+  - Select a lemma by GUID or difficulty level
+  - Count already-complete sentences toward a requested limit
+  - Queue rich translation/decomposition or text-only translation
+
+#### Buivolas (Buffalo)
+- **Animal**: Buffalo
+- **Purpose**: Find pattern or LLM example-generation work
+- **Outputs**: Queued `sentences.patterns.generate` or `sentences.examples.generate` tasks
+- **Key Functions**:
+  - Select reusable patterns or compatible lemmas
+  - Choose pattern, basic LLM, or vocabulary-guided generation
+  - Store English-first sentences with lemma hints when the worker executes
+
+#### Šarka (Magpie)
+- **Animal**: Magpie
+- **Purpose**: Plan bulk vocabulary-driven dialogs and definition narratives
+- **Outputs**: Queued `conversations.generate` or `conversations.definitions.generate` tasks
+- **Key Functions**:
+  - Balance word reuse across a difficulty level
+  - Optionally group words by category
+  - Keep generation off the web/CLI request path
 
 #### Bebras (Beaver)
 - **Animal**: Beaver
 - **Purpose**: Sentence-word link management - "industrious builder of connections"
-- **Dependencies**: Žvirblis (needs generated sentences)
+- **Dependencies**: Stored sentence data
 - **Outputs**: Links between sentences and vocabulary words, database integrity
 - **Key Functions**:
   - Link sentences to vocabulary via GUIDs
@@ -213,7 +229,7 @@ Pradzia → Voras (Translations)
   ├→ Vilkas (Word Forms)
   ├→ Lape (Grammar Facts)
   ├→ Šernas (Synonyms)
-  └→ Žvirblis (Sentence Generation)
+  └→ Buivolas (Discover Sentence Example Work)
 ```
 
 ### Phase 3: Validation (parallel with enrichment)
@@ -225,7 +241,7 @@ Pradzia → Lokys (Lemma Validation)
 
 ### Phase 4: Sentence Linking
 ```
-Žvirblis → Bebras (Link Sentences to Vocabulary)
+Generated/Imported Sentences → Sentence Linking and Verification
 ```
 
 ### Phase 5: Audio Generation

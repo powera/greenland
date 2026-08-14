@@ -203,13 +203,29 @@ if __name__ == '__main__':
     sys.exit(main())
 ```
 
-**Examples:** `lokys.py`, `papuga.py`, `pradzia.py`, `ungurys.py`, `zvirblis.py`
+**Examples:** `lokys.py`, `papuga.py`, `pradzia.py`, `ungurys.py`
 
 ---
 
-### Multi-Module Agents (Complex)
+### Compatibility CLIs for capability packages
 
-For agents with substantial logic, refactor into a subdirectory:
+When the behavior belongs to a domain package such as `sentences`, `words`, or
+`exports`, put the implementation and canonical CLI there. The animal-named
+module should only re-export the public compatibility surface:
+
+```python
+from sentences.generation_cli import get_argument_parser, main
+
+__all__ = ["get_argument_parser", "main"]
+```
+
+Production callers import the domain package directly. Do not import an animal
+wrapper merely to reach its implementation.
+
+### Multi-Module Agents (legacy pattern)
+
+Use an agent subdirectory only when the logic is genuinely agent-specific.
+Capability logic should instead move to its domain package as described above.
 
 ```
 agents/
