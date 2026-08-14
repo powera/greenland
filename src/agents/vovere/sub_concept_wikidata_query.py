@@ -27,7 +27,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 from agents.common.common_args import add_backend_args, add_common_args, get_data_source_config
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import DataSourceConfig
-from storage.concept_service import file_sub_concept_from_qid
+from concepts.sub_concepts import file_sub_concept_from_qid
 from storage.models.concept import ALL_SUB_CONCEPT_CATEGORIES
 from storage.wikidata import normalize_qid, query_wikidata_sparql
 

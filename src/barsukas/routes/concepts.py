@@ -28,13 +28,13 @@ from flask import (
 from flask.typing import ResponseReturnValue
 
 from barsukas.helpers.wikilinks import get_resolved_link_targets, render_concept_body
-from storage.backend.config import DataSourceConfig
-from storage.concept_service import (
-    create_concept_from_qid,
+from concepts.pipeline import create_concept_from_qid
+from concepts.sub_concepts import (
     demote_concept_to_sub,
     file_sub_concept_from_qid,
     promote_sub_concept,
 )
+from storage.backend.config import DataSourceConfig
 from storage.crud.concept import (
     create_concept,
     create_sub_concept,
@@ -174,13 +174,13 @@ def _generate_body(title: str, summary: str, sources: List[Dict[str, Any]], mode
 
 def _body_generator_for_model(model: str) -> Callable[[str, str, List[Dict[str, Any]]], str]:
     """Return a (title, summary, sources) -> body callable backed by Vovere."""
-    from agents.vovere import VovereAgent
+    from concepts.generate.entry import ConceptEntryGenerator
 
     config = _get_config().with_model(model)
-    agent = VovereAgent(config)
+    generator = ConceptEntryGenerator(config)
 
     def generate(title: str, summary: str, sources: List[Dict[str, Any]]) -> str:
-        return agent.generate_body(title, summary, sources)
+        return generator.generate_body(title, summary, sources)
 
     return generate
 

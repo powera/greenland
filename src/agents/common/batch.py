@@ -332,7 +332,7 @@ def _apply_concept_seed_bodies(
     Returns:
         ``{"processed", "created", "skipped", "failed"}`` counts.
     """
-    from storage.concept_service import create_concept_from_seed
+    from concepts.persist import create_concept_from_seed
     from storage.wikidata import WikidataConceptSeed
 
     results = {"processed": 0, "created": 0, "skipped": 0, "failed": 0}

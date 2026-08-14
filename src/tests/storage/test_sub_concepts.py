@@ -13,8 +13,8 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from storage.concept_service import (
-    create_concept_from_qid,
+from concepts.pipeline import create_concept_from_qid
+from concepts.sub_concepts import (
     demote_concept_to_sub,
     file_sub_concept_from_qid,
     promote_sub_concept,
@@ -130,7 +130,7 @@ def test_delete_sub_concept_detaches_index_rows(session: Session) -> None:
 
 def test_file_sub_concept_from_qid_files_and_is_idempotent(monkeypatch, session: Session) -> None:  # type: ignore[no-untyped-def]
     monkeypatch.setattr(
-        "storage.concept_service.fetch_wikidata_concept_seed",
+        "concepts.sub_concepts.fetch_wikidata_concept_seed",
         lambda qid, include_regional_wikis=False: _seed(qid, "Sicilian Defence", "chess opening"),
     )
 
@@ -151,13 +151,13 @@ def test_file_sub_concept_from_qid_rejects_bad_inputs(monkeypatch, session: Sess
     assert file_sub_concept_from_qid(session, "nope", "chess_concept").status == "failed"
 
     monkeypatch.setattr(
-        "storage.concept_service.fetch_wikidata_concept_seed",
+        "concepts.sub_concepts.fetch_wikidata_concept_seed",
         lambda qid, include_regional_wikis=False: None,
     )
     assert file_sub_concept_from_qid(session, "Q1", "chess_concept").status == "unresolved"
 
     monkeypatch.setattr(
-        "storage.concept_service.fetch_wikidata_concept_seed",
+        "concepts.sub_concepts.fetch_wikidata_concept_seed",
         lambda qid, include_regional_wikis=False: _seed(qid, "Some Topic"),
     )
     assert file_sub_concept_from_qid(session, "Q1", "not_a_category").status == "failed"
@@ -352,7 +352,7 @@ def test_create_concept_from_qid_reports_excluded_qids(session: Session) -> None
 
 def test_file_sub_concept_from_qid_accepts_excluded_category(monkeypatch, session: Session) -> None:  # type: ignore[no-untyped-def]
     monkeypatch.setattr(
-        "storage.concept_service.fetch_wikidata_concept_seed",
+        "concepts.sub_concepts.fetch_wikidata_concept_seed",
         lambda qid, include_regional_wikis=False: _seed(qid, "Principality of Sealand"),
     )
 

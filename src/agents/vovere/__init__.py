@@ -12,6 +12,6 @@ Vovere body -> concept-creation pipeline:
 from ``agents/vovere.py`` to this package.
 """
 
-from agents.vovere.vovere import VovereAgent, html_to_text
+from concepts.generate.entry import VovereAgent, html_to_text
 
 __all__ = ["VovereAgent", "html_to_text"]
