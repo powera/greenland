@@ -20,6 +20,7 @@ src/
 ├── benchmarks/            # LLM benchmark suite
 ├── exports/               # Export services and formats
 │   └── wireword/          # WireWord format export
+├── reports/               # Read-only database coverage and distribution reports
 ├── util/                  # General utilities
 ├── langtools/             # Language processing tools
 ├── ipa/                   # IPA pronunciation utilities

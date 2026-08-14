@@ -26,7 +26,8 @@ POS subtype classification, and form generation (`client.py`,
 `processor.py`, `generate_forms_*.py`, `wiktionary_forms.py`).
 
 ### `dictionary/`
-Word list export and review tools (`export_wordlist.py`, `reviewer.py`).
+Word list export tooling (`export_wordlist.py`). Interactive review is handled
+by Barsukas.
 
 ### `tools/`
 CLI utilities: difficulty override management, release reports,

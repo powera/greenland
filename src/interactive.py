@@ -9,10 +9,6 @@ cl = wordfreq.translation.client.LinguisticClient(model=MODEL)
 get_session = cl.get_session
 session = get_session()
 
-import wordfreq.dictionary.reviewer
-
-rv = wordfreq.dictionary.reviewer.LinguisticReviewer()
-
 import storage.database
 import wordfreq.translation.processor
 
