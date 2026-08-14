@@ -7,8 +7,7 @@ import logging
 import random
 from typing import Any, Dict, Iterator, List, Optional
 
-import jieba
-from pypinyin import Style, pinyin
+from langtools.zh.tokenizer import tokenize
 
 from benchmarks.lib.utils.base import BenchmarkGenerator
 from benchmarks.lib.utils.data_models import (
@@ -25,6 +24,20 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+# pypinyin is an optional native dependency.  Importing it at module load would
+# take the whole benchmarks package down with it when it is missing, because
+# benchmarks.lib.generators imports every generator eagerly for its registration
+# side effects.  Only question generation actually needs it, so the failure is
+# deferred to _get_pinyin_representation().  jieba is handled the same way one
+# level down, inside langtools.zh.tokenizer.
+try:
+    from pypinyin import Style, pinyin
+
+    PYPINYIN_AVAILABLE = True
+except ImportError:
+    PYPINYIN_AVAILABLE = False
+    logger.warning("pypinyin not available - 0018_pinyin_letters cannot generate questions")
 
 # Sample Chinese sentences
 SAMPLE_SENTENCES = [
@@ -74,9 +87,21 @@ class PinyinLetterCountGenerator(BenchmarkGenerator):
         """
 
     def _get_pinyin_representation(self, chinese_text: str) -> str:
-        """Convert Chinese text to Pinyin."""
-        # Split text into words for better pinyin conversion
-        words = jieba.cut(chinese_text)
+        """Convert Chinese text to Pinyin.
+
+        Raises:
+            RuntimeError: if pypinyin is not installed.
+        """
+        if not PYPINYIN_AVAILABLE:
+            raise RuntimeError(
+                "pypinyin is required to generate 0018_pinyin_letters questions; "
+                "install it with 'pip install -r requirements.txt'"
+            )
+
+        # Split text into words for better pinyin conversion.  Falls back to
+        # character-by-character segmentation when jieba is missing; the answer
+        # is counted from the same pinyin string, so it stays self-consistent.
+        words = tokenize(chinese_text)
 
         # Convert to pinyin
         pinyin_list = pinyin(words, style=Style.NORMAL)

@@ -15,25 +15,23 @@
 # portable is base with the tests that require optional native dependencies
 # removed, so the suite runs cleanly in environments where those wheels do not
 # build or install (jieba, pypinyin, opencc, pykakasi). It is a strict superset
-# of smoke and a strict subset of base. The exclusions below are paths rather
-# than pytest markers on purpose: the offending imports (notably jieba, pulled
-# in eagerly by benchmarks.lib.generators) fail at collection time, before any
-# marker-based deselection would apply. Keep this list in sync with the Testing
+# of smoke and a strict subset of base. Keep this list in sync with the Testing
 # section of AGENTS.md when it changes.
+#
+# Everything else in the tree imports its optional deps behind a try/except and
+# degrades or skips at runtime, so it collects fine without them. Keep it that
+# way: a bare `import jieba` at module scope in anything reachable from src/
+# breaks *collection*, which no marker or exclusion below can recover -- smoke
+# collects the whole tree to find its marked tests and would fail too.
 set -euo pipefail
 
 cd "$(dirname "$0")"
 export PYTHONPATH=src
 
-# Tests that cannot be collected or cannot pass without optional native deps.
-# See the comment above for why these are path exclusions.
+# Tests that cannot pass without optional native deps. Path exclusions rather
+# than marker deselection so that a collection-time failure is also covered.
 PORTABLE_EXCLUDES=(
-  # jieba: benchmarks.lib.generators.pinyin_letter_count_generator imports jieba
-  # at module load, and benchmarks.lib.utils eagerly imports the generators
-  # package, so the whole benchmarks tree fails to collect without it.
-  --ignore=src/tests/benchmarks
-  --ignore=src/tests/lib/benchmarks
-  # pypinyin + pykakasi: reading-field construction for Chinese/Japanese.
+  # pypinyin + pykakasi: asserts real reading output for Chinese/Japanese.
   --ignore=src/tests/exports/wireword/test_readings.py
 )
 

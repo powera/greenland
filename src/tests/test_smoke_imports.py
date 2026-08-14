@@ -49,6 +49,11 @@ def test_agent_modules_import() -> None:
     "module",
     [
         "barsukas.app",
+        # benchmarks.lib.utils eagerly pulls in every runner, generator and the
+        # registry, so this one name covers the whole benchmarks import graph --
+        # including the optional-native-dep guards (jieba, pypinyin) that keep it
+        # collectable in environments where those wheels are not installed.
+        "benchmarks.lib.utils",
         "clients.unified_client",
         "storage.models.schema",
         "storage.translation_helpers",
