@@ -31,7 +31,7 @@ rather than silently applied to a different set of rows.
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 from flask import current_app, flash, request
 
@@ -169,6 +169,22 @@ class SyncOutcome:
             flash(f"Skipped {self.skipped} {plural}", "info")
         if self.errors:
             flash(f"Errors: {self.errors}", "warning")
+
+    def write_release(self, write: Callable[[], Any]) -> None:
+        """Run a release-file write, converting a failure into a flashed error.
+
+        Zeroes ``updated_release`` on failure for the same reason ``commit``
+        zeroes the database counters: nothing was written, so nothing should be
+        reported as written.
+        """
+        try:
+            write()
+        except Exception as write_error:  # noqa: BLE001 - surfaced to the user
+            logger.error(f"Release file write error: {write_error}")
+            flash(f"Error updating release files: {write_error}", "error")
+            self.updated_release = 0
+            self.exported = 0
+            self.errors += 1
 
     def commit(self, session: Any) -> None:
         """Commit the session, converting a failure into a flashed error.

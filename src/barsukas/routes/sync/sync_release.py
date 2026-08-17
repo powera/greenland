@@ -483,24 +483,9 @@ def apply_difficulty() -> ResponseReturnValue:
             outcome.record_error(f"Error updating lemma {lemma_id_str}: {e}")
 
     outcome.commit(g.db)
-    _write_release_updates(release_updates, outcome)
+    outcome.write_release(lambda: release_io.apply_field_updates(release_updates))
     outcome.flash_summary()
     return redirect(url_for("sync_release.difficulty"))
-
-
-def _write_release_updates(
-    release_updates: Dict[Path, Dict[str, Dict[str, Any]]], outcome: SyncOutcome
-) -> None:
-    """Flush queued release-file field updates, reporting a failure as an error."""
-    if not release_updates:
-        return
-    try:
-        release_io.apply_field_updates(release_updates)
-    except Exception as e:  # noqa: BLE001 - surfaced to the user
-        logger.error(f"Release file update error: {e}")
-        flash(f"Error updating release files: {e}", "error")
-        outcome.updated_release = 0
-        outcome.errors += 1
 
 
 # =============================================================================
@@ -1397,7 +1382,7 @@ def apply_changes() -> ResponseReturnValue:
             outcome.record_error(f"Error updating lemma {lemma_id_str}: {e}")
 
     outcome.commit(g.db)
-    _write_release_updates(release_updates, outcome)
+    outcome.write_release(lambda: release_io.apply_field_updates(release_updates))
     outcome.flash_summary()
     return redirect(url_for("sync_release.changes"))
 
@@ -1749,14 +1734,7 @@ def apply_translations() -> ResponseReturnValue:
             outcome.record_error(f"Error processing lemma {lemma_id_str}: {e}")
 
     outcome.commit(g.db)
-    if release_updates:
-        try:
-            _apply_release_translation_updates(release_updates)
-        except Exception as e:  # noqa: BLE001 - surfaced to the user
-            logger.error(f"Release file update error: {e}")
-            flash(f"Error updating release files: {e}", "error")
-            outcome.updated_release = 0
-            outcome.errors += 1
+    outcome.write_release(lambda: _apply_release_translation_updates(release_updates))
     outcome.flash_summary()
 
     return redirect(url_for("sync_release.translations"))
@@ -2134,14 +2112,7 @@ def apply_secondary_translations() -> ResponseReturnValue:
             outcome.record_error(f"Error processing lemma {lemma_id_str}: {e}")
 
     outcome.commit(g.db)
-    if release_updates:
-        try:
-            _apply_secondary_translation_updates(release_updates)
-        except Exception as e:  # noqa: BLE001 - surfaced to the user
-            logger.error(f"Release file update error: {e}")
-            flash(f"Error updating release files: {e}", "error")
-            outcome.updated_release = 0
-            outcome.errors += 1
+    outcome.write_release(lambda: _apply_secondary_translation_updates(release_updates))
     outcome.flash_summary()
     return redirect(url_for("sync_release.secondary_translations"))
 

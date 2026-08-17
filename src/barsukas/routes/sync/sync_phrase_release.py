@@ -14,24 +14,33 @@ Field mapping (release JSONL <-> Phrase):
   translations[lang]  <-> PhraseTranslation   (the "translations" mode, non-en)
 """
 
-import json
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
-from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 from sqlalchemy.orm import selectinload
 
+from barsukas.routes.sync import release_io
+from barsukas.routes.sync.actions import (
+    SKIP,
+    USE_DB,
+    USE_RELEASE,
+    SyncOutcome,
+    bulk_actions_for,
+    is_readonly,
+    parse_bulk_request,
+    parse_language_actions,
+    parse_row_actions,
+)
+from barsukas.routes.sync.paging import PER_PAGE_CHOICES, paginate
 from storage.crud.operation_log import log_operation, log_translation_change
 from storage.crud.phrase import set_phrase_translation
-from storage.migrate import _write_jsonl_atomic, phrase_to_release_records
+from storage.migrate import phrase_to_release_records
 from storage.models.schema import Phrase, PhraseTranslation
 from storage.translation_helpers import LANGUAGE_NAMES, RELEASE_LANGUAGES
-
-if TYPE_CHECKING:
-    from barsukas.app import BarsukasFlask
 
 logger = logging.getLogger(__name__)
 
@@ -54,52 +63,12 @@ def _get_phrase_release_dir() -> Path:
 
 
 def _load_release_phrases(release_dir: Path) -> Dict[str, Dict[str, Any]]:
-    """Load all phrases from data/release/phrases base.jsonl files, keyed by GUID."""
-    release_phrases: Dict[str, Dict[str, Any]] = {}
-    if not release_dir.exists():
-        logger.warning(f"Phrase release directory not found: {release_dir}")
-        return release_phrases
+    """Load all phrases from data/release/phrases base.jsonl files, keyed by GUID.
 
-    for base_file in release_dir.rglob("base.jsonl"):
-        subtype_from_dir = base_file.parent.name
-        try:
-            with open(base_file, "r", encoding="utf-8") as f:
-                for line_num, line in enumerate(f, 1):
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        data = json.loads(line)
-                    except json.JSONDecodeError as e:
-                        logger.error(f"JSON parse error in {base_file}:{line_num}: {e}")
-                        continue
-                    guid = data.get("guid")
-                    if guid:
-                        data.setdefault("phrase_subtype", subtype_from_dir)
-                        release_phrases[guid] = data
-        except Exception as e:
-            logger.error(f"Error reading {base_file}: {e}")
-
-    return release_phrases
-
-
-def _find_release_file_for_phrase(release_dir: Path, guid: str) -> Optional[Path]:
-    """Find the base.jsonl file containing a specific phrase GUID."""
-    for base_file in release_dir.rglob("base.jsonl"):
-        try:
-            with open(base_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        if json.loads(line).get("guid") == guid:
-                            return base_file
-                    except json.JSONDecodeError:
-                        continue
-        except Exception:
-            continue
-    return None
+    A phrase's subtype is its directory name rather than a stored field, so it
+    is filled in from the path.
+    """
+    return release_io.load_release_records(release_dir, subtype_key="phrase_subtype")
 
 
 def _release_english(release_data: Dict[str, Any]) -> str:
@@ -207,7 +176,8 @@ def additions() -> ResponseReturnValue:
     ]
     return render_template(
         "sync_phrase_release/additions.html",
-        additions=additions_list,
+        page=paginate(additions_list),
+        per_page_choices=PER_PAGE_CHOICES,
         release_dir=str(release_dir),
     )
 
@@ -215,23 +185,28 @@ def additions() -> ResponseReturnValue:
 @bp.route("/additions/apply", methods=["POST"])
 def apply_additions() -> ResponseReturnValue:
     """Import selected new phrases from release."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
         return redirect(url_for("sync_phrase_release.additions"))
 
-    selected_guids = request.form.getlist("selected_guids")
+    release_dir = _get_phrase_release_dir()
+    release_phrases = _load_release_phrases(release_dir)
+
+    if request.form.get("select_scope") == "all":
+        db_guids = {guid for (guid,) in g.db.query(Phrase.guid).filter(Phrase.guid.isnot(None))}
+        selected_guids = [guid for guid in sorted(release_phrases) if guid not in db_guids]
+    else:
+        selected_guids = request.form.getlist("selected_guids")
+
     if not selected_guids:
         flash("No phrases selected for import", "warning")
         return redirect(url_for("sync_phrase_release.additions"))
 
-    release_phrases = _load_release_phrases(_get_phrase_release_dir())
-    imported = 0
-    errors = 0
+    outcome = SyncOutcome(noun="phrase")
     for guid in selected_guids:
         release_data = release_phrases.get(guid)
         if not release_data:
-            errors += 1
+            outcome.record_error(f"Release data not found for GUID: {guid}")
             continue
         try:
             phrase = Phrase(
@@ -261,20 +236,12 @@ def apply_additions() -> ResponseReturnValue:
                 operation_type="phrase_import",
                 details={"guid": guid, "english_text": _release_english(release_data)[:80]},
             )
-            imported += 1
+            outcome.imported += 1
         except Exception as e:
-            logger.error(f"Error importing phrase {guid}: {e}")
-            errors += 1
+            outcome.record_error(f"Error importing phrase {guid}: {e}")
 
-    if imported:
-        try:
-            g.db.commit()
-            flash(f"Imported {imported} phrase(s)", "success")
-        except Exception as e:
-            g.db.rollback()
-            flash(f"Error committing changes: {e}", "error")
-    if errors:
-        flash(f"Errors: {errors}", "warning")
+    outcome.commit(g.db)
+    outcome.flash_summary()
     return redirect(url_for("sync_phrase_release.additions"))
 
 
@@ -302,7 +269,8 @@ def removals() -> ResponseReturnValue:
     ]
     return render_template(
         "sync_phrase_release/removals.html",
-        removals=removals_list,
+        page=paginate(removals_list),
+        per_page_choices=PER_PAGE_CHOICES,
         release_dir=str(release_dir),
     )
 
@@ -310,8 +278,7 @@ def removals() -> ResponseReturnValue:
 @bp.route("/removals/apply", methods=["POST"])
 def apply_removals() -> ResponseReturnValue:
     """Delete selected phrases that are not in release."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
         return redirect(url_for("sync_phrase_release.removals"))
 
@@ -320,13 +287,12 @@ def apply_removals() -> ResponseReturnValue:
         flash("No phrases selected for deletion", "warning")
         return redirect(url_for("sync_phrase_release.removals"))
 
-    deleted = 0
-    errors = 0
+    outcome = SyncOutcome(noun="phrase")
     for phrase_id_str in selected_ids:
         try:
             phrase = g.db.query(Phrase).filter(Phrase.id == int(phrase_id_str)).first()
             if not phrase:
-                errors += 1
+                outcome.record_error(f"Phrase not found: {phrase_id_str}")
                 continue
             log_operation(
                 session=g.db,
@@ -335,20 +301,12 @@ def apply_removals() -> ResponseReturnValue:
                 details={"guid": phrase.guid, "phrase_id": phrase.id},
             )
             g.db.delete(phrase)
-            deleted += 1
+            outcome.deleted += 1
         except Exception as e:
-            logger.error(f"Error deleting phrase {phrase_id_str}: {e}")
-            errors += 1
+            outcome.record_error(f"Error deleting phrase {phrase_id_str}: {e}")
 
-    if deleted:
-        try:
-            g.db.commit()
-            flash(f"Deleted {deleted} phrase(s)", "success")
-        except Exception as e:
-            g.db.rollback()
-            flash(f"Error committing changes: {e}", "error")
-    if errors:
-        flash(f"Errors: {errors}", "warning")
+    outcome.commit(g.db)
+    outcome.flash_summary()
     return redirect(url_for("sync_phrase_release.removals"))
 
 
@@ -391,7 +349,10 @@ def level() -> ResponseReturnValue:
         )
     differences.sort(key=lambda x: str(x["guid"]))
     return render_template(
-        "sync_phrase_release/level.html", differences=differences, release_dir=str(release_dir)
+        "sync_phrase_release/level.html",
+        page=paginate(differences),
+        per_page_choices=PER_PAGE_CHOICES,
+        release_dir=str(release_dir),
     )
 
 
@@ -429,7 +390,10 @@ def changes() -> ResponseReturnValue:
         )
     changes_list.sort(key=lambda x: str(x["guid"]))
     return render_template(
-        "sync_phrase_release/changes.html", changes=changes_list, release_dir=str(release_dir)
+        "sync_phrase_release/changes.html",
+        page=paginate(changes_list),
+        per_page_choices=PER_PAGE_CHOICES,
+        release_dir=str(release_dir),
     )
 
 
@@ -447,46 +411,49 @@ def _apply_field_actions(field: str, redirect_endpoint: str) -> ResponseReturnVa
     ``field`` is ``difficulty_level`` or ``concept_label``; it selects which
     Phrase attribute and which release JSONL key to sync.
     """
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
-        return redirect(url_for(redirect_endpoint))
-
-    actions = {
-        key[len("action_") :]: value
-        for key, value in request.form.items()
-        if key.startswith("action_")
-    }
-    if not actions:
-        flash("No changes selected", "warning")
         return redirect(url_for(redirect_endpoint))
 
     release_dir = _get_phrase_release_dir()
     release_phrases = _load_release_phrases(release_dir)
     attr = "difficulty_level" if field == "difficulty_level" else "label"
 
-    updated_db = 0
-    skipped = 0
-    errors = 0
+    bulk = parse_bulk_request()
+    if bulk is not None:
+        differing = _differing_phrase_ids(release_phrases, field, attr)
+        expanded = bulk_actions_for(bulk, differing, total=len(differing))
+        if expanded is None:
+            return redirect(url_for(redirect_endpoint))
+        actions = expanded
+    else:
+        actions = parse_row_actions()
+
+    if not actions:
+        flash("No changes selected", "warning")
+        return redirect(url_for(redirect_endpoint))
+
+    outcome = SyncOutcome(noun="phrase")
+    guid_files = release_io.build_guid_file_index(release_dir)
     release_updates: Dict[Path, Dict[str, Dict[str, Any]]] = {}
 
     for phrase_id_str, action in actions.items():
-        if action == "skip":
-            skipped += 1
+        if action == SKIP:
+            outcome.skipped += 1
             continue
-        if action not in ("use_release", "use_db"):
+        if action not in (USE_RELEASE, USE_DB):
             continue
         try:
             phrase = g.db.query(Phrase).filter(Phrase.id == int(phrase_id_str)).first()
             if not phrase:
-                errors += 1
+                outcome.record_error(f"Phrase not found: {phrase_id_str}")
                 continue
             release_data = release_phrases.get(phrase.guid)
             if not release_data:
-                errors += 1
+                outcome.record_error(f"Release data not found for GUID: {phrase.guid}")
                 continue
 
-            if action == "use_release":
+            if action == USE_RELEASE:
                 old_value = getattr(phrase, attr)
                 new_value = release_data.get(field)
                 setattr(phrase, attr, new_value)
@@ -498,37 +465,35 @@ def _apply_field_actions(field: str, redirect_endpoint: str) -> ResponseReturnVa
                     old_value=str(old_value) if old_value is not None else None,
                     new_value=str(new_value) if new_value is not None else None,
                 )
-                updated_db += 1
-            else:  # use_db
-                file_path = _find_release_file_for_phrase(release_dir, phrase.guid)
-                if file_path:
-                    release_updates.setdefault(file_path, {})[phrase.guid] = {
-                        field: getattr(phrase, attr)
-                    }
-                else:
-                    errors += 1
+                outcome.updated_db += 1
+            else:  # USE_DB
+                file_path = release_io.file_for_guid(guid_files, phrase.guid)
+                if file_path is None:
+                    outcome.record_error(f"Could not find release file for GUID: {phrase.guid}")
+                    continue
+                release_updates.setdefault(file_path, {})[phrase.guid] = {
+                    field: getattr(phrase, attr)
+                }
+                outcome.updated_release += 1
         except Exception as e:
-            logger.error(f"Error updating phrase {phrase_id_str}: {e}")
-            errors += 1
+            outcome.record_error(f"Error updating phrase {phrase_id_str}: {e}")
 
-    if updated_db:
-        try:
-            g.db.commit()
-            flash(f"Updated {updated_db} phrase(s) in database", "success")
-        except Exception as e:
-            g.db.rollback()
-            flash(f"Error committing changes: {e}", "error")
-    if release_updates:
-        try:
-            _apply_release_field_updates(release_updates)
-            flash("Updated release files", "success")
-        except Exception as e:
-            flash(f"Error updating release files: {e}", "error")
-    if skipped:
-        flash(f"Skipped {skipped}", "info")
-    if errors:
-        flash(f"Errors: {errors}", "warning")
+    outcome.commit(g.db)
+    outcome.write_release(lambda: release_io.apply_field_updates(release_updates))
+    outcome.flash_summary()
     return redirect(url_for(redirect_endpoint))
+
+
+def _differing_phrase_ids(
+    release_phrases: Dict[str, Dict[str, Any]], field: str, attr: str
+) -> List[int]:
+    """Phrase ids whose ``field`` differs from the release record."""
+    return [
+        phrase.id
+        for phrase, release_data in _common_phrases(release_phrases)
+        if getattr(phrase, attr) != release_data.get(field)
+        and (field == "concept_label" or phrase.label == _release_english(release_data))
+    ]
 
 
 # =============================================================================
@@ -576,7 +541,8 @@ def translations() -> ResponseReturnValue:
     differences.sort(key=lambda x: str(x["guid"]))
     return render_template(
         "sync_phrase_release/translations.html",
-        differences=differences,
+        page=paginate(differences),
+        per_page_choices=PER_PAGE_CHOICES,
         release_dir=str(release_dir),
     )
 
@@ -584,22 +550,11 @@ def translations() -> ResponseReturnValue:
 @bp.route("/translations/apply", methods=["POST"])
 def apply_translations() -> ResponseReturnValue:
     """Apply selected per-language translation changes."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
         return redirect(url_for("sync_phrase_release.translations"))
 
-    # action_{phrase_id}_{lang_code} = skip|use_release|use_db
-    actions: Dict[str, Dict[str, str]] = {}
-    for key, value in request.form.items():
-        if not key.startswith("action_"):
-            continue
-        remainder = key[len("action_") :]
-        underscore = remainder.find("_")
-        if underscore == -1:
-            continue
-        actions.setdefault(remainder[:underscore], {})[remainder[underscore + 1 :]] = value
-
+    actions = parse_language_actions()
     if not actions:
         flash("No changes selected", "warning")
         return redirect(url_for("sync_phrase_release.translations"))
@@ -607,32 +562,31 @@ def apply_translations() -> ResponseReturnValue:
     release_dir = _get_phrase_release_dir()
     release_phrases = _load_release_phrases(release_dir)
 
-    updated_db = 0
-    skipped = 0
-    errors = 0
+    outcome = SyncOutcome(noun="translation")
+    guid_files = release_io.build_guid_file_index(release_dir)
     release_updates: Dict[Path, Dict[str, Dict[str, str]]] = {}
 
     for phrase_id_str, lang_actions in actions.items():
         try:
             phrase = g.db.query(Phrase).filter(Phrase.id == int(phrase_id_str)).first()
             if not phrase:
-                errors += 1
+                outcome.record_error(f"Phrase not found: {phrase_id_str}")
                 continue
             release_data = release_phrases.get(phrase.guid)
             if not release_data:
-                errors += 1
+                outcome.record_error(f"Release data not found for GUID: {phrase.guid}")
                 continue
             release_translations = release_data.get("translations", {})
 
             for lang_code, action in lang_actions.items():
-                if action == "use_release":
+                if action == USE_RELEASE:
                     release_val = release_translations.get(lang_code, "")
                     if release_val:
                         set_phrase_translation(g.db, phrase, lang_code, release_val)
-                        updated_db += 1
+                        outcome.updated_db += 1
                     else:
-                        skipped += 1
-                elif action == "use_db":
+                        outcome.skipped += 1
+                elif action == USE_DB:
                     existing = (
                         g.db.query(PhraseTranslation)
                         .filter(
@@ -642,39 +596,25 @@ def apply_translations() -> ResponseReturnValue:
                         .first()
                     )
                     db_val = existing.translation if existing else ""
-                    if db_val:
-                        file_path = _find_release_file_for_phrase(release_dir, phrase.guid)
-                        if file_path:
-                            release_updates.setdefault(file_path, {}).setdefault(phrase.guid, {})[
-                                lang_code
-                            ] = db_val
-                        else:
-                            errors += 1
-                    else:
-                        skipped += 1
+                    if not db_val:
+                        outcome.skipped += 1
+                        continue
+                    file_path = release_io.file_for_guid(guid_files, phrase.guid)
+                    if file_path is None:
+                        outcome.record_error(f"Could not find release file for GUID: {phrase.guid}")
+                        continue
+                    release_updates.setdefault(file_path, {}).setdefault(phrase.guid, {})[
+                        lang_code
+                    ] = db_val
+                    outcome.updated_release += 1
                 else:
-                    skipped += 1
+                    outcome.skipped += 1
         except Exception as e:
-            logger.error(f"Error processing phrase {phrase_id_str}: {e}")
-            errors += 1
+            outcome.record_error(f"Error processing phrase {phrase_id_str}: {e}")
 
-    if updated_db:
-        try:
-            g.db.commit()
-            flash(f"Updated {updated_db} translation(s) in database", "success")
-        except Exception as e:
-            g.db.rollback()
-            flash(f"Error committing DB changes: {e}", "error")
-    if release_updates:
-        try:
-            _apply_release_translation_updates(release_updates)
-            flash("Updated translations in release files", "success")
-        except Exception as e:
-            flash(f"Error updating release files: {e}", "error")
-    if skipped:
-        flash(f"Skipped {skipped} item(s)", "info")
-    if errors:
-        flash(f"Errors: {errors}", "warning")
+    outcome.commit(g.db)
+    outcome.write_release(lambda: release_io.apply_translation_updates(release_updates))
+    outcome.flash_summary()
     return redirect(url_for("sync_phrase_release.translations"))
 
 
@@ -768,8 +708,7 @@ def apply_export_sync_back() -> ResponseReturnValue:
 
 def _write_phrases_to_release(sync_back: bool) -> ResponseReturnValue:
     """Write selected DB phrases into their subtype base.jsonl, merging by GUID."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
         return redirect(url_for("sync_phrase_release.export"))
 
@@ -786,39 +725,15 @@ def _write_phrases_to_release(sync_back: bool) -> ResponseReturnValue:
         .all()
     )
 
-    # Group the new/updated records by subtype, merged with existing base.jsonl.
-    by_subtype: Dict[str, Dict[str, Dict[str, Any]]] = defaultdict(dict)
-    touched_subtypes = set()
+    # upsert_records merges by GUID, so siblings already in the file survive.
+    by_subtype: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for phrase in db_phrases:
         base_record, _ = phrase_to_release_records(phrase)
-        by_subtype[phrase.phrase_subtype][phrase.guid] = base_record
-        touched_subtypes.add(phrase.phrase_subtype)
-
-    # Pre-load existing records for touched subtypes so we don't drop siblings.
-    for subtype in touched_subtypes:
-        base_file = release_dir / subtype / "base.jsonl"
-        if not base_file.exists():
-            continue
-        with open(base_file, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    data = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-                guid = data.get("guid")
-                if guid and guid not in by_subtype[subtype]:
-                    by_subtype[subtype][guid] = data
+        by_subtype[phrase.phrase_subtype].append(base_record)
 
     written = 0
-    for subtype, guid_to_record in by_subtype.items():
-        category_dir = release_dir / subtype
-        category_dir.mkdir(parents=True, exist_ok=True)
-        records = sorted(guid_to_record.values(), key=lambda r: r["guid"])
-        _write_jsonl_atomic(category_dir / "base.jsonl", records)
-        written += sum(1 for p in db_phrases if p.phrase_subtype == subtype)
+    for subtype, records in by_subtype.items():
+        written += release_io.upsert_records(release_dir / subtype / "base.jsonl", records)
 
     log_operation(
         session=g.db,
@@ -836,59 +751,3 @@ def _write_phrases_to_release(sync_back: bool) -> ResponseReturnValue:
 # =============================================================================
 # Release-file writers
 # =============================================================================
-
-
-def _apply_release_field_updates(updates: Dict[Path, Dict[str, Dict[str, Any]]]) -> None:
-    """Apply top-level field updates (concept_label / difficulty_level) to JSONL."""
-    for file_path, guid_updates in updates.items():
-        if not file_path.exists():
-            continue
-        out: List[str] = []
-        with open(file_path, "r", encoding="utf-8") as f:
-            for line in f:
-                stripped = line.strip()
-                if not stripped:
-                    out.append(line)
-                    continue
-                try:
-                    data = json.loads(stripped)
-                except json.JSONDecodeError:
-                    out.append(line)
-                    continue
-                guid = data.get("guid")
-                if guid in guid_updates:
-                    data.update(guid_updates[guid])
-                    out.append(json.dumps(data, ensure_ascii=False) + "\n")
-                else:
-                    out.append(line)
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.writelines(out)
-
-
-def _apply_release_translation_updates(updates: Dict[Path, Dict[str, Dict[str, str]]]) -> None:
-    """Apply per-language translation updates to release JSONL files."""
-    for file_path, guid_updates in updates.items():
-        if not file_path.exists():
-            continue
-        out: List[str] = []
-        with open(file_path, "r", encoding="utf-8") as f:
-            for line in f:
-                stripped = line.strip()
-                if not stripped:
-                    out.append(line)
-                    continue
-                try:
-                    data = json.loads(stripped)
-                except json.JSONDecodeError:
-                    out.append(line)
-                    continue
-                guid = data.get("guid")
-                if guid in guid_updates:
-                    data.setdefault("translations", {})
-                    for lang_code, new_val in guid_updates[guid].items():
-                        data["translations"][lang_code] = new_val
-                    out.append(json.dumps(data, ensure_ascii=False) + "\n")
-                else:
-                    out.append(line)
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.writelines(out)

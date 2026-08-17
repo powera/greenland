@@ -135,10 +135,11 @@ def write_jsonl_sorted(file_path: Path, records: Iterable[Dict[str, Any]]) -> No
 
 def _rewrite_matching_lines(
     file_path: Path,
-    guids: Iterable[str],
+    keys: Iterable[str],
     mutate: Any,
+    key_field: str = "guid",
 ) -> int:
-    """Rewrite the lines whose GUID is in ``guids``, applying ``mutate(record)``.
+    """Rewrite the lines whose ``key_field`` is in ``keys``, applying ``mutate(record)``.
 
     Lines that do not match, and lines that do not parse, are copied through
     byte-for-byte: a sync that touches one word must not reformat its
@@ -150,7 +151,7 @@ def _rewrite_matching_lines(
         logger.warning(f"Release file not found: {file_path}")
         return 0
 
-    target_guids = set(guids)
+    target_keys = set(keys)
     output_lines: List[str] = []
     rewritten = 0
 
@@ -165,7 +166,7 @@ def _rewrite_matching_lines(
             except json.JSONDecodeError:
                 output_lines.append(raw_line)
                 continue
-            if record.get("guid") not in target_guids:
+            if record.get(key_field) not in target_keys:
                 output_lines.append(raw_line)
                 continue
             mutate(record)
@@ -177,12 +178,16 @@ def _rewrite_matching_lines(
     return rewritten
 
 
-def apply_field_updates(updates: Dict[Path, Dict[str, Dict[str, Any]]]) -> int:
+def apply_field_updates(
+    updates: Dict[Path, Dict[str, Dict[str, Any]]], key_field: str = "guid"
+) -> int:
     """Apply field updates to release JSONL files.
 
-    ``updates`` is ``{file_path: {guid: {field_or_dotted_path: value}}}``. A
-    dotted path such as ``translations.en`` addresses a nested key; a value of
-    :data:`REMOVE_FIELD` deletes the field rather than setting it.
+    ``updates`` is ``{file_path: {key: {field_or_dotted_path: value}}}``, keyed
+    by ``key_field`` - the GUID everywhere except relation groups, which are
+    identified by ``concept``. A dotted path such as ``translations.en``
+    addresses a nested key; a value of :data:`REMOVE_FIELD` deletes the field
+    rather than setting it.
 
     Returns the number of records rewritten.
     """
@@ -192,10 +197,10 @@ def apply_field_updates(updates: Dict[Path, Dict[str, Dict[str, Any]]]) -> int:
         def mutate(
             record: Dict[str, Any], guid_updates: Dict[str, Dict[str, Any]] = guid_updates
         ) -> None:
-            for field_path, new_value in guid_updates[record["guid"]].items():
+            for field_path, new_value in guid_updates[record[key_field]].items():
                 _set_field_path(record, field_path, new_value)
 
-        rewritten += _rewrite_matching_lines(file_path, guid_updates.keys(), mutate)
+        rewritten += _rewrite_matching_lines(file_path, guid_updates.keys(), mutate, key_field)
         logger.info(f"Updated {len(guid_updates)} record(s) in {file_path}")
     return rewritten
 

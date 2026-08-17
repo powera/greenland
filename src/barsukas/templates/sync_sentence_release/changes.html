@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "sync/_macros.html" as sync with context %}
 
 {% block title %}{{ STRINGS.sync.sync_sentence_text_changes_title }}{% endblock %}
 
@@ -20,7 +21,7 @@
         </div>
     </div>
 
-    {% if not changes %}
+    {% if not page.total %}
     <div class="alert alert-success">
         <i class="bi bi-check-circle"></i> No English text changes found. All texts match.
     </div>
@@ -30,20 +31,22 @@
     {% else %}
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-list-check"></i> {{ STRINGS.sync.text_changes }}: {{ changes|length }}</span>
+            <span><i class="bi bi-list-check"></i> {{ STRINGS.sync.text_changes }}: {{ page.total }}</span>
             <div>
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll('skip')">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="syncSelectAll('skip')">
                     {{ STRINGS.sync.skip_all }}
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-warning" onclick="selectAll('use_db')">
+                <button type="button" class="btn btn-sm btn-outline-warning" onclick="syncSelectAll('use_db')">
                     Use All DB
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-info" onclick="selectAll('use_release')">
+                <button type="button" class="btn btn-sm btn-outline-info" onclick="syncSelectAll('use_release')">
                     {{ STRINGS.sync.use_all_release }}
                 </button>
             </div>
         </div>
         <div class="card-body">
+            {{ sync.list_toolbar(page, 'sync_sentence_release.changes') }}
+
             <form method="post" action="{{ url_for('sync_sentence_release.apply_changes') }}">
                 <div class="table-responsive">
                     <table class="table table-sm table-hover">
@@ -57,7 +60,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for item in changes %}
+                            {% for item in page.items %}
                             <tr>
                                 <td><code>{{ item.guid }}</code></td>
                                 <td>
@@ -93,21 +96,14 @@
                     </button>
                 </div>
             </form>
+
+            {{ sync.bulk_apply(page, url_for('sync_sentence_release.apply_changes'), 'sentence') }}
+
+            <div class="mt-3">{{ sync.list_toolbar(page, 'sync_sentence_release.changes') }}</div>
         </div>
     </div>
     {% endif %}
 </div>
 
-<script>
-function selectAll(action) {
-    document.querySelectorAll('.action-select').forEach(function(select) {
-        for (var i = 0; i < select.options.length; i++) {
-            if (select.options[i].value === action) {
-                select.selectedIndex = i;
-                break;
-            }
-        }
-    });
-}
-</script>
+<script src="{{ url_for('static', filename='js/sync.js') }}"></script>
 {% endblock %}

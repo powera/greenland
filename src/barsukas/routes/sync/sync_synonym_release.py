@@ -18,11 +18,12 @@ for now treating them as DerivativeForm rows keeps load/lookup paths uniform.
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, Any, Dict, List
 
 from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
+from barsukas.routes.sync import sync_release_helpers as helpers
 from barsukas.routes.sync.sync_release_helpers import (
     find_release_file_for_lemma_lang,
     load_release_array_for_lang,
@@ -56,23 +57,6 @@ def _get_release_dir() -> Path:
 # =============================================================================
 
 
-def _db_form_to_dict(form: DerivativeForm) -> Dict[str, Any]:
-    """Convert a DB synonym DerivativeForm to the release file dict format."""
-    d: Dict[str, Any] = {
-        "grammatical_form": form.grammatical_form,
-        "text": form.derivative_form_text,
-    }
-    if form.ipa_pronunciation:
-        d["ipa"] = form.ipa_pronunciation
-    if form.phonetic_pronunciation:
-        d["phonetic"] = form.phonetic_pronunciation
-    return d
-
-
-def _form_key(grammatical_form: str, text: str) -> str:
-    return f"{grammatical_form}|{text}"
-
-
 # =============================================================================
 # Loading
 # =============================================================================
@@ -83,20 +67,6 @@ def _load_release_synonyms_for_lang(
 ) -> Dict[str, List[Dict[str, Any]]]:
     """Load synonym entries for a language from release JSONL files."""
     return load_release_array_for_lang(release_dir, lang_code, "synonyms")
-
-
-def _get_languages_with_release_files(release_dir: Path) -> Set[str]:
-    """Find which languages have release files in the release directory."""
-    languages: Set[str] = set()
-    if not release_dir.exists():
-        return languages
-    for jsonl_file in release_dir.rglob("*.jsonl"):
-        stem = jsonl_file.stem
-        if stem == "base":
-            continue
-        if len(stem) in (2, 3) and stem.isalpha():
-            languages.add(stem)
-    return languages
 
 
 def _load_db_synonyms_for_lang(db_session: Any, lang_code: str) -> Dict[str, List[DerivativeForm]]:
@@ -126,17 +96,17 @@ def _has_form_differences(
     release_forms: List[Dict[str, Any]], db_forms: List[DerivativeForm]
 ) -> bool:
     release_keys = {
-        _form_key(f.get("grammatical_form", ""), f.get("text", "")) for f in release_forms
+        helpers.form_key(f.get("grammatical_form", ""), f.get("text", "")) for f in release_forms
     }
-    db_keys = {_form_key(f.grammatical_form, f.derivative_form_text) for f in db_forms}
+    db_keys = {helpers.form_key(f.grammatical_form, f.derivative_form_text) for f in db_forms}
 
     if release_keys != db_keys:
         return True
 
     release_by_key = {
-        _form_key(f.get("grammatical_form", ""), f.get("text", "")): f for f in release_forms
+        helpers.form_key(f.get("grammatical_form", ""), f.get("text", "")): f for f in release_forms
     }
-    db_by_key = {_form_key(f.grammatical_form, f.derivative_form_text): f for f in db_forms}
+    db_by_key = {helpers.form_key(f.grammatical_form, f.derivative_form_text): f for f in db_forms}
 
     for key in release_keys:
         rf = release_by_key[key]
@@ -154,9 +124,9 @@ def _compute_form_diffs(
     diffs: List[Dict[str, Any]] = []
 
     release_by_key = {
-        _form_key(f.get("grammatical_form", ""), f.get("text", "")): f for f in release_forms
+        helpers.form_key(f.get("grammatical_form", ""), f.get("text", "")): f for f in release_forms
     }
-    db_by_key = {_form_key(f.grammatical_form, f.derivative_form_text): f for f in db_forms}
+    db_by_key = {helpers.form_key(f.grammatical_form, f.derivative_form_text): f for f in db_forms}
 
     release_keys = set(release_by_key.keys())
     db_keys = set(db_by_key.keys())
@@ -214,32 +184,6 @@ def _compute_form_diffs(
     return diffs
 
 
-def _get_lemma_info_by_guids(db_session: Any, guids: Set[str]) -> Dict[str, Dict[str, Any]]:
-    info: Dict[str, Dict[str, Any]] = {}
-    if not guids:
-        return info
-    batch_size = 500
-    guid_list = list(guids)
-    for i in range(0, len(guid_list), batch_size):
-        batch = guid_list[i : i + batch_size]
-        lemmas = db_session.query(Lemma).filter(Lemma.guid.in_(batch)).all()
-        for lemma in lemmas:
-            info[lemma.guid] = {
-                "lemma_id": lemma.id,
-                "lemma_text": lemma.lemma_text,
-                "pos_type": lemma.pos_type,
-                "pos_subtype": lemma.pos_subtype or "",
-            }
-    return info
-
-
-def _build_guid_to_lemma_id(db_session: Any) -> Dict[str, int]:
-    return {
-        guid: lid
-        for lid, guid in db_session.query(Lemma.id, Lemma.guid).filter(Lemma.guid.isnot(None)).all()
-    }
-
-
 # =============================================================================
 # Index
 # =============================================================================
@@ -258,7 +202,7 @@ def index() -> ResponseReturnValue:
             lang_counts=None,
         )
 
-    release_languages = _get_languages_with_release_files(release_dir)
+    release_languages = helpers.languages_with_release_files(release_dir)
 
     db_lang_rows = (
         g.db.query(DerivativeForm.language_code)
@@ -336,7 +280,7 @@ def language_detail(lang_code: str) -> ResponseReturnValue:
     db_guids = set(db_forms.keys())
 
     all_guids = release_guids | db_guids
-    guid_info = _get_lemma_info_by_guids(g.db, all_guids)
+    guid_info = helpers.lemma_info_by_guids(g.db, all_guids)
 
     additions: List[Dict[str, Any]] = []
     for guid in sorted(release_guids - db_guids):
@@ -415,7 +359,7 @@ def apply_additions(lang_code: str) -> ResponseReturnValue:
 
     release_dir = _get_release_dir()
     release_forms = _load_release_synonyms_for_lang(release_dir, lang_code)
-    guid_to_lemma_id = _build_guid_to_lemma_id(g.db)
+    guid_to_lemma_id = helpers.guid_to_lemma_id(g.db)
 
     imported_count = 0
     error_count = 0
@@ -527,7 +471,9 @@ def apply_removals(lang_code: str) -> ResponseReturnValue:
                 if not file_path:
                     error_count += 1
                     continue
-                form_dicts = [_db_form_to_dict(f) for f in forms]
+                form_dicts = [
+                    helpers.db_form_to_dict(include_base_form=False, form=f) for f in forms
+                ]
                 write_release_line_partial(file_path, guid, "synonyms", form_dicts)
                 exported_count += 1
                 log_operation(
@@ -611,7 +557,7 @@ def apply_changes(lang_code: str) -> ResponseReturnValue:
     release_dir = _get_release_dir()
     release_forms = _load_release_synonyms_for_lang(release_dir, lang_code)
     db_forms = _load_db_synonyms_for_lang(g.db, lang_code)
-    guid_to_lemma_id = _build_guid_to_lemma_id(g.db)
+    guid_to_lemma_id = helpers.guid_to_lemma_id(g.db)
 
     updated_db_count = 0
     updated_release_count = 0
@@ -668,7 +614,9 @@ def apply_changes(lang_code: str) -> ResponseReturnValue:
 
             elif action == "use_db":
                 d_forms = db_forms.get(guid, [])
-                form_dicts = [_db_form_to_dict(f) for f in d_forms]
+                form_dicts = [
+                    helpers.db_form_to_dict(include_base_form=False, form=f) for f in d_forms
+                ]
                 file_path = find_release_file_for_lemma_lang(release_dir, guid, lang_code)
                 if file_path:
                     write_release_line_partial(file_path, guid, "synonyms", form_dicts)
@@ -739,7 +687,7 @@ def export_all(lang_code: str) -> ResponseReturnValue:
             if not file_path:
                 error_count += 1
                 continue
-            form_dicts = [_db_form_to_dict(f) for f in forms]
+            form_dicts = [helpers.db_form_to_dict(include_base_form=False, form=f) for f in forms]
             write_release_line_partial(file_path, guid, "synonyms", form_dicts)
             exported_count += 1
         except Exception as e:
