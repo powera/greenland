@@ -85,7 +85,7 @@ class TestAdditions:
             release_dir,
             [
                 {
-                    "guid": "P01_001",
+                    "guid": "E01_001",
                     "kind": "given_name",
                     "name_text": "Maria",
                     "translations": {"lt": "Marija"},
@@ -95,7 +95,7 @@ class TestAdditions:
 
         response = client.post(
             "/sync/names/additions/apply",
-            data={"selected_guids": "P01_001"},
+            data={"selected_guids": "E01_001"},
             follow_redirects=True,
         )
         assert response.status_code == 200
@@ -111,7 +111,7 @@ class TestAdditions:
             release_dir,
             [
                 {
-                    "guid": f"P01_{index:03d}",
+                    "guid": f"E01_{index:03d}",
                     "kind": "given_name",
                     "name_text": f"Person {index}",
                     "translations": {},
@@ -137,7 +137,7 @@ class TestAdditions:
             release_dir,
             [
                 {
-                    "guid": "P01_001",
+                    "guid": "E01_001",
                     "kind": "given_name",
                     "name_text": "George",
                     "translations": {},
@@ -147,7 +147,7 @@ class TestAdditions:
 
         client.post(
             "/sync/names/additions/apply",
-            data={"selected_guids": "P01_001"},
+            data={"selected_guids": "E01_001"},
             follow_redirects=True,
         )
 
@@ -169,8 +169,8 @@ class TestRemovals:
         )
 
         records = _read_records(release_dir)
-        assert records["P01_001"]["name_text"] == "George"
-        assert records["P01_001"]["translations"] == {"lt": "Džordžas"}
+        assert records["E01_001"]["name_text"] == "George"
+        assert records["E01_001"]["translations"] == {"lt": "Džordžas"}
 
     def test_export_keeps_unrelated_release_records(
         self, client: FlaskClient, release_dir: Path, db_session: Session
@@ -180,7 +180,7 @@ class TestRemovals:
             release_dir,
             [
                 {
-                    "guid": "P04_001",
+                    "guid": "E04_001",
                     "kind": "place",
                     "name_text": "Maple Street",
                     "translations": {},
@@ -195,7 +195,7 @@ class TestRemovals:
             follow_redirects=True,
         )
 
-        assert set(_read_records(release_dir)) == {"P01_001", "P04_001"}
+        assert set(_read_records(release_dir)) == {"E01_001", "E04_001"}
 
     def test_export_all_covers_rows_beyond_the_page(
         self, client: FlaskClient, release_dir: Path, db_session: Session
@@ -252,7 +252,7 @@ class TestChanges:
             release_dir,
             [
                 {
-                    "guid": "P01_001",
+                    "guid": "E01_001",
                     "kind": "given_name",
                     "name_text": "George",
                     "gender": "masculine",
@@ -278,7 +278,7 @@ class TestChanges:
             release_dir,
             [
                 {
-                    "guid": "P01_001",
+                    "guid": "E01_001",
                     "kind": "given_name",
                     "name_text": "George",
                     "translations": {"lt": "STALE"},
@@ -292,7 +292,7 @@ class TestChanges:
             follow_redirects=True,
         )
 
-        assert _read_records(release_dir)["P01_001"]["translations"] == {"lt": "Džordžas"}
+        assert _read_records(release_dir)["E01_001"]["translations"] == {"lt": "Džordžas"}
 
     def test_skip_changes_neither_side(
         self, client: FlaskClient, release_dir: Path, db_session: Session
@@ -302,7 +302,7 @@ class TestChanges:
             release_dir,
             [
                 {
-                    "guid": "P01_001",
+                    "guid": "E01_001",
                     "kind": "given_name",
                     "name_text": "George",
                     "translations": {"lt": "STALE"},
@@ -316,7 +316,7 @@ class TestChanges:
             follow_redirects=True,
         )
 
-        assert _read_records(release_dir)["P01_001"]["translations"] == {"lt": "STALE"}
+        assert _read_records(release_dir)["E01_001"]["translations"] == {"lt": "STALE"}
         (name,) = _names(db_session)
         assert _renderings(name) == {"lt": "Džordžas"}
 
@@ -328,7 +328,7 @@ class TestChanges:
             release_dir,
             [
                 {
-                    "guid": "P01_001",
+                    "guid": "E01_001",
                     "kind": "given_name",
                     "name_text": "George",
                     "translations": {"lt": "STALE"},
@@ -342,7 +342,7 @@ class TestChanges:
             follow_redirects=True,
         )
 
-        assert _read_records(release_dir)["P01_001"]["translations"] == {"lt": "Džordžas"}
+        assert _read_records(release_dir)["E01_001"]["translations"] == {"lt": "Džordžas"}
 
     def test_bulk_apply_with_a_stale_count_changes_nothing(
         self, client: FlaskClient, release_dir: Path, db_session: Session
@@ -352,7 +352,7 @@ class TestChanges:
             release_dir,
             [
                 {
-                    "guid": "P01_001",
+                    "guid": "E01_001",
                     "kind": "given_name",
                     "name_text": "George",
                     "translations": {"lt": "STALE"},
@@ -366,7 +366,7 @@ class TestChanges:
             follow_redirects=True,
         )
 
-        assert _read_records(release_dir)["P01_001"]["translations"] == {"lt": "STALE"}
+        assert _read_records(release_dir)["E01_001"]["translations"] == {"lt": "STALE"}
 
 
 class TestExportAll:
@@ -377,12 +377,12 @@ class TestExportAll:
     ) -> None:
         _write_records(
             release_dir,
-            [{"guid": "P08_001", "kind": "other", "name_text": "Gone", "translations": {}}],
+            [{"guid": "E99_001", "kind": "other", "name_text": "Gone", "translations": {}}],
         )
         _seed_george(db_session)
 
         client.post("/sync/names/export", follow_redirects=True)
 
         records = _read_records(release_dir)
-        assert set(records) == {"P01_001"}
-        assert records["P01_001"]["name_text"] == "George"
+        assert set(records) == {"E01_001"}
+        assert records["E01_001"]["name_text"] == "George"

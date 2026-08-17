@@ -45,34 +45,22 @@ _PHRASE_PREFIXES: Tuple[str, ...] = tuple(
 # real subtype axis emerge - routes without touching this classifier.
 _IDIOM_PREFIX_FAMILY: str = IDIOM_GUID_PREFIX[0]
 
-# Name GUID prefixes (P01 given_name, P04 place, ...). Unlike idioms these are
-# matched exactly rather than by family, because names share the "P" family with
-# pronoun lemmas: P99 is ``pronoun_other``. Reading the mapping means a new name
-# kind routes as soon as it is added to NAME_KIND_GUID_PREFIXES.
-_NAME_PREFIXES: Tuple[str, ...] = tuple(
-    sorted(NAME_KIND_GUID_PREFIXES.values(), key=len, reverse=True)
-)
+# Names are subtyped by kind (E01 given_name, E04 place, ...), so like idioms
+# they are matched by family rather than by the exact allocated prefixes: a kind
+# added later routes without touching this classifier.
+_NAME_PREFIX_FAMILY: str = next(iter(NAME_KIND_GUID_PREFIXES.values()))[0]
 
 
-def _is_idiom_guid(guid: str) -> bool:
-    """Return whether a GUID belongs to the idiom ("M" family) namespace.
+def _is_family_guid(guid: str, family_letter: str) -> bool:
+    """Whether a GUID's prefix is ``family_letter`` followed by digits.
 
-    Matched by family rather than by an exact prefix so that adding an ``M02``
-    later - should a real subtype axis emerge - routes without touching this
-    classifier. The "M" family is not shared with any other kind, which is what
-    makes that safe here and not for names.
-
+    e.g. ``M01_001`` is in the "M" family and ``E04_012`` is in the "E" family.
     A bare ``M`` leaves an empty remainder, and ``"".isdigit()`` is False.
     """
     prefix, separator, _ = guid.partition("_")
-    if not separator or not prefix.startswith(_IDIOM_PREFIX_FAMILY):
+    if not separator or not prefix.startswith(family_letter):
         return False
     return prefix[1:].isdigit()
-
-
-def _has_prefix(guid: str, prefixes: Tuple[str, ...]) -> bool:
-    """Whether ``guid`` starts with one of ``prefixes`` and is prefix-shaped."""
-    return "_" in guid and any(guid.startswith(prefix) for prefix in prefixes)
 
 
 def guid_kind(guid: str) -> GuidKind:
@@ -82,11 +70,11 @@ def guid_kind(guid: str) -> GuidKind:
     """
     if guid.startswith("S_"):
         return "sentence"
-    if _is_idiom_guid(guid):
+    if _is_family_guid(guid, _IDIOM_PREFIX_FAMILY):
         return "idiom"
-    if _has_prefix(guid, _NAME_PREFIXES):
+    if _is_family_guid(guid, _NAME_PREFIX_FAMILY):
         return "name"
-    if _has_prefix(guid, _PHRASE_PREFIXES):
+    if any(guid.startswith(prefix) for prefix in _PHRASE_PREFIXES):
         return "phrase"
     return "lemma"
 

@@ -71,12 +71,7 @@ class TestUnambiguousWord(CandidateLookupTestCase):
     def test_dog_candidate_returned(self) -> None:
         sentence = add_test_sentence(
             self.session,
-            {
-                "en": "The dog runs",
-                "bn": "কুকুর দৌড়ায়",
-                "uk": "Собака біжить",
-                "kn": "ನಾಯಿ ಓಡುತ್ತದೆ",
-            },
+            {"en": "The dog runs", "bn": "কুকুর দৌড়ায়", "uk": "Собака біжить", "kn": "ನಾಯಿ ಓಡುತ್ತದೆ"},
         )
         candidates = find_candidate_lemmas_for_sentence(self.session, sentence.id)
         dog = _find_guid(candidates, _release_dog_guid(self.session))
