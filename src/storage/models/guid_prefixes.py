@@ -160,15 +160,25 @@ IDIOM_GUID_PREFIX = "M01"
 # per-language renderings - Džordžas, 乔治, ジョージ - have to stay stable across
 # every text that uses them. The kind is encoded in the prefix, mirroring how a
 # lemma's subtype is, so a bare GUID says what it names. Keys are
-# ``storage.models.name_entity.NAME_KINDS`` entries; the "E" family (entity) is
-# reserved for names.
+# ``storage.models.name_entity.NAME_KINDS`` entries; "P" is for proper noun.
+#
+# Two things to keep in mind before adding a prefix here:
+#
+# * ``P99`` is NOT available - it is ``pronoun_other`` in SUBTYPE_GUID_PREFIXES
+#   above. That is why "other" is ``P08`` rather than following the ``99 =
+#   other`` convention, which belongs to lemma pos subtypes anyway; phrases
+#   (F01/F02) and idioms (M01) do not follow it either.
+# * Because the "P" family is shared with pronoun lemmas,
+#   ``storage.guid_router`` matches names against these exact prefixes rather
+#   than against the family letter. A new kind is picked up automatically, but
+#   it must be listed here.
 NAME_KIND_GUID_PREFIXES = {
-    "given_name": "E01",
-    "family_name": "E02",
-    "full_name": "E03",
-    "place": "E04",
-    "organization": "E05",
-    "brand": "E06",
-    "animal": "E07",
-    "other": "E99",
+    "given_name": "P01",
+    "family_name": "P02",
+    "full_name": "P03",
+    "place": "P04",
+    "organization": "P05",
+    "brand": "P06",
+    "animal": "P07",
+    "other": "P08",
 }

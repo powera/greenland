@@ -113,7 +113,7 @@ class Name(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    # Release GUID, e.g. "E01_004". Nullable because a name proposed by a
+    # Release GUID, e.g. "P01_004". Nullable because a name proposed by a
     # generator is a draft until it earns a place in the release namespace;
     # assign via storage.crud.name_entity.next_name_guid.
     guid: Mapped[Optional[str]] = mapped_column(String, unique=True, nullable=True, index=True)

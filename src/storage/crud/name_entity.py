@@ -236,7 +236,7 @@ def name_kind_guid_prefix(kind: str) -> str:
 
 
 def next_name_guid(session: Session, kind: str) -> str:
-    """Return the next free GUID in a name kind's namespace (e.g. ``E01_004``).
+    """Return the next free GUID in a name kind's namespace (e.g. ``P01_004``).
 
     Numbering continues from ``MAX(guid)`` within the kind, matching
     :func:`storage.crud.idiom.next_idiom_guid`. Gaps in the middle of a

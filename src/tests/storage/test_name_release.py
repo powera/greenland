@@ -18,7 +18,12 @@ from storage.crud.name_entity import (
     set_name_translation,
 )
 from storage.guid_router import guid_kind, resolve_guid
-from storage.models.guid_prefixes import NAME_KIND_GUID_PREFIXES
+from storage.models.guid_prefixes import (
+    IDIOM_GUID_PREFIX,
+    NAME_KIND_GUID_PREFIXES,
+    PHRASE_SUBTYPE_GUID_PREFIXES,
+    SUBTYPE_GUID_PREFIXES,
+)
 from storage.models.name_entity import NAME_KINDS, Name
 from storage.models.schema import Base
 from storage.release.name import (
@@ -138,15 +143,42 @@ def test_name_guids_route_to_names(session: Session) -> None:
     assert resolved is name
 
 
-def test_name_guid_routing_does_not_capture_lemma_guids() -> None:
-    """The name family must not swallow the lemma namespace."""
+def test_name_guid_routing_does_not_capture_other_namespaces() -> None:
     assert guid_kind("N02_001") == "lemma"
     assert guid_kind("M01_001") == "idiom"
     assert guid_kind("S_00001") == "sentence"
+    assert guid_kind("F01_001") == "phrase"
+
+
+def test_pronoun_lemmas_still_route_as_lemmas() -> None:
+    """Names share the "P" family with pronouns, so matching must be exact.
+
+    ``P99`` is ``pronoun_other`` in SUBTYPE_GUID_PREFIXES. Matching names by
+    family letter - which is how idioms are matched - would classify every
+    pronoun lemma as a name.
+    """
+    assert guid_kind("P99_001") == "lemma"
+    assert guid_kind("P01_001") == "name"
+
+
+def test_no_name_prefix_collides_with_a_lemma_subtype_prefix() -> None:
+    """The two namespaces share the "P" family, so they must not overlap."""
+    lemma_prefixes = {
+        prefix
+        for subtype_prefixes in SUBTYPE_GUID_PREFIXES.values()
+        for prefix in subtype_prefixes.values()
+    }
+    assert not (set(NAME_KIND_GUID_PREFIXES.values()) & lemma_prefixes)
+
+
+def test_no_name_prefix_collides_with_phrase_or_idiom() -> None:
+    name_prefixes = set(NAME_KIND_GUID_PREFIXES.values())
+    assert not (name_prefixes & set(PHRASE_SUBTYPE_GUID_PREFIXES.values()))
+    assert IDIOM_GUID_PREFIX not in name_prefixes
 
 
 def test_get_name_by_guid_returns_none_when_absent(session: Session) -> None:
-    assert get_name_by_guid(session, "E01_999") is None
+    assert get_name_by_guid(session, "P01_999") is None
 
 
 # --- Record shape ----------------------------------------------------------
@@ -270,7 +302,7 @@ def test_reading_an_absent_release_directory_yields_nothing(tmp_path: Path) -> N
 
 def test_unknown_kind_in_a_release_record_is_rejected(session: Session, tmp_path: Path) -> None:
     (tmp_path / "base.jsonl").write_text(
-        '{"guid": "E01_001", "kind": "sidekick", "name_text": "George", "translations": {}}\n',
+        '{"guid": "P01_001", "kind": "sidekick", "name_text": "George", "translations": {}}\n',
         encoding="utf-8",
     )
     with pytest.raises(ValueError, match="Unknown name kind"):

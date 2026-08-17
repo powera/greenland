@@ -278,7 +278,7 @@ Name records live in `names/base.jsonl`:
 
 ```json
 {
-  "guid": "E01_001",
+  "guid": "P01_001",
   "kind": "given_name",
   "name_text": "George",
   "gender": "masculine",
@@ -305,8 +305,9 @@ language codes.
 Names carry no difficulty level and no definition: a learner does not *learn*
 George, and a sentence's `minimum_level` skips names when rolling up difficulty.
 The `kind` is one of `storage.models.name_entity.NAME_KINDS` and is also encoded
-in the GUID prefix (`E01` given_name, `E02` family_name, `E03` full_name, `E04`
-place, `E05` organization, `E06` brand, `E07` animal, `E99` other).
+in the GUID prefix (`P01` given_name, `P02` family_name, `P03` full_name, `P04`
+place, `P05` organization, `P06` brand, `P07` animal, `P08` other).
+Note `P99` is not used: it is `pronoun_other` in the lemma subtype table..
 
 ## Important Guidelines
 
