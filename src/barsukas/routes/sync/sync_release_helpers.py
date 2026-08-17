@@ -29,7 +29,7 @@ def db_form_to_dict(form: Any, *, include_base_form: bool) -> Dict[str, Any]:
     """
     record: Dict[str, Any] = {
         "grammatical_form": form.grammatical_form,
-        "text": form.form_text,
+        "text": form.derivative_form_text,
     }
     if include_base_form:
         record["is_base_form"] = form.is_base_form

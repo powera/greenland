@@ -14,8 +14,9 @@ from typing import Any, Dict, List
 import pytest
 from flask import Flask
 
-from barsukas.routes.sync import release_io
+from barsukas.routes.sync import release_io, sync_release_helpers
 from barsukas.routes.sync.paging import PER_PAGE_CHOICES, Page, page_args, paginate
+from storage.models.schema import DerivativeForm
 
 
 @pytest.fixture()
@@ -348,3 +349,55 @@ def test_page_args_drops_page_and_keeps_filters(app: Flask) -> None:
     assert "page" not in args
     assert args["lang"] == ["ta", "kn"]
     assert args["per_page"] == "50"
+
+
+# --- Per-language form records ---------------------------------------------
+
+
+def _derivative(**overrides: Any) -> DerivativeForm:
+    fields: Dict[str, Any] = {
+        "grammatical_form": "noun/lt_plural",
+        "derivative_form_text": "šunys",
+        "is_base_form": False,
+        "ipa_pronunciation": None,
+        "phonetic_pronunciation": None,
+    }
+    fields.update(overrides)
+    return DerivativeForm(**fields)
+
+
+def test_db_form_to_dict_reads_the_form_text() -> None:
+    """The column is derivative_form_text; naming it wrong silently exports nothing."""
+    record = sync_release_helpers.db_form_to_dict(form=_derivative(), include_base_form=True)
+    assert record["text"] == "šunys"
+    assert record["grammatical_form"] == "noun/lt_plural"
+
+
+def test_db_form_to_dict_carries_base_form_only_for_inflections() -> None:
+    inflection = sync_release_helpers.db_form_to_dict(
+        form=_derivative(is_base_form=True), include_base_form=True
+    )
+    synonym = sync_release_helpers.db_form_to_dict(
+        form=_derivative(grammatical_form="synonym", derivative_form_text="kalė"),
+        include_base_form=False,
+    )
+    assert inflection["is_base_form"] is True
+    assert "is_base_form" not in synonym
+
+
+def test_db_form_to_dict_omits_empty_pronunciations() -> None:
+    record = sync_release_helpers.db_form_to_dict(form=_derivative(), include_base_form=True)
+    assert "ipa" not in record and "phonetic" not in record
+
+    with_ipa = sync_release_helpers.db_form_to_dict(
+        form=_derivative(ipa_pronunciation="ʃuːnʲiːs"), include_base_form=True
+    )
+    assert with_ipa["ipa"] == "ʃuːnʲiːs"
+
+
+def test_languages_with_release_files_ignores_grouped_files(tmp_path: Path) -> None:
+    """base/secondary/ancient are file names, not language codes."""
+    for name in ("lt", "en", "base", "secondary", "ancient", "audio"):
+        _write_jsonl(tmp_path / "nouns" / "food" / f"{name}.jsonl", [{"guid": "N06_001"}])
+
+    assert sync_release_helpers.languages_with_release_files(tmp_path) == {"lt", "en"}
