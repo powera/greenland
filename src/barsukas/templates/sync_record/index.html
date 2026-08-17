@@ -1,0 +1,141 @@
+{#
+  Landing page for a whole-record sync type (idioms, names).
+
+  Driven entirely by the RecordSyncSpec in `spec`, so a new element type of
+  this shape needs no template of its own.
+#}
+{% extends "base.html" %}
+
+{% block title %}Sync {{ spec.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_hub.index') }}">Sync</a></li>
+                    <li class="breadcrumb-item active">{{ spec.title }}</li>
+                </ol>
+            </nav>
+            <h2><i class="bi {{ spec.icon }}"></i> Sync {{ spec.title }}</h2>
+            <p class="text-muted">
+                Compare {{ spec.noun }} records in <code>{{ release_dir }}</code> with the
+                working database. Records are compared whole: a {{ spec.noun }} either
+                matches its release record or it does not.
+            </p>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-header"><i class="bi bi-info-circle"></i> {{ STRINGS.sync.summary }}</div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Release file:</strong> <code>{{ release_dir }}/base.jsonl</code></p>
+                    <p class="mb-1"><strong>In release:</strong> {{ counts.release_total }}</p>
+                    <p class="mb-0"><strong>In database:</strong> {{ counts.db_total }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100 {% if counts.additions %}border-success{% endif %}">
+                <div class="card-header">
+                    <i class="bi bi-plus-circle text-success"></i> {{ STRINGS.sync.additions }}
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title {% if counts.additions %}text-success{% else %}text-muted{% endif %}">
+                        {{ counts.additions }}
+                    </h3>
+                    <p class="card-text text-muted">
+                        In the release file but not in the database
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for(spec.blueprint_name ~ '.additions') }}"
+                       class="btn btn-sm {% if counts.additions %}btn-success{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_import }}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100 {% if counts.removals %}border-danger{% endif %}">
+                <div class="card-header">
+                    <i class="bi bi-dash-circle text-danger"></i> {{ STRINGS.sync.removals }}
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title {% if counts.removals %}text-danger{% else %}text-muted{% endif %}">
+                        {{ counts.removals }}
+                    </h3>
+                    <p class="card-text text-muted">
+                        In the database but not in the release file - export or delete
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for(spec.blueprint_name ~ '.removals') }}"
+                       class="btn btn-sm {% if counts.removals %}btn-danger{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_delete }}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100 {% if counts.changes %}border-info{% endif %}">
+                <div class="card-header">
+                    <i class="bi bi-pencil text-info"></i> {{ STRINGS.sync.changes }}
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title {% if counts.changes %}text-info{% else %}text-muted{% endif %}">
+                        {{ counts.changes }}
+                    </h3>
+                    <p class="card-text text-muted">
+                        Same GUID, different record
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for(spec.blueprint_name ~ '.changes') }}"
+                       class="btn btn-sm {% if counts.changes %}btn-info{% else %}btn-outline-secondary{% endif %}">
+                        <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.view_sync }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-header"><i class="bi bi-box-arrow-up"></i> {{ STRINGS.sync.export }}</div>
+                <div class="card-body d-flex flex-wrap align-items-center gap-3">
+                    <p class="text-muted mb-0">
+                        Rewrite <code>base.jsonl</code> from every GUIDed {{ spec.noun }} in the
+                        database. This is the whole file, not a merge: release-only records
+                        are dropped.
+                    </p>
+                    <form method="post" action="{{ url_for(spec.blueprint_name ~ '.export_all') }}"
+                          class="ms-auto"
+                          onsubmit="return confirm('Rewrite the {{ spec.noun }} release file from the database?');">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-up"></i> Export all {{ counts.db_total }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col">
+            <a href="{{ url_for('sync_hub.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> {{ STRINGS.sync.back_to_sync_hub }}
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

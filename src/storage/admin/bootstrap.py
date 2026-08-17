@@ -12,6 +12,7 @@ from storage.migrate import (
     import_idiom_release_to_sqlite,
     import_jsonl_to_sqlite,
     import_lemma_audio_release_to_sqlite,
+    import_name_release_to_sqlite,
 )
 
 
@@ -118,6 +119,11 @@ def bootstrap_from_release(
     if (idiom_path / "base.jsonl").is_file():
         import_idiom_release_to_sqlite(str(database_path), str(idiom_path))
         imported_components.append("idioms")
+
+    name_path = resolved_release_path / "names"
+    if (name_path / "base.jsonl").is_file():
+        import_name_release_to_sqlite(str(database_path), str(name_path))
+        imported_components.append("names")
 
     if any(lemma_path.rglob("audio.jsonl")):
         import_lemma_audio_release_to_sqlite(str(database_path), str(lemma_path))

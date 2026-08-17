@@ -12,6 +12,22 @@ from storage.backend.jsonl import models
 from storage.backend.jsonl.session import JSONLSession
 from storage.models.schema import NON_INFLECTION_GRAMMATICAL_FORMS
 from storage.models.variant_form import VARIANT_KIND_SPELLING
+from storage.translation_helpers import EXTRA_RELEASE_LANGUAGE_GROUPS
+
+# Files under lemmas/{pos}/{subtype}/ whose stem is not a language code.
+#
+# Grouped translation files hold the same {guid, translations, translation_metadata}
+# shape as base.jsonl but for languages kept out of the main record: every Tier 3/4
+# language in secondary.jsonl, and one file per named group (ancient.jsonl). Reading
+# them as if "secondary"/"ancient" were language codes is how those translations used
+# to get dropped on import, so they are routed by name here instead.
+GROUPED_TRANSLATION_FILE_STEMS: Set[str] = {"secondary", *EXTRA_RELEASE_LANGUAGE_GROUPS}
+
+# audio.jsonl carries approved audio metadata, not lemma content. It is imported
+# separately (storage.migrate.import_lemma_audio_release_to_sqlite) because those
+# rows land in audio tables, so the lemma loader skips it rather than treating
+# "audio" as a language.
+NON_LEMMA_FILE_STEMS: Set[str] = {"audio"}
 
 
 class JSONLStorage(BaseStorage):
@@ -141,6 +157,10 @@ class JSONLStorage(BaseStorage):
                         if "translation_disambiguations" in data:
                             lemma.translation_disambiguations = data["translation_disambiguations"]
 
+                        # Load per-language translation status from base.jsonl
+                        if "translation_metadata" in data:
+                            lemma.translation_metadata = dict(data["translation_metadata"])
+
                         # Load emoji list from base.jsonl
                         if "emoji" in data and data["emoji"]:
                             lemma.emoji = list(data["emoji"])
@@ -176,10 +196,22 @@ class JSONLStorage(BaseStorage):
             except Exception as e:
                 print(f"Error loading {base_file}: {e}")
 
-        # Second pass: Load all language files (including en.jsonl) and merge data
+        # Second pass: grouped translation files (secondary.jsonl and the named
+        # extra-language groups). These must be merged before the per-language
+        # pass rejects them: their stem is a group name, not a language code.
+        for grouped_file in lemmas_dir.rglob("*.jsonl"):
+            if grouped_file.stem in GROUPED_TRANSLATION_FILE_STEMS:
+                self._merge_grouped_translation_file(grouped_file)
+
+        # Third pass: Load all language files (including en.jsonl) and merge data
         for lang_file in lemmas_dir.rglob("*.jsonl"):
-            # Skip base.jsonl files (already loaded)
+            # Skip base.jsonl files (already loaded), the grouped translation
+            # files handled above, and files that are not lemma content at all.
             if lang_file.name == "base.jsonl":
+                continue
+            if lang_file.stem in GROUPED_TRANSLATION_FILE_STEMS:
+                continue
+            if lang_file.stem in NON_LEMMA_FILE_STEMS:
                 continue
 
             lang_code = lang_file.stem  # e.g., "en", "zh" from "en.jsonl", "zh.jsonl"
@@ -398,6 +430,45 @@ class JSONLStorage(BaseStorage):
 
             except Exception as e:
                 print(f"Error loading {lang_file}: {e}")
+
+    def _merge_grouped_translation_file(self, grouped_file: Path) -> None:
+        """Merge one grouped translation file (secondary.jsonl, ancient.jsonl, ...).
+
+        Each line is ``{"guid": ..., "translations": {lang: text},
+        "translation_metadata": {lang: {...}}}`` for languages held outside the
+        main record. Existing translations win: base.jsonl is the primary record
+        for the languages it carries, and a group file should never quietly
+        redefine one.
+        """
+        try:
+            with open(grouped_file, "r", encoding="utf-8") as f:
+                for line_num, line in enumerate(f, start=1):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        data = json.loads(line)
+                    except json.JSONDecodeError as parse_error:
+                        print(f"Error loading {grouped_file}:{line_num}: {parse_error}")
+                        continue
+
+                    guid = data.get("guid")
+                    if not guid or guid not in self.lemmas:
+                        print(
+                            f"Warning: {grouped_file} contains guid {guid} "
+                            "not found in base data"
+                        )
+                        continue
+
+                    lemma = self.lemmas[guid]
+                    for lang_code, translation in (data.get("translations") or {}).items():
+                        if translation and lang_code not in lemma.translations:
+                            lemma.translations[lang_code] = translation
+                    for lang_code, metadata in (data.get("translation_metadata") or {}).items():
+                        if metadata and lang_code not in lemma.translation_metadata:
+                            lemma.translation_metadata[lang_code] = metadata
+        except Exception as e:
+            print(f"Error loading {grouped_file}: {e}")
 
     def _load_sentences(self) -> None:
         """Load all sentence files from disk.

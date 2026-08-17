@@ -288,6 +288,14 @@ class JSONLSession(BaseSession):
                 disambig = jsonl_lemma.translation_disambiguations.get(lang_code)
                 if disambig:
                     trans_entry["disambiguation"] = disambig
+                lang_metadata = jsonl_lemma.translation_metadata.get(lang_code)
+                if lang_metadata:
+                    if lang_metadata.get("translation_status"):
+                        trans_entry["translation_status"] = lang_metadata["translation_status"]
+                    if lang_metadata.get("translation_status_note"):
+                        trans_entry["translation_status_note"] = lang_metadata[
+                            "translation_status_note"
+                        ]
                 translations.append(trans_entry)
 
             # Per-language difficulty overrides (stored in base.jsonl).

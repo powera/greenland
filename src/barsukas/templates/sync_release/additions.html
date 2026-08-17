@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "sync/_macros.html" as sync with context %}
 
 {% block title %}Sync - New Lemmas{% endblock %}
 
@@ -19,34 +20,24 @@
         </div>
     </div>
 
-    {% if not additions %}
-    <div class="alert alert-success">
-        <i class="bi bi-check-circle"></i> No new lemmas to import. SQLite is up to date with release.
-    </div>
-    <a href="{{ url_for('sync_release.index') }}" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Back
-    </a>
+    {% if not page.total %}
+    {{ sync.all_in_sync('sync_release.index', 'No new lemmas to import. SQLite is up to date with release.') }}
     {% else %}
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-list-check"></i> New Lemmas: {{ additions|length }}</span>
-            <div>
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">
-                    {{ STRINGS.sync.deselect_all }}
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-success" onclick="toggleAll(true)">
-                    {{ STRINGS.sync.select_all }}
-                </button>
-            </div>
+            <span><i class="bi bi-list-check"></i> New Lemmas: {{ page.total }}</span>
+            {{ sync.checkbox_toggle_buttons() }}
         </div>
         <div class="card-body">
+            {{ sync.list_toolbar(page, 'sync_release.additions') }}
+
             <form method="post" action="{{ url_for('sync_release.apply_additions') }}">
                 <div class="table-responsive">
                     <table class="table table-sm table-hover">
                         <thead class="table-light">
                             <tr>
                                 <th style="width: 40px;">
-                                    <input type="checkbox" id="select-all-checkbox" onchange="toggleAll(this.checked)">
+                                    <input type="checkbox" id="select-all-checkbox" onchange="syncToggleAll(this.checked)">
                                 </th>
                                 <th>{{ STRINGS.sync.guid }}</th>
                                 <th>{{ STRINGS.linguistics.word }}</th>
@@ -56,7 +47,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for item in additions %}
+                            {% for item in page.items %}
                             <tr>
                                 <td>
                                     <input type="checkbox" class="item-checkbox" name="selected_guids" value="{{ item.guid }}">
@@ -108,17 +99,15 @@
                     </button>
                 </div>
             </form>
+
+            {{ sync.bulk_select_all(page, url_for('sync_release.apply_additions'),
+                                    'Import all', 'lemma') }}
+
+            <div class="mt-3">{{ sync.list_toolbar(page, 'sync_release.additions') }}</div>
         </div>
     </div>
     {% endif %}
 </div>
 
-<script>
-function toggleAll(checked) {
-    document.querySelectorAll('.item-checkbox').forEach(function(checkbox) {
-        checkbox.checked = checked;
-    });
-    document.getElementById('select-all-checkbox').checked = checked;
-}
-</script>
+<script src="{{ url_for('static', filename='js/sync.js') }}"></script>
 {% endblock %}

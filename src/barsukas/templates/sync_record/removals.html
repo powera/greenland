@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% import "sync/_macros.html" as sync with context %}
+
+{% block title %}Sync {{ spec.title }} - {{ STRINGS.sync.removals }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_hub.index') }}">Sync</a></li>
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for(spec.blueprint_name ~ '.index') }}">{{ spec.title }}</a>
+                    </li>
+                    <li class="breadcrumb-item active">{{ STRINGS.sync.removals }}</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-dash-circle text-danger"></i> {{ spec.title }} Not in Release</h2>
+            <p class="text-muted">
+                These exist in the database but not in <code>{{ release_dir }}</code>.
+                <strong>Export</strong> writes them to the release file;
+                <strong>Delete</strong> removes them from the database.
+            </p>
+        </div>
+    </div>
+
+    {% if not page.total %}
+    {{ sync.all_in_sync(spec.blueprint_name ~ '.index',
+                        'No unreleased %ss found. The database matches release.' % spec.noun) }}
+    {% else %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-check"></i> Database-only {{ spec.title }}: {{ page.total }}</span>
+            {{ sync.checkbox_toggle_buttons() }}
+        </div>
+        <div class="card-body">
+            {{ sync.list_toolbar(page, spec.blueprint_name ~ '.removals') }}
+
+            {# One form, two submit buttons: formaction picks the route. #}
+            <form method="post" action="{{ url_for(spec.blueprint_name ~ '.export_removals') }}">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 40px;">
+                                    <input type="checkbox" id="select-all-checkbox" onchange="syncToggleAll(this.checked)">
+                                </th>
+                                <th style="width: 110px;">{{ STRINGS.sync.guid }}</th>
+                                <th>{{ STRINGS.sync.details }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in page.items %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="item-checkbox" name="selected_ids"
+                                           value="{{ record._row_id }}">
+                                </td>
+                                <td>
+                                    {% if spec.view_endpoint %}
+                                    <a href="{{ url_for(spec.view_endpoint, **{spec.view_id_arg: record._row_id}) }}"
+                                       target="_blank"><code>{{ record.guid }}</code></a>
+                                    {% else %}
+                                    <code>{{ record.guid }}</code>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% for label, value in spec.describe(record) %}
+                                    <div><small class="text-muted">{{ label }}:</small> {{ value }}</div>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <a href="{{ url_for(spec.blueprint_name ~ '.index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-up"></i> {{ STRINGS.sync.export_to_release }}
+                        </button>
+                        <button type="submit" class="btn btn-danger"
+                                formaction="{{ url_for(spec.blueprint_name ~ '.delete_removals') }}"
+                                onclick="return confirm('Delete the selected {{ spec.noun }}(s)? This cannot be undone.');">
+                            <i class="bi bi-trash"></i> Delete Selected
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            {# Export is offered for the whole list; deletion deliberately is not. #}
+            {{ sync.bulk_select_all(page, url_for(spec.blueprint_name ~ '.export_removals'),
+                                    'Export all to release', spec.noun, 'btn-outline-primary') }}
+
+            <div class="mt-3">{{ sync.list_toolbar(page, spec.blueprint_name ~ '.removals') }}</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script src="{{ url_for('static', filename='js/sync.js') }}"></script>
+{% endblock %}

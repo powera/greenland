@@ -1,0 +1,190 @@
+{#
+  Shared building blocks for the /sync difference pages.
+
+  All of them assume a `page` object built by barsukas.routes.sync.paging.paginate
+  and an `endpoint` naming the route that rendered it.
+#}
+
+{# Per-row choice control. Options the row cannot offer (an empty side has
+   nothing to copy) are omitted rather than shown disabled. #}
+{% macro action_select(name, allow_db=True, allow_release=True, width='140px') %}
+<select class="form-select form-select-sm action-select" name="{{ name }}" style="min-width: {{ width }};">
+    <option value="skip">{{ STRINGS.sync.skip }}</option>
+    {% if allow_db %}<option value="use_db">{{ STRINGS.sync.use_db }}</option>{% endif %}
+    {% if allow_release %}<option value="use_release">{{ STRINGS.sync.use_release }}</option>{% endif %}
+</select>
+{% endmacro %}
+
+{# "Set every visible row to X" buttons. These only touch the rendered page;
+   whole-list changes go through bulk_apply below. #}
+{% macro select_all_buttons(release_class='btn-outline-primary') %}
+<div class="btn-group btn-group-sm" role="group">
+    <button type="button" class="btn btn-outline-secondary" onclick="syncSelectAll('skip')">
+        {{ STRINGS.sync.skip_all }}
+    </button>
+    <button type="button" class="btn btn-outline-warning" onclick="syncSelectAll('use_db')">
+        Use All DB
+    </button>
+    <button type="button" class="btn {{ release_class }}" onclick="syncSelectAll('use_release')">
+        {{ STRINGS.sync.use_all_release }}
+    </button>
+</div>
+{% endmacro %}
+
+{# Page-size selector. An ordinary GET form, so it works without JS. #}
+{% macro per_page_form(page, endpoint, args={}) %}
+<form method="get" action="{{ url_for(endpoint) }}" class="d-flex align-items-center gap-2">
+    {% for key, value in args.items() %}
+    {% if key not in ('per_page', 'page') %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}
+    {% endfor %}
+    <label class="form-label mb-0 small text-muted" for="per_page_{{ endpoint }}">Per page</label>
+    <select class="form-select form-select-sm" id="per_page_{{ endpoint }}" name="per_page"
+            style="width: auto;" onchange="this.form.submit()">
+        {% for choice in per_page_choices %}
+        <option value="{{ choice }}" {% if choice == page.per_page %}selected{% endif %}>
+            {{ choice if choice else 'All' }}
+        </option>
+        {% endfor %}
+    </select>
+    <noscript><button type="submit" class="btn btn-sm btn-outline-secondary">Set</button></noscript>
+</form>
+{% endmacro %}
+
+{# Numbered pager with elision. Renders nothing for a single-page list. #}
+{% macro pager(page, endpoint, args={}) %}
+{% if page.pages > 1 %}
+<nav aria-label="Difference list pages">
+    <ul class="pagination pagination-sm mb-0">
+        <li class="page-item {% if not page.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for(endpoint, **dict(args, page=page.page - 1)) }}">Prev</a>
+        </li>
+        {% for number in page.page_numbers() %}
+        {% if number is none %}
+        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        {% else %}
+        <li class="page-item {% if number == page.page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for(endpoint, **dict(args, page=number)) }}">{{ number }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+        <li class="page-item {% if not page.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for(endpoint, **dict(args, page=page.page + 1)) }}">Next</a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+{% endmacro %}
+
+{# "Showing 1-200 of 2413" plus the page-size selector and pager. #}
+{% macro list_toolbar(page, endpoint, args={}) %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+    <span class="text-muted small">
+        Showing {{ page.first_index }}-{{ page.last_index }} of {{ page.total }}
+    </span>
+    <div class="d-flex flex-wrap align-items-center gap-3">
+        {{ per_page_form(page, endpoint, args) }}
+        {{ pager(page, endpoint, args) }}
+    </div>
+</div>
+{% endmacro %}
+
+{#
+  Whole-list apply, as its own form so it cannot pick up the per-row selects.
+
+  The count the user is confirming rides along in bulk_expected_count; the route
+  refuses the submit if the list has changed size since the page was rendered.
+  The confirm checkbox is a deliberate speed bump: this is the one control on
+  the page that acts on rows the user cannot see.
+#}
+{% macro bulk_apply(page, action_url, noun='item', filter_name=none, filter_values=[]) %}
+{% if page.total > page.items|length %}
+<form method="post" action="{{ action_url }}" class="card border-warning mt-3">
+    <div class="card-body py-2">
+        <div class="d-flex flex-wrap align-items-center gap-3">
+            <div class="form-check mb-0">
+                <input class="form-check-input" type="checkbox" id="bulk_confirm" name="bulk_confirm" required>
+                <label class="form-check-label small" for="bulk_confirm">
+                    Apply to all <strong>{{ page.total }}</strong> {{ noun }}(s), including
+                    the {{ page.total - page.items|length }} not shown on this page
+                </label>
+            </div>
+            {# The filter the page was opened with, so "all" means all of what
+               is being viewed rather than all of everything. #}
+            {% if filter_name %}
+            {% for filter_value in filter_values %}
+            <input type="hidden" name="{{ filter_name }}" value="{{ filter_value }}">
+            {% endfor %}
+            {% endif %}
+            <input type="hidden" name="bulk_expected_count" value="{{ page.total }}">
+            <div class="btn-group btn-group-sm ms-auto" role="group">
+                <button type="submit" name="bulk_action" value="use_db" class="btn btn-outline-warning">
+                    All &rarr; {{ STRINGS.sync.release }}
+                </button>
+                <button type="submit" name="bulk_action" value="use_release" class="btn btn-outline-primary">
+                    All &rarr; {{ STRINGS.sync.database }}
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endif %}
+{% endmacro %}
+
+{# Check/uncheck every checkbox on the rendered page. #}
+{% macro checkbox_toggle_buttons() %}
+<div class="btn-group btn-group-sm" role="group">
+    <button type="button" class="btn btn-outline-secondary" onclick="syncToggleAll(false)">
+        {{ STRINGS.sync.deselect_all }}
+    </button>
+    <button type="button" class="btn btn-outline-success" onclick="syncToggleAll(true)">
+        {{ STRINGS.sync.select_all }}
+    </button>
+</div>
+{% endmacro %}
+
+{#
+  Whole-list action for the checkbox pages (import all, export all).
+
+  Its own form, so the confirm checkbox cannot block an ordinary per-row submit
+  and the page's checkboxes are not posted along with it.
+#}
+{% macro bulk_select_all(page, action_url, label, noun='item', button_class='btn-outline-success') %}
+{% if page.total > page.items|length %}
+<form method="post" action="{{ action_url }}" class="card border-warning mt-3">
+    <div class="card-body py-2 d-flex flex-wrap align-items-center gap-3">
+        <div class="form-check mb-0">
+            <input class="form-check-input" type="checkbox" id="bulk_confirm_all" name="bulk_confirm" required>
+            <label class="form-check-label small" for="bulk_confirm_all">
+                Include the {{ page.total - page.items|length }} {{ noun }}(s) not shown on this page
+            </label>
+        </div>
+        <input type="hidden" name="select_scope" value="all">
+        <button type="submit" class="btn btn-sm {{ button_class }} ms-auto">
+            {{ label }} (all {{ page.total }})
+        </button>
+    </div>
+</form>
+{% endif %}
+{% endmacro %}
+
+{# Back link + submit row that closes every difference form. #}
+{% macro form_footer(back_endpoint, submit_class='btn-primary') %}
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <a href="{{ url_for(back_endpoint) }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+    <button type="submit" class="btn {{ submit_class }}">
+        <i class="bi bi-check-lg"></i> {{ STRINGS.sync.apply_changes }}
+    </button>
+</div>
+{% endmacro %}
+
+{# Shown in place of the list when there is nothing to reconcile. #}
+{% macro all_in_sync(back_endpoint, message) %}
+<div class="alert alert-success">
+    <i class="bi bi-check-circle"></i> {{ message }}
+</div>
+<a href="{{ url_for(back_endpoint) }}" class="btn btn-secondary">
+    <i class="bi bi-arrow-left"></i> Back
+</a>
+{% endmacro %}

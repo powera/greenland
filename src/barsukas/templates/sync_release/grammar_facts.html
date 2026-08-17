@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "sync/_macros.html" as sync with context %}
 
 {% block title %}{{ STRINGS.sync.sync_grammar_facts_title }}{% endblock %}
 
@@ -20,31 +21,24 @@
         </div>
     </div>
 
-    {% if not differences %}
-    <div class="alert alert-success">
-        <i class="bi bi-check-circle"></i> All grammar facts are in sync!
-    </div>
+    {% if not page.total %}
+    {{ sync.all_in_sync('sync_release.index', 'All grammar facts are in sync!') }}
     {% else %}
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-list-check"></i> {{ STRINGS.sync.differences }}: {{ differences|length }} lemma(s)</span>
-            <div>
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleAll(true)">
-                    {{ STRINGS.sync.select_all }}
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">
-                    {{ STRINGS.sync.deselect_all }}
-                </button>
-            </div>
+            <span><i class="bi bi-list-check"></i> {{ STRINGS.sync.differences }}: {{ page.total }} lemma(s)</span>
+            {{ sync.checkbox_toggle_buttons() }}
         </div>
         <div class="card-body">
+            {{ sync.list_toolbar(page, 'sync_release.grammar_facts') }}
+
             <form method="post" action="{{ url_for('sync_release.apply_grammar_facts') }}">
                 <div class="table-responsive">
                     <table class="table table-sm table-hover">
                         <thead class="table-light">
                             <tr>
                                 <th style="width: 40px;">
-                                    <input type="checkbox" id="select-all-cb" onchange="toggleAll(this.checked)">
+                                    <input type="checkbox" id="select-all-checkbox" onchange="syncToggleAll(this.checked)">
                                 </th>
                                 <th>{{ STRINGS.sync.guid }}</th>
                                 <th>{{ STRINGS.linguistics.word }}</th>
@@ -53,10 +47,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for diff in differences %}
+                            {% for diff in page.items %}
                             <tr>
                                 <td>
-                                    <input type="checkbox" class="guid-cb" name="selected_guids" value="{{ diff.guid }}">
+                                    <input type="checkbox" class="item-checkbox" name="selected_guids" value="{{ diff.guid }}">
                                 </td>
                                 <td>
                                     <a href="{{ url_for('lemmas.view_lemma', lemma_id=diff.lemma_id) }}" target="_blank">
@@ -97,17 +91,15 @@
                     </button>
                 </div>
             </form>
+
+            {{ sync.bulk_select_all(page, url_for('sync_release.apply_grammar_facts'),
+                                    'Import all facts', 'lemma') }}
+
+            <div class="mt-3">{{ sync.list_toolbar(page, 'sync_release.grammar_facts') }}</div>
         </div>
     </div>
     {% endif %}
 </div>
 
-<script>
-function toggleAll(checked) {
-    document.querySelectorAll('.guid-cb').forEach(function(cb) {
-        cb.checked = checked;
-    });
-    document.getElementById('select-all-cb').checked = checked;
-}
-</script>
+<script src="{{ url_for('static', filename='js/sync.js') }}"></script>
 {% endblock %}

@@ -11,6 +11,7 @@ data/release/lemmas/
 │   ├── food/
 │   │   ├── base.jsonl
 │   │   ├── secondary.jsonl
+│   │   ├── ancient.jsonl
 │   │   ├── audio.jsonl
 │   │   └── {lang}.jsonl
 │   ├── animals/
@@ -18,18 +19,22 @@ data/release/lemmas/
 │   └── ...
 ├── verbs/
 │   └── ...
-├── phrases/
-│   ├── greetings/
-│   │   └── base.jsonl
-│   └── traveler/
-│       └── base.jsonl
 └── ...
+data/release/phrases/
+├── greetings/
+│   └── base.jsonl
+└── traveler/
+    └── base.jsonl
 data/release/sentences/
 ├── beginner/
 │   └── nouns/
 │       └── food/
 │           └── base.jsonl
 └── ...
+data/release/idioms/
+└── base.jsonl
+data/release/names/
+└── base.jsonl
 ```
 
 Each `base.jsonl` file contains concept definitions with translations and
@@ -38,6 +43,19 @@ translations, word breakdowns, pattern words, and approved audio references.
 Lemma `audio.jsonl` files contain approved audio references grouped by GUID.
 Per-language lemma files (`{lang}.jsonl`) contain inflection data, grammar
 facts, and synonym-class lexical variants for that language.
+
+Beside `base.jsonl` a lemma category may hold **grouped translation files**:
+`secondary.jsonl` for every Tier 3/4 language, and one file per named extra
+language group (`ancient.jsonl`). These hold the same
+`{guid, translations, translation_metadata}` shape as `base.jsonl` but for
+languages kept out of the main record, and they are *not* per-language files -
+their stem is a group name, not a language code. Anything reading the tree has
+to route them by name; see
+`storage.backend.jsonl.storage.GROUPED_TRANSLATION_FILE_STEMS`.
+
+Idioms and names each live in a single `base.jsonl`. Neither is subtyped in the
+release tree: an idiom has no subtype at all, and a name's kind is already
+encoded in its GUID prefix.
 
 ## Tools for Loading/Updating Data
 
@@ -100,12 +118,30 @@ PYTHONPATH=src python src/storage/migrate.py sqlite-to-release
 # Export to data/release/sentences (default)
 PYTHONPATH=src python src/storage/migrate.py sqlite-to-sentence-release
 
+# Export to data/release/phrases (default)
+PYTHONPATH=src python src/storage/migrate.py sqlite-to-phrase-release
+
+# Export to data/release/idioms (default)
+PYTHONPATH=src python src/storage/migrate.py sqlite-to-idiom-release
+
+# Export to data/release/names (default)
+PYTHONPATH=src python src/storage/migrate.py sqlite-to-name-release
+
 # Export only lemma audio files
 PYTHONPATH=src python src/storage/migrate.py sqlite-to-lemma-audio-release
 
 # Export to a custom directory
 PYTHONPATH=src python src/storage/migrate.py sqlite-to-release \
   --release-dir /path/to/output
+```
+
+Idioms and names also import in the other direction. Both skip records whose
+GUID is already present, so re-running is safe; reconciling a record that
+changed on either side is the sync UI's job, not the importer's:
+
+```bash
+PYTHONPATH=src python src/storage/migrate.py idiom-release-to-sqlite
+PYTHONPATH=src python src/storage/migrate.py name-release-to-sqlite
 ```
 
 ### Sync lemma audio back from data/release into SQLite
@@ -127,14 +163,36 @@ PYTHONPATH=src python src/storage/migrate.py lemma-audio-release-to-sqlite --pru
 
 ## Sync Capabilities Summary
 
-| Change Type               | Barsukas `/sync`   |
-|---------------------------|--------------------|
-| New GUIDs                 | `/sync/additions`  |
-| Difficulty (base level)   | `/sync/difficulty` |
-| Changed translations      | `/sync/translations` |
-| Changed lemma_text        | `/sync/changes`    |
-| Remove orphaned GUIDs     | `/sync/removals`   |
+Lemma modes live under `/sync/lemmas`:
+
+| Change Type               | Barsukas page              |
+|---------------------------|----------------------------|
+| New GUIDs                 | `/sync/lemmas/additions`   |
+| Remove orphaned GUIDs     | `/sync/lemmas/removals`    |
+| Changed lemma_text        | `/sync/lemmas/changes`     |
+| Difficulty (base level)   | `/sync/lemmas/difficulty`  |
+| Changed translations      | `/sync/lemmas/translations` |
+| Tier 3/4 translations     | `/sync/lemmas/secondary-translations` |
+| Grammar facts             | `/sync/lemmas/grammar-facts` |
 | Difficulty overrides      | manage_difficulty_overrides.py |
+
+Other element types have their own sections under `/sync`:
+`/sync/derivatives`, `/sync/synonyms`, `/sync/relations`, `/sync/sentences`,
+`/sync/phrases`, `/sync/idioms`, `/sync/names`, `/sync/lemma-audio`.
+
+Idioms and names are compared and written **whole**: each has one `base.jsonl`
+and no per-language files, so a record either matches or it does not, and
+picking a side replaces the whole record on the other. Their pages therefore
+offer three modes (additions, removals, changes) plus a whole-file export.
+
+Concepts are deliberately not synced. They are keyed to Wikidata and never
+enter `data/release`; the only concept data that ships is a lemma's `qid`,
+which the lemma "changes" mode reconciles.
+
+Long difference lists are paginated (default 200 rows). The button beneath each
+list applies one choice to the whole list, including the rows not on the current
+page; it echoes back the count it was rendered with and refuses the submit if
+the list has changed size since.
 
 ## File Format
 
@@ -215,6 +273,40 @@ The `grammatical_form` value is the relation label. Use specific labels such
 as `synonym_near`, `synonym_regional`, `synonym_register`,
 `synonym_related`, `synonym_synecdoche`, `abbreviation`, or `expanded_form`
 when the words are not exact drop-in equivalents.
+
+Name records live in `names/base.jsonl`:
+
+```json
+{
+  "guid": "E01_001",
+  "kind": "given_name",
+  "name_text": "George",
+  "gender": "masculine",
+  "translations": {
+    "lt": "Džordžas",
+    "zh": "乔治",
+    "ja": "ジョージ"
+  },
+  "translation_metadata": {
+    "lt": {"ipa_pronunciation": "ˈdʒɔrdʒɐs", "verified": true},
+    "zh": {"sort_key": "qiaozhi"}
+  }
+}
+```
+
+A name is a proper noun that appears in our texts but is not vocabulary -
+"George", "Fresh Mart", "Maple Street". It is release data because its
+per-language renderings are: every text that casts the same character has to
+render it identically. `translations` is a flat map exactly as it is for
+lemmas, and the extras a rendering can carry (IPA, phonetic respelling, the
+romanized `sort_key`, `verified`) live in `translation_metadata` under the same
+language codes.
+
+Names carry no difficulty level and no definition: a learner does not *learn*
+George, and a sentence's `minimum_level` skips names when rolling up difficulty.
+The `kind` is one of `storage.models.name_entity.NAME_KINDS` and is also encoded
+in the GUID prefix (`E01` given_name, `E02` family_name, `E03` full_name, `E04`
+place, `E05` organization, `E06` brand, `E07` animal, `E99` other).
 
 ## Important Guidelines
 

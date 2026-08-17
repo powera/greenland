@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "sync/_macros.html" as sync with context %}
 
 {% block title %}Sync - Removed Lemmas{% endblock %}
 
@@ -19,13 +20,8 @@
         </div>
     </div>
 
-    {% if not removals %}
-    <div class="alert alert-success">
-        <i class="bi bi-check-circle"></i> No orphaned lemmas found. SQLite matches release.
-    </div>
-    <a href="{{ url_for('sync_release.index') }}" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Back
-    </a>
+    {% if not page.total %}
+    {{ sync.all_in_sync('sync_release.index', 'No orphaned lemmas found. SQLite matches release.') }}
     {% else %}
     <div class="alert alert-info">
         <i class="bi bi-info-circle"></i> These lemmas exist in SQLite but not in <code>data/release</code>.
@@ -35,24 +31,21 @@
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-list-check"></i> SQLite-only Lemmas: {{ removals|length }}</span>
-            <div>
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">
-                    {{ STRINGS.sync.deselect_all }}
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleAll(true)">
-                    {{ STRINGS.sync.select_all }}
-                </button>
-            </div>
+            <span><i class="bi bi-list-check"></i> SQLite-only Lemmas: {{ page.total }}</span>
+            {{ sync.checkbox_toggle_buttons() }}
         </div>
         <div class="card-body">
-            <form id="lemma-form" method="post" action="">
+            {{ sync.list_toolbar(page, 'sync_release.removals') }}
+
+            {# One form, two submit buttons: formaction picks the route, so the
+               action does not have to be swapped from script. #}
+            <form method="post" action="{{ url_for('sync_release.export_removals_to_release') }}">
                 <div class="table-responsive">
                     <table class="table table-sm table-hover">
                         <thead class="table-light">
                             <tr>
                                 <th style="width: 40px;">
-                                    <input type="checkbox" id="select-all-checkbox" onchange="toggleAll(this.checked)">
+                                    <input type="checkbox" id="select-all-checkbox" onchange="syncToggleAll(this.checked)">
                                 </th>
                                 <th>{{ STRINGS.sync.guid }}</th>
                                 <th>{{ STRINGS.linguistics.word }}</th>
@@ -61,7 +54,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for item in removals %}
+                            {% for item in page.items %}
                             <tr>
                                 <td>
                                     <input type="checkbox" class="item-checkbox" name="selected_ids" value="{{ item.lemma_id }}">
@@ -103,52 +96,27 @@
                         <i class="bi bi-arrow-left"></i> Back
                     </a>
                     <div class="btn-group">
-                        <button type="button" class="btn btn-primary" onclick="submitExport()">
+                        <button type="submit" class="btn btn-primary">
                             <i class="bi bi-box-arrow-up"></i> {{ STRINGS.sync.export_to_release }}
                         </button>
-                        <button type="button" class="btn btn-danger" onclick="submitDelete()">
+                        <button type="submit" class="btn btn-danger"
+                                formaction="{{ url_for('sync_release.apply_removals') }}"
+                                onclick="return confirm('Delete the selected lemma(s) from SQLite? This cannot be undone.');">
                             <i class="bi bi-trash"></i> Delete Selected
                         </button>
                     </div>
                 </div>
             </form>
+
+            {# Export is offered for the whole list; deletion deliberately is not. #}
+            {{ sync.bulk_select_all(page, url_for('sync_release.export_removals_to_release'),
+                                    'Export all to release', 'lemma', 'btn-outline-primary') }}
+
+            <div class="mt-3">{{ sync.list_toolbar(page, 'sync_release.removals') }}</div>
         </div>
     </div>
     {% endif %}
 </div>
 
-<script>
-function toggleAll(checked) {
-    document.querySelectorAll('.item-checkbox').forEach(function(checkbox) {
-        checkbox.checked = checked;
-    });
-    document.getElementById('select-all-checkbox').checked = checked;
-}
-
-function submitExport() {
-    var selected = document.querySelectorAll('.item-checkbox:checked').length;
-    if (selected === 0) {
-        alert('No lemmas selected');
-        return;
-    }
-    if (confirm('Export ' + selected + ' lemma(s) to data/release?')) {
-        var form = document.getElementById('lemma-form');
-        form.action = '{{ url_for("sync_release.export_removals_to_release") }}';
-        form.submit();
-    }
-}
-
-function submitDelete() {
-    var selected = document.querySelectorAll('.item-checkbox:checked').length;
-    if (selected === 0) {
-        alert('No lemmas selected');
-        return;
-    }
-    if (confirm('Are you sure you want to delete ' + selected + ' lemma(s)? This cannot be undone.')) {
-        var form = document.getElementById('lemma-form');
-        form.action = '{{ url_for("sync_release.apply_removals") }}';
-        form.submit();
-    }
-}
-</script>
+<script src="{{ url_for('static', filename='js/sync.js') }}"></script>
 {% endblock %}
