@@ -198,6 +198,18 @@
                             <li><a class="dropdown-item" href="{{ url_for('sync_sentence_release.index') }}">
                                 <i class="bi bi-chat-left-text"></i> {{ STRINGS.navigation.get('sentences', 'Sentences') }}
                             </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('sync_phrase_release.index') }}">
+                                <i class="bi bi-chat-quote"></i> {{ STRINGS.navigation.get('phrases', 'Phrases') }}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('sync_idiom_release.index') }}">
+                                <i class="bi bi-chat-square-quote"></i> {{ STRINGS.navigation.get('idioms', 'Idioms') }}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('sync_name_release.index') }}">
+                                <i class="bi bi-person-badge"></i> {{ STRINGS.navigation.get('names', 'Names') }}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('sync_lemma_audio_release.index') }}">
+                                <i class="bi bi-music-note-list"></i> {{ STRINGS.navigation.get('lemma_audio', 'Lemma Audio') }}
+                            </a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('operation_logs.list_logs') }}">
                                 <i class="bi bi-journal-text"></i> {{ STRINGS.navigation.get('operation_logs', 'Operation Logs') }}

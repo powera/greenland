@@ -6,18 +6,27 @@ import json
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, cast
+from typing import Any, Dict, List, Set, Tuple, cast
 
-from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 from sqlalchemy.orm import selectinload
 
-from storage.crud.operation_log import log_operation, log_translation_change
-from storage.migrate import (
-    _resolve_primary_lemma_category,
-    _sentence_to_release_record,
-    _write_jsonl_atomic,
+from barsukas.routes.sync import release_io
+from barsukas.routes.sync.actions import (
+    SKIP,
+    USE_DB,
+    USE_RELEASE,
+    SyncOutcome,
+    bulk_actions_for,
+    is_readonly,
+    parse_bulk_request,
+    parse_language_actions,
+    parse_row_actions,
 )
+from barsukas.routes.sync.paging import PER_PAGE_CHOICES, paginate
+from storage.crud.operation_log import log_operation, log_translation_change
+from storage.migrate import _resolve_primary_lemma_category, _sentence_to_release_record
 from storage.models.schema import (
     ConversationSentence,
     Lemma,
@@ -31,9 +40,6 @@ from storage.translation_helpers import (
     LANGUAGE_NAMES,
     RELEASE_LANGUAGES,
 )
-
-if TYPE_CHECKING:
-    from barsukas.app import BarsukasFlask
 
 logger = logging.getLogger(__name__)
 
@@ -98,26 +104,6 @@ def _get_conversation_sentence_ids(db_session: Any) -> Set[int]:
     return set(
         row[0] for row in db_session.query(ConversationSentence.sentence_id).distinct().all()
     )
-
-
-def _find_release_file_for_sentence(release_dir: Path, guid: str) -> Optional[Path]:
-    """Find the base.jsonl file containing a specific sentence GUID."""
-    for base_file in release_dir.rglob("base.jsonl"):
-        try:
-            with open(base_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        data = json.loads(line)
-                        if data.get("guid") == guid:
-                            return base_file
-                    except json.JSONDecodeError:
-                        continue
-        except Exception:
-            continue
-    return None
 
 
 def _get_db_sentence_english(db_session: Any, sentence: Any) -> str:
@@ -284,7 +270,8 @@ def additions() -> ResponseReturnValue:
 
     return render_template(
         "sync_sentence_release/additions.html",
-        additions=importable,
+        page=paginate(importable),
+        per_page_choices=PER_PAGE_CHOICES,
         blocked=blocked,
         release_dir=str(release_dir),
     )
@@ -293,8 +280,7 @@ def additions() -> ResponseReturnValue:
 @bp.route("/additions/apply", methods=["POST"])
 def apply_additions() -> ResponseReturnValue:
     """Import selected new sentences from release."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
         return redirect(url_for("sync_sentence_release.additions"))
 
@@ -498,7 +484,8 @@ def removals() -> ResponseReturnValue:
 
     return render_template(
         "sync_sentence_release/removals.html",
-        removals=removals_list,
+        page=paginate(removals_list),
+        per_page_choices=PER_PAGE_CHOICES,
         release_dir=str(release_dir),
     )
 
@@ -506,8 +493,7 @@ def removals() -> ResponseReturnValue:
 @bp.route("/removals/apply", methods=["POST"])
 def apply_removals() -> ResponseReturnValue:
     """Delete selected sentences that are not in release."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
         return redirect(url_for("sync_sentence_release.removals"))
 
@@ -636,7 +622,8 @@ def level() -> ResponseReturnValue:
 
     return render_template(
         "sync_sentence_release/level.html",
-        differences=differences,
+        page=paginate(differences),
+        per_page_choices=PER_PAGE_CHOICES,
         release_dir=str(release_dir),
     )
 
@@ -644,61 +631,57 @@ def level() -> ResponseReturnValue:
 @bp.route("/level/apply", methods=["POST"])
 def apply_level() -> ResponseReturnValue:
     """Apply selected minimum_level changes."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
         return redirect(url_for("sync_sentence_release.level"))
 
     actions: Dict[str, str] = {}
-    for key, value in request.form.items():
-        if key.startswith("action_"):
-            sentence_id = key.replace("action_", "")
-            actions[sentence_id] = value
+    release_dir = _get_sentence_release_dir()
+    release_sentences = _load_release_sentences(release_dir)
+
+    bulk = parse_bulk_request()
+    if bulk is not None:
+        differences = _find_level_differences(release_sentences, g.db)
+        expanded = bulk_actions_for(
+            bulk, (diff["sentence_id"] for diff in differences), total=len(differences)
+        )
+        if expanded is None:
+            return redirect(url_for("sync_sentence_release.level"))
+        actions = expanded
+    else:
+        actions = parse_row_actions()
 
     if not actions:
         flash("No changes selected", "warning")
         return redirect(url_for("sync_sentence_release.level"))
 
-    release_dir = _get_sentence_release_dir()
-    release_sentences = _load_release_sentences(release_dir)
-
-    updated_db_count = 0
-    updated_release_count = 0
-    skipped_count = 0
-    error_count = 0
-
-    # Track release file updates: {filepath: {guid: {field: value}}}
+    outcome = SyncOutcome(noun="sentence")
+    guid_files = release_io.build_guid_file_index(release_dir)
     release_updates: Dict[Path, Dict[str, Dict[str, Any]]] = {}
 
     for sentence_id_str, action in actions.items():
-        if action == "skip":
-            skipped_count += 1
+        if action == SKIP:
+            outcome.skipped += 1
             continue
-
-        if action not in ("use_release", "use_db"):
+        if action not in (USE_RELEASE, USE_DB):
             continue
 
         try:
-            sentence_id_int = int(sentence_id_str)
-            sentence = g.db.query(Sentence).filter(Sentence.id == sentence_id_int).first()
-
+            sentence = g.db.query(Sentence).filter(Sentence.id == int(sentence_id_str)).first()
             if not sentence:
-                logger.warning(f"Sentence not found: {sentence_id_int}")
-                error_count += 1
+                outcome.record_error(f"Sentence not found: {sentence_id_str}")
                 continue
 
             release_data = release_sentences.get(sentence.guid)
             if not release_data:
-                logger.warning(f"Release data not found for GUID: {sentence.guid}")
-                error_count += 1
+                outcome.record_error(f"Release data not found for GUID: {sentence.guid}")
                 continue
 
-            if action == "use_release":
+            if action == USE_RELEASE:
                 new_level = release_data.get("minimum_level")
                 old_level = sentence.minimum_level
-
                 sentence.minimum_level = new_level
-                updated_db_count += 1
+                outcome.updated_db += 1
 
                 log_translation_change(
                     session=g.db,
@@ -708,62 +691,25 @@ def apply_level() -> ResponseReturnValue:
                     old_value=str(old_level) if old_level is not None else None,
                     new_value=str(new_level) if new_level is not None else None,
                 )
-
-                logger.info(
-                    f"Updated minimum_level for sentence {sentence.guid}: "
-                    f"{old_level} -> {new_level}"
-                )
-
-            elif action == "use_db":
-                db_level = sentence.minimum_level
-                file_path = _find_release_file_for_sentence(release_dir, sentence.guid)
-                if file_path:
-                    if file_path not in release_updates:
-                        release_updates[file_path] = {}
-                    release_updates[file_path][sentence.guid] = {
-                        "minimum_level": db_level,
-                    }
-                    updated_release_count += 1
-                    logger.info(
-                        f"Queued release update for sentence {sentence.guid} "
-                        f"minimum_level: -> {db_level}"
-                    )
-                else:
-                    logger.warning(
+            else:  # USE_DB
+                file_path = release_io.file_for_guid(guid_files, sentence.guid)
+                if file_path is None:
+                    outcome.record_error(
                         f"Could not find release file for sentence GUID: {sentence.guid}"
                     )
-                    error_count += 1
+                    continue
+                release_updates.setdefault(file_path, {})[sentence.guid] = {
+                    "minimum_level": sentence.minimum_level,
+                }
+                outcome.updated_release += 1
 
         except Exception as e:
-            logger.error(f"Error updating sentence {sentence_id_str}: {e}")
-            error_count += 1
+            outcome.record_error(f"Error updating sentence {sentence_id_str}: {e}")
 
-    if updated_db_count > 0:
-        try:
-            g.db.commit()
-            flash(f"Updated {updated_db_count} sentence(s) in database", "success")
-        except Exception as e:
-            g.db.rollback()
-            flash(f"Error committing changes: {e}", "error")
-            logger.error(f"Commit error: {e}")
-
-    if release_updates:
-        try:
-            _apply_release_sentence_field_updates(release_updates)
-            flash(
-                f"Updated {updated_release_count} sentence(s) in release files",
-                "success",
-            )
-        except Exception as e:
-            flash(f"Error updating release files: {e}", "error")
-            logger.error(f"Release file update error: {e}")
-
-    if skipped_count > 0:
-        flash(f"Skipped {skipped_count} sentence(s)", "info")
-
-    if error_count > 0:
-        flash(f"Errors: {error_count}", "warning")
-
+    outcome.commit(g.db)
+    outcome.write_release(lambda: release_io.apply_field_updates(release_updates))
+    outcome.flash_summary()
+    return redirect(url_for("sync_sentence_release.level"))
     return redirect(url_for("sync_sentence_release.level"))
 
 
@@ -832,7 +778,8 @@ def changes() -> ResponseReturnValue:
 
     return render_template(
         "sync_sentence_release/changes.html",
-        changes=changes_list,
+        page=paginate(changes_list),
+        per_page_choices=PER_PAGE_CHOICES,
         release_dir=str(release_dir),
     )
 
@@ -840,60 +787,55 @@ def changes() -> ResponseReturnValue:
 @bp.route("/changes/apply", methods=["POST"])
 def apply_changes() -> ResponseReturnValue:
     """Apply selected English text changes."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
-        return redirect(url_for("sync_sentence_release.changes"))
-
-    actions: Dict[str, str] = {}
-    for key, value in request.form.items():
-        if key.startswith("action_"):
-            sentence_id = key.replace("action_", "")
-            actions[sentence_id] = value
-
-    if not actions:
-        flash("No changes selected", "warning")
         return redirect(url_for("sync_sentence_release.changes"))
 
     release_dir = _get_sentence_release_dir()
     release_sentences = _load_release_sentences(release_dir)
 
-    updated_db_count = 0
-    updated_release_count = 0
-    skipped_count = 0
-    error_count = 0
+    bulk = parse_bulk_request()
+    if bulk is not None:
+        changes_list = _find_english_text_changes(release_sentences, g.db)
+        expanded = bulk_actions_for(
+            bulk, (item["sentence_id"] for item in changes_list), total=len(changes_list)
+        )
+        if expanded is None:
+            return redirect(url_for("sync_sentence_release.changes"))
+        actions = expanded
+    else:
+        actions = parse_row_actions()
 
-    # Track release file updates: {filepath: {guid: {field: value}}}
+    if not actions:
+        flash("No changes selected", "warning")
+        return redirect(url_for("sync_sentence_release.changes"))
+
+    outcome = SyncOutcome(noun="sentence")
+    guid_files = release_io.build_guid_file_index(release_dir)
     release_updates: Dict[Path, Dict[str, Dict[str, Any]]] = {}
 
     for sentence_id_str, action in actions.items():
-        if action == "skip":
-            skipped_count += 1
+        if action == SKIP:
+            outcome.skipped += 1
             continue
-
-        if action not in ("use_release", "use_db"):
+        if action not in (USE_RELEASE, USE_DB):
             continue
 
         try:
-            sentence_id_int = int(sentence_id_str)
-            sentence = g.db.query(Sentence).filter(Sentence.id == sentence_id_int).first()
-
+            sentence = g.db.query(Sentence).filter(Sentence.id == int(sentence_id_str)).first()
             if not sentence:
-                logger.warning(f"Sentence not found: {sentence_id_int}")
-                error_count += 1
+                outcome.record_error(f"Sentence not found: {sentence_id_str}")
                 continue
 
             release_data = release_sentences.get(sentence.guid)
             if not release_data:
-                logger.warning(f"Release data not found for GUID: {sentence.guid}")
-                error_count += 1
+                outcome.record_error(f"Release data not found for GUID: {sentence.guid}")
                 continue
 
-            if action == "use_release":
+            if action == USE_RELEASE:
                 new_english = _get_release_sentence_english(release_data)
                 old_english = _get_db_sentence_english(g.db, sentence)
 
-                # Update or create the English translation
                 trans_obj = (
                     g.db.query(SentenceTranslation)
                     .filter(
@@ -902,17 +844,17 @@ def apply_changes() -> ResponseReturnValue:
                     )
                     .first()
                 )
-
                 if trans_obj:
                     trans_obj.translation_text = new_english
                 else:
-                    trans_obj = SentenceTranslation(
-                        sentence_id=sentence.id,
-                        language_code="en",
-                        translation_text=new_english,
-                        verified=False,
+                    g.db.add(
+                        SentenceTranslation(
+                            sentence_id=sentence.id,
+                            language_code="en",
+                            translation_text=new_english,
+                            verified=False,
+                        )
                     )
-                    g.db.add(trans_obj)
 
                 log_translation_change(
                     session=g.db,
@@ -922,66 +864,29 @@ def apply_changes() -> ResponseReturnValue:
                     old_translation=old_english,
                     new_translation=new_english,
                 )
-
-                updated_db_count += 1
-                logger.info(
-                    f"Updated English text for sentence {sentence.guid}: "
-                    f"'{old_english[:40]}' -> '{new_english[:40]}'"
-                )
-
-            elif action == "use_db":
+                outcome.updated_db += 1
+            else:  # USE_DB
                 db_english = _get_db_sentence_english(g.db, sentence)
-                if db_english:
-                    file_path = _find_release_file_for_sentence(release_dir, sentence.guid)
-                    if file_path:
-                        if file_path not in release_updates:
-                            release_updates[file_path] = {}
-                        release_updates[file_path][sentence.guid] = {
-                            "translations.en": db_english,
-                        }
-                        updated_release_count += 1
-                        logger.info(
-                            f"Queued release update for sentence {sentence.guid} "
-                            f"English text: -> '{db_english[:40]}'"
-                        )
-                    else:
-                        logger.warning(
-                            f"Could not find release file for sentence GUID: " f"{sentence.guid}"
-                        )
-                        error_count += 1
-                else:
-                    skipped_count += 1
+                if not db_english:
+                    outcome.skipped += 1
+                    continue
+                file_path = release_io.file_for_guid(guid_files, sentence.guid)
+                if file_path is None:
+                    outcome.record_error(
+                        f"Could not find release file for sentence GUID: {sentence.guid}"
+                    )
+                    continue
+                release_updates.setdefault(file_path, {})[sentence.guid] = {
+                    "translations.en": db_english,
+                }
+                outcome.updated_release += 1
 
         except Exception as e:
-            logger.error(f"Error updating sentence {sentence_id_str}: {e}")
-            error_count += 1
+            outcome.record_error(f"Error updating sentence {sentence_id_str}: {e}")
 
-    if updated_db_count > 0:
-        try:
-            g.db.commit()
-            flash(f"Updated {updated_db_count} sentence(s) in database", "success")
-        except Exception as e:
-            g.db.rollback()
-            flash(f"Error committing changes: {e}", "error")
-            logger.error(f"Commit error: {e}")
-
-    if release_updates:
-        try:
-            _apply_release_sentence_field_updates(release_updates)
-            flash(
-                f"Updated {updated_release_count} sentence(s) in release files",
-                "success",
-            )
-        except Exception as e:
-            flash(f"Error updating release files: {e}", "error")
-            logger.error(f"Release file update error: {e}")
-
-    if skipped_count > 0:
-        flash(f"Skipped {skipped_count} sentence(s)", "info")
-
-    if error_count > 0:
-        flash(f"Errors: {error_count}", "warning")
-
+    outcome.commit(g.db)
+    outcome.write_release(lambda: release_io.apply_field_updates(release_updates))
+    outcome.flash_summary()
     return redirect(url_for("sync_sentence_release.changes"))
 
 
@@ -1148,7 +1053,8 @@ def translations() -> ResponseReturnValue:
 
     return render_template(
         "sync_sentence_release/translations.html",
-        differences=differences,
+        page=paginate(differences),
+        per_page_choices=PER_PAGE_CHOICES,
         release_dir=str(release_dir),
         language_names=LANGUAGE_NAMES,
     )
@@ -1157,271 +1063,115 @@ def translations() -> ResponseReturnValue:
 @bp.route("/translations/apply", methods=["POST"])
 def apply_translations() -> ResponseReturnValue:
     """Apply selected sentence translation changes."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
-        return redirect(url_for("sync_sentence_release.translations"))
-
-    # Parse form actions: action_{sentence_id}_{lang_code} = skip|use_release|use_db
-    actions: Dict[str, Dict[str, str]] = {}
-    for key, value in request.form.items():
-        if key.startswith("action_"):
-            remainder = key[len("action_") :]
-            underscore_pos = remainder.find("_")
-            if underscore_pos == -1:
-                continue
-            sentence_id = remainder[:underscore_pos]
-            lang_code = remainder[underscore_pos + 1 :]
-            if sentence_id not in actions:
-                actions[sentence_id] = {}
-            actions[sentence_id][lang_code] = value
-
-    if not actions:
-        flash("No changes selected", "warning")
         return redirect(url_for("sync_sentence_release.translations"))
 
     release_dir = _get_sentence_release_dir()
     release_sentences = _load_release_sentences(release_dir)
 
-    updated_db_count = 0
-    updated_release_count = 0
-    skipped_count = 0
-    error_count = 0
+    bulk = parse_bulk_request()
+    if bulk is not None:
+        differences = _find_sentence_translation_differences(release_sentences, g.db)
+        if bulk_actions_for(bulk, (), total=len(differences)) is None:
+            return redirect(url_for("sync_sentence_release.translations"))
+        actions = {
+            str(diff["sentence_id"]): {
+                str(lang_diff["lang_code"]): bulk.action for lang_diff in diff["lang_diffs"]
+            }
+            for diff in differences
+        }
+    else:
+        actions = parse_language_actions()
 
-    # Track release file updates: {filepath: {guid: {lang_code: new_translation}}}
+    if not actions:
+        flash("No changes selected", "warning")
+        return redirect(url_for("sync_sentence_release.translations"))
+
+    outcome = SyncOutcome(noun="translation")
+    guid_files = release_io.build_guid_file_index(release_dir)
     release_updates: Dict[Path, Dict[str, Dict[str, str]]] = {}
 
     for sentence_id_str, lang_actions in actions.items():
         try:
-            sentence_id_int = int(sentence_id_str)
-            sentence = g.db.query(Sentence).filter(Sentence.id == sentence_id_int).first()
-
+            sentence = g.db.query(Sentence).filter(Sentence.id == int(sentence_id_str)).first()
             if not sentence:
-                logger.warning(f"Sentence not found: {sentence_id_int}")
-                error_count += 1
+                outcome.record_error(f"Sentence not found: {sentence_id_str}")
                 continue
 
             release_data = release_sentences.get(sentence.guid)
             if not release_data:
-                logger.warning(f"Release data not found for GUID: {sentence.guid}")
-                error_count += 1
+                outcome.record_error(f"Release data not found for GUID: {sentence.guid}")
                 continue
 
             release_translations = release_data.get("translations", {})
 
             for lang_code, action in lang_actions.items():
-                if action == "skip":
-                    skipped_count += 1
+                if action == SKIP:
+                    outcome.skipped += 1
                     continue
 
-                if action == "use_release":
-                    release_val = release_translations.get(lang_code, "")
-                    if release_val:
-                        trans_obj = (
-                            g.db.query(SentenceTranslation)
-                            .filter(
-                                SentenceTranslation.sentence_id == sentence.id,
-                                SentenceTranslation.language_code == lang_code,
-                            )
-                            .first()
-                        )
+                trans_obj = (
+                    g.db.query(SentenceTranslation)
+                    .filter(
+                        SentenceTranslation.sentence_id == sentence.id,
+                        SentenceTranslation.language_code == lang_code,
+                    )
+                    .first()
+                )
 
-                        if trans_obj:
-                            old_val = trans_obj.translation_text
-                            trans_obj.translation_text = release_val
-                        else:
-                            trans_obj = SentenceTranslation(
+                if action == USE_RELEASE:
+                    release_val = release_translations.get(lang_code, "")
+                    if not release_val:
+                        outcome.skipped += 1
+                        continue
+                    if trans_obj:
+                        old_val = trans_obj.translation_text
+                        trans_obj.translation_text = release_val
+                    else:
+                        g.db.add(
+                            SentenceTranslation(
                                 sentence_id=sentence.id,
                                 language_code=lang_code,
                                 translation_text=release_val,
                                 verified=False,
                             )
-                            g.db.add(trans_obj)
-                            old_val = None
-
-                        log_translation_change(
-                            session=g.db,
-                            source="sync-release",
-                            operation_type="sentence_translation_sync",
-                            language_code=lang_code,
-                            old_translation=old_val,
-                            new_translation=release_val,
                         )
+                        old_val = None
 
-                        updated_db_count += 1
-                        logger.info(
-                            f"Updated DB translation for sentence {sentence.guid} "
-                            f"{lang_code}: '{old_val}' -> '{release_val}'"
-                        )
-                    else:
-                        skipped_count += 1
-
-                elif action == "use_db":
-                    trans_obj = (
-                        g.db.query(SentenceTranslation)
-                        .filter(
-                            SentenceTranslation.sentence_id == sentence.id,
-                            SentenceTranslation.language_code == lang_code,
-                        )
-                        .first()
+                    log_translation_change(
+                        session=g.db,
+                        source="sync-release",
+                        operation_type="sentence_translation_sync",
+                        language_code=lang_code,
+                        old_translation=old_val,
+                        new_translation=release_val,
                     )
+                    outcome.updated_db += 1
 
+                elif action == USE_DB:
                     db_val = trans_obj.translation_text if trans_obj else ""
-                    if db_val:
-                        file_path = _find_release_file_for_sentence(release_dir, sentence.guid)
-                        if file_path:
-                            if file_path not in release_updates:
-                                release_updates[file_path] = {}
-                            if sentence.guid not in release_updates[file_path]:
-                                release_updates[file_path][sentence.guid] = {}
-                            release_updates[file_path][sentence.guid][lang_code] = db_val
-                            updated_release_count += 1
-                            logger.info(
-                                f"Queued release update for sentence {sentence.guid} "
-                                f"{lang_code}: -> '{db_val}'"
-                            )
-                        else:
-                            logger.warning(
-                                f"Could not find release file for sentence GUID: "
-                                f"{sentence.guid}"
-                            )
-                            error_count += 1
-                    else:
-                        skipped_count += 1
+                    if not db_val:
+                        outcome.skipped += 1
+                        continue
+                    file_path = release_io.file_for_guid(guid_files, sentence.guid)
+                    if file_path is None:
+                        outcome.record_error(
+                            f"Could not find release file for sentence GUID: {sentence.guid}"
+                        )
+                        continue
+                    release_updates.setdefault(file_path, {}).setdefault(sentence.guid, {})[
+                        lang_code
+                    ] = db_val
+                    outcome.updated_release += 1
 
         except Exception as e:
-            logger.error(f"Error processing sentence {sentence_id_str}: {e}")
-            error_count += 1
+            outcome.record_error(f"Error processing sentence {sentence_id_str}: {e}")
 
-    # Commit DB changes
-    if updated_db_count > 0:
-        try:
-            g.db.commit()
-            flash(f"Updated {updated_db_count} translation(s) in database", "success")
-        except Exception as e:
-            g.db.rollback()
-            flash(f"Error committing DB changes: {e}", "error")
-            logger.error(f"Commit error: {e}")
-
-    # Apply release file updates
-    if release_updates:
-        try:
-            _apply_release_sentence_translation_updates(release_updates)
-            flash(
-                f"Updated {updated_release_count} translation(s) in release files",
-                "success",
-            )
-        except Exception as e:
-            flash(f"Error updating release files: {e}", "error")
-            logger.error(f"Release file update error: {e}")
-
-    if skipped_count > 0:
-        flash(f"Skipped {skipped_count} item(s)", "info")
-
-    if error_count > 0:
-        flash(f"Errors: {error_count}", "warning")
-
+    outcome.commit(g.db)
+    outcome.write_release(lambda: release_io.apply_translation_updates(release_updates))
+    outcome.flash_summary()
     return redirect(url_for("sync_sentence_release.translations"))
-
-
-def _apply_release_sentence_translation_updates(
-    updates: Dict[Path, Dict[str, Dict[str, str]]],
-) -> None:
-    """Apply translation updates to sentence release JSONL files.
-
-    Args:
-        updates: {filepath: {guid: {lang_code: new_translation}}}
-    """
-    for file_path, guid_updates in updates.items():
-        if not file_path.exists():
-            logger.warning(f"Release file not found: {file_path}")
-            continue
-
-        updated_lines: List[str] = []
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    stripped = line.strip()
-                    if not stripped:
-                        updated_lines.append(line)
-                        continue
-
-                    try:
-                        data = json.loads(stripped)
-                        guid = data.get("guid")
-
-                        if guid in guid_updates:
-                            if "translations" not in data:
-                                data["translations"] = {}
-                            for lang_code, new_val in guid_updates[guid].items():
-                                data["translations"][lang_code] = new_val
-                            updated_lines.append(json.dumps(data, ensure_ascii=False) + "\n")
-                            logger.info(f"Updated translations for {guid} in {file_path}")
-                        else:
-                            updated_lines.append(line)
-                    except json.JSONDecodeError:
-                        updated_lines.append(line)
-
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.writelines(updated_lines)
-
-        except Exception as e:
-            logger.error(f"Error updating {file_path}: {e}")
-            raise
-
-
-def _apply_release_sentence_field_updates(
-    updates: Dict[Path, Dict[str, Dict[str, Any]]],
-) -> None:
-    """Apply field updates to sentence release JSONL files.
-
-    Supports top-level fields (e.g. minimum_level) and dotted paths
-    for nested fields (e.g. translations.en).
-
-    Args:
-        updates: {filepath: {guid: {field_or_dotted_path: new_value}}}
-    """
-    for file_path, guid_updates in updates.items():
-        if not file_path.exists():
-            logger.warning(f"Release file not found: {file_path}")
-            continue
-
-        updated_lines: List[str] = []
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    stripped = line.strip()
-                    if not stripped:
-                        updated_lines.append(line)
-                        continue
-
-                    try:
-                        data = json.loads(stripped)
-                        guid = data.get("guid")
-
-                        if guid in guid_updates:
-                            for field_path, new_val in guid_updates[guid].items():
-                                if "." in field_path:
-                                    parts = field_path.split(".", 1)
-                                    parent_key, child_key = parts[0], parts[1]
-                                    if parent_key not in data:
-                                        data[parent_key] = {}
-                                    data[parent_key][child_key] = new_val
-                                else:
-                                    data[field_path] = new_val
-                            updated_lines.append(json.dumps(data, ensure_ascii=False) + "\n")
-                            logger.info(f"Updated fields for {guid} in {file_path}")
-                        else:
-                            updated_lines.append(line)
-                    except json.JSONDecodeError:
-                        updated_lines.append(line)
-
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.writelines(updated_lines)
-
-        except Exception as e:
-            logger.error(f"Error updating {file_path}: {e}")
-            raise
 
 
 # =============================================================================
@@ -1441,6 +1191,14 @@ _TYPE_TO_DIR: Dict[str, str] = {
     "numeral": "numerals",
     "particle": "particles",
 }
+
+
+def _export_file_for_sentence(release_dir: Path, sentence: Any) -> Path:
+    """The base.jsonl a sentence belongs in, by collection and primary lemma."""
+    collection = sentence.sentence_collection or "general"
+    pos_type, pos_subtype = _resolve_primary_lemma_category(sentence)
+    dir_name = _TYPE_TO_DIR.get(pos_type, pos_type)
+    return release_dir / collection / dir_name / pos_subtype / "base.jsonl"
 
 
 def _find_exportable_sentences(
@@ -1655,8 +1413,7 @@ def export() -> ResponseReturnValue:
 @bp.route("/export/apply", methods=["POST"])
 def apply_export() -> ResponseReturnValue:
     """Export selected DB sentences to release JSONL files."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
         return redirect(url_for("sync_sentence_release.export"))
 
@@ -1667,9 +1424,6 @@ def apply_export() -> ResponseReturnValue:
         return redirect(url_for("sync_sentence_release.export"))
 
     release_dir = _get_sentence_release_dir()
-
-    # Load existing release data so we can merge
-    release_sentences = _load_release_sentences(release_dir)
 
     # Get conversation sentence IDs to exclude
     conversation_ids = _get_conversation_sentence_ids(g.db)
@@ -1695,70 +1449,17 @@ def apply_export() -> ResponseReturnValue:
         flash("No valid sentences found for export", "warning")
         return redirect(url_for("sync_sentence_release.export"))
 
-    # Group new sentences by category, merging with existing release data
-    # {(collection, pos_type, pos_subtype): {guid: record}}
-    category_records: Dict[Tuple[str, str, str], Dict[str, Dict[str, Any]]] = defaultdict(dict)
-
-    # Pre-load existing release records grouped by category
-    for base_file in release_dir.rglob("base.jsonl"):
-        # Determine category from path: release_dir/collection/pos_dir/subtype/base.jsonl
-        rel_path = base_file.relative_to(release_dir)
-        parts = rel_path.parts  # e.g. ("beginner", "verbs", "motion", "base.jsonl")
-        if len(parts) < 4:
-            continue
-        collection_dir = parts[0]
-        pos_dir = parts[1]
-        subtype = parts[2]
-        # Reverse-map directory name to pos_type
-        pos_type = pos_dir
-        for pt, dn in _TYPE_TO_DIR.items():
-            if dn == pos_dir:
-                pos_type = pt
-                break
-        category_key: Tuple[str, str, str] = (collection_dir, pos_type, subtype)
-        try:
-            with open(base_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    stripped = line.strip()
-                    if not stripped:
-                        continue
-                    try:
-                        data = json.loads(stripped)
-                        guid = data.get("guid")
-                        if guid:
-                            category_records[category_key][guid] = data
-                    except json.JSONDecodeError:
-                        continue
-        except Exception:
-            continue
-
-    # Add new sentences to their categories
-    exported_count = 0
+    # upsert_records merges by GUID, so records already in a file survive and
+    # only the files actually being written to are touched.
+    records_by_file: Dict[Path, List[Dict[str, Any]]] = defaultdict(list)
     for sentence in db_sentences:
-        record = _sentence_to_release_record(sentence)
-        collection = sentence.sentence_collection or "general"
-        pos_type, pos_subtype = _resolve_primary_lemma_category(sentence)
-        category_records[(collection, pos_type, pos_subtype)][sentence.guid] = record
-        exported_count += 1
+        target = _export_file_for_sentence(release_dir, sentence)
+        records_by_file[target].append(_sentence_to_release_record(sentence))
 
-    # Write out all affected categories
-    for (collection, pos_type, pos_subtype), guid_to_record in category_records.items():
-        # Only write categories that contain newly exported sentences
-        has_new = any(
-            s.guid in guid_to_record
-            for s in db_sentences
-            if _resolve_primary_lemma_category(s) == (pos_type, pos_subtype)
-            and (s.sentence_collection or "general") == collection
-        )
-        if not has_new:
-            continue
-
-        dir_name = _TYPE_TO_DIR.get(pos_type, pos_type)
-        category_dir = release_dir / collection / dir_name / pos_subtype
-        category_dir.mkdir(parents=True, exist_ok=True)
-
-        records = sorted(guid_to_record.values(), key=lambda r: r["guid"])
-        _write_jsonl_atomic(category_dir / "base.jsonl", records)
+    exported_count = sum(
+        release_io.upsert_records(release_file, records)
+        for release_file, records in records_by_file.items()
+    )
 
     log_operation(
         session=g.db,
@@ -1778,8 +1479,7 @@ def apply_export() -> ResponseReturnValue:
 @bp.route("/export/sync-back", methods=["POST"])
 def apply_export_sync_back() -> ResponseReturnValue:
     """Overwrite existing release sentence records with canonical SQLite records."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
         return redirect(url_for("sync_sentence_release.export"))
 
@@ -1810,48 +1510,23 @@ def apply_export_sync_back() -> ResponseReturnValue:
         flash("No valid sentences found for sync-back", "warning")
         return redirect(url_for("sync_sentence_release.export"))
 
-    updated_count = 0
+    # Group by target file so each base.jsonl is rewritten once, not once per
+    # sentence. upsert_records merges by GUID, so siblings survive.
+    guid_files = release_io.build_guid_file_index(release_dir)
+    records_by_file: Dict[Path, List[Dict[str, Any]]] = defaultdict(list)
     for guid in selected_guids:
         sentence = db_by_guid.get(guid)
         if not sentence:
             continue
+        release_file = release_io.file_for_guid(guid_files, guid)
+        if release_file is None:
+            release_file = _export_file_for_sentence(release_dir, sentence)
+        records_by_file[release_file].append(_sentence_to_release_record(sentence))
 
-        new_record = _sentence_to_release_record(sentence)
-        release_file = _find_release_file_for_sentence(release_dir, guid)
-
-        # If no existing file is found (unexpected for sync-back), append via export category.
-        if not release_file:
-            collection = sentence.sentence_collection or "general"
-            pos_type, pos_subtype = _resolve_primary_lemma_category(sentence)
-            dir_name = _TYPE_TO_DIR.get(pos_type, pos_type)
-            category_dir = release_dir / collection / dir_name / pos_subtype
-            category_dir.mkdir(parents=True, exist_ok=True)
-            release_file = category_dir / "base.jsonl"
-
-        existing_records: List[Dict[str, Any]] = []
-        replaced = False
-        if release_file.exists():
-            with open(release_file, "r", encoding="utf-8") as source_file:
-                for line in source_file:
-                    stripped = line.strip()
-                    if not stripped:
-                        continue
-                    try:
-                        data = json.loads(stripped)
-                    except json.JSONDecodeError:
-                        continue
-                    existing_guid = data.get("guid")
-                    if existing_guid == guid:
-                        existing_records.append(new_record)
-                        replaced = True
-                    else:
-                        existing_records.append(data)
-        if not replaced:
-            existing_records.append(new_record)
-
-        existing_records.sort(key=lambda record: record.get("guid", ""))
-        _write_jsonl_atomic(release_file, existing_records)
-        updated_count += 1
+    updated_count = sum(
+        release_io.upsert_records(release_file, records)
+        for release_file, records in records_by_file.items()
+    )
 
     log_operation(
         session=g.db,

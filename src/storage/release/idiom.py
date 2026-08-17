@@ -156,6 +156,58 @@ def export_idioms_to_release(session: Session, release_dir: Path) -> int:
     return len(idioms)
 
 
+def read_release_records_by_guid(release_dir: Path) -> Dict[str, Dict[str, Any]]:
+    """Read idiom records keyed by GUID, dropping any record without one."""
+    return {
+        str(record["guid"]): record
+        for record in read_release_records(release_dir)
+        if record.get("guid")
+    }
+
+
+def apply_release_record(session: Session, record: Dict[str, Any], idiom: Idiom) -> Idiom:
+    """Overwrite one idiom's fields and equivalents from a release record.
+
+    Equivalents are replaced wholesale rather than merged. An equivalent is
+    identified by (language, expression), so a corrected spelling would merge as
+    an *addition* and leave the old wording behind; replacing avoids inventing a
+    second equivalent nobody asked for. The reverse direction - writing the
+    database's idiom into the file - goes through
+    :func:`idiom_to_release_record`, so the two stay symmetric.
+    """
+    source = record.get("source") or {}
+    idiom.source_language_code = source.get("language", idiom.source_language_code)
+    idiom.expression = source.get("expression", idiom.expression)
+    idiom.meaning = record.get("meaning", idiom.meaning)
+    idiom.usage_note = record.get("usageNote") or None
+    idiom.register = record.get("register") or None
+    idiom.region = record.get("region") or None
+    idiom.difficulty_level = record.get("difficulty_level")
+    idiom.verified = bool(record.get("verified", False))
+
+    for equivalent in list(idiom.equivalents):
+        session.delete(equivalent)
+    session.flush()
+
+    for language_code, equivalents in (record.get("equivalents") or {}).items():
+        for equivalent in equivalents:
+            add_idiom_equivalent(
+                session,
+                idiom,
+                language_code=language_code,
+                expression=equivalent["expression"],
+                equivalence_kind=equivalent["kind"],
+                literal_gloss=equivalent.get("literalGloss"),
+                usage_note=equivalent.get("usageNote"),
+                register=equivalent.get("register"),
+                region=equivalent.get("region"),
+                verified=bool(equivalent.get("verified", False)),
+            )
+
+    session.flush()
+    return idiom
+
+
 def import_release_record(session: Session, record: Dict[str, Any]) -> Optional[Idiom]:
     """Create one idiom (and its equivalents) from a release record.
 

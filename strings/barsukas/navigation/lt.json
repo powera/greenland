@@ -32,5 +32,8 @@
   "tools": "Įrankiai",
   "ui_language": "Sąsajos kalba",
   "word_categories": "Žodžių kategorijos",
-  "words": "Žodžiai"
+  "words": "Žodžiai",
+  "names": "Vardai",
+  "phrases": "Frazės",
+  "lemma_audio": "Leksemų garsas"
 }

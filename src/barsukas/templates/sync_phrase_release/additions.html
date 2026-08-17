@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "sync/_macros.html" as sync with context %}
 
 {% block title %}Sync - New Phrases{% endblock %}
 
@@ -13,25 +14,27 @@
     <h2><i class="bi bi-plus-circle text-success"></i> New Phrases in Release</h2>
     <p class="text-muted">Phrases present in <code>data/release/phrases</code> but not yet in the database.</p>
 
-    {% if not additions %}
+    {% if not page.total %}
     <div class="alert alert-success"><i class="bi bi-check-circle"></i> No new phrases to import.</div>
     <a href="{{ url_for('sync_phrase_release.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
     {% else %}
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-list-check"></i> New Phrases: {{ additions|length }}</span>
+            <span><i class="bi bi-list-check"></i> New Phrases: {{ page.total }}</span>
             <div>
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">Deselect All</button>
-                <button type="button" class="btn btn-sm btn-outline-success" onclick="toggleAll(true)">Select All</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="syncToggleAll(false)">Deselect All</button>
+                <button type="button" class="btn btn-sm btn-outline-success" onclick="syncToggleAll(true)">Select All</button>
             </div>
         </div>
         <div class="card-body">
+            {{ sync.list_toolbar(page, 'sync_phrase_release.additions') }}
+
             <form method="post" action="{{ url_for('sync_phrase_release.apply_additions') }}">
                 <div class="table-responsive">
                     <table class="table table-sm table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th style="width: 40px;"><input type="checkbox" id="select-all-checkbox" onchange="toggleAll(this.checked)"></th>
+                                <th style="width: 40px;"><input type="checkbox" id="select-all-checkbox" onchange="syncToggleAll(this.checked)"></th>
                                 <th>GUID</th>
                                 <th>Subtype</th>
                                 <th>English</th>
@@ -40,7 +43,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for item in additions %}
+                            {% for item in page.items %}
                             <tr>
                                 <td><input type="checkbox" class="item-checkbox" name="selected_guids" value="{{ item.guid }}"></td>
                                 <td><code>{{ item.guid }}</code></td>
@@ -63,15 +66,12 @@
                     <button type="submit" class="btn btn-success"><i class="bi bi-plus-lg"></i> Import Selected</button>
                 </div>
             </form>
+
+            <div class="mt-3">{{ sync.list_toolbar(page, 'sync_phrase_release.additions') }}</div>
         </div>
     </div>
     {% endif %}
 </div>
 
-<script>
-function toggleAll(checked) {
-    document.querySelectorAll('.item-checkbox').forEach(function(cb) { cb.checked = checked; });
-    document.getElementById('select-all-checkbox').checked = checked;
-}
-</script>
+<script src="{{ url_for('static', filename='js/sync.js') }}"></script>
 {% endblock %}

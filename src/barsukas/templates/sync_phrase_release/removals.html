@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "sync/_macros.html" as sync with context %}
 
 {% block title %}Sync - Removed Phrases{% endblock %}
 
@@ -17,26 +18,28 @@
         Use <a href="{{ url_for('sync_phrase_release.export') }}" class="alert-link">Export / Sync Back</a>.
     </div>
 
-    {% if not removals %}
+    {% if not page.total %}
     <div class="alert alert-success"><i class="bi bi-check-circle"></i> No orphaned phrases found.</div>
     <a href="{{ url_for('sync_phrase_release.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
     {% else %}
     <div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> Deleting a phrase also deletes its translations. This cannot be undone.</div>
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-list-check"></i> Orphaned Phrases: {{ removals|length }}</span>
+            <span><i class="bi bi-list-check"></i> Orphaned Phrases: {{ page.total }}</span>
             <div>
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">Deselect All</button>
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="toggleAll(true)">Select All</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="syncToggleAll(false)">Deselect All</button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="syncToggleAll(true)">Select All</button>
             </div>
         </div>
         <div class="card-body">
+            {{ sync.list_toolbar(page, 'sync_phrase_release.removals') }}
+
             <form method="post" action="{{ url_for('sync_phrase_release.apply_removals') }}" onsubmit="return confirmDelete()">
                 <div class="table-responsive">
                     <table class="table table-sm table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th style="width: 40px;"><input type="checkbox" id="select-all-checkbox" onchange="toggleAll(this.checked)"></th>
+                                <th style="width: 40px;"><input type="checkbox" id="select-all-checkbox" onchange="syncToggleAll(this.checked)"></th>
                                 <th>GUID</th>
                                 <th>Subtype</th>
                                 <th>English</th>
@@ -44,7 +47,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for item in removals %}
+                            {% for item in page.items %}
                             <tr>
                                 <td><input type="checkbox" class="item-checkbox" name="selected_ids" value="{{ item.phrase_id }}"></td>
                                 <td><code>{{ item.guid }}</code></td>
@@ -64,20 +67,12 @@
                     <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Delete Selected</button>
                 </div>
             </form>
+
+            <div class="mt-3">{{ sync.list_toolbar(page, 'sync_phrase_release.removals') }}</div>
         </div>
     </div>
     {% endif %}
 </div>
 
-<script>
-function toggleAll(checked) {
-    document.querySelectorAll('.item-checkbox').forEach(function(cb) { cb.checked = checked; });
-    document.getElementById('select-all-checkbox').checked = checked;
-}
-function confirmDelete() {
-    var n = document.querySelectorAll('.item-checkbox:checked').length;
-    if (n === 0) { alert('No phrases selected'); return false; }
-    return confirm('Delete ' + n + ' phrase(s)? This cannot be undone.');
-}
-</script>
+<script src="{{ url_for('static', filename='js/sync.js') }}"></script>
 {% endblock %}

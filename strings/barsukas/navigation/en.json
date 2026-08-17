@@ -32,5 +32,8 @@
   "tools": "Tools",
   "ui_language": "UI language",
   "word_categories": "Word Categories",
-  "words": "Words"
+  "words": "Words",
+  "names": "Names",
+  "phrases": "Phrases",
+  "lemma_audio": "Lemma Audio"
 }

@@ -196,6 +196,13 @@ class Lemma:
     translation_disambiguations: Dict[str, str] = field(
         default_factory=dict
     )  # lang_code -> disambiguation string
+    # translation_metadata: per-language translation_status / translation_status_note
+    # from base.jsonl and the grouped translation files (secondary.jsonl,
+    # ancient.jsonl). Kept separate from the flat translations map so the release
+    # shape round-trips unchanged.
+    translation_metadata: Dict[str, Dict[str, str]] = field(
+        default_factory=dict
+    )  # lang_code -> {translation_status, translation_status_note}
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSONL serialization."""

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ STRINGS.sync.derivatives_title }}{% endblock %}
+{% block title %}Sync {{ spec.title }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -8,14 +8,14 @@
         <div class="col">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('sync_release.index') }}">Sync</a></li>
-                    <li class="breadcrumb-item active">Derivative Forms</li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('sync_hub.index') }}">Sync</a></li>
+                    <li class="breadcrumb-item active">{{ spec.title }}</li>
                 </ol>
             </nav>
-            <h2><i class="bi bi-diagram-3"></i> {{ STRINGS.sync.derivatives_title }}</h2>
+            <h2><i class="bi {{ spec.icon }}"></i> Sync {{ spec.title }}</h2>
             <p class="text-muted">
-                Compare per-language derivative form files (<code>data/release/lemmas/.../{lang}.jsonl</code>)
-                with the working database. Each language has its own file alongside the <code>base.jsonl</code>.
+                Compare the per-language <code>{{ spec.array_key }}</code> array in
+                <code>data/release/lemmas/.../{lang}.jsonl</code> with the working database.
             </p>
         </div>
     </div>
@@ -27,7 +27,7 @@
     </div>
     {% elif not lang_counts %}
     <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle"></i> No derivative forms found in either release files or database.
+        <i class="bi bi-exclamation-triangle"></i> No {{ spec.title|lower }} found in either release files or database.
         <br><small>Path: <code>{{ release_dir }}</code></small>
     </div>
     {% else %}
@@ -101,7 +101,7 @@
                             {% endif %}
                         </td>
                         <td>
-                            <a href="{{ url_for('sync_derivative_release.language_detail', lang_code=lc.lang_code) }}"
+                            <a href="{{ url_for(spec.blueprint_name ~ '.language_detail', lang_code=lc.lang_code) }}"
                                class="btn btn-sm {% if lc.total_diffs > 0 %}btn-primary{% else %}btn-outline-secondary{% endif %}">
                                 <i class="bi bi-arrow-right"></i> {{ STRINGS.sync.details }}
                             </a>
@@ -115,7 +115,7 @@
 
     <div class="row mt-4">
         <div class="col">
-            <a href="{{ url_for('sync_release.index') }}" class="btn btn-outline-secondary">
+            <a href="{{ url_for('sync_hub.index') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> {{ STRINGS.sync.back_to_lemma_sync }}
             </a>
         </div>

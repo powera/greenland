@@ -4,22 +4,20 @@
 
 import json
 import logging
-import os
-import tempfile
 from collections import defaultdict
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Set, Tuple
 
-from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 from sqlalchemy.orm import joinedload
 
+from barsukas.routes.sync import release_io
+from barsukas.routes.sync.actions import is_readonly
 from storage.crud.operation_log import log_operation
 from storage.models.lemma_relation import LemmaRelationGroup, LemmaRelationMember
+from storage.migrate import _write_jsonl_atomic as migrate_write_jsonl_atomic
 from storage.models.schema import Lemma
-
-if TYPE_CHECKING:
-    from barsukas.app import BarsukasFlask
 
 logger = logging.getLogger(__name__)
 
@@ -133,17 +131,9 @@ def _group_to_release_record(group: LemmaRelationGroup) -> Dict[str, Any]:
 
 
 def _write_jsonl_atomic(file_path: Path, records: List[Dict[str, Any]]) -> None:
-    """Write JSONL file atomically."""
+    """Write JSONL file atomically, creating the parent directory."""
     file_path.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.NamedTemporaryFile(
-        mode="w", encoding="utf-8", dir=file_path.parent, delete=False, suffix=".tmp"
-    ) as tmp_file:
-        for record in records:
-            tmp_file.write(json.dumps(record, ensure_ascii=False) + "\n")
-        tmp_file.flush()
-        os.fsync(tmp_file.fileno())
-        tmp_path = tmp_file.name
-    os.replace(tmp_path, file_path)
+    migrate_write_jsonl_atomic(file_path, records)
 
 
 # =============================================================================
@@ -246,8 +236,7 @@ def additions() -> ResponseReturnValue:
 @bp.route("/additions/apply", methods=["POST"])
 def apply_additions() -> ResponseReturnValue:
     """Import selected relation groups from release into DB."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
         return redirect(url_for("sync_relation_release.additions"))
 
@@ -390,8 +379,7 @@ def removals() -> ResponseReturnValue:
 @bp.route("/removals/apply", methods=["POST"])
 def apply_removals() -> ResponseReturnValue:
     """Delete selected relation groups from DB."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
         return redirect(url_for("sync_relation_release.removals"))
 
@@ -507,8 +495,7 @@ def differences() -> ResponseReturnValue:
 @bp.route("/differences/apply", methods=["POST"])
 def apply_differences() -> ResponseReturnValue:
     """Apply member difference resolutions (use_release or use_db per group)."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
         return redirect(url_for("sync_relation_release.differences"))
 
@@ -658,44 +645,24 @@ def _apply_release_member_updates(
 ) -> None:
     """Apply member updates to relation release JSONL files.
 
+    Relation groups are identified by ``concept`` rather than by a GUID, which
+    is what ``key_field`` selects.
+
     Args:
         release_dir: Path to data/release/lemma_relations
         updates: {(relation_type, subtype): {concept: [member_guids]}}
     """
-    for (relation_type, subtype), concept_updates in updates.items():
-        file_path = release_dir / relation_type / f"{subtype}.jsonl"
-        if not file_path.exists():
-            logger.warning(f"Release file not found: {file_path}")
-            continue
-
-        updated_lines: List[str] = []
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    stripped = line.strip()
-                    if not stripped:
-                        updated_lines.append(line)
-                        continue
-
-                    try:
-                        data = json.loads(stripped)
-                        concept = data.get("concept", "")
-
-                        if concept in concept_updates:
-                            data["members"] = concept_updates[concept]
-                            updated_lines.append(json.dumps(data, ensure_ascii=False) + "\n")
-                            logger.info(f"Updated members for {concept} in {file_path}")
-                        else:
-                            updated_lines.append(line)
-                    except json.JSONDecodeError:
-                        updated_lines.append(line)
-
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.writelines(updated_lines)
-
-        except Exception as e:
-            logger.error(f"Error updating {file_path}: {e}")
-            raise
+    release_io.apply_field_updates(
+        {
+            release_dir
+            / relation_type
+            / f"{subtype}.jsonl": {
+                concept: {"members": members} for concept, members in concept_updates.items()
+            }
+            for (relation_type, subtype), concept_updates in updates.items()
+        },
+        key_field="concept",
+    )
 
 
 # =============================================================================
@@ -706,8 +673,7 @@ def _apply_release_member_updates(
 @bp.route("/export", methods=["POST"])
 def export_to_jsonl() -> ResponseReturnValue:
     """Export all DB relation groups to JSONL release files."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
         return redirect(url_for("sync_relation_release.index"))
 

@@ -8,185 +8,36 @@
         <div class="col">
             <h2><i class="bi bi-arrow-left-right"></i> {{ STRINGS.sync.hub_title }}</h2>
             <p class="text-muted">
-                Synchronize data between release files (<code>data/release</code>) and the working database.
-                Choose a category below to view and sync specific types of data.
+                Synchronize data between the working database and the release files
+                (<code>data/release</code>). Choose a category below to review and apply
+                differences.
             </p>
         </div>
     </div>
 
     <div class="row">
-        <!-- Lemmas -->
+        {% for category in categories %}
         <div class="col-md-6 col-lg-3 mb-3">
             <div class="card h-100">
-                <div class="card-header bg-primary text-white">
-                    <i class="bi bi-book"></i> Lemmas
+                <div class="card-header bg-{{ category.colour }} {% if category.colour == 'warning' %}text-dark{% else %}text-white{% endif %}">
+                    <i class="bi {{ category.icon }}"></i> {{ category.title }}
                 </div>
                 <div class="card-body">
-                    <p class="card-text">
-                        Sync base lemma data including:
-                    </p>
+                    <p class="card-text">{{ category.summary }}</p>
                     <ul class="small">
-                        <li>{{ STRINGS.sync.additions }} & {{ STRINGS.sync.removals }}</li>
-                        <li>{{ STRINGS.sync.text_changes }}</li>
-                        <li>{{ STRINGS.sync.difficulty_levels }}</li>
-                        <li>{{ STRINGS.sync.primary_translations }}</li>
-                        <li>{{ STRINGS.sync.secondary_translations }}</li>
+                        {% for item in category.covers %}
+                        <li>{{ item }}</li>
+                        {% endfor %}
                     </ul>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ url_for('sync_release.index') }}" class="btn btn-primary w-100">
-                        <i class="bi bi-arrow-right"></i> Open Lemma Sync
+                    <a href="{{ url_for(category.endpoint) }}" class="btn btn-{{ category.colour }} w-100">
+                        <i class="bi bi-arrow-right"></i> Open {{ category.title }} Sync
                     </a>
                 </div>
             </div>
         </div>
-
-        <!-- Derivative Forms -->
-        <div class="col-md-6 col-lg-3 mb-3">
-            <div class="card h-100">
-                <div class="card-header bg-success text-white">
-                    <i class="bi bi-diagram-3"></i> Derivative Forms
-                </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        Sync conjugations, declensions, and other derived word forms across all languages.
-                    </p>
-                    <ul class="small">
-                        <li>Per-language forms</li>
-                        <li>Grammatical patterns</li>
-                        <li>Pronunciations (IPA)</li>
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <a href="{{ url_for('sync_derivative_release.index') }}" class="btn btn-success w-100">
-                        <i class="bi bi-arrow-right"></i> Open Derivative Sync
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Synonyms -->
-        <div class="col-md-6 col-lg-3 mb-3">
-            <div class="card h-100">
-                <div class="card-header bg-secondary text-white">
-                    <i class="bi bi-link-45deg"></i> Synonyms
-                </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        Sync per-language synonym entries managed separately from inflected forms.
-                    </p>
-                    <ul class="small">
-                        <li>synonym, synonym_near</li>
-                        <li>synonym_regional, synonym_register</li>
-                        <li>synonym_synecdoche, synonym_related</li>
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <a href="{{ url_for('sync_synonym_release.index') }}" class="btn btn-secondary w-100">
-                        <i class="bi bi-arrow-right"></i> Open Synonym Sync
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Relations -->
-        <div class="col-md-6 col-lg-3 mb-3">
-            <div class="card h-100">
-                <div class="card-header bg-info text-white">
-                    <i class="bi bi-diagram-2"></i> Relations
-                </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        Sync semantic relationships between lemmas.
-                    </p>
-                    <ul class="small">
-                        <li>Synonyms & Antonyms</li>
-                        <li>Derivational groups</li>
-                        <li>Thematic categories</li>
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <a href="{{ url_for('sync_relation_release.index') }}" class="btn btn-info w-100">
-                        <i class="bi bi-arrow-right"></i> Open Relation Sync
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sentences -->
-        <div class="col-md-6 col-lg-3 mb-3">
-            <div class="card h-100">
-                <div class="card-header bg-warning text-dark">
-                    <i class="bi bi-chat-left-text"></i> Sentences
-                </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        Sync example sentences and their translations.
-                    </p>
-                    <ul class="small">
-                        <li>{{ STRINGS.sync.additions }} & {{ STRINGS.sync.removals }}</li>
-                        <li>{{ STRINGS.sync.text_changes }}</li>
-                        <li>{{ STRINGS.sync.difficulty_levels }}</li>
-                        <li>{{ LSTR.translations }}</li>
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <a href="{{ url_for('sync_sentence_release.index') }}" class="btn btn-warning w-100">
-                        <i class="bi bi-arrow-right"></i> Open Sentence Sync
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Phrases -->
-        <div class="col-md-6 col-lg-3 mb-3">
-            <div class="card h-100">
-                <div class="card-header bg-dark text-white">
-                    <i class="bi bi-chat-quote"></i> Phrases
-                </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        Sync fixed traveler/greeting phrases and their translations.
-                    </p>
-                    <ul class="small">
-                        <li>{{ STRINGS.sync.additions }} & {{ STRINGS.sync.removals }}</li>
-                        <li>{{ STRINGS.sync.text_changes }}</li>
-                        <li>{{ STRINGS.sync.difficulty_levels }}</li>
-                        <li>{{ LSTR.translations }}</li>
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <a href="{{ url_for('sync_phrase_release.index') }}" class="btn btn-dark w-100">
-                        <i class="bi bi-arrow-right"></i> Open Phrase Sync
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Lemma Audio -->
-        <div class="col-md-6 col-lg-3 mb-3">
-            <div class="card h-100">
-                <div class="card-header bg-danger text-white">
-                    <i class="bi bi-music-note-list"></i> Lemma Audio
-                </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        Sync approved lemma audio references (S3 URLs, status, md5) in the
-                        per-category <code>audio.jsonl</code> files.
-                    </p>
-                    <ul class="small">
-                        <li>Metadata only, not mp3 bytes</li>
-                        <li>Import / export whole directories</li>
-                        <li>Difference summary preview</li>
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <a href="{{ url_for('sync_lemma_audio_release.index') }}" class="btn btn-danger w-100">
-                        <i class="bi bi-arrow-right"></i> Open Lemma Audio Sync
-                    </a>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 
     <div class="row mt-4">
@@ -197,17 +48,31 @@
                 </div>
                 <div class="card-body">
                     <p>
-                        The sync system compares release files with the database to identify differences.
-                        You can choose which version to keep for each conflict, or skip items you're unsure about.
+                        Each category compares the release files with the database and lists
+                        the differences. For every difference you choose which side wins, or
+                        skip it. Long difference lists are paginated; the button under each
+                        list applies one choice to the whole list, including the rows not on
+                        the current page.
                     </p>
-                    <p class="mb-0">
-                        <strong>Common workflows:</strong>
-                    </p>
+                    <p class="mb-0"><strong>Common workflows:</strong></p>
                     <ul>
-                        <li><strong>After editing release files:</strong> Use sync to import new entries and update changed data.</li>
-                        <li><strong>After database updates:</strong> Export changes back to release files to keep them current.</li>
-                        <li><strong>Quality assurance:</strong> Review differences to catch inconsistencies or errors.</li>
+                        <li><strong>Publishing database work:</strong> export or sync back to the
+                            release files. This is the direction the sync system is used in most
+                            of the time.</li>
+                        <li><strong>After editing release files by hand:</strong> import new
+                            entries and pull changed records into the database.</li>
+                        <li><strong>Building a database from scratch:</strong> use
+                            <code>bootstrap_database.py</code> rather than this UI - it imports
+                            the whole release tree in one pass, including lemma audio, idioms
+                            and names.</li>
+                        <li><strong>Quality assurance:</strong> review differences to catch
+                            inconsistencies before they ship.</li>
                     </ul>
+                    <p class="text-muted small mb-0">
+                        Concepts are intentionally absent: they are keyed to Wikidata and are
+                        never exported. The only concept data in <code>data/release</code> is a
+                        lemma's Q-id, which the lemma sync reconciles.
+                    </p>
                 </div>
             </div>
         </div>

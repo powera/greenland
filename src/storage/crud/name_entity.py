@@ -10,8 +10,10 @@ name silently resolve to vocabulary.
 import logging
 from typing import Any, List, Optional, cast
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from storage.models.guid_prefixes import NAME_KIND_GUID_PREFIXES
 from storage.models.name_entity import (
     NAME_GENDERS,
     NAME_KINDS,
@@ -216,6 +218,54 @@ def delete_name(session: Session, name: Name) -> None:
     """Delete a name and its translations."""
     session.delete(name)
     session.flush()
+
+
+def name_kind_guid_prefix(kind: str) -> str:
+    """Return the GUID prefix for a name kind.
+
+    Raises:
+        ValueError: If the kind has no allocated prefix.
+    """
+    prefix = NAME_KIND_GUID_PREFIXES.get(kind)
+    if prefix is None:
+        raise ValueError(
+            f"No GUID prefix allocated for name kind {kind!r}; "
+            "add one to NAME_KIND_GUID_PREFIXES"
+        )
+    return prefix
+
+
+def next_name_guid(session: Session, kind: str) -> str:
+    """Return the next free GUID in a name kind's namespace (e.g. ``E01_004``).
+
+    Numbering continues from ``MAX(guid)`` within the kind, matching
+    :func:`storage.crud.idiom.next_idiom_guid`. Gaps in the middle of a
+    namespace are therefore preserved, but deleting the *highest* name frees its
+    number for reuse - the release file, not the database, is the record of
+    which GUIDs have been spent.
+    """
+    prefix = name_kind_guid_prefix(kind)
+    max_guid: Optional[str] = (
+        session.query(func.max(Name.guid))
+        .filter(Name.guid.like(f"{prefix}\\_%", escape="\\"))
+        .scalar()
+    )
+    if max_guid is None:
+        return f"{prefix}_001"
+    return f"{prefix}_{int(max_guid.rsplit('_', 1)[1]) + 1:03d}"
+
+
+def assign_name_guid(session: Session, name: Name) -> str:
+    """Give a name a GUID if it has none, and return the GUID it now carries."""
+    if not name.guid:
+        name.guid = next_name_guid(session, name.kind)
+        session.flush()
+    return cast(str, name.guid)
+
+
+def get_name_by_guid(session: Session, guid: str) -> Optional[Name]:
+    """Return a name by its release GUID, or None."""
+    return cast(Optional[Name], session.query(Name).filter(Name.guid == guid).first())
 
 
 def get_name_translation(

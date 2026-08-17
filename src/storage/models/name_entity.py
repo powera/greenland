@@ -17,10 +17,12 @@ katakana. Those renderings must be stable across every sentence that uses the
 name, which means they have to live somewhere. They live in
 :class:`NameTranslation`, which deliberately mirrors ``LemmaTranslation``.
 
-Names carry no GUID and are not exported to ``data/release``; like concepts
-they sit outside the lemma/GUID machinery. Unlike concepts they live in the
-main (writable) database, because sentences reference them and sentences are
-lemma-side data.
+Names do carry a GUID and are exported to ``data/release/names``: the
+renderings above are content, not derived data, and a client that shows the
+same character in Lithuanian and Japanese has to read them from somewhere.
+Concepts stay out of the release tree; names do not. The GUID prefix encodes
+:data:`~storage.models.name_entity.NAME_KINDS` via
+:data:`storage.models.guid_prefixes.NAME_KIND_GUID_PREFIXES`.
 
 Difficulty is the load-bearing distinction downstream: a sentence's
 ``minimum_level`` is the max difficulty of the *lemmas* it uses, and names are
@@ -110,6 +112,11 @@ class Name(Base):
     __table_args__ = (UniqueConstraint("name_text", "kind", name="uq_name_text_kind"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    # Release GUID, e.g. "E01_004". Nullable because a name proposed by a
+    # generator is a draft until it earns a place in the release namespace;
+    # assign via storage.crud.name_entity.next_name_guid.
+    guid: Mapped[Optional[str]] = mapped_column(String, unique=True, nullable=True, index=True)
 
     # Canonical name text; assign via normalize_name_text(). Case-significant.
     name_text: Mapped[str] = mapped_column(String, nullable=False, index=True)

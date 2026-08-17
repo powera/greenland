@@ -6,11 +6,24 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
-from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
+from barsukas.routes.sync import release_io
+from barsukas.routes.sync.actions import (
+    SKIP,
+    USE_DB,
+    USE_RELEASE,
+    SyncOutcome,
+    bulk_actions_for,
+    is_readonly,
+    parse_bulk_request,
+    parse_language_actions,
+    parse_row_actions,
+)
+from barsukas.routes.sync.paging import PER_PAGE_CHOICES, page_args, paginate
 from storage.config.grammar_facts import (
     get_release_grammar_fact_languages,
     is_release_grammar_fact_type,
@@ -35,9 +48,6 @@ from storage.translation_helpers import (
     invalidate_audio_for_translation_change,
 )
 
-if TYPE_CHECKING:
-    from barsukas.app import BarsukasFlask
-
 logger = logging.getLogger(__name__)
 
 bp = Blueprint("sync_release", __name__, url_prefix="/sync/lemmas")
@@ -51,42 +61,20 @@ DEFAULT_RELEASE_DIR = (
 )
 
 
+# Marks a per-language *disambiguation* inside a translation-update dict, so the
+# translations mode can queue a translation and its disambiguation together and
+# have release_io route each to the right key.
+_DISAMBIG_PREFIX = "_disambig_"
+
+
 def _get_release_dir() -> Path:
     """Get the path to the data/release/lemmas directory."""
     return DEFAULT_RELEASE_DIR
 
 
 def _load_release_lemmas(release_dir: Path) -> Dict[str, Dict[str, Any]]:
-    """Load all lemmas from data/release JSONL files.
-
-    Returns:
-        Dictionary mapping GUID to lemma data from release files.
-    """
-    release_lemmas: Dict[str, Dict[str, Any]] = {}
-
-    if not release_dir.exists():
-        logger.warning(f"Release directory not found: {release_dir}")
-        return release_lemmas
-
-    # Load all base.jsonl files
-    for base_file in release_dir.rglob("base.jsonl"):
-        try:
-            with open(base_file, "r", encoding="utf-8") as f:
-                for line_num, line in enumerate(f, 1):
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        data = json.loads(line)
-                        guid = data.get("guid")
-                        if guid:
-                            release_lemmas[guid] = data
-                    except json.JSONDecodeError as e:
-                        logger.error(f"JSON parse error in {base_file}:{line_num}: {e}")
-        except Exception as e:
-            logger.error(f"Error reading {base_file}: {e}")
-
-    return release_lemmas
+    """Load all lemmas from data/release base.jsonl files, keyed by GUID."""
+    return release_io.load_release_records(release_dir)
 
 
 def _load_release_grammar_facts(
@@ -407,7 +395,8 @@ def difficulty() -> ResponseReturnValue:
 
     return render_template(
         "sync_release/difficulty.html",
-        differences=differences,
+        page=paginate(differences),
+        per_page_choices=PER_PAGE_CHOICES,
         release_dir=str(release_dir),
         release_count=len(release_lemmas),
     )
@@ -416,61 +405,56 @@ def difficulty() -> ResponseReturnValue:
 @bp.route("/difficulty/apply", methods=["POST"])
 def apply_difficulty() -> ResponseReturnValue:
     """Apply selected difficulty level changes."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
-        return redirect(url_for("sync_release.difficulty"))
-
-    actions = {}
-    for key, value in request.form.items():
-        if key.startswith("action_"):
-            lemma_id = key.replace("action_", "")
-            actions[lemma_id] = value
-
-    if not actions:
-        flash("No changes selected", "warning")
         return redirect(url_for("sync_release.difficulty"))
 
     release_dir = _get_release_dir()
     release_lemmas = _load_release_lemmas(release_dir)
 
-    updated_db_count = 0
-    updated_release_count = 0
-    skipped_count = 0
-    error_count = 0
+    bulk = parse_bulk_request()
+    if bulk is not None:
+        differences = _find_difficulty_differences(release_lemmas, g.db)
+        expanded = bulk_actions_for(
+            bulk, (diff["lemma_id"] for diff in differences), total=len(differences)
+        )
+        if expanded is None:
+            return redirect(url_for("sync_release.difficulty"))
+        actions = expanded
+    else:
+        actions = parse_row_actions()
 
-    # Track release file updates: {filepath: {guid: {field: value}}}
+    if not actions:
+        flash("No changes selected", "warning")
+        return redirect(url_for("sync_release.difficulty"))
+
+    outcome = SyncOutcome(noun="lemma")
+    guid_files = release_io.build_guid_file_index(release_dir)
     release_updates: Dict[Path, Dict[str, Dict[str, Any]]] = {}
 
     for lemma_id_str, action in actions.items():
-        if action == "skip":
-            skipped_count += 1
+        if action == SKIP:
+            outcome.skipped += 1
             continue
-
-        if action not in ("use_release", "use_db"):
+        if action not in (USE_RELEASE, USE_DB):
             continue
 
         try:
-            lemma_id_int = int(lemma_id_str)
-            lemma = g.db.query(Lemma).filter(Lemma.id == lemma_id_int).first()
-
+            lemma = g.db.query(Lemma).filter(Lemma.id == int(lemma_id_str)).first()
             if not lemma:
-                logger.warning(f"Lemma not found: {lemma_id_int}")
-                error_count += 1
+                outcome.record_error(f"Lemma not found: {lemma_id_str}")
                 continue
 
             release_data = release_lemmas.get(lemma.guid)
             if not release_data:
-                logger.warning(f"Release data not found for GUID: {lemma.guid}")
-                error_count += 1
+                outcome.record_error(f"Release data not found for GUID: {lemma.guid}")
                 continue
 
-            if action == "use_release":
+            if action == USE_RELEASE:
                 new_level = release_data.get("difficulty_level")
                 old_level = lemma.difficulty_level
-
                 lemma.difficulty_level = new_level
-                updated_db_count += 1
+                outcome.updated_db += 1
 
                 log_translation_change(
                     session=g.db,
@@ -481,60 +465,26 @@ def apply_difficulty() -> ResponseReturnValue:
                     old_value=str(old_level) if old_level is not None else None,
                     new_value=str(new_level) if new_level is not None else None,
                 )
-
                 logger.info(
                     f"Updated difficulty for '{lemma.lemma_text}' ({lemma.guid}): "
                     f"{old_level} -> {new_level}"
                 )
-
-            elif action == "use_db":
-                db_level = lemma.difficulty_level
-                file_path = _find_release_file_for_lemma(release_dir, lemma.guid)
-                if file_path:
-                    if file_path not in release_updates:
-                        release_updates[file_path] = {}
-                    release_updates[file_path][lemma.guid] = {
-                        "difficulty_level": db_level,
-                    }
-                    updated_release_count += 1
-                    logger.info(
-                        f"Queued release update for '{lemma.lemma_text}' "
-                        f"({lemma.guid}) difficulty_level: -> {db_level}"
-                    )
-                else:
-                    logger.warning(f"Could not find release file for GUID: {lemma.guid}")
-                    error_count += 1
+            else:  # USE_DB
+                file_path = release_io.file_for_guid(guid_files, lemma.guid)
+                if file_path is None:
+                    outcome.record_error(f"Could not find release file for GUID: {lemma.guid}")
+                    continue
+                release_updates.setdefault(file_path, {})[lemma.guid] = {
+                    "difficulty_level": lemma.difficulty_level,
+                }
+                outcome.updated_release += 1
 
         except Exception as e:
-            logger.error(f"Error updating lemma {lemma_id_str}: {e}")
-            error_count += 1
+            outcome.record_error(f"Error updating lemma {lemma_id_str}: {e}")
 
-    if updated_db_count > 0:
-        try:
-            g.db.commit()
-            flash(f"Updated {updated_db_count} lemma(s) in database", "success")
-        except Exception as e:
-            g.db.rollback()
-            flash(f"Error committing changes: {e}", "error")
-            logger.error(f"Commit error: {e}")
-
-    if release_updates:
-        try:
-            _apply_release_field_updates(release_updates)
-            flash(
-                f"Updated {updated_release_count} lemma(s) in release files",
-                "success",
-            )
-        except Exception as e:
-            flash(f"Error updating release files: {e}", "error")
-            logger.error(f"Release file update error: {e}")
-
-    if skipped_count > 0:
-        flash(f"Skipped {skipped_count} lemma(s)", "info")
-
-    if error_count > 0:
-        flash(f"Errors: {error_count}", "warning")
-
+    outcome.commit(g.db)
+    outcome.write_release(lambda: release_io.apply_field_updates(release_updates))
+    outcome.flash_summary()
     return redirect(url_for("sync_release.difficulty"))
 
 
@@ -592,7 +542,8 @@ def additions() -> ResponseReturnValue:
 
     return render_template(
         "sync_release/additions.html",
-        additions=additions_list,
+        page=paginate(additions_list),
+        per_page_choices=PER_PAGE_CHOICES,
         release_dir=str(release_dir),
     )
 
@@ -600,30 +551,30 @@ def additions() -> ResponseReturnValue:
 @bp.route("/additions/apply", methods=["POST"])
 def apply_additions() -> ResponseReturnValue:
     """Import selected new lemmas from release."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
-        return redirect(url_for("sync_release.additions"))
-
-    selected_guids = request.form.getlist("selected_guids")
-
-    if not selected_guids:
-        flash("No lemmas selected for import", "warning")
         return redirect(url_for("sync_release.additions"))
 
     release_dir = _get_release_dir()
     release_lemmas = _load_release_lemmas(release_dir)
     release_grammar_facts = _load_release_grammar_facts(release_dir)
 
-    imported_count = 0
+    if request.form.get("select_scope") == "all":
+        selected_guids = [item["guid"] for item in _find_additions(release_lemmas, g.db)]
+    else:
+        selected_guids = request.form.getlist("selected_guids")
+
+    if not selected_guids:
+        flash("No lemmas selected for import", "warning")
+        return redirect(url_for("sync_release.additions"))
+
+    outcome = SyncOutcome(noun="lemma")
     grammar_fact_count = 0
-    error_count = 0
 
     for guid in selected_guids:
         release_data = release_lemmas.get(guid)
         if not release_data:
-            logger.warning(f"Release data not found for GUID: {guid}")
-            error_count += 1
+            outcome.record_error(f"Release data not found for GUID: {guid}")
             continue
 
         try:
@@ -690,28 +641,16 @@ def apply_additions() -> ResponseReturnValue:
                 },
             )
 
-            imported_count += 1
+            outcome.imported += 1
             logger.info(f"Imported lemma '{lemma_text}' ({guid})")
 
         except Exception as e:
-            logger.error(f"Error importing GUID {guid}: {e}")
-            error_count += 1
+            outcome.record_error(f"Error importing GUID {guid}: {e}")
 
-    if imported_count > 0:
-        try:
-            g.db.commit()
-            msg = f"Imported {imported_count} lemma(s)"
-            if grammar_fact_count > 0:
-                msg += f" with {grammar_fact_count} grammar fact(s)"
-            flash(msg, "success")
-        except Exception as e:
-            g.db.rollback()
-            flash(f"Error committing changes: {e}", "error")
-            logger.error(f"Commit error: {e}")
-
-    if error_count > 0:
-        flash(f"Errors: {error_count}", "warning")
-
+    if grammar_fact_count:
+        outcome.details.append(f"{grammar_fact_count} grammar fact(s)")
+    outcome.commit(g.db)
+    outcome.flash_summary()
     return redirect(url_for("sync_release.additions"))
 
 
@@ -803,7 +742,8 @@ def grammar_facts() -> ResponseReturnValue:
 
     return render_template(
         "sync_release/grammar_facts.html",
-        differences=differences,
+        page=paginate(differences),
+        per_page_choices=PER_PAGE_CHOICES,
         release_dir=str(release_dir),
     )
 
@@ -811,22 +751,27 @@ def grammar_facts() -> ResponseReturnValue:
 @bp.route("/grammar-facts/apply", methods=["POST"])
 def apply_grammar_facts() -> ResponseReturnValue:
     """Upsert selected grammar facts from release into DB."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
-        return redirect(url_for("sync_release.grammar_facts"))
-
-    selected_guids = request.form.getlist("selected_guids")
-    if not selected_guids:
-        flash("No lemmas selected for grammar fact sync", "warning")
         return redirect(url_for("sync_release.grammar_facts"))
 
     release_dir = _get_release_dir()
     release_grammar = _load_release_grammar_facts(release_dir)
 
+    if request.form.get("select_scope") == "all":
+        selected_guids = [
+            diff["guid"] for diff in _find_grammar_fact_differences(release_grammar, g.db)
+        ]
+    else:
+        selected_guids = request.form.getlist("selected_guids")
+
+    if not selected_guids:
+        flash("No lemmas selected for grammar fact sync", "warning")
+        return redirect(url_for("sync_release.grammar_facts"))
+
+    outcome = SyncOutcome(noun="grammar fact")
     updated_count = 0
     added_count = 0
-    error_count = 0
 
     for guid in selected_guids:
         release_facts = release_grammar.get(guid, [])
@@ -835,8 +780,7 @@ def apply_grammar_facts() -> ResponseReturnValue:
 
         db_lemma = g.db.query(Lemma).filter(Lemma.guid == guid).first()
         if not db_lemma:
-            logger.warning(f"Lemma not found for GUID: {guid}")
-            error_count += 1
+            outcome.record_error(f"Lemma not found for GUID: {guid}")
             continue
 
         try:
@@ -897,27 +841,17 @@ def apply_grammar_facts() -> ResponseReturnValue:
             )
 
         except Exception as e:
-            logger.error(f"Error syncing grammar facts for GUID {guid}: {e}")
-            error_count += 1
+            outcome.record_error(f"Error syncing grammar facts for GUID {guid}: {e}")
 
-    total_changes = updated_count + added_count
-    if total_changes > 0:
-        try:
-            g.db.commit()
-            msg_parts = []
-            if added_count > 0:
-                msg_parts.append(f"added {added_count}")
-            if updated_count > 0:
-                msg_parts.append(f"updated {updated_count}")
-            flash(f"Grammar facts: {', '.join(msg_parts)}", "success")
-        except Exception as e:
-            g.db.rollback()
-            flash(f"Error committing changes: {e}", "error")
-            logger.error(f"Commit error: {e}")
-
-    if error_count > 0:
-        flash(f"Errors: {error_count}", "warning")
-
+    # Both an upsert of an existing fact and a brand-new one are reported as
+    # "updated"; the added/updated split rides along in the detail line.
+    outcome.updated_db = updated_count + added_count
+    if added_count:
+        outcome.details.append(f"{added_count} added")
+    if updated_count:
+        outcome.details.append(f"{updated_count} changed")
+    outcome.commit(g.db)
+    outcome.flash_summary()
     return redirect(url_for("sync_release.grammar_facts"))
 
 
@@ -979,36 +913,41 @@ def removals() -> ResponseReturnValue:
 
     return render_template(
         "sync_release/removals.html",
-        removals=removals_list,
+        page=paginate(removals_list),
+        per_page_choices=PER_PAGE_CHOICES,
         release_dir=str(release_dir),
     )
+
+
+def _selected_removal_ids() -> List[str]:
+    """The lemma ids this submit targets.
+
+    Deletion is never widened to the whole list from a "select all" button: the
+    export button beside it is the safe bulk action, and a one-click delete of
+    every DB-only lemma is not something this page should offer.
+    """
+    return request.form.getlist("selected_ids")
 
 
 @bp.route("/removals/apply", methods=["POST"])
 def apply_removals() -> ResponseReturnValue:
     """Delete selected lemmas that are not in release."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
         return redirect(url_for("sync_release.removals"))
 
-    selected_ids = request.form.getlist("selected_ids")
-
+    selected_ids = _selected_removal_ids()
     if not selected_ids:
         flash("No lemmas selected for deletion", "warning")
         return redirect(url_for("sync_release.removals"))
 
-    deleted_count = 0
-    error_count = 0
+    outcome = SyncOutcome(noun="lemma")
 
     for lemma_id_str in selected_ids:
         try:
-            lemma_id = int(lemma_id_str)
-            lemma = g.db.query(Lemma).filter(Lemma.id == lemma_id).first()
-
+            lemma = g.db.query(Lemma).filter(Lemma.id == int(lemma_id_str)).first()
             if not lemma:
-                logger.warning(f"Lemma not found: {lemma_id}")
-                error_count += 1
+                outcome.record_error(f"Lemma not found: {lemma_id_str}")
                 continue
 
             log_operation(
@@ -1025,24 +964,13 @@ def apply_removals() -> ResponseReturnValue:
 
             logger.info(f"Deleting lemma '{lemma.lemma_text}' ({lemma.guid})")
             g.db.delete(lemma)
-            deleted_count += 1
+            outcome.deleted += 1
 
         except Exception as e:
-            logger.error(f"Error deleting lemma {lemma_id_str}: {e}")
-            error_count += 1
+            outcome.record_error(f"Error deleting lemma {lemma_id_str}: {e}")
 
-    if deleted_count > 0:
-        try:
-            g.db.commit()
-            flash(f"Deleted {deleted_count} lemma(s)", "success")
-        except Exception as e:
-            g.db.rollback()
-            flash(f"Error committing changes: {e}", "error")
-            logger.error(f"Commit error: {e}")
-
-    if error_count > 0:
-        flash(f"Errors: {error_count}", "warning")
-
+    outcome.commit(g.db)
+    outcome.flash_summary()
     return redirect(url_for("sync_release.removals"))
 
 
@@ -1131,70 +1059,49 @@ def _get_release_file_path_for_lemma(release_dir: Path, lemma: Lemma) -> Optiona
     return release_dir / pos_dir / str(lemma.pos_subtype) / "base.jsonl"
 
 
-def _append_lemma_to_release_file(file_path: Path, entry: Dict[str, Any]) -> None:
-    """Append a lemma entry to a base.jsonl file, keeping lines sorted by GUID."""
-    file_path.parent.mkdir(parents=True, exist_ok=True)
-
-    existing_lines: List[str] = []
-    if file_path.exists():
-        with open(file_path, "r", encoding="utf-8") as f:
-            existing_lines = [line for line in f if line.strip()]
-
-    # Append the new entry and re-sort by GUID
-    new_line = json.dumps(entry, ensure_ascii=False) + "\n"
-    existing_lines.append(new_line)
-
-    def _guid_sort_key(line: str) -> str:
-        try:
-            return str(json.loads(line).get("guid", ""))
-        except json.JSONDecodeError:
-            return ""
-
-    existing_lines.sort(key=_guid_sort_key)
-
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.writelines(existing_lines)
-
-
 @bp.route("/removals/export", methods=["POST"])
 def export_removals_to_release() -> ResponseReturnValue:
-    """Export selected SQLite-only lemmas to data/release base.jsonl files."""
-    selected_ids = request.form.getlist("selected_ids")
+    """Export selected SQLite-only lemmas to data/release base.jsonl files.
+
+    This is the direction the sync system is actually used in day to day, so it
+    honours "export all" as well as a hand-picked selection.
+    """
+    release_dir = _get_release_dir()
+
+    if request.form.get("select_scope") == "all":
+        release_lemmas = _load_release_lemmas(release_dir)
+        selected_ids = [str(item["lemma_id"]) for item in _find_removals(release_lemmas, g.db)]
+    else:
+        selected_ids = request.form.getlist("selected_ids")
 
     if not selected_ids:
         flash("No lemmas selected for export", "warning")
         return redirect(url_for("sync_release.removals"))
 
-    release_dir = _get_release_dir()
-    exported_count = 0
-    error_count = 0
+    outcome = SyncOutcome(noun="lemma")
+    # Group by target file so each base.jsonl is rewritten once rather than
+    # once per exported lemma.
+    entries_by_file: Dict[Path, List[Dict[str, Any]]] = {}
 
     for lemma_id_str in selected_ids:
         try:
-            lemma_id = int(lemma_id_str)
-            lemma = g.db.query(Lemma).filter(Lemma.id == lemma_id).first()
-
+            lemma = g.db.query(Lemma).filter(Lemma.id == int(lemma_id_str)).first()
             if not lemma:
-                logger.warning(f"Lemma not found: {lemma_id}")
-                error_count += 1
+                outcome.record_error(f"Lemma not found: {lemma_id_str}")
                 continue
-
             if not lemma.guid:
-                logger.warning(f"Lemma {lemma_id} has no GUID, skipping export")
-                error_count += 1
+                outcome.record_error(f"Lemma {lemma_id_str} has no GUID, skipping export")
                 continue
 
             file_path = _get_release_file_path_for_lemma(release_dir, lemma)
             if file_path is None:
-                logger.warning(
+                outcome.record_error(
                     f"Cannot determine release file for lemma {lemma.guid} "
                     f"(pos_type={lemma.pos_type}, pos_subtype={lemma.pos_subtype})"
                 )
-                error_count += 1
                 continue
 
-            entry = _build_release_entry_from_db(lemma)
-            _append_lemma_to_release_file(file_path, entry)
+            entries_by_file.setdefault(file_path, []).append(_build_release_entry_from_db(lemma))
 
             log_operation(
                 session=g.db,
@@ -1208,21 +1115,25 @@ def export_removals_to_release() -> ResponseReturnValue:
                     "release_file": str(file_path.relative_to(release_dir.parent.parent)),
                 },
             )
-
-            exported_count += 1
-            logger.info(f"Exported lemma '{lemma.lemma_text}' ({lemma.guid}) to {file_path}")
+            outcome.exported += 1
+            logger.info(f"Exporting lemma '{lemma.lemma_text}' ({lemma.guid}) to {file_path}")
 
         except Exception as e:
-            logger.error(f"Error exporting lemma {lemma_id_str}: {e}")
-            error_count += 1
+            outcome.record_error(f"Error exporting lemma {lemma_id_str}: {e}")
 
-    if exported_count > 0:
-        g.db.commit()
-        flash(f"Exported {exported_count} lemma(s) to data/release", "success")
+    try:
+        for file_path, entries in entries_by_file.items():
+            release_io.upsert_records(file_path, entries)
+    except Exception as e:  # noqa: BLE001 - surfaced to the user
+        logger.error(f"Release file write error: {e}")
+        flash(f"Error writing release files: {e}", "error")
+        outcome.exported = 0
+        outcome.errors += 1
+    else:
+        if outcome.exported:
+            g.db.commit()
 
-    if error_count > 0:
-        flash(f"Errors: {error_count}", "warning")
-
+    outcome.flash_summary()
     return redirect(url_for("sync_release.removals"))
 
 
@@ -1347,7 +1258,8 @@ def changes() -> ResponseReturnValue:
 
     return render_template(
         "sync_release/changes.html",
-        changes=changes_list,
+        page=paginate(changes_list),
+        per_page_choices=PER_PAGE_CHOICES,
         release_dir=str(release_dir),
     )
 
@@ -1355,56 +1267,52 @@ def changes() -> ResponseReturnValue:
 @bp.route("/changes/apply", methods=["POST"])
 def apply_changes() -> ResponseReturnValue:
     """Apply selected lemma_text changes."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
-        return redirect(url_for("sync_release.changes"))
-
-    actions = {}
-    for key, value in request.form.items():
-        if key.startswith("action_"):
-            lemma_id = key.replace("action_", "")
-            actions[lemma_id] = value
-
-    if not actions:
-        flash("No changes selected", "warning")
         return redirect(url_for("sync_release.changes"))
 
     release_dir = _get_release_dir()
     release_lemmas = _load_release_lemmas(release_dir)
 
-    updated_db_count = 0
-    updated_release_count = 0
-    skipped_count = 0
-    error_count = 0
+    bulk = parse_bulk_request()
+    if bulk is not None:
+        all_changes = _find_lemma_text_changes(release_lemmas, g.db)
+        expanded = bulk_actions_for(
+            bulk, (item["lemma_id"] for item in all_changes), total=len(all_changes)
+        )
+        if expanded is None:
+            return redirect(url_for("sync_release.changes"))
+        actions = expanded
+    else:
+        actions = parse_row_actions()
 
-    # Track release file updates: {filepath: {guid: {field: value}}}
+    if not actions:
+        flash("No changes selected", "warning")
+        return redirect(url_for("sync_release.changes"))
+
+    outcome = SyncOutcome(noun="lemma")
+    guid_files = release_io.build_guid_file_index(release_dir)
     release_updates: Dict[Path, Dict[str, Dict[str, Any]]] = {}
 
     for lemma_id_str, action in actions.items():
-        if action == "skip":
-            skipped_count += 1
+        if action == SKIP:
+            outcome.skipped += 1
             continue
-
-        if action not in ("use_release", "use_db"):
+        if action not in (USE_RELEASE, USE_DB):
             continue
 
         try:
-            lemma_id_int = int(lemma_id_str)
-            lemma = g.db.query(Lemma).filter(Lemma.id == lemma_id_int).first()
-
+            lemma = g.db.query(Lemma).filter(Lemma.id == int(lemma_id_str)).first()
             if not lemma:
-                logger.warning(f"Lemma not found: {lemma_id_int}")
-                error_count += 1
+                outcome.record_error(f"Lemma not found: {lemma_id_str}")
                 continue
 
             release_data = release_lemmas.get(lemma.guid)
             if not release_data:
-                logger.warning(f"Release data not found for GUID: {lemma.guid}")
-                error_count += 1
+                outcome.record_error(f"Release data not found for GUID: {lemma.guid}")
                 continue
 
-            if action == "use_release":
+            if action == USE_RELEASE:
                 old_text = lemma.lemma_text
                 new_text = _get_release_lemma_text(release_data)
                 new_definition = release_data.get("concept_definition", "") or ""
@@ -1439,15 +1347,21 @@ def apply_changes() -> ResponseReturnValue:
                     new_value=new_text,
                 )
 
-                updated_db_count += 1
+                outcome.updated_db += 1
                 logger.info(f"Updated base info for ({lemma.guid}): '{old_text}' -> '{new_text}'")
 
-            elif action == "use_db":
+            else:  # USE_DB
+                file_path = release_io.file_for_guid(guid_files, lemma.guid)
+                if file_path is None:
+                    outcome.record_error(f"Could not find release file for GUID: {lemma.guid}")
+                    continue
+
                 db_text = lemma.lemma_text
-                update_fields: Dict[str, Any] = {}
-                # Update English translation in release (stored as translations.en)
-                update_fields["translations.en"] = db_text
-                update_fields["concept_definition"] = lemma.definition_text or ""
+                update_fields: Dict[str, Any] = {
+                    # English lives in the release record as translations.en.
+                    "translations.en": db_text,
+                    "concept_definition": lemma.definition_text or "",
+                }
                 if lemma.notes:
                     update_fields["notes"] = lemma.notes
                 if lemma.lexical_gap_reason:
@@ -1458,51 +1372,18 @@ def apply_changes() -> ResponseReturnValue:
                 # Concept pairing: write the DB's Q-id, or remove the field when
                 # the lemma is unpaired so a stale qid doesn't linger in release.
                 db_qid = get_qid_for_lemma(g.db, lemma.id)
-                update_fields["qid"] = db_qid if db_qid else _REMOVE_FIELD
+                update_fields["qid"] = db_qid if db_qid else release_io.REMOVE_FIELD
 
-                file_path = _find_release_file_for_lemma(release_dir, lemma.guid)
-                if file_path:
-                    if file_path not in release_updates:
-                        release_updates[file_path] = {}
-                    release_updates[file_path][lemma.guid] = update_fields
-                    updated_release_count += 1
-                    logger.info(
-                        f"Queued release update for ({lemma.guid}) " f"lemma_text: -> '{db_text}'"
-                    )
-                else:
-                    logger.warning(f"Could not find release file for GUID: {lemma.guid}")
-                    error_count += 1
+                release_updates.setdefault(file_path, {})[lemma.guid] = update_fields
+                outcome.updated_release += 1
+                logger.info(f"Queued release update for ({lemma.guid}) lemma_text: -> '{db_text}'")
 
         except Exception as e:
-            logger.error(f"Error updating lemma {lemma_id_str}: {e}")
-            error_count += 1
+            outcome.record_error(f"Error updating lemma {lemma_id_str}: {e}")
 
-    if updated_db_count > 0:
-        try:
-            g.db.commit()
-            flash(f"Updated {updated_db_count} lemma(s) in database", "success")
-        except Exception as e:
-            g.db.rollback()
-            flash(f"Error committing changes: {e}", "error")
-            logger.error(f"Commit error: {e}")
-
-    if release_updates:
-        try:
-            _apply_release_field_updates(release_updates)
-            flash(
-                f"Updated {updated_release_count} lemma(s) in release files",
-                "success",
-            )
-        except Exception as e:
-            flash(f"Error updating release files: {e}", "error")
-            logger.error(f"Release file update error: {e}")
-
-    if skipped_count > 0:
-        flash(f"Skipped {skipped_count} lemma(s)", "info")
-
-    if error_count > 0:
-        flash(f"Errors: {error_count}", "warning")
-
+    outcome.commit(g.db)
+    outcome.write_release(lambda: release_io.apply_field_updates(release_updates))
+    outcome.flash_summary()
     return redirect(url_for("sync_release.changes"))
 
 
@@ -1683,66 +1564,62 @@ def translations() -> ResponseReturnValue:
 
     return render_template(
         "sync_release/translations.html",
-        differences=differences,
+        page=paginate(differences),
+        per_page_choices=PER_PAGE_CHOICES,
         release_dir=str(release_dir),
         language_names=LANGUAGE_NAMES,
     )
 
 
+def _bulk_language_actions(
+    differences: List[Dict[str, Any]], action: str
+) -> Dict[str, Dict[str, str]]:
+    """Expand a bulk choice across every differing (lemma, language) pair."""
+    return {
+        str(diff["lemma_id"]): {
+            str(lang_diff["lang_code"]): action for lang_diff in diff["lang_diffs"]
+        }
+        for diff in differences
+    }
+
+
 @bp.route("/translations/apply", methods=["POST"])
 def apply_translations() -> ResponseReturnValue:
     """Apply selected translation changes."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
-        return redirect(url_for("sync_release.translations"))
-
-    # Parse form actions
-    # Format: action_{lemma_id}_{lang_code} = skip|use_release|use_db
-    actions: Dict[str, Dict[str, str]] = {}  # {lemma_id: {lang_code: action}}
-    for key, value in request.form.items():
-        if key.startswith("action_"):
-            # key format: action_{lemma_id}_{lang_code}
-            # lang_code may contain hyphens (e.g. zh-tw), so split carefully
-            remainder = key[len("action_") :]
-            underscore_pos = remainder.find("_")
-            if underscore_pos == -1:
-                continue
-            lemma_id = remainder[:underscore_pos]
-            lang_code = remainder[underscore_pos + 1 :]
-            if lemma_id not in actions:
-                actions[lemma_id] = {}
-            actions[lemma_id][lang_code] = value
-
-    if not actions:
-        flash("No changes selected", "warning")
         return redirect(url_for("sync_release.translations"))
 
     release_dir = _get_release_dir()
     release_lemmas = _load_release_lemmas(release_dir)
 
-    updated_db_count = 0
-    updated_release_count = 0
-    skipped_count = 0
-    error_count = 0
+    bulk = parse_bulk_request()
+    if bulk is not None:
+        differences = _find_translation_differences(release_lemmas, g.db)
+        if bulk_actions_for(bulk, (), total=len(differences)) is None:
+            return redirect(url_for("sync_release.translations"))
+        actions = _bulk_language_actions(differences, bulk.action)
+    else:
+        actions = parse_language_actions()
 
-    # Track release file updates: {filepath: {guid: {lang_code: new_translation}}}
+    if not actions:
+        flash("No changes selected", "warning")
+        return redirect(url_for("sync_release.translations"))
+
+    outcome = SyncOutcome(noun="translation")
+    guid_files = release_io.build_guid_file_index(release_dir)
     release_updates: Dict[Path, Dict[str, Dict[str, str]]] = {}
 
     for lemma_id_str, lang_actions in actions.items():
         try:
-            lemma_id_int = int(lemma_id_str)
-            lemma = g.db.query(Lemma).filter(Lemma.id == lemma_id_int).first()
-
+            lemma = g.db.query(Lemma).filter(Lemma.id == int(lemma_id_str)).first()
             if not lemma:
-                logger.warning(f"Lemma not found: {lemma_id_int}")
-                error_count += 1
+                outcome.record_error(f"Lemma not found: {lemma_id_str}")
                 continue
 
             release_data = release_lemmas.get(lemma.guid)
             if not release_data:
-                logger.warning(f"Release data not found for GUID: {lemma.guid}")
-                error_count += 1
+                outcome.record_error(f"Release data not found for GUID: {lemma.guid}")
                 continue
 
             release_translations = release_data.get("translations", {})
@@ -1750,11 +1627,11 @@ def apply_translations() -> ResponseReturnValue:
             release_metadata = release_data.get("translation_metadata", {})
 
             for lang_code, action in lang_actions.items():
-                if action == "skip":
-                    skipped_count += 1
+                if action == SKIP:
+                    outcome.skipped += 1
                     continue
 
-                if action == "use_release":
+                if action == USE_RELEASE:
                     # Copy from release to DB
                     release_val = release_translations.get(lang_code, "")
                     release_disambig = release_disambiguations.get(lang_code)
@@ -1811,15 +1688,15 @@ def apply_translations() -> ResponseReturnValue:
                             g.db, lemma.guid, lang_code, old_val, release_val
                         )
 
-                        updated_db_count += 1
+                        outcome.updated_db += 1
                         logger.info(
                             f"Updated DB translation for '{lemma.lemma_text}' "
                             f"({lemma.guid}) {lang_code}: '{old_val}' -> '{release_val}'"
                         )
                     else:
-                        skipped_count += 1
+                        outcome.skipped += 1
 
-                elif action == "use_db":
+                elif action == USE_DB:
                     # Mark for release file update (DB value -> release)
                     trans_obj = (
                         g.db.query(LemmaTranslation)
@@ -1832,59 +1709,33 @@ def apply_translations() -> ResponseReturnValue:
 
                     db_val = trans_obj.translation if trans_obj else ""
                     db_disambig = trans_obj.disambiguation if trans_obj else None
-                    if db_val:
-                        # Find the release file for this lemma
-                        file_path = _find_release_file_for_lemma(release_dir, lemma.guid)
-                        if file_path:
-                            if file_path not in release_updates:
-                                release_updates[file_path] = {}
-                            if lemma.guid not in release_updates[file_path]:
-                                release_updates[file_path][lemma.guid] = {}
-                            release_updates[file_path][lemma.guid][lang_code] = db_val
-                            # Also export disambiguation if set
-                            if db_disambig:
-                                release_updates[file_path][lemma.guid][
-                                    f"_disambig_{lang_code}"
-                                ] = db_disambig
-                            updated_release_count += 1
-                            logger.info(
-                                f"Queued release update for '{lemma.lemma_text}' "
-                                f"({lemma.guid}) {lang_code}: -> '{db_val}'"
-                            )
-                        else:
-                            logger.warning(f"Could not find release file for GUID: {lemma.guid}")
-                            error_count += 1
-                    else:
-                        skipped_count += 1
+                    if not db_val:
+                        outcome.skipped += 1
+                        continue
+
+                    file_path = release_io.file_for_guid(guid_files, lemma.guid)
+                    if file_path is None:
+                        outcome.record_error(f"Could not find release file for GUID: {lemma.guid}")
+                        continue
+
+                    guid_updates = release_updates.setdefault(file_path, {}).setdefault(
+                        lemma.guid, {}
+                    )
+                    guid_updates[lang_code] = db_val
+                    if db_disambig:
+                        guid_updates[f"{_DISAMBIG_PREFIX}{lang_code}"] = db_disambig
+                    outcome.updated_release += 1
+                    logger.info(
+                        f"Queued release update for '{lemma.lemma_text}' "
+                        f"({lemma.guid}) {lang_code}: -> '{db_val}'"
+                    )
 
         except Exception as e:
-            logger.error(f"Error processing lemma {lemma_id_str}: {e}")
-            error_count += 1
+            outcome.record_error(f"Error processing lemma {lemma_id_str}: {e}")
 
-    # Commit DB changes
-    if updated_db_count > 0:
-        try:
-            g.db.commit()
-            flash(f"Updated {updated_db_count} translation(s) in database", "success")
-        except Exception as e:
-            g.db.rollback()
-            flash(f"Error committing DB changes: {e}", "error")
-            logger.error(f"Commit error: {e}")
-
-    # Apply release file updates
-    if release_updates:
-        try:
-            _apply_release_translation_updates(release_updates)
-            flash(f"Updated {updated_release_count} translation(s) in release files", "success")
-        except Exception as e:
-            flash(f"Error updating release files: {e}", "error")
-            logger.error(f"Release file update error: {e}")
-
-    if skipped_count > 0:
-        flash(f"Skipped {skipped_count} item(s)", "info")
-
-    if error_count > 0:
-        flash(f"Errors: {error_count}", "warning")
+    outcome.commit(g.db)
+    outcome.write_release(lambda: _apply_release_translation_updates(release_updates))
+    outcome.flash_summary()
 
     return redirect(url_for("sync_release.translations"))
 
@@ -2116,7 +1967,11 @@ def secondary_translations_view() -> ResponseReturnValue:
 
     return render_template(
         "sync_release/secondary_translations_detail.html",
-        differences=differences,
+        page=paginate(differences),
+        per_page_choices=PER_PAGE_CHOICES,
+        # The language filter has to survive the pager links, so it is carried
+        # through page_args rather than rebuilt in the template.
+        list_args=page_args(),
         release_dir=str(release_dir),
         language_names=LANGUAGE_NAMES,
         selected_languages=selected_langs,
@@ -2126,58 +1981,53 @@ def secondary_translations_view() -> ResponseReturnValue:
 @bp.route("/secondary-translations/apply", methods=["POST"])
 def apply_secondary_translations() -> ResponseReturnValue:
     """Apply selected secondary translation changes."""
-    app: "BarsukasFlask" = current_app  # type: ignore[assignment]
-    if app.config.get("READONLY", False):
+    if is_readonly():
         flash("Database is in read-only mode", "error")
-        return redirect(url_for("sync_release.secondary_translations"))
-
-    # Parse form actions — same format as primary translations
-    actions: Dict[str, Dict[str, str]] = {}
-    for key, value in request.form.items():
-        if key.startswith("action_"):
-            remainder = key[len("action_") :]
-            underscore_pos = remainder.find("_")
-            if underscore_pos == -1:
-                continue
-            lemma_id = remainder[:underscore_pos]
-            lang_code = remainder[underscore_pos + 1 :]
-            if lemma_id not in actions:
-                actions[lemma_id] = {}
-            actions[lemma_id][lang_code] = value
-
-    if not actions:
-        flash("No changes selected", "warning")
         return redirect(url_for("sync_release.secondary_translations"))
 
     release_dir = _get_release_dir()
     sec_translations = _load_secondary_translations(release_dir)
 
-    updated_db_count = 0
-    updated_release_count = 0
-    skipped_count = 0
-    error_count = 0
+    bulk = parse_bulk_request()
+    if bulk is not None:
+        # The bulk button carries the language filter the page was viewed with,
+        # so "apply to all" stays scoped to the languages on screen.
+        selected_langs = request.form.getlist("lang")
+        release_lemmas = _load_release_lemmas(release_dir)
+        differences = _find_secondary_translation_differences_filtered(
+            release_lemmas, sec_translations, g.db, selected_langs
+        )
+        if bulk_actions_for(bulk, (), total=len(differences)) is None:
+            return redirect(url_for("sync_release.secondary_translations"))
+        actions = _bulk_language_actions(differences, bulk.action)
+    else:
+        actions = parse_language_actions()
 
-    # Track release file updates: {dir_path: {guid: {lang_code: new_translation}}}
+    if not actions:
+        flash("No changes selected", "warning")
+        return redirect(url_for("sync_release.secondary_translations"))
+
+    outcome = SyncOutcome(noun="secondary translation")
+    guid_files = release_io.build_guid_file_index(release_dir)
+    # Release updates are keyed by directory: a GUID may not be in
+    # secondary.jsonl yet, so the target is the category dir, not a known file.
     release_updates: Dict[Path, Dict[str, Dict[str, str]]] = {}
 
     for lemma_id_str, lang_actions in actions.items():
         try:
-            lemma_id_int = int(lemma_id_str)
-            lemma = g.db.query(Lemma).filter(Lemma.id == lemma_id_int).first()
-
+            lemma = g.db.query(Lemma).filter(Lemma.id == int(lemma_id_str)).first()
             if not lemma:
-                logger.warning(f"Lemma not found: {lemma_id_int}")
-                error_count += 1
+                outcome.record_error(f"Lemma not found: {lemma_id_str}")
                 continue
 
             guid_sec_trans = sec_translations.get(lemma.guid, {})
 
             for lang_code, action in lang_actions.items():
-                if action == "skip":
-                    skipped_count += 1
+                if action == SKIP:
+                    outcome.skipped += 1
                     continue
 
-                if action == "use_release":
+                if action == USE_RELEASE:
                     release_val = guid_sec_trans.get(lang_code, "")
                     if release_val:
                         trans_obj = (
@@ -2218,16 +2068,16 @@ def apply_secondary_translations() -> ResponseReturnValue:
                             g.db, lemma.guid, lang_code, old_val, release_val
                         )
 
-                        updated_db_count += 1
+                        outcome.updated_db += 1
                         logger.info(
                             f"Updated DB secondary translation for "
                             f"'{lemma.lemma_text}' ({lemma.guid}) "
                             f"{lang_code}: '{old_val}' -> '{release_val}'"
                         )
                     else:
-                        skipped_count += 1
+                        outcome.skipped += 1
 
-                elif action == "use_db":
+                elif action == USE_DB:
                     trans_obj = (
                         g.db.query(LemmaTranslation)
                         .filter(
@@ -2238,140 +2088,51 @@ def apply_secondary_translations() -> ResponseReturnValue:
                     )
 
                     db_val = trans_obj.translation if trans_obj else ""
-                    if db_val:
-                        dir_path = _find_secondary_file_dir_for_lemma(release_dir, lemma.guid)
-                        if dir_path:
-                            if dir_path not in release_updates:
-                                release_updates[dir_path] = {}
-                            if lemma.guid not in release_updates[dir_path]:
-                                release_updates[dir_path][lemma.guid] = {}
-                            release_updates[dir_path][lemma.guid][lang_code] = db_val
-                            updated_release_count += 1
-                            logger.info(
-                                f"Queued secondary release update for "
-                                f"'{lemma.lemma_text}' ({lemma.guid}) "
-                                f"{lang_code}: -> '{db_val}'"
-                            )
-                        else:
-                            logger.warning(f"Could not find release dir for GUID: " f"{lemma.guid}")
-                            error_count += 1
-                    else:
-                        skipped_count += 1
+                    if not db_val:
+                        outcome.skipped += 1
+                        continue
+
+                    # base.jsonl locates the category directory; the GUID may not
+                    # be in secondary.jsonl yet, so we cannot look it up there.
+                    base_file = release_io.file_for_guid(guid_files, lemma.guid)
+                    if base_file is None:
+                        outcome.record_error(f"Could not find release dir for GUID: {lemma.guid}")
+                        continue
+
+                    release_updates.setdefault(base_file.parent, {}).setdefault(lemma.guid, {})[
+                        lang_code
+                    ] = db_val
+                    outcome.updated_release += 1
+                    logger.info(
+                        f"Queued secondary release update for "
+                        f"'{lemma.lemma_text}' ({lemma.guid}) {lang_code}: -> '{db_val}'"
+                    )
 
         except Exception as e:
-            logger.error(f"Error processing lemma {lemma_id_str}: {e}")
-            error_count += 1
+            outcome.record_error(f"Error processing lemma {lemma_id_str}: {e}")
 
-    if updated_db_count > 0:
-        try:
-            g.db.commit()
-            flash(
-                f"Updated {updated_db_count} secondary translation(s) in database",
-                "success",
-            )
-        except Exception as e:
-            g.db.rollback()
-            flash(f"Error committing DB changes: {e}", "error")
-            logger.error(f"Commit error: {e}")
-
-    if release_updates:
-        try:
-            _apply_secondary_translation_updates(release_updates)
-            flash(
-                f"Updated {updated_release_count} secondary translation(s) " f"in release files",
-                "success",
-            )
-        except Exception as e:
-            flash(f"Error updating release files: {e}", "error")
-            logger.error(f"Release file update error: {e}")
-
-    if skipped_count > 0:
-        flash(f"Skipped {skipped_count} item(s)", "info")
-
-    if error_count > 0:
-        flash(f"Errors: {error_count}", "warning")
-
+    outcome.commit(g.db)
+    outcome.write_release(lambda: _apply_secondary_translation_updates(release_updates))
+    outcome.flash_summary()
     return redirect(url_for("sync_release.secondary_translations"))
-
-
-def _find_release_file_for_lemma(release_dir: Path, guid: str) -> Optional[Path]:
-    """Find the base.jsonl file containing a specific GUID."""
-    for base_file in release_dir.rglob("base.jsonl"):
-        try:
-            with open(base_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        data = json.loads(line)
-                        if data.get("guid") == guid:
-                            return base_file
-                    except json.JSONDecodeError:
-                        continue
-        except Exception:
-            continue
-    return None
 
 
 def _apply_release_translation_updates(
     updates: Dict[Path, Dict[str, Dict[str, str]]],
 ) -> None:
-    """Apply translation updates to release JSONL files.
+    """Apply translation updates to release base.jsonl files.
 
-    Args:
-        updates: {filepath: {guid: {lang_code: new_translation}}}
+    Keys prefixed ``_disambig_`` carry a per-language disambiguation rather than
+    a translation; see :func:`release_io.apply_translation_updates`.
     """
-    for file_path, guid_updates in updates.items():
-        if not file_path.exists():
-            logger.warning(f"Release file not found: {file_path}")
-            continue
+    release_io.apply_translation_updates(updates, disambiguation_prefix=_DISAMBIG_PREFIX)
 
-        # Read all lines, update translations, write back
-        updated_lines: List[str] = []
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    stripped = line.strip()
-                    if not stripped:
-                        updated_lines.append(line)
-                        continue
 
-                    try:
-                        data = json.loads(stripped)
-                        guid = data.get("guid")
-
-                        if guid in guid_updates:
-                            # Update translations for this lemma
-                            if "translations" not in data:
-                                data["translations"] = {}
-                            disambig_updates: Dict[str, str] = {}
-                            for update_key, new_val in guid_updates[guid].items():
-                                if update_key.startswith("_disambig_"):
-                                    disambig_lang = update_key[len("_disambig_") :]
-                                    disambig_updates[disambig_lang] = new_val
-                                else:
-                                    data["translations"][update_key] = new_val
-                            # Apply disambiguation updates
-                            if disambig_updates:
-                                if "translation_disambiguations" not in data:
-                                    data["translation_disambiguations"] = {}
-                                data["translation_disambiguations"].update(disambig_updates)
-                            # Re-serialize with consistent formatting
-                            updated_lines.append(json.dumps(data, ensure_ascii=False) + "\n")
-                            logger.info(f"Updated translations for {guid} in {file_path}")
-                        else:
-                            updated_lines.append(line)
-                    except json.JSONDecodeError:
-                        updated_lines.append(line)
-
-            # Write back
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.writelines(updated_lines)
-
-        except Exception as e:
-            logger.error(f"Error updating {file_path}: {e}")
-            raise
+def _extra_translation_filenames() -> List[str]:
+    """Return all grouped extra-translation filenames (secondary + named groups)."""
+    return ["secondary.jsonl"] + [
+        f"{group_name}.jsonl" for group_name in EXTRA_RELEASE_LANGUAGE_GROUPS
+    ]
 
 
 def _load_secondary_translations(
@@ -2381,85 +2142,15 @@ def _load_secondary_translations(
 
     Returns:
         Dictionary mapping GUID to {lang_code: translation} for extra languages.
+        A GUID may appear in several group files; their languages are merged.
     """
     secondary: Dict[str, Dict[str, str]] = {}
-
-    if not release_dir.exists():
-        logger.warning(f"Release directory not found: {release_dir}")
-        return secondary
-
-    extra_filenames = ["secondary.jsonl"] + [
-        f"{group_name}.jsonl" for group_name in EXTRA_RELEASE_LANGUAGE_GROUPS
-    ]
-    for extra_filename in extra_filenames:
-        for sec_file in release_dir.rglob(extra_filename):
-            _load_extra_translation_file(sec_file, secondary)
-
-    return secondary
-
-
-def _load_extra_translation_file(
-    file_path: Path, translations_by_guid: Dict[str, Dict[str, str]]
-) -> None:
-    """Merge one grouped extra-translation file into translations_by_guid."""
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            for line_num, line in enumerate(f, 1):
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    data = json.loads(line)
-                    guid = data.get("guid")
-                    translations = data.get("translations", {})
-                    if guid and translations:
-                        if guid not in translations_by_guid:
-                            translations_by_guid[guid] = {}
-                        translations_by_guid[guid].update(translations)
-                except json.JSONDecodeError as e:
-                    logger.error(f"JSON parse error in {file_path}:{line_num}: {e}")
-    except Exception as e:
-        logger.error(f"Error reading {file_path}: {e}")
-
-
-def _extra_translation_filenames() -> List[str]:
-    """Return all grouped extra translation filenames."""
-    return ["secondary.jsonl"] + [
-        f"{group_name}.jsonl" for group_name in EXTRA_RELEASE_LANGUAGE_GROUPS
-    ]
-
-
-def _find_secondary_file_for_lemma(release_dir: Path, guid: str) -> Optional[Path]:
-    """Find the extra translation file containing a specific GUID."""
     for extra_filename in _extra_translation_filenames():
-        for sec_file in release_dir.rglob(extra_filename):
-            try:
-                with open(sec_file, "r", encoding="utf-8") as f:
-                    for line in f:
-                        line = line.strip()
-                        if not line:
-                            continue
-                        try:
-                            data = json.loads(line)
-                            if data.get("guid") == guid:
-                                return sec_file
-                        except json.JSONDecodeError:
-                            continue
-            except Exception:
-                continue
-    return None
-
-
-def _find_secondary_file_dir_for_lemma(release_dir: Path, guid: str) -> Optional[Path]:
-    """Find the directory that should contain a secondary.jsonl entry for a GUID.
-
-    Uses base.jsonl to locate the right category directory, since the GUID
-    may not yet exist in secondary.jsonl.
-    """
-    base_file = _find_release_file_for_lemma(release_dir, guid)
-    if base_file:
-        return base_file.parent
-    return None
+        for guid, record in release_io.load_release_records(release_dir, extra_filename).items():
+            translations = record.get("translations") or {}
+            if translations:
+                secondary.setdefault(guid, {}).update(translations)
+    return secondary
 
 
 def _apply_secondary_translation_updates(
@@ -2467,131 +2158,34 @@ def _apply_secondary_translation_updates(
 ) -> None:
     """Apply translation updates to secondary.jsonl files.
 
-    If a GUID doesn't exist in the file yet, it is appended.
+    Keyed by *directory* rather than file: a GUID that has no secondary
+    translations yet has no line in secondary.jsonl to find, so the target is
+    resolved from the category directory and the record is created.
 
     Args:
         updates: {directory_path: {guid: {lang_code: new_translation}}}
     """
     for dir_path, guid_updates in updates.items():
-        sec_file = dir_path / "secondary.jsonl"
+        secondary_file = dir_path / "secondary.jsonl"
+        existing = release_io.load_records_from_file(secondary_file)
 
-        # Read existing records
-        existing_lines: List[str] = []
-        seen_guids: set[str] = set()
-        if sec_file.exists():
-            try:
-                with open(sec_file, "r", encoding="utf-8") as f:
-                    for line in f:
-                        stripped = line.strip()
-                        if not stripped:
-                            existing_lines.append(line)
-                            continue
-                        try:
-                            data = json.loads(stripped)
-                            guid = data.get("guid")
-                            if guid in guid_updates:
-                                seen_guids.add(guid)
-                                if "translations" not in data:
-                                    data["translations"] = {}
-                                for lang_code, new_val in guid_updates[guid].items():
-                                    if new_val:
-                                        data["translations"][lang_code] = new_val
-                                    else:
-                                        data["translations"].pop(lang_code, None)
-                                existing_lines.append(json.dumps(data, ensure_ascii=False) + "\n")
-                                logger.info(
-                                    f"Updated secondary translations for {guid} " f"in {sec_file}"
-                                )
-                            else:
-                                existing_lines.append(line)
-                        except json.JSONDecodeError:
-                            existing_lines.append(line)
-            except Exception as e:
-                logger.error(f"Error reading {sec_file}: {e}")
-                raise
+        merged: List[Dict[str, Any]] = []
+        for guid, record in existing.items():
+            if guid in guid_updates:
+                record.setdefault("translations", {})
+                for lang_code, new_value in guid_updates[guid].items():
+                    if new_value:
+                        record["translations"][lang_code] = new_value
+                    else:
+                        record["translations"].pop(lang_code, None)
+            merged.append(record)
 
-        # Append any GUIDs not already in the file
         for guid, translations in guid_updates.items():
-            if guid not in seen_guids:
-                non_empty = {lc: t for lc, t in translations.items() if t}
-                if non_empty:
-                    new_record = {
-                        "guid": guid,
-                        "translations": non_empty,
-                    }
-                    existing_lines.append(json.dumps(new_record, ensure_ascii=False) + "\n")
-                    logger.info(f"Appended secondary translations for {guid} " f"in {sec_file}")
+            if guid in existing:
+                continue
+            non_empty = {lang: text for lang, text in translations.items() if text}
+            if non_empty:
+                merged.append({"guid": guid, "translations": non_empty})
 
-        # Write back
-        try:
-            with open(sec_file, "w", encoding="utf-8") as f:
-                f.writelines(existing_lines)
-        except Exception as e:
-            logger.error(f"Error writing {sec_file}: {e}")
-            raise
-
-
-# Sentinel value: setting a field to this in an update dict removes the field
-# from the release record (used to clear e.g. "qid" when a lemma is unpaired).
-_REMOVE_FIELD = object()
-
-
-def _apply_release_field_updates(
-    updates: Dict[Path, Dict[str, Dict[str, Any]]],
-) -> None:
-    """Apply field updates to release JSONL files.
-
-    Supports top-level fields (e.g. difficulty_level) and dotted paths
-    for nested fields (e.g. translations.en). A value of ``_REMOVE_FIELD``
-    deletes the field instead of setting it.
-
-    Args:
-        updates: {filepath: {guid: {field_or_dotted_path: new_value}}}
-    """
-    for file_path, guid_updates in updates.items():
-        if not file_path.exists():
-            logger.warning(f"Release file not found: {file_path}")
-            continue
-
-        updated_lines: List[str] = []
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    stripped = line.strip()
-                    if not stripped:
-                        updated_lines.append(line)
-                        continue
-
-                    try:
-                        data = json.loads(stripped)
-                        guid = data.get("guid")
-
-                        if guid in guid_updates:
-                            for field_path, new_val in guid_updates[guid].items():
-                                if "." in field_path:
-                                    parts = field_path.split(".", 1)
-                                    parent_key, child_key = parts[0], parts[1]
-                                    if new_val is _REMOVE_FIELD:
-                                        if parent_key in data:
-                                            data[parent_key].pop(child_key, None)
-                                    else:
-                                        if parent_key not in data:
-                                            data[parent_key] = {}
-                                        data[parent_key][child_key] = new_val
-                                elif new_val is _REMOVE_FIELD:
-                                    data.pop(field_path, None)
-                                else:
-                                    data[field_path] = new_val
-                            updated_lines.append(json.dumps(data, ensure_ascii=False) + "\n")
-                            logger.info(f"Updated fields for {guid} in {file_path}")
-                        else:
-                            updated_lines.append(line)
-                    except json.JSONDecodeError:
-                        updated_lines.append(line)
-
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.writelines(updated_lines)
-
-        except Exception as e:
-            logger.error(f"Error updating {file_path}: {e}")
-            raise
+        release_io.write_jsonl_sorted(secondary_file, merged)
+        logger.info(f"Updated {len(guid_updates)} record(s) in {secondary_file}")

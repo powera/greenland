@@ -154,3 +154,21 @@ PHRASE_SUBTYPE_GUID_PREFIXES = {
 # like phrases they are not part of SUBTYPE_GUID_PREFIXES above. Idioms are not
 # subtyped, so this is a single prefix rather than a mapping.
 IDIOM_GUID_PREFIX = "M01"
+
+# GUID prefixes for name kinds. Names ("George", "Fresh Mart") live in their own
+# ``names`` table and are exported to ``data/release/names`` because their
+# per-language renderings - Džordžas, 乔治, ジョージ - have to stay stable across
+# every text that uses them. The kind is encoded in the prefix, mirroring how a
+# lemma's subtype is, so a bare GUID says what it names. Keys are
+# ``storage.models.name_entity.NAME_KINDS`` entries; the "E" family (entity) is
+# reserved for names.
+NAME_KIND_GUID_PREFIXES = {
+    "given_name": "E01",
+    "family_name": "E02",
+    "full_name": "E03",
+    "place": "E04",
+    "organization": "E05",
+    "brand": "E06",
+    "animal": "E07",
+    "other": "E99",
+}

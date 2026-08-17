@@ -13,9 +13,80 @@ out that file I/O so the two routes can share it.
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
+
+from storage.models.schema import Lemma
 
 logger = logging.getLogger(__name__)
+
+
+def db_form_to_dict(form: Any, *, include_base_form: bool) -> Dict[str, Any]:
+    """Convert a DB ``DerivativeForm`` to its release-file dict shape.
+
+    ``include_base_form`` is the one real difference between the two callers:
+    an inflection records whether it is the base form, a synonym has no such
+    notion.
+    """
+    record: Dict[str, Any] = {
+        "grammatical_form": form.grammatical_form,
+        "text": form.derivative_form_text,
+    }
+    if include_base_form:
+        record["is_base_form"] = form.is_base_form
+    if form.ipa_pronunciation:
+        record["ipa"] = form.ipa_pronunciation
+    if form.phonetic_pronunciation:
+        record["phonetic"] = form.phonetic_pronunciation
+    return record
+
+
+def form_key(grammatical_form: str, text: str) -> str:
+    """Comparison key identifying one form within a lemma+language."""
+    return f"{grammatical_form}\x00{text}"
+
+
+def languages_with_release_files(release_dir: Path) -> Set[str]:
+    """Language codes that have per-language files under the release tree.
+
+    Only 2-3 letter alphabetic stems count, which excludes ``base`` and the
+    grouped translation files (``secondary``, ``ancient``) along with it.
+    """
+    languages: Set[str] = set()
+    if not release_dir.exists():
+        return languages
+
+    for jsonl_file in release_dir.rglob("*.jsonl"):
+        stem = jsonl_file.stem
+        if stem != "base" and len(stem) in (2, 3) and stem.isalpha():
+            languages.add(stem)
+    return languages
+
+
+def lemma_info_by_guids(db_session: Any, guids: Set[str]) -> Dict[str, Dict[str, Any]]:
+    """Look up basic lemma display info for a set of GUIDs, in batches."""
+    info: Dict[str, Dict[str, Any]] = {}
+    guid_list = list(guids)
+    for start in range(0, len(guid_list), 500):
+        for lemma in (
+            db_session.query(Lemma).filter(Lemma.guid.in_(guid_list[start : start + 500])).all()
+        ):
+            info[lemma.guid] = {
+                "lemma_id": lemma.id,
+                "lemma_text": lemma.lemma_text,
+                "pos_type": lemma.pos_type,
+                "pos_subtype": lemma.pos_subtype or "",
+            }
+    return info
+
+
+def guid_to_lemma_id(db_session: Any) -> Dict[str, int]:
+    """Map every GUIDed lemma's GUID to its row id."""
+    return {
+        guid: lemma_id
+        for lemma_id, guid in db_session.query(Lemma.id, Lemma.guid)
+        .filter(Lemma.guid.isnot(None))
+        .all()
+    }
 
 
 def load_release_array_for_lang(
