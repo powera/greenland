@@ -1,110 +1,96 @@
 #!/usr/bin/python3
 
-"""Pin which grammar fact types reach data/release and which stay in the database.
+"""Every grammar fact type must be classified as exported or not.
 
-``GrammarFactDefinition.release_sync`` defaults to ``False``, so a fact type
-added without thinking about it silently becomes database-only -- and the lemma
-sync only ever diffs release-side facts, so nobody would notice. These tests
-make that choice explicit: a new fact type fails here until it is listed in one
-of the two sets below, and the diff shows a reviewer which side it landed on.
+The registry's rule is "export what a mechanical generator cannot reproduce"
+(see the module docstring on ``storage.config.grammar_fact_registry``). The two
+lists there are the source of truth, and a fact type added without being put in
+one of them would silently default to database-only -- which nobody would
+notice, because the lemma sync only ever diffs release-side facts.
 
-Changing a fact type's side changes what a release export writes. That is a
-deliberate act; update the sets here in the same commit and say why.
+These tests make that impossible: a new fact type fails until it is listed, and
+the diff then shows a reviewer which side it landed on.
 """
 
 import unittest
 
 from storage.config.grammar_fact_registry import (
+    EXPORTED_FACT_TYPES,
     GRAMMAR_FACT_DEFINITIONS,
+    NOT_EXPORTED_FACT_TYPES,
     RELEASE_GRAMMAR_FACT_TYPES,
 )
 
-#: Fact types written to and read from ``data/release/lemmas/{lang}.jsonl``.
-#: Almost all are inflected forms -- a principal part or an irregular form that
-#: cannot be regenerated from the lemma alone.
-RELEASE_SYNCED_FACT_TYPES = frozenset(
-    {
-        "1s_future",
-        "1s_past",
-        "1s_present",
-        "3p_past",
-        "3p_present",
-        "3s_past",
-        "3s_present",
-        "comparative",
-        "fanciful_collective",
-        "feminine_form",
-        "gradability",
-        "infinitive",
-        "measure_words",
-        "number_type",
-        "past",
-        "past_participle",
-        "plural",
-        "superlative",
-    }
-)
 
-#: Fact types that stay in the database. These are lexical classifications an
-#: agent can regenerate, rather than forms that must round-trip.
-#:
-#: Two of these are worth revisiting: ``grammatical_gender`` and
-#: ``declension_class`` drive inflection rather than decorate it, and while they
-#: sit here the release tree cannot rebuild a database that declines correctly.
-#: Moving either is a release-format decision, not a cleanup.
-DATABASE_ONLY_FACT_TYPES = frozenset(
-    {
-        "animacy",
-        "auxiliary_verb",
-        "countability",
-        "declension_class",
-        "grammatical_gender",
-        "verb_reflexivity",
-        "verb_transitivity",
-    }
-)
+class TestEveryFactTypeIsClassified(unittest.TestCase):
+    """The two lists must partition the registry, exactly."""
 
-
-class TestGrammarFactReleasePartition(unittest.TestCase):
-    """The registry's release_sync flags, pinned."""
-
-    def test_every_fact_type_is_classified(self) -> None:
-        """A new fact type must be added to exactly one of the two sets."""
+    def test_the_lists_cover_every_fact_type(self) -> None:
         self.assertEqual(
-            RELEASE_SYNCED_FACT_TYPES | DATABASE_ONLY_FACT_TYPES,
+            set(EXPORTED_FACT_TYPES) | set(NOT_EXPORTED_FACT_TYPES),
             set(GRAMMAR_FACT_DEFINITIONS),
-            "A grammar fact type was added or removed. Decide whether it belongs in "
-            "data/release and add it to RELEASE_SYNCED_FACT_TYPES or "
-            "DATABASE_ONLY_FACT_TYPES in this file.",
+            "A grammar fact type was added or removed. Decide whether a mechanical "
+            "generator can reproduce it (see the registry module docstring) and add it "
+            "to EXPORTED_FACT_TYPES or NOT_EXPORTED_FACT_TYPES, with the reason.",
         )
 
-    def test_the_two_sets_do_not_overlap(self) -> None:
-        self.assertEqual(frozenset(), RELEASE_SYNCED_FACT_TYPES & DATABASE_ONLY_FACT_TYPES)
+    def test_no_fact_type_is_in_both_lists(self) -> None:
+        self.assertEqual(set(), set(EXPORTED_FACT_TYPES) & set(NOT_EXPORTED_FACT_TYPES))
 
-    def test_release_sync_flags_match_the_pinned_sets(self) -> None:
-        """Each definition's release_sync flag agrees with its set membership."""
+    def test_neither_list_has_duplicates(self) -> None:
+        self.assertEqual(len(EXPORTED_FACT_TYPES), len(set(EXPORTED_FACT_TYPES)))
+        self.assertEqual(len(NOT_EXPORTED_FACT_TYPES), len(set(NOT_EXPORTED_FACT_TYPES)))
+
+    def test_neither_list_names_an_unknown_fact_type(self) -> None:
+        """A typo in a list would otherwise silently classify nothing."""
+        for fact_type in (*EXPORTED_FACT_TYPES, *NOT_EXPORTED_FACT_TYPES):
+            with self.subTest(fact_type=fact_type):
+                self.assertIn(fact_type, GRAMMAR_FACT_DEFINITIONS)
+
+
+class TestDerivedFlagFollowsTheLists(unittest.TestCase):
+    """release_sync is derived, so it cannot drift from the lists."""
+
+    def test_flag_matches_list_membership(self) -> None:
         for fact_type, definition in sorted(GRAMMAR_FACT_DEFINITIONS.items()):
             with self.subTest(fact_type=fact_type):
-                self.assertEqual(
-                    definition.release_sync,
-                    fact_type in RELEASE_SYNCED_FACT_TYPES,
-                    f"{fact_type} has release_sync={definition.release_sync} but is pinned "
-                    f"as {'release-synced' if fact_type in RELEASE_SYNCED_FACT_TYPES else 'database-only'}",
-                )
+                self.assertEqual(definition.release_sync, fact_type in EXPORTED_FACT_TYPES)
 
-    def test_database_only_types_reach_no_language(self) -> None:
-        """Nothing database-only leaks into the per-language release lookup."""
+    def test_exported_types_reach_the_per_language_lookup(self) -> None:
+        """The lookup the sync actually consults must agree with the list."""
         synced_somewhere = set()
         for fact_types in RELEASE_GRAMMAR_FACT_TYPES.values():
             synced_somewhere.update(fact_types)
-        self.assertEqual(frozenset(), synced_somewhere & DATABASE_ONLY_FACT_TYPES)
+        self.assertEqual(set(EXPORTED_FACT_TYPES), synced_somewhere)
 
-    def test_every_release_type_reaches_at_least_one_language(self) -> None:
-        """A release-synced type with no languages would be silently inert."""
+    def test_non_exported_types_reach_no_language(self) -> None:
         synced_somewhere = set()
         for fact_types in RELEASE_GRAMMAR_FACT_TYPES.values():
             synced_somewhere.update(fact_types)
-        self.assertEqual(RELEASE_SYNCED_FACT_TYPES, synced_somewhere)
+        self.assertEqual(set(), synced_somewhere & set(NOT_EXPORTED_FACT_TYPES))
+
+
+class TestTheRuleIsNotGeneratable(unittest.TestCase):
+    """Pin the cases that show `generatable` is the wrong axis.
+
+    `generatable` means "an LLM agent can produce this". Exporting is about
+    whether a *mechanical* generator can reproduce it. The two cut across each
+    other, and these three worked examples are why.
+    """
+
+    def test_an_llm_generatable_fact_is_still_exported(self) -> None:
+        """measure_words: regenerating means paying again, and may not agree."""
+        self.assertTrue(GRAMMAR_FACT_DEFINITIONS["measure_words"].generatable)
+        self.assertIn("measure_words", EXPORTED_FACT_TYPES)
+
+    def test_a_generator_input_is_exported(self) -> None:
+        """grammatical_gender feeds decline_noun; nothing derives it."""
+        self.assertTrue(GRAMMAR_FACT_DEFINITIONS["grammatical_gender"].generatable)
+        self.assertIn("grammatical_gender", EXPORTED_FACT_TYPES)
+
+    def test_a_generator_output_is_not_exported(self) -> None:
+        """declension_class is computed by decline_noun from the noun plus gender."""
+        self.assertIn("declension_class", NOT_EXPORTED_FACT_TYPES)
 
 
 if __name__ == "__main__":
