@@ -20,19 +20,21 @@ The pair is orthogonal, and three of the four quadrants are occupied::
 
                      GENERATED=no                  GENERATED=yes
     EXPORTED=yes     infinitive, plural, past,     grammatical_gender,
-                     past_participle, comparative, measure_words,
-                     superlative, feminine_form,   fanciful_collective
-                     number_type, gradability,
-                     1s_*/3s_*/3p_* principal parts
-    EXPORTED=no      -- must stay empty --         declension_class,
-                                                   countability, animacy,
-                                                   verb_transitivity,
-                                                   verb_reflexivity,
-                                                   auxiliary_verb
+                     past_participle, comparative, countability, animacy,
+                     superlative, feminine_form,   verb_transitivity,
+                     number_type, gradability,     verb_reflexivity,
+                     1s_*/3s_*/3p_* principal parts auxiliary_verb,
+                                                   measure_words,
+                                                   fanciful_collective
+    EXPORTED=no      -- must stay empty --         declension_class
 
 The bottom-left quadrant has to stay empty, and the test enforces it: a fact
 that can neither be regenerated nor survives a rebuild could only have been
 typed by a human, and the next rebuild throws it away.
+
+The bottom-right quadrant is deliberately thin. Being GENERATED is not on its
+own a reason to skip exporting -- only being *derivable in Python from the rest
+of the release tree* is, and among the grammar facts exactly one thing is.
 
 Why the axes come apart, in three worked examples:
 
@@ -352,10 +354,21 @@ EXPORTED_FACT_TYPES: Tuple[str, ...] = (
     # agree, so the file is the record.
     "measure_words",  # zh classifiers
     "fanciful_collective",  # en ornamental collective nouns
-    # GENERATED, exported, and *consumed* by a mechanical generator:
-    # decline_noun() uses gender to disambiguate overlapping endings, so a
-    # rebuild without it declines by the wrong pattern.
-    "grammatical_gender",  # fr, lt, es, de, pt, it
+    # GENERATED lexical classifications. No Python derives any of these from
+    # the release tree, so the EXPORTED rule puts all of them here: without
+    # them a rebuild has to re-run an agent, pay for it again, and accept
+    # whatever the second run says.
+    #
+    # Two are read back by mechanical generators, the same way gender is:
+    # decline_noun() takes gender, and the English form generator takes
+    # countability (langtools/en/llm_forms.py:133) and number_type to decide
+    # whether a plural slot exists at all.
+    "grammatical_gender",  # fr, lt, es, de, pt, it; feeds decline_noun()
+    "countability",  # en; feeds the English form generator
+    "animacy",  # en
+    "verb_transitivity",  # en
+    "verb_reflexivity",  # fr, es, de, lt, it
+    "auxiliary_verb",  # fr, de, it, nl; selects the compound-tense auxiliary
 )
 
 #: Fact types deliberately kept out of ``data/release``.
@@ -363,23 +376,13 @@ EXPORTED_FACT_TYPES: Tuple[str, ...] = (
 #: quadrant: a fact that is neither generated nor exported cannot survive a
 #: rebuild.
 NOT_EXPORTED_FACT_TYPES: Tuple[str, ...] = (
-    # The one true derivation: decline_noun() computes it in pure Python from
-    # the noun plus its gender (langtools/lt/declension.py), and both of those
-    # ship, so the release tree already contains everything needed to recompute
-    # it. That holds only because grammatical_gender is exported -- if gender
-    # ever leaves the release tree, this has to follow it back in.
+    # The only true derivation among the grammar facts: decline_noun() computes
+    # it in pure Python from the noun plus its gender
+    # (langtools/lt/declension.py), and both of those ship, so the release tree
+    # already contains everything needed to recompute it. That holds only
+    # because grammatical_gender is exported -- if gender ever leaves the
+    # release tree, this has to follow it back in.
     "declension_class",  # lt
-    # The rest are LLM-only classifications: nothing derives them from the
-    # release tree in Python, so by the EXPORTED rule they are export
-    # *candidates*, parked here because promoting one rewrites release files --
-    # a data decision rather than a code cleanup. countability is the strongest
-    # candidate: langtools/en/llm_forms.py reads it the way decline_noun reads
-    # gender.
-    "countability",  # en; consumed by the English form generator
-    "animacy",  # en
-    "verb_transitivity",  # en
-    "verb_reflexivity",  # fr, es, de, lt, it
-    "auxiliary_verb",  # fr, de, it, nl; selects the compound-tense auxiliary
 )
 
 # The lists above are the source of truth; the per-definition flag follows them

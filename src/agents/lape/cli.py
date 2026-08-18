@@ -84,8 +84,13 @@ Supported fact types:
     - verb_reflexivity: Inherently/optionally/non-reflexive (languages: fr, es, de, lt, it)
     - auxiliary_verb: Compound tense auxiliary (languages: fr, de, it, nl)
 
-  Note: release-synced non-generated facts include irregular plural, number_type,
-  English past, past_participle, French feminine_form, comparative, and superlative.
+  Note: every fact type above is exported to data/release except declension_class,
+  which langtools.lt.declension recomputes from the noun plus its gender. Generating
+  one of the others writes data that ships, so a rerun is not free.
+
+  Facts that ship but no agent generates (hand-curated overrides): irregular plural,
+  number_type, English past, past_participle, French feminine_form, comparative,
+  superlative, gradability, and the Lithuanian/Italian principal parts.
 
 Task presets:
   - all: All fact types
