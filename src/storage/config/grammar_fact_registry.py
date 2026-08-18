@@ -1,46 +1,57 @@
 """Shared registry for grammar fact capabilities and release behavior.
 
-What gets exported
-------------------
+Two independent axes
+--------------------
 
-The test for whether a fact belongs in ``data/release`` is:
+A fact type is classified on two axes that have nothing to do with each other.
+Confusing them is how facts get silently lost.
 
-    can a *mechanical* generator reproduce it from what the release files
-    already carry?
+**EXPORTED** -- is it *not* derivable mechanically, in Python, from the rest of
+``data/release``? If it is derivable, the release tree already contains
+everything needed to recompute it and shipping it would just cache a
+derivation. If it is not, it must be exported or a rebuild destroys it.
+:data:`EXPORTED_FACT_TYPES` / :data:`NOT_EXPORTED_FACT_TYPES` below.
 
-If yes, it is derived data and stays in the database -- a rebuild recomputes it
-for free and gets the same answer. If no, it must be exported, or a rebuild
-destroys it.
+**GENERATED** -- can it be produced automatically at all, by Python *or* by an
+LLM? That is the ``generatable`` flag, and it answers "can an agent fill this
+in", not "may we drop it".
 
-``generatable`` is **not** that test and must not be used as one: it means "an
-LLM agent knows how to produce this". An LLM call is not reproduction -- it
-costs money and two runs need not agree. ``measure_words`` is the worked
-example: it is ``generatable=True`` *and* exported, because regenerating a
-Chinese classifier means paying for it again and possibly getting something
-else. The rule cuts across ``generatable`` in both directions.
+The pair is orthogonal, and three of the four quadrants are occupied::
 
-Three groups end up exported:
+                     GENERATED=no                  GENERATED=yes
+    EXPORTED=yes     infinitive, plural, past,     grammatical_gender,
+                     past_participle, comparative, measure_words,
+                     superlative, feminine_form,   fanciful_collective
+                     number_type, gradability,
+                     1s_*/3s_*/3p_* principal parts
+    EXPORTED=no      -- must stay empty --         declension_class,
+                                                   countability, animacy,
+                                                   verb_transitivity,
+                                                   verb_reflexivity,
+                                                   auxiliary_verb
 
-* **Principal parts and overrides** -- ``infinitive``, ``plural``, ``past``,
-  ``comparative`` and friends. These exist precisely because the mechanical
-  rule cannot produce them; "irregular or non-derivable" is what the
-  descriptions say.
-* **LLM-only content** -- ``measure_words``, ``fanciful_collective``.
-* **Classifications a mechanical generator consumes as input** --
-  ``grammatical_gender`` is read by :func:`langtools.lt.declension.decline_noun`
-  to choose between overlapping endings. Nothing derives it, and a rebuild
-  without it silently declines nouns by the wrong pattern.
+The bottom-left quadrant has to stay empty, and the test enforces it: a fact
+that can neither be regenerated nor survives a rebuild could only have been
+typed by a human, and the next rebuild throws it away.
 
-One group stays in the database: **outputs of the mechanical generators**.
-``declension_class`` is computed by ``decline_noun`` from the noun plus its
-gender, so exporting it would ship a cached derivation the importer could
-recompute. Note the dependency -- that is only true *because*
-``grammatical_gender`` ships.
+Why the axes come apart, in three worked examples:
 
-:data:`EXPORTED_FACT_TYPES` and :data:`NOT_EXPORTED_FACT_TYPES` below are the
-source of truth; ``GrammarFactDefinition.release_sync`` is derived from them,
-and ``src/tests/storage/test_grammar_fact_registry.py`` fails if a fact type is
-missing from both.
+* ``measure_words`` is GENERATED (an LLM writes it) and still EXPORTED. An LLM
+  call is not a mechanical derivation -- it costs money and two runs need not
+  agree, so the file is the record.
+* ``grammatical_gender`` is GENERATED and EXPORTED. Nothing in Python derives
+  it from the release tree, and :func:`langtools.lt.declension.decline_noun`
+  *consumes* it to choose between overlapping endings, so a rebuild without it
+  declines nouns by the wrong pattern.
+* ``declension_class`` is GENERATED and NOT exported -- the one case that turns
+  on "from the rest of ``data/release``". ``decline_noun`` computes it in pure
+  Python from the noun plus its gender, both of which ship. Note the
+  dependency: that holds *because* ``grammatical_gender`` is exported. If gender
+  ever leaves the release tree, this one has to follow it back in.
+
+``GrammarFactDefinition.release_sync`` is derived from the lists below, and
+``src/tests/storage/test_grammar_fact_registry.py`` fails if a fact type is
+missing from both, appears in both, or lands in the empty quadrant.
 """
 
 from __future__ import annotations
@@ -104,8 +115,10 @@ class GrammarFactDefinition:
     required_pos: Tuple[str, ...]
     display_label: str
     description: str
+    #: GENERATED axis: can this be produced automatically, by Python or by an
+    #: LLM? Independent of release_sync -- see the module docstring.
     generatable: bool = False
-    #: Derived from EXPORTED_FACT_TYPES; never set this on a definition.
+    #: EXPORTED axis. Derived from EXPORTED_FACT_TYPES; never set on a definition.
     release_sync: bool = False
 
 
@@ -334,28 +347,32 @@ EXPORTED_FACT_TYPES: Tuple[str, ...] = (
     "superlative",  # irregular superlative
     "number_type",  # exceptional number behavior (plurale tantum, etc.)
     "gradability",  # selects which comparison strategy applies at all
-    # LLM-only content: regenerating costs money and need not agree with
-    # itself, so the file is the record.
+    # GENERATED, and exported anyway: an LLM writes these, which is not a
+    # mechanical derivation -- regenerating costs money and two runs need not
+    # agree, so the file is the record.
     "measure_words",  # zh classifiers
     "fanciful_collective",  # en ornamental collective nouns
-    # An LLM classification that a mechanical generator consumes as *input*:
+    # GENERATED, exported, and *consumed* by a mechanical generator:
     # decline_noun() uses gender to disambiguate overlapping endings, so a
     # rebuild without it declines by the wrong pattern.
     "grammatical_gender",  # fr, lt, es, de, pt, it
 )
 
 #: Fact types deliberately kept out of ``data/release``.
+#: Everything here must be GENERATED -- see the module docstring's empty
+#: quadrant: a fact that is neither generated nor exported cannot survive a
+#: rebuild.
 NOT_EXPORTED_FACT_TYPES: Tuple[str, ...] = (
-    # An *output* of a mechanical generator rather than an input to one:
-    # decline_noun() computes it from the noun plus its gender
-    # (langtools/lt/declension.py), so exporting it would ship a cached
-    # derivation. Safe to omit only because grammatical_gender is exported --
-    # if that ever changes, revisit this one with it.
+    # The one true derivation: decline_noun() computes it in pure Python from
+    # the noun plus its gender (langtools/lt/declension.py), and both of those
+    # ship, so the release tree already contains everything needed to recompute
+    # it. That holds only because grammatical_gender is exported -- if gender
+    # ever leaves the release tree, this has to follow it back in.
     "declension_class",  # lt
-    # The rest are LLM classifications that nothing mechanical derives, so by
-    # the rule above they are export *candidates*. They are parked here rather
-    # than promoted because promoting one rewrites release files, which is a
-    # data decision rather than a code cleanup. countability is the strongest
+    # The rest are LLM-only classifications: nothing derives them from the
+    # release tree in Python, so by the EXPORTED rule they are export
+    # *candidates*, parked here because promoting one rewrites release files --
+    # a data decision rather than a code cleanup. countability is the strongest
     # candidate: langtools/en/llm_forms.py reads it the way decline_noun reads
     # gender.
     "countability",  # en; consumed by the English form generator
@@ -385,7 +402,15 @@ RELEASE_GRAMMAR_FACT_PREFIXES: Dict[str, Tuple[str, ...]] = {
 
 
 def get_generatable_fact_definitions() -> Dict[str, GrammarFactDefinition]:
-    """Return grammar facts that have implemented LLM generation."""
+    """Return grammar facts that can be produced automatically.
+
+    "Automatically" spans both mechanisms: an LLM agent (most of these) and pure
+    Python (``declension_class`` comes out of
+    :func:`langtools.lt.declension.decline_noun`). This is the GENERATED axis in
+    the module docstring, and it says nothing about whether the fact is exported
+    -- see :data:`EXPORTED_FACT_TYPES` for that, and do not use this flag to
+    decide it.
+    """
     return {
         fact_type: definition
         for fact_type, definition in GRAMMAR_FACT_DEFINITIONS.items()

@@ -70,27 +70,56 @@ class TestDerivedFlagFollowsTheLists(unittest.TestCase):
         self.assertEqual(set(), synced_somewhere & set(NOT_EXPORTED_FACT_TYPES))
 
 
-class TestTheRuleIsNotGeneratable(unittest.TestCase):
-    """Pin the cases that show `generatable` is the wrong axis.
+class TestNothingIsBothUngeneratedAndUnexported(unittest.TestCase):
+    """The empty quadrant, enforced.
 
-    `generatable` means "an LLM agent can produce this". Exporting is about
-    whether a *mechanical* generator can reproduce it. The two cut across each
-    other, and these three worked examples are why.
+    A fact that is neither GENERATED nor EXPORTED could only have been typed by
+    a human, and nothing can put it back after a rebuild: no agent regenerates
+    it and no release file carries it. That combination is always a mistake, so
+    it is checked rather than trusted.
     """
 
-    def test_an_llm_generatable_fact_is_still_exported(self) -> None:
-        """measure_words: regenerating means paying again, and may not agree."""
+    def test_every_unexported_fact_type_is_generated(self) -> None:
+        for fact_type in NOT_EXPORTED_FACT_TYPES:
+            with self.subTest(fact_type=fact_type):
+                self.assertTrue(
+                    GRAMMAR_FACT_DEFINITIONS[fact_type].generatable,
+                    f"{fact_type} is neither exported nor automatically generated, so a "
+                    f"rebuild would destroy it. Export it, or give it a generator.",
+                )
+
+
+class TestTheTwoAxesAreIndependent(unittest.TestCase):
+    """EXPORTED and GENERATED are orthogonal; these are the worked examples.
+
+    GENERATED asks "can an agent produce this at all, by Python or LLM".
+    EXPORTED asks "is this *not* derivable mechanically, in Python, from the
+    rest of data/release". Reading one off the other is how facts get lost.
+    """
+
+    def test_a_generated_fact_can_still_be_exported(self) -> None:
+        """measure_words: an LLM call is not a mechanical derivation."""
         self.assertTrue(GRAMMAR_FACT_DEFINITIONS["measure_words"].generatable)
         self.assertIn("measure_words", EXPORTED_FACT_TYPES)
 
     def test_a_generator_input_is_exported(self) -> None:
-        """grammatical_gender feeds decline_noun; nothing derives it."""
+        """grammatical_gender feeds decline_noun; nothing in Python derives it."""
         self.assertTrue(GRAMMAR_FACT_DEFINITIONS["grammatical_gender"].generatable)
         self.assertIn("grammatical_gender", EXPORTED_FACT_TYPES)
 
-    def test_a_generator_output_is_not_exported(self) -> None:
-        """declension_class is computed by decline_noun from the noun plus gender."""
+    def test_a_python_derivation_is_not_exported(self) -> None:
+        """declension_class falls out of decline_noun given the noun and its gender."""
         self.assertIn("declension_class", NOT_EXPORTED_FACT_TYPES)
+        # ...which is only safe while its inputs ship.
+        self.assertIn("grammatical_gender", EXPORTED_FACT_TYPES)
+
+    def test_both_axes_are_actually_populated_both_ways(self) -> None:
+        """Guard the docstring's quadrant table against quietly collapsing."""
+        generated = {ft for ft, d in GRAMMAR_FACT_DEFINITIONS.items() if d.generatable}
+        exported = set(EXPORTED_FACT_TYPES)
+        self.assertTrue(exported - generated, "no exported-but-not-generated fact types")
+        self.assertTrue(exported & generated, "no exported-and-generated fact types")
+        self.assertTrue(generated - exported, "no generated-but-not-exported fact types")
 
 
 if __name__ == "__main__":
