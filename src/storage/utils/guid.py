@@ -1,10 +1,11 @@
 """GUID generation utilities for lemmas."""
 
-from typing import Iterator, Optional
+from typing import Iterable, Iterator, Optional
 
 from sqlalchemy.orm import Session
 
 from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
+from storage.models.guid_tombstone import GuidTombstone
 from storage.models.schema import Lemma
 
 
@@ -28,6 +29,22 @@ def _guid_sequence_number(guid: str, prefix: str) -> Optional[int]:
         return None
 
 
+def _highest_sequence_number(guids: Iterable[Optional[str]], prefix: str) -> int:
+    """The largest parseable sequence number among ``guids``, or 0 if none parse.
+
+    Unparseable GUIDs are skipped rather than raising, so one malformed row
+    cannot block allocation for its whole prefix.
+    """
+    highest = 0
+    for guid in guids:
+        if not guid:
+            continue
+        sequence_number = _guid_sequence_number(guid, prefix)
+        if sequence_number is not None:
+            highest = max(highest, sequence_number)
+    return highest
+
+
 def _pending_guids(session: Session, prefix: str) -> Iterator[str]:
     """Yield GUIDs on lemmas that are in the session but not yet in the table.
 
@@ -45,9 +62,15 @@ def generate_guid(session: Session, pos_type: str, subtype: str) -> str:
     """
     Generate a unique GUID for a lemma in a specific POS type and subtype.
 
-    Committed rows, flushed rows, and lemmas still pending in this session are
-    all considered, so adding lemmas back-to-back without flushing between them
-    does not reuse a GUID.
+    Committed rows, flushed rows, lemmas still pending in this session, and
+    GUIDs recorded in ``guid_tombstones`` are all considered, so adding lemmas
+    back-to-back without flushing between them does not reuse a GUID, and a
+    retired GUID is never reissued.
+
+    Tombstoned GUIDs are permanently retired. ``data/release`` treats a GUID as
+    immutable and leaves a gap where a word was removed (see AGENTS.md), so a
+    number that was ever published must not come back attached to a different
+    word - even once its lemma row is gone from this database.
 
     A GUID counts as taken only once it is attached to a Lemma. Calling this
     twice without assigning the first result returns the same GUID both times,
@@ -82,30 +105,48 @@ def generate_guid(session: Session, pos_type: str, subtype: str) -> str:
 
     prefix = SUBTYPE_GUID_PREFIXES[pos_type][subtype]
 
-    # Find the highest existing GUID number for this subtype. Unparseable GUIDs
-    # are skipped rather than raising, so one malformed row cannot block
-    # allocation for its whole prefix.
+    # Find the highest existing GUID number for this subtype.
     existing_guids = (
         session.query(Lemma.guid)
         .filter(Lemma.guid.like(f"{prefix}%"))
         .filter(Lemma.guid != None)
         .all()
     )
-
-    max_num = 0
-    for (guid,) in existing_guids:
-        if guid:
-            sequence_number = _guid_sequence_number(guid, prefix)
-            if sequence_number is not None:
-                max_num = max(max_num, sequence_number)
+    max_num = _highest_sequence_number((guid for (guid,) in existing_guids), prefix)
 
     # Fold in GUIDs held by lemmas that are pending in this session but not yet
     # visible to the query above.
-    for pending_guid in _pending_guids(session, prefix):
-        sequence_number = _guid_sequence_number(pending_guid, prefix)
-        if sequence_number is not None:
-            max_num = max(max_num, sequence_number)
+    max_num = max(max_num, _highest_sequence_number(_pending_guids(session, prefix), prefix))
+
+    # Fold in retired GUIDs. Their lemma rows may be long gone, so the query
+    # above cannot see them, and without this the next allocation walks straight
+    # back onto a number that ships in released data.
+    max_num = max(max_num, _highest_sequence_number(tombstoned_guids(session, prefix), prefix))
 
     # Generate next GUID in new format (using underscore for valid Python variable names)
     next_num = max_num + 1
     return f"{prefix}_{next_num:03d}"
+
+
+def tombstoned_guids(session: Session, prefix: str) -> Iterator[str]:
+    """Yield every tombstoned GUID that starts with ``prefix``.
+
+    Shared by the lemma and phrase allocators so both retire numbers on the same
+    evidence.
+    """
+    rows = session.query(GuidTombstone.guid).filter(GuidTombstone.guid.like(f"{prefix}%")).all()
+    for (guid,) in rows:
+        if guid:
+            yield guid
+
+
+def next_sequence_number(session: Session, prefix: str, live_guids: Iterable[str]) -> int:
+    """The next free sequence number for ``prefix``, honouring tombstones.
+
+    ``live_guids`` are the GUIDs currently attached to rows of whichever table
+    owns this prefix. Callers outside :func:`generate_guid` (phrases, sentences)
+    use this so that "never reuse a retired GUID" is stated in one place.
+    """
+    highest = _highest_sequence_number(live_guids, prefix)
+    highest = max(highest, _highest_sequence_number(tombstoned_guids(session, prefix), prefix))
+    return highest + 1

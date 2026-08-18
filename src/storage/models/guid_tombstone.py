@@ -15,10 +15,18 @@ class GuidTombstone(Base):
     """Model for tracking GUIDs that have been removed or replaced.
 
     When a word's type/subtype changes, the old GUID is tombstoned here.
-    This prevents GUID reuse conflicts and provides an audit trail.
-    For example, if "triangle" was mischaracterized as an adjective (A03_001)
-    and then corrected to a noun (N08_001), the A03_001 GUID would be tombstoned
-    and could potentially be reused for "triangular" later.
+    This provides an audit trail and, because ``storage.utils.guid`` reads this
+    table, retires the number permanently.  For example, if "triangle" was
+    mischaracterized as an adjective (A03_001) and then corrected to a noun
+    (N08_001), A03_001 is tombstoned with N08_001 as its replacement.
+
+    A tombstoned GUID is **never** reissued, not even to a closely related word
+    like "triangular".  ``data/release`` treats a GUID as immutable and leaves a
+    gap where a word was removed (see AGENTS.md), so a number that was ever
+    published must not come back attached to something else -- the released
+    files, the Trakaido export and any client that cached them would disagree
+    about what it names.  This is why the table records retirements whose lemma
+    row is long gone: it is the only remaining evidence that the number is spent.
     """
 
     __tablename__ = "guid_tombstones"

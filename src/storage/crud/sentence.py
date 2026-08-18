@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Tuple, cast
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
+from storage.models.guid_prefixes import SENTENCE_GUID_PREFIX
 from storage.models.schema import (
     ConversationSentence,
     Lemma,
@@ -12,6 +13,7 @@ from storage.models.schema import (
     SentenceTranslation,
     SentenceWord,
 )
+from storage.utils.guid import next_sequence_number
 
 
 def next_sentence_guid(session: Session) -> str:
@@ -19,12 +21,14 @@ def next_sentence_guid(session: Session) -> str:
 
     Queries the maximum existing sentence GUID and increments the numeric
     portion.  If no sentences exist yet, starts at S_00001.
+
+    Retired GUIDs recorded in ``guid_tombstones`` count as taken, so a number
+    that once shipped in ``data/release`` is never handed to a new sentence
+    even after its row is deleted.
     """
     max_guid: Optional[str] = session.query(func.max(Sentence.guid)).scalar()
-    if max_guid is None:
-        return "S_00001"
-    seq = int(max_guid.split("_")[1]) + 1
-    return f"S_{seq:05d}"
+    seq = next_sequence_number(session, SENTENCE_GUID_PREFIX, [max_guid] if max_guid else [])
+    return f"{SENTENCE_GUID_PREFIX}_{seq:05d}"
 
 
 def add_sentence(
