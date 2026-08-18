@@ -27,7 +27,9 @@ from barsukas.routes.sync.actions import (
 from barsukas.routes.sync.paging import PER_PAGE_CHOICES, paginate
 from storage.crud.operation_log import log_operation, log_translation_change
 from storage.migrate import _resolve_primary_lemma_category, _sentence_to_release_record
+from storage.models.name_entity import Name
 from storage.models.schema import (
+    AudioQualityReview,
     ConversationSentence,
     Lemma,
     Sentence,
@@ -36,7 +38,6 @@ from storage.models.schema import (
     SentenceWord,
 )
 from storage.translation_helpers import (
-    LANGUAGE_HIERARCHY,
     LANGUAGE_NAMES,
     RELEASE_LANGUAGES,
 )
@@ -300,6 +301,12 @@ def apply_additions() -> ResponseReturnValue:
     ):
         lemma_guid_to_id[lemma_guid] = lemma_id
 
+    # Same for proper names: a word or hint may resolve to one instead of a lemma.
+    name_guid_to_id: Dict[str, int] = {
+        name_guid: name_id
+        for name_id, name_guid in g.db.query(Name.id, Name.guid).filter(Name.guid.isnot(None)).all()
+    }
+
     imported_count = 0
     error_count = 0
 
@@ -331,6 +338,24 @@ def apply_additions() -> ResponseReturnValue:
                 error_count += 1
                 continue
 
+            # Same rule for names: importing a name-filled slot as unresolved
+            # would lose exactly the distinction name_guid exists to record.
+            missing_name_guids = sorted(
+                {
+                    release_word["name_guid"]
+                    for release_word in [*word_hints, *sentence_words]
+                    if release_word.get("name_guid")
+                    and release_word["name_guid"] not in name_guid_to_id
+                }
+            )
+            if missing_name_guids:
+                flash(
+                    f"Skipped {guid}: missing name GUIDs: {', '.join(missing_name_guids)}",
+                    "warning",
+                )
+                error_count += 1
+                continue
+
             sentence = Sentence(
                 guid=guid,
                 sentence_collection=release_data.get("collection") or None,
@@ -355,16 +380,21 @@ def apply_additions() -> ResponseReturnValue:
                 )
                 g.db.add(trans)
 
-            # Add word hints
+            # Add word hints. A hint needs a lemma or a name to reference -- the
+            # table's check constraint requires one -- but a name-backed hint is
+            # as valid as a lemma-backed one and used to be dropped here.
             for pw in word_hints:
                 lemma_guid = pw.get("lemma_guid")
-                lemma_id = lemma_guid_to_id.get(lemma_guid) if lemma_guid else None
-                if lemma_id is None:
+                hint_lemma_id = lemma_guid_to_id.get(lemma_guid) if lemma_guid else None
+                hint_name_guid = pw.get("name_guid")
+                hint_name_id = name_guid_to_id.get(hint_name_guid) if hint_name_guid else None
+                if hint_lemma_id is None and hint_name_id is None:
                     continue
 
                 word_hint = SentenceWordHint(
                     sentence_id=sentence.id,
-                    lemma_id=lemma_id,
+                    lemma_id=hint_lemma_id,
+                    name_id=hint_name_id,
                     position=pw.get("position", 0),
                     slot_name=pw.get("slot_name", "unknown"),
                     english_text=pw.get("english_text", ""),
@@ -376,10 +406,13 @@ def apply_additions() -> ResponseReturnValue:
             # fields; importing them here completes the Barsukas sync round trip.
             for word_data in sentence_words:
                 lemma_guid = word_data.get("lemma_guid")
-                lemma_id = lemma_guid_to_id.get(lemma_guid) if lemma_guid else None
+                word_lemma_id = lemma_guid_to_id.get(lemma_guid) if lemma_guid else None
+                word_name_guid = word_data.get("name_guid")
+                word_name_id = name_guid_to_id.get(word_name_guid) if word_name_guid else None
                 sentence_word = SentenceWord(
                     sentence_id=sentence.id,
-                    lemma_id=lemma_id,
+                    lemma_id=word_lemma_id,
+                    name_id=word_name_id,
                     language_code=word_data.get("language_code", ""),
                     position=word_data.get("position", 0),
                     part_of_speech=word_data.get("word_role", ""),
@@ -393,6 +426,27 @@ def apply_additions() -> ResponseReturnValue:
                 )
                 g.db.add(sentence_word)
 
+            # Approved audio rows. The exporter writes these and the export
+            # comparison diffs them, so without this the round trip lost a
+            # sentence's audio metadata entirely. Sentence audio is keyed by
+            # sentence_id; `guid` is the lemma-side key and stays NULL.
+            release_audio = release_data.get("audio", [])
+            for audio_data in release_audio:
+                g.db.add(
+                    AudioQualityReview(
+                        sentence_id=sentence.id,
+                        language_code=audio_data.get("language_code", ""),
+                        voice_name=audio_data.get("voice_name", ""),
+                        filename=audio_data.get("filename", ""),
+                        status=audio_data.get("status", "approved"),
+                        expected_text=audio_data.get("expected_text", ""),
+                        manifest_md5=audio_data.get("manifest_md5", ""),
+                        s3_prod_url=audio_data.get("s3_prod_url"),
+                        s3_staging_url=audio_data.get("s3_staging_url"),
+                        staging_agent=audio_data.get("staging_agent"),
+                    )
+                )
+
             log_operation(
                 session=g.db,
                 source="sync-release",
@@ -403,6 +457,7 @@ def apply_additions() -> ResponseReturnValue:
                     "translation_count": len(translations),
                     "word_hint_count": len(word_hints),
                     "word_count": len(sentence_words),
+                    "audio_count": len(release_audio),
                 },
             )
 
@@ -436,12 +491,21 @@ def apply_additions() -> ResponseReturnValue:
 def _find_sentence_removals(
     release_sentences: Dict[str, Dict[str, Any]], db_session: Any
 ) -> List[Dict[str, Any]]:
-    """Find sentence GUIDs in SQLite that don't exist in release."""
+    """Find sentence GUIDs in SQLite that don't exist in release.
+
+    Rejected sentences are excluded for the same reason the export excludes
+    them: a sentence the export will never write is not "missing from release",
+    and offering it for deletion here made the two pages disagree about the
+    same row.
+    """
     removals: List[Dict[str, Any]] = []
 
     conversation_ids = _get_conversation_sentence_ids(db_session)
     all_db_rows = (
-        db_session.query(Sentence.id, Sentence.guid).filter(Sentence.guid.isnot(None)).all()
+        db_session.query(Sentence.id, Sentence.guid)
+        .filter(Sentence.guid.isnot(None))
+        .filter(Sentence.rejected.is_(False))
+        .all()
     )
     db_guids_with_ids = {
         guid: sid for sid, guid in all_db_rows if guid and sid not in conversation_ids
@@ -710,7 +774,6 @@ def apply_level() -> ResponseReturnValue:
     outcome.write_release(lambda: release_io.apply_field_updates(release_updates))
     outcome.flash_summary()
     return redirect(url_for("sync_sentence_release.level"))
-    return redirect(url_for("sync_sentence_release.level"))
 
 
 # =============================================================================
@@ -909,7 +972,10 @@ def _find_sentence_translation_differences(
         return differences
 
     # All languages except English (which is handled by changes sync)
-    lang_codes_to_check = [lang for lang in LANGUAGE_HIERARCHY if lang != "en"]
+    # RELEASE_LANGUAGES, not LANGUAGE_HIERARCHY: the exporter filters to the
+    # former, and zh-tw is in it but not in the hierarchy, so a zh-tw
+    # translation was written to the file and then never diffable.
+    lang_codes_to_check = [lang for lang in RELEASE_LANGUAGES if lang != "en"]
 
     batch_size = 500
     guid_list = list(release_guids)
@@ -989,7 +1055,10 @@ def _count_sentence_translation_differences(
     if not release_guids:
         return count
 
-    lang_codes_to_check = [lang for lang in LANGUAGE_HIERARCHY if lang != "en"]
+    # RELEASE_LANGUAGES, not LANGUAGE_HIERARCHY: the exporter filters to the
+    # former, and zh-tw is in it but not in the hierarchy, so a zh-tw
+    # translation was written to the file and then never diffable.
+    lang_codes_to_check = [lang for lang in RELEASE_LANGUAGES if lang != "en"]
 
     batch_size = 500
     guid_list = list(release_guids)

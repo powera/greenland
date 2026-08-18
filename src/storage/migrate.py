@@ -392,11 +392,16 @@ def _sentence_word_to_dict(word: Any) -> Dict[str, Any]:
     database column name, which the JSONL read path maps back to
     ``part_of_speech``.
 
+    ``name_guid`` is emitted for the same reason and only when set: a word that
+    resolves to a proper name is not an unresolved gap, and without the key the
+    two cases were indistinguishable on disk (both ``lemma_guid: null``).
+
     Shared by every sentence-word serialization path so a newly added column
     reaches all of them at once.
     """
     return {
         "lemma_guid": word.lemma.guid if word.lemma and word.lemma.guid else None,
+        "name_guid": word.name.guid if word.name and word.name.guid else None,
         "language_code": word.language_code,
         "position": word.position,
         "word_role": word.word_role,
@@ -529,8 +534,10 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
 
     from storage import translation_helpers
     from storage.database import create_database_session
+    from storage.models.concept import ConceptLemmaLink
     from storage.models.guid_tombstone import GuidTombstone
     from storage.models.schema import Lemma, NON_INFLECTION_GRAMMATICAL_FORMS
+    from storage.release.lemma import lemma_to_release_record
 
     session = create_database_session(sqlite_path)
     from storage.utils.session import ensure_tables_exist
@@ -548,11 +555,19 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                 selectinload(Lemma.derivative_forms),
                 selectinload(Lemma.variant_forms),
                 selectinload(Lemma.grammar_facts),
+                # Read by the base record builder.
+                selectinload(Lemma.difficulty_overrides),
             )
             .order_by(Lemma.id)
             .all()
         )
         print(f"Found {len(lemmas)} curated lemmas to export")
+
+        # Every lemma's Q-id in one query. Resolving these per lemma inside the
+        # export loop would be one query per word on a whole-tree export.
+        qid_by_lemma_id: Dict[int, str] = dict(
+            session.query(ConceptLemmaLink.lemma_id, ConceptLemmaLink.qid).all()
+        )
 
         # Group lemmas by POS type/subtype
         lemmas_by_category: Dict[tuple, list] = defaultdict(list)
@@ -608,9 +623,10 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                 # Get all translations
                 all_translations = translation_helpers.get_all_translations(session, lemma)
 
-                # Build translations dict (only non-empty values, filtered to RELEASE_LANGUAGES)
-                translations_dict: Dict[str, str] = {}
-                translation_metadata_dict: Dict[str, Dict[str, str]] = {}
+                # Route each language to the file that carries it. RELEASE_LANGUAGES
+                # ride in the base record, which lemma_to_release_record builds
+                # below, so this loop only needs to note that the language is in
+                # play; the secondary and grouped tiers are collected here.
                 secondary_translations_dict: Dict[str, str] = {}
                 secondary_translation_metadata_dict: Dict[str, Dict[str, str]] = {}
                 extra_group_translations: Dict[str, Dict[str, str]] = defaultdict(dict)
@@ -629,9 +645,6 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                     if translation and translation.strip():
                         if lang_code in release_lang_set:
                             all_languages.add(lang_code)
-                            translations_dict[lang_code] = translation
-                            if lang_code in metadata_by_lang:
-                                translation_metadata_dict[lang_code] = metadata_by_lang[lang_code]
                         elif lang_code in secondary_lang_set:
                             all_languages.add(lang_code)
                             secondary_translations_dict[lang_code] = translation
@@ -650,38 +663,16 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                                         )
                                     break
 
-                # Get difficulty overrides (filtered to RELEASE_LANGUAGES)
-                difficulty_overrides_dict: Dict[str, int] = {}
-                for override in lemma.difficulty_overrides:
-                    if override.language_code in release_lang_set:
-                        difficulty_overrides_dict[override.language_code] = (
-                            override.difficulty_level
-                        )
-
-                # Base concept data with translations and difficulty_overrides
-                base_data: Dict[str, Any] = {
-                    "guid": lemma.guid,
-                    "pos_type": lemma.pos_type,
-                    "pos_subtype": lemma.pos_subtype,
-                    "concept_label": lemma.lemma_text,
-                    "concept_definition": lemma.definition_text,
-                }
-
-                if translations_dict:
-                    base_data["translations"] = translations_dict
-                if translation_metadata_dict:
-                    base_data["translation_metadata"] = translation_metadata_dict
-
-                if lemma.difficulty_level is not None:
-                    base_data["difficulty_level"] = lemma.difficulty_level
-
-                if difficulty_overrides_dict:
-                    base_data["difficulty_overrides"] = difficulty_overrides_dict
-
-                if lemma.lexical_gap_reason:
-                    base_data["lexical_gap_reason"] = lemma.lexical_gap_reason
-
-                base_records.append(base_data)
+                # The base record is built by storage.release.lemma, the same
+                # function the Barsukas sync uses, so the two exports cannot
+                # disagree about it. (They used to: this path wrote
+                # concept_label without the disambiguation and omitted qid and
+                # translation_disambiguations, so a CLI export after UI work
+                # stripped both from the tree.) Secondary and grouped-language
+                # records are this function's own concern and stay below.
+                base_records.append(
+                    lemma_to_release_record(lemma, qid=qid_by_lemma_id.get(lemma.id))
+                )
 
                 # Secondary translations record (guid + translations only)
                 if secondary_translations_dict:
@@ -2000,6 +1991,9 @@ def _sentence_to_release_record(sentence: Any) -> Dict[str, Any]:
                 "position": pw.position,
                 "slot_name": pw.slot_name,
                 "lemma_guid": lemma_guid,
+                # See _sentence_word_to_dict: a name-filled slot has to stay
+                # distinguishable from an unresolved one.
+                "name_guid": pw.name.guid if pw.name and pw.name.guid else None,
                 "english_text": pw.english_text,
             }
         )

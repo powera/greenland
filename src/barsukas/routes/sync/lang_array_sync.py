@@ -507,6 +507,10 @@ def build_blueprint(spec: LangArraySpec) -> Blueprint:
     @bp.route("/<lang_code>/export_all", methods=["POST"])
     def export_all(lang_code: str) -> ResponseReturnValue:
         """Write every DB array for this language into the release files."""
+        if is_readonly():
+            flash("Database is in read-only mode", "error")
+            return detail_url(lang_code)
+
         if not DEFAULT_RELEASE_DIR.exists():
             flash(f"Release directory not found: {DEFAULT_RELEASE_DIR}", "error")
             return detail_url(lang_code)

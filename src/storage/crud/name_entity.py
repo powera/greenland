@@ -292,6 +292,7 @@ def set_name_translation(
     ipa_pronunciation: Optional[str] = None,
     phonetic_pronunciation: Optional[str] = None,
     sort_key: Optional[str] = None,
+    notes: Optional[str] = None,
     verified: bool = False,
 ) -> NameTranslation:
     """Create or update how a name is written in one language.
@@ -304,6 +305,9 @@ def set_name_translation(
         ipa_pronunciation: Optional IPA.
         phonetic_pronunciation: Optional simplified pronunciation.
         sort_key: Optional romanized sort key (pinyin, kana).
+        notes: Optional free-text note about the rendering. Ships in the release
+            record's ``translation_metadata``, so it has to be settable here or
+            an imported name would differ from its own file forever.
         verified: Whether a human confirmed the rendering.
 
     Returns:
@@ -332,6 +336,8 @@ def set_name_translation(
         row.phonetic_pronunciation = phonetic_pronunciation
     if sort_key is not None:
         row.sort_key = sort_key
+    if notes is not None:
+        row.notes = notes
     row.verified = verified
     session.flush()
     return row

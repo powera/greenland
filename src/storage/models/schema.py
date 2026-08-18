@@ -698,6 +698,7 @@ class SentenceWordHint(Base):
     sentence = relationship("Sentence", back_populates="word_hints")
     lemma = relationship("Lemma")
     pending_import = relationship("PendingImport")
+    name = relationship("Name")
 
 
 class Phrase(Base):

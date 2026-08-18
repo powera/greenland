@@ -411,6 +411,10 @@ def build_blueprint(spec: RecordSyncSpec) -> Blueprint:
     @bp.route("/export", methods=["POST"])
     def export_all() -> ResponseReturnValue:
         """Rewrite the release file from every GUIDed row in the database."""
+        if is_readonly():
+            flash("Database is in read-only mode", "error")
+            return redirect(url_for(endpoint("index")))
+
         rows = spec.query_rows(g.db)
         try:
             _write_release_from_db(spec, [spec.to_record(row) for row in rows])
