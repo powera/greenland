@@ -102,7 +102,7 @@ def paginate(items: Sequence[Any], *, default_per_page: int = DEFAULT_PER_PAGE) 
     error.
     """
     per_page = _int_arg("per_page", default_per_page)
-    if per_page < 0 or per_page not in PER_PAGE_CHOICES:
+    if per_page not in PER_PAGE_CHOICES:
         per_page = default_per_page
 
     total = len(items)

@@ -577,12 +577,24 @@ def apply_translations() -> ResponseReturnValue:
                 outcome.record_error(f"Release data not found for GUID: {phrase.guid}")
                 continue
             release_translations = release_data.get("translations", {})
+            release_metadata = release_data.get("translation_metadata", {})
 
             for lang_code, action in lang_actions.items():
                 if action == USE_RELEASE:
                     release_val = release_translations.get(lang_code, "")
                     if release_val:
-                        set_phrase_translation(g.db, phrase, lang_code, release_val)
+                        # The status fields have to ride along: set_phrase_translation
+                        # assigns them unconditionally, so omitting them here would
+                        # null out the status the release record actually carries.
+                        lang_metadata = release_metadata.get(lang_code, {})
+                        set_phrase_translation(
+                            g.db,
+                            phrase,
+                            lang_code,
+                            release_val,
+                            translation_status=lang_metadata.get("translation_status"),
+                            translation_status_note=lang_metadata.get("translation_status_note"),
+                        )
                         outcome.updated_db += 1
                     else:
                         outcome.skipped += 1

@@ -356,7 +356,7 @@ def removals() -> ResponseReturnValue:
                 member_details.append(
                     {
                         "guid": lemma.guid or "",
-                        "word": lemma.word,
+                        "word": lemma.word_text,
                         "pos_type": lemma.pos_type,
                     }
                 )
@@ -468,7 +468,7 @@ def differences() -> ResponseReturnValue:
                 db_member_details.append(
                     {
                         "guid": lemma.guid or "",
-                        "word": lemma.word,
+                        "word": lemma.word_text,
                         "pos_type": lemma.pos_type,
                     }
                 )
@@ -482,7 +482,7 @@ def differences() -> ResponseReturnValue:
                 "release_members": release_members,
                 "db_members": db_member_details,
                 "only_in_release": sorted(set(release_members) - set(db_members)),
-                "only_in_db": sorted(set(db_members) - {m["guid"] for m in db_member_details}),
+                "only_in_db": sorted(set(db_members) - set(release_members)),
             }
         )
 

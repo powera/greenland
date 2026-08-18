@@ -39,6 +39,22 @@ from storage.wikidata import normalize_qid
 from storage.crud.operation_log import log_operation, log_translation_change
 from storage.models.grammar_fact import GrammarFact
 from storage.models.schema import Lemma, LemmaTranslation
+from storage.release.lemma import (
+    decode_db_emoji as _decode_db_emoji,
+)
+from storage.release import lemma as release_lemma
+from storage.release.lemma import (
+    lemma_to_release_record,
+)
+from storage.release.lemma import (
+    release_disambiguation as _get_release_disambiguation,
+)
+from storage.release.lemma import (
+    release_emoji as _get_release_emoji,
+)
+from storage.release.lemma import (
+    release_lemma_text as _get_release_lemma_text,
+)
 from storage.translation_helpers import (
     EXTRA_RELEASE_LANGUAGE_GROUPS,
     LANGUAGE_NAMES,
@@ -131,75 +147,6 @@ def _load_release_grammar_facts(
     return grammar_facts
 
 
-def _parse_concept_label(concept_label: str) -> Tuple[str, Optional[str]]:
-    """Parse concept_label into (word, disambiguation).
-
-    E.g. "sharp (pointed)" -> ("sharp", "pointed"),
-         "dog" -> ("dog", None).
-    """
-    match = re.match(r"^(.+?)\s+\(([^)]+)\)$", concept_label)
-    if match:
-        return match.group(1).strip(), match.group(2).strip()
-    return concept_label, None
-
-
-def _get_release_disambiguation(release_data: Dict[str, Any]) -> Optional[str]:
-    """Extract disambiguation from release data's concept_label."""
-    concept_label = release_data.get("concept_label", "")
-    if not concept_label:
-        return None
-    _, disambiguation = _parse_concept_label(concept_label)
-    return disambiguation
-
-
-def _normalize_emoji_entry(item: Any) -> Optional[Dict[str, str]]:
-    """Coerce one emoji-list item into a {type, value} dict, or None if invalid.
-
-    Accepts either the canonical dict form or a bare Unicode string (legacy).
-    """
-    if isinstance(item, dict):
-        entry_type = str(item.get("type", "")).strip()
-        value = str(item.get("value", "")).strip()
-        if entry_type in ("unicode", "image") and value:
-            return {"type": entry_type, "value": value}
-        return None
-    if isinstance(item, str) and item.strip():
-        return {"type": "unicode", "value": item.strip()}
-    return None
-
-
-def _normalize_emoji_list(raw: Any) -> List[Dict[str, str]]:
-    """Normalize any emoji-list shape into a list of {type, value} dicts."""
-    if not isinstance(raw, list):
-        return []
-    out: List[Dict[str, str]] = []
-    for item in raw:
-        entry = _normalize_emoji_entry(item)
-        if entry is not None:
-            out.append(entry)
-    return out
-
-
-def _decode_db_emoji(raw: Optional[str]) -> List[Dict[str, str]]:
-    """Decode the JSON-encoded emoji list stored on Lemma.emoji.
-
-    Returns [] for null/empty/unparseable values so equality comparisons with
-    a missing release-side list ("emoji" key absent) treat both as "no emoji".
-    """
-    if not raw:
-        return []
-    try:
-        value = json.loads(raw)
-    except (json.JSONDecodeError, TypeError):
-        return []
-    return _normalize_emoji_list(value)
-
-
-def _get_release_emoji(release_data: Dict[str, Any]) -> List[Dict[str, str]]:
-    """Extract the emoji list from release base.jsonl data (missing -> [])."""
-    return _normalize_emoji_list(release_data.get("emoji"))
-
-
 def _format_emoji_for_display(entries: List[Dict[str, str]]) -> str:
     """Render an emoji list as a short human-readable string for diff rows.
 
@@ -213,16 +160,6 @@ def _format_emoji_for_display(entries: List[Dict[str, str]]) -> str:
         else:
             parts.append(entry.get("value", ""))
     return " ".join(parts)
-
-
-def _get_release_lemma_text(release_data: Dict[str, Any]) -> str:
-    """Extract lemma_text from release data."""
-    translations = release_data.get("translations", {})
-    en_text = translations.get("en")
-    if en_text:
-        return str(en_text)
-    concept_label = release_data.get("concept_label", "")
-    return str(concept_label) if concept_label else ""
 
 
 # =============================================================================
@@ -578,42 +515,18 @@ def apply_additions() -> ResponseReturnValue:
             continue
 
         try:
-            lemma_text = _get_release_lemma_text(release_data)
-
-            lemma = Lemma(
-                guid=guid,
-                lemma_text=lemma_text,
-                disambiguation=_get_release_disambiguation(release_data),
-                definition_text=release_data.get("concept_definition", ""),
-                pos_type=release_data.get("pos_type", ""),
-                pos_subtype=release_data.get("pos_subtype"),
-                difficulty_level=release_data.get("difficulty_level"),
-            )
-            g.db.add(lemma)
-            g.db.flush()  # Get the ID
-
-            # Add translations
+            # The record builder owns every base field and the translations, so
+            # an import cannot drift from an export the way it used to (notes,
+            # emoji and lexical_gap_reason were all silently dropped here).
+            lemma = release_lemma.import_release_record(g.db, release_data)
+            lemma_text = lemma.lemma_text
             translations = release_data.get("translations", {})
-            translation_disambiguations = release_data.get("translation_disambiguations", {})
-            translation_metadata = release_data.get("translation_metadata", {})
-            for lang_code, translation_text in translations.items():
-                if lang_code == "en":  # English is stored as lemma_text
-                    continue
-                if not translation_text:
-                    continue
-                lang_metadata = translation_metadata.get(lang_code, {})
 
-                trans = LemmaTranslation(
-                    lemma_id=lemma.id,
-                    language_code=lang_code,
-                    translation=translation_text,
-                    disambiguation=translation_disambiguations.get(lang_code),
-                    translation_status=lang_metadata.get("translation_status"),
-                    translation_status_note=lang_metadata.get("translation_status_note"),
-                    sort_key=compute_sort_key(lang_code, translation_text),
-                    verified=False,
-                )
-                g.db.add(trans)
+            # Concept pairing: the release file carries only the Q-id. Pairing
+            # lives in concept_lemma_links and is committed by link itself.
+            new_qid = normalize_qid(release_data.get("qid") or "") or None
+            if new_qid:
+                link_lemma_to_concept(g.db, lemma.id, new_qid, verified=True)
 
             # Add grammar facts from language files
             guid_facts = release_grammar_facts.get(guid, [])
@@ -976,62 +889,12 @@ def apply_removals() -> ResponseReturnValue:
 
 def _build_release_entry_from_db(lemma: Lemma) -> Dict[str, Any]:
     """Build a data/release base.jsonl entry from a Lemma and its translations."""
-    # Build translations dict with en first (from lemma_text), then RELEASE_LANGUAGES order
-    translations: Dict[str, str] = {"en": lemma.lemma_text}
-    translation_disambiguations: Dict[str, str] = {}
-    translation_metadata: Dict[str, Dict[str, str]] = {}
-
-    lang_to_trans: Dict[str, LemmaTranslation] = {t.language_code: t for t in lemma.translations}
-
-    for lang_code in RELEASE_LANGUAGES:
-        if lang_code == "en":
-            continue
-        trans_obj = lang_to_trans.get(lang_code)
-        if trans_obj and trans_obj.translation:
-            translations[lang_code] = trans_obj.translation
-            if trans_obj.disambiguation:
-                translation_disambiguations[lang_code] = trans_obj.disambiguation
-            metadata: Dict[str, str] = {}
-            if trans_obj.translation_status:
-                metadata["translation_status"] = trans_obj.translation_status
-            if trans_obj.translation_status_note:
-                metadata["translation_status_note"] = trans_obj.translation_status_note
-            if metadata:
-                translation_metadata[lang_code] = metadata
-
-    # Build concept_label: "word (disambiguation)" if disambiguation exists
-    concept_label = lemma.lemma_text
-    if lemma.disambiguation:
-        concept_label = f"{lemma.lemma_text} ({lemma.disambiguation})"
-
-    entry: Dict[str, Any] = {
-        "guid": lemma.guid,
-        "pos_type": lemma.pos_type,
-        "pos_subtype": lemma.pos_subtype or "",
-        "concept_label": concept_label,
-        "concept_definition": lemma.definition_text or "",
-        "translations": translations,
-        "difficulty_level": lemma.difficulty_level if lemma.difficulty_level is not None else -1,
-    }
-
-    if translation_disambiguations:
-        entry["translation_disambiguations"] = translation_disambiguations
-    if translation_metadata:
-        entry["translation_metadata"] = translation_metadata
-
-    if lemma.lexical_gap_reason:
-        entry["lexical_gap_reason"] = lemma.lexical_gap_reason
-
-    # If this lemma is paired with a concept that has a Wikidata Q-id, emit the
-    # Q-id (e.g. "Apple" -> Q89). The concept itself is never exported; this is
-    # the only piece of concept data that flows into data/release.
+    # The Q-id is the only piece of concept data that flows into data/release,
+    # and resolving it needs a session, so it is looked up here and handed to
+    # the builder rather than queried inside it.
     session = object_session(lemma)
-    if session is not None:
-        qid = get_qid_for_lemma(session, lemma.id)
-        if qid:
-            entry["qid"] = qid
-
-    return entry
+    qid = get_qid_for_lemma(session, lemma.id) if session is not None else None
+    return lemma_to_release_record(lemma, qid=qid)
 
 
 def _get_release_file_path_for_lemma(release_dir: Path, lemma: Lemma) -> Optional[Path]:
@@ -1066,6 +929,10 @@ def export_removals_to_release() -> ResponseReturnValue:
     This is the direction the sync system is actually used in day to day, so it
     honours "export all" as well as a hand-picked selection.
     """
+    if is_readonly():
+        flash("Database is in read-only mode", "error")
+        return redirect(url_for("sync_release.removals"))
+
     release_dir = _get_release_dir()
 
     if request.form.get("select_scope") == "all":
@@ -1314,19 +1181,10 @@ def apply_changes() -> ResponseReturnValue:
 
             if action == USE_RELEASE:
                 old_text = lemma.lemma_text
-                new_text = _get_release_lemma_text(release_data)
-                new_definition = release_data.get("concept_definition", "") or ""
-                new_notes = release_data.get("notes") or None
-                new_lexical_gap_reason = release_data.get("lexical_gap_reason") or None
-                new_emoji_list = _get_release_emoji(release_data)
-                new_emoji_json = json.dumps(new_emoji_list) if new_emoji_list else None
-
-                lemma.lemma_text = new_text
-                lemma.disambiguation = _get_release_disambiguation(release_data)
-                lemma.definition_text = new_definition
-                lemma.notes = new_notes
-                lemma.lexical_gap_reason = new_lexical_gap_reason
-                lemma.emoji = new_emoji_json
+                # Same base fields the record builder writes, so this direction
+                # cannot fall behind the export.
+                release_lemma.apply_base_fields(lemma, release_data)
+                new_text = lemma.lemma_text
 
                 # Concept pairing: the release file carries only the Q-id. Pair
                 # (or repair) when present, unlink when absent. The pairing lives
@@ -1357,22 +1215,27 @@ def apply_changes() -> ResponseReturnValue:
                     continue
 
                 db_text = lemma.lemma_text
-                update_fields: Dict[str, Any] = {
-                    # English lives in the release record as translations.en.
-                    "translations.en": db_text,
-                    "concept_definition": lemma.definition_text or "",
-                }
-                if lemma.notes:
-                    update_fields["notes"] = lemma.notes
-                if lemma.lexical_gap_reason:
-                    update_fields["lexical_gap_reason"] = lemma.lexical_gap_reason
                 db_emoji_list = _decode_db_emoji(lemma.emoji)
-                if db_emoji_list:
-                    update_fields["emoji"] = db_emoji_list
-                # Concept pairing: write the DB's Q-id, or remove the field when
-                # the lemma is unpaired so a stale qid doesn't linger in release.
-                db_qid = get_qid_for_lemma(g.db, lemma.id)
-                update_fields["qid"] = db_qid if db_qid else release_io.REMOVE_FIELD
+                # Every optional field is written as its value *or* REMOVE_FIELD,
+                # never skipped when empty: skipping leaves the old value in the
+                # file, and since the diff treats "" and absent alike the row
+                # would come straight back to this page.
+                update_fields: Dict[str, Any] = {
+                    # English lives in the release record as translations.en,
+                    # and the disambiguation rides on concept_label - which the
+                    # diff parses back out, so it has to move with the text.
+                    "translations.en": db_text,
+                    "concept_label": release_lemma.build_concept_label(
+                        db_text, lemma.disambiguation
+                    ),
+                    "concept_definition": lemma.definition_text or "",
+                    "notes": lemma.notes or release_io.REMOVE_FIELD,
+                    "lexical_gap_reason": (lemma.lexical_gap_reason or release_io.REMOVE_FIELD),
+                    "emoji": db_emoji_list or release_io.REMOVE_FIELD,
+                    # Concept pairing: write the DB's Q-id, or remove the field
+                    # when the lemma is unpaired so no stale qid lingers.
+                    "qid": get_qid_for_lemma(g.db, lemma.id) or release_io.REMOVE_FIELD,
+                }
 
                 release_updates.setdefault(file_path, {})[lemma.guid] = update_fields
                 outcome.updated_release += 1

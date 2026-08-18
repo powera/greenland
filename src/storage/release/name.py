@@ -194,6 +194,7 @@ def apply_release_record(session: Session, record: Dict[str, Any], name: Name) -
             ipa_pronunciation=metadata.get("ipa_pronunciation"),
             phonetic_pronunciation=metadata.get("phonetic_pronunciation"),
             sort_key=metadata.get("sort_key"),
+            notes=metadata.get("notes"),
             verified=bool(metadata.get("verified", False)),
         )
 
@@ -245,6 +246,7 @@ def import_release_record(session: Session, record: Dict[str, Any]) -> Optional[
             ipa_pronunciation=metadata.get("ipa_pronunciation"),
             phonetic_pronunciation=metadata.get("phonetic_pronunciation"),
             sort_key=metadata.get("sort_key"),
+            notes=metadata.get("notes"),
             verified=bool(metadata.get("verified", False)),
         )
 
