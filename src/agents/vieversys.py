@@ -59,6 +59,7 @@ from clients.audio.gpt_voices import (
 from clients.audio.polly_tts import PollyTTSClient, PollyVoice
 from clients.audio.manifest import generate_manifest
 from clients.audio.s3_uploader import S3AudioUploader
+from audiotools import s3_ops
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import (
@@ -178,64 +179,17 @@ class VieversysAgent:
         Returns:
             Tuple of (success: bool, audio_url: str, manifest_url: str)
         """
-        from clients.audio.s3_uploader import get_staging_audio_key, get_staging_manifest_key
-
         if not self.s3_uploader:
             return False, "", ""
 
-        audio_key = get_staging_audio_key(language_code, voice_path_name, md5_hash)
-        manifest_key = get_staging_manifest_key(language_code, voice_path_name, md5_hash)
-
-        try:
-            # Check if audio file already exists
-            try:
-                self.s3_uploader.s3.head_object(Bucket=self.s3_uploader.bucket_name, Key=audio_key)
-                # File exists
-                audio_url = self.s3_uploader.get_cdn_url(audio_key)
-                manifest_url = self.s3_uploader.get_cdn_url(manifest_key)
-                logger.info(f"Audio already exists in staging: {audio_key}")
-                return True, audio_url, manifest_url
-            except Exception:
-                pass  # File doesn't exist, proceed with upload
-
-            # Upload audio file
-            audio_extra_args = {
-                "ContentType": "audio/mpeg",
-                "ACL": "public-read",
-                "CacheControl": "public, max-age=3600",  # 1 hour cache for staging
-            }
-            self.s3_uploader.s3.upload_file(
-                str(audio_path),
-                self.s3_uploader.bucket_name,
-                audio_key,
-                ExtraArgs=audio_extra_args,
-            )
-            logger.info(f"Uploaded audio to staging: {audio_key}")
-
-            # Upload manifest file
-            import json
-
-            manifest_json = json.dumps(manifest_data, indent=2, ensure_ascii=False)
-            manifest_extra_args = {
-                "ContentType": "application/json",
-                "ACL": "public-read",
-                "CacheControl": "public, max-age=3600",
-            }
-            self.s3_uploader.s3.put_object(
-                Bucket=self.s3_uploader.bucket_name,
-                Key=manifest_key,
-                Body=manifest_json.encode("utf-8"),
-                **manifest_extra_args,
-            )
-            logger.info(f"Uploaded manifest to staging: {manifest_key}")
-
-            audio_url = self.s3_uploader.get_cdn_url(audio_key)
-            manifest_url = self.s3_uploader.get_cdn_url(manifest_key)
-            return True, audio_url, manifest_url
-
-        except Exception as e:
-            logger.error(f"Error uploading to staging: {e}")
-            return False, "", ""
+        return s3_ops.upload_to_staging(
+            uploader=self.s3_uploader,
+            audio_path=audio_path,
+            manifest_data=manifest_data,
+            language_code=language_code,
+            voice_path_name=voice_path_name,
+            md5_hash=md5_hash,
+        )
 
     def _upload_to_prod_path(
         self,
@@ -259,39 +213,13 @@ class VieversysAgent:
         if not self.s3_uploader:
             return False, ""
 
-        prod_key = f"prod/{language_code}/{voice_path_name}/{md5_hash}.mp3"
-
-        try:
-            # Check if file already exists
-            try:
-                self.s3_uploader.s3.head_object(Bucket=self.s3_uploader.bucket_name, Key=prod_key)
-                # File exists
-                prod_url = self.s3_uploader.get_cdn_url(prod_key)
-                logger.info(f"Audio already exists in production: {prod_key}")
-                return True, prod_url
-            except Exception:
-                pass  # File doesn't exist, proceed with upload
-
-            # Upload to production
-            extra_args = {
-                "ContentType": "audio/mpeg",
-                "ACL": "public-read",
-                "CacheControl": "public, max-age=31536000, immutable",
-            }
-            self.s3_uploader.s3.upload_file(
-                str(audio_path),
-                self.s3_uploader.bucket_name,
-                prod_key,
-                ExtraArgs=extra_args,
-            )
-
-            prod_url = self.s3_uploader.get_cdn_url(prod_key)
-            logger.info(f"Uploaded to production: {prod_key}")
-            return True, prod_url
-
-        except Exception as e:
-            logger.error(f"Error uploading to production: {e}")
-            return False, ""
+        return s3_ops.upload_to_production(
+            uploader=self.s3_uploader,
+            audio_path=audio_path,
+            md5_hash=md5_hash,
+            language_code=language_code,
+            voice_path_name=voice_path_name,
+        )
 
     def generate_audio_for_lemma(
         self,

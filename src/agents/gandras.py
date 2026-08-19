@@ -14,8 +14,6 @@ Matching Strategy:
 """
 
 import argparse
-import hashlib
-import json
 import logging
 import sys
 import tempfile
@@ -37,6 +35,7 @@ from agents.common.common_args import (
     add_processing_args,
     get_data_source_config,
 )
+from audiotools import s3_ops
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import DataSourceConfig
 from storage.models.schema import (
@@ -180,44 +179,13 @@ class GandrasAgent:
         Returns:
             List of (audio_key, manifest_key) tuples
         """
-        # Build prefix based on filters
-        # New structure: staging/{language}/{voice}/{md5}.manifest
-        # Legacy structure: staging/{agent}/{md5}.manifest
-        prefix = "staging/"
-
-        if language_code and voice_name:
-            prefix = f"staging/{language_code}/{voice_name}/"
-        elif language_code:
-            prefix = f"staging/{language_code}/"
-        elif agent_filter:
-            prefix = f"staging/{agent_filter}/"
-
-        logger.info(f"Listing manifests with prefix: {prefix}")
-
-        manifests: List[Tuple[str, str]] = []
-        paginator = self.s3_uploader.s3.get_paginator("list_objects_v2")
-
-        try:
-            for page in paginator.paginate(Bucket=self.s3_uploader.bucket_name, Prefix=prefix):
-                if "Contents" not in page:
-                    continue
-
-                for obj in page["Contents"]:
-                    key = obj["Key"]
-                    if key.endswith(".manifest"):
-                        # Derive audio key from manifest key
-                        audio_key = key.replace(".manifest", ".mp3")
-                        manifests.append((audio_key, key))
-
-                        if limit and len(manifests) >= limit:
-                            return manifests
-
-        except Exception as e:
-            logger.error(f"Error listing S3 objects: {e}")
-            raise
-
-        logger.info(f"Found {len(manifests)} manifest files")
-        return manifests
+        return s3_ops.list_staging_manifests(
+            uploader=self.s3_uploader,
+            language_code=language_code,
+            voice_name=voice_name,
+            agent_filter=agent_filter,
+            limit=limit,
+        )
 
     def download_manifest(self, manifest_key: str) -> Optional[Dict[str, Any]]:
         """
@@ -229,16 +197,7 @@ class GandrasAgent:
         Returns:
             Parsed manifest dict or None on error
         """
-        try:
-            response = self.s3_uploader.s3.get_object(
-                Bucket=self.s3_uploader.bucket_name, Key=manifest_key
-            )
-            content = response["Body"].read().decode("utf-8")
-            result: Dict[str, Any] = json.loads(content)
-            return result
-        except Exception as e:
-            logger.error(f"Error downloading manifest {manifest_key}: {e}")
-            return None
+        return s3_ops.download_manifest(self.s3_uploader, manifest_key)
 
     def match_manifest_to_database(self, session: Session, manifest: ManifestEntry) -> MatchResult:
         """
@@ -373,19 +332,7 @@ class GandrasAgent:
             logger.info(f"[DRY RUN] Would download {audio_key} to {output_path}")
             return True, None
 
-        try:
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            self.s3_uploader.s3.download_file(
-                self.s3_uploader.bucket_name, audio_key, str(output_path)
-            )
-
-            # Calculate MD5 to verify
-            md5_hash = hashlib.md5(output_path.read_bytes()).hexdigest()
-            logger.info(f"Downloaded {audio_key} to {output_path} (MD5: {md5_hash})")
-            return True, md5_hash
-        except Exception as e:
-            logger.error(f"Error downloading {audio_key}: {e}")
-            return False, None
+        return s3_ops.download_audio_file(self.s3_uploader, audio_key, output_path)
 
     def create_or_update_review_record(
         self,
