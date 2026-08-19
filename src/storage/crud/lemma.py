@@ -396,6 +396,11 @@ def handle_lemma_type_subtype_change(
         }
     """
     from storage.crud.guid_tombstone import create_tombstone
+    from storage.models.guid_tombstone import (
+        TOMBSTONE_REASON_SUBTYPE_CHANGE,
+        TOMBSTONE_REASON_TYPE_AND_SUBTYPE_CHANGE,
+        TOMBSTONE_REASON_TYPE_CHANGE,
+    )
 
     result: dict[str, Any] = {
         "old_guid": lemma.guid,
@@ -438,11 +443,11 @@ def handle_lemma_type_subtype_change(
 
         # Determine the reason
         if type_changed and subtype_changed:
-            reason = "type_and_subtype_change"
+            reason = TOMBSTONE_REASON_TYPE_AND_SUBTYPE_CHANGE
         elif type_changed:
-            reason = "type_change"
+            reason = TOMBSTONE_REASON_TYPE_CHANGE
         else:
-            reason = "subtype_change"
+            reason = TOMBSTONE_REASON_SUBTYPE_CHANGE
 
         # Create tombstone
         create_tombstone(

@@ -28,6 +28,7 @@ from barsukas.helpers.lemma_display import (
 )
 from workqueue.task_queue import get_tasks_for_target
 from storage.crud.derivative_form import delete_derivative_form
+from storage.crud.guid_tombstone import create_tombstone, get_tombstones_by_lemma_id
 from storage.crud.difficulty_override import get_all_overrides_for_lemma
 from storage.crud.lemma import handle_lemma_type_subtype_change
 from storage.crud.lemma_tags import parse_tags_input, serialize_tags_for_column
@@ -38,6 +39,7 @@ from storage.models.schema import (
     Lemma,
     LemmaTranslation,
 )
+from storage.models.guid_tombstone import TOMBSTONE_REASON_MANUAL_CORRECTION
 from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
 from storage.queries.lemma import build_lemma_search_query
 from storage.translation_helpers import (
@@ -388,6 +390,7 @@ def _get_lemma_page_context(lemma_id: int) -> Optional[Dict[str, Any]]:
         "sentence_count": data["sentence_count"],
         "needs_disambiguation_check": data["needs_disambiguation_check"],
         "related_lemmas": data["related_lemmas"],
+        "tombstones": data["tombstones"],
         "hidden_languages": set(language_names) - set(DEFAULT_GENERATION_LANGUAGES),
         # Per-tab counts for the lemma sub-navigation
         "nav_counts": {
@@ -765,6 +768,23 @@ def edit_lemma(lemma_id: int) -> ResponseReturnValue:
         # Allow manual GUID override (but only if type/subtype didn't change)
         new_guid = request.form.get("guid", "").strip() or None
         if new_guid != lemma.guid and not (type_changed or subtype_changed):
+            # Retire the old GUID the same way a type/subtype change does.
+            # Without this a hand-edited GUID frees its old number for reuse,
+            # which is the one thing the release format does not allow.
+            if lemma.guid:
+                create_tombstone(
+                    session=g.db,
+                    guid=lemma.guid,
+                    original_lemma_text=lemma.lemma_text,
+                    original_pos_type=lemma.pos_type,
+                    original_pos_subtype=lemma.pos_subtype,
+                    replacement_guid=new_guid,
+                    lemma_id=lemma.id,
+                    reason=TOMBSTONE_REASON_MANUAL_CORRECTION,
+                    notes="GUID reassigned by hand via the BARSUKAS edit form.",
+                    changed_by=Config.OPERATION_LOG_SOURCE,
+                )
+                flash(f"Old GUID {lemma.guid} tombstoned; it will not be reissued.", "warning")
             changes.append(("guid", lemma.guid, new_guid))
             lemma.guid = new_guid
 

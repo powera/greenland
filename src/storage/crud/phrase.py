@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from storage.models.guid_prefixes import PHRASE_SUBTYPE_GUID_PREFIXES
 from storage.models.schema import Phrase, PhraseTranslation
+from storage.utils.guid import next_sequence_number
 
 
 def next_phrase_guid(session: Session, phrase_subtype: str) -> str:
@@ -20,6 +21,10 @@ def next_phrase_guid(session: Session, phrase_subtype: str) -> str:
     Args:
         session: Database session
         phrase_subtype: Phrase subtype (e.g. "greetings", "traveler")
+
+    Retired GUIDs recorded in ``guid_tombstones`` count as taken, so a number
+    that once shipped in ``data/release`` is never handed to a new phrase even
+    after its row is deleted.
 
     Returns:
         Unique GUID string (e.g. "F01_004")
@@ -36,9 +41,7 @@ def next_phrase_guid(session: Session, phrase_subtype: str) -> str:
         .filter(Phrase.guid.like(f"{prefix}\\_%", escape="\\"))
         .scalar()
     )
-    if max_guid is None:
-        return f"{prefix}_001"
-    seq = int(max_guid.split("_")[1]) + 1
+    seq = next_sequence_number(session, prefix, [max_guid] if max_guid else [])
     return f"{prefix}_{seq:03d}"
 
 

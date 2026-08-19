@@ -172,3 +172,9 @@ NAME_KIND_GUID_PREFIXES = {
     "animal": "E07",
     "other": "E99",
 }
+
+# GUID prefix for sentences. Sentences are not subtyped and are numbered in one
+# flat sequence across the whole corpus (``S_00077``), so like idioms this is a
+# single prefix rather than a mapping. The sequence is five digits wide, not the
+# three used by lemmas, because there are far more sentences than words.
+SENTENCE_GUID_PREFIX = "S"

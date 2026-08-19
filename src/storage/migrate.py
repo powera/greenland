@@ -27,6 +27,7 @@ import constants
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
 from storage.config.grammar_facts import RELEASE_GRAMMAR_FACT_TYPES
+from storage.release.variant import variants_by_language
 
 APPROVED_AUDIO_RELEASE_STATUSES = {"approved", "approved_with_issues"}
 
@@ -298,39 +299,10 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any = None) -> Any:
             "phonetic": form.phonetic_pronunciation,
         }
 
-    # Get variant forms (alternate spellings), grouped per language and then
-    # per variant so each variant keeps its own paradigm.
-    variants_by_key: Dict[str, Dict[Tuple[str, str], List[Dict[str, Any]]]] = defaultdict(
-        lambda: defaultdict(list)
-    )
-    for variant_form in lemma.variant_forms:
-        variant_record: Dict[str, Any] = {
-            "grammatical_form": variant_form.grammatical_form,
-            "text": variant_form.variant_form_text,
-            "is_base_form": variant_form.is_base_form,
-        }
-        if variant_form.ipa_pronunciation:
-            variant_record["ipa"] = variant_form.ipa_pronunciation
-        if variant_form.phonetic_pronunciation:
-            variant_record["phonetic"] = variant_form.phonetic_pronunciation
-        variants_by_key[variant_form.language_code][
-            (variant_form.variant_kind, variant_form.variant_key)
-        ].append(variant_record)
-
-    variants: Dict[str, List[Dict[str, Any]]] = {
-        lang_code: [
-            {
-                "kind": variant_kind,
-                "key": variant_key,
-                "forms": sorted(
-                    variant_forms,
-                    key=lambda current_form: current_form["grammatical_form"],
-                ),
-            }
-            for (variant_kind, variant_key), variant_forms in sorted(variant_group.items())
-        ]
-        for lang_code, variant_group in variants_by_key.items()
-    }
+    # Variant forms (alternate spellings), grouped per language and then per
+    # variant so each keeps its own paradigm. Built by storage.release.variant
+    # so this and the release exporter below cannot disagree about the shape.
+    variants: Dict[str, List[Dict[str, Any]]] = variants_by_language(lemma.variant_forms)
 
     # Get grammar facts
     grammar_facts = []
@@ -535,7 +507,10 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
     from storage import translation_helpers
     from storage.database import create_database_session
     from storage.models.concept import ConceptLemmaLink
-    from storage.models.guid_tombstone import GuidTombstone
+    from storage.release.tombstone import (
+        RELEASE_DIRNAME as TOMBSTONE_RELEASE_DIRNAME,
+    )
+    from storage.release.tombstone import export_tombstones_to_release
     from storage.models.schema import Lemma, NON_INFLECTION_GRAMMATICAL_FORMS
     from storage.release.lemma import lemma_to_release_record
 
@@ -739,25 +714,11 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                         "phonetic": form.phonetic_pronunciation,
                     }
 
-                # Group variant forms (alternate spellings) by language, then by
-                # the variant they belong to, so each variant keeps its own
-                # paradigm: {"en": {("spelling", "grey"): [grey, greyer, ...]}}
-                variants_by_lang: Dict[str, Dict[Tuple[str, str], List[Dict[str, Any]]]] = (
-                    defaultdict(lambda: defaultdict(list))
+                # Variant forms (alternate spellings), already grouped per
+                # language and per variant by storage.release.variant.
+                variants_by_lang: Dict[str, List[Dict[str, Any]]] = variants_by_language(
+                    lemma.variant_forms
                 )
-                for variant_form in lemma.variant_forms:
-                    variant_record: Dict[str, Any] = {
-                        "grammatical_form": variant_form.grammatical_form,
-                        "text": variant_form.variant_form_text,
-                        "is_base_form": variant_form.is_base_form,
-                    }
-                    if variant_form.ipa_pronunciation:
-                        variant_record["ipa"] = variant_form.ipa_pronunciation
-                    if variant_form.phonetic_pronunciation:
-                        variant_record["phonetic"] = variant_form.phonetic_pronunciation
-                    variants_by_lang[variant_form.language_code][
-                        (variant_form.variant_kind, variant_form.variant_key)
-                    ].append(variant_record)
 
                 # Group grammar facts by language (only whitelisted types)
                 facts_by_lang: Dict[str, List[Dict[str, Any]]] = {}
@@ -794,19 +755,7 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                             ),
                         )
                     if lang in variants_by_lang:
-                        record["variants"] = [
-                            {
-                                "kind": variant_kind,
-                                "key": variant_key,
-                                "forms": sorted(
-                                    variant_forms,
-                                    key=lambda current_form: current_form["grammatical_form"],
-                                ),
-                            }
-                            for (variant_kind, variant_key), variant_forms in sorted(
-                                variants_by_lang[lang].items()
-                            )
-                        ]
+                        record["variants"] = variants_by_lang[lang]
                     if lang in facts_by_lang:
                         record["grammar_facts"] = facts_by_lang[lang]
                     lang_records[lang].append(record)
@@ -819,45 +768,16 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
         print(f"\nExport complete!")
         print(f"Languages exported: {', '.join(sorted(all_languages))}")
 
-        tombstone_records: List[Dict[str, Any]] = []
-        for tombstone in session.query(GuidTombstone).order_by(GuidTombstone.guid).all():
-            tombstone_record: Dict[str, Any] = {
-                "guid": tombstone.guid,
-                "original_lemma_text": tombstone.original_lemma_text,
-                "original_pos_type": tombstone.original_pos_type,
-                "reason": tombstone.reason,
-            }
-            if tombstone.original_pos_subtype:
-                tombstone_record["original_pos_subtype"] = tombstone.original_pos_subtype
-            if tombstone.replacement_guid:
-                tombstone_record["replacement_guid"] = tombstone.replacement_guid
-            if tombstone.lemma_id:
-                tombstone_record["lemma_id"] = tombstone.lemma_id
-            if tombstone.notes:
-                tombstone_record["notes"] = tombstone.notes
-            if tombstone.changed_by:
-                tombstone_record["changed_by"] = tombstone.changed_by
-            _add_tombstoned_at(tombstone_record, tombstone.tombstoned_at)
-            tombstone_records.append(tombstone_record)
-
-        _write_jsonl_atomic(
-            Path(release_dir).parent / "tombstones" / "guid_tombstones.jsonl",
-            tombstone_records,
+        # Tombstones ship beside the lemma tree rather than inside it, and the
+        # record is built by storage.release.tombstone so the CLI and the sync
+        # blueprint cannot drift apart the way the lemma builders once did.
+        tombstone_count = export_tombstones_to_release(
+            session, Path(release_dir).parent / TOMBSTONE_RELEASE_DIRNAME
         )
-        print(f"Tombstones exported: {len(tombstone_records)}")
+        print(f"Tombstones exported: {tombstone_count}")
 
     finally:
         session.close()
-
-
-def _add_tombstoned_at(record: Dict[str, Any], tombstoned_at: Any) -> None:
-    """Add tombstoned_at to a release tombstone record if it is available."""
-    if tombstoned_at is None:
-        return
-    if hasattr(tombstoned_at, "isoformat"):
-        record["tombstoned_at"] = tombstoned_at.isoformat()
-    else:
-        record["tombstoned_at"] = str(tombstoned_at)
 
 
 def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> None:
@@ -1168,6 +1088,38 @@ def export_sqlite_to_name_release(sqlite_path: str, release_dir: str) -> None:
         exported = export_names_to_release(session, Path(release_dir))
         print(f"Exported {exported} names")
         print("Name export complete!")
+    finally:
+        session.close()
+
+
+def import_tombstone_release_to_sqlite(sqlite_path: str, release_dir: str) -> None:
+    """Import data/release/tombstones into SQLite.
+
+    Unlike the name and idiom importers, this one *refreshes* records whose GUID
+    is already present rather than skipping them: create_tombstone upserts on
+    the GUID, so re-running is safe and a row whose replacement or notes changed
+    is brought up to date. There is nothing to lose by overwriting - a tombstone
+    has no local review state the way a lemma or an audio row does.
+
+    Until this existed the file reached SQLite only through a full bootstrap, so
+    a database built any other way had no idea which GUIDs were spent.
+    """
+    print(
+        f"Importing GUID tombstones from release format ({release_dir}) "
+        f"into SQLite ({sqlite_path})..."
+    )
+
+    from storage.database import create_database_session
+    from storage.release.tombstone import import_tombstones_from_release
+    from storage.utils.session import ensure_tables_exist
+
+    session = create_database_session(sqlite_path)
+    ensure_tables_exist(session)
+
+    try:
+        imported = import_tombstones_from_release(session, Path(release_dir))
+        print(f"Imported {imported} tombstones")
+        print("Tombstone import complete!")
     finally:
         session.close()
 
@@ -2059,6 +2011,12 @@ def _write_jsonl_atomic(file_path: Path, records: List[Dict[str, Any]]) -> None:
         file_path: Path to write to
         records: List of dictionaries to write as JSONL
     """
+    # The temp file is created beside the target so the rename below stays on one
+    # filesystem and is therefore atomic; that also means the directory has to
+    # exist first. Exporting into a fresh --release-dir used to fail here, at the
+    # very end of the run, after every lemma file had already been written.
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+
     # Write to temp file first
     with tempfile.NamedTemporaryFile(
         mode="w", encoding="utf-8", dir=file_path.parent, delete=False, suffix=".tmp"
@@ -2087,6 +2045,7 @@ def main() -> None:
             "idiom-release-to-sqlite",
             "sqlite-to-name-release",
             "name-release-to-sqlite",
+            "tombstone-release-to-sqlite",
             "sqlite-to-lemma-audio-release",
             "lemma-audio-release-to-sqlite",
         ],
@@ -2150,6 +2109,11 @@ def main() -> None:
         default="data/release/names",
         help="Path to name release directory (default: data/release/names)",
     )
+    parser.add_argument(
+        "--tombstone-release-dir",
+        default="data/release/tombstones",
+        help="Path to tombstone release directory (default: data/release/tombstones)",
+    )
 
     args = parser.parse_args()
 
@@ -2186,6 +2150,8 @@ def main() -> None:
         export_sqlite_to_name_release(args.sqlite_path, args.name_release_dir)
     elif args.direction == "name-release-to-sqlite":
         import_name_release_to_sqlite(args.sqlite_path, args.name_release_dir)
+    elif args.direction == "tombstone-release-to-sqlite":
+        import_tombstone_release_to_sqlite(args.sqlite_path, args.tombstone_release_dir)
     elif args.direction == "sqlite-to-lemma-audio-release":
         export_sqlite_to_lemma_audio_release(
             args.sqlite_path, args.release_dir, categories=lemma_audio_categories

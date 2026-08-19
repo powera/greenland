@@ -69,6 +69,7 @@ from barsukas.routes import (
     concepts,
     conversations,
     exports,
+    guids,
     idioms,
     lemmas,
     llm_api,
@@ -105,6 +106,8 @@ from barsukas.routes.sync import (
     sync_release,
     sync_sentence_release,
     sync_synonym_release,
+    sync_variant_release,
+    sync_tombstone_release,
 )
 from storage.backend import configure_backend, create_session
 from storage.backend.config import BackendType, DataSourceConfig
@@ -391,6 +394,7 @@ def create_app(
     app.register_blueprint(phrases.bp)
     app.register_blueprint(idioms.bp)
     app.register_blueprint(rhymes.bp)
+    app.register_blueprint(guids.bp)
     app.register_blueprint(pradzia.bp)
     app.register_blueprint(sync_hub.bp)
     app.register_blueprint(sync_release.bp)
@@ -399,9 +403,11 @@ def create_app(
     app.register_blueprint(sync_phrase_release.bp)
     app.register_blueprint(sync_derivative_release.bp)
     app.register_blueprint(sync_synonym_release.bp)
+    app.register_blueprint(sync_variant_release.bp)
     app.register_blueprint(sync_lemma_audio_release.bp)
     app.register_blueprint(sync_idiom_release.bp)
     app.register_blueprint(sync_name_release.bp)
+    app.register_blueprint(sync_tombstone_release.bp)
 
     # --- Benchmarks integration ---
     # Barsukas always uses PostgreSQL to access the benchmarks schema.

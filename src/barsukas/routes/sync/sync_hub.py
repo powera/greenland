@@ -80,6 +80,18 @@ SYNC_CATEGORIES: List[SyncCategory] = [
         ],
     ),
     SyncCategory(
+        endpoint="sync_variant_release.index",
+        title="Spelling Variants",
+        icon="bi-fonts",
+        colour="success",
+        summary="Alternate spellings of the same word, each with its own paradigm.",
+        covers=[
+            "spelling (gray / grey)",
+            "script (Chinese simplified / traditional)",
+            "Per-variant paradigms and pronunciations",
+        ],
+    ),
+    SyncCategory(
         endpoint="sync_relation_release.index",
         title="Relations",
         icon="bi-diagram-2",
@@ -130,6 +142,18 @@ SYNC_CATEGORIES: List[SyncCategory] = [
             "Additions & removals",
             "Whole-record changes",
             "Renderings, transcriptions and sort keys",
+        ],
+    ),
+    SyncCategory(
+        endpoint="sync_tombstone_release.index",
+        title="GUID Tombstones",
+        icon="bi-archive",
+        colour="dark",
+        summary="Retired GUIDs, which must never be issued to another word.",
+        covers=[
+            "Additions & removals",
+            "Replacement links and reasons",
+            "Export only - a tombstone is never deleted",
         ],
     ),
     SyncCategory(

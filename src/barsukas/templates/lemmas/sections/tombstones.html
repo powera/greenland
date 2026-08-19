@@ -1,0 +1,66 @@
+<!-- Retired GUIDs -->
+{% if tombstones %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-archive"></i> Previous GUIDs
+                <span class="badge bg-secondary">{{ tombstones|length }}</span>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-secondary">
+                    <i class="bi bi-info-circle"></i>
+                    GUIDs this word used to have. A GUID changes when a word's part of
+                    speech is corrected, or when it is merged into another lemma. The old
+                    number is <strong>retired permanently</strong> and is never issued to
+                    another word, so released files that still refer to it keep pointing at
+                    a number with a known history.
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Retired GUID</th>
+                                <th>Was</th>
+                                <th>Replaced by</th>
+                                <th>Reason</th>
+                                <th>When</th>
+                                <th>By</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tombstone in tombstones %}
+                            <tr>
+                                <td><code>{{ tombstone.guid }}</code></td>
+                                <td>
+                                    {{ tombstone.original_pos_type }}{% if tombstone.original_pos_subtype %}
+                                    / {{ tombstone.original_pos_subtype }}{% endif %}
+                                </td>
+                                <td>
+                                    {% if tombstone.replacement_guid %}
+                                        <code>{{ tombstone.replacement_guid }}</code>
+                                    {% else %}
+                                        <span class="text-muted">&mdash;</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ tombstone.reason.replace('_', ' ') }}</td>
+                                <td>
+                                    {% if tombstone.tombstoned_at %}
+                                        {{ tombstone.tombstoned_at.strftime('%Y-%m-%d') }}
+                                    {% else %}
+                                        <span class="text-muted">&mdash;</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ tombstone.changed_by or '' }}</td>
+                                <td>{{ tombstone.notes or '' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

@@ -11,7 +11,7 @@ from storage.backend.base import BaseSession, BaseStorage
 from storage.backend.jsonl import models
 from storage.backend.jsonl.session import JSONLSession
 from storage.models.schema import NON_INFLECTION_GRAMMATICAL_FORMS
-from storage.models.variant_form import VARIANT_KIND_SPELLING
+from storage.release.variant import paradigms_to_records, records_to_paradigms
 from storage.translation_helpers import EXTRA_RELEASE_LANGUAGE_GROUPS
 
 # Files under lemmas/{pos}/{subtype}/ whose stem is not a language code.
@@ -379,37 +379,11 @@ class JSONLStorage(BaseStorage):
                         # separately from "forms" so variants are never routed
                         # into the synonyms bucket: a variant is the same
                         # lexeme, not a different one.
-                        if "variants" in data and isinstance(data["variants"], list):
-                            variant_list = lemma.variants.setdefault(lang_code, [])
-                            for variant_entry in data["variants"]:
-                                variant_key = variant_entry.get("key", "")
-                                raw_forms = variant_entry.get("forms", [])
-                                if not variant_key or not isinstance(raw_forms, list):
-                                    continue
-                                variant_forms: List[Dict[str, Any]] = []
-                                for form_entry in raw_forms:
-                                    vgform = form_entry.get("grammatical_form", "")
-                                    vtext = form_entry.get("text", "")
-                                    if not vgform or not vtext:
-                                        continue
-                                    variant_record: Dict[str, Any] = {
-                                        "grammatical_form": vgform,
-                                        "text": vtext,
-                                        "is_base_form": form_entry.get("is_base_form", False),
-                                    }
-                                    if form_entry.get("ipa"):
-                                        variant_record["ipa"] = form_entry["ipa"]
-                                    if form_entry.get("phonetic"):
-                                        variant_record["phonetic"] = form_entry["phonetic"]
-                                    variant_forms.append(variant_record)
-                                if not variant_forms:
-                                    continue
-                                variant_list.append(
-                                    {
-                                        "kind": variant_entry.get("kind", VARIANT_KIND_SPELLING),
-                                        "key": variant_key,
-                                        "forms": variant_forms,
-                                    }
+                        if "variants" in data:
+                            parsed = records_to_paradigms(data["variants"])
+                            if parsed:
+                                lemma.variants.setdefault(lang_code, []).extend(
+                                    paradigms_to_records(parsed)
                                 )
 
                         if "audio_hashes" in data:

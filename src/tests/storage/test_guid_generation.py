@@ -17,7 +17,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
+from storage.crud.phrase import next_phrase_guid
+from storage.crud.sentence import next_sentence_guid
+from storage.models.guid_prefixes import (
+    PHRASE_SUBTYPE_GUID_PREFIXES,
+    SENTENCE_GUID_PREFIX,
+    SUBTYPE_GUID_PREFIXES,
+)
+from storage.models.guid_tombstone import GuidTombstone
 from storage.models.schema import Base, Lemma
 from storage.utils.guid import generate_guid
 
@@ -221,3 +228,88 @@ def test_concurrent_sessions_are_guarded_by_the_unique_constraint() -> None:
         _add_without_flush(second_session, second_guid, pos_type)
         with pytest.raises(IntegrityError):
             second_session.commit()
+
+
+def _tombstone(session: Session, guid: str, pos_type: str = "noun") -> None:
+    session.add(
+        GuidTombstone(
+            guid=guid,
+            original_lemma_text=f"retired-{guid}",
+            original_pos_type=pos_type,
+            original_pos_subtype=None,
+            reason="release_history_gap",
+        )
+    )
+    session.flush()
+
+
+def test_tombstoned_guids_are_never_reissued(session: Session) -> None:
+    """A retired GUID is taken even though no lemma row holds it any more.
+
+    This is the case the tombstone table exists for: a prefix whose lemmas were
+    all moved or deleted still has published numbers behind it, and counting
+    only live rows walks straight back onto them.
+    """
+    pos_type, subtype, prefix = _any_subtype()
+    _tombstone(session, f"{prefix}_003", pos_type)
+
+    assert generate_guid(session, pos_type, subtype) == f"{prefix}_004"
+
+
+def test_tombstones_above_the_live_maximum_advance_allocation(session: Session) -> None:
+    """The real data shape: live lemmas below, retired GUIDs above.
+
+    data/release has prefixes where the highest tombstoned number exceeds the
+    highest live one, so allocating from live rows alone hands out a GUID that
+    already belongs to a removed word.
+    """
+    pos_type, subtype, prefix = _any_subtype()
+    _add_lemma(session, f"{prefix}_045", pos_type)
+    _tombstone(session, f"{prefix}_053", pos_type)
+
+    assert generate_guid(session, pos_type, subtype) == f"{prefix}_054"
+
+
+def test_tombstones_below_the_live_maximum_change_nothing(session: Session) -> None:
+    """An interior gap was never reissuable; tombstoning it must not skip ahead."""
+    pos_type, subtype, prefix = _any_subtype()
+    _add_lemma(session, f"{prefix}_010", pos_type)
+    _tombstone(session, f"{prefix}_004", pos_type)
+
+    assert generate_guid(session, pos_type, subtype) == f"{prefix}_011"
+
+
+def test_tombstones_are_isolated_per_prefix(session: Session) -> None:
+    """A retired GUID in one subtype does not advance another subtype."""
+    pos_type, busy_subtype, busy_prefix = _any_subtype()
+    other_subtype, other_prefix = sorted(SUBTYPE_GUID_PREFIXES[pos_type].items())[1]
+    assert busy_prefix != other_prefix
+
+    _tombstone(session, f"{busy_prefix}_042", pos_type)
+
+    assert generate_guid(session, pos_type, other_subtype) == f"{other_prefix}_001"
+    assert generate_guid(session, pos_type, busy_subtype) == f"{busy_prefix}_043"
+
+
+def test_tombstoned_guids_in_legacy_formats_still_count(session: Session) -> None:
+    """The dot and unseparated forms are parsed for tombstones too."""
+    pos_type, subtype, prefix = _any_subtype()
+    _tombstone(session, f"{prefix}.007", pos_type)
+    _tombstone(session, f"{prefix}009", pos_type)
+
+    assert generate_guid(session, pos_type, subtype) == f"{prefix}_010"
+
+
+def test_next_phrase_guid_skips_tombstoned_numbers(session: Session) -> None:
+    """Phrases allocate from the same evidence as lemmas."""
+    phrase_subtype, prefix = sorted(PHRASE_SUBTYPE_GUID_PREFIXES.items())[0]
+    _tombstone(session, f"{prefix}_012", "phrase")
+
+    assert next_phrase_guid(session, phrase_subtype) == f"{prefix}_013"
+
+
+def test_next_sentence_guid_skips_tombstoned_numbers(session: Session) -> None:
+    """Sentence GUIDs are five digits wide but retire on the same rule."""
+    _tombstone(session, f"{SENTENCE_GUID_PREFIX}_00077", "sentence")
+
+    assert next_sentence_guid(session) == f"{SENTENCE_GUID_PREFIX}_00078"

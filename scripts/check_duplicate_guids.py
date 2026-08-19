@@ -1,15 +1,84 @@
 #!/usr/bin/env python3
-"""Pre-commit check: ensure no duplicate GUIDs exist in data/release JSONL files.
+"""Pre-commit check: GUID integrity across the data/release JSONL tree.
 
 Usage: python scripts/check_duplicate_guids.py [DATA_DIR]
 
-Scans all .jsonl files under DATA_DIR (default: data/release) for duplicate
-GUID values.  Exits 0 if clean, 1 if duplicates found.
+Two things are checked, both of which break the release contract that a GUID
+names exactly one thing, forever:
+
+1. **Duplicates.** A GUID may appear at most once per file, and all of its files
+   must live in one directory.  A category directory holds several files that
+   describe the same words from different angles -- ``base.jsonl``, the grouped
+   translation files (``secondary.jsonl``, ``ancient.jsonl``), the per-language
+   files (``en.jsonl``, ``lt.jsonl``, ...) and ``audio.jsonl`` -- so one GUID
+   legitimately appears once in each.  The same GUID in *two* directories means
+   two different words were given the same number.
+
+2. **Reuse of a retired GUID.** ``tombstones/guid_tombstones.jsonl`` records
+   GUIDs that have been permanently retired.  None of them may name a live
+   record anywhere in the tree.  ``storage.utils.guid`` enforces this when
+   allocating, so a hit here means a file was hand-edited or an import carried
+   in a stale number.
+
+Exits 0 if clean, 1 otherwise.
 """
 
 import json
 import sys
+from collections import defaultdict
 from pathlib import Path
+from typing import Dict, Iterator, List, Set, Tuple
+
+# Retired GUIDs, not live records: scanned separately and never counted as
+# content. See storage.models.guid_tombstone.
+TOMBSTONE_RELATIVE_PATH = Path("tombstones") / "guid_tombstones.jsonl"
+
+Location = Tuple[Path, int]
+
+
+def _iter_guids(jsonl_path: Path) -> Iterator[Tuple[str, int]]:
+    """Yield (guid, line number) for every record in a file carrying a GUID.
+
+    Records without a ``guid`` are skipped rather than treated as errors: the
+    relation files are keyed by ``concept``, not by GUID.
+    """
+    with open(jsonl_path, encoding="utf-8") as handle:
+        for line_num, line in enumerate(handle, start=1):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = json.loads(line)
+            except json.JSONDecodeError as exc:
+                print(f"WARNING: bad JSON in {jsonl_path}:{line_num}: {exc}", file=sys.stderr)
+                continue
+            if isinstance(entry, dict) and entry.get("guid") is not None:
+                yield str(entry["guid"]), line_num
+
+
+def _collect(data_dir: Path) -> Tuple[Dict[str, List[Location]], Set[str]]:
+    """Map every live GUID to where it appears, and collect retired GUIDs."""
+    live: Dict[str, List[Location]] = defaultdict(list)
+    tombstoned: Set[str] = set()
+    tombstone_file = data_dir / TOMBSTONE_RELATIVE_PATH
+
+    for jsonl_path in sorted(data_dir.rglob("*.jsonl")):
+        for guid, line_num in _iter_guids(jsonl_path):
+            if jsonl_path == tombstone_file:
+                tombstoned.add(guid)
+            else:
+                live[guid].append((jsonl_path, line_num))
+
+    return live, tombstoned
+
+
+def _report(title: str, offenders: Dict[str, List[Location]]) -> None:
+    print(f"FAIL: {len(offenders)} {title}:\n", file=sys.stderr)
+    for guid in sorted(offenders):
+        print(f"  {guid}:", file=sys.stderr)
+        for path, line_num in offenders[guid]:
+            print(f"    {path}:{line_num}", file=sys.stderr)
+    print("", file=sys.stderr)
 
 
 def main() -> int:
@@ -19,63 +88,35 @@ def main() -> int:
         print(f"ERROR: directory not found: {data_dir}", file=sys.stderr)
         return 1
 
-    # A GUID may appear in both base.jsonl and secondary.jsonl within the same
-    # directory (one entry each).  That is expected, not a duplicate.
-    # We flag a GUID as duplicate only when it appears in files that are NOT a
-    # base/secondary pair in the same directory, or more than once in any file.
+    live, tombstoned = _collect(data_dir)
 
-    # guid -> list of (file, line_number)
-    seen: dict[str, list[tuple[str, int]]] = {}
+    duplicates: Dict[str, List[Location]] = {}
+    for guid, locations in live.items():
+        directories = {path.parent for path, _ in locations}
+        files = [path for path, _ in locations]
+        if len(directories) > 1 or len(files) != len(set(files)):
+            duplicates[guid] = locations
 
-    # Files whose stem is "base" or "secondary" form companion pairs.
-    COMPANION_STEMS = {"base", "secondary"}
+    reused = {guid: live[guid] for guid in sorted(set(live) & tombstoned)}
 
-    for jsonl_path in sorted(data_dir.rglob("*.jsonl")):
-        with open(jsonl_path, encoding="utf-8") as fh:
-            for line_num, line in enumerate(fh, start=1):
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    entry = json.loads(line)
-                except json.JSONDecodeError as exc:
-                    print(
-                        f"WARNING: bad JSON in {jsonl_path}:{line_num}: {exc}",
-                        file=sys.stderr,
-                    )
-                    continue
-                guid = entry.get("guid")
-                if guid is None:
-                    continue
-                location = (str(jsonl_path), line_num)
-                seen.setdefault(guid, []).append(location)
+    failed = False
+    if duplicates:
+        _report("duplicate GUID(s) found", duplicates)
+        failed = True
+    if reused:
+        _report("retired GUID(s) back in use", reused)
+        print(
+            "These GUIDs are recorded in "
+            f"{TOMBSTONE_RELATIVE_PATH} and must never name a record again.",
+            file=sys.stderr,
+        )
+        failed = True
 
-    def _is_companion_pair(locs: list[tuple[str, int]]) -> bool:
-        """Return True if locs are exactly a base/secondary pair in one dir."""
-        if len(locs) != 2:
-            return False
-        paths = [Path(loc[0]) for loc in locs]
-        if paths[0].parent != paths[1].parent:
-            return False
-        stems = {p.stem for p in paths}
-        return stems == COMPANION_STEMS
+    if failed:
+        return 1
 
-    duplicates = {
-        guid: locs
-        for guid, locs in seen.items()
-        if len(locs) > 1 and not _is_companion_pair(locs)
-    }
-
-    if not duplicates:
-        print(f"OK: {len(seen)} unique GUIDs, no duplicates.")
-        return 0
-
-    print(f"FAIL: {len(duplicates)} duplicate GUID(s) found:\n", file=sys.stderr)
-    for guid in sorted(duplicates):
-        print(f"  {guid}:", file=sys.stderr)
-        for filepath, line_num in duplicates[guid]:
-            print(f"    {filepath}:{line_num}", file=sys.stderr)
-    return 1
+    print(f"OK: {len(live)} unique GUIDs, {len(tombstoned)} tombstoned, no conflicts.")
+    return 0
 
 
 if __name__ == "__main__":

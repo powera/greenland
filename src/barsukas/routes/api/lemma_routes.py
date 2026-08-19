@@ -30,6 +30,7 @@ from audioshoe.qwen.types import QwenVoice
 
 from storage.crud.grammar_fact import get_grammar_facts
 from storage.crud.guid_tombstone import create_tombstone, get_tombstone_by_guid
+from storage.models.guid_tombstone import TOMBSTONE_REASON_SYNONYM_MERGE
 from storage.crud.lemma import get_lemma_by_guid
 from storage.crud.lemma_tags import read_tags
 from storage.crud.operation_log import log_translation_change
@@ -1263,7 +1264,7 @@ def merge_lemma_synonym(main_guid: str, synonym_guid: str) -> ResponseReturnValu
         original_pos_subtype=synonym_lemma.pos_subtype,
         replacement_guid=main_guid,
         lemma_id=synonym_lemma.id,
-        reason="synonym_merge",
+        reason=TOMBSTONE_REASON_SYNONYM_MERGE,
         notes=notes,
         changed_by=changed_by,
     )

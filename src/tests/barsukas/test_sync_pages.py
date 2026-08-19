@@ -62,11 +62,17 @@ SYNC_PAGES: Tuple[SyncPage, ...] = (
     SyncPage("derivatives-lang", "/sync/derivatives/lt", "lt"),
     SyncPage("synonyms", "/sync/synonyms/", "Synonym"),
     SyncPage("synonyms-lang", "/sync/synonyms/lt", "lt"),
+    SyncPage("variants", "/sync/variants/", "Variant"),
+    SyncPage("variants-lang", "/sync/variants/en", "en"),
     SyncPage("lemma-audio", "/sync/lemma-audio/", "Audio"),
     SyncPage("relations", "/sync/relations/", "Relation"),
     SyncPage("relation-additions", "/sync/relations/additions", "Relation"),
     SyncPage("relation-removals", "/sync/relations/removals", "Relation"),
     SyncPage("relation-differences", "/sync/relations/differences", "Relation"),
+    SyncPage("tombstones", "/sync/tombstones/", "Tombstone"),
+    SyncPage("tombstone-additions", "/sync/tombstones/additions", "Tombstone"),
+    SyncPage("tombstone-removals", "/sync/tombstones/removals", "Tombstone"),
+    SyncPage("tombstone-changes", "/sync/tombstones/changes", "Tombstone"),
 )
 
 
@@ -148,3 +154,75 @@ class TestBulkApplyGuards:
         response = client.post("/sync/names/additions/apply", data={}, follow_redirects=True)
         assert response.status_code == 200
         assert "No names selected" in response.data.decode()
+
+
+@pytest.fixture()
+def removable_rows(db_engine) -> None:  # type: ignore[type-arg]
+    """A tombstone and a name that exist in the database but not in release.
+
+    Both removals pages render "all in sync" against the bare seed, which would
+    make the delete-button assertions below pass for the wrong reason.
+    """
+    from sqlalchemy.orm import sessionmaker
+
+    from storage.crud.guid_tombstone import create_tombstone
+    from storage.models.guid_tombstone import TOMBSTONE_REASON_RELEASE_REMOVAL
+    from storage.models.name_entity import Name
+
+    session = sessionmaker(bind=db_engine)()
+    create_tombstone(
+        session=session,
+        guid="N02_997",
+        original_lemma_text="aurochs",
+        original_pos_type="noun",
+        original_pos_subtype="animal",
+        replacement_guid=None,
+        lemma_id=None,
+        reason=TOMBSTONE_REASON_RELEASE_REMOVAL,
+    )
+    session.add(Name(guid="E01_997", name_text="Testina", kind="given_name"))
+    session.commit()
+    session.close()
+
+
+class TestTombstoneSyncIsExportOnly:
+    """A tombstone is a permanent record, so its removals page cannot delete.
+
+    Every other whole-record type offers export-or-delete there. Deleting a
+    tombstone would un-retire its GUID and free it to be issued to a different
+    word, which is the outcome the whole mechanism exists to prevent.
+    """
+
+    def test_the_removals_page_lists_the_unreleased_tombstone(
+        self, client: FlaskClient, removable_rows: None
+    ) -> None:
+        """Guards the two assertions below against a vacuous empty page."""
+        html = client.get("/sync/tombstones/removals").data.decode()
+
+        assert "N02_997" in html
+
+    def test_the_removals_page_offers_no_delete_button(
+        self, client: FlaskClient, removable_rows: None
+    ) -> None:
+        html = client.get("/sync/tombstones/removals").data.decode()
+
+        assert "Delete Selected" not in html
+
+    def test_other_types_still_offer_delete(
+        self, client: FlaskClient, removable_rows: None
+    ) -> None:
+        """The knob is opt-out, so the shared engine keeps its usual behaviour."""
+        html = client.get("/sync/names/removals").data.decode()
+
+        assert "E01_997" in html
+        assert "Delete Selected" in html
+
+    def test_the_delete_route_refuses_even_when_posted_directly(
+        self, client: FlaskClient, removable_rows: None
+    ) -> None:
+        """Hiding the button is not enough; the route itself declines."""
+        response = client.post("/sync/tombstones/removals/delete", data={"selected_ids": ["1"]})
+
+        assert response.status_code == 302
+        assert "/sync/tombstones/removals" in response.headers["Location"]
+        assert "N02_997" in client.get("/sync/tombstones/removals").data.decode()
