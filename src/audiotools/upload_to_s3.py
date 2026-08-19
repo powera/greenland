@@ -46,6 +46,8 @@ except ImportError:
     print("Error: boto3 not installed. Run: pip install boto3")
     sys.exit(1)
 
+from clients.audio.s3_uploader import assert_s3_calls_enabled
+
 # Supported languages (audio directories use language codes directly, e.g., 'lt', 'zh')
 SUPPORTED_LANGUAGES = ["zh", "lt", "ko", "fr", "de", "es", "pt", "sw", "vi"]
 
@@ -66,6 +68,10 @@ class S3AudioUploader:
             secret_key: Digital Ocean Spaces secret key
             bucket_name: e.g., "trakaido-audio"
         """
+        # Same guard the clients.audio uploader uses: never build a
+        # credentialed client under pytest or when S3 is switched off.
+        assert_s3_calls_enabled()
+
         self.s3 = boto3.client(
             "s3",
             endpoint_url=endpoint_url,
@@ -135,7 +141,7 @@ class S3AudioUploader:
 
     def upload_from_manifest(
         self, manifest_path: Path, language: str, voice: str, dry_run: bool = False
-    ):
+    ) -> None:
         """
         Upload all files listed in a manifest.
 
@@ -195,7 +201,7 @@ class S3AudioUploader:
             # Upload
             self.upload_file(local_path, s3_key, md5_hash, dry_run)
 
-    def print_summary(self):
+    def print_summary(self) -> None:
         """Print upload summary."""
         print(f"\n{'='*60}")
         print(f"Upload Summary:")
@@ -205,7 +211,7 @@ class S3AudioUploader:
         print(f"{'='*60}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Upload audio files to Digital Ocean Spaces",
         formatter_class=argparse.RawDescriptionHelpFormatter,
