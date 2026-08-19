@@ -24,7 +24,7 @@ ISSUE_DETECTION_SETTINGS = {
     "breath_sensitivity": "medium",  # low, medium, high
     "noise_sensitivity": "medium",
     "pronunciation_strictness": "medium",
-    "clarity_threshold": 0.8
+    "clarity_threshold": 0.8,
 }
 
 # Output Configuration
@@ -37,13 +37,13 @@ LANGUAGE_CONFIGS = {
     "Lithuanian": {
         "pronunciation_guide": "Standard Lithuanian pronunciation",
         "common_issues": ["palatalization", "vowel_length", "stress_patterns"],
-        "special_characters": "ąčęėįšųūž"
+        "special_characters": "ąčęėįšųūž",
     },
     "English": {
-        "pronunciation_guide": "Standard American English pronunciation", 
+        "pronunciation_guide": "Standard American English pronunciation",
         "common_issues": ["th_sounds", "r_sounds", "vowel_reduction"],
-        "special_characters": ""
-    }
+        "special_characters": "",
+    },
 }
 
 # Error Handling

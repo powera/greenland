@@ -47,7 +47,7 @@ except ImportError:
     sys.exit(1)
 
 # Supported languages (audio directories use language codes directly, e.g., 'lt', 'zh')
-SUPPORTED_LANGUAGES = ['zh', 'lt', 'ko', 'fr', 'de', 'es', 'pt', 'sw', 'vi']
+SUPPORTED_LANGUAGES = ["zh", "lt", "ko", "fr", "de", "es", "pt", "sw", "vi"]
 
 # Base directory for local audio files
 AUDIO_BASE_DIR = Path.home() / "repo/wireword-audio/trakaido"
@@ -67,10 +67,10 @@ class S3AudioUploader:
             bucket_name: e.g., "trakaido-audio"
         """
         self.s3 = boto3.client(
-            's3',
+            "s3",
             endpoint_url=endpoint_url,
             aws_access_key_id=access_key,
-            aws_secret_access_key=secret_key
+            aws_secret_access_key=secret_key,
         )
         self.bucket_name = bucket_name
         self.uploaded_count = 0
@@ -78,11 +78,7 @@ class S3AudioUploader:
         self.error_count = 0
 
     def upload_file(
-        self,
-        local_path: Path,
-        s3_key: str,
-        md5_hash: str,
-        dry_run: bool = False
+        self, local_path: Path, s3_key: str, md5_hash: str, dry_run: bool = False
     ) -> bool:
         """
         Upload a single file to S3.
@@ -100,7 +96,7 @@ class S3AudioUploader:
         try:
             response = self.s3.head_object(Bucket=self.bucket_name, Key=s3_key)
             # File exists - check if MD5 matches
-            existing_etag = response['ETag'].strip('"')
+            existing_etag = response["ETag"].strip('"')
             if existing_etag == md5_hash:
                 print(f"  ⏭️  Skip (already exists): {s3_key}")
                 self.skipped_count += 1
@@ -108,7 +104,7 @@ class S3AudioUploader:
             else:
                 print(f"  ⚠️  MD5 mismatch for {s3_key} - re-uploading")
         except ClientError as e:
-            if e.response['Error']['Code'] != '404':
+            if e.response["Error"]["Code"] != "404":
                 print(f"  ❌ Error checking {s3_key}: {e}")
                 self.error_count += 1
                 return False
@@ -121,17 +117,12 @@ class S3AudioUploader:
         # Upload file
         try:
             extra_args = {
-                'ContentType': 'audio/mpeg',
-                'ACL': 'public-read',  # Make files publicly accessible
-                'CacheControl': 'public, max-age=31536000, immutable',  # Cache for 1 year
+                "ContentType": "audio/mpeg",
+                "ACL": "public-read",  # Make files publicly accessible
+                "CacheControl": "public, max-age=31536000, immutable",  # Cache for 1 year
             }
 
-            self.s3.upload_file(
-                str(local_path),
-                self.bucket_name,
-                s3_key,
-                ExtraArgs=extra_args
-            )
+            self.s3.upload_file(str(local_path), self.bucket_name, s3_key, ExtraArgs=extra_args)
 
             print(f"  ✅ Uploaded: {s3_key}")
             self.uploaded_count += 1
@@ -143,11 +134,7 @@ class S3AudioUploader:
             return False
 
     def upload_from_manifest(
-        self,
-        manifest_path: Path,
-        language: str,
-        voice: str,
-        dry_run: bool = False
+        self, manifest_path: Path, language: str, voice: str, dry_run: bool = False
     ):
         """
         Upload all files listed in a manifest.
@@ -171,7 +158,7 @@ class S3AudioUploader:
             print(f"  ❌ Invalid JSON in manifest: {e}")
             return
 
-        files = manifest.get('files', {})
+        files = manifest.get("files", {})
 
         if not files:
             print(f"  ⚠️  No files in manifest")
@@ -188,7 +175,7 @@ class S3AudioUploader:
                 continue
 
             # Get MD5 from manifest
-            md5_hash = metadata.get('md5')
+            md5_hash = metadata.get("md5")
             if not md5_hash:
                 print(f"  ⚠️  No MD5 hash in manifest for {filename}")
                 continue
@@ -220,7 +207,7 @@ class S3AudioUploader:
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Upload audio files to Digital Ocean Spaces',
+        description="Upload audio files to Digital Ocean Spaces",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -238,16 +225,16 @@ Environment Variables:
   DO_SPACES_SECRET    Digital Ocean Spaces secret key (required)
   DO_SPACES_ENDPOINT  Endpoint URL (default: https://nyc3.digitaloceanspaces.com)
   DO_SPACES_BUCKET    Bucket name (default: trakaido-audio)
-        """
+        """,
     )
-    parser.add_argument('--language', required=True,
-                        help='Language code (zh, lt, ko, fr)')
-    parser.add_argument('--voice', action='append',
-                        help='Voice name (ash, alloy, echo, etc.) - can specify multiple times')
-    parser.add_argument('--all-voices', action='store_true',
-                        help='Upload all voices')
-    parser.add_argument('--dry-run', action='store_true',
-                        help='Preview without uploading')
+    parser.add_argument("--language", required=True, help="Language code (zh, lt, ko, fr)")
+    parser.add_argument(
+        "--voice",
+        action="append",
+        help="Voice name (ash, alloy, echo, etc.) - can specify multiple times",
+    )
+    parser.add_argument("--all-voices", action="store_true", help="Upload all voices")
+    parser.add_argument("--dry-run", action="store_true", help="Preview without uploading")
     args = parser.parse_args()
 
     # Validate arguments
@@ -261,10 +248,10 @@ Environment Variables:
         sys.exit(1)
 
     # Get credentials from environment
-    endpoint_url = os.getenv('DO_SPACES_ENDPOINT', 'https://nyc3.digitaloceanspaces.com')
-    access_key = os.getenv('DO_SPACES_KEY')
-    secret_key = os.getenv('DO_SPACES_SECRET')
-    bucket_name = os.getenv('DO_SPACES_BUCKET', 'trakaido-audio')
+    endpoint_url = os.getenv("DO_SPACES_ENDPOINT", "https://nyc3.digitaloceanspaces.com")
+    access_key = os.getenv("DO_SPACES_KEY")
+    secret_key = os.getenv("DO_SPACES_SECRET")
+    bucket_name = os.getenv("DO_SPACES_BUCKET", "trakaido-audio")
 
     if not access_key or not secret_key:
         print("Error: Set DO_SPACES_KEY and DO_SPACES_SECRET environment variables")
@@ -312,5 +299,5 @@ Environment Variables:
     uploader.print_summary()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

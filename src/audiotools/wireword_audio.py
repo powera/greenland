@@ -168,7 +168,7 @@ def load_api_key() -> Optional[str]:
 
     # Try reading from file
     if API_KEY_FILE.exists():
-        with open(API_KEY_FILE, 'r') as f:
+        with open(API_KEY_FILE, "r") as f:
             return f.read().strip()
 
     return None
@@ -188,7 +188,7 @@ def load_wireword_data(file_path: Path) -> List[Dict]:
         raise FileNotFoundError(f"File not found: {file_path}")
 
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
         # Try standard JSON first
@@ -198,7 +198,8 @@ def load_wireword_data(file_path: Path) -> List[Dict]:
             # If that fails, try stripping trailing commas (common in generated files)
             # This is a simple regex that removes trailing commas before } or ]
             import re
-            content_fixed = re.sub(r',(\s*[}\]])', r'\1', content)
+
+            content_fixed = re.sub(r",(\s*[}\]])", r"\1", content)
             data = json.loads(content_fixed)
 
     except json.JSONDecodeError as e:
@@ -207,14 +208,16 @@ def load_wireword_data(file_path: Path) -> List[Dict]:
     # Handle both array and object formats
     if isinstance(data, list):
         return data
-    elif isinstance(data, dict) and 'words' in data:
-        return data['words']
-    elif isinstance(data, dict) and 'items' in data:
-        return data['items']
-    elif isinstance(data, dict) and 'sentences' in data:
-        return data['sentences']
+    elif isinstance(data, dict) and "words" in data:
+        return data["words"]
+    elif isinstance(data, dict) and "items" in data:
+        return data["items"]
+    elif isinstance(data, dict) and "sentences" in data:
+        return data["sentences"]
     else:
-        raise ValueError(f"Unexpected JSON format in {file_path}. Expected list or dict with 'words', 'items', or 'sentences' key.")
+        raise ValueError(
+            f"Unexpected JSON format in {file_path}. Expected list or dict with 'words', 'items', or 'sentences' key."
+        )
 
 
 def resolve_wireword_files(paths: List[Path]) -> List[Path]:
@@ -234,7 +237,7 @@ def resolve_wireword_files(paths: List[Path]) -> List[Path]:
     for path in paths:
         if path.is_file():
             # Direct file path - check if it's a sentence file
-            if '_sentences.json' in path.name:
+            if "_sentences.json" in path.name:
                 print(f"Skipping sentence file: {path.name}")
                 continue
             resolved_files.append(path)
@@ -242,7 +245,7 @@ def resolve_wireword_files(paths: List[Path]) -> List[Path]:
             # Directory - find all wireword_*.json files except sentences
             wireword_files = sorted(path.glob("wireword_*.json"))
             # Filter out sentence files
-            wireword_files = [f for f in wireword_files if '_sentences.json' not in f.name]
+            wireword_files = [f for f in wireword_files if "_sentences.json" not in f.name]
 
             if not wireword_files:
                 print(f"Warning: No wireword_*.json files found in {path}")
@@ -273,19 +276,19 @@ def get_output_filename(word_data: Dict, language: str) -> str:
         Filename without extension
     """
     # Lithuanian audio files use the target word as filename, not GUID
-    if language == 'lt' and 'base_target' in word_data:
-        return word_data['base_target']
+    if language == "lt" and "base_target" in word_data:
+        return word_data["base_target"]
 
     # Other languages use GUID if available
-    if 'guid' in word_data:
-        return word_data['guid']
+    if "guid" in word_data:
+        return word_data["guid"]
 
     # Fallback: create filename from English text
-    english = word_data.get('base_english', 'unknown')
+    english = word_data.get("base_english", "unknown")
     # Sanitize for filename
-    filename = english.lower().replace(' ', '_').replace('/', '_')
+    filename = english.lower().replace(" ", "_").replace("/", "_")
     # Remove special characters
-    filename = ''.join(c for c in filename if c.isalnum() or c == '_')
+    filename = "".join(c for c in filename if c.isalnum() or c == "_")
     return filename
 
 
@@ -301,7 +304,7 @@ def get_text_to_speak(word_data: Dict, language: str) -> str:
         Text to be converted to speech
     """
     lang_config = SUPPORTED_LANGUAGES[language]
-    field = lang_config['field']
+    field = lang_config["field"]
 
     text = word_data.get(field)
     if not text:
@@ -311,12 +314,7 @@ def get_text_to_speak(word_data: Dict, language: str) -> str:
 
 
 def generate_audio_openai(
-    text: str,
-    output_path: Path,
-    voice: str,
-    api_key: str,
-    language: str,
-    model: str = TTS_MODEL
+    text: str, output_path: Path, voice: str, api_key: str, language: str, model: str = TTS_MODEL
 ) -> bool:
     """
     Generate audio file using OpenAI TTS API.
@@ -343,7 +341,7 @@ def generate_audio_openai(
             "model": model,
             "voice": voice,
             "input": text,
-            "response_format": AUDIO_FORMAT
+            "response_format": AUDIO_FORMAT,
         }
 
         # Add instructions field for gpt-4o-mini-tts
@@ -374,8 +372,8 @@ def calculate_md5(file_path: Path) -> str:
         MD5 hex digest
     """
     md5 = hashlib.md5()
-    with open(file_path, 'rb') as f:
-        for chunk in iter(lambda: f.read(4096), b''):
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
             md5.update(chunk)
     return md5.hexdigest()
 
@@ -396,14 +394,9 @@ def load_manifest(cache_dir: Path, language: str, voice: str) -> Dict:
     manifest_path = cache_dir / language_dir / voice / MANIFEST_FILENAME
 
     if not manifest_path.exists():
-        return {
-            "generated_at": None,
-            "language": language,
-            "voice": voice,
-            "files": {}
-        }
+        return {"generated_at": None, "language": language, "voice": voice, "files": {}}
 
-    with open(manifest_path, 'r', encoding='utf-8') as f:
+    with open(manifest_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -422,11 +415,11 @@ def save_manifest(cache_dir: Path, language: str, voice: str, manifest: Dict) ->
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Update timestamp
-    manifest["generated_at"] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+    manifest["generated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     manifest["language"] = language
     manifest["voice"] = voice
 
-    with open(manifest_path, 'w', encoding='utf-8') as f:
+    with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
 
 
@@ -452,15 +445,14 @@ def add_to_manifest(manifest: Dict, filename: str, text: str, file_path: Path, g
         # New file, changed MD5, or missing timestamp - use file creation time
         stat = file_path.stat()
         # Use birthtime (creation) if available, otherwise mtime
-        creation_time = getattr(stat, 'st_birthtime', stat.st_mtime)
-        timestamp = datetime.fromtimestamp(creation_time, tz=timezone.utc).isoformat().replace('+00:00', 'Z')
+        creation_time = getattr(stat, "st_birthtime", stat.st_mtime)
+        timestamp = (
+            datetime.fromtimestamp(creation_time, tz=timezone.utc)
+            .isoformat()
+            .replace("+00:00", "Z")
+        )
 
-    manifest["files"][filename] = {
-        "md5": md5,
-        "text": text,
-        "guid": guid,
-        "created_at": timestamp
-    }
+    manifest["files"][filename] = {"md5": md5, "text": text, "guid": guid, "created_at": timestamp}
 
 
 def _load_derivative_forms_from_wireword(wireword_files: List[Path]) -> Dict[str, Tuple[str, str]]:
@@ -480,15 +472,15 @@ def _load_derivative_forms_from_wireword(wireword_files: List[Path]) -> Dict[str
         try:
             words = load_wireword_data(wireword_file)
             for word in words:
-                guid = word.get('guid')
+                guid = word.get("guid")
                 if not guid:
                     continue
 
                 # Check for grammatical_forms field
-                grammatical_forms = word.get('grammatical_forms', {})
+                grammatical_forms = word.get("grammatical_forms", {})
                 for form_key, form_data in grammatical_forms.items():
                     # Extract target text
-                    target_text = form_data.get('target')
+                    target_text = form_data.get("target")
                     if not target_text:
                         continue
 
@@ -507,10 +499,7 @@ def _load_derivative_forms_from_wireword(wireword_files: List[Path]) -> Dict[str
 
 
 def rebuild_manifest_from_files(
-    cache_dir: Path,
-    language: str,
-    voice: str,
-    wireword_files: List[Path]
+    cache_dir: Path, language: str, voice: str, wireword_files: List[Path]
 ) -> Dict:
     """
     Rebuild manifest by scanning existing audio files and matching with wireword data.
@@ -541,7 +530,7 @@ def rebuild_manifest_from_files(
         for word in words:
             filename = get_output_filename(word, language)
             text = get_text_to_speak(word, language)
-            guid = word.get('guid', filename)  # Use actual GUID from wireword data
+            guid = word.get("guid", filename)  # Use actual GUID from wireword data
 
             text_by_filename[filename] = text
             guid_by_filename[filename] = guid
@@ -556,19 +545,9 @@ def rebuild_manifest_from_files(
     voice_dir = cache_dir / language_dir / voice
     if not voice_dir.exists():
         print(f"  No audio files found in {voice_dir}")
-        return {
-            "generated_at": None,
-            "language": language,
-            "voice": voice,
-            "files": {}
-        }
+        return {"generated_at": None, "language": language, "voice": voice, "files": {}}
 
-    manifest = {
-        "generated_at": None,
-        "language": language,
-        "voice": voice,
-        "files": {}
-    }
+    manifest = {"generated_at": None, "language": language, "voice": voice, "files": {}}
 
     audio_files = list(voice_dir.glob(f"*.{AUDIO_FORMAT}"))
     print(f"  Found {len(audio_files)} audio files")
@@ -609,15 +588,19 @@ def rebuild_manifest_from_files(
             # New file, changed MD5, or missing timestamp - get from file stats
             stat = audio_file.stat()
             # Use birthtime (creation) if available, otherwise mtime
-            creation_time = getattr(stat, 'st_birthtime', stat.st_mtime)
-            timestamp = datetime.fromtimestamp(creation_time, tz=timezone.utc).isoformat().replace('+00:00', 'Z')
+            creation_time = getattr(stat, "st_birthtime", stat.st_mtime)
+            timestamp = (
+                datetime.fromtimestamp(creation_time, tz=timezone.utc)
+                .isoformat()
+                .replace("+00:00", "Z")
+            )
 
         manifest["files"][filename] = {
             "md5": md5,
             "text": text,
             "guid": guid,
             "grammatical_form": grammatical_form,  # None for base forms
-            "created_at": timestamp
+            "created_at": timestamp,
         }
 
     print(f"  Added {len(manifest['files'])} entries to manifest")
@@ -705,7 +688,7 @@ def generate_audio_for_file(
     voices: List[str],
     force: bool = False,
     dry_run: bool = False,
-    limit: Optional[int] = None
+    limit: Optional[int] = None,
 ) -> Dict[str, int]:
     """
     Generate audio files for all words in wireword files.
@@ -724,7 +707,9 @@ def generate_audio_for_file(
     # Load API key
     api_key = load_api_key()
     if not api_key and not dry_run:
-        raise ValueError("OpenAI API key not found. Set OPENAI_API_KEY environment variable or create keys/openai.key")
+        raise ValueError(
+            "OpenAI API key not found. Set OPENAI_API_KEY environment variable or create keys/openai.key"
+        )
 
     # Load word data from all files
     print(f"Loading data from {len(file_paths)} file(s)...")
@@ -740,11 +725,7 @@ def generate_audio_for_file(
     else:
         print(f"Found {len(words)} total words")
 
-    stats = {
-        'generated': 0,
-        'skipped': 0,
-        'failed': 0
-    }
+    stats = {"generated": 0, "skipped": 0, "failed": 0}
 
     for voice in voices:
         print(f"\n{'='*60}")
@@ -758,11 +739,7 @@ def generate_audio_for_file(
         existing_files = get_existing_files(CACHE_DIR, language, voice)
         print(f"Found {len(existing_files)} existing files in cache")
 
-        voice_stats = {
-            'generated': 0,
-            'skipped': 0,
-            'failed': 0
-        }
+        voice_stats = {"generated": 0, "skipped": 0, "failed": 0}
 
         for i, word_data in enumerate(words, 1):
             try:
@@ -773,7 +750,7 @@ def generate_audio_for_file(
 
                 # Check if file already exists
                 if not force and filename in existing_files:
-                    voice_stats['skipped'] += 1
+                    voice_stats["skipped"] += 1
                     continue
 
                 # Generate output path
@@ -782,24 +759,24 @@ def generate_audio_for_file(
 
                 if dry_run:
                     print(f"[DRY RUN] Would generate: {full_filename} - '{text}'")
-                    voice_stats['generated'] += 1
+                    voice_stats["generated"] += 1
                 else:
                     # Generate audio
                     print(f"[{i}/{len(words)}] Generating {full_filename} - '{text}'")
 
                     if generate_audio_openai(text, output_path, voice, api_key, language):
-                        voice_stats['generated'] += 1
+                        voice_stats["generated"] += 1
                         # Add to manifest
                         add_to_manifest(manifest, full_filename, text, output_path, filename)
                     else:
-                        voice_stats['failed'] += 1
+                        voice_stats["failed"] += 1
 
                     # Small delay to avoid rate limits
                     time.sleep(0.1)
 
             except Exception as e:
                 print(f"Error processing word: {e}")
-                voice_stats['failed'] += 1
+                voice_stats["failed"] += 1
 
         # Save manifest after processing all words for this voice
         if not dry_run:
@@ -839,23 +816,25 @@ Examples:
 
   # Check what would be generated (dry run)
   python wireword_audio.py --language zh --file data/chinese/wireword_nouns.json --dry-run
-        """
+        """,
     )
 
     parser.add_argument(
-        "--language", "-l",
+        "--language",
+        "-l",
         type=str,
         required=True,
         choices=list(SUPPORTED_LANGUAGES.keys()),
-        help="Language code (zh=Chinese, ko=Korean, fr=French, lt=Lithuanian)"
+        help="Language code (zh=Chinese, ko=Korean, fr=French, lt=Lithuanian)",
     )
 
     parser.add_argument(
-        "--file", "-f",
+        "--file",
+        "-f",
         type=str,
         nargs="+",
         required=True,
-        help="Path(s) to wireword JSON file(s) or directory containing wireword_*.json files. Can specify multiple paths."
+        help="Path(s) to wireword JSON file(s) or directory containing wireword_*.json files. Can specify multiple paths.",
     )
 
     parser.add_argument(
@@ -863,7 +842,7 @@ Examples:
         type=str,
         choices=AVAILABLE_VOICES,
         default=DEFAULT_VOICE,
-        help=f"Voice to use (default: {DEFAULT_VOICE})"
+        help=f"Voice to use (default: {DEFAULT_VOICE})",
     )
 
     parser.add_argument(
@@ -871,43 +850,35 @@ Examples:
         type=str,
         nargs="+",
         choices=AVAILABLE_VOICES,
-        help="Specific voices to use (overrides --voice and --multi-voice)"
+        help="Specific voices to use (overrides --voice and --multi-voice)",
     )
 
     parser.add_argument(
-        "--multi-voice",
-        action="store_true",
-        help="Generate audio with all available voices"
+        "--multi-voice", action="store_true", help="Generate audio with all available voices"
     )
 
     parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Regenerate files even if they already exist"
+        "--force", action="store_true", help="Regenerate files even if they already exist"
     )
 
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Show what would be done without actually generating files"
+        help="Show what would be done without actually generating files",
     )
 
-    parser.add_argument(
-        "--limit",
-        type=int,
-        help="Only process first N words (useful for testing)"
-    )
+    parser.add_argument("--limit", type=int, help="Only process first N words (useful for testing)")
 
     parser.add_argument(
         "--check-remote",
         action="store_true",
-        help="Check which files are available remotely (TODO: not yet implemented)"
+        help="Check which files are available remotely (TODO: not yet implemented)",
     )
 
     parser.add_argument(
         "--sync",
         action="store_true",
-        help="Sync generated files to remote storage (TODO: not yet implemented)"
+        help="Sync generated files to remote storage (TODO: not yet implemented)",
     )
 
     parser.add_argument(
@@ -915,13 +886,13 @@ Examples:
         type=str,
         choices=["gpt-4o-mini-tts", "tts-1", "tts-1-hd"],
         default=TTS_MODEL,
-        help=f"OpenAI TTS model to use (default: {TTS_MODEL})"
+        help=f"OpenAI TTS model to use (default: {TTS_MODEL})",
     )
 
     parser.add_argument(
         "--rebuild-manifest",
         action="store_true",
-        help="Rebuild manifest file from existing audio files by scanning cache and matching with wireword data"
+        help="Rebuild manifest file from existing audio files by scanning cache and matching with wireword data",
     )
 
     args = parser.parse_args()
@@ -984,16 +955,16 @@ Examples:
             voices,
             force=args.force,
             dry_run=args.dry_run,
-            limit=args.limit
+            limit=args.limit,
         )
 
         # Print overall statistics
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("Overall Statistics:")
         print(f"  Total generated: {stats['generated']}")
         print(f"  Total skipped:   {stats['skipped']}")
         print(f"  Total failed:    {stats['failed']}")
-        print("="*60)
+        print("=" * 60)
 
         # Handle remote sync
         if args.sync and not args.dry_run:
@@ -1003,7 +974,7 @@ Examples:
                 sync_to_remote(local_dir, args.language, voice)
 
         # Exit with error if any failures
-        if stats['failed'] > 0:
+        if stats["failed"] > 0:
             sys.exit(1)
 
     except KeyboardInterrupt:

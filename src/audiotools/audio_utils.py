@@ -29,39 +29,39 @@ Pronounce this Lithuanian word or phrase with clear, accurate pronunciation:
 def sanitize_lithuanian_word(word: str) -> str:
     """
     Sanitize a Lithuanian word or phrase for use as a filename.
-    
+
     Args:
         word: The Lithuanian word or phrase to sanitize
-    
+
     Returns:
         Sanitized filename-safe version or empty string if invalid
     """
     word = word.strip().lower()
-    
+
     # Replace spaces with underscores for multi-word phrases
-    word_with_underscores = word.replace(' ', '_')
-    
+    word_with_underscores = word.replace(" ", "_")
+
     # Allow all Lithuanian letters, basic Latin letters, and safe characters
-    sanitized = re.sub(r'[^a-z' + LITHUANIAN_CHARS + r'\-_]', '', word_with_underscores)
-    
+    sanitized = re.sub(r"[^a-z" + LITHUANIAN_CHARS + r"\-_]", "", word_with_underscores)
+
     if not sanitized or len(sanitized) > 100:
         return ""
-        
+
     return sanitized
 
 
 def read_words_from_file(file_path: str) -> List[str]:
     """
     Read words from a text file, one word per line.
-    
+
     Args:
         file_path: Path to the text file
-    
+
     Returns:
         List of words/phrases, with empty lines filtered out
     """
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             words = [line.strip() for line in f if line.strip()]
         return words
     except Exception as e:
@@ -72,10 +72,10 @@ def read_words_from_file(file_path: str) -> List[str]:
 def ensure_output_directory(output_dir: str) -> Path:
     """
     Ensure output directory exists and return Path object.
-    
+
     Args:
         output_dir: Directory path as string
-    
+
     Returns:
         Path object for the directory
     """
@@ -87,17 +87,17 @@ def ensure_output_directory(output_dir: str) -> Path:
 def read_api_key_from_file(key_file: str = "keys/openai.key") -> Optional[str]:
     """
     Read OpenAI API key from a file.
-    
+
     Args:
         key_file: Path to the file containing the API key
-    
+
     Returns:
         API key as string or None if file not found/readable
     """
     try:
         key_path = Path(key_file)
         if key_path.exists():
-            with open(key_path, 'r', encoding='utf-8') as f:
+            with open(key_path, "r", encoding="utf-8") as f:
                 return f.read().strip()
         return None
     except Exception as e:

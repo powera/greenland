@@ -73,7 +73,7 @@ def run_genaudio(
     force: bool = False,
     format: str = "mp3",
     items_key: str = None,
-    debug: bool = False
+    debug: bool = False,
 ) -> bool:
     """
     Run genaudio_outetts.py with the specified parameters.
@@ -83,9 +83,12 @@ def run_genaudio(
     cmd = [
         "python3",
         str(GENAUDIO_SCRIPT),
-        "--json-file", str(json_path),
-        "--lithuanian-speaker", speaker,
-        "--format", format
+        "--json-file",
+        str(json_path),
+        "--lithuanian-speaker",
+        speaker,
+        "--format",
+        format,
     ]
 
     if output_dir:
@@ -132,7 +135,7 @@ def upload_files(
     remote_user: str,
     remote_host: str,
     remote_dir: str,
-    format: str = "mp3"
+    format: str = "mp3",
 ) -> bool:
     """
     Upload generated audio files to remote server.
@@ -152,11 +155,7 @@ def upload_files(
 
     # Create remote directory for this speaker
     remote_speaker_dir = f"{remote_dir}/{speaker}"
-    ssh_cmd = [
-        "ssh",
-        f"{remote_user}@{remote_host}",
-        f"mkdir -p '{remote_speaker_dir}'"
-    ]
+    ssh_cmd = ["ssh", f"{remote_user}@{remote_host}", f"mkdir -p '{remote_speaker_dir}'"]
 
     try:
         result = subprocess.run(ssh_cmd, capture_output=True, text=True, check=False)
@@ -175,7 +174,11 @@ def upload_files(
 
         # Upload files using scp
         # Use a single scp command for efficiency
-        scp_cmd = ["scp"] + [str(f) for f in audio_files] + [f"{remote_user}@{remote_host}:{remote_speaker_dir}/"]
+        scp_cmd = (
+            ["scp"]
+            + [str(f) for f in audio_files]
+            + [f"{remote_user}@{remote_host}:{remote_speaker_dir}/"]
+        )
 
         result = subprocess.run(scp_cmd, check=False)
 
@@ -208,21 +211,23 @@ Examples:
 
   # Custom output directory
   python generate_json_audio.py --input sentences.json --output-dir ./my_audio
-        """
+        """,
     )
 
     parser.add_argument(
-        "--input", "-i",
+        "--input",
+        "-i",
         type=str,
         required=True,
-        help="Path to JSON file containing sentences/phrases"
+        help="Path to JSON file containing sentences/phrases",
     )
 
     parser.add_argument(
-        "--output-dir", "-o",
+        "--output-dir",
+        "-o",
         type=str,
         default=None,
-        help="Output directory (default: ./lithuanian-audio-cache/<speaker>)"
+        help="Output directory (default: ./lithuanian-audio-cache/<speaker>)",
     )
 
     parser.add_argument(
@@ -230,13 +235,13 @@ Examples:
         type=str,
         choices=SPEAKERS,
         default=DEFAULT_SPEAKER,
-        help=f"Speaker voice to use (default: {DEFAULT_SPEAKER})"
+        help=f"Speaker voice to use (default: {DEFAULT_SPEAKER})",
     )
 
     parser.add_argument(
         "--multi-voice",
         action="store_true",
-        help="Generate audio with all three speakers (ash, alloy, nova)"
+        help="Generate audio with all three speakers (ash, alloy, nova)",
     )
 
     parser.add_argument(
@@ -244,61 +249,49 @@ Examples:
         type=str,
         nargs="+",
         choices=SPEAKERS,
-        help="Specific voices to use (overrides --speaker and --multi-voice)"
+        help="Specific voices to use (overrides --speaker and --multi-voice)",
     )
 
     parser.add_argument(
-        "--items-key",
-        type=str,
-        help="JSON key containing the items list (default: auto-detect)"
+        "--items-key", type=str, help="JSON key containing the items list (default: auto-detect)"
     )
 
-    parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Overwrite existing audio files"
-    )
+    parser.add_argument("--force", action="store_true", help="Overwrite existing audio files")
 
     parser.add_argument(
         "--format",
         type=str,
         choices=["wav", "mp3", "ogg", "flac"],
         default="mp3",
-        help="Audio format (default: mp3)"
+        help="Audio format (default: mp3)",
     )
 
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable debug output"
-    )
+    parser.add_argument("--debug", action="store_true", help="Enable debug output")
 
     # Upload options
     parser.add_argument(
-        "--upload",
-        action="store_true",
-        help="Upload generated files to remote server"
+        "--upload", action="store_true", help="Upload generated files to remote server"
     )
 
     parser.add_argument(
         "--remote-user",
         type=str,
         default=DEFAULT_REMOTE_USER,
-        help=f"Remote SSH username (default: {DEFAULT_REMOTE_USER})"
+        help=f"Remote SSH username (default: {DEFAULT_REMOTE_USER})",
     )
 
     parser.add_argument(
         "--remote-host",
         type=str,
         default=DEFAULT_REMOTE_HOST,
-        help=f"Remote SSH hostname (default: {DEFAULT_REMOTE_HOST})"
+        help=f"Remote SSH hostname (default: {DEFAULT_REMOTE_HOST})",
     )
 
     parser.add_argument(
         "--remote-dir",
         type=str,
         default=DEFAULT_REMOTE_DIR,
-        help=f"Remote base directory (default: {DEFAULT_REMOTE_DIR})"
+        help=f"Remote base directory (default: {DEFAULT_REMOTE_DIR})",
     )
 
     args = parser.parse_args()
@@ -342,11 +335,13 @@ Examples:
             if run_genaudio(
                 input_path,
                 speaker,
-                speaker_output_dir if output_dir else None,  # Let genaudio use default if not specified
+                (
+                    speaker_output_dir if output_dir else None
+                ),  # Let genaudio use default if not specified
                 args.force,
                 args.format,
                 args.items_key,
-                args.debug
+                args.debug,
             ):
                 success_count += 1
                 generated_dirs.append((speaker, speaker_output_dir))
@@ -372,12 +367,14 @@ Examples:
                     args.remote_user,
                     args.remote_host,
                     args.remote_dir,
-                    args.format
+                    args.format,
                 ):
                     upload_success_count += 1
 
             print("\n" + "=" * 60)
-            print(f"Upload Summary: {upload_success_count}/{len(generated_dirs)} speakers uploaded successfully")
+            print(
+                f"Upload Summary: {upload_success_count}/{len(generated_dirs)} speakers uploaded successfully"
+            )
             print("=" * 60)
 
             if upload_success_count < len(generated_dirs):
@@ -394,6 +391,7 @@ Examples:
         print(f"\nError: {e}")
         if args.debug:
             import traceback
+
             traceback.print_exc()
         sys.exit(1)
 
