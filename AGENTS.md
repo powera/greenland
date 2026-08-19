@@ -68,6 +68,20 @@ back to a paid model.  It overrides GREENLAND_ALLOW_LIVE_LLM, which only opts a
 test out of the separate pytest guard and must never re-enable a disabled
 backend.
 
+S3 uploads have the same pair of guards, in
+clients.audio.s3_uploader.assert_s3_calls_enabled :
+
+  GREENLAND_DISABLE_S3=1 PYTHONPATH=src python src/agents/vieversys.py ...
+
+Constructing an S3AudioUploader then raises S3CallsDisabledError instead of
+reading credentials.  Under pytest, construction raises LiveS3CallInTestError
+outright - tests must pass a double rather than a real uploader, which is why
+the audiotools.s3_ops helpers take the uploader as an argument instead of
+reaching for a singleton.  GREENLAND_ALLOW_LIVE_S3=1 opts a test out, and (as
+with the LLM guard) GREENLAND_DISABLE_S3 overrides it.  The check runs in
+__init__ before any secret is read, so a blocked run never loads a credential
+it is not allowed to use.
+
 When you do a live LLM test run of a new agent or pipeline phase, persist the
 results to the local database.  The call has already been paid for, and the
 point of the run is to see the data land in the real schema - a script that
