@@ -15,7 +15,6 @@ uploaded to S3 after review.
 
 import argparse
 import hashlib
-import json
 import logging
 import sys
 import tempfile
@@ -60,6 +59,7 @@ from clients.audio.polly_tts import PollyTTSClient, PollyVoice
 from clients.audio.manifest import generate_manifest
 from clients.audio.s3_uploader import S3AudioUploader
 from audiotools import s3_ops
+from audiotools.manifests import write_manifest_for_directory
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import (
@@ -1201,36 +1201,7 @@ class VieversysAgent:
             Path to generated manifest file
         """
         voice_dir = self.output_dir / language_code / voice_name
-        if not voice_dir.exists():
-            raise ValueError(f"Voice directory not found: {voice_dir}")
-
-        manifest: Dict[str, Any] = {"language": language_code, "voice": voice_name, "files": {}}
-
-        # Scan for MP3 files
-        for mp3_file in voice_dir.glob("*.mp3"):
-            # Calculate MD5
-            md5_hash = hashlib.md5(mp3_file.read_bytes()).hexdigest()
-
-            # Extract GUID from filename (format: {GUID}_{text}.mp3)
-            filename_parts = mp3_file.stem.split("_", 1)
-            guid = filename_parts[0] if len(filename_parts) > 0 else "UNKNOWN"
-
-            # Get text from filename (not ideal but works for now)
-            text = filename_parts[1] if len(filename_parts) > 1 else guid
-
-            manifest["files"][mp3_file.name] = {
-                "guid": guid,
-                "text": text,
-                "md5": md5_hash,
-                "grammatical_form": None,
-            }
-
-        # Write manifest
-        manifest_path = voice_dir / "audio_manifest.json"
-        manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False))
-
-        logger.info(f"Generated manifest: {manifest_path} ({len(manifest['files'])} files)")
-        return manifest_path
+        return write_manifest_for_directory(voice_dir, language_code, voice_name)
 
 
 def get_argument_parser() -> argparse.ArgumentParser:
