@@ -36,7 +36,9 @@ from storage.crud.concept import (
     unlink_lemma_from_concept,
 )
 from storage.wikidata import normalize_qid
+from storage.crud.guid_tombstone import create_tombstone
 from storage.crud.operation_log import log_operation, log_translation_change
+from storage.models.guid_tombstone import TOMBSTONE_REASON_RELEASE_REMOVAL
 from storage.models.grammar_fact import GrammarFact
 from storage.models.schema import Lemma, LemmaTranslation
 from storage.release.lemma import (
@@ -874,6 +876,24 @@ def apply_removals() -> ResponseReturnValue:
                     "pos_type": lemma.pos_type,
                 },
             )
+
+            # Retire the GUID before the row goes away. Once the lemma is
+            # deleted this is the only remaining record that the number was
+            # ever used, and generate_guid reads it to avoid handing the same
+            # number to a different word later.
+            if lemma.guid:
+                create_tombstone(
+                    session=g.db,
+                    guid=lemma.guid,
+                    original_lemma_text=lemma.lemma_text,
+                    original_pos_type=lemma.pos_type,
+                    original_pos_subtype=lemma.pos_subtype,
+                    replacement_guid=None,
+                    lemma_id=None,
+                    reason=TOMBSTONE_REASON_RELEASE_REMOVAL,
+                    notes="Deleted through /sync/lemmas/removals: absent from data/release.",
+                    changed_by="sync-release",
+                )
 
             logger.info(f"Deleting lemma '{lemma.lemma_text}' ({lemma.guid})")
             g.db.delete(lemma)

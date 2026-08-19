@@ -6,7 +6,11 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
-from storage.models.guid_tombstone import GuidTombstone
+from storage.models.guid_tombstone import (
+    TOMBSTONE_REASON_TYPE_CHANGE,
+    TOMBSTONE_REASONS,
+    GuidTombstone,
+)
 
 
 def create_tombstone(
@@ -17,12 +21,17 @@ def create_tombstone(
     original_pos_subtype: Optional[str],
     replacement_guid: Optional[str],
     lemma_id: Optional[int],
-    reason: str = "type_change",
+    reason: str = TOMBSTONE_REASON_TYPE_CHANGE,
     notes: Optional[str] = None,
     changed_by: Optional[str] = None,
 ) -> GuidTombstone:
     """
-    Create a tombstone entry for a removed/replaced GUID.
+    Create (or refresh) a tombstone entry for a removed/replaced GUID.
+
+    Idempotent on ``guid``, which is unique: re-tombstoning a GUID updates the
+    existing row rather than raising, so re-running a backfill or applying the
+    same sync twice is safe.  This mirrors ``add_variant_form``'s upsert on its
+    own unique key.
 
     Args:
         session: Database session
@@ -32,13 +41,36 @@ def create_tombstone(
         original_pos_subtype: The original POS subtype
         replacement_guid: The new GUID that replaced this one (if applicable)
         lemma_id: The lemma ID (if still exists)
-        reason: Reason for tombstoning (default: "type_change")
+        reason: Reason for tombstoning; must be one of TOMBSTONE_REASONS
         notes: Optional notes
         changed_by: Who made this change
 
     Returns:
-        The created GuidTombstone object
+        The created or updated GuidTombstone object
+
+    Raises:
+        ValueError: If ``reason`` is not a known tombstone reason.
     """
+    if reason not in TOMBSTONE_REASONS:
+        raise ValueError(
+            f"Unknown tombstone reason {reason!r}; expected one of {sorted(TOMBSTONE_REASONS)}"
+        )
+
+    existing = get_tombstone_by_guid(session, guid)
+    if existing is not None:
+        existing.original_lemma_text = original_lemma_text
+        existing.original_pos_type = original_pos_type
+        existing.original_pos_subtype = original_pos_subtype
+        existing.replacement_guid = replacement_guid
+        existing.lemma_id = lemma_id
+        existing.reason = reason
+        if notes is not None:
+            existing.notes = notes
+        if changed_by is not None:
+            existing.changed_by = changed_by
+        session.flush()
+        return existing
+
     tombstone = GuidTombstone(
         guid=guid,
         original_lemma_text=original_lemma_text,

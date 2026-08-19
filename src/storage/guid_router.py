@@ -15,10 +15,12 @@ Use these helpers anywhere code receives a bare GUID and must fetch the
 underlying object without knowing its kind up front.
 """
 
-from typing import Literal, Optional, Tuple, Union
+from dataclasses import dataclass
+from typing import List, Literal, Optional, Tuple, Union
 
 from sqlalchemy.orm import Session
 
+from storage.crud.guid_tombstone import get_replacement_chain
 from storage.crud.idiom import get_idiom_by_guid
 from storage.crud.lemma import get_lemma_by_guid
 from storage.crud.name_entity import get_name_by_guid
@@ -28,6 +30,7 @@ from storage.models.guid_prefixes import (
     NAME_KIND_GUID_PREFIXES,
     PHRASE_SUBTYPE_GUID_PREFIXES,
 )
+from storage.models.guid_tombstone import GuidTombstone
 from storage.models.idiom import Idiom
 from storage.models.name_entity import Name
 from storage.models.schema import Lemma, Phrase, Sentence
@@ -107,3 +110,73 @@ def resolve_guid(
     else:
         obj = get_lemma_by_guid(session, guid)
     return kind, obj
+
+
+@dataclass(frozen=True)
+class ResolvedGuid:
+    """What a GUID names now, including GUIDs that no longer name anything.
+
+    :func:`resolve_guid` answers "is there a row with this GUID?" and returns
+    ``None`` when there is not - which is the same answer for a GUID that was
+    never issued and one that was retired years ago.  This distinguishes them,
+    so "what happened to A05_001?" has an answer.
+    """
+
+    #: The GUID that was looked up.
+    guid: str
+    #: Entity kind implied by the prefix, whether or not a row exists.
+    kind: GuidKind
+    #: The row this GUID names, if it still exists.
+    obj: Optional[Union[Lemma, Phrase, Sentence, Idiom, Name]]
+    #: Tombstones walked from ``guid`` along ``replacement_guid``, nearest first.
+    #: Empty when the GUID was never retired.
+    tombstones: List[GuidTombstone]
+    #: The live row the chain ends at, when ``guid`` itself is retired but its
+    #: replacement (or the replacement's replacement) still exists.
+    replacement: Optional[Union[Lemma, Phrase, Sentence, Idiom, Name]]
+    #: The GUID of :attr:`replacement`.
+    replacement_guid: Optional[str]
+
+    @property
+    def is_tombstoned(self) -> bool:
+        """Whether this GUID was retired."""
+        return bool(self.tombstones)
+
+    @property
+    def exists(self) -> bool:
+        """Whether the GUID still names a live row."""
+        return self.obj is not None
+
+
+def resolve_guid_with_history(session: Session, guid: str) -> ResolvedGuid:
+    """Resolve a GUID, following tombstones when it no longer names a row.
+
+    A retired GUID is never reissued (see ``storage.utils.guid``), so a lookup
+    that misses is worth explaining rather than reporting as "not found": the
+    number may have been replaced when a word changed part of speech, or when
+    it was merged into another lemma as a synonym.
+
+    The chain is followed to whichever GUID last had a replacement recorded, and
+    that row is resolved if it still exists.  A tombstone with no
+    ``replacement_guid`` - a plain deletion - leaves ``replacement`` as None.
+    """
+    kind, obj = resolve_guid(session, guid)
+
+    chain = get_replacement_chain(session, guid)
+    replacement_guid: Optional[str] = None
+    for tombstone in chain:
+        if tombstone.replacement_guid:
+            replacement_guid = tombstone.replacement_guid
+
+    replacement: Optional[Union[Lemma, Phrase, Sentence, Idiom, Name]] = None
+    if replacement_guid is not None and replacement_guid != guid:
+        _, replacement = resolve_guid(session, replacement_guid)
+
+    return ResolvedGuid(
+        guid=guid,
+        kind=kind,
+        obj=obj,
+        tombstones=chain,
+        replacement=replacement,
+        replacement_guid=replacement_guid,
+    )

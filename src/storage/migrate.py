@@ -831,8 +831,10 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                 tombstone_record["original_pos_subtype"] = tombstone.original_pos_subtype
             if tombstone.replacement_guid:
                 tombstone_record["replacement_guid"] = tombstone.replacement_guid
-            if tombstone.lemma_id:
-                tombstone_record["lemma_id"] = tombstone.lemma_id
+            # lemma_id is deliberately not exported. It is a local SQLite primary
+            # key: it differs after every bootstrap, and on the synonym-merge path
+            # it names a row that is deleted moments later. The GUID is the stable
+            # identifier, and replacement_guid already carries the link that matters.
             if tombstone.notes:
                 tombstone_record["notes"] = tombstone.notes
             if tombstone.changed_by:
@@ -2059,6 +2061,12 @@ def _write_jsonl_atomic(file_path: Path, records: List[Dict[str, Any]]) -> None:
         file_path: Path to write to
         records: List of dictionaries to write as JSONL
     """
+    # The temp file is created beside the target so the rename below stays on one
+    # filesystem and is therefore atomic; that also means the directory has to
+    # exist first. Exporting into a fresh --release-dir used to fail here, at the
+    # very end of the run, after every lemma file had already been written.
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+
     # Write to temp file first
     with tempfile.NamedTemporaryFile(
         mode="w", encoding="utf-8", dir=file_path.parent, delete=False, suffix=".tmp"

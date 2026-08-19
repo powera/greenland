@@ -22,8 +22,14 @@ import unittest
 from pathlib import Path
 from typing import Any, Dict
 
+from storage.backend.jsonl.storage import JSONLStorage
 from storage.crud.concept import link_lemma_to_concept
+from storage.crud.guid_tombstone import create_tombstone
 from storage.migrate import export_sqlite_to_release
+from storage.models.guid_tombstone import (
+    TOMBSTONE_REASON_RELEASE_REMOVAL,
+    TOMBSTONE_REASON_TYPE_AND_SUBTYPE_CHANGE,
+)
 from storage.models.schema import (
     Lemma,
     LemmaDifficultyOverride,
@@ -70,9 +76,10 @@ class TestExportSqliteToRelease(unittest.TestCase):
         self.tmp_path = Path(self._tmp.name)
         self.db_path = str(self.tmp_path / "test.sqlite")
         self.release_dir = self.tmp_path / "lemmas"
-        # The exporter also writes GUID tombstones to a sibling directory and
-        # expects it to exist, as it does in a real data/release tree.
-        (self.tmp_path / "tombstones").mkdir()
+        # Note there is deliberately no mkdir for the sibling tombstones/
+        # directory here: the exporter creates what it writes into, so exporting
+        # to a fresh --release-dir works. It used to raise FileNotFoundError at
+        # the very end of the run, after every lemma file had been written.
 
         session = create_database_session(self.db_path)
         ensure_tables_exist(session)
@@ -120,3 +127,111 @@ class TestExportSqliteToRelease(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def _seed_tombstones(session: Any) -> None:
+    """One tombstone of each interesting shape: replaced, and plainly deleted."""
+    lemma = session.query(Lemma).one()
+    create_tombstone(
+        session=session,
+        guid="A03_001",
+        original_lemma_text="bat",
+        original_pos_type="adjective",
+        original_pos_subtype="quality",
+        replacement_guid="N08_001",
+        lemma_id=lemma.id,
+        reason=TOMBSTONE_REASON_TYPE_AND_SUBTYPE_CHANGE,
+        notes="was miscategorised",
+        changed_by="tests",
+    )
+    create_tombstone(
+        session=session,
+        guid="N08_002",
+        original_lemma_text="wyvern",
+        original_pos_type="noun",
+        original_pos_subtype="animal",
+        replacement_guid=None,
+        lemma_id=None,
+        reason=TOMBSTONE_REASON_RELEASE_REMOVAL,
+    )
+    session.commit()
+
+
+class TestTombstoneExport(unittest.TestCase):
+    """The tombstone file the lemma export writes as a side effect.
+
+    Nothing asserted its contents before; the only existing reference created
+    the directory so the exporter would not crash.
+    """
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.tmp_path = Path(self._tmp.name)
+        self.db_path = str(self.tmp_path / "test.sqlite")
+        self.release_dir = self.tmp_path / "lemmas"
+
+        session = create_database_session(self.db_path)
+        ensure_tables_exist(session)
+        _seed(session)
+        _seed_tombstones(session)
+        session.close()
+
+        export_sqlite_to_release(self.db_path, str(self.release_dir))
+
+    def tearDown(self) -> None:
+        self._tmp.cleanup()
+
+    def _records(self) -> list[Dict[str, Any]]:
+        path = self.tmp_path / "tombstones" / "guid_tombstones.jsonl"
+        self.assertTrue(path.exists(), "the exporter must create the tombstones directory")
+        return [
+            dict(json.loads(line))
+            for line in path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+
+    def test_every_tombstone_is_written_sorted_by_guid(self) -> None:
+        records = self._records()
+
+        self.assertEqual(["A03_001", "N08_002"], [record["guid"] for record in records])
+
+    def test_the_recorded_fields_survive_the_export(self) -> None:
+        replaced = self._records()[0]
+
+        self.assertEqual("bat", replaced["original_lemma_text"])
+        self.assertEqual("adjective", replaced["original_pos_type"])
+        self.assertEqual("quality", replaced["original_pos_subtype"])
+        self.assertEqual("N08_001", replaced["replacement_guid"])
+        self.assertEqual("type_and_subtype_change", replaced["reason"])
+        self.assertEqual("was miscategorised", replaced["notes"])
+        self.assertEqual("tests", replaced["changed_by"])
+        self.assertIn("tombstoned_at", replaced)
+
+    def test_empty_optional_fields_are_omitted_rather_than_written_as_null(self) -> None:
+        deleted = self._records()[1]
+
+        self.assertNotIn("replacement_guid", deleted)
+        self.assertNotIn("notes", deleted)
+        self.assertNotIn("changed_by", deleted)
+
+    def test_the_local_lemma_id_is_never_exported(self) -> None:
+        """lemma_id is a SQLite primary key, not a portable identifier.
+
+        It differs after every bootstrap, and on the synonym-merge path it names
+        a row that is deleted moments later, so writing it into release data
+        produces churn that means nothing to a reader.
+        """
+        for record in self._records():
+            self.assertNotIn("lemma_id", record)
+
+    def test_the_export_reloads_into_a_database(self) -> None:
+        """Round-trip: what the exporter wrote is what the JSONL backend reads."""
+        storage = JSONLStorage(str(self.tmp_path))
+        storage.ensure_initialized()  # the backend loads lazily
+
+        self.assertEqual(
+            {"A03_001", "N08_002"}, {tombstone.guid for tombstone in storage.tombstones}
+        )
+        replaced = next(t for t in storage.tombstones if t.guid == "A03_001")
+        self.assertEqual("N08_001", replaced.replacement_guid)
+        self.assertEqual("type_and_subtype_change", replaced.reason)
