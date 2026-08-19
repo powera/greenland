@@ -177,9 +177,9 @@ Lemma modes live under `/sync/lemmas`:
 | Difficulty overrides      | manage_difficulty_overrides.py |
 
 Other element types have their own sections under `/sync`:
-`/sync/derivatives`, `/sync/synonyms`, `/sync/relations`, `/sync/sentences`,
-`/sync/phrases`, `/sync/idioms`, `/sync/names`, `/sync/lemma-audio`,
-`/sync/tombstones`.
+`/sync/derivatives`, `/sync/synonyms`, `/sync/variants`, `/sync/relations`,
+`/sync/sentences`, `/sync/phrases`, `/sync/idioms`, `/sync/names`,
+`/sync/lemma-audio`, `/sync/tombstones`.
 
 Idioms and names are compared and written **whole**: each has one `base.jsonl`
 and no per-language files, so a record either matches or it does not, and

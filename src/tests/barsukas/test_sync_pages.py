@@ -62,6 +62,8 @@ SYNC_PAGES: Tuple[SyncPage, ...] = (
     SyncPage("derivatives-lang", "/sync/derivatives/lt", "lt"),
     SyncPage("synonyms", "/sync/synonyms/", "Synonym"),
     SyncPage("synonyms-lang", "/sync/synonyms/lt", "lt"),
+    SyncPage("variants", "/sync/variants/", "Variant"),
+    SyncPage("variants-lang", "/sync/variants/en", "en"),
     SyncPage("lemma-audio", "/sync/lemma-audio/", "Audio"),
     SyncPage("relations", "/sync/relations/", "Relation"),
     SyncPage("relation-additions", "/sync/relations/additions", "Relation"),

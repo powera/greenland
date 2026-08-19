@@ -80,6 +80,18 @@ SYNC_CATEGORIES: List[SyncCategory] = [
         ],
     ),
     SyncCategory(
+        endpoint="sync_variant_release.index",
+        title="Spelling Variants",
+        icon="bi-fonts",
+        colour="success",
+        summary="Alternate spellings of the same word, each with its own paradigm.",
+        covers=[
+            "spelling (gray / grey)",
+            "script (Chinese simplified / traditional)",
+            "Per-variant paradigms and pronunciations",
+        ],
+    ),
+    SyncCategory(
         endpoint="sync_relation_release.index",
         title="Relations",
         icon="bi-diagram-2",

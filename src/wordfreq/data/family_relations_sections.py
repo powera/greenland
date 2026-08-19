@@ -21,6 +21,20 @@ GUID Allocation (10 slots per section):
   N35_111-120: Step-parent
   N35_121-130: Step-child
   N35_131-140: Other relations
+
+KNOWN ISSUE - these reservations are invisible to the GUID allocator.
+
+storage.utils.guid.generate_guid works out the next N35 number from the lemmas
+and tombstones that exist, and knows nothing about this file.  The ranges above
+run to N35_140 while the live data reaches only N35_102, so the next
+family-relation noun added through Barsukas is handed N35_103 - already spoken
+for here, as are 104-107, 111, 112, 121-123 and 131.  Emitting that section
+later would then hit the UNIQUE constraint on lemmas.guid.
+
+Nothing enforces this yet; it is recorded rather than fixed because the fix is a
+layering decision (teach storage about this module, or generate the reserved
+words so they stop being reservations).  Until then, when adding a variant here,
+check that its GUID is not already live.
 """
 
 from dataclasses import dataclass

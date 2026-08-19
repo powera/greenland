@@ -211,7 +211,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th style="width: 80px;">{{ LSTR.status }}</th>
-                                    <th>Grammatical Form</th>
+                                    <th>{% if item.form_diffs and item.form_diffs[0].variant %}Variant &amp; Form{% else %}Grammatical Form{% endif %}</th>
                                     <th>DB</th>
                                     <th>{{ STRINGS.sync.release }}</th>
                                 </tr>
@@ -228,7 +228,7 @@
                                         <span class="badge bg-warning text-dark">differs</span>
                                         {% endif %}
                                     </td>
-                                    <td><code>{{ fd.grammatical_form }}</code></td>
+                                    <td><code>{{ fd.variant or fd.grammatical_form }}</code></td>
                                     <td>
                                         {% if fd.db_text %}
                                         <strong>{{ fd.db_text }}</strong>

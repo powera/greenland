@@ -106,6 +106,7 @@ from barsukas.routes.sync import (
     sync_release,
     sync_sentence_release,
     sync_synonym_release,
+    sync_variant_release,
     sync_tombstone_release,
 )
 from storage.backend import configure_backend, create_session
@@ -402,6 +403,7 @@ def create_app(
     app.register_blueprint(sync_phrase_release.bp)
     app.register_blueprint(sync_derivative_release.bp)
     app.register_blueprint(sync_synonym_release.bp)
+    app.register_blueprint(sync_variant_release.bp)
     app.register_blueprint(sync_lemma_audio_release.bp)
     app.register_blueprint(sync_idiom_release.bp)
     app.register_blueprint(sync_name_release.bp)
