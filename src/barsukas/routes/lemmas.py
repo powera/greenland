@@ -390,6 +390,7 @@ def _get_lemma_page_context(lemma_id: int) -> Optional[Dict[str, Any]]:
         "sentence_count": data["sentence_count"],
         "needs_disambiguation_check": data["needs_disambiguation_check"],
         "related_lemmas": data["related_lemmas"],
+        "tombstones": data["tombstones"],
         "hidden_languages": set(language_names) - set(DEFAULT_GENERATION_LANGUAGES),
         # Per-tab counts for the lemma sub-navigation
         "nav_counts": {

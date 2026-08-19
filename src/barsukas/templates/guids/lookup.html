@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}GUID Lookup{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="bi bi-search"></i> GUID Lookup</h2>
+        <p class="text-muted">
+            Resolve any GUID &mdash; a lemma, sentence, phrase, idiom or name. A GUID
+            that has been retired reports what replaced it rather than simply coming
+            back empty.
+        </p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <form method="get" action="{{ url_for('guids.index') }}" class="card">
+            <div class="card-body">
+                <label for="guid" class="form-label">GUID</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="guid" name="guid"
+                           value="{{ guid }}" placeholder="N02_001, S_00077, M01_001, E01_003"
+                           autofocus>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Look up
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if resolved %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <code>{{ resolved.guid }}</code>
+                <span class="badge bg-secondary">{{ resolved.kind }}</span>
+            </div>
+            <div class="card-body">
+
+                {% if resolved.exists %}
+                    <div class="alert alert-success mb-0">
+                        <i class="bi bi-check-circle"></i>
+                        This GUID names a live record.
+                        {% if detail_url %}<a href="{{ detail_url }}">Open it</a>.{% endif %}
+                    </div>
+
+                {% elif resolved.is_tombstoned %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-archive"></i>
+                        <strong>This GUID has been retired.</strong>
+                        It is permanently out of use and will never be issued to another
+                        record, so anything still referring to it is referring to
+                        something that no longer exists under this number.
+                    </div>
+
+                    {% if resolved.replacement_guid %}
+                        <p>
+                            Replaced by <code>{{ resolved.replacement_guid }}</code>{% if detail_url %}
+                            &mdash; <a href="{{ detail_url }}">open it</a>{% else %}
+                            (which no longer exists either){% endif %}.
+                        </p>
+                    {% else %}
+                        <p class="text-muted">
+                            No replacement was recorded: the record was deleted rather than
+                            renumbered.
+                        </p>
+                    {% endif %}
+
+                    <h6 class="mt-4">History</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>GUID</th>
+                                    <th>Was</th>
+                                    <th>Replaced by</th>
+                                    <th>Reason</th>
+                                    <th>When</th>
+                                    <th>By</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tombstone in resolved.tombstones %}
+                                <tr>
+                                    <td><code>{{ tombstone.guid }}</code></td>
+                                    <td>
+                                        {{ tombstone.original_lemma_text }}
+                                        <small class="text-muted">
+                                            ({{ tombstone.original_pos_type }}{% if tombstone.original_pos_subtype %}
+                                            / {{ tombstone.original_pos_subtype }}{% endif %})
+                                        </small>
+                                    </td>
+                                    <td>
+                                        {% if tombstone.replacement_guid %}
+                                            <code>{{ tombstone.replacement_guid }}</code>
+                                        {% else %}
+                                            <span class="text-muted">&mdash;</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ tombstone.reason.replace('_', ' ') }}</td>
+                                    <td>
+                                        {% if tombstone.tombstoned_at %}
+                                            {{ tombstone.tombstoned_at.strftime('%Y-%m-%d') }}
+                                        {% else %}
+                                            <span class="text-muted">&mdash;</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ tombstone.changed_by or '' }}</td>
+                                    <td>{{ tombstone.notes or '' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                {% else %}
+                    <div class="alert alert-secondary mb-0">
+                        <i class="bi bi-question-circle"></i>
+                        No record has this GUID, and it has never been retired &mdash; as far
+                        as this database is concerned it was never issued. Its prefix says it
+                        would be a <strong>{{ resolved.kind }}</strong>.
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

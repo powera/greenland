@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import and_, case, func
 from sqlalchemy.orm import Session
 
+from storage.crud.guid_tombstone import get_tombstones_by_lemma_id
 from storage.models.grammar_fact import GrammarFact
 from storage.models.lemma_relation import LemmaRelationGroup, LemmaRelationMember
 from storage.models.schema import (
@@ -243,8 +244,9 @@ def get_lemma_view_data(session: Session, lemma_id: int) -> Dict[str, Any]:
     5. Audio files (single query)
     6. Sentence count (single query)
     7. Duplicate count for disambiguation (single query)
-    8. Tombstones (single query)
-    9. Tasks (single query)
+    8. Related lemmas (single query)
+    9. Variant forms (single query)
+    10. Retired GUIDs for this lemma (single query)
 
     Args:
         session: Database session
@@ -403,6 +405,12 @@ def get_lemma_view_data(session: Session, lemma_id: int) -> Dict[str, Any]:
         .all()
     )
 
+    # Query 11: GUIDs this lemma used to have. A lemma picks up a tombstone when
+    # its part of speech is corrected or its GUID is reassigned by hand, and the
+    # old number is retired for good, so the detail page can show where it has
+    # been. The query plan above has claimed this since before it was written.
+    tombstones = get_tombstones_by_lemma_id(session, lemma_id)
+
     return {
         "lemma": lemma,
         "translations": translations,
@@ -418,6 +426,7 @@ def get_lemma_view_data(session: Session, lemma_id: int) -> Dict[str, Any]:
         "sentence_count": sentence_count,
         "needs_disambiguation_check": needs_disambiguation_check,
         "related_lemmas": related_lemmas,
+        "tombstones": tombstones,
     }
 
 
