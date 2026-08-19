@@ -49,7 +49,9 @@ import subprocess
 import soundfile as sf
 import time
 import outetts
+from contextlib import AbstractContextManager
 from pathlib import Path
+from typing import Any, List, Optional, Tuple, Union
 
 from audiotools.audio_utils import (
     sanitize_lithuanian_word,
@@ -78,7 +80,7 @@ AUDIO_FORMATS = {
 }
 
 
-def configure_logging(debug_mode=False):
+def configure_logging(debug_mode: bool = False) -> AbstractContextManager[Any]:
     """Configure logging levels to reduce verbose output from underlying libraries."""
     if debug_mode:
         # Enable debug logging
@@ -104,7 +106,7 @@ def configure_logging(debug_mode=False):
     return contextlib.nullcontext()
 
 
-def setup_tts_interface(debug_mode=False):
+def setup_tts_interface(debug_mode: bool = False) -> Any:
     """Initialize and return the TTS interface with the 1B model."""
     if not debug_mode:
         print("Initializing OuteTTS model (this may take a moment)...")
@@ -129,16 +131,23 @@ def setup_tts_interface(debug_mode=False):
     return interface
 
 
-def list_available_speakers(interface):
+def list_available_speakers(interface: Any) -> List[str]:
     """List all available speaker profiles."""
     print("\nAvailable speaker profiles:")
-    speakers = interface.list_speakers()
+    # outetts is untyped, so list_speakers() comes back as Any.
+    speakers: List[str] = list(interface.list_speakers())
     for i, speaker in enumerate(speakers):
         print(f"{i+1}. {speaker}")
     return speakers
 
 
-def generate_audio(interface, text, output_path, speaker_name=None, debug_mode=False):
+def generate_audio(
+    interface: Any,
+    text: str,
+    output_path: Union[str, Path],
+    speaker_name: Optional[str] = None,
+    debug_mode: bool = False,
+) -> Union[str, Path]:
     """Generate audio from text and save to the specified output path."""
     start_time = time.time()
 
@@ -178,14 +187,14 @@ def generate_audio(interface, text, output_path, speaker_name=None, debug_mode=F
 
 
 def process_file(
-    interface,
-    file_path,
-    output_dir,
-    speaker_name=None,
-    force=False,
-    output_format="wav",
-    debug_mode=False,
-):
+    interface: Any,
+    file_path: Union[str, Path],
+    output_dir: Union[str, Path],
+    speaker_name: Optional[str] = None,
+    force: bool = False,
+    output_format: str = "wav",
+    debug_mode: bool = False,
+) -> None:
     """
     Process a text file and generate audio for each line.
 
@@ -234,7 +243,13 @@ def process_file(
         generate_audio(interface, line, str(wav_file), speaker_name, debug_mode)
 
 
-def generate_lithuanian_audio(interface, text, output_path, speaker_name="ash", debug_mode=False):
+def generate_lithuanian_audio(
+    interface: Any,
+    text: str,
+    output_path: Union[str, Path],
+    speaker_name: str = "ash",
+    debug_mode: bool = False,
+) -> Optional[str]:
     """
     Generate audio for a Lithuanian word or phrase with proper pronunciation.
 
@@ -299,7 +314,12 @@ def generate_lithuanian_audio(interface, text, output_path, speaker_name="ash", 
         return None
 
 
-def convert_audio(input_path, output_format="mp3", quality="medium", delete_original=False):
+def convert_audio(
+    input_path: Union[str, Path],
+    output_format: str = "mp3",
+    quality: str = "medium",
+    delete_original: bool = False,
+) -> Optional[Path]:
     """
     Convert audio file to a more space-efficient format.
 
@@ -407,14 +427,14 @@ def convert_audio(input_path, output_format="mp3", quality="medium", delete_orig
 
 
 def process_lithuanian_batch(
-    interface,
-    file_path,
-    output_dir,
-    force=False,
-    speaker_name="ash",
-    output_format="wav",
-    debug_mode=False,
-):
+    interface: Any,
+    file_path: Union[str, Path],
+    output_dir: Union[str, Path],
+    force: bool = False,
+    speaker_name: str = "ash",
+    output_format: str = "wav",
+    debug_mode: bool = False,
+) -> Tuple[int, int]:
     """
     Process a batch of Lithuanian words or phrases from a file.
 
@@ -485,15 +505,15 @@ def process_lithuanian_batch(
 
 
 def process_json_file(
-    interface,
-    json_path,
-    output_dir,
-    force=False,
-    speaker_name="ash",
-    output_format="wav",
-    items_key=None,
-    debug_mode=False,
-):
+    interface: Any,
+    json_path: Union[str, Path],
+    output_dir: Union[str, Path],
+    force: bool = False,
+    speaker_name: str = "ash",
+    output_format: str = "wav",
+    items_key: Optional[str] = None,
+    debug_mode: bool = False,
+) -> Tuple[int, int]:
     """
     Process a JSON file containing sentences/phrases with explicit filenames.
 
@@ -610,7 +630,7 @@ def process_json_file(
     return success_count, total_count
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Generate audio files using OuteTTS")
 
     # Create a mutually exclusive group for input methods

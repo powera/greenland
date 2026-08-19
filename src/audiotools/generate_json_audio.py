@@ -46,7 +46,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 # Get the directory where this script is located
 SCRIPT_DIR = Path(__file__).parent
@@ -69,10 +69,10 @@ DEFAULT_REMOTE_DIR = "/home/atacama/trakaido"
 def run_genaudio(
     json_path: Path,
     speaker: str,
-    output_dir: Path = None,
+    output_dir: Optional[Path] = None,
     force: bool = False,
     format: str = "mp3",
-    items_key: str = None,
+    items_key: Optional[str] = None,
     debug: bool = False,
 ) -> bool:
     """
@@ -158,9 +158,9 @@ def upload_files(
     ssh_cmd = ["ssh", f"{remote_user}@{remote_host}", f"mkdir -p '{remote_speaker_dir}'"]
 
     try:
-        result = subprocess.run(ssh_cmd, capture_output=True, text=True, check=False)
-        if result.returncode != 0:
-            print(f"Warning: Could not create remote directory: {result.stderr}")
+        mkdir_result = subprocess.run(ssh_cmd, capture_output=True, text=True, check=False)
+        if mkdir_result.returncode != 0:
+            print(f"Warning: Could not create remote directory: {mkdir_result.stderr}")
             # Continue anyway, directory might already exist
 
         # Find all audio files for this speaker
@@ -180,9 +180,9 @@ def upload_files(
             + [f"{remote_user}@{remote_host}:{remote_speaker_dir}/"]
         )
 
-        result = subprocess.run(scp_cmd, check=False)
+        scp_result = subprocess.run(scp_cmd, check=False)
 
-        if result.returncode == 0:
+        if scp_result.returncode == 0:
             print(f"✓ Successfully uploaded {len(audio_files)} files for speaker {speaker}")
             return True
         else:
@@ -194,7 +194,7 @@ def upload_files(
         return False
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Generate Lithuanian audio from JSON files (wrapper for genaudio_outetts.py)",
         formatter_class=argparse.RawDescriptionHelpFormatter,

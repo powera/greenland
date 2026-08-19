@@ -86,7 +86,7 @@ import json
 import sys
 import time
 from pathlib import Path
-from typing import List, Dict, Optional, Set, Tuple
+from typing import Any, List, Dict, Optional, Set, Tuple, cast
 import os
 import hashlib
 from datetime import datetime, timezone
@@ -206,14 +206,15 @@ def load_wireword_data(file_path: Path) -> List[Dict]:
         raise ValueError(f"JSON parsing error in {file_path}: {e}")
 
     # Handle both array and object formats
+    # json.loads returns Any; each branch is checked before being narrowed.
     if isinstance(data, list):
-        return data
+        return cast(List[Dict], data)
     elif isinstance(data, dict) and "words" in data:
-        return data["words"]
+        return cast(List[Dict], data["words"])
     elif isinstance(data, dict) and "items" in data:
-        return data["items"]
+        return cast(List[Dict], data["items"])
     elif isinstance(data, dict) and "sentences" in data:
-        return data["sentences"]
+        return cast(List[Dict], data["sentences"])
     else:
         raise ValueError(
             f"Unexpected JSON format in {file_path}. Expected list or dict with 'words', 'items', or 'sentences' key."
@@ -277,11 +278,11 @@ def get_output_filename(word_data: Dict, language: str) -> str:
     """
     # Lithuanian audio files use the target word as filename, not GUID
     if language == "lt" and "base_target" in word_data:
-        return word_data["base_target"]
+        return cast(str, word_data["base_target"])
 
     # Other languages use GUID if available
     if "guid" in word_data:
-        return word_data["guid"]
+        return cast(str, word_data["guid"])
 
     # Fallback: create filename from English text
     english = word_data.get("base_english", "unknown")
@@ -289,7 +290,7 @@ def get_output_filename(word_data: Dict, language: str) -> str:
     filename = english.lower().replace(" ", "_").replace("/", "_")
     # Remove special characters
     filename = "".join(c for c in filename if c.isalnum() or c == "_")
-    return filename
+    return str(filename)
 
 
 def get_text_to_speak(word_data: Dict, language: str) -> str:
@@ -310,7 +311,7 @@ def get_text_to_speak(word_data: Dict, language: str) -> str:
     if not text:
         raise ValueError(f"Missing '{field}' field in word data: {word_data}")
 
-    return text
+    return cast(str, text)
 
 
 def generate_audio_openai(
@@ -397,7 +398,7 @@ def load_manifest(cache_dir: Path, language: str, voice: str) -> Dict:
         return {"generated_at": None, "language": language, "voice": voice, "files": {}}
 
     with open(manifest_path, "r", encoding="utf-8") as f:
-        return json.load(f)
+        return cast(Dict, json.load(f))
 
 
 def save_manifest(cache_dir: Path, language: str, voice: str, manifest: Dict) -> None:
@@ -547,7 +548,14 @@ def rebuild_manifest_from_files(
         print(f"  No audio files found in {voice_dir}")
         return {"generated_at": None, "language": language, "voice": voice, "files": {}}
 
-    manifest = {"generated_at": None, "language": language, "voice": voice, "files": {}}
+    # Heterogeneous values, so the type is spelled out rather than inferred
+    # as a union that would reject manifest["files"][...] assignment.
+    manifest: Dict[str, Any] = {
+        "generated_at": None,
+        "language": language,
+        "voice": voice,
+        "files": {},
+    }
 
     audio_files = list(voice_dir.glob(f"*.{AUDIO_FORMAT}"))
     print(f"  Found {len(audio_files)} audio files")
@@ -559,20 +567,22 @@ def rebuild_manifest_from_files(
         # Try to match as derivative form first (e.g., "aš_gyvenu")
         # Convert filename to text form (replace underscores with spaces)
         text_form = file_stem.replace("_", " ").strip().lower()
-        grammatical_form = None
-        guid = None
-        text = None
+        # Named apart from the guid/text used above when loading wireword data:
+        # these describe the audio file being matched, not a source word.
+        grammatical_form: Optional[str] = None
+        file_guid: Optional[str] = None
+        file_text: Optional[str] = None
 
         if text_form in derivative_form_map:
             # This is a derivative form (e.g., "aš gyvenu")
-            guid, grammatical_form = derivative_form_map[text_form]
-            text = file_stem.replace("_", " ")  # Keep original casing for text
+            file_guid, grammatical_form = derivative_form_map[text_form]
+            file_text = file_stem.replace("_", " ")  # Keep original casing for text
         else:
             # This is a base form - look up GUID from wireword data
-            guid = guid_by_filename.get(file_stem)
-            text = text_by_filename.get(file_stem)
+            file_guid = guid_by_filename.get(file_stem)
+            file_text = text_by_filename.get(file_stem)
 
-        if not text or not guid:
+        if not file_text or not file_guid:
             print(f"  Warning: No match found for {filename}, skipping")
             continue
 
@@ -597,8 +607,8 @@ def rebuild_manifest_from_files(
 
         manifest["files"][filename] = {
             "md5": md5,
-            "text": text,
-            "guid": guid,
+            "text": file_text,
+            "guid": file_guid,
             "grammatical_form": grammatical_form,  # None for base forms
             "created_at": timestamp,
         }
@@ -764,6 +774,9 @@ def generate_audio_for_file(
                     # Generate audio
                     print(f"[{i}/{len(words)}] Generating {full_filename} - '{text}'")
 
+                    # Guaranteed by the load_api_key() guard above, which raises
+                    # unless dry_run; this branch is the not-dry_run path.
+                    assert api_key is not None
                     if generate_audio_openai(text, output_path, voice, api_key, language):
                         voice_stats["generated"] += 1
                         # Add to manifest
@@ -796,7 +809,7 @@ def generate_audio_for_file(
     return stats
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Generate multi-language audio using OpenAI TTS API",
         formatter_class=argparse.RawDescriptionHelpFormatter,

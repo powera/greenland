@@ -53,7 +53,7 @@ DEFAULT_MULTI_VOICES = ["onyx", "nova", "alloy"]
 def generate_audio(
     word: str,
     voice: str = "alloy",
-    output_dir: Path = None,
+    output_dir: Optional[Path] = None,
     organize_by_voice: bool = False,
     force: bool = False,
     delay: float = 0.0,
@@ -125,7 +125,7 @@ def generate_audio(
 def generate_multi_voice_audio(
     word: str,
     voices: List[str] = DEFAULT_MULTI_VOICES,
-    output_dir: Path = None,
+    output_dir: Optional[Path] = None,
     organize_by_voice: bool = True,
     delay: float = 1.0,
     force: bool = False,
@@ -151,7 +151,7 @@ def generate_multi_voice_audio(
     return success_count, total_count
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Generate Lithuanian pronunciation audio files")
     parser.add_argument("--word", type=str, help="Single word to generate audio for")
     parser.add_argument("--batch", type=str, help="Text file with words to process (one per line)")
