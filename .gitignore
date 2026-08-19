@@ -37,3 +37,8 @@ src/wordfreq/output/
 
 # gitstore local
 data/working
+
+# audiotools local output caches
+src/audiotools/lithuanian-audio-cache/
+src/audiotools/wireword-audio-cache/
+src/audiotools/data/
