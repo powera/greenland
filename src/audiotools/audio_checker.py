@@ -367,7 +367,7 @@ Respond ONLY with the JSON format above."""
         correct_words = sum(1 for r in results if r.is_word_correct)
 
         # Count issue types
-        issue_counts = {}
+        issue_counts: Dict[str, int] = {}
         for result in results:
             for issue in result.detected_issues:
                 issue_counts[issue.value] = issue_counts.get(issue.value, 0) + 1

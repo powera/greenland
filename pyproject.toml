@@ -129,6 +129,9 @@ module = [
     "TTS.*",
     "qwen_tts.*",
     "whisper.*",
+    "openai.*",
+    "outetts.*",
+    "soundfile.*",
 ]
 ignore_missing_imports = true
 

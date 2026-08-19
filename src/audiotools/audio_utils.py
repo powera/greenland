@@ -7,7 +7,7 @@ for Lithuanian text-to-speech processing.
 """
 
 import re
-from typing import List, Optional
+from typing import List, Optional, Union
 from pathlib import Path
 
 # Complete list of Lithuanian letters and diacritics
@@ -50,12 +50,12 @@ def sanitize_lithuanian_word(word: str) -> str:
     return sanitized
 
 
-def read_words_from_file(file_path: str) -> List[str]:
+def read_words_from_file(file_path: Union[str, Path]) -> List[str]:
     """
     Read words from a text file, one word per line.
 
     Args:
-        file_path: Path to the text file
+        file_path: Path to the text file, as a str or Path
 
     Returns:
         List of words/phrases, with empty lines filtered out
@@ -69,12 +69,12 @@ def read_words_from_file(file_path: str) -> List[str]:
         return []
 
 
-def ensure_output_directory(output_dir: str) -> Path:
+def ensure_output_directory(output_dir: Union[str, Path]) -> Path:
     """
     Ensure output directory exists and return Path object.
 
     Args:
-        output_dir: Directory path as string
+        output_dir: Directory path, as a str or Path
 
     Returns:
         Path object for the directory
