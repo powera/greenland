@@ -57,8 +57,8 @@
 
                         <div class="mb-3">
                             <label for="limit" class="form-label">Limit (optional)</label>
-                            <input type="number" class="form-control" id="limit" name="limit" min="1" placeholder="All lemmas">
-                            <div class="form-text">Maximum number of lemmas to process. Leave empty for all.</div>
+                            <input type="number" class="form-control" id="limit" name="limit" min="1" max="{{ max_lemmas_per_request }}" placeholder="{{ max_lemmas_per_request }} lemmas">
+                            <div class="form-text">Maximum number of lemmas to process. This page generates at most {{ max_lemmas_per_request }} per submit; use the agent CLIs for a full run.</div>
                         </div>
 
                         <!-- Warning -->

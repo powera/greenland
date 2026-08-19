@@ -26,9 +26,102 @@ from audioshoe.qwen import QwenVoice
 from clients.audio import Voice
 from clients.audio.gpt_voices import GptVoice
 from storage.backend.config import DataSourceConfig
-from storage.models.schema import Lemma, Sentence, SentenceTranslation
+from storage.models.schema import AudioQualityReview, Lemma, Sentence, SentenceTranslation
 
 logger = logging.getLogger(__name__)
+
+
+def _upsert_review_record(
+    session: Session,
+    *,
+    language_code: str,
+    voice_name: str,
+    filename: str,
+    expected_text: str,
+    md5_hash: str,
+    lemma: Optional[Lemma] = None,
+    sentence_id: Optional[int] = None,
+) -> None:
+    """Create or update the AudioQualityReview row for one generated audio file.
+
+    A plain insert is wrong for both kinds of row, in two different ways. Sentence
+    audio is covered by uq_audio_review_sentence (sentence_id, language_code,
+    voice_name), all non-NULL, so regenerating raised IntegrityError and failed
+    the task. Lemma audio is covered by uq_audio_review_lemma, which includes
+    grammatical_form; these handlers always leave it NULL, and SQL compares NULLs
+    as distinct, so nothing caught the duplicate and a second row was added on
+    every run. Look the row up first and update it in place, the way the strazdas
+    and vieversys agents already do for this table.
+
+    These handlers write audio to local disk only. Any S3 URLs on an existing row
+    came from an earlier agent run and describe the *previous* audio, so they are
+    cleared rather than left pointing at a file this row no longer refers to.
+
+    Exactly one of ``lemma`` or ``sentence_id`` must be given.
+    """
+    existing: Optional[AudioQualityReview]
+
+    if lemma is not None and sentence_id is None:
+        guid = lemma.guid
+        lemma_id: Optional[int] = lemma.id
+        existing = (
+            session.query(AudioQualityReview)
+            .filter_by(
+                guid=guid,
+                language_code=language_code,
+                voice_name=voice_name,
+                grammatical_form=None,  # Base form
+            )
+            .first()
+        )
+    elif sentence_id is not None and lemma is None:
+        guid = f"S_{sentence_id:05d}"  # Synthetic GUID for sentences
+        lemma_id = None
+        existing = (
+            session.query(AudioQualityReview)
+            .filter_by(
+                sentence_id=sentence_id,
+                language_code=language_code,
+                voice_name=voice_name,
+            )
+            .first()
+        )
+    else:
+        raise ValueError("_upsert_review_record requires exactly one of lemma or sentence_id")
+
+    if existing is not None:
+        existing.filename = filename
+        existing.expected_text = expected_text
+        existing.manifest_md5 = md5_hash
+        existing.status = "pending_review"
+        existing.s3_staging_url = None
+        existing.s3_staging_manifest_url = None
+        existing.s3_prod_url = None
+        existing.staging_agent = None
+        existing.accepted_at = None
+        existing.accepted_by = None
+        existing.quality_issues = None
+        existing.notes = None
+        existing.reviewed_at = None
+        existing.reviewed_by = None
+        logger.debug(f"Updated existing review record for {guid}/{language_code}/{voice_name}")
+        return
+
+    session.add(
+        AudioQualityReview(
+            guid=guid,
+            sentence_id=sentence_id,
+            lemma_id=lemma_id,
+            language_code=language_code,
+            voice_name=voice_name,
+            grammatical_form=None,  # Base form
+            filename=filename,
+            expected_text=expected_text,
+            manifest_md5=md5_hash,
+            status="pending_review",
+        )
+    )
+    logger.debug(f"Created review record for {guid}/{language_code}/{voice_name}")
 
 
 def _get_audio_output_dir() -> str:
@@ -190,11 +283,9 @@ def _generate_audio_piper(
         dict with success, voices (list of dicts with success key), and error information
     """
     import hashlib
-    import json
 
     from audioshoe.piper import PiperClient
     from clients.audio.types import AudioFormat
-    from storage.models.schema import AudioQualityReview
     from storage.translation_helpers import get_translation
 
     try:
@@ -241,19 +332,16 @@ def _generate_audio_piper(
                 with open(file_path, "wb") as f:
                     f.write(result.audio_data)
 
-                # Create review record
-                review = AudioQualityReview(
-                    guid=lemma.guid,
-                    lemma_id=lemma.id,
+                # Create or update review record
+                _upsert_review_record(
+                    session,
+                    lemma=lemma,
                     language_code=language_code,
                     voice_name=voice.ui_name,
                     filename=filename,
                     expected_text=translation,
-                    manifest_md5=md5_hash,
-                    status="pending_review",
-                    quality_issues=json.dumps([]),
+                    md5_hash=md5_hash,
                 )
-                session.add(review)
                 generated_voices.append({"voice": voice.ui_name, "success": True})
             except Exception as e:
                 logger.error(f"Error generating Piper audio for {voice.ui_name}: {e}")
@@ -292,11 +380,9 @@ def _generate_audio_coqui(
         dict with success, voices (list of dicts with success key), and error information
     """
     import hashlib
-    import json
 
     from audioshoe.coqui import CoquiClient
     from clients.audio.types import AudioFormat
-    from storage.models.schema import AudioQualityReview
     from storage.translation_helpers import get_translation
 
     try:
@@ -343,19 +429,16 @@ def _generate_audio_coqui(
                 with open(file_path, "wb") as f:
                     f.write(result.audio_data)
 
-                # Create review record
-                review = AudioQualityReview(
-                    guid=lemma.guid,
-                    lemma_id=lemma.id,
+                # Create or update review record
+                _upsert_review_record(
+                    session,
+                    lemma=lemma,
                     language_code=language_code,
                     voice_name=voice.ui_name,
                     filename=filename,
                     expected_text=translation,
-                    manifest_md5=md5_hash,
-                    status="pending_review",
-                    quality_issues=json.dumps([]),
+                    md5_hash=md5_hash,
                 )
-                session.add(review)
                 generated_voices.append({"voice": voice.ui_name, "success": True})
             except Exception as e:
                 logger.error(f"Error generating Coqui audio for {voice.ui_name}: {e}")
@@ -461,11 +544,9 @@ def _generate_sentence_audio_openai(
 ) -> Dict:
     """Generate sentence audio using OpenAI TTS."""
     import hashlib
-    import json
 
     from clients.audio import generate_audio
     from clients.audio.types import AudioFormat
-    from storage.models.schema import AudioQualityReview
 
     try:
         openai_voice_enums = [Voice(v) for v in voice_names]
@@ -493,19 +574,16 @@ def _generate_sentence_audio_openai(
                 with open(file_path, "wb") as f:
                     f.write(result.audio_data)
 
-                # Create review record for sentence
-                review = AudioQualityReview(
-                    guid=f"S_{sentence_id:05d}",  # Synthetic GUID for sentences
+                # Create or update review record
+                _upsert_review_record(
+                    session,
                     sentence_id=sentence_id,
                     language_code=language_code,
                     voice_name=voice.value,
                     filename=filename,
                     expected_text=text,
-                    manifest_md5=md5_hash,
-                    status="pending_review",
-                    quality_issues=json.dumps([]),
+                    md5_hash=md5_hash,
                 )
-                session.add(review)
                 generated_voices.append({"voice": voice.value, "success": True})
 
             except Exception as e:
@@ -531,11 +609,9 @@ def _generate_sentence_audio_espeak(
 ) -> Dict:
     """Generate sentence audio using eSpeak-NG."""
     import hashlib
-    import json
 
     from audioshoe.espeak import EspeakNGClient
     from clients.audio.types import AudioFormat
-    from storage.models.schema import AudioQualityReview
 
     try:
         espeak_voice_enums = [EspeakVoice[v.upper()] for v in voice_names]
@@ -568,19 +644,16 @@ def _generate_sentence_audio_espeak(
                 with open(file_path, "wb") as f:
                     f.write(result.audio_data)
 
-                # Create review record
-                review = AudioQualityReview(
-                    guid=f"S_{sentence_id:05d}",  # Synthetic GUID for sentences
+                # Create or update review record
+                _upsert_review_record(
+                    session,
                     sentence_id=sentence_id,
                     language_code=language_code,
                     voice_name=voice.name,
                     filename=filename,
                     expected_text=text,
-                    manifest_md5=md5_hash,
-                    status="pending_review",
-                    quality_issues=json.dumps([]),
+                    md5_hash=md5_hash,
                 )
-                session.add(review)
                 generated_voices.append({"voice": voice.name, "success": True})
 
             except Exception as e:
@@ -606,11 +679,9 @@ def _generate_sentence_audio_qwen(
 ) -> Dict:
     """Generate sentence audio using Qwen3."""
     import hashlib
-    import json
 
     from audioshoe.qwen import QwenTTSClient
     from clients.audio.types import AudioFormat
-    from storage.models.schema import AudioQualityReview
 
     try:
         qwen_voice_enums = [QwenVoice[v.upper()] for v in voice_names]
@@ -643,19 +714,16 @@ def _generate_sentence_audio_qwen(
                 with open(file_path, "wb") as f:
                     f.write(result.audio_data)
 
-                # Create review record
-                review = AudioQualityReview(
-                    guid=f"S_{sentence_id:05d}",  # Synthetic GUID for sentences
+                # Create or update review record
+                _upsert_review_record(
+                    session,
                     sentence_id=sentence_id,
                     language_code=language_code,
                     voice_name=voice.ui_name,
                     filename=filename,
                     expected_text=text,
-                    manifest_md5=md5_hash,
-                    status="pending_review",
-                    quality_issues=json.dumps([]),
+                    md5_hash=md5_hash,
                 )
-                session.add(review)
                 generated_voices.append({"voice": voice.ui_name, "success": True})
 
             except Exception as e:
@@ -680,11 +748,9 @@ def _generate_sentence_audio_piper(
 ) -> Dict:
     """Generate sentence audio using Piper TTS."""
     import hashlib
-    import json
 
     from audioshoe.piper import PiperClient
     from clients.audio.types import AudioFormat
-    from storage.models.schema import AudioQualityReview
 
     try:
         piper_voice_enums = [PiperVoice[v.upper()] for v in voice_names]
@@ -718,19 +784,16 @@ def _generate_sentence_audio_piper(
                 with open(file_path, "wb") as f:
                     f.write(result.audio_data)
 
-                # Create review record
-                review = AudioQualityReview(
-                    guid=f"S_{sentence_id:05d}",  # Synthetic GUID for sentences
+                # Create or update review record
+                _upsert_review_record(
+                    session,
                     sentence_id=sentence_id,
                     language_code=language_code,
                     voice_name=voice.ui_name,
                     filename=filename,
                     expected_text=text,
-                    manifest_md5=md5_hash,
-                    status="pending_review",
-                    quality_issues=json.dumps([]),
+                    md5_hash=md5_hash,
                 )
-                session.add(review)
                 generated_voices.append({"voice": voice.ui_name, "success": True})
 
             except Exception as e:
@@ -755,11 +818,9 @@ def _generate_sentence_audio_coqui(
 ) -> Dict:
     """Generate sentence audio using Coqui TTS."""
     import hashlib
-    import json
 
     from audioshoe.coqui import CoquiClient
     from clients.audio.types import AudioFormat
-    from storage.models.schema import AudioQualityReview
 
     try:
         coqui_voice_enums = [CoquiVoice[v.upper()] for v in voice_names]
@@ -793,19 +854,16 @@ def _generate_sentence_audio_coqui(
                 with open(file_path, "wb") as f:
                     f.write(result.audio_data)
 
-                # Create review record
-                review = AudioQualityReview(
-                    guid=f"S_{sentence_id:05d}",  # Synthetic GUID for sentences
+                # Create or update review record
+                _upsert_review_record(
+                    session,
                     sentence_id=sentence_id,
                     language_code=language_code,
                     voice_name=voice.ui_name,
                     filename=filename,
                     expected_text=text,
-                    manifest_md5=md5_hash,
-                    status="pending_review",
-                    quality_issues=json.dumps([]),
+                    md5_hash=md5_hash,
                 )
-                session.add(review)
                 generated_voices.append({"voice": voice.ui_name, "success": True})
 
             except Exception as e:
@@ -831,13 +889,11 @@ def _generate_sentence_audio_cloud(
 ) -> Dict:
     """Generate sentence audio using a cloud TTS engine (Polly, Azure, or Google)."""
     import hashlib
-    import json
 
     from clients.audio.azure_tts import AzureTTSClient, AzureVoice
     from clients.audio.google_tts import GoogleTTSClient, GoogleTtsVoice
     from clients.audio.polly_tts import PollyTTSClient, PollyVoice
     from clients.audio.types import AudioFormat
-    from storage.models.schema import AudioQualityReview
 
     try:
         generated_voices: List[Dict] = []
@@ -930,19 +986,16 @@ def _generate_sentence_audio_cloud(
                 with open(file_path, "wb") as f:
                     f.write(result.audio_data)
 
-                # Create review record
-                review = AudioQualityReview(
-                    guid=f"S_{sentence_id:05d}",
+                # Create or update review record
+                _upsert_review_record(
+                    session,
                     sentence_id=sentence_id,
                     language_code=language_code,
                     voice_name=voice_name,
                     filename=filename,
                     expected_text=text,
-                    manifest_md5=md5_hash,
-                    status="pending_review",
-                    quality_issues=json.dumps([]),
+                    md5_hash=md5_hash,
                 )
-                session.add(review)
                 generated_voices.append({"voice": voice_name, "success": True})
 
             except Exception as e:

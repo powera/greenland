@@ -769,42 +769,50 @@ def main() -> None:
             print(f"Error: --language is required for --mode {args.mode}")
             sys.exit(1)
 
-        # Confirm before running (unless --yes was provided)
-        if not args.yes and not args.dry_run:
-            # Count lemmas with translations
-            session = agent.get_session()
-            try:
-                lemmas_with_translation = []
-                if lemmas:
-                    for lemma in lemmas:
-                        if agent.get_translation_text(session, lemma, args.language):
-                            lemmas_with_translation.append(lemma)
-                lemma_count = len(lemmas_with_translation)
-            finally:
-                session.close()
+        # Count lemmas with translations for the dry-run and confirmation summaries
+        session = agent.get_session()
+        try:
+            lemmas_with_translation = []
+            if lemmas:
+                for lemma in lemmas:
+                    if agent.get_translation_text(session, lemma, args.language):
+                        lemmas_with_translation.append(lemma)
+            lemma_count = len(lemmas_with_translation)
+        finally:
+            session.close()
 
-            # Get default voices for the selected backend
-            backend_voices = BACKEND_DEFAULT_VOICES.get(tts_backend, {})
-            voice_list = selected_voices or backend_voices.get(args.language, [])
-            voice_count = len(voice_list)
-            estimated_files = lemma_count * voice_count
+        # Get default voices for the selected backend
+        backend_voices = BACKEND_DEFAULT_VOICES.get(tts_backend, {})
+        voice_list = selected_voices or backend_voices.get(args.language, [])
+        voice_count = len(voice_list)
+        estimated_files = lemma_count * voice_count
 
-            voices_str = (
-                ", ".join(v.name for v in selected_voices)
-                if selected_voices
-                else ", ".join(v.name for v in voice_list)
+        voices_str = ", ".join(v.name for v in voice_list)
+
+        backend_desc = {
+            TtsBackend.ESPEAK: "eSpeak-NG TTS (fast, local)",
+            TtsBackend.QWEN: "Qwen3-TTS neural TTS (high quality, local)",
+        }.get(tts_backend, tts_backend.value)
+
+        if args.dry_run:
+            logger.info(
+                "Dry-run mode: would generate audio for %s lemmas with %s voices each "
+                "(estimated files: %s) using %s. Voices: %s. No audio generated.",
+                lemma_count,
+                voice_count,
+                estimated_files,
+                backend_desc,
+                voices_str,
             )
+            return
 
-            backend_desc = {
-                TtsBackend.ESPEAK: "eSpeak-NG TTS (fast, local)",
-                TtsBackend.QWEN: "Qwen3-TTS neural TTS (high quality, local)",
-            }.get(tts_backend, tts_backend.value)
-
+        # Confirm before running (unless --yes was provided)
+        if not args.yes:
             if not confirm_operation(
                 message=f"This will generate audio for {lemma_count} lemmas with {voice_count} voices each.\nTotal files: {estimated_files}\nVoices: {voices_str}\nBackend: {backend_desc}",
                 estimated_calls=None,  # No API calls, local generation
                 skip_confirmation=args.yes,
-                dry_run=args.dry_run,
+                dry_run=False,
             ):
                 print("Aborted.")
                 sys.exit(0)

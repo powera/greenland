@@ -13,7 +13,7 @@ import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union
 
 from flask import (
     Blueprint,
@@ -54,9 +54,17 @@ from storage.models.schema import (
     SentenceTranslation,
 )
 from storage.queries.lemma import apply_effective_difficulty_filter
+from words.lemma_selection import get_lemmas_for_processing
 
 bp = Blueprint("audio", __name__, url_prefix="/audio")
 logger = logging.getLogger(__name__)
+
+# The generate form runs synchronously in the request, and the OpenAI and cloud
+# engines bill per call, so one submit must not be able to start an unbounded
+# batch. The CLI agents ask for confirmation before a large run; a form POST has
+# no equivalent, so it gets a hard ceiling instead. Use the agent CLIs, or the
+# per-lemma queue actions, for anything larger.
+MAX_LEMMAS_PER_GENERATE_REQUEST = 50
 
 
 @bp.route("/")
@@ -739,6 +747,7 @@ def generate() -> ResponseReturnValue:
             azure_voices=azure_voices,
             google_voices=google_voices,
             tts_engines=tts_engines,
+            max_lemmas_per_request=MAX_LEMMAS_PER_GENERATE_REQUEST,
         )
 
     # Handle POST - trigger generation
@@ -758,6 +767,7 @@ def generate() -> ResponseReturnValue:
         return redirect(url_for("audio.generate"))
 
     # Validate voice names for the selected engine
+    gpt_voice_enums: List[GptVoice] = []
     try:
         if tts_engine == "espeak-ng":
             espeak_voice_enums: List[Union[EspeakVoice, QwenVoice]] = [
@@ -766,10 +776,41 @@ def generate() -> ResponseReturnValue:
         elif tts_engine in ("polly", "azure", "google"):
             pass  # Cloud voice names are passed as-is to vieversys
         else:
-            openai_voice_enums = [Voice(v) for v in voice_names]
+            # VieversysAgent works in GptVoice, which pairs an OpenAI voice with
+            # a language; the form submits bare OpenAI voice names.
+            for voice_name in voice_names:
+                gpt_voice = GptVoice.from_openai_voice(Voice(voice_name), language_code)
+                if gpt_voice is None:
+                    flash(
+                        f"OpenAI voice '{voice_name}' is not configured for language "
+                        f"'{language_code}'",
+                        "error",
+                    )
+                    return redirect(url_for("audio.generate"))
+                gpt_voice_enums.append(gpt_voice)
     except (ValueError, KeyError) as e:
         flash(f"Invalid voice: {e}", "error")
         return redirect(url_for("audio.generate"))
+
+    # Select the lemmas to generate for. Without this the agents' generate_batch
+    # returns an empty result and the page silently does nothing.
+    # Clamp into 1..MAX. A zero or negative limit reaching SQL would mean "no
+    # limit" in SQLite, so the ceiling has to be applied here, not just trusted
+    # from the form's own min/max attributes.
+    requested_limit = limit if limit and limit > 0 else MAX_LEMMAS_PER_GENERATE_REQUEST
+    effective_limit = min(requested_limit, MAX_LEMMAS_PER_GENERATE_REQUEST)
+    lemmas = get_lemmas_for_processing(
+        g.db,
+        difficulty_level=difficulty_level,
+        language_code=language_code,
+        limit=effective_limit,
+    )
+
+    if not lemmas:
+        flash(f"No lemmas found with a {language_code} translation for those filters", "warning")
+        return redirect(url_for("audio.generate"))
+
+    capped = requested_limit > effective_limit or (limit is None and len(lemmas) == effective_limit)
 
     # Run the appropriate agent based on TTS engine
     try:
@@ -780,17 +821,10 @@ def generate() -> ResponseReturnValue:
         else:
             audio_base_dir = Path(audio_base_dir)
 
-        # Create DataSourceConfig for agents
-        from barsukas.config import Config
-
-        from storage.backend.config import BackendType, DataSourceConfig
-
-        config = DataSourceConfig(
-            backend_type=BackendType.SQLITE,
-            sqlite_path=Config.DB_PATH,
-            model=constants.DEFAULT_MODEL,
-            debug=Config.DEBUG,
-        )
+        # The agents open their own sessions, so they need this app's backend
+        # config. Rebuilding one from barsukas.config.Config would point them at
+        # the default SQLite file rather than the database the app is serving.
+        config = current_app.backend_config.with_model(constants.DEFAULT_MODEL)
 
         engine_names = {
             "openai": "OpenAI",
@@ -805,6 +839,7 @@ def generate() -> ResponseReturnValue:
             strazdas_agent = StrazdasAgent(config=config, output_dir=str(audio_base_dir))
             results = strazdas_agent.generate_batch(
                 language_code=language_code,
+                lemmas=lemmas,
                 voices=espeak_voice_enums,
                 use_ipa=use_ipa,
             )
@@ -814,13 +849,15 @@ def generate() -> ResponseReturnValue:
             )
             results = vieversys_agent.generate_batch(
                 language_code=language_code,
+                lemmas=lemmas,
                 cloud_voice_names=voice_names,
             )
         else:
             vieversys_agent = VieversysAgent(config=config, output_dir=str(audio_base_dir))
             results = vieversys_agent.generate_batch(
                 language_code=language_code,
-                voices=cast(List[GptVoice], openai_voice_enums),
+                lemmas=lemmas,
+                voices=gpt_voice_enums,
             )
 
         flash(
@@ -829,6 +866,14 @@ def generate() -> ResponseReturnValue:
             f"Files saved to {audio_base_dir}",
             "success" if results["error_count"] == 0 else "warning",
         )
+
+        if capped:
+            flash(
+                f"Stopped at {MAX_LEMMAS_PER_GENERATE_REQUEST} lemmas, the most this page "
+                f"generates in one submit. Submit again for the next batch, or use the "
+                f"agent CLIs for a full run.",
+                "info",
+            )
 
         return redirect(
             url_for("audio.list_files", language=language_code, status="pending_review")
