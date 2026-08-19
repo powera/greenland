@@ -162,7 +162,13 @@ When modifying files in data/release :
 * make sure the GUID prefixes match those in storage/models/guid_prefixes.py
 * when creating a new "subtype", follow those instructions for updates
 * do not "change" GUIDs - keep the file sorted by GUID, and add new words at
-  the end, leaving gaps in GUIDs for removed words is expected
+  the end, leaving gaps in GUIDs for removed words is expected.  A removed GUID
+  is retired permanently and recorded in
+  data/release/tombstones/guid_tombstones.jsonl ; storage.utils.guid reads that
+  table so a retired number is never reissued.  Note the converse does not hold:
+  a gap need not have a tombstone, because some ranges never held a word (a
+  category split that began numbering mid-range, or a range hardcoded in a
+  generator such as src/wordfreq/data/family_relations_sections.py).
 * the "difficulty level" for newly added words should be -1 unless otherwise requested
 * words should be in "lemma" form, and should specify one definition of a
   word, using a disambiguation if necessary

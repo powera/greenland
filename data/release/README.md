@@ -178,7 +178,8 @@ Lemma modes live under `/sync/lemmas`:
 
 Other element types have their own sections under `/sync`:
 `/sync/derivatives`, `/sync/synonyms`, `/sync/relations`, `/sync/sentences`,
-`/sync/phrases`, `/sync/idioms`, `/sync/names`, `/sync/lemma-audio`.
+`/sync/phrases`, `/sync/idioms`, `/sync/names`, `/sync/lemma-audio`,
+`/sync/tombstones`.
 
 Idioms and names are compared and written **whole**: each has one `base.jsonl`
 and no per-language files, so a record either matches or it does not, and
@@ -274,6 +275,37 @@ as `synonym_near`, `synonym_regional`, `synonym_register`,
 `synonym_related`, `synonym_synecdoche`, `abbreviation`, or `expanded_form`
 when the words are not exact drop-in equivalents.
 
+A per-language record may also contain `variants`: alternate *spellings of the
+same lexeme*, each carrying its own full paradigm. "grey" is not a synonym of
+"gray" (a different lexeme) nor an inflection of it (a different grammatical
+slot), which is why it is neither of the two arrays above:
+
+```json
+{
+  "guid": "A02_008",
+  "variants": [
+    {
+      "kind": "spelling",
+      "key": "grey",
+      "forms": [
+        {"grammatical_form": "adjective/en_positive", "text": "grey", "is_base_form": true},
+        {"grammatical_form": "adjective/en_comparative", "text": "greyer", "is_base_form": false}
+      ]
+    }
+  ]
+}
+```
+
+`kind` is `spelling` or `script` (Chinese simplified/traditional); it is
+deliberately open, since the meaningful kinds are language-specific. `key`
+identifies the variant within the lemma and is conventionally the variant's own
+base form. `is_base_form` is scoped to the variant: "grey" is the base form of
+the "grey" variant, while "gray" remains the lemma's own base form in `forms`.
+
+A regional *dialect* is a different axis and is not a variant: "grey" is an
+alternate spelling within en-US here, and separately the en-GB translation of
+the same lemma. See `storage/models/variant_form.py`.
+
 Name records live in `names/base.jsonl`:
 
 ```json
@@ -308,10 +340,57 @@ The `kind` is one of `storage.models.name_entity.NAME_KINDS` and is also encoded
 in the GUID prefix (`E01` given_name, `E02` family_name, `E03` full_name, `E04`
 place, `E05` organization, `E06` brand, `E07` animal, `E99` other).
 
+### Retired GUIDs: `tombstones/guid_tombstones.jsonl`
+
+A GUID is permanent. When a word is removed, or its part of speech is corrected
+and it needs a GUID from another prefix, the old number is **retired** rather
+than freed, and a tombstone records that:
+
+```json
+{
+  "guid": "A05_001",
+  "original_lemma_text": "kind",
+  "original_pos_type": "adjective",
+  "original_pos_subtype": "quality",
+  "reason": "release_history_gap",
+  "replacement_guid": "A16_001",
+  "notes": "Tombstoned from git history to prevent GUID reuse.",
+  "changed_by": "agent_git_history_backfill",
+  "tombstoned_at": "2026-06-15T00:00:00"
+}
+```
+
+This is the machine-readable form of the "leave gaps for removed words" rule
+below. `storage.utils.guid.generate_guid` reads it and will not issue a
+tombstoned number, which matters most for a prefix whose lemmas are *all* gone:
+counting up from the highest live row would otherwise restart at `_001` on top
+of GUIDs that already shipped.
+
+`reason` is one of the values in `storage.models.guid_tombstone.TOMBSTONE_REASONS`.
+Optional fields are omitted rather than written as `null`. The lemma's local
+database id is deliberately **not** part of the record: it changes with every
+bootstrap, and `replacement_guid` carries the only link worth shipping.
+
+Tombstones are never deleted. `/sync/tombstones` therefore offers export but no
+delete, and `tombstone-release-to-sqlite` refreshes existing rows rather than
+skipping them:
+
+```bash
+PYTHONPATH=src python src/storage/migrate.py tombstone-release-to-sqlite
+```
+
+Note that a gap in the numbering does **not** imply a tombstone. Some gaps never
+held a word at all - a category split that started numbering mid-range, or a
+range reserved in a generator (see `src/wordfreq/data/family_relations_sections.py`,
+which hardcodes its `N35` GUIDs). Only a GUID that actually named something gets
+a tombstone.
+
 ## Important Guidelines
 
 - **GUIDs**: Keep files sorted by GUID. Add new words at the end. Leave gaps
-  for removed words (don't renumber).
+  for removed words (don't renumber). A removed GUID is retired permanently and
+  recorded in `tombstones/guid_tombstones.jsonl`; `generate_guid` reads that
+  file's contents and will not reissue it.
 - **Difficulty**: New words should have difficulty level `-1` unless specified.
 - **Lemma form**: Words should be in lemma form with disambiguation if needed.
 - **Chinese**: Use mainland Chinese with simplified characters.

@@ -127,7 +127,9 @@ Word data is stored in `data/release/` files organized by language and GUID pref
 - Use GUID prefixes defined in `storage/models/guid_prefixes.py`
 - Store words in lemma form with difficulty levels
 - Include disambiguation when necessary
-- Leave gaps for removed words (GUIDs are immutable)
+- Leave gaps for removed words (GUIDs are immutable). Retirements are recorded in
+  `data/release/tombstones/guid_tombstones.jsonl`, which `storage.utils.guid` reads so a
+  retired GUID is never issued to a different word
 
 The release files are processed by export agents to generate the final WireWord JSON consumed by Trakaido applications.
 
