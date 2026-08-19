@@ -97,10 +97,10 @@ Testing
 -------
 There are four test targets, run via ./run_tests.sh :
 
-  ./run_tests.sh smoke     ~16 tests, ~1s    - run on every commit
-  ./run_tests.sh portable  ~1676 tests       - base minus optional-native-dep tests
-  ./run_tests.sh base      ~1700 tests, ~16s - run often, not every commit
-  ./run_tests.sh all       everything, including the audio suite
+  ./run_tests.sh smoke     ~17 tests, ~1s    - run on every commit
+  ./run_tests.sh portable  ~2772 tests, ~60s - base minus optional-native-dep tests
+  ./run_tests.sh base      ~2777 tests, ~60s - run often, not every commit
+  ./run_tests.sh all       alias for base
 
 Extra arguments pass through to pytest:
   ./run_tests.sh base -k combined_rank -x
@@ -112,7 +112,9 @@ that immediately.  Mark new smoke tests with @pytest.mark.smoke and keep the
 total under ~20 - it is worthless if it stops being fast.  Tests needing a
 database, an LLM client, or fixtures belong in base instead.
 
-base is everything except src/tests/clients/audio ; all adds that back.
+base is the whole of src/tests, and all is an alias for it.  (base once
+excluded src/tests/clients/audio, which needed the audio submodule synced;
+those tests target src/clients/audio, need no submodule, and run in ~0.2s.)
 
 portable is base with the tests that require optional native dependencies
 removed, so the suite runs cleanly where those wheels do not build or install.

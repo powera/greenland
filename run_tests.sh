@@ -4,13 +4,16 @@
 #   ./run_tests.sh smoke      fast import/startup checks; run on every commit
 #   ./run_tests.sh portable   base minus tests that need native/optional deps
 #   ./run_tests.sh base       the tests known to pass; run often, not every commit
-#   ./run_tests.sh all        everything, including known-failing suites
+#   ./run_tests.sh all        currently identical to base
 #
 # Any extra arguments are passed through to pytest, so this works:
 #   ./run_tests.sh base -k combined_rank -x
 #
-# base excludes one directory:
-#   clients/audio   - needs the audio submodule synced to its recorded commit
+# base excludes nothing; it is the whole of src/tests. `all` is kept as an
+# alias so existing invocations and docs keep working. (base once excluded
+# clients/audio, which needed the audio submodule synced; those tests target
+# src/clients/audio, run in ~0.2s with no submodule, and are no longer
+# special-cased.)
 #
 # portable is base with the tests that require optional native dependencies
 # removed, so the suite runs cleanly in environments where those wheels do not
@@ -45,10 +48,7 @@ case "$TARGET" in
   portable)
     exec python -m pytest src/tests "${PORTABLE_EXCLUDES[@]}" "$@"
     ;;
-  base)
-    exec python -m pytest src/tests "$@"
-    ;;
-  all)
+  base|all)
     exec python -m pytest src/tests "$@"
     ;;
   *)
