@@ -94,6 +94,10 @@ class RecordSyncSpec:
     view_endpoint: Optional[str] = None
     #: Keyword name the view endpoint takes the row id under.
     view_id_arg: str = "id"
+    #: Whether the removals page may delete database rows. False for types whose
+    #: rows are permanent records rather than content: deleting a GUID tombstone
+    #: would un-retire the GUID and let it be issued to a different word.
+    allow_delete: bool = True
 
 
 @dataclass
@@ -298,6 +302,10 @@ def build_blueprint(spec: RecordSyncSpec) -> Blueprint:
         this page, and one-click deletion of every unreleased row is not
         something a sync page should make easy.
         """
+        if not spec.allow_delete:
+            flash(f"{spec.title} cannot be deleted from this page", "error")
+            return redirect(url_for(endpoint("removals")))
+
         if is_readonly():
             flash("Database is in read-only mode", "error")
             return redirect(url_for(endpoint("removals")))

@@ -19,8 +19,8 @@
             <h2><i class="bi bi-dash-circle text-danger"></i> {{ spec.title }} Not in Release</h2>
             <p class="text-muted">
                 These exist in the database but not in <code>{{ release_dir }}</code>.
-                <strong>Export</strong> writes them to the release file;
-                <strong>Delete</strong> removes them from the database.
+                <strong>Export</strong> writes them to the release file{% if spec.allow_delete %};
+                <strong>Delete</strong> removes them from the database{% endif %}.
             </p>
         </div>
     </div>
@@ -84,11 +84,13 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-box-arrow-up"></i> {{ STRINGS.sync.export_to_release }}
                         </button>
+                        {% if spec.allow_delete %}
                         <button type="submit" class="btn btn-danger"
                                 formaction="{{ url_for(spec.blueprint_name ~ '.delete_removals') }}"
                                 onclick="return confirm('Delete the selected {{ spec.noun }}(s)? This cannot be undone.');">
                             <i class="bi bi-trash"></i> Delete Selected
                         </button>
+                        {% endif %}
                     </div>
                 </div>
             </form>

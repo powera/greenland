@@ -106,6 +106,7 @@ from barsukas.routes.sync import (
     sync_release,
     sync_sentence_release,
     sync_synonym_release,
+    sync_tombstone_release,
 )
 from storage.backend import configure_backend, create_session
 from storage.backend.config import BackendType, DataSourceConfig
@@ -404,6 +405,7 @@ def create_app(
     app.register_blueprint(sync_lemma_audio_release.bp)
     app.register_blueprint(sync_idiom_release.bp)
     app.register_blueprint(sync_name_release.bp)
+    app.register_blueprint(sync_tombstone_release.bp)
 
     # --- Benchmarks integration ---
     # Barsukas always uses PostgreSQL to access the benchmarks schema.

@@ -133,6 +133,18 @@ SYNC_CATEGORIES: List[SyncCategory] = [
         ],
     ),
     SyncCategory(
+        endpoint="sync_tombstone_release.index",
+        title="GUID Tombstones",
+        icon="bi-archive",
+        colour="dark",
+        summary="Retired GUIDs, which must never be issued to another word.",
+        covers=[
+            "Additions & removals",
+            "Replacement links and reasons",
+            "Export only - a tombstone is never deleted",
+        ],
+    ),
+    SyncCategory(
         endpoint="sync_lemma_audio_release.index",
         title="Lemma Audio",
         icon="bi-music-note-list",

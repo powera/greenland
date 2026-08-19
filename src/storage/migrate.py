@@ -535,7 +535,10 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
     from storage import translation_helpers
     from storage.database import create_database_session
     from storage.models.concept import ConceptLemmaLink
-    from storage.models.guid_tombstone import GuidTombstone
+    from storage.release.tombstone import (
+        RELEASE_DIRNAME as TOMBSTONE_RELEASE_DIRNAME,
+    )
+    from storage.release.tombstone import export_tombstones_to_release
     from storage.models.schema import Lemma, NON_INFLECTION_GRAMMATICAL_FORMS
     from storage.release.lemma import lemma_to_release_record
 
@@ -819,47 +822,16 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
         print(f"\nExport complete!")
         print(f"Languages exported: {', '.join(sorted(all_languages))}")
 
-        tombstone_records: List[Dict[str, Any]] = []
-        for tombstone in session.query(GuidTombstone).order_by(GuidTombstone.guid).all():
-            tombstone_record: Dict[str, Any] = {
-                "guid": tombstone.guid,
-                "original_lemma_text": tombstone.original_lemma_text,
-                "original_pos_type": tombstone.original_pos_type,
-                "reason": tombstone.reason,
-            }
-            if tombstone.original_pos_subtype:
-                tombstone_record["original_pos_subtype"] = tombstone.original_pos_subtype
-            if tombstone.replacement_guid:
-                tombstone_record["replacement_guid"] = tombstone.replacement_guid
-            # lemma_id is deliberately not exported. It is a local SQLite primary
-            # key: it differs after every bootstrap, and on the synonym-merge path
-            # it names a row that is deleted moments later. The GUID is the stable
-            # identifier, and replacement_guid already carries the link that matters.
-            if tombstone.notes:
-                tombstone_record["notes"] = tombstone.notes
-            if tombstone.changed_by:
-                tombstone_record["changed_by"] = tombstone.changed_by
-            _add_tombstoned_at(tombstone_record, tombstone.tombstoned_at)
-            tombstone_records.append(tombstone_record)
-
-        _write_jsonl_atomic(
-            Path(release_dir).parent / "tombstones" / "guid_tombstones.jsonl",
-            tombstone_records,
+        # Tombstones ship beside the lemma tree rather than inside it, and the
+        # record is built by storage.release.tombstone so the CLI and the sync
+        # blueprint cannot drift apart the way the lemma builders once did.
+        tombstone_count = export_tombstones_to_release(
+            session, Path(release_dir).parent / TOMBSTONE_RELEASE_DIRNAME
         )
-        print(f"Tombstones exported: {len(tombstone_records)}")
+        print(f"Tombstones exported: {tombstone_count}")
 
     finally:
         session.close()
-
-
-def _add_tombstoned_at(record: Dict[str, Any], tombstoned_at: Any) -> None:
-    """Add tombstoned_at to a release tombstone record if it is available."""
-    if tombstoned_at is None:
-        return
-    if hasattr(tombstoned_at, "isoformat"):
-        record["tombstoned_at"] = tombstoned_at.isoformat()
-    else:
-        record["tombstoned_at"] = str(tombstoned_at)
 
 
 def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> None:
@@ -1170,6 +1142,38 @@ def export_sqlite_to_name_release(sqlite_path: str, release_dir: str) -> None:
         exported = export_names_to_release(session, Path(release_dir))
         print(f"Exported {exported} names")
         print("Name export complete!")
+    finally:
+        session.close()
+
+
+def import_tombstone_release_to_sqlite(sqlite_path: str, release_dir: str) -> None:
+    """Import data/release/tombstones into SQLite.
+
+    Unlike the name and idiom importers, this one *refreshes* records whose GUID
+    is already present rather than skipping them: create_tombstone upserts on
+    the GUID, so re-running is safe and a row whose replacement or notes changed
+    is brought up to date. There is nothing to lose by overwriting - a tombstone
+    has no local review state the way a lemma or an audio row does.
+
+    Until this existed the file reached SQLite only through a full bootstrap, so
+    a database built any other way had no idea which GUIDs were spent.
+    """
+    print(
+        f"Importing GUID tombstones from release format ({release_dir}) "
+        f"into SQLite ({sqlite_path})..."
+    )
+
+    from storage.database import create_database_session
+    from storage.release.tombstone import import_tombstones_from_release
+    from storage.utils.session import ensure_tables_exist
+
+    session = create_database_session(sqlite_path)
+    ensure_tables_exist(session)
+
+    try:
+        imported = import_tombstones_from_release(session, Path(release_dir))
+        print(f"Imported {imported} tombstones")
+        print("Tombstone import complete!")
     finally:
         session.close()
 
@@ -2095,6 +2099,7 @@ def main() -> None:
             "idiom-release-to-sqlite",
             "sqlite-to-name-release",
             "name-release-to-sqlite",
+            "tombstone-release-to-sqlite",
             "sqlite-to-lemma-audio-release",
             "lemma-audio-release-to-sqlite",
         ],
@@ -2158,6 +2163,11 @@ def main() -> None:
         default="data/release/names",
         help="Path to name release directory (default: data/release/names)",
     )
+    parser.add_argument(
+        "--tombstone-release-dir",
+        default="data/release/tombstones",
+        help="Path to tombstone release directory (default: data/release/tombstones)",
+    )
 
     args = parser.parse_args()
 
@@ -2194,6 +2204,8 @@ def main() -> None:
         export_sqlite_to_name_release(args.sqlite_path, args.name_release_dir)
     elif args.direction == "name-release-to-sqlite":
         import_name_release_to_sqlite(args.sqlite_path, args.name_release_dir)
+    elif args.direction == "tombstone-release-to-sqlite":
+        import_tombstone_release_to_sqlite(args.sqlite_path, args.tombstone_release_dir)
     elif args.direction == "sqlite-to-lemma-audio-release":
         export_sqlite_to_lemma_audio_release(
             args.sqlite_path, args.release_dir, categories=lemma_audio_categories
