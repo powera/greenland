@@ -37,6 +37,14 @@ src/clients/ contains all code to access LLMs.  The system was built around
 the expectation that different small local models would run for different
 tasks; currently it is expected that a remote ChatGPT/Claude/Gemini is used.
 
+src/audiotools contains the production audio pipeline: TTS generation
+(OpenAI, OuteTTS) for flashcard audio, and the S3 upload path.  Run its
+scripts the usual way, e.g.
+  PYTHONPATH=src python src/audiotools/gen_audio.py --help
+The acoustic-analysis research tooling (qualityreview/, stirna.py, the
+calibration sample generators) stays in the audio/ submodule; that
+submodule imports clients.audio from this repo, not the reverse.
+
 Most of the remaining code of relevance is in src/wordfreq ; many of the other
 top-level directories in src/ are deprecated.
 
