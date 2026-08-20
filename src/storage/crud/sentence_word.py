@@ -1,4 +1,11 @@
-"""CRUD operations for SentenceWord model."""
+"""CRUD operations for SentenceWord model.
+
+Unlike the other sentence CRUD modules these functions take no ``source``
+argument and write no operation log entries. A decomposition writes 5-15 word
+rows per language per sentence, so per-row entries would swamp the table while
+saying nothing the batch entry does not. :func:`sentences.persistence.store_decomposition`
+logs one ``sentence_word_create`` per (sentence, language) instead.
+"""
 
 from typing import List, Optional
 

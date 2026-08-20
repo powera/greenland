@@ -5,6 +5,14 @@ from typing import Optional
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from storage.crud.operation_log import (
+    SENTENCE_TRANSLATION_CREATE,
+    SENTENCE_TRANSLATION_DELETE,
+    SENTENCE_TRANSLATION_UPDATE,
+    FieldChange,
+    log_entity_operation,
+    log_field_changes,
+)
 from storage.models.schema import Sentence, SentenceTranslation
 
 
@@ -14,6 +22,7 @@ def add_sentence_translation(
     language_code: str,
     translation_text: str,
     verified: bool = False,
+    source: Optional[str] = None,
 ) -> SentenceTranslation:
     """Add a translation to a sentence.
 
@@ -23,6 +32,7 @@ def add_sentence_translation(
         language_code: ISO 639-1 language code (e.g., "en", "lt", "zh")
         translation_text: The translated sentence text
         verified: Whether this translation has been verified
+        source: Who is adding it, for the operation log. None skips logging.
 
     Returns:
         Created SentenceTranslation object
@@ -38,6 +48,20 @@ def add_sentence_translation(
     )
     session.add(translation)
     session.flush()
+
+    if source is not None:
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=SENTENCE_TRANSLATION_CREATE,
+            entity_guid=sentence.guid,
+            fact={
+                "language_code": language_code,
+                "new_value": translation_text,
+                "verified": verified,
+            },
+        )
+
     return translation
 
 
@@ -70,6 +94,7 @@ def update_sentence_translation(
     translation: SentenceTranslation,
     translation_text: Optional[str] = None,
     verified: Optional[bool] = None,
+    source: Optional[str] = None,
 ) -> SentenceTranslation:
     """Update a sentence translation.
 
@@ -78,25 +103,58 @@ def update_sentence_translation(
         translation: SentenceTranslation object to update
         translation_text: New translation text (optional)
         verified: New verification status (optional)
+        source: Who is making the edit, for the operation log. None skips logging.
 
     Returns:
         Updated SentenceTranslation object
     """
+    # Captured before the assignments below.
+    changes = [
+        FieldChange("translation_text", translation.translation_text, translation_text),
+        FieldChange("verified", translation.verified, verified),
+    ]
+
     if translation_text is not None:
         translation.translation_text = translation_text
     if verified is not None:
         translation.verified = verified
 
+    log_field_changes(
+        session,
+        source=source,
+        operation_type=SENTENCE_TRANSLATION_UPDATE,
+        entity_guid=translation.sentence.guid,
+        # A None argument means "leave this field alone", not "set it to None".
+        changes=[change for change in changes if change.new_value is not None],
+        extra={"language_code": translation.language_code},
+    )
+
     return translation
 
 
-def delete_sentence_translation(session: Session, translation: SentenceTranslation) -> None:
+def delete_sentence_translation(
+    session: Session, translation: SentenceTranslation, source: Optional[str] = None
+) -> None:
     """Delete a sentence translation.
 
     Args:
         session: Database session
         translation: SentenceTranslation object to delete
+        source: Who is deleting it, for the operation log. None skips logging.
     """
+    if source is not None:
+        # Logged before the delete, while the text is still readable.
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=SENTENCE_TRANSLATION_DELETE,
+            entity_guid=translation.sentence.guid,
+            fact={
+                "language_code": translation.language_code,
+                "old_value": translation.translation_text,
+            },
+        )
+
     session.delete(translation)
 
 
@@ -106,6 +164,7 @@ def get_or_create_sentence_translation(
     language_code: str,
     translation_text: str,
     verified: bool = False,
+    source: Optional[str] = None,
 ) -> tuple[SentenceTranslation, bool]:
     """Get an existing translation or create a new one.
 
@@ -115,6 +174,8 @@ def get_or_create_sentence_translation(
         language_code: ISO 639-1 language code
         translation_text: The translated sentence text
         verified: Whether this translation has been verified
+        source: Who is creating it, for the operation log. None skips logging.
+            Only the create branch logs; returning an existing row is not an edit.
 
     Returns:
         Tuple of (SentenceTranslation object, created: bool)
@@ -126,6 +187,6 @@ def get_or_create_sentence_translation(
         return existing, False
 
     translation = add_sentence_translation(
-        session, sentence, language_code, translation_text, verified
+        session, sentence, language_code, translation_text, verified, source=source
     )
     return translation, True

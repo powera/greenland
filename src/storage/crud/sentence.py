@@ -5,6 +5,15 @@ from typing import Dict, List, Optional, Tuple, cast
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
+from storage.crud.operation_log import (
+    SENTENCE_CREATE,
+    SENTENCE_DELETE,
+    SENTENCE_MERGE,
+    SENTENCE_UPDATE,
+    FieldChange,
+    log_entity_operation,
+    log_field_changes,
+)
 from storage.models.guid_prefixes import SENTENCE_GUID_PREFIX
 from storage.models.schema import (
     ConversationSentence,
@@ -38,6 +47,7 @@ def add_sentence(
     source_filename: Optional[str] = None,
     verified: bool = False,
     notes: Optional[str] = None,
+    source: Optional[str] = None,
 ) -> Sentence:
     """Create a new sentence.
 
@@ -48,6 +58,7 @@ def add_sentence(
         source_filename: Source file identifier (e.g., "sentence_a1_1")
         verified: Whether this sentence has been verified
         notes: Optional notes about the sentence
+        source: Who is creating this, for the operation log. None skips logging.
 
     Returns:
         Created Sentence object
@@ -63,6 +74,21 @@ def add_sentence(
     )
     session.add(sentence)
     session.flush()
+
+    if source is not None:
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=SENTENCE_CREATE,
+            entity_guid=sentence.guid,
+            fact={
+                "pattern_type": pattern_type,
+                "tense": tense,
+                "source_filename": source_filename,
+                "verified": verified,
+            },
+        )
+
     return sentence
 
 
@@ -167,6 +193,7 @@ def update_sentence(
     tense: Optional[str] = None,
     verified: Optional[bool] = None,
     notes: Optional[str] = None,
+    source: Optional[str] = None,
 ) -> Sentence:
     """Update a sentence's metadata.
 
@@ -177,10 +204,20 @@ def update_sentence(
         tense: New tense (optional)
         verified: New verification status (optional)
         notes: New notes (optional)
+        source: Who is making the edit, for the operation log. None skips logging.
 
     Returns:
         Updated Sentence object
     """
+    # Captured before the assignments below, so the log records what actually
+    # changed rather than the new value twice.
+    changes = [
+        FieldChange("pattern_type", sentence.pattern_type, pattern_type),
+        FieldChange("tense", sentence.tense, tense),
+        FieldChange("verified", sentence.verified, verified),
+        FieldChange("notes", sentence.notes, notes),
+    ]
+
     if pattern_type is not None:
         sentence.pattern_type = pattern_type
     if tense is not None:
@@ -190,10 +227,20 @@ def update_sentence(
     if notes is not None:
         sentence.notes = notes
 
+    log_field_changes(
+        session,
+        source=source,
+        operation_type=SENTENCE_UPDATE,
+        entity_guid=sentence.guid,
+        # A None argument means "leave this field alone", not "set it to None",
+        # so it is not a change even when the stored value is not None.
+        changes=[change for change in changes if change.new_value is not None],
+    )
+
     return sentence
 
 
-def delete_sentence(session: Session, sentence: Sentence) -> None:
+def delete_sentence(session: Session, sentence: Sentence, source: Optional[str] = None) -> None:
     """Delete a sentence and all its associated data.
 
     This will cascade delete all translations and word associations.
@@ -201,7 +248,26 @@ def delete_sentence(session: Session, sentence: Sentence) -> None:
     Args:
         session: Database session
         sentence: Sentence object to delete
+        source: Who is deleting it, for the operation log. None skips logging.
     """
+    if source is not None:
+        # Logged before the delete: afterwards the cascade has taken the
+        # translations and words with it and there is nothing left to count.
+        # The entry outlives the row, which is the point -- resolve_guid_with_history
+        # is what turns its GUID back into a story.
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=SENTENCE_DELETE,
+            entity_guid=sentence.guid,
+            fact={
+                "pattern_type": sentence.pattern_type,
+                "source_filename": sentence.source_filename,
+                "translation_count": len(sentence.translations),
+                "word_count": len(sentence.words),
+            },
+        )
+
     session.delete(sentence)
 
 
@@ -303,7 +369,10 @@ def get_sentence_conversation_count(session: Session, sentence_id: int) -> int:
 
 
 def merge_duplicate_sentences(
-    session: Session, keep_id: int, duplicate_ids: List[int]
+    session: Session,
+    keep_id: int,
+    duplicate_ids: List[int],
+    source: Optional[str] = None,
 ) -> Dict[str, int]:
     """Merge duplicate sentences into one, updating all conversation references.
 
@@ -315,6 +384,7 @@ def merge_duplicate_sentences(
         session: Database session
         keep_id: ID of the sentence to keep
         duplicate_ids: List of sentence IDs to merge into keep_id
+        source: Who is merging, for the operation log. None skips logging.
 
     Returns:
         Dict with merge statistics:
@@ -339,6 +409,7 @@ def merge_duplicate_sentences(
     keep_languages = {t.language_code for t in keep_sentence.translations}
 
     stats = {"conversations_updated": 0, "sentences_deleted": 0, "translations_merged": 0}
+    merged_guids: List[Optional[str]] = []
 
     for dup_id in duplicate_ids:
         dup_sentence = (
@@ -369,11 +440,32 @@ def merge_duplicate_sentences(
                 keep_languages.add(trans.language_code)
                 stats["translations_merged"] += 1
 
+        if source is not None:
+            # One entry per duplicate, keyed to its own GUID: without it a
+            # merged-away GUID has no trace of where it went.
+            log_entity_operation(
+                session,
+                source=source,
+                operation_type=SENTENCE_DELETE,
+                entity_guid=dup_sentence.guid,
+                fact={"merged_into": keep_sentence.guid},
+            )
+            merged_guids.append(dup_sentence.guid)
+
         # Delete the duplicate sentence (cascades to its translations, words, etc.)
         session.delete(dup_sentence)
         stats["sentences_deleted"] += 1
 
     # Recalculate minimum_level for kept sentence if needed
     calculate_minimum_level(session, keep_sentence)
+
+    if source is not None:
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=SENTENCE_MERGE,
+            entity_guid=keep_sentence.guid,
+            fact={"merged_guids": merged_guids, "counts": dict(stats)},
+        )
 
     return stats
