@@ -3,7 +3,8 @@
 
 import logging
 import os
-from typing import Optional
+from pathlib import Path
+from typing import Optional, Union
 
 import constants
 
@@ -68,18 +69,36 @@ def assert_credential_reads_enabled(key_name: str) -> None:
     """
     if not credential_reads_blocked():
         return
+    what = f"keys/{key_name}.key"
     if test_mode_enabled():
         raise CredentialReadBlockedError(
-            f"Read of keys/{key_name}.key blocked: GREENLAND_TEST_MODE=1 is set. "
+            f"Read of {what} blocked: GREENLAND_TEST_MODE=1 is set. "
             f"Test mode forbids loading any credential. Pass a double or an "
             f"explicit fake key instead, or unset GREENLAND_TEST_MODE for a "
             f"deliberate live run."
         )
     raise CredentialReadBlockedError(
-        f"Read of keys/{key_name}.key blocked: tests must not load real "
+        f"Read of {what} blocked: tests must not load real "
         f"credentials. Pass a double or an explicit fake key instead (the "
         f"audiotools.s3_ops helpers take the uploader as an argument for this "
         f"reason). Set GREENLAND_ALLOW_LIVE_KEYS=1 only for a deliberate live run."
+    )
+
+
+def _assert_path_reads_enabled(key_path: "Union[str, Path]") -> None:
+    """assert_credential_reads_enabled for an explicit path rather than a name."""
+    if not credential_reads_blocked():
+        return
+    if test_mode_enabled():
+        raise CredentialReadBlockedError(
+            f"Read of {key_path} blocked: GREENLAND_TEST_MODE=1 is set. "
+            f"Test mode forbids loading any credential. Pass an explicit fake "
+            f"key instead, or unset GREENLAND_TEST_MODE for a deliberate live run."
+        )
+    raise CredentialReadBlockedError(
+        f"Read of {key_path} blocked: tests must not load real credentials. "
+        f"Pass an explicit fake key instead, or set GREENLAND_ALLOW_LIVE_KEYS=1 "
+        f"for a deliberate live run."
     )
 
 
@@ -143,3 +162,47 @@ def load_key(key_name: str, required: bool = False) -> Optional[str]:
         if required:
             raise RuntimeError(f"Error loading API key from {key_path}: {e}")
         return None
+
+
+def load_key_from_path(key_path: Union[str, Path], required: bool = False) -> Optional[str]:
+    """Load an API key from an explicit file path.
+
+    Prefer load_key(), which resolves a key by name under constants.KEY_DIR .
+    This variant exists for CLI flags that let an operator point at a key file
+    somewhere else (e.g. gen_lithuanian_word_audio.py --api-key-file); it honours the same
+    test-mode guard, so such a flag cannot be used to route around it.
+
+    Args:
+        key_path: Path to the file containing the key.
+        required: If True, raise instead of returning None when unreadable.
+
+    Returns:
+        The key, or None if it could not be read (when required=False).
+
+    Raises:
+        CredentialReadBlockedError: If credential reads are blocked.
+        RuntimeError: If required=True and the key could not be read.
+    """
+    if credential_reads_blocked():
+        if required:
+            _assert_path_reads_enabled(key_path)
+        logger.debug(f"Key at {key_path} not loaded: credential reads are blocked")
+        return None
+
+    resolved = Path(key_path)
+    try:
+        key = resolved.read_text(encoding="utf-8").strip()
+    except OSError as e:
+        logger.warning(f"Error reading API key file {resolved}: {e}")
+        if required:
+            raise RuntimeError(f"Error reading API key file {resolved}: {e}")
+        return None
+
+    if key:
+        logger.debug(f"Loaded API key from {resolved}")
+        return key
+
+    logger.warning(f"API key file {resolved} is empty")
+    if required:
+        raise RuntimeError(f"API key file {resolved} is empty")
+    return None

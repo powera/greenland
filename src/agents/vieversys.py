@@ -59,7 +59,7 @@ from clients.audio.polly_tts import PollyTTSClient, PollyVoice
 from clients.audio.manifest import generate_manifest
 from clients.audio.s3_uploader import S3AudioUploader
 from audiotools import s3_ops
-from audiotools.manifests import write_manifest_for_directory
+from audiotools.manifest_rebuild import write_manifest_for_directory
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import (

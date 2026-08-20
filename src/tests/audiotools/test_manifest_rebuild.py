@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-"""Tests for audiotools.manifests.
+"""Tests for audiotools.manifest_rebuild.
 
 This is the rebuild path: it reconstructs a manifest from MP3s already on
 disk, so everything it records is derived from the filename convention
@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from audiotools.manifests import (
+from audiotools.manifest_rebuild import (
     MANIFEST_FILENAME,
     UNKNOWN_GUID,
     build_manifest_for_directory,

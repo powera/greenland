@@ -40,7 +40,7 @@ tasks; currently it is expected that a remote ChatGPT/Claude/Gemini is used.
 src/audiotools contains the production audio pipeline: TTS generation
 (OpenAI, OuteTTS) for flashcard audio, and the S3 upload path.  Run its
 scripts the usual way, e.g.
-  PYTHONPATH=src python src/audiotools/gen_audio.py --help
+  PYTHONPATH=src python src/audiotools/gen_lithuanian_word_audio.py --help
 The acoustic-analysis research tooling (qualityreview/, stirna.py, the
 calibration sample generators) stays in the audio/ submodule; that
 submodule imports clients.audio from this repo, not the reverse.
@@ -99,9 +99,11 @@ which those callers already degrade on - while required=True raises.  This
 matters because clients.audio builds a default OpenAITTSClient at import time;
 raising on the soft path would make `import clients.audio` fail outright.  The
 few hand-rolled key readers (the two Digital Ocean uploaders, azure_tts,
-polly_tts, the audiotools OpenAI helpers) call the assert directly, before any
-secret is read from the environment or the key file, so a blocked run never
-loads a credential it is not allowed to use.  Helpers that merely test for the
+polly_tts, wireword_audio) call the assert directly, before any secret is read
+from the environment or the key file, so a blocked run never loads a credential
+it is not allowed to use.  load_key_from_path covers the CLI flags that point at
+a key file outside keys/ (gen_lithuanian_word_audio.py --api-key-file), so such
+a flag cannot be used to route around the guard either.  Helpers that merely test for the
 presence of credentials (_cdn_credentials_available) report False under test
 mode, so a feature degrades instead of raising partway through.
 

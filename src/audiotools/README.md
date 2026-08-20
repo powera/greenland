@@ -10,7 +10,7 @@ calibration generators, and `do-automation/`) remains in the separate
 
 Run these as ordinary modules with the project's `PYTHONPATH`:
 
-    PYTHONPATH=src python src/audiotools/gen_audio.py --help
+    PYTHONPATH=src python src/audiotools/gen_lithuanian_word_audio.py --help
 
 ## Top-level Python files
 
@@ -22,12 +22,16 @@ breaths. Returns a structured `AudioCheckResult` with confidence scores.
 Also consumed by `qualityreview/batch_review.py` in the `audio/` submodule
 as the "second opinion" alongside librosa-based analysis.
 
-### `audio_utils.py`
-Shared utilities for the Lithuanian TTS pipeline. Defines the Lithuanian
-alphabet (`LITHUANIAN_CHARS`), diacritic-aware normalization, and the
-`LITHUANIAN_TTS_INSTRUCTIONS` prompt that gets threaded into OpenAI calls
-to coax better pronunciation of length/stress patterns. Imported by
-`gen_audio.py` and the legacy `genaudio_outetts.py`.
+### `file_utils.py`
+Small file helpers shared by the generation CLIs: reading a word list one
+per line, and creating an output directory. Nothing audio- or
+language-specific. The Lithuanian pieces that used to live alongside these
+now sit where they belong -- `sanitize_lithuanian_word` and
+`LITHUANIAN_CHARS` in `langtools.lt.utils` (the charset derived from
+`langtools/lt/letters.py` rather than restated), the TTS instructions in
+`prompts/audio/word/lt.txt` behind
+`clients.audio.openai_tts.get_instructions`, and key loading in
+`clients.keys`.
 
 ### `config.py`
 Static configuration for the audio-checker library. Model name, API-key
@@ -35,7 +39,7 @@ path, request timeout/retries, supported audio formats, max file size,
 default language, and thresholds (temperature, confidence, batch size).
 No runtime logic.
 
-### `gen_audio.py`
+### `gen_lithuanian_word_audio.py`
 Primary CLI for generating Lithuanian pronunciation audio via OpenAI TTS.
 Accepts a single word (`--word`) or a batch file (`--batch words.txt`),
 supports all eight OpenAI voices, multi-voice generation with per-voice
@@ -47,6 +51,21 @@ Convenience wrapper around `genaudio_outetts.py` for bulk Lithuanian audio
 from a JSON-of-sentences format. JSON contains `english`, `lithuanian`,
 and required `filename` per item. Supports generating audio across
 multiple speakers in one pass and optionally uploading to a remote server.
+
+### `manifest_rebuild.py`
+Rebuilds an `audio_manifest.json` for a directory of already-generated MP3s
+by scanning the files themselves -- no database involved. Recovers a
+manifest from whatever is on disk, deriving each entry's GUID and text from
+the filename convention. Distinct from
+`clients.audio.manifest.generate_manifest`, which builds a manifest for a
+single freshly generated file from metadata the caller already holds: use
+that one when generating, this one when reconstructing after the fact.
+
+### `s3_ops.py`
+Agent-local S3 helpers for the staging bucket -- listing staged manifests,
+fetching them, and uploading audio. Each helper takes the uploader as an
+argument rather than reaching for a singleton, so tests can pass a double
+(see the credential guard in `clients.keys`).
 
 ### `upload_to_s3.py`
 Uploads files from `../wireword-audio/` to Digital Ocean Spaces
@@ -67,4 +86,4 @@ emits a manifest the review tools consume.
 - `outetts/` — legacy OuteTTS integration. The speaker voice JSONs it loads
   are not checked in here; they live in the `audio/` submodule under
   `outetts/outetts_voices/`. Set `OUTETTS_VOICES_DIR` to point at them.
-  OuteTTS is deprioritized in favor of the OpenAI path in `gen_audio.py`.
+  OuteTTS is deprioritized in favor of the OpenAI path in `gen_lithuanian_word_audio.py`.

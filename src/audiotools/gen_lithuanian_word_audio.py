@@ -7,13 +7,13 @@ files using OpenAI's text-to-speech API. Files are saved to a cache directory
 that can be served by the Atacama web application.
 
 Usage:
-    python gen_audio.py --batch words.txt
-    python gen_audio.py --word "duona"
-    python gen_audio.py --batch words.txt --voice alloy
-    python gen_audio.py --batch words.txt --multi-voice  # automatically enables --organize-by-voice
-    python gen_audio.py --batch words.txt --output-dir ./audio --organize-by-voice
-    python gen_audio.py --batch words.txt --speed 0.75 --voice nova
-    python gen_audio.py --batch words.txt --force  # overwrite existing files
+    python gen_lithuanian_word_audio.py --batch words.txt
+    python gen_lithuanian_word_audio.py --word "duona"
+    python gen_lithuanian_word_audio.py --batch words.txt --voice alloy
+    python gen_lithuanian_word_audio.py --batch words.txt --multi-voice  # automatically enables --organize-by-voice
+    python gen_lithuanian_word_audio.py --batch words.txt --output-dir ./audio --organize-by-voice
+    python gen_lithuanian_word_audio.py --batch words.txt --speed 0.75 --voice nova
+    python gen_lithuanian_word_audio.py --batch words.txt --force  # overwrite existing files
 """
 
 import argparse
@@ -29,13 +29,13 @@ except ImportError:
     print("OpenAI library not installed. Install with: pip install openai")
     sys.exit(1)
 
-from audiotools.audio_utils import (
-    sanitize_lithuanian_word,
-    read_words_from_file,
-    read_api_key_from_file,
+from audiotools.file_utils import (
     ensure_output_directory,
-    LITHUANIAN_TTS_INSTRUCTIONS,
+    read_words_from_file,
 )
+from clients.audio.openai_tts import get_instructions
+from clients.keys import load_key_from_path
+from langtools.lt.utils import sanitize_lithuanian_word
 
 MODEL = "gpt-4o-mini-tts"
 
@@ -102,7 +102,7 @@ def generate_audio(
             voice=voice,
             input=word,
             response_format="mp3",
-            instructions=LITHUANIAN_TTS_INSTRUCTIONS,
+            instructions=get_instructions("lt"),
         )
 
         # Save the audio file
@@ -212,9 +212,7 @@ def main() -> None:
     # 1. Command line argument
     # 2. Environment variable
     # 3. API key file
-    api_key = (
-        args.api_key or os.getenv("OPENAI_API_KEY") or read_api_key_from_file(args.api_key_file)
-    )
+    api_key = args.api_key or os.getenv("OPENAI_API_KEY") or load_key_from_path(args.api_key_file)
     if not api_key:
         print(
             "Error: OpenAI API key required. Set OPENAI_API_KEY environment variable, use --api-key, or create a key file"

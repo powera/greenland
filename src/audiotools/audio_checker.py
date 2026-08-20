@@ -24,7 +24,7 @@ try:
 except ImportError:
     AudioSegment = None
 
-from .audio_utils import read_api_key_from_file
+from clients.keys import load_key_from_path
 from .config import (
     DEFAULT_MODEL,
     API_KEY_FILE,
@@ -76,7 +76,7 @@ class AudioChecker:
         if openai is None:
             raise ImportError("OpenAI library not installed. Install with: pip install openai")
 
-        self.api_key = api_key or read_api_key_from_file(API_KEY_FILE)
+        self.api_key = api_key or load_key_from_path(API_KEY_FILE)
         if not self.api_key:
             raise ValueError(f"OpenAI API key not provided and not found in {API_KEY_FILE}")
 

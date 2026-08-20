@@ -1,7 +1,16 @@
 """Lithuanian-specific utility functions."""
 
+import re
 import unicodedata
 from typing import List
+
+from langtools.lt.letters import LETTERS_UPPER
+
+# Lithuanian alphabet as a lowercase character-class body, derived from the
+# canonical alphabet in letters.py rather than restated, so the two cannot
+# drift apart:
+#   a ą b c č d e ę ė f g h i į y j k l m n o p r s š t u ų ū v z ž
+LITHUANIAN_CHARS = "".join(LETTERS_UPPER).lower()
 
 
 def remove_stress_marks(text: str) -> str:
@@ -144,3 +153,31 @@ def strip_subject_pronoun(text: str) -> str:
         if normalized.startswith(pronoun):
             return normalized[len(pronoun) :].strip()
     return normalized
+
+
+def sanitize_lithuanian_word(word: str) -> str:
+    """
+    Sanitize a Lithuanian word or phrase for use as a filename.
+
+    Keeps Lithuanian letters, basic Latin letters, hyphens and underscores;
+    spaces become underscores so multi-word phrases stay one filename.
+
+    Args:
+        word: The Lithuanian word or phrase to sanitize
+
+    Returns:
+        Sanitized filename-safe version, or "" if nothing survives
+        sanitization or the result exceeds 100 characters
+    """
+    word = word.strip().lower()
+
+    # Replace spaces with underscores for multi-word phrases
+    word_with_underscores = word.replace(" ", "_")
+
+    # Allow all Lithuanian letters, basic Latin letters, and safe characters
+    sanitized = re.sub(r"[^a-z" + LITHUANIAN_CHARS + r"\-_]", "", word_with_underscores)
+
+    if not sanitized or len(sanitized) > 100:
+        return ""
+
+    return sanitized

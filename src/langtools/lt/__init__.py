@@ -34,6 +34,7 @@ from langtools.lt.utils import (
     clean_form,
     normalize_lithuanian_text,
     remove_stress_marks,
+    sanitize_lithuanian_word,
 )
 from langtools.lt.wiktionary import (
     LithuanianParser,
@@ -66,4 +67,5 @@ __all__ = [
     "clean_form",
     "normalize_lithuanian_text",
     "remove_stress_marks",
+    "sanitize_lithuanian_word",
 ]

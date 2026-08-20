@@ -53,12 +53,11 @@ from contextlib import AbstractContextManager
 from pathlib import Path
 from typing import Any, List, Optional, Tuple, Union
 
-from audiotools.audio_utils import (
-    sanitize_lithuanian_word,
-    read_words_from_file,
+from audiotools.file_utils import (
     ensure_output_directory,
-    LITHUANIAN_TTS_INSTRUCTIONS,
+    read_words_from_file,
 )
+from langtools.lt.utils import sanitize_lithuanian_word
 
 # Get the directory where this script is located
 SCRIPT_DIR = Path(__file__).parent
