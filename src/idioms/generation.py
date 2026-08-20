@@ -348,6 +348,7 @@ def store_generated_idioms(
             difficulty_level=difficulty_level,
             source_model=model,
             verified=False,
+            source="idiom-generation",
         )
         stored.append(idiom)
 
@@ -543,6 +544,7 @@ def store_equivalents(
             register=_optional(candidate.get("register")),
             source_model=model,
             verified=False,
+            source="idiom-generation",
         )
         stored.append(equivalent)
 
