@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
 from storage.models.schema import Lemma
+from storage.release.derivative_form import form_to_record
 
 logger = logging.getLogger(__name__)
 
@@ -23,21 +24,12 @@ logger = logging.getLogger(__name__)
 def db_form_to_dict(form: Any, *, include_base_form: bool) -> Dict[str, Any]:
     """Convert a DB ``DerivativeForm`` to its release-file dict shape.
 
-    ``include_base_form`` is the one real difference between the two callers:
-    an inflection records whether it is the base form, a synonym has no such
-    notion.
+    Thin alias for :func:`storage.release.derivative_form.form_to_record`,
+    kept so the sync routes read the same as their sibling helpers here. The
+    record is built in exactly one place so this page and the ``migrate`` CLI
+    cannot drift apart.
     """
-    record: Dict[str, Any] = {
-        "grammatical_form": form.grammatical_form,
-        "text": form.derivative_form_text,
-    }
-    if include_base_form:
-        record["is_base_form"] = form.is_base_form
-    if form.ipa_pronunciation:
-        record["ipa"] = form.ipa_pronunciation
-    if form.phonetic_pronunciation:
-        record["phonetic"] = form.phonetic_pronunciation
-    return record
+    return form_to_record(form, include_base_form=include_base_form)
 
 
 def form_key(grammatical_form: str, text: str) -> str:

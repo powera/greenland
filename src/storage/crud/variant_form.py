@@ -10,11 +10,41 @@ from typing import Dict, List, Optional
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from storage.crud.operation_log import (
+    VARIANT_CREATE,
+    VARIANT_DELETE,
+    VARIANT_UPDATE,
+    FieldChange,
+    log_batch_operation,
+    log_entity_operation,
+    log_field_changes,
+)
 from storage.crud.word_token import add_word_token
 from storage.models.schema import Lemma, WordToken
 from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
 
 logger = logging.getLogger(__name__)
+
+
+def _variant_identity(
+    language_code: str,
+    variant_kind: str,
+    variant_key: str,
+    grammatical_form: Optional[str] = None,
+) -> Dict[str, str]:
+    """Fact keys naming which variant of a lemma an entry is about.
+
+    A variant row has no GUID, so the log entry is keyed to the owning lemma
+    and these fields say which of its variants (and which slot) was touched.
+    """
+    identity: Dict[str, str] = {
+        "language_code": language_code,
+        "variant_kind": variant_kind,
+        "variant_key": variant_key,
+    }
+    if grammatical_form is not None:
+        identity["grammatical_form"] = grammatical_form
+    return identity
 
 
 def add_variant_form(
@@ -32,6 +62,7 @@ def add_variant_form(
     phonetic_pronunciation: Optional[str] = None,
     verified: bool = False,
     notes: Optional[str] = None,
+    source: Optional[str] = None,
 ) -> VariantForm:
     """Add (or update) one grammatical form of a variant paradigm.
 
@@ -56,6 +87,9 @@ def add_variant_form(
         phonetic_pronunciation: Optional simplified pronunciation
         verified: Whether this form has been verified
         notes: Optional free-text notes
+        source: Who is making this change, for the operation log. None skips
+            logging. A variant has no GUID of its own, so the entry is keyed to
+            the owning lemma's GUID with the variant's identity in the fact.
 
     Returns:
         VariantForm: The created or updated row
@@ -77,6 +111,30 @@ def add_variant_form(
         resolved_token = add_word_token(session, variant_form_text, language_code)
 
     if existing is not None:
+        # Captured before the assignments so the log records the real diff.
+        # Only the fields this call can actually change are candidates; the
+        # optional ones are skipped when not supplied, matching the assignments
+        # below, so "not passed" never reads as "cleared".
+        changes = [
+            FieldChange("variant_form_text", existing.variant_form_text, variant_form_text),
+            FieldChange("is_base_form", existing.is_base_form, is_base_form),
+            FieldChange("verified", existing.verified, verified),
+        ]
+        if ipa_pronunciation is not None:
+            changes.append(
+                FieldChange("ipa_pronunciation", existing.ipa_pronunciation, ipa_pronunciation)
+            )
+        if phonetic_pronunciation is not None:
+            changes.append(
+                FieldChange(
+                    "phonetic_pronunciation",
+                    existing.phonetic_pronunciation,
+                    phonetic_pronunciation,
+                )
+            )
+        if notes is not None:
+            changes.append(FieldChange("notes", existing.notes, notes))
+
         existing.variant_form_text = variant_form_text
         existing.is_base_form = is_base_form
         if resolved_token is not None:
@@ -89,6 +147,16 @@ def add_variant_form(
             existing.notes = notes
         existing.verified = verified
         session.flush()
+
+        log_field_changes(
+            session,
+            source=source,
+            operation_type=VARIANT_UPDATE,
+            entity_guid=lemma.guid,
+            changes=changes,
+            extra=_variant_identity(language_code, variant_kind, variant_key, grammatical_form),
+            lemma_id=lemma.id,
+        )
         return existing
 
     variant_form = VariantForm(
@@ -107,6 +175,20 @@ def add_variant_form(
     )
     session.add(variant_form)
     session.flush()
+
+    if source is not None:
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=VARIANT_CREATE,
+            entity_guid=lemma.guid,
+            fact={
+                **_variant_identity(language_code, variant_kind, variant_key, grammatical_form),
+                "text": variant_form_text,
+                "is_base_form": is_base_form,
+            },
+            lemma_id=lemma.id,
+        )
     return variant_form
 
 
@@ -201,8 +283,18 @@ def delete_variant(
     variant_key: str,
     language_code: str = "en",
     variant_kind: str = VARIANT_KIND_SPELLING,
+    source: Optional[str] = None,
 ) -> int:
     """Delete an entire variant paradigm for a lemma.
+
+    Args:
+        session: Database session
+        lemma: The lemma the variant belongs to
+        variant_key: Which variant to delete (e.g. "grey")
+        language_code: Language of the variant
+        variant_kind: Kind of variant; defaults to "spelling"
+        source: Who is deleting this, for the operation log. None skips
+            logging.
 
     Returns:
         Number of rows deleted
@@ -218,4 +310,17 @@ def delete_variant(
         .delete(synchronize_session=False)
     )
     session.flush()
+
+    # One entry for the paradigm rather than one per form: "the grey variant
+    # was removed" is the operation, and log_batch_operation writes nothing
+    # when the delete matched no rows.
+    log_batch_operation(
+        session,
+        source=source,
+        operation_type=VARIANT_DELETE,
+        entity_guid=lemma.guid,
+        count=deleted,
+        fact=_variant_identity(language_code, variant_kind, variant_key),
+        lemma_id=lemma.id,
+    )
     return deleted

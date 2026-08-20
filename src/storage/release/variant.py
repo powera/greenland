@@ -30,6 +30,7 @@ from collections import defaultdict
 from typing import Any, Dict, Iterable, List, Tuple
 
 from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
+from storage.release.derivative_form import in_paradigm_order
 
 #: Identifies one variant paradigm within a lemma and language.
 VariantIdentity = Tuple[str, str]
@@ -54,7 +55,14 @@ def form_to_record(variant_form: VariantForm) -> Dict[str, Any]:
 
 
 def _sorted_forms(forms: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    return sorted(forms, key=lambda form: str(form.get("grammatical_form", "")))
+    """Order a variant's forms exactly as the lemma's own ``forms`` array is.
+
+    A variant carries a full paradigm, so it reads in paradigm order
+    ("grey", "greyer", "greyest") rather than alphabetically -- the same
+    ordering ``storage.release.derivative_form`` applies to ``forms``, so the
+    two arrays on one line cannot disagree about how a paradigm is laid out.
+    """
+    return in_paradigm_order(list(forms))
 
 
 def paradigms_to_records(

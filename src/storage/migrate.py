@@ -512,7 +512,8 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
         RELEASE_DIRNAME as TOMBSTONE_RELEASE_DIRNAME,
     )
     from storage.release.tombstone import export_tombstones_to_release
-    from storage.models.schema import Lemma, NON_INFLECTION_GRAMMATICAL_FORMS
+    from storage.models.schema import Lemma
+    from storage.release.derivative_form import forms_by_language
     from storage.release.lemma import lemma_to_release_record
 
     session = create_database_session(sqlite_path)
@@ -688,32 +689,10 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
             lang_records: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
 
             for lemma in category_lemmas:
-                # Group derivative forms by language. True inflections are keyed by
-                # grammatical_form; synonym-class forms are list-shaped because the
-                # same relation label can repeat for a lemma/language.
-                forms_by_lang: Dict[str, Dict[str, Dict[str, Any]]] = {}
-                synonyms_by_lang: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
-                for form in lemma.derivative_forms:
-                    lang = form.language_code
-                    if form.grammatical_form in NON_INFLECTION_GRAMMATICAL_FORMS:
-                        synonym_record: Dict[str, Any] = {
-                            "grammatical_form": form.grammatical_form,
-                            "text": form.derivative_form_text,
-                        }
-                        if form.ipa_pronunciation:
-                            synonym_record["ipa"] = form.ipa_pronunciation
-                        if form.phonetic_pronunciation:
-                            synonym_record["phonetic"] = form.phonetic_pronunciation
-                        synonyms_by_lang[lang].append(synonym_record)
-                        continue
-                    if lang not in forms_by_lang:
-                        forms_by_lang[lang] = {}
-                    forms_by_lang[lang][form.grammatical_form] = {
-                        "form": form.derivative_form_text,
-                        "is_base_form": form.is_base_form,
-                        "ipa": form.ipa_pronunciation,
-                        "phonetic": form.phonetic_pronunciation,
-                    }
+                # Derivative forms, split into the array-shaped "forms" and
+                # "synonyms" keys by storage.release.derivative_form -- the same
+                # builder the /sync/derivatives and /sync/synonyms pages use.
+                forms_by_lang, synonyms_by_lang = forms_by_language(lemma.derivative_forms)
 
                 # Variant forms (alternate spellings), already grouped per
                 # language and per variant by storage.release.variant.
@@ -746,15 +725,9 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                 for lang in langs_with_data:
                     record: Dict[str, Any] = {"guid": lemma.guid}
                     if lang in forms_by_lang:
-                        record["derivative_forms"] = forms_by_lang[lang]
+                        record["forms"] = forms_by_lang[lang]
                     if lang in synonyms_by_lang:
-                        record["synonyms"] = sorted(
-                            synonyms_by_lang[lang],
-                            key=lambda current_synonym: (
-                                current_synonym["grammatical_form"],
-                                current_synonym["text"],
-                            ),
-                        )
+                        record["synonyms"] = synonyms_by_lang[lang]
                     if lang in variants_by_lang:
                         record["variants"] = variants_by_lang[lang]
                     if lang in facts_by_lang:

@@ -32,7 +32,11 @@ from storage.crud.guid_tombstone import create_tombstone, get_tombstones_by_lemm
 from storage.crud.difficulty_override import get_all_overrides_for_lemma
 from storage.crud.lemma import handle_lemma_type_subtype_change
 from storage.crud.lemma_tags import parse_tags_input, serialize_tags_for_column
-from storage.crud.operation_log import log_translation_change
+from storage.crud.operation_log import (
+    VARIANT_DELETE,
+    log_entity_operation,
+    log_translation_change,
+)
 from storage.models.schema import (
     SYNONYM_GRAMMATICAL_FORMS,
     DerivativeForm,
@@ -1072,27 +1076,21 @@ def add_variant(lemma_id: int) -> ResponseReturnValue:
         flash("Language is required", "error")
         return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
 
+    # store_spelling_variants logs one variant_create per form it writes,
+    # keyed to the lemma's GUID.
     stored = store_spelling_variants(
         session=g.db,
         lemma=lemma,
         language_code=lang_code,
         alternate_spellings=[variant_text],
         variant_kind=variant_kind,
+        source=Config.OPERATION_LOG_SOURCE,
     )
 
     if not stored:
         flash(f'Failed to add variant "{variant_text}"', "error")
         return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
 
-    log_translation_change(
-        session=g.db,
-        source=Config.OPERATION_LOG_SOURCE,
-        operation_type="variant_form_add",
-        lemma_id=lemma_id,
-        field_name=f"{lang_code}_{variant_kind}",
-        old_value=None,
-        new_value=variant_text,
-    )
     g.db.commit()
 
     flash(f'Added variant "{variant_text}"', "success")
@@ -1118,19 +1116,25 @@ def delete_variant_form(lemma_id: int, form_id: int) -> ResponseReturnValue:
         return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
 
     form_text = form.variant_form_text
-    language_code = form.language_code
-    grammatical_form = form.grammatical_form
 
-    g.db.delete(form)
-    log_translation_change(
+    # Logged before the delete, while the row is still there to describe, and
+    # keyed to the owning lemma's GUID since a variant form has none of its own.
+    log_entity_operation(
         session=g.db,
         source=Config.OPERATION_LOG_SOURCE,
-        operation_type="variant_form_delete",
+        operation_type=VARIANT_DELETE,
+        entity_guid=form.lemma.guid,
+        fact={
+            "language_code": form.language_code,
+            "variant_kind": form.variant_kind,
+            "variant_key": form.variant_key,
+            "grammatical_form": form.grammatical_form,
+            "text": form_text,
+            "count": 1,
+        },
         lemma_id=lemma_id,
-        field_name=f"{language_code}_{grammatical_form}",
-        old_value=form_text,
-        new_value=None,
     )
+    g.db.delete(form)
     g.db.commit()
 
     flash(f'Deleted variant form: "{form_text}"', "success")
@@ -1161,24 +1165,18 @@ def delete_variant_paradigm(lemma_id: int) -> ResponseReturnValue:
         flash("Variant key and language are required", "error")
         return redirect(url_for("lemmas.view_lemma_related", lemma_id=lemma_id))
 
+    # delete_variant logs one variant_delete for the paradigm, and writes
+    # nothing when it matched no rows.
     deleted_count = delete_variant(
         session=g.db,
         lemma=lemma,
         variant_key=variant_key,
         language_code=lang_code,
         variant_kind=variant_kind,
+        source=Config.OPERATION_LOG_SOURCE,
     )
 
     if deleted_count:
-        log_translation_change(
-            session=g.db,
-            source=Config.OPERATION_LOG_SOURCE,
-            operation_type="variant_delete",
-            lemma_id=lemma_id,
-            field_name=f"{lang_code}_{variant_kind}",
-            old_value=variant_key,
-            new_value=None,
-        )
         g.db.commit()
         flash(f'Deleted variant "{variant_key}" ({deleted_count} form(s))', "success")
     else:

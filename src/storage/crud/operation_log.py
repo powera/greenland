@@ -83,6 +83,19 @@ IDIOM_EQUIVALENT_CREATE = "idiom_equivalent_create"
 IDIOM_EQUIVALENT_UPDATE = "idiom_equivalent_update"
 IDIOM_EQUIVALENT_DELETE = "idiom_equivalent_delete"
 
+# Operation types for the variant and derivative-form families. Neither row
+# carries a GUID of its own, so both log against the owning *lemma's* GUID with
+# the form's identity in the fact -- the same shape phrase and name
+# translations use. A variant is identified within its lemma by
+# (variant_kind, variant_key, grammatical_form), a derivative form by
+# (language_code, grammatical_form).
+VARIANT_CREATE = "variant_create"
+VARIANT_UPDATE = "variant_update"
+VARIANT_DELETE = "variant_delete"
+DERIVATIVE_FORM_CREATE = "derivative_form_create"
+DERIVATIVE_FORM_UPDATE = "derivative_form_update"
+DERIVATIVE_FORM_DELETE = "derivative_form_delete"
+
 # Operation types for GUID retirement. The entity here is the retired GUID
 # itself rather than a row that owns it -- a tombstone exists precisely because
 # the thing that held the GUID is gone.
