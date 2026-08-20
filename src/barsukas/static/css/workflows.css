@@ -41,3 +41,12 @@
 .workflow-sentence-text {
     max-width: 40rem;
 }
+
+/* The import task's result string: one semicolon-separated line per stage.
+ * Wrapped rather than scrolled, since the interesting part (why the run
+ * stopped) is at the end. */
+.workflow-task-result {
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-bottom: 0;
+}

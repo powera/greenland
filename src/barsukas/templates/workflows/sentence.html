@@ -41,17 +41,38 @@
                             <option value="fr">French</option>
                             <option value="zh">Chinese</option>
                         </select>
+                        <div class="form-text">
+                            The language the pasted text <em>is written in</em>, not a
+                            translation target.
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <label for="source_name" class="form-label">Source label</label>
                         <input type="text" class="form-control" id="source_name" name="source_name"
                                placeholder="pasted text">
+                        <div class="form-text">Provenance only; recorded on each sentence.</div>
                     </div>
                     <div class="col-md-2">
                         <label for="limit" class="form-label">Max sentences</label>
                         <input type="number" class="form-control" id="limit" name="limit" min="1"
                                placeholder="all">
+                        <div class="form-text">Blank imports every sentence found.</div>
                     </div>
+                </div>
+
+                <div class="alert alert-light border mt-3 mb-0 small">
+                    <i class="bi bi-info-circle"></i>
+                    Each sentence is translated into
+                    <strong>{{ default_spec.target_languages | join(', ') }}</strong>, and
+                    <strong>{{ default_spec.decompose_languages | join(', ') }}</strong>
+                    {{ 'is' if default_spec.decompose_languages | length == 1 else 'are' }}
+                    broken into words and linked to lemmas. Words with no lemma are staged
+                    for approval rather than created automatically. These defaults are not
+                    configurable from this page.
+                    <br>
+                    Queuing only records the work &mdash; a worker must be running for
+                    anything to happen:
+                    <code>PYTHONPATH=src python src/workqueue/worker.py</code>
                 </div>
 
                 <div class="form-check mt-3">
