@@ -36,8 +36,29 @@
                     <dt class="col-sm-3">Operation Type:</dt>
                     <dd class="col-sm-9"><span class="badge bg-primary">{{ log.operation_type }}</span></dd>
 
-                    {% if log.lemma_id %}
-                        <dt class="col-sm-3">Lemma:</dt>
+                    {% if log.entity_guid %}
+                        <dt class="col-sm-3">Entity:</dt>
+                        <dd class="col-sm-9">
+                            <a href="{{ url_for('guids.lookup', guid=log.entity_guid) }}">
+                                <code>{{ log.entity_guid }}</code>
+                            </a>
+                            {% if resolved %}
+                                <span class="badge bg-light text-dark">{{ resolved.kind }}</span>
+                                {% if resolved.is_tombstoned %}
+                                    <span class="badge bg-warning text-dark">retired</span>
+                                    {% if resolved.replacement_guid %}
+                                        &rarr;
+                                        <a href="{{ url_for('guids.lookup', guid=resolved.replacement_guid) }}">
+                                            <code>{{ resolved.replacement_guid }}</code>
+                                        </a>
+                                    {% endif %}
+                                {% elif not resolved.exists %}
+                                    <span class="text-muted">(no longer in the database)</span>
+                                {% endif %}
+                            {% endif %}
+                        </dd>
+                    {% elif log.lemma_id %}
+                        <dt class="col-sm-3">Entity:</dt>
                         <dd class="col-sm-9">
                             {% if lemma %}
                                 <a href="{{ url_for('lemmas.view_lemma', lemma_id=lemma.id) }}">
@@ -45,8 +66,11 @@
                                 </a>
                                 <small class="text-muted">(ID: {{ log.lemma_id }})</small>
                             {% else %}
-                                <span class="text-muted">Lemma ID {{ log.lemma_id }} (not found)</span>
+                                <span class="text-muted">
+                                    {{ legacy_entity_type or 'unknown' }} ID {{ log.lemma_id }}
+                                </span>
                             {% endif %}
+                            <span class="badge bg-warning text-dark" title="Written before entity GUIDs existed, when this column held the id of whatever kind of row the entry was about.">legacy reference</span>
                         </dd>
                     {% endif %}
 
@@ -73,6 +97,27 @@
                         <i class="bi bi-exclamation-triangle"></i> {{ fact_data.error }}
                     </div>
                 {% else %}
+                    {% if fact_data.get('changes') %}
+                        <table class="table table-sm mb-3">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30%;">Field</th>
+                                    <th>Old</th>
+                                    <th>New</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for change in fact_data.changes %}
+                                    <tr>
+                                        <th>{{ change.field }}</th>
+                                        <td><span class="text-muted">{{ change.old_value if change.old_value is not none else 'null' }}</span></td>
+                                        <td>{{ change.new_value if change.new_value is not none else 'null' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+
                     <table class="table table-sm">
                         <tbody>
                             {% for key, value in fact_data.items() %}
