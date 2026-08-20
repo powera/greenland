@@ -6,6 +6,13 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
+from storage.crud.operation_log import (
+    GUID_TOMBSTONE,
+    GUID_TOMBSTONE_UPDATE,
+    FieldChange,
+    log_entity_operation,
+    log_field_changes,
+)
 from storage.models.guid_tombstone import (
     TOMBSTONE_REASON_TYPE_CHANGE,
     TOMBSTONE_REASONS,
@@ -24,6 +31,7 @@ def create_tombstone(
     reason: str = TOMBSTONE_REASON_TYPE_CHANGE,
     notes: Optional[str] = None,
     changed_by: Optional[str] = None,
+    source: Optional[str] = None,
 ) -> GuidTombstone:
     """
     Create (or refresh) a tombstone entry for a removed/replaced GUID.
@@ -32,6 +40,16 @@ def create_tombstone(
     existing row rather than raising, so re-running a backfill or applying the
     same sync twice is safe.  This mirrors ``add_variant_form``'s upsert on its
     own unique key.
+
+    The two branches log as different operation types, because they are
+    different events: minting a tombstone retires a GUID permanently, while
+    refreshing one only corrects the details recorded about a retirement that
+    already happened.  ``entity_guid`` is the retired GUID itself -- there is no
+    parent row to hang it on, which is the whole reason a tombstone exists.
+
+    The release importer deliberately passes no ``source``.  It upserts all ~550
+    records on every run, so logging it would write one entry per known
+    tombstone per import and drown the real retirements.
 
     Args:
         session: Database session
@@ -44,6 +62,9 @@ def create_tombstone(
         reason: Reason for tombstoning; must be one of TOMBSTONE_REASONS
         notes: Optional notes
         changed_by: Who made this change
+        source: Who is retiring the GUID, for the operation log. None skips
+            logging.  Distinct from ``changed_by``, which is stored on the
+            tombstone row and travels with it into ``data/release``.
 
     Returns:
         The created or updated GuidTombstone object
@@ -58,6 +79,15 @@ def create_tombstone(
 
     existing = get_tombstone_by_guid(session, guid)
     if existing is not None:
+        # Captured before the assignments so the log records the real diff.
+        # Only the fields that identify the retirement are tracked; notes and
+        # changed_by are metadata about the record, not about the GUID.
+        changes = [
+            FieldChange("original_lemma_text", existing.original_lemma_text, original_lemma_text),
+            FieldChange("replacement_guid", existing.replacement_guid, replacement_guid),
+            FieldChange("reason", existing.reason, reason),
+        ]
+
         existing.original_lemma_text = original_lemma_text
         existing.original_pos_type = original_pos_type
         existing.original_pos_subtype = original_pos_subtype
@@ -69,6 +99,16 @@ def create_tombstone(
         if changed_by is not None:
             existing.changed_by = changed_by
         session.flush()
+
+        log_field_changes(
+            session,
+            source=source,
+            operation_type=GUID_TOMBSTONE_UPDATE,
+            entity_guid=guid,
+            changes=changes,
+            lemma_id=lemma_id,
+        )
+
         return existing
 
     tombstone = GuidTombstone(
@@ -84,6 +124,24 @@ def create_tombstone(
     )
     session.add(tombstone)
     session.flush()
+
+    if source is not None:
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=GUID_TOMBSTONE,
+            entity_guid=guid,
+            fact={
+                "reason": reason,
+                "original_lemma_text": original_lemma_text,
+                "original_pos_type": original_pos_type,
+                "original_pos_subtype": original_pos_subtype,
+                "replacement_guid": replacement_guid,
+                "changed_by": changed_by,
+            },
+            lemma_id=lemma_id,
+        )
+
     return tombstone
 
 

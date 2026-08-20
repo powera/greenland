@@ -783,6 +783,7 @@ def edit_lemma(lemma_id: int) -> ResponseReturnValue:
                     reason=TOMBSTONE_REASON_MANUAL_CORRECTION,
                     notes="GUID reassigned by hand via the BARSUKAS edit form.",
                     changed_by=Config.OPERATION_LOG_SOURCE,
+                    source=Config.OPERATION_LOG_SOURCE,
                 )
                 flash(f"Old GUID {lemma.guid} tombstoned; it will not be reissued.", "warning")
             changes.append(("guid", lemma.guid, new_guid))

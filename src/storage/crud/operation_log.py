@@ -83,6 +83,12 @@ IDIOM_EQUIVALENT_CREATE = "idiom_equivalent_create"
 IDIOM_EQUIVALENT_UPDATE = "idiom_equivalent_update"
 IDIOM_EQUIVALENT_DELETE = "idiom_equivalent_delete"
 
+# Operation types for GUID retirement. The entity here is the retired GUID
+# itself rather than a row that owns it -- a tombstone exists precisely because
+# the thing that held the GUID is gone.
+GUID_TOMBSTONE = "guid_tombstone"
+GUID_TOMBSTONE_UPDATE = "guid_tombstone_update"
+
 # Operation types for the name family.
 NAME_CREATE = "name_create"
 NAME_UPDATE = "name_update"

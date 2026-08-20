@@ -1,4 +1,4 @@
-"""Tests for operation logging in the phrase, idiom and name CRUD functions.
+"""Tests for operation logging in the phrase, idiom, name and tombstone CRUD.
 
 These are the same opt-in contract the sentence CRUD functions follow (see
 :mod:`tests.storage.test_sentence_crud_logging`): passing ``source`` means "log
@@ -6,6 +6,9 @@ this", omitting it means "do not". What is specific here is that all three types
 have child rows with no GUID of their own -- phrase translations, idiom
 equivalents, name renderings -- which are logged against their *parent's* GUID
 with ``language_code`` in the fact, so one GUID filter returns the whole story.
+
+Tombstones invert that: the entity is the retired GUID itself, because the row
+that held it is gone. That is the case ``resolve_guid_with_history`` exists for.
 """
 
 from __future__ import annotations
@@ -27,6 +30,7 @@ from storage.crud.idiom import (
     update_idiom,
     update_idiom_equivalent,
 )
+from storage.crud.guid_tombstone import create_tombstone
 from storage.crud.name_entity import (
     create_name,
     delete_name,
@@ -35,6 +39,8 @@ from storage.crud.name_entity import (
     update_name,
 )
 from storage.crud.operation_log import (
+    GUID_TOMBSTONE,
+    GUID_TOMBSTONE_UPDATE,
     IDIOM_CREATE,
     IDIOM_DELETE,
     IDIOM_EQUIVALENT_CREATE,
@@ -51,6 +57,7 @@ from storage.crud.operation_log import (
     PHRASE_TRANSLATION_UPDATE,
 )
 from storage.crud.phrase import add_phrase, set_phrase_translation
+from storage.models.guid_tombstone import TOMBSTONE_REASON_SYNONYM_MERGE
 from storage.models.idiom import Idiom
 from storage.models.name_entity import Name
 from storage.models.operation_log import OperationLog
@@ -380,5 +387,91 @@ def test_nothing_is_logged_without_a_source(session: Session) -> None:
     set_name_translation(session, name, language_code="lt", translation="Džordžas")
     set_name_translation(session, name, language_code="lt", translation="Georgas")
     delete_name(session, name)
+
+    assert _log_count(session) == 0
+
+
+# ── GUID tombstones ────────────────────────────────────────────────────────
+
+
+def test_creating_a_tombstone_logs_against_the_retired_guid(session: Session) -> None:
+    """The entity is the GUID itself: nothing else survives to name it."""
+    create_tombstone(
+        session,
+        guid="N01_007",
+        original_lemma_text="dog",
+        original_pos_type="noun",
+        original_pos_subtype="animal",
+        replacement_guid="N02_003",
+        lemma_id=None,
+        reason=TOMBSTONE_REASON_SYNONYM_MERGE,
+        source=SOURCE,
+    )
+
+    (entry,) = _logs(session, GUID_TOMBSTONE)
+    assert entry.entity_guid == "N01_007"
+    fact = _fact(entry)
+    assert fact["reason"] == TOMBSTONE_REASON_SYNONYM_MERGE
+    assert fact["replacement_guid"] == "N02_003"
+    # The retired GUID still classifies by its prefix, so the /logs filter and
+    # the kind badge keep working for a row that no longer exists.
+    assert fact["entity_kind"] == "lemma"
+
+
+def test_refreshing_a_tombstone_logs_as_an_update(session: Session) -> None:
+    """Minting a tombstone and correcting one are different events."""
+    for _ in range(2):
+        create_tombstone(
+            session,
+            guid="N01_007",
+            original_lemma_text="dog",
+            original_pos_type="noun",
+            original_pos_subtype="animal",
+            replacement_guid="N02_003",
+            lemma_id=None,
+            reason=TOMBSTONE_REASON_SYNONYM_MERGE,
+            source=SOURCE,
+        )
+
+    # The second call changed nothing, so it recorded nothing.
+    assert len(_logs(session, GUID_TOMBSTONE)) == 1
+    assert _logs(session, GUID_TOMBSTONE_UPDATE) == []
+
+    create_tombstone(
+        session,
+        guid="N01_007",
+        original_lemma_text="dog",
+        original_pos_type="noun",
+        original_pos_subtype="animal",
+        replacement_guid="N02_009",
+        lemma_id=None,
+        reason=TOMBSTONE_REASON_SYNONYM_MERGE,
+        source=SOURCE,
+    )
+
+    (entry,) = _logs(session, GUID_TOMBSTONE_UPDATE)
+    assert entry.entity_guid == "N01_007"
+    (change,) = _fact(entry)["changes"]
+    assert change == {
+        "field": "replacement_guid",
+        "old_value": "N02_003",
+        "new_value": "N02_009",
+    }
+    # Still exactly one retirement: the GUID was retired once.
+    assert len(_logs(session, GUID_TOMBSTONE)) == 1
+
+
+def test_tombstoning_without_a_source_logs_nothing(session: Session) -> None:
+    """The release importer relies on this: it upserts ~550 rows per run."""
+    create_tombstone(
+        session,
+        guid="N01_007",
+        original_lemma_text="dog",
+        original_pos_type="noun",
+        original_pos_subtype="animal",
+        replacement_guid=None,
+        lemma_id=None,
+        reason=TOMBSTONE_REASON_SYNONYM_MERGE,
+    )
 
     assert _log_count(session) == 0
