@@ -60,6 +60,7 @@ from clients.audio.manifest import generate_manifest
 from clients.audio.s3_uploader import S3AudioUploader
 from audiotools import s3_ops
 from audiotools.manifest_rebuild import write_manifest_for_directory
+from audiotools.review_records import clear_review_verdict, find_existing_review
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.schema import (
@@ -429,15 +430,12 @@ class VieversysAgent:
         accepted_by = "vieversys-auto" if self.auto_approve else None
 
         # Check if record already exists
-        existing = (
-            session.query(AudioQualityReview)
-            .filter_by(
-                guid=lemma.guid,
-                language_code=language_code,
-                voice_name=voice_name,
-                grammatical_form=None,  # Base form
-            )
-            .first()
+        existing = find_existing_review(
+            session,
+            language_code=language_code,
+            voice_name=voice_name,
+            guid=lemma.guid,
+            grammatical_form=None,  # Base form
         )
 
         if existing:
@@ -452,10 +450,7 @@ class VieversysAgent:
             existing.s3_prod_url = s3_prod_url
             existing.accepted_at = accepted_at
             existing.accepted_by = accepted_by
-            existing.quality_issues = None
-            existing.notes = None
-            existing.reviewed_at = None
-            existing.reviewed_by = None
+            clear_review_verdict(existing)
             logger.debug(f"Updated existing review record for {lemma.guid}")
         else:
             # Create new record
@@ -662,14 +657,11 @@ class VieversysAgent:
     ) -> None:
         """Create AudioQualityReview record for generated sentence audio."""
         # Check if record already exists
-        existing = (
-            session.query(AudioQualityReview)
-            .filter_by(
-                sentence_id=sentence.id,
-                language_code=language_code,
-                voice_name=voice_name,
-            )
-            .first()
+        existing = find_existing_review(
+            session,
+            language_code=language_code,
+            voice_name=voice_name,
+            sentence_id=sentence.id,
         )
 
         if existing:
@@ -684,10 +676,7 @@ class VieversysAgent:
             existing.s3_prod_url = None  # Clear prod URL when regenerating
             existing.accepted_at = None
             existing.accepted_by = None
-            existing.quality_issues = None
-            existing.notes = None
-            existing.reviewed_at = None
-            existing.reviewed_by = None
+            clear_review_verdict(existing)
             logger.debug(f"Updated existing review record for sentence {sentence.id}")
         else:
             # Create new record

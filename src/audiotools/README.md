@@ -22,6 +22,12 @@ breaths. Returns a structured `AudioCheckResult` with confidence scores.
 Also consumed by `qualityreview/batch_review.py` in the `audio/` submodule
 as the "second opinion" alongside librosa-based analysis.
 
+### `config.py`
+Static configuration for the audio-checker library. Model name, API-key
+path, request timeout/retries, supported audio formats, max file size,
+default language, and thresholds (temperature, confidence, batch size).
+No runtime logic.
+
 ### `file_utils.py`
 Small file helpers shared by the generation CLIs: reading a word list one
 per line, and creating an output directory. Nothing audio- or
@@ -32,12 +38,6 @@ now sit where they belong -- `sanitize_lithuanian_word` and
 `prompts/audio/word/lt.txt` behind
 `clients.audio.openai_tts.get_instructions`, and key loading in
 `clients.keys`.
-
-### `config.py`
-Static configuration for the audio-checker library. Model name, API-key
-path, request timeout/retries, supported audio formats, max file size,
-default language, and thresholds (temperature, confidence, batch size).
-No runtime logic.
 
 ### `gen_lithuanian_word_audio.py`
 Primary CLI for generating Lithuanian pronunciation audio via OpenAI TTS.
@@ -61,11 +61,29 @@ the filename convention. Distinct from
 single freshly generated file from metadata the caller already holds: use
 that one when generating, this one when reconstructing after the fact.
 
+### `review_records.py`
+Shared helpers for the `AudioQualityReview` table. `find_existing_review`
+performs the lookup mirroring both unique constraints -- notably the lemma
+one, whose NULL `grammatical_form` SQL will not catch, so a missed lookup
+silently duplicates rows rather than raising. `clear_review_verdict` drops a
+stale human judgement from a row being pointed at new audio. Used by
+`agents.gandras`, `agents.vieversys`, and `workqueue.handlers.vieversys`,
+each of which previously carried its own copy.
+
 ### `s3_ops.py`
 Agent-local S3 helpers for the staging bucket -- listing staged manifests,
 fetching them, and uploading audio. Each helper takes the uploader as an
 argument rather than reaching for a singleton, so tests can pass a double
 (see the credential guard in `clients.keys`).
+
+### `staging_manifest.py`
+Parses the JSON manifest an agent writes to S3 beside each MP3
+(`ManifestEntry`) and decides which database row it describes
+(`match_manifest_to_database`, returning a `MatchResult`). Matching goes by
+GUID for lemmas or `sentence_id` for sentences, then compares the manifest
+text against the stored translation; `require_text_match=False` imports a
+mismatch anyway but still warns. Distinct from `manifest_rebuild.py`, which
+reconstructs a manifest from filenames on disk.
 
 ### `upload_to_s3.py`
 Uploads files from `../wireword-audio/` to Digital Ocean Spaces
