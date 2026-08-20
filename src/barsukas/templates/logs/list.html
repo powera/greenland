@@ -37,11 +37,15 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-3">
-                        <label for="lemma_id" class="form-label">Lemma ID</label>
-                        <input type="text" class="form-control" id="lemma_id" name="lemma_id" value="{{ lemma_id_filter }}" placeholder="Filter by lemma ID">
+                    <div class="col-md-2">
+                        <label for="guid" class="form-label">GUID</label>
+                        <input type="text" class="form-control" id="guid" name="guid" value="{{ guid_filter }}" placeholder="e.g. S_00001">
                     </div>
-                    <div class="col-md-3 d-flex align-items-end">
+                    <div class="col-md-2">
+                        <label for="lemma_id" class="form-label">Lemma ID</label>
+                        <input type="text" class="form-control" id="lemma_id" name="lemma_id" value="{{ lemma_id_filter }}" placeholder="Legacy rows">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
                         <button type="submit" class="btn btn-primary me-2">
                             <i class="bi bi-search"></i> Filter
                         </button>
@@ -75,7 +79,7 @@
                                     <th>Timestamp</th>
                                     <th>Source</th>
                                     <th>Operation</th>
-                                    <th>Lemma</th>
+                                    <th>Entity</th>
                                     <th>Summary</th>
                                     <th>Actions</th>
                                 </tr>
@@ -88,12 +92,22 @@
                                         <td><span class="badge bg-info">{{ item.log.source }}</span></td>
                                         <td><span class="badge bg-secondary">{{ item.log.operation_type }}</span></td>
                                         <td>
-                                            {% if item.lemma %}
+                                            {% if item.log.entity_guid %}
+                                                <a href="{{ url_for('guids.lookup', guid=item.log.entity_guid) }}">
+                                                    <code>{{ item.log.entity_guid }}</code>
+                                                </a>
+                                                {% if item.entity_kind %}
+                                                    <span class="badge bg-light text-dark">{{ item.entity_kind }}</span>
+                                                {% endif %}
+                                            {% elif item.lemma %}
                                                 <a href="{{ url_for('lemmas.view_lemma', lemma_id=item.lemma.id) }}">
                                                     {{ item.lemma.lemma_text }}
                                                 </a>
+                                                <span class="badge bg-warning text-dark" title="Written before entity GUIDs; this reference may point at another kind of row.">legacy</span>
                                             {% elif item.log.lemma_id %}
-                                                ID: {{ item.log.lemma_id }}
+                                                <span class="text-muted" title="Written before entity GUIDs existed, when this column held the id of whatever kind of row the entry was about.">
+                                                    {{ item.legacy_entity_type or 'unknown' }} ID: {{ item.log.lemma_id }}
+                                                </span>
                                             {% else %}
                                                 <span class="text-muted">-</span>
                                             {% endif %}
@@ -103,7 +117,13 @@
                                                 {% if 'language_code' in item.fact_data %}
                                                     {{ item.fact_data.language_code }}:
                                                 {% endif %}
-                                                {% if 'old_translation' in item.fact_data or 'new_translation' in item.fact_data %}
+                                                {% if 'changes' in item.fact_data %}
+                                                    {{ item.fact_data.get('changed_fields') | join(', ') }}
+                                                {% elif 'steps' in item.fact_data %}
+                                                    {{ item.fact_data.get('steps') | join('; ') | truncate(60) }}
+                                                {% elif 'count' in item.fact_data %}
+                                                    {{ item.fact_data.count }} row(s)
+                                                {% elif 'old_translation' in item.fact_data or 'new_translation' in item.fact_data %}
                                                     "{{ item.fact_data.get('old_translation') or 'null' }}" → "{{ item.fact_data.get('new_translation') or 'null' }}"
                                                 {% elif 'old_value' in item.fact_data or 'new_value' in item.fact_data %}
                                                     {% if 'field_name' in item.fact_data %}{{ item.fact_data.field_name }}: {% endif %}
@@ -131,21 +151,21 @@
                         <nav>
                             <ul class="pagination justify-content-center">
                                 <li class="page-item {% if page == 1 %}disabled{% endif %}">
-                                    <a class="page-link" href="?page={{ page - 1 }}{% if source_filter %}&source={{ source_filter }}{% endif %}{% if operation_type_filter %}&operation_type={{ operation_type_filter }}{% endif %}{% if lemma_id_filter %}&lemma_id={{ lemma_id_filter }}{% endif %}">Previous</a>
+                                    <a class="page-link" href="?page={{ page - 1 }}{% if source_filter %}&source={{ source_filter }}{% endif %}{% if operation_type_filter %}&operation_type={{ operation_type_filter }}{% endif %}{% if lemma_id_filter %}&lemma_id={{ lemma_id_filter }}{% endif %}{% if guid_filter %}&guid={{ guid_filter }}{% endif %}">Previous</a>
                                 </li>
                                 {% for p in range(1, total_pages + 1) %}
                                     {% if p == page %}
                                         <li class="page-item active"><span class="page-link">{{ p }}</span></li>
                                     {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
                                         <li class="page-item">
-                                            <a class="page-link" href="?page={{ p }}{% if source_filter %}&source={{ source_filter }}{% endif %}{% if operation_type_filter %}&operation_type={{ operation_type_filter }}{% endif %}{% if lemma_id_filter %}&lemma_id={{ lemma_id_filter }}{% endif %}">{{ p }}</a>
+                                            <a class="page-link" href="?page={{ p }}{% if source_filter %}&source={{ source_filter }}{% endif %}{% if operation_type_filter %}&operation_type={{ operation_type_filter }}{% endif %}{% if lemma_id_filter %}&lemma_id={{ lemma_id_filter }}{% endif %}{% if guid_filter %}&guid={{ guid_filter }}{% endif %}">{{ p }}</a>
                                         </li>
                                     {% elif p == page - 3 or p == page + 3 %}
                                         <li class="page-item disabled"><span class="page-link">...</span></li>
                                     {% endif %}
                                 {% endfor %}
                                 <li class="page-item {% if page == total_pages %}disabled{% endif %}">
-                                    <a class="page-link" href="?page={{ page + 1 }}{% if source_filter %}&source={{ source_filter }}{% endif %}{% if operation_type_filter %}&operation_type={{ operation_type_filter }}{% endif %}{% if lemma_id_filter %}&lemma_id={{ lemma_id_filter }}{% endif %}">Next</a>
+                                    <a class="page-link" href="?page={{ page + 1 }}{% if source_filter %}&source={{ source_filter }}{% endif %}{% if operation_type_filter %}&operation_type={{ operation_type_filter }}{% endif %}{% if lemma_id_filter %}&lemma_id={{ lemma_id_filter }}{% endif %}{% if guid_filter %}&guid={{ guid_filter }}{% endif %}">Next</a>
                                 </li>
                             </ul>
                         </nav>
