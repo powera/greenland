@@ -12,10 +12,11 @@ from sentences.patterns.simple_patterns import SIMPLE_PATTERNS
 from storage.backend import create_session as create_backend_session
 from sqlalchemy.orm import Session
 from storage.backend.config import DataSourceConfig
+from storage.crud.sentence import add_sentence
+from storage.crud.sentence_translation import add_sentence_translation
 from storage.models.schema import (
     Lemma,
     Sentence,
-    SentenceTranslation,
     SentenceWord,
     SentenceWordHint,
 )
@@ -366,21 +367,26 @@ class PatternSentenceGenerator:
                     )
                     return "duplicate"
 
-            sentence = Sentence(
+            # Through add_sentence rather than Sentence(...) directly: it is the
+            # only thing that calls next_sentence_guid, and nothing backfills a
+            # GUID later, so a hand-built row would stay GUID-less forever and
+            # could never be referenced by an operation log entry or a release
+            # file.
+            sentence = add_sentence(
+                session,
                 pattern_type=pattern.get("pattern_type"),
                 source_filename=pattern_source,
                 verified=False,
+                source="pattern-generation",
             )
-            session.add(sentence)
-            session.flush()
 
-            translation = SentenceTranslation(
-                sentence_id=sentence.id,
-                language_code="en",
-                translation_text=template_text,
-                verified=False,
+            add_sentence_translation(
+                session,
+                sentence,
+                "en",
+                template_text,
+                source="pattern-generation",
             )
-            session.add(translation)
 
             # Record the lemmas this sentence was built around as word hints.
             # The sentence was generated from these, so they are accurate now,
