@@ -463,6 +463,7 @@ def convert_sqlalchemy_operation_log_to_jsonl(log: Any) -> Any:
         lemma_id=log.lemma_id,
         word_token_id=log.word_token_id,
         derivative_form_id=log.derivative_form_id,
+        entity_guid=log.entity_guid,
     )
 
 

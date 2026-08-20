@@ -40,3 +40,13 @@ class OperationLog(Base):
     lemma_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
     word_token_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
     derivative_form_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
+
+    # GUID of the entity this entry is about ("S_00001", "N02_001", "M01_004").
+    # GUID prefixes are namespaced per type, so this one string says both what
+    # kind of thing was touched and which one, with no join -- see
+    # storage.guid_router.guid_kind. Like the id columns above it is not a
+    # foreign key and is not resolved at write time: an entry outlives the row
+    # it describes, and a *_delete entry names a GUID that is already gone by
+    # the time anyone reads it (storage.guid_router.resolve_guid_with_history
+    # walks the tombstone chain for exactly that case).
+    entity_guid: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)
