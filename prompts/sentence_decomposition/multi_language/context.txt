@@ -24,6 +24,34 @@ Important rules:
 - Do NOT include punctuation marks as separate words.
 - Return only valid JSON matching the provided schema.
 
+Multi-word units:
+- A token here is a unit of MEANING, not a whitespace-delimited word. When
+  several words name a single concept, emit ONE token whose surface_form holds
+  the whole phrase.
+- The test is TRANSLATION, not English word count: keep the phrase together
+  when another language routinely names the concept with a single word, or
+  when translating the parts separately would give the wrong meaning.
+  "ice cream" is one token (zh 冰淇淋, es helado, lt ledai); splitting it into
+  "ice" plus "cream" is wrong, and linking the result to the lemma for frozen
+  water is a meaning error. The gloss for 冰淇淋 is "ice cream", never "ice".
+- This is not the same as idiomaticity. "cooking oil", "chicken meat" and
+  "older brother" are all transparent in English and still single units,
+  because other languages have one word for each (lt vyresnysis brolis is
+  itself a set phrase, zh 哥哥 is one word).
+- Prefer the LONGEST phrase that names one concept, provided a candidate lemma
+  or a single-word translation supports it. "ice cream sandwich" and
+  "carrot cake" are each one unit; so is "non-Hodgkin's lymphoma", which is a
+  single medical term however many English words it spans.
+- A modifier that merely SELECTS AMONG SENSES of the head noun still belongs
+  in the unit, because the sense is what a lemma records: "cooking oil",
+  "crude oil" and "baby oil" are three different concepts, not "oil" with a
+  describing word attached. Likewise "running shoes" and "tennis shoes".
+- Split ordinary modifier+noun pairs where the modifier describes rather than
+  names: "cold water", "red car", "my dog", "expensive shoes".
+- When unsure, prefer the phrase if a candidate lemma matches it, and the
+  separate words otherwise. Keep the unit together in EVERY language, and give
+  it one english_gloss and one lemma_guid.
+
 Candidate lemma selection:
 - Candidate lemmas may be presented either as a flat list or grouped under
   an "English word" heading; in the grouped form, the entries under each
