@@ -243,9 +243,14 @@ def test_importing_twice_is_a_no_op(session: Session, tmp_path: Path) -> None:
 
 
 def test_names_without_a_guid_are_not_exported(session: Session, tmp_path: Path) -> None:
-    """A generator's draft has no place in the release namespace yet."""
+    """A row with no GUID has no place in the release namespace.
+
+    create_name allocates a GUID now, so the GUID-less row is built directly
+    here. Rows predating that change still exist in the database, and the
+    export filter that skips them is what this guards.
+    """
     _seed_george(session)
-    create_name(session, name_text="Draft Person", kind="given_name")
+    session.add(Name(name_text="Draft Person", kind="given_name", guid=None))
     session.commit()
 
     assert export_names_to_release(session, tmp_path) == 1

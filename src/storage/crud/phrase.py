@@ -10,6 +10,14 @@ from typing import Optional
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
+from storage.crud.operation_log import (
+    PHRASE_CREATE,
+    PHRASE_TRANSLATION_CREATE,
+    PHRASE_TRANSLATION_UPDATE,
+    FieldChange,
+    log_entity_operation,
+    log_field_changes,
+)
 from storage.models.guid_prefixes import PHRASE_SUBTYPE_GUID_PREFIXES
 from storage.models.schema import Phrase, PhraseTranslation
 from storage.utils.guid import next_sequence_number
@@ -73,6 +81,7 @@ def add_phrase(
     guid: Optional[str] = None,
     verified: bool = False,
     notes: Optional[str] = None,
+    source: Optional[str] = None,
 ) -> Phrase:
     """Create a new phrase.
 
@@ -85,6 +94,7 @@ def add_phrase(
         guid: Explicit GUID; auto-generated from the subtype prefix if omitted
         verified: Whether this phrase has been verified
         notes: Optional notes
+        source: Who is creating this, for the operation log. None skips logging.
 
     Returns:
         Created Phrase object (flushed, so ``id`` is populated).
@@ -100,6 +110,21 @@ def add_phrase(
     )
     session.add(phrase)
     session.flush()
+
+    if source is not None:
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=PHRASE_CREATE,
+            entity_guid=phrase.guid,
+            fact={
+                "phrase_subtype": phrase_subtype,
+                "label": label,
+                "difficulty_level": difficulty_level,
+                "verified": verified,
+            },
+        )
+
     return phrase
 
 
@@ -111,10 +136,19 @@ def set_phrase_translation(
     translation_status: Optional[str] = None,
     translation_status_note: Optional[str] = None,
     verified: bool = False,
+    source: Optional[str] = None,
 ) -> PhraseTranslation:
     """Create or update a phrase translation for a language.
 
-    Returns the created or updated :class:`PhraseTranslation`.
+    Logs against the *phrase's* GUID with ``language_code`` in the fact, since
+    translation rows carry no GUID of their own -- the same shape
+    :func:`storage.crud.sentence_translation.add_sentence_translation` uses.
+
+    Args:
+        source: Who is writing this, for the operation log. None skips logging.
+
+    Returns:
+        The created or updated :class:`PhraseTranslation`.
     """
     existing: Optional[PhraseTranslation] = (
         session.query(PhraseTranslation)
@@ -125,11 +159,28 @@ def set_phrase_translation(
         .first()
     )
     if existing is not None:
+        # Captured before the assignments so the log records the real diff.
+        changes = [
+            FieldChange("translation", existing.translation, translation),
+            FieldChange("translation_status", existing.translation_status, translation_status),
+            FieldChange("verified", existing.verified, verified),
+        ]
+
         existing.translation = translation
         existing.translation_status = translation_status
         existing.translation_status_note = translation_status_note
         existing.verified = verified
         session.flush()
+
+        log_field_changes(
+            session,
+            source=source,
+            operation_type=PHRASE_TRANSLATION_UPDATE,
+            entity_guid=phrase.guid,
+            changes=changes,
+            extra={"language_code": language_code},
+        )
+
         return existing
 
     row = PhraseTranslation(
@@ -142,4 +193,19 @@ def set_phrase_translation(
     )
     session.add(row)
     session.flush()
+
+    if source is not None:
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=PHRASE_TRANSLATION_CREATE,
+            entity_guid=phrase.guid,
+            fact={
+                "language_code": language_code,
+                "new_value": translation,
+                "translation_status": translation_status,
+                "verified": verified,
+            },
+        )
+
     return row
