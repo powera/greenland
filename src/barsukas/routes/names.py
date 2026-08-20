@@ -97,6 +97,7 @@ def create() -> Response:
             disambiguation=request.form.get("disambiguation", "").strip() or None,
             gender=request.form.get("gender", "").strip() or None,
             verified=True,
+            source=Config.OPERATION_LOG_SOURCE,
         )
         g.db.commit()
     except ValueError as exc:
@@ -155,6 +156,7 @@ def update(name_id: int) -> Response:
             gender=request.form.get("gender", "").strip() or None,
             notes=request.form.get("notes", "").strip() or None,
             verified=request.form.get("verified") == "on",
+            source=Config.OPERATION_LOG_SOURCE,
         )
         g.db.commit()
         flash("Name updated.", "success")
@@ -194,6 +196,7 @@ def set_rendering(name_id: int) -> Response:
             translation=rendering,
             phonetic_pronunciation=request.form.get("phonetic", "").strip() or None,
             verified=True,
+            source=Config.OPERATION_LOG_SOURCE,
         )
         g.db.commit()
         flash(f"Set the {language_code} rendering of {name.name_text!r}.", "success")
@@ -251,7 +254,7 @@ def delete(name_id: int) -> Response:
     g.db.query(SentenceWord).filter(SentenceWord.name_id == name_id).update(
         {SentenceWord.name_id: None}, synchronize_session=False
     )
-    delete_name(g.db, name)
+    delete_name(g.db, name, source=Config.OPERATION_LOG_SOURCE)
     g.db.commit()
     flash(f"Deleted name {name_text!r}.", "success")
     return redirect(url_for("names.list_names_view"))

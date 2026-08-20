@@ -23,7 +23,7 @@ which is a form framework rather than a configuration - so the view pages keep
 using the shared templates and the edit pages stay siblings.
 """
 
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 from flask import (
     Blueprint,
@@ -49,7 +49,12 @@ from storage.crud.idiom import (
     list_idiom_source_languages,
     list_idioms,
 )
-from storage.crud.operation_log import log_translation_change
+from storage.crud.operation_log import (
+    IDIOM_EQUIVALENT_UPDATE,
+    IDIOM_UPDATE,
+    FieldChange,
+    log_field_changes,
+)
 from storage.models.idiom import IDIOM_EQUIVALENCE_KINDS
 from storage.translation_helpers import get_supported_languages
 from workqueue.task_queue import enqueue_task
@@ -172,8 +177,8 @@ def new_idiom() -> ResponseReturnValue:
             difficulty_level=_parse_int(request.form.get("difficulty_level", "").strip()),
             notes=request.form.get("notes", "").strip() or None,
             verified=request.form.get("verified") == "on",
+            source=Config.OPERATION_LOG_SOURCE,
         )
-        _log("create", None, idiom.guid)
         g.db.commit()
 
         flash(f"Created idiom: {idiom.expression}", "success")
@@ -202,6 +207,8 @@ def edit_idiom(idiom_id: int) -> ResponseReturnValue:
             flash("Cannot update: running in read-only mode", "error")
             return redirect(url_for("idioms.view_idiom", idiom_id=idiom_id))
 
+        idiom_changes: List[FieldChange] = []
+
         for field_name in ("expression", "meaning"):
             new_value = request.form.get(field_name, "").strip()
             old_value = getattr(idiom, field_name)
@@ -209,25 +216,29 @@ def edit_idiom(idiom_id: int) -> ResponseReturnValue:
             # request to clear, so it is ignored instead of writing an empty
             # string past the crud layer's validation.
             if new_value and new_value != old_value:
-                _log(field_name, old_value, new_value)
+                idiom_changes.append(FieldChange(field_name, old_value, new_value))
                 setattr(idiom, field_name, new_value)
 
         for field_name in ("usage_note", "register", "region", "notes"):
             new_optional = request.form.get(field_name, "").strip() or None
             old_optional = getattr(idiom, field_name)
             if new_optional != old_optional:
-                _log(field_name, old_optional, new_optional)
+                idiom_changes.append(FieldChange(field_name, old_optional, new_optional))
                 setattr(idiom, field_name, new_optional)
 
         new_difficulty = _parse_int(request.form.get("difficulty_level", "").strip())
         if new_difficulty != idiom.difficulty_level:
-            _log("difficulty_level", idiom.difficulty_level, new_difficulty)
+            idiom_changes.append(
+                FieldChange("difficulty_level", idiom.difficulty_level, new_difficulty)
+            )
             idiom.difficulty_level = new_difficulty
 
         new_verified = request.form.get("verified") == "on"
         if new_verified != idiom.verified:
-            _log("verified", idiom.verified, new_verified)
+            idiom_changes.append(FieldChange("verified", idiom.verified, new_verified))
             idiom.verified = new_verified
+
+        _log_idiom_changes(idiom, idiom_changes)
 
         _apply_equivalent_edits(idiom)
         _apply_new_equivalents(idiom)
@@ -259,8 +270,7 @@ def delete_idiom_view(idiom_id: int) -> ResponseReturnValue:
         return redirect(url_for("idioms.list_idioms_view"))
 
     expression = idiom.expression
-    _log("delete", idiom.guid, None)
-    delete_idiom(g.db, idiom)
+    delete_idiom(g.db, idiom, source=Config.OPERATION_LOG_SOURCE)
     g.db.commit()
 
     flash(f"Deleted idiom: {expression}", "success")
@@ -353,9 +363,13 @@ def _apply_equivalent_edits(idiom: Any) -> None:
         prefix = f"equivalent_{equivalent.id}"
 
         if request.form.get(f"{prefix}_delete") == "on":
-            _log("equivalent_delete", equivalent.expression, None)
-            delete_idiom_equivalent(g.db, equivalent)
+            delete_idiom_equivalent(g.db, equivalent, source=Config.OPERATION_LOG_SOURCE)
             continue
+
+        # One entry per equivalent per submission, keyed to the parent idiom's
+        # GUID. The gloss/note/register edits below went unlogged entirely
+        # before; they cost nothing to include now that the changes are batched.
+        equivalent_changes: List[FieldChange] = []
 
         expression = request.form.get(f"{prefix}_expression")
         # A missing key means the row was not rendered; only a present-and-empty
@@ -363,12 +377,16 @@ def _apply_equivalent_edits(idiom: Any) -> None:
         if expression is not None:
             expression = expression.strip()
             if expression and expression != equivalent.expression:
-                _log("equivalent_expression", equivalent.expression, expression)
+                equivalent_changes.append(
+                    FieldChange("expression", equivalent.expression, expression)
+                )
                 equivalent.expression = expression
 
         kind = (request.form.get(f"{prefix}_kind") or "").strip()
         if kind in IDIOM_EQUIVALENCE_KINDS and kind != equivalent.equivalence_kind:
-            _log("equivalent_kind", equivalent.equivalence_kind, kind)
+            equivalent_changes.append(
+                FieldChange("equivalence_kind", equivalent.equivalence_kind, kind)
+            )
             equivalent.equivalence_kind = kind
 
         for field_name, column_name in (
@@ -381,12 +399,24 @@ def _apply_equivalent_edits(idiom: Any) -> None:
                 continue
             new_value = raw.strip() or None
             if new_value != getattr(equivalent, column_name):
+                equivalent_changes.append(
+                    FieldChange(column_name, getattr(equivalent, column_name), new_value)
+                )
                 setattr(equivalent, column_name, new_value)
 
         new_verified = request.form.get(f"{prefix}_verified") == "on"
         if new_verified != equivalent.verified:
-            _log("equivalent_verified", equivalent.verified, new_verified)
+            equivalent_changes.append(FieldChange("verified", equivalent.verified, new_verified))
             equivalent.verified = new_verified
+
+        log_field_changes(
+            g.db,
+            source=Config.OPERATION_LOG_SOURCE,
+            operation_type=IDIOM_EQUIVALENT_UPDATE,
+            entity_guid=idiom.guid,
+            changes=equivalent_changes,
+            extra={"language_code": equivalent.language_code},
+        )
 
 
 def _apply_new_equivalents(idiom: Any) -> None:
@@ -429,8 +459,8 @@ def _apply_new_equivalents(idiom: Any) -> None:
             usage_note=(request.form.get(f"{prefix}_note") or "").strip() or None,
             register=(request.form.get(f"{prefix}_register") or "").strip() or None,
             verified=request.form.get(f"{prefix}_verified") == "on",
+            source=Config.OPERATION_LOG_SOURCE,
         )
-        _log("equivalent_create", None, f"{language_code}: {expression}")
 
 
 def _parse_int(value: str) -> Optional[int]:
@@ -443,13 +473,18 @@ def _parse_int(value: str) -> Optional[int]:
         return None
 
 
-def _log(field_name: str, old_value: Any, new_value: Any) -> None:
-    """Record an idiom field change in the operation log."""
-    log_translation_change(
-        session=g.db,
+def _log_idiom_changes(idiom: Any, changes: List[FieldChange]) -> None:
+    """Record a form's worth of idiom field edits as one operation log entry.
+
+    One entry per submission rather than per field, keyed to the idiom's GUID.
+    These edits used to go through ``log_translation_change`` one field at a
+    time, which recorded no entity reference at all -- the resulting rows named
+    a field and two values with nothing to say which idiom they belonged to.
+    """
+    log_field_changes(
+        g.db,
         source=Config.OPERATION_LOG_SOURCE,
-        operation_type="idiom_update",
-        field_name=field_name,
-        old_value=str(old_value) if old_value is not None else None,
-        new_value=str(new_value) if new_value is not None else None,
+        operation_type=IDIOM_UPDATE,
+        entity_guid=idiom.guid,
+        changes=changes,
     )

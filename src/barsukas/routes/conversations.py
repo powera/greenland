@@ -531,6 +531,7 @@ def register_name(conversation_id: int) -> Response:
             name_text=name_text,
             kind=kind,
             notes=f"Registered from conversation {conversation_id}",
+            source=Config.OPERATION_LOG_SOURCE,
         )
     except ValueError as exc:
         flash(str(exc), "error")
