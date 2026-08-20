@@ -13,6 +13,16 @@ from typing import Any, List, Optional, cast
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from storage.crud.operation_log import (
+    NAME_CREATE,
+    NAME_DELETE,
+    NAME_TRANSLATION_CREATE,
+    NAME_TRANSLATION_UPDATE,
+    NAME_UPDATE,
+    FieldChange,
+    log_entity_operation,
+    log_field_changes,
+)
 from storage.models.guid_prefixes import NAME_KIND_GUID_PREFIXES
 from storage.models.name_entity import (
     NAME_GENDERS,
@@ -100,8 +110,17 @@ def create_name(
     confidence: float = 0.0,
     notes: Optional[str] = None,
     verified: bool = False,
+    guid: Optional[str] = None,
+    source: Optional[str] = None,
 ) -> Name:
     """Create a name row.
+
+    A GUID is allocated from the kind's namespace (``E01`` given names, ``E04``
+    places, ...) unless one is supplied, matching
+    :func:`storage.crud.idiom.create_idiom` and
+    :func:`storage.crud.phrase.add_phrase`. Names used to be created GUID-less
+    and numbered only at release-sync time, which left them unaddressable by
+    every GUID-keyed path -- including the operation log.
 
     Args:
         session: Database session (the caller commits).
@@ -113,6 +132,10 @@ def create_name(
         confidence: 0-1 score from the generator.
         notes: Free-form notes.
         verified: Whether a human has confirmed the entry.
+        guid: Explicit GUID; allocated from the kind's prefix when omitted.
+            Importers pass the GUID from the release record so no number is
+            spent on a row that is about to carry a different one.
+        source: Who is creating this, for the operation log. None skips logging.
 
     Returns:
         The created Name (flushed, so its id is populated).
@@ -138,9 +161,26 @@ def create_name(
         confidence=confidence,
         notes=notes,
         verified=verified,
+        guid=guid if guid is not None else next_name_guid(session, kind),
     )
     session.add(name)
     session.flush()
+
+    if source is not None:
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=NAME_CREATE,
+            entity_guid=name.guid,
+            fact={
+                "name_text": normalized,
+                "kind": kind,
+                "gender": gender,
+                "source_model": source_model,
+                "verified": verified,
+            },
+        )
+
     return name
 
 
@@ -152,12 +192,18 @@ def get_or_create_name(
     gender: Optional[str] = None,
     source_model: Optional[str] = None,
     notes: Optional[str] = None,
+    source: Optional[str] = None,
 ) -> tuple[Name, bool]:
     """Return the existing name with this (text, kind), creating it when absent.
 
     This is the entry point the dialog generator uses: a scene's cast is
     registered once and reused by every later scene that casts the same
     character, which is what keeps ``Džordžas`` stable across dialogs.
+
+    Args:
+        source: Who is creating this, for the operation log. Passed through only
+            on the create branch -- reusing an existing name is not a write
+            worth an entry, and the gender backfill below is a hint, not an edit.
 
     Returns:
         Tuple of (name, created) where ``created`` is True when a new row was
@@ -177,6 +223,7 @@ def get_or_create_name(
         gender=gender,
         source_model=source_model,
         notes=notes,
+        source=source,
     )
     return name, True
 
@@ -190,12 +237,36 @@ def update_name(
     gender: Any = _UNSET,
     notes: Any = _UNSET,
     verified: Any = _UNSET,
+    source: Optional[str] = None,
 ) -> Name:
     """Update the supplied fields of a name, leaving omitted ones untouched.
+
+    Args:
+        source: Who is making the edit, for the operation log. None skips logging.
 
     Raises:
         ValueError: If a supplied kind or gender is outside its vocabulary.
     """
+    # Which fields the caller actually supplied, with their values as they
+    # stand now. Unlike the other update helpers, omission is _UNSET rather
+    # than None here, so a supplied None is a real edit (clearing a gender
+    # hint) and must not be filtered out. The new values are read back off the
+    # object after the assignments, because several are normalized on the way
+    # in ("" becomes None, verified is coerced to bool) and comparing the raw
+    # argument against the stored value would report edits that did not happen.
+    supplied_fields = [
+        field
+        for field, supplied in (
+            ("kind", kind),
+            ("disambiguation", disambiguation),
+            ("gender", gender),
+            ("notes", notes),
+            ("verified", verified),
+        )
+        if supplied is not _UNSET
+    ]
+    old_values = {field: getattr(name, field) for field in supplied_fields}
+
     if kind is not _UNSET:
         if kind not in NAME_KINDS:
             raise ValueError(f"Unknown name kind {kind!r}")
@@ -211,11 +282,41 @@ def update_name(
     if verified is not _UNSET:
         name.verified = bool(verified)
     session.flush()
+
+    log_field_changes(
+        session,
+        source=source,
+        operation_type=NAME_UPDATE,
+        entity_guid=name.guid,
+        changes=[
+            FieldChange(field, old_values[field], getattr(name, field)) for field in supplied_fields
+        ],
+    )
+
     return name
 
 
-def delete_name(session: Session, name: Name) -> None:
-    """Delete a name and its translations."""
+def delete_name(session: Session, name: Name, source: Optional[str] = None) -> None:
+    """Delete a name and its translations.
+
+    Args:
+        source: Who is deleting it, for the operation log. None skips logging.
+    """
+    if source is not None:
+        # Logged before the delete, while the row and its translations are
+        # still there to describe. The entry outlives them, which is the point.
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=NAME_DELETE,
+            entity_guid=name.guid,
+            fact={
+                "name_text": name.name_text,
+                "kind": name.kind,
+                "translation_count": len(get_name_renderings(session, name)),
+            },
+        )
+
     session.delete(name)
     session.flush()
 
@@ -294,6 +395,7 @@ def set_name_translation(
     sort_key: Optional[str] = None,
     notes: Optional[str] = None,
     verified: bool = False,
+    source: Optional[str] = None,
 ) -> NameTranslation:
     """Create or update how a name is written in one language.
 
@@ -309,6 +411,9 @@ def set_name_translation(
             record's ``translation_metadata``, so it has to be settable here or
             an imported name would differ from its own file forever.
         verified: Whether a human confirmed the rendering.
+        source: Who is writing this, for the operation log. None skips logging.
+            Logged against the *name's* GUID with ``language_code`` in the fact,
+            since rendering rows carry no GUID of their own.
 
     Returns:
         The created or updated NameTranslation.
@@ -321,6 +426,11 @@ def set_name_translation(
         raise ValueError(f"Empty rendering for {name.name_text!r} in {language_code!r}")
 
     row = get_name_translation(session, name, language_code)
+    created = row is None
+    # Captured before the assignments below, on the update branch only.
+    old_translation = None if row is None else row.translation
+    old_verified = None if row is None else row.verified
+
     if row is None:
         row = NameTranslation(
             name_id=name.id,
@@ -340,6 +450,33 @@ def set_name_translation(
         row.notes = notes
     row.verified = verified
     session.flush()
+
+    if created:
+        if source is not None:
+            log_entity_operation(
+                session,
+                source=source,
+                operation_type=NAME_TRANSLATION_CREATE,
+                entity_guid=name.guid,
+                fact={
+                    "language_code": language_code,
+                    "new_value": rendered,
+                    "verified": verified,
+                },
+            )
+    else:
+        log_field_changes(
+            session,
+            source=source,
+            operation_type=NAME_TRANSLATION_UPDATE,
+            entity_guid=name.guid,
+            changes=[
+                FieldChange("translation", old_translation, rendered),
+                FieldChange("verified", old_verified, verified),
+            ],
+            extra={"language_code": language_code},
+        )
+
     return row
 
 

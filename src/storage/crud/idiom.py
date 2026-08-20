@@ -5,6 +5,17 @@ from typing import List, Optional, Tuple
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload, selectinload
 
+from storage.crud.operation_log import (
+    IDIOM_CREATE,
+    IDIOM_DELETE,
+    IDIOM_EQUIVALENT_CREATE,
+    IDIOM_EQUIVALENT_DELETE,
+    IDIOM_EQUIVALENT_UPDATE,
+    IDIOM_UPDATE,
+    FieldChange,
+    log_entity_operation,
+    log_field_changes,
+)
 from storage.models.guid_prefixes import IDIOM_GUID_PREFIX
 from storage.models.idiom import (
     IDIOM_EQUIVALENCE_KINDS,
@@ -62,8 +73,13 @@ def create_idiom(
     confidence: float = 0.0,
     verified: bool = False,
     notes: Optional[str] = None,
+    source: Optional[str] = None,
 ) -> Idiom:
-    """Create and flush an idiom without committing the caller's transaction."""
+    """Create and flush an idiom without committing the caller's transaction.
+
+    Args:
+        source: Who is creating this, for the operation log. None skips logging.
+    """
     idiom = Idiom(
         guid=guid or next_idiom_guid(session),
         source_language_code=_validate_language_code(source_language_code),
@@ -80,6 +96,23 @@ def create_idiom(
     )
     session.add(idiom)
     session.flush()
+
+    if source is not None:
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=IDIOM_CREATE,
+            entity_guid=idiom.guid,
+            fact={
+                "language_code": idiom.source_language_code,
+                "expression": idiom.expression,
+                "meaning": idiom.meaning,
+                "difficulty_level": difficulty_level,
+                "source_model": source_model,
+                "verified": verified,
+            },
+        )
+
     return idiom
 
 
@@ -153,8 +186,17 @@ def add_idiom_equivalent(
     source_model: Optional[str] = None,
     confidence: float = 0.0,
     verified: bool = False,
+    source: Optional[str] = None,
 ) -> IdiomEquivalent:
-    """Add and flush one equivalent without imposing one-row-per-language."""
+    """Add and flush one equivalent without imposing one-row-per-language.
+
+    Logs against the *idiom's* GUID with ``language_code`` in the fact:
+    equivalents carry no GUID of their own, and a language may hold several, so
+    the parent GUID is the only stable handle.
+
+    Args:
+        source: Who is adding this, for the operation log. None skips logging.
+    """
     equivalent = IdiomEquivalent(
         idiom_id=idiom.id,
         language_code=_validate_language_code(language_code),
@@ -170,6 +212,22 @@ def add_idiom_equivalent(
     )
     session.add(equivalent)
     session.flush()
+
+    if source is not None:
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=IDIOM_EQUIVALENT_CREATE,
+            entity_guid=idiom.guid,
+            fact={
+                "language_code": equivalent.language_code,
+                "new_value": equivalent.expression,
+                "equivalence_kind": equivalent.equivalence_kind,
+                "source_model": source_model,
+                "verified": verified,
+            },
+        )
+
     return equivalent
 
 
@@ -182,8 +240,32 @@ def update_idiom(
     difficulty_level: Optional[int] = None,
     verified: Optional[bool] = None,
     notes: Optional[str] = None,
+    source: Optional[str] = None,
 ) -> Idiom:
-    """Update common idiom fields without committing the transaction."""
+    """Update common idiom fields without committing the transaction.
+
+    Args:
+        source: Who is making the edit, for the operation log. None skips logging.
+    """
+    # Captured before the assignments below, so the log records what actually
+    # changed rather than the new value twice. ``expression`` and ``meaning``
+    # are compared post-normalization, since that is what gets stored.
+    changes = [
+        FieldChange(
+            "expression",
+            idiom.expression,
+            _required_text(expression, "expression") if expression is not None else None,
+        ),
+        FieldChange(
+            "meaning",
+            idiom.meaning,
+            _required_text(meaning, "meaning") if meaning is not None else None,
+        ),
+        FieldChange("difficulty_level", idiom.difficulty_level, difficulty_level),
+        FieldChange("verified", idiom.verified, verified),
+        FieldChange("notes", idiom.notes, notes),
+    ]
+
     if expression is not None:
         idiom.expression = _required_text(expression, "expression")
     if meaning is not None:
@@ -195,6 +277,17 @@ def update_idiom(
     if notes is not None:
         idiom.notes = notes
     session.flush()
+
+    log_field_changes(
+        session,
+        source=source,
+        operation_type=IDIOM_UPDATE,
+        entity_guid=idiom.guid,
+        # A None argument means "leave this field alone", not "set it to None",
+        # so it is not a change even when the stored value is not None.
+        changes=[change for change in changes if change.new_value is not None],
+    )
+
     return idiom
 
 
@@ -206,8 +299,29 @@ def update_idiom_equivalent(
     equivalence_kind: Optional[str] = None,
     verified: Optional[bool] = None,
     usage_note: Optional[str] = None,
+    source: Optional[str] = None,
 ) -> IdiomEquivalent:
-    """Update common equivalent fields without committing the transaction."""
+    """Update common equivalent fields without committing the transaction.
+
+    Args:
+        source: Who is making the edit, for the operation log. None skips logging.
+    """
+    # Captured before the assignments below; see update_idiom.
+    changes = [
+        FieldChange(
+            "expression",
+            equivalent.expression,
+            (
+                _required_text(expression, "equivalent expression")
+                if expression is not None
+                else None
+            ),
+        ),
+        FieldChange("equivalence_kind", equivalent.equivalence_kind, equivalence_kind),
+        FieldChange("verified", equivalent.verified, verified),
+        FieldChange("usage_note", equivalent.usage_note, usage_note),
+    ]
+
     if expression is not None:
         equivalent.expression = _required_text(expression, "equivalent expression")
     if equivalence_kind is not None:
@@ -217,14 +331,65 @@ def update_idiom_equivalent(
     if usage_note is not None:
         equivalent.usage_note = usage_note
     session.flush()
+
+    log_field_changes(
+        session,
+        source=source,
+        operation_type=IDIOM_EQUIVALENT_UPDATE,
+        entity_guid=equivalent.idiom.guid,
+        # A None argument means "leave this field alone"; see update_idiom.
+        changes=[change for change in changes if change.new_value is not None],
+        extra={"language_code": equivalent.language_code},
+    )
+
     return equivalent
 
 
-def delete_idiom(session: Session, idiom: Idiom) -> None:
-    """Delete an idiom; configured cascade also removes its equivalents."""
+def delete_idiom(session: Session, idiom: Idiom, source: Optional[str] = None) -> None:
+    """Delete an idiom; configured cascade also removes its equivalents.
+
+    Args:
+        source: Who is deleting it, for the operation log. None skips logging.
+    """
+    if source is not None:
+        # Logged before the delete: afterwards the cascade has taken the
+        # equivalents with it and there is nothing left to count. The entry
+        # outlives the row, which is the point.
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=IDIOM_DELETE,
+            entity_guid=idiom.guid,
+            fact={
+                "language_code": idiom.source_language_code,
+                "expression": idiom.expression,
+                "equivalent_count": len(idiom.equivalents),
+            },
+        )
+
     session.delete(idiom)
 
 
-def delete_idiom_equivalent(session: Session, equivalent: IdiomEquivalent) -> None:
-    """Delete one language equivalent."""
+def delete_idiom_equivalent(
+    session: Session, equivalent: IdiomEquivalent, source: Optional[str] = None
+) -> None:
+    """Delete one language equivalent.
+
+    Args:
+        source: Who is deleting it, for the operation log. None skips logging.
+    """
+    if source is not None:
+        # Read before the delete, while the parent relationship still resolves.
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=IDIOM_EQUIVALENT_DELETE,
+            entity_guid=equivalent.idiom.guid,
+            fact={
+                "language_code": equivalent.language_code,
+                "old_value": equivalent.expression,
+                "equivalence_kind": equivalent.equivalence_kind,
+            },
+        )
+
     session.delete(equivalent)

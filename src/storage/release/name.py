@@ -33,7 +33,6 @@ from storage import translation_helpers
 from storage.crud.name_entity import (
     create_name,
     get_name_by_guid,
-    next_name_guid,
     set_name_translation,
 )
 from storage.models.name_entity import NAME_KINDS, Name, NameTranslation
@@ -230,8 +229,11 @@ def import_release_record(session: Session, record: Dict[str, Any]) -> Optional[
         gender=record.get("gender"),
         notes=record.get("notes"),
         verified=bool(record.get("verified", False)),
+        # Passed in rather than assigned afterwards: create_name now allocates a
+        # GUID when none is given, and letting it do that here would spend a
+        # sequence number on a row that is about to carry the record's own GUID.
+        guid=str(guid) if guid else None,
     )
-    name.guid = str(guid) if guid else next_name_guid(session, kind)
 
     metadata_by_language = record.get("translation_metadata") or {}
     for language_code, rendering in (record.get("translations") or {}).items():

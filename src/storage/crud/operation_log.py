@@ -65,6 +65,31 @@ SENTENCE_WORD_CREATE = "sentence_word_create"
 SENTENCE_WORD_UPDATE = "sentence_word_update"
 SENTENCE_WORD_DELETE = "sentence_word_delete"
 
+# Operation types for the phrase family. ``phrase_update`` predates this module
+# and is deliberately reused rather than renamed, as with ``idiom_update``.
+PHRASE_CREATE = "phrase_create"
+PHRASE_UPDATE = "phrase_update"
+PHRASE_DELETE = "phrase_delete"
+PHRASE_TRANSLATION_CREATE = "phrase_translation_create"
+PHRASE_TRANSLATION_UPDATE = "phrase_translation_update"
+
+# Operation types for the idiom family. ``idiom_update`` predates this module
+# and is deliberately reused rather than renamed: the rows already written under
+# that name are idiom field edits, which is exactly what it still means.
+IDIOM_CREATE = "idiom_create"
+IDIOM_UPDATE = "idiom_update"
+IDIOM_DELETE = "idiom_delete"
+IDIOM_EQUIVALENT_CREATE = "idiom_equivalent_create"
+IDIOM_EQUIVALENT_UPDATE = "idiom_equivalent_update"
+IDIOM_EQUIVALENT_DELETE = "idiom_equivalent_delete"
+
+# Operation types for the name family.
+NAME_CREATE = "name_create"
+NAME_UPDATE = "name_update"
+NAME_DELETE = "name_delete"
+NAME_TRANSLATION_CREATE = "name_translation_create"
+NAME_TRANSLATION_UPDATE = "name_translation_update"
+
 
 @dataclass(frozen=True)
 class FieldChange:
