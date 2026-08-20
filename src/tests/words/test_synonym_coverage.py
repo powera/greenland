@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from storage.crud.operation_log import log_operation
+from storage.models.operation_log import OperationLog
 from storage.models.schema import Base, Lemma
 from words.synonym_coverage import ALL_FORM_TYPES, find_missing_synonyms
 
@@ -110,3 +111,26 @@ def test_report_totals_sum_every_language(session: Session) -> None:
     report = find_missing_synonyms(session, lemmas=lemmas, language_code="en")
 
     assert report.total_missing == 2
+
+
+def test_scan_records_without_an_entity_guid_still_count_as_processed(
+    session: Session,
+) -> None:
+    """The SERNAS canary.
+
+    The operation log is not just an audit trail here: ``has_synonym_scan_record``
+    reads it as state, keyed on the ``lemma_id`` column. Rows written before
+    ``entity_guid`` existed carry NULL there, and every row this agent writes
+    still keys on ``lemma_id``. If that reference is ever moved to
+    ``entity_guid`` instead of alongside it, this check goes blind and SERNAS
+    re-scans the entire corpus.
+    """
+    lemma = _add_lemma(session, "N00_009", "avenue")
+    _record_scan(session, lemma, "en")
+
+    stored = session.query(OperationLog).filter_by(operation_type="synonym_scan").one()
+    assert stored.entity_guid is None
+    assert stored.lemma_id == lemma.id
+
+    report = find_missing_synonyms(session, lemmas=[lemma], language_code="en")
+    assert report.total_missing == 0
