@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Optional, Sequence
 from sqlalchemy.orm import Session
 
 from sentences.translate_and_decompose import SYNTHETIC_GUID_PREFIX
+from storage.crud.operation_log import SENTENCE_WORD_CREATE, log_batch_operation
 from storage.crud.sentence_word import add_sentence_word
 from storage.models.schema import Lemma, Sentence, SentenceWord
 
@@ -69,6 +70,7 @@ def store_decomposition(
     language_code: str,
     words: Sequence[Dict[str, Any]],
     replace_existing: bool = False,
+    source: Optional[str] = None,
 ) -> int:
     """Write one language's decomposition as ``SentenceWord`` rows.
 
@@ -87,6 +89,8 @@ def store_decomposition(
             earlier pass established; the unique key on
             ``(sentence_id, language_code, position)`` would otherwise reject
             the insert.
+        source: Who is writing these, for the operation log. None skips logging.
+            One entry is written per call, not per word row.
 
     Returns:
         Number of rows written.
@@ -99,6 +103,7 @@ def store_decomposition(
         session.flush()
 
     written = 0
+    linked_lemma_guids: List[str] = []
     for position, word_entry in enumerate(words):
         part_of_speech = str(word_entry.get("part_of_speech") or "").strip().lower() or "unknown"
         surface = str(word_entry.get("surface_form") or "").strip()
@@ -113,6 +118,8 @@ def store_decomposition(
         lemma_guid = str(word_entry.get("lemma_guid") or "").strip()
         if is_real_guid(lemma_guid):
             word_lemma = session.query(Lemma).filter(Lemma.guid == lemma_guid).first()
+            if word_lemma is not None:
+                linked_lemma_guids.append(lemma_guid)
 
         ud_relation_raw = word_entry.get("ud_relation")
         ud_relation = str(ud_relation_raw).strip() if ud_relation_raw is not None else None
@@ -134,4 +141,21 @@ def store_decomposition(
         written += 1
 
     session.flush()
+
+    # One entry for the whole decomposition. Per-word entries would outnumber
+    # every other kind of log in the table by an order of magnitude while
+    # telling you nothing this does not.
+    log_batch_operation(
+        session,
+        source=source,
+        operation_type=SENTENCE_WORD_CREATE,
+        entity_guid=sentence.guid,
+        count=written,
+        fact={
+            "language_code": language_code,
+            "linked_lemma_guids": linked_lemma_guids,
+            "replaced_existing": replace_existing,
+        },
+    )
+
     return written

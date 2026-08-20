@@ -51,6 +51,7 @@ from sentences.link_writer import link_sentence_words
 from sentences.pending_staging import stage_unlinked_words
 from sentences.promotion import PromotionPolicy, promote_sentence_pendings
 from storage.backend.config import DataSourceConfig
+from storage.crud.operation_log import SENTENCE_IMPORT, log_entity_operation
 from storage.crud.sentence import calculate_minimum_level
 from storage.models.schema import Sentence, SentenceTranslation
 from workqueue.task_queue import enqueue_task
@@ -102,6 +103,7 @@ def _run_translate(session: Any, sentence_id: int, spec: SentenceImportSpec, sta
         session,
         model=spec.model,
         source_language=_source_language(session, sentence_id),
+        log_source=f"{TASK_TYPE}/translate",
     )
     return f"translate: +{len(produced)} language(s)"
 
@@ -172,7 +174,9 @@ def _run_decompose(
     if word_payload:
         from sentences.translation import store_translation_results
 
-        store_translation_results(sentence_id, word_payload, session)
+        store_translation_results(
+            sentence_id, word_payload, session, source=f"{TASK_TYPE}/decompose"
+        )
 
     # The reason a language was skipped lives only on the in-memory result, and
     # a skipped Phase 3 is the most common way this stage produces nothing. The
@@ -257,8 +261,8 @@ def _run_annotate(
     return f"annotate: {annotated_languages} language(s)"
 
 
-def _run_link(session: Any, sentence_id: int, spec: SentenceImportSpec) -> str:
-    outcome = link_sentence_words(session, sentence_id)
+def _run_link(session: Any, sentence_id: int, spec: SentenceImportSpec, *, log_source: str) -> str:
+    outcome = link_sentence_words(session, sentence_id, source=log_source)
     return f"link: {outcome.summary()}"
 
 
@@ -468,7 +472,7 @@ def do_import_sentence(
             assert client is not None
             steps.append(_run_annotate(session, sentence_id, spec, client))
         elif stage is SentenceImportStage.LINK:
-            steps.append(_run_link(session, sentence_id, spec))
+            steps.append(_run_link(session, sentence_id, spec, log_source=f"{TASK_TYPE}/link"))
         elif stage is SentenceImportStage.STAGE:
             steps.append(_run_stage(session, sentence_id, spec, source=staging_source, tags=tags))
         elif stage is SentenceImportStage.PROMOTE:
@@ -485,6 +489,26 @@ def do_import_sentence(
         elif stage is SentenceImportStage.FINALIZE:
             steps.append(_run_finalize(session, sentence_id))
 
+        session.commit()
+
+    if steps:
+        # One entry per execution, not per stage: the per-stage summaries are
+        # already collected in ``steps``, so seven entries would each say the
+        # same thing. This is the narrative of the run; the field-level audit
+        # trail comes from the CRUD functions the stages call. Needs its own
+        # commit because the PROMOTE branch above commits and breaks.
+        log_entity_operation(
+            session,
+            source=source or TASK_TYPE,
+            operation_type=SENTENCE_IMPORT,
+            entity_guid=sentence.guid,
+            fact={
+                "steps": steps,
+                "iteration": iteration,
+                "model": spec.model,
+                "deferred_pendings": deferred_pendings,
+            },
+        )
         session.commit()
 
     fingerprint = progress_fingerprint(session, sentence_id)

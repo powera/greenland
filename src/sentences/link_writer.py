@@ -37,7 +37,8 @@ from typing import Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
-from storage.models.schema import Lemma, SentenceWord, SentenceWordHint
+from storage.crud.operation_log import SENTENCE_LINK, log_entity_operation
+from storage.models.schema import Lemma, Sentence, SentenceWord, SentenceWordHint
 from words.pending_imports.sentence_links import release_legacy_hints
 from wordfreq.tools.sentence_word_linker import ResolvedLemma, resolve_lemmas_for_sentence
 
@@ -179,6 +180,7 @@ def link_sentence_words(
     write_hints: bool = True,
     source_lemma: Optional[Lemma] = None,
     min_derivative_languages: int = 2,
+    source: Optional[str] = None,
 ) -> LinkOutcome:
     """Resolve this sentence's words to lemmas and persist the confident ones.
 
@@ -195,6 +197,7 @@ def link_sentence_words(
         source_lemma: Prefer this lemma when a slot's text matches it.
         min_derivative_languages: Languages that must agree for the
             cross-language derivative-form strategy to fire.
+        source: Who is linking, for the operation log. None skips logging.
 
     Returns:
         A :class:`LinkOutcome`. Its ``unresolved`` list is what the staging step
@@ -262,6 +265,23 @@ def link_sentence_words(
                 outcome.hints_written += 1
 
     session.flush()
+
+    if source is not None:
+        sentence = session.get(Sentence, sentence_id)
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=SENTENCE_LINK,
+            entity_guid=sentence.guid if sentence else None,
+            fact={
+                "linked": outcome.linked,
+                "ambiguous": outcome.ambiguous,
+                "unresolved": len(outcome.unresolved),
+                "hints_written": outcome.hints_written,
+                "already_linked": outcome.already_linked,
+            },
+        )
+
     logger.info("Linked sentence %s: %s", sentence_id, outcome.summary())
     return outcome
 

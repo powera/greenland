@@ -8,6 +8,7 @@ must let the sequencer move past it, or the workflow stalls on sentences it can
 never finish.
 """
 
+import json
 import unittest
 
 from sqlalchemy import create_engine
@@ -23,7 +24,9 @@ from sentences.import_workflow import (
     unlinked_words,
 )
 from sentences.translate_and_decompose import PHASE3_MIN_LANGUAGES
+from storage.crud.operation_log import SENTENCE_IMPORT
 from storage.models.imports import PendingImport, SentencePendingImport
+from storage.models.operation_log import OperationLog
 from storage.models.schema import (
     Base,
     Lemma,
@@ -459,3 +462,80 @@ class TestSequencerReachesStage(SentenceWorkflowTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestImportOperationLogging(SentenceWorkflowTestCase):
+    """``do_import_sentence`` records one entry per execution, not per stage."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        # A sentence with nothing left to translate, decompose or link, so the
+        # run reaches FINALIZE without needing an LLM.
+        self.add_translation("en", "The dog barks.")
+        self.add_translation("lt", "Šuo loja.")
+
+        # A difficulty level gives FINALIZE something to compute, so the run
+        # reaches a stage that actually does work rather than reporting
+        # "complete" without executing anything.
+        self.lemma = Lemma(
+            lemma_text="dog",
+            definition_text="an animal",
+            pos_type="noun",
+            guid="N01_001",
+            difficulty_level=3,
+        )
+        self.session.add(self.lemma)
+        self.session.commit()
+        self.add_word(0, "dog", lemma_id=self.lemma.id)
+
+    def _run(self) -> str:
+        from workqueue.handlers.sentences.import_workflow import do_import_sentence
+
+        summary: str = do_import_sentence(
+            self.session,
+            self.sentence.id,
+            target_languages=["en", "lt"],
+            decompose_languages=["en"],
+        )
+        return summary
+
+    def _import_logs(self) -> list:
+        return (
+            self.session.query(OperationLog)
+            .filter(OperationLog.operation_type == SENTENCE_IMPORT)
+            .order_by(OperationLog.id)
+            .all()
+        )
+
+    def test_one_entry_per_run_keyed_to_the_sentence_guid(self) -> None:
+        self._run()
+
+        entries = self._import_logs()
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0].entity_guid, "S_00001")
+
+    def test_the_entry_records_the_stages_that_ran(self) -> None:
+        summary = self._run()
+
+        fact = json.loads(self._import_logs()[0].fact)
+        # The same per-stage summaries the task stores as its result, so the log
+        # and the task agree on what happened.
+        self.assertTrue(fact["steps"])
+        for step in fact["steps"]:
+            self.assertIn(step, summary)
+
+    def test_the_entry_survives_the_transaction(self) -> None:
+        """The handler commits its own entry; the PROMOTE branch breaks early."""
+        self._run()
+        self.session.rollback()
+
+        self.assertEqual(len(self._import_logs()), 1)
+
+    def test_a_run_that_does_nothing_writes_no_entry(self) -> None:
+        """A no-op re-run must not accumulate entries saying nothing happened."""
+        self._run()
+        self.assertEqual(len(self._import_logs()), 1)
+
+        # Everything is settled now, so the second run executes no stage.
+        self._run()
+        self.assertEqual(len(self._import_logs()), 1)
