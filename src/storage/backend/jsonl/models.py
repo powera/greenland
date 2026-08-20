@@ -610,6 +610,7 @@ class OperationLog:
     lemma_id: Optional[int] = None
     word_token_id: Optional[int] = None
     derivative_form_id: Optional[int] = None
+    entity_guid: Optional[str] = None
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSONL serialization."""
@@ -624,7 +625,14 @@ class OperationLog:
         if "timestamp" in data and data["timestamp"]:
             data["timestamp"] = datetime.datetime.fromisoformat(data["timestamp"])
 
-        return cls(**data)
+        # Ignore keys that aren't dataclass fields, so a file written by a newer
+        # schema still loads here. Without this, cls(**data) raises TypeError --
+        # and JSONLStorage._load_operation_logs wraps its whole file loop in a
+        # bare except, so one such line silently drops *every* log entry.
+        known_fields = {f.name for f in fields(cls)}
+        filtered = {k: v for k, v in data.items() if k in known_fields}
+
+        return cls(**filtered)
 
 
 @dataclass
