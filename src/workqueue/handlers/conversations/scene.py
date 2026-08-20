@@ -94,6 +94,7 @@ def _register_cast(session: Session, draft: SceneDraft) -> Dict[str, Name]:
             gender=member.gender,
             source_model=draft.source_model,
             notes=member.role,
+            source="conversation-scene",
         )
         registered[normalize_name_text(member.name_text)] = name
         if created:

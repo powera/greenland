@@ -149,6 +149,7 @@ def approve_as_name(session: Session, pending: PendingImport) -> Dict[str, Any]:
         kind=kind,
         source_model=pending.source,
         notes=f"Approved from pending import #{pending.id}",
+        source="pending-import/approve",
     )
     name_id = int(name.id)
     delete_pending_import(session, pending, name_id=name_id)
