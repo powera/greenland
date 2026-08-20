@@ -25,6 +25,7 @@ except ImportError:
     ClientError = Exception
 
 import constants
+from clients.keys import assert_credential_reads_enabled
 
 # Configure logging
 logging.basicConfig(
@@ -35,56 +36,6 @@ logger = logging.getLogger(__name__)
 # Default configuration
 DEFAULT_ENDPOINT = "https://sfo3.digitaloceanspaces.com"
 DEFAULT_BUCKET = "trakaido-audio"
-
-
-class S3CallsDisabledError(RuntimeError):
-    """Raised when GREENLAND_DISABLE_S3 blocks S3 credential loading."""
-
-
-class LiveS3CallInTestError(RuntimeError):
-    """Raised when test code tries to build a real, credentialed S3 client."""
-
-
-def assert_s3_calls_enabled() -> None:
-    """Refuse to build a credentialed S3 client when it should not be possible.
-
-    Two separate guards, mirroring the LLM ones in clients.lib and
-    clients.unified_client:
-
-    * GREENLAND_DISABLE_S3=1 is an operator kill switch, so a bulk agent can
-      run against the database with a hard guarantee that nothing reaches a
-      real bucket. Code paths that only generate files locally still work;
-      anything that would upload fails loudly.
-    * Under pytest, constructing a credentialed uploader is blocked outright.
-      Tests must pass a double (see audiotools.s3_ops, whose helpers take the
-      uploader as an argument). A test deliberately exercising a real bucket
-      can opt out with GREENLAND_ALLOW_LIVE_S3=1 .
-
-    The check sits in __init__, before credentials are read from the
-    environment or keys/digitalocean.key, so a blocked run never loads a
-    secret it is not allowed to use.
-
-    Raises:
-        S3CallsDisabledError: If GREENLAND_DISABLE_S3=1 .
-        LiveS3CallInTestError: If running under pytest without an opt-out.
-    """
-    if os.environ.get("GREENLAND_DISABLE_S3") == "1":
-        raise S3CallsDisabledError(
-            "S3 client construction blocked: GREENLAND_DISABLE_S3=1 is set. "
-            "Unset it to allow S3 access, or use a code path that does not "
-            "require an upload."
-        )
-
-    if "PYTEST_CURRENT_TEST" not in os.environ:
-        return
-    if os.environ.get("GREENLAND_ALLOW_LIVE_S3") == "1":
-        return
-    raise LiveS3CallInTestError(
-        "S3AudioUploader was constructed from a test. Tests must not load real "
-        "credentials or reach a real bucket: pass a double instead (the "
-        "audiotools.s3_ops helpers take the uploader as an argument). Set "
-        "GREENLAND_ALLOW_LIVE_S3=1 only for a deliberate live run."
-    )
 
 
 def get_staging_prefix() -> str:
@@ -178,8 +129,12 @@ class S3AudioUploader:
         if boto3 is None:
             raise ImportError("boto3 not installed. Install with: pip install boto3")
 
-        # Before any secret is read from the environment or the key file.
-        assert_s3_calls_enabled()
+        # Before any secret is read from the environment or the key file, so a
+        # blocked run never loads a credential it is not allowed to use. A
+        # caller that passes both keys explicitly (as tests do) supplies its
+        # own fake and sources nothing, so it is left alone.
+        if not (access_key and secret_key):
+            assert_credential_reads_enabled("digitalocean")
 
         # Load credentials
         self.endpoint_url = endpoint_url or os.getenv("DO_SPACES_ENDPOINT", DEFAULT_ENDPOINT)

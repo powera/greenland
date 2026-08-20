@@ -94,6 +94,10 @@ def read_api_key_from_file(key_file: str = "keys/openai.key") -> Optional[str]:
     Returns:
         API key as string or None if file not found/readable
     """
+    from clients.keys import assert_credential_reads_enabled
+
+    assert_credential_reads_enabled("openai")
+
     try:
         key_path = Path(key_file)
         if key_path.exists():

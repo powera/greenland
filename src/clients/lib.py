@@ -169,13 +169,23 @@ def resolve_output_tokens(
 
 
 def assert_llm_calls_enabled(backend: str) -> None:
-    """Refuse to send an outbound LLM request when GREENLAND_DISABLE_LLM=1 .
+    """Refuse to send an outbound LLM request when LLM calls are switched off.
 
     This is an operator-facing kill switch: it lets a bulk agent run against the
     database with a hard guarantee that nothing reaches a paid backend, so code
     paths that generate data mechanically (e.g. langtools.en rule-based forms)
     still run while any LLM fallback fails loudly instead of silently spending
     money.
+
+    Two environment variables reach here:
+
+    * GREENLAND_DISABLE_LLM=1 blocks outbound LLM requests only.
+    * GREENLAND_TEST_MODE=1 is the stricter switch. It blocks the same requests
+      and additionally forbids reading anything out of keys/ (see
+      clients.keys.assert_credential_reads_enabled).
+
+    Both block keyless backends such as a local Ollama as well: the point is
+    that no LLM runs, not merely that no key is spent.
 
     Call this at the point of the outbound HTTP request, not in a wrapper.
     Each backend client defines its own generate_chat/warm_model, and callers
@@ -185,6 +195,15 @@ def assert_llm_calls_enabled(backend: str) -> None:
     Args:
         backend: Backend name, for the error message (e.g. "openai").
     """
+    from clients.keys import test_mode_enabled
+
+    if test_mode_enabled():
+        raise LLMCallsDisabledError(
+            f"Outbound {backend} LLM request blocked: GREENLAND_TEST_MODE=1 is set. "
+            f"Test mode blocks every LLM call and every read of keys/ . Unset it "
+            f"for a deliberate live run."
+        )
+
     if os.environ.get("GREENLAND_DISABLE_LLM") != "1":
         return
     raise LLMCallsDisabledError(

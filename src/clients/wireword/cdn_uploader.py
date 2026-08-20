@@ -25,6 +25,7 @@ except ImportError:
     ClientError = Exception
 
 import constants
+from clients.keys import assert_credential_reads_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +55,12 @@ class WirewordCdnUploader:
     ) -> None:
         if boto3 is None:
             raise ImportError("boto3 not installed. Install with: pip install boto3")
+
+        # Only when a credential would actually be sourced: a caller that
+        # passes both keys explicitly (as tests do) supplies its own fake and
+        # reads nothing out of the environment or keys/ .
+        if not (access_key and secret_key):
+            assert_credential_reads_enabled("digitalocean")
 
         self.endpoint_url = endpoint_url or os.getenv("DO_SPACES_ENDPOINT", DEFAULT_ENDPOINT)
         self.bucket_name = bucket_name or os.getenv("DO_WIREWORD_BUCKET", WIREWORD_BUCKET)

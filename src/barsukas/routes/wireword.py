@@ -42,7 +42,15 @@ def _get_config() -> DataSourceConfig:
 
 
 def _cdn_credentials_available() -> bool:
-    """Return True if DigitalOcean Spaces credentials are configured."""
+    """Return True if DigitalOcean Spaces credentials are configured.
+
+    Reports no credentials under GREENLAND_TEST_MODE, so the UI offers the
+    non-CDN path rather than a button that would raise on click.
+    """
+    from clients.keys import test_mode_enabled
+
+    if test_mode_enabled():
+        return False
     if os.getenv("DO_SPACES_KEY") and os.getenv("DO_SPACES_SECRET"):
         return True
     key_file = Path(constants.KEY_DIR) / "digitalocean.key"

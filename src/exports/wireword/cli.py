@@ -118,12 +118,19 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
 
 def _cdn_credentials_available() -> bool:
-    """Return True if Digital Ocean Spaces credentials are configured."""
+    """Return True if Digital Ocean Spaces credentials are configured.
+
+    Reports no credentials under GREENLAND_TEST_MODE, so an export skips the
+    CDN step rather than failing partway through it.
+    """
     import os
     from pathlib import Path
 
     import constants
+    from clients.keys import test_mode_enabled
 
+    if test_mode_enabled():
+        return False
     if os.getenv("DO_SPACES_KEY") and os.getenv("DO_SPACES_SECRET"):
         return True
     key_file = Path(constants.KEY_DIR) / "digitalocean.key"
