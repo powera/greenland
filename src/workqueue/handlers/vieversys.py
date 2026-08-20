@@ -26,6 +26,7 @@ from audioshoe.qwen import QwenVoice
 from clients.audio import Voice
 from clients.audio.gpt_voices import GptVoice
 from storage.backend.config import DataSourceConfig
+from audiotools.review_records import clear_review_verdict, find_existing_review
 from storage.models.schema import AudioQualityReview, Lemma, Sentence, SentenceTranslation
 
 logger = logging.getLogger(__name__)
@@ -64,27 +65,21 @@ def _upsert_review_record(
     if lemma is not None and sentence_id is None:
         guid = lemma.guid
         lemma_id: Optional[int] = lemma.id
-        existing = (
-            session.query(AudioQualityReview)
-            .filter_by(
-                guid=guid,
-                language_code=language_code,
-                voice_name=voice_name,
-                grammatical_form=None,  # Base form
-            )
-            .first()
+        existing = find_existing_review(
+            session,
+            language_code=language_code,
+            voice_name=voice_name,
+            guid=guid,
+            grammatical_form=None,  # Base form
         )
     elif sentence_id is not None and lemma is None:
         guid = f"S_{sentence_id:05d}"  # Synthetic GUID for sentences
         lemma_id = None
-        existing = (
-            session.query(AudioQualityReview)
-            .filter_by(
-                sentence_id=sentence_id,
-                language_code=language_code,
-                voice_name=voice_name,
-            )
-            .first()
+        existing = find_existing_review(
+            session,
+            language_code=language_code,
+            voice_name=voice_name,
+            sentence_id=sentence_id,
         )
     else:
         raise ValueError("_upsert_review_record requires exactly one of lemma or sentence_id")
@@ -100,10 +95,7 @@ def _upsert_review_record(
         existing.staging_agent = None
         existing.accepted_at = None
         existing.accepted_by = None
-        existing.quality_issues = None
-        existing.notes = None
-        existing.reviewed_at = None
-        existing.reviewed_by = None
+        clear_review_verdict(existing)
         logger.debug(f"Updated existing review record for {guid}/{language_code}/{voice_name}")
         return
 

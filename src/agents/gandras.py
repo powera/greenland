@@ -17,8 +17,6 @@ import argparse
 import logging
 import sys
 import tempfile
-from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -36,74 +34,21 @@ from agents.common.common_args import (
     get_data_source_config,
 )
 from audiotools import s3_ops
+from audiotools.review_records import clear_review_verdict, find_existing_review
+from audiotools.staging_manifest import (
+    ManifestEntry,
+    MatchResult,
+    match_manifest_to_database,
+)
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import DataSourceConfig
-from storage.models.schema import (
-    AudioQualityReview,
-    Lemma,
-    Sentence,
-    SentenceTranslation,
-)
-from storage.translation_helpers import get_translation
+from storage.models.schema import AudioQualityReview
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class ManifestEntry:
-    """Parsed manifest entry from S3."""
-
-    md5: str
-    agent: str
-    voice_name: str
-    language_code: str
-    expected_text: str
-    guid: Optional[str]
-    sentence_id: Optional[int]
-    grammatical_form: Optional[str]
-    generated_at: str
-    file_size_bytes: int
-    generation_params: Optional[Dict[str, Any]]
-    s3_audio_key: str
-    s3_manifest_key: str
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any], audio_key: str, manifest_key: str) -> "ManifestEntry":
-        """Create ManifestEntry from manifest dict."""
-        return cls(
-            md5=data.get("md5", ""),
-            agent=data.get("agent", ""),
-            voice_name=data.get("voice_name", ""),
-            language_code=data.get("language_code", ""),
-            expected_text=data.get("expected_text", ""),
-            guid=data.get("guid"),
-            sentence_id=data.get("sentence_id"),
-            grammatical_form=data.get("grammatical_form"),
-            generated_at=data.get("generated_at", ""),
-            file_size_bytes=data.get("file_size_bytes", 0),
-            generation_params=data.get("generation_params"),
-            s3_audio_key=audio_key,
-            s3_manifest_key=manifest_key,
-        )
-
-
-@dataclass
-class MatchResult:
-    """Result of matching a manifest to database records."""
-
-    matched: bool
-    match_type: str  # "guid", "sentence_id", "text_only", "no_match"
-    lemma: Optional[Lemma]
-    sentence: Optional[Sentence]
-    text_matches: bool
-    guid_matches: bool
-    sentence_id_matches: bool
-    pos_type: Optional[str]
-    warnings: List[str]
 
 
 class GandrasAgent:
@@ -203,10 +148,8 @@ class GandrasAgent:
         """
         Match a manifest entry against the database.
 
-        Matching priority:
-        1. If guid is present, try to match lemma by GUID
-        2. If sentence_id is present, try to match sentence by ID
-        3. Fall back to text matching within the language
+        Thin wrapper over audiotools.staging_manifest.match_manifest_to_database,
+        supplying this agent's require_text_match setting.
 
         Args:
             session: Database session
@@ -215,106 +158,8 @@ class GandrasAgent:
         Returns:
             MatchResult with match details
         """
-        warnings: List[str] = []
-        lemma: Optional[Lemma] = None
-        sentence: Optional[Sentence] = None
-        text_matches = False
-        guid_matches = False
-        sentence_id_matches = False
-        pos_type: Optional[str] = None
-
-        # Try GUID match for lemmas
-        if manifest.guid and not manifest.guid.startswith("S_"):
-            lemma = session.query(Lemma).filter_by(guid=manifest.guid).first()
-
-            if lemma:
-                guid_matches = True
-                pos_type = lemma.pos_type
-
-                # Check if text matches translation
-                db_translation = get_translation(session, lemma, manifest.language_code)
-                if db_translation:
-                    # Normalize for comparison (strip whitespace, lowercase for comparison)
-                    manifest_text_norm = manifest.expected_text.strip().lower()
-                    db_text_norm = db_translation.strip().lower()
-                    text_matches = manifest_text_norm == db_text_norm
-
-                    if not text_matches:
-                        warnings.append(
-                            f"Text mismatch: manifest='{manifest.expected_text}' "
-                            f"vs db='{db_translation}'"
-                        )
-                else:
-                    warnings.append(
-                        f"No {manifest.language_code} translation found for lemma {manifest.guid}"
-                    )
-
-        # Try sentence_id match
-        if manifest.sentence_id:
-            sentence = session.query(Sentence).filter_by(id=manifest.sentence_id).first()
-
-            if sentence:
-                sentence_id_matches = True
-
-                # Check if text matches translation
-                translation = (
-                    session.query(SentenceTranslation)
-                    .filter_by(
-                        sentence_id=manifest.sentence_id, language_code=manifest.language_code
-                    )
-                    .first()
-                )
-
-                if translation:
-                    manifest_text_norm = manifest.expected_text.strip().lower()
-                    db_text_norm = translation.translation_text.strip().lower()
-                    text_matches = manifest_text_norm == db_text_norm
-
-                    if not text_matches:
-                        warnings.append(
-                            f"Text mismatch: manifest='{manifest.expected_text}' "
-                            f"vs db='{translation.translation_text}'"
-                        )
-                else:
-                    warnings.append(
-                        f"No {manifest.language_code} translation found for sentence {manifest.sentence_id}"
-                    )
-
-        # Determine match type and whether it's a valid match
-        if guid_matches and text_matches:
-            match_type = "guid"
-            matched = True
-        elif sentence_id_matches and text_matches:
-            match_type = "sentence_id"
-            matched = True
-        elif guid_matches and not text_matches:
-            match_type = "guid_text_mismatch"
-            matched = not self.require_text_match  # Match if text match not required
-        elif sentence_id_matches and not text_matches:
-            match_type = "sentence_id_text_mismatch"
-            matched = not self.require_text_match
-        elif not manifest.guid and not manifest.sentence_id:
-            match_type = "no_identifier"
-            matched = False
-            warnings.append("Manifest has no guid or sentence_id")
-        else:
-            match_type = "no_match"
-            matched = False
-            if manifest.guid:
-                warnings.append(f"GUID {manifest.guid} not found in database")
-            if manifest.sentence_id:
-                warnings.append(f"Sentence ID {manifest.sentence_id} not found in database")
-
-        return MatchResult(
-            matched=matched,
-            match_type=match_type,
-            lemma=lemma,
-            sentence=sentence,
-            text_matches=text_matches,
-            guid_matches=guid_matches,
-            sentence_id_matches=sentence_id_matches,
-            pos_type=pos_type,
-            warnings=warnings,
+        return match_manifest_to_database(
+            session, manifest, require_text_match=self.require_text_match
         )
 
     def download_audio_file(self, audio_key: str, output_path: Path) -> Tuple[bool, Optional[str]]:
@@ -354,10 +199,7 @@ class GandrasAgent:
             Created or updated AudioQualityReview record
         """
         if self.dry_run:
-            logger.info(
-                f"[DRY RUN] Would create/update AudioQualityReview for "
-                f"{manifest.guid or f'sentence_{manifest.sentence_id}'}"
-            )
+            logger.info(f"[DRY RUN] Would create/update AudioQualityReview for {manifest.label}")
             return None
 
         # Build S3 URLs
@@ -367,25 +209,19 @@ class GandrasAgent:
         # Check for existing record
         existing: Optional[AudioQualityReview] = None
         if manifest.guid and match_result.lemma:
-            existing = (
-                session.query(AudioQualityReview)
-                .filter_by(
-                    guid=manifest.guid,
-                    language_code=manifest.language_code,
-                    voice_name=manifest.voice_name,
-                    grammatical_form=manifest.grammatical_form,
-                )
-                .first()
+            existing = find_existing_review(
+                session,
+                language_code=manifest.language_code,
+                voice_name=manifest.voice_name,
+                guid=manifest.guid,
+                grammatical_form=manifest.grammatical_form,
             )
         elif manifest.sentence_id and match_result.sentence:
-            existing = (
-                session.query(AudioQualityReview)
-                .filter_by(
-                    sentence_id=manifest.sentence_id,
-                    language_code=manifest.language_code,
-                    voice_name=manifest.voice_name,
-                )
-                .first()
+            existing = find_existing_review(
+                session,
+                language_code=manifest.language_code,
+                voice_name=manifest.voice_name,
+                sentence_id=manifest.sentence_id,
             )
 
         if existing:
@@ -397,8 +233,7 @@ class GandrasAgent:
             # depending on this DB's review state.
             if existing.status == "needs_replacement" and existing.manifest_md5 == manifest.md5:
                 logger.info(
-                    f"Skipping re-import of rejected audio for "
-                    f"{manifest.guid or f'sentence_{manifest.sentence_id}'} "
+                    f"Skipping re-import of rejected audio for {manifest.label} "
                     f"(status=needs_replacement, same MD5)"
                 )
                 return existing
@@ -412,14 +247,8 @@ class GandrasAgent:
             existing.staging_agent = manifest.agent
             # Reset to pending_review since we're re-downloading
             existing.status = "pending_review"
-            existing.reviewed_at = None
-            existing.reviewed_by = None
-            existing.quality_issues = None
-            existing.notes = None
-            logger.debug(
-                f"Updated existing review record for "
-                f"{manifest.guid or f'sentence_{manifest.sentence_id}'}"
-            )
+            clear_review_verdict(existing)
+            logger.debug(f"Updated existing review record for {manifest.label}")
             return existing
 
         # Create new record
@@ -440,9 +269,7 @@ class GandrasAgent:
             status="pending_review",
         )
         session.add(review)
-        logger.debug(
-            f"Created review record for {manifest.guid or f'sentence_{manifest.sentence_id}'}"
-        )
+        logger.debug(f"Created review record for {manifest.label}")
         return review
 
     def process_manifests(
