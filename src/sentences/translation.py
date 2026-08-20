@@ -18,6 +18,12 @@ from sentences.decomposition import (
     build_decomposition_schema,
     build_prompt_for_translate_and_decompose,
 )
+from storage.crud.operation_log import (
+    SENTENCE_TRANSLATION_UPDATE,
+    SENTENCE_WORD_CREATE,
+    log_batch_operation,
+    log_entity_operation,
+)
 from storage.models.schema import (
     Lemma,
     Sentence,
@@ -97,6 +103,7 @@ def translate_sentence(
     model: str = "gpt-5.4-mini",
     *,
     source_language: str = "en",
+    log_source: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Translate a stored sentence into target languages using the 3-phase pipeline.
 
@@ -113,6 +120,8 @@ def translate_sentence(
         model: LLM model to use.
         source_language: Language code of the existing SentenceTranslation to use
             as the prompt's source sentence (default: "en").
+        log_source: Who is running this, for the operation log. None skips
+            logging. Named to keep it distinct from ``source_language``.
 
     Returns:
         Dict of language_code -> translation_text for the languages that were
@@ -208,7 +217,7 @@ def translate_sentence(
     # before Phase 3. This way the explicit batch decompose path's precondition
     # is satisfied on retry, and a Phase-3 failure doesn't lose the Phase-1
     # work.
-    _persist_phase1_translations(sentence_id, phase1_translations, session)
+    _persist_phase1_translations(sentence_id, phase1_translations, session, source=log_source)
 
     # ── Phase 2 + Phase 3 ─────────────────────────────────────────────────
     pipeline_result = TranslateAndDecomposeResult(
@@ -245,7 +254,7 @@ def translate_sentence(
             translations[language_code] = decomposition.translation
         translations[f"words_{language_code}"] = list(decomposition.words)
 
-    store_translation_results(sentence_id, translations, session)
+    store_translation_results(sentence_id, translations, session, source=log_source)
     return translations
 
 
@@ -253,13 +262,21 @@ def _persist_phase1_translations(
     sentence_id: int,
     translations: Dict[str, str],
     session: Session,
+    source: Optional[str] = None,
 ) -> None:
     """Insert/update SentenceTranslation rows for Phase-1 outputs and commit.
 
     Used by the synchronous decompose path so Phase-1 work survives a Phase-3
     failure and so the DB state matches what the explicit two-phase OpenAI
     Batch flow produces.
+
+    Args:
+        sentence_id: Sentence being translated.
+        translations: Phase-1 output, language code -> text.
+        session: Database session.
+        source: Who produced these, for the operation log. None skips logging.
     """
+    persisted: List[str] = []
     for lang_code, translation_text in translations.items():
         if not isinstance(translation_text, str) or not translation_text.strip():
             continue
@@ -279,6 +296,18 @@ def _persist_phase1_translations(
                     verified=False,
                 )
             )
+        persisted.append(lang_code)
+
+    if source is not None and persisted:
+        phase1_sentence = session.get(Sentence, sentence_id)
+        log_entity_operation(
+            session,
+            source=source,
+            operation_type=SENTENCE_TRANSLATION_UPDATE,
+            entity_guid=phase1_sentence.guid if phase1_sentence else None,
+            fact={"languages": sorted(persisted), "phase": 1},
+        )
+
     session.commit()
     logger.info(
         "Persisted Phase-1 translations for sentence %d: %s",
@@ -315,7 +344,10 @@ def _optional_int_word_field(value: Any) -> Optional[int]:
 
 
 def store_translation_results(
-    sentence_id: int, translations: Dict[str, Any], session: Session
+    sentence_id: int,
+    translations: Dict[str, Any],
+    session: Session,
+    source: Optional[str] = None,
 ) -> None:
     """
     Store translation results in database.
@@ -324,8 +356,12 @@ def store_translation_results(
         sentence_id: ID of sentence
         translations: Dict with translation data from LLM
         session: Database session
+        source: Who produced these, for the operation log. None skips logging.
     """
     logger.info(f"=== Storing translations for sentence {sentence_id} ===")
+
+    stored_languages: List[str] = []
+    word_counts: Dict[str, int] = {}
 
     # Update or create English translation if provided
     if "en" in translations:
@@ -355,6 +391,7 @@ def store_translation_results(
         # This is a language translation
         lang_code = key
         translation_text = value
+        stored_languages.append(lang_code)
 
         logger.info(f"Storing translation for {lang_code}: {translation_text}")
 
@@ -384,6 +421,7 @@ def store_translation_results(
             continue
 
         lang_code = key.replace("words_", "")
+        word_counts[lang_code] = len(words_data)
         logger.debug(f"Storing {len(words_data)} words for {lang_code}")
 
         # Delete existing word links for this language
@@ -435,6 +473,32 @@ def store_translation_results(
                 ud_head_position=_optional_int_word_field(word_data.get("ud_head_position")),
             )
             session.add(new_word)
+
+    if source is not None:
+        # This function writes its rows by hand rather than through
+        # storage.crud.sentence_translation, so the logging those functions do
+        # never fires here; it has to be done at this level.
+        sentence = session.get(Sentence, sentence_id)
+        sentence_guid = sentence.guid if sentence else None
+
+        if stored_languages:
+            log_entity_operation(
+                session,
+                source=source,
+                operation_type=SENTENCE_TRANSLATION_UPDATE,
+                entity_guid=sentence_guid,
+                fact={"languages": sorted(stored_languages)},
+            )
+
+        for lang_code, count in sorted(word_counts.items()):
+            log_batch_operation(
+                session,
+                source=source,
+                operation_type=SENTENCE_WORD_CREATE,
+                entity_guid=sentence_guid,
+                count=count,
+                fact={"language_code": lang_code, "replaced_existing": True},
+            )
 
     session.commit()
     logger.info(f"Stored translation results for sentence {sentence_id}")

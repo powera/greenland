@@ -7,12 +7,18 @@ call site; a caller that forgot to adapt got rows with empty text columns and
 no error. These tests pin the field mapping so that failure cannot return.
 """
 
+import json
 from typing import Any, Dict, List
 
 from sqlalchemy.orm import Session
 
 from langtools.ud_relations import ROOT_HEAD_POSITION
 from sentences.translation import store_translation_results
+from storage.crud.operation_log import (
+    SENTENCE_TRANSLATION_UPDATE,
+    SENTENCE_WORD_CREATE,
+)
+from storage.models.operation_log import OperationLog
 from storage.models.schema import Lemma, SentenceWord
 from tests.sentences.candidate_lookup_fixture import (
     add_test_sentence,
@@ -202,3 +208,65 @@ def test_store_translation_results_replaces_prior_words_for_language() -> None:
         store_translation_results(sentence.id, payload, session)
 
         assert len(_stored_words(session, sentence.id)) == 1
+
+
+def test_store_translation_results_logs_nothing_by_default() -> None:
+    """Logging is opt-in: no source means no operation log entries.
+
+    This is what keeps the change from silently making every existing caller
+    start writing to the log.
+    """
+    engine = build_test_engine()
+    with Session(engine) as session:
+        seed_test_database(session)
+        sentence = add_test_sentence(session, {"en": "a book", "lt": "knyga"})
+
+        store_translation_results(
+            sentence.id,
+            {
+                "lt": "knyga",
+                "words_lt": [_phase3_word(position=0, surface_form="knyga", english_gloss="book")],
+            },
+            session,
+        )
+
+        assert session.query(OperationLog).count() == 0
+
+
+def test_store_translation_results_logs_translations_and_word_batch() -> None:
+    """With a source, one entry per language plus one batch entry per language.
+
+    This function writes its rows by hand rather than through
+    storage.crud.sentence_translation, so the CRUD-level logging never fires
+    here and these entries are the only record of the write.
+    """
+    engine = build_test_engine()
+    with Session(engine) as session:
+        seed_test_database(session)
+        sentence = add_test_sentence(session, {"en": "a book", "lt": "knyga"})
+
+        store_translation_results(
+            sentence.id,
+            {
+                "lt": "knyga",
+                "words_lt": [
+                    _phase3_word(position=0, surface_form="knyga", english_gloss="book"),
+                    _phase3_word(position=1, surface_form="nauja", english_gloss="new"),
+                ],
+            },
+            session,
+            source="test-suite",
+        )
+
+        entries = session.query(OperationLog).order_by(OperationLog.id).all()
+        by_type = {entry.operation_type: entry for entry in entries}
+
+        translation_entry = by_type[SENTENCE_TRANSLATION_UPDATE]
+        assert translation_entry.entity_guid == sentence.guid
+        assert json.loads(translation_entry.fact)["languages"] == ["lt"]
+
+        word_entry = by_type[SENTENCE_WORD_CREATE]
+        assert word_entry.entity_guid == sentence.guid
+        word_fact = json.loads(word_entry.fact)
+        assert word_fact["count"] == 2
+        assert word_fact["language_code"] == "lt"
