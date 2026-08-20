@@ -10,17 +10,19 @@
         <p class="lead">Multilingual Dictionary Editor for Language Learning</p>
         <p class="text-muted">
             Barsukas is a database editor for building multilingual vocabulary content.
-            It manages words (lemmas), their translations across multiple languages,
-            example sentences, and audio pronunciations. Content created here is
-            exported for use in the Trakaido language-learning app.
+            It manages words (lemmas), their translations across
+            {{ languages | default(0) }} languages, their inflected forms and grammar,
+            example sentences, phrases, names, idioms, and audio pronunciations.
+            Content created here is exported for use in the Trakaido
+            language-learning app.
         </p>
     </div>
 </div>
 
 <!-- Stats Cards -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card stat-card">
+<div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+    <div class="col">
+        <div class="card stat-card h-100">
             <div class="card-body">
                 <h5 class="card-title text-muted">Words</h5>
                 <h2 class="card-text">{{ total_lemmas | default(0) }}</h2>
@@ -28,8 +30,8 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card">
+    <div class="col">
+        <div class="card stat-card h-100">
             <div class="card-body">
                 <h5 class="card-title text-muted">Reviewed</h5>
                 <h2 class="card-text text-success">{{ verified_lemmas | default(0) }}</h2>
@@ -37,8 +39,8 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card">
+    <div class="col">
+        <div class="card stat-card h-100">
             <div class="card-body">
                 <h5 class="card-title text-muted">With Levels</h5>
                 <h2 class="card-text text-info">{{ with_difficulty | default(0) }}</h2>
@@ -46,12 +48,52 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card">
+    <div class="col">
+        <div class="card stat-card h-100">
             <div class="card-body">
                 <h5 class="card-title text-muted">Sentences</h5>
                 <h2 class="card-text text-warning">{{ total_sentences | default(0) }}</h2>
                 <small class="text-muted">example sentences</small>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Languages</h5>
+                <h2 class="card-text">{{ languages | default(0) }}</h2>
+                <small class="text-muted">with translations</small>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Word Forms</h5>
+                <h2 class="card-text">{{ derivative_forms | default(0) }}</h2>
+                <small class="text-muted">inflections &amp; derivatives</small>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Approved Audio</h5>
+                <h2 class="card-text">{{ approved_audio | default(0) }}</h2>
+                <small class="text-muted">recordings cleared for release</small>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Phrases &amp; Names</h5>
+                <h2 class="card-text">{{ (total_phrases | default(0)) + (total_names | default(0)) + (total_idioms | default(0)) }}</h2>
+                <small class="text-muted">
+                    {{ total_phrases | default(0) }} phrases,
+                    {{ total_names | default(0) }} names,
+                    {{ total_idioms | default(0) }} idioms
+                </small>
             </div>
         </div>
     </div>
@@ -83,6 +125,25 @@
                         <i class="bi bi-chat-left-quote"></i> Browse Sentences
                     </a>
                 </div>
+
+                <hr class="my-4">
+
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-hash"></i> Look Up a GUID
+                </h5>
+                <form action="{{ url_for('guids.index') }}" method="get">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="guid"
+                               placeholder="N02_001, S_00077, M01_001, E01_003">
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="bi bi-arrow-right-circle"></i> Go
+                        </button>
+                    </div>
+                </form>
+                <small class="text-muted">
+                    Jumps straight to the word, sentence, phrase, idiom or name.
+                    A retired GUID reports what replaced it.
+                </small>
             </div>
         </div>
     </div>
@@ -91,79 +152,137 @@
 <!-- Features -->
 <div class="row mt-5">
     <div class="col-12 mb-3">
-        <h4>Key Features</h4>
+        <h4>Explore</h4>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-4 mb-3">
         <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">
-                    <i class="bi bi-pencil-square text-primary"></i> Edit Dictionary Entries
+                    <i class="bi bi-book text-primary"></i> Dictionary Entries
                 </h5>
                 <p class="card-text">
-                    Add and update words with definitions, parts of speech (noun, verb, etc.),
-                    and learner difficulty levels from 1 (beginner) to 20 (advanced).
+                    Words carry a definition, a part of speech and subtype, and a learner
+                    difficulty level. A level of <code>-1</code> means the word is
+                    deliberately excluded from that language's wordlist.
                 </p>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-4 mb-3">
         <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">
                     <i class="bi bi-translate text-success"></i> Multilingual Translations
                 </h5>
                 <p class="card-text">
-                    Manage translations across 9 languages including Chinese, Spanish, French,
-                    German, and Lithuanian. AI-assisted with human review.
+                    Translations span {{ languages | default(0) }} languages &mdash; Lithuanian,
+                    Chinese, Japanese, Korean, Vietnamese, Swahili and the major European
+                    languages among them. AI-assisted, with human review.
                 </p>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-4 mb-3">
         <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">
-                    <i class="bi bi-robot text-info"></i> AI-Powered Agents
+                    <i class="bi bi-diagram-3 text-info"></i> Forms &amp; Grammar
                 </h5>
                 <p class="card-text">
-                    Automated tools generate translations, verify quality, link sentences
-                    to vocabulary, and produce audio pronunciations.
+                    Each word can carry inflected and derived forms, grammar facts,
+                    alternate spellings, and synonym relations to other words.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-chat-left-quote text-warning"></i> Sentences &amp; Conversations
+                </h5>
+                <p class="card-text">
+                    Example sentences link to the vocabulary they use, so a sentence's
+                    level follows from the words in it.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-volume-up text-danger"></i> Audio Pronunciations
+                </h5>
+                <p class="card-text">
+                    Generated speech for words and sentences, reviewed for quality before
+                    any recording is cleared for release.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-hash text-secondary"></i> Stable GUIDs
+                </h5>
+                <p class="card-text">
+                    Every word, sentence, phrase, idiom and name has a permanent GUID.
+                    Retired GUIDs are never reissued, and
+                    <a href="{{ url_for('guids.index') }}">GUID lookup</a> reports what
+                    replaced them.
                 </p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Getting Started -->
+{% if not config.get('READONLY', False) %}
+<!-- Editing -->
 <div class="row mt-4">
     <div class="col-12 mb-3">
-        <h4>Getting Started</h4>
+        <h4>Editing</h4>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4 mb-3">
         <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">
-                    <i class="bi bi-eye text-secondary"></i> Browse Content
+                    <i class="bi bi-pencil-square text-primary"></i> Add &amp; Edit Words
                 </h5>
                 <p class="card-text">
-                    Use the <strong>View</strong> menu to explore existing words, sentences,
-                    and conversations. Click any word to see its translations and related content.
+                    Create and update entries, assign difficulty levels, and merge
+                    duplicates. New words start at level <code>-1</code> until reviewed.
                 </p>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4 mb-3">
         <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">
-                    <i class="bi bi-play-circle text-secondary"></i> Run Operations
+                    <i class="bi bi-robot text-info"></i> Run Agents
                 </h5>
                 <p class="card-text">
-                    Use the <strong>Tools</strong> menu to run AI agents, verify translations,
-                    review audio, and export data for the Trakaido app.
+                    Bulk LLM operations generate translations, decompose sentences,
+                    produce audio, and rank candidate vocabulary for import.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-arrow-left-right text-success"></i> Sync &amp; Export
+                </h5>
+                <p class="card-text">
+                    Reconcile the database against the release files, then export the
+                    content the Trakaido app consumes.
                 </p>
             </div>
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock %}

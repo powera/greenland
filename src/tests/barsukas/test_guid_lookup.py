@@ -106,11 +106,59 @@ def test_an_unissued_guid_is_distinguished_from_a_retired_one(client: FlaskClien
     assert "never been retired" in body
 
 
-def test_the_permalink_form_redirects_into_the_search(client: FlaskClient) -> None:
-    response = client.get("/guids/A03_001")
+def test_the_permalink_goes_straight_to_a_live_record(
+    client: FlaskClient, tombstoned: str
+) -> None:
+    """A live GUID redirects to its detail page, not back into the search box."""
+    response = client.get(f"/guids/{tombstoned}")
 
     assert response.status_code == 302
-    assert "guid=A03_001" in response.headers["Location"]
+    assert "/lemmas/" in response.headers["Location"]
+
+
+def test_the_permalink_404s_for_a_guid_that_names_nothing(client: FlaskClient) -> None:
+    """The permalink and the search box deliberately differ here.
+
+    The search box is a form reporting on what was typed, so an unissued GUID
+    renders the "never issued" panel at 200. A permalink is an address claiming
+    a record exists at it, so anything following links or hunting dead
+    references needs that claim to fail properly.
+    """
+    assert client.get("/guids/N08_404").status_code == 404
+    assert client.get("/guids/?guid=N08_404").status_code == 200
+
+
+def test_the_permalink_still_explains_a_retired_guid(
+    client: FlaskClient, tombstoned: str
+) -> None:
+    """A tombstoned GUID is not a 404: the number was issued, and what replaced
+    it is the answer the caller came for.
+
+    ``A03_001`` is the retired GUID the fixture creates; the ``tombstoned``
+    fixture itself yields the live lemma that replaced it.
+    """
+    response = client.get("/guids/A03_001")
+
+    assert response.status_code == 200
+    body = response.data.decode()
+    assert "retired" in body
+    assert tombstoned in body
+
+
+def test_a_string_that_is_not_a_guid_is_reported_as_such(client: FlaskClient) -> None:
+    """"banana" is a typo, not a lemma GUID that was never issued.
+
+    guid_kind() falls back to "lemma" for any unrecognized string, so without a
+    separate well-formedness check the search box told users their typo "would
+    be a lemma".
+    """
+    response = client.get("/guids/?guid=banana")
+
+    assert response.status_code == 200
+    assert "That is not a GUID" in response.data.decode()
+
+    # As an address, though, it is simply not found.
+    assert client.get("/guids/banana").status_code == 404
 
 
 def test_the_lemma_page_lists_the_guids_that_lemma_used_to_have(

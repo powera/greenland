@@ -32,7 +32,27 @@
     </div>
 </div>
 
-{% if resolved %}
+{% if malformed %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <code>{{ guid }}</code>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger mb-0">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>That is not a GUID.</strong>
+                    A GUID is a prefix and a number joined by an underscore &mdash;
+                    <code>N02_001</code> for a word, <code>S_00077</code> for a sentence,
+                    <code>F01_003</code> for a phrase, <code>M01_001</code> for an idiom,
+                    <code>E01_003</code> for a name.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% elif resolved %}
 <div class="row mb-4">
     <div class="col">
         <div class="card">

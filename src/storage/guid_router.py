@@ -66,6 +66,36 @@ def _is_family_guid(guid: str, family_letter: str) -> bool:
     return prefix[1:].isdigit()
 
 
+def is_wellformed_guid(guid: str) -> bool:
+    """Whether ``guid`` has the shape of a GUID this database could have issued.
+
+    Deliberately separate from :func:`guid_kind`, which answers a different
+    question. ``guid_kind`` must return a kind for *any* string so that routing
+    has a total function, and it falls back to ``"lemma"`` - which is the right
+    default for routing but makes "banana" indistinguishable from a real lemma
+    GUID that was never issued. Callers that need to tell a typo from a missing
+    record ask this first.
+
+    Accepted shapes, mirroring the prefixes in
+    :mod:`storage.models.guid_prefixes`:
+
+    * ``S_`` followed by digits (sentences)
+    * a letter-plus-digits prefix, an underscore, then digits (``N02_001``,
+      ``M01_001``, ``E04_012``, ``F01_003``)
+
+    The prefix is not checked against the allocated set: an unallocated but
+    well-formed ``N98_001`` is a GUID that does not exist, not a malformed
+    string, and the "never issued" answer is the accurate one for it.
+    """
+    prefix, separator, sequence = guid.partition("_")
+    if not separator or not sequence.isdigit():
+        return False
+    if not prefix[:1].isalpha():
+        return False
+    # "S" alone is the sentence prefix; every other family is letter + digits.
+    return len(prefix) == 1 or prefix[1:].isdigit()
+
+
 def guid_kind(guid: str) -> GuidKind:
     """Return the entity kind a GUID refers to based on its prefix.
 

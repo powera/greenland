@@ -623,13 +623,7 @@ def create_app(
         # Get stats in a single optimized query (replaces 4 separate COUNT queries)
         stats = get_home_page_stats(g.db)
 
-        return render_template(
-            "index.html",
-            total_lemmas=stats["total_lemmas"],
-            verified_lemmas=stats["verified_lemmas"],
-            with_difficulty=stats["with_difficulty"],
-            total_sentences=stats["total_sentences"],
-        )
+        return render_template("index.html", **stats)
 
     @app.route("/ipa-reference")
     def ipa_reference() -> Any:
