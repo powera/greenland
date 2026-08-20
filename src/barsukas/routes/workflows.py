@@ -48,6 +48,7 @@ from sentences.import_workflow import (
     next_incomplete_stage,
 )
 from storage.models.grammar_fact import GrammarFact
+from storage.translation_helpers import get_language_name
 from storage.models.schema import (
     SYNONYM_GRAMMATICAL_FORMS,
     DerivativeForm,
@@ -366,6 +367,19 @@ def _sentence_steps(session: Any, sentence_id: int, spec: SentenceImportSpec) ->
     return steps
 
 
+def _language_name(language_code: str) -> str:
+    """Display name for a language code, falling back to the code itself.
+
+    ``get_language_name`` raises on a code it does not know, and the spec's
+    languages come from a task payload, so an unrecognised code must degrade to
+    something printable rather than break the page.
+    """
+    try:
+        return get_language_name(language_code)
+    except ValueError:
+        return language_code
+
+
 def _sentence_display_text(session: Any, sentence_id: int) -> str:
     """Best available text for a sentence: English if present, else anything."""
     rows = (
@@ -445,6 +459,8 @@ def sentence_workflow() -> ResponseReturnValue:
         stage_help=stage_help,
         in_flight=rows,
         default_spec=spec,
+        target_language_names=[_language_name(code) for code in spec.target_languages],
+        decompose_language_names=[_language_name(code) for code in spec.decompose_languages],
     )
 
 
