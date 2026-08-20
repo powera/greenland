@@ -461,6 +461,7 @@ def handle_lemma_type_subtype_change(
             reason=reason,
             notes=notes,
             changed_by=source,
+            source=source,
         )
         result["tombstone_created"] = True
 

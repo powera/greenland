@@ -893,6 +893,11 @@ def apply_removals() -> ResponseReturnValue:
                     reason=TOMBSTONE_REASON_RELEASE_REMOVAL,
                     notes="Deleted through /sync/lemmas/removals: absent from data/release.",
                     changed_by="sync-release",
+                    # Logged separately from the lemma_delete entry above: that
+                    # one is about the row, this one about the number, and the
+                    # retirement outlives the deletion. next_sequence_number
+                    # reads the tombstone, not the lemma.
+                    source="sync-release",
                 )
 
             logger.info(f"Deleting lemma '{lemma.lemma_text}' ({lemma.guid})")

@@ -1267,6 +1267,7 @@ def merge_lemma_synonym(main_guid: str, synonym_guid: str) -> ResponseReturnValu
         reason=TOMBSTONE_REASON_SYNONYM_MERGE,
         notes=notes,
         changed_by=changed_by,
+        source=changed_by,
     )
     g.db.delete(synonym_lemma)
 
