@@ -6,6 +6,14 @@ from typing import Dict, List, Optional
 from sqlalchemy import ColumnElement, and_, not_, or_, true
 from sqlalchemy.orm import Session
 
+from storage.crud.operation_log import (
+    DERIVATIVE_FORM_CREATE,
+    DERIVATIVE_FORM_DELETE,
+    DERIVATIVE_FORM_UPDATE,
+    FieldChange,
+    log_entity_operation,
+    log_field_changes,
+)
 from storage.crud.word_token import add_word_token
 from storage.models.schema import DerivativeForm, Lemma, WordToken
 
@@ -78,8 +86,15 @@ def add_derivative_form(
     phonetic_pronunciation: Optional[str] = None,
     verified: bool = False,
     notes: Optional[str] = None,
+    source: Optional[str] = None,
 ) -> DerivativeForm:
-    """Add a derivative form for a lemma in a specific language."""
+    """Add a derivative form for a lemma in a specific language.
+
+    ``source`` names who is making the change, for the operation log; None
+    skips logging. A derivative form has no GUID of its own, so the entry is
+    keyed to the owning lemma's GUID with the form's identity in the fact.
+    Re-adding an identical form returns the existing row and logs nothing.
+    """
     try:
         # Check if this derivative form already exists
         existing = (
@@ -118,6 +133,22 @@ def add_derivative_form(
 
         session.add(derivative_form)
         session.flush()
+
+        if source is not None:
+            log_entity_operation(
+                session,
+                source=source,
+                operation_type=DERIVATIVE_FORM_CREATE,
+                entity_guid=lemma.guid,
+                fact={
+                    "language_code": language_code,
+                    "grammatical_form": grammatical_form,
+                    "text": derivative_form_text,
+                    "is_base_form": is_base_form,
+                },
+                lemma_id=lemma.id,
+                derivative_form_id=derivative_form.id,
+            )
         return derivative_form
     except Exception as e:
         session.rollback()
@@ -135,13 +166,38 @@ def update_derivative_form(
     phonetic_pronunciation: Optional[str] = None,
     verified: Optional[bool] = None,
     notes: Optional[str] = None,
+    source: Optional[str] = None,
 ) -> bool:
-    """Update derivative form information."""
+    """Update derivative form information.
+
+    ``source`` names who is making the edit, for the operation log; None skips
+    logging, as does an update where no field actually changes.
+    """
     derivative_form = (
         session.query(DerivativeForm).filter(DerivativeForm.id == derivative_form_id).first()
     )
     if not derivative_form:
         return False
+
+    # Captured before the assignments so the log records the real diff. Only
+    # supplied fields are candidates, matching the assignments below, so "not
+    # passed" never reads as "cleared".
+    changes = [
+        FieldChange(field, getattr(derivative_form, field), new_value)
+        for field, new_value in (
+            ("derivative_form_text", derivative_form_text),
+            ("grammatical_form", grammatical_form),
+            ("is_base_form", is_base_form),
+            ("ipa_pronunciation", ipa_pronunciation),
+            ("phonetic_pronunciation", phonetic_pronunciation),
+            ("verified", verified),
+            ("notes", notes),
+        )
+        if new_value is not None
+    ]
+    lemma_guid = derivative_form.lemma.guid if derivative_form.lemma else None
+    lemma_id = derivative_form.lemma_id
+    language_code = derivative_form.language_code
 
     if derivative_form_text is not None:
         derivative_form.derivative_form_text = derivative_form_text
@@ -158,17 +214,30 @@ def update_derivative_form(
     if notes is not None:
         derivative_form.notes = notes
 
+    log_field_changes(
+        session,
+        source=source,
+        operation_type=DERIVATIVE_FORM_UPDATE,
+        entity_guid=lemma_guid,
+        changes=changes,
+        extra={"language_code": language_code},
+        lemma_id=lemma_id,
+    )
     session.commit()
     return True
 
 
-def delete_derivative_form(session: Session, derivative_form_id: int) -> bool:
+def delete_derivative_form(
+    session: Session, derivative_form_id: int, source: Optional[str] = None
+) -> bool:
     """
     Delete a specific derivative form.
 
     Args:
         session: Database session
         derivative_form_id: ID of the derivative form to delete
+        source: Who is deleting this, for the operation log. None skips
+            logging.
 
     Returns:
         Success flag
@@ -178,6 +247,21 @@ def delete_derivative_form(session: Session, derivative_form_id: int) -> bool:
             session.query(DerivativeForm).filter(DerivativeForm.id == derivative_form_id).first()
         )
         if derivative_form:
+            # Logged before the delete, while the row is still there to
+            # describe. The entry outlives it, which is the point.
+            if source is not None:
+                log_entity_operation(
+                    session,
+                    source=source,
+                    operation_type=DERIVATIVE_FORM_DELETE,
+                    entity_guid=(derivative_form.lemma.guid if derivative_form.lemma else None),
+                    fact={
+                        "language_code": derivative_form.language_code,
+                        "grammatical_form": derivative_form.grammatical_form,
+                        "text": derivative_form.derivative_form_text,
+                    },
+                    lemma_id=derivative_form.lemma_id,
+                )
             session.delete(derivative_form)
             session.commit()
             return True
@@ -448,6 +532,24 @@ def add_alternative_form(
     """
     Add an alternative form for a lemma.
 
+    .. deprecated::
+        This is the pre-``variant_forms`` mechanism and writes
+        ``grammatical_form`` values (``alternative_variant``,
+        ``alternative_informal``, ...) that nothing reads any more.  The live
+        database holds **zero** such rows.  Do not call it in new code:
+
+        * an alternate *spelling* ("grey" for "gray") is a
+          :class:`~storage.models.variant_form.VariantForm`; it carries a full
+          paradigm, which a single derivative row cannot represent.  Use
+          ``words.synonyms.store_spelling_variants``.
+        * a different *lexeme* ("bike" for "bicycle") is a synonym-class
+          derivative form; use ``add_derivative_form`` with one of
+          :data:`~storage.models.schema.SYNONYM_GRAMMATICAL_FORMS`,
+          ``abbreviation`` or ``expanded_form``.
+
+        Kept only until the remaining callers are migrated; slated for removal
+        once they are.
+
     Args:
         session: Database session
         lemma: The lemma this is an alternative for
@@ -480,6 +582,13 @@ def get_alternative_forms_for_lemma(
     """
     Get all alternative forms for a lemma (abbreviations, expanded forms, and alternate spellings).
     This excludes synonyms, which are a separate category.
+
+    The ``abbreviation`` and ``expanded_form`` half of this is current.  The
+    ``alternate_spelling`` / ``alternative_form`` half is **deprecated** and
+    matches nothing: alternate spellings moved to ``variant_forms`` (see
+    :mod:`storage.models.variant_form`) and no such rows remain.  A caller that
+    wants spellings should read ``variant_forms`` via
+    ``storage.crud.variant_form``; those legacy values are slated for removal.
 
     Args:
         session: Database session

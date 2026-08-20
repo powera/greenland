@@ -372,6 +372,7 @@ def store_spelling_variants(
     language_code: str,
     alternate_spellings: List[str],
     variant_kind: str = VARIANT_KIND_SPELLING,
+    source: Optional[str] = None,
 ) -> int:
     """Persist alternate spellings as ``variant_forms`` rows.
 
@@ -395,6 +396,8 @@ def store_spelling_variants(
         language_code: Language of the variants (e.g. "en")
         alternate_spellings: Base forms of the variants (e.g. ``["grey"]``)
         variant_kind: Kind of variant; defaults to "spelling"
+        source: Who is storing these, for the operation log. None skips
+            logging. One entry is written per form, keyed to the lemma's GUID.
 
     Returns:
         Number of variant paradigms stored (not rows).
@@ -475,6 +478,7 @@ def store_spelling_variants(
                     variant_kind=variant_kind,
                     is_base_form=is_base_form,
                     verified=False,
+                    source=source,
                 )
             stored_variants += 1
         except Exception as error:
@@ -621,6 +625,10 @@ def generate_synonyms_for_lemma(
         lemma=lemma,
         language_code=language_code,
         alternate_spellings=alternate_spellings,
+        # Same source string the synonym_scan state entry below uses, so a
+        # lemma's variant rows and the scan that produced them line up in the
+        # log under one name.
+        source=f"sernas-agent:{language_code}",
     )
 
     record_synonym_processing_metadata(session, lemma.id, language_code, stored_counts)
