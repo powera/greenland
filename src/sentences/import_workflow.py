@@ -360,15 +360,57 @@ def _evaluate_annotate(session: Session, sentence_id: int, spec: SentenceImportS
 
 
 def _evaluate_link(session: Session, sentence_id: int, spec: SentenceImportSpec) -> StageStatus:
+    """Complete when every word that should carry a lemma has one.
+
+    A word that is still unlinked once it has been *staged* is not work LINK can
+    do: the term has no lemma in the database, which is precisely what staging
+    records and promotion fixes. Reporting that as plain incomplete deadlocked
+    the sequencer -- LINK was the first unsettled stage, so it was returned
+    forever and STAGE, the one stage that could break the tie, was never
+    reached. Such words are therefore reported as *blocked* rather than
+    incomplete, which counts as settled and lets the machine move on.
+
+    Words that are not yet staged still leave LINK incomplete, so linking runs
+    at least once before staging gets a turn.
+    """
+    staged_texts = staged_texts_for_sentence(session, sentence_id)
+
     outstanding: Dict[str, int] = {}
+    awaiting_promotion: Dict[str, int] = {}
     for language_code in spec.decompose_languages:
-        count = len(unlinked_words(session, sentence_id, language_code))
-        if count:
-            outstanding[language_code] = count
+        unresolvable = 0
+        pending_link = 0
+        for word in unlinked_words(session, sentence_id, language_code):
+            text = (word.english_text or "").strip().lower()
+            if text and text in staged_texts:
+                unresolvable += 1
+            else:
+                pending_link += 1
+        if pending_link:
+            outstanding[language_code] = pending_link
+        if unresolvable:
+            awaiting_promotion[language_code] = unresolvable
+
+    if outstanding:
+        return StageStatus(
+            stage=SentenceImportStage.LINK,
+            complete=False,
+            detail={"unlinked": outstanding, "awaiting_promotion": awaiting_promotion},
+        )
+
+    if awaiting_promotion:
+        total = sum(awaiting_promotion.values())
+        return StageStatus(
+            stage=SentenceImportStage.LINK,
+            complete=False,
+            blocked_reason=f"{total} staged word(s) have no lemma yet; waiting on promotion",
+            detail={"unlinked": {}, "awaiting_promotion": awaiting_promotion},
+        )
+
     return StageStatus(
         stage=SentenceImportStage.LINK,
-        complete=not outstanding,
-        detail={"unlinked": outstanding},
+        complete=True,
+        detail={"unlinked": {}},
     )
 
 
@@ -534,6 +576,30 @@ def progress_fingerprint(session: Session, sentence_id: int) -> Tuple[int, int, 
         or 0
     )
     return (int(linked), int(staged), int(translations), int(words))
+
+
+def last_import_task(session: Session, sentence_id: int, task_type: str) -> Optional[Any]:
+    """The most recent import task recorded for this sentence, if any.
+
+    The task's ``result_message`` is the only place the per-stage summary is
+    kept -- which stages ran, what each did, and why the run stopped. Deriving
+    the stage list says what is left to do but never why the last attempt did
+    not do it, so a page that shows only stages cannot explain a stalled
+    sentence. Returns the ORM row so the caller can read status, result and
+    error together.
+    """
+    from storage.models.schema import BarsukasTask
+
+    return (
+        session.query(BarsukasTask)
+        .filter(
+            BarsukasTask.task_type == task_type,
+            BarsukasTask.target_type == "sentence",
+            BarsukasTask.target_id == sentence_id,
+        )
+        .order_by(BarsukasTask.id.desc())
+        .first()
+    )
 
 
 def import_attempt_count(session: Session, sentence_id: int, task_type: str) -> int:

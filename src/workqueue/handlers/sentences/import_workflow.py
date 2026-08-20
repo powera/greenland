@@ -22,12 +22,20 @@ That loop terminates on three independent guards, any one of which is enough:
 an iteration cap, a progress fingerprint that stops the loop as soon as an
 iteration changes nothing, and the fact that a blocked stage counts as settled
 so the sequencer never sits on a stage that cannot proceed.
+
+Within a single execution there is a fourth rule: a stage runs at most once.
+The stage predicates are pure reads and so cannot distinguish "never ran" from
+"ran and legitimately changed nothing" -- and LINK is exactly the second case
+whenever a word has no lemma in the database. Without the rule the sequencer
+returned LINK forever and STAGE, the stage that records such a word for
+promotion, was never reached; the outer guards then ended the run with "no
+progress" rather than hanging, which made a deadlock look like a stall.
 """
 
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import constants
 from clients.unified_client import UnifiedLLMClient
@@ -147,6 +155,7 @@ def _run_decompose(
     # output, which is exactly what this stage must not do.
     word_payload: Dict[str, Any] = {}
     decomposed: List[str] = []
+    failures: List[str] = []
     for language_code, decomposition in result.decompositions.items():
         if not decomposition.success:
             logger.warning(
@@ -155,6 +164,7 @@ def _run_decompose(
                 language_code,
                 decomposition.error,
             )
+            failures.append(f"{language_code}: {decomposition.error or 'unknown error'}")
             continue
         word_payload[f"words_{language_code}"] = list(decomposition.words)
         decomposed.append(language_code)
@@ -163,7 +173,15 @@ def _run_decompose(
         from sentences.translation import store_translation_results
 
         store_translation_results(sentence_id, word_payload, session)
-    return f"decompose: {len(decomposed)} language(s)"
+
+    # The reason a language was skipped lives only on the in-memory result, and
+    # a skipped Phase 3 is the most common way this stage produces nothing. The
+    # summary is the task's stored result, so naming the reason here is what
+    # makes a stalled DECOMPOSE explicable without reading the worker log.
+    summary = f"decompose: {len(decomposed)} language(s)"
+    if failures:
+        summary += f" ({len(failures)} failed -- " + "; ".join(failures) + ")"
+    return summary
 
 
 def _run_annotate(
@@ -320,6 +338,36 @@ def _run_finalize(session: Any, sentence_id: int) -> str:
     return f"finalize: minimum_level={level}"
 
 
+def _next_runnable_stage(
+    session: Any,
+    sentence_id: int,
+    *,
+    spec: SentenceImportSpec,
+    attempted: Set[SentenceImportStage],
+) -> Optional[SentenceImportStage]:
+    """The next stage to run, skipping any already attempted in this execution.
+
+    ``next_incomplete_stage`` is a pure function of the stored data, which is
+    what makes it correct for a sentence created by any path -- but it also
+    means it cannot distinguish a stage that has never run from one that ran and
+    legitimately changed nothing. Running LINK on a sentence containing a word
+    with no lemma in the database is the second case: linking is a no-op, LINK
+    stays incomplete, and it is returned again on the next pass forever.
+
+    Skipping a stage that has already had its turn makes the sequencer strictly
+    advance, so the later stage that *can* resolve the situation -- STAGE, which
+    records the missing word for promotion -- is always reached.
+    """
+    from sentences.import_workflow import STAGE_ORDER, evaluate_stage
+
+    for stage in STAGE_ORDER:
+        if stage in attempted:
+            continue
+        if not evaluate_stage(session, sentence_id, stage, spec=spec).settled:
+            return stage
+    return None
+
+
 def do_import_sentence(
     session: Any,
     sentence_id: int,
@@ -380,15 +428,25 @@ def do_import_sentence(
     steps: List[str] = []
     deferred_pendings = 0
     guard = 0
-    # Each stage either completes or reports blocked, so the sequencer advances
-    # every pass; the bound is a safety net against a stage that lies.
+    # Every stage runs at most once per execution, so the loop cannot exceed the
+    # stage count; the bound is a safety net against a sequencer that repeats.
     max_steps = len(SentenceImportStage) + 2
+
+    # Stages already run in this execution. ``next_incomplete_stage`` re-derives
+    # from the data every pass and cannot tell "never ran" from "ran and changed
+    # nothing", so a stage whose work does not complete it -- LINK, when a word
+    # simply has no lemma in the database -- would be handed back forever and
+    # the stage that resolves it (STAGE) would never be reached. Remembering
+    # what already ran lets the sequencer step past such a stage exactly once,
+    # which is what breaks the LINK/STAGE deadlock.
+    attempted: Set[SentenceImportStage] = set()
 
     while guard < max_steps:
         guard += 1
-        stage = next_incomplete_stage(session, sentence_id, spec=spec)
+        stage = _next_runnable_stage(session, sentence_id, spec=spec, attempted=attempted)
         if stage is None:
             break
+        attempted.add(stage)
 
         status = evaluate_stage(session, sentence_id, stage, spec=spec)
         if stage in _LLM_STAGES and client is None and stage is not SentenceImportStage.PROMOTE:

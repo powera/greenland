@@ -20,6 +20,7 @@ the sentence side.
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Sequence
@@ -42,6 +43,8 @@ from sentences.import_workflow import (
     SentenceImportSpec,
     SentenceImportStage,
     evaluate_all,
+    import_attempt_count,
+    last_import_task,
     next_incomplete_stage,
 )
 from storage.models.grammar_fact import GrammarFact
@@ -383,9 +386,15 @@ def sentence_workflow() -> ResponseReturnValue:
 
     # Sentences worth showing: those with staged words still outstanding, plus
     # the most recent imports. Anything fully complete drops off on its own.
+    # Newest first: without an ordering the 50-row cap picks an arbitrary subset,
+    # so which blocked sentences appear would vary between page loads.
     blocked_ids = [
         int(row[0])
-        for row in g.db.query(SentencePendingImport.sentence_id).distinct().limit(50).all()
+        for row in g.db.query(SentencePendingImport.sentence_id)
+        .distinct()
+        .order_by(SentencePendingImport.sentence_id.desc())
+        .limit(50)
+        .all()
         if row[0] is not None
     ]
     recent_ids = [
@@ -469,19 +478,29 @@ def start_sentence_import() -> ResponseReturnValue:
     if limit is not None:
         payload["limit"] = limit
 
+    # Dedup on the text itself: a double-click would otherwise queue the same
+    # document twice and create two full sets of duplicate sentences. Only
+    # *active* tasks dedup, so re-importing the same text later still works.
+    digest = hashlib.sha256(f"{document_language}\n{text}".encode("utf-8")).hexdigest()[:16]
+
     try:
-        enqueue_task(
+        result = enqueue_task(
             g.db,
             task_type=TaskType.SENTENCES_IMPORT_DOCUMENT,
             target_type=None,
             target_id=None,
             payload=payload,
+            dedup_key=f"{TaskType.SENTENCES_IMPORT_DOCUMENT}:{digest}",
         )
         g.db.commit()
-        flash(
-            f"Queued {source_name!r} for import. Sentences appear below as the worker splits them.",
-            "success",
-        )
+        if result.created:
+            flash(
+                f"Queued {source_name!r} for import. Sentences appear below as "
+                "the worker splits them.",
+                "success",
+            )
+        else:
+            flash("This text is already queued or being imported.", "info")
     except Exception as exc:
         g.db.rollback()
         flash(f"Could not queue the import: {exc}", "error")
@@ -500,6 +519,11 @@ def sentence_detail(sentence_id: int) -> ResponseReturnValue:
     spec = SentenceImportSpec()
     steps = _sentence_steps(g.db, sentence_id, spec=spec)
 
+    # The stage list says what is left; the task result says what the last run
+    # actually did and why it stopped. A stalled sentence needs both.
+    last_task = last_import_task(g.db, sentence_id, TaskType.SENTENCES_IMPORT)
+    attempts = import_attempt_count(g.db, sentence_id, TaskType.SENTENCES_IMPORT)
+
     pendings = pending_imports_for_sentence(g.db, sentence_id)
 
     translations = (
@@ -516,6 +540,8 @@ def sentence_detail(sentence_id: int) -> ResponseReturnValue:
         steps=steps,
         pendings=pendings,
         translations=translations,
+        last_task=last_task,
+        attempts=attempts,
     )
 
 
@@ -531,13 +557,18 @@ def run_sentence_import(sentence_id: int) -> ResponseReturnValue:
         return redirect(url_for("workflows.sentence_workflow"))
 
     auto_promote = bool(request.form.get("auto_promote"))
+    annotate = bool(request.form.get("annotate_dependencies"))
     try:
         result = enqueue_task(
             g.db,
             task_type=TaskType.SENTENCES_IMPORT,
             target_type="sentence",
             target_id=sentence_id,
-            payload={"sentence_id": sentence_id, "auto_promote": auto_promote},
+            payload={
+                "sentence_id": sentence_id,
+                "auto_promote": auto_promote,
+                "annotate_dependencies": annotate,
+            },
             dedup_key=f"{TaskType.SENTENCES_IMPORT}:{sentence_id}:0",
         )
         g.db.commit()

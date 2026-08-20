@@ -47,6 +47,14 @@
                     <i class="bi bi-arrow-repeat"></i> Queue next steps
                 </button>
                 <div class="form-check mb-0">
+                    <input class="form-check-input" type="checkbox" id="annotate_dependencies"
+                           name="annotate_dependencies">
+                    <label class="form-check-label small" for="annotate_dependencies">
+                        Annotate dependencies
+                        <span class="text-muted">(one extra LLM call)</span>
+                    </label>
+                </div>
+                <div class="form-check mb-0">
                     <input class="form-check-input" type="checkbox" id="auto_promote" name="auto_promote">
                     <label class="form-check-label small" for="auto_promote">
                         Auto-promote staged words
@@ -61,6 +69,32 @@
         </div>
         {% endif %}
     </div>
+
+    {% if last_task %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-clock-history"></i> Last import run
+            <span class="badge {% if last_task.status == 'failed' %}bg-danger
+                {%- elif last_task.status == 'completed' %}bg-success
+                {%- else %}bg-secondary{% endif %}">{{ last_task.status }}</span>
+            <span class="text-muted small ms-2">
+                attempt {{ attempts }}{% if last_task.finished_at %} · {{ last_task.finished_at }}{% endif %}
+            </span>
+        </div>
+        <div class="card-body py-2">
+            {% if last_task.result_message %}
+            <pre class="small mb-0 workflow-task-result">{{ last_task.result_message }}</pre>
+            {% else %}
+            <span class="text-muted small">No result recorded.</span>
+            {% endif %}
+            {% if last_task.error_detail %}
+            <div class="alert alert-danger small mt-2 mb-0">
+                <i class="bi bi-exclamation-octagon"></i> {{ last_task.error_detail }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 
     {% if pendings %}
     <div class="card mb-4 border-warning">
@@ -86,7 +120,8 @@
             {% endfor %}
         </ul>
         <div class="card-footer small text-muted">
-            Approving a word here re-queues this sentence automatically.
+            Approving a word links it into this sentence right away. Use
+            &ldquo;Queue next steps&rdquo; above to run whatever stages remain.
         </div>
     </div>
     {% endif %}

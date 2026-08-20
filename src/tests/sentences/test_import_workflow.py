@@ -390,5 +390,72 @@ class TestSpecFromPayload(unittest.TestCase):
         self.assertEqual(spec.max_iterations, 3)
 
 
+class TestSequencerReachesStage(SentenceWorkflowTestCase):
+    """The LINK/STAGE deadlock: the sequencer must always advance.
+
+    A word with no lemma in the database leaves LINK incomplete no matter how
+    many times linking runs, because linking is not what fixes it -- STAGE is.
+    ``next_incomplete_stage`` is a pure read and cannot tell "never ran" from
+    "ran and changed nothing", so on its own it hands LINK back forever and the
+    sentence never reaches STAGE. These tests pin both halves of the fix.
+    """
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.add_translation("en", "My dog is Rover.")
+        self.add_translation("lt", "Mano suo yra Roveris.")
+        # "Rover" is a content word with no lemma: exactly the case that hung.
+        self.add_word(0, "Rover", part_of_speech="noun")
+
+    def test_link_alone_never_settles(self) -> None:
+        """Without the orchestrator's skip, LINK is returned indefinitely."""
+        for _ in range(5):
+            self.assertIs(
+                next_incomplete_stage(self.session, self.sentence.id, spec=self.spec),
+                SentenceImportStage.LINK,
+            )
+
+    def test_sequencer_skips_an_attempted_stage_and_reaches_stage(self) -> None:
+        """Once LINK has had its turn, STAGE is next rather than LINK again."""
+        from workqueue.handlers.sentences.import_workflow import _next_runnable_stage
+
+        attempted: set = set()
+        first = _next_runnable_stage(
+            self.session, self.sentence.id, spec=self.spec, attempted=attempted
+        )
+        self.assertIs(first, SentenceImportStage.LINK)
+        attempted.add(first)
+
+        second = _next_runnable_stage(
+            self.session, self.sentence.id, spec=self.spec, attempted=attempted
+        )
+        self.assertIs(second, SentenceImportStage.STAGE)
+
+    def test_link_is_blocked_not_incomplete_once_the_word_is_staged(self) -> None:
+        """A staged word is promotion's problem, so LINK stops asking for it."""
+        self.stage_word("Rover")
+
+        status = evaluate_stage(
+            self.session, self.sentence.id, SentenceImportStage.LINK, spec=self.spec
+        )
+        self.assertFalse(status.complete)
+        self.assertIsNotNone(status.blocked_reason)
+        # Blocked counts as settled, so the sequencer moves past LINK.
+        self.assertTrue(status.settled)
+        self.assertNotEqual(
+            next_incomplete_stage(self.session, self.sentence.id, spec=self.spec),
+            SentenceImportStage.LINK,
+        )
+
+    def test_link_still_incomplete_while_a_word_is_unstaged(self) -> None:
+        """Linking must get its turn before staging does."""
+        status = evaluate_stage(
+            self.session, self.sentence.id, SentenceImportStage.LINK, spec=self.spec
+        )
+        self.assertFalse(status.complete)
+        self.assertIsNone(status.blocked_reason)
+        self.assertEqual(status.detail["unlinked"], {"en": 1})
+
+
 if __name__ == "__main__":
     unittest.main()
