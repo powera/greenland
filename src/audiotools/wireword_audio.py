@@ -161,6 +161,12 @@ def load_api_key() -> Optional[str]:
     Returns:
         API key string or None if not found
     """
+    from clients.keys import assert_credential_reads_enabled
+
+    # Before the environment is consulted, so test mode blocks the env-supplied
+    # key too and not just the one in keys/ .
+    assert_credential_reads_enabled("openai")
+
     # Try environment variable first
     api_key = os.environ.get("OPENAI_API_KEY")
     if api_key:

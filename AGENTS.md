@@ -68,19 +68,46 @@ back to a paid model.  It overrides GREENLAND_ALLOW_LIVE_LLM, which only opts a
 test out of the separate pytest guard and must never re-enable a disabled
 backend.
 
-S3 uploads have the same pair of guards, in
-clients.audio.s3_uploader.assert_s3_calls_enabled :
+GREENLAND_TEST_MODE=1 is the stricter, second kill switch:
 
-  GREENLAND_DISABLE_S3=1 PYTHONPATH=src python src/agents/vieversys.py ...
+  GREENLAND_TEST_MODE=1 PYTHONPATH=src python src/agents/vieversys.py ...
 
-Constructing an S3AudioUploader then raises S3CallsDisabledError instead of
-reading credentials.  Under pytest, construction raises LiveS3CallInTestError
-outright - tests must pass a double rather than a real uploader, which is why
-the audiotools.s3_ops helpers take the uploader as an argument instead of
-reaching for a singleton.  GREENLAND_ALLOW_LIVE_S3=1 opts a test out, and (as
-with the LLM guard) GREENLAND_DISABLE_S3 overrides it.  The check runs in
-__init__ before any secret is read, so a blocked run never loads a credential
-it is not allowed to use.
+It blocks every LLM call exactly as GREENLAND_DISABLE_LLM does - keyless
+backends such as a local Ollama included, since the point is that no model
+runs, not merely that no key is spent - and additionally blocks any read of
+the keys/ directory.  A run under test mode therefore cannot load a credential
+of any kind: LLM, TTS, S3, or the postgres password.  The two switches are
+distinct and DISABLE_LLM is the weaker one: an agent may legitimately need an
+S3 or database credential while running with LLM calls off.
+
+The credential guard lives in clients.keys :
+
+  test_mode_enabled()               - is GREENLAND_TEST_MODE=1 set
+  credential_reads_blocked()        - that, or running under pytest
+  assert_credential_reads_enabled() - raise CredentialReadBlockedError if so
+
+Credential reads are blocked under pytest as well, so the suite cannot load a
+real secret by accident; GREENLAND_ALLOW_LIVE_KEYS=1 opts a deliberate test
+out, and (as with the LLM guard) an explicit GREENLAND_TEST_MODE=1 overrides
+that opt-out.  Tests must pass a double rather than a real uploader, which is
+why the audiotools.s3_ops helpers take the uploader as an argument instead of
+reaching for a singleton.
+
+Most clients go through clients.keys.load_key, which is guarded centrally.  A
+blocked load_key(required=False) returns None - the same as an absent key file,
+which those callers already degrade on - while required=True raises.  This
+matters because clients.audio builds a default OpenAITTSClient at import time;
+raising on the soft path would make `import clients.audio` fail outright.  The
+few hand-rolled key readers (the two Digital Ocean uploaders, azure_tts,
+polly_tts, the audiotools OpenAI helpers) call the assert directly, before any
+secret is read from the environment or the key file, so a blocked run never
+loads a credential it is not allowed to use.  Helpers that merely test for the
+presence of credentials (_cdn_credentials_available) report False under test
+mode, so a feature degrades instead of raising partway through.
+
+The uploaders guard only when they would actually source a credential: a caller
+that passes both access_key and secret_key supplies its own fake and reads
+nothing, so it is left alone.  That is the supported way to build one in a test.
 
 When you do a live LLM test run of a new agent or pipeline phase, persist the
 results to the local database.  The call has already been paid for, and the

@@ -46,7 +46,7 @@ except ImportError:
     print("Error: boto3 not installed. Run: pip install boto3")
     sys.exit(1)
 
-from clients.audio.s3_uploader import assert_s3_calls_enabled
+from clients.keys import assert_credential_reads_enabled
 
 # Supported languages (audio directories use language codes directly, e.g., 'lt', 'zh')
 SUPPORTED_LANGUAGES = ["zh", "lt", "ko", "fr", "de", "es", "pt", "sw", "vi"]
@@ -68,9 +68,10 @@ class S3AudioUploader:
             secret_key: Digital Ocean Spaces secret key
             bucket_name: e.g., "trakaido-audio"
         """
-        # Same guard the clients.audio uploader uses: never build a
-        # credentialed client under pytest or when S3 is switched off.
-        assert_s3_calls_enabled()
+        # Same guard the clients.audio uploader uses. This script takes its
+        # credentials from the environment rather than keys/, but test mode
+        # means "no credential is used at all", so it is blocked here too.
+        assert_credential_reads_enabled("digitalocean")
 
         self.s3 = boto3.client(
             "s3",

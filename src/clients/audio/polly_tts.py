@@ -220,6 +220,9 @@ def _load_polly_credentials() -> tuple[Optional[str], Optional[str], str]:
         Tuple of (access_key_id, secret_access_key, region)
     """
     import constants
+    from clients.keys import assert_credential_reads_enabled
+
+    assert_credential_reads_enabled("polly")
 
     key_path = f"{constants.KEY_DIR}/polly.key"
     try:

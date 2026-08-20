@@ -328,6 +328,9 @@ def _load_azure_credentials() -> tuple[Optional[str], str]:
         Tuple of (subscription_key, region)
     """
     import constants
+    from clients.keys import assert_credential_reads_enabled
+
+    assert_credential_reads_enabled("azure_tts")
 
     key_path = f"{constants.KEY_DIR}/azure_tts.key"
     try:
