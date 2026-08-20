@@ -15,13 +15,16 @@ from sqlalchemy.orm import Session
 
 from storage.crud.guid_tombstone import get_tombstones_by_lemma_id
 from storage.models.grammar_fact import GrammarFact
+from storage.models.idiom import Idiom
 from storage.models.lemma_relation import LemmaRelationGroup, LemmaRelationMember
+from storage.models.name_entity import Name
 from storage.models.schema import (
     AudioQualityReview,
     DerivativeForm,
     Lemma,
     LemmaDifficultyOverride,
     LemmaTranslation,
+    Phrase,
     Sentence,
     SentenceWord,
 )
@@ -31,12 +34,20 @@ from storage.translation_helpers import LANGUAGE_FIELDS
 
 def get_home_page_stats(session: Session) -> Dict[str, int]:
     """
-    Get home page statistics in a single optimized query.
+    Get home page statistics in a small number of optimized queries.
 
-    Replaces 4 separate COUNT queries with 1 query using conditional aggregation.
+    The three lemma counts share one query via conditional aggregation; each
+    other entity is a cheap ``COUNT(*)`` against its own table.
+
+    ``languages`` counts the distinct languages actually present in
+    ``lemma_translations`` rather than the size of the supported-language
+    registry: the home page previously hardcoded "9 languages" in prose and went
+    stale silently, so the number it shows is now derived from the data.
 
     Returns:
-        Dictionary with keys: total_lemmas, verified_lemmas, with_difficulty, total_sentences
+        Dictionary with keys: total_lemmas, verified_lemmas, with_difficulty,
+        total_sentences, languages, total_phrases, total_names, total_idioms,
+        derivative_forms, grammar_facts, approved_audio
     """
     # Combine lemma stats into a single query with conditional counts
     lemma_stats = session.query(
@@ -48,11 +59,36 @@ def get_home_page_stats(session: Session) -> Dict[str, int]:
     # Sentence count as a separate query (different table)
     sentence_count = session.query(func.count(Sentence.id)).scalar()
 
+    language_count = session.query(
+        func.count(func.distinct(LemmaTranslation.language_code))
+    ).scalar()
+
+    phrase_count = session.query(func.count(Phrase.id)).scalar()
+    name_count = session.query(func.count(Name.id)).scalar()
+    idiom_count = session.query(func.count(Idiom.id)).scalar()
+    derivative_count = session.query(func.count(DerivativeForm.id)).scalar()
+    grammar_fact_count = session.query(func.count(GrammarFact.id)).scalar()
+
+    # Only production-bound audio is worth showing; pending_review rows are a
+    # work queue, not content, and dwarf the approved set.
+    approved_audio_count = (
+        session.query(func.count(AudioQualityReview.id))
+        .filter(AudioQualityReview.status.in_(("approved", "approved_with_issues")))
+        .scalar()
+    )
+
     return {
         "total_lemmas": lemma_stats.total if lemma_stats else 0,
         "verified_lemmas": lemma_stats.verified if lemma_stats else 0,
         "with_difficulty": lemma_stats.with_difficulty if lemma_stats else 0,
         "total_sentences": sentence_count or 0,
+        "languages": language_count or 0,
+        "total_phrases": phrase_count or 0,
+        "total_names": name_count or 0,
+        "total_idioms": idiom_count or 0,
+        "derivative_forms": derivative_count or 0,
+        "grammar_facts": grammar_fact_count or 0,
+        "approved_audio": approved_audio_count or 0,
     }
 
 

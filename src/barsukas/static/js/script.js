@@ -59,9 +59,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Track submitted forms to prevent double-submission
     const submittedForms = new Set();
 
-    // Add submit handler to all forms
+    // Add submit handler to all forms.
+    //
+    // GET forms are exempt: the guard exists to stop a second POST kicking off
+    // a duplicate LLM run or write, and a GET form is a search box whose
+    // resubmission is both idempotent and the normal way to use it. Guarding
+    // them left the button dead after a back-navigation.
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
+        if ((form.method || '').toLowerCase() === 'get') {
+            return;
+        }
         form.addEventListener('submit', function(event) {
             // Create a unique identifier for this form
             const formId = form.action + form.method;
@@ -98,6 +106,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // Clean up submitted forms set when navigating away
     window.addEventListener('beforeunload', function() {
         submittedForms.clear();
+    });
+
+    // Restore every guarded button when the page is shown again.
+    //
+    // Going Back restores the page from the bfcache with its DOM intact, so the
+    // button is still disabled and its formId is still in the set - and
+    // beforeunload does not fire on the way *in*, so nothing undid either one.
+    // The result was a permanently dead submit button on any page reached by
+    // Back. pageshow fires on both a fresh load and a bfcache restore.
+    window.addEventListener('pageshow', function() {
+        submittedForms.clear();
+        document.querySelectorAll('button[type="submit"][disabled]').forEach(button => {
+            button.disabled = false;
+            if (button.dataset.originalHtml) {
+                button.innerHTML = button.dataset.originalHtml;
+                delete button.dataset.originalHtml;
+            }
+        });
     });
 });
 

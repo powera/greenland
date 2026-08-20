@@ -21,13 +21,25 @@ class TestGetHomePageStats:
     """Tests for get_home_page_stats."""
 
     def test_returns_expected_keys(self, db_session: Session) -> None:
+        # issubset rather than equality, matching TestGetLemmaViewData below:
+        # the home page gained cards for languages, forms, audio and the
+        # phrase/name/idiom types, and adding another stat should not break
+        # this test.
         result = get_home_page_stats(db_session)
-        assert set(result.keys()) == {
+        expected_keys = {
             "total_lemmas",
             "verified_lemmas",
             "with_difficulty",
             "total_sentences",
+            "languages",
+            "total_phrases",
+            "total_names",
+            "total_idioms",
+            "derivative_forms",
+            "grammar_facts",
+            "approved_audio",
         }
+        assert expected_keys.issubset(set(result.keys()))
 
     def test_empty_database_returns_zeros(self, db_session: Session) -> None:
         result = get_home_page_stats(db_session)

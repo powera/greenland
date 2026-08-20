@@ -11,10 +11,15 @@ way to tell the two apart. This page answers "what happened to A05_001?".
 
 from typing import Dict, Optional
 
-from flask import Blueprint, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, abort, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
-from storage.guid_router import GuidKind, ResolvedGuid, resolve_guid_with_history
+from storage.guid_router import (
+    GuidKind,
+    ResolvedGuid,
+    is_wellformed_guid,
+    resolve_guid_with_history,
+)
 
 bp = Blueprint("guids", __name__, url_prefix="/guids")
 
@@ -48,12 +53,42 @@ def _detail_url(kind: GuidKind, obj: object) -> Optional[str]:
     return url_for(endpoint, **{id_arg: row_id})
 
 
+def _render_resolved(guid: str, resolved: Optional[ResolvedGuid]) -> str:
+    """Render the lookup page for a GUID that did not resolve to a live row.
+
+    ``resolved`` is None when ``guid`` is not GUID-shaped at all, which the
+    template reports as a malformed entry rather than a missing record.
+    """
+    return render_template(
+        "guids/lookup.html",
+        guid=guid,
+        resolved=resolved,
+        malformed=resolved is None,
+        detail_url=(
+            _detail_url(resolved.kind, resolved.replacement)
+            if resolved is not None and resolved.replacement is not None
+            else None
+        ),
+    )
+
+
 @bp.route("/")
 def index() -> ResponseReturnValue:
-    """Search box, and the result when a ``guid`` query argument is present."""
+    """Search box, and the result when a ``guid`` query argument is present.
+
+    A GUID that names nothing renders the "never issued" panel with a normal
+    200: this is a form reporting on what was typed, and a typo is not an error
+    condition. The permalink at :func:`lookup` 404s in that case instead.
+    """
     guid = (request.args.get("guid") or "").strip()
     if not guid:
-        return render_template("guids/lookup.html", guid="", resolved=None, detail_url=None)
+        return render_template(
+            "guids/lookup.html", guid="", resolved=None, malformed=False, detail_url=None
+        )
+
+    # A string that is not GUID-shaped is a typo, not a missing record.
+    if not is_wellformed_guid(guid):
+        return _render_resolved(guid, None)
 
     resolved: ResolvedGuid = resolve_guid_with_history(g.db, guid)
 
@@ -63,19 +98,35 @@ def index() -> ResponseReturnValue:
         if target is not None:
             return redirect(target)
 
-    return render_template(
-        "guids/lookup.html",
-        guid=guid,
-        resolved=resolved,
-        detail_url=(
-            _detail_url(resolved.kind, resolved.replacement)
-            if resolved.replacement is not None
-            else None
-        ),
-    )
+    return _render_resolved(guid, resolved)
 
 
 @bp.route("/<guid>")
 def lookup(guid: str) -> ResponseReturnValue:
-    """Permalink form, so a GUID can be pasted into the address bar."""
-    return redirect(url_for("guids.index", guid=guid))
+    """Permalink form, so a GUID can be pasted into the address bar.
+
+    Unlike :func:`index`, a GUID that names nothing and was never retired is a
+    genuine 404 here. The two differ deliberately: the search box is a form
+    reporting on what the user typed, so a typo should come back as a page with
+    the "never issued" explanation rather than an error, while a permalink is an
+    address claiming a record exists at it. Something following a link or
+    scraping for dead references needs that claim to fail as a 404.
+
+    A tombstoned GUID is *not* a 404. The number was issued, and what replaced
+    it is the answer the caller wants, so it renders like it does in the search
+    box.
+    """
+    if not is_wellformed_guid(guid):
+        abort(404)
+
+    resolved: ResolvedGuid = resolve_guid_with_history(g.db, guid)
+
+    if resolved.exists:
+        target = _detail_url(resolved.kind, resolved.obj)
+        if target is not None:
+            return redirect(target)
+
+    if not resolved.is_tombstoned:
+        abort(404)
+
+    return _render_resolved(guid, resolved)
