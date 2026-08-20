@@ -63,11 +63,14 @@
                 <div class="alert alert-light border mt-3 mb-0 small">
                     <i class="bi bi-info-circle"></i>
                     Each sentence is translated into
-                    <strong>{{ default_spec.target_languages | join(', ') }}</strong>, and
-                    <strong>{{ default_spec.decompose_languages | join(', ') }}</strong>
-                    {{ 'is' if default_spec.decompose_languages | length == 1 else 'are' }}
-                    broken into words and linked to lemmas. Words with no lemma are staged
-                    for approval rather than created automatically. These defaults are not
+                    <strong>{{ target_language_names | join(', ') }}</strong>.
+                    Only the
+                    <strong>{{ decompose_language_names | join(' and ') }}</strong>
+                    {{ 'version is' if decompose_language_names | length == 1 else 'versions are' }}
+                    then broken into individual words and linked to lemmas, so only
+                    {{ 'that language' if decompose_language_names | length == 1 else 'those languages' }}
+                    can contribute missing words. Words with no lemma are staged for
+                    approval rather than created automatically. These defaults are not
                     configurable from this page.
                     <br>
                     Queuing only records the work &mdash; a worker must be running for
