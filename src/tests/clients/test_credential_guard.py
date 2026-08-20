@@ -12,6 +12,8 @@ blocks credential reads *and* implies GREENLAND_DISABLE_LLM, so keyless
 backends such as a local Ollama are blocked too.
 """
 
+from pathlib import Path
+
 import pytest
 
 from clients import keys as keys_module
@@ -227,3 +229,66 @@ def test_partial_keys_still_blocked(monkeypatch: pytest.MonkeyPatch) -> None:
         mock_boto3.client.return_value = MagicMock()
         with pytest.raises(CredentialReadBlockedError):
             WirewordCdnUploader(access_key="fake")
+
+
+def test_load_key_from_path_reads_an_explicit_file(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The --api-key-file style loader reads the path it is given."""
+
+    from clients.keys import load_key_from_path
+
+    monkeypatch.setenv("GREENLAND_ALLOW_LIVE_KEYS", "1")
+    monkeypatch.delenv("GREENLAND_TEST_MODE", raising=False)
+
+    key_file = tmp_path / "custom.key"
+    key_file.write_text("  sk-not-a-real-key\n")
+
+    assert load_key_from_path(key_file) == "sk-not-a-real-key"
+
+
+def test_load_key_from_path_is_guarded(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """A custom path must not be a way around test mode."""
+
+    from clients.keys import load_key_from_path
+
+    monkeypatch.setenv("GREENLAND_TEST_MODE", "1")
+
+    key_file = tmp_path / "custom.key"
+    key_file.write_text("sk-not-a-real-key")
+
+    assert load_key_from_path(key_file) is None
+    with pytest.raises(CredentialReadBlockedError):
+        load_key_from_path(key_file, required=True)
+
+
+def test_load_key_from_path_names_the_path_in_the_error(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The message must show the real path, not a keys/<path>.key fiction."""
+
+    from clients.keys import load_key_from_path
+
+    monkeypatch.setenv("GREENLAND_TEST_MODE", "1")
+
+    key_file = tmp_path / "custom.key"
+
+    with pytest.raises(CredentialReadBlockedError) as excinfo:
+        load_key_from_path(key_file, required=True)
+
+    assert str(key_file) in str(excinfo.value)
+    assert "keys/" not in str(excinfo.value).split("blocked")[0]
+
+
+def test_load_key_from_path_missing_file(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+
+    from clients.keys import load_key_from_path
+
+    monkeypatch.setenv("GREENLAND_ALLOW_LIVE_KEYS", "1")
+    monkeypatch.delenv("GREENLAND_TEST_MODE", raising=False)
+
+    missing = tmp_path / "nope.key"
+
+    assert load_key_from_path(missing) is None
+    with pytest.raises(RuntimeError):
+        load_key_from_path(missing, required=True)
