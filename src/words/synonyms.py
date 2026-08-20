@@ -506,6 +506,11 @@ def record_synonym_processing_metadata(
         "true" if stored_counts["expanded_forms"] > 0 else "false",
         verified=True,
     )
+    # This entry is state, not just an audit record: has_synonym_scan_record()
+    # reads it back to decide whether this lemma/language pair was already
+    # scanned. It keys on the lemma_id column, so lemma_id must keep being set
+    # here -- adding an entity_guid alongside it is fine, replacing it is not,
+    # or the coverage check goes blind and SERNAS re-scans everything.
     log_operation(
         session,
         operation_type="synonym_scan",
