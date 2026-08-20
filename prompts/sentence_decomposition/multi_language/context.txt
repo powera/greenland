@@ -38,10 +38,24 @@ Multi-word units:
   "older brother" are all transparent in English and still single units,
   because other languages have one word for each (lt vyresnysis brolis is
   itself a set phrase, zh 哥哥 is one word).
-- Prefer the LONGEST phrase that names one concept, provided a candidate lemma
-  or a single-word translation supports it. "ice cream sandwich" and
+- Prefer the LONGEST phrase that names ONE concept -- but never merge two
+  concepts that each have their own lemma. "ice cream sandwich" and
   "carrot cake" are each one unit; so is "non-Hodgkin's lymphoma", which is a
   single medical term however many English words it spans.
+- Do NOT chain adjacent units together. "strawberry ice cream" is TWO tokens,
+  "strawberry" and "ice cream": it is simply ice cream of a strawberry
+  flavour, so both parts keep their own meaning and their own lemma. Compare
+  "carrot cake", which is one token because it is a specific named kind of
+  cake rather than a cake made of carrots -- the phrase, not its parts, is
+  what a dictionary lists.
+- The test: if the phrase means exactly "an X that is/has Y", emit Y and X
+  separately. If it names a thing in its own right, emit one token.
+- This holds in every language and regardless of spacing: Chinese 草莓冰淇淋
+  is written without spaces but is still 草莓 + 冰淇淋, two tokens. Merging
+  them loses both vocabulary links, since the merged string matches no lemma.
+- Scripts without spaces (zh, ja, th) need this care most: absence of a space
+  is not evidence of a single concept. Segment them the way a dictionary
+  would, into the longest units that each have their own entry.
 - A modifier that merely SELECTS AMONG SENSES of the head noun still belongs
   in the unit, because the sense is what a lemma records: "cooking oil",
   "crude oil" and "baby oil" are three different concepts, not "oil" with a
