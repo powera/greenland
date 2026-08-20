@@ -211,7 +211,16 @@ When writing HTML templates, try to avoid inline CSS/JS; use separate files.
 Also, always use ordinary form submits for POST data - do not do an AJAX-based
 submission.  Avoid using disappearing UX elements most of the time.
 
-When modifying files in data/release :
+NEVER edit anything under data/release directly unless the developer explicitly
+tells you to.  Those files are generated artifacts of the database: add or change
+a word through the application - the Barsukas API routes (src/barsukas/routes/api ,
+documented in src/barsukas/routes/API.md) or the ordinary CRUD/agent paths - and
+let the release files be written from there.  Hand-editing them puts the JSONL and
+the database out of sync and skips GUID allocation, tombstone checks, and every
+validation the write path performs.  This applies to reading-then-writing too: it
+is fine to read data/release to understand a format, never to patch it in place.
+
+The rules below apply when the developer HAS asked for a direct edit:
 * make sure the GUID prefixes match those in storage/models/guid_prefixes.py
 * when creating a new "subtype", follow those instructions for updates
 * do not "change" GUIDs - keep the file sorted by GUID, and add new words at
