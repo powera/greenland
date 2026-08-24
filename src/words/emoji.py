@@ -308,11 +308,67 @@ def mark_missing_lemma(
     return row
 
 
+def stage_lemma_for_emoji(
+    session: Session,
+    value: str,
+    *,
+    english_word: str,
+    definition: str,
+    disambiguation_translation: Optional[str] = None,
+    disambiguation_language: str = "lt",
+    pos_type: Optional[str] = None,
+    pos_subtype: Optional[str] = None,
+    source: Optional[str] = None,
+    notes: Optional[str] = None,
+) -> Emoji:
+    """Stage the word a glyph depicts, and park the glyph against it.
+
+    The producer side of the ``missing_lemma`` workflow: the reviewer sees a
+    glyph with one clear concept the vocabulary has no word for (the ninja
+    emoji, the pile-of-poo emoji), and says what that word is. The term enters
+    the ordinary pending queue, and the glyph waits on it -- when the term is
+    approved into a lemma, ``delete_pending_import`` attaches the glyph; if it
+    is rejected or turns out to be a name or a concept, the glyph returns to
+    ``undecided`` and the walk offers it again.
+
+    ``disambiguation_translation`` is NOT NULL on the pending table, so it
+    falls back to the definition the way the sentence-staging path does.
+
+    Does not commit; the caller owns the transaction.
+    """
+    # Deferred: words.pending_imports.approval imports this module, so a
+    # module-scope import of the staging package would close a cycle.
+    from words.pending_imports.staging import create_pending_import
+
+    pending = create_pending_import(
+        session,
+        english_word=english_word,
+        definition=definition,
+        disambiguation_translation=disambiguation_translation or definition,
+        disambiguation_language=disambiguation_language,
+        pos_type=pos_type,
+        pos_subtype=pos_subtype,
+        source=source or "emoji-review",
+        notes=notes,
+        classify=False,
+    )
+    return mark_missing_lemma(
+        session,
+        value,
+        pending_import_id=int(pending.id),
+        notes=notes,
+    )
+
+
 def attach_pending_emoji_to_lemma(session: Session, pending_import_id: int, lemma: Lemma) -> int:
     """Assign glyphs staged against a pending import to the lemma it became.
 
-    Called from the pending-import approval path: a glyph parked as
-    ``missing_lemma`` becomes a real assignment as soon as its word exists.
+    Called from :func:`words.pending_imports.approval.delete_pending_import`,
+    the single exit from the pending queue: a glyph parked as ``missing_lemma``
+    becomes a real assignment as soon as its word exists. Must run *before* the
+    pending row is deleted -- ``Emoji.pending_import_id`` is ``ON DELETE SET
+    NULL``, so afterwards there is nothing left to match on.
+
     Returns the number of glyphs attached. Any glyph that has since been taken
     by another lemma is left alone rather than stolen.
     """
@@ -337,6 +393,32 @@ def attach_pending_emoji_to_lemma(session: Session, pending_import_id: int, lemm
         session.flush()
         refresh_lemma_mirror(session, lemma)
     return attached
+
+
+def release_pending_emoji(session: Session, pending_import_id: int) -> int:
+    """Park glyphs staged against a pending import that resolved to no lemma.
+
+    The counterpart to :func:`attach_pending_emoji_to_lemma` for the exits that
+    produce nothing to attach to -- a rejection, or a promotion to a name or a
+    concept. The glyph goes back to ``undecided`` so the review walk offers it
+    again, rather than being stranded in ``missing_lemma`` pointing at a row
+    that no longer exists. Returns the number of glyphs released.
+    """
+    rows = (
+        session.query(Emoji)
+        .filter(
+            Emoji.pending_import_id == pending_import_id,
+            Emoji.status == EMOJI_STATUS_MISSING_LEMMA,
+        )
+        .all()
+    )
+    for row in rows:
+        row.status = EMOJI_STATUS_UNDECIDED
+        row.pending_import_id = None
+
+    if rows:
+        session.flush()
+    return len(rows)
 
 
 # ---------------------------------------------------------------------------

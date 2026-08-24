@@ -24,25 +24,38 @@
             </div>
             <div class="card-body">
                 <form method="post">
+                    {#- After a failed POST the form redisplays what was typed, not what
+                        is in the database: `submitted` is request.form on that path and
+                        None on a GET. value() picks the submitted value when there is
+                        one, so an unrelated validation error does not discard the edit. -#}
+                    {%- macro value(name, fallback) -%}
+                        {%- if submitted is not none -%}{{ submitted.get(name, '') }}
+                        {%- else -%}{{ fallback if fallback is not none else '' }}{%- endif -%}
+                    {%- endmacro -%}
+                    {%- macro checked(name, fallback) -%}
+                        {%- if submitted is not none -%}
+                            {%- if submitted.get(name) == 'on' %}checked{% endif -%}
+                        {%- elif fallback %}checked{% endif -%}
+                    {%- endmacro -%}
                     <!-- Lemma Text -->
                     <div class="mb-3">
                         <label for="lemma_text" class="form-label">Lemma Text <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="lemma_text" name="lemma_text"
-                               value="{{ lemma.lemma_text }}" required>
+                               value="{{ value('lemma_text', lemma.lemma_text) }}" required>
                     </div>
 
                     <!-- Definition -->
                     <div class="mb-3">
                         <label for="definition_text" class="form-label">Definition <span class="text-danger">*</span></label>
                         <textarea class="form-control" id="definition_text" name="definition_text"
-                                  rows="3" required>{{ lemma.definition_text }}</textarea>
+                                  rows="3" required>{{ value('definition_text', lemma.definition_text) }}</textarea>
                     </div>
 
                     <!-- Disambiguation -->
                     <div class="mb-3">
                         <label for="disambiguation" class="form-label">Disambiguation</label>
                         <input type="text" class="form-control" id="disambiguation" name="disambiguation"
-                               value="{{ lemma.disambiguation or '' }}"
+                               value="{{ value('disambiguation', lemma.disambiguation) }}"
                                placeholder="e.g., animal, computer, tool">
                         <small class="form-text text-muted">
                             Optional: Used to distinguish polysemes (e.g., "mouse (animal)" vs "mouse (computer)")
@@ -56,7 +69,7 @@
                             <select class="form-select" id="pos_type" name="pos_type" required>
                                 <option value="">-- Select POS Type --</option>
                                 {% for pos_type_option in pos_types %}
-                                <option value="{{ pos_type_option }}" {% if pos_type_option == lemma.pos_type %}selected{% endif %}>
+                                <option value="{{ pos_type_option }}" {% if pos_type_option == value('pos_type', lemma.pos_type) %}selected{% endif %}>
                                     {{ pos_type_option }}
                                 </option>
                                 {% endfor %}
@@ -87,7 +100,7 @@
                     <div class="mb-3">
                         <label for="guid" class="form-label">GUID</label>
                         <input type="text" class="form-control" id="guid" name="guid"
-                               value="{{ lemma.guid or '' }}"
+                               value="{{ value('guid', lemma.guid) }}"
                                placeholder="e.g., N01_001">
                         <small class="form-text text-muted">
                             Auto-generated when type/subtype changes. Can be manually overridden if needed.
@@ -98,7 +111,7 @@
                     <div class="mb-3">
                         <label for="difficulty_level" class="form-label">Base Difficulty Level</label>
                         <input type="number" class="form-control" id="difficulty_level" name="difficulty_level"
-                               value="{{ lemma.difficulty_level if lemma.difficulty_level is not none else '' }}"
+                               value="{{ value('difficulty_level', lemma.difficulty_level) }}"
                                min="-1" max="{{ config.MAX_DIFFICULTY_LEVEL }}" placeholder="-1 or 1-{{ config.MAX_DIFFICULTY_LEVEL }}">
                         <small class="form-text text-muted">
                             Enter -1 to exclude from all languages, 1-{{ config.MAX_DIFFICULTY_LEVEL }} for Trakaido level, or leave empty for no base level
@@ -126,7 +139,7 @@
                         <div class="col-md-6">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="verified" name="verified"
-                                       {% if lemma.verified %}checked{% endif %}>
+                                       {{ checked('verified', lemma.verified) }}>
                                 <label class="form-check-label" for="verified">
                                     Verified
                                 </label>
@@ -135,7 +148,7 @@
                         <div class="col-md-6">
                             <label for="confidence" class="form-label">Confidence (0-1)</label>
                             <input type="number" class="form-control" id="confidence" name="confidence"
-                                   value="{{ lemma.confidence }}" step="0.01" min="0" max="1">
+                                   value="{{ value('confidence', lemma.confidence) }}" step="0.01" min="0" max="1">
                         </div>
                     </div>
 
@@ -143,7 +156,7 @@
                     <div class="mb-3">
                         <label for="tags" class="form-label">Tags</label>
                         <input type="text" class="form-control" id="tags" name="tags"
-                               value="{{ lemma.tags or '' }}"
+                               value="{{ value('tags', lemma.tags) }}"
                                placeholder="e.g. legal, archaic">
                         <small class="form-text text-muted">Comma-separated or a JSON array;
                             stored as a JSON array and normalized to lowercase.</small>
@@ -153,7 +166,7 @@
                     <div class="mb-3">
                         <label for="emoji" class="form-label">Emoji</label>
                         <input type="text" class="form-control" id="emoji" name="emoji"
-                               value="{{ lemma|lemma_emoji }}"
+                               value="{{ value('emoji', lemma|lemma_emoji) }}"
                                placeholder="e.g. 🐕 🐶">
                         <small class="form-text text-muted">Optional, and usually empty.
                             Only use an emoji that depicts the concept itself &mdash; a cow for
@@ -165,7 +178,7 @@
                     <!-- Notes -->
                     <div class="mb-3">
                         <label for="notes" class="form-label">Notes</label>
-                        <textarea class="form-control" id="notes" name="notes" rows="3">{{ lemma.notes or '' }}</textarea>
+                        <textarea class="form-control" id="notes" name="notes" rows="3">{{ value('notes', lemma.notes) }}</textarea>
                     </div>
 
                     <!-- Buttons -->
@@ -201,9 +214,15 @@
 // POS subtypes mapping from server
 const posSubtypesMap = {{ pos_subtypes_map|safe }};
 
-// Original values to detect changes
+// Original values to detect changes. These stay the *database* values even
+// when the form is redisplaying a failed submission, because that is what the
+// "changing type/subtype clears translations" warning compares against.
 const originalPosType = {{ lemma.pos_type|tojson }};
 const originalPosSubtype = {{ lemma.pos_subtype|tojson }};
+
+// What the subtype dropdown should show once JS populates it: the submitted
+// value after a failed POST, otherwise the stored one.
+const selectedPosSubtype = {{ (submitted.get('pos_subtype') if submitted is not none else lemma.pos_subtype)|tojson }};
 
 // Function to update subtype dropdown based on selected POS type
 function updateSubtypeDropdown() {
@@ -222,7 +241,7 @@ function updateSubtypeDropdown() {
             option.textContent = subtype.replace(/_/g, ' ');
 
             // Select the current subtype if it matches
-            if (subtype === originalPosSubtype && selectedPosType === originalPosType) {
+            if (subtype === selectedPosSubtype) {
                 option.selected = true;
             }
 

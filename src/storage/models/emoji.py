@@ -10,8 +10,10 @@ considering gets a row, and each row records the decision made about it:
     ``lemma_id`` is set: this glyph depicts that lemma's concept.
 ``no_match``
     Reviewed and dismissed -- nothing in the vocabulary depicts it, or only by
-    a stretch. Distinct from ``undecided`` so a dismissed glyph is never shown
-    again, which is what lets the walk terminate.
+    a stretch. Distinct from ``undecided`` so a dismissed glyph is not shown
+    again, which is what lets the walk terminate. This table has no release
+    file, so that distinction is local to the database: see
+    :mod:`words.emoji_catalog`.
 ``missing_lemma``
     There is one clear concept for the glyph but no lemma for it yet (the ninja
     emoji, the pile-of-poo emoji). ``pending_import_id`` points at the staged

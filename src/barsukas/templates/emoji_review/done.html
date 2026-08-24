@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Emoji Review{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/emoji_review.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6 offset-lg-3">
+        <div class="card text-center">
+            <div class="card-body py-5">
+                <div class="emoji-review-glyph">&#127881;</div>
+                <h4 class="mt-3">Every emoji has been reviewed</h4>
+                <p class="text-muted">
+                    All {{ catalog_total }} glyphs in the catalog have a decision.
+                </p>
+                <p class="mb-4">
+                    <span class="badge bg-success">{{ counts.get('assigned', 0) }} assigned</span>
+                    <span class="badge bg-secondary">{{ counts.get('no_match', 0) }} dismissed</span>
+                    <span class="badge bg-primary">{{ counts.get('missing_lemma', 0) }} staged for import</span>
+                </p>
+                <a href="{{ url_for('quality.index') }}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-arrow-left"></i> Back to the Quality Hub
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

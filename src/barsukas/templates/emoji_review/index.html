@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Emoji Review{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 offset-lg-1">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="mb-0"><i class="bi bi-emoji-smile"></i> Emoji Review</h3>
+            <span class="text-muted small">
+                {{ decided_count }} of {{ catalog_total }} decided &middot;
+                {{ counts.get('assigned', 0) }} assigned &middot;
+                {{ counts.get('no_match', 0) }} dismissed &middot;
+                {{ counts.get('missing_lemma', 0) }} staged
+            </span>
+        </div>
+
+        <div class="progress mb-4" style="height: 6px;">
+            <div class="progress-bar" role="progressbar"
+                 style="width: {{ (decided_count / catalog_total * 100) if catalog_total else 0 }}%"
+                 aria-valuenow="{{ decided_count }}" aria-valuemin="0"
+                 aria-valuemax="{{ catalog_total }}"></div>
+        </div>
+
+        <div class="row">
+            <!-- The glyph under review -->
+            <div class="col-md-4">
+                <div class="card text-center mb-3">
+                    <div class="card-body">
+                        <div class="emoji-review-glyph">{{ entry.value }}</div>
+                        <div class="fw-bold mt-2">{{ entry.name|lower }}</div>
+                        <div class="text-muted small">{{ entry.codepoint }}</div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header py-2"><small class="fw-bold">When to assign</small></div>
+                    <div class="card-body py-2">
+                        <pre class="emoji-review-guidance mb-0">{{ guidance }}</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- The decision -->
+            <div class="col-md-8">
+
+                <!-- Search for a different lemma -->
+                <form method="get" class="mb-3">
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control" name="search" value="{{ search }}"
+                               placeholder="Search for another word&hellip;">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                        {% if search %}
+                        <a class="btn btn-outline-secondary" href="{{ url_for('emoji_review.index') }}">Clear</a>
+                        {% endif %}
+                    </div>
+                    <small class="form-text text-muted">
+                        {% if search %}Results for &quot;{{ search }}&quot;.
+                        {% else %}Suggestions from the emoji's Unicode name.{% endif %}
+                    </small>
+                </form>
+
+                <!-- Assign to one of these lemmas -->
+                <div class="card mb-3">
+                    <div class="card-header py-2"><small class="fw-bold">Attach to a word</small></div>
+                    <div class="card-body">
+                        {% if candidates %}
+                        <form method="post" action="{{ url_for('emoji_review.decide') }}">
+                            <input type="hidden" name="value" value="{{ entry.value }}">
+                            <input type="hidden" name="action" value="assign">
+                            <div class="list-group list-group-flush mb-3">
+                                {% for candidate in candidates %}
+                                <label class="list-group-item d-flex gap-2 align-items-start">
+                                    <input class="form-check-input flex-shrink-0" type="radio"
+                                           name="lemma_id" value="{{ candidate.id }}"
+                                           {% if loop.first %}checked{% endif %}>
+                                    <span>
+                                        <strong>{{ candidate.lemma_text }}</strong>
+                                        {% if candidate.disambiguation %}
+                                        <span class="text-muted">({{ candidate.disambiguation }})</span>
+                                        {% endif %}
+                                        <span class="badge bg-light text-dark">{{ candidate.pos_type }}</span>
+                                        {% if candidate|lemma_emoji %}
+                                        <span class="ms-1">{{ candidate|lemma_emoji }}</span>
+                                        {% endif %}
+                                        <br>
+                                        <small class="text-muted">{{ candidate.definition_text }}</small>
+                                    </span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-link-45deg"></i> Attach {{ entry.value }}
+                            </button>
+                        </form>
+                        {% else %}
+                        <p class="text-muted mb-0">
+                            No matching words. Search above, dismiss the emoji, or stage a new word.
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <!-- Dismiss -->
+                    <div class="col-md-5">
+                        <div class="card h-100">
+                            <div class="card-header py-2"><small class="fw-bold">Nothing depicts it</small></div>
+                            <div class="card-body">
+                                <form method="post" action="{{ url_for('emoji_review.decide') }}">
+                                    <input type="hidden" name="value" value="{{ entry.value }}">
+                                    <input type="hidden" name="action" value="no_match">
+                                    <input type="text" class="form-control form-control-sm mb-2"
+                                           name="notes" placeholder="Why (optional)">
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-x-circle"></i> Dismiss
+                                    </button>
+                                </form>
+                                <small class="form-text text-muted">
+                                    The glyph is not offered again by this database.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stage a missing word -->
+                    <div class="col-md-7">
+                        <div class="card h-100">
+                            <div class="card-header py-2"><small class="fw-bold">Clear concept, no word yet</small></div>
+                            <div class="card-body">
+                                <form method="post" action="{{ url_for('emoji_review.decide') }}">
+                                    <input type="hidden" name="value" value="{{ entry.value }}">
+                                    <input type="hidden" name="action" value="missing_lemma">
+                                    <input type="text" class="form-control form-control-sm mb-2"
+                                           name="english_word" placeholder="English word, e.g. ninja" required>
+                                    <input type="text" class="form-control form-control-sm mb-2"
+                                           name="definition" placeholder="One-sentence definition" required>
+                                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-inbox"></i> Stage for import
+                                    </button>
+                                </form>
+                                <small class="form-text text-muted">
+                                    Enters the pending queue; the emoji attaches when it is approved.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skip -->
+                <form method="post" action="{{ url_for('emoji_review.decide') }}" class="mt-3">
+                    <input type="hidden" name="value" value="{{ entry.value }}">
+                    <input type="hidden" name="action" value="skip">
+                    <button type="submit" class="btn btn-link btn-sm text-muted">
+                        Skip for now &rarr;
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/emoji_review.css') }}">
+{% endblock %}

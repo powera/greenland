@@ -40,6 +40,8 @@ from words.emoji import (
     mark_no_match,
     normalize_emoji_input,
     primary_emoji,
+    release_pending_emoji,
+    stage_lemma_for_emoji,
     refresh_lemma_mirror,
     status_counts,
 )
@@ -245,6 +247,86 @@ class ReviewOutcomeTests(unittest.TestCase):
 
         self.assertEqual(1, attached)
         self.assertEqual(["\U0001F977"], emoji_values(ninja))
+
+    def test_staging_a_word_for_a_glyph_parks_it_against_the_pending_row(self) -> None:
+        row = stage_lemma_for_emoji(
+            self.session,
+            "\U0001F977",
+            english_word="ninja",
+            definition="A covert agent of feudal Japan.",
+        )
+        self.assertEqual(EMOJI_STATUS_MISSING_LEMMA, row.status)
+        self.assertIsNotNone(row.pending_import_id)
+
+        pending = self.session.get(PendingImport, row.pending_import_id)
+        self.assertIsNotNone(pending)
+        assert pending is not None
+        self.assertEqual("ninja", pending.english_word)
+        # NOT NULL on the table, so it falls back to the definition.
+        self.assertEqual("A covert agent of feudal Japan.", pending.disambiguation_translation)
+
+    def test_deleting_the_pending_row_with_a_lemma_attaches_the_glyph(self) -> None:
+        """The real approval choke point promotes the link, not just the helper."""
+        from words.pending_imports.approval import delete_pending_import
+
+        row = stage_lemma_for_emoji(
+            self.session,
+            "\U0001F977",
+            english_word="ninja",
+            definition="A covert agent of feudal Japan.",
+        )
+        pending = self.session.get(PendingImport, row.pending_import_id)
+        assert pending is not None
+
+        ninja = _add_lemma(self.session, "N05_050", "ninja")
+        delete_pending_import(self.session, pending, lemma_id=int(ninja.id))
+
+        self.assertEqual(EMOJI_STATUS_ASSIGNED, row.status)
+        self.assertEqual(ninja.id, row.lemma_id)
+        self.assertIsNone(row.pending_import_id)
+        self.assertEqual(["\U0001F977"], emoji_values(ninja))
+
+    def test_deleting_the_pending_row_without_a_lemma_releases_the_glyph(self) -> None:
+        """A rejection, or a promotion to a name, must not strand the glyph."""
+        from words.pending_imports.approval import delete_pending_import
+
+        row = stage_lemma_for_emoji(
+            self.session,
+            "\U0001F977",
+            english_word="ninja",
+            definition="A covert agent of feudal Japan.",
+        )
+        pending = self.session.get(PendingImport, row.pending_import_id)
+        assert pending is not None
+
+        delete_pending_import(self.session, pending)
+
+        self.assertEqual(EMOJI_STATUS_UNDECIDED, row.status)
+        self.assertIsNone(row.pending_import_id)
+        self.assertIsNone(row.lemma_id)
+
+    def test_release_leaves_a_glyph_taken_by_another_lemma_alone(self) -> None:
+        released = release_pending_emoji(self.session, 4242)
+        self.assertEqual(0, released)
+
+    def test_attach_does_not_steal_a_glyph_another_lemma_took(self) -> None:
+        pending = PendingImport(
+            english_word="ninja",
+            definition="A covert agent of feudal Japan.",
+            disambiguation_translation="ninja",
+            disambiguation_language="lt",
+        )
+        self.session.add(pending)
+        self.session.flush()
+        row = mark_missing_lemma(self.session, "\U0001F977", pending_import_id=int(pending.id))
+
+        other = _add_lemma(self.session, "N05_051", "spy")
+        row.lemma_id = int(other.id)
+        self.session.flush()
+
+        ninja = _add_lemma(self.session, "N05_052", "ninja")
+        self.assertEqual(0, attach_pending_emoji_to_lemma(self.session, int(pending.id), ninja))
+        self.assertEqual(other.id, row.lemma_id)
 
     def test_dismissing_an_assigned_glyph_clears_the_mirror(self) -> None:
         assign_emoji(self.session, self.dog, normalize_emoji_input("\U0001F415"))

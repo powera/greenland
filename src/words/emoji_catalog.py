@@ -13,14 +13,25 @@ Each glyph has three possible outcomes, all of them progress:
 ``assigned``
     A lemma in the database depicts it. The glyph is attached to that lemma.
 ``no_match``
-    Nothing depicts it, or only by a stretch. The glyph is dismissed and never
-    shown again.
+    Nothing depicts it, or only by a stretch. The glyph is dismissed and not
+    shown again for the life of this database.
 ``missing_lemma``
     There is one clear concept for the glyph but the database has no lemma for
     it -- the ninja emoji, the pile-of-poo emoji. This stages a
     :class:`~storage.models.imports.PendingImport` so the ordinary approval
     path can create the word, and records the glyph so it can be attached once
     the lemma exists.
+
+Review state is local to the database
+------------------------------------
+Only the *assignments* survive a rebuild, because ``Lemma.emoji`` is what the
+release round trip carries (:mod:`storage.release.lemma`). The ``emoji`` table
+itself has no release file, so a database rebuilt from ``data/release/`` keeps
+every attached glyph but forgets the ``no_match`` dismissals and the
+``missing_lemma`` stagings, and the walk offers those glyphs again. That is a
+deliberate trade: the distinction between "dismissed" and "not yet reviewed" is
+not considered worth a release artifact, so "decides every glyph exactly once"
+holds within one database rather than across rebuilds.
 
 The catalog itself is a generated snapshot of the pictographic Unicode blocks
 (``data/emoji_catalog.json``); regenerate it with

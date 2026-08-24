@@ -1,0 +1,17 @@
+/* Emoji review walk: the glyph under review, and the guidance beside it. */
+
+/* Large enough to judge what the glyph actually depicts, which is the whole
+   decision being made here. Falls back through the platform emoji fonts. */
+.emoji-review-glyph {
+    font-size: 5rem;
+    line-height: 1.1;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+}
+
+/* The assignment rules are pre-formatted text with meaningful alignment
+   (Good/OK/No columns), so it wraps rather than scrolls sideways. */
+.emoji-review-guidance {
+    font-size: 0.75rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
