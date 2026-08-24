@@ -1,5 +1,6 @@
 """Integrity checks on the Gutenberg book lists behind the generated corpora."""
 
+from collections import Counter
 from typing import Set
 
 import pytest

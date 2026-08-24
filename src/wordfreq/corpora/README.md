@@ -5,9 +5,9 @@ Gutenberg books. Three corpora have book lists here:
 
 | Corpus | Books | Contents |
 | --- | --- | --- |
-| `19th_books` | 64 | Novels, children's books, essays and science first published 1800-1899, British / American / translated European |
-| `20th_books` | 70 | Books first published 1900-1938, i.e. what Gutenberg carries of the 20th century |
-| `early_modern_science` | 37 | Science writing from Boyle and Newton to Einstein and Eddington, written in English by its authors (Einstein excepted) |
+| `19th_books` | 55 | Novels, children's books, essays and science first published 1800-1899, British / American / translated European |
+| `20th_books` | 65 | Books first published 1900-1938, i.e. what Gutenberg carries of the 20th century |
+| `early_modern_science` | 30 | Science writing from Boyle and Newton to Einstein and Eddington, written in English by its authors (Einstein excepted) |
 | `religious_translated` | 23 | Old religious works in English translation: Bible (three translations), Apocrypha, Enoch, Talmud selections, Qur'an (two translations), Upanishads, Bhagavad-Gita, Mahabharata, Ramayana, Dhammapada, Tao Te Ching, Analects, Shih King, Eddas, Egyptian Book of the Dead, Augustine, Aquinas, à Kempis |
 
 ## Running it
@@ -15,8 +15,9 @@ Gutenberg books. Three corpora have book lists here:
 Two steps. The first is the only one that touches the network.
 
 ```bash
-# 0. Confirm the book IDs point at the books they claim (metadata only, no
-#    book text). Needed for any ID listed in book_lists.UNVERIFIED_IDS.
+# 0. Optional: re-confirm the book IDs against the catalogue (metadata only,
+#    no book text). Required for any ID listed in book_lists.UNVERIFIED_IDS,
+#    which is currently empty.
 PYTHONPATH=src python src/wordfreq/corpora/download_gutenberg.py \
     --corpus early_modern_science --verify
 
@@ -98,11 +99,15 @@ and has been imported — an enabled corpus with no annotations makes
 
 ## Adding or changing books
 
-Edit `book_lists.py`. IDs listed in `UNVERIFIED_IDS` were written from memory
-and have not been checked against the catalogue — run `--verify` (above), fix
-any mismatch, and clear the ID from that set. Every other entry's `title` and
-`author` are the Gutenberg catalogue values for that ID, and `year` is the work's first publication,
+Edit `book_lists.py`. **Check every new ID with `--verify` before committing
+it** — of 35 IDs written from memory for the science list, 15 pointed at an
+unrelated book, which would have fed the corpus the wrong text silently. Put
+anything unchecked in `UNVERIFIED_IDS` in the meantime; a test fails if it is
+not empty. Each entry's `title` and `author` are the Gutenberg catalogue values
+for that ID, and `year` is the work's first publication,
 which is what decides the century list it belongs in. Tests in
 `src/tests/wordfreq/corpora/test_book_lists.py` check for duplicate IDs,
-cross-corpus overlap, century boundaries and list size. Volume splits of a
+cross-corpus overlap, century boundaries, list size, a cap of two works per
+author, and that no unverified ID ships. No work appears twice (a complete
+posting and its volume splits are never both included). Volume splits of a
 single work are deliberately excluded so no book is counted twice.

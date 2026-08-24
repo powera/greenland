@@ -9,11 +9,14 @@ long predate any of these lists, it is the year of the English translation.
 Selection principles, since the point of these corpora is general vocabulary
 frequency rather than a literary canon:
 
+* At most two works per author, so no one writer's habits of vocabulary set a
+  word's rank.
 * Breadth over prominence.  A word's rank should come from many authors, so
   each list mixes British, American and translated European writing, several
   genres, and some non-fiction - no single famous book decides a word's rank.
-* No volume splits.  Multi-volume postings of one work are skipped so a book
-  does not get counted twice.
+* No work appears twice.  A complete posting and its volume splits are never
+  both included; where only volume splits exist, either one volume stands for
+  the work or the work is left out.
 * Nothing so short that it cannot carry its own weight; see
   ``frequency_build.DEFAULT_FULL_WEIGHT_TOKENS`` for how length is handled.
 
@@ -94,20 +97,14 @@ class BookList:
 NINETEENTH_CENTURY_BOOKS: Tuple[GutenbergBook, ...] = (
     # British novels
     GutenbergBook(1342, "Pride and Prejudice", "Austen, Jane", 1813),
-    GutenbergBook(161, "Sense and Sensibility", "Austen, Jane", 1811),
     GutenbergBook(158, "Emma", "Austen, Jane", 1815),
-    GutenbergBook(105, "Persuasion", "Austen, Jane", 1817),
-    GutenbergBook(141, "Mansfield Park", "Austen, Jane", 1814),
     GutenbergBook(1260, "Jane Eyre: An Autobiography", "Brontë, Charlotte", 1847),
     GutenbergBook(9182, "Villette", "Brontë, Charlotte", 1853),
     GutenbergBook(768, "Wuthering Heights", "Brontë, Emily", 1847),
     GutenbergBook(145, "Middlemarch", "Eliot, George", 1872),
     GutenbergBook(550, "Silas Marner", "Eliot, George", 1861),
-    GutenbergBook(98, "A Tale of Two Cities", "Dickens, Charles", 1859),
     GutenbergBook(1400, "Great Expectations", "Dickens, Charles", 1861),
-    GutenbergBook(730, "Oliver Twist", "Dickens, Charles", 1838),
     GutenbergBook(766, "David Copperfield", "Dickens, Charles", 1850),
-    GutenbergBook(786, "Hard Times", "Dickens, Charles", 1854),
     GutenbergBook(394, "Cranford", "Gaskell, Elizabeth Cleghorn", 1853),
     GutenbergBook(110, "Tess of the d'Urbervilles: A Pure Woman", "Hardy, Thomas", 1891),
     GutenbergBook(153, "Jude the Obscure", "Hardy, Thomas", 1895),
@@ -126,14 +123,12 @@ NINETEENTH_CENTURY_BOOKS: Tuple[GutenbergBook, ...] = (
     GutenbergBook(120, "Treasure Island", "Stevenson, Robert Louis", 1883),
     GutenbergBook(35, "The Time Machine", "Wells, H. G.", 1895),
     GutenbergBook(36, "The War of the Worlds", "Wells, H. G.", 1898),
-    GutenbergBook(5230, "The Invisible Man: A Grotesque Romance", "Wells, H. G.", 1897),
     GutenbergBook(1661, "The Adventures of Sherlock Holmes", "Doyle, Arthur Conan", 1892),
     GutenbergBook(244, "A Study in Scarlet", "Doyle, Arthur Conan", 1887),
     GutenbergBook(10007, "Carmilla", "Le Fanu, Joseph Sheridan", 1872),
     # American
     GutenbergBook(76, "Adventures of Huckleberry Finn", "Twain, Mark", 1884),
     GutenbergBook(74, "The Adventures of Tom Sawyer, Complete", "Twain, Mark", 1876),
-    GutenbergBook(1837, "The Prince and the Pauper", "Twain, Mark", 1881),
     GutenbergBook(2701, "Moby Dick; Or, The Whale", "Melville, Herman", 1851),
     GutenbergBook(25344, "The Scarlet Letter", "Hawthorne, Nathaniel", 1850),
     GutenbergBook(203, "Uncle Tom's Cabin", "Stowe, Harriet Beecher", 1852),
@@ -153,7 +148,6 @@ NINETEENTH_CENTURY_BOOKS: Tuple[GutenbergBook, ...] = (
     GutenbergBook(2413, "Madame Bovary", "Flaubert, Gustave", 1856),
     GutenbergBook(164, "Twenty Thousand Leagues under the Sea", "Verne, Jules", 1870),
     GutenbergBook(103, "Around the World in Eighty Days", "Verne, Jules", 1873),
-    GutenbergBook(1268, "The Mysterious Island", "Verne, Jules", 1875),
     GutenbergBook(500, "The Adventures of Pinocchio", "Collodi, Carlo", 1883),
     # Children's books and fairy tales
     GutenbergBook(11, "Alice's Adventures in Wonderland", "Carroll, Lewis", 1865),
@@ -175,12 +169,9 @@ NINETEENTH_CENTURY_BOOKS: Tuple[GutenbergBook, ...] = (
 TWENTIETH_CENTURY_BOOKS: Tuple[GutenbergBook, ...] = (
     # British and Irish novels
     GutenbergBook(2852, "The Hound of the Baskervilles", "Doyle, Arthur Conan", 1902),
-    GutenbergBook(108, "The Return of Sherlock Holmes", "Doyle, Arthur Conan", 1905),
-    GutenbergBook(3289, "The Valley of Fear", "Doyle, Arthur Conan", 1915),
     GutenbergBook(139, "The Lost World", "Doyle, Arthur Conan", 1912),
     GutenbergBook(974, "The Secret Agent: A Simple Tale", "Conrad, Joseph", 1907),
     GutenbergBook(5658, "Lord Jim", "Conrad, Joseph", 1900),
-    GutenbergBook(2021, "Nostromo: A Tale of the Seaboard", "Conrad, Joseph", 1904),
     GutenbergBook(2226, "Kim", "Kipling, Rudyard", 1901),
     GutenbergBook(1695, "The Man Who Was Thursday: A Nightmare", "Chesterton, G. K.", 1908),
     GutenbergBook(204, "The Innocence of Father Brown", "Chesterton, G. K.", 1911),
@@ -203,11 +194,9 @@ TWENTIETH_CENTURY_BOOKS: Tuple[GutenbergBook, ...] = (
     # American novels
     GutenbergBook(64317, "The Great Gatsby", "Fitzgerald, F. Scott", 1925),
     GutenbergBook(805, "This Side of Paradise", "Fitzgerald, F. Scott", 1920),
-    GutenbergBook(9830, "The Beautiful and Damned", "Fitzgerald, F. Scott", 1922),
     GutenbergBook(67138, "The Sun Also Rises", "Hemingway, Ernest", 1926),
     GutenbergBook(541, "The Age of Innocence", "Wharton, Edith", 1920),
     GutenbergBook(284, "The House of Mirth", "Wharton, Edith", 1905),
-    GutenbergBook(4517, "Ethan Frome", "Wharton, Edith", 1911),
     GutenbergBook(543, "Main Street", "Lewis, Sinclair", 1920),
     GutenbergBook(1156, "Babbitt", "Lewis, Sinclair", 1922),
     GutenbergBook(242, "My Ántonia", "Cather, Willa", 1918),
@@ -348,18 +337,41 @@ RELIGIOUS_VOCABULARY: Tuple[str, ...] = (
 # --- Early modern science, Newton to Einstein --------------------------------
 
 # Works of science written in English by their authors, so the corpus measures
-# period scientific prose rather than a translator's later idiom.  Einstein is
-# the one deliberate exception: the corpus is named for the span it covers, and
-# the endpoint is worth having even in translation.
+# period scientific prose rather than a translator's later idiom.  Translations
+# are allowed when they are contemporaneous - within ten years of the original,
+# which keeps the English of the same era: Lavoisier (French 1789, English
+# 1790), Poincare (1902/1905) and Einstein (1916/1920).
 #
 # Boyle and Hooke sit just before Newton.  They are the Royal Society milieu
 # Opticks came out of, and dropping them would start the corpus mid-conversation.
 EARLY_MODERN_SCIENCE_BOOKS: Tuple[GutenbergBook, ...] = (
     # The founding generation
-    GutenbergBook(22914, "The Sceptical Chymist", "Boyle, Robert", 1661),
-    GutenbergBook(15491, "Micrographia", "Hooke, Robert", 1665),
-    GutenbergBook(33504, "Opticks", "Newton, Isaac", 1704),
+    GutenbergBook(
+        22914,
+        "The Sceptical Chymist: or Chymico-Physical Doubts & Paradoxes",
+        "Boyle, Robert",
+        1661,
+    ),
+    GutenbergBook(
+        15491,
+        "Micrographia: Some Physiological Descriptions of Minute Bodies",
+        "Hooke, Robert",
+        1665,
+    ),
+    GutenbergBook(
+        33504,
+        "Opticks: or, A Treatise of the Reflections, Refractions, Inflections and Colours of Light",
+        "Newton, Isaac",
+        1704,
+    ),
     GutenbergBook(1408, "The Natural History of Selborne", "White, Gilbert", 1789),
+    GutenbergBook(
+        30775,
+        "Elements of Chemistry, in a New Systematic Order",
+        "Lavoisier, Antoine Laurent",
+        1790,
+        "translated from the 1789 French the following year",
+    ),
     # Physics, chemistry and astronomy
     GutenbergBook(
         14986,
@@ -367,17 +379,23 @@ EARLY_MODERN_SCIENCE_BOOKS: Tuple[GutenbergBook, ...] = (
         "Faraday, Michael",
         1839,
     ),
-    GutenbergBook(39957, "Outlines of Astronomy", "Herschel, John F. W.", 1849),
     GutenbergBook(14474, "The Chemical History of a Candle", "Faraday, Michael", 1861),
-    GutenbergBook(44149, "Heat Considered as a Mode of Motion", "Tyndall, John", 1863),
-    GutenbergBook(21657, "Six Lectures on Light", "Tyndall, John", 1873),
-    GutenbergBook(39834, "Matter and Motion", "Maxwell, James Clerk", 1876),
-    GutenbergBook(28540, "The Story of the Heavens", "Ball, Robert S.", 1885),
-    GutenbergBook(44420, "Pioneers of Science", "Lodge, Oliver", 1893),
-    GutenbergBook(15335, "Side-Lights on Astronomy", "Newcomb, Simon", 1906),
-    GutenbergBook(28380, "Curiosities of the Sky", "Serviss, Garrett P.", 1909),
-    GutenbergBook(42463, "The Interpretation of Radium", "Soddy, Frederick", 1909),
-    GutenbergBook(15843, "Creative Chemistry", "Slosson, Edwin E.", 1919),
+    GutenbergBook(14000, "Six Lectures on Light", "Tyndall, John", 1873),
+    GutenbergBook(27378, "The Story of the Heavens", "Ball, Robert S.", 1885),
+    GutenbergBook(28613, "Pioneers of Science", "Lodge, Oliver", 1893),
+    GutenbergBook(
+        4065,
+        "Side-Lights on Astronomy and Kindred Fields of Popular Science",
+        "Newcomb, Simon",
+        1906,
+    ),
+    GutenbergBook(6630, "Curiosities of the Sky", "Serviss, Garrett P.", 1909),
+    GutenbergBook(
+        17149,
+        "Creative Chemistry: Descriptive of Recent Achievements in the Chemical Industries",
+        "Slosson, Edwin E.",
+        1919,
+    ),
     GutenbergBook(
         5001,
         "Relativity: The Special and General Theory",
@@ -387,55 +405,55 @@ EARLY_MODERN_SCIENCE_BOOKS: Tuple[GutenbergBook, ...] = (
     ),
     GutenbergBook(29782, "Space, Time and Gravitation", "Eddington, Arthur", 1920),
     # Geology, biology and natural history
-    GutenbergBook(33224, "Principles of Geology, Volume 1", "Lyell, Charles", 1830),
+    GutenbergBook(
+        33224,
+        "Principles of Geology: or, The Modern Changes of the Earth and its Inhabitants",
+        "Lyell, Charles",
+        1830,
+    ),
     GutenbergBook(944, "The Voyage of the Beagle", "Darwin, Charles", 1839),
+    GutenbergBook(
+        32021,
+        "Island Life; Or, The Phenomena and Causes of Insular Faunas and Floras",
+        "Wallace, Alfred Russel",
+        1880,
+    ),
     GutenbergBook(1228, "On the Origin of Species", "Darwin, Charles", 1859),
     GutenbergBook(2931, "Evidence as to Man's Place in Nature", "Huxley, Thomas Henry", 1863),
-    GutenbergBook(2529, "The Naturalist on the River Amazons", "Bates, Henry Walter", 1863),
-    GutenbergBook(2530, "The Malay Archipelago", "Wallace, Alfred Russel", 1869),
-    GutenbergBook(2300, "The Descent of Man", "Darwin, Charles", 1871),
-    GutenbergBook(
-        1227,
-        "The Expression of the Emotions in Man and Animals",
-        "Darwin, Charles",
-        1872,
-    ),
-    GutenbergBook(
-        2355,
-        "The Formation of Vegetable Mould through the Action of Worms",
-        "Darwin, Charles",
-        1881,
-    ),
-    GutenbergBook(25011, "Ants, Bees, and Wasps", "Lubbock, John", 1882),
-    GutenbergBook(8695, "My First Summer in the Sierra", "Muir, John", 1911),
+    GutenbergBook(16729, "Lay Sermons, Addresses and Reviews", "Huxley, Thomas Henry", 1870),
+    GutenbergBook(2440, "The Naturalist on the River Amazons", "Bates, Henry Walter", 1863),
+    GutenbergBook(32540, "My First Summer in the Sierra", "Muir, John", 1911),
     # Medicine
-    GutenbergBook(17366, "Notes on Nursing", "Nightingale, Florence", 1859),
+    GutenbergBook(
+        17366, "Notes on Nursing: What It Is, and What It Is Not", "Nightingale, Florence", 1859
+    ),
     GutenbergBook(1566, "The Evolution of Modern Medicine", "Osler, William", 1921),
     # Mathematics and scientific method
     GutenbergBook(15114, "An Investigation of the Laws of Thought", "Boole, George", 1854),
+    GutenbergBook(
+        37157,
+        "Science and Hypothesis",
+        "Poincaré, Henri",
+        1905,
+        "translated from the 1902 French within three years",
+    ),
     GutenbergBook(57532, "Passages from the Life of a Philosopher", "Babbage, Charles", 1864),
-    GutenbergBook(22599, "The Common Sense of the Exact Sciences", "Clifford, William K.", 1885),
-    GutenbergBook(36297, "The Grammar of Science", "Pearson, Karl", 1892),
     GutenbergBook(41568, "An Introduction to Mathematics", "Whitehead, Alfred North", 1911),
     GutenbergBook(41654, "Introduction to Mathematical Philosophy", "Russell, Bertrand", 1919),
 )
 
 # Gutenberg IDs in this file that have NOT been checked against catalogue
-# metadata, and so may point at a different book than the title claims.  Every
-# other ID here was confirmed against the catalogue when it was added.
+# metadata, and so may point at a different book than the title claims.  It is
+# empty: every ID here has been confirmed.  Add an ID here when writing an
+# entry from memory, and clear it once
 #
 #   PYTHONPATH=src python src/wordfreq/corpora/download_gutenberg.py \
-#       --corpus early_modern_science --verify
+#       --corpus <name> --verify
 #
-# checks these without downloading any book text; remove an ID from this set
-# once it comes back OK, and correct the entry when it does not.
-UNVERIFIED_IDS: FrozenSet[int] = frozenset(
-    book.gutenberg_id
-    for book in EARLY_MODERN_SCIENCE_BOOKS
-    # These two were moved here from the century lists, where they had already
-    # been checked.
-    if book.gutenberg_id not in {1228, 5001}
-)
+# reports it OK.  That check reads catalogue metadata only - a few KB per book,
+# no book text.  It is worth running: of 35 IDs written from memory for the
+# science list, 15 pointed at an unrelated book.
+UNVERIFIED_IDS: FrozenSet[int] = frozenset()
 
 
 # --- Registry ----------------------------------------------------------------
