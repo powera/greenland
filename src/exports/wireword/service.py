@@ -16,7 +16,6 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
-from langtools.dialect_overrides import get_translation_target_dialects
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.translation_helpers import (
     LANGUAGE_NAMES,
@@ -24,7 +23,7 @@ from storage.translation_helpers import (
     TIER_2_LANGUAGES,
 )
 from storage.backend.factory import create_session
-from exports.wireword.export_manager import TrakaidoExporter
+from exports.wireword.export_manager import WIREWORD_EXPORT_LANGUAGES, TrakaidoExporter
 from exports.wireword.generate_manifest import generate_manifest
 from exports.wireword.generate_categorychoice import (
     build_reverse_subtype_map,
@@ -39,14 +38,10 @@ from wordfreq.tools.family_relation_priorities import (
 from exports.wireword.export_wireword_conversations import WirewordConversationExporter
 from exports.wireword.export_wireword_sentences import WirewordSentenceExporter
 
-# Supported languages: Tier 1, Tier 2, plus Japanese and the dialects that
-# store their own translations (zh-tw, es-419, pt-br), for WireWord exports.
+# Supported languages, from the one list TrakaidoExporter.LANGUAGE_CONFIG also
+# reads, so the CLI cannot offer a language the exporter rejects.
 SUPPORTED_LANGUAGES = {
-    lang_code: LANGUAGE_NAMES[lang_code]
-    for lang_code in TIER_1_LANGUAGES
-    + TIER_2_LANGUAGES
-    + ["ja"]
-    + get_translation_target_dialects()
+    lang_code: LANGUAGE_NAMES[lang_code] for lang_code in WIREWORD_EXPORT_LANGUAGES
 }
 
 # Explicitly supported non-English source languages for WireWord export variants.
