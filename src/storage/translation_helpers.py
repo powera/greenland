@@ -1180,11 +1180,15 @@ def lang_code_to_llm_field(lang_code: str) -> Optional[str]:
     return LANG_CODE_TO_LLM_FIELD.get(lang_code)
 
 
+#: Canonical ``translation_status`` values. The API validator, the LLM response
+#: schema and the term-age scorer all read this, so add a new status here and
+#: nowhere else.
 TRANSLATION_STATUS_VALUES = {
     "conventional",
     "late_construction",
     "modern_loan",
     "descriptive",
+    "modern_reimagining",
     "uncertain",
 }
 
