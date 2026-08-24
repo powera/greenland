@@ -9,8 +9,10 @@ long predate any of these lists, it is the year of the English translation.
 Selection principles, since the point of these corpora is general vocabulary
 frequency rather than a literary canon:
 
-* At most two works per author, so no one writer's habits of vocabulary set a
-  word's rank.
+* At most two works per author across all the lists together, so no one
+  writer's habits of vocabulary set a word's rank.  Where an author spans two
+  centuries, the surviving pair is split between them (Kipling: The Jungle Book
+  in the 19th list, Kim in the 20th).
 * Breadth over prominence.  A word's rank should come from many authors, so
   each list mixes British, American and translated European writing, several
   genres, and some non-fiction - no single famous book decides a word's rank.
@@ -124,7 +126,6 @@ NINETEENTH_CENTURY_BOOKS: Tuple[GutenbergBook, ...] = (
     GutenbergBook(35, "The Time Machine", "Wells, H. G.", 1895),
     GutenbergBook(36, "The War of the Worlds", "Wells, H. G.", 1898),
     GutenbergBook(1661, "The Adventures of Sherlock Holmes", "Doyle, Arthur Conan", 1892),
-    GutenbergBook(244, "A Study in Scarlet", "Doyle, Arthur Conan", 1887),
     GutenbergBook(10007, "Carmilla", "Le Fanu, Joseph Sheridan", 1872),
     # American
     GutenbergBook(76, "Adventures of Huckleberry Finn", "Twain, Mark", 1884),
@@ -169,7 +170,6 @@ NINETEENTH_CENTURY_BOOKS: Tuple[GutenbergBook, ...] = (
 TWENTIETH_CENTURY_BOOKS: Tuple[GutenbergBook, ...] = (
     # British and Irish novels
     GutenbergBook(2852, "The Hound of the Baskervilles", "Doyle, Arthur Conan", 1902),
-    GutenbergBook(139, "The Lost World", "Doyle, Arthur Conan", 1912),
     GutenbergBook(974, "The Secret Agent: A Simple Tale", "Conrad, Joseph", 1907),
     GutenbergBook(5658, "Lord Jim", "Conrad, Joseph", 1900),
     GutenbergBook(2226, "Kim", "Kipling, Rudyard", 1901),
@@ -215,7 +215,6 @@ TWENTIETH_CENTURY_BOOKS: Tuple[GutenbergBook, ...] = (
     GutenbergBook(1300, "Riders of the Purple Sage", "Grey, Zane", 1912),
     GutenbergBook(175, "The Phantom of the Opera", "Leroux, Gaston", 1910),
     GutenbergBook(434, "The Circular Staircase", "Rinehart, Mary Roberts", 1908),
-    GutenbergBook(1013, "The First Men in the Moon", "Wells, H. G.", 1901),
     # Children's books
     GutenbergBook(55, "The Wonderful Wizard of Oz", "Baum, L. Frank", 1900),
     GutenbergBook(113, "The Secret Garden", "Burnett, Frances Hodgson", 1911),
@@ -226,7 +225,6 @@ TWENTIETH_CENTURY_BOOKS: Tuple[GutenbergBook, ...] = (
     GutenbergBook(16, "Peter Pan (Peter and Wendy)", "Barrie, J. M.", 1911),
     GutenbergBook(1874, "The Railway Children", "Nesbit, E.", 1906),
     GutenbergBook(501, "The Story of Doctor Dolittle", "Lofting, Hugh", 1920),
-    GutenbergBook(2781, "Just So Stories", "Kipling, Rudyard", 1902),
     GutenbergBook(1450, "Pollyanna", "Porter, Eleanor H.", 1913),
     GutenbergBook(157, "Daddy-Long-Legs", "Webster, Jean", 1912),
     GutenbergBook(67098, "Winnie-the-Pooh", "Milne, A. A.", 1926),

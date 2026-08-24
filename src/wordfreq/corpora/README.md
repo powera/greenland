@@ -5,8 +5,8 @@ Gutenberg books. Three corpora have book lists here:
 
 | Corpus | Books | Contents |
 | --- | --- | --- |
-| `19th_books` | 55 | Novels, children's books, essays and science first published 1800-1899, British / American / translated European |
-| `20th_books` | 65 | Books first published 1900-1938, i.e. what Gutenberg carries of the 20th century |
+| `19th_books` | 54 | Novels, children's books, essays and science first published 1800-1899, British / American / translated European |
+| `20th_books` | 62 | Books first published 1900-1938, i.e. what Gutenberg carries of the 20th century |
 | `early_modern_science` | 30 | Science writing from Boyle and Newton to Einstein and Eddington, written in English by its authors (Einstein excepted) |
 | `religious_translated` | 23 | Old religious works in English translation: Bible (three translations), Apocrypha, Enoch, Talmud selections, Qur'an (two translations), Upanishads, Bhagavad-Gita, Mahabharata, Ramayana, Dhammapada, Tao Te Ching, Analects, Shih King, Eddas, Egyptian Book of the Dead, Augustine, Aquinas, à Kempis |
 
@@ -108,6 +108,6 @@ for that ID, and `year` is the work's first publication,
 which is what decides the century list it belongs in. Tests in
 `src/tests/wordfreq/corpora/test_book_lists.py` check for duplicate IDs,
 cross-corpus overlap, century boundaries, list size, a cap of two works per
-author, and that no unverified ID ships. No work appears twice (a complete
+author across all the lists together, and that no unverified ID ships. No work appears twice (a complete
 posting and its volume splits are never both included). Volume splits of a
 single work are deliberately excluded so no book is counted twice.

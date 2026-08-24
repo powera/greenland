@@ -64,13 +64,31 @@ def test_science_corpus_spans_newton_to_einstein() -> None:
     assert max(year for year in years if year is not None) >= 1916
 
 
-def test_only_the_science_list_holds_unverified_ids() -> None:
-    """Hand-written IDs must be marked until checked against the catalogue."""
-    for corpus_name in ("19th_books", "20th_books", "religious_translated"):
-        unverified = [
-            book.gutenberg_id for book in get_book_list(corpus_name).books if not book.id_verified
-        ]
-        assert unverified == [], f"{corpus_name} has unchecked IDs: {unverified}"
+@pytest.mark.parametrize("corpus_name", sorted(BOOK_LISTS))
+def test_no_unverified_ids_ship(corpus_name: str) -> None:
+    """An ID written from memory must be checked before it lands in a list.
+
+    Of 35 IDs written from memory for the science list, 15 pointed at an
+    unrelated book -- a wrong ID silently feeds the corpus the wrong text.
+    """
+    unverified = [
+        book.gutenberg_id for book in get_book_list(corpus_name).books if not book.id_verified
+    ]
+    assert unverified == [], f"{corpus_name} has unchecked IDs: {unverified}"
+
+
+def test_at_most_two_works_per_author_across_all_corpora() -> None:
+    """No author may dominate the vocabulary, counting every list together.
+
+    The cap is global, not per corpus: an author who spans two centuries gets
+    two works in total, not two in each list.  Anonymous and compiled works
+    (empty author) are exempt - they are distinct works, not one writer.
+    """
+    counts = Counter(
+        book.author for book_list in BOOK_LISTS.values() for book in book_list.books if book.author
+    )
+    over_cap = {author: count for author, count in counts.items() if count > 2}
+    assert over_cap == {}, f"more than two works per author: {over_cap}"
 
 
 @pytest.mark.parametrize("corpus_name", sorted(BOOK_LISTS))
