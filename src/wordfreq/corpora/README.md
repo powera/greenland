@@ -5,8 +5,9 @@ Gutenberg books. Three corpora have book lists here:
 
 | Corpus | Books | Contents |
 | --- | --- | --- |
-| `19th_books` | 65 | Novels, children's books, essays and science first published 1800-1899, British / American / translated European |
-| `20th_books` | 71 | Books first published 1900-1938, i.e. what Gutenberg carries of the 20th century |
+| `19th_books` | 64 | Novels, children's books, essays and science first published 1800-1899, British / American / translated European |
+| `20th_books` | 70 | Books first published 1900-1938, i.e. what Gutenberg carries of the 20th century |
+| `early_modern_science` | 37 | Science writing from Boyle and Newton to Einstein and Eddington, written in English by its authors (Einstein excepted) |
 | `religious_translated` | 23 | Old religious works in English translation: Bible (three translations), Apocrypha, Enoch, Talmud selections, Qur'an (two translations), Upanishads, Bhagavad-Gita, Mahabharata, Ramayana, Dhammapada, Tao Te Ching, Analects, Shih King, Eddas, Egyptian Book of the Dead, Augustine, Aquinas, à Kempis |
 
 ## Running it
@@ -14,6 +15,11 @@ Gutenberg books. Three corpora have book lists here:
 Two steps. The first is the only one that touches the network.
 
 ```bash
+# 0. Confirm the book IDs point at the books they claim (metadata only, no
+#    book text). Needed for any ID listed in book_lists.UNVERIFIED_IDS.
+PYTHONPATH=src python src/wordfreq/corpora/download_gutenberg.py \
+    --corpus early_modern_science --verify
+
 # 1. Download the books to a scratch directory (not the repo).
 PYTHONPATH=src python src/wordfreq/corpora/download_gutenberg.py --corpus all
 
@@ -21,6 +27,7 @@ PYTHONPATH=src python src/wordfreq/corpora/download_gutenberg.py --corpus all
 PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus 19th_books
 PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus 20th_books
 PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus religious_translated
+PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus early_modern_science
 ```
 
 The cache defaults to `$GREENLAND_GUTENBERG_CACHE`, else
@@ -84,15 +91,17 @@ so they read like occurrence counts; only their ratios are meaningful.
 
 ## After generating
 
-`religious_translated` ships **disabled** in
-`wordfreq.frequency.corpus.CORPUS_CONFIGS`. Enable it once the JSON exists and
-has been imported — an enabled corpus with no annotations makes
+`religious_translated` and `early_modern_science` ship **disabled** in
+`wordfreq.frequency.corpus.CORPUS_CONFIGS`. Enable each once its JSON exists
+and has been imported — an enabled corpus with no annotations makes
 `combined_rank` charge every lemma that corpus's unknown-rank floor.
 
 ## Adding or changing books
 
-Edit `book_lists.py`. Every entry's `title` and `author` are the Gutenberg
-catalogue values for that ID, and `year` is the work's first publication,
+Edit `book_lists.py`. IDs listed in `UNVERIFIED_IDS` were written from memory
+and have not been checked against the catalogue — run `--verify` (above), fix
+any mismatch, and clear the ID from that set. Every other entry's `title` and
+`author` are the Gutenberg catalogue values for that ID, and `year` is the work's first publication,
 which is what decides the century list it belongs in. Tests in
 `src/tests/wordfreq/corpora/test_book_lists.py` check for duplicate IDs,
 cross-corpus overlap, century boundaries and list size. Volume splits of a

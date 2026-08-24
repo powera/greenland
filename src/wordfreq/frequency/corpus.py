@@ -101,6 +101,21 @@ CORPUS_CONFIGS = [
         enabled=True,
     ),
     CorpusConfig(
+        name="early_modern_science",
+        description="Word frequency data from early modern science writing, Newton to Einstein",
+        file_path="early_modern_science.json",
+        max_words=3000,
+        file_type="json",
+        value_type="auto",
+        # Technical prose of its period: good coverage of words the novels
+        # never use, but not how everyday English is weighted.
+        corpus_weight=0.6,
+        max_unknown_rank=8000,
+        # Disabled until the JSON has been generated and imported; see the
+        # religious_translated note below.
+        enabled=False,
+    ),
+    CorpusConfig(
         name="religious_translated",
         description="Word frequency data from old religious works in English translation",
         file_path="religious_translated.json",

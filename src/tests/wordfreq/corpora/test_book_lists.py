@@ -52,6 +52,24 @@ def test_lists_are_large_enough_that_no_single_book_dominates() -> None:
     assert len(get_book_list("19th_books").books) >= 40
     assert len(get_book_list("20th_books").books) >= 40
     assert len(get_book_list("religious_translated").books) >= 15
+    assert len(get_book_list("early_modern_science").books) >= 20
+
+
+def test_science_corpus_spans_newton_to_einstein() -> None:
+    years = [book.year for book in get_book_list("early_modern_science").books]
+    assert all(year is not None for year in years)
+    # Boyle and Hooke open the corpus just before Newton; Einstein closes it.
+    assert min(year for year in years if year is not None) <= 1665
+    assert max(year for year in years if year is not None) >= 1916
+
+
+def test_only_the_science_list_holds_unverified_ids() -> None:
+    """Hand-written IDs must be marked until checked against the catalogue."""
+    for corpus_name in ("19th_books", "20th_books", "religious_translated"):
+        unverified = [
+            book.gutenberg_id for book in get_book_list(corpus_name).books if not book.id_verified
+        ]
+        assert unverified == [], f"{corpus_name} has unchecked IDs: {unverified}"
 
 
 @pytest.mark.parametrize("corpus_name", sorted(BOOK_LISTS))

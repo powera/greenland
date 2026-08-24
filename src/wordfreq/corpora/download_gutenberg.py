@@ -25,7 +25,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -43,6 +43,11 @@ DEFAULT_TIMEOUT_SECONDS = 60
 DEFAULT_RETRIES = 3
 USER_AGENT = "greenland-wordfreq-corpus-builder/1.0 (linguistic research; contact via repo)"
 MANIFEST_FILENAME = "manifest.json"
+
+# Catalogue metadata API, used only by --verify. It returns a few KB of JSON
+# per book and never any book text.
+METADATA_API = "https://gutendex.com/books"
+METADATA_BATCH_SIZE = 30
 
 # Gutenberg exposes plain text at several paths depending on the book's age.
 URL_TEMPLATES = (
@@ -213,6 +218,75 @@ def _titles_agree(found: str, expected: str) -> bool:
     return shorter[: max(12, len(shorter) // 2)] in longer
 
 
+def verify_book_ids(
+    books: Sequence[GutenbergBook],
+    *,
+    timeout: int = DEFAULT_TIMEOUT_SECONDS,
+    session: Optional[requests.Session] = None,
+) -> List[Tuple[GutenbergBook, str, Optional[str]]]:
+    """Check each book's ID against the Gutenberg catalogue.
+
+    Downloads catalogue metadata only - a few KB per book, no book text - so
+    this is the cheap way to confirm a hand-written book list points at the
+    books it claims. Use it on any ID listed in
+    ``book_lists.UNVERIFIED_IDS``.
+
+    Args:
+        books: Books to check.
+        timeout: Per-request timeout in seconds.
+        session: Optional requests session to reuse.
+
+    Returns:
+        One ``(book, status, catalogue_title)`` per book, where status is
+        ``"ok"``, ``"mismatch"``, ``"not-found"`` or ``"error"``.
+    """
+    http = session or requests.Session()
+    headers = {"User-Agent": USER_AGENT}
+    results: List[Tuple[GutenbergBook, str, Optional[str]]] = []
+
+    for start in range(0, len(books), METADATA_BATCH_SIZE):
+        batch = list(books[start : start + METADATA_BATCH_SIZE])
+        ids = ",".join(str(book.gutenberg_id) for book in batch)
+        catalogue: Dict[int, str] = {}
+        try:
+            response = http.get(METADATA_API, params={"ids": ids}, headers=headers, timeout=timeout)
+            response.raise_for_status()
+            for entry in response.json().get("results", []):
+                catalogue[int(entry["id"])] = str(entry.get("title", ""))
+        except (requests.RequestException, ValueError, KeyError) as error:
+            logger.error("Metadata lookup failed for %s: %s", ids, error)
+            results.extend((book, "error", None) for book in batch)
+            continue
+
+        for book in batch:
+            found = catalogue.get(book.gutenberg_id)
+            if found is None:
+                results.append((book, "not-found", None))
+            elif _titles_agree(found, book.title):
+                results.append((book, "ok", found))
+            else:
+                results.append((book, "mismatch", found))
+
+    return results
+
+
+def print_verification(results: Sequence[Tuple[GutenbergBook, str, Optional[str]]]) -> int:
+    """Print a verification table. Returns the number of problems found."""
+    problems = 0
+    for book, status, found in results:
+        if status == "ok":
+            marker = "ok      "
+        else:
+            marker = status.upper().ljust(8)
+            problems += 1
+        detail = f"  catalogue says: {found!r}" if status == "mismatch" else ""
+        print(f"  {marker} {book.gutenberg_id:>6}  {book.title[:52]:<54}{detail}")
+    print(f"\n  {len(results) - problems} of {len(results)} IDs confirmed")
+    if problems:
+        print("  Fix the entries above in book_lists.py, then clear them from UNVERIFIED_IDS.")
+    return problems
+
+
 def resolve_books(corpus: Optional[str], ids: Optional[Sequence[int]]) -> List[GutenbergBook]:
     """Resolve the CLI selection into a list of books to download."""
     if ids:
@@ -271,6 +345,12 @@ def main() -> int:
     parser.add_argument(
         "--dry-run", action="store_true", help="List what would be downloaded and exit"
     )
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="Check IDs against Gutenberg catalogue metadata and exit "
+        "(no book text is downloaded)",
+    )
     parser.add_argument("--verbose", action="store_true", help="Debug logging")
     args = parser.parse_args()
 
@@ -290,6 +370,10 @@ def main() -> int:
         return 1
 
     cache_dir = args.dest or default_cache_dir()
+
+    if args.verify:
+        print(f"Checking {len(books)} ID(s) against the Gutenberg catalogue:")
+        return 1 if print_verification(verify_book_ids(books, timeout=args.timeout)) else 0
 
     if args.dry_run:
         print(f"Would download {len(books)} book(s) into {cache_dir}:")

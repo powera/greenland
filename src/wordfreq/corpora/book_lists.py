@@ -24,7 +24,7 @@ jargon up the list.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, FrozenSet, List, Optional, Tuple
 
 from wordfreq.corpora.gutenberg_text import slugify_title
 
@@ -56,6 +56,11 @@ class GutenbergBook:
     def slug(self) -> str:
         """Key used for this book in the corpus JSON (``<id>_<Title>``)."""
         return slugify_title(self.gutenberg_id, self.title)
+
+    @property
+    def id_verified(self) -> bool:
+        """Whether this ID has been checked against Gutenberg's catalogue."""
+        return self.gutenberg_id not in UNVERIFIED_IDS
 
 
 @dataclass(frozen=True)
@@ -160,7 +165,6 @@ NINETEENTH_CENTURY_BOOKS: Tuple[GutenbergBook, ...] = (
     GutenbergBook(
         205, "Walden, and On The Duty Of Civil Disobedience", "Thoreau, Henry David", 1854
     ),
-    GutenbergBook(1228, "On the Origin of Species", "Darwin, Charles", 1859),
     GutenbergBook(61, "The Communist Manifesto", "Marx, Karl; Engels, Friedrich", 1848),
     GutenbergBook(1998, "Thus Spake Zarathustra", "Nietzsche, Friedrich Wilhelm", 1883),
     GutenbergBook(1322, "Leaves of Grass", "Whitman, Walt", 1855),
@@ -243,7 +247,6 @@ TWENTIETH_CENTURY_BOOKS: Tuple[GutenbergBook, ...] = (
     # Non-fiction
     GutenbergBook(408, "The Souls of Black Folk", "Du Bois, W. E. B.", 1903),
     GutenbergBook(2376, "Up from Slavery: An Autobiography", "Washington, Booker T.", 1901),
-    GutenbergBook(5001, "Relativity: The Special and General Theory", "Einstein, Albert", 1916),
     GutenbergBook(15489, "Dream Psychology: Psychoanalysis for Beginners", "Freud, Sigmund", 1920),
     GutenbergBook(3825, "Pygmalion", "Shaw, Bernard", 1913),
 )
@@ -342,6 +345,99 @@ RELIGIOUS_VOCABULARY: Tuple[str, ...] = (
 )
 
 
+# --- Early modern science, Newton to Einstein --------------------------------
+
+# Works of science written in English by their authors, so the corpus measures
+# period scientific prose rather than a translator's later idiom.  Einstein is
+# the one deliberate exception: the corpus is named for the span it covers, and
+# the endpoint is worth having even in translation.
+#
+# Boyle and Hooke sit just before Newton.  They are the Royal Society milieu
+# Opticks came out of, and dropping them would start the corpus mid-conversation.
+EARLY_MODERN_SCIENCE_BOOKS: Tuple[GutenbergBook, ...] = (
+    # The founding generation
+    GutenbergBook(22914, "The Sceptical Chymist", "Boyle, Robert", 1661),
+    GutenbergBook(15491, "Micrographia", "Hooke, Robert", 1665),
+    GutenbergBook(33504, "Opticks", "Newton, Isaac", 1704),
+    GutenbergBook(1408, "The Natural History of Selborne", "White, Gilbert", 1789),
+    # Physics, chemistry and astronomy
+    GutenbergBook(
+        14986,
+        "Experimental Researches in Electricity, Volume 1",
+        "Faraday, Michael",
+        1839,
+    ),
+    GutenbergBook(39957, "Outlines of Astronomy", "Herschel, John F. W.", 1849),
+    GutenbergBook(14474, "The Chemical History of a Candle", "Faraday, Michael", 1861),
+    GutenbergBook(44149, "Heat Considered as a Mode of Motion", "Tyndall, John", 1863),
+    GutenbergBook(21657, "Six Lectures on Light", "Tyndall, John", 1873),
+    GutenbergBook(39834, "Matter and Motion", "Maxwell, James Clerk", 1876),
+    GutenbergBook(28540, "The Story of the Heavens", "Ball, Robert S.", 1885),
+    GutenbergBook(44420, "Pioneers of Science", "Lodge, Oliver", 1893),
+    GutenbergBook(15335, "Side-Lights on Astronomy", "Newcomb, Simon", 1906),
+    GutenbergBook(28380, "Curiosities of the Sky", "Serviss, Garrett P.", 1909),
+    GutenbergBook(42463, "The Interpretation of Radium", "Soddy, Frederick", 1909),
+    GutenbergBook(15843, "Creative Chemistry", "Slosson, Edwin E.", 1919),
+    GutenbergBook(
+        5001,
+        "Relativity: The Special and General Theory",
+        "Einstein, Albert",
+        1916,
+        "translated from German - the corpus's endpoint, kept despite that",
+    ),
+    GutenbergBook(29782, "Space, Time and Gravitation", "Eddington, Arthur", 1920),
+    # Geology, biology and natural history
+    GutenbergBook(33224, "Principles of Geology, Volume 1", "Lyell, Charles", 1830),
+    GutenbergBook(944, "The Voyage of the Beagle", "Darwin, Charles", 1839),
+    GutenbergBook(1228, "On the Origin of Species", "Darwin, Charles", 1859),
+    GutenbergBook(2931, "Evidence as to Man's Place in Nature", "Huxley, Thomas Henry", 1863),
+    GutenbergBook(2529, "The Naturalist on the River Amazons", "Bates, Henry Walter", 1863),
+    GutenbergBook(2530, "The Malay Archipelago", "Wallace, Alfred Russel", 1869),
+    GutenbergBook(2300, "The Descent of Man", "Darwin, Charles", 1871),
+    GutenbergBook(
+        1227,
+        "The Expression of the Emotions in Man and Animals",
+        "Darwin, Charles",
+        1872,
+    ),
+    GutenbergBook(
+        2355,
+        "The Formation of Vegetable Mould through the Action of Worms",
+        "Darwin, Charles",
+        1881,
+    ),
+    GutenbergBook(25011, "Ants, Bees, and Wasps", "Lubbock, John", 1882),
+    GutenbergBook(8695, "My First Summer in the Sierra", "Muir, John", 1911),
+    # Medicine
+    GutenbergBook(17366, "Notes on Nursing", "Nightingale, Florence", 1859),
+    GutenbergBook(1566, "The Evolution of Modern Medicine", "Osler, William", 1921),
+    # Mathematics and scientific method
+    GutenbergBook(15114, "An Investigation of the Laws of Thought", "Boole, George", 1854),
+    GutenbergBook(57532, "Passages from the Life of a Philosopher", "Babbage, Charles", 1864),
+    GutenbergBook(22599, "The Common Sense of the Exact Sciences", "Clifford, William K.", 1885),
+    GutenbergBook(36297, "The Grammar of Science", "Pearson, Karl", 1892),
+    GutenbergBook(41568, "An Introduction to Mathematics", "Whitehead, Alfred North", 1911),
+    GutenbergBook(41654, "Introduction to Mathematical Philosophy", "Russell, Bertrand", 1919),
+)
+
+# Gutenberg IDs in this file that have NOT been checked against catalogue
+# metadata, and so may point at a different book than the title claims.  Every
+# other ID here was confirmed against the catalogue when it was added.
+#
+#   PYTHONPATH=src python src/wordfreq/corpora/download_gutenberg.py \
+#       --corpus early_modern_science --verify
+#
+# checks these without downloading any book text; remove an ID from this set
+# once it comes back OK, and correct the entry when it does not.
+UNVERIFIED_IDS: FrozenSet[int] = frozenset(
+    book.gutenberg_id
+    for book in EARLY_MODERN_SCIENCE_BOOKS
+    # These two were moved here from the century lists, where they had already
+    # been checked.
+    if book.gutenberg_id not in {1228, 5001}
+)
+
+
 # --- Registry ----------------------------------------------------------------
 
 BOOK_LISTS: Dict[str, BookList] = {
@@ -356,6 +452,12 @@ BOOK_LISTS: Dict[str, BookList] = {
         description="Word frequency data from 20th century books",
         max_words=5000,
         books=TWENTIETH_CENTURY_BOOKS,
+    ),
+    "early_modern_science": BookList(
+        corpus_name="early_modern_science",
+        description="Word frequency data from early modern science writing, Newton to Einstein",
+        max_words=3000,
+        books=EARLY_MODERN_SCIENCE_BOOKS,
     ),
     "religious_translated": BookList(
         corpus_name="religious_translated",
