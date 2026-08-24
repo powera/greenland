@@ -3,15 +3,31 @@
 Dialect override definitions for language variants.
 
 This module provides a centralized registry of dialect variants (e.g., zh-tw,
-es-mx, pt-br) and their relationships to parent languages.  It defines:
+es-419, pt-br) and their relationships to parent languages.  It defines:
 
-- Parent language mappings  (zh-tw -> zh, es-mx -> es, etc.)
+- Parent language mappings  (zh-tw -> zh, es-419 -> es, etc.)
 - Display names with dialect qualifiers for use in LLM prompts
 - Text transformation functions (e.g., simplified -> traditional Chinese)
 - Sort-key language inheritance (dialects typically reuse the parent's sort key)
 - TTS locale codes for speech synthesis
+- Whether a dialect is stored separately or folded into another variant
 
 Import from this module rather than hardcoding dialect information locally.
+
+Two kinds of dialect live here, told apart by ``translation_target``:
+
+* **Storage dialects** (``translation_target=True``: zh-tw, es-419, pt-br) get
+  their own ``LemmaTranslation`` rows, their own LLM prompt configuration, and
+  their own release/export column.  Adding one means registering it here *and*
+  in ``storage.translation_helpers.LANGUAGE_FIELDS`` /
+  ``wordfreq.translation.constants.DEFAULT_TRANSLATION_LANGUAGES``.
+* **Presentation dialects** (``translation_target=False``: es-mx, fr-ca, en-gb)
+  carry a prompt note and a TTS locale but store no separate text.  Their
+  ``covered_by`` (falling back to ``parent_lang``) names the variant whose
+  stored translations they read.  es-mx is the worked example: Mexican Spanish
+  differs from neutral Latin American Spanish mostly in colloquial register,
+  which lemma-level vocabulary rarely reaches, so it reads es-419 text and only
+  contributes an accent for TTS.
 
 Usage::
 
@@ -83,6 +99,15 @@ class DialectOverride:
             TTS locale is defined.
         llm_prompt_note: Optional extra instruction to include in LLM prompts
             when generating or verifying content for this dialect.
+        translation_target: Whether this dialect stores its own translations.
+            ``True`` means it is a first-class generation/storage language and
+            must also appear in ``LANGUAGE_FIELDS`` and
+            ``DEFAULT_TRANSLATION_LANGUAGES``.  ``False`` means it only supplies
+            a prompt note and a TTS locale, and reads *covered_by*'s text.
+        covered_by: For a non-storage dialect, the language code whose stored
+            translations it reads (e.g. es-mx reads es-419).  ``None`` means
+            fall back to *parent_lang*.  Ignored when *translation_target* is
+            ``True``.
     """
 
     parent_lang: str
@@ -93,6 +118,8 @@ class DialectOverride:
     sort_key_lang: Optional[str] = None
     tts_locale: Optional[str] = None
     llm_prompt_note: Optional[str] = None
+    translation_target: bool = False
+    covered_by: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
@@ -113,8 +140,35 @@ DIALECT_OVERRIDES: Dict[str, DialectOverride] = {
             "Use Traditional Chinese characters as used in Taiwan. "
             "Do NOT use Simplified Chinese characters."
         ),
+        translation_target=True,
     ),
-    # Spanish (Mexico) - Latin American Spanish
+    # Spanish (Latin America) - the neutral pan-regional standard.  This is the
+    # variety US classroom Spanish teaches, so it is a storage dialect even
+    # though the country-specific varieties below it are not.
+    "es-419": DialectOverride(
+        parent_lang="es",
+        display_name="Spanish (Latin America)",
+        dialect_display_name="Spanish (Latin American)",
+        text_transform=None,  # text is the same script
+        reverse_transform=None,
+        sort_key_lang="es",
+        # es-419 is not a locale any TTS engine offers; es-US is the neutral
+        # Latin American voice Google, Azure, and Polly all expose.
+        tts_locale="es-US",
+        llm_prompt_note=(
+            "Use neutral Latin American Spanish (español latinoamericano), the "
+            "pan-regional standard used for dubbing and textbooks, not the "
+            "Spanish of any single country. Use 'ustedes' for the second-person "
+            "plural and never 'vosotros'. Prefer vocabulary understood across "
+            "Latin America over Peninsular-only terms (e.g. 'computadora' not "
+            "'ordenador', 'carro'/'auto' not 'coche', 'jugo' not 'zumo', "
+            "'papa' not 'patata'). Avoid country-specific slang."
+        ),
+        translation_target=True,
+    ),
+    # Spanish (Mexico) - a regional accent within Latin American Spanish.
+    # Not stored separately: at lemma level its vocabulary is es-419's, so it
+    # reads es-419 text and contributes only a voice locale and prompt note.
     "es-mx": DialectOverride(
         parent_lang="es",
         display_name="Spanish (Mexico)",
@@ -127,6 +181,8 @@ DIALECT_OVERRIDES: Dict[str, DialectOverride] = {
             "Use Mexican Spanish. Prefer 'ustedes' over 'vosotros'. "
             "Use Latin American vocabulary where it differs from Castilian Spanish."
         ),
+        translation_target=False,
+        covered_by="es-419",
     ),
     # Portuguese (Brazil) - Brazilian Portuguese
     "pt-br": DialectOverride(
@@ -139,8 +195,11 @@ DIALECT_OVERRIDES: Dict[str, DialectOverride] = {
         tts_locale="pt-BR",
         llm_prompt_note=(
             "Use Brazilian Portuguese. Prefer Brazilian vocabulary and spelling "
-            "conventions where they differ from European Portuguese."
+            "conventions where they differ from European Portuguese (e.g. "
+            "'ônibus' not 'autocarro', 'trem' not 'comboio', 'celular' not "
+            "'telemóvel'). Use 'você' rather than 'tu' for the second person."
         ),
+        translation_target=True,
     ),
     # French (Canada) - Canadian French
     "fr-ca": DialectOverride(
@@ -155,6 +214,7 @@ DIALECT_OVERRIDES: Dict[str, DialectOverride] = {
             "Use Canadian French (québécois standard). Prefer Canadian vocabulary "
             "where it differs from Metropolitan French."
         ),
+        translation_target=False,
     ),
     # English (UK) - British English
     "en-gb": DialectOverride(
@@ -169,6 +229,7 @@ DIALECT_OVERRIDES: Dict[str, DialectOverride] = {
             "Use British English spelling (e.g. 'colour', 'favourite', "
             "'organise') and vocabulary."
         ),
+        translation_target=False,
     ),
 }
 
@@ -179,19 +240,57 @@ for _dialect_code, _override in DIALECT_OVERRIDES.items():
     _PARENT_TO_DIALECTS.setdefault(_override.parent_lang, []).append(_dialect_code)
 
 
+# Spellings of a dialect that are not the canonical registry key.  BCP-47 tags
+# people actually type (``pt-BR``), Android-style underscores (``zh_TW``), and
+# the region tags that mean the same variety we already register.
+_CODE_ALIASES: Dict[str, str] = {
+    "es-la": "es-419",
+    "es-latam": "es-419",
+    "es-us": "es-419",  # US Spanish is the neutral Latin American standard
+    "pt-pt": "pt",
+    "es-es": "es",
+    "fr-fr": "fr",
+    "en-us": "en",
+    "zh-cn": "zh",
+    "zh-hans": "zh",
+    "zh-hant": "zh-tw",
+}
+
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
 
+def normalize_language_code(lang_code: str) -> str:
+    """Canonicalize a language code to the spelling this registry uses.
+
+    Case, underscores, and the region aliases people type are folded away, so
+    a CLI can accept whatever the caller wrote.  Unknown codes pass through
+    lowercased with underscores turned into hyphens -- this is a normalizer,
+    not a validator.
+
+    >>> normalize_language_code("pt-BR")
+    'pt-br'
+    >>> normalize_language_code("zh_TW")
+    'zh-tw'
+    >>> normalize_language_code("es-US")
+    'es-419'
+    >>> normalize_language_code("es-419")
+    'es-419'
+    """
+    normalized = (lang_code or "").strip().lower().replace("_", "-")
+    return _CODE_ALIASES.get(normalized, normalized)
+
+
 def is_dialect(lang_code: str) -> bool:
     """Return ``True`` if *lang_code* is a registered dialect variant."""
-    return lang_code in DIALECT_OVERRIDES
+    return normalize_language_code(lang_code) in DIALECT_OVERRIDES
 
 
 def get_dialect_override(lang_code: str) -> Optional[DialectOverride]:
     """Return the :class:`DialectOverride` for *lang_code*, or ``None``."""
-    return DIALECT_OVERRIDES.get(lang_code)
+    return DIALECT_OVERRIDES.get(normalize_language_code(lang_code))
 
 
 def get_parent_language(lang_code: str) -> str:
@@ -202,8 +301,61 @@ def get_parent_language(lang_code: str) -> str:
     >>> get_parent_language("fr")
     'fr'
     """
-    override = DIALECT_OVERRIDES.get(lang_code)
-    return override.parent_lang if override else lang_code
+    override = get_dialect_override(lang_code)
+    return override.parent_lang if override else normalize_language_code(lang_code)
+
+
+# ``get_base_language`` is the name to reach for when picking a *module*: the
+# grammar, collation, tokenizer, and inflection engines are written per base
+# language and a dialect always shares them.
+get_base_language = get_parent_language
+
+
+def is_translation_target(lang_code: str) -> bool:
+    """Return ``True`` if *lang_code* stores its own translations.
+
+    True for every non-dialect language and for the storage dialects; False
+    for a presentation dialect such as es-mx, whose text comes from the
+    variant named by :func:`get_translation_language`.
+
+    >>> is_translation_target("es-419")
+    True
+    >>> is_translation_target("es-mx")
+    False
+    >>> is_translation_target("de")
+    True
+    """
+    override = get_dialect_override(lang_code)
+    return override.translation_target if override else True
+
+
+def get_translation_language(lang_code: str) -> str:
+    """Return the code whose stored translations *lang_code* should read.
+
+    A storage language (including zh-tw, es-419, pt-br) reads its own rows; a
+    presentation dialect reads its ``covered_by``, or its parent when it names
+    none.
+
+    >>> get_translation_language("es-419")
+    'es-419'
+    >>> get_translation_language("es-mx")
+    'es-419'
+    >>> get_translation_language("fr-ca")
+    'fr'
+    """
+    override = get_dialect_override(lang_code)
+    if override is None or override.translation_target:
+        return normalize_language_code(lang_code)
+    return override.covered_by or override.parent_lang
+
+
+def get_translation_target_dialects() -> List[str]:
+    """Return the dialect codes that store their own translations.
+
+    >>> get_translation_target_dialects()
+    ['zh-tw', 'es-419', 'pt-br']
+    """
+    return [code for code, override in DIALECT_OVERRIDES.items() if override.translation_target]
 
 
 def get_dialect_display_name(lang_code: str) -> str:
@@ -218,13 +370,14 @@ def get_dialect_display_name(lang_code: str) -> str:
     >>> get_dialect_display_name("zh")
     'Chinese (Mainland Simplified)'
     """
-    override = DIALECT_OVERRIDES.get(lang_code)
+    override = get_dialect_override(lang_code)
     if override:
         return override.dialect_display_name
 
     # For parent languages that have dialects, return a qualified name
     # to distinguish from the dialect variants.
-    return _PARENT_DISPLAY_NAMES.get(lang_code, _language_name_fallback(lang_code))
+    normalized = normalize_language_code(lang_code)
+    return _PARENT_DISPLAY_NAMES.get(normalized, _language_name_fallback(normalized))
 
 
 def get_dialects_for_language(parent_lang: str) -> List[str]:
@@ -232,17 +385,19 @@ def get_dialects_for_language(parent_lang: str) -> List[str]:
 
     >>> get_dialects_for_language("zh")
     ['zh-tw']
+    >>> get_dialects_for_language("es")
+    ['es-419', 'es-mx']
     >>> get_dialects_for_language("ko")
     []
     """
-    return list(_PARENT_TO_DIALECTS.get(parent_lang, []))
+    return list(_PARENT_TO_DIALECTS.get(normalize_language_code(parent_lang), []))
 
 
 def get_all_dialect_codes() -> List[str]:
     """Return all registered dialect codes.
 
     >>> sorted(get_all_dialect_codes())
-    ['en-gb', 'es-mx', 'fr-ca', 'pt-br', 'zh-tw']
+    ['en-gb', 'es-419', 'es-mx', 'fr-ca', 'pt-br', 'zh-tw']
     """
     return list(DIALECT_OVERRIDES.keys())
 
@@ -258,7 +413,7 @@ def transform_to_dialect(lang_code: str, text: str) -> str:
     >>> transform_to_dialect("es-mx", "hola")
     'hola'
     """
-    override = DIALECT_OVERRIDES.get(lang_code)
+    override = get_dialect_override(lang_code)
     if override and override.text_transform:
         try:
             return override.text_transform(text)
@@ -278,7 +433,7 @@ def transform_from_dialect(lang_code: str, text: str) -> str:
     >>> transform_from_dialect("es-mx", "hola")
     'hola'
     """
-    override = DIALECT_OVERRIDES.get(lang_code)
+    override = get_dialect_override(lang_code)
     if override and override.reverse_transform:
         try:
             return override.reverse_transform(text)
@@ -303,10 +458,10 @@ def get_sort_key_language(lang_code: str) -> str:
     >>> get_sort_key_language("fr")
     'fr'
     """
-    override = DIALECT_OVERRIDES.get(lang_code)
+    override = get_dialect_override(lang_code)
     if override:
         return override.sort_key_lang or override.parent_lang
-    return lang_code
+    return normalize_language_code(lang_code)
 
 
 def get_tts_locale(lang_code: str) -> Optional[str]:
@@ -319,7 +474,7 @@ def get_tts_locale(lang_code: str) -> Optional[str]:
     >>> get_tts_locale("fr") is None
     True
     """
-    override = DIALECT_OVERRIDES.get(lang_code)
+    override = get_dialect_override(lang_code)
     return override.tts_locale if override else None
 
 
@@ -331,7 +486,7 @@ def get_llm_prompt_note(lang_code: str) -> Optional[str]:
     >>> get_llm_prompt_note("fr") is None
     True
     """
-    override = DIALECT_OVERRIDES.get(lang_code)
+    override = get_dialect_override(lang_code)
     return override.llm_prompt_note if override else None
 
 

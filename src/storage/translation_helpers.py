@@ -29,6 +29,14 @@ _CJK_SORT_KEY_LANGUAGES = frozenset({"zh", "ja", "ko"})
 # Import collation languages (Latin + Cyrillic + Brahmic/Thai) so we have
 # the full set.  CJK is handled separately via script-specific helpers.
 from langtools.collation import SORT_KEY_LANGUAGES as _COLLATION_SORT_KEY_LANGUAGES  # noqa: E402
+from langtools.dialect_overrides import (  # noqa: E402
+    get_parent_language,
+    get_sort_key_language,
+    get_translation_language,
+    get_translation_target_dialects,
+    normalize_language_code,
+    transform_to_dialect,
+)
 
 _SORT_KEY_LANGUAGES = _CJK_SORT_KEY_LANGUAGES | _COLLATION_SORT_KEY_LANGUAGES
 
@@ -133,10 +141,12 @@ RELEASE_LANGUAGES = [
     "zh-tw",
     "fr",
     "es",
+    "es-419",
     "de",
     "it",
     "nl",
     "pt",
+    "pt-br",
     "sv",
     "vi",
     "ja",
@@ -159,12 +169,15 @@ LANGUAGE_HIERARCHY = [
     "en",  # English (special case - source language)
     "lt",  # Lithuanian
     "zh",  # Chinese
+    "zh-tw",  # Chinese (Taiwan, Traditional)
     "fr",  # French
     "es",  # Spanish
+    "es-419",  # Spanish (Latin America)
     "de",  # German
     "it",  # Italian
     "nl",  # Dutch
     "pt",  # Portuguese
+    "pt-br",  # Portuguese (Brazil)
     "sv",  # Swedish
     "vi",  # Vietnamese
     "ja",  # Japanese (experimental)
@@ -244,10 +257,12 @@ LANGUAGE_FIELDS = {
     "zh-tw": ("zh-tw", "Chinese (Taiwan)", True),  # Taiwan-specific Chinese variant
     "fr": ("fr", "French", True),
     "es": ("es", "Spanish", True),
+    "es-419": ("es-419", "Spanish (Latin America)", True),  # neutral Latin American variety
     "de": ("de", "German", True),
     "it": ("it", "Italian", True),
     "nl": ("nl", "Dutch", True),
     "pt": ("pt", "Portuguese", True),
+    "pt-br": ("pt-br", "Portuguese (Brazil)", True),  # Brazilian Portuguese variant
     "sv": ("sv", "Swedish", True),
     "vi": ("vi", "Vietnamese", True),
     "ja": ("ja", "Japanese", True),
@@ -325,6 +340,7 @@ LLM_FIELD_TO_LANG_CODE = {
     "korean_translation": "ko",
     "french_translation": "fr",
     "spanish_translation": "es",
+    "spanish_latam_translation": "es-419",
     "german_translation": "de",
     "japanese_translation": "ja",
     "latin_translation": "la",
@@ -335,6 +351,7 @@ LLM_FIELD_TO_LANG_CODE = {
     "italian_translation": "it",
     "dutch_translation": "nl",
     "portuguese_translation": "pt",
+    "portuguese_brazil_translation": "pt-br",
     "swahili_translation": "sw",
     "swedish_translation": "sv",
     "vietnamese_translation": "vi",
@@ -426,6 +443,43 @@ def get_translation(session: Session, lemma: Lemma, lang_code: str) -> Optional[
     else:
         # Get from Lemma table column (English uses lemma_text)
         return getattr(lemma, field_name, None)
+
+
+def get_translation_with_dialect_fallback(
+    session: Session, lemma: Lemma, lang_code: str
+) -> Tuple[Optional[str], Optional[str]]:
+    """Get a translation for *lang_code*, falling back to its parent variety.
+
+    A dialect is usually far less populated than the language it derives from,
+    so an export or a UI that asks for one wants the parent's text rather than
+    a blank.  When the fallback is used the parent text is run through the
+    dialect's ``text_transform`` (zh-tw converts Simplified to Traditional;
+    es-419 and pt-br share their parent's script and pass through unchanged).
+
+    Presentation dialects that store nothing (es-mx, fr-ca, en-gb) read the
+    variety named by ``get_translation_language`` -- es-mx reads es-419 -- and
+    fall back from there.
+
+    Returns:
+        ``(text, source_lang_code)``.  *source_lang_code* is the language the
+        text actually came from, so a caller can tell an exact hit from a
+        fallback.  ``(None, None)`` when neither has a translation.
+    """
+    storage_code = get_translation_language(lang_code)
+    if storage_code in LANGUAGE_FIELDS:
+        translation = get_translation(session, lemma, storage_code)
+        if translation and translation.strip():
+            return translation, storage_code
+
+    parent_code = get_parent_language(storage_code)
+    if parent_code == storage_code or parent_code not in LANGUAGE_FIELDS:
+        return None, None
+
+    parent_translation = get_translation(session, lemma, parent_code)
+    if parent_translation and parent_translation.strip():
+        return transform_to_dialect(storage_code, parent_translation), parent_code
+
+    return None, None
 
 
 def get_definition(session: Session, lemma: Lemma, lang_code: str) -> Optional[str]:
@@ -600,6 +654,15 @@ def get_all_definitions(session: Session, lemma: Lemma) -> Dict[str, Optional[st
     return definitions
 
 
+def has_sort_key(lang_code: str) -> bool:
+    """Return True if translations in *lang_code* get a computed sort key.
+
+    Dialects answer for the language their sort key is inherited from, so
+    ``zh-tw`` is True (it sorts by pinyin) while ``en-gb`` is False.
+    """
+    return get_sort_key_language(lang_code) in _SORT_KEY_LANGUAGES
+
+
 def compute_sort_key(lang_code: str, translation: str) -> Optional[str]:
     """Compute a sort key for dictionary ordering.
 
@@ -612,14 +675,20 @@ def compute_sort_key(lang_code: str, translation: str) -> Optional[str]:
       remapping so that accented letters sort in their correct alphabet
       position (e.g. Lithuanian "š" → "s{", sorting after "s" and before "t").
 
+    Dialects reuse their parent's algorithm (zh-tw sorts by pinyin like zh,
+    es-419 by the Spanish letter remapping), so ``sort_key_lang`` from the
+    dialect registry decides which branch runs.
+
     Returns None for unsupported languages or if the required library is
     unavailable.
     """
-    if lang_code not in _SORT_KEY_LANGUAGES:
+    if not has_sort_key(lang_code):
         return None
 
     if not translation or not translation.strip():
         return None
+
+    lang_code = get_sort_key_language(lang_code)
 
     try:
         if lang_code == "zh":
@@ -769,7 +838,7 @@ def set_translation(
                 translation_obj.translation_status = translation_status
             if translation_status_note is not None:
                 translation_obj.translation_status_note = translation_status_note
-            if lang_code in _SORT_KEY_LANGUAGES:
+            if has_sort_key(lang_code):
                 translation_obj.sort_key = sort_key
         else:
             translation_obj = LemmaTranslation(
@@ -1070,7 +1139,7 @@ DEFAULT_GENERATION_LANGUAGES = [
     "ja",
     "ko",
     "sw",
-    "zh-tw",
+    *get_translation_target_dialects(),
 ]
 
 
@@ -1084,13 +1153,18 @@ def normalize_llm_language_codes(
     *,
     operation_name: str,
     all_expansion: Optional[List[str]] = None,
-    max_languages: int = MAX_LLM_LANGUAGES_PER_OPERATION,
+    max_languages: Optional[int] = MAX_LLM_LANGUAGES_PER_OPERATION,
 ) -> List[str]:
     """Normalize language codes for LLM operations.
 
+    - Canonicalizes dialect spellings, so ``pt-BR``/``zh_TW``/``es-US`` from a
+      CLI arrive as ``pt-br``/``zh-tw``/``es-419``.
     - Expands ``all`` to ``all_expansion`` when provided.
     - De-duplicates while preserving order.
-    - Enforces an upper bound for a single LLM operation.
+    - Enforces an upper bound for a single LLM operation.  Pass
+      ``max_languages=None`` when the caller splits the result into
+      per-request batches itself (see :func:`split_llm_language_batches`);
+      otherwise the cap silently drops the tail of the requested set.
     """
     if not languages:
         normalized = []
@@ -1106,11 +1180,12 @@ def normalize_llm_language_codes(
     seen: set[str] = set()
     deduped: List[str] = []
     for lang in normalized:
-        if lang not in seen:
-            seen.add(lang)
-            deduped.append(lang)
+        canonical = normalize_language_code(lang)
+        if canonical and canonical not in seen:
+            seen.add(canonical)
+            deduped.append(canonical)
 
-    if len(deduped) > max_languages:
+    if max_languages is not None and len(deduped) > max_languages:
         logger.warning(
             "%s requested %s languages; limiting to first %s",
             operation_name,

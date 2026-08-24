@@ -1,0 +1,6 @@
+Speak this Spanish sentence at a natural conversational pace:
+- Use neutral Latin American Spanish, as heard in pan-regional broadcast and dubbing, not the Spanish of Spain
+- Use seseo: pronounce "c" before e/i and "z" as /s/, never as the Castilian /θ/
+- Use the rhythm and speed of everyday Spanish speech
+- Maintain natural sentence-level intonation and prosody
+- Connect words smoothly as a native speaker would

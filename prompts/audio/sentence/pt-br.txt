@@ -1,0 +1,6 @@
+Speak this Portuguese sentence at a natural conversational pace:
+- Use Brazilian Portuguese, as spoken in Brazil, not European Portuguese
+- Use open, fully articulated unstressed vowels; do not reduce them the way European Portuguese does
+- Use the rhythm and speed of everyday Brazilian speech
+- Maintain natural sentence-level intonation and prosody
+- Connect words smoothly as a native speaker would

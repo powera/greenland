@@ -5,6 +5,8 @@
 from importlib import import_module
 from typing import Any, Dict, List, TypedDict
 
+from langtools.dialect_overrides import get_base_language
+
 
 class VerbFormSlot(TypedDict):
     """Definition for one required slot in a verb-form response."""
@@ -72,7 +74,8 @@ def _sanitize_config(raw: Any) -> Dict[str, Any]:
 
 def get_language_verb_forms_config(language_code: str) -> Dict[str, Any]:
     """Return per-language verb-form benchmark config with sane defaults."""
-    normalized = (language_code or "").strip().lower()
+    # Dialects share their parent's verb system, so resolve pt-br -> pt first.
+    normalized = get_base_language(language_code)
     if not normalized:
         return _default_config()
 

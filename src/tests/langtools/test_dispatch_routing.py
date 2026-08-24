@@ -5,6 +5,8 @@ import importlib
 import pytest
 
 from langtools.conjugation import conjugate
+from langtools.dialect_overrides import get_llm_prompt_note
+from langtools.directions import get_language_direction_note
 from langtools.inflection import inflect
 from langtools.wiktionary import _PARSER_SPECS, _POS_TO_METHOD
 
@@ -67,3 +69,29 @@ def test_conjugation_dispatches_to_english() -> None:
 
     assert forms is not None
     assert forms["3s_present"] == "walks"
+
+
+def test_dispatchers_route_a_dialect_to_its_parent_module() -> None:
+    """There is no langtools/en-gb/, and there should not need to be.
+
+    A dialect differs in vocabulary and accent, not in morphology, so it uses
+    the parent's engines rather than a copy of them.
+    """
+    assert inflect("giraffe", "en-gb", "noun") == inflect("giraffe", "en", "noun")
+    assert conjugate("walk", "en-gb") == conjugate("walk", "en")
+
+
+def test_dispatchers_accept_unnormalized_dialect_codes() -> None:
+    assert inflect("giraffe", "en_GB", "noun") == inflect("giraffe", "en", "noun")
+
+
+def test_a_dialect_does_not_inherit_its_parents_variant_direction_note() -> None:
+    """The parent's note pins the default variant and would contradict the dialect.
+
+    "For Spanish, use Castilian" is exactly wrong for es-419; the dialect's own
+    llm_prompt_note says what to use instead.
+    """
+    assert get_language_direction_note("es")
+    assert get_language_direction_note("es-419") == ""
+    assert get_language_direction_note("zh-tw") == ""
+    assert get_llm_prompt_note("es-419")

@@ -16,6 +16,7 @@ if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
 import constants
+from langtools.dialect_overrides import get_translation_target_dialects
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.translation_helpers import (
     LANGUAGE_NAMES,
@@ -38,10 +39,14 @@ from wordfreq.tools.family_relation_priorities import (
 from exports.wireword.export_wireword_conversations import WirewordConversationExporter
 from exports.wireword.export_wireword_sentences import WirewordSentenceExporter
 
-# Supported languages: Tier 1, Tier 2, plus Japanese for WireWord exports.
+# Supported languages: Tier 1, Tier 2, plus Japanese and the dialects that
+# store their own translations (zh-tw, es-419, pt-br), for WireWord exports.
 SUPPORTED_LANGUAGES = {
     lang_code: LANGUAGE_NAMES[lang_code]
-    for lang_code in TIER_1_LANGUAGES + TIER_2_LANGUAGES + ["ja"]
+    for lang_code in TIER_1_LANGUAGES
+    + TIER_2_LANGUAGES
+    + ["ja"]
+    + get_translation_target_dialects()
 }
 
 # Explicitly supported non-English source languages for WireWord export variants.

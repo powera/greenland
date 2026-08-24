@@ -10,6 +10,7 @@ import requests
 
 import constants
 from clients.keys import load_key
+from langtools.dialect_overrides import get_parent_language, normalize_language_code
 
 from .types import AudioFormat, AudioGenerationResult, Voice
 
@@ -43,22 +44,30 @@ def _load_prompt(prompt_type: str, language_code: str) -> str:
     """
     Load a prompt from file.
 
+    A dialect uses its own file when one exists and its parent language's
+    otherwise, so es-419 falls back to es rather than to the generic default.
+    That fallback is a compromise: prompts/audio/word/es.txt asks for a
+    Castilian accent, so a dialect that wants a different one needs its own
+    file, which zh-tw, es-419, and pt-br have.
+
     Args:
         prompt_type: Either "word" or "sentence"
-        language_code: Language code (e.g., "lt", "zh")
+        language_code: Language code (e.g., "lt", "zh", "es-419")
 
     Returns:
-        The prompt text, or a default fallback if file not found
+        The prompt text, or a default fallback if no file is found
     """
+    language_code = normalize_language_code(language_code)
     cache_key = (prompt_type, language_code)
     if cache_key in _prompt_cache:
         return _prompt_cache[cache_key]
 
-    prompt_file = PROMPTS_DIR / prompt_type / f"{language_code}.txt"
-    if prompt_file.exists():
-        prompt_text = prompt_file.read_text().strip()
-        _prompt_cache[cache_key] = prompt_text
-        return prompt_text
+    for candidate in (language_code, get_parent_language(language_code)):
+        prompt_file = PROMPTS_DIR / prompt_type / f"{candidate}.txt"
+        if prompt_file.exists():
+            prompt_text = prompt_file.read_text().strip()
+            _prompt_cache[cache_key] = prompt_text
+            return prompt_text
 
     # Fallback to default
     default_prompt = "Speak clearly and naturally."

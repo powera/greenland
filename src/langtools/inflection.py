@@ -18,6 +18,8 @@ from importlib import import_module
 from inspect import Parameter, signature
 from typing import Callable, Dict, Optional
 
+from langtools.dialect_overrides import get_base_language
+
 _POS_TO_BUILDER: Dict[str, str] = {
     "noun": "build_noun_forms",
     "adjective": "build_adjective_forms",
@@ -33,8 +35,10 @@ def _load_builder(
     builder_name = _POS_TO_BUILDER.get(pos_type)
     if builder_name is None:
         return None
+    # A dialect inflects like its parent (es-419 -> es), and langtools has no
+    # per-dialect packages.
     try:
-        module = import_module(f"langtools.{language_code}.inflection")
+        module = import_module(f"langtools.{get_base_language(language_code)}.inflection")
     except ModuleNotFoundError:
         return None
     builder = getattr(module, builder_name, None)

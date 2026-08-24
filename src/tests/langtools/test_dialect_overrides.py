@@ -10,14 +10,19 @@ from langtools.dialect_overrides import (
     DIALECT_OVERRIDES,
     DialectOverride,
     get_all_dialect_codes,
+    get_base_language,
     get_dialect_display_name,
     get_dialect_override,
     get_dialects_for_language,
     get_llm_prompt_note,
     get_parent_language,
     get_sort_key_language,
+    get_translation_language,
+    get_translation_target_dialects,
     get_tts_locale,
     is_dialect,
+    is_translation_target,
+    normalize_language_code,
     transform_from_dialect,
     transform_to_dialect,
 )
@@ -27,7 +32,7 @@ class TestDialectRegistry(unittest.TestCase):
     """Tests for the dialect registry and its consistency."""
 
     def test_all_expected_dialects_registered(self) -> None:
-        expected = {"zh-tw", "es-mx", "pt-br", "fr-ca", "en-gb"}
+        expected = {"zh-tw", "es-419", "es-mx", "pt-br", "fr-ca", "en-gb"}
         self.assertEqual(set(DIALECT_OVERRIDES.keys()), expected)
 
     def test_all_dialect_codes_returns_all(self) -> None:
@@ -43,10 +48,24 @@ class TestDialectRegistry(unittest.TestCase):
                 f"{parent} is both a parent and a dialect code",
             )
 
+    def test_covered_by_only_names_a_storage_language(self) -> None:
+        """A presentation dialect must read text that is actually stored."""
+        for code, override in DIALECT_OVERRIDES.items():
+            if override.covered_by is None:
+                continue
+            self.assertFalse(
+                override.translation_target,
+                f"{code} stores its own translations, so covered_by is meaningless",
+            )
+            self.assertTrue(
+                is_translation_target(override.covered_by),
+                f"{code} is covered by {override.covered_by}, which stores nothing itself",
+            )
+
 
 class TestIsDialect(unittest.TestCase):
     def test_known_dialects(self) -> None:
-        for code in ["zh-tw", "es-mx", "pt-br", "fr-ca", "en-gb"]:
+        for code in ["zh-tw", "es-419", "es-mx", "pt-br", "fr-ca", "en-gb"]:
             self.assertTrue(is_dialect(code), f"{code} should be a dialect")
 
     def test_parent_languages(self) -> None:
@@ -57,6 +76,7 @@ class TestIsDialect(unittest.TestCase):
 class TestGetParentLanguage(unittest.TestCase):
     def test_dialect_returns_parent(self) -> None:
         self.assertEqual(get_parent_language("zh-tw"), "zh")
+        self.assertEqual(get_parent_language("es-419"), "es")
         self.assertEqual(get_parent_language("es-mx"), "es")
         self.assertEqual(get_parent_language("pt-br"), "pt")
         self.assertEqual(get_parent_language("fr-ca"), "fr")
@@ -73,7 +93,7 @@ class TestGetDialectsForLanguage(unittest.TestCase):
         self.assertEqual(get_dialects_for_language("zh"), ["zh-tw"])
 
     def test_spanish(self) -> None:
-        self.assertEqual(get_dialects_for_language("es"), ["es-mx"])
+        self.assertEqual(get_dialects_for_language("es"), ["es-419", "es-mx"])
 
     def test_no_dialects(self) -> None:
         self.assertEqual(get_dialects_for_language("ko"), [])
@@ -83,6 +103,7 @@ class TestGetDialectsForLanguage(unittest.TestCase):
 class TestGetDialectDisplayName(unittest.TestCase):
     def test_dialect_codes(self) -> None:
         self.assertEqual(get_dialect_display_name("zh-tw"), "Chinese (Taiwan Traditional)")
+        self.assertEqual(get_dialect_display_name("es-419"), "Spanish (Latin American)")
         self.assertEqual(get_dialect_display_name("es-mx"), "Spanish (Mexican)")
         self.assertEqual(get_dialect_display_name("pt-br"), "Portuguese (Brazilian)")
         self.assertEqual(get_dialect_display_name("fr-ca"), "French (Canadian)")
@@ -142,6 +163,7 @@ class TestTransformFromDialect(unittest.TestCase):
 class TestGetSortKeyLanguage(unittest.TestCase):
     def test_dialect_inherits_parent(self) -> None:
         self.assertEqual(get_sort_key_language("zh-tw"), "zh")
+        self.assertEqual(get_sort_key_language("es-419"), "es")
         self.assertEqual(get_sort_key_language("es-mx"), "es")
         self.assertEqual(get_sort_key_language("pt-br"), "pt")
         self.assertEqual(get_sort_key_language("fr-ca"), "fr")
@@ -158,6 +180,7 @@ class TestGetSortKeyLanguage(unittest.TestCase):
 class TestGetTtsLocale(unittest.TestCase):
     def test_dialect_locales(self) -> None:
         self.assertEqual(get_tts_locale("zh-tw"), "zh-TW")
+        self.assertEqual(get_tts_locale("es-419"), "es-US")
         self.assertEqual(get_tts_locale("es-mx"), "es-MX")
         self.assertEqual(get_tts_locale("pt-br"), "pt-BR")
         self.assertEqual(get_tts_locale("fr-ca"), "fr-CA")
@@ -197,6 +220,77 @@ class TestDialectOverrideDataclass(unittest.TestCase):
         # But other fields should be present
         self.assertIn("parent_lang", repr_str)
         self.assertIn("zh", repr_str)
+
+
+class TestNormalizeLanguageCode(unittest.TestCase):
+    def test_case_and_separator_folding(self) -> None:
+        self.assertEqual(normalize_language_code("pt-BR"), "pt-br")
+        self.assertEqual(normalize_language_code("zh_TW"), "zh-tw")
+        self.assertEqual(normalize_language_code("  ES  "), "es")
+
+    def test_canonical_codes_are_unchanged(self) -> None:
+        for code in DIALECT_OVERRIDES:
+            self.assertEqual(normalize_language_code(code), code)
+
+    def test_region_aliases_fold_to_the_registered_variety(self) -> None:
+        self.assertEqual(normalize_language_code("es-US"), "es-419")
+        self.assertEqual(normalize_language_code("es-latam"), "es-419")
+        self.assertEqual(normalize_language_code("zh-Hant"), "zh-tw")
+        self.assertEqual(normalize_language_code("pt-PT"), "pt")
+
+    def test_unknown_codes_pass_through(self) -> None:
+        """This is a normalizer, not a validator."""
+        self.assertEqual(normalize_language_code("xx-YY"), "xx-yy")
+        self.assertEqual(normalize_language_code(""), "")
+
+    def test_lookups_accept_unnormalized_input(self) -> None:
+        self.assertTrue(is_dialect("pt-BR"))
+        self.assertEqual(get_parent_language("zh_TW"), "zh")
+        self.assertEqual(get_tts_locale("PT-br"), "pt-BR")
+        self.assertEqual(get_dialect_display_name("es-US"), "Spanish (Latin American)")
+
+
+class TestTranslationTargets(unittest.TestCase):
+    def test_storage_dialects(self) -> None:
+        self.assertEqual(get_translation_target_dialects(), ["zh-tw", "es-419", "pt-br"])
+
+    def test_is_translation_target(self) -> None:
+        for code in ["zh-tw", "es-419", "pt-br"]:
+            self.assertTrue(is_translation_target(code), f"{code} stores its own translations")
+        for code in ["es-mx", "fr-ca", "en-gb"]:
+            self.assertFalse(is_translation_target(code), f"{code} stores no translations")
+
+    def test_plain_languages_are_translation_targets(self) -> None:
+        for code in ["es", "pt", "zh", "lt"]:
+            self.assertTrue(is_translation_target(code))
+
+    def test_storage_dialect_reads_its_own_text(self) -> None:
+        for code in get_translation_target_dialects():
+            self.assertEqual(get_translation_language(code), code)
+
+    def test_mexican_spanish_reads_latin_american_spanish(self) -> None:
+        """The reason es-mx is not a separate generation target."""
+        self.assertEqual(get_translation_language("es-mx"), "es-419")
+
+    def test_presentation_dialect_without_coverage_reads_its_parent(self) -> None:
+        self.assertEqual(get_translation_language("fr-ca"), "fr")
+        self.assertEqual(get_translation_language("en-gb"), "en")
+
+    def test_plain_language_reads_itself(self) -> None:
+        self.assertEqual(get_translation_language("de"), "de")
+
+
+class TestGetBaseLanguage(unittest.TestCase):
+    """``get_base_language`` is what picks a langtools module for a code."""
+
+    def test_dialects_resolve_to_their_module_language(self) -> None:
+        self.assertEqual(get_base_language("es-419"), "es")
+        self.assertEqual(get_base_language("es-mx"), "es")
+        self.assertEqual(get_base_language("pt-BR"), "pt")
+        self.assertEqual(get_base_language("zh-tw"), "zh")
+
+    def test_plain_language_resolves_to_itself(self) -> None:
+        self.assertEqual(get_base_language("lt"), "lt")
 
 
 if __name__ == "__main__":

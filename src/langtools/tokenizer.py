@@ -15,6 +15,8 @@ import re
 from functools import lru_cache
 from typing import Callable, List, Optional
 
+from langtools.dialect_overrides import get_base_language
+
 logger = logging.getLogger(__name__)
 
 # Languages with dedicated tokenizer modules.
@@ -28,7 +30,8 @@ _LANGUAGE_MODULE_PATHS: dict[str, str] = {
 @lru_cache(maxsize=None)
 def _load_tokenize_fn(language_code: str) -> Callable[[str], List[str]] | None:
     """Return the tokenize() function for a language module, or None if unavailable."""
-    module_path = _LANGUAGE_MODULE_PATHS.get(language_code)
+    # zh-tw tokenizes with the zh segmenter; there is no per-dialect module.
+    module_path = _LANGUAGE_MODULE_PATHS.get(get_base_language(language_code))
     if module_path is None:
         return None
     try:
