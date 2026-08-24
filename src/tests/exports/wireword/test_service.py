@@ -70,3 +70,26 @@ def test_legacy_ungurys_agent_is_service_alias() -> None:
     from agents.ungurys import UngurysAgent
 
     assert UngurysAgent is WirewordExportService
+
+
+def test_every_advertised_language_can_actually_be_exported() -> None:
+    """The CLI validates against the service, then hands the code to the exporter.
+
+    These were two separate comprehensions over the tier lists, so adding a
+    language to one left the other rejecting it at construction with
+    "Unsupported language" after it had passed every visible check.
+    """
+    from exports.wireword.export_manager import TrakaidoExporter
+    from exports.wireword.service import SUPPORTED_LANGUAGES
+
+    assert set(SUPPORTED_LANGUAGES) == set(TrakaidoExporter.LANGUAGE_CONFIG)
+    for language_code in SUPPORTED_LANGUAGES:
+        TrakaidoExporter(language=language_code)
+
+
+def test_the_storage_dialects_are_exportable() -> None:
+    from exports.wireword.service import SUPPORTED_LANGUAGES
+    from langtools.dialect_overrides import get_translation_target_dialects
+
+    for language_code in get_translation_target_dialects():
+        assert language_code in SUPPORTED_LANGUAGES, language_code

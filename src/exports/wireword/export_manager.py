@@ -27,6 +27,7 @@ from storage.translation_helpers import (
     bulk_get_translations,
     get_translation,
 )
+from langtools.dialect_overrides import get_translation_target_dialects
 from langtools.zh.converter import to_simplified
 
 from .data_models import ExportStats, create_export_stats
@@ -36,17 +37,29 @@ from .text_rendering import format_subtype_display_name
 logger = logging.getLogger(__name__)
 
 
+# The languages WireWord exports: tier 1 and tier 2, plus Japanese, plus the
+# dialects that store their own translations (zh-tw, es-419, pt-br).  Defined
+# here rather than in the service because the service imports this module; both
+# it and TrakaidoExporter.LANGUAGE_CONFIG below read this one list, so the CLI
+# cannot offer a language the exporter then rejects.
+WIREWORD_EXPORT_LANGUAGES = (
+    TIER_1_LANGUAGES + TIER_2_LANGUAGES + ["ja"] + get_translation_target_dialects()
+)
+
+
 class TrakaidoExporter:
     """Main class for exporting trakaido data in various formats."""
 
-    # Language configuration mapping - generated from tier 1 and tier 2 languages, plus
-    # Japanese which is explicitly supported by the WireWord export flow.
+    # Language configuration mapping, keyed by the same set of codes the export
+    # service advertises.  It has to be that same set: the CLI validates against
+    # the service's list, so a code accepted there and missing here fails at
+    # construction with "Unsupported language" after passing every check.
     LANGUAGE_CONFIG = {
         lang_code: {
             "name": LANGUAGE_FIELDS[lang_code][1],  # Display name
             "field": LANG_CODE_TO_LLM_FIELD[lang_code],  # LLM field name
         }
-        for lang_code in TIER_1_LANGUAGES + TIER_2_LANGUAGES + ["ja"]
+        for lang_code in WIREWORD_EXPORT_LANGUAGES
     }
 
     def __init__(
