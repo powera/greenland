@@ -322,3 +322,21 @@ ruby.with-separator rt {
     transform: translateY(-5px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
+
+/* Emoji assigned to a lemma. Sized up because the glyph is the content here,
+   not decoration, and the review page compares glyphs side by side. */
+.lemma-emoji {
+    font-size: 1.5rem;
+    line-height: 1.2;
+}
+
+.emoji-review-glyph {
+    font-size: 3rem;
+    line-height: 1;
+}
+
+.emoji-review-name {
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.85rem;
+    color: #6c757d;
+}

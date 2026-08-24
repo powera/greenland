@@ -46,6 +46,12 @@ from storage.models.schema import (
 from storage.models.guid_tombstone import TOMBSTONE_REASON_MANUAL_CORRECTION
 from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
 from storage.queries.lemma import build_lemma_search_query
+from words.emoji import (
+    EmojiConflictError,
+    assign_emoji,
+    emoji_values,
+    normalize_emoji_input,
+)
 from storage.translation_helpers import (
     DEFAULT_GENERATION_LANGUAGES,
     get_supported_languages,
@@ -862,6 +868,26 @@ def edit_lemma(lemma_id: int) -> ResponseReturnValue:
         if new_disambiguation != lemma.disambiguation:
             changes.append(("disambiguation", lemma.disambiguation, new_disambiguation))
             lemma.disambiguation = new_disambiguation
+
+        # Handle emoji. An emoji belongs to at most one lemma, so a clash is a
+        # user error to report rather than something to silently resolve; the
+        # whole edit is abandoned so the form redisplays with the input intact.
+        old_emoji_values = emoji_values(lemma)
+        new_emoji_entries = normalize_emoji_input(request.form.get("emoji", ""))
+        if [entry["value"] for entry in new_emoji_entries] != old_emoji_values:
+            try:
+                assign_emoji(g.db, lemma, new_emoji_entries)
+            except EmojiConflictError as emoji_error:
+                g.db.rollback()
+                flash(str(emoji_error), "error")
+                return redirect(url_for("lemmas.edit_lemma", lemma_id=lemma_id))
+            changes.append(
+                (
+                    "emoji",
+                    " ".join(old_emoji_values),
+                    " ".join(entry["value"] for entry in new_emoji_entries),
+                )
+            )
 
         # Log all changes
         for field_name, old_value, new_value in changes:

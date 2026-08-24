@@ -22,6 +22,14 @@ from storage.models.enums import (
     NounSubtype,
     VerbSubtype,
 )
+from storage.models.emoji import (
+    EMOJI_STATUS_ASSIGNED,
+    EMOJI_STATUS_MISSING_LEMMA,
+    EMOJI_STATUS_NO_MATCH,
+    EMOJI_STATUS_UNDECIDED,
+    EMOJI_STATUSES,
+    Emoji,
+)
 from storage.models.grammar_fact import GrammarFact
 from storage.models.idiom import (
     IDIOM_EQUIVALENCE_KINDS,
@@ -94,6 +102,12 @@ from storage.models.imports import (
 )
 
 __all__ = [
+    "EMOJI_STATUSES",
+    "EMOJI_STATUS_ASSIGNED",
+    "EMOJI_STATUS_MISSING_LEMMA",
+    "EMOJI_STATUS_NO_MATCH",
+    "EMOJI_STATUS_UNDECIDED",
+    "Emoji",
     "ALL_SUB_CONCEPT_CATEGORIES",
     "ALL_TEXT_TYPES",
     "AUTHORED_TEXT_TYPES",

@@ -54,6 +54,7 @@ from exports.wireword.helpers import (
 )
 from exports.wireword.generate_manifest import generate_manifest
 from words.cognates import detect_cognate
+from words.emoji import emoji_values
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -850,6 +851,15 @@ class WirewordExporter:
                 if lemma.notes:
                     wireword["notes"] = lemma.notes
 
+                # Emoji depicting the concept, when one was assigned (most
+                # lemmas have none). "emoji" is the primary glyph for clients
+                # that show exactly one; "emoji_all" keeps the alternates.
+                lemma_emoji_values = emoji_values(lemma)
+                if lemma_emoji_values:
+                    wireword["emoji"] = lemma_emoji_values[0]
+                    if len(lemma_emoji_values) > 1:
+                        wireword["emoji_all"] = lemma_emoji_values
+
                 # Add tags based on subtype and level
                 tags = [entry["subtype"], f"level_{entry['trakaido_level']}"]
                 if lemma.verified:
@@ -1571,6 +1581,15 @@ class WirewordExporter:
 
                 if lemma.notes:
                     wireword["notes"] = lemma.notes
+
+                # Emoji depicting the concept, when one was assigned (most
+                # lemmas have none). "emoji" is the primary glyph for clients
+                # that show exactly one; "emoji_all" keeps the alternates.
+                lemma_emoji_values = emoji_values(lemma)
+                if lemma_emoji_values:
+                    wireword["emoji"] = lemma_emoji_values[0]
+                    if len(lemma_emoji_values) > 1:
+                        wireword["emoji_all"] = lemma_emoji_values
 
                 # Add tags
                 tags = [lemma.pos_subtype or "action", f"level_{effective_lemma_level}"]

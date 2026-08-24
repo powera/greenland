@@ -99,6 +99,11 @@
                                 <dd class="col-sm-7"><code>{{ lemma.tags }}</code></dd>
                             {% endif %}
 
+                            {% if lemma|lemma_emoji %}
+                                <dt class="col-sm-5">Emoji:</dt>
+                                <dd class="col-sm-7"><span class="lemma-emoji">{{ lemma|lemma_emoji }}</span></dd>
+                            {% endif %}
+
                             {% if lemma.notes %}
                                 <dt class="col-sm-5">Notes:</dt>
                                 <dd class="col-sm-7">{{ lemma.notes }}</dd>
