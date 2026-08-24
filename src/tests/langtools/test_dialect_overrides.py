@@ -14,6 +14,7 @@ from langtools.dialect_overrides import (
     get_dialect_display_name,
     get_dialect_override,
     get_dialects_for_language,
+    get_dialects_reading,
     get_llm_prompt_note,
     get_parent_language,
     get_sort_key_language,
@@ -278,6 +279,32 @@ class TestTranslationTargets(unittest.TestCase):
 
     def test_plain_language_reads_itself(self) -> None:
         self.assertEqual(get_translation_language("de"), "de")
+
+
+class TestGetDialectsReading(unittest.TestCase):
+    """The inverse of get_translation_language, used to fan changes outward."""
+
+    def test_latin_american_spanish_is_read_by_mexican_spanish(self) -> None:
+        self.assertEqual(get_dialects_reading("es-419"), ["es-mx"])
+
+    def test_a_parent_read_directly_by_a_presentation_dialect(self) -> None:
+        self.assertEqual(get_dialects_reading("fr"), ["fr-ca"])
+        self.assertEqual(get_dialects_reading("en"), ["en-gb"])
+
+    def test_castilian_spanish_is_read_by_nothing(self) -> None:
+        """es-mx reads es-419, not es, so a Castilian edit does not reach it."""
+        self.assertEqual(get_dialects_reading("es"), [])
+
+    def test_a_language_with_no_dialects(self) -> None:
+        self.assertEqual(get_dialects_reading("lt"), [])
+
+    def test_accepts_unnormalized_codes(self) -> None:
+        self.assertEqual(get_dialects_reading("ES-419"), ["es-mx"])
+
+    def test_round_trips_with_get_translation_language(self) -> None:
+        for source in {get_translation_language(code) for code in DIALECT_OVERRIDES}:
+            for dialect in get_dialects_reading(source):
+                self.assertEqual(get_translation_language(dialect), source)
 
 
 class TestGetBaseLanguage(unittest.TestCase):

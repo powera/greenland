@@ -10,7 +10,11 @@ import requests
 
 import constants
 from clients.keys import load_key
-from langtools.dialect_overrides import get_parent_language, normalize_language_code
+from langtools.dialect_overrides import (
+    get_parent_language,
+    get_translation_language,
+    normalize_language_code,
+)
 
 from .types import AudioFormat, AudioGenerationResult, Voice
 
@@ -44,11 +48,11 @@ def _load_prompt(prompt_type: str, language_code: str) -> str:
     """
     Load a prompt from file.
 
-    A dialect uses its own file when one exists and its parent language's
-    otherwise, so es-419 falls back to es rather than to the generic default.
-    That fallback is a compromise: prompts/audio/word/es.txt asks for a
-    Castilian accent, so a dialect that wants a different one needs its own
-    file, which zh-tw, es-419, and pt-br have.
+    A dialect uses its own file when one exists, then the file of the variety
+    it reads, then its base language's.  The middle step matters: es-mx speaks
+    es-419's text, and prompts/audio/word/es.txt asks for a *Castilian*
+    accent, so falling straight back to the base language would instruct the
+    wrong pronunciation of the very words being read.
 
     Args:
         prompt_type: Either "word" or "sentence"
@@ -62,7 +66,12 @@ def _load_prompt(prompt_type: str, language_code: str) -> str:
     if cache_key in _prompt_cache:
         return _prompt_cache[cache_key]
 
-    for candidate in (language_code, get_parent_language(language_code)):
+    candidates = (
+        language_code,
+        get_translation_language(language_code),
+        get_parent_language(language_code),
+    )
+    for candidate in candidates:
         prompt_file = PROMPTS_DIR / prompt_type / f"{candidate}.txt"
         if prompt_file.exists():
             prompt_text = prompt_file.read_text().strip()

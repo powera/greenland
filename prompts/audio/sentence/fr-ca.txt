@@ -1,0 +1,6 @@
+Speak this French sentence at a natural conversational pace:
+- Use Canadian French (québécois standard), as spoken in Quebec, not the French of France
+- Affricate "t" and "d" before /i/ and /y/ to /ts/ and /dz/, as Quebec speakers do
+- Use the rhythm and speed of everyday Quebec speech
+- Maintain natural sentence-level intonation and prosody
+- Use standard broadcast québécois, not a strongly regional or joual register

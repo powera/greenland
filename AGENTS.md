@@ -46,15 +46,32 @@ source of truth for what a dialect code means.  There are two kinds:
   src/tests/storage/test_translation_helpers_languages.py enforces the set.
 * Presentation dialects (es-mx, fr-ca, en-gb) store no text of their own.
   They carry a prompt note and a TTS locale, and read the variety named by
-  get_translation_language() - es-mx reads es-419.  Prefer one of these to a
-  new storage dialect whenever the two varieties would hold near-identical
-  lemma-level vocabulary: a second column doubles the LLM spend and the review
-  burden to store the same words twice.
+  get_translation_language() - es-mx is es-419's words in a Mexican accent.
+  Prefer one of these to a new storage dialect whenever the two varieties
+  would hold near-identical lemma-level vocabulary: there is no point storing
+  the same words twice to say the same thing.
+
+Overlap between two storage dialects is stored, not resolved.  es and es-419
+agree on most words; both rows carry that word and both reach data/release.
+There is deliberately no read-time fallback from a dialect to its parent -
+a blank means the translation has not been generated yet, not that the
+parent's should be substituted.  (The zh/zh-Hant WireWord export is the one
+exception and predates this.)
+
+Anything keyed by the language a word is *written* in must also reach the
+presentation dialects reading it - get_dialects_reading() is the inverse of
+get_translation_language(), and is why editing an es-419 word invalidates the
+es-mx recording of it.
 
 Take a code from a user through normalize_language_code() (it folds pt-BR,
 zh_TW, and es-US to the registered spelling), and pick a langtools module for
 one with get_base_language() rather than interpolating the code directly - a
 dialect shares its parent's grammar, collation, and tokenizer.
+
+Any dialect with a tts_locale is recordable and needs its own
+prompts/audio/{word,sentence}/<code>.txt.  Falling back to the parent's file
+would instruct the wrong accent: es.txt asks for Castilian, fr.txt for
+Metropolitan French.
 
 src/clients/ contains all code to access LLMs.  The system was built around
 the expectation that different small local models would run for different
