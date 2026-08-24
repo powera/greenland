@@ -75,10 +75,17 @@ NAMED_ENTITY_SUBTYPES: frozenset[str] = frozenset(
 #: ``translation_status`` values, mapped to their pull toward "modern".
 #: ``conventional`` is evidence of age; the coinage values are evidence of
 #: modernity; ``uncertain`` abstains.
+#:
+#: ``modern_reimagining`` scores as *modern* despite naming an ancient word,
+#: because the status is about the concept rather than the form: Sanskrit
+#: विमानम् is genuinely Vedic, but a mythological flying palace is not a word for
+#: "airplane". Such cases previously scored ``conventional`` and pulled a plainly
+#: modern concept toward ancient against the other four languages.
 STATUS_MODERNITY: Mapping[str, float] = {
     "conventional": -1.0,
     "late_construction": 1.0,
     "modern_loan": 1.0,
+    "modern_reimagining": 1.0,
     "descriptive": 0.6,
     "uncertain": 0.0,
 }

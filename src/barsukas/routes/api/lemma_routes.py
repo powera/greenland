@@ -58,6 +58,7 @@ from storage.models.schema import (
 from storage.queries.lemma import build_lemma_search_query
 from storage.translation_helpers import (
     LANGUAGE_HIERARCHY,
+    TRANSLATION_STATUS_VALUES,
     get_all_translations,
     get_translation_pronunciations,
     set_translation,
@@ -65,14 +66,6 @@ from storage.translation_helpers import (
 from storage.utils.guid import generate_guid
 from workqueue.task_queue import TaskStatus, TaskType, enqueue_task
 from barsukas.routes.api import bp
-
-TRANSLATION_STATUS_VALUES = {
-    "conventional",
-    "late_construction",
-    "modern_loan",
-    "descriptive",
-    "uncertain",
-}
 
 
 @bp.route("/v1/search")

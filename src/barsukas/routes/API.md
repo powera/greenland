@@ -114,15 +114,20 @@ Base prefix: `/api`.
   - Mark one populated translation with optional metadata.
   - Body: `{"translation_status": <string|null>, "translation_status_note": <string|null>}`.
   - `translation_status` may be one of `conventional`, `late_construction`,
-    `modern_loan`, `descriptive`, or `uncertain`.
+    `modern_loan`, `descriptive`, `modern_reimagining`, or `uncertain`.
   - Use `late_construction` for useful learner cues that are not ordinary
     historical/native vocabulary, such as Neo-Latin terms or modern Sanskrit
     coinages.
+  - Use `modern_reimagining` when the word form is genuinely ancient but is
+    being reapplied to a modern concept, so the attestation says nothing about
+    the concept's age - Sanskrit `विमानम्` names a mythological flying palace,
+    not an airplane.
 
 Ancient/classical dictionary targets are grouped as `la` Latin, `sa` Sanskrit,
 `grc` Ancient Greek, `ar-classical` Classical Arabic (pre-1200), and `non` Old
 Norse. Expect more `late_construction`, `modern_loan`, `descriptive`, and
-`lexical_gap` cases for this group than for modern living-language targets.
+`modern_reimagining` cases for this group than for modern living-language
+targets.
 
 - `GET /api/v1/lemma/<guid>/wordfreq`
   - Word frequency rollups nested by `language_code -> corpus_name -> {total_frequency, best_rank}`.

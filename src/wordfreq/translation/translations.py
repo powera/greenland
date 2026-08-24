@@ -9,7 +9,11 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from storage import database as linguistic_db
-from storage.translation_helpers import MAX_LLM_LANGUAGES_PER_OPERATION, LANGUAGE_NAMES
+from storage.translation_helpers import (
+    MAX_LLM_LANGUAGES_PER_OPERATION,
+    LANGUAGE_NAMES,
+    TRANSLATION_STATUS_VALUES,
+)
 from wordfreq.translation.constants import (
     DEFAULT_TRANSLATION_LANGUAGES,
     DEFAULT_TRANSLATION_LANGUAGES_BY_CODE,
@@ -89,14 +93,8 @@ def query_translations(
                 "translation": SchemaProperty("string", lang_config["description"]),
                 "translation_status": SchemaProperty(
                     "string",
-                    "How historically/native the translation is: conventional, late_construction, modern_loan, descriptive, or uncertain.",
-                    enum=[
-                        "conventional",
-                        "late_construction",
-                        "modern_loan",
-                        "descriptive",
-                        "uncertain",
-                    ],
+                    "How historically/native the translation is: conventional, late_construction, modern_loan, descriptive, modern_reimagining, or uncertain.",
+                    enum=sorted(TRANSLATION_STATUS_VALUES),
                 ),
                 "translation_status_note": SchemaProperty(
                     "string",

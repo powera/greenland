@@ -282,7 +282,8 @@ class LemmaTranslation(Base):
     # Marks translations that are useful learner cues but not ordinary historical
     # vocabulary, e.g. Neo-Latin, modern loans, or descriptive Sanskrit coinages.
     # Suggested values: conventional, late_construction, modern_loan, descriptive,
-    # uncertain.
+    # modern_reimagining, uncertain.  See TRANSLATION_STATUS_VALUES in
+    # storage.translation_helpers for the canonical set.
     translation_status: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     translation_status_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 

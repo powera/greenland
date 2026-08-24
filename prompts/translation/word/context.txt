@@ -14,6 +14,7 @@ CRITICAL REQUIREMENTS:
    - late_construction: a useful learner cue, but a Neo-Latin, post-classical, modern Sanskrit coinage, post-1200 Classical Arabic construction, or otherwise late learned construction
    - modern_loan: a modern loanword or transliteration rather than native/classical vocabulary
    - descriptive: a descriptive phrase/compound used because there is no simple ordinary term
+   - modern_reimagining: a genuinely ancient word reapplied to a modern concept, so its attestation says nothing about the concept's age - Sanskrit विमानम् for "airplane" names a flying palace in the epics. Attestation only in myth or literature is not conventional usage
    - uncertain: use only when the fit is genuinely unclear
 8. For the ancient/classical target language group (Latin, Sanskrit, Ancient Greek, Classical Arabic pre-1200, and Old Norse), expect lexical gaps and do not hide modernity: mark post-classical foods, institutions, clothing, technologies, and modern loans clearly.
 
