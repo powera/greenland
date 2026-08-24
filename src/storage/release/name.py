@@ -15,6 +15,13 @@ inventing a third convention:
   sort key, a verified flag -- live in ``translation_metadata`` keyed by the
   same language codes, exactly as translation status does for lemmas.
 
+``translations`` holds transliterations: the same character respelled for a
+script that cannot hold the original. A name that has also been *localized* --
+recast as a local character, John as ``Иван`` -- carries those in a parallel
+``localizations`` map, with ``localization_metadata`` alongside it. Both are
+omitted when empty, so a name with no localization produces exactly the record
+it produced before the distinction existed.
+
 Names are not levelled and carry no definition, so there is no difficulty or
 concept field. All names live in one file: they have a kind, but the kind is
 already in the GUID prefix, and splitting a few hundred names across eight
@@ -35,7 +42,12 @@ from storage.crud.name_entity import (
     get_name_by_guid,
     set_name_translation,
 )
-from storage.models.name_entity import NAME_KINDS, Name, NameTranslation
+from storage.models.name_entity import (
+    DEFAULT_RENDERING_KIND,
+    NAME_KINDS,
+    Name,
+    NameTranslation,
+)
 
 RELEASE_FILENAME = "base.jsonl"
 
@@ -72,7 +84,12 @@ def name_to_release_record(name: Name) -> Dict[str, Any]:
     by_language: Dict[str, NameTranslation] = {
         translation.language_code: translation
         for translation in name.translations
-        if translation.translation
+        if translation.translation and translation.rendering_kind == DEFAULT_RENDERING_KIND
+    }
+    localizations_by_language: Dict[str, NameTranslation] = {
+        translation.language_code: translation
+        for translation in name.translations
+        if translation.translation and translation.rendering_kind == "localization"
     }
     ordered_languages: List[str] = [
         language_code
@@ -90,6 +107,24 @@ def name_to_release_record(name: Name) -> Dict[str, Any]:
         if metadata:
             translation_metadata[language_code] = metadata
 
+    ordered_localizations: List[str] = [
+        language_code
+        for language_code in translation_helpers.RELEASE_LANGUAGES
+        if language_code in localizations_by_language
+    ]
+    ordered_localizations.extend(
+        sorted(set(localizations_by_language) - set(translation_helpers.RELEASE_LANGUAGES))
+    )
+
+    localizations: Dict[str, str] = {}
+    localization_metadata: Dict[str, Dict[str, Any]] = {}
+    for language_code in ordered_localizations:
+        localization = localizations_by_language[language_code]
+        localizations[language_code] = localization.translation
+        metadata = translation_metadata_record(localization)
+        if metadata:
+            localization_metadata[language_code] = metadata
+
     record: Dict[str, Any] = {
         "guid": name.guid,
         "kind": name.kind,
@@ -102,6 +137,12 @@ def name_to_release_record(name: Name) -> Dict[str, Any]:
     record["translations"] = translations
     if translation_metadata:
         record["translation_metadata"] = translation_metadata
+    # Emitted only when a localization exists, so a name with none produces the
+    # record it produced before this field existed.
+    if localizations:
+        record["localizations"] = localizations
+    if localization_metadata:
+        record["localization_metadata"] = localization_metadata
     if name.notes:
         record["notes"] = name.notes
     if name.verified:
@@ -181,24 +222,40 @@ def apply_release_record(session: Session, record: Dict[str, Any], name: Name) -
 
     translations = record.get("translations") or {}
     metadata_by_language = record.get("translation_metadata") or {}
-    for language_code, rendering in translations.items():
-        if not rendering:
-            continue
-        metadata = metadata_by_language.get(language_code, {})
-        set_name_translation(
-            session,
-            name,
-            language_code=language_code,
-            translation=rendering,
-            ipa_pronunciation=metadata.get("ipa_pronunciation"),
-            phonetic_pronunciation=metadata.get("phonetic_pronunciation"),
-            sort_key=metadata.get("sort_key"),
-            notes=metadata.get("notes"),
-            verified=bool(metadata.get("verified", False)),
-        )
+    localizations = record.get("localizations") or {}
+    localization_metadata = record.get("localization_metadata") or {}
 
+    # (rendering kind, record block, that block's metadata block)
+    rendering_blocks = (
+        (DEFAULT_RENDERING_KIND, translations, metadata_by_language),
+        ("localization", localizations, localization_metadata),
+    )
+    for rendering_kind, block, metadata_block in rendering_blocks:
+        for language_code, rendering in block.items():
+            if not rendering:
+                continue
+            metadata = metadata_block.get(language_code, {})
+            set_name_translation(
+                session,
+                name,
+                language_code=language_code,
+                translation=rendering,
+                rendering_kind=rendering_kind,
+                ipa_pronunciation=metadata.get("ipa_pronunciation"),
+                phonetic_pronunciation=metadata.get("phonetic_pronunciation"),
+                sort_key=metadata.get("sort_key"),
+                notes=metadata.get("notes"),
+                verified=bool(metadata.get("verified", False)),
+            )
+
+    # Prune on (language, kind): a record listing only transliterations must not
+    # drop a language's localization, and vice versa.
+    kept: set[tuple[str, str]] = {
+        (language_code, DEFAULT_RENDERING_KIND) for language_code in translations
+    }
+    kept.update((language_code, "localization") for language_code in localizations)
     for translation in list(name.translations):
-        if translation.language_code not in translations:
+        if (translation.language_code, translation.rendering_kind) not in kept:
             session.delete(translation)
 
     session.flush()
@@ -235,22 +292,35 @@ def import_release_record(session: Session, record: Dict[str, Any]) -> Optional[
         guid=str(guid) if guid else None,
     )
 
-    metadata_by_language = record.get("translation_metadata") or {}
-    for language_code, rendering in (record.get("translations") or {}).items():
-        if not rendering:
-            continue
-        metadata = metadata_by_language.get(language_code, {})
-        set_name_translation(
-            session,
-            name,
-            language_code=language_code,
-            translation=rendering,
-            ipa_pronunciation=metadata.get("ipa_pronunciation"),
-            phonetic_pronunciation=metadata.get("phonetic_pronunciation"),
-            sort_key=metadata.get("sort_key"),
-            notes=metadata.get("notes"),
-            verified=bool(metadata.get("verified", False)),
-        )
+    rendering_blocks = (
+        (
+            DEFAULT_RENDERING_KIND,
+            record.get("translations") or {},
+            record.get("translation_metadata") or {},
+        ),
+        (
+            "localization",
+            record.get("localizations") or {},
+            record.get("localization_metadata") or {},
+        ),
+    )
+    for rendering_kind, block, metadata_block in rendering_blocks:
+        for language_code, rendering in block.items():
+            if not rendering:
+                continue
+            metadata = metadata_block.get(language_code, {})
+            set_name_translation(
+                session,
+                name,
+                language_code=language_code,
+                translation=rendering,
+                rendering_kind=rendering_kind,
+                ipa_pronunciation=metadata.get("ipa_pronunciation"),
+                phonetic_pronunciation=metadata.get("phonetic_pronunciation"),
+                sort_key=metadata.get("sort_key"),
+                notes=metadata.get("notes"),
+                verified=bool(metadata.get("verified", False)),
+            )
 
     session.flush()
     return name

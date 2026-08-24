@@ -102,15 +102,21 @@
                         <thead>
                             <tr>
                                 <th>Language</th>
+                                <th>Kind</th>
                                 <th>Rendering</th>
                                 <th>Pronunciation</th>
                                 <th style="width: 6rem;"></th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for rendering in name.translations|sort(attribute='language_code') %}
+                            {% for rendering in name.translations|sort(attribute='rendering_kind')|sort(attribute='language_code') %}
                             <tr>
                                 <td>{{ language_names.get(rendering.language_code, rendering.language_code) }}</td>
+                                <td>
+                                    <span class="badge {% if rendering.rendering_kind == 'localization' %}bg-info{% else %}bg-secondary{% endif %}">
+                                        {{ rendering_kind_labels.get(rendering.rendering_kind, rendering.rendering_kind) }}
+                                    </span>
+                                </td>
                                 <td><strong>{{ rendering.translation }}</strong></td>
                                 <td class="text-muted">{{ rendering.phonetic_pronunciation or '-' }}</td>
                                 <td>
@@ -135,7 +141,7 @@
 
                 <form method="POST" action="{{ url_for('names.set_rendering', name_id=name.id) }}">
                     <div class="row g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="language_code" class="form-label">Language</label>
                             <select class="form-select" id="language_code" name="language_code">
                                 {% for code, label in language_names.items() %}
@@ -143,12 +149,24 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label for="rendering_kind" class="form-label">Kind</label>
+                            <select class="form-select" id="rendering_kind" name="rendering_kind">
+                                {% for kind in rendering_kinds %}
+                                    <option value="{{ kind }}">{{ rendering_kind_labels.get(kind, kind) }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">
+                                A transliteration respells this character; a localization recasts
+                                them as a local one (John &rarr; Иван).
+                            </div>
+                        </div>
+                        <div class="col-md-3">
                             <label for="translation" class="form-label">Rendering</label>
                             <input type="text" class="form-control" id="translation" name="translation"
                                    required placeholder="Džordžas">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="phonetic" class="form-label">Pronunciation</label>
                             <input type="text" class="form-control" id="phonetic" name="phonetic"
                                    placeholder="optional">

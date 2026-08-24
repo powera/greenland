@@ -11,7 +11,7 @@ from __future__ import annotations
 from typing import Iterator
 
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import UniqueConstraint, create_engine
 from sqlalchemy.orm import Session
 
 from storage.crud.name_entity import (
@@ -20,6 +20,7 @@ from storage.crud.name_entity import (
     delete_name,
     find_name,
     get_name_renderings,
+    get_name_renderings_for,
     get_name_translation,
     get_or_create_name,
     list_names,
@@ -29,10 +30,15 @@ from storage.crud.name_entity import (
 from storage.crud.sentence import add_sentence
 from storage.crud.sentence_word import add_sentence_word
 from storage.models.name_entity import (
+    DEFAULT_RENDERING_KIND,
     NAME_KIND_LABELS,
     NAME_KINDS,
+    RENDERING_KIND_LABELS,
+    RENDERING_KINDS,
     Name,
+    NameTranslation,
     is_valid_name_kind,
+    is_valid_rendering_kind,
     normalize_name_text,
 )
 from storage.models.schema import Base, Lemma
@@ -229,3 +235,114 @@ def test_sentence_word_refuses_both_a_lemma_and_a_name(session: Session) -> None
             lemma=lemma,
             name=name,
         )
+
+
+# ── rendering kinds ──────────────────────────────────────────────────────────
+#
+# A rendering answers one of two questions, and the difference is the reason a
+# language can hold more than one. Lithuanian "Džonas" respells the same
+# character for a script that cannot hold "John"; Russian "Иван" recasts him as
+# a local. Both are correct, for different texts.
+
+
+def test_every_rendering_kind_has_a_label() -> None:
+    """The rendering form reads labels by kind, so the vocabularies must not drift."""
+    assert set(RENDERING_KIND_LABELS) == set(RENDERING_KINDS)
+
+
+def test_default_rendering_kind_is_a_valid_kind() -> None:
+    assert is_valid_rendering_kind(DEFAULT_RENDERING_KIND)
+
+
+def test_a_language_holds_both_a_transliteration_and_a_localization(
+    session: Session,
+) -> None:
+    """The widened unique key is what lets Russian keep Джон *and* Иван."""
+    name = create_name(session, name_text="John", kind="given_name")
+
+    transliteration = set_name_translation(session, name, language_code="ru", translation="Джон")
+    localization = set_name_translation(
+        session,
+        name,
+        language_code="ru",
+        translation="Иван",
+        rendering_kind="localization",
+    )
+
+    assert transliteration.id != localization.id
+    assert transliteration.rendering_kind == "transliteration"
+    assert localization.rendering_kind == "localization"
+    # Writing the localization must not have overwritten the transliteration.
+    assert get_name_translation(session, name, "ru") is not None
+    assert get_name_translation(session, name, "ru").translation == "Джон"
+
+
+def test_set_name_translation_updates_within_one_kind(session: Session) -> None:
+    """Re-setting the same (language, kind) still updates rather than duplicating."""
+    name = create_name(session, name_text="John", kind="given_name")
+    first = set_name_translation(session, name, language_code="ru", translation="Джон")
+    second = set_name_translation(session, name, language_code="ru", translation="Джонни")
+
+    assert first.id == second.id
+    assert second.translation == "Джонни"
+
+
+def test_set_name_translation_rejects_an_unknown_rendering_kind(session: Session) -> None:
+    name = create_name(session, name_text="John", kind="given_name")
+    with pytest.raises(ValueError, match="Unknown rendering kind"):
+        set_name_translation(
+            session,
+            name,
+            language_code="ru",
+            translation="Иван",
+            rendering_kind="etymology",
+        )
+
+
+def test_get_name_renderings_returns_only_transliterations(session: Session) -> None:
+    """Existing callers must keep getting this character, not a different one."""
+    name = create_name(session, name_text="John", kind="given_name")
+    set_name_translation(session, name, language_code="ru", translation="Джон")
+    set_name_translation(
+        session, name, language_code="ru", translation="Иван", rendering_kind="localization"
+    )
+    set_name_translation(session, name, language_code="lt", translation="Džonas")
+
+    assert get_name_renderings(session, name) == {"ru": "Джон", "lt": "Džonas"}
+
+
+def test_localizations_fall_back_to_transliterations_per_language(session: Session) -> None:
+    """Asking for localizations must not drop the names we have not localized."""
+    name = create_name(session, name_text="John", kind="given_name")
+    set_name_translation(session, name, language_code="ru", translation="Джон")
+    set_name_translation(
+        session, name, language_code="ru", translation="Иван", rendering_kind="localization"
+    )
+    # Lithuanian has only a transliteration; it must survive the lookup.
+    set_name_translation(session, name, language_code="lt", translation="Džonas")
+
+    assert get_name_renderings_for(session, name, "localization") == {
+        "ru": "Иван",
+        "lt": "Džonas",
+    }
+
+
+def test_get_name_renderings_for_rejects_an_unknown_kind(session: Session) -> None:
+    name = create_name(session, name_text="John", kind="given_name")
+    with pytest.raises(ValueError, match="Unknown rendering kind"):
+        get_name_renderings_for(session, name, "etymology")
+
+
+def test_rendering_unique_key_covers_the_rendering_kind() -> None:
+    """The unique key must be three columns, not two.
+
+    Pinned because the two-column key is what silently blocks a second
+    rendering, and because ``add_name_rendering_kind.py`` has to reproduce
+    exactly this shape on databases created before the column existed.
+    """
+    unique_keys = [
+        tuple(column.name for column in constraint.columns)
+        for constraint in NameTranslation.__table__.constraints
+        if isinstance(constraint, UniqueConstraint)
+    ]
+    assert ("name_id", "language_code", "rendering_kind") in unique_keys

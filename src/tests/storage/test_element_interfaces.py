@@ -158,7 +158,7 @@ def test_name_is_an_element_with_renderings(session: Session) -> None:
             id=rendering.id,
             language_code="lt",
             text="Fresh Mart",
-            value_kind="rendering",
+            value_kind="transliteration",
             verified=True,
         )
     ]

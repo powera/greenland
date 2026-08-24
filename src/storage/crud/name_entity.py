@@ -25,10 +25,13 @@ from storage.crud.operation_log import (
 )
 from storage.models.guid_prefixes import NAME_KIND_GUID_PREFIXES
 from storage.models.name_entity import (
+    DEFAULT_RENDERING_KIND,
     NAME_GENDERS,
     NAME_KINDS,
+    RENDERING_KINDS,
     Name,
     NameTranslation,
+    is_valid_rendering_kind,
     normalize_name_text,
 )
 
@@ -370,15 +373,27 @@ def get_name_by_guid(session: Session, guid: str) -> Optional[Name]:
 
 
 def get_name_translation(
-    session: Session, name: Name, language_code: str
+    session: Session,
+    name: Name,
+    language_code: str,
+    rendering_kind: str = DEFAULT_RENDERING_KIND,
 ) -> Optional[NameTranslation]:
-    """Return the rendering of a name in one language, or None."""
+    """Return one rendering of a name in one language, or None.
+
+    Args:
+        session: Database session.
+        name: The name being looked up.
+        language_code: Target language, e.g. "lt".
+        rendering_kind: Which of RENDERING_KINDS to return. Defaults to the
+            transliteration, which is what a caller that does not care wants.
+    """
     return cast(
         Optional[NameTranslation],
         session.query(NameTranslation)
         .filter(
             NameTranslation.name_id == name.id,
             NameTranslation.language_code == language_code,
+            NameTranslation.rendering_kind == rendering_kind,
         )
         .first(),
     )
@@ -390,6 +405,7 @@ def set_name_translation(
     *,
     language_code: str,
     translation: str,
+    rendering_kind: str = DEFAULT_RENDERING_KIND,
     ipa_pronunciation: Optional[str] = None,
     phonetic_pronunciation: Optional[str] = None,
     sort_key: Optional[str] = None,
@@ -399,11 +415,16 @@ def set_name_translation(
 ) -> NameTranslation:
     """Create or update how a name is written in one language.
 
+    A language can hold one rendering of each kind, so writing a localization
+    ("Иван") leaves the transliteration ("Джон") in place rather than replacing
+    it.
+
     Args:
         session: Database session (the caller commits).
         name: The name being rendered.
         language_code: Target language, e.g. "lt".
         translation: The rendering ("Džordžas").
+        rendering_kind: One of RENDERING_KINDS. Defaults to transliteration.
         ipa_pronunciation: Optional IPA.
         phonetic_pronunciation: Optional simplified pronunciation.
         sort_key: Optional romanized sort key (pinyin, kana).
@@ -419,13 +440,17 @@ def set_name_translation(
         The created or updated NameTranslation.
 
     Raises:
-        ValueError: If the rendering is empty.
+        ValueError: If the rendering is empty or the rendering kind is unknown.
     """
     rendered = translation.strip()
     if not rendered:
         raise ValueError(f"Empty rendering for {name.name_text!r} in {language_code!r}")
+    if not is_valid_rendering_kind(rendering_kind):
+        raise ValueError(
+            f"Unknown rendering kind {rendering_kind!r}; expected one of {RENDERING_KINDS}"
+        )
 
-    row = get_name_translation(session, name, language_code)
+    row = get_name_translation(session, name, language_code, rendering_kind)
     created = row is None
     # Captured before the assignments below, on the update branch only.
     old_translation = None if row is None else row.translation
@@ -435,6 +460,7 @@ def set_name_translation(
         row = NameTranslation(
             name_id=name.id,
             language_code=language_code,
+            rendering_kind=rendering_kind,
             translation=rendered,
         )
         session.add(row)
@@ -460,6 +486,7 @@ def set_name_translation(
                 entity_guid=name.guid,
                 fact={
                     "language_code": language_code,
+                    "rendering_kind": rendering_kind,
                     "new_value": rendered,
                     "verified": verified,
                 },
@@ -474,13 +501,54 @@ def set_name_translation(
                 FieldChange("translation", old_translation, rendered),
                 FieldChange("verified", old_verified, verified),
             ],
-            extra={"language_code": language_code},
+            extra={"language_code": language_code, "rendering_kind": rendering_kind},
         )
 
     return row
 
 
 def get_name_renderings(session: Session, name: Name) -> dict[str, str]:
-    """Return ``{language_code: rendering}`` for every language this name has."""
+    """Return ``{language_code: transliteration}`` for every language this name has.
+
+    Transliterations only, so a caller that does not care about the distinction
+    keeps getting the respelling of this character rather than sometimes getting
+    a different character's name.
+    """
+    return get_name_renderings_for(session, name, DEFAULT_RENDERING_KIND)
+
+
+def get_name_renderings_for(session: Session, name: Name, rendering_kind: str) -> dict[str, str]:
+    """Return ``{language_code: rendering}`` of one kind, falling back per language.
+
+    A language that has no rendering of the requested kind falls back to its
+    transliteration: asking for localizations means "recast the character where
+    we have decided how", not "drop every name we have not localized".
+
+    Args:
+        session: Database session.
+        name: The name being rendered.
+        rendering_kind: One of RENDERING_KINDS.
+
+    Raises:
+        ValueError: If the rendering kind is unknown.
+    """
+    if not is_valid_rendering_kind(rendering_kind):
+        raise ValueError(
+            f"Unknown rendering kind {rendering_kind!r}; expected one of {RENDERING_KINDS}"
+        )
+
     rows = session.query(NameTranslation).filter(NameTranslation.name_id == name.id).all()
-    return {row.language_code: row.translation for row in rows}
+    renderings = {
+        row.language_code: row.translation
+        for row in rows
+        if row.rendering_kind == DEFAULT_RENDERING_KIND
+    }
+    if rendering_kind != DEFAULT_RENDERING_KIND:
+        renderings.update(
+            {
+                row.language_code: row.translation
+                for row in rows
+                if row.rendering_kind == rendering_kind
+            }
+        )
+    return renderings
