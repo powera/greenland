@@ -48,6 +48,7 @@ def test_agent_modules_import() -> None:
 @pytest.mark.parametrize(
     "module",
     [
+        "agents.papuga.cli",
         "barsukas.app",
         # benchmarks.lib.utils eagerly pulls in every runner, generator and the
         # registry, so this one name covers the whole benchmarks import graph --
