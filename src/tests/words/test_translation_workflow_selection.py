@@ -8,6 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from storage.models.schema import BarsukasTask, Base, Lemma
+from storage.translation_helpers import MAX_LLM_LANGUAGES_PER_OPERATION
 from words.translation_workflow import (
     count_curated_lemmas,
     enqueue_translation_population,
@@ -124,10 +125,39 @@ def test_dry_run_queues_nothing(session: Session) -> None:
 def test_empty_language_request_falls_back_to_the_generation_defaults() -> None:
     from storage.translation_helpers import get_default_generation_languages
 
-    # The defaults are themselves capped by the per-call language limit.
     defaults = resolve_generation_languages(get_default_generation_languages())
 
     assert resolve_generation_languages(None) == defaults
     assert resolve_generation_languages([]) == defaults
     assert resolve_generation_languages(["all"]) == defaults
     assert resolve_generation_languages(["fr"]) == ["fr"]
+
+
+def test_the_whole_default_set_survives_resolution() -> None:
+    """Generation batches its own requests, so nothing may be dropped here.
+
+    The per-call LLM limit used to truncate the default set, silently dropping
+    everything past the tenth entry -- which is exactly where the dialects and
+    the experimental languages sit.
+    """
+    from storage.translation_helpers import get_default_generation_languages
+
+    defaults = get_default_generation_languages()
+
+    assert len(defaults) > MAX_LLM_LANGUAGES_PER_OPERATION
+    assert resolve_generation_languages(None) == defaults
+    for language_code in ("zh-tw", "es-419", "pt-br"):
+        assert language_code in resolve_generation_languages(None)
+
+
+def test_dialect_codes_are_accepted_however_they_are_spelled() -> None:
+    """``--languages pt-BR`` from a shell must reach storage as ``pt-br``."""
+    assert resolve_generation_languages(["es-419", "pt-BR", "zh_TW"]) == [
+        "es-419",
+        "pt-br",
+        "zh-tw",
+    ]
+    # es-US and es-419 name the same variety, so the request de-duplicates.
+    assert resolve_generation_languages(["es-419", "es-US"]) == ["es-419"]
+    # The parent language stays distinct from its dialect.
+    assert resolve_generation_languages(["es", "es-419"]) == ["es", "es-419"]

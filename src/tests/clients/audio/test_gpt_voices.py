@@ -28,6 +28,7 @@ from clients.audio.gpt_voices import (
     get_character_name,
 )
 from clients.audio.types import Voice
+from langtools.dialect_overrides import get_translation_target_dialects
 
 
 class TestGptVoiceEnum(unittest.TestCase):
@@ -326,6 +327,28 @@ class TestS3PathGeneration(unittest.TestCase):
                 len(set(path_names)),
                 f"Duplicate path_names found for language {lang}: {path_names}",
             )
+
+
+class TestDialectVoices(unittest.TestCase):
+    """Dialects reuse their parent's speaker; the accent comes from the prompt."""
+
+    def test_storage_dialects_have_voices(self) -> None:
+        for dialect in get_translation_target_dialects():
+            self.assertIn(dialect, DEFAULT_GPT_VOICES, f"{dialect} has no voices to record with")
+
+    def test_dialect_voices_are_the_parents_voices(self) -> None:
+        self.assertEqual(DEFAULT_GPT_VOICES["es-419"], DEFAULT_GPT_VOICES["es"])
+        self.assertEqual(ALL_GPT_VOICES["pt-br"], ALL_GPT_VOICES["pt"])
+
+    def test_lookup_resolves_a_dialect_to_its_parent(self) -> None:
+        self.assertEqual(
+            GptVoice.get_default_voices_for_language("zh-tw"),
+            GptVoice.get_default_voices_for_language("zh"),
+        )
+
+    def test_dialects_have_display_names(self) -> None:
+        self.assertEqual(LANGUAGE_DISPLAY_NAMES["es-419"], "Spanish (Latin America)")
+        self.assertEqual(LANGUAGE_DISPLAY_NAMES["pt-br"], "Portuguese (Brazil)")
 
 
 if __name__ == "__main__":

@@ -3,12 +3,15 @@
 from importlib import import_module
 from typing import Callable, Dict, Optional, cast
 
+from langtools.dialect_overrides import get_base_language
+
 DeclineFunc = Callable[[str], Optional[Dict[str, str]]]
 
 
 def get_mechanical_noun_decliner(language_code: str) -> Optional[DeclineFunc]:
     """Return a language-specific mechanical noun declension function if available."""
-    normalized = (language_code or "").strip().lower()
+    # Dialects share their parent's morphology, so resolve es-419 -> es first.
+    normalized = get_base_language(language_code)
     if not normalized:
         return None
 

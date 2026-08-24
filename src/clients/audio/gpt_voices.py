@@ -18,6 +18,12 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional
 
+from langtools.dialect_overrides import (
+    DIALECT_OVERRIDES,
+    get_base_language,
+    get_translation_target_dialects,
+)
+
 from .types import Voice
 
 
@@ -254,15 +260,20 @@ class GptVoice(Enum):
 
     @classmethod
     def get_voices_for_language(cls, language_code: str) -> List["GptVoice"]:
-        """Get all available voices for a specific language."""
-        return [voice for voice in cls if voice.language_code == language_code]
+        """Get all available voices for a specific language.
+
+        A dialect uses its parent's voices: OpenAI TTS picks an accent from the
+        instructions (see ``prompts/audio/``), not from the voice, so es-419
+        and es share one speaker rather than duplicating the roster.
+        """
+        base_code = get_base_language(language_code)
+        return [voice for voice in cls if voice.language_code == base_code]
 
     @classmethod
     def get_default_voices_for_language(cls, language_code: str) -> List["GptVoice"]:
         """Get default voices for a language (primary male and female)."""
-        return [
-            voice for voice in cls if voice.language_code == language_code and voice.variant == 1
-        ]
+        base_code = get_base_language(language_code)
+        return [voice for voice in cls if voice.language_code == base_code and voice.variant == 1]
 
     @classmethod
     def from_ui_name(cls, ui_name: str) -> Optional["GptVoice"]:
@@ -337,10 +348,20 @@ DEFAULT_GPT_VOICES: Dict[str, List[GptVoice]] = {
     "sl": [GptVoice.GPT_SL_F1, GptVoice.GPT_SL_M1],
 }
 
+# Dialects that store their own translations need their own audio, and reuse
+# their parent's voices for it (the accent comes from the TTS instructions).
+# Registered here so a plain ``DEFAULT_GPT_VOICES.get(lang)`` finds them.
+DEFAULT_GPT_VOICES.update(
+    {
+        dialect: DEFAULT_GPT_VOICES[base]
+        for dialect in get_translation_target_dialects()
+        if (base := get_base_language(dialect)) in DEFAULT_GPT_VOICES
+    }
+)
+
 # All voices per language (all 4 variants)
 ALL_GPT_VOICES: Dict[str, List[GptVoice]] = {
-    lang: GptVoice.get_voices_for_language(lang)
-    for lang in ["lt", "zh", "es", "fr", "it", "pt", "nl", "de", "sv", "bs", "sq", "hr", "sl"]
+    lang: GptVoice.get_voices_for_language(lang) for lang in DEFAULT_GPT_VOICES
 }
 
 # Supported languages
@@ -461,6 +482,15 @@ LANGUAGE_DISPLAY_NAMES: Dict[str, str] = {
     "hr": "Croatian",
     "sl": "Slovenian",
 }
+
+# The dialects share their parent's voices (see DEFAULT_GPT_VOICES above) but
+# need their own label, taken from the dialect registry so the two stay in step.
+LANGUAGE_DISPLAY_NAMES.update(
+    {
+        dialect: DIALECT_OVERRIDES[dialect].display_name
+        for dialect in get_translation_target_dialects()
+    }
+)
 
 
 def get_character_description(voice: GptVoice) -> Optional[str]:

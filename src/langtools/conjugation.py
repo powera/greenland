@@ -18,14 +18,18 @@ from importlib import import_module
 from inspect import Parameter, signature
 from typing import Callable, Dict, Optional
 
+from langtools.dialect_overrides import get_base_language
+
 
 @lru_cache(maxsize=None)
 def _load_conjugator(
     language_code: str,
 ) -> Optional[Callable[..., Optional[Dict[str, str]]]]:
     """Return the ``conjugate`` callable for a language, or None if unavailable."""
+    # A dialect conjugates like its parent (pt-br -> pt), and langtools has no
+    # per-dialect packages.
     try:
-        module = import_module(f"langtools.{language_code}.conjugation")
+        module = import_module(f"langtools.{get_base_language(language_code)}.conjugation")
     except ModuleNotFoundError:
         return None
     conjugator = getattr(module, "conjugate", None)

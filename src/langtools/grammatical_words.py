@@ -20,6 +20,8 @@ from functools import lru_cache
 import importlib
 from typing import Final, Literal, cast
 
+from langtools.dialect_overrides import get_base_language
+
 
 @dataclass(frozen=True)
 class _LanguageTierData:
@@ -62,8 +64,10 @@ _LANGUAGE_CONSTANT_PREFIXES: Final[dict[str, str]] = {
 
 @lru_cache(maxsize=None)
 def _load_language_tiers(language_code: str) -> _LanguageTierData:
-    module_path = _LANGUAGE_MODULE_PATHS.get(language_code)
-    constant_prefix = _LANGUAGE_CONSTANT_PREFIXES.get(language_code)
+    # Dialects share their parent's function words (es-419 -> es).
+    base_code = get_base_language(language_code)
+    module_path = _LANGUAGE_MODULE_PATHS.get(base_code)
+    constant_prefix = _LANGUAGE_CONSTANT_PREFIXES.get(base_code)
     if module_path is None or constant_prefix is None:
         raise KeyError(language_code)
 

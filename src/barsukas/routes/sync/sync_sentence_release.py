@@ -973,8 +973,8 @@ def _find_sentence_translation_differences(
 
     # All languages except English (which is handled by changes sync)
     # RELEASE_LANGUAGES, not LANGUAGE_HIERARCHY: the exporter filters to the
-    # former, and zh-tw is in it but not in the hierarchy, so a zh-tw
-    # translation was written to the file and then never diffable.
+    # former, so anything the hierarchy carries beyond it would be diffed
+    # against a file that never held it.
     lang_codes_to_check = [lang for lang in RELEASE_LANGUAGES if lang != "en"]
 
     batch_size = 500
@@ -1056,8 +1056,8 @@ def _count_sentence_translation_differences(
         return count
 
     # RELEASE_LANGUAGES, not LANGUAGE_HIERARCHY: the exporter filters to the
-    # former, and zh-tw is in it but not in the hierarchy, so a zh-tw
-    # translation was written to the file and then never diffable.
+    # former, so anything the hierarchy carries beyond it would be diffed
+    # against a file that never held it.
     lang_codes_to_check = [lang for lang in RELEASE_LANGUAGES if lang != "en"]
 
     batch_size = 500

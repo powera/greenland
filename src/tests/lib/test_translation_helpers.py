@@ -36,6 +36,35 @@ class TestTranslationHelpers(unittest.TestCase):
         self.assertEqual(normalized[0], "l0")
         self.assertEqual(normalized[-1], "l9")
 
+    def test_no_cap_when_the_caller_batches(self):
+        """``max_languages=None`` is how a batching caller keeps its whole set."""
+        oversized = [f"l{i}" for i in range(20)]
+        normalized = normalize_llm_language_codes(
+            oversized,
+            operation_name="test operation",
+            max_languages=None,
+        )
+        self.assertEqual(normalized, oversized)
+
+    def test_canonicalizes_dialect_spellings(self):
+        self.assertEqual(
+            normalize_llm_language_codes(
+                ["pt-BR", "zh_TW", "ES", "es-419"],
+                operation_name="test operation",
+            ),
+            ["pt-br", "zh-tw", "es", "es-419"],
+        )
+
+    def test_dedupes_after_canonicalizing(self):
+        """es-US and es-419 are the same variety, so only one request is made."""
+        self.assertEqual(
+            normalize_llm_language_codes(
+                ["es-419", "es-US", "ES-419"],
+                operation_name="test operation",
+            ),
+            ["es-419"],
+        )
+
     def test_split_llm_language_batches_chunks_in_order(self):
         batches = split_llm_language_batches([f"l{i}" for i in range(11)])
         self.assertEqual([len(batch) for batch in batches], [MAX_LLM_LANGUAGES_PER_OPERATION, 1])

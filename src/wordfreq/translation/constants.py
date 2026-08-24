@@ -66,6 +66,12 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "description": "Spanish translation in lemma form",
         "instructions": "- Spanish: Provide Peninsular Spanish (Spain) in base form (infinitive for verbs, singular for nouns)",
     },
+    "spanish (latin america)": {
+        "field": "spanish_latam_translation",
+        "code": "es-419",
+        "description": "Latin American Spanish translation in lemma form",
+        "instructions": "- Spanish (Latin America): Provide neutral Latin American Spanish (español latinoamericano) in base form (infinitive for verbs, singular for nouns)\n  - Use the pan-regional standard taught in textbooks and used for dubbing, not the Spanish of any single country\n  - Prefer vocabulary understood across Latin America over Peninsular-only terms (computadora not ordenador, carro/auto not coche, jugo not zumo, papa not patata)\n  - Where the Latin American and Peninsular words are the same, give that word; do not invent a difference\n  - Avoid country-specific slang",
+    },
     "german": {
         "field": "german_translation",
         "code": "de",
@@ -125,6 +131,12 @@ DEFAULT_TRANSLATION_LANGUAGES = {
         "code": "pt",
         "description": "Portuguese translation in lemma form",
         "instructions": "- Portuguese: Provide European Portuguese (Portugal) in base form (infinitive for verbs, singular for nouns)",
+    },
+    "portuguese (brazil)": {
+        "field": "portuguese_brazil_translation",
+        "code": "pt-br",
+        "description": "Brazilian Portuguese translation in lemma form",
+        "instructions": "- Portuguese (Brazil): Provide Brazilian Portuguese in base form (infinitive for verbs, singular for nouns)\n  - Use Brazilian vocabulary and spelling where it differs from European Portuguese (ônibus not autocarro, trem not comboio, celular not telemóvel, café da manhã not pequeno-almoço)\n  - Where the Brazilian and European words are the same, give that word; do not invent a difference",
     },
     "swahili": {
         "field": "swahili_translation",

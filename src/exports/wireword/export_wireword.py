@@ -37,6 +37,7 @@ from storage.translation_helpers import (
     bulk_get_translations,
     get_translation,
 )
+from langtools.dialect_overrides import get_base_language
 from langtools.zh.converter import to_simplified, to_traditional
 from exports.wireword.data_models import ExportStats, create_export_stats
 from exports.wireword.readings import (
@@ -132,7 +133,14 @@ class WirewordExporter:
 
     def _get_max_export_level(self) -> int:
         """Return the highest difficulty level allowed for this export language."""
-        return LANGUAGE_EXPORT_MAX_LEVELS.get(self.language, DEFAULT_EXPORT_MAX_LEVEL)
+        # A dialect inherits its parent's ceiling (es-419 exports as deep as es)
+        # until it earns an entry of its own.
+        return LANGUAGE_EXPORT_MAX_LEVELS.get(
+            self.language,
+            LANGUAGE_EXPORT_MAX_LEVELS.get(
+                get_base_language(self.language), DEFAULT_EXPORT_MAX_LEVEL
+            ),
+        )
 
     def _format_missing_verb_translation_warning(
         self, missing_forms: List[Tuple[int, str, str]]

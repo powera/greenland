@@ -97,12 +97,19 @@ def count_curated_lemmas(session: Any, limit: Optional[int] = None) -> int:
 
 
 def resolve_generation_languages(languages: Optional[Sequence[str]]) -> List[str]:
-    """Normalize requested language codes, expanding "all" and empty input."""
+    """Normalize requested language codes, expanding "all" and empty input.
+
+    Uncapped: generation splits the selection into per-request batches with
+    ``split_llm_language_batches``, so the whole requested set must survive
+    here.  Capping at one request's worth would silently drop the tail of the
+    default set (the dialects and the experimental languages sit at its end).
+    """
     default_languages = get_default_generation_languages()
     return normalize_llm_language_codes(
         list(languages) if languages else default_languages,
         operation_name="Voras translation generation",
         all_expansion=default_languages,
+        max_languages=None,
     )
 
 
@@ -890,6 +897,7 @@ class TranslationWorkflow:
             languages_to_fix,
             operation_name="Voras translation generation",
             all_expansion=get_default_generation_languages(),
+            max_languages=None,  # batched below by split_llm_language_batches
         )
 
         # Initialize results structure

@@ -33,6 +33,29 @@ manipulation functions and constants (LLM_FIELD_TO_LANG_CODE,
 LANG_CODE_TO_LLM_FIELD, convert_llm_response_to_lang_codes, etc.).
 Do not create local language mappings - import from translation_helpers.py.
 
+Regional variants live in src/langtools/dialect_overrides.py, which is the
+source of truth for what a dialect code means.  There are two kinds:
+
+* Storage dialects (zh-tw, es-419, pt-br) are ordinary languages in every
+  other respect - their own LemmaTranslation rows, LLM prompt config, release
+  column, and audio.  Adding one means four matching registrations: the
+  registry entry with translation_target=True, LANGUAGE_FIELDS +
+  LLM_FIELD_TO_LANG_CODE + LANGUAGE_HIERARCHY in translation_helpers.py, a
+  DEFAULT_TRANSLATION_LANGUAGES entry in wordfreq/translation/constants.py,
+  and prompts/audio/{word,sentence}/<code>.txt.  A test in
+  src/tests/storage/test_translation_helpers_languages.py enforces the set.
+* Presentation dialects (es-mx, fr-ca, en-gb) store no text of their own.
+  They carry a prompt note and a TTS locale, and read the variety named by
+  get_translation_language() - es-mx reads es-419.  Prefer one of these to a
+  new storage dialect whenever the two varieties would hold near-identical
+  lemma-level vocabulary: a second column doubles the LLM spend and the review
+  burden to store the same words twice.
+
+Take a code from a user through normalize_language_code() (it folds pt-BR,
+zh_TW, and es-US to the registered spelling), and pick a langtools module for
+one with get_base_language() rather than interpolating the code directly - a
+dialect shares its parent's grammar, collation, and tokenizer.
+
 src/clients/ contains all code to access LLMs.  The system was built around
 the expectation that different small local models would run for different
 tasks; currently it is expected that a remote ChatGPT/Claude/Gemini is used.
