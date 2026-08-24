@@ -494,6 +494,17 @@ def create_app(
     # Register JSON filter for parsing JSON strings in templates
     app.jinja_env.filters["fromjson"] = json.loads
 
+    # Lemma.emoji is a JSON-encoded list; templates want the glyphs. Registered
+    # as a filter so every page showing a lemma can render it without each
+    # route having to add it to its own context.
+    def lemma_emoji_text(lemma: Any) -> str:
+        """Space-separated emoji glyphs of a lemma ("" when unassigned)."""
+        from words.emoji import emoji_values
+
+        return " ".join(emoji_values(lemma))
+
+    app.jinja_env.filters["lemma_emoji"] = lemma_emoji_text
+
     # Register filter to extract grammatical case from grammatical_form
     def extract_case(grammatical_form: Optional[str]) -> Optional[str]:
         """Extract case from grammatical_form string.

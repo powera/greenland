@@ -149,6 +149,19 @@
                             stored as a JSON array and normalized to lowercase.</small>
                     </div>
 
+                    <!-- Emoji -->
+                    <div class="mb-3">
+                        <label for="emoji" class="form-label">Emoji</label>
+                        <input type="text" class="form-control" id="emoji" name="emoji"
+                               value="{{ lemma|lemma_emoji }}"
+                               placeholder="e.g. 🐕 🐶">
+                        <small class="form-text text-muted">Optional, and usually empty.
+                            Only use an emoji that depicts the concept itself &mdash; a cow for
+                            &quot;cow&quot;. Not an association (a snowflake for &quot;cold&quot;)
+                            or a symbol (a dollar sign for &quot;money&quot;). The first emoji is
+                            the primary one; an emoji can belong to only one lemma.</small>
+                    </div>
+
                     <!-- Notes -->
                     <div class="mb-3">
                         <label for="notes" class="form-label">Notes</label>
