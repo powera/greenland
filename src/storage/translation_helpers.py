@@ -30,12 +30,10 @@ _CJK_SORT_KEY_LANGUAGES = frozenset({"zh", "ja", "ko"})
 # the full set.  CJK is handled separately via script-specific helpers.
 from langtools.collation import SORT_KEY_LANGUAGES as _COLLATION_SORT_KEY_LANGUAGES  # noqa: E402
 from langtools.dialect_overrides import (  # noqa: E402
-    get_parent_language,
+    get_dialects_reading,
     get_sort_key_language,
-    get_translation_language,
     get_translation_target_dialects,
     normalize_language_code,
-    transform_to_dialect,
 )
 
 _SORT_KEY_LANGUAGES = _CJK_SORT_KEY_LANGUAGES | _COLLATION_SORT_KEY_LANGUAGES
@@ -445,43 +443,6 @@ def get_translation(session: Session, lemma: Lemma, lang_code: str) -> Optional[
         return getattr(lemma, field_name, None)
 
 
-def get_translation_with_dialect_fallback(
-    session: Session, lemma: Lemma, lang_code: str
-) -> Tuple[Optional[str], Optional[str]]:
-    """Get a translation for *lang_code*, falling back to its parent variety.
-
-    A dialect is usually far less populated than the language it derives from,
-    so an export or a UI that asks for one wants the parent's text rather than
-    a blank.  When the fallback is used the parent text is run through the
-    dialect's ``text_transform`` (zh-tw converts Simplified to Traditional;
-    es-419 and pt-br share their parent's script and pass through unchanged).
-
-    Presentation dialects that store nothing (es-mx, fr-ca, en-gb) read the
-    variety named by ``get_translation_language`` -- es-mx reads es-419 -- and
-    fall back from there.
-
-    Returns:
-        ``(text, source_lang_code)``.  *source_lang_code* is the language the
-        text actually came from, so a caller can tell an exact hit from a
-        fallback.  ``(None, None)`` when neither has a translation.
-    """
-    storage_code = get_translation_language(lang_code)
-    if storage_code in LANGUAGE_FIELDS:
-        translation = get_translation(session, lemma, storage_code)
-        if translation and translation.strip():
-            return translation, storage_code
-
-    parent_code = get_parent_language(storage_code)
-    if parent_code == storage_code or parent_code not in LANGUAGE_FIELDS:
-        return None, None
-
-    parent_translation = get_translation(session, lemma, parent_code)
-    if parent_translation and parent_translation.strip():
-        return transform_to_dialect(storage_code, parent_translation), parent_code
-
-    return None, None
-
-
 def get_definition(session: Session, lemma: Lemma, lang_code: str) -> Optional[str]:
     """
     Get definition for a lemma in the specified language.
@@ -725,6 +686,12 @@ def invalidate_audio_for_translation_change(
     and sets their status to 'needs_replacement' with a 'translation_mismatch'
     quality issue.
 
+    Presentation dialects are invalidated alongside the language they read.
+    Audio recorded for es-mx speaks es-419's text in a Mexican accent, so it is
+    stored under language_code "es-mx" but goes stale the moment the es-419
+    word changes -- filtering on the changed code alone would leave it behind,
+    still claiming an expected_text nothing says any more.
+
     Args:
         session: Database session
         guid: Lemma GUID (e.g. "N01_001"). If None, no-op.
@@ -742,11 +709,14 @@ def invalidate_audio_for_translation_change(
     if old_translation == new_translation:
         return []
 
+    affected_languages = [normalize_language_code(lang_code)]
+    affected_languages.extend(get_dialects_reading(lang_code))
+
     audio_records = (
         session.query(AudioQualityReview)
         .filter(
             AudioQualityReview.guid == guid,
-            AudioQualityReview.language_code == lang_code,
+            AudioQualityReview.language_code.in_(affected_languages),
             AudioQualityReview.status != "needs_replacement",
         )
         .all()

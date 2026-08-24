@@ -1,0 +1,6 @@
+Pronounce this French word or phrase with clear, accurate Quebec French pronunciation:
+- Use Canadian French (québécois standard), as spoken in Quebec, not the French of France
+- Keep the Quebec vowel system: the distinct short/long vowels and the diphthongized long vowels
+- Affricate "t" and "d" before /i/ and /y/ to /ts/ and /dz/, as Quebec speakers do
+- Always use French pronunciation rules, even for loanwords or words borrowed from English
+- Use standard broadcast québécois, not a strongly regional or joual register

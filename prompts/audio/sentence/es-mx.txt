@@ -1,0 +1,6 @@
+Speak this Spanish sentence at a natural conversational pace:
+- Use Mexican Spanish, as spoken in central Mexico, not the Spanish of Spain
+- Use seseo: pronounce "c" before e/i and "z" as /s/, never as the Castilian /θ/
+- Use the rhythm and characteristic rising intonation of everyday Mexican speech
+- Maintain natural sentence-level intonation and prosody
+- Connect words smoothly as a native speaker would

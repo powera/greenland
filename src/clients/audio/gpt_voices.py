@@ -20,8 +20,9 @@ from typing import Dict, List, Optional
 
 from langtools.dialect_overrides import (
     DIALECT_OVERRIDES,
+    get_all_dialect_codes,
     get_base_language,
-    get_translation_target_dialects,
+    get_tts_locale,
 )
 
 from .types import Voice
@@ -348,14 +349,17 @@ DEFAULT_GPT_VOICES: Dict[str, List[GptVoice]] = {
     "sl": [GptVoice.GPT_SL_F1, GptVoice.GPT_SL_M1],
 }
 
-# Dialects that store their own translations need their own audio, and reuse
-# their parent's voices for it (the accent comes from the TTS instructions).
-# Registered here so a plain ``DEFAULT_GPT_VOICES.get(lang)`` finds them.
+# Every dialect with a TTS locale is recordable, and reuses its parent's voices
+# (the accent comes from the TTS instructions, not the speaker).  That covers
+# both kinds: a storage dialect records its own text, and a presentation
+# dialect records the text of the variety it reads -- es-mx is es-419's words
+# in a Mexican accent.  Registered here so a plain
+# ``DEFAULT_GPT_VOICES.get(lang)`` finds them.
 DEFAULT_GPT_VOICES.update(
     {
         dialect: DEFAULT_GPT_VOICES[base]
-        for dialect in get_translation_target_dialects()
-        if (base := get_base_language(dialect)) in DEFAULT_GPT_VOICES
+        for dialect in get_all_dialect_codes()
+        if get_tts_locale(dialect) and (base := get_base_language(dialect)) in DEFAULT_GPT_VOICES
     }
 )
 
@@ -487,8 +491,9 @@ LANGUAGE_DISPLAY_NAMES: Dict[str, str] = {
 # need their own label, taken from the dialect registry so the two stay in step.
 LANGUAGE_DISPLAY_NAMES.update(
     {
-        dialect: DIALECT_OVERRIDES[dialect].display_name
-        for dialect in get_translation_target_dialects()
+        dialect: override.display_name
+        for dialect, override in DIALECT_OVERRIDES.items()
+        if dialect in DEFAULT_GPT_VOICES
     }
 )
 

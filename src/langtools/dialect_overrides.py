@@ -29,6 +29,14 @@ Two kinds of dialect live here, told apart by ``translation_target``:
   which lemma-level vocabulary rarely reaches, so it reads es-419 text and only
   contributes an accent for TTS.
 
+Overlap between two storage dialects is stored rather than resolved: es and
+es-419 hold the same word for most entries, and both rows carry it.  Nothing
+here falls back from a dialect to its parent at read time -- a missing
+translation means "not generated yet", not "use the parent's".
+``get_dialects_reading`` is the inverse of ``get_translation_language``, for
+the things keyed by the language a word is written in (audio, chiefly) that
+have to follow the text outward.
+
 Usage::
 
     from langtools.dialect_overrides import (
@@ -347,6 +355,30 @@ def get_translation_language(lang_code: str) -> str:
     if override is None or override.translation_target:
         return normalize_language_code(lang_code)
     return override.covered_by or override.parent_lang
+
+
+def get_dialects_reading(lang_code: str) -> List[str]:
+    """Return the presentation dialects whose text comes from *lang_code*.
+
+    The inverse of :func:`get_translation_language`.  Anything keyed by the
+    language a word is *written* in has to reach these too -- audio recorded
+    for es-mx speaks es-419's text, so a change to that text invalidates the
+    Mexican recording just as it does the Latin American one.
+
+    >>> get_dialects_reading("es-419")
+    ['es-mx']
+    >>> get_dialects_reading("fr")
+    ['fr-ca']
+    >>> get_dialects_reading("es")
+    []
+    """
+    normalized = normalize_language_code(lang_code)
+    return [
+        code
+        for code, override in DIALECT_OVERRIDES.items()
+        if not override.translation_target
+        and (override.covered_by or override.parent_lang) == normalized
+    ]
 
 
 def get_translation_target_dialects() -> List[str]:
