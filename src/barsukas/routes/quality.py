@@ -22,7 +22,14 @@ from barsukas.helpers.integrity_runner import (
     INTEGRITY_CHECKS,
     run_integrity_check,
 )
+from storage.models.emoji import (
+    EMOJI_STATUS_ASSIGNED,
+    EMOJI_STATUS_MISSING_LEMMA,
+    EMOJI_STATUS_NO_MATCH,
+)
 from storage.models.schema import AudioQualityReview, Lemma, Sentence
+from words.emoji import status_counts
+from words.emoji_catalog import load_catalog
 
 bp = Blueprint("quality", __name__, url_prefix="/quality")
 
@@ -93,8 +100,26 @@ def index() -> ResponseReturnValue:
         row.language_code for row in pending_by_language if row.sentence_count
     ]
 
+    # Emoji review walks the catalog, so "remaining" is the catalog minus the
+    # glyphs that already carry a decision.
+    emoji_counts = status_counts(g.db)
+    emoji_decided = sum(
+        emoji_counts.get(status, 0)
+        for status in (
+            EMOJI_STATUS_ASSIGNED,
+            EMOJI_STATUS_NO_MATCH,
+            EMOJI_STATUS_MISSING_LEMMA,
+        )
+    )
+    emoji_stats = {
+        "decided": emoji_decided,
+        "total": len(load_catalog()),
+        "assigned": emoji_counts.get(EMOJI_STATUS_ASSIGNED, 0),
+    }
+
     return render_template(
         "quality/index.html",
+        emoji_stats=emoji_stats,
         sentence_stats=sentence_stats,
         audio_stats=audio_stats,
         total_lemmas=total_lemmas,

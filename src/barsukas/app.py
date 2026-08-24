@@ -94,7 +94,12 @@ from barsukas.routes import (
     wireword,
     workflows,
 )
-from barsukas.routes.review import rapid_review, rapid_review_hub, sentence_rapid_review
+from barsukas.routes.review import (
+    emoji_review,
+    rapid_review,
+    rapid_review_hub,
+    sentence_rapid_review,
+)
 from barsukas.routes.sync import (
     sync_derivative_release,
     sync_hub,
@@ -385,6 +390,7 @@ def create_app(
     app.register_blueprint(audio.bp)
     app.register_blueprint(rapid_review.bp)
     app.register_blueprint(rapid_review_hub.bp)
+    app.register_blueprint(emoji_review.bp)
     app.register_blueprint(settings.bp)
     app.register_blueprint(strings_export.bp)
     app.register_blueprint(trakaido.bp)

@@ -45,6 +45,7 @@ from storage.models.imports import (
 from storage.models.name_entity import NAME_KINDS, normalize_name_text
 from storage.models.schema import Lemma
 from util.logging_config import get_logger
+from words.emoji import attach_pending_emoji_to_lemma, release_pending_emoji
 from words.pending_imports.classification import DEFAULT_NAME_KIND
 from words.pending_imports.sentence_links import (
     release_legacy_hints,
@@ -112,7 +113,13 @@ def delete_pending_import(
        word rows, so the word is *linked* and not merely un-staged;
     2. hint rows from before the link table existed are repointed or dropped,
        since their foreign key has no ON DELETE behavior;
-    3. the row goes, taking its synonym candidates and sentence links with it
+    3. emoji staged against the term settle: glyphs parked as ``missing_lemma``
+       attach to the lemma when there is one, and otherwise go back to
+       ``undecided`` for the review walk to offer again. This must happen here
+       rather than in the callers -- ``Emoji.pending_import_id`` is ``ON DELETE
+       SET NULL``, so once step 4 runs the link is gone and the glyph would be
+       stranded in ``missing_lemma`` forever;
+    4. the row goes, taking its synonym candidates and sentence links with it
        through the ORM cascades.
 
     Does not commit; the caller owns the transaction.
@@ -127,6 +134,13 @@ def delete_pending_import(
     pending_import_id = int(pending.id)
     resolve_sentence_links(session, pending_import_id, lemma_id=lemma_id, name_id=name_id)
     release_legacy_hints(session, pending_import_id, lemma_id=lemma_id, name_id=name_id)
+
+    lemma = session.get(Lemma, lemma_id) if lemma_id is not None else None
+    if lemma is not None:
+        attach_pending_emoji_to_lemma(session, pending_import_id, lemma)
+    else:
+        release_pending_emoji(session, pending_import_id)
+
     session.delete(pending)
     session.flush()
 

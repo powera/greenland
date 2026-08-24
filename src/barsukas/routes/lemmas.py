@@ -698,6 +698,35 @@ def _build_voice_options(language_names: Dict[str, str]) -> Dict[str, Any]:
     }
 
 
+def _render_lemma_edit_form(lemma: Lemma) -> str:
+    """Render the edit form with the dropdown data every return path needs.
+
+    Also passes ``request.form`` through as ``submitted`` when there is one, so
+    a validation failure redisplays what the user typed instead of the database
+    values they were trying to replace. The template prefers ``submitted`` for
+    every field and falls back to ``lemma`` on a GET.
+    """
+    import json
+
+    from storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
+
+    pos_types = sorted(list(VALID_POS_TYPES))
+    pos_subtypes_map: Dict[str, List[str]] = {}
+    for pos_type in pos_types:
+        subtypes = get_subtype_values_for_pos(pos_type)
+        if subtypes:
+            pos_subtypes_map[pos_type] = subtypes
+
+    return render_template(
+        "lemmas/edit.html",
+        lemma=lemma,
+        difficulty_stats=get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype),
+        pos_types=pos_types,
+        pos_subtypes_map=json.dumps(pos_subtypes_map),
+        submitted=request.form if request.method == "POST" else None,
+    )
+
+
 @bp.route("/<int:lemma_id>/edit", methods=["GET", "POST"])
 def edit_lemma(lemma_id: int) -> ResponseReturnValue:
     """Edit a lemma."""
@@ -814,10 +843,10 @@ def edit_lemma(lemma_id: int) -> ResponseReturnValue:
                         f"Difficulty level must be -1 or between {Config.MIN_DIFFICULTY_LEVEL} and {Config.MAX_DIFFICULTY_LEVEL}",
                         "error",
                     )
-                    return render_template("lemmas/edit.html", lemma=lemma)
+                    return _render_lemma_edit_form(lemma)
             except ValueError:
                 flash("Invalid difficulty level", "error")
-                return render_template("lemmas/edit.html", lemma=lemma)
+                return _render_lemma_edit_form(lemma)
 
         if new_difficulty != lemma.difficulty_level:
             changes.append(("difficulty_level", lemma.difficulty_level, new_difficulty))
@@ -839,7 +868,7 @@ def edit_lemma(lemma_id: int) -> ResponseReturnValue:
                     lemma.confidence = new_confidence
             except ValueError:
                 flash("Invalid confidence value", "error")
-                return render_template("lemmas/edit.html", lemma=lemma)
+                return _render_lemma_edit_form(lemma)
 
         # Handle notes and tags
         new_notes = request.form.get("notes", "").strip() or None
@@ -856,7 +885,7 @@ def edit_lemma(lemma_id: int) -> ResponseReturnValue:
             parsed_tags = parse_tags_input(raw_tags)
         except ValueError as tag_error:
             flash(f"Invalid tags: {tag_error}", "error")
-            return render_template("lemmas/edit.html", lemma=lemma)
+            return _render_lemma_edit_form(lemma)
 
         new_tags = serialize_tags_for_column(parsed_tags)
         if new_tags != lemma.tags:
@@ -878,9 +907,17 @@ def edit_lemma(lemma_id: int) -> ResponseReturnValue:
             try:
                 assign_emoji(g.db, lemma, new_emoji_entries)
             except EmojiConflictError as emoji_error:
+                # The rollback abandons every pending field change with it, so
+                # the form is redisplayed from request.form rather than from
+                # the (now reverted) lemma -- a redirect here would issue a
+                # fresh GET and silently discard the whole edit.
                 g.db.rollback()
+                lemma = g.db.query(Lemma).get(lemma_id)
+                if lemma is None:
+                    flash("Lemma not found", "error")
+                    return redirect(url_for("lemmas.list_lemmas"))
                 flash(str(emoji_error), "error")
-                return redirect(url_for("lemmas.edit_lemma", lemma_id=lemma_id))
+                return _render_lemma_edit_form(lemma)
             changes.append(
                 (
                     "emoji",
@@ -905,30 +942,7 @@ def edit_lemma(lemma_id: int) -> ResponseReturnValue:
         flash(f"Updated lemma: {lemma.lemma_text}", "success")
         return redirect(url_for("lemmas.view_lemma", lemma_id=lemma.id))
 
-    # Get difficulty level distribution for same POS type/subtype
-    difficulty_stats = get_difficulty_stats(g.db, lemma.pos_type, lemma.pos_subtype)
-
-    # Get POS types and subtypes for dropdowns
-    import json
-
-    from storage.utils.enums import VALID_POS_TYPES, get_subtype_values_for_pos
-
-    pos_types = sorted(list(VALID_POS_TYPES))
-
-    # Build a mapping of POS type to subtypes for JavaScript
-    pos_subtypes_map = {}
-    for pos_type in pos_types:
-        subtypes = get_subtype_values_for_pos(pos_type)
-        if subtypes:
-            pos_subtypes_map[pos_type] = subtypes
-
-    return render_template(
-        "lemmas/edit.html",
-        lemma=lemma,
-        difficulty_stats=difficulty_stats,
-        pos_types=pos_types,
-        pos_subtypes_map=json.dumps(pos_subtypes_map),
-    )
+    return _render_lemma_edit_form(lemma)
 
 
 @bp.route("/<int:lemma_id>/delete-synonym/<int:form_id>", methods=["POST"])

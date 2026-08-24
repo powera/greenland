@@ -136,6 +136,29 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-warning">
+                    <h6 class="mb-0"><i class="bi bi-emoji-smile"></i> Emoji Review</h6>
+                </div>
+                <div class="card-body">
+                    <p class="card-text small">
+                        Walk the emoji catalog and attach each glyph to the word it
+                        depicts, dismiss it, or stage the missing word for import.
+                    </p>
+                    <p class="small text-muted mb-0">
+                        {{ emoji_stats.decided }} of {{ emoji_stats.total }} decided &middot;
+                        {{ emoji_stats.assigned }} assigned
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('emoji_review.index') }}" class="btn btn-warning btn-sm">
+                        <i class="bi bi-play-fill"></i> Start Emoji Review
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Section 2: Data Quality Checks -->
