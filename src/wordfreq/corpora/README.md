@@ -7,7 +7,7 @@ Gutenberg books. Five corpora have book lists here:
 | --- | --- | --- |
 | `19th_books` | 54 | Novels, children's books, essays and science first published 1800-1899, British / American / translated European |
 | `20th_books` | 62 | Books first published 1900-1938, i.e. what Gutenberg carries of the 20th century |
-| `early_modern_science` | 30 | Science writing from Boyle and Newton to Einstein and Eddington, written in English by its authors (Einstein excepted) |
+| `early_modern_science` | 24 | Science writing from Boyle and Newton to the early twentieth century, written in English by its authors |
 | `cooking` | 10 | Recipe writing, 1878-1920: general household cookery, vegetarian cookery, salads and baking |
 | `religious_translated` | 23 | Old religious works in English translation: Bible (three translations), Apocrypha, Enoch, Talmud selections, Qur'an (two translations), Upanishads, Bhagavad-Gita, Mahabharata, Ramayana, Dhammapada, Tao Te Ching, Analects, Shih King, Eddas, Egyptian Book of the Dead, Augustine, Aquinas, à Kempis |
 
@@ -33,11 +33,12 @@ PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus early_mode
 PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus cooking
 ```
 
-Six books in `early_modern_science` (5001, 29782, 15114, 37157, 41568, 41654)
-have no plain-text edition on Gutenberg - only HTML, PDF or LaTeX source - so
-that corpus is built with `--skip-missing` and covers 24 of its 30 books.  The
-IDs are correct; the text simply is not published in a form this pipeline
-reads.
+Six science books were removed from the list because Gutenberg has no
+plain-text edition of them, only HTML, PDF or LaTeX source: Einstein (5001) and
+Russell (41654) are HTML-only; Eddington (29782), Boole (15114), Poincare
+(37157) and Whitehead (41568) are PDF and LaTeX only.  Their IDs were correct -
+see the note in `book_lists.py` before re-adding any of them.  That cost the
+corpus its relativity and mathematical-logic end.
 
 The cache defaults to `$GREENLAND_GUTENBERG_CACHE`, else
 `data/working/gutenberg` in the repo (gitignored, and persistent - Gutenberg

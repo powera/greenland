@@ -102,7 +102,7 @@ CORPUS_CONFIGS = [
     ),
     CorpusConfig(
         name="early_modern_science",
-        description="Word frequency data from early modern science writing, Newton to Einstein",
+        description="Word frequency data from early modern science writing, Boyle to Osler",
         file_path="early_modern_science.json",
         max_words=3000,
         file_type="json",

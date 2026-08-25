@@ -56,10 +56,13 @@ def test_lists_are_large_enough_that_no_single_book_dominates() -> None:
     assert len(get_book_list("early_modern_science").books) >= 20
 
 
-def test_science_corpus_spans_newton_to_einstein() -> None:
+def test_science_corpus_spans_the_early_modern_period() -> None:
     years = [book.year for book in get_book_list("early_modern_science").books]
     assert all(year is not None for year in years)
-    # Boyle and Hooke open the corpus just before Newton; Einstein closes it.
+    # Boyle and Hooke open the corpus just before Newton, and it runs into the
+    # twentieth century.  Einstein and Eddington used to close it, but neither
+    # has a plain-text edition on Gutenberg, so both were dropped; see the
+    # module docstring in book_lists.
     assert min(year for year in years if year is not None) <= 1665
     assert max(year for year in years if year is not None) >= 1916
 

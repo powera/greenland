@@ -332,13 +332,21 @@ RELIGIOUS_VOCABULARY: Tuple[str, ...] = (
 )
 
 
-# --- Early modern science, Newton to Einstein --------------------------------
+# --- Early modern science, Newton onwards ------------------------------------
 
 # Works of science written in English by their authors, so the corpus measures
 # period scientific prose rather than a translator's later idiom.  Translations
 # are allowed when they are contemporaneous - within ten years of the original,
 # which keeps the English of the same era: Lavoisier (French 1789, English
-# 1790), Poincare (1902/1905) and Einstein (1916/1920).
+# 1790).
+#
+# Six books were dropped because Gutenberg has no plain-text edition of them,
+# only HTML, PDF or LaTeX source: Einstein's Relativity (5001) and Russell's
+# Introduction to Mathematical Philosophy (41654) are HTML-only, and Eddington
+# (29782), Boole (15114), Poincare (37157) and Whitehead (41568) exist as PDF
+# and LaTeX only.  Their IDs were correct - do not re-add them from the
+# catalogue without first adding an extraction path for one of those formats.
+# Losing them cost the corpus its relativity and mathematical-logic end.
 #
 # Boyle and Hooke sit just before Newton.  They are the Royal Society milieu
 # Opticks came out of, and dropping them would start the corpus mid-conversation.
@@ -394,14 +402,6 @@ EARLY_MODERN_SCIENCE_BOOKS: Tuple[GutenbergBook, ...] = (
         "Slosson, Edwin E.",
         1919,
     ),
-    GutenbergBook(
-        5001,
-        "Relativity: The Special and General Theory",
-        "Einstein, Albert",
-        1916,
-        "translated from German - the corpus's endpoint, kept despite that",
-    ),
-    GutenbergBook(29782, "Space, Time and Gravitation", "Eddington, Arthur", 1920),
     # Geology, biology and natural history
     GutenbergBook(
         33224,
@@ -427,17 +427,7 @@ EARLY_MODERN_SCIENCE_BOOKS: Tuple[GutenbergBook, ...] = (
     ),
     GutenbergBook(1566, "The Evolution of Modern Medicine", "Osler, William", 1921),
     # Mathematics and scientific method
-    GutenbergBook(15114, "An Investigation of the Laws of Thought", "Boole, George", 1854),
-    GutenbergBook(
-        37157,
-        "Science and Hypothesis",
-        "Poincaré, Henri",
-        1905,
-        "translated from the 1902 French within three years",
-    ),
     GutenbergBook(57532, "Passages from the Life of a Philosopher", "Babbage, Charles", 1864),
-    GutenbergBook(41568, "An Introduction to Mathematics", "Whitehead, Alfred North", 1911),
-    GutenbergBook(41654, "Introduction to Mathematical Philosophy", "Russell, Bertrand", 1919),
 )
 
 
@@ -540,7 +530,7 @@ BOOK_LISTS: Dict[str, BookList] = {
     ),
     "early_modern_science": BookList(
         corpus_name="early_modern_science",
-        description="Word frequency data from early modern science writing, Newton to Einstein",
+        description="Word frequency data from early modern science writing, Boyle to Osler",
         max_words=3000,
         books=EARLY_MODERN_SCIENCE_BOOKS,
     ),
