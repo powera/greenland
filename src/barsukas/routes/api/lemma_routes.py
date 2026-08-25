@@ -53,6 +53,7 @@ from storage.models.schema import (
     ExternalLexemeAnnotationLemma,
     LemmaDifficultyOverride,
     BarsukasTask,
+    SENSE_PROMINENCE_VALUES,
     SYNONYM_GRAMMATICAL_FORMS,
 )
 from storage.queries.lemma import build_lemma_search_query
@@ -901,6 +902,19 @@ def add_lemmas() -> ResponseReturnValue:
                     f"or {Config.EXCLUDE_DIFFICULTY_LEVEL}"
                 )
 
+        prominence_value = item.get("sense_prominence")
+        sense_prominence: Optional[str] = None
+        if prominence_value is not None:
+            if (
+                not isinstance(prominence_value, str)
+                or prominence_value not in SENSE_PROMINENCE_VALUES
+            ):
+                return _build_error_response(
+                    f"lemmas[{index}].sense_prominence must be one of "
+                    f"{sorted(SENSE_PROMINENCE_VALUES)} or null"
+                )
+            sense_prominence = prominence_value
+
         translations_raw = item.get("translations")
         translations: Dict[str, str] = {}
         if translations_raw is not None:
@@ -951,6 +965,8 @@ def add_lemmas() -> ResponseReturnValue:
             confidence=0.0,
             verified=False,
         )
+        if sense_prominence is not None:
+            new_lemma.sense_prominence = sense_prominence
         g.db.add(new_lemma)
         g.db.flush()
 

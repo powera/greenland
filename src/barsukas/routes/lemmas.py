@@ -37,6 +37,7 @@ from storage.crud.operation_log import (
     log_translation_change,
 )
 from storage.models.schema import (
+    SENSE_PROMINENCE_VALUES,
     SYNONYM_GRAMMATICAL_FORMS,
     DerivativeForm,
     Lemma,
@@ -96,6 +97,7 @@ def add_lemma() -> ResponseReturnValue:
         pos_type = request.form.get("pos_type", "").strip()
         pos_subtype = request.form.get("pos_subtype", "").strip() or None
         difficulty_level_str = request.form.get("difficulty_level", "").strip()
+        sense_prominence = request.form.get("sense_prominence", "").strip()
         initial_translation_lang = request.form.get("initial_translation_lang", "").strip()
         initial_translation_text = request.form.get("initial_translation_text", "").strip()
 
@@ -114,6 +116,10 @@ def add_lemma() -> ResponseReturnValue:
 
         if not pos_subtype:
             flash("POS subtype is required for GUID generation", "error")
+            return render_template("lemmas/add.html")
+
+        if sense_prominence and sense_prominence not in SENSE_PROMINENCE_VALUES:
+            flash(f'Invalid sense prominence "{sense_prominence}"', "error")
             return render_template("lemmas/add.html")
 
         # Check if lemma already exists
@@ -166,6 +172,8 @@ def add_lemma() -> ResponseReturnValue:
             confidence=0.0,
             verified=False,
         )
+        if sense_prominence:
+            new_lemma.sense_prominence = sense_prominence
 
         g.db.add(new_lemma)
         g.db.flush()  # Get the ID
@@ -544,10 +552,13 @@ def view_lemma_levels(lemma_id: int) -> ResponseReturnValue:
         TierDefinition,
     )
     from wordfreq.frequency.corpus import get_enabled_corpus_configs
-    from wordfreq.frequency.combined_rank import get_corpus_zipf_exponent
-    from wordfreq.frequency.zipf import combine_ranks
+    from wordfreq.frequency.combined_rank import (
+        get_corpus_unknown_rank,
+        get_corpus_zipf_exponent,
+        get_lemma_corpus_rank,
+    )
     from wordfreq.lexeme_frequency import (
-        get_lexeme_form_ranks,
+        get_lexeme_form_rank_shares,
         get_lexeme_frequencies_all_corpora,
     )
 
@@ -598,19 +609,35 @@ def view_lemma_levels(lemma_id: int) -> ResponseReturnValue:
     lexeme_frequency_by_corpus = {}
     lexeme_rank_by_corpus: Dict[str, Optional[int]] = {}
     lexeme_best_rank_by_corpus: Dict[str, Optional[int]] = {}
+    # Why a Zipf rank came out worse than the lemma's best form. Two separate
+    # things can push it down, and the single combined number shows neither:
+    # the lemma's share of a contested spelling, and the ceiling a rank is
+    # clamped to once the share puts it past what the corpus can support.
+    lexeme_share_by_corpus: Dict[str, Optional[float]] = {}
+    lexeme_unknown_rank_by_corpus: Dict[str, int] = {}
     english_lexeme = get_lexeme(g.db, lemma_id, "en")
     if english_lexeme:
         all_rollups = get_lexeme_frequencies_all_corpora(g.db, english_lexeme)
         for corpus_name in target_corpora:
             lexeme_frequency_by_corpus[corpus_name] = all_rollups.get(corpus_name)
-            # get_lexeme_form_ranks covers variant spellings too, so this page
-            # agrees with what combined-rank scoring actually used.
-            form_ranks = get_lexeme_form_ranks(g.db, english_lexeme, corpus_name)
-            lexeme_best_rank_by_corpus[corpus_name] = min(form_ranks) if form_ranks else None
-            lexeme_rank_by_corpus[corpus_name] = (
-                combine_ranks(form_ranks, get_corpus_zipf_exponent(g.db, corpus_name))
-                if form_ranks
-                else None
+            # Best rank stays share-blind: it reports how the spelling itself
+            # ranked in the corpus, which is a fact about the form.
+            rank_shares = get_lexeme_form_rank_shares(g.db, english_lexeme, corpus_name)
+            lexeme_best_rank_by_corpus[corpus_name] = (
+                min(rank for rank, _share in rank_shares) if rank_shares else None
+            )
+            # The share belonging to that best-ranked form specifically, since
+            # that is the pairing the "Best form" column invites the reader to
+            # make. A form nothing else claims has a share of 1.0.
+            lexeme_share_by_corpus[corpus_name] = (
+                min(rank_shares, key=lambda pair: pair[0])[1] if rank_shares else None
+            )
+            lexeme_unknown_rank_by_corpus[corpus_name] = get_corpus_unknown_rank(g.db, corpus_name)
+            # Ask scoring for the combined rank rather than recomputing it, so
+            # the page cannot drift from it -- this is where the share split
+            # and the unknown-rank cap are both applied.
+            lexeme_rank_by_corpus[corpus_name] = get_lemma_corpus_rank(
+                g.db, lemma_id, corpus_name, get_corpus_zipf_exponent(g.db, corpus_name)
             )
 
     return render_template(
@@ -625,6 +652,8 @@ def view_lemma_levels(lemma_id: int) -> ResponseReturnValue:
         lexeme_frequency_by_corpus=lexeme_frequency_by_corpus,
         lexeme_rank_by_corpus=lexeme_rank_by_corpus,
         lexeme_best_rank_by_corpus=lexeme_best_rank_by_corpus,
+        lexeme_share_by_corpus=lexeme_share_by_corpus,
+        lexeme_unknown_rank_by_corpus=lexeme_unknown_rank_by_corpus,
         **context,
     )
 

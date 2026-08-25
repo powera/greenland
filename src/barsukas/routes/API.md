@@ -42,8 +42,9 @@ Base prefix: `/api`.
 
 - `POST /api/v1/lemmas/add`
   - Create one or more lemmas, returning their generated GUIDs.
-  - Body: `{"lemmas": [{"lemma_text": ..., "definition_text": ..., "pos_type": ..., "pos_subtype": ..., "difficulty_level": <int|null>, "translations": {"<code>": "..."}}]}`.
-  - `lemma_text`/`definition_text`/`pos_type`/`pos_subtype` are required per entry; `difficulty_level` and `translations` are optional. Max 100 entries.
+  - Body: `{"lemmas": [{"lemma_text": ..., "definition_text": ..., "pos_type": ..., "pos_subtype": ..., "difficulty_level": <int|null>, "sense_prominence": <string|null>, "translations": {"<code>": "..."}}]}`.
+  - `lemma_text`/`definition_text`/`pos_type`/`pos_subtype` are required per entry; `difficulty_level`, `sense_prominence` and `translations` are optional. Max 100 entries.
+  - `sense_prominence` is one of `very_common`, `common`, `uncommon`, `rare`; omit it or pass null to take the default (`common`). It only affects lemmas that share a spelling with others, where it weights the split of that spelling's corpus frequency.
   - GUIDs are assigned automatically from the `pos_type`/`pos_subtype` prefix. An entry whose `(lemma_text, pos_type)` already exists is returned with `status: "already_exists"` and its existing GUID, and is not modified; created entries return `status: "created"`.
 
 - `POST /api/v1/words/exists`

@@ -38,9 +38,23 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
-from storage.models.schema import Corpus, ExternalLexemeAnnotation, Lemma, LemmaTier
+from storage.models.schema import (
+    SENSE_PROMINENCE_COMMON,
+    SENSE_PROMINENCE_RARE,
+    SENSE_PROMINENCE_UNCOMMON,
+    SENSE_PROMINENCE_VERY_COMMON,
+    Corpus,
+    ExternalLexemeAnnotation,
+    Lemma,
+    LemmaTier,
+)
 from wordfreq.frequency.corpus import CorpusConfig, get_enabled_corpus_configs
-from wordfreq.frequency.zipf import DEFAULT_ZIPF_EXPONENT, combine_ranks, fit_zipf_exponent
+from wordfreq.frequency.zipf import (
+    DEFAULT_ZIPF_EXPONENT,
+    combine_ranks,
+    combine_weighted_ranks,
+    fit_zipf_exponent,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +97,32 @@ BASIC_ENGLISH_TIER_WEIGHT: float = 1.0
 # floor near the tier range would single-handedly pin truly-rare words to
 # a deceptively common combined rank.
 BASIC_ENGLISH_UNKNOWN_RANK: int = 7500
+
+# How much of a tier signal a sense is entitled to, by Lemma.sense_prominence.
+#
+# A tier row says Cambridge/CEFR/Ogden listed *the spelling* "top"; the import
+# fans that one judgment out to every lemma holding the spelling. Unscaled,
+# that hands a rare sense the teaching-list credit earned by a common one:
+# "top" the spinning toy ranks ~42000 on corpus evidence alone, but three
+# borrowed tier rows at 600/750/800 pull it to ~1700, because the combined
+# score is a harmonic mean and is dominated by its smallest contributor.
+#
+# A multiplier of 0 does not drop the contributor -- it substitutes that
+# source's ``*_UNKNOWN_RANK``, exactly as an untiered lemma is already scored.
+# "This sense is not on the Cambridge list" is a stronger and truer statement
+# than "we have no information", and it keeps the contributor count stable for
+# a lemma with thin corpus coverage.
+#
+# ``common`` is the schema default, so an unrated lemma takes 0.2 rather than
+# full credit: a lemma sharing its spelling with nothing is unaffected either
+# way (see _tier_contribution), and a contested one should not claim the whole
+# signal merely because nobody has rated it yet.
+TIER_PROMINENCE_MULTIPLIERS: Dict[str, float] = {
+    SENSE_PROMINENCE_VERY_COMMON: 1.0,
+    SENSE_PROMINENCE_COMMON: 0.2,
+    SENSE_PROMINENCE_UNCOMMON: 0.0,
+    SENSE_PROMINENCE_RARE: 0.0,
+}
 
 # Lemmas are written back in batches of this size to bound the per-commit
 # transaction footprint on a large corpus.
@@ -190,28 +230,44 @@ def get_lemma_corpus_rank(
 ) -> Optional[int]:
     """This lemma's rank in one corpus, from its own forms' imported ranks.
 
-    Depends only on the lemma being scored: the corpus files already rank each
-    surface form, and ``zipf.combine_ranks`` folds a lemma's forms into one
-    rank without reference to any other lemma. That is what lets a single word
-    be rescored after an edit -- adding a variant spelling, say -- instead of
-    re-ranking the database.
+    The corpus files already rank each surface form, and
+    ``zipf.combine_weighted_ranks`` folds a lemma's forms into one rank. Each
+    form's rank is scaled by this lemma's share of it, so senses competing for
+    a spelling are separated here rather than all inheriting the form's rank.
+
+    The share depends on the *other* lemmas holding the same spelling, so
+    unlike the frequency rollup this is not entirely self-contained: editing a
+    competing sense's prominence changes this lemma's rank too. Adding or
+    removing a sense of an existing word therefore warrants rescoring that
+    word's other senses.
 
     Returns:
-        The combined rank, or None when this corpus ranks none of the lemma's
-        forms.
+        The combined rank, capped at what absence from this corpus would cost,
+        or None when this corpus ranks none of the lemma's forms.
     """
     # Imported lazily to avoid a circular import via storage.lexeme ->
     # storage.models.schema -> wordfreq.frequency package init.
     from storage.lexeme import get_lexeme
-    from wordfreq.lexeme_frequency import get_lexeme_form_ranks
+    from wordfreq.lexeme_frequency import get_lexeme_form_rank_shares
 
     lexeme = get_lexeme(session, lemma_id, "en")
     if lexeme is None:
         return None
-    form_ranks = get_lexeme_form_ranks(session, lexeme, corpus_name)
-    if not form_ranks:
+    rank_shares = get_lexeme_form_rank_shares(session, lexeme, corpus_name)
+    if not rank_shares:
         return None
-    return combine_ranks(form_ranks, exponent)
+    rank = combine_weighted_ranks(rank_shares, exponent)
+    if rank is None:
+        return None
+
+    # Cap a share-scaled rank at what absence from this corpus would cost.
+    # Dividing a rank by a small share can push it far past the corpus's own
+    # size -- a 0.6% share of rank 734 in wiki_vital implies rank 151228, in a
+    # corpus holding 6000 words. Beyond the unknown-rank floor the number says
+    # nothing the corpus can support, and "this sense is effectively absent
+    # here" is the honest reading. Mirrors the ceiling already applied to a
+    # lemma the corpus genuinely does not list.
+    return min(rank, get_corpus_unknown_rank(session, corpus_name))
 
 
 def _build_corpus_rank_table(
@@ -255,6 +311,19 @@ def _enabled_corpus_configs_by_name() -> Dict[str, CorpusConfig]:
     return {cfg.name: cfg for cfg in get_enabled_corpus_configs()}
 
 
+def get_corpus_unknown_rank(session: Session, corpus_name: str) -> int:
+    """The rank this corpus assigns to a lemma it does not list.
+
+    This is also the ceiling :func:`get_lemma_corpus_rank` clamps to, so a
+    caller wanting to explain a rank -- rather than merely report it -- can
+    compare the two without reimplementing the cap.
+    """
+    cfg = _enabled_corpus_configs_by_name().get(corpus_name)
+    if cfg is None:
+        return _DEFAULT_UNKNOWN_RANK
+    return _unknown_rank_for_corpus(cfg, get_corpus_size(session, corpus_name))
+
+
 def _unknown_rank_for_corpus(cfg: CorpusConfig, corpus_size: int) -> int:
     """Effective rank to assign when a lemma is absent from this corpus.
 
@@ -277,6 +346,81 @@ def _tier_rank_for_lemma(
     if tier_name is None:
         return None
     return rank_table.get(tier_name)
+
+
+# The tier sources, in the order they contribute: (name, rank table, weight,
+# rank when the source does not list the lemma). Shared by the single-lemma and
+# bulk scoring paths so the two cannot drift apart.
+_TIER_SOURCES: Tuple[Tuple[str, Dict[str, int], float, int], ...] = (
+    ("cambridge_yle", YLE_TIER_RANKS, YLE_TIER_WEIGHT, YLE_UNKNOWN_RANK),
+    ("cefr", CEFR_TIER_RANKS, CEFR_TIER_WEIGHT, CEFR_UNKNOWN_RANK),
+    (
+        "basic_english",
+        BASIC_ENGLISH_TIER_RANKS,
+        BASIC_ENGLISH_TIER_WEIGHT,
+        BASIC_ENGLISH_UNKNOWN_RANK,
+    ),
+)
+
+
+def _is_contested_spelling(session: Session, lemma_text: str, lemma_id: int) -> bool:
+    """Whether another lemma holds this lemma's spelling.
+
+    Only a contested spelling has a tier signal worth discounting: an
+    uncontested one has no competing sense the listing could have been about.
+    """
+    return (
+        session.query(Lemma.id).filter(Lemma.lemma_text == lemma_text, Lemma.id != lemma_id).first()
+        is not None
+    )
+
+
+def _tier_contribution(
+    tier_rank: Optional[int],
+    unknown_rank: int,
+    sense_prominence: Optional[str],
+    is_contested: bool,
+) -> int:
+    """The rank a tier source contributes for one lemma.
+
+    A lemma that is the only holder of its spelling keeps its tier rank in
+    full: there is no competing sense for the listing to have been about, so
+    the prominence label carries no information here and scaling by it would
+    penalize ordinary monosemous words.
+
+    For a contested spelling the tier rank is discounted by
+    :data:`TIER_PROMINENCE_MULTIPLIERS`. A multiplier of 0 yields
+    ``unknown_rank`` -- the sense is scored as absent from the list, which is
+    how an untiered lemma is scored already.
+
+    Args:
+        tier_rank: Synthetic rank from the source's tier table, or None when
+            this lemma has no row for that source.
+        unknown_rank: The source's rank for a lemma it does not list.
+        sense_prominence: ``Lemma.sense_prominence``; None is treated as the
+            schema default.
+        is_contested: Whether another lemma shares this lemma's spelling.
+    """
+    if tier_rank is None:
+        return unknown_rank
+    if not is_contested:
+        return tier_rank
+
+    multiplier = TIER_PROMINENCE_MULTIPLIERS.get(
+        sense_prominence or SENSE_PROMINENCE_COMMON,
+        TIER_PROMINENCE_MULTIPLIERS[SENSE_PROMINENCE_COMMON],
+    )
+    if multiplier <= 0.0:
+        return unknown_rank
+    if multiplier >= 1.0:
+        return tier_rank
+
+    # Scale the implied frequency, not the rank: ranks are not linear in
+    # frequency. Under Zipf with s=1, keeping a fraction f of the frequency
+    # multiplies the rank by 1/f. Never better than the raw tier rank, and
+    # never worse than being unlisted.
+    scaled = int(round(tier_rank / multiplier))
+    return min(max(scaled, tier_rank), unknown_rank)
 
 
 def _harmonic_mean(weighted_ranks: List[Tuple[float, int]]) -> Optional[int]:
@@ -348,18 +492,20 @@ def recalculate_lemma_rank(
         (row.lemma_id, row.source): row.tier_name for row in tier_rows_q
     }
 
-    for source, rank_table, weight, unknown_rank in (
-        ("cambridge_yle", YLE_TIER_RANKS, YLE_TIER_WEIGHT, YLE_UNKNOWN_RANK),
-        ("cefr", CEFR_TIER_RANKS, CEFR_TIER_WEIGHT, CEFR_UNKNOWN_RANK),
-        (
-            "basic_english",
-            BASIC_ENGLISH_TIER_RANKS,
-            BASIC_ENGLISH_TIER_WEIGHT,
-            BASIC_ENGLISH_UNKNOWN_RANK,
-        ),
-    ):
+    scored_lemma = session.query(Lemma).filter(Lemma.id == lemma_id).first()
+    sense_prominence = scored_lemma.sense_prominence if scored_lemma is not None else None
+    is_contested = scored_lemma is not None and _is_contested_spelling(
+        session, scored_lemma.lemma_text, lemma_id
+    )
+
+    for source, rank_table, weight, unknown_rank in _TIER_SOURCES:
         tier_rank = _tier_rank_for_lemma(tier_rows, lemma_id, source, rank_table)
-        contributors.append((weight, tier_rank if tier_rank is not None else unknown_rank))
+        contributors.append(
+            (
+                weight,
+                _tier_contribution(tier_rank, unknown_rank, sense_prominence, is_contested),
+            )
+        )
 
     combined = _harmonic_mean(contributors)
     if combined is None:
@@ -422,6 +568,19 @@ def calculate_lemma_combined_ranks(
         (row.lemma_id, row.source): row.tier_name for row in tier_rows_q
     }
 
+    # Spelling and prominence for every lemma, plus the set of spellings held
+    # by more than one, read once rather than per lemma: the bulk path scores
+    # the whole database and a query per lemma per tier source would dominate
+    # its runtime.
+    lemma_text_by_id: Dict[int, str] = {}
+    prominence_by_lemma_id: Dict[int, str] = {}
+    text_counts: Dict[str, int] = {}
+    for row in session.query(Lemma.id, Lemma.lemma_text, Lemma.sense_prominence).all():
+        lemma_text_by_id[row.id] = row.lemma_text
+        prominence_by_lemma_id[row.id] = row.sense_prominence
+        text_counts[row.lemma_text] = text_counts.get(row.lemma_text, 0) + 1
+    contested_texts = {text for text, count in text_counts.items() if count > 1}
+
     sources_used: set[str] = set()
     new_ranks: Dict[int, int] = {}
     skipped = 0
@@ -453,31 +612,22 @@ def calculate_lemma_combined_ranks(
         # corpora, we apply the floor unconditionally — these are curated
         # English vocabulary lists, so "absent" is a real signal that the
         # word is at least somewhat outside the everyday/learner core.
-        yle_rank = _tier_rank_for_lemma(tier_rows, lemma_id, "cambridge_yle", YLE_TIER_RANKS)
-        if yle_rank is not None:
-            contributors.append((YLE_TIER_WEIGHT, yle_rank))
-            sources_used.add("cambridge_yle")
-        else:
-            contributors.append((YLE_TIER_WEIGHT, YLE_UNKNOWN_RANK))
-            sources_used.add("cambridge_yle_unknown")
+        # A tier rank is evidence about the spelling, not the sense. Where a
+        # spelling is contested, _tier_contribution discounts it by this
+        # lemma's prominence, so a rare sense stops inheriting the listing a
+        # common one earned. See TIER_PROMINENCE_MULTIPLIERS.
+        prominence = prominence_by_lemma_id.get(lemma_id)
+        contested = lemma_text_by_id.get(lemma_id) in contested_texts
 
-        cefr_rank = _tier_rank_for_lemma(tier_rows, lemma_id, "cefr", CEFR_TIER_RANKS)
-        if cefr_rank is not None:
-            contributors.append((CEFR_TIER_WEIGHT, cefr_rank))
-            sources_used.add("cefr")
-        else:
-            contributors.append((CEFR_TIER_WEIGHT, CEFR_UNKNOWN_RANK))
-            sources_used.add("cefr_unknown")
-
-        be_rank = _tier_rank_for_lemma(
-            tier_rows, lemma_id, "basic_english", BASIC_ENGLISH_TIER_RANKS
-        )
-        if be_rank is not None:
-            contributors.append((BASIC_ENGLISH_TIER_WEIGHT, be_rank))
-            sources_used.add("basic_english")
-        else:
-            contributors.append((BASIC_ENGLISH_TIER_WEIGHT, BASIC_ENGLISH_UNKNOWN_RANK))
-            sources_used.add("basic_english_unknown")
+        for source, rank_table, weight, unknown_rank in _TIER_SOURCES:
+            tier_rank = _tier_rank_for_lemma(tier_rows, lemma_id, source, rank_table)
+            contributors.append(
+                (
+                    weight,
+                    _tier_contribution(tier_rank, unknown_rank, prominence, contested),
+                )
+            )
+            sources_used.add(source if tier_rank is not None else f"{source}_unknown")
 
         combined = _harmonic_mean(contributors)
         if combined is None:
@@ -530,12 +680,14 @@ __all__ = [
     "CEFR_TIER_RANKS",
     "CEFR_TIER_WEIGHT",
     "CEFR_UNKNOWN_RANK",
+    "TIER_PROMINENCE_MULTIPLIERS",
     "YLE_TIER_RANKS",
     "YLE_TIER_WEIGHT",
     "YLE_UNKNOWN_RANK",
     "calculate_lemma_combined_ranks",
     "clear_zipf_exponent_cache",
     "get_corpus_size",
+    "get_corpus_unknown_rank",
     "get_corpus_zipf_exponent",
     "get_lemma_corpus_rank",
     "recalculate_lemma_rank",

@@ -106,6 +106,13 @@ class PendingImport(Base):
     # Lemma.tags; read/write it with storage.crud.lemma_tags.
     tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+    # How common this sense is for its surface form, when the stager already
+    # knows. Carried onto Lemma.sense_prominence at approval; the pre-staged
+    # branch of approve_as_lemma makes no second LLM call, so without this the
+    # rating the staging call already paid for would be thrown away. NULL means
+    # unrated, and the lemma keeps the schema default.
+    sense_prominence: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
     # Optional metadata
     source: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # Where this came from
     frequency_rank: Mapped[Optional[int]] = mapped_column(

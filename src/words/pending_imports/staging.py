@@ -68,6 +68,7 @@ def create_pending_import(
     target_kind: Optional[str] = None,
     name_kind: Optional[str] = None,
     concept_type: Optional[str] = None,
+    sense_prominence: Optional[str] = None,
     classify: bool = True,
 ) -> PendingImport:
     """Stage one term for review, classified into a target kind.
@@ -99,6 +100,9 @@ def create_pending_import(
         name_kind: For a name, one of ``NAME_KINDS``. Ignored for other kinds
             at approval time, so passing it costs nothing.
         concept_type: For a concept, its coarse type.
+        sense_prominence: How common this sense is for its surface form, when
+            the staging call already rated it. Carried onto the lemma at
+            approval. None leaves the lemma at the schema default.
         classify: Run the rule-tier classifier when ``target_kind`` is None.
             Off for callers that know they are staging vocabulary.
 
@@ -145,6 +149,7 @@ def create_pending_import(
         frequency_rank=frequency_rank,
         notes=notes,
         example_sentence=example_sentence,
+        sense_prominence=sense_prominence,
     )
     session.add(pending)
     session.flush()

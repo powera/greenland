@@ -272,6 +272,12 @@ def approve_as_lemma(
 
     example_sentence: Optional[str] = pending.example_sentence
 
+    # Rated at staging time, when it was rated at all. The pre-staged branch
+    # below makes no LLM call, so this is the only place that rating can come
+    # from; on the LLM branch it overrides the fresh answer, since a human may
+    # have corrected it on the detail page.
+    pending_prominence: Optional[str] = pending.sense_prominence
+
     if pending_pos_type and pending_pos_subtype:
         # Already staged via the detail page — use stored values to avoid a redundant LLM call.
         logger.info(f"Using pre-staged data for '{word}': {pending_pos_type}/{pending_pos_subtype}")
@@ -281,6 +287,7 @@ def approve_as_lemma(
                 "pos_subtype": pending_pos_subtype,
                 "definition": pending_definition,
                 "lemma": word,
+                "sense_prominence": pending_prominence,
             }
         ]
     else:
@@ -318,6 +325,8 @@ def approve_as_lemma(
                 f"guid={existing.guid})"
             )
         else:
+            if pending_prominence and not def_data.get("sense_prominence"):
+                def_data["sense_prominence"] = pending_prominence
             filtered_definitions.append(def_data)
 
     if not filtered_definitions:

@@ -69,6 +69,7 @@
                                             <th>Corpus</th>
                                             <th>Freq (per M)</th>
                                             <th>Best form</th>
+                                            <th>Share</th>
                                             <th>Zipf rank</th>
                                             <th>Forms</th>
                                         </tr>
@@ -93,9 +94,23 @@
                                                 {% endif %}
                                             </td>
                                             <td>
+                                                {% set share = lexeme_share_by_corpus.get(corpus_name) %}
+                                                {% if share is not none %}
+                                                    <span {% if share < 1.0 %}class="text-danger"{% endif %}>{{ "%.0f%%"|format(share * 100) }}</span>
+                                                {% else %}
+                                                    <span class="text-muted">—</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
                                                 {% set zipf_rank = lexeme_rank_by_corpus.get(corpus_name) %}
+                                                {% set unknown_rank = lexeme_unknown_rank_by_corpus.get(corpus_name) %}
                                                 {% if zipf_rank is not none %}
                                                     <strong>{{ zipf_rank }}</strong>
+                                                    {% if unknown_rank and zipf_rank >= unknown_rank %}
+                                                        <span class="badge bg-secondary" title="Capped at this corpus's unknown-word rank ({{ unknown_rank }}): the share-scaled rank came out past anything the corpus can support, so this sense reads as absent here.">capped</span>
+                                                    {% elif best_rank is not none and zipf_rank > best_rank %}
+                                                        <span class="badge bg-warning text-dark" title="Worse than the best form's own rank ({{ best_rank }}), because this lemma holds only part of that spelling.">downrated</span>
+                                                    {% endif %}
                                                 {% else %}
                                                     <span class="text-muted">—</span>
                                                 {% endif %}
@@ -112,7 +127,15 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <p class="text-muted small mb-0">Best form = the single best-ranked form in the corpus. Zipf rank = all the forms combined (variant spellings included), and what feeds the combined frequency rank.</p>
+                            <p class="text-muted small mb-0">
+                                Best form = the single best-ranked form in the corpus, share-blind &mdash; how the spelling itself ranked.
+                                Share = how much of that spelling belongs to this lemma, when several senses compete for it.
+                                Zipf rank = all the forms combined (variant spellings included), each scaled by its share, and what feeds
+                                the combined frequency rank. Combining forms improves on the best form, but a share below 100% pushes the
+                                other way and usually wins: a sense holding a small slice of a common spelling is a rare word, so its rank
+                                lands <em>downrated</em> below the best form &mdash; and once it falls past what the corpus can support it is
+                                <em>capped</em> at the rank an unlisted word would get.
+                            </p>
                         {% else %}
                             <p class="text-muted mb-0">No enabled lexeme-based corpora configured for this lemma yet.</p>
                         {% endif %}

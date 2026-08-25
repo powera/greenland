@@ -7,7 +7,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from storage.crud.operation_log import log_translation_change
-from storage.models.schema import DerivativeForm, Lemma, LemmaTranslation
+from storage.models.schema import (
+    SENSE_PROMINENCE_VALUES,
+    DerivativeForm,
+    Lemma,
+    LemmaTranslation,
+)
 from storage.translation_helpers import set_translation
 from storage.utils.guid import generate_guid
 
@@ -33,8 +38,15 @@ def add_lemma(
     notes: Optional[str] = None,
     auto_generate_guid: bool = True,
     source: Optional[str] = None,
+    sense_prominence: Optional[str] = None,
 ) -> Lemma:
-    """Add or get a lemma (concept/meaning)."""
+    """Add or get a lemma (concept/meaning).
+
+    ``sense_prominence`` is how common this sense is for its surface form; it
+    drives the weighted frequency split in ``wordfreq.lexeme_frequency`` when
+    the form is shared with other lemmas. ``None`` leaves the schema default
+    ("common") in place, which is what a caller with no opinion should pass.
+    """
     # Check if lemma already exists with same text, definition, and POS
     existing = (
         session.query(Lemma)
@@ -60,6 +72,14 @@ def add_lemma(
     if tags:
         tags_json = json.dumps(tags)
 
+    # An unrecognized value would silently weight the frequency split as
+    # "common" in lexeme_frequency, so reject it here rather than store it.
+    if sense_prominence is not None and sense_prominence not in SENSE_PROMINENCE_VALUES:
+        raise ValueError(
+            f"sense_prominence must be one of {sorted(SENSE_PROMINENCE_VALUES)}, "
+            f"got {sense_prominence!r}"
+        )
+
     lemma = Lemma(
         lemma_text=lemma_text,
         definition_text=definition_text,
@@ -73,6 +93,8 @@ def add_lemma(
         verified=verified,
         notes=notes,
     )
+    if sense_prominence is not None:
+        lemma.sense_prominence = sense_prominence
     session.add(lemma)
     session.flush()
 
