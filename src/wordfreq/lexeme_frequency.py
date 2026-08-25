@@ -9,9 +9,10 @@ frequency across the competing lexemes weighted by ``Lemma.sense_prominence``
 common case) get the full token frequency regardless of their prominence label,
 since the weight only matters relative to competitors.
 
-We sum per-form per-corpus frequencies up to the lexeme. Rank rollup is
-intentionally not provided here — ranks are not additive; if you need a rank
-for a lexeme, derive it from the rolled-up frequency in a downstream pass.
+We sum per-form per-corpus frequencies up to the lexeme. Ranks are not summed,
+because ranks are not additive: ``get_lexeme_form_rank_shares`` hands the raw
+ranks and their homograph shares to ``wordfreq.frequency.zipf``, which converts
+each to an implied frequency, applies the share, sums, and converts back.
 
 Spelling variants count toward their lemma. "aluminium" is the same lexeme as
 "aluminum", so a corpus that spells it the British way is still measuring how
@@ -209,21 +210,46 @@ def get_lexeme_form_ranks(
 ) -> List[int]:
     """Every stored corpus rank among this lexeme's forms, variants included.
 
-    The corpus files carry a rank as well as a frequency for each surface form,
-    and both are kept on the annotation. This returns the ranks as they were
-    imported, for ``wordfreq.frequency.zipf`` to combine into one rank for the
-    lexeme -- the ranks are used directly rather than re-derived by sorting
-    lemmas against each other.
-
-    Homograph share-splitting deliberately plays no part here: a rank is a
-    property of the surface form in the corpus, and the corpus cannot say which
-    sense of "bank" it counted. Senses competing for a form therefore each take
-    the form's full rank, and ``Lemma.sense_prominence`` separates them
-    elsewhere.
+    Share-blind: a form contested by several senses yields its full rank here.
+    Prefer :func:`get_lexeme_form_rank_shares`, which pairs each rank with this
+    lemma's share of it; combining these bare ranks gives every sense of a
+    homograph the same rank no matter how the frequency divides.
 
     Returns:
         The ranks, in no particular order. Empty when the lexeme has no ranked
         form in this corpus.
+    """
+    return [rank for rank, _share in get_lexeme_form_rank_shares(session, lexeme, corpus_name)]
+
+
+def get_lexeme_form_rank_shares(
+    session: Session,
+    lexeme: Lexeme,
+    corpus_name: str,
+) -> List[Tuple[int, float]]:
+    """Each stored corpus rank among this lexeme's forms, with its share.
+
+    The corpus files carry a rank as well as a frequency for each surface form,
+    and both are kept on the annotation. The ranks are returned as they were
+    imported, for ``wordfreq.frequency.zipf.combine_weighted_ranks`` to fold
+    into one rank for the lexeme -- rather than re-derived by sorting lemmas
+    against each other.
+
+    A rank is a property of the surface form, and the corpus cannot say which
+    sense of "bank" it counted. So each rank is paired with this lemma's
+    ``get_token_share`` of the form: the same split that divides the form's
+    frequency divides the frequency its rank implies. Without that pairing every
+    sense of a homograph combines to an identical rank while their rolled-up
+    frequencies differ by orders of magnitude -- "top" the spinning toy holding
+    0.6% of the token's frequency but ranking exactly as well as "top" the
+    highest point.
+
+    An uncontested form has a share of 1.0, so a word with no homograph is
+    unaffected.
+
+    Returns:
+        ``(rank, share)`` pairs, in no particular order. Empty when the lexeme
+        has no ranked form in this corpus.
     """
     source = _source_for_corpus(corpus_name)
 
@@ -245,7 +271,10 @@ def get_lexeme_form_ranks(
         return []
 
     rows = (
-        session.query(ExternalLexemeAnnotation.ordinal_rank)
+        session.query(
+            ExternalLexemeAnnotation.ordinal_rank,
+            ExternalLexemeAnnotation.word_token_id,
+        )
         .filter(
             ExternalLexemeAnnotation.word_token_id.in_(token_ids),
             ExternalLexemeAnnotation.source == source,
@@ -253,7 +282,18 @@ def get_lexeme_form_ranks(
         )
         .all()
     )
-    return [row[0] for row in rows if row[0] is not None and row[0] > 0]
+
+    # One share lookup per token, not per annotation row: a token may be ranked
+    # by several corpora, but its claimants do not change between them.
+    shares: Dict[int, float] = {}
+    out: List[Tuple[int, float]] = []
+    for rank, token_id in rows:
+        if rank is None or rank <= 0 or token_id is None:
+            continue
+        if token_id not in shares:
+            shares[token_id] = get_token_share(session, token_id, lexeme.lemma.id)
+        out.append((rank, shares[token_id]))
+    return out
 
 
 def get_lexeme_frequencies_all_corpora(
@@ -289,6 +329,7 @@ __all__ = [
     "LexemeFrequency",
     "get_lemma_frequency",
     "get_lexeme_frequencies_all_corpora",
+    "get_lexeme_form_rank_shares",
     "get_lexeme_form_ranks",
     "get_lexeme_frequency",
     "get_token_share",

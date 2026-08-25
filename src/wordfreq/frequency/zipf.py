@@ -121,14 +121,51 @@ def combine_ranks(ranks: Sequence[int], exponent: float = DEFAULT_ZIPF_EXPONENT)
         The combined rank, rounded to an integer and never below 1, or None
         when no usable rank was supplied.  A single rank is returned unchanged.
     """
+    return combine_weighted_ranks([(rank, 1.0) for rank in ranks], exponent)
+
+
+def combine_weighted_ranks(
+    ranks_and_shares: Sequence[Tuple[int, float]],
+    exponent: float = DEFAULT_ZIPF_EXPONENT,
+) -> Optional[int]:
+    """Combine per-form ranks into one lexeme rank, scaling each by a share.
+
+    A corpus ranks a *surface form*, and it cannot say which sense of that form
+    it counted: "top" is ranked 675 in ``19th_books`` whether the text meant the
+    highest point or a spinning toy.  When several lemmas compete for a form,
+    each one's share of that form -- from
+    ``wordfreq.lexeme_frequency.get_token_share`` -- says how much of the
+    ranked frequency is really theirs.
+
+    The share applies to the *implied frequency*, not to the rank, because
+    ranks are not additive and not linear in frequency.  A sense holding 0.6%
+    of a form ranked 675 is not "a sense ranked 405"; it is a sense whose
+    frequency is 0.6% of what rank 675 implies, which under Zipf's law is a far
+    worse rank.  Scaling the frequency and converting back is the only step
+    that gets that right.
+
+    A share of 1.0 leaves a rank exactly as :func:`combine_ranks` would, so an
+    uncontested form round-trips unchanged.
+
+    Args:
+        ranks_and_shares: ``(ordinal_rank, share)`` per form in one corpus.
+            Non-positive ranks are dropped, as are non-positive shares -- a
+            lemma with no claim on a form contributes nothing rather than
+            being treated as its sole owner.
+        exponent: The corpus's Zipf exponent, from :func:`fit_zipf_exponent`.
+
+    Returns:
+        The combined rank, rounded to an integer and never below 1, or None
+        when no usable ``(rank, share)`` pair was supplied.
+    """
     if exponent <= 0.0:
         exponent = DEFAULT_ZIPF_EXPONENT
 
     implied_frequency = 0.0
-    for rank in ranks:
-        if rank is None or rank <= 0:
+    for rank, share in ranks_and_shares:
+        if rank is None or rank <= 0 or share is None or share <= 0.0:
             continue
-        implied_frequency += float(rank) ** -exponent
+        implied_frequency += share * (float(rank) ** -exponent)
 
     if implied_frequency <= 0.0:
         return None
@@ -141,5 +178,6 @@ __all__ = [
     "MIN_FIT_SAMPLES",
     "MIN_ZIPF_EXPONENT",
     "combine_ranks",
+    "combine_weighted_ranks",
     "fit_zipf_exponent",
 ]

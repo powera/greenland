@@ -246,6 +246,7 @@ def process_word(
                 translations=translations_set,
                 confidence=def_data.get("confidence", 0.0),
                 notes=def_data.get("notes"),
+                sense_prominence=def_data.get("sense_prominence"),
             )
 
             if not derivative_form:

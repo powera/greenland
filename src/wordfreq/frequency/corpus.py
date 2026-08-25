@@ -75,7 +75,7 @@ CORPUS_CONFIGS = [
         file_type="json",
         value_type="auto",
         corpus_weight=0.8,
-        max_unknown_rank=10000,
+        max_unknown_rank=15000,
         enabled=True,
     ),
     CorpusConfig(
@@ -86,7 +86,7 @@ CORPUS_CONFIGS = [
         file_type="json",
         value_type="auto",
         corpus_weight=0.9,
-        max_unknown_rank=10000,
+        max_unknown_rank=15000,
         enabled=True,
     ),
     CorpusConfig(
@@ -130,11 +130,11 @@ CORPUS_CONFIGS = [
         name="cooking",
         description="Word frequency data from Cookbooks",
         file_path="cooking.json",
-        max_words=1000,
+        max_words=2000,
         file_type="json",
         value_type="frequency",
         corpus_weight=0.7,
-        max_unknown_rank=1500,
+        max_unknown_rank=4000,
         enabled=True,
     ),
 ]

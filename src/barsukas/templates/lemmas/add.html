@@ -116,6 +116,18 @@
                         <small class="form-text text-muted">Trakaido difficulty level (1-{{ config.MAX_DIFFICULTY_LEVEL }}), or -1 to exclude from wordlists</small>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="sense_prominence" class="form-label">Sense Prominence (Optional)</label>
+                        <select class="form-select" id="sense_prominence" name="sense_prominence">
+                            <option value="">Not set (common)</option>
+                            <option value="very_common">Very common</option>
+                            <option value="common">Common</option>
+                            <option value="uncommon">Uncommon</option>
+                            <option value="rare">Rare</option>
+                        </select>
+                        <small class="form-text text-muted">How common this sense is for this spelling. Only matters when other lemmas share the spelling: it splits the corpus frequency between them.</small>
+                    </div>
+
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle"></i> <strong>Note:</strong> After creating the lemma, you can add translations and other details on the lemma view page.
                     </div>

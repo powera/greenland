@@ -648,6 +648,7 @@ def add_complete_word_entry(
     verified: bool = False,
     notes: Optional[str] = None,
     auto_generate_guid: bool = True,
+    sense_prominence: Optional[str] = None,
 ) -> DerivativeForm:
     """
     Convenience function to add a complete word entry (token + lemma + derivative form).
@@ -658,6 +659,8 @@ def add_complete_word_entry(
     Args:
         translations: Optional TranslationSet object. If provided, individual translation
                      parameters are ignored.
+        sense_prominence: How common this sense is for its surface form; passed
+                     through to the lemma. None keeps the schema default.
     """
     from storage.crud.lemma import add_lemma
     from storage.crud.word_token import add_word_token
@@ -705,6 +708,7 @@ def add_complete_word_entry(
         verified=verified,
         notes=notes,
         auto_generate_guid=auto_generate_guid,
+        sense_prominence=sense_prominence,
     )
 
     # Add derivative form

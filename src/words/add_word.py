@@ -456,6 +456,7 @@ def _stage_for_review(
         pos_subtype=pos_subtype,
         source=source,
         frequency_rank=frequency_rank,
+        sense_prominence=sense.get("sense_prominence"),
         notes=f"add_word: {pos_subtype} needs subtype review before import",
     )
     session.commit()
