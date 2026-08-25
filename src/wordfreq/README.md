@@ -9,6 +9,11 @@ top-level `prompts/` directory (loaded via `util.prompt_loader`).
 
 ## Directory Structure
 
+### `corpora/`
+Corpus generation from Project Gutenberg: the book lists behind `19th_books`,
+`20th_books` and `religious_translated`, a downloader, and the frequency
+builder that writes `data/wordfreq/<corpus>.json`. See `corpora/README.md`.
+
 ### `frequency/`
 Frequency analysis and corpus management:
 - `corpus.py` — corpus loading and processing (`load_all_corpora()`)
