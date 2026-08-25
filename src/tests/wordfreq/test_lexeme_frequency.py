@@ -17,7 +17,9 @@ from storage.models.schema import (
     Lemma,
     WordToken,
 )
+from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
 from wordfreq.lexeme_frequency import (
+    get_lexeme_form_ranks,
     get_lexeme_frequency,
     get_token_share,
 )
@@ -242,5 +244,144 @@ def test_token_share_zero_for_unattached_token() -> None:
         session.add(token)
         session.flush()
         assert get_token_share(session, token.id, lemma_id=999) == 0.0
+    finally:
+        session.close()
+
+
+def _add_variant(
+    session: Session,
+    lemma: Lemma,
+    text: str,
+    variant_key: str,
+    grammatical_form: str,
+    *,
+    word_token: WordToken | None = None,
+    language_code: str = "en",
+) -> VariantForm:
+    variant = VariantForm(
+        lemma_id=lemma.id,
+        language_code=language_code,
+        variant_kind=VARIANT_KIND_SPELLING,
+        variant_key=variant_key,
+        grammatical_form=grammatical_form,
+        variant_form_text=text,
+        word_token_id=word_token.id if word_token is not None else None,
+        is_base_form=True,
+    )
+    session.add(variant)
+    session.flush()
+    return variant
+
+
+def test_variant_spelling_contributes_frequency_to_its_lemma() -> None:
+    """A corpus using the British spelling still measures the same lexeme.
+
+    "aluminium" is not a derivative form of "aluminum" -- it is the same word
+    spelled another way -- so without variants counted, a corpus that prefers
+    the British spelling charges that usage to nobody.
+    """
+    session = _make_session()
+    try:
+        aluminum = _add_lemma(session, "aluminum", "N14_005")
+        own = _add_token_with_freq(session, "aluminum", "testcorpus", 83.0)
+        _add_form(session, aluminum, "aluminum", "singular", word_token=own, is_base_form=True)
+
+        british = _add_token_with_freq(session, "aluminium", "testcorpus", 350.0)
+        _add_variant(session, aluminum, "aluminium", "aluminium", "singular", word_token=british)
+        session.commit()
+
+        lexeme = get_lexeme(session, aluminum.id, "en")
+        assert lexeme is not None
+        rollup = get_lexeme_frequency(session, lexeme, "testcorpus")
+
+        assert rollup.total_frequency == pytest.approx(433.0)
+        assert {f.derivative_form_text for f in rollup.form_breakdown} == {
+            "aluminum",
+            "aluminium",
+        }
+    finally:
+        session.close()
+
+
+def test_variant_only_token_is_still_owned_by_its_lemma() -> None:
+    """A token reached only through a variant must not have share 0.0.
+
+    The lemma's own spelling may have no token at all (no corpus used it), and
+    the variant's frequency would then be discarded rather than credited.
+    """
+    session = _make_session()
+    try:
+        aluminum = _add_lemma(session, "aluminum", "N14_005")
+        _add_form(session, aluminum, "aluminum", "singular", word_token=None, is_base_form=True)
+        british = _add_token_with_freq(session, "aluminium", "testcorpus", 350.0)
+        _add_variant(session, aluminum, "aluminium", "aluminium", "singular", word_token=british)
+        session.commit()
+
+        assert get_token_share(session, british.id, aluminum.id) == pytest.approx(1.0)
+
+        lexeme = get_lexeme(session, aluminum.id, "en")
+        assert lexeme is not None
+        rollup = get_lexeme_frequency(session, lexeme, "testcorpus")
+        assert rollup.total_frequency == pytest.approx(350.0)
+    finally:
+        session.close()
+
+
+def test_variant_ranks_are_collected_for_scoring() -> None:
+    """get_lexeme_form_ranks sees variants, so rank scoring agrees with frequency."""
+    session = _make_session()
+    try:
+        aluminum = _add_lemma(session, "aluminum", "N14_005")
+        _add_form(session, aluminum, "aluminum", "singular", word_token=None, is_base_form=True)
+        british = WordToken(token="aluminium", language_code="en")
+        session.add(british)
+        session.flush()
+        session.add(
+            ExternalLexemeAnnotation(
+                word_token_id=british.id,
+                source="wordfreq_testcorpus",
+                tier_name="r2001-3000",
+                frequency=56.7,
+                ordinal_rank=2302,
+            )
+        )
+        _add_variant(session, aluminum, "aluminium", "aluminium", "singular", word_token=british)
+        session.commit()
+
+        lexeme = get_lexeme(session, aluminum.id, "en")
+        assert lexeme is not None
+        assert get_lexeme_form_ranks(session, lexeme, "testcorpus") == [2302]
+    finally:
+        session.close()
+
+
+def test_a_form_counted_once_even_when_slots_share_a_spelling() -> None:
+    """English past tense fills many slots with one word; frequency counts it once.
+
+    "refined" occupies 1s/2s/3s/1p/2p/3p past plus the participle, all pointing
+    at the same token. Summing per row would multiply that word's frequency by
+    the size of the paradigm table.
+    """
+    session = _make_session()
+    try:
+        refine = _add_lemma(session, "refine", "V80", pos_type="verb")
+        token = _add_token_with_freq(session, "refined", "c", 100.0)
+        for slot in (
+            "verb/en_1s_past",
+            "verb/en_2s_past",
+            "verb/en_3s_past",
+            "verb/en_1p_past",
+            "verb/en_2p_past",
+            "verb/en_3p_past",
+            "verb/en_past_participle",
+        ):
+            _add_form(session, refine, "refined", slot, word_token=token)
+        session.commit()
+
+        lex = get_lexeme(session, refine.id, "en")
+        assert lex is not None
+        rollup = get_lexeme_frequency(session, lex, "c")
+        assert rollup.total_frequency == pytest.approx(100.0)
+        assert get_lexeme_form_ranks(session, lex, "c") == []
     finally:
         session.close()

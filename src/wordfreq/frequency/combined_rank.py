@@ -5,11 +5,15 @@ which read the now-deprecated ``WordFrequency`` table. This module rolls the
 new lexeme-level signal up to a single integer ``Lemma.frequency_rank`` per
 English lemma:
 
-  * Wordfreq corpora — for each enabled corpus, every English lexeme is
-    ordered by its rolled-up ``LexemeFrequency.total_frequency`` (already
-    share-split across homographs by ``sense_prominence``); the resulting
-    1..N position is the per-corpus synthetic rank. Corpus-level weight comes
-    from ``Corpus.corpus_weight`` (synced from ``CORPUS_CONFIGS``).
+  * Wordfreq corpora — for each enabled corpus, a lexeme's rank is its own
+    forms' imported ranks combined under the corpus's fitted Zipf exponent
+    (see ``wordfreq.frequency.zipf``); spelling variants count as forms, so
+    "aluminium" contributes to "aluminum". Corpus-level weight comes from
+    ``Corpus.corpus_weight`` (synced from ``CORPUS_CONFIGS``).
+
+    These per-corpus ranks depend only on the lemma being scored. Nothing is
+    sorted across lemmas, so one word can be rescored after an edit without
+    recomputing the database, and two lemmas may share a rank.
   * Cambridge YLE — fixed synthetic ranks per tier (``starters``/``movers``/
     ``flyers``), weight 1.0.
   * CEFR — fixed synthetic ranks per tier (``A1``..``C2``), weight 1.0.
@@ -34,8 +38,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
-from storage.models.schema import Corpus, Lemma, LemmaTier
+from storage.models.schema import Corpus, ExternalLexemeAnnotation, Lemma, LemmaTier
 from wordfreq.frequency.corpus import CorpusConfig, get_enabled_corpus_configs
+from wordfreq.frequency.zipf import DEFAULT_ZIPF_EXPONENT, combine_ranks, fit_zipf_exponent
 
 logger = logging.getLogger(__name__)
 
@@ -111,31 +116,124 @@ def _english_lemma_ids(session: Session) -> List[int]:
     return [row[0] for row in rows]
 
 
+#: Fitted Zipf exponent per corpus name. The exponent is a property of the
+#: corpus data, which does not change while a process runs, and fitting it
+#: reads every annotation row for that corpus -- so scoring lemmas one at a
+#: time must not refit it each call. Re-importing a corpus in the same process
+#: invalidates this; call :func:`clear_zipf_exponent_cache` if that happens.
+_ZIPF_EXPONENT_CACHE: Dict[str, float] = {}
+
+
+def clear_zipf_exponent_cache() -> None:
+    """Forget the fitted exponents, so the next call refits from the database."""
+    _ZIPF_EXPONENT_CACHE.clear()
+
+
+def get_corpus_zipf_exponent(session: Session, corpus_name: str) -> float:
+    """This corpus's Zipf exponent, fitted from its imported (rank, frequency) pairs.
+
+    The fit is a least-squares regression over every ranked form in the corpus,
+    so it needs each form's frequency -- it is not derivable from the corpus
+    size. It is memoized because it depends only on the corpus data, and every
+    lemma scored against that corpus wants the same number.
+    """
+    cached = _ZIPF_EXPONENT_CACHE.get(corpus_name)
+    if cached is not None:
+        return cached
+
+    rows = (
+        session.query(ExternalLexemeAnnotation.ordinal_rank, ExternalLexemeAnnotation.frequency)
+        .filter(
+            ExternalLexemeAnnotation.source == f"wordfreq_{corpus_name}",
+            ExternalLexemeAnnotation.ordinal_rank.isnot(None),
+            ExternalLexemeAnnotation.frequency.isnot(None),
+        )
+        .all()
+    )
+    exponent = fit_zipf_exponent((rank, frequency) for rank, frequency in rows)
+    if exponent is None:
+        logger.info(
+            f"Corpus '{corpus_name}': too few usable pairs to fit a Zipf exponent; "
+            f"using default {DEFAULT_ZIPF_EXPONENT}"
+        )
+        exponent = DEFAULT_ZIPF_EXPONENT
+    else:
+        logger.info(f"Corpus '{corpus_name}': fitted Zipf exponent s={exponent:.3f}")
+
+    _ZIPF_EXPONENT_CACHE[corpus_name] = exponent
+    return exponent
+
+
+def get_corpus_size(session: Session, corpus_name: str) -> int:
+    """How many surface forms this corpus ranks.
+
+    The corpus's own size, not how many lemmas happen to match it: the
+    unknown-rank floor is meant to say "worse than anything this corpus
+    contains", which is a fact about the corpus file.
+    """
+    count: int = (
+        session.query(ExternalLexemeAnnotation)
+        .filter(
+            ExternalLexemeAnnotation.source == f"wordfreq_{corpus_name}",
+            ExternalLexemeAnnotation.ordinal_rank.isnot(None),
+        )
+        .count()
+    )
+    return count
+
+
+def get_lemma_corpus_rank(
+    session: Session,
+    lemma_id: int,
+    corpus_name: str,
+    exponent: float,
+) -> Optional[int]:
+    """This lemma's rank in one corpus, from its own forms' imported ranks.
+
+    Depends only on the lemma being scored: the corpus files already rank each
+    surface form, and ``zipf.combine_ranks`` folds a lemma's forms into one
+    rank without reference to any other lemma. That is what lets a single word
+    be rescored after an edit -- adding a variant spelling, say -- instead of
+    re-ranking the database.
+
+    Returns:
+        The combined rank, or None when this corpus ranks none of the lemma's
+        forms.
+    """
+    # Imported lazily to avoid a circular import via storage.lexeme ->
+    # storage.models.schema -> wordfreq.frequency package init.
+    from storage.lexeme import get_lexeme
+    from wordfreq.lexeme_frequency import get_lexeme_form_ranks
+
+    lexeme = get_lexeme(session, lemma_id, "en")
+    if lexeme is None:
+        return None
+    form_ranks = get_lexeme_form_ranks(session, lexeme, corpus_name)
+    if not form_ranks:
+        return None
+    return combine_ranks(form_ranks, exponent)
+
+
 def _build_corpus_rank_table(
     session: Session,
     corpus_name: str,
     lemma_ids: List[int],
 ) -> Dict[int, int]:
-    """Rank lemmas by their per-corpus rolled-up frequency.
+    """Each lemma's rank in this corpus, combined from its forms' stored ranks.
 
-    Returns ``{lemma_id: rank}`` where rank is 1-based and most-frequent first.
-    Lemmas with zero or missing rollup in this corpus are omitted.
+    Returns ``{lemma_id: rank}``. Lemmas with no ranked form in this corpus are
+    omitted. The values are rank-like numbers rather than positions in an
+    ordering: ties and gaps are both expected, and each entry is computed
+    independently of the others.
     """
-    # Imported lazily to avoid a circular import via storage.lexeme ->
-    # storage.models.schema -> wordfreq.frequency package init.
-    from storage.lexeme import get_lexeme
-    from wordfreq.lexeme_frequency import get_lexeme_frequency
+    exponent = get_corpus_zipf_exponent(session, corpus_name)
 
-    scored: List[Tuple[int, float]] = []
+    table: Dict[int, int] = {}
     for lemma_id in lemma_ids:
-        lexeme = get_lexeme(session, lemma_id, "en")
-        if lexeme is None:
-            continue
-        rollup = get_lexeme_frequency(session, lexeme, corpus_name)
-        if rollup.total_frequency > 0.0:
-            scored.append((lemma_id, rollup.total_frequency))
-    scored.sort(key=lambda pair: pair[1], reverse=True)
-    return {lemma_id: i + 1 for i, (lemma_id, _) in enumerate(scored)}
+        rank = get_lemma_corpus_rank(session, lemma_id, corpus_name, exponent)
+        if rank is not None:
+            table[lemma_id] = rank
+    return table
 
 
 def _corpus_weights(session: Session) -> Dict[str, float]:
@@ -197,6 +295,83 @@ def _harmonic_mean(weighted_ranks: List[Tuple[float, int]]) -> Optional[int]:
     return int(round(total_weight / weighted_inv))
 
 
+def recalculate_lemma_rank(
+    session: Session,
+    lemma_id: int,
+    *,
+    dry_run: bool = False,
+) -> Optional[int]:
+    """Recompute and store ``frequency_rank`` for a single lemma.
+
+    Scores one word the same way :func:`calculate_lemma_combined_ranks` scores
+    all of them, but touches only that word. Use it after an edit that changes
+    which surface forms a lemma owns -- adding a spelling variant, linking a
+    form to a token -- rather than rebuilding every rank in the database.
+
+    Args:
+        session: Session bound to the target database. The caller commits.
+        lemma_id: The lemma to rescore.
+        dry_run: Compute the rank but leave the row unchanged.
+
+    Returns:
+        The computed rank, or None when nothing contributed one (the stored
+        value is then left alone, as in the bulk path).
+    """
+    corpus_weights = _corpus_weights(session)
+    cfgs_by_name = _enabled_corpus_configs_by_name()
+
+    contributors: List[Tuple[float, int]] = []
+    corpus_ranks: Dict[str, Optional[int]] = {}
+    for corpus_name in corpus_weights:
+        exponent = get_corpus_zipf_exponent(session, corpus_name)
+        corpus_ranks[corpus_name] = get_lemma_corpus_rank(session, lemma_id, corpus_name, exponent)
+
+    has_wordfreq_hit = any(rank is not None for rank in corpus_ranks.values())
+    for corpus_name, weight in corpus_weights.items():
+        rank = corpus_ranks[corpus_name]
+        if rank is not None:
+            contributors.append((weight, rank))
+        elif has_wordfreq_hit:
+            cfg = cfgs_by_name.get(corpus_name)
+            if cfg is None:
+                unknown_rank = _DEFAULT_UNKNOWN_RANK
+            else:
+                unknown_rank = _unknown_rank_for_corpus(cfg, get_corpus_size(session, corpus_name))
+            contributors.append((weight, unknown_rank))
+
+    tier_rows_q = (
+        session.query(LemmaTier.lemma_id, LemmaTier.source, LemmaTier.tier_name)
+        .filter(LemmaTier.lemma_id == lemma_id)
+        .all()
+    )
+    tier_rows: Dict[Tuple[int, str], str] = {
+        (row.lemma_id, row.source): row.tier_name for row in tier_rows_q
+    }
+
+    for source, rank_table, weight, unknown_rank in (
+        ("cambridge_yle", YLE_TIER_RANKS, YLE_TIER_WEIGHT, YLE_UNKNOWN_RANK),
+        ("cefr", CEFR_TIER_RANKS, CEFR_TIER_WEIGHT, CEFR_UNKNOWN_RANK),
+        (
+            "basic_english",
+            BASIC_ENGLISH_TIER_RANKS,
+            BASIC_ENGLISH_TIER_WEIGHT,
+            BASIC_ENGLISH_UNKNOWN_RANK,
+        ),
+    ):
+        tier_rank = _tier_rank_for_lemma(tier_rows, lemma_id, source, rank_table)
+        contributors.append((weight, tier_rank if tier_rank is not None else unknown_rank))
+
+    combined = _harmonic_mean(contributors)
+    if combined is None:
+        return None
+
+    if not dry_run:
+        lemma = session.query(Lemma).filter(Lemma.id == lemma_id).first()
+        if lemma is not None and lemma.frequency_rank != combined:
+            lemma.frequency_rank = combined
+    return combined
+
+
 def calculate_lemma_combined_ranks(
     session: Session,
     *,
@@ -239,7 +414,7 @@ def calculate_lemma_combined_ranks(
             unknown_rank_by_corpus[corpus_name] = _DEFAULT_UNKNOWN_RANK
         else:
             unknown_rank_by_corpus[corpus_name] = _unknown_rank_for_corpus(
-                cfg, len(per_corpus_ranks[corpus_name])
+                cfg, get_corpus_size(session, corpus_name)
             )
 
     tier_rows_q = session.query(LemmaTier.lemma_id, LemmaTier.source, LemmaTier.tier_name).all()
@@ -359,4 +534,9 @@ __all__ = [
     "YLE_TIER_WEIGHT",
     "YLE_UNKNOWN_RANK",
     "calculate_lemma_combined_ranks",
+    "clear_zipf_exponent_cache",
+    "get_corpus_size",
+    "get_corpus_zipf_exponent",
+    "get_lemma_corpus_rank",
+    "recalculate_lemma_rank",
 ]

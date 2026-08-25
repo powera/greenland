@@ -4,7 +4,6 @@
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from sqlalchemy import func
 
 from barsukas.config import Config
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
@@ -545,7 +544,12 @@ def view_lemma_levels(lemma_id: int) -> ResponseReturnValue:
         TierDefinition,
     )
     from wordfreq.frequency.corpus import get_enabled_corpus_configs
-    from wordfreq.lexeme_frequency import get_lexeme_frequencies_all_corpora
+    from wordfreq.frequency.combined_rank import get_corpus_zipf_exponent
+    from wordfreq.frequency.zipf import combine_ranks
+    from wordfreq.lexeme_frequency import (
+        get_lexeme_form_ranks,
+        get_lexeme_frequencies_all_corpora,
+    )
 
     context = _get_lemma_page_context(lemma_id)
     if context is None:
@@ -590,34 +594,24 @@ def view_lemma_levels(lemma_id: int) -> ResponseReturnValue:
         if tier.source in ranks_by_source
     }
 
-    target_corpora = ["19th_books", "20th_books", "cooking", "wiki_vital"]
-    enabled_corpora = {cfg.name for cfg in get_enabled_corpus_configs()}
+    target_corpora = [cfg.name for cfg in get_enabled_corpus_configs()]
     lexeme_frequency_by_corpus = {}
     lexeme_rank_by_corpus: Dict[str, Optional[int]] = {}
+    lexeme_best_rank_by_corpus: Dict[str, Optional[int]] = {}
     english_lexeme = get_lexeme(g.db, lemma_id, "en")
     if english_lexeme:
         all_rollups = get_lexeme_frequencies_all_corpora(g.db, english_lexeme)
-        form_token_ids = [
-            form.word_token_id for form in english_lexeme.forms if form.word_token_id is not None
-        ]
         for corpus_name in target_corpora:
-            if corpus_name not in enabled_corpora:
-                continue
             lexeme_frequency_by_corpus[corpus_name] = all_rollups.get(corpus_name)
-            best_rank: Optional[int] = None
-            if form_token_ids:
-                source_name = f"wordfreq_{corpus_name}"
-                rank_row = (
-                    g.db.query(func.min(ExternalLexemeAnnotation.ordinal_rank))
-                    .filter(
-                        ExternalLexemeAnnotation.word_token_id.in_(form_token_ids),
-                        ExternalLexemeAnnotation.source == source_name,
-                        ExternalLexemeAnnotation.ordinal_rank.isnot(None),
-                    )
-                    .scalar()
-                )
-                best_rank = int(rank_row) if rank_row is not None else None
-            lexeme_rank_by_corpus[corpus_name] = best_rank
+            # get_lexeme_form_ranks covers variant spellings too, so this page
+            # agrees with what combined-rank scoring actually used.
+            form_ranks = get_lexeme_form_ranks(g.db, english_lexeme, corpus_name)
+            lexeme_best_rank_by_corpus[corpus_name] = min(form_ranks) if form_ranks else None
+            lexeme_rank_by_corpus[corpus_name] = (
+                combine_ranks(form_ranks, get_corpus_zipf_exponent(g.db, corpus_name))
+                if form_ranks
+                else None
+            )
 
     return render_template(
         "lemmas/levels.html",
@@ -630,6 +624,7 @@ def view_lemma_levels(lemma_id: int) -> ResponseReturnValue:
         tier_rank_by_source_name=tier_rank_by_source_name,
         lexeme_frequency_by_corpus=lexeme_frequency_by_corpus,
         lexeme_rank_by_corpus=lexeme_rank_by_corpus,
+        lexeme_best_rank_by_corpus=lexeme_best_rank_by_corpus,
         **context,
     )
 

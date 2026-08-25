@@ -3,7 +3,7 @@ lexeme rollups + Cambridge YLE + CEFR tier signals."""
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Iterator, Optional
 from unittest.mock import patch
 
 import pytest
@@ -21,6 +21,19 @@ from storage.models.schema import (
 )
 from wordfreq.frequency import combined_rank
 from wordfreq.frequency.corpus import CorpusConfig
+
+
+@pytest.fixture(autouse=True)
+def _isolate_zipf_exponent_cache() -> Iterator[None]:
+    """Keep one test's fitted exponent out of the next one's database.
+
+    The cache is keyed by corpus name alone, which is right in production (a
+    process reads one database) but wrong here, where every test builds a
+    fresh in-memory database that reuses the name "cooking".
+    """
+    combined_rank.clear_zipf_exponent_cache()
+    yield
+    combined_rank.clear_zipf_exponent_cache()
 
 
 def _make_session() -> Session:
@@ -41,7 +54,14 @@ def _add_token_with_freq(
     token_text: str,
     corpus_name: str,
     frequency: float,
+    ordinal_rank: Optional[int] = None,
 ) -> WordToken:
+    """Add a token annotated for one corpus.
+
+    Scoring reads ``ordinal_rank`` -- the corpus's own rank for that surface
+    form. Leaving it None models a token the corpus scored but did not rank,
+    which contributes nothing to the lemma's corpus rank.
+    """
     token = WordToken(token=token_text, language_code="en")
     session.add(token)
     session.flush()
@@ -51,6 +71,7 @@ def _add_token_with_freq(
             source=f"wordfreq_{corpus_name}",
             tier_name="r1-50",
             frequency=frequency,
+            ordinal_rank=ordinal_rank,
         )
     )
     session.flush()
@@ -87,11 +108,17 @@ def _patched_run(session: Session) -> dict:
 # calls in tests still work.
 
 
-def test_combined_rank_uses_only_wordfreq_when_only_corpus_signal() -> None:
-    """A lemma with only one wordfreq corpus contribution gets that corpus' rank."""
+def test_spread_out_paradigm_beats_one_common_form() -> None:
+    """Which lemma wins is decided by combining its forms, not by its best one.
+
+    ``spread`` is never the most common word in the corpus, but three moderately
+    common forms make it a more common *lexeme* than ``peak``, whose single good
+    form is followed by two rare ones. Asserting the comparison this way round
+    means the test fails if the combination is dropped for ``min()`` or for the
+    best form alone -- both of which would rank ``peak`` first.
+    """
     session = _make_session()
     try:
-        # Configure one enabled corpus, weight 1.0
         with patch.object(
             combined_rank,
             "get_enabled_corpus_configs",
@@ -105,26 +132,26 @@ def test_combined_rank_uses_only_wordfreq_when_only_corpus_signal() -> None:
                 )
             ],
         ):
-            common = _add_lemma(session, "salt", "N01")
-            rare = _add_lemma(session, "saffron", "N02")
-            t_common = _add_token_with_freq(session, "salt", "cooking", 100.0)
-            t_rare = _add_token_with_freq(session, "saffron", "cooking", 1.0)
-            _add_form(session, common, "salt", word_token=t_common)
-            _add_form(session, rare, "saffron", word_token=t_rare)
+            spread = _add_lemma(session, "spread", "N01")
+            peak = _add_lemma(session, "peak", "N02")
+            for text, rank in (("spread", 1200), ("spreads", 1400), ("spreading", 1600)):
+                token = _add_token_with_freq(session, text, "cooking", 1.0, ordinal_rank=rank)
+                _add_form(session, spread, text, word_token=token)
+            for text, rank in (("peak", 1100), ("peaks", 9000), ("peaking", 9500)):
+                token = _add_token_with_freq(session, text, "cooking", 1.0, ordinal_rank=rank)
+                _add_form(session, peak, text, word_token=token)
             session.commit()
 
             result = _patched_run(session)
 
         assert result["success"] is True
-        # Both lemmas are absent from every tier source, so each also picks up
-        # the YLE/CEFR/Basic English unknown floors. That compresses the
-        # absolute values, but salt (corpus rank 1) still beats saffron (rank 2).
         session.expire_all()
-        salt = session.query(Lemma).filter_by(guid="N01").one()
-        saffron = session.query(Lemma).filter_by(guid="N02").one()
-        assert salt.frequency_rank == 4
-        assert saffron.frequency_rank == 8
-        assert salt.frequency_rank < saffron.frequency_rank
+        spread_row = session.query(Lemma).filter_by(guid="N01").one()
+        peak_row = session.query(Lemma).filter_by(guid="N02").one()
+
+        # peak owns the single best-ranked form (1100 vs 1200), so anything
+        # that looked only at the best form would put it ahead instead.
+        assert spread_row.frequency_rank < peak_row.frequency_rank
         assert "wordfreq_cooking" in result["sources_used"]
     finally:
         session.close()
@@ -195,7 +222,7 @@ def test_yle_plus_wordfreq_harmonic_mean() -> None:
             ],
         ):
             cat = _add_lemma(session, "cat", "N01")
-            t_cat = _add_token_with_freq(session, "cat", "cooking", 999.0)
+            t_cat = _add_token_with_freq(session, "cat", "cooking", 999.0, ordinal_rank=1)
             _add_form(session, cat, "cat", word_token=t_cat)
             session.add(LemmaTier(lemma_id=cat.id, source="cambridge_yle", tier_name="starters"))
             session.commit()
