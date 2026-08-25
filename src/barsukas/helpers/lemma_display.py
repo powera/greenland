@@ -198,6 +198,21 @@ def build_lemma_pronunciation_rows(
     return pronunciation_rows
 
 
+def _distinct_form_count(forms: Sequence[Any]) -> int:
+    """How many distinct words a language's forms amount to.
+
+    One word usually fills several grammatical slots -- English collapses
+    person and number in the past tense, so "refined" is stored once per slot
+    and an English verb has 23 rows spelling only 5 different words. Counting
+    rows reports the size of the paradigm table; what the coverage summary is
+    asking is how much of the language has actually been written down, so
+    identical spellings count once.
+    """
+    return len(
+        {(getattr(form, "derivative_form_text", "") or "").strip().lower() for form in forms} - {""}
+    )
+
+
 def build_language_coverage_rows(
     language_names: Mapping[str, str],
     translations: Mapping[str, Optional[str]],
@@ -246,7 +261,7 @@ def build_language_coverage_rows(
                 "lang_code": lang_code,
                 "lang_name": language_names[lang_code],
                 "has_translation": bool((translations.get(lang_code) or "").strip()),
-                "forms_count": len(forms_by_language.get(lang_code, [])),
+                "forms_count": _distinct_form_count(forms_by_language.get(lang_code, [])),
                 "pronunciation_count": len(pronunciation_forms_by_language.get(lang_code, [])),
                 "has_lemma_pronunciation": lang_code in lemma_pronunciation_rows,
                 "audio_total": audio_total_by_language.get(lang_code, 0),

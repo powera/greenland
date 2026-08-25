@@ -117,7 +117,12 @@
                     {% for lang_code, forms in forms_by_language.items() %}
                     <h5 class="mt-3">
                         {{ language_names.get(lang_code, lang_code) }}
-                        <span class="badge bg-secondary">{{ forms|length }} form(s)</span>
+                        {# Counts the rows in the table below, which is one per
+                           grammatical slot; several slots often share a spelling. #}
+                        <span class="badge bg-secondary">{{ forms|length }} slot(s)</span>
+                        <span class="badge bg-light text-dark">
+                            {{ forms | map(attribute='derivative_form_text') | map('lower') | unique | list | length }} word(s)
+                        </span>
                     </h5>
                     <div class="table-responsive">
                         <table class="table table-sm table-hover">

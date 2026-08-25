@@ -13,6 +13,12 @@ We sum per-form per-corpus frequencies up to the lexeme. Rank rollup is
 intentionally not provided here — ranks are not additive; if you need a rank
 for a lexeme, derive it from the rolled-up frequency in a downstream pass.
 
+Spelling variants count toward their lemma. "aluminium" is the same lexeme as
+"aluminum", so a corpus that spells it the British way is still measuring how
+often this word is used. Variant forms live in ``variant_forms`` rather than
+``derivative_forms`` (see ``storage.models.variant_form``), so they are
+collected by a separate query here and folded into the same total.
+
 The ``corpus_name`` argument is the wordfreq corpus identifier (e.g.
 ``"19th_books"``); internally it maps to annotation source ``wordfreq_<name>``.
 """
@@ -20,7 +26,7 @@ The ``corpus_name`` argument is the wordfreq corpus identifier (e.g.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from sqlalchemy.orm import Session
 
@@ -32,6 +38,7 @@ from storage.models.schema import (
     ExternalLexemeAnnotation,
     Lemma,
 )
+from storage.models.variant_form import VariantForm
 from wordfreq.frequency.corpus import get_enabled_corpus_configs
 
 
@@ -46,15 +53,25 @@ def _weight_for(prominence: Optional[str]) -> float:
 def get_token_share(session: Session, word_token_id: int, lemma_id: int) -> float:
     """Return this lemma's share (0.0–1.0) of the given WordToken's frequency.
 
-    The share is ``weight(this_lemma) / sum(weight(every_lemma_attached_via_DerivativeForm))``.
+    The share is ``weight(this_lemma) / sum(weight(every_attached_lemma))``. A
+    lemma is attached when it owns the token through a ``DerivativeForm`` or
+    through a ``VariantForm``: a lemma reaching a token only by a variant must
+    still be a claimant, or the frequency of that spelling is charged to nobody.
+
     A token attached to only one lemma always returns 1.0, regardless of that
-    lemma's prominence label. A token with no DerivativeForm attachments returns
-    0.0 (no lexeme owns the frequency).
+    lemma's prominence label. A token with no attachments returns 0.0 (no
+    lexeme owns the frequency).
     """
     rows = (
         session.query(Lemma.id, Lemma.sense_prominence)
         .join(DerivativeForm, DerivativeForm.lemma_id == Lemma.id)
         .filter(DerivativeForm.word_token_id == word_token_id)
+        .distinct()
+        .all()
+    ) + (
+        session.query(Lemma.id, Lemma.sense_prominence)
+        .join(VariantForm, VariantForm.lemma_id == Lemma.id)
+        .filter(VariantForm.word_token_id == word_token_id)
         .distinct()
         .all()
     )
@@ -96,12 +113,27 @@ def _source_for_corpus(corpus_name: str) -> str:
     return f"wordfreq_{corpus_name}"
 
 
+def _form_text(form: Union[DerivativeForm, VariantForm]) -> str:
+    """Surface text of a form row from either table.
+
+    The two models spell the column differently (``derivative_form_text`` vs.
+    ``variant_form_text``) but the rollup treats them alike.
+    """
+    if isinstance(form, VariantForm):
+        return form.variant_form_text
+    return form.derivative_form_text
+
+
 def get_lexeme_frequency(
     session: Session,
     lexeme: Lexeme,
     corpus_name: str,
 ) -> LexemeFrequency:
     """Roll up token-level frequencies into a single lexeme frequency for a corpus.
+
+    Both the lexeme's own forms and its variant spellings contribute:
+    "aluminium" is the same word as "aluminum", so a corpus using the British
+    spelling is still counting this lexeme.
 
     Returns a zero-frequency LexemeFrequency (with empty breakdown) if the
     lexeme has no forms with matching ExternalLexemeAnnotation rows for the
@@ -111,9 +143,31 @@ def get_lexeme_frequency(
 
     breakdown: List[FormFrequency] = []
     total = 0.0
-    for form in lexeme.forms:
-        if form.word_token_id is None:
+
+    # A Lexeme is deliberately a facade over derivative_forms alone, so that an
+    # unfiltered read of a lemma's forms does not return "grey"; frequency is
+    # one of the consumers that opts into variants explicitly.
+    variant_forms = (
+        session.query(VariantForm)
+        .filter(
+            VariantForm.lemma_id == lexeme.lemma.id,
+            VariantForm.language_code == lexeme.language_code,
+        )
+        .all()
+    )
+
+    # One contribution per distinct token, not per form row. A word usually
+    # fills several grammatical slots -- English collapses person and number in
+    # the past tense, so "refined" is stored once per slot and all seven rows
+    # point at the same token. Adding each row would multiply that word's
+    # frequency by the size of the paradigm table, which is why verbs used to
+    # rank far more common than the corpora support.
+    counted_token_ids: set[int] = set()
+
+    for form in list(lexeme.forms) + variant_forms:
+        if form.word_token_id is None or form.word_token_id in counted_token_ids:
             continue
+        counted_token_ids.add(form.word_token_id)
         annotation = (
             session.query(ExternalLexemeAnnotation)
             .filter(
@@ -130,7 +184,7 @@ def get_lexeme_frequency(
         breakdown.append(
             FormFrequency(
                 derivative_form_id=form.id,
-                derivative_form_text=form.derivative_form_text,
+                derivative_form_text=_form_text(form),
                 word_token_id=form.word_token_id,
                 raw_frequency=annotation.frequency,
                 share=share,
@@ -146,6 +200,60 @@ def get_lexeme_frequency(
         total_frequency=total,
         form_breakdown=tuple(breakdown),
     )
+
+
+def get_lexeme_form_ranks(
+    session: Session,
+    lexeme: Lexeme,
+    corpus_name: str,
+) -> List[int]:
+    """Every stored corpus rank among this lexeme's forms, variants included.
+
+    The corpus files carry a rank as well as a frequency for each surface form,
+    and both are kept on the annotation. This returns the ranks as they were
+    imported, for ``wordfreq.frequency.zipf`` to combine into one rank for the
+    lexeme -- the ranks are used directly rather than re-derived by sorting
+    lemmas against each other.
+
+    Homograph share-splitting deliberately plays no part here: a rank is a
+    property of the surface form in the corpus, and the corpus cannot say which
+    sense of "bank" it counted. Senses competing for a form therefore each take
+    the form's full rank, and ``Lemma.sense_prominence`` separates them
+    elsewhere.
+
+    Returns:
+        The ranks, in no particular order. Empty when the lexeme has no ranked
+        form in this corpus.
+    """
+    source = _source_for_corpus(corpus_name)
+
+    variant_forms = (
+        session.query(VariantForm)
+        .filter(
+            VariantForm.lemma_id == lexeme.lemma.id,
+            VariantForm.language_code == lexeme.language_code,
+        )
+        .all()
+    )
+
+    token_ids = {
+        form.word_token_id
+        for form in list(lexeme.forms) + variant_forms
+        if form.word_token_id is not None
+    }
+    if not token_ids:
+        return []
+
+    rows = (
+        session.query(ExternalLexemeAnnotation.ordinal_rank)
+        .filter(
+            ExternalLexemeAnnotation.word_token_id.in_(token_ids),
+            ExternalLexemeAnnotation.source == source,
+            ExternalLexemeAnnotation.ordinal_rank.isnot(None),
+        )
+        .all()
+    )
+    return [row[0] for row in rows if row[0] is not None and row[0] > 0]
 
 
 def get_lexeme_frequencies_all_corpora(
@@ -181,6 +289,7 @@ __all__ = [
     "LexemeFrequency",
     "get_lemma_frequency",
     "get_lexeme_frequencies_all_corpora",
+    "get_lexeme_form_ranks",
     "get_lexeme_frequency",
     "get_token_share",
 ]
