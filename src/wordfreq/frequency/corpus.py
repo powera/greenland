@@ -111,9 +111,7 @@ CORPUS_CONFIGS = [
         # never use, but not how everyday English is weighted.
         corpus_weight=0.6,
         max_unknown_rank=8000,
-        # Disabled until the JSON has been generated and imported; see the
-        # religious_translated note below.
-        enabled=False,
+        enabled=True,
     ),
     CorpusConfig(
         name="religious_translated",
@@ -126,16 +124,12 @@ CORPUS_CONFIGS = [
         # novels miss, but not a guide to how modern English is weighted.
         corpus_weight=0.5,
         max_unknown_rank=8000,
-        # Disabled until data/wordfreq/religious_translated.json has been
-        # generated (wordfreq/corpora/build_wordfreq.py) and imported. An
-        # enabled corpus with no annotations makes combined_rank charge every
-        # lemma this corpus's unknown-rank floor, which would drag all ranks.
-        enabled=False,
+        enabled=True,
     ),
     CorpusConfig(
         name="cooking",
         description="Word frequency data from Cookbooks",
-        file_path="cooking_wordfreq.json",
+        file_path="cooking.json",
         max_words=1000,
         file_type="json",
         value_type="frequency",

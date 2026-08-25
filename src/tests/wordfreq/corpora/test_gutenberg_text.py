@@ -84,6 +84,39 @@ def test_curly_apostrophes_normalize_to_straight() -> None:
     assert tokens == ["it's", "alice's", "book"]
 
 
+def test_every_apostrophe_variant_folds_to_one_word() -> None:
+    """A contraction must be one word corpus-wide, however a book typesets it.
+
+    Books are individually consistent but differ from each other, so an
+    unfolded variant splits a common contraction across two entries and
+    ``--min-books`` can then drop both.  U+02BC is a modifier *letter*, so
+    without folding it splits "donʼt" into "don" + "t" rather than merely
+    spelling it differently.
+    """
+    for text in ("don't", "don’t", "donʼt", "don′t", "don‛t"):
+        tokens = [token for token, _, _ in iter_tokens(text)]
+        assert tokens == ["don't"], f"{text!r} tokenized as {tokens}"
+
+
+def test_dashes_separate_words_rather_than_joining_them() -> None:
+    """An unspaced em dash is ordinary 19th-century typesetting, not a compound."""
+    for text in ("cat—the dog", "cat–the dog", "cat--the dog", "cat―the dog"):
+        tokens = [token for token, _, _ in iter_tokens(text)]
+        assert tokens == ["cat", "the", "dog"], f"{text!r} tokenized as {tokens}"
+
+
+def test_quote_marks_do_not_attach_to_words() -> None:
+    """Folding ‘ to ' must not glue a quote mark onto the word it opens."""
+    tokens = [token for token, _, _ in iter_tokens("‘Tis so,’ said the boys’ friend.")]
+    assert tokens == ["tis", "so", "said", "the", "boys", "friend"]
+
+
+def test_hyphen_still_splits_a_compound() -> None:
+    """A plain hyphen is left alone; the token regex splits it as it always did."""
+    tokens = [token for token, _, _ in iter_tokens("a well-known man")]
+    assert tokens == ["a", "well", "known", "man"]
+
+
 def test_sentence_initial_flag_marks_line_and_sentence_starts() -> None:
     text = 'Alice ran. Alice ran again.\nAlice sang.\n"Alice!" he said, and Alice smiled.'
     tokens = list(iter_tokens(text))

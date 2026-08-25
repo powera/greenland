@@ -440,6 +440,75 @@ EARLY_MODERN_SCIENCE_BOOKS: Tuple[GutenbergBook, ...] = (
     GutenbergBook(41654, "Introduction to Mathematical Philosophy", "Russell, Bertrand", 1919),
 )
 
+
+# --- Cooking -----------------------------------------------------------------
+
+# Recipe writing, which is where the everyday vocabulary of food, quantity and
+# kitchen process lives - words the novels use in passing and the science list
+# never uses at all.  The corpus is deliberately small and narrow: it exists to
+# cover that vocabulary, not to weigh general English, which is why its
+# ``corpus_weight`` and ``max_words`` in ``wordfreq.frequency.corpus`` are low.
+#
+# The first five books reproduce the previous hand-built cooking corpus, whose
+# ``books_processed`` keys carried their Gutenberg IDs.  Two of its seven
+# entries (``veg100``, ``bread_500``) were locally named files with no
+# recoverable ID; the vegetable and bread cookery below stands in for them.
+COOKING_BOOKS: Tuple[GutenbergBook, ...] = (
+    # Carried over from the previous cooking corpus
+    GutenbergBook(
+        13923,
+        "The Whitehouse Cookbook (1887)",
+        "Gillette, F. L.; Ziemann, Hugo",
+        1887,
+        "general American household cookery",
+    ),
+    GutenbergBook(17438, "Mrs. Wilson's Cook Book", "Wilson, Mary A.", 1920),
+    GutenbergBook(
+        31534,
+        "Fifty-two Sunday Dinners: A Book of Recipes",
+        "Hiller, Elizabeth O.",
+        1915,
+    ),
+    GutenbergBook(
+        42868,
+        "A Thousand Ways to Please a Husband with Bettina's Best Recipes",
+        "Weaver, Louise Bennett; LeCron, Helen Cowles",
+        1917,
+    ),
+    GutenbergBook(51542, "The Just-Wed Cook Book", "Kiessling, E. F.", 1917),
+    # Standing in for the two untraceable files, plus general cookery for
+    # breadth.  IDs read off the Cookery bookshelf listing
+    # (gutenberg.org/ebooks/bookshelf/419), not written from memory.
+    GutenbergBook(
+        26209,
+        "The Golden Age Cook Book",
+        "Dwight, Henrietta Latham",
+        1898,
+        "vegetarian cookery, for the vocabulary veg100 supplied",
+    ),
+    GutenbergBook(
+        14594,
+        "Cassell's Vegetarian Cookery: A Manual of Cheap and Wholesome Diet",
+        "Payne, A. G.",
+        1891,
+    ),
+    GutenbergBook(
+        9935,
+        "Woman's Institute Library of Cookery. Volume 1: Essentials of Cookery",
+        "Woman's Institute of Domestic Arts and Sciences",
+        1918,
+        "bread and batter cookery, for the vocabulary bread_500 supplied; one "
+        "volume stands for the work, the others are not included",
+    ),
+    GutenbergBook(
+        19077,
+        "Salads, Sandwiches and Chafing-Dish Dainties",
+        "Hill, Janet McKenzie",
+        1899,
+    ),
+    GutenbergBook(34822, "The Century Cook Book", "Ronald, Mary", 1895),
+)
+
 # Gutenberg IDs in this file that have NOT been checked against catalogue
 # metadata, and so may point at a different book than the title claims.  It is
 # empty: every ID here has been confirmed.  Add an ID here when writing an
@@ -481,6 +550,12 @@ BOOK_LISTS: Dict[str, BookList] = {
         max_words=3000,
         books=RELIGIOUS_TRANSLATED_BOOKS,
         always_vocabulary=RELIGIOUS_VOCABULARY,
+    ),
+    "cooking": BookList(
+        corpus_name="cooking",
+        description="Word frequency data from Cookbooks",
+        max_words=2000,
+        books=COOKING_BOOKS,
     ),
 }
 

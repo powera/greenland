@@ -22,7 +22,6 @@ import json
 import logging
 import os
 import sys
-import tempfile
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
@@ -32,6 +31,7 @@ if str(Path(__file__).parent.parent.parent) not in sys.path:
 
 import requests
 
+import constants
 from wordfreq.corpora.book_lists import BOOK_LISTS, GutenbergBook, find_book, get_book_list
 from wordfreq.corpora.gutenberg_text import extract_title
 
@@ -63,11 +63,16 @@ MIN_REASONABLE_BYTES = 5000
 
 
 def default_cache_dir() -> Path:
-    """Scratch directory holding downloaded books."""
+    """Directory holding downloaded books.
+
+    Defaults to ``data/working/gutenberg`` in the repo, which is gitignored and
+    survives reboots.  Gutenberg rate-limits downloads, so re-fetching a book
+    because a scratch directory was cleared is worth avoiding.
+    """
     configured = os.environ.get("GREENLAND_GUTENBERG_CACHE")
     if configured:
         return Path(configured)
-    return Path(tempfile.gettempdir()) / "greenland-gutenberg"
+    return Path(constants.GUTENBERG_CACHE_DIR)
 
 
 def text_path(cache_dir: Path, book_id: int) -> Path:

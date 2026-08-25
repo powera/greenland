@@ -61,9 +61,25 @@ MAX_APPARATUS_PARAGRAPHS = 4
 
 # --- Tokenization ------------------------------------------------------------
 
+# Apostrophe variants, all folded to ASCII "'" before tokenizing.  Books are
+# individually consistent but differ from each other, so without this the same
+# contraction is two different words across the corpus: a book typeset with
+# U+2019 contributes to "don’t" and one with ASCII to "don't", and --min-books
+# can then drop both for appearing in too few books.  U+02BC is a modifier
+# letter rather than punctuation, so it would split "donʼt" into "don" + "t".
+APOSTROPHE_VARIANTS = "’‘ʼ՚′´‛"
+_APOSTROPHE_RE = re.compile(f"[{APOSTROPHE_VARIANTS}]")
+
+# Dash variants that separate words: em, en, horizontal bar, figure dash, minus,
+# and the "--" that older files use for an em dash.  A plain hyphen is NOT here:
+# it joins a genuine compound ("well-known"), which the token regex then splits
+# into its parts, and that is the existing behaviour.
+DASH_VARIANTS = "—–―‒−"
+_DASH_RE = re.compile(f"[{DASH_VARIANTS}]|--+")
+
 # A raw token may contain digits; those are dropped afterwards, so that "1st"
 # disappears entirely instead of contributing a bogus "st".
-RAW_TOKEN_RE = re.compile(r"[A-Za-z0-9]+(?:['’][A-Za-z0-9]+)*")
+RAW_TOKEN_RE = re.compile(r"[A-Za-z0-9]+(?:'[A-Za-z0-9]+)*")
 CONTAINS_DIGIT_RE = re.compile(r"[0-9]")
 
 # Single letters that are real English words; every other one-letter token is
@@ -76,10 +92,17 @@ _SENTENCE_ENDERS = ".!?"
 
 
 def _normalize(text: str) -> str:
-    """Normalize encoding artifacts that would otherwise split tokens."""
+    """Normalize encoding artifacts that would otherwise split or double tokens."""
     text = text.replace("﻿", "")
     text = text.replace("\r\n", "\n").replace("\r", "\n")
     text = unicodedata.normalize("NFC", text)
+    # Fold typographic apostrophes so a contraction is one word corpus-wide.
+    text = _APOSTROPHE_RE.sub("'", text)
+    # Dashes separate words rather than joining them: "cat—the" is two words,
+    # and an unspaced em dash is the ordinary 19th-century typesetting.  The
+    # token regex already stops at them, but a dash flanked by letters must not
+    # be mistaken for a hyphenated compound, so make the break explicit.
+    text = _DASH_RE.sub(" ", text)
     return text
 
 
@@ -188,12 +211,17 @@ def iter_tokens(text: str) -> Iterator[Tuple[str, bool, bool]]:
 
     Tokens containing digits, and single letters other than ``a``/``i``/``o``,
     are skipped entirely.
+
+    The text is normalized first, so apostrophe and dash variants are folded
+    whether or not the caller came through
+    :func:`strip_gutenberg_boilerplate`.
     """
+    text = _normalize(text)
     for match in RAW_TOKEN_RE.finditer(text):
         raw = match.group(0)
         if CONTAINS_DIGIT_RE.search(raw):
             continue
-        lowered = raw.lower().replace("’", "'")
+        lowered = raw.lower()
         if len(lowered) == 1 and lowered not in VALID_SINGLE_LETTERS:
             continue
         if lowered.startswith("'") or lowered.endswith("'"):

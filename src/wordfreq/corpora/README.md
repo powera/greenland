@@ -1,13 +1,14 @@
 # Gutenberg corpus generation
 
 Builds the `data/wordfreq/*.json` word-frequency corpora from Project
-Gutenberg books. Three corpora have book lists here:
+Gutenberg books. Five corpora have book lists here:
 
 | Corpus | Books | Contents |
 | --- | --- | --- |
 | `19th_books` | 54 | Novels, children's books, essays and science first published 1800-1899, British / American / translated European |
 | `20th_books` | 62 | Books first published 1900-1938, i.e. what Gutenberg carries of the 20th century |
 | `early_modern_science` | 30 | Science writing from Boyle and Newton to Einstein and Eddington, written in English by its authors (Einstein excepted) |
+| `cooking` | 10 | Recipe writing, 1878-1920: general household cookery, vegetarian cookery, salads and baking |
 | `religious_translated` | 23 | Old religious works in English translation: Bible (three translations), Apocrypha, Enoch, Talmud selections, Qur'an (two translations), Upanishads, Bhagavad-Gita, Mahabharata, Ramayana, Dhammapada, Tao Te Ching, Analects, Shih King, Eddas, Egyptian Book of the Dead, Augustine, Aquinas, à Kempis |
 
 ## Running it
@@ -21,7 +22,7 @@ Two steps. The first is the only one that touches the network.
 PYTHONPATH=src python src/wordfreq/corpora/download_gutenberg.py \
     --corpus early_modern_science --verify
 
-# 1. Download the books to a scratch directory (not the repo).
+# 1. Download the books to the cache (data/working/gutenberg, gitignored).
 PYTHONPATH=src python src/wordfreq/corpora/download_gutenberg.py --corpus all
 
 # 2. Build each corpus JSON from the cache.
@@ -29,10 +30,19 @@ PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus 19th_books
 PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus 20th_books
 PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus religious_translated
 PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus early_modern_science
+PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus cooking
 ```
 
+Six books in `early_modern_science` (5001, 29782, 15114, 37157, 41568, 41654)
+have no plain-text edition on Gutenberg - only HTML, PDF or LaTeX source - so
+that corpus is built with `--skip-missing` and covers 24 of its 30 books.  The
+IDs are correct; the text simply is not published in a form this pipeline
+reads.
+
 The cache defaults to `$GREENLAND_GUTENBERG_CACHE`, else
-`<tempdir>/greenland-gutenberg`; `--dest` / `--source-dir` override it.
+`data/working/gutenberg` in the repo (gitignored, and persistent - Gutenberg
+rate-limits, so a cache a reboot clears costs real re-download time);
+`--dest` / `--source-dir` override it.
 Downloads are skipped when the file is already cached, so step 2 can be redone
 freely — it is deterministic and needs no network. `--delay` (default 1.5s)
 paces requests to gutenberg.org; keep it polite.
@@ -58,6 +68,13 @@ verse and chapter headings from marking every word a name. Names are reported
 in `name_frequency`, not silently dropped. `I`/`I'm`/`I've` and friends are
 exempt — the previous 19th-century corpus lost the first-person pronoun
 entirely to this rule.
+
+**Apostrophes and dashes are folded before counting.** Books are individually
+consistent in their typography but differ from each other, so `don't`, `don’t`
+and `donʼt` would otherwise be three separate words and `--min-books` could
+drop all three. Every apostrophe variant becomes ASCII `'`; every dash variant
+(and `--`) becomes a word separator, because an unspaced em dash is ordinary
+19th-century typesetting rather than a compound. A plain hyphen is left alone.
 
 **Rank comes from a word's average rate across books, not pooled counts.**
 Pooling lets one long book decide a word's rank: that is why `whale` sat near
@@ -92,10 +109,18 @@ so they read like occurrence counts; only their ratios are meaningful.
 
 ## After generating
 
-`religious_translated` and `early_modern_science` ship **disabled** in
-`wordfreq.frequency.corpus.CORPUS_CONFIGS`. Enable each once its JSON exists
-and has been imported — an enabled corpus with no annotations makes
-`combined_rank` charge every lemma that corpus's unknown-rank floor.
+Every corpus here is now enabled in
+`wordfreq.frequency.corpus.CORPUS_CONFIGS`, and each one's JSON exists.
+**Import them before relying on `combined_rank`**: an enabled corpus with no annotations makes
+`combined_rank` charge every lemma that corpus's unknown-rank floor, which
+drags every rank down.
+
+The `cooking` corpus replaces the older hand-built `cooking_wordfreq.json`
+(the file is renamed to `cooking.json`, matching every other corpus). Five of
+that file's seven books carried their Gutenberg IDs in the `books_processed`
+keys and are carried over; the other two (`veg100`, `bread_500`) were locally
+named files with no recoverable ID, so vegetarian cookery and a baking-heavy
+volume stand in for them.
 
 ## Adding or changing books
 
