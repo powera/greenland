@@ -79,7 +79,10 @@ class BookList:
         books: The books making up the corpus.
         always_vocabulary: Words this corpus keeps as ordinary vocabulary even
             though they are almost always capitalized, and so would otherwise
-            be classified as proper nouns and dropped.
+            be classified as proper nouns and dropped.  Corpus-specific
+            additions only; the names every corpus should keep (days, months,
+            cities, countries) come from ``data/release`` via
+            :meth:`resolved_always_vocabulary`.
     """
 
     corpus_name: str
@@ -92,6 +95,20 @@ class BookList:
     def gutenberg_ids(self) -> List[int]:
         """Gutenberg IDs of every book in the list."""
         return [book.gutenberg_id for book in self.books]
+
+    def resolved_always_vocabulary(self, release_dir: Optional[str] = None) -> Tuple[str, ...]:
+        """This corpus's own never-names plus the release-derived ones.
+
+        Read at build time rather than baked into the dataclass, so a lemma
+        added to ``data/release`` reaches the next corpus build without an
+        edit here. See :mod:`wordfreq.corpora.proper_noun_vocabulary` for what
+        the release contributes and what it deliberately holds back.
+        """
+        from wordfreq.corpora.proper_noun_vocabulary import load_always_vocabulary
+
+        combined = set(word.lower() for word in self.always_vocabulary)
+        combined.update(load_always_vocabulary(release_dir=release_dir))
+        return tuple(sorted(combined))
 
 
 # --- 19th century ------------------------------------------------------------
@@ -519,32 +536,32 @@ BOOK_LISTS: Dict[str, BookList] = {
     "19th_books": BookList(
         corpus_name="19th_books",
         description="Word frequency data from 19th century books",
-        max_words=7500,
+        max_words=10000,
         books=NINETEENTH_CENTURY_BOOKS,
     ),
     "20th_books": BookList(
         corpus_name="20th_books",
         description="Word frequency data from 20th century books",
-        max_words=7500,
+        max_words=10000,
         books=TWENTIETH_CENTURY_BOOKS,
     ),
     "early_modern_science": BookList(
         corpus_name="early_modern_science",
         description="Word frequency data from early modern science writing, Boyle to Osler",
-        max_words=4000,
+        max_words=5200,
         books=EARLY_MODERN_SCIENCE_BOOKS,
     ),
     "religious_translated": BookList(
         corpus_name="religious_translated",
         description="Word frequency data from old religious works in English translation",
-        max_words=4000,
+        max_words=5200,
         books=RELIGIOUS_TRANSLATED_BOOKS,
         always_vocabulary=RELIGIOUS_VOCABULARY,
     ),
     "cooking": BookList(
         corpus_name="cooking",
         description="Word frequency data from Cookbooks",
-        max_words=2000,
+        max_words=2600,
         books=COOKING_BOOKS,
     ),
 }

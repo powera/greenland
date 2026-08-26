@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Word Tokens{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/word_tokens.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <h1 class="h4 mb-1"><i class="bi bi-fonts"></i> Word Tokens</h1>
+        <p class="text-muted small mb-0">
+            A word token is one spelling in one language &mdash; &ldquo;top&rdquo;, &ldquo;will&rdquo;,
+            &ldquo;ice cream&rdquo; &mdash; regardless of which sense means it.
+            Frequency is measured here, then split across the senses that share the string.
+        </p>
+    </div>
+</div>
+
+<form method="get" class="row g-2 align-items-end mb-4">
+    <div class="col-auto">
+        <label for="q" class="form-label mb-1">Token</label>
+        <input type="text" class="form-control form-control-sm" id="q" name="q"
+               value="{{ query_text }}" placeholder="top, will, ice cream" autofocus>
+    </div>
+    <div class="col-auto">
+        <label for="language" class="form-label mb-1">Language</label>
+        <input type="text" class="form-control form-control-sm wt-lang-input" id="language"
+               name="language" value="{{ language_code }}">
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-primary">Look up</button>
+    </div>
+</form>
+
+{% if query_text %}
+    {% if matches %}
+        <p class="text-muted small">No exact token &ldquo;{{ query_text }}&rdquo;. Closest matches:</p>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Token</th>
+                        <th class="text-end">Combined rank</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for token in matches %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('word_tokens.detail', word_token_id=token.id) }}">{{ token.token }}</a>
+                        </td>
+                        <td class="text-end text-muted">
+                            {{ token.frequency_rank if token.frequency_rank is not none else '&mdash;'|safe }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            No token matching &ldquo;{{ query_text }}&rdquo; in <code>{{ language_code }}</code>.
+        </div>
+    {% endif %}
+{% endif %}
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h2 class="h6 mb-2"><i class="bi bi-bar-chart-steps"></i> Corpus vocabulary</h2>
+        <p class="text-muted small mb-2">
+            Words that lean toward one corpus more than the rest &mdash; the cooking words,
+            the science words.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+            {% for corpus in corpus_options %}
+            <a class="btn btn-sm btn-outline-secondary"
+               href="{{ url_for('word_tokens.corpus_skew', corpus=corpus.name) }}"
+               title="{{ corpus.description }}">{{ corpus.name }}</a>
+            {% endfor %}
+        </div>
+        <hr>
+        <h2 class="h6 mb-2"><i class="bi bi-align-middle"></i> Register-neutral words</h2>
+        <p class="text-muted small mb-2">
+            The complement: words that sit at the same frequency in every corpus.
+        </p>
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('word_tokens.steady') }}">
+            Steadiest across corpora
+        </a>
+    </div>
+</div>
+{% endblock %}

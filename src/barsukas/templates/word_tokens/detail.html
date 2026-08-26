@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}{{ view.token if view else 'Word Token' }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/word_tokens.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <a href="{{ url_for('word_tokens.index') }}" class="text-muted small">
+            <i class="bi bi-arrow-left"></i> Word tokens
+        </a>
+    </div>
+</div>
+
+{% if not view %}
+<div class="alert alert-danger">No such word token.</div>
+{% else %}
+
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="h3 mb-1">
+            <span class="wt-token">{{ view.token }}</span>
+            <span class="badge bg-secondary align-middle">{{ view.language_code }}</span>
+            {% if view.is_multiword %}
+                <span class="badge bg-info align-middle" title="Stored as a single token despite the space">multi-word</span>
+            {% endif %}
+            {% if view.is_homograph %}
+                <span class="badge bg-warning text-dark align-middle">{{ view.lemma_ids|length }} senses</span>
+            {% endif %}
+        </h1>
+        <p class="text-muted small mb-0">
+            Word token #{{ view.word_token.id }}{% if view.word_token.frequency_rank is not none %}
+            &middot; combined rank {{ view.word_token.frequency_rank }}{% endif %}
+        </p>
+    </div>
+</div>
+
+<!-- Lemmas using this string -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-diagram-3"></i> Lemmas using this token</span>
+        <span class="text-muted small">{{ view.attachments|length }} form link{{ '' if view.attachments|length == 1 else 's' }}</span>
+    </div>
+    <div class="card-body p-0">
+        {% if view.attachments %}
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Lemma</th>
+                        <th>POS</th>
+                        <th>Definition</th>
+                        <th>Via</th>
+                        <th>Grammatical form</th>
+                        <th class="text-end" title="Share of this token's corpus frequency assigned to this sense">Freq. share</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attachment in view.attachments %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('lemmas.view_lemma', lemma_id=attachment.lemma_id) }}">
+                                {{ attachment.display_text }}
+                            </a>
+                            {% if attachment.is_base_form %}
+                                <span class="badge bg-light text-dark border">base</span>
+                            {% endif %}
+                            {% if attachment.guid %}
+                                <div class="text-muted wt-guid">{{ attachment.guid }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted small">{{ attachment.pos_type }}</td>
+                        <td class="small">{{ attachment.definition_text }}</td>
+                        <td>
+                            {% if attachment.attachment_kind == 'variant' %}
+                                <span class="badge bg-info text-dark"
+                                      title="Alternate spelling of the same word">{{ attachment.variant_kind or 'variant' }}</span>
+                                {% if attachment.variant_key %}
+                                    <div class="text-muted wt-guid">{{ attachment.variant_key }}</div>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge bg-light text-dark border">form</span>
+                            {% endif %}
+                            {% if attachment.form_text != view.token %}
+                                <div class="text-muted wt-guid">{{ attachment.form_text }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted small">{{ attachment.grammatical_form or '—' }}</td>
+                        <td class="text-end">
+                            {% if attachment.share is not none %}
+                                <span class="wt-share">{{ '%.1f'|format(attachment.share * 100) }}%</span>
+                                <div class="text-muted wt-guid">{{ attachment.sense_prominence }}</div>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-3 text-muted small">
+            No lemma uses this token yet. The corpora and tier sources below still
+            measure the string &mdash; nothing in this database claims its frequency.
+        </div>
+        {% endif %}
+    </div>
+    {% if view.is_homograph %}
+    <div class="card-footer text-muted small">
+        A corpus counts the string, not the sense, so this token's frequency is split
+        across the competing lemmas by their sense prominence.
+    </div>
+    {% endif %}
+</div>
+
+<!-- Corpus frequency -->
+<div class="card mb-4">
+    <div class="card-header"><i class="bi bi-graph-up"></i> Corpus frequency</div>
+    <div class="card-body p-0">
+        {% if view.wordfreq_stats %}
+        <div class="table-responsive">
+            <table class="table table-sm mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Corpus</th>
+                        <th class="text-end">Rank</th>
+                        <th class="text-end" title="Occurrences per million words">Freq. / M</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in view.wordfreq_stats %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('word_tokens.corpus_skew', corpus=stat.corpus_name) }}">{{ stat.corpus_name }}</a>
+                        </td>
+                        <td class="text-end">{{ stat.ordinal_rank if stat.ordinal_rank is not none else '—' }}</td>
+                        <td class="text-end">{{ '%.1f'|format(stat.frequency) if stat.frequency is not none else '—' }}</td>
+                        <td class="text-muted small">{{ corpus_descriptions.get(stat.corpus_name, '') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-3 text-muted small">No corpus attests this token.</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Tier sources -->
+{% if view.tier_stats %}
+<div class="card mb-4">
+    <div class="card-header"><i class="bi bi-mortarboard"></i> Learner tiers</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Tier</th>
+                        <th>POS hint</th>
+                        <th>Sense hint</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in view.tier_stats %}
+                    <tr>
+                        <td>{{ stat.source }}</td>
+                        <td><span class="badge bg-secondary">{{ stat.tier_name }}</span></td>
+                        <td class="text-muted small">{{ stat.pos_hint or '—' }}</td>
+                        <td class="text-muted small">{{ stat.sense_hint or '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endif %}
+{% endblock %}

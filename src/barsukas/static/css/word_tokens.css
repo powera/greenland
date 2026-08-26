@@ -1,0 +1,38 @@
+/* Word token browsing: surface-string detail and corpus vocabulary. */
+
+.wt-token {
+    font-family: var(--bs-font-monospace, monospace);
+    font-weight: 600;
+}
+
+/* Secondary identifiers under a table cell's main value (GUID, source form,
+   prominence label). Smaller than .small so the row stays one visual line. */
+.wt-guid {
+    font-size: 0.75rem;
+    line-height: 1.2;
+}
+
+.wt-share {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+.wt-score {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+/* Rank columns line up digit-for-digit so the size of a gap reads at a glance. */
+.wt-score,
+.table td.text-end,
+.table th.text-end {
+    font-variant-numeric: tabular-nums;
+}
+
+.wt-lang-input {
+    width: 6rem;
+}
+
+.wt-num-input {
+    width: 6rem;
+}

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Register-neutral words{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/word_tokens.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <a href="{{ url_for('word_tokens.index') }}" class="text-muted small">
+            <i class="bi bi-arrow-left"></i> Word tokens
+        </a>
+        <h1 class="h4 mb-1 mt-2">
+            <i class="bi bi-align-middle"></i> Register-neutral words
+        </h1>
+        <p class="text-muted small mb-0">
+            Words whose frequency barely moves between corpora &mdash; as common in
+            cookbooks as in scripture or science writing. The complement of the
+            <a href="{{ url_for('word_tokens.corpus_skew') }}">corpus vocabulary</a> page.
+        </p>
+    </div>
+</div>
+
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-auto">
+        <label for="max_rank" class="form-label mb-1"
+               title="Ignore a corpus's measurement when it ranks the word worse than this">
+            Best rank required
+        </label>
+        <input type="number" class="form-control form-control-sm wt-num-input" id="max_rank"
+               name="max_rank" value="{{ max_rank if max_rank is not none else '' }}"
+               min="1" placeholder="any">
+    </div>
+    <div class="col-auto">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="require_all" name="require_all"
+                   value="1" {% if require_all %}checked{% endif %}>
+            <label class="form-check-label small" for="require_all">
+                Require all {{ corpus_names|length }} corpora
+            </label>
+        </div>
+    </div>
+    <div class="col-auto">
+        <label for="min_corpora" class="form-label mb-1">Min. corpora</label>
+        <input type="number" class="form-control form-control-sm wt-num-input" id="min_corpora"
+               name="min_corpora" value="{{ min_corpora }}" min="2" max="{{ corpus_names|length }}">
+    </div>
+    <div class="col-auto">
+        <input type="hidden" name="require_all" value="0">
+        <button type="submit" class="btn btn-sm btn-primary">Apply</button>
+    </div>
+</form>
+
+<div class="alert alert-light border small">
+    Ranked by the <strong>standard deviation</strong> of a word's Zipf value across
+    {% if require_all %}all {{ corpus_names|length }} corpora{% else %}the corpora that attest it{% endif %}.
+    <strong>Spread</strong> is the plain-language version: the gap between the corpus that
+    uses the word least and the one that uses it most, in Zipf &mdash; 0.30 means the
+    extremes differ by a factor of two.
+    {% if not require_all %}
+        <br>
+        <i class="bi bi-exclamation-triangle"></i>
+        Rows measured over fewer corpora are not directly comparable: variance over four
+        points is systematically smaller than over six, so the thinnest evidence tends to
+        rise. Check the <em>Corpora</em> column before reading the order.
+    {% endif %}
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Steadiest across corpora</span>
+        <span class="text-muted small">{{ steady_words|length }} shown</span>
+    </div>
+    <div class="card-body p-0">
+        {% if steady_words %}
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Word</th>
+                        <th class="text-end" title="Standard deviation of Zipf across corpora">Std. dev.</th>
+                        <th class="text-end" title="Highest Zipf minus lowest Zipf">Spread</th>
+                        <th class="text-end" title="Mean Zipf: 6.0 is once per thousand words">Mean Zipf</th>
+                        <th>Least in</th>
+                        <th>Most in</th>
+                        <th class="text-end">Corpora</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for word in steady_words %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('word_tokens.detail', word_token_id=word.word_token_id) }}">{{ word.token }}</a>
+                        </td>
+                        <td class="text-end wt-score">{{ '%.3f'|format(word.stdev) }}</td>
+                        <td class="text-end">{{ '%.2f'|format(word.spread) }}</td>
+                        <td class="text-end text-muted">{{ '%.2f'|format(word.mean_zipf) }}</td>
+                        <td class="text-muted small">
+                            {{ word.lowest_corpus }}
+                            <span class="wt-guid">{{ '%.2f'|format(word.min_zipf) }}</span>
+                        </td>
+                        <td class="text-muted small">
+                            {{ word.highest_corpus }}
+                            <span class="wt-guid">{{ '%.2f'|format(word.max_zipf) }}</span>
+                        </td>
+                        <td class="text-end text-muted">{{ word.corpus_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-3 text-muted small">
+            No word is attested in every corpus under these settings. Try relaxing the
+            rank requirement, or untick &ldquo;require all&rdquo;.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
