@@ -38,9 +38,73 @@ from storage.models.schema import (
     DerivativeForm,
     ExternalLexemeAnnotation,
     Lemma,
+    WordToken,
 )
 from storage.models.variant_form import VariantForm
 from wordfreq.frequency.corpus import get_enabled_corpus_configs
+
+
+def link_forms_to_word_tokens(session: Session, language_code: str = "en") -> Dict[str, int]:
+    """Set ``word_token_id`` on forms whose surface text matches a ``WordToken``.
+
+    Forms arrive from the release files with no ``word_token_id``: the release
+    format carries no tokens, and the wordfreq importer creates ``WordToken``
+    rows only once a corpus is loaded. Until the two are wired together every
+    rollup here skips every form (they all filter on ``word_token_id is not
+    None``), so a database can hold a full set of corpus annotations and still
+    roll up zero -- combined ranks then quietly collapse to the tier signals
+    (CEFR / Cambridge YLE / Basic English) alone.
+
+    Both ``derivative_forms`` and ``variant_forms`` are linked: a variant counts
+    toward its lemma (see the module docstring), so leaving variants unlinked
+    would drop the British spelling of a word from its own frequency.
+
+    Matching is case-insensitive; the wordfreq importer lowercases every token.
+    Only rows whose FK is currently NULL are touched, so this is idempotent and
+    safe to re-run.
+
+    Returns a dict of ``{"derivative_forms": n, "variant_forms": n}``.
+    """
+    tokens = session.query(WordToken).filter(WordToken.language_code == language_code).all()
+    token_id_by_text: Dict[str, int] = {}
+    for token in tokens:
+        token_id_by_text.setdefault(token.token.lower(), token.id)
+
+    counts: Dict[str, int] = {"derivative_forms": 0, "variant_forms": 0}
+    if not token_id_by_text:
+        return counts
+
+    derivative_forms = (
+        session.query(DerivativeForm)
+        .filter(
+            DerivativeForm.language_code == language_code,
+            DerivativeForm.word_token_id.is_(None),
+        )
+        .all()
+    )
+    for derivative_form in derivative_forms:
+        token_id = token_id_by_text.get((derivative_form.derivative_form_text or "").lower())
+        if token_id is not None:
+            derivative_form.word_token_id = token_id
+            counts["derivative_forms"] += 1
+
+    variant_forms = (
+        session.query(VariantForm)
+        .filter(
+            VariantForm.language_code == language_code,
+            VariantForm.word_token_id.is_(None),
+        )
+        .all()
+    )
+    for variant_form in variant_forms:
+        token_id = token_id_by_text.get((variant_form.variant_form_text or "").lower())
+        if token_id is not None:
+            variant_form.word_token_id = token_id
+            counts["variant_forms"] += 1
+
+    if counts["derivative_forms"] or counts["variant_forms"]:
+        session.commit()
+    return counts
 
 
 def _weight_for(prominence: Optional[str]) -> float:

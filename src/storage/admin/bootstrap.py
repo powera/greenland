@@ -71,6 +71,7 @@ def bootstrap_empty_database(config: DataSourceConfig, *, dry_run: bool = False)
                 "create_schema",
                 "sync_corpus_configurations",
                 "load_corpora",
+                "link_forms_to_word_tokens",
                 "import_tiers",
                 "calculate_ranks",
             ],
@@ -142,6 +143,10 @@ def bootstrap_from_release(
     service = DatabaseAdminService(config)
     result["config_sync"] = service.sync_configurations()
     result["corpus_load"] = service.load_corpora()
+    # Release files carry no word tokens, so the forms just imported have no
+    # word_token_id until the corpus load creates the tokens to point at. The
+    # rank pass rolls up nothing without this link.
+    result["form_token_links"] = service.link_forms_to_word_tokens()
     result["tier_import"] = service.import_tiers()
     result["rank_calculation"] = service.calculate_ranks()
     return result

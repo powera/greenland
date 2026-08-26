@@ -15,10 +15,11 @@ from wordfreq.tiers.cambridge_yle import CambridgeYleImporter
 from wordfreq.tiers.cefr import CefrImporter
 from wordfreq.tiers.base import TierImporter
 from wordfreq.tiers.runner import run_import as run_tier_import
+from wordfreq.lexeme_frequency import link_forms_to_word_tokens as link_forms_to_tokens
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.database import ensure_tables_exist, initialize_corpora
-from storage.models.schema import Corpus  # Ensure Corpus model is imported
+from storage.models.schema import Corpus, DerivativeForm  # Ensure Corpus model is imported
 from storage.translation_helpers import has_translation_clause
 import storage.admin.legacy_json_import as legacy_json_import
 
@@ -326,6 +327,39 @@ class DatabaseAdminService:
         logger.info(f"Corpus loading complete")
         return result
 
+    def link_forms_to_word_tokens(self, dry_run: bool = False) -> Dict[str, Any]:
+        """Wire release-loaded forms to the WordTokens the corpus import created.
+
+        Must run after ``load_corpora`` and before ``calculate_ranks``: the
+        rollup skips forms with no ``word_token_id``, so without this step the
+        corpus signal never reaches a lemma and ranks fall back to tier sources
+        alone. Idempotent -- only NULL foreign keys are filled in.
+        """
+        logger.info(f"Linking forms to word tokens (dry_run={dry_run})...")
+        session = self.get_session()
+        try:
+            if dry_run:
+                unlinked = (
+                    session.query(DerivativeForm)
+                    .filter(
+                        DerivativeForm.language_code == "en",
+                        DerivativeForm.word_token_id.is_(None),
+                    )
+                    .count()
+                )
+                return {"dry_run": True, "success": True, "unlinked_derivative_forms": unlinked}
+            counts = link_forms_to_tokens(session)
+            logger.info(
+                f"Linked {counts['derivative_forms']} derivative forms and "
+                f"{counts['variant_forms']} variant forms to word tokens"
+            )
+            return {"dry_run": False, "success": True, "linked": counts}
+        except Exception as e:
+            logger.error(f"Form/word-token linking failed: {e}")
+            return {"dry_run": dry_run, "success": False, "error": str(e)}
+        finally:
+            session.close()
+
     def import_tiers(self, dry_run: bool = False) -> Dict[str, Any]:
         """Run every English tier importer (YLE, CEFR, Basic English).
 
@@ -539,7 +573,9 @@ class DatabaseAdminService:
         1. Ensuring database tables exist
         2. Syncing corpus configurations
         3. Loading all enabled corpora
-        4. Calculating combined ranks
+        4. Linking forms to the word tokens the corpus load created
+        5. Importing tier annotations
+        6. Calculating combined ranks
 
         Args:
             dry_run: If True, report what would be done without making changes
@@ -582,12 +618,17 @@ class DatabaseAdminService:
         logger.info("Step 3: Loading enabled corpora...")
         results["corpus_load"] = self.load_corpora(dry_run=dry_run)
 
-        # Step 4: Import tier annotations (YLE / CEFR / Basic English)
-        logger.info("Step 4: Importing tier annotations...")
+        # Step 4: Wire forms to the tokens the corpus load just created, so the
+        # lexeme rollup can see them (it skips forms with no word_token_id).
+        logger.info("Step 4: Linking forms to word tokens...")
+        results["form_token_links"] = self.link_forms_to_word_tokens(dry_run=dry_run)
+
+        # Step 5: Import tier annotations (YLE / CEFR / Basic English)
+        logger.info("Step 5: Importing tier annotations...")
         results["tier_import"] = self.import_tiers(dry_run=dry_run)
 
-        # Step 5: Calculate ranks
-        logger.info("Step 5: Calculating combined ranks...")
+        # Step 6: Calculate ranks
+        logger.info("Step 6: Calculating combined ranks...")
         results["rank_calculation"] = self.calculate_ranks(dry_run=dry_run)
 
         end_time = datetime.now()
