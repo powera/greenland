@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Corpus vocabulary: {{ selected_corpus }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/word_tokens.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <a href="{{ url_for('word_tokens.index') }}" class="text-muted small">
+            <i class="bi bi-arrow-left"></i> Word tokens
+        </a>
+        <h1 class="h4 mb-1 mt-2">
+            <i class="bi bi-bar-chart-steps"></i> Words characteristic of
+            <span class="wt-token">{{ selected_corpus }}</span>
+        </h1>
+        <p class="text-muted small mb-0">
+            {{ selected_description }}
+        </p>
+    </div>
+</div>
+
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-auto">
+        <label for="corpus" class="form-label mb-1">Corpus</label>
+        <select class="form-select form-select-sm" id="corpus" name="corpus">
+            {% for corpus in corpus_options %}
+            <option value="{{ corpus.name }}" {% if corpus.name == selected_corpus %}selected{% endif %}
+                    title="{{ corpus.description }}">{{ corpus.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <label for="min_others" class="form-label mb-1"
+               title="How many other corpora must attest a word before it is scored">
+            Min. other corpora
+        </label>
+        <input type="number" class="form-control form-control-sm wt-num-input" id="min_others"
+               name="min_others" value="{{ min_others }}" min="0" max="{{ max_min_others }}">
+    </div>
+    <div class="col-auto">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="exclusive" name="exclusive"
+                   value="1" {% if show_exclusive %}checked{% endif %}>
+            <label class="form-check-label small" for="exclusive">
+                Also list words unique to this corpus
+            </label>
+        </div>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-primary">Apply</button>
+    </div>
+</form>
+
+<div class="alert alert-light border small">
+    Ranked by <strong>Zipf delta</strong>: how much more common a word is here than its
+    average across the {{ other_corpora|length }} other corpora
+    ({{ other_corpora|join(', ') }}).
+    &plus;1.00 means ten times as common here. The ranks beside it say the same thing
+    in readable terms &mdash; they are not used for sorting, because the corpora are
+    different sizes and rank 500 does not mean the same thing in each.
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Most skewed toward {{ selected_corpus }}</span>
+        <span class="text-muted small">{{ skewed|length }} shown</span>
+    </div>
+    <div class="card-body p-0">
+        {% if skewed %}
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Word</th>
+                        <th class="text-end" title="Zipf here minus mean Zipf elsewhere">Zipf &Delta;</th>
+                        <th class="text-end">Rank here</th>
+                        <th class="text-end">Mean rank elsewhere</th>
+                        <th class="text-end" title="Mean rank elsewhere divided by rank here">Rank ratio</th>
+                        <th class="text-end" title="How many corpora attest this word at all">Corpora</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for word in skewed %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('word_tokens.detail', word_token_id=word.word_token_id) }}">{{ word.token }}</a>
+                        </td>
+                        <td class="text-end wt-score">{{ '%+.2f'|format(word.score) }}</td>
+                        <td class="text-end">{{ word.rank_here if word.rank_here is not none else '—' }}</td>
+                        <td class="text-end text-muted">
+                            {{ '%d'|format(word.mean_rank_elsewhere|round) if word.mean_rank_elsewhere is not none else '—' }}
+                        </td>
+                        <td class="text-end text-muted">
+                            {% if word.rank_ratio is not none %}{{ '%.1f'|format(word.rank_ratio) }}&times;{% else %}—{% endif %}
+                        </td>
+                        <td class="text-end text-muted">{{ word.corpus_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-3 text-muted small">
+            No scored words. Every word this corpus attests may be exclusive to it &mdash;
+            try lowering the minimum, or tick the box above.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if show_exclusive %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Attested only in {{ selected_corpus }}</span>
+        <span class="text-muted small">{{ exclusive|length }} shown</span>
+    </div>
+    <div class="card-body p-0">
+        {% if exclusive %}
+        <p class="text-muted small px-3 pt-3 mb-2">
+            No other corpus has these words, so there is no baseline to subtract and no
+            score to give them. Ordered by their rank within this corpus.
+        </p>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Word</th>
+                        <th class="text-end">Rank here</th>
+                        <th class="text-end">Freq. / M</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for word in exclusive %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('word_tokens.detail', word_token_id=word.word_token_id) }}">{{ word.token }}</a>
+                        </td>
+                        <td class="text-end">{{ word.ordinal_rank if word.ordinal_rank is not none else '—' }}</td>
+                        <td class="text-end text-muted">
+                            {{ '%.1f'|format(word.frequency) if word.frequency is not none else '—' }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-3 text-muted small">Every word here is attested by another corpus too.</div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

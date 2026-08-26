@@ -147,10 +147,16 @@ def analyze_book(
     capitalization_ratio: float = DEFAULT_CAPITALIZATION_RATIO,
     min_mid_sentence: int = DEFAULT_MIN_MID_SENTENCE,
     extra_never_names: Collection[str] = (),
+    phrases: Optional[Dict[str, int]] = None,
 ) -> BookAnalysis:
-    """Strip Gutenberg boilerplate, tokenize and split names from vocabulary."""
+    """Strip Gutenberg boilerplate, tokenize and split names from vocabulary.
+
+    ``phrases`` (from ``gutenberg_text.build_phrase_index``) makes known
+    multi-word forms count as one token, so "ice cream" is measured as itself
+    rather than inflating "ice" and "cream".
+    """
     body = strip_gutenberg_boilerplate(raw_text)
-    stats = analyze_text(body)
+    stats = analyze_text(body, phrases)
     names = detect_names(
         stats,
         capitalization_ratio=capitalization_ratio,

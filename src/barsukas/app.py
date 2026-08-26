@@ -92,6 +92,7 @@ from barsukas.routes import (
     trakaido_activities,
     translations,
     wireword,
+    word_tokens,
     workflows,
 )
 from barsukas.routes.review import (
@@ -400,6 +401,7 @@ def create_app(
     app.register_blueprint(phrases.bp)
     app.register_blueprint(idioms.bp)
     app.register_blueprint(rhymes.bp)
+    app.register_blueprint(word_tokens.bp)
     app.register_blueprint(guids.bp)
     app.register_blueprint(pradzia.bp)
     app.register_blueprint(sync_hub.bp)

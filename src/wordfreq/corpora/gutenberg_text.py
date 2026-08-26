@@ -14,7 +14,7 @@ import re
 import unicodedata
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import Dict, Iterator, List, Optional, Tuple
+from typing import Dict, Iterable, Iterator, List, Optional, Tuple
 
 # --- Header / footer markers -------------------------------------------------
 
@@ -206,7 +206,26 @@ def _is_sentence_initial(text: str, index: int) -> bool:
     return True
 
 
-def iter_tokens(text: str) -> Iterator[Tuple[str, bool, bool]]:
+def build_phrase_index(phrases: Iterable[str]) -> Dict[str, int]:
+    """Index multi-word phrases by their first word, for :func:`iter_tokens`.
+
+    Returns ``{lowercased phrase: word count}`` for every phrase of two or more
+    words. Single words are dropped: they need no joining, and keeping them
+    would make the lookup claim matches it does not perform.
+    """
+    index: Dict[str, int] = {}
+    for phrase in phrases:
+        parts = phrase.lower().split()
+        if len(parts) < 2:
+            continue
+        index[" ".join(parts)] = len(parts)
+    return index
+
+
+def iter_tokens(
+    text: str,
+    phrases: Optional[Dict[str, int]] = None,
+) -> Iterator[Tuple[str, bool, bool]]:
     """Yield ``(lowercase_token, is_capitalized, is_sentence_initial)`` triples.
 
     Tokens containing digits, and single letters other than ``a``/``i``/``o``,
@@ -215,8 +234,24 @@ def iter_tokens(text: str) -> Iterator[Tuple[str, bool, bool]]:
     The text is normalized first, so apostrophe and dash variants are folded
     whether or not the caller came through
     :func:`strip_gutenberg_boilerplate`.
+
+    When ``phrases`` is given (from :func:`build_phrase_index`), a run of words
+    matching a known phrase is emitted as **one** token: "ice cream" counts as
+    itself rather than as "ice" plus "cream", and "New York" is one name rather
+    than two words that are separately common. The longest match at a position
+    wins, and the words it consumes are not emitted again -- a phrase's count
+    is therefore taken out of its parts' counts, which is the point: "ice
+    cream" should not also inflate "cream".
+
+    A phrase's capitalization and sentence position are those of its first
+    word, so "New York" mid-sentence reads as capitalized evidence for the
+    whole phrase, exactly as a single-word name would.
     """
     text = _normalize(text)
+
+    # Materialize the token stream first: a phrase match needs to look ahead,
+    # which a bare finditer loop cannot do.
+    collected: List[Tuple[str, bool, bool]] = []
     for match in RAW_TOKEN_RE.finditer(text):
         raw = match.group(0)
         if CONTAINS_DIGIT_RE.search(raw):
@@ -228,7 +263,38 @@ def iter_tokens(text: str) -> Iterator[Tuple[str, bool, bool]]:
             lowered = lowered.strip("'")
             if not lowered:
                 continue
-        yield lowered, raw[0].isupper(), _is_sentence_initial(text, match.start())
+        collected.append((lowered, raw[0].isupper(), _is_sentence_initial(text, match.start())))
+
+    if not phrases:
+        yield from collected
+        return
+
+    longest = max(phrases.values())
+    position = 0
+    total = len(collected)
+    while position < total:
+        matched_length = 0
+        # Prefer the longest phrase starting here, so "New York" wins over a
+        # hypothetical "New" and a longer name wins over a shorter prefix.
+        for length in range(min(longest, total - position), 1, -1):
+            candidate = " ".join(
+                collected[index][0] for index in range(position, position + length)
+            )
+            if phrases.get(candidate) == length:
+                matched_length = length
+                break
+
+        if matched_length:
+            joined = " ".join(
+                collected[index][0] for index in range(position, position + matched_length)
+            )
+            _, is_capitalized, is_sentence_initial = collected[position]
+            yield joined, is_capitalized, is_sentence_initial
+            position += matched_length
+            continue
+
+        yield collected[position]
+        position += 1
 
 
 @dataclass
@@ -259,10 +325,14 @@ class TextStats:
         return self.mid_sentence_capitalized[word] / total
 
 
-def analyze_text(text: str) -> TextStats:
-    """Tokenize ``text`` and collect per-word counts and capitalization stats."""
+def analyze_text(text: str, phrases: Optional[Dict[str, int]] = None) -> TextStats:
+    """Tokenize ``text`` and collect per-word counts and capitalization stats.
+
+    ``phrases`` (from :func:`build_phrase_index`) makes known multi-word forms
+    count as single tokens; see :func:`iter_tokens`.
+    """
     stats = TextStats()
-    for token, is_capitalized, is_sentence_initial in iter_tokens(text):
+    for token, is_capitalized, is_sentence_initial in iter_tokens(text, phrases):
         stats.token_total += 1
         stats.counts[token] += 1
         if not is_sentence_initial:

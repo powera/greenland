@@ -66,27 +66,35 @@ class CorpusConfig:
 
 # Corpus configurations
 # Corpus files are located in data/wordfreq/ (constants.WORDFREQ_DATA_DIR)
+#
+# max_words on the Gutenberg-built corpora was raised ~30% when the tokenizer
+# began joining multi-word forms: each "will <verb>" and "more <adjective>" is
+# its own token competing for a slot (~660 of them against the current
+# database), so the old caps would have pushed ordinary vocabulary off the
+# bottom of every list. These values must stay in step with the matching
+# max_words in wordfreq.corpora.book_lists. wiki_vital is not built by that
+# pipeline and is unaffected.
 CORPUS_CONFIGS = [
     CorpusConfig(
         name="19th_books",
         description="Word frequency data from 19th century books",
         file_path="19th_books.json",
-        max_words=7500,
+        max_words=10000,
         file_type="json",
         value_type="auto",
         corpus_weight=0.8,
-        max_unknown_rank=15000,
+        max_unknown_rank=20000,
         enabled=True,
     ),
     CorpusConfig(
         name="20th_books",
         description="Word frequency data from 20th century books",
         file_path="20th_books.json",
-        max_words=7500,
+        max_words=10000,
         file_type="json",
         value_type="auto",
         corpus_weight=0.9,
-        max_unknown_rank=15000,
+        max_unknown_rank=20000,
         enabled=True,
     ),
     CorpusConfig(
@@ -104,37 +112,37 @@ CORPUS_CONFIGS = [
         name="early_modern_science",
         description="Word frequency data from early modern science writing, Boyle to Osler",
         file_path="early_modern_science.json",
-        max_words=4000,
+        max_words=5200,
         file_type="json",
         value_type="auto",
         # Technical prose of its period: good coverage of words the novels
         # never use, but not how everyday English is weighted.
         corpus_weight=0.6,
-        max_unknown_rank=8000,
+        max_unknown_rank=10400,
         enabled=True,
     ),
     CorpusConfig(
         name="religious_translated",
         description="Word frequency data from old religious works in English translation",
         file_path="religious_translated.json",
-        max_words=4000,
+        max_words=5200,
         file_type="json",
         value_type="auto",
         # Archaic, heavily translated register: useful for coverage of words the
         # novels miss, but not a guide to how modern English is weighted.
         corpus_weight=0.5,
-        max_unknown_rank=8000,
+        max_unknown_rank=10400,
         enabled=True,
     ),
     CorpusConfig(
         name="cooking",
         description="Word frequency data from Cookbooks",
         file_path="cooking.json",
-        max_words=2000,
+        max_words=2600,
         file_type="json",
         value_type="frequency",
         corpus_weight=0.7,
-        max_unknown_rank=4000,
+        max_unknown_rank=5200,
         enabled=True,
     ),
 ]

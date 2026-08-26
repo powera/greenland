@@ -10,7 +10,10 @@ the Gutenberg header/footer and transcription apparatus, separates proper nouns
 from ordinary vocabulary, and writes ``data/wordfreq/<corpus>.json`` in the
 format ``wordfreq.frequency.importer`` expects.
 
-No network and no database access: this step is reproducible from the cache.
+No network. No database access either, unless ``--phrases-from-db`` is passed:
+that reads the multi-word lemma forms so "ice cream" is counted as one token
+rather than inflating "ice" and "cream". Without the flag the step stays
+reproducible from the cache alone.
 """
 
 import argparse
@@ -18,12 +21,13 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence
 
 if str(Path(__file__).parent.parent.parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import constants
+from agents.common.common_args import add_backend_args, get_data_source_config
 from wordfreq.corpora.book_lists import BOOK_LISTS, GutenbergBook, get_book_list
 from wordfreq.corpora.download_gutenberg import default_cache_dir, text_path
 from wordfreq.corpora.frequency_build import (
@@ -40,12 +44,41 @@ from wordfreq.corpora.frequency_build import (
 logger = logging.getLogger(__name__)
 
 
+def _load_phrases(args: argparse.Namespace, always_vocabulary: Sequence[str]) -> Dict[str, int]:
+    """Build the multi-word phrase index from the selected data source.
+
+    The backend comes from the standard ``--persona`` / ``--backend`` flags, so
+    this reads the local SQLite database by default and a release tree under
+    ``--persona custom --backend jsonl --data-dir data/release``.
+
+    The multi-word entries of ``always_vocabulary`` are folded in, because a
+    whitelisted name like "New York" is only protected if the tokenizer emits
+    it as one token.
+    """
+    from storage.backend import create_session
+    from wordfreq.corpora.lemma_phrases import load_phrase_index
+
+    # Passed explicitly rather than through configure_backend(): only the
+    # explicit-config path of create_session() honors the JSONL backend, so a
+    # --data-dir release tree would otherwise fall through to SQLite.
+    session = create_session(get_data_source_config(args))
+    try:
+        return load_phrase_index(
+            session,
+            include_periphrastic=args.join_periphrastic,
+            extra_phrases=[word for word in always_vocabulary if " " in word],
+        )
+    finally:
+        session.close()
+
+
 def analyze_corpus_books(
     books: List[GutenbergBook],
     cache_dir: Path,
     *,
     skip_missing: bool = False,
     always_vocabulary: Sequence[str] = (),
+    phrases: Optional[Dict[str, int]] = None,
 ) -> List[BookAnalysis]:
     """Analyze every cached book in ``books``.
 
@@ -56,6 +89,8 @@ def analyze_corpus_books(
             raising.
         always_vocabulary: Words this corpus keeps as vocabulary rather than
             letting them be classified as proper nouns.
+        phrases: Multi-word forms to count as single tokens, from
+            ``wordfreq.corpora.lemma_phrases.load_phrase_index``.
 
     Returns:
         One :class:`BookAnalysis` per book that could be read.
@@ -76,7 +111,12 @@ def analyze_corpus_books(
             continue
 
         raw_text = path.read_text(encoding="utf-8", errors="replace")
-        analysis = analyze_book(book.slug, raw_text, extra_never_names=always_vocabulary)
+        analysis = analyze_book(
+            book.slug,
+            raw_text,
+            extra_never_names=always_vocabulary,
+            phrases=phrases,
+        )
         logger.info(
             "[%d/%d] %s: %d tokens, %d names",
             index,
@@ -137,10 +177,36 @@ def main() -> int:
     parser.add_argument(
         "--skip-missing", action="store_true", help="Ignore books that are not downloaded"
     )
+    parser.add_argument(
+        "--phrases-from-db",
+        action="store_true",
+        help="Read multi-word lemma forms from the database (or --data-dir "
+        "release tree) and count each as a single token: ice cream, New York.",
+    )
+    parser.add_argument(
+        "--no-join-periphrastic",
+        dest="join_periphrastic",
+        action="store_false",
+        help="Do not join periphrastic inflections (will walk, more quickly). "
+        "They are joined by default, since 'will want' is a form of 'want'; "
+        "this leaves the auxiliary merged into a single 'will' token instead.",
+    )
     parser.add_argument("--report", type=Path, help="Write per-book statistics as JSON")
     parser.add_argument("--top", type=int, default=25, help="Top words to print (default: 25)")
     parser.add_argument("--dry-run", action="store_true", help="Do not write the corpus file")
     parser.add_argument("--verbose", action="store_true", help="Debug logging")
+    # Standard backend selection, so --phrases-from-db can read the local
+    # SQLite database or a release tree (--persona custom --backend jsonl
+    # --data-dir data/release) the same way the agents do. Only --db-path is
+    # taken from add_common_args' set: its --debug and --dry-run would collide
+    # with this script's own flags.
+    parser.add_argument(
+        "--db-path",
+        type=str,
+        default=None,
+        help="Path to database file (default: inferred from environment)",
+    )
+    add_backend_args(parser)
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -152,11 +218,23 @@ def main() -> int:
     cache_dir = args.source_dir or default_cache_dir()
     max_words: Optional[int] = args.max_words or book_list.max_words
 
+    always_vocabulary = book_list.resolved_always_vocabulary()
+
+    phrases: Optional[Dict[str, int]] = None
+    if args.phrases_from_db:
+        phrases = _load_phrases(args, always_vocabulary)
+        logger.info(
+            "Phrase index: %d multi-word forms (periphrastic %s)",
+            len(phrases),
+            "included" if args.join_periphrastic else "excluded",
+        )
+
     analyses = analyze_corpus_books(
         list(book_list.books),
         cache_dir,
         skip_missing=args.skip_missing,
-        always_vocabulary=book_list.always_vocabulary,
+        always_vocabulary=always_vocabulary,
+        phrases=phrases,
     )
     if not analyses:
         logger.error("No books could be read from %s", cache_dir)
