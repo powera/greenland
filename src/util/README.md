@@ -10,4 +10,3 @@ imported as libraries; there are no CLI entry points here.
 - `optional_imports.py` — graceful handling of optional dependencies
 - `flesch_kincaid.py` — readability scoring
 - `stopwords.py` — stopword lists
-- `wiki_loader.py` — indexing and querying Wikimedia dump files

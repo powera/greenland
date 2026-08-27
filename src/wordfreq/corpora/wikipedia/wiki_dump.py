@@ -1,26 +1,34 @@
 #!/usr/bin/python3
 
-"""
-WikiLoader - A utility for accessing and indexing Wikimedia dump files.
+"""Random access into a Wikimedia dump snapshot, by page title.
 
-This module provides tools to build and query SQLite indexes for Wikimedia
-"multistream.xml.bz2" dump files. The dumps are quite large and stored in
-compressed form, but they are seekable. This allows us to read a ~2MB section
-of the file, decompress it, and access the XML for a specific page.
+The source for the ``wiki_vital`` corpus.  Unlike Gutenberg books and CAP
+opinions, which are downloaded per document, Wikipedia is taken from a single
+downloaded snapshot -- a ``pages-articles-multistream.xml.bz2`` dump and its
+``-index.txt`` companion, located by :data:`constants.WIKI_CORPUS_BASE_PATH`.
+Nothing here touches the network: the snapshot is fetched by hand, and the
+builder reads whatever is on disk.
 
-The location of each page is provided in a multistream-index.txt.bz2 file.
-We use this to create an index in SQLite files. For performance, we hash the
-page names and shard the tables based on that hash. This optimizes for direct
-page lookups rather than title range queries.
+The dump is one large bz2 file, but it is a *multistream* one: it concatenates
+independently compressed ~2MB blocks, so a block holding a given page can be
+seeked to and decompressed alone.  The index file records which byte offset
+each page lives at.  :meth:`WikiLoader.build_offset_index` converts that index
+into SQLite databases sharded by the MD5 of the page title, which optimizes for
+direct title lookups rather than title-range scans; the builder then asks for
+its thousand articles by name.
+
+This module predates the rest of the corpora package and is left as it was
+found: the paths still come from module-level ``constants`` rather than a
+config object, and the index build has had no exercise recently.  It is the
+one part of the Wikipedia pipeline that needs a snapshot on hand to run.
 """
 
 import bz2
 import hashlib
 import os
 import sqlite3
-import time
 import xml.dom.minidom
-from typing import Dict, List, Optional, Tuple
+from typing import Optional, Tuple
 
 import constants
 
@@ -40,10 +48,22 @@ class WikiLoader:
             corpus: Corpus identifier (e.g., "enwiki" for English Wikipedia)
         """
         self.corpus = corpus
-        self.corpus_base = constants.WIKI_CORPUS_BASE_PATH
         self.corpus_prefix = constants.WIKI_CORPUS_PREFIX
+        self.schema_file = constants.WIKI_INDEX_SCHEMA_PATH
+        self.set_corpus_base(constants.WIKI_CORPUS_BASE_PATH, constants.WIKI_CORPUS_PREFIX)
 
-        # Derived paths
+    def set_corpus_base(self, corpus_base: str, corpus_prefix: Optional[str] = None) -> None:
+        """Point this loader at a snapshot directory.
+
+        Args:
+            corpus_base: Directory holding the dump and its index file.
+            corpus_prefix: Dump filename prefix (e.g. ``enwiki-20220501``).
+                Keeps the current prefix when omitted.
+        """
+        self.corpus_base = corpus_base
+        if corpus_prefix is not None:
+            self.corpus_prefix = corpus_prefix
+
         self.offset_dir = os.path.join(self.corpus_base, "offset")
         self.dump_file = os.path.join(
             self.corpus_base, f"{self.corpus_prefix}-pages-articles-multistream.xml.bz2"
@@ -51,7 +71,14 @@ class WikiLoader:
         self.index_file = os.path.join(
             self.corpus_base, f"{self.corpus_prefix}-pages-articles-multistream-index.txt"
         )
-        self.schema_file = constants.WIKI_INDEX_SCHEMA_PATH
+
+    def is_indexed(self) -> bool:
+        """Whether :meth:`build_offset_index` has been run for this snapshot.
+
+        Checks for the shard databases rather than the dump, because reading a
+        page needs both and only the index is something this class creates.
+        """
+        return all(os.path.exists(self._get_db_path(key)) for key in ALL_KEYS)
 
     @staticmethod
     def _shard_for_title(title: str) -> str:
