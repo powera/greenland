@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import pytest
 from sqlalchemy import create_engine
@@ -37,7 +37,7 @@ def _add_lemma(
     definition: str,
     *,
     pos_type: str = "noun",
-    prominence: str = SENSE_PROMINENCE_COMMON,
+    prominence: Optional[str] = None,
 ) -> Lemma:
     lemma = Lemma(
         lemma_text=text,
@@ -106,13 +106,50 @@ class TestFindDuplicateTextGroups:
     def test_only_unrated_skips_an_already_rated_spelling(self) -> None:
         with _make_session() as session:
             _add_lemma(session, "bank", "money", prominence=SENSE_PROMINENCE_VERY_COMMON)
-            _add_lemma(session, "bank", "river edge")
+            _add_lemma(session, "bank", "river edge", prominence=SENSE_PROMINENCE_COMMON)
             _add_lemma(session, "bat", "club")
             _add_lemma(session, "bat", "mammal")
 
             groups = find_duplicate_text_groups(session, only_unrated=True)
 
             assert [text for text, _ in groups] == ["bat"]
+
+    def test_only_unrated_skips_a_uniformly_common_spelling(self) -> None:
+        """A group the model judged all-common is rated, not unrated.
+
+        Inferring rated-ness from "differs from common" made this group
+        eligible on every run, so the same spelling was paid for repeatedly
+        and its verdict never recorded.
+        """
+        with _make_session() as session:
+            _add_lemma(session, "spade", "card suit", prominence=SENSE_PROMINENCE_COMMON)
+            _add_lemma(session, "spade", "digging tool", prominence=SENSE_PROMINENCE_COMMON)
+
+            groups = find_duplicate_text_groups(session, only_unrated=True)
+
+            assert groups == []
+
+    def test_only_unrated_keeps_a_partly_rated_spelling(self) -> None:
+        """One unrated sense is enough: the judgment is comparative."""
+        with _make_session() as session:
+            _add_lemma(session, "pen", "writing tool", prominence=SENSE_PROMINENCE_VERY_COMMON)
+            _add_lemma(session, "pen", "animal enclosure")
+
+            groups = find_duplicate_text_groups(session, only_unrated=True)
+
+            assert [text for text, _ in groups] == ["pen"]
+
+    def test_unrated_sense_is_reported_as_none(self) -> None:
+        with _make_session() as session:
+            _add_lemma(session, "bat", "club")
+            _add_lemma(session, "bat", "mammal", prominence=SENSE_PROMINENCE_COMMON)
+
+            _, senses = find_duplicate_text_groups(session)[0]
+
+            assert [sense.current_prominence for sense in senses] == [
+                None,
+                SENSE_PROMINENCE_COMMON,
+            ]
 
 
 class TestBuildPrompt:
@@ -230,8 +267,12 @@ class TestRateGroup:
 class TestApplyRatings:
     def test_only_changed_lemmas_are_reported(self) -> None:
         with _make_session() as session:
-            unchanged = _add_lemma(session, "top", "the highest point")
-            changed = _add_lemma(session, "top", "a spinning toy")
+            unchanged = _add_lemma(
+                session, "top", "the highest point", prominence=SENSE_PROMINENCE_COMMON
+            )
+            changed = _add_lemma(
+                session, "top", "a spinning toy", prominence=SENSE_PROMINENCE_COMMON
+            )
 
             applied = apply_ratings(
                 session,
@@ -244,6 +285,23 @@ class TestApplyRatings:
             assert applied == [changed.id]
             assert changed.sense_prominence == SENSE_PROMINENCE_RARE
             assert unchanged.sense_prominence == SENSE_PROMINENCE_COMMON
+
+    def test_rating_an_unrated_sense_common_is_a_change(self) -> None:
+        """NULL -> "common" is how a rating gets recorded.
+
+        Skipping it as a no-op would leave the sense unrated, so
+        ``--only-unrated`` would ask about it again on the next run.
+        """
+        with _make_session() as session:
+            lemma = _add_lemma(session, "bat", "mammal")
+            assert lemma.sense_prominence is None
+
+            applied = apply_ratings(
+                session, [ProminenceRating(lemma.id, SENSE_PROMINENCE_COMMON, "")]
+            )
+
+            assert applied == [lemma.id]
+            assert lemma.sense_prominence == SENSE_PROMINENCE_COMMON
 
     def test_missing_lemma_is_skipped(self) -> None:
         with _make_session() as session:
