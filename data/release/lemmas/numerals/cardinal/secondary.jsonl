@@ -1,31 +1,31 @@
-{"guid": "Z01_001", "translations": {"th": "ศูนย์", "kn": "ಶೂನ್ಯ", "uk": "нуль", "bn": "শূন্য", "ro": "zero", "pl": "zero", "ta": "பூஜ்யம்", "hi": "शून्य"}}
-{"guid": "Z01_002", "translations": {"th": "หนึ่ง", "kn": "ಒಂದು", "uk": "один", "bn": "এক", "ro": "unu", "pl": "jeden", "ta": "ஒன்று", "hi": "एक"}}
-{"guid": "Z01_003", "translations": {"th": "สอง", "kn": "ಓರರ್?", "uk": "два", "bn": "দুই", "ro": "doi", "pl": "dwa", "ta": "இரண்டு", "hi": "दो"}}
-{"guid": "Z01_004", "translations": {"th": "สาม", "kn": "ಮೂರು", "uk": "три", "bn": "তিন", "ro": "trei", "pl": "trzy", "ta": "மூன்று", "hi": "तीन"}}
-{"guid": "Z01_005", "translations": {"th": "สี่", "kn": "ನಾಲ್ಕು", "uk": "чотири", "bn": "চার", "ro": "patru", "pl": "cztery", "ta": "நான்கு", "hi": "चार"}}
-{"guid": "Z01_006", "translations": {"th": "ห้า", "kn": "ಐದು", "uk": "п’ять", "bn": "পাঁচ", "ro": "cinci", "pl": "pięć", "ta": "ஐந்து", "hi": "पाँच"}}
-{"guid": "Z01_007", "translations": {"th": "หก", "kn": "ಆರು", "uk": "шість", "bn": "ছয়", "ro": "șase", "pl": "sześć", "ta": "ஆறு", "hi": "छह"}}
-{"guid": "Z01_008", "translations": {"th": "เจ็ด", "kn": "ಏಳು", "uk": "сім", "bn": "সাত", "ro": "șapte", "pl": "siedem", "ta": "ஏழு", "hi": "सात"}}
-{"guid": "Z01_009", "translations": {"th": "แปด", "kn": "ಎಂಟು", "uk": "вісім", "bn": "আট", "ro": "opt", "pl": "osiem", "ta": "எட்டு", "hi": "आठ"}}
-{"guid": "Z01_010", "translations": {"th": "เก้า", "kn": "ಒಂಬತ್ತು", "uk": "дев'ять", "bn": "নয়", "ro": "nouă", "pl": "dziewięć", "ta": "ஒன்பது", "hi": "नौ"}}
-{"guid": "Z01_011", "translations": {"th": "สิบ", "kn": "ಹತ್ತು", "uk": "десять", "bn": "দশ", "ro": "zece", "pl": "dziesięć", "ta": "பத்து", "hi": "दस"}}
-{"guid": "Z01_012", "translations": {"th": "สิบเอ็ด", "kn": "ಹನ್ನೊಂದು", "uk": "одинадцять", "bn": "এগারো", "ro": "unsprezece", "pl": "jedenaście", "ta": "பதினொன்று", "hi": "ग्याहर"}}
-{"guid": "Z01_013", "translations": {"th": "สิบสอง", "kn": "ಹನ್ನೆರಡು", "uk": "дванадцять", "bn": "বারো", "ro": "douăsprezece", "pl": "dwanaście", "ta": "பனிரண்டு", "hi": "बारह"}}
-{"guid": "Z01_014", "translations": {"th": "สิบสาม", "kn": "ತೇಹರು", "uk": "тринадцять", "bn": "তেরো", "ro": "treisprezece", "pl": "trzynaście", "ta": "பதின்மூன்று", "hi": "तेरह"}}
-{"guid": "Z01_015", "translations": {"th": "สิบสี่", "kn": "ಹದಿನಾಲ್ಕು", "uk": "чотирнадцять", "bn": "চৌদ্দ", "ro": "paisprezece", "pl": "czternaście", "ta": "பதினாநான்கு", "hi": "चौदह"}}
-{"guid": "Z01_016", "translations": {"th": "สิบห้า", "kn": "ಹದಿನೈದು", "uk": "п’ятнадцять", "bn": "পনেরো", "ro": "cincisprezece", "pl": "piętnaście", "ta": "பதினைந்து", "hi": "पंद्रह"}}
-{"guid": "Z01_017", "translations": {"th": "สิบหก", "kn": "ಹದಿನಾರು", "uk": "шістнадцять", "bn": "ষোলো", "ro": "șaisprezece", "pl": "szesnaście", "ta": "பதினாறு", "hi": "सोलह"}}
-{"guid": "Z01_018", "translations": {"th": "สิบเจ็ด", "kn": "ಹದಿನೇಳು", "uk": "сімнадцять", "bn": "সতেরো", "ro": "șaptesprezece", "pl": "siedemnaście", "ta": "பதினெ븐்னு", "hi": "सत्रह"}}
-{"guid": "Z01_019", "translations": {"th": "สิบแปด", "kn": "ಹನ್ನೆಂಟು", "uk": "вісімнадцять", "bn": "আঠারো", "ro": "optsprezece", "pl": "osiemnaście", "ta": "பதினெட்டு", "hi": "अठारह"}}
-{"guid": "Z01_020", "translations": {"th": "สิบเก้า", "kn": "ದಶೊಂಬತ್ತು", "uk": "дев’ятнадцять", "bn": "ঊনিশ", "ro": "nouăsprezece", "pl": "dziewiętnaście", "ta": "தொண்ணூற்றிென்பது", "hi": "उन्नीस"}}
-{"guid": "Z01_021", "translations": {"th": "ยี่สิบ", "kn": "ಇವತ್ತು", "uk": "двадцять", "bn": "বিশ〔placeholder〕", "ro": "douăzeci", "pl": "dwadzieścia", "ta": "இருபது", "hi": "बीस"}}
-{"guid": "Z01_022", "translations": {"th": "สามสิบ", "kn": "ತಿರಿವತ್ತು", "uk": "тридцять", "bn": "ত্রিশ", "ro": "treizeci", "pl": "trzydzieści", "ta": "முப்பது", "hi": "तीस"}}
-{"guid": "Z01_023", "translations": {"th": "สี่สิบ", "kn": "ನಲವತ್ತು", "uk": "сорок", "bn": "চল্লিশ", "ro": "patruzeci", "pl": "czterdzieści", "ta": "நாற்பது", "hi": "चालीस"}}
-{"guid": "Z01_024", "translations": {"th": "ห้าสิบ", "kn": "ಐವತ್ತು", "uk": "п'ятдесят", "bn": "পঞ্চাশ", "ro": "cincizeci", "pl": "pięćdziesiąt", "ta": "ஐம்பது", "hi": "पचास"}}
-{"guid": "Z01_025", "translations": {"th": "หกสิบ", "kn": "ಅರವತ್ತು", "uk": "шістдесят", "bn": "ষাট", "ro": "șaizeci", "pl": "sześćdziesiąt", "ta": "அறுபது", "hi": "साठ"}}
-{"guid": "Z01_026", "translations": {"th": "เจ็ดสิบ", "kn": "ಎಪ್ಪತ್ತು", "uk": "сімдесят", "bn": "সত্তর", "ro": "șaptezeci", "pl": "siedemdziesiąt", "ta": "எழுபது", "hi": "सत्तर"}}
-{"guid": "Z01_027", "translations": {"th": "แปดสิบ", "kn": "ಎಪ್ಪತ್ತು", "uk": "вісімдесят", "bn": "আশি", "ro": "optzeci", "pl": "osiemdziesiąt", "ta": "எண்பது", "hi": "अस्सी"}}
-{"guid": "Z01_028", "translations": {"th": "เก้าสิบ", "kn": "ತೊಂಬತ್ತು", "uk": "дев'яносто", "bn": "নব্বই", "ro": "nouăzeci", "pl": "dziewięćdziesiąt", "ta": "தொண்ணூறு", "hi": "नब्बे"}}
-{"guid": "Z01_029", "translations": {"th": "ร้อย", "kn": "ನೂರು", "uk": "сто", "bn": "শত", "ro": "o sută", "pl": "sto", "ta": "நூறு", "hi": "सौ"}}
-{"guid": "Z01_030", "translations": {"th": "หนึ่งพัน", "kn": "ಸಾವಿರ", "uk": "тисяча", "bn": "হাজার", "ro": "o mie", "pl": "tysiąc", "ta": "ஆயிரம்", "hi": "हज़ार"}}
+{"guid": "Z01_001", "translations": {"ro": "zero", "pl": "zero", "th": "ศูนย์", "ta": "பூஜ்யம்", "kn": "ಶೂನ್ಯ", "uk": "нуль", "bn": "শূন্য", "hi": "शून्य"}}
+{"guid": "Z01_002", "translations": {"ro": "unu", "pl": "jeden", "th": "หนึ่ง", "ta": "ஒன்று", "kn": "ಒಂದು", "uk": "один", "bn": "এক", "hi": "एक"}}
+{"guid": "Z01_003", "translations": {"ro": "doi", "pl": "dwa", "th": "สอง", "ta": "இரண்டு", "kn": "ಓರರ್?", "uk": "два", "bn": "দুই", "hi": "दो"}}
+{"guid": "Z01_004", "translations": {"ro": "trei", "pl": "trzy", "th": "สาม", "ta": "மூன்று", "kn": "ಮೂರು", "uk": "три", "bn": "তিন", "hi": "तीन"}}
+{"guid": "Z01_005", "translations": {"ro": "patru", "pl": "cztery", "th": "สี่", "ta": "நான்கு", "kn": "ನಾಲ್ಕು", "uk": "чотири", "bn": "চার", "hi": "चार"}}
+{"guid": "Z01_006", "translations": {"ro": "cinci", "pl": "pięć", "th": "ห้า", "ta": "ஐந்து", "kn": "ಐದು", "uk": "п’ять", "bn": "পাঁচ", "hi": "पाँच"}}
+{"guid": "Z01_007", "translations": {"ro": "șase", "pl": "sześć", "th": "หก", "ta": "ஆறு", "kn": "ಆರು", "uk": "шість", "bn": "ছয়", "hi": "छह"}}
+{"guid": "Z01_008", "translations": {"ro": "șapte", "pl": "siedem", "th": "เจ็ด", "ta": "ஏழு", "kn": "ಏಳು", "uk": "сім", "bn": "সাত", "hi": "सात"}}
+{"guid": "Z01_009", "translations": {"ro": "opt", "pl": "osiem", "th": "แปด", "ta": "எட்டு", "kn": "ಎಂಟು", "uk": "вісім", "bn": "আট", "hi": "आठ"}}
+{"guid": "Z01_010", "translations": {"ro": "nouă", "pl": "dziewięć", "th": "เก้า", "ta": "ஒன்பது", "kn": "ಒಂಬತ್ತು", "uk": "дев'ять", "bn": "নয়", "hi": "नौ"}}
+{"guid": "Z01_011", "translations": {"ro": "zece", "pl": "dziesięć", "th": "สิบ", "ta": "பத்து", "kn": "ಹತ್ತು", "uk": "десять", "bn": "দশ", "hi": "दस"}}
+{"guid": "Z01_012", "translations": {"ro": "unsprezece", "pl": "jedenaście", "th": "สิบเอ็ด", "ta": "பதினொன்று", "kn": "ಹನ್ನೊಂದು", "uk": "одинадцять", "bn": "এগারো", "hi": "ग्याहर"}}
+{"guid": "Z01_013", "translations": {"ro": "douăsprezece", "pl": "dwanaście", "th": "สิบสอง", "ta": "பனிரண்டு", "kn": "ಹನ್ನೆರಡು", "uk": "дванадцять", "bn": "বারো", "hi": "बारह"}}
+{"guid": "Z01_014", "translations": {"ro": "treisprezece", "pl": "trzynaście", "th": "สิบสาม", "ta": "பதின்மூன்று", "kn": "ತೇಹರು", "uk": "тринадцять", "bn": "তেরো", "hi": "तेरह"}}
+{"guid": "Z01_015", "translations": {"ro": "paisprezece", "pl": "czternaście", "th": "สิบสี่", "ta": "பதினாநான்கு", "kn": "ಹದಿನಾಲ್ಕು", "uk": "чотирнадцять", "bn": "চৌদ্দ", "hi": "चौदह"}}
+{"guid": "Z01_016", "translations": {"ro": "cincisprezece", "pl": "piętnaście", "th": "สิบห้า", "ta": "பதினைந்து", "kn": "ಹದಿನೈದು", "uk": "п’ятнадцять", "bn": "পনেরো", "hi": "पंद्रह"}}
+{"guid": "Z01_017", "translations": {"ro": "șaisprezece", "pl": "szesnaście", "th": "สิบหก", "ta": "பதினாறு", "kn": "ಹದಿನಾರು", "uk": "шістнадцять", "bn": "ষোলো", "hi": "सोलह"}}
+{"guid": "Z01_018", "translations": {"ro": "șaptesprezece", "pl": "siedemnaście", "th": "สิบเจ็ด", "ta": "பதினெ븐்னு", "kn": "ಹದಿನೇಳು", "uk": "сімнадцять", "bn": "সতেরো", "hi": "सत्रह"}}
+{"guid": "Z01_019", "translations": {"ro": "optsprezece", "pl": "osiemnaście", "th": "สิบแปด", "ta": "பதினெட்டு", "kn": "ಹನ್ನೆಂಟು", "uk": "вісімнадцять", "bn": "আঠারো", "hi": "अठारह"}}
+{"guid": "Z01_020", "translations": {"ro": "nouăsprezece", "pl": "dziewiętnaście", "th": "สิบเก้า", "ta": "தொண்ணூற்றிென்பது", "kn": "ದಶೊಂಬತ್ತು", "uk": "дев’ятнадцять", "bn": "ঊনিশ", "hi": "उन्नीस"}}
+{"guid": "Z01_021", "translations": {"ro": "douăzeci", "pl": "dwadzieścia", "th": "ยี่สิบ", "ta": "இருபது", "kn": "ಇವತ್ತು", "uk": "двадцять", "bn": "বিশ〔placeholder〕", "hi": "बीस"}}
+{"guid": "Z01_022", "translations": {"ro": "treizeci", "pl": "trzydzieści", "th": "สามสิบ", "ta": "முப்பது", "kn": "ತಿರಿವತ್ತು", "uk": "тридцять", "bn": "ত্রিশ", "hi": "तीस"}}
+{"guid": "Z01_023", "translations": {"ro": "patruzeci", "pl": "czterdzieści", "th": "สี่สิบ", "ta": "நாற்பது", "kn": "ನಲವತ್ತು", "uk": "сорок", "bn": "চল্লিশ", "hi": "चालीस"}}
+{"guid": "Z01_024", "translations": {"ro": "cincizeci", "pl": "pięćdziesiąt", "th": "ห้าสิบ", "ta": "ஐம்பது", "kn": "ಐವತ್ತು", "uk": "п'ятдесят", "bn": "পঞ্চাশ", "hi": "पचास"}}
+{"guid": "Z01_025", "translations": {"ro": "șaizeci", "pl": "sześćdziesiąt", "th": "หกสิบ", "ta": "அறுபது", "kn": "ಅರವತ್ತು", "uk": "шістдесят", "bn": "ষাট", "hi": "साठ"}}
+{"guid": "Z01_026", "translations": {"ro": "șaptezeci", "pl": "siedemdziesiąt", "th": "เจ็ดสิบ", "ta": "எழுபது", "kn": "ಎಪ್ಪತ್ತು", "uk": "сімдесят", "bn": "সত্তর", "hi": "सत्तर"}}
+{"guid": "Z01_027", "translations": {"ro": "optzeci", "pl": "osiemdziesiąt", "th": "แปดสิบ", "ta": "எண்பது", "kn": "ಎಪ್ಪತ್ತು", "uk": "вісімдесят", "bn": "আশি", "hi": "अस्सी"}}
+{"guid": "Z01_028", "translations": {"ro": "nouăzeci", "pl": "dziewięćdziesiąt", "th": "เก้าสิบ", "ta": "தொண்ணூறு", "kn": "ತೊಂಬತ್ತು", "uk": "дев'яносто", "bn": "নব্বই", "hi": "नब्बे"}}
+{"guid": "Z01_029", "translations": {"ro": "o sută", "pl": "sto", "th": "ร้อย", "ta": "நூறு", "kn": "ನೂರು", "uk": "сто", "bn": "শত", "hi": "सौ"}}
+{"guid": "Z01_030", "translations": {"ro": "o mie", "pl": "tysiąc", "th": "หนึ่งพัน", "ta": "ஆயிரம்", "kn": "ಸಾವಿರ", "uk": "тисяча", "bn": "হাজার", "hi": "हज़ार"}}
 {"guid": "Z01_031", "translations": {"ro": "un milion", "pl": "milion", "th": "หนึ่งล้าน", "ta": "ஒரு மில்லியன்", "kn": "ದಶಲಕ್ಷ", "uk": "мільйон", "bn": "এক মিলিয়ন", "hi": "एक मिलियन"}}

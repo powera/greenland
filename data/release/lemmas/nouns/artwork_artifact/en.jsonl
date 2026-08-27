@@ -9,3 +9,10 @@
 {"guid": "N10_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "photograph", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "photographs", "is_base_form": false}]}
 {"guid": "N10_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "sketch", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "sketches", "is_base_form": false}]}
 {"guid": "N10_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "track", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "tracks", "is_base_form": false}]}
+{"guid": "N10_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "roller coaster", "is_base_form": true}]}
+{"guid": "N10_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "jigsaw puzzle", "is_base_form": true}]}
+{"guid": "N10_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "crossword puzzle", "is_base_form": true}]}
+{"guid": "N10_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "chess board", "is_base_form": true}]}
+{"guid": "N10_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "short story", "is_base_form": true}]}
+{"guid": "N10_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "comic book", "is_base_form": true}]}
+{"guid": "N10_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "talk show", "is_base_form": true}]}

@@ -6,3 +6,6 @@
 {"guid": "N56_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "Sahara", "is_base_form": true}]}
 {"guid": "N56_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "Nile", "is_base_form": true}]}
 {"guid": "N56_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "Alps", "is_base_form": true}]}
+{"guid": "N56_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "national park", "is_base_form": true}]}
+{"guid": "N56_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "north pole", "is_base_form": true}]}
+{"guid": "N56_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "south pole", "is_base_form": true}]}

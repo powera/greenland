@@ -33,3 +33,4 @@
 {"guid": "N01_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "secretary", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "secretaries", "is_base_form": false}]}
 {"guid": "N01_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "servant", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "servants", "is_base_form": false}]}
 {"guid": "N01_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "star", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stars", "is_base_form": false}]}
+{"guid": "N01_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "best friend", "is_base_form": true}]}

@@ -9,3 +9,6 @@
 {"guid": "N21_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "math", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "maths", "is_base_form": false}]}
 {"guid": "N21_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "species", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "species", "is_base_form": false}]}
 {"guid": "N21_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "field", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "fields", "is_base_form": false}]}
+{"guid": "N21_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "artificial intelligence", "is_base_form": true}]}
+{"guid": "N21_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "machine learning", "is_base_form": true}]}
+{"guid": "N21_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "science fiction", "is_base_form": true}]}

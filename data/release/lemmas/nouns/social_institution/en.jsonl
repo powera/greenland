@@ -20,3 +20,5 @@
 {"guid": "N55_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "committee", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "committees", "is_base_form": false}]}
 {"guid": "N55_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "nation", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "nations", "is_base_form": false}]}
 {"guid": "N55_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "tax", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "taxes", "is_base_form": false}]}
+{"guid": "N55_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "driving school", "is_base_form": true}]}
+{"guid": "N55_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "health insurance", "is_base_form": true}]}

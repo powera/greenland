@@ -1,12 +1,12 @@
-{"guid": "N13_001", "translations": {"th": "ถนน", "kn": "ರಸ್ತೆ", "uk": "дорога", "bn": "রাস্তায়", "ro": "drum", "pl": "droga", "ta": "சாலை", "hi": "सड़क"}}
-{"guid": "N13_002", "translations": {"th": "สะพาน", "kn": "ಸೇತುವೆ", "uk": "міст", "bn": "সেতু", "ro": "pod", "pl": "most", "ta": "பாலம்", "hi": "पुल"}}
-{"guid": "N13_003", "translations": {"th": "อุโมงค์", "kn": "ಸುರಂಗ", "uk": "тунель", "bn": "tuneল? Wait need Bengali script of 'tunnel' lemma: 'টানেল'", "ro": "tunel", "pl": "tunel", "ta": "சுரங்கப்பாதை", "hi": "tunel?"}}
-{"guid": "N13_004", "translations": {"th": "ถนน", "kn": "ಬೀದಿ", "uk": "вулиця", "bn": "রাস্তা", "ro": "stradă", "pl": "ulica", "ta": "தெரு", "hi": "सड़क"}}
-{"guid": "N13_005", "translations": {"th": "ทางหลวง", "kn": "ಹೆದ್ದಾರಿ", "ro": "autostradă", "pl": "autostrada", "ta": "நெடுஞ்சாலை", "uk": "автошлях", "bn": "হাইওয়ে", "hi": "हाइवे"}}
-{"guid": "N13_006", "translations": {"th": "ทางเท้า", "kn": "ಕಾಲುದಾರಿ", "ro": "trotuar", "pl": "chodnik", "ta": "நடைபாதை", "uk": "тротуар", "bn": "ফুটপাত", "hi": "फुटपाथ"}}
-{"guid": "N13_007", "translations": {"th": "สี่แยก", "kn": "ಕೂಡುರಸ್ತೆ", "ro": "intersecție", "pl": "skrzyżowanie", "ta": "சந்திப்பு", "uk": "перехрестя", "bn": "চৌরাস্তা", "hi": "चौराहा"}}
-{"guid": "N13_008", "translations": {"th": "ทางม้าลาย", "kn": "ಪಾದಚಾರಿ ದಾಟುವ ಮಾರ್ಗ", "ro": "trecere de pietoni", "pl": "przejście dla pieszych", "ta": "பாதசாரி கடவை", "uk": "пішохідний перехід", "bn": "পথচারীর পারাপার স্থান", "hi": "पैदल यात्री क्रॉसिंग"}}
-{"guid": "N13_009", "translations": {"th": "ทางรถไฟ", "kn": "ರೈಲ್ವೆ", "ro": "cale ferată", "pl": "kolej", "ta": "இரயில்வே", "uk": "залізниця", "bn": "রেলওয়ে", "hi": "रेलवे"}}
-{"guid": "N13_010", "translations": {"th": "ราง", "kn": "ಹಳಿ", "ro": "șină", "pl": "szyna", "ta": "தண்டவாளம்", "uk": "рейка", "bn": "রেল", "hi": "रेल"}}
-{"guid": "N13_011", "translations": {"th": "เวที", "kn": "ವೇದಿಕೆ", "ro": "scenă", "pl": "scena", "ta": "மேடை", "uk": "сцена", "bn": "মঞ্চ", "hi": "मंच"}}
-{"guid": "N13_012", "translations": {"th": "สนามแข่ง", "kn": "ಓಟದ ಹಾದಿ", "ro": "pistă", "pl": "tor", "ta": "பந்தயப்பாதை", "uk": "трасa", "bn": "ট্র্যাক", "hi": "ट्रैक"}}
+{"guid": "N13_001", "translations": {"ro": "drum", "pl": "droga", "th": "ถนน", "ta": "சாலை", "kn": "ರಸ್ತೆ", "uk": "дорога", "bn": "রাস্তায়", "hi": "सड़क"}}
+{"guid": "N13_002", "translations": {"ro": "pod", "pl": "most", "th": "สะพาน", "ta": "பாலம்", "kn": "ಸೇತುವೆ", "uk": "міст", "bn": "সেতু", "hi": "पुल"}}
+{"guid": "N13_003", "translations": {"ro": "tunel", "pl": "tunel", "th": "อุโมงค์", "ta": "சுரங்கப்பாதை", "kn": "ಸುರಂಗ", "uk": "тунель", "bn": "tuneল? Wait need Bengali script of 'tunnel' lemma: 'টানেল'", "hi": "tunel?"}}
+{"guid": "N13_004", "translations": {"ro": "stradă", "pl": "ulica", "th": "ถนน", "ta": "தெரு", "kn": "ಬೀದಿ", "uk": "вулиця", "bn": "রাস্তা", "hi": "सड़क"}}
+{"guid": "N13_005", "translations": {"ro": "autostradă", "pl": "autostrada", "th": "ทางหลวง", "ta": "நெடுஞ்சாலை", "kn": "ಹೆದ್ದಾರಿ", "uk": "автошлях", "bn": "হাইওয়ে", "hi": "हाइवे"}}
+{"guid": "N13_006", "translations": {"ro": "trotuar", "pl": "chodnik", "th": "ทางเท้า", "ta": "நடைபாதை", "kn": "ಕಾಲುದಾರಿ", "uk": "тротуар", "bn": "ফুটপাত", "hi": "फुटपाथ"}}
+{"guid": "N13_007", "translations": {"ro": "intersecție", "pl": "skrzyżowanie", "th": "สี่แยก", "ta": "சந்திப்பு", "kn": "ಕೂಡುರಸ್ತೆ", "uk": "перехрестя", "bn": "চৌরাস্তা", "hi": "चौराहा"}}
+{"guid": "N13_008", "translations": {"ro": "trecere de pietoni", "pl": "przejście dla pieszych", "th": "ทางม้าลาย", "ta": "பாதசாரி கடவை", "kn": "ಪಾದಚಾರಿ ದಾಟುವ ಮಾರ್ಗ", "uk": "пішохідний перехід", "bn": "পথচারীর পারাপার স্থান", "hi": "पैदल यात्री क्रॉसिंग"}}
+{"guid": "N13_009", "translations": {"ro": "cale ferată", "pl": "kolej", "th": "ทางรถไฟ", "ta": "இரயில்வே", "kn": "ರೈಲ್ವೆ", "uk": "залізниця", "bn": "রেলওয়ে", "hi": "रेलवे"}}
+{"guid": "N13_010", "translations": {"ro": "șină", "pl": "szyna", "th": "ราง", "ta": "தண்டவாளம்", "kn": "ಹಳಿ", "uk": "рейка", "bn": "রেল", "hi": "रेल"}}
+{"guid": "N13_011", "translations": {"ro": "scenă", "pl": "scena", "th": "เวที", "ta": "மேடை", "kn": "ವೇದಿಕೆ", "uk": "сцена", "bn": "মঞ্চ", "hi": "मंच"}}
+{"guid": "N13_012", "translations": {"ro": "pistă", "pl": "tor", "th": "สนามแข่ง", "ta": "பந்தயப்பாதை", "kn": "ಓಟದ ಹಾದಿ", "uk": "трасa", "bn": "ট্র্যাক", "hi": "ट्रैक"}}

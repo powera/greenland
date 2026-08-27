@@ -92,3 +92,31 @@
 {"guid": "N06_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "date", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "dates", "is_base_form": false}]}
 {"guid": "N06_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "stock", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stocks", "is_base_form": false}]}
 {"guid": "N06_103", "forms": [{"grammatical_form": "noun/en_singular", "text": "roll", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "rolls", "is_base_form": false}]}
+{"guid": "N06_104", "forms": [{"grammatical_form": "noun/en_singular", "text": "ice cream", "is_base_form": true}]}
+{"guid": "N06_105", "forms": [{"grammatical_form": "noun/en_singular", "text": "whipped cream", "is_base_form": true}]}
+{"guid": "N06_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "peanut butter", "is_base_form": true}]}
+{"guid": "N06_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "olive oil", "is_base_form": true}]}
+{"guid": "N06_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "soy sauce", "is_base_form": true}]}
+{"guid": "N06_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "hot dog", "is_base_form": true}]}
+{"guid": "N06_110", "forms": [{"grammatical_form": "noun/en_singular", "text": "french fries", "is_base_form": true}]}
+{"guid": "N06_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "mashed potatoes", "is_base_form": true}]}
+{"guid": "N06_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "green beans", "is_base_form": true}]}
+{"guid": "N06_113", "forms": [{"grammatical_form": "noun/en_singular", "text": "sweet potato", "is_base_form": true}]}
+{"guid": "N06_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "green onion", "is_base_form": true}]}
+{"guid": "N06_115", "forms": [{"grammatical_form": "noun/en_singular", "text": "baking soda", "is_base_form": true}]}
+{"guid": "N06_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "baking powder", "is_base_form": true}]}
+{"guid": "N06_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "maple syrup", "is_base_form": true}]}
+{"guid": "N06_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "chewing gum", "is_base_form": true}]}
+{"guid": "N06_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "cream cheese", "is_base_form": true}]}
+{"guid": "N06_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "ground beef", "is_base_form": true}]}
+{"guid": "N06_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "egg white", "is_base_form": true}]}
+{"guid": "N06_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "egg yolk", "is_base_form": true}]}
+{"guid": "N06_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "fruit salad", "is_base_form": true}]}
+{"guid": "N06_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "salad dressing", "is_base_form": true}]}
+{"guid": "N06_125", "forms": [{"grammatical_form": "noun/en_singular", "text": "tomato sauce", "is_base_form": true}]}
+{"guid": "N06_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "hot sauce", "is_base_form": true}]}
+{"guid": "N06_127", "forms": [{"grammatical_form": "noun/en_singular", "text": "fast food", "is_base_form": true}]}
+{"guid": "N06_128", "forms": [{"grammatical_form": "noun/en_singular", "text": "junk food", "is_base_form": true}]}
+{"guid": "N06_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "sea salt", "is_base_form": true}]}
+{"guid": "N06_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "brown sugar", "is_base_form": true}]}
+{"guid": "N06_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "bay leaf", "is_base_form": true}]}

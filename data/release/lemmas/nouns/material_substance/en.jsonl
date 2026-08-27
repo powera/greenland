@@ -60,3 +60,6 @@
 {"guid": "N14_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "powder", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "powders", "is_base_form": false}]}
 {"guid": "N14_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "polish", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "polishes", "is_base_form": false}]}
 {"guid": "N14_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "steam", "is_base_form": true}]}
+{"guid": "N14_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "dish soap", "is_base_form": true}]}
+{"guid": "N14_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "fossil fuel", "is_base_form": true}]}
+{"guid": "N14_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "renewable energy", "is_base_form": true}]}

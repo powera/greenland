@@ -1,6 +1,6 @@
-{"guid": "D99_001", "translations": {"th": "น้อยที่สุด", "kn": "ಕನಿಷ್ಠವಾಗಿ", "uk": "найменше", "bn": "অতিক্ষুদ্রভাবে", "ro": "cel mai puțin", "pl": "najmniej", "ta": "குறைந்தபட்சமாக", "hi": "सबसे कम"}}
-{"guid": "D99_002", "translations": {"th": "น้อยลง", "kn": "ಕಡಿಮೆ", "uk": "менш", "bn": "কম", "ro": "mai puțin", "pl": "mniej", "ta": "குறைவு", "hi": "कम"}}
-{"guid": "D99_003", "translations": {"th": "สองครั้ง", "kn": "ಎರಡು ಬಾರಿ", "uk": "двічі", "bn": "দুইবার", "ro": "de două ori", "pl": "dwa razy", "ta": "இருமுறை", "hi": "दो बार"}}
+{"guid": "D99_001", "translations": {"ro": "cel mai puțin", "pl": "najmniej", "th": "น้อยที่สุด", "ta": "குறைந்தபட்சமாக", "kn": "ಕನಿಷ್ಠವಾಗಿ", "uk": "найменше", "bn": "অতিক্ষুদ্রভাবে", "hi": "सबसे कम"}}
+{"guid": "D99_002", "translations": {"ro": "mai puțin", "pl": "mniej", "th": "น้อยลง", "ta": "குறைவு", "kn": "ಕಡಿಮೆ", "uk": "менш", "bn": "কম", "hi": "कम"}}
+{"guid": "D99_003", "translations": {"ro": "de două ori", "pl": "dwa razy", "th": "สองครั้ง", "ta": "இருமுறை", "kn": "ಎರಡು ಬಾರಿ", "uk": "двічі", "bn": "দুইবার", "hi": "दो बार"}}
 {"guid": "D99_004", "translations": {"ro": "odată", "pl": "raz", "th": "ครั้งหนึ่ง", "ta": "ஒருமுறை", "kn": "ಒಮ್ಮೆ", "uk": "колись", "bn": "একবার", "hi": "एक बार"}}
 {"guid": "D99_005", "translations": {"ro": "din nou", "pl": "znowu", "th": "อีกครั้ง", "ta": "மீண்டும்", "kn": "ಮತ್ತೆ", "uk": "знову", "bn": "আবার", "hi": "फिर"}}
 {"guid": "D99_006", "translations": {"ro": "de asemenea", "pl": "podobnie", "th": "เช่นกัน", "ta": "அதுபோலவே", "kn": "ಹೀಗೆಯೇ", "uk": "також", "bn": "একইভাবে", "hi": "तद्वत्"}}

@@ -1,7 +1,7 @@
-{"guid": "A15_011", "translations": {"th": "สุดท้าย", "kn": "ಕೊನೆಯ", "uk": "останній", "bn": "শেষ", "ro": "ultimul", "pl": "ostatni", "ta": "கடைசி", "hi": "अंतिम"}}
-{"guid": "A15_012", "translations": {"th": "สุดท้าย", "kn": "ಅಂತಿಮ", "uk": "остаточний", "bn": "চূড়ান্ত", "ro": "final", "pl": "końcowy", "ta": "இறுதி", "hi": "अंतिम"}}
-{"guid": "A15_013", "translations": {"th": "ถัดไป", "kn": "ಮುಂದಿನ", "ro": "următor", "pl": "następny", "ta": "அடுத்த", "uk": "наступний", "bn": "পরবর্তী", "hi": "अगला"}}
-{"guid": "A15_014", "translations": {"th": "ก่อนหน้า", "kn": "ಹಿಂದಿನ", "ro": "anterior", "pl": "poprzedni", "ta": "முந்தைய", "uk": "попередній", "bn": "পূর্ববর্তী", "hi": "पूर्व"}}
-{"guid": "A15_015", "translations": {"th": "ต่อไปนี้", "kn": "ಕೆಳಗಿನ", "ro": "următor", "pl": "następujący", "ta": "தொடர்ந்து வரும்", "uk": "наступний", "bn": "পরবর্তী", "hi": "अगला"}}
-{"guid": "A15_017", "translations": {"th": "กลาง", "kn": "ಮಧ್ಯದ", "ro": "mijlociu", "pl": "środkowy", "ta": "நடு", "uk": "середній", "bn": "মধ্যবর্তী", "hi": "मध्य"}}
-{"guid": "A15_018", "translations": {"th": "หน้า", "kn": "ಮುಂದಿನ", "ro": "din față", "pl": "przedni", "ta": "முன்", "uk": "передній", "bn": "সামনের", "hi": "सामने का"}}
+{"guid": "A15_011", "translations": {"ro": "ultimul", "pl": "ostatni", "th": "สุดท้าย", "ta": "கடைசி", "kn": "ಕೊನೆಯ", "uk": "останній", "bn": "শেষ", "hi": "अंतिम"}}
+{"guid": "A15_012", "translations": {"ro": "final", "pl": "końcowy", "th": "สุดท้าย", "ta": "இறுதி", "kn": "ಅಂತಿಮ", "uk": "остаточний", "bn": "চূড়ান্ত", "hi": "अंतिम"}}
+{"guid": "A15_013", "translations": {"ro": "următor", "pl": "następny", "th": "ถัดไป", "ta": "அடுத்த", "kn": "ಮುಂದಿನ", "uk": "наступний", "bn": "পরবর্তী", "hi": "अगला"}}
+{"guid": "A15_014", "translations": {"ro": "anterior", "pl": "poprzedni", "th": "ก่อนหน้า", "ta": "முந்தைய", "kn": "ಹಿಂದಿನ", "uk": "попередній", "bn": "পূর্ববর্তী", "hi": "पूर्व"}}
+{"guid": "A15_015", "translations": {"ro": "următor", "pl": "następujący", "th": "ต่อไปนี้", "ta": "தொடர்ந்து வரும்", "kn": "ಕೆಳಗಿನ", "uk": "наступний", "bn": "পরবর্তী", "hi": "अगला"}}
+{"guid": "A15_017", "translations": {"ro": "mijlociu", "pl": "środkowy", "th": "กลาง", "ta": "நடு", "kn": "ಮಧ್ಯದ", "uk": "середній", "bn": "মধ্যবর্তী", "hi": "मध्य"}}
+{"guid": "A15_018", "translations": {"ro": "din față", "pl": "przedni", "th": "หน้า", "ta": "முன்", "kn": "ಮುಂದಿನ", "uk": "передній", "bn": "সামনের", "hi": "सामने का"}}

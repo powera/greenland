@@ -18,3 +18,10 @@
 {"guid": "N42_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "cider", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "ciders", "is_base_form": false}]}
 {"guid": "N42_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "beverage", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "beverages", "is_base_form": false}]}
 {"guid": "N42_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "port", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "ports", "is_base_form": false}]}
+{"guid": "N42_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "orange juice", "is_base_form": true}]}
+{"guid": "N42_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "green tea", "is_base_form": true}]}
+{"guid": "N42_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "iced tea", "is_base_form": true}]}
+{"guid": "N42_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "instant coffee", "is_base_form": true}]}
+{"guid": "N42_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "mineral water", "is_base_form": true}]}
+{"guid": "N42_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "sparkling water", "is_base_form": true}]}
+{"guid": "N42_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "tap water", "is_base_form": true}]}

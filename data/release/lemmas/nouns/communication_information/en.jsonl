@@ -36,3 +36,17 @@
 {"guid": "N50_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "form", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "forms", "is_base_form": false}]}
 {"guid": "N50_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "will", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "wills", "is_base_form": false}]}
 {"guid": "N50_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "tip", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "tips", "is_base_form": false}]}
+{"guid": "N50_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "shopping list", "is_base_form": true}]}
+{"guid": "N50_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "report card", "is_base_form": true}]}
+{"guid": "N50_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "parking ticket", "is_base_form": true}]}
+{"guid": "N50_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "driver's license", "is_base_form": true}]}
+{"guid": "N50_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "boarding pass", "is_base_form": true}]}
+{"guid": "N50_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "middle name", "is_base_form": true}]}
+{"guid": "N50_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "last name", "is_base_form": true}]}
+{"guid": "N50_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "first name", "is_base_form": true}]}
+{"guid": "N50_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "maiden name", "is_base_form": true}]}
+{"guid": "N50_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "text message", "is_base_form": true}]}
+{"guid": "N50_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "phone number", "is_base_form": true}]}
+{"guid": "N50_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "email address", "is_base_form": true}]}
+{"guid": "N50_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "cover letter", "is_base_form": true}]}
+{"guid": "N50_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "sheet music", "is_base_form": true}]}

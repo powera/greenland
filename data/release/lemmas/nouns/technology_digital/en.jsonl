@@ -11,3 +11,6 @@
 {"guid": "N52_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "database", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "databases", "is_base_form": false}]}
 {"guid": "N52_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "app", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "apps", "is_base_form": false}]}
 {"guid": "N52_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "port", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "ports", "is_base_form": false}]}
+{"guid": "N52_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "search engine", "is_base_form": true}]}
+{"guid": "N52_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "operating system", "is_base_form": true}]}
+{"guid": "N52_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "social network", "is_base_form": true}]}

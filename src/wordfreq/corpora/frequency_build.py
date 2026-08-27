@@ -236,11 +236,18 @@ def aggregate_frequencies(
         word: score for word, score in scores.items() if book_count[word] >= effective_min_books
     }
 
-    ordered = sorted(filtered.items(), key=lambda item: (-item[1], item[0]))
+    # Rank on the published integer, not the float score behind it.  Two words
+    # whose scores differ only below the rounding threshold (2002.6 and 2003.4)
+    # both publish 2003, and ordering them by the float leaves the file looking
+    # unsorted and -- worse -- reshuffles those ties whenever an unrelated
+    # corpus change nudges the scores.  Rounding first makes the tie-break
+    # alphabetical and the file diff-stable.
+    rounded = {word: max(1, int(round(score))) for word, score in filtered.items()}
+    ordered = sorted(rounded.items(), key=lambda item: (-item[1], item[0]))
     if max_words is not None:
         ordered = ordered[:max_words]
 
-    frequencies = {word: max(1, int(round(score))) for word, score in ordered}
+    frequencies = dict(ordered)
     return frequencies, total_unique_words
 
 

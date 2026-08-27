@@ -12,3 +12,8 @@
 {"guid": "N39_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "bench", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "benches", "is_base_form": false}]}
 {"guid": "N39_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "drawer", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "drawers", "is_base_form": false}]}
 {"guid": "N39_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "counter", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "counters", "is_base_form": false}]}
+{"guid": "N39_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "coffee table", "is_base_form": true}]}
+{"guid": "N39_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "dining table", "is_base_form": true}]}
+{"guid": "N39_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "bunk bed", "is_base_form": true}]}
+{"guid": "N39_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "rocking chair", "is_base_form": true}]}
+{"guid": "N39_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "ironing board", "is_base_form": true}]}

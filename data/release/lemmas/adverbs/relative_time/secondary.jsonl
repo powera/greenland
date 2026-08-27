@@ -1,14 +1,14 @@
-{"guid": "D04_001", "translations": {"th": "ภายหลัง", "kn": "ನಂತರ", "uk": "пізніше", "bn": "পরে", "ro": "mai târziu", "pl": "później", "ta": "பின்னர்", "hi": "बाद में"}}
-{"guid": "D04_003", "translations": {"th": "ยัง", "kn": "ಇನ್ನೂ", "uk": "ще", "bn": "এখনও", "ro": "încă", "pl": "jeszcze", "ta": "இன்னும்", "hi": "अभी भी"}}
-{"guid": "D04_004", "translations": {"th": "ที่ผ่านมา", "kn": "ಕಳೆದ", "uk": "тому", "bn": "আগে", "ro": "înainte", "pl": "temu", "ta": "முன்னர்", "hi": "पहले"}}
-{"guid": "D04_005", "translations": {"th": "ในที่สุด", "kn": "ಅವಸರವಾಗಿ (ಕೊನೆಗೆ)", "uk": "нарешті", "bn": "অবশেষে", "ro": "în cele din urmă", "pl": "wreszcie", "ta": "இறுதியில்", "hi": "आखिरकार"}}
-{"guid": "D04_006", "translations": {"th": "ทันที", "kn": "ತಕ್ಷಣ", "uk": "негайно", "bn": "তৎক্ষণাৎ", "ro": "imediat", "pl": "natychmiast", "ta": "உடனே", "hi": "तुरंत"}}
-{"guid": "D04_007", "translations": {"th": "โดยปกติ", "kn": "ಸಾಮಾನ್ಯವಾಗಿ", "uk": "зазвичай", "bn": "সাধারণত", "ro": "de obicei", "pl": "zwykle", "ta": "சாதாரணமாக", "hi": "आम तौर पर"}}
-{"guid": "D04_010", "translations": {"th": "ในไม่ช้า", "kn": "ಶೀಘ್ರದಲ್ಲೇ", "uk": "незабаром", "bn": "শীঘ্রই", "ro": "în curând", "pl": "wkrótce", "ta": "விடாமல்", "hi": "जल्दी"}}
-{"guid": "D04_011", "translations": {"th": "ก่อนหน้านี้", "kn": "ಹಿಂದೆ", "uk": "раніше", "bn": "আগে", "ro": "mai devreme", "pl": "wcześniej", "ta": "முந்த்/முந்துபோல்", "hi": "पहले"}}
-{"guid": "D04_012", "translations": {"th": "ไม่บ่อย", "kn": "稀少", "uk": "рідко", "bn": "কদাচিৎ", "ro": "rărareori", "pl": "rzadko", "ta": "அரிதாக", "hi": "कदाचित्"}}
-{"guid": "D04_014", "translations": {"th": "เร็วกว่า", "kn": "ಅಗತ್ಯವಾಗಿ ಬೆಳಿಗ್ಗೆ/ಮುಂಚಿತವಾಗಿ", "uk": "раніше", "bn": "আগে", "ro": "mai devreme", "pl": "wcześniej", "ta": "முன்", "hi": "पहले"}}
-{"guid": "D04_015", "translations": {"th": "ต่อไป", "kn": "ಮುಂದು", "uk": "далі", "bn": "পরবর্তী", "ro": "următor", "pl": "następnie", "ta": "அடுத்து", "hi": "आगे"}}
+{"guid": "D04_001", "translations": {"ro": "mai târziu", "pl": "później", "th": "ภายหลัง", "ta": "பின்னர்", "kn": "ನಂತರ", "uk": "пізніше", "bn": "পরে", "hi": "बाद में"}}
+{"guid": "D04_003", "translations": {"ro": "încă", "pl": "jeszcze", "th": "ยัง", "ta": "இன்னும்", "kn": "ಇನ್ನೂ", "uk": "ще", "bn": "এখনও", "hi": "अभी भी"}}
+{"guid": "D04_004", "translations": {"ro": "înainte", "pl": "temu", "th": "ที่ผ่านมา", "ta": "முன்னர்", "kn": "ಕಳೆದ", "uk": "тому", "bn": "আগে", "hi": "पहले"}}
+{"guid": "D04_005", "translations": {"ro": "în cele din urmă", "pl": "wreszcie", "th": "ในที่สุด", "ta": "இறுதியில்", "kn": "ಅವಸರವಾಗಿ (ಕೊನೆಗೆ)", "uk": "нарешті", "bn": "অবশেষে", "hi": "आखिरकार"}}
+{"guid": "D04_006", "translations": {"ro": "imediat", "pl": "natychmiast", "th": "ทันที", "ta": "உடனே", "kn": "ತಕ್ಷಣ", "uk": "негайно", "bn": "তৎক্ষণাৎ", "hi": "तुरंत"}}
+{"guid": "D04_007", "translations": {"ro": "de obicei", "pl": "zwykle", "th": "โดยปกติ", "ta": "சாதாரணமாக", "kn": "ಸಾಮಾನ್ಯವಾಗಿ", "uk": "зазвичай", "bn": "সাধারণত", "hi": "आम तौर पर"}}
+{"guid": "D04_010", "translations": {"ro": "în curând", "pl": "wkrótce", "th": "ในไม่ช้า", "ta": "விடாமல்", "kn": "ಶೀಘ್ರದಲ್ಲೇ", "uk": "незабаром", "bn": "শীঘ্রই", "hi": "जल्दी"}}
+{"guid": "D04_011", "translations": {"ro": "mai devreme", "pl": "wcześniej", "th": "ก่อนหน้านี้", "ta": "முந்த்/முந்துபோல்", "kn": "ಹಿಂದೆ", "uk": "раніше", "bn": "আগে", "hi": "पहले"}}
+{"guid": "D04_012", "translations": {"ro": "rărareori", "pl": "rzadko", "th": "ไม่บ่อย", "ta": "அரிதாக", "kn": "稀少", "uk": "рідко", "bn": "কদাচিৎ", "hi": "कदाचित्"}}
+{"guid": "D04_014", "translations": {"ro": "mai devreme", "pl": "wcześniej", "th": "เร็วกว่า", "ta": "முன்", "kn": "ಅಗತ್ಯವಾಗಿ ಬೆಳಿಗ್ಗೆ/ಮುಂಚಿತವಾಗಿ", "uk": "раніше", "bn": "আগে", "hi": "पहले"}}
+{"guid": "D04_015", "translations": {"ro": "următor", "pl": "następnie", "th": "ต่อไป", "ta": "அடுத்து", "kn": "ಮುಂದು", "uk": "далі", "bn": "পরবর্তী", "hi": "आगे"}}
 {"guid": "D04_016", "translations": {"ro": "devreme", "pl": "wcześnie", "th": "แต่เนิ่นๆ", "ta": "முன்னதாக", "kn": "ಮುನ್ಸೂಚನೆಯಾಗಿ", "uk": "рано", "bn": "আগে", "hi": "जल्दी"}}
 {"guid": "D04_017", "translations": {"ro": "târziu", "pl": "późno", "th": "สาย", "ta": "தாமதமாக", "kn": "ದೇರಿಯಾಗಿ", "uk": "пізно", "bn": "দেরিতে", "hi": "देर से"}}
 {"guid": "D04_018", "translations": {"ro": "între timp", "pl": "tymczasem", "th": "ระหว่างนั้น", "ta": "இதற்கிடையில்", "kn": "ಈ ನಡುವೆ", "uk": "тим часом", "bn": "এদিকে", "hi": "इसी दौरान"}}
