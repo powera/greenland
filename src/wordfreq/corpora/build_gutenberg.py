@@ -3,7 +3,7 @@
 """Generate a corpus word-frequency JSON file from downloaded Gutenberg books.
 
     PYTHONPATH=src python src/wordfreq/corpora/download_gutenberg.py --corpus 19th_books
-    PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus 19th_books
+    PYTHONPATH=src python src/wordfreq/corpora/build_gutenberg.py --corpus 19th_books
 
 Reads the cached plain-text files written by ``download_gutenberg.py``, strips
 the Gutenberg header/footer and transcription apparatus, separates proper nouns

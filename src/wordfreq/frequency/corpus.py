@@ -145,6 +145,22 @@ CORPUS_CONFIGS = [
         max_unknown_rank=5200,
         enabled=True,
     ),
+    CorpusConfig(
+        name="legal_scotus",
+        description="Word frequency data from Supreme Court opinions, 1997-2006",
+        file_path="legal_scotus.json",
+        max_words=10000,
+        file_type="json",
+        value_type="auto",
+        # The only corpus here written after 1938, and the reason it exists:
+        # "credit card", "cruise ship" and "elementary school" appear in no
+        # book Gutenberg carries.  Weighted below the novels because an
+        # opinion's register is formal and its subject matter is whatever
+        # happened to be litigated, not how everyday English is distributed.
+        corpus_weight=0.7,
+        max_unknown_rank=20000,
+        enabled=True,
+    ),
 ]
 
 

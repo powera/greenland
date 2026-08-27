@@ -1,7 +1,16 @@
-# Gutenberg corpus generation
+# Corpus generation
 
-Builds the `data/wordfreq/*.json` word-frequency corpora from Project
-Gutenberg books. Five corpora have book lists here:
+Builds the `data/wordfreq/*.json` word-frequency corpora. Two builders share
+this directory, and everything after text extraction is common code in
+`frequency_build.py` — proper-noun detection, per-document weighting and the
+output format are the same for both:
+
+| Builder | Source | Corpora |
+| --- | --- | --- |
+| `build_gutenberg.py` | Project Gutenberg books | the five below |
+| `build_scotus.py` | Supreme Court opinions | `legal_scotus` |
+
+Five corpora have book lists here:
 
 | Corpus | Books | Contents |
 | --- | --- | --- |
@@ -26,11 +35,11 @@ PYTHONPATH=src python src/wordfreq/corpora/download_gutenberg.py \
 PYTHONPATH=src python src/wordfreq/corpora/download_gutenberg.py --corpus all
 
 # 2. Build each corpus JSON from the cache.
-PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus 19th_books
-PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus 20th_books
-PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus religious_translated
-PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus early_modern_science
-PYTHONPATH=src python src/wordfreq/corpora/build_wordfreq.py --corpus cooking
+PYTHONPATH=src python src/wordfreq/corpora/build_gutenberg.py --corpus 19th_books
+PYTHONPATH=src python src/wordfreq/corpora/build_gutenberg.py --corpus 20th_books
+PYTHONPATH=src python src/wordfreq/corpora/build_gutenberg.py --corpus religious_translated
+PYTHONPATH=src python src/wordfreq/corpora/build_gutenberg.py --corpus early_modern_science
+PYTHONPATH=src python src/wordfreq/corpora/build_gutenberg.py --corpus cooking
 ```
 
 Six science books were removed from the list because Gutenberg has no
@@ -51,6 +60,51 @@ paces requests to gutenberg.org; keep it polite.
 Useful flags on the builder: `--dry-run` (report without writing),
 `--report FILE` (per-book token/name counts), `--weighting pooled` (the old
 behaviour, see below), `--min-books`, `--max-words`, `--skip-missing`.
+
+## The SCOTUS corpus
+
+`legal_scotus` is built from Supreme Court opinions rather than books, because
+no book Project Gutenberg carries contains "credit card", "cruise ship" or
+"elementary school": Gutenberg's copyright horizon is 1928, and those are
+mid-twentieth-century terms. Federal judicial opinions are uncopyrightable
+government edicts, and the Caselaw Access Project serves them as static JSON
+with no API key.
+
+```bash
+# 1. Download the cases (data/working/scotus, gitignored).
+PYTHONPATH=src python src/wordfreq/corpora/download_scotus.py --years 1997-2006
+
+# 2. Build the corpus JSON from the cache.
+PYTHONPATH=src python src/wordfreq/corpora/build_scotus.py --phrases-from-db
+```
+
+The unit of analysis is the **opinion**, not the case: a case carries a
+majority and often several dissents and concurrences, each by a different
+Justice, and counting them separately is what lets the per-document mean stop
+one long opinion deciding a word's rank. The current corpus is 1,474 opinions
+from 575 cases, about 5M tokens.
+
+Two defaults differ from the book builder's, because opinions are not novels.
+`--full-weight-tokens` is 4000 rather than 20000 (a long majority opinion runs
+to about 10000 tokens, so the book threshold would down-weight every one), and
+`--min-opinions` is 8 rather than 3 (there are 1,474 documents, not 54).
+
+**Citation apparatus is stripped, case names are not.** About 5% of an
+opinion's words are citations, and left in they would put `stat`, `ibid` and
+`ante` into an English frequency list. Two rules do the work: a *run* rule
+removes sequences of two or more abbreviations, numbers and section signs
+(`La. Rev. Stat. Ann. §§27:301`), which is what covers the open-ended set of
+jurisdictions without naming them; and a short list covers isolated
+abbreviations (`Inc.`, `Cf.`, `e. g.`), which have no neighbour for the run
+rule to catch. A 20-case sample holds 539 distinct abbreviation-shaped tokens,
+so a list alone was never going to be complete. Party names stay in: the
+per-document capitalization rule already routes them to `name_frequency`, and
+removing them would take the surrounding syntax with them.
+
+Editorial brackets are unwrapped before tokenizing. Quotations are altered in
+brackets to fit the sentence quoting them (`"[w]hen"`, `"see[k]"`), and since
+the tokenizer treats brackets as boundaries those would otherwise count as
+`hen` and `see`.
 
 ## How words are counted
 
@@ -110,7 +164,7 @@ so they read like occurrence counts; only their ratios are meaningful.
 
 ## After generating
 
-Every corpus here is now enabled in
+Every corpus here — the five book lists and `legal_scotus` — is enabled in
 `wordfreq.frequency.corpus.CORPUS_CONFIGS`, and each one's JSON exists.
 **Import them before relying on `combined_rank`**: an enabled corpus with no annotations makes
 `combined_rank` charge every lemma that corpus's unknown-rank floor, which

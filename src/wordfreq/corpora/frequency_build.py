@@ -260,8 +260,14 @@ def build_corpus_payload(
     max_words: Optional[int] = None,
     min_name_count: int = DEFAULT_MIN_NAME_COUNT,
     full_weight_tokens: int = DEFAULT_FULL_WEIGHT_TOKENS,
+    generator: str = "wordfreq.corpora.build_gutenberg",
 ) -> Dict[str, Any]:
-    """Assemble the corpus JSON payload from analyzed books."""
+    """Assemble the corpus JSON payload from analyzed books.
+
+    ``generator`` names the builder for the ``generation`` block; it defaults
+    to the Gutenberg builder, which is what every corpus but ``legal_scotus``
+    is made by.
+    """
     frequencies, total_unique_words = aggregate_frequencies(
         analyses,
         weighting=weighting,
@@ -296,7 +302,7 @@ def build_corpus_payload(
             "full_weight_tokens": full_weight_tokens,
             "total_tokens": sum(analysis.content_tokens for analysis in analyses),
             "books": len(analyses),
-            "generator": "wordfreq.corpora.build_wordfreq",
+            "generator": generator,
         },
     }
 
