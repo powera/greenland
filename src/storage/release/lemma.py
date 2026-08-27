@@ -226,6 +226,11 @@ def lemma_to_release_record(lemma: Lemma, *, qid: Optional[str] = None) -> Dict[
         record["lexical_gap_reason"] = lemma.lexical_gap_reason
     if lemma.notes:
         record["notes"] = lemma.notes
+    # Omitted when unrated: an absent key means nobody has judged this sense,
+    # which readers treat as "common". Writing "common" for a NULL would make
+    # a round-trip claim a rating that was never made.
+    if lemma.sense_prominence:
+        record["sense_prominence"] = lemma.sense_prominence
 
     emoji = decode_db_emoji(lemma.emoji)
     if emoji:
@@ -254,6 +259,7 @@ def apply_base_fields(lemma: Lemma, record: Dict[str, Any]) -> None:
     lemma.definition_text = record.get("concept_definition", "") or ""
     lemma.notes = record.get("notes") or None
     lemma.lexical_gap_reason = record.get("lexical_gap_reason") or None
+    lemma.sense_prominence = record.get("sense_prominence") or None
     lemma.emoji = encode_db_emoji(release_emoji(record))
 
 
@@ -305,6 +311,7 @@ def import_release_record(session: Session, record: Dict[str, Any]) -> Lemma:
         difficulty_level=record.get("difficulty_level"),
         notes=record.get("notes") or None,
         lexical_gap_reason=record.get("lexical_gap_reason") or None,
+        sense_prominence=record.get("sense_prominence") or None,
         emoji=encode_db_emoji(release_emoji(record)),
     )
     session.add(lemma)

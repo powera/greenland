@@ -33,7 +33,12 @@ def session() -> Session:
         yield active
 
 
-def test_defaults_to_common_when_not_given(session: Session) -> None:
+def test_is_unrated_when_not_given(session: Session) -> None:
+    """An omitted rating stays NULL rather than being invented as "common".
+
+    Readers treat NULL as common, but storing it would claim someone had
+    judged the sense -- see words.sense_prominence.find_duplicate_text_groups.
+    """
     lemma = add_lemma(
         session,
         lemma_text="elephant",
@@ -42,7 +47,7 @@ def test_defaults_to_common_when_not_given(session: Session) -> None:
         auto_generate_guid=False,
     )
 
-    assert lemma.sense_prominence == SENSE_PROMINENCE_COMMON
+    assert lemma.sense_prominence is None
 
 
 def test_stores_an_explicit_rating(session: Session) -> None:
@@ -58,7 +63,7 @@ def test_stores_an_explicit_rating(session: Session) -> None:
     assert lemma.sense_prominence == SENSE_PROMINENCE_RARE
 
 
-def test_explicit_none_keeps_the_default(session: Session) -> None:
+def test_explicit_none_leaves_it_unrated(session: Session) -> None:
     """A caller with no opinion passes None rather than guessing a label."""
     lemma = add_lemma(
         session,
@@ -69,7 +74,7 @@ def test_explicit_none_keeps_the_default(session: Session) -> None:
         sense_prominence=None,
     )
 
-    assert lemma.sense_prominence == SENSE_PROMINENCE_COMMON
+    assert lemma.sense_prominence is None
 
 
 def test_unknown_value_is_rejected(session: Session) -> None:

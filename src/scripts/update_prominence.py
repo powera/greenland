@@ -14,7 +14,8 @@ early a word is taught, and which of its meanings a reader encounters. "top"
 the spinning toy is easy vocabulary and a rare sense of the written word.
 
 Idempotent: a lemma is written only when the model's answer differs from what
-is stored. Use ``--only-unrated`` to skip spellings someone has already rated.
+is stored. Use ``--only-unrated`` to skip spellings that already carry a rating;
+an unrated sense is NULL, and stays eligible until something writes a label.
 
 Examples:
   # See what would be rated, no LLM calls at all
@@ -71,7 +72,7 @@ def run(args: argparse.Namespace) -> int:
                 print(f"\n{lemma_text} ({len(senses)} senses)")
                 for sense in senses:
                     print(
-                        f"  [{sense.current_prominence:11s}] {sense.guid or '-':8s} "
+                        f"  [{sense.current_prominence or 'unrated':11s}] {sense.guid or '-':8s} "
                         f"({sense.pos_type}) {sense.definition_text[:60]}"
                     )
             return 0
@@ -99,7 +100,7 @@ def run(args: argparse.Namespace) -> int:
                 sense = by_id[rating.lemma_id]
                 marker = "->" if sense.current_prominence != rating.prominence else "  "
                 print(
-                    f"    {marker} {sense.current_prominence:11s} => "
+                    f"    {marker} {sense.current_prominence or 'unrated':11s} => "
                     f"{rating.prominence:11s} {sense.definition_text[:45]}"
                 )
 
@@ -138,7 +139,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument(
         "--only-unrated",
         action="store_true",
-        help="Skip spellings where some lemma is already off the 'common' default",
+        help="Skip spellings where every lemma already carries a rating",
     )
     parser.add_argument(
         "--list",

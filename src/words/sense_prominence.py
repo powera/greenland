@@ -48,7 +48,8 @@ class SenseToRate:
     guid: Optional[str]
     pos_type: str
     definition_text: str
-    current_prominence: str
+    # None when the sense has never been rated; readers treat that as "common".
+    current_prominence: Optional[str]
 
 
 @dataclass(frozen=True)
@@ -83,8 +84,11 @@ def find_duplicate_text_groups(
     Args:
         session: Database session.
         limit: Stop after this many groups. None for all of them.
-        only_unrated: Skip groups where at least one lemma already differs from
-            the schema default, i.e. someone has already rated this spelling.
+        only_unrated: Skip groups where every lemma already carries a rating.
+            A rating is a non-NULL ``sense_prominence``; NULL means nobody has
+            judged the sense yet. Note this is not "differs from common" -- a
+            group the model judged uniformly common is rated, and re-asking
+            about it every run would repeat the spend forever.
     """
     duplicate_texts = (
         session.query(Lemma.lemma_text)
@@ -109,7 +113,7 @@ def find_duplicate_text_groups(
             )
             for lemma in lemmas
         ]
-        if only_unrated and any(sense.current_prominence != "common" for sense in senses):
+        if only_unrated and all(sense.current_prominence is not None for sense in senses):
             continue
         groups.append((lemma_text, senses))
         if limit is not None and len(groups) >= limit:
@@ -263,6 +267,8 @@ def apply_ratings(
         if lemma is None:
             logger.warning("Lemma %s vanished before its rating was applied", rating.lemma_id)
             continue
+        # A NULL lemma rated "common" is a real change: it is how the rating
+        # gets recorded, and what stops --only-unrated asking again.
         if lemma.sense_prominence == rating.prominence:
             continue
         lemma.sense_prominence = rating.prominence

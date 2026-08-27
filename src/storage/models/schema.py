@@ -146,14 +146,16 @@ class Lemma(Base):
 
     # Sense prominence: how prominent this sense is when its surface form is shared
     # with other lemmas (homographs). Drives weighted split of token frequency in
-    # wordfreq.lexeme_frequency. One of SENSE_PROMINENCE_VALUES; default "common".
+    # wordfreq.lexeme_frequency. One of SENSE_PROMINENCE_VALUES, or NULL.
     # For lemmas with no homograph competition, the value has no effect on the rollup.
-    sense_prominence: Mapped[str] = mapped_column(
-        String,
-        nullable=False,
-        server_default=SENSE_PROMINENCE_COMMON,
-        default=SENSE_PROMINENCE_COMMON,
-    )
+    #
+    # NULL means "nobody has rated this sense", and every reader treats it as
+    # SENSE_PROMINENCE_COMMON. It is deliberately distinct from a stored
+    # "common": that is a rating someone made, and it stops the sense being
+    # re-rated. Storing "common" as a default would erase that difference and
+    # leave words.sense_prominence unable to tell an unrated sense from one the
+    # model judged equal to its homographs.
+    sense_prominence: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     # Metadata
     confidence: Mapped[float] = mapped_column(Float, default=0.0)  # 0-1 score from LLM

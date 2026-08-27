@@ -64,7 +64,8 @@ class TokenAttachment:
     definition_text: str
     pos_type: str
     disambiguation: Optional[str]
-    sense_prominence: str
+    # None when the sense has never been rated; readers treat that as "common".
+    sense_prominence: Optional[str]
     guid: Optional[str]
     attachment_kind: str  # ATTACHMENT_DERIVATIVE or ATTACHMENT_VARIANT
     form_id: int
