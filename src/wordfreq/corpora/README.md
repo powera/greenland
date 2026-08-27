@@ -1,14 +1,15 @@
 # Corpus generation
 
-Builds the `data/wordfreq/*.json` word-frequency corpora. Two builders share
+Builds the `data/wordfreq/*.json` word-frequency corpora. Three builders share
 this directory, and everything after text extraction is common code in
 `frequency_build.py` — proper-noun detection, per-document weighting and the
-output format are the same for both:
+output format are the same for all of them:
 
 | Builder | Source | Corpora |
 | --- | --- | --- |
 | `build_gutenberg.py` | Project Gutenberg books | the five below |
 | `build_scotus.py` | Supreme Court opinions | `legal_scotus` |
+| `build_wikipedia.py` | A Wikipedia dump snapshot | `wiki_vital`, `wiki_math` |
 
 Five corpora have book lists here:
 
@@ -106,6 +107,60 @@ brackets to fit the sentence quoting them (`"[w]hen"`, `"see[k]"`), and since
 the tokenizer treats brackets as boundaries those would otherwise count as
 `hen` and `see`.
 
+## The Wikipedia corpora
+
+`wiki_vital` and `wiki_math` are built from a Wikipedia dump snapshot rather
+than per-document downloads, which is what makes this builder different from
+the other two: there is no `download_wikipedia.py`. You fetch one
+`pages-articles-multistream.xml.bz2` and its `-index.txt` companion by hand,
+point `constants.WIKI_CORPUS_BASE_PATH` at the directory, and index it once.
+
+```bash
+# 1. Index the snapshot by page title (once per snapshot; slow).
+PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --build-index
+
+# 2. Build either corpus from it.
+PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py \
+    --corpus wiki_vital --phrases-from-db
+PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py \
+    --corpus wiki_math --phrases-from-db
+```
+
+| Corpus | Articles | Contents |
+| --- | --- | --- |
+| `wiki_vital` | 1000 | Wikipedia's "Vital articles" selection, in eleven topic groups — a general sample of modern encyclopedic English |
+| `wiki_math` | 299 | Mathematics in depth, from arithmetic to category theory. A strict superset of the vital list's 53-title Mathematics section |
+
+`wiki_math` has **no `CORPUS_CONFIGS` entry yet** — deliberately. An enabled
+corpus with no JSON file makes `combined_rank` charge every lemma that corpus's
+unknown-rank floor, so it is registered only once the file has been built.
+
+The dump is a *multistream* bz2: it concatenates independently compressed ~2MB
+blocks, so a block holding a given page can be seeked to and decompressed
+alone. `wiki_dump.py` turns the index file into SQLite databases sharded by the
+MD5 of the page title, and the builder then asks for its articles by name. A
+title that has been renamed since the snapshot was taken is reported as missing
+and costs the corpus one document rather than failing the run.
+
+**Wikitext is parsed, not regex-stripped.** Its constructs nest — a template
+argument holds another template, an infobox holds a table holding links — and a
+pattern like `\{\{[^}]*\}\}` stops at the first `}}` it meets, so on
+`{{convert|5|km|{{abbr|mi}}}}` it consumes through the inner close and leaves
+`}}` behind as prose. The previous version of `wiki_vital.json` was built that
+way. `wiki_text.py` instead runs a character-level tokenizer into a block tree,
+so every construct closes where it actually closes. Links contribute their
+display text (`[[Pablo Picasso|Picasso]]` → "Picasso"); templates, tables,
+references, headings and `[[File:]]` links contribute nothing, except the few
+templates in `RAW_TEMPLATES` that wrap running prose. An infobox is a data
+table, and counting it would put "caption", "align" and "px" into an English
+frequency list.
+
+Two defaults differ from the book builder's. `--full-weight-tokens` is 2500
+rather than 20000 (a substantial article runs to about 5000 tokens of prose
+once apparatus is stripped), and `--min-articles` is 15 for `wiki_vital`
+against `--min-books` 3, because there are 1000 documents rather than 54.
+`--section` limits a run to one group of the article list.
+
 ## How words are counted
 
 **Boilerplate is stripped.** Everything outside the
@@ -164,8 +219,10 @@ so they read like occurrence counts; only their ratios are meaningful.
 
 ## After generating
 
-Every corpus here — the five book lists and `legal_scotus` — is enabled in
-`wordfreq.frequency.corpus.CORPUS_CONFIGS`, and each one's JSON exists.
+Every corpus here — the five book lists, `legal_scotus` and `wiki_vital` — is
+enabled in `wordfreq.frequency.corpus.CORPUS_CONFIGS`, and each one's JSON
+exists. `wiki_math` is the exception: it is buildable but not yet registered,
+and gets its `CORPUS_CONFIGS` entry once its file has been built.
 **Import them before relying on `combined_rank`**: an enabled corpus with no annotations makes
 `combined_rank` charge every lemma that corpus's unknown-rank floor, which
 drags every rank down.
