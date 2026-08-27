@@ -67,3 +67,9 @@
 {"guid": "N03_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "feather", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "feathers", "is_base_form": false}]}
 {"guid": "N03_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "temple", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "temples", "is_base_form": false}]}
 {"guid": "N03_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "mole", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "moles", "is_base_form": false}]}
+{"guid": "N03_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "rib cage", "is_base_form": true}]}
+{"guid": "N03_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "shoulder blade", "is_base_form": true}]}
+{"guid": "N03_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "index finger", "is_base_form": true}]}
+{"guid": "N03_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "ring finger", "is_base_form": true}]}
+{"guid": "N03_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "wisdom tooth", "is_base_form": true}]}
+{"guid": "N03_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "vocal cords", "is_base_form": true}]}

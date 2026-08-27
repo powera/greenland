@@ -23,3 +23,12 @@
 {"guid": "N47_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "drain", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "drains", "is_base_form": false}]}
 {"guid": "N47_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "pen", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "pens", "is_base_form": false}]}
 {"guid": "N47_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "flight", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "flights", "is_base_form": false}]}
+{"guid": "N47_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "waiting room", "is_base_form": true}]}
+{"guid": "N47_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "emergency room", "is_base_form": true}]}
+{"guid": "N47_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "operating room", "is_base_form": true}]}
+{"guid": "N47_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "locker room", "is_base_form": true}]}
+{"guid": "N47_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "dressing room", "is_base_form": true}]}
+{"guid": "N47_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "guest room", "is_base_form": true}]}
+{"guid": "N47_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "front door", "is_base_form": true}]}
+{"guid": "N47_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "back door", "is_base_form": true}]}
+{"guid": "N47_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "power outlet", "is_base_form": true}]}

@@ -141,3 +141,7 @@
 {"guid": "N17_294", "forms": [{"grammatical_form": "noun/en_singular", "text": "scale", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "scales", "is_base_form": false}]}
 {"guid": "N17_295", "forms": [{"grammatical_form": "noun/en_singular", "text": "stock", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stocks", "is_base_form": false}]}
 {"guid": "N17_296", "forms": [{"grammatical_form": "noun/en_singular", "text": "wave", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "waves", "is_base_form": false}]}
+{"guid": "N17_297", "forms": [{"grammatical_form": "noun/en_singular", "text": "birth control", "is_base_form": true}]}
+{"guid": "N17_298", "forms": [{"grammatical_form": "noun/en_singular", "text": "human right", "is_base_form": true}]}
+{"guid": "N17_299", "forms": [{"grammatical_form": "noun/en_singular", "text": "free speech", "is_base_form": true}]}
+{"guid": "N17_300", "forms": [{"grammatical_form": "noun/en_singular", "text": "public opinion", "is_base_form": true}]}

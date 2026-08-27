@@ -64,3 +64,26 @@
 {"guid": "N07_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "camp", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "camps", "is_base_form": false}]}
 {"guid": "N07_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "field", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "fields", "is_base_form": false}]}
 {"guid": "N07_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "ring", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "rings", "is_base_form": false}]}
+{"guid": "N07_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "high school", "is_base_form": true}]}
+{"guid": "N07_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "middle school", "is_base_form": true}]}
+{"guid": "N07_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "elementary school", "is_base_form": true}]}
+{"guid": "N07_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "boarding school", "is_base_form": true}]}
+{"guid": "N07_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "apartment building", "is_base_form": true}]}
+{"guid": "N07_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "office building", "is_base_form": true}]}
+{"guid": "N07_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "parking garage", "is_base_form": true}]}
+{"guid": "N07_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "shopping mall", "is_base_form": true}]}
+{"guid": "N07_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "grocery store", "is_base_form": true}]}
+{"guid": "N07_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "department store", "is_base_form": true}]}
+{"guid": "N07_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "convenience store", "is_base_form": true}]}
+{"guid": "N07_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "bus station", "is_base_form": true}]}
+{"guid": "N07_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "train station", "is_base_form": true}]}
+{"guid": "N07_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "subway station", "is_base_form": true}]}
+{"guid": "N07_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "police station", "is_base_form": true}]}
+{"guid": "N07_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "swimming pool", "is_base_form": true}]}
+{"guid": "N07_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "amusement park", "is_base_form": true}]}
+{"guid": "N07_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "city hall", "is_base_form": true}]}
+{"guid": "N07_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "public library", "is_base_form": true}]}
+{"guid": "N07_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "art gallery", "is_base_form": true}]}
+{"guid": "N07_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "movie theater", "is_base_form": true}]}
+{"guid": "N07_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "concert hall", "is_base_form": true}]}
+{"guid": "N07_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "nursing home", "is_base_form": true}]}

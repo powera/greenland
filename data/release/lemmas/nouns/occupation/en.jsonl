@@ -53,3 +53,16 @@
 {"guid": "N36_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "economist", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "economists", "is_base_form": false}]}
 {"guid": "N36_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "diplomat", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "diplomats", "is_base_form": false}]}
 {"guid": "N36_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "miner", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "miners", "is_base_form": false}]}
+{"guid": "N36_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "flight attendant", "is_base_form": true}]}
+{"guid": "N36_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "mail carrier", "is_base_form": true}]}
+{"guid": "N36_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "bus driver", "is_base_form": true}]}
+{"guid": "N36_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "taxi driver", "is_base_form": true}]}
+{"guid": "N36_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "truck driver", "is_base_form": true}]}
+{"guid": "N36_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "social worker", "is_base_form": true}]}
+{"guid": "N36_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "personal trainer", "is_base_form": true}]}
+{"guid": "N36_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "tour guide", "is_base_form": true}]}
+{"guid": "N36_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "real estate agent", "is_base_form": true}]}
+{"guid": "N36_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "travel agent", "is_base_form": true}]}
+{"guid": "N36_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "software engineer", "is_base_form": true}]}
+{"guid": "N36_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "graphic designer", "is_base_form": true}]}
+{"guid": "N36_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "movie star", "is_base_form": true}]}

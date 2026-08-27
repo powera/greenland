@@ -35,3 +35,13 @@
 {"guid": "N09_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "buckle", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "buckles", "is_base_form": false}]}
 {"guid": "N09_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "handkerchief", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "handkerchiefs", "is_base_form": false}]}
 {"guid": "N09_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "top", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "tops", "is_base_form": false}]}
+{"guid": "N09_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "dress shirt", "is_base_form": true}]}
+{"guid": "N09_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "tank top", "is_base_form": true}]}
+{"guid": "N09_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "high heels", "is_base_form": true}]}
+{"guid": "N09_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "winter coat", "is_base_form": true}]}
+{"guid": "N09_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "life jacket", "is_base_form": true}]}
+{"guid": "N09_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "bow tie", "is_base_form": true}]}
+{"guid": "N09_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "wedding dress", "is_base_form": true}]}
+{"guid": "N09_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "bathing suit", "is_base_form": true}]}
+{"guid": "N09_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "baseball cap", "is_base_form": true}]}
+{"guid": "N09_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "wedding ring", "is_base_form": true}]}

@@ -21,3 +21,5 @@
 {"guid": "N20_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "consciousness", "is_base_form": true}]}
 {"guid": "N20_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "opinion", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "opinions", "is_base_form": false}]}
 {"guid": "N20_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "theory", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "theories", "is_base_form": false}]}
+{"guid": "N20_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "point of view", "is_base_form": true}]}
+{"guid": "N20_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "common sense", "is_base_form": true}]}

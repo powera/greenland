@@ -14,3 +14,12 @@
 {"guid": "N57_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "remote", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "remotes", "is_base_form": false}]}
 {"guid": "N57_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "earbud", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "earbuds", "is_base_form": false}]}
 {"guid": "N57_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "phone", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "phones", "is_base_form": false}]}
+{"guid": "N57_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "remote control", "is_base_form": true}]}
+{"guid": "N57_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "smoke detector", "is_base_form": true}]}
+{"guid": "N57_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "solar panel", "is_base_form": true}]}
+{"guid": "N57_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "hard drive", "is_base_form": true}]}
+{"guid": "N57_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "flash drive", "is_base_form": true}]}
+{"guid": "N57_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "memory card", "is_base_form": true}]}
+{"guid": "N57_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "laptop computer", "is_base_form": true}]}
+{"guid": "N57_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "desktop computer", "is_base_form": true}]}
+{"guid": "N57_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "touch screen", "is_base_form": true}]}

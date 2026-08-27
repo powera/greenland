@@ -23,3 +23,12 @@
 {"guid": "N54_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "beauty", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "beauties", "is_base_form": false}]}
 {"guid": "N54_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "health", "is_base_form": true}]}
 {"guid": "N54_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "hearing", "is_base_form": true}]}
+{"guid": "N54_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "student loan", "is_base_form": true}]}
+{"guid": "N54_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "blood pressure", "is_base_form": true}]}
+{"guid": "N54_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "blood type", "is_base_form": true}]}
+{"guid": "N54_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "bank account", "is_base_form": true}]}
+{"guid": "N54_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "savings account", "is_base_form": true}]}
+{"guid": "N54_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "income tax", "is_base_form": true}]}
+{"guid": "N54_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "sales tax", "is_base_form": true}]}
+{"guid": "N54_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "sick leave", "is_base_form": true}]}
+{"guid": "N54_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "world record", "is_base_form": true}]}

@@ -10,3 +10,9 @@
 {"guid": "N13_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "rail", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "rails", "is_base_form": false}]}
 {"guid": "N13_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "stage", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stages", "is_base_form": false}]}
 {"guid": "N13_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "track", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "tracks", "is_base_form": false}]}
+{"guid": "N13_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "parking lot", "is_base_form": true}]}
+{"guid": "N13_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "town square", "is_base_form": true}]}
+{"guid": "N13_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "front yard", "is_base_form": true}]}
+{"guid": "N13_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "back yard", "is_base_form": true}]}
+{"guid": "N13_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "traffic light", "is_base_form": true}]}
+{"guid": "N13_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "bus stop", "is_base_form": true}]}

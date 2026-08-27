@@ -67,3 +67,11 @@
 {"guid": "N02_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "lobster", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "lobsters", "is_base_form": false}]}
 {"guid": "N02_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "fowl", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "fowls", "is_base_form": false}]}
 {"guid": "N02_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "insect", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "insects", "is_base_form": false}]}
+{"guid": "N02_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "polar bear", "is_base_form": true}]}
+{"guid": "N02_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "guinea pig", "is_base_form": true}]}
+{"guid": "N02_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "bald eagle", "is_base_form": true}]}
+{"guid": "N02_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "killer whale", "is_base_form": true}]}
+{"guid": "N02_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "honey bee", "is_base_form": true}]}
+{"guid": "N02_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "rattle snake", "is_base_form": true}]}
+{"guid": "N02_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "mountain lion", "is_base_form": true}]}
+{"guid": "N02_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "sea lion", "is_base_form": true}]}

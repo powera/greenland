@@ -27,3 +27,13 @@
 {"guid": "N12_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "spade", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "spades", "is_base_form": false}]}
 {"guid": "N12_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "wheel", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "wheels", "is_base_form": false}]}
 {"guid": "N12_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "stamp", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stamps", "is_base_form": false}]}
+{"guid": "N12_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "extension cord", "is_base_form": true}]}
+{"guid": "N12_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "cutting board", "is_base_form": true}]}
+{"guid": "N12_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "frying pan", "is_base_form": true}]}
+{"guid": "N12_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "rolling pin", "is_base_form": true}]}
+{"guid": "N12_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "can opener", "is_base_form": true}]}
+{"guid": "N12_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "bottle opener", "is_base_form": true}]}
+{"guid": "N12_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "measuring cup", "is_base_form": true}]}
+{"guid": "N12_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "fire extinguisher", "is_base_form": true}]}
+{"guid": "N12_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "steering wheel", "is_base_form": true}]}
+{"guid": "N12_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "musical instrument", "is_base_form": true}]}

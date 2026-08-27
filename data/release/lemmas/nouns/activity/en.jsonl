@@ -49,3 +49,10 @@
 {"guid": "N41_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "stitch", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stitches", "is_base_form": false}]}
 {"guid": "N41_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "driving", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "drivings", "is_base_form": false}]}
 {"guid": "N41_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "waiting", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "waitings", "is_base_form": false}]}
+{"guid": "N41_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "field trip", "is_base_form": true}]}
+{"guid": "N41_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "round trip", "is_base_form": true}]}
+{"guid": "N41_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "customer service", "is_base_form": true}]}
+{"guid": "N41_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "table tennis", "is_base_form": true}]}
+{"guid": "N41_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "ice skating", "is_base_form": true}]}
+{"guid": "N41_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "board game", "is_base_form": true}]}
+{"guid": "N41_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "card game", "is_base_form": true}]}

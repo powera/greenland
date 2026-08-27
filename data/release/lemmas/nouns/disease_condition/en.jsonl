@@ -12,3 +12,9 @@
 {"guid": "N04_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "asthma", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "asthmas", "is_base_form": false}]}
 {"guid": "N04_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "wound", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "wounds", "is_base_form": false}]}
 {"guid": "N04_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "sunburn", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "sunburns", "is_base_form": false}]}
+{"guid": "N04_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "heart attack", "is_base_form": true}]}
+{"guid": "N04_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "common cold", "is_base_form": true}]}
+{"guid": "N04_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "sore throat", "is_base_form": true}]}
+{"guid": "N04_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "runny nose", "is_base_form": true}]}
+{"guid": "N04_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "food poisoning", "is_base_form": true}]}
+{"guid": "N04_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "broken bone", "is_base_form": true}]}

@@ -108,3 +108,21 @@
 {"guid": "N08_117", "forms": [{"grammatical_form": "noun/en_singular", "text": "bat", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "bats", "is_base_form": false}]}
 {"guid": "N08_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "spring", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "springs", "is_base_form": false}]}
 {"guid": "N08_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "top", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "tops", "is_base_form": false}]}
+{"guid": "N08_120", "forms": [{"grammatical_form": "noun/en_singular", "text": "light bulb", "is_base_form": true}]}
+{"guid": "N08_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "alarm clock", "is_base_form": true}]}
+{"guid": "N08_122", "forms": [{"grammatical_form": "noun/en_singular", "text": "shower curtain", "is_base_form": true}]}
+{"guid": "N08_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "trash can", "is_base_form": true}]}
+{"guid": "N08_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "shopping cart", "is_base_form": true}]}
+{"guid": "N08_125", "forms": [{"grammatical_form": "noun/en_singular", "text": "paper towel", "is_base_form": true}]}
+{"guid": "N08_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "toilet paper", "is_base_form": true}]}
+{"guid": "N08_127", "forms": [{"grammatical_form": "noun/en_singular", "text": "sleeping bag", "is_base_form": true}]}
+{"guid": "N08_128", "forms": [{"grammatical_form": "noun/en_singular", "text": "picture frame", "is_base_form": true}]}
+{"guid": "N08_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "flower pot", "is_base_form": true}]}
+{"guid": "N08_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "clothes hanger", "is_base_form": true}]}
+{"guid": "N08_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "seat belt", "is_base_form": true}]}
+{"guid": "N08_132", "forms": [{"grammatical_form": "noun/en_singular", "text": "spare tire", "is_base_form": true}]}
+{"guid": "N08_133", "forms": [{"grammatical_form": "noun/en_singular", "text": "gas tank", "is_base_form": true}]}
+{"guid": "N08_134", "forms": [{"grammatical_form": "noun/en_singular", "text": "credit card", "is_base_form": true}]}
+{"guid": "N08_135", "forms": [{"grammatical_form": "noun/en_singular", "text": "debit card", "is_base_form": true}]}
+{"guid": "N08_136", "forms": [{"grammatical_form": "noun/en_singular", "text": "business card", "is_base_form": true}]}
+{"guid": "N08_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "playing card", "is_base_form": true}]}

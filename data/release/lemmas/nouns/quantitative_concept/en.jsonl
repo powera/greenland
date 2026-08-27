@@ -39,3 +39,10 @@
 {"guid": "N22_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "volume", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "volumes", "is_base_form": false}]}
 {"guid": "N22_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "record", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "records", "is_base_form": false}]}
 {"guid": "N22_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "rest", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "rests", "is_base_form": false}]}
+{"guid": "N22_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "speed limit", "is_base_form": true}]}
+{"guid": "N22_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "sea level", "is_base_form": true}]}
+{"guid": "N22_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "life expectancy", "is_base_form": true}]}
+{"guid": "N22_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "cost of living", "is_base_form": true}]}
+{"guid": "N22_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "interest rate", "is_base_form": true}]}
+{"guid": "N22_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "exchange rate", "is_base_form": true}]}
+{"guid": "N22_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "minimum wage", "is_base_form": true}]}

@@ -14,3 +14,4 @@
 {"guid": "N43_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "kettle", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "kettles", "is_base_form": false}]}
 {"guid": "N43_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "heater", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "heaters", "is_base_form": false}]}
 {"guid": "N43_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "fan", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "fans", "is_base_form": false}]}
+{"guid": "N43_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "cash register", "is_base_form": true}]}

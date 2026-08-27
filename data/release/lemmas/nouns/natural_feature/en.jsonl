@@ -59,3 +59,9 @@
 {"guid": "N11_068", "forms": [{"grammatical_form": "noun/en_singular", "text": "range", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "ranges", "is_base_form": false}]}
 {"guid": "N11_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "spring", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "springs", "is_base_form": false}]}
 {"guid": "N11_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "plot", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "plots", "is_base_form": false}]}
+{"guid": "N11_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "mountain range", "is_base_form": true}]}
+{"guid": "N11_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "coral reef", "is_base_form": true}]}
+{"guid": "N11_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "sand dune", "is_base_form": true}]}
+{"guid": "N11_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "hot spring", "is_base_form": true}]}
+{"guid": "N11_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "shooting star", "is_base_form": true}]}
+{"guid": "N11_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "solar system", "is_base_form": true}]}

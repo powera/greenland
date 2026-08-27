@@ -68,3 +68,20 @@
 {"guid": "N24_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "mass", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "masses", "is_base_form": false}]}
 {"guid": "N24_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "sentence", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "sentences", "is_base_form": false}]}
 {"guid": "N24_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "plot", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "plots", "is_base_form": false}]}
+{"guid": "N24_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "final exam", "is_base_form": true}]}
+{"guid": "N24_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "traffic jam", "is_base_form": true}]}
+{"guid": "N24_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "family reunion", "is_base_form": true}]}
+{"guid": "N24_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "baby shower", "is_base_form": true}]}
+{"guid": "N24_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "blood test", "is_base_form": true}]}
+{"guid": "N24_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "thunder storm", "is_base_form": true}]}
+{"guid": "N24_078", "forms": [{"grammatical_form": "noun/en_singular", "text": "snow storm", "is_base_form": true}]}
+{"guid": "N24_079", "forms": [{"grammatical_form": "noun/en_singular", "text": "climate change", "is_base_form": true}]}
+{"guid": "N24_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "global warming", "is_base_form": true}]}
+{"guid": "N24_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "natural disaster", "is_base_form": true}]}
+{"guid": "N24_082", "forms": [{"grammatical_form": "noun/en_singular", "text": "high tide", "is_base_form": true}]}
+{"guid": "N24_083", "forms": [{"grammatical_form": "noun/en_singular", "text": "low tide", "is_base_form": true}]}
+{"guid": "N24_084", "forms": [{"grammatical_form": "noun/en_singular", "text": "world war", "is_base_form": true}]}
+{"guid": "N24_085", "forms": [{"grammatical_form": "noun/en_singular", "text": "civil war", "is_base_form": true}]}
+{"guid": "N24_086", "forms": [{"grammatical_form": "noun/en_singular", "text": "job interview", "is_base_form": true}]}
+{"guid": "N24_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "conference call", "is_base_form": true}]}
+{"guid": "N24_088", "forms": [{"grammatical_form": "noun/en_singular", "text": "video call", "is_base_form": true}]}

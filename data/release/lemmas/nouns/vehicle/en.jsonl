@@ -19,3 +19,15 @@
 {"guid": "N40_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "sailboat", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "sailboats", "is_base_form": false}]}
 {"guid": "N40_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "carriage", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "carriages", "is_base_form": false}]}
 {"guid": "N40_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "cart", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "carts", "is_base_form": false}]}
+{"guid": "N40_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "school bus", "is_base_form": true}]}
+{"guid": "N40_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "sports car", "is_base_form": true}]}
+{"guid": "N40_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "race car", "is_base_form": true}]}
+{"guid": "N40_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "police car", "is_base_form": true}]}
+{"guid": "N40_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "fire truck", "is_base_form": true}]}
+{"guid": "N40_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "pickup truck", "is_base_form": true}]}
+{"guid": "N40_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "tow truck", "is_base_form": true}]}
+{"guid": "N40_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "garbage truck", "is_base_form": true}]}
+{"guid": "N40_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "mountain bike", "is_base_form": true}]}
+{"guid": "N40_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "cruise ship", "is_base_form": true}]}
+{"guid": "N40_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "space shuttle", "is_base_form": true}]}
+{"guid": "N40_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "hot air balloon", "is_base_form": true}]}
