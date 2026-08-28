@@ -15,6 +15,7 @@ from storage.models.schema import (
     SENSE_PROMINENCE_UNCOMMON,
     SENSE_PROMINENCE_VERY_COMMON,
 )
+from storage.utils.enums import get_subtype_values_for_pos
 from wordfreq.translation.constants import VALID_POS_TYPES
 
 logger = logging.getLogger(__name__)
@@ -23,13 +24,17 @@ logger = logging.getLogger(__name__)
 # below requests. Callers that pick a translation field by language code should
 # check against this so an unsupported language fails loudly instead of
 # silently yielding no translation.
-DEFINITIONS_PROMPT_LANGUAGES: Tuple[str, ...] = ("lt", "es", "fr", "zh")
+DEFINITIONS_PROMPT_LANGUAGES: Tuple[str, ...] = ("lt", "es", "es-419", "fr", "zh")
 
 # How common a sense is, most to least. These are the values of
 # Lemma.sense_prominence, so an answer can be stored directly on the lemma and
 # feeds the frequency rollup in wordfreq.lexeme_frequency via
-# SENSE_PROMINENCE_WEIGHTS. Senses are rated independently: a word may have two
-# "very_common" senses, or none.
+# SENSE_PROMINENCE_WEIGHTS. Senses are rated against the word's *other* senses,
+# not on an absolute scale: judged absolutely, nearly every dictionary sense of a
+# frequent word is "common" in modern English, which collapses the four tiers to
+# two and leaves add_word's ceiling with nothing to rank by. A word may still
+# have two "very_common" senses, or none -- this is a budget, not a forced
+# ranking.
 SENSE_PROMINENCE_ORDER: Tuple[str, ...] = (
     SENSE_PROMINENCE_VERY_COMMON,
     SENSE_PROMINENCE_COMMON,
@@ -185,6 +190,10 @@ def query_definitions(
                         "spanish_translation": SchemaProperty(
                             "string", "The Spanish translation of this form"
                         ),
+                        "spanish_latam_translation": SchemaProperty(
+                            "string",
+                            "The neutral Latin American Spanish translation of this form",
+                        ),
                         "french_translation": SchemaProperty(
                             "string", "The French translation of this form"
                         ),
@@ -193,8 +202,13 @@ def query_definitions(
                         ),
                         "sense_prominence": SchemaProperty(
                             "string",
-                            "How common this sense is for this word in general "
-                            "modern English, independent of the other senses",
+                            "How common this sense is relative to this word's other "
+                            "senses. Reserve very_common for the one or two meanings a "
+                            "learner meets first, and common for at most two or three "
+                            "more; rate a sense uncommon or rare when it is specialized, "
+                            "literary, archaic, or would not be worth teaching. Most "
+                            "words should have at most three or four senses rated "
+                            "common or better, however many senses are listed",
                             enum=list(SENSE_PROMINENCE_ORDER),
                         ),
                         "confidence": SchemaProperty("number", "Confidence score from 0-1"),
@@ -204,7 +218,13 @@ def query_definitions(
         },
     )
 
-    context = util.prompt_loader.get_context("translation", "definitions")
+    context_template = util.prompt_loader.get_context("translation", "definitions")
+    context = context_template.format(
+        noun_subtypes=", ".join(get_subtype_values_for_pos("noun")),
+        verb_subtypes=", ".join(get_subtype_values_for_pos("verb")),
+        adjective_subtypes=", ".join(get_subtype_values_for_pos("adjective")),
+        adverb_subtypes=", ".join(get_subtype_values_for_pos("adverb")),
+    )
     prompt_template = util.prompt_loader.get_prompt("translation", "definitions")
     prompt = prompt_template.format(word=word)
     if example_sentence:

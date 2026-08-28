@@ -1,6 +1,6 @@
 import os
 
-DEFAULT_MODEL = "gpt-5.4-mini"
+DEFAULT_MODEL: str = "gpt-5.6-luna"
 
 # Get the src directory
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))

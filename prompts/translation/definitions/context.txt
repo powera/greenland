@@ -1,7 +1,16 @@
 
 You are a linguistic expert specialized in dictionary definitions.
 
-Your task is to provide comprehensive definitions for all distinct meanings of a given word.
+Your task is to provide comprehensive definitions for all lexically distinct meanings of a given word.
+
+Do not split one dictionary sense into separate entries for small differences in
+emphasis, context, wording, or subtype. If two candidate definitions would use
+the same English headword with the same core meaning, combine them even when
+one description emphasizes quantity and another emphasizes variety. Create
+separate entries only for meanings that a normal learner's dictionary would
+treat as different senses. A subtype difference by itself does not establish a
+different sense. Preserve genuine polysemy: for example, "product" as an item
+for sale and "product" as the result of multiplication are distinct senses.
 
 For each definition, provide this information:
 
@@ -11,14 +20,10 @@ conjunction, interjection, determiner, article, numeral, auxiliary, modal.
 
 - The part-of-speech subtype, for "noun", "verb", "adjective", and "adverb".  For any other
 part-of-speech, return the part-of-speech (pronoun, preposition, etc.) as the subtype.
-NOUN SUBTYPES: human, animal, body_part, disease_condition, plant, plant_part, food, beverage,
-  building_structure, furniture, small_movable_object, clothing_accessory, artwork_artifact,
-  natural_feature, tool_machine, vehicle, path_infrastructure, material_substance, chemical_compound, medication_remedy,
-  concept_idea, symbolic_element, quality_attribute, mental_construct, knowledge_domain, quantitative_concept, emotion_feeling,
-  process_event, time_period, group_people, group_animal, collection_things, personal_name, place_name, organization_name, other
-VERB SUBTYPES: physical_action, creation_action, destruction_action, mental_state, emotional_state, perception, communication, possession, existence, development, change, directional_movement, manner_movement, other
-ADJECTIVE SUBTYPES: size, color, shape, texture, personal_quality, condition, quality, aesthetic, importance, origin, purpose, material, definite_quantity, indefinite_quantity, duration, frequency, sequence, other
-ADVERB SUBTYPES: style, attitude, specific_time, relative_time, duration, direction, location, distance, intensity, completeness, approximation, definite_frequency, indefinite_frequency, other
+NOUN SUBTYPES: {noun_subtypes}
+VERB SUBTYPES: {verb_subtypes}
+ADJECTIVE SUBTYPES: {adjective_subtypes}
+ADVERB SUBTYPES: {adverb_subtypes}
 
 For lemmatization (finding the base form):
 - Should be capitalized as appropriate
@@ -41,12 +46,22 @@ For translations:
   - Use standard Mandarin Chinese (not regional variants)
   - Do not print the pinyin, just the characters
 - For French:
-  - Include articles (la table) where appropriate, and provide verbs in the infinitive (aller)
+  - Give nouns bare, with no definite article: "table", not "la table"
+  - The exception is a proper name whose article is part of the name (Le Caire, Le Cap)
+  - Provide verbs in the infinitive (aller)
 - For Lithuanian:
   - Use the nominative singular form for nouns and adjectives
 - For Spanish:
-  - Include articles (la mesa) where appropriate, and provide verbs in the infinitive (ir)
+  - Give nouns bare, with no definite article: "mesa", not "la mesa"
+  - The exception is a proper name whose article is part of the name (El Cairo, Los Ángeles)
+  - Provide verbs in the infinitive (ir)
   - Use the masculine singular form for adjectives
+- For Spanish (Latin America):
+  - Provide neutral, pan-regional Latin American Spanish in lemma form
+  - Give nouns bare, with no definite article: "mesa", not "la mesa"
+  - The exception is a proper name whose article is part of the name (El Cairo, Los Ángeles)
+  - Prefer broadly understood Latin American vocabulary over Peninsular-only terms
+  - When the Latin American and Peninsular forms are identical, repeat the same form
 
 For phonetic spellings:
 - Provide the pronunciation for the specific definition of the word.
@@ -70,12 +85,21 @@ In summary: for each definition, provide in order:
 7. Whether this is a special case (foreign word, part of name, etc.)
 8. At least one example sentence
 9. Any additional notes about the definition
-10. Translations in all supported languages (Lithuanian, Spanish, French, Chinese)
+10. Translations in all supported languages (Lithuanian, Peninsular Spanish,
+    Latin American Spanish, French, Chinese). Every translation must be a
+    non-empty string.
 11. How prominent this sense is: very_common, common, uncommon, or rare.
-    Rate each sense on its own, against how often the word carries that meaning in
-    general modern English. This is not a ranking within your answer: a word may have
-    two very_common senses, or none. Include uncommon and rare senses, but label them
-    honestly rather than inflating them.
+    Rate each sense against the word's other senses, not on an absolute scale.
+    Judged absolutely almost every dictionary sense of a frequent word looks
+    "common", which makes the rating useless for choosing what to teach.
+    Use this budget: very_common for the one or two meanings a learner meets
+    first, common for at most two or three more, and uncommon or rare for
+    everything else - a sense that is specialized, technical, literary, archaic,
+    or simply not worth a learner's time. However many senses you list, no more
+    than three or four should be common or better, and a long list should be
+    mostly uncommon and rare. It is not a forced ranking: a word may have two
+    very_common senses, or none, and senses may tie. But do not inflate a
+    marginal sense to common merely because the word itself is frequent.
 12. A confidence score (0-1) - how confident you are that this definition is correct
     and well-formed. This is about your certainty, not about how common the sense is.
 
