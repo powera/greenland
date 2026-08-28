@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Migration: Move phrases out of the ``lemmas`` table into the new ``phrases``
+Migration: Move phrases out of the ``lemmas`` table into the ``phrases``
 table (and their translations into ``phrase_translations``).
 
 Phrases (fixed traveler/greeting expressions like "See you later") used to be
@@ -18,21 +18,19 @@ It is idempotent: re-running skips GUIDs already present in ``phrases`` and
 simply removes any leftover phrase-type lemmas.
 
 Usage:
-    PYTHONPATH=src python src/storage/migrations/move_phrases_to_phrase_table.py
-    PYTHONPATH=src python src/storage/migrations/move_phrases_to_phrase_table.py --postgres
-    PYTHONPATH=src python src/storage/migrations/move_phrases_to_phrase_table.py --dry-run
+    python migrations/20260718_move_phrases_to_phrase_table.py
+    python migrations/20260718_move_phrases_to_phrase_table.py --postgres
+    python migrations/20260718_move_phrases_to_phrase_table.py --dry-run
 """
 
 import argparse
 import sys
 from pathlib import Path
-from typing import cast
 
-# Add src to path
-if str(Path(__file__).parent.parent.parent) not in sys.path:
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
-from sqlalchemy import Table, inspect
+ROOT = Path(__file__).resolve().parent.parent
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
 from constants import WORDFREQ_DB_PATH
 from storage.backend import create_session
@@ -53,25 +51,10 @@ def build_data_source_config(db_path: str, use_postgres: bool) -> DataSourceConf
     )
 
 
-def _ensure_tables(session: object) -> None:
-    """Create the phrases / phrase_translations tables if they are missing."""
-    bind = session.get_bind()  # type: ignore[attr-defined]
-    inspector = inspect(bind)
-    for model in (Phrase, PhraseTranslation):
-        table_name = cast(str, model.__tablename__)
-        if inspector.has_table(table_name):
-            print(f"Table '{table_name}' already exists.")
-        else:
-            print(f"Creating table '{table_name}'...")
-            cast(Table, model.__table__).create(bind, checkfirst=True)
-
-
 def migrate(config: DataSourceConfig, *, dry_run: bool = False) -> int:
     """Move phrase lemmas into the phrases table. Returns the number moved."""
     session = create_session(config)
     try:
-        _ensure_tables(session)
-
         existing_phrase_guids = {
             guid for (guid,) in session.query(Phrase.guid).filter(Phrase.guid.isnot(None)).all()
         }

@@ -369,18 +369,12 @@ Wikidata/Wikipedia calls and need developer confirmation before running.
 Barsukas changes need no tests per repo convention, but should be verified in
 the developer's local browser.
 
-## Migration
+## Schema rollout
 
-`src/storage/migrations/add_sub_concepts.py`, following the
-`add_concept_wikidata_index_title.py` pattern (idempotent, backend-agnostic,
-`--postgres` / `--dry-run` flags):
-
-1. Create the `sub_concepts` table if missing (fresh databases get it from
-   `Base.metadata.create_all` automatically).
-2. `ALTER TABLE concept_wikidata_index ADD COLUMN sub_concept_id` (nullable
-   Integer) + index. The CHECK constraint applies to fresh databases via the
-   model; for existing SQLite databases (no easy `ALTER ... ADD CONSTRAINT`)
-   the CRUD-layer validation is the effective guard.
+Normal model initialization creates `sub_concepts` and adds the nullable
+`concept_wikidata_index.sub_concept_id` column when missing. The CHECK
+constraint applies to fresh databases via the model; for existing SQLite
+databases the CRUD-layer validation is the effective guard.
 
 No data backfill is required; filing existing topics as sub-concepts is a
 curation activity, not a migration.

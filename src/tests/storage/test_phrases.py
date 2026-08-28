@@ -8,6 +8,10 @@ lemmas into the dedicated ``phrases`` table.
 
 from __future__ import annotations
 
+import importlib.util
+import sys
+from pathlib import Path
+from types import ModuleType
 from typing import Iterator
 
 import pytest
@@ -30,6 +34,20 @@ from storage.models.schema import (
     PhraseTranslation,
     Sentence,
 )
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+PHRASE_MIGRATION_PATH = PROJECT_ROOT / "migrations" / "20260718_move_phrases_to_phrase_table.py"
+
+
+def _load_phrase_migration() -> ModuleType:
+    module_name = "migration_20260718_move_phrases_to_phrase_table"
+    spec = importlib.util.spec_from_file_location(module_name, PHRASE_MIGRATION_PATH)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 @pytest.fixture()
@@ -131,8 +149,8 @@ def test_resolve_guid_dispatches_to_right_table(session: Session) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_migration_moves_phrase_lemmas(tmp_path) -> None:  # type: ignore[no-untyped-def]
-    from storage.migrations.move_phrases_to_phrase_table import migrate
+def test_migration_moves_phrase_lemmas(tmp_path: Path) -> None:
+    migration = _load_phrase_migration()
 
     db_path = str(tmp_path / "old_style.sqlite")
     engine = create_engine(f"sqlite:///{db_path}")
@@ -168,9 +186,9 @@ def test_migration_moves_phrase_lemmas(tmp_path) -> None:  # type: ignore[no-unt
         setup.commit()
 
     config = DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=db_path)
-    assert migrate(config, dry_run=False) == 1
+    assert migration.migrate(config, dry_run=False) == 1
     # Idempotent re-run.
-    assert migrate(config, dry_run=False) == 0
+    assert migration.migrate(config, dry_run=False) == 0
 
     with Session(engine) as check:
         assert check.query(Lemma).filter(Lemma.pos_type == "phrase").count() == 0

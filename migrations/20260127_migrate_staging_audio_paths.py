@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Migrate staging audio files to the new path structure.
+"""Migrate staging audio files to the language/voice path structure.
 
 Old format: staging/{agent}/{md5}.mp3
 New format: staging/{language}/{voice}/{md5}.mp3
@@ -12,9 +12,9 @@ This script:
 5. Optionally deletes old files after migration
 
 Usage:
-    PYTHONPATH=src python src/scripts/migrate_staging_audio_paths.py --dry-run
-    PYTHONPATH=src python src/scripts/migrate_staging_audio_paths.py --agent strazdas
-    PYTHONPATH=src python src/scripts/migrate_staging_audio_paths.py --agent strazdas --delete-old
+    python migrations/20260127_migrate_staging_audio_paths.py --dry-run
+    python migrations/20260127_migrate_staging_audio_paths.py --agent strazdas
+    python migrations/20260127_migrate_staging_audio_paths.py --agent strazdas --delete-old
 """
 
 import argparse
@@ -22,11 +22,12 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
-# Add src to path for imports
-if str(Path(__file__).parent.parent) not in sys.path:
-    sys.path.insert(0, str(Path(__file__).parent.parent))
+ROOT = Path(__file__).resolve().parent.parent
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
 from clients.audio.s3_uploader import (
     S3AudioUploader,
@@ -57,7 +58,10 @@ def fetch_manifest(s3_uploader: S3AudioUploader, manifest_key: str) -> Optional[
     try:
         response = s3_uploader.s3.get_object(Bucket=s3_uploader.bucket_name, Key=manifest_key)
         content = response["Body"].read().decode("utf-8")
-        return json.loads(content)
+        decoded = json.loads(content)
+        if not isinstance(decoded, dict):
+            return None
+        return cast(Dict[str, Any], decoded)
     except Exception as e:
         print(f"  Warning: Could not fetch manifest {manifest_key}: {e}")
         return None

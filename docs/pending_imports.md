@@ -95,15 +95,13 @@ the term again on every pass and never reach a complete `LINK`.
 
 ## Migrations
 
-Existing databases need both, in either order:
+Normal model initialization adds the three target-kind columns and creates the
+link table for existing databases. The dated migration is only the data
+backfill from legacy hint references:
 
 ```bash
-PYTHONPATH=src python src/storage/migrations/add_pending_import_target_kind.py
-PYTHONPATH=src python src/storage/migrations/add_sentence_pending_imports.py
+python migrations/20260814_backfill_sentence_pending_import_links.py
 ```
 
-The first adds `target_kind` (NOT NULL, defaulting to `lemma`, which is exactly
-the old behavior), `name_kind`, and `concept_type`. The second creates
-`sentence_pending_imports` and backfills it from every live hint reference.
-Both accept `--dry-run` and `--db-path`. A database created fresh from the
-models needs neither.
+It accepts `--dry-run`, `--db-path`, and `--postgres`. A database created fresh
+from the models needs no migration.
