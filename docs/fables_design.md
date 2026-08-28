@@ -443,13 +443,11 @@ system ("lapė" is already taken by the grammar-facts agent). Scope is
   should not grow a `--text` mode until intake batches of works actually
   exist).
 
-## Migration
+## Schema rollout
 
-`src/storage/migrations/add_text_works.py`, following the
-`add_sub_concepts.py` pattern (idempotent, backend-agnostic, `--postgres` /
-`--dry-run`): create `text_works` and `text_versions` if missing; fresh
-databases get both from `Base.metadata.create_all`. No index changes, no
-backfill -- populating the library is curation, not migration.
+Normal model initialization creates `text_works` and `text_versions` when they
+are missing. No dated migration is needed because there is no data backfill;
+populating the library is curation, not migration.
 
 ## Rollout Steps
 

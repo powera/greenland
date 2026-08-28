@@ -154,10 +154,10 @@ Names are browsable and editable at `/names`.
 | `src/storage/models/name_entity.py` | `Name` / `NameTranslation` |
 | `prompts/conversations/scene/` | context and prompt templates |
 
-New databases pick up the schema through `create_all`; existing ones need
-`PYTHONPATH=src python src/storage/migrations/add_names.py` (add `--postgres`
-for production), which creates the name tables and adds
-`sentence_words.name_id`.
+New and existing databases pick up the schema through normal model
+initialization. A historical database containing names without GUIDs can run
+`python migrations/20260817_backfill_name_guids.py` (add `--postgres` for
+production).
 
 ## Known gaps
 

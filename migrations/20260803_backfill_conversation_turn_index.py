@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Migration: Add ``conversation_sentences.turn_index`` and backfill it.
+Migration: Backfill ``conversation_sentences.turn_index``.
 
 A dialog turn used to be stored as one ``Sentence`` row even when the speaker
 said several sentences, which broke the "one Sentence = one sentence" invariant
@@ -19,25 +19,25 @@ rather than approximate: every row written before this migration *is* one whole
 turn. Existing conversations are not split retroactively; they keep their
 multi-sentence rows until regenerated.
 
-This migration is idempotent and backend-agnostic: it creates whatever is
-missing in the configured backend (SQLite locally, PostgreSQL in production)
-and does nothing for parts that already exist.
+Schema creation is handled by normal model initialization. This migration is
+idempotent and backend-agnostic: it only fills rows whose turn index is NULL.
 
 Usage:
-    PYTHONPATH=src python src/storage/migrations/add_conversation_turn_index.py
-    PYTHONPATH=src python src/storage/migrations/add_conversation_turn_index.py --postgres
-    PYTHONPATH=src python src/storage/migrations/add_conversation_turn_index.py --dry-run
+    python migrations/20260803_backfill_conversation_turn_index.py
+    python migrations/20260803_backfill_conversation_turn_index.py --postgres
+    python migrations/20260803_backfill_conversation_turn_index.py --dry-run
 """
 
 import argparse
 import sys
 from pathlib import Path
 
-# Add src to path
-if str(Path(__file__).parent.parent.parent) not in sys.path:
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+ROOT = Path(__file__).resolve().parent.parent
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
-from sqlalchemy import inspect, text
+from sqlalchemy import text
 
 from constants import WORDFREQ_DB_PATH
 from storage.backend import create_session
@@ -58,50 +58,6 @@ def build_data_source_config(db_path: str, use_postgres: bool) -> DataSourceConf
     )
 
 
-def add_turn_index_column(config: DataSourceConfig, *, dry_run: bool = False) -> bool:
-    """Add the ``turn_index`` column to conversation_sentences if missing.
-
-    Args:
-        config: Storage configuration selecting the backend.
-        dry_run: If True, report what would happen without altering the table.
-
-    Returns:
-        True if the column was added (or would be), False if it already existed
-        or the table does not exist.
-    """
-    table_name = ConversationSentence.__tablename__
-    session = create_session(config)
-    try:
-        bind = session.get_bind()
-        inspector = inspect(bind)
-        if not inspector.has_table(table_name):
-            print(f"Table '{table_name}' does not exist; nothing to do.")
-            return False
-
-        columns = {col["name"] for col in inspector.get_columns(table_name)}
-        if "turn_index" in columns:
-            print(f"Column '{table_name}.turn_index' already exists; nothing to do.")
-            return False
-
-        if dry_run:
-            print(f"Would add column '{table_name}.turn_index' (INTEGER, nullable) + index.")
-            return True
-
-        print(f"Adding column '{table_name}.turn_index'...")
-        session.execute(text(f"ALTER TABLE {table_name} ADD COLUMN turn_index INTEGER"))
-        session.execute(
-            text(
-                f"CREATE INDEX IF NOT EXISTS ix_{table_name}_turn_index "
-                f"ON {table_name} (turn_index)"
-            )
-        )
-        session.commit()
-        print("Column added successfully.")
-        return True
-    finally:
-        session.close()
-
-
 def backfill_turn_index(config: DataSourceConfig, *, dry_run: bool = False) -> int:
     """Set ``turn_index = position`` for rows that do not have one yet.
 
@@ -118,16 +74,6 @@ def backfill_turn_index(config: DataSourceConfig, *, dry_run: bool = False) -> i
     table_name = ConversationSentence.__tablename__
     session = create_session(config)
     try:
-        bind = session.get_bind()
-        inspector = inspect(bind)
-        if not inspector.has_table(table_name):
-            print(f"Table '{table_name}' does not exist; nothing to backfill.")
-            return 0
-        columns = {col["name"] for col in inspector.get_columns(table_name)}
-        if "turn_index" not in columns:
-            print(f"Column '{table_name}.turn_index' does not exist yet; nothing to backfill.")
-            return 0
-
         pending = session.execute(
             text(f"SELECT COUNT(*) FROM {table_name} WHERE turn_index IS NULL")
         ).scalar()
@@ -154,7 +100,7 @@ def backfill_turn_index(config: DataSourceConfig, *, dry_run: bool = False) -> i
 def main() -> int:
     """Run the migration."""
     parser = argparse.ArgumentParser(
-        description="Add conversation_sentences.turn_index and backfill it from position"
+        description="Backfill conversation_sentences.turn_index from position"
     )
     parser.add_argument(
         "--dry-run",
@@ -181,7 +127,6 @@ def main() -> int:
     print(f"Dry run: {args.dry_run}")
     print()
 
-    add_turn_index_column(config, dry_run=args.dry_run)
     backfill_turn_index(config, dry_run=args.dry_run)
     return 0
 
