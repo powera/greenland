@@ -179,6 +179,15 @@ class ParseBlock:
             self.sub_blocks.append(TextBlock(" "))
         elif isinstance(block, ParseBlock):
             self.sub_blocks.append(block)
+        elif block.startswith("</"):
+            # A closing tag that reaches here has no open block to close: the
+            # block it belonged to was force-closed early by the "\n\n" guard
+            # below.  Dropping it is the point -- matching on the tag name
+            # alone would open a *new* block, which then swallows the rest of
+            # the article.  A taxobox holding an <imagemap> with a blank line
+            # in it does exactly that, and cost "Animal", "Bird" and "Mammal"
+            # their entire text.
+            pass
         elif block.startswith("<!--"):
             self.sub_blocks.append(CommentBlock())
         elif _tag_name(block) == "ref":

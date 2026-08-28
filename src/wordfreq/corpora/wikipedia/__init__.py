@@ -1,9 +1,11 @@
-"""Wikipedia sources for the ``wiki_vital`` corpus.
+"""Wikipedia sources for the ``wiki_*`` corpora.
 
 Driven by :mod:`wordfreq.corpora.build_wikipedia`, which holds the CLI; this
 package holds everything that CLI reads.
 
-1. ``vital_articles`` names the 1000 articles that make up the corpus.
+1. ``vital_articles`` names the articles making up each corpus: the 1000 vital
+   articles, and the Level 4 lists for mathematics, geography, organisms and
+   anatomy, everyday life, technology and the arts.
 2. ``wiki_dump`` looks a page up by title in a downloaded Wikimedia snapshot.
 3. ``wiki_text`` parses that page's wikitext down to running prose.
 

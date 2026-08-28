@@ -4,6 +4,9 @@
 
     PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --corpus wiki_vital
     PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --corpus wiki_math
+    PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --corpus wiki_geography
+    PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --corpus wiki_biology
+    PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --corpus wiki_modern_life
 
 Reads the articles named in ``wordfreq.corpora.wikipedia.vital_articles`` out
 of a downloaded Wikimedia snapshot, parses each one's wikitext down to running
@@ -11,13 +14,19 @@ prose, separates proper nouns from ordinary vocabulary, and writes
 ``data/wordfreq/<corpus>.json`` in the format ``wordfreq.frequency.importer``
 expects.
 
-Two corpora are buildable, listed in :data:`WIKIPEDIA_CORPORA`:
+Five corpora are buildable, listed in :data:`WIKIPEDIA_CORPORA`:
 
 * ``wiki_vital`` -- Wikipedia's 1000 vital articles, a general sample of
   modern encyclopedic English.
 * ``wiki_math`` -- 299 mathematics articles, which reach the vocabulary a
   general sample only touches ("theorem", "integer", "coefficient").  A strict
   superset of the vital list's 53-title Mathematics section.
+* ``wiki_geography`` -- 1204 Level 4 geography articles, which go from the
+  continents the vital list names down to their rivers, ranges and cities.
+* ``wiki_biology`` -- 1004 Level 4 organism and anatomy articles, which is
+  where the ordinary names of plants and animals come from.
+* ``wiki_modern_life`` -- 1200 Level 4 everyday-life and technology articles,
+  the vocabulary of modern material life the older corpora cannot have.
 
 The third builder alongside ``build_gutenberg.py`` and ``build_scotus.py``.
 Everything after text extraction is shared: all three call
@@ -61,7 +70,15 @@ from wordfreq.corpora.frequency_build import (
     build_corpus_payload,
     write_corpus_json,
 )
-from wordfreq.corpora.wikipedia.vital_articles import MATH_ARTICLES, VITAL_ARTICLES, flatten
+from wordfreq.corpora.wikipedia.vital_articles import (
+    BIOLOGY_ARTICLES,
+    EVERYDAY_LIFE_ARTICLES,
+    GEOGRAPHY_ARTICLES,
+    MATH_ARTICLES,
+    TECHNOLOGY_ARTICLES,
+    VITAL_ARTICLES,
+    flatten,
+)
 from wordfreq.corpora.wikipedia.wiki_dump import WikiLoader
 from wordfreq.corpora.wikipedia.wiki_text import wikitext_to_plain_text
 
@@ -95,6 +112,18 @@ class WikipediaCorpus(NamedTuple):
     description: str
 
 
+# Everyday life and technology are one corpus rather than two.  Each is small
+# on its own (475 and 725 articles), and they are after the same thing: the
+# vocabulary of modern material life -- appliances, clothing, sport, computing,
+# transport -- which the book corpora predate and which encyclopedic prose
+# about history and science never reaches.  The group names stay prefixed so a
+# gap in either list is still visible.
+MODERN_LIFE_ARTICLES: Dict[str, List[str]] = {
+    **{f"Everyday life: {group}": titles for group, titles in EVERYDAY_LIFE_ARTICLES.items()},
+    **{f"Technology: {group}": titles for group, titles in TECHNOLOGY_ARTICLES.items()},
+}
+
+
 WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
     "wiki_vital": WikipediaCorpus(
         name="wiki_vital",
@@ -123,6 +152,40 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
         # mathematical English.
         max_words=4000,
         description="Mathematics in depth, from arithmetic to category theory",
+    ),
+    "wiki_geography": WikipediaCorpus(
+        name="wiki_geography",
+        articles=GEOGRAPHY_ARTICLES,
+        # 1204 documents, the same order as the vital list, so the same
+        # threshold applies.
+        min_articles=15,
+        # The narrowest subject matter of the three: a river article and a city
+        # article share their descriptive vocabulary and little else, so past a
+        # few thousand words the list is place names rather than English.
+        max_words=4500,
+        description="Wikipedia's 1204 Level 4 geography articles, from continents to cities",
+    ),
+    "wiki_biology": WikipediaCorpus(
+        name="wiki_biology",
+        articles=BIOLOGY_ARTICLES,
+        # 1004 documents, so the vital list's threshold carries over.
+        min_articles=15,
+        # Mostly the names of organisms, which are proper-noun-like and shared
+        # between few articles: a beetle article and a fern article have little
+        # vocabulary in common past the anatomical terms.
+        max_words=4500,
+        description="Wikipedia's Level 4 organisms and anatomy articles",
+    ),
+    "wiki_modern_life": WikipediaCorpus(
+        name="wiki_modern_life",
+        articles=MODERN_LIFE_ARTICLES,
+        # 1200 documents across two lists, the largest of the Wikipedia
+        # corpora, so the vital list's threshold applies unchanged.
+        min_articles=15,
+        # Two everyday registers rather than one technical one, so the tail
+        # stays ordinary English further down than wiki_math's does.
+        max_words=5000,
+        description="Wikipedia's Level 4 everyday-life and technology articles",
     ),
 }
 
