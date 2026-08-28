@@ -8,6 +8,13 @@ Two jobs live here, both purely mechanical (no network, no database):
   it appears capitalized *away from a sentence boundary*.  That capitalization
   signal is what :mod:`wordfreq.corpora.frequency_build` uses to tell proper
   nouns apart from ordinary vocabulary.
+
+The same signal is kept in a second, finer form.  Every occurrence is filed as
+certainly lowercase, certainly capitalized, or uncertain (at a sentence or line
+start, where the position forces the capital);
+:meth:`TextStats.case_split` then apportions the uncertain ones by the ratio the
+decided ones show.  That is what lets a corpus count "London" apart from
+"london", rather than collapsing both into one lowercased entry.
 """
 
 import re
@@ -88,7 +95,12 @@ VALID_SINGLE_LETTERS = frozenset({"a", "i", "o"})
 
 # Characters skipped when looking backwards for a sentence boundary.
 _OPENING_PUNCTUATION = "\"'‘’“”([{*_"
-_SENTENCE_ENDERS = ".!?"
+# A colon or semicolon introduces a following clause, and a capital after one
+# is as uninformative as a capital after a full stop -- "[Illustration: “The
+# entreaties...", or a quotation introduced mid-paragraph.  Without them such a
+# word counts as capitalized *evidence*, which is how "The", "And" and "To"
+# accumulate hundreds of spurious capitalized occurrences across a corpus.
+_SENTENCE_ENDERS = ".!?:;"
 
 
 def _normalize(text: str) -> str:
@@ -193,15 +205,40 @@ def _is_sentence_initial(text: str, index: int) -> bool:
     Line starts count as sentence starts: verse, chapter headings and list
     items capitalize their first word for reasons that say nothing about
     whether the word is a proper noun.
+
+    So does a reference number that opens a verse.  A chapter-and-verse marker
+    ("1:2 And the earth was without form") is a structural label, and the word
+    after it is as forced as one after a full stop.  The marker's own token is
+    discarded for containing a digit, so without this the backward scan reaches
+    the digit, finds no sentence ender, and reads "And" as capitalized
+    *evidence* -- 25,389 such occurrences across the religious corpus alone,
+    which is what put "And", "The" and "He" in its capitalized vocabulary.
     """
     position = index - 1
+    seen_digit = False
     while position >= 0:
         char = text[position]
         if char == "\n":
             return True
+        if char.isdigit():
+            # Walk back over the whole marker: digits and the separators used in
+            # "1:2", "023:016" and "xxviii. 11".
+            seen_digit = True
+            position -= 1
+            continue
+        if seen_digit and char in ":." and position and text[position - 1].isdigit():
+            # Interior separator of the marker itself ("1:2", "xxviii.11").
+            position -= 1
+            continue
         if char.isspace() or char in _OPENING_PUNCTUATION:
             position -= 1
             continue
+        if seen_digit:
+            # The marker ended.  Anything that terminates a clause before it --
+            # "unto the LORD: 6:3 He shall" -- leaves the following word as
+            # forced as one opening a line.  Otherwise the digits were running
+            # prose ("Psalm 23 says"), and the ordinary rules apply.
+            return char in _SENTENCE_ENDERS
         return char in _SENTENCE_ENDERS
     return True
 
@@ -306,12 +343,24 @@ class TextStats:
         counts: Occurrences of each lowercased word.
         mid_sentence_total: Occurrences away from a sentence/line start.
         mid_sentence_capitalized: Of those, how many were capitalized.
+        lower_counts: Occurrences that are certainly lowercase -- mid-sentence
+            and uncapitalized.
+        upper_counts: Occurrences that are certainly capitalized -- mid-sentence
+            and capitalized.
+        uncertain_counts: Occurrences at a sentence or line start, where the
+            position forces a capital and so carries no evidence either way.
+
+    The three case counters partition :attr:`counts` exactly: every occurrence
+    lands in one of them.
     """
 
     token_total: int = 0
     counts: Counter[str] = field(default_factory=Counter)
     mid_sentence_total: Counter[str] = field(default_factory=Counter)
     mid_sentence_capitalized: Counter[str] = field(default_factory=Counter)
+    lower_counts: Counter[str] = field(default_factory=Counter)
+    upper_counts: Counter[str] = field(default_factory=Counter)
+    uncertain_counts: Counter[str] = field(default_factory=Counter)
 
     def capitalization_ratio(self, word: str) -> Optional[float]:
         """Share of mid-sentence occurrences that were capitalized.
@@ -324,6 +373,35 @@ class TextStats:
             return None
         return self.mid_sentence_capitalized[word] / total
 
+    def case_split(self, word: str) -> Tuple[float, float]:
+        """Split a word's occurrences into ``(uppercase, lowercase)`` totals.
+
+        Sentence-initial occurrences carry no evidence of their own -- the
+        position forces the capital -- so they are apportioned between the two
+        sides in the ratio the *decided* occurrences show. A word capitalized
+        in 90% of its mid-sentence uses takes 90% of its sentence starts to the
+        uppercase side.
+
+        When a word never appears mid-sentence there is no ratio to apply, and
+        the whole of it goes to the lowercase side. That matches what the
+        proper-noun filter does with the same absence of evidence:
+        :meth:`capitalization_ratio` returns ``None`` and ``detect_names``
+        leaves the word in the ordinary vocabulary.
+
+        Returns:
+            ``(upper_total, lower_total)``, summing to ``counts[word]``.
+        """
+        upper = self.upper_counts[word]
+        lower = self.lower_counts[word]
+        uncertain = self.uncertain_counts[word]
+
+        decided = upper + lower
+        if decided == 0:
+            return 0.0, float(lower + uncertain)
+
+        ratio = upper / decided
+        return upper + uncertain * ratio, lower + uncertain * (1.0 - ratio)
+
 
 def analyze_text(text: str, phrases: Optional[Dict[str, int]] = None) -> TextStats:
     """Tokenize ``text`` and collect per-word counts and capitalization stats.
@@ -335,10 +413,15 @@ def analyze_text(text: str, phrases: Optional[Dict[str, int]] = None) -> TextSta
     for token, is_capitalized, is_sentence_initial in iter_tokens(text, phrases):
         stats.token_total += 1
         stats.counts[token] += 1
-        if not is_sentence_initial:
-            stats.mid_sentence_total[token] += 1
-            if is_capitalized:
-                stats.mid_sentence_capitalized[token] += 1
+        if is_sentence_initial:
+            stats.uncertain_counts[token] += 1
+            continue
+        stats.mid_sentence_total[token] += 1
+        if is_capitalized:
+            stats.mid_sentence_capitalized[token] += 1
+            stats.upper_counts[token] += 1
+        else:
+            stats.lower_counts[token] += 1
     return stats
 
 

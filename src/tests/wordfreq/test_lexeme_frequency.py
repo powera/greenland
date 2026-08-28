@@ -22,6 +22,7 @@ from wordfreq.lexeme_frequency import (
     get_lexeme_form_ranks,
     get_lexeme_frequency,
     get_token_share,
+    link_forms_to_word_tokens,
 )
 
 
@@ -383,5 +384,42 @@ def test_a_form_counted_once_even_when_slots_share_a_spelling() -> None:
         rollup = get_lexeme_frequency(session, lex, "c")
         assert rollup.total_frequency == pytest.approx(100.0)
         assert get_lexeme_form_ranks(session, lex, "c") == []
+    finally:
+        session.close()
+
+
+@pytest.mark.parametrize("capitalized_first", [True, False])
+def test_link_forms_prefers_the_exact_spelling_over_a_case_twin(
+    capitalized_first: bool,
+) -> None:
+    """A form spelled "May" links to the "May" token, not to "may".
+
+    Both spellings are legal rows -- ``uq_word_token_language`` is
+    case-sensitive -- and the linker used to pick between them with
+    ``setdefault`` over an unordered query, so the winner was whichever row came
+    back first. Insertion order is parametrized here because that arbitrariness
+    is the actual defect: the month must win both ways round.
+    """
+    session = _make_session()
+    try:
+        spellings = ["May", "may"] if capitalized_first else ["may", "May"]
+        for spelling in spellings:
+            session.add(WordToken(token=spelling, language_code="en"))
+        session.flush()
+
+        month = _add_lemma(session, "May", "N01_001")
+        modal = _add_lemma(session, "may", "V01_001", pos_type="verb")
+        _add_form(session, month, "May", "singular", is_base_form=True)
+        _add_form(session, modal, "may", "infinitive", is_base_form=True)
+        session.commit()
+
+        counts = link_forms_to_word_tokens(session)
+        assert counts["derivative_forms"] == 2
+
+        linked = {
+            form.derivative_form_text: form.word_token.token
+            for form in session.query(DerivativeForm).all()
+        }
+        assert linked == {"May": "May", "may": "may"}
     finally:
         session.close()

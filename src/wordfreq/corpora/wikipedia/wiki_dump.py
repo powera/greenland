@@ -40,31 +40,54 @@ ALL_KEYS = [a + b for a in HEX_DIGITS for b in HEX_DIGITS]
 class WikiLoader:
     """Class for accessing and indexing Wikimedia dump files."""
 
-    def __init__(self, corpus: str = "enwiki"):
+    def __init__(self, corpus: str = "enwiki", offset_dir: Optional[str] = None):
         """
         Initialize a WikiLoader for the specified corpus.
 
         Args:
             corpus: Corpus identifier (e.g., "enwiki" for English Wikipedia)
+            offset_dir: Where the sharded SQLite index lives; see
+                :meth:`set_corpus_base`.
         """
         self.corpus = corpus
         self.corpus_prefix = constants.WIKI_CORPUS_PREFIX
         self.schema_file = constants.WIKI_INDEX_SCHEMA_PATH
-        self.set_corpus_base(constants.WIKI_CORPUS_BASE_PATH, constants.WIKI_CORPUS_PREFIX)
+        self.set_corpus_base(
+            constants.WIKI_CORPUS_BASE_PATH, constants.WIKI_CORPUS_PREFIX, offset_dir
+        )
 
-    def set_corpus_base(self, corpus_base: str, corpus_prefix: Optional[str] = None) -> None:
+    def set_corpus_base(
+        self,
+        corpus_base: str,
+        corpus_prefix: Optional[str] = None,
+        offset_dir: Optional[str] = None,
+    ) -> None:
         """Point this loader at a snapshot directory.
 
         Args:
             corpus_base: Directory holding the dump and its index file.
             corpus_prefix: Dump filename prefix (e.g. ``enwiki-20220501``).
                 Keeps the current prefix when omitted.
+            offset_dir: Where the sharded SQLite index lives.  Defaults to an
+                ``offset`` subdirectory of ``corpus_base``.
+
+                Override this **while building** when the snapshot sits on an
+                **exFAT** drive, which is the usual case for a 21GB dump on an
+                external disk: exFAT lacks the byte-range locking SQLite needs
+                to write, so ``build_offset_index`` fails part-way with
+                "attempt to write a readonly database" even though ordinary
+                file writes to the same directory succeed.  Build the index on
+                local disk, then copy it beside the dump.
+
+                Reading is unaffected -- an exFAT-hosted index opens and
+                queries normally, so the finished index can live on the drive
+                with the dump and needs no override to be used.
         """
         self.corpus_base = corpus_base
         if corpus_prefix is not None:
             self.corpus_prefix = corpus_prefix
 
-        self.offset_dir = os.path.join(self.corpus_base, "offset")
+        self.offset_dir = offset_dir or os.path.join(self.corpus_base, "offset")
         self.dump_file = os.path.join(
             self.corpus_base, f"{self.corpus_prefix}-pages-articles-multistream.xml.bz2"
         )

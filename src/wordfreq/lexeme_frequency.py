@@ -44,6 +44,20 @@ from storage.models.variant_form import VariantForm
 from wordfreq.frequency.corpus import get_enabled_corpus_configs
 
 
+def _token_sort_key(token: WordToken) -> Tuple[int, int, int]:
+    """Order case-variant tokens best-first for the case-insensitive fallback.
+
+    A ranked token beats an unranked one, then the better (lower) rank wins,
+    then the lower id, so the choice never depends on query order. An unranked
+    token is one no corpus reached -- typically a tier import's capitalized
+    spelling -- and is the worse thing to link a form to.
+    """
+    rank = token.frequency_rank
+    if rank is None:
+        return (1, 0, token.id)
+    return (0, rank, token.id)
+
+
 def link_forms_to_word_tokens(session: Session, language_code: str = "en") -> Dict[str, int]:
     """Set ``word_token_id`` on forms whose surface text matches a ``WordToken``.
 
@@ -59,19 +73,47 @@ def link_forms_to_word_tokens(session: Session, language_code: str = "en") -> Di
     toward its lemma (see the module docstring), so leaving variants unlinked
     would drop the British spelling of a word from its own frequency.
 
-    Matching is case-insensitive; the wordfreq importer lowercases every token.
+    A form's own spelling is matched first, and only then its lowercased one.
+    Both spellings can exist as tokens -- ``uq_word_token_language`` is
+    case-sensitive, and the corpora now count "March" apart from "march" -- so
+    an exact match is the difference between the month's rank and the verb's.
+
+    Where only a differently-cased token exists, the fallback picks
+    deterministically: a ranked row beats an unranked one, then the better
+    rank, then the lower id. It used to be whichever row the unordered query
+    happened to return first, which is how the "London" lemma ended up on a
+    rankless tier-import row while "China" landed on its corpus-ranked one.
+
     Only rows whose FK is currently NULL are touched, so this is idempotent and
     safe to re-run.
 
     Returns a dict of ``{"derivative_forms": n, "variant_forms": n}``.
     """
     tokens = session.query(WordToken).filter(WordToken.language_code == language_code).all()
-    token_id_by_text: Dict[str, int] = {}
+
+    token_id_by_exact: Dict[str, int] = {}
+    best_by_lower: Dict[str, WordToken] = {}
     for token in tokens:
-        token_id_by_text.setdefault(token.token.lower(), token.id)
+        token_id_by_exact[token.token] = token.id
+        lowered = token.token.lower()
+        incumbent = best_by_lower.get(lowered)
+        if incumbent is None or _token_sort_key(token) < _token_sort_key(incumbent):
+            best_by_lower[lowered] = token
+    token_id_by_lower: Dict[str, int] = {
+        lowered: token.id for lowered, token in best_by_lower.items()
+    }
+
+    def resolve(text: str) -> Optional[int]:
+        """The best token id for one form's surface text, or None."""
+        if not text:
+            return None
+        exact = token_id_by_exact.get(text)
+        if exact is not None:
+            return exact
+        return token_id_by_lower.get(text.lower())
 
     counts: Dict[str, int] = {"derivative_forms": 0, "variant_forms": 0}
-    if not token_id_by_text:
+    if not token_id_by_exact:
         return counts
 
     derivative_forms = (
@@ -83,7 +125,7 @@ def link_forms_to_word_tokens(session: Session, language_code: str = "en") -> Di
         .all()
     )
     for derivative_form in derivative_forms:
-        token_id = token_id_by_text.get((derivative_form.derivative_form_text or "").lower())
+        token_id = resolve(derivative_form.derivative_form_text or "")
         if token_id is not None:
             derivative_form.word_token_id = token_id
             counts["derivative_forms"] += 1
@@ -97,7 +139,7 @@ def link_forms_to_word_tokens(session: Session, language_code: str = "en") -> Di
         .all()
     )
     for variant_form in variant_forms:
-        token_id = token_id_by_text.get((variant_form.variant_form_text or "").lower())
+        token_id = resolve(variant_form.variant_form_text or "")
         if token_id is not None:
             variant_form.word_token_id = token_id
             counts["variant_forms"] += 1

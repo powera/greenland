@@ -19,7 +19,14 @@ from wordfreq.lexeme_frequency import link_forms_to_word_tokens as link_forms_to
 from storage.backend import create_session as create_backend_session
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.database import ensure_tables_exist, initialize_corpora
-from storage.models.schema import Corpus, DerivativeForm  # Ensure Corpus model is imported
+from storage.models.schema import (  # Ensure Corpus model is imported
+    Corpus,
+    DerivativeForm,
+    ExternalLexemeAnnotation,
+    ExternalLexemeAnnotationLemma,
+    WordToken,
+)
+from storage.models.variant_form import VariantForm
 from storage.translation_helpers import has_translation_clause
 import storage.admin.legacy_json_import as legacy_json_import
 
@@ -233,6 +240,84 @@ class DatabaseAdminService:
             f"{result.get('disabled_count', 0)} disabled"
         )
         return result
+
+    def clear_wordfreq_data(self, dry_run: bool = False) -> Dict[str, Any]:
+        """Delete every corpus-derived row, so a reload starts from nothing.
+
+        The corpus importer updates the rows a corpus file still mentions and
+        leaves the rest alone, so a spelling a rebuild dropped keeps its old
+        ``WordToken`` and its stale rank for ever.  After the corpora began
+        counting "France" apart from "france", the lowercase rows survived that
+        way -- no corpus attested them any more, but 38 lemmas were still
+        linked to them and still scoring off their stale ranks.
+
+        Removes, in FK-safe order:
+
+        1. ``derivative_forms.word_token_id`` / ``variant_forms.word_token_id``
+           are set NULL.  The forms themselves are dictionary data and are kept;
+           only the link is corpus-derived, and step 4 of
+           :meth:`initialize_database` rebuilds it.
+        2. ``external_lexeme_annotations`` rows under a ``wordfreq_*`` source,
+           and their ``external_lexeme_annotation_lemmas`` links.  Tier sources
+           (CEFR / YLE / Basic English) are **not** corpus data and are left
+           alone -- they come from :meth:`import_tiers`.
+        3. Every ``WordToken``.  These are wholly corpus-derived; the load
+           recreates the ones the current files attest.
+
+        Args:
+            dry_run: Report the counts without deleting anything.
+
+        Returns:
+            Dictionary of the row counts removed (or that would be).
+        """
+        logger.info(f"Clearing wordfreq data (dry_run={dry_run})...")
+        session = self.get_session()
+        try:
+            wordfreq_annotations = session.query(ExternalLexemeAnnotation).filter(
+                ExternalLexemeAnnotation.source.like("wordfreq_%")
+            )
+            counts: Dict[str, Any] = {
+                "derivative_form_links": session.query(DerivativeForm)
+                .filter(DerivativeForm.word_token_id.isnot(None))
+                .count(),
+                "variant_form_links": session.query(VariantForm)
+                .filter(VariantForm.word_token_id.isnot(None))
+                .count(),
+                "annotations": wordfreq_annotations.count(),
+                "word_tokens": session.query(WordToken).count(),
+                "dry_run": dry_run,
+            }
+
+            if dry_run:
+                logger.info(f"Would clear: {counts}")
+                return counts
+
+            annotation_ids = [row.id for row in wordfreq_annotations.all()]
+            if annotation_ids:
+                session.query(ExternalLexemeAnnotationLemma).filter(
+                    ExternalLexemeAnnotationLemma.annotation_id.in_(annotation_ids)
+                ).delete(synchronize_session=False)
+
+            # Drop the FK references before the rows they point at.
+            session.query(DerivativeForm).filter(DerivativeForm.word_token_id.isnot(None)).update(
+                {DerivativeForm.word_token_id: None}, synchronize_session=False
+            )
+            session.query(VariantForm).filter(VariantForm.word_token_id.isnot(None)).update(
+                {VariantForm.word_token_id: None}, synchronize_session=False
+            )
+
+            wordfreq_annotations.delete(synchronize_session=False)
+            session.query(WordToken).delete(synchronize_session=False)
+            session.commit()
+
+            logger.info(f"Cleared wordfreq data: {counts}")
+            return counts
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Failed to clear wordfreq data: {e}")
+            return {"success": False, "error": str(e), "dry_run": dry_run}
+        finally:
+            session.close()
 
     def load_corpora(
         self, corpus_names: Optional[List[str]] = None, dry_run: bool = False
@@ -578,20 +663,29 @@ class DatabaseAdminService:
 
         return result
 
-    def initialize_database(self, dry_run: bool = False) -> Dict[str, Any]:
+    def initialize_database(self, dry_run: bool = False, clear: bool = False) -> Dict[str, Any]:
         """
         Perform complete database initialization.
 
+        This is the one entry point for populating everything corpus-derived;
+        the individual steps are exposed separately only for partial re-runs.
+
         This includes:
         1. Ensuring database tables exist
-        2. Syncing corpus configurations
-        3. Loading all enabled corpora
-        4. Linking forms to the word tokens the corpus load created
+        2. Optionally clearing existing wordfreq data (``clear``)
+        3. Syncing corpus configurations
+        4. Loading all enabled corpora
         5. Importing tier annotations
-        6. Calculating combined ranks
+        6. Linking forms to the word tokens those two steps created
+        7. Calculating combined ranks
 
         Args:
             dry_run: If True, report what would be done without making changes
+            clear: Delete every corpus-derived row first, so the reload starts
+                from nothing.  Without it the load updates what the current
+                corpus files mention and leaves anything they have dropped in
+                place, stale rank included -- see :meth:`clear_wordfreq_data`.
+                Lemmas, forms and tier data are never touched either way.
 
         Returns:
             Dictionary with initialization results
@@ -623,25 +717,39 @@ class DatabaseAdminService:
         else:
             results["tables_initialized"] = "skipped (dry_run)"
 
-        # Step 2: Sync corpus configurations
-        logger.info("Step 2: Syncing corpus configurations...")
+        # Step 2: Optionally drop everything corpus-derived, so spellings the
+        # current files no longer attest do not survive with a stale rank.
+        if clear:
+            logger.info("Step 2: Clearing existing wordfreq data...")
+            results["wordfreq_cleared"] = self.clear_wordfreq_data(dry_run=dry_run)
+        else:
+            results["wordfreq_cleared"] = "skipped (clear=False)"
+
+        # Step 3: Sync corpus configurations
+        logger.info("Step 3: Syncing corpus configurations...")
         results["config_sync"] = self.sync_configurations(dry_run=dry_run)
 
-        # Step 3: Load corpora
-        logger.info("Step 3: Loading enabled corpora...")
+        # Step 4: Load corpora
+        logger.info("Step 4: Loading enabled corpora...")
         results["corpus_load"] = self.load_corpora(dry_run=dry_run)
 
-        # Step 4: Wire forms to the tokens the corpus load just created, so the
-        # lexeme rollup can see them (it skips forms with no word_token_id).
-        logger.info("Step 4: Linking forms to word tokens...")
-        results["form_token_links"] = self.link_forms_to_word_tokens(dry_run=dry_run)
-
-        # Step 5: Import tier annotations (YLE / CEFR / Basic English)
+        # Step 5: Import tier annotations (YLE / CEFR / Basic English).
+        #
+        # Before the link step, because a tier import creates word tokens of its
+        # own for any spelling no corpus attested.  Linking first strands those:
+        # the corpora carry "Journalist" the surname but not "journalist", so
+        # the lowercase lemma linked to the capitalized token, and the lowercase
+        # one the tier import went on to create was never picked up.
         logger.info("Step 5: Importing tier annotations...")
         results["tier_import"] = self.import_tiers(dry_run=dry_run)
 
-        # Step 6: Calculate ranks
-        logger.info("Step 6: Calculating combined ranks...")
+        # Step 6: Wire forms to the tokens the load and tier import created, so
+        # the lexeme rollup can see them (it skips forms with no word_token_id).
+        logger.info("Step 6: Linking forms to word tokens...")
+        results["form_token_links"] = self.link_forms_to_word_tokens(dry_run=dry_run)
+
+        # Step 7: Calculate ranks
+        logger.info("Step 7: Calculating combined ranks...")
         results["rank_calculation"] = self.calculate_ranks(dry_run=dry_run)
 
         end_time = datetime.now()
