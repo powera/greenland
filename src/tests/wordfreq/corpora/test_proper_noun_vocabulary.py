@@ -122,6 +122,8 @@ def test_place_name_is_not_a_default_subtype() -> None:
     """``place_name`` holds common nouns (area, city), not capitalized names."""
     assert "place_name" not in VOCABULARY_NAME_SUBTYPES
     assert "temporal_name" in VOCABULARY_NAME_SUBTYPES
+    assert "region" in VOCABULARY_NAME_SUBTYPES
+    assert "country" not in VOCABULARY_NAME_SUBTYPES
 
 
 def test_real_release_gives_the_priority_categories() -> None:

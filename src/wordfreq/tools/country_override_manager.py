@@ -95,7 +95,7 @@ class CountryOverrideManager:
     """
 
     # POS subtypes that are considered "country-related"
-    COUNTRY_SUBTYPES = {"country", "nationality"}
+    COUNTRY_SUBTYPES = {"region", "nationality"}
 
     def __init__(self, session: Session):
         """
@@ -124,7 +124,7 @@ class CountryOverrideManager:
             self.session.query(Lemma)
             .filter(
                 Lemma.pos_type == "noun",
-                Lemma.pos_subtype == "country",
+                Lemma.pos_subtype == "region",
             )
             .all()
         )

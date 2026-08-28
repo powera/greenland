@@ -63,7 +63,7 @@ class LexicalStratum(Enum):
 NAMED_ENTITY_SUBTYPES: frozenset[str] = frozenset(
     {
         NounSubtype.PERSONAL_NAME.value,
-        NounSubtype.COUNTRY.value,
+        NounSubtype.REGION.value,
         NounSubtype.CITY.value,
         NounSubtype.GEOGRAPHIC_PLACE.value,
         NounSubtype.ORGANIZATION_NAME.value,

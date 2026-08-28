@@ -48,7 +48,7 @@ _SUPPORTED_POS_TYPES = {"nouns", "verbs", "adjectives"}
 _DISTRACTOR_COUNT = 5
 _MIN_CATEGORY_SIZE = _DISTRACTOR_COUNT + 1
 _MAX_QUESTIONS_PER_CATEGORY = 4
-_EXCLUDED_NOUN_SUBTYPES = {"country", "nationality", "city"}
+_EXCLUDED_NOUN_SUBTYPES = {"region", "nationality", "city"}
 
 
 # Define benchmark metadata creator

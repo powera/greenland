@@ -42,7 +42,7 @@ TIER_3_LEVEL = 18  # Remaining countries (lowest priority)
 # Value: dict mapping tier level -> list of country concept_labels
 #
 # NOTE: concept_labels must match exactly those in the country data file
-# (data/release/lemmas/nouns/country/base.jsonl)
+# (data/release/lemmas/nouns/region/base.jsonl)
 
 COUNTRY_PRIORITIES: Dict[str, Dict[int, List[str]]] = {
     # -------------------------------------------------------------------------

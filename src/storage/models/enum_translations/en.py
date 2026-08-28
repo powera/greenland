@@ -56,7 +56,7 @@ SUBTYPE_DISPLAY = {
     # Named Entities
     "personal_name": "Personal Name",
     "place_name": "Place Name",
-    "country": "Country",
+    "region": "Region",
     "city": "City",
     "geographic_place": "Geographic Place",
     "organization_name": "Organization Name",
