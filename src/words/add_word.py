@@ -18,7 +18,9 @@ Not every sense is committed. A sense that lands on a catch-all ``*_other``
 subtype for an open-class word is diverted to that same pending-import queue
 instead of becoming a lemma, on the reasoning that "noun_other" out of 55
 available noun subtypes is usually the LLM failing to place the sense rather
-than a sense with genuinely no category.
+than a sense with genuinely no category. A whole tier of senses tied at one
+prominence, wider than ``_MAX_TIED_SENSES``, is queued for the same reason: the
+model rated too many senses alike to rank them, so a human picks.
 
 The "does the database already have this word?" guard is
 ``word_exists_in_english`` -- the canonical check that folds in lemmas,
@@ -43,6 +45,7 @@ from langtools.en.utils import (
 )
 from langtools.collation import strip_diacritics
 from storage.backend.config import DataSourceConfig
+from storage.crud.derivative_form import add_derivative_form
 from storage.crud.operation_log import log_translation_change
 from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
 from storage.models.schema import (
@@ -62,6 +65,7 @@ from wordfreq.translation.definitions import (
     SENSE_PROMINENCE_ORDER,
     select_senses_to_add,
 )
+from wordfreq.translation.word_processing import determine_default_grammatical_form
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +102,28 @@ _SENSE_BANDS: Tuple[Tuple[Optional[int], int], ...] = (
     (10000, 3),  # rank 2001-10000: up to 3
     (None, 2),  # rank > 10000 or unknown: up to 2
 )
+
+# How large a single prominence tier may get before the whole tier is sent to
+# review instead of imported. ``_extend_for_prominence_ties`` keeps a tier whole
+# rather than cutting it at an arbitrary list position, which is right when the
+# tier is a genuine tie of two or three. A tier several senses wider than the
+# frequency ceiling is not a tie -- it is the model failing to discriminate, and
+# no code-side rule can pick the real senses out of it. "further" came back with
+# seven senses at "common" against a ceiling of four; the honest answer is that a
+# human should look at all seven, not that the first four win on list order.
+_MAX_TIED_SENSES = 5
+
+# Sentinel key set on a sense dict to route it to the pending queue for a reason
+# other than its POS subtype. Not part of the LLM schema.
+_REVIEW_REASON_KEY = "_review_reason"
+
+# POS types with no "<pos>_other" catch-all subtype to fall back on. Only
+# numeral qualifies: its subtypes are "cardinal" and "ordinal" and nothing else,
+# so the prompt's blanket "return the part-of-speech as the subtype" yields an
+# unusable "numeral" with no catch-all to absorb it. Numerals go to review
+# rather than being guessed: cardinal and ordinal are a real distinction, and
+# they are rare enough in a word list that a human look costs nothing.
+_NO_CATCH_ALL_POS_TYPES: Tuple[str, ...] = ("numeral",)
 
 
 @dataclass
@@ -286,7 +312,7 @@ def _apply_pos_sense_cap(senses: List[Dict[str, Any]]) -> Tuple[List[Dict[str, A
 
 def _normalize_translation(text: Optional[str]) -> str:
     """Accent-fold and case-fold one translation for duplicate comparison."""
-    return strip_diacritics((text or "").strip()).lower()
+    return str(strip_diacritics((text or "").strip())).lower()
 
 
 def _same_stem(first: str, second: str) -> bool:
@@ -393,6 +419,21 @@ def _normalize_subtype(pos_type: str, pos_subtype: Optional[str]) -> Optional[st
     ``storage/utils/guid.py`` already special-cases exactly this for
     interjection; the same mismatch exists for preposition, conjunction,
     pronoun, article and determiner, so normalize them all here.
+
+    The definitions schema constrains ``pos`` and ``pos_subtype`` independently:
+    its subtype enum is the union of every POS's values. A small model can
+    therefore return a schema-valid but incompatible pair, such as adjective +
+    ``completeness`` (an adverb subtype). Fall back to the selected POS's
+    catch-all in that case. Open-class ``*_other`` senses are subsequently sent
+    to pending review; closed classes use ``*_other`` as their ordinary and only
+    subtype.
+
+    ``numeral`` is the exception with no catch-all at all -- its only subtypes
+    are "cardinal" and "ordinal" -- so the prompt's blanket instruction to
+    "return the part-of-speech as the subtype" yields the unusable "numeral"
+    and there is no ``numeral_other`` to fall back to. The value is left as-is
+    here; :func:`_review_reason` routes it to the pending queue rather than
+    guessing between cardinal and ordinal.
     """
     if pos_subtype is None:
         return None
@@ -403,6 +444,8 @@ def _normalize_subtype(pos_type: str, pos_subtype: Optional[str]) -> Optional[st
     # Verbs/nouns/adjectives/adverbs spell their catch-all "<pos>_other" too,
     # while storage.utils.enums spells it plain "other".
     if pos_subtype == "other" and canonical in subtypes:
+        return canonical
+    if pos_subtype not in subtypes and canonical in subtypes:
         return canonical
     return pos_subtype
 
@@ -423,6 +466,25 @@ def _needs_subtype_review(pos_type: str, pos_subtype: str) -> bool:
     return pos_type in MAJOR_POS_TYPES and pos_subtype.endswith("_other")
 
 
+def _review_reason(sense: Dict[str, Any], pos_type: str, pos_subtype: str) -> Optional[str]:
+    """Why this sense should be queued rather than imported, or None to import.
+
+    Two independent triggers: a catch-all subtype on an open-class word (the LLM
+    could not place the sense), and an oversized prominence tie marked upstream
+    by :func:`_extend_for_prominence_ties` (the LLM could not rank the senses).
+    """
+    tie_reason = sense.get(_REVIEW_REASON_KEY)
+    if isinstance(tie_reason, str) and tie_reason:
+        return tie_reason
+    if pos_type in _NO_CATCH_ALL_POS_TYPES and pos_subtype not in SUBTYPE_GUID_PREFIXES.get(
+        pos_type, {}
+    ):
+        return f"{pos_type} needs a cardinal/ordinal decision before import"
+    if _needs_subtype_review(pos_type, pos_subtype):
+        return f"{pos_subtype} needs subtype review before import"
+    return None
+
+
 def _stage_for_review(
     session: Session,
     word: str,
@@ -433,6 +495,7 @@ def _stage_for_review(
     definition_text: str,
     frequency_rank: Optional[int],
     source: str,
+    reason: str,
 ) -> bool:
     """Write one sense to the pending-import queue. Returns False if already there.
 
@@ -453,11 +516,17 @@ def _stage_for_review(
         disambiguation_translation=disambiguation or definition_text,
         disambiguation_language=REVIEW_DISAMBIGUATION_LANGUAGE,
         pos_type=pos_type,
-        pos_subtype=pos_subtype,
+        # Only a real subtype is worth recording. A POS with no catch-all (see
+        # _NO_CATCH_ALL_POS_TYPES) reaches here holding the LLM's unusable
+        # answer, and storing it would put a value in the queue that no GUID
+        # prefix accepts; None correctly says "the reviewer picks".
+        pos_subtype=(
+            pos_subtype if pos_subtype in SUBTYPE_GUID_PREFIXES.get(pos_type, {}) else None
+        ),
         source=source,
         frequency_rank=frequency_rank,
         sense_prominence=sense.get("sense_prominence"),
-        notes=f"add_word: {pos_subtype} needs subtype review before import",
+        notes=f"add_word: {reason}",
     )
     session.commit()
     return True
@@ -503,6 +572,11 @@ def _extend_for_prominence_ties(
     tier of what ``select_senses_to_add`` already kept, so this never reaches
     down into ``uncommon``/``rare``: those stay dropped.
 
+    A tier wider than ``_MAX_TIED_SENSES`` is not a tie but a failure to
+    discriminate, so every sense in it is marked for review instead: keeping the
+    tier whole would import the lot, and cutting it would pick by list position.
+    Senses above the boundary tier are unaffected and still import normally.
+
     Returns the (possibly extended) selection, most-prominent first.
     """
     if not selected:
@@ -521,7 +595,16 @@ def _extend_for_prominence_ties(
         for sense in definitions_list
         if id(sense) not in kept_ids and _prominence_rank(sense) == boundary_rank
     ]
-    return selected + extras
+    extended = selected + extras
+
+    tied = [sense for sense in extended if _prominence_rank(sense) == boundary_rank]
+    if len(tied) > _MAX_TIED_SENSES:
+        prominence = tied[0].get("sense_prominence") or SENSE_PROMINENCE_COMMON
+        for sense in tied:
+            sense[_REVIEW_REASON_KEY] = (
+                f"{len(tied)} senses tied at {prominence}; needs review before import"
+            )
+    return extended
 
 
 def _query_senses(client: LinguisticClient, word: str) -> List[Dict[str, Any]]:
@@ -535,7 +618,7 @@ def _query_senses(client: LinguisticClient, word: str) -> List[Dict[str, Any]]:
     definitions_list, success = client.query_definitions(word)
     if not success or not definitions_list:
         return []
-    return definitions_list
+    return list(definitions_list)
 
 
 def _leading_pos_type(definitions_list: List[Dict[str, Any]]) -> str:
@@ -587,7 +670,7 @@ def _store_sense_translations(
 ) -> Dict[str, str]:
     """Save the translations the definitions call already returned for this sense.
 
-    The definitions schema returns lt/es/fr/zh per sense, so they arrive with
+    The definitions schema returns lt/es/es-419/fr/zh per sense, so they arrive with
     the definition at no extra LLM cost, and each sense gets its own
     translation. Field names map to language codes through translation_helpers,
     per CLAUDE.md -- no local mapping.
@@ -615,6 +698,16 @@ def _store_sense_translations(
         )
         stored[lang_code] = translation
     return stored
+
+
+def _missing_sense_translations(sense: Dict[str, Any]) -> List[str]:
+    """Return required target languages with no non-empty translation."""
+    by_lang_code = convert_llm_response_to_lang_codes(sense)
+    return [
+        lang_code
+        for lang_code in TRANSLATION_LANGUAGES
+        if not (by_lang_code.get(lang_code) or "").strip()
+    ]
 
 
 def add_word(
@@ -695,6 +788,30 @@ def add_word(
             dropped_senses=dropped,
         )
 
+    # Validate the whole selected batch before committing its first sense. The
+    # structured schema requires these fields, but an LLM can still satisfy a
+    # string field with an empty string. Partial translations would make the
+    # word look imported while leaving a storage dialect silently blank.
+    for sense in senses:
+        pos_type = (sense.get("pos") or "").lower()
+        pos_subtype = _normalize_subtype(pos_type, sense.get("pos_subtype"))
+        if pos_subtype is not None and _review_reason(sense, pos_type, pos_subtype) is not None:
+            continue
+        missing_languages = _missing_sense_translations(sense)
+        if missing_languages:
+            definition_text = str(sense.get("definition") or "")
+            return AddWordResult(
+                word=normalized,
+                status="error",
+                frequency_rank=frequency_rank,
+                frequency_rank_source=rank_source,
+                dropped_senses=dropped,
+                error=(
+                    f"LLM omitted required translations {missing_languages!r} "
+                    f"for sense {definition_text[:60]!r}"
+                ),
+            )
+
     result = AddWordResult(
         word=normalized,
         status="created",
@@ -714,24 +831,38 @@ def add_word(
                 logger.warning("Skipping empty definition for %r", normalized)
                 continue
 
-            pos_error = _validate_pos(pos_type, pos_subtype)
-            if pos_error is not None:
-                session.rollback()
-                return AddWordResult(
-                    word=normalized,
-                    status="error",
-                    frequency_rank=frequency_rank,
-                    frequency_rank_source=rank_source,
-                    senses=result.senses,
-                    dropped_senses=dropped,
-                    error=f"LLM gave {pos_error}",
-                )
-            assert pos_subtype is not None  # _validate_pos rejects None
+            # Review routing comes before validation: a sense bound for the
+            # queue does not need a GUID-able subtype, and a POS with no
+            # catch-all (numeral) reaches here holding a subtype _validate_pos
+            # would reject. Erroring there would fail the whole word over a
+            # sense we were going to hand to a human anyway.
+            review_reason = (
+                _review_reason(sense, pos_type, pos_subtype) if pos_subtype is not None else None
+            )
+
+            if review_reason is None:
+                pos_error = _validate_pos(pos_type, pos_subtype)
+                if pos_error is not None:
+                    session.rollback()
+                    return AddWordResult(
+                        word=normalized,
+                        status="error",
+                        frequency_rank=frequency_rank,
+                        frequency_rank_source=rank_source,
+                        senses=result.senses,
+                        dropped_senses=dropped,
+                        error=f"LLM gave {pos_error}",
+                    )
+                assert pos_subtype is not None  # _validate_pos rejects None
+            else:
+                # Bound for the queue, so the subtype was never validated; only
+                # a real one is worth recording on the pending row.
+                assert pos_subtype is not None  # _review_reason is None when it is
 
             # A catch-all subtype on an open-class word is usually the LLM
             # failing to place the sense. Queue it for review rather than
             # minting a GUID that a human would have to undo.
-            if _needs_subtype_review(pos_type, pos_subtype):
+            if review_reason is not None:
                 staged = _stage_for_review(
                     session,
                     normalized,
@@ -741,6 +872,7 @@ def add_word(
                     definition_text=definition_text,
                     frequency_rank=frequency_rank,
                     source=source,
+                    reason=review_reason,
                 )
                 if staged:
                     result.pending_senses.append(
@@ -815,6 +947,37 @@ def add_word(
             )
             sense_result.translations = _store_sense_translations(
                 session, new_lemma, sense, source=source, model=client_model
+            )
+
+            # A lemma's English text is stored on Lemma rather than in
+            # LemmaTranslation, but the token-frequency system reaches lemmas
+            # only through DerivativeForm/VariantForm attachments. Record the
+            # English base form immediately so this newly claimed token leaves
+            # the unlinked-token queue and its frequency can roll up to every
+            # created sense.
+            word_token = (
+                session.query(WordToken)
+                .filter(
+                    WordToken.token == normalized,
+                    WordToken.language_code == "en",
+                )
+                .first()
+            )
+            if word_token is None:
+                word_token = WordToken(token=normalized, language_code="en")
+                session.add(word_token)
+                session.flush()
+            add_derivative_form(
+                session,
+                new_lemma,
+                normalized,
+                "en",
+                determine_default_grammatical_form(normalized, pos_type, normalized),
+                word_token=word_token,
+                is_base_form=True,
+                ipa_pronunciation=(sense.get("ipa_spelling") or None),
+                phonetic_pronunciation=(sense.get("phonetic_spelling") or None),
+                source=source,
             )
 
             # Commit per sense: a multi-sense word is a series of small writes,

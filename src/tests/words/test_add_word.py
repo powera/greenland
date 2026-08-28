@@ -26,7 +26,10 @@ from words.add_word import (
     AddWordResult,
     _apply_pos_sense_cap,
     _drop_translation_duplicates,
+    _MAX_TIED_SENSES,
+    _REVIEW_REASON_KEY,
     _extend_for_prominence_ties,
+    _review_reason,
     _inflected_candidates,
     _normalize_subtype,
     _sense_bounds,
@@ -98,6 +101,11 @@ def _def(
         "pos": pos,
         "pos_subtype": pos_subtype,
         "sense_prominence": prominence,
+        "lithuanian_translation": "vertimas",
+        "spanish_translation": "traducción",
+        "spanish_latam_translation": "traducción",
+        "french_translation": "traduction",
+        "chinese_translation": "翻译",
     }
     entry.update(translations)
     return entry
@@ -168,6 +176,62 @@ def test_tie_extension_never_reaches_uncommon() -> None:
         ("c", "uncommon"),
     )
     assert _select_and_extend(defs, max_senses=3) == ["a"]
+
+
+def test_oversized_tie_is_marked_for_review() -> None:
+    # 1 very_common + 7 common against a ceiling of 4 is what "further" produced:
+    # too wide to be a real tie, so every sense in the tier is marked for review
+    # rather than imported on list position. The very_common sense is untouched.
+    defs = _senses(
+        ("a", "very_common"),
+        ("b", "common"),
+        ("c", "common"),
+        ("d", "common"),
+        ("e", "common"),
+        ("f", "common"),
+        ("g", "common"),
+        ("h", "common"),
+    )
+    selected = select_senses_to_add(defs, max_senses=4, min_senses=1)
+    extended = _extend_for_prominence_ties(selected, defs)
+
+    assert [sense["definition"] for sense in extended] == list("abcdefgh")
+    assert _REVIEW_REASON_KEY not in extended[0]
+    for sense in extended[1:]:
+        assert _REVIEW_REASON_KEY in sense
+    assert _review_reason(extended[0], "adjective", "quality") is None
+    assert _review_reason(extended[1], "adjective", "quality") is not None
+
+
+def test_tie_at_the_limit_still_imports() -> None:
+    # Exactly _MAX_TIED_SENSES in the tier is a tie, not a failure to rank.
+    defs = _senses(("a", "very_common"), *[(letter, "common") for letter in "bcdef"])
+    selected = select_senses_to_add(defs, max_senses=4, min_senses=1)
+    extended = _extend_for_prominence_ties(selected, defs)
+
+    assert len([s for s in extended if s["sense_prominence"] == "common"]) == _MAX_TIED_SENSES
+    assert all(_REVIEW_REASON_KEY not in sense for sense in extended)
+
+
+def test_review_reason_reports_the_subtype_trigger() -> None:
+    # The pre-existing *_other trigger is unchanged and still fires on its own.
+    assert _review_reason({}, "noun", "noun_other") is not None
+    assert _review_reason({}, "noun", "human") is None
+    # Closed-class *_other is ordinary, not a review trigger.
+    assert _review_reason({}, "preposition", "preposition_other") is None
+
+
+def test_numeral_without_a_valid_subtype_goes_to_review() -> None:
+    # "numeral" is the one POS with no *_other catch-all, so the prompt's
+    # "return the part-of-speech as the subtype" instruction yields an unusable
+    # value. It must reach review rather than failing the word (the HTTP 400
+    # "invalid pos_subtype 'numeral' for 'numeral'" that halted the 'hundred'
+    # import), and rather than being guessed as cardinal or ordinal.
+    assert _normalize_subtype("numeral", "numeral") == "numeral"
+    assert _review_reason({}, "numeral", "numeral") is not None
+    # A subtype the LLM did get right imports normally.
+    assert _review_reason({}, "numeral", "cardinal") is None
+    assert _review_reason({}, "numeral", "ordinal") is None
 
 
 def test_closed_class_capped_to_one_sense() -> None:
@@ -285,7 +349,12 @@ def test_partial_translation_agreement_does_not_collapse() -> None:
 def test_normalize_subtype_closed_class() -> None:
     assert _normalize_subtype("preposition", "preposition") == "preposition_other"
     assert _normalize_subtype("conjunction", "other") == "conjunction_other"
-    assert _normalize_subtype("noun", "abstract") == "abstract"
+    assert _normalize_subtype("noun", "concept_idea") == "concept_idea"
+
+
+def test_normalize_subtype_replaces_cross_pos_value_with_other() -> None:
+    assert _normalize_subtype("adjective", "completeness") == "adjective_other"
+    assert _normalize_subtype("preposition", "location") == "preposition_other"
 
 
 # --- add_word end to end ----------------------------------------------------
@@ -301,6 +370,10 @@ def test_add_word_creates_lemma(
                 pos="noun",
                 pos_subtype="animal",
                 lithuanian_translation="šuo",
+                spanish_translation="perro",
+                spanish_latam_translation="perro",
+                french_translation="chien",
+                chinese_translation="狗",
             )
         ]
     )
@@ -318,6 +391,18 @@ def test_add_word_creates_lemma(
     assert lemma.pos_type == "noun"
     assert lemma.difficulty_level == -1
     assert result.senses[0].translations.get("lt") == "šuo"
+    assert result.senses[0].translations == {
+        "lt": "šuo",
+        "es": "perro",
+        "es-419": "perro",
+        "fr": "chien",
+        "zh": "狗",
+    }
+    assert len(lemma.derivative_forms) == 1
+    assert lemma.derivative_forms[0].derivative_form_text == "dog"
+    assert lemma.derivative_forms[0].grammatical_form == "noun/en_singular"
+    assert lemma.derivative_forms[0].is_base_form is True
+    assert lemma.derivative_forms[0].word_token_id is not None
 
 
 def test_add_word_skips_existing_lemma(
@@ -371,9 +456,24 @@ def test_add_word_all_very_common_senses_kept(
     # ceiling only bounds lower tiers.
     patch_client(
         [
-            _def("first sense", pos="noun", prominence="very_common"),
-            _def("second sense", pos="noun", prominence="very_common"),
-            _def("third sense", pos="noun", prominence="very_common"),
+            _def(
+                "first sense",
+                pos="noun",
+                prominence="very_common",
+                lithuanian_translation="pirmas",
+            ),
+            _def(
+                "second sense",
+                pos="noun",
+                prominence="very_common",
+                lithuanian_translation="antras",
+            ),
+            _def(
+                "third sense",
+                pos="noun",
+                prominence="very_common",
+                lithuanian_translation="trečias",
+            ),
         ]
     )
 
@@ -454,6 +554,21 @@ def test_add_word_no_definitions(
     result = add_word(session, "zzznotaword", config=config)
 
     assert result.status == "no_definitions"
+
+
+def test_add_word_rejects_a_selected_sense_with_a_missing_target_translation(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    incomplete = _def("a domesticated carnivore", pos="noun", pos_subtype="animal")
+    incomplete["spanish_latam_translation"] = ""
+    patch_client([incomplete])
+
+    result = add_word(session, "dog", config=config)
+
+    assert result.status == "error"
+    assert result.error is not None
+    assert "es-419" in result.error
+    assert session.query(Lemma).filter(Lemma.lemma_text == "dog").count() == 0
     assert result.senses == []
 
 
@@ -530,7 +645,13 @@ def test_inflected_rank_widens_the_sense_ceiling(
     the same senses at rank 500 are allowed 4.
     """
     definitions = [
-        _def(f"sense {n}", pos="verb", pos_subtype="physical_action", prominence="very_common")
+        _def(
+            f"sense {n}",
+            pos="verb",
+            pos_subtype="physical_action",
+            prominence="very_common",
+            lithuanian_translation=f"vertimas {n}",
+        )
         for n in range(4)
     ]
     patch_client(definitions)
@@ -606,6 +727,31 @@ def test_other_subtype_on_open_class_is_queued_not_written(
     assert result.pending_senses[0].guid == ""
 
 
+def test_cross_pos_subtype_on_open_class_is_queued_as_other(
+    session: Session, config: DataSourceConfig, patch_client: Any
+) -> None:
+    patch_client(
+        [
+            _def(
+                "forming an entire or complete thing",
+                pos="adjective",
+                pos_subtype="completeness",
+                lithuanian_translation="visas",
+            )
+        ]
+    )
+
+    result = add_word(session, "whole", config=config)
+
+    assert result.status == "pending_review"
+    assert result.senses == []
+    assert session.query(Lemma).filter(Lemma.lemma_text == "whole").count() == 0
+
+    pending = session.query(PendingImport).filter(PendingImport.english_word == "whole").one()
+    assert pending.pos_type == "adjective"
+    assert pending.pos_subtype == "adjective_other"
+
+
 def test_other_subtype_on_closed_class_is_still_written(
     session: Session, config: DataSourceConfig, patch_client: Any
 ) -> None:
@@ -616,7 +762,11 @@ def test_other_subtype_on_closed_class_is_still_written(
 
     assert result.status == "created"
     assert len(result.senses) == 1
-    assert session.query(Lemma).filter(Lemma.lemma_text == "within").count() == 1
+    lemma = session.query(Lemma).filter(Lemma.lemma_text == "within").one()
+    assert len(lemma.derivative_forms) == 1
+    assert lemma.derivative_forms[0].grammatical_form == "preposition/base"
+    assert lemma.derivative_forms[0].word_token is not None
+    assert lemma.derivative_forms[0].word_token.token == "within"
     assert session.query(PendingImport).count() == 0
 
 
@@ -655,7 +805,16 @@ def test_queued_sense_falls_back_to_definition_for_disambiguation(
     session: Session, config: DataSourceConfig, patch_client: Any
 ) -> None:
     """disambiguation_translation is NOT NULL, so it needs a fallback."""
-    patch_client([_def("an unplaceable sense", pos="noun", pos_subtype="noun_other")])
+    patch_client(
+        [
+            _def(
+                "an unplaceable sense",
+                pos="noun",
+                pos_subtype="noun_other",
+                lithuanian_translation="",
+            )
+        ]
+    )
 
     add_word(session, "guard", config=config)
 

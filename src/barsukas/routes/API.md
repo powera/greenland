@@ -72,7 +72,7 @@ Base prefix: `/api`.
     words — anything other than noun/verb/adjective/adverb — to a single sense,
     collapses senses the LLM over-split (same POS and identical translations),
     and writes one lemma per surviving sense at difficulty `-1` with the
-    lt/es/fr/zh translations the definitions call returned.
+    lt/es/es-419/fr/zh translations the definitions call returned.
   - A word already accounted for — as a lemma, disambiguated lemma, English
     derivative form, or alternate spelling (`variant_forms`) — returns
     `status: "already_exists"` and nothing is written.

@@ -30,6 +30,10 @@ EN_BASE_FORM_BY_POS: Dict[str, str] = {
     "adjective": GrammaticalForm["ADJ_EN_POSITIVE"].value,
     "adverb": GrammaticalForm["ADVERB_EN_POSITIVE"].value,
     "pronoun": GrammaticalForm["PRONOUN_EN_SUBJECTIVE"].value,
+    "preposition": GrammaticalForm.PREPOSITION.value,
+    "conjunction": GrammaticalForm.CONJUNCTION.value,
+    "interjection": GrammaticalForm.INTERJECTION.value,
+    "determiner": GrammaticalForm.DETERMINER.value,
     "numeral": GrammaticalForm["NUMERAL_EN_CARDINAL"].value,
     "article": GrammaticalForm["ARTICLE_EN_BASE"].value,
 }
@@ -61,32 +65,32 @@ def determine_default_grammatical_form(word_text: str, pos_type: str, lemma_text
     pos_lower = pos_type.lower()
 
     if word_text == lemma_text:
-        return EN_BASE_FORM_BY_POS.get(pos_lower, GrammaticalForm.OTHER.value)
+        return str(EN_BASE_FORM_BY_POS.get(pos_lower, GrammaticalForm.OTHER.value))
 
     # Basic heuristics for English inflected forms
     if pos_lower == "verb":
         if word_text.endswith("ing"):
-            return _EN_INFLECTED["VERB_EN_PRESENT_PARTICIPLE"]
+            return str(_EN_INFLECTED["VERB_EN_PRESENT_PARTICIPLE"])
         elif word_text.endswith("ed"):
-            return _EN_INFLECTED["VERB_EN_PAST_PARTICIPLE"]
+            return str(_EN_INFLECTED["VERB_EN_PAST_PARTICIPLE"])
 
     elif pos_lower == "noun":
         if word_text.endswith("s") and not lemma_text.endswith("s"):
-            return _EN_INFLECTED["NOUN_EN_PLURAL"]
+            return str(_EN_INFLECTED["NOUN_EN_PLURAL"])
 
     elif pos_lower == "adjective":
         if word_text.endswith("er"):
-            return _EN_INFLECTED["ADJ_EN_COMPARATIVE"]
+            return str(_EN_INFLECTED["ADJ_EN_COMPARATIVE"])
         elif word_text.endswith("est"):
-            return _EN_INFLECTED["ADJ_EN_SUPERLATIVE"]
+            return str(_EN_INFLECTED["ADJ_EN_SUPERLATIVE"])
 
     elif pos_lower == "adverb":
         if word_text.endswith("er"):
-            return _EN_INFLECTED["ADVERB_EN_COMPARATIVE"]
+            return str(_EN_INFLECTED["ADVERB_EN_COMPARATIVE"])
         elif word_text.endswith("est"):
-            return _EN_INFLECTED["ADVERB_EN_SUPERLATIVE"]
+            return str(_EN_INFLECTED["ADVERB_EN_SUPERLATIVE"])
 
-    return GrammaticalForm.OTHER.value
+    return str(GrammaticalForm.OTHER.value)
 
 
 def is_likely_base_form(word_text: str, lemma_text: str, pos_type: str) -> bool:
