@@ -68,6 +68,16 @@
 
 <div class="card mt-4">
     <div class="card-body">
+        <h2 class="h6 mb-2"><i class="bi bi-link-45deg"></i> Top unlinked tokens</h2>
+        <p class="text-muted small mb-2">
+            Frequent spellings that no lemma claims yet &mdash; the queue of vocabulary
+            the corpora measured but the database has no sense for.
+        </p>
+        <a class="btn btn-sm btn-outline-secondary"
+           href="{{ url_for('word_tokens.unlinked', language=language_code) }}">
+            Most common unlinked
+        </a>
+        <hr>
         <h2 class="h6 mb-2"><i class="bi bi-bar-chart-steps"></i> Corpus vocabulary</h2>
         <p class="text-muted small mb-2">
             Words that lean toward one corpus more than the rest &mdash; the cooking words,

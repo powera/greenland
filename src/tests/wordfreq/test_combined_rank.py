@@ -303,3 +303,203 @@ def test_corpus_weight_zero_excludes_corpus() -> None:
         assert scored.frequency_rank == 9783
     finally:
         session.close()
+
+
+# --- Token ranks -------------------------------------------------------------
+#
+# calculate_token_combined_ranks writes a dense ordinal, so these assert on the
+# ordering (rank 1, 2, 3...) rather than on a score, which is the property the
+# callers rely on.
+
+
+def _corpus_configs(*names: str) -> list[CorpusConfig]:
+    return [
+        CorpusConfig(
+            name=name,
+            description="t",
+            file_path="x",
+            max_words=1000,
+            corpus_weight=1.0,
+            max_unknown_rank=5000,
+        )
+        for name in names
+    ]
+
+
+def _annotate(
+    session: Session,
+    token: WordToken,
+    corpus_name: str,
+    ordinal_rank: Optional[int],
+    frequency: float = 100.0,
+) -> None:
+    session.add(
+        ExternalLexemeAnnotation(
+            word_token_id=token.id,
+            source=f"wordfreq_{corpus_name}",
+            tier_name="r1-50",
+            frequency=frequency,
+            ordinal_rank=ordinal_rank,
+        )
+    )
+    session.flush()
+
+
+def _add_bare_token(session: Session, text: str, language_code: str = "en") -> WordToken:
+    token = WordToken(token=text, language_code=language_code)
+    session.add(token)
+    session.flush()
+    return token
+
+
+def test_token_ranks_are_dense_ordinals_ordered_by_corpus_rank() -> None:
+    """The written rank is a position 1..N, not the underlying score."""
+    session = _make_session()
+    try:
+        with patch.object(
+            combined_rank, "get_enabled_corpus_configs", return_value=_corpus_configs("cooking")
+        ):
+            common = _add_bare_token(session, "salt")
+            middling = _add_bare_token(session, "paprika")
+            rare = _add_bare_token(session, "asafoetida")
+            _annotate(session, common, "cooking", 3)
+            _annotate(session, middling, "cooking", 40)
+            _annotate(session, rare, "cooking", 900)
+            session.commit()
+
+            result = combined_rank.calculate_token_combined_ranks(session)
+
+        assert result["success"] is True
+        assert result["tokens_scored"] == 3
+        session.expire_all()
+        assert common.frequency_rank == 1
+        assert middling.frequency_rank == 2
+        assert rare.frequency_rank == 3
+    finally:
+        session.close()
+
+
+def test_token_absent_from_a_corpus_takes_the_unknown_floor() -> None:
+    """A word common in one corpus still loses to one common in both."""
+    session = _make_session()
+    try:
+        with patch.object(
+            combined_rank,
+            "get_enabled_corpus_configs",
+            return_value=_corpus_configs("cooking", "science"),
+        ):
+            both = _add_bare_token(session, "water")
+            _annotate(session, both, "cooking", 10)
+            _annotate(session, both, "science", 10)
+
+            one_only = _add_bare_token(session, "saute")
+            _annotate(session, one_only, "cooking", 5)
+            session.commit()
+
+            combined_rank.calculate_token_combined_ranks(session)
+
+        session.expire_all()
+        # "saute" ranks better in cooking, but is absent from science and takes
+        # that corpus's floor, so the word both corpora attest wins.
+        assert both.frequency_rank == 1
+        assert one_only.frequency_rank == 2
+    finally:
+        session.close()
+
+
+def test_token_ranks_ignore_tier_annotations() -> None:
+    """Tier sources are not corpora and must not contribute to a token rank."""
+    session = _make_session()
+    try:
+        with patch.object(
+            combined_rank, "get_enabled_corpus_configs", return_value=_corpus_configs("cooking")
+        ):
+            tiered = _add_bare_token(session, "apple")
+            session.add(
+                ExternalLexemeAnnotation(
+                    word_token_id=tiered.id,
+                    source="cambridge_yle",
+                    tier_name="starters",
+                    frequency=None,
+                    ordinal_rank=None,
+                )
+            )
+            corpus_word = _add_bare_token(session, "zucchini")
+            _annotate(session, corpus_word, "cooking", 700)
+            session.flush()
+            session.commit()
+
+            result = combined_rank.calculate_token_combined_ranks(session)
+
+        assert result["corpora_used"] == ["cooking"]
+        session.expire_all()
+        # The YLE row gives "apple" no corpus evidence at all, so it falls to
+        # the unknown floor and lands behind a genuinely-ranked corpus word.
+        assert corpus_word.frequency_rank == 1
+        assert tiered.frequency_rank == 2
+    finally:
+        session.close()
+
+
+def test_token_ranks_are_language_scoped() -> None:
+    """Ranking English leaves another language's tokens untouched."""
+    session = _make_session()
+    try:
+        with patch.object(
+            combined_rank, "get_enabled_corpus_configs", return_value=_corpus_configs("cooking")
+        ):
+            english = _add_bare_token(session, "salt")
+            _annotate(session, english, "cooking", 3)
+            lithuanian = _add_bare_token(session, "druska", language_code="lt")
+            session.commit()
+
+            result = combined_rank.calculate_token_combined_ranks(session)
+
+        assert result["tokens_scored"] == 1
+        session.expire_all()
+        assert english.frequency_rank == 1
+        assert lithuanian.frequency_rank is None
+    finally:
+        session.close()
+
+
+def test_token_rank_dry_run_writes_nothing() -> None:
+    session = _make_session()
+    try:
+        with patch.object(
+            combined_rank, "get_enabled_corpus_configs", return_value=_corpus_configs("cooking")
+        ):
+            token = _add_bare_token(session, "salt")
+            _annotate(session, token, "cooking", 3)
+            session.commit()
+
+            result = combined_rank.calculate_token_combined_ranks(session, dry_run=True)
+
+        assert result["dry_run"] is True
+        assert result["tokens_updated"] == 1
+        session.expire_all()
+        assert token.frequency_rank is None
+    finally:
+        session.close()
+
+
+def test_token_ranks_are_stable_across_reruns() -> None:
+    """A rerun over unchanged data updates nothing (ties break on token text)."""
+    session = _make_session()
+    try:
+        with patch.object(
+            combined_rank, "get_enabled_corpus_configs", return_value=_corpus_configs("cooking")
+        ):
+            for text in ("alpha", "beta", "gamma", "delta"):
+                _add_bare_token(session, text)
+            ranked = _add_bare_token(session, "salt")
+            _annotate(session, ranked, "cooking", 3)
+            session.commit()
+
+            first = combined_rank.calculate_token_combined_ranks(session)
+            second = combined_rank.calculate_token_combined_ranks(session)
+
+        assert first["tokens_updated"] == 5
+        assert second["tokens_updated"] == 0
+    finally:
+        session.close()

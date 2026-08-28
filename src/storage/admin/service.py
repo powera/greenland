@@ -415,17 +415,20 @@ class DatabaseAdminService:
                     ExternalLexemeAnnotation,
                     Lemma,
                     LemmaTier,
+                    WordToken,
                 )
 
                 lemma_count = session.query(Lemma).count()
                 annotation_count = session.query(ExternalLexemeAnnotation).count()
                 tier_count = session.query(LemmaTier).count()
+                token_count = session.query(WordToken).count()
 
                 result = {
                     "dry_run": True,
                     "lemmas": lemma_count,
                     "external_lexeme_annotations": annotation_count,
                     "lemma_tiers": tier_count,
+                    "word_tokens": token_count,
                     "would_calculate": True,
                 }
             finally:
@@ -433,15 +436,25 @@ class DatabaseAdminService:
         else:
             session = self.get_session()
             try:
+                # Tokens first: the pass is cheaper and independent, so a
+                # failure in the longer lemma pass still leaves the token
+                # ranks written rather than rolling both back.
+                logger.info("Calculating token combined ranks (wordfreq corpora)...")
+                token_result = combined_rank.calculate_token_combined_ranks(session)
+
                 logger.info("Calculating lemma combined ranks (lexeme + tier sources)...")
                 rank_result = combined_rank.calculate_lemma_combined_ranks(session)
                 result = {
                     "dry_run": False,
-                    "success": rank_result.get("success", False),
+                    "success": rank_result.get("success", False)
+                    and token_result.get("success", False),
                     "lemmas_updated": rank_result.get("lemmas_updated", 0),
                     "lemmas_scored": rank_result.get("lemmas_scored", 0),
                     "lemmas_skipped": rank_result.get("lemmas_skipped", 0),
                     "sources_used": rank_result.get("sources_used", []),
+                    "tokens_updated": token_result.get("tokens_updated", 0),
+                    "tokens_scored": token_result.get("tokens_scored", 0),
+                    "corpora_used": token_result.get("corpora_used", []),
                     "message": "Combined ranks calculated successfully",
                 }
                 logger.info("Combined ranks calculation completed!")

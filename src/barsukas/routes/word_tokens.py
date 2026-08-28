@@ -2,13 +2,20 @@
 
 """Routes for browsing word tokens: the surface string rather than the sense.
 
-Two views, both anchored on ``WordToken``:
+Several views, all anchored on ``WordToken``:
 
 * ``/word-tokens/`` and ``/word-tokens/<id>`` -- one surface string, the lemmas
   that use it, and its standing in every corpus. This is the string-level
   counterpart to the lemma page: "top" is one entry here and three there.
 * ``/word-tokens/corpus-skew`` -- per corpus, the words that lean toward it.
   The cooking vocabulary, the science vocabulary.
+* ``/word-tokens/steady`` -- the complement: words at the same frequency
+  everywhere.
+* ``/word-tokens/unlinked`` -- the frequent strings no lemma claims yet, which
+  is the work queue for what to add next.
+
+The nav lists only the index; the other three are reached from it, so that one
+"Word Tokens" entry covers the whole area.
 """
 
 from typing import Any, Dict, List, Optional
@@ -21,6 +28,7 @@ from storage.word_token_view import (
     get_word_token_view,
     get_word_token_view_by_text,
     search_word_tokens,
+    unlinked_word_tokens,
 )
 from wordfreq.frequency.corpus import get_corpus_config, get_enabled_corpus_names
 from wordfreq.frequency.corpus_skew import (
@@ -40,6 +48,7 @@ DEFAULT_LANGUAGE: str = "en"
 SKEW_PAGE_SIZE: int = 100
 EXCLUSIVE_PAGE_SIZE: int = 50
 STEADY_PAGE_SIZE: int = 200
+UNLINKED_PAGE_SIZE: int = 200
 
 
 def _corpus_options() -> List[Dict[str, Any]]:
@@ -210,4 +219,45 @@ def steady() -> ResponseReturnValue:
         min_corpora=min_corpora,
         max_rank=max_rank,
         steady_words=steady_words,
+    )
+
+
+@bp.route("/unlinked")
+def unlinked() -> ResponseReturnValue:
+    """The most frequent tokens that no lemma reaches, as a work queue.
+
+    Ordered by the combined frequency rank, so the first row is the most
+    common word in the language that this database has no sense for.
+    """
+    language_code = request.args.get("language", DEFAULT_LANGUAGE).strip() or DEFAULT_LANGUAGE
+
+    raw_max_rank = request.args.get("max_rank", "").strip()
+    max_rank: Optional[int] = None
+    if raw_max_rank:
+        try:
+            max_rank = int(raw_max_rank)
+        except ValueError:
+            max_rank = None
+        if max_rank is not None and max_rank < 1:
+            max_rank = None
+
+    # Default on: the unfiltered head of this list is "the", "of", "a", which
+    # is coverage information rather than a work queue.
+    include_function_words = request.args.get("include_function_words", "").strip() == "1"
+
+    tokens = unlinked_word_tokens(
+        g.db,
+        language_code=language_code,
+        limit=UNLINKED_PAGE_SIZE,
+        max_rank=max_rank,
+        exclude_function_words=not include_function_words,
+    )
+
+    return render_template(
+        "word_tokens/unlinked.html",
+        language_code=language_code,
+        max_rank=max_rank,
+        include_function_words=include_function_words,
+        tokens=tokens,
+        page_size=UNLINKED_PAGE_SIZE,
     )
