@@ -85,7 +85,7 @@ class NounSubtype(enum.Enum):
     # Named Entities
     PERSONAL_NAME = "personal_name"
     PLACE_NAME = "place_name"  # Generic place nouns (room, street, etc.)
-    COUNTRY = "country"  # Countries (Lithuania, France, Japan)
+    REGION = "region"  # Countries, states, and similar political regions
     CITY = "city"  # Cities (Vilnius, Paris, Tokyo)
     GEOGRAPHIC_PLACE = "geographic_place"  # Named geographic features (Atlantic Ocean, Pacific Ocean, Indian Ocean)
     ORGANIZATION_NAME = "organization_name"

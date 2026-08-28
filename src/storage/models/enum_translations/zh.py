@@ -56,7 +56,7 @@ SUBTYPE_DISPLAY = {
     # Named Entities
     "personal_name": "人名",
     "place_name": "地名",
-    "country": "国家",
+    "region": "地区",
     "city": "城市",
     "geographic_place": "地理地点",
     "organization_name": "组织名称",

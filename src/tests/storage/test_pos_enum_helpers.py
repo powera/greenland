@@ -13,6 +13,7 @@ from typing import Iterable, cast
 
 import pytest
 
+from storage.models.enums import NounSubtype
 from storage.models.guid_prefixes import SUBTYPE_GUID_PREFIXES
 from storage.utils.enums import (
     VALID_POS_TYPES,
@@ -23,6 +24,12 @@ from storage.utils.enums import (
 
 # POS types that carry a dedicated Subtype enum class.
 ENUM_BACKED_POS_TYPES = ["noun", "verb", "adjective", "adverb", "numeral"]
+
+
+def test_region_subtype_owns_the_existing_n45_guid_prefix() -> None:
+    assert NounSubtype.REGION.value == "region"
+    assert SUBTYPE_GUID_PREFIXES["noun"]["region"] == "N45"
+    assert "country" not in SUBTYPE_GUID_PREFIXES["noun"]
 
 
 @pytest.mark.parametrize("pos_type", ENUM_BACKED_POS_TYPES)

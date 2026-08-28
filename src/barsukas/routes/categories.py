@@ -78,7 +78,7 @@ SUBTYPE_DESCRIPTIONS: Dict[str, Dict[str, str]] = {
         # Named Entities
         "personal_name": "Personal names",
         "place_name": "Generic place nouns (room, street, etc.)",
-        "country": "Countries (Lithuania, France, Japan)",
+        "region": "Regions (Lithuania, California, Scotland)",
         "city": "Cities (Vilnius, Paris, Tokyo)",
         "organization_name": "Organization names",
         # Temporal Names
@@ -211,7 +211,7 @@ NOUN_GROUPS = {
     "Named Entities": [
         "personal_name",
         "place_name",
-        "country",
+        "region",
         "city",
         "organization_name",
     ],

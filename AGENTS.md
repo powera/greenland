@@ -247,6 +247,12 @@ constant or a derived value over a hardcoded literal that will go stale again.
 After cloning, enable pre-commit hooks to automatically check black formatting:
   git config core.hooksPath .githooks
 
+New one-off migrations live in the root-level `migrations/` directory and use a
+`YYYYMMDD_` filename prefix so their order is visible. Do not move the legacy
+migrations under `src/`. Each root migration must add `ROOT/src` to `sys.path`
+before importing project code, use `DataSourceConfig` for database selection,
+and be safe to rerun (or fail clearly when that is impossible).
+
 When writing HTML templates, try to avoid inline CSS/JS; use separate files.
 Also, always use ordinary form submits for POST data - do not do an AJAX-based
 submission.  Avoid using disappearing UX elements most of the time.

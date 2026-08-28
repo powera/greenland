@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 VOCABULARY_NAME_SUBTYPES: Tuple[str, ...] = (
     "temporal_name",
     "city",
-    "country",
+    "region",
     "geographic_place",
 )
 

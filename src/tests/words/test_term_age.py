@@ -99,9 +99,9 @@ class TestJapaneseSignal(unittest.TestCase):
         """Berlin is katakana because it transliterates a foreign name.
 
         Regression guard for the confound that motivated NAMED_ENTITY_SUBTYPES:
-        these carry pos_subtype 'city'/'country', never 'proper_noun'.
+        these carry pos_subtype 'city'/'region', never 'proper_noun'.
         """
-        for subtype in (NounSubtype.CITY.value, NounSubtype.COUNTRY.value):
+        for subtype in (NounSubtype.CITY.value, NounSubtype.REGION.value):
             with self.subTest(subtype=subtype):
                 script, modernity, reasons = japanese_signal("ベルリン", subtype)
                 self.assertEqual(script, JapaneseScriptType.KATAKANA)
