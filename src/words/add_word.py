@@ -117,6 +117,15 @@ _MAX_TIED_SENSES = 5
 # other than its POS subtype. Not part of the LLM schema.
 _REVIEW_REASON_KEY = "_review_reason"
 
+# Prefix marking a pending row that was queued under a *different* term than the
+# word that produced it ("stand-in", queued while adding "double"). The queried
+# word is the only record of where the sense came from -- PendingImport has no
+# column for it -- so it goes in the note behind a fixed prefix rather than only
+# in prose. Relating it to the approved lemma is not built yet; recovering the
+# source word is what that step will need, so parse it with
+# :func:`source_word_from_note` rather than re-deriving the format.
+DIVERGENT_TERM_NOTE = "queued from"
+
 # POS types with no "<pos>_other" catch-all subtype to fall back on. Only
 # numeral qualifies: its subtypes are "cardinal" and "ordinal" and nothing else,
 # so the prompt's blanket "return the part-of-speech as the subtype" yields an
@@ -466,16 +475,66 @@ def _needs_subtype_review(pos_type: str, pos_subtype: str) -> bool:
     return pos_type in MAJOR_POS_TYPES and pos_subtype.endswith("_other")
 
 
-def _review_reason(sense: Dict[str, Any], pos_type: str, pos_subtype: str) -> Optional[str]:
+def divergent_english_term(sense: Dict[str, Any], word: str) -> Optional[str]:
+    """The sense's English term when it is not the queried word, else None.
+
+    ``english_translation`` names the sense; the queried word is only the token
+    that led here. They differ when the token is a clipping ("gas" for
+    "gasoline"), when the sense's real headword is another word entirely
+    ("double" for a film "stand-in"), and also when the LLM simply glossed the
+    sense with a synonym ("double" -> "twice"). Those cases are not separable
+    here, so divergence routes to review rather than being applied: a wrong
+    rename would mint a lemma under the wrong word and drag its translations
+    along with it.
+    """
+    english = str(sense.get("english_translation") or "").strip()
+    if not english:
+        return None
+    return None if english.casefold() == word.strip().casefold() else english
+
+
+def source_word_from_note(notes: Optional[str]) -> Optional[str]:
+    """The word a divergent pending row was queued from, or None.
+
+    The inverse of the note :func:`_review_reason` writes. A row queued as
+    "stand-in" while adding "double" returns "double" -- the word whose relation
+    to the term a reviewer settles. Returns None for every other pending row,
+    including those queued for a subtype or tie reason.
+    """
+    if not notes:
+        return None
+    _, marker, rest = notes.partition(DIVERGENT_TERM_NOTE)
+    if not marker:
+        return None
+    source = rest.split(":", 1)[0].strip()
+    return source or None
+
+
+def _review_reason(
+    sense: Dict[str, Any], pos_type: str, pos_subtype: str, word: str
+) -> Optional[str]:
     """Why this sense should be queued rather than imported, or None to import.
 
-    Two independent triggers: a catch-all subtype on an open-class word (the LLM
-    could not place the sense), and an oversized prominence tie marked upstream
-    by :func:`_extend_for_prominence_ties` (the LLM could not rank the senses).
+    Three independent triggers: a catch-all subtype on an open-class word (the
+    LLM could not place the sense), an oversized prominence tie marked upstream
+    by :func:`_extend_for_prominence_ties` (the LLM could not rank the senses),
+    and an English term that is not the queried word (see
+    :func:`divergent_english_term`).
     """
     tie_reason = sense.get(_REVIEW_REASON_KEY)
     if isinstance(tie_reason, str) and tie_reason:
         return tie_reason
+    divergent = divergent_english_term(sense, word)
+    if divergent is not None:
+        # Three different relationships reach this note and the LLM cannot tell
+        # them apart: a wrong headword ("double" for a film "stand-in"), a
+        # clipping of the right one ("gas" for "gasoline"), and a sense two
+        # lemmas genuinely share ("done" and "cooked" of a steak, where both are
+        # real headwords). Ask rather than presume which.
+        return (
+            f"{DIVERGENT_TERM_NOTE} {word}: is {divergent!r} the headword for this sense, "
+            f"is {word!r} a variant of it, or are both separate lemmas?"
+        )
     if pos_type in _NO_CATCH_ALL_POS_TYPES and pos_subtype not in SUBTYPE_GUID_PREFIXES.get(
         pos_type, {}
     ):
@@ -795,7 +854,10 @@ def add_word(
     for sense in senses:
         pos_type = (sense.get("pos") or "").lower()
         pos_subtype = _normalize_subtype(pos_type, sense.get("pos_subtype"))
-        if pos_subtype is not None and _review_reason(sense, pos_type, pos_subtype) is not None:
+        if (
+            pos_subtype is not None
+            and _review_reason(sense, pos_type, pos_subtype, normalized) is not None
+        ):
             continue
         missing_languages = _missing_sense_translations(sense)
         if missing_languages:
@@ -837,7 +899,9 @@ def add_word(
             # would reject. Erroring there would fail the whole word over a
             # sense we were going to hand to a human anyway.
             review_reason = (
-                _review_reason(sense, pos_type, pos_subtype) if pos_subtype is not None else None
+                _review_reason(sense, pos_type, pos_subtype, normalized)
+                if pos_subtype is not None
+                else None
             )
 
             if review_reason is None:
@@ -863,9 +927,13 @@ def add_word(
             # failing to place the sense. Queue it for review rather than
             # minting a GUID that a human would have to undo.
             if review_reason is not None:
+                # Queue a divergent sense under the term that names it, so the
+                # entry reads "add stand-in" and dedups against an existing
+                # stand-in lemma. Queuing it under the queried word would file a
+                # second "double" behind the one already there.
                 staged = _stage_for_review(
                     session,
-                    normalized,
+                    divergent_english_term(sense, normalized) or normalized,
                     sense,
                     pos_type=pos_type,
                     pos_subtype=pos_subtype,

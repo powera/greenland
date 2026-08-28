@@ -184,6 +184,17 @@ def query_definitions(
                         # name as f"{language}_translation" (dramblys
                         # --target-language, client.get_translation_for_form)
                         # can only request one of these four.
+                        # The standard English term naming this sense, which is
+                        # not always the queried token: "gas" is a colloquial
+                        # clipping of both "gasoline" and "natural gas", and the
+                        # sense deserves the full term as its headword. Distinct
+                        # from "lemma", which is the queried token's uninflected
+                        # form ("done" -> "do") and drives grammatical-form
+                        # selection; conflating the two would make a clipping
+                        # look like an inflection.
+                        "english_translation": SchemaProperty(
+                            "string", "The standard English term for this sense"
+                        ),
                         "lithuanian_translation": SchemaProperty(
                             "string", "The Lithuanian translation of this form"
                         ),

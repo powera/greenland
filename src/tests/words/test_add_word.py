@@ -30,6 +30,8 @@ from words.add_word import (
     _REVIEW_REASON_KEY,
     _extend_for_prominence_ties,
     _review_reason,
+    divergent_english_term,
+    source_word_from_note,
     _inflected_candidates,
     _normalize_subtype,
     _sense_bounds,
@@ -199,8 +201,8 @@ def test_oversized_tie_is_marked_for_review() -> None:
     assert _REVIEW_REASON_KEY not in extended[0]
     for sense in extended[1:]:
         assert _REVIEW_REASON_KEY in sense
-    assert _review_reason(extended[0], "adjective", "quality") is None
-    assert _review_reason(extended[1], "adjective", "quality") is not None
+    assert _review_reason(extended[0], "adjective", "quality", "word") is None
+    assert _review_reason(extended[1], "adjective", "quality", "word") is not None
 
 
 def test_tie_at_the_limit_still_imports() -> None:
@@ -215,10 +217,52 @@ def test_tie_at_the_limit_still_imports() -> None:
 
 def test_review_reason_reports_the_subtype_trigger() -> None:
     # The pre-existing *_other trigger is unchanged and still fires on its own.
-    assert _review_reason({}, "noun", "noun_other") is not None
-    assert _review_reason({}, "noun", "human") is None
+    assert _review_reason({}, "noun", "noun_other", "word") is not None
+    assert _review_reason({}, "noun", "human", "word") is None
     # Closed-class *_other is ordinary, not a review trigger.
-    assert _review_reason({}, "preposition", "preposition_other") is None
+    assert _review_reason({}, "preposition", "preposition_other", "word") is None
+
+
+def test_divergent_english_term_detects_a_different_headword() -> None:
+    # The queried token is only how we got here; english_translation names the
+    # sense. "gas" for the motor-fuel sense is really "gasoline".
+    assert divergent_english_term({"english_translation": "gasoline"}, "gas") == "gasoline"
+    # Same word is not divergence, whatever its case or surrounding space.
+    assert divergent_english_term({"english_translation": "gas"}, "gas") is None
+    assert divergent_english_term({"english_translation": "Gas"}, "gas") is None
+    assert divergent_english_term({"english_translation": "  gas  "}, "gas") is None
+    # An absent or empty field is not a divergence claim: senses predating the
+    # schema field must keep importing normally rather than all going to review.
+    assert divergent_english_term({}, "gas") is None
+    assert divergent_english_term({"english_translation": ""}, "gas") is None
+
+
+def test_divergent_english_term_routes_to_review() -> None:
+    # A divergence is a signal to have a human look, not a licence to rename:
+    # the LLM returns real clippings ("gasoline") and bare synonyms ("twice"
+    # for "double") in the same field, and they are not separable here.
+    reason = _review_reason({"english_translation": "gasoline"}, "noun", "chemical_compound", "gas")
+    assert reason is not None
+    # The reason names both terms so the reviewer sees the proposed headword.
+    assert "gasoline" in reason and "gas" in reason
+    # PendingImport has no column for the word a row was queued from, so the
+    # note is the only record of it. Attaching "gas" as a variant of the
+    # approved "gasoline" is not built yet and will need to recover it.
+    assert source_word_from_note(f"add_word: {reason}") == "gas"
+    # A sense whose English term is the queried word imports as before.
+    assert (
+        _review_reason({"english_translation": "gas"}, "noun", "material_substance", "gas") is None
+    )
+
+
+def test_source_word_is_not_recovered_from_other_pending_rows() -> None:
+    # Only a divergent row carries a source word. A row queued for a subtype or
+    # a prominence tie was queued under the word itself, so there is no variant
+    # to consider and the parser must not invent one.
+    assert source_word_from_note("add_word: noun_other needs subtype review before import") is None
+    assert source_word_from_note("Found in top frequency words") is None
+    assert source_word_from_note(None) is None
+    assert source_word_from_note("") is None
 
 
 def test_numeral_without_a_valid_subtype_goes_to_review() -> None:
@@ -228,10 +272,10 @@ def test_numeral_without_a_valid_subtype_goes_to_review() -> None:
     # "invalid pos_subtype 'numeral' for 'numeral'" that halted the 'hundred'
     # import), and rather than being guessed as cardinal or ordinal.
     assert _normalize_subtype("numeral", "numeral") == "numeral"
-    assert _review_reason({}, "numeral", "numeral") is not None
+    assert _review_reason({}, "numeral", "numeral", "word") is not None
     # A subtype the LLM did get right imports normally.
-    assert _review_reason({}, "numeral", "cardinal") is None
-    assert _review_reason({}, "numeral", "ordinal") is None
+    assert _review_reason({}, "numeral", "cardinal", "word") is None
+    assert _review_reason({}, "numeral", "ordinal", "word") is None
 
 
 def test_closed_class_capped_to_one_sense() -> None:
