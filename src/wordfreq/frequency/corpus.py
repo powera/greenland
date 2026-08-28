@@ -125,6 +125,50 @@ CORPUS_CONFIGS = [
         enabled=True,
     ),
     CorpusConfig(
+        name="wiki_geography",
+        description="Word frequency data from Wikipedia Level 4 geography articles",
+        file_path="wiki_geography.json",
+        max_words=4500,
+        file_type="json",
+        value_type="auto",
+        # Narrower than wiki_vital and mostly about places, so it says less
+        # about how English is weighted than about which place names recur.
+        # It earns its weight on the descriptive vocabulary of terrain, climate
+        # and settlement, which the other corpora reach only in passing.
+        corpus_weight=0.5,
+        max_unknown_rank=9000,
+        enabled=True,
+    ),
+    CorpusConfig(
+        name="wiki_biology",
+        description="Word frequency data from Wikipedia organism and anatomy articles",
+        file_path="wiki_biology.json",
+        max_words=4500,
+        file_type="json",
+        value_type="auto",
+        # Narrow in the same way wiki_math is: the subject matter is largely
+        # the names of organisms, so it earns its weight on the anatomical and
+        # descriptive vocabulary rather than on how English is weighted.
+        corpus_weight=0.5,
+        max_unknown_rank=9000,
+        enabled=True,
+    ),
+    CorpusConfig(
+        name="wiki_modern_life",
+        description="Word frequency data from Wikipedia everyday-life and technology articles",
+        file_path="wiki_modern_life.json",
+        max_words=5000,
+        file_type="json",
+        value_type="auto",
+        # The one corpus here covering modern material life -- appliances,
+        # clothing, sport, computing, transport.  Weighted above the other
+        # topic corpora because that vocabulary is ordinary English the book
+        # corpora simply predate, not a technical register.
+        corpus_weight=0.8,
+        max_unknown_rank=10000,
+        enabled=True,
+    ),
+    CorpusConfig(
         name="early_modern_science",
         description="Word frequency data from early modern science writing, Boyle to Osler",
         file_path="early_modern_science.json",

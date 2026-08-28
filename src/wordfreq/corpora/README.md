@@ -9,7 +9,7 @@ output format are the same for all of them:
 | --- | --- | --- |
 | `build_gutenberg.py` | Project Gutenberg books | the five below |
 | `build_scotus.py` | Supreme Court opinions | `legal_scotus` |
-| `build_wikipedia.py` | A Wikipedia dump snapshot | `wiki_vital`, `wiki_math` |
+| `build_wikipedia.py` | A Wikipedia dump snapshot | `wiki_vital`, `wiki_math`, `wiki_geography`, `wiki_biology`, `wiki_modern_life` |
 
 Five corpora have book lists here:
 
@@ -109,7 +109,7 @@ the tokenizer treats brackets as boundaries those would otherwise count as
 
 ## The Wikipedia corpora
 
-`wiki_vital` and `wiki_math` are built from a Wikipedia dump snapshot rather
+The `wiki_*` corpora are built from a Wikipedia dump snapshot rather
 than per-document downloads, which is what makes this builder different from
 the other two: there is no `download_wikipedia.py`. You fetch one
 `pages-articles-multistream.xml.bz2` and its `-index.txt` companion by hand,
@@ -123,11 +123,17 @@ bunzip2 -k enwiki-20220501-pages-articles-multistream-index.txt.bz2
 # 1. Index the snapshot by page title (once per snapshot; slow).
 PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --build-index
 
-# 2. Build either corpus from it.
+# 2. Build any of the corpora from it.
 PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py \
     --corpus wiki_vital --phrases-from-db
 PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py \
     --corpus wiki_math --phrases-from-db
+PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py \
+    --corpus wiki_geography --phrases-from-db
+PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py \
+    --corpus wiki_biology --phrases-from-db
+PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py \
+    --corpus wiki_modern_life --phrases-from-db
 ```
 
 **If the snapshot is on an exFAT drive** — the usual case for 21GB on an
@@ -147,6 +153,9 @@ rsync -a data/working/wiki_offset/ "$WIKI_BASE/offset/"
 | --- | --- | --- |
 | `wiki_vital` | 1000 | Wikipedia's "Vital articles" selection, in eleven topic groups — a general sample of modern encyclopedic English |
 | `wiki_math` | 299 | Mathematics in depth, from arithmetic to category theory. A strict superset of the vital list's 53-title Mathematics section |
+| `wiki_geography` | 1204 | Wikipedia's Level 4 Geography list, from the continents down to their rivers, ranges and cities |
+| `wiki_biology` | 1004 | Level 4 organisms and anatomy — the ordinary names of plants and animals. Molecular biology, ecology and medicine are deliberately excluded |
+| `wiki_modern_life` | 1200 | Level 4 everyday life and technology, merged: appliances, clothing, sport, computing, transport |
 
 `wiki_math` is now built and registered in `CORPUS_CONFIGS`, at weight 0.5 —
 the lowest here. It is the smallest corpus (294 articles, ~1.1M tokens) and a
@@ -155,6 +164,28 @@ vocabulary the other seven barely touch rather than by describing how English
 is weighted. Registration waited on the file existing: an enabled corpus with
 no JSON file makes `combined_rank` charge every lemma that corpus's
 unknown-rank floor.
+
+`wiki_geography`, `wiki_biology` and `wiki_modern_life` are built, enabled in
+`CORPUS_CONFIGS`, and loaded into the database.
+
+Each list is checked against the snapshot rather than taken verbatim, because
+`wiki_dump` looks a page up by exact title: a redirect is a miss, and so is a
+page created after May 2022. Titles renamed since are stored under their 2022
+spelling with the current name in a comment; titles with no snapshot article,
+and disambiguation pages, are dropped. The per-list counts above are what
+survives that check.
+
+`wiki_modern_life` merges the Everyday life and Technology lists. Each is small
+alone, and both are after the same thing — the vocabulary of modern material
+life, which the book corpora predate and which encyclopedic prose about history
+and science never reaches. It is weighted 0.8 rather than the 0.5 the other
+topic corpora get, because that vocabulary is ordinary English rather than a
+technical register.
+
+The Arts list (`ARTS_ARTICLES`, 704 titles) is parsed and kept in
+`vital_articles.py` but has no corpus: its vocabulary overlaps `wiki_vital` and
+the book corpora more than the others do. Adding one is a matter of a
+`WikipediaCorpus` entry and a `CorpusConfig`.
 
 The dump is a *multistream* bz2: it concatenates independently compressed ~2MB
 blocks, so a block holding a given page can be seeked to and decompressed
@@ -240,12 +271,23 @@ so they read like occurrence counts; only their ratios are meaningful.
 
 ## After generating
 
-Every corpus here — the five book lists, `legal_scotus`, `wiki_vital` and
-`wiki_math` — is enabled in `wordfreq.frequency.corpus.CORPUS_CONFIGS`, and
-each one's JSON exists.
+Every corpus here — the five book lists, `legal_scotus` and the five `wiki_*`
+corpora — is enabled in `wordfreq.frequency.corpus.CORPUS_CONFIGS`, and each
+one's JSON exists.
 **Import them before relying on `combined_rank`**: an enabled corpus with no annotations makes
 `combined_rank` charge every lemma that corpus's unknown-rank floor, which
 drags every rank down.
+
+```bash
+PYTHONPATH=src python -m storage.admin --sync-config --yes
+PYTHONPATH=src python -m storage.admin --load <corpus> [<corpus> ...] --yes
+PYTHONPATH=src python -m storage.admin --link-forms --yes
+PYTHONPATH=src python -m storage.admin --calc-ranks --yes
+```
+
+`--link-forms` must run between the load and `--calc-ranks`: it attaches
+derivative forms to the word tokens the corpora just created, and ranks
+calculated before it silently fall back to tier estimates.
 
 The `cooking` corpus replaces the older hand-built `cooking_wordfreq.json`
 (the file is renamed to `cooking.json`, matching every other corpus). Five of

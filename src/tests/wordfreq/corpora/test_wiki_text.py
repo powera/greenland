@@ -99,3 +99,30 @@ def test_unclosed_opaque_tag_does_not_swallow_the_article() -> None:
     )
     assert "A whole paragraph of real prose." in text
     assert "Another one." in text
+
+
+def test_stray_closing_tag_does_not_open_a_new_block() -> None:
+    """The close left behind by the "\\n\\n" guard must not reopen the block.
+
+    A taxobox whose ``image`` argument holds an ``<imagemap>`` with a blank
+    line in it: the guard force-closes the imagemap at the blank line, so its
+    real ``</imagemap>`` arrives with nothing to close.  Matching it on the tag
+    name alone would open a second opaque block, which then eats the ``}}`` and
+    leaves the template open over the rest of the page -- which is what cost
+    "Animal", "Bird" and "Mammal" their entire text.
+    """
+    text = wikitext_to_plain_text(
+        "{{automatic taxobox\n"
+        "| image = <imagemap>\n"
+        "File:Animal diversity.png |300px\n"
+        "\n"
+        "rect 0 0 118 86 [[Echinoderm]]\n"
+        "</imagemap>\n"
+        "}}\n"
+        "\n"
+        "Animals are multicellular eukaryotic organisms.\n"
+    )
+    assert "Animals are multicellular eukaryotic organisms." in text
+    # The imagemap's own body is apparatus and stays out of the prose.
+    assert "Echinoderm" not in text
+    assert "300px" not in text
