@@ -37,7 +37,15 @@ Example sentences for each definition
 
 For translations:
 - For each language, provide a translation that specifically matches the given definition, not other meanings of the word
+- For English:
+  - Give the standard English term that names this sense, which is not always the word you were asked about
+  - When the given word is a clipping, abbreviation, or colloquial stand-in, give the full term: for "gas", the motor-fuel sense is "gasoline" and the heating/cooking-fuel sense is "natural gas"
+  - When the given word is already the standard term for the sense, repeat it unchanged
+  - This is not lemmatization, which the separate "lemma" field already covers: give the term that names the sense, not the given word's uninflected form
+  - Give nouns bare, with no article, in the singular
+  - Provide verbs in the infinitive without "to"
 - When multiple translations are possible, choose the most common or appropriate one
+- Prefer the everyday term a learner would meet over a technical, specialized, or category term for the same thing
 - For Chinese:
   - Prefer two-character terms for clarity and naturalness
   - Use single-character terms for common basic vocabulary (e.g., 酒 for wine, 牛 for cow, 茶 for tea, 水 for water)
@@ -85,9 +93,9 @@ In summary: for each definition, provide in order:
 7. Whether this is a special case (foreign word, part of name, etc.)
 8. At least one example sentence
 9. Any additional notes about the definition
-10. Translations in all supported languages (Lithuanian, Peninsular Spanish,
-    Latin American Spanish, French, Chinese). Every translation must be a
-    non-empty string.
+10. Translations in all supported languages (English, Lithuanian, Peninsular
+    Spanish, Latin American Spanish, French, Chinese). Every translation must be
+    a non-empty string.
 11. How prominent this sense is: very_common, common, uncommon, or rare.
     Rate each sense against the word's other senses, not on an absolute scale.
     Judged absolutely almost every dictionary sense of a frequent word looks
