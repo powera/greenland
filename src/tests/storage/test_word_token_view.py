@@ -25,6 +25,7 @@ from storage.word_token_view import (
     get_word_token_view,
     get_word_token_view_by_text,
     search_word_tokens,
+    unlinked_word_tokens,
 )
 
 
@@ -356,5 +357,43 @@ def test_display_text_includes_the_disambiguation() -> None:
         view = get_word_token_view(session, token.id)
         assert view is not None
         assert view.attachments[0].display_text == "top (spinning toy)"
+    finally:
+        session.close()
+
+
+def test_unlinked_tokens_are_ranked_and_exclude_both_attachment_kinds() -> None:
+    session = _make_session()
+    try:
+        linked = _add_token(session, "top", frequency_rank=5)
+        lemma = _add_lemma(session, "top", "N01_001")
+        _add_form(session, lemma, linked, "top")
+
+        variant_linked = _add_token(session, "grey", frequency_rank=8)
+        session.add(
+            VariantForm(
+                lemma_id=lemma.id,
+                language_code="en",
+                variant_kind=VARIANT_KIND_SPELLING,
+                variant_key="grey",
+                grammatical_form="adjective/en_positive",
+                variant_form_text="grey",
+                word_token_id=variant_linked.id,
+                is_base_form=True,
+            )
+        )
+
+        _add_token(session, "whilst", frequency_rank=40)
+        _add_token(session, "henceforth", frequency_rank=12)
+        _add_token(session, "unmeasured", frequency_rank=None)
+        _add_token(session, "tada", language_code="lt", frequency_rank=3)
+        session.flush()
+
+        rows = unlinked_word_tokens(session, "en")
+        assert [row.token for row in rows] == ["henceforth", "whilst"]
+
+        assert [row.token for row in unlinked_word_tokens(session, "en", max_rank=20)] == [
+            "henceforth"
+        ]
+        assert [row.token for row in unlinked_word_tokens(session, "en", limit=1)] == ["henceforth"]
     finally:
         session.close()

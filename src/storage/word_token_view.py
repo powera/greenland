@@ -401,6 +401,71 @@ def search_word_tokens(
     return rows[:limit]
 
 
+def unlinked_word_tokens(
+    session: Session,
+    language_code: str,
+    limit: int = 200,
+    max_rank: Optional[int] = None,
+    exclude_function_words: bool = True,
+) -> List[WordToken]:
+    """Return the most frequent tokens no lemma claims, best rank first.
+
+    A token is "linked" when some lemma reaches it through a
+    :class:`DerivativeForm` or a :class:`VariantForm` -- the same two
+    attachments :func:`_attachments_for_token` collects.  A token with neither
+    is vocabulary the corpora measured but the database has no sense for, which
+    is what makes this listing a work queue: the top of it is the next word
+    worth adding.
+
+    Tokens with no ``frequency_rank`` are excluded rather than sorted last: the
+    rank is a dense ordinal written by
+    ``wordfreq.frequency.combined_rank.calculate_token_combined_ranks``, so a
+    NULL means that pass has not been run, not that the token is rare. Ordering
+    those in among ranked rows would put unscored tokens at an arbitrary spot.
+
+    ``exclude_function_words`` applies the missing-word report's candidate
+    filter, and defaults on because without it the whole head of the list is
+    "the", "of", "a", "in" -- function words, contractions and bare initials
+    that rank high precisely because they are not vocabulary anyone needs to
+    add. Turn it off to audit coverage rather than to pick the next word.
+    Filtering happens in Python, so the query fetches a multiple of ``limit``
+    to leave room for what the filter drops.
+    """
+    linked_derivative = session.query(DerivativeForm.word_token_id).filter(
+        DerivativeForm.word_token_id.isnot(None)
+    )
+    linked_variant = session.query(VariantForm.word_token_id).filter(
+        VariantForm.word_token_id.isnot(None)
+    )
+
+    query = session.query(WordToken).filter(
+        WordToken.language_code == language_code,
+        WordToken.frequency_rank.isnot(None),
+        ~WordToken.id.in_(linked_derivative),
+        ~WordToken.id.in_(linked_variant),
+    )
+    if max_rank is not None:
+        query = query.filter(WordToken.frequency_rank <= max_rank)
+
+    query = query.order_by(WordToken.frequency_rank.asc(), WordToken.token.asc())
+
+    if not exclude_function_words:
+        return list(query.limit(limit).all())
+
+    # Imported here rather than at module scope: storage must not depend on
+    # reports at import time, and this is the only path that needs the filter.
+    from reports.missing_words import is_valid_frequency_candidate
+
+    kept: List[WordToken] = []
+    for row in query.limit(max(limit * 8, limit)).all():
+        if not is_valid_frequency_candidate(row.token):
+            continue
+        kept.append(row)
+        if len(kept) >= limit:
+            break
+    return kept
+
+
 __all__ = [
     "ATTACHMENT_DERIVATIVE",
     "ATTACHMENT_VARIANT",
@@ -412,4 +477,5 @@ __all__ = [
     "get_word_token_view",
     "get_word_token_view_by_text",
     "search_word_tokens",
+    "unlinked_word_tokens",
 ]

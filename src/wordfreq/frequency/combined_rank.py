@@ -1,5 +1,16 @@
 """Combined-rank scoring across wordfreq corpora and tier sources.
 
+Two passes live here, and they differ in what they write:
+
+  * :func:`calculate_lemma_combined_ranks` writes ``Lemma.frequency_rank`` from
+    corpus rollups *and* tier signals, as a weighted harmonic mean. The value is
+    the mean itself, unsorted, so two lemmas may share one.
+  * :func:`calculate_token_combined_ranks` writes ``WordToken.frequency_rank``
+    from corpus ranks only, then sorts and renumbers 1..N, so the value is a
+    true ordinal position. Tiers are excluded: a tier lists a spelling but
+    judges a sense, which is why the lemma pass scales it by sense_prominence;
+    a token has no sense to scale by.
+
 Replacement for the legacy ``wordfreq.frequency.analysis.calculate_combined_ranks``
 which read the now-deprecated ``WordFrequency`` table. This module rolls the
 new lexeme-level signal up to a single integer ``Lemma.frequency_rank`` per
@@ -34,6 +45,7 @@ still receive a rank from tier signals alone.
 from __future__ import annotations
 
 import logging
+import math
 from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
@@ -47,6 +59,7 @@ from storage.models.schema import (
     ExternalLexemeAnnotation,
     Lemma,
     LemmaTier,
+    WordToken,
 )
 from wordfreq.frequency.corpus import CorpusConfig, get_enabled_corpus_configs
 from wordfreq.frequency.zipf import (
@@ -692,3 +705,209 @@ __all__ = [
     "get_lemma_corpus_rank",
     "recalculate_lemma_rank",
 ]
+
+# Annotation sources that carry a wordfreq corpus rank. Tier sources
+# (cambridge_yle, cefr, basic_english) are deliberately excluded from the token
+# pass: a tier lists a *spelling*, and the judgment it encodes is about a sense,
+# which is why the lemma path scales it by sense_prominence. A token has no
+# sense to scale by, so a tier signal here would be uninterpretable. Tokens are
+# ranked on corpus evidence alone.
+WORDFREQ_SOURCE_PREFIX: str = "wordfreq_"
+
+
+def _token_corpus_ranks(
+    session: Session,
+    corpus_names: List[str],
+    language_code: str,
+) -> Dict[int, Dict[str, int]]:
+    """Per-token, per-corpus ordinal rank, read from the annotation rows.
+
+    Keyed ``{word_token_id: {corpus_name: rank}}``. Only the ``wordfreq_*``
+    sources are read, and only rows that actually carry an ``ordinal_rank`` --
+    a tier annotation has none, so it drops out here rather than needing a
+    second filter.
+    """
+    wanted_sources = {f"{WORDFREQ_SOURCE_PREFIX}{name}": name for name in corpus_names}
+    if not wanted_sources:
+        return {}
+
+    rows = (
+        session.query(
+            ExternalLexemeAnnotation.word_token_id,
+            ExternalLexemeAnnotation.source,
+            ExternalLexemeAnnotation.ordinal_rank,
+        )
+        .join(WordToken, WordToken.id == ExternalLexemeAnnotation.word_token_id)
+        .filter(
+            ExternalLexemeAnnotation.word_token_id.isnot(None),
+            ExternalLexemeAnnotation.ordinal_rank.isnot(None),
+            ExternalLexemeAnnotation.source.in_(list(wanted_sources.keys())),
+            WordToken.language_code == language_code,
+        )
+        .all()
+    )
+
+    ranks_by_token: Dict[int, Dict[str, int]] = {}
+    for word_token_id, source, ordinal_rank in rows:
+        corpus_name = wanted_sources.get(source)
+        if corpus_name is None:
+            continue
+        ranks_by_token.setdefault(word_token_id, {})[corpus_name] = int(ordinal_rank)
+    return ranks_by_token
+
+
+def _combined_score(
+    corpus_ranks: Dict[str, int],
+    corpus_weights: Dict[str, float],
+    unknown_rank_by_corpus: Dict[str, int],
+) -> float:
+    """Score one token: arithmetic mean of the weighted harmonic and geometric means.
+
+    Every enabled corpus contributes, whether or not it lists the token: an
+    absent token takes that corpus's unknown-rank floor. Without the floor a
+    word appearing only in a small corpus would outscore a word the large
+    corpora agree is common, because the corpora that never saw it would
+    silently drop out of the mean.
+
+    The two means are averaged because they fail in opposite directions. The
+    harmonic mean is dominated by the smallest rank, so one corpus calling a
+    word common outweighs five calling it rare; the geometric mean spreads the
+    influence evenly and lets an outlier be buried. Their average is what the
+    original pipeline used, and it keeps a domain word (high in cooking, absent
+    elsewhere) ranked between the two extremes rather than at one of them.
+    """
+    weighted_ranks: List[int] = []
+    weights: List[float] = []
+    for corpus_name, weight in corpus_weights.items():
+        rank = corpus_ranks.get(corpus_name)
+        if rank is None:
+            rank = unknown_rank_by_corpus.get(corpus_name, _DEFAULT_UNKNOWN_RANK)
+        if rank <= 0:
+            continue
+        weighted_ranks.append(rank)
+        weights.append(weight)
+
+    if not weighted_ranks:
+        return float(max(unknown_rank_by_corpus.values(), default=_DEFAULT_UNKNOWN_RANK))
+
+    total_weight = sum(weights)
+    harmonic = total_weight / sum(w / r for w, r in zip(weights, weighted_ranks))
+    geometric = math.exp(
+        sum(w * math.log(r) for w, r in zip(weights, weighted_ranks)) / total_weight
+    )
+    return (harmonic + geometric) / 2.0
+
+
+def calculate_token_combined_ranks(
+    session: Session,
+    *,
+    language_code: str = "en",
+    dry_run: bool = False,
+) -> Dict[str, Any]:
+    """Compute ``WordToken.frequency_rank`` from the wordfreq corpus ranks.
+
+    Unlike the lemma pass, this writes a *dense ordinal rank*: every token is
+    scored, the scores are sorted, and the tokens are renumbered 1..N. So
+    ``frequency_rank == 1`` is the single most common token in the language and
+    the value is directly comparable between two tokens -- which is what makes
+    it usable as an ordering for "the next word worth adding". The lemma pass
+    writes its harmonic mean unsorted, and two lemmas may share a value.
+
+    Tokens with no rank in any corpus are scored from the unknown-rank floors
+    alone. They still receive a rank, landing together at the bottom of the
+    ordering; the alternative -- leaving them NULL -- makes "unranked" mean
+    both "never measured" and "measured as rare", which readers cannot tell
+    apart.
+
+    The caller owns the session lifecycle; writes are committed in batches.
+
+    Args:
+        session: SQLAlchemy session bound to the target database.
+        language_code: Which language's tokens to rank.
+        dry_run: If True, compute the ranks but do not write them back.
+
+    Returns:
+        A summary dict: success flag, counts, and the corpora that contributed.
+    """
+    logger.info(f"Calculating token combined ranks for '{language_code}' (dry_run={dry_run})...")
+
+    corpus_weights = _corpus_weights(session)
+    if not corpus_weights:
+        logger.warning("No enabled corpora with positive weight; nothing to rank")
+        return {
+            "success": False,
+            "error": "no enabled corpora with positive weight",
+            "tokens_scored": 0,
+            "tokens_updated": 0,
+            "corpora_used": [],
+        }
+    logger.info(f"Active corpora ({len(corpus_weights)}): {sorted(corpus_weights.keys())}")
+
+    cfgs_by_name = _enabled_corpus_configs_by_name()
+    unknown_rank_by_corpus: Dict[str, int] = {}
+    for corpus_name in corpus_weights:
+        cfg = cfgs_by_name.get(corpus_name)
+        if cfg is None:
+            unknown_rank_by_corpus[corpus_name] = _DEFAULT_UNKNOWN_RANK
+        else:
+            unknown_rank_by_corpus[corpus_name] = _unknown_rank_for_corpus(
+                cfg, get_corpus_size(session, corpus_name)
+            )
+
+    ranks_by_token = _token_corpus_ranks(session, list(corpus_weights.keys()), language_code)
+
+    token_rows = (
+        session.query(WordToken.id, WordToken.token, WordToken.frequency_rank)
+        .filter(WordToken.language_code == language_code)
+        .all()
+    )
+    logger.info(f"Found {len(token_rows)} '{language_code}' tokens to score")
+
+    # Score every token, then sort: the rank written back is the position in
+    # this ordering, not the score itself.
+    scored: List[Tuple[float, str, int, Optional[int]]] = []
+    for token_id, token_text, current_rank in token_rows:
+        score = _combined_score(
+            ranks_by_token.get(token_id, {}),
+            corpus_weights,
+            unknown_rank_by_corpus,
+        )
+        # The token text breaks ties so a rerun over unchanged data produces
+        # the same ranks; without it, tokens sharing a score (every token
+        # absent from every corpus, for one) would be ordered arbitrarily.
+        scored.append((score, token_text, token_id, current_rank))
+    scored.sort(key=lambda row: (row[0], row[1]))
+
+    updates: Dict[int, int] = {}
+    for position, (_score, _text, token_id, current_rank) in enumerate(scored, start=1):
+        if current_rank != position:
+            updates[token_id] = position
+
+    if dry_run:
+        logger.info(f"Dry run: would update {len(updates)} of {len(scored)} token ranks")
+        return {
+            "dry_run": True,
+            "success": True,
+            "tokens_scored": len(scored),
+            "tokens_updated": len(updates),
+            "corpora_used": sorted(corpus_weights.keys()),
+        }
+
+    updated_count = 0
+    token_ids = list(updates.keys())
+    for start in range(0, len(token_ids), _BATCH_SIZE):
+        batch_ids = token_ids[start : start + _BATCH_SIZE]
+        for token in session.query(WordToken).filter(WordToken.id.in_(batch_ids)).all():
+            token.frequency_rank = updates[token.id]
+            updated_count += 1
+        session.commit()
+        logger.info(f"Updated {updated_count}/{len(updates)} token ranks")
+
+    logger.info(f"Token rank calculation completed: {updated_count} updated")
+    return {
+        "dry_run": False,
+        "success": True,
+        "tokens_scored": len(scored),
+        "tokens_updated": updated_count,
+        "corpora_used": sorted(corpus_weights.keys()),
+    }
