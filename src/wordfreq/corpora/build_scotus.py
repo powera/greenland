@@ -44,6 +44,8 @@ from wordfreq.corpora.download_scotus import default_cache_dir
 from wordfreq.corpora.frequency_build import (
     DEFAULT_FULL_WEIGHT_TOKENS,
     DEFAULT_MIN_NAME_COUNT,
+    DEFAULT_MIN_UPPERCASE_COUNT,
+    DEFAULT_MIN_UPPERCASE_SHARE,
     BookAnalysis,
     analyze_book,
     build_corpus_payload,
@@ -185,6 +187,24 @@ def main() -> int:
         f"(default: {DEFAULT_FULL_WEIGHT_OPINION_TOKENS})",
     )
     parser.add_argument(
+        "--min-uppercase-count",
+        type=int,
+        default=DEFAULT_MIN_UPPERCASE_COUNT,
+        help=(
+            "Minimum count to publish a capitalized spelling as its own entry "
+            f"(default: {DEFAULT_MIN_UPPERCASE_COUNT})"
+        ),
+    )
+    parser.add_argument(
+        "--min-uppercase-share",
+        type=float,
+        default=DEFAULT_MIN_UPPERCASE_SHARE,
+        help=(
+            "Minimum share of a word's uses that must be capitalized to publish "
+            f"it separately (default: {DEFAULT_MIN_UPPERCASE_SHARE})"
+        ),
+    )
+    parser.add_argument(
         "--phrases-from-db",
         action="store_true",
         help="Count known multi-word lemma forms as single tokens",
@@ -229,6 +249,8 @@ def main() -> int:
         max_words=args.max_words,
         min_name_count=args.min_name_count,
         full_weight_tokens=args.full_weight_tokens,
+        min_uppercase_count=args.min_uppercase_count,
+        min_uppercase_share=args.min_uppercase_share,
         generator="wordfreq.corpora.build_scotus",
     )
 

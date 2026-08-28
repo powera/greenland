@@ -35,7 +35,27 @@ def get_argument_parser() -> argparse.ArgumentParser:
         help="Load specified corpora, or all enabled corpora when no names are given",
     )
     mode_group.add_argument("--import-tiers", action="store_true")
+    mode_group.add_argument(
+        "--link-forms",
+        action="store_true",
+        help="Link derivative/variant forms to their word tokens. Runs inside "
+        "--repopulate; needed on its own only between a bare --load and --calc-ranks, "
+        "since the rank rollup skips any form with no word_token_id",
+    )
     mode_group.add_argument("--calc-ranks", action="store_true")
+    mode_group.add_argument(
+        "--clear-wordfreq",
+        action="store_true",
+        help="Delete every corpus-derived row (word tokens, wordfreq annotations, "
+        "form links). Lemmas, forms and tier data are kept",
+    )
+    mode_group.add_argument(
+        "--repopulate",
+        action="store_true",
+        help="Clear all wordfreq data and rebuild it end to end: sync config, load "
+        "corpora, link forms, import tiers, calculate ranks. The single entry point "
+        "for a full refresh from the corpus files",
+    )
     return parser
 
 
@@ -65,8 +85,14 @@ def main() -> None:
         result = service.load_corpora(corpus_names=corpus_names, dry_run=args.dry_run)
     elif args.import_tiers:
         result = service.import_tiers(dry_run=args.dry_run)
+    elif args.link_forms:
+        result = service.link_forms_to_word_tokens(dry_run=args.dry_run)
     elif args.calc_ranks:
         result = service.calculate_ranks(dry_run=args.dry_run)
+    elif args.clear_wordfreq:
+        result = service.clear_wordfreq_data(dry_run=args.dry_run)
+    elif args.repopulate:
+        result = service.initialize_database(dry_run=args.dry_run, clear=True)
     else:
         service.run_check(output_file=args.output)
         return

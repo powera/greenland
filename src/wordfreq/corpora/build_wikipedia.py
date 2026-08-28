@@ -53,6 +53,8 @@ import constants
 from agents.common.common_args import add_backend_args, get_data_source_config
 from wordfreq.corpora.frequency_build import (
     DEFAULT_MIN_NAME_COUNT,
+    DEFAULT_MIN_UPPERCASE_COUNT,
+    DEFAULT_MIN_UPPERCASE_SHARE,
     BookAnalysis,
     analyze_book,
     book_report_rows,
@@ -207,6 +209,14 @@ def main() -> int:
         help=f"Dump file prefix (default: {constants.WIKI_CORPUS_PREFIX})",
     )
     parser.add_argument(
+        "--offset-dir",
+        type=Path,
+        default=None,
+        help="Where the sharded SQLite index lives (default: <corpus-base>/offset). "
+        "Build to local disk when the snapshot is on an exFAT drive, which cannot "
+        "host SQLite writes, then copy the finished index back; reads work there.",
+    )
+    parser.add_argument(
         "--build-index",
         action="store_true",
         help="Build the title offset index from the snapshot, then exit. "
@@ -255,6 +265,24 @@ def main() -> int:
         f"(default: {DEFAULT_FULL_WEIGHT_ARTICLE_TOKENS})",
     )
     parser.add_argument(
+        "--min-uppercase-count",
+        type=int,
+        default=DEFAULT_MIN_UPPERCASE_COUNT,
+        help=(
+            "Minimum count to publish a capitalized spelling as its own entry "
+            f"(default: {DEFAULT_MIN_UPPERCASE_COUNT})"
+        ),
+    )
+    parser.add_argument(
+        "--min-uppercase-share",
+        type=float,
+        default=DEFAULT_MIN_UPPERCASE_SHARE,
+        help=(
+            "Minimum share of a word's uses that must be capitalized to publish "
+            f"it separately (default: {DEFAULT_MIN_UPPERCASE_SHARE})"
+        ),
+    )
+    parser.add_argument(
         "--phrases-from-db",
         action="store_true",
         help="Count known multi-word lemma forms as single tokens",
@@ -282,11 +310,12 @@ def main() -> int:
     min_articles = args.min_articles if args.min_articles is not None else corpus.min_articles
     max_words = args.max_words if args.max_words is not None else corpus.max_words
 
-    loader = WikiLoader()
+    offset_dir = str(args.offset_dir) if args.offset_dir is not None else None
+    loader = WikiLoader(offset_dir=offset_dir)
     if args.corpus_base is not None:
-        loader.set_corpus_base(str(args.corpus_base), args.corpus_prefix)
+        loader.set_corpus_base(str(args.corpus_base), args.corpus_prefix, offset_dir)
     elif args.corpus_prefix is not None:
-        loader.set_corpus_base(loader.corpus_base, args.corpus_prefix)
+        loader.set_corpus_base(loader.corpus_base, args.corpus_prefix, offset_dir)
 
     if args.build_index:
         logger.info("Building the title index for %s", loader.dump_file)
@@ -332,6 +361,8 @@ def main() -> int:
         max_words=max_words,
         min_name_count=args.min_name_count,
         full_weight_tokens=args.full_weight_tokens,
+        min_uppercase_count=args.min_uppercase_count,
+        min_uppercase_share=args.min_uppercase_share,
         generator="wordfreq.corpora.build_wikipedia",
     )
 

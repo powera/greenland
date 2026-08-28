@@ -1,5 +1,7 @@
 """Tests for Gutenberg plain-text extraction and tokenization."""
 
+import pytest
+
 from wordfreq.corpora.gutenberg_text import (
     analyze_text,
     extract_title,
@@ -143,6 +145,42 @@ def test_analyze_text_counts_capitalization_only_mid_sentence() -> None:
 def test_capitalization_ratio_is_none_without_evidence() -> None:
     stats = analyze_text("Hymns.\nHymns.\nHymns.")
     assert stats.capitalization_ratio("hymns") is None
+
+
+def test_case_split_apportions_sentence_starts_by_the_decided_ratio() -> None:
+    """The three case counters partition counts, and uncertain follows evidence."""
+    text = "Rose walked. He gave Rose a rose. The rose was for Rose."
+    stats = analyze_text(text)
+
+    # Every occurrence lands in exactly one bucket -- the invariant the whole
+    # split rests on.
+    for word in stats.counts:
+        buckets = stats.lower_counts[word] + stats.upper_counts[word]
+        assert buckets + stats.uncertain_counts[word] == stats.counts[word]
+
+    # Mid-sentence: "Rose a" and "for Rose" capitalized, "a rose" and "rose was"
+    # not.  One sentence-initial "Rose" carries no evidence of its own.
+    assert stats.upper_counts["rose"] == 2
+    assert stats.lower_counts["rose"] == 2
+    assert stats.uncertain_counts["rose"] == 1
+
+    upper, lower = stats.case_split("rose")
+    # A 50/50 ratio splits the single uncertain occurrence down the middle.
+    assert upper == pytest.approx(2.5)
+    assert lower == pytest.approx(2.5)
+    assert upper + lower == stats.counts["rose"]
+
+
+def test_case_split_without_mid_sentence_evidence_stays_lowercase() -> None:
+    """A word seen only at sentence starts is not evidence of a capital.
+
+    This matches what the proper-noun filter does with the same absence:
+    ``capitalization_ratio`` is None and the word stays ordinary vocabulary.
+    """
+    stats = analyze_text("Hymns.\nHymns.\nHymns.")
+    upper, lower = stats.case_split("hymns")
+    assert upper == 0.0
+    assert lower == stats.counts["hymns"] == 3
 
 
 def test_slug_matches_existing_corpus_key_format() -> None:

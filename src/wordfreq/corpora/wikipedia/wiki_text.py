@@ -81,6 +81,8 @@ class ParseBlock:
             self.sub_blocks.append(block)
         elif block.startswith("<ref"):
             self.sub_blocks.append(ReferenceBlock(block))
+        elif block.startswith("<math") or block.startswith("<chem"):
+            self.sub_blocks.append(MathBlock(block))
         elif block.startswith("<!--"):
             self.sub_blocks.append(CommentBlock())
         elif block == "{|":
@@ -278,6 +280,43 @@ class ReferenceBlock(ParseBlock):
 
     def add_block(self, block: Node) -> None:
         if block == "</ref>":
+            self.is_open = False
+            return
+        if self.sub_blocks:
+            last = self.sub_blocks[-1]
+            if isinstance(last, ParseBlock) and last.is_open:
+                last.add_block(block)
+                return
+        super().add_block(block)
+
+    def to_text(self) -> str:
+        return ""
+
+
+class MathBlock(ParseBlock):
+    """A ``<math>`` formula, contributing no text.
+
+    The body is LaTeX, not prose.  Left in, its control sequences are counted
+    as English words: ``frac`` was the wiki_math corpus's 4068-count entry,
+    with ``mathbf``, ``cdot``, ``sqrt``, ``infty`` and the spelled-out Greek
+    letters close behind.  Those are notation, and a learner meets none of them
+    as vocabulary.
+
+    ``sin``/``cos``/``tan`` come from here too.  They are real abbreviations
+    rather than markup, but a corpus counting them is measuring formulas, not
+    the English around them.
+
+    Also covers ``<chem>``, whose body is chemical markup with the same
+    problem.
+    """
+
+    def __init__(self, block: str) -> None:
+        super().__init__()
+        # A self-closing "<math />" has no body to consume.
+        self.is_open = not block.endswith("/>")
+
+    def add_block(self, block: Node) -> None:
+        if isinstance(block, str) and block in ("</math>", "</chem>"):
             self.is_open = False
             return
         if self.sub_blocks:

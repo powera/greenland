@@ -34,6 +34,8 @@ from wordfreq.corpora.frequency_build import (
     DEFAULT_FULL_WEIGHT_TOKENS,
     DEFAULT_MIN_BOOKS,
     DEFAULT_MIN_NAME_COUNT,
+    DEFAULT_MIN_UPPERCASE_COUNT,
+    DEFAULT_MIN_UPPERCASE_SHARE,
     BookAnalysis,
     analyze_book,
     book_report_rows,
@@ -175,6 +177,24 @@ def main() -> int:
         help=f"Length at which a book gets full weight (default: {DEFAULT_FULL_WEIGHT_TOKENS})",
     )
     parser.add_argument(
+        "--min-uppercase-count",
+        type=int,
+        default=DEFAULT_MIN_UPPERCASE_COUNT,
+        help=(
+            "Minimum count to publish a capitalized spelling as its own entry "
+            f"(default: {DEFAULT_MIN_UPPERCASE_COUNT})"
+        ),
+    )
+    parser.add_argument(
+        "--min-uppercase-share",
+        type=float,
+        default=DEFAULT_MIN_UPPERCASE_SHARE,
+        help=(
+            "Minimum share of a word's uses that must be capitalized to publish "
+            f"it separately (default: {DEFAULT_MIN_UPPERCASE_SHARE})"
+        ),
+    )
+    parser.add_argument(
         "--skip-missing", action="store_true", help="Ignore books that are not downloaded"
     )
     parser.add_argument(
@@ -248,6 +268,8 @@ def main() -> int:
         max_words=max_words,
         min_name_count=args.min_name_count,
         full_weight_tokens=args.full_weight_tokens,
+        min_uppercase_count=args.min_uppercase_count,
+        min_uppercase_share=args.min_uppercase_share,
     )
 
     output_path = args.output or Path(constants.WORDFREQ_DATA_DIR) / f"{args.corpus}.json"

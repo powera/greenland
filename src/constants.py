@@ -41,7 +41,7 @@ IPA_DICT_PATH = os.path.join(WORDFREQ_DATA_DIR, "en_US_ipadict.txt")
 
 # Wiki corpus directories
 # WIKI_CORPUS_BASE_PATH = os.path.join(PROJECT_ROOT, "data", "wikicorpus")
-WIKI_CORPUS_BASE_PATH = "/Volumes/kelvin/wikipedia/2022_MAY"
+WIKI_CORPUS_BASE_PATH = "/Volumes/Dorothy Day/wikipedia/2022_MAY"
 WIKI_CORPUS_PREFIX = "enwiki-20220501"
 # Note: wiki_index.schema is currently in benchmarks/schema but should probably move
 WIKI_INDEX_SCHEMA_PATH = os.path.join(SRC_DIR, "benchmarks", "schema", "wiki_index.schema")

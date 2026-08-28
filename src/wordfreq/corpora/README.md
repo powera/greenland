@@ -116,6 +116,10 @@ the other two: there is no `download_wikipedia.py`. You fetch one
 point `constants.WIKI_CORPUS_BASE_PATH` at the directory, and index it once.
 
 ```bash
+# 0. The index file must be decompressed first; the dump itself stays bz2,
+#    because the builder seeks into its multistream blocks.
+bunzip2 -k enwiki-20220501-pages-articles-multistream-index.txt.bz2
+
 # 1. Index the snapshot by page title (once per snapshot; slow).
 PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --build-index
 
@@ -126,14 +130,31 @@ PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py \
     --corpus wiki_math --phrases-from-db
 ```
 
+**If the snapshot is on an exFAT drive** — the usual case for 21GB on an
+external disk — step 1 fails part-way with `attempt to write a readonly
+database`. exFAT lacks the byte-range locking SQLite needs to *write*, though
+ordinary file writes to the same directory succeed. Build the index somewhere
+local and copy it back afterwards; reading an exFAT-hosted index works fine, so
+the finished index can live beside the dump:
+
+```bash
+PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py \
+    --build-index --offset-dir data/working/wiki_offset
+rsync -a data/working/wiki_offset/ "$WIKI_BASE/offset/"
+```
+
 | Corpus | Articles | Contents |
 | --- | --- | --- |
 | `wiki_vital` | 1000 | Wikipedia's "Vital articles" selection, in eleven topic groups — a general sample of modern encyclopedic English |
 | `wiki_math` | 299 | Mathematics in depth, from arithmetic to category theory. A strict superset of the vital list's 53-title Mathematics section |
 
-`wiki_math` has **no `CORPUS_CONFIGS` entry yet** — deliberately. An enabled
-corpus with no JSON file makes `combined_rank` charge every lemma that corpus's
-unknown-rank floor, so it is registered only once the file has been built.
+`wiki_math` is now built and registered in `CORPUS_CONFIGS`, at weight 0.5 —
+the lowest here. It is the smallest corpus (294 articles, ~1.1M tokens) and a
+single narrow register, so it earns its place by covering mathematical
+vocabulary the other seven barely touch rather than by describing how English
+is weighted. Registration waited on the file existing: an enabled corpus with
+no JSON file makes `combined_rank` charge every lemma that corpus's
+unknown-rank floor.
 
 The dump is a *multistream* bz2: it concatenates independently compressed ~2MB
 blocks, so a block holding a given page can be seeked to and decompressed
@@ -219,10 +240,9 @@ so they read like occurrence counts; only their ratios are meaningful.
 
 ## After generating
 
-Every corpus here — the five book lists, `legal_scotus` and `wiki_vital` — is
-enabled in `wordfreq.frequency.corpus.CORPUS_CONFIGS`, and each one's JSON
-exists. `wiki_math` is the exception: it is buildable but not yet registered,
-and gets its `CORPUS_CONFIGS` entry once its file has been built.
+Every corpus here — the five book lists, `legal_scotus`, `wiki_vital` and
+`wiki_math` — is enabled in `wordfreq.frequency.corpus.CORPUS_CONFIGS`, and
+each one's JSON exists.
 **Import them before relying on `combined_rank`**: an enabled corpus with no annotations makes
 `combined_rank` charge every lemma that corpus's unknown-rank floor, which
 drags every rank down.

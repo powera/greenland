@@ -33,7 +33,10 @@ def _parse_frequency_file(
     file_type: str,
     value_type: str,
 ) -> Dict[str, Dict[str, Optional[Union[int, float]]]]:
-    """Parse a corpus frequency file into ``{lowercase_word: {"rank", "frequency"}}``.
+    """Parse a corpus frequency file into ``{word: {"rank", "frequency"}}``.
+
+    Keys keep the corpus file's own spelling, case included, so "March" and
+    "march" stay distinct entries and get a ``WordToken`` each.
 
     Pure parsing/normalization — no database access.
     """
@@ -80,8 +83,11 @@ def _parse_frequency_file(
     merged_count = 0
 
     for word_text, entry in raw_words_data.items():
-        word_text_lower = word_text.lower()
-        if CONTAINS_NUMERAL_PATTERN.search(word_text_lower):
+        # Case is preserved: a corpus counts "March" the month apart from
+        # "march" the verb, and each needs its own WordToken for a lemma
+        # spelled that way to link to. Folding them here would put the verb's
+        # frequency on the month.
+        if CONTAINS_NUMERAL_PATTERN.search(word_text):
             skipped_numeral_count += 1
             continue
 
@@ -97,9 +103,9 @@ def _parse_frequency_file(
             else:
                 frequency = float(entry)
 
-        if word_text_lower in words_data:
+        if word_text in words_data:
             merged_count += 1
-            existing = words_data[word_text_lower]
+            existing = words_data[word_text]
             if resolved_value_type == "rank" and rank is not None:
                 existing_rank = existing.get("rank")
                 if existing_rank is None or rank < existing_rank:  # type: ignore[operator]
@@ -109,7 +115,7 @@ def _parse_frequency_file(
                 if existing_freq is None or frequency > existing_freq:  # type: ignore[operator]
                     existing["frequency"] = frequency
         else:
-            words_data[word_text_lower] = {"rank": rank, "frequency": frequency}
+            words_data[word_text] = {"rank": rank, "frequency": frequency}
 
     logger.info(
         f"Parsed {len(words_data)} unique words from {file_path} "

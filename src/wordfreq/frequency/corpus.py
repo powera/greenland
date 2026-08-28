@@ -109,6 +109,22 @@ CORPUS_CONFIGS = [
         enabled=True,
     ),
     CorpusConfig(
+        name="wiki_math",
+        description="Word frequency data from Wikipedia mathematics articles",
+        file_path="wiki_math.json",
+        max_words=4000,
+        file_type="json",
+        value_type="auto",
+        # A single narrow register, and the smallest corpus here at 294
+        # articles and ~1.1M tokens. It earns its place by covering the
+        # mathematical vocabulary the other seven barely touch, not by
+        # describing how English is weighted, so it is weighted below
+        # early_modern_science -- which is also technical, but broader.
+        corpus_weight=0.5,
+        max_unknown_rank=8000,
+        enabled=True,
+    ),
+    CorpusConfig(
         name="early_modern_science",
         description="Word frequency data from early modern science writing, Boyle to Osler",
         file_path="early_modern_science.json",
