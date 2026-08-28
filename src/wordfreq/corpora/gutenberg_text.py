@@ -21,7 +21,7 @@ import re
 import unicodedata
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, Iterator, List, Optional, Tuple
+from typing import Dict, Iterable, Iterator, List, Optional, Set, Tuple
 
 # --- Header / footer markers -------------------------------------------------
 
@@ -92,6 +92,48 @@ CONTAINS_DIGIT_RE = re.compile(r"[0-9]")
 # Single letters that are real English words; every other one-letter token is
 # scanning noise or a list marker.
 VALID_SINGLE_LETTERS = frozenset({"a", "i", "o"})
+
+
+def _roman_numerals(limit: int) -> Set[str]:
+    """The lowercased roman numerals for ``2..limit``."""
+    symbols = (
+        (100, "c"),
+        (90, "xc"),
+        (50, "l"),
+        (40, "xl"),
+        (10, "x"),
+        (9, "ix"),
+        (5, "v"),
+        (4, "iv"),
+        (1, "i"),
+    )
+    numerals: Set[str] = set()
+    for number in range(2, limit + 1):
+        remainder = number
+        numeral = ""
+        for value, sign in symbols:
+            while remainder >= value:
+                numeral += sign
+                remainder -= value
+        numerals.add(numeral)
+    return numerals
+
+
+# Chapter, verse and volume markers, which are numbers written in letters
+# rather than words: "CHAPTER XXIII" is a heading label the way a digit is, and
+# the digit form is already dropped by CONTAINS_DIGIT_RE.  Left in, they were
+# ~60 distinct entries in the religious corpus (chapter-and-verse citations)
+# and a full "xi".."xxviii" series in both book corpora, each also published in
+# its capitalized spelling because a heading starts a line.
+#
+# The range stops at 120 and starts at 2 deliberately.  "i" is the pronoun, and
+# beyond 120 the numerals get long enough to be unambiguous but rare enough not
+# to matter, while a wider range would start claiming real words.  Within
+# 2..120 none of the numerals is an English word -- "mix", "mild", "did" and
+# "civil" look like numerals but are not valid ones, and "li" (51) and "cv"
+# (105) are numeral noise in these corpora rather than vocabulary.
+MAX_ROMAN_NUMERAL = 120
+ROMAN_NUMERALS = frozenset(_roman_numerals(MAX_ROMAN_NUMERAL))
 
 # Characters skipped when looking backwards for a sentence boundary.
 _OPENING_PUNCTUATION = "\"'‘’“”([{*_"
@@ -265,8 +307,8 @@ def iter_tokens(
 ) -> Iterator[Tuple[str, bool, bool]]:
     """Yield ``(lowercase_token, is_capitalized, is_sentence_initial)`` triples.
 
-    Tokens containing digits, and single letters other than ``a``/``i``/``o``,
-    are skipped entirely.
+    Tokens containing digits, single letters other than ``a``/``i``/``o``, and
+    the roman numerals in :data:`ROMAN_NUMERALS` are skipped entirely.
 
     The text is normalized first, so apostrophe and dash variants are folded
     whether or not the caller came through
@@ -295,6 +337,8 @@ def iter_tokens(
             continue
         lowered = raw.lower()
         if len(lowered) == 1 and lowered not in VALID_SINGLE_LETTERS:
+            continue
+        if lowered in ROMAN_NUMERALS:
             continue
         if lowered.startswith("'") or lowered.endswith("'"):
             lowered = lowered.strip("'")

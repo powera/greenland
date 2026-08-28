@@ -33,6 +33,12 @@ What each construct contributes to the text:
   counting it would weight "References", "See also" and "History" once per
   article across the whole corpus.
 * **Bold and italic markers** are dropped, keeping the words they wrap.
+* **HTML tags** are dropped.  A prose tag (``<small>``, ``<sub>``, ``<span>``)
+  keeps the text it wraps, as an emphasis marker does; an opaque one
+  (``<gallery>``, ``<syntaxhighlight>``) drops its body too, as ``<math>``
+  does; ``<nowiki>`` keeps its body as literal text.  The tag name itself
+  never reaches the text: left in, ``sub`` and ``sup`` were counted as English
+  words 3494 and 1980 times in the wiki_math corpus.
 * **HTML comments** yield nothing.
 
 The tokenizer and block model are adapted from the wikitext parser in the slmt
@@ -48,6 +54,100 @@ RAW_TEMPLATES = frozenset(["as of", "circa", "lang", "nihongo", "sc"])
 
 # Link namespaces that are media rather than prose.
 _MEDIA_PREFIXES = ("File:", "Image:", "Media:")
+
+# HTML tags whose body is prose: the tag itself is dropped and the text it
+# wraps is kept, the way an emphasis marker is.  Without this the tokenizer
+# emits the tag verbatim as text and the word tokenizer reads its name as an
+# English word -- "sub" was wiki_math's 3494-count entry, "sup" its 1980, and
+# "small" (a real word) had 4034 counts in wiki_vital against ~2000 in a book
+# corpus of comparable size.
+_PROSE_TAGS = frozenset(
+    [
+        "abbr",
+        "b",
+        "big",
+        "blockquote",
+        "bdi",
+        "center",
+        "cite",
+        "code",
+        "data",
+        "del",
+        "dfn",
+        "div",
+        "em",
+        "font",
+        "i",
+        "ins",
+        "kbd",
+        "li",
+        "mark",
+        "ol",
+        "p",
+        "poem",
+        "q",
+        "rb",
+        "rp",
+        "rt",
+        "ruby",
+        "s",
+        "samp",
+        "small",
+        "span",
+        "strong",
+        "sub",
+        "sup",
+        "td",
+        "th",
+        "time",
+        "tr",
+        "tt",
+        "u",
+        "ul",
+        "var",
+    ]
+)
+
+# HTML tags whose body is not prose at all: markup, data or a generated
+# listing, dropped whole the way <math> is.
+_OPAQUE_TAGS = frozenset(
+    [
+        "categorytree",
+        "gallery",
+        "graph",
+        "hiero",
+        "imagemap",
+        "indicator",
+        "mapframe",
+        "maplink",
+        "pre",
+        "score",
+        "source",
+        "syntaxhighlight",
+        "templatedata",
+        "timeline",
+    ]
+)
+
+# Void tags, which have no body to close: "<br>" is written both bare and
+# self-closing, and neither form should reach the text.
+_VOID_TAGS = frozenset(["br", "hr", "wbr"])
+
+
+def _tag_name(block: str) -> str:
+    """The element name of an HTML tag token, lowercased.
+
+    ``"<ref name=x />"`` gives ``"ref"``, ``"</small>"`` gives ``"small"``,
+    and a token that is not a tag gives ``""``.
+    """
+    if not block.startswith("<") or block.startswith("<!"):
+        return ""
+    name = block[1:].lstrip("/")
+    end = 0
+    while end < len(name) and (name[end].isalnum() or name[end] == "-"):
+        end += 1
+    return name[:end].lower()
+
 
 # A token is either a structural marker (a bare string) or a parsed block.
 Token = str
@@ -79,12 +179,28 @@ class ParseBlock:
             self.sub_blocks.append(TextBlock(" "))
         elif isinstance(block, ParseBlock):
             self.sub_blocks.append(block)
-        elif block.startswith("<ref"):
-            self.sub_blocks.append(ReferenceBlock(block))
-        elif block.startswith("<math") or block.startswith("<chem"):
-            self.sub_blocks.append(MathBlock(block))
         elif block.startswith("<!--"):
             self.sub_blocks.append(CommentBlock())
+        elif _tag_name(block) == "ref":
+            self.sub_blocks.append(ReferenceBlock(block))
+        elif _tag_name(block) in ("math", "chem"):
+            self.sub_blocks.append(MathBlock(block))
+        elif _tag_name(block) == "nowiki":
+            self.sub_blocks.append(NowikiBlock(block))
+        elif _tag_name(block) in _OPAQUE_TAGS:
+            self.sub_blocks.append(OpaqueTagBlock(block))
+        elif _tag_name(block) in _VOID_TAGS:
+            # A line break separates the words either side of it, so it must
+            # not join them into one token: "one<br>two" is two words.
+            self.sub_blocks.append(TextBlock(" "))
+        elif _tag_name(block) in _PROSE_TAGS:
+            # The tag is apparatus; the text it wraps (if any) is prose and is
+            # collected by this block's other children, as an emphasis marker's
+            # text is.
+            pass
+        elif block.startswith("<"):
+            # An unrecognized tag is still markup, not a word.
+            pass
         elif block == "{|":
             self.sub_blocks.append(TableBlock())
             self.sub_blocks[-1].is_open = True  # type: ignore[union-attr]
@@ -328,6 +444,66 @@ class MathBlock(ParseBlock):
 
     def to_text(self) -> str:
         return ""
+
+
+class OpaqueTagBlock(ParseBlock):
+    """An HTML tag in :data:`_OPAQUE_TAGS`, contributing no text.
+
+    Its body is markup or generated apparatus rather than prose -- a
+    ``<gallery>`` is a list of filenames, a ``<syntaxhighlight>`` is source
+    code -- so it is dropped whole, as :class:`MathBlock` drops a formula.
+    """
+
+    def __init__(self, block: str) -> None:
+        super().__init__()
+        self.name = _tag_name(block)
+        # A self-closing "<gallery />" has no body to consume.
+        self.is_open = not block.endswith("/>")
+
+    def add_block(self, block: Node) -> None:
+        if isinstance(block, str) and _tag_name(block) == self.name and block.startswith("</"):
+            self.is_open = False
+            return
+        if block == "\n\n":
+            # Malformed: an unclosed tag must not swallow the rest of the
+            # article.  These blocks are long and hand-edited, so a missing
+            # close is likelier here than on a one-line <math>, and the cost is
+            # the whole article rather than one construct.  Same guard as
+            # LinkBlock's.
+            self.is_open = False
+            return
+        if self.sub_blocks:
+            last = self.sub_blocks[-1]
+            if isinstance(last, ParseBlock) and last.is_open:
+                last.add_block(block)
+                return
+        super().add_block(block)
+
+    def to_text(self) -> str:
+        return ""
+
+
+class NowikiBlock(ParseBlock):
+    """A ``<nowiki>`` span, whose body is literal text rather than markup.
+
+    The body is kept -- it is prose the author wanted shown verbatim -- but
+    without letting the wikitext constructs inside it open blocks, which is the
+    whole point of the tag.
+    """
+
+    def __init__(self, block: str) -> None:
+        super().__init__()
+        self.is_open = not block.endswith("/>")
+
+    def add_block(self, block: Node) -> None:
+        if isinstance(block, str) and _tag_name(block) == "nowiki" and block.startswith("</"):
+            self.is_open = False
+            return
+        # Every token is literal, so no child block is opened.
+        self.sub_blocks.append(TextBlock(_node_str(block)))
+
+    def to_text(self) -> str:
+        return "".join(_node_text(child) for child in self.sub_blocks)
 
 
 class TableBlock(ParseBlock):

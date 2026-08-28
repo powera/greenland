@@ -3,6 +3,8 @@
 import pytest
 
 from wordfreq.corpora.gutenberg_text import (
+    MAX_ROMAN_NUMERAL,
+    ROMAN_NUMERALS,
     analyze_text,
     extract_title,
     iter_tokens,
@@ -189,3 +191,36 @@ def test_slug_matches_existing_corpus_key_format() -> None:
         == "84_Frankenstein__Or__The_Modern_Prometheus"
     )
     assert slugify_title(1342, "Pride and Prejudice") == "1342_Pride_and_Prejudice"
+
+
+def test_roman_numerals_are_dropped() -> None:
+    """A chapter or verse marker is a number, not a word.
+
+    The digit form is already dropped for containing a digit; the letter form
+    reached the corpora as ~60 entries in the religious one and a full
+    "xi".."xxviii" series in both book ones.
+    """
+    tokens = [
+        token for token, _, _ in iter_tokens("CHAPTER XXIII. Louis XIV read verse xi and cv.")
+    ]
+    assert tokens == ["chapter", "louis", "read", "verse", "and"]
+
+
+def test_roman_numeral_filter_spares_the_pronoun_and_real_words() -> None:
+    """The range starts at 2 so "I" survives, and no numeral in it is a word."""
+    assert "i" not in ROMAN_NUMERALS
+    # These look like numerals but are not valid ones, so the set must not
+    # claim them.
+    for word in ("mix", "mild", "mill", "civil", "did", "lid", "vivid", "dim", "ill", "mid"):
+        assert word not in ROMAN_NUMERALS, f"{word!r} would be filtered as a numeral"
+    tokens = [token for token, _, _ in iter_tokens("I did mix a mild civil drink.")]
+    assert tokens == ["i", "did", "mix", "a", "mild", "civil", "drink"]
+
+
+def test_roman_numeral_set_covers_two_through_the_maximum() -> None:
+    """Derived from the bound rather than a literal, so it cannot go stale."""
+    assert len(ROMAN_NUMERALS) == MAX_ROMAN_NUMERAL - 1
+    assert "ii" in ROMAN_NUMERALS
+    assert "cxx" in ROMAN_NUMERALS
+    # One past the bound is left alone.
+    assert "cxxi" not in ROMAN_NUMERALS
