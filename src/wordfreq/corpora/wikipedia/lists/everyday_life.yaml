@@ -1,0 +1,495 @@
+# Wikipedia's Level 4 Everyday life list.
+# Clothing, food, family, housing, sport and recreation.  Merged with the
+# technology list into wiki_modern_life: each is small alone and both are after
+# the vocabulary of modern material life.
+#
+# 475 titles in 8 groups, resolved against the
+# enwiki-20220501 snapshot: a title renamed since then is stored under its
+# 2022 spelling so wiki_dump can find it by exact title.
+
+source: Wikipedia:Vital articles/Level 4/Everyday life
+snapshot: enwiki-20220501
+groups:
+  Clothing and fashion:
+    - Clothing
+    - Jewellery
+    - Belt (clothing)
+    - Button
+    - Cloak
+    - Coat
+    - Cosmetics
+    - Perfume
+    - Dress
+    - Skirt
+    - Glove
+    - Hairstyle
+    - Beard
+    - Moustache
+    - Wig
+    - Handbag
+    - Hat
+    - Mask
+    - Nightwear
+    - Nudity
+    - Scarf
+    - Shirt
+    - Shoe
+    - Boot
+    - Suit
+    - Swimsuit
+    - Trousers
+    - Undergarment
+    - Bra
+    - Sock
+    - Diaper
+    - Umbrella
+    - Uniform
+    - Veil
+    - Wallet
+    - Zipper
+  Cooking, food and drink:
+    - Food
+    - Eating
+    - Vegetable
+    - Drink
+    - Drinking
+    - Meal
+    - Breakfast
+    - Lunch
+    - Dinner
+    - Snack
+    - Dieting
+    - Vegetarianism
+    - Veganism
+    - Cuisine
+    - Chinese cuisine
+    - Fast food
+    - French cuisine
+    - Japanese cuisine
+    - Indian cuisine
+    - Italian cuisine
+    - Mexican cuisine
+    - Cooking
+    - Baking
+    - Cooking oil
+    - Vegetable oil
+    - Frying
+    - Grilling
+    - Steaming
+    - Culinary arts
+    - Food preservation
+    - Canning
+    - Fruit preserves
+    - Pickling
+    - Smoking (cooking)
+    - Brewing
+    - Bar (establishment)
+    - Restaurant
+    - Biscuit
+    - Breakfast cereal
+    - Curry
+    - Dessert
+    - Cake
+    - Candy
+    - Chocolate
+    - Dumpling
+    - Noodle
+    - Pasta
+    - Pastry
+    - Pie
+    - Pizza
+    - Porridge
+    - Salad
+    - Sandwich
+    - Hamburger
+    - Soup
+    - Stew
+    - Sushi
+    - Meat
+    - Beef
+    - Lamb and mutton
+    - Pork
+    - Bacon
+    - Ham
+    - Lard
+    - Poultry
+    - Chicken as food
+    - Sausage
+    - Seafood
+    - Fish as food
+    - Egg as food
+    - Honey
+    - Milk
+    - Butter
+    - Cream
+    - Margarine
+    - Cheese
+    - Ice cream
+    - Soy milk
+    - Tofu
+    - Yogurt
+    - Bread
+    - Cereal
+    - Flour
+    - Condiment
+    - Ketchup
+    - Mayonnaise
+    - Mustard (condiment)
+    - Sauce
+    - Soy sauce
+    - Herb
+    - Salt
+    - Spice
+    - Sugar
+    - Vinegar
+    - Coffee
+    - Tea
+    - Drinking water
+    - Juice
+    - Soft drink
+    - Coca-Cola
+    - Alcoholic drink
+    - Beer
+    - Wine
+    - Cider
+    - Cocktail
+    - Liquor
+    - Brandy
+    - Gin
+    - Rum
+    - Sake
+    - Tequila
+    - Vodka
+    - Whisky
+  Family, kinship and interpersonal relationships:
+    - Family
+    - Household
+    - Nuclear family
+    - Extended family
+    - Stepfamily
+    - Kinship
+    - Affinity (law)
+    - Clan
+    - Consanguinity
+    - Interpersonal relationship
+    - Friendship
+    - Intimate relationship
+    - Breakup
+    - Cohabitation
+    - Concubinage
+    - Infidelity
+    - Same-sex relationship
+    - Marriage
+    - Arranged marriage
+    - Civil union
+    - Courtship
+    - Dating
+    - Romance
+    - Wedding
+    - Divorce
+    - Monogamy
+    - Polygamy
+    - Parenting
+    - Family planning
+    - Adoption
+    - Orphan
+    - Husband
+    - Wife
+    - Parent
+    - Father
+    - Mother
+    - Sibling
+    - Brother
+    - Sister
+    - Twin
+    - Grandparent
+    - Cousin
+    - Pet
+  Household items:
+    - Furniture
+    - Bathtub
+    - Bed
+    - Cabinetry
+    - Carpet
+    - Chair
+    - Couch
+    - Pillow
+    - Shower
+    - Table (furniture)
+    - Chopsticks
+    - Cookware and bakeware
+    - Cutlery
+    - Fork
+    - Spoon
+    - Tableware
+    - Cup
+    - Plate (dishware)
+  Housing:
+    - Home
+    - House
+    - Apartment
+    - Fence
+    - Hut
+    - Igloo
+    - Palace
+    - Tent
+    - Hotel
+    - Bathroom
+    - Bedroom
+    - Garage (residential)
+    - Kitchen
+    - Sauna
+  Sexuality and gender:
+    - Human sexuality
+    - Gender
+    - Man
+    - Woman
+    - Transgender
+    - Intersex
+    - Sexual orientation
+    - Heterosexuality
+    - Homosexuality
+    - Bisexuality
+    - Asexuality
+    - LGBT
+    - Human sexual activity
+    - Sexual intercourse
+    - Foreplay
+    - Kiss
+    - Oral sex
+    - Anal sex
+    - BDSM
+    - Incest
+    - Masturbation
+    - Orgasm
+    - Promiscuity
+    - Prostitution
+    - Birth control
+    - Combined oral contraceptive pill
+    - Condom
+    - Fertility
+    - Sex education
+    - Age of consent
+    - Pornography
+    - Sexual attraction
+    - Sexual fetishism
+    - Virginity
+  Stages of life:
+    - Infant
+    - Child
+    - Boy
+    - Girl
+    - Adolescence
+    - Adult
+    - Young adult
+    - Middle age
+    - Old age
+  Sports and recreation:
+    - Entertainment
+    - Leisure
+    - Hobby
+    - Aquarium
+    - Beauty pageant
+    - Collecting
+    - Fan (person)
+    - Karaoke
+    - Party
+    - Puzzle
+    - Crossword
+    - Jigsaw puzzle
+    - Maze
+    - Riddle
+    - Rubik's Cube
+    - Professional wrestling
+    - Quiz
+    - Recreation
+    - Tourism
+    - Vacation
+    - Play (activity)
+    - Playground
+    - Amusement park
+    - Disneyland
+    - Camping
+    - Hiking
+    - Zoo
+    - Toy
+    - Action figure
+    - Doll
+    - Barbie
+    - Frisbee
+    - Kite
+    - Lego
+    - Marble (toy)
+    - Scale model
+    - Top
+    - Stuffed toy
+    - Game
+    - Board game
+    - Backgammon
+    - Chess
+    - Checkers
+    - Go (game)
+    - Mancala
+    - Monopoly (game)
+    - Pachisi
+    - Scrabble
+    - Xiangqi
+    - Card game
+    - Tarot
+    - Blackjack
+    - Contract bridge
+    - Poker
+    - Gambling
+    - Casino
+    - Dice
+    - Lottery
+    - Roulette
+    - Slot machine
+    - Role-playing game
+    - Video game
+    - Video game console
+    - Esports
+    - Final Fantasy
+    - Grand Theft Auto
+    - The Legend of Zelda
+    - Minecraft
+    - Pokémon
+    - Tetris
+    - Arcade game
+    - Pinball
+    - Dominoes
+    - Hide-and-seek
+    - Hopscotch
+    - Mahjong
+    - Tag (game)
+    - Sport
+    - Doping in sport
+    - Extreme sport
+    - Sports equipment
+    - Ball
+    - Women's sports
+    - Olympic Games
+    - Ancient Olympic Games
+    - Paralympic Games
+    - Summer Olympic Games
+    - Winter Olympic Games
+    - Asian Games
+    - Mascot
+    - Stadium
+    - American football
+    - National Football League
+    - Association football
+    - Copa América
+    - FIFA World Cup
+    - La Liga
+    - Premier League
+    - UEFA Champions League
+    - Australian rules football
+    - Baseball
+    - Major League Baseball
+    - Softball
+    - Basketball
+    - National Basketball Association
+    - Cricket
+    - Cricket World Cup
+    - Curling
+    - Field hockey
+    - Handball
+    - Ice hockey
+    - National Hockey League
+    - Kabaddi
+    - Lacrosse
+    - Netball
+    - Polo
+    - Rugby football
+    - Rugby league
+    - Rugby sevens
+    - Rugby union
+    - Rugby World Cup
+    - Tug of war
+    - Volleyball
+    - Beach volleyball
+    - Sport of athletics
+    - Running
+    - Jumping
+    - Track and field
+    - 100 metres
+    - Decathlon
+    - Discus throw
+    - High jump
+    - Hurdling
+    - Javelin throw
+    - Long jump
+    - Marathon
+    - Pole vault
+    - Shot put
+    - Walking
+    - Ice skating
+    - Figure skating
+    - Speed skating
+    - Roller skating
+    - Skateboarding
+    - Canoeing
+    - Diving (sport)
+    - Rowing (sport)
+    - Sailing (sport)
+    - Underwater diving
+    - Swimming
+    - Swimming pool
+    - Swimming (sport)
+    - Martial arts
+    - Boxing
+    - Brazilian jiu-jitsu
+    - Capoeira
+    - Chinese martial arts
+    - Jujutsu
+    - Karate
+    - Kickboxing
+    - Mixed martial arts
+    - Muay Thai
+    - Taekwondo
+    - Wrestling
+    - Judo
+    - Sumo
+    - Angling
+    - Archery
+    - Auto racing
+    - Formula One
+    - Badminton
+    - Bowling
+    - Ten-pin bowling
+    - Bodybuilding
+    - Bullfighting
+    - Climbing
+    - Mountaineering
+    - Rock climbing
+    - Cue sports
+    - Pool (cue sports)
+    - Snooker
+    - Cycle sport
+    - Road bicycle racing
+    - Tour de France
+    - Darts
+    - Equestrianism
+    - Horse racing
+    - Fencing
+    - Gladiator
+    - Golf
+    - Gymnastics
+    - Powerlifting
+    - Rodeo
+    - Shooting sports
+    - Biathlon
+    - Skiing
+    - Alpine skiing
+    - Ski jumping
+    - Sled
+    - Bobsleigh
+    - Luge
+    - Snowboarding
+    - Squash (sport)
+    - Surfing
+    - Table tennis
+    - Tennis
+    - Grand Slam (tennis)
+    - Olympic weightlifting

@@ -1,0 +1,2259 @@
+# Wikipedia's Level 4 People list, as of the August 2026 revision.
+# Biographies in sixteen categories.  Overwhelmingly proper nouns, which
+# analyze_book separates per document, so what the corpus contributes is the
+# connective prose of biography rather than the names themselves.
+#
+# 1919 titles in 283 groups, resolved against the
+# enwiki-20220501 snapshot: a title renamed since then is stored under its
+# 2022 spelling so wiki_dump can find it by exact title.
+#
+# 32 titles were redirects in 2022 and are stored
+# under the target they redirect to:
+#   Abd Allah al-Mahdi Billah  ->  Abdallah al-Mahdi Billah
+#   Al-Khwarizmi  ->  Muhammad ibn Musa al-Khwarizmi
+#   B. B. King  ->  B.B. King
+#   Baybars  ->  Baibars
+#   Clement of Rome  ->  Pope Clement I
+#   Edward I  ->  Edward I of England
+#   Edward III  ->  Edward III of England
+#   Franz Joseph I  ->  Franz Joseph I of Austria
+#   Frederick Barbarossa  ->  Frederick I, Holy Roman Emperor
+#   Hulegu Khan  ->  Hulagu Khan
+#   Hürrem Sultan  ->  Hurrem Sultan
+#   Ibn Taymiyya  ->  Ibn Taymiyyah
+#   James McNeill Whistler  ->  James Abbott McNeill Whistler
+#   Jean Le Rond d'Alembert  ->  Jean le Rond d'Alembert
+#   Kim Il Sung  ->  Kim Il-sung
+#   Lord Kelvin  ->  William Thomson, 1st Baron Kelvin
+#   Lumière brothers  ->  Auguste and Louis Lumière
+#   Mary I  ->  Mary I of England
+#   Mehmed II  ->  Mehmed the Conqueror
+#   Mohammad Zahir Shah  ->  Mohammed Zahir Shah
+#   Nicholas II  ->  Nicholas II of Russia
+#   Padmasambhava  ->  Padmasambhāva
+#   Park Chung Hee  ->  Park Chung-hee
+#   Philipp Melanchthon  ->  Philip Melanchthon
+#   Ramkhamhaeng  ->  Ram Khamhaeng
+#   Robert Millikan  ->  Robert Andrews Millikan
+#   Syama Sastri  ->  Shyama Shastri
+#   The Buddha  ->  Gautama Buddha
+#   Tughril I  ->  Tughril
+#   Vytautas the Great  ->  Vytautas
+#   Wilhelm I  ->  William I, German Emperor
+#   Wilhelm II  ->  Wilhelm II, German Emperor
+#
+# 7 titles have no snapshot article under any
+# spelling tried, and are dropped:
+#   Draco (legislator)
+#   Fuzuli (poet)
+#   Isma'il Pasha of Egypt
+#   Kaṇāda
+#   Tamar I
+#   William Gilbert (physicist)
+#   Xunzi (philosopher)
+
+source: Wikipedia:Vital articles/Level 4/People
+snapshot: enwiki-20220501
+groups:
+  Entertainers / Actors / Asia:
+    - Toshiro Mifune
+    - Setsuko Hara
+    - Madhubala
+    - Amitabh Bachchan
+    - Rajinikanth
+    - Jackie Chan
+  Entertainers / Actors / Europe:
+    - Rudolph Valentino
+    - Marlene Dietrich
+    - Greta Garbo
+    - Ingrid Bergman
+    - Marcello Mastroianni
+    - Sophia Loren
+  Entertainers / Actors / Europe / France:
+    - Sarah Bernhardt
+    - Jeanne Moreau
+    - Brigitte Bardot
+    - Alain Delon
+  Entertainers / Actors / Europe / United Kingdom:
+    - John Gielgud
+    - Laurence Olivier
+    - Vivien Leigh
+    - Audrey Hepburn
+    - Sean Connery
+    - Peter O'Toole
+    - Julie Andrews
+  Entertainers / Actors / United States:
+    - Mary Pickford
+    - Lillian Gish
+    - Humphrey Bogart
+    - Clark Gable
+    - Cary Grant
+    - Katharine Hepburn
+    - John Wayne
+    - Bette Davis
+    - James Stewart
+    - Gregory Peck
+    - Judy Garland
+    - Marlon Brando
+    - Marilyn Monroe
+    - Sidney Poitier
+    - Shirley Temple
+    - Clint Eastwood
+    - Elizabeth Taylor
+    - Jack Nicholson
+    - Al Pacino
+    - Robert De Niro
+    - Meryl Streep
+    - Tom Hanks
+  Entertainers / Dancers and choreographers / Ballet:
+    - Marius Petipa
+    - Anna Pavlova
+    - Vaslav Nijinsky
+    - George Balanchine
+    - Rudolf Nureyev
+    - Mikhail Baryshnikov
+  Entertainers / Dancers and choreographers / Other dance:
+    - Izumo no Okuni
+    - Isadora Duncan
+    - Martha Graham
+    - Fred Astaire
+    - Josephine Baker
+    - Ginger Rogers
+    - Gene Kelly
+    - Bob Fosse
+  Entertainers / Comedians:
+    - Marx Brothers
+    - Laurel and Hardy
+    - Mae West
+    - Lucille Ball
+    - Louis de Funès
+    - George Carlin
+    - Bill Cosby
+    - Richard Pryor
+    - Monty Python
+  Entertainers / Hosts and performers:
+    - Harry Houdini
+    - Marcel Marceau
+    - Fred Rogers
+    - Oprah Winfrey
+  Visual artists / Western painters and illustrators / Pre-Renaissance:
+    - Giotto
+  Visual artists / Western painters and illustrators / Renaissance to early modern era:
+    - Jan van Eyck
+    - Masaccio
+    - Sandro Botticelli
+    - Hieronymus Bosch
+    - Leonardo da Vinci
+    - Albrecht Dürer
+    - Titian
+    - Raphael
+    - Hans Holbein the Younger
+    - Pieter Bruegel the Elder
+    - El Greco
+    - Caravaggio
+    - Peter Paul Rubens
+    - Artemisia Gentileschi
+    - Nicolas Poussin
+    - Diego Velázquez
+    - Rembrandt
+    - Johannes Vermeer
+    - Antoine Watteau
+    - William Hogarth
+    - Francisco Goya
+    - Jacques-Louis David
+  Visual artists / Western painters and illustrators / Modern era:
+    - Caspar David Friedrich
+    - J. M. W. Turner
+    - John Constable
+    - Jean-Auguste-Dominique Ingres
+    - Eugène Delacroix
+    - Gustave Courbet
+    - Camille Pissarro
+    - Édouard Manet
+    - James Abbott McNeill Whistler
+    - Edgar Degas
+    - Paul Cézanne
+    - Claude Monet
+    - Pierre-Auguste Renoir
+    - Henri Rousseau
+    - Ilya Repin
+    - Paul Gauguin
+    - Vincent van Gogh
+    - John Singer Sargent
+    - Georges Seurat
+    - Gustav Klimt
+    - Edvard Munch
+    - Henri de Toulouse-Lautrec
+    - Wassily Kandinsky
+    - Henri Matisse
+    - Piet Mondrian
+    - Kazimir Malevich
+    - Paul Klee
+    - Pablo Picasso
+    - Edward Hopper
+    - Diego Rivera
+    - Marc Chagall
+    - Georgia O'Keeffe
+    - Max Ernst
+    - Joan Miró
+    - René Magritte
+    - Mark Rothko
+    - Salvador Dalí
+    - Frida Kahlo
+    - Jackson Pollock
+    - Andy Warhol
+    - Gerhard Richter
+  Visual artists / Western painters and illustrators / Comics and manga artists, print cartoonists and illustrators:
+    - Winsor McCay
+    - Aubrey Beardsley
+    - Norman Rockwell
+    - M. C. Escher
+    - Hergé
+    - Will Eisner
+    - Jack Kirby
+    - Osamu Tezuka
+  Visual artists / Other visual arts / Sculptors:
+    - Phidias
+    - Donatello
+    - Michelangelo
+    - Gian Lorenzo Bernini
+    - Auguste Rodin
+    - Constantin Brâncuși
+    - Marcel Duchamp
+    - Henry Moore
+    - Alberto Giacometti
+  Visual artists / Other visual arts / Architects:
+    - Imhotep
+    - Vitruvius
+    - Filippo Brunelleschi
+    - Leon Battista Alberti
+    - Mimar Sinan
+    - Andrea Palladio
+    - Christopher Wren
+    - Antoni Gaudí
+    - Louis Sullivan
+    - Frank Lloyd Wright
+    - Walter Gropius
+    - Ludwig Mies van der Rohe
+    - Le Corbusier
+    - Buckminster Fuller
+    - Alvar Aalto
+    - Louis Kahn
+    - Philip Johnson
+    - Oscar Niemeyer
+    - I. M. Pei
+    - Frank Gehry
+    - Zaha Hadid
+  Visual artists / Other visual arts / Designers:
+    - Coco Chanel
+    - Raymond Loewy
+    - Yves Saint Laurent (designer)
+    - Shigeru Miyamoto
+  Visual artists / Other visual arts / Photographers:
+    - Eadweard Muybridge
+    - Sergey Prokudin-Gorsky
+    - Edward Weston
+    - Man Ray
+    - Ansel Adams
+    - Henri Cartier-Bresson
+  Visual artists / Other visual arts / Instrument makers:
+    - Antonio Stradivari
+  Visual artists / Other visual arts / Urban planners and landscape architects:
+    - Georges-Eugène Haussmann
+    - Frederick Law Olmsted
+    - Jane Jacobs
+  Visual artists / Non-Western art:
+    - Wang Xizhi
+    - Sesshū Tōyō
+    - Shitao
+    - Hokusai
+    - Hiroshige
+  Writers / Ancient / Asia:
+    - Enheduanna
+    - Qu Yuan
+    - Kalidasa
+    - Tao Yuanming
+  Writers / Ancient / Europe / Greece:
+    - Homer
+    - Hesiod
+    - Sappho
+    - Aeschylus
+    - Sophocles
+    - Euripides
+    - Aristophanes
+  Writers / Ancient / Europe / Ancient Rome:
+    - Plautus
+    - Terence
+    - Catullus
+    - Virgil
+    - Horace
+    - Ovid
+    - Lucian
+  Writers / Post-classical / Asia / Eastern Asia:
+    - Wang Wei
+    - Li Bai
+    - Du Fu
+    - Han Yu
+    - Bai Juyi
+    - Murasaki Shikibu
+    - Ouyang Xiu
+    - Su Shi
+  Writers / Post-classical / Asia / Southern Asia:
+    - Amir Khusrau
+    - Kabir
+  Writers / Post-classical / Asia / Western Asia:
+    - Abu Nuwas
+    - Rudaki
+    - Ferdowsi
+    - Omar Khayyam
+    - Nizami Ganjavi
+    - Rumi
+    - Saadi Shirazi
+    - Hafez
+    - Jami
+  Writers / Post-classical / Europe:
+    - Chrétien de Troyes
+    - Dante Alighieri
+    - Petrarch
+    - Giovanni Boccaccio
+    - Geoffrey Chaucer
+    - Christine de Pizan
+    - François Villon
+  Writers / Early modern / Asia:
+    - Mirabai
+    - Tulsidas
+    - Tukaram
+    - Matsuo Bashō
+    - Mir Taqi Mir
+  Writers / Early modern / Europe:
+    - Luís de Camões
+    - Miguel de Cervantes
+    - Lope de Vega
+    - Pedro Calderón de la Barca
+    - Giacomo Casanova
+    - Johann Wolfgang von Goethe
+    - Friedrich Schiller
+  Writers / Early modern / Europe / France:
+    - François Rabelais
+    - Nostradamus
+    - Michel de Montaigne
+    - Molière
+    - Charles Perrault
+    - Jean Racine
+    - Voltaire
+    - Marquis de Sade
+  Writers / Early modern / Europe / Great Britain and Ireland:
+    - Thomas More
+    - Edmund Spenser
+    - Christopher Marlowe
+    - William Shakespeare
+    - John Donne
+    - Ben Jonson
+    - John Milton
+    - John Dryden
+    - Daniel Defoe
+    - Jonathan Swift
+    - Alexander Pope
+    - Samuel Johnson
+    - William Blake
+    - Robert Burns
+  Writers / Modern / Africa:
+    - Naguib Mahfouz
+    - Nadine Gordimer
+    - Chinua Achebe
+    - Wole Soyinka
+    - Ngũgĩ wa Thiong'o
+    - J. M. Coetzee
+    - Ben Okri
+  Writers / Modern / Americas / Caribbean:
+    - V. S. Naipaul
+  Writers / Modern / Americas / US and Canada:
+    - Henry Wadsworth Longfellow
+    - Edgar Allan Poe
+    - Walt Whitman
+    - Herman Melville
+    - Emily Dickinson
+    - Mark Twain
+    - Henry James
+    - Edith Wharton
+    - Robert Frost
+    - Upton Sinclair
+    - Jack London
+    - Ezra Pound
+    - Raymond Chandler
+    - T. S. Eliot
+    - H. P. Lovecraft
+    - F. Scott Fitzgerald
+    - William Faulkner
+    - Ernest Hemingway
+    - Langston Hughes
+    - John Steinbeck
+    - Dr. Seuss
+    - Robert A. Heinlein
+    - Tennessee Williams
+    - Saul Bellow
+    - Arthur Miller
+    - Isaac Asimov
+    - Ray Bradbury
+    - Jack Kerouac
+    - Kurt Vonnegut
+    - Stan Lee
+    - Maya Angelou
+    - Ursula K. Le Guin
+    - Toni Morrison
+    - Sylvia Plath
+    - Margaret Atwood
+    - Stephen King
+  Writers / Modern / Americas / Latin America:
+    - Machado de Assis
+    - José Martí
+    - Jorge Luis Borges
+    - Pablo Neruda
+    - Alejo Carpentier
+    - Jorge Amado
+    - Gabriel García Márquez
+    - Carlos Fuentes
+    - Mario Vargas Llosa
+  Writers / Modern / Asia / Central Asia:
+    - Chinghiz Aitmatov
+  Writers / Modern / Asia / Eastern Asia:
+    - Natsume Sōseki
+    - Lu Xun
+    - Ryūnosuke Akutagawa
+    - Lao She
+    - Yasunari Kawabata
+    - Jin Yong
+    - Yukio Mishima
+    - Kenzaburō Ōe
+    - Haruki Murakami
+  Writers / Modern / Asia / Southern Asia:
+    - Ghalib
+    - Rabindranath Tagore
+    - Muhammad Iqbal
+    - Premchand
+  Writers / Modern / Asia / Western Asia:
+    - Kahlil Gibran
+    - Orhan Pamuk
+  Writers / Modern / Europe / Eastern Europe:
+    - Adam Mickiewicz
+    - Taras Shevchenko
+    - Sándor Petőfi
+    - Henryk Sienkiewicz
+    - Joseph Conrad
+    - Constantine P. Cavafy
+    - Tristan Tzara
+    - Elie Wiesel
+    - Ismail Kadare
+  Writers / Modern / Europe / Eastern Europe / Russia:
+    - Alexander Pushkin
+    - Nikolai Gogol
+    - Mikhail Lermontov
+    - Ivan Turgenev
+    - Fyodor Dostoevsky
+    - Leo Tolstoy
+    - Anton Chekhov
+    - Maxim Gorky
+    - Ivan Bunin
+    - Anna Akhmatova
+    - Boris Pasternak
+    - Mikhail Bulgakov
+    - Vladimir Mayakovsky
+    - Vladimir Nabokov
+    - Mikhail Sholokhov
+    - Aleksandr Solzhenitsyn
+    - Joseph Brodsky
+  Writers / Modern / Europe / Western Europe:
+    - Luigi Pirandello
+    - Fernando Pessoa
+    - Federico García Lorca
+    - José Saramago
+    - Anne Frank
+    - Umberto Eco
+  Writers / Modern / Europe / Western Europe / France:
+    - Stendhal
+    - Honoré de Balzac
+    - Victor Hugo
+    - Alexandre Dumas
+    - Charles Baudelaire
+    - Gustave Flaubert
+    - Jules Verne
+    - Émile Zola
+    - Stéphane Mallarmé
+    - Guy de Maupassant
+    - Arthur Rimbaud
+    - Marcel Proust
+    - Antonin Artaud
+    - Eugène Ionesco
+    - Albert Camus
+  Writers / Modern / Europe / Western Europe / Germany and Austria:
+    - Brothers Grimm
+    - Heinrich Heine
+    - Thomas Mann
+    - Rainer Maria Rilke
+    - Hermann Hesse
+    - Franz Kafka
+    - Bertolt Brecht
+  Writers / Modern / Europe / Western Europe / Nordic countries:
+    - Hans Christian Andersen
+    - Henrik Ibsen
+    - August Strindberg
+    - Selma Lagerlöf
+    - Knut Hamsun
+    - Karen Blixen
+    - Astrid Lindgren
+  Writers / Modern / Europe / Western Europe / UK and Ireland:
+    - William Wordsworth
+    - Walter Scott
+    - Samuel Taylor Coleridge
+    - Jane Austen
+    - Lord Byron
+    - Percy Bysshe Shelley
+    - John Keats
+    - Mary Shelley
+    - Charles Dickens
+    - Brontë family
+    - George Eliot
+    - Lewis Carroll
+    - Thomas Hardy
+    - Robert Louis Stevenson
+    - Oscar Wilde
+    - George Bernard Shaw
+    - Arthur Conan Doyle
+    - W. B. Yeats
+    - Rudyard Kipling
+    - H. G. Wells
+    - Virginia Woolf
+    - James Joyce
+    - D. H. Lawrence
+    - Agatha Christie
+    - J. R. R. Tolkien
+    - C. S. Lewis
+    - George Orwell
+    - Samuel Beckett
+    - William Golding
+    - Dylan Thomas
+    - Roald Dahl
+    - Arthur C. Clarke
+    - Salman Rushdie
+    - Kazuo Ishiguro
+  Writers / Modern / Oceania:
+    - Banjo Paterson
+  Journalists:
+    - Horace Greeley
+    - Joseph Pulitzer
+    - William Randolph Hearst
+    - Nellie Bly
+    - Walter Lippmann
+    - Edward R. Murrow
+    - Walter Cronkite
+    - David Attenborough
+    - Hunter S. Thompson
+    - Svetlana Alexievich
+  Musicians and composers / Western art music / Composers / Medieval and Renaissance:
+    - Hildegard of Bingen
+    - Guillaume de Machaut
+    - Guillaume Du Fay
+    - Josquin des Prez
+    - Giovanni Pierluigi da Palestrina
+  Musicians and composers / Western art music / Composers / Baroque:
+    - Claudio Monteverdi
+    - Henry Purcell
+    - Antonio Vivaldi
+    - George Frideric Handel
+    - Johann Sebastian Bach
+  Musicians and composers / Western art music / Composers / Classical:
+    - Joseph Haydn
+    - Wolfgang Amadeus Mozart
+    - Ludwig van Beethoven
+  Musicians and composers / Western art music / Composers / Romantic:
+    - Gioachino Rossini
+    - Franz Schubert
+    - Hector Berlioz
+    - Felix Mendelssohn
+    - Frédéric Chopin
+    - Robert Schumann
+    - Franz Liszt
+    - Richard Wagner
+    - Giuseppe Verdi
+    - Anton Bruckner
+    - Johann Strauss II
+    - Johannes Brahms
+    - Modest Mussorgsky
+    - Pyotr Ilyich Tchaikovsky
+    - Antonín Dvořák
+    - Gilbert and Sullivan
+    - Nikolai Rimsky-Korsakov
+    - Edward Elgar
+  Musicians and composers / Western art music / Composers / Post-romantic/early modern:
+    - Gabriel Fauré
+    - Giacomo Puccini
+    - Gustav Mahler
+    - Claude Debussy
+    - Richard Strauss
+    - Jean Sibelius
+    - Sergei Rachmaninoff
+    - Maurice Ravel
+  Musicians and composers / Western art music / Composers / 20th century modern:
+    - Ralph Vaughan Williams
+    - Arnold Schoenberg
+    - Béla Bartók
+    - Igor Stravinsky
+    - Sergei Prokofiev
+    - George Gershwin
+    - Aaron Copland
+    - Dmitri Shostakovich
+    - Benjamin Britten
+    - John Williams
+  Musicians and composers / Western art music / Composers / Avant-garde/postmodern:
+    - John Cage
+    - György Ligeti
+    - Pierre Boulez
+    - Karlheinz Stockhausen
+    - Philip Glass
+  Musicians and composers / Western art music / Pedagogues:
+    - Nadia Boulanger
+  Musicians and composers / Western art music / Performers / Cellists:
+    - Pablo Casals
+    - Mstislav Rostropovich
+  Musicians and composers / Western art music / Performers / Conductors:
+    - Arturo Toscanini
+    - Herbert von Karajan
+    - Leonard Bernstein
+  Musicians and composers / Western art music / Performers / Pianists:
+    - Clara Schumann
+    - Arthur Rubinstein
+    - Vladimir Horowitz
+    - Sviatoslav Richter
+    - Glenn Gould
+  Musicians and composers / Western art music / Performers / Singers:
+    - Enrico Caruso
+    - Maria Callas
+    - Dietrich Fischer-Dieskau
+    - Joan Sutherland
+    - Luciano Pavarotti
+    - Plácido Domingo
+  Musicians and composers / Western art music / Performers / Violinists:
+    - Niccolò Paganini
+  Musicians and composers / Non-Western art music / Carnatic classical:
+    - Shyama Shastri
+    - Tyagaraja
+    - Muthuswami Dikshitar
+  Musicians and composers / Non-Western art music / Hindustani classical:
+    - Ravi Shankar
+    - Ali Akbar Khan
+  Musicians and composers / Non-Western art music / Qawwali:
+    - Nusrat Fateh Ali Khan
+  Musicians and composers / Non-Western art music / Persian traditional:
+    - Mohammad-Reza Shajarian
+  Musicians and composers / Jazz:
+    - Scott Joplin
+    - Duke Ellington
+    - Louis Armstrong
+    - Django Reinhardt
+    - Billie Holiday
+    - Ella Fitzgerald
+    - Charlie Parker
+    - Celia Cruz
+    - Miles Davis
+    - John Coltrane
+    - Antônio Carlos Jobim
+  "Musicians and composers / Popular music / Popular music: general":
+    - Bing Crosby
+    - Frank Sinatra
+    - Miriam Makeba
+    - Bob Marley
+    - ABBA
+    - Madonna
+    - Michael Jackson
+    - Taylor Swift
+  Musicians and composers / Popular music / Non-English language popular music:
+    - Umm Kulthum
+    - Édith Piaf
+    - Astor Piazzolla
+    - Charles Aznavour
+    - Serge Gainsbourg
+    - Lata Mangeshkar
+    - Fairuz
+    - Vladimir Vysotsky
+    - Julio Iglesias
+    - Paco de Lucía
+    - Teresa Teng
+    - Shakira
+  Musicians and composers / Popular music / Blues, R&B, soul and funk:
+    - Robert Johnson
+    - B.B. King
+    - Ray Charles
+    - James Brown
+    - Fela Kuti
+    - Marvin Gaye
+    - Aretha Franklin
+    - The Supremes
+    - Stevie Wonder
+    - Prince (musician)
+  Musicians and composers / Popular music / Electronic music:
+    - Kraftwerk
+    - Brian Eno
+  Musicians and composers / Popular music / Folk and country:
+    - Woody Guthrie
+    - Hank Williams
+    - Johnny Cash
+    - Joni Mitchell
+    - Dolly Parton
+  Musicians and composers / Popular music / Hip-hop and rap:
+    - Run-DMC
+    - Tupac Shakur
+    - Eminem
+  Musicians and composers / Popular music / Musical theatre and film:
+    - Irving Berlin
+    - Rodgers and Hammerstein
+    - Andrew Lloyd Webber
+  Musicians and composers / Popular music / Rock:
+    - Chuck Berry
+    - Little Richard
+    - Elvis Presley
+    - Buddy Holly
+    - The Beatles
+    - John Lennon
+    - The Beach Boys
+    - Bob Dylan
+    - The Rolling Stones
+    - Jimi Hendrix
+    - Janis Joplin
+    - Pink Floyd
+    - Led Zeppelin
+    - David Bowie
+    - Black Sabbath
+    - Queen (band)
+    - Metallica
+    - Nirvana (band)
+  Directors, producers and screenwriters / Animators and puppeteers:
+    - Walt Disney
+    - Jim Henson
+    - Hayao Miyazaki
+  Directors, producers and screenwriters / Directors / Africa:
+    - Ousmane Sembène
+  Directors, producers and screenwriters / Directors / Asia:
+    - Yasujirō Ozu
+    - Akira Kurosawa
+    - Abbas Kiarostami
+    - Ang Lee
+    - Wong Kar-wai
+  Directors, producers and screenwriters / Directors / Asia / India:
+    - Satyajit Ray
+    - Raj Kapoor
+    - Guru Dutt
+  Directors, producers and screenwriters / Directors / Europe:
+    - Carl Theodor Dreyer
+    - Fritz Lang
+    - Sergei Eisenstein
+    - Luis Buñuel
+    - Leni Riefenstahl
+    - Ingmar Bergman
+    - Andrei Tarkovsky
+    - Roman Polanski
+    - Werner Herzog
+  Directors, producers and screenwriters / Directors / Europe / France:
+    - Georges Méliès
+    - Auguste and Louis Lumière
+    - Jean Cocteau
+    - Jean Renoir
+    - Robert Bresson
+    - Agnès Varda
+    - Jean-Luc Godard
+    - François Truffaut
+  Directors, producers and screenwriters / Directors / Europe / Italy:
+    - Vittorio De Sica
+    - Michelangelo Antonioni
+    - Federico Fellini
+  Directors, producers and screenwriters / Directors / Europe / United Kingdom:
+    - Charlie Chaplin
+    - Alfred Hitchcock
+    - David Lean
+    - Christopher Nolan
+  Directors, producers and screenwriters / Directors / US and Canada:
+    - D. W. Griffith
+    - Cecil B. DeMille
+    - John Ford
+    - Buster Keaton
+    - Howard Hawks
+    - Frank Capra
+    - William Wyler
+    - Billy Wilder
+    - Elia Kazan
+    - Orson Welles
+    - Ida Lupino
+    - Stanley Kubrick
+    - Woody Allen
+    - Francis Ford Coppola
+    - Martin Scorsese
+    - George Lucas
+    - David Lynch
+    - Steven Spielberg
+    - James Cameron
+    - Quentin Tarantino
+  Directors, producers and screenwriters / Producers and executives:
+    - Samuel Goldwyn
+    - Louis B. Mayer
+    - Jack L. Warner
+    - Irving Thalberg
+  Businesspeople:
+    - Marcus Licinius Crassus
+    - Jakob Fugger
+    - Josiah Wedgwood
+    - Rothschild family
+    - John Jacob Astor
+    - Cornelius Vanderbilt
+    - Leland Stanford
+    - Andrew Carnegie
+    - J. P. Morgan
+    - Jamsetji Tata
+    - John D. Rockefeller
+    - George Westinghouse
+    - Andrew Mellon
+    - Henry Ford
+    - Howard Hughes
+    - Estée Lauder (businesswoman)
+    - Sam Walton
+    - Li Ka-shing
+    - George Soros
+    - Warren Buffett
+    - Rupert Murdoch
+    - Ted Turner
+    - Carlos Slim
+    - Steve Jobs
+    - Bill Gates
+    - Elon Musk
+  Explorers / Ancient:
+    - Hanno the Navigator
+    - Zhang Qian
+  Explorers / Post-classical:
+    - Xuanzang
+    - Leif Erikson
+    - Marco Polo
+    - Ibn Battuta
+    - Zheng He
+    - Christopher Columbus
+    - Amerigo Vespucci
+    - Vasco da Gama
+  Explorers / Early modern:
+    - Pedro Álvares Cabral
+    - Juan Ponce de León
+    - Ferdinand Magellan
+    - Jacques Cartier
+    - Hernando de Soto
+    - Willem Barentsz
+    - Abel Tasman
+    - Vitus Bering
+    - James Cook
+  Explorers / Modern:
+    - David Livingstone
+    - Fridtjof Nansen
+    - Robert Falcon Scott
+    - Ernest Shackleton
+    - Roald Amundsen
+    - Amelia Earhart
+    - Charles Lindbergh
+    - Tenzing Norgay
+    - Edmund Hillary
+    - Neil Armstrong
+    - Yuri Gagarin
+    - Valentina Tereshkova
+  Philosophers, historians, political and social scientists / Philosophers / Ancient:
+    - Thales of Miletus
+    - Laozi
+    - Heraclitus
+    - Confucius
+    - Socrates
+    - Democritus
+    - Plato
+    - Diogenes
+    - Shang Yang
+    - Aristotle
+    - Mencius
+    - Epicurus
+    - Han Fei
+    - Li Si
+    - Cicero
+    - Lucretius
+    - Seneca the Younger
+    - Plotinus
+    - Augustine of Hippo
+  Philosophers, historians, political and social scientists / Philosophers / Post-classical:
+    - Al-Kindi
+    - Al-Farabi
+    - Peter Abelard
+    - Averroes
+    - Zhu Xi
+    - Thomas Aquinas
+    - Duns Scotus
+    - William of Ockham
+  Philosophers, historians, political and social scientists / Philosophers / Early modern:
+    - Erasmus
+    - Wang Yangming
+    - Giordano Bruno
+    - Francis Bacon
+    - René Descartes
+    - Baruch Spinoza
+    - George Berkeley
+    - David Hume
+    - Jean-Jacques Rousseau
+    - Denis Diderot
+    - Immanuel Kant
+    - Gotthold Ephraim Lessing
+    - Jeremy Bentham
+    - Johann Gottlieb Fichte
+  Philosophers, historians, political and social scientists / Philosophers / Modern:
+    - Georg Wilhelm Friedrich Hegel
+    - Arthur Schopenhauer
+    - Auguste Comte
+    - Ralph Waldo Emerson
+    - John Stuart Mill
+    - Søren Kierkegaard
+    - Henry David Thoreau
+    - Charles Sanders Peirce
+    - William James
+    - Friedrich Nietzsche
+    - Edmund Husserl
+    - Henri Bergson
+    - John Dewey
+    - Alfred North Whitehead
+    - Bertrand Russell
+    - Ludwig Wittgenstein
+    - Martin Heidegger
+    - Karl Popper
+    - Jean-Paul Sartre
+    - Hannah Arendt
+    - Simone de Beauvoir
+    - Isaiah Berlin
+    - Marshall McLuhan
+    - John Rawls
+    - Frantz Fanon
+    - Michel Foucault
+    - Jürgen Habermas
+    - Jacques Derrida
+    - Edward Said
+  Philosophers, historians, political and social scientists / Historians and archaeologists / Ancient:
+    - Herodotus
+    - Thucydides
+    - Xenophon
+    - Sima Qian
+    - Josephus
+    - Plutarch
+    - Tacitus
+    - Eusebius
+  Philosophers, historians, political and social scientists / Historians and archaeologists / Post-classical:
+    - Bede
+    - Snorri Sturluson
+    - Ibn Khaldun
+    - Jean Froissart
+  Philosophers, historians, political and social scientists / Historians and archaeologists / Early modern:
+    - Giorgio Vasari
+    - Edward Gibbon
+    - Nikolay Karamzin
+  Philosophers, historians, political and social scientists / Historians and archaeologists / Modern:
+    - Leopold von Ranke
+    - Theodor Mommsen
+    - Heinrich Schliemann
+    - Frederick Jackson Turner
+    - Charles A. Beard
+    - Fernand Braudel
+    - A. J. P. Taylor
+    - Eric Hobsbawm
+  Philosophers, historians, political and social scientists / Political writers / Early modern:
+    - Niccolò Machiavelli
+    - Hugo Grotius
+    - Thomas Hobbes
+    - John Locke
+    - Montesquieu
+    - Edmund Burke
+    - Thomas Paine
+    - Cesare Beccaria
+    - Mary Wollstonecraft
+  Philosophers, historians, political and social scientists / Political writers / Modern:
+    - Alexis de Tocqueville
+    - Pierre-Joseph Proudhon
+    - Mikhail Bakunin
+    - Herbert Spencer
+    - Friedrich Engels
+    - Peter Kropotkin
+    - Eduard Bernstein
+    - Antonio Gramsci
+  Philosophers, historians, political and social scientists / Economists:
+    - Adam Smith
+    - Thomas Robert Malthus
+    - David Ricardo
+    - Friedrich List
+    - Karl Marx
+    - Vilfredo Pareto
+    - John Maynard Keynes
+    - Friedrich Hayek
+    - John Kenneth Galbraith
+    - Milton Friedman
+    - Paul Samuelson
+  Philosophers, historians, political and social scientists / Social scientists:
+    - Émile Durkheim
+    - Franz Boas
+    - Max Weber
+    - Maria Montessori
+    - Marcel Mauss
+    - Bronisław Malinowski
+    - Edward Bernays
+    - Margaret Mead
+    - Talcott Parsons
+    - Theodor W. Adorno
+    - Claude Lévi-Strauss
+    - Clifford Geertz
+    - Pierre Bourdieu
+  Philosophers, historians, political and social scientists / Linguists:
+    - Pāṇini
+    - Noah Webster
+    - Sequoyah
+    - Louis Braille
+    - Ferdinand de Saussure
+    - Noam Chomsky
+  Philosophers, historians, political and social scientists / Psychologists:
+    - Francis Galton
+    - Wilhelm Wundt
+    - Ivan Pavlov
+    - Sigmund Freud
+    - Edward Thorndike
+    - Carl Jung
+    - John B. Watson
+    - Kurt Lewin
+    - Anna Freud
+    - Jean Piaget
+    - Lev Vygotsky
+    - Gordon Allport
+    - Carl Rogers
+    - Erik Erikson
+    - B. F. Skinner
+    - Abraham Maslow
+    - Albert Ellis
+    - Leon Festinger
+    - George Armitage Miller
+    - Albert Bandura
+  Religious figures / Abrahamic religions / Judaism:
+    - Rabbi Akiva
+    - Rashi
+    - Maimonides
+    - Judah Loew ben Bezalel
+    - Baal Shem Tov
+    - Vilna Gaon
+  Religious figures / Abrahamic religions / Christianity / New Testament figures:
+    - Mary, mother of Jesus
+    - John the Baptist
+    - Jesus
+    - Saint Peter
+    - Judas Iscariot
+    - Paul the Apostle
+    - John the Apostle
+    - Mary Magdalene
+  Religious figures / Abrahamic religions / Christianity / Pre-Schism:
+    - Irenaeus
+    - Clement of Alexandria
+    - Tertullian
+    - Origen
+    - Arius
+    - Saint Nicholas
+    - Saint George
+    - Athanasius of Alexandria
+    - Gregory of Nazianzus
+    - Basil of Caesarea
+    - Gregory of Nyssa
+    - Ambrose
+    - Jerome
+    - John Chrysostom
+    - Cyril of Alexandria
+    - Benedict of Nursia
+    - John of Damascus
+    - Cyril and Methodius
+  Religious figures / Abrahamic religions / Christianity / Pre-Schism / Popes:
+    - Pope Clement I
+    - Pope Leo I
+    - Pope Gregory I
+  Religious figures / Abrahamic religions / Christianity / Catholic Church:
+    - Anselm of Canterbury
+    - Francis of Assisi
+    - Bonaventure
+    - John Wycliffe
+    - Jan Hus
+    - Tomás de Torquemada
+    - Ignatius of Loyola
+    - Francis Xavier
+    - Teresa of Ávila
+    - John of the Cross
+    - Mother Teresa
+  Religious figures / Abrahamic religions / Christianity / Catholic Church / Popes:
+    - Pope Pius IX
+    - Pope John XXIII
+    - Pope John Paul II
+  Religious figures / Abrahamic religions / Christianity / Orthodox Church:
+    - Patriarch Nikon of Moscow
+    - Grigori Rasputin
+  Religious figures / Abrahamic religions / Christianity / Protestantism:
+    - Martin Luther
+    - Huldrych Zwingli
+    - Thomas Cranmer
+    - Philip Melanchthon
+    - John Calvin
+    - John Knox
+    - Jacobus Arminius
+    - John Wesley
+    - Jonathan Edwards (theologian)
+    - Karl Barth
+    - Billy Graham
+    - Desmond Tutu
+  Religious figures / Abrahamic religions / Christianity / Others:
+    - Joseph Smith
+    - Mary Baker Eddy
+  Religious figures / Abrahamic religions / Islam / Early Islam:
+    - Khadija bint Khuwaylid
+    - Muhammad
+    - Fatima
+    - Aisha
+  Religious figures / Abrahamic religions / Islam / Shia Islam:
+    - Ali
+    - Husayn ibn Ali
+    - Ja'far al-Sadiq
+    - Mulla Sadra
+  Religious figures / Abrahamic religions / Islam / Sunni Islam:
+    - Abu Hanifa
+    - Malik ibn Anas
+    - Al-Shafi'i
+    - Ahmad ibn Hanbal
+    - Muhammad al-Bukhari
+    - Muslim ibn al-Hajjaj
+    - Al-Ghazali
+    - Ibn Arabi
+    - Al-Nawawi
+    - Ibn Taymiyyah
+    - Muhammad ibn Abd al-Wahhab
+  Religious figures / Abrahamic religions / Baháʼí Faith:
+    - Baháʼu'lláh
+  Religious figures / Dharmic religions / Hinduism / Ancient:
+    - Valmiki
+    - Vyasa
+    - Kapila
+    - Patanjali
+  Religious figures / Dharmic religions / Hinduism / Post-classical:
+    - Gaudapada
+    - Kumārila Bhaṭṭa
+    - Adi Shankara
+    - Ramanuja
+    - Basava
+    - Madhvacharya
+  Religious figures / Dharmic religions / Hinduism / Modern:
+    - Chaitanya Mahaprabhu
+    - Ramakrishna
+    - Swami Vivekananda
+    - Sri Aurobindo
+    - Ramana Maharshi
+    - Paramahansa Yogananda
+    - A. C. Bhaktivedanta Swami Prabhupada
+  Religious figures / Dharmic religions / Buddhism:
+    - Gautama Buddha
+    - Nagarjuna
+    - Padmasambhāva
+    - 14th Dalai Lama
+  Religious figures / Dharmic religions / Buddhism / Chinese Buddhism:
+    - Kumārajīva
+    - Bodhidharma
+    - Zhiyi
+    - Huineng
+  Religious figures / Dharmic religions / Buddhism / Indian Buddhism:
+    - Maudgalyayana
+    - Śāriputra
+    - Ānanda
+    - Vasubandhu
+  Religious figures / Dharmic religions / Buddhism / Japanese Buddhism:
+    - Kūkai
+    - Dōgen
+  Religious figures / Dharmic religions / Jainism:
+    - Mahavira
+  Religious figures / Dharmic religions / Sikhism:
+    - Guru Nanak
+    - Guru Gobind Singh
+  Religious figures / Dharmic religions / Theosophy:
+    - Helena Blavatsky
+  Religious figures / Others:
+    - Zoroaster
+    - Aleister Crowley
+  Politicians and leaders / Ancient / Africa:
+    - Gaiseric
+  Politicians and leaders / Ancient / Africa / Egypt:
+    - Narmer
+    - Ahmose I
+    - Hatshepsut
+    - Thutmose III
+    - Akhenaten
+    - Nefertiti
+    - Tutankhamun
+    - Ramesses II
+    - Ramesses III
+    - Ptolemy I Soter
+    - Cleopatra
+  Politicians and leaders / Ancient / Asia / Central Asia, Iran, Caucasus:
+    - Cyrus the Great
+    - Darius the Great
+    - Xerxes I
+  Politicians and leaders / Ancient / Asia / Eastern Asia:
+    - Modu Chanyu
+    - Gwanggaeto the Great
+  Politicians and leaders / Ancient / Asia / Eastern Asia / China:
+    - Qin Shi Huang
+    - Emperor Gaozu of Han
+    - Emperor Wu of Han
+    - Cao Cao
+  Politicians and leaders / Ancient / Asia / Southern Asia:
+    - Ajatashatru
+    - Chandragupta Maurya
+    - Chanakya
+    - Ashoka
+    - Menander I
+    - Kanishka
+    - Samudragupta
+    - Chandragupta II
+  Politicians and leaders / Ancient / Asia / Western Asia:
+    - Sargon of Akkad
+    - Šuppiluliuma I
+    - Ashurbanipal
+    - Tigranes the Great
+    - Mithridates VI Eupator
+    - Herod the Great
+    - Zenobia
+  Politicians and leaders / Ancient / Asia / Western Asia / Babylon:
+    - Hammurabi
+    - Nebuchadnezzar II
+  Politicians and leaders / Ancient / Asia / Western Asia / Hellenistic Kingdoms:
+    - Antigonus I Monophthalmus
+    - Seleucus I Nicator
+    - Antiochus III the Great
+  Politicians and leaders / Ancient / Europe / Eastern Europe:
+    - Decebalus
+    - Attila
+  Politicians and leaders / Ancient / Europe / Eastern Europe / Greece:
+    - Lycurgus
+    - Solon
+    - Themistocles
+    - Pericles
+    - Alcibiades
+    - Demosthenes
+    - Philip II of Macedon
+    - Alexander the Great
+    - Pyrrhus of Epirus
+  Politicians and leaders / Ancient / Europe / Western Europe:
+    - Vercingetorix
+    - Arminius
+    - Boudica
+    - Alaric I
+    - Theodoric I
+    - Theodoric the Great
+  Politicians and leaders / Ancient / Europe / Rome:
+    - Cato the Elder
+    - Gracchi brothers
+    - Julius Caesar
+    - Augustus
+    - Tiberius
+    - Caligula
+    - Nero
+    - Domitian
+    - Trajan
+    - Hadrian
+    - Marcus Aurelius
+    - Diocletian
+    - Constantine the Great
+    - Theodosius I
+  Politicians and leaders / Post-classical / Africa:
+    - Abdallah al-Mahdi Billah
+    - Al-Hakim bi-Amr Allah
+    - Baibars
+    - Mansa Musa
+    - Al-Nasir Muhammad
+    - Amda Seyon I
+    - Zara Yaqob
+    - Askia Muhammad I
+  Politicians and leaders / Post-classical / Americas:
+    - Moctezuma I
+    - Pachacuti
+  Politicians and leaders / Post-classical / Asia / Central Asia, Iran, Caucasus:
+    - Bumin Qaghan
+    - Khosrow I
+    - Mahmud of Ghazni
+    - Tughril
+    - Nizam al-Mulk
+    - Muhammad of Ghor
+    - Timur
+    - Ulugh Beg
+  Politicians and leaders / Post-classical / Asia / East Asia / China:
+    - Emperor Wen of Sui
+    - Emperor Taizong of Tang
+    - Wu Zetian
+    - Emperor Xuanzong of Tang
+    - Emperor Taizu of Song
+    - Hongwu Emperor
+    - Yongle Emperor
+  Politicians and leaders / Post-classical / Asia / East Asia / Korea:
+    - Taejo of Goryeo
+    - Taejo of Joseon
+    - Sejong the Great
+  Politicians and leaders / Post-classical / Asia / East Asia / Mongol Empire:
+    - Genghis Khan
+    - Jochi
+    - Ögedei Khan
+    - Batu Khan
+    - Kublai Khan
+    - Hulagu Khan
+    - Tokhtamysh
+  Politicians and leaders / Post-classical / Asia / Southeastern Asia:
+    - Anawrahta
+    - Suryavarman II
+    - Jayavarman VII
+    - Ram Khamhaeng
+    - Gajah Mada
+  Politicians and leaders / Post-classical / Asia / Southeastern Asia / Vietnam:
+    - Lê Lợi
+  Politicians and leaders / Post-classical / Asia / Southern Asia:
+    - Harsha
+    - Rajaraja I
+    - Prithviraj Chauhan
+    - Alauddin Khalji
+  Politicians and leaders / Post-classical / Asia / Western Asia:
+    - Saladin
+    - Osman I
+    - Mehmed the Conqueror
+  Politicians and leaders / Post-classical / Asia / Western Asia / Caliphates:
+    - Abu Bakr
+    - Uthman
+    - Umar
+    - Mu'awiya I
+    - Abd al-Malik ibn Marwan
+    - Harun al-Rashid
+  Politicians and leaders / Post-classical / Europe / Eastern Europe:
+    - Svatopluk I of Moravia
+    - Stefan Dušan
+    - Vlad the Impaler
+    - Stephen the Great
+  Politicians and leaders / Post-classical / Europe / Eastern Europe / Bulgaria:
+    - Krum
+    - Boris I of Bulgaria
+    - Ivan Asen II
+  Politicians and leaders / Post-classical / Europe / Eastern Europe / Byzantine Empire:
+    - Justinian I
+    - Theodora (wife of Justinian I)
+    - Heraclius
+    - Leo III the Isaurian
+    - Basil II
+    - Manuel I Komnenos
+  Politicians and leaders / Post-classical / Europe / Eastern Europe / Hungary:
+    - Stephen I of Hungary
+    - Béla IV of Hungary
+    - Louis I of Hungary
+    - Matthias Corvinus
+  Politicians and leaders / Post-classical / Europe / Eastern Europe / Poland and Lithuania:
+    - Mieszko I
+    - Bolesław I the Brave
+    - Gediminas
+    - Casimir III the Great
+    - Vytautas
+    - Władysław II Jagiełło
+  Politicians and leaders / Post-classical / Europe / Eastern Europe / Russia and Ukraine:
+    - Sviatoslav I
+    - Vladimir the Great
+    - Yaroslav the Wise
+    - Daniel of Galicia
+    - Alexander Nevsky
+    - Ivan III of Russia
+  Politicians and leaders / Post-classical / Europe / Western Europe / British Isles:
+    - Alfred the Great
+    - Æthelstan
+    - William the Conqueror
+    - Henry II of England
+    - Richard I of England
+    - John, King of England
+    - Edward I of England
+    - Robert the Bruce
+    - Edward III of England
+    - Henry V of England
+  Politicians and leaders / Post-classical / Europe / Western Europe / France:
+    - Clovis I
+    - Charles Martel
+    - Charlemagne
+    - Louis the Pious
+    - Eleanor of Aquitaine
+    - Philip II of France
+    - Louis IX of France
+    - Philip IV of France
+    - Louis XI
+  Politicians and leaders / Post-classical / Europe / Western Europe / Germany, Holy Roman Empire:
+    - Charles the Fat
+    - Otto the Great
+    - Henry IV, Holy Roman Emperor
+    - Frederick I, Holy Roman Emperor
+    - Frederick II, Holy Roman Emperor
+    - Charles IV, Holy Roman Emperor
+    - Sigismund, Holy Roman Emperor
+    - Maximilian I, Holy Roman Emperor
+  Politicians and leaders / Post-classical / Europe / Western Europe / Iberia:
+    - Abd al-Rahman I
+    - Abd al-Rahman III
+    - Afonso I of Portugal
+    - Prince Henry the Navigator
+    - Isabella I of Castile
+    - Ferdinand II of Aragon
+  Politicians and leaders / Post-classical / Europe / Western Europe / Italy:
+    - Robert Guiscard
+    - Roger II of Sicily
+    - Cosimo de' Medici
+    - Lorenzo de' Medici
+    - Cesare Borgia
+  Politicians and leaders / Post-classical / Europe / Western Europe / Papal States:
+    - Pope Gregory VII
+    - Pope Urban II
+    - Pope Innocent III
+    - Pope Boniface VIII
+    - Pope Alexander VI
+    - Pope Julius II
+  Politicians and leaders / Post-classical / Europe / Western Europe / Scandinavia:
+    - Cnut
+    - Margaret I of Denmark
+  Politicians and leaders / Early modern / Africa:
+    - Ahmad ibn Ibrahim al-Ghazi
+    - Ahmad al-Mansur
+    - Nzinga of Ndongo and Matamba
+    - Andrianampoinimerina
+  Politicians and leaders / Early modern / Americas / Aztec:
+    - Moctezuma II
+    - La Malinche
+  Politicians and leaders / Early modern / Americas / Haiti:
+    - Toussaint Louverture
+  Politicians and leaders / Early modern / Americas / Inca:
+    - Atahualpa
+    - Túpac Amaru
+    - Túpac Amaru II
+  Politicians and leaders / Early modern / Americas / United States:
+    - Benjamin Franklin
+    - George Washington
+    - Thomas Jefferson
+  Politicians and leaders / Early modern / Asia and Oceania / Central Asia, Iran, Caucasus:
+    - Ismail I
+    - Abbas the Great
+    - Nader Shah
+    - Ahmad Shah Durrani
+  Politicians and leaders / Early modern / Asia and Oceania / China:
+    - Jiajing Emperor
+    - Nurhaci
+    - Wanli Emperor
+    - Hong Taiji
+    - Kangxi Emperor
+    - Qianlong Emperor
+  Politicians and leaders / Early modern / Asia and Oceania / Japan:
+    - Oda Nobunaga
+    - Toyotomi Hideyoshi
+    - Tokugawa Ieyasu
+  Politicians and leaders / Early modern / Asia and Oceania / Korea:
+    - Seonjo of Joseon
+    - Jeongjo of Joseon
+  Politicians and leaders / Early modern / Asia and Oceania / Southeastern Asia:
+    - Iskandar Muda
+    - Sultan Agung of Mataram
+    - Rama I
+    - Quang Trung
+  Politicians and leaders / Early modern / Asia and Oceania / Southeastern Asia / Burma:
+    - Bayinnaung
+    - Tabinshwehti
+    - Alaungpaya
+  Politicians and leaders / Early modern / Asia and Oceania / Southern Asia:
+    - Krishnadevaraya
+    - Sher Shah Suri
+    - Babur
+    - Humayun
+    - Akbar
+    - Shah Jahan
+    - Aurangzeb
+    - Shivaji
+    - Hyder Ali
+    - Prithvi Narayan Shah
+    - Robert Clive
+    - Tipu Sultan
+  Politicians and leaders / Early modern / Asia and Oceania / Western Asia:
+    - Selim I
+    - Suleiman the Magnificent
+    - Hurrem Sultan
+    - Mehmed IV
+    - Selim III
+  Politicians and leaders / Early modern / Asia and Oceania / Oceania:
+    - Kamehameha I
+  Politicians and leaders / Early modern / Europe / Eastern Europe:
+    - Bohdan Khmelnytsky
+  Politicians and leaders / Early modern / Europe / Eastern Europe / Poland and Lithuania:
+    - Stephen Báthory
+    - Sigismund III Vasa
+    - John III Sobieski
+    - Augustus II the Strong
+  Politicians and leaders / Early modern / Europe / Eastern Europe / Russia:
+    - Ivan the Terrible
+    - Alexis of Russia
+    - Peter the Great
+    - Elizabeth of Russia
+    - Catherine the Great
+  Politicians and leaders / Early modern / Europe / Western Europe:
+    - William the Silent
+  Politicians and leaders / Early modern / Europe / Western Europe / France:
+    - Francis I of France
+    - Catherine de' Medici
+    - Henry IV of France
+    - Cardinal Richelieu
+    - Cardinal Mazarin
+    - Louis XIV
+    - Louis XV
+    - Louis XVI
+    - Marie Antoinette
+  Politicians and leaders / Early modern / Europe / Western Europe / Great Britain and United Kingdom:
+    - Henry VIII
+    - Mary I of England
+    - Elizabeth I
+    - Mary, Queen of Scots
+    - James VI and I
+    - Oliver Cromwell
+    - Charles I of England
+    - William III of England
+    - Robert Walpole
+    - William Murray, 1st Earl of Mansfield
+    - William Blackstone
+    - George III
+    - William Pitt the Younger
+  Politicians and leaders / Early modern / Europe / Western Europe / Holy Roman Empire, Austria:
+    - Charles V, Holy Roman Emperor
+    - Ferdinand I, Holy Roman Emperor
+    - Leopold I, Holy Roman Emperor
+    - Maria Theresa
+    - Joseph II, Holy Roman Emperor
+  Politicians and leaders / Early modern / Europe / Western Europe / Prussia, Germany:
+    - Frederick William I of Prussia
+    - Frederick the Great
+  Politicians and leaders / Early modern / Europe / Western Europe / Scandinavia:
+    - Gustavus Adolphus
+    - Christina, Queen of Sweden
+    - Charles XII of Sweden
+  Politicians and leaders / Early modern / Europe / Western Europe / Southern Europe:
+    - Philip II of Spain
+    - Philip V of Spain
+    - Sebastião José de Carvalho e Melo, 1st Marquis of Pombal
+  Politicians and leaders / Modern / Africa / Central Africa:
+    - Patrice Lumumba
+    - Mobutu Sese Seko
+    - Paul Biya
+  Politicians and leaders / Modern / Africa / Eastern Africa:
+    - Ranavalona I
+    - Jomo Kenyatta
+    - Hastings Banda
+    - Julius Nyerere
+    - Kenneth Kaunda
+    - Idi Amin
+    - Samora Machel
+    - Paul Kagame
+  Politicians and leaders / Modern / Africa / Eastern Africa / Ethiopia:
+    - Tewodros II
+    - Yohannes IV
+    - Menelik II
+    - Haile Selassie
+  Politicians and leaders / Modern / Africa / Northern Africa:
+    - Emir Abdelkader
+    - Muhammad Ahmad
+    - Muammar Gaddafi
+  Politicians and leaders / Modern / Africa / Northern Africa / Egypt:
+    - Muhammad Ali of Egypt
+    - Gamal Abdel Nasser
+    - Anwar Sadat
+  Politicians and leaders / Modern / Africa / Southern Africa:
+    - Shaka
+    - Cecil Rhodes
+    - Nelson Mandela
+    - Robert Mugabe
+  Politicians and leaders / Modern / Africa / Western Africa:
+    - Léopold Sédar Senghor
+    - Nnamdi Azikiwe
+    - Kwame Nkrumah
+    - Olusegun Obasanjo
+    - Kofi Annan
+    - Ellen Johnson Sirleaf
+    - Thomas Sankara
+  Politicians and leaders / Modern / Americas / South America:
+    - José de San Martín
+    - Simón Bolívar
+    - Antonio José de Sucre
+    - Juan Perón
+    - Salvador Allende
+    - Alfredo Stroessner
+    - Augusto Pinochet
+    - Hugo Chávez
+  Politicians and leaders / Modern / Americas / South America / Brazil:
+    - Pedro I of Brazil
+    - Pedro II of Brazil
+    - Getúlio Vargas
+  Politicians and leaders / Modern / Americas / Central America and the Caribbean:
+    - Francisco Morazán
+    - Rafael Trujillo
+    - François Duvalier
+    - Fidel Castro
+  Politicians and leaders / Modern / Americas / Mexico:
+    - Antonio López de Santa Anna
+    - Benito Juárez
+    - Porfirio Díaz
+  Politicians and leaders / Modern / Americas / United States:
+    - Andrew Jackson
+    - Tecumseh
+    - Abraham Lincoln
+    - Sitting Bull
+    - Woodrow Wilson
+    - Theodore Roosevelt
+    - Franklin D. Roosevelt
+    - Harry S. Truman
+    - Eleanor Roosevelt
+    - Dwight D. Eisenhower
+    - J. Edgar Hoover
+    - Lyndon B. Johnson
+    - Ronald Reagan
+    - Richard Nixon
+    - John F. Kennedy
+    - Donald Trump
+    - George W. Bush
+    - Barack Obama
+  Politicians and leaders / Modern / Americas / Canada:
+    - John A. Macdonald
+    - Pierre Trudeau
+  Politicians and leaders / Modern / Asia and Oceania / Central Asia, Iran, Caucasus:
+    - Mohammad Mosaddegh
+    - Ruhollah Khomeini
+    - Mohammed Zahir Shah
+    - Mohammad Reza Pahlavi
+    - Eduard Shevardnadze
+  Politicians and leaders / Modern / Asia and Oceania / China:
+    - Empress Dowager Cixi
+    - Chiang Kai-shek
+    - Soong Ching-ling
+    - Mao Zedong
+    - Zhou Enlai
+    - Deng Xiaoping
+    - Puyi
+    - Jiang Qing
+    - Jiang Zemin
+    - Xi Jinping
+  Politicians and leaders / Modern / Asia and Oceania / Japan:
+    - Itō Hirobumi
+    - Emperor Meiji
+    - Hideki Tojo
+    - Eisaku Satō
+    - Hirohito
+    - Shinzo Abe
+  Politicians and leaders / Modern / Asia and Oceania / Korea:
+    - Syngman Rhee
+    - Kim Il-sung
+    - Park Chung-hee
+  Politicians and leaders / Modern / Asia and Oceania / Southeastern Asia:
+    - Bhumibol Adulyadej
+    - Chulalongkorn
+    - Ho Chi Minh
+    - Sukarno
+    - Ne Win
+    - Ferdinand Marcos
+    - Suharto
+    - Lee Kuan Yew
+    - Pol Pot
+    - Mahathir Mohamad
+    - Corazon Aquino
+  Politicians and leaders / Modern / Asia and Oceania / Southern Asia:
+    - Muhammad Ali Jinnah
+    - D. S. Senanayake
+    - Sheikh Mujibur Rahman
+    - Benazir Bhutto
+  Politicians and leaders / Modern / Asia and Oceania / Southern Asia / India:
+    - George Curzon, 1st Marquess Curzon of Kedleston
+    - Vallabhbhai Patel
+    - Jawaharlal Nehru
+    - Indira Gandhi
+    - Atal Bihari Vajpayee
+    - Manmohan Singh
+    - Narendra Modi
+  Politicians and leaders / Modern / Asia and Oceania / Western Asia:
+    - Ibn Saud
+    - David Ben-Gurion
+    - Yasser Arafat
+    - Saddam Hussein
+    - Benjamin Netanyahu
+    - Ali Abdullah Saleh
+  Politicians and leaders / Modern / Asia and Oceania / Western Asia / Ottoman Empire and Turkey:
+    - Mahmud II
+    - Abdul Hamid II
+    - Talaat Pasha
+    - Mustafa Kemal Atatürk
+    - Recep Tayyip Erdoğan
+  Politicians and leaders / Modern / Europe / Central Europe:
+    - Francis II, Holy Roman Emperor
+    - Klemens von Metternich
+    - Franz Joseph I of Austria
+    - Józef Piłsudski
+    - Alexander Dubček
+    - Václav Havel
+    - Lech Wałęsa
+  Politicians and leaders / Modern / Europe / Southeastern Europe:
+    - Ion Antonescu
+    - Ante Pavelić
+    - Josip Broz Tito
+    - Nicolae Ceaușescu
+    - Slobodan Milošević
+  Politicians and leaders / Modern / Europe / Russia and USSR:
+    - Alexander I of Russia
+    - Nicholas I of Russia
+    - Alexander II of Russia
+    - Nicholas II of Russia
+    - Vladimir Lenin
+    - Joseph Stalin
+    - Leon Trotsky
+    - Nikita Khrushchev
+    - Leonid Brezhnev
+    - Boris Yeltsin
+    - Mikhail Gorbachev
+    - Vladimir Putin
+  Politicians and leaders / Modern / Europe / Scandinavia:
+    - Carl Gustaf Emil Mannerheim
+    - Dag Hammarskjöld
+  Politicians and leaders / Modern / Europe / Western Europe:
+    - Leopold II of Belgium
+  Politicians and leaders / Modern / Europe / Western Europe / France:
+    - Napoleon
+    - Louis Philippe I
+    - Adolphe Thiers
+    - Napoleon III
+    - Georges Clemenceau
+    - Charles de Gaulle
+    - François Mitterrand
+  Politicians and leaders / Modern / Europe / Western Europe / Germany:
+    - William I, German Emperor
+    - Otto von Bismarck
+    - Wilhelm II, German Emperor
+    - Konrad Adenauer
+    - Adolf Hitler
+    - Joseph Goebbels
+    - Erich Honecker
+    - Willy Brandt
+    - Helmut Kohl
+    - Angela Merkel
+  Politicians and leaders / Modern / Europe / Western Europe / Iberia:
+    - António de Oliveira Salazar
+    - Francisco Franco
+    - Juan Carlos I
+  Politicians and leaders / Modern / Europe / Western Europe / Ireland:
+    - Éamon de Valera
+    - Michael Collins (Irish leader)
+  Politicians and leaders / Modern / Europe / Western Europe / Italy:
+    - Camillo Benso, Count of Cavour
+    - Benito Mussolini
+  Politicians and leaders / Modern / Europe / Western Europe / United Kingdom:
+    - Robert Peel
+    - Benjamin Disraeli
+    - William Ewart Gladstone
+    - Queen Victoria
+    - David Lloyd George
+    - Winston Churchill
+    - Clement Attlee
+    - Margaret Thatcher
+    - Elizabeth II
+  Military leaders and theorists / Ancient / Africa:
+    - Hannibal
+  Military leaders and theorists / Ancient / Asia:
+    - Sun Tzu
+    - Zhuge Liang
+  Military leaders and theorists / Ancient / Europe:
+    - Leonidas I
+    - Scipio Africanus
+    - Sulla
+    - Pompey
+    - Mark Antony
+    - Flavius Aetius
+  Military leaders and theorists / Post-classical:
+    - Khalid ibn al-Walid
+    - Amr ibn al-As
+    - El Cid
+    - Godfrey of Bouillon
+    - Subutai
+    - Trần Hưng Đạo
+    - Jan Žižka
+    - Skanderbeg
+    - John Hunyadi
+    - Joan of Arc
+    - Afonso de Albuquerque
+  Military leaders and theorists / Early modern / Asia:
+    - Yi Sun-sin
+    - Miyamoto Musashi
+  Military leaders and theorists / Early modern / Europe:
+    - Hayreddin Barbarossa
+    - Francisco Pizarro
+    - Hernán Cortés
+    - Fernando Álvarez de Toledo, 3rd Duke of Alba
+    - Francis Drake
+    - Michiel de Ruyter
+    - John Churchill, 1st Duke of Marlborough
+    - Prince Eugene of Savoy
+    - Alexander Suvorov
+    - Horatio Nelson, 1st Viscount Nelson
+  Military leaders and theorists / Modern / Americas:
+    - Ulysses S. Grant
+    - John J. Pershing
+    - Douglas MacArthur
+    - George C. Marshall
+  Military leaders and theorists / Modern / Asia:
+    - Enver Pasha
+    - Isoroku Yamamoto
+    - Võ Nguyên Giáp
+  Military leaders and theorists / Modern / Europe:
+    - Arthur Wellesley, 1st Duke of Wellington
+    - Carl von Clausewitz
+    - Helmuth von Moltke the Elder
+    - Giuseppe Garibaldi
+    - Paul von Hindenburg
+    - Ferdinand Foch
+    - Robert Baden-Powell, 1st Baron Baden-Powell
+    - Erich Ludendorff
+    - Bernard Montgomery
+    - T. E. Lawrence
+    - Erwin Rommel
+    - Hermann Göring
+    - Georgy Zhukov
+    - Heinrich Himmler
+  Rebels, revolutionaries and activists / Ancient:
+    - Spartacus
+    - Trưng sisters
+  Rebels, revolutionaries and activists / Post-classical:
+    - Abu Muslim
+    - Babak Khorramdin
+    - Huang Chao
+  "Rebels, revolutionaries and activists / Early modern / Early modern: General":
+    - Bartolomé de las Casas
+    - Miguel Hidalgo y Costilla
+  Rebels, revolutionaries and activists / Early modern / Europe:
+    - Thomas Müntzer
+    - Yemelyan Pugachev
+    - William Wilberforce
+  Rebels, revolutionaries and activists / Early modern / Europe / France:
+    - Jean-Paul Marat
+    - Maximilien Robespierre
+    - Georges Danton
+  Rebels, revolutionaries and activists / Modern / Americas:
+    - Louis Riel
+    - Marcus Garvey
+    - Che Guevara
+  Rebels, revolutionaries and activists / Modern / Americas / Mexico:
+    - Pancho Villa
+    - Emiliano Zapata
+  Rebels, revolutionaries and activists / Modern / Americas / United States:
+    - Sojourner Truth
+    - Elizabeth Cady Stanton
+    - Frederick Douglass
+    - Susan B. Anthony
+    - Harriet Tubman
+    - John Muir
+    - Booker T. Washington
+    - Jane Addams
+    - W. E. B. Du Bois
+    - Margaret Sanger
+    - Helen Keller
+    - Rosa Parks
+    - Betty Friedan
+    - Malcolm X
+    - Martin Luther King Jr.
+    - Harvey Milk
+  Rebels, revolutionaries and activists / Modern / Africa:
+    - Sayyid Qutb
+    - Ken Saro-Wiwa
+    - Steve Biko
+  Rebels, revolutionaries and activists / Modern / Asia:
+    - Diponegoro
+    - Hong Xiuquan
+    - José Rizal
+    - Sun Yat-sen
+    - Aung San
+    - Aung San Suu Kyi
+    - Osama bin Laden
+  Rebels, revolutionaries and activists / Modern / Asia / India:
+    - Rani of Jhansi
+    - Bal Gangadhar Tilak
+    - Mahatma Gandhi
+    - B. R. Ambedkar
+    - Subhas Chandra Bose
+  Rebels, revolutionaries and activists / Modern / Europe:
+    - Henry Dunant
+    - Emmeline Pankhurst
+    - Theodor Herzl
+    - Emma Goldman
+    - Rosa Luxemburg
+  Scientists, inventors and mathematicians / Pre-modern figures / Ancient history:
+    - Pythagoras
+    - Hippocrates
+    - Euclid
+    - Archimedes
+    - Eratosthenes
+    - Apollonius of Perga
+    - Hipparchus
+    - Pliny the Elder
+    - Cai Lun
+    - Hero of Alexandria
+    - Zhang Heng
+    - Ptolemy
+    - Galen
+    - Diophantus
+    - Hypatia
+  Scientists, inventors and mathematicians / Pre-modern figures / Post-classical history:
+    - Aryabhata
+    - Brahmagupta
+    - Jabir ibn Hayyan
+    - Muhammad ibn Musa al-Khwarizmi
+    - Abu Bakr al-Razi
+    - Al-Zahrawi
+    - Ibn al-Haytham
+    - Al-Biruni
+    - Avicenna
+    - Su Song
+    - Shen Kuo
+    - Fibonacci
+    - Nasir al-Din al-Tusi
+    - Johannes Gutenberg
+  Scientists, inventors and mathematicians / Physics / Early modern:
+    - Christiaan Huygens
+    - Robert Hooke
+    - Isaac Newton
+    - Mikhail Lomonosov
+    - Henry Cavendish
+  Scientists, inventors and mathematicians / Physics / Modern:
+    - Thomas Young (scientist)
+    - André-Marie Ampère
+    - Amedeo Avogadro
+    - Hans Christian Ørsted
+    - Augustin-Jean Fresnel
+    - Georg Ohm
+    - Michael Faraday
+    - Nicolas Léonard Sadi Carnot
+    - James Prescott Joule
+    - Léon Foucault
+    - Hermann von Helmholtz
+    - Gustav Kirchhoff
+    - William Thomson, 1st Baron Kelvin
+    - James Clerk Maxwell
+    - Johannes Diderik van der Waals
+    - Ernst Mach
+    - Ludwig Boltzmann
+    - Wilhelm Röntgen
+    - Henri Becquerel
+    - Albert A. Michelson
+    - Hendrik Lorentz
+    - J. J. Thomson
+    - Heinrich Hertz
+    - Max Planck
+    - Pierre Curie
+    - William Henry Bragg
+    - Marie Curie
+    - Robert Andrews Millikan
+    - Ernest Rutherford
+    - Lise Meitner
+    - Albert Einstein
+    - Max Born
+    - Niels Bohr
+    - Erwin Schrödinger
+    - C. V. Raman
+    - James Chadwick
+    - Louis de Broglie
+    - Satyendra Nath Bose
+    - Wolfgang Pauli
+    - Ernest Lawrence
+    - Enrico Fermi
+    - Werner Heisenberg
+    - Paul Dirac
+    - J. Robert Oppenheimer
+    - Hans Bethe
+    - Edward Teller
+  Scientists, inventors and mathematicians / Physics / Contemporary:
+    - Chien-Shiung Wu
+    - Richard Feynman
+    - Andrei Sakharov
+    - Yang Chen-Ning
+    - Murray Gell-Mann
+    - Charles K. Kao
+    - Stephen Hawking
+  Scientists, inventors and mathematicians / Astronomy:
+    - Nicolaus Copernicus
+    - Tycho Brahe
+    - Galileo Galilei
+    - Johannes Kepler
+    - Edmond Halley
+    - William Herschel
+    - Caroline Herschel
+    - Edwin Hubble
+    - Georges Lemaître
+    - Carl Sagan
+  Scientists, inventors and mathematicians / Chemistry / Early modern:
+    - Robert Boyle
+    - Joseph Priestley
+    - Antoine Lavoisier
+    - John Dalton
+  Scientists, inventors and mathematicians / Chemistry / Modern:
+    - Joseph Louis Gay-Lussac
+    - Humphry Davy
+    - Jöns Jacob Berzelius
+    - Friedrich Wöhler
+    - Justus von Liebig
+    - Dmitri Mendeleev
+    - Josiah Willard Gibbs
+    - Jacobus Henricus van 't Hoff
+    - Svante Arrhenius
+    - Fritz Haber
+    - Gilbert N. Lewis
+    - Otto Hahn
+    - Irving Langmuir
+    - Peter Debye
+    - Harold Urey
+    - Linus Pauling
+    - Dorothy Hodgkin
+    - Robert Burns Woodward
+    - Frederick Sanger
+  Scientists, inventors and mathematicians / Biology / Early modern:
+    - Antonie van Leeuwenhoek
+    - Carl Linnaeus
+    - Joseph Banks
+    - Jean-Baptiste Lamarck
+  Scientists, inventors and mathematicians / Biology / Modern:
+    - Georges Cuvier
+    - John James Audubon
+    - Louis Agassiz
+    - Charles Darwin
+    - Joseph Dalton Hooker
+    - Gregor Mendel
+    - Alfred Russel Wallace
+    - Thomas Henry Huxley
+    - Ernst Haeckel
+    - Edward Drinker Cope
+    - Eugenius Warming
+    - Santiago Ramón y Cajal
+    - George Washington Carver
+    - Alfred Kinsey
+    - Hans Krebs (biochemist)
+    - Barbara McClintock
+    - Konrad Lorenz
+    - Rachel Carson
+    - Norman Borlaug
+    - Francis Crick
+    - Rosalind Franklin
+    - James Watson
+    - Jane Goodall
+    - W. D. Hamilton
+    - Stephen Jay Gould
+  Scientists, inventors and mathematicians / Medicine / Early modern:
+    - Paracelsus
+    - Andreas Vesalius
+    - William Harvey
+    - Luigi Galvani
+    - Edward Jenner
+  Scientists, inventors and mathematicians / Medicine / Modern:
+    - Claude Bernard
+    - John Snow
+    - Ignaz Semmelweis
+    - Florence Nightingale
+    - Louis Pasteur
+    - Joseph Lister
+    - Robert Koch
+    - Alexander Fleming
+    - Jonas Salk
+  Scientists, inventors and mathematicians / Earth science and physical geography:
+    - James Hutton
+    - Alexander von Humboldt
+    - Charles Lyell
+    - Alfred Wegener
+    - Jacques Cousteau
+    - Marie Tharp
+  Scientists, inventors and mathematicians / Inventors and engineers / Early modern:
+    - James Watt
+    - Montgolfier brothers
+    - Alessandro Volta
+    - Nicéphore Niépce
+    - Robert Fulton
+  Scientists, inventors and mathematicians / Inventors and engineers / Modern:
+    - George Stephenson
+    - Louis Daguerre
+    - Samuel Morse
+    - Isambard Kingdom Brunel
+    - Cyrus McCormick
+    - Nicolaus Otto
+    - Gustave Eiffel
+    - Alfred Nobel
+    - Carl Benz
+    - Thomas Edison
+    - Alexander Graham Bell
+    - Emile Berliner
+    - Charles Algernon Parsons
+    - George Eastman
+    - Nikola Tesla
+    - Rudolf Diesel
+    - Leo Baekeland
+    - Wright brothers
+    - Lee de Forest
+    - Guglielmo Marconi
+    - Robert H. Goddard
+    - John Logie Baird
+    - Philo Farnsworth
+    - Sergei Korolev
+    - John Bardeen
+    - William Shockley
+    - Wernher von Braun
+    - Jack Kilby
+  Scientists, inventors and mathematicians / Mathematicians / Early modern:
+    - Gerolamo Cardano
+    - Pierre de Fermat
+    - Blaise Pascal
+    - Gottfried Wilhelm Leibniz
+    - Jacob Bernoulli
+    - Johann Bernoulli
+    - Daniel Bernoulli
+    - Leonhard Euler
+    - Jean le Rond d'Alembert
+    - Joseph-Louis Lagrange
+    - Gaspard Monge
+    - Adrien-Marie Legendre
+    - Pierre-Simon Laplace
+  Scientists, inventors and mathematicians / Mathematicians / Modern:
+    - Joseph Fourier
+    - Carl Friedrich Gauss
+    - Siméon Denis Poisson
+    - Augustin-Louis Cauchy
+    - Nikolai Lobachevsky
+    - Niels Henrik Abel
+    - Carl Gustav Jacob Jacobi
+    - Peter Gustav Lejeune Dirichlet
+    - William Rowan Hamilton
+    - Évariste Galois
+    - Karl Weierstrass
+    - George Boole
+    - Arthur Cayley
+    - Charles Hermite
+    - Bernhard Riemann
+    - Richard Dedekind
+    - Georg Cantor
+    - Gottlob Frege
+    - Sofya Kovalevskaya
+    - Henri Poincaré
+    - Karl Pearson
+    - David Hilbert
+    - G. H. Hardy
+    - Emmy Noether
+    - Hermann Weyl
+    - Srinivasa Ramanujan
+    - Ronald Fisher
+    - Stefan Banach
+    - Alfred Tarski
+    - Andrey Kolmogorov
+    - John von Neumann
+    - Kurt Gödel
+    - Claude Shannon
+    - Benoit Mandelbrot
+    - Alexander Grothendieck
+  Scientists, inventors and mathematicians / Computer scientists:
+    - Charles Babbage
+    - Ada Lovelace
+    - Grace Hopper
+    - Konrad Zuse
+    - Alan Turing
+    - Douglas Engelbart
+    - Edsger W. Dijkstra
+    - Donald Knuth
+    - Dennis Ritchie
+    - Steve Wozniak
+    - Tim Berners-Lee
+    - Linus Torvalds
+  Sports figures / Individual sports / Athletics:
+    - Pierre de Coubertin
+    - Paavo Nurmi
+    - Jesse Owens
+    - Fanny Blankers-Koen
+    - Wilma Rudolph
+    - Florence Griffith Joyner
+    - Carl Lewis
+    - Jackie Joyner-Kersee
+    - Haile Gebrselassie
+    - Usain Bolt
+  Sports figures / Individual sports / Auto racing:
+    - Enzo Ferrari
+    - Juan Manuel Fangio
+    - Michael Schumacher
+  Sports figures / Individual sports / Body-building:
+    - Arnold Schwarzenegger
+  Sports figures / Individual sports / Boxing:
+    - Joe Louis
+    - Sugar Ray Robinson
+    - Muhammad Ali
+  Sports figures / Individual sports / Chess:
+    - Bobby Fischer
+    - Garry Kasparov
+  Sports figures / Individual sports / Cycling:
+    - Eddy Merckx
+  Sports figures / Individual sports / Figure skating:
+    - Sonja Henie
+    - Yuzuru Hanyu
+  Sports figures / Individual sports / Golf:
+    - Jack Nicklaus
+    - Tiger Woods
+  Sports figures / Individual sports / Gymnastics:
+    - Larisa Latynina
+    - Nadia Comăneci
+    - Simone Biles
+  Sports figures / Individual sports / Martial arts:
+    - Kanō Jigorō
+    - Bruce Lee
+  Sports figures / Individual sports / Swimming:
+    - Johnny Weissmuller
+    - Michael Phelps
+  Sports figures / Individual sports / Tennis:
+    - Rod Laver
+    - Margaret Court
+    - Martina Navratilova
+    - Steffi Graf
+    - Roger Federer
+    - Serena Williams
+    - Novak Djokovic
+  Sports figures / Individual sports / Wrestling:
+    - Aleksandr Karelin
+  Sports figures / Individual sports / Multiple sports:
+    - Jim Thorpe
+    - Babe Didrikson Zaharias
+  Sports figures / Team sports / American football:
+    - Tom Brady
+  Sports figures / Team sports / Association football:
+    - Alfredo Di Stéfano
+    - Pelé
+    - Franz Beckenbauer
+    - Johan Cruyff
+    - Diego Maradona
+    - Zinedine Zidane
+    - Cristiano Ronaldo
+    - Marta (footballer)
+    - Lionel Messi
+  Sports figures / Team sports / Baseball:
+    - Babe Ruth
+    - Jackie Robinson
+  Sports figures / Team sports / Basketball:
+    - Kareem Abdul-Jabbar
+    - Michael Jordan
+    - LeBron James
+  Sports figures / Team sports / Cricket:
+    - W. G. Grace
+    - Don Bradman
+    - Sachin Tendulkar
+  Sports figures / Team sports / Field hockey:
+    - Dhyan Chand
+  Sports figures / Team sports / Ice hockey:
+    - Gordie Howe
+    - Wayne Gretzky
+  Sports figures / Team sports / Rugby union:
+    - Jonah Lomu
+  Criminals:
+    - Blackbeard
+    - Jack the Ripper
+    - Al Capone
+    - Pablo Escobar

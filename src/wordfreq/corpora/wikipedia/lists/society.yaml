@@ -1,0 +1,1046 @@
+# Wikipedia's Level 4 Society and social sciences list, as of the August 2026 revision.
+# Politics, economics, law, education, language and culture.  Abstract
+#
+# 926 titles in 87 groups, resolved against the
+# enwiki-20220501 snapshot: a title renamed since then is stored under its
+# 2022 spelling so wiki_dump can find it by exact title.
+#
+# 11 titles were redirects in 2022 and are stored
+# under the target they redirect to:
+#   Adposition  ->  Preposition and postposition
+#   Eskaleut languages  ->  Eskimo–Aleut languages
+#   Ethnicity  ->  Ethnic group
+#   Exam  ->  Test (assessment)
+#   Haudenosaunee  ->  Iroquois
+#   Kurdish language  ->  Kurdish languages
+#   LMU Munich  ->  Ludwig Maximilian University of Munich
+#   Mortgage  ->  Mortgage loan
+#   Sámi people  ->  Sámi
+#   Tibetans  ->  Tibetan people
+#   Trust (law)  ->  Trust law
+#
+# 6 titles have no snapshot article under any
+# spelling tried, and are dropped:
+#   AT&T
+#   Paper money
+#   Power (political science)
+#   San peoples
+#   Television broadcaster
+#   Welfare spending
+
+source: Wikipedia:Vital articles/Level 4/Society and social sciences
+snapshot: enwiki-20220501
+groups:
+  "Society and social sciences: General":
+    - Communication
+    - Conversation
+    - Nonverbal communication
+    - Body language
+    - Social science
+    - Humanities
+    - Information
+    - Question
+    - Safety
+  Anthropology:
+    - Anthropology
+    - Cultural anthropology
+    - Linguistic anthropology
+  Anthropology / Societal adaptations:
+    - Farmer
+    - Hunter-gatherer
+    - Nomad
+  "Business and economics / Business and economics: General":
+    - Business
+    - Company
+    - Corporation
+    - Partnership
+    - Commerce
+    - E-commerce
+    - Economics
+    - Macroeconomics
+    - Microeconomics
+    - Econometrics
+    - Economic growth
+    - Economy
+    - Economy of China
+    - Economy of the European Union
+    - Economy of the United States
+    - World economy
+    - Gross domestic product
+    - Goods
+    - Service (economics)
+    - Inflation
+    - Deflation
+    - Labour economics
+    - Market (economics)
+    - Black market
+    - Market failure
+    - Monopoly
+    - Competition (economics)
+    - Supply and demand
+    - Productivity
+    - Subsidy
+    - Price
+    - Tax
+    - Income tax
+    - Profit (economics)
+    - Property tax
+    - Sales tax
+    - Value-added tax
+    - Trade
+    - International trade
+    - Protectionism
+    - Management
+    - Logistics
+    - Marketing
+    - Advertising
+    - Brand
+    - Sales
+    - Retail
+    - Marketplace
+    - Shopping
+    - Shopping center
+    - Property
+    - Capital (economics)
+    - Agriculture
+    - Construction
+    - Energy industry
+    - Film industry
+    - Fishing industry
+    - Forestry
+    - Fur trade
+    - Hunting
+    - Fishing
+    - Whaling
+    - Manufacturing
+    - Aerospace manufacturer
+    - Automotive industry
+    - Chemical industry
+    - Clothing industry
+    - Food industry
+    - Textile manufacturing
+    - Mining
+    - Music industry
+    - Insurance
+    - Investment
+    - Derivative (finance)
+    - Real estate
+    - Stock
+    - Stock exchange
+    - New York Stock Exchange
+    - London Stock Exchange
+  "Business and economics / Banking and finance / Banking and finance: General":
+    - Accounting
+    - Bank
+    - Bankruptcy
+    - Cheque
+    - Debit card
+    - Debt
+    - Credit card
+    - Interest
+    - Loan
+    - Mortgage loan
+    - Finance
+  Business and economics / Banking and finance / Money:
+    - Money
+    - Currency
+    - Coin
+    - Exchange rate
+  Business and economics / Banking and finance / Money / Specific currencies:
+    - Euro
+    - Japanese yen
+    - Pound sterling
+    - Renminbi
+    - United States dollar
+  Business and economics / Employment:
+    - Domestic worker
+    - Employment
+    - Layoff
+    - Retirement
+    - Pension
+    - Unemployment
+    - Wage
+    - Work (human activity)
+  "Business and economics / Companies / Companies: General":
+    - Alibaba Group
+    - Amazon (company)
+    - Apple Inc.
+    - General Electric
+    - Google
+    - IBM
+    - McDonald's
+    - Microsoft
+    - Nestlé
+    - Samsung
+    - Standard Oil
+    - Tencent
+    - Walmart
+  Business and economics / Companies / Car companies:
+    - Ford Motor Company
+    - General Motors
+    - Toyota
+    - Volkswagen
+  Business and economics / Companies / Media companies:
+    - Nintendo
+    - The Walt Disney Company
+  Culture / Basics:
+    - Culture
+    - Cultural heritage
+    - Popular culture
+    - Cultural assimilation
+    - Tradition
+    - Oral tradition
+    - Greeting
+    - Body modification
+    - Body piercing
+    - Circumcision
+    - Female genital mutilation
+    - Tattoo
+    - Taboo
+    - Human cannibalism
+  Culture / Festivals, holidays, and observances:
+    - Birthday
+    - Festival
+    - Carnival
+    - Harvest festival
+    - Holi
+    - Diwali
+    - World's fair
+    - Holiday
+    - Chinese New Year
+    - Christmas
+    - Easter
+    - Eid al-Adha
+    - Halloween
+    - New Year's Eve
+    - Nowruz
+    - Passover
+    - Yom Kippur
+    - Ramadan
+    - Eid al-Fitr
+    - Sabbath
+  "Education / Education: General":
+    - Education
+    - Early childhood education
+    - Primary education
+    - Secondary education
+    - Tertiary education
+    - Learning
+    - Skill
+    - Pedagogy
+    - Library
+    - School
+    - Curriculum
+    - Test (assessment)
+    - Homework
+    - Lesson
+    - Teacher
+    - University
+    - College
+    - Academic degree
+    - Bachelor's degree
+    - Doctor of Philosophy
+    - Master's degree
+  Education / Libraries / Africa:
+    - Library of Alexandria
+  Education / Libraries / Americas:
+    - Library of Congress
+  Education / Libraries / Europe:
+    - British Library
+  Education / Educational institutions / Africa:
+    - Al-Azhar University
+  Education / Educational institutions / Americas:
+    - National Autonomous University of Mexico
+    - University of Toronto
+  Education / Educational institutions / Americas / United States:
+    - Harvard University
+    - Columbia University
+    - Johns Hopkins University
+    - Massachusetts Institute of Technology
+    - Princeton University
+    - Stanford University
+    - University of California, Berkeley
+    - Yale University
+  Education / Educational institutions / Asia:
+    - House of Wisdom
+    - Indian Institutes of Technology
+    - Peking University
+    - Tsinghua University
+  Education / Educational institutions / Asia / Japan:
+    - Kyoto University
+    - University of Tokyo
+  Education / Educational institutions / Europe:
+    - ETH Zurich
+    - Moscow State University
+    - Sorbonne University
+    - University of Copenhagen
+    - University of Vienna
+  Education / Educational institutions / Europe / Germany:
+    - Ludwig Maximilian University of Munich
+    - Humboldt University of Berlin
+    - University of Göttingen
+    - Heidelberg University
+  Education / Educational institutions / Europe / Italy:
+    - University of Bologna
+    - Sapienza University of Rome
+  Education / Educational institutions / Europe / UK:
+    - University of Cambridge
+    - University of Oxford
+  "Ethnology / Ethnology: General":
+    - Ethnology
+    - Ethnic group
+    - Indigenous peoples
+    - Diaspora
+    - Ethnocentrism
+    - Ethnography
+    - Self-determination
+  Ethnology / Ethnic groups:
+    - Aboriginal Australians
+    - Adivasi
+    - African Pygmies
+    - Arabs
+    - Austronesian peoples
+    - Bantu peoples
+    - Zulu people
+    - Basques
+    - Berbers
+    - Han Chinese
+    - Hmong people
+    - Indigenous peoples of the Americas
+    - Cherokee
+    - Inuit
+    - Iroquois
+    - Maya peoples
+    - Navajo
+    - Quechua people
+    - Sioux
+    - Jews
+    - Kurds
+    - Maasai people
+    - Māori people
+    - Romani people
+    - Sámi
+    - Slavs
+    - Tibetan people
+    - Turkic peoples
+    - Uyghurs
+    - Yoruba people
+  International organizations / United Nations organizations:
+    - United Nations
+    - International Atomic Energy Agency
+    - International Court of Justice
+    - International Monetary Fund
+    - UNESCO
+    - UNICEF
+    - World Bank Group
+    - World Health Organization
+    - World Trade Organization
+  International organizations / Governmental organizations:
+    - African Union
+    - Arab League
+    - ASEAN
+    - Commonwealth of Independent States
+    - Commonwealth of Nations
+    - Council of Europe
+    - European Union
+    - G20
+    - Interpol
+    - League of Nations
+    - NATO
+    - OECD
+    - OPEC
+    - Organization for Security and Co-operation in Europe
+    - Organization of American States
+  International organizations / Non-governmental organizations:
+    - International Red Cross and Red Crescent Movement
+    - Nobel Prize
+    - Scouting
+  Language / Basics:
+    - Language
+    - Origin of language
+    - Language acquisition
+    - Linguistics
+    - Comparative linguistics
+    - Historical linguistics
+    - Etymology
+    - Linguistic typology
+    - Literacy
+    - Reading
+    - Morphology (linguistics)
+    - Morpheme
+    - Phonetics
+    - Consonant
+    - International Phonetic Alphabet
+    - Prosody (linguistics)
+    - Vowel
+    - Phonology
+    - Phoneme
+    - Syllable
+    - Rhetoric
+    - Semantics
+    - Euphemism
+    - Profanity
+    - Semiotics
+    - Pragmatics
+    - Symbol
+    - Sociolinguistics
+    - Accent (sociolinguistics)
+    - Dialect
+    - Diglossia
+    - Endangered language
+    - Language death
+    - Multilingualism
+    - Slang
+    - Speech
+    - Speech act
+    - Translation
+    - Vocabulary
+    - Word
+    - Writing
+    - Alphabet
+    - Letter (alphabet)
+    - Logogram
+    - Orthography
+    - Transliteration
+    - Writing system
+  Language / Basics / Grammar:
+    - Grammar
+    - Syntax
+    - Sentence (linguistics)
+    - Clause
+    - Phrase
+    - Proverb
+    - Noun
+    - Name
+    - Personal name
+    - Surname
+    - Verb
+    - Grammatical tense
+    - Adjective
+    - Adverb
+    - Pronoun
+    - Preposition and postposition
+    - Conjunction (grammar)
+    - Interjection
+  Language / Language families:
+    - Language family
+    - Afroasiatic languages
+    - Semitic languages
+    - Algic languages
+    - Austroasiatic languages
+    - Austronesian languages
+    - Creole language
+    - Dravidian languages
+    - Eskimo–Aleut languages
+    - Indo-European languages
+    - Indo-Aryan languages
+    - Romance languages
+    - Germanic languages
+    - Iranian languages
+    - Slavic languages
+    - Kartvelian languages
+    - Khoisan languages
+    - Kra–Dai languages
+    - Niger–Congo languages
+    - Bantu languages
+    - Nilo-Saharan languages
+    - Sign language
+    - Sino-Tibetan languages
+    - Trans–New Guinea languages
+    - Turkic languages
+    - Uralic languages
+    - Uto-Aztecan languages
+  Language / Alphabets and writing systems:
+    - Arabic script
+    - Brahmic scripts
+    - Braille
+    - Chinese characters
+    - Cuneiform
+    - Cyrillic script
+    - Devanagari
+    - Egyptian hieroglyphs
+    - Greek alphabet
+    - Hangul
+    - Japanese writing system
+    - Latin script
+    - Maya script
+    - Morse code
+    - Phoenician alphabet
+    - Rosetta Stone
+    - Runes
+  Language / Specific languages / Indo-European languages:
+    - Armenian language
+    - Greek language
+    - Ancient Greek
+  Language / Specific languages / Indo-European languages / Germanic languages:
+    - Danish language
+    - Dutch language
+    - English language
+    - Old English
+    - Middle English
+    - Modern English
+    - German language
+    - Swedish language
+    - Yiddish
+  Language / Specific languages / Indo-European languages / Romance languages:
+    - French language
+    - Italian language
+    - Latin
+    - Portuguese language
+    - Romanian language
+    - Spanish language
+  Language / Specific languages / Indo-European languages / Slavic languages:
+    - Czech language
+    - Polish language
+    - Russian language
+    - Serbo-Croatian
+    - Ukrainian language
+  Language / Specific languages / Indo-European languages / Iranian languages:
+    - Kurdish languages
+    - Pashto
+    - Persian language
+  Language / Specific languages / Indo-European languages / Indo-Aryan languages:
+    - Assamese language
+    - Bengali language
+    - Hindustani language
+    - Hindi
+    - Urdu
+    - Marathi language
+    - Nepali language
+    - Odia language
+    - Pali
+    - Sanskrit
+    - Sindhi language
+    - Sinhala language
+    - Punjabi language
+    - Gujarati language
+  Language / Specific languages / Afroasiatic languages:
+    - Akkadian language
+    - Amharic
+    - Arabic
+    - Classical Arabic
+    - Egyptian Arabic
+    - Aramaic
+    - Berber languages
+    - Egyptian language
+    - Hebrew language
+    - Hausa language
+    - Oromo language
+    - Somali language
+  Language / Specific languages / Sino-Tibetan languages:
+    - Burmese language
+    - Chinese language
+    - Classical Chinese
+    - Hakka Chinese
+    - Mandarin Chinese
+    - Wu Chinese
+    - Yue Chinese
+    - Min Chinese
+  Language / Specific languages / Austronesian languages:
+    - Cebuano language
+    - Indonesian language
+    - Javanese language
+    - Malagasy language
+    - Malay language
+    - Sundanese language
+    - Tagalog language
+  Language / Specific languages / Austro-Asiatic languages:
+    - Khmer language
+    - Vietnamese language
+  Language / Specific languages / Dravidian languages:
+    - Kannada
+    - Malayalam
+    - Tamil language
+    - Telugu language
+  Language / Specific languages / Niger–Congo languages:
+    - Fula language
+    - Igbo language
+    - Swahili
+    - Yoruba language
+  Language / Specific languages / Turkic languages:
+    - Azerbaijani language
+    - Kazakh language
+    - Turkish language
+    - Uzbek language
+  Language / Specific languages / Other languages:
+    - Esperanto
+    - Japanese language
+    - Hungarian language
+    - Korean language
+    - Quechuan languages
+    - Sumerian language
+    - Thai language
+  Law / Basics:
+    - Law
+    - Alternative dispute resolution
+    - Appeal
+    - Capital punishment
+    - Constitution
+    - Contract
+    - Damages
+    - Equity (law)
+    - Evidence (law)
+    - Forensic science
+    - Impartiality
+    - Injunction
+    - Jurisprudence
+    - Statutory interpretation
+    - Justice
+    - Lawsuit
+    - Negligence
+    - Presumption of innocence
+    - Rights
+    - Civil and political rights
+    - Freedom of religion
+    - Freedom of speech
+    - Suffrage
+    - Women's suffrage
+    - Tort
+    - Trial
+    - Witness
+  Law / Crime:
+    - Crime
+    - Organized crime
+    - Assault
+    - Battery (crime)
+    - Domestic violence
+    - Driving under the influence
+    - Financial crime
+    - Fraud
+    - Homicide
+    - Murder
+    - Assassination
+    - Serial killer
+    - Human trafficking
+    - Identity theft
+    - Illegal drug trade
+    - Kidnapping
+    - Looting
+    - Piracy
+    - Sexual assault
+    - Rape
+    - Smuggling
+    - Theft
+    - Robbery
+    - Torture
+  Law / Institutions and professions:
+    - Court
+    - Judge
+    - Judiciary
+    - Rule of law
+    - Jury
+    - Lawyer
+    - Police
+    - Security
+    - Surveillance
+  Law / Subjects:
+    - Administrative law
+    - Civil law (legal system)
+    - Common law
+    - Criminal law
+    - Customary law
+    - Intellectual property
+    - Copyright
+    - Patent
+    - International law
+    - Precedent
+    - Property law
+    - Inheritance
+    - Will and testament
+    - Religious law
+    - Statute
+    - Treaty
+    - Trust law
+  Law / Specific documents:
+    - Code of Hammurabi
+    - Corpus Juris Civilis
+    - Declaration of the Rights of Man and of the Citizen
+    - Geneva Conventions
+    - International Covenant on Civil and Political Rights
+    - International Covenant on Economic, Social and Cultural Rights
+    - Magna Carta
+    - Napoleonic Code
+    - Constitution of the United States
+    - United States Declaration of Independence
+    - Universal Declaration of Human Rights
+  "Mass media / Mass media: General":
+    - Cartoon
+    - Censorship
+    - Internet meme
+    - Journalism
+    - Mass media
+    - Multimedia
+    - News
+    - News media
+    - Photojournalism
+    - Propaganda
+    - Public relations
+    - Publishing
+    - Western (genre)
+  Mass media / Academic journals:
+    - Academic journal
+    - Nature (journal)
+    - Science (journal)
+  Mass media / Magazines:
+    - Magazine
+    - National Geographic
+    - Playboy
+    - Scientific American
+    - Time (magazine)
+    - Vogue (magazine)
+    - Weekly Shōnen Jump
+  Mass media / Newspapers:
+    - Newspaper
+    - The Times
+    - The New York Times
+    - The Wall Street Journal
+    - The Washington Post
+    - Le Monde
+  Mass media / Radio:
+    - The Hitchhiker's Guide to the Galaxy
+  Mass media / Television:
+    - BBC
+    - NBC
+  Mass media / Internet media:
+    - Facebook
+    - TikTok
+    - Wikipedia
+    - YouTube
+  Politics and government / Politics:
+    - Politics
+    - Political science
+    - Civics
+    - Citizenship
+    - Civil liberties
+    - Cult of personality
+    - Diplomacy
+    - Diplomatic mission
+    - International relations
+    - Election
+    - Opinion poll
+    - Political campaign
+    - Political party
+    - Chinese Communist Party
+    - Referendum
+    - Voting
+    - Globalization
+    - Imperialism
+    - Colonialism
+    - Nation
+    - Revolution
+    - Coup d'état
+    - Riot
+  Politics and government / Forms of government:
+    - Government
+    - Autocracy
+    - Democracy
+    - Dictatorship
+    - Monarchy
+    - Absolute monarchy
+    - Constitutional monarchy
+    - Oligarchy
+    - Republic
+    - Theocracy
+  Politics and government / State structure and administration:
+    - State (polity)
+    - City-state
+    - Sovereign state
+    - Unitary state
+    - Federation
+    - Federalism
+    - Confederation
+    - Empire
+    - Welfare state
+    - Sovereignty
+    - Decentralization
+    - Executive (government)
+    - Head of state
+    - Legislature
+    - Parliament
+    - National security
+    - Public administration
+    - Civil service
+    - Public policy
+    - Economic policy
+    - Separation of powers
+  Politics and government / Ideology and political theory:
+    - Ideology
+    - Political spectrum
+    - Anarchism
+    - Authoritarianism
+    - Totalitarianism
+    - Capitalism
+    - Christian democracy
+    - Communism
+    - Marxism
+    - Marxism–Leninism
+    - Conservatism
+    - Fascism
+    - Nazism
+    - Green politics
+    - Islamism
+    - Liberalism
+    - Libertarianism
+    - Multiculturalism
+    - Nationalism
+    - Patriotism
+    - Populism
+    - Socialism
+    - Social democracy
+  Psychology / Basics:
+    - Psychology
+    - Clinical psychology
+    - Cognitive psychology
+    - Developmental psychology
+    - Personality psychology
+    - Psychotherapy
+    - Social psychology
+  Psychology / Psychology schools:
+    - Analytical psychology
+    - Behaviorism
+    - Evolutionary psychology
+    - Gestalt psychology
+    - Humanistic psychology
+    - Psychoanalysis
+  Psychology / Interpersonal relations:
+    - Aggression
+    - Altruism
+    - Blame
+    - Bullying
+    - Charisma
+    - Competition
+    - Conformity
+    - Consent
+    - Cooperation
+    - Empathy
+    - Forgiveness
+    - Honour
+    - Lie
+    - Privacy
+    - Prejudice
+    - Punishment
+    - Respect
+    - Revenge
+    - Shyness
+    - Trust (social science)
+  Psychology / Emotions and traits:
+    - Emotion
+    - Anger
+    - Anxiety
+    - Courage
+    - Curiosity
+    - Dignity
+    - Disgust
+    - Doubt
+    - Embarrassment
+    - Extraversion and introversion
+    - Fear
+    - Greed
+    - Grief
+    - Guilt (emotion)
+    - Happiness
+    - Hatred
+    - Hope
+    - Humour
+    - Jealousy
+    - Love
+    - Lust
+    - Pleasure
+    - Sadness
+    - Self-esteem
+    - Shame
+    - Surprise (emotion)
+    - Suffering
+  Psychology / Concepts:
+    - Amnesia
+    - Attention
+    - Bias
+    - Cognition
+    - Cognitive development
+    - Consciousness
+    - Creativity
+    - Dream
+    - Feeling
+    - Human behavior
+    - Human intelligence
+    - Hypnosis
+    - Imagination
+    - Introspection
+    - Memory
+    - Mind
+    - Mood (psychology)
+    - Motivation
+    - Perception
+    - Personality
+    - Stereotype
+    - Thought
+  Society / Basics:
+    - Society
+    - Civil society
+    - Institution
+    - Social norm
+    - Social order
+    - Solidarity
+    - Public
+  Society / Groups:
+    - Club (organization)
+    - Community
+    - Gang
+    - Organization
+    - Non-governmental organization
+    - Nonprofit organization
+    - Trade union
+    - Secret society
+    - Social network
+    - Support group
+    - Tribe
+    - Voluntary association
+  Society / Services and institutions:
+    - Emergency management
+    - Firefighting
+    - Orphanage
+    - Prison
+    - Social work
+  Society / Issues:
+    - Social issue
+    - Animal rights
+    - Activism
+    - Child labour
+    - Corruption
+    - Deforestation
+    - Disability
+    - Environmentalism
+    - Euthanasia
+    - Famine
+    - Homelessness
+    - Human migration
+    - Immigration
+    - Human overpopulation
+    - One-child policy
+    - Humanitarianism
+    - Hunger
+    - Pacifism
+    - Peace
+    - World peace
+    - Pollution
+    - Air pollution
+    - Water pollution
+    - Population ageing
+    - Protest
+    - Poverty
+    - Social movement
+    - Sustainable development
+    - Violence
+  Society / Social status:
+    - Celebrity
+    - Economic inequality
+    - Gender equality
+    - Feminism
+    - Women's rights
+    - Human rights
+    - Liberty
+    - Social equality
+    - Minority group
+    - Political freedom
+    - Race (human categorization)
+    - Social stratification
+    - Slavery
+    - Wealth
+  Society / Social status / Caste:
+    - Caste
+    - Caste system in India
+  Society / Social status / Social classes:
+    - Social class
+    - Clergy
+    - Eunuch
+    - Upper class
+    - Middle class
+    - Working class
+    - Underclass
+    - Peasant
+  Society / Social status / Discrimination:
+    - Discrimination
+    - Ableism
+    - Class discrimination
+    - Homophobia
+    - Racism
+    - Sexism
+    - Genocide denial
+  Sociology:
+    - Sociology
+    - Criminology
+    - Demography
+    - Census
+    - Etiquette
+    - Generation
+    - Peer pressure
+    - Social change
+    - Industrialisation
+    - Social control
+    - Conspiracy theory
+    - Deviance (sociology)
+    - Social group
+    - Identity (social science)
+    - Social reality
+    - Social research
+    - Social theory
+    - Socialization
+    - Sociological theory
+    - Structure and agency
+    - Subculture
+    - Fandom
+  War and military / Basics:
+    - War
+    - Casualty (person)
+    - Conscription
+    - Desertion
+    - Duel
+    - Law of war
+    - Militarism
+    - Prisoner of war
+    - Refugee
+    - War crime
+    - Genocide
+  War and military / Wars by type:
+    - Civil war
+    - Counterinsurgency
+    - Ethnic conflict
+    - Insurgency
+    - Invasion
+    - Religious war
+  War and military / Warfare by type:
+    - Terrorism
+    - Aerial warfare
+    - Anti-aircraft warfare
+    - Armoured warfare
+    - Espionage
+    - Naval warfare
+    - Siege
+    - Sniper
+    - Trench warfare
+  War and military / Military / Basics:
+    - Military
+    - Military education and training
+    - Military–industrial complex
+    - Military science
+    - Military strategy
+    - Military tactics
+  War and military / Military / Military forces:
+    - Army
+    - Cavalry
+    - Infantry
+    - Militia
+    - Navy
+    - Air force
+    - Soldier
+    - Military reserve
+  War and military / Military / Military operations:
+    - Battle
+    - Blockade
+    - Military exercise
+  War and military / Military / Military organization:
+    - Military organization
+    - Staff (military)
+  War and military / Military / Military ranks:
+    - Military rank
+    - Officer (armed forces)

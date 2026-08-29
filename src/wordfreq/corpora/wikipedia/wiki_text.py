@@ -26,6 +26,13 @@ What each construct contributes to the text:
   wrap running prose rather than generating apparatus.  An infobox is a data
   table, and counting it would put "caption", "align" and "px" into an English
   frequency list.
+* **External links** yield nothing -- neither the URL nor its label.
+  ``[https://www.bbc.co.uk/news BBC News]`` is citation apparatus, and its
+  text is a publisher or "Archived from the original" rather than a sentence.
+  A bare URL in prose is stripped too.  Left in, the word tokenizer split
+  these on their punctuation: "http" was rank 80 in the wiki_biology corpus,
+  with "www", "org", "com", "html", "edu", "php", "gov" and "aspx" behind it.
+  A ``[`` with no URL after it is prose ("[sic]") and is kept.
 * **References** yield nothing.  ``<ref>`` content is citation apparatus, the
   same material :mod:`wordfreq.corpora.scotus_text` strips from opinions.
 * **Tables** yield nothing, for the reason infoboxes do not.
@@ -45,6 +52,7 @@ The tokenizer and block model are adapted from the wikitext parser in the slmt
 project.
 """
 
+import re
 from typing import Dict, List, Optional, Sequence, Set, Union
 
 # Templates whose body is running prose rather than generated apparatus, so
@@ -55,11 +63,16 @@ RAW_TEMPLATES = frozenset(["as of", "circa", "lang", "nihongo", "sc"])
 # Link namespaces that are media rather than prose.
 _MEDIA_PREFIXES = ("File:", "Image:", "Media:")
 
+# URL schemes that make a single "[" an external link rather than punctuation,
+# and that mark a bare run of text in prose as a URL.  Wikitext also permits
+# a protocol-relative "//host/path".
+_URL_PREFIXES = ("http://", "https://", "ftp://", "//", "www.")
+
 # HTML tags whose body is prose: the tag itself is dropped and the text it
 # wraps is kept, the way an emphasis marker is.  Without this the tokenizer
 # emits the tag verbatim as text and the word tokenizer reads its name as an
 # English word -- "sub" was wiki_math's 3494-count entry, "sup" its 1980, and
-# "small" (a real word) had 4034 counts in wiki_vital against ~2000 in a book
+# "small" (a real word) had 4034 counts in a wiki corpus against ~2000 in a book
 # corpus of comparable size.
 _PROSE_TAGS = frozenset(
     [
@@ -216,6 +229,14 @@ class ParseBlock:
         elif block == "[[":
             self.sub_blocks.append(LinkBlock())
             self.sub_blocks[-1].is_open = True  # type: ignore[union-attr]
+        elif block == "[":
+            # A single bracket opens an external link only when a URL follows.
+            # In prose "[" is ordinary punctuation -- "[sic]", "[citation
+            # needed]", "[1]" -- so the block decides from its first child
+            # whether it is a link at all, and renders itself as plain text
+            # when it is not.
+            self.sub_blocks.append(ExternalLinkBlock())
+            self.sub_blocks[-1].is_open = True  # type: ignore[union-attr]
         elif block == "{{":
             self.sub_blocks.append(TemplateBlock())
             self.sub_blocks[-1].is_open = True  # type: ignore[union-attr]
@@ -346,6 +367,55 @@ class LinkBlock(ParseBlock):
         if pipe_index < 0:
             return "".join(_node_text(child) for child in self.sub_blocks)
         return "".join(_node_text(child) for child in self.sub_blocks[pipe_index + 1 :])
+
+
+class ExternalLinkBlock(ParseBlock):
+    """A ``[url text]`` external link, contributing no text.
+
+    The URL is not prose, and neither is the label beside it: an external link
+    is citation apparatus, so its text is "BBC News", "Archived from the
+    original" or "Official website" rather than a sentence.  Dropping the whole
+    construct is what :class:`ReferenceBlock` does with a ``<ref>``, and for the
+    same reason -- the ``<ref>``-wrapped citations were already dropped, while
+    these were not, which is how "www", "com", "org" and "html" reached the
+    frequency lists.  The word tokenizer splits a bare URL on its punctuation,
+    so ``https://www.bbc.co.uk/news`` was counted as six English words.
+
+    Only a bracket that actually opens a link is treated as one: ``[`` is
+    ordinary punctuation in prose, so :class:`DocumentBlock` opens this block
+    only when a URL scheme follows the bracket.
+    """
+
+    def add_block(self, block: Node) -> None:
+        if block == "\n\n":
+            # Malformed: an unclosed link cannot span a paragraph break, and
+            # leaving it open would swallow the rest of the article.  Same
+            # guard as LinkBlock's.
+            self.is_open = False
+            return
+        if self.sub_blocks:
+            last = self.sub_blocks[-1]
+            if isinstance(last, ParseBlock) and last.is_open:
+                last.add_block(block)
+                return
+        if block == "]":
+            self.is_open = False
+            return
+        super().add_block(block)
+
+    def _is_link(self) -> bool:
+        """Whether a URL scheme follows the bracket."""
+        if not self.sub_blocks:
+            return False
+        return _node_str(self.sub_blocks[0]).startswith(_URL_PREFIXES)
+
+    def to_text(self) -> str:
+        if self._is_link():
+            return ""
+        # Not a link: "[sic]" and "[1]" are prose, so the bracket and the text
+        # inside it are kept as they were written.
+        inner = "".join(_node_text(child) for child in self.sub_blocks)
+        return f"[{inner}]" if not self.is_open else f"[{inner}"
 
 
 class TemplateBlock(ParseBlock):
@@ -700,6 +770,24 @@ def parse(wikitext: str, page_name: str = "") -> DocumentBlock:
     return WikiTokenizer(page_name).tokenize(wikitext)
 
 
+# A bare URL written in running prose, which no bracket construct covers.
+# Matched on the rendered text rather than during tokenization because the
+# tokenizer splits a URL across several tokens ("https", "://", "www.bbc.co.uk")
+# and rejoining them there would mean re-parsing.
+_BARE_URL_RE = re.compile(r"(?:https?://|ftp://|www\.)\S+", re.IGNORECASE)
+
+
+def _strip_bare_urls(text: str) -> str:
+    """Drop URLs written directly into prose.
+
+    The word tokenizer splits on punctuation, so a surviving
+    ``https://www.bbc.co.uk/news`` is counted as "https", "www", "bbc", "co",
+    "uk" and "news" -- six entries in an English frequency list, none of them
+    words.
+    """
+    return _BARE_URL_RE.sub(" ", text)
+
+
 def _collapse_whitespace(text: str) -> str:
     """Normalize the whitespace left behind by removed constructs."""
     lines = [line.strip() for line in text.splitlines()]
@@ -732,4 +820,4 @@ def wikitext_to_plain_text(wikitext: str, page_name: str = "") -> str:
     """
     if is_redirect(wikitext):
         return ""
-    return _collapse_whitespace(parse(wikitext, page_name).to_text())
+    return _collapse_whitespace(_strip_bare_urls(parse(wikitext, page_name).to_text()))

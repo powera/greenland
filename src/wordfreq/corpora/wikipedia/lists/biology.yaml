@@ -1,0 +1,1026 @@
+# The organism and anatomy half of Wikipedia's Level 4 Biology and health sciences list.
+# Where the ordinary names of plants and animals come from.  The molecular
+# sections of the same page are in molecular_biology.yaml; the health and
+# medicine section is excluded from both.
+#
+# 1004 titles in 10 groups, resolved against the
+# enwiki-20220501 snapshot: a title renamed since then is stored under its
+# 2022 spelling so wiki_dump can find it by exact title.
+
+source: Wikipedia:Vital articles/Level 4/Biology and health sciences
+snapshot: enwiki-20220501
+groups:
+  "Anatomy and morphology: Basics":
+    - Anatomy
+    - Dissection
+    - Organ (biology)
+    - Tissue (biology)
+    - Sexual dimorphism
+  "Anatomy and morphology: Animal":
+    - Endocrine system
+    - Adrenal gland
+    - Thyroid
+    - Gland
+    - Immune system
+    - Antibody
+    - Abdomen
+    - Head
+    - Thorax
+    - Venom
+    - Circulatory system
+    - Artery
+    - Blood
+    - Red blood cell
+    - White blood cell
+    - Capillary
+    - Heart
+    - Lymphatic system
+    - Spleen
+    - Vein
+    - Mouth
+    - Tongue
+    - Esophagus
+    - Stomach
+    - Small intestine
+    - Large intestine
+    - Liver
+    - Pancreas
+    - Muscular system
+    - Muscle cell
+    - Sarcomere
+    - Skeletal muscle
+    - Nervous system
+    - Central nervous system
+    - Neuron
+    - Brain
+    - Brainstem
+    - Cerebellum
+    - Cerebral cortex
+    - Cerebrum
+    - Spinal cord
+    - Peripheral nervous system
+    - Ganglion
+    - Sensory nervous system
+    - Auditory system
+    - Ear
+    - Hearing
+    - Taste
+    - Olfactory system
+    - Nose
+    - Sense of smell
+    - Odor
+    - Somatosensory system
+    - Pain
+    - Visual system
+    - Eye
+    - Compound eye
+    - Visual perception
+    - Color vision
+    - Integumentary system
+    - Breast
+    - Feather
+    - Fingerprint
+    - Fur
+    - Hair
+    - Whiskers
+    - Nail (anatomy)
+    - Scale (anatomy)
+    - Skin
+    - Stinger
+    - Reproductive system
+    - Sex organ
+    - Female reproductive system
+    - Clitoris
+    - Ovary
+    - Placenta
+    - Uterus
+    - Vagina
+    - Male reproductive system
+    - Penis
+    - Testicle
+    - Respiratory system
+    - Gill
+    - Lung
+    - Skeleton
+    - Bone
+    - Jaw
+    - Joint
+    - Pelvis
+    - Skull
+    - Vertebral column
+    - Urinary bladder
+    - Kidney
+    - Urinary system
+    - Connective tissue
+    - Cartilage
+    - Ligament
+    - Tendon
+    - Epithelium
+    - Nervous tissue
+  "Anatomy and morphology: Plant anatomy":
+    - Plant anatomy
+    - Plant morphology
+    - Flower
+    - Fruit
+    - Berry (botany)
+    - Nut (fruit)
+    - Leaf
+    - Root
+    - Plant stem
+    - Bark (botany)
+    - Trunk (botany)
+    - Stoma
+    - Seed
+    - Shrub
+    - Tree
+    - Epidermis (botany)
+    - Ground tissue
+    - Meristem
+    - Vascular tissue
+    - Vascular cambium
+  "Anatomy and morphology: Fungus":
+    - Hypha
+    - Mycelium
+  Organisms:
+    - Eukaryote
+    - Algae
+    - Flagellate
+    - Lichen
+    - Plankton
+  "Organisms: Animals":
+    - Animal
+    - Bilateria
+    - Chordate
+    - Invertebrate
+    - Cnidaria
+    - Coral
+    - Jellyfish
+    - Echinoderm
+    - Sea cucumber
+    - Sea urchin
+    - Starfish
+    - Mollusca
+    - Bivalvia
+    - Oyster
+    - Scallop
+    - Octopus
+    - Squid
+    - Gastropoda
+    - Sponge
+    - Arthropod
+    - Arachnid
+    - Mite
+    - Pseudoscorpion
+    - Scorpion
+    - Spider
+    - Jumping spider
+    - Tarantula
+    - Tick
+    - Crustacean
+    - Decapoda
+    - Crab
+    - Crayfish
+    - Lobster
+    - Shrimp
+    - Krill
+    - Malacostraca
+    - Ostracod
+    - Woodlouse
+    - Hexapoda
+    - Springtail
+    - Insect
+    - Pterygota
+    - Cockroach
+    - Earwig
+    - Flea
+    - Louse
+    - Body louse
+    - Mantis
+    - Phasmatodea
+    - Termite
+    - Beetle
+    - Coccinellidae
+    - Dung beetle
+    - Firefly
+    - Weevil
+    - Fly
+    - Drosophila melanogaster
+    - Black fly
+    - Botfly
+    - Crane fly
+    - Calliphoridae
+    - Horse-fly
+    - Housefly
+    - Mosquito
+    - Tsetse fly
+    - Hemiptera
+    - Cicada
+    - Bed bug
+    - Leafhopper
+    - Aphid
+    - Scale insect
+    - Whitefly
+    - Hymenoptera
+    - Ant
+    - Fire ant
+    - Carpenter ant
+    - Bee
+    - Bumblebee
+    - Africanized bee
+    - Western honey bee
+    - Wasp
+    - Hornet
+    - Lepidoptera
+    - Butterfly
+    - Bombyx mori
+    - Geometer moth
+    - Moth
+    - Pieris brassicae
+    - Swallowtail butterfly
+    - Odonata
+    - Damselfly
+    - Dragonfly
+    - Orthoptera
+    - Cricket (insect)
+    - Grasshopper
+    - Mole cricket
+    - Locust
+    - Tettigoniidae
+    - Trilobite
+    - Myriapoda
+    - Centipede
+    - Millipede
+    - Chelicerata
+    - Eurypterid
+    - Xiphosura
+    - Nematode
+    - Caenorhabditis elegans
+    - Tardigrade
+    - Annelid
+    - Earthworm
+    - Leech
+    - Polychaete
+    - Bryozoa
+    - Flatworm
+    - Cestoda
+    - Vertebrate
+    - Gnathostomata
+    - Tetrapod
+    - Agnatha
+    - Hagfish
+    - Lamprey
+    - Ostracoderm
+    - Fish
+    - Coral reef fish
+    - Deep-sea fish
+    - Chondrichthyes
+    - Acanthodii
+    - Osteichthyes
+    - Actinopterygii
+    - Sarcopterygii
+    - Coelacanth
+    - Lungfish
+    - Placodermi
+    - Anglerfish
+    - Arapaima
+    - Chimaera
+    - Eel
+    - Electric eel
+    - Flying fish
+    - Milkfish
+    - Northern pike
+    - Oarfish
+    - Mullet (fish)
+    - Ophidiiformes
+    - Scorpaeniformes
+    - Stickleback
+    - Stingray
+    - Manta ray
+    - Skate (fish)
+    - Sawfish
+    - Electric ray
+    - Perciformes
+    - Barracuda
+    - Cichlid
+    - Tilapia
+    - Cyprinodontiformes
+    - Guppy
+    - Flatfish
+    - Plaice
+    - Turbot
+    - Alaska pollock
+    - Cod
+    - Haddock
+    - Gobiiformes
+    - Mackerel
+    - Marlin
+    - Mahi-mahi
+    - Serranidae
+    - European bass
+    - Grouper
+    - Seahorse
+    - Siamese fighting fish
+    - Swordfish
+    - Perch
+    - Remora
+    - Ocean sunfish
+    - Tetraodontidae
+    - Tuna
+    - Wrasse
+    - Characiformes
+    - Piranha
+    - Bichir
+    - Sturgeon
+    - Anchovy
+    - Herring
+    - Ilish
+    - Sardine
+    - Sprat
+    - Cypriniformes
+    - Carp
+    - Goldfish
+    - Koi
+    - Galaxiidae
+    - Smelt (fish)
+    - Salmonidae
+    - Salmon
+    - Trout
+    - Shark
+    - Great white shark
+    - Hammerhead shark
+    - Tiger shark
+    - Nurse shark
+    - Whale shark
+    - Catfish
+    - Loricariidae
+    - Amphibian
+    - Caecilian
+    - Salamander
+    - Newt
+    - Frog
+    - Hylidae
+    - Leptodactylidae
+    - True toad
+    - True frog
+    - American bullfrog
+    - Reptile
+    - Crocodilia
+    - Alligator
+    - Caiman
+    - Crocodile
+    - Lizard
+    - Chameleon
+    - Gecko
+    - Gila monster
+    - Green iguana
+    - Horned lizard
+    - Komodo dragon
+    - Skink
+    - Snake
+    - Eastern copperhead
+    - Agkistrodon piscivorus
+    - Boidae
+    - Coral snake
+    - Garter snake
+    - Sea snake
+    - Mamba
+    - Naja
+    - Rattlesnake
+    - Vipera berus
+    - Tuatara
+    - Turtle
+    - Alligator snapping turtle
+    - Box turtle
+    - Common snapping turtle
+    - Painted turtle
+    - Red-eared slider
+    - Sea turtle
+    - Tortoise
+    - Galápagos tortoise
+    - Dinosaur
+    - Iguanodon
+    - Sauropoda
+    - Diplodocus
+    - Stegosaurus
+    - Theropoda
+    - Allosaurus
+    - Tyrannosaurus
+    - Velociraptor
+    - Triceratops
+    - Plesiosaur
+    - Pterosaur
+    - Synapsid
+    - Dimetrodon
+    - Bird
+    - Seabird
+    - Bird of prey
+    - Palaeognathae
+    - Archaeopteryx
+    - Accipiter
+    - Eagle
+    - Golden eagle
+    - Falcon
+    - Peregrine falcon
+    - New World vulture
+    - Old World vulture
+    - Osprey
+    - Secretarybird
+    - Duck
+    - Mallard
+    - Goose
+    - Swan
+    - Hummingbird
+    - Swift (bird)
+    - Nightjar
+    - Auk
+    - Gull
+    - Sandpiper
+    - Tern
+    - Columbidae
+    - Dodo
+    - Passenger pigeon
+    - Rock dove
+    - River kingfisher
+    - Hornbill
+    - Hoopoe
+    - Cuckoo
+    - Hoatzin
+    - Turaco
+    - Galliformes
+    - Chicken
+    - Grouse
+    - Guineafowl
+    - Peafowl
+    - Common pheasant
+    - Common quail
+    - Domestic turkey
+    - Loon
+    - Gruiformes
+    - Crane (bird)
+    - Bustard
+    - Rail (bird)
+    - Passerine
+    - Songbird
+    - Bird-of-paradise
+    - Corvidae
+    - Corvus
+    - Common raven
+    - Eurasian magpie
+    - Honeyeater
+    - Lyrebird
+    - Shrike
+    - Bulbul
+    - Cardinal (bird)
+    - Finch
+    - Icterid
+    - Red-winged blackbird
+    - Lark
+    - Mockingbird
+    - New World warbler
+    - Old World flycatcher
+    - European robin
+    - Common nightingale
+    - Ploceidae
+    - Old World sparrow
+    - House sparrow
+    - Starling
+    - Common myna
+    - Common starling
+    - Sunbird
+    - Swallow
+    - Tit (bird)
+    - Thrush (bird)
+    - American robin
+    - Wren
+    - Antbird
+    - Ovenbird (family)
+    - Tyrant flycatcher
+    - Cormorant
+    - Darter
+    - Frigatebird
+    - Heron
+    - Ibis
+    - Pelican
+    - Shoebill
+    - Stork
+    - Sulidae
+    - Flamingo
+    - Honeyguide
+    - Toucan
+    - Woodpecker
+    - Procellariiformes
+    - Albatross
+    - Parrot
+    - Ara (bird)
+    - Budgerigar
+    - Cockatoo
+    - Cassowary
+    - Emu
+    - Kiwi (bird)
+    - Moa
+    - Common ostrich
+    - Rhea (bird)
+    - Penguin
+    - Owl
+    - Eurasian eagle-owl
+    - Tyto
+    - Tinamou
+    - Trogon
+    - Resplendent quetzal
+    - Mammal
+    - Aardvark
+    - Armadillo
+    - Hyrax
+    - Pangolin
+    - Sirenia
+    - Bat
+    - Megabat
+    - Microbat
+    - Pteropus
+    - Vampire bat
+    - Carnivora
+    - Bear
+    - Brown bear
+    - Giant panda
+    - Polar bear
+    - Canidae
+    - Dog
+    - Dingo
+    - Coyote
+    - Fox
+    - Jackal
+    - Wolf
+    - Felidae
+    - Cat
+    - Cheetah
+    - Cougar
+    - Jaguar
+    - Leopard
+    - Lion
+    - Lynx
+    - Snow leopard
+    - Tiger
+    - Hyena
+    - Mongoose
+    - Mustelidae
+    - European badger
+    - Honey badger
+    - Marten
+    - Otter
+    - Sea otter
+    - Stoat
+    - Weasel
+    - Wolverine
+    - Procyonidae
+    - Skunk
+    - Cetacea
+    - Whale
+    - Blue whale
+    - Dolphin
+    - Humpback whale
+    - Orca
+    - Porpoise
+    - Sperm whale
+    - Hedgehog
+    - Even-toed ungulate
+    - Ruminant
+    - Alpaca
+    - Bovidae
+    - African buffalo
+    - American bison
+    - Antelope
+    - Aurochs
+    - Capra (genus)
+    - Cattle
+    - Gazelle
+    - Gaur
+    - Goat
+    - Impala
+    - Muskox
+    - Sheep
+    - Water buffalo
+    - Wildebeest
+    - European bison
+    - Yak
+    - Camel
+    - Bactrian camel
+    - Dromedary
+    - Deer
+    - Elk
+    - Moose
+    - Red deer
+    - Reindeer
+    - Llama
+    - Giraffe
+    - Guanaco
+    - Hippopotamus
+    - Peccary
+    - Pig
+    - Pronghorn
+    - Vicuña
+    - Wild boar
+    - Lagomorpha
+    - Hare
+    - Rabbit
+    - Marsupial
+    - Diprotodontia
+    - Kangaroo
+    - Koala
+    - Dasyuromorphia
+    - Tasmanian devil
+    - Opossum
+    - Peramelemorphia
+    - Monotreme
+    - Echidna
+    - Platypus
+    - Odd-toed ungulate
+    - Donkey
+    - Equidae
+    - Horse
+    - Rhinoceros
+    - Tapir
+    - Zebra
+    - Anteater
+    - Sloth
+    - Pinniped
+    - Eared seal
+    - Earless seal
+    - Walrus
+    - Primate
+    - Monkey
+    - Ape
+    - Chimpanzee
+    - Bonobo
+    - Gibbon
+    - Gorilla
+    - Orangutan
+    - Homo
+    - Human
+    - Human evolution
+    - Australopithecus
+    - Homo habilis
+    - Homo erectus
+    - Early European modern humans
+    - Denisovan
+    - Neanderthal
+    - Paranthropus
+    - New World monkey
+    - Capuchin monkey
+    - Spider monkey
+    - Old World monkey
+    - Baboon
+    - Macaque
+    - Rhesus macaque
+    - Strepsirrhini
+    - Slow loris
+    - Galago
+    - Lemur
+    - Tarsier
+    - Proboscidea
+    - Elephant
+    - Mammoth
+    - Rodent
+    - Capybara
+    - Nutria
+    - Beaver
+    - Dormouse
+    - Guinea pig
+    - Hamster
+    - Marmot
+    - Mouse
+    - Muridae
+    - Muskrat
+    - Porcupine
+    - Rat
+    - Brown rat
+    - Squirrel
+    - Shrew
+    - Mole (animal)
+    - Siamese cat
+    - American Brahman
+    - Hereford cattle
+    - Holstein Friesian cattle
+    - Gun dog
+    - Herding dog
+    - Hound
+    - Mastiff
+    - Spitz
+    - Terrier
+    - Arabian horse
+    - Andalusian horse
+    - Friesian horse
+    - Thoroughbred
+    - Pony
+    - Mule
+    - Merino
+  "Organisms: Plants":
+    - Plant
+    - Green algae
+    - Charophyta
+    - Chlorophyta
+    - Bryophyte
+    - Hornwort
+    - Marchantiophyta
+    - Moss
+    - Sphagnum
+    - Pteridophyte
+    - Fern
+    - Equisetum
+    - Lycophyte
+    - Gymnosperm
+    - Cycad
+    - Ginkgo biloba
+    - Conifer
+    - Cedrus
+    - Cupressus
+    - Douglas fir
+    - Fir
+    - Juniper
+    - Pine
+    - Podocarpus
+    - Sequoioideae
+    - Spruce
+    - Flowering plant
+    - Magnoliids
+    - Avocado
+    - Black pepper
+    - Cinnamon
+    - Nutmeg
+    - Monocotyledon
+    - Araceae
+    - Anthurium
+    - Philodendron
+    - Taro
+    - Arecaceae
+    - Coconut
+    - Date palm
+    - Agave
+    - Garlic
+    - Leek
+    - Onion
+    - Aloe
+    - Amaryllis
+    - Asparagus
+    - Gladiolus
+    - Iridaceae
+    - Iris (plant)
+    - Saffron
+    - Lily of the valley
+    - Narcissus (plant)
+    - Orchidaceae
+    - Vanilla
+    - Yucca
+    - Eichhornia crassipes
+    - Yam (vegetable)
+    - Alstroemeria
+    - Colchicum
+    - Liliaceae
+    - Lilium
+    - Tulip
+    - Pandanus
+    - Arrowroot
+    - Banana
+    - Cooking banana
+    - Canna (plant)
+    - Cardamom
+    - Ginger
+    - Heliconia
+    - Bromeliaceae
+    - Puya (plant)
+    - Spanish moss
+    - Pineapple
+    - Cyperaceae
+    - Juncus
+    - Poaceae
+    - Bamboo
+    - Barley
+    - Maize
+    - Millet
+    - Oat
+    - Rice
+    - Oryza sativa
+    - Rye
+    - Sorghum
+    - Sugarcane
+    - Wheat
+    - Common wheat
+    - Typha
+    - Eudicots
+    - Apiaceae
+    - Anise
+    - Carrot
+    - Celery
+    - Cumin
+    - Fennel
+    - Parsley
+    - Parsnip
+    - Ginseng
+    - Hedera
+    - Asteraceae
+    - Artichoke
+    - Bellis perennis
+    - Chicory
+    - Chrysanthemum
+    - Cirsium
+    - Dahlia
+    - Lettuce
+    - Solidago
+    - Helianthus
+    - Sonchus
+    - Tagetes
+    - Taraxacum
+    - Campanulaceae
+    - Brassicaceae
+    - Arabidopsis thaliana
+    - Broccoli
+    - Cabbage
+    - Cauliflower
+    - Collard (plant)
+    - Kale
+    - Kohlrabi
+    - Eruca vesicaria
+    - Horseradish
+    - Radish
+    - Daikon
+    - Rapeseed
+    - Rutabaga
+    - Tropaeolum
+    - Turnip
+    - Papaya
+    - Amaranth
+    - Beetroot
+    - Chard
+    - Spinach
+    - Sugar beet
+    - Quinoa
+    - Cactus
+    - Buckwheat
+    - Cucurbitaceae
+    - Cucumis melo
+    - Cucumber
+    - Cucurbita
+    - Pumpkin
+    - Zucchini
+    - Watermelon
+    - Brazil nut
+    - Diospyros
+    - Ericaceae
+    - Blueberry
+    - Cranberry
+    - Rhododendron
+    - Azalea
+    - Theaceae
+    - Camellia
+    - Impatiens
+    - Kiwifruit
+    - Primulaceae
+    - Fabaceae
+    - Bean
+    - Chickpea
+    - Green bean
+    - Lentil
+    - Lima bean
+    - Liquorice
+    - Mimosa
+    - Pea
+    - Peanut
+    - Phaseolus vulgaris
+    - Soybean
+    - Tamarind
+    - Vicia faba
+    - Alder
+    - Beech
+    - Birch
+    - Chestnut
+    - Hazelnut
+    - Hickory
+    - Oak
+    - Pecan
+    - Walnut
+    - Lamiaceae
+    - Basil
+    - Lavandula
+    - Mentha
+    - Salvia
+    - Thyme
+    - Oleaceae
+    - Fraxinus
+    - Olive
+    - Sesame
+    - Verbena
+    - Euphorbiaceae
+    - Cassava
+    - Poinsettia
+    - Flax
+    - Hypericum
+    - Viola (plant)
+    - Willow
+    - Henna
+    - Myrtaceae
+    - Clove
+    - Eucalyptus
+    - Guava
+    - Pomegranate
+    - Cannabis
+    - Elm
+    - Moraceae
+    - Breadfruit
+    - Ficus sycomorus
+    - Fig
+    - Jackfruit
+    - Morus (plant)
+    - Rosaceae
+    - Almond
+    - Apple
+    - Apricot
+    - Blackberry
+    - Cherry
+    - Peach
+    - Pear
+    - Plum
+    - Raspberry
+    - Rose
+    - Strawberry
+    - Citrus
+    - Grapefruit
+    - Kumquat
+    - Lemon
+    - Lime (fruit)
+    - Orange (fruit)
+    - Mandarin orange
+    - Cashew
+    - Lychee
+    - Mahogany
+    - Mango
+    - Maple
+    - Solanaceae
+    - Bell pepper
+    - Chili pepper
+    - Eggplant
+    - Potato
+    - Tomato
+    - Sweet potato
+    - Cornus
+    - Apocynaceae
+    - Rubiaceae
+    - Gardenia
+    - Malvaceae
+    - Adansonia
+    - Durian
+    - Okra
+    - Proteaceae
+    - Macadamia
+    - Nelumbo
+    - Platanus
+    - Blackcurrant
+    - Grape
+  "Organisms: Fungi":
+    - Fungus
+    - Mushroom
+    - Yeast
+    - Saccharomyces cerevisiae
+    - Ascomycota
+    - Basidiomycota
+    - Zygomycota
+    - Agaricus
+    - Boletus edulis
+    - Chanterelle
+    - Pleurotus ostreatus
+    - Shiitake
+    - Truffle
+    - Amanita muscaria
+    - Amanita phalloides
+  "Organisms: Other eukaryotes":
+    - Alveolate
+    - Apicomplexa
+    - Dinoflagellate
+    - Ciliate
+    - Paramecium
+    - Amoeba
+    - Amoebozoa
+    - Chromalveolata
+    - Stramenopile
+    - Brown algae
+    - Kelp
+    - Diatom
+    - Oomycete
+    - Haptophyte
+    - Cryptomonad
+    - Excavata
+    - Euglenozoa
+    - Protist
+    - Protozoa
+    - Seaweed
+    - Slime mold
+    - Rhizaria
+    - Radiolaria
+    - Foraminifera
+    - Red algae
+  "Organisms: Prokaryotes":
+    - Prokaryote
+    - Archaea
+    - Bacteria
+    - Cyanobacteria
+    - Escherichia coli
+    - Salmonella
+    - Staphylococcus aureus

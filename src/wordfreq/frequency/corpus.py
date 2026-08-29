@@ -72,7 +72,7 @@ class CorpusConfig:
 # its own token competing for a slot (~660 of them against the current
 # database), so the old caps would have pushed ordinary vocabulary off the
 # bottom of every list. These values must stay in step with the matching
-# max_words in wordfreq.corpora.book_lists. wiki_vital is not built by that
+# max_words in wordfreq.corpora.book_lists. The wiki corpora are not built by that
 # pipeline and is unaffected.
 CORPUS_CONFIGS = [
     CorpusConfig(
@@ -98,17 +98,6 @@ CORPUS_CONFIGS = [
         enabled=True,
     ),
     CorpusConfig(
-        name="wiki_vital",
-        description="Word frequency data from Wikipedia vital articles",
-        file_path="wiki_vital.json",
-        max_words=6000,
-        file_type="json",
-        value_type="frequency",
-        corpus_weight=1.0,
-        max_unknown_rank=12000,
-        enabled=True,
-    ),
-    CorpusConfig(
         name="wiki_math",
         description="Word frequency data from Wikipedia mathematics articles",
         file_path="wiki_math.json",
@@ -131,7 +120,7 @@ CORPUS_CONFIGS = [
         max_words=4500,
         file_type="json",
         value_type="auto",
-        # Narrower than wiki_vital and mostly about places, so it says less
+        # Narrower than the general corpora and mostly about places, so it says less
         # about how English is weighted than about which place names recur.
         # It earns its weight on the descriptive vocabulary of terrain, climate
         # and settlement, which the other corpora reach only in passing.
@@ -166,6 +155,69 @@ CORPUS_CONFIGS = [
         # corpora simply predate, not a technical register.
         corpus_weight=0.8,
         max_unknown_rank=10000,
+        enabled=True,
+    ),
+    CorpusConfig(
+        name="wiki_arts",
+        description="Word frequency data from Wikipedia Level 4 arts articles",
+        file_path="wiki_arts.json",
+        max_words=5000,
+        file_type="json",
+        value_type="auto",
+        # The critical metalanguage of the arts -- narrative, genre, motif,
+        # counterpoint, chiaroscuro -- is ordinary educated English rather than
+        # a technical register, so this is weighted with wiki_modern_life
+        # rather than with the topic corpora.  It does not duplicate the book
+        # corpora: those *are* literature, and narrative English is not the
+        # vocabulary used to write *about* literature.
+        corpus_weight=0.8,
+        max_unknown_rank=10000,
+        enabled=True,
+    ),
+    CorpusConfig(
+        name="wiki_society",
+        description="Word frequency data from Wikipedia Level 4 society, philosophy and religion articles",
+        file_path="wiki_society.json",
+        max_words=5500,
+        file_type="json",
+        value_type="auto",
+        # Abstract institutional vocabulary -- law, politics, economics,
+        # ethics, belief -- which no other corpus here reaches, and which is
+        # ordinary educated English rather than a technical register.  The
+        # broadest of the topic corpora, so it is weighted highest of them.
+        corpus_weight=0.8,
+        max_unknown_rank=11000,
+        enabled=True,
+    ),
+    CorpusConfig(
+        name="wiki_physical_science",
+        description="Word frequency data from Wikipedia Level 4 physical science and molecular biology articles",
+        file_path="wiki_physical_science.json",
+        max_words=4000,
+        file_type="json",
+        value_type="auto",
+        # Narrow in the way wiki_math and wiki_biology are: much of the subject
+        # matter is named compounds, particles and reactions, so it earns its
+        # weight on the process vocabulary -- oxidize, dissolve, orbit,
+        # pressure, decay -- rather than on how English is weighted.
+        corpus_weight=0.5,
+        max_unknown_rank=8000,
+        enabled=True,
+    ),
+    CorpusConfig(
+        name="wiki_history",
+        description="Word frequency data from Wikipedia Level 4 history and biography articles",
+        file_path="wiki_history.json",
+        max_words=4500,
+        file_type="json",
+        value_type="auto",
+        # The largest corpus here by article count, but overwhelmingly proper
+        # nouns once past the connective prose, and analyze_book separates
+        # those per document.  What is left -- reign, treaty, siege, dynasty,
+        # revolt -- is real but narrow, so it is weighted with the other topic
+        # corpora rather than with the general ones.
+        corpus_weight=0.6,
+        max_unknown_rank=9000,
         enabled=True,
     ),
     CorpusConfig(

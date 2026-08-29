@@ -2,7 +2,7 @@
 
 """Random access into a Wikimedia dump snapshot, by page title.
 
-The source for the ``wiki_vital`` corpus.  Unlike Gutenberg books and CAP
+The source for every ``wiki_*`` corpus.  Unlike Gutenberg books and CAP
 opinions, which are downloaded per document, Wikipedia is taken from a single
 downloaded snapshot -- a ``pages-articles-multistream.xml.bz2`` dump and its
 ``-index.txt`` companion, located by :data:`constants.WIKI_CORPUS_BASE_PATH`.
@@ -16,6 +16,16 @@ each page lives at.  :meth:`WikiLoader.build_offset_index` converts that index
 into SQLite databases sharded by the MD5 of the page title, which optimizes for
 direct title lookups rather than title-range scans; the builder then asks for
 its thousand articles by name.
+
+Wikitext read from the dump is cached under :data:`constants.WIKI_CACHE_DIR`
+(``data/working/wiki_cache``, gitignored), sharded by the MD5 of the title the
+way the offset index is.  Seeking and decompressing a block per article is the
+expensive part of a build, so a rebuild after a parser or word-list change
+reads the cache instead of the dump.  What is cached is *raw wikitext*, not
+parsed prose: the snapshot is fixed, so a change to
+:mod:`wordfreq.corpora.wikipedia.wiki_text` cannot make it stale.  Were it ever
+changed to cache parsed text, a parser change would have to wipe the directory.
+Delete the directory to reclaim the space; it rebuilds on the next run.
 
 This module predates the rest of the corpora package and is left as it was
 found: the paths still come from module-level ``constants`` rather than a
@@ -40,7 +50,12 @@ ALL_KEYS = [a + b for a in HEX_DIGITS for b in HEX_DIGITS]
 class WikiLoader:
     """Class for accessing and indexing Wikimedia dump files."""
 
-    def __init__(self, corpus: str = "enwiki", offset_dir: Optional[str] = None):
+    def __init__(
+        self,
+        corpus: str = "enwiki",
+        offset_dir: Optional[str] = None,
+        cache_dir: Optional[str] = None,
+    ):
         """
         Initialize a WikiLoader for the specified corpus.
 
@@ -48,7 +63,11 @@ class WikiLoader:
             corpus: Corpus identifier (e.g., "enwiki" for English Wikipedia)
             offset_dir: Where the sharded SQLite index lives; see
                 :meth:`set_corpus_base`.
+            cache_dir: Where to cache the wikitext read from the dump.
+                Defaults to :data:`constants.WIKI_CACHE_DIR`; pass ``""``
+                to read the dump every time.
         """
+        self.cache_dir = constants.WIKI_CACHE_DIR if cache_dir is None else cache_dir
         self.corpus = corpus
         self.corpus_prefix = constants.WIKI_CORPUS_PREFIX
         self.schema_file = constants.WIKI_INDEX_SCHEMA_PATH
@@ -345,13 +364,93 @@ class WikiLoader:
 
     def get_text_from_page(self, page_name: str) -> str:
         """
-        Get the text content for a specific wiki page.
+        Get the wikitext for a specific wiki page, using the local cache.
+
+        Reads from :attr:`cache_dir` when the page is cached and falls through
+        to the dump otherwise, storing what it reads.  Caching is on unless the
+        loader was built with ``cache_dir=""``.
 
         Args:
             page_name: The title of the wiki page
 
         Returns:
-            The text content of the page
+            The wikitext of the page
+
+        Raises:
+            ValueError: If the page is not found or its content cannot be extracted
+        """
+        cached = self._read_cache(page_name)
+        if cached is not None:
+            return cached
+        wikitext = self._read_page_from_dump(page_name)
+        self._write_cache(page_name, wikitext)
+        return wikitext
+
+    def _cache_path(self, page_name: str) -> str:
+        """Where ``page_name``'s wikitext is cached.
+
+        Sharded on the MD5 of the title, the same scheme
+        :meth:`_shard_for_title` uses for the offset index: the article lists
+        run to thousands of titles, and a single flat directory holding all of
+        them is slow to stat and unpleasant to inspect.  256 shards keeps a
+        full run to tens of files each.
+
+        The title is not usable as a filename -- "AC/DC" and "Nul (band)"
+        contain separators and shell metacharacters -- so the file is named by
+        the full MD5 and the title is stored in the file's first line.
+        """
+        digest = hashlib.md5(bytes(page_name, "utf-8")).hexdigest()
+        return os.path.join(self.cache_dir, digest[:2], f"{digest}.txt")
+
+    def _read_cache(self, page_name: str) -> Optional[str]:
+        """Return cached wikitext for ``page_name``, or None if not cached.
+
+        A cache miss is never an error: an unreadable or truncated file is
+        treated as absent, and the dump is read instead.
+        """
+        if not self.cache_dir:
+            return None
+        try:
+            with open(self._cache_path(page_name), "r", encoding="utf-8") as handle:
+                title = handle.readline().rstrip("\n")
+                # Guards against an MD5 collision, and against a file written
+                # for a different title.
+                if title != page_name:
+                    return None
+                return handle.read()
+        except OSError:
+            return None
+
+    def _write_cache(self, page_name: str, wikitext: str) -> None:
+        """Store ``wikitext`` for ``page_name``.
+
+        Written to a temporary file and renamed, so an interrupted run leaves
+        no half-written article to be read back as truncated text.  A failure
+        to write is not fatal -- the cache is an optimization, and a read-only
+        or full disk should cost speed rather than the build.
+        """
+        if not self.cache_dir:
+            return
+        path = self._cache_path(page_name)
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            temp_path = f"{path}.{os.getpid()}.tmp"
+            with open(temp_path, "w", encoding="utf-8") as handle:
+                handle.write(f"{page_name}\n")
+                handle.write(wikitext)
+            os.replace(temp_path, path)
+        except OSError:
+            return
+
+    def _read_page_from_dump(self, page_name: str) -> str:
+        """
+        Get the wikitext for a page by seeking into the dump.
+
+        Args:
+            page_name: The title of the wiki page
+
+        Returns:
+            The wikitext of the page
 
         Raises:
             ValueError: If the page is not found or its content cannot be extracted

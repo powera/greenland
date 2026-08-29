@@ -57,7 +57,7 @@ WORDFREQ_TIER_SPECS: Tuple[_TierSpec, ...] = tuple(
 WORDFREQ_SOURCES: Tuple[str, ...] = (
     "wordfreq_19th_books",
     "wordfreq_20th_books",
-    "wordfreq_wiki_vital",
+    "wordfreq_wiki_society",
     "wordfreq_cooking",
 )
 

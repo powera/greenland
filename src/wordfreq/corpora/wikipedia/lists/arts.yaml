@@ -1,0 +1,800 @@
+# Wikipedia's Level 4 Arts list, as of the August 2026 revision.
+# Architecture, literature, music, the performing and visual arts, film and
+# television.  The critical metalanguage here -- narrative, genre, motif,
+# counterpoint, chiaroscuro, choreography -- is what the book corpora do not
+# supply: they *are* literature, and narrative English is not the vocabulary
+# used to write *about* literature.
+#
+# 703 titles in 66 groups, resolved against the
+# enwiki-20220501 snapshot: a title renamed since then is stored under its
+# 2022 spelling so wiki_dump can find it by exact title.
+#
+# 11 titles were redirects in 2022 and are stored
+# under the target they redirect to:
+#   Al-Jabr  ->  The Compendious Book on Calculation by Completion and Balancing
+#   Dark humor  ->  Black comedy
+#   Hip-hop  ->  Hip hop
+#   Hip-hop dance  ->  Hip hop dance
+#   Non-fiction  ->  Nonfiction
+#   On the Consolation of Philosophy  ->  The Consolation of Philosophy
+#   Peter Pan (character)  ->  Peter Pan
+#   Song of Roland  ->  The Song of Roland
+#   Sun Wukong  ->  Monkey King
+#   Symbolism (movement)  ->  Symbolism (arts)
+#   Visual arts of the Indigenous peoples of the Americas  ->  Visual arts by indigenous peoples of the Americas
+#
+# Dropped by lists/redactions.yaml (see that file for why):
+#   Kādambarī
+
+source: Wikipedia:Vital articles/Level 4/Arts
+snapshot: enwiki-20220501
+groups:
+  "Arts: General":
+    - The arts
+    - Art
+    - Artist
+    - Genre
+  "Architecture / Architecture: General":
+    - Architecture
+    - Sacral architecture
+    - Architectural drawing
+    - Architectural theory
+    - Proportion (architecture)
+    - Landscape architecture
+  Architecture / Styles:
+    - Ancient Egyptian architecture
+    - Ancient Greek architecture
+    - Ancient Roman architecture
+    - Baroque architecture
+    - Byzantine architecture
+    - Chinese architecture
+    - Gothic architecture
+    - Architecture of India
+    - Iranian architecture
+    - Islamic architecture
+    - Megalith
+    - Mesoamerican architecture
+    - Architecture of Mesopotamia
+    - Modern architecture
+    - Neoclassical architecture
+    - Postmodern architecture
+    - Renaissance architecture
+    - Romanesque architecture
+  Architecture / Specific structures:
+    - Acropolis of Athens
+    - Alhambra
+    - Angkor Wat
+    - Borobudur
+    - Burj Khalifa
+    - Christ the Redeemer (statue)
+    - Colosseum
+    - Eiffel Tower
+    - Empire State Building
+    - Florence Cathedral
+    - Forbidden City
+    - Great Sphinx of Giza
+    - Golden Temple
+    - Great Wall of China
+    - Hagia Sophia
+    - Kaaba
+    - Kinkaku-ji
+    - Kremlin
+    - Leaning Tower of Pisa
+    - Masjid al-Haram
+    - Notre-Dame de Paris
+    - Palace of Versailles
+    - Palace of Westminster
+    - Pantheon, Rome
+    - Parthenon
+    - Red Fort
+    - Sagrada Família
+    - Seven Wonders of the Ancient World
+    - Great Pyramid of Giza
+    - St. Peter's Basilica
+    - Statue of Liberty
+    - Stonehenge
+    - Sydney Opera House
+    - Taj Mahal
+    - Temple Mount
+    - Ziggurat of Ur
+  "Cultural venues / Cultural venues: General":
+    - Museum
+    - Movie theater
+  Cultural venues / Africa:
+    - Egyptian Museum
+  Cultural venues / Americas:
+    - American Museum of Natural History
+    - Metropolitan Museum of Art
+    - Museum of Modern Art
+    - Smithsonian Institution
+  Cultural venues / Asia:
+    - National Museum of China
+  Cultural venues / Europe:
+    - British Museum
+    - Hermitage Museum
+    - Louvre
+    - Musée d'Orsay
+    - Museo del Prado
+    - National Gallery
+    - Natural History Museum, London
+    - Uffizi
+    - Vatican Museums
+  Literature / Basics:
+    - Literature
+    - Character (arts)
+    - Hero
+    - Superhero
+    - Literary criticism
+    - Narrative
+    - Narration
+    - Prose
+    - Saga
+    - Fiction
+    - Children's literature
+    - Detective fiction
+    - Fable
+    - Fairy tale
+    - Fantasy
+    - Fictional universe
+    - Horror fiction
+    - Legend
+    - Novel
+    - Romance novel
+    - Satire
+    - Black comedy
+    - Science fiction
+    - Time travel
+    - Short story
+    - Thriller (genre)
+    - Utopia
+    - Nonfiction
+    - Biography
+    - Diary
+    - Dictionary
+    - Encyclopedia
+    - Essay
+    - Thesaurus
+    - Poetry
+    - Epic poetry
+    - Ghazal
+    - Haiku
+    - Ode
+    - Prose poetry
+    - Rhyme
+    - Sonnet
+    - Writer
+  Literature / Literatures by language and area:
+    - African literature
+    - Ancient Egyptian literature
+    - Ancient Greek literature
+    - Arabic literature
+    - Chinese literature
+    - English literature
+    - French literature
+    - German literature
+    - Indian literature
+    - Italian literature
+    - Japanese literature
+    - Jewish literature
+    - Latin American literature
+    - Latin literature
+    - Persian literature
+    - Russian literature
+    - Scandinavian literature
+    - Spanish literature
+  Literature / Specific works of fiction / Fiction of antiquity:
+    - Aesop's Fables
+    - The Bacchae
+    - The Golden Ass
+    - Investiture of the Gods
+    - Journey to the West
+    - Kathasaritsagara
+    - Lysistrata
+    - Oresteia
+    - Oedipus Rex
+    - One Thousand and One Nights
+    - Aladdin
+    - Ali Baba and the Forty Thieves
+    - Panchatantra
+    - Romance of the Three Kingdoms
+    - The Tale of Genji
+    - Water Margin
+  Literature / Specific works of fiction / Fiction of early printed book era:
+    - Candide
+    - Cinderella
+    - Don Quixote
+    - Dream of the Red Chamber
+    - Goethe's Faust
+    - Gulliver's Travels
+    - Hamlet
+    - King Lear
+    - Macbeth
+    - A Midsummer Night's Dream
+    - Othello
+    - La Princesse de Clèves
+    - Robinson Crusoe
+    - Romeo and Juliet
+    - Tartuffe
+    - The Tempest
+    - Utopia (book)
+  Literature / Specific works of fiction / Fiction of modern era:
+    - Adventures of Huckleberry Finn
+    - Alice's Adventures in Wonderland
+    - Anna Karenina
+    - Brave New World
+    - The Brothers Karamazov
+    - The Catcher in the Rye
+    - A Christmas Carol
+    - The Chronicles of Narnia
+    - The Color Purple
+    - Crime and Punishment
+    - Death of a Salesman
+    - A Doll's House
+    - Dracula
+    - Dune (novel)
+    - Eugene Onegin
+    - Frankenstein
+    - The Grapes of Wrath
+    - The Great Gatsby
+    - Grimms' Fairy Tales
+    - Harry Potter
+    - Heart of Darkness
+    - The Hunchback of Notre-Dame
+    - The Importance of Being Earnest
+    - In Search of Lost Time
+    - Jane Eyre
+    - Les Misérables
+    - The Little Prince
+    - Little Women
+    - Lolita
+    - The Lord of the Rings
+    - Madame Bovary
+    - The Metamorphosis
+    - Middlemarch
+    - Midnight's Children
+    - Moby-Dick
+    - Nineteen Eighty-Four
+    - The Old Man and the Sea
+    - On the Road
+    - One Hundred Years of Solitude
+    - Pride and Prejudice
+    - Snow Country
+    - The Sound and the Fury
+    - The Stranger (Camus novel)
+    - Things Fall Apart
+    - The Three Musketeers
+    - To Kill a Mockingbird
+    - To the Lighthouse
+    - Ulysses (novel)
+    - Uncle Tom's Cabin
+    - Waiting for Godot
+    - War and Peace
+    - The War of the Worlds
+    - Wuthering Heights
+  Literature / Specific works of fiction / Comics:
+    - The Adventures of Tintin
+    - Asterix
+    - Dragon Ball
+    - One Piece
+    - Peanuts
+  Literature / Specific works of nonfiction / Nonfiction of antiquity:
+    - Anabasis (Xenophon)
+    - The Compendious Book on Calculation by Completion and Balancing
+    - Analects
+    - Apology (Plato)
+    - Arthashastra
+    - The Art of War
+    - The Book of Healing
+    - The Canon of Medicine
+    - The Consolation of Philosophy
+    - Dead Sea Scrolls
+    - Euclid's Elements
+    - Histories (Herodotus)
+    - History of the Peloponnesian War
+    - I Ching
+    - The Incoherence of the Philosophers
+    - Metaphysics (Aristotle)
+    - Muqaddimah
+    - Nicomachean Ethics
+    - Organon
+    - Poetic Edda
+    - Popol Vuh
+    - Republic (Plato)
+    - Septuagint
+    - Summa Theologica
+    - Vulgate
+  Literature / Specific works of nonfiction / Nonfiction of early printed book era:
+    - Critique of Pure Reason
+    - De revolutionibus orbium coelestium
+    - Discourse on the Method
+    - Encyclopædia Britannica
+    - Encyclopédie
+    - Gutenberg Bible
+    - The History of the Decline and Fall of the Roman Empire
+    - Leviathan (Hobbes book)
+    - Ninety-five Theses
+    - Philosophiæ Naturalis Principia Mathematica
+    - The Prince
+    - A Vindication of the Rights of Woman
+  Literature / Specific works of nonfiction / Nonfiction of modern era:
+    - The Communist Manifesto
+    - Das Kapital
+    - The General Theory of Employment, Interest and Money
+    - On the Origin of Species
+    - Oxford English Dictionary
+    - Quotations from Chairman Mao Tse-tung
+    - Silent Spring
+    - The Structure of Scientific Revolutions
+    - The Wealth of Nations
+  Literature / Specific works of poetry / Poetic works of antiquity:
+    - Aeneid
+    - Beowulf
+    - The Canterbury Tales
+    - Divine Comedy
+    - Divan-i Shams-i Tabrizi
+    - Epic of Gilgamesh
+    - Iliad
+    - Mahabharata
+    - Masnavi
+    - Metamorphoses
+    - Nibelungenlied
+    - Odyssey
+    - Shahnameh
+    - The Song of Roland
+  Literature / Specific works of poetry / Poetic works of early printed book era:
+    - Shakespeare's sonnets
+    - Paradise Lost
+    - Rubaiyat of Omar Khayyam
+    - Songs of Innocence and of Experience
+  Literature / Specific works of poetry / Poetic works of modern era:
+    - Duino Elegies
+    - Leaves of Grass
+    - The Raven
+    - The Rime of the Ancient Mariner
+    - The Waste Land
+  Music / Basics:
+    - Music
+    - Album
+    - Choir
+    - Concert
+    - Counterpoint
+    - Harmony
+    - Chord (music)
+    - Melody
+    - Musician
+    - Musicology
+    - Music theory
+    - Music video
+    - Musical notation
+    - Orchestra
+    - Rhythm
+    - Scale (music)
+    - Singing
+    - Song
+  Music / Musical instruments:
+    - Musical instrument
+    - Electronic musical instrument
+    - Synthesizer
+    - Keyboard instrument
+    - Accordion
+    - Harpsichord
+    - Piano
+    - Pipe organ
+    - Percussion instrument
+    - Bell
+    - Cymbal
+    - Djembe
+    - Drum
+    - Xylophone
+    - String instrument
+    - Cello
+    - Double bass
+    - Guitar
+    - Bass guitar
+    - Electric guitar
+    - Harp
+    - Lute
+    - Lyre
+    - Mandolin
+    - Sitar
+    - Viola
+    - Violin
+    - Wind instrument
+    - Bagpipes
+    - Brass instrument
+    - Horn (instrument)
+    - Trombone
+    - Trumpet
+    - Tuba
+    - Harmonica
+    - Woodwind instrument
+    - Bassoon
+    - Clarinet
+    - Flute
+    - Recorder (musical instrument)
+    - Western concert flute
+    - Oboe
+    - Saxophone
+  "Music / Music genres and forms / Music genres and forms: General":
+    - Music genre
+    - Ballad
+    - Christmas carol
+    - Hymn
+    - Lullaby
+    - National anthem
+    - Protest song
+  Music / Music genres and forms / Western classical music:
+    - Classical music
+    - Aria
+    - Chamber music
+    - Concerto
+    - Fugue
+    - Opera
+    - Sonata
+    - Symphony
+    - Medieval music
+    - Gregorian chant
+    - Renaissance music
+    - Baroque music
+    - Classical period (music)
+    - Romantic music
+    - 20th-century classical music
+    - Contemporary classical music
+  Music / Music genres and forms / Non-Western music:
+    - Arabic music
+    - Music of Africa
+    - Gamelan
+    - Indian classical music
+    - Carnatic music
+    - Hindustani classical music
+    - Music of China
+  Music / Music genres and forms / Popular music:
+    - Blues
+    - Country music
+    - Disco
+    - Electronic music
+    - Electronic dance music
+    - Folk music
+    - Funk
+    - Hip hop
+    - Rapping
+    - Jazz
+    - Bossa nova
+    - Ragtime
+    - Pop music
+    - J-pop
+    - K-pop
+    - Reggae
+    - Rhythm and blues
+    - Soul music
+    - Rock music
+    - Alternative rock
+    - Heavy metal music
+    - Punk rock
+    - Rock and roll
+    - Salsa music
+    - Samba
+  Music / Specific musical works / Baroque:
+    - Brandenburg Concertos
+    - The Four Seasons (Vivaldi)
+    - Mass in B minor
+    - Messiah (Handel)
+    - The Well-Tempered Clavier
+  Music / Specific musical works / Classical:
+    - Nocturnes (Chopin)
+    - Piano sonatas (Beethoven)
+    - Symphony No. 3 (Beethoven)
+    - Symphony No. 5 (Beethoven)
+    - Symphony No. 2 (Mahler)
+    - Symphony No. 9 (Beethoven)
+    - Symphony No. 41 (Mozart)
+  Music / Specific musical works / Opera:
+    - La bohème
+    - Carmen
+    - Don Giovanni
+    - The Magic Flute
+    - The Marriage of Figaro
+    - Der Ring des Nibelungen
+    - La traviata
+    - Tristan und Isolde
+  Music / Specific musical works / Ballet:
+    - The Nutcracker
+    - The Rite of Spring
+    - Swan Lake
+  Music / Specific musical works / Musicals:
+    - The Phantom of the Opera (1986 musical)
+    - West Side Story
+  Music / Specific musical works / Modern:
+    - Bohemian Rhapsody
+    - Gangnam Style
+    - The Girl from Ipanema
+    - Johnny B. Goode
+    - Kind of Blue
+    - Like a Rolling Stone
+    - Rhapsody in Blue
+    - Sgt. Pepper's Lonely Hearts Club Band
+    - Thriller (album)
+  Performing arts / Basic concepts:
+    - Performing arts
+    - Actor
+    - Audience
+    - Costume
+    - Stage (theatre)
+  Performing arts / Forms:
+    - Acrobatics
+    - Burlesque
+    - Circus
+    - Clown
+    - Magic (illusion)
+    - Mime artist
+    - Performance art
+    - Puppetry
+  Performing arts / Forms / Dance:
+    - Dance
+    - Choreography
+    - Ballet
+    - Ballroom dance
+    - Tango
+    - Waltz
+    - Belly dance
+    - Bharatanatyam
+    - Flamenco
+    - Folk dance
+    - Hip hop dance
+    - Jazz dance
+    - Modern dance
+  Performing arts / Forms / Theatre:
+    - Theatre
+    - Acting
+    - Play (theatre)
+    - Stagecraft
+    - Comedy
+    - Commedia dell'arte
+    - Improvisational theatre
+    - Joke
+    - Parody
+    - Stand-up comedy
+    - Drama
+    - Tragedy
+    - Broadway theatre
+    - West End theatre
+    - Kabuki
+    - Musical theatre
+    - Noh
+    - Peking opera
+    - Theatre of ancient Greece
+  Visual arts / History of art / Pre-modern art:
+    - Academic art
+    - Ancient Greek art
+    - Baroque
+    - Classicism
+    - Empire style
+    - Gothic art
+    - Hellenistic art
+    - Mannerism
+    - Prehistoric art
+    - Cave painting
+    - Rock art
+    - Renaissance art
+    - Rococo
+    - Roman art
+    - Romanesque art
+  Visual arts / History of art / Modern art:
+    - Modern art
+    - Abstract art
+    - Abstract expressionism
+    - Art Deco
+    - Art Nouveau
+    - Arts and Crafts movement
+    - Avant-garde
+    - Cubism
+    - Dada
+    - Expressionism
+    - Futurism
+    - Impressionism
+    - Modernism
+    - Neoclassicism
+    - Post-Impressionism
+    - Postmodernism
+    - Pre-Raphaelite Brotherhood
+    - Realism (arts)
+    - Romanticism
+    - Surrealism
+    - Symbolism (arts)
+  Visual arts / History of art / Contemporary art:
+    - Contemporary art
+    - Conceptual art
+    - Minimalism
+    - Outsider art
+    - Pop art
+  Visual arts / History of art / Non-Western art traditions:
+    - African art
+    - Chinese art
+    - Indian art
+    - Islamic art
+    - Japanese art
+    - Ukiyo-e
+    - Persian art
+    - Visual arts by indigenous peoples of the Americas
+  Visual arts / Concepts and forms:
+    - Visual arts
+    - Art criticism
+    - Calligraphy
+    - Ceramic art
+    - Collage
+    - Comics
+    - Comic book
+    - Manga
+    - Decorative arts
+    - Drawing
+    - Fashion
+    - Design
+    - Fashion design
+    - Graphic design
+    - Typography
+    - Interior design
+    - Industrial design
+    - Web design
+    - Digital art
+    - Computer graphics
+    - Folk art
+    - Graffiti
+    - Handicraft
+    - Illustration
+    - Model (person)
+    - Mosaic
+    - Mural
+    - Optical illusion
+    - Origami
+    - Painting
+    - Landscape painting
+    - Oil painting
+    - Watercolor painting
+    - Perspective (graphical)
+    - Portrait
+    - Printmaking
+    - Engraving
+    - Religious art
+    - Sculpture
+    - Taxidermy
+    - Textile arts
+    - Wood carving
+  Visual arts / Specific works / Painting:
+    - A Sunday Afternoon on the Island of La Grande Jatte
+    - Along the River During the Qingming Festival
+    - Arnolfini Portrait
+    - The Birth of Venus
+    - Campbell's Soup Cans
+    - Les Demoiselles d'Avignon
+    - The Garden of Earthly Delights
+    - Guernica (Picasso)
+    - The Last Supper (Leonardo)
+    - Liberty Leading the People
+    - Las Meninas
+    - Mona Lisa
+    - The Night Watch
+    - The Persistence of Memory
+    - The School of Athens
+    - The Scream
+    - Sistine Chapel
+    - The Starry Night
+    - Water Lilies (Monet series)
+  Visual arts / Specific works / Sculpture:
+    - David (Michelangelo)
+    - Fountain (Duchamp)
+    - Moai
+    - Olmec colossal heads
+    - Terracotta Army
+    - The Thinker
+    - Venus de Milo
+    - Venus of Willendorf
+  Visual arts / Specific works / Other media:
+    - Bayeux Tapestry
+    - The Blue Marble
+    - Book of Kells
+    - The Great Wave off Kanagawa
+  "Film and television / Filmmaking: General":
+    - Film
+    - Animation
+    - Anime
+    - Computer animation
+    - Traditional animation
+    - Silent film
+    - Filmmaking
+    - Cinematography
+    - Special effect
+    - Studio system
+    - Television show
+  Film and television / Cinema by country:
+    - Cinema of the United States
+    - Cinema of France
+    - Cinema of India
+    - Cinema of Japan
+    - Cinema of China
+    - Cinema of the Soviet Union
+  Film and television / Film and television festival and awards:
+    - Film festival
+    - Cannes Film Festival
+    - Academy Awards
+  Film and television / Film and television genres:
+    - Action film
+    - Documentary film
+    - Game show
+    - Reality television
+    - Sitcom
+    - Soap opera
+    - Talk show
+  Film and television / Specific films / Action:
+    - James Bond
+    - Sholay
+  Film and television / Specific films / Animation:
+    - Looney Tunes
+    - Snow White and the Seven Dwarfs (1937 film)
+    - Spirited Away
+    - Toy Story
+  Film and television / Specific films / Art film:
+    - Mirror (1975 film)
+  Film and television / Specific films / Comedy:
+    - City Lights
+  Film and television / Specific films / Drama film:
+    - The Apu Trilogy
+    - Bicycle Thieves
+    - Breathless (1960 film)
+    - Citizen Kane
+    - The Godfather
+    - La Dolce Vita
+    - Tokyo Story
+  Film and television / Specific films / Epic/Historical:
+    - Battleship Potemkin
+    - The Birth of a Nation
+    - Lawrence of Arabia (film)
+    - Seven Samurai
+    - The Seventh Seal
+  Film and television / Specific films / Horror/Thriller:
+    - Jaws (film)
+    - Psycho (1960 film)
+    - Vertigo (film)
+  Film and television / Specific films / Musical:
+    - The Jazz Singer
+    - Singin' in the Rain
+    - The Sound of Music (film)
+  Film and television / Specific films / Romance film:
+    - Casablanca (film)
+    - Gone with the Wind (film)
+  Film and television / Specific films / Science fiction/Fantasy:
+    - "2001: A Space Odyssey"
+    - Metropolis (1927 film)
+    - Star Wars
+    - The Wizard of Oz
+  Film and television / Specific films / Western:
+    - The Good, the Bad and the Ugly
+  Film and television / Specific television shows:
+    - Doctor Who
+    - Eurovision Song Contest
+    - Sesame Street
+    - The Simpsons
+    - The Sopranos
+    - Star Trek
+  Fictional and legendary characters / Western folklore:
+    - Baba Yaga
+    - Faust
+    - King Arthur
+    - Robin Hood
+    - Santa Claus
+  Fictional and legendary characters / Eastern folklore:
+    - Hua Mulan
+    - Monkey King
+  Fictional and legendary characters / Literature and drama:
+    - Peter Pan
+    - Sherlock Holmes
+    - Winnie-the-Pooh
+  Fictional and legendary characters / Film, television, and games:
+    - Donald Duck
+    - Hello Kitty
+    - Mario
+    - Mickey Mouse
+  Fictional and legendary characters / Superheroes:
+    - Batman
+    - Spider-Man
+    - Superman
+    - Wonder Woman

@@ -1,0 +1,753 @@
+# Wikipedia's Level 4 Technology list.
+# Computing, industry, machinery, transport and infrastructure.  Merged with
+# the everyday-life list into wiki_modern_life.
+#
+# 725 titles in 17 groups, resolved against the
+# enwiki-20220501 snapshot: a title renamed since then is stored under its
+# 2022 spelling so wiki_dump can find it by exact title.
+
+source: Wikipedia:Vital articles/Level 4/Technology
+snapshot: enwiki-20220501
+groups:
+  "Technology: General":
+    - Technology
+    - Invention
+  Agriculture:
+    - Agricultural science
+    - Crop
+    - Weed
+    - Aquaculture
+    - Beekeeping
+    - Dairy
+    - Gardening
+    - Intensive farming
+    - Orchard
+    - Organic farming
+    - Sustainable agriculture
+    - Subsistence agriculture
+    - Garden
+    - Farm
+    - Barn
+    - Stable
+    - Silo
+    - Granary
+    - Animal husbandry
+    - Domestication
+    - Selective breeding
+    - Breed
+    - Livestock
+    - Hay
+    - Agronomy
+    - Horticulture
+    - Plant breeding
+    - Cultivar
+    - Fertilizer
+    - Harvest
+    - Irrigation
+    - Pesticide
+    - Tillage
+  Biotechnology:
+    - Biotechnology
+    - Genetic engineering
+    - Genetically modified organism
+    - Cloning
+    - Gel electrophoresis
+    - Polymerase chain reaction
+  Computing and information technology:
+    - Computing
+    - Information technology
+    - Abacus
+    - Calculator
+    - Computer security
+    - Malware
+    - Digital data
+    - Data communication
+    - Computer science
+    - Artificial intelligence
+    - Machine learning
+    - Computer architecture
+    - Computer simulation
+    - Parallel computing
+    - Pixel
+    - Computer hardware
+    - Computer
+    - Mobile device
+    - Smartphone
+    - IPhone
+    - Personal computer
+    - Macintosh
+    - Supercomputer
+    - Central processing unit
+    - ENIAC
+    - Computer program
+    - Database
+    - Open-source software
+    - Software
+    - Spreadsheet
+    - Web browser
+    - Word processor
+    - Operating system
+    - Android (operating system)
+    - Linux
+    - Microsoft Windows
+    - MS-DOS
+    - Unix
+    - User interface
+    - Computer keyboard
+    - Computer monitor
+    - Computer mouse
+    - Touchscreen
+    - Cryptography
+    - Authentication
+    - Encryption
+    - Computer file
+    - File system
+    - Barcode
+    - Data storage
+    - Hard disk drive
+    - Magnetic tape
+    - Memory card
+    - Optical disc
+    - Punched card
+    - Random-access memory
+    - Read-only memory
+    - Computer network
+    - Email
+    - Ethernet
+    - Router (computing)
+    - Wi-Fi
+    - Internet
+    - Hypertext Transfer Protocol
+    - Internet protocol suite
+    - Search engine
+    - Social media
+    - Website
+    - World Wide Web
+    - Computer programming
+    - Character encoding
+    - Compiler
+    - Programming language
+    - Assembly language
+    - C (programming language)
+    - CSS
+    - HTML
+    - Java (programming language)
+    - JavaScript
+    - Programming paradigm
+    - Functional programming
+    - Object-oriented programming
+  Electronics:
+    - Electronics
+    - Consumer electronics
+    - Sensor
+    - Signal processing
+    - Signal-to-noise ratio
+    - Circuit design
+    - Oscilloscope
+    - Remote control
+    - Semiconductor device
+    - Transistor
+    - Diode
+    - Light-emitting diode
+    - Integrated circuit
+    - Electric battery
+    - Amplifier
+    - Antenna (radio)
+    - Capacitor
+    - Cavity magnetron
+    - Electrical connector
+    - Filter (signal processing)
+    - Inductor
+    - Power supply
+    - Printed circuit board
+    - Resistor
+    - Switch
+    - Circuit breaker
+    - Fuse (electrical)
+    - Relay
+    - Transformer
+    - Vacuum tube
+    - Waveguide
+    - Wire
+  Engineering:
+    - Engineering
+    - Nanotechnology
+    - Nuclear technology
+    - Technical drawing
+    - Civil engineering
+    - Architectural engineering
+    - Mechanical engineering
+    - Aerospace engineering
+    - Biomedical engineering
+    - Chemical engineering
+    - Electrical engineering
+    - Industrial engineering
+    - Military engineering
+    - Software engineering
+  Industry:
+    - Factory
+    - Assembly line
+    - Automation
+    - Industrial robot
+    - Interchangeable parts
+    - Mass production
+    - Mechanization
+    - Standardization
+    - Waste
+    - Landfill
+    - Recycling
+    - Waste management
+    - Fuel
+    - Candle
+    - Biofuel
+    - Charcoal
+    - Fossil fuel
+    - Coal
+    - Natural gas
+    - Petroleum
+    - Gasoline
+    - Kerosene
+    - Oil refinery
+    - Oil well
+    - Nuclear power
+    - Renewable energy
+    - Geothermal power
+    - Hydropower
+    - Hydroelectricity
+    - Watermill
+    - Solar energy
+    - Solar power
+    - Solar cell
+    - Wind power
+    - Windmill
+    - Electric light
+    - Incandescent light bulb
+    - Electric power transmission
+    - Electric power distribution
+    - Electrical grid
+    - Electric generator
+    - Electricity generation
+    - Power station
+    - Turbine
+    - Gas turbine
+    - Steam turbine
+    - Wind turbine
+    - Cooling tower
+    - Bleach
+    - Desalination
+    - Detergent
+    - Laundry
+    - Pasteurization
+    - Refrigeration
+    - Sanitation
+    - Sanitary sewer
+    - Sewage treatment
+    - Water purification
+    - Soap
+    - Water supply network
+    - Aqueduct (water supply)
+    - Plumbing
+    - Qanat
+    - Pumping station
+    - Water tower
+    - Well
+    - Abrasive
+    - Adhesive
+    - Ceramic
+    - Chemical plant
+    - Composite material
+    - Explosive
+    - Dynamite
+    - Fireworks
+    - Glass
+    - Natural rubber
+    - Paper
+    - Parchment
+    - Papyrus
+    - Petrochemical
+    - Plastic
+    - Pottery
+    - Porcelain
+    - Wood
+    - Woodworking
+    - Carpentry
+    - Metallurgy
+    - Smelting
+    - Metalworking
+    - Die casting
+    - Extrusion
+    - Forging
+    - Heat treating
+    - Laser cutting
+    - Rolling (metalworking)
+    - Soldering
+    - Steelmaking
+    - Welding
+  Infrastructure:
+    - Infrastructure
+    - Building
+    - Concrete
+    - Masonry
+    - Brick
+    - Quarry
+    - Cement
+    - Lumber
+    - Scaffolding
+    - Arch
+    - Ceiling
+    - Column
+    - Dome
+    - Door
+    - Elevator
+    - Façade
+    - Floor
+    - Foundation (engineering)
+    - Ladder
+    - Lighting
+    - Roof
+    - Room
+    - Stairs
+    - Wall
+    - Window
+    - Dock
+    - Harbor
+    - Lighthouse
+    - Pier
+    - Port
+    - Pagoda
+    - Pyramid
+    - Office
+    - Warehouse
+    - Tower
+    - Tower block
+    - Skyscraper
+    - Central heating
+    - Electrical wiring
+    - Heating, ventilation, and air conditioning
+    - Chimney
+    - Fireplace
+    - Dam
+    - Aswan Dam
+    - Hoover Dam
+    - Itaipu Dam
+    - Three Gorges Dam
+    - Flood control
+    - Levee
+    - Reservoir
+    - Drainage
+    - Bridge
+    - Brooklyn Bridge
+    - Golden Gate Bridge
+    - Tower Bridge
+    - Tunnel
+    - Channel Tunnel
+  Machinery and tools:
+    - Machine
+    - Crane (machine)
+    - Engine
+    - Electric motor
+    - Internal combustion engine
+    - Diesel engine
+    - Four-stroke engine
+    - Jet engine
+    - Steam engine
+    - Robotics
+    - Robot
+    - Simple machine
+    - Inclined plane
+    - Lever
+    - Pulley
+    - Screw (simple machine)
+    - Wedge
+    - Wheel
+    - Wheel and axle
+    - Siphon
+    - System
+    - Cybernetics
+    - Axle
+    - Bearing (mechanical)
+    - Clutch
+    - Gear
+    - Electrical cable
+    - Chain
+    - Rope
+    - Fastener
+    - Knot
+    - Nail (fastener)
+    - Nut (hardware)
+    - Rivet
+    - Screw
+    - Lock and key
+    - Pipe (fluid conveyance)
+    - Valve
+    - Spring (device)
+    - Tool
+    - Container
+    - Instrumentation
+    - Barometer
+    - Calipers
+    - Photometer
+    - Ruler
+    - Spectrometer
+    - Thermometer
+    - Ink
+    - Modelling clay
+    - Paint
+    - Brush
+    - Pencil
+    - Pigment
+    - Pen
+    - Axe
+    - Chisel
+    - Clamp (tool)
+    - Drilling
+    - Hammer
+    - Plane (tool)
+    - Saw
+    - Scissors
+    - Archimedes' screw
+    - Harrow (tool)
+    - Hoe (tool)
+    - Machete
+    - Plough
+    - Rake (tool)
+    - Sickle
+    - Shovel
+    - Wheelbarrow
+    - Chainsaw
+    - Combine harvester
+    - Cotton gin
+    - Cultivator
+    - Irrigation sprinkler
+    - Lawn mower
+    - Home appliance
+    - Air conditioning
+    - Clothes dryer
+    - Dishwasher
+    - Ironing
+    - Microwave oven
+    - Oven
+    - Refrigerator
+    - Sewing machine
+    - Sink
+    - Stove
+    - Toilet
+    - Vacuum cleaner
+    - Washing machine
+    - Centrifuge
+    - Lathe
+    - Loom
+    - Machine press
+    - Potter's wheel
+  Media and communication:
+    - Broadcasting
+    - Cathode-ray tube
+    - Communications satellite
+    - Flat-panel display
+    - Liquid-crystal display
+    - Image
+    - Image scanner
+    - Mail
+    - Postage stamp
+    - Mobile phone
+    - Podcast
+    - Printing
+    - Book
+    - Scroll
+    - Photocopier
+    - Printer (computing)
+    - Printing press
+    - Radio
+    - Amateur radio
+    - Radio broadcasting
+    - Sound recording and reproduction
+    - Loudspeaker
+    - Microphone
+    - Speech synthesis
+    - Telecommunications
+    - Modulation
+    - Telegraphy
+    - Telephone
+    - Television
+    - Cable television
+    - Satellite television
+    - Text messaging
+    - Typewriter
+    - Video
+    - Video camera
+  Medical technology:
+    - Artificial organ
+    - Dentures
+    - Prosthesis
+    - Stethoscope
+    - Wheelchair
+    - Bandage
+    - Syringe
+    - Cardiopulmonary bypass
+    - DNA profiling
+    - Electrocardiography
+    - Endoscopy
+    - Ambulance
+    - Medical imaging
+    - Magnetic resonance imaging
+    - Medical ultrasound
+    - Radiography
+  Military technology:
+    - Weapon
+    - Tank
+    - Military technology
+    - Horses in warfare
+    - Chariot
+    - Stealth technology
+    - War elephant
+    - Ammunition
+    - Gunpowder
+    - Armour
+    - Bulletproof vest
+    - Helmet
+    - Chain mail
+    - Plate armour
+    - Shield
+    - Bomb
+    - Cluster munition
+    - Improvised explosive device
+    - Grenade
+    - Land mine
+    - Missile
+    - Fortification
+    - Castle
+    - Defensive wall
+    - Moat
+    - Napalm
+    - Knife
+    - Dagger
+    - Sword
+    - Katana
+    - Rapier
+    - Battle axe
+    - Bayonet
+    - Club (weapon)
+    - Spear
+    - Military aircraft
+    - Attack aircraft
+    - Bomber
+    - Fighter aircraft
+    - Aircraft carrier
+    - Battleship
+    - Galley
+    - Naval mine
+    - Ship of the line
+    - Submarine
+    - Torpedo
+    - Warship
+    - Boomerang
+    - Bow and arrow
+    - Crossbow
+    - Firearm
+    - Rifle
+    - Handgun
+    - Machine gun
+    - Musket
+    - Shotgun
+    - Gun
+    - Sling (weapon)
+    - Artillery
+    - Ballista
+    - Battering ram
+    - Cannon
+    - Catapult
+    - Mortar (weapon)
+    - Weapon of mass destruction
+    - Biological warfare
+    - Chemical weapon
+    - Nuclear weapon
+    - Thermonuclear weapon
+  Navigation and timekeeping:
+    - Calendar
+    - Chinese calendar
+    - Gregorian calendar
+    - Islamic calendar
+    - Julian calendar
+    - Future
+    - Past
+    - Leap year
+    - Coordinated Universal Time
+    - Clock
+    - Watch
+    - Atomic clock
+    - Pendulum
+    - Sundial
+    - Time zone
+    - Daylight saving time
+    - Navigation
+    - Compass
+    - Celestial navigation
+    - Sextant
+    - Dead reckoning
+    - Gyroscope
+    - Satellite navigation
+    - Global Positioning System
+    - Radar
+    - Sonar
+  Optical technology:
+    - Laser
+    - Holography
+    - Optical fiber
+    - Lens
+    - Anti-reflective coating
+    - Diffraction grating
+    - Mirror
+    - Polarizer
+    - Prism
+    - Microscope
+    - Electron microscope
+    - Optical microscope
+    - Telescope
+    - Optical telescope
+    - Radio telescope
+    - Theodolite
+    - Camera
+    - Photography
+    - Digital photography
+    - Fine-art photography
+    - Photographic film
+    - Glasses
+    - Binoculars
+    - Charge-coupled device
+    - Interferometry
+  Space:
+    - Space exploration
+    - Exploration of Mars
+    - Spaceflight
+    - Spacecraft
+    - Rocket
+    - Launch vehicle
+    - Rocket engine
+    - Satellite
+    - Space station
+    - Astronaut
+    - NASA
+    - Apollo program
+    - Voyager program
+    - Soviet space program
+    - Roscosmos
+    - European Space Agency
+    - China National Space Administration
+    - Apollo 11
+    - International Space Station
+    - Mir
+    - Space Shuttle
+    - Saturn V
+    - Soyuz (spacecraft)
+    - Hubble Space Telescope
+    - Sputnik 1
+    - Atacama Large Millimeter Array
+    - Mauna Kea Observatories
+  Textiles:
+    - Textile
+    - Canvas
+    - Cotton
+    - Felt
+    - Fiber
+    - Lace
+    - Leather
+    - Linen
+    - Silk
+    - Thread (yarn)
+    - Wool
+    - Yarn
+    - Basket weaving
+    - Crochet
+    - Dye
+    - Embroidery
+    - Hand spinning
+    - Knitting
+    - Sewing
+    - Tapestry
+    - Weaving
+  Transportation:
+    - Transport
+    - Public transport
+    - Travel
+    - Freight transport
+    - Cargo
+    - Land transport
+    - Passport
+    - Vehicle
+    - Road transport
+    - Road
+    - Highway
+    - Controlled-access highway
+    - Trail
+    - Car
+    - Bicycle
+    - Cycling
+    - Bus
+    - Motorcycle
+    - Rickshaw
+    - Truck
+    - Taxi
+    - Van
+    - Driving
+    - Parking
+    - Tire
+    - Filling station
+    - Traffic
+    - Traffic collision
+    - Carriage
+    - Cart
+    - Saddle
+    - Train
+    - Locomotive
+    - Steam locomotive
+    - Train station
+    - Rail transport
+    - Railway track
+    - Rapid transit
+    - London Underground
+    - New York City Subway
+    - High-speed rail
+    - Shinkansen
+    - Monorail
+    - Tram
+    - Trans-Siberian Railway
+    - Aircraft
+    - Aviation
+    - Air traffic control
+    - Aircraft engine
+    - Airline
+    - Airplane
+    - Airport
+    - Airship
+    - Balloon (aeronautics)
+    - Hot air balloon
+    - Fixed-wing aircraft
+    - Glider (aircraft)
+    - Helicopter
+    - Jet aircraft
+    - Parachute
+    - Unmanned aerial vehicle
+    - Wing
+    - Maritime transport
+    - Ship
+    - Canal
+    - Lock (water navigation)
+    - Barge
+    - Boat
+    - Canoe
+    - Cargo ship
+    - Ferry
+    - Fishing vessel
+    - Hovercraft
+    - Merchant ship
+    - Passenger ship
+    - Riverboat
+    - Sailing
+    - Sail
+    - Sailing ship
+    - Shipbuilding
+    - Steamship
+    - Tanker (ship)
+    - Cable transport
+    - Pipeline
+    - Tractor

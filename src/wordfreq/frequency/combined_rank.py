@@ -275,7 +275,7 @@ def get_lemma_corpus_rank(
 
     # Cap a share-scaled rank at what absence from this corpus would cost.
     # Dividing a rank by a small share can push it far past the corpus's own
-    # size -- a 0.6% share of rank 734 in wiki_vital implies rank 151228, in a
+    # size -- a 0.6% share of rank 734 in a wiki corpus implies rank 151228, in a
     # corpus holding 6000 words. Beyond the unknown-rank floor the number says
     # nothing the corpus can support, and "this sense is effectively absent
     # here" is the honest reading. Mirrors the ceiling already applied to a

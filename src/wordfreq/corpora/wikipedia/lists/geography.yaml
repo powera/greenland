@@ -1,0 +1,1220 @@
+# Wikipedia's Level 4 Geography list.
+# From the continents down to their rivers, ranges and cities.  Subject matter
+# is overwhelmingly place names, so this is the corpus that exercises
+# proper-noun detection hardest.
+#
+# 1204 titles in 4 groups, resolved against the
+# enwiki-20220501 snapshot: a title renamed since then is stored under its
+# 2022 spelling so wiki_dump can find it by exact title.
+
+source: Wikipedia:Vital articles/Level 4/Geography
+snapshot: enwiki-20220501
+groups:
+  Basics:
+    - Geography
+    - Human geography
+    - Physical geography
+    - Geographic information system
+    - Country
+    - Exploration
+    - Region
+    - Continent
+    - Eurasia
+    - Europe
+    - Asia
+    - Africa
+    - Americas
+    - North America
+    - South America
+    - Antarctica
+    - Australia (continent)
+    - Cartography
+    - Map
+    - Map projection
+    - Mercator projection
+    - Atlas
+    - Cardinal direction
+    - Globe
+    - Border
+    - Surveying
+    - Geographic coordinate system
+    - Elevation
+    - Latitude
+    - Longitude
+    - Geodetic datum
+    - Geoid
+    - Remote sensing
+    - Hemispheres of Earth
+    - Equator
+    - Tropic of Cancer
+    - Tropic of Capricorn
+    - Arctic Circle
+    - Antarctic Circle
+    - North Pole
+    - South Pole
+    - Prime meridian
+    - International Date Line
+  Physical geography:
+    - Atlantic Ocean
+    - Baltic Sea
+    - Bay of Biscay
+    - Black Sea
+    - Caribbean Sea
+    - Gulf of Guinea
+    - Gulf of Mexico
+    - Gulf Stream
+    - Gulf of St. Lawrence
+    - Irish Sea
+    - Labrador Sea
+    - Mediterranean Sea
+    - Adriatic Sea
+    - Aegean Sea
+    - Ionian Sea
+    - North Sea
+    - Norwegian Sea
+    - Sargasso Sea
+    - Sea of Azov
+    - Sea of Marmara
+    - Pacific Ocean
+    - Gulf of Alaska
+    - Bering Sea
+    - Gulf of California
+    - Gulf of Carpentaria
+    - Coral Sea
+    - East China Sea
+    - Sea of Japan
+    - Sea of Okhotsk
+    - Philippine Sea
+    - Seto Inland Sea
+    - South China Sea
+    - Gulf of Thailand
+    - Tasman Sea
+    - Yellow Sea
+    - Indian Ocean
+    - Andaman Sea
+    - Arabian Sea
+    - Bay of Bengal
+    - Persian Gulf
+    - Red Sea
+    - Timor Sea
+    - Arctic Ocean
+    - Baffin Bay
+    - Barents Sea
+    - Beaufort Sea
+    - Greenland Sea
+    - Hudson Bay
+    - Kara Sea
+    - White Sea
+    - Southern Ocean
+    - Great Australian Bight
+    - Ross Sea
+    - Scotia Sea
+    - Weddell Sea
+    - Gulf of Aden
+    - Bass Strait
+    - Bering Strait
+    - Bosporus
+    - Cook Strait
+    - Dardanelles
+    - Strait of Dover
+    - Drake Passage
+    - English Channel
+    - Straits of Florida
+    - Strait of Gibraltar
+    - Strait of Hormuz
+    - Kattegat
+    - Korea Strait
+    - Strait of Magellan
+    - Strait of Malacca
+    - Mozambique Channel
+    - Palk Strait
+    - Skagerrak
+    - Taiwan Strait
+    - African Great Lakes
+    - Lake Victoria
+    - Lake Albert (Africa)
+    - Lake Malawi
+    - Lake Tanganyika
+    - Lake Turkana
+    - Lake Chad
+    - Lake Kariba
+    - Lake Mweru
+    - Lake Volta
+    - Lake Ladoga
+    - Lake Onega
+    - Vänern
+    - Great Lakes
+    - Lake Erie
+    - Lake Huron
+    - Lake Michigan
+    - Lake Ontario
+    - Lake Superior
+    - Great Bear Lake
+    - Great Slave Lake
+    - Lake Nicaragua
+    - Lake Winnipeg
+    - Lake Maracaibo
+    - Lake Titicaca
+    - Caspian Sea
+    - Aral Sea
+    - Lake Baikal
+    - Lake Balkhash
+    - Dead Sea
+    - Issyk-Kul
+    - Poyang Lake
+    - Qinghai Lake
+    - Lake Urmia
+    - Lake Van
+    - West Lake
+    - Lake Vostok
+    - Lake Eyre
+    - Yangtze
+    - Ganges
+    - Yamuna
+    - Yellow River
+    - Mekong
+    - Lena (river)
+    - Yenisey
+    - Angara
+    - OB
+    - Irtysh
+    - Indus River
+    - Brahmaputra River
+    - Amur
+    - Songhua River
+    - Euphrates
+    - Amu Darya
+    - Salween River
+    - Ural (river)
+    - Syr Darya
+    - Irrawaddy River
+    - Pearl River
+    - Tigris
+    - Godavari River
+    - Krishna River
+    - Jordan River
+    - Mississippi River
+    - Missouri River
+    - Ohio River
+    - Colorado River
+    - Columbia River
+    - Rio Grande
+    - St. Lawrence River
+    - Yukon River
+    - Mackenzie River
+    - Amazon River
+    - Madeira River
+    - Rio Negro (Amazon)
+    - Magdalena River
+    - Orinoco
+    - Paraná River
+    - Río de la Plata
+    - São Francisco River
+    - Uruguay River
+    - Nile
+    - Blue Nile
+    - White Nile
+    - Congo River
+    - Ubangi River
+    - Limpopo River
+    - Niger River
+    - Orange River
+    - Senegal River
+    - Zambezi
+    - Danube
+    - Dnieper
+    - Don (river)
+    - Elbe
+    - Loire
+    - Neva
+    - Rhine
+    - Vistula
+    - Volga
+    - Murray River
+    - Erie Canal
+    - Grand Canal (China)
+    - Kiel Canal
+    - Panama Canal
+    - St. Lawrence Seaway
+    - Suez Canal
+    - White Sea–Baltic Canal
+    - Angel Falls
+    - Iguazu Falls
+    - Niagara Falls
+    - Victoria Falls
+    - Great Barrier Reef
+    - Mid-Atlantic Ridge
+    - Mariana Trench
+    - Everglades
+    - Antarctic ice sheet
+    - Greenland ice sheet
+    - Great Artesian Basin
+    - Canary Islands
+    - Madeira
+    - Mayotte
+    - Réunion
+    - Zanzibar
+    - Aleutian Islands
+    - Arctic Archipelago
+    - Baffin Island
+    - Ellesmere Island
+    - Bermuda
+    - Greenland
+    - Newfoundland (island)
+    - Greater Antilles
+    - Cayman Islands
+    - Hispaniola
+    - Puerto Rico
+    - Lesser Antilles
+    - Guadeloupe
+    - Martinique
+    - Easter Island
+    - Galápagos Islands
+    - Tierra del Fuego
+    - Marajó
+    - Falkland Islands
+    - Andaman and Nicobar Islands
+    - British Indian Ocean Territory
+    - Hokkaido
+    - Honshu
+    - Kyushu
+    - Shikoku
+    - Ryukyu Islands
+    - Jeju Island
+    - Kuril Islands
+    - Malay Archipelago
+    - Borneo
+    - Java
+    - Lesser Sunda Islands
+    - Bali
+    - Timor
+    - Luzon
+    - Maluku Islands
+    - Mindanao
+    - Sumatra
+    - Sulawesi
+    - Visayas
+    - Phuket province
+    - Sakhalin
+    - Socotra
+    - Alexander Island
+    - Azores
+    - Balearic Islands
+    - British Isles
+    - Great Britain
+    - Ireland
+    - Isle of Man
+    - Channel Islands
+    - Crete
+    - Corsica
+    - Faroe Islands
+    - Novaya Zemlya
+    - Sardinia
+    - Sicily
+    - Svalbard
+    - Zealand
+    - American Samoa
+    - French Polynesia
+    - Guam
+    - New Britain
+    - New Caledonia
+    - New Guinea
+    - Northern Mariana Islands
+    - Tasmania
+    - North Island
+    - South Island
+    - Cape of Good Hope
+    - Horn of Africa
+    - Baja California peninsula
+    - Yucatán Peninsula
+    - Cape Horn
+    - Anatolia
+    - Arabian Peninsula
+    - Korea
+    - Mainland Southeast Asia
+    - Malay Peninsula
+    - Kamchatka Peninsula
+    - Sinai Peninsula
+    - Balkans
+    - Crimea
+    - Iberian Peninsula
+    - Antarctic Peninsula
+    - Eurasian Steppe
+    - Ring of Fire
+    - Rocky Mountains
+    - Appalachian Mountains
+    - Canadian Shield
+    - Grand Canyon
+    - Great Plains
+    - Pacific Coast Ranges
+    - Sierra Nevada
+    - Andes
+    - Altiplano
+    - Brazilian Highlands
+    - Cerrado
+    - Gran Chaco
+    - Guiana Shield
+    - Pampas
+    - Transantarctic Mountains
+    - Himalayas
+    - Deccan Plateau
+    - Indo-Gangetic Plain
+    - Karakoram
+    - Western Ghats
+    - Caucasus Mountains
+    - Iranian plateau
+    - Hindu Kush
+    - Zagros Mountains
+    - North China Plain
+    - Tibetan Plateau
+    - Kunlun Mountains
+    - Yunnan–Guizhou Plateau
+    - Altai Mountains
+    - Tian Shan
+    - West Siberian Plain
+    - Alps
+    - Apennine Mountains
+    - Balkan Mountains
+    - Carpathian Mountains
+    - East European Plain
+    - Pyrenees
+    - Scandinavian Mountains
+    - Ural Mountains
+    - Aïr Mountains
+    - Atlas Mountains
+    - Drakensberg
+    - Ethiopian Highlands
+    - Great Rift Valley
+    - Sahel
+    - Tassili n'Ajjer
+    - Great Dividing Range
+    - Outback
+    - Southern Alps
+    - Uluru
+    - Mount Kenya
+    - Mount Kilimanjaro
+    - K2
+    - Krakatoa
+    - Mount Everest
+    - Mount Fuji
+    - Mount Kailash
+    - Mount Pinatubo
+    - Mount Tai
+    - Denali
+    - Mount Pelée
+    - Mount St. Helens
+    - Aconcagua
+    - Mauna Loa
+    - Mount Kosciuszko
+    - Puncak Jaya
+    - Mont Blanc
+    - Mount Elbrus
+    - Mount Etna
+    - Mount Olympus
+    - Mount Vesuvius
+    - Vinson Massif
+    - Arabian Desert
+    - Atacama Desert
+    - Chihuahuan Desert
+    - Gobi Desert
+    - Great Victoria Desert
+    - Kalahari Desert
+    - Karakum Desert
+    - Mojave Desert
+    - Sahara
+    - Taklamakan Desert
+    - Amazon rainforest
+    - Congolian rainforests
+    - Sundarbans
+    - Park
+    - National park
+    - World Heritage Site
+    - Banc d'Arguin National Park
+    - Kavango–Zambezi Transfrontier Conservation Area
+    - Ngorongoro Conservation Area
+    - Serengeti National Park
+    - Kaziranga National Park
+    - Banff National Park
+    - Central Park
+    - Great Smoky Mountains National Park
+    - Northeast Greenland National Park
+    - Yellowstone National Park
+    - Yosemite National Park
+    - Tumucumaque Mountains National Park
+    - Lake District
+    - Phoenix Islands Protected Area
+    - Royal National Park
+  Countries and other regions:
+    - Algeria
+    - Egypt
+    - Libya
+    - Morocco
+    - Sudan
+    - Tunisia
+    - Botswana
+    - Eswatini
+    - Lesotho
+    - Namibia
+    - South Africa
+    - Angola
+    - Cameroon
+    - Central African Republic
+    - Chad
+    - Democratic Republic of the Congo
+    - Republic of the Congo
+    - Equatorial Guinea
+    - Gabon
+    - São Tomé and Príncipe
+    - Burundi
+    - Comoros
+    - Djibouti
+    - Eritrea
+    - Ethiopia
+    - Kenya
+    - Madagascar
+    - Malawi
+    - Mauritius
+    - Mozambique
+    - Rwanda
+    - Seychelles
+    - Somalia
+    - South Sudan
+    - Tanzania
+    - Uganda
+    - Zambia
+    - Zimbabwe
+    - Benin
+    - Burkina Faso
+    - Cape Verde
+    - The Gambia
+    - Ghana
+    - Guinea
+    - Guinea-Bissau
+    - Ivory Coast
+    - Liberia
+    - Mali
+    - Mauritania
+    - Niger
+    - Nigeria
+    - Senegal
+    - Sierra Leone
+    - Togo
+    - China
+    - Japan
+    - Mongolia
+    - North Korea
+    - South Korea
+    - Brunei
+    - Cambodia
+    - East Timor
+    - Indonesia
+    - Laos
+    - Malaysia
+    - Myanmar
+    - Philippines
+    - Singapore
+    - Thailand
+    - Vietnam
+    - Kazakhstan
+    - Kyrgyzstan
+    - Tajikistan
+    - Turkmenistan
+    - Uzbekistan
+    - Afghanistan
+    - Bangladesh
+    - Bhutan
+    - India
+    - Maldives
+    - Nepal
+    - Pakistan
+    - Sri Lanka
+    - Armenia
+    - Azerbaijan
+    - Bahrain
+    - Cyprus
+    - Georgia (country)
+    - Iran
+    - Iraq
+    - Israel
+    - Jordan
+    - Kuwait
+    - Lebanon
+    - Oman
+    - Qatar
+    - Saudi Arabia
+    - Syria
+    - Turkey
+    - United Arab Emirates
+    - Yemen
+    - Denmark
+    - Estonia
+    - Finland
+    - Iceland
+    - Republic of Ireland
+    - Latvia
+    - Lithuania
+    - Norway
+    - Sweden
+    - United Kingdom
+    - Austria
+    - Belgium
+    - France
+    - Germany
+    - Liechtenstein
+    - Luxembourg
+    - Monaco
+    - Netherlands
+    - Switzerland
+    - Albania
+    - Andorra
+    - Bosnia and Herzegovina
+    - Croatia
+    - Greece
+    - Italy
+    - Malta
+    - Montenegro
+    - North Macedonia
+    - Portugal
+    - San Marino
+    - Serbia
+    - Slovenia
+    - Spain
+    - Vatican City
+    - Belarus
+    - Bulgaria
+    - Czech Republic
+    - Hungary
+    - Moldova
+    - Poland
+    - Romania
+    - Russia
+    - Slovakia
+    - Ukraine
+    - Canada
+    - Mexico
+    - United States
+    - Belize
+    - Costa Rica
+    - El Salvador
+    - Guatemala
+    - Honduras
+    - Nicaragua
+    - Panama
+    - Antigua and Barbuda
+    - The Bahamas
+    - Barbados
+    - Cuba
+    - Dominica
+    - Dominican Republic
+    - Grenada
+    - Haiti
+    - Jamaica
+    - Saint Kitts and Nevis
+    - Saint Lucia
+    - Saint Vincent and the Grenadines
+    - Trinidad and Tobago
+    - Australia
+    - New Zealand
+    - Samoa
+    - Tonga
+    - Tuvalu
+    - Kiribati
+    - Marshall Islands
+    - Federated States of Micronesia
+    - Nauru
+    - Palau
+    - Fiji
+    - Papua New Guinea
+    - Solomon Islands
+    - Vanuatu
+    - Argentina
+    - Bolivia
+    - Brazil
+    - Colombia
+    - Chile
+    - Ecuador
+    - Guyana
+    - Paraguay
+    - Peru
+    - Suriname
+    - Uruguay
+    - Venezuela
+    - Puntland
+    - Somaliland
+    - Western Sahara
+    - Abkhazia
+    - Northern Cyprus
+    - Palestine
+    - South Ossetia
+    - Taiwan
+    - Kosovo
+    - Transnistria
+    - Cook Islands
+    - Niue
+    - Holy See
+    - Global North and Global South
+    - Oceania
+    - Middle East
+    - Arctic
+    - Tropics
+    - Arab world
+    - Eastern world
+    - Western world
+    - Central Africa
+    - East Africa
+    - North Africa
+    - Southern Africa
+    - Sub-Saharan Africa
+    - West Africa
+    - Caribbean
+    - Central America
+    - French Guiana
+    - Latin America
+    - Patagonia
+    - Southern Cone
+    - Minas Gerais
+    - São Paulo (state)
+    - Ontario
+    - Quebec
+    - New England
+    - New York (state)
+    - Pennsylvania
+    - Midwestern United States
+    - Southern United States
+    - Florida
+    - Texas
+    - California
+    - Hawaii
+    - Melanesia
+    - Micronesia
+    - Polynesia
+    - Caucasus
+    - Nagorno-Karabakh
+    - Central Asia
+    - East Asia
+    - Kashmir
+    - Penang
+    - Punjab
+    - South Asia
+    - Southeast Asia
+    - Western Asia
+    - Hebei
+    - Inner Mongolia
+    - Fujian
+    - Jiangsu
+    - Shandong
+    - Zhejiang
+    - Guangdong
+    - Hainan
+    - Henan
+    - Hubei
+    - Hunan
+    - Sichuan
+    - Tibet
+    - Yunnan
+    - Xinjiang
+    - Manchuria
+    - Andhra Pradesh
+    - Bihar
+    - Gujarat
+    - Maharashtra
+    - Northeast India
+    - Rajasthan
+    - Tamil Nadu
+    - Uttar Pradesh
+    - West Bengal
+    - Aceh
+    - Western New Guinea
+    - Eastern Arabia
+    - Hejaz
+    - Najd
+    - Kurdistan
+    - Levant
+    - Gaza Strip
+    - Balochistan, Pakistan
+    - Punjab, Pakistan
+    - Sindh
+    - Western Europe
+    - Flanders
+    - Wallonia
+    - Eastern Europe
+    - Vojvodina
+    - Brittany
+    - Provence
+    - Bavaria
+    - Tuscany
+    - Scandinavia
+    - Moldavia
+    - Transylvania
+    - Wallachia
+    - Bashkortostan
+    - Chechnya
+    - Dagestan
+    - Kaliningrad Oblast
+    - Sakha
+    - Siberia
+    - Tatarstan
+    - Andalusia
+    - Basque Country (autonomous community)
+    - Catalonia
+    - Galicia (Spain)
+    - England
+    - Scotland
+    - Wales
+    - Northern Ireland
+    - Gibraltar
+  Cities:
+    - City
+    - Capital city
+    - City block
+    - Ghetto
+    - Human settlement
+    - Metropolitan area
+    - Megalopolis
+    - Neighbourhood
+    - Rural area
+    - Slum
+    - Suburb
+    - Town
+    - Village
+    - Urban planning
+    - Urban design
+    - Urban area
+    - Urbanization
+    - Zoning
+    - Central business district
+    - Industrial park
+    - Algiers
+    - Benghazi
+    - Casablanca
+    - Constantine, Algeria
+    - Fez, Morocco
+    - Khartoum
+    - Omdurman
+    - Marrakesh
+    - Oran
+    - Rabat
+    - Tripoli
+    - Tunis
+    - Alexandria
+    - Aswan
+    - Cairo
+    - Giza
+    - Damietta
+    - Luxor
+    - Bangui
+    - Brazzaville
+    - Kinshasa
+    - Luanda
+    - Lubumbashi
+    - Mbuji-Mayi
+    - Addis Ababa
+    - Antananarivo
+    - Asmara
+    - Dar es Salaam
+    - Dire Dawa
+    - Gondar
+    - Harare
+    - Kampala
+    - Kigali
+    - Lilongwe
+    - Lusaka
+    - Maputo
+    - Mogadishu
+    - Mombasa
+    - Nairobi
+    - Gaborone
+    - Windhoek
+    - Cape Town
+    - Durban
+    - Port Elizabeth
+    - Johannesburg
+    - Pretoria
+    - Abidjan
+    - Accra
+    - Bamako
+    - Conakry
+    - Cotonou
+    - Dakar
+    - Douala
+    - Freetown
+    - Kumasi
+    - Monrovia
+    - N'Djamena
+    - Niamey
+    - Nouakchott
+    - Ouagadougou
+    - Timbuktu
+    - Yaoundé
+    - Abuja
+    - Benin City
+    - Ibadan
+    - Kaduna
+    - Kano (city)
+    - Lagos
+    - Maiduguri
+    - Port Harcourt
+    - Calgary
+    - Montreal
+    - Ottawa
+    - Toronto
+    - Vancouver
+    - Guadalajara
+    - Ciudad Juárez
+    - León, Guanajuato
+    - Mérida, Yucatán
+    - Mexico City
+    - Monterrey
+    - Puebla (city)
+    - Tijuana
+    - Veracruz (city)
+    - Atlanta
+    - Austin, Texas
+    - Baltimore
+    - Boston
+    - Chicago
+    - Cleveland
+    - Dallas
+    - Denver
+    - Detroit
+    - Houston
+    - Las Vegas
+    - Los Angeles
+    - Miami
+    - Minneapolis
+    - Nashville, Tennessee
+    - New Orleans
+    - New York City
+    - Philadelphia
+    - Phoenix, Arizona
+    - Pittsburgh
+    - San Antonio
+    - San Diego
+    - San Francisco
+    - Silicon Valley
+    - Seattle
+    - St. Louis
+    - Washington, D.C.
+    - Guatemala City
+    - Havana
+    - Kingston, Jamaica
+    - Managua
+    - Panama City
+    - Port-au-Prince
+    - San José, Costa Rica
+    - San Juan, Puerto Rico
+    - San Salvador
+    - Santo Domingo
+    - Tegucigalpa
+    - Arequipa
+    - Asunción
+    - Buenos Aires
+    - Caracas
+    - Córdoba, Argentina
+    - Cusco
+    - Guayaquil
+    - La Paz
+    - Lima
+    - Maracaibo
+    - Montevideo
+    - Quito
+    - Rosario, Santa Fe
+    - Santa Cruz de la Sierra
+    - Santiago
+    - Valencia, Venezuela
+    - Valparaíso
+    - Belém
+    - Belo Horizonte
+    - Brasília
+    - Curitiba
+    - Fortaleza
+    - Manaus
+    - Porto Alegre
+    - Recife
+    - Rio de Janeiro
+    - Salvador, Bahia
+    - São Luís, Maranhão
+    - São Paulo
+    - Barranquilla
+    - Bogotá
+    - Cali
+    - Cartagena, Colombia
+    - Medellín
+    - Almaty
+    - Nur-Sultan
+    - Samarkand
+    - Tashkent
+    - Busan
+    - Daegu
+    - Daejeon
+    - Kaohsiung
+    - Pyongyang
+    - Seoul
+    - Taichung
+    - Taipei
+    - Ulaanbaatar
+    - Beijing
+    - Changchun
+    - Changsha
+    - Chengdu
+    - Chongqing
+    - Dalian
+    - Fuzhou
+    - Guangzhou
+    - Hangzhou
+    - Harbin
+    - Hefei
+    - Hong Kong
+    - Jinan
+    - Kunming
+    - Lanzhou
+    - Lhasa
+    - Luoyang
+    - Macau
+    - Nanchang
+    - Nanjing
+    - Nanning
+    - Ningbo
+    - Qingdao
+    - Quanzhou
+    - Shanghai
+    - Shenyang
+    - Shenzhen
+    - Shijiazhuang
+    - Suzhou
+    - Taiyuan
+    - Tianjin
+    - Ürümqi
+    - Wuhan
+    - Xi'an
+    - Xiamen
+    - Zhengzhou
+    - Fukuoka
+    - Hiroshima
+    - Kobe
+    - Kyoto
+    - Nagoya
+    - Osaka
+    - Sapporo
+    - Sendai
+    - Tokyo
+    - Yokohama
+    - Chittagong
+    - Colombo
+    - Dhaka
+    - Herat
+    - Kabul
+    - Kandahar
+    - Kathmandu
+    - Sylhet
+    - Agra
+    - Amritsar
+    - Ahmedabad
+    - Bangalore
+    - Bhopal
+    - Bhubaneswar
+    - Chandigarh
+    - Chennai
+    - Coimbatore
+    - Delhi
+    - Guwahati
+    - Hyderabad
+    - Indore
+    - Jaipur
+    - Jodhpur
+    - Kanpur
+    - Kolkata
+    - Lucknow
+    - Ludhiana
+    - Madurai
+    - Mumbai
+    - Mysore
+    - Nagpur
+    - Patna
+    - Pune
+    - Allahabad
+    - Raipur
+    - Ranchi
+    - Srinagar
+    - Surat
+    - Thiruvananthapuram
+    - Vadodara
+    - Varanasi
+    - Visakhapatnam
+    - Faisalabad
+    - Gujranwala
+    - Hyderabad, Sindh
+    - Karachi
+    - Lahore
+    - Multan
+    - Peshawar
+    - Rawalpindi
+    - Islamabad
+    - Bangkok
+    - Cebu City
+    - Chiang Mai
+    - Davao City
+    - Johor Bahru
+    - Kuala Lumpur
+    - Mandalay
+    - Manila
+    - Quezon City
+    - Phnom Penh
+    - Vientiane
+    - Yangon
+    - Bandung
+    - Jakarta
+    - Makassar
+    - Malang
+    - Medan
+    - Padang
+    - Palembang
+    - Semarang
+    - Surabaya
+    - Yogyakarta
+    - Cần Thơ
+    - Da Nang
+    - Haiphong
+    - Hanoi
+    - Ho Chi Minh City
+    - Huế
+    - Abu Dhabi
+    - Aden
+    - Aleppo
+    - Amman
+    - Baghdad
+    - Baku
+    - Basra
+    - Beirut
+    - Damascus
+    - Doha
+    - Dubai
+    - Erbil
+    - Jeddah
+    - Jericho
+    - Jerusalem
+    - Kuwait City
+    - Mecca
+    - Medina
+    - Mosul
+    - Muscat
+    - Riyadh
+    - Sanaa
+    - Tbilisi
+    - Tel Aviv
+    - Tyre, Lebanon
+    - Yerevan
+    - Ahvaz
+    - Isfahan
+    - Kermanshah
+    - Mashhad
+    - Qom
+    - Shiraz
+    - Tabriz
+    - Tehran
+    - Adana
+    - Ankara
+    - Antalya
+    - Bursa
+    - Gaziantep
+    - Istanbul
+    - İzmir
+    - Belgrade
+    - Bratislava
+    - Bucharest
+    - Budapest
+    - Minsk
+    - Prague
+    - Sarajevo
+    - Sofia
+    - Zagreb
+    - Gdańsk
+    - Kraków
+    - Łódź
+    - Poznań
+    - Warsaw
+    - Wrocław
+    - Chelyabinsk
+    - Kazan
+    - Moscow
+    - Nizhny Novgorod
+    - Novosibirsk
+    - Omsk
+    - Rostov-on-Don
+    - Saint Petersburg
+    - Samara
+    - Ufa
+    - Vladivostok
+    - Volgograd
+    - Yekaterinburg
+    - Dnipro
+    - Donetsk
+    - Kharkiv
+    - Kyiv
+    - Lviv
+    - Odessa
+    - Copenhagen
+    - Helsinki
+    - Oslo
+    - Riga
+    - Stockholm
+    - Tallinn
+    - Vilnius
+    - Amsterdam
+    - Antwerp
+    - Brussels
+    - Dublin
+    - Geneva
+    - The Hague
+    - Rotterdam
+    - Vienna
+    - Zürich
+    - Bordeaux
+    - Lyon
+    - Marseille
+    - Nantes
+    - Nice
+    - Paris
+    - Strasbourg
+    - Toulouse
+    - Berlin
+    - Cologne
+    - Düsseldorf
+    - Dresden
+    - Frankfurt
+    - Hamburg
+    - Munich
+    - Nuremberg
+    - Stuttgart
+    - Belfast
+    - Birmingham
+    - Cardiff
+    - Edinburgh
+    - Glasgow
+    - Leeds
+    - Liverpool
+    - London
+    - Manchester
+    - Athens
+    - Lisbon
+    - Porto
+    - Florence
+    - Genoa
+    - Milan
+    - Naples
+    - Palermo
+    - Rome
+    - Syracuse, Sicily
+    - Turin
+    - Venice
+    - Barcelona
+    - Madrid
+    - Seville
+    - Valencia
+    - Zaragoza
+    - Auckland
+    - Adelaide
+    - Brisbane
+    - Melbourne
+    - Perth
+    - Sydney
