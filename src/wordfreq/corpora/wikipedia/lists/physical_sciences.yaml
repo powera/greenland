@@ -1,0 +1,1262 @@
+# Wikipedia's Level 4 Physical sciences list, as of the August 2026 revision.
+# Physics, chemistry, astronomy and earth science.  wiki_biology covers
+#
+# 1111 titles in 122 groups, resolved against the
+# enwiki-20220501 snapshot: a title renamed since then is stored under its
+# 2022 spelling so wiki_dump can find it by exact title.
+#
+# 7 titles were redirects in 2022 and are stored
+# under the target they redirect to:
+#   Cosmic inflation  ->  Inflation (cosmology)
+#   History of atomic theory  ->  Atomic theory
+#   Late Devonian mass extinction  ->  Late Devonian extinction
+#   Organophosphorus chemistry  ->  Organophosphorus compound
+#   Organosilicon chemistry  ->  Organosilicon compound
+#   Organosulfur chemistry  ->  Organosulfur compounds
+#   Propylene  ->  Propene
+#
+# 6 titles have no snapshot article under any
+# spelling tried, and are dropped:
+#   Barycenter (astronomy)
+#   Internal structure of Earth
+#   Rutherford scattering experiments
+#   Substance (chemistry)
+#   Triassic–Jurassic extinction
+#   pH
+
+source: Wikipedia:Vital articles/Level 4/Physical sciences
+snapshot: enwiki-20220501
+groups:
+  Science basics:
+    - Science
+    - Scientific method
+    - Nature
+    - Natural science
+    - Data
+    - Experiment
+    - Field research
+    - Information science
+    - Methodology
+    - Observation
+    - Scientific law
+    - Research
+    - Scientific modelling
+    - Scientific theory
+  Science basics / Research methods:
+    - Qualitative research
+    - Quantitative research
+    - Laboratory
+  "Measurement / Measurement: General":
+    - Measurement
+    - Accuracy and precision
+    - Metrology
+    - Unit of measurement
+    - Natural units
+    - Planck units
+  Measurement / Measurement systems:
+    - Metric system
+    - International System of Units
+    - United States customary units
+    - Imperial units
+  Measurement / Units of measurement / Time:
+    - Second
+    - Minute
+    - Hour
+    - Day
+    - Week
+    - Month
+    - Year
+  Measurement / Units of measurement / Dimensional space / Length and distance:
+    - Inch
+    - Foot (unit)
+    - Cubit
+    - Metre
+    - Mile
+    - Nautical mile
+    - Astronomical unit
+    - Light-year
+    - Parsec
+  Measurement / Units of measurement / Dimensional space / Area:
+    - Acre
+    - Hectare
+  Measurement / Units of measurement / Dimensional space / Volume:
+    - Gallon
+    - Litre
+  Measurement / Units of measurement / Mechanics / Energy, power, force and pressure:
+    - Standard atmosphere (unit)
+    - Calorie
+    - Electronvolt
+    - Joule
+    - Watt
+    - Newton (unit)
+    - Pascal (unit)
+  Measurement / Units of measurement / Mechanics / Mass:
+    - Dalton (unit)
+    - Kilogram
+    - Ton
+    - Pound (mass)
+    - Ounce
+  Measurement / Units of measurement / Mechanics / Velocity:
+    - Knot (unit)
+  Measurement / Units of measurement / Angle:
+    - Degree (angle)
+    - Radian
+    - Steradian
+  Measurement / Units of measurement / Light:
+    - Candela
+    - Lumen (unit)
+    - Lux
+  Measurement / Units of measurement / Temperature:
+    - Celsius
+    - Fahrenheit
+    - Kelvin
+  Measurement / Units of measurement / Electromagnetism:
+    - Ampere
+    - Farad
+    - Coulomb
+    - Hertz
+    - Ohm
+    - Siemens (unit)
+    - Tesla (unit)
+    - Volt
+  Measurement / Units of measurement / Quantity / Amount of substance:
+    - Mole (unit)
+  Measurement / Units of measurement / Quantity / Data:
+    - Byte
+    - Bit
+  Measurement / Units of measurement / Radioactivity:
+    - Becquerel
+    - Gray (unit)
+    - Sievert
+  Measurement / Units of measurement / Other:
+    - Decibel
+  Astronomy / Basics:
+    - Astronomy
+    - Astronomical object
+    - Astrophysics
+    - Extraterrestrial life
+  Astronomy / Basics / Observational astronomy:
+    - Observatory
+    - Luminosity
+    - Magnitude (astronomy)
+    - Extinction (astronomy)
+  Astronomy / Astronomical objects / Solar System:
+    - Solar System
+    - Sun
+    - Mercury (planet)
+    - Venus
+    - Earth
+    - Moon
+    - Mars
+    - Asteroid belt
+    - Ceres (dwarf planet)
+    - Jupiter
+    - Io (moon)
+    - Europa (moon)
+    - Ganymede (moon)
+    - Callisto (moon)
+    - Saturn
+    - Enceladus
+    - Titan (moon)
+    - Uranus
+    - Neptune
+    - Triton (moon)
+    - Halley's Comet
+    - Kuiper belt
+    - Pluto
+    - Eris (dwarf planet)
+    - Oort cloud
+    - Interplanetary medium
+  Astronomy / Astronomical objects / Notable stars:
+    - Alpha Centauri
+    - Arcturus
+    - Betelgeuse
+    - Canopus
+    - Capella
+    - Polaris
+    - Procyon
+    - Rigel
+    - Sirius
+    - Vega
+  Astronomy / Astronomical objects / Notable galaxies:
+    - Local Group
+    - Milky Way
+    - Galactic Center
+    - Sagittarius A*
+    - Andromeda Galaxy
+    - Large Magellanic Cloud
+    - Small Magellanic Cloud
+    - Triangulum Galaxy
+    - Centaurus A
+    - Messier 87
+    - Pinwheel Galaxy
+    - Whirlpool Galaxy
+  Astronomy / Astronomical objects / Notable nebulae:
+    - Carina Nebula
+    - Crab Nebula
+    - Eagle Nebula
+    - Horsehead Nebula
+    - Orion Nebula
+    - Ring Nebula
+  Astronomy / Astronomical objects / Other notable objects:
+    - 3C 273
+    - Cygnus X-1
+    - Hyades (star cluster)
+    - Omega Centauri
+    - Pleiades
+    - Virgo Supercluster
+    - Virgo Cluster
+  Astronomy / Celestial mechanics and astrometry / Celestial mechanics:
+    - Celestial mechanics
+    - Orbit
+    - Tidal locking
+    - Eclipse
+    - Lunar eclipse
+    - Solar eclipse
+    - Kepler's laws of planetary motion
+    - Lagrange point
+    - Night
+  Astronomy / Celestial mechanics and astrometry / Celestial mechanics / Orbital mechanics:
+    - Orbital mechanics
+    - Escape velocity
+    - Geostationary orbit
+    - Geosynchronous orbit
+    - Gravitational acceleration
+    - Gravity assist
+    - Low Earth orbit
+  Astronomy / Celestial mechanics and astrometry / Celestial sphere:
+    - Celestial sphere
+    - Astronomical coordinate systems
+    - Equatorial coordinate system
+    - Equinox
+    - Ecliptic
+    - Horizon
+    - Solstice
+    - Zodiac
+  Astronomy / Celestial mechanics and astrometry / Constellations:
+    - Constellation
+    - Canis Major
+    - Cassiopeia (constellation)
+    - Centaurus
+    - Crux
+    - Orion (constellation)
+    - Ursa Major
+    - Ursa Minor
+  Astronomy / Celestial mechanics and astrometry / Astrometry:
+    - Astrometry
+    - Albedo
+    - Cosmic distance ladder
+    - Parallax
+    - Photometry (astronomy)
+  Astronomy / Galactic astronomy and extragalactic astronomy / Basics:
+    - Outer space
+    - Galaxy
+    - Black hole
+    - Event horizon
+    - Stellar black hole
+    - Supermassive black hole
+    - Galaxy groups and clusters
+    - Supercluster
+    - Interstellar medium
+    - Nebula
+    - Dark nebula
+    - Molecular cloud
+    - Great Attractor
+    - H II region
+    - Void (astronomy)
+    - Cosmic ray
+  Astronomy / Galactic astronomy and extragalactic astronomy / Galaxy morphological classification:
+    - Galaxy morphological classification
+    - Spiral galaxy
+    - Barred spiral galaxy
+    - Elliptical galaxy
+    - Lenticular galaxy
+    - Irregular galaxy
+    - Dwarf galaxy
+  Astronomy / Galactic astronomy and extragalactic astronomy / Active galactic nucleus:
+    - Active galactic nucleus
+    - Blazar
+    - Quasar
+    - Radio galaxy
+    - Seyfert galaxy
+  Astronomy / Physical cosmology:
+    - Physical cosmology
+    - Universe
+    - Observable universe
+    - Chronology of the universe
+    - Ultimate fate of the universe
+    - Big Bang
+    - Inflation (cosmology)
+    - Cosmic microwave background
+    - Galaxy formation and evolution
+    - Formation and evolution of the Solar System
+    - Nebular hypothesis
+    - Dark matter
+    - Dark energy
+    - Cosmological constant
+    - Redshift
+    - Hubble's law
+  Astronomy / Planetary science:
+    - Planet
+    - Terrestrial planet
+    - Giant planet
+    - Exoplanet
+    - Natural satellite
+    - Comet
+    - Minor planet
+    - Asteroid
+    - Dwarf planet
+    - Meteoroid
+    - Atmosphere
+    - Meteor shower
+    - Impact event
+    - Ring system
+  Astronomy / Stellar astronomy:
+    - Star
+    - Variable star
+    - Supernova
+    - Gamma-ray burst
+    - Nova
+    - Pulsar
+    - Cepheid variable
+    - Star system
+    - Planetary system
+    - Binary star
+    - Star cluster
+    - Stellar classification
+    - Stellar evolution
+    - Star formation
+    - Starburst galaxy
+    - Planetary nebula
+    - Protostar
+    - Main sequence
+    - Giant star
+    - Red giant
+    - Supergiant
+    - Wolf–Rayet star
+    - White dwarf
+    - Neutron star
+    - Stellar kinematics
+    - Stellar magnetic field
+    - Stellar structure
+    - Solar wind
+    - Metallicity
+    - Brown dwarf
+    - Hertzsprung–Russell diagram
+  "Chemistry / Chemistry: General":
+    - Chemistry
+    - Organic chemistry
+    - Inorganic chemistry
+    - Physical chemistry
+    - Electrochemistry
+    - Electrolysis
+    - Environmental chemistry
+    - Medicinal chemistry
+    - Nuclear chemistry
+    - Nuclide
+    - Organometallic chemistry
+    - Phase diagram
+    - Photochemistry
+    - Polymer chemistry
+    - Polymer
+    - Quantum chemistry
+    - Materials science
+    - Alchemy
+    - Amount of substance
+    - Chemical synthesis
+    - Conservation of mass
+  Chemistry / Chemical reactions:
+    - Chemical reaction
+    - Acid–base reaction
+    - Catalysis
+    - Chemical equation
+    - Chemical equilibrium
+    - Chemical formula
+    - Chemical kinetics
+    - Redox
+    - Combustion
+    - Fire
+    - Corrosion
+    - Haber process
+    - Radical (chemistry)
+    - Reaction mechanism
+    - Substitution reaction
+  Chemistry / Chemical bonds:
+    - Chemical bond
+    - Molecule
+    - Ionic bonding
+    - Covalent bond
+    - Metallic bonding
+    - Intermolecular force
+    - Hydrogen bond
+    - Valence bond theory
+  Chemistry / Separation processes:
+    - Chromatography
+    - Distillation
+    - Filtration
+  Chemistry / Analytical chemistry:
+    - Analytical chemistry
+    - Spectroscopy
+    - Absorption spectroscopy
+    - Mass spectrometry
+  Chemistry / Chemical substances / Chemical elements / Basics:
+    - Chemical element
+    - Periodic table
+    - Allotropy
+    - Atomic number
+    - Atomic mass
+  Chemistry / Chemical substances / Chemical elements / Chemical element groups:
+    - Metal
+    - Alkali metal
+    - Alkaline earth metal
+    - Lanthanide
+    - Actinide
+    - Transition metal
+    - Metalloid
+    - Halogen
+    - Noble gas
+    - Synthetic element
+  Chemistry / Chemical substances / Chemical elements / Chemical elements:
+    - Hydrogen
+    - Helium
+    - Lithium
+    - Beryllium
+    - Boron
+    - Carbon
+    - Diamond
+    - Graphite
+    - Carbon nanotube
+    - Nitrogen
+    - Oxygen
+    - Ozone
+    - Fluorine
+    - Neon
+    - Sodium
+    - Magnesium
+    - Aluminium
+    - Silicon
+    - Phosphorus
+    - Sulfur
+    - Chlorine
+    - Argon
+    - Potassium
+    - Calcium
+    - Scandium
+    - Titanium
+    - Vanadium
+    - Chromium
+    - Manganese
+    - Iron
+    - Cobalt
+    - Nickel
+    - Copper
+    - Zinc
+    - Gallium
+    - Germanium
+    - Arsenic
+    - Selenium
+    - Bromine
+    - Krypton
+    - Rubidium
+    - Strontium
+    - Yttrium
+    - Zirconium
+    - Niobium
+    - Molybdenum
+    - Technetium
+    - Ruthenium
+    - Rhodium
+    - Palladium
+    - Silver
+    - Cadmium
+    - Indium
+    - Tin
+    - Antimony
+    - Tellurium
+    - Iodine
+    - Xenon
+    - Caesium
+    - Barium
+    - Lanthanum
+    - Cerium
+    - Praseodymium
+    - Neodymium
+    - Promethium
+    - Samarium
+    - Europium
+    - Gadolinium
+    - Terbium
+    - Dysprosium
+    - Holmium
+    - Erbium
+    - Thulium
+    - Ytterbium
+    - Lutetium
+    - Hafnium
+    - Tantalum
+    - Tungsten
+    - Rhenium
+    - Osmium
+    - Iridium
+    - Platinum
+    - Gold
+    - Mercury (element)
+    - Thallium
+    - Lead
+    - Bismuth
+    - Polonium
+    - Astatine
+    - Radon
+    - Francium
+    - Radium
+    - Actinium
+    - Thorium
+    - Protactinium
+    - Uranium
+    - Neptunium
+    - Plutonium
+    - Americium
+    - Curium
+    - Berkelium
+    - Californium
+  "Chemistry / Chemical substances / Chemical compounds / Chemical compounds: General":
+    - Chemical compound
+    - Inorganic compound
+    - Organic compound
+  Chemistry / Chemical substances / Chemical compounds / Inorganic compounds:
+    - Water
+    - Properties of water
+    - Ice
+    - Water vapor
+    - Oxide
+    - Carbon dioxide
+    - Carbon monoxide
+    - Nitrous oxide
+    - Titanium dioxide
+    - Hydrogen peroxide
+    - Cyanide
+    - Acid
+    - Boric acid
+    - Hydrochloric acid
+    - Hydrofluoric acid
+    - Nitric acid
+    - Phosphoric acid
+    - Sulfuric acid
+    - Base (chemistry)
+    - Ammonia
+    - Potassium hydroxide
+    - Sodium hydroxide
+  Chemistry / Chemical substances / Chemical compounds / Salts:
+    - Salt (chemistry)
+    - Carbonate
+    - Calcium carbonate
+    - Sodium bicarbonate
+    - Sodium carbonate
+    - Chloride
+    - Calcium chloride
+    - Polyvinyl chloride
+    - Sodium chloride
+    - Nitrate
+    - Ammonium nitrate
+    - Potassium nitrate
+    - Sodium nitrate
+    - Silicate
+    - Sodium silicate
+    - Sulfate
+    - Alum
+    - Sodium sulfate
+    - Ammonium sulfate
+    - Magnesium sulfate
+  Chemistry / Chemical substances / Chemical compounds / Organic compounds:
+    - Haloalkane
+    - Organophosphorus compound
+    - Organosilicon compound
+    - Silicone
+    - Organosulfur compounds
+    - Thiol
+  Chemistry / Chemical substances / Chemical compounds / Carbon–nitrogen bond:
+    - Amide
+    - Urea
+    - Nylon
+    - Amine
+  Chemistry / Chemical substances / Chemical compounds / Carbon–oxygen bond:
+    - Alcohol (chemistry)
+    - Ethanol
+    - Methanol
+    - Aldehyde
+    - Formaldehyde
+    - Carboxylic acid
+    - Acetic acid
+    - Citric acid
+    - Lactic acid
+    - Ester
+    - Polyester
+    - Ether
+    - Ketone
+    - Acetone
+    - Phenol
+    - Tannin
+  Chemistry / Chemical substances / Chemical compounds / Hydrocarbons:
+    - Hydrocarbon
+    - Alkane
+    - Butane
+    - Ethane
+    - Methane
+    - Propane
+    - Alkene
+    - Ethylene
+    - Polyethylene
+    - Propene
+    - Polypropylene
+    - Aromatic compound
+    - Benzene
+    - Alkyne
+    - Oil
+  "Chemistry / Chemical substances / Chemical mixtures / Chemical mixtures: General":
+    - Alloy
+    - Mixture
+    - Aerosol
+    - Amalgam (chemistry)
+    - Colloid
+    - Dispersion (chemistry)
+    - Emulsion
+    - Foam
+    - Gel
+    - Solution (chemistry)
+    - Suspension (chemistry)
+    - Syngas
+  Chemistry / Chemical substances / Chemical mixtures / Specific alloys:
+    - Brass
+    - Bronze
+    - Cast iron
+    - Steel
+    - Stainless steel
+    - Wrought iron
+  Earth science / Basics:
+    - Earth science
+    - Natural environment
+    - Natural resource
+  Earth science / Natural disasters:
+    - Natural disaster
+    - Earthquake
+    - Flood
+    - Drought
+    - Avalanche
+    - Landslide
+    - Tsunami
+    - Wildfire
+  Earth science / Earth / Geology:
+    - Geology
+    - Plate tectonics
+    - Fold (geology)
+    - Meteorite
+    - Impact crater
+    - Lithosphere
+    - Crust (geology)
+    - Fault (geology)
+    - Stratigraphy
+    - Thrust fault
+  Earth science / Earth / Geology / Mineralogy:
+    - Mineral
+    - Mineralogy
+    - Gemstone
+    - Feldspar
+    - Kaolinite
+    - Pyroxene
+    - Quartz
+    - Talc
+    - Mica
+    - Gypsum
+    - Asbestos
+  Earth science / Earth / Geology / Mineral gemstones:
+    - Emerald
+    - Jade
+    - Sapphire
+    - Ruby
+  Earth science / Earth / Geology / Organic gemstones:
+    - Amber
+    - Ivory
+    - Pearl
+  Earth science / Earth / Geology / Petrology:
+    - Petrology
+    - Rock (geology)
+    - Ore
+    - Igneous rock
+    - Basalt
+    - Granite
+    - Magma
+    - Tuff
+    - Sedimentary rock
+    - Limestone
+    - Clay
+    - Sand
+    - Oil shale
+    - Sandstone
+    - Bauxite
+    - Metamorphic rock
+    - Schist
+    - Marble
+    - Gneiss
+    - Slate
+    - Conglomerate (geology)
+    - Breccia
+    - Gravel
+  Earth science / Earth / Geophysics:
+    - Geodesy
+    - Geophysics
+    - Earth's inner core
+    - Earth's magnetic field
+    - Earth's outer core
+    - Earth's mantle
+    - Earth's crust
+    - Seismology
+  Earth science / Earth / Geomorphology:
+    - Geomorphology
+    - Erosion
+    - Weathering
+  Earth science / Earth / Geomorphology / Landforms:
+    - Landform
+    - Land
+    - Mountain
+    - Mountain pass
+    - Mountain range
+    - Hill
+    - Valley
+    - Plateau
+    - Mesa
+    - Plain
+    - Sedimentary basin
+  Earth science / Earth / Geomorphology / Fluvial landforms:
+    - Alluvial fan
+    - Beach
+    - Canyon
+    - Cliff
+    - Floodplain
+    - Meander
+    - Oasis
+    - Rapids
+    - Waterfall
+  Earth science / Earth / Geomorphology / Glacial landforms:
+    - Glacial landform
+    - Fjord
+    - Moraine
+  Earth science / Earth / Geomorphology / Caves:
+    - Cave
+    - Karst
+  Earth science / Earth / Geomorphology / Oceanic and coastal landforms:
+    - Abyssal plain
+    - Archipelago
+    - Bay
+    - Coast
+    - Continental shelf
+    - Coral reef
+    - Atoll
+    - Lagoon
+    - Oceanic trench
+    - Peninsula
+    - Island
+    - Seamount
+  Earth science / Earth / Geomorphology / Volcanic landforms:
+    - Volcano
+    - Geyser
+    - Hot spring
+    - Hotspot (geology)
+    - Lava
+    - Mid-ocean ridge
+  Earth science / Earth / Geomorphology / Aeolian landforms:
+    - Aeolian processes
+    - Dune
+  Earth science / Earth / Geomorphology / Artificial landforms:
+    - Artificial island
+    - Land reclamation
+    - Polder
+  Earth science / Earth / Geological history:
+    - History of Earth
+    - Geological history of Earth
+    - Geochronology
+    - Geologic time scale
+    - Great Oxidation Event
+    - Cambrian explosion
+    - Extinction event
+    - Late Ordovician mass extinction
+    - Late Devonian extinction
+    - Permian–Triassic extinction event
+    - Cretaceous–Paleogene extinction event
+    - Ice age
+    - Pangaea
+  Earth science / Earth / Geological history / Geological periods:
+    - Precambrian
+    - Phanerozoic
+    - Paleozoic
+    - Cambrian
+    - Permian
+    - Mesozoic
+    - Triassic
+    - Jurassic
+    - Cretaceous
+    - Cenozoic
+    - Paleogene
+    - Neogene
+    - Quaternary
+    - Holocene
+  Earth science / Earth / Biomes:
+    - Desert
+    - Tundra
+    - Shrubland
+  Earth science / Earth / Biomes / Forests:
+    - Forest
+    - Jungle
+    - Mangrove
+    - Taiga
+    - Rainforest
+    - Tropical rainforest
+    - Temperate broadleaf and mixed forests
+  Earth science / Earth / Biomes / Grasslands:
+    - Grassland
+    - Meadow
+    - Prairie
+    - Savanna
+    - Steppe
+  Earth science / Earth / Biomes / Wetlands:
+    - Wetland
+    - Swamp
+    - Marsh
+    - Bog
+  Earth science / Earth / Pedology:
+    - Soil
+    - Peat
+    - Soil formation
+    - Pedosphere
+    - Sediment
+    - Soil fertility
+    - Soil science
+  Earth science / Air / Atmosphere:
+    - Atmosphere of Earth
+    - Air mass
+    - Atmospheric pressure
+    - Atmospheric science
+    - Ozone depletion
+  Earth science / Air / Atmosphere / Atmospheric optics:
+    - Aurora
+    - Mirage
+    - Rainbow
+    - Sky
+  Earth science / Air / Climatology:
+    - Climatology
+    - Climate
+    - Climate change
+    - Greenhouse effect
+    - Climate variability and change
+    - El Niño–Southern Oscillation
+    - Köppen climate classification
+    - Temperate climate
+    - Tropical climate
+  "Earth science / Air / Meteorology / Meteorology: General":
+    - Meteorology
+    - Weather
+    - Weather front
+    - Weather forecasting
+    - Humidity
+    - Low-pressure area
+  Earth science / Air / Meteorology / Clouds:
+    - Cloud
+    - Cirrus cloud
+    - Cumulonimbus cloud
+    - Cumulus cloud
+    - Fog
+  Earth science / Air / Meteorology / Precipitation:
+    - Precipitation
+    - Rain
+    - Snow
+    - Acid rain
+    - Hail
+    - Dew
+    - Frost
+  Earth science / Air / Meteorology / Seasons:
+    - Season
+    - Spring (season)
+    - Summer
+    - Autumn
+    - Winter
+    - Dry season
+    - Wet season
+  Earth science / Air / Meteorology / Atmospheric circulation:
+    - Atmospheric circulation
+    - High-pressure area
+    - Cyclone
+    - Extratropical cyclone
+    - Hadley cell
+    - Polar vortex
+    - Walker circulation
+  Earth science / Air / Meteorology / Storms:
+    - Storm
+    - Tornado
+    - Tropical cyclone
+    - Blizzard
+    - Dust storm
+    - Lightning
+    - Thunderstorm
+  Earth science / Air / Meteorology / Winds:
+    - Wind
+    - Jet stream
+    - Monsoon
+    - Trade winds
+  "Earth science / Water / Water: General":
+    - Hydrosphere
+    - Cryosphere
+  Earth science / Water / Glaciology:
+    - Glacier
+    - Ice sheet
+    - Ice shelf
+    - Iceberg
+    - Sea ice
+    - Permafrost
+  Earth science / Water / Oceanography:
+    - Oceanography
+    - Sea
+    - Ocean
+    - Tide
+    - Sea level
+    - Seabed
+    - Strait
+    - Ocean current
+    - Thermohaline circulation
+  Earth science / Water / Hydrology:
+    - Hydrology
+    - Water cycle
+    - Body of water
+    - Groundwater
+    - Spring (hydrology)
+    - Hydrography
+    - Limnology
+    - Lake
+    - Dry lake
+    - Pond
+    - River
+    - Drainage basin
+    - Estuary
+    - River delta
+  Physics / Basics:
+    - Physics
+    - Energy
+    - Conservation of energy
+    - Matter
+    - Atom
+    - Force
+    - Fundamental interaction
+    - Electromagnetism
+    - Gravity
+    - Strong interaction
+    - Weak interaction
+    - Spacetime
+    - Space
+    - Vacuum
+    - Time
+    - Mass–energy equivalence
+    - Quantum gravity
+    - Radiation
+    - Ionizing radiation
+    - Field (physics)
+    - Flux
+    - Gauge theory
+    - Symmetry (physics)
+    - Theoretical physics
+  Physics / Atomic, molecular and optical physics / Atomic physics:
+    - Atomic physics
+    - Atomic orbital
+    - Atomic theory
+    - Binding energy
+    - Bohr model
+    - Bremsstrahlung
+    - Electron configuration
+    - Electron shell
+    - Energy level
+    - Ion
+  Physics / Atomic, molecular and optical physics / Molecular physics:
+    - Molecular orbital
+    - Molecular orbital theory
+  Physics / Atomic, molecular and optical physics / Optics:
+    - Optics
+    - Focus (optics)
+    - Focal length
+    - Polarization (waves)
+    - Reflection (physics)
+    - Refraction
+    - Refractive index
+    - Transparency and translucency
+  Physics / Color / Basics:
+    - Color
+    - CMYK color model
+    - Color theory
+    - Primary color
+    - Gloss (optics)
+    - RGB color model
+  Physics / Color / Color terms:
+    - White
+    - Black
+    - Grey
+    - Red
+    - Orange (colour)
+    - Yellow
+    - Green
+    - Blue
+    - Pink
+    - Purple
+    - Brown
+  Physics / Condensed matter physics / Basics:
+    - Condensed matter physics
+    - Solid-state physics
+    - Amorphous solid
+  Physics / Condensed matter physics / Crystallography:
+    - Crystallography
+    - Crystal
+    - Crystallization
+  Physics / Condensed matter physics / States of matter:
+    - State of matter
+    - Solid
+    - Liquid
+    - Gas
+    - Vapor
+    - Plasma (physics)
+    - Degenerate matter
+    - Bose–Einstein condensate
+  Physics / Condensed matter physics / Phase transitions:
+    - Phase transition
+    - Phase (matter)
+    - Boiling
+    - Melting
+    - Freezing
+    - Evaporation
+    - Condensation
+    - Ionization
+    - Critical point (thermodynamics)
+    - Triple point
+  Physics / Electromagnetism / Basics:
+    - Electricity
+    - Magnetism
+    - Ferromagnetism
+    - Magnet
+    - Electromagnet
+    - Dielectric
+    - Dipole
+    - Metamaterial
+    - Oil drop experiment
+    - Photoelectric effect
+  Physics / Electromagnetism / Electrostatics:
+    - Electrostatics
+    - Coulomb's law
+    - Electric charge
+    - Electric field
+    - Electric potential
+    - Voltage
+  Physics / Electromagnetism / Electrodynamics:
+    - Electromagnetic radiation
+    - Electromagnetic spectrum
+    - Radio wave
+    - Microwave
+    - Infrared
+    - Light
+    - Visible spectrum
+    - Ultraviolet
+    - X-ray
+    - Fluorescence
+    - Electromagnetic field
+    - Electromagnetic induction
+    - Electromotive force
+    - Lorentz force
+    - Eddy current
+    - Maxwell's equations
+  Physics / Electromagnetism / Magnetism:
+    - Magnetic field
+    - Magnetostatics
+  Physics / Electromagnetism / Electrical circuits:
+    - Electric current
+    - Alternating current
+    - Direct current
+    - Electrical network
+    - Electrical impedance
+    - Electrical resistance and conductance
+    - Ohm's law
+    - Capacitance
+    - Semiconductor
+    - Superconductivity
+    - Gain (electronics)
+    - Inductance
+    - Kirchhoff's circuit laws
+  Physics / Mechanics / Basics:
+    - Mechanics
+    - Ballistics
+    - Continuum mechanics
+    - Kinematics
+    - Relativistic mechanics
+    - Statics
+    - Oscillation
+    - Harmonic oscillator
+    - Simple harmonic motion
+  Physics / Mechanics / Quantum mechanics:
+    - Quantum mechanics
+    - Pauli exclusion principle
+    - Quantum chromodynamics
+    - Quantum electrodynamics
+    - Quantum entanglement
+    - Quantum field theory
+    - Quantum tunnelling
+    - Schrödinger equation
+    - Uncertainty principle
+    - Wave function
+    - Wave–particle duality
+  Physics / Mechanics / Theory of relativity:
+    - Theory of relativity
+    - General relativity
+    - Special relativity
+    - Principle of relativity
+    - Equivalence principle
+    - Gravitational singularity
+    - Gravitational wave
+    - Lorentz transformation
+    - Michelson–Morley experiment
+    - Speed of light
+  Physics / Mechanics / Classical mechanics:
+    - Classical mechanics
+    - Hamiltonian mechanics
+    - Lagrangian mechanics
+    - Mass
+    - Density
+    - Momentum
+    - Motion
+    - Newton's laws of motion
+    - Speed
+    - Acceleration
+    - Velocity
+    - Equations of motion
+    - Kinetic energy
+    - Potential energy
+    - Inertia
+    - Moment of inertia
+    - Friction
+    - Impulse (physics)
+    - Power (physics)
+    - Work (physics)
+    - Rotation
+    - Angular momentum
+    - Centripetal force
+    - Coriolis force
+    - Torque
+    - Weight
+    - Weighing scale
+    - Frame of reference
+    - Newton's law of universal gravitation
+  Physics / Mechanics / Fluid mechanics:
+    - Fluid mechanics
+    - Fluid dynamics
+    - Aerodynamics
+    - Bernoulli's principle
+    - Buoyancy
+    - Convection
+    - Drag (physics)
+    - Diffusion
+    - Flight
+    - Lift (force)
+    - Navier–Stokes equations
+    - Osmosis
+    - Reynolds number
+    - Surface tension
+    - Turbulence
+    - Viscosity
+  Physics / Mechanics / Solid mechanics:
+    - Solid mechanics
+    - Deformation (engineering)
+    - Elastic modulus
+    - Elasticity (physics)
+    - Fatigue (material)
+    - Hooke's law
+    - Plasticity (physics)
+    - Stiffness
+    - Strength of materials
+    - Stress (mechanics)
+  Physics / Mechanics / Statistical mechanics:
+    - Statistical mechanics
+  Physics / Nuclear physics:
+    - Atomic nucleus
+    - Nuclear physics
+    - Isotope
+    - Nuclear fission
+    - Nuclear fusion
+    - Nucleosynthesis
+    - Radioactive decay
+    - Alpha particle
+    - Beta particle
+    - Gamma ray
+  "Physics / Particle physics / Particle physics: General":
+    - Particle physics
+    - Standard Model
+    - Physics beyond the Standard Model
+    - String theory
+    - Supersymmetry
+    - Particle
+    - Particle accelerator
+    - Large Hadron Collider
+    - Tevatron
+    - Particle detector
+    - Cloud chamber
+    - Scattering
+    - Spin (physics)
+  Physics / Particle physics / Subatomic particles:
+    - Subatomic particle
+  Physics / Particle physics / Subatomic particles / Fermions:
+    - Fermion
+    - Lepton
+    - Electron
+    - Muon
+    - Tau (particle)
+    - Neutrino
+    - Quark
+    - Hadron
+    - Baryon
+    - Neutron
+    - Proton
+    - Meson
+  Physics / Particle physics / Subatomic particles / Bosons:
+    - Boson
+    - Gauge boson
+    - Photon
+    - Gluon
+    - W and Z bosons
+    - Higgs boson
+  Physics / Particle physics / Antimatter:
+    - Antimatter
+    - Antiparticle
+    - Positron
+  Physics / Thermodynamics:
+    - Thermodynamics
+    - Heat
+    - Temperature
+    - Absolute zero
+    - Pressure
+    - Laws of thermodynamics
+    - Heat capacity
+    - Heat transfer
+    - Entropy
+    - Enthalpy
+    - Black-body radiation
+    - Internal energy
+    - Thermodynamic cycle
+    - Thermodynamic free energy
+    - Ideal gas law
+    - Explosion
+  Physics / Waves:
+    - Wave
+    - Acoustics
+    - Sound
+    - Speed of sound
+    - Ultrasound
+    - Amplitude
+    - Frequency
+    - Wavelength
+    - Diffraction
+    - Doppler effect
+    - Wave interference
+    - Noise
+    - Resonance
+    - Superposition principle
+    - Wave equation

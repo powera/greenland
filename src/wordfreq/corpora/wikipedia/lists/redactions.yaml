@@ -1,0 +1,30 @@
+# Titles deliberately excluded from every article list, with the reason.
+#
+# These are *not* resolver failures.  A title that simply has no article in the
+# snapshot is reported as missing by the list builder and noted in that list's
+# own file; this file is for titles that resolve fine and are still unwanted.
+#
+# The usual reason is that the May 2022 snapshot predates the subject: the
+# article exists, but it is a stub written before the topic mattered, so its
+# prose describes an embryonic version of the subject and contributes almost
+# nothing to an English frequency list.
+#
+# Applied by wordfreq.corpora.wikipedia.article_lists to every list it loads,
+# so a title listed here stays out even when a later re-fetch of an upstream
+# page adds it.  Add to this file rather than deleting a line from a list: a
+# deleted line comes back on the next fetch, and the reason is lost.
+
+redactions:
+  Large language model: >-
+    The 2022 snapshot predates the subject.  The article as it stood is a stub
+    about an emerging research topic, not the thing the term now names.
+
+  Kādambarī: >-
+    The snapshot has this only as "Kādambari" (a 19K article) or "Kadambari"
+    (a 70-byte redirect stub); dropped rather than resolved to either.
+
+  Oku no Hosomichi: >-
+    Removed from the upstream Arts list since the repo's earlier list was
+    built, so a fetch no longer returns it.  Listed here so that it stays out
+    if upstream restores it: the snapshot article is real, but the list
+    follows upstream.

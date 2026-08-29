@@ -6,13 +6,13 @@ builders share the package, one per kind of source:
 
 * ``build_gutenberg`` -- the five Project Gutenberg book lists.
 * ``build_scotus`` -- ``legal_scotus``, from Supreme Court opinions.
-* ``build_wikipedia`` -- ``wiki_vital``, ``wiki_math``, ``wiki_geography``,
+* ``build_wikipedia`` -- ``wiki_arts``, ``wiki_math``, ``wiki_geography``,
   ``wiki_biology`` and ``wiki_modern_life``, from a dump snapshot.
 
 Each has its own text extraction, and they share everything after it:
 
 1. A source module names the documents (``book_lists``,
-   ``wikipedia.vital_articles``) or a downloader fetches them
+   ``wikipedia.article_lists``) or a downloader fetches them
    (``download_gutenberg``, ``download_scotus``).
 2. A text module reduces one document to running prose (``gutenberg_text``,
    ``scotus_text``, ``wikipedia.wiki_text``).

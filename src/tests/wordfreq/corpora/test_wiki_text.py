@@ -5,6 +5,8 @@ Narrow by design: these cover HTML tag handling, which is what put ``frac``,
 (from the tags of those names) into the wiki corpora as if they were English.
 """
 
+import re
+
 from wordfreq.corpora.wikipedia.wiki_text import wikitext_to_plain_text
 
 
@@ -126,3 +128,58 @@ def test_stray_closing_tag_does_not_open_a_new_block() -> None:
     # The imagemap's own body is apparatus and stays out of the prose.
     assert "Echinoderm" not in text
     assert "300px" not in text
+
+
+def test_external_links_contribute_no_text() -> None:
+    """Neither the URL nor its label is prose.
+
+    The label on an external link is a publisher or "Archived from the
+    original" rather than a sentence, so the whole construct is dropped the way
+    a <ref> is.
+    """
+    text = wikitext_to_plain_text(
+        "See [https://www.bbc.co.uk/news BBC News] for coverage of the event."
+    )
+    # Whole words: "co" is also a substring of the "coverage" that is
+    # legitimately part of the prose.
+    words = set(re.findall(r"[\w']+", text.lower()))
+    assert not words & {"https", "www", "bbc", "co", "uk", "news"}
+    assert "See" in text
+    assert "for coverage of the event" in text
+
+
+def test_bare_urls_are_stripped_from_prose() -> None:
+    """A URL outside any bracket is split on its punctuation if left in.
+
+    "http" reached rank 80 in the wiki_biology corpus this way, with "www",
+    "org", "com" and "html" behind it.
+    """
+    cases = [
+        "Visit https://www.example.com/a/b.html today.",
+        "Visit http://example.org/index.php today.",
+        "Visit www.example.com/page today.",
+    ]
+    for wikitext in cases:
+        text = wikitext_to_plain_text(wikitext)
+        words = set(re.findall(r"[\w']+", text.lower()))
+        assert not words & {"http", "https", "www", "com", "org", "html", "php", "example"}
+        assert "Visit" in text
+        assert "today" in text
+
+
+def test_brackets_in_prose_are_kept() -> None:
+    """A "[" is only a link when a URL follows it.
+
+    Editorial brackets are ordinary prose and must survive, or "[sic]" would
+    cost the sentence around it.
+    """
+    for wikitext in ("He wrote thier [sic] name.", "As noted [1] earlier."):
+        text = wikitext_to_plain_text(wikitext)
+        assert wikitext.rstrip("\n") in text
+
+
+def test_unclosed_external_link_does_not_swallow_the_article() -> None:
+    """A missing "]" must cost one construct, not the rest of the page."""
+    text = wikitext_to_plain_text("Broken [https://example.com/x\n\nNext paragraph here.")
+    assert "Next paragraph here" in text
+    assert "example" not in text

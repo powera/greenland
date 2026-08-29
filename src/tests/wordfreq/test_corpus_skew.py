@@ -124,10 +124,10 @@ def test_mean_is_taken_over_every_other_attesting_corpus() -> None:
         token = _add_token(session, "sugar")
         _annotate(session, token, "cooking", frequency=1000.0, ordinal_rank=26)
         _annotate(session, token, "19th_books", frequency=10.0, ordinal_rank=3000)
-        _annotate(session, token, "wiki_vital", frequency=1000.0, ordinal_rank=200)
+        _annotate(session, token, "wiki_society", frequency=1000.0, ordinal_rank=200)
 
         results = score_corpus_skew(
-            session, "cooking", comparison_corpora=["19th_books", "wiki_vital"]
+            session, "cooking", comparison_corpora=["19th_books", "wiki_society"]
         )
         word = results[0]
         # Zipf elsewhere is mean(4.0, 6.0) = 5.0 against 6.0 here.
@@ -166,9 +166,9 @@ def test_min_other_corpora_demands_a_broader_baseline() -> None:
         _annotate(session, thin, "19th_books", frequency=100.0, ordinal_rank=2000)
         _annotate(session, broad, "cooking", frequency=1000.0, ordinal_rank=11)
         _annotate(session, broad, "19th_books", frequency=100.0, ordinal_rank=2100)
-        _annotate(session, broad, "wiki_vital", frequency=100.0, ordinal_rank=2200)
+        _annotate(session, broad, "wiki_society", frequency=100.0, ordinal_rank=2200)
 
-        comparison = ["19th_books", "wiki_vital"]
+        comparison = ["19th_books", "wiki_society"]
         loose = score_corpus_skew(
             session, "cooking", comparison_corpora=comparison, min_other_corpora=1
         )
@@ -284,10 +284,10 @@ def test_a_word_at_the_same_zipf_everywhere_has_zero_deviation() -> None:
     session = _make_session()
     try:
         token = _add_token(session, "for")
-        for corpus in ("cooking", "19th_books", "wiki_vital"):
+        for corpus in ("cooking", "19th_books", "wiki_society"):
             _annotate(session, token, corpus, frequency=1000.0, ordinal_rank=10)
 
-        results = score_zipf_steadiness(session, corpora=["cooking", "19th_books", "wiki_vital"])
+        results = score_zipf_steadiness(session, corpora=["cooking", "19th_books", "wiki_society"])
         assert len(results) == 1
         word = results[0]
         assert word.token == "for"
@@ -322,13 +322,13 @@ def test_spread_reports_the_extremes_and_names_them() -> None:
         token = _add_token(session, "wine")
         _annotate(session, token, "cooking", frequency=10000.0, ordinal_rank=5)
         _annotate(session, token, "19th_books", frequency=1000.0, ordinal_rank=50)
-        _annotate(session, token, "wiki_vital", frequency=100.0, ordinal_rank=500)
+        _annotate(session, token, "wiki_society", frequency=100.0, ordinal_rank=500)
 
-        word = score_zipf_steadiness(session, corpora=["cooking", "19th_books", "wiki_vital"])[0]
+        word = score_zipf_steadiness(session, corpora=["cooking", "19th_books", "wiki_society"])[0]
         # Zipf values are 7.0, 6.0, 5.0.
         assert math.isclose(word.spread, 2.0)
         assert math.isclose(word.mean_zipf, 6.0)
-        assert word.lowest_corpus == "wiki_vital"
+        assert word.lowest_corpus == "wiki_society"
         assert word.highest_corpus == "cooking"
         assert math.isclose(word.min_zipf, 5.0)
         assert math.isclose(word.max_zipf, 7.0)
@@ -398,14 +398,14 @@ def test_more_corpora_wins_a_tie_on_steadiness() -> None:
     try:
         broad = _add_token(session, "broad")
         thin = _add_token(session, "thin")
-        for corpus in ("cooking", "19th_books", "wiki_vital"):
+        for corpus in ("cooking", "19th_books", "wiki_society"):
             _annotate(session, broad, corpus, frequency=1000.0, ordinal_rank=10)
         for corpus in ("cooking", "19th_books"):
             _annotate(session, thin, corpus, frequency=1000.0, ordinal_rank=10)
 
         results = score_zipf_steadiness(
             session,
-            corpora=["cooking", "19th_books", "wiki_vital"],
+            corpora=["cooking", "19th_books", "wiki_society"],
             require_all=False,
         )
         assert [word.stdev for word in results] == [0.0, 0.0]

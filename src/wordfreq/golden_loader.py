@@ -9,7 +9,7 @@ from their on-disk files into the same in-memory SQLite so that
 queries return real data in golden mode.
 
 The seven sources:
-    1. wordfreq corpora (4): 19th_books, 20th_books, wiki_vital, cooking
+    1. wordfreq corpora (4): 19th_books, 20th_books, wiki_society, cooking
     2. tier sources (3): cambridge_yle, cefr, basic_english
 
 After loading, ``Lemma.frequency_rank`` is recomputed from the rolled-up

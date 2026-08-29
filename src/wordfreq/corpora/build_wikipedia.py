@@ -2,31 +2,44 @@
 
 """Generate a Wikipedia corpus JSON file from a dump snapshot.
 
-    PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --corpus wiki_vital
-    PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --corpus wiki_math
-    PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --corpus wiki_geography
-    PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --corpus wiki_biology
-    PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --corpus wiki_modern_life
+    PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --corpus wiki_arts
+    PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --corpus wiki_society
+    PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --corpus wiki_history
 
-Reads the articles named in ``wordfreq.corpora.wikipedia.vital_articles`` out
+Reads the articles named in ``wordfreq.corpora.wikipedia.article_lists`` out
 of a downloaded Wikimedia snapshot, parses each one's wikitext down to running
 prose, separates proper nouns from ordinary vocabulary, and writes
 ``data/wordfreq/<corpus>.json`` in the format ``wordfreq.frequency.importer``
 expects.
 
-Five corpora are buildable, listed in :data:`WIKIPEDIA_CORPORA`:
+Eight corpora are buildable, listed in :data:`WIKIPEDIA_CORPORA`:
 
-* ``wiki_vital`` -- Wikipedia's 1000 vital articles, a general sample of
-  modern encyclopedic English.
 * ``wiki_math`` -- 299 mathematics articles, which reach the vocabulary a
-  general sample only touches ("theorem", "integer", "coefficient").  A strict
-  superset of the vital list's 53-title Mathematics section.
+  general sample only touches ("theorem", "integer", "coefficient").
 * ``wiki_geography`` -- 1204 Level 4 geography articles, which go from the
-  continents the vital list names down to their rivers, ranges and cities.
+  continents down to their rivers, ranges and cities.
 * ``wiki_biology`` -- 1004 Level 4 organism and anatomy articles, which is
   where the ordinary names of plants and animals come from.
 * ``wiki_modern_life`` -- 1200 Level 4 everyday-life and technology articles,
   the vocabulary of modern material life the older corpora cannot have.
+* ``wiki_arts`` -- 703 Level 4 arts articles, whose critical metalanguage
+  ("narrative", "genre", "counterpoint") the book corpora do not supply: they
+  *are* literature, and narrative English is not the vocabulary used to write
+  *about* literature.
+* ``wiki_society`` -- 1369 Level 4 society, philosophy and religion articles,
+  the abstract institutional vocabulary of law, politics and belief.
+* ``wiki_physical_science`` -- 1317 Level 4 physical science and molecular
+  biology articles, covering the process vocabulary ("oxidize", "orbit",
+  "decay") that wiki_biology's organism articles never reach.
+* ``wiki_history`` -- 2606 Level 4 history and biography articles, the
+  connective prose of historical narrative.
+
+These replace the former ``wiki_vital``, which was the 1000-article Level 3
+list.  Five of its eleven sections were already covered in depth by the Level 4
+corpora; the four new corpora cover the rest, at roughly six times the article
+count.  Its Health and medicine section is deliberately not replaced: the Level
+4 expansion of it is named drugs, syndromes and procedures, a technical
+register that helps no learner.
 
 The third builder alongside ``build_gutenberg.py`` and ``build_scotus.py``.
 Everything after text extraction is shared: all three call
@@ -70,15 +83,7 @@ from wordfreq.corpora.frequency_build import (
     build_corpus_payload,
     write_corpus_json,
 )
-from wordfreq.corpora.wikipedia.vital_articles import (
-    BIOLOGY_ARTICLES,
-    EVERYDAY_LIFE_ARTICLES,
-    GEOGRAPHY_ARTICLES,
-    MATH_ARTICLES,
-    TECHNOLOGY_ARTICLES,
-    VITAL_ARTICLES,
-    flatten,
-)
+from wordfreq.corpora.wikipedia.article_lists import flatten, load_list, load_lists
 from wordfreq.corpora.wikipedia.wiki_dump import WikiLoader
 from wordfreq.corpora.wikipedia.wiki_text import wikitext_to_plain_text
 
@@ -112,37 +117,41 @@ class WikipediaCorpus(NamedTuple):
     description: str
 
 
-# Everyday life and technology are one corpus rather than two.  Each is small
-# on its own (475 and 725 articles), and they are after the same thing: the
-# vocabulary of modern material life -- appliances, clothing, sport, computing,
-# transport -- which the book corpora predate and which encyclopedic prose
-# about history and science never reaches.  The group names stay prefixed so a
-# gap in either list is still visible.
-MODERN_LIFE_ARTICLES: Dict[str, List[str]] = {
-    **{f"Everyday life: {group}": titles for group, titles in EVERYDAY_LIFE_ARTICLES.items()},
-    **{f"Technology: {group}": titles for group, titles in TECHNOLOGY_ARTICLES.items()},
-}
+# Three corpora span two upstream lists each.  In every case the two are after
+# the same register and neither is large enough alone, and the group names stay
+# prefixed so a gap in either list is still visible.
+#
+# Everyday life + technology: the vocabulary of modern material life --
+# appliances, clothing, sport, computing, transport -- which the book corpora
+# predate and which encyclopedic prose about history and science never reaches.
+MODERN_LIFE_ARTICLES: Dict[str, List[str]] = load_lists(
+    "everyday_life", "technology", prefix_groups=True
+)
+
+# Society + philosophy and religion: abstract institutional vocabulary -- law,
+# politics, economics, ethics, belief -- that no other corpus here reaches.
+SOCIETY_ARTICLES: Dict[str, List[str]] = load_lists(
+    "society", "philosophy_religion", prefix_groups=True
+)
+
+# Physical sciences + molecular biology: wiki_biology covers organisms and
+# anatomy only, so the process vocabulary of the physical and molecular
+# sciences -- oxidize, dissolve, orbit, pressure, decay -- had no corpus.
+PHYSICAL_SCIENCE_ARTICLES: Dict[str, List[str]] = load_lists(
+    "physical_sciences", "molecular_biology", prefix_groups=True
+)
+
+# History + people: a period's prose and its actors' biographies are the same
+# register, and the biography list is mostly proper nouns, which analyze_book
+# separates per document.  What is left is the connective vocabulary of
+# historical narrative -- reign, treaty, siege, dynasty, revolt.
+HISTORY_ARTICLES: Dict[str, List[str]] = load_lists("history", "people", prefix_groups=True)
 
 
 WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
-    "wiki_vital": WikipediaCorpus(
-        name="wiki_vital",
-        articles=VITAL_ARTICLES,
-        # There are 1000 documents here, against 54 books in the 19th-century
-        # list, so a word must reach more of them before it counts as corpus
-        # vocabulary rather than one article's subject matter.  An article is
-        # also narrower than a novel: "Photosynthesis" uses "chloroplast"
-        # throughout and no other article uses it at all.
-        min_articles=15,
-        # Matches the wiki_vital entry in CORPUS_CONFIGS, which is 6000 rather
-        # than the books' 10000: encyclopedic prose repeats a narrow register,
-        # so its tail is thinner than a novel corpus's at the same rank.
-        max_words=6000,
-        description="Wikipedia's 1000 vital articles, across eleven topic groups",
-    ),
     "wiki_math": WikipediaCorpus(
         name="wiki_math",
-        articles=MATH_ARTICLES,
+        articles=load_list("math"),
         # 299 documents rather than 1000, so the vital list's threshold would
         # ask a word to reach a far larger share of the corpus.  Scaled to keep
         # roughly the same proportion.
@@ -155,7 +164,7 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
     ),
     "wiki_geography": WikipediaCorpus(
         name="wiki_geography",
-        articles=GEOGRAPHY_ARTICLES,
+        articles=load_list("geography"),
         # 1204 documents, the same order as the vital list, so the same
         # threshold applies.
         min_articles=15,
@@ -167,7 +176,7 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
     ),
     "wiki_biology": WikipediaCorpus(
         name="wiki_biology",
-        articles=BIOLOGY_ARTICLES,
+        articles=load_list("biology"),
         # 1004 documents, so the vital list's threshold carries over.
         min_articles=15,
         # Mostly the names of organisms, which are proper-noun-like and shared
@@ -187,9 +196,55 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
         max_words=5000,
         description="Wikipedia's Level 4 everyday-life and technology articles",
     ),
+    "wiki_arts": WikipediaCorpus(
+        name="wiki_arts",
+        articles=load_list("arts"),
+        # 703 documents, so the threshold is scaled down from the 15 the
+        # thousand-document lists use, in the same proportion wiki_math's is.
+        min_articles=11,
+        # The critical metalanguage this corpus exists for -- narrative, genre,
+        # motif, counterpoint, chiaroscuro -- is ordinary educated English and
+        # its tail stays ordinary further down than a technical corpus's.
+        max_words=5000,
+        description="Wikipedia's Level 4 arts articles, from architecture to film",
+    ),
+    "wiki_society": WikipediaCorpus(
+        name="wiki_society",
+        articles=SOCIETY_ARTICLES,
+        # 1369 documents across two lists, the same order as the other large
+        # corpora, so their threshold applies unchanged.
+        min_articles=15,
+        # Abstract institutional prose, which repeats a broad vocabulary rather
+        # than a narrow technical one, so its tail is thicker than wiki_math's.
+        max_words=5500,
+        description="Wikipedia's Level 4 society, philosophy and religion articles",
+    ),
+    "wiki_physical_science": WikipediaCorpus(
+        name="wiki_physical_science",
+        articles=PHYSICAL_SCIENCE_ARTICLES,
+        # 1317 documents across two lists.
+        min_articles=15,
+        # Largely named compounds, particles and reactions, which are
+        # proper-noun-like and shared between few articles, so the useful yield
+        # sits in the first few thousand words as wiki_math's does.
+        max_words=4000,
+        description="Wikipedia's Level 4 physical science and molecular biology articles",
+    ),
+    "wiki_history": WikipediaCorpus(
+        name="wiki_history",
+        articles=HISTORY_ARTICLES,
+        # 2606 documents across two lists, the largest corpus here, so a word
+        # must reach more of them than in the thousand-document lists.
+        min_articles=30,
+        # Overwhelmingly proper nouns once past the connective prose, and
+        # analyze_book separates those per document, so the ordinary-English
+        # tail thins out early.
+        max_words=4500,
+        description="Wikipedia's Level 4 history and biography articles",
+    ),
 }
 
-DEFAULT_CORPUS = "wiki_vital"
+DEFAULT_CORPUS = "wiki_arts"
 
 
 def _load_phrases(args: argparse.Namespace) -> Dict[str, int]:

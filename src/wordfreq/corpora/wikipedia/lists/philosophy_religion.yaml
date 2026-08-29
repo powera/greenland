@@ -1,0 +1,534 @@
+# Wikipedia's Level 4 Philosophy and religion list, as of the August 2026 revision.
+# Ethics, logic, metaphysics and the world's religions.  Paired with the
+#
+# 443 titles in 63 groups, resolved against the
+# enwiki-20220501 snapshot: a title renamed since then is stored under its
+# 2022 spelling so wiki_dump can find it by exact title.
+#
+# 9 titles were redirects in 2022 and are stored
+# under the target they redirect to:
+#   African traditional religions  ->  Traditional African religions
+#   Jupiter (god)  ->  Jupiter (mythology)
+#   Modern paganism  ->  Modern Paganism
+#   Mythologies of the Indigenous peoples of the Americas  ->  Mythologies of the indigenous peoples of the Americas
+#   Pali Canon  ->  Pāli Canon
+#   Personifications of death  ->  Death (personification)
+#   Quetzalcōātl  ->  Quetzalcoatl
+#   Reformed Christianity  ->  Calvinism
+#   Value (ethics)  ->  Value (ethics and social sciences)
+#
+# 3 titles have no snapshot article under any
+# spelling tried, and are dropped:
+#   Buddhist canons
+#   Mystical or religious experience
+#   Spiritualism (movement)
+
+source: Wikipedia:Vital articles/Level 4/Philosophy and religion
+snapshot: enwiki-20220501
+groups:
+  "Philosophy / Philosophy: General":
+    - Philosophy
+  Philosophy / Philosophy by region and period:
+    - Western philosophy
+    - Ancient Greek philosophy
+    - Medieval philosophy
+    - Renaissance philosophy
+    - Modern philosophy
+    - Contemporary philosophy
+    - Eastern philosophy
+    - Chinese philosophy
+    - Indian philosophy
+  Philosophy / Philosophical schools and traditions:
+    - Analytic philosophy
+    - Confucianism
+    - Existentialism
+    - Hedonism
+    - Legalism (Chinese philosophy)
+    - Phenomenology (philosophy)
+    - Positivism
+    - Pragmatism
+    - Sophist
+    - Stoicism
+    - Thomism
+  Philosophy / Philosophical schools and traditions / Religious philosophy:
+    - Buddhist philosophy
+    - Christian philosophy
+    - Hindu philosophy
+    - Islamic philosophy
+  Philosophy / Philosophical branches, approaches and concepts / Ethics:
+    - Ethics
+  Philosophy / Philosophical branches, approaches and concepts / Ethics / Concepts:
+    - Free will
+    - Good and evil
+    - Conscience
+    - Golden Rule
+    - Is–ought problem
+    - Morality
+    - Plagiarism
+    - Value (ethics and social sciences)
+    - Virtue
+    - Wisdom
+  Philosophy / Philosophical branches, approaches and concepts / Ethics / Approaches:
+    - Consequentialism
+    - Deontology
+    - Humanism
+    - Nihilism
+    - Relativism
+    - Utilitarianism
+  Philosophy / Philosophical branches, approaches and concepts / Logic:
+    - Logic
+    - Argument
+    - A priori and a posteriori
+    - Contradiction
+    - Paradox
+    - Critical thinking
+    - Dialectic
+    - Socratic method
+    - Inference
+    - Deductive reasoning
+    - Fallacy
+    - Inductive reasoning
+    - Thought experiment
+  Philosophy / Philosophical branches, approaches and concepts / Epistemology:
+    - Epistemology
+  Philosophy / Philosophical branches, approaches and concepts / Epistemology / Concepts:
+    - Knowledge
+    - Truth
+    - Reason
+    - Belief
+    - Common sense
+    - Concept
+    - Experience
+    - Luck
+    - Occam's razor
+    - Opinion
+    - Proposition
+    - Worldview
+  Philosophy / Philosophical branches, approaches and concepts / Epistemology / Approaches:
+    - Empiricism
+    - Naturalism (philosophy)
+    - Rationalism
+    - Skepticism
+  Philosophy / Philosophical branches, approaches and concepts / Metaphysics:
+    - Metaphysics
+  Philosophy / Philosophical branches, approaches and concepts / Metaphysics / Concepts:
+    - Ontology
+    - Abstraction
+    - Causality (physics)
+    - Existence
+    - Mental representation
+    - Reality
+  Philosophy / Philosophical branches, approaches and concepts / Metaphysics / Approaches:
+    - Determinism
+    - Idealism
+    - Materialism
+    - Mind–body dualism
+    - Monism
+    - Theory of forms
+  Philosophy / Philosophical branches, approaches and concepts / Aesthetics:
+    - Aesthetics
+    - Beauty
+  Philosophy / Philosophical branches, approaches and concepts / Philosophy of science:
+    - Philosophy of science
+    - Fact
+    - Hypothesis
+    - Natural philosophy
+    - Paradigm
+    - Pseudoscience
+    - Parapsychology
+    - Reductionism
+    - Theory
+  Philosophy / Philosophical branches, approaches and concepts / Other branches of philosophy:
+    - Philosophy of language
+    - Meaning (philosophy)
+    - Philosophy of mathematics
+    - Philosophy of mind
+    - Philosophy of religion
+    - Political philosophy
+  "Religion and spirituality / Religion and spirituality: General":
+    - Religion
+    - Comparative religion
+    - Folk religion
+    - Mysticism
+    - Religious studies
+    - Theology
+  "Religion and spirituality / Religion and spirituality: General / Deity":
+    - Deity
+    - God
+    - Goddess
+  "Religion and spirituality / Religion and spirituality: General / Practices":
+    - Ritual
+    - Prayer
+    - Lord's Prayer
+    - Meditation
+    - Apologetics
+    - Apostasy
+    - Celibacy
+    - Fasting
+    - Heresy
+    - Icon
+    - Iconoclasm
+    - Idolatry
+    - Liturgy
+    - Pilgrimage
+    - Prophecy
+    - Relic
+    - Religious conversion
+    - Sacrifice
+    - Saint
+    - Veneration of the dead
+    - Worship
+  "Religion and spirituality / Religion and spirituality: General / Beliefs":
+    - Spirituality
+    - Animism
+    - Astrology
+    - Creation myth
+    - Curse
+    - Divination
+    - Eschatology
+    - Faith
+    - Magic (supernatural)
+    - Witchcraft
+    - Mandate of Heaven
+    - Miracle
+    - Sacredness
+    - Supernatural
+    - Superstition
+    - Totem
+  "Religion and spirituality / Religion and spirituality: General / Death":
+    - Burial
+    - Cemetery
+    - Cremation
+    - Funeral
+    - Mummy
+  "Religion and spirituality / Religion and spirituality: General / Afterlife":
+    - Afterlife
+    - Heaven
+    - Hell
+    - Incarnation
+    - Reincarnation
+    - Resurrection
+    - Soul
+  "Religion and spirituality / Religion and spirituality: General / Institutions":
+    - Altar
+    - Anti-clericalism
+    - Creed
+    - Cult
+    - Monastery
+    - Priest
+    - Schism
+    - Sect
+    - State religion
+    - Temple
+  "Religion and spirituality / Religion and spirituality: General / Theistic philosophies":
+    - Theism
+    - Deism
+    - Fundamentalism
+    - Monotheism
+    - Orthodoxy
+    - Paganism
+    - Panentheism
+    - Pantheism
+    - Polytheism
+    - Syncretism
+  "Religion and spirituality / Religion and spirituality: General / Non-theistic philosophies":
+    - Atheism
+    - Agnosticism
+    - Freethought
+    - Secularism
+  Religion and spirituality / Abrahamic religions / Main branches:
+    - Christianity
+    - Islam
+    - Judaism
+    - Baháʼí Faith
+    - Druze
+    - Gnosticism
+    - Rastafari
+  Religion and spirituality / Abrahamic religions / Common concepts:
+    - Apocalypse
+    - Bible
+    - Old Testament
+    - New Testament
+    - Holy Spirit
+    - Messiah
+    - Predestination
+    - Salvation
+    - Sin
+    - Ten Commandments
+  Religion and spirituality / Abrahamic religions / Judaism:
+    - Talmud
+    - Torah
+    - Halakha
+    - Kashrut
+    - Hebrew Bible
+    - Rabbi
+    - Synagogue
+    - Conservative Judaism
+    - Orthodox Judaism
+    - Reform Judaism
+  Religion and spirituality / Abrahamic religions / Christianity / Branches:
+    - Catholic Church
+    - Eastern Catholic Churches
+    - Eastern Christianity
+    - Eastern Orthodox Church
+    - Ecumenical Patriarchate of Constantinople
+    - Russian Orthodox Church
+    - Oriental Orthodox Churches
+    - Coptic Orthodox Church
+    - Ethiopian Orthodox Tewahedo Church
+    - Nontrinitarianism
+    - Jehovah's Witnesses
+    - Mormonism
+    - Unitarianism
+    - Protestantism
+    - Anglicanism
+    - Arminianism
+    - Baptists
+    - Calvinism
+    - Evangelicalism
+    - Lutheranism
+    - Methodism
+    - Pentecostalism
+    - Presbyterianism
+    - Quakers
+    - Seventh-day Adventist Church
+  Religion and spirituality / Abrahamic religions / Christianity / Concepts:
+    - Catholicity
+    - Pope
+    - Purgatory
+    - Baptism
+    - Church (congregation)
+    - Church (building)
+    - Ecumenism
+    - Eucharist
+    - Grace in Christianity
+    - Second Coming
+    - Trinity
+  Religion and spirituality / Abrahamic religions / Islam:
+    - Islamic schools and branches
+    - Sunni Islam
+    - Shia Islam
+    - Sufism
+    - Quran
+    - Allah
+    - Five Pillars of Islam
+    - Hajj
+    - Fiqh
+    - Hadith
+    - Halal
+    - Haram
+    - Imam
+    - Mosque
+    - Sharia
+  Religion and spirituality / Eastern religions / Major religions:
+    - Hinduism
+    - Buddhism
+    - Jainism
+    - Sikhism
+    - Taoism
+    - Shinto
+    - Manichaeism
+  Religion and spirituality / Eastern religions / Common concepts:
+    - Dhammapada
+    - Dharma
+    - Karma
+    - Mantra
+    - Om
+    - Qi
+    - Swastika
+    - Tantra
+    - Yin and yang
+    - Yoga
+  Religion and spirituality / Eastern religions / Buddhism:
+    - Mahayana
+    - Diamond Sutra
+    - Theravada
+    - Pāli Canon
+    - Vajrayana
+    - Four Noble Truths
+    - Nirvana
+    - Zen
+  Religion and spirituality / Eastern religions / Hinduism:
+    - Bhagavad Gita
+    - Vedas
+    - Brahman
+    - Kumbh Mela
+    - Ramayana
+    - Shaivism
+    - Shaktism
+    - Upanishads
+    - Vaishnavism
+    - Vedanta
+  Religion and spirituality / Eastern religions / Sikhism:
+    - Guru Granth Sahib
+  Religion and spirituality / Eastern religions / Taoism:
+    - Tao
+    - Tao Te Ching
+    - Zhuangzi (book)
+  Religion and spirituality / Eastern religions / Shinto:
+    - Kojiki
+  "Religion and spirituality / Other religions / Other religions: General":
+    - Shamanism
+    - Zoroastrianism
+    - Avesta
+    - Chinese folk religion
+    - Haitian Vodou
+    - Traditional African religions
+    - Yoruba religion
+  Religion and spirituality / Other religions / Ancient religions:
+    - Prehistoric religion
+    - Ancient Celtic religion
+    - Ancient Egyptian religion
+    - Ancient Greek religion
+    - Ancient Mesopotamian religion
+    - Aztec religion
+    - Germanic paganism
+    - Maya religion
+    - Old Norse religion
+    - Religion in ancient Rome
+    - Religion in pre-Islamic Arabia
+    - Slavic paganism
+  Religion and spirituality / Other religions / Western esotericism:
+    - Western esotericism
+    - Freemasonry
+    - New Age
+  Religion and spirituality / Other religions / New religious movements:
+    - New religious movement
+    - Modern Paganism
+    - Wicca
+    - Satanism
+  "Religion and spirituality / Mythology / Mythology: General":
+    - Folklore
+    - Legendary creature
+    - Monster
+    - Myth
+    - Comparative mythology
+    - Paradise
+  Religion and spirituality / Mythology / By culture:
+    - Australian Aboriginal religion and mythology
+    - Chinese mythology
+    - Egyptian mythology
+    - Greek mythology
+    - Japanese mythology
+    - Korean mythology
+    - Mythologies of the indigenous peoples of the Americas
+    - Norse mythology
+    - Persian mythology
+    - Roman mythology
+  Religion and spirituality / Mythology / Abrahamic mythology:
+    - Abraham
+    - Adam and Eve
+    - Cain and Abel
+    - Daniel (biblical figure)
+    - David
+    - Elijah
+    - Ezra
+    - Isaac
+    - Isaiah
+    - Ishmael
+    - Jacob
+    - Joseph (Genesis)
+    - Moses
+    - Noah
+    - Solomon
+    - Yahweh
+  Religion and spirituality / Mythology / Egyptian mythology:
+    - Amun
+    - Anubis
+    - Hathor
+    - Horus
+    - Isis
+    - Osiris
+    - Ra
+    - Thoth
+  Religion and spirituality / Mythology / Hindu mythology:
+    - Brahma
+    - Durga
+    - Ganesha
+    - Kali
+    - Krishna
+    - Lakshmi
+    - Parvati
+    - Rama
+    - Saraswati
+    - Shiva
+    - Vishnu
+  Religion and spirituality / Mythology / Greco-Roman mythology / Greek mythological heroes:
+    - Achilles
+    - Aeneas
+    - Amazons
+    - Heracles
+    - Odysseus
+  Religion and spirituality / Mythology / Greco-Roman mythology / Greek deities:
+    - Apollo
+    - Artemis
+    - Athena
+    - Hades
+    - Hera
+    - Hermes
+    - Poseidon
+    - Titans
+    - Zeus
+  Religion and spirituality / Mythology / Greco-Roman mythology / Roman deities:
+    - Jupiter (mythology)
+    - Mars (mythology)
+    - Venus (mythology)
+  Religion and spirituality / Mythology / Chinese mythology:
+    - Jade Emperor
+    - Three Sovereigns and Five Emperors
+    - Yellow Emperor
+    - Yu the Great
+  Religion and spirituality / Mythology / Mesopotamian mythology:
+    - Enki
+    - Enlil
+    - Inanna
+  Religion and spirituality / Mythology / Native American mythology:
+    - Coyote (mythology)
+    - Great Spirit
+    - Quetzalcoatl
+  Religion and spirituality / Mythology / Norse mythology:
+    - Freyja
+    - Loki
+    - Odin
+    - Thor
+  Religion and spirituality / Mythology / Other mythology / African mythology:
+    - Anansi
+  Religion and spirituality / Mythology / Other mythology / Buddhist mythology:
+    - Avalokiteśvara
+  Religion and spirituality / Mythology / Other mythology / Central Asia mythology:
+    - Tengri
+  Religion and spirituality / Mythology / Other mythology / Iranian mythology:
+    - Ahura Mazda
+  Religion and spirituality / Mythology / Other mythology / Japanese mythology:
+    - Amaterasu
+    - Yōkai
+  Religion and spirituality / Mythology / Mythological creatures:
+    - Angel
+    - Centaur
+    - Death (personification)
+    - Demon
+    - Lilith
+    - Devil
+    - Satan
+    - Dragon
+    - Fairy
+    - Leprechaun
+    - Ghost
+    - Giant
+    - Jinn
+    - Medusa
+    - Mermaid
+    - Minotaur
+    - Pegasus
+    - Phoenix (mythology)
+    - Siren (mythology)
+    - Sphinx
+    - Unicorn
+    - Vampire
+    - Werewolf
+    - Zombie
+  Religion and spirituality / Mythology / Mythological places:
+    - Atlantis
+    - El Dorado
+  Religion and spirituality / Mythology / Mythological items:
+    - Holy Grail

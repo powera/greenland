@@ -1,0 +1,319 @@
+# Wikipedia's Level 4 Mathematics list.
+# A strict superset of the Level 3 list's 53-title Mathematics section,
+# reaching the topics a general encyclopedia sample never gets to.  This is what
+# registers mathematical English as ordinary vocabulary rather than as the tail
+# of a general corpus.
+#
+# 299 titles in 7 groups, resolved against the
+# enwiki-20220501 snapshot: a title renamed since then is stored under its
+# 2022 spelling so wiki_dump can find it by exact title.
+
+source: Wikipedia:Vital articles/Level 4/Mathematics
+snapshot: enwiki-20220501
+groups:
+  General:
+    - Mathematics
+    - Mathematician
+    - Arithmetic
+    - Addition
+    - Subtraction
+    - Multiplication
+    - Division (mathematics)
+    - Euclidean algorithm
+    - Fraction (mathematics)
+    - Percentage
+    - Modular arithmetic
+    - Number
+    - Natural number
+    - Integer
+    - Parity (mathematics)
+    - Real number
+    - Negative number
+    - Complex number
+    - Rational number
+    - Irrational number
+    - Imaginary number
+    - Positional notation
+    - Numerical digit
+    - Decimal
+    - Arabic numerals
+    - Roman numerals
+    - Binary number
+    - Scientific notation
+    - Order of operations
+    - Function (mathematics)
+    - Exponentiation
+    - Logarithm
+    - Nth root
+    - Square root
+    - Exponential function
+    - Inverse function
+    - Implicit function
+    - Function composition
+    - Graph of a function
+    - Parametric equation
+    - Equation
+    - Series (mathematics)
+    - Equation solving
+    - Polynomial
+    - Variable (mathematics)
+    - Constant (mathematics)
+    - Pi
+    - E (mathematical constant)
+    - "0"
+    - "1"
+    - −1
+    - Imaginary unit
+    - Golden ratio
+    - Formula
+    - Theorem
+    - Conjecture
+    - Factorial
+    - Gamma function
+    - Hilbert's problems
+  Geometry:
+    - Geometry
+    - Coordinate system
+    - Cartesian coordinate system
+    - Polar coordinate system
+    - Dimension
+    - Point (geometry)
+    - Line (geometry)
+    - Two-dimensional space
+    - Plane (geometry)
+    - Angle
+    - Right angle
+    - Area
+    - Shape
+    - Polygon
+    - Triangle
+    - Quadrilateral
+    - Square
+    - Conic section
+    - Circle
+    - Ellipse
+    - Parabola
+    - Hyperbola
+    - Three-dimensional space
+    - Volume
+    - Sphere
+    - Polyhedron
+    - Cube
+    - Trigonometry
+    - Trigonometric functions
+    - Hyperbolic function
+    - Topology
+    - General topology
+    - Topological space
+    - Compact space
+    - Manifold
+    - Open set
+    - Homology (mathematics)
+    - Homotopy
+    - Euler characteristic
+    - Knot theory
+    - Poincaré conjecture
+    - Length
+    - Distance
+    - Metric space
+    - Symmetry
+    - Symmetry in mathematics
+    - Analytic geometry
+    - Differential geometry
+    - Riemannian geometry
+    - Euclidean geometry
+    - Euclidean space
+    - Convex set
+    - Pythagorean theorem
+    - Non-Euclidean geometry
+    - Fractal
+    - Tensor
+    - Tessellation
+  Algebra:
+    - Algebra
+    - Elementary algebra
+    - Linear algebra
+    - Linear equation
+    - Gaussian elimination
+    - Matrix (mathematics)
+    - Determinant
+    - Eigenvalues and eigenvectors
+    - Vector space
+    - Euclidean vector
+    - Cross product
+    - Dot product
+    - Algebraic geometry
+    - Algebraic variety
+    - Boolean algebra
+    - Inequality (mathematics)
+    - Quadratic equation
+    - Abstract algebra
+    - Algebraic topology
+    - Sheaf (mathematics)
+    - Associative property
+    - Commutative algebra
+    - Commutative property
+    - Distributive property
+    - Field (mathematics)
+    - Fundamental theorem of algebra
+    - Galois theory
+    - Group (mathematics)
+    - Abelian group
+    - Classification of finite simple groups
+    - Fundamental group
+    - Group representation
+    - Group theory
+    - Homological algebra
+    - Isomorphism
+    - Module (mathematics)
+    - Representation theory
+    - Ring theory
+    - Commutative ring
+    - Ring (mathematics)
+  Statistics:
+    - Statistics
+    - Bayesian inference
+    - Correlation and dependence
+    - Regression analysis
+    - Ordinary least squares
+    - Data visualization
+    - Design of experiments
+    - Randomized controlled trial
+    - Mean
+    - Median
+    - Meta-analysis
+    - Mode (statistics)
+    - Observational study
+    - Sample mean and covariance
+    - Standard deviation
+    - Standard error
+    - Statistical hypothesis testing
+    - P-value
+    - Chi-squared test
+    - Student's t-test
+    - Survey methodology
+    - Statistical population
+    - Sampling (statistics)
+    - Probability
+    - Probability theory
+    - Bayes' theorem
+    - Central limit theorem
+    - Expected value
+    - Law of large numbers
+    - Markov chain
+    - Probability density function
+    - Probability distribution
+    - Binomial distribution
+    - Exponential distribution
+    - Normal distribution
+    - Poisson distribution
+    - Discrete uniform distribution
+    - Random variable
+    - Stochastic process
+    - Variance
+  Logic:
+    - Discrete mathematics
+    - Mathematical logic
+    - Mathematical proof
+    - Axiom
+    - Computability theory
+    - Computable function
+    - Gödel's incompleteness theorems
+    - Mathematical induction
+    - Propositional calculus
+    - Combinatorics
+    - Combination
+    - Permutation
+    - Theoretical computer science
+    - Algorithm
+    - Abstract machine
+    - Numerical integration
+    - Coding theory
+    - Data compression
+    - Error detection and correction
+    - Computational complexity theory
+    - P versus NP problem
+    - Data structure
+    - Formal language
+    - Theory of computation
+    - Set theory
+    - Set (mathematics)
+    - Empty set
+    - Subset
+    - Axiom of choice
+    - Cantor's theorem
+    - Equivalence relation
+    - Intersection (set theory)
+    - Naive set theory
+    - Russell's paradox
+    - Union (set theory)
+    - Venn diagram
+    - Graph theory
+    - Graph (discrete mathematics)
+  Calculus:
+    - Calculus
+    - Limit (mathematics)
+    - "Infinity"
+    - Limit of a function
+    - Limit of a sequence
+    - Sequence
+    - Fibonacci number
+    - Fundamental theorem of calculus
+    - Continuous function
+    - Differential calculus
+    - Derivative
+    - Differential equation
+    - Ordinary differential equation
+    - Integral
+    - Laplace transform
+    - Multivariable calculus
+    - Multiple integral
+    - Partial derivative
+    - Laplace's equation
+    - Partial differential equation
+    - Vector calculus
+    - Del
+    - Taylor series
+    - Mathematical analysis
+    - Approximation theory
+    - Numerical analysis
+    - Complex analysis
+    - Cauchy's integral formula
+    - Euler's formula
+    - Euler's identity
+    - Holomorphic function
+    - Riemann surface
+    - Functional analysis
+    - Hilbert space
+    - Harmonic analysis
+    - Fourier analysis
+    - Fourier series
+    - Fourier transform
+    - Real analysis
+    - Calculus of variations
+  Other mathematics:
+    - Number theory
+    - Prime number
+    - Prime number theorem
+    - Euclid's theorem
+    - Fundamental theorem of arithmetic
+    - Algebraic number theory
+    - Algebraic number field
+    - Class field theory
+    - Analytic number theory
+    - Riemann hypothesis
+    - Diophantine equation
+    - Fermat's Last Theorem
+    - Applied mathematics
+    - Mathematical optimization
+    - Linear programming
+    - Nonlinear programming
+    - Operations research
+    - Game theory
+    - Information theory
+    - Dynamical systems theory
+    - Dynamical system
+    - Control theory
+    - Chaos theory
+    - Category theory
+    - Pure mathematics

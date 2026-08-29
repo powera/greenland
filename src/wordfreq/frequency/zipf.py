@@ -1,6 +1,6 @@
 """Combine a lexeme's per-form corpus ranks into one rank for that lexeme.
 
-A corpus file gives a rank to every *surface form* it saw: ``wiki_vital`` ranks
+A corpus file gives a rank to every *surface form* it saw: ``wiki_society`` ranks
 "block" 2500 and "blocks" 4500 separately.  What a lemma needs is a single rank
 for the lexeme those forms belong to, and that rank should be better than
 either input -- a word spelled two moderately common ways is a more common word
@@ -18,7 +18,7 @@ frequency, adding those, and converting back::
 
 With ``s = 1`` this is the reciprocal sum.  The exponent is fitted per corpus
 rather than assumed, because the corpora here disagree about it: the Gutenberg
-book corpora sit near 1.2 while ``wiki_vital`` is near 0.96, and using 1.0
+book corpora sit near 1.2 while the wiki corpora are near 0.96, and using 1.0
 everywhere would misprice both.  See :func:`fit_zipf_exponent`.
 
 Two properties make this safe to use in place of a global ordering:

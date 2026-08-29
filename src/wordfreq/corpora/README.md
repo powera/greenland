@@ -9,7 +9,7 @@ output format are the same for all of them:
 | --- | --- | --- |
 | `build_gutenberg.py` | Project Gutenberg books | the five below |
 | `build_scotus.py` | Supreme Court opinions | `legal_scotus` |
-| `build_wikipedia.py` | A Wikipedia dump snapshot | `wiki_vital`, `wiki_math`, `wiki_geography`, `wiki_biology`, `wiki_modern_life` |
+| `build_wikipedia.py` | A Wikipedia dump snapshot | `wiki_math`, `wiki_geography`, `wiki_biology`, `wiki_modern_life`, `wiki_arts`, `wiki_society`, `wiki_physical_science`, `wiki_history` |
 
 Five corpora have book lists here:
 
@@ -125,7 +125,7 @@ PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py --build-index
 
 # 2. Build any of the corpora from it.
 PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py \
-    --corpus wiki_vital --phrases-from-db
+    --corpus wiki_arts --phrases-from-db
 PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py \
     --corpus wiki_math --phrases-from-db
 PYTHONPATH=src python src/wordfreq/corpora/build_wikipedia.py \
@@ -151,29 +151,36 @@ rsync -a data/working/wiki_offset/ "$WIKI_BASE/offset/"
 
 | Corpus | Articles | Contents |
 | --- | --- | --- |
-| `wiki_vital` | 1000 | Wikipedia's "Vital articles" selection, in eleven topic groups — a general sample of modern encyclopedic English |
+| `wiki_arts` | 703 | Level 4 arts: architecture, literature, music, the performing and visual arts, film |
+| `wiki_society` | 1369 | Level 4 society, philosophy and religion: law, politics, economics, ethics, belief |
+| `wiki_physical_science` | 1317 | Level 4 physical sciences and molecular biology: physics, chemistry, astronomy, earth science, biochemistry |
+| `wiki_history` | 2606 | Level 4 history and biography, merged: periods, empires, wars, and the people in them |
 | `wiki_math` | 299 | Mathematics in depth, from arithmetic to category theory. A strict superset of the vital list's 53-title Mathematics section |
 | `wiki_geography` | 1204 | Wikipedia's Level 4 Geography list, from the continents down to their rivers, ranges and cities |
 | `wiki_biology` | 1004 | Level 4 organisms and anatomy — the ordinary names of plants and animals. Molecular biology, ecology and medicine are deliberately excluded |
 | `wiki_modern_life` | 1200 | Level 4 everyday life and technology, merged: appliances, clothing, sport, computing, transport |
 
-`wiki_math` is now built and registered in `CORPUS_CONFIGS`, at weight 0.5 —
-the lowest here. It is the smallest corpus (294 articles, ~1.1M tokens) and a
-single narrow register, so it earns its place by covering mathematical
-vocabulary the other seven barely touch rather than by describing how English
-is weighted. Registration waited on the file existing: an enabled corpus with
-no JSON file makes `combined_rank` charge every lemma that corpus's
-unknown-rank floor.
+All eight are built, registered in `CORPUS_CONFIGS`, and enabled. Registration
+must wait on the file existing: an enabled corpus with no JSON file makes
+`combined_rank` charge every lemma that corpus's unknown-rank floor.
 
-`wiki_geography`, `wiki_biology` and `wiki_modern_life` are built, enabled in
-`CORPUS_CONFIGS`, and loaded into the database.
+Weights split into two groups. `wiki_arts` and `wiki_society` are weighted 0.8,
+with `wiki_modern_life`: all three carry ordinary educated English — the
+critical metalanguage of the arts, the institutional vocabulary of law and
+politics — rather than a technical register. `wiki_math`,
+`wiki_physical_science`, `wiki_geography` and `wiki_biology` are weighted 0.5
+and `wiki_history` 0.6: each is a narrow register or largely proper nouns, so
+it earns its place by covering vocabulary the others barely touch rather than
+by describing how English is weighted.
 
 Each list is checked against the snapshot rather than taken verbatim, because
 `wiki_dump` looks a page up by exact title: a redirect is a miss, and so is a
-page created after May 2022. Titles renamed since are stored under their 2022
-spelling with the current name in a comment; titles with no snapshot article,
-and disambiguation pages, are dropped. The per-list counts above are what
-survives that check.
+page created after May 2022. A title that was a redirect in 2022 is followed to
+its target and stored under that; one renamed since is stored under its 2022
+spelling; titles with no snapshot article under any spelling tried are dropped.
+Every such decision is recorded in the header comment of the list's YAML file.
+The per-list counts above are what survives that check — hit rates run 98–99%,
+and the builder reports the rest as missing rather than failing the run.
 
 `wiki_modern_life` merges the Everyday life and Technology lists. Each is small
 alone, and both are after the same thing — the vocabulary of modern material
@@ -182,10 +189,38 @@ and science never reaches. It is weighted 0.8 rather than the 0.5 the other
 topic corpora get, because that vocabulary is ordinary English rather than a
 technical register.
 
-The Arts list (`ARTS_ARTICLES`, 704 titles) is parsed and kept in
-`vital_articles.py` but has no corpus: its vocabulary overlaps `wiki_vital` and
-the book corpora more than the others do. Adding one is a matter of a
-`WikipediaCorpus` entry and a `CorpusConfig`.
+`wiki_vital` was removed in August 2026. It was the 1000-article Level 3 vital
+list, and the one general Wikipedia corpus. Five of its eleven sections were
+already covered in depth by Level 4 corpora (geography, everyday life,
+technology, mathematics, and the organism half of biology); the four corpora
+added alongside its removal — `wiki_arts`, `wiki_society`,
+`wiki_physical_science` and `wiki_history` — cover the remaining six at roughly
+six times the article count. Its Health and medicine section is deliberately
+not replaced: the Level 4 expansion of it is named drugs, syndromes and
+procedures, a technical register that helps no learner. `wiki_society` took
+over its role as the default corpus read by `translation/processor.py` and as
+a `WORDFREQ_SOURCES` entry, being the broadest of the topic lists.
+
+The article lists themselves live in `wikipedia/lists/` as YAML, one file per
+upstream page, loaded by `wikipedia/article_lists.py`. They were Python dicts
+in a single `vital_articles.py` until the same August 2026 change; at twelve
+lists and ~9800 titles that file was almost entirely data. YAML rather than
+JSON because the provenance is worth keeping beside the titles — which were
+renamed between the 2026 upstream revision and the 2022 snapshot, which were
+dropped, and why — and JSON cannot hold a comment. `lists/redactions.yaml`
+names titles kept out of every list with the reason; filtering at load time
+means a re-fetch of an upstream page cannot quietly reintroduce one.
+
+The Arts list (`lists/arts.yaml`, 703 titles) is loaded by
+`article_lists.py`. It was long left without a corpus on the grounds that its
+vocabulary overlaps the general corpora and the book corpora, but that conflates
+subject matter with register: the book corpora *are* literature, supplying
+narrative English (`he said`, `the room`, `walked`), while an encyclopedia
+article *about* literature supplies the critical metalanguage (`narrative`,
+`protagonist`, `genre`, `motif`, `stanza`, `counterpoint`, `chiaroscuro`,
+`choreography`, `cinematography`), which the novels essentially never use. The
+overlap that does exist is titles and character names, and those are proper
+nouns, already separated per-document by `analyze_book`.
 
 The dump is a *multistream* bz2: it concatenates independently compressed ~2MB
 blocks, so a block holding a given page can be seeked to and decompressed
@@ -194,11 +229,28 @@ MD5 of the page title, and the builder then asks for its articles by name. A
 title that has been renamed since the snapshot was taken is reported as missing
 and costs the corpus one document rather than failing the run.
 
+**Article text is cached.** Seeking and decompressing a block per article is
+the expensive part of a build, so the wikitext each article yields is written
+under `data/working/wiki_cache/` (gitignored) and read from there next time. A
+rebuild after a parser change or a word-list edit therefore does not touch the
+dump, and the drive holding the snapshot need not even be mounted. The cache is
+sharded into 256 subdirectories by the MD5 of the title — the same scheme the
+offset index uses — because the article lists run to thousands of titles and a
+single flat directory of them is slow to stat and awkward to inspect. Files are
+named by the full MD5 with the title on the first line, since titles like
+`AC/DC` are not usable as filenames. Budget roughly 120KB per article. Delete
+the directory to reclaim the space; it rebuilds on the next run.
+
+What is cached is *raw wikitext*, not extracted prose, so a change to
+`wiki_text.py` cannot serve stale text — the snapshot is fixed at May 2022 and
+the wikitext with it. If the cache is ever changed to store parsed text
+instead, a parser change must wipe the directory.
+
 **Wikitext is parsed, not regex-stripped.** Its constructs nest — a template
 argument holds another template, an infobox holds a table holding links — and a
 pattern like `\{\{[^}]*\}\}` stops at the first `}}` it meets, so on
 `{{convert|5|km|{{abbr|mi}}}}` it consumes through the inner close and leaves
-`}}` behind as prose. The previous version of `wiki_vital.json` was built that
+`}}` behind as prose. An earlier version of the wiki corpora was built that
 way. `wiki_text.py` instead runs a character-level tokenizer into a block tree,
 so every construct closes where it actually closes. Links contribute their
 display text (`[[Pablo Picasso|Picasso]]` → "Picasso"); templates, tables,
@@ -209,7 +261,7 @@ frequency list.
 
 Two defaults differ from the book builder's. `--full-weight-tokens` is 2500
 rather than 20000 (a substantial article runs to about 5000 tokens of prose
-once apparatus is stripped), and `--min-articles` is 15 for `wiki_vital`
+once apparatus is stripped), and `--min-articles` is 15 for the thousand-article lists
 against `--min-books` 3, because there are 1000 documents rather than 54.
 `--section` limits a run to one group of the article list.
 

@@ -1,0 +1,250 @@
+# The molecular half of Wikipedia's Level 4 Biology and health sciences list, as of the August 2026 revision.
+# Biochemistry, cell biology, physiology, ecology and general biology.  The
+# Anatomy and Organisms sections of the same page build wiki_biology and are
+# excluded here; the Health, medicine and disease section is excluded from both,
+# being the technical register of named drugs, syndromes and procedures rather
+# than ordinary English.
+#
+# 206 titles in 19 groups, resolved against the
+# enwiki-20220501 snapshot: a title renamed since then is stored under its
+# 2022 spelling so wiki_dump can find it by exact title.
+#
+# 3 titles were redirects in 2022 and are stored
+# under the target they redirect to:
+#   Biological sex  ->  Sex
+#   Mitochondria  ->  Mitochondrion
+#   Population (biology)  ->  Population
+#
+# 2 titles have no snapshot article under any
+# spelling tried, and are dropped:
+#   Domain (taxonomy)
+#   Kingdom (taxonomy)
+
+source: Wikipedia:Vital articles/Level 4/Biology and health sciences
+snapshot: enwiki-20220501
+groups:
+  "Biology and health sciences: General / Basics":
+    - Life
+    - Death
+    - Decomposition
+    - Suicide
+    - Abiogenesis
+    - Organism
+    - Microorganism
+    - Model organism
+    - Biology
+    - Microbiology
+    - Mycology
+    - Biomechanics
+    - Neuroscience
+    - Sense
+    - Paleontology
+    - Fossil
+  "Biology and health sciences: General / Evolution":
+    - Evolution
+    - Natural selection
+    - Adaptation
+    - Genetic drift
+    - History of life
+    - Mutation
+  "Biology and health sciences: General / Genetics and taxonomy":
+    - Genetics
+    - Gene
+    - Genetic code
+    - Gene expression
+    - Heredity
+    - Epigenetics
+    - Human genome
+    - Hybrid (biology)
+    - Mendelian inheritance
+    - Phylogenetics
+    - Binomial nomenclature
+    - Taxonomy (biology)
+    - Species
+  Biochemistry and molecular biology:
+    - Biochemistry
+    - Chemical biology
+    - Molecular biology
+    - Biomolecule
+    - Alkaloid
+    - Caffeine
+    - Cocaine
+    - Morphine
+    - Nicotine
+    - Biological pigment
+    - Carotenoid
+    - Chlorophyll
+    - Melanin
+    - Carbohydrate
+    - Fructose
+    - Glucose
+    - Lactose
+    - Cellulose
+    - Chitin
+    - Glycogen
+    - Starch
+    - Hormone
+    - Adrenaline
+    - Dopamine
+    - Estrogen
+    - Insulin
+    - Neurotransmitter
+    - Oxytocin
+    - Plant hormone
+    - Testosterone
+    - Pheromone
+    - Lipid
+    - Steroid
+    - Cholesterol
+    - Fat
+    - Fatty acid
+    - Nucleic acid
+    - Adenosine triphosphate
+    - DNA
+    - RNA
+    - Protein
+    - Amino acid
+    - Enzyme
+    - Hemoglobin
+    - Protein (nutrient)
+  Biological processes and physiology / Basics:
+    - Physiology
+    - Blood sugar level
+    - Breathing
+    - Circadian rhythm
+    - Digestion
+    - Excretion
+    - Defecation
+    - Metabolism
+    - Muscle contraction
+    - Photosynthesis
+    - Respiration (physiology)
+    - Thermoregulation
+    - Transpiration
+  Biological processes and physiology / Biological reproduction:
+    - Reproduction
+    - Asexual reproduction
+    - Sexual reproduction
+    - Sex
+    - Female
+    - Male
+    - Fertilisation
+    - Microbial cyst
+    - Spore
+  Biological processes and physiology / Animal reproduction:
+    - Birth
+    - Childbirth
+    - Egg
+    - Egg cell
+    - Menstrual cycle
+    - Menopause
+    - Pregnancy
+    - Semen
+    - Sperm
+  Biological processes and physiology / Plant reproduction:
+    - Plant reproduction
+    - Alternation of generations
+    - Gametophyte
+    - Plant reproductive morphology
+    - Pollen
+    - Pollination
+    - Sporophyte
+  Biological processes and physiology / Development:
+    - Developmental biology
+    - Development of the human body
+  Biological processes and physiology / Animal ontogeny:
+    - Cuticle
+    - Embryo
+    - Fetus
+    - Imago
+    - Larva
+    - Longevity
+    - Metamorphosis
+    - Moulting
+    - Nymph (biology)
+    - Ontogeny
+    - Puberty
+    - Pupa
+    - Tadpole
+  Botany:
+    - Botany
+    - Carnivorous plant
+  "Cell biology / Cell biology: General":
+    - Cell biology
+  Cell biology / Cell processes:
+    - Active transport
+    - Cell signaling
+    - Cellular respiration
+    - Glycolysis
+    - DNA replication
+    - Fermentation
+    - Programmed cell death
+    - Stem cell
+    - Transcription (biology)
+    - Translation (biology)
+  Cell biology / Cellular division:
+    - Cell cycle
+    - Fission (biology)
+    - Meiosis
+    - Mitosis
+    - Plasmid
+  Cell biology / Organelles and other cell parts:
+    - Cell (biology)
+    - Cell membrane
+    - Cytoplasm
+    - Cytoskeleton
+    - Flagellum
+    - Symbiogenesis
+    - Organelle
+    - Cell nucleus
+    - Chromosome
+    - Centriole
+    - Endoplasmic reticulum
+    - Golgi apparatus
+    - Lysosome
+    - Mitochondrion
+    - Ribosome
+    - Vacuole
+  Cell biology / Plant cells:
+    - Plant cell
+    - Cell wall
+    - Chloroplast
+    - Plastid
+  Ecology:
+    - Ecology
+    - Biodiversity
+    - Biome
+    - Biosphere
+    - Competition (biology)
+    - Ecological niche
+    - Ecosystem
+    - Extinction
+    - Endangered species
+    - Extremophile
+    - Habitat
+    - Invasive species
+    - Parasitism
+    - Population
+    - Sustainability
+    - Symbiosis
+    - Wildlife conservation
+  "Zoology / Zoology: General":
+    - Zoology
+    - Animal coloration
+    - Camouflage
+  Zoology / Ethology:
+    - Ethology
+    - Intelligence
+    - Sleep
+    - Hibernation
+    - Animal locomotion
+    - Bipedalism
+    - Animal migration
+    - Carnivore
+    - Predation
+    - Scavenger
+    - Herbivore
+    - Grazing
+    - Instinct
+    - Sociality
+    - Herd
