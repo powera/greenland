@@ -5,6 +5,7 @@ Tests for the sentence generation library.
 """
 
 import unittest
+from typing import Any, Dict
 from unittest.mock import Mock, patch
 
 from benchmarks.lib.sentence_generation import SentenceGenerator
@@ -14,7 +15,7 @@ class TestSentenceGenerator(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.sample_matrices = {
+        self.sample_matrices: Dict[str, Dict[str, Dict]] = {
             "subjects": {"I": {"english": "I", "lithuanian": "aš", "guid": "PRON_001"}},
             "verbs": {
                 "eat": {
@@ -27,7 +28,9 @@ class TestSentenceGenerator(unittest.TestCase):
             "foods": {"apple": {"english": "apple", "lithuanian": "obuolys", "guid": "F01_001"}},
         }
 
-        self.sample_grammar = {"lt": {"cases": {"accusative": {"endings": {"default": "ą"}}}}}
+        self.sample_grammar: Dict[str, Any] = {
+            "lt": {"cases": {"accusative": {"endings": {"default": "ą"}}}}
+        }
 
         self.generator = SentenceGenerator(
             word_matrices=self.sample_matrices, grammar_rules=self.sample_grammar
@@ -37,7 +40,7 @@ class TestSentenceGenerator(unittest.TestCase):
         """Test basic sentence pattern creation."""
         pattern = self.generator.create_sentence_pattern("SVO")
 
-        self.assertIsNotNone(pattern)
+        assert pattern is not None
         self.assertIn("subject", pattern)
         self.assertIn("verb", pattern)
         self.assertIn("object", pattern)
@@ -72,7 +75,7 @@ class TestSentenceGenerator(unittest.TestCase):
     def test_incompatible_pattern(self):
         """Test handling of incompatible word combinations."""
         # Create matrices with no compatible combinations
-        incompatible_matrices = {
+        incompatible_matrices: Dict[str, Dict[str, Dict]] = {
             "subjects": {"I": {"english": "I"}},
             "verbs": {
                 "eat": {
@@ -115,7 +118,7 @@ class TestSentenceGenerator(unittest.TestCase):
 
         result = generator.generate_with_llm(pattern, "lt")
 
-        self.assertIsNotNone(result)
+        assert result is not None
         self.assertTrue(result["llm_generated"])
         self.assertEqual(result["english"], "I eat an apple.")
         self.assertEqual(result["target_sentence"], "Aš valgau obuolį.")

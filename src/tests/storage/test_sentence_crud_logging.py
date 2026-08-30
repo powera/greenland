@@ -9,7 +9,7 @@ the row is still readable, and has to survive the row it describes.
 from __future__ import annotations
 
 import json
-from typing import List
+from typing import Iterator, List
 
 import pytest
 from sqlalchemy import create_engine
@@ -45,7 +45,7 @@ SOURCE = "test-suite"
 
 
 @pytest.fixture()
-def session() -> Session:
+def session() -> Iterator[Session]:
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     with Session(engine) as db:

@@ -11,7 +11,7 @@ from pathlib import Path
 
 def _load_synonyms_runner_module() -> types.ModuleType:
     clients_module = types.ModuleType("clients")
-    clients_module.unified_client = object()
+    setattr(clients_module, "unified_client", object())
     sys.modules.setdefault("clients", clients_module)
 
     ollama_module = types.ModuleType("clients.ollama_client")
@@ -19,7 +19,7 @@ def _load_synonyms_runner_module() -> types.ModuleType:
     class OllamaTimeoutError(Exception):
         pass
 
-    ollama_module.OllamaTimeoutError = OllamaTimeoutError
+    setattr(ollama_module, "OllamaTimeoutError", OllamaTimeoutError)
     sys.modules.setdefault("clients.ollama_client", ollama_module)
 
     base_module = types.ModuleType("benchmarks.lib.utils.base")
@@ -29,7 +29,7 @@ def _load_synonyms_runner_module() -> types.ModuleType:
             self.model = model
             self.metadata = metadata
 
-    base_module.BenchmarkRunner = BenchmarkRunner
+    setattr(base_module, "BenchmarkRunner", BenchmarkRunner)
     sys.modules.setdefault("benchmarks.lib.utils.base", base_module)
 
     data_models_module = types.ModuleType("benchmarks.lib.utils.data_models")
@@ -37,7 +37,7 @@ def _load_synonyms_runner_module() -> types.ModuleType:
     class BenchmarkResult:
         pass
 
-    data_models_module.BenchmarkResult = BenchmarkResult
+    setattr(data_models_module, "BenchmarkResult", BenchmarkResult)
     sys.modules.setdefault("benchmarks.lib.utils.data_models", data_models_module)
 
     factory_module = types.ModuleType("benchmarks.lib.utils.factory")
@@ -48,14 +48,14 @@ def _load_synonyms_runner_module() -> types.ModuleType:
 
         return decorator
 
-    factory_module.runner = runner
+    setattr(factory_module, "runner", runner)
     sys.modules.setdefault("benchmarks.lib.utils.factory", factory_module)
 
     module_path = Path(__file__).with_name("synonyms_runner.py")
     spec = importlib.util.spec_from_file_location("synonyms_runner_under_test", module_path)
-    module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
     assert spec and spec.loader
-    spec.loader.exec_module(module)  # type: ignore[union-attr]
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
     return module
 
 

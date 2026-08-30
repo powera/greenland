@@ -11,7 +11,7 @@ TranslateGemma is a translation-only model that requires a specific prompt forma
 import json
 import logging
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import requests
 from requests.exceptions import RequestException
@@ -153,6 +153,7 @@ class TranslateGemmaClient:
             Response with translated text in response_text
         """
         # Build message format based on backend
+        messages: List[Dict[str, Any]]
         if self.backend == "ollama":
             # Ollama: Detailed professional translator prompt
             source_name = self._get_language_name(source_lang)

@@ -105,6 +105,9 @@ def find_missing_synonyms(
         }
 
         for lemma in lemmas:
+            # Uncurated lemmas have no GUID, so no agent can be pointed at them.
+            if not lemma.guid:
+                continue
             for lang in lang_codes:
                 if lang == "en":
                     translation: Optional[str] = lemma.lemma_text

@@ -51,6 +51,7 @@ class TestFindLemmaByGuid(unittest.TestCase):
 
         result = find_lemma_by_guid(self.session, "A01_001", error_on_missing=False)
 
+        assert result is not None
         self.assertEqual(result, mock_lemma)
         self.assertEqual(result.lemma_text, "test")
 

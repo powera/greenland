@@ -143,6 +143,15 @@ def _calculate_timeout(target_length: int) -> int:
     return 20 + (target_length // 5)
 
 
+def _combine_usage(first: Optional[LLMUsage], second: Optional[LLMUsage]) -> Optional[LLMUsage]:
+    """Combine two optional usage records, tolerating a missing one on either side."""
+    if first is None:
+        return second
+    if second is None:
+        return first
+    return first.combine(second)
+
+
 def _generate_response(
     topic: str, target_length: int, config: ResponseConfig, model: str = DEFAULT_MODEL
 ) -> Tuple[str, Optional[LLMUsage]]:
@@ -177,7 +186,7 @@ def _generate_response(
 
 def generate_smart_response(
     topic: str, target_length: int, model: str = DEFAULT_MODEL
-) -> Tuple[str, LLMUsage, ResponseType]:
+) -> Tuple[str, Optional[LLMUsage], ResponseType]:
     """Generate an appropriate response based on topic categorization.
 
     Args:
@@ -199,7 +208,7 @@ def generate_smart_response(
     response, gen_usage = _generate_response(topic, target_length, config, model)
 
     # Combine usage metrics from both operations
-    total_usage = cat_usage.combine(gen_usage)
+    total_usage = _combine_usage(cat_usage, gen_usage)
 
     return response, total_usage, response_type
 
@@ -209,7 +218,7 @@ def generate_response(
     target_length: int,
     response_type: Union[str, ResponseType],
     model: str = DEFAULT_MODEL,
-) -> Tuple[str, LLMUsage]:
+) -> Tuple[str, Optional[LLMUsage]]:
     """Generate a response for a given topic and response type.
 
     Args:

@@ -215,7 +215,9 @@ class GeneratorTestCase(unittest.TestCase):
             self.generator = self.generator_class(metadata, session=self.mock_session)
         elif self.benchmark_code:
             # If only benchmark code is provided, use the factory
-            self.generator = get_generator(self.benchmark_code, session=self.mock_session)
+            registered = get_generator(self.benchmark_code, session=self.mock_session)
+            assert registered is not None, f"no generator registered for {self.benchmark_code}"
+            self.generator = registered
         else:
             self.skipTest("No generator_class or benchmark_code specified")
 
@@ -352,6 +354,7 @@ class GeneratorTestCase(unittest.TestCase):
         question_id = self.generator.save_question(question, "test_id")
 
         # Check that the question_id has the correct format
+        assert self.benchmark_code is not None
         self.assertTrue(question_id.startswith(self.benchmark_code + ":"))
 
         # Verify insert_question was called

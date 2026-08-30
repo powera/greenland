@@ -103,6 +103,9 @@ class VerbFormsGenerator(BenchmarkGenerator):
         }
 
     def _generate_from_file(self, **kwargs: Any) -> Iterator[BenchmarkQuestion]:
+        if not self.can_load_from_file or not self.questions_file_path:
+            return
+
         try:
             if self._samples is None:
                 self._samples = self.load_json_file(self.questions_file_path)

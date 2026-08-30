@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, Iterator, List
+from typing import Any, Dict, Iterator, List, Optional
 
 import pytest
 from flask.testing import FlaskClient
@@ -62,7 +62,7 @@ def _write_base(
     )
 
 
-def _facts(db_session: Session, guid: str) -> Dict[str, str]:
+def _facts(db_session: Session, guid: str) -> Dict[str, Optional[str]]:
     db_session.expire_all()
     lemma = db_session.query(Lemma).filter(Lemma.guid == guid).one()
     return {

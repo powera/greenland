@@ -13,7 +13,7 @@ import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from flask import (
     Blueprint,
@@ -55,6 +55,9 @@ from storage.models.schema import (
 )
 from storage.queries.lemma import apply_effective_difficulty_filter
 from words.lemma_selection import get_lemmas_for_processing
+
+if TYPE_CHECKING:
+    from barsukas.app import BarsukasFlask
 
 bp = Blueprint("audio", __name__, url_prefix="/audio")
 logger = logging.getLogger(__name__)
@@ -824,7 +827,8 @@ def generate() -> ResponseReturnValue:
         # The agents open their own sessions, so they need this app's backend
         # config. Rebuilding one from barsukas.config.Config would point them at
         # the default SQLite file rather than the database the app is serving.
-        config = current_app.backend_config.with_model(constants.DEFAULT_MODEL)
+        app: "BarsukasFlask" = current_app  # type: ignore[assignment]
+        config = app.backend_config.with_model(constants.DEFAULT_MODEL)
 
         engine_names = {
             "openai": "OpenAI",

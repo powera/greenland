@@ -68,6 +68,7 @@ def test_population_tasks_carry_the_requested_languages(session: Session) -> Non
     task = session.query(BarsukasTask).one()
     assert task.task_type == TaskType.WORDS_TRANSLATIONS
     assert task.dedup_key == f"{TaskType.WORDS_TRANSLATIONS}:{lemma.id}:es:fr"
+    assert task.payload is not None
     payload = json.loads(task.payload)
     assert payload["languages"] == ["fr", "es"]
     assert payload["source_component"] == "agents.voras"

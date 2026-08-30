@@ -11,7 +11,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Any, Callable, Optional, cast
 
 # Add src to path if not already present
 if str(Path(__file__).parent.parent.parent) not in sys.path:
@@ -19,10 +19,17 @@ if str(Path(__file__).parent.parent.parent) not in sys.path:
 
 from benchmarks.server.config import Config
 from flask import Flask, g, redirect, render_template, url_for
+from flask.json.provider import DefaultJSONProvider
 
 from benchmarks.config import BenchmarkConfig
 from benchmarks.datastore.common import create_database_and_session, create_postgres_session
 from benchmarks.server.benchmark_worker import BenchmarkRunWorker
+
+
+class BenchmarkFlask(Flask):
+    """Flask subclass with the benchmark server's typed custom attributes."""
+
+    db_session_factory: Callable[[], Any]
 
 
 def create_app(config_class=Config, postgres_url: Optional[str] = None):
@@ -39,9 +46,9 @@ def create_app(config_class=Config, postgres_url: Optional[str] = None):
         force=True,
     )
 
-    app = Flask(__name__)
+    app = BenchmarkFlask(__name__)
     app.config.from_object(config_class)
-    app.json.ensure_ascii = False
+    cast(DefaultJSONProvider, app.json).ensure_ascii = False
 
     # Resolve postgres URL: prefer explicit arg, then env-based config class setting.
     resolved_postgres_url: Optional[str] = postgres_url

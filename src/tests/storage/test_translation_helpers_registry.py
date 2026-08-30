@@ -45,6 +45,13 @@ from storage.translation_helpers import (
 ALL_TIERS = [TIER_1_LANGUAGES, TIER_2_LANGUAGES, TIER_3_LANGUAGES, TIER_4_LANGUAGES]
 
 
+def _llm_field(lang_code: str) -> str:
+    """Return the LLM field for a registered code, failing the test if there is none."""
+    field_name = lang_code_to_llm_field(lang_code)
+    assert field_name is not None, f"no LLM field registered for {lang_code}"
+    return field_name
+
+
 # --- registry consistency -------------------------------------------------
 
 
@@ -221,16 +228,16 @@ def test_translation_metadata_drops_default_status_for_modern_languages() -> Non
     """The models answer "conventional" for nearly every living-language word."""
     metadata = convert_llm_response_to_translation_metadata(
         {
-            lang_code_to_llm_field("es"): {
+            _llm_field("es"): {
                 "translation": "Europa",
                 "translation_status": "conventional",
                 "translation_status_note": "",
             },
-            lang_code_to_llm_field("la"): {
+            _llm_field("la"): {
                 "translation": "Europa",
                 "translation_status": "conventional",
             },
-            lang_code_to_llm_field("lt"): {
+            _llm_field("lt"): {
                 "translation": "kompiuteris",
                 "translation_status": "modern_loan",
             },

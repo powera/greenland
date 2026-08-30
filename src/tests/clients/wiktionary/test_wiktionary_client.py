@@ -303,7 +303,7 @@ German content
 """
         result = self.client.extract_language_section(wikitext, "Lithuanian")
 
-        self.assertIsNotNone(result)
+        assert result is not None
         self.assertIn("Lithuanian content", result)
         self.assertNotIn("German content", result)
         self.assertNotIn("English content", result)
@@ -329,7 +329,7 @@ Lithuanian content to the end
 """
         result = self.client.extract_language_section(wikitext, "Lithuanian")
 
-        self.assertIsNotNone(result)
+        assert result is not None
         self.assertIn("Lithuanian content to the end", result)
 
     def test_find_templates(self) -> None:
@@ -361,7 +361,7 @@ Some other text
 
         result = self.client.parse_to_html("{{lt-noun-m-as-2|vilk}}")
 
-        self.assertIsNotNone(result)
+        assert result is not None
         self.assertIn("inflection-table", result)
 
 

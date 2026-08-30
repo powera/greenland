@@ -5,11 +5,12 @@ Phase 2 path is exercised separately in ``test_candidate_lookup.py``.
 """
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 from unittest.mock import MagicMock
 
 import pytest
 
+from clients.unified_client import UnifiedLLMClient
 from langtools.dialect_overrides import get_dialect_display_name
 from sentences.translate_and_decompose import (
     DecomposedLanguage,
@@ -168,7 +169,7 @@ def test_pipeline_translates_and_decomposes_english_by_default(
         sentence_text="Leo un libro",
         source_language="es",
         session=_make_session_with_no_candidates(),
-        client=client,
+        client=cast(UnifiedLLMClient, client),
         target_languages=["en", "fr", "zh"],
     )
 
@@ -204,7 +205,7 @@ def test_pipeline_drops_source_language_from_targets() -> None:
         sentence_text="I read a book",
         source_language="en",
         session=_make_session_with_no_candidates(),
-        client=client,
+        client=cast(UnifiedLLMClient, client),
         target_languages=["en", "fr"],
         decompose_languages=["en"],
     )
@@ -245,7 +246,7 @@ def test_pipeline_runs_phase3_in_one_combined_call(phase2_returns_a_candidate: N
         sentence_text="I read",
         source_language="en",
         session=_make_session_with_no_candidates(),
-        client=client,
+        client=cast(UnifiedLLMClient, client),
         target_languages=["fr", "lt"],
         decompose_languages=["fr", "lt"],
     )
@@ -301,7 +302,7 @@ def test_pipeline_records_phase3_failure_for_every_language(
         sentence_text="I read",
         source_language="en",
         session=_make_session_with_no_candidates(),
-        client=client,
+        client=cast(UnifiedLLMClient, client),
         target_languages=["fr", "lt"],
         decompose_languages=["fr", "lt"],
     )

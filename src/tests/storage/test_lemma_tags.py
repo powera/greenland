@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import json
 
+from typing import Iterator
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -32,7 +34,7 @@ from storage.models.schema import Base, Lemma
 
 
 @pytest.fixture()
-def session() -> Session:
+def session() -> Iterator[Session]:
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     with Session(engine) as db:
@@ -92,6 +94,7 @@ def test_read_tags_tolerates_legacy_bare_string(session: Session) -> None:
 def test_add_tags_stores_json_array(session: Session) -> None:
     lemma = _make_lemma(session)
     assert add_tags(session, lemma, ["legal"]) == ["legal"]
+    assert lemma.tags is not None
     assert json.loads(lemma.tags) == ["legal"]
 
 
@@ -113,6 +116,7 @@ def test_remove_tags_hard_deletes(session: Session) -> None:
     lemma = _make_lemma(session)
     add_tags(session, lemma, ["legal", "archaic"])
     assert remove_tags(session, lemma, ["legal"]) == ["archaic"]
+    assert lemma.tags is not None
     assert json.loads(lemma.tags) == ["archaic"]
 
 

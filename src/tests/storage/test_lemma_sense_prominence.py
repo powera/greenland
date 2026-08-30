@@ -10,6 +10,8 @@ and the default when a caller has no opinion.
 
 from __future__ import annotations
 
+from typing import Iterator
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -26,7 +28,7 @@ from storage.models.schema import (
 
 
 @pytest.fixture()
-def session() -> Session:
+def session() -> Iterator[Session]:
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     with Session(engine) as active:

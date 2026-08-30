@@ -5,11 +5,12 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
 from exports.bootstrap.exporter import BootstrapExporter
+from exports.wireword.export_manager import TrakaidoExporter
 
 
 class _ExporterStub:
@@ -41,7 +42,7 @@ def test_bootstrap_export_preserves_output_shape_and_query_filters(
     exporter = BootstrapExporter.__new__(BootstrapExporter)
     exporter.language = "lt"
     exporter.language_suffix = "lt"
-    exporter.exporter = exporter_stub
+    exporter.exporter = cast(TrakaidoExporter, exporter_stub)
     output_path = tmp_path / "bootstrap.json"
 
     with caplog.at_level(logging.INFO):

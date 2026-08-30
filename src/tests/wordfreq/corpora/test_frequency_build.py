@@ -150,8 +150,10 @@ def test_generated_payload_loads_through_the_corpus_importer(tmp_path: Path) -> 
     write_corpus_json(payload, str(output))
 
     parsed = _parse_frequency_file(str(output), "json", "auto")
-    assert parsed["the"]["frequency"] is not None
-    assert parsed["the"]["frequency"] > parsed["dog"]["frequency"]
+    the_frequency = parsed["the"]["frequency"]
+    dog_frequency = parsed["dog"]["frequency"]
+    assert the_frequency is not None and dog_frequency is not None
+    assert the_frequency > dog_frequency
 
 
 @pytest.mark.parametrize("weighting", ["per-book-mean", "pooled"])

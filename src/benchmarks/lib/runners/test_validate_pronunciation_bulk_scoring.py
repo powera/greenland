@@ -17,7 +17,7 @@ def _load_validate_pronunciation_bulk_runner_module():
             self.model = model
             self.metadata = metadata
 
-    base_runner_module.BenchmarkRunner = BenchmarkRunner
+    setattr(base_runner_module, "BenchmarkRunner", BenchmarkRunner)
     sys.modules.setdefault("benchmarks.lib.utils.base_runner", base_runner_module)
 
     data_models_module = types.ModuleType("benchmarks.lib.utils.data_models")
@@ -31,8 +31,8 @@ def _load_validate_pronunciation_bulk_runner_module():
     class BenchmarkResult:
         pass
 
-    data_models_module.BenchmarkMetadata = BenchmarkMetadata
-    data_models_module.BenchmarkResult = BenchmarkResult
+    setattr(data_models_module, "BenchmarkMetadata", BenchmarkMetadata)
+    setattr(data_models_module, "BenchmarkResult", BenchmarkResult)
     sys.modules.setdefault("benchmarks.lib.utils.data_models", data_models_module)
 
     agents_verification_module = types.ModuleType("agents.bebras.verification")
@@ -46,27 +46,33 @@ def _load_validate_pronunciation_bulk_runner_module():
     def build_bulk_pronunciation_verification_schema():
         return {}
 
-    agents_verification_module.build_bulk_pronunciation_verification_context = (
-        build_bulk_pronunciation_verification_context
+    setattr(
+        agents_verification_module,
+        "build_bulk_pronunciation_verification_context",
+        build_bulk_pronunciation_verification_context,
     )
-    agents_verification_module.build_bulk_pronunciation_verification_prompt = (
-        build_bulk_pronunciation_verification_prompt
+    setattr(
+        agents_verification_module,
+        "build_bulk_pronunciation_verification_prompt",
+        build_bulk_pronunciation_verification_prompt,
     )
-    agents_verification_module.build_bulk_pronunciation_verification_schema = (
-        build_bulk_pronunciation_verification_schema
+    setattr(
+        agents_verification_module,
+        "build_bulk_pronunciation_verification_schema",
+        build_bulk_pronunciation_verification_schema,
     )
     sys.modules.setdefault("agents.bebras.verification", agents_verification_module)
 
     clients_module = types.ModuleType("clients")
-    clients_module.unified_client = types.SimpleNamespace(generate_chat=lambda **_: None)
+    setattr(clients_module, "unified_client", types.SimpleNamespace(generate_chat=lambda **_: None))
     sys.modules.setdefault("clients", clients_module)
 
     module_path = Path(__file__).with_name("validate_pronunciation_bulk_runner.py")
     spec = importlib.util.spec_from_file_location(
         "validate_pronunciation_bulk_runner_under_test", module_path
     )
-    module = importlib.util.module_from_spec(spec)
     assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
 

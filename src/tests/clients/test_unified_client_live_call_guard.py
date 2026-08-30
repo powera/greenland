@@ -155,7 +155,7 @@ def test_disable_env_is_inert_when_unset(monkeypatch):
     """With the kill switch unset, assert_llm_calls_enabled does nothing."""
     monkeypatch.delenv("GREENLAND_DISABLE_LLM", raising=False)
 
-    assert lib.assert_llm_calls_enabled("openai") is None
+    lib.assert_llm_calls_enabled("openai")
 
 
 class _StubClient:

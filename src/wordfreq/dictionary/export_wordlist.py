@@ -10,16 +10,44 @@ ordered by their combined frequency rank (merged wordfreq order).
 import argparse
 import logging
 import sys
-from typing import Optional, TextIO
+from typing import Dict, List, Optional, TextIO
+
+from sqlalchemy.orm import Session
 
 import constants
 from storage import database as linguistic_db
+from storage.models.schema import ExternalLexemeAnnotation, WordToken
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+
+def _load_first_corpus_frequencies(
+    session: Session, tokens: List[WordToken]
+) -> Dict[int, Optional[float]]:
+    """Map each token id to the frequency of its first external annotation.
+
+    Per-corpus frequency values live in ``ExternalLexemeAnnotation`` rather than
+    on the token itself. Annotations are ordered by source then id so repeated
+    exports pick the same corpus for a given token.
+    """
+    token_ids = [token.id for token in tokens]
+    if not token_ids:
+        return {}
+
+    frequencies: Dict[int, Optional[float]] = {}
+    annotations = (
+        session.query(ExternalLexemeAnnotation)
+        .filter(ExternalLexemeAnnotation.word_token_id.in_(token_ids))
+        .order_by(ExternalLexemeAnnotation.source, ExternalLexemeAnnotation.id)
+        .all()
+    )
+    for annotation in annotations:
+        frequencies.setdefault(annotation.word_token_id, annotation.frequency)
+    return frequencies
 
 
 def export_wordlist_to_file(
@@ -54,29 +82,21 @@ def export_wordlist_to_file(
 
         logger.info(f"Retrieved {len(words)} words from database")
 
+        frequencies = _load_first_corpus_frequencies(session, words) if include_frequency else {}
+
         # Write words to file
         count = 0
         for word in words:
+            freq_value = ""
+            if include_frequency:
+                frequency = frequencies.get(word.id)
+                freq_value = f"{frequency:.6f}" if frequency else "0.000000"
             if include_rank and include_frequency:
-                # Get frequency information from first corpus (if available)
-                freq_info = ""
-                if word.frequencies:
-                    first_freq = word.frequencies[0]
-                    freq_info = (
-                        f"\t{first_freq.frequency:.6f}" if first_freq.frequency else "\t0.000000"
-                    )
-                output_file.write(f"{word.frequency_rank}\t{word.token}{freq_info}\n")
+                output_file.write(f"{word.frequency_rank}\t{word.token}\t{freq_value}\n")
             elif include_rank:
                 output_file.write(f"{word.frequency_rank}\t{word.token}\n")
             elif include_frequency:
-                # Get frequency information from first corpus (if available)
-                freq_info = "0.000000"
-                if word.frequencies:
-                    first_freq = word.frequencies[0]
-                    freq_info = (
-                        f"{first_freq.frequency:.6f}" if first_freq.frequency else "0.000000"
-                    )
-                output_file.write(f"{word.token}\t{freq_info}\n")
+                output_file.write(f"{word.token}\t{freq_value}\n")
             else:
                 output_file.write(f"{word.token}\n")
             count += 1

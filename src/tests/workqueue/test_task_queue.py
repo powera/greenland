@@ -132,6 +132,7 @@ class TestEnqueueTask(TaskQueueDBTestCase):
         payload = {"lemma_id": 42, "lang_code": "fr"}
         result = self._enqueue(payload=payload)
         self.assertTrue(result.created)
+        assert result.task.payload is not None
         stored_payload = json.loads(result.task.payload)
         self.assertEqual(stored_payload["lemma_id"], 42)
         self.assertEqual(stored_payload["lang_code"], "fr")

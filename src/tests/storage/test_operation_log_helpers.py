@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import fields
-from typing import List
+from typing import Iterator, List
 
 import pytest
 from sqlalchemy import create_engine
@@ -32,7 +32,7 @@ from storage.models.schema import Base
 
 
 @pytest.fixture()
-def session() -> Session:
+def session() -> Iterator[Session]:
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     with Session(engine) as db:

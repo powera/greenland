@@ -97,7 +97,7 @@ def test_store_translation_results_resolves_real_lemma_guid() -> None:
         sentence = add_test_sentence(session, {"en": "a dog", "lt": "šuo"})
 
         lemma = session.query(Lemma).filter(Lemma.guid.isnot(None)).first()
-        assert lemma is not None
+        assert lemma is not None and lemma.guid is not None
 
         store_translation_results(
             sentence.id,
