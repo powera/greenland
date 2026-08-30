@@ -127,13 +127,13 @@ def test_language_name_lookup_is_unambiguous() -> None:
 def test_language_fields_entries_are_self_consistent() -> None:
     """Names agree with LANGUAGE_NAMES, and each entry names a storage field.
 
-    The storage field is the language code for every language held in a
-    translation row; English is the documented exception, living on the lemma
-    row itself, so the field is asserted to be non-empty rather than equal to
-    the code.
+    The storage field is the language code for every language, English
+    included: they are all held as LemmaTranslation rows keyed by that code.
+    English was once the exception, stored on Lemma.lemma_text, which is why
+    the entry still carries the field at all.
     """
-    for lang_code, (storage_field, name, _flag) in LANGUAGE_FIELDS.items():
-        assert storage_field
+    for lang_code, (storage_field, name) in LANGUAGE_FIELDS.items():
+        assert storage_field == lang_code
         assert LANGUAGE_NAMES[lang_code] == name
 
 
