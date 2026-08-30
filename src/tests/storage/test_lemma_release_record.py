@@ -38,6 +38,7 @@ from storage.release.lemma import (
     release_disambiguation,
     release_emoji,
     release_lemma_text,
+    translation_metadata_record,
 )
 
 
@@ -187,6 +188,42 @@ class TestLemmaToReleaseRecord(unittest.TestCase):
         self.assertNotIn("notes", record)
         self.assertNotIn("emoji", record)
         self.assertEqual("bat", record["concept_label"])
+
+    def test_default_status_on_a_living_language_is_not_written(self) -> None:
+        """ "Conventional" is what every ordinary word is, so it says nothing."""
+        translation = next(t for t in self.lemma.translations if t.language_code == "lt")
+        translation.translation_status = "conventional"
+        translation.translation_status_note = None
+
+        self.assertNotIn("translation_metadata", lemma_to_release_record(self.lemma))
+
+    def test_default_status_is_written_for_an_ancient_language(self) -> None:
+        """term_age reads it there: Latin "conventional" means Rome had the word."""
+        self.session.add(
+            LemmaTranslation(
+                lemma_id=self.lemma.id,
+                language_code="la",
+                translation="vespertilio",
+                translation_status="conventional",
+            )
+        )
+        self.session.commit()
+        self.session.refresh(self.lemma)
+
+        # "la" rides in ancient.jsonl rather than the base record, so assert on
+        # the entry builder directly.
+        latin = next(t for t in self.lemma.translations if t.language_code == "la")
+        self.assertEqual({"translation_status": "conventional"}, translation_metadata_record(latin))
+
+    def test_a_non_default_status_survives_in_a_living_language(self) -> None:
+        translation = next(t for t in self.lemma.translations if t.language_code == "lt")
+        translation.translation_status = "descriptive"
+        translation.translation_status_note = None
+
+        record = lemma_to_release_record(self.lemma)
+        self.assertEqual(
+            {"translation_status": "descriptive"}, record["translation_metadata"]["lt"]
+        )
 
 
 class TestRoundTrip(unittest.TestCase):

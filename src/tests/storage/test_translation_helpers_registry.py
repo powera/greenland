@@ -14,6 +14,7 @@ from typing import Dict, List
 import pytest
 
 from storage.translation_helpers import (
+    ANCIENT_LANGUAGE_GROUP,
     EXTRA_RELEASE_LANGUAGE_GROUPS,
     LANG_CODE_TO_LLM_FIELD,
     LANGUAGE_FIELDS,
@@ -28,6 +29,7 @@ from storage.translation_helpers import (
     TIER_2_LANGUAGES,
     TIER_3_LANGUAGES,
     TIER_4_LANGUAGES,
+    TRANSLATION_STATUS_VALUES,
     convert_llm_response_to_lang_codes,
     convert_llm_response_to_translation_metadata,
     get_language_code,
@@ -37,6 +39,7 @@ from storage.translation_helpers import (
     llm_field_to_lang_code,
     normalize_llm_language_codes,
     split_llm_language_batches,
+    translation_status_is_informative,
 )
 
 ALL_TIERS = [TIER_1_LANGUAGES, TIER_2_LANGUAGES, TIER_3_LANGUAGES, TIER_4_LANGUAGES]
@@ -212,6 +215,63 @@ def test_translation_metadata_skips_entries_without_metadata() -> None:
     assert convert_llm_response_to_translation_metadata({sample_field: "plain string"}) == {}
     assert convert_llm_response_to_translation_metadata({sample_field: {"translation": "w"}}) == {}
     assert convert_llm_response_to_translation_metadata({"unknown_translation": {"x": "y"}}) == {}
+
+
+def test_translation_metadata_drops_default_status_for_modern_languages() -> None:
+    """The models answer "conventional" for nearly every living-language word."""
+    metadata = convert_llm_response_to_translation_metadata(
+        {
+            lang_code_to_llm_field("es"): {
+                "translation": "Europa",
+                "translation_status": "conventional",
+                "translation_status_note": "",
+            },
+            lang_code_to_llm_field("la"): {
+                "translation": "Europa",
+                "translation_status": "conventional",
+            },
+            lang_code_to_llm_field("lt"): {
+                "translation": "kompiuteris",
+                "translation_status": "modern_loan",
+            },
+        }
+    )
+
+    assert "es" not in metadata
+    assert metadata["la"]["translation_status"] == "conventional"
+    assert metadata["lt"]["translation_status"] == "modern_loan"
+
+
+# --- default-status suppression -------------------------------------------
+
+
+def test_unset_status_is_never_informative() -> None:
+    assert not translation_status_is_informative("la", None)
+    assert not translation_status_is_informative("es", "")
+
+
+def test_conventional_is_informative_only_for_ancient_languages() -> None:
+    """It is term_age's evidence there, and the assumed default everywhere else."""
+    for language_code in ANCIENT_LANGUAGE_GROUP:
+        assert translation_status_is_informative(language_code, "conventional")
+    for language_code in ("es", "es-419", "zh", "zh-tw", "fr", "lt", "ja"):
+        assert not translation_status_is_informative(language_code, "conventional")
+
+
+def test_every_non_default_status_is_informative_in_any_language() -> None:
+    """A loan or a coinage marks a word that genuinely is unusual."""
+    for status in TRANSLATION_STATUS_VALUES - {"conventional"}:
+        assert translation_status_is_informative("es", status), status
+        assert translation_status_is_informative("la", status), status
+
+
+def test_a_note_keeps_a_conventional_status() -> None:
+    """Somebody wrote the note on purpose, so the status it explains stays."""
+    assert translation_status_is_informative("es", "conventional", "the established exonym")
+
+
+def test_dialect_spelling_is_normalized_before_the_ancient_check() -> None:
+    assert not translation_status_is_informative("pt-BR", "conventional")
 
 
 # --- LLM batching ---------------------------------------------------------

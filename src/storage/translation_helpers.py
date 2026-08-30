@@ -1237,6 +1237,55 @@ TRANSLATION_STATUS_VALUES = {
     "uncertain",
 }
 
+#: The ``translation_status`` a translation is assumed to have when a record
+#: says nothing. Every ordinary word in a living language is a conventional
+#: rendering, so recording that says nothing a reader did not already assume.
+DEFAULT_TRANSLATION_STATUS = "conventional"
+
+
+def translation_status_is_informative(
+    language_code: str,
+    status: Optional[str],
+    note: Optional[str] = None,
+) -> bool:
+    """Whether a ``translation_status`` is worth storing and releasing.
+
+    The status field was designed for the ancient languages, where *how* a
+    concept is rendered is itself the evidence :mod:`words.term_age` reads:
+    Latin ``conventional`` means the Romans had a word for the thing, and
+    ``modern_loan`` means they did not. For a living target language that
+    contrast does not exist - "Europa" being the established Spanish exonym is
+    the unremarkable default - so a bare ``conventional`` there is noise that
+    bloats every release record without telling a reader anything.
+
+    Informative, and therefore kept:
+
+    * any status on an :data:`ANCIENT_LANGUAGE_GROUP` language,
+      ``conventional`` included, because that group is scored on the contrast;
+    * any status other than ``conventional`` in any language, since those mark
+      a word that genuinely is unusual (a loan, a coinage, a descriptive
+      phrase);
+    * a ``conventional`` carrying an explanatory note, which someone wrote on
+      purpose.
+
+    Args:
+        language_code: The translation's language code.
+        status: The status value, or None when unset.
+        note: The accompanying ``translation_status_note``, if any.
+
+    Returns:
+        True when the status should be persisted and emitted, False when it is
+        the assumed default and should be dropped.
+    """
+    if not status:
+        return False
+    if status != DEFAULT_TRANSLATION_STATUS:
+        return True
+    if note:
+        return True
+    # The ancient group has no dialects, so a direct membership test is exact.
+    return normalize_language_code(language_code) in ANCIENT_LANGUAGE_GROUP
+
 
 def _extract_llm_translation_text(value: Any) -> str:
     """Extract translation text from either legacy string or object response values."""
@@ -1270,7 +1319,13 @@ def convert_llm_response_to_lang_codes(llm_response: Dict[str, Any]) -> Dict[str
 def convert_llm_response_to_translation_metadata(
     llm_response: Dict[str, Any],
 ) -> Dict[str, Dict[str, Optional[str]]]:
-    """Convert LLM response object metadata to language-code keyed metadata."""
+    """Convert LLM response object metadata to language-code keyed metadata.
+
+    A status the reader would have assumed anyway is dropped here rather than
+    stored - see :func:`translation_status_is_informative`. The models answer
+    ``conventional`` for nearly every living-language word, and keeping those
+    would put a metadata block on nearly every record.
+    """
     metadata: Dict[str, Dict[str, Optional[str]]] = {}
     for field_name, value in llm_response.items():
         lang_code = LLM_FIELD_TO_LANG_CODE.get(field_name)
@@ -1284,6 +1339,9 @@ def convert_llm_response_to_translation_metadata(
             note_value = None
         if status_value and status_value not in TRANSLATION_STATUS_VALUES:
             status_value = "uncertain"
+        if not translation_status_is_informative(lang_code, status_value, note_value):
+            status_value = None
+            note_value = None
         if status_value or note_value:
             metadata[lang_code] = {
                 "translation_status": status_value,

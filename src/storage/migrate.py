@@ -611,10 +611,16 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                 metadata_by_lang: Dict[str, Dict[str, str]] = {}
                 for trans_obj in lemma.translations:
                     metadata: Dict[str, str] = {}
-                    if trans_obj.translation_status:
+                    # A bare "conventional" on a living language is the assumed
+                    # default and is not written out.
+                    if translation_helpers.translation_status_is_informative(
+                        trans_obj.language_code,
+                        trans_obj.translation_status,
+                        trans_obj.translation_status_note,
+                    ):
                         metadata["translation_status"] = trans_obj.translation_status
-                    if trans_obj.translation_status_note:
-                        metadata["translation_status_note"] = trans_obj.translation_status_note
+                        if trans_obj.translation_status_note:
+                            metadata["translation_status_note"] = trans_obj.translation_status_note
                     if metadata:
                         metadata_by_lang[trans_obj.language_code] = metadata
 
@@ -872,8 +878,15 @@ def phrase_to_release_records(phrase: Any) -> Tuple[Dict[str, Any], Optional[Dic
 
     def _metadata_for(trans_obj: Any) -> Dict[str, str]:
         meta: Dict[str, str] = {}
-        if trans_obj.translation_status:
-            meta["translation_status"] = trans_obj.translation_status
+        # A bare "conventional" on a living language is the assumed default and
+        # is not written out.
+        if not translation_helpers.translation_status_is_informative(
+            trans_obj.language_code,
+            trans_obj.translation_status,
+            trans_obj.translation_status_note,
+        ):
+            return meta
+        meta["translation_status"] = trans_obj.translation_status
         if trans_obj.translation_status_note:
             meta["translation_status_note"] = trans_obj.translation_status_note
         return meta
