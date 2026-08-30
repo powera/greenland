@@ -153,8 +153,20 @@ def release_emoji(record: Dict[str, Any]) -> List[Dict[str, str]]:
 
 
 def translation_metadata_record(translation: LemmaTranslation) -> Dict[str, str]:
-    """Build the ``translation_metadata`` entry for one translation (may be empty)."""
+    """Build the ``translation_metadata`` entry for one translation (may be empty).
+
+    An uninformative ``translation_status`` - a bare ``conventional`` on a
+    living language, which is what every ordinary word is - is dropped along
+    with its note, so it never reaches the file. See
+    ``translation_helpers.translation_status_is_informative``.
+    """
     metadata: Dict[str, str] = {}
+    if not translation_helpers.translation_status_is_informative(
+        translation.language_code,
+        translation.translation_status,
+        translation.translation_status_note,
+    ):
+        return metadata
     for release_key, model_field in _TRANSLATION_METADATA_FIELDS:
         value = getattr(translation, model_field, None)
         if value:

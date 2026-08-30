@@ -93,7 +93,8 @@ def query_translations(
                 "translation": SchemaProperty("string", lang_config["description"]),
                 "translation_status": SchemaProperty(
                     "string",
-                    "How historically/native the translation is: conventional, late_construction, modern_loan, descriptive, modern_reimagining, or uncertain.",
+                    "How historically native the translation is: conventional, late_construction, modern_loan, descriptive, modern_reimagining, or uncertain. "
+                    "'conventional' is the default and is discarded for modern languages, so it only ever matters that you mark the others.",
                     enum=sorted(TRANSLATION_STATUS_VALUES),
                 ),
                 "translation_status_note": SchemaProperty(
