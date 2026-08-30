@@ -104,6 +104,7 @@ class TestAdditions:
         assert imported.disambiguation == "animal"
         assert imported.notes == "not the cricket kind"
         assert imported.lexical_gap_reason == "no single-word equivalent"
+        assert imported.emoji is not None
         assert json.loads(imported.emoji) == [{"type": "unicode", "value": "🦇"}]
         assert get_qid_for_lemma(db_session, imported.id) == "Q28425"
         assert {t.language_code: t.translation for t in imported.translations} == {
@@ -280,6 +281,7 @@ class TestChangesUseRelease:
         assert updated.disambiguation == "dwelling"
         assert updated.definition_text == "a place someone lives"
         assert updated.notes == "from release"
+        assert updated.emoji is not None
         assert json.loads(updated.emoji) == [{"type": "unicode", "value": "🏠"}]
 
     def test_release_clears_a_field_the_database_has(

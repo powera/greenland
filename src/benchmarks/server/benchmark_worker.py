@@ -237,11 +237,11 @@ class BenchmarkRunWorker:
 
         logger.info("Running benchmark via worker: %s", " ".join(cmd))
         task = self._tasks.get(request.task_id)
-        stdout_path = (
-            task.stdout_path if task else self._output_dir / f"task-{request.task_id}.stdout.log"
+        stdout_path = (task.stdout_path if task else None) or (
+            self._output_dir / f"task-{request.task_id}.stdout.log"
         )
-        stderr_path = (
-            task.stderr_path if task else self._output_dir / f"task-{request.task_id}.stderr.log"
+        stderr_path = (task.stderr_path if task else None) or (
+            self._output_dir / f"task-{request.task_id}.stderr.log"
         )
 
         with (

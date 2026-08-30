@@ -7,7 +7,8 @@ import sys
 import tempfile
 import threading
 import unittest
-from unittest.mock import MagicMock, patch
+from typing import Dict, Union
+from unittest.mock import patch
 
 # Add the src directory to the path so we can import the module
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -136,15 +137,16 @@ class TestConnectionPool(unittest.TestCase):
         session2 = pool.get_session(os.path.join(self.temp_dir.name, "test2.db"))
 
         # Mock the session.close method to verify it's called
-        session1.close = MagicMock()
-        session2.close = MagicMock()
-
-        # Close all sessions
-        pool.close_thread_sessions()
+        with (
+            patch.object(session1, "close") as close_session1,
+            patch.object(session2, "close") as close_session2,
+        ):
+            # Close all sessions
+            pool.close_thread_sessions()
 
         # Verify close was called on both sessions
-        session1.close.assert_called_once()
-        session2.close.assert_called_once()
+        close_session1.assert_called_once()
+        close_session2.assert_called_once()
 
         # Verify sessions dict is empty
         self.assertEqual(pool._thread_local.sessions, {})
@@ -154,8 +156,8 @@ class TestConnectionPool(unittest.TestCase):
         # Create a shared pool
         pool = ConnectionPool()
 
-        # Track success/failure for each thread
-        results = {}
+        # Track success/failure for each thread: True, or the failure message.
+        results: Dict[int, Union[bool, str]] = {}
 
         def thread_func(thread_id):
             try:
@@ -213,15 +215,16 @@ class TestConnectionPool(unittest.TestCase):
         )
 
         # Mock the session.close methods to verify they're called
-        session1.close = MagicMock()
-        different_session.close = MagicMock()
-
-        # Close sessions using the convenience function
-        close_thread_sessions()
+        with (
+            patch.object(session1, "close") as close_session1,
+            patch.object(different_session, "close") as close_different_session,
+        ):
+            # Close sessions using the convenience function
+            close_thread_sessions()
 
         # Verify close was called on both sessions
-        session1.close.assert_called_once()
-        different_session.close.assert_called_once()
+        close_session1.assert_called_once()
+        close_different_session.assert_called_once()
 
         # Verify we get a new session after closing
         new_session = get_session(config)

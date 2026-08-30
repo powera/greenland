@@ -328,6 +328,8 @@ def backfill_links_from_hints(
 
     created = 0
     for hint in query.all():
+        if hint.pending_import_id is None:
+            continue
         pending_id = int(hint.pending_import_id)
         if pending_id not in alive:
             continue

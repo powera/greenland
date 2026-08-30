@@ -6,7 +6,9 @@ import sys
 import types
 
 if "pydantic" not in sys.modules:
-    sys.modules["pydantic"] = types.SimpleNamespace(BaseModel=object)
+    pydantic_stub = types.ModuleType("pydantic")
+    setattr(pydantic_stub, "BaseModel", object)
+    sys.modules["pydantic"] = pydantic_stub
 
 # Must precede any runner import; see test_sentence_decomposition_scoring.py.
 import benchmarks.lib.utils  # noqa: F401  (import order matters)

@@ -543,7 +543,7 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
         # Every lemma's Q-id in one query. Resolving these per lemma inside the
         # export loop would be one query per word on a whole-tree export.
         qid_by_lemma_id: Dict[int, str] = dict(
-            session.query(ConceptLemmaLink.lemma_id, ConceptLemmaLink.qid).all()
+            session.query(ConceptLemmaLink.lemma_id, ConceptLemmaLink.qid).tuples().all()
         )
 
         # Group lemmas by POS type/subtype

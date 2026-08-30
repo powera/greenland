@@ -223,19 +223,19 @@ class TestCharacterNames(unittest.TestCase):
         """Test that all voices have character names defined."""
         for voice in GptVoice:
             name = get_character_name(voice)
-            self.assertIsNotNone(name, f"Voice {voice.name} has no character name defined")
+            assert name is not None, f"Voice {voice.name} has no character name defined"
             self.assertTrue(len(name) > 0)
 
     def test_get_character_description(self) -> None:
         """Test getting character description for a voice."""
         desc = get_character_description(GptVoice.GPT_LT_F1)
-        self.assertIsNotNone(desc)
+        assert desc is not None
         self.assertIn("Rūta", desc)
         self.assertIn("Lithuanian", desc)
         self.assertIn("teacher", desc)
 
         desc = get_character_description(GptVoice.GPT_ZH_M1)
-        self.assertIsNotNone(desc)
+        assert desc is not None
         self.assertIn("Zhiyuan", desc)
         self.assertIn("Chinese", desc)
 
@@ -243,7 +243,7 @@ class TestCharacterNames(unittest.TestCase):
         """Test that all voices have character descriptions defined."""
         for voice in GptVoice:
             desc = get_character_description(voice)
-            self.assertIsNotNone(desc, f"Voice {voice.name} has no character description defined")
+            assert desc is not None, f"Voice {voice.name} has no character description defined"
             self.assertTrue(len(desc) > 0)
 
 

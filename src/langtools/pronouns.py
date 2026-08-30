@@ -44,7 +44,13 @@ def strip_pronoun_or_raise(language_code: str, text: str) -> str:
             f"Language '{language_code}' does not implement strip_subject_pronoun"
         )
 
-    return strip_func(text)
+    stripped = strip_func(text)
+    if not isinstance(stripped, str):
+        raise TypeError(
+            f"Language '{language_code}' strip_subject_pronoun returned "
+            f"{type(stripped).__name__}, expected str"
+        )
+    return stripped
 
 
 def strip_pronoun(language_code: str, text: str) -> str:

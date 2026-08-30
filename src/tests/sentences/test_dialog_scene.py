@@ -9,13 +9,14 @@ that must not become empty sentence rows).
 from __future__ import annotations
 
 import random
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Dict, Iterator, List, Optional, cast
 
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from clients.types import Response
+from clients.unified_client import UnifiedLLMClient
 from sentences.dialog_scene import (
     CastMember,
     SceneRequest,
@@ -267,7 +268,9 @@ def test_generate_scene_passes_prompt_context_and_schema(session: Session) -> No
         backend_type=BackendType.SQLITE, sqlite_path=":memory:", model="test-model"
     )
 
-    draft = generate_scene(session, _request(), config, known_names=["Maria"], client=client)
+    draft = generate_scene(
+        session, _request(), config, known_names=["Maria"], client=cast(UnifiedLLMClient, client)
+    )
 
     assert draft.title == "Buying tomatoes"
     call = client.calls[0]
@@ -281,7 +284,9 @@ def test_generate_scene_requires_a_model(session: Session) -> None:
     config = DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=":memory:")
 
     with pytest.raises(ValueError, match="requires a model"):
-        generate_scene(session, _request(), config, client=_StubClient(_VALID_REPLY))
+        generate_scene(
+            session, _request(), config, client=cast(UnifiedLLMClient, _StubClient(_VALID_REPLY))
+        )
 
 
 def test_generate_scene_raises_on_an_empty_reply(session: Session) -> None:
@@ -290,7 +295,7 @@ def test_generate_scene_raises_on_an_empty_reply(session: Session) -> None:
     )
 
     with pytest.raises(RuntimeError, match="no structured data"):
-        generate_scene(session, _request(), config, client=_StubClient({}))
+        generate_scene(session, _request(), config, client=cast(UnifiedLLMClient, _StubClient({})))
 
 
 # --------------------------------------------------------------------------- #

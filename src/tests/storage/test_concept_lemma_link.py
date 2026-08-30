@@ -8,6 +8,8 @@ one-to-one behavior and the Q-id readout used by the data/release export.
 
 from __future__ import annotations
 
+from typing import Iterator
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -26,7 +28,7 @@ from storage.models.schema import Base, Lemma
 
 
 @pytest.fixture()
-def session() -> Session:
+def session() -> Iterator[Session]:
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     with Session(engine) as db:
@@ -50,7 +52,9 @@ def test_link_normalizes_qid_and_reads_back(session: Session) -> None:
     assert link.qid == "Q89"
     assert link.concept_slug == "Apple"
     assert get_qid_for_lemma(session, lemma.id) == "Q89"
-    assert get_link_for_qid(session, "Q89").lemma_id == lemma.id
+    qid_link = get_link_for_qid(session, "Q89")
+    assert qid_link is not None
+    assert qid_link.lemma_id == lemma.id
 
 
 def test_get_lemma_for_qid_round_trips(session: Session) -> None:

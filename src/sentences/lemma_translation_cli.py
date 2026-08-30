@@ -12,6 +12,7 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
+import constants
 from sentences.translation_coverage import ensure_translations
 from clients.batch_queue import (
     BatchQueueManager,
@@ -729,7 +730,7 @@ def main() -> int:
                 if args.dry_run:
                     logger.info("Would queue sentence batch translation submission")
                     return 0
-                result = enqueue_task(
+                enqueue_result = enqueue_task(
                     session,
                     task_type=TaskType.SENTENCES_TRANSLATE_BATCH_SUBMIT,
                     target_type="sentence_batch",
@@ -751,8 +752,8 @@ def main() -> int:
                 session.commit()
                 logger.info(
                     "%s batch-submission task %s",
-                    "Queued" if result.created else "Reused",
-                    result.task.id,
+                    "Queued" if enqueue_result.created else "Reused",
+                    enqueue_result.task.id,
                 )
                 return 0
             finally:
@@ -826,23 +827,23 @@ def main() -> int:
 
             # Choose translation method based on --use-translategemma flag
             if args.use_translategemma:
-                result = service.translate_sentences_simple(
+                translation_result = service.translate_sentences_simple(
                     lemma=lemma,
                     target_languages=args.languages,
                     limit=args.translation_limit,
                 )
             else:
-                result = service.translate_sentences_for_lemma(
+                translation_result = service.translate_sentences_for_lemma(
                     lemma=lemma,
                     target_languages=args.languages,
                     limit=args.translation_limit,
                 )
 
-            if result.get("success"):
-                total_translated += result.get("translated", 0)
-                total_added += result.get("translations_added", 0)
+            if translation_result.get("success"):
+                total_translated += translation_result.get("translated", 0)
+                total_added += translation_result.get("translations_added", 0)
             else:
-                total_errors.extend(result.get("errors", []))
+                total_errors.extend(translation_result.get("errors", []))
 
         logger.info("=" * 80)
         logger.info("LEVEL %s TRANSLATION COMPLETE", args.level)
@@ -868,29 +869,29 @@ def main() -> int:
         # Choose translation method based on --use-translategemma flag
         if args.use_translategemma:
             logger.info("Using TranslateGemma for simple text-only translations")
-            result = service.translate_sentences_simple(
+            translation_result = service.translate_sentences_simple(
                 lemma=lemma,
                 target_languages=args.languages,
                 limit=args.translation_limit,
             )
         else:
             logger.info("Using GPT-5 for translations with word-by-word breakdown")
-            result = service.translate_sentences_for_lemma(
+            translation_result = service.translate_sentences_for_lemma(
                 lemma=lemma,
                 target_languages=args.languages,
                 limit=args.translation_limit,
             )
 
-        if result.get("success"):
+        if translation_result.get("success"):
             logger.info(
                 "Added translations for %s sentence(s); newly completed=%s, already complete=%s",
-                result.get("translations_added", 0),
-                result.get("translated", 0),
-                result.get("already_translated", 0),
+                translation_result.get("translations_added", 0),
+                translation_result.get("translated", 0),
+                translation_result.get("already_translated", 0),
             )
             return 0
 
-        logger.error("Translation failed: %s", result.get("errors"))
+        logger.error("Translation failed: %s", translation_result.get("errors"))
         return 1
 
 

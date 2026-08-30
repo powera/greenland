@@ -1,11 +1,17 @@
 """Tests for barsukas.helpers.flash_helpers."""
 
 import logging
+from typing import List, Tuple, cast
 
 import pytest
 from flask import Flask, get_flashed_messages
 
 from barsukas.helpers.flash_helpers import flash_and_log, log_and_flash_error
+
+
+def _flashed_with_categories() -> List[Tuple[str, str]]:
+    """get_flashed_messages returns a union; pin the with-categories shape."""
+    return cast(List[Tuple[str, str]], get_flashed_messages(with_categories=True))
 
 
 @pytest.fixture()
@@ -23,19 +29,19 @@ class TestFlashAndLog:
     def test_default_category_is_info(self, flask_app: Flask) -> None:
         with flask_app.test_request_context():
             flash_and_log("hello")
-            messages = get_flashed_messages(with_categories=True)
+            messages = _flashed_with_categories()
             assert ("info", "hello") in messages
 
     def test_error_category(self, flask_app: Flask) -> None:
         with flask_app.test_request_context():
             flash_and_log("bad thing", category="error")
-            messages = get_flashed_messages(with_categories=True)
+            messages = _flashed_with_categories()
             assert ("error", "bad thing") in messages
 
     def test_success_category(self, flask_app: Flask) -> None:
         with flask_app.test_request_context():
             flash_and_log("done!", category="success")
-            messages = get_flashed_messages(with_categories=True)
+            messages = _flashed_with_categories()
             assert ("success", "done!") in messages
 
     def test_logs_with_warning_for_error_category(
@@ -76,7 +82,7 @@ class TestLogAndFlashError:
             except ValueError as e:
                 log_and_flash_error(e, "testing")
 
-            messages = get_flashed_messages(with_categories=True)
+            messages = _flashed_with_categories()
             assert len(messages) == 1
             category, msg = messages[0]
             assert category == "error"
@@ -90,7 +96,7 @@ class TestLogAndFlashError:
             except RuntimeError as e:
                 log_and_flash_error(e, "operation")
 
-            messages = get_flashed_messages(with_categories=True)
+            messages = _flashed_with_categories()
             _, msg = messages[0]
             # Should include file:line from traceback
             assert "test_flash_helpers.py" in msg
@@ -101,6 +107,6 @@ class TestLogAndFlashError:
             exc.__traceback__ = None
             log_and_flash_error(exc, "ctx")
 
-            messages = get_flashed_messages(with_categories=True)
+            messages = _flashed_with_categories()
             _, msg = messages[0]
             assert "no tb" in msg

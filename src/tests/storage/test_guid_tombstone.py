@@ -304,6 +304,7 @@ class TestTypeSubtypeChange:
         session.add(lemma)
         session.flush()
         old_guid = lemma.guid
+        assert old_guid is not None
 
         handle_lemma_type_subtype_change(
             session=session,

@@ -151,6 +151,8 @@ def test_spread_out_paradigm_beats_one_common_form() -> None:
 
         # peak owns the single best-ranked form (1100 vs 1200), so anything
         # that looked only at the best form would put it ahead instead.
+        assert spread_row.frequency_rank is not None
+        assert peak_row.frequency_rank is not None
         assert spread_row.frequency_rank < peak_row.frequency_rank
         assert "wordfreq_cooking" in result["sources_used"]
     finally:

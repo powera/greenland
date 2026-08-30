@@ -12,7 +12,7 @@ from pathlib import Path
 def _load_runner_module():
     # Provide lightweight stubs so this unit test can run without full benchmark deps.
     clients_module = types.ModuleType("clients")
-    clients_module.unified_client = object()
+    setattr(clients_module, "unified_client", object())
     sys.modules.setdefault("clients", clients_module)
 
     ollama_module = types.ModuleType("clients.ollama_client")
@@ -20,7 +20,7 @@ def _load_runner_module():
     class OllamaTimeoutError(Exception):
         pass
 
-    ollama_module.OllamaTimeoutError = OllamaTimeoutError
+    setattr(ollama_module, "OllamaTimeoutError", OllamaTimeoutError)
     sys.modules.setdefault("clients.ollama_client", ollama_module)
 
     base_module = types.ModuleType("benchmarks.lib.utils.base")
@@ -30,7 +30,7 @@ def _load_runner_module():
             self.model = model
             self.metadata = metadata
 
-    base_module.BenchmarkRunner = BenchmarkRunner
+    setattr(base_module, "BenchmarkRunner", BenchmarkRunner)
     sys.modules.setdefault("benchmarks.lib.utils.base", base_module)
 
     data_models_module = types.ModuleType("benchmarks.lib.utils.data_models")
@@ -44,8 +44,8 @@ def _load_runner_module():
     class BenchmarkResult:
         pass
 
-    data_models_module.BenchmarkMetadata = BenchmarkMetadata
-    data_models_module.BenchmarkResult = BenchmarkResult
+    setattr(data_models_module, "BenchmarkMetadata", BenchmarkMetadata)
+    setattr(data_models_module, "BenchmarkResult", BenchmarkResult)
     sys.modules.setdefault("benchmarks.lib.utils.data_models", data_models_module)
 
     factory_module = types.ModuleType("benchmarks.lib.utils.factory")
@@ -56,7 +56,7 @@ def _load_runner_module():
 
         return decorator
 
-    factory_module.runner = runner
+    setattr(factory_module, "runner", runner)
     sys.modules.setdefault("benchmarks.lib.utils.factory", factory_module)
 
     runners_pkg = types.ModuleType("benchmarks.lib.runners")
@@ -67,15 +67,15 @@ def _load_runner_module():
     partial_spec = importlib.util.spec_from_file_location(
         "benchmarks.lib.runners.partial_credit_runner", partial_path
     )
-    partial_module = importlib.util.module_from_spec(partial_spec)
     assert partial_spec and partial_spec.loader
+    partial_module = importlib.util.module_from_spec(partial_spec)
     partial_spec.loader.exec_module(partial_module)
     sys.modules["benchmarks.lib.runners.partial_credit_runner"] = partial_module
 
     module_path = Path(__file__).with_name("verb_forms_runner.py")
     spec = importlib.util.spec_from_file_location("verb_forms_runner_under_test", module_path)
-    module = importlib.util.module_from_spec(spec)
     assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
 

@@ -17,7 +17,7 @@ def _load_word_to_ipa_runner_module():
             self.model = model
             self.metadata = metadata
 
-    base_runner_module.BenchmarkRunner = BenchmarkRunner
+    setattr(base_runner_module, "BenchmarkRunner", BenchmarkRunner)
     sys.modules.setdefault("benchmarks.lib.utils.base_runner", base_runner_module)
 
     data_models_module = types.ModuleType("benchmarks.lib.utils.data_models")
@@ -31,8 +31,8 @@ def _load_word_to_ipa_runner_module():
     class BenchmarkResult:
         pass
 
-    data_models_module.BenchmarkMetadata = BenchmarkMetadata
-    data_models_module.BenchmarkResult = BenchmarkResult
+    setattr(data_models_module, "BenchmarkMetadata", BenchmarkMetadata)
+    setattr(data_models_module, "BenchmarkResult", BenchmarkResult)
     sys.modules.setdefault("benchmarks.lib.utils.data_models", data_models_module)
 
     factory_module = types.ModuleType("benchmarks.lib.utils.factory")
@@ -43,7 +43,7 @@ def _load_word_to_ipa_runner_module():
 
         return decorator
 
-    factory_module.runner = runner
+    setattr(factory_module, "runner", runner)
     sys.modules.setdefault("benchmarks.lib.utils.factory", factory_module)
 
     words_module = types.ModuleType("words")
@@ -51,13 +51,13 @@ def _load_word_to_ipa_runner_module():
     def build_ipa_pronunciation_prompt(_language_code, _word, definition="", sentence=""):
         return "context\n\nprompt"
 
-    words_module.build_ipa_pronunciation_prompt = build_ipa_pronunciation_prompt
+    setattr(words_module, "build_ipa_pronunciation_prompt", build_ipa_pronunciation_prompt)
     sys.modules.setdefault("words", words_module)
 
     module_path = Path(__file__).with_name("word_to_ipa_runner.py")
     spec = importlib.util.spec_from_file_location("word_to_ipa_runner_under_test", module_path)
-    module = importlib.util.module_from_spec(spec)
     assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
 

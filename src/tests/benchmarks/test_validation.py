@@ -178,12 +178,14 @@ class TestResponseValidator(unittest.TestCase):
         self.assertTrue(result.valid)
         # Mean of the two default validators: qwen2.5 (90) and gemma2 (85).
         self.assertAlmostEqual(result.confidence, 87.5, places=2)
+        assert result.validator_results is not None
         self.assertTrue(all(r["valid"] for r in result.validator_results))
 
     def test_validate_incorrect_definition(self):
         """Test validation of an incorrect definition."""
         result = self.validator.validate("An incorrect definition", "definition", expected="test")
         self.assertFalse(result.valid)
+        assert result.validator_results is not None
         self.assertTrue(all(not r["valid"] for r in result.validator_results))
 
     def test_validate_correct_general_knowledge(self):
@@ -221,6 +223,7 @@ class TestResponseValidator(unittest.TestCase):
         result = self.validator.validate(
             "A large gray mammal with a trunk", "definition", expected="elephant"
         )
+        assert result.validator_results is not None
         for validator_result in result.validator_results:
             self.assertIn("validator_model", validator_result)
             self.assertIn("explanation", validator_result)

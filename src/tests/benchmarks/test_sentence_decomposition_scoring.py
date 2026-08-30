@@ -5,6 +5,7 @@ import json
 import sys
 import types
 from pathlib import Path
+from typing import Any, Dict
 
 # The benchmark runner imports validation utilities that depend on pydantic,
 # which is unavailable in this test environment.
@@ -14,7 +15,7 @@ if "pydantic" not in sys.modules:
     class BaseModel:  # pragma: no cover - compatibility shim
         pass
 
-    pydantic_stub.BaseModel = BaseModel
+    setattr(pydantic_stub, "BaseModel", BaseModel)
     sys.modules["pydantic"] = pydantic_stub
 
 # Import benchmarks.lib.utils BEFORE any runner module. The utils package init
@@ -188,7 +189,7 @@ def test_0062_debug_info_contains_payload_for_future_rescoring():
     question_data = {"question_text": "q", "correct_answer": {"languages": []}}
 
     class _Response:
-        structured_data = {"languages": []}
+        structured_data: Dict[str, Any] = {"languages": []}
         response_text = "raw"
 
     debug = runner.build_debug_info(question_data, _Response(), is_correct=False)

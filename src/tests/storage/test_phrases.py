@@ -134,6 +134,7 @@ def test_resolve_guid_dispatches_to_right_table(session: Session) -> None:
     session.add_all([lemma, sentence])
     session.flush()
     phrase = add_phrase(session, "greetings", "Hello")
+    assert phrase.guid is not None
 
     assert resolve_guid(session, "N02_001") == ("lemma", lemma)
     assert resolve_guid(session, "S_00001") == ("sentence", sentence)

@@ -14,7 +14,7 @@ that held it is gone. That is the case ``resolve_guid_with_history`` exists for.
 from __future__ import annotations
 
 import json
-from typing import List
+from typing import Iterator, List
 
 import pytest
 from sqlalchemy import create_engine
@@ -67,7 +67,7 @@ SOURCE = "test-suite"
 
 
 @pytest.fixture()
-def session() -> Session:
+def session() -> Iterator[Session]:
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     with Session(engine) as db:
@@ -266,8 +266,8 @@ def test_create_name_allocates_a_guid_in_its_kind_namespace(session: Session) ->
     given = create_name(session, name_text="George", kind="given_name")
     place = create_name(session, name_text="Vilnius", kind="place")
 
-    assert given.guid.startswith("E01_")
-    assert place.guid.startswith("E04_")
+    assert given.guid is not None and given.guid.startswith("E01_")
+    assert place.guid is not None and place.guid.startswith("E04_")
 
 
 def test_create_name_honours_an_explicit_guid(session: Session) -> None:

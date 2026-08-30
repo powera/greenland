@@ -18,9 +18,10 @@ from agents.common.common_args import (
     add_output_args,
     get_data_source_config,
 )
+from sentences.translation_coverage import validate_language_codes
+from storage.translation_helpers import get_language_name
 
 from .agent import BebrasAgent
-from .translation import get_language_name, validate_language_codes
 
 # Configure logging
 logging.basicConfig(
