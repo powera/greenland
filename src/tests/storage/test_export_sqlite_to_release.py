@@ -4,9 +4,9 @@
 
 ``export_sqlite_to_release`` used to build the lemma base record inline, and its
 version disagreed with the sync blueprint's: no ``qid``, no
-``translation_disambiguations``, and ``concept_label`` without the
+the ``disambiguation`` map, and ``concept_label`` without the
 disambiguation. Running it after any UI work therefore stripped those from the
-tree -- and since the disambiguation is recovered by parsing ``concept_label``,
+tree -- and since the disambiguation was then recovered by parsing ``concept_label``,
 re-importing then nulled it on every lemma.
 
 Both now call ``storage.release.lemma.lemma_to_release_record``. This test runs
@@ -118,7 +118,7 @@ class TestExportSqliteToRelease(unittest.TestCase):
         record = self._exported_record()
         self.assertEqual("bat (animal)", record["concept_label"])
         self.assertEqual("Q28425", record["qid"])
-        self.assertEqual({"lt": "gyvūnas"}, record["translation_disambiguations"])
+        self.assertEqual({"lt": "gyvūnas", "en": "animal"}, record["disambiguation"])
 
     def test_export_still_carries_what_only_it_had(self) -> None:
         """difficulty_overrides was CLI-only; unifying must not have lost it."""

@@ -14,9 +14,17 @@ module there were two base-record builders -- one in the sync blueprint, one
 inline in ``storage.migrate.export_sqlite_to_release`` -- and they disagreed:
 the CLI wrote ``concept_label`` without the disambiguation and omitted ``qid``
 and ``translation_disambiguations``, so a CLI export after any UI work stripped
-those from the tree. Since :func:`release_disambiguation` recovers a
-disambiguation *by parsing ``concept_label``*, re-importing that tree then
-nulled the disambiguation on every lemma.
+those from the tree, and re-importing it then nulled the disambiguation on
+every lemma, because the sense had nowhere else to live.
+
+It has somewhere now. ``disambiguation`` is a ``{language: sense}`` map in the
+base record, covering English alongside every other language; it replaces the
+old English-only parenthetical and the separate ``translation_disambiguations``
+key. Splitting it on import is the same split ``translations`` already makes -
+``en`` is the lemma's own column, the rest are per-translation rows.
+
+``concept_label`` is a display string and nothing parses it back apart. A
+record's identity is its GUID, so two labels may coincide without ambiguity.
 
 Concepts are deliberately not handled here. A lemma's Wikidata pairing lives in
 ``concept_lemma_links`` and is written by ``storage.crud.concept``; the only
@@ -27,7 +35,6 @@ back out. See ``docs/element_types_design.md``.
 from __future__ import annotations
 
 import json
-import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
@@ -56,42 +63,37 @@ UNLEVELLED_DIFFICULTY = -1
 # ---------------------------------------------------------------------------
 
 
-def parse_concept_label(concept_label: str) -> Tuple[str, Optional[str]]:
-    """Split a concept label into ``(word, disambiguation)``.
-
-    ``"sharp (pointed)"`` -> ``("sharp", "pointed")``; ``"dog"`` -> ``("dog", None)``.
-    """
-    match = re.match(r"^(.+?)\s+\(([^)]+)\)$", concept_label)
-    if match:
-        return match.group(1).strip(), match.group(2).strip()
-    return concept_label, None
-
-
 def build_concept_label(lemma_text: str, disambiguation: Optional[str]) -> str:
-    """Join a headword and its optional sense into one concept label."""
+    """Join a headword and its optional sense into one display label.
+
+    The result is for people to read. Nothing in the system parses it back
+    apart: a sense is read from the ``disambiguation`` map, and identity is the
+    GUID. Two records may legitimately share a label.
+    """
     return f"{lemma_text} ({disambiguation})" if disambiguation else lemma_text
 
 
 def release_lemma_text(record: Dict[str, Any]) -> str:
-    """The English headword of a release record.
-
-    ``translations.en`` is authoritative; ``concept_label`` is the fallback for
-    older records, and carries the disambiguation, so it is parsed rather than
-    used raw.
-    """
+    """The English headword of a release record."""
     english = (record.get("translations") or {}).get("en")
-    if english:
-        return str(english)
-    concept_label = record.get("concept_label") or ""
-    return parse_concept_label(str(concept_label))[0] if concept_label else ""
+    return str(english) if english else ""
 
 
-def release_disambiguation(record: Dict[str, Any]) -> Optional[str]:
-    """The sense disambiguation of a release record, parsed from its label."""
-    concept_label = record.get("concept_label") or ""
-    if not concept_label:
-        return None
-    return parse_concept_label(str(concept_label))[1]
+def release_disambiguations(record: Dict[str, Any]) -> Dict[str, str]:
+    """The ``{language: sense}`` map of a release record."""
+    raw = record.get("disambiguation")
+    if not isinstance(raw, dict):
+        return {}
+    return {
+        str(language): str(sense).strip()
+        for language, sense in raw.items()
+        if sense and str(sense).strip()
+    }
+
+
+def release_disambiguation(record: Dict[str, Any], language_code: str = "en") -> Optional[str]:
+    """One language's sense from a release record, or None."""
+    return release_disambiguations(record).get(language_code)
 
 
 def normalize_emoji_entry(item: Any) -> Optional[Dict[str, str]]:
@@ -193,7 +195,7 @@ def lemma_to_release_record(lemma: Lemma, *, qid: Optional[str] = None) -> Dict[
     }
 
     translations: Dict[str, str] = {"en": lemma.lemma_text}
-    translation_disambiguations: Dict[str, str] = {}
+    disambiguations: Dict[str, str] = {}
     translation_metadata: Dict[str, Dict[str, str]] = {}
 
     for language_code in translation_helpers.RELEASE_LANGUAGES:
@@ -204,7 +206,7 @@ def lemma_to_release_record(lemma: Lemma, *, qid: Optional[str] = None) -> Dict[
             continue
         translations[language_code] = translation.translation
         if translation.disambiguation:
-            translation_disambiguations[language_code] = translation.disambiguation
+            disambiguations[language_code] = translation.disambiguation
         metadata = translation_metadata_record(translation)
         if metadata:
             translation_metadata[language_code] = metadata
@@ -228,8 +230,12 @@ def lemma_to_release_record(lemma: Lemma, *, qid: Optional[str] = None) -> Dict[
         ),
     }
 
-    if translation_disambiguations:
-        record["translation_disambiguations"] = translation_disambiguations
+    # One {language: sense} map. English is the lemma's own column and the
+    # others are per-translation, but the release presents them uniformly.
+    if lemma.disambiguation:
+        disambiguations["en"] = lemma.disambiguation
+    if disambiguations:
+        record["disambiguation"] = disambiguations
     if translation_metadata:
         record["translation_metadata"] = translation_metadata
     if difficulty_overrides:
@@ -282,7 +288,9 @@ def apply_translations(session: Session, lemma: Lemma, record: Dict[str, Any]) -
     the number of languages written.
     """
     translations = record.get("translations") or {}
-    disambiguations = record.get("translation_disambiguations") or {}
+    # The "en" entry belongs to the lemma row, not here; apply_base_fields
+    # takes it. Everything else annotates a translation.
+    disambiguations = release_disambiguations(record)
     metadata_by_language = record.get("translation_metadata") or {}
 
     existing_by_language: Dict[str, LemmaTranslation] = {
