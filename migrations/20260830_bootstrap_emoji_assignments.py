@@ -37,6 +37,8 @@ if str(SRC) not in sys.path:
 
 from typing import Dict, List, Optional, Sequence, Tuple
 
+from sqlalchemy.orm import Session
+
 from constants import WORDFREQ_DB_PATH
 from storage.backend import create_session
 from storage.backend.config import BackendType, DataSourceConfig
@@ -51,7 +53,7 @@ PAIRS: Sequence[Tuple[str, str]] = (
     ("🐇", "N02_011"),  # rabbit
     ("🐳", "N02_012"),  # whale
     ("🦈", "N02_016"),  # shark
-    ("🐏", "N02_028"),  # sheep
+    ("🐑", "N02_028"),  # sheep -- the plain ewe, not the RAM glyph: see ALTERNATES
     ("🐝", "N02_039"),  # bee
     ("🍅", "N06_018"),  # tomato
     ("🍕", "N06_026"),  # pizza
@@ -256,6 +258,51 @@ PAIRS: Sequence[Tuple[str, str]] = (
     ("✈", "N40_006"),  # airplane
     ("✉", "N08_053"),  # envelope
     ("✏", "N08_020"),  # pencil
+    # -- matched by hand: the Unicode name does not contain the word, so the
+    #    name search never proposed these, but the glyph depicts the lemma --
+    ("🐪", "N02_051"),  # camel <- DROMEDARY CAMEL
+    ("☕", "N42_002"),  # coffee <- HOT BEVERAGE
+    ("🍵", "N42_003"),  # tea <- TEACUP WITHOUT HANDLE
+    ("🍺", "N42_004"),  # beer <- BEER MUG
+    ("🍷", "N42_005"),  # wine <- WINE GLASS
+    ("🥛", "N42_006"),  # milk <- GLASS OF MILK
+    ("🧀", "N06_010"),  # cheese <- CHEESE WEDGE
+    ("🍚", "N06_020"),  # rice <- COOKED RICE
+    # SHORTCAKE names a specific dessert, but the glyph is a slice of cake and
+    # this lemma's definition ends "served in slices" -- a closer fit than
+    # BIRTHDAY CAKE, which is a whole decorated cake for one occasion.
+    ("🍰", "N06_022"),  # cake <- SHORTCAKE
+    ("🍫", "N06_023"),  # chocolate <- CHOCOLATE BAR
+    ("🍯", "N06_030"),  # honey <- HONEY POT
+    ("👞", "N09_006"),  # shoe <- MANS SHOE
+    ("👒", "N09_008"),  # hat <- WOMANS HAT
+    ("🧊", "N11_030"),  # ice <- ICE CUBE
+)
+
+# Extra glyphs for a lemma that several emoji depict equally well. Unicode
+# encodes both a side-on animal and a cartoon head for most livestock, and
+# splits some species by sex or age where this vocabulary has one word: there is
+# no ram/ewe or ox/cow pair here, so those glyphs all belong to the one lemma.
+#
+# The order matters. assign_emoji writes the list as given and the first entry
+# is the primary glyph (words.emoji.primary_emoji), which is what the wireword
+# export ships as "emoji"; the rest follow in "emoji_all". Each list below
+# therefore leads with the glyph already named in PAIRS.
+#
+# Kept out: the chick glyphs, which depict a chick rather than a chicken, and
+# 🐗 BOAR, a different animal from the farm pig.
+ALTERNATES: Sequence[Tuple[str, Sequence[str]]] = (
+    ("N02_001", ("🐕", "🐶")),  # dog: side-on, dog face
+    ("N02_002", ("🐈", "🐱")),  # cat
+    ("N02_004", ("🐎", "🐴")),  # horse
+    ("N02_005", ("🐄", "🐮", "🐂", "🐃")),  # cow: cow, face, ox, water buffalo
+    ("N02_006", ("🐖", "🐷")),  # pig
+    ("N02_011", ("🐇", "🐰")),  # rabbit
+    ("N02_012", ("🐳", "🐋")),  # whale: spouting, and the plain whale
+    ("N02_013", ("🐅", "🐯")),  # tiger
+    ("N02_028", ("🐑", "🐏")),  # sheep: ewe primary, ram alternate
+    ("N02_036", ("🐒", "🐵")),  # monkey
+    ("N02_051", ("🐪", "🐫")),  # camel: one hump and two, one word for both
 )
 
 
@@ -269,15 +316,42 @@ def build_data_source_config(db_path: str, use_postgres: bool) -> DataSourceConf
     return DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=db_path)
 
 
+def expanded_pairs() -> List[Tuple[str, str]]:
+    """PAIRS with the ALTERNATES folded in, in the order they should be stored.
+
+    A lemma's alternates replace its PAIRS entry in place, so the primary glyph
+    keeps its position in the run and the extra glyphs follow immediately after
+    it. Because assign_emoji appends to whatever the lemma already holds, that
+    ordering is what ends up in the mirror -- and the first glyph of an
+    ALTERNATES list, which is also its PAIRS glyph, stays primary.
+    """
+    extra: Dict[str, Sequence[str]] = {guid: glyphs for guid, glyphs in ALTERNATES}
+    pairs: List[Tuple[str, str]] = []
+    for glyph, guid in PAIRS:
+        glyphs = extra.get(guid)
+        if glyphs is None:
+            pairs.append((glyph, guid))
+            continue
+        if glyphs[0] != glyph:
+            raise ValueError(
+                f"ALTERNATES for {guid} must lead with its PAIRS glyph "
+                f"{glyph!r}, not {glyphs[0]!r}"
+            )
+        pairs.extend((value, guid) for value in glyphs)
+    return pairs
+
+
 def apply_pairs(config: DataSourceConfig, *, dry_run: bool = False) -> Dict[str, int]:
     """Attach every pairing that is not already in place.
 
-    Returns counts keyed ``assigned``/``already``/``conflict``/``missing``.
+    Returns counts keyed ``assigned``/``already``/``reordered``/``conflict``/
+    ``missing``.
     """
     session = create_session(config)
-    counts = {"assigned": 0, "already": 0, "conflict": 0, "missing": 0}
+    counts = {"assigned": 0, "already": 0, "conflict": 0, "missing": 0, "reordered": 0}
     try:
-        guids = [guid for _, guid in PAIRS]
+        pairs = expanded_pairs()
+        guids = [guid for _, guid in pairs]
         # guid is nullable on the model, so the None case is filtered out
         # rather than assumed away; a lemma without one cannot be a target here.
         lemmas: Dict[str, Lemma] = {
@@ -292,7 +366,7 @@ def apply_pairs(config: DataSourceConfig, *, dry_run: bool = False) -> Dict[str,
             for row in session.query(Emoji).filter(Emoji.status == EMOJI_STATUS_ASSIGNED)
         }
 
-        for glyph, guid in PAIRS:
+        for glyph, guid in pairs:
             lemma = lemmas.get(guid)
             if lemma is None:
                 counts["missing"] += 1
@@ -331,9 +405,41 @@ def apply_pairs(config: DataSourceConfig, *, dry_run: bool = False) -> Dict[str,
             session.commit()
             holders[glyph] = lemma.id
             print(f"  {glyph} -> {lemma.lemma_text} ({guid})")
+
+        counts["reordered"] = enforce_primary(session, lemmas, dry_run=dry_run)
     finally:
         session.close()
     return counts
+
+
+def enforce_primary(session: Session, lemmas: Dict[str, Lemma], *, dry_run: bool = False) -> int:
+    """Put each ALTERNATES lemma's glyphs into the declared order.
+
+    assign_emoji appends to whatever a lemma already holds, so a glyph attached
+    before this script ran keeps the primary slot even when ALTERNATES names a
+    different one -- the sheep lemma picked up the RAM glyph by hand first, and
+    would otherwise keep leading with it. Rewriting the list here makes the
+    declared order the outcome rather than a function of what happened earlier.
+    """
+    reordered = 0
+    for guid, glyphs in ALTERNATES:
+        lemma = lemmas.get(guid)
+        if lemma is None:
+            continue
+        current = emoji_values(lemma)
+        # Declared glyphs first, in order, then anything else the lemma holds.
+        wanted = [value for value in glyphs if value in current]
+        wanted += [value for value in current if value not in wanted]
+        if wanted == current:
+            continue
+        reordered += 1
+        if dry_run:
+            print(f"  would reorder {lemma.lemma_text} ({guid}): {''.join(wanted)}")
+            continue
+        assign_emoji(session, lemma, [{"type": "unicode", "value": v} for v in wanted])
+        session.commit()
+        print(f"  reordered {lemma.lemma_text} ({guid}): {''.join(wanted)}")
+    return reordered
 
 
 def main() -> int:
@@ -346,13 +452,14 @@ def main() -> int:
 
     config = build_data_source_config(args.db_path, args.postgres)
     print(f"Database: {config.postgres_url if args.postgres else config.sqlite_path}")
-    print(f"Pairings: {len(PAIRS)}")
+    print(f"Pairings: {len(expanded_pairs())}")
     print(f"Dry run: {args.dry_run}\n")
 
     counts = apply_pairs(config, dry_run=args.dry_run)
     print(
         f"\nassigned {counts['assigned']}, already set {counts['already']}, "
-        f"conflicts {counts['conflict']}, missing lemma {counts['missing']}"
+        f"reordered {counts['reordered']}, conflicts {counts['conflict']}, "
+        f"missing lemma {counts['missing']}"
     )
     if args.dry_run:
         print("\n** DRY RUN - No changes were made **")
