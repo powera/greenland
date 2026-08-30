@@ -2,7 +2,6 @@
 
 import json
 import os
-import re
 import tempfile
 from collections import defaultdict
 from pathlib import Path
@@ -12,6 +11,7 @@ from storage.backend.base import BaseSession, BaseStorage
 from storage.backend.jsonl import models
 from storage.backend.jsonl.session import JSONLSession
 from storage.models.schema import NON_INFLECTION_GRAMMATICAL_FORMS
+from storage.release.lemma import build_concept_label, parse_concept_label
 from storage.release.variant import paradigms_to_records, records_to_paradigms
 from storage.translation_helpers import EXTRA_RELEASE_LANGUAGE_GROUPS
 
@@ -29,21 +29,6 @@ GROUPED_TRANSLATION_FILE_STEMS: Set[str] = {"secondary", *EXTRA_RELEASE_LANGUAGE
 # rows land in audio tables, so the lemma loader skips it rather than treating
 # "audio" as a language.
 NON_LEMMA_FILE_STEMS: Set[str] = {"audio"}
-
-# Matches a trailing "(...)" qualifier on a concept label, e.g. the "quality"
-# in "fine (quality)". The release stores an English lemma's disambiguation only
-# inside its concept_label parenthetical; there is no separate field for it, so
-# the loader parses it back out into Lemma.disambiguation. Any explicit
-# "disambiguation" field in en.jsonl still overrides this (see load below).
-_CONCEPT_LABEL_DISAMBIG_RE = re.compile(r"^(.+?)\s+\(([^)]+)\)$")
-
-
-def _disambiguation_from_concept_label(concept_label: str) -> Optional[str]:
-    """Return the parenthetical disambiguation in a concept label, or None."""
-    match = _CONCEPT_LABEL_DISAMBIG_RE.match(concept_label.strip())
-    if match:
-        return match.group(2).strip()
-    return None
 
 
 class JSONLStorage(BaseStorage):
@@ -165,9 +150,8 @@ class JSONLStorage(BaseStorage):
                         # parenthetical (e.g. "fine (quality)"); parse it back
                         # into its own field. An explicit "disambiguation" field
                         # in en.jsonl overrides this in the second pass below.
-                        lemma.disambiguation = _disambiguation_from_concept_label(
-                            lemma.concept_label
-                        )
+                        label_text, label_disambiguation = parse_concept_label(lemma.concept_label)
+                        lemma.disambiguation = label_disambiguation
 
                         # Load translations from base.jsonl (new format)
                         if "translations" in data:
@@ -190,11 +174,14 @@ class JSONLStorage(BaseStorage):
                             lemma.emoji = list(data["emoji"])
 
                         # Populate lemma_text and definition_text from concept fields
-                        # or from translations dict for backward compatibility
+                        # or from translations dict for backward compatibility.
+                        # The concept_label fallback is the parsed headword, not
+                        # the raw label: a disambiguation belongs in its own
+                        # field, never inside lemma_text as a parenthetical.
                         if "en" in lemma.translations:
                             lemma.lemma_text = lemma.translations["en"]
                         else:
-                            lemma.lemma_text = lemma.concept_label
+                            lemma.lemma_text = label_text
                         lemma.definition_text = lemma.concept_definition
 
                         lemma.difficulty_level = data.get("difficulty_level")
@@ -883,7 +870,13 @@ class JSONLStorage(BaseStorage):
             "guid": lemma.guid,
             "pos_type": lemma.pos_type,
             "pos_subtype": lemma.pos_subtype,
-            "concept_label": lemma.concept_label,
+            # Derive the label from the headword and its sense rather than
+            # echoing the stored string, so a lemma built in memory (which has
+            # no concept_label) still exports its disambiguation, and this
+            # backend agrees with storage.release.lemma.lemma_to_release_record.
+            "concept_label": build_concept_label(
+                lemma.lemma_text or lemma.concept_label, lemma.disambiguation
+            ),
             "concept_definition": lemma.concept_definition,
         }
 
