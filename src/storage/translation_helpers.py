@@ -3,10 +3,16 @@
 """
 Helper functions for accessing lemma translations.
 
-This module abstracts away the storage implementation details - some translations
-are stored as columns in the Lemma table, while others are stored in the
-LemmaTranslation table. Code should use these helper functions instead of
-directly accessing translation fields.
+Every translation, English included, is a row in the LemmaTranslation table.
+Code should use these helper functions rather than querying it directly.
+
+English is the one language with a fallback: ``Lemma.lemma_text`` holds the same
+string as the ``en`` translation by convention and is set on every lemma, so
+:func:`get_translation` returns it when the ``en`` row has not been written yet.
+The row is the definitive translation -- lemma_text is the concept's identity and
+may not stay English-only -- so writes always go to the row.  The English
+*definition* is the exception that has not moved: it lives on
+``Lemma.definition_text``, and no ``en`` row carries one.
 """
 
 import json
@@ -244,12 +250,16 @@ LANGUAGE_HIERARCHY = [
 # in wordfreq/translation/constants.py. When adding/removing a language here,
 # make the matching change there (and in LLM_FIELD_TO_LANG_CODE below), or the
 # active query_translations path will skip it as "unknown".
-# Format: 'code': (field_name_or_code, display_name, use_lemma_translation_table)
-# If use_lemma_translation_table is True, field_name_or_code is the language_code for LemmaTranslation table
-# If False, field_name_or_code is the column name in Lemma table (only used for English)
+# Format: 'code': (language_code, display_name, True)
+# Every language, English included, stores its translation as a LemmaTranslation
+# row keyed by that language_code.  The third element is a vestige of the older
+# scheme, where a handful of languages lived in columns on Lemma instead; English
+# was the last of those and moved with the rest, so the flag is True for every
+# entry and no code branches on it.  It is kept only so the tuple shape stays
+# stable for the callers that unpack three values.
 # Order follows LANGUAGE_HIERARCHY for consistent display across the application
 LANGUAGE_FIELDS = {
-    "en": ("lemma_text", "English", False),  # English uses lemma_text field
+    "en": ("en", "English", True),
     "lt": ("lt", "Lithuanian", True),
     "zh": ("zh", "Chinese", True),
     "zh-tw": ("zh-tw", "Chinese (Taiwan)", True),  # Taiwan-specific Chinese variant
@@ -426,21 +436,25 @@ def get_translation(session: Session, lemma: Lemma, lang_code: str) -> Optional[
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
 
-    if use_translation_table:
-        # Query LemmaTranslation table
-        translation_obj = (
-            session.query(LemmaTranslation)
-            .filter(
-                LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == field_name
-            )
-            .first()
-        )
-        return translation_obj.translation if translation_obj else None
-    else:
-        # Get from Lemma table column (English uses lemma_text)
-        return getattr(lemma, field_name, None)
+    translation_obj = (
+        session.query(LemmaTranslation)
+        .filter(LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == field_name)
+        .first()
+    )
+    if translation_obj is not None:
+        return translation_obj.translation
+
+    # The ``en`` row is the definitive English translation, but lemma_text
+    # holds the same string by convention and is set on every lemma, so it is
+    # the fallback while a lemma's ``en`` row has not been written yet.  Only
+    # English has such a fallback: no other language's word is recoverable
+    # from the lemma itself.
+    if lang_code == "en":
+        return lemma.lemma_text
+
+    return None
 
 
 def get_definition(session: Session, lemma: Lemma, lang_code: str) -> Optional[str]:
@@ -461,21 +475,23 @@ def get_definition(session: Session, lemma: Lemma, lang_code: str) -> Optional[s
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
 
-    if use_translation_table:
-        # Query LemmaTranslation table
-        translation_obj = (
-            session.query(LemmaTranslation)
-            .filter(
-                LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == field_name
-            )
-            .first()
-        )
-        return translation_obj.definition_text if translation_obj else None
-    else:
-        # For English, fall back to definition_text on Lemma table
+    # The English *definition* still lives on Lemma.definition_text, unlike the
+    # English translation, which is an ordinary LemmaTranslation row like every
+    # other language's.  The two moved separately: every lemma carries a
+    # definition_text, while no ``en`` translation row has ever had its
+    # definition_text populated, so reading the row here would return None for
+    # every word in the database.
+    if lang_code == "en":
         return lemma.definition_text if lemma else None
+
+    translation_obj = (
+        session.query(LemmaTranslation)
+        .filter(LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == field_name)
+        .first()
+    )
+    return translation_obj.definition_text if translation_obj else None
 
 
 def get_translation_pronunciations(
@@ -485,22 +501,19 @@ def get_translation_pronunciations(
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
 
-    if use_translation_table:
-        translation_obj = (
-            session.query(LemmaTranslation)
-            .filter(
-                LemmaTranslation.lemma_id == lemma.id,
-                LemmaTranslation.language_code == field_name,
-            )
-            .first()
+    translation_obj = (
+        session.query(LemmaTranslation)
+        .filter(
+            LemmaTranslation.lemma_id == lemma.id,
+            LemmaTranslation.language_code == field_name,
         )
-        if not translation_obj:
-            return None, None
-        return translation_obj.ipa_pronunciation, translation_obj.phonetic_pronunciation
-
-    return None, None
+        .first()
+    )
+    if not translation_obj:
+        return None, None
+    return translation_obj.ipa_pronunciation, translation_obj.phonetic_pronunciation
 
 
 def set_translation_pronunciations(
@@ -514,10 +527,7 @@ def set_translation_pronunciations(
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
-
-    if not use_translation_table:
-        return None, None
+    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
 
     old_ipa, old_phonetic = get_translation_pronunciations(session, lemma, lang_code)
     translation_obj = (
@@ -783,50 +793,42 @@ def set_translation(
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
 
     # Get old translation for logging
     old_translation = get_translation(session, lemma, lang_code)
 
-    if use_translation_table:
-        # Insert or update in LemmaTranslation table
-        translation_obj = (
-            session.query(LemmaTranslation)
-            .filter(
-                LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == field_name
-            )
-            .first()
-        )
+    # Insert or update in LemmaTranslation table
+    translation_obj = (
+        session.query(LemmaTranslation)
+        .filter(LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == field_name)
+        .first()
+    )
 
-        sort_key = compute_sort_key(lang_code, translation)
+    sort_key = compute_sort_key(lang_code, translation)
 
-        if translation_obj:
-            translation_obj.translation = translation
-            if definition is not None:
-                translation_obj.definition_text = definition
-            if translation_status is not None:
-                translation_obj.translation_status = translation_status
-            if translation_status_note is not None:
-                translation_obj.translation_status_note = translation_status_note
-            if has_sort_key(lang_code):
-                translation_obj.sort_key = sort_key
-        else:
-            translation_obj = LemmaTranslation(
-                lemma_id=lemma.id,
-                language_code=field_name,
-                translation=translation,
-                definition_text=definition,
-                translation_status=translation_status,
-                translation_status_note=translation_status_note,
-                sort_key=sort_key,
-                verified=False,
-            )
-            session.add(translation_obj)
+    if translation_obj:
+        translation_obj.translation = translation
+        if definition is not None:
+            translation_obj.definition_text = definition
+        if translation_status is not None:
+            translation_obj.translation_status = translation_status
+        if translation_status_note is not None:
+            translation_obj.translation_status_note = translation_status_note
+        if has_sort_key(lang_code):
+            translation_obj.sort_key = sort_key
     else:
-        # Set on Lemma table column (English uses lemma_text)
-        setattr(lemma, field_name, translation)
-        if definition is not None and hasattr(lemma, "definition_text"):
-            lemma.definition_text = definition
+        translation_obj = LemmaTranslation(
+            lemma_id=lemma.id,
+            language_code=field_name,
+            translation=translation,
+            definition_text=definition,
+            translation_status=translation_status,
+            translation_status_note=translation_status_note,
+            sort_key=sort_key,
+            verified=False,
+        )
+        session.add(translation_obj)
 
     # Invalidate any audio records whose expected_text no longer matches
     invalidate_audio_for_translation_change(
@@ -850,11 +852,7 @@ def get_translation_disambiguation(session: Session, lemma: Lemma, lang_code: st
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
-
-    if not use_translation_table:
-        # English uses Lemma.disambiguation (concept-level)
-        return None
+    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
 
     translation_obj = (
         session.query(LemmaTranslation)
@@ -890,12 +888,7 @@ def set_translation_disambiguation(
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
-
-    if not use_translation_table:
-        raise ValueError(
-            "Cannot set translation disambiguation for English (use Lemma.disambiguation)"
-        )
+    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
 
     translation_obj = (
         session.query(LemmaTranslation)
@@ -961,43 +954,28 @@ def set_definition(
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
 
     # Get old definition for logging
     old_definition = get_definition(session, lemma, lang_code)
 
-    if use_translation_table:
-        # Insert or update in LemmaTranslation table
-        translation_obj = (
-            session.query(LemmaTranslation)
-            .filter(
-                LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == field_name
-            )
-            .first()
-        )
+    # The English definition stays on Lemma.definition_text -- see get_definition
+    # for why the two halves of "English" live in different places.
+    if lang_code == "en":
+        lemma.definition_text = definition
+        return old_definition, definition
 
-        if translation_obj:
-            translation_obj.definition_text = definition
-        else:
-            # Need to create a row - but we need a translation too
-            # Use lemma_text as placeholder if English, otherwise raise error
-            if lang_code == "en":
-                translation = lemma.lemma_text
-            else:
-                raise ValueError(f"Cannot set definition for {lang_code} without translation")
+    # Insert or update in LemmaTranslation table
+    translation_obj = (
+        session.query(LemmaTranslation)
+        .filter(LemmaTranslation.lemma_id == lemma.id, LemmaTranslation.language_code == field_name)
+        .first()
+    )
 
-            translation_obj = LemmaTranslation(
-                lemma_id=lemma.id,
-                language_code=field_name,
-                translation=translation,
-                definition_text=definition,
-                verified=False,
-            )
-            session.add(translation_obj)
+    if translation_obj:
+        translation_obj.definition_text = definition
     else:
-        # For English, set on Lemma table
-        if hasattr(lemma, "definition_text"):
-            lemma.definition_text = definition
+        raise ValueError(f"Cannot set definition for {lang_code} without translation")
 
     return old_definition, definition
 
@@ -1376,23 +1354,19 @@ def bulk_get_translations(
     if not lemmas:
         return {}
 
-    field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
 
-    if use_translation_table:
-        # Batch query LemmaTranslation table
-        lemma_ids = [lemma.id for lemma in lemmas]
-        translation_rows = (
-            session.query(LemmaTranslation)
-            .filter(
-                LemmaTranslation.lemma_id.in_(lemma_ids),
-                LemmaTranslation.language_code == field_name,
-            )
-            .all()
+    # Batch query LemmaTranslation table
+    lemma_ids = [lemma.id for lemma in lemmas]
+    translation_rows = (
+        session.query(LemmaTranslation)
+        .filter(
+            LemmaTranslation.lemma_id.in_(lemma_ids),
+            LemmaTranslation.language_code == field_name,
         )
-        return {t.lemma_id: t.translation for t in translation_rows}
-    else:
-        # Get from Lemma table column (English uses lemma_text)
-        return {lemma.id: getattr(lemma, field_name, None) for lemma in lemmas}
+        .all()
+    )
+    return {t.lemma_id: t.translation for t in translation_rows}
 
 
 def get_reference_translation(

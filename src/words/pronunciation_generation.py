@@ -185,9 +185,11 @@ def generate_pronunciations_for_lemma(
         )
         .first()
     )
-    supports_translation_pronunciations = LANGUAGE_FIELDS.get(
-        effective_language_code, (None, None, False)
-    )[2]
+    # English pronunciation is carried by the base DerivativeForm, not by the
+    # ``en`` LemmaTranslation row -- ``needs_english_lemma_pronunciation`` below
+    # is the English path.  Every other language stores its pronunciation on the
+    # translation itself.
+    supports_translation_pronunciations = effective_language_code != "en"
     translation_missing = bool(
         supports_translation_pronunciations
         and translation_text

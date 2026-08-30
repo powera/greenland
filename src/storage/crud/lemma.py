@@ -549,43 +549,29 @@ def handle_lemma_type_subtype_change(
             if not translation_text:
                 continue
 
-            field_name, _, use_translation_table = LANGUAGE_FIELDS[lang_code]
+            field_name, _, _ = LANGUAGE_FIELDS[lang_code]
 
-            if use_translation_table:
-                # Delete from LemmaTranslation table
-                translation_obj = (
-                    session.query(LemmaTranslation)
-                    .filter(
-                        LemmaTranslation.lemma_id == lemma.id,
-                        LemmaTranslation.language_code == field_name,
-                    )
-                    .first()
+            # Delete from LemmaTranslation table
+            translation_obj = (
+                session.query(LemmaTranslation)
+                .filter(
+                    LemmaTranslation.lemma_id == lemma.id,
+                    LemmaTranslation.language_code == field_name,
                 )
-                if translation_obj:
-                    result["translations_cleared"] += 1
-                    log_translation_change(
-                        session=session,
-                        source=source,
-                        operation_type="translation_invalidated",
-                        lemma_id=lemma.id,
-                        field_name=f"{lang_code}_translation",
-                        old_value=translation_text,
-                        new_value=None,
-                    )
-                    session.delete(translation_obj)
-            else:
-                # Clear from Lemma table column
-                setattr(lemma, field_name, None)
+                .first()
+            )
+            if translation_obj:
                 result["translations_cleared"] += 1
                 log_translation_change(
                     session=session,
                     source=source,
                     operation_type="translation_invalidated",
                     lemma_id=lemma.id,
-                    field_name=field_name,
+                    field_name=f"{lang_code}_translation",
                     old_value=translation_text,
                     new_value=None,
                 )
+                session.delete(translation_obj)
 
     # Step 4: Delete derivative forms
     derivative_forms = (

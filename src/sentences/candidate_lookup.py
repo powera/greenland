@@ -100,36 +100,38 @@ def _find_candidate_lemmas_in_language(
     seen_ids: Set[int] = set()
     out: List[Lemma] = []
 
-    # Base-translation match. English lives on Lemma.lemma_text; every other
-    # supported language lives on LemmaTranslation.
-    field_info = LANGUAGE_FIELDS.get(language_code)
-    if field_info is not None:
-        _field_name, _display, use_translation_table = field_info
-        if use_translation_table:
-            # Exact match in every language. CJK previously used substring
-            # LIKE here, but single-character function-word tokens (e.g. zh
-            # ``的``, ``了``, ``是``) matched hundreds of unrelated lemmas
-            # whose translations happened to contain that character, drowning
-            # out real candidates. The cost is occasional false negatives
-            # when jieba returns a compound like ``好朋友`` and the DB only
-            # has ``朋友`` — acceptable to keep the candidate list clean.
-            trans_rows = (
-                session.query(LemmaTranslation.lemma_id)
-                .filter(
-                    LemmaTranslation.language_code == language_code,
-                    func.lower(LemmaTranslation.translation) == token,
-                )
-                .all()
+    # Base-translation match. Every supported language, English included, lives
+    # on LemmaTranslation.
+    if language_code in LANGUAGE_FIELDS:
+        # Exact match in every language. CJK previously used substring
+        # LIKE here, but single-character function-word tokens (e.g. zh
+        # ``的``, ``了``, ``是``) matched hundreds of unrelated lemmas
+        # whose translations happened to contain that character, drowning
+        # out real candidates. The cost is occasional false negatives
+        # when jieba returns a compound like ``好朋友`` and the DB only
+        # has ``朋友`` — acceptable to keep the candidate list clean.
+        trans_rows = (
+            session.query(LemmaTranslation.lemma_id)
+            .filter(
+                LemmaTranslation.language_code == language_code,
+                func.lower(LemmaTranslation.translation) == token,
             )
-            trans_lemma_ids = {row[0] for row in trans_rows}
-            if trans_lemma_ids:
-                direct = session.query(Lemma).filter(Lemma.id.in_(trans_lemma_ids)).all()
-                for lemma in direct:
-                    if lemma.id not in seen_ids:
-                        seen_ids.add(lemma.id)
-                        out.append(lemma)
-        else:
-            # English: column on Lemma.
+            .all()
+        )
+        trans_lemma_ids = {row[0] for row in trans_rows}
+        if trans_lemma_ids:
+            direct = session.query(Lemma).filter(Lemma.id.in_(trans_lemma_ids)).all()
+            for lemma in direct:
+                if lemma.id not in seen_ids:
+                    seen_ids.add(lemma.id)
+                    out.append(lemma)
+
+        # English additionally matches Lemma.lemma_text.  The ``en``
+        # LemmaTranslation row is the definitive English translation, but
+        # lemma_text carries the same string by convention and is set on every
+        # lemma, so matching it too keeps a lemma findable whose ``en`` row has
+        # not been written yet.
+        if language_code == "en":
             direct = session.query(Lemma).filter(func.lower(Lemma.lemma_text) == token).all()
             for lemma in direct:
                 if lemma.id not in seen_ids:

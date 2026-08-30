@@ -165,20 +165,12 @@ class TrakaidoExporter:
 
         logger.info(f"Querying database for trakaido data (language: {self.language_name})...")
 
-        # Check if language uses column (can filter in SQL) or table (filter in Python)
-        _, _, use_translation_table = LANGUAGE_FIELDS[self.language]
-
         # Build the query
         query = session.query(Lemma)
 
         # Optionally exclude verbs (default behavior for backward compatibility)
         if exclude_verbs:
             query = query.filter(Lemma.pos_type != "verb")
-
-        # For column-based translations, we can filter in SQL
-        if not use_translation_table:
-            language_column = getattr(Lemma, self.language_field)
-            query = query.filter(language_column != None).filter(language_column != "")
 
         # Apply filters
         if not include_without_guid:
@@ -245,18 +237,15 @@ class TrakaidoExporter:
                 )
             all_lemmas = filtered_lemmas
 
-        # For table-based translations, filter by translation availability using pre-fetched data
-        if use_translation_table:
-            lemmas = []
-            for lemma in all_lemmas:
-                translation = translations_by_id.get(lemma.id)
-                if translation and translation.strip():
-                    lemmas.append(lemma)
-                if limit and len(lemmas) >= limit:
-                    break
-            logger.info(f"Filtered to {len(lemmas)} lemmas with {self.language_name} translations")
-        else:
-            lemmas = all_lemmas
+        # Filter by translation availability using pre-fetched data
+        lemmas = []
+        for lemma in all_lemmas:
+            translation = translations_by_id.get(lemma.id)
+            if translation and translation.strip():
+                lemmas.append(lemma)
+            if limit and len(lemmas) >= limit:
+                break
+        logger.info(f"Filtered to {len(lemmas)} lemmas with {self.language_name} translations")
 
         # Convert to export format using pre-fetched data
         export_data = []
