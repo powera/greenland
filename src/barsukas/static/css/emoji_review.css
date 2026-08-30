@@ -15,3 +15,63 @@
     white-space: pre-wrap;
     word-break: break-word;
 }
+
+/* Overview grid: the whole catalog at a glance. auto-fill keeps the cells a
+   fixed size and lets the column count follow the viewport, so ~1700 glyphs
+   stay scannable without a media query per breakpoint. */
+.emoji-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+    gap: 0.25rem;
+}
+
+.emoji-overview-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0.35rem 0.15rem;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+}
+
+.emoji-overview-cell:hover {
+    border-color: #0d6efd;
+}
+
+.emoji-overview-glyph {
+    font-size: 1.75rem;
+    line-height: 1.2;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+}
+
+/* The assigned word, kept to one line: the cell is a target to click, not a
+   place to read a definition. */
+.emoji-overview-label {
+    font-size: 0.65rem;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #6c757d;
+}
+
+/* Status is carried by background tint, so scanning for gaps is a glance
+   rather than a read. */
+.emoji-overview-assigned { background-color: #d1e7dd; }
+.emoji-overview-undecided { background-color: #f8f9fa; }
+.emoji-overview-no_match { background-color: #e9ecef; opacity: 0.55; }
+.emoji-overview-missing_lemma { background-color: #fff3cd; }
+
+/* Legend swatches reuse the same tints. */
+.emoji-overview-swatch {
+    display: inline-block;
+    width: 0.85rem;
+    height: 0.85rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.15rem;
+    vertical-align: middle;
+}

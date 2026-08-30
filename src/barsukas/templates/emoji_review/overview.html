@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Emoji Overview{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="mb-0">
+                <i class="bi bi-grid-3x3-gap"></i> Emoji Overview
+                <a class="btn btn-outline-primary btn-sm ms-2"
+                   href="{{ url_for('emoji_review.index') }}">
+                    <i class="bi bi-play"></i> Continue review
+                </a>
+            </h3>
+            <span class="text-muted small">
+                {{ counts.get('assigned', 0) }} assigned &middot;
+                {{ counts.get('undecided', 0) }} undecided &middot;
+                {{ counts.get('no_match', 0) }} dismissed &middot;
+                {{ counts.get('missing_lemma', 0) }} staged
+            </span>
+        </div>
+
+        <!-- Filters -->
+        <form method="get" class="row g-2 align-items-end mb-3">
+            <div class="col-auto">
+                <label class="form-label small mb-1" for="status">Status</label>
+                <select class="form-select form-select-sm" id="status" name="status">
+                    <option value="">All statuses</option>
+                    {% for status in statuses %}
+                    <option value="{{ status }}" {% if status_filter == status %}selected{% endif %}>
+                        {{ status.replace('_', ' ') }} ({{ counts.get(status, 0) }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <label class="form-label small mb-1" for="block">Block</label>
+                <select class="form-select form-select-sm" id="block" name="block">
+                    <option value="">All blocks</option>
+                    {% for block in blocks %}
+                    <option value="{{ block }}" {% if block_filter == block %}selected{% endif %}>
+                        {{ block.replace('_', ' ') }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+                {% if status_filter or block_filter %}
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="{{ url_for('emoji_review.overview') }}">Clear</a>
+                {% endif %}
+            </div>
+            <div class="col-auto ms-auto">
+                <span class="text-muted small">
+                    Showing {{ entries|length }} of {{ catalog_total }}
+                </span>
+            </div>
+        </form>
+
+        <!-- Legend -->
+        <div class="mb-3 small text-muted">
+            <span class="emoji-overview-swatch emoji-overview-assigned"></span> assigned
+            <span class="emoji-overview-swatch emoji-overview-undecided ms-3"></span> undecided
+            <span class="emoji-overview-swatch emoji-overview-no_match ms-3"></span> dismissed
+            <span class="emoji-overview-swatch emoji-overview-missing_lemma ms-3"></span> staged
+            <span class="ms-3">Click any glyph to search, set, or change its word.</span>
+        </div>
+
+        {% if entries %}
+        <div class="emoji-overview-grid">
+            {% for item in entries %}
+            <a class="emoji-overview-cell emoji-overview-{{ item.status }}"
+               href="{{ url_for('emoji_review.index', at=item.entry.value,
+                                return_to='overview',
+                                status_filter=status_filter or None,
+                                block_filter=block_filter or None) }}"
+               title="{{ item.entry.name|lower }}{% if item.lemma %} &rarr; {{ item.lemma.lemma_text }}{% endif %}">
+                <span class="emoji-overview-glyph">{{ item.entry.value }}</span>
+                {% if item.lemma %}
+                <span class="emoji-overview-label">{{ item.lemma.lemma_text }}</span>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">No emoji match these filters.</p>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/emoji_review.css') }}">
+{% endblock %}

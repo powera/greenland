@@ -19,12 +19,16 @@ table is left alone, and a glyph that already has a row is never re-inserted,
 so a re-run cannot clobber a decision that has been made.
 """
 
+from __future__ import annotations
+
+import argparse
 import sys
 from pathlib import Path
 
-# Add src to path
-if str(Path(__file__).parent.parent.parent) not in sys.path:
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+ROOT = Path(__file__).resolve().parent.parent
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
 from typing import List
 
@@ -32,7 +36,8 @@ from sqlalchemy import Connection, Engine, inspect
 from sqlalchemy.orm import Session
 
 from constants import WORDFREQ_DB_PATH
-from storage.database import create_database_session
+from storage.backend import create_session
+from storage.backend.config import BackendType, DataSourceConfig
 from storage.models.emoji import EMOJI_STATUS_UNDECIDED, Emoji
 from words.emoji_catalog import CatalogEntry, load_catalog
 
@@ -91,10 +96,21 @@ def seed_catalog(session: Session) -> int:
     return len(pending)
 
 
+def build_data_source_config(db_path: str, use_postgres: bool) -> DataSourceConfig:
+    """Build the storage config for this migration."""
+    if use_postgres:
+        return DataSourceConfig(
+            backend_type=BackendType.POSTGRES,
+            postgres_url=DataSourceConfig.build_postgres_url(),
+        )
+    return DataSourceConfig(
+        backend_type=BackendType.SQLITE,
+        sqlite_path=db_path,
+    )
+
+
 def main() -> int:
     """Run the migration."""
-    import argparse
-
     parser = argparse.ArgumentParser(description="Create and seed the emoji table")
     parser.add_argument(
         "--dry-run",
@@ -111,14 +127,23 @@ def main() -> int:
         default=WORDFREQ_DB_PATH,
         help=f"Path to SQLite database (default: {WORDFREQ_DB_PATH})",
     )
+    parser.add_argument(
+        "--postgres",
+        action="store_true",
+        help="Use PostgreSQL instead of SQLite",
+    )
 
     args = parser.parse_args()
 
-    print(f"Database: {args.db_path}")
+    config = build_data_source_config(args.db_path, args.postgres)
+    database_label = config.postgres_url if args.postgres else config.sqlite_path
+
+    print(f"Database: {database_label}")
+    print(f"Backend: {config.backend_type.value}")
     print(f"Dry run: {args.dry_run}")
     print()
 
-    session = create_database_session(args.db_path)
+    session = create_session(config)
     try:
         if args.dry_run:
             if table_exists(session, _TABLE_NAME):

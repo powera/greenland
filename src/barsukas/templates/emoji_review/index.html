@@ -7,7 +7,13 @@
     <div class="col-lg-10 offset-lg-1">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="mb-0"><i class="bi bi-emoji-smile"></i> Emoji Review</h3>
+            <h3 class="mb-0">
+                <i class="bi bi-emoji-smile"></i> Emoji Review
+                <a class="btn btn-outline-secondary btn-sm ms-2"
+                   href="{{ url_for('emoji_review.overview') }}">
+                    <i class="bi bi-grid-3x3-gap"></i> Overview
+                </a>
+            </h3>
             <span class="text-muted small">
                 {{ decided_count }} of {{ catalog_total }} decided &middot;
                 {{ counts.get('assigned', 0) }} assigned &middot;
@@ -32,6 +38,20 @@
                         <div class="fw-bold mt-2">{{ entry.name|lower }}</div>
                         <div class="text-muted small">{{ entry.codepoint }}</div>
                     </div>
+                    {% if current and current.status == 'assigned' and current.lemma %}
+                    <div class="card-footer py-2 small">
+                        Assigned to <strong>{{ current.lemma.lemma_text }}</strong>.
+                        Attaching it elsewhere moves it.
+                    </div>
+                    {% elif current and current.status == 'no_match' %}
+                    <div class="card-footer py-2 small text-muted">
+                        Dismissed. Deciding again replaces that.
+                    </div>
+                    {% elif current and current.status == 'missing_lemma' %}
+                    <div class="card-footer py-2 small text-muted">
+                        Staged for import; it attaches when that word is approved.
+                    </div>
+                    {% endif %}
                 </div>
 
                 <div class="card mb-3">
@@ -47,6 +67,12 @@
 
                 <!-- Search for a different lemma -->
                 <form method="get" class="mb-3">
+                    <!-- Hold the walk on this glyph: a search must change the word
+                         list, not move to a different emoji. -->
+                    <input type="hidden" name="at" value="{{ entry.value }}">
+                    <input type="hidden" name="return_to" value="{{ request.args.get('return_to', '') }}">
+                    <input type="hidden" name="status_filter" value="{{ request.args.get('status_filter', '') }}">
+                    <input type="hidden" name="block_filter" value="{{ request.args.get('block_filter', '') }}">
                     <div class="input-group input-group-sm">
                         <input type="text" class="form-control" name="search" value="{{ search }}"
                                placeholder="Search for another word&hellip;">
@@ -54,7 +80,11 @@
                             <i class="bi bi-search"></i> Search
                         </button>
                         {% if search %}
-                        <a class="btn btn-outline-secondary" href="{{ url_for('emoji_review.index') }}">Clear</a>
+                        <a class="btn btn-outline-secondary"
+                           href="{{ url_for('emoji_review.index', at=entry.value,
+                                            return_to=request.args.get('return_to') or None,
+                                            status_filter=request.args.get('status_filter') or None,
+                                            block_filter=request.args.get('block_filter') or None) }}">Clear</a>
                         {% endif %}
                     </div>
                     <small class="form-text text-muted">
@@ -70,6 +100,9 @@
                         {% if candidates %}
                         <form method="post" action="{{ url_for('emoji_review.decide') }}">
                             <input type="hidden" name="value" value="{{ entry.value }}">
+                            <input type="hidden" name="return_to" value="{{ request.args.get('return_to', '') }}">
+                            <input type="hidden" name="status_filter" value="{{ request.args.get('status_filter', '') }}">
+                            <input type="hidden" name="block_filter" value="{{ request.args.get('block_filter', '') }}">
                             <input type="hidden" name="action" value="assign">
                             <div class="list-group list-group-flush mb-3">
                                 {% for candidate in candidates %}
@@ -112,6 +145,9 @@
                             <div class="card-body">
                                 <form method="post" action="{{ url_for('emoji_review.decide') }}">
                                     <input type="hidden" name="value" value="{{ entry.value }}">
+                                    <input type="hidden" name="return_to" value="{{ request.args.get('return_to', '') }}">
+                                    <input type="hidden" name="status_filter" value="{{ request.args.get('status_filter', '') }}">
+                                    <input type="hidden" name="block_filter" value="{{ request.args.get('block_filter', '') }}">
                                     <input type="hidden" name="action" value="no_match">
                                     <input type="text" class="form-control form-control-sm mb-2"
                                            name="notes" placeholder="Why (optional)">
@@ -133,6 +169,9 @@
                             <div class="card-body">
                                 <form method="post" action="{{ url_for('emoji_review.decide') }}">
                                     <input type="hidden" name="value" value="{{ entry.value }}">
+                                    <input type="hidden" name="return_to" value="{{ request.args.get('return_to', '') }}">
+                                    <input type="hidden" name="status_filter" value="{{ request.args.get('status_filter', '') }}">
+                                    <input type="hidden" name="block_filter" value="{{ request.args.get('block_filter', '') }}">
                                     <input type="hidden" name="action" value="missing_lemma">
                                     <input type="text" class="form-control form-control-sm mb-2"
                                            name="english_word" placeholder="English word, e.g. ninja" required>
@@ -153,6 +192,9 @@
                 <!-- Skip -->
                 <form method="post" action="{{ url_for('emoji_review.decide') }}" class="mt-3">
                     <input type="hidden" name="value" value="{{ entry.value }}">
+                                    <input type="hidden" name="return_to" value="{{ request.args.get('return_to', '') }}">
+                                    <input type="hidden" name="status_filter" value="{{ request.args.get('status_filter', '') }}">
+                                    <input type="hidden" name="block_filter" value="{{ request.args.get('block_filter', '') }}">
                     <input type="hidden" name="action" value="skip">
                     <button type="submit" class="btn btn-link btn-sm text-muted">
                         Skip for now &rarr;
