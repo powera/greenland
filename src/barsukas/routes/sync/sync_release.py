@@ -1246,10 +1246,12 @@ def apply_changes() -> ResponseReturnValue:
                 # file, and since the diff treats "" and absent alike the row
                 # would come straight back to this page.
                 update_fields: Dict[str, Any] = {
-                    # English lives in the release record as translations.en,
-                    # and the disambiguation rides on concept_label - which the
-                    # diff parses back out, so it has to move with the text.
+                    # English lives in the release record as translations.en
+                    # and its sense as disambiguation.en. concept_label is the
+                    # display string built from the two, rewritten alongside
+                    # them so it never goes stale.
                     "translations.en": db_text,
+                    "disambiguation.en": (lemma.disambiguation or release_io.REMOVE_FIELD),
                     "concept_label": release_lemma.build_concept_label(
                         db_text, lemma.disambiguation
                     ),
@@ -1511,7 +1513,7 @@ def apply_translations() -> ResponseReturnValue:
                 continue
 
             release_translations = release_data.get("translations", {})
-            release_disambiguations = release_data.get("translation_disambiguations", {})
+            release_disambiguations = release_lemma.release_disambiguations(release_data)
             release_metadata = release_data.get("translation_metadata", {})
 
             for lang_code, action in lang_actions.items():

@@ -11,7 +11,7 @@ from storage.backend.base import BaseSession, BaseStorage
 from storage.backend.jsonl import models
 from storage.backend.jsonl.session import JSONLSession
 from storage.models.schema import NON_INFLECTION_GRAMMATICAL_FORMS
-from storage.release.lemma import build_concept_label, parse_concept_label
+from storage.release.lemma import build_concept_label, release_disambiguations
 from storage.release.variant import paradigms_to_records, records_to_paradigms
 from storage.translation_helpers import EXTRA_RELEASE_LANGUAGE_GROUPS
 
@@ -146,12 +146,16 @@ class JSONLStorage(BaseStorage):
                         lemma.concept_label = data.get("concept_label", "")
                         lemma.concept_definition = data.get("concept_definition", "")
 
-                        # The disambiguation lives only in the concept_label
-                        # parenthetical (e.g. "fine (quality)"); parse it back
-                        # into its own field. An explicit "disambiguation" field
-                        # in en.jsonl overrides this in the second pass below.
-                        label_text, label_disambiguation = parse_concept_label(lemma.concept_label)
-                        lemma.disambiguation = label_disambiguation
+                        # One {language: sense} map. "en" is the lemma's own
+                        # sense; the rest annotate a translation. concept_label
+                        # is display text and is never parsed for this.
+                        base_disambiguations = release_disambiguations(data)
+                        lemma.disambiguation = base_disambiguations.get("en")
+                        lemma.translation_disambiguations = {
+                            language: sense
+                            for language, sense in base_disambiguations.items()
+                            if language != "en"
+                        }
 
                         # Load translations from base.jsonl (new format)
                         if "translations" in data:
@@ -161,10 +165,6 @@ class JSONLStorage(BaseStorage):
                         if "difficulty_overrides" in data:
                             lemma.difficulty_overrides = data["difficulty_overrides"]
 
-                        # Load translation_disambiguations from base.jsonl
-                        if "translation_disambiguations" in data:
-                            lemma.translation_disambiguations = data["translation_disambiguations"]
-
                         # Load per-language translation status from base.jsonl
                         if "translation_metadata" in data:
                             lemma.translation_metadata = dict(data["translation_metadata"])
@@ -173,15 +173,9 @@ class JSONLStorage(BaseStorage):
                         if "emoji" in data and data["emoji"]:
                             lemma.emoji = list(data["emoji"])
 
-                        # Populate lemma_text and definition_text from concept fields
-                        # or from translations dict for backward compatibility.
-                        # The concept_label fallback is the parsed headword, not
-                        # the raw label: a disambiguation belongs in its own
-                        # field, never inside lemma_text as a parenthetical.
-                        if "en" in lemma.translations:
-                            lemma.lemma_text = lemma.translations["en"]
-                        else:
-                            lemma.lemma_text = label_text
+                        # translations.en is the headword. concept_label is a
+                        # display string built from it, so it is not a source.
+                        lemma.lemma_text = lemma.translations.get("en", "")
                         lemma.definition_text = lemma.concept_definition
 
                         lemma.difficulty_level = data.get("difficulty_level")
@@ -290,15 +284,6 @@ class JSONLStorage(BaseStorage):
                         if "tags" in data:
                             if lang_code == "en":
                                 lemma.tags = data["tags"]
-
-                        if "disambiguation" in data:
-                            if lang_code == "en":
-                                lemma.disambiguation = data["disambiguation"]
-
-                        if "translation_disambiguation" in data:
-                            lemma.translation_disambiguations[lang_code] = data[
-                                "translation_disambiguation"
-                            ]
 
                         if "confidence" in data:
                             if lang_code == "en":
@@ -756,7 +741,6 @@ class JSONLStorage(BaseStorage):
         languages_to_save.update(lemma.base_forms.keys())
         languages_to_save.update(lemma.audio_hashes.keys())
         languages_to_save.update(lemma.definitions.keys())
-        languages_to_save.update(lemma.translation_disambiguations.keys())
         languages_to_save.update(lemma.variants.keys())
 
         # Extract grammar_facts languages
@@ -764,9 +748,10 @@ class JSONLStorage(BaseStorage):
             if "language_code" in fact:
                 languages_to_save.add(fact["language_code"])
 
-        # English file may also have tags, disambiguation, confidence (English-only fields)
-        # and definition_text for backward compat
-        if lemma.definition_text or lemma.tags or lemma.disambiguation or lemma.confidence:
+        # English file may also have tags and confidence (English-only fields)
+        # and definition_text for backward compat. The sense is not among them:
+        # it lives in the base record's disambiguation map.
+        if lemma.definition_text or lemma.tags or lemma.confidence:
             languages_to_save.add("en")
 
         # Rewrite all affected language files
@@ -899,9 +884,12 @@ class JSONLStorage(BaseStorage):
         if lemma.difficulty_overrides:
             data["difficulty_overrides"] = lemma.difficulty_overrides
 
-        # Translation disambiguations per language (e.g., {"lt": "medžiaga"})
-        if lemma.translation_disambiguations:
-            data["translation_disambiguations"] = lemma.translation_disambiguations
+        # One {language: sense} map, English included (e.g. {"en": "animal"}).
+        disambiguations: Dict[str, str] = dict(lemma.translation_disambiguations or {})
+        if lemma.disambiguation:
+            disambiguations["en"] = lemma.disambiguation
+        if disambiguations:
+            data["disambiguation"] = disambiguations
 
         # Emoji representations of the concept (e.g. ["🐕"] for dog)
         if lemma.emoji:
@@ -966,7 +954,7 @@ class JSONLStorage(BaseStorage):
         Note: Translation and difficulty_overrides are now stored in base.jsonl.
         Per-language files contain: derivative_forms, base_form (if no derivative
         has is_base_form=true), audio_hashes, grammar_facts, definition_text (all languages),
-        and English-only fields (tags, disambiguation, confidence).
+        and English-only fields (tags, confidence). Senses live in base.jsonl.
 
         Args:
             lemma: The lemma
@@ -1036,22 +1024,12 @@ class JSONLStorage(BaseStorage):
                 data["phonetic_pronunciation"] = phonetic_value
                 has_data = True
 
-        # Translation disambiguation (any language)
-        translation_disambig = lemma.translation_disambiguations.get(lang_code)
-        if translation_disambig:
-            data["translation_disambiguation"] = translation_disambig
-            has_data = True
-
         # English-only fields
         if lang_code == "en":
             # Note: frequency_rank is development-only and not exported
 
             if lemma.tags:
                 data["tags"] = lemma.tags
-                has_data = True
-
-            if lemma.disambiguation:
-                data["disambiguation"] = lemma.disambiguation
                 has_data = True
 
             if lemma.confidence is not None and lemma.confidence != 0.0:

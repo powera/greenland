@@ -34,8 +34,8 @@ from storage.release.lemma import (
     decode_db_emoji,
     import_release_record,
     lemma_to_release_record,
-    parse_concept_label,
     release_disambiguation,
+    release_disambiguations,
     release_emoji,
     release_lemma_text,
     translation_metadata_record,
@@ -85,40 +85,40 @@ def _seed_full_lemma(session: Session) -> Lemma:
 
 
 class TestConceptLabel(unittest.TestCase):
-    """concept_label carries the disambiguation, so it has to round-trip."""
+    """concept_label is display text: built for people, never parsed back."""
 
-    def test_label_round_trips_through_parse(self) -> None:
-        for text, disambiguation in (
-            ("bat", "animal"),
-            ("bat", None),
-            ("light bulb", "electric"),
-        ):
-            with self.subTest(text=text, disambiguation=disambiguation):
-                label = build_concept_label(text, disambiguation)
-                self.assertEqual((text, disambiguation), parse_concept_label(label))
+    def test_a_sense_becomes_a_parenthetical(self) -> None:
+        self.assertEqual("bat (animal)", build_concept_label("bat", "animal"))
 
-    def test_label_without_parens_has_no_disambiguation(self) -> None:
-        self.assertEqual(("dog", None), parse_concept_label("dog"))
+    def test_no_sense_leaves_the_word_bare(self) -> None:
+        self.assertEqual("bat", build_concept_label("bat", None))
 
-    def test_only_the_trailing_group_is_the_disambiguation(self) -> None:
-        self.assertEqual(("a (b)", "c"), parse_concept_label("a (b) (c)"))
+    def test_a_label_is_not_a_source_of_senses(self) -> None:
+        """Identity is the GUID; a label may even repeat without ambiguity."""
+        self.assertEqual({}, release_disambiguations({"concept_label": "bat (animal)"}))
+        self.assertIsNone(release_disambiguation({"concept_label": "bat (animal)"}))
 
 
 class TestReleaseReaders(unittest.TestCase):
     """Reading a record back."""
 
-    def test_lemma_text_prefers_translations_en(self) -> None:
+    def test_lemma_text_comes_from_translations_en(self) -> None:
         record = {"translations": {"en": "bat"}, "concept_label": "bat (animal)"}
         self.assertEqual("bat", release_lemma_text(record))
 
-    def test_lemma_text_falls_back_to_the_label_without_its_sense(self) -> None:
-        """An older record has no translations.en; the label must still not leak its sense."""
-        self.assertEqual("bat", release_lemma_text({"concept_label": "bat (animal)"}))
+    def test_lemma_text_is_empty_without_translations_en(self) -> None:
+        self.assertEqual("", release_lemma_text({"concept_label": "bat (animal)"}))
 
-    def test_disambiguation_comes_from_the_label(self) -> None:
-        self.assertEqual("animal", release_disambiguation({"concept_label": "bat (animal)"}))
-        self.assertIsNone(release_disambiguation({"concept_label": "bat"}))
+    def test_disambiguation_comes_from_the_map(self) -> None:
+        record = {"disambiguation": {"en": "animal", "lt": "gyvūnas"}}
+        self.assertEqual("animal", release_disambiguation(record))
+        self.assertEqual("gyvūnas", release_disambiguation(record, "lt"))
+        self.assertIsNone(release_disambiguation(record, "fr"))
         self.assertIsNone(release_disambiguation({}))
+
+    def test_the_map_drops_blank_senses(self) -> None:
+        record = {"disambiguation": {"en": "animal", "lt": "", "fr": "   "}}
+        self.assertEqual({"en": "animal"}, release_disambiguations(record))
 
     def test_emoji_shapes_normalize(self) -> None:
         self.assertEqual([{"type": "unicode", "value": "🦇"}], release_emoji({"emoji": ["🦇"]}))
@@ -148,7 +148,7 @@ class TestLemmaToReleaseRecord(unittest.TestCase):
                 "concept_definition": "a flying mammal",
                 "translations": {"en": "bat", "lt": "šikšnosparnis", "fr": "chauve-souris"},
                 "difficulty_level": 4,
-                "translation_disambiguations": {"lt": "gyvūnas"},
+                "disambiguation": {"lt": "gyvūnas", "en": "animal"},
                 "translation_metadata": {
                     "lt": {
                         "translation_status": "needs_review",
@@ -240,7 +240,7 @@ class TestRoundTrip(unittest.TestCase):
                 "concept_definition": "a long-legged wading bird",
                 "translations": {"en": "crane", "lt": "gervė"},
                 "difficulty_level": 5,
-                "translation_disambiguations": {"lt": "paukštis"},
+                "disambiguation": {"lt": "paukštis", "en": "bird"},
                 "translation_metadata": {"lt": {"translation_status": "verified"}},
                 "notes": "not the machine",
                 "emoji": [{"type": "unicode", "value": "🐦"}],
@@ -255,7 +255,7 @@ class TestRoundTrip(unittest.TestCase):
         finally:
             session.close()
 
-    def test_import_keeps_the_disambiguation_off_the_headword(self) -> None:
+    def test_import_takes_the_sense_from_the_map(self) -> None:
         session = _make_session()
         try:
             lemma = import_release_record(
@@ -267,6 +267,7 @@ class TestRoundTrip(unittest.TestCase):
                     "concept_label": "seal (animal)",
                     "concept_definition": "a marine mammal",
                     "translations": {"en": "seal"},
+                    "disambiguation": {"en": "animal"},
                     "difficulty_level": 3,
                 },
             )
@@ -276,14 +277,33 @@ class TestRoundTrip(unittest.TestCase):
         finally:
             session.close()
 
+    def test_a_label_alone_yields_no_sense(self) -> None:
+        """concept_label is display text; nothing reads a sense out of it."""
+        session = _make_session()
+        try:
+            lemma = import_release_record(
+                session,
+                {
+                    "guid": "N08_004",
+                    "pos_type": "noun",
+                    "concept_label": "seal (animal)",
+                    "translations": {"en": "seal"},
+                },
+            )
+            session.commit()
+            self.assertEqual("seal", lemma.lemma_text)
+            self.assertIsNone(lemma.disambiguation)
+        finally:
+            session.close()
+
 
 class TestCliAndUiAgree(unittest.TestCase):
     """The regression that let the two builders drift.
 
     Both exports now call lemma_to_release_record, so this asserts the shared
-    builder emits the keys each side used to emit alone -- qid and
-    translation_disambiguations (UI only) and difficulty_overrides (CLI only) --
-    and that concept_label keeps its disambiguation, which the CLI dropped.
+    builder emits the keys each side used to emit alone -- qid and the
+    disambiguation map (UI only) and difficulty_overrides (CLI only) -- and
+    that concept_label keeps its disambiguation, which the CLI dropped.
     """
 
     def test_shared_builder_emits_both_sides_keys(self) -> None:
@@ -294,7 +314,7 @@ class TestCliAndUiAgree(unittest.TestCase):
 
             # Formerly UI-only.
             self.assertEqual("Q28425", record["qid"])
-            self.assertEqual({"lt": "gyvūnas"}, record["translation_disambiguations"])
+            self.assertEqual({"lt": "gyvūnas", "en": "animal"}, record["disambiguation"])
             self.assertEqual("bat (animal)", record["concept_label"])
 
             # Formerly CLI-only.

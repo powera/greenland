@@ -215,7 +215,7 @@ def test_prefixed_keys_route_to_disambiguations(tmp_path: Path) -> None:
 
     record = _read_jsonl(release_file)[0]
     assert record["translations"] == {"en": "bank", "lt": "krantas"}
-    assert record["translation_disambiguations"] == {"lt": "riverside"}
+    assert record["disambiguation"] == {"lt": "riverside"}
 
 
 def test_prefix_routing_is_off_unless_asked_for(tmp_path: Path) -> None:

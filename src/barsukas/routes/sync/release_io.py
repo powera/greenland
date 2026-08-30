@@ -239,8 +239,8 @@ def apply_translation_updates(
     Args:
         updates: The per-file, per-GUID, per-language new values.
         disambiguation_prefix: When set, keys carrying this prefix are routed to
-            ``translation_disambiguations`` instead of ``translations`` (the
-            lemma sync uses ``"_disambig_"`` to ship both in one dict).
+            the ``disambiguation`` map instead of ``translations`` (the lemma
+            sync uses ``"_disambig_"`` to ship both in one dict).
 
     Returns the number of records rewritten.
     """
@@ -254,7 +254,7 @@ def apply_translation_updates(
             for key, new_value in guid_updates[record["guid"]].items():
                 if disambiguation_prefix and key.startswith(disambiguation_prefix):
                     language_code = key[len(disambiguation_prefix) :]
-                    disambiguations = record.setdefault("translation_disambiguations", {})
+                    disambiguations = record.setdefault("disambiguation", {})
                     if new_value:
                         disambiguations[language_code] = new_value
                     else:
