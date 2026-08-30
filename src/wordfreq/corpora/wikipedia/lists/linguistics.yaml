@@ -1,0 +1,708 @@
+# Wikipedia's Level 5 Language list, as of the August 2026 revision.
+# Linguistics and its metalanguage: grammar, phonetics, punctuation, spelling,
+# semantics, sociolinguistics, the writing systems, the language families, and
+# the individual languages.
+#
+# Level 5 rather than Level 4 because Level 4's Language branch is 197 titles
+# and mostly names languages, while the vocabulary a learner needs -- morpheme,
+# declension, diacritic, allophone, serial comma -- is concentrated in the
+# Level 5 expansion.  Those 197 titles are a near-subset of these and were
+# removed from lists/society.yaml when this list was added, so the two corpora
+# share no article and a word can be exclusive to one of them.
+#
+# 602 titles in 48 groups, resolved against the
+# enwiki-20220501 snapshot: a title renamed since then is stored under its
+# 2022 spelling so wiki_dump can find it by exact title.
+#
+# 4 titles were renamed after 2022 and are stored
+# under their snapshot spelling:
+#   Degrees of comparison of adjectives and adverbs  ->  Comparison (grammar)
+#   Mon-Burmese script  ->  Burmese alphabet
+#   Personal pronouns in English  ->  English personal pronouns
+#   Twi-Fante language  ->  Akan language
+#
+# 9 titles were redirects in 2022 and are stored
+# under the target they redirect to:
+#   Adposition  ->  Preposition and postposition
+#   Central Kurdish  ->  Sorani
+#   Eskaleut languages  ->  Eskimo-Aleut languages
+#   Jawi script  ->  Jawi alphabet
+#   Kurdish language  ->  Kurdish languages
+#   Mapudungun  ->  Mapuche language
+#   Middle dot  ->  Interpunct
+#   Neo-Latin  ->  New Latin
+#   Northern Sámi  ->  Northern Sami
+#
+# 6 titles resolve to a real article that the wikitext parser currently
+# reduces to zero prose, so the build skips them:
+#   Bulgarian language, Esperanto, Modern Hebrew, Norwegian language,
+#   Pashto, Sundanese language
+# Each one's {{Infobox language}} carries one more '}}' than '{{' -- the
+# Col-begin/Col-2/Col-end legend in the speaker-distribution map -- and
+# wiki_text's template matcher takes the surplus closer as the end of the
+# infobox, then treats the article body as template argument.  These are
+# kept in the list rather than dropped: the titles are right, and a parser
+# that tolerated the surplus would pick them up with no change here.  Only
+# language articles carry that infobox, which is why no other corpus hits it.
+#
+# 4 further titles are real but too short for --min-chars: Hypocorism,
+# Assimilation (phonology), Luba-Katanga language, and the Swahili
+# disambiguation stub.  So 592 of the 602 reach the corpus.
+#
+# "Mr." is kept: it is an article about the honorific as a lexical item,
+# which is on-topic here.
+
+source: Wikipedia:Vital articles/Level 5/Society and social sciences/Culture#Language
+snapshot: enwiki-20220501
+
+groups:
+  'Language: General':
+    - Language
+    - Origin of language
+    - Artificial language
+    - Constructed language
+    - Fictional language
+    - Fluency
+    - Language complexity
+    - Literacy
+    - Reading
+    - Literary language
+    - Metafunction
+    - Natural language
+    - Philology
+    - Pidgin
+    - Proto-language
+    - Speech
+    - Origin of speech
+    - Speech processing
+    - Spoken language
+    - Translation
+    - Language interpretation
+    - Visual language
+  'Language: General / Writing: General':
+    - Writing
+    - Abjad
+    - Abugida
+    - Alphabet
+    - Diacritic
+    - Letter (alphabet)
+    - Logogram
+    - Orthography
+    - Syllabary
+    - Transliteration
+    - Writing system
+  'Language: General / Language acquisition':
+    - Language acquisition
+    - Babbling
+    - Extensive reading
+    - First language
+    - Input hypothesis
+    - Interlanguage
+    - Language development
+    - Phonological development
+    - Second language
+    - Second-language acquisition
+    - Speech repetition
+    - Vocabulary development
+  'Language: General / Language mechanics / Grammar':
+    - Grammar
+    - Syntax
+    - Theta role
+    - Sentence (linguistics)
+    - Clause
+    - Phrase
+    - Proverb
+    - Idiom
+    - Affirmation and negation
+    - Comparison (grammar)
+    - Declension
+    - Description
+    - Determiner
+    - Formal grammar
+    - Function word
+    - Grammatical aspect
+    - Grammatical case
+    - Grammatical category
+    - Grammatical conjugation
+    - Grammatical gender
+    - Grammatical mood
+    - Grammatical number
+    - Grammatical tense
+    - Past tense
+    - Present tense
+    - Future tense
+    - Inflection
+    - Nominalization
+    - Possessive
+    - Reduplication
+    - Speech act
+  'Language: General / Language mechanics / Grammar / Parts of speech':
+    - Part of speech
+    - Noun
+    - Proper noun
+    - Verb
+    - Adjective
+    - Article (grammar)
+    - Adverb
+    - Conjunction (grammar)
+    - Grammatical particle
+    - Interjection
+    - Pronoun
+    - Preposition and postposition
+  'Language: General / Language mechanics / Phonetics':
+    - Phonetics
+    - Pronunciation
+    - Consonant
+    - Rhotic consonant
+    - International Phonetic Alphabet
+    - Intonation (linguistics)
+    - Phonics
+    - Prosody (linguistics)
+    - Stress (linguistics)
+    - Tone (linguistics)
+    - Vowel
+    - Mid central vowel
+  'Language: General / Language mechanics / Punctuation':
+    - Punctuation
+    - Apostrophe
+    - Bracket
+    - Colon (punctuation)
+    - Comma
+    - Serial comma
+    - Dash
+    - Ellipsis
+    - Exclamation mark
+    - Full stop
+    - Guillemet
+    - Hyphen
+    - Question mark
+    - Quotation mark
+    - Semicolon
+    - Interpunct
+    - Slash (punctuation)
+    - Backslash
+    - Space (punctuation)
+  'Language: General / Language mechanics / Spelling':
+    - Spelling
+    - Official script
+    - Phonemic orthography
+    - Silent letter
+    - Spelling pronunciation
+    - Spelling reform
+    - Typographical error
+  'Language: General / Linguistics':
+    - Linguistics
+    - Lexicology
+    - Linguistic typology
+  'Language: General / Linguistics / Applied linguistics':
+    - Applied linguistics
+    - Computational linguistics
+    - Evolutionary linguistics
+    - Forensic linguistics
+    - Internet linguistics
+    - Neurolinguistics
+    - Psycholinguistics
+  'Language: General / Linguistics / Descriptive linguistics':
+    - Linguistic description
+    - Anthropological linguistics
+    - Comparative linguistics
+  'Language: General / Linguistics / Descriptive linguistics / Historical linguistics':
+    - Historical linguistics
+    - Etymology
+    - Language change
+    - Semantic change
+    - Sound change
+    - Grimm's law
+    - Phonological change
+  'Language: General / Linguistics / Descriptive linguistics / Sociolinguistics':
+    - Sociolinguistics
+    - Accent (sociolinguistics)
+    - Cant
+    - Language game
+    - Code-switching
+    - Context
+    - Dialect
+    - Variety (linguistics)
+    - Dialect continuum
+    - Diglossia
+    - Discourse analysis
+    - Endangered language
+    - Language preservation
+    - Jargon
+    - Language death
+    - Lingua franca
+    - World language
+    - Loanword
+    - Mixed language
+    - Multilingualism
+    - Bilingual education
+    - Register (sociolinguistics)
+    - Slang
+    - Sociolect
+    - Standard language
+    - Pluricentric language
+  'Language: General / Linguistics / Theoretical linguistics':
+    - Theoretical linguistics
+    - Cognitive linguistics
+    - Functional linguistics
+    - Systemic functional linguistics
+    - Generative grammar
+    - Lexis (linguistics)
+    - Linguistic relativity
+    - Morphology (linguistics)
+    - Abbreviation
+    - Acronym
+    - Contraction (grammar)
+    - Hypocorism
+    - Morpheme
+    - Morphophonology
+    - Phonology
+    - Phoneme
+    - Syllable
+  'Language: General / Linguistics / Theoretical linguistics / Semantics':
+    - Semantics
+    - Pragmatics
+    - Ambiguity
+    - Euphemism
+    - Intensifier
+    - Pejorative
+    - Profanity
+    - Reference
+  'Language: General / Vocabulary':
+    - Vocabulary
+    - Word
+    - Neologism
+    - Onomatopoeia
+  'Language: General / Vocabulary / Names':
+    - Name
+    - Middle name
+    - Given name
+    - Personal name
+    - Surname
+    - Honorific
+    - Miss
+    - Mr.
+    - Mrs.
+  'Language: General / Sound change and alternation':
+    - Assimilation (phonology)
+    - Elision
+    - Epenthesis
+    - Lenition
+    - Metathesis (linguistics)
+    - Sandhi
+  Language families and sprachbund:
+    - Language family
+    - Afroasiatic languages
+    - Semitic languages
+    - Algic languages
+    - Altaic languages
+    - Arawakan languages
+    - Australian Aboriginal languages
+    - Austroasiatic languages
+    - Austronesian languages
+    - Oceanic languages
+    - Polynesian languages
+    - Creole language
+    - Dravidian languages
+    - Eskimo–Aleut languages
+    - Indo-European languages
+    - Celtic languages
+    - Indo-Aryan languages
+    - Bihari languages
+    - Romance languages
+    - Germanic languages
+    - Frisian languages
+    - North Germanic languages
+    - Iranian languages
+    - Slavic languages
+    - Kartvelian languages
+    - Khoisan languages
+    - Kra–Dai languages
+    - Zhuang languages
+    - Language isolate
+    - Niger–Congo languages
+    - Akan language
+    - Bantu languages
+    - Nilo-Saharan languages
+    - Nilotic languages
+    - Mayan languages
+    - Na-Dene languages
+    - North Caucasian languages
+    - Oto-Manguean languages
+    - Quechuan languages
+    - Sign language
+    - Sino-Tibetan languages
+    - Trans–New Guinea languages
+    - Tungusic languages
+    - Turkic languages
+    - Uralic languages
+    - Uto-Aztecan languages
+  Alphabets and writing systems:
+    - Braille
+    - Arabic script
+    - Arabic alphabet
+    - Jawi alphabet
+    - Kufic
+    - Nastaliq
+    - Persian alphabet
+    - Armenian alphabet
+    - Brahmic scripts
+    - Bengali–Assamese script
+    - Brahmi script
+    - Burmese alphabet
+    - Tamil script
+    - Thai script
+    - Tibetan script
+    - Canadian Aboriginal syllabics
+    - Chinese characters
+    - Seal script
+    - Simplified Chinese characters
+    - Traditional Chinese characters
+    - Chữ Nôm
+    - Cuneiform
+    - Cursive
+    - Cyrillic script
+    - Devanagari
+    - Egyptian hieroglyphs
+    - Glagolitic script
+    - Geʽez script
+    - Georgian scripts
+    - Greek alphabet
+    - Hangul
+    - Hanja
+    - Hebrew alphabet
+    - Indus script
+    - Japanese writing system
+    - Hiragana
+    - Kanji
+    - Katakana
+    - Khmer script
+    - Latin script
+    - Blackletter
+    - Latin alphabet
+    - Linear A
+    - Linear B
+    - Maya script
+    - Mongolian script
+    - Morse code
+    - Ogham
+    - Phoenician alphabet
+    - Rosetta Stone
+    - Romanization
+    - Romanization of Arabic
+    - Romanization of Chinese
+    - Pinyin
+    - Romanization of Japanese
+    - Rongorongo
+    - Runes
+    - Shorthand
+  'Specific languages / Specific languages: General':
+    - Abkhaz language
+    - Aymara language
+    - Cherokee language
+    - Georgian language
+    - Guarani language
+    - Hmong language
+    - Japanese language
+    - Korean language
+    - Mongolian language
+    - Nahuatl
+    - Navajo language
+  Specific languages / Afroasiatic languages:
+    - Afar language
+    - Akkadian language
+    - Amharic
+    - Arabic
+    - Classical Arabic
+    - Egyptian Arabic
+    - Levantine Arabic
+    - Maghrebi Arabic
+    - Modern Standard Arabic
+    - Moroccan Arabic
+    - Peninsular Arabic
+    - Maltese language
+    - Tunisian Arabic
+    - Arabic grammar
+    - Aramaic
+    - Syriac language
+    - Berber languages
+    - Egyptian language
+    - Coptic language
+    - Hebrew language
+    - Modern Hebrew
+    - Hausa language
+    - Oromo language
+    - Somali language
+    - Tigrinya language
+  Specific languages / Algic languages:
+    - Cree language
+    - Ojibwe language
+  Specific languages / Austronesian languages:
+    - Cebuano language
+    - Chamorro language
+    - Fijian language
+    - Gilbertese language
+    - Hawaiian language
+    - Hiri Motu
+    - Indonesian language
+    - Javanese language
+    - Madurese language
+    - Malagasy language
+    - Malay language
+    - Māori language
+    - Marshallese language
+    - Samoan language
+    - Sundanese language
+    - Tagalog language
+    - Filipino language
+    - Tahitian language
+    - Tongan language
+    - Tuvaluan language
+  Specific languages / Austro-Asiatic languages:
+    - Khmer language
+    - Vietnamese language
+  Specific languages / Constructed languages:
+    - Esperanto
+    - Volapük
+  Specific languages / Creole languages:
+    - Bislama
+    - Haitian Creole
+    - Sango language
+    - Tok Pisin
+  Specific languages / Dravidian languages:
+    - Kannada
+    - Malayalam
+    - Tamil language
+    - Telugu language
+  Specific languages / Eskaleut languages:
+    - Greenlandic language
+    - Inuktitut
+    - Iñupiaq language
+  'Specific languages / Indo-European languages / Indo-European languages: General':
+    - Albanian language
+    - Armenian language
+    - Greek language
+    - Ancient Greek
+    - Koine Greek
+    - Hittite language
+    - Proto-Indo-European language
+  Specific languages / Indo-European languages / Baltic languages:
+    - Latvian language
+    - Lithuanian language
+  Specific languages / Indo-European languages / Celtic languages:
+    - Breton language
+    - Cornish language
+    - Irish language
+    - Scottish Gaelic
+    - Welsh language
+  Specific languages / Indo-European languages / Indo-Aryan languages:
+    - Assamese language
+    - Bengali language
+    - Bhojpuri language
+    - Gujarati language
+    - Hindustani language
+    - Hindi
+    - Urdu
+    - Kashmiri language
+    - Maithili language
+    - Maldivian language
+    - Marathi language
+    - Nepali language
+    - Odia language
+    - Pali
+    - Romani language
+    - Sanskrit
+    - Sindhi language
+    - Sinhala language
+    - Punjabi language
+  Specific languages / Indo-European languages / Romance languages:
+    - Aragonese language
+    - Catalan language
+    - Corsican language
+    - French language
+    - African French
+    - French of France
+    - Middle French
+    - Old French
+    - Quebec French
+    - Galician language
+    - Italian language
+    - Regional Italian
+    - Latin
+    - Classical Latin
+    - Latin grammar
+    - Medieval Latin
+    - New Latin
+    - Vulgar Latin
+    - Occitan language
+    - Portuguese language
+    - Brazilian Portuguese
+    - Romanian language
+    - Romansh language
+    - Sardinian language
+    - Spanish language
+    - Spanish language in the Americas
+    - Mexican Spanish
+    - Rioplatense Spanish
+    - Peninsular Spanish
+    - Walloon language
+  Specific languages / Indo-European languages / Germanic languages:
+    - Afrikaans
+    - Danish language
+    - Dutch language
+    - Faroese language
+    - German language
+    - High German languages
+    - Swiss German
+    - Low German
+    - Gothic language
+    - Icelandic language
+    - Limburgish
+    - Luxembourgish
+    - Norwegian language
+    - Swedish language
+    - West Frisian language
+    - Yiddish
+  Specific languages / Indo-European languages / Germanic languages / English language:
+    - English language
+    - Old English
+    - Middle English
+    - Early Modern English
+    - Modern English
+    - American English
+    - African-American Vernacular English
+    - British English
+    - Indian English
+    - Scots language
+    - West African Pidgin English
+    - Nigerian Pidgin
+  Specific languages / Indo-European languages / Iranian languages:
+    - Avestan
+    - Kurdish languages
+    - Kurmanji
+    - Sorani
+    - Ossetian language
+    - Pashto
+    - Persian language
+    - Dari
+    - Tajik language
+  Specific languages / Indo-European languages / Slavic languages:
+    - Belarusian language
+    - Bulgarian language
+    - Czech language
+    - Macedonian language
+    - Old Church Slavonic
+    - Polish language
+    - Russian language
+    - Serbo-Croatian
+    - Bosnian language
+    - Croatian language
+    - Serbian language
+    - Slovak language
+    - Slovene language
+    - Ukrainian language
+  Specific languages / Kra–Dai languages:
+    - Lao language
+    - Thai language
+  Specific languages / Language isolates:
+    - Basque language
+    - Burushaski
+    - Elamite language
+    - Mapuche language
+    - Purépecha language
+    - Sumerian language
+  Specific languages / Nilo-Saharan languages:
+    - Kanuri language
+    - Old Nubian
+  Specific languages / Niger–Congo languages:
+    - Bambara language
+    - Chewa language
+    - Ewe language
+    - Fula language
+    - Igbo language
+    - Kikuyu language
+    - Kongo language
+    - Lingala
+    - Luba-Katanga language
+    - Luganda
+    - Herero language
+    - Mooré
+    - Northern Ndebele language
+    - Ovambo language
+    - Rwanda-Rundi
+    - Kinyarwanda
+    - Kirundi
+    - Shona language
+    - Sotho language
+    - Southern Ndebele language
+    - Sukuma language
+    - Swahili
+    - Swazi language
+    - Tsonga language
+    - Tswana language
+    - Venda language
+    - Wolof language
+    - Xhosa language
+    - Yoruba language
+    - Zulu language
+  Specific languages / Northeast Caucasian languages:
+    - Avar language
+    - Chechen language
+  Specific languages / Sign language:
+    - American Sign Language
+    - British Sign Language
+    - French Sign Language
+  Specific languages / Sino-Tibetan languages:
+    - Burmese language
+    - Chinese language
+    - Classical Chinese
+    - Gan Chinese
+    - Hakka Chinese
+    - Huizhou Chinese
+    - Mandarin Chinese
+    - Sichuanese dialects
+    - Standard Chinese
+    - Min Chinese
+    - Fuzhou dialect
+    - Southern Min
+    - Hokkien
+    - Wu Chinese
+    - Shanghainese
+    - Xiang Chinese
+    - Yue Chinese
+    - Cantonese
+    - Chinese grammar
+    - Dzongkha
+    - Nuosu language
+    - Lhasa Tibetan
+  Specific languages / Turkic languages:
+    - Azerbaijani language
+    - Bashkir language
+    - Chuvash language
+    - Kazakh language
+    - Kyrgyz language
+    - Tatar language
+    - Turkish language
+    - Turkmen language
+    - Uyghur language
+    - Uzbek language
+    - Yakut language
+  Specific languages / Uralic languages:
+    - Estonian language
+    - Finnish language
+    - Hungarian language
+    - Northern Sami
+  The English language:
+    - English alphabet
+    - English Braille
+    - English as a second or foreign language
+    - English grammar
+    - English personal pronouns
+    - English verbs
+    - English orthography
+    - English phonology
+    - Phonological history of English
+    - Great Vowel Shift
+    - Rhoticity in English
+    - English punctuation
+    - International English

@@ -12,7 +12,7 @@ prose, separates proper nouns from ordinary vocabulary, and writes
 ``data/wordfreq/<corpus>.json`` in the format ``wordfreq.frequency.importer``
 expects.
 
-Eight corpora are buildable, listed in :data:`WIKIPEDIA_CORPORA`:
+Nine corpora are buildable, listed in :data:`WIKIPEDIA_CORPORA`:
 
 * ``wiki_math`` -- 299 mathematics articles, which reach the vocabulary a
   general sample only touches ("theorem", "integer", "coefficient").
@@ -26,8 +26,14 @@ Eight corpora are buildable, listed in :data:`WIKIPEDIA_CORPORA`:
   ("narrative", "genre", "counterpoint") the book corpora do not supply: they
   *are* literature, and narrative English is not the vocabulary used to write
   *about* literature.
-* ``wiki_society`` -- 1369 Level 4 society, philosophy and religion articles,
+* ``wiki_society`` -- 1172 Level 4 society, philosophy and religion articles,
   the abstract institutional vocabulary of law, politics and belief.
+* ``wiki_linguistics`` -- 602 Level 5 language articles: the metalanguage a
+  language-learning app needs most ("morpheme", "declension", "diacritic",
+  "allophone"), plus the writing systems, families and individual languages.
+  Level 5 rather than Level 4 because Level 4's Language branch is 197 titles
+  and mostly names languages; those 197 moved into this corpus, so
+  wiki_society no longer carries them.
 * ``wiki_physical_science`` -- 1317 Level 4 physical science and molecular
   biology articles, covering the process vocabulary ("oxidize", "orbit",
   "decay") that wiki_biology's organism articles never reach.
@@ -218,6 +224,18 @@ WIKIPEDIA_CORPORA: Dict[str, WikipediaCorpus] = {
         # than a narrow technical one, so its tail is thicker than wiki_math's.
         max_words=5500,
         description="Wikipedia's Level 4 society, philosophy and religion articles",
+    ),
+    "wiki_linguistics": WikipediaCorpus(
+        name="wiki_linguistics",
+        articles=load_list("linguistics"),
+        # 602 documents, between wiki_math's 299 and wiki_arts' 703, so the
+        # threshold is scaled from theirs in the same proportion.
+        min_articles=10,
+        # The terminology this corpus exists for is dense and technical, but
+        # its tail is the ordinary English of grammar description -- "ending",
+        # "stem", "borrowed", "spoken" -- so it runs deeper than wiki_math's.
+        max_words=4500,
+        description="Wikipedia's Level 5 language articles, from phonetics to writing systems",
     ),
     "wiki_physical_science": WikipediaCorpus(
         name="wiki_physical_science",

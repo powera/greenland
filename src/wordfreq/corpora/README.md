@@ -152,7 +152,8 @@ rsync -a data/working/wiki_offset/ "$WIKI_BASE/offset/"
 | Corpus | Articles | Contents |
 | --- | --- | --- |
 | `wiki_arts` | 703 | Level 4 arts: architecture, literature, music, the performing and visual arts, film |
-| `wiki_society` | 1369 | Level 4 society, philosophy and religion: law, politics, economics, ethics, belief |
+| `wiki_society` | 1172 | Level 4 society, philosophy and religion: law, politics, economics, ethics, belief |
+| `wiki_linguistics` | 602 | Level 5 language: grammar, phonetics, punctuation, semantics, sociolinguistics, writing systems, families and individual languages |
 | `wiki_physical_science` | 1317 | Level 4 physical sciences and molecular biology: physics, chemistry, astronomy, earth science, biochemistry |
 | `wiki_history` | 2606 | Level 4 history and biography, merged: periods, empires, wars, and the people in them |
 | `wiki_math` | 299 | Mathematics in depth, from arithmetic to category theory. A strict superset of the vital list's 53-title Mathematics section |
@@ -160,7 +161,7 @@ rsync -a data/working/wiki_offset/ "$WIKI_BASE/offset/"
 | `wiki_biology` | 1004 | Level 4 organisms and anatomy — the ordinary names of plants and animals. Molecular biology, ecology and medicine are deliberately excluded |
 | `wiki_modern_life` | 1200 | Level 4 everyday life and technology, merged: appliances, clothing, sport, computing, transport |
 
-All eight are built, registered in `CORPUS_CONFIGS`, and enabled. Registration
+All nine are built, registered in `CORPUS_CONFIGS`, and enabled. Registration
 must wait on the file existing: an enabled corpus with no JSON file makes
 `combined_rank` charge every lemma that corpus's unknown-rank floor.
 
@@ -171,7 +172,18 @@ politics — rather than a technical register. `wiki_math`,
 `wiki_physical_science`, `wiki_geography` and `wiki_biology` are weighted 0.5
 and `wiki_history` 0.6: each is a narrow register or largely proper nouns, so
 it earns its place by covering vocabulary the others barely touch rather than
-by describing how English is weighted.
+by describing how English is weighted. `wiki_linguistics` is weighted 0.5 with
+them: its subject matter is exactly what a language-learning app wants, but
+outside that subject it is a technical register, and its commonest words
+(`language`, `word`, `vowel`) are already well attested elsewhere.
+
+`wiki_linguistics` comes from the Level **5** Language list rather than Level 4.
+Level 4's Language branch is 197 titles and mostly names individual languages,
+while the terminology a learner needs — `morpheme`, `declension`, `diacritic`,
+`allophone`, `serial comma` — is concentrated in the Level 5 expansion. Those
+197 titles were removed from `lists/society.yaml` when this corpus was added
+(926 → 729 titles there, and 1369 → 1172 for the merged corpus), so the two
+share no article and a word can be exclusive to one of them.
 
 Each list is checked against the snapshot rather than taken verbatim, because
 `wiki_dump` looks a page up by exact title: a redirect is a miss, and so is a
@@ -211,6 +223,17 @@ renamed between the 2026 upstream revision and the 2022 snapshot, which were
 dropped, and why — and JSON cannot hold a comment. `lists/redactions.yaml`
 names titles kept out of every list with the reason; filtering at load time
 means a re-fetch of an upstream page cannot quietly reintroduce one.
+
+Transcribing a new list from a current upstream page produces titles under
+their *2026* spelling, and a build resolves nothing — `wiki_dump` looks a page
+up by exact title, so a renamed article is simply a miss. `wikipedia/
+snapshot_check.py` is the curation tool for that gap: `check_titles` /
+`check_groups` report which titles the snapshot lacks (offset index only, so
+the 21GB dump need not be mounted), and `resolve_redirect` /
+`resolve_candidates` read the dump to say whether a title is an article or a
+redirect and how large it is — enough to choose between two candidate
+spellings. It never rewrites a list: which target a rename maps to is a
+judgement, and it belongs in the list's header beside the others.
 
 The Arts list (`lists/arts.yaml`, 703 titles) is loaded by
 `article_lists.py`. It was long left without a corpus on the grounds that its

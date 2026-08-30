@@ -190,6 +190,24 @@ CORPUS_CONFIGS = [
         enabled=True,
     ),
     CorpusConfig(
+        name="wiki_linguistics",
+        description="Word frequency data from Wikipedia Level 5 language articles",
+        file_path="wiki_linguistics.json",
+        max_words=4500,
+        file_type="json",
+        value_type="auto",
+        # The metalanguage of grammar, phonetics and writing -- morpheme,
+        # declension, diacritic, allophone -- which no other corpus supplies
+        # and which a language-learning app needs more than most vocabulary.
+        # Weighted with the topic corpora rather than the broad ones: outside
+        # its own subject this is a technical register, and its commonest
+        # words ("language", "word", "vowel") are already well attested
+        # elsewhere.
+        corpus_weight=0.5,
+        max_unknown_rank=9000,
+        enabled=True,
+    ),
+    CorpusConfig(
         name="wiki_physical_science",
         description="Word frequency data from Wikipedia Level 4 physical science and molecular biology articles",
         file_path="wiki_physical_science.json",
