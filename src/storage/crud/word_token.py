@@ -47,25 +47,6 @@ def get_word_tokens_needing_analysis(session: Session, limit: int = 100) -> List
     return result
 
 
-def get_word_tokens_by_frequency_rank(
-    session: Session, corpus_name: Optional[str] = None, limit: int = 100
-) -> List[WordToken]:
-    """Get word tokens ordered by combined frequency rank.
-
-    ``corpus_name`` is accepted for API compatibility but ignored — ranking is
-    by ``WordToken.frequency_rank`` (the combined rank column).
-    """
-    del corpus_name  # ignored
-    result: list[WordToken] = (
-        session.query(WordToken)
-        .filter(WordToken.frequency_rank != None)
-        .order_by(WordToken.frequency_rank)
-        .limit(limit)
-        .all()
-    )
-    return result
-
-
 def get_word_tokens_by_combined_frequency_rank(
     session: Session, limit: int = 1000
 ) -> List[WordToken]:

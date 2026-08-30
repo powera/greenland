@@ -197,9 +197,10 @@ added alongside its removal — `wiki_arts`, `wiki_society`,
 `wiki_physical_science` and `wiki_history` — cover the remaining six at roughly
 six times the article count. Its Health and medicine section is deliberately
 not replaced: the Level 4 expansion of it is named drugs, syndromes and
-procedures, a technical register that helps no learner. `wiki_society` took
-over its role as the default corpus read by `translation/processor.py` and as
-a `WORDFREQ_SOURCES` entry, being the broadest of the topic lists.
+procedures, a technical register that helps no learner. Nothing inherited its
+role as a named default: `translation/processor.py` orders word tokens by the
+combined rank across every enabled corpus, and a corpus's tier rank-buckets are
+bootstrapped by name when it is imported, so neither names a corpus in code.
 
 The article lists themselves live in `wikipedia/lists/` as YAML, one file per
 upstream page, loaded by `wikipedia/article_lists.py`. They were Python dicts

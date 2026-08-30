@@ -183,12 +183,10 @@ class WordProcessor:
         if skip_processed:
             words = linguistic_db.get_word_tokens_needing_analysis(session, limit=limit or 100000)
         else:
-            # Get word tokens by frequency rank from the default corpus.
-            # wiki_society replaced wiki_vital as the broadest Wikipedia
-            # corpus: it is the widest-vocabulary of the topic lists and the
-            # closest in role to the general Level 3 sample this used to read.
-            words = linguistic_db.get_word_tokens_by_frequency_rank(
-                session, "wiki_society", limit=limit or 100000
+            # Get word tokens in combined-rank order (across every enabled
+            # corpus and tier source), most frequent first.
+            words = linguistic_db.get_word_tokens_by_combined_frequency_rank(
+                session, limit=limit or 100000
             )
 
         total_words = len(words)
