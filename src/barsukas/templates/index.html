@@ -97,6 +97,17 @@
             </div>
         </div>
     </div>
+    <div class="col">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Emoji</h5>
+                <h2 class="card-text">{{ assigned_emoji | default(0) }}</h2>
+                <small class="text-muted">
+                    <a href="{{ url_for('emoji_review.overview') }}">assigned to words</a>
+                </small>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Quick Search -->
@@ -231,6 +242,23 @@
                     Retired GUIDs are never reissued, and
                     <a href="{{ url_for('guids.index') }}">GUID lookup</a> reports what
                     replaced them.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-emoji-smile text-warning"></i> Emoji
+                </h5>
+                <p class="card-text">
+                    A word carries an emoji only where the glyph depicts the concept
+                    itself &mdash; a horse for <em>horse</em>, not a snowflake for
+                    <em>cold</em>. Most words have none.
+                    <a href="{{ url_for('emoji_review.overview') }}">Overview</a> shows
+                    the whole catalog;
+                    <a href="{{ url_for('emoji_review.index') }}">review</a> walks it.
                 </p>
             </div>
         </div>

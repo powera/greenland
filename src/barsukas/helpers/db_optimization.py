@@ -14,6 +14,7 @@ from sqlalchemy import and_, case, func
 from sqlalchemy.orm import Session
 
 from storage.crud.guid_tombstone import get_tombstones_by_lemma_id
+from storage.models.emoji import EMOJI_STATUS_ASSIGNED, Emoji
 from storage.models.grammar_fact import GrammarFact
 from storage.models.idiom import Idiom
 from storage.models.lemma_relation import LemmaRelationGroup, LemmaRelationMember
@@ -47,7 +48,7 @@ def get_home_page_stats(session: Session) -> Dict[str, int]:
     Returns:
         Dictionary with keys: total_lemmas, verified_lemmas, with_difficulty,
         total_sentences, languages, total_phrases, total_names, total_idioms,
-        derivative_forms, grammar_facts, approved_audio
+        derivative_forms, grammar_facts, approved_audio, assigned_emoji
     """
     # Combine lemma stats into a single query with conditional counts
     lemma_stats = session.query(
@@ -77,6 +78,13 @@ def get_home_page_stats(session: Session) -> Dict[str, int]:
         .scalar()
     )
 
+    # Assigned glyphs only: undecided rows are the size of the seeded catalog,
+    # not a measure of content, and the dismissals are deliberately local to
+    # this database (see words.emoji_catalog).
+    assigned_emoji_count = (
+        session.query(func.count(Emoji.id)).filter(Emoji.status == EMOJI_STATUS_ASSIGNED).scalar()
+    )
+
     return {
         "total_lemmas": lemma_stats.total if lemma_stats else 0,
         "verified_lemmas": lemma_stats.verified if lemma_stats else 0,
@@ -89,6 +97,7 @@ def get_home_page_stats(session: Session) -> Dict[str, int]:
         "derivative_forms": derivative_count or 0,
         "grammar_facts": grammar_fact_count or 0,
         "approved_audio": approved_audio_count or 0,
+        "assigned_emoji": assigned_emoji_count or 0,
     }
 
 
