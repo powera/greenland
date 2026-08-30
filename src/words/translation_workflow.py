@@ -425,7 +425,7 @@ class TranslationWorkflow:
         if language_code not in LANGUAGE_FIELDS:
             raise ValueError(f"Unsupported language code: {language_code}")
 
-        field_name, language_name, _ = LANGUAGE_FIELDS[language_code]
+        field_name, language_name = LANGUAGE_FIELDS[language_code]
         logger.info(
             f"Validating {language_name} translations (efficient mode: 1 LLM call per word)..."
         )
@@ -762,7 +762,7 @@ class TranslationWorkflow:
             logger.info("Deleting existing non-Lithuanian translations...")
             for lemma in words_to_process:
                 for lang_code in languages_to_regenerate:
-                    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
+                    field_name, _ = LANGUAGE_FIELDS[lang_code]
                     existing = getattr(lemma, field_name)
                     if existing and existing.strip():
                         if not dry_run:
@@ -825,7 +825,7 @@ class TranslationWorkflow:
                         # Add all non-Lithuanian translations
                         added_this_word = 0
                         for lang_code in languages_to_regenerate:
-                            field_name, language_name, _ = LANGUAGE_FIELDS[lang_code]
+                            field_name, language_name = LANGUAGE_FIELDS[lang_code]
                             llm_field = LANG_CODE_TO_LLM_FIELD.get(lang_code, "")
                             translation = translations.get(llm_field, "").strip()
 

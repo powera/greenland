@@ -549,7 +549,7 @@ def handle_lemma_type_subtype_change(
             if not translation_text:
                 continue
 
-            field_name, _, _ = LANGUAGE_FIELDS[lang_code]
+            field_name, _ = LANGUAGE_FIELDS[lang_code]
 
             # Delete from LemmaTranslation table
             translation_obj = (

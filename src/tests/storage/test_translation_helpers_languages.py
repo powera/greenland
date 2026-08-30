@@ -35,15 +35,14 @@ def test_ancient_languages_are_tier4_languages() -> None:
 
 def test_ancient_language_metadata() -> None:
     """Language display names and storage mappings come from translation_helpers."""
-    assert LANGUAGE_FIELDS["la"] == ("la", "Latin", True)
-    assert LANGUAGE_FIELDS["sa"] == ("sa", "Sanskrit", True)
-    assert LANGUAGE_FIELDS["grc"] == ("grc", "Ancient Greek", True)
+    assert LANGUAGE_FIELDS["la"] == ("la", "Latin")
+    assert LANGUAGE_FIELDS["sa"] == ("sa", "Sanskrit")
+    assert LANGUAGE_FIELDS["grc"] == ("grc", "Ancient Greek")
     assert LANGUAGE_FIELDS["ar-classical"] == (
         "ar-classical",
         "Classical Arabic (pre-1200)",
-        True,
     )
-    assert LANGUAGE_FIELDS["non"] == ("non", "Old Norse", True)
+    assert LANGUAGE_FIELDS["non"] == ("non", "Old Norse")
     assert LANGUAGE_NAMES["la"] == "Latin"
     assert LANGUAGE_NAMES["sa"] == "Sanskrit"
     assert LANGUAGE_NAMES["grc"] == "Ancient Greek"
@@ -117,8 +116,8 @@ def test_presentation_dialects_are_not_storage_languages() -> None:
 
 
 def test_storage_dialect_metadata() -> None:
-    assert LANGUAGE_FIELDS["es-419"] == ("es-419", "Spanish (Latin America)", True)
-    assert LANGUAGE_FIELDS["pt-br"] == ("pt-br", "Portuguese (Brazil)", True)
+    assert LANGUAGE_FIELDS["es-419"] == ("es-419", "Spanish (Latin America)")
+    assert LANGUAGE_FIELDS["pt-br"] == ("pt-br", "Portuguese (Brazil)")
     assert LANGUAGE_NAMES["es-419"] == "Spanish (Latin America)"
     assert get_language_name("pt-br") == "Portuguese (Brazil)"
     assert LLM_FIELD_TO_LANG_CODE["spanish_latam_translation"] == "es-419"

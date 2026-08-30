@@ -245,96 +245,92 @@ LANGUAGE_HIERARCHY = [
 
 # Language mappings
 # This is the storage-side source of truth for supported languages (code,
-# display name, table routing). The translation LLM path additionally needs
-# prompt data (description, instructions) kept in DEFAULT_TRANSLATION_LANGUAGES
-# in wordfreq/translation/constants.py. When adding/removing a language here,
+# display name). The translation LLM path additionally needs prompt data
+# (description, instructions) kept in DEFAULT_TRANSLATION_LANGUAGES in
+# wordfreq/translation/constants.py. When adding/removing a language here,
 # make the matching change there (and in LLM_FIELD_TO_LANG_CODE below), or the
 # active query_translations path will skip it as "unknown".
-# Format: 'code': (language_code, display_name, True)
+# Format: 'code': (language_code, display_name)
 # Every language, English included, stores its translation as a LemmaTranslation
-# row keyed by that language_code.  The third element is a vestige of the older
-# scheme, where a handful of languages lived in columns on Lemma instead; English
-# was the last of those and moved with the rest, so the flag is True for every
-# entry and no code branches on it.  It is kept only so the tuple shape stays
-# stable for the callers that unpack three values.
+# row keyed by that language_code.
 # Order follows LANGUAGE_HIERARCHY for consistent display across the application
 LANGUAGE_FIELDS = {
-    "en": ("en", "English", True),
-    "lt": ("lt", "Lithuanian", True),
-    "zh": ("zh", "Chinese", True),
-    "zh-tw": ("zh-tw", "Chinese (Taiwan)", True),  # Taiwan-specific Chinese variant
-    "fr": ("fr", "French", True),
-    "es": ("es", "Spanish", True),
-    "es-419": ("es-419", "Spanish (Latin America)", True),  # neutral Latin American variety
-    "de": ("de", "German", True),
-    "it": ("it", "Italian", True),
-    "nl": ("nl", "Dutch", True),
-    "pt": ("pt", "Portuguese", True),
-    "pt-br": ("pt-br", "Portuguese (Brazil)", True),  # Brazilian Portuguese variant
-    "sv": ("sv", "Swedish", True),
-    "vi": ("vi", "Vietnamese", True),
-    "ja": ("ja", "Japanese", True),
-    "ko": ("ko", "Korean", True),
-    "la": ("la", "Latin", True),
-    "sa": ("sa", "Sanskrit", True),
-    "grc": ("grc", "Ancient Greek", True),
-    "ar-classical": ("ar-classical", "Classical Arabic (pre-1200)", True),
-    "non": ("non", "Old Norse", True),
-    "sw": ("sw", "Swahili", True),
-    "ro": ("ro", "Romanian", True),
-    "pl": ("pl", "Polish", True),
-    "th": ("th", "Thai", True),
-    "ms": ("ms", "Malay", True),
-    "my": ("my", "Burmese", True),
-    "km": ("km", "Khmer", True),
-    "lo": ("lo", "Lao", True),
-    "tl": ("tl", "Filipino", True),
-    "ta": ("ta", "Tamil", True),
-    "te": ("te", "Telugu", True),
-    "kn": ("kn", "Kannada", True),
-    "ml": ("ml", "Malayalam", True),
-    "si": ("si", "Sinhala", True),
-    "uk": ("uk", "Ukrainian", True),
-    "bn": ("bn", "Bengali", True),
-    "ha": ("ha", "Hausa", True),
-    "yo": ("yo", "Yoruba", True),
-    "ig": ("ig", "Igbo", True),
-    "am": ("am", "Amharic", True),
-    "zu": ("zu", "Zulu", True),
-    "om": ("om", "Oromo", True),
-    "so": ("so", "Somali", True),
-    "xh": ("xh", "Xhosa", True),
-    "sn": ("sn", "Shona", True),
-    "hi": ("hi", "Hindi", True),
-    "pa": ("pa", "Punjabi", True),
-    "ps": ("ps", "Pashto", True),
-    "fa": ("fa", "Persian", True),
-    "ka": ("ka", "Georgian", True),
-    "hy": ("hy", "Armenian", True),
-    "az": ("az", "Azerbaijani", True),
-    "tr": ("tr", "Turkish", True),
-    "bg": ("bg", "Bulgarian", True),
-    "cs": ("cs", "Czech", True),
-    "el": ("el", "Greek", True),
-    "et": ("et", "Estonian", True),
-    "fi": ("fi", "Finnish", True),
-    "ga": ("ga", "Irish", True),
-    "hu": ("hu", "Hungarian", True),
-    "lv": ("lv", "Latvian", True),
-    "mt": ("mt", "Maltese", True),
-    "sk": ("sk", "Slovak", True),
-    "sl": ("sl", "Slovenian", True),
-    "bs": ("bs", "Bosnian", True),
-    "sr": ("sr", "Serbian", True),
-    "hr": ("hr", "Croatian", True),
-    "mk": ("mk", "Macedonian", True),
-    "sq": ("sq", "Albanian", True),
-    "me": ("me", "Montenegrin", True),
+    "en": ("en", "English"),
+    "lt": ("lt", "Lithuanian"),
+    "zh": ("zh", "Chinese"),
+    "zh-tw": ("zh-tw", "Chinese (Taiwan)"),  # Taiwan-specific Chinese variant
+    "fr": ("fr", "French"),
+    "es": ("es", "Spanish"),
+    "es-419": ("es-419", "Spanish (Latin America)"),  # neutral Latin American variety
+    "de": ("de", "German"),
+    "it": ("it", "Italian"),
+    "nl": ("nl", "Dutch"),
+    "pt": ("pt", "Portuguese"),
+    "pt-br": ("pt-br", "Portuguese (Brazil)"),  # Brazilian Portuguese variant
+    "sv": ("sv", "Swedish"),
+    "vi": ("vi", "Vietnamese"),
+    "ja": ("ja", "Japanese"),
+    "ko": ("ko", "Korean"),
+    "la": ("la", "Latin"),
+    "sa": ("sa", "Sanskrit"),
+    "grc": ("grc", "Ancient Greek"),
+    "ar-classical": ("ar-classical", "Classical Arabic (pre-1200)"),
+    "non": ("non", "Old Norse"),
+    "sw": ("sw", "Swahili"),
+    "ro": ("ro", "Romanian"),
+    "pl": ("pl", "Polish"),
+    "th": ("th", "Thai"),
+    "ms": ("ms", "Malay"),
+    "my": ("my", "Burmese"),
+    "km": ("km", "Khmer"),
+    "lo": ("lo", "Lao"),
+    "tl": ("tl", "Filipino"),
+    "ta": ("ta", "Tamil"),
+    "te": ("te", "Telugu"),
+    "kn": ("kn", "Kannada"),
+    "ml": ("ml", "Malayalam"),
+    "si": ("si", "Sinhala"),
+    "uk": ("uk", "Ukrainian"),
+    "bn": ("bn", "Bengali"),
+    "ha": ("ha", "Hausa"),
+    "yo": ("yo", "Yoruba"),
+    "ig": ("ig", "Igbo"),
+    "am": ("am", "Amharic"),
+    "zu": ("zu", "Zulu"),
+    "om": ("om", "Oromo"),
+    "so": ("so", "Somali"),
+    "xh": ("xh", "Xhosa"),
+    "sn": ("sn", "Shona"),
+    "hi": ("hi", "Hindi"),
+    "pa": ("pa", "Punjabi"),
+    "ps": ("ps", "Pashto"),
+    "fa": ("fa", "Persian"),
+    "ka": ("ka", "Georgian"),
+    "hy": ("hy", "Armenian"),
+    "az": ("az", "Azerbaijani"),
+    "tr": ("tr", "Turkish"),
+    "bg": ("bg", "Bulgarian"),
+    "cs": ("cs", "Czech"),
+    "el": ("el", "Greek"),
+    "et": ("et", "Estonian"),
+    "fi": ("fi", "Finnish"),
+    "ga": ("ga", "Irish"),
+    "hu": ("hu", "Hungarian"),
+    "lv": ("lv", "Latvian"),
+    "mt": ("mt", "Maltese"),
+    "sk": ("sk", "Slovak"),
+    "sl": ("sl", "Slovenian"),
+    "bs": ("bs", "Bosnian"),
+    "sr": ("sr", "Serbian"),
+    "hr": ("hr", "Croatian"),
+    "mk": ("mk", "Macedonian"),
+    "sq": ("sq", "Albanian"),
+    "me": ("me", "Montenegrin"),
 }
 
 # Language display names (for use in prompts, UIs, etc.)
 # This is derived from LANGUAGE_FIELDS for convenience
-LANGUAGE_NAMES = {code: name for code, (_, name, _) in LANGUAGE_FIELDS.items()}
+LANGUAGE_NAMES = {code: name for code, (_, name) in LANGUAGE_FIELDS.items()}
 
 # Inverse of LANGUAGE_NAMES, keyed by lowercased display name ("chinese" -> "zh").
 LANGUAGE_NAME_TO_CODE = {name.lower(): code for code, name in LANGUAGE_NAMES.items()}
@@ -436,7 +432,7 @@ def get_translation(session: Session, lemma: Lemma, lang_code: str) -> Optional[
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
+    field_name, _ = LANGUAGE_FIELDS[lang_code]
 
     translation_obj = (
         session.query(LemmaTranslation)
@@ -475,7 +471,7 @@ def get_definition(session: Session, lemma: Lemma, lang_code: str) -> Optional[s
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
+    field_name, _ = LANGUAGE_FIELDS[lang_code]
 
     # The English *definition* still lives on Lemma.definition_text, unlike the
     # English translation, which is an ordinary LemmaTranslation row like every
@@ -501,7 +497,7 @@ def get_translation_pronunciations(
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
+    field_name, _ = LANGUAGE_FIELDS[lang_code]
 
     translation_obj = (
         session.query(LemmaTranslation)
@@ -527,7 +523,7 @@ def set_translation_pronunciations(
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
+    field_name, _ = LANGUAGE_FIELDS[lang_code]
 
     old_ipa, old_phonetic = get_translation_pronunciations(session, lemma, lang_code)
     translation_obj = (
@@ -793,7 +789,7 @@ def set_translation(
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
+    field_name, _ = LANGUAGE_FIELDS[lang_code]
 
     # Get old translation for logging
     old_translation = get_translation(session, lemma, lang_code)
@@ -852,7 +848,7 @@ def get_translation_disambiguation(session: Session, lemma: Lemma, lang_code: st
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
+    field_name, _ = LANGUAGE_FIELDS[lang_code]
 
     translation_obj = (
         session.query(LemmaTranslation)
@@ -888,7 +884,7 @@ def set_translation_disambiguation(
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
+    field_name, _ = LANGUAGE_FIELDS[lang_code]
 
     translation_obj = (
         session.query(LemmaTranslation)
@@ -954,7 +950,7 @@ def set_definition(
     if lang_code not in LANGUAGE_FIELDS:
         raise ValueError(f"Unsupported language code: {lang_code}")
 
-    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
+    field_name, _ = LANGUAGE_FIELDS[lang_code]
 
     # Get old definition for logging
     old_definition = get_definition(session, lemma, lang_code)
@@ -1066,7 +1062,7 @@ def get_supported_languages() -> Dict[str, str]:
         Dictionary mapping language codes to display names.
         Example: {'es': 'Spanish', 'fr': 'French', ...}
     """
-    return {code: name for code, (_, name, _) in LANGUAGE_FIELDS.items()}
+    return {code: name for code, (_, name) in LANGUAGE_FIELDS.items()}
 
 
 def get_tier_1_and_tier_2_languages() -> List[str]:
@@ -1354,7 +1350,7 @@ def bulk_get_translations(
     if not lemmas:
         return {}
 
-    field_name, _, _ = LANGUAGE_FIELDS[lang_code]
+    field_name, _ = LANGUAGE_FIELDS[lang_code]
 
     # Batch query LemmaTranslation table
     lemma_ids = [lemma.id for lemma in lemmas]
