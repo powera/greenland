@@ -3,13 +3,13 @@
 Golden/hosted personas serve from JSONL files in ``data/release/`` via a cached
 in-memory SQLite database. That database normally only holds lemma/sentence
 data because the wordfreq frequency signal is not (yet) checked into the
-release directory. This module loads the seven frequency sources directly
+release directory. This module loads the frequency sources directly
 from their on-disk files into the same in-memory SQLite so that
 ``Lemma.frequency_rank``, ``ExternalLexemeAnnotation``, and ``LemmaTier``
 queries return real data in golden mode.
 
-The seven sources:
-    1. wordfreq corpora (4): 19th_books, 20th_books, wiki_society, cooking
+The sources:
+    1. every enabled wordfreq corpus (see ``frequency.corpus.CORPUS_CONFIGS``)
     2. tier sources (3): cambridge_yle, cefr, basic_english
 
 After loading, ``Lemma.frequency_rank`` is recomputed from the rolled-up

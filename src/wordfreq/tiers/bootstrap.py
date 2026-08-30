@@ -54,12 +54,7 @@ WORDFREQ_TIER_SPECS: Tuple[_TierSpec, ...] = tuple(
     for i, (name, lo, hi) in enumerate(_WORDFREQ_BUCKETS)
 )
 
-WORDFREQ_SOURCES: Tuple[str, ...] = (
-    "wordfreq_19th_books",
-    "wordfreq_20th_books",
-    "wordfreq_wiki_society",
-    "wordfreq_cooking",
-)
+WORDFREQ_SOURCE_PREFIX = "wordfreq_"
 
 
 def rank_to_wordfreq_tier_name(rank: Optional[int]) -> str:
@@ -96,20 +91,35 @@ BOOTSTRAP_TIER_DEFINITIONS: Dict[str, Tuple[_TierSpec, ...]] = {
             "Basic English extended set (compound, international, addendum, endings)",
         ),
     ),
-    **{source: WORDFREQ_TIER_SPECS for source in WORDFREQ_SOURCES},
 }
+
+
+def tier_specs_for_source(source: str) -> Optional[Tuple[_TierSpec, ...]]:
+    """Return the tier specs for ``source``, or None if it is not a known source.
+
+    Every ``wordfreq_<corpus>`` source uses the same rank buckets, so they are
+    synthesized from the prefix rather than listed: a new corpus needs no entry
+    here. Named sources (YLE, CEFR, Basic English) come from
+    ``BOOTSTRAP_TIER_DEFINITIONS``.
+    """
+    if source.startswith(WORDFREQ_SOURCE_PREFIX) and len(source) > len(WORDFREQ_SOURCE_PREFIX):
+        return WORDFREQ_TIER_SPECS
+    return BOOTSTRAP_TIER_DEFINITIONS.get(source)
 
 
 def bootstrap_tier_definitions(session: Session, sources: List[str] | None = None) -> int:
     """Insert any missing TierDefinition rows for the given sources.
 
     Existing rows are left untouched (DB is authoritative). Returns the number
-    of rows inserted. If ``sources`` is None, bootstraps every known source.
+    of rows inserted. If ``sources`` is None, bootstraps the named tier sources
+    (YLE, CEFR, Basic English); ``wordfreq_<corpus>`` sources are not enumerable
+    without the corpus registry, and each is bootstrapped by name when that
+    corpus is imported (see ``wordfreq.frequency.importer``).
     """
     target_sources = sources if sources is not None else list(BOOTSTRAP_TIER_DEFINITIONS.keys())
     inserted = 0
     for source in target_sources:
-        specs = BOOTSTRAP_TIER_DEFINITIONS.get(source)
+        specs = tier_specs_for_source(source)
         if specs is None:
             continue
         existing_names = {

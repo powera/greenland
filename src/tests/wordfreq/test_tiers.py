@@ -20,7 +20,9 @@ from storage.models.schema import (
 )
 from wordfreq.tiers.bootstrap import (
     BOOTSTRAP_TIER_DEFINITIONS,
+    WORDFREQ_TIER_SPECS,
     bootstrap_tier_definitions,
+    tier_specs_for_source,
 )
 from wordfreq.tiers.cambridge_yle import CambridgeYleImporter, _split_surface_forms
 from wordfreq.tiers.runner import reconcile_external_annotations, run_import
@@ -63,6 +65,26 @@ def test_bootstrap_inserts_yle_and_cefr() -> None:
         ]
     finally:
         session.close()
+
+
+def test_bootstrap_accepts_any_wordfreq_corpus_source() -> None:
+    """A ``wordfreq_<corpus>`` source gets rank buckets without being listed."""
+    session = _make_session()
+    try:
+        source = "wordfreq_wiki_physical_science"
+        assert source not in BOOTSTRAP_TIER_DEFINITIONS
+        inserted = bootstrap_tier_definitions(session, sources=[source])
+        assert inserted == len(WORDFREQ_TIER_SPECS)
+        rows = session.query(TierDefinition).filter(TierDefinition.source == source).all()
+        assert {r.tier_name for r in rows} == {s.tier_name for s in WORDFREQ_TIER_SPECS}
+    finally:
+        session.close()
+
+
+def test_tier_specs_for_source_rejects_unknown_sources() -> None:
+    assert tier_specs_for_source("wordfreq_") is None
+    assert tier_specs_for_source("not_a_source") is None
+    assert tier_specs_for_source("cefr") == BOOTSTRAP_TIER_DEFINITIONS["cefr"]
 
 
 def test_bootstrap_is_idempotent() -> None:

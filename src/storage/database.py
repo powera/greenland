@@ -122,7 +122,6 @@ from storage.crud.word_token import (
     add_word_token,
     get_word_token_by_text,
     get_word_tokens_by_combined_frequency_rank,
-    get_word_tokens_by_frequency_rank,
     get_word_tokens_needing_analysis,
 )
 
@@ -234,7 +233,6 @@ __all__ = [
     "add_word_token",
     "get_word_token_by_text",
     "get_word_tokens_needing_analysis",
-    "get_word_tokens_by_frequency_rank",
     "get_word_tokens_by_combined_frequency_rank",
     # Lemma CRUD
     "add_lemma",
