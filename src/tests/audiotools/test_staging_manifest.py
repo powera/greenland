@@ -197,5 +197,32 @@ class TestNoIdentifier(MatchTestCase):
         self.assertIn("Manifest has no guid or sentence_id", result.warnings)
 
 
+class TestRejection(unittest.TestCase):
+    """The "rejected" block a manifest carries once invalidated in S3."""
+
+    def test_absent_block_means_not_rejected(self) -> None:
+        entry = make_entry(guid="N01_001")
+        self.assertFalse(entry.is_rejected)
+        self.assertEqual(entry.rejection_reason, "")
+
+    def test_reads_rejection_block(self) -> None:
+        entry = make_entry(
+            guid="N01_001",
+            rejected={"reason": "wrong word spoken", "rejected_by": "reviewer"},
+        )
+        self.assertTrue(entry.is_rejected)
+        self.assertEqual(entry.rejection_reason, "wrong word spoken")
+
+    def test_rejection_without_reason_still_counts(self) -> None:
+        """A malformed block must not read as "not rejected"."""
+        entry = make_entry(guid="N01_001", rejected={"rejected_by": "reviewer"})
+        self.assertTrue(entry.is_rejected)
+        self.assertEqual(entry.rejection_reason, "no reason recorded")
+
+    def test_empty_block_is_not_a_rejection(self) -> None:
+        entry = make_entry(guid="N01_001", rejected={})
+        self.assertFalse(entry.is_rejected)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -43,6 +43,10 @@ class ManifestEntry:
     generation_params: Optional[Dict[str, Any]]
     s3_audio_key: str
     s3_manifest_key: str
+    # Set when this audio was rejected and the verdict written back to S3 (see
+    # s3_ops.mark_manifest_rejected). Travels with the manifest, so every
+    # database importing it sees the rejection, not just the one that made it.
+    rejected: Optional[Dict[str, Any]] = None
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any], audio_key: str, manifest_key: str) -> "ManifestEntry":
@@ -61,12 +65,26 @@ class ManifestEntry:
             generation_params=data.get("generation_params"),
             s3_audio_key=audio_key,
             s3_manifest_key=manifest_key,
+            rejected=data.get("rejected"),
         )
 
     @property
     def label(self) -> str:
         """Short identifier for log messages."""
         return self.guid or f"sentence_{self.sentence_id}"
+
+    @property
+    def is_rejected(self) -> bool:
+        """Whether this manifest carries a rejection written back to S3."""
+        return bool(self.rejected)
+
+    @property
+    def rejection_reason(self) -> str:
+        """The recorded rejection reason, or a placeholder when absent."""
+        if not self.rejected:
+            return ""
+        reason = self.rejected.get("reason") or "no reason recorded"
+        return str(reason)
 
 
 @dataclass
