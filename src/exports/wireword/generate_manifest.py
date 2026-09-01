@@ -22,6 +22,7 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
+from langtools.dialect_overrides import get_dialect_override
 from langtools.manifest_grammar import get_manifest_conjugation_config
 from storage.translation_helpers import LANGUAGE_NAMES
 from exports.wireword.readings import get_manifest_reading_config
@@ -144,9 +145,15 @@ def generate_manifest(
     """
     manifest_path = os.path.join(wireword_dir, "wireword_manifest_v2.json")
 
-    # Determine language name and code.  A dialect is an ordinary language here:
-    # zh-tw is its own code with its own display name, not a variant flag on zh.
-    language_name = _slugify_language_name(LANGUAGE_NAMES.get(language, language))
+    # Determine language name and code.  A storage dialect keeps the *base*
+    # language's name -- es-419's manifest says "spanish", not
+    # "spanish (latin america)" -- because the client keys its language-level
+    # state (stats namespace, grammar lessons, UI strings) off this name and a
+    # variant shares all of it.  The variety is carried by language_code, and
+    # asserted by the "variant" field below.
+    variant_of = get_dialect_override(language)
+    manifest_language = variant_of.parent_lang if variant_of else language
+    language_name = _slugify_language_name(LANGUAGE_NAMES.get(manifest_language, manifest_language))
     language_code = language
 
     # Get available voices for this language
@@ -172,8 +179,13 @@ def generate_manifest(
         "version": 1,
         "language": language_name,
         "language_code": language_code,
-        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
+    # Name the variety explicitly so a client can assert the bundle it received
+    # is the one it asked for.  Now that "language" collapses to the base name
+    # above, this is what tells an es-419 manifest apart from an es one.
+    if variant_of is not None:
+        manifest["variant"] = language
+    manifest["generated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     # Add source language metadata between generated_at and config
     if source_language != "en":
         source_lang_name = _slugify_language_name(

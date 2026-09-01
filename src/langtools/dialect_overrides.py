@@ -125,6 +125,24 @@ class DialectOverride:
             translations it reads (e.g. es-mx reads es-419).  ``None`` means
             fall back to *parent_lang*.  Ignored when *translation_target* is
             ``True``.
+        variant_name: Learner-facing name of the *region*, in the source
+            language, for the client's variant picker: "Latin America", not
+            "Spanish (Latin America)".  The picker sits inside an already
+            chosen language, so repeating the language name there is noise.
+            ``None`` means the dialect is not offered as a pickable variant.
+        variant_native_name: The same regional name written in the target
+            language ("Español de Latinoamérica").
+        variant_description: One jargon-free sentence shown under the option.
+        variant_flag: Emoji shown on the option row.
+        variant_regions: ISO 3166-1 alpha-2 regions that select this variant by
+            default.  A region should appear under at most one variant of a
+            language.
+        speech_locale: Locale the *client* passes to on-device TTS and speech
+            recognition when the variant's own tag is not a locale those APIs
+            accept (es-419 is not).  This is a client-side hint only and names
+            no recording we ship -- it is deliberately separate from
+            *tts_locale*, which is what our own audio pipeline records with.
+            ``None`` means the client uses the variant's language code.
     """
 
     parent_lang: str
@@ -137,6 +155,12 @@ class DialectOverride:
     llm_prompt_note: Optional[str] = None
     translation_target: bool = False
     covered_by: Optional[str] = None
+    variant_name: Optional[str] = None
+    variant_native_name: Optional[str] = None
+    variant_description: Optional[str] = None
+    variant_flag: Optional[str] = None
+    variant_regions: List[str] = field(default_factory=list)
+    speech_locale: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
@@ -163,6 +187,15 @@ DIALECT_OVERRIDES: Dict[str, DialectOverride] = {
             "Do NOT use Simplified Chinese characters."
         ),
         translation_target=True,
+        variant_name="Taiwan",
+        variant_native_name="臺灣正體",
+        variant_description=("Traditional characters and vocabulary as used in Taiwan."),
+        variant_flag="🇹🇼",
+        # HK and MO also write Traditional, but their vocabulary is Cantonese-
+        # influenced and not what this bundle holds; they stay on the base
+        # variant until there is a zh-hk to send them to.
+        variant_regions=["TW"],
+        speech_locale="zh-TW",
     ),
     # Spanish (Latin America) - the neutral pan-regional standard.  This is the
     # variety US classroom Spanish teaches, so it is a storage dialect even
@@ -187,6 +220,41 @@ DIALECT_OVERRIDES: Dict[str, DialectOverride] = {
             "'papa' not 'patata'). Avoid country-specific slang."
         ),
         translation_target=True,
+        variant_name="Latin America",
+        variant_native_name="Español de Latinoamérica",
+        variant_description=(
+            "Vocabulary and pronunciation as used in Mexico, Colombia, "
+            "Argentina and the rest of Latin America."
+        ),
+        variant_flag="🌎",
+        # Spanish-speaking Latin America, plus US (where classroom and
+        # community Spanish is the Latin American standard, not Peninsular).
+        variant_regions=[
+            "MX",
+            "CO",
+            "AR",
+            "PE",
+            "VE",
+            "CL",
+            "EC",
+            "GT",
+            "CU",
+            "BO",
+            "DO",
+            "HN",
+            "PY",
+            "SV",
+            "NI",
+            "CR",
+            "PA",
+            "UY",
+            "PR",
+            "US",
+        ],
+        # es-MX, not the es-US of tts_locale: this is the accent the client
+        # asks the device to speak in, and es-MX is the Latin American voice
+        # every mobile OS ships.  We record no audio for either locale today.
+        speech_locale="es-MX",
     ),
     # Spanish (Mexico) - a regional accent within Latin American Spanish.
     # Not stored separately: at lemma level its vocabulary is es-419's, so it
@@ -222,6 +290,12 @@ DIALECT_OVERRIDES: Dict[str, DialectOverride] = {
             "'telemóvel'). Use 'você' rather than 'tu' for the second person."
         ),
         translation_target=True,
+        variant_name="Brazil",
+        variant_native_name="Português do Brasil",
+        variant_description="Vocabulary and pronunciation as used in Brazil.",
+        variant_flag="🇧🇷",
+        variant_regions=["BR"],
+        speech_locale="pt-BR",
     ),
     # French (Canada) - Canadian French
     "fr-ca": DialectOverride(
@@ -553,6 +627,58 @@ _PARENT_DISPLAY_NAMES: Dict[str, str] = {
     "pt": "Portuguese (European)",
     "fr": "French (Metropolitan)",
     "en": "English (American)",
+}
+
+
+# Variant-picker metadata for a *base* language, which is an option in its own
+# variants.json but is not a dialect and so has no DIALECT_OVERRIDES entry.
+# The fields mirror the ``variant_*`` ones on DialectOverride; a base language
+# absent here is simply not offered as a pickable variant, which is what keeps
+# a language with no regional varieties from emitting a registry at all.
+@dataclass(frozen=True)
+class BaseVariant:
+    """Picker metadata for the unmarked variety of a language."""
+
+    name: str
+    native_name: str
+    description: str
+    language_code: str
+    flag: Optional[str] = None
+    regions: List[str] = field(default_factory=list)
+    speech_locale: Optional[str] = None
+
+
+BASE_VARIANTS: Dict[str, BaseVariant] = {
+    "es": BaseVariant(
+        name="Spain",
+        native_name="Español de España",
+        description="Vocabulary and pronunciation as used in Spain.",
+        # The bundle is plain "es", but the picker names the variety it is:
+        # es-ES is what distinguishes it from es-419 to a client.
+        language_code="es-ES",
+        flag="🇪🇸",
+        regions=["ES"],
+        speech_locale="es-ES",
+    ),
+    "zh": BaseVariant(
+        name="Mainland China",
+        native_name="简体中文",
+        description="Simplified characters and vocabulary as used in mainland China.",
+        language_code="zh-CN",
+        flag="🇨🇳",
+        # SG also writes Simplified and reads this bundle comfortably.
+        regions=["CN", "SG"],
+        speech_locale="zh-CN",
+    ),
+    "pt": BaseVariant(
+        name="Portugal",
+        native_name="Português de Portugal",
+        description="Vocabulary and pronunciation as used in Portugal.",
+        language_code="pt-PT",
+        flag="🇵🇹",
+        regions=["PT"],
+        speech_locale="pt-PT",
+    ),
 }
 
 
