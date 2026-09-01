@@ -11,8 +11,8 @@ from sqlalchemy.orm import Session
 
 import constants
 import wordfreq.frequency.importer
+from storage.backend import create_session
 from storage.backend.config import DataSourceConfig
-from storage.connection_pool import get_session
 import storage.database
 import storage.models.schema
 
@@ -387,10 +387,10 @@ def sync_corpus_configs_to_db(
     if session is None:
         if db_path:
             session_config = DataSourceConfig(sqlite_path=db_path)
-            session = storage.connection_pool.get_session(session_config)
+            session = create_session(session_config)
         else:
             session_config = DataSourceConfig()
-            session = storage.connection_pool.get_session(session_config)
+            session = create_session(session_config)
         should_close = True
     else:
         should_close = False
@@ -493,10 +493,10 @@ def get_corpus_size(
     if session is None:
         if db_path:
             session_config = DataSourceConfig(sqlite_path=db_path)
-            session = storage.connection_pool.get_session(session_config)
+            session = create_session(session_config)
         else:
             session_config = DataSourceConfig()
-            session = storage.connection_pool.get_session(session_config)
+            session = create_session(session_config)
         should_close = True
     else:
         should_close = False
@@ -539,10 +539,10 @@ def get_effective_unknown_rank(
     if session is None:
         if db_path:
             session_config = DataSourceConfig(sqlite_path=db_path)
-            session = storage.connection_pool.get_session(session_config)
+            session = create_session(session_config)
         else:
             session_config = DataSourceConfig()
-            session = storage.connection_pool.get_session(session_config)
+            session = create_session(session_config)
         should_close = True
     else:
         should_close = False
@@ -589,10 +589,10 @@ def get_corpus_configs_from_db(
     if session is None:
         if db_path:
             session_config = DataSourceConfig(sqlite_path=db_path)
-            session = storage.connection_pool.get_session(session_config)
+            session = create_session(session_config)
         else:
             session_config = DataSourceConfig()
-            session = storage.connection_pool.get_session(session_config)
+            session = create_session(session_config)
         should_close = True
     else:
         should_close = False
