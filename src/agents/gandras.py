@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 """
-Gandras - Audio Manifest Downloader Agent
+Gandras - Audio Manifest Import Agent
 
 This agent scans S3 staging directories for manifest files, matches them against
-the database, and downloads audio files for matching entries.
+the database, and writes an AudioQualityReview row for each match.
+
+The import is metadata-only by default. Everything a review row holds - the
+MD5, the staging URLs, the expected text, the agent - comes from the manifest
+JSON, and the MP3s themselves are served to clients straight from S3, so there
+is no reason to transfer the audio to import it. Pass --fetch-audio when a
+local copy is genuinely wanted (spot-checking a voice, say); it also verifies
+each file's MD5 against its manifest.
 
 "Gandras" means "stork" in Lithuanian - a migratory bird that brings things home.
 
@@ -61,6 +68,8 @@ class GandrasAgent:
         require_guid_match: bool = True,
         require_text_match: bool = True,
         dry_run: bool = False,
+        fetch_audio: bool = False,
+        import_rejected: bool = False,
     ) -> None:
         """
         Initialize the Gandras agent.
@@ -71,15 +80,30 @@ class GandrasAgent:
             require_guid_match: Require GUID/sentence_id match (default: True)
             require_text_match: Require text match (default: True)
             dry_run: If True, only report what would be downloaded without downloading
+            fetch_audio: If True, also download each matched MP3. Off by default:
+                the review row is built entirely from the manifest JSON, and the
+                MP3s are served from S3, so importing metadata needs no transfer
+                of the audio itself.
+            import_rejected: If True, import audio whose manifest is marked
+                rejected in S3. Off by default -- a rejection travels with the
+                manifest precisely so every database honors it.
         """
         self.config = config
         self.debug = config.debug
         self.require_guid_match = require_guid_match
         self.require_text_match = require_text_match
         self.dry_run = dry_run
-        self.output_dir = (
-            Path(output_dir) if output_dir else Path(tempfile.mkdtemp(prefix="gandras_"))
-        )
+        self.fetch_audio = fetch_audio
+        self.import_rejected = import_rejected
+        # A temp dir is only made when MP3s are actually fetched, so a
+        # metadata-only run leaves nothing behind.
+        self.output_dir: Optional[Path]
+        if output_dir:
+            self.output_dir = Path(output_dir)
+        elif fetch_audio:
+            self.output_dir = Path(tempfile.mkdtemp(prefix="gandras_"))
+        else:
+            self.output_dir = None
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
@@ -87,10 +111,10 @@ class GandrasAgent:
         # Lazy-initialize S3 client
         self._s3_uploader: Optional[Any] = None
 
-        # Ensure output directory exists
-        if not self.dry_run:
+        # Ensure output directory exists (only meaningful when fetching MP3s)
+        if self.fetch_audio and not self.dry_run and self.output_dir is not None:
             self.output_dir.mkdir(parents=True, exist_ok=True)
-        logger.info(f"Output directory: {self.output_dir}")
+            logger.info(f"Output directory: {self.output_dir}")
 
     @property
     def s3_uploader(self) -> Any:
@@ -225,12 +249,12 @@ class GandrasAgent:
             )
 
         if existing:
-            # If the existing record was rejected and this manifest is the same
-            # audio file (same MD5 — filenames in S3 are the audio MD5), skip.
-            # Don't resurrect bad audio that's already been reviewed and rejected.
-            # TODO: rewrite the manifest JSON in S3 on rejection so other clients
-            # / databases that run gandras also see the rejection without
-            # depending on this DB's review state.
+            # Second line of defence against resurrecting rejected audio. The
+            # first is the manifest's own "rejected" block, which process_manifests
+            # honors before reaching here and which every database sees; this
+            # local check still covers audio rejected in this database before the
+            # verdict was pushed to S3 (see s3_ops.mark_manifest_rejected).
+            # Same MD5 means the same file, since staging keys are the audio MD5.
             if existing.status == "needs_replacement" and existing.manifest_md5 == manifest.md5:
                 logger.info(
                     f"Skipping re-import of rejected audio for {manifest.label} "
@@ -294,7 +318,8 @@ class GandrasAgent:
         results: Dict[str, Any] = {
             "total_manifests": 0,
             "matched": 0,
-            "downloaded": 0,
+            "imported": 0,
+            "rejected": 0,
             "skipped": 0,
             "errors": 0,
             "match_types": {},
@@ -341,6 +366,16 @@ class GandrasAgent:
                     results["skipped"] += 1
                     continue
 
+                # The manifest itself says this audio was rejected, so no
+                # database needs to have made that call locally to honor it.
+                if manifest.is_rejected and not self.import_rejected:
+                    logger.info(
+                        f"Skipping rejected audio for {manifest.label}: "
+                        f"{manifest.rejection_reason}"
+                    )
+                    results["rejected"] += 1
+                    continue
+
                 # Match against database
                 match_result = self.match_manifest_to_database(session, manifest)
 
@@ -368,21 +403,30 @@ class GandrasAgent:
                 if match_result.matched:
                     results["matched"] += 1
 
-                    # Download audio file
                     identifier = manifest.guid or f"sent_{manifest.sentence_id}"
                     safe_text = manifest.expected_text.lower().replace(" ", "_")[:30]
                     local_filename = f"{identifier}_{safe_text}.mp3"
 
-                    output_path = (
-                        self.output_dir
-                        / manifest.language_code
-                        / manifest.voice_name
-                        / local_filename
-                    )
+                    # The review row is built from the manifest alone, so the
+                    # MP3 is fetched only when explicitly asked for.
+                    if self.fetch_audio:
+                        assert self.output_dir is not None  # set whenever fetch_audio
+                        output_path = (
+                            self.output_dir
+                            / manifest.language_code
+                            / manifest.voice_name
+                            / local_filename
+                        )
 
-                    success, downloaded_md5 = self.download_audio_file(audio_key, output_path)
+                        success, downloaded_md5 = self.download_audio_file(audio_key, output_path)
 
-                    if success:
+                        if not success:
+                            results["errors"] += 1
+                            entry_result["downloaded"] = False
+                            entry_result["error"] = "Download failed"
+                            results["entries"].append(entry_result)
+                            continue
+
                         # Verify MD5 if we downloaded
                         if downloaded_md5 and downloaded_md5 != manifest.md5:
                             logger.warning(
@@ -391,17 +435,15 @@ class GandrasAgent:
                             )
                             match_result.warnings.append("MD5 mismatch after download")
 
-                        # Create/update review record
-                        self.create_or_update_review_record(
-                            session, manifest, match_result, local_filename
-                        )
-                        results["downloaded"] += 1
-                        entry_result["downloaded"] = True
                         entry_result["local_path"] = str(output_path)
-                    else:
-                        results["errors"] += 1
-                        entry_result["downloaded"] = False
-                        entry_result["error"] = "Download failed"
+
+                    # Create/update review record
+                    self.create_or_update_review_record(
+                        session, manifest, match_result, local_filename
+                    )
+                    results["imported"] += 1
+                    entry_result["imported"] = True
+                    entry_result["downloaded"] = self.fetch_audio
                 else:
                     results["skipped"] += 1
                     entry_result["downloaded"] = False
@@ -422,30 +464,33 @@ class GandrasAgent:
 def get_argument_parser() -> argparse.ArgumentParser:
     """Return the argument parser for introspection."""
     parser = argparse.ArgumentParser(
-        description="Gandras - Audio Manifest Downloader Agent",
+        description="Gandras - Audio Manifest Import Agent",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Matching Strategy:
   By default, both GUID/sentence_id AND text must match.
 
-  Use --no-require-guid to allow downloads even when GUID/sentence_id
+  Use --no-require-guid to allow imports even when GUID/sentence_id
   doesn't match (matches by text only within the language).
 
-  Use --no-require-text to allow downloads even when the text doesn't
+  Use --no-require-text to allow imports even when the text doesn't
   exactly match (matches by GUID/sentence_id only).
 
 Examples:
   # List all manifests in staging
   %(prog)s --mode list
 
-  # Download manifests for Lithuanian/ruta voice
+  # Import audio metadata for Lithuanian/ruta voice (no MP3 transfer)
   %(prog)s --language lt --voice ruta
 
-  # Download with relaxed matching (GUID match only)
+  # Import with relaxed matching (GUID match only)
   %(prog)s --language lt --no-require-text
 
-  # Dry run to see what would be downloaded
+  # Dry run to see what would be imported
   %(prog)s --language lt --dry-run
+
+  # Also pull down the MP3s themselves
+  %(prog)s --language lt --fetch-audio --output-dir /tmp/lt_audio
 """,
     )
 
@@ -459,8 +504,8 @@ Examples:
         "--mode",
         choices=["list", "download", "report"],
         default="download",
-        help="Operation mode: list (show manifests), download (download matching audio), "
-        "report (show match statistics without downloading)",
+        help="Operation mode: list (show manifests), download (import matching "
+        "manifests into the database), report (show match statistics without writing)",
     )
 
     # Filter options
@@ -480,7 +525,23 @@ Examples:
     # Output options
     parser.add_argument(
         "--output-dir",
-        help="Output directory for downloaded audio (default: temp directory)",
+        help="Output directory for downloaded audio (default: temp directory). "
+        "Only used with --fetch-audio.",
+    )
+
+    parser.add_argument(
+        "--import-rejected",
+        action="store_true",
+        help="Import audio even when its manifest is marked rejected in S3. "
+        "Off by default, so a rejection recorded by any database is honored here.",
+    )
+
+    parser.add_argument(
+        "--fetch-audio",
+        action="store_true",
+        help="Also download each matched MP3. Off by default: the review record "
+        "is built from the manifest JSON and the MP3s are served from S3, so a "
+        "metadata import needs no audio transfer.",
     )
 
     # Matching options
@@ -513,6 +574,8 @@ def main() -> None:
         require_guid_match=not args.no_require_guid,
         require_text_match=not args.no_require_text,
         dry_run=args.dry_run,
+        fetch_audio=args.fetch_audio,
+        import_rejected=args.import_rejected,
     )
 
     # Handle modes
@@ -550,6 +613,7 @@ def main() -> None:
 
         print(f"\nTotal manifests: {results['total_manifests']}")
         print(f"Matched: {results['matched']}")
+        print(f"Rejected in S3: {results['rejected']}")
         print(f"Skipped (no match): {results['skipped']}")
         print(f"Errors: {results['errors']}")
 
@@ -567,12 +631,14 @@ def main() -> None:
         return
 
     elif args.mode == "download":
-        # Download matching audio
-        print("\nDownloading audio from S3 staging...")
+        if args.fetch_audio:
+            print("\nImporting audio metadata from S3 staging (with MP3 download)...")
+        else:
+            print("\nImporting audio metadata from S3 staging...")
         print("=" * 80)
 
         if args.dry_run:
-            print("[DRY RUN MODE - no files will be downloaded]")
+            print("[DRY RUN MODE - no records will be written]")
 
         results = agent.process_manifests(
             language_code=args.language,
@@ -583,14 +649,16 @@ def main() -> None:
 
         # Print summary
         print("\n" + "=" * 80)
-        print("GANDRAS AGENT REPORT - Audio Manifest Download")
+        print("GANDRAS AGENT REPORT - Audio Manifest Import")
         print("=" * 80)
         print(f"Total manifests: {results['total_manifests']}")
         print(f"Matched: {results['matched']}")
-        print(f"Downloaded: {results['downloaded']}")
+        print(f"Imported: {results['imported']}")
+        print(f"Rejected in S3: {results['rejected']}")
         print(f"Skipped: {results['skipped']}")
         print(f"Errors: {results['errors']}")
-        print(f"Output directory: {agent.output_dir}")
+        if args.fetch_audio:
+            print(f"Output directory: {agent.output_dir}")
 
         print("\nMatch types:")
         for match_type, count in sorted(results["match_types"].items()):

@@ -22,6 +22,7 @@ paths by hand, so a layout change lands in one place.
 import hashlib
 import json
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Protocol, Tuple
 
@@ -231,6 +232,104 @@ def download_manifest(
     except Exception as e:
         logger.error(f"Error downloading manifest {manifest_key}: {e}")
         return None
+
+
+def mark_manifest_rejected(
+    uploader: SupportsS3,
+    manifest_key: str,
+    reason: str,
+    rejected_by: str,
+    quality_issues: Optional[str] = None,
+) -> bool:
+    """
+    Record a rejection inside a staged manifest, in place.
+
+    Staged audio is content-addressed: the object key is the file's MD5, so the
+    audio itself can never be edited or meaningfully overwritten. The manifest
+    beside it can, and that is where a rejection belongs -- otherwise the
+    verdict lives only in the database that made it, and every other database
+    running an import re-adopts audio this one has already thrown out.
+
+    Adds (or replaces) a "rejected" block; the rest of the manifest is
+    preserved, so provenance is not lost. Re-rejecting an already-rejected
+    manifest simply refreshes the block.
+
+    Args:
+        uploader: Configured S3AudioUploader
+        manifest_key: Key of the manifest to amend
+        reason: Human-readable explanation, kept verbatim
+        rejected_by: Who or what rejected it (a reviewer, or an agent name)
+        quality_issues: Optional structured issue codes, as stored on the
+            review row
+
+    Returns:
+        True if the manifest was rewritten.
+    """
+    manifest = download_manifest(uploader, manifest_key)
+    if manifest is None:
+        logger.error(f"Cannot reject missing or unreadable manifest: {manifest_key}")
+        return False
+
+    manifest["rejected"] = {
+        "reason": reason,
+        "rejected_by": rejected_by,
+        "rejected_at": datetime.now(timezone.utc).isoformat(),
+        "quality_issues": quality_issues,
+    }
+
+    try:
+        uploader.s3.put_object(
+            Bucket=uploader.bucket_name,
+            Key=manifest_key,
+            Body=json.dumps(manifest, indent=2, ensure_ascii=False).encode("utf-8"),
+            ContentType="application/json",
+            ACL="public-read",
+            CacheControl="public, max-age=3600",
+        )
+    except Exception as e:
+        logger.error(f"Error writing rejection to {manifest_key}: {e}")
+        return False
+
+    logger.info(f"Marked manifest rejected: {manifest_key} ({reason})")
+    return True
+
+
+def clear_manifest_rejection(
+    uploader: SupportsS3,
+    manifest_key: str,
+) -> bool:
+    """
+    Drop the "rejected" block from a staged manifest, un-invalidating it.
+
+    The escape hatch for a rejection made in error. Returns True if the
+    manifest was rewritten or carried no rejection to begin with.
+    """
+    manifest = download_manifest(uploader, manifest_key)
+    if manifest is None:
+        logger.error(f"Cannot clear rejection on missing manifest: {manifest_key}")
+        return False
+
+    if "rejected" not in manifest:
+        logger.info(f"Manifest carries no rejection: {manifest_key}")
+        return True
+
+    del manifest["rejected"]
+
+    try:
+        uploader.s3.put_object(
+            Bucket=uploader.bucket_name,
+            Key=manifest_key,
+            Body=json.dumps(manifest, indent=2, ensure_ascii=False).encode("utf-8"),
+            ContentType="application/json",
+            ACL="public-read",
+            CacheControl="public, max-age=3600",
+        )
+    except Exception as e:
+        logger.error(f"Error clearing rejection on {manifest_key}: {e}")
+        return False
+
+    logger.info(f"Cleared rejection on manifest: {manifest_key}")
+    return True
 
 
 def download_audio_file(

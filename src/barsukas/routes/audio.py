@@ -39,7 +39,11 @@ from audioshoe.coqui import CoquiVoice
 from audioshoe.espeak import EspeakVoice
 from audioshoe.qwen.types import QwenVoice
 from audioshoe.piper import PiperVoice
-from barsukas.helpers.audio_helpers import link_audio_to_lemma, validate_audio_translation
+from barsukas.helpers.audio_helpers import (
+    link_audio_to_lemma,
+    sync_rejection_to_s3,
+    validate_audio_translation,
+)
 from clients.audio import Voice
 from clients.audio.gpt_voices import GptVoice
 from clients.audio.azure_tts import AzureVoice
@@ -529,6 +533,14 @@ def review_file(review_id: int) -> ResponseReturnValue:
         review.reviewed_at = datetime.utcnow()
         # TODO: Add reviewed_by when auth is implemented
 
+        # Publish the verdict into the staged manifest (or clear it when this
+        # is no longer a rejection); non-fatal, as in rapid review.
+        synced, sync_message = sync_rejection_to_s3(review, rejected_by="audio review")
+        if not synced:
+            logging.getLogger(__name__).warning(
+                f"Failed to sync rejection state for audio {review_id}: {sync_message}"
+            )
+
         g.db.commit()
 
         flash("Review updated successfully", "success")
@@ -577,6 +589,13 @@ def quick_update(review_id: int) -> ResponseReturnValue:
     try:
         review.status = status
         review.reviewed_at = datetime.utcnow()
+
+        synced, sync_message = sync_rejection_to_s3(review, rejected_by="audio review")
+        if not synced:
+            logging.getLogger(__name__).warning(
+                f"Failed to sync rejection state for audio {review_id}: {sync_message}"
+            )
+
         g.db.commit()
 
         return jsonify({"success": True, "status": status})

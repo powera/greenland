@@ -175,3 +175,65 @@ def copy_staging_to_prod(staging_url: str) -> Tuple[bool, str]:
     except Exception as e:
         logger.error(f"Error copying to production: {e}")
         return False, str(e)
+
+
+def sync_rejection_to_s3(review: Any, rejected_by: str = "rapid_review") -> Tuple[bool, str]:
+    """Make the staged manifest agree with this row's review status.
+
+    A rejection recorded only in this database is invisible to everyone else:
+    the next database to run gandras re-imports the file and re-adopts audio
+    this one threw out. Staged audio is content-addressed -- the key is the
+    MD5 -- so the verdict goes in the manifest beside it, where it travels with
+    the audio.
+
+    Driven by the row's *current* status rather than by which button was
+    pressed, so undo is handled by the same call: moving out of
+    'needs_replacement' clears the block that moving into it wrote.
+
+    Callers should treat a False return as non-fatal and leave the database
+    verdict standing -- push_audio_rejections_to_s3.py reconciles later. This
+    mirrors copy_staging_to_prod, which likewise lets the review stand when S3
+    is unreachable.
+
+    Args:
+        review: The AudioQualityReview row, already carrying its new status
+        rejected_by: Recorded in the manifest as who made the call
+
+    Returns:
+        Tuple of (success, message). Success with "no manifest" when the row
+        has no MD5 to address, since there is nothing to write.
+    """
+    from audiotools import s3_ops
+    from clients.audio.s3_uploader import S3AudioUploader, get_staging_manifest_key
+
+    if not review.manifest_md5:
+        return True, "no manifest to update"
+
+    # Rebuilt from the row's own fields rather than parsed out of the stored
+    # CDN URL, so an endpoint change cannot misaddress the write.
+    manifest_key = get_staging_manifest_key(
+        review.language_code, review.voice_name, review.manifest_md5
+    )
+
+    try:
+        uploader = S3AudioUploader()
+
+        if review.status == "needs_replacement":
+            reason = str(review.notes) if review.notes else "Rejected during audio review"
+            ok = s3_ops.mark_manifest_rejected(
+                uploader,
+                manifest_key=manifest_key,
+                reason=reason,
+                rejected_by=rejected_by,
+                quality_issues=review.quality_issues,
+            )
+            return (ok, "rejected in S3" if ok else "failed to write rejection")
+
+        # Any other status means this audio is not rejected, so a block left
+        # over from a previous rejection (or an undo) must come off.
+        ok = s3_ops.clear_manifest_rejection(uploader, manifest_key)
+        return (ok, "rejection cleared in S3" if ok else "failed to clear rejection")
+
+    except Exception as e:
+        logger.error(f"Error syncing rejection state for {manifest_key}: {e}")
+        return False, str(e)

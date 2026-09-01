@@ -7,6 +7,7 @@ Provides streamlined keyboard-driven audio quality review interface.
 """
 
 import json
+import logging
 from datetime import datetime
 from typing import Optional
 
@@ -24,7 +25,7 @@ from flask.typing import ResponseReturnValue
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import joinedload
 
-from barsukas.helpers.audio_helpers import validate_audio_translation
+from barsukas.helpers.audio_helpers import sync_rejection_to_s3, validate_audio_translation
 from langtools.zh.pinyin_helper import generate_pinyin
 from storage.models.schema import AudioQualityReview, Lemma, Sentence, SentenceTranslation
 from storage.queries.lemma import apply_effective_difficulty_filter
@@ -184,14 +185,22 @@ def submit(review_id: int) -> ResponseReturnValue:
                     review.accepted_by = "rapid_review"
                 else:
                     # Log but don't fail the review - audio can be pushed later
-                    import logging
-
                     logging.getLogger(__name__).warning(
                         f"Failed to push audio {review_id} to production: {prod_url}"
                     )
-            g.db.commit()
-        else:
-            g.db.commit()
+
+        # Publish the verdict into the staged manifest so every database that
+        # imports this audio honors it, not just this one. Driven by the new
+        # status, so an undo back to pending_review clears the block the
+        # rejection wrote. Failure is non-fatal: the database verdict stands and
+        # scripts/push_audio_rejections_to_s3.py reconciles later.
+        synced, sync_message = sync_rejection_to_s3(review)
+        if not synced:
+            logging.getLogger(__name__).warning(
+                f"Failed to sync rejection state for audio {review_id}: {sync_message}"
+            )
+
+        g.db.commit()
 
         # Get next file based on same filters
         language_filter = data.get("language", "")
@@ -434,6 +443,16 @@ def bad_translation(review_id: int) -> ResponseReturnValue:
         review.quality_issues = json.dumps(["translation_mismatch"])
         review.notes = "Translation marked as incorrect during rapid review"
         review.reviewed_at = datetime.utcnow()
+
+        # Publish the rejection, as the reject button does. The text being wrong
+        # still makes this recording bad: the corrected text is re-recorded as a
+        # new file with its own MD5 and manifest, so rejecting this one is right.
+        synced, sync_message = sync_rejection_to_s3(review)
+        if not synced:
+            logging.getLogger(__name__).warning(
+                f"Failed to sync rejection state for audio {review_id}: {sync_message}"
+            )
+
         g.db.commit()
 
         # Get next file based on same filters

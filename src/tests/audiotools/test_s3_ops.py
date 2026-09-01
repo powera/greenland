@@ -15,6 +15,7 @@ to get wrong in the agent copies:
 Everything here uses a fake uploader; nothing touches real credentials.
 """
 
+import json
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional
 
@@ -48,6 +49,8 @@ class FakeS3:
         self._body = body
         self._list_error = list_error
         self.downloaded: List[str] = []
+        self.put_objects: List[Dict[str, Any]] = []
+        self.put_error: Optional[Exception] = None
 
     def get_paginator(self, _operation: str) -> "FakeS3":
         return self
@@ -70,6 +73,12 @@ class FakeS3:
     def download_file(self, _bucket: str, key: str, dest: str) -> None:
         self.downloaded.append(key)
         Path(dest).write_bytes(b"audio-bytes")
+
+    def put_object(self, **kwargs: Any) -> Dict[str, Any]:
+        if self.put_error is not None:
+            raise self.put_error
+        self.put_objects.append(kwargs)
+        return {}
 
 
 class FakeUploader:
@@ -205,3 +214,88 @@ def test_download_audio_reports_failure(tmp_path: Path) -> None:
         FakeUploader(ExplodingS3()), "missing.mp3", tmp_path / "out.mp3"
     )
     assert result == (False, None)
+
+
+# ---------- manifest rejection ----------
+
+
+def test_reject_adds_block_and_preserves_manifest() -> None:
+    s3 = FakeS3(body=b'{"md5": "abc", "guid": "N01_001", "voice_name": "ruta"}')
+
+    assert s3_ops.mark_manifest_rejected(
+        FakeUploader(s3),
+        "staging/lt/ruta/abc.manifest",
+        reason="wrong word spoken",
+        rejected_by="reviewer",
+        quality_issues='["translation_mismatch"]',
+    )
+
+    (put,) = s3.put_objects
+    assert put["Key"] == "staging/lt/ruta/abc.manifest"
+    written = json.loads(put["Body"].decode("utf-8"))
+
+    # Provenance survives the rewrite.
+    assert written["md5"] == "abc"
+    assert written["guid"] == "N01_001"
+
+    rejection = written["rejected"]
+    assert rejection["reason"] == "wrong word spoken"
+    assert rejection["rejected_by"] == "reviewer"
+    assert rejection["quality_issues"] == '["translation_mismatch"]'
+    assert rejection["rejected_at"].endswith("+00:00"), "timestamp must be UTC-explicit"
+
+
+def test_reject_writes_public_json() -> None:
+    s3 = FakeS3()
+    s3_ops.mark_manifest_rejected(FakeUploader(s3), "k.manifest", "bad", "reviewer")
+
+    (put,) = s3.put_objects
+    assert put["ContentType"] == "application/json"
+    assert put["ACL"] == "public-read"
+
+
+def test_reject_is_idempotent() -> None:
+    """Re-rejecting refreshes the block rather than nesting or duplicating it."""
+    s3 = FakeS3(body=b'{"md5": "abc", "rejected": {"reason": "old", "rejected_by": "x"}}')
+    s3_ops.mark_manifest_rejected(FakeUploader(s3), "k.manifest", "new reason", "reviewer")
+
+    written = json.loads(s3.put_objects[0]["Body"].decode("utf-8"))
+    assert written["rejected"]["reason"] == "new reason"
+    assert "rejected" not in written["rejected"], "block must not nest"
+
+
+def test_reject_preserves_non_ascii_reason() -> None:
+    s3 = FakeS3()
+    s3_ops.mark_manifest_rejected(FakeUploader(s3), "k.manifest", "sakė 'ačiū'", "reviewer")
+
+    written = json.loads(s3.put_objects[0]["Body"].decode("utf-8"))
+    assert written["rejected"]["reason"] == "sakė 'ačiū'"
+
+
+def test_reject_reports_unreadable_manifest() -> None:
+    s3 = FakeS3(body=b"not json")
+    assert not s3_ops.mark_manifest_rejected(FakeUploader(s3), "k.manifest", "bad", "reviewer")
+    assert s3.put_objects == [], "must not write when the original could not be read"
+
+
+def test_reject_reports_write_failure() -> None:
+    s3 = FakeS3()
+    s3.put_error = RuntimeError("AccessDenied")
+    assert not s3_ops.mark_manifest_rejected(FakeUploader(s3), "k.manifest", "bad", "reviewer")
+
+
+def test_clear_rejection_removes_block() -> None:
+    s3 = FakeS3(body=b'{"md5": "abc", "rejected": {"reason": "mistake"}}')
+
+    assert s3_ops.clear_manifest_rejection(FakeUploader(s3), "k.manifest")
+
+    written = json.loads(s3.put_objects[0]["Body"].decode("utf-8"))
+    assert "rejected" not in written
+    assert written["md5"] == "abc"
+
+
+def test_clear_rejection_on_clean_manifest_writes_nothing() -> None:
+    s3 = FakeS3(body=b'{"md5": "abc"}')
+
+    assert s3_ops.clear_manifest_rejection(FakeUploader(s3), "k.manifest")
+    assert s3.put_objects == [], "no rewrite when there was no rejection"
