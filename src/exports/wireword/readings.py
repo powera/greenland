@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, Optional, Sequence
 
+from langtools.dialect_overrides import get_base_language
 from langtools.ja.romaji_helper import generate_hiragana, generate_romaji
 from langtools.zh.pinyin_helper import generate_pinyin
 
@@ -31,9 +32,20 @@ DEFAULT_READING_SYSTEM_BY_LANGUAGE: dict[str, str] = {
 }
 
 
+def _get_generators(language_code: str) -> Optional[dict[str, ReadingGenerator]]:
+    """Return the reading generators for a language, resolving dialects.
+
+    A dialect reads with its parent's script: zh-tw is written in Traditional
+    characters but is still annotated with pinyin, and pypinyin reads those
+    characters directly.  Keyed on the raw code, zh-tw would silently ship
+    without readings at all.
+    """
+    return READING_GENERATORS_BY_LANGUAGE.get(get_base_language(language_code))
+
+
 def get_manifest_reading_config(language_code: str) -> Optional[dict[str, Any]]:
     """Return manifest reading configuration for a target language."""
-    generators = READING_GENERATORS_BY_LANGUAGE.get(language_code)
+    generators = _get_generators(language_code)
     if not generators:
         return None
 
@@ -53,7 +65,7 @@ def get_manifest_reading_config(language_code: str) -> Optional[dict[str, Any]]:
 
     return {
         "style": "ruby",
-        "default_system": DEFAULT_READING_SYSTEM_BY_LANGUAGE[language_code],
+        "default_system": DEFAULT_READING_SYSTEM_BY_LANGUAGE[get_base_language(language_code)],
         "systems": systems,
     }
 
@@ -63,7 +75,7 @@ def build_target_reading_fields(language_code: str, target_text: Optional[str]) 
     if not target_text:
         return {}
 
-    generators = READING_GENERATORS_BY_LANGUAGE.get(language_code)
+    generators = _get_generators(language_code)
     if not generators:
         return {}
 
@@ -82,7 +94,7 @@ def build_target_reading_list_fields(
     base_field_name: str,
 ) -> dict[str, list[str]]:
     """Build parallel reading arrays for alternative or synonym target strings."""
-    generators = READING_GENERATORS_BY_LANGUAGE.get(language_code)
+    generators = _get_generators(language_code)
     if not generators or not target_texts:
         return {}
 
@@ -110,7 +122,7 @@ def build_translation_reading_fields(
     if not target_text:
         return {}
 
-    generators = READING_GENERATORS_BY_LANGUAGE.get(language_code)
+    generators = _get_generators(language_code)
     if not generators:
         return {}
 

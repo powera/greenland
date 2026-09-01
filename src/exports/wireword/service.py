@@ -23,6 +23,7 @@ from storage.translation_helpers import (
     TIER_2_LANGUAGES,
 )
 from storage.backend.factory import create_session
+from langtools.dialect_overrides import normalize_language_code
 from exports.wireword.export_manager import WIREWORD_EXPORT_LANGUAGES, TrakaidoExporter
 from exports.wireword.generate_manifest import generate_manifest
 from exports.wireword.generate_categorychoice import (
@@ -63,7 +64,6 @@ class WirewordExportService:
         self,
         config: DataSourceConfig,
         language: str = "lt",
-        simplified_chinese: bool = True,
         include_unreviewed_audio: bool = False,
         source_language: str = "en",
     ):
@@ -72,8 +72,9 @@ class WirewordExportService:
 
         Args:
             config: DataSourceConfig with model, debug, and backend settings (required)
-            language: Language code ('lt' for Lithuanian, 'zh' for Chinese, 'zh-Hant' for Traditional Chinese)
-            simplified_chinese: For 'zh', whether to convert to Simplified (default: True)
+            language: Language code ('lt' for Lithuanian, 'zh' for Chinese, 'zh-tw' for
+                Taiwan Traditional Chinese).  Taken through normalize_language_code, so
+                the older 'zh-Hant' spelling (and 'zh_TW') resolves to 'zh-tw'.
             include_unreviewed_audio: If True, include audio that exists in staging but hasn't been
                 reviewed yet. The manifest's audio_prefix will be changed to point to staging.
             source_language: Source language code (default: 'en'). The language the learner already
@@ -82,9 +83,8 @@ class WirewordExportService:
         """
         self.config = config
         self.debug = config.debug
-        self.simplified_chinese = simplified_chinese
         self.include_unreviewed_audio = include_unreviewed_audio
-        self.source_language = source_language
+        self.source_language = normalize_language_code(source_language)
 
         supported_source_languages = {"en", *SUPPORTED_NON_ENGLISH_SOURCE_LANGUAGES}
         if self.source_language not in supported_source_languages:
@@ -94,18 +94,11 @@ class WirewordExportService:
                 f"Supported: {supported_source_display}"
             )
 
-        # Handle language variants
-        if language == "zh-Hant":
-            self.language = "zh"
-            self.simplified_chinese = False
-            self.language_suffix = "zh_Hant"
-        elif language == "zh" and not self.simplified_chinese:
-            # Traditional Chinese passed as language="zh" with simplified_chinese=False
-            self.language = "zh"
-            self.language_suffix = "zh_Hant"
-        else:
-            self.language = language
-            self.language_suffix = language
+        # zh-tw is an ordinary export language: its own translation rows, its own
+        # output directory, its own manifest language_code.  It is not a variant
+        # flag on zh, and nothing here falls back to zh's text.
+        self.language = normalize_language_code(language)
+        self.language_suffix = self.language
 
         if self.source_language == self.language:
             raise ValueError(f"Source language cannot equal target language ({self.language}).")
@@ -123,45 +116,38 @@ class WirewordExportService:
                 f"Unsupported language: {self.language}. Supported: {', '.join(SUPPORTED_LANGUAGES.keys())}"
             )
 
-        # Initialize exporter with language parameter and Chinese variant
+        # Initialize exporter with language parameter
         # Pass config directly so exporters use correct backend (SQLite or PostgreSQL)
         self.exporter = TrakaidoExporter(
             config=config,
             debug=self.debug,
             language=self.language,
-            simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
             include_unreviewed_audio=self.include_unreviewed_audio,
             source_language=self.source_language,
         )
 
-        # Initialize sentence exporter with Chinese variant support
         self.sentence_exporter = WirewordSentenceExporter(
             config=config,
             debug=self.debug,
             language=self.language,
-            simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
             include_unreviewed_audio=self.include_unreviewed_audio,
             source_language=self.source_language,
         )
 
-        # Initialize conversation exporter with Chinese variant support
         self.conversation_exporter = WirewordConversationExporter(
             config=config,
             debug=self.debug,
             language=self.language,
-            simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
             include_unreviewed_audio=self.include_unreviewed_audio,
             source_language=self.source_language,
         )
 
-        variant_info = ""
-        if self.language == "zh":
-            variant_info = f" ({'Simplified' if self.simplified_chinese else 'Traditional'})"
         source_info = ""
         if self.source_language != "en":
             source_info = f" from {LANGUAGE_NAMES.get(self.source_language, self.source_language)}"
         logger.info(
-            f"Initialized WireWord export service for {SUPPORTED_LANGUAGES[self.language]}{variant_info}{source_info} (lang_{self.language_suffix})"
+            f"Initialized WireWord export service for "
+            f"{SUPPORTED_LANGUAGES[self.language]}{source_info} (lang_{self.language_suffix})"
         )
 
     def _apply_country_overrides(self) -> Dict[str, Any]:
@@ -284,8 +270,8 @@ class WirewordExportService:
 
         Returns:
             Path to data/trakaido_wordlists/lang_{code}/generated/
-            For Traditional Chinese: lang_zh_Hant/generated/
-            For Simplified Chinese: lang_zh/generated/
+            For Taiwan Traditional Chinese: lang_zh-tw/generated/
+            For Mainland Simplified Chinese: lang_zh/generated/
         """
         # Get project root (greenland directory)
         project_root = constants.PROJECT_ROOT
@@ -354,8 +340,6 @@ class WirewordExportService:
 
     def _get_cdn_language_code(self) -> str:
         """Return the language code used for CDN paths and the manifest."""
-        if self.language == "zh" and not self.simplified_chinese:
-            return "zh_Hant"
         return self.language
 
     def export_wireword_directory(
@@ -426,7 +410,6 @@ class WirewordExportService:
             manifest_success, manifest_path = generate_manifest(
                 wireword_dir,
                 self.language,
-                self.simplified_chinese,
                 include_unreviewed_audio=self.include_unreviewed_audio,
                 source_language=self.source_language,
                 cdn_base=cdn_base,
@@ -832,12 +815,7 @@ class WirewordExportService:
         logger.info("=" * 80)
         logger.info("UNGURYS AGENT REPORT - WireWord Export")
         logger.info("=" * 80)
-        variant_info = ""
-        if self.language == "zh":
-            variant_info = f" ({'Simplified' if self.simplified_chinese else 'Traditional'})"
-        logger.info(
-            f"Language: {SUPPORTED_LANGUAGES[self.language]}{variant_info} (lang_{self.language_suffix})"
-        )
+        logger.info(f"Language: {SUPPORTED_LANGUAGES[self.language]} (lang_{self.language_suffix})")
         logger.info(f"Timestamp: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         logger.info(f"Export Mode: {results['export_mode']}")
         logger.info(f"Duration: {duration:.2f} seconds")

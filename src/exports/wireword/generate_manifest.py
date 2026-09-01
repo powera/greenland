@@ -30,7 +30,10 @@ from exports.wireword.readings import get_manifest_reading_config
 logger = logging.getLogger(__name__)
 
 # Voice names per language for manifest generation
-# Maps language code to list of path_name strings (used in audio URLs)
+# Maps language code to list of path_name strings (used in audio URLs).
+# Keyed on the exact code, dialects included: a dialect's audio is recorded from
+# its own text in its own accent, so zh-tw stays absent until Taiwanese voices
+# exist rather than advertising zh's mainland recordings of Simplified text.
 LANGUAGE_VOICE_NAMES: Dict[str, List[str]] = {
     "lt": ["ruta", "jonas"],
     "zh": ["meiling", "zhiyuan"],
@@ -38,6 +41,15 @@ LANGUAGE_VOICE_NAMES: Dict[str, List[str]] = {
     "ja": ["sakura", "haruto"],  # Placeholder names for Japanese
     "ko": ["yuna", "minho"],  # Placeholder names for Korean
 }
+
+
+def _slugify_language_name(display_name: str) -> str:
+    """Lowercase a display name into a manifest-safe identifier.
+
+    "Lithuanian" stays "lithuanian"; the parenthesized dialect names become
+    underscore-joined words ("Chinese (Taiwan)" -> "chinese_taiwan").
+    """
+    return "_".join(re.findall(r"[a-z0-9]+", display_name.lower()))
 
 
 def calculate_file_md5(filepath: str) -> str:
@@ -107,7 +119,6 @@ def get_sentence_file_stats(filepath: str) -> Dict[str, Any]:
 def generate_manifest(
     wireword_dir: str,
     language: str,
-    simplified_chinese: bool = True,
     include_unreviewed_audio: bool = False,
     source_language: str = "en",
     cdn_base: Optional[str] = None,
@@ -120,8 +131,7 @@ def generate_manifest(
 
     Args:
         wireword_dir: The wireword output directory containing the exported files
-        language: Language code (e.g., "lt", "zh", "fr")
-        simplified_chinese: For Chinese, whether simplified (True) or traditional (False)
+        language: Language code (e.g., "lt", "zh", "zh-tw", "fr")
         include_unreviewed_audio: If True, set audio_prefix to staging path
         source_language: Source language code (default: "en"). When not "en", adds
             source_language metadata to the manifest.
@@ -134,13 +144,10 @@ def generate_manifest(
     """
     manifest_path = os.path.join(wireword_dir, "wireword_manifest_v2.json")
 
-    # Determine language name and code
-    if language == "zh" and not simplified_chinese:
-        language_name = "chinese_traditional"
-        language_code = "zh_Hant"
-    else:
-        language_name = LANGUAGE_NAMES.get(language, language).lower()
-        language_code = language
+    # Determine language name and code.  A dialect is an ordinary language here:
+    # zh-tw is its own code with its own display name, not a variant flag on zh.
+    language_name = _slugify_language_name(LANGUAGE_NAMES.get(language, language))
+    language_code = language
 
     # Get available voices for this language
     available_voices = LANGUAGE_VOICE_NAMES.get(language, [])
@@ -168,10 +175,10 @@ def generate_manifest(
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
     # Add source language metadata between generated_at and config
-    source_lang_display: Optional[str] = None
     if source_language != "en":
-        source_lang_name = LANGUAGE_NAMES.get(source_language, source_language).lower()
-        source_lang_display = LANGUAGE_NAMES.get(source_language, source_language)
+        source_lang_name = _slugify_language_name(
+            LANGUAGE_NAMES.get(source_language, source_language)
+        )
         manifest["source_language"] = source_lang_name
         manifest["source_language_code"] = source_language
     config: Dict[str, Any] = {

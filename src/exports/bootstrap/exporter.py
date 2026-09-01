@@ -31,11 +31,22 @@ from agents.common.common_args import (
     add_output_args,
     get_data_source_config,
 )
+from langtools.dialect_overrides import normalize_language_code
 from storage.backend.config import BackendType, DataSourceConfig
 from exports.wireword.export_manager import TrakaidoExporter
 
 # Supported languages and their codes
-SUPPORTED_LANGUAGES = {"lt": "Lithuanian", "zh": "Chinese", "ko": "Korean", "fr": "French"}
+SUPPORTED_LANGUAGES = {
+    "lt": "Lithuanian",
+    "zh": "Chinese",
+    "zh-tw": "Chinese (Taiwan)",
+    "ko": "Korean",
+    "fr": "French",
+}
+
+# Spellings accepted but not advertised; normalize_language_code folds each to a
+# supported code (zh-Hant and zh_TW both mean zh-tw).
+DEPRECATED_LANGUAGE_ALIASES = ["zh-Hant", "zh_TW"]
 
 # Configure logging
 logging.basicConfig(
@@ -51,28 +62,23 @@ class BootstrapExporter:
         self,
         config: DataSourceConfig,
         language: str = "lt",
-        simplified_chinese: bool = True,
     ):
         """
         Initialize the Elnias agent.
 
         Args:
             config: DataSourceConfig with model, debug, and backend settings (required)
-            language: Language code ('lt' for Lithuanian, 'zh' for Chinese, 'zh-Hant' for Traditional Chinese)
-            simplified_chinese: For 'zh', whether to convert to Simplified (default: True)
+            language: Language code ('lt' for Lithuanian, 'zh' for Chinese, 'zh-tw' for
+                Taiwan Traditional Chinese).  Taken through normalize_language_code, so
+                the older 'zh-Hant' spelling (and 'zh_TW') resolves to 'zh-tw'.
         """
         self.config = config
         self.debug = config.debug
-        self.simplified_chinese = simplified_chinese
 
-        # Handle language variants
-        if language == "zh-Hant":
-            self.language = "zh"
-            self.simplified_chinese = False
-            self.language_suffix = "zh_Hant"
-        else:
-            self.language = language
-            self.language_suffix = language
+        # zh-tw is an ordinary language here: its own translation rows and its
+        # own output directory, with no fallback to zh's text.
+        self.language = normalize_language_code(language)
+        self.language_suffix = self.language
 
         if self.debug:
             logger.setLevel(logging.DEBUG)
@@ -83,19 +89,16 @@ class BootstrapExporter:
                 f"Unsupported language: {self.language}. Supported: {', '.join(SUPPORTED_LANGUAGES.keys())}"
             )
 
-        # Initialize exporter with language parameter and Chinese variant
+        # Initialize exporter with language parameter
         self.exporter = TrakaidoExporter(
             config=config,
             debug=self.debug,
             language=self.language,
-            simplified_chinese=self.simplified_chinese if self.language == "zh" else True,
         )
 
-        variant_info = ""
-        if self.language == "zh":
-            variant_info = f" ({'Simplified' if self.simplified_chinese else 'Traditional'})"
         logger.info(
-            f"Initialized Elnias agent for {SUPPORTED_LANGUAGES[self.language]}{variant_info} (lang_{self.language_suffix})"
+            f"Initialized Elnias agent for {SUPPORTED_LANGUAGES[self.language]} "
+            f"(lang_{self.language_suffix})"
         )
 
     def get_language_output_dir(self) -> str:
@@ -104,8 +107,8 @@ class BootstrapExporter:
 
         Returns:
             Path to data/trakaido_wordlists/lang_{code}/generated/
-            For Traditional Chinese: lang_zh_Hant/generated/
-            For Simplified Chinese: lang_zh/generated/
+            For Taiwan Traditional Chinese: lang_zh-tw/generated/
+            For Mainland Simplified Chinese: lang_zh/generated/
         """
         # Get project root (greenland directory)
         project_root = constants.PROJECT_ROOT
@@ -249,8 +252,8 @@ Examples:
   # Export Chinese (Simplified) bootstrap data
   python3 elnias.py --language zh
 
-  # Export Chinese (Traditional) bootstrap data
-  python3 elnias.py --language zh-Hant
+  # Export Chinese (Taiwan, Traditional) bootstrap data
+  python3 elnias.py --language zh-tw
 
   # Export Korean bootstrap data
   python3 elnias.py --language ko
@@ -276,7 +279,7 @@ Examples:
         "--language",
         type=str,
         default="lt",
-        choices=["lt", "zh", "zh-Hant", "ko", "fr"],
+        choices=sorted(SUPPORTED_LANGUAGES.keys()) + DEPRECATED_LANGUAGE_ALIASES,
         help="Target language code (default: lt)",
     )
 
@@ -298,16 +301,10 @@ def main() -> None:
     # Create configuration from args (always returns a valid config with defaults)
     config = get_data_source_config(args)
 
-    # Handle Traditional Chinese flag
-    simplified_chinese = True
-    if args.language == "zh-Hant":
-        simplified_chinese = False
-
-    # Create agent with config
+    # Create agent with config (BootstrapExporter normalizes the language code)
     agent = BootstrapExporter(
         config=config,
         language=args.language,
-        simplified_chinese=simplified_chinese,
     )
 
     # Run export

@@ -77,3 +77,24 @@ def test_build_translation_reading_fields_for_chinese() -> None:
     reading_fields = build_translation_reading_fields("zh", "你好")
 
     assert reading_fields == {"pinyin": "nǐ hǎo"}
+
+
+def test_manifest_reading_config_for_zh_tw_matches_chinese() -> None:
+    """A dialect reads with its parent's script; zh-tw is annotated with pinyin.
+
+    Keyed on the raw code, zh-tw fell through to no reading config at all and
+    the export shipped Traditional characters with no pronunciation.
+    """
+    assert get_manifest_reading_config("zh-tw") == get_manifest_reading_config("zh")
+
+
+def test_build_target_reading_fields_for_zh_tw() -> None:
+    reading_fields = build_target_reading_fields("zh-tw", "電腦")
+
+    assert reading_fields == {"target_pinyin": "diàn nǎo"}
+
+
+def test_build_translation_reading_fields_for_zh_tw() -> None:
+    reading_fields = build_translation_reading_fields("zh-tw", "你好")
+
+    assert reading_fields == {"pinyin": "nǐ hǎo"}

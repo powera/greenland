@@ -55,8 +55,11 @@ Overlap between two storage dialects is stored, not resolved.  es and es-419
 agree on most words; both rows carry that word and both reach data/release.
 There is deliberately no read-time fallback from a dialect to its parent -
 a blank means the translation has not been generated yet, not that the
-parent's should be substituted.  (The zh/zh-Hant WireWord export is the one
-exception and predates this.)
+parent's should be substituted.  The WireWord export used to be the one
+exception, exporting a "zh-Hant" variant built from zh text run through
+opencc; it now exports zh-tw like any other language, reading zh-tw rows
+only, to lang_zh-tw/ and CDN prefix zh-tw.  A word with no zh-tw translation
+is simply absent from that export.
 
 Anything keyed by the language a word is *written* in must also reach the
 presentation dialects reading it - get_dialects_reading() is the inverse of

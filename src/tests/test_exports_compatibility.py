@@ -22,12 +22,21 @@ def test_legacy_agent_imports_are_aliases_for_export_capabilities() -> None:
 
 def test_elnias_parser_preserves_export_arguments() -> None:
     args = get_elnias_parser().parse_args(
-        ["--language", "zh-Hant", "--include-unverified", "--output", "result.json"]
+        ["--language", "zh-tw", "--include-unverified", "--output", "result.json"]
     )
 
-    assert args.language == "zh-Hant"
+    assert args.language == "zh-tw"
     assert args.include_unverified is True
     assert args.output == "result.json"
+
+
+def test_elnias_parser_still_accepts_the_legacy_zh_hant_spelling() -> None:
+    """zh-Hant now means zh-tw; the old spelling stays accepted, not advertised."""
+    from langtools.dialect_overrides import normalize_language_code
+
+    args = get_elnias_parser().parse_args(["--language", "zh-Hant"])
+
+    assert normalize_language_code(args.language) == "zh-tw"
 
 
 def test_povas_parser_preserves_index_only_argument() -> None:

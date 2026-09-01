@@ -38,7 +38,7 @@
                 <form method="post" action="{{ url_for('wireword.export_wireword') }}">
                     <div class="mb-4">
                         <label for="language" class="form-label">Language <span class="text-danger">*</span></label>
-                        <select class="form-select" id="language" name="language" required onchange="toggleChineseOptions()">
+                        <select class="form-select" id="language" name="language" required onchange="toggleExportOptions()">
                             <option value="">Select language...</option>
                             <option value="all">All Languages</option>
                             {% for code, name in languages.items() %}
@@ -56,20 +56,6 @@
                             {% endfor %}
                         </select>
                         <small class="form-text text-muted">The language shown to the learner (defaults to English)</small>
-                    </div>
-
-                    <div class="mb-4" id="chinese_variant_group" style="display: none;">
-                        <label class="form-label">Chinese Variant</label>
-                        <div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="chinese_variant" id="simplified" value="simplified" checked>
-                                <label class="form-check-label" for="simplified">Simplified (简体)</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="chinese_variant" id="traditional" value="traditional">
-                                <label class="form-check-label" for="traditional">Traditional (繁體)</label>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="mb-4">
@@ -202,24 +188,25 @@
                     {% for code, name in languages.items() %}
                         <li><strong>{{ name }}</strong> ({{ code }})</li>
                     {% endfor %}
-                    <li><strong>Chinese Traditional</strong> (zh-Hant) - Traditional character variant</li>
                 </ul>
+                <p class="text-muted small">
+                    Chinese comes in two separate exports: <code>zh</code> (Mainland, Simplified)
+                    and <code>zh-tw</code> (Taiwan, Traditional). Each reads its own translations,
+                    so a word missing from <code>zh-tw</code> is left out of that export rather
+                    than converted from <code>zh</code>.
+                </p>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-function toggleChineseOptions() {
+function toggleExportOptions() {
     const language = document.getElementById('language').value;
     const sourceLanguage = document.getElementById('source_language').value;
-    const chineseGroup = document.getElementById('chinese_variant_group');
     const exportType = document.getElementById('export_type');
     const singleOption = exportType.querySelector('option[value="single"]');
     const allSourcesSelected = sourceLanguage === 'all';
-
-    // Show Chinese options only for Chinese language (not for "All Languages")
-    chineseGroup.style.display = (language === 'zh') ? 'block' : 'none';
 
     // Disable single-file export when "All Languages" or "All source languages" is selected
     if (singleOption) {
@@ -246,10 +233,10 @@ function toggleFilterOptions() {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    toggleChineseOptions();
+    toggleExportOptions();
     toggleFilterOptions();
     document.getElementById('source_language').addEventListener('change', function() {
-        toggleChineseOptions();
+        toggleExportOptions();
         toggleFilterOptions();
     });
 });

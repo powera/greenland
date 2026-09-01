@@ -10,7 +10,31 @@ import json
 import logging
 from typing import Any, Dict, Optional
 
+from langtools.dialect_overrides import is_dialect, normalize_language_code, transform_to_dialect
+from langtools.zh.converter import to_simplified
+
 logger = logging.getLogger(__name__)
+
+
+def normalize_translation_text(language_code: str, text: str) -> str:
+    """Normalize stored translation text into the script *language_code* writes.
+
+    zh rows hold Simplified characters and zh-tw rows Traditional ones, but a
+    bulk import can land in the wrong script; running each language's text
+    through its own converter is a no-op for correct text and repairs the rest.
+
+    This converts *within* a language and never across one.  A zh-tw export
+    reads zh-tw rows only: a lemma or sentence with no zh-tw translation is
+    absent from it rather than filled in from zh.
+    """
+    if not text:
+        return text
+    normalized_code = normalize_language_code(language_code)
+    if normalized_code == "zh":
+        return to_simplified(text)
+    if is_dialect(normalized_code):
+        return transform_to_dialect(normalized_code, text)
+    return text
 
 
 def extract_conjugation_slot(grammatical_form_key: str) -> Optional[str]:

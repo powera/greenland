@@ -243,3 +243,57 @@ def test_generate_manifest_sorts_level_files_numerically(tmp_path: Path) -> None
     manifest = _load_manifest(manifest_path)
     ids = [wf["id"] for wf in manifest["word_files"]]
     assert ids == ["levels_1_5", "levels_6_10", "levels_11_15"]
+
+
+def test_generate_manifest_uses_zh_tw_as_its_own_language(tmp_path: Path) -> None:
+    """zh-tw is an ordinary export language, not a variant flag on zh.
+
+    It used to be written as language "zh" plus simplified_chinese=False and
+    labeled zh_Hant; the manifest now names the dialect code the CDN and the
+    output directory use.
+    """
+    _write_level_file(tmp_path)
+
+    success, manifest_path = generate_manifest(str(tmp_path), "zh-tw")
+
+    assert success
+    manifest = _load_manifest(manifest_path)
+    assert manifest["language_code"] == "zh-tw"
+    assert manifest["language"] == "chinese_taiwan"
+
+
+def test_generate_manifest_zh_tw_keeps_pinyin_reading_config(tmp_path: Path) -> None:
+    """A dialect reads with its parent's script, so zh-tw still gets pinyin."""
+    _write_level_file(tmp_path)
+
+    success, zh_manifest_path = generate_manifest(str(tmp_path), "zh")
+    assert success
+    zh_reading = _load_manifest(zh_manifest_path)["config"]["reading"]
+
+    success, zh_tw_manifest_path = generate_manifest(str(tmp_path), "zh-tw")
+    assert success
+    assert _load_manifest(zh_tw_manifest_path)["config"]["reading"] == zh_reading
+
+
+def test_generate_manifest_zh_tw_advertises_no_voices_yet(tmp_path: Path) -> None:
+    """zh-tw audio is recorded from zh-tw text; it does not borrow zh's voices."""
+    _write_level_file(tmp_path)
+
+    success, manifest_path = generate_manifest(str(tmp_path), "zh-tw")
+
+    assert success
+    manifest = _load_manifest(manifest_path)
+    assert manifest["config"]["available_voices"] == []
+    assert manifest["config"]["default_voice"] is None
+
+
+def test_generate_manifest_slugifies_parenthesized_language_names(tmp_path: Path) -> None:
+    """Display names with punctuation become underscore-joined identifiers."""
+    _write_level_file(tmp_path)
+
+    success, manifest_path = generate_manifest(str(tmp_path), "es-419")
+
+    assert success
+    manifest = _load_manifest(manifest_path)
+    assert manifest["language_code"] == "es-419"
+    assert manifest["language"] == "spanish_latin_america"

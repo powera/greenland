@@ -38,7 +38,6 @@ from storage.translation_helpers import (
     get_translation,
 )
 from langtools.dialect_overrides import get_base_language
-from langtools.zh.converter import to_simplified, to_traditional
 from exports.wireword.data_models import ExportStats, create_export_stats
 from exports.wireword.readings import (
     build_target_reading_fields,
@@ -52,6 +51,7 @@ from exports.wireword.helpers import (
     format_verb_entry,
     generate_simple_grammatical_form_label,
     normalize_pos_type,
+    normalize_translation_text,
 )
 from exports.wireword.generate_manifest import generate_manifest
 from words.cognates import detect_cognate
@@ -80,7 +80,6 @@ class WirewordExporter:
         config: Optional[DataSourceConfig] = None,
         debug: bool = False,
         language: str = "lt",
-        simplified_chinese: bool = True,
         include_unreviewed_audio: bool = False,
         source_language: str = "en",
     ):
@@ -90,8 +89,8 @@ class WirewordExporter:
         Args:
             config: DataSourceConfig with backend settings (uses default SQLite if None)
             debug: Enable debug logging
-            language: Target language code ('lt' for Lithuanian, 'zh' for Chinese, etc.)
-            simplified_chinese: If True and language is 'zh', convert to Simplified Chinese (default: True)
+            language: Target language code ('lt' for Lithuanian, 'zh' for Chinese,
+                'zh-tw' for Taiwan Traditional Chinese, etc.)
             include_unreviewed_audio: If True, include audio that exists in staging but hasn't been
                 reviewed yet. The manifest's audio_prefix will be changed to point to staging.
             source_language: Source language code (default: 'en'). The language the learner already
@@ -103,7 +102,6 @@ class WirewordExporter:
         self.config = config
         self.debug = debug
         self.language = language
-        self.simplified_chinese = simplified_chinese
         self.include_unreviewed_audio = include_unreviewed_audio
         self.source_language = source_language
 
@@ -141,6 +139,12 @@ class WirewordExporter:
                 get_base_language(self.language), DEFAULT_EXPORT_MAX_LEVEL
             ),
         )
+
+    def _normalize_target_text(self, text: Optional[str]) -> Optional[str]:
+        """Normalize a stored translation into the script this export writes."""
+        if not text:
+            return text
+        return normalize_translation_text(self.language, text)
 
     def _format_missing_verb_translation_warning(
         self, missing_forms: List[Tuple[int, str, str]]
@@ -270,14 +274,6 @@ class WirewordExporter:
                 f"{self.source_language_name} source translations"
             )
 
-        # For Traditional Chinese export, also fetch zh-tw translations
-        zh_tw_translations_by_id: Dict[int, Optional[str]] = {}
-        if self.language == "zh" and not self.simplified_chinese:
-            zh_tw_translations_by_id = bulk_get_translations(session, all_lemmas, "zh-tw")
-            logger.info(
-                f"Fetched {sum(1 for v in zh_tw_translations_by_id.values() if v)} zh-tw translations"
-            )
-
         # Filter by translation availability using pre-fetched data
         lemmas = []
         for lemma in all_lemmas:
@@ -287,20 +283,11 @@ class WirewordExporter:
                 if not source_trans or not source_trans.strip():
                     continue
 
-            # For Traditional Chinese, consider both zh and zh-tw translations
-            if self.language == "zh" and not self.simplified_chinese:
-                zh_tw_trans = zh_tw_translations_by_id.get(lemma.id)
-                zh_trans = translations_by_id.get(lemma.id)
-                if (zh_tw_trans and zh_tw_trans.strip()) or (zh_trans and zh_trans.strip()):
-                    lemmas.append(lemma)
-                    if limit and len(lemmas) >= limit:
-                        break
-            else:
-                translation = translations_by_id.get(lemma.id)
-                if translation and translation.strip():
-                    lemmas.append(lemma)
-                    if limit and len(lemmas) >= limit:
-                        break
+            translation = translations_by_id.get(lemma.id)
+            if translation and translation.strip():
+                lemmas.append(lemma)
+                if limit and len(lemmas) >= limit:
+                    break
 
         logger.info(f"Found {len(lemmas)} lemmas with {self.language_name} translations")
 
@@ -313,22 +300,7 @@ class WirewordExporter:
             self.language,
         )
         for lemma in lemmas:
-            target_translation = translations_by_id.get(lemma.id)
-
-            # For Chinese, handle simplified vs traditional
-            if self.language == "zh":
-                if self.simplified_chinese:
-                    # Convert to Simplified Chinese
-                    if target_translation:
-                        target_translation = to_simplified(target_translation)
-                else:
-                    # Traditional Chinese: prefer zh-tw, fall back to converting zh
-                    zh_tw_trans = zh_tw_translations_by_id.get(lemma.id)
-                    if zh_tw_trans and zh_tw_trans.strip():
-                        target_translation = zh_tw_trans
-                    elif target_translation:
-                        # Convert zh to traditional as fallback
-                        target_translation = to_traditional(target_translation)
+            target_translation = self._normalize_target_text(translations_by_id.get(lemma.id))
 
             # Get effective difficulty level from pre-fetched data
             raw_level = difficulty_levels_by_id.get(lemma.id)
@@ -1155,7 +1127,6 @@ class WirewordExporter:
         manifest_success, manifest_path = generate_manifest(
             wireword_dir,
             self.language,
-            self.simplified_chinese,
             include_unreviewed_audio=self.include_unreviewed_audio,
             source_language=self.source_language,
             cdn_base=cdn_base,
@@ -1271,14 +1242,6 @@ class WirewordExporter:
                     f"{self.source_language_name} source translations for verbs"
                 )
 
-            # For Traditional Chinese export, also fetch zh-tw translations
-            zh_tw_translations_by_id: Dict[int, Optional[str]] = {}
-            if self.language == "zh" and not self.simplified_chinese:
-                zh_tw_translations_by_id = bulk_get_translations(session, lemmas, "zh-tw")
-                logger.info(
-                    f"Fetched {sum(1 for v in zh_tw_translations_by_id.values() if v)} zh-tw translations for verbs"
-                )
-
             # Bulk fetch all derivative forms for all verbs
             all_derivative_forms = (
                 session.query(DerivativeForm).filter(DerivativeForm.lemma_id.in_(lemma_ids)).all()
@@ -1364,22 +1327,7 @@ class WirewordExporter:
                     base_source: Optional[str] = lemma.lemma_text
                 else:
                     base_source = verb_source_translations_by_id.get(lemma.id)
-                base_target = translations_by_id.get(lemma.id)
-
-                # For Chinese, handle simplified vs traditional
-                if self.language == "zh":
-                    if self.simplified_chinese:
-                        # Convert to Simplified Chinese
-                        if base_target:
-                            base_target = to_simplified(base_target)
-                    else:
-                        # Traditional Chinese: prefer zh-tw, fall back to converting zh
-                        zh_tw_trans = zh_tw_translations_by_id.get(lemma.id)
-                        if zh_tw_trans and zh_tw_trans.strip():
-                            base_target = zh_tw_trans
-                        elif base_target:
-                            # Convert zh to traditional as fallback
-                            base_target = to_traditional(base_target)
+                base_target = self._normalize_target_text(translations_by_id.get(lemma.id))
 
                 # Skip verbs without target language translation
                 if not base_target or not base_target.strip():

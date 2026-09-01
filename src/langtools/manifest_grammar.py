@@ -7,6 +7,7 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any, Optional
 
+from langtools.dialect_overrides import get_base_language
 from langtools.person_labels import get_person_labels
 
 
@@ -15,12 +16,15 @@ def _load_manifest_module(language_code: str) -> ModuleType:
     if langtools_spec is None or not langtools_spec.submodule_search_locations:
         raise NotImplementedError("Could not locate langtools package")
 
+    # A dialect shares its parent's grammar, so it reads the parent's manifest
+    # metadata: zh-tw conjugates exactly as zh does.
+    base_language = get_base_language(language_code)
     langtools_root = Path(next(iter(langtools_spec.submodule_search_locations)))
-    manifest_path = langtools_root / language_code.lower() / "manifest.py"
+    manifest_path = langtools_root / base_language / "manifest.py"
     if not manifest_path.exists():
         raise NotImplementedError(f"No manifest metadata module for language '{language_code}'")
 
-    module_name = f"langtools_dynamic_{language_code.lower()}_manifest"
+    module_name = f"langtools_dynamic_{base_language}_manifest"
     spec = util.spec_from_file_location(module_name, manifest_path)
     if spec is None or spec.loader is None:
         raise NotImplementedError(
