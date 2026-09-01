@@ -25,7 +25,7 @@ from langtools.dialect_overrides import (
     is_translation_target,
     normalize_language_code,
     transform_from_dialect,
-    transform_to_dialect,
+    normalize_dialect_script,
 )
 
 
@@ -130,21 +130,30 @@ class TestGetDialectOverride(unittest.TestCase):
         self.assertIsNone(get_dialect_override("xx"))
 
 
-class TestTransformToDialect(unittest.TestCase):
+class TestNormalizeDialectScript(unittest.TestCase):
     @unittest.skipUnless(OPENCC_AVAILABLE, "opencc not installed")
-    def test_zh_tw_converts_simplified_to_traditional(self) -> None:
-        # "鸡" (simplified) -> "雞" (traditional)
-        result = transform_to_dialect("zh-tw", "鸡")
-        self.assertEqual(result, "雞")
+    def test_zh_tw_repairs_a_row_stored_in_the_wrong_script(self) -> None:
+        # A zh-tw row that landed holding Simplified characters is normalized
+        # into the script zh-tw writes.  This is a repair of zh-tw's own text,
+        # not a derivation of zh-tw text from zh.
+        self.assertEqual(normalize_dialect_script("zh-tw", "鸡"), "雞")
+
+    def test_normalizing_never_fills_a_blank_row(self) -> None:
+        # The guard against the old parent-to-dialect fallback: an absent
+        # translation stays absent.  A blank zh-tw row means "not generated
+        # yet", never "convert the Mainland word".
+        for lang_code in get_translation_target_dialects():
+            with self.subTest(lang_code=lang_code):
+                self.assertEqual(normalize_dialect_script(lang_code, ""), "")
 
     def test_non_dialect_returns_unchanged(self) -> None:
-        self.assertEqual(transform_to_dialect("es", "hola"), "hola")
+        self.assertEqual(normalize_dialect_script("es", "hola"), "hola")
 
-    def test_dialect_without_transform_returns_unchanged(self) -> None:
-        self.assertEqual(transform_to_dialect("es-mx", "hola"), "hola")
+    def test_dialect_without_normalizer_returns_unchanged(self) -> None:
+        self.assertEqual(normalize_dialect_script("es-mx", "hola"), "hola")
 
     def test_empty_text(self) -> None:
-        self.assertEqual(transform_to_dialect("zh-tw", ""), "")
+        self.assertEqual(normalize_dialect_script("zh-tw", ""), "")
 
 
 class TestTransformFromDialect(unittest.TestCase):

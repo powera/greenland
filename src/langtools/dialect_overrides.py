@@ -7,7 +7,7 @@ es-419, pt-br) and their relationships to parent languages.  It defines:
 
 - Parent language mappings  (zh-tw -> zh, es-419 -> es, etc.)
 - Display names with dialect qualifiers for use in LLM prompts
-- Text transformation functions (e.g., simplified -> traditional Chinese)
+- Per-dialect script normalizers (e.g., repairing a mis-scripted zh-tw row)
 - Sort-key language inheritance (dialects typically reuse the parent's sort key)
 - TTS locale codes for speech synthesis
 - Whether a dialect is stored separately or folded into another variant
@@ -43,13 +43,19 @@ Usage::
         is_dialect,
         get_parent_language,
         get_dialect_display_name,
-        transform_to_dialect,
+        normalize_dialect_script,
     )
 
     if is_dialect("zh-tw"):
         parent = get_parent_language("zh-tw")   # "zh"
         name   = get_dialect_display_name("zh-tw")  # "Chinese (Taiwan Traditional)"
-        text   = transform_to_dialect("zh-tw", "简体字")  # -> "簡體字"
+
+A storage dialect's text is generated and stored per variant, never derived from
+its parent -- including zh-tw, where OpenCC could convert the script but would
+still carry Mainland vocabulary (軟體 vs 軟件).  ``normalize_dialect_script``
+is therefore scoped to a dialect's *own* rows: it repairs one stored in the
+wrong script and leaves a blank row blank.  There is no forward parent-to-
+dialect transform, and adding one would reintroduce exactly that fallback.
 """
 
 import logging
@@ -92,10 +98,13 @@ class DialectOverride:
         display_name: Short display name (e.g. ``"Chinese (Taiwan)"``).
         dialect_display_name: Longer name suitable for LLM prompts that
             clarifies the specific variant (e.g. ``"Chinese (Taiwan Traditional)"``).
-        text_transform: Optional callable that converts text **from the parent
-            language** into this dialect.  For example, zh-tw's transform
-            converts Simplified Chinese to Traditional Chinese.  ``None`` means
-            the parent text is used as-is.
+        script_normalizer: Optional callable that normalizes text **already
+            stored for this dialect** into the script the dialect writes.  For
+            example, zh-tw's normalizer converts Simplified characters to
+            Traditional, repairing a row that was imported in the wrong script.
+            It is deliberately *not* a way to derive this dialect's text from
+            its parent's: it runs only on the dialect's own rows, and a blank
+            row stays blank.  ``None`` means the stored text is used as-is.
         reverse_transform: Optional callable that converts text **from this
             dialect back to the parent** language.  For example, zh-tw's
             reverse converts Traditional Chinese to Simplified.  ``None``
@@ -121,7 +130,7 @@ class DialectOverride:
     parent_lang: str
     display_name: str
     dialect_display_name: str
-    text_transform: Optional[Callable[[str], str]] = field(default=None, repr=False)
+    script_normalizer: Optional[Callable[[str], str]] = field(default=None, repr=False)
     reverse_transform: Optional[Callable[[str], str]] = field(default=None, repr=False)
     sort_key_lang: Optional[str] = None
     tts_locale: Optional[str] = None
@@ -140,7 +149,12 @@ DIALECT_OVERRIDES: Dict[str, DialectOverride] = {
         parent_lang="zh",
         display_name="Chinese (Taiwan)",
         dialect_display_name="Chinese (Taiwan Traditional)",
-        text_transform=_zh_simplified_to_traditional,
+        # Repairs a zh-tw row that was imported holding Simplified characters.
+        # This runs only on text already stored for zh-tw; it is never a way to
+        # fill a blank zh-tw row from zh.  OpenCC gets the script right but not
+        # the word (軟體 vs 軟件), so deriving would quietly ship Mainland
+        # vocabulary in Traditional characters.
+        script_normalizer=_zh_simplified_to_traditional,
         reverse_transform=_zh_traditional_to_simplified,
         sort_key_lang="zh",  # pinyin sort keys work for both variants
         tts_locale="zh-TW",
@@ -157,7 +171,7 @@ DIALECT_OVERRIDES: Dict[str, DialectOverride] = {
         parent_lang="es",
         display_name="Spanish (Latin America)",
         dialect_display_name="Spanish (Latin American)",
-        text_transform=None,  # text is the same script
+        script_normalizer=None,  # text is the same script
         reverse_transform=None,
         sort_key_lang="es",
         # es-419 is not a locale any TTS engine offers; es-US is the neutral
@@ -181,7 +195,7 @@ DIALECT_OVERRIDES: Dict[str, DialectOverride] = {
         parent_lang="es",
         display_name="Spanish (Mexico)",
         dialect_display_name="Spanish (Mexican)",
-        text_transform=None,  # text is the same script
+        script_normalizer=None,  # text is the same script
         reverse_transform=None,
         sort_key_lang="es",
         tts_locale="es-MX",
@@ -197,7 +211,7 @@ DIALECT_OVERRIDES: Dict[str, DialectOverride] = {
         parent_lang="pt",
         display_name="Portuguese (Brazil)",
         dialect_display_name="Portuguese (Brazilian)",
-        text_transform=None,  # text is the same script
+        script_normalizer=None,  # text is the same script
         reverse_transform=None,
         sort_key_lang="pt",
         tts_locale="pt-BR",
@@ -214,7 +228,7 @@ DIALECT_OVERRIDES: Dict[str, DialectOverride] = {
         parent_lang="fr",
         display_name="French (Canada)",
         dialect_display_name="French (Canadian)",
-        text_transform=None,
+        script_normalizer=None,
         reverse_transform=None,
         sort_key_lang="fr",
         tts_locale="fr-CA",
@@ -229,7 +243,7 @@ DIALECT_OVERRIDES: Dict[str, DialectOverride] = {
         parent_lang="en",
         display_name="English (UK)",
         dialect_display_name="English (British)",
-        text_transform=None,
+        script_normalizer=None,
         reverse_transform=None,
         sort_key_lang=None,  # English has no special sort key
         tts_locale="en-GB",
@@ -434,23 +448,29 @@ def get_all_dialect_codes() -> List[str]:
     return list(DIALECT_OVERRIDES.keys())
 
 
-def transform_to_dialect(lang_code: str, text: str) -> str:
-    """Transform *text* from the parent language into the dialect variant.
+def normalize_dialect_script(lang_code: str, text: str) -> str:
+    """Normalize *text* stored for *lang_code* into the script it writes.
 
-    If *lang_code* has no text transform (or is not a dialect), the original
-    text is returned unchanged.
+    *text* must already be this dialect's own stored text.  This repairs a row
+    that landed in the wrong script (a zh-tw row holding Simplified characters,
+    say) and is a no-op for text that is already correct.  It is not a way to
+    derive a dialect's text from its parent's: pass a parent's text here and
+    you get the parent's vocabulary in the dialect's script, which is wrong.
 
-    >>> transform_to_dialect("zh-tw", "简体字")  # simplified -> traditional
+    If *lang_code* has no normalizer (or is not a dialect), the original text is
+    returned unchanged.
+
+    >>> normalize_dialect_script("zh-tw", "简体字")  # repair a mis-scripted row
     '簡體字'
-    >>> transform_to_dialect("es-mx", "hola")
+    >>> normalize_dialect_script("es-mx", "hola")
     'hola'
     """
     override = get_dialect_override(lang_code)
-    if override and override.text_transform:
+    if override and override.script_normalizer:
         try:
-            return override.text_transform(text)
+            return override.script_normalizer(text)
         except Exception as exc:
-            logger.warning("Failed to transform text for dialect %s: %s", lang_code, exc)
+            logger.warning("Failed to normalize text for dialect %s: %s", lang_code, exc)
     return text
 
 

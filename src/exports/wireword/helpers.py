@@ -10,7 +10,11 @@ import json
 import logging
 from typing import Any, Dict, Optional
 
-from langtools.dialect_overrides import is_dialect, normalize_language_code, transform_to_dialect
+from langtools.dialect_overrides import (
+    is_dialect,
+    normalize_dialect_script,
+    normalize_language_code,
+)
 from langtools.zh.converter import to_simplified
 
 logger = logging.getLogger(__name__)
@@ -33,7 +37,7 @@ def normalize_translation_text(language_code: str, text: str) -> str:
     if normalized_code == "zh":
         return to_simplified(text)
     if is_dialect(normalized_code):
-        return transform_to_dialect(normalized_code, text)
+        return normalize_dialect_script(normalized_code, text)
     return text
 
 
