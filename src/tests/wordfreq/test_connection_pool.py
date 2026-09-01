@@ -231,5 +231,81 @@ class TestConnectionPool(unittest.TestCase):
         self.assertIsNot(session1, new_session, "Should return a new session after closing")
 
 
+class TestPooledSessionOwnership(unittest.TestCase):
+    """The pool owns the sessions it hands out; callers must not close them.
+
+    ``get_session`` returns a *shared* thread-local session, so a caller that
+    closes it closes an object the pool still caches and hands to the next
+    caller.  Code that wants a session of its own calls
+    ``storage.backend.create_session`` instead, which builds a fresh one.
+    """
+
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.db_path = os.path.join(self.temp_dir.name, "test.db")
+        ConnectionPool._instance = None
+        ConnectionPool._initialized = False
+        self.config = DataSourceConfig(backend_type=BackendType.SQLITE, sqlite_path=self.db_path)
+
+    def tearDown(self):
+        close_thread_sessions()
+        self.temp_dir.cleanup()
+        ConnectionPool._instance = None
+
+    def test_pooled_session_is_shared_not_owned(self) -> None:
+        """Two callers on one thread get the same object, so neither owns it."""
+        self.assertIs(get_session(self.config), get_session(self.config))
+
+    def test_closing_a_pooled_session_leaves_it_cached(self) -> None:
+        """Closing a pooled session does not evict it -- which is the bug.
+
+        A closed SQLAlchemy session reopens lazily, so this fails quietly
+        rather than raising: the next caller receives an object whose state
+        was discarded out from under it.  ``close_thread_sessions`` is the
+        supported way to release pooled sessions.
+        """
+        session = get_session(self.config)
+        session.close()
+        self.assertIs(
+            get_session(self.config),
+            session,
+            "a directly-closed session is still handed to the next caller",
+        )
+
+    def test_create_session_returns_an_owned_session(self) -> None:
+        """The factory hands out a fresh session that its caller may close."""
+        from storage.backend import create_session
+
+        owned = create_session(self.config)
+        try:
+            self.assertIsNot(owned, get_session(self.config))
+            self.assertIsNot(owned, create_session(self.config))
+        finally:
+            owned.close()
+
+
+class TestCorpusHelpersDoNotClosePooledSessions(unittest.TestCase):
+    """wordfreq.frequency.corpus must not close sessions it does not own.
+
+    Its helpers take an optional session and fall back to making their own,
+    closing it in a ``finally`` when they do.  That is only correct while the
+    fallback is the factory: taking it from the pool made them close a shared
+    session (see :class:`TestPooledSessionOwnership`).
+    """
+
+    def test_corpus_module_does_not_use_the_connection_pool(self) -> None:
+        import inspect
+
+        import wordfreq.frequency.corpus as corpus
+
+        source = inspect.getsource(corpus)
+        self.assertNotIn(
+            "connection_pool.get_session",
+            source,
+            "corpus.py closes the sessions it creates, so it must use "
+            "storage.backend.create_session rather than the shared pool",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
