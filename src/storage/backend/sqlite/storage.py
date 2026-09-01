@@ -2,10 +2,11 @@
 
 from typing import Any
 
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from storage.backend.base import BaseSession, BaseStorage
+from storage.backend.sqlite_pragmas import apply_sqlite_pragmas
 from storage.backend.sqlite.session import SQLiteSession
 from storage.models.schema import Base
 
@@ -33,13 +34,7 @@ class SQLiteStorage(BaseStorage):
         )
 
         # Enable WAL mode for better concurrency (allows concurrent reads during writes)
-        @event.listens_for(self.engine, "connect")
-        def set_sqlite_pragma(dbapi_conn: Any, connection_record: Any) -> None:
-            cursor = dbapi_conn.cursor()
-            cursor.execute("PRAGMA journal_mode=WAL")
-            cursor.execute("PRAGMA busy_timeout=30000")  # 30 second timeout
-            cursor.execute("PRAGMA synchronous=NORMAL")  # Faster, still safe with WAL
-            cursor.close()
+        apply_sqlite_pragmas(self.engine)
 
         self.SessionFactory: Any = sessionmaker(bind=self.engine)
 
