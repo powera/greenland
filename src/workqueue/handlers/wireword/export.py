@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from exports.wireword.service import WirewordExportService
+from langtools.dialect_overrides import normalize_language_code
 from workqueue.tools import build_default_config, workqueue_payload_handler
 
 
@@ -19,16 +20,11 @@ def do_wireword_export_directory(
     _ = session
     config = build_default_config()
 
-    simplified_chinese = True
-    normalized_language = language
-    if language == "zh-Hant":
-        normalized_language = "zh"
-        simplified_chinese = False
-
+    # Tasks queued before zh-tw became a first-class export language carry
+    # "zh-Hant" in their payload; normalize_language_code folds it to zh-tw.
     exporter = WirewordExportService(
         config=config,
-        language=normalized_language,
-        simplified_chinese=simplified_chinese,
+        language=normalize_language_code(language),
         include_unreviewed_audio=include_unreviewed_audio,
         source_language=source_language,
     )

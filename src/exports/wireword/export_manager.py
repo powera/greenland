@@ -28,9 +28,9 @@ from storage.translation_helpers import (
     get_translation,
 )
 from langtools.dialect_overrides import get_translation_target_dialects
-from langtools.zh.converter import to_simplified
 
 from .data_models import ExportStats, create_export_stats
+from .helpers import normalize_translation_text
 from .text_rendering import format_subtype_display_name
 
 # Configure logging
@@ -67,7 +67,6 @@ class TrakaidoExporter:
         config: Optional[DataSourceConfig] = None,
         debug: bool = False,
         language: str = "lt",
-        simplified_chinese: bool = True,
         include_unreviewed_audio: bool = False,
         source_language: str = "en",
     ):
@@ -77,8 +76,8 @@ class TrakaidoExporter:
         Args:
             config: DataSourceConfig with backend settings (uses default SQLite if None)
             debug: Enable debug logging
-            language: Target language code ('lt' for Lithuanian, 'zh' for Chinese)
-            simplified_chinese: If True and language is 'zh', convert to Simplified Chinese (default: True)
+            language: Target language code ('lt' for Lithuanian, 'zh' for Chinese,
+                'zh-tw' for Taiwan Traditional Chinese)
             include_unreviewed_audio: If True, include audio that exists in staging but hasn't been
                 reviewed yet. The manifest's audio_prefix will be changed to point to staging.
             source_language: Source language code (default: 'en'). The language the learner already
@@ -90,7 +89,6 @@ class TrakaidoExporter:
         self.config = config
         self.debug = debug
         self.language = language
-        self.simplified_chinese = simplified_chinese
         self.include_unreviewed_audio = include_unreviewed_audio
         self.source_language = source_language
 
@@ -262,12 +260,11 @@ class TrakaidoExporter:
                 skipped_count += 1
                 continue
 
-            # Get the target language translation from pre-fetched data
+            # Get the target language translation from pre-fetched data,
+            # normalized into the script this language writes.
             target_translation = translations_by_id.get(lemma.id)
-
-            # For Chinese, optionally convert to simplified
-            if self.language == "zh" and self.simplified_chinese and target_translation:
-                target_translation = to_simplified(target_translation)
+            if target_translation:
+                target_translation = normalize_translation_text(self.language, target_translation)
 
             # Create the export entry with standardized key names
             entry = {
@@ -410,7 +407,6 @@ class TrakaidoExporter:
             config=self.config,
             debug=self.debug,
             language=self.language,
-            simplified_chinese=self.simplified_chinese,
             include_unreviewed_audio=self.include_unreviewed_audio,
             source_language=self.source_language,
         )
@@ -426,7 +422,6 @@ class TrakaidoExporter:
             config=self.config,
             debug=self.debug,
             language=self.language,
-            simplified_chinese=self.simplified_chinese,
             include_unreviewed_audio=self.include_unreviewed_audio,
             source_language=self.source_language,
         )
@@ -442,7 +437,6 @@ class TrakaidoExporter:
             config=self.config,
             debug=self.debug,
             language=self.language,
-            simplified_chinese=self.simplified_chinese,
             include_unreviewed_audio=self.include_unreviewed_audio,
             source_language=self.source_language,
         )

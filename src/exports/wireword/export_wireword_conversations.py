@@ -30,7 +30,7 @@ from storage.models.schema import (
     SentenceTranslation,
     SentenceWord,
 )
-from langtools.zh.converter import to_simplified
+from exports.wireword.helpers import normalize_translation_text
 from exports.wireword.readings import build_translation_reading_fields
 
 # Configure logging
@@ -45,7 +45,6 @@ class WirewordConversationExporter:
         config: Optional[DataSourceConfig] = None,
         debug: bool = False,
         language: str = "lt",
-        simplified_chinese: bool = True,
         include_unreviewed_audio: bool = False,
         source_language: str = "en",
     ):
@@ -55,8 +54,7 @@ class WirewordConversationExporter:
         Args:
             config: DataSourceConfig with backend settings (uses default SQLite if None)
             debug: Enable debug logging
-            language: Target language code ('lt', 'zh', etc.)
-            simplified_chinese: If True and language is 'zh', convert to Simplified Chinese
+            language: Target language code ('lt', 'zh', 'zh-tw', etc.)
             include_unreviewed_audio: If True, include audio that exists in staging but hasn't been
                 reviewed yet.
             source_language: Source language code (default: 'en'). The language the learner already
@@ -68,7 +66,6 @@ class WirewordConversationExporter:
         self.config = config
         self.debug = debug
         self.language = language
-        self.simplified_chinese = simplified_chinese
         self.include_unreviewed_audio = include_unreviewed_audio
         self.source_language = source_language
 
@@ -210,12 +207,12 @@ class WirewordConversationExporter:
                     translations = {}
                     for trans in sentence.translations:
                         translation_text = trans.translation_text
-                        if (
-                            trans.language_code == "zh"
-                            and self.language == "zh"
-                            and self.simplified_chinese
-                        ):
-                            translation_text = to_simplified(translation_text)
+                        # Normalize the target language's own text into its
+                        # script (Simplified for zh, Traditional for zh-tw).
+                        if trans.language_code == self.language:
+                            translation_text = normalize_translation_text(
+                                self.language, translation_text
+                            )
                         translations[trans.language_code] = translation_text
 
                     # Filter to requested languages (source + target)

@@ -93,3 +93,43 @@ def test_the_storage_dialects_are_exportable() -> None:
 
     for language_code in get_translation_target_dialects():
         assert language_code in SUPPORTED_LANGUAGES, language_code
+
+
+def _service_for(language: str) -> WirewordExportService:
+    from storage.backend.config import BackendType, DataSourceConfig
+
+    return WirewordExportService(
+        config=DataSourceConfig(backend_type=BackendType.SQLITE),
+        language=language,
+    )
+
+
+def test_zh_tw_exports_as_its_own_language() -> None:
+    """Traditional Chinese is a zh-tw export, not a zh export with a flag.
+
+    It writes lang_zh-tw/, uploads under the zh-tw CDN prefix, and reads zh-tw
+    translation rows -- there is no zh fallback and no zh_Hant naming left.
+    """
+    service = _service_for("zh-tw")
+
+    assert service.language == "zh-tw"
+    assert service.language_suffix == "zh-tw"
+    assert service._get_cdn_language_code() == "zh-tw"
+    assert service.get_language_output_dir().endswith("lang_zh-tw/generated")
+    assert service.exporter.language == "zh-tw"
+    assert service.sentence_exporter.language == "zh-tw"
+    assert service.conversation_exporter.language == "zh-tw"
+
+
+def test_legacy_zh_hant_spelling_resolves_to_zh_tw() -> None:
+    """Queued tasks and saved commands still say zh-Hant; it means zh-tw."""
+    for legacy_spelling in ("zh-Hant", "zh_TW", "zh-hant"):
+        assert _service_for(legacy_spelling).language == "zh-tw"
+
+
+def test_zh_export_is_unaffected_by_the_dialect() -> None:
+    service = _service_for("zh")
+
+    assert service.language == "zh"
+    assert service._get_cdn_language_code() == "zh"
+    assert service.get_language_output_dir().endswith("lang_zh/generated")

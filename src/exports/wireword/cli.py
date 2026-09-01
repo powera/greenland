@@ -12,8 +12,13 @@ from exports.wireword.service import (
     WirewordExportService,
     logger,
 )
+from langtools.dialect_overrides import normalize_language_code
 from storage.backend.factory import create_session
 from workqueue.task_queue import TaskType, enqueue_task
+
+# Spellings accepted but not advertised; normalize_language_code folds each to a
+# supported code (zh-Hant and zh_TW both mean zh-tw).
+DEPRECATED_LANGUAGE_ALIASES = ["zh-Hant", "zh_TW"]
 
 
 def get_argument_parser() -> argparse.ArgumentParser:
@@ -24,9 +29,10 @@ def get_argument_parser() -> argparse.ArgumentParser:
     add_common_args(parser)
     add_backend_args(parser)
 
-    # Language options
-    language_help = f'Language code (default: lt). Supported: {", ".join(f"{k}={v}" for k, v in SUPPORTED_LANGUAGES.items())}, zh-Hant=Chinese (Traditional)'
-    language_choices = sorted(SUPPORTED_LANGUAGES.keys()) + ["zh-Hant"]
+    # Language options.  zh-Hant is kept as a deprecated spelling of zh-tw so
+    # existing invocations and queued tasks keep working; it is not listed.
+    language_help = f'Language code (default: lt). Supported: {", ".join(f"{k}={v}" for k, v in SUPPORTED_LANGUAGES.items())}'
+    language_choices = sorted(SUPPORTED_LANGUAGES.keys()) + DEPRECATED_LANGUAGE_ALIASES
     parser.add_argument(
         "--language",
         choices=language_choices,
@@ -36,7 +42,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--traditional",
         action="store_true",
-        help="For Chinese (zh): export Traditional characters instead of Simplified (exports to lang_zh_Hant/)",
+        help="DEPRECATED: same as --language zh-tw (exports to lang_zh-tw/)",
     )
 
     # Export mode
@@ -151,10 +157,12 @@ def main() -> None:
         else [args.source_language]
     )
 
-    # Handle Traditional Chinese flag
-    language = args.language
-    if args.traditional and args.language == "zh":
-        language = "zh-Hant"
+    # Fold zh-Hant/zh_TW to zh-tw, and honor the deprecated --traditional flag.
+    language = normalize_language_code(args.language)
+    if args.traditional:
+        if language == "zh":
+            language = "zh-tw"
+        logger.warning("⚠️  --traditional is DEPRECATED. Use --language zh-tw instead.")
 
     # Deprecation warnings for legacy export modes
     if args.mode in ("single", "both"):

@@ -7,6 +7,8 @@ from pathlib import Path
 from types import ModuleType
 from typing import Optional, TypedDict
 
+from langtools.dialect_overrides import get_base_language
+
 
 class PersonPronounEntry(TypedDict):
     """Metadata for pronouns used by a grammatical person slot.
@@ -43,12 +45,15 @@ def _load_pronouns_module(language_code: str) -> ModuleType:
     if langtools_spec is None or not langtools_spec.submodule_search_locations:
         raise NotImplementedError("Could not locate langtools package")
 
+    # A dialect shares its parent's grammar, so it shares the parent's module:
+    # there is no langtools/zh-tw/ and there should not be one.
+    base_language = get_base_language(language_code)
     langtools_root = Path(next(iter(langtools_spec.submodule_search_locations)))
-    pronouns_path = langtools_root / language_code.lower() / "pronouns.py"
+    pronouns_path = langtools_root / base_language / "pronouns.py"
     if not pronouns_path.exists():
         raise NotImplementedError(f"No pronouns module for language '{language_code}'")
 
-    module_name = f"langtools_dynamic_{language_code.lower()}_pronouns"
+    module_name = f"langtools_dynamic_{base_language}_pronouns"
     spec = util.spec_from_file_location(module_name, pronouns_path)
     if spec is None or spec.loader is None:
         raise NotImplementedError(f"Could not load pronouns for language '{language_code}'")

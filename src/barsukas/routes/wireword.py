@@ -26,6 +26,7 @@ from exports.wireword.service import (
     SUPPORTED_NON_ENGLISH_SOURCE_LANGUAGES,
     WirewordExportService,
 )
+from langtools.dialect_overrides import normalize_language_code
 from storage.backend.config import DataSourceConfig
 
 if TYPE_CHECKING:
@@ -105,63 +106,20 @@ def export_all_languages(
                     else f"{lang_name} from English"
                 )
                 try:
-                    # Handle Chinese: export both Simplified and Traditional
-                    if lang_code == "zh":
-                        # Export Simplified Chinese
-                        simplified_exporter = WirewordExportService(
-                            config=config,
-                            language=lang_code,
-                            simplified_chinese=True,
-                            include_unreviewed_audio=include_unreviewed_audio,
-                            source_language=source_language,
-                        )
-                        if apply_level_overrides:
-                            simplified_exporter.apply_level_overrides()
-                        success_simp, results_simp = simplified_exporter.export_wireword_directory(
-                            cdn_upload=cdn_upload
-                        )
-                        simplified_label = f"{result_label} (Simplified)"
-                        all_results[simplified_label] = {
-                            "success": success_simp,
-                            "results": results_simp,
-                        }
-                        if not success_simp:
-                            errors.append(simplified_label)
-
-                        # Export Traditional Chinese
-                        traditional_exporter = WirewordExportService(
-                            config=config,
-                            language=lang_code,
-                            simplified_chinese=False,
-                            include_unreviewed_audio=include_unreviewed_audio,
-                            source_language=source_language,
-                        )
-                        if apply_level_overrides:
-                            traditional_exporter.apply_level_overrides()
-                        success_trad, results_trad = traditional_exporter.export_wireword_directory(
-                            cdn_upload=cdn_upload
-                        )
-                        traditional_label = f"{result_label} (Traditional)"
-                        all_results[traditional_label] = {
-                            "success": success_trad,
-                            "results": results_trad,
-                        }
-                        if not success_trad:
-                            errors.append(traditional_label)
-                    else:
-                        # Export other languages
-                        exporter = WirewordExportService(
-                            config=config,
-                            language=lang_code,
-                            include_unreviewed_audio=include_unreviewed_audio,
-                            source_language=source_language,
-                        )
-                        if apply_level_overrides:
-                            exporter.apply_level_overrides()
-                        success, results = exporter.export_wireword_directory(cdn_upload=cdn_upload)
-                        all_results[result_label] = {"success": success, "results": results}
-                        if not success:
-                            errors.append(result_label)
+                    # Every supported language is exported the same way; zh-tw
+                    # is one of them, not a second pass over zh.
+                    exporter = WirewordExportService(
+                        config=config,
+                        language=lang_code,
+                        include_unreviewed_audio=include_unreviewed_audio,
+                        source_language=source_language,
+                    )
+                    if apply_level_overrides:
+                        exporter.apply_level_overrides()
+                    success, results = exporter.export_wireword_directory(cdn_upload=cdn_upload)
+                    all_results[result_label] = {"success": success, "results": results}
+                    if not success:
+                        errors.append(result_label)
 
                 except Exception as e:
                     errors.append(f"{result_label}: {str(e)}")
@@ -330,18 +288,12 @@ def export_wireword() -> ResponseReturnValue:
             source_languages=selected_source_languages,
         )
 
-    # Validate language
+    # Validate language.  zh-tw is an ordinary entry in SUPPORTED_LANGUAGES, so
+    # the Traditional Chinese export is just another language choice here.
+    language = normalize_language_code(language)
     if language not in SUPPORTED_LANGUAGES:
         flash("Invalid language selected", "error")
         return redirect(url_for("wireword.export_page"))
-
-    # Handle Chinese variant
-    simplified_chinese = True
-    if language == "zh":
-        chinese_variant = request.form.get("chinese_variant", "simplified")
-        if chinese_variant == "traditional":
-            simplified_chinese = False
-            language = "zh-Hant"
 
     # Parse optional filters
     difficulty_filter = (
@@ -356,8 +308,7 @@ def export_wireword() -> ResponseReturnValue:
         # Initialize exporter
         exporter = WirewordExportService(
             config=config,
-            language=language if language != "zh-Hant" else "zh",
-            simplified_chinese=simplified_chinese,
+            language=language,
             include_unreviewed_audio=include_unreviewed_audio,
             source_language=source_language,
         )
@@ -377,8 +328,7 @@ def export_wireword() -> ResponseReturnValue:
             variant_results: dict[str, dict[str, Any]] = {}
             variant_errors: list[str] = []
             for selected_source_language in selected_source_languages:
-                target_lang_code = language if language != "zh-Hant" else "zh"
-                if selected_source_language == target_lang_code:
+                if selected_source_language == language:
                     # Skip same source/target combos.
                     continue
                 source_label = SUPPORTED_SOURCE_LANGUAGES.get(
@@ -386,8 +336,7 @@ def export_wireword() -> ResponseReturnValue:
                 )
                 variant_exporter = WirewordExportService(
                     config=config,
-                    language=language if language != "zh-Hant" else "zh",
-                    simplified_chinese=simplified_chinese,
+                    language=language,
                     include_unreviewed_audio=include_unreviewed_audio,
                     source_language=selected_source_language,
                 )
@@ -428,7 +377,8 @@ def export_wireword() -> ResponseReturnValue:
                 sentences_exported = results.get("sentences_exported", 0)
 
                 flash(
-                    f'Successfully exported WireWord files for {SUPPORTED_LANGUAGES.get(language if language != "zh-Hant" else "zh", language)}!',
+                    f"Successfully exported WireWord files for "
+                    f"{SUPPORTED_LANGUAGES.get(language, language)}!",
                     "success",
                 )
                 flash(
@@ -445,9 +395,7 @@ def export_wireword() -> ResponseReturnValue:
                     "wireword/results.html",
                     success=True,
                     language=language,
-                    language_name=SUPPORTED_LANGUAGES.get(
-                        language if language != "zh-Hant" else "zh", language
-                    ),
+                    language_name=SUPPORTED_LANGUAGES.get(language, language),
                     export_type="directory",
                     files_created=files_created,
                     levels_exported=levels_exported,

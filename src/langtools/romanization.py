@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from typing import Mapping
 
+from langtools.dialect_overrides import get_base_language
 from langtools.ja.romaji_helper import generate_romaji
 from langtools.zh.pinyin_helper import generate_pinyin
 
@@ -51,8 +52,12 @@ _BASIC_UK_ROMANIZATION_MAP: Mapping[str, str] = {
 
 
 def romanize_text(text: str, language_code: str) -> str:
-    """Return romanized text when supported; otherwise return input text."""
-    normalized_lang = language_code.lower()
+    """Return romanized text when supported; otherwise return input text.
+
+    A dialect romanizes with its parent's scheme -- zh-tw is written in
+    Traditional characters, which pypinyin reads just as it reads Simplified.
+    """
+    normalized_lang = get_base_language(language_code)
     if normalized_lang == "zh":
         return _remove_spaces(generate_pinyin(text)) or text
     if normalized_lang == "ja":
