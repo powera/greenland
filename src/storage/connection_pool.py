@@ -14,6 +14,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from storage.backend.config import BackendType, DataSourceConfig
+from storage.backend.sqlite_pragmas import apply_sqlite_pragmas
 
 # Configure logging
 logging.basicConfig(
@@ -68,8 +69,16 @@ class ConnectionPool:
                 # which is required for SQLite to work in a multi-threaded environment
                 conn_str = f"sqlite:///{db_path}"
                 engine = create_engine(
-                    conn_str, echo=echo, connect_args={"check_same_thread": False}
+                    conn_str,
+                    echo=echo,
+                    connect_args={"check_same_thread": False, "timeout": 30},
                 )
+                # Same pragmas the DataSourceConfig engine gets. Without them
+                # this engine ran at SQLite's default busy_timeout=0, so a write
+                # meeting a lock held by another agent failed instantly instead
+                # of waiting -- which is how the query log lost rows whenever
+                # two agents ran at once.
+                apply_sqlite_pragmas(engine)
                 self._engines[db_path] = engine
                 self._session_factories[db_path] = sessionmaker(bind=engine)
                 logger.debug(f"Created new engine for {db_path}")

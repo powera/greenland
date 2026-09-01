@@ -4,6 +4,7 @@ import threading
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from storage.backend.config import BackendType, DataSourceConfig
+from storage.backend.sqlite_pragmas import apply_sqlite_pragmas
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
@@ -87,13 +88,7 @@ def _create_engine(db_path: str, readonly: bool = False) -> "Engine":
         )
 
         # Enable WAL mode for SQLite for better concurrency
-        @event.listens_for(engine, "connect")
-        def set_sqlite_pragma(dbapi_conn: Any, connection_record: Any) -> None:
-            cursor = dbapi_conn.cursor()
-            cursor.execute("PRAGMA journal_mode=WAL")
-            cursor.execute("PRAGMA busy_timeout=30000")
-            cursor.execute("PRAGMA synchronous=NORMAL")
-            cursor.close()
+        apply_sqlite_pragmas(engine)
 
     return engine
 
