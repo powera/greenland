@@ -1,6 +1,5 @@
 """Storage layer for linguistic data - database models and connections."""
 
-from storage.connection_pool import ConnectionPool, close_thread_sessions, get_session
 from storage.database import (
     add_complete_word_entry,
     add_derivative_form,
@@ -13,9 +12,6 @@ from storage.database import (
 )
 
 __all__ = [
-    "ConnectionPool",
-    "get_session",
-    "close_thread_sessions",
     "create_database_session",
     "ensure_tables_exist",
     "add_word_token",

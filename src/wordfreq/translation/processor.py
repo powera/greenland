@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 import constants
 from storage import database as linguistic_db
-from storage.connection_pool import close_thread_sessions, get_session
+from storage.backend import create_session
 from wordfreq.translation.client import LinguisticClient
 
 # Configure logging
@@ -21,6 +21,37 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+
+def _close_worker_sessions(executor: ThreadPoolExecutor, threads: int) -> None:
+    """Close the session each worker thread in *executor* is holding.
+
+    Every worker opens its own session on first use and keeps it for the life
+    of the batch.  A thread-local is only reachable from its owning thread, so
+    the main thread cannot close these itself; it has to run the close *on*
+    each worker.  A barrier makes that reliable: no worker can leave until all
+    of them have arrived, so the executor cannot satisfy the run with one
+    thread taking every task.
+    """
+    barrier = threading.Barrier(threads, timeout=30)
+
+    def _close() -> None:
+        try:
+            barrier.wait()
+        except threading.BrokenBarrierError:
+            # Fewer live workers than expected; close this one regardless.
+            pass
+        LinguisticClient.close_thread_session()
+
+    try:
+        futures = [executor.submit(_close) for _ in range(threads)]
+        for future in futures:
+            future.result()
+    except RuntimeError:
+        # Executor is already shutting down and will not accept new work; its
+        # threads are being torn down anyway.
+        logger.debug("Executor shut down before worker sessions could be closed")
+
 
 # Constants
 DEFAULT_DB_PATH = constants.WORDFREQ_DB_PATH
@@ -76,22 +107,28 @@ class WordProcessor:
             model=model,
             debug=debug,
         )
-        session = get_session(config, echo=debug)
-        linguistic_db.ensure_tables_exist(session)
+        self._session: Optional[Any] = create_session(config)
+        linguistic_db.ensure_tables_exist(self._session)
 
         logger.info(f"Initialized WordProcessor with model {model}")
 
     def get_session(self) -> Any:
-        """Get a thread-local database session."""
-        from storage.backend.config import BackendType, DataSourceConfig
+        """Get this processor's session, creating it on first use.
 
-        config = DataSourceConfig(
-            backend_type=BackendType.SQLITE,
-            sqlite_path=self.db_path,
-            model=self.model,
-            debug=self.debug,
-        )
-        return get_session(config, echo=self.debug)
+        Only the main thread uses this -- the worker threads go through their
+        own ``LinguisticClient``.  ``close`` releases it.
+        """
+        if self._session is None:
+            from storage.backend.config import BackendType, DataSourceConfig
+
+            config = DataSourceConfig(
+                backend_type=BackendType.SQLITE,
+                sqlite_path=self.db_path,
+                model=self.model,
+                debug=self.debug,
+            )
+            self._session = create_session(config)
+        return self._session
 
     def process_single_word(self, word: str) -> bool:
         """
@@ -130,6 +167,9 @@ class WordProcessor:
                 logger.error(
                     f"[{thread_name}] Error processing '{word}' (attempt {attempt+1}): {e}"
                 )
+                # The session is this thread's and may hold a failed
+                # transaction; drop it so the retry starts clean.
+                client.close_thread_session()
                 time.sleep(self.throttle)
 
         return (word, False)
@@ -150,16 +190,19 @@ class WordProcessor:
         with ThreadPoolExecutor(max_workers=self.threads) as executor:
             futures = [executor.submit(self._worker, word) for word in words]
 
-            for future in as_completed(futures):
-                word, success = future.result()
-                if success:
-                    success_count += 1
-                    logger.debug(f"Successfully processed '{word}'")
-                else:
-                    logger.warning(f"Failed to process '{word}'")
+            try:
+                for future in as_completed(futures):
+                    word, success = future.result()
+                    if success:
+                        success_count += 1
+                        logger.debug(f"Successfully processed '{word}'")
+                    else:
+                        logger.warning(f"Failed to process '{word}'")
 
-                # Throttle to avoid overloading the API
-                time.sleep(self.throttle / self.threads)
+                    # Throttle to avoid overloading the API
+                    time.sleep(self.throttle / self.threads)
+            finally:
+                _close_worker_sessions(executor, self.threads)
 
         return (success_count, total_count)
 
@@ -224,7 +267,14 @@ class WordProcessor:
         }
 
     def close(self) -> None:
-        """Close database sessions and other resources."""
-        close_thread_sessions()
+        """Close database sessions and other resources.
+
+        Worker sessions are released at the end of each batch, so by here
+        only this processor's own session and this thread's client session
+        remain.
+        """
+        if self._session is not None:
+            self._session.close()
+            self._session = None
         LinguisticClient.close_all()
         logger.info("All resources closed")

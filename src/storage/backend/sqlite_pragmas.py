@@ -1,13 +1,12 @@
 """Connection pragmas shared by every SQLite engine in the project.
 
-There is more than one place that builds a SQLite engine -- the
-``DataSourceConfig`` path in :mod:`storage.backend.factory` and the thread-local
-pool in :mod:`storage.connection_pool` -- and they must agree on these settings.
-When they did not, the pool's engine ran with SQLite's default
-``busy_timeout=0``: WAL lets a writer and readers coexist, but it does not make
-a *second* writer wait, so any write that met a held lock failed instantly with
-"database is locked" instead of retrying.  That is what made a concurrent
-gandras import and voras run collide on the query log.
+More than one place builds a SQLite engine -- the ``DataSourceConfig`` path in
+:mod:`storage.backend.factory` and :class:`storage.backend.sqlite.storage.SQLiteStorage`
+-- and they must agree on these settings.  When they did not, an engine ran with
+SQLite's default ``busy_timeout=0``: WAL lets a writer and readers coexist, but
+it does not make a *second* writer wait, so any write that met a held lock
+failed instantly with "database is locked" instead of retrying.  That is what
+made a concurrent gandras import and voras run collide on the query log.
 
 Anything that creates a SQLite engine should call :func:`apply_sqlite_pragmas`
 on it rather than repeating the pragma list.

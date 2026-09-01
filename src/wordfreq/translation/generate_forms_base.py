@@ -8,6 +8,7 @@ language-specific form generation scripts.
 """
 
 import argparse
+import contextlib
 import logging
 import time
 from dataclasses import dataclass
@@ -20,7 +21,7 @@ from agents.common.common_args import get_data_source_config
 from langtools.wiktionary import WIKTIONARY_TO_TASK_MAPPINGS, get_wiktionary_forms
 from storage import database as linguistic_db
 from storage.backend.config import DataSourceConfig
-from storage.connection_pool import get_session
+from storage.backend import create_session
 from storage.crud.operation_log import log_operation
 from storage.models.enums import GrammaticalForm
 from storage.translation_helpers import get_translation
@@ -72,74 +73,75 @@ def get_lemmas_with_translation(
     Returns:
         List of dictionaries with lemma information
     """
-    session = get_session(config)
-
-    if form_config.use_legacy_translation:
-        # Old schema: direct translation column on Lemma table
-        translation_column = getattr(linguistic_db.Lemma, form_config.translation_field_name or "")
-        query = (
-            session.query(linguistic_db.Lemma)
-            .filter(
-                linguistic_db.Lemma.pos_type == form_config.pos_type,
-                translation_column.isnot(None),
-                translation_column != "",
+    with contextlib.closing(create_session(config)) as session:
+        if form_config.use_legacy_translation:
+            # Old schema: direct translation column on Lemma table
+            translation_column = getattr(
+                linguistic_db.Lemma, form_config.translation_field_name or ""
             )
-            .order_by(linguistic_db.Lemma.frequency_rank)
-        )
-
-        if limit:
-            query = query.limit(limit)
-
-        results = []
-        for lemma in query.all():
-            translation = getattr(lemma, form_config.translation_field_name or "")
-            results.append(
-                {
-                    "id": lemma.id,
-                    "english": lemma.lemma_text,
-                    form_config.language_code: translation,
-                    "pos_subtype": lemma.pos_subtype,
-                }
-            )
-        return results
-    else:
-        # New schema: LemmaTranslation table
-        query = (
-            session.query(linguistic_db.Lemma)
-            .join(
-                linguistic_db.LemmaTranslation,
-                (linguistic_db.Lemma.id == linguistic_db.LemmaTranslation.lemma_id)
-                & (linguistic_db.LemmaTranslation.language_code == form_config.language_code),
-            )
-            .filter(linguistic_db.Lemma.pos_type == form_config.pos_type)
-            .order_by(linguistic_db.Lemma.frequency_rank)
-        )
-
-        if limit:
-            query = query.limit(limit)
-
-        results = []
-        for lemma in query.all():
-            translation = (
-                session.query(linguistic_db.LemmaTranslation)
+            query = (
+                session.query(linguistic_db.Lemma)
                 .filter(
-                    linguistic_db.LemmaTranslation.lemma_id == lemma.id,
-                    linguistic_db.LemmaTranslation.language_code == form_config.language_code,
+                    linguistic_db.Lemma.pos_type == form_config.pos_type,
+                    translation_column.isnot(None),
+                    translation_column != "",
                 )
-                .first()
+                .order_by(linguistic_db.Lemma.frequency_rank)
             )
 
-            if translation:
+            if limit:
+                query = query.limit(limit)
+
+            results = []
+            for lemma in query.all():
+                translation = getattr(lemma, form_config.translation_field_name or "")
                 results.append(
                     {
                         "id": lemma.id,
                         "english": lemma.lemma_text,
-                        form_config.language_code: translation.translation,
+                        form_config.language_code: translation,
                         "pos_subtype": lemma.pos_subtype,
                     }
                 )
+            return results
+        else:
+            # New schema: LemmaTranslation table
+            query = (
+                session.query(linguistic_db.Lemma)
+                .join(
+                    linguistic_db.LemmaTranslation,
+                    (linguistic_db.Lemma.id == linguistic_db.LemmaTranslation.lemma_id)
+                    & (linguistic_db.LemmaTranslation.language_code == form_config.language_code),
+                )
+                .filter(linguistic_db.Lemma.pos_type == form_config.pos_type)
+                .order_by(linguistic_db.Lemma.frequency_rank)
+            )
 
-        return results
+            if limit:
+                query = query.limit(limit)
+
+            results = []
+            for lemma in query.all():
+                translation = (
+                    session.query(linguistic_db.LemmaTranslation)
+                    .filter(
+                        linguistic_db.LemmaTranslation.lemma_id == lemma.id,
+                        linguistic_db.LemmaTranslation.language_code == form_config.language_code,
+                    )
+                    .first()
+                )
+
+                if translation:
+                    results.append(
+                        {
+                            "id": lemma.id,
+                            "english": lemma.lemma_text,
+                            form_config.language_code: translation.translation,
+                            "pos_subtype": lemma.pos_subtype,
+                        }
+                    )
+
+            return results
 
 
 def get_lemmas_without_translation(
@@ -156,26 +158,25 @@ def get_lemmas_without_translation(
     Returns:
         List of dictionaries with lemma information
     """
-    session = get_session(config)
+    with contextlib.closing(create_session(config)) as session:
+        query = (
+            session.query(linguistic_db.Lemma)
+            .filter(linguistic_db.Lemma.pos_type == pos_type)
+            .order_by(linguistic_db.Lemma.frequency_rank)
+        )
 
-    query = (
-        session.query(linguistic_db.Lemma)
-        .filter(linguistic_db.Lemma.pos_type == pos_type)
-        .order_by(linguistic_db.Lemma.frequency_rank)
-    )
+        if limit:
+            query = query.limit(limit)
 
-    if limit:
-        query = query.limit(limit)
-
-    return [
-        {
-            "id": lemma.id,
-            "english": lemma.lemma_text,
-            "pos_subtype": lemma.pos_subtype,
-            "frequency_rank": lemma.frequency_rank,
-        }
-        for lemma in query.all()
-    ]
+        return [
+            {
+                "id": lemma.id,
+                "english": lemma.lemma_text,
+                "pos_subtype": lemma.pos_subtype,
+                "frequency_rank": lemma.frequency_rank,
+            }
+            for lemma in query.all()
+        ]
 
 
 def get_lemmas_needing_forms(
@@ -192,44 +193,43 @@ def get_lemmas_needing_forms(
     Returns:
         List of dictionaries with lemma information
     """
-    session = get_session(config)
-
-    # Get all lemmas of the specified POS type
-    query = (
-        session.query(linguistic_db.Lemma)
-        .filter(linguistic_db.Lemma.pos_type == form_config.pos_type)
-        .order_by(linguistic_db.Lemma.frequency_rank)
-    )
-
-    results = []
-    for lemma in query.all():
-        # Count existing derivative forms for this lemma in the target language
-        form_count = (
-            session.query(linguistic_db.DerivativeForm)
-            .filter(
-                linguistic_db.DerivativeForm.lemma_id == lemma.id,
-                linguistic_db.DerivativeForm.language_code == form_config.language_code,
-            )
-            .count()
+    with contextlib.closing(create_session(config)) as session:
+        # Get all lemmas of the specified POS type
+        query = (
+            session.query(linguistic_db.Lemma)
+            .filter(linguistic_db.Lemma.pos_type == form_config.pos_type)
+            .order_by(linguistic_db.Lemma.frequency_rank)
         )
 
-        # If forms are below threshold, this lemma needs forms generated
-        if form_count <= form_config.min_forms_threshold:
-            results.append(
-                {
-                    "id": lemma.id,
-                    "english": lemma.lemma_text,
-                    "pos_subtype": lemma.pos_subtype,
-                    "frequency_rank": lemma.frequency_rank,
-                    "current_form_count": form_count,
-                }
+        results = []
+        for lemma in query.all():
+            # Count existing derivative forms for this lemma in the target language
+            form_count = (
+                session.query(linguistic_db.DerivativeForm)
+                .filter(
+                    linguistic_db.DerivativeForm.lemma_id == lemma.id,
+                    linguistic_db.DerivativeForm.language_code == form_config.language_code,
+                )
+                .count()
             )
 
-            # Check if we've reached the limit
-            if limit and len(results) >= limit:
-                break
+            # If forms are below threshold, this lemma needs forms generated
+            if form_count <= form_config.min_forms_threshold:
+                results.append(
+                    {
+                        "id": lemma.id,
+                        "english": lemma.lemma_text,
+                        "pos_subtype": lemma.pos_subtype,
+                        "frequency_rank": lemma.frequency_rank,
+                        "current_form_count": form_count,
+                    }
+                )
 
-    return results
+                # Check if we've reached the limit
+                if limit and len(results) >= limit:
+                    break
+
+        return results
 
 
 def detect_number_type_from_forms(forms_dict: Dict[str, str], config: FormGenerationConfig) -> str:
@@ -476,7 +476,7 @@ def process_lemma_forms(
     Returns:
         True if successful, False otherwise
     """
-    session = get_session(data_config)
+    session = create_session(data_config)
 
     try:
         lemma = (
@@ -637,6 +637,8 @@ def process_lemma_forms(
         session.rollback()
         logger.error(f"Error processing lemma ID {lemma_id}: {e}", exc_info=True)
         return False
+    finally:
+        session.close()
 
 
 def process_lemma_forms_wiktionary(
@@ -659,7 +661,7 @@ def process_lemma_forms_wiktionary(
     Returns:
         True if any form was stored, False otherwise
     """
-    session = get_session(data_config)
+    session = create_session(data_config)
 
     try:
         lemma = (
@@ -775,6 +777,8 @@ def process_lemma_forms_wiktionary(
         session.rollback()
         logger.error(f"Error processing lemma ID {lemma_id} with Wiktionary: {e}", exc_info=True)
         return False
+    finally:
+        session.close()
 
 
 def run_form_generation(

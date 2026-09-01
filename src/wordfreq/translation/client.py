@@ -10,7 +10,7 @@ import constants
 from clients.unified_client import UnifiedLLMClient
 from storage import database as linguistic_db
 from storage.backend.config import BackendType, DataSourceConfig
-from storage.connection_pool import close_thread_sessions, get_session
+from storage.backend import create_session
 
 # Import specialized modules
 from wordfreq.translation import (
@@ -193,12 +193,29 @@ class LinguisticClient:
 
     def get_session(self) -> Any:
         """
-        Get a thread-local database session.
+        Get this thread's database session, creating it on first use.
+
+        The session is owned by this thread-local client and reused across the
+        many ``query_*`` helpers, which call this repeatedly and never close
+        what they get back.  ``close_thread_session`` releases it; the worker
+        loop calls that when the thread is done.
 
         Returns:
-            Thread-local database session
+            This thread's database session
         """
-        return get_session(self.config, echo=self.debug)
+        session = getattr(self._thread_local, "session", None)
+        if session is None:
+            session = create_session(self.config)
+            self._thread_local.session = session
+        return session
+
+    @classmethod
+    def close_thread_session(cls) -> None:
+        """Close and drop this thread's session, if it opened one."""
+        session = getattr(cls._thread_local, "session", None)
+        if session is not None:
+            session.close()
+            cls._thread_local.session = None
 
     # Definition queries
     def query_definitions(
@@ -578,8 +595,11 @@ class LinguisticClient:
     @classmethod
     def close_all(cls) -> None:
         """
-        Close all resources for all threads.
-        This should be called when the application is shutting down.
+        Close this thread's resources at shutdown.
+
+        Thread-local state is only reachable from its own thread, so this
+        releases the calling thread's session and no other.  Worker threads
+        must release their own before exiting -- see ``close_thread_session``.
         """
-        close_thread_sessions()
-        logger.info("Closed all database sessions")
+        cls.close_thread_session()
+        logger.info("Closed this thread's database session")
