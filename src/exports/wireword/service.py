@@ -26,6 +26,7 @@ from storage.backend.factory import create_session
 from langtools.dialect_overrides import normalize_language_code
 from exports.wireword.export_manager import WIREWORD_EXPORT_LANGUAGES, TrakaidoExporter
 from exports.wireword.generate_manifest import generate_manifest
+from exports.wireword.generate_variants import generate_variants
 from exports.wireword.generate_categorychoice import (
     build_reverse_subtype_map,
     generate_for_language,
@@ -420,6 +421,18 @@ class WirewordExportService:
             else:
                 logger.error("  Failed to refresh manifest after sentence export")
                 return False, results
+
+            # Emit the regional-variant registry.  Only a base language with
+            # storage dialects writes one; for everything else this is a no-op
+            # returning a None path, because a missing file is how the client
+            # spells "one variant".
+            variants_success, variants_path = generate_variants(wireword_dir, self.language)
+            if not variants_success:
+                logger.error("  Failed to write variants.json")
+                return False, results
+            if variants_path:
+                results["variants_path"] = variants_path
+                results.setdefault("files_created", []).append(variants_path)
 
             # Export category choice data (language-independent, goes to trakaido_wordlists root)
             logger.info("Exporting category choice data...")

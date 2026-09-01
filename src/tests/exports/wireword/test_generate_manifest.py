@@ -2,7 +2,11 @@ import json
 from pathlib import Path
 from typing import Any
 
-from exports.wireword.generate_manifest import calculate_file_md5, generate_manifest
+from exports.wireword.generate_manifest import (
+    _slugify_language_name,
+    calculate_file_md5,
+    generate_manifest,
+)
 
 
 def _write_json_file(path: Path, data: str = "[]") -> None:
@@ -246,11 +250,14 @@ def test_generate_manifest_sorts_level_files_numerically(tmp_path: Path) -> None
 
 
 def test_generate_manifest_uses_zh_tw_as_its_own_language(tmp_path: Path) -> None:
-    """zh-tw is an ordinary export language, not a variant flag on zh.
+    """zh-tw keeps its own language_code, but the base language's name.
 
     It used to be written as language "zh" plus simplified_chinese=False and
-    labeled zh_Hant; the manifest now names the dialect code the CDN and the
-    output directory use.
+    labeled zh_Hant, then as its own language named "chinese_taiwan".  Now that
+    a dialect is served as a regional *variant* of its base language, the name
+    collapses back to "chinese": the client keys its language-level state
+    (stats namespace, grammar lessons, UI strings) off that name, and a variant
+    shares all of it.  The variety travels in language_code and "variant".
     """
     _write_level_file(tmp_path)
 
@@ -259,7 +266,27 @@ def test_generate_manifest_uses_zh_tw_as_its_own_language(tmp_path: Path) -> Non
     assert success
     manifest = _load_manifest(manifest_path)
     assert manifest["language_code"] == "zh-tw"
-    assert manifest["language"] == "chinese_taiwan"
+    assert manifest["language"] == "chinese"
+    assert manifest["variant"] == "zh-tw"
+
+
+def test_generate_manifest_variant_matches_base_language_name(tmp_path: Path) -> None:
+    """A variant's manifest is told apart from its base by variant, not name."""
+    _write_level_file(tmp_path)
+
+    success, base_path = generate_manifest(str(tmp_path), "es")
+    assert success
+    base = _load_manifest(base_path)
+
+    success, variant_path = generate_manifest(str(tmp_path), "es-419")
+    assert success
+    variant = _load_manifest(variant_path)
+
+    assert variant["language"] == base["language"]
+    assert variant["language_code"] == "es-419"
+    assert variant["variant"] == "es-419"
+    # The base language is not a variant of anything, so it carries no field.
+    assert "variant" not in base
 
 
 def test_generate_manifest_zh_tw_keeps_pinyin_reading_config(tmp_path: Path) -> None:
@@ -287,8 +314,18 @@ def test_generate_manifest_zh_tw_advertises_no_voices_yet(tmp_path: Path) -> Non
     assert manifest["config"]["default_voice"] is None
 
 
-def test_generate_manifest_slugifies_parenthesized_language_names(tmp_path: Path) -> None:
-    """Display names with punctuation become underscore-joined identifiers."""
+def test_slugify_language_name_joins_parenthesized_names() -> None:
+    """Display names with punctuation become underscore-joined identifiers.
+
+    A dialect no longer reaches this via its own name -- it takes the base
+    language's -- but source-language names still run through it.
+    """
+    assert _slugify_language_name("Lithuanian") == "lithuanian"
+    assert _slugify_language_name("Spanish (Latin America)") == "spanish_latin_america"
+
+
+def test_generate_manifest_variant_keeps_the_dialect_code(tmp_path: Path) -> None:
+    """The variety travels in language_code even though the name does not."""
     _write_level_file(tmp_path)
 
     success, manifest_path = generate_manifest(str(tmp_path), "es-419")
@@ -296,4 +333,4 @@ def test_generate_manifest_slugifies_parenthesized_language_names(tmp_path: Path
     assert success
     manifest = _load_manifest(manifest_path)
     assert manifest["language_code"] == "es-419"
-    assert manifest["language"] == "spanish_latin_america"
+    assert manifest["language"] == "spanish"
