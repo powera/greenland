@@ -37,6 +37,7 @@ from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session as create_backend_session
 from storage.migrate import export_sqlite_to_jsonl, import_jsonl_to_sqlite
 from storage.models import GrammarFact
+from storage.release.lemma import decode_db_emoji, encode_db_emoji
 from storage.models.schema import (
     Base,
     DerivativeForm,
@@ -82,6 +83,13 @@ EXPECTED_WORD: Dict[str, object] = {
 
 LEMMA_GUID = "V06_004"
 
+# Two base-concept fields that live on the Lemma row rather than in a related
+# table, and so are easy to drop from one of the three transformations without
+# any test noticing: a release import once carried neither, which silently
+# stripped every sense_prominence rating from data/release on the next export.
+EXPECTED_SENSE_PROMINENCE = "very_common"
+EXPECTED_EMOJI = [{"type": "unicode", "value": "\N{SHOPPING TROLLEY}"}]
+
 
 def _build_source_db(sqlite_path: str) -> None:
     """Create a SQLite database with one richly-populated lemma and sentence."""
@@ -95,6 +103,8 @@ def _build_source_db(sqlite_path: str) -> None:
             guid=LEMMA_GUID,
             difficulty_level=3,
             disambiguation="acquire",
+            sense_prominence=EXPECTED_SENSE_PROMINENCE,
+            emoji=encode_db_emoji(EXPECTED_EMOJI),
         )
         db.add(lemma)
         db.flush()
@@ -303,6 +313,7 @@ class ReleaseRoundTripTest(unittest.TestCase):
             self.assertEqual(lemma.difficulty_level, 3)
             self.assertEqual(lemma.disambiguation, "acquire")
             self.assertIn("to acquire", (lemma.definition_text or ""))
+            self._assert_base_concept_fields(lemma)
 
             translations = {
                 t.language_code: t
@@ -361,6 +372,9 @@ class ReleaseRoundTripTest(unittest.TestCase):
         try:
             self._assert_word_fields(session)
             self._assert_lemma_link(session)
+            self._assert_base_concept_fields(
+                session.query(Lemma).filter(Lemma.guid == LEMMA_GUID).one()
+            )
         finally:
             session.close()
 
@@ -375,6 +389,19 @@ class ReleaseRoundTripTest(unittest.TestCase):
                 EXPECTED_WORD[column],
                 f"column {column!r} round-tripped as {actual!r}",
             )
+
+    def _assert_base_concept_fields(self, lemma: Lemma) -> None:
+        """The Lemma-row fields the release carries alongside the translations."""
+        self.assertEqual(
+            lemma.sense_prominence,
+            EXPECTED_SENSE_PROMINENCE,
+            "sense_prominence lost across the round trip",
+        )
+        self.assertEqual(
+            decode_db_emoji(lemma.emoji),
+            EXPECTED_EMOJI,
+            "emoji lost across the round trip",
+        )
 
     def _assert_lemma_link(self, db: Session) -> None:
         verb_word = db.query(SentenceWord).filter(SentenceWord.word_role == "verb").one()

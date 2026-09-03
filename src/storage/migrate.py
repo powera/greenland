@@ -27,6 +27,7 @@ import constants
 from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
 from storage.config.grammar_facts import RELEASE_GRAMMAR_FACT_TYPES
+from storage.release.lemma import decode_db_emoji
 from storage.release.variant import variants_by_language
 
 APPROVED_AUDIO_RELEASE_STATUSES = {"approved", "approved_with_issues"}
@@ -337,6 +338,8 @@ def convert_sqlalchemy_lemma_to_jsonl(lemma: Any, session: Any = None) -> Any:
         # LemmaTranslation; the JSONL model's per-language fields are left unset.
         # Metadata
         disambiguation=lemma.disambiguation,
+        sense_prominence=lemma.sense_prominence,
+        emoji=decode_db_emoji(lemma.emoji),
         confidence=lemma.confidence,
         verified=lemma.verified,
         notes=lemma.notes,

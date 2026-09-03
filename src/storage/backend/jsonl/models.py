@@ -137,6 +137,11 @@ class Lemma:
     # Disambiguation
     disambiguation: Optional[str] = None
 
+    # How prominent this sense is when its surface form is shared with other
+    # lemmas. Carried through from base.jsonl so a release -> SQLite -> release
+    # round trip does not drop a rating; see storage.models.schema.Lemma.
+    sense_prominence: Optional[str] = None
+
     # Emoji representation(s) of the concept. Each entry is a dict
     #   {"type": "unicode", "value": "🐕"}  — a real Unicode emoji
     #   {"type": "image",   "value": "badger.svg"} — a custom static image
