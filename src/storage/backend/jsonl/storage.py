@@ -179,6 +179,7 @@ class JSONLStorage(BaseStorage):
                         lemma.definition_text = lemma.concept_definition
 
                         lemma.difficulty_level = data.get("difficulty_level")
+                        lemma.sense_prominence = data.get("sense_prominence")
                         lemma.notes = data.get("notes")
                         lemma.lexical_gap_reason = data.get("lexical_gap_reason")
                         lemma.qid = data.get("qid")
@@ -894,6 +895,11 @@ class JSONLStorage(BaseStorage):
         # Emoji representations of the concept (e.g. ["🐕"] for dog)
         if lemma.emoji:
             data["emoji"] = list(lemma.emoji)
+
+        # Absent means "nobody has rated this sense"; only a real rating is
+        # written, matching storage.release.lemma.lemma_to_release_record.
+        if lemma.sense_prominence:
+            data["sense_prominence"] = lemma.sense_prominence
 
         if lemma.notes:
             data["notes"] = lemma.notes

@@ -219,6 +219,7 @@ class JSONLSession(BaseSession):
         from storage.models.schema import SentenceTranslation, SentenceWord
         from storage.models.variant_form import VARIANT_KIND_SPELLING
         from storage.models.variant_form import VariantForm as SQLVariantForm
+        from storage.release.lemma import encode_db_emoji, normalize_emoji_list
         from storage.translation_helpers import compute_sort_key
         from storage.wikidata import normalize_qid
 
@@ -254,6 +255,10 @@ class JSONLSession(BaseSession):
                 "tags": jsonl_lemma.tags,
                 "lexical_gap_reason": jsonl_lemma.lexical_gap_reason,
                 "disambiguation": jsonl_lemma.disambiguation,
+                "sense_prominence": jsonl_lemma.sense_prominence,
+                # The SQL column holds the JSON-encoded list the release file
+                # carries as an array, so encode rather than hand over the list.
+                "emoji": encode_db_emoji(normalize_emoji_list(jsonl_lemma.emoji)),
                 "confidence": jsonl_lemma.confidence,
                 "notes": jsonl_lemma.notes,
                 "verified": jsonl_lemma.verified,
