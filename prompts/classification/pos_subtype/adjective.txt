@@ -12,6 +12,7 @@ ADJECTIVE SUBTYPES:
 - aesthetic: Beauty or appearance (beautiful, ugly, pretty)
 - importance: Importance or priority (important, essential, trivial)
 - origin: Origin or source (American, Chinese, domestic)
+- location: Where something is situated (northern, coastal, inland, urban)
 - purpose: Purpose or function (educational, medical, industrial)
 - material: Material composition (wooden, metal, plastic)
 - definite_quantity: Specific amounts (one, ten, hundred)

@@ -355,7 +355,24 @@ def main() -> None:
 
     # Batch processing mode - get confirmation before running
     if not args.yes and not args.dry_run:
+        # Name the languages and the call count: "90 lemmas" alone reads as the
+        # whole cost, but each word's languages are translated together in one
+        # request, so the bill is words x batches, not words x languages.
+        from storage.translation_helpers import split_llm_language_batches
+        from words.translation_workflow import resolve_generation_languages
+
+        languages = resolve_generation_languages(args.languages)
+        batches = split_llm_language_batches(languages)
+        calls = len(lemmas) * len(batches)
+        per_word = (
+            "1 LLM call per word covering all of them"
+            if len(batches) == 1
+            else f"{len(batches)} LLM calls per word, batched by language"
+        )
+
         print(f"\nThis will process {len(lemmas)} lemmas using model '{args.model}'")
+        print(f"Languages ({len(languages)}): {', '.join(languages)}")
+        print(f"Translation is {per_word}, so ~{calls} LLM call(s) in total.")
         print("This may incur costs and take some time to complete.")
         response = input("Do you want to proceed? [y/N]: ").strip().lower()
         if response not in ["y", "yes"]:

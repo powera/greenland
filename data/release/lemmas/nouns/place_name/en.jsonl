@@ -11,3 +11,7 @@
 {"guid": "N30_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "inside", "is_base_form": true, "ipa": "/ɪnˈsaɪd/", "phonetic": "IN-sighd"}, {"grammatical_form": "noun/en_plural", "text": "insides", "is_base_form": false}]}
 {"guid": "N30_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "outside", "is_base_form": true, "ipa": "/aʊtˈsaɪd/", "phonetic": "AWT-side"}, {"grammatical_form": "noun/en_plural", "text": "outsides", "is_base_form": false}]}
 {"guid": "N30_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "behind", "is_base_form": true, "ipa": "/bɪˈhaɪnd/", "phonetic": "BIGH-end"}, {"grammatical_form": "noun/en_plural", "text": "behinds", "is_base_form": false}]}
+{"guid": "N30_054", "variants": [{"kind": "spelling", "key": "north-east", "forms": [{"grammatical_form": "noun/en_base", "text": "north-east", "is_base_form": true}]}]}
+{"guid": "N30_055", "variants": [{"kind": "spelling", "key": "north-west", "forms": [{"grammatical_form": "noun/en_base", "text": "north-west", "is_base_form": true}]}]}
+{"guid": "N30_056", "variants": [{"kind": "spelling", "key": "south-east", "forms": [{"grammatical_form": "noun/en_base", "text": "south-east", "is_base_form": true}]}]}
+{"guid": "N30_057", "variants": [{"kind": "spelling", "key": "south-west", "forms": [{"grammatical_form": "noun/en_base", "text": "south-west", "is_base_form": true}]}]}
