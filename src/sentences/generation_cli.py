@@ -64,7 +64,7 @@ Examples:
     )
 
     add_common_args(parser)
-    add_llm_args(parser, default_model="gpt-5.4-mini")
+    add_llm_args(parser)
     add_guid_arg(parser, help_text="Target this lemma GUID")
     add_backend_args(parser)
 

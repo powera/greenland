@@ -69,7 +69,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
 def _add_common_verification_args(parser: argparse.ArgumentParser) -> None:
     add_common_args(parser)
-    add_llm_args(parser, default_model="gpt-5.4-mini")
+    add_llm_args(parser)
     add_backend_args(parser)
     add_processing_args(parser)
     add_language_args(parser)
