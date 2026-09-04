@@ -141,6 +141,7 @@ class AdjectiveSubtype(enum.Enum):
     AESTHETIC = "aesthetic"  # Beauty or appearance (beautiful, ugly, pretty, handsome)
     IMPORTANCE = "importance"  # Importance or priority (important, essential, trivial, critical)
     ORIGIN = "origin"  # Origin or source (American, Chinese, domestic, foreign)
+    LOCATION = "location"  # Where a thing is situated (northern, coastal, inland, urban, rural)
     PURPOSE = "purpose"  # Purpose or function (educational, medical, industrial, recreational)
     MATERIAL = "material"  # Material composition (wooden, metal, plastic, cotton)
     # DEFINITE_QUANTITY removed: moved to numeral POS

@@ -92,6 +92,7 @@ SUBTYPE_GUID_PREFIXES = {
         "aesthetic": "A06",
         "importance": "A07",
         "origin": "A08",
+        "location": "A20",
         "purpose": "A09",
         "material": "A10",
         # A11 removed: definite_quantity moved to numeral POS
