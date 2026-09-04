@@ -24,7 +24,7 @@ from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
 from storage.crud.difficulty_override import bulk_get_effective_difficulty_levels
 from storage.models.grammar_fact import GrammarFact
-from storage.models.variant_form import VariantForm
+from storage.models.variant_form import ACCEPTED_ANSWER_VARIANT_KINDS, VariantForm
 from storage.models.schema import (
     SYNONYM_GRAMMATICAL_FORMS,
     AudioQualityReview,
@@ -144,13 +144,21 @@ class WirewordExporter:
     def _bulk_fetch_variant_base_forms(
         self, session: Any, lemma_ids: List[int]
     ) -> Dict[int, Dict[str, List[str]]]:
-        """Base forms of each lemma's spelling variants, by lemma and language.
+        """Base forms of each lemma's variants, by lemma and language.
+
+        A variant is the same lemma written another way -- "grey" for "gray",
+        "TV" for "television" -- so its base form is something a learner may
+        type and be right.
 
         Only the base form of a variant paradigm is returned. A variant carries
         a full paradigm of its own -- "grey" brings "greyer" and "greyest" --
         but the inflected slots are not alternate spellings of the headword and
         must not be offered as answers to it. "grey" is a correct way to write
         "gray"; "greyer" is not.
+
+        Only kinds in ``ACCEPTED_ANSWER_VARIANT_KINDS`` are returned. Every kind
+        defined today qualifies, but the filter is explicit so that adding a
+        kind which is *not* an acceptable answer does not silently make one.
 
         Returns ``{lemma_id: {language_code: [base form, ...]}}``. A lemma with
         no variants is absent rather than mapped to an empty dict.
@@ -164,6 +172,7 @@ class WirewordExporter:
             .filter(
                 VariantForm.lemma_id.in_(lemma_ids),
                 VariantForm.is_base_form.is_(True),
+                VariantForm.variant_kind.in_(tuple(ACCEPTED_ANSWER_VARIANT_KINDS)),
             )
             .all()
         )
@@ -174,7 +183,7 @@ class WirewordExporter:
             by_language = variant_base_forms.setdefault(row.lemma_id, {})
             by_language.setdefault(row.language_code, []).append(text)
 
-        logger.info(f"Bulk fetched {len(rows)} spelling variant base forms")
+        logger.info(f"Bulk fetched {len(rows)} variant base forms")
         return variant_base_forms
 
     def _normalize_target_text(self, text: Optional[str]) -> Optional[str]:
@@ -650,31 +659,19 @@ class WirewordExporter:
                         # Skip base forms as they're already in base_target/base_english
                         continue
 
-                    # Determine if this form is an alternative form or synonym.
-                    # "abbreviation" and "expanded_form" are the live values.
-                    # "alternate_spelling" and "alternative_form" are the legacy
-                    # pre-variant_forms mechanism and match nothing: the live
-                    # database holds zero rows of either (see
-                    # storage.crud.derivative_form.add_alternative_form). Real
-                    # spelling variants come from variant_forms, appended below.
-                    is_alternative = form.grammatical_form in [
-                        "abbreviation",
-                        "expanded_form",
-                        "alternate_spelling",
-                        "alternative_form",
-                    ]
+                    # Every way of writing the lemma itself -- alternate
+                    # spellings, abbreviations, expansions -- is a variant_forms
+                    # row, and is appended below from that table. A derivative
+                    # form is an inflection, so the only non-inflection left to
+                    # sort out here is the legacy synonym class.
                     is_synonym = form.grammatical_form in SYNONYM_GRAMMATICAL_FORMS
 
                     # Handle different types of derivative forms
                     if form.language_code == "en":
-                        if is_alternative:
-                            english_alternatives.append(form.derivative_form_text)
-                        elif is_synonym:
+                        if is_synonym:
                             english_synonyms.append(form.derivative_form_text)
                     elif form.language_code == self.language:
-                        if is_alternative:
-                            target_alternatives.append(form.derivative_form_text)
-                        elif is_synonym:
+                        if is_synonym:
                             target_synonyms.append(form.derivative_form_text)
                         elif form.grammatical_form == "plural_nominative":
                             # Add plural nominative form with appropriate level (minimum level 4)
@@ -729,11 +726,9 @@ class WirewordExporter:
                             grammatical_forms[form.grammatical_form] = gram_form
                         else:
                             # Generic handler for other grammatical forms (French verbs, Korean forms, etc.)
-                            # Skip alternative_form and synonym as they're handled separately above
-                            if (
-                                form.grammatical_form != "alternative_form"
-                                and form.grammatical_form not in SYNONYM_GRAMMATICAL_FORMS
-                            ):
+                            # Legacy synonym rows are collected above and are not
+                            # grammatical slots, so they never become entries here.
+                            if form.grammatical_form not in SYNONYM_GRAMMATICAL_FORMS:
                                 form_level = max(entry["trakaido_level"], 4)
 
                                 gram_form = {
@@ -767,9 +762,11 @@ class WirewordExporter:
 
                                 grammatical_forms[form.grammatical_form] = gram_form
 
-                # Spelling variants are alternate ways to write the same word,
-                # so they belong with the alternatives a learner may type: a
-                # user who answers "grey" for "pilkas" has not made a mistake.
+                # Variants are the other ways of writing the same word -- an
+                # alternate spelling ("grey"), an abbreviation ("TV"), an
+                # expansion ("television") -- so they are the alternatives a
+                # learner may type: someone who answers "grey" for "pilkas" has
+                # not made a mistake. This is the only source of alternatives.
                 lemma_variants = variant_base_forms_by_lemma.get(lemma_id, {})
                 for variant_text in lemma_variants.get("en", []):
                     if variant_text not in english_alternatives:
@@ -1313,6 +1310,10 @@ class WirewordExporter:
                 derivative_forms_by_lemma[form.lemma_id].append(form)
             logger.info(f"Bulk fetched {len(all_derivative_forms)} derivative forms")
 
+            # Verbs have variants too ("realise" for "realize"), and they are
+            # accepted answers here for the same reason they are for nouns.
+            variant_base_forms_by_lemma = self._bulk_fetch_variant_base_forms(session, lemma_ids)
+
             # Build English translation lookup for derivative forms
             english_forms_by_lemma: Dict[int, Dict[str, str]] = {}
             source_forms_by_lemma: Dict[int, Dict[str, str]] = {}
@@ -1400,9 +1401,19 @@ class WirewordExporter:
                 # Build grammatical forms (conjugations)
                 grammatical_forms = {}
                 conjugation_mode_tables: Dict[str, Dict[str, Dict[str, str]]] = {}
+                english_alternatives: List[str] = []
                 target_alternatives: List[str] = []
                 english_synonyms = []
                 target_synonyms = []
+
+                lemma_variants = variant_base_forms_by_lemma.get(lemma.id, {})
+                for variant_text in lemma_variants.get("en", []):
+                    if variant_text not in english_alternatives:
+                        english_alternatives.append(variant_text)
+                if self.language != "en":
+                    for variant_text in lemma_variants.get(self.language, []):
+                        if variant_text not in target_alternatives:
+                            target_alternatives.append(variant_text)
 
                 for form in derivative_forms:
                     if form.is_base_form:
@@ -1566,9 +1577,25 @@ class WirewordExporter:
                 wireword.update(build_target_reading_fields(self.language, base_target))
 
                 # Add optional fields
+                verb_source_alt_key = (
+                    "english_alternatives"
+                    if self.source_language == "en"
+                    else "source_alternatives"
+                )
                 verb_source_syn_key = (
                     "english_synonyms" if self.source_language == "en" else "source_synonyms"
                 )
+                if english_alternatives:
+                    wireword[verb_source_alt_key] = english_alternatives
+                if target_alternatives:
+                    wireword["target_alternatives"] = target_alternatives
+                    wireword.update(
+                        build_target_reading_list_fields(
+                            self.language,
+                            target_alternatives,
+                            "target_alternatives",
+                        )
+                    )
                 if english_synonyms:
                     wireword[verb_source_syn_key] = english_synonyms
                 if target_synonyms:

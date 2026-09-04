@@ -296,15 +296,30 @@ slot), which is why it is neither of the two arrays above:
 }
 ```
 
-`kind` is `spelling` or `script` (Chinese simplified/traditional); it is
-deliberately open, since the meaningful kinds are language-specific. `key`
-identifies the variant within the lemma and is conventionally the variant's own
-base form. `is_base_form` is scoped to the variant: "grey" is the base form of
-the "grey" variant, while "gray" remains the lemma's own base form in `forms`.
+A variant is the same lemma written another way, and that is what separates it
+from the other two relations the database records:
 
-A regional *dialect* is a different axis and is not a variant: "grey" is an
-alternate spelling within en-US here, and separately the en-GB translation of
-the same lemma. See `storage/models/variant_form.py`.
+* An **inflection** is a different grammatical slot of one spelling (gray,
+  grayer, grayest). It is a `forms` entry, from `derivative_forms`.
+* A **variant** is another way of writing the lemma itself (grey for gray, TV
+  for television). It is a `variants` entry, from `variant_forms`, and carries
+  a paradigm of its own — which is why it cannot be one extra `forms` row.
+* A **synonym** is a different lemma with a similar meaning (quickly/swiftly).
+  It belongs to neither word, so it is a relation between lemmas, in
+  `lemma_relations/synonym/`.
+
+`kind` is `spelling`, `script` (Chinese simplified/traditional),
+`abbreviation`, or `expanded`; it is deliberately open, since the meaningful
+kinds are language-specific. `key` identifies the variant within the lemma and
+is conventionally the variant's own base form. `is_base_form` is scoped to the
+variant: "grey" is the base form of the "grey" variant, while "gray" remains
+the lemma's own base form in `forms`.
+
+**Only en-US variants are written today.** A row saying "grey" is an accepted
+way to write "gray" makes no claim that it is *the British* form — a regional
+dialect is a different axis, and is not stored here yet. When en-GB is taken up
+properly it becomes either a region tag on these rows or a storage dialect of
+its own. See `storage/models/variant_form.py`.
 
 Name records live in `names/base.jsonl`:
 

@@ -15,8 +15,15 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from langtools.en.variants import build_variant_paradigm
 from storage.models import Base, DerivativeForm, Lemma
-from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
-from words.synonyms import store_spelling_variants
+from storage.models.variant_form import (
+    ACCEPTED_ANSWER_VARIANT_KINDS,
+    VARIANT_KIND_ABBREVIATION,
+    VARIANT_KIND_EXPANDED,
+    VARIANT_KIND_SCRIPT,
+    VARIANT_KIND_SPELLING,
+    VariantForm,
+)
+from words.synonyms import store_spelling_variants, store_synonym_forms
 
 
 @pytest.fixture()
@@ -114,4 +121,87 @@ def test_variant_paradigm_expands_regular_lemmas() -> None:
     assert build_variant_paradigm("doughnut", "donut", "noun") == {
         "singular": "donut",
         "plural": "donuts",
+    }
+
+
+def test_abbreviations_are_stored_as_variants_not_derivative_forms(session: Session) -> None:
+    """An abbreviation is the same lemma at another length, so it is a variant.
+
+    It used to be a DerivativeForm tagged "abbreviation", which could hold only
+    the one spelling -- no room for the abbreviation's own plural.
+    """
+    lemma = _add_lemma(session, "advertisement", "noun")
+
+    stored = store_synonym_forms(
+        session=session,
+        lemma=lemma,
+        language_code="en",
+        synonym_groups={},
+        abbreviations=["ad"],
+        expanded_forms=[],
+    )
+
+    assert stored["abbreviations"] == 1
+    assert session.query(DerivativeForm).count() == 0
+
+    rows = session.query(VariantForm).order_by(VariantForm.variant_form_text).all()
+    assert [row.variant_form_text for row in rows] == ["ad", "ads"]
+    assert {row.variant_kind for row in rows} == {VARIANT_KIND_ABBREVIATION}
+    assert [row.is_base_form for row in rows] == [True, False]
+
+
+def test_acronym_abbreviation_stores_base_form_alone(session: Session) -> None:
+    """The paradigm builder declines an acronym, and that is the right answer.
+
+    Nothing here knows whether "TV" pluralizes as "TVs" or "TV's", so only the
+    base form is stored and the rest is left for a human. The variant still
+    exists, so duplicate detection and the export both find it.
+    """
+    lemma = _add_lemma(session, "television", "noun")
+
+    stored = store_synonym_forms(
+        session=session,
+        lemma=lemma,
+        language_code="en",
+        synonym_groups={},
+        abbreviations=["TV"],
+        expanded_forms=[],
+    )
+
+    assert stored["abbreviations"] == 1
+    rows = session.query(VariantForm).all()
+    assert [row.variant_form_text for row in rows] == ["TV"]
+    assert rows[0].is_base_form is True
+    assert rows[0].variant_kind == VARIANT_KIND_ABBREVIATION
+
+
+def test_expanded_forms_get_their_own_kind(session: Session) -> None:
+    """An expansion is a variant too, distinguishable from an abbreviation."""
+    lemma = _add_lemma(session, "TV", "noun")
+
+    stored = store_synonym_forms(
+        session=session,
+        lemma=lemma,
+        language_code="en",
+        synonym_groups={},
+        abbreviations=[],
+        expanded_forms=["television"],
+    )
+
+    assert stored["expanded_forms"] == 1
+    kinds = {row.variant_kind for row in session.query(VariantForm).all()}
+    assert kinds == {VARIANT_KIND_EXPANDED}
+
+
+def test_accepted_answer_kinds_cover_every_kind_defined_today() -> None:
+    """Every kind currently defined is a way of writing the lemma itself.
+
+    A new kind that is *not* an acceptable answer must be left out of this set
+    deliberately, which is why the export filters on it.
+    """
+    assert ACCEPTED_ANSWER_VARIANT_KINDS == {
+        VARIANT_KIND_SPELLING,
+        VARIANT_KIND_SCRIPT,
+        VARIANT_KIND_ABBREVIATION,
+        VARIANT_KIND_EXPANDED,
     }

@@ -26,7 +26,11 @@ from storage.crud.operation_log import log_operation
 from storage.crud.variant_form import add_variant_form
 from storage.crud.word_token import add_word_token
 from storage.models.schema import SYNONYM_GRAMMATICAL_FORMS, DerivativeForm, Lemma
-from storage.models.variant_form import VARIANT_KIND_SPELLING
+from storage.models.variant_form import (
+    VARIANT_KIND_ABBREVIATION,
+    VARIANT_KIND_EXPANDED,
+    VARIANT_KIND_SPELLING,
+)
 from storage.translation_helpers import get_supported_languages, get_translation
 from wordfreq.tools.text_utils import is_numeral
 
@@ -39,9 +43,10 @@ logger = logging.getLogger(__name__)
 # ``DerivativeForm`` rows. The ordering here is also the canonical
 # preference order when deduplicating across categories.
 #
-# ``alternate_spellings`` is deliberately not in this map. A spelling variant
-# is the same lexeme as the lemma and carries its own paradigm, so it is
-# stored in ``variant_forms`` by ``store_spelling_variants`` instead.
+# ``alternate_spellings``, ``abbreviations`` and ``expanded_forms`` are
+# deliberately not in this map. Each is the same lemma written another way and
+# carries its own paradigm, so all three are stored in ``variant_forms`` by
+# ``store_spelling_variants`` instead, under their own ``variant_kind``.
 SYNONYM_FORM_MAP: Dict[str, str] = {
     "synonyms": "synonym",
     "near_synonyms": "synonym_near",
@@ -245,9 +250,17 @@ def store_synonym_forms(
 ) -> Dict[str, int]:
     """Persist synonym/abbreviation/expanded-form rows.
 
+    The three go to two different tables.  Abbreviations and expanded forms are
+    the same lemma at another length, so they are ``variant_forms`` paradigms
+    like any other variant.  Synonyms are still written as ``derivative_forms``
+    rows here, but that is legacy: a synonym is a different lemma, and belongs
+    in a ``LemmaRelationGroup`` of type ``synonym`` instead.  See
+    ``SYNONYM_GRAMMATICAL_FORMS`` in ``storage.models.schema``.
+
     Returns a dict with counts under ``synonyms``, ``abbreviations``, and
-    ``expanded_forms``. Individual insert failures are logged and skipped
-    so a single bad form doesn't abort the batch.
+    ``expanded_forms``. The abbreviation counts are *paradigms* stored, not
+    rows, matching ``store_spelling_variants``. Individual insert failures are
+    logged and skipped so a single bad form doesn't abort the batch.
     """
     stored_counts = {
         "synonyms": 0,
@@ -295,37 +308,30 @@ def store_synonym_forms(
                     "Failed to store synonym '%s' (%s): %s", synonym, grammatical_form, error
                 )
 
-    for abbr in abbreviations:
-        try:
-            word_token = add_word_token(session, abbr, language_code)
-            add_derivative_form(
-                session=session,
-                lemma=lemma,
-                derivative_form_text=abbr,
-                language_code=language_code,
-                grammatical_form="abbreviation",
-                word_token=word_token,
-                verified=False,
-            )
-            stored_counts["abbreviations"] += 1
-        except Exception as error:
-            logger.warning("Failed to store abbreviation '%s': %s", abbr, error)
+    # An abbreviation is the same lemma at a different length ("TV" for
+    # "television"), so it is a variant rather than a derivative form -- and it
+    # needs a paradigm of its own ("TVs"), which one derivative row cannot hold.
+    try:
+        stored_counts["abbreviations"] = store_spelling_variants(
+            session=session,
+            lemma=lemma,
+            language_code=language_code,
+            alternate_spellings=abbreviations,
+            variant_kind=VARIANT_KIND_ABBREVIATION,
+        )
+    except Exception as error:
+        logger.warning("Failed to store abbreviations %s: %s", abbreviations, error)
 
-    for exp_form in expanded_forms:
-        try:
-            word_token = add_word_token(session, exp_form, language_code)
-            add_derivative_form(
-                session=session,
-                lemma=lemma,
-                derivative_form_text=exp_form,
-                language_code=language_code,
-                grammatical_form="expanded_form",
-                word_token=word_token,
-                verified=False,
-            )
-            stored_counts["expanded_forms"] += 1
-        except Exception as error:
-            logger.warning("Failed to store expanded form '%s': %s", exp_form, error)
+    try:
+        stored_counts["expanded_forms"] = store_spelling_variants(
+            session=session,
+            lemma=lemma,
+            language_code=language_code,
+            alternate_spellings=expanded_forms,
+            variant_kind=VARIANT_KIND_EXPANDED,
+        )
+    except Exception as error:
+        logger.warning("Failed to store expanded forms %s: %s", expanded_forms, error)
 
     return stored_counts
 
@@ -357,7 +363,7 @@ def _variant_form_mapping(language_code: str, pos_type: str) -> Dict[str, str]:
     }
 
 
-def _variant_base_grammatical_form(language_code: str, pos_type: str) -> Optional[str]:
+def variant_base_grammatical_form(language_code: str, pos_type: str) -> Optional[str]:
     """The ``grammatical_form`` naming a variant's base form, or ``None``."""
     normalized_pos = pos_type.lower()
     base_form_key = _EN_BASE_FORM_KEY.get(normalized_pos)
@@ -374,10 +380,11 @@ def store_spelling_variants(
     variant_kind: str = VARIANT_KIND_SPELLING,
     source: Optional[str] = None,
 ) -> int:
-    """Persist alternate spellings as ``variant_forms`` rows.
+    """Persist variants of a lemma as ``variant_forms`` rows.
 
-    A spelling variant is the same lexeme as the lemma, so it does not belong
-    in ``derivative_forms`` alongside synonyms; see
+    A variant is the same lemma written another way -- an alternate spelling
+    ("grey"), an abbreviation ("TV"), or an expansion ("television") -- so it
+    does not belong in ``derivative_forms``, which holds inflections; see
     ``storage.models.variant_form``. Callers only ever supply the variant's
     base form ("grey"), which is expanded into a full paradigm by the
     mechanical rules where they are confident. When they are not -- irregular
@@ -395,7 +402,8 @@ def store_spelling_variants(
         lemma: The lemma these are variants of
         language_code: Language of the variants (e.g. "en")
         alternate_spellings: Base forms of the variants (e.g. ``["grey"]``)
-        variant_kind: Kind of variant; defaults to "spelling"
+        variant_kind: One of the ``VARIANT_KIND_*`` values in
+            ``storage.models.variant_form``; defaults to "spelling"
         source: Who is storing these, for the operation log. None skips
             logging. One entry is written per form, keyed to the lemma's GUID.
 
@@ -436,7 +444,7 @@ def store_spelling_variants(
             )
 
         form_mapping = _variant_form_mapping(language_code, lemma.pos_type)
-        base_grammatical_form = _variant_base_grammatical_form(language_code, lemma.pos_type)
+        base_grammatical_form = variant_base_grammatical_form(language_code, lemma.pos_type)
 
         # Fall back to the bare base form when the rules declined to expand, so
         # duplicate detection still recognizes the spelling.
