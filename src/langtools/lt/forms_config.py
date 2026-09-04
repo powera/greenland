@@ -40,11 +40,35 @@ VERB_CONFIG: Dict[str, Any] = {
     "schema_name": "LithuanianVerbConjugations",
 }
 
+# Degree forms carried alongside the case table.  A Lithuanian comparative
+# declines like any adjective ("raudonesnio obuolio"), so the complete paradigm
+# would be 3 degrees x 28 cases = 84 forms.  That is far more than Trakaido
+# needs -- the app deliberately avoids drilling declension tables, and picks
+# these up through sentences instead -- so only the slots that actually carry
+# sentences are stored:
+#
+#     nominative  "the big apple was redder", "those apples were the reddest"
+#     accusative  "he has a redder apple"
+#
+# in both genders and numbers, giving 8 per degree.  A declined comparative in
+# another case (genitive "of the redder apple") has no row and will surface as a
+# decomposition miss in sentences.analysis, which matches by surface text -- so
+# the gap is observable, and a case can be added when one actually shows up.
+_DEGREE_CASES: List[str] = ["nominative", "accusative"]
+ADJECTIVE_DEGREE_FORMS: List[str] = [
+    f"{degree}_{case}_{number}_{gender}"
+    for degree in ("comparative", "superlative")
+    for case in _DEGREE_CASES
+    for number in ("singular", "plural")
+    for gender in ("m", "f")
+]
+
 ADJECTIVE_CONFIG: Dict[str, Any] = {
     "type": "case_number_gender",
     "cases": CASES,
     "numbers": ["singular", "plural"],
     "genders": ["m", "f"],
+    "extra_forms": ADJECTIVE_DEGREE_FORMS,
     "query_type": "lithuanian_adjective_declensions",
     "schema_name": "LithuanianAdjectiveDeclensions",
 }

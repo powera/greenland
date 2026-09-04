@@ -1,6 +1,17 @@
-Generate all Lithuanian adjective declension forms for the Lithuanian adjective "{adjective}".
+Generate all Lithuanian adjective forms for the Lithuanian adjective "{adjective}".
 
 English adjective: {english_adjective}
 Definition: {definition}{subtype_context}
 
-Please provide all 28 forms (7 cases × 2 numbers × 2 genders), using empty strings for forms that don't exist.
+Please provide all 44 forms, using empty strings for forms that don't exist:
+
+- 28 positive-degree declension forms (7 cases × 2 numbers × 2 genders)
+- 8 comparative forms (nominative and accusative × 2 numbers × 2 genders)
+- 8 superlative forms (nominative and accusative × 2 numbers × 2 genders)
+
+The comparative and superlative are requested only in the nominative and
+accusative; leave every other case out rather than guessing at it.
+
+Many adjectives do not grade at all — absolute or classifying adjectives such
+as "medinis" (wooden) or "mirtinas" (mortal) have no natural comparative. Use
+empty strings for those rather than coining a form.

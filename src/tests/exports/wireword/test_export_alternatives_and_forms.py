@@ -1,4 +1,4 @@
-"""The WireWord export offers every variant of a lemma as an accepted answer.
+"""What the WireWord export offers as answers, and as grammatical-form cards.
 
 A variant is the same lemma written another way -- "grey" for "gray", "ad" for
 "advertisement" -- so a learner who types one has not made a mistake.  All of
@@ -10,6 +10,10 @@ The kind filter is the part worth pinning down: every kind defined today is an
 acceptable answer, so the export would behave identically without it.  It is
 there so that adding a kind which is *not* an answer does not silently become
 one, and this test fails if the filter is dropped.
+
+The degree-form tests cover the other direction: a Lithuanian comparative is a
+card, and takes its English label from the single ``adjective/en_comparative``
+slot rather than matching Lithuanian's case/number/gender slot-for-slot.
 """
 
 from typing import Generator, List
@@ -19,7 +23,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from exports.wireword.export_wireword import WirewordExporter
+from exports.wireword.export_wireword import (
+    DEGREE_FORM_MIN_LEVEL,
+    GENERIC_FORM_MIN_LEVEL,
+    WirewordExporter,
+    _minimum_level_for_form,
+)
 from storage.models import Base, Lemma
 from storage.models.variant_form import (
     VARIANT_KIND_ABBREVIATION,
@@ -144,3 +153,55 @@ def test_lemma_without_variants_is_absent(session: Session) -> None:
     lemma = _add_lemma(session, "blue")
 
     assert _fetch(session, [lemma.id]) == {}
+
+
+def test_lithuanian_degree_forms_take_their_english_label_from_the_en_slot() -> None:
+    """Eight Lithuanian comparatives all mean "redder".
+
+    Lithuanian carries case, number and gender on a comparative where English
+    has one form, so the mapping collapses rather than matching slot-for-slot
+    the way verbs do.
+    """
+    exporter = WirewordExporter(language="lt")
+    english_forms = {
+        7: {
+            "adjective/en_comparative": "grayer",
+            "adjective/en_superlative": "grayest",
+        }
+    }
+
+    for slot in (
+        "adjective/lt_comparative_nominative_singular_m",
+        "adjective/lt_comparative_accusative_plural_f",
+    ):
+        assert exporter._get_english_translation_from_prefetched(english_forms, 7, slot) == "grayer"
+
+    assert (
+        exporter._get_english_translation_from_prefetched(
+            english_forms, 7, "adjective/lt_superlative_nominative_plural_m"
+        )
+        == "grayest"
+    )
+
+
+def test_unmapped_languages_still_fall_back_to_a_generated_label() -> None:
+    exporter = WirewordExporter(language="fr")
+
+    assert (
+        exporter._get_english_translation_from_prefetched(
+            {7: {"adjective/en_comparative": "grayer"}}, 7, "adjective/fr_comparative"
+        )
+        is None
+    )
+
+
+def test_degree_cards_sit_above_the_generic_form_floor() -> None:
+    """Comparison is a later concept than a plain declension."""
+    assert _minimum_level_for_form("adjective/lt_comparative_nominative_singular_m") == (
+        DEGREE_FORM_MIN_LEVEL
+    )
+    assert _minimum_level_for_form("adjective/lt_superlative_accusative_plural_f") == (
+        DEGREE_FORM_MIN_LEVEL
+    )
+    assert _minimum_level_for_form("noun/lt_genitive_singular") == GENERIC_FORM_MIN_LEVEL
+    assert _minimum_level_for_form("verb/lt_1s_present") == GENERIC_FORM_MIN_LEVEL

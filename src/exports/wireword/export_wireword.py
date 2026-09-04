@@ -72,6 +72,21 @@ DEFAULT_EXPORT_MAX_LEVEL = 10
 # Number of difficulty levels per split file (e.g. levels 1-5, 6-10, …)
 LEVEL_RANGE_SIZE = 5
 
+# Floor for a grammatical form card, when the lemma's own level is lower.
+# Comparison is a later concept than the plain declension of a word, and it
+# reads oddly to be asked for "raudonesnis" before "raudonas" is settled, so
+# degree forms sit above the generic floor.  The accusative's own floor of 9 is
+# applied by its dedicated handler above.
+GENERIC_FORM_MIN_LEVEL = 4
+DEGREE_FORM_MIN_LEVEL = 7
+
+
+def _minimum_level_for_form(grammatical_form: str) -> int:
+    """Lowest level a card for this grammatical form may appear at."""
+    if "_comparative" in grammatical_form or "_superlative" in grammatical_form:
+        return DEGREE_FORM_MIN_LEVEL
+    return GENERIC_FORM_MIN_LEVEL
+
 
 class WirewordExporter:
     """Exporter for WireWord API format."""
@@ -729,7 +744,10 @@ class WirewordExporter:
                             # Legacy synonym rows are collected above and are not
                             # grammatical slots, so they never become entries here.
                             if form.grammatical_form not in SYNONYM_GRAMMATICAL_FORMS:
-                                form_level = max(entry["trakaido_level"], 4)
+                                form_level = max(
+                                    entry["trakaido_level"],
+                                    _minimum_level_for_form(form.grammatical_form),
+                                )
 
                                 gram_form = {
                                     "level": form_level,
@@ -956,8 +974,18 @@ class WirewordExporter:
         """
         Look up the English translation for a grammatical form from pre-fetched data.
 
-        Currently only supports Lithuanian verb forms. Other languages will need
-        their English translations stored directly in the database.
+        Two mappings are supported, both from Lithuanian:
+
+        * Verb conjugations map slot-for-slot: ``verb/lt_1s_present`` ->
+          ``verb/en_1s_present``.
+        * Adjective *degree* forms collapse: Lithuanian carries case, number and
+          gender on a comparative (``adjective/lt_comparative_nominative_plural_f``)
+          where English has the single ``adjective/en_comparative``.  Every
+          Lithuanian comparative therefore labels as "redder", which is the
+          correct English for all eight of them.
+
+        Other languages are not yet supported and fall back to a generated
+        label. Returns None when nothing matches.
 
         Args:
             english_forms_by_lemma: Pre-fetched dict mapping lemma_id -> grammatical_form -> text
@@ -967,9 +995,12 @@ class WirewordExporter:
         Returns:
             English translation string, or None if not found
         """
-        # For Lithuanian forms, convert verb/lt_* to verb/en_*
         if grammatical_form.startswith("verb/lt_"):
             english_form_key = grammatical_form.replace("verb/lt_", "verb/en_")
+        elif grammatical_form.startswith("adjective/lt_comparative_"):
+            english_form_key = "adjective/en_comparative"
+        elif grammatical_form.startswith("adjective/lt_superlative_"):
+            english_form_key = "adjective/en_superlative"
         else:
             # Other languages not yet supported - return None
             return None
