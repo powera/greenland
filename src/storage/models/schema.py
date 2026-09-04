@@ -33,9 +33,17 @@ class Base(DeclarativeBase):
     pass
 
 
-# Alternate spellings are deliberately absent here: "grey" is the same lexeme
-# as "gray", not a different one, and it carries its own paradigm.  Those live
-# in the variant_forms table; see storage.models.variant_form.
+# DEPRECATED.  A synonym is a different *lemma* with a similar meaning
+# (quickly/swiftly), so it is a relation between two lemmas -- a
+# LemmaRelationGroup of type RELATION_TYPE_SYNONYM -- and not a form row on
+# either one.  These values remain because ~124 rows still carry them, but they
+# are unvetted LLM output (lemma 1776 "bag" lists "wallet" and "handle" among
+# its synonyms), so nothing may treat them as answers a learner could type.
+# Migrating them into relation groups needs human review and is a separate pass.
+#
+# Alternate spellings were never in this set and still are not: "grey" is the
+# same lemma as "gray" written differently, and lives in variant_forms along
+# with abbreviations like "TV".  See storage.models.variant_form.
 SYNONYM_GRAMMATICAL_FORMS: frozenset[str] = frozenset(
     {
         "synonym",
@@ -51,6 +59,11 @@ SYNONYM_GRAMMATICAL_FORMS: frozenset[str] = frozenset(
 # (lemma, language) — same shape semantics as synonyms (list, not dict).
 # True inflectional grammatical_form values (e.g. "singular",
 # "verb/en_3s_present") are expected to be unique per (lemma, language).
+#
+# Every member is legacy: new synonyms are relation groups, and new
+# abbreviations are variant_forms rows.  This set stays so that the rows still
+# in derivative_forms keep round-tripping through the release files and stay
+# out of the "forms" array.  A derivative form written today is an inflection.
 NON_INFLECTION_GRAMMATICAL_FORMS: frozenset[str] = SYNONYM_GRAMMATICAL_FORMS | frozenset(
     {"abbreviation", "expanded_form"}
 )

@@ -6,13 +6,34 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
 from storage.models.schema import DerivativeForm, Lemma, WordToken
+from storage.models.variant_form import VariantForm
 
 
 def get_processing_stats(session: Session) -> Dict[str, Any]:
-    """Get statistics about the current processing state."""
+    """Get statistics about the current processing state.
+
+    ``tokens_with_derivative_forms`` counts tokens some lemma claims, which is
+    the coverage question worth asking. A lemma reaches a token through a
+    ``DerivativeForm`` *or* a ``VariantForm`` -- the same two attachments
+    ``storage.word_token_view`` collects -- so both count, or the British
+    spelling of a word would read as uncovered vocabulary.
+
+    Counting is over *distinct* tokens: a token with five inflections attached
+    is one covered token, not five. Counting the join's rows instead let this
+    figure exceed the total and put ``percent_complete`` above 100.
+    """
     total_word_tokens = session.query(func.count(WordToken.id)).scalar()
+
+    claimed_by_derivative = session.query(DerivativeForm.word_token_id).filter(
+        DerivativeForm.word_token_id.isnot(None)
+    )
+    claimed_by_variant = session.query(VariantForm.word_token_id).filter(
+        VariantForm.word_token_id.isnot(None)
+    )
     tokens_with_derivative_forms = (
-        session.query(func.count(WordToken.id)).join(DerivativeForm).scalar()
+        session.query(func.count(WordToken.id))
+        .filter(WordToken.id.in_(claimed_by_derivative.union(claimed_by_variant)))
+        .scalar()
     )
 
     total_lemmas = session.query(func.count(Lemma.id)).scalar()

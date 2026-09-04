@@ -18,6 +18,7 @@ from typing import Dict, List, Optional, Tuple
 from sqlalchemy.orm import Session
 
 from storage.models.schema import (
+    NON_INFLECTION_GRAMMATICAL_FORMS,
     SYNONYM_GRAMMATICAL_FORMS,
     DerivativeForm,
     Lemma,
@@ -55,9 +56,12 @@ class Lexeme:
 
     @property
     def inflections(self) -> List[DerivativeForm]:
-        """Forms that are neither synonyms nor abbreviations/expanded forms."""
-        non_inflection = SYNONYM_GRAMMATICAL_FORMS | {"abbreviation", "expanded_form"}
-        return [f for f in self.forms if f.grammatical_form not in non_inflection]
+        """Forms that are neither synonyms nor abbreviations/expanded forms.
+
+        Both excluded classes are legacy (see NON_INFLECTION_GRAMMATICAL_FORMS);
+        a derivative form written today is already an inflection.
+        """
+        return [f for f in self.forms if f.grammatical_form not in NON_INFLECTION_GRAMMATICAL_FORMS]
 
 
 def _build_lexeme(session: Session, lemma: Lemma, language_code: str) -> Optional[Lexeme]:

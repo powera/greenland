@@ -33,6 +33,30 @@ manipulation functions and constants (LLM_FIELD_TO_LANG_CODE,
 LANG_CODE_TO_LLM_FIELD, convert_llm_response_to_lang_codes, etc.).
 Do not create local language mappings - import from translation_helpers.py.
 
+Three different relations between surface forms, kept apart on purpose:
+
+* An *inflection* is a different grammatical slot of one spelling: gray,
+  grayer, grayest.  These are derivative_forms rows, and that is all
+  derivative_forms holds - a grammatical_form names the slot.
+* A *variant* is another way of writing the same lemma: grey for gray, TV for
+  television.  These are variant_forms rows, grouped into paradigms by
+  (variant_kind, variant_key), because a variant inflects too (greyer, TVs).
+  Everything a learner may type and be right is here; the export reads
+  ACCEPTED_ANSWER_VARIANT_KINDS.
+* A *synonym* is a different lemma with a similar meaning: quickly/swiftly.
+  Neither word belongs to the other, so it is a LemmaRelationGroup of type
+  synonym, not a row on either lemma's form tables.  The synonym_* values in
+  SYNONYM_GRAMMATICAL_FORMS are legacy, unvetted, and must never be treated as
+  accepted answers.
+
+Not every near-synonym pair will stay two lemmas - couch/sofa and gift/present
+are one concept with two everyday words - so variant_kind stays free-form.  Do
+not tighten it into an enum.  See src/storage/models/variant_form.py.
+
+Only en-US variants are written today: "grey" is an accepted spelling of
+"gray", with no claim about where it is used.  A regional dialect is a separate
+axis from a variant.
+
 Regional variants live in src/langtools/dialect_overrides.py, which is the
 source of truth for what a dialect code means.  There are two kinds:
 

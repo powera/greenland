@@ -1,23 +1,44 @@
-"""VariantForm model for alternate spellings and other orthographic variants.
+"""VariantForm model for the other ways of writing one lemma.
 
-A variant form is the *same lexeme* as its lemma, written differently:
-"grey" for "gray", "donut" for "doughnut", "catalogue" for "catalog".  It is
-neither a synonym (which is a different lexeme with a similar meaning, e.g.
-"large"/"huge") nor an inflection (which is a different grammatical slot of
-the same spelling, e.g. "gray"/"grayer").
+The database tells three things apart:
+
+* An *inflection* is a different grammatical slot of one spelling: gray,
+  grayer, grayest.  Those are ``derivative_forms`` rows, and that is now all
+  ``derivative_forms`` holds.
+* A *variant* is another way of writing the same lemma: "grey" for "gray",
+  "donut" for "doughnut", "TV" for "television".  This table.
+* A *synonym* is a different lemma with a similar meaning: quickly/swiftly.
+  Neither word belongs to the other, so it is a reference between two lemmas --
+  a ``LemmaRelationGroup`` of type ``synonym`` -- and not a row here or on
+  ``derivative_forms``.
 
 Variants carry a *full paradigm*, which is why they cannot be a single extra
-row on ``derivative_forms``: "grey" needs "greyer" and "greyest" alongside it.
-Each variant is identified by a (``variant_kind``, ``variant_key``) pair:
+row on ``derivative_forms``: "grey" needs "greyer" and "greyest" alongside it,
+and "TV" needs "TVs".  Each variant is identified by a (``variant_kind``,
+``variant_key``) pair:
 
-    kind="spelling", key="grey"    -> grey / greyer / greyest
-    kind="spelling", key="donut"   -> donut / donuts
+    kind="spelling",     key="grey"        -> grey / greyer / greyest
+    kind="spelling",     key="donut"       -> donut / donuts
+    kind="abbreviation", key="TV"          -> TV / TVs
+    kind="expanded",     key="television"  -> television / televisions
 
-``variant_kind`` is deliberately free-form.  The set of meaningful kinds is
-language-specific -- English has spelling variants, Chinese additionally has
-script (simplified/traditional) variants, and other languages have their own --
-so no central enum enumerates them.  Any per-language validation belongs in
-``langtools/<lang>/``.
+``variant_kind`` is deliberately free-form, and the kinds named in this module
+are what the table holds *today* rather than a closed definition.  The set of
+meaningful kinds is language-specific -- English has spelling variants, Chinese
+additionally has script (simplified/traditional) variants, and other languages
+have their own -- so no central enum enumerates them.  Any per-language
+validation belongs in ``langtools/<lang>/``.
+
+Every kind here is currently orthographic: the variant and the lemma are the
+same word, differing in spelling or in length.  That is not guaranteed to stay
+true.  Pairs like couch/sofa, gift/present and use/utilize are two everyday
+words for one concept, where a learner who answers either knows the word and
+two lemmas would mean two cards testing the same thing; those may well become
+variants of a further kind.  The line runs *inside* a synonym set rather than
+around it -- for couch/sofa, "divan" and "chesterfield" are equally not lemmas,
+but they are not everyday equivalents either.  Where exactly it falls is
+undecided, so do not tighten ``variant_kind`` into an enum and do not restate
+"a variant is the same word spelled differently" as though it were exhaustive.
 
 ``is_base_form`` is scoped to the variant: "grey" is the base form of the
 "grey" variant, while "gray" remains the base form of the lemma itself in
@@ -35,6 +56,18 @@ en-US (this table), and would separately be the en-GB translation of the same
 lemma (``lemma_translations``, mirroring how zh-tw works today).  Both
 statements are true and neither is derivable from the other: "donut" has no
 dialect, and Taiwanese vocabulary like 軟體 is not a variant of anything.
+
+**Only en-US variants are written today.**  A row saying "grey" is an accepted
+way to write "gray" carries no claim that it is *the British* form; that
+regional axis is not stored yet.  When en-GB is taken up properly it becomes
+either a region tag on these rows or a storage dialect of its own -- that
+decision is deferred, not made here.  Until then, do not read a variant as
+evidence of where a spelling is used.
+
+Unrelated despite the name: ``exports/wireword/generate_variants.py`` emits a
+registry of regional *varieties* of a language (``variants.json``, which tells
+a client that lang_es and lang_es-419 both exist).  It has nothing to do with
+this table.
 """
 
 import datetime
@@ -61,6 +94,25 @@ VARIANT_KIND_SPELLING: str = "spelling"
 # simplified/traditional).  Distinct from regional vocabulary differences,
 # which are dialect translations rather than variants.
 VARIANT_KIND_SCRIPT: str = "script"
+
+# The same word at a different length: "TV" for "television", and the expansion
+# back the other way.  Both directions are recorded, because which one is the
+# lemma is a separate question from which spellings a reader may meet.
+VARIANT_KIND_ABBREVIATION: str = "abbreviation"
+VARIANT_KIND_EXPANDED: str = "expanded"
+
+# The kinds a learner may type and be right.  Every kind above is currently in
+# this set -- each one is a way of writing the lemma itself -- but naming the
+# set keeps that judgement in one place, so a future kind that is *not* an
+# acceptable answer does not silently become one in the export.
+ACCEPTED_ANSWER_VARIANT_KINDS: frozenset[str] = frozenset(
+    {
+        VARIANT_KIND_SPELLING,
+        VARIANT_KIND_SCRIPT,
+        VARIANT_KIND_ABBREVIATION,
+        VARIANT_KIND_EXPANDED,
+    }
+)
 
 
 class VariantForm(Base):

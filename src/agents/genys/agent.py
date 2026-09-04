@@ -42,6 +42,7 @@ from storage.crud.lemma_tags import serialize_tags_for_column
 from storage.models.imports import PendingImport
 from words.pending_imports.staging import create_pending_import
 from storage.models.schema import DerivativeForm, Lemma
+from storage.models.variant_form import VariantForm
 from storage.translation_helpers import normalize_llm_language_codes
 
 logger = logging.getLogger(__name__)
@@ -140,6 +141,10 @@ class GenysAgent:
         if cache_key in cache:
             return cache[cache_key]
 
+        # A lemma owns a surface form through either form table: "grey" reaches
+        # the "gray" lemma only through variant_forms, so matching derivative
+        # forms alone would leave a sentence using the variant spelling
+        # undecomposed.
         if language_code in SUBSTRING_MATCH_LANGUAGES:
             rows = (
                 session.query(DerivativeForm.lemma_id)
@@ -153,6 +158,18 @@ class GenysAgent:
                 )
                 .all()
             )
+            variant_rows = (
+                session.query(VariantForm.lemma_id)
+                .filter(
+                    VariantForm.language_code == language_code,
+                    or_(
+                        VariantForm.variant_form_text == surface_form,
+                        VariantForm.variant_form_text.contains(surface_form),
+                        literal(surface_form).contains(VariantForm.variant_form_text),
+                    ),
+                )
+                .all()
+            )
         else:
             rows = (
                 session.query(DerivativeForm.lemma_id)
@@ -162,7 +179,15 @@ class GenysAgent:
                 )
                 .all()
             )
-        ids = {row[0] for row in rows}
+            variant_rows = (
+                session.query(VariantForm.lemma_id)
+                .filter(
+                    VariantForm.language_code == language_code,
+                    func.lower(VariantForm.variant_form_text) == normalized,
+                )
+                .all()
+            )
+        ids = {row[0] for row in rows} | {row[0] for row in variant_rows}
         cache[cache_key] = ids
         return ids
 
