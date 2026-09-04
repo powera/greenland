@@ -53,12 +53,18 @@ def expand_fields(config: Dict[str, Any]) -> List[str]:
         return list(config["tenses"])
 
     if pattern == "case_number_gender":
-        return [
+        fields = [
             f"{case}_{number}_{gender}"
             for case in config["cases"]
             for number in config["numbers"]
             for gender in config["genders"]
         ]
+        # Degree (comparative/superlative) is a separate axis from case, and
+        # crossing the two would multiply the table by three for forms that are
+        # mostly rare.  A language that needs degree lists the slots it actually
+        # needs in ``extra_forms`` instead -- see lt/forms_config.py.
+        fields.extend(config.get("extra_forms", []))
+        return fields
 
     if pattern == "degree":
         return list(config["forms"])

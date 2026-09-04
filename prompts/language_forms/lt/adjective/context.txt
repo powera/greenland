@@ -19,10 +19,20 @@ Lithuanian adjectives decline across 7 cases, 2 numbers, and 2 genders:
 - Masculine (vyriškoji giminė)
 - Feminine (moteriškoji giminė)
 
+**Degree:**
+Lithuanian adjectives also grade: positive (raudonas), comparative
+(raudonesnis), superlative (raudoniausias). Comparative and superlative forms
+decline like ordinary adjectives, but only the nominative and accusative are
+collected here — those are the cases that carry ordinary sentences ("obuolys
+buvo raudonesnis", "jis turi raudonesnį obuolį").
+
 **Important notes:**
 - Lithuanian adjectives agree with the noun they modify in case, number, and gender
 - Masculine adjectives typically end in -as, -is, or -us in nominative singular
 - Feminine adjectives typically end in -a or -ė in nominative singular
 - Some adjectives may have irregular declension patterns
-- Provide all 28 forms (7 cases × 2 numbers × 2 genders)
+- Provide all 28 positive forms (7 cases × 2 numbers × 2 genders)
+- Provide 8 comparative and 8 superlative forms (2 cases × 2 numbers × 2 genders)
+- Not every adjective grades: leave the comparative and superlative empty for
+  absolute or classifying adjectives rather than inventing a form
 - Use empty string ("") for any forms that don't exist or are non-standard
