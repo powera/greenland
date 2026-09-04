@@ -63,9 +63,15 @@ import logging
 import re
 from typing import Dict, FrozenSet, List, Optional, Sequence, Set, Tuple
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from storage.models.schema import SYNONYM_GRAMMATICAL_FORMS, DerivativeForm, Lemma
+from storage.models.variant_form import (
+    VARIANT_KIND_SCRIPT,
+    VARIANT_KIND_SPELLING,
+    VariantForm,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +125,20 @@ PERIPHRASTIC_LEADING_WORDS: FrozenSet[str] = frozenset(
 ANNOTATION_RE = re.compile(r"[()\[\]/]")
 
 
+# The variant kinds that mean "the same lexeme, written differently", and so
+# whose occurrences belong to the lemma.  A spelling variant ("north-east") and
+# a script variant are the same word; an "expanded" row ("table wine" against
+# "wine") is a narrower term and an "abbreviation" a short form, and folding
+# either into the lemma would hand one word another's count.
+SAME_LEXEME_VARIANT_KINDS = frozenset({VARIANT_KIND_SPELLING, VARIANT_KIND_SCRIPT})
+
+
+# A form the tokenizer will see as more than one token: it contains a space or
+# a hyphen.  RAW_TOKEN_RE splits on both, so "north-east" and "north east" are
+# equally in need of joining and equally indexable.
+_MULTI_WORD_RE = re.compile(r"[\s-]")
+
+
 def is_periphrastic(form_text: str, grammatical_form: Optional[str]) -> bool:
     """Whether a multi-word form is grammatical inflection rather than a compound.
 
@@ -141,10 +161,13 @@ def is_indexable_phrase(form_text: str, grammatical_form: Optional[str]) -> bool
     """Whether a form should be counted as one token by the corpus tokenizer.
 
     Requires a genuine multi-word surface string that a corpus could contain:
-    at least two words, no dictionary annotation, and not periphrastic.
+    at least two words, no dictionary annotation, and not periphrastic.  A
+    hyphen counts as a word separator, because the tokenizer treats it as one:
+    "north-east" reaches the corpus as two tokens and needs joining exactly as
+    "north east" does.
     """
     text = form_text.strip()
-    if " " not in text:
+    if not _MULTI_WORD_RE.search(text):
         return False
     if ANNOTATION_RE.search(text):
         return False
@@ -182,7 +205,10 @@ def load_lemma_phrases(
         .join(Lemma, DerivativeForm.lemma_id == Lemma.id)
         .filter(
             DerivativeForm.language_code == language_code,
-            DerivativeForm.derivative_form_text.like("% %"),
+            or_(
+                DerivativeForm.derivative_form_text.like("% %"),
+                DerivativeForm.derivative_form_text.like("%-%"),
+            ),
         )
         .all()
     ]
@@ -197,16 +223,35 @@ def load_lemma_phrases(
         candidates.extend(
             (lemma_text, None)
             for (lemma_text,) in session.query(Lemma.lemma_text)
-            .filter(Lemma.lemma_text.like("% %"))
+            .filter(or_(Lemma.lemma_text.like("% %"), Lemma.lemma_text.like("%-%")))
             .all()
         )
+
+    # Variant spellings are the same lexeme as their lemma, so a corpus writing
+    # "north-east" is writing the "northeast" lemma and the occurrence belongs
+    # to it.  The variant has to be in the index before it can be joined at all
+    # -- the tokenizer splits it into "north" and "east" otherwise --  and
+    # load_canonical_phrases then says which spelling to credit.  Hyphenated
+    # and spaced variants both qualify; a solid one needs no joining.
+    candidates.extend(
+        (variant_text, None)
+        for (variant_text,) in session.query(VariantForm.variant_form_text)
+        .filter(
+            VariantForm.language_code == language_code,
+            or_(
+                VariantForm.variant_form_text.like("% %"),
+                VariantForm.variant_form_text.like("%-%"),
+            ),
+        )
+        .all()
+    )
 
     phrases: Set[str] = set()
     for form_text, grammatical_form in candidates:
         if not include_synonyms and grammatical_form in SYNONYM_GRAMMATICAL_FORMS:
             continue
         text = form_text.strip()
-        if " " not in text or ANNOTATION_RE.search(text):
+        if not _MULTI_WORD_RE.search(text) or ANNOTATION_RE.search(text):
             continue
         if not include_periphrastic and is_periphrastic(text, grammatical_form):
             continue
@@ -242,12 +287,65 @@ def load_phrase_index(
     return build_phrase_index(phrases)
 
 
+def load_canonical_phrases(
+    session: Session,
+    language_code: str = "en",
+) -> Dict[str, str]:
+    """Map each multi-word variant spelling to the lemma spelling it counts as.
+
+    A variant is the same lexeme as its lemma written differently, so its
+    occurrences are the lemma's: a corpus writing "north-east" is writing
+    "northeast", and counting them apart splits one word's frequency between
+    two entries, which is the whole problem this exists to fix.
+
+    Only variants the tokenizer would otherwise fragment are mapped -- ones
+    containing a space or a hyphen.  A solid variant is a single token already
+    and is not a phrase, so the phrase index has no say over it.
+
+    **Only same-lexeme kinds are folded.**  ``variant_kind`` is free-form and
+    not every kind means "the same word, written differently": this database
+    also holds ``expanded`` rows ("table wine" against "wine") and an
+    ``abbreviation`` ("vino"), which are a narrower term and a short form
+    rather than spellings.  Crediting "table wine" to "wine" would give one
+    word another's occurrences, so those kinds are left to count as themselves.
+
+    Args:
+        session: Open session.
+        language_code: Language of the variants to read.
+
+    Returns:
+        ``{joined phrase: lemma spelling}``, ready for
+        :func:`wordfreq.corpora.gutenberg_text.build_canonical_phrase_index`.
+    """
+    from wordfreq.corpora.gutenberg_text import build_canonical_phrase_index
+
+    rows = (
+        session.query(VariantForm.variant_form_text, Lemma.lemma_text)
+        .join(Lemma, VariantForm.lemma_id == Lemma.id)
+        .filter(
+            VariantForm.language_code == language_code,
+            VariantForm.variant_kind.in_(SAME_LEXEME_VARIANT_KINDS),
+            or_(
+                VariantForm.variant_form_text.like("% %"),
+                VariantForm.variant_form_text.like("%-%"),
+            ),
+        )
+        .all()
+    )
+    return build_canonical_phrase_index(
+        (variant_text, lemma_text)
+        for variant_text, lemma_text in rows
+        if variant_text and lemma_text and not ANNOTATION_RE.search(variant_text)
+    )
+
+
 __all__ = [
     "ANNOTATION_RE",
     "PERIPHRASTIC_FORM_SUFFIXES",
     "PERIPHRASTIC_LEADING_WORDS",
     "is_indexable_phrase",
     "is_periphrastic",
+    "load_canonical_phrases",
     "load_lemma_phrases",
     "load_phrase_index",
 ]

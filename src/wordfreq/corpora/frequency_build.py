@@ -182,15 +182,20 @@ def analyze_book(
     min_mid_sentence: int = DEFAULT_MIN_MID_SENTENCE,
     extra_never_names: Collection[str] = (),
     phrases: Optional[Dict[str, int]] = None,
+    canonical_phrases: Optional[Dict[str, str]] = None,
 ) -> BookAnalysis:
     """Strip Gutenberg boilerplate, tokenize and split names from vocabulary.
 
     ``phrases`` (from ``gutenberg_text.build_phrase_index``) makes known
     multi-word forms count as one token, so "ice cream" is measured as itself
     rather than inflating "ice" and "cream".
+
+    ``canonical_phrases`` (from ``build_canonical_phrase_index``) credits a
+    matched variant spelling to its lemma, so "north-east" counts as
+    "northeast" rather than as a word of its own.
     """
     body = strip_gutenberg_boilerplate(raw_text)
-    stats = analyze_text(body, phrases)
+    stats = analyze_text(body, phrases, canonical_phrases)
     names = detect_names(
         stats,
         capitalization_ratio=capitalization_ratio,

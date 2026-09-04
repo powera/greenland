@@ -8,10 +8,17 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from storage.models.schema import Base, DerivativeForm, Lemma
-from wordfreq.corpora.gutenberg_text import analyze_text, build_phrase_index, iter_tokens
+from storage.models.variant_form import VARIANT_KIND_SPELLING, VariantForm
+from wordfreq.corpora.gutenberg_text import (
+    analyze_text,
+    build_canonical_phrase_index,
+    build_phrase_index,
+    iter_tokens,
+)
 from wordfreq.corpora.lemma_phrases import (
     is_indexable_phrase,
     is_periphrastic,
+    load_canonical_phrases,
     load_lemma_phrases,
     load_phrase_index,
 )
@@ -270,3 +277,163 @@ def test_phrase_at_end_of_text_is_matched() -> None:
     index = build_phrase_index(["ice cream"])
     tokens = [token for token, _, _ in iter_tokens("I want ice cream", index)]
     assert tokens == ["i", "want", "ice cream"]
+
+
+# --- Variant spellings count as their lemma ----------------------------------
+
+
+def _add_variant(
+    session: Session,
+    lemma_text: str,
+    variant_text: str,
+    pos_type: str = "noun",
+    language_code: str = "en",
+) -> None:
+    """Record ``variant_text`` as a spelling variant of ``lemma_text``."""
+    lemma = (
+        session.query(Lemma)
+        .filter(Lemma.lemma_text == lemma_text, Lemma.pos_type == pos_type)
+        .first()
+    )
+    if lemma is None:
+        lemma = Lemma(
+            lemma_text=lemma_text,
+            definition_text=lemma_text,
+            pos_type=pos_type,
+        )
+        session.add(lemma)
+        session.flush()
+    session.add(
+        VariantForm(
+            lemma_id=lemma.id,
+            variant_form_text=variant_text,
+            language_code=language_code,
+            variant_kind=VARIANT_KIND_SPELLING,
+            variant_key=variant_text,
+            grammatical_form=f"{pos_type}/en_base",
+            is_base_form=True,
+        )
+    )
+    session.flush()
+
+
+def test_a_hyphenated_form_is_indexable() -> None:
+    """The tokenizer splits on a hyphen, so a hyphenated form needs joining.
+
+    Before this, "north-east" was one "word", failed the two-word test, and was
+    dropped from the index -- so it fragmented into "north" and "east".
+    """
+    assert is_indexable_phrase("north-east", None)
+    assert is_indexable_phrase("brother-in-law", None)
+
+
+def test_a_solid_word_is_not_indexable() -> None:
+    assert not is_indexable_phrase("northeast", None)
+
+
+def test_hyphenated_and_spaced_spellings_share_an_index_entry() -> None:
+    """One entry catches both, because the tokenizer splits a hyphen anyway."""
+    assert build_phrase_index(["north-east"]) == {"north east": 2}
+    assert build_phrase_index(["north east"]) == {"north east": 2}
+
+
+def test_canonical_index_maps_a_variant_to_its_lemma() -> None:
+    assert build_canonical_phrase_index([("north-east", "northeast")]) == {
+        "north east": "northeast"
+    }
+
+
+def test_canonical_index_skips_a_self_mapping() -> None:
+    """A phrase that is its own canonical spelling needs no substitution."""
+    assert build_canonical_phrase_index([("ice cream", "ice cream")]) == {}
+
+
+def test_variant_spellings_are_loaded_as_phrases() -> None:
+    session = _make_session()
+    _add_variant(session, "northeast", "north-east")
+    assert "north-east" in load_lemma_phrases(session)
+    session.close()
+
+
+def test_load_canonical_phrases_maps_variant_to_lemma() -> None:
+    session = _make_session()
+    _add_variant(session, "northeast", "north-east")
+    assert load_canonical_phrases(session) == {"north east": "northeast"}
+    session.close()
+
+
+def test_load_canonical_phrases_ignores_a_solid_variant() -> None:
+    """A one-token variant is not a phrase, so the phrase index has no say."""
+    session = _make_session()
+    _add_variant(session, "gray", "grey")
+    assert load_canonical_phrases(session) == {}
+    session.close()
+
+
+def test_all_three_spellings_count_as_the_lemma() -> None:
+    """The point of the exercise: one word, one count.
+
+    "north-east", "north east" and "northeast" are one lexeme written three
+    ways; counting them apart splits one word's frequency between three
+    entries and buries all three in the rankings.
+    """
+    session = _make_session()
+    _add_variant(session, "northeast", "north-east")
+    phrases = load_phrase_index(session)
+    canonical = load_canonical_phrases(session)
+    session.close()
+
+    stats = analyze_text(
+        "He went north-east. The northeast wind. Travelling north east today.",
+        phrases,
+        canonical,
+    )
+    assert stats.counts["northeast"] == 3
+    assert "north east" not in stats.counts
+    assert stats.counts["north"] == 0
+
+
+def test_a_hyphenated_lemma_counts_whole() -> None:
+    """ "brother-in-law" fragmented into three words before it was indexable."""
+    stats = analyze_text("My brother-in-law called.", build_phrase_index(["brother-in-law"]))
+    assert stats.counts["brother in law"] == 1
+    assert stats.counts["brother"] == 0
+
+
+def test_a_single_letter_opening_a_phrase_survives_the_filter() -> None:
+    """ "T-shirt" tokenizes to "t" then "shirt".
+
+    The single-letter filter would drop the "t", leaving the phrase
+    unassemblable and "shirt" wrongly credited with the compound.
+    """
+    stats = analyze_text("He wore a T-shirt.", build_phrase_index(["T-shirt"]))
+    assert stats.counts["t shirt"] == 1
+    assert stats.counts["shirt"] == 0
+
+
+def test_only_same_lexeme_variants_are_folded() -> None:
+    """An "expanded" variant is a narrower term, not a spelling.
+
+    This database holds "table wine" against "wine" that way. Crediting its
+    occurrences to "wine" would hand one word another's count, so only kinds
+    that mean "the same lexeme, written differently" are mapped.
+    """
+    session = _make_session()
+    lemma = Lemma(lemma_text="wine", definition_text="wine", pos_type="noun")
+    session.add(lemma)
+    session.flush()
+    session.add(
+        VariantForm(
+            lemma_id=lemma.id,
+            variant_form_text="table wine",
+            language_code="en",
+            variant_kind="expanded",
+            variant_key="table wine",
+            grammatical_form="noun/en_singular",
+        )
+    )
+    session.flush()
+    assert load_canonical_phrases(session) == {}
+    # It is still a phrase worth counting as itself, just not as "wine".
+    assert "table wine" in load_lemma_phrases(session)
+    session.close()

@@ -118,6 +118,7 @@ SUBTYPE_DESCRIPTIONS: Dict[str, Dict[str, str]] = {
         "aesthetic": "Beauty or appearance (beautiful, ugly, pretty, handsome)",
         "importance": "Importance or priority (important, essential, trivial)",
         "origin": "Origin or source (American, Chinese, domestic, foreign)",
+        "location": "Where something is situated (northern, coastal, inland, urban)",
         "purpose": "Purpose or function (educational, medical, industrial)",
         "material": "Material composition (wooden, metal, plastic, cotton)",
         # definite_quantity removed: moved to numeral POS
@@ -223,7 +224,7 @@ ADJECTIVE_GROUPS = {
     "Physical Properties": ["size", "color", "shape", "texture", "physical_property"],
     "Personal and Emotional": ["personal_quality", "condition", "emotion"],
     "Evaluative": ["quality", "aesthetic", "importance"],
-    "Origin and Material": ["origin", "purpose", "material"],
+    "Origin and Material": ["origin", "location", "purpose", "material"],
     "Quantity and Time": [
         # definite_quantity removed: moved to numeral POS
         "indefinite_quantity",
