@@ -24,6 +24,7 @@ from storage.backend.config import BackendType, DataSourceConfig
 from storage.backend.factory import create_session
 from storage.crud.difficulty_override import bulk_get_effective_difficulty_levels
 from storage.models.grammar_fact import GrammarFact
+from storage.models.variant_form import VariantForm
 from storage.models.schema import (
     SYNONYM_GRAMMATICAL_FORMS,
     AudioQualityReview,
@@ -139,6 +140,42 @@ class WirewordExporter:
                 get_base_language(self.language), DEFAULT_EXPORT_MAX_LEVEL
             ),
         )
+
+    def _bulk_fetch_variant_base_forms(
+        self, session: Any, lemma_ids: List[int]
+    ) -> Dict[int, Dict[str, List[str]]]:
+        """Base forms of each lemma's spelling variants, by lemma and language.
+
+        Only the base form of a variant paradigm is returned. A variant carries
+        a full paradigm of its own -- "grey" brings "greyer" and "greyest" --
+        but the inflected slots are not alternate spellings of the headword and
+        must not be offered as answers to it. "grey" is a correct way to write
+        "gray"; "greyer" is not.
+
+        Returns ``{lemma_id: {language_code: [base form, ...]}}``. A lemma with
+        no variants is absent rather than mapped to an empty dict.
+        """
+        variant_base_forms: Dict[int, Dict[str, List[str]]] = {}
+        if not lemma_ids:
+            return variant_base_forms
+
+        rows = (
+            session.query(VariantForm)
+            .filter(
+                VariantForm.lemma_id.in_(lemma_ids),
+                VariantForm.is_base_form.is_(True),
+            )
+            .all()
+        )
+        for row in rows:
+            text = (row.variant_form_text or "").strip()
+            if not text:
+                continue
+            by_language = variant_base_forms.setdefault(row.lemma_id, {})
+            by_language.setdefault(row.language_code, []).append(text)
+
+        logger.info(f"Bulk fetched {len(rows)} spelling variant base forms")
+        return variant_base_forms
 
     def _normalize_target_text(self, text: Optional[str]) -> Optional[str]:
         """Normalize a stored translation into the script this export writes."""
@@ -534,6 +571,12 @@ class WirewordExporter:
                 derivative_forms_by_lemma[form.lemma_id].append(form)
             logger.info(f"Bulk fetched {len(all_derivative_forms)} derivative forms")
 
+            # Bulk fetch spelling variants ("grey" for "gray"). These live in
+            # variant_forms rather than derivative_forms, so the loop below has
+            # to read them separately or they reach no consumer at all -- see
+            # storage.models.variant_form for why they are a table of their own.
+            variant_base_forms_by_lemma = self._bulk_fetch_variant_base_forms(session, lemma_ids)
+
             # Bulk fetch all audio records for all GUIDs (base forms only)
             all_audio_records = (
                 session.query(AudioQualityReview)
@@ -607,8 +650,13 @@ class WirewordExporter:
                         # Skip base forms as they're already in base_target/base_english
                         continue
 
-                    # Determine if this form is an alternative form or synonym
-                    # Alternative forms include: abbreviation, expanded_form, alternate_spelling, and legacy 'alternative_form'
+                    # Determine if this form is an alternative form or synonym.
+                    # "abbreviation" and "expanded_form" are the live values.
+                    # "alternate_spelling" and "alternative_form" are the legacy
+                    # pre-variant_forms mechanism and match nothing: the live
+                    # database holds zero rows of either (see
+                    # storage.crud.derivative_form.add_alternative_form). Real
+                    # spelling variants come from variant_forms, appended below.
                     is_alternative = form.grammatical_form in [
                         "abbreviation",
                         "expanded_form",
@@ -718,6 +766,18 @@ class WirewordExporter:
                                     gram_form["audio"] = form_audio
 
                                 grammatical_forms[form.grammatical_form] = gram_form
+
+                # Spelling variants are alternate ways to write the same word,
+                # so they belong with the alternatives a learner may type: a
+                # user who answers "grey" for "pilkas" has not made a mistake.
+                lemma_variants = variant_base_forms_by_lemma.get(lemma_id, {})
+                for variant_text in lemma_variants.get("en", []):
+                    if variant_text not in english_alternatives:
+                        english_alternatives.append(variant_text)
+                if self.language != "en":
+                    for variant_text in lemma_variants.get(self.language, []):
+                        if variant_text not in target_alternatives:
+                            target_alternatives.append(variant_text)
 
                 # Get corpus assignment for this entry
                 corpus_key = (entry["trakaido_level"], entry["subtype"])
