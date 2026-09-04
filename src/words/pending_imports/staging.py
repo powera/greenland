@@ -24,6 +24,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+import constants
 from storage.models.imports import TARGET_KIND_LEMMA, PendingImport
 from storage.translation_helpers import LANG_CODE_TO_LLM_FIELD
 from util.logging_config import get_logger
@@ -161,7 +162,7 @@ def stage_missing_words_for_import(
     missing_words: List[Dict[str, Any]],
     db_path: str,
     limit: Optional[int] = None,
-    model: str = "gpt-5.4-mini",
+    model: str = constants.DEFAULT_MODEL,
     throttle: float = 1.0,
     dry_run: bool = False,
     target_language: str = "lt",

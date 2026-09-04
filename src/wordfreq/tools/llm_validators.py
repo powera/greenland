@@ -16,6 +16,7 @@ GREENLAND_SRC_PATH = str(Path(__file__).parent.parent.parent)
 if GREENLAND_SRC_PATH not in sys.path:
     sys.path.insert(0, GREENLAND_SRC_PATH)
 
+import constants
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
@@ -24,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 def validate_lemma_form(
-    word: str, pos_type: str, model: Optional[str] = "gpt-5.4-mini"
+    word: str, pos_type: str, model: Optional[str] = constants.DEFAULT_MODEL
 ) -> Dict[str, Any]:
     """
     Validate that a word is in its correct lemma (base) form.
@@ -99,7 +100,7 @@ def validate_translation(
     translation: str,
     target_language: str,
     pos_type: str,
-    model: str = "gpt-5.4-mini",
+    model: str = constants.DEFAULT_MODEL,
 ) -> Dict[str, Any]:
     """
     Validate that a translation is correct and in lemma form.
@@ -192,7 +193,7 @@ def validate_definition(
     word: str,
     definition: str,
     pos_type: str,
-    model: Optional[str] = "gpt-5.4-mini",
+    model: Optional[str] = constants.DEFAULT_MODEL,
     translation_language: Optional[str] = None,
     translation_text: Optional[str] = None,
 ) -> Dict[str, Any]:
@@ -281,7 +282,9 @@ def validate_definition(
 
 
 def batch_validate_lemmas(
-    words: List[Dict[str, str]], model: str = "gpt-5.4-mini", confidence_threshold: float = 0.7
+    words: List[Dict[str, str]],
+    model: str = constants.DEFAULT_MODEL,
+    confidence_threshold: float = 0.7,
 ) -> List[Dict[str, Any]]:
     """
     Validate multiple words for lemma form.
@@ -312,7 +315,7 @@ def validate_all_translations_for_word(
     english_word: str,
     translations: Dict[str, str],
     pos_type: str,
-    model: Optional[str] = "gpt-5.4-mini",
+    model: Optional[str] = constants.DEFAULT_MODEL,
 ) -> Dict[str, Any]:
     """
     Validate all translations for a single word in one LLM call.
@@ -454,7 +457,7 @@ Language guidance: Validate for {language_list}.
 
 def batch_validate_translations(
     translations: List[Dict[str, str]],
-    model: str = "gpt-5.4-mini",
+    model: str = constants.DEFAULT_MODEL,
     confidence_threshold: float = 0.7,
 ) -> List[Dict[str, Any]]:
     """
@@ -505,7 +508,7 @@ def validate_pronunciation(
     pos_type: str,
     example_sentence: Optional[str] = None,
     definition: Optional[str] = None,
-    model: str = "gpt-5.4-mini",
+    model: str = constants.DEFAULT_MODEL,
     language_code: str = "en",
     grammatical_form: Optional[str] = None,
     english_translation: Optional[str] = None,
@@ -789,7 +792,7 @@ def generate_pronunciation(
     pos_type: str,
     example_sentence: Optional[str] = None,
     definition: Optional[str] = None,
-    model: str = "gpt-5.4-mini",
+    model: str = constants.DEFAULT_MODEL,
     language_code: str = "en",
     grammatical_form: Optional[str] = None,
     english_translation: Optional[str] = None,
@@ -845,7 +848,7 @@ def batch_generate_pronunciations(
     definition: str,
     pos_type: str,
     forms: List[Dict[str, str]],
-    model: str = "gpt-5.4-mini",
+    model: str = constants.DEFAULT_MODEL,
     language_code: str = "en",
     english_translation: Optional[str] = None,
 ) -> Dict[str, Dict[str, Any]]:
@@ -992,7 +995,7 @@ def batch_generate_pronunciations(
 
 
 def suggest_disambiguation(
-    word: str, definitions: List[Dict[str, Any]], model: Optional[str] = "gpt-5.4-mini"
+    word: str, definitions: List[Dict[str, Any]], model: Optional[str] = constants.DEFAULT_MODEL
 ) -> Dict[str, Any]:
     """
     Suggest short disambiguation terms for multiple meanings of the same word.
@@ -1075,7 +1078,7 @@ def suggest_translation_disambiguation(
     target_language: str,
     target_lang_code: str,
     meanings: List[Dict[str, Any]],
-    model: Optional[str] = "gpt-5.4-mini",
+    model: Optional[str] = constants.DEFAULT_MODEL,
 ) -> Dict[str, Any]:
     """Suggest short disambiguation terms in the target language for a shared translation.
 
@@ -1164,7 +1167,7 @@ def validate_disambiguation_need(
     definition: str,
     translations: Optional[Dict[str, str]] = None,
     has_parenthetical: bool = False,
-    model: Optional[str] = "gpt-5.4-mini",
+    model: Optional[str] = constants.DEFAULT_MODEL,
 ) -> Dict[str, Any]:
     """
     Validate whether a lemma needs parenthetical disambiguation.

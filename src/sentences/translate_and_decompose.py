@@ -37,6 +37,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple
 
 from sqlalchemy.orm import Session
 
+import constants
 from clients.lib import limit_from_estimate
 from clients.unified_client import UnifiedLLMClient
 from langtools.dialect_overrides import get_dialect_display_name, get_llm_prompt_note
@@ -74,7 +75,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL: str = "gpt-5.4-mini"
+# Re-exported for callers that take a model default from this pipeline (see
+# sentences.import_workflow).  It is the project-wide default, not a choice
+# this module makes.
+DEFAULT_MODEL: str = constants.DEFAULT_MODEL
 
 # DEPRECATED. Synthetic GUID prefix — an LLM-emitted placeholder for "no DB
 # lemma matched", e.g. SYN001. No prompt asks for these any more: every

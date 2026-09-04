@@ -173,7 +173,7 @@ class LemmaSentenceTranslationService:
                     source_text=en_translation,
                     source_language="en",
                     target_languages=target_languages,
-                    model=self.config.model or "gpt-5.4-mini",
+                    model=self.config.model or constants.DEFAULT_MODEL,
                     verified=False,
                     pivot_languages=self.pivot_languages,
                 )

@@ -4,6 +4,7 @@
 
 from typing import Any, Optional, Union
 
+import constants
 from barsukas.config import Config
 from flask import Blueprint, current_app, flash, g, redirect, render_template, request, url_for
 from flask.typing import ResponseReturnValue
@@ -802,7 +803,7 @@ def accept_sentence(sentence_id: int) -> Response:
         if not has_all_translations:
             from sentences.translation import translate_sentence
 
-            translate_sentence(sentence_id, target_languages, g.db, model="gpt-5.4-mini")
+            translate_sentence(sentence_id, target_languages, g.db, model=constants.DEFAULT_MODEL)
 
         # Auto-populate the level if not set (reuse already-loaded lemmas)
         if sentence.minimum_level is None:

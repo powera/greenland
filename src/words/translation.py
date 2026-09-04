@@ -6,6 +6,7 @@ import json
 import logging
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
+import constants
 from clients.unified_client import UnifiedLLMClient
 from storage.backend.config import DataSourceConfig
 from storage.translation_helpers import get_supported_languages
@@ -13,7 +14,7 @@ from storage.translation_helpers import get_supported_languages
 import util.prompt_loader
 
 logger = logging.getLogger(__name__)
-_DEFAULT_TRANSLATION_MODEL = "gpt-5.4-mini"
+_DEFAULT_TRANSLATION_MODEL = constants.DEFAULT_MODEL
 
 
 def _language_name(language_code: str) -> str:

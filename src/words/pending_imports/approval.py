@@ -30,6 +30,7 @@ if GREENLAND_SRC_PATH not in sys.path:
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+import constants
 from storage.backend.config import DataSourceConfig
 from storage.crud.concept import create_concept, get_concept_by_slug
 from storage.crud.lemma_tags import add_tags, read_pending_import_tags
@@ -245,7 +246,7 @@ def approve_as_lemma(
     session: Any,
     pending: PendingImport,
     data_source_config: DataSourceConfig,
-    model: str = "gpt-5.4-mini",
+    model: str = constants.DEFAULT_MODEL,
     debug: bool = False,
 ) -> Dict[str, Any]:
     """Convert a staged term into a full Lemma/DerivativeForm entry.
@@ -398,7 +399,7 @@ def approve_pending_import(
     session: Any,
     pending_import_id: int,
     data_source_config: DataSourceConfig,
-    model: str = "gpt-5.4-mini",
+    model: str = constants.DEFAULT_MODEL,
     debug: bool = False,
 ) -> Dict[str, Any]:
     """

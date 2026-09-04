@@ -21,6 +21,7 @@ from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
 from sqlalchemy import func, literal, or_
 
+import constants
 from clients.unified_client import UnifiedLLMClient
 from langtools.grammatical_words import is_function_word
 from langtools.tokenizer import tokenize
@@ -331,7 +332,7 @@ class GenysAgent:
 
         session = self.get_session()
         client = self.get_llm_client()
-        model = self.config.model or "gpt-5.4-mini"
+        model = self.config.model or constants.DEFAULT_MODEL
 
         processed_glosses: Set[str] = set()
         gloss_cache: Dict[str, Set[int]] = {}

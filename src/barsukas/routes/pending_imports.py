@@ -12,6 +12,7 @@ import json
 import logging
 from typing import Any, Dict, List, Sequence, cast
 
+import constants
 from barsukas.config import Config
 from barsukas.routes._mirror import mirrored_facade
 from words.pending_imports.approval import (
@@ -291,7 +292,7 @@ def approve(pending_import_id: int) -> ResponseReturnValue:
         return redirect(request.referrer or url_for("pending_imports.list_pending_imports"))
 
     try:
-        model_name = str(current_app.config.get("DEFAULT_LLM_MODEL", "gpt-5.4-mini"))
+        model_name = str(current_app.config.get("DEFAULT_LLM_MODEL", constants.DEFAULT_MODEL))
         debug = bool(current_app.config.get("DEBUG", False))
         base_config = cast(DataSourceConfig, current_app.backend_config)  # type: ignore[attr-defined]
         data_source_config = base_config.with_model(model_name, debug=debug)
@@ -491,7 +492,7 @@ def stage(pending_import_id: int) -> ResponseReturnValue:
     if not pending:
         return jsonify({"success": False, "error": "Pending import not found"}), 404
 
-    model_name = str(current_app.config.get("DEFAULT_LLM_MODEL", "gpt-5.4-mini"))
+    model_name = str(current_app.config.get("DEFAULT_LLM_MODEL", constants.DEFAULT_MODEL))
     debug = bool(current_app.config.get("DEBUG", False))
     base_config = cast(DataSourceConfig, current_app.backend_config)  # type: ignore[attr-defined]
     data_source_config = base_config.with_model(model_name, debug=debug)

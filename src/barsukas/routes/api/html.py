@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 import json
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
+import constants
 from barsukas.config import Config
 from barsukas.routes._mirror import mirrored_facade
 from clients.audio.azure_tts import AzureVoice
@@ -121,7 +122,9 @@ def auto_populate_lemma() -> ResponseReturnValue:
         from wordfreq.translation.client import LinguisticClient
 
         base_config = cast(DataSourceConfig, current_app.backend_config)  # type: ignore[attr-defined]
-        client = LinguisticClient(config=base_config.with_model("gpt-5.4-mini", debug=Config.DEBUG))
+        client = LinguisticClient(
+            config=base_config.with_model(constants.DEFAULT_MODEL, debug=Config.DEBUG)
+        )
 
         # Build prompt for LLM
         if translation and lang_code:
@@ -163,7 +166,7 @@ The definition should be suitable for language learners."""
         )
 
         response = client.client.generate_chat(
-            prompt=prompt, model="gpt-5.4-mini", json_schema=schema, timeout=30
+            prompt=prompt, model=constants.DEFAULT_MODEL, json_schema=schema, timeout=30
         )
 
         if not response.structured_data:

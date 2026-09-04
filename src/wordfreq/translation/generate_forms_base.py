@@ -798,7 +798,7 @@ def run_form_generation(
     parser.add_argument("--limit", type=int, help="Limit number of lemmas")
     parser.add_argument("--throttle", type=float, default=1.0, help="Seconds between calls")
     parser.add_argument("--db-path", type=str, default=constants.WORDFREQ_DB_PATH)
-    parser.add_argument("--model", type=str, default="gpt-5.4-mini")
+    parser.add_argument("--model", type=str, default=constants.DEFAULT_MODEL)
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--yes", "-y", action="store_true", help="Skip confirmation prompt")
     args = parser.parse_args()
