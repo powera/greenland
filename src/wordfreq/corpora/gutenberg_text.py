@@ -291,19 +291,70 @@ def build_phrase_index(phrases: Iterable[str]) -> Dict[str, int]:
     Returns ``{lowercased phrase: word count}`` for every phrase of two or more
     words. Single words are dropped: they need no joining, and keeping them
     would make the lookup claim matches it does not perform.
+
+    A hyphen counts as a word separator here, because it is one to the
+    tokenizer: ``RAW_TOKEN_RE`` splits "north-east" into "north" and "east", so
+    a hyphenated phrase and its spaced spelling reduce to the same index entry
+    and one entry catches both.  Without this a hyphenated variant would be
+    read as a single "word", fail the two-word test, and be dropped from the
+    index entirely.
     """
     index: Dict[str, int] = {}
     for phrase in phrases:
-        parts = phrase.lower().split()
+        parts = _phrase_words(phrase)
         if len(parts) < 2:
             continue
         index[" ".join(parts)] = len(parts)
     return index
 
 
+def _phrase_words(phrase: str) -> List[str]:
+    """The tokenizer's words for a phrase, splitting on spaces and hyphens.
+
+    Matches what :data:`RAW_TOKEN_RE` does to the same string in running text,
+    which is what makes "north-east" and "north east" the same index key.
+    """
+    return [word for word in re.split(r"[\s-]+", phrase.lower()) if word]
+
+
+def build_canonical_phrase_index(
+    phrase_spellings: Iterable[Tuple[str, str]],
+) -> Dict[str, str]:
+    """Index ``{phrase: the spelling its count belongs to}``.
+
+    A variant spelling is the same lexeme as its lemma, so its occurrences are
+    the lemma's occurrences: "north-east" is how some writers spell
+    "northeast", and counting the two apart splits one word's frequency in
+    half.  This maps the joined phrase form back to the spelling that should be
+    credited, so :func:`iter_tokens` can emit "northeast" for a run of text
+    reading "north-east".
+
+    Only entries that actually rename something are kept -- a phrase whose
+    canonical spelling is itself needs no mapping, and storing it would make
+    the index claim a substitution it does not perform.
+
+    Args:
+        phrase_spellings: ``(phrase, canonical_spelling)`` pairs.
+
+    Returns:
+        ``{joined phrase: canonical spelling}`` for the renaming entries.
+    """
+    index: Dict[str, str] = {}
+    for phrase, canonical in phrase_spellings:
+        parts = _phrase_words(phrase)
+        if len(parts) < 2:
+            continue
+        joined = " ".join(parts)
+        if joined == canonical.lower().strip():
+            continue
+        index[joined] = canonical.lower().strip()
+    return index
+
+
 def iter_tokens(
     text: str,
     phrases: Optional[Dict[str, int]] = None,
+    canonical_phrases: Optional[Dict[str, str]] = None,
 ) -> Iterator[Tuple[str, bool, bool]]:
     """Yield ``(lowercase_token, is_capitalized, is_sentence_initial)`` triples.
 
@@ -325,8 +376,18 @@ def iter_tokens(
     A phrase's capitalization and sentence position are those of its first
     word, so "New York" mid-sentence reads as capitalized evidence for the
     whole phrase, exactly as a single-word name would.
+
+    ``canonical_phrases`` (from :func:`build_canonical_phrase_index`) renames a
+    matched phrase to the spelling its count belongs to. A variant spelling is
+    the same lexeme as its lemma, so "north-east" and "north east" are emitted
+    as "northeast" and the three spellings share one count instead of splitting
+    one word's frequency three ways.
     """
     text = _normalize(text)
+
+    # The single-letter filter below has to know which letters open a phrase,
+    # so that "T-shirt" survives long enough to be matched as one.
+    phrase_initials = {phrase.split(" ", 1)[0] for phrase in phrases} if phrases else set()
 
     # Materialize the token stream first: a phrase match needs to look ahead,
     # which a bare finditer loop cannot do.
@@ -337,7 +398,11 @@ def iter_tokens(
             continue
         lowered = raw.lower()
         if len(lowered) == 1 and lowered not in VALID_SINGLE_LETTERS:
-            continue
+            # ... unless a known phrase starts with this letter. "T-shirt"
+            # tokenizes to "t" then "shirt", and dropping the "t" here would
+            # make the phrase unassemblable and leave "shirt" credited with it.
+            if not (phrase_initials and lowered in phrase_initials):
+                continue
         if lowered in ROMAN_NUMERALS:
             continue
         if lowered.startswith("'") or lowered.endswith("'"):
@@ -370,6 +435,8 @@ def iter_tokens(
                 collected[index][0] for index in range(position, position + matched_length)
             )
             _, is_capitalized, is_sentence_initial = collected[position]
+            if canonical_phrases:
+                joined = canonical_phrases.get(joined, joined)
             yield joined, is_capitalized, is_sentence_initial
             position += matched_length
             continue
@@ -447,14 +514,20 @@ class TextStats:
         return upper + uncertain * ratio, lower + uncertain * (1.0 - ratio)
 
 
-def analyze_text(text: str, phrases: Optional[Dict[str, int]] = None) -> TextStats:
+def analyze_text(
+    text: str,
+    phrases: Optional[Dict[str, int]] = None,
+    canonical_phrases: Optional[Dict[str, str]] = None,
+) -> TextStats:
     """Tokenize ``text`` and collect per-word counts and capitalization stats.
 
     ``phrases`` (from :func:`build_phrase_index`) makes known multi-word forms
-    count as single tokens; see :func:`iter_tokens`.
+    count as single tokens; ``canonical_phrases`` (from
+    :func:`build_canonical_phrase_index`) credits a matched variant spelling to
+    its lemma.  See :func:`iter_tokens`.
     """
     stats = TextStats()
-    for token, is_capitalized, is_sentence_initial in iter_tokens(text, phrases):
+    for token, is_capitalized, is_sentence_initial in iter_tokens(text, phrases, canonical_phrases):
         stats.token_total += 1
         stats.counts[token] += 1
         if is_sentence_initial:

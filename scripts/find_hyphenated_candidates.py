@@ -22,6 +22,35 @@ Usage::
     PYTHONPATH=src python scripts/find_hyphenated_candidates.py --corpus gutenberg
     PYTHONPATH=src python scripts/find_hyphenated_candidates.py --min-documents 5 --limit 500
     PYTHONPATH=src python scripts/find_hyphenated_candidates.py --format wordlist
+    PYTHONPATH=src python scripts/find_hyphenated_candidates.py \
+        --format wordlist --category fraction
+
+**The report is sectioned, not one ranked list.**  The first run's output showed
+why: a hyphen joins several quite different things, and ranking them together
+buried the vocabulary among them.  ``wordfreq.corpora.hyphenated.classify``
+separates the sections and its docstring says what each one is; briefly, the
+fractions lead (they are wanted at a much earlier level than the rest), the
+general vocabulary follows, and after it come the compounds that are really
+spellings of a solid word ("north-east" for "northeast"), prefixed bases,
+attributive participles ("long-tailed"), hyphenated phrases
+("black-and-white"), numbers-plus-units ("five-year"), numerals, and names.
+``--limit`` applies within each section, so capping the general list does not
+truncate the short ones off the end of the report.
+
+**Case is evidence now.**  Compounds are still counted lowercased, but each
+occurrence is recorded as capitalized, lowercase or sentence-initial, exactly as
+``gutenberg_text.analyze_text`` records a single word.  That is what the
+``proper`` section runs on, and it is why "jean-luc" no longer reaches the
+import list.  A capital on a part after the first is treated separately and
+needs no minimum, because sentence position cannot force it: that alone
+separates "non-Jewish" from "non-fiction".
+
+**The unhyphenated spellings are counted alongside.**  For each two-part
+compound a document attests, the same pass counts the solid spelling
+("northeast") and the spaced one ("north east").  Where the solid form wins, the
+hyphenated one is a ``variant_forms`` row against that lemma rather than a word
+to import -- and once it exists as a variant, all three spellings can be counted
+together, which was the point of the exercise.
 
 The three sources are the ones with cached text locally:
 
@@ -58,9 +87,15 @@ from wordfreq.corpora.download_gutenberg import text_path
 from wordfreq.corpora.download_scotus import default_cache_dir as scotus_cache_dir
 from wordfreq.corpora.gutenberg_text import strip_gutenberg_boilerplate
 from wordfreq.corpora.hyphenated import (
+    CATEGORY_GENERAL,
+    CATEGORY_ORDER,
+    DEFAULT_MIN_CASE_EVIDENCE,
+    DEFAULT_PROPER_SHARE,
+    DEFAULT_SOLID_RATIO,
     Document,
     HyphenatedCandidate,
     HyphenatedStats,
+    group_by_category,
     rank_candidates,
     scan_source,
 )
@@ -223,22 +258,111 @@ def collect(
     return stats_by_corpus
 
 
+# What each report section is for, printed above it so the curator does not
+# have to reconstruct the reasoning from the module docstring.
+CATEGORY_NOTES: Dict[str, str] = {
+    "fraction": (
+        "Spelled-out fractions. Vocabulary, and wanted well before the level "
+        "the general list lands at, so decide these on their own."
+    ),
+    "general": "Ordinary hyphenated vocabulary: the import list.",
+    "solid-variant": (
+        "The corpora mostly write these solid. Each is a spelling of that word "
+        "-- a variant_forms row against the solid lemma, not a lemma."
+    ),
+    "prefixed": (
+        "A productive prefix on a base. Keep the ones whose whole means "
+        "something its parts do not (non-fiction, non-profit); the rest are "
+        "just the base, negated."
+    ),
+    "attributive": (
+        "Participles that describe a head noun and mean little alone "
+        "(long-tailed). Some are worth holding; most are not."
+    ),
+    "phrase": (
+        "Three or more parts: a phrase written with hyphens (black-and-white, "
+        "day-to-day) rather than a compound word."
+    ),
+    "measure": (
+        "A number modifying a unit for one attributive use (a five-year plan). "
+        "The words are the number and the unit; nothing here is new."
+    ),
+    "number": "Spelled-out compound numerals. Arithmetic, not vocabulary.",
+    "proper": (
+        "Capitalized in the corpora: names, nationalities and proper "
+        "adjectives (Jean-Luc, Anglo-Saxon, non-Jewish). Not for this list. "
+        "Read it before discarding it, though: a word derived from a name is "
+        "capitalized for the same reason a name is, and the case evidence "
+        "cannot tell them apart -- non-Euclidean is ordinary mathematical "
+        "vocabulary and lands here."
+    ),
+}
+
+
+def _format_row(candidate: HyphenatedCandidate) -> str:
+    """One candidate as a report line, with its case and spelling evidence."""
+    share = candidate.capitalized_share
+    case = "n/a" if share is None else f"{share:.2f}"
+    spelling = candidate.preferred_spelling
+    return (
+        f"{candidate.text:<32} {candidate.documents:>6} {candidate.count:>7}  "
+        f"{case:>5} {candidate.inner_upper:>5}  "
+        f"{candidate.solid:>6} {candidate.spaced:>6}  {spelling:<10} "
+        f"{','.join(candidate.corpora)}"
+    )
+
+
+_HEADER = (
+    f"{'compound':<32} {'docs':>6} {'count':>7}  "
+    f"{'cap':>5} {'inner':>5}  {'solid':>6} {'spaced':>6}  {'prefers':<10} corpora"
+)
+
+
 def print_table(candidates: Sequence[HyphenatedCandidate], limit: Optional[int]) -> None:
-    shown = candidates[:limit] if limit else candidates
-    print(f"{'compound':<32} {'docs':>6} {'count':>7}  corpora")
-    print("-" * 72)
-    for candidate in shown:
-        print(
-            f"{candidate.text:<32} {candidate.documents:>6} {candidate.count:>7}  "
-            f"{','.join(candidate.corpora)}"
-        )
-    print("-" * 72)
-    print(f"{len(shown)} shown of {len(candidates)} candidates")
+    """Print the candidates grouped into sections, fractions first.
+
+    ``limit`` applies per section rather than to the report as a whole: a cap
+    meant to keep the general list reviewable should not push the fractions --
+    which are few and lead the report -- off the end of it.
+
+    The ``cap`` column is the share of *decided* occurrences written with a
+    leading capital, and ``n/a`` means every occurrence opened a sentence, so
+    there is no evidence.  ``inner`` counts occurrences capitalized on a later
+    part ("non-Jewish"), which position can never force.
+    """
+    grouped = group_by_category(candidates)
+    for category, group in grouped.items():
+        shown = group[:limit] if limit else group
+        print(f"== {category} ({len(shown)} shown of {len(group)})")
+        note = CATEGORY_NOTES.get(category)
+        if note:
+            print(f"   {note}")
+        print()
+        print(_HEADER)
+        print("-" * len(_HEADER))
+        for candidate in shown:
+            print(_format_row(candidate))
+        print()
+    print("-" * len(_HEADER))
+    print(f"{len(candidates)} candidates in {len(grouped)} categories")
 
 
-def print_wordlist(candidates: Sequence[HyphenatedCandidate], limit: Optional[int]) -> None:
-    """Print a paste-ready Python list for an import script."""
-    shown = candidates[:limit] if limit else candidates
+def print_wordlist(
+    candidates: Sequence[HyphenatedCandidate],
+    limit: Optional[int],
+    *,
+    category: str = CATEGORY_GENERAL,
+) -> None:
+    """Print a paste-ready Python list for an import script.
+
+    One category only -- by default the general vocabulary.  The other sections
+    are curation input rather than import lists, and pasting a mixed list into
+    an import script is how the names got in last time.
+    """
+    grouped = group_by_category(candidates)
+    group = grouped.get(category, [])
+    shown = group[:limit] if limit else group
+    print(f"# {category}: {len(shown)} of {len(group)} candidates")
     print("WORDS: Sequence[str] = (")
     for candidate in shown:
         print(f'    "{candidate.text}",  # {candidate.documents} docs, {candidate.count} uses')
@@ -274,6 +398,42 @@ def parse_args() -> argparse.Namespace:
         choices=("table", "wordlist"),
         default="table",
         help="table for review, wordlist to paste into an import script",
+    )
+    parser.add_argument(
+        "--category",
+        choices=CATEGORY_ORDER,
+        default=CATEGORY_GENERAL,
+        help=(
+            "Which section --format wordlist emits (default: general). The "
+            "table format always prints every section."
+        ),
+    )
+    parser.add_argument(
+        "--proper-share",
+        type=float,
+        default=DEFAULT_PROPER_SHARE,
+        help=(
+            f"Capitalized share above which a compound is a name "
+            f"(default: {DEFAULT_PROPER_SHARE})"
+        ),
+    )
+    parser.add_argument(
+        "--min-case-evidence",
+        type=int,
+        default=DEFAULT_MIN_CASE_EVIDENCE,
+        help=(
+            f"Mid-sentence occurrences needed before the capitalized share is "
+            f"trusted (default: {DEFAULT_MIN_CASE_EVIDENCE})"
+        ),
+    )
+    parser.add_argument(
+        "--solid-ratio",
+        type=float,
+        default=DEFAULT_SOLID_RATIO,
+        help=(
+            f"Solid-spelling share above which a compound is a variant of the "
+            f"solid word rather than a lemma (default: {DEFAULT_SOLID_RATIO})"
+        ),
     )
     parser.add_argument(
         "--no-exclude-known",
@@ -324,6 +484,9 @@ def main() -> int:
         min_documents=args.min_documents,
         min_corpora=args.min_corpora,
         exclude=exclude,
+        proper_share=args.proper_share,
+        min_case_evidence=args.min_case_evidence,
+        solid_ratio=args.solid_ratio,
     )
 
     for corpus_name, stats in sorted(stats_by_corpus.items()):
@@ -340,7 +503,7 @@ def main() -> int:
             original_stdout = sys.stdout
             sys.stdout = handle
         if args.format == "wordlist":
-            print_wordlist(candidates, args.limit)
+            print_wordlist(candidates, args.limit, category=args.category)
         else:
             print_table(candidates, args.limit)
     finally:
