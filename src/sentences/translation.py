@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
+import constants
 from clients.unified_client import UnifiedLLMClient
 from sentences.decomposition import (
     build_decomposition_schema,
@@ -100,7 +101,7 @@ def translate_sentence(
     sentence_id: int,
     target_languages: List[str],
     session: Session,
-    model: str = "gpt-5.4-mini",
+    model: str = constants.DEFAULT_MODEL,
     *,
     source_language: str = "en",
     log_source: Optional[str] = None,

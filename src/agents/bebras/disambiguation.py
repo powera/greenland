@@ -9,6 +9,7 @@ lemmas in the database, especially when there are multiple candidates (polysemes
 import logging
 from typing import Any, List, Optional
 
+import constants
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
@@ -83,7 +84,10 @@ def find_best_lemma_match(
 
 
 def disambiguate_lemma(
-    candidates: List[Lemma], lemma_text: str, disambiguation_hint: str, model: str = "gpt-5.4-mini"
+    candidates: List[Lemma],
+    lemma_text: str,
+    disambiguation_hint: str,
+    model: str = constants.DEFAULT_MODEL,
 ) -> Optional[Lemma]:
     """
     Use LLM to disambiguate between multiple lemma candidates.

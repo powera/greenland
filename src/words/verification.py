@@ -11,6 +11,7 @@ from typing import Dict, List, Literal, Optional, TypedDict
 
 from sqlalchemy.orm import Session
 
+import constants
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from storage.backend.config import DataSourceConfig
@@ -98,7 +99,7 @@ def verify_word_translations(
     if lemma is None:
         raise ValueError(f"Lemma {lemma_id} not found")
 
-    model = config.model or "gpt-5.4-mini"
+    model = config.model or constants.DEFAULT_MODEL
     requested_languages = languages or DEFAULT_VERIFY_LANGUAGES
     supported_languages = filter_languages_for_model(requested_languages, model)
     if not supported_languages:

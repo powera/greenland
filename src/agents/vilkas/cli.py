@@ -106,7 +106,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Common arguments
     add_common_args(parser)
-    add_llm_args(parser, default_model="gpt-5.4-mini")
+    add_llm_args(parser)
     add_output_args(parser)
     add_processing_args(parser)
     add_guid_arg(parser, help_text="Process only the lemma with this GUID")
@@ -291,7 +291,7 @@ def main() -> None:
     validate_cache_args(args)
 
     # Create data source configuration (includes backend, cache, and LLM model)
-    config = get_data_source_config(args, default_model="gpt-5.4-mini")
+    config = get_data_source_config(args)
 
     # Create agent with unified configuration
     agent = InflectionService(config=config)

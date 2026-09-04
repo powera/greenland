@@ -173,7 +173,7 @@ class LemmaSentenceTranslationService:
                     source_text=en_translation,
                     source_language="en",
                     target_languages=target_languages,
-                    model=self.config.model or "gpt-5.4-mini",
+                    model=self.config.model or constants.DEFAULT_MODEL,
                     verified=False,
                     pivot_languages=self.pivot_languages,
                 )
@@ -551,7 +551,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Translate sentences for a lemma GUID")
 
     add_common_args(parser)
-    add_llm_args(parser, default_model="gpt-5.4-mini")
+    add_llm_args(parser)
     add_guid_arg(parser, help_text="Translate sentences for this specific lemma GUID")
     add_language_args(parser)
     add_backend_args(parser)

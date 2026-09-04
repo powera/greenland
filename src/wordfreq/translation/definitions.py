@@ -6,6 +6,7 @@ import json
 import logging
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
+import constants
 import util.prompt_loader
 from clients.types import Schema, SchemaProperty
 from storage import database as linguistic_db
@@ -242,7 +243,7 @@ def query_definitions(
         prompt += f'\n\nContext: this word appears in the sentence: "{example_sentence}"'
 
     # Get model name from parameter or client attribute
-    model_name: str = cast(str, model or getattr(client, "model", "gpt-5.4-mini"))
+    model_name: str = cast(str, model or getattr(client, "model", constants.DEFAULT_MODEL))
 
     try:
         # Make a single API call without retries

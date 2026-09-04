@@ -24,6 +24,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
+import constants
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -190,7 +191,7 @@ def rate_group(
     entry would otherwise silently misassign every rating after it. An entry
     with an out-of-range number or an unrecognized label is discarded.
     """
-    model_name: str = model or getattr(client, "model", None) or "gpt-5.4-mini"
+    model_name: str = model or getattr(client, "model", None) or constants.DEFAULT_MODEL
     prompt = build_prompt(lemma_text, senses)
 
     try:

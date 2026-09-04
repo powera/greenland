@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Literal, Optional, TypedDict
 
 from sqlalchemy.orm import Session
 
+import constants
 from clients.types import Schema, SchemaProperty
 from clients.unified_client import UnifiedLLMClient
 from storage.backend.config import DataSourceConfig
@@ -74,7 +75,7 @@ def _get_english_text(session: Session, sentence_id: int) -> str:
 
 
 def _supported_languages(config: DataSourceConfig, languages: Optional[List[str]]) -> List[str]:
-    model = config.model or "gpt-5.4-mini"
+    model = config.model or constants.DEFAULT_MODEL
     supported_languages = filter_languages_for_model(languages or DEFAULT_VERIFY_LANGUAGES, model)
     if not supported_languages:
         raise ValueError(f"No supported verification languages for model {model}")

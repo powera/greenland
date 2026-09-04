@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional, Sequence
 
 from sqlalchemy.orm import Session
 
+import constants
 from clients.unified_client import UnifiedLLMClient
 from sentences.candidate_lookup import find_candidate_lemmas_for_sentence
 from storage.database import Sentence
@@ -144,7 +145,7 @@ def ensure_translations(
     source_text: str,
     source_language: str,
     target_languages: List[str],
-    model: str = "gpt-5.4-mini",
+    model: str = constants.DEFAULT_MODEL,
     verified: bool = False,
     *,
     pivot_languages: Optional[Sequence[str]] = None,

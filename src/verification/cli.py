@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, Sequence, cast
 
 from sqlalchemy.orm import Query, Session
 
+import constants
 from agents.common.common_args import (
     add_backend_args,
     add_common_args,
@@ -69,7 +70,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
 def _add_common_verification_args(parser: argparse.ArgumentParser) -> None:
     add_common_args(parser)
-    add_llm_args(parser, default_model="gpt-5.4-mini")
+    add_llm_args(parser)
     add_backend_args(parser)
     add_processing_args(parser)
     add_language_args(parser)
@@ -88,7 +89,7 @@ def _add_common_verification_args(parser: argparse.ArgumentParser) -> None:
 
 def _languages(args: argparse.Namespace, config: DataSourceConfig) -> List[str]:
     requested_languages = args.languages or DEFAULT_VERIFY_LANGUAGES
-    model = config.model or "gpt-5.4-mini"
+    model = config.model or constants.DEFAULT_MODEL
     supported_languages = filter_languages_for_model(requested_languages, model)
     if not supported_languages:
         raise ValueError(f"No supported verification languages for model {model}")
@@ -180,7 +181,7 @@ def _queue_words(
     dry_run: bool,
 ) -> Dict[str, Any]:
     created = 0
-    model = config.model or "gpt-5.4-mini"
+    model = config.model or constants.DEFAULT_MODEL
     for lemma in lemmas:
         enqueue_result = enqueue_task(
             session,
@@ -217,7 +218,7 @@ def _queue_sentences(
 ) -> Dict[str, Any]:
     created = 0
     requested = 0
-    model = config.model or "gpt-5.4-mini"
+    model = config.model or constants.DEFAULT_MODEL
     task_types = [TaskType.SENTENCES_TRANSLATIONS_VERIFY]
     if check_lemma_links:
         task_types.append(TaskType.SENTENCES_LINKS_VERIFY)
