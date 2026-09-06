@@ -42,3 +42,9 @@ data/working
 src/audiotools/lithuanian-audio-cache/
 src/audiotools/wireword-audio-cache/
 src/audiotools/data/
+
+# working dir for llms
+llm_temp/
+
+# coverage data from tools/measure_test_coverage.py
+.coverage

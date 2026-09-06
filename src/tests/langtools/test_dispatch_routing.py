@@ -10,18 +10,23 @@ from langtools.directions import get_language_direction_note
 from langtools.inflection import inflect
 from langtools.wiktionary import _PARSER_SPECS, _POS_TO_METHOD
 
-OPTIONAL_DEPENDENCIES = {"bs4", "jieba", "opencc", "pypinyin", "sqlalchemy"}
+# Optional native deps only.  sqlalchemy is a hard dependency and must never
+# be listed here: swallowing its ModuleNotFoundError would turn a real breakage
+# into a silent pass.
+OPTIONAL_DEPENDENCIES = {"bs4", "jieba", "opencc", "pypinyin", "pykakasi"}
 
 
 def test_wiktionary_parser_registry_resolves_adapters() -> None:
     """Registered parser names resolve to adapters with the shared interface."""
     failures: list[str] = []
+    skipped: list[str] = []
 
     for language_code, (module_path, class_name) in _PARSER_SPECS.items():
         try:
             module = importlib.import_module(module_path)
         except ModuleNotFoundError as error:
             if error.name in OPTIONAL_DEPENDENCIES:
+                skipped.append(f"{language_code} ({error.name})")
                 continue
             raise
 
@@ -39,6 +44,11 @@ def test_wiktionary_parser_registry_resolves_adapters() -> None:
             failures.append(f"{language_code}: {class_name} missing methods: {missing_methods}")
 
     assert not failures, "Wiktionary parser registry issues:\n  " + "\n  ".join(failures)
+
+    # Every parser skipped for a missing optional dep means this test verified
+    # less than it appears to.  Skip rather than pass green on an empty check.
+    if skipped and len(skipped) == len(_PARSER_SPECS):
+        pytest.skip("no wiktionary parser could be imported: " + ", ".join(skipped))
 
 
 @pytest.mark.parametrize(

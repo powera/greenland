@@ -152,8 +152,14 @@ def test_disable_env_takes_priority_over_recording_opt_out(monkeypatch):
 
 
 def test_disable_env_is_inert_when_unset(monkeypatch):
-    """With the kill switch unset, assert_llm_calls_enabled does nothing."""
+    """With both kill switches unset, assert_llm_calls_enabled does nothing.
+
+    TEST_MODE has to be cleared too, not just DISABLE_LLM: the guard honours
+    both, so leaving it set made this test fail whenever the suite was run with
+    GREENLAND_TEST_MODE=1 in the environment -- which is how it is normally run.
+    """
     monkeypatch.delenv("GREENLAND_DISABLE_LLM", raising=False)
+    monkeypatch.delenv("GREENLAND_TEST_MODE", raising=False)
 
     lib.assert_llm_calls_enabled("openai")
 
