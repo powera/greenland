@@ -10,6 +10,7 @@ from clients.unified_client import UnifiedLLMClient
 from langtools.dialect_overrides import get_dialect_display_name, get_llm_prompt_note
 from langtools.directions import get_language_direction_note
 from langtools.grammatical_words import is_grammatical_word
+from storage.crud.name_entity import get_name_by_id, get_name_renderings
 from storage.models.schema import (
     Lemma,
     Sentence,
@@ -114,6 +115,63 @@ def build_decomposed_word_schema(*, additional_properties: bool = True) -> Dict[
     if not additional_properties:
         schema["additionalProperties"] = False
     return schema
+
+
+def build_name_rendering_lines(
+    sentence: Sentence,
+    target_languages: List[str],
+    session: Any,
+) -> List[str]:
+    """Render the pinned spelling of each name in a sentence, one line per name.
+
+    A name has to be written *somehow* in every target language -- Lithuanian
+    needs a declinable ``Džonas``, Chinese needs ``约翰`` -- and if the prompt
+    does not say which, the model invents one per call and the same character is
+    spelled differently in consecutive sentences. These lines pin the answer we
+    have already curated.
+
+    A name with no rendering in a given language is simply omitted for that
+    language, leaving the model to do what it does today; that gap is the signal
+    that the name needs a rendering, not an error.
+
+    Args:
+        sentence: The sentence being translated.
+        target_languages: Already-normalized target language codes.
+        session: Database session.
+
+    Returns:
+        Formatted lines, empty when the sentence casts no names.
+    """
+    sentence_names = (
+        session.query(SentenceWord)
+        .filter(
+            SentenceWord.sentence_id == sentence.id,
+            SentenceWord.name_id.isnot(None),
+        )
+        .order_by(SentenceWord.position)
+        .all()
+    )
+
+    lines: List[str] = []
+    seen_name_ids: set[int] = set()
+    for sentence_word in sentence_names:
+        if sentence_word.name_id in seen_name_ids:
+            continue
+        seen_name_ids.add(sentence_word.name_id)
+
+        name = get_name_by_id(session, sentence_word.name_id)
+        if name is None:
+            continue
+
+        renderings = get_name_renderings(session, name)
+        rendering_items = [
+            f"{lang}={renderings[lang]}" for lang in target_languages if lang in renderings
+        ]
+        if not rendering_items:
+            continue
+        lines.append(f"  {name.name_text}: {', '.join(rendering_items)}")
+
+    return lines
 
 
 def build_prompt_for_translate_and_decompose(
@@ -225,6 +283,8 @@ def build_prompt_for_translate_and_decompose(
                 f"{candidate_guid_str}: {candidate_trans_str}"
             )
 
+    name_rendering_lines = build_name_rendering_lines(sentence, target_languages, session)
+
     english_instruction = (
         "IMPORTANT: Also provide a grammatically correct English version "
         "(fixing issues like singular/plural, articles, etc.)."
@@ -255,6 +315,7 @@ def build_prompt_for_translate_and_decompose(
         template_sentence=source_translation.translation_text,
         word_translations="\n".join(word_translation_lines) or "- (none provided)",
         candidate_lemmas="\n".join(candidate_lines) or "- (none provided)",
+        name_renderings="\n".join(name_rendering_lines) or "  (none)",
         target_languages_with_notes="\n".join(target_language_lines),
         english_instruction=english_instruction,
     )

@@ -15,6 +15,14 @@ inventing a third convention:
   sort key, a verified flag -- live in ``translation_metadata`` keyed by the
   same language codes, exactly as translation status does for lemmas.
 
+``translations`` holds the one rendering a translation should use. A language
+that also has a localized alternative -- John as ``Иван`` in Russian, the
+character recast rather than respelled -- carries it as
+``localized_alternative`` inside that language's ``translation_metadata``, and
+it is omitted when unset, so a name without one produces exactly the record it
+did before the field existed. It is a reading aid for reviewers, never an
+instruction to a translator.
+
 Names are not levelled and carry no definition, so there is no difficulty or
 concept field. All names live in one file: they have a kind, but the kind is
 already in the GUID prefix, and splitting a few hundred names across eight
@@ -46,6 +54,7 @@ _TRANSLATION_METADATA_FIELDS: Tuple[Tuple[str, str], ...] = (
     ("ipa_pronunciation", "ipa_pronunciation"),
     ("phonetic_pronunciation", "phonetic_pronunciation"),
     ("sort_key", "sort_key"),
+    ("localized_alternative", "localized_alternative"),
     ("notes", "notes"),
 )
 
@@ -193,6 +202,7 @@ def apply_release_record(session: Session, record: Dict[str, Any], name: Name) -
             ipa_pronunciation=metadata.get("ipa_pronunciation"),
             phonetic_pronunciation=metadata.get("phonetic_pronunciation"),
             sort_key=metadata.get("sort_key"),
+            localized_alternative=metadata.get("localized_alternative"),
             notes=metadata.get("notes"),
             verified=bool(metadata.get("verified", False)),
         )
@@ -248,6 +258,7 @@ def import_release_record(session: Session, record: Dict[str, Any]) -> Optional[
             ipa_pronunciation=metadata.get("ipa_pronunciation"),
             phonetic_pronunciation=metadata.get("phonetic_pronunciation"),
             sort_key=metadata.get("sort_key"),
+            localized_alternative=metadata.get("localized_alternative"),
             notes=metadata.get("notes"),
             verified=bool(metadata.get("verified", False)),
         )

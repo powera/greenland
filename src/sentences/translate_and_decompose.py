@@ -287,6 +287,7 @@ def build_phase1_prompt(
     source_language: str,
     target_languages: Sequence[str],
     conversation_context: Optional[str] = None,
+    name_renderings: Optional[str] = None,
 ) -> Optional[Tuple[str, str, str, Dict[str, Any], List[str]]]:
     """Build the Phase-1 sentence-translation prompt.
 
@@ -305,6 +306,12 @@ def build_phase1_prompt(
             cast, plus the instructions for resolving elliptical replies and
             choosing pronouns and register. A standalone sentence passes None
             here and gets the ordinary prompt unchanged.
+        name_renderings: Optional block pinning the established spelling of the
+            proper names in this sentence, from
+            :func:`sentences.decomposition.build_name_rendering_lines`. Passed
+            in rather than looked up here so this function stays free of
+            database access. None or empty renders as "(none)", which leaves the
+            model to spell names as it would otherwise.
     """
     normalized_targets = normalize_llm_language_codes(
         list(target_languages), operation_name="Phase 1 translation"
@@ -332,6 +339,7 @@ def build_phase1_prompt(
         "sentence": sentence_text,
         "source_language": get_dialect_display_name(source_language),
         "target_languages_with_notes": "\n".join(target_language_lines),
+        "name_renderings": name_renderings or "  (none)",
     }
     if conversation_context:
         format_fields["conversation_context"] = conversation_context
@@ -403,6 +411,7 @@ def translate_sentence_text(
     client: UnifiedLLMClient,
     model: str = DEFAULT_MODEL,
     conversation_context: Optional[str] = None,
+    name_renderings: Optional[str] = None,
 ) -> Dict[str, str]:
     """Phase 1: ask the LLM for sentence-level translations only.
 
@@ -414,12 +423,15 @@ def translate_sentence_text(
         conversation_context: Optional dialog context block (see
             :func:`format_conversation_context`). When present, the
             conversation-aware prompt variant is used.
+        name_renderings: Optional block pinning the established spelling of the
+            sentence's proper names; see :func:`build_phase1_prompt`.
     """
     built = build_phase1_prompt(
         sentence_text=sentence_text,
         source_language=source_language,
         target_languages=target_languages,
         conversation_context=conversation_context,
+        name_renderings=name_renderings,
     )
     if built is None:
         return {}

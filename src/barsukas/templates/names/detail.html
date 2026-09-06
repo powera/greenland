@@ -104,6 +104,7 @@
                                 <th>Language</th>
                                 <th>Rendering</th>
                                 <th>Pronunciation</th>
+                                <th>Localized alt.</th>
                                 <th style="width: 6rem;"></th>
                             </tr>
                         </thead>
@@ -113,6 +114,10 @@
                                 <td>{{ language_names.get(rendering.language_code, rendering.language_code) }}</td>
                                 <td><strong>{{ rendering.translation }}</strong></td>
                                 <td class="text-muted">{{ rendering.phonetic_pronunciation or '-' }}</td>
+                                <td class="text-muted"
+                                    {% if rendering.notes %}title="{{ rendering.notes }}"{% endif %}>
+                                    {{ rendering.localized_alternative or '-' }}
+                                </td>
                                 <td>
                                     <form method="POST"
                                           action="{{ url_for('names.delete_rendering', name_id=name.id, rendering_id=rendering.id) }}">
@@ -135,7 +140,7 @@
 
                 <form method="POST" action="{{ url_for('names.set_rendering', name_id=name.id) }}">
                     <div class="row g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="language_code" class="form-label">Language</label>
                             <select class="form-select" id="language_code" name="language_code">
                                 {% for code, label in language_names.items() %}
@@ -143,15 +148,24 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="translation" class="form-label">Rendering</label>
                             <input type="text" class="form-control" id="translation" name="translation"
                                    required placeholder="Džordžas">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="phonetic" class="form-label">Pronunciation</label>
                             <input type="text" class="form-control" id="phonetic" name="phonetic"
                                    placeholder="optional">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="localized_alternative" class="form-label">Localized alternative</label>
+                            <input type="text" class="form-control" id="localized_alternative"
+                                   name="localized_alternative" placeholder="optional">
+                            <div class="form-text">
+                                What an aggressively localized translation would use instead
+                                (John &rarr; Иван). Recorded for reviewers; never used to translate.
+                            </div>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary mt-3

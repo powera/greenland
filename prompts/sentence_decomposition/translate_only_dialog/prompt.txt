@@ -2,6 +2,11 @@ Translate the following {source_language} sentence into each of these languages:
 
 {target_languages_with_notes}
 
+Name renderings. These are the established spellings of the proper names in this sentence.
+Use them exactly as given, adapting only for grammar (e.g. case endings in a language that
+declines names). Do not invent a different spelling or transliteration for a name listed here:
+{name_renderings}
+
 {conversation_context}
 
 Translate only the sentence given below, not the surrounding dialog. Use the

@@ -349,6 +349,26 @@ lemmas, and the extras a rendering can carry (IPA, phonetic respelling, the
 romanized `sort_key`, `verified`) live in `translation_metadata` under the same
 language codes.
 
+A rendering is the spelling a translation should use: Lithuanian cannot write
+"John is at school" without a declinable `Džonas`, and the sentence pipeline
+pins these so the same character is not spelled two ways in consecutive
+sentences. Where a language also has a *localized* alternative - John as `Иван`
+in Russian, the character recast as a local rather than respelled - it is
+recorded as `localized_alternative` in that language's `translation_metadata`,
+with any explanation in that language's `notes`:
+
+```json
+  "translations": {"ru": "Джон"},
+  "translation_metadata": {
+    "ru": {"localized_alternative": "Иван"}
+  }
+```
+
+It is a reading aid, not an instruction: a reviewer seeing `Иван` in a
+translation can tell a deliberate localization from a botched transliteration.
+It is never sent to a model, and it is omitted when unset, so a name without
+one produces exactly the record it did before the field existed.
+
 Names carry no difficulty level and no definition: a learner does not *learn*
 George, and a sentence's `minimum_level` skips names when rolling up difficulty.
 The `kind` is one of `storage.models.name_entity.NAME_KINDS` and is also encoded

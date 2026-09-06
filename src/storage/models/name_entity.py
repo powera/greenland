@@ -17,6 +17,14 @@ katakana. Those renderings must be stable across every sentence that uses the
 name, which means they have to live somewhere. They live in
 :class:`NameTranslation`, which deliberately mirrors ``LemmaTranslation``.
 
+One rendering per language is what the translation pipeline pins. Where a
+language also has a *localized* alternative -- John as ``Иван`` in Russian, the
+character recast as a local rather than respelled -- that goes in
+``NameTranslation.localized_alternative``, with any explanation in ``notes``.
+It is a reading aid, not an output choice: a reviewer seeing ``Иван`` in a
+translation can tell a deliberate localization from a botched transliteration,
+while translation itself always uses ``translation``.
+
 Names do carry a GUID and are exported to ``data/release/names``: the
 renderings above are content, not derived data, and a client that shows the
 same character in Lithuanian and Japanese has to read them from somewhere.
@@ -209,6 +217,14 @@ class NameTranslation(Base):
 
     # Romanized/phonetic form for sorting (pinyin for zh, kana for ja).
     sort_key: Mapped[Optional[str]] = mapped_column(String, nullable=True, index=True)
+
+    # An alternative rendering an aggressively localized translation might use
+    # instead of the pinned one: John is written "Джон" in Russian, but a
+    # translation that recasts the cast as Russian would write "Иван". Recorded
+    # so a reviewer reading Russian output can tell a deliberate localization
+    # from a botched transliteration; free-form `notes` carries the why. Never
+    # sent to the model -- the translation prompt always pins `translation`.
+    localized_alternative: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

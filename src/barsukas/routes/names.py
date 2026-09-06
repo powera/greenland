@@ -195,6 +195,7 @@ def set_rendering(name_id: int) -> Response:
             language_code=language_code,
             translation=rendering,
             phonetic_pronunciation=request.form.get("phonetic", "").strip() or None,
+            localized_alternative=request.form.get("localized_alternative", "").strip() or None,
             verified=True,
             source=Config.OPERATION_LOG_SOURCE,
         )

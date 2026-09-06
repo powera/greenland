@@ -1,17 +1,28 @@
 """Tests for shared sentence decomposition helpers."""
 
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
+
+from sqlalchemy.orm import Session
 
 from sentences.decomposition import (
     all_words_are_lemmas_or_grammatical,
     build_decomposed_word_schema,
     build_decomposition_schema,
     build_multi_language_decomposition_schema,
+    build_name_rendering_lines,
     build_sentence_decomposition_context,
     build_prompt_for_translate_and_decompose,
     build_sentence_decomposition_prompt,
     build_single_language_decomposition_schema,
     find_unresolved_non_grammatical_words,
+)
+from storage.crud.name_entity import create_name, set_name_translation
+from storage.crud.sentence_word import add_sentence_word
+from storage.models.schema import Sentence
+from tests.sentences.candidate_lookup_fixture import (
+    add_test_sentence,
+    build_test_engine,
+    seed_test_database,
 )
 
 
@@ -380,3 +391,89 @@ def test_find_unresolved_non_grammatical_words_accepts_resolved_function_lemma()
 
     assert find_unresolved_non_grammatical_words(words, "en") == []
     assert all_words_are_lemmas_or_grammatical(words, "en")
+
+
+def _session_with_name_sentence(
+    sentence_text: str,
+    *,
+    renderings: Dict[str, str],
+) -> Tuple[Session, Sentence]:
+    """A seeded session whose sentence casts "John" with the given renderings."""
+    session = Session(build_test_engine())
+    seed_test_database(session)
+    sentence = add_test_sentence(session, {"en": sentence_text})
+
+    name = create_name(session, name_text="John", kind="given_name")
+    for language_code, rendering in renderings.items():
+        set_name_translation(
+            session,
+            name,
+            language_code=language_code,
+            translation=rendering,
+        )
+    add_sentence_word(
+        session,
+        sentence=sentence,
+        position=0,
+        part_of_speech="noun",
+        language_code="en",
+        name=name,
+    )
+    session.flush()
+    return session, sentence
+
+
+def test_translate_and_decompose_prompt_pins_name_renderings() -> None:
+    """A name the sentence casts reaches the prompt as its curated spelling.
+
+    Without this the model invents a rendering per call and the same character
+    is spelled differently in consecutive sentences.
+    """
+    session, sentence = _session_with_name_sentence(
+        "John is at school",
+        renderings={"lt": "Džonas", "ru": "Джон"},
+    )
+    try:
+        _, prompt = build_prompt_for_translate_and_decompose(
+            sentence, ["lt", "ru"], session, source_language="en"
+        )
+
+        assert "John: lt=Džonas, ru=Джон" in prompt
+    finally:
+        session.close()
+
+
+def test_name_rendering_lines_omit_languages_without_a_rendering() -> None:
+    """A language with no rendering is left to the model rather than faked.
+
+    The gap is the signal that the name needs a rendering; inventing one here
+    would hide it.
+    """
+    session, sentence = _session_with_name_sentence(
+        "John is at school",
+        renderings={"lt": "Džonas"},
+    )
+    try:
+        lines = build_name_rendering_lines(sentence, ["lt", "ru"], session)
+
+        assert lines == ["  John: lt=Džonas"]
+    finally:
+        session.close()
+
+
+def test_name_rendering_lines_are_empty_without_names() -> None:
+    """A sentence casting no names produces no lines, and a well-formed prompt."""
+    session = Session(build_test_engine())
+    try:
+        seed_test_database(session)
+        sentence = add_test_sentence(session, {"en": "I can see him"})
+
+        assert build_name_rendering_lines(sentence, ["fr"], session) == []
+
+        _, prompt = build_prompt_for_translate_and_decompose(
+            sentence, ["fr"], session, source_language="en"
+        )
+        assert "Name renderings" in prompt
+        assert "(none)" in prompt
+    finally:
+        session.close()

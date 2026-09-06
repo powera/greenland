@@ -17,6 +17,7 @@ import constants
 from clients.unified_client import UnifiedLLMClient
 from sentences.decomposition import (
     build_decomposition_schema,
+    build_name_rendering_lines,
     build_prompt_for_translate_and_decompose,
 )
 from storage.crud.operation_log import (
@@ -202,6 +203,10 @@ def translate_sentence(
         else None
     )
 
+    # Pin the established spelling of any names this sentence casts, so the
+    # same character is not spelled differently in consecutive sentences.
+    name_rendering_lines = build_name_rendering_lines(sentence, phase1_languages, session)
+
     # ── Phase 1: translate, then PERSIST before Phase 3 ────────────────────
     phase1_translations = translate_sentence_text(
         sentence_text=source_text,
@@ -210,6 +215,7 @@ def translate_sentence(
         client=client,
         model=model,
         conversation_context=conversation_context,
+        name_renderings="\n".join(name_rendering_lines) or None,
     )
     if not phase1_translations:
         raise ValueError("Phase 1 translation produced no results")

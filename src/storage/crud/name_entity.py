@@ -393,6 +393,7 @@ def set_name_translation(
     ipa_pronunciation: Optional[str] = None,
     phonetic_pronunciation: Optional[str] = None,
     sort_key: Optional[str] = None,
+    localized_alternative: Optional[str] = None,
     notes: Optional[str] = None,
     verified: bool = False,
     source: Optional[str] = None,
@@ -407,6 +408,10 @@ def set_name_translation(
         ipa_pronunciation: Optional IPA.
         phonetic_pronunciation: Optional simplified pronunciation.
         sort_key: Optional romanized sort key (pinyin, kana).
+        localized_alternative: Optional alternative rendering that an
+            aggressively localized translation might use instead ("Иван" for
+            John in Russian). A reading aid for reviewers; never pinned into a
+            translation prompt.
         notes: Optional free-text note about the rendering. Ships in the release
             record's ``translation_metadata``, so it has to be settable here or
             an imported name would differ from its own file forever.
@@ -446,6 +451,8 @@ def set_name_translation(
         row.phonetic_pronunciation = phonetic_pronunciation
     if sort_key is not None:
         row.sort_key = sort_key
+    if localized_alternative is not None:
+        row.localized_alternative = localized_alternative
     if notes is not None:
         row.notes = notes
     row.verified = verified
