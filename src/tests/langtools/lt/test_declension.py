@@ -41,6 +41,25 @@ class TestLithuanianMechanicalDeclension(unittest.TestCase):
     def test_respects_known_gender(self) -> None:
         self.assertIsNone(decline_noun("vilkas", grammatical_gender="feminine"))
 
+    def test_declines_regular_number_type(self) -> None:
+        forms = decline_noun("vilkas", number_type="regular")
+        assert forms is not None
+        self.assertEqual(forms["genitive_singular"], "vilko")
+
+    def test_refuses_plurale_tantum(self) -> None:
+        # "durys" (door) is a feminine plurale tantum, but its -ys ending
+        # matches the masculine masc_ys class that "traukinys" uses.  Without
+        # the fact it declines to a fabricated singular and the wrong gender,
+        # so the number_type has to veto the pattern match.
+        unguarded = decline_noun("durys")
+        assert unguarded is not None
+        self.assertEqual(unguarded["gender"], "masculine")
+
+        self.assertIsNone(decline_noun("durys", number_type="plurale_tantum"))
+
+    def test_refuses_singulare_tantum(self) -> None:
+        self.assertIsNone(decline_noun("vilkas", number_type="singulare_tantum"))
+
     def test_requirements_shape(self) -> None:
         requirements = get_declension_requirements()
         self.assertIn("declension_class", requirements)

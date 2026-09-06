@@ -23,7 +23,17 @@ builders read countability, number_type, gradability, irregular forms and the
 Lithuanian principal parts per lemma, and those facts are themselves loaded
 from the release files.
 
-Existing forms are never overwritten, so re-running is safe and additive.
+Some builders also report what they worked out about the paradigm.  Lithuanian
+``decline_noun`` infers gender from the ending it matched, and that is written
+back as a ``grammatical_gender`` fact when the noun has none: gender is
+recomputable, but it is also what other languages get from an LLM, and a
+release file holding only the exceptions would read as "no fact" for every
+regular noun rather than "regular".  A noun whose gender was already stored
+keeps it -- that fact is what selected the pattern, so re-reporting it would
+claim the generator derived what it was told.
+
+Existing forms and facts are never overwritten, so re-running is safe and
+additive.
 """
 
 import argparse
@@ -50,7 +60,7 @@ from langtools.lt.conjugation import conjugate as lt_conjugate
 from langtools.lt.declension import decline_noun as lt_decline_noun
 from storage.backend import create_session
 from storage.backend.config import BackendType, DataSourceConfig
-from storage.crud.grammar_fact import get_grammar_fact_value
+from storage.crud.grammar_fact import add_grammar_fact, get_grammar_fact_value
 from storage.crud.operation_log import log_operation
 from storage.crud.word_token import add_word_token
 from storage.models.enums import GrammaticalForm
@@ -103,6 +113,12 @@ BASE_FORM_KEY: Dict[Tuple[str, str], str] = {
 # decline_noun returns grammatical metadata alongside the case forms; these
 # keys describe the paradigm rather than naming a form to store.
 LT_NOUN_METADATA_KEYS = frozenset({"number_type", "declension_class", "gender"})
+
+# Paradigm metadata worth keeping as a grammar fact, mapped from the builder's
+# key to the registered fact_type.  ``declension_class`` is deliberately absent:
+# it is the one fact the registry keeps out of data/release, because
+# decline_noun recomputes it from the noun plus its gender.
+METADATA_FACT_TYPES: Dict[str, str] = {"gender": "grammatical_gender"}
 
 # Kept ready for the TODO on SUPPORTED below: this mapping is correct and was
 # validated against sentence_words; it is the conjugator that needs fixing, so
@@ -173,11 +189,16 @@ def _is_mechanically_safe_translation(word: str) -> bool:
 
 def _build_non_english(
     session: Session, lemma: Lemma, pos_type: str, language_code: str
-) -> Optional[Dict[str, str]]:
-    """Build a non-English paradigm from the lemma's translation."""
+) -> Tuple[Optional[Dict[str, str]], Dict[str, str]]:
+    """Build a non-English paradigm from the lemma's translation.
+
+    Returns the paradigm and any paradigm metadata the builder inferred
+    (see ``METADATA_FACT_TYPES``); the metadata is empty for languages and
+    parts of speech whose builders report none.
+    """
     word = get_translation(session, lemma, language_code)
     if not word or not _is_mechanically_safe_translation(word):
-        return None
+        return None, {}
     word = word.strip()
 
     if language_code == "lt":
@@ -188,30 +209,44 @@ def _build_non_english(
                 session, lemma.id, "3s_present", "3s_past", language_code="lt"
             )
             if not present_3 or not past_3:
-                return None
-            return lt_conjugate(word, present_3, past_3)
+                return None, {}
+            return lt_conjugate(word, present_3, past_3), {}
 
         if pos_type == "noun":
-            (gender,) = _facts(session, lemma.id, "grammatical_gender", language_code="lt")
-            declined = lt_decline_noun(word, gender)
+            gender, number_type = _facts(
+                session, lemma.id, "grammatical_gender", "number_type", language_code="lt"
+            )
+            declined = lt_decline_noun(word, gender, number_type)
             if not declined:
-                return None
-            # Drop the paradigm metadata decline_noun reports alongside forms.
-            return {k: v for k, v in declined.items() if k not in LT_NOUN_METADATA_KEYS}
+                return None, {}
+            # Split the paradigm metadata decline_noun reports alongside the
+            # forms: the forms are stored as derivative_forms, the metadata as
+            # grammar facts.  Only report metadata the noun did not already
+            # have -- a stored gender is what selected the pattern above, so
+            # re-reporting it would claim the generator derived what it was told.
+            metadata = {
+                key: declined[key]
+                for key in METADATA_FACT_TYPES
+                if declined.get(key) and not gender
+            }
+            return (
+                {k: v for k, v in declined.items() if k not in LT_NOUN_METADATA_KEYS},
+                metadata,
+            )
 
     if language_code == "fr":
         if pos_type == "verb":
-            return fr_conjugate(word)
+            return fr_conjugate(word), {}
         if pos_type == "adjective":
-            return fr_build_adjective_forms(word)
+            return fr_build_adjective_forms(word), {}
 
     if language_code == "es":
         if pos_type == "verb":
-            return es_conjugate(word)
+            return es_conjugate(word), {}
         if pos_type == "adjective":
-            return es_build_adjective_forms(word)
+            return es_build_adjective_forms(word), {}
 
-    return None
+    return None, {}
 
 
 def build_for_lemma(
@@ -222,7 +257,17 @@ def build_for_lemma(
     For English the lemma text is the word itself; for other languages the
     word is the lemma's translation, so a lemma with no translation in that
     language has nothing to inflect.
+
+    Callers that also want the paradigm metadata a builder inferred (Lithuanian
+    gender, say) should use :func:`build_for_lemma_with_metadata`.
     """
+    return build_for_lemma_with_metadata(session, lemma, language_code)[0]
+
+
+def build_for_lemma_with_metadata(
+    session: Session, lemma: Lemma, language_code: str = "en"
+) -> Tuple[Optional[Dict[str, str]], Dict[str, str]]:
+    """Return the mechanical paradigm for *lemma* and its paradigm metadata."""
     pos_type = lemma.pos_type.lower()
 
     if language_code != "en":
@@ -234,7 +279,7 @@ def build_for_lemma(
         countability, number_type, irregular_plural = _facts(
             session, lemma.id, "countability", "number_type", "plural"
         )
-        return build_noun_forms(text, countability, number_type, irregular_plural)
+        return build_noun_forms(text, countability, number_type, irregular_plural), {}
 
     if pos_type in ("adjective", "adverb"):
         gradability, comparative, superlative = _facts(
@@ -243,7 +288,7 @@ def build_for_lemma(
         builder: Callable[..., Optional[Dict[str, str]]] = (
             build_adjective_forms if pos_type == "adjective" else build_adverb_forms
         )
-        return builder(text, gradability, comparative, superlative)
+        return builder(text, gradability, comparative, superlative), {}
 
     if pos_type == "verb":
         past, past_participle = _facts(session, lemma.id, "past", "past_participle")
@@ -255,10 +300,10 @@ def build_for_lemma(
         # expand_verb_forms always returns a table; an irregular verb with no
         # stored past would get a wrong regular one, so require the facts.
         if not past or not past_participle:
-            return None
-        return expand_verb_forms(base_forms)
+            return None, {}
+        return expand_verb_forms(base_forms), {}
 
-    return None
+    return None, {}
 
 
 def resolve_grammatical_form(language_code: str, pos_type: str, form_key: str) -> Optional[str]:
@@ -299,6 +344,7 @@ def generate(
                 "lemmas_written": 0,
                 "forms_added": 0,
                 "rules_declined": 0,
+                "facts_added": 0,
             }
             stats[language_code] = counts
 
@@ -310,10 +356,32 @@ def generate(
                 counts["lemmas_seen"] += 1
                 pos_type = lemma.pos_type.lower()
 
-                paradigm = build_for_lemma(session, lemma, language_code)
+                paradigm, metadata = build_for_lemma_with_metadata(session, lemma, language_code)
                 if not paradigm:
                     counts["rules_declined"] += 1
                     continue
+
+                # Persist what the builder worked out about the paradigm.  The
+                # gender decline_noun infers is worth storing even though it is
+                # recomputable: other languages get gender from an LLM, and a
+                # release file that carried only the exceptions would be read as
+                # "no fact" for every regular noun rather than "regular".
+                for metadata_key, fact_type in METADATA_FACT_TYPES.items():
+                    fact_value = metadata.get(metadata_key)
+                    if not fact_value:
+                        continue
+                    if get_grammar_fact_value(session, lemma.id, language_code, fact_type):
+                        continue
+                    if not dry_run:
+                        add_grammar_fact(
+                            session,
+                            lemma_id=lemma.id,
+                            language_code=language_code,
+                            fact_type=fact_type,
+                            fact_value=fact_value,
+                            notes="derived mechanically by generate_mechanical_forms",
+                        )
+                    counts["facts_added"] += 1
 
                 existing = {
                     row.grammatical_form
@@ -403,6 +471,7 @@ def main() -> None:
             f"{counts['rules_declined']:5} declined, "
             f"{prefix} {counts['forms_added']:6} forms "
             f"across {counts['lemmas_written']} lemmas"
+            + (f", {counts['facts_added']} grammar facts" if counts["facts_added"] else "")
         )
     print(f"  total forms {prefix}: {total}")
 
