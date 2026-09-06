@@ -869,6 +869,7 @@ def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> Non
 
         print(f"Organized into {len(sentences_by_category)} categories")
 
+        written_files: Set[Path] = set()
         for (collection, pos_type, pos_subtype), records in sentences_by_category.items():
             dir_name = type_to_dir.get(pos_type, pos_type)
             category_dir = Path(release_dir) / collection / dir_name / pos_subtype
@@ -878,7 +879,36 @@ def export_sqlite_to_sentence_release(sqlite_path: str, release_dir: str) -> Non
             records.sort(key=lambda r: r["guid"])
 
             print(f"Exporting {len(records)} sentences to {collection}/{dir_name}/{pos_subtype}...")
-            _write_jsonl_atomic(category_dir / "base.jsonl", records)
+            base_file = category_dir / "base.jsonl"
+            _write_jsonl_atomic(base_file, records)
+            written_files.add(base_file.resolve())
+
+        # A category that had sentences before and has none now must lose its
+        # file, or the export stops being a rebuild -- the same rule the lemma
+        # export follows above.  This matters more here than on the lemma side
+        # because a sentence's directory is *derived* (from its collection and
+        # its primary lemma's category), not stored: re-categorizing a sentence
+        # moves its record to a different file and leaves the old one behind,
+        # still holding the stale copy that the next import would read back.
+        removed_count = 0
+        for stale_file in Path(release_dir).rglob("base.jsonl"):
+            if stale_file.resolve() in written_files:
+                continue
+            stale_file.unlink()
+            removed_count += 1
+
+        # Prune the directories those files left empty, deepest first, so a
+        # renamed collection does not leave an empty tree behind.  Anything
+        # still holding a file (or a file this export does not manage) stops
+        # the walk up.
+        for stale_dir in sorted(
+            Path(release_dir).rglob("*"), key=lambda p: len(p.parts), reverse=True
+        ):
+            if stale_dir.is_dir() and not any(stale_dir.iterdir()):
+                stale_dir.rmdir()
+
+        if removed_count:
+            print(f"Removed {removed_count} stale category file(s)")
 
         print("Sentence export complete!")
 
@@ -1971,6 +2001,10 @@ def _sentence_to_release_record(sentence: Any) -> Dict[str, Any]:
     }
     if sentence.sentence_collection:
         record["collection"] = sentence.sentence_collection
+    # Which agent or corpus file produced this sentence. The release never
+    # carried it, so a bootstrap nulled the column on every row it loaded.
+    if sentence.source_filename:
+        record["source_filename"] = sentence.source_filename
     if sentence.pattern_type:
         record["pattern_type"] = sentence.pattern_type
     if sentence.tense:
