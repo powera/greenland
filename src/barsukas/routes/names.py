@@ -31,9 +31,12 @@ from storage.crud.name_entity import (
     update_name,
 )
 from storage.models.name_entity import (
+    DEFAULT_RENDERING_KIND,
     NAME_GENDERS,
     NAME_KIND_LABELS,
     NAME_KINDS,
+    RENDERING_KIND_LABELS,
+    RENDERING_KINDS,
     NameTranslation,
 )
 from storage.models.schema import SentenceWord
@@ -132,6 +135,8 @@ def detail(name_id: int) -> Union[str, Response]:
         name_kinds=NAME_KINDS,
         name_kind_labels=NAME_KIND_LABELS,
         name_genders=NAME_GENDERS,
+        rendering_kinds=RENDERING_KINDS,
+        rendering_kind_labels=RENDERING_KIND_LABELS,
     )
 
 
@@ -184,6 +189,7 @@ def set_rendering(name_id: int) -> Response:
 
     language_code = request.form.get("language_code", "").strip()
     rendering = request.form.get("translation", "").strip()
+    rendering_kind = request.form.get("rendering_kind", "").strip() or DEFAULT_RENDERING_KIND
     if not language_code:
         flash("Pick a language for the rendering", "error")
         return redirect(url_for("names.detail", name_id=name_id))
@@ -194,12 +200,16 @@ def set_rendering(name_id: int) -> Response:
             name,
             language_code=language_code,
             translation=rendering,
+            rendering_kind=rendering_kind,
             phonetic_pronunciation=request.form.get("phonetic", "").strip() or None,
             verified=True,
             source=Config.OPERATION_LOG_SOURCE,
         )
         g.db.commit()
-        flash(f"Set the {language_code} rendering of {name.name_text!r}.", "success")
+        flash(
+            f"Set the {language_code} {rendering_kind} of {name.name_text!r}.",
+            "success",
+        )
     except ValueError as exc:
         g.db.rollback()
         flash(str(exc), "error")

@@ -337,6 +337,9 @@ Name records live in `names/base.jsonl`:
   "translation_metadata": {
     "lt": {"ipa_pronunciation": "ˈdʒɔrdʒɐs", "verified": true},
     "zh": {"sort_key": "qiaozhi"}
+  },
+  "localizations": {
+    "ru": "Иван"
   }
 }
 ```
@@ -348,6 +351,22 @@ render it identically. `translations` is a flat map exactly as it is for
 lemmas, and the extras a rendering can carry (IPA, phonetic respelling, the
 romanized `sort_key`, `verified`) live in `translation_metadata` under the same
 language codes.
+
+A rendering answers one of two different questions, and the record keeps them
+apart:
+
+* `translations` holds **transliterations** - the same character respelled for
+  a script or morphology that cannot hold the original. Lithuanian needs a
+  declinable `Džonas`, Chinese needs `约翰`. This is forced, not chosen.
+* `localizations` holds **localizations** - the character recast as a local
+  one, John as `Иван` in Russian or `Juan` in Spanish. This is an editorial
+  choice about whether the character reads as a foreigner or a local, and both
+  answers are correct for different texts. Its per-language extras live in
+  `localization_metadata`.
+
+Both `localizations` and `localization_metadata` are omitted when empty, so a
+name that has never been localized produces exactly the record it did before
+the distinction existed. A language may carry one rendering of each kind.
 
 Names carry no difficulty level and no definition: a learner does not *learn*
 George, and a sentence's `minimum_level` skips names when rolling up difficulty.

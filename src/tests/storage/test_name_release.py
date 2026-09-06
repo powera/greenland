@@ -319,3 +319,90 @@ def test_apply_release_record_round_trips_an_unchanged_record(session: Session) 
     session.commit()
 
     assert name_to_release_record(name) == before
+
+
+# ── localizations in the release record ──────────────────────────────────────
+
+
+def test_a_name_without_localizations_emits_the_original_record(session: Session) -> None:
+    """The format stays backward compatible: no localization, no new keys."""
+    name = _seed_george(session)
+    record = name_to_release_record(name)
+
+    assert "localizations" not in record
+    assert "localization_metadata" not in record
+
+
+def test_localizations_emit_in_their_own_block(session: Session) -> None:
+    """A localization must not displace the transliteration in ``translations``."""
+    name = create_name(session, name_text="John", kind="given_name")
+    set_name_translation(session, name, language_code="ru", translation="Джон")
+    set_name_translation(
+        session,
+        name,
+        language_code="ru",
+        translation="Иван",
+        rendering_kind="localization",
+    )
+    session.commit()
+
+    record = name_to_release_record(name)
+
+    assert record["translations"] == {"ru": "Джон"}
+    assert record["localizations"] == {"ru": "Иван"}
+
+
+def test_release_record_round_trips_both_rendering_kinds(session: Session) -> None:
+    """Export -> import must preserve which kind each rendering is."""
+    name = create_name(session, name_text="John", kind="given_name")
+    set_name_translation(session, name, language_code="ru", translation="Джон")
+    set_name_translation(session, name, language_code="lt", translation="Džonas")
+    set_name_translation(
+        session,
+        name,
+        language_code="ru",
+        translation="Иван",
+        rendering_kind="localization",
+    )
+    session.commit()
+    before = name_to_release_record(name)
+
+    apply_release_record(session, before, name)
+    session.commit()
+
+    assert name_to_release_record(name) == before
+    by_kind = {(t.language_code, t.rendering_kind): t.translation for t in name.translations}
+    assert by_kind == {
+        ("ru", "transliteration"): "Джон",
+        ("ru", "localization"): "Иван",
+        ("lt", "transliteration"): "Džonas",
+    }
+
+
+def test_apply_release_record_prunes_per_kind(session: Session) -> None:
+    """A record listing only transliterations drops the localization it omits."""
+    name = create_name(session, name_text="John", kind="given_name")
+    set_name_translation(session, name, language_code="ru", translation="Джон")
+    set_name_translation(
+        session,
+        name,
+        language_code="ru",
+        translation="Иван",
+        rendering_kind="localization",
+    )
+    session.commit()
+
+    apply_release_record(
+        session,
+        {
+            "guid": name.guid,
+            "kind": "given_name",
+            "name_text": "John",
+            "translations": {"ru": "Джон"},
+        },
+        name,
+    )
+    session.commit()
+
+    by_kind = {(t.language_code, t.rendering_kind): t.translation for t in name.translations}
+    assert by_kind == {("ru", "transliteration"): "Джон"}

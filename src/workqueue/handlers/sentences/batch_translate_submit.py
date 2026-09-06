@@ -28,6 +28,7 @@ from clients.lib import limit_from_estimate, schema_from_dict, to_openai_schema
 from clients.openai.batch_client import OpenAIBatchClient
 from clients.openai.client import is_gpt5_nano_or_mini_model, reasoning_effort_for_model
 from sentences.candidate_lookup import DEFAULT_SOURCE_LANGUAGES
+from sentences.decomposition import build_name_rendering_lines
 from sentences.token_estimates import estimate_translation_output_tokens
 from sentences.translate_and_decompose import build_phase1_prompt, format_conversation_context
 from storage.crud.conversation import get_sentence_conversation_context
@@ -132,11 +133,16 @@ def handle_sentences_batch_translate_submit(
                 else None
             )
 
+            # Pin the established spelling of any names the sentence casts, so a
+            # batched translation does not re-invent one per call.
+            name_rendering_lines = build_name_rendering_lines(sentence, phase1_targets, session)
+
             built = build_phase1_prompt(
                 sentence_text=source_translation,
                 source_language=source_language,
                 target_languages=phase1_targets,
                 conversation_context=conversation_context,
+                name_renderings="\n".join(name_rendering_lines) or None,
             )
             if built is None:
                 logger.warning(

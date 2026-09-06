@@ -17,6 +17,13 @@ katakana. Those renderings must be stable across every sentence that uses the
 name, which means they have to live somewhere. They live in
 :class:`NameTranslation`, which deliberately mirrors ``LemmaTranslation``.
 
+A rendering answers one of two different questions, recorded in
+``NameTranslation.rendering_kind`` (see :data:`RENDERING_KINDS`): respelling the
+same character for a script that cannot hold the original (``Džonas``, ``约翰``),
+or recasting the character as a local one (``Иван``, ``Juan``). A language may
+carry both, and which one a text wants is an editorial decision rather than a
+fact about the name.
+
 Names do carry a GUID and are exported to ``data/release/names``: the
 renderings above are content, not derived data, and a client that shows the
 same character in Lithuanian and Japanese has to read them from somewhere.
@@ -80,10 +87,42 @@ NAME_KIND_LABELS: dict[str, str] = {
 # never a claim about a real person.
 NAME_GENDERS: tuple[str, ...] = ("masculine", "feminine", "neutral")
 
+# What kind of answer a rendering is. The two are not interchangeable, and the
+# distinction is the reason a language can hold more than one rendering:
+#
+# * A **transliteration** respells the same character in the target language's
+#   script and morphology. It is forced, not chosen: Lithuanian cannot write
+#   "John is at school" without a declinable ``Džonas``, and Chinese has no way
+#   to leave the name in Latin script at all.
+# * A **localization** recasts the character as a local one -- John becomes
+#   ``Иван`` in Russian, ``Juan`` in Spanish. This is an editorial choice about
+#   whether the character reads as a foreigner or a local, and both answers are
+#   correct for different texts.
+#
+# Storing which kind a rendering is lets a reviewer tell a deliberate ``Иван``
+# from a botched transliteration of "John", and lets a translation ask for the
+# reading it actually wants.
+RENDERING_KINDS: tuple[str, ...] = ("transliteration", "localization")
+
+# Renderings created without an explicit kind are transliterations: that is what
+# every row written before this distinction existed meant.
+DEFAULT_RENDERING_KIND: str = "transliteration"
+
+# Display labels for the rendering kinds, for the rendering form's select.
+RENDERING_KIND_LABELS: dict[str, str] = {
+    "transliteration": "Transliteration",
+    "localization": "Localization",
+}
+
 
 def is_valid_name_kind(kind: str) -> bool:
     """Return True when ``kind`` is part of the closed NAME_KINDS vocabulary."""
     return kind in NAME_KINDS
+
+
+def is_valid_rendering_kind(rendering_kind: str) -> bool:
+    """Return True when ``rendering_kind`` is part of RENDERING_KINDS."""
+    return rendering_kind in RENDERING_KINDS
 
 
 def normalize_name_text(name_text: str) -> str:
@@ -170,13 +209,13 @@ class Name(Base):
                 id=translation.id,
                 language_code=translation.language_code,
                 text=translation.translation,
-                value_kind="rendering",
+                value_kind=translation.rendering_kind,
                 verified=translation.verified,
                 status_note=translation.notes,
             )
             for translation in sorted(
                 self.translations,
-                key=lambda row: (row.language_code, row.id or 0),
+                key=lambda row: (row.language_code, row.rendering_kind, row.id or 0),
             )
         ]
 
@@ -193,13 +232,28 @@ class NameTranslation(Base):
     """
 
     __tablename__ = "name_translations"
-    __table_args__ = (UniqueConstraint("name_id", "language_code", name="uq_name_translation"),)
+    # Keyed on the rendering kind as well as the language: Russian legitimately
+    # holds both "Джон" (transliteration) and "Иван" (localization) for the same
+    # name, so (name_id, language_code) alone is too narrow.
+    __table_args__ = (
+        UniqueConstraint("name_id", "language_code", "rendering_kind", name="uq_name_translation"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("names.id", ondelete="CASCADE"), nullable=False, index=True
     )
     language_code: Mapped[str] = mapped_column(String, nullable=False, index=True)
+
+    # One of RENDERING_KINDS. Defaulted server-side so rows written before the
+    # distinction existed read back as transliterations, which is what they are.
+    rendering_kind: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+        default=DEFAULT_RENDERING_KIND,
+        server_default=DEFAULT_RENDERING_KIND,
+        index=True,
+    )
 
     # The name as written in this language (base/nominative form).
     translation: Mapped[str] = mapped_column(String, nullable=False, index=True)

@@ -380,3 +380,93 @@ def test_find_unresolved_non_grammatical_words_accepts_resolved_function_lemma()
 
     assert find_unresolved_non_grammatical_words(words, "en") == []
     assert all_words_are_lemmas_or_grammatical(words, "en")
+
+
+def test_translate_and_decompose_prompt_pins_name_renderings() -> None:
+    """A name the sentence casts must reach the prompt as its curated spelling.
+
+    Without this the model invents a rendering per call and the same character
+    is spelled differently in consecutive sentences.
+    """
+    from sqlalchemy.orm import Session
+
+    from storage.crud.name_entity import create_name, set_name_translation
+    from storage.crud.sentence_word import add_sentence_word
+    from tests.sentences.candidate_lookup_fixture import (
+        add_test_sentence,
+        build_test_engine,
+        seed_test_database,
+    )
+
+    engine = build_test_engine()
+    session = Session(engine)
+    try:
+        seed_test_database(session)
+        sentence = add_test_sentence(session, {"en": "John is at school"})
+
+        name = create_name(session, name_text="John", kind="given_name")
+        set_name_translation(session, name, language_code="lt", translation="Džonas")
+        set_name_translation(
+            session,
+            name,
+            language_code="ru",
+            translation="Иван",
+            rendering_kind="localization",
+        )
+        add_sentence_word(
+            session,
+            sentence=sentence,
+            position=0,
+            part_of_speech="noun",
+            language_code="en",
+            name=name,
+        )
+        session.flush()
+
+        _, prompt = build_prompt_for_translate_and_decompose(
+            sentence, ["lt", "ru"], session, source_language="en"
+        )
+
+        assert "John: lt=Džonas" in prompt
+        # Transliteration is the default, so the localization is not pinned here.
+        assert "Иван" not in prompt
+
+        _, localized = build_prompt_for_translate_and_decompose(
+            sentence,
+            ["lt", "ru"],
+            session,
+            source_language="en",
+            rendering_kind="localization",
+        )
+
+        assert "ru=Иван" in localized
+        # Lithuanian has no localization, so it falls back rather than dropping.
+        assert "lt=Džonas" in localized
+    finally:
+        session.close()
+
+
+def test_translate_and_decompose_prompt_without_names_says_none() -> None:
+    """A sentence casting no names must still render a well-formed prompt."""
+    from sqlalchemy.orm import Session
+
+    from tests.sentences.candidate_lookup_fixture import (
+        add_test_sentence,
+        build_test_engine,
+        seed_test_database,
+    )
+
+    engine = build_test_engine()
+    session = Session(engine)
+    try:
+        seed_test_database(session)
+        sentence = add_test_sentence(session, {"en": "I can see him"})
+
+        _, prompt = build_prompt_for_translate_and_decompose(
+            sentence, ["fr"], session, source_language="en"
+        )
+
+        assert "Name renderings" in prompt
+        assert "(none)" in prompt
+    finally:
+        session.close()
