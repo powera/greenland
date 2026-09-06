@@ -273,13 +273,29 @@ def _find_pattern(
     return None
 
 
-def decline_noun(noun: str, grammatical_gender: Optional[str] = None) -> Optional[Dict[str, str]]:
+def decline_noun(
+    noun: str,
+    grammatical_gender: Optional[str] = None,
+    number_type: Optional[str] = None,
+) -> Optional[Dict[str, str]]:
     """Decline a Lithuanian noun using a conservative regular-pattern set.
+
+    ``number_type`` names exceptional number behaviour when it is known.  A
+    plurale tantum has no singular to build a paradigm from, and its plural
+    citation form is not a nominative singular the suffix table can read:
+    "durys" ends in -ys and would otherwise match the masculine ``masc_ys``
+    class alongside "traukinys", yielding a fabricated singular and the wrong
+    gender.  Most plurale tantum endings (-ai, -os, -ės) already match no
+    singular pattern and fall out on their own; -ys and -us do not, so the
+    fact has to be consulted rather than inferred.
 
     Returns ``None`` when no safe mechanical pattern can be applied.
     """
     normalized_noun = noun.strip().lower()
     if not normalized_noun or normalized_noun in _IRREGULAR_NOUNS:
+        return None
+
+    if number_type and number_type != NounNumberType.REGULAR.value:
         return None
 
     pattern = _find_pattern(normalized_noun, grammatical_gender=grammatical_gender)
