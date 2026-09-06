@@ -14,6 +14,7 @@ from storage.migrate import (
     import_lemma_audio_release_to_sqlite,
     import_name_release_to_sqlite,
 )
+from wordfreq.tools.generate_mechanical_forms import generate as generate_mechanical_forms
 
 
 def _sqlite_path(config: DataSourceConfig) -> Path:
@@ -142,6 +143,16 @@ def bootstrap_from_release(
 
     service = DatabaseAdminService(config)
     result["config_sync"] = service.sync_configurations()
+
+    # Release files carry only the forms the rules cannot derive -- Lithuanian
+    # verbs, for instance, ship as three principal parts rather than a 27-form
+    # paradigm.  Rebuilding the mechanical forms here is what turns those facts
+    # back into derivative_forms rows; without it a bootstrapped database has
+    # the principal parts and no conjugations, and the WireWord export writes no
+    # Lithuanian forms at all.  It runs before the corpus load so the forms exist
+    # for link_forms_to_word_tokens() to attach tokens to.  No LLM is involved.
+    result["mechanical_forms"] = generate_mechanical_forms(config)
+
     result["corpus_load"] = service.load_corpora()
     # Release files carry no word tokens, so the forms just imported have no
     # word_token_id until the corpus load creates the tokens to point at. The
