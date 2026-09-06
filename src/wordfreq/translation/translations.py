@@ -15,8 +15,8 @@ from storage.translation_helpers import (
     TRANSLATION_STATUS_VALUES,
 )
 from wordfreq.translation.constants import (
-    DEFAULT_TRANSLATION_LANGUAGES,
-    DEFAULT_TRANSLATION_LANGUAGES_BY_CODE,
+    AVAILABLE_TRANSLATION_LANGUAGES,
+    AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE,
 )
 
 logger = logging.getLogger(__name__)
@@ -82,7 +82,7 @@ def query_translations(
     language_instructions_lines = []
 
     for lang_code in languages:
-        lang_config = DEFAULT_TRANSLATION_LANGUAGES_BY_CODE.get(lang_code)
+        lang_config = AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE.get(lang_code)
         if lang_config is None:
             logger.warning(f"Unknown language code '{lang_code}' requested, skipping")
             continue

@@ -21,7 +21,7 @@ from storage.translation_helpers import (
     get_language_name,
     has_sort_key,
 )
-from wordfreq.translation.constants import DEFAULT_TRANSLATION_LANGUAGES_BY_CODE
+from wordfreq.translation.constants import AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE
 
 
 def test_ancient_languages_are_tier4_languages() -> None:
@@ -75,13 +75,13 @@ def test_ancient_language_llm_field_mappings() -> None:
 
 def test_ancient_languages_are_generation_targets() -> None:
     """The LLM translation path has prompt config for each ancient language."""
-    assert DEFAULT_TRANSLATION_LANGUAGES_BY_CODE["grc"]["field"] == "ancient_greek_translation"
+    assert AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE["grc"]["field"] == "ancient_greek_translation"
     assert (
-        DEFAULT_TRANSLATION_LANGUAGES_BY_CODE["ar-classical"]["field"]
+        AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE["ar-classical"]["field"]
         == "classical_arabic_translation"
     )
-    assert DEFAULT_TRANSLATION_LANGUAGES_BY_CODE["non"]["field"] == "old_norse_translation"
-    assert "ar" not in DEFAULT_TRANSLATION_LANGUAGES_BY_CODE
+    assert AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE["non"]["field"] == "old_norse_translation"
+    assert "ar" not in AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE
 
 
 def test_storage_dialects_are_registered_everywhere_a_language_must_be() -> None:
@@ -89,13 +89,13 @@ def test_storage_dialects_are_registered_everywhere_a_language_must_be() -> None
 
     Missing any one of these makes it look supported while a generation run
     silently skips it: LANGUAGE_FIELDS routes storage, LLM_FIELD_TO_LANG_CODE
-    parses the model's reply, DEFAULT_TRANSLATION_LANGUAGES_BY_CODE supplies the
+    parses the model's reply, AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE supplies the
     prompt, and LANGUAGE_HIERARCHY orders it in the UI.
     """
     for language_code in get_translation_target_dialects():
         assert language_code in LANGUAGE_FIELDS, language_code
         assert language_code in LANG_CODE_TO_LLM_FIELD, language_code
-        assert language_code in DEFAULT_TRANSLATION_LANGUAGES_BY_CODE, language_code
+        assert language_code in AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE, language_code
         assert language_code in LANGUAGE_HIERARCHY, language_code
         assert language_code in get_default_generation_languages(), language_code
         assert language_code in RELEASE_LANGUAGES, language_code
@@ -111,7 +111,7 @@ def test_presentation_dialects_are_not_storage_languages() -> None:
     assert presentation_dialects == {"es-mx", "fr-ca", "en-gb"}
     for language_code in presentation_dialects:
         assert language_code not in LANGUAGE_FIELDS, language_code
-        assert language_code not in DEFAULT_TRANSLATION_LANGUAGES_BY_CODE, language_code
+        assert language_code not in AVAILABLE_TRANSLATION_LANGUAGES_BY_CODE, language_code
         assert get_translation_language(language_code) in LANGUAGE_FIELDS, language_code
 
 

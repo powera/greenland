@@ -17,3 +17,10 @@
 {"guid": "R99_028", "forms": [{"grammatical_form": "preposition/base", "text": "against", "is_base_form": true}]}
 {"guid": "R99_029", "forms": [{"grammatical_form": "preposition/base", "text": "during", "is_base_form": true}]}
 {"guid": "R99_030", "forms": [{"grammatical_form": "preposition/base", "text": "beyond", "is_base_form": true}]}
+{"guid": "R99_031", "forms": [{"grammatical_form": "preposition/base", "text": "for", "is_base_form": true, "ipa": "/fɔr/", "phonetic": "FOR"}]}
+{"guid": "R99_032", "forms": [{"grammatical_form": "preposition/base", "text": "into", "is_base_form": true, "ipa": "/ˈɪntu/", "phonetic": "IN-too"}]}
+{"guid": "R99_033", "forms": [{"grammatical_form": "preposition/base", "text": "over", "is_base_form": true, "ipa": "/ˈoʊvɚ/", "phonetic": "OH-ver"}]}
+{"guid": "R99_034", "forms": [{"grammatical_form": "preposition/base", "text": "after", "is_base_form": true, "ipa": "/ˈæftɚ/", "phonetic": "AF-ter"}]}
+{"guid": "R99_035", "forms": [{"grammatical_form": "preposition/base", "text": "after", "is_base_form": true, "ipa": "/ˈæftɚ/", "phonetic": "AF-ter"}]}
+{"guid": "R99_036", "forms": [{"grammatical_form": "preposition/base", "text": "before", "is_base_form": true, "ipa": "/bɪˈfɔr/", "phonetic": "bih-FOR"}]}
+{"guid": "R99_037", "forms": [{"grammatical_form": "preposition/base", "text": "except", "is_base_form": true, "ipa": "/ɪkˈsɛpt/", "phonetic": "ik-SEPT"}]}

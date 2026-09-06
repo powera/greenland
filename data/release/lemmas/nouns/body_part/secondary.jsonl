@@ -1,32 +1,32 @@
 {"guid": "N03_001", "translations": {"ro": "cap", "pl": "głowa", "th": "ศีรษะ", "ta": "தலை", "kn": "ತಲೆ", "uk": "голова", "bn": "মাথা", "hi": "सिर"}}
 {"guid": "N03_002", "translations": {"ro": "față", "pl": "twarz", "th": "หน้า", "ta": "முகம்", "kn": "ಮುಖ", "uk": "обличчя", "bn": "মুখ", "hi": "चेहरा"}}
-{"guid": "N03_003", "translations": {"ro": "ochi", "pl": "oko", "th": "ตา", "ta": "கண்", "kn": "ಕಣ್ಣು", "uk": "око", "bn": "চোখ", "hi": "आँख"}}
-{"guid": "N03_004", "translations": {"ro": "nas", "pl": "nos", "th": "จมูก", "ta": "மூக்கு", "kn": "ಮುಖದ ಮೂಗು", "uk": "ніс", "bn": "নাক", "hi": "नाक"}}
-{"guid": "N03_005", "translations": {"ro": "gură", "pl": "usta", "th": "ปาก", "ta": "வாய்", "kn": "ಬಾಯಿ", "uk": "рот", "bn": "মুখ", "hi": "मुँह"}}
-{"guid": "N03_006", "translations": {"ro": "ureche", "pl": "ucho", "th": "หู", "ta": "காது", "kn": "ಕಿವಿ", "uk": "вухо", "bn": "কান", "hi": "कान"}}
+{"guid": "N03_003", "translations": {"ro": "ochi", "pl": "oko", "th": "ตา", "ta": "கண்", "kn": "ಕಣ್ಣು", "uk": "око", "bn": "চোখ", "hi": "आँख", "bs": "oko"}}
+{"guid": "N03_004", "translations": {"ro": "nas", "pl": "nos", "th": "จมูก", "ta": "மூக்கு", "kn": "ಮುಖದ ಮೂಗು", "uk": "ніс", "bn": "নাক", "hi": "नाक", "bs": "nos"}}
+{"guid": "N03_005", "translations": {"ro": "gură", "pl": "usta", "th": "ปาก", "ta": "வாய்", "kn": "ಬಾಯಿ", "uk": "рот", "bn": "মুখ", "hi": "मुँह", "bs": "usta"}}
+{"guid": "N03_006", "translations": {"ro": "ureche", "pl": "ucho", "th": "หู", "ta": "காது", "kn": "ಕಿವಿ", "uk": "вухо", "bn": "কান", "hi": "कान", "bs": "uho"}}
 {"guid": "N03_007", "translations": {"ro": "dinte", "pl": "ząb", "th": "ฟัน", "ta": "பல்", "kn": "ದಂತ", "uk": "зуб", "bn": "দাঁত", "hi": "दांत"}}
 {"guid": "N03_008", "translations": {"ro": "limbă", "pl": "język", "th": "ลิ้น", "ta": "நாக்கு", "kn": "ನಾಯಾಮುుక", "uk": "язик", "bn": "জিহ্বা", "hi": "जिह्वा"}}
 {"guid": "N03_009", "translations": {"ro": "gât", "pl": "szyja", "th": "คอ", "ta": "கழுத்து", "kn": "ಗೈದು", "uk": "шија", "bn": "ঘাড়", "hi": "गर्दन"}}
 {"guid": "N03_010", "translations": {"ro": "umăr", "pl": "ramię", "th": "ไหล่", "ta": "தோள்", "kn": "ಹೋಳಿ", "uk": "плече", "bn": "কাঁধ", "hi": "कंधा"}}
-{"guid": "N03_011", "translations": {"ro": "braţ", "pl": "ręka", "th": "แขน", "ta": "பந்து", "kn": "ಬೈಲು", "uk": "рука", "bn": "বাহু", "hi": "बाँह"}}
+{"guid": "N03_011", "translations": {"ro": "braţ", "pl": "ręka", "th": "แขน", "ta": "பந்து", "kn": "ಬೈಲು", "uk": "рука", "bn": "বাহু", "hi": "बाँह", "bs": "ruka"}}
 {"guid": "N03_012", "translations": {"ro": "cot", "pl": "łokieć", "th": "ข้อศอก", "ta": "உரைமிசை", "kn": "ಮಣಕಟ್ಟು", "uk": "лікоть", "bn": "কনুই", "hi": "कोहनी"}}
 {"guid": "N03_013", "translations": {"ro": "încheietură", "pl": "nadgarstek", "th": "ข้อมือ", "ta": "கைமுழங்கு", "kn": "ಮುಣುಕು", "uk": "зап’ястя", "bn": "কিস্টি", "hi": "कलाई"}}
-{"guid": "N03_014", "translations": {"ro": "mână", "pl": "ręka", "th": "มือ", "ta": "கை", "kn": "ಕೈ", "uk": "рука", "bn": "হাত", "hi": "हाथ"}}
-{"guid": "N03_015", "translations": {"ro": "deget", "pl": "palec", "th": "นิ้ว", "ta": "விரல்", "kn": "ಆಂಗುಲಿ", "uk": "палець", "bn": "আঙ্গুল", "hi": "उँगली"}}
-{"guid": "N03_016", "translations": {"ro": "deget mare", "pl": "kciuk", "th": "นิ้วหัวแม่มือ", "ta": "엄ர்த்து", "kn": "ಅಂಗುಲಿದೊಡ್ಡಿ", "uk": "великий палець", "bn": "বড় আঙ্গুল", "hi": "अंगूठा"}}
+{"guid": "N03_014", "translations": {"ro": "mână", "pl": "ręka", "th": "มือ", "ta": "கை", "kn": "ಕೈ", "uk": "рука", "bn": "হাত", "hi": "हाथ", "bs": "šaka"}}
+{"guid": "N03_015", "translations": {"ro": "deget", "pl": "palec", "th": "นิ้ว", "ta": "விரல்", "kn": "ಆಂಗುಲಿ", "uk": "палець", "bn": "আঙ্গুল", "hi": "उँगली", "bs": "prst"}}
+{"guid": "N03_016", "translations": {"ro": "deget mare", "pl": "kciuk", "th": "นิ้วหัวแม่มือ", "ta": "엄ர்த்து", "kn": "ಅಂಗುಲಿದೊಡ್ಡಿ", "uk": "великий палець", "bn": "বড় আঙ্গুল", "hi": "अंगूठा", "bs": "palac"}}
 {"guid": "N03_017", "translations": {"ro": "piept", "pl": "klatka piersiowa", "th": "อก", "ta": "மடக்கு", "kn": "ಇದ್ದಿಗೆ", "uk": "груди", "bn": "স্তন", "hi": "छाती"}}
 {"guid": "N03_018", "translations": {"ro": "spate", "pl": "plecy", "th": "หลัง", "ta": "பிணைப்பு", "kn": "ಬ೧ಕ್", "uk": "спина", "bn": "পিঠ", "hi": "पीठ"}}
-{"guid": "N03_020", "translations": {"ro": "picior", "pl": "noga", "th": "ขา", "ta": "கால்", "kn": "ಕಾಲು", "uk": "нога", "bn": "পা", "hi": "पैर"}}
+{"guid": "N03_020", "translations": {"ro": "picior", "pl": "noga", "th": "ขา", "ta": "கால்", "kn": "ಕಾಲು", "uk": "нога", "bn": "পা", "hi": "पैर", "bs": "noga"}}
 {"guid": "N03_021", "translations": {"ro": "coapsă", "pl": "udo", "th": "ต้นขา", "ta": "கால் மார்பு", "kn": "ಉರ್ದುದಕ (ಉಪವಾಕ್ಯ)", "uk": "стегно", "bn": "উরু", "hi": "जांघ"}}
-{"guid": "N03_022", "translations": {"ro": "genunchi", "pl": "kolano", "th": "หัวเข่า", "ta": "மூக்கு", "kn": "ಮೊಣಗು", "uk": "коліно", "bn": "মুটু", "hi": "घुटना"}}
+{"guid": "N03_022", "translations": {"ro": "genunchi", "pl": "kolano", "th": "หัวเข่า", "ta": "மூக்கு", "kn": "ಮೊಣಗು", "uk": "коліно", "bn": "মুটু", "hi": "घुटना", "bs": "koljeno"}}
 {"guid": "N03_023", "translations": {"ro": "gleznă", "pl": "kostka", "th": "ข้อเท้า", "ta": "டிரங்கல்", "kn": "ಕಾಲುಬೋಡಿ", "uk": "щиколотка", "bn": "মোচড়", "hi": "टखना"}}
-{"guid": "N03_024", "translations": {"ro": "picior", "pl": "stopa", "th": "เท้า", "ta": "கால்", "kn": "ಕಾಲು", "uk": "ступня", "bn": "পায়ে", "hi": "पैर"}}
+{"guid": "N03_024", "translations": {"ro": "picior", "pl": "stopa", "th": "เท้า", "ta": "கால்", "kn": "ಕಾಲು", "uk": "ступня", "bn": "পায়ে", "hi": "पैर", "bs": "stopalo"}}
 {"guid": "N03_025", "translations": {"ro": "degetul piciorului", "pl": "palec stopy", "th": "นิ้วเท้า", "ta": "பாத் மற்றும் விரல்", "kn": "ಕಾಲು ಬೆರಳೆ", "uk": "палець стопи", "bn": "পা আঙুল", "hi": "पैर की उँगली"}}
 {"guid": "N03_026", "translations": {"ro": "piele", "pl": "skóra", "th": "ผิวหนัง", "ta": "சருமம்", "kn": "ಚರ್ಮ", "uk": "шкіра", "bn": "চর্ম", "hi": "त्वचा"}}
-{"guid": "N03_027", "translations": {"ro": "păr", "pl": "włos", "th": "ผม", "ta": "முடி", "kn": "ಮೂರು (ತಲೆಯ ಕೂದಲು)", "uk": "волос", "bn": "চুল", "hi": "बाल"}}
-{"guid": "N03_028", "translations": {"ro": "os", "pl": "kość", "th": "กระดูก", "ta": "எலும்பு", "kn": "ಎಲುಬು", "uk": "кістка", "bn": "হাড়", "hi": "हड्डी"}}
-{"guid": "N03_029", "translations": {"ro": "mușchi", "pl": "mięsień", "th": "กล้ามเนื้อ", "ta": "வறுப்பு", "kn": "ಸಂಜೋಳು", "uk": "м’яз", "bn": "পেশী", "hi": "पेशी"}}
-{"guid": "N03_030", "translations": {"ro": "inimă", "pl": "serce", "th": "หัวใจ", "ta": "ஹொர்டு", "kn": "ಹೃದಯ", "uk": "серце", "bn": "হৃদয়", "hi": "हृदय"}}
+{"guid": "N03_027", "translations": {"ro": "păr", "pl": "włos", "th": "ผม", "ta": "முடி", "kn": "ಮೂರು (ತಲೆಯ ಕೂದಲು)", "uk": "волос", "bn": "চুল", "hi": "बाल", "bs": "dlaka"}}
+{"guid": "N03_028", "translations": {"ro": "os", "pl": "kość", "th": "กระดูก", "ta": "எலும்பு", "kn": "ಎಲುಬು", "uk": "кістка", "bn": "হাড়", "hi": "हड्डी", "bs": "kost"}}
+{"guid": "N03_029", "translations": {"ro": "mușchi", "pl": "mięsień", "th": "กล้ามเนื้อ", "ta": "வறுப்பு", "kn": "ಸಂಜೋಳು", "uk": "м’яз", "bn": "পেশী", "hi": "पेशी", "bs": "mišić"}}
+{"guid": "N03_030", "translations": {"ro": "inimă", "pl": "serce", "th": "หัวใจ", "ta": "ஹொர்டு", "kn": "ಹೃದಯ", "uk": "серце", "bn": "হৃদয়", "hi": "हृदय", "bs": "srce"}}
 {"guid": "N03_031", "translations": {"ro": "plămân", "pl": "płuco", "th": "ปอด", "ta": "உயிருக்கூறு", "kn": "ಫೆಫಸೆ", "uk": "легеня", "bn": "ফুসফুস", "hi": "फेफ़ड़ा"}}
 {"guid": "N03_032", "translations": {"ro": "creier", "pl": "mózg", "th": "สมอง", "ta": "முச்சி", "kn": "ಮಗಜ", "uk": "мозок", "bn": "মস্তিষ্ক", "hi": "मस्तिष्क"}}
 {"guid": "N03_033", "translations": {"ro": "rinichi", "pl": "nerka", "th": "ไต", "ta": "வகைச்சேறு?", "kn": "ಮೂತ್ರದಂಡೆ", "uk": "нирка", "bn": "কিডনি", "hi": "गुर्दा"}}

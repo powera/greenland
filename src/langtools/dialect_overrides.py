@@ -20,7 +20,7 @@ Two kinds of dialect live here, told apart by ``translation_target``:
   their own ``LemmaTranslation`` rows, their own LLM prompt configuration, and
   their own release/export column.  Adding one means registering it here *and*
   in ``storage.translation_helpers.LANGUAGE_FIELDS`` /
-  ``wordfreq.translation.constants.DEFAULT_TRANSLATION_LANGUAGES``.
+  ``wordfreq.translation.constants.AVAILABLE_TRANSLATION_LANGUAGES``.
 * **Presentation dialects** (``translation_target=False``: es-mx, fr-ca, en-gb)
   carry a prompt note and a TTS locale but store no separate text.  Their
   ``covered_by`` (falling back to ``parent_lang``) names the variant whose
@@ -119,7 +119,7 @@ class DialectOverride:
         translation_target: Whether this dialect stores its own translations.
             ``True`` means it is a first-class generation/storage language and
             must also appear in ``LANGUAGE_FIELDS`` and
-            ``DEFAULT_TRANSLATION_LANGUAGES``.  ``False`` means it only supplies
+            ``AVAILABLE_TRANSLATION_LANGUAGES``.  ``False`` means it only supplies
             a prompt note and a TTS locale, and reads *covered_by*'s text.
         covered_by: For a non-storage dialect, the language code whose stored
             translations it reads (e.g. es-mx reads es-419).  ``None`` means

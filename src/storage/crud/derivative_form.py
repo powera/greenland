@@ -640,6 +640,7 @@ def add_complete_word_entry(
     chinese_translation: Optional[str] = None,
     french_translation: Optional[str] = None,
     spanish_translation: Optional[str] = None,
+    spanish_latam_translation: Optional[str] = None,
     korean_translation: Optional[str] = None,
     swahili_translation: Optional[str] = None,
     lithuanian_translation: Optional[str] = None,
@@ -675,6 +676,9 @@ def add_complete_word_entry(
             chinese_translation = translations.chinese.text if translations.chinese else None
             french_translation = translations.french.text if translations.french else None
             spanish_translation = translations.spanish.text if translations.spanish else None
+            spanish_latam_translation = (
+                translations.spanish_latam.text if translations.spanish_latam else None
+            )
             korean_translation = translations.korean.text if translations.korean else None
             swahili_translation = translations.swahili.text if translations.swahili else None
             lithuanian_translation = (
@@ -700,6 +704,7 @@ def add_complete_word_entry(
         chinese_translation=chinese_translation,
         french_translation=french_translation,
         spanish_translation=spanish_translation,
+        spanish_latam_translation=spanish_latam_translation,
         korean_translation=korean_translation,
         swahili_translation=swahili_translation,
         lithuanian_translation=lithuanian_translation,

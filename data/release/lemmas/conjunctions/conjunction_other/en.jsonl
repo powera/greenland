@@ -11,3 +11,4 @@
 {"guid": "C99_039", "forms": [{"grammatical_form": "conjunction/base", "text": "while", "is_base_form": true}]}
 {"guid": "C99_040", "forms": [{"grammatical_form": "conjunction/base", "text": "although", "is_base_form": true}]}
 {"guid": "C99_041", "forms": [{"grammatical_form": "conjunction/base", "text": "whether", "is_base_form": true}]}
+{"guid": "C99_042", "forms": [{"grammatical_form": "conjunction/base", "text": "after", "is_base_form": true, "ipa": "/ˈæftɚ/", "phonetic": "AF-ter"}]}

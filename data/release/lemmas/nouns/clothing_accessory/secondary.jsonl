@@ -1,15 +1,15 @@
-{"guid": "N09_001", "translations": {"ro": "cămașă", "pl": "koszula", "th": "เสื้อเชิ้ต", "ta": "சட்டை", "kn": "ಅಂಗಿ", "uk": "сорочка", "bn": "শার্ট", "hi": "शर्ट", "el": "πουκάμισο"}}
-{"guid": "N09_002", "translations": {"ro": "pantaloni", "pl": "spodnie", "th": "กางเกง", "ta": "பேன்ட்", "kn": "ಪ್ಯಾಂಟ್", "uk": "штани", "bn": "প্যান্ট", "hi": "पैंट", "el": "παντελόνι"}}
-{"guid": "N09_003", "translations": {"ro": "rochie", "pl": "sukienka", "th": "ชุดเดรส", "ta": "ஆடை", "kn": "ಉಡುಗೆ", "uk": "сукня", "bn": "পোশাক", "hi": "पोशाक", "el": "φόρεμα"}}
+{"guid": "N09_001", "translations": {"ro": "cămașă", "pl": "koszula", "th": "เสื้อเชิ้ต", "ta": "சட்டை", "kn": "ಅಂಗಿ", "uk": "сорочка", "bn": "শার্ট", "hi": "शर्ट", "el": "πουκάμισο", "bs": "košulja"}}
+{"guid": "N09_002", "translations": {"ro": "pantaloni", "pl": "spodnie", "th": "กางเกง", "ta": "பேன்ட்", "kn": "ಪ್ಯಾಂಟ್", "uk": "штани", "bn": "প্যান্ট", "hi": "पैंट", "el": "παντελόνι", "bs": "hlače"}}
+{"guid": "N09_003", "translations": {"ro": "rochie", "pl": "sukienka", "th": "ชุดเดรส", "ta": "ஆடை", "kn": "ಉಡುಗೆ", "uk": "сукня", "bn": "পোশাক", "hi": "पोशाक", "el": "φόρεμα", "bs": "haljina"}}
 {"guid": "N09_004", "translations": {"ro": "palton", "pl": "płaszcz", "th": "เสื้อโค้ท", "ta": "மேலங்கி", "kn": "ಕೋಟು", "uk": "пальто", "bn": "কোট", "hi": "कोट"}}
-{"guid": "N09_005", "translations": {"ro": "jachetă", "pl": "kurtka", "th": "แจ็คเก็ต", "ta": "ஜாக்கெட்", "kn": "ಜಾಕೆಟ್", "uk": "куртка", "bn": "জ্যাকেট", "hi": "जैकेट", "el": "τζάκετ"}}
-{"guid": "N09_006", "translations": {"ro": "pantof", "pl": "but", "th": "รองเท้า", "ta": "காலணி", "kn": "ಶೂ", "uk": "туфля", "bn": "জুতো", "hi": "जूता", "el": "παπούτσι"}}
-{"guid": "N09_007", "translations": {"ro": "șosetă", "pl": "skarpetka", "th": "ถุงเท้า", "ta": "சாக்ஸ்", "kn": "ಸಾಕ್ಸ್", "uk": "шкарпетка", "bn": "মোজা", "hi": "मोज़ा", "el": "κάλτσα"}}
-{"guid": "N09_008", "translations": {"ro": "pălărie", "pl": "kapelusz", "th": "หมวก", "ta": "தொப்பி", "kn": "ಟೋಪಿ", "uk": "капелюх", "bn": "টুপি", "hi": "टोपी", "el": "καπέλο"}}
-{"guid": "N09_009", "translations": {"ro": "mănușă", "pl": "rękawiczka", "th": "ถุงมือ", "ta": "கையுறை", "kn": "ಕೈಗವಸು", "uk": "рукавиця", "bn": "দস্তানা", "hi": "दस्ताना", "el": "γάντι"}}
+{"guid": "N09_005", "translations": {"ro": "jachetă", "pl": "kurtka", "th": "แจ็คเก็ต", "ta": "ஜாக்கெட்", "kn": "ಜಾಕೆಟ್", "uk": "куртка", "bn": "জ্যাকেট", "hi": "जैकेट", "el": "τζάκετ", "bs": "jakna"}}
+{"guid": "N09_006", "translations": {"ro": "pantof", "pl": "but", "th": "รองเท้า", "ta": "காலணி", "kn": "ಶೂ", "uk": "туфля", "bn": "জুতো", "hi": "जूता", "el": "παπούτσι", "bs": "cipela"}}
+{"guid": "N09_007", "translations": {"ro": "șosetă", "pl": "skarpetka", "th": "ถุงเท้า", "ta": "சாக்ஸ்", "kn": "ಸಾಕ್ಸ್", "uk": "шкарпетка", "bn": "মোজা", "hi": "मोज़ा", "el": "κάλτσα", "bs": "čarapa"}}
+{"guid": "N09_008", "translations": {"ro": "pălărie", "pl": "kapelusz", "th": "หมวก", "ta": "தொப்பி", "kn": "ಟೋಪಿ", "uk": "капелюх", "bn": "টুপি", "hi": "टोपी", "el": "καπέλο", "bs": "šešir"}}
+{"guid": "N09_009", "translations": {"ro": "mănușă", "pl": "rękawiczka", "th": "ถุงมือ", "ta": "கையுறை", "kn": "ಕೈಗವಸು", "uk": "рукавиця", "bn": "দস্তানা", "hi": "दस्ताना", "el": "γάντι", "bs": "rukavica"}}
 {"guid": "N09_010", "translations": {"ro": "cravată", "pl": "krawat", "th": "เนคไท", "ta": "கழுத்துப்பட்டை", "kn": "ಟೈ", "uk": "краватка", "bn": "টাই", "hi": "टाई"}}
-{"guid": "N09_011", "translations": {"ro": "pulover", "pl": "sweter", "th": "เสื้อกันหนาว", "ta": "ஸ்வெட்டர்", "kn": "ಸ್ವೆಟರ್", "uk": "светр", "bn": "সুইটার", "hi": "स्वेटर", "el": "πουλόβερ"}}
-{"guid": "N09_012", "translations": {"ro": "lenjerie intimă", "pl": "bielizna", "th": "ชุดชั้นใน", "ta": "உள்ளாடை", "kn": "ಒಳ ಉಡುಪು", "uk": "білизна", "bn": "অন্তর্বস্ত্র", "hi": "अवस्त्र", "el": "εσώρουχο"}}
+{"guid": "N09_011", "translations": {"ro": "pulover", "pl": "sweter", "th": "เสื้อกันหนาว", "ta": "ஸ்வெட்டர்", "kn": "ಸ್ವೆಟರ್", "uk": "светр", "bn": "সুইটার", "hi": "स्वेटर", "el": "πουλόβερ", "bs": "džemper"}}
+{"guid": "N09_012", "translations": {"ro": "lenjerie intimă", "pl": "bielizna", "th": "ชุดชั้นใน", "ta": "உள்ளாடை", "kn": "ಒಳ ಉಡುಪು", "uk": "білизна", "bn": "অন্তর্বস্ত্র", "hi": "अवस्त्र", "el": "εσώρουχο", "bs": "donje rublje"}}
 {"guid": "N09_013", "translations": {"ro": "fustă", "pl": "spódnica", "th": "กระโปรง", "ta": "பாவாடை", "kn": "ಸ್ಕರ್ಟ್", "uk": "спідниця", "bn": "স্কার্ট", "hi": "स्कर्ट"}}
 {"guid": "N09_014", "translations": {"ro": "sutien", "pl": "biustonosz", "th": "เสื้อชั้นใน", "ta": "மார்பணி", "kn": "ಬ್ರಾ", "uk": "ліфчик", "bn": "ব্রা", "hi": "ब्रा"}}
 {"guid": "N09_015", "translations": {"ro": "curea", "pl": "pasek", "th": "เข็มขัด", "ta": "பெல்ட்", "kn": "ಬೆಲ್ಟ್", "uk": "пасок", "bn": "বেল্ট", "hi": "बेल्ट"}}

@@ -204,9 +204,10 @@ def process_word(
                 is_base_form_flag = is_likely_base_form(word, def_data.get("lemma", word), pos_type)
 
             # Create Translation objects for each language the definitions
-            # prompt returns: lt/es/fr/zh. The prompt previously also asked for
-            # Korean, Swahili and Vietnamese; those dated to an older target
-            # language set and are no longer requested.
+            # prompt returns, which is DEFINITIONS_PROMPT_LANGUAGES:
+            # lt/es/es-419/fr/zh. The prompt previously also asked for Korean,
+            # Swahili and Vietnamese; those dated to an older target language
+            # set and are no longer requested.
             lithuanian_trans = None
             lithuanian_text = def_data.get("lithuanian_translation")
             if lithuanian_text and isinstance(lithuanian_text, str):
@@ -216,6 +217,11 @@ def process_word(
             spanish_text = def_data.get("spanish_translation")
             if spanish_text and isinstance(spanish_text, str):
                 spanish_trans = Translation(text=spanish_text)
+
+            spanish_latam_trans = None
+            spanish_latam_text = def_data.get("spanish_latam_translation")
+            if spanish_latam_text and isinstance(spanish_latam_text, str):
+                spanish_latam_trans = Translation(text=spanish_latam_text)
 
             french_trans = None
             french_text = def_data.get("french_translation")
@@ -231,6 +237,7 @@ def process_word(
             translations_set = TranslationSet(
                 lithuanian=lithuanian_trans,
                 spanish=spanish_trans,
+                spanish_latam=spanish_latam_trans,
                 french=french_trans,
                 chinese=chinese_trans,
             )

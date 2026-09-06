@@ -1,13 +1,13 @@
 {"guid": "N40_001", "translations": {"ro": "mașină", "pl": "samochód", "th": "รถยนต์", "ta": "கார்", "kn": "ಕಾರು", "uk": "автомобіль", "bn": "গাড়ি", "hi": "कार"}}
 {"guid": "N40_002", "translations": {"ro": "autobuz", "pl": "autobus", "th": "รถบัส", "ta": "பேருந்து", "kn": "ಬಸ್ಸು", "uk": "автобус", "bn": "বাস", "hi": "बस"}}
 {"guid": "N40_003", "translations": {"ro": "tren", "pl": "pociąg", "th": "รถไฟ", "ta": "ரயில்", "kn": "ರೈಲು", "uk": "потяг", "bn": "ট্রেন", "hi": "ट्रेन"}}
-{"guid": "N40_006", "translations": {"ro": "avion", "pl": "samolot", "th": "เครื่องบิน", "ta": "விமானம்", "kn": "ವಿಮಾನ", "uk": "літак", "bn": "বিমান", "hi": "विमान"}}
-{"guid": "N40_007", "translations": {"ro": "bicicletă", "pl": "rower", "th": "จักรยาน", "ta": "மிதிவண்டி", "kn": "ಸೈಕಲ್", "uk": "велосипед", "bn": "সাইকেল", "hi": "साइकिल"}}
-{"guid": "N40_008", "translations": {"ro": "barcă", "pl": "łódź", "th": "เรือ", "ta": "படகு", "kn": "ದೋಣಿ", "uk": "човен", "bn": "নৌকা", "hi": "नाव"}}
-{"guid": "N40_009", "translations": {"ro": "navă", "pl": "statek", "th": "เรือ", "ta": "கப்பல்", "kn": "ಹಡಗು", "uk": "корабель", "bn": "জাহাজ", "hi": "जहाज़"}}
-{"guid": "N40_010", "translations": {"ro": "taxi", "pl": "taksówka", "th": "แท็กซี่", "ta": "டாக்சி", "kn": "ಟ್ಯಾಕ್ಸಿ", "uk": "таксі", "bn": "ট্যাক্সি", "hi": "टैक्सी"}}
-{"guid": "N40_011", "translations": {"ro": "camion", "pl": "ciężarówka", "th": "รถบรรทุก", "ta": "லாரி", "kn": "ಲಾರಿ", "uk": "вантажівка", "bn": "ট্রাক", "hi": "ट्रक"}}
-{"guid": "N40_012", "translations": {"ro": "motocicletă", "pl": "motocykl", "th": "รถจักรยานยนต์", "ta": "மோட்டார் சைக்கிள்", "kn": "ಮೋಟಾರ್ ಸೈಕಲ್", "uk": "мотоцикл", "bn": "মোটরসাইকেল", "hi": "मोटरसाइकिल"}}
+{"guid": "N40_006", "translations": {"ro": "avion", "pl": "samolot", "th": "เครื่องบิน", "ta": "விமானம்", "kn": "ವಿಮಾನ", "uk": "літак", "bn": "বিমান", "hi": "विमान", "bs": "avion"}}
+{"guid": "N40_007", "translations": {"ro": "bicicletă", "pl": "rower", "th": "จักรยาน", "ta": "மிதிவண்டி", "kn": "ಸೈಕಲ್", "uk": "велосипед", "bn": "সাইকেল", "hi": "साइकिल", "bs": "bicikl"}}
+{"guid": "N40_008", "translations": {"ro": "barcă", "pl": "łódź", "th": "เรือ", "ta": "படகு", "kn": "ದೋಣಿ", "uk": "човен", "bn": "নৌকা", "hi": "नाव", "bs": "čamac"}}
+{"guid": "N40_009", "translations": {"ro": "navă", "pl": "statek", "th": "เรือ", "ta": "கப்பல்", "kn": "ಹಡಗು", "uk": "корабель", "bn": "জাহাজ", "hi": "जहाज़", "bs": "brod"}}
+{"guid": "N40_010", "translations": {"ro": "taxi", "pl": "taksówka", "th": "แท็กซี่", "ta": "டாக்சி", "kn": "ಟ್ಯಾಕ್ಸಿ", "uk": "таксі", "bn": "ট্যাক্সি", "hi": "टैक्सी", "bs": "taksi"}, "translation_metadata": {"bs": {"translation_status": "modern_loan", "translation_status_note": "Established modern international loanword."}}}
+{"guid": "N40_011", "translations": {"ro": "camion", "pl": "ciężarówka", "th": "รถบรรทุก", "ta": "லாரி", "kn": "ಲಾರಿ", "uk": "вантажівка", "bn": "ট্রাক", "hi": "ट्रक", "bs": "kamion"}}
+{"guid": "N40_012", "translations": {"ro": "motocicletă", "pl": "motocykl", "th": "รถจักรยานยนต์", "ta": "மோட்டார் சைக்கிள்", "kn": "ಮೋಟಾರ್ ಸೈಕಲ್", "uk": "мотоцикл", "bn": "মোটরসাইকেল", "hi": "मोटरसाइकिल", "bs": "motocikl"}}
 {"guid": "N40_013", "translations": {"ro": "elicopter", "pl": "helikopter", "th": "เฮลิคอปเตอร์", "ta": "ஹெலிகாப்டர்", "kn": "ಹೆಲಿಕಾಪ್ಟರ್", "uk": "гелікоптер", "bn": "হেলিকপ্টার", "hi": "हेलिकॉप्टर"}}
 {"guid": "N40_014", "translations": {"ro": "metrou", "pl": "metro", "th": "รถไฟใต้ดิน", "ta": "மெட்ரோ", "kn": "ಮೆಟ್ರೋ", "uk": "метро", "bn": "মেট্রো", "hi": "मेट्रो"}}
 {"guid": "N40_015", "translations": {"ro": "dubă", "pl": "furgonetka", "th": "รถตู้", "ta": "வேன்", "kn": "ವ್ಯಾನ್", "uk": "фургон", "bn": "ভ্যান", "hi": "वैन"}}

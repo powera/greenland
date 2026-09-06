@@ -1,6 +1,6 @@
-{"guid": "V12_001", "translations": {"ro": "merge", "pl": "iść", "th": "เดิน", "ta": "நடக்க", "kn": "ನಡಿಗೆ/ನಡಿಗೆ ಹೋಗು", "uk": "йти", "bn": "চলা", "hi": "चलना"}}
+{"guid": "V12_001", "translations": {"ro": "merge", "pl": "iść", "th": "เดิน", "ta": "நடக்க", "kn": "ನಡಿಗೆ/ನಡಿಗೆ ಹೋಗು", "uk": "йти", "bn": "চলা", "hi": "चलना", "bs": "hodati"}}
 {"guid": "V12_002", "translations": {"ro": "conduce", "pl": "prowadzić", "th": "ขับ", "ta": "இயக்குவது", "kn": "ಚಾಲನೆಮಾಡು", "uk": "керувати", "bn": "চালানো", "hi": "चलाना"}}
-{"guid": "V12_003", "translations": {"ro": "alergare", "pl": "biegać", "th": "วิ่ง", "ta": "ஒட RUN", "kn": "ಓಡಲು", "uk": "бігти", "bn": "দৌড়ানো", "hi": "दौड़ना"}}
+{"guid": "V12_003", "translations": {"ro": "alergare", "pl": "biegać", "th": "วิ่ง", "ta": "ஒட RUN", "kn": "ಓಡಲು", "uk": "бігти", "bn": "দৌড়ানো", "hi": "दौड़ना", "bs": "trčati"}}
 {"guid": "V12_004", "translations": {"ro": "merge", "pl": "iść", "th": "ไป", "ta": "போவத", "kn": "ಹೋಗು", "uk": "йти", "bn": "যাওয়া", "hi": "जाना"}}
 {"guid": "V12_005", "translations": {"ro": "veni", "pl": "przyjść", "th": "มา", "ta": "வருவதற்கு", "kn": "ಬರಲು", "uk": "приходити", "bn": "আসা", "hi": "आना"}}
 {"guid": "V12_006", "translations": {"ro": "întoarce", "pl": "wrócić", "th": "กลับไป", "ta": "திரும்புவது", "kn": "ಹಿಂತಿರುಗಲು", "uk": "повертатися", "bn": "ফিরে আসা", "hi": "वापस आना"}}
