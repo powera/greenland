@@ -97,6 +97,60 @@ def variants_by_language(
     }
 
 
+def _is_derivable_variant_form(variant_form: VariantForm) -> bool:
+    """Whether ``generate_variant_forms`` would rebuild this inflection.
+
+    Asks the generator itself rather than restating its rules, so the two
+    cannot drift the way an inlined copy would.
+    """
+    if variant_form.ipa_pronunciation or variant_form.phonetic_pronunciation:
+        return False
+    # Imported lazily: the generator pulls in every langtools builder, far too
+    # much to load for a module that usually only regroups records.
+    from wordfreq.tools.generate_mechanical_forms import derivable_variant_slots
+
+    return variant_form.grammatical_form in derivable_variant_slots(variant_form)
+
+
+def release_variants_by_language(
+    variant_forms: Iterable[VariantForm],
+) -> Dict[str, List[Dict[str, Any]]]:
+    """Group variants for ``data/release``, keeping only what rules cannot derive.
+
+    A variant's base form is the irreducible fact -- nothing takes "gray" to
+    "grey" -- so it is always written.  Its inflections are not: "greyer"
+    follows from "grey" by the same rule that makes "grayer" from "gray", and
+    ``generate_mechanical_forms.generate_variant_forms`` rebuilds them on
+    import.  Writing them would make one line disagree with itself, shipping
+    "greyer" beside a "grayer" withheld as derivable.
+
+    An inflection is withheld only when the generator would actually rebuild
+    it, asked here through the same helper the generator uses.  A variant whose
+    base form sits in a slot the builders do not model (the compass words'
+    ``adjective/en_base``) generates nothing, so its inflections would be lost
+    for good and are kept; so is any form carrying a pronunciation, which the
+    text-only builders cannot restore -- the same trap
+    :mod:`storage.release.mechanical_filter` guards for the lemma's own forms.
+    """
+    keep = [
+        variant_form
+        for variant_form in variant_forms
+        if variant_form.is_base_form or not _is_derivable_variant_form(variant_form)
+    ]
+    grouped: Dict[str, Dict[VariantIdentity, List[Dict[str, Any]]]] = defaultdict(
+        lambda: defaultdict(list)
+    )
+    for variant_form in keep:
+        grouped[variant_form.language_code][
+            (variant_form.variant_kind, variant_form.variant_key)
+        ].append(form_to_record(variant_form))
+
+    return {
+        language_code: paradigms_to_records(paradigms)
+        for language_code, paradigms in grouped.items()
+    }
+
+
 def records_to_paradigms(entries: Any) -> Dict[VariantIdentity, List[Dict[str, Any]]]:
     """Parse a release ``variants`` array back into ``{(kind, key): [form, ...]}``.
 
