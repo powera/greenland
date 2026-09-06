@@ -1,36 +1,31 @@
 {"guid": "N23_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "happiness", "is_base_form": true, "ipa": "/ˈhæpɪnəs/", "phonetic": "HAP-ih-nuss"}]}
 {"guid": "N23_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "sadness", "is_base_form": true, "ipa": "/ˈsæd.nəs/", "phonetic": "SAD-niss"}]}
 {"guid": "N23_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "anger", "is_base_form": true, "ipa": "/ˈæŋ.ɡɚ/", "phonetic": "ANG-guh"}]}
-{"guid": "N23_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "excitement", "is_base_form": true, "ipa": "/ɪkˈsaɪtmənt/", "phonetic": "EK-sayt-mənt"}, {"grammatical_form": "noun/en_plural", "text": "excitements", "is_base_form": false}]}
+{"guid": "N23_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "excitement", "is_base_form": true, "ipa": "/ɪkˈsaɪtmənt/", "phonetic": "EK-sayt-mənt"}]}
 {"guid": "N23_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "tiredness", "is_base_form": true, "ipa": "/ˈtara.dnəs/", "phonetic": "TAYR-dn-uss"}]}
-{"guid": "N23_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "fear", "is_base_form": true, "ipa": "/fɪr/", "phonetic": "FIR"}, {"grammatical_form": "noun/en_plural", "text": "fears", "is_base_form": false}]}
-{"guid": "N23_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "surprise", "is_base_form": true, "ipa": "/ˈsɚˌpraɪz/", "phonetic": "SUR-pree-z"}, {"grammatical_form": "noun/en_plural", "text": "surprises", "is_base_form": false}]}
-{"guid": "N23_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "worry", "is_base_form": true, "ipa": "/ˈwɜːri/", "phonetic": "WOR-ee"}, {"grammatical_form": "noun/en_plural", "text": "worries", "is_base_form": false}]}
+{"guid": "N23_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "fear", "is_base_form": true, "ipa": "/fɪr/", "phonetic": "FIR"}]}
+{"guid": "N23_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "surprise", "is_base_form": true, "ipa": "/ˈsɚˌpraɪz/", "phonetic": "SUR-pree-z"}]}
+{"guid": "N23_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "worry", "is_base_form": true, "ipa": "/ˈwɜːri/", "phonetic": "WOR-ee"}]}
 {"guid": "N23_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "calmness", "is_base_form": true, "ipa": "/ˈkælm.nəs/", "phonetic": "KALM-nəs"}]}
 {"guid": "N23_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "nervousness", "is_base_form": true, "ipa": "/nɜrvəs/ -> /nɜːrvəs/", "phonetic": "NER-vəs"}]}
-{"guid": "N23_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "confusion", "is_base_form": true, "ipa": "/kənˈfjuːʒən/", "phonetic": "kuhn-FYOO-zhən"}, {"grammatical_form": "noun/en_plural", "text": "confusions", "is_base_form": false}]}
-{"guid": "N23_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "embarrassment", "is_base_form": true, "ipa": "/ˌɛmbəˈræs.mənt/", "phonetic": "EM-buh-RASS-mənt"}, {"grammatical_form": "noun/en_plural", "text": "embarrassments", "is_base_form": false}]}
-{"guid": "N23_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "pride", "is_base_form": true, "ipa": "praɪd", "phonetic": "PRY-d"}, {"grammatical_form": "noun/en_plural", "text": "prides", "is_base_form": false}]}
-{"guid": "N23_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "jealousy", "is_base_form": true, "ipa": "/ˈdʒɛləzi/", "phonetic": "JEL-uh-see"}, {"grammatical_form": "noun/en_plural", "text": "jealousies", "is_base_form": false}]}
+{"guid": "N23_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "confusion", "is_base_form": true, "ipa": "/kənˈfjuːʒən/", "phonetic": "kuhn-FYOO-zhən"}]}
+{"guid": "N23_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "embarrassment", "is_base_form": true, "ipa": "/ˌɛmbəˈræs.mənt/", "phonetic": "EM-buh-RASS-mənt"}]}
+{"guid": "N23_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "pride", "is_base_form": true, "ipa": "praɪd", "phonetic": "PRY-d"}]}
+{"guid": "N23_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "jealousy", "is_base_form": true, "ipa": "/ˈdʒɛləzi/", "phonetic": "JEL-uh-see"}]}
 {"guid": "N23_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "loneliness", "is_base_form": true, "ipa": "/ˈlʌn.lɪ.nəs/", "phonetic": "LOO-nuh-nes"}]}
 {"guid": "N23_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "gratitude", "is_base_form": true, "ipa": "/ˈɡræ.tɪ.tjuːd/", "phonetic": "GRAH-ti-TOO-dee"}]}
-{"guid": "N23_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "frustration", "is_base_form": true, "ipa": "/frʌsˈtreɪʃn/", "phonetic": "FRUS-tray-shun"}, {"grammatical_form": "noun/en_plural", "text": "frustrations", "is_base_form": false}]}
-{"guid": "N23_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "hope", "is_base_form": true, "ipa": "ˈhoʊp", "phonetic": "HOOEP"}, {"grammatical_form": "noun/en_plural", "text": "hopes", "is_base_form": false}]}
-{"guid": "N23_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "disappointment", "is_base_form": true, "ipa": "/dɪˌsəpˈtaɪntmɛnt/", "phonetic": "DI-suh-TYINT-mənt"}, {"grammatical_form": "noun/en_plural", "text": "disappointments", "is_base_form": false}]}
-{"guid": "N23_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "curiosity", "is_base_form": true, "ipa": "/kjuːɹɪˈɒsɪti/", "phonetic": "KYOO-ry-uh-SI-ti"}, {"grammatical_form": "noun/en_plural", "text": "curiosities", "is_base_form": false}]}
+{"guid": "N23_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "frustration", "is_base_form": true, "ipa": "/frʌsˈtreɪʃn/", "phonetic": "FRUS-tray-shun"}]}
+{"guid": "N23_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "hope", "is_base_form": true, "ipa": "ˈhoʊp", "phonetic": "HOOEP"}]}
+{"guid": "N23_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "disappointment", "is_base_form": true, "ipa": "/dɪˌsəpˈtaɪntmɛnt/", "phonetic": "DI-suh-TYINT-mənt"}]}
+{"guid": "N23_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "curiosity", "is_base_form": true, "ipa": "/kjuːɹɪˈɒsɪti/", "phonetic": "KYOO-ry-uh-SI-ti"}]}
 {"guid": "N23_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "boredom", "is_base_form": true, "ipa": "/ˈbɔːrədm/", "phonetic": "BOH-rə-dəm"}]}
 {"guid": "N23_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "cheerfulness", "is_base_form": true, "ipa": "/ˈtʃɪərfəl.nəs/", "phonetic": "CHEER-fəl-nəs"}]}
-{"guid": "N23_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "anxiety", "is_base_form": true, "ipa": "/æŋˈzaɪəti/", "phonetic": "ANG-zy-uh-tee"}, {"grammatical_form": "noun/en_plural", "text": "anxieties", "is_base_form": false}]}
-{"guid": "N23_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "joy", "is_base_form": true, "ipa": "dʒɔɪ", "phonetic": "JOH-ee"}, {"grammatical_form": "noun/en_plural", "text": "joys", "is_base_form": false}]}
-{"guid": "N23_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "pain", "is_base_form": true, "ipa": "/peɪn/", "phonetic": "PAY-n"}, {"grammatical_form": "noun/en_plural", "text": "pains", "is_base_form": false}]}
+{"guid": "N23_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "anxiety", "is_base_form": true, "ipa": "/æŋˈzaɪəti/", "phonetic": "ANG-zy-uh-tee"}]}
+{"guid": "N23_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "joy", "is_base_form": true, "ipa": "dʒɔɪ", "phonetic": "JOH-ee"}]}
+{"guid": "N23_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "pain", "is_base_form": true, "ipa": "/peɪn/", "phonetic": "PAY-n"}]}
 {"guid": "N23_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "terror", "is_base_form": true, "ipa": "/ˈtɛr.ər/", "phonetic": "TER-ər"}]}
-{"guid": "N23_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "desire", "is_base_form": true, "ipa": "/dɪˈzaɪɹ/", "phonetic": "DIZ-ir"}, {"grammatical_form": "noun/en_plural", "text": "desires", "is_base_form": false}]}
+{"guid": "N23_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "desire", "is_base_form": true, "ipa": "/dɪˈzaɪɹ/", "phonetic": "DIZ-ir"}]}
 {"guid": "N23_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "courage", "is_base_form": true, "ipa": "/ˈkɜːrɪdʒ/", "phonetic": "KUR-i-j"}]}
-{"guid": "N23_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "shock", "is_base_form": true, "ipa": "/ʃɔk/", "phonetic": "SHOCK"}, {"grammatical_form": "noun/en_plural", "text": "shocks", "is_base_form": false}]}
-{"guid": "N23_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "love", "is_base_form": true, "ipa": "/ˈlʌv/", "phonetic": "LOOV"}, {"grammatical_form": "noun/en_plural", "text": "loves", "is_base_form": false}]}
-{"guid": "N23_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "hate", "is_base_form": true, "ipa": "/ˈheɪt/", "phonetic": "HAIt"}, {"grammatical_form": "noun/en_plural", "text": "hates", "is_base_form": false}]}
-{"guid": "N23_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "guilt", "is_base_form": true}]}
-{"guid": "N23_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "shame", "is_base_form": true}]}
-{"guid": "N23_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "disgust", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "disgusts", "is_base_form": false}]}
-{"guid": "N23_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "compassion", "is_base_form": true}]}
-{"guid": "N23_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "bite", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "bites", "is_base_form": false}]}
+{"guid": "N23_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "shock", "is_base_form": true, "ipa": "/ʃɔk/", "phonetic": "SHOCK"}]}
+{"guid": "N23_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "love", "is_base_form": true, "ipa": "/ˈlʌv/", "phonetic": "LOOV"}]}
+{"guid": "N23_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "hate", "is_base_form": true, "ipa": "/ˈheɪt/", "phonetic": "HAIt"}]}

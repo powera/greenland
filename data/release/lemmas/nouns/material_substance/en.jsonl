@@ -1,5 +1,5 @@
 {"guid": "N14_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "wood", "is_base_form": true, "ipa": "/wʊd/", "phonetic": "WOOD"}]}
-{"guid": "N14_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "metal", "is_base_form": true, "ipa": "ˈmɛtəl", "phonetic": "MET-əl"}, {"grammatical_form": "noun/en_plural", "text": "metals", "is_base_form": false}]}
+{"guid": "N14_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "metal", "is_base_form": true, "ipa": "ˈmɛtəl", "phonetic": "MET-əl"}]}
 {"guid": "N14_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "iron", "is_base_form": true, "ipa": "/ˈaɪərən/", "phonetic": "EYE-uh-rən"}]}
 {"guid": "N14_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "steel", "is_base_form": true, "ipa": "/stiːl/", "phonetic": "STEE-l"}]}
 {"guid": "N14_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "aluminum", "is_base_form": true, "ipa": "/ˈæləmɪnəm/", "phonetic": "AYL-uh-muh-nuhm"}]}
@@ -8,58 +8,27 @@
 {"guid": "N14_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "silver", "is_base_form": true, "ipa": "/ˈsɪlvər/", "phonetic": "SIL-vur"}]}
 {"guid": "N14_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "plastic", "is_base_form": true, "ipa": "/plæˈstɪk/", "phonetic": "PLAS-tik"}]}
 {"guid": "N14_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "rubber", "is_base_form": true, "ipa": "/ˈrʌbər/", "phonetic": "RUB-ber"}]}
-{"guid": "N14_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "glass", "is_base_form": true, "ipa": "/ɡlæs/", "phonetic": "GLAES"}, {"grammatical_form": "noun/en_plural", "text": "glasses", "is_base_form": false}]}
+{"guid": "N14_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "glass", "is_base_form": true, "ipa": "/ɡlæs/", "phonetic": "GLAES"}]}
 {"guid": "N14_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "cardboard", "is_base_form": true, "ipa": "/ˈkɑːrdˌbɔːrd/", "phonetic": "KAWRD-bawrd"}]}
-{"guid": "N14_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "cloth", "is_base_form": true, "ipa": "/kləʊθ/", "phonetic": "KLOW-th"}, {"grammatical_form": "noun/en_plural", "text": "cloths", "is_base_form": false}]}
+{"guid": "N14_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "cloth", "is_base_form": true, "ipa": "/kləʊθ/", "phonetic": "KLOW-th"}]}
 {"guid": "N14_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "cotton", "is_base_form": true, "ipa": "/ˈkʌtən/", "phonetic": "KUH-tuhn"}]}
 {"guid": "N14_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "wool", "is_base_form": true, "ipa": "/wʊl/", "phonetic": "WOOL"}]}
 {"guid": "N14_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "silk", "is_base_form": true, "ipa": "sɪl̩k", "phonetic": "SIH-lk"}]}
 {"guid": "N14_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "leather", "is_base_form": true, "ipa": "/ˈlɛðər/", "phonetic": "LEH-thər"}]}
-{"guid": "N14_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "stone", "is_base_form": true, "ipa": "/ˌsʰoʊn/", "phonetic": "SOH-ohn"}, {"grammatical_form": "noun/en_plural", "text": "stones", "is_base_form": false}]}
+{"guid": "N14_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "stone", "is_base_form": true, "ipa": "/ˌsʰoʊn/", "phonetic": "SOH-ohn"}]}
 {"guid": "N14_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "marble", "is_base_form": true, "ipa": "/ˈmɑːr.bəl/", "phonetic": "MAR-buh-l"}]}
 {"guid": "N14_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "concrete", "is_base_form": true, "ipa": "/ˈkɒŋkriːt/", "phonetic": "CONK-reet"}]}
-{"guid": "N14_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "brick", "is_base_form": true, "ipa": "/brɪk/", "phonetic": "BRICK"}, {"grammatical_form": "noun/en_plural", "text": "bricks", "is_base_form": false}]}
-{"guid": "N14_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "ceramic", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "ceramics", "is_base_form": false}]}
+{"guid": "N14_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "brick", "is_base_form": true, "ipa": "/brɪk/", "phonetic": "BRICK"}]}
 {"guid": "N14_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "clay", "is_base_form": true, "ipa": "/kley/", "phonetic": "KLAY"}]}
 {"guid": "N14_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "sand", "is_base_form": true, "ipa": "/sænd/", "phonetic": "SAEND"}]}
-{"guid": "N14_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "air", "is_base_form": true, "ipa": "/ɛr/", "phonetic": "AIR"}, {"grammatical_form": "noun/en_plural", "text": "airs", "is_base_form": false}]}
+{"guid": "N14_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "air", "is_base_form": true, "ipa": "/ɛr/", "phonetic": "AIR"}]}
 {"guid": "N14_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "dust", "is_base_form": true, "ipa": "/dʌst/", "phonetic": "DUST"}]}
-{"guid": "N14_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "smoke", "is_base_form": true, "ipa": "/smoʊk/", "phonetic": "SMOKE"}, {"grammatical_form": "noun/en_plural", "text": "smokes", "is_base_form": false}]}
-{"guid": "N14_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "tin", "is_base_form": true, "ipa": "/tɪn/", "phonetic": "TIN"}, {"grammatical_form": "noun/en_plural", "text": "tins", "is_base_form": false}]}
-{"guid": "N14_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "wire", "is_base_form": true, "ipa": "/waɪr/", "phonetic": "WIRE"}, {"grammatical_form": "noun/en_plural", "text": "wires", "is_base_form": false}]}
-{"guid": "N14_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "poison", "is_base_form": true, "ipa": "/ˈpɔɪ.zən/", "phonetic": "POY-zən"}, {"grammatical_form": "noun/en_plural", "text": "poisons", "is_base_form": false}]}
-{"guid": "N14_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "board", "is_base_form": true, "ipa": "/bɔːrd/", "phonetic": "BOHRD"}, {"grammatical_form": "noun/en_plural", "text": "boards", "is_base_form": false}]}
-{"guid": "N14_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "lead", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "leads", "is_base_form": false}]}
-{"guid": "N14_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "cement", "is_base_form": true}]}
-{"guid": "N14_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "wax", "is_base_form": true}]}
-{"guid": "N14_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "bronze", "is_base_form": true}]}
-{"guid": "N14_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "coal", "is_base_form": true}]}
-{"guid": "N14_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "charcoal", "is_base_form": true}]}
-{"guid": "N14_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "chalk", "is_base_form": true}]}
-{"guid": "N14_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "foam", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "foams", "is_base_form": false}]}
-{"guid": "N14_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "dye", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "dyes", "is_base_form": false}]}
-{"guid": "N14_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "ink", "is_base_form": true}]}
-{"guid": "N14_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "tar", "is_base_form": true}]}
-{"guid": "N14_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "plaster", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "plasters", "is_base_form": false}]}
-{"guid": "N14_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "granite", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "granites", "is_base_form": false}]}
-{"guid": "N14_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "limestone", "is_base_form": true}]}
-{"guid": "N14_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "fiberglass", "is_base_form": true}]}
-{"guid": "N14_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "nylon", "is_base_form": true}]}
-{"guid": "N14_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "brass", "is_base_form": true}]}
-{"guid": "N14_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "asphalt", "is_base_form": true}]}
-{"guid": "N14_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "yarn", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "yarns", "is_base_form": false}]}
-{"guid": "N14_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "trash", "is_base_form": true}]}
+{"guid": "N14_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "smoke", "is_base_form": true, "ipa": "/smoʊk/", "phonetic": "SMOKE"}]}
+{"guid": "N14_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "tin", "is_base_form": true, "ipa": "/tɪn/", "phonetic": "TIN"}]}
+{"guid": "N14_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "wire", "is_base_form": true, "ipa": "/waɪr/", "phonetic": "WIRE"}]}
+{"guid": "N14_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "poison", "is_base_form": true, "ipa": "/ˈpɔɪ.zən/", "phonetic": "POY-zən"}]}
+{"guid": "N14_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "board", "is_base_form": true, "ipa": "/bɔːrd/", "phonetic": "BOHRD"}]}
 {"guid": "N14_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "cargo", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "cargoes", "is_base_form": false}]}
-{"guid": "N14_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "paint", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "paints", "is_base_form": false}]}
-{"guid": "N14_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "oil", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "oils", "is_base_form": false}]}
-{"guid": "N14_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "fat", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "fats", "is_base_form": false}]}
-{"guid": "N14_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "chemical", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "chemicals", "is_base_form": false}]}
-{"guid": "N14_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "jelly", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "jellies", "is_base_form": false}]}
-{"guid": "N14_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "liquid", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "liquids", "is_base_form": false}]}
-{"guid": "N14_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "paste", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "pastes", "is_base_form": false}]}
-{"guid": "N14_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "powder", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "powders", "is_base_form": false}]}
-{"guid": "N14_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "polish", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "polishes", "is_base_form": false}]}
-{"guid": "N14_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "steam", "is_base_form": true}]}
 {"guid": "N14_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "dish soap", "is_base_form": true}]}
 {"guid": "N14_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "fossil fuel", "is_base_form": true}]}
 {"guid": "N14_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "renewable energy", "is_base_form": true}]}

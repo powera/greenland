@@ -1,17 +1,13 @@
-{"guid": "N05_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "tree", "is_base_form": true, "ipa": "/>truː/", "phonetic": "TROO"}, {"grammatical_form": "noun/en_plural", "text": "trees", "is_base_form": false}]}
-{"guid": "N05_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "flower", "is_base_form": true, "ipa": "/ˈflaʊ.ɚ/", "phonetic": "FLAW-ər"}, {"grammatical_form": "noun/en_plural", "text": "flowers", "is_base_form": false}]}
+{"guid": "N05_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "tree", "is_base_form": true, "ipa": "/>truː/", "phonetic": "TROO"}]}
+{"guid": "N05_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "flower", "is_base_form": true, "ipa": "/ˈflaʊ.ɚ/", "phonetic": "FLAW-ər"}]}
 {"guid": "N05_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "grass", "is_base_form": true, "ipa": "/ɡræs/", "phonetic": "GRASS"}]}
-{"guid": "N05_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "oak", "is_base_form": true, "ipa": "/oʊk/", "phonetic": "OWK"}, {"grammatical_form": "noun/en_plural", "text": "oaks", "is_base_form": false}]}
-{"guid": "N05_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "rose", "is_base_form": true, "ipa": "/roʊz/", "phonetic": "ROH-z"}, {"grammatical_form": "noun/en_plural", "text": "roses", "is_base_form": false}]}
-{"guid": "N05_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "forest", "is_base_form": true, "ipa": "/fɔːrɛst/", "phonetic": "FOR-est"}, {"grammatical_form": "noun/en_plural", "text": "forests", "is_base_form": false}]}
-{"guid": "N05_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "weed", "is_base_form": true, "ipa": "/wiːd/", "phonetic": "WEED"}, {"grammatical_form": "noun/en_plural", "text": "weeds", "is_base_form": false}]}
-{"guid": "N05_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "bush", "is_base_form": true, "ipa": "/bʊʃ/", "phonetic": "BOO-sh"}, {"grammatical_form": "noun/en_plural", "text": "bushes", "is_base_form": false}]}
-{"guid": "N05_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "vine", "is_base_form": true, "ipa": "/vaɪn/", "phonetic": "VY-neh"}, {"grammatical_form": "noun/en_plural", "text": "vines", "is_base_form": false}]}
+{"guid": "N05_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "oak", "is_base_form": true, "ipa": "/oʊk/", "phonetic": "OWK"}]}
+{"guid": "N05_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "rose", "is_base_form": true, "ipa": "/roʊz/", "phonetic": "ROH-z"}]}
+{"guid": "N05_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "forest", "is_base_form": true, "ipa": "/fɔːrɛst/", "phonetic": "FOR-est"}]}
+{"guid": "N05_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "weed", "is_base_form": true, "ipa": "/wiːd/", "phonetic": "WEED"}]}
+{"guid": "N05_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "bush", "is_base_form": true, "ipa": "/bʊʃ/", "phonetic": "BOO-sh"}]}
+{"guid": "N05_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "vine", "is_base_form": true, "ipa": "/vaɪn/", "phonetic": "VY-neh"}]}
 {"guid": "N05_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "moss", "is_base_form": true, "ipa": "/mɒs/", "phonetic": "MOHS"}]}
-{"guid": "N05_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "fern", "is_base_form": true, "ipa": "/fɝn/", "phonetic": "FURN"}, {"grammatical_form": "noun/en_plural", "text": "ferns", "is_base_form": false}]}
-{"guid": "N05_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "pine", "is_base_form": true, "ipa": "/paɪn/", "phonetic": "PYNE"}, {"grammatical_form": "noun/en_plural", "text": "pines", "is_base_form": false}]}
-{"guid": "N05_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "palm", "is_base_form": true, "ipa": "/pɑːlm/", "phonetic": "PALM"}, {"grammatical_form": "noun/en_plural", "text": "palms", "is_base_form": false}]}
-{"guid": "N05_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "plant", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "plants", "is_base_form": false}]}
-{"guid": "N05_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "berry", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "berries", "is_base_form": false}]}
-{"guid": "N05_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "grain", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "grains", "is_base_form": false}]}
-{"guid": "N05_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "nut", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "nuts", "is_base_form": false}]}
+{"guid": "N05_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "fern", "is_base_form": true, "ipa": "/fɝn/", "phonetic": "FURN"}]}
+{"guid": "N05_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "pine", "is_base_form": true, "ipa": "/paɪn/", "phonetic": "PYNE"}]}
+{"guid": "N05_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "palm", "is_base_form": true, "ipa": "/pɑːlm/", "phonetic": "PALM"}]}

@@ -1,11 +1,11 @@
-{"guid": "N48_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "sir", "is_base_form": true, "ipa": "/sɜːr/", "phonetic": "SUR"}, {"grammatical_form": "noun/en_plural", "text": "sirs", "is_base_form": false}]}
-{"guid": "N48_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "lady", "is_base_form": true, "ipa": "/ˈleɪdi/", "phonetic": "LAY-dee"}, {"grammatical_form": "noun/en_plural", "text": "ladies", "is_base_form": false}]}
+{"guid": "N48_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "sir", "is_base_form": true, "ipa": "/sɜːr/", "phonetic": "SUR"}]}
+{"guid": "N48_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "lady", "is_base_form": true, "ipa": "/ˈleɪdi/", "phonetic": "LAY-dee"}]}
 {"guid": "N48_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mr.", "is_base_form": true, "ipa": "/mɪstə/", "phonetic": "MIHS-tuh"}]}
 {"guid": "N48_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "Mrs.", "is_base_form": true}]}
 {"guid": "N48_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "Miss", "is_base_form": true, "ipa": "/mɪs/", "phonetic": "MIS"}]}
 {"guid": "N48_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "Ms.", "is_base_form": true, "ipa": "/mɪz/", "phonetic": "MIZ"}]}
 {"guid": "N48_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "Dr.", "is_base_form": true, "ipa": "/dʌr/", "phonetic": "DOOR"}]}
 {"guid": "N48_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "Lord", "is_base_form": true, "ipa": "/lɔːrd/", "phonetic": "LAWD"}]}
-{"guid": "N48_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "madam", "is_base_form": true, "ipa": "/ˈmædəm/", "phonetic": "MA-dəm"}, {"grammatical_form": "noun/en_plural", "text": "madams", "is_base_form": false}]}
-{"guid": "N48_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "master", "is_base_form": true, "ipa": "/ˈmæstər/", "phonetic": "MAHS-tur"}, {"grammatical_form": "noun/en_plural", "text": "masters", "is_base_form": false}]}
+{"guid": "N48_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "madam", "is_base_form": true, "ipa": "/ˈmædəm/", "phonetic": "MA-dəm"}]}
+{"guid": "N48_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "master", "is_base_form": true, "ipa": "/ˈmæstər/", "phonetic": "MAHS-tur"}]}
 {"guid": "N48_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "Prof.", "is_base_form": true}]}

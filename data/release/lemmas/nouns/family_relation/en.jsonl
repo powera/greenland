@@ -1,40 +1,31 @@
-{"guid": "N35_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "family", "is_base_form": true, "ipa": "ˈfæm.ə.li", "phonetic": "FAM-uh-lee"}, {"grammatical_form": "noun/en_plural", "text": "families", "is_base_form": false}]}
-{"guid": "N35_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "mother", "is_base_form": true, "ipa": "/ˈmʌðɚ/", "phonetic": "MOO-dur"}, {"grammatical_form": "noun/en_plural", "text": "mothers", "is_base_form": false}]}
-{"guid": "N35_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "father", "is_base_form": true, "ipa": "/ˈfɑːðər/", "phonetic": "FATH-ər"}, {"grammatical_form": "noun/en_plural", "text": "fathers", "is_base_form": false}]}
-{"guid": "N35_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "brother", "is_base_form": true, "ipa": "/ˈbrʌðər/", "phonetic": "BRUH-ther"}, {"grammatical_form": "noun/en_plural", "text": "brothers", "is_base_form": false}]}
-{"guid": "N35_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "sister", "is_base_form": true, "ipa": "/ˈsɪstər/", "phonetic": "SIS-tər"}, {"grammatical_form": "noun/en_plural", "text": "sisters", "is_base_form": false}]}
-{"guid": "N35_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "son", "is_base_form": true, "ipa": "/sʌn/", "phonetic": "SOHN"}, {"grammatical_form": "noun/en_plural", "text": "sons", "is_base_form": false}]}
-{"guid": "N35_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "daughter", "is_base_form": true, "ipa": "/ˈdɔːtər/", "phonetic": "DAW-tər"}, {"grammatical_form": "noun/en_plural", "text": "daughters", "is_base_form": false}]}
-{"guid": "N35_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "uncle", "is_base_form": true, "ipa": "/ʌŋkl/", "phonetic": "UNG-kul"}, {"grammatical_form": "noun/en_plural", "text": "uncles", "is_base_form": false}]}
-{"guid": "N35_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "aunt", "is_base_form": true, "ipa": "/ænt/", "phonetic": "AUNT"}, {"grammatical_form": "noun/en_plural", "text": "aunts", "is_base_form": false}]}
-{"guid": "N35_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "partner", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "partners", "is_base_form": false}]}
-{"guid": "N35_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "spouse", "is_base_form": true, "ipa": "/spaʊz/", "phonetic": "SPAHZ"}, {"grammatical_form": "noun/en_plural", "text": "spouses", "is_base_form": false}]}
-{"guid": "N35_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "grandfather", "is_base_form": true, "ipa": "/ˌɡrænˈdɑːfə/", "phonetic": "GRAN-də-fər"}, {"grammatical_form": "noun/en_plural", "text": "grandfathers", "is_base_form": false}]}
-{"guid": "N35_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "grandmother", "is_base_form": true, "ipa": "ˈɡrænˌmʌðɚ", "phonetic": "GRAN-DOO-duh"}, {"grammatical_form": "noun/en_plural", "text": "grandmothers", "is_base_form": false}]}
-{"guid": "N35_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "grandson", "is_base_form": true, "ipa": "/ˈɡrændˌsɒn/", "phonetic": "GRAND-son"}, {"grammatical_form": "noun/en_plural", "text": "grandsons", "is_base_form": false}]}
-{"guid": "N35_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "granddaughter", "is_base_form": true, "ipa": "/ˈɡrænd.dɔʊ.dɔɹ/", "phonetic": "GRAND-dow-DOW-er"}, {"grammatical_form": "noun/en_plural", "text": "granddaughters", "is_base_form": false}]}
-{"guid": "N35_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "cousin", "is_base_form": true, "ipa": "/ˈkʌz(ə)n/", "phonetic": "COO-zuhn"}, {"grammatical_form": "noun/en_plural", "text": "cousins", "is_base_form": false}]}
-{"guid": "N35_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "cousin", "is_base_form": true, "ipa": "/ˈkʌzɪn/", "phonetic": "COO-zihn"}, {"grammatical_form": "noun/en_plural", "text": "cousins", "is_base_form": false}]}
-{"guid": "N35_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "nephew", "is_base_form": true, "ipa": "/ˈnɛfju/", "phonetic": "NEF-yyoo"}, {"grammatical_form": "noun/en_plural", "text": "nephews", "is_base_form": false}]}
-{"guid": "N35_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "niece", "is_base_form": true, "ipa": "/niːs/", "phonetic": "NEES"}, {"grammatical_form": "noun/en_plural", "text": "nieces", "is_base_form": false}]}
-{"guid": "N35_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "fiancé", "is_base_form": true, "ipa": "/fiˈaːnsɛ/", "phonetic": "FEE-ahns-EH"}, {"grammatical_form": "noun/en_plural", "text": "fiancés", "is_base_form": false}]}
-{"guid": "N35_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "fiancée", "is_base_form": true, "ipa": "/ˌfiːəˈneɪsˌiː/", "phonetic": "FEE-uh-nay-see"}, {"grammatical_form": "noun/en_plural", "text": "fiancées", "is_base_form": false}]}
-{"guid": "N35_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "boyfriend", "is_base_form": true, "ipa": "/ˈboɪfrɛnd/", "phonetic": "BOY-frend"}, {"grammatical_form": "noun/en_plural", "text": "boyfriends", "is_base_form": false}]}
-{"guid": "N35_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "girlfriend", "is_base_form": true, "ipa": "/ɡɝːlˈfɹɛnd/", "phonetic": "GUR-lfrend"}, {"grammatical_form": "noun/en_plural", "text": "girlfriends", "is_base_form": false}]}
+{"guid": "N35_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "family", "is_base_form": true, "ipa": "ˈfæm.ə.li", "phonetic": "FAM-uh-lee"}]}
+{"guid": "N35_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "mother", "is_base_form": true, "ipa": "/ˈmʌðɚ/", "phonetic": "MOO-dur"}]}
+{"guid": "N35_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "father", "is_base_form": true, "ipa": "/ˈfɑːðər/", "phonetic": "FATH-ər"}]}
+{"guid": "N35_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "brother", "is_base_form": true, "ipa": "/ˈbrʌðər/", "phonetic": "BRUH-ther"}]}
+{"guid": "N35_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "sister", "is_base_form": true, "ipa": "/ˈsɪstər/", "phonetic": "SIS-tər"}]}
+{"guid": "N35_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "son", "is_base_form": true, "ipa": "/sʌn/", "phonetic": "SOHN"}]}
+{"guid": "N35_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "daughter", "is_base_form": true, "ipa": "/ˈdɔːtər/", "phonetic": "DAW-tər"}]}
+{"guid": "N35_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "uncle", "is_base_form": true, "ipa": "/ʌŋkl/", "phonetic": "UNG-kul"}]}
+{"guid": "N35_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "aunt", "is_base_form": true, "ipa": "/ænt/", "phonetic": "AUNT"}]}
+{"guid": "N35_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "spouse", "is_base_form": true, "ipa": "/spaʊz/", "phonetic": "SPAHZ"}]}
+{"guid": "N35_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "grandfather", "is_base_form": true, "ipa": "/ˌɡrænˈdɑːfə/", "phonetic": "GRAN-də-fər"}]}
+{"guid": "N35_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "grandmother", "is_base_form": true, "ipa": "ˈɡrænˌmʌðɚ", "phonetic": "GRAN-DOO-duh"}]}
+{"guid": "N35_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "grandson", "is_base_form": true, "ipa": "/ˈɡrændˌsɒn/", "phonetic": "GRAND-son"}]}
+{"guid": "N35_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "granddaughter", "is_base_form": true, "ipa": "/ˈɡrænd.dɔʊ.dɔɹ/", "phonetic": "GRAND-dow-DOW-er"}]}
+{"guid": "N35_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "cousin", "is_base_form": true, "ipa": "/ˈkʌz(ə)n/", "phonetic": "COO-zuhn"}]}
+{"guid": "N35_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "cousin", "is_base_form": true, "ipa": "/ˈkʌzɪn/", "phonetic": "COO-zihn"}]}
+{"guid": "N35_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "nephew", "is_base_form": true, "ipa": "/ˈnɛfju/", "phonetic": "NEF-yyoo"}]}
+{"guid": "N35_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "niece", "is_base_form": true, "ipa": "/niːs/", "phonetic": "NEES"}]}
+{"guid": "N35_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "fiancé", "is_base_form": true, "ipa": "/fiˈaːnsɛ/", "phonetic": "FEE-ahns-EH"}]}
+{"guid": "N35_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "fiancée", "is_base_form": true, "ipa": "/ˌfiːəˈneɪsˌiː/", "phonetic": "FEE-uh-nay-see"}]}
+{"guid": "N35_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "boyfriend", "is_base_form": true, "ipa": "/ˈboɪfrɛnd/", "phonetic": "BOY-frend"}]}
+{"guid": "N35_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "girlfriend", "is_base_form": true, "ipa": "/ɡɝːlˈfɹɛnd/", "phonetic": "GUR-lfrend"}]}
 {"guid": "N35_071", "forms": [{"grammatical_form": "noun/en_singular", "text": "wife", "is_base_form": true, "ipa": "/waɪf/", "phonetic": "WAH-f"}, {"grammatical_form": "noun/en_plural", "text": "wives", "is_base_form": false}]}
-{"guid": "N35_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "husband", "is_base_form": true, "ipa": "/ˈhʌzbənd/", "phonetic": "HUZ-bənd"}, {"grammatical_form": "noun/en_plural", "text": "husbands", "is_base_form": false}]}
-{"guid": "N35_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "cousin", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "cousins", "is_base_form": false}]}
+{"guid": "N35_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "husband", "is_base_form": true, "ipa": "/ˈhʌzbənd/", "phonetic": "HUZ-bənd"}]}
 {"guid": "N35_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "father-in-law", "is_base_form": true}]}
 {"guid": "N35_090", "forms": [{"grammatical_form": "noun/en_singular", "text": "mother-in-law", "is_base_form": true}]}
 {"guid": "N35_091", "forms": [{"grammatical_form": "noun/en_singular", "text": "son-in-law", "is_base_form": true}]}
 {"guid": "N35_092", "forms": [{"grammatical_form": "noun/en_singular", "text": "daughter-in-law", "is_base_form": true}]}
 {"guid": "N35_093", "forms": [{"grammatical_form": "noun/en_singular", "text": "brother-in-law", "is_base_form": true}]}
 {"guid": "N35_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "sister-in-law", "is_base_form": true}]}
-{"guid": "N35_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "stepfather", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stepfathers", "is_base_form": false}]}
-{"guid": "N35_096", "forms": [{"grammatical_form": "noun/en_singular", "text": "stepmother", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stepmothers", "is_base_form": false}]}
-{"guid": "N35_097", "forms": [{"grammatical_form": "noun/en_singular", "text": "stepson", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stepsons", "is_base_form": false}]}
-{"guid": "N35_098", "forms": [{"grammatical_form": "noun/en_singular", "text": "stepdaughter", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stepdaughters", "is_base_form": false}]}
-{"guid": "N35_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "parent", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "parents", "is_base_form": false}]}
-{"guid": "N35_100", "forms": [{"grammatical_form": "noun/en_singular", "text": "child", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "children", "is_base_form": false}]}
-{"guid": "N35_101", "forms": [{"grammatical_form": "noun/en_singular", "text": "grandchild", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "grandchilds", "is_base_form": false}]}
-{"guid": "N35_102", "forms": [{"grammatical_form": "noun/en_singular", "text": "grandparent", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "grandparents", "is_base_form": false}]}
+{"guid": "N35_100", "forms": [{"grammatical_form": "noun/en_plural", "text": "children", "is_base_form": false}]}

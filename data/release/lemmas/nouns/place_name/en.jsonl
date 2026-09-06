@@ -1,16 +1,16 @@
-{"guid": "N30_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "place", "is_base_form": true, "ipa": "/pleɪs/", "phonetic": "PLAYS"}, {"grammatical_form": "noun/en_plural", "text": "places", "is_base_form": false}]}
-{"guid": "N30_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "city", "is_base_form": true, "ipa": "/ˈsɪti/", "phonetic": "SIT-ee"}, {"grammatical_form": "noun/en_plural", "text": "cities", "is_base_form": false}]}
-{"guid": "N30_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "country", "is_base_form": true, "ipa": "/ˈkʌntri/", "phonetic": "KUN-trē"}, {"grammatical_form": "noun/en_plural", "text": "countries", "is_base_form": false}]}
-{"guid": "N30_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "state", "is_base_form": true, "ipa": "/steɪt/", "phonetic": "STAYT"}, {"grammatical_form": "noun/en_plural", "text": "states", "is_base_form": false}]}
-{"guid": "N30_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "area", "is_base_form": true, "ipa": "/ˈɛəriə/", "phonetic": "AIR-ee-ə"}, {"grammatical_form": "noun/en_plural", "text": "areas", "is_base_form": false}]}
-{"guid": "N30_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "land", "is_base_form": true, "ipa": "/lænd/", "phonetic": "LAND"}, {"grammatical_form": "noun/en_plural", "text": "lands", "is_base_form": false}]}
-{"guid": "N30_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "north", "is_base_form": true, "ipa": "/nɔːrθ/", "phonetic": "NOR-th"}, {"grammatical_form": "noun/en_plural", "text": "norths", "is_base_form": false}]}
-{"guid": "N30_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "south", "is_base_form": true, "ipa": "/sʌθ/", "phonetic": "SOOTH"}, {"grammatical_form": "noun/en_plural", "text": "souths", "is_base_form": false}]}
-{"guid": "N30_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "east", "is_base_form": true, "ipa": "/iːst/", "phonetic": "EEST"}, {"grammatical_form": "noun/en_plural", "text": "easts", "is_base_form": false}]}
-{"guid": "N30_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "west", "is_base_form": true, "ipa": "/wɛst/", "phonetic": "WEST"}, {"grammatical_form": "noun/en_plural", "text": "wests", "is_base_form": false}]}
-{"guid": "N30_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "inside", "is_base_form": true, "ipa": "/ɪnˈsaɪd/", "phonetic": "IN-sighd"}, {"grammatical_form": "noun/en_plural", "text": "insides", "is_base_form": false}]}
-{"guid": "N30_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "outside", "is_base_form": true, "ipa": "/aʊtˈsaɪd/", "phonetic": "AWT-side"}, {"grammatical_form": "noun/en_plural", "text": "outsides", "is_base_form": false}]}
-{"guid": "N30_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "behind", "is_base_form": true, "ipa": "/bɪˈhaɪnd/", "phonetic": "BIGH-end"}, {"grammatical_form": "noun/en_plural", "text": "behinds", "is_base_form": false}]}
+{"guid": "N30_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "place", "is_base_form": true, "ipa": "/pleɪs/", "phonetic": "PLAYS"}]}
+{"guid": "N30_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "city", "is_base_form": true, "ipa": "/ˈsɪti/", "phonetic": "SIT-ee"}]}
+{"guid": "N30_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "country", "is_base_form": true, "ipa": "/ˈkʌntri/", "phonetic": "KUN-trē"}]}
+{"guid": "N30_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "state", "is_base_form": true, "ipa": "/steɪt/", "phonetic": "STAYT"}]}
+{"guid": "N30_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "area", "is_base_form": true, "ipa": "/ˈɛəriə/", "phonetic": "AIR-ee-ə"}]}
+{"guid": "N30_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "land", "is_base_form": true, "ipa": "/lænd/", "phonetic": "LAND"}]}
+{"guid": "N30_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "north", "is_base_form": true, "ipa": "/nɔːrθ/", "phonetic": "NOR-th"}]}
+{"guid": "N30_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "south", "is_base_form": true, "ipa": "/sʌθ/", "phonetic": "SOOTH"}]}
+{"guid": "N30_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "east", "is_base_form": true, "ipa": "/iːst/", "phonetic": "EEST"}]}
+{"guid": "N30_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "west", "is_base_form": true, "ipa": "/wɛst/", "phonetic": "WEST"}]}
+{"guid": "N30_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "inside", "is_base_form": true, "ipa": "/ɪnˈsaɪd/", "phonetic": "IN-sighd"}]}
+{"guid": "N30_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "outside", "is_base_form": true, "ipa": "/aʊtˈsaɪd/", "phonetic": "AWT-side"}]}
+{"guid": "N30_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "behind", "is_base_form": true, "ipa": "/bɪˈhaɪnd/", "phonetic": "BIGH-end"}]}
 {"guid": "N30_054", "variants": [{"kind": "spelling", "key": "north-east", "forms": [{"grammatical_form": "noun/en_base", "text": "north-east", "is_base_form": true}]}]}
 {"guid": "N30_055", "variants": [{"kind": "spelling", "key": "north-west", "forms": [{"grammatical_form": "noun/en_base", "text": "north-west", "is_base_form": true}]}]}
 {"guid": "N30_056", "variants": [{"kind": "spelling", "key": "south-east", "forms": [{"grammatical_form": "noun/en_base", "text": "south-east", "is_base_form": true}]}]}

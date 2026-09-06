@@ -1,14 +1,11 @@
 {"guid": "N38_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "leaf", "is_base_form": true, "ipa": "/liːf/", "phonetic": "LEEV"}, {"grammatical_form": "noun/en_plural", "text": "leaves", "is_base_form": false}]}
-{"guid": "N38_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "root", "is_base_form": true, "ipa": "/ruːt/", "phonetic": "ROO-t"}, {"grammatical_form": "noun/en_plural", "text": "roots", "is_base_form": false}]}
-{"guid": "N38_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "branch", "is_base_form": true, "ipa": "/bræntʃ/", "phonetic": "BRANSH"}, {"grammatical_form": "noun/en_plural", "text": "branches", "is_base_form": false}]}
-{"guid": "N38_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "seed", "is_base_form": true, "ipa": "/siːd/", "phonetic": "SEED"}, {"grammatical_form": "noun/en_plural", "text": "seeds", "is_base_form": false}]}
-{"guid": "N38_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "fruit", "is_base_form": true, "ipa": "/fɹuːt/", "phonetic": "FROOT"}, {"grammatical_form": "noun/en_plural", "text": "fruits", "is_base_form": false}]}
-{"guid": "N38_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "bark", "is_base_form": true, "ipa": "/ˈbɑːrk/", "phonetic": "BAR-k"}, {"grammatical_form": "noun/en_plural", "text": "barks", "is_base_form": false}]}
+{"guid": "N38_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "root", "is_base_form": true, "ipa": "/ruːt/", "phonetic": "ROO-t"}]}
+{"guid": "N38_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "branch", "is_base_form": true, "ipa": "/bræntʃ/", "phonetic": "BRANSH"}]}
+{"guid": "N38_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "seed", "is_base_form": true, "ipa": "/siːd/", "phonetic": "SEED"}]}
+{"guid": "N38_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "fruit", "is_base_form": true, "ipa": "/fɹuːt/", "phonetic": "FROOT"}]}
+{"guid": "N38_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "bark", "is_base_form": true, "ipa": "/ˈbɑːrk/", "phonetic": "BAR-k"}]}
 {"guid": "N38_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "pollen", "is_base_form": true, "ipa": "ˈpɒlən", "phonetic": "POH-lən"}]}
-{"guid": "N38_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "trunk", "is_base_form": true, "ipa": "/trʌŋk/", "phonetic": "TRUNGK"}, {"grammatical_form": "noun/en_plural", "text": "trunks", "is_base_form": false}]}
-{"guid": "N38_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "stem", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stems", "is_base_form": false}]}
-{"guid": "N38_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "petal", "is_base_form": true, "ipa": "/ˈpɛtəl/", "phonetic": "PEH-tuhl"}, {"grammatical_form": "noun/en_plural", "text": "petals", "is_base_form": false}]}
-{"guid": "N38_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "thorn", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "thorns", "is_base_form": false}]}
-{"guid": "N38_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "bud", "is_base_form": true, "ipa": "/bʌd/", "phonetic": "BUD"}, {"grammatical_form": "noun/en_plural", "text": "buds", "is_base_form": false}]}
-{"guid": "N38_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "flower", "is_base_form": true, "ipa": "/ˈflaʊ.ər/", "phonetic": "FLAW-ər"}, {"grammatical_form": "noun/en_plural", "text": "flowers", "is_base_form": false}]}
-{"guid": "N38_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "blade", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "blades", "is_base_form": false}]}
+{"guid": "N38_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "trunk", "is_base_form": true, "ipa": "/trʌŋk/", "phonetic": "TRUNGK"}]}
+{"guid": "N38_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "petal", "is_base_form": true, "ipa": "/ˈpɛtəl/", "phonetic": "PEH-tuhl"}]}
+{"guid": "N38_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "bud", "is_base_form": true, "ipa": "/bʌd/", "phonetic": "BUD"}]}
+{"guid": "N38_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "flower", "is_base_form": true, "ipa": "/ˈflaʊ.ər/", "phonetic": "FLAW-ər"}]}
