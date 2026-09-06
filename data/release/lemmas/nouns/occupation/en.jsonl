@@ -1,58 +1,27 @@
-{"guid": "N36_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "accountant", "is_base_form": true, "ipa": "/əˈkaʊn.tənt/", "phonetic": "uh-CAWNT-ent"}, {"grammatical_form": "noun/en_plural", "text": "accountants", "is_base_form": false}]}
-{"guid": "N36_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "teacher", "is_base_form": true, "ipa": "/ˈtiːtʃər/", "phonetic": "TEE-cher"}, {"grammatical_form": "noun/en_plural", "text": "teachers", "is_base_form": false}]}
-{"guid": "N36_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "doctor", "is_base_form": true, "ipa": "/ˈdɒktər/", "phonetic": "DAK-tər"}, {"grammatical_form": "noun/en_plural", "text": "doctors", "is_base_form": false}]}
-{"guid": "N36_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "nurse", "is_base_form": true, "ipa": "/nɜːrs/", "phonetic": "NUR-suh"}, {"grammatical_form": "noun/en_plural", "text": "nurses", "is_base_form": false}]}
-{"guid": "N36_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "engineer", "is_base_form": true, "ipa": "/ˈɛndʒɪnɪər/", "phonetic": "EN-jin-yer"}, {"grammatical_form": "noun/en_plural", "text": "engineers", "is_base_form": false}]}
-{"guid": "N36_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "lawyer", "is_base_form": true, "ipa": "/ˈlɔːjər/", "phonetic": "LOH-yer"}, {"grammatical_form": "noun/en_plural", "text": "lawyers", "is_base_form": false}]}
+{"guid": "N36_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "accountant", "is_base_form": true, "ipa": "/əˈkaʊn.tənt/", "phonetic": "uh-CAWNT-ent"}]}
+{"guid": "N36_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "teacher", "is_base_form": true, "ipa": "/ˈtiːtʃər/", "phonetic": "TEE-cher"}]}
+{"guid": "N36_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "doctor", "is_base_form": true, "ipa": "/ˈdɒktər/", "phonetic": "DAK-tər"}]}
+{"guid": "N36_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "nurse", "is_base_form": true, "ipa": "/nɜːrs/", "phonetic": "NUR-suh"}]}
+{"guid": "N36_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "engineer", "is_base_form": true, "ipa": "/ˈɛndʒɪnɪər/", "phonetic": "EN-jin-yer"}]}
+{"guid": "N36_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "lawyer", "is_base_form": true, "ipa": "/ˈlɔːjər/", "phonetic": "LOH-yer"}]}
 {"guid": "N36_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "police officer", "is_base_form": true, "ipa": "/ˈpɑlɪs ˈɑfɚ/", "phonetic": "PAH-lee-s OH-fer"}, {"grammatical_form": "noun/en_plural", "text": "police officers", "is_base_form": false}]}
-{"guid": "N36_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "firefighter", "is_base_form": true, "ipa": "IPA: /ˈfaɪərˌfaɪtər/", "phonetic": "FYUR-fyte-ər"}, {"grammatical_form": "noun/en_plural", "text": "firefighters", "is_base_form": false}]}
-{"guid": "N36_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "cook", "is_base_form": true, "ipa": "/kʊk/", "phonetic": "KOOK"}, {"grammatical_form": "noun/en_plural", "text": "cooks", "is_base_form": false}]}
-{"guid": "N36_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "farmer", "is_base_form": true, "ipa": "/ˈfɑːrmər/", "phonetic": "FAR-mur"}, {"grammatical_form": "noun/en_plural", "text": "farmers", "is_base_form": false}]}
-{"guid": "N36_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "pilot", "is_base_form": true, "ipa": "/ˈpaɪlət/", "phonetic": "PYE-lut"}, {"grammatical_form": "noun/en_plural", "text": "pilots", "is_base_form": false}]}
-{"guid": "N36_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "driver", "is_base_form": true, "ipa": "/ˈdraɪvər/", "phonetic": "DRAI-vər"}, {"grammatical_form": "noun/en_plural", "text": "drivers", "is_base_form": false}]}
-{"guid": "N36_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "mechanic", "is_base_form": true, "ipa": "ˈmɛkənɪk", "phonetic": "MEK-uh-nik"}, {"grammatical_form": "noun/en_plural", "text": "mechanics", "is_base_form": false}]}
-{"guid": "N36_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "electrician", "is_base_form": true, "ipa": "/ɛlɛkˈtrɪʃ.ən/", "phonetic": "EL-uhk-TRI-shən"}, {"grammatical_form": "noun/en_plural", "text": "electricians", "is_base_form": false}]}
-{"guid": "N36_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "plumber", "is_base_form": true, "ipa": "/ˈplʌmbər/", "phonetic": "PLUH-mər"}, {"grammatical_form": "noun/en_plural", "text": "plumbers", "is_base_form": false}]}
-{"guid": "N36_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "carpenter", "is_base_form": true, "ipa": "/ˈkɑrpɛntər/", "phonetic": "KAR-pen-ter"}, {"grammatical_form": "noun/en_plural", "text": "carpenters", "is_base_form": false}]}
-{"guid": "N36_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "musician", "is_base_form": true, "ipa": "/ˈmjuːzɪʃ.ən/", "phonetic": "MYOO-zih-shuhn"}, {"grammatical_form": "noun/en_plural", "text": "musicians", "is_base_form": false}]}
-{"guid": "N36_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "artist", "is_base_form": true, "ipa": "/ɑːrtɪst/", "phonetic": "AHR-tilst"}, {"grammatical_form": "noun/en_plural", "text": "artists", "is_base_form": false}]}
-{"guid": "N36_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "writer", "is_base_form": true, "ipa": "/ˈraɪtər/", "phonetic": "RYT-uh"}, {"grammatical_form": "noun/en_plural", "text": "writers", "is_base_form": false}]}
-{"guid": "N36_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "journalist", "is_base_form": true, "ipa": "/ˈdʒɜːrnəlɪst/", "phonetic": "JURN-ə-list"}, {"grammatical_form": "noun/en_plural", "text": "journalists", "is_base_form": false}]}
-{"guid": "N36_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "photographer", "is_base_form": true, "ipa": "/fəˈtɑːɡrəfər/", "phonetic": "fuh-TAW-gruh-fur"}, {"grammatical_form": "noun/en_plural", "text": "photographers", "is_base_form": false}]}
-{"guid": "N36_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "dentist", "is_base_form": true, "ipa": "/ˈdɛntɪst/", "phonetic": "DEN-tist"}, {"grammatical_form": "noun/en_plural", "text": "dentists", "is_base_form": false}]}
-{"guid": "N36_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "veterinarian", "is_base_form": true, "ipa": "/vɛtəˈnɛriən/", "phonetic": "VET-uh-NAIR-yuhn"}, {"grammatical_form": "noun/en_plural", "text": "veterinarians", "is_base_form": false}]}
-{"guid": "N36_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "baker", "is_base_form": true, "ipa": "/ˈbeɪkər/", "phonetic": "BAY-ker"}, {"grammatical_form": "noun/en_plural", "text": "bakers", "is_base_form": false}]}
-{"guid": "N36_042", "forms": [{"grammatical_form": "noun/en_singular", "text": "soldier", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "soldiers", "is_base_form": false}]}
-{"guid": "N36_043", "forms": [{"grammatical_form": "noun/en_singular", "text": "waiter", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "waiters", "is_base_form": false}]}
-{"guid": "N36_044", "forms": [{"grammatical_form": "noun/en_singular", "text": "pharmacist", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "pharmacists", "is_base_form": false}]}
-{"guid": "N36_045", "forms": [{"grammatical_form": "noun/en_singular", "text": "architect", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "architects", "is_base_form": false}]}
-{"guid": "N36_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "scientist", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "scientists", "is_base_form": false}]}
-{"guid": "N36_047", "forms": [{"grammatical_form": "noun/en_singular", "text": "actor", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "actors", "is_base_form": false}]}
-{"guid": "N36_048", "forms": [{"grammatical_form": "noun/en_singular", "text": "judge", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "judges", "is_base_form": false}]}
-{"guid": "N36_049", "forms": [{"grammatical_form": "noun/en_singular", "text": "hairdresser", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "hairdressers", "is_base_form": false}]}
-{"guid": "N36_050", "forms": [{"grammatical_form": "noun/en_singular", "text": "fisherman", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "fishermans", "is_base_form": false}]}
-{"guid": "N36_051", "forms": [{"grammatical_form": "noun/en_singular", "text": "worker", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "workers", "is_base_form": false}]}
-{"guid": "N36_052", "forms": [{"grammatical_form": "noun/en_singular", "text": "librarian", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "librarians", "is_base_form": false}]}
-{"guid": "N36_053", "forms": [{"grammatical_form": "noun/en_singular", "text": "surgeon", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "surgeons", "is_base_form": false}]}
-{"guid": "N36_054", "forms": [{"grammatical_form": "noun/en_singular", "text": "programmer", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "programmers", "is_base_form": false}]}
-{"guid": "N36_055", "forms": [{"grammatical_form": "noun/en_singular", "text": "sailor", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "sailors", "is_base_form": false}]}
-{"guid": "N36_056", "forms": [{"grammatical_form": "noun/en_singular", "text": "tailor", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "tailors", "is_base_form": false}]}
-{"guid": "N36_057", "forms": [{"grammatical_form": "noun/en_singular", "text": "painter", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "painters", "is_base_form": false}]}
-{"guid": "N36_058", "forms": [{"grammatical_form": "noun/en_singular", "text": "butcher", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "butchers", "is_base_form": false}]}
-{"guid": "N36_059", "forms": [{"grammatical_form": "noun/en_singular", "text": "gardener", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "gardeners", "is_base_form": false}]}
-{"guid": "N36_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "translator", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "translators", "is_base_form": false}]}
-{"guid": "N36_061", "forms": [{"grammatical_form": "noun/en_singular", "text": "receptionist", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "receptionists", "is_base_form": false}]}
-{"guid": "N36_062", "forms": [{"grammatical_form": "noun/en_singular", "text": "coach", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "coaches", "is_base_form": false}]}
-{"guid": "N36_063", "forms": [{"grammatical_form": "noun/en_singular", "text": "professor", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "professors", "is_base_form": false}]}
-{"guid": "N36_064", "forms": [{"grammatical_form": "noun/en_singular", "text": "psychologist", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "psychologists", "is_base_form": false}]}
-{"guid": "N36_065", "forms": [{"grammatical_form": "noun/en_singular", "text": "therapist", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "therapists", "is_base_form": false}]}
-{"guid": "N36_066", "forms": [{"grammatical_form": "noun/en_singular", "text": "cashier", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "cashiers", "is_base_form": false}]}
-{"guid": "N36_067", "forms": [{"grammatical_form": "noun/en_singular", "text": "janitor", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "janitors", "is_base_form": false}]}
-{"guid": "N36_069", "forms": [{"grammatical_form": "noun/en_singular", "text": "detective", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "detectives", "is_base_form": false}]}
-{"guid": "N36_070", "forms": [{"grammatical_form": "noun/en_singular", "text": "paramedic", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "paramedics", "is_base_form": false}]}
-{"guid": "N36_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "economist", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "economists", "is_base_form": false}]}
-{"guid": "N36_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "diplomat", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "diplomats", "is_base_form": false}]}
-{"guid": "N36_074", "forms": [{"grammatical_form": "noun/en_singular", "text": "miner", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "miners", "is_base_form": false}]}
+{"guid": "N36_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "firefighter", "is_base_form": true, "ipa": "IPA: /ˈfaɪərˌfaɪtər/", "phonetic": "FYUR-fyte-ər"}]}
+{"guid": "N36_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "cook", "is_base_form": true, "ipa": "/kʊk/", "phonetic": "KOOK"}]}
+{"guid": "N36_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "farmer", "is_base_form": true, "ipa": "/ˈfɑːrmər/", "phonetic": "FAR-mur"}]}
+{"guid": "N36_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "pilot", "is_base_form": true, "ipa": "/ˈpaɪlət/", "phonetic": "PYE-lut"}]}
+{"guid": "N36_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "driver", "is_base_form": true, "ipa": "/ˈdraɪvər/", "phonetic": "DRAI-vər"}]}
+{"guid": "N36_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "mechanic", "is_base_form": true, "ipa": "ˈmɛkənɪk", "phonetic": "MEK-uh-nik"}]}
+{"guid": "N36_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "electrician", "is_base_form": true, "ipa": "/ɛlɛkˈtrɪʃ.ən/", "phonetic": "EL-uhk-TRI-shən"}]}
+{"guid": "N36_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "plumber", "is_base_form": true, "ipa": "/ˈplʌmbər/", "phonetic": "PLUH-mər"}]}
+{"guid": "N36_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "carpenter", "is_base_form": true, "ipa": "/ˈkɑrpɛntər/", "phonetic": "KAR-pen-ter"}]}
+{"guid": "N36_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "musician", "is_base_form": true, "ipa": "/ˈmjuːzɪʃ.ən/", "phonetic": "MYOO-zih-shuhn"}]}
+{"guid": "N36_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "artist", "is_base_form": true, "ipa": "/ɑːrtɪst/", "phonetic": "AHR-tilst"}]}
+{"guid": "N36_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "writer", "is_base_form": true, "ipa": "/ˈraɪtər/", "phonetic": "RYT-uh"}]}
+{"guid": "N36_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "journalist", "is_base_form": true, "ipa": "/ˈdʒɜːrnəlɪst/", "phonetic": "JURN-ə-list"}]}
+{"guid": "N36_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "photographer", "is_base_form": true, "ipa": "/fəˈtɑːɡrəfər/", "phonetic": "fuh-TAW-gruh-fur"}]}
+{"guid": "N36_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "dentist", "is_base_form": true, "ipa": "/ˈdɛntɪst/", "phonetic": "DEN-tist"}]}
+{"guid": "N36_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "veterinarian", "is_base_form": true, "ipa": "/vɛtəˈnɛriən/", "phonetic": "VET-uh-NAIR-yuhn"}]}
+{"guid": "N36_041", "forms": [{"grammatical_form": "noun/en_singular", "text": "baker", "is_base_form": true, "ipa": "/ˈbeɪkər/", "phonetic": "BAY-ker"}]}
 {"guid": "N36_075", "forms": [{"grammatical_form": "noun/en_singular", "text": "flight attendant", "is_base_form": true}]}
 {"guid": "N36_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "mail carrier", "is_base_form": true}]}
 {"guid": "N36_077", "forms": [{"grammatical_form": "noun/en_singular", "text": "bus driver", "is_base_form": true}]}

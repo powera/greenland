@@ -11,13 +11,13 @@
 {"guid": "D07_011", "forms": [{"grammatical_form": "adverb/en_positive", "text": "soon", "is_base_form": true, "ipa": "/suːn/", "phonetic": "SOO-n"}, {"grammatical_form": "adverb/en_comparative", "text": "sooner", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "soonest", "is_base_form": false}]}
 {"guid": "D07_012", "forms": [{"grammatical_form": "adverb/en_positive", "text": "recently", "is_base_form": true, "ipa": "/ɹɪˈsɛntli/", "phonetic": "RIH-sent-lee"}]}
 {"guid": "D07_013", "forms": [{"grammatical_form": "adverb/en_positive", "text": "away", "is_base_form": true, "ipa": "/əˈweɪ/", "phonetic": "uh-WAY"}]}
-{"guid": "D07_014", "forms": [{"grammatical_form": "adverb/en_positive", "text": "far", "is_base_form": true, "ipa": "fɑː", "phonetic": "FAAR"}, {"grammatical_form": "adverb/en_comparative", "text": "farther", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "farthest", "is_base_form": false}]}
+{"guid": "D07_014", "forms": [{"grammatical_form": "adverb/en_positive", "text": "far", "is_base_form": true, "ipa": "fɑː", "phonetic": "FAAR"}]}
 {"guid": "D07_015", "forms": [{"grammatical_form": "adverb/en_positive", "text": "near", "is_base_form": true, "ipa": "/nɪr/", "phonetic": "NEER"}, {"grammatical_form": "adverb/en_comparative", "text": "nearer", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "nearest", "is_base_form": false}]}
 {"guid": "D07_016", "forms": [{"grammatical_form": "adverb/en_positive", "text": "round", "is_base_form": true, "ipa": "/raʊnd/", "phonetic": "ROWnd"}]}
 {"guid": "D07_017", "forms": [{"grammatical_form": "adverb/en_positive", "text": "forward", "is_base_form": true, "ipa": "/ˈfɔːrd/", "phonetic": "FOWRD"}]}
 {"guid": "D07_018", "forms": [{"grammatical_form": "adverb/en_positive", "text": "ahead", "is_base_form": true, "ipa": "/əˈhɛd/", "phonetic": "uh-HED"}]}
 {"guid": "D07_019", "forms": [{"grammatical_form": "adverb/en_positive", "text": "distant", "is_base_form": true, "ipa": "/ˈdɪs.tənt/", "phonetic": "DIS-tuhnt"}]}
-{"guid": "D07_020", "forms": [{"grammatical_form": "adverb/en_positive", "text": "directly", "is_base_form": true, "ipa": "/dəˈrɛktli/", "phonetic": "DYUR-ek-tlee"}, {"grammatical_form": "adverb/en_comparative", "text": "more directly", "is_base_form": false}, {"grammatical_form": "adverb/en_superlative", "text": "most directly", "is_base_form": false}]}
+{"guid": "D07_020", "forms": [{"grammatical_form": "adverb/en_positive", "text": "directly", "is_base_form": true, "ipa": "/dəˈrɛktli/", "phonetic": "DYUR-ek-tlee"}]}
 {"guid": "D07_021", "forms": [{"grammatical_form": "adverb/en_positive", "text": "anywhere", "is_base_form": true, "ipa": "/ˈɛniˌhɛwɚ/", "phonetic": "EH-nigh-HUR-er"}]}
 {"guid": "D07_022", "forms": [{"grammatical_form": "adverb/en_positive", "text": "aside", "is_base_form": true, "ipa": "/əˈsaɪd/", "phonetic": "uh-SYD"}]}
 {"guid": "D07_023", "forms": [{"grammatical_form": "adverb/en_positive", "text": "forth", "is_base_form": true, "ipa": "/fɔːrθ/", "phonetic": "FOR-th"}]}

@@ -518,11 +518,16 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
     from storage.models.schema import Lemma
     from storage.release.derivative_form import forms_by_language
     from storage.release.lemma import lemma_to_release_record
+    from storage.release.mechanical_filter import clear_cache, without_derivable
 
     session = create_database_session(sqlite_path)
     from storage.utils.session import ensure_tables_exist
 
     ensure_tables_exist(session)
+
+    # Paradigms are memoized per lemma; a second export in the same process
+    # must re-read facts that may have changed since the first.
+    clear_cache()
 
     try:
         # Get all lemmas with GUIDs (curated words only)
@@ -701,7 +706,14 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
                 # Derivative forms, split into the array-shaped "forms" and
                 # "synonyms" keys by storage.release.derivative_form -- the same
                 # builder the /sync/derivatives and /sync/synonyms pages use.
-                forms_by_lang, synonyms_by_lang = forms_by_language(lemma.derivative_forms)
+                #
+                # Forms the langtools rules regenerate are withheld: the release
+                # carries only what cannot be derived, and generate_mechanical_forms
+                # puts the rest back on import.  Without this an export after a
+                # bootstrap writes back every generated paradigm.
+                forms_by_lang, synonyms_by_lang = forms_by_language(
+                    without_derivable(session, lemma, lemma.derivative_forms)
+                )
 
                 # Variant forms (alternate spellings), already grouped per
                 # language and per variant by storage.release.variant.
@@ -747,6 +759,20 @@ def export_sqlite_to_release(sqlite_path: str, release_dir: str) -> None:
             for lang, records in sorted(lang_records.items()):
                 lang_file = category_dir / f"{lang}.jsonl"
                 _write_jsonl_atomic(lang_file, records)
+
+            # A language that had rows before and has none now must lose its
+            # file, or the export stops being a rebuild: the stale file would
+            # survive and be re-imported.  This is reachable whenever the last
+            # row for a language goes away -- deleting a translation, or the
+            # mechanical filter withholding a whole category's forms.
+            # "audio" is written by the separate lemma-audio export, so it is
+            # reserved here even though this pass never writes it.
+            reserved_stems = {"base", "secondary", "audio"} | set(extra_group_records)
+            for stale_file in category_dir.glob("*.jsonl"):
+                lang = stale_file.stem
+                if lang in reserved_stems or lang in lang_records:
+                    continue
+                stale_file.unlink()
 
         print(f"\nExport complete!")
         print(f"Languages exported: {', '.join(sorted(all_languages))}")

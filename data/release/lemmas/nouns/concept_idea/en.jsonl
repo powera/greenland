@@ -1,146 +1,61 @@
-{"guid": "N17_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "truth", "is_base_form": true, "ipa": "/truːθ/", "phonetic": "TROO-th"}, {"grammatical_form": "noun/en_plural", "text": "truths", "is_base_form": false}]}
-{"guid": "N17_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "problem", "is_base_form": true, "ipa": "/ˈprɑːbləm/", "phonetic": "PROH-bluhm"}, {"grammatical_form": "noun/en_plural", "text": "problems", "is_base_form": false}]}
+{"guid": "N17_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "truth", "is_base_form": true, "ipa": "/truːθ/", "phonetic": "TROO-th"}]}
+{"guid": "N17_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "problem", "is_base_form": true, "ipa": "/ˈprɑːbləm/", "phonetic": "PROH-bluhm"}]}
 {"guid": "N17_046", "forms": [{"grammatical_form": "noun/en_singular", "text": "money", "is_base_form": true, "ipa": "/ˈmʌni/", "phonetic": "MUN-ee"}]}
-{"guid": "N17_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "solution", "is_base_form": true, "ipa": "/səˈluːʃn/", "phonetic": "SOO-loo-shn"}, {"grammatical_form": "noun/en_plural", "text": "solutions", "is_base_form": false}]}
+{"guid": "N17_060", "forms": [{"grammatical_form": "noun/en_singular", "text": "solution", "is_base_form": true, "ipa": "/səˈluːʃn/", "phonetic": "SOO-loo-shn"}]}
 {"guid": "N17_072", "forms": [{"grammatical_form": "noun/en_singular", "text": "magic", "is_base_form": true, "ipa": "/ˈmædʒ.ɪk/", "phonetic": "MAD-jik"}]}
-{"guid": "N17_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "sound", "is_base_form": true, "ipa": "ˈsaʊnd", "phonetic": "SOH-nd"}, {"grammatical_form": "noun/en_plural", "text": "sounds", "is_base_form": false}]}
-{"guid": "N17_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "body", "is_base_form": true, "ipa": "/ˈbɑdi/", "phonetic": "BAH-dee"}, {"grammatical_form": "noun/en_plural", "text": "bodies", "is_base_form": false}]}
-{"guid": "N17_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "matter", "is_base_form": true, "ipa": "[ˈmætər]", "phonetic": "MAT-ər"}, {"grammatical_form": "noun/en_plural", "text": "matters", "is_base_form": false}]}
-{"guid": "N17_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "fact", "is_base_form": true, "ipa": "fact", "phonetic": "FAKT"}, {"grammatical_form": "noun/en_plural", "text": "facts", "is_base_form": false}]}
-{"guid": "N17_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "sight", "is_base_form": true, "ipa": "/saɪt/", "phonetic": "SIGH-t"}, {"grammatical_form": "noun/en_plural", "text": "sights", "is_base_form": false}]}
-{"guid": "N17_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "control", "is_base_form": true, "ipa": "/kənˈtroʊl/", "phonetic": "KON-troh-l"}, {"grammatical_form": "noun/en_plural", "text": "controls", "is_base_form": false}]}
-{"guid": "N17_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "sort", "is_base_form": true, "ipa": "/sɔːrt/", "phonetic": "SOR-t"}, {"grammatical_form": "noun/en_plural", "text": "sorts", "is_base_form": false}]}
-{"guid": "N17_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "care", "is_base_form": true, "ipa": "/kɛər/", "phonetic": "KAYR"}, {"grammatical_form": "noun/en_plural", "text": "cares", "is_base_form": false}]}
-{"guid": "N17_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "case", "is_base_form": true, "ipa": "/keɪs/", "phonetic": "KEYS"}, {"grammatical_form": "noun/en_plural", "text": "cases", "is_base_form": false}]}
-{"guid": "N17_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "order", "is_base_form": true, "ipa": "/ˈɔːr.dɚ/", "phonetic": "AWR-dur"}, {"grammatical_form": "noun/en_plural", "text": "orders", "is_base_form": false}]}
-{"guid": "N17_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "form", "is_base_form": true, "ipa": "/fɔːrm/", "phonetic": "FOHRM"}, {"grammatical_form": "noun/en_plural", "text": "forms", "is_base_form": false}]}
-{"guid": "N17_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "command", "is_base_form": true, "ipa": "/kəˈmænd/", "phonetic": " kuh-MAND"}, {"grammatical_form": "noun/en_plural", "text": "commands", "is_base_form": false}]}
-{"guid": "N17_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "system", "is_base_form": true, "ipa": "/ˈsɪs.təm/", "phonetic": "SISS-təm"}, {"grammatical_form": "noun/en_plural", "text": "systems", "is_base_form": false}]}
-{"guid": "N17_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "smell", "is_base_form": true, "ipa": "/smɛl/", "phonetic": "SMEL"}, {"grammatical_form": "noun/en_plural", "text": "smells", "is_base_form": false}]}
-{"guid": "N17_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "deal", "is_base_form": true, "ipa": "/diːl/", "phonetic": "DEE-l"}, {"grammatical_form": "noun/en_plural", "text": "deals", "is_base_form": false}]}
-{"guid": "N17_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "direction", "is_base_form": true, "ipa": "/dɪˈrɛkʃən/", "phonetic": "DI-REK-shən"}, {"grammatical_form": "noun/en_plural", "text": "directions", "is_base_form": false}]}
-{"guid": "N17_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "purpose", "is_base_form": true, "ipa": "/ˈpɝpəs/", "phonetic": "PUR-puh-s"}, {"grammatical_form": "noun/en_plural", "text": "purposes", "is_base_form": false}]}
-{"guid": "N17_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "job", "is_base_form": true, "ipa": "/dʒɒb/", "phonetic": "JO-b"}, {"grammatical_form": "noun/en_plural", "text": "jobs", "is_base_form": false}]}
-{"guid": "N17_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "authority", "is_base_form": true, "ipa": "/ɔːθɚɪˈtaɪ/", "phonetic": "AWTH-uh-ree-TY"}, {"grammatical_form": "noun/en_plural", "text": "authorities", "is_base_form": false}]}
-{"guid": "N17_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "noise", "is_base_form": true, "ipa": "/naɪz/", "phonetic": "NY-z"}, {"grammatical_form": "noun/en_plural", "text": "noises", "is_base_form": false}]}
-{"guid": "N17_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "plan", "is_base_form": true, "ipa": "/plæn/", "phonetic": "P-LAN"}, {"grammatical_form": "noun/en_plural", "text": "plans", "is_base_form": false}]}
-{"guid": "N17_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "talent", "is_base_form": true, "ipa": "/ˈtæl.ənt/", "phonetic": "TAL-uhnt"}, {"grammatical_form": "noun/en_plural", "text": "talents", "is_base_form": false}]}
-{"guid": "N17_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "view", "is_base_form": true, "ipa": "/vjuː/", "phonetic": "VYOO"}, {"grammatical_form": "noun/en_plural", "text": "views", "is_base_form": false}]}
-{"guid": "N17_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "smile", "is_base_form": true, "ipa": "/ˈsmaɪl/", "phonetic": "SMY-l"}, {"grammatical_form": "noun/en_plural", "text": "smiles", "is_base_form": false}]}
-{"guid": "N17_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "spell", "is_base_form": true, "ipa": "/spɛl/", "phonetic": "SPELL"}, {"grammatical_form": "noun/en_plural", "text": "spells", "is_base_form": false}]}
-{"guid": "N17_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "universe", "is_base_form": true, "ipa": "/ˌjuː.nɪˈvɜːs/", "phonetic": "yoo-NEH-vers"}, {"grammatical_form": "noun/en_plural", "text": "universes", "is_base_form": false}]}
-{"guid": "N17_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "choice", "is_base_form": true, "ipa": "/tʃɔɪs/", "phonetic": "CHOYS"}, {"grammatical_form": "noun/en_plural", "text": "choices", "is_base_form": false}]}
-{"guid": "N17_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "rule", "is_base_form": true, "ipa": "/ruːl/", "phonetic": "ROO-l"}, {"grammatical_form": "noun/en_plural", "text": "rules", "is_base_form": false}]}
-{"guid": "N17_150", "forms": [{"grammatical_form": "noun/en_singular", "text": "position", "is_base_form": true, "ipa": "/ˈpəʊ.zə.ʃən/", "phonetic": "POH-zhuhn-shuhn"}, {"grammatical_form": "noun/en_plural", "text": "positions", "is_base_form": false}]}
-{"guid": "N17_156", "forms": [{"grammatical_form": "noun/en_singular", "text": "manner", "is_base_form": true, "ipa": "/ˈmænr/", "phonetic": "MAN-ur"}, {"grammatical_form": "noun/en_plural", "text": "manners", "is_base_form": false}]}
-{"guid": "N17_158", "forms": [{"grammatical_form": "noun/en_singular", "text": "stuff", "is_base_form": true, "ipa": "/stʌf/", "phonetic": "STUF"}, {"grammatical_form": "noun/en_plural", "text": "stuffs", "is_base_form": false}]}
-{"guid": "N17_159", "forms": [{"grammatical_form": "noun/en_singular", "text": "pattern", "is_base_form": true, "ipa": "/ˈpætər̩n/", "phonetic": "PAT-ər-n"}, {"grammatical_form": "noun/en_plural", "text": "patterns", "is_base_form": false}]}
-{"guid": "N17_160", "forms": [{"grammatical_form": "noun/en_singular", "text": "effect", "is_base_form": true, "ipa": "/ɛˈfɛkt/", "phonetic": "EF-ect"}, {"grammatical_form": "noun/en_plural", "text": "effects", "is_base_form": false}]}
-{"guid": "N17_163", "forms": [{"grammatical_form": "noun/en_singular", "text": "effort", "is_base_form": true, "ipa": "/ˈɛfərt/", "phonetic": "EFF-uh-rt"}, {"grammatical_form": "noun/en_plural", "text": "efforts", "is_base_form": false}]}
+{"guid": "N17_073", "forms": [{"grammatical_form": "noun/en_singular", "text": "sound", "is_base_form": true, "ipa": "ˈsaʊnd", "phonetic": "SOH-nd"}]}
+{"guid": "N17_076", "forms": [{"grammatical_form": "noun/en_singular", "text": "body", "is_base_form": true, "ipa": "/ˈbɑdi/", "phonetic": "BAH-dee"}]}
+{"guid": "N17_080", "forms": [{"grammatical_form": "noun/en_singular", "text": "matter", "is_base_form": true, "ipa": "[ˈmætər]", "phonetic": "MAT-ər"}]}
+{"guid": "N17_081", "forms": [{"grammatical_form": "noun/en_singular", "text": "fact", "is_base_form": true, "ipa": "fact", "phonetic": "FAKT"}]}
+{"guid": "N17_087", "forms": [{"grammatical_form": "noun/en_singular", "text": "sight", "is_base_form": true, "ipa": "/saɪt/", "phonetic": "SIGH-t"}]}
+{"guid": "N17_089", "forms": [{"grammatical_form": "noun/en_singular", "text": "control", "is_base_form": true, "ipa": "/kənˈtroʊl/", "phonetic": "KON-troh-l"}]}
+{"guid": "N17_094", "forms": [{"grammatical_form": "noun/en_singular", "text": "sort", "is_base_form": true, "ipa": "/sɔːrt/", "phonetic": "SOR-t"}]}
+{"guid": "N17_095", "forms": [{"grammatical_form": "noun/en_singular", "text": "care", "is_base_form": true, "ipa": "/kɛər/", "phonetic": "KAYR"}]}
+{"guid": "N17_099", "forms": [{"grammatical_form": "noun/en_singular", "text": "case", "is_base_form": true, "ipa": "/keɪs/", "phonetic": "KEYS"}]}
+{"guid": "N17_106", "forms": [{"grammatical_form": "noun/en_singular", "text": "order", "is_base_form": true, "ipa": "/ˈɔːr.dɚ/", "phonetic": "AWR-dur"}]}
+{"guid": "N17_107", "forms": [{"grammatical_form": "noun/en_singular", "text": "form", "is_base_form": true, "ipa": "/fɔːrm/", "phonetic": "FOHRM"}]}
+{"guid": "N17_108", "forms": [{"grammatical_form": "noun/en_singular", "text": "command", "is_base_form": true, "ipa": "/kəˈmænd/", "phonetic": " kuh-MAND"}]}
+{"guid": "N17_109", "forms": [{"grammatical_form": "noun/en_singular", "text": "system", "is_base_form": true, "ipa": "/ˈsɪs.təm/", "phonetic": "SISS-təm"}]}
+{"guid": "N17_111", "forms": [{"grammatical_form": "noun/en_singular", "text": "smell", "is_base_form": true, "ipa": "/smɛl/", "phonetic": "SMEL"}]}
+{"guid": "N17_112", "forms": [{"grammatical_form": "noun/en_singular", "text": "deal", "is_base_form": true, "ipa": "/diːl/", "phonetic": "DEE-l"}]}
+{"guid": "N17_114", "forms": [{"grammatical_form": "noun/en_singular", "text": "direction", "is_base_form": true, "ipa": "/dɪˈrɛkʃən/", "phonetic": "DI-REK-shən"}]}
+{"guid": "N17_116", "forms": [{"grammatical_form": "noun/en_singular", "text": "purpose", "is_base_form": true, "ipa": "/ˈpɝpəs/", "phonetic": "PUR-puh-s"}]}
+{"guid": "N17_118", "forms": [{"grammatical_form": "noun/en_singular", "text": "job", "is_base_form": true, "ipa": "/dʒɒb/", "phonetic": "JO-b"}]}
+{"guid": "N17_119", "forms": [{"grammatical_form": "noun/en_singular", "text": "authority", "is_base_form": true, "ipa": "/ɔːθɚɪˈtaɪ/", "phonetic": "AWTH-uh-ree-TY"}]}
+{"guid": "N17_121", "forms": [{"grammatical_form": "noun/en_singular", "text": "noise", "is_base_form": true, "ipa": "/naɪz/", "phonetic": "NY-z"}]}
+{"guid": "N17_123", "forms": [{"grammatical_form": "noun/en_singular", "text": "plan", "is_base_form": true, "ipa": "/plæn/", "phonetic": "P-LAN"}]}
+{"guid": "N17_124", "forms": [{"grammatical_form": "noun/en_singular", "text": "talent", "is_base_form": true, "ipa": "/ˈtæl.ənt/", "phonetic": "TAL-uhnt"}]}
+{"guid": "N17_126", "forms": [{"grammatical_form": "noun/en_singular", "text": "view", "is_base_form": true, "ipa": "/vjuː/", "phonetic": "VYOO"}]}
+{"guid": "N17_129", "forms": [{"grammatical_form": "noun/en_singular", "text": "smile", "is_base_form": true, "ipa": "/ˈsmaɪl/", "phonetic": "SMY-l"}]}
+{"guid": "N17_130", "forms": [{"grammatical_form": "noun/en_singular", "text": "spell", "is_base_form": true, "ipa": "/spɛl/", "phonetic": "SPELL"}]}
+{"guid": "N17_131", "forms": [{"grammatical_form": "noun/en_singular", "text": "universe", "is_base_form": true, "ipa": "/ˌjuː.nɪˈvɜːs/", "phonetic": "yoo-NEH-vers"}]}
+{"guid": "N17_137", "forms": [{"grammatical_form": "noun/en_singular", "text": "choice", "is_base_form": true, "ipa": "/tʃɔɪs/", "phonetic": "CHOYS"}]}
+{"guid": "N17_142", "forms": [{"grammatical_form": "noun/en_singular", "text": "rule", "is_base_form": true, "ipa": "/ruːl/", "phonetic": "ROO-l"}]}
+{"guid": "N17_150", "forms": [{"grammatical_form": "noun/en_singular", "text": "position", "is_base_form": true, "ipa": "/ˈpəʊ.zə.ʃən/", "phonetic": "POH-zhuhn-shuhn"}]}
+{"guid": "N17_156", "forms": [{"grammatical_form": "noun/en_singular", "text": "manner", "is_base_form": true, "ipa": "/ˈmænr/", "phonetic": "MAN-ur"}]}
+{"guid": "N17_158", "forms": [{"grammatical_form": "noun/en_singular", "text": "stuff", "is_base_form": true, "ipa": "/stʌf/", "phonetic": "STUF"}]}
+{"guid": "N17_159", "forms": [{"grammatical_form": "noun/en_singular", "text": "pattern", "is_base_form": true, "ipa": "/ˈpætər̩n/", "phonetic": "PAT-ər-n"}]}
+{"guid": "N17_160", "forms": [{"grammatical_form": "noun/en_singular", "text": "effect", "is_base_form": true, "ipa": "/ɛˈfɛkt/", "phonetic": "EF-ect"}]}
+{"guid": "N17_163", "forms": [{"grammatical_form": "noun/en_singular", "text": "effort", "is_base_form": true, "ipa": "/ˈɛfərt/", "phonetic": "EFF-uh-rt"}]}
 {"guid": "N17_167", "forms": [{"grammatical_form": "noun/en_singular", "text": "gravity", "is_base_form": true, "ipa": "/ɡrˈævɪti/", "phonetic": "GRAH-vih-tee"}]}
-{"guid": "N17_171", "forms": [{"grammatical_form": "noun/en_singular", "text": "nature", "is_base_form": true, "ipa": "/ˈneɪtʃər/", "phonetic": "NEY-chər"}, {"grammatical_form": "noun/en_plural", "text": "natures", "is_base_form": false}]}
-{"guid": "N17_173", "forms": [{"grammatical_form": "noun/en_singular", "text": "situation", "is_base_form": true, "ipa": "/sɪˈtuː.ə.ʃən/", "phonetic": "sih-TOO-uh-shuhn"}, {"grammatical_form": "noun/en_plural", "text": "situations", "is_base_form": false}]}
-{"guid": "N17_178", "forms": [{"grammatical_form": "noun/en_singular", "text": "tone", "is_base_form": true, "ipa": "/toʊn/", "phonetic": "TOH-n"}, {"grammatical_form": "noun/en_plural", "text": "tones", "is_base_form": false}]}
-{"guid": "N17_183", "forms": [{"grammatical_form": "noun/en_singular", "text": "source", "is_base_form": true, "ipa": "/sɔːrs/", "phonetic": "SOR-s"}, {"grammatical_form": "noun/en_plural", "text": "sources", "is_base_form": false}]}
-{"guid": "N17_184", "forms": [{"grammatical_form": "noun/en_singular", "text": "program", "is_base_form": true, "ipa": "/ˈpɹoʊɡræm/", "phonetic": "PROH-gruhm"}, {"grammatical_form": "noun/en_plural", "text": "programs", "is_base_form": false}]}
-{"guid": "N17_187", "forms": [{"grammatical_form": "noun/en_singular", "text": "base", "is_base_form": true, "ipa": "/beɪs/", "phonetic": "BAI-seh"}, {"grammatical_form": "noun/en_plural", "text": "bases", "is_base_form": false}]}
-{"guid": "N17_188", "forms": [{"grammatical_form": "noun/en_singular", "text": "color", "is_base_form": true, "ipa": "/ˈkʌlər/", "phonetic": "KULL-ər"}, {"grammatical_form": "noun/en_plural", "text": "colors", "is_base_form": false}]}
-{"guid": "N17_190", "forms": [{"grammatical_form": "noun/en_singular", "text": "mark", "is_base_form": true, "ipa": "[/mɑːrk/, /mɑːk/]", "phonetic": "MAWK"}, {"grammatical_form": "noun/en_plural", "text": "marks", "is_base_form": false}]}
-{"guid": "N17_194", "forms": [{"grammatical_form": "noun/en_singular", "text": "fool", "is_base_form": true, "ipa": "/fuːl/", "phonetic": "FOO-l"}, {"grammatical_form": "noun/en_plural", "text": "fools", "is_base_form": false}]}
-{"guid": "N17_196", "forms": [{"grammatical_form": "noun/en_singular", "text": "breath", "is_base_form": true, "ipa": "/brɛð/", "phonetic": "BRĒ-th"}, {"grammatical_form": "noun/en_plural", "text": "breaths", "is_base_form": false}]}
-{"guid": "N17_198", "forms": [{"grammatical_form": "noun/en_singular", "text": "trust", "is_base_form": true, "ipa": "/trʌst/", "phonetic": "TRUST"}, {"grammatical_form": "noun/en_plural", "text": "trusts", "is_base_form": false}]}
-{"guid": "N17_199", "forms": [{"grammatical_form": "noun/en_singular", "text": "wonder", "is_base_form": true, "ipa": "/ˈwʌndɚ/", "phonetic": "WUN-dər"}, {"grammatical_form": "noun/en_plural", "text": "wonders", "is_base_form": false}]}
-{"guid": "N17_204", "forms": [{"grammatical_form": "noun/en_singular", "text": "cover", "is_base_form": true, "ipa": "/kʌvɚ/", "phonetic": "KUV-er"}, {"grammatical_form": "noun/en_plural", "text": "covers", "is_base_form": false}]}
-{"guid": "N17_206", "forms": [{"grammatical_form": "noun/en_singular", "text": "pay", "is_base_form": true, "ipa": "/peɪ/", "phonetic": "PEY"}, {"grammatical_form": "noun/en_plural", "text": "pays", "is_base_form": false}]}
-{"guid": "N17_207", "forms": [{"grammatical_form": "noun/en_singular", "text": "mine", "is_base_form": true, "ipa": "/maɪn/", "phonetic": "MYN"}, {"grammatical_form": "noun/en_plural", "text": "mines", "is_base_form": false}]}
-{"guid": "N17_208", "forms": [{"grammatical_form": "noun/en_singular", "text": "bottom", "is_base_form": true, "ipa": "/ˈbɑːtəm/", "phonetic": "BOH-tuhm"}, {"grammatical_form": "noun/en_plural", "text": "bottoms", "is_base_form": false}]}
-{"guid": "N17_209", "forms": [{"grammatical_form": "noun/en_singular", "text": "state", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "states", "is_base_form": false}]}
-{"guid": "N17_210", "forms": [{"grammatical_form": "noun/en_singular", "text": "interest", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "interests", "is_base_form": false}]}
-{"guid": "N17_211", "forms": [{"grammatical_form": "noun/en_singular", "text": "power", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "powers", "is_base_form": false}]}
-{"guid": "N17_213", "forms": [{"grammatical_form": "noun/en_singular", "text": "justice", "is_base_form": true}]}
-{"guid": "N17_214", "forms": [{"grammatical_form": "noun/en_singular", "text": "value", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "values", "is_base_form": false}]}
-{"guid": "N17_215", "forms": [{"grammatical_form": "noun/en_singular", "text": "task", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "tasks", "is_base_form": false}]}
-{"guid": "N17_216", "forms": [{"grammatical_form": "noun/en_singular", "text": "advice", "is_base_form": true}]}
-{"guid": "N17_217", "forms": [{"grammatical_form": "noun/en_singular", "text": "homework", "is_base_form": true}]}
-{"guid": "N17_218", "forms": [{"grammatical_form": "noun/en_singular", "text": "lesson", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "lessons", "is_base_form": false}]}
-{"guid": "N17_219", "forms": [{"grammatical_form": "noun/en_singular", "text": "argument", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "arguments", "is_base_form": false}]}
-{"guid": "N17_220", "forms": [{"grammatical_form": "noun/en_singular", "text": "joke", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "jokes", "is_base_form": false}]}
-{"guid": "N17_221", "forms": [{"grammatical_form": "noun/en_singular", "text": "recipe", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "recipes", "is_base_form": false}]}
-{"guid": "N17_222", "forms": [{"grammatical_form": "noun/en_singular", "text": "teaching", "is_base_form": true}]}
-{"guid": "N17_223", "forms": [{"grammatical_form": "noun/en_singular", "text": "scene", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "scenes", "is_base_form": false}]}
-{"guid": "N17_224", "forms": [{"grammatical_form": "noun/en_singular", "text": "spot", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "spots", "is_base_form": false}]}
-{"guid": "N17_225", "forms": [{"grammatical_form": "noun/en_singular", "text": "art", "is_base_form": true}]}
-{"guid": "N17_226", "forms": [{"grammatical_form": "noun/en_singular", "text": "mistake", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "mistakes", "is_base_form": false}]}
-{"guid": "N17_227", "forms": [{"grammatical_form": "noun/en_singular", "text": "account", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "accounts", "is_base_form": false}]}
-{"guid": "N17_228", "forms": [{"grammatical_form": "noun/en_singular", "text": "cash", "is_base_form": true}]}
+{"guid": "N17_171", "forms": [{"grammatical_form": "noun/en_singular", "text": "nature", "is_base_form": true, "ipa": "/ˈneɪtʃər/", "phonetic": "NEY-chər"}]}
+{"guid": "N17_173", "forms": [{"grammatical_form": "noun/en_singular", "text": "situation", "is_base_form": true, "ipa": "/sɪˈtuː.ə.ʃən/", "phonetic": "sih-TOO-uh-shuhn"}]}
+{"guid": "N17_178", "forms": [{"grammatical_form": "noun/en_singular", "text": "tone", "is_base_form": true, "ipa": "/toʊn/", "phonetic": "TOH-n"}]}
+{"guid": "N17_183", "forms": [{"grammatical_form": "noun/en_singular", "text": "source", "is_base_form": true, "ipa": "/sɔːrs/", "phonetic": "SOR-s"}]}
+{"guid": "N17_184", "forms": [{"grammatical_form": "noun/en_singular", "text": "program", "is_base_form": true, "ipa": "/ˈpɹoʊɡræm/", "phonetic": "PROH-gruhm"}]}
+{"guid": "N17_187", "forms": [{"grammatical_form": "noun/en_singular", "text": "base", "is_base_form": true, "ipa": "/beɪs/", "phonetic": "BAI-seh"}]}
+{"guid": "N17_188", "forms": [{"grammatical_form": "noun/en_singular", "text": "color", "is_base_form": true, "ipa": "/ˈkʌlər/", "phonetic": "KULL-ər"}]}
+{"guid": "N17_190", "forms": [{"grammatical_form": "noun/en_singular", "text": "mark", "is_base_form": true, "ipa": "[/mɑːrk/, /mɑːk/]", "phonetic": "MAWK"}]}
+{"guid": "N17_194", "forms": [{"grammatical_form": "noun/en_singular", "text": "fool", "is_base_form": true, "ipa": "/fuːl/", "phonetic": "FOO-l"}]}
+{"guid": "N17_196", "forms": [{"grammatical_form": "noun/en_singular", "text": "breath", "is_base_form": true, "ipa": "/brɛð/", "phonetic": "BRĒ-th"}]}
+{"guid": "N17_198", "forms": [{"grammatical_form": "noun/en_singular", "text": "trust", "is_base_form": true, "ipa": "/trʌst/", "phonetic": "TRUST"}]}
+{"guid": "N17_199", "forms": [{"grammatical_form": "noun/en_singular", "text": "wonder", "is_base_form": true, "ipa": "/ˈwʌndɚ/", "phonetic": "WUN-dər"}]}
+{"guid": "N17_204", "forms": [{"grammatical_form": "noun/en_singular", "text": "cover", "is_base_form": true, "ipa": "/kʌvɚ/", "phonetic": "KUV-er"}]}
+{"guid": "N17_206", "forms": [{"grammatical_form": "noun/en_singular", "text": "pay", "is_base_form": true, "ipa": "/peɪ/", "phonetic": "PEY"}]}
+{"guid": "N17_207", "forms": [{"grammatical_form": "noun/en_singular", "text": "mine", "is_base_form": true, "ipa": "/maɪn/", "phonetic": "MYN"}]}
+{"guid": "N17_208", "forms": [{"grammatical_form": "noun/en_singular", "text": "bottom", "is_base_form": true, "ipa": "/ˈbɑːtəm/", "phonetic": "BOH-tuhm"}]}
 {"guid": "N17_229", "forms": [{"grammatical_form": "noun/en_singular", "text": "sales", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "sales", "is_base_form": false}]}
-{"guid": "N17_230", "forms": [{"grammatical_form": "noun/en_singular", "text": "side", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "sides", "is_base_form": false}]}
-{"guid": "N17_231", "forms": [{"grammatical_form": "noun/en_singular", "text": "fine", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "fines", "is_base_form": false}]}
-{"guid": "N17_232", "forms": [{"grammatical_form": "noun/en_singular", "text": "line", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "lines", "is_base_form": false}]}
-{"guid": "N17_233", "forms": [{"grammatical_form": "noun/en_singular", "text": "line", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "lines", "is_base_form": false}]}
-{"guid": "N17_234", "forms": [{"grammatical_form": "noun/en_singular", "text": "middle", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "middles", "is_base_form": false}]}
-{"guid": "N17_235", "forms": [{"grammatical_form": "noun/en_singular", "text": "energy", "is_base_form": true}]}
-{"guid": "N17_236", "forms": [{"grammatical_form": "noun/en_singular", "text": "style", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "styles", "is_base_form": false}]}
-{"guid": "N17_237", "forms": [{"grammatical_form": "noun/en_singular", "text": "cause", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "causes", "is_base_form": false}]}
-{"guid": "N17_238", "forms": [{"grammatical_form": "noun/en_singular", "text": "evidence", "is_base_form": true}]}
-{"guid": "N17_239", "forms": [{"grammatical_form": "noun/en_singular", "text": "soul", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "souls", "is_base_form": false}]}
-{"guid": "N17_240", "forms": [{"grammatical_form": "noun/en_singular", "text": "town", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "towns", "is_base_form": false}]}
-{"guid": "N17_241", "forms": [{"grammatical_form": "noun/en_singular", "text": "type", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "types", "is_base_form": false}]}
-{"guid": "N17_242", "forms": [{"grammatical_form": "noun/en_singular", "text": "front", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "fronts", "is_base_form": false}]}
-{"guid": "N17_243", "forms": [{"grammatical_form": "noun/en_singular", "text": "quarter", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "quarters", "is_base_form": false}]}
-{"guid": "N17_244", "forms": [{"grammatical_form": "noun/en_singular", "text": "amusement", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "amusements", "is_base_form": false}]}
-{"guid": "N17_245", "forms": [{"grammatical_form": "noun/en_singular", "text": "attraction", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "attractions", "is_base_form": false}]}
-{"guid": "N17_246", "forms": [{"grammatical_form": "noun/en_singular", "text": "comfort", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "comforts", "is_base_form": false}]}
-{"guid": "N17_247", "forms": [{"grammatical_form": "noun/en_singular", "text": "condition", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "conditions", "is_base_form": false}]}
-{"guid": "N17_248", "forms": [{"grammatical_form": "noun/en_singular", "text": "credit", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "credits", "is_base_form": false}]}
-{"guid": "N17_249", "forms": [{"grammatical_form": "noun/en_singular", "text": "damage", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "damages", "is_base_form": false}]}
-{"guid": "N17_250", "forms": [{"grammatical_form": "noun/en_singular", "text": "debt", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "debts", "is_base_form": false}]}
-{"guid": "N17_251", "forms": [{"grammatical_form": "noun/en_singular", "text": "detail", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "details", "is_base_form": false}]}
-{"guid": "N17_252", "forms": [{"grammatical_form": "noun/en_singular", "text": "education", "is_base_form": true}]}
-{"guid": "N17_253", "forms": [{"grammatical_form": "noun/en_singular", "text": "error", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "errors", "is_base_form": false}]}
-{"guid": "N17_254", "forms": [{"grammatical_form": "noun/en_singular", "text": "event", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "events", "is_base_form": false}]}
-{"guid": "N17_255", "forms": [{"grammatical_form": "noun/en_singular", "text": "existence", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "existences", "is_base_form": false}]}
-{"guid": "N17_256", "forms": [{"grammatical_form": "noun/en_singular", "text": "fiction", "is_base_form": true}]}
-{"guid": "N17_257", "forms": [{"grammatical_form": "noun/en_singular", "text": "harmony", "is_base_form": true}]}
-{"guid": "N17_258", "forms": [{"grammatical_form": "noun/en_singular", "text": "humor", "is_base_form": true}]}
-{"guid": "N17_259", "forms": [{"grammatical_form": "noun/en_singular", "text": "impulse", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "impulses", "is_base_form": false}]}
-{"guid": "N17_260", "forms": [{"grammatical_form": "noun/en_singular", "text": "industry", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "industries", "is_base_form": false}]}
-{"guid": "N17_261", "forms": [{"grammatical_form": "noun/en_singular", "text": "insurance", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "insurances", "is_base_form": false}]}
-{"guid": "N17_262", "forms": [{"grammatical_form": "noun/en_singular", "text": "learning", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "learnings", "is_base_form": false}]}
-{"guid": "N17_263", "forms": [{"grammatical_form": "noun/en_singular", "text": "living", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "livings", "is_base_form": false}]}
-{"guid": "N17_264", "forms": [{"grammatical_form": "noun/en_singular", "text": "organization", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "organizations", "is_base_form": false}]}
-{"guid": "N17_265", "forms": [{"grammatical_form": "noun/en_singular", "text": "pleasure", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "pleasures", "is_base_form": false}]}
-{"guid": "N17_266", "forms": [{"grammatical_form": "noun/en_singular", "text": "profit", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "profits", "is_base_form": false}]}
-{"guid": "N17_267", "forms": [{"grammatical_form": "noun/en_singular", "text": "property", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "properties", "is_base_form": false}]}
-{"guid": "N17_268", "forms": [{"grammatical_form": "noun/en_singular", "text": "quality", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "qualities", "is_base_form": false}]}
-{"guid": "N17_269", "forms": [{"grammatical_form": "noun/en_singular", "text": "record", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "records", "is_base_form": false}]}
-{"guid": "N17_270", "forms": [{"grammatical_form": "noun/en_singular", "text": "relation", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "relations", "is_base_form": false}]}
-{"guid": "N17_271", "forms": [{"grammatical_form": "noun/en_singular", "text": "respect", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "respects", "is_base_form": false}]}
-{"guid": "N17_272", "forms": [{"grammatical_form": "noun/en_singular", "text": "reward", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "rewards", "is_base_form": false}]}
-{"guid": "N17_273", "forms": [{"grammatical_form": "noun/en_singular", "text": "rhythm", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "rhythms", "is_base_form": false}]}
 {"guid": "N17_274", "forms": [{"grammatical_form": "noun/en_singular", "text": "sex", "is_base_form": true}]}
-{"guid": "N17_275", "forms": [{"grammatical_form": "noun/en_singular", "text": "statement", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "statements", "is_base_form": false}]}
-{"guid": "N17_276", "forms": [{"grammatical_form": "noun/en_singular", "text": "structure", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "structures", "is_base_form": false}]}
-{"guid": "N17_277", "forms": [{"grammatical_form": "noun/en_singular", "text": "substance", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "substances", "is_base_form": false}]}
-{"guid": "N17_278", "forms": [{"grammatical_form": "noun/en_singular", "text": "tendency", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "tendencies", "is_base_form": false}]}
-{"guid": "N17_279", "forms": [{"grammatical_form": "noun/en_singular", "text": "trick", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "tricks", "is_base_form": false}]}
-{"guid": "N17_280", "forms": [{"grammatical_form": "noun/en_singular", "text": "waste", "is_base_form": true}]}
-{"guid": "N17_281", "forms": [{"grammatical_form": "noun/en_singular", "text": "crime", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "crimes", "is_base_form": false}]}
-{"guid": "N17_282", "forms": [{"grammatical_form": "noun/en_singular", "text": "offer", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "offers", "is_base_form": false}]}
-{"guid": "N17_283", "forms": [{"grammatical_form": "noun/en_singular", "text": "price", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "prices", "is_base_form": false}]}
-{"guid": "N17_284", "forms": [{"grammatical_form": "noun/en_singular", "text": "thing", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "things", "is_base_form": false}]}
-{"guid": "N17_285", "forms": [{"grammatical_form": "noun/en_singular", "text": "shade", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "shades", "is_base_form": false}]}
-{"guid": "N17_286", "forms": [{"grammatical_form": "noun/en_singular", "text": "way", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "ways", "is_base_form": false}]}
-{"guid": "N17_287", "forms": [{"grammatical_form": "noun/en_singular", "text": "top", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "tops", "is_base_form": false}]}
-{"guid": "N17_288", "forms": [{"grammatical_form": "noun/en_singular", "text": "support", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "supports", "is_base_form": false}]}
-{"guid": "N17_289", "forms": [{"grammatical_form": "noun/en_singular", "text": "behavior", "is_base_form": true}]}
-{"guid": "N17_290", "forms": [{"grammatical_form": "noun/en_singular", "text": "ray", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "rays", "is_base_form": false}]}
-{"guid": "N17_291", "forms": [{"grammatical_form": "noun/en_singular", "text": "plane", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "planes", "is_base_form": false}]}
-{"guid": "N17_292", "forms": [{"grammatical_form": "noun/en_singular", "text": "key", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "keys", "is_base_form": false}]}
-{"guid": "N17_293", "forms": [{"grammatical_form": "noun/en_singular", "text": "rock", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "rocks", "is_base_form": false}]}
-{"guid": "N17_294", "forms": [{"grammatical_form": "noun/en_singular", "text": "scale", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "scales", "is_base_form": false}]}
-{"guid": "N17_295", "forms": [{"grammatical_form": "noun/en_singular", "text": "stock", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "stocks", "is_base_form": false}]}
-{"guid": "N17_296", "forms": [{"grammatical_form": "noun/en_singular", "text": "wave", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "waves", "is_base_form": false}]}
 {"guid": "N17_297", "forms": [{"grammatical_form": "noun/en_singular", "text": "birth control", "is_base_form": true}]}
 {"guid": "N17_298", "forms": [{"grammatical_form": "noun/en_singular", "text": "human right", "is_base_form": true}]}
 {"guid": "N17_299", "forms": [{"grammatical_form": "noun/en_singular", "text": "free speech", "is_base_form": true}]}

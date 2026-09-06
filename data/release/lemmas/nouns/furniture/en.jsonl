@@ -1,17 +1,9 @@
-{"guid": "N39_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "chair", "is_base_form": true, "ipa": "/tʃɛər/", "phonetic": "CHAIR"}, {"grammatical_form": "noun/en_plural", "text": "chairs", "is_base_form": false}]}
-{"guid": "N39_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "desk", "is_base_form": true, "ipa": "dɛsk", "phonetic": "DESK"}, {"grammatical_form": "noun/en_plural", "text": "desks", "is_base_form": false}]}
-{"guid": "N39_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "couch", "is_base_form": true, "ipa": "/kʌtʃ/", "phonetic": "KOTCH"}, {"grammatical_form": "noun/en_plural", "text": "couches", "is_base_form": false}]}
+{"guid": "N39_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "chair", "is_base_form": true, "ipa": "/tʃɛər/", "phonetic": "CHAIR"}]}
+{"guid": "N39_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "desk", "is_base_form": true, "ipa": "dɛsk", "phonetic": "DESK"}]}
+{"guid": "N39_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "couch", "is_base_form": true, "ipa": "/kʌtʃ/", "phonetic": "KOTCH"}]}
 {"guid": "N39_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "shelf", "is_base_form": true, "ipa": "ˈʃɛlf", "phonetic": "SHĒLF"}, {"grammatical_form": "noun/en_plural", "text": "shelves", "is_base_form": false}]}
-{"guid": "N39_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "bed", "is_base_form": true, "ipa": "/bɛd/", "phonetic": "BED"}, {"grammatical_form": "noun/en_plural", "text": "beds", "is_base_form": false}]}
-{"guid": "N39_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "table", "is_base_form": true, "ipa": "/ˈteɪ.bəl/", "phonetic": "TAY-buhl"}, {"grammatical_form": "noun/en_plural", "text": "tables", "is_base_form": false}]}
-{"guid": "N39_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "wardrobe", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "wardrobes", "is_base_form": false}]}
-{"guid": "N39_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "cabinet", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "cabinets", "is_base_form": false}]}
-{"guid": "N39_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "armchair", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "armchairs", "is_base_form": false}]}
-{"guid": "N39_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "bookcase", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "bookcases", "is_base_form": false}]}
-{"guid": "N39_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "dresser", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "dressers", "is_base_form": false}]}
-{"guid": "N39_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "bench", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "benches", "is_base_form": false}]}
-{"guid": "N39_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "drawer", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "drawers", "is_base_form": false}]}
-{"guid": "N39_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "counter", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "counters", "is_base_form": false}]}
+{"guid": "N39_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "bed", "is_base_form": true, "ipa": "/bɛd/", "phonetic": "BED"}]}
+{"guid": "N39_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "table", "is_base_form": true, "ipa": "/ˈteɪ.bəl/", "phonetic": "TAY-buhl"}]}
 {"guid": "N39_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "coffee table", "is_base_form": true}]}
 {"guid": "N39_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "dining table", "is_base_form": true}]}
 {"guid": "N39_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "bunk bed", "is_base_form": true}]}

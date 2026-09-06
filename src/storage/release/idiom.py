@@ -185,23 +185,26 @@ def apply_release_record(session: Session, record: Dict[str, Any], idiom: Idiom)
     idiom.difficulty_level = record.get("difficulty_level")
     idiom.verified = bool(record.get("verified", False))
 
-    for equivalent in list(idiom.equivalents):
-        session.delete(equivalent)
+    for existing_equivalent in list(idiom.equivalents):
+        session.delete(existing_equivalent)
     session.flush()
 
-    for language_code, equivalents in (record.get("equivalents") or {}).items():
-        for equivalent in equivalents:
+    # A separate name from the ORM rows deleted above: these are release
+    # records (dicts), and reusing one name for both types is what let the
+    # dict lookups below be read as attribute access on IdiomEquivalent.
+    for language_code, equivalent_records in (record.get("equivalents") or {}).items():
+        for equivalent_record in equivalent_records:
             add_idiom_equivalent(
                 session,
                 idiom,
                 language_code=language_code,
-                expression=equivalent["expression"],
-                equivalence_kind=equivalent["kind"],
-                literal_gloss=equivalent.get("literalGloss"),
-                usage_note=equivalent.get("usageNote"),
-                register=equivalent.get("register"),
-                region=equivalent.get("region"),
-                verified=bool(equivalent.get("verified", False)),
+                expression=equivalent_record["expression"],
+                equivalence_kind=equivalent_record["kind"],
+                literal_gloss=equivalent_record.get("literalGloss"),
+                usage_note=equivalent_record.get("usageNote"),
+                register=equivalent_record.get("register"),
+                region=equivalent_record.get("region"),
+                verified=bool(equivalent_record.get("verified", False)),
             )
 
     session.flush()

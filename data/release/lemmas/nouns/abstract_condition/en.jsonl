@@ -1,28 +1,22 @@
-{"guid": "N54_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "peace", "is_base_form": true, "ipa": "/pi:s/", "phonetic": "PEE-s"}, {"grammatical_form": "noun/en_plural", "text": "peaces", "is_base_form": false}]}
+{"guid": "N54_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "peace", "is_base_form": true, "ipa": "/pi:s/", "phonetic": "PEE-s"}]}
 {"guid": "N54_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "luck", "is_base_form": true, "ipa": "/lʌk/", "phonetic": "LUHK"}]}
-{"guid": "N54_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "rest", "is_base_form": true, "ipa": "/rɛst/", "phonetic": "REST"}, {"grammatical_form": "noun/en_plural", "text": "rests", "is_base_form": false}]}
-{"guid": "N54_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "shadow", "is_base_form": true, "ipa": "/ʃædˈoʊ/", "phonetic": "SHAD-oh"}, {"grammatical_form": "noun/en_plural", "text": "shadows", "is_base_form": false}]}
+{"guid": "N54_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "rest", "is_base_form": true, "ipa": "/rɛst/", "phonetic": "REST"}]}
+{"guid": "N54_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "shadow", "is_base_form": true, "ipa": "/ʃædˈoʊ/", "phonetic": "SHAD-oh"}]}
 {"guid": "N54_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "silence", "is_base_form": true, "ipa": "/ˈsaɪləns/", "phonetic": "SYL-ence"}]}
 {"guid": "N54_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "darkness", "is_base_form": true, "ipa": "/ˈdɑrknəs/", "phonetic": "DARK-ness"}]}
-{"guid": "N54_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "space", "is_base_form": true, "ipa": "spes", "phonetic": "SPES"}, {"grammatical_form": "noun/en_plural", "text": "spaces", "is_base_form": false}]}
+{"guid": "N54_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "space", "is_base_form": true, "ipa": "spes", "phonetic": "SPES"}]}
 {"guid": "N54_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "evil", "is_base_form": true, "ipa": "/ˈiː.vəl/", "phonetic": "EE-vuhl"}]}
-{"guid": "N54_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "chance", "is_base_form": true, "ipa": "/t͡ʃæns/", "phonetic": "CHAHNS"}, {"grammatical_form": "noun/en_plural", "text": "chances", "is_base_form": false}]}
-{"guid": "N54_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "trouble", "is_base_form": true, "ipa": "/ˈtrʌb.əl/", "phonetic": "TROO-bul"}, {"grammatical_form": "noun/en_plural", "text": "troubles", "is_base_form": false}]}
-{"guid": "N54_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "danger", "is_base_form": true, "ipa": "/ˈdæŋɡər/", "phonetic": "DANG-ger"}, {"grammatical_form": "noun/en_plural", "text": "dangers", "is_base_form": false}]}
-{"guid": "N54_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "doom", "is_base_form": true, "ipa": "/duːm/", "phonetic": "DOO-m"}, {"grammatical_form": "noun/en_plural", "text": "dooms", "is_base_form": false}]}
+{"guid": "N54_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "chance", "is_base_form": true, "ipa": "/t͡ʃæns/", "phonetic": "CHAHNS"}]}
+{"guid": "N54_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "trouble", "is_base_form": true, "ipa": "/ˈtrʌb.əl/", "phonetic": "TROO-bul"}]}
+{"guid": "N54_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "danger", "is_base_form": true, "ipa": "/ˈdæŋɡər/", "phonetic": "DANG-ger"}]}
+{"guid": "N54_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "doom", "is_base_form": true, "ipa": "/duːm/", "phonetic": "DOO-m"}]}
 {"guid": "N54_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "weather", "is_base_form": true, "ipa": "/ˈwɛðər/", "phonetic": "WEHD-ər"}]}
-{"guid": "N54_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "risk", "is_base_form": true, "ipa": "/rɪsk/", "phonetic": "RISK"}, {"grammatical_form": "noun/en_plural", "text": "risks", "is_base_form": false}]}
-{"guid": "N54_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "peril", "is_base_form": true, "ipa": "/ˈpɛrəl/", "phonetic": "PER-uh-l"}, {"grammatical_form": "noun/en_plural", "text": "perils", "is_base_form": false}]}
-{"guid": "N54_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "presence", "is_base_form": true, "ipa": "/ˈprɛz.əns/", "phonetic": "PRĕZ-əns"}, {"grammatical_form": "noun/en_plural", "text": "presences", "is_base_form": false}]}
-{"guid": "N54_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "loss", "is_base_form": true, "ipa": "/lɒs/", "phonetic": "LAWSS"}, {"grammatical_form": "noun/en_plural", "text": "losses", "is_base_form": false}]}
-{"guid": "N54_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "fate", "is_base_form": true, "ipa": "/feɪt/", "phonetic": "FEY-t"}, {"grammatical_form": "noun/en_plural", "text": "fates", "is_base_form": false}]}
-{"guid": "N54_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "freedom", "is_base_form": true}]}
-{"guid": "N54_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "poverty", "is_base_form": true}]}
+{"guid": "N54_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "risk", "is_base_form": true, "ipa": "/rɪsk/", "phonetic": "RISK"}]}
+{"guid": "N54_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "peril", "is_base_form": true, "ipa": "/ˈpɛrəl/", "phonetic": "PER-uh-l"}]}
+{"guid": "N54_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "presence", "is_base_form": true, "ipa": "/ˈprɛz.əns/", "phonetic": "PRĕZ-əns"}]}
+{"guid": "N54_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "loss", "is_base_form": true, "ipa": "/lɒs/", "phonetic": "LAWSS"}]}
+{"guid": "N54_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "fate", "is_base_form": true, "ipa": "/feɪt/", "phonetic": "FEY-t"}]}
 {"guid": "N54_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "chaos", "is_base_form": true}]}
-{"guid": "N54_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "safety", "is_base_form": true}]}
-{"guid": "N54_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "beauty", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "beauties", "is_base_form": false}]}
-{"guid": "N54_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "health", "is_base_form": true}]}
-{"guid": "N54_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "hearing", "is_base_form": true}]}
 {"guid": "N54_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "student loan", "is_base_form": true}]}
 {"guid": "N54_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "blood pressure", "is_base_form": true}]}
 {"guid": "N54_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "blood type", "is_base_form": true}]}

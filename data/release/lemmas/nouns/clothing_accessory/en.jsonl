@@ -1,40 +1,34 @@
-{"guid": "N09_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "shirt", "is_base_form": true, "ipa": "/ˈʃɝt/", "phonetic": "SHART"}, {"grammatical_form": "noun/en_plural", "text": "shirts", "is_base_form": false}]}
+{"guid": "N09_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "shirt", "is_base_form": true, "ipa": "/ˈʃɝt/", "phonetic": "SHART"}]}
 {"guid": "N09_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "pants", "is_base_form": true, "ipa": "/pænts/", "phonetic": "PAHTNTS"}, {"grammatical_form": "noun/en_plural", "text": "pants", "is_base_form": false}]}
-{"guid": "N09_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "dress", "is_base_form": true, "ipa": "/dɹɛs/", "phonetic": "DRES"}, {"grammatical_form": "noun/en_plural", "text": "dresses", "is_base_form": false}]}
-{"guid": "N09_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "coat", "is_base_form": true, "ipa": "/kɑːt/", "phonetic": "KAT"}, {"grammatical_form": "noun/en_plural", "text": "coats", "is_base_form": false}]}
-{"guid": "N09_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "jacket", "is_base_form": true, "ipa": "/ˈdʒækɪt/", "phonetic": "JACK-it"}, {"grammatical_form": "noun/en_plural", "text": "jackets", "is_base_form": false}]}
-{"guid": "N09_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "shoe", "is_base_form": true, "ipa": "/ʃuː/", "phonetic": "SHOO"}, {"grammatical_form": "noun/en_plural", "text": "shoes", "is_base_form": false}]}
-{"guid": "N09_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "sock", "is_base_form": true, "ipa": "/sɒk/", "phonetic": "SAWK"}, {"grammatical_form": "noun/en_plural", "text": "socks", "is_base_form": false}]}
-{"guid": "N09_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "hat", "is_base_form": true, "ipa": "/hæt/", "phonetic": "HAT"}, {"grammatical_form": "noun/en_plural", "text": "hats", "is_base_form": false}]}
-{"guid": "N09_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "glove", "is_base_form": true, "ipa": "/ˈɡlʌv/", "phonetic": "GLOV"}, {"grammatical_form": "noun/en_plural", "text": "gloves", "is_base_form": false}]}
-{"guid": "N09_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "tie", "is_base_form": true, "ipa": "/taɪ/", "phonetic": "TYE"}, {"grammatical_form": "noun/en_plural", "text": "ties", "is_base_form": false}]}
-{"guid": "N09_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "sweater", "is_base_form": true, "ipa": "/ˈswiːtər/", "phonetic": "SWEE-tur"}, {"grammatical_form": "noun/en_plural", "text": "sweaters", "is_base_form": false}]}
+{"guid": "N09_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "dress", "is_base_form": true, "ipa": "/dɹɛs/", "phonetic": "DRES"}]}
+{"guid": "N09_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "coat", "is_base_form": true, "ipa": "/kɑːt/", "phonetic": "KAT"}]}
+{"guid": "N09_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "jacket", "is_base_form": true, "ipa": "/ˈdʒækɪt/", "phonetic": "JACK-it"}]}
+{"guid": "N09_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "shoe", "is_base_form": true, "ipa": "/ʃuː/", "phonetic": "SHOO"}]}
+{"guid": "N09_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "sock", "is_base_form": true, "ipa": "/sɒk/", "phonetic": "SAWK"}]}
+{"guid": "N09_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "hat", "is_base_form": true, "ipa": "/hæt/", "phonetic": "HAT"}]}
+{"guid": "N09_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "glove", "is_base_form": true, "ipa": "/ˈɡlʌv/", "phonetic": "GLOV"}]}
+{"guid": "N09_010", "forms": [{"grammatical_form": "noun/en_singular", "text": "tie", "is_base_form": true, "ipa": "/taɪ/", "phonetic": "TYE"}]}
+{"guid": "N09_011", "forms": [{"grammatical_form": "noun/en_singular", "text": "sweater", "is_base_form": true, "ipa": "/ˈswiːtər/", "phonetic": "SWEE-tur"}]}
 {"guid": "N09_012", "forms": [{"grammatical_form": "noun/en_singular", "text": "underwear", "is_base_form": true, "ipa": "/ˌʌndəˈwɛər/", "phonetic": "UN-duh-WAIR"}]}
-{"guid": "N09_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "skirt", "is_base_form": true, "ipa": "/sɜːrt/", "phonetic": "SURT"}, {"grammatical_form": "noun/en_plural", "text": "skirts", "is_base_form": false}]}
-{"guid": "N09_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "bra", "is_base_form": true, "ipa": "/brɑː/", "phonetic": "BRUH"}, {"grammatical_form": "noun/en_plural", "text": "bras", "is_base_form": false}]}
-{"guid": "N09_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "belt", "is_base_form": true, "ipa": "/bɛlt/", "phonetic": "BELLT"}, {"grammatical_form": "noun/en_plural", "text": "belts", "is_base_form": false}]}
-{"guid": "N09_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "earring", "is_base_form": true, "ipa": "/ˈɪərɪŋ/", "phonetic": "AIR-ing"}, {"grammatical_form": "noun/en_plural", "text": "earrings", "is_base_form": false}]}
-{"guid": "N09_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "ring", "is_base_form": true, "ipa": "/ɹɪŋ/", "phonetic": "RING"}, {"grammatical_form": "noun/en_plural", "text": "rings", "is_base_form": false}]}
+{"guid": "N09_013", "forms": [{"grammatical_form": "noun/en_singular", "text": "skirt", "is_base_form": true, "ipa": "/sɜːrt/", "phonetic": "SURT"}]}
+{"guid": "N09_014", "forms": [{"grammatical_form": "noun/en_singular", "text": "bra", "is_base_form": true, "ipa": "/brɑː/", "phonetic": "BRUH"}]}
+{"guid": "N09_015", "forms": [{"grammatical_form": "noun/en_singular", "text": "belt", "is_base_form": true, "ipa": "/bɛlt/", "phonetic": "BELLT"}]}
+{"guid": "N09_016", "forms": [{"grammatical_form": "noun/en_singular", "text": "earring", "is_base_form": true, "ipa": "/ˈɪərɪŋ/", "phonetic": "AIR-ing"}]}
+{"guid": "N09_017", "forms": [{"grammatical_form": "noun/en_singular", "text": "ring", "is_base_form": true, "ipa": "/ɹɪŋ/", "phonetic": "RING"}]}
 {"guid": "N09_018", "forms": [{"grammatical_form": "noun/en_singular", "text": "scarf", "is_base_form": true, "ipa": "/sɔːrf/", "phonetic": "SOORF"}, {"grammatical_form": "noun/en_plural", "text": "scarves", "is_base_form": false}]}
-{"guid": "N09_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "sandal", "is_base_form": true, "ipa": "/ˈsændl/", "phonetic": "SAND-ul"}, {"grammatical_form": "noun/en_plural", "text": "sandals", "is_base_form": false}]}
+{"guid": "N09_019", "forms": [{"grammatical_form": "noun/en_singular", "text": "sandal", "is_base_form": true, "ipa": "/ˈsændl/", "phonetic": "SAND-ul"}]}
 {"guid": "N09_020", "forms": [{"grammatical_form": "noun/en_singular", "text": "pajamas", "is_base_form": true, "ipa": "/pəˈdʒɑːməz/", "phonetic": "pə-JAH-məz"}, {"grammatical_form": "noun/en_plural", "text": "pajamas", "is_base_form": false}]}
 {"guid": "N09_021", "forms": [{"grammatical_form": "noun/en_singular", "text": "jeans", "is_base_form": true, "ipa": "/dʒiːnz/", "phonetic": "JEENZ"}, {"grammatical_form": "noun/en_plural", "text": "jeans", "is_base_form": false}]}
-{"guid": "N09_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "apron", "is_base_form": true, "ipa": "/ˈæpɹən/", "phonetic": "AY-pruh-n"}, {"grammatical_form": "noun/en_plural", "text": "aprons", "is_base_form": false}]}
-{"guid": "N09_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "raincoat", "is_base_form": true, "ipa": "/ˈreɪnkoʊt/", "phonetic": "RAY-nah-kot"}, {"grammatical_form": "noun/en_plural", "text": "raincoats", "is_base_form": false}]}
+{"guid": "N09_022", "forms": [{"grammatical_form": "noun/en_singular", "text": "apron", "is_base_form": true, "ipa": "/ˈæpɹən/", "phonetic": "AY-pruh-n"}]}
+{"guid": "N09_023", "forms": [{"grammatical_form": "noun/en_singular", "text": "raincoat", "is_base_form": true, "ipa": "/ˈreɪnkoʊt/", "phonetic": "RAY-nah-kot"}]}
 {"guid": "N09_024", "forms": [{"grammatical_form": "noun/en_singular", "text": "business suit", "is_base_form": true, "ipa": "/ˈbɪz.nəs ˈsuːt/", "phonetic": "BIZ-nəs SOO-t"}]}
 {"guid": "N09_025", "forms": [{"grammatical_form": "noun/en_singular", "text": "shorts", "is_base_form": true, "ipa": "shɔːrts", "phonetic": "SHORTS"}, {"grammatical_form": "noun/en_plural", "text": "shorts", "is_base_form": false}]}
-{"guid": "N09_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "suit", "is_base_form": true, "ipa": "/suːt/", "phonetic": "SOOT"}, {"grammatical_form": "noun/en_plural", "text": "suits", "is_base_form": false}]}
-{"guid": "N09_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "cloak", "is_base_form": true, "ipa": "/kloʊk/", "phonetic": "KLOHK"}, {"grammatical_form": "noun/en_plural", "text": "cloaks", "is_base_form": false}]}
-{"guid": "N09_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "pocket", "is_base_form": true, "ipa": "/ˈpɒk.ɪt/", "phonetic": "POK-it"}, {"grammatical_form": "noun/en_plural", "text": "pockets", "is_base_form": false}]}
+{"guid": "N09_026", "forms": [{"grammatical_form": "noun/en_singular", "text": "suit", "is_base_form": true, "ipa": "/suːt/", "phonetic": "SOOT"}]}
+{"guid": "N09_027", "forms": [{"grammatical_form": "noun/en_singular", "text": "cloak", "is_base_form": true, "ipa": "/kloʊk/", "phonetic": "KLOHK"}]}
+{"guid": "N09_028", "forms": [{"grammatical_form": "noun/en_singular", "text": "pocket", "is_base_form": true, "ipa": "/ˈpɒk.ɪt/", "phonetic": "POK-it"}]}
 {"guid": "N09_029", "forms": [{"grammatical_form": "noun/en_singular", "text": "clothing", "is_base_form": true, "ipa": "/ˈkləʊθɪŋ/", "phonetic": "KLOITH-ing"}]}
-{"guid": "N09_030", "forms": [{"grammatical_form": "noun/en_singular", "text": "boot", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "boots", "is_base_form": false}]}
-{"guid": "N09_031", "forms": [{"grammatical_form": "noun/en_singular", "text": "necklace", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "necklaces", "is_base_form": false}]}
 {"guid": "N09_032", "forms": [{"grammatical_form": "noun/en_singular", "text": "T-shirt", "is_base_form": true}]}
-{"guid": "N09_033", "forms": [{"grammatical_form": "noun/en_singular", "text": "bracelet", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "bracelets", "is_base_form": false}]}
-{"guid": "N09_034", "forms": [{"grammatical_form": "noun/en_singular", "text": "jewelry", "is_base_form": true}]}
-{"guid": "N09_035", "forms": [{"grammatical_form": "noun/en_singular", "text": "buckle", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "buckles", "is_base_form": false}]}
 {"guid": "N09_036", "forms": [{"grammatical_form": "noun/en_singular", "text": "handkerchief", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "handkerchiefs", "is_base_form": false}]}
-{"guid": "N09_037", "forms": [{"grammatical_form": "noun/en_singular", "text": "top", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "tops", "is_base_form": false}]}
 {"guid": "N09_038", "forms": [{"grammatical_form": "noun/en_singular", "text": "dress shirt", "is_base_form": true}]}
 {"guid": "N09_039", "forms": [{"grammatical_form": "noun/en_singular", "text": "tank top", "is_base_form": true}]}
 {"guid": "N09_040", "forms": [{"grammatical_form": "noun/en_singular", "text": "high heels", "is_base_form": true}]}

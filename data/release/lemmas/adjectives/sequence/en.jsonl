@@ -1,7 +1,3 @@
 {"guid": "A15_011", "forms": [{"grammatical_form": "adjective/en_positive", "text": "last", "is_base_form": true, "ipa": "/læst/", "phonetic": "LAST"}]}
 {"guid": "A15_012", "forms": [{"grammatical_form": "adjective/en_positive", "text": "final", "is_base_form": true, "ipa": "/faɪnəl/", "phonetic": "FY-nəl"}]}
-{"guid": "A15_013", "forms": [{"grammatical_form": "adjective/en_positive", "text": "next", "is_base_form": true}]}
-{"guid": "A15_014", "forms": [{"grammatical_form": "adjective/en_positive", "text": "previous", "is_base_form": true}]}
-{"guid": "A15_015", "forms": [{"grammatical_form": "adjective/en_positive", "text": "following", "is_base_form": true}]}
 {"guid": "A15_017", "forms": [{"grammatical_form": "adjective/en_positive", "text": "middle", "is_base_form": true}]}
-{"guid": "A15_018", "forms": [{"grammatical_form": "adjective/en_positive", "text": "front", "is_base_form": true}]}

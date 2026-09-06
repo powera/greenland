@@ -1,9 +1,3 @@
-{"guid": "N26_001", "forms": [{"grammatical_form": "noun/en_singular", "text": "team", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "teams", "is_base_form": false}]}
-{"guid": "N26_002", "forms": [{"grammatical_form": "noun/en_singular", "text": "population", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "populations", "is_base_form": false}]}
-{"guid": "N26_003", "forms": [{"grammatical_form": "noun/en_singular", "text": "band", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "bands", "is_base_form": false}]}
-{"guid": "N26_004", "forms": [{"grammatical_form": "noun/en_singular", "text": "board", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "boards", "is_base_form": false}]}
-{"guid": "N26_005", "forms": [{"grammatical_form": "noun/en_singular", "text": "branch", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "branches", "is_base_form": false}]}
-{"guid": "N26_006", "forms": [{"grammatical_form": "noun/en_singular", "text": "cabinet", "is_base_form": true}, {"grammatical_form": "noun/en_plural", "text": "cabinets", "is_base_form": false}]}
 {"guid": "N26_007", "forms": [{"grammatical_form": "noun/en_singular", "text": "study group", "is_base_form": true}]}
 {"guid": "N26_008", "forms": [{"grammatical_form": "noun/en_singular", "text": "middle class", "is_base_form": true}]}
 {"guid": "N26_009", "forms": [{"grammatical_form": "noun/en_singular", "text": "working class", "is_base_form": true}]}
