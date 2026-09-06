@@ -354,6 +354,10 @@ class Sentence:
     minimum_level: Optional[int] = None
     source_filename: Optional[str] = None
     notes: Optional[str] = None
+    # The release record spells this "collection"; from_dict maps it across.
+    # Without the field, from_dict's unknown-key filter dropped it silently and
+    # every bootstrapped sentence loaded with a NULL collection.
+    collection: Optional[str] = None
 
     # Runtime/internal fields (not exported to JSONL)
     verified: bool = False  # Moved to verifications.jsonl

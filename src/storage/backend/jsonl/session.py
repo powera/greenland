@@ -125,7 +125,7 @@ class JSONLSession(BaseSession):
         from storage.models.schema import Lemma as SQLLemma
         from storage.models.schema import LemmaTranslation
         from storage.models.schema import Sentence as SQLSentence
-        from storage.models.schema import SentenceTranslation, SentenceWord
+        from storage.models.schema import SentenceTranslation, SentenceWord, SentenceWordHint
 
         assert temp_session is not None  # For type checking
         lemma_count = temp_session.query(SQLLemma).count()
@@ -136,6 +136,7 @@ class JSONLSession(BaseSession):
         sentence_count = temp_session.query(SQLSentence).count()
         sentence_translation_count = temp_session.query(SentenceTranslation).count()
         sentence_word_count = temp_session.query(SentenceWord).count()
+        sentence_word_hint_count = temp_session.query(SentenceWordHint).count()
 
         logger.info(
             f"Populated cached SQLite DB: "
@@ -146,7 +147,8 @@ class JSONLSession(BaseSession):
             f"{relation_member_count} relation_members, "
             f"{sentence_count} sentences, "
             f"{sentence_translation_count} sentence_translations, "
-            f"{sentence_word_count} sentence_words"
+            f"{sentence_word_count} sentence_words, "
+            f"{sentence_word_hint_count} sentence_word_hints"
         )
 
         # Cache the engine in storage for reuse by future sessions
@@ -216,7 +218,7 @@ class JSONLSession(BaseSession):
         from storage.models.schema import Phrase as SQLPhrase
         from storage.models.schema import PhraseTranslation as SQLPhraseTranslation
         from storage.models.schema import Sentence as SQLSentence
-        from storage.models.schema import SentenceTranslation, SentenceWord
+        from storage.models.schema import SentenceTranslation, SentenceWord, SentenceWordHint
         from storage.models.variant_form import VARIANT_KIND_SPELLING
         from storage.models.variant_form import VariantForm as SQLVariantForm
         from storage.release.lemma import encode_db_emoji, normalize_emoji_list
@@ -236,6 +238,7 @@ class JSONLSession(BaseSession):
         sentences = []
         sentence_translations = []
         sentence_words = []
+        sentence_word_hints: list[dict] = []
         phrases: list[dict] = []
         phrase_translations: list[dict] = []
         tombstones = []
@@ -434,6 +437,13 @@ class JSONLSession(BaseSession):
                 "tense": jsonl_sentence.tense,
                 "minimum_level": jsonl_sentence.minimum_level,
                 "source_filename": jsonl_sentence.source_filename,
+                # notes and sentence_collection were absent here, so every
+                # bootstrap loaded them NULL and the next export wrote the
+                # blanks back to disk. sentence_collection decides which
+                # collection directory a sentence exports to, so losing it
+                # filed the whole corpus under "general".
+                "notes": jsonl_sentence.notes,
+                "sentence_collection": jsonl_sentence.collection,
                 "verified": jsonl_sentence.verified,
                 "added_at": jsonl_sentence.added_at,
                 "updated_at": jsonl_sentence.updated_at,
@@ -476,6 +486,39 @@ class JSONLSession(BaseSession):
                         "declined_form": word_data.get("declined_form"),
                         "ud_relation": word_data.get("ud_relation"),
                         "ud_head_position": word_data.get("ud_head_position"),
+                    }
+                )
+
+            # Word hints -- the slot-level links that decide which category
+            # directory a sentence exports to (_resolve_primary_lemma_category
+            # reads them). These were not loaded at all, so a bootstrapped
+            # database resolved every sentence to misc/misc.
+            #
+            # A hint must reference a lemma or a name (ck_word_hint_has_reference),
+            # so a slot the release could not resolve is skipped rather than
+            # inserted with both NULL. Positions are left as the release wrote
+            # them: uq_sentence_word_hint_position wants uniqueness, not
+            # contiguity, and renumbering would disagree with `words`.
+            #
+            # name_id is left NULL: proper names are not part of this JSONL
+            # storage (bootstrap_from_release imports them afterwards, via
+            # import_name_release_to_sqlite), so there is no GUID map to
+            # resolve against here. A name-backed hint is therefore skipped
+            # rather than mis-attached to a lemma.
+            for hint_data in jsonl_sentence.word_hints:
+                hint_lemma_guid = hint_data.get("lemma_guid")
+                hint_lemma_id = hint_data.get("lemma_id")
+                if hint_lemma_id is None and hint_lemma_guid:
+                    hint_lemma_id = guid_to_lemma_id.get(hint_lemma_guid)
+                if hint_lemma_id is None:
+                    continue
+                sentence_word_hints.append(
+                    {
+                        "sentence_id": jsonl_sentence.id,
+                        "lemma_id": hint_lemma_id,
+                        "position": hint_data.get("position", 0),
+                        "slot_name": hint_data.get("slot_name", "unknown"),
+                        "english_text": hint_data.get("english_text", ""),
                     }
                 )
 
@@ -578,6 +621,8 @@ class JSONLSession(BaseSession):
             self._sqlite_session.bulk_insert_mappings(SentenceTranslation, sentence_translations)
         if sentence_words:
             self._sqlite_session.bulk_insert_mappings(SentenceWord, sentence_words)
+        if sentence_word_hints:
+            self._sqlite_session.bulk_insert_mappings(SentenceWordHint, sentence_word_hints)
         if phrases:
             self._sqlite_session.bulk_insert_mappings(SQLPhrase, phrases)
         if phrase_translations:
