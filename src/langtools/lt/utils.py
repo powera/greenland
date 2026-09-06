@@ -181,3 +181,26 @@ def sanitize_lithuanian_word(word: str) -> str:
         return ""
 
     return sanitized
+
+
+def palatalize_final(stem: str) -> str:
+    """Apply Lithuanian palatalization to the final consonant of a stem.
+
+    Before a front-vowel ending (the ``-i-`` suffixes: -iu, -iau, -io, -iai),
+    the dental stops palatalize:
+
+      - t -> č
+      - d -> dž
+
+    Other consonants (l, r, n, k, g, ...) are unchanged.
+
+    The rule is shared: conjugation needs it for the 1st person ("matau" ->
+    "mačiau"), declension for any t/d stem in a class with -i- suffixes
+    ("pavyzdys" -> "pavyzdžio").  It belongs to the sound system rather than to
+    either paradigm, which is why it lives here instead of in one of them.
+    """
+    if stem.endswith("d"):
+        return stem[:-1] + "dž"
+    if stem.endswith("t"):
+        return stem[:-1] + "č"
+    return stem

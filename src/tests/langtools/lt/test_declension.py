@@ -38,6 +38,38 @@ class TestLithuanianMechanicalDeclension(unittest.TestCase):
     def test_skips_irregular(self) -> None:
         self.assertIsNone(decline_noun("žmogus"))
 
+    def test_palatalizes_t_and_d_before_i_endings(self) -> None:
+        # A t/d stem palatalizes before an -i- ending and not otherwise, so the
+        # same word shows both stems: "pavyzdžio" but "pavyzdį".
+        forms = decline_noun("pavyzdys")
+        assert forms is not None
+        self.assertEqual(forms["genitive_singular"], "pavyzdžio")
+        self.assertEqual(forms["dative_singular"], "pavyzdžiui")
+        self.assertEqual(forms["instrumental_singular"], "pavyzdžiu")
+        self.assertEqual(forms["nominative_plural"], "pavyzdžiai")
+        self.assertEqual(forms["genitive_plural"], "pavyzdžių")
+        # Endings that do not start with -i- keep the plain stem.
+        self.assertEqual(forms["nominative_singular"], "pavyzdys")
+        self.assertEqual(forms["accusative_singular"], "pavyzdį")
+        self.assertEqual(forms["locative_singular"], "pavyzdyje")
+
+        t_stem = decline_noun("nykštys")
+        assert t_stem is not None
+        self.assertEqual(t_stem["genitive_singular"], "nykščio")
+        self.assertEqual(t_stem["accusative_singular"], "nykštį")
+
+    def test_non_dental_stems_are_unchanged(self) -> None:
+        forms = decline_noun("traukinys")
+        assert forms is not None
+        self.assertEqual(forms["genitive_singular"], "traukinio")
+        self.assertEqual(forms["nominative_plural"], "traukiniai")
+
+    def test_petys_is_irregular_for_its_second_genitive(self) -> None:
+        # "petys" has two genitive singulars -- petiẽs (the more common, and
+        # the one the sentence corpus uses) and the regular pẽčio -- and a
+        # single paradigm cannot carry both.
+        self.assertIsNone(decline_noun("petys"))
+
     def test_respects_known_gender(self) -> None:
         self.assertIsNone(decline_noun("vilkas", grammatical_gender="feminine"))
 

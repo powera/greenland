@@ -26,6 +26,8 @@ cannot be derived mechanically and is hard-coded.
 import logging
 from typing import Dict, Optional
 
+from langtools.lt.utils import palatalize_final
+
 logger = logging.getLogger(__name__)
 
 # Hard-coded forms for būti (to be) — the only irregular verb.
@@ -62,21 +64,9 @@ _BUTI_FORMS: Dict[str, str] = {
 }
 
 
-def _palatalize_final(stem: str) -> str:
-    """Apply Lithuanian palatalization to the final consonant of a stem.
-
-    Before front-vowel endings (-iu, -iau), the consonants t and d
-    undergo palatalization:
-      - t → č
-      - d → dž
-
-    Other consonants (l, r, n, k, g, etc.) are unchanged.
-    """
-    if stem.endswith("d"):
-        return stem[:-1] + "dž"
-    if stem.endswith("t"):
-        return stem[:-1] + "č"
-    return stem
+# Kept as a module-level alias: the rule is shared with declension and now
+# lives in langtools.lt.utils, but the call sites below read better unqualified.
+_palatalize_final = palatalize_final
 
 
 def _make_future_stem(infinitive: str) -> str:
